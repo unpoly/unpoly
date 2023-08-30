@@ -1,5 +1,5 @@
-Render hooks
-============
+Render lifecycle hooks
+======================
 
 You may hook into specific stages of the rendering process in order to change the result or handle error cases.
 

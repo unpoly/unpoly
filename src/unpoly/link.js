@@ -119,9 +119,9 @@ up.link = (function() {
     See [Handling all links and forms](/handling-everything).
 
   @param {Array<string>} config.noFollowSelectors
-    Exceptions to `config.followSelectors`.
+    Exceptions to `up.link.config.followSelectors`.
 
-    Matching links will *not* be [followed through Unpoly](/a-up-follow), even if they match `config.followSelectors`.
+    Matching links will *not* be [followed through Unpoly](/a-up-follow), even if they match `up.link.config.followSelectors`.
 
     By default Unpoly excludes:
 
@@ -145,9 +145,9 @@ up.link = (function() {
     [`[up-follow]`](/a-up-follow) attribute or by configuring `up.link.config.followSelectors`.
 
   @param {Array<string>} config.noInstantSelectors
-    Exceptions to `config.followSelectors`.
+    Exceptions to `up.link.config.instantSelectors`.
 
-    Matching links will *not* be [followed through Unpoly](/a-up-follow), even if they match `config.followSelectors`.
+    Matching links will *not* be [followed on `mousedown`](/a-up-instant), even if they match `up.link.config.instantSelectors`.
 
     By default Unpoly excludes:
 
@@ -161,9 +161,9 @@ up.link = (function() {
     See [Handling all links and forms](/handling-everything).
 
   @param {Array<string>} config.noPreloadSelectors
-    Exceptions to `config.preloadSelectors`.
+    Exceptions to `up.link.config.preloadSelectors`.
 
-    Matching links will *not* be [preloaded on hover](/a-up-preload), even if they match `config.preloadSelectors`.
+    Matching links will *not* be [preloaded on hover](/a-up-preload), even if they match `up.link.config.preloadSelectors`.
 
     By default Unpoly excludes:
 

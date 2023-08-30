@@ -27,6 +27,31 @@ up.script = (function() {
   const u = up.util
   const e = up.element
 
+  /*-
+  Configures defaults for script handling.
+
+  @param [config.assetSelectors]
+    An array of CSS selectors matching default [assets](/up-asset).
+
+    By default all remote scripts and stylesheets in the `<head>` are considered assets.
+    [Inline scripts](https://simpledev.io/lesson/inline-script-javascript-1/) and
+    [internal styles](https://www.tutorialspoint.com/How-to-use-internal-CSS-Style-Sheet-in-HTML)
+    are not tracked by default, but you can include them with an `[up-asset]` attribute.
+
+    Unpoly only tracks assets in the `<head>`. Elements in the `<body>` are never tracked,
+    even if they match one of the configured selectors.
+
+    See [Tracking assets](/detecting-asset-changes#tracking-assets) for examples.
+
+  @param [config.noAssetSelectors]
+    Exceptions to `up.script.config.assetSelectors`.
+
+    Matching elements will *not* be considered [assets](/up-asset)
+    even if they match `up.script.config.assetSelectors`.
+
+  @property up.script.config
+  @stable
+  */
   const config = new up.Config(() => ({
     assetSelectors: [
       'link[rel=stylesheet]',
@@ -59,7 +84,7 @@ up.script = (function() {
   Registers a function to be called when an element with
   the given selector is inserted into the DOM.
 
-  Use compilers to activate your custom Javascript behavior on matching
+  Use compilers to activate your custom JavaScript behavior on matching
   elements.
 
   You should migrate your [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event)
@@ -645,6 +670,66 @@ up.script = (function() {
     return e.filteredQuery(head, config.assetSelectors, config.noAssetSelectors)
   }
 
+  /*-
+  Marks an element for [asset tracking](/detecting-asset-changes).
+
+  When [rendering](/up.render), Unpoly compares the current assets on the page with the new assets
+  from the server response. If the assets don't match, an `up:assets:changed` event is emitted.
+
+
+  ### Default assets
+
+  By default all remote scripts and stylesheets in the `<head>` are considered assets:
+
+  ```html
+  <html>
+    <head>
+      <link rel="stylesheet" href="/assets/frontend-5f3aa101.css"> <!-- mark-line -->
+      <script src="/assets/frontend-81ba23a9.js"></script> <!-- mark-line -->
+    </head>
+    <body>
+      ...
+    </body>
+  </html>
+  ```
+
+  Unpoly only tracks assets in the `<head>`. Elements in the `<body>` are never tracked.
+
+  [Inline scripts](https://simpledev.io/lesson/inline-script-javascript-1/) and
+  [internal styles](https://www.tutorialspoint.com/How-to-use-internal-CSS-Style-Sheet-in-HTML)
+  are not tracked by default, but you can [include them explicitly](#including-assets).
+
+
+  ### Excluding assets from tracking {#excluding-assets}
+
+  To *exclude* an element in the `<head>` from tracking, mark it with an `[up-asset="false"]` attribute:
+
+  ```html
+  <script src="/assets/analytics.js" up-asset="false"></script>
+  ```
+
+  To exclude assets by default, configure `up.script.config.noAssetSelectors`.
+
+
+  ### Tracking additional assets {#including-assets}
+
+  To track additional assets, mark them with an `[up-asset]` attribute.
+
+  For example, [inline scripts](https://simpledev.io/lesson/inline-script-javascript-1/) are not tracked by default,
+  but you can include them explictily:
+
+  ```html
+  <script up-asset>
+    window.SALE_START = new Date('2024-05-01')
+  </script>
+  ```
+
+  To track additional assets by default, configure `up.script.config.assetSelectors`.
+
+  @selector [up-asset]
+  @stable
+  */
+
   function assertAssetsOK(newAssets, renderOptions) {
     let oldAssets = findAssets()
 
@@ -655,6 +740,32 @@ up.script = (function() {
       up.event.assertEmitted('up:assets:changed', { oldAssets, newAssets, renderOptions })
     }
   }
+
+  /*-
+  This event is emitted when [frontend code](/up-asset) changes while the application is running.
+
+  Even listeners may [handle changed frontend code](/detecting-asset-changes#handling-changed-assets),
+  e.g. by [notifying the user](/detecting-asset-changes#notifying-the-user) that a new app version is available.
+
+  The event is emitted on the `document`.
+
+  @event up:assets:changed
+  @param {List<Element>} event.newAssets
+    A list of all [assets](/up-asset) in the new content.
+
+    The list is not filtered by old assets.
+
+    By default no asset elements are updated in the current page.
+    [Listeners can do this](/detecting-asset-changes#loading-new-assets).
+  @param {List<Element>} event.oldAssets
+    A list of [assets](/up-asset) in the `<head>` of the current page.
+  @param {object} event.renderOptions
+  @param event.preventDefault()
+    Aborts this render pass before new content is inserted.
+
+    @experimental
+  @stable
+  */
 
   /*
   Resets the list of registered compiler directives to the

@@ -42,9 +42,10 @@ up.form = (function() {
     You may configure additional exceptions in `config.noSubmitSelectors`.
 
   @param {Array<string>} [config.noSubmitSelectors]
-    Exceptions to `config.submitSelectors`.
+    Exceptions to `up.form.config.submitSelectors`.
 
-    Matching forms will *not* be [submitted through Unpoly](/form-up-submit), even if they match `config.submitSelectors`.
+    Matching forms will *not* be [submitted through Unpoly](/form-up-submit),
+    even if they match `up.form.config.submitSelectors`.
 
   @param {Array<string>} [config.groupSelectors=['[up-form-group]', 'fieldset', 'label', 'form']]
     An array of CSS selectors matching a [form group](/up-form-group).

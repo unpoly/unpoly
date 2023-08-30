@@ -355,7 +355,7 @@ up.element = (function() {
   Attach it with [`Element#appendChild()`](https://developer.mozilla.org/en-US/docs/Web/API/Node/appendChild)
   or use `up.element.affix()` to create an attached element.
 
-  Use `up.hello()` to activate JavaScript behavior within the created element.
+  Use `up.hello()` to activate [JavaScript behavior](/up.script) within the created element.
 
   ### Examples
 
@@ -592,7 +592,7 @@ up.element = (function() {
 
   To create a detached element from a selector, see `up.element.createFromSelector()`.
 
-  Use `up.hello()` to activate JavaScript behavior within the created element.
+  Use `up.hello()` to activate [JavaScript behavior](/up.script) within the created element.
 
   ### Example
 
@@ -738,7 +738,7 @@ up.element = (function() {
   /*-
   Creates an element from the given HTML fragment string.
 
-  Use `up.hello()` to activate JavaScript behavior within the created element.
+  Use `up.hello()` to activate [JavaScript behavior](/up.script) within the created element.
 
   ### Example
 

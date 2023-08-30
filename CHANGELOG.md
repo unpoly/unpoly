@@ -2515,7 +2515,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 - When a fragment updates cannot find the requested element, you can now define a fallback selector to use instead.
 
-  A `{ fallback }` option has been added to all Javascript functions that update fragments, like [`up.replace()`](/up.replace).
+  A `{ fallback }` option has been added to all JavaScript functions that update fragments, like [`up.replace()`](/up.replace).
 
   Also an `[up-fallback]` attribute has been added to all CSS selectors that update fragments, like for [`a[up-target]`](/a-up-target).
 

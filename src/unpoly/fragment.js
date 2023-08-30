@@ -15,7 +15,7 @@ a server-rendered web application:
 - Fragments are [identified by a CSS selector](/target-derivation), like a `.class` or `#id`.
 - Fragments are usually updated by a [link](/a-up-follow) for [form](/form-up-submit) that targets their selector.
   When the server renders HTML with a matching element, the fragment is swapped with a new version.
-- As fragments enter the page they are automatically [compiled](/up.compiler) to activate JavaScript behavior.
+- As fragments enter the page they are automatically [compiled](/up.compiler) to activate [JavaScript behavior](/up.script).
 - Fragment changes may be [animated](/up.motion).
 - Fragments are placed on a [layer](/up.layer) that is isolated from other layers.
   Unpoly features will only see or change fragments from the [current layer](/up.layer.current)

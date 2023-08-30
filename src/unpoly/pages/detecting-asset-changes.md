@@ -1,12 +1,17 @@
-Detecting changed frontend code
-===============================
+Detecting changes in frontend code
+==================================
 
-When rendering, Unpoly compares scripts and stylesheets in the `<head>` and emits an event if anything changed. 
+When rendering new fragments, Unpoly compares scripts and stylesheets in the `<head>`
+and emits an [event](/up:assets:changed) if anything changed.
+
+It is up to your code to [handle changed frontend code](#handling-changed-assets),
+e.g. by [notifying the user](#notifying-the-user) that a new app version is available.
 
 
-## Assets
+## Tracking assets
 
-An asset is either a script or a stylesheet with a remote source.
+To detect changes in your frontend code, Unpoly must track your application's *assets*.
+An *asset* is either a script or a stylesheet with a remote source:
 
 ```html
 <html>
@@ -20,28 +25,29 @@ An asset is either a script or a stylesheet with a remote source.
 </html>
 ```
 
-Unpoly only tracks assets in the `<head>`. Elements in the `<body>`, inline scripts or internal styles are *not* tracked. 
-
-To exclude an element in the `<head>` from tracking, mark it with an `[up-asset="false"]` attribute.
-
+See `[up-asset]` for ways to exclude elements from asset tracking, or how
+to track non-default assets.
 
 
-## Reacting to new app versions
+## Handling new asset versions {#handling-changed-assets}
 
 When [rendering](/up.render), Unpoly compares the current assets on the page with the new assets
-from the server response. If the assets don't match, Unpoly emits an `up:assets:changed` event.
+from the server response. If the assets don't match, an `up:assets:changed` event is emitted.
 
-There is no default behavior when assets have changed. In particular no asset elements from the response
-are replaced in the current page. It is up to the developer to observe the `up:assets:changed` event and
+**There is no default behavior when assets have changed.**
+In particular no asset elements from the response
+are updated in the current page. It is up to the developer to observe the `up:assets:changed` event and
 implement a behavior that fits their app. 
 
-Below you can find some popular implementations.
+Below you can find some popular ways to handle new asset versions.
 
 
-### Notifying the user of new app versions
+### Notifying the user of new app versions {#notifying-the-user}
 
-A good way is to show a notification banner informing that a new app version is available.
-The user can then choose to reload at their convenience.
+A friendly way to handle new asset version is to show a notification banner informing that a new app version is available.
+The user can then choose to reload at their convenience, by clicking on the notification.
+
+The code below inserts a clickable `<div id="new-version">` banner when assets change:
 
 ```js
 up.on('up:assets:changed', function() {
@@ -55,56 +61,68 @@ up.on('up:assets:changed', function() {
 })
 ```
 
-Note that we could `[up-poll]`. Every 2 minutes.
 
-```html
-<div id="new-version-detector" up-poll up-interval="120_000"></div>
-```
+### Reloading the app with the next link
 
-
-## Updating the app with the next link
-
-An alternative approach is to remember that a new app version, and make a full page load
-when the user follows a simple `GET` link:
+An invisible way to handle new app versions if to make a full page load when the user follows
+the next link. This will unload all scripts and stylesheets, and reload your app from scratch.
 
 
 ```js
-assetsChanged = false
+let assetsChanged = false
 
 up.on('up:assets:changed', function() {
   assetsChanged = true
 })
 
 up.on('up:link:follow', function(event) {
-  let { url, method } = event.renderOptions
+  let { url, method, layer } = event.renderOptions
   
-  if (assetsChanged && url && method === 'GET' && up.layer.current.isRoot()) {
-    event.preventDefault()
-    up.network.loadPage(url)
+  if (assetsChanged && url && method === 'GET' && up.layer.current.isRoot() && layer !== 'new') {
+    event.preventDefault()   // Prevent the render pass
+    up.network.loadPage(url) // Make full page load without Unpoly
   }
 })
 ```
 
+> [note]
+> To prevent any [overlays](/up.layer) from closing, we only make a full page load when the link is
+> changing the [root layer](/up.layer.root).
 
 
-
-### Appending new assets
+### Loading new assets
 
 The `up:assets:changed` event has `{ oldAssets, newAssets }` properties that you can use to manually
-append the new assets from the response.
+insert the new assets into the page.
 
-Also note that JavaScript cannot be unloaded by removing its `<script>` tag. With this approach
+There are two challenges when loading additional assets into an existing page:
+
+1. JavaScript cannot be unloaded by removing its `<script>` tag.
+   New scripts must always be additive to the scripts we already have.
+2. Asset paths often contain a version hash to allow heavy caching, e.g. `application-c80fd51c.js`.
+   This makes is harder to re-identify a script that was changed between two render passes.
+
+#### Version hash conventions
+
+Different bundlers have different conventions for version hashes.
+Here are some examples we have seen in the wild:
+
+| Bundler    | Path example                      | Comment                       |
+|------------|-----------------------------------|-------------------------------|
+| Webpack    | `/assets/application-4a83f506.js` | dash and lowercase hexdecimal |
+| esbuild    | `/assets/application-C2AU6HVK.js` | full alphabet but uppercase   |
+| Vite       | `/assets/application.5753e9b0.js` | dot and lowercase hexdcimal   |
+| Sprockets  | `/assets/application-c80fd51c.js` | dash and lowercase hexdecimal |
+| No hash    | `/assets/application.js`          |                               |
+
+Note that the id/version separators (like `.` or `-`) are often configurable, but
+most examples choose dots or dashes.
 
 
-The code above does *not* handle assets paths that include a content hash, e.g.
+#### Example implementation
 
-```
-/assets/layout-6cf2f53f.css
-/assets/chat-c42ce512.js
-```
-
-
-The code below will append new assets to the page `<head>` except if they are already appended.
+The code below will append new assets to the page `<head>` unless they are already appended.
+It ignores version hashes from asset paths, so changed assets are not re-inserted.
 
 
 ```js
@@ -120,7 +138,7 @@ up.on('up:assets:changed', function({ oldAssets, newAssets }) {
 Returns whether the given `newAsset` has a match in the given `oldAssets` array.
 
 If an existing asset has the same base name, but a different content hash,
-it will still be considered loaded.
+it is still be considered to be "loaded".
 */
 function isAssetLoaded(oldAssets, newAsset) {
   return oldAssets.find(function(oldAsset) {
@@ -129,20 +147,7 @@ function isAssetLoaded(oldAssets, newAsset) {
 }
 
 /*
-Return the given asset's path with its hash removed, e.g. "app.js" from "app.344af1ca.js"
-Different bundlers have different conventions for version hashes.
-Some examples we have seen in the wild:
-
-| Bundler    | Path example                                      | Comment                       |
-|------------|---------------------------------------------------|-------------------------------|
-| Sprockets  | /assets/application-c80fd51cb7fbcc3c0008500a8f.js | dash and lowercase hexdecimal |
-| Webpack    | /assets/application-4a83f50652e9f7ac47ed.js       | dash and lowercase hexdecimal |
-| esbuild    | /assets/application-C2AU6HVK.js                   | full alphabet but uppercase   |
-| Vite       | /assets/chunks/framework.5753e9b0.js              | dot and lowercase hexdcimal   |
-| No hash    | /assets/application.js                            |                               |
-
-Note that the id/version separators (like `.` or `-`) are often configurable, but
-most examples choose dots or dashes.
+Return the given asset's path with its hash removed, e.g. "app.js" from "app.344af1ca.js".
 */
 function getPathWithoutHash(asset) {
   // It's <script src="app.js"> but <link rel="stylesheet" href="app.css">
@@ -152,5 +157,29 @@ function getPathWithoutHash(asset) {
   return match ? (base + extension) : path
 }
 ```
+
+## Detecting new versions without a user interaction
+
+If you want to detect asset changes without a user interaction, use [polling](/up-poll)
+to reload an empty fragments every few minutes.
+
+This will reload an empty fragment `#version-detector` from a URL `/version` every 2 minutes:
+
+```html
+<div id="version-detector" up-poll up-interval="120_000" up-source="/version"></div>
+```
+
+## Tracking the backend version
+
+To detect a new deployment of your *backend* code, consider including the deployed commit hash in a `<meta>` tag.
+
+By marking the `<meta>` tag with `[up-asset]` it will also emit an `up:assets:changed` event when the commit hash changes:
+
+```html
+<meta name="backend-version" value="d50c6dd629e9bbc80304e14a6ba99a18c32ba738" up-asset>
+```
+
+
+
 
 @page detecting-asset-changes
