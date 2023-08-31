@@ -95,7 +95,7 @@ up.layer = (function() {
   @param {string} [config.mode='modal']
     The default [mode](/layer-terminology) used when opening a new overlay.
 
-  @param {object} config.any
+  @param {Object} config.any
     Defaults for all layer modes.
 
   @param {Array<string>} config.any.mainTargets
@@ -103,16 +103,16 @@ up.layer = (function() {
 
     This is an alias for `up.fragment.config.mainTargets`.
 
-  @param {object} config.root
+  @param {Object} config.root
     Defaults for the [root layer](/layer-terminology).
 
     Inherits from `up.layer.config.any`.
 
-  @param {object} config.root.mainTargets
+  @param {Object} config.root.mainTargets
     An array of CSS selectors matching default [render targets](/targeting-fragments)
     for the [root layer](/layer-terminology), but not for overlays.
 
-  @param {object} config.overlay
+  @param {Object} config.overlay
     Defaults for all [overlays](/layer-terminology).
 
     In addition to the options documented here,
@@ -159,22 +159,22 @@ up.layer = (function() {
 
     See [overlay classes](/customizing-overlays#overlay-classes).
 
-  @param {object} config.modal
+  @param {Object} config.modal
     Defaults for [modal overlays](/layer-terminology).
 
     Inherits from `up.layer.config.overlay` and `up.layer.config.any`.
 
-  @param {object} config.cover
+  @param {Object} config.cover
     Defaults for [cover overlays](/layer-terminology).
 
     Inherits from `up.layer.config.overlay` and `up.layer.config.any`.
 
-  @param {object} config.drawer
+  @param {Object} config.drawer
     Defaults for [drawer overlays](/layer-terminology).
 
     Inherits from `up.layer.config.overlay` and `up.layer.config.any`.
 
-  @param {object} config.popup
+  @param {Object} config.popup
     Defaults for [popup overlays](/layer-terminology).
 
     Inherits from `up.layer.config.overlay` and `up.layer.config.any`.

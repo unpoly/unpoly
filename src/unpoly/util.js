@@ -188,7 +188,7 @@ up.util = (function() {
 
   @function up.util.parseURL
   @param {string|URL} the URL to parse
-  @return {object}
+  @return {Object}
     The parsed URL as an object with
     `{ protocol, hostname, port, pathname, search, hash }` properties.
   @stable
@@ -235,7 +235,7 @@ up.util = (function() {
 
   @function up.util.map
   @param {List|Iterator} list
-  @param {Function(element, index): any|String} block
+  @param {Function(element, index): any|string} block
     A function that will be called with each element and (optional) iteration index.
 
     You can also pass a property name as a String,

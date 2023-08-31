@@ -13,7 +13,7 @@ for details.
 
 @see data
 @see legacy-scripts
-@see detecting-asset-changes
+@see handling-asset-changes
 
 @see up.compiler
 @see [up-data]
@@ -41,7 +41,7 @@ up.script = (function() {
     Unpoly only tracks assets in the `<head>`. Elements in the `<body>` are never tracked,
     even if they match one of the configured selectors.
 
-    See [Tracking assets](/detecting-asset-changes#tracking-assets) for examples.
+    See [Tracking assets](/handling-asset-changes#tracking-assets) for examples.
 
   @param [config.noAssetSelectors]
     Exceptions to `up.script.config.assetSelectors`.
@@ -671,9 +671,9 @@ up.script = (function() {
   }
 
   /*-
-  Marks an element for [asset tracking](/detecting-asset-changes).
+  Tracks an element as a [frontend asset](/handling-asset-changes), usually JavaScripts and stylesheets.
 
-  When [rendering](/up.render), Unpoly compares the current assets on the page with the new assets
+  When [rendering](/up.render), Unpoly compares the assets on the current page with the new assets
   from the server response. If the assets don't match, an `up:assets:changed` event is emitted.
 
 
@@ -726,6 +726,18 @@ up.script = (function() {
 
   To track additional assets by default, configure `up.script.config.assetSelectors`.
 
+
+  ### Tracking the backend version {#tracking-backend-versions}
+
+  To detect a new deployment of your *backend* code, consider including the deployed commit hash in a `<meta>` tag.
+
+  By marking the `<meta>` tag with `[up-asset]` it will also emit an `up:assets:changed` event when the commit hash changes:
+
+  ```html
+  <meta name="backend-version" value="d50c6dd629e9bbc80304e14a6ba99a18c32ba738" up-asset>
+  ```
+
+
   @selector [up-asset]
   @stable
   */
@@ -744,10 +756,35 @@ up.script = (function() {
   /*-
   This event is emitted when [frontend code](/up-asset) changes while the application is running.
 
-  Even listeners may [handle changed frontend code](/detecting-asset-changes#handling-changed-assets),
-  e.g. by [notifying the user](/detecting-asset-changes#notifying-the-user) that a new app version is available.
+  There is no default behavior when assets have changed.
+  In particular no asset elements from the response are updated in the current page.
+  Even listeners may [handle changed frontend code](/handling-asset-changes#handling-changed-assets),
+  e.g. by [notifying the user](/handling-asset-changes#notifying-the-user) or [loading new assets](/handling-asset-changes#loading-new-assets).
+
+  When a server response has no `<head>`, this event is never emitted.
 
   The event is emitted on the `document`.
+
+
+  ### Example
+
+  The code below inserts a clickable `<div id="new-version">` banner when assets change.
+  The user can then choose to reload at their convenience, by clicking on the notification.
+
+  @include new-asset-notification-example
+
+  For more examples see [Handling asset changes](/handling-asset-changes).
+
+
+  ### Emission time
+
+  The event is emitted at a particular time in the [render lifecycle](/render-hooks):
+
+   - *after* new content has been loaded from the server
+   - *before* any fragments have been changed on the page.
+   - *before* the [browser history](/up.history) was changed. A future history location may be found in `event.renderOptions.location`.
+
+  If you cannot allow the rendering to proceed with changed assets, listeners may abort the render pass by calling `event.preventDefault()`.
 
   @event up:assets:changed
   @param {List<Element>} event.newAssets
@@ -756,10 +793,11 @@ up.script = (function() {
     The list is not filtered by old assets.
 
     By default no asset elements are updated in the current page.
-    [Listeners can do this](/detecting-asset-changes#loading-new-assets).
+    [Listeners can do this](/handling-asset-changes#loading-new-assets).
   @param {List<Element>} event.oldAssets
     A list of [assets](/up-asset) in the `<head>` of the current page.
-  @param {object} event.renderOptions
+  @param {Object} event.renderOptions
+    The [render options](/up.render) for the current render pass.
   @param event.preventDefault()
     Aborts this render pass before new content is inserted.
 

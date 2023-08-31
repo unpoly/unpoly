@@ -159,7 +159,7 @@ up.fragment = (function() {
 
   @param {Function(Object): boolean} [config.skipResponse]
     When to finishes a render pass without changes,
-    ususually to [not re-insert identical content](/skipping-rendering).
+    usually to [not re-insert identical content](/skipping-rendering).
 
     The configured function accepts an object with the same properties
     as an `up:fragment:loaded` event.
@@ -539,7 +539,7 @@ up.fragment = (function() {
     Common values are `'get'`, `'post'`, `'put'`, `'patch'` and `'delete`'.
     The value is case insensitive.
 
-  @param {Object|FormData|string|Array} [options.params]
+  @param {Object|up.Params|FormData|string|Array} [options.params]
     Additional [parameters](/up.Params) that should be sent as the request's
     [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
 
@@ -1003,7 +1003,7 @@ up.fragment = (function() {
 
   @param event.skip()
     Finishes this render pass without changes,
-    ususually to [not re-insert identical content](/skipping-rendering).
+    usually to [not re-insert identical content](/skipping-rendering).
 
     Programmatic callers will fulfill with an [empty](/up.RenderResult.prototype.none) `up.RenderResult`.
 

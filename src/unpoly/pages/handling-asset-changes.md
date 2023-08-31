@@ -1,11 +1,11 @@
-Detecting changes in frontend code
-==================================
+Handling changes in frontend code
+=================================
 
 When rendering new fragments, Unpoly compares scripts and stylesheets in the `<head>`
 and emits an [event](/up:assets:changed) if anything changed.
 
-It is up to your code to [handle changed frontend code](#handling-changed-assets),
-e.g. by [notifying the user](#notifying-the-user) that a new app version is available.
+It is up to your code to [handle new asset versions](#handling-changed-assets),
+e.g. by [notifying the user](#notifying-the-user) or [loading new assets](#loading-new-assets).
 
 
 ## Tracking assets
@@ -49,24 +49,16 @@ The user can then choose to reload at their convenience, by clicking on the noti
 
 The code below inserts a clickable `<div id="new-version">` banner when assets change:
 
-```js
-up.on('up:assets:changed', function() {
-  // If we are already showing a notification, do nothing.
-  if (document.querySelector('#new-version')) return
-  
-  up.element.affix(document.body, '#new-version', {
-    text: 'A new app version is available. Click to reload.',
-    onclick: 'location.reload()'
-  })
-})
-```
+@include new-asset-notification-example
+
+> [tip]
+> The code snippet uses the `up.element.affix()` function to quickly create a DOM element from a CSS selector.
 
 
-### Reloading the app with the next link
+### Reloading the app at the next opportunity
 
 An invisible way to handle new app versions if to make a full page load when the user follows
 the next link. This will unload all scripts and stylesheets, and reload your app from scratch.
-
 
 ```js
 let assetsChanged = false
@@ -76,18 +68,21 @@ up.on('up:assets:changed', function() {
 })
 
 up.on('up:link:follow', function(event) {
-  let { url, method, layer } = event.renderOptions
-  
-  if (assetsChanged && url && method === 'GET' && up.layer.current.isRoot() && layer !== 'new') {
-    event.preventDefault()   // Prevent the render pass
-    up.network.loadPage(url) // Make full page load without Unpoly
+  if (assetsChanged && isLoadPageSafe(renderOptions)) {
+    // Prevent the render pass
+    event.preventDefault()
+
+    // Make full page load without Unpoly
+    up.network.loadPage(renderOptions)
   }
 })
-```
 
-> [note]
-> To prevent any [overlays](/up.layer) from closing, we only make a full page load when the link is
-> changing the [root layer](/up.layer.root).
+function isLoadPageSafe({ url, layer }) {
+   // To prevent any overlays from closing, we only make a full page load
+   // when the link is changing the root layer.
+   return url && up.layer.current.isRoot() && layer !== 'new'
+}
+```
 
 
 ### Loading new assets
@@ -151,9 +146,9 @@ Return the given asset's path with its hash removed, e.g. "app.js" from "app.344
 */
 function getPathWithoutHash(asset) {
   // It's <script src="app.js"> but <link rel="stylesheet" href="app.css">
-  let path = asset.src || asset.href
+  const path = asset.src || asset.href
   const hashedPathPattern = /^(.+)[\.\-]([a-f0-9]+|[A-Z0-9]+)(\.\w+)$/
-  let [match, base, hash, extension] = hashedPathPattern.exec(path)
+  const [match, base, hash, extension] = hashedPathPattern.exec(path)
   return match ? (base + extension) : path
 }
 ```
@@ -169,17 +164,11 @@ This will reload an empty fragment `#version-detector` from a URL `/version` eve
 <div id="version-detector" up-poll up-interval="120_000" up-source="/version"></div>
 ```
 
-## Tracking the backend version
+## Detecting changes in backend code
 
-To detect a new deployment of your *backend* code, consider including the deployed commit hash in a `<meta>` tag.
+You can configure Unpoly to also emit the `up:asset:changed` event after a new version of your backend code was deployed.
 
-By marking the `<meta>` tag with `[up-asset]` it will also emit an `up:assets:changed` event when the commit hash changes:
-
-```html
-<meta name="backend-version" value="d50c6dd629e9bbc80304e14a6ba99a18c32ba738" up-asset>
-```
+See [Tracking the backend version](/up-asset#tracking-backend-versions) for details.
 
 
-
-
-@page detecting-asset-changes
+@page handling-asset-changes

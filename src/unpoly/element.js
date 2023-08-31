@@ -166,7 +166,7 @@ up.element = (function() {
   ```
 
   @function up.element.list
-  @param {Array<jQuery|Element|Array<Element>|String|undefined|null>} ...args
+  @param {Array<jQuery|Element|Array<Element>|string|undefined|null>} ...args
   @return {Array<Element>}
   @internal
   */
@@ -353,7 +353,7 @@ up.element = (function() {
 
   The created element will not yet be attached to the DOM tree.
   Attach it with [`Element#appendChild()`](https://developer.mozilla.org/en-US/docs/Web/API/Node/appendChild)
-  or use `up.element.affix()` to create an attached element.
+  or use `up.element.affix()` to create an already-attached element.
 
   Use `up.hello()` to activate [JavaScript behavior](/up.script) within the created element.
 
@@ -361,49 +361,81 @@ up.element = (function() {
 
   To create an element with a given tag name:
 
-      element = up.element.createFromSelector('span')
-      // element is <span></span>
+  ```js
+  element = up.element.createFromSelector('span')
+  // element is <span></span>
+  ```
 
   To create an element with a given class:
 
-      element = up.element.createFromSelector('.klass')
-      // element is <div class="klass"></div>
+  ```js
+  element = up.element.createFromSelector('.klass')
+  // element is <div class="klass"></div>
+  ```
 
   To create an element with a given ID:
 
-      element = up.element.createFromSelector('#foo')
-      // element is <div id="foo"></div>
+  ```js
+  element = up.element.createFromSelector('#foo')
+  // element is <div id="foo"></div>
+  ```
+
+  ### Setting attributes
 
   To create an element with a given boolean attribute:
 
-      element = up.element.createFromSelector('[attr]')
-      // element is <div attr></div>
+  ```js
+  element = up.element.createFromSelector('[attr]')
+  // element is <div attr></div>
+  ```
 
   To create an element with a given attribute value:
 
-      element = up.element.createFromSelector('[attr="value"]')
-      // element is <div attr="value"></div>
+  ```js
+  element = up.element.createFromSelector('[attr="value"]')
+  // element is <div attr="value"></div>
+  ```
 
   You may also pass an object of attribute names/values as a second argument:
 
-      element = up.element.createFromSelector('div', { attr: 'value' })
-      // element is <div attr="value"></div>
+  ```js
+  element = up.element.createFromSelector('div', { attr: 'value' })
+  // element is <div attr="value"></div>
+  ```
+
+  ### Passing child nodes
 
   You may set the element's inner text by passing a `{ text }` option (HTML control characters will
   be escaped):
 
-      element = up.element.createFromSelector('div', { text: 'inner text' })
-      // element is <div>inner text</div>
+  ```js
+  element = up.element.createFromSelector('div', { text: 'inner text' })
+  // element is <div>inner text</div>
+  ```
 
   You may set the element's inner HTML by passing a `{ content }` option:
 
-      element = up.element.createFromSelector('div', { content: '<span>inner text</span>' })
-      // element is <div>inner text</div>
+  ```js
+  element = up.element.createFromSelector('div', { content: '<span>inner text</span>' })
+  // element is <div>inner text</div>
+  ```
 
-  You may set inline styles by passing an object of CSS properties as a second argument:
+  ### Setting inline styles
 
-      element = up.element.createFromSelector('div', { style: { color: 'red' }})
-      // element is <div style="color: red"></div>
+  You may set inline styles by passing an object of CSS properties as a `{ style }` option:
+
+  ```js
+  element = up.element.createFromSelector('div', { style: { color: 'red' }})
+  // element is <div style="color: red"></div>
+  ```
+
+  ### Adding event listeners
+
+  To quickly register an event listener, pass a function value with any property that begins with `on...`:
+
+  ```js
+  element = up.element.createFromSelector('.button', { onclick: () => alert("Clicked") }) // mark-phrase "onclick"
+  ```
 
   @function up.element.createFromSelector
   @param {string} selector
@@ -419,6 +451,10 @@ up.element = (function() {
     of the created element. The given object may use kebab-case or camelCase keys.
 
     You may also pass a string with semicolon-separated styles.
+  @param {Function} [attrs.on...]
+    An [event listener](#adding-event-listeners) to register on the created element.
+
+    You can register multiple event listeners by passing multiple properties that begin with `on...`.
   @return {Element}
     The created element.
   @stable
@@ -472,6 +508,9 @@ up.element = (function() {
         rootElement.textContent = value
       } else if (key === 'content') {
         rootElement.innerHTML = value
+      } else if (key.startsWith('on') && u.isFunction(value)) {
+        let eventType = key.substring(2)
+        rootElement.addEventListener(eventType, value)
       } else {
         rootElement.setAttribute(key, value)
       }
@@ -602,6 +641,8 @@ up.element = (function() {
   element.className // returns 'klass'
   ```
 
+  See `up.element.createFromSelector()` for many more examples.
+
   @function up.element.affix
   @param {Element} parent
     The parent to which to attach the created element.
@@ -615,15 +656,21 @@ up.element = (function() {
     - `'afterend'`: After `parent`, as a new sibling.
   @param {string} selector
     The CSS selector from which to create an element.
-  @param {Object} attrs
+  @param {Object} [attrs]
     An object of attributes to set on the created element.
-  @param {Object} attrs.text
+  @param {Object} [attrs.text]
     The [text content](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent) of the created element.
-  @param {Object|string} attrs.style
+  @param {Object} [attrs.content]
+    The [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML) of the created element.
+  @param {Object|string} [attrs.style]
     An object of CSS properties that will be set as the inline style
     of the created element.
 
     The given object may use kebab-case or camelCase keys.
+  @param {Function} [attrs.on...]
+    An [event listener](/up.element.createFromSelector#adding-event-listeners) to register on the created element.
+
+    You can register multiple event listeners by passing multiple properties that begin with `on...`.
   @return {Element}
     The created element.
   @stable
@@ -1124,9 +1171,9 @@ up.element = (function() {
 
   @function up.element.style
   @param {Element} element
-  @param {String|Array} propOrProps
+  @param {string|Array} propOrProps
     One or more CSS property names in kebab-case or camelCase.
-  @return {string|object}
+  @return {string|Object}
   @stable
   */
   function computedStyle(element, props) {
@@ -1173,9 +1220,9 @@ up.element = (function() {
 
   @function up.element.inlineStyle
   @param {Element} element
-  @param {String|Array} propOrProps
+  @param {string|Array} propOrProps
     One or more CSS property names in kebab-case or camelCase.
-  @return {string|object}
+  @return {string|Object}
   @internal
   */
   function inlineStyle(element, props) {
@@ -1198,7 +1245,7 @@ up.element = (function() {
   @param {Element} element
   @param {Object} props
     One or more CSS properties with kebab-case keys or camelCase keys.
-  @return {string|object}
+  @return {string|Object}
   @stable
   */
   function setInlineStyle(element, props) {
