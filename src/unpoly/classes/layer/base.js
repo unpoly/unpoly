@@ -167,7 +167,8 @@ up.Layer = class Layer extends up.Record {
 
     If the layer has a close animation, the callback will run after the animation has finished.
   @param {number} [options.history=true]
-    Whether to restore the the parent layer's location in the browser's address bar.
+    Whether to restore the the parent layer's [history state](/updating-history#history-state)
+    in the browser's address bar.
 
     @experimental
   @param {boolean} [options.preventable=true]

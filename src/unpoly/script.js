@@ -713,7 +713,7 @@ up.script = (function() {
 
   ### Tracking additional assets {#including-assets}
 
-  To track additional assets, mark them with an `[up-asset]` attribute.
+  To track additional assets in the `<head>`, mark them with an `[up-asset]` attribute.
 
   For example, [inline scripts](https://simpledev.io/lesson/inline-script-javascript-1/) are not tracked by default,
   but you can include them explictily:
@@ -724,8 +724,9 @@ up.script = (function() {
   </script>
   ```
 
-  To track additional assets by default, configure `up.script.config.assetSelectors`.
+  Only elements in the `<head>` can be matched this way.
 
+  To track additional assets by default, configure `up.script.config.assetSelectors`.
 
   ### Tracking the backend version {#tracking-backend-versions}
 
@@ -790,10 +791,10 @@ up.script = (function() {
   @param {List<Element>} event.newAssets
     A list of all [assets](/up-asset) in the new content.
 
-    The list is not filtered by old assets.
+    The list also includes asset that have a matching element on the current page.
 
-    By default no asset elements are updated in the current page.
-    [Listeners can do this](/handling-asset-changes#loading-new-assets).
+    By default no new asset are inserted into the current page.
+    Event listeners must [explicitly load new assets](/handling-asset-changes#loading-new-assets).
   @param {List<Element>} event.oldAssets
     A list of [assets](/up-asset) in the `<head>` of the current page.
   @param {Object} event.renderOptions

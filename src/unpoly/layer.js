@@ -442,9 +442,9 @@ up.layer = (function() {
     Passing `true` or `false` will enable or disable all dismiss controls.
 
   @param {boolean|string} [options.history]
-    Whether history of the overlay content is visible.
+    Whether the [history state](/updating-history#history-state) of the overlay content is visible.
 
-    If set to `true` the overlay location and title will be shown in browser UI.
+    If set to `true` the overlay's location, title and meta elements will be shown in browser UI.
 
     If set to `'auto'` history will be visible if the initial overlay
     content matches a [main target](/up-main).
