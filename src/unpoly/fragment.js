@@ -297,8 +297,8 @@ up.fragment = (function() {
       // and RFC 1123 times (e.g. "Wed, 21 Oct 2015 07:28:00 GMT").
       if (/^\d+$/.test(value)) {
        value = Number(value) * 1000
-     }
-     return new Date(value)
+      }
+      return new Date(value)
     }
   }
 
