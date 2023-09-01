@@ -51,6 +51,12 @@ up.history = (function() {
     noMetaSelectors: [
       'meta[http-equiv]',
       '[up-meta=false]',
+      // Do not invalidate existing nonced callbacks.
+      // New nonced callbacks from the response will validates and then rewritten to match the existing nonce.
+      'meta[name=csp-nonce]',
+      // Since the CSRF token needs to be global (not per-form) it should be safe to replace with a
+      // differently masked version. However let's not confuse any scripts that may have copied the token.
+      'meta[name^=csrf-]',
     ],
   }))
 

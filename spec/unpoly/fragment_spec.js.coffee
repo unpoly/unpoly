@@ -5064,6 +5064,41 @@ describe 'up.fragment', ->
             expect('.target').toHaveText('new text')
             expect('.target').toHaveAttribute('callback', "nonce-secret1 alert()")
 
+        it "ensures nonced callbacks still match the current page's nonce after a render pass that updates history (meta elements are part of history state) (bugfix)", ->
+          up.element.affix(document.head, 'meta#test-nonce[name="csp-nonce"][content="nonce-secret1"]')
+          expect(up.protocol.cspNonce()).toBe('nonce-secret1')
+
+          element = fixture('.element', callback: 'nonce-secret1 alert()')
+          fixture('.target', text: 'old text')
+
+          up.render('.target', url: '/path', history: true)
+
+          await wait()
+
+          jasmine.respondWith(
+            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'"}
+            responseText: """
+              <html>
+                <head>
+                  <meta id="test-nonce" name="csp-nonce" content="nonce-secret2">
+                </head>
+                <body>
+                  <div class="target">
+                    new text
+                  </div>
+                </body>
+              </html>
+            """
+          )
+
+          await wait()
+
+          currentPageNonce = up.protocol.cspNonce()
+          expect(element.getAttribute('callback')).toBe("#{currentPageNonce} alert()")
+
+          # clean up
+          document.querySelector('meta#test-nonce').remove()
+
         it "rewrites a callback's nonce it the nonce matches one of multiple script-src nonces in its own response", asyncSpec (next) ->
           spyOn(up.protocol, 'cspNonce').and.returnValue('secret1')
           fixture('.target')
