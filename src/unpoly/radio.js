@@ -130,7 +130,6 @@ up.radio = (function() {
   - Unread message counters
   - Notification flashes
   - Page-specific subnavigation
-  - [Canonical link elements](https://en.wikipedia.org/wiki/Canonical_link_element) in the `<head>`.
 
   Instead of explicitly including such elements in every [target selector](/targeting-fragments)
   (e.g. `.content, .flashes:maybe`) we can mark as `[up-hungry]`.

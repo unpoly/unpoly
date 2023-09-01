@@ -1,42 +1,15 @@
 Updating history
 ================
 
-Unpoly will update the browser location as the user [follows links](/a-up-follow) and [submits forms](/form-up-submit).
+Unpoly will update the browser location, document title and other [history-related state](#history-state)
+as the user [follows links](/a-up-follow) and [submits forms](/form-up-submit).
 
-
-
-## History state
-
-
-
-- The URL shown in the browser's address bar
-- The document title shown as the browser's window title
-- History-related `<meta>` elements in the `<head>`, like `meta[name=description]`, `meta[rel=canonical]` or `meta[property="og:image"]`.
-
-```html
-<head>
-  <title>AcmeCorp</title> <!-- mark-line -->
-  <link rel="canonical" href="https://example.com/dresses/green-dresses"> <!-- mark-line -->
-  <meta name="description" content="About the AcmeCorp team"> <!-- mark-line -->
-  <meta prop="og:image" content="https://app.com/og.jpg"> <!-- mark-line -->
-  <script src="/assets/app.js"></script>
-  <link rel="stylesheet" href="/assets/app.css">  
-</head>
-```
-
-When Unpoly renders content with the `<head>` above, Unpoly will update:
-
-- The browser URL
-- The `<title>` element
-- The `<link rel="canonical">` element
-- The `<meta name="description">` element
-- The `<meta prop="og:image`>` element
-
-The linked JavaScript and stylesheet are not part of history state and will not be updated.
-They may hover cause an `up:assets:changed` event.
 
 
 ## When history is changed
+
+There are some restrictions for when Unpoly will change history.
+This sections explains the reasons for these restrictions and shows how to override them.
 
 
 ### Only major fragments change history 
@@ -81,6 +54,35 @@ However, if a successful form submssion redirects to a `GET` URL, that new reque
 again egible to change history.
 
 
+
+
+## What is updated when history changes {#history-state}
+
+A history update comprises the following:
+
+- The URL shown in the browser's address bar.
+- The document title shown as the browser's window title.
+- History-related `<meta>` and `<link>` elements, like `meta[name=description]`, `link[rel=canonical]`.
+
+In the document below, the highlighted elements will be updated when history is changed, in additional to the location URL:
+
+```html
+<head>
+  <title>AcmeCorp</title> <!-- mark-line -->
+  <link rel="canonical" href="https://example.com/dresses/green-dresses"> <!-- mark-line -->
+  <meta name="description" content="About the AcmeCorp team"> <!-- mark-line -->
+  <meta prop="og:image" content="https://app.com/og.jpg"> <!-- mark-line -->
+  <script src="/assets/app.js"></script>
+  <link rel="stylesheet" href="/assets/app.css">  
+</head>
+```
+
+The linked JavaScript and stylesheet are *not* part of history state and will not be updated.
+
+The updating of `<link>` and `<meta>` elements can be disabled with `up.history.config.updateMetas = false`.
+
+
+
 ## History in overlays
 
 By default modals and overlays will have visible history if their initial fragment is a [main element](/main).
@@ -97,9 +99,9 @@ Also see [History restoration in overlays](/restoring-history#overlays)
 ### Behavior of overlays with history
 
 When an overlay has visible history, its location and title are shown in the browser window while
-the overlay is open. Also `<meta>` elements from the overlay content will be appended to the `<head>`.  
+the overlay is open. Also [history-related meta elements](#history-state) from the overlay content will be appended to the `<head>`.  
 
-When an overlay is closed, the URL, title and `<meta>` elements from the background layer are restored.
+When an overlay is closed, the URL, title and history-related meta elements from the background layer are restored.
 
 ### Behavior of overlays without history
 

@@ -24,15 +24,43 @@ up.history = (function() {
 
   @property up.history.config
   @param {Array} [config.restoreTargets=[]]
-    A list of possible CSS selectors to [replace](/up.render) when the user goes back or forward in history.
+    A list of possible CSS selectors to [replace](/up.render)
+    when the user [goes back or forward in history](/restoring-history).
 
-    If more than one target is configured, the first selector matching both the current page and server response will be updated.
+    If more than one target is configured, the first selector matching both
+    the current page and server response will be updated.
 
     If nothing is configured, the `<body>` element will be replaced.
   @param {boolean} [config.enabled=true]
-    Defines whether [fragment updates](/up.render) will update the browser's current URL.
+    Configures whether [fragment updates](/up.render) can [update history](/updating-history).
 
-    If set to `false` Unpoly will never change the browser URL.
+    If set to `false` Unpoly will never change history.
+
+  @param {boolean} [config.updateMetas=true]
+    Configures whether [history changes](/updating-history) update
+    [history-related meta elements](/updating-history#history-state) in addition
+    to the document's title and URL.
+
+  @param {config.metaSelectors}
+    An array of CSS selectors matching default [meta elements](/up-meta)
+    that are be updated during [history changes](/updating-history).
+
+    By default popular `<meta>` and certain `<link>` elements are considered meta elements.
+
+    Because of the [large number of `[rel]` attribute values](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/rel)
+    Unpoly the most common `link[rel]` elements are matched by default.
+    You can [include additional elements](/up-meta#including-metas) by assigning an `[up-meta]` attribute
+    or by pushing their selector into this configuration array.
+
+    Only elements in the `<head>` can be matched. Elements in the `<body>` are never considered,
+    even if they match one of the configured selectors.
+
+  @param {config.noMetaSelectors}
+    Exceptions to `up.history.config.metaSelectors`.
+
+    Matching elements will *not* be considered [meta elements](/up-meta)
+    even if they match `up.history.config.metaSelectors`.
+
   @stable
   */
   const config = new up.Config(() => ({
@@ -385,6 +413,49 @@ up.history = (function() {
   function findMetas(head = document.head) {
     return e.filteredQuery(head, config.metaSelectors, config.noMetaSelectors)
   }
+
+  /*-
+  Configures whether this `<head>` element is updated during [history changes](/updating-history).
+
+  By default popular `<meta>` and certain `<link>` elements in the `<head>` are considered meta elements.
+  They will be updated when history is changed, in addition to the document's title and URL.
+
+  ```html
+  <link rel="canonical" href="https://example.com/dresses/green-dresses"> <!-- mark-line -->
+  <meta name="description" content="About the AcmeCorp team"> <!-- mark-line -->
+  <meta prop="og:image" content="https://app.com/og.jpg"> <!-- mark-line -->
+  <script src="/assets/app.js"></script>
+  <link rel="stylesheet" href="/assets/app.css">
+  ```
+
+  The linked JavaScript and stylesheet are *not* part of history state and will not be updated
+  during history changes.
+
+  ### Including additional elements {#including-metas}
+
+  To update additional `<head>` elements during history changes, mark them with an `[up-meta]` attribute:
+
+  ```html
+  <link rel="license" href="https://opensource.org/license/mit/" up-meta>
+  ```
+
+  Only elements in the `<head>` can be matched this way.
+
+  To include additional elements by default, configure `up.history.config.metaSelectors`.
+
+  ### Excluding elements {#excluding-metas}
+
+  To preserve a `<head>` element during history, changes, set an `[up-meta=false]` attribute:
+
+  ```html
+  <meta charset="utf-8" up-meta="false">
+  ```
+
+  To exclude elements by default, configure `up.history.config.noMetaSelectors`.
+
+  @selector [up-meta]
+  @stable
+  */
 
   function updateMetas(newMetas) {
     let oldMetas = findMetas()

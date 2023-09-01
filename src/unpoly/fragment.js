@@ -61,7 +61,7 @@ up.fragment = (function() {
 
     When [navigating](/navigation) to a main target, Unpoly will automatically
     [reset scroll positions](/scrolling#automatic-scrolling-logic) and
-    [update the browser history](/up.render#options.history).
+    [update the browser history](/updating-history).
 
     This property is aliased as [`up.layer.config.any.mainTargets`](/up.layer.config#config.any.mainTargets).
 
@@ -586,9 +586,9 @@ up.fragment = (function() {
     See [handling server errors](/failed-responses) for details.
 
   @param {boolean|string} [options.history]
-    Whether the browser URL and window title will be [updated](/updating-history).
+    Whether the browser URL, window title and meta elements will be [updated](/updating-history).
 
-    If set to `true`, the history will always be updated, using the title and URL from
+    If set to `true`, the history will always be updated, using history
     the server response, or from given `{ title }` and `{ location }` options.
 
     If set to `'auto'` history will be updated if the `{ target }` matches

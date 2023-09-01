@@ -519,7 +519,7 @@ up.viewport = (function() {
   If no earlier scroll position is known, scroll positions are not changed
   and `false` is returned.
 
-  Unpoly automatically restores scroll positions when the user presses the back button.
+  Unpoly automatically restores scroll positions when the user [presses the back button](/restoring-history).
 
   @function up.viewport.restoreScroll
   @param {Element|Array<Element>} [viewport]
@@ -597,7 +597,7 @@ up.viewport = (function() {
   /*-
   Restores [previously saved](/up.viewport.saveFocus) focus-related state.
 
-  Unpoly automatically restores focus-related state when the user presses the back button.
+  Unpoly automatically restores focus-related state when the user [presses the back button](/restoring-history).
 
   @function up.viewport.restoreFocus
   @param {Element|Array<Element>} [viewport]
