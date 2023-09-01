@@ -11,7 +11,8 @@ Cached pages also [remain accessible](/network-issues#offline-cache) after a [di
 Enabling caching
 ----------------
 
-You can enable caching with `{ cache: 'auto' }`, which caches all responses to GET requests. You can configure this default:
+You can enable caching with `{ cache: 'auto' }`, which caches all responses to GET requests.
+You can configure this default:
 
 ```js
 up.network.config.autoCache = (request) => request.method === 'GET'
@@ -25,13 +26,35 @@ To force caching regardless of HTTP method, pass `{ cache: true }`.
 Disabling caching
 -----------------
 
-To opt *out* of caching while navigating, there are several methods:
+[Navigation](/navigation) is the only moment when Unpoly caches by default.
 
-- Set `up.fragment.config.navigateOptions.cache = false`.
-- Pass a [`{ cache: false }`](/up.render#options.cache) option to a rendering function.
-- Set an [`[up-cache=false]`](/a-up-follow#up-cache) attribute on a link. 
-- Exclude a URL from `up.network.config.autoCache`.
+You can disable caching while navigating like so:
 
+```js
+up.fragment.config.navigateOptions.cache = false
+```
+
+If you want to keep the navigation default, but disable auto-caching for some URLs, configure `up.network.config.autoCache`: 
+
+```js
+let defaultAutoCache = up.network.config.autoCache
+up.network.config.autoCache = function(request) {
+  defaultAutoCache(request) && !request.url.endsWith('/edit')
+}
+```
+
+If you want to keep the default, but disable caching for an individual link, use an `[up-cache=false]` attribute:
+
+```html
+<a href="/stock-charts" up-cache="false">View latest prices</a>
+```
+
+If you want to keep the default, but disable caching for function call that would otherwise navigate,
+pass an `{ cache: false }` option:
+
+```js
+up.follow(link, { cache: false })
+```
 
 
 Revalidation
@@ -59,12 +82,32 @@ To force revalidation regardless of cache age, pass `{ revalidate: true }`.
 
 ### Disabling revalidation
 
-When [navigating](/navigation) the `{ revalidate: 'auto' }` option is already set by [default](/up.fragment.config#config.navigateOptions). To opt *out* of revalidation while navigating, there are several methods:
+[Navigation](/navigation) is the only moment when Unpoly revalidates by default.
 
-- Pass a  [`{ revalidate: false }`](/up.render#options.revalidate) option (JavaScript)
-- Set an [`[up-revalidate=false]`](/a-up-follow#up-revalidate) attribute (HTML)
-- Configure `up.fragment.config.navigateOptions.revalidate = false`
+You can disable cache revalidation while navigating like so:
 
+```js
+up.fragment.config.navigateOptions.revalidate = false
+```
+
+If you want to keep the navigation default, but disable revalidation for some responses, configure `up.network.config.autoRevalidate`:
+
+```js
+up.fragment.config.autoRevalidate = (response) => response.expired && response.url != '/dashboard'
+```
+
+If you want to keep the default, but disable caching for an individual link, use an `[up-revalidate=false]` attribute:
+
+```html
+<a href="/" up-revalidate="false">Start page</a>
+```
+
+If you want to keep the default, but disable revalidation for function call that would otherwise navigate,
+pass an `{ revalidate: false }` option:
+
+```js
+up.follow(link, { cache: true, revalidate: false })
+```
 
 ### When nothing changed
 
