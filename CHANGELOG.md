@@ -273,7 +273,7 @@ Unpoly often needs to [derive a target selector](/target-derivation) from an ele
     'main',           // main
     '[up-main]',      // [up-main="root"]
     'link[rel]',      // link[rel="canonical"]
-    'meta[property]', // link[rel="canonical"]
+    'meta[property]', // meta[property="og:image"]
     '*[name]',        // input[name="email"]
     'form[action]',   // form[action="/users"]
     'a[href]',        // a[href="/users/"]
