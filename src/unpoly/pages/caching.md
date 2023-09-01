@@ -22,6 +22,9 @@ When [navigating](/navigation) the `{ cache: 'auto' }` option is already set by 
 
 To force caching regardless of HTTP method, pass `{ cache: true }`.
 
+> [note]
+> [Preloading](/a-up-preload) a link will [enable caching](/caching#enabling-caching) for that link automatically.
+
 
 Disabling caching
 -----------------

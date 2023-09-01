@@ -520,6 +520,8 @@ up.link = (function() {
   Preload requests are considered [background requests](/up.render#options.background)
   and will not show the [progress bar](/loading-indicators#progress-bar).
 
+  Preloading a link will [enable caching](/caching#enabling-caching) for that link automatically.
+
   @function up.link.preload
   @param {string|Element|jQuery} link
     The element or selector whose destination should be preloaded.
@@ -1438,6 +1440,8 @@ up.link = (function() {
 
   Preload requests are considered [background requests](/up.render#options.background)
   and will not show the [progress bar](/loading-indicators#progress-bar).
+
+  Preloading a link will [enable caching](/caching#enabling-caching) for that link automatically.
 
   @selector a[up-preload]
   @param [up-preload-delay]
