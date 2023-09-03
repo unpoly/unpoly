@@ -3679,8 +3679,8 @@ describe 'up.fragment', ->
           expect(document.head).toHaveSelector('link[rel="canonical"][href="/old-canonical"]')
           expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
 
-        it 'does not update meta elements with up.history.config.updateMetas = false', ->
-          up.history.config.updateMetas = false
+        it 'does not update meta elements with up.history.config.updateMetaElements = false', ->
+          up.history.config.updateMetaElements = false
 
           e.affix(document.head, 'link[rel="canonical"][href="/old-canonical"]')
           e.affix(document.head, 'meta[name="description"][content="old description"]')

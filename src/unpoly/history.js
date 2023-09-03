@@ -36,7 +36,7 @@ up.history = (function() {
 
     If set to `false` Unpoly will never change history.
 
-  @param {boolean} [config.updateMetas=true]
+  @param {boolean} [config.updateMetaElements=true]
     Configures whether [history changes](/updating-history) update
     [history-related meta elements](/updating-history#history-state) in addition
     to the document's title and URL.
@@ -65,7 +65,7 @@ up.history = (function() {
   */
   const config = new up.Config(() => ({
     enabled: true,
-    updateMetas: true,
+    updateMetaElements: true,
     // Prefer restoring the body instead of :main, in case the last fragment update
     // changed the page layout. See https://github.com/unpoly/unpoly/issues/237.
     restoreTargets: ['body'],
@@ -457,7 +457,7 @@ up.history = (function() {
   @stable
   */
 
-  function updateMetas(newMetas) {
+  function updateMetaElements(newMetas) {
     let oldMetas = findMetas()
     for (let oldMeta of oldMetas) {
       // We do not use up.destroy() as meta elements may be inserted/removed
@@ -522,6 +522,6 @@ up.history = (function() {
     normalizeURL,
     isLocation,
     findMetas,
-    updateMetas,
+    updateMetaElements,
   }
 })()

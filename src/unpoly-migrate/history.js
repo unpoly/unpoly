@@ -25,27 +25,27 @@ up.migrate.renamedEvent('up:history:replaced', 'up:location:changed')
 
 up.migrate.removedEvent('up:fragment:kept', 'up:fragment:keep')
 
-let updateMetas = up.history.config.updateMetas
-let updateMetasSet = false
-Object.defineProperty(up.history.config, 'updateMetas', {
+let updateMetaElements = up.history.config.updateMetaElements
+let updateMetaElementsSet = false
+Object.defineProperty(up.history.config, 'updateMetaElements', {
   get() {
-    return updateMetas
+    return updateMetaElements
   },
   set(value) {
-    updateMetas = value
-    updateMetasSet = true
+    updateMetaElements = value
+    updateMetaElementsSet = true
   }
 })
 
 up.on('up:framework:boot', function() {
-  if (!updateMetasSet) {
-    up.migrate.warn('Meta elements in the <head> are now updated automatically. Configure up.history.config.updateMetas to remove this warning.')
+  if (!updateMetaElementsSet) {
+    up.migrate.warn('Meta elements in the <head> are now updated automatically. Configure up.history.config.updateMetaElements to remove this warning.')
   }
 })
 
 // up.compiler('[up-hungry]')
 
-up.migrate.warnOfHungryMetas = function(metas) {
+up.migrate.warnOfHungryMetaElements = function(metas) {
   let fullHungrySelector = up.radio.config.hungrySelectors.join()
   let hungryMetas = up.util.filter(metas, (meta) => meta.matches(fullHungrySelector))
   if (hungryMetas.length) {

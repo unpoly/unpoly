@@ -610,7 +610,7 @@ up.Layer = class Layer extends up.Record {
     }
 
     if (this.savedMetas) {
-      up.history.updateMetas(this.savedMetas)
+      up.history.updateMetaElements(this.savedMetas)
     }
   }
 
@@ -638,10 +638,10 @@ up.Layer = class Layer extends up.Record {
       this.location = options.location
     }
 
-    // Set unless { headMetas: false }
-    if (up.history.config.updateMetas && u.isList(options.headMetas)) {
-      up.migrate?.warnOfHungryMetas?.(options.headMetas)
-      this.headMetas = options.headMetas
+    // Set unless { metaElements: false }
+    if (up.history.config.updateMetaElements && u.isList(options.metaElements)) {
+      up.migrate?.warnOfHungryMetaElements?.(options.metaElements)
+      this.metaElements = options.metaElements
     }
 
     // Set unless { title: false }
@@ -695,7 +695,7 @@ up.Layer = class Layer extends up.Record {
     }
   }
 
-  get headMetas() {
+  get metaElements() {
     if (this.showsLiveHistory()) {
       return up.history.findMetas()
     } else {
@@ -703,11 +703,11 @@ up.Layer = class Layer extends up.Record {
     }
   }
 
-  set headMetas(metas) {
+  set metaElements(metas) {
     this.savedMetas = metas
 
     if (this.showsLiveHistory()) {
-      up.history.updateMetas(metas)
+      up.history.updateMetaElements(metas)
     }
   }
 

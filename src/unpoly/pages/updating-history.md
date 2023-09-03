@@ -79,7 +79,7 @@ In the document below, the highlighted elements will be updated when history is 
 
 The linked JavaScript and stylesheet are *not* part of history state and will not be updated.
 
-The updating of `<link>` and `<meta>` elements can be disabled with `up.history.config.updateMetas = false`.
+The updating of `<link>` and `<meta>` elements can be disabled with `up.history.config.updateMetaElements = false`.
 
 
 

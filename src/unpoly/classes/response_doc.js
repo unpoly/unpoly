@@ -106,7 +106,7 @@ up.ResponseDoc = class ResponseDoc {
     return head && fn(head)
   }
 
-  get headMetas() {
+  get metaElements() {
     return this.fromHead(up.history.findMetas)
   }
 
