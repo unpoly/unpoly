@@ -7,11 +7,7 @@ Remaining V3 tasks
 Head reconciliation
 ===================
 
-- Docs
-  - Docs for { history } and { up-history } must also mention metas
 - Rebase changes with [tag] prefix
-- Try to upgrade DB with the changes
-- Consider fixing paused polling when re-focusing tab
 - CHANGELOG
 - Release
 - Deploy unpoly-demo changes
@@ -21,6 +17,7 @@ Head reconciliation
 Priority
 =========
 
+- Consider fixing paused polling when re-focusing tab
 - When an fragment is aborted while animating, we should not revalidate
 - newPageReason for non-GET boot method: Allow rendering fragments when options.history is falsey
 - Docs: /accessibility page
