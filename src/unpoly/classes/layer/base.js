@@ -640,6 +640,7 @@ up.Layer = class Layer extends up.Record {
 
     // Set unless { headMetas: false }
     if (up.history.config.updateMetas && u.isList(options.headMetas)) {
+      up.migrate?.warnOfHungryMetas?.(options.headMetas)
       this.headMetas = options.headMetas
     }
 
