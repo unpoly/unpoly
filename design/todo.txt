@@ -7,44 +7,12 @@ Remaining V3 tasks
 Head reconciliation
 ===================
 
-- Problem: We cannot really do location.reload() in up:assets:changed as the location has not been updated yet
-  - Event prop?
-    - Location preview is hard
-  - Emit after render pass?
-    - We could then no longer prevent default
-  - Emit after history change
-    - When opening a layer the layer stack has already been changed
-- migrate
-  - Disable reconciliation by default, but force migrate user to decide true/false
-  - Warn when reconciliation is enabled, but a head element is targeted or has [up-hungry]
 - Docs
-  - We may have examples for <link rel=canonical> in [up-hungry][up-if-history]
-  - [ok] event.newAssets should mention
-    - that it includes all new assets, even if an identical element is already in the page
-    - that it includes stylesheets and javascripts
-  - Doc page "Updating history" should describe what updating history entails
-    - Browser URL
-    - Browser title
-    - Meta tags
-  - [ok] New doc page for detecting new deployments / backend revisions
-    - Detecting changed frontend code
-    - /handling-asset-changes
-  - New config options
-    - updateMetas
-    - [ok] assetSelectors / noAssetSelectors
-      - assetSelectors should mention that only in the <head>
-    - metaSelectors / noMetaSelectors
-  - For [up-meta]
-  - For [up-asset]
-  - [ok] For up:assets:changed
-    - Does not do anything by default
-    - Is not triggered if a response has no <head>
-    - Where it is emitted
   - Docs for { history } and { up-history } must also mention metas
-- Update /render-hooks diagram
 - Rebase changes with [tag] prefix
-- [ok] Test and document affix() / createElementFromSelector() with on-prefixed functions
-- Do we need to exclude `meta[name=csp-nonce]` from metaSelectors?
+- Try to upgrade DB with the changes
+- Consider fixing paused polling when re-focusing tab
+- CHANGELOG
 - Release
 - Deploy unpoly-demo changes
   - Make screenshot!
