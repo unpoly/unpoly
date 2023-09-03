@@ -988,7 +988,7 @@ up.link = (function() {
     See [handling server errors](/failed-responses) for details.
 
   @param [up-history='auto']
-    Whether the browser URL and window title will be [updated](/updating-history).
+    Whether the browser URL, window title and meta elements will be [updated](/updating-history).
 
     If set to `true`, the history will always be updated, using the title and URL from
     the server response, or from given `[up-title]` and `[up-location]` attributes.
