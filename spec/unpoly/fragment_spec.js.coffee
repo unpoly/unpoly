@@ -3679,6 +3679,36 @@ describe 'up.fragment', ->
           expect(document.head).toHaveSelector('link[rel="canonical"][href="/old-canonical"]')
           expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
 
+        it 'does not update meta elements with up.history.config.updateMetas = false', ->
+          up.history.config.updateMetas = false
+
+          e.affix(document.head, 'link[rel="canonical"][href="/old-canonical"]')
+          e.affix(document.head, 'meta[name="description"][content="old description"]')
+
+          fixture('.container', text: 'old container text')
+          up.render('.container', url: '/path', history: true)
+
+          await wait()
+
+          jasmine.respondWith """
+              <html>
+                <head>
+                  <link rel='canonical' href='/new-canonical'>
+                  <meta name='description' content='old description'>
+                </head>
+                <body>
+                  <div class='container'>
+                    new container text
+                  </div>
+                </body>
+              </html>
+            """
+
+          await wait()
+
+          expect(document.head).toHaveSelector('link[rel="canonical"][href="/old-canonical"]')
+          expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
+
         it 'does not render meta elements for a background layer, but saves them for later restoration', ->
           e.affix(document.head, 'meta[name="description"][content="old root description"]')
           document.title = 'old root title'
@@ -3771,6 +3801,37 @@ describe 'up.fragment', ->
 
           expect(document.head).toHaveSelector('link[rel="canonical"][href="/old-canonical"]')
           expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
+
+        if up.migrate.loaded
+          it "warns if an auto-update meta elements is also [up-hungry]", ->
+            e.affix(document.head, 'link[rel="canonical"][href="/old-canonical"][up-hungry]')
+            warnSpy = spyOn(up.migrate, 'warn')
+
+            fixture('.container', text: 'old container text')
+            up.render('.container', url: '/path', history: true)
+
+            await wait()
+
+            jasmine.respondWith """
+                <html>
+                  <head>
+                    <link rel='canonical' href='/new-canonical' up-hungry>
+                  </head>
+                  <body>
+                    <div class='container'>
+                      new container text
+                    </div>
+                  </body>
+                </html>
+              """
+
+            await wait()
+
+            expect(document.head).not.toHaveSelector('link[rel="canonical"][href="/old-canonical"]')
+            expect(document.head).toHaveSelector('link[rel="canonical"][href="/new-canonical"]')
+
+            expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('Remove the [up-hungry] attribute'), jasmine.anything())
+
 
       describe 'assets in the head', ->
 
