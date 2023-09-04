@@ -52,10 +52,7 @@ For instance, when a focused `<input>` element is swapped out with a new fragmen
 
 The following properties are preserved:
 
-- Which element is focused.
-- The cursor position within a focused input element.
-- The selection range within a focused input element.
-- The scroll position within a focused input element.
+@include focus-state
 
 ### Restoring focus
 

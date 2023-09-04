@@ -554,10 +554,7 @@ up.viewport = (function() {
 
   Saved state includes:
 
-  - Which element is focused.
-  - The cursor position within a focused input element.
-  - The selection range within a focused input element.
-  - The scroll position within a focused input element.
+  @include focus-state
 
   State can only be preserved if the focused element is [targetable](/up.fragment.isTargetable).
 
