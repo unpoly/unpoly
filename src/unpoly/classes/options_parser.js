@@ -18,12 +18,12 @@ up.OptionsParser = class OptionsParser {
     nor can be parsed from `element`.
   */
   constructor(element, options, parserOptions = {}) {
-    this.options = options
-    this.element = element
-    this.fail = parserOptions.fail
-    this.closest = parserOptions.closest
-    this.attrPrefix = parserOptions.attrPrefix || 'up-'
-    this.defaults = parserOptions.defaults || {}
+    this._options = options
+    this._element = element
+    this._fail = parserOptions.fail
+    this._closest = parserOptions.closest
+    this._attrPrefix = parserOptions.attrPrefix || 'up-'
+    this._defaults = parserOptions.defaults || {}
   }
 
   string(key, keyOptions) {
@@ -52,16 +52,16 @@ up.OptionsParser = class OptionsParser {
   }
 
   parse(attrValueFn, key, keyOptions = {}) {
-    const attrNames = u.wrapList(keyOptions.attr ?? this.attrNameForKey(key))
+    const attrNames = u.wrapList(keyOptions.attr ?? this._attrNameForKey(key))
 
     // Below we will only set @options[key] = value if value is defined.
-    let value = this.options[key]
+    let value = this._options[key]
 
     for (let attrName of attrNames) {
-      value ??= this.parseFromAttr(attrValueFn, this.element, attrName)
+      value ??= this._parseFromAttr(attrValueFn, this._element, attrName)
     }
 
-    value ??= keyOptions.default ?? this.defaults[key]
+    value ??= keyOptions.default ?? this._defaults[key]
 
     let normalizeFn = keyOptions.normalize
     if (normalizeFn) {
@@ -69,36 +69,36 @@ up.OptionsParser = class OptionsParser {
     }
 
     if (u.isDefined(value)) {
-      this.options[key] = value
+      this._options[key] = value
     }
 
     let failKey
-    if (this.fail && (failKey = up.fragment.failKey(key))) {
-      const failAttrNames = u.compact(u.map(attrNames, (attrName) => this.deriveFailAttrName(attrName)))
+    if (this._fail && (failKey = up.fragment.failKey(key))) {
+      const failAttrNames = u.compact(u.map(attrNames, (attrName) => this._deriveFailAttrName(attrName)))
       this.parse(attrValueFn, failKey, { ... keyOptions, attr: failAttrNames })
     }
   }
 
-  parseFromAttr(attrValueFn, element, attrName) {
-    if (this.closest) {
+  _parseFromAttr(attrValueFn, element, attrName) {
+    if (this._closest) {
       return e.closestAttr(element, attrName, attrValueFn)
     } else {
       return attrValueFn(element, attrName)
     }
   }
 
-  deriveFailAttrName(attr) {
-    return this.deriveFailAttrNameForPrefix(attr, this.attrPrefix + 'on-') ||
-      this.deriveFailAttrNameForPrefix(attr, this.attrPrefix)
+  _deriveFailAttrName(attr) {
+    return this._deriveFailAttrNameForPrefix(attr, this._attrPrefix + 'on-') ||
+      this._deriveFailAttrNameForPrefix(attr, this._attrPrefix)
   }
 
-  deriveFailAttrNameForPrefix(attr, prefix) {
+  _deriveFailAttrNameForPrefix(attr, prefix) {
     if (attr.startsWith(prefix)) {
       return `${prefix}fail-${attr.substring(prefix.length)}`
     }
   }
 
-  attrNameForKey(option) {
-    return `${this.attrPrefix}${u.camelToKebabCase(option)}`
+  _attrNameForKey(option) {
+    return `${this._attrPrefix}${u.camelToKebabCase(option)}`
   }
 }
