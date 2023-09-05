@@ -26,7 +26,7 @@ up.EventListener = class EventListener extends up.Record {
     // Listeners that do need to run before Unpoly boots can pass { beforeBoot: true } to override.
     // We also default to { beforeBoot: true } for framework events that are emitted
     // before booting.
-    this._beforeBoot ??= (this.eventType.indexOf('up:framework:') === 0)
+    this.beforeBoot ??= (this.eventType.indexOf('up:framework:') === 0)
 
     // Need to store the bound nativeCallback function because addEventListener()
     // and removeEventListener() need to see the exact same reference.
@@ -60,7 +60,7 @@ up.EventListener = class EventListener extends up.Record {
   }
 
   nativeCallback(event) {
-    if (up.framework.beforeBoot && !this._beforeBoot) {
+    if (up.framework.beforeBoot && !this.beforeBoot) {
       return
     }
 
