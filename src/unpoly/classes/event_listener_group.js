@@ -19,7 +19,7 @@ up.EventListenerGroup = class EventListenerGroup extends up.Record {
   bind() {
     const unbindFns = []
 
-    this.eachListenerAttributes(function(attrs) {
+    this._eachListenerAttributes(function(attrs) {
       const listener = new up.EventListener(attrs)
       listener.bind()
       return unbindFns.push(listener.unbind.bind(listener))
@@ -28,20 +28,20 @@ up.EventListenerGroup = class EventListenerGroup extends up.Record {
     return u.sequence(unbindFns)
   }
 
-  eachListenerAttributes(fn) {
+  _eachListenerAttributes(fn) {
     for (let element of this.elements) {
       for (let eventType of this.eventTypes) {
-        fn(this.listenerAttributes(element, eventType))
+        fn(this._listenerAttributes(element, eventType))
       }
     }
   }
 
-  listenerAttributes(element, eventType) {
+  _listenerAttributes(element, eventType) {
     return { ...this.attributes(), element, eventType }
   }
 
   unbind() {
-    this.eachListenerAttributes(function(attrs) {
+    this._eachListenerAttributes(function(attrs) {
       let listener = up.EventListener.fromElement(attrs)
       if (listener) {
         listener.unbind()
