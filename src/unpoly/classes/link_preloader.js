@@ -3,82 +3,77 @@ const e = up.element
 
 up.LinkPreloader = class LinkPreloader {
 
-  constructor() {
-    this.considerPreload = this.considerPreload.bind(this)
-  }
-
   watchLink(link) {
     // If the link has an unsafe method (like POST) and is hence not preloadable,
     // prevent up.link.preload() from blowing up by not observing the link (even if
     // the user uses [up-preload] everywhere).
     if (!up.link.preloadIssue(link)) {
-      this.on(link, 'mouseenter',           event => this.considerPreload(event, true))
-      this.on(link, 'mousedown touchstart', event => this.considerPreload(event))
-      this.on(link, 'mouseleave',           event => this.stopPreload(event))
+      this._on(link, 'mouseenter',           (event) => this._considerPreload(event, true))
+      this._on(link, 'mousedown touchstart', (event) => this._considerPreload(event))
+      this._on(link, 'mouseleave',           (event) => this._stopPreload(event))
     }
   }
 
-  on(link, eventTypes, callback) {
+  _on(link, eventTypes, callback) {
     up.on(link, eventTypes, { passive: true }, callback)
   }
 
-  considerPreload(event, applyDelay) {
+  _considerPreload(event, applyDelay) {
     const link = event.target
-    if (link !== this.currentLink) {
+    if (link !== this._currentLink) {
       this.reset()
 
-      this.currentLink = link
+      this._currentLink = link
 
       // Don't preload when the user is holding down CTRL or SHIFT.
       if (up.link.shouldFollowEvent(event, link)) {
         if (applyDelay) {
-          this.preloadAfterDelay(event, link)
+          this._preloadAfterDelay(event, link)
         } else {
-          this.preloadNow(event, link)
+          this._preloadNow(event, link)
         }
       }
     }
   }
 
-  stopPreload(event) {
-    if (event.target === this.currentLink) {
+  _stopPreload(event) {
+    if (event.target === this._currentLink) {
       return this.reset()
     }
   }
 
   reset() {
-    if (!this.currentLink) { return }
+    if (!this._currentLink) { return }
 
-    clearTimeout(this.timer)
+    clearTimeout(this._timer)
 
     // Only abort if the request is still preloading.
     // If the user has clicked on the link while the request was in flight,
     // and then unhovered the link, we do not abort the navigation.
-    if (this.currentRequest?.background) {
-      this.currentRequest.abort()
+    if (this._currentRequest?.background) {
+      this._currentRequest.abort()
     }
 
-    this.currentLink = undefined
-    this.currentRequest = undefined
+    this._currentLink = undefined
+    this._currentRequest = undefined
   }
 
-  preloadAfterDelay(event, link) {
+  _preloadAfterDelay(event, link) {
     const delay = e.numberAttr(link, 'up-preload-delay') ?? up.link.config.preloadDelay
-    this.timer = u.timer(delay, () => this.preloadNow(event, link))
+    this._timer = u.timer(delay, () => this._preloadNow(event, link))
   }
 
-  preloadNow(event, link) {
+  _preloadNow(event, link) {
     // Don't preload if the link was removed from the DOM while we were waiting for the timer.
     if (!link.isConnected) {
       this.reset()
       return
     }
 
-    const onQueued = request => { return this.currentRequest = request }
+    const onQueued = request => { return this._currentRequest = request }
     up.log.putsEvent(event)
 
     // Here we really need { onQueued }, not something like { onProcessed }
     up.error.muteUncriticalRejection(up.link.preload(link, { onQueued }))
-    this.queued = true
   }
 }
