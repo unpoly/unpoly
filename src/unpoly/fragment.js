@@ -2610,6 +2610,7 @@ up.fragment = (function() {
   @experimental
   */
   function abort(...args) {
+    console.debug("*** up.fragment.abort(%o)", ...args)
     let options = parseTargetAndOptions(args)
 
     // The function that checks whether a given function will be aborted.

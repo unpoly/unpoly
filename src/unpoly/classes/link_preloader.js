@@ -11,7 +11,7 @@ up.LinkPreloader = class LinkPreloader {
     // If the link has an unsafe method (like POST) and is hence not preloadable,
     // prevent up.link.preload() from blowing up by not observing the link (even if
     // the user uses [up-preload] everywhere).
-    if (up.link.isSafe(link)) {
+    if (!up.link.preloadIssue(link)) {
       this.on(link, 'mouseenter',           event => this.considerPreload(event, true))
       this.on(link, 'mousedown touchstart', event => this.considerPreload(event))
       this.on(link, 'mouseleave',           event => this.stopPreload(event))

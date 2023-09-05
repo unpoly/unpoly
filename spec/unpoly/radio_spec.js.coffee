@@ -872,19 +872,6 @@ describe 'up.radio', ->
         next.after 20, =>
           expect(@lastRequest().url).toMatchURL('/optimized-path')
 
-      it 'polls less frequently while we reduce requests', asyncSpec (next) ->
-        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve(new up.RenderResult())
-
-        spyOn(up.network, 'shouldReduceRequests').and.returnValue(true)
-
-        up.hello(fixture('.element[up-poll][up-interval=100]'))
-
-        next.after 150, ->
-          expect(reloadSpy).not.toHaveBeenCalled()
-
-        next.after 100, ->
-          expect(reloadSpy).toHaveBeenCalled()
-
       it 'pauses polling while the element is detached', asyncSpec (next) ->
         reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve(new up.RenderResult())
 

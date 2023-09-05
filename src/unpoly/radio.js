@@ -35,15 +35,6 @@ up.radio = (function() {
   @param {number} [config.pollInterval=30000]
     The default [polling](/up-poll) interval in milliseconds.
 
-  @param {Function(number): number} [config.stretchPollInterval]
-    Adjusts the given [polling](/up-poll) interval before it is used.
-
-    On a good network connection this returns the given interval unchanged.
-    On a [poor connection](/network-issues#low-bandwidth) it returns
-    the doubled interval, causing Unpoly to poll at half as frequently.
-
-    @experimental
-
   @param {boolean|string|Function(Element)} [config.pollEnabled=true]
     Whether Unpoly will follow instructions to poll fragments, like the `[up-poll]` attribute.
 
@@ -68,8 +59,6 @@ up.radio = (function() {
   const config = new up.Config(() => ({
     hungrySelectors: ['[up-hungry]'],
     pollInterval: 30000,
-    stretchPollInterval: (interval) => interval * (up.network.shouldReduceRequests() ? 2 : 1),
-    pollEnabled: 'auto',
   }))
 
   function reset() {
@@ -218,26 +207,12 @@ up.radio = (function() {
     up.FragmentPolling.forFragment(element).forceStop()
   }
 
-  function pollIssue(fragment) {
-    let enabled = config.pollEnabled
-
-    if (enabled === false) {
-      return 'User has disabled polling'
-    }
-
-    if (enabled === 'auto') {
-      if (document.hidden) {
-        return 'Tab is hidden'
-      }
-
-      if (!up.layer.get(fragment)?.isFront?.()) {
-        return 'Fragment is on a background layer'
-      }
-    }
-
-    if (up.emit(fragment, 'up:fragment:poll', { log: ['Polling fragment', fragment] }).defaultPrevented) {
-      return 'User prevented up:fragment:poll event'
-    }
+  function pollOptions(fragment, options = {}) {
+    const parser = new up.OptionsParser(fragment, options)
+    parser.number('interval', { default: config.pollInterval })
+    parser.string('ifLayer', { default: 'front' }) // TODO: Docs
+    parser.string('ifTab', { default: 'visible' }) // TODO: Docs
+    return options
   }
 
   /*-
@@ -312,21 +287,11 @@ up.radio = (function() {
   - Client-side code has called `up.radio.stopPolling()` with the polling element.
   - Polling was [disabled globally](/up.radio.config#config.pollEnabled).
 
-  ### Polling under low bandwidth
-
-  When Unpoly detects a [poor network connection](/network-issues#low-bandwidth),
-  the polling frequency is halfed.
-
-  This can be configured in `up.radio.config.stretchPollInterval`.
-
   @selector [up-poll]
   @param [up-interval]
     The reload interval in milliseconds.
 
     Defaults to `up.radio.config.pollInterval`.
-
-    Under [low bandiwdth](/network-issues#low-bandwidth) the given interval
-    will be scaled through `up.radio.config.stretchPollInterval`.
   @param [up-keep-data]
     [Preserve](/data#preserving-data-through-reloads) the polling fragment's
     [data object](/data) through reloads.
@@ -339,11 +304,6 @@ up.radio = (function() {
   @stable
   */
   up.compiler('[up-poll]', function(fragment) {
-    if (!up.fragment.isTargetable(fragment)) {
-      up.warn('[up-poll]', 'Ignoring untargetable fragment %o', fragment)
-      return
-    }
-
     up.FragmentPolling.forFragment(fragment).onPollAttributeObserved()
   })
 
@@ -368,6 +328,6 @@ up.radio = (function() {
     hungrySteps,
     startPolling,
     stopPolling,
-    pollIssue,
+    pollOptions,
   }
 })()

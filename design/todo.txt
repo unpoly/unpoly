@@ -14,6 +14,29 @@ Head reconciliation
   - Make screenshot!
 
 
+Polling rework
+==============
+
+- [ok] Remove up.link.config.preloadEnabled
+- [ok] Remove preloadIssue()
+  - Link preloader can immediately decide whether to register events based on up.link.isSafe()
+- [ok] Remove up.network.config.badDownlink
+- [ok] Remove up.network.config.badRTT
+- Polling for hidden tabs
+  - Unschedule / re-check and reschedule-remaining on visibilityhcnage
+- Polling for background layers
+  - Unschedule / re-check and reschedule-remaining on up:layer:dismissed / up:layer:accepted
+    - How about up:layer:covered / up:layer:uncovered ?
+- Remove up:layer:covered / :uncovered again
+- Move up:fragment:poll event from pollIssue to up.FragmentPolling
+- Remove up.radio#pollIssue
+- [ok] Remove up.radio.config.pollEnabled
+- [ok] Remove up.radio.config.pollStretchInterval
+- Consider offering an up.radio.poll(fragment)
+  - Poll now
+  - Or reload if no polling active
+
+
 Priority
 =========
 
@@ -25,6 +48,8 @@ Priority
   - Top-level?
 - [v4] Document throws
   - But consider waiting until async compilers, as we're changing some method signatures
+  - How do we document async rejections?
+    - up.link.preload documents in @return
 - [v4] Async compiler functions
   - See separate doc
 - Publish up.util.sprintf()

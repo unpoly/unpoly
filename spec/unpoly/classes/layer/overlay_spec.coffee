@@ -345,6 +345,20 @@ describe 'up.Layer.Overlay', ->
 
       it 'emits an up:layer:accept event with the acceptance value'
 
+      it 'emits an up:layer:accepted event with the acceptance value', (done) ->
+        makeLayers(2)
+        expect(up.layer.count).toBe(2)
+
+        up.on 'up:layer:accepted', (event) ->
+          expect(up.layer.count).toBe(1)
+          expect(event.layer).toBe(up.layer.root)
+          expect(event.target).toBe(up.layer.root.element)
+          expect(event.value).toBe('value')
+          expect(up.layer.current).toBe(up.layer.root)
+          done()
+
+        up.layer.current.accept('value')
+
       it 'lets an up:layer:accept event handler mutate the acceptance value'
 
       it 'lets an up:layer:accept event handler replace the acceptance value', ->

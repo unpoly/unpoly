@@ -8,11 +8,6 @@ const $ = jQuery
 
 describe('up.network', function() {
 
-  beforeEach(function() {
-    // Disable response time measuring for these tests
-    up.network.config.preloadEnabled = true
-  })
-
   describe('JavaScript functions', function() {
 
     describe('up.request()', function() {

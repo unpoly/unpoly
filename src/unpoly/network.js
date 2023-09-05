@@ -79,38 +79,11 @@ up.network = (function() {
 
     Defaults to 90 minutes.
 
-  @param {number} [config.badDownlink=0.6]
-    The connection's minimum effective bandwidth estimate required
-    to prevent Unpoly from [reducing requests](/up.network.shouldReduceRequests).
-
-    The value is given in megabits per second. Higher is better.
-
-    Bandwidth estimation is currently [only supported in Chromium-based browsers](https://caniuse.com/mdn-api_networkinformation_downlink).
-
-    @experimental
-
-  @param {number} [config.badRTT=0.6]
-    The connection's maximum effective [round-trip time](https://en.wikipedia.org/wiki/Round-trip_delay) required
-    to prevent Unpoly from [reducing requests](/up.network.shouldReduceRequests).
-
-    The value is given in milliseconds. Lower is better.
-
-    Note that round-trip time only describes the time for a signal to be sent and acknowledged ("ping time").
-    It does not include the time it takes for your server to calculate and render a response.
-    For this configure `up.network.config.badResponseTime`.
-
-    Round-trip time detection is currently [only supported in Chromium-based browsers](https://caniuse.com/mdn-http_headers_rtt).
-
-    @experimental
-
   @param {number|Function(up.Request): number} [config.badResponseTime=400]
     How long to wait before emitting the [`up:network:late` event](/up:network:late).
 
     Requests exceeding this response time will also cause a [progress bar](/loading-indicators#progress-bar)
     to appear at the top edge of the screen.
-
-    This metric is *not* considered for the decision to
-    [reduce requests](/up.network.shouldReduceRequests).
 
     The value is given in milliseconds.
 
@@ -191,15 +164,11 @@ up.network = (function() {
   @stable
   */
   const config = new up.Config(() => ({
-    concurrency() { return shouldReduceRequests() ? 3 : 6 },
+    concurrency: 6,
     wrapMethod: true,
     cacheSize: 70,
     cacheExpireAge: 15 * 1000,
     cacheEvictAge: 90 * 60 * 1000,
-    // 2G 66th percentile: RTT >= 1400 ms, downlink <=  70 Kbps
-    // 3G 50th percentile: RTT >=  270 ms, downlink <= 700 Kbps
-    badDownlink: 0.6,
-    badRTT: 750,
     badResponseTime: 400,
     fail(response) { return (response.status < 200 || response.status > 299) && response.status !== 304 },
     autoCache(request) { return request.isSafe() },
@@ -656,33 +625,6 @@ up.network = (function() {
   }
 
   /*-
-  Returns whether optional requests should be avoided where possible.
-
-  We assume the user wants to avoid requests if either of following applies:
-
-  - The connection's effective round-trip time is longer than `up.network.config.badRTT`.
-  - The connection's effective bandwidth estimate is less than `up.network.config.badDownlink`.
-
-  When Unpoly detects a slow connection, [some defaults are changed](/network-issues#low-bandwidth)
-  to more effectively use the client's limited network resources.
-
-  @function up.network.shouldReduceRequests
-  @return {boolean}
-    Whether requests should be avoided where possible.
-  @experimental
-  */
-  function shouldReduceRequests() {
-    // Browser support for navigator.connection: https://caniuse.com/?search=networkinformation
-    let netInfo = navigator.connection
-    if (netInfo) {
-      // API for NetworkInformation#downlink: https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/downlink
-      // API for NetworkInformation#rtt:      https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/rtt
-      return (netInfo.rtt      && (netInfo.rtt      > config.badRTT)) ||
-             (netInfo.downlink && (netInfo.downlink < config.badDownlink))
-    }
-  }
-
-  /*-
   Aborts pending [requests](/up.request) matching a condition.
 
   > [important]
@@ -966,7 +908,6 @@ up.network = (function() {
     abort: abortRequests,
     registerAliasForRedirect,
     queue, // for testing
-    shouldReduceRequests,
     loadPage,
   }
 })()

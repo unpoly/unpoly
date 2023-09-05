@@ -211,7 +211,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
   }
 
   emitOpenedEvent() {
-    return this.layer.emit('up:layer:opened', {
+    this.layer.emit('up:layer:opened', {
       origin: this.origin,
       callback: this.layer.callback('onOpened'),
       log: `Opened new ${this.layer}`

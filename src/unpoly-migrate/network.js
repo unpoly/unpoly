@@ -247,3 +247,8 @@ function disableProgressBarIfCustomIndicator() {
 
 disableProgressBarIfCustomIndicator()
 up.on('up:framework:reset', disableProgressBarIfCustomIndicator)
+
+up.network.shouldReduceRequests = function() {
+  up.migrate('up.network.shouldReduceRequests() has been removed without replacement')
+  return false
+}

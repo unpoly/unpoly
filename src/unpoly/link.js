@@ -169,25 +169,12 @@ up.link = (function() {
 
     - Links with an `[up-preload=false]` attribute.
     - Links that are [not followable](#config.noFollowSelectors).
+    - Links with an [unsafe method](/up.link.isSafe).
     - When the link destination [cannot be cached](/up.network.config#config.autoCache).
 
   @param {number} [config.preloadDelay=75]
     The number of milliseconds to wait before [`[up-preload]`](/a-up-preload)
     starts preloading.
-
-  @param {boolean|string|Function(Element): boolean|string} [config.preloadEnabled='auto']
-    Whether Unpoly will load [preload requests](/a-up-preload).
-
-    With the default setting (`"auto"`) Unpoly will load preload requests
-    unless `up.network.shouldReduceRequests()` detects a poor connection.
-
-    If set to `true`, Unpoly will always preload links.
-
-    If set to `false`, Unpoly will never preload links.
-
-    You may also configure a function that accepts a link element and returns `true`, `false` or `'auto'`.
-
-    Regardless of what you configure here, Unpoly will only preload [links with safe methods](/up.link.isSafe).
 
   @param {Array<string>} [config.clickableSelectors]
     A list of CSS selectors matching elements that should behave like links or buttons.
@@ -218,9 +205,6 @@ up.link = (function() {
     noPreloadSelectors: ['[up-preload=false]'],
     clickableSelectors: LINKS_WITH_LOCAL_HTML.concat(['[up-emit]', '[up-accept]', '[up-dismiss]', '[up-clickable]']),
     preloadDelay: 90,
-
-    // true | false | 'auto'
-    preloadEnabled: 'auto'
   }))
 
   function fullFollowSelector() {
@@ -535,8 +519,7 @@ up.link = (function() {
   @return {Promise}
     A promise that will be fulfilled when the request was loaded and cached.
 
-    When preloading is [disabled](/up.link.config#config.preloadEnabled) the promise
-    rejects with an `up.AbortError`.
+    When the link cannot be preloaded, the promise rejects with an `up.AbortError`.
   @stable
   */
   function preload(link, options) {
@@ -549,6 +532,7 @@ up.link = (function() {
     }
 
     const guardEvent = up.event.build('up:link:preload', {log: ['Preloading link %o', link]})
+
     return follow(link, {
       abortable: false,
       ...options,
@@ -558,16 +542,10 @@ up.link = (function() {
   }
 
   function preloadIssue(link) {
-    // Since connection.effectiveType might change during a session we need to
-    // re-evaluate the value every time.
-    if  (!u.evalAutoOption(config.preloadEnabled, autoPreloadEnabled, link)) {
-      return 'Preloading is disabled'
-    } else if (!isSafe(link)) {
+    if (!isSafe(link)) {
       return 'Will not preload an unsafe link'
     }
   }
-
-  const autoPreloadEnabled = u.negate(up.network.shouldReduceRequests)
 
   /*-
   This event is [emitted](/up.emit) before a link is [preloaded](/a-up-preload).
@@ -1443,6 +1421,8 @@ up.link = (function() {
 
   Preloading a link will [enable caching](/caching#enabling-caching) for that link automatically.
 
+  Unpoly will only preload [links with safe methods](/up.link.isSafe).
+
   @selector a[up-preload]
   @param [up-preload-delay]
     The number of milliseconds to wait between hovering
@@ -1475,6 +1455,7 @@ up.link = (function() {
     combineFollowableSelectors,
     preloadSelector: fullPreloadSelector,
     followSelector: fullFollowSelector,
+    preloadIssue,
   }
 })()
 
