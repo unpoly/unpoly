@@ -37,6 +37,12 @@ Polling rework
   - Or reload if no polling active
 
 
+Size reduction
+==============
+
+- Check if we can get rid of Object.setPrototypeOf(this, up.LayerStack.prototype) in up.LayerStack
+
+
 Priority
 =========
 
