@@ -336,7 +336,7 @@ up.Request = class Request extends up.Record {
     if (this.wrapMethod == null) { this.wrapMethod = up.network.config.wrapMethod }
 
     // Normalize a first time to get a normalized cache key.
-    this.normalize()
+    this._normalize()
 
     if ((this.target || this.layer || this.origin) && !options.basic) {
       const layerLookupOptions = { origin: this.origin }
@@ -370,7 +370,7 @@ up.Request = class Request extends up.Record {
 
     // this.uid = u.uid()
 
-    this.addAutoHeaders()
+    this._addAutoHeaders()
   }
 
   /*-
@@ -437,16 +437,16 @@ up.Request = class Request extends up.Record {
     return this.fragments?.[0]
   }
 
-  normalize() {
+  _normalize() {
     this.method = u.normalizeMethod(this.method)
-    this.extractHashFromURL()
-    this.transferParamsToURL()
+    this._extractHashFromURL()
+    this._transferParamsToURL()
 
     // This consistently strips the hostname from same-origin requests.
     this.url = u.normalizeURL(this.url)
   }
 
-  evictExpensiveAttrs() {
+  _evictExpensiveAttrs() {
     // We want to allow up:request:loaded events etc. to still access the properties that
     // we are about to evict, so we wait for one more frame. It shouldn't matter for GC.
     u.task(() => {
@@ -471,7 +471,7 @@ up.Request = class Request extends up.Record {
     })
   }
 
-  extractHashFromURL() {
+  _extractHashFromURL() {
     let match = this.url?.match(/^([^#]*)(#.+)$/)
     if (match) {
       this.url = match[1]
@@ -480,7 +480,7 @@ up.Request = class Request extends up.Record {
     }
   }
 
-  transferParamsToURL() {
+  _transferParamsToURL() {
     if (!this.url || this.allowsPayload() || u.isBlank(this.params)) {
       return
     }
@@ -508,7 +508,7 @@ up.Request = class Request extends up.Record {
   }
 
   runQueuedCallbacks() {
-    u.always(this, () => this.evictExpensiveAttrs())
+    u.always(this, () => this._evictExpensiveAttrs())
 
     this.onQueued?.(this)
   }
@@ -518,16 +518,16 @@ up.Request = class Request extends up.Record {
     // we don't send it.
     if (this.state !== 'new') return
 
-    if (this.emitLoad()) {
+    if (this._emitLoad()) {
       this.state = 'loading'
 
       // Listeners to up:request:load may have mutated properties that need to be
       // re-normalized and/or are part of a cache key.
       //
-      // To be correct we would also need to re-run addAutoHeaders() here. However since
+      // To be correct we would also need to re-run _addAutoHeaders() here. However since
       // this is costly and also rare that listeners mutate properties like #target or #layer,
       // we leave it to the listener to update headers.
-      this.normalize()
+      this._normalize()
 
       // This callback is used by up.network to re-cache the request after its cache key
       // may have changed by mutation from a up:request:load listener.
@@ -540,10 +540,10 @@ up.Request = class Request extends up.Record {
 
       // Convert from XHR's callback-based API to up.Request's promise-based API
       new up.Request.XHRRenderer(this).buildAndSend({
-        onload: () => this.onXHRLoad(),
-        onerror: () => this.onXHRError(),
-        ontimeout: () => this.onXHRTimeout(),
-        onabort: () => this.onXHRAbort()
+        onload: () => this._onXHRLoad(),
+        onerror: () => this._onXHRError(),
+        ontimeout: () => this._onXHRTimeout(),
+        onabort: () => this._onXHRAbort()
       })
 
       // Signal to callers (in particular to up.Queue) that load() was not aborted.
@@ -553,7 +553,7 @@ up.Request = class Request extends up.Record {
     }
   }
 
-  emitLoad() {
+  _emitLoad() {
     let event = this.emit('up:request:load', { log: ['Loading %s', this.description] })
     return !event.defaultPrevented
   }
@@ -584,8 +584,8 @@ up.Request = class Request extends up.Record {
     new up.Request.FormRenderer(this).buildAndSubmit()
   }
 
-  onXHRLoad() {
-    const response = this.extractResponseFromXHR()
+  _onXHRLoad() {
+    const response = this._extractResponseFromXHR()
 
     const log = 'Loaded ' + response.description
     this.emit('up:request:loaded', { request: response.request, response, log })
@@ -593,22 +593,22 @@ up.Request = class Request extends up.Record {
     this.respondWith(response)
   }
 
-  onXHRError() {
+  _onXHRError() {
     // Neither XHR nor fetch() provide any meaningful error message.
     // Hence we ignore the passed ProgressEvent and use our own error message.
-    this.setOfflineState('Network error')
+    this._setOfflineState('Network error')
   }
 
-  onXHRTimeout() {
+  _onXHRTimeout() {
     // We used to treat timeouts like a client-side abort. While this is technically
     // what happens, it is more practical for users to consider a timeout like a failed
     // connection that we can retry with up.render({ onOffline }) etc.
-    this.setOfflineState('Timeout')
+    this._setOfflineState('Timeout')
   }
 
-  onXHRAbort() {
+  _onXHRAbort() {
     // Use the default message that callers of request.abort() would also get.
-    this.setAbortedState()
+    this._setAbortedState()
   }
 
   /*-
@@ -642,15 +642,15 @@ up.Request = class Request extends up.Record {
   @experimental
   */
   abort({ reason } = {}) {
-    // setAbortedState() must be called before xhr.abort(), since xhr's event handlers
-    // will call setAbortedState() a second time, without a message.
-    if (this.setAbortedState(reason) && this._xhr) {
+    // _setAbortedState() must be called before xhr.abort(), since xhr's event handlers
+    // will call _setAbortedState() a second time, without a message.
+    if (this._setAbortedState(reason) && this._xhr) {
       this._xhr.abort()
     }
   }
 
-  setAbortedState(reason) {
-    if (this.isSettled()) return
+  _setAbortedState(reason) {
+    if (this._isSettled()) return
 
     let message = 'Aborted request to ' + this.description + (reason ? ': ' + reason : '')
     this.state = 'aborted'
@@ -661,8 +661,8 @@ up.Request = class Request extends up.Record {
     return true
   }
 
-  setOfflineState(reason) {
-    if (this.isSettled()) return
+  _setOfflineState(reason) {
+    if (this._isSettled()) return
 
     let message = 'Cannot load request to ' + this.description + (reason ? ': ' + reason : '')
     this.state = 'offline'
@@ -673,7 +673,7 @@ up.Request = class Request extends up.Record {
   respondWith(response) {
     this.response = response
 
-    if (this.isSettled()) return
+    if (this._isSettled()) return
     this.state = 'loaded'
 
     if (response.ok) {
@@ -683,7 +683,7 @@ up.Request = class Request extends up.Record {
     }
   }
 
-  isSettled() {
+  _isSettled() {
     return (this.state !== 'new') && (this.state !== 'loading') && (this.state !== 'tracking')
   }
 
@@ -695,7 +695,7 @@ up.Request = class Request extends up.Record {
     return up.protocol.csrfParam()
   }
 
-  // Returns a csrfToken if this request requires it
+  // Returns a CSRF token if this request requires it
   csrfToken() {
     if (!this.isSafe() && !this.isCrossOrigin()) {
       return up.protocol.csrfToken()
@@ -706,7 +706,7 @@ up.Request = class Request extends up.Record {
     return u.isCrossOrigin(this.url)
   }
 
-  extractResponseFromXHR() {
+  _extractResponseFromXHR() {
     const responseAttrs = {
       method: this.method,
       url: this.url,
@@ -750,7 +750,7 @@ up.Request = class Request extends up.Record {
     return new up.Response(responseAttrs)
   }
 
-  buildEventEmitter(args) {
+  _buildEventEmitter(args) {
     // We prefer emitting request-related events on the targeted layer.
     // This way listeners can observe event-related events on a given layer.
     // This request has an optional { layer } attribute, which is used by
@@ -763,11 +763,11 @@ up.Request = class Request extends up.Record {
   }
 
   emit(...args) {
-    return this.buildEventEmitter(args).emit()
+    return this._buildEventEmitter(args).emit()
   }
 
   assertEmitted(...args) {
-    this.buildEventEmitter(args).assertEmitted()
+    this._buildEventEmitter(args).assertEmitted()
   }
 
   get description() {
@@ -794,11 +794,11 @@ up.Request = class Request extends up.Record {
     return this.headers[name]
   }
 
-  addAutoHeaders() {
+  _addAutoHeaders() {
     // Add information about the response's intended use, so the server may
     // customize or shorten its response.
     for (let key of ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']) {
-      this.addAutoHeader(
+      this._addAutoHeader(
         up.protocol.headerize(key),
         this[key]
       )
@@ -806,13 +806,13 @@ up.Request = class Request extends up.Record {
 
     let csrfHeader, csrfToken
     if ((csrfHeader = this.csrfHeader()) && (csrfToken = this.csrfToken())) {
-      this.addAutoHeader(csrfHeader, csrfToken)
+      this._addAutoHeader(csrfHeader, csrfToken)
     }
 
-    this.addAutoHeader(up.protocol.headerize('version'), up.version)
+    this._addAutoHeader(up.protocol.headerize('version'), up.version)
   }
 
-  addAutoHeader(name, value) {
+  _addAutoHeader(name, value) {
     if (u.isMissing(value)) {
       return
     }
