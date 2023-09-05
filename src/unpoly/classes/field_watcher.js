@@ -2,95 +2,94 @@ const u = up.util
 
 up.FieldWatcher = class FieldWatcher {
 
-  constructor(form, fields, options, callback) {
-    this.callback = callback
-    this.form = form
-    this.fields = fields
-    this.options = options
-    this.batch = options.batch
-    this.unbindFns = []
+  constructor(fields, options, callback) {
+    this._callback = callback
+    this._fields = fields
+    this._options = options
+    this._batch = options.batch
+    this._unbindFns = []
   }
 
-  fieldOptions(field) {
-    let options = u.copy(this.options)
+  _fieldOptions(field) {
+    let options = u.copy(this._options)
     return up.form.watchOptions(field, options, { defaults: { event: 'input' } })
   }
 
   start() {
-    this.scheduledValues = null
-    this.processedValues = this.readFieldValues()
-    this.currentTimer = null
-    this.callbackRunning = false
+    this._scheduledValues = null
+    this._processedValues = this._readFieldValues()
+    this._currentTimer = null
+    this._callbackRunning = false
 
-    for (let field of this.fields) {
-      this.watchField(field)
+    for (let field of this._fields) {
+      this._watchField(field)
     }
   }
 
-  watchField(field) {
-    let fieldOptions = this.fieldOptions(field)
-    this.unbindFns.push(up.on(field, fieldOptions.event, (event) => this.check(event, fieldOptions)))
-    this.unbindFns.push(up.fragment.onAborted(field, () => this.cancelTimer()))
+  _watchField(field) {
+    let _fieldOptions = this._fieldOptions(field)
+    this._unbindFns.push(up.on(field, _fieldOptions.event, (event) => this._check(event, _fieldOptions)))
+    this._unbindFns.push(up.fragment.onAborted(field, () => this._cancelTimer()))
   }
 
   stop() {
-    for (let unbindFn of this.unbindFns) unbindFn()
-    this.cancelTimer()
+    for (let unbindFn of this._unbindFns) unbindFn()
+    this._cancelTimer()
   }
 
-  cancelTimer() {
-    clearTimeout(this.currentTimer)
-    this.currentTimer = null
+  _cancelTimer() {
+    clearTimeout(this._currentTimer)
+    this._currentTimer = null
   }
 
-  isAnyFieldAttached() {
-    return u.some(this.fields, 'isConnected')
+  _isAnyFieldAttached() {
+    return u.some(this._fields, 'isConnected')
   }
 
-  scheduleValues(values, event, fieldOptions) {
-    this.cancelTimer()
-    this.scheduledValues = values
-    let delay = u.evalOption(fieldOptions.delay, event)
-    this.currentTimer = u.timer(delay, () => {
-      this.currentTimer = null
-      if (this.isAnyFieldAttached()) {
-        this.scheduledFieldOptions = fieldOptions
-        this.requestCallback()
+  _scheduleValues(values, event, _fieldOptions) {
+    this._cancelTimer()
+    this._scheduledValues = values
+    let delay = u.evalOption(_fieldOptions.delay, event)
+    this._currentTimer = u.timer(delay, () => {
+      this._currentTimer = null
+      if (this._isAnyFieldAttached()) {
+        this.scheduledFieldOptions = _fieldOptions
+        this._requestCallback()
       } else {
         // If a pending callback finished after elements got detached,
-        // it will call requestCallback() again. Nullifying this.scheduledValues
+        // it will call _requestCallback() again. Nullifying this._scheduledValues
         // will prevent the callback from running again.
-        this.scheduledValues = null
+        this._scheduledValues = null
       }
     })
   }
 
-  isNewValues(values) {
-    return !u.isEqual(values, this.processedValues) && !u.isEqual(this.scheduledValues, values)
+  _isNewValues(values) {
+    return !u.isEqual(values, this._processedValues) && !u.isEqual(this._scheduledValues, values)
   }
 
-  async requestCallback() {
-    let fieldOptions = this.scheduledFieldOptions
+  async _requestCallback() {
+    let _fieldOptions = this.scheduledFieldOptions
 
-    if ((this.scheduledValues !== null) && !this.currentTimer && !this.callbackRunning) {
-      const diff = this.changedValues(this.processedValues, this.scheduledValues)
-      this.processedValues = this.scheduledValues
-      this.scheduledValues = null
-      this.callbackRunning = true
+    if ((this._scheduledValues !== null) && !this._currentTimer && !this._callbackRunning) {
+      const diff = this._changedValues(this._processedValues, this._scheduledValues)
+      this._processedValues = this._scheduledValues
+      this._scheduledValues = null
+      this._callbackRunning = true
       this.scheduledFieldOptions = null
 
       // If any callback returns a promise, we will handle { disable } below.
       // We set { disable: false } so callbacks that *do* forward options
       // to up.render() don't unnecessarily disable a second time.
-      let callbackOptions = { ...fieldOptions, disable: false }
+      let callbackOptions = { ..._fieldOptions, disable: false }
 
       const callbackReturnValues = []
-      if (this.batch) {
-        callbackReturnValues.push(this.callback(diff, callbackOptions))
+      if (this._batch) {
+        callbackReturnValues.push(this._callback(diff, callbackOptions))
       } else {
         for (let name in diff) {
           const value = diff[name]
-          callbackReturnValues.push(this.callback(value, name, callbackOptions))
+          callbackReturnValues.push(this._callback(value, name, callbackOptions))
         }
       }
 
@@ -99,17 +98,17 @@ up.FieldWatcher = class FieldWatcher {
       // attrs so callbacks don't have to handle this.
       if (u.some(callbackReturnValues, u.isPromise)) {
         let callbackDone = Promise.allSettled(callbackReturnValues)
-        up.form.disableWhile(callbackDone, fieldOptions)
+        up.form.disableWhile(callbackDone, _fieldOptions)
         await callbackDone
       }
 
-      this.callbackRunning = false
+      this._callbackRunning = false
 
-      this.requestCallback()
+      this._requestCallback()
     }
   }
 
-  changedValues(previous, next) {
+  _changedValues(previous, next) {
     const changes = {}
     let keys = Object.keys(previous)
     keys = keys.concat(Object.keys(next))
@@ -124,14 +123,14 @@ up.FieldWatcher = class FieldWatcher {
     return changes
   }
 
-  readFieldValues() {
-    return up.Params.fromFields(this.fields).toObject()
+  _readFieldValues() {
+    return up.Params.fromFields(this._fields).toObject()
   }
 
-  check(event, fieldOptions) {
-    const values = this.readFieldValues()
-    if (this.isNewValues(values)) {
-      this.scheduleValues(values, event, fieldOptions)
+  _check(event, _fieldOptions) {
+    const values = this._readFieldValues()
+    if (this._isNewValues(values)) {
+      this._scheduleValues(values, event, _fieldOptions)
     }
   }
 }

@@ -744,7 +744,6 @@ up.form = (function() {
   @stable
   */
   function watch(container, ...args) {
-    let form = getForm(container)
     const fields = findFields(container)
     const unnamedFields = u.reject(fields, 'name')
     if (unnamedFields.length) {
@@ -758,7 +757,7 @@ up.form = (function() {
     const callback = u.extractCallback(args) || watchCallbackFromElement(container) || up.fail('No callback given for up.watch()')
     let options = u.extractOptions(args)
 
-    const watch = new up.FieldWatcher(form, fields, options, callback)
+    const watch = new up.FieldWatcher(fields, options, callback)
     watch.start()
     return () => watch.stop()
   }
