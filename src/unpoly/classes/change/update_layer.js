@@ -25,6 +25,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       origin: this.options.origin,
       target: this.bestPreflightSelector(),
       fragments: this.getFragments(),
+      newLayer: false
     }
   }
 

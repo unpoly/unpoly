@@ -144,9 +144,6 @@ describe 'up.Layer.Overlay', ->
       await wait()
 
       expect(up.layer.isOverlay()).toBe(true)
-
-      debugger
-
       expect(document.title).toBe('Overlay title')
 
       up.layer.current.accept()
@@ -344,6 +341,18 @@ describe 'up.Layer.Overlay', ->
     describe 'events', ->
 
       it 'emits an up:layer:accept event with the acceptance value'
+
+      it 'emits an up:layer:accepted event with the acceptance value', (done) ->
+        makeLayers(2)
+        expect(up.layer.count).toBe(2)
+
+        up.on 'up:layer:accepted', (event) ->
+          expect(up.layer.count).toBe(1)
+          expect(event.value).toBe('value')
+          expect(up.layer.current).toBe(up.layer.root)
+          done()
+
+        up.layer.current.accept('value')
 
       it 'lets an up:layer:accept event handler mutate the acceptance value'
 

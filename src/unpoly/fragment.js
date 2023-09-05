@@ -2617,7 +2617,7 @@ up.fragment = (function() {
 
     // The reason will be logged with the up:request:abort event when we actually abort an event.
     // It should be a string, not an array that goes through sprintf().
-    let { reason } = options
+    let { reason, newLayer } = options
 
     // At the end we're going to emit up:fragment:aborted on these elements.
     // Other async code observing these elements can then chose to abort itself.
@@ -2665,7 +2665,7 @@ up.fragment = (function() {
       //     a message "Change with { abort } option will abort other requests' before
       //     we abort the first request. This is done via an { logOnce } option that
       //     this function passes on to up.network.abort().
-      up.emit(element, 'up:fragment:aborted', { log: false })
+      up.emit(element, 'up:fragment:aborted', { newLayer, log: false })
     }
   }
 
@@ -2713,6 +2713,10 @@ up.fragment = (function() {
   @event up:fragment:aborted
   @param {Element} event.target
     The element for which requests were aborted.
+  @param {boolean} event.newLayer
+    Whether the fragment was aborted by a [new overlay opening](/opening-overlays).
+
+    @experimental
   @experimental
   */
 

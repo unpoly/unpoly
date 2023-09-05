@@ -50,18 +50,20 @@ up.migrate = (function() {
     // to print the object, which will call the warning, which will access the getter, etc.
     const doWarn = u.memoize(() => warning ? warn(warning) : warn('Property { %s } has been removed without replacement (found in %o)', key, object))
 
-    let value = object[key]
+    let valueRef = [object[key]]
 
     Object.defineProperty(object, key, {
       get() {
         doWarn()
-        return value
+        return valueRef[0]
       },
       set(newValue) {
         doWarn()
-        value = newValue
+        valueRef[0] = newValue
       }
     })
+
+    return valueRef
   }
 
   function forbiddenPropertyValue(object, key, forbiddenValue, errorMessage) {

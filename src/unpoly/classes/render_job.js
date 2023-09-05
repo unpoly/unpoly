@@ -145,11 +145,13 @@ up.RenderJob = class RenderJob {
 
     if (!abort || !up.network.isBusy()) return
 
-    let { fragments, layer, origin } = this.change.getPreflightProps()
+    let { fragments, layer, origin, newLayer } = this.change.getPreflightProps()
 
     let abortOptions = {
       except: request, // don't abort the request we just made
       logOnce: ['up.render()', 'Change with { abort } option will abort other requests'],
+      newLayer,
+      origin,
     }
 
     if (abort === 'target') {
@@ -169,7 +171,7 @@ up.RenderJob = class RenderJob {
     } else {
       // (1) Abort requests in the subtree of a given selector (string)
       // (2) Abort requests targeting a given element
-      up.fragment.abort(abort, { ...abortOptions, layer, origin })
+      up.fragment.abort(abort, { ...abortOptions, layer })
     }
   }
 

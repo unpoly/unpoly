@@ -8137,7 +8137,6 @@ describe 'up.fragment', ->
         link = fixture('link.some-class[rel="canonical"][href="/foo"]')
 
         if up.fragment.toTarget(link).includes('some-class')
-          debugger
           re = up.fragment.toTarget(link)
           console.log(re)
 

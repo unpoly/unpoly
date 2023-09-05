@@ -180,6 +180,13 @@ describe 'up.radio', ->
           expect(jasmine.Ajax.requests.count()).toBe(1)
           expect(jasmine.lastRequest().url).toMatchURL('/two')
 
+          jasmine.respondWithSelector('.element[up-poll][up-source="/one"]')
+
+        next.after (interval + timingTolerance), ->
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+          # Assert that the { url } option is passed to the new up.FragmentPolling instance.
+          expect(jasmine.lastRequest().url).toMatchURL('/two')
+
       it 'polls with the given { interval }', asyncSpec (next) ->
         defaultInterval = 100
         up.radio.config.pollInterval = defaultInterval
@@ -750,12 +757,68 @@ describe 'up.radio', ->
       it 'does not reload if the tab is hidden', asyncSpec (next) ->
         up.radio.config.pollInterval = 50
         spyOnProperty(document, 'hidden', 'get').and.returnValue(true)
+        spyOnProperty(document, 'visibilityState', 'get').and.returnValue('hidden')
         reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve(new up.RenderResult())
 
         up.hello(fixture('.element[up-poll]'))
 
         next.after 100, ->
           expect(reloadSpy).not.toHaveBeenCalled()
+
+      it "pauses polling while the browser tab is hidden", ->
+        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve(new up.RenderResult())
+
+        currentHidden = false
+        currentVisibilityState = 'visible'
+        spyOnProperty(document, 'hidden', 'get').and.callFake -> currentHidden
+        spyOnProperty(document, 'visibilityState', 'get').and.callFake -> currentVisibilityState
+
+        element = fixture('.unread[up-poll][up-interval=100]')
+        up.hello(element) # start polling
+
+        await wait(125)
+
+        expect(reloadSpy.calls.count()).toBe(1)
+
+        currentHidden = true
+        currentVisibilityState = 'hidden'
+        up.emit(document, 'visibilitychange')
+
+        await wait(250)
+
+        expect(reloadSpy.calls.count()).toBe(1)
+
+        currentHidden = false
+        currentVisibilityState = 'visible'
+        up.emit(document, 'visibilitychange')
+
+        # Since we spent the entire interval in the background layer, we now load immediately
+        await wait(10)
+
+        expect(reloadSpy.calls.count()).toBe(2)
+
+      it "keeps polling in hidden tabs with [up-if-tab='any']", ->
+        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve(new up.RenderResult())
+
+        currentHidden = false
+        currentVisibilityState = 'visible'
+        spyOnProperty(document, 'hidden', 'get').and.callFake -> currentHidden
+        spyOnProperty(document, 'visibilityState', 'get').and.callFake -> currentVisibilityState
+
+        element = fixture('.unread[up-poll][up-interval=100][up-if-tab=any]')
+        up.hello(element) # start polling
+
+        await wait(125)
+
+        expect(reloadSpy.calls.count()).toBe(1)
+
+        currentHidden = true
+        currentVisibilityState = 'hidden'
+        up.emit(document, 'visibilitychange')
+
+        await wait(125)
+
+        expect(reloadSpy.calls.count()).toBe(2)
 
       it 'stops polling when the element is destroyed', asyncSpec (next) ->
         up.radio.config.pollInterval = 75
@@ -872,34 +935,6 @@ describe 'up.radio', ->
         next.after 20, =>
           expect(@lastRequest().url).toMatchURL('/optimized-path')
 
-      it 'polls less frequently while we reduce requests', asyncSpec (next) ->
-        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve(new up.RenderResult())
-
-        spyOn(up.network, 'shouldReduceRequests').and.returnValue(true)
-
-        up.hello(fixture('.element[up-poll][up-interval=100]'))
-
-        next.after 150, ->
-          expect(reloadSpy).not.toHaveBeenCalled()
-
-        next.after 100, ->
-          expect(reloadSpy).toHaveBeenCalled()
-
-      it 'pauses polling while the element is detached', asyncSpec (next) ->
-        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve(new up.RenderResult())
-
-        element = up.element.createFromSelector('.element[up-poll][up-interval=2]')
-        registerFixture(element) # make sure this element is destroyed after the example
-        up.hello(element)
-
-        next.after 20, ->
-          expect(reloadSpy).not.toHaveBeenCalled()
-
-          document.body.appendChild(element)
-
-        next.after 20, ->
-          expect(reloadSpy).toHaveBeenCalled()
-
       it 'pauses polling when an up:fragment:poll event is prevented', asyncSpec (next) ->
         up.radio.config.pollInterval = interval = 150
         timingTolerance = interval / 3
@@ -909,8 +944,10 @@ describe 'up.radio', ->
 
         up.on 'up:fragment:poll', '.element', (event) ->
           eventCount++
+          # Prevent the second event
           if eventCount == 1
             event.preventDefault()
+
 
         next.after timingTolerance, ->
           expect(eventCount).toBe(0)
@@ -924,24 +961,72 @@ describe 'up.radio', ->
           expect(eventCount).toBe(2)
           expect(jasmine.Ajax.requests.count()).toBe(1)
 
-      it "pauses polling while the element's layer is in the background", asyncSpec (next) ->
+      it "pauses polling while the element's layer is in the background", ->
         reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve(new up.RenderResult())
 
-        makeLayers(2)
-        expect(up.layer.isOverlay()).toBe(true)
-        element = up.layer.root.affix('.unread[up-poll][up-interval=2]')
-        registerFixture(element) # make sure this element is destroyed after the example
-
+        element = fixture('.unread[up-poll][up-interval=100]')
         up.hello(element) # start polling
 
-        next.after 20, ->
-          expect(reloadSpy).not.toHaveBeenCalled()
+        await wait(125)
 
-          up.layer.dismiss()
+        expect(reloadSpy.calls.count()).toBe(1)
 
-        next.after 20, ->
-          expect(up.layer.isRoot()).toBe(true)
-          expect(reloadSpy).toHaveBeenCalled()
+        up.layer.open()
+
+        # Spend two intervals on a background layer
+        await wait(250)
+
+        expect(reloadSpy.calls.count()).toBe(1)
+
+        up.layer.dismiss()
+
+        # Since we spent the entire interval on the overlay, we now load immediately
+        await wait(10)
+
+        expect(reloadSpy.calls.count()).toBe(2)
+
+      it "keeps polling on background layers with [up-if-layer='any']", ->
+        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve(new up.RenderResult())
+
+        element = fixture('.unread[up-poll][up-interval=100][up-if-layer=any]')
+        up.hello(element) # start polling
+
+        await wait(125)
+
+        expect(reloadSpy.calls.count()).toBe(1)
+
+        up.layer.open()
+
+        await wait(125)
+
+        expect(reloadSpy.calls.count()).toBe(2)
+
+      it 'does not poll when it was paused for a full interval on a background layer, but an { onAccepted } or { onDismissed } callback renders the polling layer', ->
+        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve(new up.RenderResult())
+
+        container = fixture('.container')
+        element = e.affix(container, '.unread[up-poll][up-interval=100]')
+        up.hello(container) # start polling
+
+        await wait(125)
+
+        expect(reloadSpy.calls.count()).toBe(1)
+
+        up.layer.open({ onDismissed: () => up.render('.container', { url: '/page2' })})
+
+        # Spend two intervals on a background layer
+        await wait(250)
+
+        expect(reloadSpy.calls.count()).toBe(1)
+
+        up.layer.dismiss()
+
+        await wait(10)
+
+        # Polling was aborted by the onAccepted callback
+        expect(reloadSpy.calls.count()).toBe(1)
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(jasmine.lastRequest().url).toMatchURL('/page2')
 
       it 'does not poll a fragment with a weak selector', asyncSpec (next) ->
         warnSpy = spyOn(up, 'warn')
@@ -951,7 +1036,7 @@ describe 'up.radio', ->
         next.after 80, ->
           expect(jasmine.Ajax.requests.count()).toBe(0)
           expect(warnSpy).toHaveBeenCalled()
-          expect(warnSpy.calls.argsFor(0)[1]).toMatch(/ignoring untargetable fragment/i)
+          expect(warnSpy.calls.argsFor(0)[1]).toMatch(/untargetable fragment/i)
 
       describe 'with [up-keep-data] attribute', ->
 

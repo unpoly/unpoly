@@ -113,3 +113,12 @@ This is shorthand for:
 up.migrate.targetMacro('up-dash', { 'up-preload': '', 'up-instant': '' }, () => up.migrate.deprecated('a[up-dash]', 'up.link.config.instantSelectors and up.link.config.preloadSelectors'))
 
 up.migrate.renamedAttribute('up-delay', 'up-preload-delay', { scope: up.link.preloadSelector })
+
+up.link.config.preloadEnabled = true
+let preloadEnabledRef = up.migrate.removedProperty(up.link.config, 'preloadEnabled', 'The configuration up.link.config.preloadEnabled has been removed. To disable preloading, prevent up:link:preload instead.')
+
+up.on('up:link:preload', function(event) {
+  if (!preloadEnabledRef[0]) {
+    event.preventDefault()
+  }
+})

@@ -74,19 +74,6 @@ You may use different timeouts for individual requests by passing an [`{ timeout
 or by setting an [`[up-timeout]`](/a-up-follow#up-timeout) attribute.
 
 
-Low bandwidth
--------------
-
-When Unpoly detects [low network throughput](/up.network.config#config.badDownlink)
-or [long round-trip delays](/up.network.config#config.badRTT),
-some defaults are changed to more effectively use a poor connection:   
-
-- Fewer requests are [loaded concurrently](/up.network.config#config.concurrency). Additional requests are queued.
-- [Polling](/up-poll) fragments update [half as frequently](/up.radio.config#config.stretchPollInterval).
-- Links are [configured](/up.radio.config#config.pollEnabled) to no longer [preload](/a-up-preload).
-
-Your own code may behave differently under low bandwidth by checking `up.network.shouldReduceRequests()`.
-
 
 Slow server responses
 ---------------------

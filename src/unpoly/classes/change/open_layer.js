@@ -33,6 +33,8 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
       // will be aborted if the base layer receives a major navigation, but not when a
       // minor fragment is updated.
       fragments: u.compact([up.fragment.get(':main', { layer: this.baseLayer })]),
+
+      newLayer: true,
     }
   }
 
@@ -211,7 +213,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
   }
 
   emitOpenedEvent() {
-    return this.layer.emit('up:layer:opened', {
+    this.layer.emit('up:layer:opened', {
       origin: this.origin,
       callback: this.layer.callback('onOpened'),
       log: `Opened new ${this.layer}`

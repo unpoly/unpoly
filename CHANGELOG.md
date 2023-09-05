@@ -8,6 +8,26 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+3.4.0
+-----
+
+- Removed up.network.shouldReduceRequests()
+- Removed `up.radio.config.stretchPollInterval`
+- Removed up.network.config.badDownlink
+- Removed up.network.config.badRTT
+- Resume polling immediately if an entire interval was spend on a background layer
+- Resume polling immediately if an entire interval was spend on an inactive tab
+- No longer timers in inactive tabs, saves energy
+- Fix a bug where polling in a background layer would not resume when the layer was uncovered
+- [up-if-layer]
+- [up-if-tab]
+- { ifLayer } (docs!)
+- { ifTab } (docs!)
+- up:fragment:aborted new experimental property { newLayer }.
+- Remove up.link.config.preloadEnabled. Prevent up:link:preload instead.
+- Remove up.radio.config.pollEnabled. Prevent up:fragment:poll instead.
+
+
 3.3.0
 -----
 

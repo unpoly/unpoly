@@ -35,41 +35,11 @@ up.radio = (function() {
   @param {number} [config.pollInterval=30000]
     The default [polling](/up-poll) interval in milliseconds.
 
-  @param {Function(number): number} [config.stretchPollInterval]
-    Adjusts the given [polling](/up-poll) interval before it is used.
-
-    On a good network connection this returns the given interval unchanged.
-    On a [poor connection](/network-issues#low-bandwidth) it returns
-    the doubled interval, causing Unpoly to poll at half as frequently.
-
-    @experimental
-
-  @param {boolean|string|Function(Element)} [config.pollEnabled=true]
-    Whether Unpoly will follow instructions to poll fragments, like the `[up-poll]` attribute.
-
-    When set to `'auto'` Unpoly will skip polling updates while one of the following applies:
-
-    - The browser tab is in the foreground
-    - The fragment's layer is the [frontmost layer](/up.layer.front).
-
-    When set to `true`, Unpoly will always allow polling.
-
-    When set to `false`, Unpoly will never allow polling.
-
-    To enable polling on a case-by-case basis, you may also pass a function that accepts the polling
-    fragment and returns `true`, `false` or `'auto'`. As an alternative you may also skip a
-    polling update by preventing the `up:fragment:poll` event.
-
-    When an update is skipped due to polling being disabled,
-    Unpoly will try to poll again after the configured interval.
-
   @stable
   */
   const config = new up.Config(() => ({
     hungrySelectors: ['[up-hungry]'],
     pollInterval: 30000,
-    stretchPollInterval: (interval) => interval * (up.network.shouldReduceRequests() ? 2 : 1),
-    pollEnabled: 'auto',
   }))
 
   function reset() {
@@ -194,12 +164,34 @@ up.radio = (function() {
   @function up.radio.startPolling
   @param {Element} fragment
     The fragment to reload periodically.
-  @param {number} options.interval
+  @param {number} [options.interval]
     The reload interval in milliseconds.
 
     Defaults to `up.radio.config.pollInterval`.
-  @param {string} options.url
-    Defaults to the element's closest `[up-source]` attribute.
+  @param {string} [options.url]
+    The URL from which to reload the fragment.
+
+    Defaults to the closest `[up-source]` attribute of an ancestor element.
+  @param {string} [options.ifTab='visible']
+    Controls polling while the browser tab is hidden.
+
+    When set to `'visible'`, polling will pause while the browser tab is hidden.
+    When the browser tab is re-activated, polling will resume.
+
+    When set to `'any'`, polling will continue on inactive tabs. Note that many browsers
+    [throttle the interval on inactive tabs](https://developer.mozilla.org/en-US/docs/Web/API/setTimeout#timeouts_in_inactive_tabs)
+    to reduce battery usage.
+
+    @experimental
+  @param {string} [options.ifTab='front']
+    Controls polling while the fragment's [layer](/up.layer) is covered by an overlay.
+
+    When set to `'front'`, polling will pause while the fragment's layer is covered by an overlay.
+    When the fragment's layer is uncovered, polling will resume.
+
+    When set to `'any'`, polling will continue on background layers.
+
+    @experimental
   @stable
   */
   function startPolling(fragment, options = {}) {
@@ -218,26 +210,12 @@ up.radio = (function() {
     up.FragmentPolling.forFragment(element).forceStop()
   }
 
-  function pollIssue(fragment) {
-    let enabled = config.pollEnabled
-
-    if (enabled === false) {
-      return 'User has disabled polling'
-    }
-
-    if (enabled === 'auto') {
-      if (document.hidden) {
-        return 'Tab is hidden'
-      }
-
-      if (!up.layer.get(fragment)?.isFront?.()) {
-        return 'Fragment is on a background layer'
-      }
-    }
-
-    if (up.emit(fragment, 'up:fragment:poll', { log: ['Polling fragment', fragment] }).defaultPrevented) {
-      return 'User prevented up:fragment:poll event'
-    }
+  function pollOptions(fragment, options = {}) {
+    const parser = new up.OptionsParser(fragment, options)
+    parser.number('interval', { default: config.pollInterval })
+    parser.string('ifLayer', { default: 'front' }) // TODO: Docs
+    parser.string('ifTab', { default: 'visible' }) // TODO: Docs
+    return options
   }
 
   /*-
@@ -291,10 +269,13 @@ up.radio = (function() {
   Client-side code may skip an update by preventing an `up:fragment:poll` event
   on the polling fragment.
 
-  Unpoly will also choose to skip updates under certain conditions,
-  e.g. when the browser tab is in the background. See `up.radio.config.pollEnabled` for details.
+  By default polling will pause while the browser tab is hidden.
+  When the browser tab is re-activated, polling will resume.
+  To keep polling on inactive tabs, set [`[up-if-tab=any]`](#up-if-tab).
 
-  When an update is skipped, Unpoly will try to poll again after the configured interval.
+  By default polling will pause while the fragment's [layer](/up.layer) is covered by an overlay.
+  When the layer is uncovered, polling will resume.
+  To keep polling on background layers, set [`[up-if-layer=any]`](#up-if-layer).
 
   ### Skipping updates on the server
 
@@ -308,25 +289,36 @@ up.radio = (function() {
 
   ### Stopping polling
 
+  There are two reasons for polling to stop:
+
   - The fragment from the server response no longer has an `[up-poll]` attribute.
   - Client-side code has called `up.radio.stopPolling()` with the polling element.
-  - Polling was [disabled globally](/up.radio.config#config.pollEnabled).
-
-  ### Polling under low bandwidth
-
-  When Unpoly detects a [poor network connection](/network-issues#low-bandwidth),
-  the polling frequency is halfed.
-
-  This can be configured in `up.radio.config.stretchPollInterval`.
 
   @selector [up-poll]
   @param [up-interval]
     The reload interval in milliseconds.
 
     Defaults to `up.radio.config.pollInterval`.
+  @param [up-if-tab='visible']
+    Controls polling while the browser tab is hidden.
 
-    Under [low bandiwdth](/network-issues#low-bandwidth) the given interval
-    will be scaled through `up.radio.config.stretchPollInterval`.
+    When set to `'visible'`, polling will pause while the browser tab is hidden.
+    When the browser tab is re-activated, polling will resume.
+
+    When set to `'any'`, polling will continue on inactive tabs. Note that many browsers
+    [throttle the interval on inactive tabs](https://developer.mozilla.org/en-US/docs/Web/API/setTimeout#timeouts_in_inactive_tabs)
+    to reduce battery usage.
+
+    @experimental
+  @param [up-if-layer='front']
+    Controls polling while the fragment's [layer](/up.layer) is covered by an overlay.
+
+    When set to `'front'`, polling will pause while the fragment's layer is covered by an overlay.
+    When the fragment's layer is uncovered, polling will resume.
+
+    When set to `'any'`, polling will continue on background layers.
+
+    @experimental
   @param [up-keep-data]
     [Preserve](/data#preserving-data-through-reloads) the polling fragment's
     [data object](/data) through reloads.
@@ -339,11 +331,6 @@ up.radio = (function() {
   @stable
   */
   up.compiler('[up-poll]', function(fragment) {
-    if (!up.fragment.isTargetable(fragment)) {
-      up.warn('[up-poll]', 'Ignoring untargetable fragment %o', fragment)
-      return
-    }
-
     up.FragmentPolling.forFragment(fragment).onPollAttributeObserved()
   })
 
@@ -368,6 +355,6 @@ up.radio = (function() {
     hungrySteps,
     startPolling,
     stopPolling,
-    pollIssue,
+    pollOptions,
   }
 })()
