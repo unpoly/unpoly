@@ -18,7 +18,7 @@ up.EventListener = class EventListener extends up.Record {
 
   constructor(attributes) {
     super(attributes)
-    this.key = this.constructor.buildKey(attributes)
+    this._key = this.constructor._buildKey(attributes)
     this.isDefault = up.framework.evaling
 
     // We don't usually run up.on() listeners before Unpoly has booted.
@@ -26,7 +26,7 @@ up.EventListener = class EventListener extends up.Record {
     // Listeners that do need to run before Unpoly boots can pass { beforeBoot: true } to override.
     // We also default to { beforeBoot: true } for framework events that are emitted
     // before booting.
-    this.beforeBoot ??= (this.eventType.indexOf('up:framework:') === 0)
+    this._beforeBoot ??= (this.eventType.indexOf('up:framework:') === 0)
 
     // Need to store the bound nativeCallback function because addEventListener()
     // and removeEventListener() need to see the exact same reference.
@@ -35,15 +35,15 @@ up.EventListener = class EventListener extends up.Record {
 
   bind() {
     const map = (this.element.upEventListeners ||= {})
-    if (map[this.key]) {
+    if (map[this._key]) {
       up.fail('up.on(): The %o callback %o cannot be registered more than once', this.eventType, this.callback)
     }
-    map[this.key] = this
+    map[this._key] = this
 
-    this.element.addEventListener(...this.addListenerArgs())
+    this.element.addEventListener(...this._addListenerArg())
   }
 
-  addListenerArgs() {
+  _addListenerArg() {
     // Avoid setting a default { passive: false } since some browsers have non-false
     // defaults for some event types like `touchstart`.
     // See https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#parameters
@@ -54,13 +54,13 @@ up.EventListener = class EventListener extends up.Record {
   unbind() {
     let map = this.element.upEventListeners
     if (map) {
-      delete map[this.key]
+      delete map[this._key]
     }
-    this.element.removeEventListener(...this.addListenerArgs())
+    this.element.removeEventListener(...this._addListenerArg())
   }
 
   nativeCallback(event) {
-    if (up.framework.beforeBoot && !this.beforeBoot) {
+    if (up.framework.beforeBoot && !this._beforeBoot) {
       return
     }
 
@@ -112,12 +112,12 @@ up.EventListener = class EventListener extends up.Record {
   static fromElement(attributes) {
     let map = attributes.element.upEventListeners
     if (map) {
-      const key = this.buildKey(attributes)
+      const key = this._buildKey(attributes)
       return map[key]
     }
   }
 
-  static buildKey(attributes) {
+  static _buildKey(attributes) {
     // Give the callback function a numeric identifier so it
     // can become part of the upEventListeners key.
     attributes.callback.upUid ||= u.uid()
