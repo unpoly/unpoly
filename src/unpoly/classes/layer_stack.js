@@ -15,11 +15,11 @@ up.LayerStack = class LayerStack extends Array {
     // The official TypeScript recommendation is to use setProtoTypeOf() after calling super:
     // https://github.com/Microsoft/TypeScript/wiki/FAQ#why-doesnt-extending-built-ins-like-error-array-and-map-work
     Object.setPrototypeOf(this, up.LayerStack.prototype)
-    this.currentOverrides = []
-    this.push(this.buildRoot())
+    this._currentOverrides = []
+    this.push(this._buildRoot())
   }
 
-  buildRoot() {
+  _buildRoot() {
     return up.layer.build({ mode: 'root', stack: this })
   }
 
@@ -44,7 +44,7 @@ up.LayerStack = class LayerStack extends Array {
 
   reset() {
     this.peel(this.root, {animation: false})
-    this.currentOverrides = []
+    this._currentOverrides = []
     this.root.reset()
   }
 
@@ -110,10 +110,10 @@ up.LayerStack = class LayerStack extends Array {
 
   asCurrent(layer, fn) {
     try {
-      this.currentOverrides.push(layer)
+      this._currentOverrides.push(layer)
       return fn()
     } finally {
-      this.currentOverrides.pop()
+      this._currentOverrides.pop()
     }
   }
 
@@ -148,7 +148,7 @@ up.LayerStack = class LayerStack extends Array {
   get current() {
     // Event listeners and compilers will push into @currentOverrides
     // to temporarily set up.layer.current to the layer they operate in.
-    return u.last(this.currentOverrides) || this.front
+    return u.last(this._currentOverrides) || this.front
   }
 
   get front() {
