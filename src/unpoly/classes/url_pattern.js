@@ -3,8 +3,8 @@ const u = up.util
 up.URLPattern = class URLPattern {
 
   constructor(fullPattern, normalizeURL = u.normalizeURL) {
-    this.normalizeURL = normalizeURL
-    this.groups = []
+    this._normalizeURL = normalizeURL
+    this._groups = []
 
     const positiveList = []
     const negativeList = []
@@ -17,11 +17,11 @@ up.URLPattern = class URLPattern {
       }
     }
 
-    this.positiveRegexp = this.buildRegexp(positiveList, true)
-    this.negativeRegexp = this.buildRegexp(negativeList, false)
+    this._positiveRegexp = this._buildRegexp(positiveList, true)
+    this._negativeRegexp = this._buildRegexp(negativeList, false)
   }
 
-  buildRegexp(list, capture) {
+  _buildRegexp(list, capture) {
     if (!list.length) { return }
 
     list = list.map((url) => {
@@ -30,7 +30,7 @@ up.URLPattern = class URLPattern {
       if (url[0] === '*') {
         url = '/' + url
       }
-      url = this.normalizeURL(url)
+      url = this._normalizeURL(url)
       url = u.escapeRegExp(url)
       return url
     })
@@ -42,10 +42,10 @@ up.URLPattern = class URLPattern {
     reCode = reCode.replace(/(:|\\\$)([a-z][\w-]*)/ig, (match, type, name) => {
       // It's \\$ instead of $ because we do u.escapeRegExp above
       if (type === '\\$') {
-        if (capture) { this.groups.push({ name, cast: Number }) }
+        if (capture) { this._groups.push({ name, cast: Number }) }
         return '(\\d+)'
       } else {
-        if (capture) { this.groups.push({ name, cast: String }) }
+        if (capture) { this._groups.push({ name, cast: String }) }
         return '([^/?#]+)'
       }
     })
@@ -56,18 +56,18 @@ up.URLPattern = class URLPattern {
   // This method is performance-sensitive. It's called for every link in an [up-nav]
   // after every fragment update.
   test(url, doNormalize = true) {
-    if (doNormalize) { url = this.normalizeURL(url) }
+    if (doNormalize) { url = this._normalizeURL(url) }
     // Use RegExp#test() instead of RegExp#recognize() as building match groups is expensive,
     // and we only need to know whether the URL matches (true / false).
-    return this.positiveRegexp.test(url) && !this.isExcluded(url)
+    return this._positiveRegexp.test(url) && !this._isExcluded(url)
   }
 
   recognize(url, doNormalize = true) {
-    if (doNormalize) { url = this.normalizeURL(url) }
-    let match = this.positiveRegexp.exec(url)
-    if (match && !this.isExcluded(url)) {
+    if (doNormalize) { url = this._normalizeURL(url) }
+    let match = this._positiveRegexp.exec(url)
+    if (match && !this._isExcluded(url)) {
       const resolution = {}
-      this.groups.forEach((group, groupIndex) => {
+      this._groups.forEach((group, groupIndex) => {
         let value = match[groupIndex + 1]
         if (value) {
           return resolution[group.name] = group.cast(value)
@@ -77,7 +77,7 @@ up.URLPattern = class URLPattern {
     }
   }
 
-  isExcluded(url) {
-    return this.negativeRegexp?.test(url)
+  _isExcluded(url) {
+    return this._negativeRegexp?.test(url)
   }
 }
