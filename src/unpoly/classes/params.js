@@ -79,7 +79,7 @@ up.Params = class Params {
     for (let entry of this.entries) {
       const { name, value } = entry
       if (!u.isBasicObjectProperty(name)) {
-        if (this.isArrayKey(name)) {
+        if (this._isArrayKey(name)) {
           obj[name] ||= []
           obj[name].push(value)
         } else {
@@ -165,16 +165,16 @@ up.Params = class Params {
   @experimental
   */
   toQuery() {
-    let parts = u.map(this.entries, this.arrayEntryToQuery.bind(this))
+    let parts = u.map(this.entries, this._arrayEntryToQuery.bind(this))
     parts = u.compact(parts)
     return parts.join('&')
   }
 
-  arrayEntryToQuery(entry) {
+  _arrayEntryToQuery(entry) {
     const { value } = entry
 
     // We cannot transpot a binary value in a query string.
-    if (this.isBinaryValue(value)) {
+    if (this._isBinaryValue(value)) {
       return
     }
 
@@ -195,16 +195,16 @@ up.Params = class Params {
   We will have `File` values in our params when we serialize a form with a file input.
   These entries will be filtered out when converting to a query string.
 
-  @function up.Params#isBinaryValue
+  @function up.Params#_isBinaryValue
   @internal
   */
-  isBinaryValue(value) {
+  _isBinaryValue(value) {
     return value instanceof Blob
   }
 
   hasBinaryValues() {
     const values = u.map(this.entries, 'value')
-    return u.some(values, this.isBinaryValue)
+    return u.some(values, this._isBinaryValue)
   }
 
   /*-
@@ -271,17 +271,17 @@ up.Params = class Params {
       // internal use for copying
       this.entries.push(...raw)
     } else if (u.isString(raw)) {
-      this.addAllFromQuery(raw)
+      this._addAllFromQuery(raw)
     } else if (u.isFormData(raw)) {
-      this.addAllFromFormData(raw)
+      this._addAllFromFormData(raw)
     } else if (u.isObject(raw)) {
-      this.addAllFromObject(raw)
+      this._addAllFromObject(raw)
     } else {
       up.fail("Unsupport params type: %o", raw)
     }
   }
 
-  addAllFromObject(object) {
+  _addAllFromObject(object) {
     for (let key in object) {
       const value = object[key]
       const valueElements = u.isArray(value) ? value : [value]
@@ -291,7 +291,7 @@ up.Params = class Params {
     }
   }
 
-  addAllFromQuery(query) {
+  _addAllFromQuery(query) {
     for (let part of query.split('&')) {
       if (part) {
         let [name, value] = part.split('=')
@@ -310,7 +310,7 @@ up.Params = class Params {
     }
   }
 
-  addAllFromFormData(formData) {
+  _addAllFromFormData(formData) {
     for (let value of formData.entries()) {
       this.add(...value)
     }
@@ -343,10 +343,10 @@ up.Params = class Params {
   @experimental
   */
   delete(name) {
-    this.entries = u.reject(this.entries, this.matchEntryFn(name))
+    this.entries = u.reject(this.entries, this._matchEntryFn(name))
   }
 
-  matchEntryFn(name) {
+  _matchEntryFn(name) {
     return entry => entry.name === name
   }
 
@@ -382,7 +382,7 @@ up.Params = class Params {
   @experimental
   */
   get(name) {
-    if (this.isArrayKey(name)) {
+    if (this._isArrayKey(name)) {
       return this.getAll(name)
     } else {
       return this.getFirst(name)
@@ -401,7 +401,7 @@ up.Params = class Params {
   @experimental
   */
   getFirst(name) {
-    const entry = u.find(this.entries, this.matchEntryFn(name))
+    const entry = u.find(this.entries, this._matchEntryFn(name))
     return entry?.value
   }
 
@@ -417,15 +417,15 @@ up.Params = class Params {
   @experimental
   */
   getAll(name) {
-    if (this.isArrayKey(name)) {
+    if (this._isArrayKey(name)) {
       return this.getAll(name)
     } else {
-      const entries = u.map(this.entries, this.matchEntryFn(name))
+      const entries = u.map(this.entries, this._matchEntryFn(name))
       return u.map(entries, 'value')
     }
   }
 
-  isArrayKey(key) {
+  _isArrayKey(key) {
     return key.endsWith('[]')
   }
 
