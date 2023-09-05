@@ -1,11 +1,11 @@
 up.Config = class Config {
 
   constructor(blueprintFn = (() => ({}))) {
-    this.blueprintFn = blueprintFn
+    this._blueprintFn = blueprintFn
     this.reset()
   }
 
   reset() {
-    Object.assign(this, this.blueprintFn())
+    Object.assign(this, this._blueprintFn())
   }
 }
