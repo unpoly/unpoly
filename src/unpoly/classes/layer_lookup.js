@@ -4,7 +4,7 @@ const e = up.element
 up.LayerLookup = class LayerLookup {
 
   constructor(stack, ...args) {
-    this.stack = stack
+    this._stack = stack
     const options = u.parseArgIntoOptions(args, 'layer')
 
     // Options normalization might change `options` relevant to the lookup:
@@ -15,23 +15,23 @@ up.LayerLookup = class LayerLookup {
       up.layer.normalizeOptions(options)
     }
 
-    this.values = u.parseTokens(options.layer)
+    this._values = u.parseTokens(options.layer)
 
-    this.origin = options.origin
-    this.baseLayer = options.baseLayer || this.originLayer() || this.stack.current
+    this._origin = options.origin
+    this._baseLayer = options.baseLayer || this._originLayer() || this._stack.current
 
-    if (u.isString(this.baseLayer)) {
+    if (u.isString(this._baseLayer)) {
       // The { baseLayer } option may itself be a string like "parent".
       // In this case we look it up using a new up.LayerLookup instance, using
       // up.layer.current as the { baseLayer } for that second lookup.
-      const recursiveOptions = { ...options, baseLayer: this.stack.current, normalizeLayerOptions: false }
-      this.baseLayer = new this.constructor(this.stack, this.baseLayer, recursiveOptions).first()
+      const recursiveOptions = { ...options, baseLayer: this._stack.current, normalizeLayerOptions: false }
+      this._baseLayer = new this.constructor(this._stack, this._baseLayer, recursiveOptions).first()
     }
   }
 
-  originLayer() {
-    if (this.origin) {
-      return this.forElement(this.origin)
+  _originLayer() {
+    if (this._origin) {
+      return this._forElement(this._origin)
     }
   }
 
@@ -40,68 +40,68 @@ up.LayerLookup = class LayerLookup {
   }
 
   all() {
-    let results = u.flatMap(this.values, value => this.resolveValue(value))
+    let results = u.flatMap(this._values, value => this._resolveValue(value))
     results = u.compact(results)
     results = u.uniq(results)
     return results
   }
 
-  forElement(element) {
+  _forElement(element) {
     element = e.get(element) // unwrap jQuery
-    return u.find(this.stack.reversed(), layer => layer.contains(element))
+    return u.find(this._stack.reversed(), layer => layer.contains(element))
   }
 
-  forIndex(value) {
-    return this.stack[value]
+  _forIndex(value) {
+    return this._stack[value]
   }
 
-  resolveValue(value) {
+  _resolveValue(value) {
     if (value instanceof up.Layer) {
       return value
     }
 
     if (u.isNumber(value)) {
-      return this.forIndex(value)
+      return this._forIndex(value)
     }
 
     if (/^\d+$/.test(value)) {
-      return this.forIndex(Number(value))
+      return this._forIndex(Number(value))
     }
 
     if (u.isElementish(value)) {
-      return this.forElement(value)
+      return this._forElement(value)
     }
 
     switch (value) {
       case 'any':
         // Return all layers, but prefer a layer that's either the current
         // layer, or closer to the front.
-        return [this.baseLayer, ...this.stack.reversed()]
+        return [this._baseLayer, ...this._stack.reversed()]
       case 'current':
-        return this.baseLayer
+        return this._baseLayer
       case 'closest':
-        return this.stack.selfAndAncestorsOf(this.baseLayer)
+        return this._stack.selfAndAncestorsOf(this._baseLayer)
       case 'parent':
-        return this.baseLayer.parent
+        return this._baseLayer.parent
       case 'ancestor':
       case 'ancestors':
-        return this.baseLayer.ancestors
+        return this._baseLayer.ancestors
       case 'child':
-        return this.baseLayer.child
+        return this._baseLayer.child
       case 'descendant':
       case 'descendants':
-        return this.baseLayer.descendants
+        return this._baseLayer.descendants
       case 'new':
         return 'new' // pass-through
       case 'root':
-        return this.stack.root
+        return this._stack.root
       case 'overlay':
       case 'overlays':
-        return u.reverse(this.stack.overlays)
+        return u.reverse(this._stack.overlays)
       case 'front':
-        return this.stack.front
+        return this._stack.front
       case 'origin':
-        return this.originLayer()
+        return this._originLayer()
       default:
         return up.fail("Unknown { layer } option: %o", value)
     }
