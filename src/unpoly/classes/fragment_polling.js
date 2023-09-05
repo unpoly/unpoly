@@ -3,16 +3,16 @@ const e = up.element
 up.FragmentPolling = class FragmentPolling {
 
   constructor(fragment) {
-    this.options = up.radio.pollOptions(fragment)
+    this._options = up.radio.pollOptions(fragment)
 
-    this.fragment = fragment
-    up.destructor(fragment, this.onFragmentDestroyed.bind(this))
-    up.fragment.onAborted(fragment, this.onFragmentAborted.bind(this))
+    this._fragment = fragment
+    up.destructor(fragment, this._onFragmentDestroyed.bind(this))
+    up.fragment.onAborted(fragment, this._onFragmentAborted.bind(this))
 
-    this.state = 'initialized' // 'initialized' || 'started' || 'stopped'
-    this.abortable = true
-    this.loading = false
-    this.satisfyInterval()
+    this._state = 'initialized' // 'initialized' || 'started' || 'stopped'
+    this._abortable = true
+    this._loading = false
+    this._satisfyInterval()
   }
 
   static forFragment(fragment) {
@@ -20,58 +20,58 @@ up.FragmentPolling = class FragmentPolling {
   }
 
   onPollAttributeObserved() {
-    this.start()
+    this._start()
   }
 
-  onFragmentDestroyed() {
+  _onFragmentDestroyed() {
     // The element may come back (when it is swapped) or or may not come back (when it is destroyed).
     // If it does come back, `onPollAttributeObserved()` will restart the polling.
-    this.stop()
+    this._stop()
   }
 
-  start(options) {
-    Object.assign(this.options, options)
+  _start(options) {
+    Object.assign(this._options, options)
 
-    if (this.state !== 'started') {
-      if (!up.fragment.isTargetable(this.fragment)) {
-        up.warn('[up-poll]', 'Cannot poll untargetable fragment %o', this.fragment)
+    if (this._state !== 'started') {
+      if (!up.fragment.isTargetable(this._fragment)) {
+        up.warn('[up-poll]', 'Cannot poll untargetable fragment %o', this._fragment)
         return
       }
 
-      this.state = 'started'
-      this.ensureEventsBound()
-      this.scheduleRemainingTime()
+      this._state = 'started'
+      this._ensureEventsBound()
+      this._scheduleRemainingTime()
     }
   }
 
-  stop() {
-    if (this.state === 'started') {
-      this.clearReloadTimer()
-      this.state = 'stopped'
+  _stop() {
+    if (this._state === 'started') {
+      this._clearReloadTimer()
+      this._state = 'stopped'
       this.unbindEvents?.()
     }
   }
 
   forceStart(options) {
-    Object.assign(this.options, options)
+    Object.assign(this._options, options)
     this.forceStarted = true
-    this.start()
+    this._start()
   }
 
   forceStop() {
-    this.stop()
+    this._stop()
     this.forceStarted = false
   }
 
-  ensureEventsBound() {
+  _ensureEventsBound() {
     if (!this.unbindEvents) {
-      this.unbindEvents = up.on('visibilitychange up:layer:opened up:layer:dismissed up:layer:accepted', this.onVisibilityChange.bind(this))
+      this.unbindEvents = up.on('visibilitychange up:layer:opened up:layer:dismissed up:layer:accepted', this._onVisibilityChange.bind(this))
     }
   }
 
-  onVisibilityChange() {
-    if (this.isFragmentVisible()) {
-      this.scheduleRemainingTime()
+  _onVisibilityChange() {
+    if (this._isFragmentVisible()) {
+      this._scheduleRemainingTime()
     } else {
       // Let the existing timer play out for two reasons:
       //
@@ -80,146 +80,146 @@ up.FragmentPolling = class FragmentPolling {
     }
   }
 
-  isFragmentVisible() {
-    return (this.options.ifTab   === 'any' || !document.hidden) &&
-           (this.options.ifLayer === 'any' || this.isOnFrontLayer())
+  _isFragmentVisible() {
+    return (this._options.ifTab   === 'any' || !document.hidden) &&
+           (this._options.ifLayer === 'any' || this._isOnFrontLayer())
   }
 
-  clearReloadTimer() {
+  _clearReloadTimer() {
     clearTimeout(this.reloadTimer)
     this.reloadTimer = null
   }
 
-  scheduleRemainingTime() {
-    if (!this.reloadTimer && !this.loading) {
-      this.clearReloadTimer()
+  _scheduleRemainingTime() {
+    if (!this.reloadTimer && !this._loading) {
+      this._clearReloadTimer()
       this.reloadTimer = setTimeout(
-        this.onTimerReached.bind(this),
-        this.getRemainingDelay()
+        this._onTimerReached.bind(this),
+        this._getRemainingDelay()
       )
     }
   }
 
-  onTimerReached() {
+  _onTimerReached() {
     this.reloadTimer = null
-    this.tryReload()
+    this._tryReload()
   }
 
-  tryReload() {
+  _tryReload() {
     // The setTimeout(doReload) callback might already be scheduled
     // before the polling stopped.
-    if (this.state !== 'started') {
+    if (this._state !== 'started') {
       return
     }
 
-    if (!this.isFragmentVisible()) {
+    if (!this._isFragmentVisible()) {
       up.puts('[up-poll]', 'Will not poll hidden fragment')
-      // (1) We don't need to re-schedule a timer here. onVisibilityChange() will do that for us.
+      // (1) We don't need to re-schedule a timer here. _onVisibilityChange() will do that for us.
       // (2) Also we prefer to not have pending timers in inactive tabs to save resources.
       return
     }
 
-    if (up.emit(this.fragment, 'up:fragment:poll', { log: ['Polling fragment', this.fragment] }).defaultPrevented) {
+    if (up.emit(this._fragment, 'up:fragment:poll', { log: ['Polling fragment', this._fragment] }).defaultPrevented) {
       up.puts('[up-poll]', 'User prevented up:fragment:poll event')
-      this.satisfyInterval() // Block polling for a full interval
-      this.scheduleRemainingTime() // There is no event that would re-schedule for us
+      this._satisfyInterval() // Block polling for a full interval
+      this._scheduleRemainingTime() // There is no event that would re-schedule for us
       return
     }
 
-    this.reloadNow()
+    this._reloadNow()
   }
 
-  getFullDelay() {
-    return this.options.interval ?? e.numberAttr(this.fragment, 'up-interval') ?? up.radio.config.pollInterval
+  _getFullDelay() {
+    return this._options.interval ?? e.numberAttr(this._fragment, 'up-interval') ?? up.radio.config.pollInterval
   }
 
-  getRemainingDelay() {
-    return Math.max(this.getFullDelay() - this.getFragmentAge(), 0)
+  _getRemainingDelay() {
+    return Math.max(this._getFullDelay() - this._getFragmentAge(), 0)
   }
 
-  getFragmentAge() {
-    return new Date() - this.lastAttempt
+  _getFragmentAge() {
+    return new Date() - this._lastAttempt
   }
 
-  isOnFrontLayer() {
-    this.layer ||= up.layer.get(this.fragment)
+  _isOnFrontLayer() {
+    this.layer ||= up.layer.get(this._fragment)
     return this.layer?.isFront?.()
   }
 
-  reloadNow() {
+  _reloadNow() {
     // If we were called manually (not by a timeout), clear a scheeduled timeout to prevent concurrency.
-    // The timeout will be re-scheduled by this.onReloadSuccess() or this.onReloadFailure().
-    this.clearReloadTimer()
+    // The timeout will be re-scheduled by this._onReloadSuccess() or this._onReloadFailure().
+    this._clearReloadTimer()
 
     let reloadOptions = {
-      url: this.options.url,
+      url: this._options.url,
       fail: false,
       background: true,
     }
 
-    let oldAbortable = this.abortable
+    let oldAbortable = this._abortable
 
     try {
       // Prevent our own reloading from aborting ourselves.
-      this.abortable = false
+      this._abortable = false
 
-      // Don't schedule timers while we're loading. onReloadSuccess() and onReloadFailure() will do that for us.
-      this.loading = true
+      // Don't schedule timers while we're loading. _onReloadSuccess() and _onReloadFailure() will do that for us.
+      this._loading = true
 
-      up.reload(this.fragment, reloadOptions).then(
-        this.onReloadSuccess.bind(this),
-        this.onReloadFailure.bind(this)
+      up.reload(this._fragment, reloadOptions).then(
+        this._onReloadSuccess.bind(this),
+        this._onReloadFailure.bind(this)
       )
     } finally {
       // Now that our own render pass has process abort options (this happens sync),
       // we can resume listening to abort signals.
-      this.abortable = oldAbortable
+      this._abortable = oldAbortable
     }
   }
 
-  onFragmentAborted({ newLayer }) {
-    // We temporarily set this.abortable to false while we're reloading our fragment, which also aborts our fragment.
-    if (this.abortable && !newLayer) {
-      this.stop()
+  _onFragmentAborted({ newLayer }) {
+    // We temporarily set this._abortable to false while we're reloading our fragment, which also aborts our fragment.
+    if (this._abortable && !newLayer) {
+      this._stop()
     }
   }
 
-  onReloadSuccess({ fragment }) {
-    this.loading = false
-    this.satisfyInterval()
+  _onReloadSuccess({ fragment }) {
+    this._loading = false
+    this._satisfyInterval()
 
     if (fragment) {
-      // No need to scheduleRemainingTime() in this branch:
+      // No need to _scheduleRemainingTime() in this branch:
       //
-      // (1) Either the new fragment also has an [up-poll] and we have already started in #onPollAttributeObserved().
-      // (2) Or we are force-started and we will start in #onFragmentSwapped().
-      this.onFragmentSwapped(fragment)
+      // (1) Either the new fragment also has an [up-poll] and we have already started in _onPollAttributeObserved().
+      // (2) Or we are force-started and we will start in __onFragmentSwapped().
+      this._onFragmentSwapped(fragment)
     } else {
       // The server may have opted to not send an update, e.g. if there is no fresher content.
       // In that case we try again in the next interval.
-      this.scheduleRemainingTime()
+      this._scheduleRemainingTime()
     }
   }
 
-  onFragmentSwapped(newFragment) {
-    this.stop()
+  _onFragmentSwapped(newFragment) {
+    this._stop()
 
-    if (this.forceStarted && up.fragment.matches(this.fragment, newFragment)) {
+    if (this.forceStarted && up.fragment.matches(this._fragment, newFragment)) {
       // Force start the new up.Polling instance for the new fragment.
-      this.constructor.forFragment(newFragment).forceStart(this.options)
+      this.constructor.forFragment(newFragment).forceStart(this._options)
     }
   }
 
-  onReloadFailure(reason) {
-    this.loading = false
-    this.satisfyInterval()
-    this.scheduleRemainingTime()
+  _onReloadFailure(reason) {
+    this._loading = false
+    this._satisfyInterval()
+    this._scheduleRemainingTime()
     up.error.rethrowCritical(reason)
   }
 
-  satisfyInterval() {
+  _satisfyInterval() {
     // This will delay the next timer scheduling for a full interval.
-    this.lastAttempt = new Date()
+    this._lastAttempt = new Date()
   }
 
 }
