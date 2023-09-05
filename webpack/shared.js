@@ -13,7 +13,7 @@ function minify(doMinify) {
           terserOptions: { // https://github.com/terser/terser#minify-options
             compress: { // https://github.com/terser/terser#compress-options
               passes: 3,
-              ecma: 2020,
+              ecma: 2021,
             },
           }
         })
