@@ -28,7 +28,7 @@ up.RenderJob = class RenderJob {
 
   constructor(options) {
     this.options = up.RenderOptions.preprocess(options)
-    this.rendered = this.execute()
+    this._rendered = this._execute()
   }
 
   /*-
@@ -39,19 +39,19 @@ up.RenderJob = class RenderJob {
   @stable
   */
 
-  async execute() {
+  async _execute() {
     try {
-      let result = await this.makeChange()
-      this.runResultCallbacks(result)
+      let result = await this._makeChange()
+      this._runResultCallbacks(result)
       return result
     } catch (error) {
-      this.runResultCallbacks(error) || this.options.onError?.(error)
+      this._runResultCallbacks(error) || this.options.onError?.(error)
       throw error
     }
   }
 
 
-  runResultCallbacks(result) {
+  _runResultCallbacks(result) {
     // There may be multiple reasons why `result` is not an up.RenderResult:
     //
     // (1) There was an error during the request (return value is up.Offline, up.Aborted, etc.)
@@ -85,12 +85,12 @@ up.RenderJob = class RenderJob {
   @stable
   */
   get finished() {
-    return this.awaitFinished()
+    return this._awaitFinished()
   }
 
-  async awaitFinished() {
+  async _awaitFinished() {
     try {
-      let result = await this.rendered
+      let result = await this._rendered
       return await result.finished
     } catch (error) {
       if (error instanceof up.RenderResult) {
@@ -101,24 +101,24 @@ up.RenderJob = class RenderJob {
     }
   }
 
-  makeChange() {
-    this.guardRender()
+  _makeChange() {
+    this._guardRender()
 
     if (this.options.url) {
-      let onRequest = (request) => this.handleAbortOption(request)
+      let onRequest = (request) => this._handleAbortOption(request)
       this.change = new up.Change.FromURL({ ...this.options, onRequest })
     } else if (this.options.response) {
       this.change = new up.Change.FromResponse(this.options)
-      this.handleAbortOption(null)
+      this._handleAbortOption(null)
     } else {
       this.change = new up.Change.FromContent(this.options)
-      this.handleAbortOption(null)
+      this._handleAbortOption(null)
     }
 
     return this.change.execute()
   }
 
-  guardRender() {
+  _guardRender() {
     up.browser.assertConfirmed(this.options)
 
     let guardEvent = u.pluckKey(this.options, 'guardEvent')
@@ -139,7 +139,7 @@ up.RenderJob = class RenderJob {
     up.RenderOptions.assertContentGiven(this.options)
   }
 
-  handleAbortOption(request) {
+  _handleAbortOption(request) {
     // When preloading up.RenderOptions forces { abort: false }.
     let { abort } = this.options
 
@@ -197,7 +197,7 @@ up.RenderJob = class RenderJob {
   */
   static {
     // A request is also a promise ("thenable") for its initial render pass.
-    u.delegate(this.prototype, ['then', 'catch', 'finally'], function() { return this.rendered })
+    u.delegate(this.prototype, ['then', 'catch', 'finally'], function() { return this._rendered })
   }
 
 }
