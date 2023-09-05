@@ -34,10 +34,10 @@ up.NonceableCallback = class NonceableCallback {
       // Don't return a bound function so callers can re-bind to a different this.
       let callbackThis = this
       return function(...args) {
-        return callbackThis.runAsNoncedFunction(this, argNames, args)
+        return callbackThis._runAsNoncedFunction(this, argNames, args)
       }
     } else {
-      return this.cannotRun.bind(this)
+      return this._cannotRun.bind(this)
     }
   }
 
@@ -45,11 +45,11 @@ up.NonceableCallback = class NonceableCallback {
     return `nonce-${this.nonce} ${this.script}`
   }
 
-  cannotRun() {
+  _cannotRun() {
     throw new Error(`Your Content Security Policy disallows inline JavaScript (${this.script}). See https://unpoly.com/csp for solutions.`)
   }
 
-  runAsNoncedFunction(thisArg, argNames, args) {
+  _runAsNoncedFunction(thisArg, argNames, args) {
     let wrappedScript = `
       try {
         up.noncedEval.value = (function(${argNames.join()}) {
@@ -77,7 +77,7 @@ up.NonceableCallback = class NonceableCallback {
     }
   }
 
-  allowedBy(allowedNonces) {
+  _allowedBy(allowedNonces) {
     return this.nonce && u.contains(allowedNonces, this.nonce)
   }
 
@@ -98,7 +98,7 @@ up.NonceableCallback = class NonceableCallback {
         let callback = this.fromString(attributeValue)
         let warn = (message, ...args) => up.log.warn('up.render()', `Cannot use callback [${attribute}="${attributeValue}"]: ${message}`, ...args)
 
-        if (!callback.allowedBy(allowedNonces)) {
+        if (!callback._allowedBy(allowedNonces)) {
           // Don't rewrite a nonce that the browser would have rejected.
           return warn("Callback's CSP nonce (%o) does not match response header (%o)", callback.nonce, allowedNonces)
         }
