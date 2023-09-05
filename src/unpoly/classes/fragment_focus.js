@@ -16,77 +16,77 @@ up.FragmentFocus = class FragmentFocus extends up.FragmentProcessor {
     switch (opt) {
       case 'keep':
         // Try to keep the focus from before the fragment update.
-        return this.restoreLostFocus()
+        return this._restoreLostFocus()
       case 'restore':
         // Restore the focus we saved at a previous visit the current location.
-        return this.restorePreviousFocusForLocation()
+        return this._restorePreviousFocusForLocation()
       case 'target':
       case true:
-        return this.focusElement(this.fragment)
+        return this._focusElement(this.fragment)
       case 'layer':
-        return this.focusElement(this.layer.getFocusElement())
+        return this._focusElement(this.layer.getFocusElement())
       case 'main':
-        return this.focusSelector(':main')
+        return this._focusSelector(':main')
       case 'hash':
-        return this.focusHash()
+        return this._focusHash()
       case 'autofocus':
-        return this.autofocus()
+        return this._autofocus()
       default:
         if (u.isString(opt)) {
-          return this.focusSelector(opt)
+          return this._focusSelector(opt)
         }
     }
   }
 
   processElement(element) {
-    return this.focusElement(element)
+    return this._focusElement(element)
   }
 
   resolveCondition(condition) {
     if (condition === 'lost') {
-      return this.wasFocusLost()
+      return this._wasFocusLost()
     } else {
       return super.resolveCondition(condition)
     }
   }
 
-  focusSelector(selector) {
+  _focusSelector(selector) {
     let match = this.findSelector(selector)
-    return this.focusElement(match)
+    return this._focusElement(match)
   }
 
-  restoreLostFocus() {
-    if (this.wasFocusLost()) {
+  _restoreLostFocus() {
+    if (this._wasFocusLost()) {
       return this.focusCapsule?.restore(this.layer, PREVENT_SCROLL_OPTIONS)
     }
   }
 
-  restorePreviousFocusForLocation() {
+  _restorePreviousFocusForLocation() {
     return up.viewport.restoreFocus({ layer: this.layer })
   }
 
-  autofocus() {
-    let autofocusElement = this.fragment && e.subtree(this.fragment, '[autofocus]')[0]
+  _autofocus() {
+    let autofocusElement = this.fragment && e.subtree(this.fragment, '[_autofocus]')[0]
     if (autofocusElement) {
-      return this.focusElement(autofocusElement)
+      return this._focusElement(autofocusElement)
     }
   }
 
-  focusElement(element) {
+  _focusElement(element) {
     if (element) {
       up.focus(element, { force: true, ...PREVENT_SCROLL_OPTIONS })
       return true
     }
   }
 
-  focusHash() {
+  _focusHash() {
     let hashTarget = up.viewport.firstHashTarget(this.hash, { layer: this.layer })
     if (hashTarget) {
-      return this.focusElement(hashTarget)
+      return this._focusElement(hashTarget)
     }
   }
 
-  wasFocusLost() {
+  _wasFocusLost() {
     return !this.layer.hasFocus()
   }
 
