@@ -41,6 +41,7 @@ Size reduction
 ==============
 
 - Check if we can get rid of Object.setPrototypeOf(this, up.LayerStack.prototype) in up.LayerStack
+- Check if we can get rid of up.Record and mangle more props
 
 
 Priority
