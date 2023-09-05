@@ -4,15 +4,15 @@ const e = up.element
 up.MotionController = class MotionController {
 
   constructor(name) {
-    this.activeClass = `up-${name}`
-    this.selector = `.${this.activeClass}`
+    this._activeClass = `up-${name}`
+    this._selector = `.${this._activeClass}`
     this.finishEvent = `up:${name}:finish`
 
     // Track the number of finish() calls for testing
     this.finishCount = 0
 
     // Track the number of active clusters. If no clusters are active, we can early return in finish().
-    this.clusterCount = 0
+    this._clusterCount = 0
   }
 
   /*-
@@ -55,9 +55,9 @@ up.MotionController = class MotionController {
     } else {
       memory.trackMotion = false
       this.finish(cluster)
-      this.markCluster(cluster)
-      let promise = this.whileForwardingFinishEvent(cluster, mutedAnimator)
-      promise = promise.then(() => this.unmarkCluster(cluster))
+      this._markCluster(cluster)
+      let promise = this._whileForwardingFinishEvent(cluster, mutedAnimator)
+      promise = promise.then(() => this._unmarkCluster(cluster))
       // Return the original promise that is still running
       return promise
     }
@@ -72,65 +72,65 @@ up.MotionController = class MotionController {
   */
   finish(elements) {
     this.finishCount++
-    if ((this.clusterCount === 0) || !up.motion.isEnabled()) { return }
-    elements = this.expandFinishRequest(elements)
+    if ((this._clusterCount === 0) || !up.motion.isEnabled()) { return }
+    elements = this._expandFinishRequest(elements)
 
     for (let element of elements) {
-      this.finishOneElement(element)
+      this._finishOneElement(element)
     }
 
     return up.migrate.formerlyAsync?.('up.motion.finish()')
   }
 
-  expandFinishRequest(elements) {
+  _expandFinishRequest(elements) {
     if (elements) {
-      return u.flatMap(elements, el => e.list(el.closest(this.selector), el.querySelectorAll(this.selector)))
+      return u.flatMap(elements, el => e.list(el.closest(this._selector), el.querySelectorAll(this._selector)))
     } else {
       // If no reference elements were given, we finish every matching
       // element on the screen.
-      return document.querySelectorAll(this.selector)
+      return document.querySelectorAll(this._selector)
     }
   }
 
   isActive(element) {
-    return element.classList.contains(this.activeClass)
+    return element.classList.contains(this._activeClass)
   }
 
-  finishOneElement(element) {
+  _finishOneElement(element) {
     // Animating code is expected to listen to this event, fast-forward
     // the animation and resolve their promise. All built-ins like
     // `up.animate()` or `up.morph()` behave that way.
-    this.emitFinishEvent(element)
+    this._emitFinishEvent(element)
   }
 
-  emitFinishEvent(element, eventAttrs = {}) {
+  _emitFinishEvent(element, eventAttrs = {}) {
     eventAttrs = { target: element, log: false, ...eventAttrs }
     return up.emit(this.finishEvent, eventAttrs)
   }
 
-  markCluster(cluster) {
-    this.clusterCount++
-    this.toggleActive(cluster, true)
+  _markCluster(cluster) {
+    this._clusterCount++
+    this._toggleActive(cluster, true)
   }
 
-  unmarkCluster(cluster) {
-    this.clusterCount--
-    this.toggleActive(cluster, false)
+  _unmarkCluster(cluster) {
+    this._clusterCount--
+    this._toggleActive(cluster, false)
   }
 
-  toggleActive(cluster, isActive) {
+  _toggleActive(cluster, isActive) {
     for (let element of cluster) {
-      element.classList.toggle(this.activeClass, isActive)
+      element.classList.toggle(this._activeClass, isActive)
     }
   }
 
-  whileForwardingFinishEvent(cluster, fn) {
+  _whileForwardingFinishEvent(cluster, fn) {
     if (cluster.length < 2) { return fn() }
     const doForward = (event) => {
       if (!event.forwarded) {
         for (let element of cluster) {
           if (element !== event.target && this.isActive(element)) {
-            this.emitFinishEvent(element, { forwarded: true })
+            this._emitFinishEvent(element, { forwarded: true })
           }
         }
       }
@@ -145,6 +145,6 @@ up.MotionController = class MotionController {
   async reset() {
     await this.finish()
     this.finishCount = 0
-    this.clusterCount = 0
+    this._clusterCount = 0
   }
 }
