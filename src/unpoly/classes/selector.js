@@ -3,16 +3,16 @@ const u = up.util
 up.Selector = class Selector {
 
   constructor(selectors, filters = []) {
-    this.selectors = selectors
-    this.filters = filters
+    this._selectors = selectors
+    this._filters = filters
 
     // If the user has set config.mainTargets = [] then a selector :main
     // will resolve to an empty array.
-    this.unionSelector = this.selectors.join() || 'match-none'
+    this._unionSelector = this._selectors.join() || 'match-none'
   }
 
   matches(element) {
-    return element.matches(this.unionSelector) && this.passesFilter(element)
+    return element.matches(this._unionSelector) && this._passesFilter(element)
   }
 
   closest(element) {
@@ -24,8 +24,8 @@ up.Selector = class Selector {
     }
   }
 
-  passesFilter(element) {
-    return u.every(this.filters, filter => filter(element))
+  _passesFilter(element) {
+    return u.every(this._filters, filter => filter(element))
   }
 
   descendants(root) {
@@ -36,8 +36,8 @@ up.Selector = class Selector {
     //
     // To respect this priority we do not join @selectors into a single, comma-separated
     // CSS selector, but rather make one query per selector and concatenate the results.
-    const results = u.flatMap(this.selectors, selector => root.querySelectorAll(selector))
-    return u.filter(results, element => this.passesFilter(element))
+    const results = u.flatMap(this._selectors, selector => root.querySelectorAll(selector))
+    return u.filter(results, element => this._passesFilter(element))
   }
 
   subtree(root) {
