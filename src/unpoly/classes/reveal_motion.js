@@ -4,41 +4,41 @@ const u = up.util
 up.RevealMotion = class RevealMotion {
 
   constructor(element, options = {}) {
-    this.element = element
-    this.options = options
-    this.viewport = e.get(this.options.viewport) || up.viewport.get(this.element)
-    this.obstructionsLayer = up.layer.get(this.viewport)
+    this._element = element
+    this._options = options
+    this._viewport = e.get(this._options.viewport) || up.viewport.get(this._element)
+    this._obstructionsLayer = up.layer.get(this._viewport)
 
     const viewportConfig = up.viewport.config
-    this.snap    = this.options.snap    ?? this.options.revealSnap    ?? viewportConfig.revealSnap
-    this.padding = this.options.padding ?? this.options.revealPadding ?? viewportConfig.revealPadding
-    this.top     = this.options.top     ?? this.options.revealTop     ?? viewportConfig.revealTop
-    this.max     = this.options.max     ?? this.options.revealMax     ?? viewportConfig.revealMax
+    this._snap    = this._options.snap    ?? this._options.revealSnap    ?? viewportConfig.revealSnap
+    this._padding = this._options.padding ?? this._options.revealPadding ?? viewportConfig.revealPadding
+    this._top     = this._options.top     ?? this._options.revealTop     ?? viewportConfig.revealTop
+    this._max     = this._options.max     ?? this._options.revealMax     ?? viewportConfig.revealMax
 
-    this.topObstructions = viewportConfig.fixedTop
-    this.bottomObstructions = viewportConfig.fixedBottom
+    this._topObstructions = viewportConfig.fixedTop
+    this._bottomObstructions = viewportConfig.fixedBottom
   }
 
   start() {
-    const viewportRect = this.getViewportRect(this.viewport)
-    const elementRect = up.Rect.fromElement(this.element)
-    if (this.max) {
-      const maxPixels =  u.evalOption(this.max, this.element)
+    const viewportRect = this._getViewportRect(this._viewport)
+    const elementRect = up.Rect.fromElement(this._element)
+    if (this._max) {
+      const maxPixels =  u.evalOption(this._max, this._element)
       elementRect.height = Math.min(elementRect.height, maxPixels)
     }
 
-    this.addPadding(elementRect)
-    this.substractObstructions(viewportRect)
+    this._addPadding(elementRect)
+    this._substractObstructions(viewportRect)
 
     // Cards test (topics dropdown) throw an error when we also fail at zero
     if (viewportRect.height < 0) {
       up.fail('Viewport has no visible area')
     }
 
-    const originalScrollTop = this.viewport.scrollTop
+    const originalScrollTop = this._viewport.scrollTop
     let newScrollTop = originalScrollTop
 
-    if (this.top || (elementRect.height > viewportRect.height)) {
+    if (this._top || (elementRect.height > viewportRect.height)) {
       // Element is either larger than the viewport,
       // or the user has explicitly requested for the element to align at top
       // => Scroll the viewport so the first element row is the first viewport row
@@ -58,17 +58,17 @@ up.RevealMotion = class RevealMotion {
       // Do nothing.
     }
 
-    if (u.isNumber(this.snap) && (newScrollTop < this.snap) && (elementRect.top < (0.5 * viewportRect.height))) {
+    if (u.isNumber(this._snap) && (newScrollTop < this._snap) && (elementRect.top < (0.5 * viewportRect.height))) {
       newScrollTop = 0
     }
 
     if (newScrollTop !== originalScrollTop) {
-      this.viewport.scrollTo({ ...this.options, top: newScrollTop })
+      this._viewport.scrollTo({ ...this._options, top: newScrollTop })
     }
   }
 
-  getViewportRect() {
-    if (up.viewport.isRoot(this.viewport)) {
+  _getViewportRect() {
+    if (up.viewport.isRoot(this._viewport)) {
       // Other than an element with overflow-y, the document viewport
       // stretches to the full height of its contents. So we create a viewport
       // sized to the usuable screen area.
@@ -79,22 +79,22 @@ up.RevealMotion = class RevealMotion {
         height: up.viewport.rootHeight()
       })
     } else {
-      return up.Rect.fromElement(this.viewport)
+      return up.Rect.fromElement(this._viewport)
     }
   }
 
-  addPadding(elementRect) {
-    elementRect.top -= this.padding
-    elementRect.height += 2 * this.padding
+  _addPadding(elementRect) {
+    elementRect.top -= this._padding
+    elementRect.height += 2 * this._padding
   }
 
-  selectObstructions(selectors) {
-    let elements = up.fragment.all(selectors.join(), { layer: this.obstructionsLayer })
+  _selectObstructions(selectors) {
+    let elements = up.fragment.all(selectors.join(), { layer: this._obstructionsLayer })
     return u.filter(elements, e.isVisible)
   }
 
-  substractObstructions(viewportRect) {
-    for (let obstruction of this.selectObstructions(this.topObstructions)) {
+  _substractObstructions(viewportRect) {
+    for (let obstruction of this._selectObstructions(this._topObstructions)) {
       let obstructionRect = up.Rect.fromElement(obstruction)
       let diff = obstructionRect.bottom - viewportRect.top
       if (diff > 0) {
@@ -103,7 +103,7 @@ up.RevealMotion = class RevealMotion {
       }
     }
 
-    for (let obstruction of this.selectObstructions(this.bottomObstructions)) {
+    for (let obstruction of this._selectObstructions(this._bottomObstructions)) {
       let obstructionRect = up.Rect.fromElement(obstruction)
       let diff = viewportRect.bottom - obstructionRect.top
       if (diff > 0) {
