@@ -4,101 +4,101 @@ const e = up.element
 up.CSSTransition = class CSSTransition {
 
   constructor(element, lastFrameKebab, options) {
-    this.element = element
-    this.lastFrameKebab = lastFrameKebab
-    this.lastFrameKeysKebab = Object.keys(this.lastFrameKebab)
-    if (u.some(this.lastFrameKeysKebab, key => key.match(/A-Z/))) {
+    this._element = element
+    this._lastFrameKebab = lastFrameKebab
+    this._lastFrameKeysKebab = Object.keys(this._lastFrameKebab)
+    if (u.some(this._lastFrameKeysKebab, key => key.match(/A-Z/))) {
       up.fail('Animation keys must be kebab-case')
     }
-    this.finishEvent = options.finishEvent
-    this.duration = options.duration
-    this.easing = options.easing
-    this.finished = false
+    this._finishEvent = options.finishEvent
+    this._duration = options.duration
+    this._easing = options.easing
+    this._finished = false
   }
 
   start() {
-    if (this.lastFrameKeysKebab.length === 0) {
-      this.finished = true
+    if (this._lastFrameKeysKebab.length === 0) {
+      this._finished = true
       // If we have nothing to animate, we will never get a transitionEnd event
       // and the returned promise will never resolve.
       return Promise.resolve()
     }
 
-    this.deferred = u.newDeferred()
-    this.pauseOldTransition()
-    this.startTime = new Date()
-    this.startFallbackTimer()
-    this.listenToFinishEvent()
-    this.listenToTransitionEnd()
+    this._deferred = u.newDeferred()
+    this._pauseOldTransition()
+    this._startTime = new Date()
+    this._startFallbackTimer()
+    this._listenToFinishEvent()
+    this._listenToTransitionEnd()
 
-    this.startMotion()
+    this._startMotion()
 
-    return this.deferred
+    return this._deferred
   }
 
-  listenToFinishEvent() {
-    if (this.finishEvent) {
-      this.stopListenToFinishEvent = up.on(this.element, this.finishEvent, this.onFinishEvent.bind(this))
+  _listenToFinishEvent() {
+    if (this._finishEvent) {
+      this._stopListenToFinishEvent = up.on(this._element, this._finishEvent, this._onFinishEvent.bind(this))
     }
   }
 
-  onFinishEvent(event) {
+  _onFinishEvent(event) {
     // don't waste time letting the event bubble up the DOM
     event.stopPropagation()
-    this.finish()
+    this._finish()
   }
 
-  startFallbackTimer() {
+  _startFallbackTimer() {
     const timingTolerance = 100
-    this.fallbackTimer = u.timer((this.duration + timingTolerance), () => {
-      this.finish()
+    this._fallbackTimer = u.timer((this._duration + timingTolerance), () => {
+      this._finish()
     })
   }
 
-  stopFallbackTimer() {
-    clearTimeout(this.fallbackTimer)
+  _stopFallbackTimer() {
+    clearTimeout(this._fallbackTimer)
   }
 
-  listenToTransitionEnd() {
-    this.stopListenToTransitionEnd = up.on(this.element, 'transitionend', this.onTransitionEnd.bind(this))
+  _listenToTransitionEnd() {
+    this._stopListenToTransitionEnd = up.on(this._element, 'transitionend', this._onTransitionEnd.bind(this))
   }
 
-  onTransitionEnd(event) {
+  _onTransitionEnd(event) {
     // Check if the transitionend event was caused by our own transition,
     // and not by some other transition that happens to affect this element.
-    if (event.target !== this.element) { return }
+    if (event.target !== this._element) { return }
 
     // Check if we are receiving a late transitionEnd event
     // from a previous CSS transition.
-    const elapsed = new Date() - this.startTime
-    if (elapsed <= (0.25 * this.duration)) { return }
+    const elapsed = new Date() - this._startTime
+    if (elapsed <= (0.25 * this._duration)) { return }
 
     const completedPropertyKebab = event.propertyName
-    if (!u.contains(this.lastFrameKeysKebab, completedPropertyKebab)) { return }
+    if (!u.contains(this._lastFrameKeysKebab, completedPropertyKebab)) { return }
 
-    this.finish()
+    this._finish()
   }
 
-  finish() {
+  _finish() {
     // Make sure that any queued events won't finish multiple times.
-    if (this.finished) { return }
-    this.finished = true
+    if (this._finished) { return }
+    this._finished = true
 
-    this.stopFallbackTimer()
-    this.stopListenToFinishEvent?.()
-    this.stopListenToTransitionEnd?.()
+    this._stopFallbackTimer()
+    this._stopListenToFinishEvent?.()
+    this._stopListenToTransitionEnd?.()
 
     // Cleanly finish our own transition so the old transition
     // (or any other transition set right after that) will be able to take effect.
-    e.concludeCSSTransition(this.element)
+    e.concludeCSSTransition(this._element)
 
-    this.resumeOldTransition()
+    this._resumeOldTransition()
 
-    this.deferred.resolve()
+    this._deferred.resolve()
   }
 
-  pauseOldTransition() {
-    const oldTransition = e.style(this.element, [
+  _pauseOldTransition() {
+    const oldTransition = e.style(this._element, [
       'transitionProperty',
       'transitionDuration',
       'transitionDelay',
@@ -111,27 +111,27 @@ up.CSSTransition = class CSSTransition {
       // since that would involve setting every single CSS property as an inline style.
       if (oldTransition.transitionProperty !== 'all') {
         const oldTransitionProperties = oldTransition.transitionProperty.split(/\s*,\s*/)
-        const oldTransitionFrameKebab = e.style(this.element, oldTransitionProperties)
-        this.setOldTransitionTargetFrame = e.setTemporaryStyle(this.element, oldTransitionFrameKebab)
+        const oldTransitionFrameKebab = e.style(this._element, oldTransitionProperties)
+        this._setOldTransitionTargetFrame = e.setTemporaryStyle(this._element, oldTransitionFrameKebab)
       }
 
       // Stop the existing CSS transition so it does not emit transitionEnd events
-      this.setOldTransition = e.concludeCSSTransition(this.element)
+      this._setOldTransition = e.concludeCSSTransition(this._element)
     }
   }
 
-  resumeOldTransition() {
-    this.setOldTransitionTargetFrame?.()
-    this.setOldTransition?.()
+  _resumeOldTransition() {
+    this._setOldTransitionTargetFrame?.()
+    this._setOldTransition?.()
   }
 
-  startMotion() {
-    e.setStyle(this.element, {
-      transitionProperty: Object.keys(this.lastFrameKebab).join(', '),
-      transitionDuration: `${this.duration}ms`,
-      transitionTimingFunction: this.easing
+  _startMotion() {
+    e.setStyle(this._element, {
+      transitionProperty: Object.keys(this._lastFrameKebab).join(', '),
+      transitionDuration: `${this._duration}ms`,
+      transitionTimingFunction: this._easing
     })
-    e.setStyle(this.element, this.lastFrameKebab)
+    e.setStyle(this._element, this._lastFrameKebab)
   }
 }
 
