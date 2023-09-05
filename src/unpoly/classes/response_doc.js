@@ -5,12 +5,12 @@ up.ResponseDoc = class ResponseDoc {
 
   constructor(options) {
     this.root =
-      this.parseDocument(options) ||
-      this.parseFragment(options) ||
-      this.parseContent(options)
+      this._parseDocument(options) ||
+      this._parseFragment(options) ||
+      this._parseContent(options)
 
     // If the user doesn't want to run scripts in the new fragment, we disable all <script> elements.
-    // While <script> elements parsed by `DOMParser` are inert anyway, we also parse HTML through
+    // While <script> elements parsed by `DOMParser` are inert anyway, we also _parse HTML through
     // other methods, which do create non-inert <script> elements.
     if (!up.fragment.config.runScripts) {
       this.root.querySelectorAll('script').forEach((e) => e.remove())
@@ -26,8 +26,8 @@ up.ResponseDoc = class ResponseDoc {
     }
   }
 
-  parseDocument(options) {
-    let document = this.parse(options.document, e.createBrokenDocumentFromHTML)
+  _parseDocument(options) {
+    let document = this._parse(options.document, e.createBrokenDocumentFromHTML)
     if (document) {
       // Remember that we need to fix <script> and <noscript> elements later.
       // We could fix these elements right now for the entire document, but since we will only use
@@ -38,7 +38,7 @@ up.ResponseDoc = class ResponseDoc {
     }
   }
 
-  parseContent(options) {
+  _parseContent(options) {
     // Parsing { inner } is the last option we try. It should always succeed in case someone
     // tries `up.layer.open()` without any args. Hence we set the innerHTML to an empty string.
     let content = options.content || ''
@@ -59,11 +59,11 @@ up.ResponseDoc = class ResponseDoc {
     return matchingElement
   }
 
-  parseFragment(options) {
-    return this.parse(options.fragment)
+  _parseFragment(options) {
+    return this._parse(options.fragment)
   }
 
-  parse(value, parseFn = e.createFromHTML) {
+  _parse(value, parseFn = e.createFromHTML) {
     if (u.isString(value)) {
       value = parseFn(value)
     }
@@ -78,7 +78,7 @@ up.ResponseDoc = class ResponseDoc {
     // We get it from the <head> instead of this.root.title.
     // We want to distinguish between a parsed document that does not have a <head> or <title>
     // and a given, but empty title.
-    return this.fromHead(this.getTitleText)
+    return this.fromHead(this._getTitleText)
   }
 
   /*
@@ -114,7 +114,7 @@ up.ResponseDoc = class ResponseDoc {
     return this.fromHead(up.script.findAssets)
   }
 
-  getTitleText(head) {
+  _getTitleText(head) {
     // We must find inside the head ('head title') instead of 'title'
     // so we won't match the <title> of an inline SVG image.
     return head.querySelector('title')?.textContent
