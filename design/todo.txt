@@ -22,14 +22,14 @@ Polling rework
   - Link preloader can immediately decide whether to register events based on up.link.isSafe()
 - [ok] Remove up.network.config.badDownlink
 - [ok] Remove up.network.config.badRTT
-- Polling for hidden tabs
+- [ok] Polling for hidden tabs
   - Unschedule / re-check and reschedule-remaining on visibilityhcnage
-- Polling for background layers
+- [ok] Polling for background layers
   - Unschedule / re-check and reschedule-remaining on up:layer:dismissed / up:layer:accepted
     - How about up:layer:covered / up:layer:uncovered ?
-- Remove up:layer:covered / :uncovered again
-- Move up:fragment:poll event from pollIssue to up.FragmentPolling
-- Remove up.radio#pollIssue
+- [ok] Remove up:layer:covered / :uncovered again
+- [ok] Move up:fragment:poll event from pollIssue to up.FragmentPolling
+- pollIssueRemove up.radio#pollIssue
 - [ok] Remove up.radio.config.pollEnabled
 - [ok] Remove up.radio.config.pollStretchInterval
 - Consider offering an up.radio.poll(fragment)
