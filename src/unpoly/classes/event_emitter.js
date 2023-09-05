@@ -15,17 +15,17 @@ up.EventEmitter = class EventEmitter extends up.Record {
   }
 
   emit() {
-    this.logEmission()
+    this._logEmission()
 
     if (this.baseLayer) {
-      this.baseLayer.asCurrent(() => this.dispatchEvent())
+      this.baseLayer.asCurrent(() => this._dispatchEvent())
     } else {
-      this.dispatchEvent()
+      this._dispatchEvent()
     }
     return this.event
   }
 
-  dispatchEvent() {
+  _dispatchEvent() {
     this.target.dispatchEvent(this.event)
 
     if (this.ensureBubbles && !this.target.isConnected) {
@@ -42,7 +42,7 @@ up.EventEmitter = class EventEmitter extends up.Record {
     }
   }
 
-  logEmission() {
+  _logEmission() {
     if (!up.log.config.enabled) { return }
 
     let message = this.log
