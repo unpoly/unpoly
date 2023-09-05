@@ -15,6 +15,11 @@ function minify(doMinify) {
               passes: 3,
               ecma: 2021,
             },
+            mangle: {
+              properties: {
+                regex: /^[_#]/
+              }
+            }
           }
         })
       ]
