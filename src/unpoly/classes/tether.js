@@ -5,67 +5,67 @@ up.Tether = class Tether {
 
   constructor(options) {
     up.migrate.handleTetherOptions?.(options)
-    this.anchor = options.anchor
-    this.align = options.align
-    this.position = options.position
+    this._anchor = options.anchor
+    this._align = options.align
+    this._position = options.position
 
-    this.alignAxis = (this.position === 'top') || (this.position === 'bottom') ? 'horizontal' : 'vertical'
+    this._alignAxis = (this._position === 'top') || (this._position === 'bottom') ? 'horizontal' : 'vertical'
 
-    this.viewport = up.viewport.get(this.anchor)
+    this._viewport = up.viewport.get(this._anchor)
     // The document viewport is <html> on some browsers, and we cannot attach children to that.
-    this.parent = this.viewport === e.root ? document.body : this.viewport
+    this.parent = this._viewport === e.root ? document.body : this._viewport
 
     // If the offsetParent is within the viewport (or is the viewport) we can simply
     // `position: absolute` and it will move as the viewport scrolls, without JavaScript.
     // If not however, we have no choice but to move it on every scroll event.
-    this.syncOnScroll = !this.viewport.contains(this.anchor.offsetParent)
+    this._syncOnScroll = !this._viewport.contains(this._anchor.offsetParent)
   }
 
   start(element) {
-    this.element = element
-    this.element.style.position = 'absolute'
-    this.setOffset(0, 0)
+    this._element = element
+    this._element.style.position = 'absolute'
+    this._setOffset(0, 0)
     this.sync()
-    this.changeEventSubscription('on')
+    this._changeEventSubscription('on')
   }
 
   stop() {
-    this.changeEventSubscription('off')
+    this._changeEventSubscription('off')
   }
 
-  changeEventSubscription(fn) {
-    let doScheduleSync = this.scheduleSync.bind(this)
+  _changeEventSubscription(fn) {
+    let doScheduleSync = this._scheduleSync.bind(this)
     up[fn](window, 'resize', doScheduleSync)
-    if (this.syncOnScroll) { up[fn](this.viewport, 'scroll', doScheduleSync) }
+    if (this._syncOnScroll) { up[fn](this._viewport, 'scroll', doScheduleSync) }
   }
 
-  scheduleSync() {
+  _scheduleSync() {
     clearTimeout(this.syncTimer)
     return this.syncTimer = u.task(this.sync.bind(this))
   }
 
   isDetached() {
-    return !this.parent.isConnected || !this.anchor.isConnected
+    return !this.parent.isConnected || !this._anchor.isConnected
   }
 
   sync() {
-    const elementBox = this.element.getBoundingClientRect()
+    const elementBox = this._element.getBoundingClientRect()
 
     const elementMargin = {
-      top:    e.styleNumber(this.element, 'marginTop'),
-      right:  e.styleNumber(this.element, 'marginRight'),
-      bottom: e.styleNumber(this.element, 'marginBottom'),
-      left:   e.styleNumber(this.element, 'marginLeft')
+      top:    e.styleNumber(this._element, 'marginTop'),
+      right:  e.styleNumber(this._element, 'marginRight'),
+      bottom: e.styleNumber(this._element, 'marginBottom'),
+      left:   e.styleNumber(this._element, 'marginLeft')
     }
 
-    const anchorBox = this.anchor.getBoundingClientRect()
+    const anchorBox = this._anchor.getBoundingClientRect()
 
     let left
     let top
 
-    switch (this.alignAxis) {
+    switch (this._alignAxis) {
       case 'horizontal': { // position is 'top' or 'bottom'
-        switch (this.position) {
+        switch (this._position) {
           case 'top':
             top = anchorBox.top - elementMargin.bottom - elementBox.height
             break
@@ -83,7 +83,7 @@ up.Tether = class Tether {
             // margin
             // ------
             // element
-        switch (this.align) {
+        switch (this._align) {
           case 'left':
             // anchored to anchor's left, grows to the right
             left = anchorBox.left + elementMargin.left
@@ -109,7 +109,7 @@ up.Tether = class Tether {
         break
       }
       case 'vertical': { // position is 'left' or 'right'
-        switch (this.align) {
+        switch (this._align) {
           case 'top':
             // anchored to the top, grows to the bottom
             top = anchorBox.top + elementMargin.top
@@ -132,7 +132,7 @@ up.Tether = class Tether {
             // ------- |
             //  margin | anchor
         }
-        switch (this.position) {
+        switch (this._position) {
           case 'left':
             left = anchorBox.left - elementMargin.right - elementBox.width
             break
@@ -147,27 +147,27 @@ up.Tether = class Tether {
     }
 
     if (u.isDefined(left) || u.isDefined(top)) {
-      this.moveTo(left, top)
+      this._moveTo(left, top)
     } else {
-      up.fail('Invalid tether constraints: %o', this.describeConstraints())
+      up.fail('Invalid tether constraints: %o', this._describeConstraints())
     }
   }
 
-  describeConstraints() {
-    return { position: this.position, align: this.align }
+  _describeConstraints() {
+    return { position: this._position, align: this._align }
   }
 
-  moveTo(targetLeft, targetTop) {
-    const elementBox = this.element.getBoundingClientRect()
-    this.setOffset(
+  _moveTo(targetLeft, targetTop) {
+    const elementBox = this._element.getBoundingClientRect()
+    this._setOffset(
       (targetLeft - elementBox.left) + this.offsetLeft,
       (targetTop - elementBox.top) + this.offsetTop
     )
   }
 
-  setOffset(left, top) {
+  _setOffset(left, top) {
     this.offsetLeft = left
     this.offsetTop = top
-    e.setStyle(this.element, { left, top })
+    e.setStyle(this._element, { left, top })
   }
 }
