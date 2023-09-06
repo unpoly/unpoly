@@ -57,14 +57,14 @@ up.Layer.Root = class Root extends up.Layer {
   }
 
   accept() {
-    this.cannotCloseRoot()
+    this._cannotCloseRoot()
   }
 
   dismiss() {
-    this.cannotCloseRoot()
+    this._cannotCloseRoot()
   }
 
-  cannotCloseRoot() {
+  _cannotCloseRoot() {
     up.fail('Cannot close the root layer')
   }
 
