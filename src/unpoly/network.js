@@ -74,11 +74,6 @@ up.network = (function() {
 
     If the size is exceeded, the oldest responses will be dropped from the cache.
 
-  @param {number} [config.cacheEvictAge=90*60*1000]
-    The number of milliseconds until a cached response is discarded.
-
-    Defaults to 90 minutes.
-
   @param {number|Function(up.Request): number} [config.badResponseTime=400]
     How long to wait before emitting the [`up:network:late` event](/up:network:late).
 
@@ -115,7 +110,7 @@ up.network = (function() {
 
     Defaults to 15 seconds.
 
-  @param {number} [config.cacheEvictAge=15_000]
+  @param {number} [config.cacheEvictAge=90*60*1000]
     The number of milliseconds after which a cache entry is [evicted](/caching#eviction).
 
     In practice you will often prefer [*expiration*](/caching#expiration) over *eviction*.
