@@ -5,55 +5,55 @@ up.Change.FromResponse = class FromResponse extends up.Change {
   constructor(options) {
     super(options)
 
-    this.response = options.response
-    this.request = this.response.request
+    this._response = options.response
+    this._request = this._response.request
   }
 
   execute() {
-    if (up.fragment.config.skipResponse(this.loadedEventProps())) {
-      this.skip()
+    if (up.fragment.config.skipResponse(this._loadedEventProps())) {
+      this._skip()
     } else {
       // Allow listeners to inspect the response and either prevent the fragment change
       // or manipulate change options. An example for when this is useful is a maintenance
       // page with its own layout, that cannot be loaded as a fragment and must be loaded
       // with a full page load.
-      this.request.assertEmitted('up:fragment:loaded', {
-        ...this.loadedEventProps(),
+      this._request.assertEmitted('up:fragment:loaded', {
+        ...this._loadedEventProps(),
         callback: this.options.onLoaded, // One callback is used for both success and failure. There is no { onFailLoaded }.
-        log: ['Loaded fragment from %s', this.response.description],
-        skip: () => this.skip()
+        log: ['Loaded fragment from %s', this._response.description],
+        skip: () => this._skip()
       })
     }
 
     // Listeners to up:fragment:loaded may have changed renderOptions.fail
     // to force success or failure options.
-    let fail = u.evalOption(this.options.fail, this.response) ?? !this.response.ok
+    let fail = u.evalOption(this.options.fail, this._response) ?? !this._response.ok
 
     if (fail) {
-      throw this.updateContentFromResponse(this.deriveFailOptions())
+      throw this._updateContentFromResponse(this.deriveFailOptions())
     }
 
-    return this.updateContentFromResponse(this.options)
+    return this._updateContentFromResponse(this.options)
   }
 
-  skip() {
-    up.puts('up.render()', 'Skipping ' + this.response.description)
+  _skip() {
+    up.puts('up.render()', 'Skipping ' + this._response.description)
     this.options.target = ':none'
     this.options.failTarget = ':none'
   }
 
-  updateContentFromResponse(finalRenderOptions) {
+  _updateContentFromResponse(finalRenderOptions) {
     if (finalRenderOptions.failPrefixForced) {
       up.puts('up.render()', 'Rendering failed response using fail-prefixed options (https://unpoly.com/failed-responses)')
     }
 
     // The response might carry some updates for our change options,
     // like a server-set location, or server-sent events.
-    this.augmentOptionsFromResponse(finalRenderOptions)
+    this._augmentOptionsFromResponse(finalRenderOptions)
 
     // When up.Change.FromContent eventually compiles fragments, the { meta } object
     // will be passed as a third argument to compilers.
-    finalRenderOptions.meta = this.compilerPassMeta()
+    finalRenderOptions.meta = this._compilerPassMeta()
 
     let result = new up.Change.FromContent(finalRenderOptions).execute()
     result.finished = this.finish(result, finalRenderOptions)
@@ -63,14 +63,14 @@ up.Change.FromResponse = class FromResponse extends up.Change {
   async finish(renderResult, originalRenderOptions) {
     renderResult = await renderResult.finished
 
-    if (up.fragment.shouldRevalidate(this.request, this.response, originalRenderOptions)) {
-      renderResult = await this.revalidate(renderResult, originalRenderOptions)
+    if (up.fragment.shouldRevalidate(this._request, this._response, originalRenderOptions)) {
+      renderResult = await this._revalidate(renderResult, originalRenderOptions)
     }
 
     return renderResult
   }
 
-  async revalidate(renderResult, originalRenderOptions) {
+  async _revalidate(renderResult, originalRenderOptions) {
     let target = originalRenderOptions.target
     if (/:(before|after)/.test(target)) {
       up.warn('up.render()', 'Cannot revalidate cache when prepending/appending (target %s)', target)
@@ -87,7 +87,7 @@ up.Change.FromResponse = class FromResponse extends up.Change {
         confirm: false,
         feedback: false,
         abort: false,
-        expiredResponse: this.response, // flag will be forwarded to up:fragment:loaded
+        expiredResponse: this._response, // flag will be forwarded to up:fragment:loaded
         // The guardEvent was already plucked from render options in up.RenderJob#guardRender().
       })
 
@@ -106,42 +106,42 @@ up.Change.FromResponse = class FromResponse extends up.Change {
     return renderResult
   }
 
-  loadedEventProps() {
+  _loadedEventProps() {
     const { expiredResponse } = this.options
 
     return {
-      request: this.request,
-      response: this.response,
+      request: this._request,
+      response: this._response,
       renderOptions: this.options,
       revalidating: !!expiredResponse,
       expiredResponse,
     }
   }
 
-  compilerPassMeta() {
+  _compilerPassMeta() {
     // (1) We only expose selected properties as to not prevent GC
     // by compilers holding a reference to their meta arg in their close.
     //
     // (2) Another property { layer } will be assigned by up.hello().
-    return u.pick(this.loadedEventProps(), [
+    return u.pick(this._loadedEventProps(), [
       'revalidating',
       'response'
     ])
   }
 
-  augmentOptionsFromResponse(renderOptions) {
+  _augmentOptionsFromResponse(renderOptions) {
     // Also see preprocessing of server response in up.Request#extractResponseFromXHR().
 
-    const responseURL = this.response.url
+    const responseURL = this._response.url
     let serverLocation = responseURL
 
-    let hash = this.request.hash
+    let hash = this._request.hash
     if (hash) {
       renderOptions.hash = hash
       serverLocation += hash
     }
 
-    const isReloadable = (this.response.method === 'GET')
+    const isReloadable = (this._response.method === 'GET')
 
     if (isReloadable) {
       // Remember where we got the fragment from so we can up.reload() it later.
@@ -155,34 +155,34 @@ up.Change.FromResponse = class FromResponse extends up.Change {
     }
 
     renderOptions.location = this.improveHistoryValue(renderOptions.location, serverLocation)
-    renderOptions.title = this.improveHistoryValue(renderOptions.title, this.response.title)
-    renderOptions.eventPlans = this.response.eventPlans
+    renderOptions.title = this.improveHistoryValue(renderOptions.title, this._response.title)
+    renderOptions.eventPlans = this._response.eventPlans
 
-    let serverTarget = this.response.target
+    let serverTarget = this._response.target
     if (serverTarget) {
       renderOptions.target = serverTarget
     }
 
-    renderOptions.acceptLayer = this.response.acceptLayer
-    renderOptions.dismissLayer = this.response.dismissLayer
-    renderOptions.document = this.response.text
+    renderOptions.acceptLayer = this._response.acceptLayer
+    renderOptions.dismissLayer = this._response.dismissLayer
+    renderOptions.document = this._response.text
 
-    if (this.response.none) {
+    if (this._response.none) {
       renderOptions.target = ':none'
     }
 
     // If the server has provided an update to our context via the X-Up-Context
     // response header, merge it into our existing { context } option.
-    renderOptions.context = u.merge(renderOptions.context, this.response.context)
+    renderOptions.context = u.merge(renderOptions.context, this._response.context)
 
-    renderOptions.cspNonces = this.response.cspNonces
-    renderOptions.time ??= this.response.lastModified
-    renderOptions.etag ??= this.response.etag
+    renderOptions.cspNonces = this._response.cspNonces
+    renderOptions.time ??= this._response.lastModified
+    renderOptions.etag ??= this._response.etag
   }
 
   static {
     u.memoizeMethod(this.prototype, [
-      'loadedEventProps',
+      '_loadedEventProps',
     ])
   }
 }
