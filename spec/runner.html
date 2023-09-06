@@ -15,20 +15,23 @@
 
       insertScript('/dist/jasmine.js')
 
-      let canModernJS = ('noModule' in document.createElement('script'))
-      let useModernJS = canModernJS && !/(\?|&)es=es6($|\?|&)/.test(location.search)
+      let es6 = /(\?|&)es=es6($|\?|&)/.test(location.search)
+      let minify = /(\?|&)minify=1($|\?|&)/.test(location.search)
 
-      insertScript(useModernJS ? '/dist/unpoly.js' : '/dist/unpoly.es6.js')
+      let esSuffix = es6 ? '.es6' : ''
+      let minifySuffix = minify  ? '.min' : ''
+
+      insertScript(`/dist/unpoly${esSuffix}${minifySuffix}.js`)
 
       if (/(\?|&)jquery=1($|\?|&)/.test(location.search)) {
         insertScript('https://code.jquery.com/jquery-3.6.0.js')
       }
 
       if (/(\?|&)migrate=1($|\?|&)/.test(location.search)) {
-        insertScript('/dist/unpoly-migrate.js')
+        insertScript(`/dist/unpoly-migrate${minifySuffix}.js`)
       }
 
-      insertScript(useModernJS ? '/dist/specs.js' : '/dist/specs.es6.js')
+      insertScript(`/dist/specs${esSuffix}.js`)
     </script>
 
 <!--    <script>-->
