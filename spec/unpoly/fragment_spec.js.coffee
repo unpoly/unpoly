@@ -6464,19 +6464,22 @@ describe 'up.fragment', ->
 
             expect(url: '/cached-path').toBeCached()
 
-          it 'reloads a fragment that was rendered from an older cached response', asyncSpec (next) ->
+          it 'reloads a fragment that was rendered from an older cached response', ->
             up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
 
-            next ->
-              expect('.target').toHaveText('cached text')
+            await wait()
 
-              expect(up.network.isBusy()).toBe(true)
+            expect('.target').toHaveText('cached text')
 
-              jasmine.respondWithSelector('.target', text: 'verified text')
+            expect(up.network.isBusy()).toBe(true)
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.target')
 
-            next ->
-              expect(up.network.isBusy()).toBe(false)
-              expect('.target').toHaveText('verified text')
+            jasmine.respondWithSelector('.target', text: 'verified text')
+
+            await wait()
+
+            expect(up.network.isBusy()).toBe(false)
+            expect('.target').toHaveText('verified text')
 
           it 'does not verify a fragment rendered from a recent cached response with { revalidate: "auto" }', asyncSpec (next) ->
             up.fragment.config.autoRevalidate = (response) => response.age >= 10 * 1000
@@ -6703,6 +6706,23 @@ describe 'up.fragment', ->
             next ->
                 expect('input[name=foo]').toBeFocused()
 
+          it 'revalidates a fallback target', ->
+            up.fragment.config.mainTargets = ['.target']
+            up.render({ url: '/cached-path', cache: true, revalidate: true, fallback: true })
+
+            await wait()
+
+            expect('.target').toHaveText('cached text')
+
+            expect(up.network.isBusy()).toBe(true)
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.target')
+
+            jasmine.respondWithSelector('.target', text: 'verified text')
+
+            await wait()
+
+            expect(up.network.isBusy()).toBe(false)
+            expect('.target').toHaveText('verified text')
 
           it 'calls compilers with a third argument containing a { revalidating } property', asyncSpec (next) ->
             compiler = jasmine.createSpy('compiler')

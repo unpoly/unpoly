@@ -71,12 +71,20 @@ up.Change.FromResponse = class FromResponse extends up.Change {
   }
 
   async _revalidate(renderResult, originalRenderOptions) {
-    let target = originalRenderOptions.target
-    if (/:(before|after)/.test(target)) {
-      up.warn('up.render()', 'Cannot revalidate cache when prepending/appending (target %s)', target)
+    // This is an explicit target passed as `{ render }` option.
+    // It may be `undefined` if the user has not given an explicit selector and relies on a fallback.
+    let inputTarget = originalRenderOptions.target
+
+    // This is the target that we ended up rendering.
+    // It may be a fallback target. It is always defined.
+    let effectiveTarget = renderResult.target
+
+    // let target = originalRenderOptions.target || renderResult.target
+    if (/:(before|after)/.test(inputTarget)) {
+      up.warn('up.render()', 'Cannot revalidate cache when prepending/appending (target %s)', inputTarget)
     } else {
-      up.puts('up.render()', 'Revalidating cached response for target "%s"', target)
-      let verifyResult = await up.reload(renderResult.target, {
+      up.puts('up.render()', 'Revalidating cached response for target "%s"', effectiveTarget)
+      let verifyResult = await up.reload(effectiveTarget, {
         ...originalRenderOptions,
         layer: renderResult.layer, // if the original render opened a layer, we now update it
         onFinished: null, // we're delaying the finish event here
