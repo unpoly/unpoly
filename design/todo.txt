@@ -4,52 +4,22 @@ Remaining V3 tasks
 - Do a podcast
 
 
-Head reconciliation
-===================
+Next release
+============
 
-- Rebase changes with [tag] prefix
 - CHANGELOG
+- Merge PR
 - Release
+- Check if we can get rid of Object.setPrototypeOf(this, up.LayerStack.prototype) in up.LayerStack
 - Deploy unpoly-demo changes
   - Make screenshot!
-
-
-Polling rework
-==============
-
-- [ok] Remove up.link.config.preloadEnabled
-- [ok] Remove preloadIssue()
-  - Link preloader can immediately decide whether to register events based on up.link.isSafe()
-- [ok] Remove up.network.config.badDownlink
-- [ok] Remove up.network.config.badRTT
-- [ok] Polling for hidden tabs
-  - Unschedule / re-check and reschedule-remaining on visibilityhcnage
-- [ok] Polling for background layers
-  - Unschedule / re-check and reschedule-remaining on up:layer:dismissed / up:layer:accepted
-    - How about up:layer:covered / up:layer:uncovered ?
-- [ok] Remove up:layer:covered / :uncovered again
-- [ok] Move up:fragment:poll event from pollIssue to up.FragmentPolling
-- pollIssueRemove up.radio#pollIssue
-- [ok] Remove up.radio.config.pollEnabled
-- [ok] Remove up.radio.config.pollStretchInterval
-- Consider offering an up.radio.poll(fragment)
-  - Poll now
-  - Or reload if no polling active
-
-
-Size reduction
-==============
-
-- Check if we can get rid of Object.setPrototypeOf(this, up.LayerStack.prototype) in up.LayerStack
-- Check if we can get rid of up.Record and mangle more props
-
-
-Priority
-=========
-
-- Consider fixing paused polling when re-focusing tab
 - When an fragment is aborted while animating, we should not revalidate
 - newPageReason for non-GET boot method: Allow rendering fragments when options.history is falsey
+
+
+Backlog
+=======
+
 - Docs: /accessibility page
   - But where does it go?
   - Top-level?
@@ -63,12 +33,6 @@ Priority
   - But rename it to something else, as sprintf() is something else
 - When rendering local content we should not set [up-source=true]
 - Publish up.fragment.contains()
-
-
-
-Backlog
-=======
-
 - Docs: Custom input elements
   - Have your custom element expose `{ name }` and { value }` properties (AFAIK Shoelance components already do)
   - Also `{ disable }`
