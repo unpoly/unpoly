@@ -7,61 +7,61 @@ up.Request.Cache = class Cache {
   }
 
   reset() {
-    this.varyInfo = {}
-    this.map = new Map()
+    this._varyInfo = {}
+    this._map = new Map()
   }
 
-  cacheKey(request) {
-    let influencingHeaders = this.getPreviousInfluencingHeaders(request)
+  _cacheKey(request) {
+    let influencingHeaders = this._getPreviousInfluencingHeaders(request)
     let varyPart = u.flatMap(influencingHeaders, (headerName) => [headerName, request.header(headerName)])
     return [request.description, ...varyPart].join(':')
   }
 
-  getPreviousInfluencingHeaders(request) {
+  _getPreviousInfluencingHeaders(request) {
     // Returns a list of `Vary` header names that we have seen
     // in responses to earlier requests with the same method and URL.
     // This is how we know how fine we must segment our cache buckets.
-    return (this.varyInfo[request.description] ||= new Set())
+    return (this._varyInfo[request.description] ||= new Set())
   }
 
   get(request) {
-    request = this.wrap(request)
-    let cacheKey = this.cacheKey(request)
-    let cachedRequest = this.map.get(cacheKey)
+    request = this._wrap(request)
+    let cacheKey = this._cacheKey(request)
+    let cachedRequest = this._map.get(cacheKey)
 
     if (cachedRequest) {
-      if (this.isUsable(cachedRequest)) {
+      if (this._isUsable(cachedRequest)) {
         return cachedRequest
       } else {
-        this.map.delete(cacheKey)
+        this._map.delete(cacheKey)
       }
     }
   }
 
-  get capacity() {
+  get _capacity() {
     return up.network.config.cacheSize
 
   }
 
-  isUsable(request) {
+  _isUsable(request) {
     return request.age < up.network.config.cacheEvictAge
   }
 
   async put(request) {
-    request = this.wrap(request)
-    this.makeRoom()
-    let cacheKey = this.updateCacheKey(request)
-    this.map.set(cacheKey, request)
+    request = this._wrap(request)
+    this._makeRoom()
+    let cacheKey = this._updateCacheKey(request)
+    this._map.set(cacheKey, request)
   }
 
-  updateCacheKey(request) {
-    let oldCacheKey = this.cacheKey(request)
+  _updateCacheKey(request) {
+    let oldCacheKey = this._cacheKey(request)
     let { response } = request
 
     if (response) {
-      this.mergePreviousHeaderNames(request, response)
-      let newCacheKey = this.cacheKey(request)
-      this.renameMapKey(oldCacheKey, newCacheKey)
+      this._mergePreviousHeaderNames(request, response)
+      let newCacheKey = this._cacheKey(request)
+      this._renameMapKey(oldCacheKey, newCacheKey)
       return newCacheKey
     } else {
       // If we haven't expanded our cache key above, use the old cache key.
@@ -69,17 +69,17 @@ up.Request.Cache = class Cache {
     }
   }
 
-  renameMapKey(oldKey, newKey) {
-    if (oldKey !== newKey && this.map.has(oldKey)) {
-      this.map.set(newKey, this.map.get(oldKey))
-      this.map.delete(oldKey)
+  _renameMapKey(oldKey, newKey) {
+    if (oldKey !== newKey && this._map.has(oldKey)) {
+      this._map.set(newKey, this._map.get(oldKey))
+      this._map.delete(oldKey)
     }
   }
 
-  mergePreviousHeaderNames(request, response) {
+  _mergePreviousHeaderNames(request, response) {
     let headersInfluencingResponse = response.ownInfluncingHeaders
     if (headersInfluencingResponse.length) {
-      let previousInfluencingHeaders = this.getPreviousInfluencingHeaders(request)
+      let previousInfluencingHeaders = this._getPreviousInfluencingHeaders(request)
       for (let headerName of headersInfluencingResponse) {
         previousInfluencingHeaders.add(headerName)
       }
@@ -97,7 +97,7 @@ up.Request.Cache = class Cache {
     // If the existing request is no longer in the cache, we have nothing to register an alias against.
     if (!existingCachedRequest) return
 
-    newRequest = this.wrap(newRequest)
+    newRequest = this._wrap(newRequest)
 
     this.track(existingCachedRequest, newRequest, { force: true })
     this.put(newRequest)
@@ -114,7 +114,7 @@ up.Request.Cache = class Cache {
     let value = await u.always(existingRequest)
 
     if (value instanceof up.Response) {
-      if (options.force || this.isCacheCompatible(existingRequest, newRequest)) {
+      if (options.force || this._isCacheCompatible(existingRequest, newRequest)) {
         // Remember that newRequest was settles from cache.
         // This makes it a candidate for cache revalidation.
         newRequest.fromCache = true
@@ -153,22 +153,22 @@ up.Request.Cache = class Cache {
     return existingRequest === newRequest || existingRequest === newRequest.trackedRequest
   }
 
-  delete(request) {
-    request = this.wrap(request)
-    let cacheKey = this.cacheKey(request)
-    this.map.delete(cacheKey)
+  _delete(request) {
+    request = this._wrap(request)
+    let cacheKey = this._cacheKey(request)
+    this._map.delete(cacheKey)
   }
 
   evict(condition = true, testerOptions) {
-    this.eachMatch(condition, testerOptions,
+    this._eachMatch(condition, testerOptions,
       // It is generally not a great idea to manipulate the list we're iterating over,
-      // but this.eachMatch() copies results before iterating.
-      (request) => this.delete(request)
+      // but this._eachMatch() copies results before iterating.
+      (request) => this._delete(request)
     )
   }
 
   expire(condition = true, testerOptions) {
-    this.eachMatch(condition, testerOptions,
+    this._eachMatch(condition, testerOptions,
       // We need to force cached responses to be expired, regardless of their age.
       // It may seem strange that we're setting an { expired } property on the *request*
       // instead, but there are two good reasons:
@@ -181,28 +181,27 @@ up.Request.Cache = class Cache {
     )
   }
 
-  makeRoom() {
-    while (this.map.size >= this.capacity) {
-      let oldestKey = this.map.keys().next().value
-      this.map.delete(oldestKey)
+  _makeRoom() {
+    while (this._map.size >= this._capacity) {
+      let oldestKey = this._map.keys().next().value
+      this._map.delete(oldestKey)
     }
   }
 
-  eachMatch(condition = true, testerOptions, fn) {
+  _eachMatch(condition = true, testerOptions, fn) {
     let tester = up.Request.tester(condition, testerOptions)
 
     // Copy results so evict() can delete from the list we're iterating over
-    let results = u.filter(this.map.values(), tester)
+    let results = u.filter(this._map.values(), tester)
 
     u.each(results, fn)
   }
 
-  // Used by up.Request.tester({ except })
-  isCacheCompatible(request1, request2) {
-    return this.cacheKey(request1) === this.cacheKey(request2)
+  _isCacheCompatible(request1, request2) {
+    return this._cacheKey(request1) === this._cacheKey(request2)
   }
 
-  wrap(requestOrOptions) {
+  _wrap(requestOrOptions) {
     return u.wrapValue(up.Request, requestOrOptions)
   }
 
