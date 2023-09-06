@@ -14,8 +14,10 @@ function minify(doMinify) {
             compress: { // https://github.com/terser/terser#compress-options
               passes: 3,
               ecma: 2021,
+              keep_classnames: true,
             },
             mangle: {
+              keep_classnames: true,
               properties: {
                 regex: /^[_#]/
               }
