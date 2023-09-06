@@ -5,73 +5,73 @@ up.Change.CloseLayer = class CloseLayer extends up.Change.Removal {
   constructor(options) {
     super(options)
 
-    this.verb = options.verb
-    this.layer = up.layer.get(options)
-    this.origin = options.origin
-    this.value = options.value
-    this.preventable = options.preventable ?? true
-    this.response = options.response
-    this.history = options.history ?? true
+    this._verb = options.verb
+    this._layer = up.layer.get(options)
+    this._origin = options.origin
+    this._value = options.value
+    this._preventable = options.preventable ?? true
+    this._response = options.response
+    this._history = options.history ?? true
   }
 
   execute() {
     // Closing a layer is a sync function.
 
-    if (!this.layer.isOpen()) {
+    if (!this._layer.isOpen()) {
       return Promise.resolve()
     }
 
     up.browser.assertConfirmed(this.options)
 
-    if (this.emitCloseEvent().defaultPrevented && this.preventable) {
+    if (this._emitCloseEvent().defaultPrevented && this._preventable) {
       throw new up.Aborted('Close event was prevented')
     }
 
     // Abort all pending requests targeting the layer we're now closing.
-    up.fragment.abort({ reason: 'Layer is closing', layer: this.layer })
+    up.fragment.abort({ reason: 'Layer is closing', layer: this._layer })
 
     // Remember the parent, which will no longer be accessible once we
     // remove @layer from the @stack.
-    const { parent } = this.layer
+    const { parent } = this._layer
 
     // Close any child-layers we might have.
     // We don't wait for peeling to finish, since changes that affect the
     // layer stack should happen sync:
-    this.layer.peel()
+    this._layer.peel()
 
     // Remove ourselves from the layer stack.
-    this.layer.stack.remove(this.layer)
+    this._layer.stack.remove(this._layer)
 
-    if (this.history) {
+    if (this._history) {
       // Restore the history of the parent layer we just uncovered.
       parent.restoreHistory()
     }
 
-    this.handleFocus(parent)
+    this._handleFocus(parent)
 
-    this.layer.teardownHandlers()
+    this._layer.teardownHandlers()
 
-    this.layer.destroyElements(this.options) // this will also pass the { onFinished } option
+    this._layer.destroyElements(this.options) // this will also pass the { onFinished } option
 
-    this.emitClosedEvent(parent)
+    this._emitClosedEvent(parent)
   }
 
-  emitCloseEvent() {
+  _emitCloseEvent() {
     // The close event is emitted on the layer that is about to close.
-    let event = this.layer.emit(
-      this.buildEvent(`up:layer:${this.verb}`), {
-      callback: this.layer.callback(`on${u.upperCaseFirst(this.verb)}`),
-      log: [`Will ${this.verb} ${this.layer} with value %o`, this.value]
+    let event = this._layer.emit(
+      this._buildEvent(`up:layer:${this._verb}`), {
+      callback: this._layer.callback(`on${u.upperCaseFirst(this._verb)}`),
+      log: [`Will ${this._verb} ${this._layer} with value %o`, this._value]
     })
 
     // Allow an event listener to replace event.value with a new value.
-    this.value = event.value
+    this._value = event.value
 
     return event
   }
 
-  emitClosedEvent(formerParent) {
-    const verbPast = `${this.verb}ed`
+  _emitClosedEvent(formerParent) {
+    const verbPast = `${this._verb}ed`
     const verbPastUpperCaseFirst = u.upperCaseFirst(verbPast)
 
     // layer.emit({ ensureBubbles: true }) will automatically emit a second event on document
@@ -80,35 +80,35 @@ up.Change.CloseLayer = class CloseLayer extends up.Change.Removal {
     // is now detached, the event will no longer bubble up to the document where global
     // event listeners can receive it. So we explicitly emit the event a second time
     // on the document.
-    return this.layer.emit(
-      this.buildEvent(`up:layer:${verbPast}`), {
+    return this._layer.emit(
+      this._buildEvent(`up:layer:${verbPast}`), {
         // Set up.layer.current to the parent of the closed layer, which is now likely
         // to be the front layer.
         baseLayer: formerParent,
-        callback: this.layer.callback(`on${verbPastUpperCaseFirst}`),
+        callback: this._layer.callback(`on${verbPastUpperCaseFirst}`),
         ensureBubbles: true,
-        log: [`${verbPastUpperCaseFirst} ${this.layer} with value %o`, this.value]
+        log: [`${verbPastUpperCaseFirst} ${this._layer} with value %o`, this._value]
       }
     )
   }
 
-  buildEvent(name) {
+  _buildEvent(name) {
     return up.event.build(name, {
-      layer: this.layer,
-      value: this.value,
-      origin: this.origin,
-      response: this.response,
+      layer: this._layer,
+      value: this._value,
+      origin: this._origin,
+      response: this._response,
     })
   }
 
-  handleFocus(formerParent) {
+  _handleFocus(formerParent) {
     // A11Y: Stop trapping focus in the layer that's about to close
-    this.layer.overlayFocus.teardown()
+    this._layer.overlayFocus.teardown()
     // A11Y: Start trapping focus in the parent layer that is being promoted to front.
 
     formerParent.overlayFocus?.moveToFront()
     // A11Y: Focus the element that originally opened this layer.
-    let newFocusElement = this.layer.origin || formerParent.element
+    let newFocusElement = this._layer.origin || formerParent.element
     newFocusElement.focus({ preventScroll: true })
   }
 }
