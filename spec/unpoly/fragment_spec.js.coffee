@@ -1596,27 +1596,40 @@ describe 'up.fragment', ->
 
         describeFallback 'canPushState', ->
 
-          it 'loads the content in a new page', asyncSpec (next) ->
-            loadPage = spyOn(up.network, 'loadPage')
+          describe 'when options.history is truthy', ->
 
-            fixture('.one')
-            up.render(target: '.one', url: '/path')
+            it 'loads the content in a new page', ->
+              loadPage = spyOn(up.network, 'loadPage')
 
-            next ->
+              fixture('.one')
+              up.render(target: '.one', url: '/path', history: true)
+
+              await wait()
+
               expect(loadPage).toHaveBeenCalledWith(jasmine.objectContaining(url: '/path'))
               expect(jasmine.Ajax.requests.count()).toBe(0)
 
-          it "returns an pending promise (since we do not want any callbacks to run as we're tearing down this page context)", (done) ->
-            loadPage = spyOn(up.network, 'loadPage')
+            it "returns an pending promise (since we do not want any callbacks to run as we're tearing down this page context)", ->
+              loadPage = spyOn(up.network, 'loadPage')
 
-            fixture('.one')
-            promise = up.render(target: '.one', url: '/path')
+              fixture('.one')
+              promise = up.render(target: '.one', url: '/path', history: true)
 
-            promiseState(promise).then (result) ->
+              result = await promiseState(promise)
               expect(result.state).toBe('pending')
-              done()
 
-            return
+          describe 'when options.history is falsy', ->
+
+            it "does not load the content in a new page", ->
+              loadPage = spyOn(up.network, 'loadPage')
+
+              fixture('.one')
+              up.render(target: '.one', url: '/path')
+
+              await wait()
+
+              expect(loadPage).not.toHaveBeenCalled()
+              expect(jasmine.Ajax.requests.count()).toBe(1)
 
       describe 'with { response } option', ->
 

@@ -54,7 +54,7 @@ up.Change.FromURL = class FromURL extends up.Change {
     // E.g. when the initial page was loaded from a POST response.
     // In this case we make a full page load in hopes to reboot with
     // pushState support.
-    if (!up.browser.canPushState()) {
+    if (this.options.history && !up.browser.canPushState()) {
       return 'Loading content in new page to restore history support'
     }
   }
