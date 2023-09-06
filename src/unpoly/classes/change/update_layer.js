@@ -6,39 +6,39 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     options = up.RenderOptions.finalize(options)
     super(options)
     this.layer = options.layer
-    this.target = options.target
-    this.context = options.context
-    this.useKeep = options.useKeep
+    this._target = options.target
+    this._context = options.context
+    this._useKeep = options.useKeep
     // up.fragment.expandTargets() was already called by up.Change.FromContent
-    this.steps = up.fragment.parseTargetSteps(this.target, this.options)
+    this._steps = up.fragment.parseTargetSteps(this._target, this.options)
     // this.uid = Math.random()
   }
 
   getPreflightProps() {
     // This will throw up.CannotMatch if { target } cannot be found in { layer }.
-    this.matchPreflight()
+    this._matchPreflight()
 
     return {
       layer: this.layer,
       mode: this.layer.mode,
-      context: u.merge(this.layer.context, this.context),
+      context: u.merge(this.layer.context, this._context),
       origin: this.options.origin,
-      target: this.bestPreflightSelector(),
-      fragments: this.getFragments(),
+      target: this._bestPreflightSelector(),
+      fragments: this._getFragments(),
       newLayer: false
     }
   }
 
-  bestPreflightSelector() {
-    this.matchPreflight()
+  _bestPreflightSelector() {
+    this._matchPreflight()
 
-    return up.fragment.targetForSteps(this.steps)
+    return up.fragment.targetForSteps(this._steps)
   }
 
-  getFragments() {
-    this.matchPreflight()
+  _getFragments() {
+    this._matchPreflight()
 
-    return u.map(this.steps, 'oldElement')
+    return u.map(this._steps, 'oldElement')
   }
 
   execute(responseDoc, onApplicable) {
@@ -50,19 +50,19 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     //     do it later. This way we will throw up.CannotMatch early, and our caller
     //     up.Change.FromContent knows that this plan is not applicable. It can then
     //     try a fallback plan.
-    this.matchPostflight()
+    this._matchPostflight()
 
     onApplicable()
 
-    if (this.steps.length) {
+    if (this._steps.length) {
       // Don't log @target since that does not include hungry elements
-      up.puts('up.render()', `Updating "${this.bestPreflightSelector()}" in ${this.layer}`)
+      up.puts('up.render()', `Updating "${this._bestPreflightSelector()}" in ${this.layer}`)
     } else {
       up.puts('up.render()', 'Nothing was rendered')
     }
 
     // Make sure only the first step will have scroll-related options.
-    this.setScrollAndFocusOptions()
+    this._setScrollAndFocusOptions()
 
     if (this.options.saveScroll) {
       up.viewport.saveScroll({ layer: this.layer })
@@ -80,20 +80,20 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       //
       // (3) Only restore the base layer's history if the fragment update adds a
       //     history entry (issue #397).
-      this.layer.peel({ history: !this.hasHistory() })
+      this.layer.peel({ history: !this._hasHistory() })
     }
 
     // Unless the user has explicitly opted out of the default { abort: 'target' }
     // by passing { abort: false }, we abort pending requests targeting
     // the elements that we're about to remove.
     if (this.options.abort !== false) {
-      up.fragment.abort(this.getFragments(), { reason: 'Fragment is being replaced' })
+      up.fragment.abort(this._getFragments(), { reason: 'Fragment is being replaced' })
     }
 
-    Object.assign(this.layer.context, this.context)
+    Object.assign(this.layer.context, this._context)
 
     // Change history before compilation, so new fragments see the new location.
-    if (this.hasHistory()) {
+    if (this._hasHistory()) {
       this.layer.updateHistory(this.options)
     }
 
@@ -109,7 +109,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     this.handleLayerChangeRequests()
 
     let renderResult = new up.Change.UpdateSteps({
-      steps: this.steps,
+      steps: this._steps,
       noneOptions: this.options,
     }).execute(responseDoc)
 
@@ -118,8 +118,8 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     return renderResult
   }
 
-  matchPreflight() {
-    this.steps = this.steps.filter((step) => {
+  _matchPreflight() {
+    this._steps = this._steps.filter((step) => {
       const finder = new up.FragmentFinder(step)
       // Try to find fragments matching step.selector within step.layer.
       // Note that step.oldElement might already have been set by @parseSteps().
@@ -133,28 +133,28 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       }
     })
 
-    this.steps = up.fragment.compressNestedSteps(this.steps)
+    this._steps = up.fragment.compressNestedSteps(this._steps)
   }
 
-  matchPostflight() {
-    this.matchPreflight()
+  _matchPostflight() {
+    this._matchPreflight()
 
-    this.steps = this.responseDoc.selectSteps(this.steps)
+    this._steps = this.responseDoc.selectSteps(this._steps)
   }
 
   getHungrySteps() {
     // Find all [up-hungry] elements matching our layer and fragments.
     return up.radio.hungrySteps({
       layer: this.layer,
-      history: this.hasHistory(),
+      history: this._hasHistory(),
       origin: this.options.origin
     })
   }
 
-  setScrollAndFocusOptions() {
+  _setScrollAndFocusOptions() {
     let focusCapsule = up.FocusCapsule.preserve(this.layer)
 
-    this.steps.forEach((step, i) => {
+    this._steps.forEach((step, i) => {
       step.focusCapsule = focusCapsule
 
       // Since up.motion will call @handleScrollAndFocus() after each fragment,
@@ -175,22 +175,22 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     })
   }
 
-  hasHistory() {
-    return u.evalAutoOption(this.options.history, this.hasAutoHistory.bind(this))
+  _hasHistory() {
+    return u.evalAutoOption(this.options.history, this._hasAutoHistory.bind(this))
   }
 
-  hasAutoHistory() {
+  _hasAutoHistory() {
     // We update the history with { history: 'auto' } when at least
     // one targeted fragment has auto-history.
-    const oldFragments = u.map(this.steps, 'oldElement')
+    const oldFragments = u.map(this._steps, 'oldElement')
     return u.some(oldFragments, up.fragment.hasAutoHistory)
   }
 
   static {
     u.memoizeMethod(this.prototype, [
-      'matchPreflight',
-      'matchPostflight',
-      'hasHistory',
+      '_matchPreflight',
+      '_matchPostflight',
+      '_hasHistory',
     ])
   }
 
