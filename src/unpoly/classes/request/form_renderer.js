@@ -9,13 +9,13 @@ const HTML_FORM_METHODS = ['GET', 'POST']
 up.Request.FormRenderer = class FormRenderer {
 
   constructor(request) {
-    this.request = request
+    this._request = request
   }
 
   buildAndSubmit() {
-    this.params = u.copy(this.request.params)
-    let action = this.request.url
-    let { method } = this.request
+    this.params = u.copy(this._request.params)
+    let action = this._request.url
+    let { method } = this._request
 
     // GET forms cannot have an URL with a query section in their [action] attribute.
     // The query section would be overridden by the serialized input values on submission.
@@ -29,30 +29,30 @@ up.Request.FormRenderer = class FormRenderer {
       method = up.protocol.wrapMethod(method, this.params)
     }
 
-    this.form = e.affix(document.body, 'form.up-request-loader', { method, action })
+    this._form = e.affix(document.body, 'form.up-request-loader', { method, action })
 
     // We only need an [enctype] attribute if the user has explicitly
     // requested one. If none is given, we can use the browser's default
     // [enctype]. Binary values cannot be sent by this renderer anyway, so
     // we don't need to default to multipart/form-data in this case.
-    let contentType = this.request.contentType
+    let contentType = this._request.contentType
     if (contentType) {
-      this.form.setAttribute('enctype', contentType)
+      this._form.setAttribute('enctype', contentType)
     }
 
     let csrfParam, csrfToken
-    if ((csrfParam = this.request.csrfParam()) && (csrfToken = this.request.csrfToken())) {
+    if ((csrfParam = this._request.csrfParam()) && (csrfToken = this._request.csrfToken())) {
       this.params.add(csrfParam, csrfToken)
     }
 
     // @params will be undefined for GET requests, since we have already
     // transfered all params to the URL during normalize().
-    u.each(this.params.toArray(), this.addField.bind(this))
+    u.each(this.params.toArray(), this._addField.bind(this))
 
-    up.browser.submitForm(this.form)
+    up.browser.submitForm(this._form)
   }
 
-  addField(attrs) {
-    e.affix(this.form, 'input[type=hidden]', attrs)
+  _addField(attrs) {
+    e.affix(this._form, 'input[type=hidden]', attrs)
   }
 }
