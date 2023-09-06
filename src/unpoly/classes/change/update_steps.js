@@ -6,8 +6,8 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
   constructor(options) {
     super(options)
 
-    this.noneOptions = options.noneOptions || {}
-    this.steps = u.copy(options.steps) // we mutate it below
+    this._noneOptions = options.noneOptions || {}
+    this._steps = u.copy(options.steps) // we mutate it below
   }
 
   execute(responseDoc) {
@@ -15,15 +15,15 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
 
     // Fill in `step.newElement` unless it was already done by our caller.
     // This may throw up.CannotMatch for non-optional steps that don't match in `responseDoc`.
-    this.steps = responseDoc.selectSteps(this.steps)
+    this._steps = responseDoc.selectSteps(this._steps)
 
-    if (!this.steps.length) {
-      return this.executeNone()
+    if (!this._steps.length) {
+      return this._executeNone()
     }
 
     this.renderResult = new up.RenderResult({
-      layer: this.steps[0]?.layer,
-      target: up.fragment.targetForSteps(this.steps),
+      layer: this._steps[0]?.layer,
+      target: up.fragment.targetForSteps(this._steps),
     })
 
     // We swap fragments in reverse order for two reasons:
@@ -33,27 +33,27 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     //     { focus: 'main-if-lost' } to not satisfy the "lost" condition.
     // (2) Only the first step will scroll. However other steps may change
     //     the viewport height through element insertions.
-    this.steps.reverse()
+    this._steps.reverse()
 
-    const motionEndPromises = this.steps.map(step => this.executeStep(step))
-    this.renderResult.finished = this.finish(motionEndPromises)
+    const motionEndPromises = this._steps.map(step => this._executeStep(step))
+    this.renderResult.finished = this._finish(motionEndPromises)
 
     return this.renderResult
   }
 
-  executeNone() {
+  _executeNone() {
     // When rendering nothing we still want to process { focus, scroll } options.
-    this.handleFocus(null, this.noneOptions)
-    this.handleScroll(null, this.noneOptions)
+    this._handleFocus(null, this._noneOptions)
+    this._handleScroll(null, this._noneOptions)
     return up.RenderResult.buildNone()
   }
 
-  async finish(motionEndPromises) {
+  async _finish(motionEndPromises) {
     await Promise.all(motionEndPromises)
 
     // If our layer was closed while animations are running, don't finish
     // and reject with an up.AbortError.
-    for (let step of this.steps) {
+    for (let step of this._steps) {
       this.abortWhenLayerClosed(step.layer)
     }
 
@@ -61,7 +61,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     return this.renderResult
   }
 
-  addToResult(fragment) {
+  _addToResult(fragment) {
     let newFragments = fragment.matches('up-wrapper') ? fragment.children : [fragment]
 
     // Since we're executing steps in reverse order we prepend the new fragment
@@ -70,19 +70,19 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     this.renderResult.fragments.unshift(...newFragments)
   }
 
-  executeStep(step) {
+  _executeStep(step) {
     // Remember where the element came from to support up.reload(element).
     this.setReloadAttrs(step)
 
     switch (step.placement) {
       case 'swap': {
-        let keepPlan = this.findKeepPlan(step)
+        let keepPlan = this._findKeepPlan(step)
         if (keepPlan) {
           // Since we're keeping the element that was requested to be swapped,
           // we won't be making changes to the DOM.
 
-          this.handleFocus(step.oldElement, step)
-          this.handleScroll(step.oldElement, step)
+          this._handleFocus(step.oldElement, step)
+          this._handleScroll(step.oldElement, step)
 
           // Don't add kept fragment to this.renderResult.
 
@@ -91,7 +91,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
         } else {
           // This needs to happen before up.script.clean() below.
           // Otherwise we would run destructors for elements we want to keep.
-          this.preserveKeepables(step)
+          this._preserveKeepables(step)
 
           // TODO: Don't suppport [up-keep] for direct children of <body>
 
@@ -106,14 +106,14 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
               this.responseDoc.finalizeElement(step.newElement)
 
               // step.keepPlans.forEach(this.reviveKeepable)
-              this.restoreKeepables(step)
+              this._restoreKeepables(step)
 
               // In the case of [up-keep] descendants, keepable elements are now transferred
               // to step.newElement, leaving a clone in their old DOM Position.
               // up.hello() is aware of step.keepPlans and will not compile kept elements a second time.
               up.hello(step.newElement, step)
 
-              this.addToResult(step.newElement)
+              this._addToResult(step.newElement)
             },
             beforeDetach: () => {
               // In the case of [up-keep] descendants, keepable elements have been replaced
@@ -127,8 +127,8 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
               up.fragment.emitDestroyed(step.oldElement, {parent, log: false})
             },
             scrollNew: () => {
-              this.handleFocus(step.newElement, step)
-              this.handleScroll(step.newElement, step)
+              this._handleFocus(step.newElement, step)
+              this._handleScroll(step.newElement, step)
             }
           }
 
@@ -153,11 +153,11 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
           focus: false
         }
 
-        return this.executeStep(wrapperStep).then(() => {
+        return this._executeStep(wrapperStep).then(() => {
           e.unwrap(newWrapper)
           // Unwrapping may destroy focus, so we need to handle it again.
           // Since we never inserted step.newElement (only its children), we handle focus on step.oldElement.
-          this.handleFocus(step.oldElement, step)
+          this._handleFocus(step.oldElement, step)
         })
 
       }
@@ -178,14 +178,14 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
         this.responseDoc.finalizeElement(wrapper)
         up.hello(wrapper, step)
 
-        this.addToResult(wrapper)
+        this._addToResult(wrapper)
 
-        this.handleFocus(wrapper, step)
+        this._handleFocus(wrapper, step)
 
         // Reveal element that was being prepended/appended.
         // Since we will animate (not morph) it's OK to allow animation of scrolling
         // if options.scrollBehavior is given.
-        this.handleScroll(wrapper, step)
+        this._handleScroll(wrapper, step)
 
         // Since we're adding content instead of replacing, we'll only
         // animate newElement instead of morphing between oldElement and newElement
@@ -203,7 +203,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
   // @param {Element} options.oldElement
   // @param {Element} options.newElement
   // @param {boolean} options.descendantsOnly
-  findKeepPlan(options) {
+  _findKeepPlan(options) {
     if (!options.useKeep) { return }
 
     const { oldElement, newElement } = options
@@ -242,11 +242,11 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
   // This will find all [up-keep] descendants in oldElement, overwrite their partner
   // element in newElement and leave a visually identical clone in oldElement for a later transition.
   // Returns an array of keepPlans.
-  preserveKeepables(step) {
+  _preserveKeepables(step) {
     const keepPlans = []
     if (step.useKeep) {
       for (let keepable of step.oldElement.querySelectorAll('[up-keep]')) {
-        let keepPlan = this.findKeepPlan({ ...step, oldElement: keepable, descendantsOnly: true })
+        let keepPlan = this._findKeepPlan({ ...step, oldElement: keepable, descendantsOnly: true })
         if (keepPlan) {
           // Replace keepable with its clone so it looks good in a transition
           // between oldElement and newElement.
@@ -261,7 +261,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
             return () => up.viewport.copyCursorProps(cursorProps, viewport)
           })
 
-          if (this.willChangeElement(document.body)) {
+          if (this._willChangeElement(document.body)) {
             // Since we're going to swap the entire oldElement and newElement containers afterwards,
             // replace the matching element with keepable so it will eventually return to the DOM.
             keepPlan.newElement.replaceWith(keepable)
@@ -284,7 +284,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     step.keepPlans = keepPlans
   }
 
-  restoreKeepables(step) {
+  _restoreKeepables(step) {
     for (let keepPlan of step.keepPlans) {
       // Now that we know the final destination of { newElement }, we can replace it with the keepable.
       keepPlan.newElement.replaceWith(keepPlan.oldElement)
@@ -295,11 +295,11 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     }
   }
 
-  willChangeElement(element) {
-    return u.some(this.steps, (step) => step.oldElement.contains(element))
+  _willChangeElement(element) {
+    return u.some(this._steps, (step) => step.oldElement.contains(element))
   }
 
-  handleFocus(fragment, options) {
+  _handleFocus(fragment, options) {
     const fragmentFocus = new up.FragmentFocus({
       ...options,
       fragment,
@@ -308,7 +308,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     return fragmentFocus.process(options.focus)
   }
 
-  handleScroll(fragment, options) {
+  _handleScroll(fragment, options) {
     const scrolling = new up.FragmentScrolling({
       ...options,
       fragment,
