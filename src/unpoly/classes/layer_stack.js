@@ -4,17 +4,6 @@ up.LayerStack = class LayerStack extends Array {
 
   constructor() {
     super()
-    // When TypeScript transpiles to ES5, there is an issue with this constructor always creating
-    // a `this` of type `Array` instead of `LayerStack`. The transpiled code looks like this:
-    //
-    //     function LayerStack() {
-    //       let this = Array.call(this) || this
-    //     }
-    //
-    // And since Array() returns a value, this returns the new this.
-    // The official TypeScript recommendation is to use setProtoTypeOf() after calling super:
-    // https://github.com/Microsoft/TypeScript/wiki/FAQ#why-doesnt-extending-built-ins-like-error-array-and-map-work
-    Object.setPrototypeOf(this, up.LayerStack.prototype)
     this._currentOverrides = []
     this.push(this._buildRoot())
   }
