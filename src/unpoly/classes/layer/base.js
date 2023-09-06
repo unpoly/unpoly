@@ -498,7 +498,7 @@ up.Layer = class Layer extends up.Record {
   @stable
   */
   on(...args) {
-    return this.buildEventListenerGroup(args).bind()
+    return this._buildEventListenerGroup(args).bind()
   }
 
   /*-
@@ -515,18 +515,18 @@ up.Layer = class Layer extends up.Record {
   @stable
   */
   off(...args) {
-    return this.buildEventListenerGroup(args).unbind()
+    return this._buildEventListenerGroup(args).unbind()
   }
 
-  buildEventListenerGroup(args) {
+  _buildEventListenerGroup(args) {
     return up.EventListenerGroup.fromBindArgs(args, {
-      guard: (event) => this.containsEventTarget(event),
+      guard: (event) => this._containsEventTarget(event),
       elements: [this.element],
       baseLayer: this
     })
   }
 
-  containsEventTarget(event) {
+  _containsEventTarget(event) {
     // Since the root layer will receive events emitted on descendant layers
     // we need to manually check whether the event target is contained
     // by this layer.
@@ -538,7 +538,7 @@ up.Layer = class Layer extends up.Record {
     return !hittableElement || this.contains(hittableElement)
   }
 
-  buildEventEmitter(args) {
+  _buildEventEmitter(args) {
     return up.EventEmitter.fromEmitArgs(args, { layer: this })
   }
 
@@ -578,7 +578,7 @@ up.Layer = class Layer extends up.Record {
   @stable
   */
   emit(...args) {
-    return this.buildEventEmitter(args).emit()
+    return this._buildEventEmitter(args).emit()
   }
 
   isDetached() {
