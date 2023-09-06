@@ -7,18 +7,18 @@ up.Layer.OverlayWithTether = class OverlayWithTether extends up.Layer.Overlay {
 
     // We first construct an un-started Tether object so we can
     // ask for its parent element.
-    this.tether = new up.Tether({
+    this._tether = new up.Tether({
       anchor: this.origin,
       align: this.align,
       position: this.position
     })
-    this.createElement(this.tether.parent)
+    this.createElement(this._tether.parent)
     this.createContentElement(this.element, content)
-    this.tether.start(this.element)
+    this._tether.start(this.element)
   }
 
   onElementsRemoved() {
-    this.tether.stop()
+    this._tether.stop()
   }
 
   sync() {
@@ -26,7 +26,7 @@ up.Layer.OverlayWithTether = class OverlayWithTether extends up.Layer.Overlay {
     // don't run the code below that might re-attach the overlay.
     if (this.isOpen()) {
 
-      if (this.isDetached() || this.tether.isDetached()) {
+      if (this.isDetached() || this._tether.isDetached()) {
         // If our tether parent and anchor is gone, the best thing we can
         // do now is to dismiss ourselves and have a consistent layer stack.
         this.dismiss(
@@ -37,7 +37,7 @@ up.Layer.OverlayWithTether = class OverlayWithTether extends up.Layer.Overlay {
       } else {
         // The fragment update might have moved elements around.
         // This is a good moment to sync our position relative to the anchor.
-        this.tether.sync()
+        this._tether.sync()
       }
     }
   }
