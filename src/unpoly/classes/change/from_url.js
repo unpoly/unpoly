@@ -17,16 +17,16 @@ up.Change.FromURL = class FromURL extends up.Change {
   }
 
   execute() {
-    let newPageReason = this.newPageReason()
-    if (newPageReason) {
-      up.puts('up.render()', newPageReason)
+    let _newPageReason = this._newPageReason()
+    if (_newPageReason) {
+      up.puts('up.render()', _newPageReason)
       up.network.loadPage(this.options)
       // Prevent our caller from executing any further code, since we're already
       // navigating away from this JavaScript environment.
       return u.unresolvablePromise()
     }
 
-    this.request = up.request(this.getRequestAttrs())
+    this.request = up.request(this._getRequestAttrs())
     this.options.onRequest?.(this.request)
 
     up.feedback.showAroundRequest(this.request, this.options)
@@ -37,12 +37,12 @@ up.Change.FromURL = class FromURL extends up.Change {
       return this.request
     }
 
-    // Use always() since onRequestSettled() will decide whether the promise
+    // Use always() since _onRequestSettled() will decide whether the promise
     // will be fulfilled or rejected.
-    return u.always(this.request, responseOrError => this.onRequestSettled(responseOrError))
+    return u.always(this.request, responseOrError => this._onRequestSettled(responseOrError))
   }
 
-  newPageReason() {
+  _newPageReason() {
     // Rendering content from cross-origin URLs is out of scope for Unpoly.
     // We still allow users to call up.render() with a cross-origin URL, but
     // we will then make a full-page request.
@@ -59,9 +59,9 @@ up.Change.FromURL = class FromURL extends up.Change {
     }
   }
 
-  getRequestAttrs() {
-    const successAttrs = this.preflightPropsForRenderOptions(this.options)
-    const failAttrs = this.preflightPropsForRenderOptions(this.deriveFailOptions(), { optional: true })
+  _getRequestAttrs() {
+    const successAttrs = this._preflightPropsForRenderOptions(this.options)
+    const failAttrs = this._preflightPropsForRenderOptions(this.deriveFailOptions(), { optional: true })
 
     return {
       ...this.options, // contains preflight keys relevant for the request, e.g. { url, method }
@@ -72,10 +72,10 @@ up.Change.FromURL = class FromURL extends up.Change {
 
   // This is required by up.RenderJob to handle { abort: 'target' }.
   getPreflightProps() {
-    return this.getRequestAttrs()
+    return this._getRequestAttrs()
   }
 
-  preflightPropsForRenderOptions(renderOptions, requestAttributesOptions) {
+  _preflightPropsForRenderOptions(renderOptions, requestAttributesOptions) {
     const preview = new up.Change.FromContent({ ...renderOptions, preview: true })
     // #getPreflightProps() will return meta information about the change that is most
     // likely before the request was dispatched.
@@ -83,22 +83,22 @@ up.Change.FromURL = class FromURL extends up.Change {
     return preview.getPreflightProps(requestAttributesOptions)
   }
 
-  onRequestSettled(response) {
+  _onRequestSettled(response) {
     if (response instanceof up.Response) {
-      return this.onRequestSettledWithResponse(response)
+      return this._onRequestSettledWithResponse(response)
     } else {
       // Value is up.AbortError, up.Offline or another fatal error that can never
       // be used as a fragment update. At this point up:request:aborted or up:request:offline
       // have already been emitted by up.Request.
-      return this.onRequestSettledWithError(response)
+      return this._onRequestSettledWithError(response)
     }
   }
 
-  onRequestSettledWithResponse(response) {
+  _onRequestSettledWithResponse(response) {
     return new up.Change.FromResponse({ ...this.options, response }).execute()
   }
 
-  onRequestSettledWithError(error) {
+  _onRequestSettledWithError(error) {
     if (error instanceof up.Offline) {
       this.request.emit('up:fragment:offline', {
         callback: this.options.onOffline,
@@ -121,7 +121,7 @@ up.Change.FromURL = class FromURL extends up.Change {
 
   static {
     u.memoizeMethod(this.prototype, [
-      'getRequestAttrs',
+      '_getRequestAttrs',
     ])
   }
 }
