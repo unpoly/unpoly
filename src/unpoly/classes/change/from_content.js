@@ -8,35 +8,35 @@ up.Change.FromContent = class FromContent extends up.Change {
     // Only extract options required for step building, since #execute() will be called with an
     // postflightOptions argument once the response is received and has provided refined
     // options.
-    this.origin = this.options.origin
-    this.preview = this.options.preview
+    this._origin = this.options.origin
+    this._preview = this.options.preview
 
     // // When we're swapping elements in origin's layer, we can be choose a fallback
     // // replacement zone close to the origin instead of looking up a selector in the
     // // entire layer (where it might match unrelated elements).
-    // if (this.origin) {
-    //   this.originLayer = up.layer.get(this.origin)
+    // if (this._origin) {
+    //   this.originLayer = up.layer.get(this._origin)
     // }
   }
 
-  getPlans() {
+  _getPlans() {
     let plans = []
 
-    this.ensureRenderableLayers()
-    this.improveOptionsFromResponseDoc()
+    this._ensureRenderableLayers()
+    this._improveOptionsFromResponseDoc()
 
     // First seek { target } in all layers, then seek { fallback } in all layers.
-    this.expandIntoPlans(plans, this.layers, this.options.target)
-    this.expandIntoPlans(plans, this.layers, this.options.fallback)
+    this._expandIntoPlans(plans, this._layers, this.options.target)
+    this._expandIntoPlans(plans, this._layers, this.options.fallback)
 
     return plans
   }
 
-  isRenderableLayer(layer) {
+  _isRenderableLayer(layer) {
     return (layer === 'new') || layer.isOpen()
   }
 
-  ensureRenderableLayers() {
+  _ensureRenderableLayers() {
     // (1) If we're rendering a fragment from a { url }, options.layer will already
     //     be an array of up.Layer objects, set by up.Change.FromURL. It looks up the
     //     layer eagerly because in case of { layer: 'origin' } (default for navigation)
@@ -46,10 +46,10 @@ up.Change.FromContent = class FromContent extends up.Change {
     //
     // (2) If we're rendering a framgent from local content ({ document, fragment, content }),
     //     options.layer will be a layer name like "current" and needs to be looked up.
-    this.layers = u.filter(up.layer.getAll(this.options), this.isRenderableLayer)
+    this._layers = u.filter(up.layer.getAll(this.options), this._isRenderableLayer)
 
-    if (u.isBlank(this.layers)) {
-      // At this point this.layers is an empty array. This can be caused by:
+    if (u.isBlank(this._layers)) {
+      // At this point this._layers is an empty array. This can be caused by:
       //
       // - A { layer } option pointing to a non-existing layer, e.g. { layer: 'parent' } when we're on the root layer.
       // - A detached { origin } option for which we cannot look up a layer.
@@ -57,21 +57,21 @@ up.Change.FromContent = class FromContent extends up.Change {
     }
   }
 
-  expandIntoPlans(plans, layers, targets) {
+  _expandIntoPlans(plans, layers, targets) {
     for (let layer of layers) {
       // An abstract selector like :main may expand into multiple
       // concrete selectors, like ['main', '.content'].
-      for (let target of this.expandTargets(targets, layer)) {
+      for (let target of this._expandTargets(targets, layer)) {
         // Any plans we add will inherit all properties from @options
-        const props = { ...this.options, target, layer, defaultPlacement: this.defaultPlacement() }
+        const props = { ...this.options, target, layer, defaultPlacement: this._defaultPlacement() }
         const change = layer === 'new' ? new up.Change.OpenLayer(props) : new up.Change.UpdateLayer(props)
         plans.push(change)
       }
     }
   }
 
-  expandTargets(targets, layer) {
-    return up.fragment.expandTargets(targets, { layer, mode: this.options.mode, origin: this.origin })
+  _expandTargets(targets, layer) {
+    return up.fragment.expandTargets(targets, { layer, mode: this.options.mode, origin: this._origin })
   }
 
   execute() {
@@ -80,37 +80,37 @@ up.Change.FromContent = class FromContent extends up.Change {
       return Promise.resolve()
     }
 
-    return this.seekPlan(this.executePlan.bind(this)) || this.cannotMatchPostflightTarget()
+    return this._seekPlan(this._executePlan.bind(this)) || this._cannotMatchPostflightTarget()
   }
 
-  executePlan(matchedPlan) {
+  _executePlan(matchedPlan) {
     let result
 
     try {
       result = matchedPlan.execute(
-        this.getResponseDoc(),
-        this.onPlanApplicable.bind(this, matchedPlan)
+        this._getResponseDoc(),
+        this._onPlanApplicable.bind(this, matchedPlan)
       )
 
       result.options = this.options
 
-      this.executeHungry(matchedPlan, result)
+      this._executeHungry(matchedPlan, result)
 
       return result
     } catch (error) {
-      if (this.isApplicablePlanError(error)) {
-        this.executeHungry(matchedPlan, result)
+      if (this._isApplicablePlanError(error)) {
+        this._executeHungry(matchedPlan, result)
       }
 
       throw error
     }
   }
 
-  isApplicablePlanError(error) {
+  _isApplicablePlanError(error) {
     return !(error instanceof up.CannotMatch)
   }
 
-  executeHungry(plan, originalResult) {
+  _executeHungry(plan, originalResult) {
     if (!this.options.useHungry) return
 
     let hungrySteps = plan.getHungrySteps()
@@ -118,27 +118,27 @@ up.Change.FromContent = class FromContent extends up.Change {
     // up.Change.UpdateSteps will match step.newElement in responseDoc.
     // We do not need to worry about nested changes as this.content was already
     // removed from responseDoc.
-    let hungryResult = new up.Change.UpdateSteps({ steps: hungrySteps }).execute(this.getResponseDoc())
+    let hungryResult = new up.Change.UpdateSteps({ steps: hungrySteps }).execute(this._getResponseDoc())
 
     if (originalResult) { // If we're executing after an AbortError, the originalResult may not have been set
       originalResult.fragments.push(...hungryResult.fragments)
     }
   }
 
-  onPlanApplicable(plan) {
-    let primaryPlan = this.getPlans()[0]
+  _onPlanApplicable(plan) {
+    let primaryPlan = this._getPlans()[0]
     if (plan !== primaryPlan) {
       up.puts('up.render()', 'Could not match primary target "%s". Updating a fallback target "%s".', primaryPlan.target, plan.target)
     }
 
-    let { assets } = this.getResponseDoc()
+    let { assets } = this._getResponseDoc()
     if (assets) {
       up.script.assertAssetsOK(assets, plan.options)
     }
   }
 
-  getResponseDoc() {
-    if (this.preview) return
+  _getResponseDoc() {
+    if (this._preview) return
 
     const docOptions = u.pick(this.options, [
       'target',
@@ -152,19 +152,19 @@ up.Change.FromContent = class FromContent extends up.Change {
     up.migrate.handleResponseDocOptions?.(docOptions)
 
     // If neither { document } nor { fragment } source is given, we assume { content }.
-    if (this.defaultPlacement() === 'content') {
+    if (this._defaultPlacement() === 'content') {
       // When processing { content }, ResponseDoc needs a { target }
       // to create a matching element.
-      docOptions.target = this.firstExpandedTarget(docOptions.target)
+      docOptions.target = this._firstExpandedTarget(docOptions.target)
     }
 
     return new up.ResponseDoc(docOptions)
   }
 
-  improveOptionsFromResponseDoc() {
-    if (this.preview) return
+  _improveOptionsFromResponseDoc() {
+    if (this._preview) return
 
-    let responseDoc = this.getResponseDoc()
+    let responseDoc = this._getResponseDoc()
 
     if (this.options.fragment) {
       // ResponseDoc allows to pass innerHTML as { fragment }, but then it also
@@ -177,7 +177,7 @@ up.Change.FromContent = class FromContent extends up.Change {
     this.options.metaElements = this.improveHistoryValue(this.options.metaElements, responseDoc.metaElements)
   }
 
-  defaultPlacement() {
+  _defaultPlacement() {
     if (!this.options.document && !this.options.fragment) {
       return 'content'
     }
@@ -185,40 +185,40 @@ up.Change.FromContent = class FromContent extends up.Change {
 
   // When the user provided a { content } we need an actual CSS selector for
   // which up.ResponseDoc can create a matching element.
-  firstExpandedTarget(target) {
-    return this.expandTargets(target || ':main', this.layers[0])[0]
+  _firstExpandedTarget(target) {
+    return this._expandTargets(target || ':main', this._layers[0])[0]
   }
 
   // Returns information about the change that is most likely before the request was dispatched.
   // This might change postflight if the response does not contain the desired target.
   getPreflightProps(opts = {}) {
     const getPlanProps = plan => plan.getPreflightProps()
-    return this.seekPlan(getPlanProps) || opts.optional || this.cannotMatchPreflightTarget()
+    return this._seekPlan(getPlanProps) || opts.optional || this._cannotMatchPreflightTarget()
   }
 
-  cannotMatchPreflightTarget() {
-    this.cannotMatchTarget('Could not find target in current page')
+  _cannotMatchPreflightTarget() {
+    this._cannotMatchTarget('Could not find target in current page')
   }
 
-  cannotMatchPostflightTarget() {
-    this.cannotMatchTarget('Could not find common target in current page and response')
+  _cannotMatchPostflightTarget() {
+    this._cannotMatchTarget('Could not find common target in current page and response')
   }
 
-  cannotMatchTarget(reason) {
+  _cannotMatchTarget(reason) {
     let message
 
-    if (this.getPlans().length) {
-      const planTargets = u.uniq(u.map(this.getPlans(), 'target'))
+    if (this._getPlans().length) {
+      const planTargets = u.uniq(u.map(this._getPlans(), 'target'))
       const humanizedLayerOption = up.layer.optionToString(this.options.layer)
       message =  [reason + " (tried selectors %o in %s)", planTargets, humanizedLayerOption]
-    } else if (this.layers.length) {
+    } else if (this._layers.length) {
       if (this.options.failPrefixForced) {
         message = 'No target selector given for failed responses (https://unpoly.com/failed-responses)'
       } else {
         message = 'No target selector given'
       }
     } else {
-      // At this point this.layers is an empty array. This can be caused by:
+      // At this point this._layers is an empty array. This can be caused by:
       //
       // - A { layer } option pointing to a non-existing layer, e.g. { layer: 'parent' } when we're on the root layer.
       // - A detached { origin } option for which we cannot look up a layer.
@@ -228,15 +228,15 @@ up.Change.FromContent = class FromContent extends up.Change {
     throw new up.CannotMatch(message)
   }
 
-  seekPlan(fn) {
-    for (let plan of this.getPlans()) {
+  _seekPlan(fn) {
+    for (let plan of this._getPlans()) {
       try {
         // A return statement stops iteration of a vanilla for loop,
         // but would not stop an u.each() or Array#forEach().
         return fn(plan)
       } catch (error) {
         // Re-throw any unexpected type of error, but ignore up.CannotMatch to try the next plan.
-        if (this.isApplicablePlanError(error)) {
+        if (this._isApplicablePlanError(error)) {
           throw error
         }
       }
@@ -245,8 +245,8 @@ up.Change.FromContent = class FromContent extends up.Change {
 
   static {
     u.memoizeMethod(this.prototype, [
-      'getPlans',
-      'getResponseDoc',
+      '_getPlans',
+      '_getResponseDoc',
       'getPreflightProps',
     ])
   }
