@@ -1921,8 +1921,10 @@ up.util = (function() {
     }
   }
 
-  function memoizeMethod(object, propOrProps) {
-    for (let prop of wrapList(propOrProps)) {
+  function memoizeMethod(object, propLiteral) {
+    // We're accepting the property names as the keys of an object. We don't care about the values.
+    // We do this so that object's keys go through the same property mangling as the rest of the code.
+    for (let prop in propLiteral) {
       let originalDescriptor = Object.getOwnPropertyDescriptor(object, prop)
       let oldImpl = originalDescriptor.get || originalDescriptor.value
       object[prop] = function (...args) {

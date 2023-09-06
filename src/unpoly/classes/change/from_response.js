@@ -181,8 +181,8 @@ up.Change.FromResponse = class FromResponse extends up.Change {
   }
 
   static {
-    u.memoizeMethod(this.prototype, [
-      '_loadedEventProps',
-    ])
+    u.memoizeMethod(this.prototype, {
+      _loadedEventProps: true,
+    })
   }
 }

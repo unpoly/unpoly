@@ -244,11 +244,11 @@ up.Change.FromContent = class FromContent extends up.Change {
   }
 
   static {
-    u.memoizeMethod(this.prototype, [
-      '_getPlans',
-      '_getResponseDoc',
-      'getPreflightProps',
-    ])
+    u.memoizeMethod(this.prototype, {
+      _getPlans: true,
+      _getResponseDoc: true,
+      getPreflightProps: true,
+    })
   }
 
 }

@@ -120,8 +120,8 @@ up.Change.FromURL = class FromURL extends up.Change {
   }
 
   static {
-    u.memoizeMethod(this.prototype, [
-      '_getRequestAttrs',
-    ])
+    u.memoizeMethod(this.prototype, {
+      _getRequestAttrs: true,
+    })
   }
 }

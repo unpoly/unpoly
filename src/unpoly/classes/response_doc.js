@@ -157,9 +157,9 @@ up.ResponseDoc = class ResponseDoc {
 
   static {
     // Cache since multiple plans will query this.
-    u.memoizeMethod(this.prototype, [
-      'head',
-    ])
+    u.memoizeMethod(this.prototype, {
+      head: true,
+    })
   }
 
 }

@@ -187,11 +187,11 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   }
 
   static {
-    u.memoizeMethod(this.prototype, [
-      '_matchPreflight',
-      '_matchPostflight',
-      '_hasHistory',
-    ])
+    u.memoizeMethod(this.prototype, {
+      _matchPreflight: true,
+      _matchPostflight: true,
+      _hasHistory: true,
+    })
   }
 
 }

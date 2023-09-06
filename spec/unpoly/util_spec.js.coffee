@@ -1845,7 +1845,7 @@ describe 'up.util', ->
         spy = jasmine.createSpy('method').and.returnValue('return value')
 
         obj = { foo: spy }
-        up.util.memoizeMethod(obj, 'foo')
+        up.util.memoizeMethod(obj, { foo: true })
 
         expect(obj.foo()).toBe('return value')
         expect(obj.foo()).toBe('return value')
@@ -1858,7 +1858,7 @@ describe 'up.util', ->
           getFullName: ->
             return @firstName + ' ' + @lastName
 
-        up.util.memoizeMethod(Person.prototype, 'getFullName')
+        up.util.memoizeMethod(Person.prototype, { getFullName: true })
 
         alice = new Person('Alice', 'Anderson')
         bob = new Person('Bob', 'Bertison')
@@ -1870,7 +1870,7 @@ describe 'up.util', ->
         spy = jasmine.createSpy('spy')
 
         obj = { foo: (arg) -> spy(this, arg) }
-        up.util.memoizeMethod(obj, 'foo')
+        up.util.memoizeMethod(obj, { foo: true })
 
         obj.foo('given arg')
 
@@ -1881,7 +1881,7 @@ describe 'up.util', ->
         spy = jasmine.createSpy('method').and.throwError(new Error('error message'))
 
         obj = { foo: spy }
-        up.util.memoizeMethod(obj, 'foo')
+        up.util.memoizeMethod(obj, { foo: true })
 
         expect(-> obj.foo()).toThrowError(/error message/)
         expect(-> obj.foo()).toThrowError(/error message/)
@@ -1896,7 +1896,7 @@ describe 'up.util', ->
             spy(arg)
             return arg * 2
 
-        up.util.memoizeMethod(obj, 'foo')
+        up.util.memoizeMethod(obj, { foo: true })
 
         expect(obj.foo(3)).toBe(6)
         expect(obj.foo(3)).toBe(6)
@@ -1912,7 +1912,7 @@ describe 'up.util', ->
         obj =
           foo: fooSpy
           bar: barSpy
-        up.util.memoizeMethod(obj, ['foo', 'bar'])
+        up.util.memoizeMethod(obj, { foo: true, bar: true })
 
         expect(obj.foo()).toBe('foo return value')
         expect(obj.foo()).toBe('foo return value')

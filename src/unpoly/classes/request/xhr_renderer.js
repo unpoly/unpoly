@@ -93,9 +93,9 @@ up.Request.XHRRenderer = class XHRRenderer {
   }
 
   static {
-    u.memoizeMethod(this.prototype, [
-      '_finalizePayload',
-      '_getMethod',
-    ])
+    u.memoizeMethod(this.prototype, {
+      _finalizePayload: true,
+      _getMethod: true,
+    })
   }
 }
