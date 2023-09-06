@@ -7,25 +7,25 @@ up.Request.Queue = class Queue {
   }
 
   reset() {
-    this.queuedRequests = []
-    this.currentRequests = []
-    this.emittedLate = false
+    this._queuedRequests = []
+    this._currentRequests = []
+    this._emittedLate = false
   }
 
   get allRequests() {
-    return this.currentRequests.concat(this.queuedRequests)
+    return this._currentRequests.concat(this._queuedRequests)
   }
 
   asap(request) {
     request.runQueuedCallbacks()
-    u.always(request, responseOrError => this.onRequestSettled(request, responseOrError))
+    u.always(request, responseOrError => this._onRequestSettled(request, responseOrError))
 
     // When considering whether a request is "slow", we're measing the duration between request.queuedAt
     // and the moment when the request gets settled. Note that when setSlowTimer() occurs, it will
     // make its own check whether a request in the queue is considered slow.
-    this.scheduleSlowTimer(request)
-    this.queueRequest(request)
-    u.microtask(() => this.poke())
+    this._scheduleSlowTimer(request)
+    this._queueRequest(request)
+    u.microtask(() => this._poke())
   }
 
   // Promotes a background request to a non-background request.
@@ -40,72 +40,72 @@ up.Request.Queue = class Queue {
 
       // If the request has been loading longer than its badResponseTime, we have
       // already ignored its up:network:late event. Hence we schedule another check.
-      this.scheduleSlowTimer(request)
+      this._scheduleSlowTimer(request)
     }
   }
 
-  scheduleSlowTimer(request) {
+  _scheduleSlowTimer(request) {
     // In case the request was loading in the background before it was promoted to
     // the foreground, the request may have less time left than request.badResponseTime.
     let timeUntilLate = Math.max(request.badResponseTime - request.age, 0)
 
     // We may have multiple timers running concurrently.
-    // Nonethess we don't emit duplicate events due to the check in @checkLate().
-    u.timer(timeUntilLate, () => this.checkLate())
+    // Nonethess we don't emit duplicate events due to the check in @_checkLate().
+    u.timer(timeUntilLate, () => this._checkLate())
   }
 
-  getMaxConcurrency() {
+  _getMaxConcurrency() {
     return u.evalOption(up.network.config.concurrency)
   }
 
-  hasConcurrencyLeft() {
-    const maxConcurrency = this.getMaxConcurrency()
-    return (maxConcurrency === -1) || (this.currentRequests.length < maxConcurrency)
+  _hasConcurrencyLeft() {
+    const maxConcurrency = this._getMaxConcurrency()
+    return (maxConcurrency === -1) || (this._currentRequests.length < maxConcurrency)
   }
 
   isBusy() {
-    return this.currentRequests.length > 0 || this.queuedRequests.length > 0
+    return this._currentRequests.length > 0 || this._queuedRequests.length > 0
   }
 
-  queueRequest(request) {
+  _queueRequest(request) {
     // Queue the request at the end of our FIFO queue.
-    this.queuedRequests.push(request)
+    this._queuedRequests.push(request)
   }
 
-  pluckNextRequest() {
+  _pluckNextRequest() {
     // We always prioritize foreground requests over background requests.
     // Only when there is no foreground request left in the queue we will send a background request.
     // Note that if a queued preload request is requested without { preload: true } we will
     // promote it to the foreground (see @promoteToForeground()).
-    let request = u.find(this.queuedRequests, request => !request.background)
-    request ||= this.queuedRequests[0]
-    return u.remove(this.queuedRequests, request)
+    let request = u.find(this._queuedRequests, request => !request.background)
+    request ||= this._queuedRequests[0]
+    return u.remove(this._queuedRequests, request)
   }
 
-  sendRequestNow(request) {
+  _sendRequestNow(request) {
     if (request.load()) {
-      this.currentRequests.push(request)
+      this._currentRequests.push(request)
     }
   }
 
-  onRequestSettled(request, responseOrError) {
+  _onRequestSettled(request, responseOrError) {
     // If the request was aborted before it was sent, it still sits in @queuedRequests.
-    u.remove(this.currentRequests, request) || u.remove(this.queuedRequests, request)
+    u.remove(this._currentRequests, request) || u.remove(this._queuedRequests, request)
 
     if ((responseOrError instanceof up.Response) && responseOrError.ok) {
       up.network.registerAliasForRedirect(request, responseOrError)
     }
 
     // Check if we can emit up:network:recover after a previous up:network:late event.
-    this.checkLate()
+    this._checkLate()
 
-    u.microtask(() => this.poke())
+    u.microtask(() => this._poke())
   }
 
-  poke() {
+  _poke() {
     let request
-    if (this.hasConcurrencyLeft() && (request = this.pluckNextRequest())) {
-      return this.sendRequestNow(request)
+    if (this._hasConcurrencyLeft() && (request = this._pluckNextRequest())) {
+      return this._sendRequestNow(request)
     }
   }
 
@@ -117,7 +117,7 @@ up.Request.Queue = class Queue {
     let conditions = args[0] ?? true
 
     let tester = up.Request.tester(conditions, { except })
-    for (let list of [this.currentRequests, this.queuedRequests]) {
+    for (let list of [this._currentRequests, this._queuedRequests]) {
       const abortableRequests = u.filter(list, tester)
       for (let abortableRequest of abortableRequests) {
         if (logOnce) {
@@ -131,11 +131,11 @@ up.Request.Queue = class Queue {
     }
   }
 
-  checkLate() {
-    const currentLate = this.isLate()
+  _checkLate() {
+    const currentLate = this._isLate()
 
-    if (this.emittedLate !== currentLate) {
-      this.emittedLate = currentLate
+    if (this._emittedLate !== currentLate) {
+      this._emittedLate = currentLate
 
       if (currentLate) {
         up.emit('up:network:late', { log: 'Server is slow to respond' })
@@ -145,11 +145,11 @@ up.Request.Queue = class Queue {
     }
   }
 
-  isLate() {
+  _isLate() {
     const allForegroundRequests = u.reject(this.allRequests, 'background')
 
-    // If badResponseTime is 200, we're scheduling the checkLate() timer after 200 ms.
-    // The request must be slow when checkLate() is called, or we will never look
+    // If badResponseTime is 200, we're scheduling the _checkLate() timer after 200 ms.
+    // The request must be slow when _checkLate() is called, or we will never look
     // at it again. Since the JavaScript setTimeout() is inaccurate, we allow a request
     // to "be slow" a few ms earlier than actually configured.
     const timerTolerance = 1
