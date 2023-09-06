@@ -112,7 +112,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   }
 
   createElement(parentElement) {
-    this.nesting ||= this.suggestVisualNesting()
+    this.nesting ||= this._suggestVisualNesting()
     const elementAttrs = u.compactObject(u.pick(this, ['align', 'position', 'size', 'class', 'nesting']))
     this.element = this.affixPart(parentElement, null, elementAttrs)
   }
@@ -154,10 +154,10 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     return u.compact(['up', this.mode, part]).join('-')
   }
 
-  suggestVisualNesting() {
+  _suggestVisualNesting() {
     const { parent } = this
     if (this.mode === parent.mode) {
-      return 1 + parent.suggestVisualNesting()
+      return 1 + parent._suggestVisualNesting()
     } else {
       return 0
     }
@@ -168,18 +168,18 @@ up.Layer.Overlay = class Overlay extends up.Layer {
 
     this.overlayFocus = new up.OverlayFocus(this)
 
-    if (this.supportsDismissMethod('button')) {
+    if (this._supportsDismissMethod('button')) {
       this.createDismissElement(this.getBoxElement())
     }
 
-    if (this.supportsDismissMethod('outside')) {
+    if (this._supportsDismissMethod('outside')) {
       // If this overlay has its own viewport, a click outside the frame will hit
       // the viewport and not the parent element.
       if (this.viewportElement) {
         up.on(this.viewportElement, 'up:click', event => {
           // Don't react when a click into the overlay frame bubbles to the viewportElement
           if (event.target === this.viewportElement) {
-            this.onOutsideClicked(event, true)
+            this._onOutsideClicked(event, true)
           }
         })
       } else {
@@ -192,13 +192,13 @@ up.Layer.Overlay = class Overlay extends up.Layer {
             // When our origin is clicked again, halt the click event
             // We achieve this by halting the click event.
             const originClicked = this.origin && this.origin.contains(element)
-            this.onOutsideClicked(event, originClicked)
+            this._onOutsideClicked(event, originClicked)
           }
         })
       }
     }
 
-    if (this.supportsDismissMethod('key')) {
+    if (this._supportsDismissMethod('key')) {
       this.unbindEscapePressed = up.event.onEscape(event => this.onEscapePressed(event))
     }
 
@@ -215,14 +215,14 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     up.migrate.registerLayerCloser?.(this)
 
     // let { userId } = await up.layer.open({ acceptEvent: 'user:show' })
-    // registerEventCloser() will fill in this and arguments.
-    this.registerEventCloser(this.acceptEvent, this.accept)
-    this.registerEventCloser(this.dismissEvent, this.dismiss)
+    // _registerEventCloser() will fill in this and arguments.
+    this._registerEventCloser(this.acceptEvent, this.accept)
+    this._registerEventCloser(this.dismissEvent, this.dismiss)
 
-    this.on('up:click', 'label[for]', (event, label) => this.onLabelClicked(event, label))
+    this.on('up:click', 'label[for]', (event, label) => this._onLabelClicked(event, label))
   }
 
-  onLabelClicked(event, label) {
+  _onLabelClicked(event, label) {
     // We do our own focus logic when the user clicks an label[for].
     // If an input with the same [id] is on an ancestor layer the browser would
     // focus that (even though label and input are in different forms).
@@ -249,7 +249,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     }
   }
 
-  onOutsideClicked(event, halt) {
+  _onOutsideClicked(event, halt) {
     up.log.putsEvent(event)
     if (halt) up.event.halt(event)
     this.dismiss(':outside', { origin: event.target })
@@ -266,7 +266,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
         // Allow screen reader users to get back to a state where they can dismiss the
         // modal with escape.
         field.blur()
-      } else if (this.supportsDismissMethod('key')) {
+      } else if (this._supportsDismissMethod('key')) {
         up.event.halt(event, { log: true })
         this.dismiss(':key')
       }
@@ -294,7 +294,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     })
   }
 
-  registerEventCloser(eventTypes, closeFn) {
+  _registerEventCloser(eventTypes, closeFn) {
     if (!eventTypes) { return }
     return this.on(eventTypes, event => {
       event.preventDefault()
@@ -303,14 +303,14 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   }
 
   tryAcceptForLocation(options) {
-    this.tryCloseForLocation(this.acceptLocation, this.accept, options)
+    this._tryCloseForLocation(this.acceptLocation, this.accept, options)
   }
 
   tryDismissForLocation(options) {
-    this.tryCloseForLocation(this.dismissLocation, this.dismiss, options)
+    this._tryCloseForLocation(this.dismissLocation, this.dismiss, options)
   }
 
-  tryCloseForLocation(urlPattern, closeFn, options) {
+  _tryCloseForLocation(urlPattern, closeFn, options) {
     let location, resolution
     if (urlPattern && (location = this.location) && (resolution = urlPattern.recognize(location))) {
       // resolution now contains named capture groups, e.g. when
@@ -357,10 +357,10 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     up.destroy(this.element, destroyOptions)
   }
 
+  // Optional callback used by sub-classes
   onElementsRemoved() {}
-    // optional callback
 
-  startAnimation(options = {}) {
+  _startAnimation(options = {}) {
     const boxDone = up.animate(this.getBoxElement(), options.boxAnimation, options)
 
     // If we don't animate the box, we don't animate the backdrop
@@ -374,7 +374,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   }
 
   startOpenAnimation(options = {}) {
-    return this.startAnimation({
+    return this._startAnimation({
       boxAnimation: options.animation ?? this.evalOption(this.openAnimation),
       backdropAnimation: 'fade-in',
       easing: options.easing || this.openEasing,
@@ -387,7 +387,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   startCloseAnimation(options = {}) {
     const boxAnimation = this.wasEverVisible && (options.animation ?? this.evalOption(this.closeAnimation))
 
-    return this.startAnimation({
+    return this._startAnimation({
       boxAnimation,
       backdropAnimation: 'fade-out',
       easing: options.easing || this.closeEasing,
@@ -396,18 +396,18 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   }
 
   accept(value = null, options = {}) {
-    return this.executeCloseChange('accept', value, options)
+    return this._executeCloseChange('accept', value, options)
   }
 
   dismiss(value = null, options = {}) {
-    return this.executeCloseChange('dismiss', value, options)
+    return this._executeCloseChange('dismiss', value, options)
   }
 
-  supportsDismissMethod(method) {
+  _supportsDismissMethod(method) {
     return u.contains(this.dismissable, method)
   }
 
-  executeCloseChange(verb, value, options) {
+  _executeCloseChange(verb, value, options) {
     options = { ...options, verb, value, layer: this }
     return new up.Change.CloseLayer(options).execute()
   }
