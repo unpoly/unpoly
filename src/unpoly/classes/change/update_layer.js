@@ -6,11 +6,11 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     options = up.RenderOptions.finalize(options)
     super(options)
     this.layer = options.layer
-    this._target = options.target
+    this.target = options.target
     this._context = options.context
     this._useKeep = options.useKeep
     // up.fragment.expandTargets() was already called by up.Change.FromContent
-    this._steps = up.fragment.parseTargetSteps(this._target, this.options)
+    this._steps = up.fragment.parseTargetSteps(this.target, this.options)
     // this.uid = Math.random()
   }
 

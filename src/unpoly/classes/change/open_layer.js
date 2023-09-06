@@ -4,7 +4,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
 
   constructor(options) {
     super(options)
-    this._target = options.target
+    this.target = options.target
     this._origin = options.origin
     this._baseLayer = options.baseLayer
     // Don't extract too many @properties from @options, since listeners
@@ -22,7 +22,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
 
       // The target will always exist in the current page, since
       // we're opening a new layer that will match the target.
-      target: this._target,
+      target: this.target,
 
       // We associate this request to our base layer so up:request events may be emitted on something
       // more specific than the document. This will also abort this request when
@@ -39,10 +39,10 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
   }
 
   execute(responseDoc, onApplicable) {
-    if (this._target === ':none') {
+    if (this.target === ':none') {
       this._content = document.createElement('up-none')
     } else {
-      this._content = responseDoc.select(this._target)
+      this._content = responseDoc.select(this.target)
     }
 
     if (!this._content || this._baseLayer.isClosed()) {
@@ -51,7 +51,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     }
 
     onApplicable()
-    up.puts('up.render()', `Opening element "${this._target}" in new overlay`)
+    up.puts('up.render()', `Opening element "${this.target}" in new overlay`)
 
     if (this._emitOpenEvent().defaultPrevented) {
       // We cannot use @abortWhenLayerClosed() here,
@@ -109,7 +109,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     this._renderResult = new up.RenderResult({
       layer: this.layer,
       fragments: [this._content],
-      target: this._target,
+      target: this.target,
     })
 
     this._renderResult.finished = this._finish()
