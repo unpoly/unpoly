@@ -15,7 +15,7 @@ up.Layer.OverlayWithViewport = class OverlayWithViewport extends up.Layer.Overla
   @internal
   */
   createElements(content) {
-    this.shiftBody()
+    this._shiftBody()
     this.createElement(this.constructor.getParentElement())
     if (this.backdrop) { this.createBackdropElement(this.element) }
     this.createViewportElement(this.element)
@@ -24,14 +24,14 @@ up.Layer.OverlayWithViewport = class OverlayWithViewport extends up.Layer.Overla
   }
 
   onElementsRemoved() {
-    this.unshiftBody()
+    this._unshiftBody()
   }
 
-  shiftBody() {
+  _shiftBody() {
     this.constructor.bodyShifter.shift()
   }
 
-  unshiftBody() {
+  _unshiftBody() {
     this.constructor.bodyShifter.unshift()
   }
 
