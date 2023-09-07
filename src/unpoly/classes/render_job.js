@@ -44,9 +44,9 @@ up.RenderJob = class RenderJob {
       let result = await this._makeChange()
       this._runResultCallbacks(result)
       return result
-    } catch (error) {
-      this._runResultCallbacks(error) || this.options.onError?.(error)
-      throw error
+    } catch (resultOrError) {
+      this._runResultCallbacks(resultOrError) || this._handleError(resultOrError)
+      throw resultOrError
     }
   }
 
@@ -68,6 +68,12 @@ up.RenderJob = class RenderJob {
       result.finished.then(result.options.onFinished, u.noop)
       return true
     }
+  }
+
+  _handleError(error) {
+    let prefix = error instanceof up.Aborted ? 'Rendering was aborted' : 'Error while rendering'
+    up.puts('up.render()', `${prefix}: ${error.message}`)
+    this.options.onError?.(error)
   }
 
   /*-
@@ -130,9 +136,7 @@ up.RenderJob = class RenderJob {
       // listeners that prevent the default and re-render.
       guardEvent.renderOptions = this.options
       if (up.emit(guardEvent, { target: this.options.origin }).defaultPrevented) {
-        let message = `Rendering was prevented by ${guardEvent.type} listener`
-        up.puts('up.render()', message)
-        throw new up.Aborted(message)
+        throw new up.Aborted(`Rendering was prevented by ${guardEvent.type} listener`)
       }
     }
 
