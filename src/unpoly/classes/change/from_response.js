@@ -129,14 +129,14 @@ up.Change.FromResponse = class FromResponse extends up.Change {
   }
 
   _compilerPassMeta() {
-    // (1) We only expose selected properties as to not prevent GC
-    // by compilers holding a reference to their meta arg in their close.
+    // (1) We avoid exposing values that would prevent garbage collection
+    //    by compilers holding a reference to their meta arg in their closure.
     //
-    // (2) Another property { layer } will be assigned by up.hello().
-    return u.pick(this._loadedEventProps(), [
-      'revalidating',
-      'response'
-    ])
+    // (3) We avoid exposing values that we cannot provide for the initial page load.
+    //     That includes the request and response.
+    //
+    // (3) Another property { layer } will be assigned by up.hello().
+    return { revalidating: !!this.options.expiredResponse }
   }
 
   _augmentOptionsFromResponse(renderOptions) {

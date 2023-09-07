@@ -9,7 +9,7 @@ up.Change.Addition = class Addition extends up.Change {
     this.acceptLayer = options.acceptLayer
     this.dismissLayer = options.dismissLayer
     this.eventPlans = options.eventPlans || []
-    this.response = options.meta?.response
+    this.response = options.response
   }
 
   handleLayerChangeRequests() {

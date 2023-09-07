@@ -182,16 +182,12 @@ up.script = (function() {
 
   ### Accessing information about the render pass
 
-  Compilers may accept a third argument with information about the current [render pass](/up.render).
-
-  For instance, you may access information about the request or response used to load this new fragment:
+  Compilers may accept a third argument with information about the current [render pass](/up.render):
 
   ```js
   up.compiler('.user', function(element, data, meta) { // mark-phrase "meta"
-    console.log(meta.response.text.length)        // => 160232
-    console.log(meta.response.header('X-Course')) // => "advanced-ruby"
-    console.log(meta.layer.mode)                  // => "root"
-    console.log(meta.revalidating)                // => boolean
+    console.log(meta.layer.mode)   // => "root"
+    console.log(meta.revalidating) // => boolean
   })
   ```
 
@@ -200,12 +196,7 @@ up.script = (function() {
   | Property               | Type          |                                                 | Description                                               |
   |------------------------|---------------|-------------------------------------------------|-----------------------------------------------------------|
   | `meta.layer`           | `up.Layer`    |                                                 | The [layer](/up.layer) of the fragment being compiled.<br>This has the same value as `up.layer.current`. |
-  | `meta.response`        | `up.Response` | <span class="tag is_light_gray">optional</span> | The response from which the new fragment was extracted.   |
   | `meta.revalidating`    | `boolean`     | <span class="tag is_light_gray">optional</span> | Whether the element was reloaded for the purpose of [cache revalidation](/caching#revalidation). |
-
-  > [note]
-  > Properties related to requests and responses are `undefined`
-  > when rendering from an [HTML string](/render-content#local) instead of a URL.
 
   ### Registering compilers after booting
 
