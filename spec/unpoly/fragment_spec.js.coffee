@@ -2574,55 +2574,71 @@ describe 'up.fragment', ->
               promise = promiseState(replacePromise)
               promise.then (result) => expect(result.state).toEqual('fulfilled')
 
-          describe 'when selectors are missing on the page before the request was made', ->
+        describe 'when selectors are missing on the page before the request was made', ->
 
-            beforeEach ->
-              # In helpers/protect_jasmine_runner wie have configured <default-fallback>
-              # as a default target for all layers.
-              up.layer.config.any.mainTargets = []
+          beforeEach ->
+            # In helpers/protect_jasmine_runner wie have configured <default-fallback>
+            # as a default target for all layers.
+            up.layer.config.any.mainTargets = []
 
-            it 'tries selectors from options.fallback before making a request', asyncSpec (next) ->
-              $fixture('.box').text('old box')
-              up.render('.unknown', url: '/path', fallback: '.box')
+          it 'tries selectors from options.fallback before making a request', asyncSpec (next) ->
+            $fixture('.box').text('old box')
+            up.render('.unknown', url: '/path', fallback: '.box')
 
-              next => @respondWith '<div class="box">new box</div>'
-              next => expect('.box').toHaveText('new box')
+            next => @respondWith '<div class="box">new box</div>'
+            next => expect('.box').toHaveText('new box')
 
-            it 'rejects the promise if all alternatives are exhausted', ->
-              promise = up.render('.unknown', url: '/path', fallback: '.more-unknown')
+          it 'rejects the promise with up.CannotMatch if all alternatives are exhausted', ->
+            promise = up.render('.unknown', url: '/path', fallback: '.more-unknown')
 
-              await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/Could not find target in current page/i))
+            await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotMatch', /Could not find target in current page/i))
 
-            it 'considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec (next) ->
-              $fixture('.target').text('old target')
-              $fixture('.fallback').text('old fallback')
-              up.render('.target, .unknown', url: '/path', fallback: '.fallback')
+          it 'allows the request and does not reject if the { target } can be matched, but { failTarget } cannot', ->
+            fixture('.success')
 
-              next =>
-                @respondWith """
-                  <div class="target">new target</div>
-                  <div class="fallback">new fallback</div>
-                """
+            promise = up.render('.success', url: '/path', failTarget: '.failure')
 
-              next =>
-                expect('.target').toHaveText('old target')
-                expect('.fallback').toHaveText('new fallback')
+            await wait()
 
-            it "tries the layer's main target with { fallback: true }", asyncSpec (next) ->
-              up.layer.config.any.mainTargets = ['.existing']
-              $fixture('.existing').text('old existing')
-              up.render('.unknown', url: '/path', fallback: true)
-              next => @respondWith '<div class="existing">new existing</div>'
-              next => expect('.existing').toHaveText('new existing')
+            # Allow the request. In the common case that the request is successful, we would have aborted for no reason.
+            # We can still throw if the server does end up responding with a failure.
+            await expectAsync(promise).toBePending()
+            expect(jasmine.Ajax.requests.count()).toBe(1)
 
-            it "does not try the layer's default targets and rejects the promise with { fallback: false }", ->
-              up.layer.config.any.mainTargets = ['.existing']
-              $fixture('.existing').text('old existing')
-              await expectAsync(
-                up.render('.unknown', url: '/path', fallback: false)
-              ).toBeRejectedWith(
-                jasmine.anyError(/Could not find target in current page/i)
-              )
+            # When the server does end up responding with a failure, we cannot process it and must throw up.CannotMatch.
+            jasmine.respondWithSelector('.failure', status: 500)
+            await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotMatch', /Could not find( common)? target/i))
+
+          it 'considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec (next) ->
+            $fixture('.target').text('old target')
+            $fixture('.fallback').text('old fallback')
+            up.render('.target, .unknown', url: '/path', fallback: '.fallback')
+
+            next =>
+              @respondWith """
+                <div class="target">new target</div>
+                <div class="fallback">new fallback</div>
+              """
+
+            next =>
+              expect('.target').toHaveText('old target')
+              expect('.fallback').toHaveText('new fallback')
+
+          it "tries the layer's main target with { fallback: true }", asyncSpec (next) ->
+            up.layer.config.any.mainTargets = ['.existing']
+            $fixture('.existing').text('old existing')
+            up.render('.unknown', url: '/path', fallback: true)
+            next => @respondWith '<div class="existing">new existing</div>'
+            next => expect('.existing').toHaveText('new existing')
+
+          it "does not try the layer's default targets and rejects the promise with { fallback: false }", ->
+            up.layer.config.any.mainTargets = ['.existing']
+            $fixture('.existing').text('old existing')
+            await expectAsync(
+              up.render('.unknown', url: '/path', fallback: false)
+            ).toBeRejectedWith(
+              jasmine.anyError(/Could not find target in current page/i)
+            )
 
         describe 'when selectors are missing on the page after the request was made', ->
 
@@ -3026,8 +3042,25 @@ describe 'up.fragment', ->
             fixture('.element', text: 'old text')
             promise = up.render('.element', layer: 'parent', content: 'new text')
 
-            await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/could not find (a )?layer/i))
+            await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotMatch', /could not find (a )?layer/i))
             expect('.element').toHaveText(/old text/)
+
+          it 'allows the request and does not reject if the { layer } can be resolved, but { failLayer } cannot', ->
+            fixture('.success')
+            fixture('.failure')
+
+            promise = up.render('.success', url: '/path', failTarget: '.failure', layer: 'current', failLayer: 'parent')
+
+            await wait()
+
+            # Allow the request. In the common case that the request is successful, we would have aborted for no reason.
+            # We can still throw if the server does end up responding with a failure.
+            await expectAsync(promise).toBePending()
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+
+            # When the server does end up responding with a failure, we cannot process it and must throw up.CannotMatch.
+            jasmine.respondWithSelector('.failure', status: 500)
+            await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotMatch', /could not find (a )?layer/i))
 
           it 'updates the next layer in a space-separated list of alternative layer names', (done) ->
             fixture('.element', text: 'old text')
@@ -6709,6 +6742,50 @@ describe 'up.fragment', ->
           it 'revalidates a fallback target', ->
             up.fragment.config.mainTargets = ['.target']
             up.render({ url: '/cached-path', cache: true, revalidate: true, fallback: true })
+
+            await wait()
+
+            expect('.target').toHaveText('cached text')
+
+            expect(up.network.isBusy()).toBe(true)
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.target')
+
+            jasmine.respondWithSelector('.target', text: 'verified text')
+
+            await wait()
+
+            expect(up.network.isBusy()).toBe(false)
+            expect('.target').toHaveText('verified text')
+
+          it 'updates the original { failTarget } if the revalidation response has an error code', ->
+            fixture('.fail-target', text: 'old failure text')
+
+            up.render({ target: '.target', failTarget: '.fail-target', url: '/cached-path', cache: true, revalidate: true })
+
+            await wait()
+
+            expect('.target').toHaveText('cached text')
+
+            expect(up.network.isBusy()).toBe(true)
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.target')
+
+            jasmine.respondWithSelector('.fail-target', text: 'new failure text', status: 500)
+
+            await wait()
+
+            expect(up.network.isBusy()).toBe(false)
+            expect('.target').toHaveText('cached text')
+            expect('.fail-target').toHaveText('new failure text')
+
+          it 'revalidates when a link in an overlay is loading cached content into a parent layer (bugfix)', ->
+            expect('.target').toHaveText('initial text')
+
+            up.layer.open({ content: '<a href="/cached-path" up-target=".target" up-layer="root" up-revalidate="true" id="overlay-link">label</a>'})
+
+            await wait()
+
+            overlayLink = document.querySelector('#overlay-link')
+            Trigger.clickSequence(overlayLink)
 
             await wait()
 

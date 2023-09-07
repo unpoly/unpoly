@@ -350,11 +350,11 @@ up.Request = class Request extends up.Record {
       // if any code actually calls up.request({ ..., layer: 'new' }).
       // In up.Change.OpenLayer we connect requests to the base layer we're stacking upon.
       this.layer = up.layer.get(this.layer, layerLookupOptions)
-      this.failLayer = up.layer.get(this.failLayer || this.layer, layerLookupOptions)
+      this.failLayer = up.layer.get(this.failLayer, layerLookupOptions)
       this.context ||= this.layer.context || {} // @layer might be "new", so we default to {}
-      this.failContext ||= this.failLayer.context || {} // @failLayer might be "new", so we default to {}
+      this.failContext ||= this.failLayer?.context || {} // @failLayer might be "new", so we default to {}
       this.mode ||= this.layer.mode
-      this.failMode ||= this.failLayer.mode
+      this.failMode ||= this.failLayer?.mode
     }
 
     // This up.Request object is also promise for its up.Response.

@@ -1,5 +1,3 @@
-import spyOnGlobalErrorsAsync from "jasmine.spyOnGlobalErrorsAsync"
-
 u = up.util
 e = up.element
 $ = jQuery

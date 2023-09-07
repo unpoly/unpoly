@@ -73,10 +73,12 @@ up.Change.FromResponse = class FromResponse extends up.Change {
   async _revalidate(renderResult, originalRenderOptions) {
     // This is an explicit target passed as `{ render }` option.
     // It may be `undefined` if the user has not given an explicit selector and relies on a fallback.
+    // If its is given, it may still contain ':before' or ':after'.
     let inputTarget = originalRenderOptions.target
 
     // This is the target that we ended up rendering.
     // It may be a fallback target. It is always defined.
+    // It never contains ':before' or ':after'.
     let effectiveTarget = renderResult.target
 
     // let target = originalRenderOptions.target || renderResult.target

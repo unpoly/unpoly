@@ -22,7 +22,7 @@ up.Change.FromContent = class FromContent extends up.Change {
   _getPlans() {
     let plans = []
 
-    this._ensureRenderableLayers()
+    this._lookupLayers()
     this._improveOptionsFromResponseDoc()
 
     // First seek { target } in all layers, then seek { fallback } in all layers.
@@ -36,7 +36,7 @@ up.Change.FromContent = class FromContent extends up.Change {
     return (layer === 'new') || layer.isOpen()
   }
 
-  _ensureRenderableLayers() {
+  _lookupLayers() {
     // (1) If we're rendering a fragment from a { url }, options.layer will already
     //     be an array of up.Layer objects, set by up.Change.FromURL. It looks up the
     //     layer eagerly because in case of { layer: 'origin' } (default for navigation)
@@ -46,15 +46,11 @@ up.Change.FromContent = class FromContent extends up.Change {
     //
     // (2) If we're rendering a framgent from local content ({ document, fragment, content }),
     //     options.layer will be a layer name like "current" and needs to be looked up.
-    this._layers = u.filter(up.layer.getAll(this.options), this._isRenderableLayer)
-
-    if (u.isBlank(this._layers)) {
-      // At this point this._layers is an empty array. This can be caused by:
-      //
-      // - A { layer } option pointing to a non-existing layer, e.g. { layer: 'parent' } when we're on the root layer.
-      // - A detached { origin } option for which we cannot look up a layer.
-      throw new up.Error('Could not find a layer to render in. You may have passed a non-existing layer reference, or a detached element.')
-    }
+    //
+    // (3) If we end up having no renderable layers, don't throw here.
+    //     seekPlan() and its up.CannotMatch handling may not be active yet.
+    this._allLayers = up.layer.getAll(this.options)
+    this._layers = u.filter(this._allLayers, this._isRenderableLayer)
   }
 
   _expandIntoPlans(plans, layers, targets) {
@@ -186,7 +182,10 @@ up.Change.FromContent = class FromContent extends up.Change {
   // When the user provided a { content } we need an actual CSS selector for
   // which up.ResponseDoc can create a matching element.
   _firstExpandedTarget(target) {
-    return this._expandTargets(target || ':main', this._layers[0])[0]
+    // When the user passes a closed layer as { layer } option, we expand the target with the root
+    // layer instead of having up.fragment.expandTargets() throw. In many cases we get the same result.
+    let layer = this._layers[0] || up.layer.root
+    return this._expandTargets(target || ':main', layer)[0]
   }
 
   // Returns information about the change that is most likely before the request was dispatched.
@@ -205,27 +204,21 @@ up.Change.FromContent = class FromContent extends up.Change {
   }
 
   _cannotMatchTarget(reason) {
-    let message
-
     if (this._getPlans().length) {
       const planTargets = u.uniq(u.map(this._getPlans(), 'target'))
       const humanizedLayerOption = up.layer.optionToString(this.options.layer)
-      message =  [reason + " (tried selectors %o in %s)", planTargets, humanizedLayerOption]
-    } else if (this._layers.length) {
-      if (this.options.failPrefixForced) {
-        message = 'No target selector given for failed responses (https://unpoly.com/failed-responses)'
-      } else {
-        message = 'No target selector given'
-      }
+      throw new up.CannotMatch([reason + " (tried selectors %o in %s)", planTargets, humanizedLayerOption])
+    } else if (this._layers.length === 0) {
+      this._cannotMatchLayer()
+    } else if (this.options.failPrefixForced) {
+      throw new up.CannotMatch('No target selector given for failed responses (https://unpoly.com/failed-responses)')
     } else {
-      // At this point this._layers is an empty array. This can be caused by:
-      //
-      // - A { layer } option pointing to a non-existing layer, e.g. { layer: 'parent' } when we're on the root layer.
-      // - A detached { origin } option for which we cannot look up a layer.
-      message = 'Could not find a layer to render in. You may have passed a non-existing layer reference, or a detached element.'
+      throw new up.CannotMatch('No target selector given')
     }
+  }
 
-    throw new up.CannotMatch(message)
+  _cannotMatchLayer() {
+    throw new up.CannotMatch('Could not find a layer to render in. You may have passed an unmatchable layer reference, or a detached element.')
   }
 
   _seekPlan(fn) {
