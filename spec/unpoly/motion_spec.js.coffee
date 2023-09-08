@@ -35,15 +35,35 @@ describe 'up.motion', ->
             expect(resolveSpy).toHaveBeenCalled()
             done()
 
-      it 'cancels an existing animation on the element by instantly jumping to the last frame', asyncSpec (next) ->
+      fit 'cancels an existing animation on the element by instantly jumping to the last frame (async)', ->
         $element = $fixture('.element').text('content')
         up.animate($element, { 'font-size': '40px' }, duration: 10000, easing: 'linear')
 
-        next =>
-          up.animate($element, { 'fade-in' }, duration: 100, easing: 'linear')
+        await wait()
 
-        next =>
-          expect($element.css('font-size')).toEqual('40px')
+        up.animate($element, 'fade-in', duration: 200, easing: 'linear')
+
+        await wait()
+
+        expect($element.css('font-size')).toEqual('40px')
+        expect($element).toHaveOpacity(0.0, 0.15)
+
+        await wait(250)
+
+        expect($element).toHaveOpacity(1.0, 0.15)
+
+      fit 'cancels an existing animation on the element by instantly jumping to the last frame (sync)', ->
+        $element = $fixture('.element').text('content')
+
+        up.animate($element, { 'font-size': '40px' }, duration: 10000, easing: 'linear')
+        up.animate($element, 'fade-in', duration: 200, easing: 'linear')
+
+        expect($element.css('font-size')).toEqual('40px')
+        expect($element).toHaveOpacity(0.0, 0.15)
+
+        await wait(250)
+
+        expect($element).toHaveOpacity(1.0, 0.15)
 
       it 'pauses an existing CSS transitions and restores it once the Unpoly animation is done', asyncSpec (next) ->
         $element = $fixture('.element').text('content').css
