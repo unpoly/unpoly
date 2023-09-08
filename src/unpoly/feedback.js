@@ -464,7 +464,7 @@ up.feedback = (function() {
     onBrowserLocationChanged()
   })
 
-  up.on('up:fragment:inserted', (_event, newFragment) => {
+  up.on('up:fragment:compile', (_event, newFragment) => {
     updateFragment(newFragment)
   })
 

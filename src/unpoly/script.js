@@ -355,7 +355,7 @@ up.script = (function() {
   /*-
   Applies all compilers on the given element and its descendants.
 
-  Unlike [`up.hello()`](/up.hello), this doesn't emit any events.
+  Unlike [`up.hello()`](/up.hello), this doesn't emit `up:fragment:inserted`.
 
   @function up.script.compile
   @param {Element} target
@@ -372,6 +372,7 @@ up.script = (function() {
   @internal
   */
   function compile(fragment, options) {
+    up.emit(fragment, 'up:fragment:compile')
     let compilers = options.compilers || registeredMacros.concat(registeredCompilers)
     const pass = new up.CompilerPass(fragment, compilers, options)
     pass.run()

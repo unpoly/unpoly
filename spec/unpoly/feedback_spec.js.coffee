@@ -26,6 +26,19 @@ describe 'up.feedback', ->
         expect($currentLink).toHaveClass('up-current')
         expect($otherLink).not.toHaveClass('up-current')
 
+      it 'sets the .up-current class before compilers run', (done) ->
+        replaceURL('/foo')
+        $nav = $fixture('#container[up-nav]')
+        up.hello($nav)
+
+        up.compiler '#container a', (link) ->
+          expect(link).toHaveClass('up-current')
+          done()
+
+        up.render('#container', content: '<a href="/bar">label</a>', history: true, location: '/bar')
+
+        return undefined
+
       it 'marks the element as .up-current if it is also a link to the current URL', ->
         replaceURL('/foo')
         $currentLink = $fixture('a[href="/foo"][up-nav]')
