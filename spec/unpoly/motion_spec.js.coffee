@@ -35,7 +35,7 @@ describe 'up.motion', ->
             expect(resolveSpy).toHaveBeenCalled()
             done()
 
-      fit 'cancels an existing animation on the element by instantly jumping to the last frame (async)', ->
+      it 'cancels an existing animation on the element by instantly jumping to the last frame (async)', ->
         $element = $fixture('.element').text('content')
         up.animate($element, { 'font-size': '40px' }, duration: 10000, easing: 'linear')
 
@@ -52,7 +52,7 @@ describe 'up.motion', ->
 
         expect($element).toHaveOpacity(1.0, 0.15)
 
-      fit 'cancels an existing animation on the element by instantly jumping to the last frame (sync)', ->
+      it 'cancels an existing animation on the element by instantly jumping to the last frame (sync)', ->
         $element = $fixture('.element').text('content')
 
         up.animate($element, { 'font-size': '40px' }, duration: 10000, easing: 'linear')
