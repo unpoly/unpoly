@@ -372,7 +372,7 @@ up.script = (function() {
   @internal
   */
   function compile(fragment, options) {
-    up.emit(fragment, 'up:fragment:compile')
+    up.emit(fragment, 'up:fragment:compile', { log: false })
     let compilers = options.compilers || registeredMacros.concat(registeredCompilers)
     const pass = new up.CompilerPass(fragment, compilers, options)
     pass.run()
