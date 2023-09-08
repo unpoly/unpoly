@@ -1852,6 +1852,30 @@ describe 'up.util', ->
 
         expect(spy.calls.count()).toBe(1)
 
+#      it "caches a getter's return value", ->
+#        spy = jasmine.createSpy('method').and.returnValue('return value')
+#
+#        obj = `{ get foo() { return spy() } }`
+#        up.util.memoizeMethod(obj, { foo: true })
+#
+#        expect(obj.foo).toBe('return value')
+#        expect(obj.foo).toBe('return value')
+#
+#        expect(spy.calls.count()).toBe(1)
+#
+#      it "caches a getter's return value when there is no setter in strict mode", ->
+#        'use strict'
+#
+#        spy = jasmine.createSpy('method').and.returnValue('return value')
+#
+#        obj = `{ get foo() { return spy() } }`
+#        up.util.memoizeMethod(obj, { foo: true })
+#
+#        expect(obj.foo).toBe('return value')
+#        expect(obj.foo).toBe('return value')
+#
+#        expect(spy.calls.count()).toBe(1)
+
       it 'does not share its cache between multiple instances', ->
         class Person
           constructor: (@firstName, @lastName) ->

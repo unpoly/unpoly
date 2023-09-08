@@ -88,7 +88,7 @@ up.ResponseDoc = class ResponseDoc {
   parsed from a fragment, or from a docuemnt without a `<head>` element.
   */
   // eslint-disable-next-line getter-return
-  get head() {
+  getHead() {
     // The root may be a `Document` (which always has a `#head`, even if it wasn't present in the HTML)
     // or an `Element` (which never has a `#head`).
     let { head } = this.root
@@ -102,7 +102,7 @@ up.ResponseDoc = class ResponseDoc {
   }
 
   fromHead(fn) {
-    let { head } = this
+    let head = this.getHead()
     return head && fn(head)
   }
 
@@ -158,7 +158,7 @@ up.ResponseDoc = class ResponseDoc {
   static {
     // Cache since multiple plans will query this.
     u.memoizeMethod(this.prototype, {
-      head: true,
+      getHead: true,
     })
   }
 
