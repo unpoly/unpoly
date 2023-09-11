@@ -172,18 +172,7 @@ up.radio = (function() {
     The URL from which to reload the fragment.
 
     Defaults to the closest `[up-source]` attribute of an ancestor element.
-  @param {string} [options.ifTab='visible']
-    Controls polling while the browser tab is hidden.
-
-    When set to `'visible'`, polling will pause while the browser tab is hidden.
-    When the browser tab is re-activated, polling will resume.
-
-    When set to `'any'`, polling will continue on inactive tabs. Note that many browsers
-    [throttle the interval on inactive tabs](https://developer.mozilla.org/en-US/docs/Web/API/setTimeout#timeouts_in_inactive_tabs)
-    to reduce battery usage.
-
-    @experimental
-  @param {string} [options.ifTab='front']
+  @param {string} [options.ifLayer='front']
     Controls polling while the fragment's [layer](/up.layer) is covered by an overlay.
 
     When set to `'front'`, polling will pause while the fragment's layer is covered by an overlay.
@@ -213,8 +202,7 @@ up.radio = (function() {
   function pollOptions(fragment, options = {}) {
     const parser = new up.OptionsParser(fragment, options)
     parser.number('interval', { default: config.pollInterval })
-    parser.string('ifLayer', { default: 'front' }) // TODO: Docs
-    parser.string('ifTab', { default: 'visible' }) // TODO: Docs
+    parser.string('ifLayer', { default: 'front' })
     return options
   }
 
@@ -269,9 +257,8 @@ up.radio = (function() {
   Client-side code may skip an update by preventing an `up:fragment:poll` event
   on the polling fragment.
 
-  By default polling will pause while the browser tab is hidden.
+  Polling will pause while the browser tab is hidden.
   When the browser tab is re-activated, polling will resume.
-  To keep polling on inactive tabs, set [`[up-if-tab=any]`](#up-if-tab).
 
   By default polling will pause while the fragment's [layer](/up.layer) is covered by an overlay.
   When the layer is uncovered, polling will resume.
@@ -299,17 +286,6 @@ up.radio = (function() {
     The reload interval in milliseconds.
 
     Defaults to `up.radio.config.pollInterval`.
-  @param [up-if-tab='visible']
-    Controls polling while the browser tab is hidden.
-
-    When set to `'visible'`, polling will pause while the browser tab is hidden.
-    When the browser tab is re-activated, polling will resume.
-
-    When set to `'any'`, polling will continue on inactive tabs. Note that many browsers
-    [throttle the interval on inactive tabs](https://developer.mozilla.org/en-US/docs/Web/API/setTimeout#timeouts_in_inactive_tabs)
-    to reduce battery usage.
-
-    @experimental
   @param [up-if-layer='front']
     Controls polling while the fragment's [layer](/up.layer) is covered by an overlay.
 

@@ -795,29 +795,6 @@ describe 'up.radio', ->
 
         expect(reloadSpy.calls.count()).toBe(2)
 
-      it "keeps polling in hidden tabs with [up-if-tab='any']", ->
-        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve(new up.RenderResult())
-
-        currentHidden = false
-        currentVisibilityState = 'visible'
-        spyOnProperty(document, 'hidden', 'get').and.callFake -> currentHidden
-        spyOnProperty(document, 'visibilityState', 'get').and.callFake -> currentVisibilityState
-
-        element = fixture('.unread[up-poll][up-interval=100][up-if-tab=any]')
-        up.hello(element) # start polling
-
-        await wait(125)
-
-        expect(reloadSpy.calls.count()).toBe(1)
-
-        currentHidden = true
-        currentVisibilityState = 'hidden'
-        up.emit(document, 'visibilitychange')
-
-        await wait(125)
-
-        expect(reloadSpy.calls.count()).toBe(2)
-
       it 'stops polling when the element is destroyed', asyncSpec (next) ->
         up.radio.config.pollInterval = 75
         reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve(new up.RenderResult())

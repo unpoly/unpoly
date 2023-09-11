@@ -81,7 +81,7 @@ up.FragmentPolling = class FragmentPolling {
   }
 
   _isFragmentVisible() {
-    return (this._options.ifTab   === 'any' || !document.hidden) &&
+    return (!document.hidden) &&
            (this._options.ifLayer === 'any' || this._isOnFrontLayer())
   }
 
