@@ -42,20 +42,18 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   }
 
   execute(responseDoc, onApplicable) {
-    this.responseDoc = responseDoc
-
     // (1) For each step, find a `step.newElement` that matches both in this.layer
     //     and in the response document.
     // (2) Match newElements here instead of relying on up.Change.UpdateSteps to
     //     do it later. This way we will throw up.CannotMatch early, and our caller
     //     up.Change.FromContent knows that this plan is not applicable. It can then
     //     try a fallback plan.
-    this._matchPostflight()
+    this._matchPostflight(responseDoc)
 
     onApplicable()
 
     if (this._steps.length) {
-      // Don't log @target since that does not include hungry elements
+      // Don't log this.target since that does not include hungry elements
       up.puts('up.render()', `Updating "${this._bestPreflightSelector()}" in ${this.layer}`)
     } else {
       up.puts('up.render()', 'Nothing was rendered')
@@ -97,6 +95,20 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       this.layer.updateHistory(this.options)
     }
 
+    for (let step of this._steps) {
+      responseDoc.reserveElement(step.newElement)
+    }
+
+    // We execute steps on other layers first. If the render pass ends up closing this
+    // layer (e.g. by reaching a close condition or X-Up-Accept-Layer) we want:
+    //
+    // (1) ... to use the discarded content for hungry elements on other layers that have [up-if-layer=any].
+    // (2) ... to see updated hungry elements on other layers in onDismissed/onAccepted handlers.
+    let otherLayerSteps = this._getHungrySteps().other
+    let otherLayersResult = this.executeSteps(otherLayerSteps, responseDoc)
+
+    // If the update causes the overlay to close, we don't want to render changes.
+    //
     // The server may trigger multiple signals that may cause the layer to close:
     //
     // - Close the layer directly through X-Up-Accept-Layer or X-Up-Dismiss-Layer
@@ -108,21 +120,18 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // if any of these options cause the layer to close.
     this.handleLayerChangeRequests()
 
-    let renderResult = new up.Change.UpdateSteps({
-      steps: this._steps,
-      noneOptions: this.options,
-    }).execute(responseDoc)
-
+    let currentLayerSteps = this._steps.concat(this._getHungrySteps().current)
+    let currentLayerResult = this.executeSteps(currentLayerSteps, responseDoc, this.options)
 
     // Don't wait for animations to finish.
-    return renderResult
+    return up.RenderResult.both(currentLayerResult, otherLayersResult)
   }
 
   _matchPreflight() {
     this._steps = this._steps.filter((step) => {
       const finder = new up.FragmentFinder(step)
       // Try to find fragments matching step.selector within step.layer.
-      // Note that step.oldElement might already have been set by @parseSteps().
+      // Note that step.oldElement might already have been set by up.radio.hungrySteps().
       step.oldElement ||= finder.find()
 
       if (step.oldElement) {
@@ -136,22 +145,25 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     this._steps = up.fragment.compressNestedSteps(this._steps)
   }
 
-  _matchPostflight() {
+  _matchPostflight(responseDoc) {
     this._matchPreflight()
 
-    this._steps = this.responseDoc.selectSteps(this._steps)
+    this._steps = responseDoc.selectAndReserveSteps(this._steps)
   }
 
-  getHungrySteps() {
+  _getHungrySteps() {
     // Find all [up-hungry] elements matching our layer and fragments.
     return up.radio.hungrySteps({
       layer: this.layer,
       history: this._hasHistory(),
-      origin: this.options.origin
+      origin: this.options.origin,
+      useHungry: this.options.useHungry,
     })
   }
 
   _setScrollAndFocusOptions() {
+    // Store the focused element's selector, scroll position and selection range
+    // in an up.FocusCapsule for later restoration.
     let focusCapsule = up.FocusCapsule.preserve(this.layer)
 
     this._steps.forEach((step, i) => {
@@ -168,9 +180,6 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
         // We cannot animate scrolling when we're morphing between two elements.
         // The placements 'append', 'prepend' animate (instead of morphing) and can allow scrolling.
         step.scrollBehavior = 'instant'
-
-        // Store the focused element's selector, scroll position and selection range in an up.FocusCapsule
-        // for later restoration.
       }
     })
   }
@@ -191,6 +200,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       _matchPreflight: true,
       _matchPostflight: true,
       _hasHistory: true,
+      _getHungrySteps: true,
     })
   }
 

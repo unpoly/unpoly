@@ -80,45 +80,18 @@ up.Change.FromContent = class FromContent extends up.Change {
   }
 
   _executePlan(matchedPlan) {
-    let result
+    let result = matchedPlan.execute(
+      this._getResponseDoc(),
+      this._onPlanApplicable.bind(this, matchedPlan)
+    )
 
-    try {
-      result = matchedPlan.execute(
-        this._getResponseDoc(),
-        this._onPlanApplicable.bind(this, matchedPlan)
-      )
+    result.options = this.options
 
-      result.options = this.options
-
-      this._executeHungry(matchedPlan, result)
-
-      return result
-    } catch (error) {
-      if (this._isApplicablePlanError(error)) {
-        this._executeHungry(matchedPlan, result)
-      }
-
-      throw error
-    }
+    return result
   }
 
   _isApplicablePlanError(error) {
     return !(error instanceof up.CannotMatch)
-  }
-
-  _executeHungry(plan, originalResult) {
-    if (!this.options.useHungry) return
-
-    let hungrySteps = plan.getHungrySteps()
-
-    // up.Change.UpdateSteps will match step.newElement in responseDoc.
-    // We do not need to worry about nested changes as this.content was already
-    // removed from responseDoc.
-    let hungryResult = new up.Change.UpdateSteps({ steps: hungrySteps }).execute(this._getResponseDoc())
-
-    if (originalResult) { // If we're executing after an AbortError, the originalResult may not have been set
-      originalResult.fragments.push(...hungryResult.fragments)
-    }
   }
 
   _onPlanApplicable(plan) {

@@ -132,8 +132,8 @@ up.ResponseDoc = class ResponseDoc {
     return finder.find()
   }
 
-  selectSteps(steps) {
-    return steps.filter((step) => {
+  selectAndReserveSteps(steps) {
+    steps = steps.filter((step) => {
       // The responseDoc has no layers.
       step.newElement ||= this.select(step.selector)
 
@@ -144,6 +144,24 @@ up.ResponseDoc = class ResponseDoc {
         throw new up.CannotMatch()
       }
     })
+
+    // Now that we know we could match all steps, remove their { newElement }
+    // from the DOM so they become unavailable for re-selecting.
+    // In particular we don't want hungry element processing to re-select
+    // elements that were already selected for the explicit target.
+    for (let step of steps) step.newElement.remove()
+
+    return steps
+  }
+
+  // commitElement(element) {
+  //   this.finalizeElement(element)
+  //   // Remove the newElement so they cannot be re-selected.
+  //   element.remove()
+  // }
+
+  reserveElement(element) {
+    element.remove()
   }
 
   finalizeElement(element) {

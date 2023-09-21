@@ -86,7 +86,7 @@ up.RenderJob = class RenderJob {
   See [render hooks](/render-hooks) for examples for awaiting rendering completion.
 
   @property up.RenderJob#finished
-  @param {Promise<up.RenderResult>}
+  @param {Promise<up.RenderResult>} finished
     The [revalidated](/caching#revalidation) render result.
   @stable
   */

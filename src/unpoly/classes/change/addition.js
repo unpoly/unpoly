@@ -65,6 +65,11 @@ up.Change.Addition = class Addition extends up.Change {
 
   abortWhenLayerClosed(layer = this.layer) {
     if (layer.isClosed()) {
+      // // TODO: Explain why we still want to update hungry elements here
+      // // TODO: For UpdateLayer, is it OK that we're also updating hungries in the layer that was closed? Or would it just not be included in the hungry steps?
+      // // We don't need to update a RenderResult as we're not going to return one (we are going to throw up.Aborted).
+      // this.executeHungry()
+
       // Wind up the call stack. Whoever has closed the layer will also clean up
       // elements, handlers, etc.
       throw new up.Aborted('Layer was closed')
@@ -107,5 +112,30 @@ up.Change.Addition = class Addition extends up.Change {
   responseOption() {
     return { response: this.response }
   }
+
+  executeSteps(steps, responseDoc, noneOptions) {
+    return new up.Change.UpdateSteps({ steps, noneOptions }).execute(responseDoc)
+  }
+
+  // executeHungry(originalResult) {
+  //   // Users may disable the processing of hungry elements for a single render pass
+  //   // using either [up-use-hungry=false] or { useHungry: false }
+  //   if (!this.options.useHungry) return
+  //
+  //   // // TODO: Explain why executeHungry can be called multiple times
+  //   // if (this.hungryExecuted) return
+  //   // this.hungryExecuted = true
+  //
+  //   let hungrySteps = this.getHungrySteps()
+  //
+  //   // up.Change.UpdateSteps will match step.newElement in responseDoc.
+  //   // We do not need to worry about nested changes as this.content was already
+  //   // removed from responseDoc.
+  //   let hungryResult = new up.Change.UpdateSteps({ steps: hungrySteps }).execute(this.responseDoc)
+  //
+  //   if (originalResult) { // If we're executing after an AbortError, the originalResult may not have been set
+  //     originalResult.fragments.push(...hungryResult.fragments)
+  //   }
+  // }
 
 }

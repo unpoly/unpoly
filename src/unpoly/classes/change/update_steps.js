@@ -15,7 +15,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
 
     // Fill in `step.newElement` unless it was already done by our caller.
     // This may throw up.CannotMatch for non-optional steps that don't match in `responseDoc`.
-    this._steps = responseDoc.selectSteps(this._steps)
+    this._steps = responseDoc.selectAndReserveSteps(this._steps)
 
     if (!this._steps.length) {
       return this._executeNone()
@@ -57,7 +57,8 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
       this.abortWhenLayerClosed(step.layer)
     }
 
-    // Resolve second promise for callers that need to know when animations are done.
+    // The RenderResult has not changed. We still updated the same target and fragments.
+    // We only want to signal the time of the end of animations / DOM changes.
     return this.renderResult
   }
 

@@ -50,7 +50,10 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
       throw new up.CannotMatch()
     }
 
+    // No need to remove the content from the responseDoc, as we're going
+    // to attach it to the new overlay *before* we look for hungry elements.
     onApplicable()
+
     up.puts('up.render()', `Opening element "${this.target}" in new overlay`)
 
     if (this._emitOpenEvent().defaultPrevented) {
@@ -84,14 +87,19 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // Remember where the element came from to support up.reload(element).
     this.setReloadAttrs({ newElement: this._content, source: this.options.source })
 
-    // Unwrap <noscript> tags
-    responseDoc.finalizeElement(this._content)
+    // We execute steps on other layers first. If the render pass ends up closing this
+    // layer (e.g. by reaching a close condition or X-Up-Accept-Layer) we want:
+    //
+    // (1) ... to use the discarded content for hungry elements on other layers that have [up-if-layer=any].
+    // (2) ... to see updated hungry elements on other layers in onDismissed/onAccepted handlers.
+    let otherLayerSteps = this._getHungrySteps().other
+    let otherLayersResult = this.executeSteps(otherLayerSteps, responseDoc)
 
     // Compile the entire layer, not just the user content.
     // E.g. [up-dismiss] in the layer elements needs to go through a macro.
     up.hello(this.layer.element, { ...this.options, layer: this.layer })
 
-    // The server may trigger multiple signals that may cause the layer to close:
+    // The server may trigger multiple signals that may cause the overlay to close immediately:
     //
     // - Close the layer directly through X-Up-Accept-Layer or X-Up-Dismiss-Layer
     // - Emit an event with X-Up-Events, to which a listener may close the layer
@@ -106,13 +114,14 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // Otherwise a popup would start to open and only reveal itself after the animation.
     this._handleScroll()
 
-    this._renderResult = new up.RenderResult({
+    let newLayerResult = new up.RenderResult({
       layer: this.layer,
       fragments: [this._content],
       target: this.target,
     })
 
-    this._renderResult.finished = this._finish()
+    // Resolve the RenderResult#finished promise for callers that need to know when animations are done.
+    newLayerResult.finished = this._finish()
 
     // Emit up:layer:opened to indicate that the layer was opened successfully.
     // This is a good time for listeners to manipulate the overlay optics.
@@ -123,12 +132,8 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // reject the promise returned by up.layer.open().
     this.abortWhenLayerClosed()
 
-    // Resolve the promise with the layer instance, so callers can do:
-    //
-    //     layer = await up.layer.open(...)
-    //
-    // Don't wait to animations to finish:
-    return this._renderResult
+    // Don't wait to animations to finish.
+    return up.RenderResult.both(newLayerResult, otherLayersResult)
   }
 
   async _finish() {
@@ -140,9 +145,6 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // A11Y: Place the focus on the overlay element and setup a focus circle.
     // However, don't change focus if the layer has been closed while the animation was running.
     this._handleFocus()
-
-    // Resolve the RenderResult#finished promise for callers that need to know when animations are done.
-    return this._renderResult
   }
 
   _buildLayer() {
@@ -221,11 +223,12 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     )
   }
 
-  getHungrySteps() {
+  _getHungrySteps() {
     return up.radio.hungrySteps({
       layer: null, // don't even try to find elements on the new layer
       history: (this.layer && this.layer.isHistoryVisible()), // we may have aborted before this.layer was built
       origin: this.options.origin,
+      useHungry: this.options.useHungry,
     })
   }
 }

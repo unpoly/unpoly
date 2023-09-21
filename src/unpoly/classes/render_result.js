@@ -1,3 +1,6 @@
+const u = up.util
+
+
 /*-
 Instances of `up.RenderResult` describe the effects of [rendering](/up.render).
 
@@ -130,6 +133,27 @@ up.RenderResult = class RenderResult extends up.Record {
   */
   get fragment() {
     return this.fragments[0]
+  }
+
+  static both(main, extension, mergeFinished = true) {
+    // TODO: Why does mergeFinished call this with an undefined extension?
+    if (!extension) return main
+
+    return new this({
+      target: main.target,
+      layer: main.layer,
+      options: main.options,
+      fragments: main.fragments.concat(extension.fragments),
+      finished: (mergeFinished && this.mergeFinished(main, extension)) //.finished // Promise.all([main.finished, extension.finished])
+    })
+  }
+
+  static async mergeFinished(main, extension) {
+    return this.both(
+      await main.finished,
+      await extension.finished,
+      false
+    )
   }
 
   static buildNone() {

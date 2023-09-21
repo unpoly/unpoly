@@ -46,32 +46,53 @@ up.radio = (function() {
     config.reset()
   }
 
-  function hungrySteps({ layer, history, origin }) {
-    let hungrySelector = config.hungrySelectors.join(', ')
+  // function fullHungrySelector() {
+  //   return config.hungrySelectors.join()
+  // }
+
+  // function hungryStepsOnOtherLayers({ layer, history, origin }) {
+  //   let hungries = up.fragment.all(fullHungrySelector(), { layer: 'any' })
+  //   hungries = u.filter(hungries, (element) => {
+  //     let ifLayer = e.attr(element, 'up-if-layer')
+  //     let elementLayer = up.layer.get(element)
+  //     return ifLayer === 'any' && layer !== elementLayer
+  //   })
+  //   return buildHungrySteps(hungries, { history, origin })
+  // }
+  //
+  // function hungryStepsOnThisLayer({ layer, history, origin }) {
+  //   let hungries = up.fragment.all(fullHungrySelector(), { layer })
+  //   return buildHungrySteps(hungries, { history, origin })
+  // }
+
+  function hungrySteps({ layer, history, origin, useHungry }) {
+    let steps = { current: [], other: [] }
+
+    if (!useHungry) return steps
+
+    let hungrySelector = config.hungrySelectors.join()
+    // Start by finding hungries on all layers. We will filter them below.
     let hungries = up.fragment.all(hungrySelector, { layer: 'any' })
 
-    return u.filterMap(hungries, (element) => {
+    for (let element of hungries) {
       let target = up.fragment.tryToTarget(element, { origin })
 
       if (!target) {
         up.warn('[up-hungry]', 'Ignoring untargetable fragment %o', element)
-        return
+        continue
       }
 
       let ifHistory = e.booleanAttr(element, 'up-if-history')
       if (ifHistory && !history) {
-        return
+        continue
       }
 
       let ifLayer = e.attr(element, 'up-if-layer')
       let elementLayer = up.layer.get(element)
-      if (ifLayer !== 'any' && layer !== elementLayer) {
-        return
-      }
 
       let transition = e.booleanOrStringAttr(element, 'up-transition')
 
-      return {
+      let step = {
         selector: target,    // The selector for a single step is { selector }
         oldElement: element, // The match on the current page
         layer: elementLayer, // May be different from { layer } when we found an [up-hungry][up-if-layer=any]
@@ -81,8 +102,57 @@ up.radio = (function() {
         useKeep: true,       // Always honor [up-keep] in hungry elements. Set here because we don't inherit default render options.
         maybe: true,         // Don't fail if we cannot match { newElement ] later.
       }
-    })
+
+      if (layer === elementLayer) {
+        steps.current.push(step)
+      } else if (ifLayer === 'any') {
+        steps.other.push(step)
+      } else {
+        // Ignore hungry element on a non-current layer without [up-layer=any].
+      }
+    }
+
+    return steps
   }
+
+  // function hungrySteps({ layer, history, origin }) {
+  //   let hungrySelector = config.hungrySelectors.join()
+  //   // Start by finding hungries on all layers. We will filter them below.
+  //   let hungries = up.fragment.all(hungrySelector, { layer: 'any' })
+  //
+  //   return u.filterMap(hungries, (element) => {
+  //     let target = up.fragment.tryToTarget(element, { origin })
+  //
+  //     if (!target) {
+  //       up.warn('[up-hungry]', 'Ignoring untargetable fragment %o', element)
+  //       return
+  //     }
+  //
+  //     let ifHistory = e.booleanAttr(element, 'up-if-history')
+  //     if (ifHistory && !history) {
+  //       return
+  //     }
+  //
+  //     let ifLayer = e.attr(element, 'up-if-layer')
+  //     let elementLayer = up.layer.get(element)
+  //     if (ifLayer !== 'any' && layer !== elementLayer) {
+  //       return
+  //     }
+  //
+  //     let transition = e.booleanOrStringAttr(element, 'up-transition')
+  //
+  //     return {
+  //       selector: target,    // The selector for a single step is { selector }
+  //       oldElement: element, // The match on the current page
+  //       layer: elementLayer, // May be different from { layer } when we found an [up-hungry][up-if-layer=any]
+  //       origin,              // The { origin } passed into the fn. will be used to match { newElement } later.
+  //       transition,          // The transition parsed from the hungry element's [up-transition] attribute
+  //       placement: 'swap',   // Hungry elements are always swapped, never appended
+  //       useKeep: true,       // Always honor [up-keep] in hungry elements. Set here because we don't inherit default render options.
+  //       maybe: true,         // Don't fail if we cannot match { newElement ] later.
+  //     }
+  //   })
+  // }
 
   /*-
   Elements with an `[up-hungry]` attribute are updated whenever the server

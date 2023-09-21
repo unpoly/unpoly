@@ -2528,7 +2528,9 @@ up.fragment = (function() {
   }
 
   function targetForSteps(steps) {
-    return u.map(steps, 'selector').join(', ') || ':none'
+    let requiredSteps = u.reject(steps, 'optional')
+    let selectors = u.map(requiredSteps, 'selector')
+    return selectors.join(', ') || ':none'
   }
 
   function isContainedByRivalStep(steps, candidateStep) {

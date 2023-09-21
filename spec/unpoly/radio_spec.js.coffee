@@ -413,7 +413,7 @@ describe 'up.radio', ->
           expect('.target').toHaveText('new target')
           expect('.hungry').toHaveText('old hungry')
 
-      it 'does not update an [up-hungry] element if it was contained by the original fragment', asyncSpec (next) ->
+      it 'does not update an [up-hungry] element that is contained by the explicit target', asyncSpec (next) ->
         container = fixture('.container')
         e.affix(container, '.child[up-hungry]')
 
@@ -433,6 +433,31 @@ describe 'up.radio', ->
           expect(insertedSpy.calls.count()).toBe(1)
           expect(insertedSpy.calls.argsFor(0)[0].target).toBe(document.querySelector('.container'))
 
+      it "replaces the element when the explicit target is :none", ->
+        $fixture('.hungry[up-hungry]').text('old hungry')
+        $fixture('.target').text('old target')
+
+        up.render(':none', url: '/path')
+
+        await wait()
+
+        jasmine.respondWith """
+          <div class="target">
+            new target
+          </div>
+          <div class="between">
+            new between
+          </div>
+          <div class="hungry">
+            new hungry
+          </div>
+        """
+
+        await wait()
+
+        expect('.target').toHaveText('old target')
+        expect('.hungry').toHaveText('new hungry')
+
       describe 'restriction by layer', ->
 
         it 'only updates [up-hungry] elements in the targeted layer, even if the response would yield matching elements for multiple layers', ->
@@ -442,7 +467,7 @@ describe 'up.radio', ->
           $fixture('.outside').text('old outside').attr('up-hungry', true)
 
           closeEventHandler = jasmine.createSpy('close event handler')
-          up.on('up:layer:dismiss', closeEventHandler)
+          up.on('up:layer:dismiss up:layer:accept', closeEventHandler)
 
           up.layer.open fragment: """
             <div class='inside'>
@@ -470,124 +495,375 @@ describe 'up.radio', ->
 
         describe 'if that hungry element also has [up-if-layer=any]', ->
 
-          it 'does update an [up-hungry] element in an non-targeted layer', ->
+          beforeEach ->
             up.layer.config.openDuration = 0
             up.layer.config.closeDuration = 0
 
-            $fixture('.outside').text('old outside').attr('up-hungry', true).attr('up-if-layer', 'any')
+          describe 'when updating an existing overlay', ->
 
-            closeEventHandler = jasmine.createSpy('close event handler')
-            up.on('up:layer:dismiss', closeEventHandler)
+            it 'does update an [up-hungry] element in an non-targeted layer', ->
+              $fixture('.outside').text('old outside').attr('up-hungry', true).attr('up-if-layer', 'any')
 
-            up.layer.open fragment: """
-              <div class='inside'>
-                old inside
-              </div>
+              closeEventHandler = jasmine.createSpy('close event handler')
+              up.on('up:layer:dismiss up:layer:accept', closeEventHandler)
+
+              up.layer.open fragment: """
+                <div class='inside'>
+                  old inside
+                </div>
+                """
+
+              expect(up.layer.isOverlay()).toBe(true)
+
+              up.render
+                target: '.inside',
+                document: """
+                  <div class="outside">
+                    new outside
+                  </div>
+                  <div class='inside'>
+                    new inside
+                  </div>
+                  """,
+                layer: 'front'
+
+              expect(closeEventHandler).not.toHaveBeenCalled()
+              expect('.inside').toHaveText('new inside')
+              expect('.outside').toHaveText('new outside')
+
+            it 'sets up.layer.current and meta.layer to the non-targeted layer', ->
+              currentLayerSpy = jasmine.createSpy('spy for up.layer.current')
+              metaLayerSpy = jasmine.createSpy('spy for meta.layer')
+
+              fixture('.outside', text: 'old outside', 'up-hungry': true, 'up-if-layer': 'any')
+
+              up.compiler '.outside', (element, data, meta) ->
+                currentLayerSpy(up.layer.current)
+                metaLayerSpy(meta.layer)
+
+              expect(currentLayerSpy.calls.count()).toBe(1)
+              expect(currentLayerSpy.calls.argsFor(0)[0]).toBe(up.layer.root)
+              expect(metaLayerSpy.calls.argsFor(0)[0]).toBe(up.layer.root)
+
+              up.layer.open fragment: """
+                <div class='inside'>
+                  old inside
+                </div>
+                """
+
+              expect(up.layer.isOverlay()).toBe(true)
+
+              up.render
+                target: '.inside',
+                document: """
+                  <div class="outside">
+                    new outside
+                  </div>
+                  <div class='inside'>
+                    new inside
+                  </div>
+                  """,
+                layer: 'front'
+
+              expect(up.layer.isOverlay()).toBe(true)
+
+              expect(currentLayerSpy.calls.count()).toBe(2)
+              expect(currentLayerSpy.calls.argsFor(1)[0]).toBe(up.layer.root)
+              expect(metaLayerSpy.calls.argsFor(1)[0]).toBe(up.layer.root)
+
+            it 'does not update the element if it is contained by the explicit target', ->
+              fixture('.foo', text: 'old foo', 'up-hungry': true, 'up-if-layer': 'any')
+
+              up.layer.open fragment: """
+                <div class='overlay'>
+                  <div class='foo'>old foo</div>
+                  <div class='content'>old content</div>
+                </div>
+                """
+
+              up.render fragment: """
+                <div class='overlay'>
+                  <div class='foo'>new foo</div>
+                  <div class='content'>new content</div>
+                </div>
               """
 
-            expect(up.layer.isOverlay()).toBe(true)
+              expect(up.fragment.get('.content', layer: 'overlay')).toHaveText('new content')
+              expect(up.fragment.get('.foo', layer: 'overlay')).toHaveText('new foo')
+              expect(up.fragment.get('.foo', layer: 'root')).toHaveText('old foo')
 
-            up.render
-              target: '.inside',
-              document: """
+            describe 'when a response closes the overlay via X-Up-Accept-layer', ->
+
+              it 'updates the [up-hungry] element with the discarded overlay content', ->
+                $fixture('.outside').text('old outside').attr('up-hungry', true).attr('up-if-layer', 'any')
+
+                closeEventHandler = jasmine.createSpy('close event handler')
+                up.on('up:layer:accept', closeEventHandler)
+
+                up.layer.open fragment: """
+                  <div class='inside'>
+                    old inside
+                  </div>
+                  """
+
+                expect(up.layer.count).toBe(2)
+
+                updatePromise = up.render('.inside', url: '/page2')
+
+                await wait()
+
+                jasmine.respondWith(
+                  responseText: """
+                    <div class="outside">
+                      new outside
+                    </div>
+                    <div class='inside'>
+                      new inside
+                    </div>
+                    """,
+                  responseHeaders: { 'X-Up-Accept-Layer': 'null' }
+                )
+
+                await expectAsync(updatePromise).toBeRejectedWith(jasmine.any(up.Aborted))
+
+                expect(closeEventHandler).toHaveBeenCalled()
+                expect(up.layer.count).toBe(1)
+                expect('.outside').toHaveText('new outside')
+
+              it 'updates the [up-hungry] element before onAccepted callbacks', ->
+                $fixture('.outside').text('old outside').attr('up-hungry', true).attr('up-if-layer', 'any')
+
+                outsideSpy = jasmine.createSpy('outside spy')
+                onAccepted = () -> outsideSpy(document.querySelector('.outside').innerText.trim())
+
+                up.layer.open(onAccepted: onAccepted, fragment: """
+                  <div class='inside'>
+                    old inside
+                  </div>
+                  """
+                )
+
+                expect(up.layer.count).toBe(2)
+
+                updatePromise = up.render('.inside', url: '/page2')
+
+                await wait()
+
+                jasmine.respondWith(
+                  responseText: """
+                    <div class="outside">
+                      new outside
+                    </div>
+                    <div class='inside'>
+                      new inside
+                    </div>
+                    """,
+                  responseHeaders: { 'X-Up-Accept-Layer': 'null' }
+                )
+
+                await expectAsync(updatePromise).toBeRejectedWith(jasmine.any(up.Aborted))
+
+                expect(up.layer.count).toBe(1)
+                expect(outsideSpy).toHaveBeenCalledWith('new outside')
+
+            describe 'when a response closes the overlay via X-Up-Events', ->
+
+              it 'updates the [up-hungry] element with the discarded overlay content', ->
+                $fixture('.outside').text('old outside').attr('up-hungry', true).attr('up-if-layer', 'any')
+
+                closeEventHandler = jasmine.createSpy('close event handler')
+                up.on('up:layer:accept', closeEventHandler)
+
+                up.layer.open(acceptEvent: 'goal:reached', fragment: """
+                  <div class='inside'>
+                    old inside
+                  </div>
+                  """
+                )
+
+                expect(up.layer.count).toBe(2)
+
+                updatePromise = up.render('.inside', url: '/page2')
+
+                await wait()
+
+                jasmine.respondWith(
+                  responseText: """
+                    <div class="outside">
+                      new outside
+                    </div>
+                    <div class='inside'>
+                      new inside
+                    </div>
+                    """,
+                  responseHeaders: { 'X-Up-Events': JSON.stringify([{ type: 'goal:reached', layer: 'current' }]) }
+                )
+
+                await expectAsync(updatePromise).toBeRejectedWith(jasmine.any(up.Aborted))
+
+                expect(closeEventHandler).toHaveBeenCalled()
+                expect(up.layer.count).toBe(1)
+                expect('.outside').toHaveText('new outside')
+
+              it 'updates the [up-hungry] element before onAccepted callbacks', ->
+                $fixture('.outside').text('old outside').attr('up-hungry', true).attr('up-if-layer', 'any')
+
+                outsideSpy = jasmine.createSpy('outside spy')
+                onAccepted = () -> outsideSpy(document.querySelector('.outside').innerText.trim())
+
+                up.layer.open(acceptEvent: 'goal:reached', onAccepted: onAccepted, fragment: """
+                  <div class='inside'>
+                    old inside
+                  </div>
+                  """
+                )
+
+                expect(up.layer.count).toBe(2)
+
+                updatePromise = up.render('.inside', url: '/page2')
+
+                await wait()
+
+                jasmine.respondWith(
+                  responseText: """
+                    <div class="outside">
+                      new outside
+                    </div>
+                    <div class='inside'>
+                      new inside
+                    </div>
+                    """,
+                  responseHeaders: { 'X-Up-Events': JSON.stringify([{ type: 'goal:reached', layer: 'current' }]) }
+                )
+
+                await expectAsync(updatePromise).toBeRejectedWith(jasmine.any(up.Aborted))
+
+                expect(up.layer.count).toBe(1)
+                expect(outsideSpy).toHaveBeenCalledWith('new outside')
+
+          describe 'when opening a new overlay', ->
+
+            it 'does update the [up-hungry] element in the parent layer', ->
+              fixture('.outside', text: 'old outside', 'up-hungry': true,  'up-if-layer': 'any')
+
+              up.layer.open target: '.inside', document: """
                 <div class="outside">
                   new outside
                 </div>
                 <div class='inside'>
                   new inside
                 </div>
-                """,
-              layer: 'front'
+                """
 
-            expect(closeEventHandler).not.toHaveBeenCalled()
-            expect('.inside').toHaveText('new inside')
-            expect('.outside').toHaveText('new outside')
+              expect(up.layer.isOverlay()).toBe(true)
 
-          it 'sets up.layer.current and meta.layer to the non-targeted layer', ->
-            currentLayerSpy = jasmine.createSpy('spy for up.layer.current')
-            metaLayerSpy = jasmine.createSpy('spy for meta.layer')
+              expect('.inside').toHaveText('new inside')
+              expect('.outside').toHaveText('new outside')
 
-            fixture('.outside', text: 'old outside', 'up-hungry': true, 'up-if-layer': 'any')
+            describe 'when the initial response immediately closes the new overlay via X-Up-Accept-Layer', ->
 
-            up.compiler '.outside', (element, data, meta) ->
-              currentLayerSpy(up.layer.current)
-              metaLayerSpy(meta.layer)
+              it 'updates that [up-hungry] element with the discarded overlay content', ->
+                fixture('.outside', text: 'old outside', 'up-hungry': true,  'up-if-layer': 'any')
 
-            expect(currentLayerSpy.calls.count()).toBe(1)
-            expect(currentLayerSpy.calls.argsFor(0)[0]).toBe(up.layer.root)
-            expect(metaLayerSpy.calls.argsFor(0)[0]).toBe(up.layer.root)
+                openPromise = up.layer.open(target: '.inside', url: '/other')
 
-            up.layer.open fragment: """
-              <div class='inside'>
-                old inside
-              </div>
-              """
+                await wait()
 
-            expect(up.layer.isOverlay()).toBe(true)
+                jasmine.respondWith
+                  responseText: """
+                    <div class="outside">
+                      new outside
+                    </div>
+                    <div class='inside'>
+                      new inside
+                    </div>
+                  """
+                  responseHeaders: { 'X-Up-Accept-Layer': 'null'}
 
-            up.render
-              target: '.inside',
-              document: """
-                <div class="outside">
-                  new outside
-                </div>
-                <div class='inside'>
-                  new inside
-                </div>
-                """,
-              layer: 'front'
+                await expectAsync(openPromise).toBeRejectedWith(jasmine.any(up.Aborted))
 
-            expect(up.layer.isOverlay()).toBe(true)
+                expect(up.layer.isOverlay()).toBe(false)
 
-            expect(currentLayerSpy.calls.count()).toBe(2)
-            expect(currentLayerSpy.calls.argsFor(1)[0]).toBe(up.layer.root)
-            expect(metaLayerSpy.calls.argsFor(1)[0]).toBe(up.layer.root)
+                expect('.outside').toHaveText('new outside')
 
-        it 'updates that [up-hungry] element when opening a new layer', ->
-          up.layer.config.openDuration = 0
-          up.layer.config.closeDuration = 0
+              it 'updates that [up-hungry] element before onAccepted callbacks', ->
+                fixture('.outside', text: 'old outside', 'up-hungry': true,  'up-if-layer': 'any')
 
-          fixture('.outside', text: 'old outside', 'up-hungry': true,  'up-if-layer': 'any')
+                outsideSpy = jasmine.createSpy('outside spy')
+                onAccepted = () -> outsideSpy(document.querySelector('.outside').innerText.trim())
 
-          up.layer.open target: '.inside', document: """
-            <div class="outside">
-              new outside
-            </div>
-            <div class='inside'>
-              new inside
-            </div>
-            """
+                openPromise = up.layer.open(target: '.inside', url: '/other', onAccepted: onAccepted)
 
-          expect(up.layer.isOverlay()).toBe(true)
+                await wait()
 
-          expect('.inside').toHaveText('new inside')
-          expect('.outside').toHaveText('new outside')
+                jasmine.respondWith
+                  responseText: """
+                    <div class="outside">
+                      new outside
+                    </div>
+                    <div class='inside'>
+                      new inside
+                    </div>
+                  """
+                  responseHeaders: { 'X-Up-Accept-Layer': 'null'}
 
-        it 'updates that [up-hungry] element when a server response causes an overlay to close', ->
-          fixture('.root-element', text: 'old root', 'up-hungry': 'true', 'up-if-layer': 'any')
+                await expectAsync(openPromise).toBeRejectedWith(jasmine.any(up.Aborted))
 
-          await up.layer.open fragment: """
-            <div class="overlay-element">
-              old overlay
-            </div>
-          """
+                expect(up.layer.isOverlay()).toBe(false)
+                expect(outsideSpy).toHaveBeenCalledWith('new outside')
 
-          expect(up.layer.isOverlay()).toBe(true)
+            describe 'when the initial response immediately closes the new overlay via X-Up-Events', ->
 
-          navigatePromise = up.navigate(url: '/other-page')
+              it 'updates that [up-hungry] element with the discarded overlay content', ->
+                fixture('.outside', text: 'old outside', 'up-hungry': true,  'up-if-layer': 'any')
 
-          await wait()
+                openPromise = up.layer.open(target: '.inside', url: '/other', acceptEvent: 'goal:reached')
 
-          jasmine.respondWith responseHeaders: { 'X-Up-Accept-Layer': 'null'}, responseText: """
-            <div class="overlay-element">new overlay</div>
-            <div class="root-element">new root</div>
-          """
+                await wait()
 
-          await expectAsync(navigatePromise).toBeRejectedWith(jasmine.any(up.Aborted))
+                jasmine.respondWith
+                  responseText: """
+                    <div class="outside">
+                      new outside
+                    </div>
+                    <div class='inside'>
+                      new inside
+                    </div>
+                  """
+                  responseHeaders: { 'X-Up-Events': JSON.stringify([{ type: 'goal:reached', layer: 'current' }])}
 
-          expect(up.layer.isRoot()).toBe(true)
+                await expectAsync(openPromise).toBeRejectedWith(jasmine.any(up.Aborted))
 
-          expect('.root-element').toHaveText('new root')
+                expect(up.layer.isOverlay()).toBe(false)
+
+                expect('.outside').toHaveText('new outside')
+
+              it 'updates that [up-hungry] element before onAccepted callbacks', ->
+                fixture('.outside', text: 'old outside', 'up-hungry': true,  'up-if-layer': 'any')
+
+                outsideSpy = jasmine.createSpy('outside spy')
+                onAccepted = () -> outsideSpy(document.querySelector('.outside').innerText.trim())
+
+                openPromise = up.layer.open(target: '.inside', url: '/other', acceptEvent: 'goal:reached', onAccepted: onAccepted)
+
+                await wait()
+
+                jasmine.respondWith
+                  responseText: """
+                    <div class="outside">
+                      new outside
+                    </div>
+                    <div class='inside'>
+                      new inside
+                    </div>
+                  """
+                  responseHeaders: { 'X-Up-Events': JSON.stringify([{ type: 'goal:reached', layer: 'current' }])}
+
+                await expectAsync(openPromise).toBeRejectedWith(jasmine.any(up.Aborted))
+
+                expect(up.layer.isOverlay()).toBe(false)
+
+                expect(outsideSpy).toHaveBeenCalledWith('new outside')
 
       describe 'restriction by history', ->
 
