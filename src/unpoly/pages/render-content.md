@@ -66,7 +66,7 @@ Rendering a string of HTML {#local}
 
 Sometimes you have to render a string of HTML that you already have. You may pass this string as a JavaScript variable or HTML attribute to render content without going through the server.
 
-After HTML was inserted from a string, it is [compiled](http://localhost:4567/up.compiler).
+After HTML was inserted from a string, it is [compiled](/up.compiler).
 
 ### Replacing a fragment's children {#content}
 

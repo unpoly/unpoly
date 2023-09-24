@@ -17,7 +17,7 @@ This sections explains the reasons for these restrictions and shows how to overr
 By default Unpoly only changes history when a [main element](/main) is rendered.
 This is to prevent location changes when rendering a minor fragment, like a table row or a message counter.
 
-This behavior is a [navigation default](http://localhost:4567/navigation#navigation-defaults) in
+This behavior is a [navigation default](/navigation#navigation-defaults) in
 `up.fragment.config.navigateOptions.history === 'auto'`.
 
 To cause auto-history to trigger on fragments other than main elements, add a selector to `up.fragment.config.autoHistoryTargets`.

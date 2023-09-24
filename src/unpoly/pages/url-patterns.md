@@ -1,7 +1,7 @@
 URL patterns
 ============
 
-Some Unpoly features let you match an URL using *URL patterns*. URL patterns are a powerful tool to define [overlay close conditions](http://localhost:4567/closing-overlays#close-conditions) or [adding aliases to navigation items](/a-up-alias).
+Some Unpoly features let you match an URL using *URL patterns*. URL patterns are a powerful tool to define [overlay close conditions](/closing-overlays#close-conditions) or [adding aliases to navigation items](/a-up-alias).
 
 This page describes the expression system Unpoly uses to match URL patterns. Please note that regular expressions (i.e., regexes) are not supported. You must use the expression system described on this page.
 
