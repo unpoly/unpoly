@@ -3,7 +3,7 @@ e = up.element
 
 describe 'up.OptionsParser', ->
 
-  describe '#parse', ->
+  describe '#parse()', ->
 
     stringAttr = (element, attr) ->
       element.getAttribute(attr)
@@ -72,11 +72,21 @@ describe 'up.OptionsParser', ->
 
     describe 'with { default } option', ->
 
-      it 'does not write the given default value if the options produced a value'
+      it 'does not write the given default value if the options produced a value', ->
+        element = fixture('.element')
+        options = { foo: 'options value' }
+        parser = new up.OptionsParser(element, options)
+        parser.parse(stringAttr, 'foo', default: 'default value')
+        expect(options.foo).toBe('options value')
 
-      it 'does not write the given default value if the element produced a value'
+      it "does not write the given default value if the element's attribute produced a value", ->
+        element = fixture('.element', 'up-foo': 'attribute value')
+        options = {}
+        parser = new up.OptionsParser(element, options)
+        parser.parse(stringAttr, 'foo', default: 'default value')
+        expect(options.foo).toBe('attribute value')
 
-      it 'writes the given default value if neither options nor observed element produce a value', ->
+      it "writes the given default value if neither options nor observed element's attribute produce a value", ->
         element = fixture('.element')
         options = {}
         parser = new up.OptionsParser(element, options)
@@ -85,7 +95,12 @@ describe 'up.OptionsParser', ->
 
     describe 'with parser-wide { defaults } option', ->
 
-      it 'should have tests'
+      it "writes the given default value if neither options nor observed element's attribute produce a value", ->
+        element = fixture('.element')
+        options = {}
+        parser = new up.OptionsParser(element, options, { defaults: { foo: 'default value' }})
+        parser.parse(stringAttr, 'foo')
+        expect(options.foo).toBe('default value')
 
     describe 'with parser-wide { fail: true } option', ->
 
@@ -153,6 +168,21 @@ describe 'up.OptionsParser', ->
         parser.parse(stringAttr, 'foo')
         expect(options.foo).toBe('value')
 
-    describe 'with parser-wide { only } option', ->
+  describe '#include()', ->
 
-      it 'should have tests'
+    it 'assigns the results of another parsing function', ->
+      parsingFn = jasmine.createSpy('option parsing function').and.callFake (_element, _options, _parserOptions) ->
+        return { other: 'other-value' }
+
+      element = fixture('.element', 'up-attr': 'up-attr-value')
+
+      options = {}
+      parserOptions = { fail: true }
+      parser = new up.OptionsParser(element, options, parserOptions)
+
+      parser.string('attr')
+      parser.include(parsingFn)
+
+      expect(parsingFn).toHaveBeenCalledWith(element, options, parserOptions)
+      expect(options).toEqual(attr: 'up-attr-value', other: 'other-value')
+

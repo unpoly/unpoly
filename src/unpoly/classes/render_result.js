@@ -1,6 +1,3 @@
-const u = up.util
-
-
 /*-
 Instances of `up.RenderResult` describe the effects of [rendering](/up.render).
 

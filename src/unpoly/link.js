@@ -329,7 +329,7 @@ up.link = (function() {
 
   function parseRequestOptions(link, options, parserOptions) {
     options = u.options(options)
-    const parser = new up.OptionsParser(link, options, parserOptions)
+    const parser = new up.OptionsParser(link, options, { ...parserOptions, fail: false })
 
     options.url = followURL(link, options)
     options.method = followMethod(link, options)
@@ -378,18 +378,18 @@ up.link = (function() {
   function followOptions(link, options, parserOptions) {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
     link = up.fragment.get(link)
-
-    // Request options
-    options = parseRequestOptions(link, options, parserOptions)
+    options = u.options(options)
 
     const parser = new up.OptionsParser(link, options, { fail: true, ...parserOptions })
+
+    parser.include(parseRequestOptions)
 
     // Feedback options
     parser.boolean('feedback')
 
     // Fragment options
-    parser.boolean('fail')
     options.origin ||= link
+    parser.boolean('fail')
     parser.boolean('navigate', {default: true})
     parser.string('confirm', { attr: ['up-confirm', 'data-confirm'] })
     parser.string('target')
@@ -446,10 +446,7 @@ up.link = (function() {
     parser.booleanOrString('title')
 
     // Motion options
-    parser.booleanOrString('animation')
-    parser.booleanOrString('transition')
-    parser.string('easing')
-    parser.number('duration')
+    parser.include(up.motion.motionOptions)
 
     // This is the event that may be prevented to stop the follow.
     // up.form.submit() changes this to be up:form:submit instead.

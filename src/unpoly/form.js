@@ -339,9 +339,12 @@ up.form = (function() {
   */
   function submitOptions(form, options, parserOptions) {
     form = getForm(form)
-    options = destinationOptions(form, options, parserOptions)
+
+    options = u.options(options)
 
     let parser = new up.OptionsParser(form, options, parserOptions)
+
+    parser.include(destinationOptions)
 
     // We should usually be able to derive a target selector since form[action] is a default
     // deriver. In cases when we cannot, we should usually update a main target since
@@ -362,7 +365,7 @@ up.form = (function() {
     // Now that we have extracted everything form-specific into options, we can call
     // up.link.followOptions(). This will also parse the myriads of other options
     // that are possible on both <form> and <a> elements.
-    Object.assign(options, up.link.followOptions(form, options, parserOptions))
+    parser.include(up.link.followOptions)
 
     return options
   }

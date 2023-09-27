@@ -6,7 +6,9 @@ up.OptionsParser = class OptionsParser {
   /*-
   @constructor up.OptionsParser
   @param {Object} options
-    Explicit options passed by a programmatic caller. These usuually override everything.
+    Explicit options passed by a programmatic caller. These usually override everything.
+
+    All parsed options are assigned to this given `options` argument.
   @param {Element} element
     An element from which to parse `[up-attr]` attributes.
   @param {boolean} parserOptions.fail
@@ -20,6 +22,7 @@ up.OptionsParser = class OptionsParser {
   constructor(element, options, parserOptions = {}) {
     this._options = options
     this._element = element
+    this._parserOptions = parserOptions // for pass-through in include()
     this._fail = parserOptions.fail
     this._closest = parserOptions.closest
     this._attrPrefix = parserOptions.attrPrefix || 'up-'
@@ -77,6 +80,11 @@ up.OptionsParser = class OptionsParser {
       const failAttrNames = u.compact(u.map(attrNames, (attrName) => this._deriveFailAttrName(attrName)))
       this.parse(attrValueFn, failKey, { ... keyOptions, attr: failAttrNames })
     }
+  }
+
+  include(optionsFn) {
+    let fnResult = optionsFn(this._element, this._options, this._parserOptions)
+    Object.assign(this._options, fnResult)
   }
 
   _parseFromAttr(attrValueFn, element, attrName) {

@@ -5,17 +5,31 @@ $ = jQuery
 beforeEach ->
   jasmine.addMatchers
     toHaveOpacity: (util, customEqualityTesters) ->
-      compare: (element, expectedOpacity, tolerance = 0.0) ->
-        element = e.get(element)
-        result = {}
+      compare: (elementOrTarget, expectedOpacity, tolerance = 0.0) ->
+        element = e.get(elementOrTarget)
 
-        if element.isConnected
-          actualOpacity = e.styleNumber(element, 'opacity')
-          result.pass =  Math.abs(expectedOpacity - actualOpacity) <= tolerance
-          unless result.pass
-            result.message = u.sprintf("Expected %o to have opacity %o, but it was %o (tolerance ±%o)", element, expectedOpacity, actualOpacity, tolerance)
+        if !element
+          return {
+            pass: false,
+            message: u.sprintf("Expected %o to have opacity %o, but the element could not be found", elementOrTarget, expectedOpacity)
+          }
+
+        if !element.isConnected
+          return {
+            pass: false
+            message: u.sprintf("Expected %o to have opacity %o, but element was detached", elementOrTarget, expectedOpacity)
+          }
+
+        actualOpacity = e.styleNumber(element, 'opacity')
+        withinTolerance = Math.abs(expectedOpacity - actualOpacity) <= tolerance
+
+        if withinTolerance
+          return {
+            pass: true,
+            message: u.sprintf("Expected %o to not have opacity %o, but it was %o (tolerance ±%o)", elementOrTarget, expectedOpacity, actualOpacity, tolerance)
+          }
         else
-          result.pass = false
-          result.message = u.sprintf("Expected %o to have opacity %o, but element was detached", element, expectedOpacity)
-
-        return result
+          return {
+            pass: false,
+            message: u.sprintf("Expected %o to have opacity %o, but it was %o (tolerance ±%o)", elementOrTarget, expectedOpacity, actualOpacity, tolerance)
+          }

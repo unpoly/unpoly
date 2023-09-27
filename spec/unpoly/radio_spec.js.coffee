@@ -238,48 +238,51 @@ describe 'up.radio', ->
 
     describe '[up-hungry]', ->
 
-      it "replaces the element when it is found in a response, even when the element wasn't targeted", asyncSpec (next) ->
+      it "replaces the element when it is found in a response, even when the element wasn't targeted", ->
         $fixture('.hungry[up-hungry]').text('old hungry')
         $fixture('.target').text('old target')
 
         up.render('.target', url: '/path')
 
-        next =>
-          @respondWith """
-            <div class="target">
-              new target
-            </div>
-            <div class="between">
-              new between
-            </div>
-            <div class="hungry">
-              new hungry
-            </div>
-          """
+        await wait()
 
-        next =>
-          expect('.target').toHaveText('new target')
-          expect('.hungry').toHaveText('new hungry')
+        jasmine.respondWith """
+          <div class="target">
+            new target
+          </div>
+          <div class="between">
+            new between
+          </div>
+          <div class="hungry">
+            new hungry
+          </div>
+        """
 
-      it "does not impede replacements when the element is not part of a response", asyncSpec (next) ->
+        await wait()
+
+        expect('.target').toHaveText('new target')
+        expect('.hungry').toHaveText('new hungry')
+
+      it "does not impede replacements when the element is not part of a response", ->
         $fixture('.hungry[up-hungry]').text('old hungry')
         $fixture('.target').text('old target')
 
         promise = up.render('.target', url: '/path')
 
-        next =>
-          @respondWith """
-            <div class="target">
-              new target
-            </div>
-          """
+        await wait()
 
-        next =>
-          expect('.target').toHaveText('new target')
-          expect('.hungry').toHaveText('old hungry')
+        jasmine.respondWith """
+          <div class="target">
+            new target
+          </div>
+        """
 
-          promiseState(promise).then (result) ->
-            expect(result.state).toEqual('fulfilled')
+        await wait()
+
+        expect('.target').toHaveText('new target')
+        expect('.hungry').toHaveText('old hungry')
+
+        await expectAsync(promise).toBeResolvedTo(jasmine.any(up.RenderResult))
 
       it 'allows to use [up-keep] element within a hungry element', ->
         target = fixture('#target', text: 'old target')
@@ -458,6 +461,138 @@ describe 'up.radio', ->
         expect('.target').toHaveText('old target')
         expect('.hungry').toHaveText('new hungry')
 
+      it 'updates the hungry element for a failed response', ->
+        $fixture('.hungry[up-hungry]').text('old hungry')
+        $fixture('.success-target').text('old success target')
+        $fixture('.failure-target').text('old failure target')
+
+        promise = up.render(target: '.success-target', failTarget: '.failure-target', url: '/path')
+
+        await wait()
+
+        jasmine.respondWith status: 500, responseText: """
+          <div class="success-target">
+            new success target
+          </div>
+          <div class="failure-target">
+            new failure target
+          </div>
+          <div class="between">
+            new between
+          </div>
+          <div class="hungry">
+            new hungry
+          </div>
+        """
+
+        await expectAsync(promise).toBeRejectedWith(jasmine.any(up.RenderResult))
+        await expectAsync(promise).toBeRejectedWith(jasmine.objectContaining(
+          target: '.failure-target',
+          fragments: [e.get('.failure-target'), e.get('.hungry')],
+        ))
+
+        expect('.success-target').toHaveText('old success target')
+        expect('.failure-target').toHaveText('new failure target')
+        expect('.hungry').toHaveText('new hungry')
+
+      describe 'transition', ->
+
+        it "does not use the render pass' transition for the hungry element", ->
+          fixture('.target.old', text: 'old target')
+          fixture('.hungry.new', text: 'old hungry', 'up-hungry': '')
+
+          up.render('.target', transition: 'cross-fade', duration: 300, document: """
+            <div class="target new">new target</div>
+            <div class="hungry new">new hungry</div>
+          """)
+
+          await wait(150)
+
+          # Target is morphing
+          expect(document.querySelectorAll('.target').length).toBe(2)
+          expect('.target.old').toHaveOpacity(0.5, 0.35)
+          expect('.target.new').toHaveOpacity(0.5, 0.35)
+
+          # Hungry is not morphing
+          expect(document.querySelectorAll('.hungry').length).toBe(1)
+          expect('.hungry').toHaveOpacity(1.0)
+
+        describe 'with [up-transition]', ->
+
+          it 'lets the hungry element use a transition', ->
+            fixture('#target.old', text: 'old target')
+            fixture('#hungry.old', text: 'old hungry', 'up-hungry': '', 'up-transition': 'cross-fade', 'up-duration': '300')
+
+            up.render('#target', document: """
+              <div id="target" class="new">new target</div>
+              <div id="hungry" class="new">new hungry</div>
+            """)
+
+            await wait(150)
+
+            # Hungry is morphing
+            expect(document.querySelectorAll('#hungry').length).toBe(2)
+            expect('#hungry.old').toHaveOpacity(0.5, 0.35)
+            expect('#hungry.new').toHaveOpacity(0.5, 0.35)
+
+            # Target is not morphing
+            expect(document.querySelectorAll('#target').length).toBe(1)
+            expect('#target').toHaveOpacity(1.0)
+
+          it 'delays the fulfillment of the up.render().finished promise', ->
+            fixture('#target.old', text: 'old target')
+            fixture('#hungry.new', text: 'old hungry', 'up-hungry': '', 'up-transition': 'cross-fade', 'up-duration': '200')
+
+            job = up.render('#target', transition: 'cross-fade', document: """
+              <div id="target" class="new">new target</div>
+              <div id="hungry" class="new">new hungry</div>
+            """)
+
+            await wait(100)
+
+            await expectAsync(job.finished).toBePending()
+
+            await wait(200)
+
+            await expectAsync(job.finished).toBeResolvedTo(jasmine.any(up.RenderResult))
+            await expectAsync(job.finished).toBeResolvedTo(jasmine.objectContaining(
+              target: '#target',
+              fragments: [document.querySelector('#target.new'), document.querySelector('#hungry.new')],
+              layer: up.layer.root,
+            ))
+
+          it 'delays the rejection of the up.render().finished promise when updating from a failed response', ->
+            fixture('#target.old', text: 'old target')
+            fixture('#hungry.new', text: 'old hungry', 'up-hungry': '', 'up-transition': 'cross-fade', 'up-duration': '200')
+
+            job = up.render(
+              target: '#target',
+              failTarget: '#target',
+              url: '/path2',
+            )
+            finished = job.finished
+
+            await wait()
+
+            jasmine.respondWith status: 500, responseText: """
+              <div id="target" class="new">new target</div>
+              <div id="hungry" class="new">new hungry</div>
+            """
+
+            await wait(100)
+
+            await expectAsync(job).toBeRejectedWith(jasmine.any(up.RenderResult))
+            await expectAsync(finished).toBePending()
+
+            await wait(200)
+
+            await expectAsync(finished).toBeRejectedWith(jasmine.any(up.RenderResult))
+            await expectAsync(finished).toBeRejectedWith(jasmine.objectContaining(
+              target: '#target',
+              fragments: [document.querySelector('#target.new'), document.querySelector('#hungry.new')],
+              layer: up.layer.root,
+            ))
+
       describe 'restriction by layer', ->
 
         it 'only updates [up-hungry] elements in the targeted layer, even if the response would yield matching elements for multiple layers', ->
@@ -493,7 +628,7 @@ describe 'up.radio', ->
           expect('.inside').toHaveText('new inside')
           expect('.outside').toHaveText('old outside')
 
-        describe 'if that hungry element also has [up-if-layer=any]', ->
+        describe 'with [up-if-layer=any]', ->
 
           beforeEach ->
             up.layer.config.openDuration = 0

@@ -2528,7 +2528,7 @@ up.fragment = (function() {
   }
 
   function targetForSteps(steps) {
-    let requiredSteps = u.reject(steps, 'optional')
+    let requiredSteps = u.reject(steps, 'maybe')
     let selectors = u.map(requiredSteps, 'selector')
     return selectors.join(', ') || ':none'
   }

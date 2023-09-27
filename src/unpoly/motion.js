@@ -387,7 +387,7 @@ up.motion = (function() {
         return transitionFn(oldElement, newElement, options)
       }
 
-      up.puts('up.morph()', 'Morphing %o to %o with transition %O', oldElement, newElement, transitionObject)
+      up.puts('up.morph()', 'Morphing %o to %o with transition %O over %d ms', oldElement, newElement, transitionObject, options.duration)
 
       const viewport = up.viewport.get(oldElement)
       const scrollTopBeforeReveal = viewport.scrollTop
@@ -491,6 +491,18 @@ up.motion = (function() {
   const swapElementsDirectly = up.mockable(function(oldElement, newElement) {
     oldElement.replaceWith(newElement)
   })
+
+  function motionOptions(element, options, parserOptions) {
+    options = u.options(options)
+    let parser = new up.OptionsParser(element, options, parserOptions)
+
+    parser.booleanOrString('animation')
+    parser.booleanOrString('transition')
+    parser.string('easing')
+    parser.number('duration')
+
+    return options
+  }
 
   /*-
   Defines a named transition that [morphs](/up.morph) from one element to another.
@@ -738,7 +750,8 @@ up.motion = (function() {
     isEnabled,
     isNone,
     willAnimate,
-    swapElementsDirectly
+    swapElementsDirectly,
+    motionOptions,
   }
 })()
 

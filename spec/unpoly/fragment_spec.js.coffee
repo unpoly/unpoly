@@ -757,6 +757,20 @@ describe 'up.fragment', ->
 
             await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
 
+          it 'rejects the up.render().finished promise', ->
+            fixture('.success-target')
+            fixture('.failure-target')
+            renderJob = up.render('.success-target', url: '/path', failTarget: '.failure-target')
+            finished = renderJob.finished
+
+            await expectAsync(renderJob).toBePending()
+            await expectAsync(finished).toBePending()
+
+            jasmine.respondWithSelector('.failure-target', status: 500)
+
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+            await expectAsync(finished).toBeRejectedWith(jasmine.any(up.RenderResult))
+
           it 'rejects with an error that explains why success targets were not used', ->
             fixture('.target')
             promise = up.render('.target', url: '/qux')
@@ -4289,7 +4303,7 @@ describe 'up.fragment', ->
 
           expect($element).toBeAttached()
 
-        it 'fulfills render().finished promise after the element has been removed from the DOM', (done) ->
+        it 'fulfills the render().finished promise after the element has been removed from the DOM', (done) ->
           $parent = $fixture('.parent')
           $element = $parent.affix('.element.v1').text('v1')
 
@@ -4306,6 +4320,39 @@ describe 'up.fragment', ->
           job.finished.then(testElementAttachment)
 
           expect($element).toBeAttached()
+
+        it 'rejects the render().finished promise after the element has been removed from the DOM when updating from a failed response', ->
+          fixture('.target', text: 'old target')
+
+          job = up.render(
+            target: '.target',
+            failTarget: '.target',
+            transition: 'cross-fade',
+            failTransition: 'cross-fade',
+            duration: 200,
+            url: '/path2'
+          )
+          finished = job.finished
+
+          await wait()
+
+          jasmine.respondWith status: 500, responseText: """
+              <div class="target">new target</div>
+            """
+
+          await wait(100)
+
+          await expectAsync(job).toBeRejectedWith(jasmine.any(up.RenderResult))
+          await expectAsync(finished).toBePending()
+
+          await wait(200)
+
+          await expectAsync(finished).toBeRejectedWith(jasmine.any(up.RenderResult))
+          await expectAsync(finished).toBeRejectedWith(jasmine.objectContaining(
+            target: '.target',
+            fragments: [document.querySelector('.target')],
+            layer: up.layer.root,
+          ))
 
         it 'runs an { onFinished } callback once when updating multiple elements', asyncSpec (next) ->
           fixture('.foo')
