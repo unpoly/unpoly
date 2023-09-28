@@ -11,22 +11,39 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 3.4.0
 -----
 
+### Network
+
 - Removed up.network.shouldReduceRequests()
 - Removed `up.radio.config.stretchPollInterval`
 - Removed up.network.config.badDownlink
 - Removed up.network.config.badRTT
-- Resume polling immediately if an entire interval was spend on a background layer
-- Resume polling immediately if an entire interval was spend on an inactive tab
+
+### Polling
+
+- Resume polling immediately if an entire interval was spent on a background layer
+- Resume polling immediately if an entire interval was spent on an inactive tab
 - No longer timers in inactive tabs, saves energy
 - Fix a bug where polling in a background layer would not resume when the layer was uncovered
-- [up-if-layer]
-- [up-if-tab]
-- { ifLayer } (docs!)
-- { ifTab } (docs!)
-- up:fragment:aborted new experimental property { newLayer }.
-- Remove up.link.config.preloadEnabled. Prevent up:link:preload instead.
 - Remove up.radio.config.pollEnabled. Prevent up:fragment:poll instead.
+- Polling gets [up-if-layer] / { ifLayer }
 
+
+### Hungry elements
+
+- Hungry elements get [up-duration], [up-easing]
+- Hungry elements with transitions now delay the up.render().finished promise
+- Hungry elements with [up-layer=any] should not be able to take away from the explicit target
+
+
+### Preloading
+
+- Remove up.link.config.preloadEnabled. Prevent up:link:preload instead.
+
+### Fragment API
+
+- up:fragment:aborted new experimental property { newLayer }.
+- Fatal render errors are now logged
+ 
 
 3.3.0
 -----
