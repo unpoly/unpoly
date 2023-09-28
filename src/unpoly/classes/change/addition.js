@@ -117,25 +117,4 @@ up.Change.Addition = class Addition extends up.Change {
     return new up.Change.UpdateSteps({ steps, noneOptions }).execute(responseDoc)
   }
 
-  // executeHungry(originalResult) {
-  //   // Users may disable the processing of hungry elements for a single render pass
-  //   // using either [up-use-hungry=false] or { useHungry: false }
-  //   if (!this.options.useHungry) return
-  //
-  //   // // TODO: Explain why executeHungry can be called multiple times
-  //   // if (this.hungryExecuted) return
-  //   // this.hungryExecuted = true
-  //
-  //   let hungrySteps = this.getHungrySteps()
-  //
-  //   // up.Change.UpdateSteps will match step.newElement in responseDoc.
-  //   // We do not need to worry about nested changes as this.content was already
-  //   // removed from responseDoc.
-  //   let hungryResult = new up.Change.UpdateSteps({ steps: hungrySteps }).execute(this.responseDoc)
-  //
-  //   if (originalResult) { // If we're executing after an AbortError, the originalResult may not have been set
-  //     originalResult.fragments.push(...hungryResult.fragments)
-  //   }
-  // }
-
 }
