@@ -7,19 +7,39 @@ Remaining V3 tasks
 Next release
 ============
 
+- Test fixed GZ integration
+- Ability to only update hungry if there is content?
+  - [up-if-content="present"]
+  - Means text or elements
+  - Check efficiently with child node that's an element or a string that's more than whitespace
+  - We would need to pass responseDoc to up.radio.hungrySteps if we want to provide newElement
+    - I think we could then remove newElement lookup from UpdateSteps
+- Consider rolling back error collection in CompilerPass
+  - While we do let other compilers run, the error will abort anything else in the change process
+  - It's confusing for testers of up.hello()
+  - It's less code
+- Docs and CHANGELOG for new hungry options
+  - duration
+  - easing
+- Check if we have documented all xxOptions() functions so they take an element and options array
 - CHANGELOG
-- Merge PR
+  - Make screenshot for reload prompt
 - Release
-- Check if we can get rid of Object.setPrototypeOf(this, up.LayerStack.prototype) in up.LayerStack
+- Docs and Examples for up.layer.get()
+- up.fragment should explain that it supports CSS extensions like :has() or :main
 - Deploy unpoly-demo changes
-  - Make screenshot!
-- When an fragment is aborted while animating, we should not revalidate
-- newPageReason for non-GET boot method: Allow rendering fragments when options.history is falsey
+  - Make screenshot of assets-changed prompt
 
 
 Backlog
 =======
 
+- Offer a preventable up:hungry:select event / callback
+  - Or up:hungry:select / [up-on-select]
+  - We would need to pass responseDoc to up.radio.hungrySteps if we want to provide newElement
+  - We also want to have renderOptions in that event
+- When an fragment is aborted while animating, we should not revalidate
+- consider having dev builds with debug terser
 - Docs: /accessibility page
   - But where does it go?
   - Top-level?
@@ -61,7 +81,6 @@ Backlog
     - This class does not exist. It was an idea detailled further down.
 - Consider parsing scroll-margin-top, scroll-margin-bottom for revealing
 - Allow [up-emit] for buttons
-- Do we want a preventable up:fragment:hungry event?
 - Do we want a preventable up:request:reuse event?
   - Maybe even :reused since there is no :loaded for cached requests
 - Experiment with property mangling vs. public API
