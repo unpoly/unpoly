@@ -467,8 +467,6 @@ describe 'up.script', ->
 
       describe 'when a compiler throws an error', ->
 
-        allowGlobalErrors()
-
         it 'does not prevent other compilers from running', ->
           compilerBefore = jasmine.createSpy('compiler before')
           crashingCompiler = -> throw new Error("error from crashing compiler")
@@ -641,8 +639,6 @@ describe 'up.script', ->
         expect(clean).not.toThrowError()
 
       describe 'when a destructor throws an error', ->
-
-        allowGlobalErrors()
 
         it 'does not prevent other destructors from running', ->
           destructorBefore = jasmine.createSpy('destructor before')

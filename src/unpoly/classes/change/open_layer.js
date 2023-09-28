@@ -95,9 +95,19 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     let otherLayerSteps = this._getHungrySteps().other
     let otherLayersResult = this.executeSteps(otherLayerSteps, responseDoc)
 
-    // Compile the entire layer, not just the user content.
-    // E.g. [up-dismiss] in the layer elements needs to go through a macro.
-    up.hello(this.layer.element, { ...this.options, layer: this.layer })
+    let newLayerResult = new up.RenderResult({
+      layer: this.layer,
+      fragments: [this._content],
+      target: this.target,
+    })
+
+    try {
+      // Compile the entire layer, not just the user content.
+      // E.g. [up-dismiss] in the layer elements needs to go through a macro.
+      up.hello(this.layer.element, { ...this.options, layer: this.layer })
+    } catch (error) {
+      newLayerResult.tryAddCompileError(error)
+    }
 
     // The server may trigger multiple signals that may cause the overlay to close immediately:
     //
@@ -114,14 +124,9 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // Otherwise a popup would start to open and only reveal itself after the animation.
     this._handleScroll()
 
-    let newLayerResult = new up.RenderResult({
-      layer: this.layer,
-      fragments: [this._content],
-      target: this.target,
-    })
-
+    // This starts the open animation.
     // Resolve the RenderResult#finished promise for callers that need to know when animations are done.
-    newLayerResult.finished = this._finish()
+    newLayerResult.finished = this._finish(newLayerResult)
 
     // Emit up:layer:opened to indicate that the layer was opened successfully.
     // This is a good time for listeners to manipulate the overlay optics.
@@ -136,7 +141,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     return up.RenderResult.both(newLayerResult, otherLayersResult)
   }
 
-  async _finish() {
+  async _finish(newLayerResult) {
     await this.layer.startOpenAnimation()
 
     // Don't change focus if the layer has been closed while the animation was running.
@@ -145,6 +150,9 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // A11Y: Place the focus on the overlay element and setup a focus circle.
     // However, don't change focus if the layer has been closed while the animation was running.
     this._handleFocus()
+
+    // The fulfillment value of the finished promise is the same as for the rendered promise.
+    return newLayerResult
   }
 
   _buildLayer() {

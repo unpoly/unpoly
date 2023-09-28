@@ -20,7 +20,7 @@ up.DestructorPass = class DestructorPass {
     }
 
     if (this._errors.length) {
-      throw new up.Error('Errors while destroying', { errors: this._errors })
+      throw new up.CannotCompile('Errors while destroying', { errors: this._errors })
     }
   }
 

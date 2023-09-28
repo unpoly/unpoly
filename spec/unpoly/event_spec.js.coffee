@@ -285,7 +285,7 @@ describe 'up.event', ->
           expect(listener.calls.count()).toBe(2)
 
       describe 'when a listener throws an error', ->
-        allowGlobalErrors()
+        # allowGlobalErrors()
 
         it 'does not prevent other event listeners from being called', ->
           nativeCallbackBefore = jasmine.createSpy('native callback before')

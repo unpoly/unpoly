@@ -87,6 +87,7 @@ up.RenderResult = class RenderResult extends up.Record {
       'layer',
       'target',
       'options', // set by up.Change.FromContent
+      'compileErrors',
       'finished',
     ]
   }
@@ -94,6 +95,7 @@ up.RenderResult = class RenderResult extends up.Record {
   defaults() {
     return {
       fragments: [],
+      compileErrors: [],
     }
   }
 
@@ -132,6 +134,14 @@ up.RenderResult = class RenderResult extends up.Record {
     return this.fragments[0]
   }
 
+  tryAddCompileError(error) {
+    if (error instanceof up.CannotCompile) {
+      this.compileErrors.push(...error.errors)
+    } else {
+      throw error
+    }
+  }
+
   static both(main, extension, mergeFinished = true) {
     // TODO: Why does mergeFinished call this with an undefined extension?
     if (!extension) return main
@@ -141,6 +151,7 @@ up.RenderResult = class RenderResult extends up.Record {
       layer: main.layer,
       options: main.options,
       fragments: main.fragments.concat(extension.fragments),
+      compileErrors: main.compileErrors.concat(extension.compileErrors),
       finished: (mergeFinished && this.mergeFinished(main, extension)) //.finished // Promise.all([main.finished, extension.finished])
     })
   }

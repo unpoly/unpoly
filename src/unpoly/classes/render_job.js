@@ -42,22 +42,27 @@ up.RenderJob = class RenderJob {
   async _execute() {
     try {
       let result = await this._makeChange()
-      this._runResultCallbacks(result)
+      this._handleResult(result)
       return result
     } catch (resultOrError) {
-      this._runResultCallbacks(resultOrError) || this._handleError(resultOrError)
+      this._handleResult(resultOrError) || this._handleError(resultOrError)
       throw resultOrError
     }
   }
 
-
-  _runResultCallbacks(result) {
+  _handleResult(result) {
     // There may be multiple reasons why `result` is not an up.RenderResult:
     //
     // (1) There was an error during the request (return value is up.Offline, up.Aborted, etc.)
     // (2) No fragment could be matched (return value is up.CannotMatch)
     // (3) We're preloading (early return value is up.Request)
     if (result instanceof up.RenderResult) {
+      if (result.compileErrors.length) {
+        let error = new up.CannotCompile('Errors while compiling', { errors: result.compileErrors })
+        this._handleError(error)
+        throw error
+      }
+
       // We call result.options.onRendered() instead of this.options.onRendered()
       // as this will call the correct options.onRendered() or onFailRendered()
       // depending on options.failOptions.
