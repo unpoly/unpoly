@@ -13,36 +13,89 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 
 ### Network
 
-- Removed up.network.shouldReduceRequests()
+Removed behavior on slow network throughput:
+
+- Removed `up.network.shouldReduceRequests()`
 - Removed `up.radio.config.stretchPollInterval`
-- Removed up.network.config.badDownlink
-- Removed up.network.config.badRTT
+- Removed `up.network.config.badDownlink`
+- Removed `up.network.config.badRTT`
+
+Unpoly keeps all other features for dealing with [network issues](/network-issues).
+
+### Handling asset changes
+
+When rendering new fragments, Unpoly compares scripts and stylesheets in the `<head>`
+and emits an `up:assets:changed` event if anything changed.
+
+It is up to your code to [handle changes in frontend code](/handling-asset-changes),
+e.g. by [notifying the user](/handling-asset-changes#notifying-the-user) or [loading new assets](/handling-asset-changes#loading-new-assets).
+
+- up.script.config.assetSelectors
+- up.script.config.noAssetSelectors
+- [up-asset]
+
+### Automatic head reconciliation
+
+[History-related `<meta>` and `<link>` elements, like `meta[name=description]`, `link[rel=canonical]`.](/updating-history#history-state)
+
+- up.history.config.updateMetaElements
+- up.history.config.metaSelectors
+- up.history.config.noMetaSelectors
+- [up-meta]
+
 
 ### Polling
 
 - Resume polling immediately if an entire interval was spent on a background layer
 - Resume polling immediately if an entire interval was spent on an inactive tab
+  - Use this to automatically reload when the user returns for a while
 - No longer timers in inactive tabs, saves energy
 - Fix a bug where polling in a background layer would not resume when the layer was uncovered
-- Remove up.radio.config.pollEnabled. Prevent up:fragment:poll instead.
-- Polling gets [up-if-layer] / { ifLayer }
+- Remove `up.radio.config.pollEnabled`. Prevent `up:fragment:poll` instead.
+- Elements with `[up-poll]` can now set `[up-if-layer="any"]` to keep polling on a background layer.
 
 
 ### Hungry elements
 
-- Hungry elements get [up-duration], [up-easing]
+- Hungry elements get `[up-duration]`, `[up-easing]`
 - Hungry elements with transitions now delay the up.render().finished promise
-- Hungry elements with [up-layer=any] should not be able to take away from the explicit target
-
+- Hungry elements with `[up-layer=any]` should not be able to take away from the explicit target
+- Hungry elements with `[up-layer=any]` are now updated from the discarded content if a render pass causes an overlay to cause
+- ??? Will we have [up-if-content] ???
+ 
 
 ### Preloading
 
-- Remove up.link.config.preloadEnabled. Prevent up:link:preload instead.
+- Remove `up.link.config.preloadEnabled`. Prevent `up:link:preload` instead.
 
-### Fragment API
+
+### Rendering
 
 - up:fragment:aborted new experimental property { newLayer }.
 - Fatal render errors are now logged
+- Allow in-page rendering when initial page was loaded with non-GET, but the render pass does not change history
+- When revalidating a fallback target, don't log that we're "revalidating undefined"
+- Don't crash rendering early if a { failTarget } or { failLayer } cannot be resolved
+- Allow revalidation when the { failLayer } is no longer open
+- No longer provide the response to compiler's meta argument; We cannot provide it for the initial page load and we want to progressively enhance
+- Log when rendering was aborted or had an error
+- When a compiler or destructor crashes during rendering, finish the render pass before throwing up.CannotCompile
+
+
+### Navigation feedback
+
+- Allow compilers to see updated .up-current classes for the current render pass
+
+
+### Layers
+
+- onAccepted / onDismissed handlers now see the effects of `[up-hungry][up-if-layer="any"]`
+
+
+### Various
+
+- The `up.syntax` package has been renamed to `up.script`.
+- Build is now compiled using ES2021 (up from ES2020). The ES6 build remains available.
  
 
 3.3.0
