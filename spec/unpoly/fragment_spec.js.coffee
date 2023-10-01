@@ -466,7 +466,7 @@ describe 'up.fragment', ->
               )
             )
 
-        fdescribe 'when a compiler throws an error', ->
+        describe 'when a compiler throws an error', ->
 
           it 'rejects the up.render() promise', ->
             crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(new Error("error from crashing compiler"))
@@ -609,7 +609,7 @@ describe 'up.fragment', ->
             expect('.element').toHaveText('new text')
             expect(up.reveal).toHaveBeenCalled()
 
-        fdescribe 'when a destructor throws an error', ->
+        describe 'when a destructor throws an error', ->
 
           it 'still updates subsequent elements for a multi-step target', ->
             crashingDestructor = jasmine.createSpy('crashing destructor').and.throwError(new Error("error from crashing destructor"))

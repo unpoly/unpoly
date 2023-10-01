@@ -120,9 +120,10 @@ up.ResponseDoc = class ResponseDoc {
     return head.querySelector('title')?.textContent
   }
 
-  // Selects a single fragment with the given selector.
-  // Supports custom Unpoly selectors like :has() or :main.
-  // Supports origin-aware lookup priorities.
+  // (1) Selects a single fragment with the given selector.
+  // (2) Supports custom Unpoly selectors like :has() or :main.
+  // (3) Supports origin-aware lookup priorities.
+  // (4) Returns undefined if there is no match.
   select(selector) {
     let finder = new up.FragmentFinder({
       selector: selector,

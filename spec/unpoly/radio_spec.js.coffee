@@ -1000,9 +1000,9 @@ describe 'up.radio', ->
 
                 expect(outsideSpy).toHaveBeenCalledWith('new outside')
 
-      describe 'restriction by history', ->
+      describe 'with [up-if-history]', ->
 
-        it 'only updates a hungry fragment when updating history with [up-if-history]', asyncSpec (next) ->
+        it 'only updates a hungry fragment when updating history', asyncSpec (next) ->
           $fixture('.hungry[up-hungry]').text('old hungry').attr('up-if-history', '')
           $fixture('.target').text('target version 1')
 
