@@ -133,17 +133,18 @@ up.ResponseDoc = class ResponseDoc {
     return finder.find()
   }
 
+  selectStep(step) {
+    // Look for a match in the new content.
+    // The new content has no layers, so no { layer } option here.
+    let newElement = this.select(step.selector)
+    if (newElement && (!step.ifContent || e.hasContent(newElement))) {
+      return newElement
+    }
+  }
+
   selectAndReserveSteps(steps) {
     steps = steps.filter((step) => {
-      // The responseDoc has no layers.
-      step.newElement ||= this.select(step.selector)
-
-      if (step.newElement) {
-        return true
-      } else if (!step.maybe) {
-        // An error message will be chosen by up.Change.FromContent
-        throw new up.CannotMatch()
-      }
+      return step.newElement ||= this.selectStep(step) || this.cannotMatchStep(step)
     })
 
     // Now that we know we could match all steps, remove their { newElement }
@@ -153,6 +154,13 @@ up.ResponseDoc = class ResponseDoc {
     for (let step of steps) step.newElement.remove()
 
     return steps
+  }
+
+  cannotMatchStep(step) {
+    if (!step.maybe) {
+      // An error message will be chosen by up.Change.FromContent
+      throw new up.CannotMatch()
+    }
   }
 
   // commitElement(element) {

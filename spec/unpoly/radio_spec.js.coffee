@@ -1038,6 +1038,79 @@ describe 'up.radio', ->
             expect('.target').toHaveText('target version 3')
             expect('.hungry').toHaveText('new hungry')
 
+      describe 'with [up-if-content]', ->
+
+        it 'updates a hungry fragment when the new element has text content', ->
+          fixture('.hungry[up-hungry][up-if-content]', text: 'old hungry')
+          fixture('.target', text: 'old target')
+
+          up.render '.target', document: """
+            <div class="hungry">new hungry</div>
+            <div class="target">new target</div>
+          """
+
+          await wait()
+
+          expect('.hungry').toHaveText('new hungry')
+          expect('.target').toHaveText('new target')
+
+        it 'keeps the hungry fragment and does not crash if no new element matches', ->
+          fixture('.hungry[up-hungry][up-if-content]', text: 'old hungry')
+          fixture('.target', text: 'old target')
+
+          up.render '.target', document: """
+            <div class="target">new target</div>
+          """
+
+          await wait()
+
+          expect('.hungry').toHaveText('old hungry')
+          expect('.target').toHaveText('new target')
+
+        it 'updates a hungry fragment when the new element has child elements without text content', ->
+          fixture('.hungry[up-hungry][up-if-content]', text: 'old hungry')
+          fixture('.target', text: 'old target')
+
+          up.render '.target', document: """
+            <div class="hungry"><span class="new-hungry-child"></span></div>
+            <div class="target">new target</div>
+          """
+
+          await wait()
+
+          expect('.hungry').toHaveDescendant('.new-hungry-child')
+          expect('.target').toHaveText('new target')
+
+        it 'does not update a hungry fragment when the new element is completely empty', ->
+          fixture('.hungry[up-hungry][up-if-content]', text: 'old hungry')
+          fixture('.target', text: 'old target')
+
+          up.render '.target', document: """
+            <div class="hungry"></div>
+            <div class="target">new target</div>
+          """
+
+          await wait()
+
+          expect('.hungry').toHaveText('old hungry')
+          expect('.target').toHaveText('new target')
+
+        it 'does not update a hungry fragment when the new element only has whitespace content', ->
+          fixture('.hungry[up-hungry][up-if-content]', text: 'old hungry')
+          fixture('.target', text: 'old target')
+
+          up.render '.target', document: """
+            <div class="hungry">
+
+            </div>
+            <div class="target">new target</div>
+          """
+
+          await wait()
+
+          expect('.hungry').toHaveText('old hungry')
+          expect('.target').toHaveText('new target')
+
     describe '[up-poll]', ->
 
       it 'reloads the element periodically', asyncSpec (next) ->

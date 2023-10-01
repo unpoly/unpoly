@@ -1351,6 +1351,10 @@ up.element = (function() {
     return u.reject(elements, isExcluded)
   }
 
+  function hasContent(element) {
+    return element.children.length > 0 || !!element.innerText.trim()
+  }
+
   return {
     subtree, // practical
     contains,
@@ -1406,5 +1410,6 @@ up.element = (function() {
     cleanJQuery,
     parseSelector,
     filteredQuery,
+    hasContent,
   }
 })()
