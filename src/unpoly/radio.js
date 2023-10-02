@@ -158,10 +158,8 @@ up.radio = (function() {
   ### Behavior with multiple layers
 
   By default only hungry elements on the targeted layer are updated.
-  To match a hungry element when updating *any* layer, set an [`[up-layer=any]`](#up-if-layer) attribute.
 
-  Hungry fragments are not updated for requests that [open a new overlay](/opening-overlays).
-  Subsequent requests within that new overlay *do* update hungry fragments.
+  To match a hungry element when updating *any* layer, set an [`[up-layer=any]`](#up-if-layer) attribute.
 
   ### Disabling
 
