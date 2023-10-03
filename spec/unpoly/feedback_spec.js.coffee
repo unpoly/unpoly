@@ -203,7 +203,61 @@ describe 'up.feedback', ->
         up.hello(container)
         expect(link).toHaveClass('up-current')
 
+      it 'marks an expanded link as .up-current', ->
+        replaceURL('/page')
+        nav = fixture('[up-nav]')
+        wrapper = e.affix(nav, '[up-expand]')
+        link = e.affix(wrapper, 'a[href="/page"]')
+        up.hello(wrapper)
+
+        expect(link).toHaveClass('up-current')
+        expect(wrapper).toHaveClass('up-current')
+
       describe 'updating .up-current marks when the URL changes', ->
+
+        it 'marks an existing link as .up-current as it becomes current', ->
+          replaceURL('/page1')
+          fixture('#content', text: 'content1')
+          nav = fixture('[up-nav]')
+          link1 = e.affix(nav, 'a[href="/page1"]')
+          link2 = e.affix(nav, 'a[href="/page2"]')
+          up.hello(nav)
+
+          expect(link1).toHaveClass('up-current')
+          expect(link2).not.toHaveClass('up-current')
+
+          up.render('#content', content: 'content2', history: true, location: '/page2')
+
+          await wait()
+
+          expect('#content').toHaveText('content2')
+          expect(link1).not.toHaveClass('up-current')
+          expect(link2).toHaveClass('up-current')
+
+        it 'marks an existing expanded link as .up-current as it becomes current', ->
+          replaceURL('/page1')
+          fixture('#content', text: 'content1')
+          nav = fixture('[up-nav]')
+          wrapper1 = e.affix(nav, 'span[up-expand]')
+          link1 = e.affix(wrapper1, 'a[href="/page1"]')
+          wrapper2 = e.affix(nav, 'span[up-expand]')
+          link2 = e.affix(wrapper2, 'a[href="/page2"]')
+          up.hello(nav)
+
+          expect(wrapper1).toHaveClass('up-current')
+          expect(link1).toHaveClass('up-current')
+          expect(wrapper2).not.toHaveClass('up-current')
+          expect(link2).not.toHaveClass('up-current')
+
+          up.render('#content', content: 'content2', history: true, location: '/page2')
+
+          await wait()
+
+          expect('#content').toHaveText('content2')
+          expect(wrapper1).not.toHaveClass('up-current')
+          expect(link1).not.toHaveClass('up-current')
+          expect(wrapper2).toHaveClass('up-current')
+          expect(link2).toHaveClass('up-current')
 
         it 'marks a link as .up-current if it links to the current URL, but is missing a trailing slash', asyncSpec (next) ->
           $nav = $fixture('div[up-nav]')

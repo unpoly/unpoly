@@ -1393,8 +1393,12 @@ up.link = (function() {
     let childLink = e.get(area, selector)
     if (childLink) {
       const areaAttrs = e.upAttrs(childLink)
-      if (!areaAttrs['up-href']) { areaAttrs['up-href'] = childLink.getAttribute('href') }
+      areaAttrs['up-href'] ||= childLink.getAttribute('href')
       e.setMissingAttrs(area, areaAttrs)
+
+      const areaClasses = e.upClasses(childLink)
+      area.classList.add(...areaClasses)
+
       makeFollowable(area)
       // We could also consider making the area clickable, via makeClickable().
       // However, since the original link is already present within the area,

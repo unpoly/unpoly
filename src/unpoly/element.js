@@ -1313,16 +1313,17 @@ up.element = (function() {
     return !!(element.offsetWidth || element.offsetHeight || element.getClientRects().length)
   }
 
+  function isUpPrefixed(string) {
+    return /^up-/.test(string)
+  }
+
   function upAttrs(element) {
-    const upAttributePattern = /^up-/
-    const attrs = {}
-    for (let attribute of element.attributes) {
-      const { name } = attribute
-      if (name.match(upAttributePattern)) {
-        attrs[name] = attribute.value
-      }
-    }
-    return attrs
+    let attrNames = u.filter(element.getAttributeNames(), isUpPrefixed)
+    return u.mapObject(attrNames, (name) => [name, element.getAttribute(name)])
+  }
+
+  function upClasses(element) {
+    return u.filter(element.classList.values(), isUpPrefixed)
   }
 
   /*-
@@ -1404,6 +1405,7 @@ up.element = (function() {
     setStyle: setInlineStyle, // practical.
     isVisible, // practical
     upAttrs,
+    upClasses,
     toggleAttr,
     addTemporaryClass,
     setTemporaryAttr,
