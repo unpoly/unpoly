@@ -1352,6 +1352,45 @@ up.element = (function() {
     return u.reject(elements, isExcluded)
   }
 
+  /*-
+  Returns whether the given element has content.
+
+  An element is considered to have content if it has either child elements or non-whitespace text.
+
+  ### Examples
+
+  These `<div>` elements are all considered to have content:
+
+  ```html
+  <div>
+    Text
+  </div>
+
+  <div>
+    <span>Text</span>
+  </div>
+
+  <div>
+    <span></span>
+  </div>
+  ```
+
+  These `<div>` elments are *not* considered to have content:
+
+  ```html
+  <div></div>
+
+  <div>   </div>
+
+  <div attr="text"></div>
+  ```
+
+  @function up.element.hasContent
+  @param {Element} element
+  @return {boolean}
+    Whether the given element has content.
+  @experimental
+  */
   function hasContent(element) {
     return element.children.length > 0 || !!element.innerText.trim()
   }
