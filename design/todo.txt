@@ -7,26 +7,38 @@ Remaining V3 tasks
 Next release
 ============
 
-- Test fixed GZ integration
-- Ability to only update hungry if there is content?
-  - [up-if-content="present"]
-  - Means text or elements
-  - Check efficiently with child node that's an element or a string that's more than whitespace
-  - We would need to pass responseDoc to up.radio.hungrySteps if we want to provide newElement
-    - I think we could then remove newElement lookup from UpdateSteps
-- Consider rolling back error collection in CompilerPass
-  - While we do let other compilers run, the error will abort anything else in the change process
-  - It's confusing for testers of up.hello()
-  - It's less code
+
+- Flash v4
+  - [up-hungry][up-if-layer=any] should grab a fragment within the explicit target if the target is not going to be used due to the layer closing
+    - Either go with the idea of temporarily setting an up:layer:accepting/dismissing handler that updates hungry elements on other layers before the layer is closing
+    - Or drop the requirement that closed handlers see [up-if-layer=any]
+  - Introduce up:fragment:hungry event with { oldFragment, newFragment, renderOptions } props
+  - Introduce [up-on-hungry] callback
+  - Remove [up-if-content] (no migration needed)
+  - Remove [up-if-history] with migration via up:fragment:hungry
+  - Add { renderOptions } to up:fragment:keep event
+  - Introduce [up-flash]
+    - Shortform for <div up-hungry up-if-layer="any" up-keep up-on-keep="if (!e.hasContent(newElement)) event.preventDefault()">
+    - Add [up-flash] as a low-prio targetResolver
+  - Test fixed GZ integration
+- Publish up.element.hasContent() as experimental
 - Docs and CHANGELOG for new hungry options
   - duration
   - easing
-- Check if we have documented all xxOptions() functions so they take an element and options array
+  - [up-flash]
+  - [up-on-hungry]
+  - New { renderOptions } for up:fragment:keep+
+  - up:fragment:hungry
+  - Doc page for notification flashes
+- Check if we have documented all xxOptions() functions (followOptions, submitOptions...) so they take an element and options array
+- Do we really want to u.noop here?
+  - result.finished.then(result.options.onFinished, u.noop)
+  - We could muteUncritical instead
+- Docs and Examples for up.layer.get()
+- up.fragment should explain that it supports CSS extensions like :has() or :main. up.element should explain that it does not.
 - CHANGELOG
   - Make screenshot for reload prompt
-- Release
-- Docs and Examples for up.layer.get()
-- up.fragment should explain that it supports CSS extensions like :has() or :main
+- Release 3.4 or 3.5
 - Deploy unpoly-demo changes
   - Make screenshot of assets-changed prompt
 
