@@ -2175,7 +2175,7 @@ up.fragment = (function() {
     return u.uniq(expanded)
   }
 
-  function buildSelector(selector, element, options = {}) {
+  function buildSelector(selector, elementOrDocument, options = {}) {
     const filters = []
 
     if (!options.destroying) {
@@ -2184,14 +2184,15 @@ up.fragment = (function() {
 
     // If we're given an element that is detached *or* from another document
     // (think up.ResponseDoc) we are not filtering by element layer.
-    let elementOutsideDocumentGiven = element && !document.contains(element)
+    let matchingInExternalDocument = elementOrDocument && !document.contains(elementOrDocument)
+
     let expandTargetLayer
 
-    if (elementOutsideDocumentGiven || options.layer === 'any') {
+    if (matchingInExternalDocument || options.layer === 'any') {
       expandTargetLayer = up.layer.root
     } else {
       // Some up.fragment function center around an element, like closest() or matches().
-      options.layer ??= element
+      options.layer ??= u.presence(elementOrDocument, u.isElement)
       const layers = up.layer.getAll(options)
       filters.push(match => u.some(layers, layer => layer.contains(match)))
       expandTargetLayer = layers[0]

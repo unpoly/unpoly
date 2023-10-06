@@ -8,7 +8,7 @@ up.FragmentFinder = class FragmentFinder {
     // Selector is a string, not an up.Selector
     this._selector = options.selector
     // This option is for matching fragments in detached content, as needed by up.ResponseDoc.
-    this._externalRoot = options.externalRoot
+    this._document = options.document || window.document
   }
 
   find() {
@@ -36,10 +36,6 @@ up.FragmentFinder = class FragmentFinder {
   }
 
   _findInLayer() {
-    if (this._externalRoot) {
-      return up.fragment.subtree(this._externalRoot, this._selector, this._options)[0]
-    } else {
-      return up.fragment.getDumb(this._selector, this._options)
-    }
+    return up.fragment.getDumb(this._document, this._selector, this._options)
   }
 }

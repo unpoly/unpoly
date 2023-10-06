@@ -1,6 +1,6 @@
 up.Layer.OverlayWithTether = class OverlayWithTether extends up.Layer.Overlay {
 
-  createElements(content) {
+  createElements() {
     if (!this.origin) {
       up.fail('Missing { origin } option')
     }
@@ -13,7 +13,10 @@ up.Layer.OverlayWithTether = class OverlayWithTether extends up.Layer.Overlay {
       position: this.position
     })
     this.createElement(this._tether.parent)
-    this.createContentElement(this.element, content)
+    this.createContentElement(this.element)
+  }
+
+  onContentSet() {
     this._tether.start(this.element)
   }
 

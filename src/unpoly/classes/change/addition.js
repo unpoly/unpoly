@@ -65,11 +65,6 @@ up.Change.Addition = class Addition extends up.Change {
 
   abortWhenLayerClosed(layer = this.layer) {
     if (layer.isClosed()) {
-      // // TODO: Explain why we still want to update hungry elements here
-      // // TODO: For UpdateLayer, is it OK that we're also updating hungries in the layer that was closed? Or would it just not be included in the hungry steps?
-      // // We don't need to update a RenderResult as we're not going to return one (we are going to throw up.Aborted).
-      // this.executeHungry()
-
       // Wind up the call stack. Whoever has closed the layer will also clean up
       // elements, handlers, etc.
       throw new up.Aborted('Layer was closed')

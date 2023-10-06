@@ -11,16 +11,15 @@ up.Layer.OverlayWithViewport = class OverlayWithViewport extends up.Layer.Overla
 
   /*-
   @function up.Layer.OverlayWithViewport#openNow
-  @param {Element} options.content
   @internal
   */
-  createElements(content) {
+  createElements() {
     this._shiftBody()
     this.createElement(this.constructor.getParentElement())
     if (this.backdrop) { this.createBackdropElement(this.element) }
     this.createViewportElement(this.element)
     this.createBoxElement(this.viewportElement)
-    this.createContentElement(this.boxElement, content)
+    this.createContentElement(this.boxElement)
   }
 
   onElementsRemoved() {

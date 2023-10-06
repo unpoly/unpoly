@@ -15,7 +15,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
 
     // Fill in `step.newElement` unless it was already done by our caller.
     // This may throw up.CannotMatch for non-optional steps that don't match in `responseDoc`.
-    this._steps = responseDoc.selectAndReserveSteps(this._steps)
+    this._steps = responseDoc.selectAndCommitSteps(this._steps)
 
     if (!this._steps.length) {
       return this._executeNone()

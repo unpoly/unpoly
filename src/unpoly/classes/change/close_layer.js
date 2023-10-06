@@ -27,6 +27,8 @@ up.Change.CloseLayer = class CloseLayer extends up.Change.Removal {
       throw new up.Aborted('Close event was prevented')
     }
 
+    this._emitClosingEvent()
+
     // Abort all pending requests targeting the layer we're now closing.
     up.fragment.abort({ reason: 'Layer is closing', layer: this._layer })
 
@@ -68,6 +70,11 @@ up.Change.CloseLayer = class CloseLayer extends up.Change.Removal {
     this._value = event.value
 
     return event
+  }
+
+  _emitClosingEvent() {
+    let event = this._buildEvent(`up:layer:${this._verb}ing`)
+    this._layer.emit(event, { log: false })
   }
 
   _emitClosedEvent(formerParent) {

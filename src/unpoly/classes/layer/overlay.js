@@ -131,9 +131,17 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     this.boxElement = this.affixPart(parentElement, 'box')
   }
 
-  createContentElement(parentElement, content) {
+  createContentElement(parentElement) {
     this.contentElement = this.affixPart(parentElement, 'content')
-    this.contentElement.appendChild(content)
+  }
+
+  setContent(content) {
+    this.contentElement.append(content)
+    this.onContentSet()
+  }
+
+  // Optional callback used by sub-classes
+  onContentSet() {
   }
 
   createDismissElement(parentElement) {
@@ -358,7 +366,8 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   }
 
   // Optional callback used by sub-classes
-  onElementsRemoved() {}
+  onElementsRemoved() {
+  }
 
   _startAnimation(options = {}) {
     const boxDone = up.animate(this.getBoxElement(), options.boxAnimation, options)
@@ -373,23 +382,20 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     return Promise.all([boxDone, backdropDone])
   }
 
-  startOpenAnimation(options = {}) {
-    return this._startAnimation({
+  async startOpenAnimation(options = {}) {
+    await this._startAnimation({
       boxAnimation: options.animation ?? this.evalOption(this.openAnimation),
       backdropAnimation: 'fade-in',
       easing: options.easing || this.openEasing,
       duration: options.duration || this.openDuration
-    }).then(() => {
-      return this.wasEverVisible = true
     })
+    this.wasEverVisible = true
   }
 
   startCloseAnimation(options = {}) {
-    const boxAnimation = this.wasEverVisible && (options.animation ?? this.evalOption(this.closeAnimation))
-
     return this._startAnimation({
-      boxAnimation,
-      backdropAnimation: 'fade-out',
+      boxAnimation: this.wasEverVisible && (options.animation ?? this.evalOption(this.closeAnimation)),
+      backdropAnimation: this.wasEverVisible && 'fade-out',
       easing: options.easing || this.closeEasing,
       duration: options.duration || this.closeDuration
     })

@@ -716,6 +716,9 @@ describe 'up.radio', ->
                 </div>
                 """
 
+              insertedSpy = jasmine.createSpy('up:fragment:inserted listener')
+              up.on('up:fragment:inserted', insertedSpy)
+
               up.render fragment: """
                 <div class='overlay'>
                   <div class='foo'>new foo</div>
@@ -726,6 +729,8 @@ describe 'up.radio', ->
               expect(up.fragment.get('.content', layer: 'overlay')).toHaveText('new content')
               expect(up.fragment.get('.foo', layer: 'overlay')).toHaveText('new foo')
               expect(up.fragment.get('.foo', layer: 'root')).toHaveText('old foo')
+
+              expect(insertedSpy.calls.count()).toBe(1)
 
             describe 'when a response closes the overlay via X-Up-Accept-layer', ->
 
@@ -764,6 +769,40 @@ describe 'up.radio', ->
                 expect(closeEventHandler).toHaveBeenCalled()
                 expect(up.layer.count).toBe(1)
                 expect('.outside').toHaveText('new outside')
+
+              it 'updates the [up-hungry] element with the discarded overlay content even if it would have been contained by the explicit target', ->
+                fixture('.foo', text: 'old foo in root', 'up-hungry': '', 'up-if-layer': 'any')
+
+                up.layer.open fragment: """
+                  <div class='overlay'>
+                    <div class='foo'>old foo in overlay</div>
+                    <div class='content'>old content in overlay</div>
+                  </div>
+                  """
+
+                await wait()
+
+                updatePromise = up.render('.overlay', url: '/page2')
+
+                await wait()
+
+                jasmine.respondWith(
+                  responseHeaders: { 'X-Up-Accept-Layer': 'null' }
+                  responseText: """
+                    <div class='overlay'>
+                      <div class='foo'>new foo</div>
+                      <div class='content'>new content</div>
+                    </div>
+                  """
+                )
+
+                await expectAsync(updatePromise).toBeRejectedWith(jasmine.any(up.Aborted))
+
+                await wait()
+
+                expect(up.layer.isRoot()).toBe(true)
+
+                expect(up.fragment.get('.foo', layer: 'root')).toHaveText('new foo')
 
               it 'updates the [up-hungry] element before onAccepted callbacks', ->
                 $fixture('.outside').text('old outside').attr('up-hungry', true).attr('up-if-layer', 'any')
@@ -920,6 +959,31 @@ describe 'up.radio', ->
                 expect(up.layer.isOverlay()).toBe(false)
 
                 expect('.outside').toHaveText('new outside')
+
+              it 'updates that [up-hungry] element with the discarded overlay content even if the element would have been included in the explicit target', ->
+                fixture('.foo', text: 'old foo in root', 'up-hungry': '', 'up-if-layer': 'any')
+
+                openPromise = up.layer.open({ target: '.overlay', url: '/page2' })
+
+                await wait()
+
+                jasmine.respondWith(
+                  responseHeaders: { 'X-Up-Accept-Layer': 'null' }
+                  responseText: """
+                    <div class='overlay'>
+                      <div class='foo'>new foo</div>
+                      <div class='content'>new content</div>
+                    </div>
+                  """
+                )
+
+                await expectAsync(openPromise).toBeRejectedWith(jasmine.any(up.Aborted))
+
+                await wait()
+
+                expect(up.layer.isRoot()).toBe(true)
+
+                expect(up.fragment.get('.foo', layer: 'root')).toHaveText('new foo')
 
               it 'updates that [up-hungry] element before onAccepted callbacks', ->
                 fixture('.outside', text: 'old outside', 'up-hungry': true,  'up-if-layer': 'any')

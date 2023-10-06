@@ -8,7 +8,6 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     this.layer = options.layer
     this.target = options.target
     this._context = options.context
-    this._useKeep = options.useKeep
     // up.fragment.expandTargets() was already called by up.Change.FromContent
     this._steps = up.fragment.parseTargetSteps(this.target, this.options)
     // this.uid = Math.random()
@@ -25,7 +24,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       origin: this.options.origin,
       target: this._bestPreflightSelector(),
       fragments: this._getFragments(),
-      newLayer: false
+      newLayer: false,
     }
   }
 
@@ -42,21 +41,36 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   }
 
   execute(responseDoc, onApplicable) {
+    this.responseDoc = responseDoc
+
     // (1) For each step, find a `step.newElement` that matches both in this.layer
     //     and in the response document.
     // (2) Match newElements here instead of relying on up.Change.UpdateSteps to
     //     do it later. This way we will throw up.CannotMatch early, and our caller
     //     up.Change.FromContent knows that this plan is not applicable. It can then
     //     try a fallback plan.
-    this._matchPostflight(responseDoc)
+    this._matchPostflight()
 
+    // If our steps can be matched, up.Change.FromContent wants a chance to some final
+    // preparations before we start rendering.
     onApplicable()
 
+    // If our layer ends up being closed during rendering, we still want to render
+    // [up-hungry][up-if-layer=any] elements on other layers.
+    let unbindClosing = this.layer.on('up:layer:accepting up:layer:dimissing', this._renderOtherLayers.bind(this))
+    try {
+      this._renderCurrentLayer()
+      this._renderOtherLayers()
+      return up.RenderResult.both(this._currentLayerResult, this._otherLayersResult)
+    } finally {
+      unbindClosing()
+    }
+  }
+
+  _renderCurrentLayer() {
     if (this._steps.length) {
       // Don't log this.target since that does not include hungry elements
       up.puts('up.render()', `Updating "${this._bestPreflightSelector()}" in ${this.layer}`)
-    } else {
-      up.puts('up.render()', 'Nothing was rendered')
     }
 
     // Make sure only the first step will have scroll-related options.
@@ -95,18 +109,6 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       this.layer.updateHistory(this.options)
     }
 
-    for (let step of this._steps) {
-      responseDoc.reserveElement(step.newElement)
-    }
-
-    // We execute steps on other layers first. If the render pass ends up closing this
-    // layer (e.g. by reaching a close condition or X-Up-Accept-Layer) we want:
-    //
-    // (1) ... to use the discarded content for hungry elements on other layers that have [up-if-layer=any].
-    // (2) ... to see updated hungry elements on other layers in onDismissed/onAccepted handlers.
-    let otherLayerSteps = this._getHungrySteps().other
-    let otherLayersResult = this.executeSteps(otherLayerSteps, responseDoc)
-
     // If the update causes the overlay to close, we don't want to render changes.
     //
     // The server may trigger multiple signals that may cause the layer to close:
@@ -120,16 +122,47 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // if any of these options cause the layer to close.
     this.handleLayerChangeRequests()
 
-    let currentLayerSteps = this._steps.concat(this._getHungrySteps().current)
-    let currentLayerResult = this.executeSteps(currentLayerSteps, responseDoc, this.options)
+    this._currentLayerResult = this.executeSteps(this._steps, this.responseDoc, this.options)
+  }
 
-    // Don't wait for animations to finish.
-    return up.RenderResult.both(currentLayerResult, otherLayersResult)
+  _renderOtherLayers() {
+    // Can be called twice but most only execute once.
+    if (this._otherLayersResult) return
+
+    // We execute steps on other layers first. If the render pass ends up closing this
+    // layer (e.g. by reaching a close condition or X-Up-Accept-Layer) we want:
+    //
+    // (1) ... to use the discarded content for hungry elements on other layers that have [up-if-layer=any].
+    // (2) ... to see updated hungry elements on other layers in onDismissed/onAccepted handlers.
+    let otherLayerSteps = this._getHungrySteps().other
+    this._otherLayersResult = this.executeSteps(otherLayerSteps, this.responseDoc)
   }
 
   _matchPreflight() {
+    this._matchOldElements()
+    this._compressNestedSteps()
+  }
+
+  _matchPostflight() {
+    this._matchOldElements()
+    this._addHungryStepsOnCurrentLayer()
+    this._compressNestedSteps()
+    this._matchNewElements()
+  }
+
+  _addHungryStepsOnCurrentLayer() {
+    this._steps.push(...this._getHungrySteps().current)
+  }
+
+  _matchOldElements() {
     this._steps = this._steps.filter((step) => {
-      const finder = new up.FragmentFinder(step)
+
+      const finder = new up.FragmentFinder({
+        selector: step.selector,
+        origin: step.origin,
+        layer: step.layer
+      })
+      // const finder = new up.FragmentFinder(step)
       // Try to find fragments matching step.selector within step.layer.
       // Note that step.oldElement might already have been set by up.radio.hungrySteps().
       step.oldElement ||= finder.find()
@@ -141,14 +174,14 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
         throw new up.CannotMatch()
       }
     })
-
-    this._steps = up.fragment.compressNestedSteps(this._steps)
   }
 
-  _matchPostflight(responseDoc) {
-    this._matchPreflight()
+  _matchNewElements() {
+    this._steps = this.responseDoc.selectAndCommitSteps(this._steps)
+  }
 
-    this._steps = responseDoc.selectAndReserveSteps(this._steps)
+  _compressNestedSteps() {
+    this._steps = up.fragment.compressNestedSteps(this._steps)
   }
 
   _getHungrySteps() {
@@ -198,7 +231,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   static {
     u.memoizeMethod(this.prototype, {
       _matchPreflight: true,
-      _matchPostflight: true,
+      _matchOldElements: true,
       _hasHistory: true,
       _getHungrySteps: true,
     })

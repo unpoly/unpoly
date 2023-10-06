@@ -3,50 +3,56 @@ const e = up.element
 
 up.ResponseDoc = class ResponseDoc {
 
-  constructor(options) {
-    this.root =
-      this._parseDocument(options) ||
-      this._parseFragment(options) ||
-      this._parseContent(options)
+  constructor({ document, fragment, content, target, origin, cspNonces }) {
+    if (document) {
+      this._parseDocument(document)
+    } else if (fragment) {
+      this._parseFragment(fragment)
+    } else {
+      // Parsing { inner } is the last option we try. It should always succeed in case someone
+      // tries `up.layer.open()` without any args. Hence we default the innerHTML to an empty string.
+      this._parseContent(content || '', target)
+    }
 
     // If the user doesn't want to run scripts in the new fragment, we disable all <script> elements.
     // While <script> elements parsed by `DOMParser` are inert anyway, we also _parse HTML through
     // other methods, which do create non-inert <script> elements.
     if (!up.fragment.config.runScripts) {
-      this.root.querySelectorAll('script').forEach((e) => e.remove())
+      this._document.querySelectorAll('script').forEach((e) => e.remove())
     }
 
-    this.cspNonces = options.cspNonces
+    this._cspNonces = cspNonces
 
-    if (options.origin) {
-      let originSelector = up.fragment.tryToTarget(options.origin)
+    if (origin) {
+      let originSelector = up.fragment.tryToTarget(origin)
       if (originSelector) {
-        this.rediscoveredOrigin = this.select(originSelector)
+        this._rediscoveredOrigin = this.select(originSelector)
       }
     }
   }
 
-  _parseDocument(options) {
-    let document = this._parse(options.document, e.createBrokenDocumentFromHTML)
-    if (document) {
-      // Remember that we need to fix <script> and <noscript> elements later.
-      // We could fix these elements right now for the entire document, but since we will only use
-      // a fragment, this would cause excessive work.
-      this.scriptishNeedFix = true
+  _parseDocument(document) {
+    document = this._parse(document, e.createBrokenDocumentFromHTML)
 
-      return document
-    }
+    // Remember that we need to fix <script> and <noscript> elements later.
+    // We could fix these elements right now for the entire document, but since we will only use
+    // a fragment, this would cause excessive work.
+    this._scriptishNeedFix = true
+
+    this._useParseResult(document)
   }
 
-  _parseContent(options) {
-    // Parsing { inner } is the last option we try. It should always succeed in case someone
-    // tries `up.layer.open()` without any args. Hence we set the innerHTML to an empty string.
-    let content = options.content || ''
-    let target = options.target || up.fail("must pass a { target } when passing { content }")
+  _parseFragment(fragment) {
+    fragment = this._parse(fragment, e.createFromHTML)
+    this._useParseResult(fragment)
+  }
+
+  _parseContent(content, target) {
+    if(!target) up.fail("must pass a { target } when passing { content }")
 
     target = u.map(up.fragment.parseTargetSteps(target), 'selector').join()
 
-    // Conjure an element that will later match options.target in @select()
+    // Conjure an element that will later match target in @select()
     const matchingElement = e.createFromSelector(target)
 
     if (u.isString(content)) {
@@ -56,29 +62,36 @@ up.ResponseDoc = class ResponseDoc {
       matchingElement.appendChild(content)
     }
 
-    return matchingElement
+    this._useParseResult(matchingElement)
   }
 
-  _parseFragment(options) {
-    return this._parse(options.fragment)
-  }
-
-  _parse(value, parseFn = e.createFromHTML) {
+  _parse(value, parseFn) {
     if (u.isString(value)) {
       value = parseFn(value)
     }
     return value
   }
 
+  _useParseResult(node) {
+    if (node instanceof Document) {
+      this._document = node
+    } else {
+      // TODO: Explain why we're doing this: Otherwise removing the root will still make it available
+      this._document = document.createElement('up-document')
+      this._document.append(node)
+      this._document.documentElement = node
+    }
+  }
+
   rootSelector() {
-    return up.fragment.toTarget(this.root)
+    return up.fragment.toTarget(this._document.documentElement)
   }
 
   get title() {
-    // We get it from the <head> instead of this.root.title.
+    // We get it from the <head> instead of this._document.title.
     // We want to distinguish between a parsed document that does not have a <head> or <title>
     // and a given, but empty title.
-    return this.fromHead(this._getTitleText)
+    return this._fromHead(this._getTitleText)
   }
 
   /*
@@ -88,10 +101,10 @@ up.ResponseDoc = class ResponseDoc {
   parsed from a fragment, or from a docuemnt without a `<head>` element.
   */
   // eslint-disable-next-line getter-return
-  getHead() {
+  _getHead() {
     // The root may be a `Document` (which always has a `#head`, even if it wasn't present in the HTML)
     // or an `Element` (which never has a `#head`).
-    let { head } = this.root
+    let { head } = this._document
 
     // DocumentParser also produces a document with a <head>, even if the initial HTML
     // has no <head> element. To work around this we consider the head to be missing
@@ -101,17 +114,17 @@ up.ResponseDoc = class ResponseDoc {
     }
   }
 
-  fromHead(fn) {
-    let head = this.getHead()
+  _fromHead(fn) {
+    let head = this._getHead()
     return head && fn(head)
   }
 
   get metaElements() {
-    return this.fromHead(up.history.findMetas)
+    return this._fromHead(up.history.findMetas)
   }
 
   get assets() {
-    return this.fromHead(up.script.findAssets)
+    return this._fromHead(up.script.findAssets)
   }
 
   _getTitleText(head) {
@@ -127,57 +140,40 @@ up.ResponseDoc = class ResponseDoc {
   select(selector) {
     let finder = new up.FragmentFinder({
       selector: selector,
-      origin: this.rediscoveredOrigin,
-      externalRoot: this.root,
+      origin: this._rediscoveredOrigin,
+      document: this._document,
     })
     return finder.find()
   }
 
-  selectStep(step) {
+  selectAndCommitSteps(steps) {
+    return steps.filter((step) => {
+      return this._trySelectStep(step) || this._cannotMatchStep(step)
+    })
+  }
+
+  _trySelectStep(step) {
     // Look for a match in the new content.
     // The new content has no layers, so no { layer } option here.
     let newElement = this.select(step.selector)
     if (newElement && (!step.ifContent || e.hasContent(newElement))) {
-      return newElement
+      step.newElement = newElement
+      return true
     }
   }
 
-  selectAndReserveSteps(steps) {
-    steps = steps.filter((step) => {
-      return step.newElement ||= this.selectStep(step) || this.cannotMatchStep(step)
-    })
-
-    // Now that we know we could match all steps, remove their { newElement }
-    // from the DOM so they become unavailable for re-selecting.
-    // In particular we don't want hungry element processing to re-select
-    // elements that were already selected for the explicit target.
-    for (let step of steps) step.newElement.remove()
-
-    return steps
-  }
-
-  cannotMatchStep(step) {
+  _cannotMatchStep(step) {
     if (!step.maybe) {
       // An error message will be chosen by up.Change.FromContent
       throw new up.CannotMatch()
     }
   }
 
-  // commitElement(element) {
-  //   this.finalizeElement(element)
-  //   // Remove the newElement so they cannot be re-selected.
-  //   element.remove()
-  // }
-
-  reserveElement(element) {
-    element.remove()
-  }
-
   finalizeElement(element) {
     // Rewrite per-request CSP nonces to match that of the current page.
-    up.NonceableCallback.adoptNonces(element, this.cspNonces)
+    up.NonceableCallback.adoptNonces(element, this._cspNonces)
 
-    if (this.scriptishNeedFix) {
+    if (this._scriptishNeedFix) {
       element.querySelectorAll('noscript, script').forEach(e.fixScriptish)
     }
   }
@@ -185,7 +181,7 @@ up.ResponseDoc = class ResponseDoc {
   static {
     // Cache since multiple plans will query this.
     u.memoizeMethod(this.prototype, {
-      getHead: true,
+      _getHead: true,
     })
   }
 
