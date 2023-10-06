@@ -1109,6 +1109,27 @@ describe 'up.element', ->
       expect(element).toBeVisible()
       expect(getComputedStyle(element).display).toBe('flex')
 
+  describe 'up.element.isEmpty()', ->
+
+    it 'returns true for an element without text and without children', ->
+      element = up.element.createFromHTML('<span></span>')
+
+      expect(up.element.isEmpty(element)).toBe(true)
+
+    it 'returns false for an element with text', ->
+      element = up.element.createFromHTML('<span>text</span>')
+
+      expect(up.element.isEmpty(element)).toBe(false)
+
+    it 'returns false for an element with a child element', ->
+      element = up.element.createFromHTML('<div><span>text</span></div>')
+
+      expect(up.element.isEmpty(element)).toBe(false)
+
+    it 'returns false for an element with an empty child element', ->
+      element = up.element.createFromHTML('<div><span></span></div>')
+
+      expect(up.element.isEmpty(element)).toBe(false)
 
   describe 'up.element.parseSelector()', ->
 

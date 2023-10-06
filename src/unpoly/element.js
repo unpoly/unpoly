@@ -1353,13 +1353,23 @@ up.element = (function() {
   }
 
   /*-
-  Returns whether the given element has content.
+  Returns whether the given element has no content.
 
   An element is considered to have content if it has either child elements or non-whitespace text.
 
   ### Examples
 
-  These `<div>` elements are all considered to have content:
+  These `<div>` elments are all considered empty:
+
+  ```html
+  <div></div>
+
+  <div>   </div>
+
+  <div attr="text"></div>
+  ```
+
+  These `<div>` elements are *not* considered empty:
 
   ```html
   <div>
@@ -1375,24 +1385,14 @@ up.element = (function() {
   </div>
   ```
 
-  These `<div>` elments are *not* considered to have content:
-
-  ```html
-  <div></div>
-
-  <div>   </div>
-
-  <div attr="text"></div>
-  ```
-
-  @function up.element.hasContent
+  @function up.element.isEmpty
   @param {Element} element
   @return {boolean}
-    Whether the given element has content.
+    Whether the given element is empty.
   @experimental
   */
-  function hasContent(element) {
-    return element.children.length > 0 || !!element.innerText.trim()
+  function isEmpty(element) {
+    return !element.children.length > 0 && !element.innerText.trim()
   }
 
   return {
@@ -1451,6 +1451,6 @@ up.element = (function() {
     cleanJQuery,
     parseSelector,
     filteredQuery,
-    hasContent,
+    isEmpty,
   }
 })()

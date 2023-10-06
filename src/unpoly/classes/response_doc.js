@@ -156,7 +156,7 @@ up.ResponseDoc = class ResponseDoc {
     // Look for a match in the new content.
     // The new content has no layers, so no { layer } option here.
     let newElement = this.select(step.selector)
-    if (newElement && (!step.ifContent || e.hasContent(newElement))) {
+    if (newElement && (!step.ifContent || !e.isEmpty(newElement))) {
       step.newElement = newElement
       return true
     }
