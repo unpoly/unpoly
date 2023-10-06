@@ -31,7 +31,19 @@ module.exports = {
     "up": "writable",
     "jQuery": "readonly",
     "require": "readonly",
-    "jasmine": "writable"
-  }
-};
+    "module": "readonly",
+  },
+  "overrides": [
+    {
+      "files": ["spec/**/*.js"],
+      "globals": {
+        "jasmine": "writable",
+        "describe": "readonly",
+        "it": "readonly",
+        "expect": "readonly",
+        "fixture": "readonly",
+      }
+    }
+  ]
 
+}
