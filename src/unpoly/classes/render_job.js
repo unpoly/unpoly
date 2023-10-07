@@ -68,9 +68,9 @@ up.RenderJob = class RenderJob {
       // depending on options.failOptions.
       if (!result.none) result.options.onRendered?.(result)
 
-      // Run an { onFinished } callback, but don't cause an `Unhandled rejection` error
-      // if revalidation fails. There is no callback for a failed revalidation.
-      result.finished.then(result.options.onFinished, u.noop)
+      // Run an { onFinished } callback if revalidation succeeds.
+      // There is no callback for a failed revalidation.
+      result.finished.then(result.options.onFinished, up.error.throwCritical)
       return true
     }
   }

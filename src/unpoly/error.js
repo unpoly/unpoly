@@ -61,18 +61,18 @@ up.error = (function() {
   @internal
   */
   function muteUncriticalRejection(promise) {
-    return promise.catch(rethrowCritical)
+    return promise.catch(throwCritical)
   }
 
   function muteUncriticalSync(block) {
     try {
       return block()
     } catch (e) {
-      rethrowCritical(e)
+      throwCritical(e)
     }
   }
 
-  function rethrowCritical(value) {
+  function throwCritical(value) {
     if (isCritical(value)) {
       throw value
     }
@@ -80,8 +80,7 @@ up.error = (function() {
 
   return {
     fail,
-    rethrowCritical,
-    isCritical,
+    throwCritical,
     muteUncriticalRejection,
     muteUncriticalSync,
   }

@@ -214,7 +214,7 @@ up.FragmentPolling = class FragmentPolling {
     this._loading = false
     this._satisfyInterval()
     this._scheduleRemainingTime()
-    up.error.rethrowCritical(reason)
+    up.error.throwCritical(reason)
   }
 
   _satisfyInterval() {
