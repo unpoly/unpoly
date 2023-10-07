@@ -9,20 +9,45 @@ Next release
 
 
 - Flash v4
-  - [up-hungry][up-if-layer=any] should grab a fragment within the explicit target if the target is not going to be used due to the layer closing
-    - Either go with the idea of temporarily setting an up:layer:accepting/dismissing handler that updates hungry elements on other layers before the layer is closing
-    - Or drop the requirement that closed handlers see [up-if-layer=any]
   - Introduce up:fragment:hungry event with { oldFragment, newFragment, renderOptions } props
   - Introduce [up-on-hungry] callback
   - Remove [up-if-content] (no migration needed)
   - Remove [up-if-history] with migration via up:fragment:hungry
   - Add { renderOptions } to up:fragment:keep event
-  - Introduce [up-flash]
-    - Shortform for <div up-hungry up-if-layer="any" up-keep up-on-keep="if (!e.hasContent(newElement)) event.preventDefault()">
-    - Add [up-flash] as a low-prio targetResolver
+    - For this UpdateSteps needs the original render options, which are currently in noneOptions
+  - Introduce [up-alerts]
+    - Terminology
+      - [up-alerts] (Bootstrap, Tailwind UI, MUI, negative connotation in Material etc.)
+      - [up-flashes] (Rails, Primer [although they also use Toast])
+      - [up-notifications] (Bulma, good for both success and failure, long word, may also mean passive notifications)
+      - [up-messages] (too generic)
+      - [up-snackbars] (Material, uncommon)
+      - [up-toasts] (uncommon)
+      - [up-callouts] (Foundation, uncommon)
+    - Should we offer a { placement: 'merge' } to merge children?
+      - By selector?
+      - How would that relate to recursive merging?
+      - We don't need it for flashes, [up-on-keep] suffices here
+        - [up-on-keep] can already support merging, morphing, etc.
+          - However it's impractical to use it for regular fragment updates, you'd want .target:merge or something.
+    - Shortform for <div up-hungry up-if-layer="origin or child" up-keep up-on-keep="if (!e.hasContent(newElement)) event.preventDefault()" aria-live="assertive">
+    - Also set [aria-live="assertive"]
+    - Test that it works in the layout
+    - Test that it works within main
+      - Test that it works within main for multiple nested overlays
+    - [up-transition], [up-duration], [up-easing] should be possible
+    - Add [up-alerts] as a low-prio targetResolver
+    - Don't hide [up-alerts] if empty
+      => No, not good for transitions
   - Test fixed GZ integration
-- Publish up.element.hasContent() as experimental
+  - Behavior for nested overlays
+    - Either [up-if-layer=any] picks closest parent
+    - Or we do [up-if-layer="current or child"]
+      - Possibly do the same for polling
+  - When a new overlay is immediately closed, test that the elements are never rendered
 - Docs and CHANGELOG for new hungry options
+  - up.fragment lookup functions also accept a Document (also docs!)
+    - This requires a test
   - duration
   - easing
   - [up-flash]
@@ -30,12 +55,18 @@ Next release
   - New { renderOptions } for up:fragment:keep+
   - up:fragment:hungry
   - Doc page for notification flashes
+    - Explain that user needs to merge herself
+    - Explain that user needs to remove herself
 - Check if we have documented all xxOptions() functions (followOptions, submitOptions...) so they take an element and options array
 - Do we really want to u.noop here?
   - result.finished.then(result.options.onFinished, u.noop)
   - We could muteUncritical instead
 - Docs and Examples for up.layer.get()
 - up.fragment should explain that it supports CSS extensions like :has() or :main. up.element should explain that it does not.
+- Log "Nothing was rendered" makes no sense in UpdateLayer
+  - Since we may still update hungry elements
+  - Remove it there
+  - Consider logging in RenderJob "Updated X fragments"
 - CHANGELOG
   - Make screenshot for reload prompt
 - Release 3.4 or 3.5
