@@ -9,7 +9,10 @@ Next release
 
 
 - Flash v4
-  - Introduce up:fragment:hungry event with { oldFragment, newFragment, renderOptions } props
+  - Introduce up:fragment:hungry event with { target, newElement, renderOptions } props
+    - We cannot provide { newFragment } in hungrySteps
+    - We would need to set a { selectEvent } or something
+  - up:fragment:keep: Rename { newFragment } to { newElement }
   - Introduce [up-on-hungry] callback
   - Remove [up-if-content] (no migration needed)
   - Remove [up-if-history] with migration via up:fragment:hungry
@@ -24,12 +27,6 @@ Next release
       - [up-snackbars] (Material, uncommon)
       - [up-toasts] (uncommon)
       - [up-callouts] (Foundation, uncommon)
-    - Should we offer a { placement: 'merge' } to merge children?
-      - By selector?
-      - How would that relate to recursive merging?
-      - We don't need it for flashes, [up-on-keep] suffices here
-        - [up-on-keep] can already support merging, morphing, etc.
-          - However it's impractical to use it for regular fragment updates, you'd want .target:merge or something.
     - Shortform for <div up-hungry up-if-layer="origin or child" up-keep up-on-keep="if (!e.hasContent(newElement)) event.preventDefault()" aria-live="assertive">
     - Also set [aria-live="assertive"]
     - Test that it works in the layout
@@ -58,9 +55,6 @@ Next release
     - Explain that user needs to merge herself
     - Explain that user needs to remove herself
 - Check if we have documented all xxOptions() functions (followOptions, submitOptions...) so they take an element and options array
-- Do we really want to u.noop here?
-  - result.finished.then(result.options.onFinished, u.noop)
-  - We could muteUncritical instead
 - Docs and Examples for up.layer.get()
 - up.fragment should explain that it supports CSS extensions like :has() or :main. up.element should explain that it does not.
 - Log "Nothing was rendered" makes no sense in UpdateLayer
@@ -69,6 +63,7 @@ Next release
   - Consider logging in RenderJob "Updated X fragments"
 - CHANGELOG
   - Make screenshot for reload prompt
+- Remove cookie banner from {v1,v2,v3}.unpoly.com
 - Release 3.4 or 3.5
 - Deploy unpoly-demo changes
   - Make screenshot of assets-changed prompt
@@ -255,6 +250,13 @@ Backlog
 
 Documentation
 =============
+
+- Should we offer a { placement: 'merge' } to merge children?
+  - By selector?
+  - How would that relate to recursive merging?
+  - We don't need it for flashes, [up-on-keep] suffices here
+    - [up-on-keep] can already support merging, morphing, etc.
+      - However it's impractical to use it for regular fragment updates, you'd want .target:merge or something.
 
 - Example for a custom overlay
   - Example in up:link:follow
