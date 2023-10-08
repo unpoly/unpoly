@@ -303,7 +303,25 @@ describe 'up.radio', ->
         expect('#target').toHaveText('new target')
         expect('#child').toHaveText('old child')
 
-        expect(keepListener).toHaveBeenCalledWith(jasmine.anything(), child, jasmine.anything())
+      it 'allows to use [up-keep] element on a hungry element', ->
+        target = fixture('#target', text: 'old target')
+        hungry = fixture('#hungry[up-hungry][up-keep]', text: 'old hungry')
+
+        keepListener = jasmine.createSpy('up:fragment:keep listener')
+        up.on('up:fragment:keep', keepListener)
+
+        up.render '#target', document: """
+          <div id="target">new target</div>
+
+          <div id="hungry" up-hungry up-keep>
+            new hungry
+          </div>
+        """
+
+        expect('#target').toHaveText('new target')
+        expect('#hungry').toHaveText('old hungry')
+
+        expect(keepListener).toHaveBeenCalled()
 
       it "does not reload an hungry element if it has a weak selector", asyncSpec (next) ->
         $fixture('div[up-hungry]').text('old hungry')
