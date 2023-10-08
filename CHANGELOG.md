@@ -96,6 +96,8 @@ e.g. by [notifying the user](/handling-asset-changes#notifying-the-user) or [loa
 
 - The `up.syntax` package has been renamed to `up.script`.
 - Build is now compiled using ES2021 (up from ES2020). The ES6 build remains available.
+- `up.element.isEmpty()`
+- [up-on-offline] can be nonced
  
 
 3.3.0
