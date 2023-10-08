@@ -4130,6 +4130,45 @@ describe 'up.fragment', ->
 
           expect(listener).not.toHaveBeenCalled()
 
+        it 'does not emit up:assets:changed if the updated <link> and <meta> elements are not asset-related', ->
+          listener = jasmine.createSpy('up:assets:changed listener')
+          up.on('up:assets:changed', listener)
+
+          style = e.createFromSelector('script[src="scripts.js"]')
+          registerFixture(style)
+          document.head.append(style)
+
+          description = e.createFromSelector('meta[name="description"][content="old description"]')
+          registerFixture(description)
+          document.head.append(description)
+
+          nextLink = e.createFromSelector('link[rel="next"][href="/old-next"]')
+          registerFixture(nextLink)
+          document.head.append(nextLink)
+
+          fixture('.container', text: 'old container text')
+
+          up.render('.container', location: '/path', history: true, document: """
+            <html>
+              <head>
+                <script src='scripts.js'></script>
+                <meta name='description' content='new description'>
+                <link rel='next' href='/new-next'>
+              </head>
+              <body>
+                <div class='container'>
+                  new container text
+                </div>
+              </body>
+            </html>
+          """)
+
+          await wait()
+
+          expect('.container').toHaveText('new container text')
+
+          expect(listener).not.toHaveBeenCalled()
+
         it 'does not emit up:assets:changed if the response has no <head>', ->
           listener = jasmine.createSpy('up:assets:changed listener')
           up.on('up:assets:changed', listener)
@@ -5325,7 +5364,7 @@ describe 'up.fragment', ->
       describe 'CSP nonces', ->
 
         beforeEach ->
-          up.protocol.config.nonceableAttributes.push('callback')
+          up.script.config.nonceableAttributes.push('callback')
 
         it "rewrites nonceable callbacks to use the current page's nonce", asyncSpec (next) ->
           spyOn(up.protocol, 'cspNonce').and.returnValue('secret1')
