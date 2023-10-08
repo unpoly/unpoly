@@ -811,6 +811,7 @@ up.script = (function() {
   up.on('up:framework:reset', reset)
 
   return {
+    config,
     compiler: registerCompiler,
     macro: registerMacro,
     destructor: registerDestructor,
