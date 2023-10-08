@@ -91,7 +91,7 @@ up.NonceableCallback = class NonceableCallback {
     // a nonce, and only once per response.
     const getPageNonce = u.memoize(up.protocol.cspNonce)
 
-    u.each(up.protocol.config.nonceableAttributes, (attribute) => {
+    u.each(up.script.config.nonceableAttributes, (attribute) => {
       let matches = e.subtree(element, `[${attribute}^="nonce-"]`)
       u.each(matches, (match) => {
         let attributeValue = match.getAttribute(attribute)

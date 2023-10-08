@@ -60,7 +60,17 @@ up.script = (function() {
     ],
     noAssetSelectors: [
       '[up-asset=false]',
-    ]
+    ],
+    nonceableAttributes: [
+      'up-watch',
+      'up-on-accepted',
+      'up-on-dismissed',
+      'up-on-loaded',
+      'up-on-rendered',
+      'up-on-finished',
+      'up-on-error',
+      'up-on-offline',
+    ],
   }))
 
   const SYSTEM_MACRO_PRIORITIES = {

@@ -995,16 +995,6 @@ up.protocol = (function() {
     csrfToken() { return e.metaContent('csrf-token') },
     cspNonce() { return e.metaContent('csp-nonce') },
     csrfHeader: 'X-CSRF-Token', // Used by Rails. Other frameworks use different headers.
-    nonceableAttributes: [
-      'up-watch',
-      'up-on-accepted',
-      'up-on-dismissed',
-      'up-on-loaded',
-      'up-on-rendered',
-      'up-on-finished',
-      'up-on-error',
-      'up-on-offline',
-    ],
   }))
 
   function csrfHeader() {
