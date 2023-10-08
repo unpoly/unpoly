@@ -153,13 +153,33 @@ up.ResponseDoc = class ResponseDoc {
   }
 
   _trySelectStep(step) {
+    if (step.newElement) {
+      return true
+    }
+
     // Look for a match in the new content.
     // The new content has no layers, so no { layer } option here.
     let newElement = this.select(step.selector)
-    if (newElement && (!step.ifContent || !e.isEmpty(newElement))) {
-      step.newElement = newElement
-      return true
+
+    if (!newElement) {
+      return
     }
+
+    if (step.ifContent && e.isEmpty(newElement)) {
+      return
+    }
+
+    let { selectEvent } = step
+    if (selectEvent) {
+      selectEvent.newElement = newElement
+      selectEvent.renderOptions = step.originalRenderOptions
+      if (up.emit(step.oldElement, selectEvent).defaultPrevented) {
+        return
+      }
+    }
+
+    step.newElement = newElement
+    return true
   }
 
   _cannotMatchStep(step) {

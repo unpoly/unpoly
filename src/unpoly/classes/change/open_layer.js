@@ -266,6 +266,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
       history: (this.layer && this.layer.isHistoryVisible()), // we may have aborted before this.layer was built
       origin: this.options.origin,
       useHungry: this.options.useHungry,
+      originalRenderOptions: this.renderOptions,
     })
   }
 }

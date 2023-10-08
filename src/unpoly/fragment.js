@@ -1258,7 +1258,7 @@ up.fragment = (function() {
   function emitFragmentKeep(keepPlan) {
     const log = ['Keeping fragment %o', keepPlan.oldElement]
     const callback = e.callbackAttr(keepPlan.oldElement, 'up-on-keep', { exposedKeys: ['newFragment', 'newData'] })
-    return emitFromKeepPlan(keepPlan, 'up:fragment:keep', {log, callback})
+    return emitFromKeepPlan(keepPlan, 'up:fragment:keep', { log, callback })
   }
 
   function emitFromKeepPlan(keepPlan, eventType, emitDetails) {
@@ -2242,7 +2242,8 @@ up.fragment = (function() {
         ...options,
         selector,
         placement,
-        maybe
+        maybe,
+        originalRenderOptions: options,
       }
 
       steps.push(step)

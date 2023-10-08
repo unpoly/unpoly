@@ -191,6 +191,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       history: this._hasHistory(),
       origin: this.options.origin,
       useHungry: this.options.useHungry,
+      originalRenderOptions: this.options, // TODO: Reduce signature, only { layer, history } was updated from originalRenderOptions
     })
   }
 

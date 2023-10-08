@@ -64,7 +64,7 @@ up.radio = (function() {
   //   return buildHungrySteps(hungries, { history, origin })
   // }
 
-  function hungrySteps({ layer, history, origin, useHungry }) {
+  function hungrySteps({ layer, history, origin, useHungry, originalRenderOptions }) {
     let steps = { current: [], other: [] }
 
     if (!useHungry) return steps
@@ -93,6 +93,8 @@ up.radio = (function() {
 
       let motionOptions = up.motion.motionOptions(element)
 
+      let selectEvent = up.event.build('up:fragment:hungry', { log: false })
+
       let step = {
         selector: target,    // The selector for a single step is { selector }
         oldElement: element, // The match on the current page
@@ -103,6 +105,8 @@ up.radio = (function() {
         placement: 'swap',   // Hungry elements are always swapped, never appended
         useKeep: true,       // Always honor [up-keep] in hungry elements. Set here because we don't inherit default render options.
         maybe: true,         // Don't fail if we cannot match { newElement ] later.
+        selectEvent,
+        originalRenderOptions,
       }
 
       if (layer === elementLayer) {

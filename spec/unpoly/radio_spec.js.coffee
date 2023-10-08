@@ -1193,6 +1193,65 @@ describe 'up.radio', ->
           expect('.hungry').toHaveText('old hungry')
           expect('.target').toHaveText('new target')
 
+      describe 'up:fragment:hungry', ->
+
+        it 'emits an up:fragment:hungry event with details about the render pass and the new element that would be matched', ->
+          oldHungry = fixture('#hungry[up-hungry]', text: 'old hungry')
+          fixture('#target', text: 'old target')
+
+          hungryListener = jasmine.createSpy('up:fragment:hungry listener')
+          up.on('up:fragment:hungry', hungryListener)
+
+          up.render(
+            target: '#target',
+            scroll: '#target',
+            abort: 'all',
+            document: """
+              <div id="hungry" up-hungry>new hungry</div>
+              <div id="target">new target</div>
+            """
+          )
+
+          await wait()
+
+          expect('#target').toHaveText('new target')
+          expect('#hungry').toHaveText('new hungry')
+
+          expect(hungryListener.calls.count()).toBe(1)
+          expect(hungryListener.calls.argsFor(0)[0]).toBeEvent('up:fragment:hungry')
+          expect(hungryListener.calls.argsFor(0)[0].target).toEqual(jasmine.any(Element))
+          expect(hungryListener.calls.argsFor(0)[0].target).toBe(oldHungry)
+          expect(hungryListener.calls.argsFor(0)[0].newElement).toEqual(jasmine.any(Element))
+          expect(hungryListener.calls.argsFor(0)[0].newElement.id).toBe('hungry')
+          expect(hungryListener.calls.argsFor(0)[0].newElement).toHaveText('new hungry')
+          expect(hungryListener.calls.argsFor(0)[0].renderOptions).toEqual(jasmine.objectContaining(
+            target: '#target',
+            scroll: '#target',
+            abort: 'all',
+          ))
+
+        it 'does not update the element if up:fragment:hungry is prevented', ->
+          fixture('#hungry[up-hungry]', text: 'old hungry')
+          fixture('#target', text: 'old target')
+
+          hungryListener = jasmine.createSpy('up:fragment:hungry listener').and.callFake (event) -> event.preventDefault()
+          up.on('up:fragment:hungry', hungryListener)
+
+          up.render(
+            target: '#target',
+            document: """
+              <div id="hungry" up-hungry>new hungry</div>
+              <div id="target">new target</div>
+            """
+          )
+
+          await wait()
+
+          expect(hungryListener).toHaveBeenCalled()
+
+          expect('#target').toHaveText('new target')
+          expect('#hungry').toHaveText('old hungry')
+
     describe '[up-poll]', ->
 
       it 'reloads the element periodically', asyncSpec (next) ->
