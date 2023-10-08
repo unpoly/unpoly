@@ -1003,7 +1003,7 @@ up.protocol = (function() {
       'up-on-rendered',
       'up-on-finished',
       'up-on-error',
-      'up-on-offlne',
+      'up-on-offline',
     ],
   }))
 
