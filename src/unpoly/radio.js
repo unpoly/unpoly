@@ -94,6 +94,7 @@ up.radio = (function() {
       let motionOptions = up.motion.motionOptions(element)
 
       let selectEvent = up.event.build('up:fragment:hungry', { log: false })
+      let selectCallback = e.callbackAttr(element, 'up-on-hungry', { exposedKeys: ['newElement'] })
 
       let step = {
         selector: target,    // The selector for a single step is { selector }
@@ -106,6 +107,7 @@ up.radio = (function() {
         useKeep: true,       // Always honor [up-keep] in hungry elements. Set here because we don't inherit default render options.
         maybe: true,         // Don't fail if we cannot match { newElement ] later.
         selectEvent,
+        selectCallback,
         originalRenderOptions,
       }
 

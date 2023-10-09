@@ -173,7 +173,8 @@ up.ResponseDoc = class ResponseDoc {
     if (selectEvent) {
       selectEvent.newElement = newElement
       selectEvent.renderOptions = step.originalRenderOptions
-      if (up.emit(step.oldElement, selectEvent).defaultPrevented) {
+      up.emit(step.oldElement, selectEvent, { callback: step.selectCallback })
+      if (selectEvent.defaultPrevented) {
         return
       }
     }

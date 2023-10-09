@@ -1252,6 +1252,48 @@ describe 'up.radio', ->
           expect('#target').toHaveText('new target')
           expect('#hungry').toHaveText('old hungry')
 
+        it "parses an up:fragment:hungry listener from the hungry element's [up-on-hungry] attribute", ->
+          window.attributeListener = jasmine.createSpy('attribute listener')
+          oldHungry = fixture('#hungry[up-hungry]', text: 'old hungry', 'up-on-hungry': 'window.attributeListener(event, newElement)')
+          fixture('#target', text: 'old target')
+
+
+          up.render(
+            target: '#target',
+            document: """
+              <div id="hungry" up-hungry>new hungry</div>
+              <div id="target">new target</div>
+            """
+          )
+
+          await wait()
+
+          expect('#target').toHaveText('new target')
+          expect('#hungry').toHaveText('new hungry')
+
+          expect(window.attributeListener.calls.count()).toBe(1)
+          expect(window.attributeListener.calls.argsFor(0)[0]).toBeEvent('up:fragment:hungry')
+          expect(window.attributeListener.calls.argsFor(0)[1]).toEqual(jasmine.any(Element))
+          expect(window.attributeListener.calls.argsFor(0)[1]).toHaveText('new hungry')
+          delete window.attributeListener
+
+        it 'does not update the element if an [up-on-hungry] attribute prevents the event', ->
+          fixture('#hungry[up-hungry]', text: 'old hungry', 'up-on-hungry': 'event.preventDefault()')
+          fixture('#target', text: 'old target')
+
+          up.render(
+            target: '#target',
+            document: """
+              <div id="hungry" up-hungry>new hungry</div>
+              <div id="target">new target</div>
+            """
+          )
+
+          await wait()
+
+          expect('#target').toHaveText('new target')
+          expect('#hungry').toHaveText('old hungry')
+
     describe '[up-poll]', ->
 
       it 'reloads the element periodically', asyncSpec (next) ->
