@@ -86,8 +86,6 @@ up.radio = (function() {
         continue
       }
 
-      let ifContent = e.booleanAttr(element, 'up-if-content')
-
       let ifLayer = e.attr(element, 'up-if-layer')
       let elementLayer = up.layer.get(element)
 
@@ -101,7 +99,6 @@ up.radio = (function() {
         oldElement: element, // The match on the current page
         layer: elementLayer, // May be different from { layer } when we found an [up-hungry][up-if-layer=any]
         origin,              // The { origin } passed into the fn. will be used to match { newElement } later.
-        ifContent,
         ...motionOptions,    // The hungry element defines its own transition, duration, easing.
         placement: 'swap',   // Hungry elements are always swapped, never appended
         useKeep: true,       // Always honor [up-keep] in hungry elements. Set here because we don't inherit default render options.

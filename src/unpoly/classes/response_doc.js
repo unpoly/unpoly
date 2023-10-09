@@ -165,10 +165,6 @@ up.ResponseDoc = class ResponseDoc {
       return
     }
 
-    if (step.ifContent && e.isEmpty(newElement)) {
-      return
-    }
-
     let { selectEvent } = step
     if (selectEvent) {
       selectEvent.newElement = newElement
