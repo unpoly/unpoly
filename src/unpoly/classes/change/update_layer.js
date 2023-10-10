@@ -186,13 +186,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
   _getHungrySteps() {
     // Find all [up-hungry] elements matching our layer and fragments.
-    return up.radio.hungrySteps({
-      layer: this.layer,
-      history: this._hasHistory(),
-      origin: this.options.origin,
-      useHungry: this.options.useHungry,
-      originalRenderOptions: this.options, // TODO: Reduce signature, only { layer, history } was updated from originalRenderOptions
-    })
+    return up.radio.hungrySteps(this._getEffectiveRenderOptions())
   }
 
   _setScrollAndFocusOptions() {
@@ -227,6 +221,14 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // one targeted fragment has auto-history.
     const oldFragments = u.map(this._steps, 'oldElement')
     return u.some(oldFragments, up.fragment.hasAutoHistory)
+  }
+
+  _getEffectiveRenderOptions() {
+    return {
+      ...this.options,
+      layer: this.layer,
+      history: this._hasHistory(),
+    }
   }
 
   static {

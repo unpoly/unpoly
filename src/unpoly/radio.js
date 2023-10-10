@@ -64,7 +64,8 @@ up.radio = (function() {
   //   return buildHungrySteps(hungries, { history, origin })
   // }
 
-  function hungrySteps({ layer, history, origin, useHungry, originalRenderOptions }) {
+  function hungrySteps(renderOptions) {
+    let { useHungry, origin, layer } = renderOptions
     let steps = { current: [], other: [] }
 
     if (!useHungry) return steps
@@ -74,15 +75,9 @@ up.radio = (function() {
     let hungries = up.fragment.all(hungrySelector, { layer: 'any' })
 
     for (let element of hungries) {
-      let target = up.fragment.tryToTarget(element, { origin })
-
-      if (!target) {
+      let selector = up.fragment.tryToTarget(element, { origin })
+      if (!selector) {
         up.warn('[up-hungry]', 'Ignoring untargetable fragment %o', element)
-        continue
-      }
-
-      let ifHistory = e.booleanAttr(element, 'up-if-history')
-      if (ifHistory && !history) {
         continue
       }
 
@@ -91,21 +86,26 @@ up.radio = (function() {
 
       let motionOptions = up.motion.motionOptions(element)
 
+      // We cannot emit up:fragment:hungry here as we don't know { newElement } yet.
       let selectEvent = up.event.build('up:fragment:hungry', { log: false })
       let selectCallback = e.callbackAttr(element, 'up-on-hungry', { exposedKeys: ['newElement'] })
 
       let step = {
-        selector: target,    // The selector for a single step is { selector }
+        selector,            // The selector for a single step is { selector }
         oldElement: element, // The match on the current page
         layer: elementLayer, // May be different from { layer } when we found an [up-hungry][up-if-layer=any]
         origin,              // The { origin } passed into the fn. will be used to match { newElement } later.
         ...motionOptions,    // The hungry element defines its own transition, duration, easing.
         placement: 'swap',   // Hungry elements are always swapped, never appended
         useKeep: true,       // Always honor [up-keep] in hungry elements. Set here because we don't inherit default render options.
-        maybe: true,         // Don't fail if we cannot match { newElement ] later.
-        selectEvent,
-        selectCallback,
-        originalRenderOptions,
+        maybe: true,         // Don't fail if we cannot match { newElement } later.
+        selectEvent,         // Used by up.ResponseDoc#selectStep()
+        selectCallback,      // Used by up.ResponseDoc#selectStep()
+        // The step also gets a reference to the original render options.
+        // Although these render options are not used to render the hungry step, it will be
+        // passed to up:fragment:hungry listener to e.g. only update hungry elements if the
+        // original render pass would update history.
+        originalRenderOptions: renderOptions,
       }
 
       if (layer === elementLayer) {

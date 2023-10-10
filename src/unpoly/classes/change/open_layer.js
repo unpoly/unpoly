@@ -205,7 +205,14 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
       this.layer.history = up.fragment.hasAutoHistory(this._content)
     }
 
-    this.layer.parent.saveHistory()
+    let { parent } = this.layer
+
+    // If an ancestor layer was opened with the wish to not affect history, this
+    // child layer must not affect it either, regardless of its @history setting.
+    this.layer.history &&= parent.history
+
+    // The parent's saved history will be restored when this new overlay is closed.
+    parent.saveHistory()
 
     // For the initial fragment insertion we always update its location, even if the layer
     // does not have visible history ({ history } attribute). This ensures that a
@@ -242,7 +249,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // be emitted on. We don't want to emit it on @layer.parent.element since users
     // might confuse this with the event for @layer.parent itself opening.
     //
-    // There is no @layer.onOpen() handler to accompany the DOM event.
+    // There is no { onOpen } or [up-on-open] handler to accompany the DOM event.
     up.event.assertEmitted('up:layer:open', {
       origin: this._origin,
       baseLayer: this._baseLayer, // sets up.layer.current
@@ -261,12 +268,15 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
   }
 
   _getHungrySteps() {
-    return up.radio.hungrySteps({
-      layer: null, // don't even try to find elements on the new layer
-      history: (this.layer && this.layer.isHistoryVisible()), // we may have aborted before this.layer was built
-      origin: this.options.origin,
-      useHungry: this.options.useHungry,
-      originalRenderOptions: this.renderOptions,
-    })
+    return up.radio.hungrySteps(this._getEffectiveRenderOptions())
   }
+
+  _getEffectiveRenderOptions() {
+    return {
+      ...this.options,
+      layer: this.layer,
+      history: this.layer.history,
+    }
+  }
+
 }

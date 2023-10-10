@@ -586,7 +586,7 @@ up.Layer = class Layer extends up.Record {
   }
 
   saveHistory() {
-    if (this.isHistoryVisible()) {
+    if (this.history) {
       this.savedTitle = document.title
       this.savedMetas = up.history.findMetas()
       this.savedLocation = up.history.location
@@ -650,14 +650,8 @@ up.Layer = class Layer extends up.Record {
     }
   }
 
-  isHistoryVisible() {
-    // If an ancestor layer was opened with the wish to not affect history, this
-    // child layer must not affect it either, regardless of its @history setting.
-    return this.history && (this.isRoot() || this.parent.isHistoryVisible())
-  }
-
   showsLiveHistory() {
-    return this.isHistoryVisible() && this.isFront() && (up.history.config.enabled || this.isRoot())
+    return this.history && this.isFront() // && (up.history.config.enabled || this.isRoot())
   }
 
   /*-

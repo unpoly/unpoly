@@ -1082,43 +1082,44 @@ describe 'up.radio', ->
 
                 expect(outsideSpy).toHaveBeenCalledWith('new outside')
 
-      describe 'with [up-if-history]', ->
+      if up.migrate.loaded
+        describe 'with [up-if-history]', ->
 
-        it 'only updates a hungry fragment when updating history', asyncSpec (next) ->
-          $fixture('.hungry[up-hungry]').text('old hungry').attr('up-if-history', '')
-          $fixture('.target').text('target version 1')
+          it 'only updates a hungry fragment when updating history', asyncSpec (next) ->
+            $fixture('.hungry[up-hungry]').text('old hungry').attr('up-if-history', '')
+            $fixture('.target').text('target version 1')
 
-          up.render('.target', url: '/other')
+            up.render('.target', url: '/other')
 
-          next ->
-            jasmine.respondWith """
-              <div class="target">
-                target version 2
-              </div>
-              <div class="hungry">
-                new hungry
-              </div>
-            """
+            next ->
+              jasmine.respondWith """
+                <div class="target">
+                  target version 2
+                </div>
+                <div class="hungry">
+                  new hungry
+                </div>
+              """
 
-          next ->
-            expect('.target').toHaveText('target version 2')
-            expect('.hungry').toHaveText('old hungry')
+            next ->
+              expect('.target').toHaveText('target version 2')
+              expect('.hungry').toHaveText('old hungry')
 
-            up.render('.target', url: '/target', history: true)
+              up.render('.target', url: '/target', history: true)
 
-          next ->
-            jasmine.respondWith """
-              <div class="target">
-                target version 3
-              </div>
-              <div class="hungry">
-                new hungry
-              </div>
-            """
+            next ->
+              jasmine.respondWith """
+                <div class="target">
+                  target version 3
+                </div>
+                <div class="hungry">
+                  new hungry
+                </div>
+              """
 
-          next ->
-            expect('.target').toHaveText('target version 3')
-            expect('.hungry').toHaveText('new hungry')
+            next ->
+              expect('.target').toHaveText('target version 3')
+              expect('.hungry').toHaveText('new hungry')
 
       describe 'up:fragment:hungry', ->
 
