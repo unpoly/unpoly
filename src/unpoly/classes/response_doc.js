@@ -167,7 +167,7 @@ up.ResponseDoc = class ResponseDoc {
 
     let { selectEvent } = step
     if (selectEvent) {
-      selectEvent.newElement = newElement
+      selectEvent.newFragment = newElement
       selectEvent.renderOptions = step.originalRenderOptions
       up.emit(step.oldElement, selectEvent, { callback: step.selectCallback })
       if (selectEvent.defaultPrevented) {

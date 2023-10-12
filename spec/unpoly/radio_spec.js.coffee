@@ -1149,9 +1149,9 @@ describe 'up.radio', ->
           expect(hungryListener.calls.argsFor(0)[0]).toBeEvent('up:fragment:hungry')
           expect(hungryListener.calls.argsFor(0)[0].target).toEqual(jasmine.any(Element))
           expect(hungryListener.calls.argsFor(0)[0].target).toBe(oldHungry)
-          expect(hungryListener.calls.argsFor(0)[0].newElement).toEqual(jasmine.any(Element))
-          expect(hungryListener.calls.argsFor(0)[0].newElement.id).toBe('hungry')
-          expect(hungryListener.calls.argsFor(0)[0].newElement).toHaveText('new hungry')
+          expect(hungryListener.calls.argsFor(0)[0].newFragment).toEqual(jasmine.any(Element))
+          expect(hungryListener.calls.argsFor(0)[0].newFragment.id).toBe('hungry')
+          expect(hungryListener.calls.argsFor(0)[0].newFragment).toHaveText('new hungry')
           expect(hungryListener.calls.argsFor(0)[0].renderOptions).toEqual(jasmine.objectContaining(
             target: '#target',
             scroll: '#target',
@@ -1182,7 +1182,7 @@ describe 'up.radio', ->
 
         it "parses an up:fragment:hungry listener from the hungry element's [up-on-hungry] attribute", ->
           window.attributeListener = jasmine.createSpy('attribute listener')
-          oldHungry = fixture('#hungry[up-hungry]', text: 'old hungry', 'up-on-hungry': 'window.attributeListener(event, newElement)')
+          oldHungry = fixture('#hungry[up-hungry]', text: 'old hungry', 'up-on-hungry': 'window.attributeListener(event, newFragment)')
           fixture('#target', text: 'old target')
 
 

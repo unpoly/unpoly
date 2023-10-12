@@ -88,7 +88,7 @@ up.radio = (function() {
 
       // We cannot emit up:fragment:hungry here as we don't know { newElement } yet.
       let selectEvent = up.event.build('up:fragment:hungry', { log: false })
-      let selectCallback = e.callbackAttr(element, 'up-on-hungry', { exposedKeys: ['newElement'] })
+      let selectCallback = e.callbackAttr(element, 'up-on-hungry', { exposedKeys: ['newFragment'] })
 
       let step = {
         selector,            // The selector for a single step is { selector }

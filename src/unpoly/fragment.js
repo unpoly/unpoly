@@ -1256,20 +1256,10 @@ up.fragment = (function() {
   }
 
   function emitFragmentKeep(keepPlan) {
-    const log = ['Keeping fragment %o', keepPlan.oldElement]
-    const callback = e.callbackAttr(keepPlan.oldElement, 'up-on-keep', { exposedKeys: ['newFragment', 'newData'] })
-    return emitFromKeepPlan(keepPlan, 'up:fragment:keep', { log, callback })
-  }
-
-  function emitFromKeepPlan(keepPlan, eventType, emitDetails) {
-    const keepable = keepPlan.oldElement
-
-    const event = up.event.build(eventType, {
-      newFragment: keepPlan.newElement,
-      newData: keepPlan.newData
-    })
-
-    return up.emit(keepable, event, emitDetails)
+    let { oldElement, newElement: newFragment, newData } = keepPlan
+    const log = ['Keeping fragment %o', oldElement]
+    const callback = e.callbackAttr(oldElement, 'up-on-keep', { exposedKeys: ['newFragment', 'newData'] })
+    return up.emit(oldElement, 'up:fragment:keep', { newFragment, newData, log, callback })
   }
 
   function emitFragmentDestroyed(fragment, options) {
