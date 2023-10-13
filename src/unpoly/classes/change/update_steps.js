@@ -239,7 +239,8 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
       const plan = {
         oldElement, // the element that should be kept
         newElement: partner, // the element that would have replaced it but now does not
-        newData: up.script.data(partner) // the parsed up-data attribute of the element we will discard
+        newData: up.script.data(partner), // the parsed up-data attribute of the element we will discard
+        renderOptions: options,
       }
 
       if (!up.fragment.emitKeep(plan).defaultPrevented) {

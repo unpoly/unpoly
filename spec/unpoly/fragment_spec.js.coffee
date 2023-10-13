@@ -7691,6 +7691,20 @@ describe 'up.fragment', ->
               )
             )
 
+        it 'emits an up:fragment:keep event with information about the render pass', ->
+          keeper = fixture('.keeper[up-keep]', text: 'old inside')
+          listener = jasmine.createSpy('event listener')
+          keeper.addEventListener('up:fragment:keep', listener)
+          up.render('.keeper', document: "<div class='keeper new' up-keep>new-inside</div>", abort: 'all', scroll: 'reset')
+
+          await wait()
+
+          expect(listener).toHaveBeenCalledWith(
+            jasmine.objectContaining(
+              renderOptions: jasmine.objectContaining(abort: 'all', scroll: 'reset')
+            )
+          )
+
         it 'emits an up:fragment:keep with { newData: {} } if the new element had no up-data value', asyncSpec (next) ->
           keepListener = jasmine.createSpy()
           up.on('up:fragment:keep', keepListener)

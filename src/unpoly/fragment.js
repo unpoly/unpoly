@@ -1256,10 +1256,10 @@ up.fragment = (function() {
   }
 
   function emitFragmentKeep(keepPlan) {
-    let { oldElement, newElement: newFragment, newData } = keepPlan
+    let { oldElement, newElement: newFragment, newData, renderOptions } = keepPlan
     const log = ['Keeping fragment %o', oldElement]
     const callback = e.callbackAttr(oldElement, 'up-on-keep', { exposedKeys: ['newFragment', 'newData'] })
-    return up.emit(oldElement, 'up:fragment:keep', { newFragment, newData, log, callback })
+    return up.emit(oldElement, 'up:fragment:keep', { newFragment, newData, renderOptions, log, callback })
   }
 
   function emitFragmentDestroyed(fragment, options) {
