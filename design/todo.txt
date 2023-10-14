@@ -9,39 +9,7 @@ Next release
 
 
 - Flash v4
-  - Introduce up:fragment:hungry event with { target, newElement, renderOptions } props
-    - We cannot provide { newFragment } in hungrySteps
-    - We would need to set a { selectEvent } or something
-  - up:fragment:keep: Rename { newFragment } to { newElement }
-  - Introduce [up-on-hungry] callback
-  - Remove [up-if-content] (no migration needed)
-  - Remove [up-if-history] with migration via up:fragment:hungry
-  - Add { renderOptions } to up:fragment:keep event
-    - For this UpdateSteps needs the original render options, which are currently in noneOptions
-  - Introduce [up-alerts]
-    - Terminology
-      - [up-alerts] (Bootstrap, Tailwind UI, MUI, negative connotation in Material etc.)
-      - [up-flashes] (Rails, Primer [although they also use Toast])
-      - [up-notifications] (Bulma, good for both success and failure, long word, may also mean passive notifications)
-      - [up-messages] (too generic)
-      - [up-snackbars] (Material, uncommon)
-      - [up-toasts] (uncommon)
-      - [up-callouts] (Foundation, uncommon)
-    - Shortform for <div up-hungry up-if-layer="origin or child" up-keep up-on-keep="if (!e.hasContent(newElement)) event.preventDefault()" aria-live="assertive">
-    - Also set [aria-live="assertive"]
-    - Test that it works in the layout
-    - Test that it works within main
-      - Test that it works within main for multiple nested overlays
-    - [up-transition], [up-duration], [up-easing] should be possible
-    - Add [up-alerts] as a low-prio targetResolver
-    - Don't hide [up-alerts] if empty
-      => No, not good for transitions
   - Test fixed GZ integration
-  - Behavior for nested overlays
-    - Either [up-if-layer=any] picks closest parent
-    - Or we do [up-if-layer="current or child"]
-      - Possibly do the same for polling
-  - When a new overlay is immediately closed, test that the elements are never rendered
 - Docs and CHANGELOG for new hungry options
   - up.fragment lookup functions also accept a Document (also docs!)
     - This requires a test
@@ -49,18 +17,23 @@ Next release
   - easing
   - [up-flash]
   - [up-on-hungry]
-  - New { renderOptions } for up:fragment:keep+
+  - New { renderOptions } for up:fragment:keep
   - up:fragment:hungry
   - Doc page for notification flashes
     - Explain that user needs to merge herself
     - Explain that user needs to remove herself
-- Check if we have documented all xxOptions() functions (followOptions, submitOptions...) so they take an element and options array
-- Docs and Examples for up.layer.get()
-- up.fragment should explain that it supports CSS extensions like :has() or :main. up.element should explain that it does not.
-- Log "Nothing was rendered" makes no sense in UpdateLayer
-  - Since we may still update hungry elements
-  - Remove it there
-  - Consider logging in RenderJob "Updated X fragments"
+  - Do all guardEvents document event.renderOptions
+    - up:form:submit
+    - up:link:follow
+    - up:link:preload
+    - up:form:validate
+  - Check if we have documented all xxOptions() functions (followOptions, submitOptions...) so they take an element and options array
+  - Docs and Examples for up.layer.get()
+  - Docs for [up-hungry] should mention
+    - that an element from a response is only used once,
+      - preferrably by an explict target
+    - hungry elements are merged into an explicit target
+  - up.fragment should explain that it supports CSS extensions like :has() or :main. up.element should explain that it does not.
 - CHANGELOG
   - Make screenshot for reload prompt
 - Remove cookie banner from {v1,v2,v3}.unpoly.com
@@ -74,7 +47,7 @@ Backlog
 
 - Offer a preventable up:hungry:select event / callback
   - Or up:hungry:select / [up-on-select]
-  - We would need to pass responseDoc to up.radio.hungrySteps if we want to provide newElement
+  - We would need to pass responseDoc to up.radio.hungrySteps if we want to provide newElementx
   - We also want to have renderOptions in that event
 - When an fragment is aborted while animating, we should not revalidate
 - consider having dev builds with debug terser
@@ -579,3 +552,13 @@ Decisions
   - Consider having LayerLookup#getAll() throw if results are blank
   => We have a lot of code / specs that work with closed layers and sometimes normalize the layer through up.layer.get(), and now get undefined.
      All of this code would fail with this change.
+- Terminology for notifications
+  - [up-alerts] (Bootstrap, Tailwind UI, MUI, negative connotation in Material etc.)
+  - [up-flashes] (Rails, Primer [although they also use Toast])
+  - [up-notifications] (Bulma, good for both success and failure, long word, may also mean passive notifications)
+  - [up-messages] (too generic)
+  - [up-snackbars] (Material, uncommon)
+  - [up-toasts] (uncommon, also often a "boxy" kind of notification)
+  - [up-callouts] (Foundation, uncommon)
+- Do we want to support changing the renderOptions in up:fragment:hungry? In that case { renderOptions } need to be { nonHungryRenderOptions } or something
+  => We can rename the options then. If we do support this we would no longer have { renderOptions }, we would use { targetRenderOptions, hungryRenderOptions }
