@@ -13,11 +13,16 @@ afterEach ->
   while element = externalFixtures.pop()
     up.destroy(element)
 
-createFixture = (args...) ->
-  # We cannot directly append to document.body, since that element
-  # may be swapped by a fragment update.
+getCreatedFixtureContainer = ->
   fixtureContainer ||= e.affix(document.body, '.fixtures')
-  element = e.affix(fixtureContainer, args...)
+  return fixtureContainer
+
+createFixtureFromSelector = (args...) ->
+  return e.affix(getCreatedFixtureContainer(), args...)
+
+createFixtureFromHTML = (html) ->
+  element = e.createFromHTML(html)
+  getCreatedFixtureContainer().append(element)
   return element
 
 registerExternalFixture = (element) ->
@@ -25,9 +30,10 @@ registerExternalFixture = (element) ->
   return element
 
 createJQueryFixture = (args...) ->
-  $(createFixture(args...))
+  $(createFixtureFromSelector(args...))
 
-window.fixture = createFixture
+window.fixture = createFixtureFromSelector
+window.htmlFixture = createFixtureFromHTML
 window.$fixture = createJQueryFixture
 window.registerFixture = registerExternalFixture
 
