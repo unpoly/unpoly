@@ -1110,7 +1110,7 @@ up.fragment = (function() {
 
   - The existing element has an `[up-keep]` attribute
   - The response contains an element matching the [derived target](/target-derivation) of the existing element
-  - The matching element *also* has an `[up-keep]` attribute
+  - The matching element has *no* `[up-keep=false]` attribute
   - The [`up:fragment:keep`](/up:fragment:keep) event that is [emitted](/up.emit) on the existing element
     is not prevented.
   - The [`up:fragment:keep`](/up:fragment:keep) event that is passed to an [`[up-on-keep]`](#up-on-keep)

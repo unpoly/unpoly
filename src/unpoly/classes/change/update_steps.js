@@ -234,8 +234,10 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
       partner = up.fragment.subtree(newElement, partnerSelector, lookupOpts)[0]
     }
 
-    // The partner must be matched, must be [up-keep], but not [up-keep=false]
-    if (partner && e.booleanAttr(partner, 'up-keep')) {
+    // (1) The partner must be matched
+    // (2) The partner does not need to be [up-keep]
+    // (3) The partner must not be [up-keep=false]
+    if (partner && e.booleanAttr(partner, 'up-keep') !== false) {
       const plan = {
         oldElement, // the element that should be kept
         newElement: partner, // the element that would have replaced it but now does not

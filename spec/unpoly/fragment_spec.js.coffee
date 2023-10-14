@@ -7465,23 +7465,13 @@ describe 'up.fragment', ->
             expect(barCompiler.calls.allArgs()).toEqual [['old-bar']]
             expect(barDestructor.calls.allArgs()).toEqual [['old-bar']]
 
-        it "updates an element if a matching element is found in the response, but that other element is no longer [up-keep]", asyncSpec (next) ->
-          barCompiler = jasmine.createSpy()
-          barDestructor = jasmine.createSpy()
-          up.compiler '.bar', (bar) ->
-            text = bar.innerText
-            barCompiler(text)
-            return -> barDestructor(text)
-
+        it "keeps an element even if the new element is no longer [up-keep]", ->
           $container = $fixture('.container')
           $container.html """
             <div class='foo'>old-foo</div>
             <div class='bar' up-keep>old-bar</div>
             """
           up.hello($container)
-
-          expect(barCompiler.calls.allArgs()).toEqual [['old-bar']]
-          expect(barDestructor.calls.allArgs()).toEqual []
 
           up.render fragment: """
             <div class='container'>
@@ -7490,12 +7480,8 @@ describe 'up.fragment', ->
             </div>
             """
 
-          next =>
-            expect('.container .foo').toHaveText('new-foo')
-            expect('.container .bar').toHaveText('new-bar')
-
-            expect(barCompiler.calls.allArgs()).toEqual [['old-bar'], ['new-bar']]
-            expect(barDestructor.calls.allArgs()).toEqual [['old-bar']]
+          expect('.container .foo').toHaveText('new-foo')
+          expect('.container .bar').toHaveText('old-bar')
 
         it "updates an element if a matching element is found in the response, but that other element has [up-keep=false]", asyncSpec (next) ->
           barCompiler = jasmine.createSpy()
@@ -7668,7 +7654,7 @@ describe 'up.fragment', ->
 
           up.render fragment: """
             <div class='container'>
-              <div class="keeper">new-text</div>
+              <div class="keeper" up-keep="false">new-text</div>
             </div>
             """
 
