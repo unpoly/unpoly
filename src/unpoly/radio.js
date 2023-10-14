@@ -364,6 +364,28 @@ up.radio = (function() {
   @experimental
   */
 
+  up.macro('[up-flashes]', function(fragment) {
+    e.setMissingAttrs(fragment, {
+      'up-hungry': '',
+      'up-if-layer': 'current or child',
+      'up-keep': '',
+      'role': 'alert',
+    })
+
+    fragment.addEventListener('up:fragment:keep', function(event) {
+      if (!e.isEmpty(event.newFragment)) event.preventDefault()
+    })
+  })
+
+  /*-
+  TODO: Docs
+
+  @selector [up-flashes]
+  @param [up-transition]
+  @param [up-duration]
+  @param [up-easing]
+  */
+
   up.on('up:framework:reset', reset)
 
   return {

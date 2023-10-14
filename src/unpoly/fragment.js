@@ -200,6 +200,7 @@ up.fragment = (function() {
       'form[action]',
       'a[href]',
       '[class]',
+      '[up-flashes]',
       'form',
     ],
 

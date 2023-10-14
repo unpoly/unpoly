@@ -8528,6 +8528,10 @@ describe 'up.fragment', ->
         expect(up.fragment.toTarget(preloadFoo)).toBe('link[rel="preload"][href="/foo"]')
         expect(up.fragment.toTarget(preloadBar)).toBe('link[rel="preload"][href="/bar"]')
 
+      it 'uses `[up-flashes=""]` for a flashes container', ->
+        flashes = fixture('div[up-flashes]')
+        expect(up.fragment.toTarget(flashes)).toBe('[up-flashes=""]')
+
       it 'returns a given string unchanged', ->
         expect(up.fragment.toTarget('.foo')).toBe('.foo')
 

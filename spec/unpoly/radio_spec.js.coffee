@@ -1290,6 +1290,204 @@ describe 'up.radio', ->
           expect('#target').toHaveText('new target')
           expect('#hungry').toHaveText('old hungry')
 
+    describe '[up-flashes]', ->
+
+      it 'updates flashes within an explicit target', ->
+        up.hello htmlFixture """
+          <div id='container'>
+            <div id='flashes' up-flashes></div>
+            <div id='target'>old target</div>
+          </div>
+        """
+
+        up.render fragment: """
+          <div id='container'>
+            <div id='flashes' up-flashes>new flashes</div>
+            <div id='target'>new target</div>
+          </div>
+        """
+
+        expect('#target').toHaveText('new target')
+        expect('#flashes').toHaveText('new flashes')
+
+      it 'updates flashes when not targeted explicitly', ->
+        up.hello htmlFixture """
+          <div id='container'>
+            <div id='flashes' up-flashes></div>
+            <div id='target'>old target</div>
+          </div>
+        """
+
+        up.render '#target', document: """
+          <div id='container'>
+            <div id='flashes' up-flashes>new flashes</div>
+            <div id='target'>new target</div>
+          </div>
+        """
+
+        expect('#target').toHaveText('new target')
+        expect('#flashes').toHaveText('new flashes')
+
+      it 'does not overwrite existing flashes with empty flashes', ->
+        up.hello htmlFixture """
+          <div id='container'>
+            <div id='flashes' up-flashes>existing flashes</div>
+            <div id='target'>old target</div>
+          </div>
+        """
+
+        up.render '#target', document: """
+          <div id='container'>
+            <div id='flashes' up-flashes></div>
+            <div id='target'>new target</div>
+          </div>
+        """
+
+        expect('#target').toHaveText('new target')
+        expect('#flashes').toHaveText('existing flashes')
+
+      it 'overwrites existing flashes with newer, non-empty flashes', ->
+        up.hello htmlFixture """
+          <div id='container'>
+            <div id='flashes' up-flashes>existing flashes</div>
+            <div id='target'>old target</div>
+          </div>
+        """
+
+        up.render '#target', document: """
+          <div id='container'>
+            <div id='flashes' up-flashes>new flashes</div>
+            <div id='target'>new target</div>
+          </div>
+        """
+
+        expect('#target').toHaveText('new target')
+        expect('#flashes').toHaveText('new flashes')
+
+      describe 'when flashes are rendered into an overlay', ->
+
+        it 'updates flashes on root from an overlay if the flashes are not used for the overlay', ->
+          up.hello htmlFixture """
+            <div id='container'>
+              <div id='flashes' up-flashes>old flashes</div>
+              <div id='target'>old target</div>
+            </div>
+          """
+
+          up.layer.open({ target: '#target' })
+
+          up.render '#target', layer: 'overlay', document: """
+            <div id='container'>
+              <div id='flashes' up-flashes>new flashes</div>
+              <div id='target'>new target</div>
+            </div>
+          """
+
+          expect(up.fragment.get('#target', { layer: 'root' })).toHaveText('old target')
+          expect(up.fragment.get('#flashes', { layer: 'root' })).toHaveText('new flashes')
+          expect(up.fragment.get('#target', { layer: 'overlay' })).toHaveText('new target')
+
+        it 'does not update flashes on root if the flashes were already rendered into the overlay', ->
+          up.hello htmlFixture """
+            <div id='container'>
+              <div id='flashes' up-flashes>old flashes</div>
+              <div id='target'>old target</div>
+            </div>
+          """
+
+          up.layer.open({ target: '#container' })
+
+          up.render '#container', layer: 'overlay', document: """
+            <div id='container'>
+              <div id='flashes' up-flashes>new flashes</div>
+              <div id='target'>new target</div>
+            </div>
+          """
+
+          expect(up.fragment.get('#target', { layer: 'root' })).toHaveText('old target')
+          expect(up.fragment.get('#flashes', { layer: 'root' })).toHaveText('old flashes')
+          expect(up.fragment.get('#target', { layer: 'overlay' })).toHaveText('new target')
+          expect(up.fragment.get('#flashes', { layer: 'overlay' })).toHaveText('new flashes')
+
+      describe 'when flashes are not rendered in a closing overlay', ->
+
+        it 'shows the discarded flashes in the parent layer', ->
+          up.hello htmlFixture """
+            <div id='container'>
+              <div id='flashes' up-flashes>old flashes</div>
+              <div id='target'>old target</div>
+            </div>
+          """
+
+          up.layer.open({ target: '#container' })
+
+          expect(up.layer.isOverlay()).toBe(true)
+
+          renderPromise = up.render('#container', url: '/next-page')
+
+          await wait()
+
+          jasmine.respondWith
+            responseHeaders: { 'X-Up-Accept-Layer': 'null' }
+            responseText: """
+              <div id='container'>
+                <div id='flashes' up-flashes>new flashes</div>
+                <div id='target'>new target</div>
+              </div>
+            """
+
+          await expectAsync(renderPromise).toBeRejectedWith(jasmine.any(up.Aborted))
+          expect(up.layer.isOverlay()).toBe(false)
+
+          expect('#target').toHaveText('old target')
+          expect('#flashes').toHaveText('new flashes')
+
+        it 'shows the discarded flashes in the parent overlay (not root) when multiple overlays are nested', ->
+          up.hello htmlFixture """
+            <div id='container'>
+              <div id='flashes' up-flashes>old flashes</div>
+              <div id='target'>old target</div>
+            </div>
+          """
+
+          up.layer.open fragment: """
+            <div id='container'>
+              <div id='flashes' up-flashes>old flashes</div>
+              <div id='target'>old target</div>
+            </div>
+          """
+
+          up.layer.open fragment: """
+            <div id='container'>
+              <div id='flashes' up-flashes>old flashes</div>
+              <div id='target'>old target</div>
+            </div>
+          """
+
+          expect(up.layer.count).toBe(3)
+
+          renderPromise = up.render('#container', url: '/page3')
+
+          await wait()
+
+          jasmine.respondWith
+            responseHeaders: { 'X-Up-Accept-Layer': 'null' }
+            responseText: """
+              <div id='container'>
+                <div id='flashes' up-flashes>new flashes</div>
+                <div id='target'>new target</div>
+              </div>
+            """
+
+          await expectAsync(renderPromise).toBeRejectedWith(jasmine.any(up.Aborted))
+          expect(up.layer.count).toBe(2)
+
+          expect(up.fragment.get('#target', layer: 0)).toHaveText('old target')
+          expect(up.fragment.get('#flashes', layer: 0)).toHaveText('old flashes')
+
+          expect(up.fragment.get('#target', layer: 1)).toHaveText('old target')
+          expect(up.fragment.get('#flashes', layer: 1)).toHaveText('new flashes')
+
     describe '[up-poll]', ->
 
       it 'reloads the element periodically', asyncSpec (next) ->
