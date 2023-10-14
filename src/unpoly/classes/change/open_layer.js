@@ -121,6 +121,9 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // Remember where the element came from to support up.reload(element).
     this.setReloadAttrs({ newElement: this._content, source: this.options.source })
 
+    // Adopt CSP nonces and fix broken script tags
+    this.responseDoc.finalizeElement(this._content)
+
     this._newOverlayResult = new up.RenderResult({
       layer: this.layer,
       fragments: [this._content],

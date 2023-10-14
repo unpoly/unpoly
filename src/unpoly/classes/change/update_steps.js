@@ -104,6 +104,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
               up.fragment.markAsDestroying(step.oldElement)
             },
             afterInsert: () => {
+              // Adopt CSP nonces and fix broken script tags
               this.responseDoc.finalizeElement(step.newElement)
 
               // step.keepPlans.forEach(this.reviveKeepable)
@@ -184,6 +185,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
         let position = step.placement === 'before' ? 'afterbegin' : 'beforeend'
         step.oldElement.insertAdjacentElement(position, wrapper)
 
+        // Adopt CSP nonces and fix broken script tags
         this.responseDoc.finalizeElement(wrapper)
         up.hello(wrapper, step)
 

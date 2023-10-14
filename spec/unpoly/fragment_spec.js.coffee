@@ -5366,20 +5366,40 @@ describe 'up.fragment', ->
         beforeEach ->
           up.script.config.nonceableAttributes.push('callback')
 
-        it "rewrites nonceable callbacks to use the current page's nonce", asyncSpec (next) ->
+        it "rewrites nonceable callbacks to use the current page's nonce", ->
           spyOn(up.protocol, 'cspNonce').and.returnValue('secret1')
           fixture('.target')
           up.render('.target', url: '/path')
 
-          next ->
-            jasmine.respondWith(
-              responseText: '<div class="target" callback="nonce-secret2 alert()">new text</div>'
-              responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'"}
-            )
+          await wait()
 
-          next ->
-            expect('.target').toHaveText('new text')
-            expect('.target').toHaveAttribute('callback', "nonce-secret1 alert()")
+          jasmine.respondWith(
+            responseText: '<div class="target" callback="nonce-secret2 alert()">new text</div>'
+            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'"}
+          )
+
+          await wait()
+
+          expect('.target').toHaveText('new text')
+          expect('.target').toHaveAttribute('callback', "nonce-secret1 alert()")
+
+        it "rewrites nonceable callbacks to use the current page's nonce when opening a new overlay (bugfix)", ->
+          spyOn(up.protocol, 'cspNonce').and.returnValue('secret1')
+          up.render('.target', url: '/path', layer: 'new')
+
+          await wait()
+
+          jasmine.respondWith(
+            responseText: '<div class="target" callback="nonce-secret2 alert()">new text</div>'
+            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'"}
+          )
+
+          await wait()
+
+          expect(up.layer.isOverlay()).toBe(true)
+
+          expect('.target').toHaveText('new text')
+          expect('.target').toHaveAttribute('callback', "nonce-secret1 alert()")
 
         it "ensures nonced callbacks still match the current page's nonce after a render pass that updates history (meta elements are part of history state) (bugfix)", ->
           up.element.affix(document.head, 'meta#test-nonce[name="csp-nonce"][content="nonce-secret1"]')
