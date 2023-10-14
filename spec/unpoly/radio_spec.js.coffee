@@ -1082,6 +1082,74 @@ describe 'up.radio', ->
 
                 expect(outsideSpy).toHaveBeenCalledWith('new outside')
 
+        describe 'with [up-if-layer] set to a layer option matching multiple layers', ->
+
+          it 'only grabs updates from matching layers', ->
+            makeLayers([
+              { content: '<div id="target">target1</div><div id="hungry" up-hungry up-if-layer="0 or 1">hungry1</div>' },
+              { content: '<div id="target">target1</div>' },
+              { content: '<div id="target">target1</div>' },
+            ])
+
+            await wait()
+
+            up.render({ target: '#target', layer: 0, document: '<div id="target">target2</div><div id="hungry" up-hungry up-if-layer="0 or 1">hungry2</div>' })
+
+            await wait()
+
+            expect(document.querySelector('#hungry')).toHaveText('hungry2')
+
+            up.render({ target: '#target', layer: 2, document: '<div id="target">target3</div><div id="hungry" up-hungry up-if-layer="0 or 1">hungry3</div>' })
+
+            await wait()
+
+            expect(document.querySelector('#hungry')).toHaveText('hungry2')
+
+            up.render({ target: '#target', layer: 1, document: '<div id="target">target4</div><div id="hungry" up-hungry up-if-layer="0 or 1">hungry4</div>' })
+
+            await wait()
+
+            expect(document.querySelector('#hungry')).toHaveText('hungry4')
+
+            return
+
+        describe 'with [up-if-layer] set to a relative layer option', ->
+
+          it 'resolves the option from the perspective of the hungry layer, not of the updating layer', ->
+            makeLayers([
+              { content: '<div id="target">target1</div><div id="hungry" up-hungry up-if-layer="child">hungry1</div>' },
+              { content: '<div id="target">target1</div><div id="hungry" up-hungry up-if-layer="child">hungry1</div>' },
+              { content: '<div id="target">target1</div><div id="hungry" up-hungry up-if-layer="child">hungry1</div>' },
+            ])
+
+            await wait()
+
+            up.render({ target: '#target', layer: 0, document: '<div id="target">target2</div><div id="hungry" up-hungry up-if-layer="child">hungry2</div>' })
+
+            await wait()
+
+            expect(up.fragment.get('#hungry', { layer: 0 })).toHaveText('hungry1')
+            expect(up.fragment.get('#hungry', { layer: 1 })).toHaveText('hungry1')
+            expect(up.fragment.get('#hungry', { layer: 2 })).toHaveText('hungry1')
+
+            up.render({ target: '#target', layer: 1, document: '<div id="target">target3</div><div id="hungry" up-hungry up-if-layer="child">hungry3</div>' })
+
+            await wait()
+
+            expect(up.fragment.get('#hungry', { layer: 0 })).toHaveText('hungry3')
+            expect(up.fragment.get('#hungry', { layer: 1 })).toHaveText('hungry1')
+            expect(up.fragment.get('#hungry', { layer: 2 })).toHaveText('hungry1')
+
+            up.render({ target: '#target', layer: 2, document: '<div id="target">target4</div><div id="hungry" up-hungry up-if-layer="child">hungry4</div>' })
+
+            await wait()
+
+            expect(up.fragment.get('#hungry', { layer: 0 })).toHaveText('hungry3')
+            expect(up.fragment.get('#hungry', { layer: 1 })).toHaveText('hungry4')
+            expect(up.fragment.get('#hungry', { layer: 2 })).toHaveText('hungry1')
+
+            return
+
       if up.migrate.loaded
         describe 'with [up-if-history]', ->
 

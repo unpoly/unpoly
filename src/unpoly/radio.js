@@ -81,8 +81,9 @@ up.radio = (function() {
         continue
       }
 
-      let ifLayer = e.attr(element, 'up-if-layer')
       let elementLayer = up.layer.get(element)
+      let ifLayer = e.attr(element, 'up-if-layer')
+      let applicableLayers = ifLayer ? up.layer.getAll(ifLayer, { baseLayer: elementLayer }) : [elementLayer]
 
       let motionOptions = up.motion.motionOptions(element)
 
@@ -108,12 +109,9 @@ up.radio = (function() {
         originalRenderOptions: renderOptions,
       }
 
-      if (layer === elementLayer) {
-        steps.current.push(step)
-      } else if (ifLayer === 'any') {
-        steps.other.push(step)
-      } else {
-        // Ignore hungry element on a non-current layer without [up-layer=any].
+      if (applicableLayers.includes(layer)) {
+        let list = layer === elementLayer ? steps.current : steps.other
+        list.push(step)
       }
     }
 
