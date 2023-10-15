@@ -89,7 +89,7 @@ up.radio = (function() {
 
       // We cannot emit up:fragment:hungry here as we don't know { newElement } yet.
       let selectEvent = up.event.build('up:fragment:hungry', { log: false })
-      let selectCallback = e.callbackAttr(element, 'up-on-hungry', { exposedKeys: ['newFragment'] })
+      let selectCallback = e.callbackAttr(element, 'up-on-hungry', { exposedKeys: ['newFragment', 'renderOptions'] })
 
       let step = {
         selector,            // The selector for a single step is { selector }
@@ -168,9 +168,12 @@ up.radio = (function() {
   You can control or disable the processing of hungry fragments using one of the following methods:
 
   - Setting an `[up-if-layer="any"]` attribute will also process the hungry fragment when updating other layers.
-  - Setting an `[up-if-history="true"]` attribute will only process the hungry fragment when [updating history](/up.history).
   - Rendering with an [`{ useHungry: false }`](/up.render#options.useHungry) option will not process any hungry fragments.
   - Setting an [`[up-use-hungry="false"]`](/a-up-follow#up-use-hungry) attribute on a link or form will not update hungry fragments when the element is activated.
+  - Preventing an `up:fragment:hungry` event will prevent the hungry fragment
+    from being updated.
+  - Calling `event.preventDefault()` in an `[up-on-hungry]` attribute handler will prevent the hungry fragment
+    from being updated.
 
   @selector [up-hungry]
   @param [up-if-layer='current']
@@ -178,21 +181,34 @@ up.radio = (function() {
 
     By default only hungry elements on the targeted layer are updated.
     To match a hungry element when updating *any* layer, set this attribute to `[up-layer=any]`.
-  @param [up-if-history]
-    Only piggy-back on updates that update the browser history.
+  @param [up-on-hungry]
+    Code to run before this element is included in a fragment update.
+
+    Calling `event.preventDefault()` will prevent the hungry fragment
+    from being updated.
 
     For instance, you want to auto-update an hungry navigation bar,
     but only if we're changing history entries:
 
     ```html
-    <nav id="side-nav" up-hungry up-if-history>
+    <nav id="side-nav" up-hungry up-on-hungry="if (!renderOptions.history) event.preventDefault()">
      ...
     </nav>
     ```
 
-    @experimental
+    The code may use the variables `event` (of type `up:fragment:hungry`),
+    `this` (the hungry element), `newFragment` and `renderOptions`.
+
   @param [up-transition]
     The [animated transition](/a-up-transition) to apply when this element is updated.
+  @param [up-duration]
+    The duration of the transition or animation (in millisconds).
+
+  @param [up-easing]
+    The timing function that accelerates the transition or animation.
+
+    See [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
+    for a list of available timing functions.
   @stable
   */
 
