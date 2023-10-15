@@ -1612,10 +1612,14 @@ up.fragment = (function() {
   /*-
   Returns whether the given `root` matches or contains the given selector or element.
 
-  @param {Element} element
-  @param {string} selector
+  Will always return `false` if the two elements are on different [layers](/up.layer).
+
+  @param {Element} root
+  @param {string|Element} query
+    The selector or element to look for.
+  @return {boolean}
   @function up.fragment.contains
-  @internal
+  @experimental
   */
   function contains(root, selectorOrElement) {
     if (u.isElement(selectorOrElement)) {
