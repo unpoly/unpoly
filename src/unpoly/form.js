@@ -330,9 +330,7 @@ up.form = (function() {
   @param {Object} [options]
     Additional options for the form submission.
 
-    Will override any attribute values set on the given form element.
-
-    See `up.render()` for detailed documentation of individual option properties.
+    Values from these options will override any attributes set on the given form element.
   @function up.form.submitOptions
   @return {Object}
   @stable

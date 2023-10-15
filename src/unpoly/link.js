@@ -372,6 +372,10 @@ up.link = (function() {
   @function up.link.followOptions
   @param {Element|jQuery|string} link
     The link to follow.
+  @param {Object} [options]
+    Additional options for following the link.
+
+    Values from these options will override any attributes set on the given link element.
   @return {Object}
   @stable
   */
