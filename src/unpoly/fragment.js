@@ -1226,9 +1226,10 @@ up.fragment = (function() {
     The discarded element.
   @param {Object} event.newData
     The [data](/data) attached to the discarded element.
+  @param {Object} event.renderOptions
+    An object with [render options](/up.render) for the current fragment update.
   @stable
   */
-
 
   /*-
   When any page fragment has been [inserted or updated](/up.replace),
