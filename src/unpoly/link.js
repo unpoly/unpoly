@@ -550,6 +550,10 @@ up.link = (function() {
   @event up:link:preload
   @param {Element} event.target
     The link element that will be preloaded.
+  @param {Object} event.renderOptions
+    An object with [render options](/up.render) for the preloading.
+
+    Listeners may inspect and modify these options.
   @param event.preventDefault()
     Prevents the link from being preloaded.
   @stable
