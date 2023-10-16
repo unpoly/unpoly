@@ -59,6 +59,40 @@ describe 'up.fragment', ->
 
           expect(result).toEqual(element)
 
+      describe 'when given a root Document for the search', ->
+
+        it 'matches in the current layer if no { layer } option is given', ->
+          makeLayers [
+            { '.element', content: 'element in layer 0' }
+            { '.element', content: 'element in layer 1' }
+            { '.element', content: 'element in layer 2' }
+          ]
+
+          result = up.layer.get(1).asCurrent(() => up.fragment.get(window.document, '.element'))
+
+          expect(result).toHaveText('element in layer 1')
+
+        it 'matches in the given { layer }', ->
+          makeLayers [
+            { '.element', content: 'element in layer 0' }
+            { '.element', content: 'element in layer 1' }
+            { '.element', content: 'element in layer 2' }
+          ]
+
+          result = up.fragment.get(window.document, '.element', layer: 1)
+
+          expect(result).toHaveText('element in layer 1')
+
+        it 'does not filter layers if given an external document', ->
+          html = '<div class="element">external element</div>'
+          parser = new DOMParser()
+          externalDocument = parser.parseFromString(html, "text/html")
+          expect(externalDocument).toEqual jasmine.any(Document)
+
+          result = up.fragment.get(externalDocument, '.element')
+
+          expect(result).toHaveText('external element')
+
       describe 'layers', ->
 
         it 'matches elements in the given { layer }', ->
@@ -208,7 +242,6 @@ describe 'up.fragment', ->
 
           expect(up.fragment.all(parent, '.element')).toEqual [child]
 
-
         it "only matches descendants in that root's layer", ->
           makeLayers [
             { '.element', content: 'element in root layer' }
@@ -228,6 +261,44 @@ describe 'up.fragment', ->
 
           results = up.fragment.all(container, '.match:has(.child)')
           expect(results).toEqual [otherMatch]
+
+      describe 'when given a root Document for the search', ->
+
+        it 'matches in the current layer if no { layer } option is given', ->
+          makeLayers [
+            { '.element', content: 'element in layer 0' }
+            { '.element', content: 'element in layer 1' }
+            { '.element', content: 'element in layer 2' }
+          ]
+
+
+          results = up.layer.get(1).asCurrent(() => up.fragment.all(window.document, '.element'))
+
+          expect(results.length).toBe(1)
+          expect(results[0]).toHaveText('element in layer 1')
+
+        it 'matches in the given { layer }', ->
+          makeLayers [
+            { '.element', content: 'element in layer 0' }
+            { '.element', content: 'element in layer 1' }
+            { '.element', content: 'element in layer 2' }
+          ]
+
+          results = up.fragment.all(window.document, '.element', layer: 1)
+
+          expect(results.length).toBe(1)
+          expect(results[0]).toHaveText('element in layer 1')
+
+        it 'does not filter layers if given an external document', ->
+          html = '<div class="element">external element</div>'
+          parser = new DOMParser()
+          externalDocument = parser.parseFromString(html, "text/html")
+          expect(document).toEqual jasmine.any(Document)
+
+          results = up.fragment.all(externalDocument, '.element')
+
+          expect(results.length).toBe(1)
+          expect(results[0]).toHaveText('external element')
 
       describe 'layer matching', ->
 
@@ -9015,4 +9086,57 @@ describe 'up.fragment', ->
       expect(steps).toEqual [
         jasmine.objectContaining(selector: '.one', maybe: true, placement: 'before'),
       ]
+
+  describe 'up.fragment.contains()', ->
+
+    it 'returns whether the given element is an ancestor of an element matching the given selector', ->
+      root = fixture('#root')
+      child = e.affix(root, '#child')
+      grandChild = e.affix(root, '#grand-child')
+      sibling = fixture('#sibling')
+
+      expect(up.fragment.contains(root, '#child')).toBe(true)
+      expect(up.fragment.contains(root, '#grand-child')).toBe(true)
+      expect(up.fragment.contains(root, '#sibling')).toBe(false)
+      expect(up.fragment.contains(child, '#root')).toBe(false)
+
+    it 'returns whether the given element itself matches the given selector', ->
+      root = fixture('#root')
+      expect(up.fragment.contains(root, '#root')).toBe(true)
+      expect(up.fragment.contains(root, '#other')).toBe(false)
+
+    it 'ignores matches on other layers', ->
+      up.layer.open({ target: '.child', content: 'child content' })
+
+      expect(up.fragment.contains(document.body, '.child')).toBe(false)
+
+    it 'returns whether the given element is an ancestor of the other given element', ->
+      root = fixture('#root')
+      child = e.affix(root, '#child')
+      grandChild = e.affix(root, '#grand-child')
+      sibling = fixture('#sibling')
+
+      expect(up.fragment.contains(root, child)).toBe(true)
+      expect(up.fragment.contains(root, grandChild)).toBe(true)
+      expect(up.fragment.contains(root, sibling)).toBe(false)
+      expect(up.fragment.contains(child, root)).toBe(false)
+
+    it 'returns whether the given element is the other given element', ->
+      root = fixture('#root')
+      sibling = fixture('#sibling')
+      expect(up.fragment.contains(root, root)).toBe(true)
+      expect(up.fragment.contains(root, sibling)).toBe(false)
+
+    it 'supports a Document for the root', ->
+      fixture('.internal-match')
+
+      parser = new DOMParser()
+      externalHTML = '<div class="external-match"></div>'
+      externalDocument = parser.parseFromString(externalHTML, "text/html")
+
+      expect(up.fragment.contains(document, '.internal-match')).toBe(true)
+      expect(up.fragment.contains(document, '.external-match')).toBe(false)
+
+      expect(up.fragment.contains(externalDocument, '.internal-match')).toBe(false)
+      expect(up.fragment.contains(externalDocument, '.external-match')).toBe(true)
 

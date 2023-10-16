@@ -1388,7 +1388,7 @@ up.fragment = (function() {
   without filtering by layer or destruction state.
 
   @function up.fragment.get
-  @param {Element|jQuery} [root=document]
+  @param {Element|jQuery|Document} [root=document]
     The root element for the search. Only the root's children will be matched.
 
     May be omitted to search through all elements in the `document`.
@@ -1485,7 +1485,7 @@ up.fragment = (function() {
 
   @function up.fragment.all
 
-  @param {Element|jQuery} [root=document]
+  @param {Element|jQuery|Document} [root=document]
     The root element for the search. Only the root's children will be matched.
 
     May be omitted to search through all elements in the given [layer](#options.layer).
@@ -1615,7 +1615,7 @@ up.fragment = (function() {
 
   Will always return `false` if the two elements are on different [layers](/up.layer).
 
-  @param {Element} root
+  @param {Element|Document} root
   @param {string|Element} query
     The selector or element to look for.
   @return {boolean}
