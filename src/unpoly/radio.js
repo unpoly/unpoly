@@ -160,14 +160,17 @@ up.radio = (function() {
 
   By default only hungry elements on the targeted layer are updated.
 
-  To match a hungry element when updating *any* layer, set an [`[up-layer=any]`](#up-if-layer) attribute.
+  To match a hungry element when updating other layers, set an [`[up-if-layer]`](#up-if-layer) attribute.
+
+  An element can only be rendered once per render pass.
+  If an element has already been rendered into a layer, it will cannot be matched again
+  by an `[up-hungry]` element on another layer.
 
   ### Disabling
 
   By default hungry fragments are processed for all updates of the current layer.
-  You can control or disable the processing of hungry fragments using one of the following methods:
+  You can disable the processing of hungry fragments using one of the following methods:
 
-  - Setting an `[up-if-layer="any"]` attribute will also process the hungry fragment when updating other layers.
   - Rendering with an [`{ useHungry: false }`](/up.render#options.useHungry) option will not process any hungry fragments.
   - Setting an [`[up-use-hungry="false"]`](/a-up-follow#up-use-hungry) attribute on a link or form will not update hungry fragments when the element is activated.
   - Preventing an `up:fragment:hungry` event will prevent the hungry fragment
@@ -177,10 +180,15 @@ up.radio = (function() {
 
   @selector [up-hungry]
   @param [up-if-layer='current']
-    Only piggy-back on updates for the given [layer](/up.layer).
+    Only piggy-back on updates on [layers](/up.layer) that match the given [layer reference](/layer-option).
 
-    By default only hungry elements on the targeted layer are updated.
-    To match a hungry element when updating *any* layer, set this attribute to `[up-layer=any]`.
+    Relative references like `'parent'` or `'child'` will be resolved in relation to the hungry element's layer.
+
+    To match a hungry element when updating one of multiple layers, separate the references using and `or` delimiter.
+    For example, `'current or child'` will match for updates on either the hungry element's layer, or
+    its direct child.
+
+    To match a hungry element when updating *any* layer, set this attribute to `'any'`.
   @param [up-on-hungry]
     Code to run before this element is included in a fragment update.
 
