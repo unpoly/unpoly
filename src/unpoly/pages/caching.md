@@ -52,7 +52,7 @@ If you want to keep the default, but disable caching for an individual link, use
 <a href="/stock-charts" up-cache="false">View latest prices</a>
 ```
 
-If you want to keep the default, but disable caching for function call that would otherwise navigate,
+If you want to keep the default, but disable caching for a function call that would otherwise navigate,
 pass an `{ cache: false }` option:
 
 ```js
@@ -105,7 +105,7 @@ If you want to keep the default, but disable caching for an individual link, use
 <a href="/" up-revalidate="false">Start page</a>
 ```
 
-If you want to keep the default, but disable revalidation for function call that would otherwise navigate,
+If you want to keep the default, but disable revalidation for a function call that would otherwise navigate,
 pass an `{ revalidate: false }` option:
 
 ```js
