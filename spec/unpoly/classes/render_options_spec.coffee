@@ -7,7 +7,6 @@ describe 'up.RenderOptions', ->
       options = up.RenderOptions.preprocess(givenOptions)
       expect(options.useHungry).toBe(true)
       expect(options.useKeep).toBe(true)
-      expect(options.source).toBe(true)
       expect(options.abort).toBe('target')
 
     describe 'with { navigate: true }', ->
@@ -122,7 +121,6 @@ describe 'up.RenderOptions', ->
 
       expect(options.useHungry).toBe(true)
       expect(options.useKeep).toBe(true)
-      expect(options.source).toBe(true)
 
     describe 'with { navigate: true }', ->
 

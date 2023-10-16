@@ -1928,6 +1928,27 @@ describe 'up.fragment', ->
           up.render('.target', document: '<div class="target">new text</div>')
           expect('.target').toHaveText('new text')
 
+        it 'does not set an [up-source] attribute', ->
+          fixture('.target', text: 'old text')
+          up.render('.target', document: '<div class="target">new text</div>')
+
+          expect('.target').toHaveText('new text')
+          expect('.target').not.toHaveAttribute('up-source')
+
+        it 'sets an [up-time=false] attribute to prevent an If-None-Match request header when reloading this fragment.', ->
+          fixture('.target', text: 'old text')
+          up.render('.target', document: '<div class="target">new text</div>')
+
+          expect('.target').toHaveText('new text')
+          expect('.target').toHaveAttribute('up-time', 'false')
+
+        it 'sets an [up-etag=false] attribute to prevent an If-Modified-Since request header when reloading this fragment.', ->
+          fixture('.target', text: 'old text')
+          up.render('.target', document: '<div class="target">new text</div>')
+
+          expect('.target').toHaveText('new text')
+          expect('.target').toHaveAttribute('up-etag', 'false')
+
       describe 'with { fragment } option', ->
 
         it 'derives target and outer HTML from the given { fragment } string', asyncSpec (next) ->
@@ -8145,6 +8166,37 @@ describe 'up.fragment', ->
 
         next ->
           expect('.element').toHaveText('new text')
+
+      it 'reloads a fragment from the URL from which it was received', ->
+        fixture('.container')
+
+        up.render('.container', url: '/container-source')
+
+        await wait()
+
+        jasmine.respondWith """
+          <div class='container'>
+            <div class='target'>target text</div>
+          </div>
+        """
+
+        await wait()
+
+        expect('.container').toHaveSelector('.target')
+        expect('.target').toHaveText('target text')
+
+        up.reload('.target')
+
+        await wait()
+
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.target')
+        expect(jasmine.lastRequest().url).toMatchURL('/container-source')
+
+        jasmine.respondWithSelector('.target', text: 'reloaded target text')
+
+        await wait()
+
+        expect('.target').toHaveText('reloaded target text')
 
       it 'throws a readable error when attempting to reloading a detached element', ->
         element = fixture('.element', 'up-source': '/source', text: 'old text')

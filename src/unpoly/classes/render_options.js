@@ -5,7 +5,6 @@ up.RenderOptions = (function() {
   const GLOBAL_DEFAULTS = {
     useHungry: true,
     useKeep: true,
-    source: true,
     saveScroll: true,
     saveFocus: true,
     focus: 'keep',
