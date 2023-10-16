@@ -1522,19 +1522,19 @@ describe 'up.radio', ->
       it 'does not make additional requests while a previous requests is still in flight', asyncSpec (next) ->
         deferred = u.newDeferred()
 
-        up.radio.config.pollInterval = 50
+        up.radio.config.pollInterval = 100
         reloadSpy = spyOn(up, 'reload').and.returnValue(deferred)
 
         up.hello(fixture('.element[up-poll]'))
 
-        next.after 100, ->
+        next.after 200, ->
           expect(reloadSpy.calls.count()).toBe(1)
 
-        next.after 100, ->
+        next.after 200, ->
           expect(reloadSpy.calls.count()).toBe(1)
           deferred.resolve(new up.RenderResult())
 
-        next.after 100, ->
+        next.after 200, ->
           expect(reloadSpy.calls.count()).toBe(2)
 
       it 'keeps the polling rhythm when the server responds with `X-Up-Target: :none` (bugfix)', asyncSpec (next) ->
