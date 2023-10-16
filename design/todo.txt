@@ -8,26 +8,20 @@ Next release
 ============
 
 
-- Flash v4
-  - Test fixed GZ integration
 - Docs and CHANGELOG for new hungry options
-  - up.fragment lookup functions also accept a Document (also docs!)
-    - This requires a test
-  - duration
-  - easing
-  - [up-flash]
-  - [up-on-hungry]
-  - New { renderOptions } for up:fragment:keep
   - up:fragment:hungry
-  - Doc page for notification flashes
+  - Doc page for "Notification flashes"
     - Explain that user needs to merge herself
     - Explain that user needs to remove herself
-  - Do all guardEvents document event.renderOptions
-    - up:form:submit
-    - up:link:follow
-    - up:link:preload
-    - up:form:validate
-  - Check if we have documented all xxOptions() functions (followOptions, submitOptions...) so they take an element and options array
+    - Fix existing docs that mention "Notification flash"
+  - [up-flashes]
+    - Should mostly link to /notification-flashes
+    - transition
+    - duration
+    - easing
+    - must be experimental
+    - Redirect /flashes
+    - Redirect /notifications
   - Docs and Examples for up.layer.get()
   - Docs for [up-hungry] should mention
     - that an element from a response is only used once,
@@ -37,7 +31,7 @@ Next release
 - CHANGELOG
   - Make screenshot for reload prompt
 - Remove cookie banner from {v1,v2,v3}.unpoly.com
-- Release 3.4 or 3.5
+- Release as 3.5
 - Deploy unpoly-demo changes
   - Make screenshot of assets-changed prompt
 
@@ -45,11 +39,6 @@ Next release
 Backlog
 =======
 
-- Offer a preventable up:hungry:select event / callback
-  - Or up:hungry:select / [up-on-select]
-  - We would need to pass responseDoc to up.radio.hungrySteps if we want to provide newElementx
-  - We also want to have renderOptions in that event
-- When an fragment is aborted while animating, we should not revalidate
 - consider having dev builds with debug terser
 - Docs: /accessibility page
   - But where does it go?
@@ -62,8 +51,6 @@ Backlog
   - See separate doc
 - Publish up.util.sprintf()
   - But rename it to something else, as sprintf() is something else
-- When rendering local content we should not set [up-source=true]
-- Publish up.fragment.contains()
 - Docs: Custom input elements
   - Have your custom element expose `{ name }` and { value }` properties (AFAIK Shoelance components already do)
   - Also `{ disable }`
