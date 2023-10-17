@@ -4,6 +4,8 @@ Passive updates
 
 This package contains functionality to passively receive updates from the server.
 
+@see flashes
+
 @see [up-hungry]
 @see [up-poll]
 
@@ -388,6 +390,12 @@ up.radio = (function() {
   @experimental
   */
 
+  /*-
+  TODO
+
+  @selector [up-flashes]
+  @experimental
+  */
   up.macro('[up-flashes]', function(fragment) {
     e.setMissingAttrs(fragment, {
       'up-hungry': '',

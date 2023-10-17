@@ -65,7 +65,7 @@ A **common callback** is to reload an element in the parent layer:
 <a href="/companies/new"
   up-layer="new"
   up-accept-location="/companies/$id"
-  up-on-accepted="up.reload('.company-list')">
+  up-on-accepted="up.reload('.company-list')"> <!-- mark-line -->
   New company
 </a>
 
@@ -84,7 +84,7 @@ Another common callback reloads `<select>` options and selects the new foreign k
 <a href="/companies/new"
   up-layer="new"
   up-accept-location="/companies/$id"
-  up-on-accepted="up.validate('select', { params: { company: value.id } })">
+  up-on-accepted="up.validate('select', { params: { company: value.id } })"> <!-- mark-line -->
   New company
 </a>
 ```
@@ -94,8 +94,6 @@ This example uses `up.validate()` to preview a form submission without persistin
 
 Reusing existing screens
 ------------------------
-
-## Why this is useful
 
 You already have a CRUD interaction for companies
 You can now embed the existing company form into your project form

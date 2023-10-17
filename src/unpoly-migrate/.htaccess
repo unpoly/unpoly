@@ -57,3 +57,7 @@ RedirectPermanent /changing-location /updating-history
 RedirectPermanent /updating-location /updating-history
 RedirectPermanent /history-restoration /restoring-history
 RedirectPermanent /back-button /restoring-history
+
+RedirectPermanent /notifications /flashes
+RedirectPermanent /notification-flashes /flashes
+

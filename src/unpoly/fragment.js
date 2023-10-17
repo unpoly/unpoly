@@ -2258,12 +2258,34 @@ up.fragment = (function() {
   }
 
   /*-
-  A pseudo-selector that matches the layer's main [target](/targeting-fragments).
+  A pseudo-selector that matches the layer's [main content area](/up-main).
 
-  Main targets are default render targets.
-  When no other render target is given, Unpoly will try to find and replace a main target.
+  ### Targeting the main element
 
-  In most app layouts the main target should match the primary content area.
+  You can target the main element using the `:main` selector:
+
+  ```html
+  <a href="/cards/5" up-follow>Load post</a>
+
+  <main>
+    Post will appear heare
+  </main>
+  ```
+
+  Unpoly will also update `:main` if no other target is given:
+
+  ```html
+  <a href="/cards/5" up-follow>Load post</a>
+
+  <main>
+    Post will appear heare
+  </main>
+  ```
+
+  Also see [targeting the main element](/targeting-fragments#targeting-the-main-element).
+
+  ### Default main targets
+
   The default main targets are:
 
   - any element with an `[up-main]` attribute
@@ -2272,26 +2294,18 @@ up.fragment = (function() {
 
   You may configure main target selectors in `up.fragment.config.mainTargets`.
 
-  Also see [targeting the main element](/targeting-fragments#targeting-the-main-element).
-
-  ### Example
-
-  ```js
-  up.render(':main', { url: '/page2' })
-  ```
-
   @selector :main
   @stable
   */
 
   /*-
-  Marks this element as the dominant content element of your application layout.
+  Marks this element as the primary content element of your application layout.
 
   Unpoly will update a main element when no more specific render target is given.
 
   ### Example
 
-  Many links simply replace the dominant content element in your application layout.
+  Many links simply replace the primary content element in your application layout.
 
   Unpoly lets you mark this elements as a default target using the `[up-main]` attribute:
 

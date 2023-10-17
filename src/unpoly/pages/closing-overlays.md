@@ -139,10 +139,19 @@ To emit an event, use one of the following methods:
 
 
 
+### Rendering discarded notification flashes
+
+When an overlay closes in reaction to a server response, the content from that response is discarded.
+Any [confirmation flashes](/flashes) would be lost.
+
+The `[up-flashes]` element addresses this by picking up flashes from a closing overlay and
+[rendering them into the parent layer](/flashes#from-closing-overlays).
+
+
 
 ### Using the discarded response
 
-When an overlay closes in reaction to a server response, no content from that response is rendered.
+When a server response causes an overlay to closes, no content from that response is rendered.
 
 Sometimes you need to access the discarded response, e.g. to render its content in another layer.
 For this you can access response via the `{ response }` property of the `up:layer:accepted` and `up:layer:dismissed` events.
