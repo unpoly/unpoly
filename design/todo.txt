@@ -10,6 +10,9 @@ Next release
 
 - Docs and CHANGELOG for new hungry options
   - up:fragment:hungry
+  - An [up-flashes] element outside the main element on root will *not* render a flash from a nested overlay!!!
+  - Is the [up-keep=false] pattern good to keep?
+    - E.g. for flashes: We could interrupt a keep chain this way, but then the element can never again be keepable
   - Doc page for "Notification flashes"
     - Explain that user needs to merge herself
     - Explain that user needs to remove herself
@@ -20,8 +23,6 @@ Next release
     - duration
     - easing
     - must be experimental
-    - Redirect /flashes
-    - Redirect /notifications
   - Docs and Examples for up.layer.get()
   - Docs for [up-hungry] should mention
     - that an element from a response is only used once,
@@ -33,6 +34,7 @@ Next release
 - Remove cookie banner from {v1,v2,v3}.unpoly.com
 - Release as 3.5
 - Deploy unpoly-demo changes
+  - Use flashes
   - Make screenshot of assets-changed prompt
 
 
@@ -56,7 +58,6 @@ Backlog
   - Also `{ disable }`
   - Make Unpoly aware of custom elements by pushing a selector to [`up.form.config.fieldSelectors`](https://unpoly.com/up.form.config#config.fieldSelectors).
   - Checks for .checked and .selected are still hard-coded
-- [v4] Consider removing [up-hungry][up-if-history] since we now auto-update head elements
 - [v4] Consider removing X-Up-Title, [up-title] and { title } since we now auto-update head elements
 - [v4] Consider moving history-related methods from up.Layer.Base to up.history
   - All other packages work by taking a { layer } option, why not history-related?
