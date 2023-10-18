@@ -704,6 +704,20 @@ describe 'up.fragment', ->
             expect('.secondary').toHaveText('new secondary')
             expect('.tertiary').toHaveText('new tertiary')
 
+          it 'removes the old element', ->
+            crashingDestructor = jasmine.createSpy('crashing destructor').and.throwError(new Error("error from crashing destructor"))
+            oldElement = fixture('#element.old')
+
+            up.destructor(oldElement, crashingDestructor)
+
+            promise = up.render('#element', document: '<div id="element" class="new"></div>')
+
+            await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotCompile', /errors while compiling/i))
+
+            expect(crashingDestructor).toHaveBeenCalled()
+            expect(oldElement).toBeDetached()
+            expect('#element').toHaveClass('new')
+
       describe 'with { url } option', ->
 
         it 'replaces the given selector with the same selector from a freshly fetched page', asyncSpec (next) ->
