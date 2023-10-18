@@ -380,12 +380,14 @@ up.Layer = class Layer extends up.Record {
 
   The [root layer](/up.layer.root) has an index of `0`, its child overlay has an index of `1`, and so on.
 
+  This property has no defined behavior for [closed](/up.Layer.prototype.isClosed) layers.
+
   @property up.Layer#index
   @return {number} index
   @stable
   */
   get index() {
-    return this.stack.indexOf(this)
+    return this._index ??= this.stack.indexOf(this)
   }
 
   getContentElement() {

@@ -38,7 +38,7 @@ up.LayerStack = class LayerStack extends Array {
   }
 
   isOpen(layer) {
-    return layer.index >= 0
+    return u.contains(this, layer)
   }
 
   isClosed(layer) {

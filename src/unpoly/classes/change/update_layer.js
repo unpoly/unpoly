@@ -177,7 +177,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   }
 
   _matchNewElements() {
-    this._steps = this.responseDoc.selectAndCommitSteps(this._steps)
+    this._steps = this.responseDoc.selectSteps(this._steps)
   }
 
   _compressNestedSteps() {

@@ -115,7 +115,12 @@ up.radio = (function() {
         let list = layer === elementLayer ? steps.current : steps.other
         list.push(step)
       }
+
     }
+
+    // When multiple steps target the same new element, we're updating the layer that's
+    // closer to the layer of the render pass.
+    steps.other.sort((leftStep, rightStep) => (layer.index - leftStep.layer.index) - (layer.index - rightStep.layer.index))
 
     return steps
   }
@@ -399,7 +404,7 @@ up.radio = (function() {
   up.macro('[up-flashes]', function(fragment) {
     e.setMissingAttrs(fragment, {
       'up-hungry': '',
-      'up-if-layer': 'current or child',
+      'up-if-layer': 'current or descendant',
       'up-keep': '',
       'role': 'alert',
     })

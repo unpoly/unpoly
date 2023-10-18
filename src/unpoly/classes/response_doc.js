@@ -146,9 +146,20 @@ up.ResponseDoc = class ResponseDoc {
     return finder.find()
   }
 
-  selectAndCommitSteps(steps) {
+  selectSteps(steps) {
     return steps.filter((step) => {
       return this._trySelectStep(step) || this._cannotMatchStep(step)
+    })
+  }
+
+  commitSteps(steps) {
+    return steps.filter((step) => {
+      // If multiple steps want to match the same new element, the first step will remain in the left.
+      // This will happen when multiple layers have the same hungry element with [up-if-layer=any].
+      if (this._document.contains(step.newElement)) {
+        step.newElement.remove()
+        return true
+      }
     })
   }
 
