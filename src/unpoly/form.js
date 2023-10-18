@@ -529,7 +529,7 @@ up.form = (function() {
     form = getForm(form)
     const parser = new up.OptionsParser(form, options, parserOptions)
 
-    parser.string('contentType', { attr: ['enctype', 'up-content-type'] })
+    parser.string('contentType', { attr: 'enctype' })
     parser.json('headers')
 
     // Parse params from form fields.
