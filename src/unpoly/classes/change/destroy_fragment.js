@@ -71,10 +71,10 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change.Removal {
   }
 
   _finish() {
-    this.onFinished()
     if (this._destructorError) {
       throw this._destructorError
     }
+    this.onFinished()
   }
 
   _emitDestroyed() {
