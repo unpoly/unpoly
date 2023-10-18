@@ -404,7 +404,7 @@ up.radio = (function() {
   up.macro('[up-flashes]', function(fragment) {
     e.setMissingAttrs(fragment, {
       'up-hungry': '',
-      'up-if-layer': 'current or descendant',
+      'up-if-layer': 'subtree',
       'up-keep': '',
       'role': 'alert',
     })

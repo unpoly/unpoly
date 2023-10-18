@@ -376,6 +376,24 @@ up.Layer = class Layer extends up.Record {
   }
 
   /*-
+  Returns an array of this layer and its descendant layers, with the closest descendants listed first.
+
+  Descendant layers are all layers that visually overlay this layer.
+
+  The array elements are ordered by distance to this layer.
+  The first element is this layer.
+  The second element is this layer's direct child. The last element
+  is the [frontmost layer](/up.layer.front).
+
+  @property up.Layer#subtree
+  @return {Array<up.Layer>} subtree
+  @experimental
+  */
+  get subtree() {
+    return [this, ...this.descendants]
+  }
+
+  /*-
   Returns the zero-based position of this layer in the [layer stack](/up.layer.stack).
 
   The [root layer](/up.layer.root) has an index of `0`, its child overlay has an index of `1`, and so on.

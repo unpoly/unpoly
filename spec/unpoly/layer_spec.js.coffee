@@ -1396,9 +1396,16 @@ describe 'up.layer', ->
       describe 'for "descendant"', ->
 
         it "returns the current layer's descendant layers", ->
+          makeLayers(4)
+          up.layer.get(1).asCurrent ->
+            expect(up.layer.getAll('descendant')).toEqual [up.layer.get(2), up.layer.get(3)]
+
+      describe 'for "subtree"', ->
+
+        it "returns the current layer and its descendant layers", ->
           makeLayers(3)
-          up.layer.root.asCurrent ->
-            expect(up.layer.getAll('descendant')).toEqual [up.layer.get(1), up.layer.get(2)]
+          up.layer.get(1).asCurrent ->
+            expect(up.layer.getAll('subtree')).toEqual [up.layer.get(1), up.layer.get(2)]
 
       describe 'for "ancestor"', ->
 

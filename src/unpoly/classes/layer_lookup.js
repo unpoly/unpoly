@@ -91,6 +91,8 @@ up.LayerLookup = class LayerLookup {
       case 'descendant':
       case 'descendants':
         return this._baseLayer.descendants
+      case 'subtree':
+        return this._baseLayer.subtree
       case 'new':
         return 'new' // pass-through
       case 'root':

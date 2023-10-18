@@ -47,14 +47,15 @@ in the layer stack. There are however some cases where the current layer is a la
 
 You may use common tree terminology to match a layer relative to the current layer:
 
-| Option           | Description                                                  |
-| ---------------- | ------------------------------------------------------------ |
-| `parent`         | The layer that opened the current layer                      |
-| `closest`        | The current layer or any ancestor, preferring closer layers  |
-| `overlay`        | Any overlay                                                  |
-| `ancestor`       | Any ancestor layer of the current layer                      |
-| `child`          | The child layer of the current layer                         |
-| `descendant`     | Any descendant of the current layer                          |
+| Option       | Description                                                 |
+|--------------|-------------------------------------------------------------|
+| `parent`     | The layer that opened the current layer                     |
+| `closest`    | The current layer or any ancestor, preferring closer layers |
+| `overlay`    | Any overlay                                                 |
+| `ancestor`   | Any ancestor layer of the current layer                     |
+| `child`      | The child layer of the current layer                        |
+| `descendant` | Any descendant of the current layer                         |
+| `subtree`    | The current layer and its descendants                       |
 
 ### Matching the layer of a given element
 
