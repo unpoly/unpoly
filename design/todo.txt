@@ -8,11 +8,16 @@ Next release
 ============
 
 
+- Is the [up-keep=false] pattern good to keep?
+  - E.g. for flashes: We could interrupt a keep chain this way, but then the element can never again be keepable
+- [up-hungry][up-if-layer=subtree]: Test that the closest layer is chosen with many overlays and every second has [up-hungry]
+- [up-hungry]: Compress other steps
+  - Test that nested current steps are not inserted twice
+  - Test that nested other steps are not inserted twice
+- Change.DestroyFragment can have more private fields
 - Docs and CHANGELOG for new hungry options
   - up:fragment:hungry
-  - An [up-flashes] element outside the main element on root will *not* render a flash from a nested overlay!!!
-  - Is the [up-keep=false] pattern good to keep?
-    - E.g. for flashes: We could interrupt a keep chain this way, but then the element can never again be keepable
+  - [up-hungry]: Document that if multiple hungry elements target the same new element, the layer closest to the updated layer is chosen.
   - Doc page for "Notification flashes"
     - Explain that user needs to merge herself
     - Explain that user needs to remove herself
