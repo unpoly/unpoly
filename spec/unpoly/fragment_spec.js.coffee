@@ -8172,6 +8172,32 @@ describe 'up.fragment', ->
         up.destroy(detachedElement)
         expect(destructor).toHaveBeenCalled()
 
+      describe 'when a destructor crashes', ->
+
+        it 'removes the element before throwing', ->
+          element = fixture('.element')
+          up.destructor(element, -> throw "destructor error")
+
+          doDestroy = -> up.destroy(element)
+          expect(doDestroy).toThrowError(/errors while destroying/i)
+
+          expect(element).toBeDetached()
+
+        it 'removes the element after animation', ->
+          element = fixture('.element')
+          up.destructor(element, -> throw "destructor error")
+
+          up.destroy(element, { animation: 'fade-out', duration: 50 })
+
+          expect(element).not.toBeDetached()
+
+          await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+
+            await wait(150)
+
+            expect(element).toBeDetached()
+            expect(globalErrorSpy).toHaveBeenCalledWith(jasmine.anyError(/errors while destroying/i))
+
       describe 'pending requests', ->
 
         it 'aborts pending requests targeting the given element', ->

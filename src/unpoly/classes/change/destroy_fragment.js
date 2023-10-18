@@ -8,7 +8,7 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change.Removal {
     this.log = this.options.log
   }
 
-  async execute() {
+  execute() {
     // Destroying a fragment is a sync function.
     //
     // A variant of the logic below can also be found in up.Change.UpdateLayer.
@@ -29,16 +29,24 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change.Removal {
       // If we're animating, we resolve *before* removing the element.
       // The destroy animation will then play out, but the destroying
       // element is ignored by all up.fragment.* functions.
-      this._emitDestroyed()
-      await this._animate()
-      this._wipe()
-      this.onFinished()
+      this._destroyAfterAnimation()
     } else {
-      // If we're not animating, we can remove the element before emitting up:fragment:destroyed.
-      this._wipe()
-      this._emitDestroyed()
-      this.onFinished()
+      this._destroyNow()
     }
+  }
+
+  async _destroyAfterAnimation() {
+    this._emitDestroyed()
+    await this._animate()
+    this._wipe()
+    this._finish()
+  }
+
+  _destroyNow() {
+    // If we're not animating, we can remove the element before emitting up:fragment:destroyed.
+    this._wipe()
+    this._emitDestroyed()
+    this._finish()
   }
 
   _animate() {
@@ -48,10 +56,25 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change.Removal {
   _wipe() {
     this.layer.asCurrent(() => {
       up.fragment.abort(this.element)
-      up.script.clean(this.element, { layer: this.layer })
+      try {
+        up.script.clean(this.element, { layer: this.layer })
+      } catch (error) {
+        if (error instanceof up.CannotCompile) {
+          this._destructorError = error
+        } else {
+          throw error
+        }
+      }
       up.element.cleanJQuery(this.element)
       this.element.remove()
     })
+  }
+
+  _finish() {
+    this.onFinished()
+    if (this._destructorError) {
+      throw this._destructorError
+    }
   }
 
   _emitDestroyed() {
