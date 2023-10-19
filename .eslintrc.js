@@ -20,6 +20,7 @@ module.exports = {
     "no-implicit-globals": "error",
     "no-cond-assign": "off",
     "no-control-regex": "off",
+    "getter-return": "off",
     "@typescript-eslint/no-unused-vars": ["warn", {
       "argsIgnorePattern": "^_",
       "varsIgnorePattern": "^_"
