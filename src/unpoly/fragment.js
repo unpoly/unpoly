@@ -2554,6 +2554,7 @@ up.fragment = (function() {
   }
 
   function compressNestedSteps(steps) {
+    if (steps.length < 2) return steps
     let compressed = u.uniqBy(steps, 'oldElement')
     compressed = u.reject(compressed, step => isContainedByRivalStep(compressed, step))
     return compressed
