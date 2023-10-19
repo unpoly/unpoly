@@ -9180,3 +9180,39 @@ describe 'up.fragment', ->
       expect(up.fragment.contains(externalDocument, '.internal-match')).toBe(false)
       expect(up.fragment.contains(externalDocument, '.external-match')).toBe(true)
 
+  describe 'up.fragment.compressNestedSteps()', ->
+
+    it "removes a step whose { oldElement } is contained by a later step's { oldElement }", ->
+      container = fixture('.container')
+      child = e.affix(container, '.child')
+
+      containerStep = { placement: 'swap', oldElement: container }
+      childStep = { placement: 'swap', oldElement: child }
+
+      expect(up.fragment.compressNestedSteps([childStep, containerStep])).toEqual [containerStep]
+
+    it "removes a step whose { oldElement } is contained by an earlier step's { oldElement }", ->
+      container = fixture('.container')
+      child = e.affix(container, '.child')
+
+      containerStep = { placement: 'swap', oldElement: container }
+      childStep = { placement: 'swap', oldElement: child }
+
+      expect(up.fragment.compressNestedSteps([containerStep, childStep])).toEqual [containerStep]
+
+    it "keeps a step whose { oldElement } is not contained by another step's { oldElement }", ->
+      sibling1 = fixture('.sibling')
+      sibling2 = fixture('.sibling')
+
+      sibling1Step = { placement: 'swap', oldElement: sibling1 }
+      sibling2Step = { placement: 'swap', oldElement: sibling2 }
+
+      expect(up.fragment.compressNestedSteps([sibling1Step, sibling2Step])).toEqual [sibling1Step, sibling2Step]
+
+    it 'keeps the earlier step if two steps have the same { oldElement }', ->
+      element = fixture('.element')
+
+      step1 = { placement: 'swap', oldElement: element, scroll: 'auto' }
+      step2 = { placement: 'swap', oldElement: element, scroll: false }
+
+      expect(up.fragment.compressNestedSteps([step1, step2])).toEqual [step1]
