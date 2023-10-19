@@ -2,10 +2,10 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change.Removal {
 
   constructor(options) {
     super(options)
-    this.layer = up.layer.get(options) || up.layer.current
-    this.element = this.options.element
-    this.animation = this.options.animation
-    this.log = this.options.log
+    this._layer = up.layer.get(options) || up.layer.current
+    this._element = this.options.element
+    this._animation = this.options.animation
+    this._log = this.options.log
   }
 
   execute() {
@@ -18,14 +18,14 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change.Removal {
 
     // Save the parent because we emit up:fragment:destroyed on the parent
     // after removing @element.
-    this.parent = this.element.parentNode
+    this._parent = this._element.parentNode
 
     // The destroying fragment gets an .up-destroying class so we can
     // recognize elements that are being destroyed but are still playing out their
     // removal animation.
-    up.fragment.markAsDestroying(this.element)
+    up.fragment.markAsDestroying(this._element)
 
-    if (up.motion.willAnimate(this.element, this.animation, this.options)) {
+    if (up.motion.willAnimate(this._element, this._animation, this.options)) {
       // If we're animating, we resolve *before* removing the element.
       // The destroy animation will then play out, but the destroying
       // element is ignored by all up.fragment.* functions.
@@ -50,14 +50,14 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change.Removal {
   }
 
   _animate() {
-    return up.motion.animate(this.element, this.animation, this.options)
+    return up.motion.animate(this._element, this._animation, this.options)
   }
 
   _wipe() {
-    this.layer.asCurrent(() => {
-      up.fragment.abort(this.element)
+    this._layer.asCurrent(() => {
+      up.fragment.abort(this._element)
       try {
-        up.script.clean(this.element, { layer: this.layer })
+        up.script.clean(this._element, { layer: this._layer })
       } catch (error) {
         if (error instanceof up.CannotCompile) {
           this._destructorError = error
@@ -65,8 +65,8 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change.Removal {
           throw error
         }
       }
-      up.element.cleanJQuery(this.element)
-      this.element.remove()
+      up.element.cleanJQuery(this._element)
+      this._element.remove()
     })
   }
 
@@ -79,6 +79,6 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change.Removal {
 
   _emitDestroyed() {
     // Emits up:fragment:destroyed.
-    up.fragment.emitDestroyed(this.element, { parent: this.parent, log: this.log })
+    up.fragment.emitDestroyed(this._element, { parent: this._parent, log: this._log })
   }
 }
