@@ -1,10 +1,40 @@
 const u = up.util
+const CSS_HAS_SUFFIX_PATTERN = /:has\(([^)]+)\)$/
 
 up.Selector = class Selector {
 
-  constructor(selectors, filters = []) {
-    this._selectors = selectors
-    this._filters = filters
+  constructor(selector, elementOrDocument, options = {}) {
+    this._filters = []
+
+    if (!options.destroying) {
+      this._filters.push(up.fragment.isNotDestroying)
+    }
+
+    // If we're given an element that is detached *or* from another document
+    // (think up.ResponseDoc) we are not filtering by element layer.
+    let matchingInExternalDocument = elementOrDocument && !document.contains(elementOrDocument)
+
+    let expandTargetLayer
+
+    if (matchingInExternalDocument || options.layer === 'any') {
+      expandTargetLayer = up.layer.root
+    } else {
+      // Some up.fragment function center around an element, like closest() or matches().
+      options.layer ??= u.presence(elementOrDocument, u.isElement)
+      this._layers = up.layer.getAll(options)
+      this._filters.push(match => u.some(this._layers, layer => layer.contains(match)))
+      expandTargetLayer = this._layers[0]
+    }
+
+    let expandedTargets = up.fragment.expandTargets(selector, {...options, layer: expandTargetLayer})
+
+    this._selectors = expandedTargets.map((target) => {
+      target = target.replace(CSS_HAS_SUFFIX_PATTERN, (match, descendantSelector) => {
+        this._filters.push(element => element.querySelector(descendantSelector))
+        return ''
+      })
+      return target || '*'
+    })
 
     // If the user has set config.mainTargets = [] then a selector :main
     // will resolve to an empty array.
@@ -28,7 +58,7 @@ up.Selector = class Selector {
     return u.every(this._filters, filter => filter(element))
   }
 
-  descendants(root) {
+  descendants(root = document) {
     // There's a requirement that prior selectors must match first.
     // The background here is that up.fragment.config.mainTargets may match multiple
     // elements in a layer (like .container and body), but up.fragment.get(':main') should

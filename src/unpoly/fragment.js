@@ -1443,8 +1443,6 @@ up.fragment = (function() {
     return getAll(...args)[0]
   }
 
-  const CSS_HAS_SUFFIX_PATTERN = /:has\(([^)]+)\)$/
-
   /*-
   Returns all elements matching the given CSS selector, but
   ignores elements that are being [destroyed](/up.destroy) or that are being
@@ -1532,8 +1530,8 @@ up.fragment = (function() {
     //     the descendants of rootElement.
     // (3) up.fragment.all(selector) should find selector within the current layer.
     // (4) up.fragment.all(selector, { layer }) should find selector within the given layer(s).
-    let selector = buildSelector(selectorString, root, options)
-    return selector.descendants(root || document)
+    let selector = new up.Selector(selectorString, root, options)
+    return selector.descendants(root)
   }
 
   /*-
@@ -1606,8 +1604,7 @@ up.fragment = (function() {
   @experimental
   */
   function getSubtree(element, selector, options = {}) {
-    selector = buildSelector(selector, element, options)
-    return selector.subtree(element)
+    return new up.Selector(selector, element, options).subtree(element)
   }
 
   /*-
@@ -1649,9 +1646,7 @@ up.fragment = (function() {
   @stable
   */
   function closest(element, selector, options) {
-    element = e.get(element)
-    selector = buildSelector(selector, element, options)
-    return selector.closest(element)
+    return new up.Selector(selector, element, options).closest(element)
   }
 
   /*-
@@ -2171,42 +2166,6 @@ up.fragment = (function() {
     return u.uniq(expanded)
   }
 
-  function buildSelector(selector, elementOrDocument, options = {}) {
-    const filters = []
-
-    if (!options.destroying) {
-      filters.push(isNotDestroying)
-    }
-
-    // If we're given an element that is detached *or* from another document
-    // (think up.ResponseDoc) we are not filtering by element layer.
-    let matchingInExternalDocument = elementOrDocument && !document.contains(elementOrDocument)
-
-    let expandTargetLayer
-
-    if (matchingInExternalDocument || options.layer === 'any') {
-      expandTargetLayer = up.layer.root
-    } else {
-      // Some up.fragment function center around an element, like closest() or matches().
-      options.layer ??= u.presence(elementOrDocument, u.isElement)
-      const layers = up.layer.getAll(options)
-      filters.push(match => u.some(layers, layer => layer.contains(match)))
-      expandTargetLayer = layers[0]
-    }
-
-    let expandedTargets = up.fragment.expandTargets(selector, {...options, layer: expandTargetLayer})
-
-    expandedTargets = expandedTargets.map(function (target) {
-      target = target.replace(CSS_HAS_SUFFIX_PATTERN, function (match, descendantSelector) {
-        filters.push(element => element.querySelector(descendantSelector))
-        return ''
-      })
-      return target || '*'
-    })
-
-    return new up.Selector(expandedTargets, filters)
-  }
-
   function splitTarget(target) {
     return u.parseTokens(target, { separator: 'comma' })
   }
@@ -2530,8 +2489,7 @@ up.fragment = (function() {
       let target = tryToTarget(selector)
       return target && element.matches(target)
     } else {
-      selector = buildSelector(selector, element, options)
-      return selector.matches(element)
+      return new up.Selector(selector, element, options).matches(element)
     }
   }
 
@@ -2819,6 +2777,7 @@ up.fragment = (function() {
     splitTarget,
     parseTargetSteps,
     isAlive,
+    isNotDestroying,
     targetForSteps,
     compressNestedSteps,
     // timer: scheduleTimer

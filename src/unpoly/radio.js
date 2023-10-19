@@ -47,73 +47,131 @@ up.radio = (function() {
     config.reset()
   }
 
-  // function fullHungrySelector() {
-  //   return config.hungrySelectors.join()
-  // }
-
-  // function hungryStepsOnOtherLayers({ layer, history, origin }) {
-  //   let hungries = up.fragment.all(fullHungrySelector(), { layer: 'any' })
-  //   hungries = u.filter(hungries, (element) => {
-  //     let ifLayer = e.attr(element, 'up-if-layer')
-  //     let elementLayer = up.layer.get(element)
-  //     return ifLayer === 'any' && layer !== elementLayer
-  //   })
-  //   return buildHungrySteps(hungries, { history, origin })
-  // }
+  // function hungryStepsOld(renderOptions) {
+  //   let { useHungry, origin, layer } = renderOptions
+  //   let steps = { current: [], other: [] }
   //
-  // function hungryStepsOnThisLayer({ layer, history, origin }) {
-  //   let hungries = up.fragment.all(fullHungrySelector(), { layer })
-  //   return buildHungrySteps(hungries, { history, origin })
+  //   if (!useHungry) return steps
+  //
+  //   let hungrySelector = config.hungrySelectors.join()
+  //   // Start by finding hungries on all layers. We will filter them below.
+  //   let hungries = up.fragment.all(hungrySelector, { layer: 'any' })
+  //
+  //   for (let element of hungries) {
+  //     let selector = up.fragment.tryToTarget(element, { origin })
+  //     if (!selector) {
+  //       up.warn('[up-hungry]', 'Ignoring untargetable fragment %o', element)
+  //       continue
+  //     }
+  //
+  //     let elementLayer = up.layer.get(element)
+  //     let ifLayer = e.attr(element, 'up-if-layer')
+  //     let applicableLayers = ifLayer ? up.layer.getAll(ifLayer, { baseLayer: elementLayer }) : [elementLayer]
+  //
+  //     let motionOptions = up.motion.motionOptions(element)
+  //
+  //     // We cannot emit up:fragment:hungry here as we don't know { newElement } yet.
+  //     let selectEvent = up.event.build('up:fragment:hungry', { log: false })
+  //     let selectCallback = e.callbackAttr(element, 'up-on-hungry', { exposedKeys: ['newFragment', 'renderOptions'] })
+  //
+  //     let step = {
+  //       selector,            // The selector for a single step is { selector }
+  //       oldElement: element, // The match on the current page
+  //       layer: elementLayer, // May be different from { layer } when we found an [up-hungry][up-if-layer=any]
+  //       origin,              // The { origin } passed into the fn. will be used to match { newElement } later.
+  //       ...motionOptions,    // The hungry element defines its own transition, duration, easing.
+  //       placement: 'swap',   // Hungry elements are always swapped, never appended
+  //       useKeep: true,       // Always honor [up-keep] in hungry elements. Set here because we don't inherit default render options.
+  //       maybe: true,         // Don't fail if we cannot match { newElement } later.
+  //       selectEvent,         // Used by up.ResponseDoc#selectStep()
+  //       selectCallback,      // Used by up.ResponseDoc#selectStep()
+  //       // The step also gets a reference to the original render options.
+  //       // Although these render options are not used to render the hungry step, it will be
+  //       // passed to up:fragment:hungry listener to e.g. only update hungry elements if the
+  //       // original render pass would update history.
+  //       originalRenderOptions: renderOptions,
+  //     }
+  //
+  //     if (applicableLayers.includes(layer)) {
+  //       let list = layer === elementLayer ? steps.current : steps.other
+  //       list.push(step)
+  //     }
+  //
+  //   }
+  //
+  //   // Remove nested steps on other layers.
+  //   // Note that `steps.current` is already compressed by up.Change.UpdateLayer once it's been mixed with
+  //   // the explicit target steps. So we're not doing it again here.
+  //   steps.other = up.fragment.compressNestedSteps(steps.other)
+  //
+  //   // When multiple steps target the same new selector, we're updating the layer
+  //   // that's closer to the layer of the render pass.
+  //   //
+  //   // In this case two steps will match the same { newElement }. Hence this case is
+  //   // not covered by step compression (which looks at { oldElement }).
+  //   steps.other.sort((leftStep, rightStep) => (layer.index - leftStep.layer.index) - (layer.index - rightStep.layer.index))
+  //
+  //   return steps
   // }
 
   function hungrySteps(renderOptions) {
-    let { useHungry, origin, layer } = renderOptions
+    let { useHungry, origin, layer: renderLayer } = renderOptions
     let steps = { current: [], other: [] }
 
     if (!useHungry) return steps
 
     let hungrySelector = config.hungrySelectors.join()
-    // Start by finding hungries on all layers. We will filter them below.
-    let hungries = up.fragment.all(hungrySelector, { layer: 'any' })
 
-    for (let element of hungries) {
-      let selector = up.fragment.tryToTarget(element, { origin })
-      if (!selector) {
-        up.warn('[up-hungry]', 'Ignoring untargetable fragment %o', element)
-        continue
-      }
+    // When multiple steps target the same new selector, we're updating the layer
+    // that's closer to the layer of the render pass.
+    //
+    // In this case two steps will match the same { newElement }. Hence this case is
+    // not covered by step compression (which looks at { oldElement }).
+    const layerPreference = [renderLayer, ...renderLayer.ancestors, ...renderLayer.descendants]
 
-      let elementLayer = up.layer.get(element)
-      let ifLayer = e.attr(element, 'up-if-layer')
-      let applicableLayers = ifLayer ? up.layer.getAll(ifLayer, { baseLayer: elementLayer }) : [elementLayer]
+    for (let elementLayer of layerPreference) {
+      console.debug('~~~ elementLayer is %o', elementLayer)
 
-      let motionOptions = up.motion.motionOptions(element)
+      let hungries = up.fragment.all(elementLayer.element, hungrySelector, { layer: elementLayer })
 
-      // We cannot emit up:fragment:hungry here as we don't know { newElement } yet.
-      let selectEvent = up.event.build('up:fragment:hungry', { log: false })
-      let selectCallback = e.callbackAttr(element, 'up-on-hungry', { exposedKeys: ['newFragment', 'renderOptions'] })
+      for (let element of hungries) {
+        let selector = up.fragment.tryToTarget(element, { origin })
+        if (!selector) {
+          up.warn('[up-hungry]', 'Ignoring untargetable fragment %o', element)
+          continue
+        }
 
-      let step = {
-        selector,            // The selector for a single step is { selector }
-        oldElement: element, // The match on the current page
-        layer: elementLayer, // May be different from { layer } when we found an [up-hungry][up-if-layer=any]
-        origin,              // The { origin } passed into the fn. will be used to match { newElement } later.
-        ...motionOptions,    // The hungry element defines its own transition, duration, easing.
-        placement: 'swap',   // Hungry elements are always swapped, never appended
-        useKeep: true,       // Always honor [up-keep] in hungry elements. Set here because we don't inherit default render options.
-        maybe: true,         // Don't fail if we cannot match { newElement } later.
-        selectEvent,         // Used by up.ResponseDoc#selectStep()
-        selectCallback,      // Used by up.ResponseDoc#selectStep()
-        // The step also gets a reference to the original render options.
-        // Although these render options are not used to render the hungry step, it will be
-        // passed to up:fragment:hungry listener to e.g. only update hungry elements if the
-        // original render pass would update history.
-        originalRenderOptions: renderOptions,
-      }
+        let ifLayer = e.attr(element, 'up-if-layer')
+        let applicableLayers = ifLayer ? up.layer.getAll(ifLayer, { baseLayer: elementLayer }) : [elementLayer]
 
-      if (applicableLayers.includes(layer)) {
-        let list = layer === elementLayer ? steps.current : steps.other
-        list.push(step)
+        let motionOptions = up.motion.motionOptions(element)
+
+        // We cannot emit up:fragment:hungry here as we don't know { newElement } yet.
+        let selectEvent = up.event.build('up:fragment:hungry', { log: false })
+        let selectCallback = e.callbackAttr(element, 'up-on-hungry', { exposedKeys: ['newFragment', 'renderOptions'] })
+
+        let step = {
+          selector,            // The selector for a single step is { selector }
+          oldElement: element, // The match on the current page
+          layer: elementLayer, // May be different from { layer } when we found an [up-hungry][up-if-layer=any]
+          origin,              // The { origin } passed into the fn. will be used to match { newElement } later.
+          ...motionOptions,    // The hungry element defines its own transition, duration, easing.
+          placement: 'swap',   // Hungry elements are always swapped, never appended
+          useKeep: true,       // Always honor [up-keep] in hungry elements. Set here because we don't inherit default render options.
+          maybe: true,         // Don't fail if we cannot match { newElement } later.
+          selectEvent,         // Used by up.ResponseDoc#selectStep()
+          selectCallback,      // Used by up.ResponseDoc#selectStep()
+          // The step also gets a reference to the original render options.
+          // Although these render options are not used to render the hungry step, it will be
+          // passed to up:fragment:hungry listener to e.g. only update hungry elements if the
+          // original render pass would update history.
+          originalRenderOptions: renderOptions,
+        }
+
+        if (applicableLayers.includes(renderLayer)) {
+          let list = renderLayer === elementLayer ? steps.current : steps.other
+          list.push(step)
+        }
       }
 
     }
@@ -122,13 +180,6 @@ up.radio = (function() {
     // Note that `steps.current` is already compressed by up.Change.UpdateLayer once it's been mixed with
     // the explicit target steps. So we're not doing it again here.
     steps.other = up.fragment.compressNestedSteps(steps.other)
-
-    // When multiple steps target the same new selector, we're updating the layer
-    // that's closer to the layer of the render pass.
-    //
-    // In this case two steps will match the same { newElement }. Hence this case is
-    // not covered by step compression (which looks at { oldElement }).
-    steps.other.sort((leftStep, rightStep) => (layer.index - leftStep.layer.index) - (layer.index - rightStep.layer.index))
 
     return steps
   }

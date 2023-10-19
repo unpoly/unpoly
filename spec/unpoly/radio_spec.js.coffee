@@ -809,6 +809,75 @@ describe 'up.radio', ->
               expect(insertedSpy.calls.count()).toBe(1)
               expect(insertedSpy.calls.mostRecent().args[0]).toBeEvent('up:fragment:inserted', { target: document.querySelector('#container') })
 
+            it 'updates a hungry element on a descendant layer', ->
+              htmlFixture """
+                <div id="target">old target</div>
+              """
+
+              up.layer.open(fragment: """
+                <div id="hungry" up-hungry up-if-layer='any'>old hungry</div>
+              """)
+
+              up.render(target: '#target', layer: 'root', document: """
+                <div id="hungry" up-hungry up-if-layer='any'>new hungry</div>
+                <div id="target">new target</div>
+              """)
+
+              expect(up.fragment.get('#target', layer: 'root')).toHaveText('new target')
+              expect(up.fragment.get('#hungry', layer: 'overlay')).toHaveText('new hungry')
+
+            it 'prefers to update the closest descendant layer', ->
+              makeLayers [
+                { fragment: '<main><div id="target">old target</div></main>' },
+                { fragment: '<main><div id="hungry" up-hungry up-if-layer="any">old hungry</div></main>' },
+                { fragment: '<main><div id="hungry" up-hungry up-if-layer="any">old hungry</div></main>' },
+              ]
+
+              up.render(target: '#target', layer: 'root', document: """
+                <div id="hungry" up-hungry up-if-layer='any'>new hungry</div>
+                <div id="target">new target</div>
+              """)
+
+              expect(up.fragment.get('#target', layer: 0)).toHaveText('new target')
+              expect(up.fragment.get('#hungry', layer: 1)).toHaveText('new hungry')
+              expect(up.fragment.get('#hungry', layer: 2)).toHaveText('old hungry')
+
+            it 'prefers to update the closest ancestor layer', ->
+              makeLayers [
+                { fragment: '<main><div id="hungry" up-hungry up-if-layer="any">old hungry</div></main>' },
+                { fragment: '<main><div id="hungry" up-hungry up-if-layer="any">old hungry</div></main>' },
+                { fragment: '<main><div id="target">old target</div></main>' },
+              ]
+
+              up.render(target: '#target', layer: 2, document: """
+                <div id="hungry" up-hungry up-if-layer='any'>new hungry</div>
+                <div id="target">new target</div>
+              """)
+
+              expect(up.fragment.get('#hungry', layer: 0)).toHaveText('old hungry')
+              expect(up.fragment.get('#hungry', layer: 1)).toHaveText('new hungry')
+              expect(up.fragment.get('#target', layer: 2)).toHaveText('new target')
+
+            it 'prefers to update the closest ancestor layer over updating a descendant layer', ->
+              makeLayers [
+                { fragment: '<main><div id="hungry" up-hungry up-if-layer="any">old hungry</div></main>' },
+                { fragment: '<main><div id="hungry" up-hungry up-if-layer="any">old hungry</div></main>' },
+                { fragment: '<main><div id="target">old target</div></main>' },
+                { fragment: '<main><div id="target">old target</div></main>' },
+                { fragment: '<main><div id="hungry" up-hungry up-if-layer="any">old hungry</div></main>' },
+              ]
+
+              up.render(target: '#target', layer: 3, document: """
+                <div id="hungry" up-hungry up-if-layer='any'>new hungry</div>
+                <div id="target">new target</div>
+              """)
+
+              expect(up.fragment.get('#hungry', layer: 0)).toHaveText('old hungry')
+              expect(up.fragment.get('#hungry', layer: 1)).toHaveText('new hungry')
+              expect(up.fragment.get('#target', layer: 2)).toHaveText('old target')
+              expect(up.fragment.get('#target', layer: 3)).toHaveText('new target')
+              expect(up.fragment.get('#hungry', layer: 4)).toHaveText('old hungry')
+
             describe 'when a response closes the overlay via X-Up-Accept-layer', ->
 
               it 'updates the [up-hungry] element with the discarded overlay content', ->
