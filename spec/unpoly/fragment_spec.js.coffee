@@ -9186,8 +9186,8 @@ describe 'up.fragment', ->
       container = fixture('.container')
       child = e.affix(container, '.child')
 
-      containerStep = { placement: 'swap', oldElement: container }
-      childStep = { placement: 'swap', oldElement: child }
+      containerStep = { placement: 'swap', oldElement: container, selector: '.container' }
+      childStep = { placement: 'swap', oldElement: child, selector: '.child' }
 
       expect(up.fragment.compressNestedSteps([childStep, containerStep])).toEqual [containerStep]
 
@@ -9195,24 +9195,32 @@ describe 'up.fragment', ->
       container = fixture('.container')
       child = e.affix(container, '.child')
 
-      containerStep = { placement: 'swap', oldElement: container }
-      childStep = { placement: 'swap', oldElement: child }
+      containerStep = { placement: 'swap', oldElement: container, selector: '.container' }
+      childStep = { placement: 'swap', oldElement: child, selector: '.child' }
 
       expect(up.fragment.compressNestedSteps([containerStep, childStep])).toEqual [containerStep]
 
     it "keeps a step whose { oldElement } is not contained by another step's { oldElement }", ->
-      sibling1 = fixture('.sibling')
-      sibling2 = fixture('.sibling')
+      sibling1 = fixture('.sibling1')
+      sibling2 = fixture('.sibling2')
 
-      sibling1Step = { placement: 'swap', oldElement: sibling1 }
-      sibling2Step = { placement: 'swap', oldElement: sibling2 }
+      sibling1Step = { placement: 'swap', oldElement: sibling1, selector: '.sibling1' }
+      sibling2Step = { placement: 'swap', oldElement: sibling2, selector: '.sibling2' }
 
       expect(up.fragment.compressNestedSteps([sibling1Step, sibling2Step])).toEqual [sibling1Step, sibling2Step]
 
     it 'keeps the earlier step if two steps have the same { oldElement }', ->
       element = fixture('.element')
 
-      step1 = { placement: 'swap', oldElement: element, scroll: 'auto' }
-      step2 = { placement: 'swap', oldElement: element, scroll: false }
+      step1 = { placement: 'swap', oldElement: element, selector: '.element', scroll: 'auto' }
+      step2 = { placement: 'swap', oldElement: element, selector: '.element', scroll: false }
+
+      expect(up.fragment.compressNestedSteps([step1, step2])).toEqual [step1]
+
+    it 'keeps the earlier step if two steps have the same { oldElement } but a different { selector }', ->
+      element = fixture('.element')
+
+      step1 = { placement: 'swap', oldElement: element, selector: 'div', scroll: 'auto' }
+      step2 = { placement: 'swap', oldElement: element, selector: '.element', scroll: false }
 
       expect(up.fragment.compressNestedSteps([step1, step2])).toEqual [step1]
