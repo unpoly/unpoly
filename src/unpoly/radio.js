@@ -130,8 +130,6 @@ up.radio = (function() {
     const layerPreference = [renderLayer, ...renderLayer.ancestors, ...renderLayer.descendants]
 
     for (let elementLayer of layerPreference) {
-      console.debug('~~~ elementLayer is %o', elementLayer)
-
       let hungries = up.fragment.all(elementLayer.element, hungrySelector, { layer: elementLayer })
 
       for (let element of hungries) {
