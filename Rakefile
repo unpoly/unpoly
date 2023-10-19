@@ -81,7 +81,7 @@ namespace :release do
 
   desc "Prompt user to confirm that they're ready"
   task :confirm do
-    puts "You are about to release Unpoly version #{Unpoly::Release.version} to npm."
+    puts "You are about to #{Unpoly::Release.pre_release? ? 'PRE-release' : 'release'} Unpoly version #{Unpoly::Release.version} to npm."
     puts
     puts "Before continuing, make sure the following tasks are done:"
     puts
