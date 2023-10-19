@@ -76,7 +76,9 @@ up.ResponseDoc = class ResponseDoc {
     if (node instanceof Document) {
       this._document = node
     } else {
-      // TODO: Explain why we're doing this: Otherwise removing the root will still make it available
+      // We're creating a faux document to append our fragment root to.
+      // This way, when a step selects the fragment root it will no longer be available
+      // for selection by a later step.
       this._document = document.createElement('up-document')
       this._document.append(node)
       this._document.documentElement = node
