@@ -1,4 +1,5 @@
 u = up.util
+e = up.element
 
 window.makeLayers = (stackPlans) ->
 
@@ -7,8 +8,11 @@ window.makeLayers = (stackPlans) ->
     stackPlans = u.map [1..count], -> {}
 
   stackPlans.forEach (stackPlan, i) ->
-    unless stackPlan.target || stackPlan.fragment
-      stackPlan.target = '.element'
+    if stackPlan.fragment
+      # Derive a target that we can use to create the root layer fixture below.
+      stackPlan.target ||= up.fragment.toTarget(e.createFromHTML(stackPlan.fragment))
+
+    stackPlan.target ?= '.element'
 
     unless stackPlan.content || stackPlan.fragment || stackPlan.document || stackPlan.url
       stackPlan.content = "text #{i}"
