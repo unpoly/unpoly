@@ -118,8 +118,16 @@ up.radio = (function() {
 
     }
 
-    // When multiple steps target the same new element, we're updating the layer that's
-    // closer to the layer of the render pass.
+    // Remove nested steps on other layers.
+    // Note that `steps.current` is already compressed by up.Change.UpdateLayer once it's been mixed with
+    // the explicit target steps. So we're not doing it again here.
+    steps.other = up.fragment.compressNestedSteps(steps.other)
+
+    // When multiple steps target the same new selector, we're updating the layer
+    // that's closer to the layer of the render pass.
+    //
+    // In this case two steps will match the same { newElement }. Hence this case is
+    // not covered by step compression (which looks at { oldElement }).
     steps.other.sort((leftStep, rightStep) => (layer.index - leftStep.layer.index) - (layer.index - rightStep.layer.index))
 
     return steps

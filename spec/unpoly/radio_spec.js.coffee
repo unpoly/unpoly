@@ -513,6 +513,35 @@ describe 'up.radio', ->
         expect('.failure-target').toHaveText('new failure target')
         expect('.hungry').toHaveText('new hungry')
 
+      it 'only updates a single element if two hungry elements are nested', ->
+        insertedSpy = jasmine.createSpy('up:fragment:inserted listener for hungry elements')
+        up.on('up:fragment:inserted', '[up-hungry]', insertedSpy)
+
+        htmlFixture """
+          <div id='root'>
+            <div id="container" class='old' up-hungry>
+              <div id='child' class='old' up-hungry></div>
+            </div>
+            <div id="target" class='old'></div>
+          </div>
+        """
+
+        up.render('#target', document: """
+          <div id='root'>
+            <div id="container" class='new' up-hungry>
+              <div id='child' class='new' up-hungry></div>
+            </div>
+            <div id="target" class='new'></div>
+          </div>
+        """)
+
+        expect('#container').toHaveClass('new')
+        expect('#child').toHaveClass('new')
+        expect('#target').toHaveClass('new')
+
+        expect(insertedSpy.calls.count()).toBe(1)
+        expect(insertedSpy.calls.mostRecent().args[0]).toBeEvent('up:fragment:inserted', { target: document.querySelector('#container') })
+
       describe 'transition', ->
 
         it "does not use the render pass' transition for the hungry element", ->
@@ -750,6 +779,36 @@ describe 'up.radio', ->
 
               expect(insertedSpy.calls.count()).toBe(1)
 
+            it 'only updates a single element if two hungry elements on another layer are nested', ->
+              htmlFixture """
+                <div id='root'>
+                  <div id="container" class='old' up-hungry up-if-layer='any'>
+                    <div id='child' class='old' up-hungry up-if-layer='any'></div>
+                  </div>
+                </div>
+              """
+
+              up.layer.open(fragment: "<div id='target' class='old'</div>")
+
+              insertedSpy = jasmine.createSpy('up:fragment:inserted listener for hungry elements')
+              up.on 'up:fragment:inserted', '[up-hungry]', insertedSpy
+
+              up.render('#target', document: """
+                <div id='root'>
+                  <div id="container" class='new' up-hungry up-if-layer='any'>
+                    <div id='child' class='new' up-hungry up-if-layer='any'></div>
+                  </div>
+                  <div id='target' class='new'></div>
+                </div>
+              """)
+
+              expect('#container').toHaveClass('new')
+              expect('#child').toHaveClass('new')
+              expect('#target').toHaveClass('new')
+
+              expect(insertedSpy.calls.count()).toBe(1)
+              expect(insertedSpy.calls.mostRecent().args[0]).toBeEvent('up:fragment:inserted', { target: document.querySelector('#container') })
+
             describe 'when a response closes the overlay via X-Up-Accept-layer', ->
 
               it 'updates the [up-hungry] element with the discarded overlay content', ->
@@ -951,6 +1010,34 @@ describe 'up.radio', ->
 
               expect('.inside').toHaveText('new inside')
               expect('.outside').toHaveText('new outside')
+
+            it 'only updates a single element if two hungry elements on another layer are nested', ->
+              htmlFixture """
+                <div id='root'>
+                  <div id="container" class='old' up-hungry up-if-layer='any'>
+                    <div id='child' class='old' up-hungry up-if-layer='any'></div>
+                  </div>
+                </div>
+              """
+
+              insertedSpy = jasmine.createSpy('up:fragment:inserted listener for hungry elements')
+              up.on 'up:fragment:inserted', '[up-hungry]', insertedSpy
+
+              up.layer.open(target: '#target', document: """
+                <div id='root'>
+                  <div id="container" class='new' up-hungry up-if-layer='any'>
+                    <div id='child' class='new' up-hungry up-if-layer='any'></div>
+                  </div>
+                  <div id='target' class='new'></div>
+                </div>
+              """)
+
+              expect('#container').toHaveClass('new')
+              expect('#child').toHaveClass('new')
+              expect('#target').toHaveClass('new')
+
+              expect(insertedSpy.calls.count()).toBe(1)
+              expect(insertedSpy.calls.mostRecent().args[0]).toBeEvent('up:fragment:inserted', { target: document.querySelector('#container') })
 
             describe 'when the initial response immediately closes the new overlay via X-Up-Accept-Layer', ->
 
