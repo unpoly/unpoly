@@ -134,3 +134,19 @@ describe 'up.Layer', ->
       up.layer.root.peel()
 
       expect(listener.calls.argsFor(0)[0]).toEqual jasmine.objectContaining(value: ':peel')
+
+    fdescribe 'when a destructor throws an error', ->
+
+      it 'still dismisses all descendants', ->
+        up.compiler '.overlay-element', ->
+          return -> throw "crashing destructor"
+
+        up.layer.open(fragment: '<div class="overlay-element"></div>')
+        up.layer.open(fragment: '<div class="overlay-element"></div>')
+
+        expect(up.layer.count).toBe(3)
+
+        doPeel = -> up.layer.root.peel()
+
+        expect(doPeel).toThrow(jasmine.any(up.CannotCompile))
+

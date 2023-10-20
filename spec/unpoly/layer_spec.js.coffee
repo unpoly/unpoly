@@ -19,16 +19,36 @@ describe 'up.layer', ->
         layer = await up.layer.open()
         expect(layer).toHaveText('')
 
-      it 'closes existing overlays over the { baseLayer }', ->
-        makeLayers(2)
-        [root, oldOverlay] = up.layer.stack
+      fdescribe 'if there are existing overlays over the { baseLayer }', ->
 
-        up.layer.open(baseLayer: 'root')
+        it 'closes existing overlays over the { baseLayer }', ->
+          [root, overlay1, overlay2] = makeLayers(3)
 
-        [root, newOverlay] = up.layer.stack
+          up.layer.open(baseLayer: overlay1)
 
-        expect(newOverlay).not.toBe(oldOverlay)
-        expect(oldOverlay.isOpen()).toBe(false)
+          expect(up.layer.count).toBe(3)
+
+          expect(up.layer.get(0)).toBe(root)
+          expect(up.layer.get(1)).toBe(overlay1)
+          expect(up.layer.get(2)).not.toBe(overlay2)
+          expect(overlay2).toBeClosed()
+
+        it 'still opens the layer if a destructor for an existing overlay crashes', ->
+          up.compiler '.existing-overlay-element', ->
+            return -> throw "destructor error"
+
+          htmlFixture('<div class="root-element">new root</div>')
+          up.layer.open(fragment: '<div class="existing-overlay-element"></div>')
+
+          expect(up.layer.count).toBe(2)
+
+          promise = up.layer.open(fragment: '<div class="new-overlay-element"></div>', baseLayer: 'root')
+
+          await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotCompile'))
+
+          expect(up.layer.count).toBe(2)
+          expect(up.layer.current.element).toHaveSelector('.new-overlay-element')
+
 
       describe 'from a remote URL', ->
 

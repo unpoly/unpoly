@@ -306,6 +306,51 @@ describe 'up.Layer.Overlay', ->
       next.after 600, ->
         expect(document).not.toHaveSelector('up-modal')
 
+    fdescribe 'when a destructor crashes', ->
+
+      it 'still closes the overlay', ->
+        up.compiler '.overlay-element', ->
+          return -> throw "crashing destructor"
+
+        up.layer.open(fragment: '<div class="overlay-element"></div>', mode: 'modal')
+
+        expect(up.layer.isOverlay()).toBe(true)
+
+        doAccept = -> up.layer.accept()
+        expect(doAccept).toThrow(jasmine.any(up.CannotCompile))
+
+        expect(up.layer.isOverlay()).toBe(false)
+        expect(document).not.toHaveSelector('up-modal')
+
+      it 'still emits an up:layer:accepted event', ->
+        acceptedListener = jasmine.createSpy('listener to up:layer:accepted')
+        up.on('up:layer:accepted', acceptedListener)
+
+        up.compiler '.overlay-element', ->
+          return -> throw "crashing destructor"
+
+        up.layer.open(fragment: '<div class="overlay-element"></div>', mode: 'modal')
+
+        doAccept = -> up.layer.accept()
+        expect(doAccept).toThrow(jasmine.any(up.CannotCompile))
+
+        expect(acceptedListener).toHaveBeenCalled()
+
+      it 'still restores document scroll bars', ->
+        getOverflowY = -> getComputedStyle(up.viewport.rootOverflowElement()).overflowY
+
+        up.compiler '.overlay-element', ->
+          return -> throw "crashing destructor"
+
+        up.layer.open(fragment: '<div class="overlay-element"></div>', mode: 'modal')
+
+        expect(getOverflowY()).toBe('hidden')
+
+        doAccept = -> up.layer.accept()
+        expect(doAccept).toThrow(jasmine.any(up.CannotCompile))
+
+        expect(getOverflowY()).not.toBe('hidden')
+
     describe 'with { response } option', ->
 
       it 'makes the response available to { onAccept } listeners', asyncSpec (next) ->

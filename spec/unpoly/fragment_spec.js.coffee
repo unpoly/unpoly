@@ -3090,60 +3090,82 @@ describe 'up.fragment', ->
             expect(up.layer.get(1)).toHaveText('new text in overlay 1')
             expect(up.layer.get(2)).toHaveText('old text in overlay 2')
 
-          it 'closes all overlays over the target with { peel: true }', ->
-            makeLayers [
-              { target: '.element', content: 'old text in root' }
-              { target: '.element', content: 'old text in overlay 1' }
-              { target: '.element', content: 'old text in overlay 2' }
-            ]
+          fdescribe 'with { peel: true }', ->
 
-            up.render('.element', content: 'new text', layer: 'root', peel: true)
+            it 'closes all overlays over the target with { peel: true }', ->
+              makeLayers [
+                { target: '.element', content: 'old text in root' }
+                { target: '.element', content: 'old text in overlay 1' }
+                { target: '.element', content: 'old text in overlay 2' }
+              ]
 
-            expect(up.layer.count).toBe(1)
-            expect(up.layer.current.mode).toBe('root')
-            expect(up.layer.current).toHaveText(/new text/)
+              up.render('.element', content: 'new text', layer: 'root', peel: true)
 
-          it 'does not create a history entry for the peeled layer', ->
-            up.history.config.enabled = true
-            up.history.replace('/root1')
-            locations = []
-            up.on('up:location:changed', ({ location }) -> locations.push(up.util.normalizeURL(location)))
+              expect(up.layer.count).toBe(1)
+              expect(up.layer.current.mode).toBe('root')
+              expect(up.layer.current).toHaveText(/new text/)
 
-            fixture('.content', text: 'root 1')
+            it 'does not create a history entry for the peeled layer', ->
+              up.history.config.enabled = true
+              up.history.replace('/root1')
+              locations = []
+              up.on('up:location:changed', ({ location }) -> locations.push(up.util.normalizeURL(location)))
 
-            up.layer.open(location: '/overlay1', history: true)
-            await wait()
+              fixture('.content', text: 'root 1')
 
-            expect(up.layer.count).toBe(2)
-            expect(locations).toEqual ['/overlay1']
+              up.layer.open(location: '/overlay1', history: true)
+              await wait()
 
-            up.render(content: 'root 2', target: '.content', history: true, location: '/root2', layer: 'root', peel: true)
-            await wait()
+              expect(up.layer.count).toBe(2)
+              expect(locations).toEqual ['/overlay1']
 
-            expect('.content').toHaveText('root 2')
-            expect(up.layer.count).toBe(1)
-            expect(locations).toEqual ['/overlay1', '/root2']
+              up.render(content: 'root 2', target: '.content', history: true, location: '/root2', layer: 'root', peel: true)
+              await wait()
 
-          it 'does create a history entry for the peeled layer if the fragment update does not update history', ->
-            up.history.config.enabled = true
-            up.history.replace('/root1')
-            locations = []
-            up.on('up:location:changed', ({ location }) -> locations.push(up.util.normalizeURL(location)))
+              expect('.content').toHaveText('root 2')
+              expect(up.layer.count).toBe(1)
+              expect(locations).toEqual ['/overlay1', '/root2']
 
-            fixture('.content', text: 'root 1')
+            it 'does create a history entry for the peeled layer if the fragment update does not update history', ->
+              up.history.config.enabled = true
+              up.history.replace('/root1')
+              locations = []
+              up.on('up:location:changed', ({ location }) -> locations.push(up.util.normalizeURL(location)))
 
-            up.layer.open(location: '/overlay1', history: true)
-            await wait()
+              fixture('.content', text: 'root 1')
 
-            expect(up.layer.count).toBe(2)
-            expect(locations).toEqual ['/overlay1']
+              up.layer.open(location: '/overlay1', history: true)
+              await wait()
 
-            up.render(content: 'root 2', target: '.content', history: false, layer: 'root', peel: true)
-            await wait()
+              expect(up.layer.count).toBe(2)
+              expect(locations).toEqual ['/overlay1']
 
-            expect('.content').toHaveText('root 2')
-            expect(up.layer.count).toBe(1)
-            expect(locations).toEqual ['/overlay1', '/root1']
+              up.render(content: 'root 2', target: '.content', history: false, layer: 'root', peel: true)
+              await wait()
+
+              expect('.content').toHaveText('root 2')
+              expect(up.layer.count).toBe(1)
+              expect(locations).toEqual ['/overlay1', '/root1']
+
+            it 'still renders content if a destructor for the peeled layer crashes', ->
+              up.compiler '.overlay-element', ->
+                return -> throw "destructor error"
+
+              htmlFixture('<div class="root-element">new root</div>')
+              up.layer.open(fragment: '<div class="overlay-element"></div>')
+
+              expect(up.layer.isOverlay()).toBe(true)
+
+              promise = up.render(
+                fragment: '<div class="root-element">new root</div>',
+                peel: true,
+                layer: 'root'
+              )
+
+              await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotCompile'))
+
+              expect('.root-element').toHaveText('new root')
+              expect(up.layer.isOverlay()).toBe(false)
 
         describe 'stacking a new overlay', ->
 
