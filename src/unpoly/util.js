@@ -716,11 +716,15 @@ up.util = (function() {
   Returns the given value if it is [array-like](/up.util.isList), otherwise
   returns an array with the given value as its only element.
 
+  Returns an empty array if called with `null` or `undefined`.
+
   ### Example
 
   ```js
   up.util.wrapList([1, 2, 3]) // => [1, 2, 3]
   up.util.wrapList('foo') // => ['foo']
+  up.util.wrapList(undefined) // => []
+  up.util.wrapList(null) // => []
   ```
 
   @function up.util.wrapList
