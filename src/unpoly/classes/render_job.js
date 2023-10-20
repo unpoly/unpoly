@@ -57,12 +57,6 @@ up.RenderJob = class RenderJob {
     // (2) No fragment could be matched (return value is up.CannotMatch)
     // (3) We're preloading (early return value is up.Request)
     if (result instanceof up.RenderResult) {
-      if (result.compileErrors.length) {
-        let error = new up.CannotCompile('Errors while compiling', { errors: result.compileErrors })
-        this._handleError(error)
-        throw error
-      }
-
       // We call result.options.onRendered() instead of this.options.onRendered()
       // as this will call the correct options.onRendered() or onFailRendered()
       // depending on options.failOptions.

@@ -58,6 +58,8 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
       this.abortWhenLayerClosed(step.layer)
     }
 
+    this.errorDelay.flush()
+
     // The RenderResult has not changed. We still updated the same target and fragments.
     // We only want to signal the time of the end of animations / DOM changes.
     return this.renderResult

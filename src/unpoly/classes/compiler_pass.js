@@ -14,25 +14,21 @@ up.CompilerPass = class CompilerPass {
     this._dataMap = dataMap
 
     this._meta = { layer, ...meta }
-    this._errors = []
+    this._errorDelay = up.script.errorDelay({ captureAny: true })
   }
 
   run() {
     // If we're compiling a fragment in a background layer, we want
     // up.layer.current to resolve to that background layer, not the front layer.
     this._layer.asCurrent(() => {
-
       this.setCompileData()
 
       for (let compiler of this._compilers) {
         this._runCompiler(compiler)
       }
-
     })
 
-    if (this._errors.length) {
-      throw new up.CannotCompile('Errors while compiling', { errors: this._errors })
-    }
+    this._errorDelay.flush()
   }
 
   setCompileData() {
@@ -104,12 +100,10 @@ up.CompilerPass = class CompilerPass {
   }
 
   _applyCompilerFunction(compiler, elementOrElements, compileArgs) {
-    try {
-      return compiler.apply(elementOrElements, compileArgs)
-    } catch (error) {
-      this._errors.push(error)
-      up.log.error('up.hello()', 'While compiling %o: %o', elementOrElements, error)
-    }
+    this._errorDelay.run(
+      () => compiler.apply(elementOrElements, compileArgs),
+      (error) => up.log.error('up.hello()', 'Error while compiling %o: %o', elementOrElements, error)
+    )
   }
 
   _destructorPresence(result) {

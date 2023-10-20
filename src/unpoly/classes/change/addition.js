@@ -5,7 +5,7 @@ up.Change.Addition = class Addition extends up.Change {
 
   constructor(options) {
     super(options)
-    this.responseDoc = options.responseDoc
+    this.responseDoc = options.responseDoc // TODO: Is this an actual option
     this.acceptLayer = options.acceptLayer
     this.dismissLayer = options.dismissLayer
     this.eventPlans = options.eventPlans || []

@@ -6,6 +6,7 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change.Removal {
     this._element = this.options.element
     this._animation = this.options.animation
     this._log = this.options.log
+    this._errorDelay = up.script.errorDelay()
   }
 
   execute() {
@@ -56,24 +57,14 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change.Removal {
   _wipe() {
     this._layer.asCurrent(() => {
       up.fragment.abort(this._element)
-      try {
-        up.script.clean(this._element, { layer: this._layer })
-      } catch (error) {
-        if (error instanceof up.CannotCompile) {
-          this._destructorError = error
-        } else {
-          throw error
-        }
-      }
+      this._errorDelay.run(() => up.script.clean(this._element, { layer: this._layer }))
       up.element.cleanJQuery(this._element)
       this._element.remove()
     })
   }
 
   _finish() {
-    if (this._destructorError) {
-      throw this._destructorError
-    }
+    this._errorDelay.flush()
     this.onFinished()
   }
 
