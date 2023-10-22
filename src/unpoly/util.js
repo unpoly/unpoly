@@ -1795,10 +1795,6 @@ up.util = (function() {
     return str[0].toUpperCase() + str.slice(1)
   }
 
-  function defineGetter(object, prop, get) {
-    Object.defineProperty(object, prop, { get })
-  }
-
   function defineDelegates(object, props, targetProvider) {
     for (let prop of props) {
       Object.defineProperty(object, prop, {
@@ -2075,7 +2071,6 @@ up.util = (function() {
     uid,
     upperCaseFirst,
     lowerCaseFirst,
-    getter: defineGetter,
     delegate: defineDelegates,
     // temporaryDelegate: defineTemporaryDelegates,
     reverse,

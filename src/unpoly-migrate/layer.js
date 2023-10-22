@@ -64,7 +64,8 @@ layer.registerClickCloser('up-close', (value, closeOptions) => {
 
 up.migrate.handleLayerConfig = config => up.migrate.fixKey(config, 'historyVisible', 'history')
 
-up.util.getter(up.Layer.prototype, 'historyVisible', function() {
+Object.defineProperty(up.Layer.prototype, 'historyVisible', { get: function() {
   up.migrate.deprecated('up.Layer#historyVisible', 'up.Layer#history')
   return this.history
-})
+}})
+
