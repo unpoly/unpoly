@@ -135,18 +135,25 @@ describe 'up.Layer', ->
 
       expect(listener.calls.argsFor(0)[0]).toEqual jasmine.objectContaining(value: ':peel')
 
-    fdescribe 'when a destructor throws an error', ->
+    describe 'when a destructor throws an error', ->
 
       it 'still dismisses all descendants', ->
+        destroyError = new Error('error from destructor')
+
         up.compiler '.overlay-element', ->
-          return -> throw "crashing destructor"
+          return -> throw destroyError
 
         up.layer.open(fragment: '<div class="overlay-element"></div>')
         up.layer.open(fragment: '<div class="overlay-element"></div>')
 
         expect(up.layer.count).toBe(3)
 
-        doPeel = -> up.layer.root.peel()
+        await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+          up.layer.root.peel()
 
-        expect(doPeel).toThrow(jasmine.any(up.CannotCompile))
+          expect(up.layer.count).toBe(1)
 
+          expect(globalErrorSpy).toHaveBeenCalledWith(destroyError)
+
+          # Jasmine requires this function to be async, and CoffeeScript has no async keyword to force it so.
+          return Promise.resolve()

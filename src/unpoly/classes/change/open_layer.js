@@ -133,13 +133,9 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // Change history before compilation, so new fragments see the new location.
     this._handleHistory()
 
-    try {
-      // Compile the entire layer, not just the user content.
-      // E.g. [up-dismiss] in the layer elements needs to go through a macro.
-      up.hello(this.layer.element, { ...this.options, layer: this.layer })
-    } catch (error) {
-      this._newOverlayResult.tryAddCompileError(error)
-    }
+    // Compile the entire layer, not just the user content.
+    // E.g. [up-dismiss] in the layer elements needs to go through a macro.
+    up.hello(this.layer.element, { ...this.options, layer: this.layer })
 
     // Don't wait for the open animation to finish.
     // Otherwise a popup would start to open and only reveal itself after the animation.

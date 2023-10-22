@@ -14,7 +14,6 @@ up.CompilerPass = class CompilerPass {
     this._dataMap = dataMap
 
     this._meta = { layer, ...meta }
-    this._errorDelay = up.script.errorDelay({ captureAny: true })
   }
 
   run() {
@@ -27,8 +26,6 @@ up.CompilerPass = class CompilerPass {
         this._runCompiler(compiler)
       }
     })
-
-    this._errorDelay.flush()
   }
 
   setCompileData() {
@@ -100,10 +97,8 @@ up.CompilerPass = class CompilerPass {
   }
 
   _applyCompilerFunction(compiler, elementOrElements, compileArgs) {
-    this._errorDelay.run(
-      () => compiler.apply(elementOrElements, compileArgs),
-      (error) => up.log.error('up.hello()', 'Error while compiling %o: %o', elementOrElements, error)
-    )
+    // return compiler.apply(elementOrElements, compileArgs)
+    return up.error.guard(() => compiler.apply(elementOrElements, compileArgs))
   }
 
   _destructorPresence(result) {

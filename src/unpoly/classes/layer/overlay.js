@@ -351,9 +351,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   @internal
   */
   destroyElements(options) {
-    const animation = () => {
-      return this.startCloseAnimation(options)
-    }
+    const animation = () => this.startCloseAnimation(options)
 
     const onFinished = () => {
       this.onElementsRemoved() // callback for layer implementations that need to clean up

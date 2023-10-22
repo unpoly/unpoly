@@ -6,7 +6,6 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change.Removal {
     this._element = this.options.element
     this._animation = this.options.animation
     this._log = this.options.log
-    this._errorDelay = up.script.errorDelay()
   }
 
   execute() {
@@ -26,6 +25,8 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change.Removal {
     // removal animation.
     up.fragment.markAsDestroying(this._element)
 
+    console.debug("--- willAnimate %o => %o", this._animation, up.motion.willAnimate(this._element, this._animation, this.options))
+
     if (up.motion.willAnimate(this._element, this._animation, this.options)) {
       // If we're animating, we resolve *before* removing the element.
       // The destroy animation will then play out, but the destroying
@@ -40,14 +41,14 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change.Removal {
     this._emitDestroyed()
     await this._animate()
     this._wipe()
-    this._finish()
+    this.onFinished()
   }
 
   _destroyNow() {
     // If we're not animating, we can remove the element before emitting up:fragment:destroyed.
     this._wipe()
     this._emitDestroyed()
-    this._finish()
+    this.onFinished()
   }
 
   _animate() {
@@ -57,15 +58,10 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change.Removal {
   _wipe() {
     this._layer.asCurrent(() => {
       up.fragment.abort(this._element)
-      this._errorDelay.run(() => up.script.clean(this._element, { layer: this._layer }))
+      up.script.clean(this._element, { layer: this._layer })
       up.element.cleanJQuery(this._element)
       this._element.remove()
     })
-  }
-
-  _finish() {
-    this._errorDelay.flush()
-    this.onFinished()
   }
 
   _emitDestroyed() {

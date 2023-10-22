@@ -58,8 +58,6 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
       this.abortWhenLayerClosed(step.layer)
     }
 
-    this.errorDelay.flush()
-
     // The RenderResult has not changed. We still updated the same target and fragments.
     // We only want to signal the time of the end of animations / DOM changes.
     return this.renderResult
@@ -113,27 +111,23 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
               // step.keepPlans.forEach(this.reviveKeepable)
               this._restoreKeepables(step)
 
-              try {
-                // In the case of [up-keep] descendants, keepable elements are now transferred
-                // to step.newElement, leaving a clone in their old DOM Position.
-                // up.hello() is aware of step.keepPlans and will not compile kept elements a second time.
-                up.hello(step.newElement, step)
-              } catch (error) {
-                this.renderResult.tryAddCompileError(error)
-              }
+              console.debug("--- before")
+
+              // In the case of [up-keep] descendants, keepable elements are now transferred
+              // to step.newElement, leaving a clone in their old DOM Position.
+              // up.hello() is aware of step.keepPlans and will not compile kept elements a second time.
+              up.hello(step.newElement, step)
+
+              console.debug("--- after")
 
               this._addToResult(step.newElement)
             },
             beforeDetach: () => {
-              try {
-                // In the case of [up-keep] descendants, keepable elements have been replaced
-                // with a clone in step.oldElement. However, since that clone was never compiled,
-                // it does not have destructors registered. Hence we will not clean the clone
-                // unnecessarily.
-                up.script.clean(step.oldElement, { layer: step.layer })
-              } catch (error) {
-                this.renderResult.tryAddCompileError(error)
-              }
+              // In the case of [up-keep] descendants, keepable elements have been replaced
+              // with a clone in step.oldElement. However, since that clone was never compiled,
+              // it does not have destructors registered. Hence we will not clean the clone
+              // unnecessarily.
+              up.script.clean(step.oldElement, { layer: step.layer })
             },
             afterDetach() {
               up.element.cleanJQuery()

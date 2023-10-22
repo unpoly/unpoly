@@ -78,11 +78,29 @@ up.error = (function() {
     }
   }
 
+  // Replace this with window.reportError() once the browser support is there:
+  // https://caniuse.com/mdn-api_reporterror
+  function report(error) {
+    console.error('Uncaught %o', error)
+    let event = new ErrorEvent('error', { error, message: 'Uncaught ' + error })
+    window.dispatchEvent(event)
+  }
+
+  function guard(fn) {
+    try {
+      return fn()
+    } catch (error) {
+      report(error)
+    }
+  }
+
   return {
     fail,
     throwCritical,
     muteUncriticalRejection,
     muteUncriticalSync,
+    report,
+    guard,
   }
 })()
 

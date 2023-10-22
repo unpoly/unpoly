@@ -97,22 +97,23 @@ The promises returned by `up.render()` and [`up.render().finished`](/up.RenderJo
 
 You may handle the following error cases:
 
-| Error case                                                                         | Hook | Type |
-|------------------------------------------------------------------------------------| -- | ------- |
-| Server responds with [non-200 HTTP status](/failed-responses) | [fail-prefixed options](/failed-responses) | Options |
-| Server responds with [non-200 HTTP status](/failed-responses) | `up.RenderResult` (thrown) | Error |
-| Disconnect or timeout                                         | `up.Offline` | Error |
-| Disconnect or timeout                                         | [`{ onOffline }`](/up.render#options.onOffline) | Callback |
-| Disconnect or timeout                                         | `up:fragment:offline` | Event |
-| Target selector not found                                     | `up.CannotMatch` | Error |
-| Compiler throws error                                         | `up.CannotCompile` | Error |
-| Fragment update was [aborted](/aborting-requests)             | `up.AbortError` | Error |
-| Fragment update was [aborted](/aborting-requests)             | `up:fragment:aborted` | Event |
-| Any error thrown while rendering                              | [`{ onError }`](/up.render#options.onError) | Callback |
-| Any error thrown while rendering                              | `up.Error` | Error superclass |
+| Error case                                                                         | Hook                                                                           | Type |
+|------------------------------------------------------------------------------------|--------------------------------------------------------------------------------| ------- |
+| Server responds with [non-200 HTTP status](/failed-responses) | [fail-prefixed options](/failed-responses)                                     | Options |
+| Server responds with [non-200 HTTP status](/failed-responses) | `up.RenderResult` (thrown)                                                     | Error |
+| Disconnect or timeout                                         | `up.Offline`                                                                   | Error |
+| Disconnect or timeout                                         | [`{ onOffline }`](/up.render#options.onOffline)                                | Callback |
+| Disconnect or timeout                                         | `up:fragment:offline`                                                          | Event |
+| Target selector not found                                     | `up.CannotMatch`                                                               | Error |
+| Compiler throws error                                         | [`error`](https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event) | Error |
+| Fragment update was [aborted](/aborting-requests)             | `up.AbortError`                                                                | Error |
+| Fragment update was [aborted](/aborting-requests)             | `up:fragment:aborted`                                                          | Event |
+| Any error thrown while rendering                              | [`{ onError }`](/up.render#options.onError)                                    | Callback |
+| Any error thrown while rendering                              | `up.Error`                                                                     | Error superclass |
 
 
-### Full error handling example
+
+### Error handling example
 
 To demonstrate control flow in case of error, the code below handles many different error cases:
 
@@ -128,10 +129,8 @@ try {
   if (error instanceof up.RenderResult) {
     // Server sent HTML with a non-200 status code
     console.log("Updated .errors with", error.fragments)
-  if (error instanceof up.CannotMatch) {
+  } else if (error instanceof up.CannotMatch) {
     console.log("Could not find .target in current page or response")
-  if (error instanceof up.CannotCompile) {
-    console.log("Error thrown by compiler", error)
   } else if (error instanceof up.Aborted) {
     console.log("Request to aborted")
   } else if (error instanceof up.Offline) {
@@ -143,6 +142,9 @@ try {
 ```
 
 Note how we use a `fail`-prefixed render option `{ failTarget }` to update a different fragment in case the server responds with an error code. See [handling failed responses](/failed-responses) for more details on handling server responses with an error code.
+
+
+
 
 
 Preventing a render pass
