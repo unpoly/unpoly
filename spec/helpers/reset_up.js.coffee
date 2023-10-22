@@ -88,8 +88,8 @@ afterEach ->
     if document.querySelector('up-progress-bar')
       throw new Error('Progress bar survived reset!')
 
-    # Remove styles from a crashed up.BodyShifter
-    document.body.removeAttribute('style')
+#    # Remove styles from a crashed up.BodyShifter
+#    document.body.removeAttribute('style')
 
     # Scroll to the top
     document.scrollingElement.scrollTop = 0

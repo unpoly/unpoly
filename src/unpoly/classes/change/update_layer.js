@@ -55,15 +55,12 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // preparations before we start rendering.
     onApplicable()
 
-    this._compileErrorDelay = new up.ErrorDelay(up.CannotCompile)
-
     // If our layer ends up being closed during rendering, we still want to render
     // [up-hungry][up-if-layer=any] elements on other layers.
     let unbindClosing = this.layer.on('up:layer:accepting up:layer:dimissing', this._renderOtherLayers.bind(this))
     try {
       this._renderCurrentLayer()
       this._renderOtherLayers()
-      this._errorDelay.flush()
       return up.RenderResult.both(this._currentLayerResult, this._otherLayersResult)
     } finally {
       unbindClosing()
@@ -95,7 +92,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       //
       // (3) Only restore the base layer's history if the fragment update adds a
       //     history entry (issue #397).
-      this._compileErrorDelay.run(() => this.layer.peel({ history: !this._hasHistory() }))
+      this.layer.peel({ history: !this._hasHistory() })
     }
 
     // Unless the user has explicitly opted out of the default { abort: 'target' }
@@ -125,9 +122,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // if any of these options cause the layer to close.
     this.handleLayerChangeRequests()
 
-    this._errorDelay.run(() =>
-      this._currentLayerResult = this.executeSteps(this._steps, this.responseDoc, this.options)
-    )
+    this._currentLayerResult = this.executeSteps(this._steps, this.responseDoc, this.options)
   }
 
   _renderOtherLayers() {

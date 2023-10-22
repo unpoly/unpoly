@@ -5,7 +5,6 @@ up.DestructorPass = class DestructorPass {
   constructor(fragment, options) {
     this._fragment = fragment
     this._options = options
-    this._errorDelay = up.script.errorDelay({ captureAny: true })
   }
 
   run() {
@@ -18,8 +17,6 @@ up.DestructorPass = class DestructorPass {
       }
       cleanable.classList.remove('up-can-clean')
     }
-
-    this._errorDelay.flush()
   }
 
   _selectCleanables() {
@@ -29,9 +26,6 @@ up.DestructorPass = class DestructorPass {
   }
 
   _applyDestructorFunction(destructor, element) {
-    this._errorDelay.run(
-      () => destructor(element),
-      (error) => up.log.error('up.destroy()', 'Error while destroying %o: %o', element, error)
-    )
+    up.error.guard(() => destructor(element))
   }
 }

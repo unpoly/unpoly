@@ -141,7 +141,6 @@ up.RenderResult = class RenderResult extends up.Record {
       layer: main.layer,
       options: main.options,
       fragments: main.fragments.concat(extension.fragments),
-      compileErrors: main.compileErrors.concat(extension.compileErrors),
       finished: (mergeFinished && this.mergeFinished(main, extension)) //.finished // Promise.all([main.finished, extension.finished])
     })
   }

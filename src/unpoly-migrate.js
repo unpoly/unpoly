@@ -2,6 +2,7 @@
 up.framework.startExtension()
 require('./unpoly-migrate/migrate')
 require('./unpoly-migrate/util')
+require('./unpoly-migrate/error')
 require('./unpoly-migrate/browser')
 require('./unpoly-migrate/element')
 require('./unpoly-migrate/event')

@@ -19,7 +19,7 @@ describe 'up.layer', ->
         layer = await up.layer.open()
         expect(layer).toHaveText('')
 
-      fdescribe 'if there are existing overlays over the { baseLayer }', ->
+      describe 'if there are existing overlays over the { baseLayer }', ->
 
         it 'closes existing overlays over the { baseLayer }', ->
           [root, overlay1, overlay2] = makeLayers(3)
@@ -34,21 +34,27 @@ describe 'up.layer', ->
           expect(overlay2).toBeClosed()
 
         it 'still opens the layer if a destructor for an existing overlay crashes', ->
+          destroyError = new Error('error from destructor')
+          destructor = jasmine.createSpy('crashing destructor').and.callFake -> throw destroyError
           up.compiler '.existing-overlay-element', ->
-            return -> throw "destructor error"
+            return destructor
 
           htmlFixture('<div class="root-element">new root</div>')
           up.layer.open(fragment: '<div class="existing-overlay-element"></div>')
 
           expect(up.layer.count).toBe(2)
 
-          promise = up.layer.open(fragment: '<div class="new-overlay-element"></div>', baseLayer: 'root')
+          await jasmine.expectGlobalError destroyError, ->
+            up.layer.open(fragment: '<div class="new-overlay-element"></div>', baseLayer: 'root')
 
-          await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotCompile'))
+            # Peel destructors run in the next microtask because of implementation details in
+            # up.Layer.Overlay#destroyElements().
+            await wait(300)
+
+            expect(destructor).toHaveBeenCalled()
 
           expect(up.layer.count).toBe(2)
           expect(up.layer.current.element).toHaveSelector('.new-overlay-element')
-
 
       describe 'from a remote URL', ->
 

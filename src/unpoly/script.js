@@ -809,48 +809,6 @@ up.script = (function() {
   @stable
   */
 
-  // let delayErrorsStack = 0
-  // let delayedErrors = []
-  //
-  // function isDelayingErrors() {
-  //   return delayErrorsStack === 0
-  // }
-  //
-  // function delayingErrors(fn) {
-  //   delayErrorsStack++
-  //   try {
-  //     return fn()
-  //   } finally {
-  //     delayErrorsStack--
-  //
-  //     if (delayedErrors.length && !isDelayingErrors()) {
-  //       throw new up.CannotCompile('Errors from compiler', { errors: delayedErrors })
-  //     }
-  //   }
-  // }
-  //
-  // function cannotCompile(element, error) {
-  //   up.log.error('up.hello()', 'Error while compiling %o: %o', element, error)
-  //   handleCompileError(element, error)
-  // }
-  //
-  // function cannotDestroy(element, error) {
-  //   up.log.error('up.destroy()', 'Error while destroying %o: %o', element, error)
-  //   handleCompileError(element, error)
-  // }
-  //
-  // function handleCompileError(element, error) {
-  //   if (isDelayingErrors()) {
-  //     delayedErrors.push(error)
-  //   } else {
-  //     throw error
-  //   }
-  // }
-
-  function errorDelay(options) {
-    return new up.ErrorDelay(up.CannotCompile, options)
-  }
-
   /*
   Resets the list of registered compiler directives to the
   moment when the framework was booted.
@@ -873,7 +831,6 @@ up.script = (function() {
     data: readData,
     findAssets,
     assertAssetsOK,
-    errorDelay,
   }
 })()
 

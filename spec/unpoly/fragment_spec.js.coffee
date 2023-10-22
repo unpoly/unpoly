@@ -540,183 +540,190 @@ describe 'up.fragment', ->
 
         describe 'when a compiler throws an error', ->
 
-          it 'rejects the up.render() promise', ->
-            crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(new Error("error from crashing compiler"))
+          it 'emits an error event, but does not reject the up.render() promise', ->
+            compileError = new Error("error from crashing compiler")
+            crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(compileError)
             up.compiler '.element', crashingCompiler
             fixture('.element', text: 'old text')
 
-            promise = up.render({ fragment: '<div class="element">new text</div>' })
+            await jasmine.expectGlobalError compileError, ->
+              promise = up.render({ fragment: '<div class="element">new text</div>' })
 
-            await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotCompile', /errors while compiling/i))
+              await expectAsync(promise).toBeResolvedTo(jasmine.any(up.RenderResult))
 
-            expect(crashingCompiler).toHaveBeenCalled()
             expect('.element').toHaveText('new text')
+            expect(crashingCompiler).toHaveBeenCalled()
 
-          it 'rejects the up.render().finished promise', ->
-            crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(new Error("error from crashing compiler"))
+          it 'emits an error event, but does not reject the up.render().finished promise', ->
+            compileError = new Error('error from crashing compiler')
+            crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(compileError)
             up.compiler '.element', crashingCompiler
             element = fixture('.element', text: 'old text')
 
-            job = up.render({ fragment: '<div class="element">new text</div>' })
+            await jasmine.expectGlobalError compileError, ->
+              promise = up.render({ fragment: '<div class="element">new text</div>' })
 
-            await expectAsync(job).toBeRejectedWith(jasmine.anyError('up.CannotCompile', /errors while compiling/i))
-            await expectAsync(job.finished).toBeRejectedWith(jasmine.anyError('up.CannotCompile', /errors while compiling/i))
+              await expectAsync(promise.finished).toBeResolvedTo(jasmine.any(up.RenderResult))
 
-            expect(crashingCompiler).toHaveBeenCalled()
             expect('.element').toHaveText('new text')
+            expect(crashingCompiler).toHaveBeenCalled()
 
-          it 'calls an { onError } callback', ->
-            crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(new Error("error from crashing compiler"))
+          it 'does not call an { onError } callback', ->
+            compileError = new Error("error from crashing compiler")
+            crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(compileError)
             errorCallback = jasmine.createSpy('onError callback')
             up.compiler '.element', crashingCompiler
             element = fixture('.element', text: 'old text')
 
-            promise = up.render({ fragment: '<div class="element">new text</div>', onError: errorCallback })
+            await jasmine.expectGlobalError compileError, ->
+              up.render({ fragment: '<div class="element">new text</div>', onError: errorCallback })
 
-            await expectAsync(promise).toBeRejected()
-
-            expect(crashingCompiler).toHaveBeenCalled()
             expect('.element').toHaveText('new text')
-            expect(errorCallback).toHaveBeenCalledWith(jasmine.any(up.CannotCompile))
+            expect(crashingCompiler).toHaveBeenCalled()
+            expect(errorCallback).not.toHaveBeenCalled()
 
           it 'does not prevent other compilers on the same element', ->
+            compileError = new Error("error from crashing compiler")
             compilerBefore = jasmine.createSpy('compiler before')
-            crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(new Error("error from crashing compiler"))
+            crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(compileError)
             compilerAfter = jasmine.createSpy('compiler after')
             up.compiler '.element', compilerBefore
             up.compiler '.element', crashingCompiler
             up.compiler '.element', compilerAfter
             fixture('.element', text: 'old text')
 
-            promise = up.render({ fragment: '<div class="element">new text</div>' })
+            await jasmine.expectGlobalError compileError, ->
+              up.render({ fragment: '<div class="element">new text</div>' })
 
-            await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotCompile', /errors while compiling/i))
+            expect('.element').toHaveText('new text')
 
             expect(compilerBefore).toHaveBeenCalled()
             expect(crashingCompiler).toHaveBeenCalled()
             expect(compilerAfter).toHaveBeenCalled()
-            expect('.element').toHaveText('new text')
 
           it 'still updates subsequent elements for a multi-step target', ->
-            crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(new Error("error from crashing compiler"))
+            compileError = new Error("error from crashing compiler")
+            crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(compileError)
             up.compiler '.secondary', crashingCompiler
             fixture('.primary', text: 'old primary')
             fixture('.secondary', text: 'old secondary')
             fixture('.tertiary', text: 'old tertiary')
 
-            promise = up.render('.primary, .secondary, .tertiary', document: """
-              <div class="primary">new primary</div>
-              <div class="secondary">new secondary</div>
-              <div class="tertiary">new tertiary</div>
-            """)
+            await jasmine.expectGlobalError compileError, ->
+              up.render('.primary, .secondary, .tertiary', document: """
+                <div class="primary">new primary</div>
+                <div class="secondary">new secondary</div>
+                <div class="tertiary">new tertiary</div>
+              """)
 
-            await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotCompile', /errors while compiling/i))
-
-            expect(crashingCompiler).toHaveBeenCalled()
             expect('.primary').toHaveText('new primary')
             expect('.secondary').toHaveText('new secondary')
             expect('.tertiary').toHaveText('new tertiary')
 
+            expect(crashingCompiler).toHaveBeenCalled()
+
           it 'still updates the target when failing to compile a hungry element on another layer', ->
-            crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(new Error("error from crashing compiler"))
+            compileError = new Error("error from crashing compiler")
+            crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(compileError)
             up.compiler '.root', crashingCompiler
             fixture('.root', text: 'root', 'up-hungry': '', 'up-if-layer': 'any')
 
             up.layer.open(fragment: '<div class="overlay">old secondary</div>')
 
-            promise = up.render('.overlay', document: """
-              <div class="root">new root</div>
-              <div class="overlay">new overlay</div>
-            """)
+            await jasmine.expectGlobalError compileError, ->
+              up.render('.overlay', document: """
+                <div class="root">new root</div>
+                <div class="overlay">new overlay</div>
+              """)
 
-            await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotCompile', /errors while compiling/i))
-
-            expect(crashingCompiler).toHaveBeenCalled()
             expect('.root').toHaveText('new root')
             expect('.overlay').toHaveText('new overlay')
 
+            expect(crashingCompiler).toHaveBeenCalled()
+
           it 'still opens an overlay when failing to compile a hungry element on another layer', ->
-            crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(new Error("error from crashing compiler"))
+            compileError = new Error("error from crashing compiler")
+            crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(compileError)
             up.compiler '.root', crashingCompiler
             fixture('.root', text: 'root', 'up-hungry': '', 'up-if-layer': 'any')
 
-            promise = up.layer.open(target: '.overlay', document: """
-              <div class="root">new root</div>
-              <div class="overlay">new overlay</div>
-            """)
+            await jasmine.expectGlobalError compileError, ->
+              up.layer.open(target: '.overlay', document: """
+                <div class="root">new root</div>
+                <div class="overlay">new overlay</div>
+              """)
 
-            await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotCompile', /errors while compiling/i))
-
-            expect(crashingCompiler).toHaveBeenCalled()
             expect(up.layer.isOverlay()).toBe(true)
             expect('.root').toHaveText('new root')
             expect('.overlay').toHaveText('new overlay')
+            expect(crashingCompiler).toHaveBeenCalled()
 
           it 'does not prevent destructors', ->
+            compileError = new Error("error from crashing compiler")
             destructor = jasmine.createSpy('destructor')
-            crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(new Error("error from crashing compiler"))
+            crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(compileError)
             up.compiler('.element', crashingCompiler)
             element = fixture('.element', text: 'old text')
             up.destructor(element, destructor)
 
-            promise = up.render({ fragment: '<div class="element">new text</div>' })
+            await jasmine.expectGlobalError compileError, ->
+              up.render({ fragment: '<div class="element">new text</div>' })
 
-            await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotCompile', /errors while compiling/i))
-
-            expect(crashingCompiler).toHaveBeenCalled()
             expect('.element').toHaveText('new text')
 
+            expect(crashingCompiler).toHaveBeenCalled()
+
           it 'still processes a { scroll } option', ->
-            crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(new Error("error from crashing compiler"))
+            compileError = new Error("error from crashing compiler")
+            crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(compileError)
             up.compiler '.element', crashingCompiler
             fixture('.element', text: 'old text')
 
             spyOn(up, 'reveal')
 
-            promise = up.render({ fragment: '<div class="element">new text</div>', scroll: 'target' })
+            await jasmine.expectGlobalError compileError, ->
+              up.render({ fragment: '<div class="element">new text</div>', scroll: 'target' })
 
-            await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotCompile', /errors while compiling/i))
-
-            expect(crashingCompiler).toHaveBeenCalled()
             expect('.element').toHaveText('new text')
             expect(up.reveal).toHaveBeenCalled()
+            expect(crashingCompiler).toHaveBeenCalled()
 
         describe 'when a destructor throws an error', ->
 
           it 'still updates subsequent elements for a multi-step target', ->
-            crashingDestructor = jasmine.createSpy('crashing destructor').and.throwError(new Error("error from crashing destructor"))
+            destroyError = new Error("error from crashing destructor")
+            crashingDestructor = jasmine.createSpy('crashing destructor').and.throwError(destroyError)
             primary = fixture('.primary', text: 'old primary')
             secondary = fixture('.secondary', text: 'old secondary')
             tertiary = fixture('.tertiary', text: 'old tertiary')
 
             up.destructor(secondary, crashingDestructor)
 
-            promise = up.render('.primary, .secondary, .tertiary', document: """
-              <div class="primary">new primary</div>
-              <div class="secondary">new secondary</div>
-              <div class="tertiary">new tertiary</div>
-            """)
+            await jasmine.expectGlobalError destroyError, ->
+              up.render('.primary, .secondary, .tertiary', document: """
+                <div class="primary">new primary</div>
+                <div class="secondary">new secondary</div>
+                <div class="tertiary">new tertiary</div>
+              """)
 
-            await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotCompile', /errors while compiling/i))
-
-            expect(crashingDestructor).toHaveBeenCalled()
             expect('.primary').toHaveText('new primary')
             expect('.secondary').toHaveText('new secondary')
             expect('.tertiary').toHaveText('new tertiary')
+            expect(crashingDestructor).toHaveBeenCalled()
 
           it 'removes the old element', ->
-            crashingDestructor = jasmine.createSpy('crashing destructor').and.throwError(new Error("error from crashing destructor"))
+            destroyError = new Error("error from crashing destructor")
+            crashingDestructor = jasmine.createSpy('crashing destructor').and.throwError(destroyError)
             oldElement = fixture('#element.old')
 
             up.destructor(oldElement, crashingDestructor)
 
-            promise = up.render('#element', document: '<div id="element" class="new"></div>')
+            await jasmine.expectGlobalError destroyError, ->
+              up.render('#element', document: '<div id="element" class="new"></div>')
 
-            await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotCompile', /errors while compiling/i))
-
-            expect(crashingDestructor).toHaveBeenCalled()
             expect(oldElement).toBeDetached()
             expect('#element').toHaveClass('new')
+            expect(crashingDestructor).toHaveBeenCalled()
 
       describe 'with { url } option', ->
 
@@ -3090,7 +3097,7 @@ describe 'up.fragment', ->
             expect(up.layer.get(1)).toHaveText('new text in overlay 1')
             expect(up.layer.get(2)).toHaveText('old text in overlay 2')
 
-          fdescribe 'with { peel: true }', ->
+          describe 'with { peel: true }', ->
 
             it 'closes all overlays over the target with { peel: true }', ->
               makeLayers [
@@ -3148,21 +3155,22 @@ describe 'up.fragment', ->
               expect(locations).toEqual ['/overlay1', '/root1']
 
             it 'still renders content if a destructor for the peeled layer crashes', ->
+              destroyError = new Error('error from crashing destructor')
+
               up.compiler '.overlay-element', ->
-                return -> throw "destructor error"
+                return -> throw destroyError
 
               htmlFixture('<div class="root-element">new root</div>')
               up.layer.open(fragment: '<div class="overlay-element"></div>')
 
               expect(up.layer.isOverlay()).toBe(true)
 
-              promise = up.render(
-                fragment: '<div class="root-element">new root</div>',
-                peel: true,
-                layer: 'root'
-              )
-
-              await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotCompile'))
+              await jasmine.expectGlobalError destroyError, ->
+                up.render(
+                  fragment: '<div class="root-element">new root</div>',
+                  peel: true,
+                  layer: 'root'
+                )
 
               expect('.root-element').toHaveText('new root')
               expect(up.layer.isOverlay()).toBe(false)
@@ -8210,29 +8218,41 @@ describe 'up.fragment', ->
 
       describe 'when a destructor crashes', ->
 
-        it 'removes the element before throwing', ->
+        it 'emits an error event but does not throw an exception', ->
+          destroyError = new Error('destructor error')
           element = fixture('.element')
-          up.destructor(element, -> throw "destructor error")
+          up.destructor(element, -> throw destroyError)
 
-          doDestroy = -> up.destroy(element)
-          expect(doDestroy).toThrowError(/errors while destroying/i)
+          await jasmine.expectGlobalError destroyError, ->
+            doDestroy = -> up.destroy(element)
+            expect(doDestroy).not.toThrowError()
+
+        it 'removes the element', ->
+          destroyError = new Error('destructor error')
+          element = fixture('.element')
+          up.destructor(element, -> throw destroyError)
+
+          await jasmine.expectGlobalError destroyError, ->
+            up.destroy(element)
 
           expect(element).toBeDetached()
 
         it 'removes the element after animation', ->
+          destroyError = new Error('destructor error')
           element = fixture('.element')
-          up.destructor(element, -> throw "destructor error")
+          up.destructor(element, -> throw destroyError)
 
           up.destroy(element, { animation: 'fade-out', duration: 50 })
 
           expect(element).not.toBeDetached()
 
           await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+            expect(globalErrorSpy).not.toHaveBeenCalled()
 
             await wait(150)
 
             expect(element).toBeDetached()
-            expect(globalErrorSpy).toHaveBeenCalledWith(jasmine.anyError(/errors while destroying/i))
+            expect(globalErrorSpy).toHaveBeenCalledWith(destroyError)
 
       describe 'pending requests', ->
 
