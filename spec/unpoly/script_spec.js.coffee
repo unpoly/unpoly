@@ -467,9 +467,20 @@ describe 'up.script', ->
 
       describe 'when a compiler throws an error', ->
 
+        it 'emits an error event but does not throw an exception', ->
+          compileError = new Error("error from crashing compiler")
+          crashingCompiler = -> throw compileError
+          up.compiler '.element', crashingCompiler
+          element = fixture('.element')
+
+          await jasmine.expectGlobalError compileError, ->
+            hello = -> up.hello(element)
+            expect(hello).not.toThrowError()
+
         it 'does not prevent other compilers from running', ->
           compilerBefore = jasmine.createSpy('compiler before')
-          crashingCompiler = -> throw new Error("error from crashing compiler")
+          compileError = new Error("error from crashing compiler")
+          crashingCompiler = -> throw compileError
           compilerAfter = jasmine.createSpy('compiler after')
 
           up.compiler '.element', compilerBefore
@@ -478,21 +489,11 @@ describe 'up.script', ->
 
           element = fixture('.element')
 
-          hello = -> up.hello(element)
-          expect(hello).toThrowError(/errors while compiling/i)
+          await jasmine.expectGlobalError compileError, ->
+            up.hello(element)
 
           expect(compilerBefore).toHaveBeenCalled()
           expect(compilerAfter).toHaveBeenCalled()
-
-        it 'throws an error', ->
-          crashingCompiler = -> throw new Error("error from crashing compiler")
-
-          up.compiler '.element', crashingCompiler
-
-          element = fixture('.element')
-
-          hello = -> up.hello(element)
-          expect(hello).toThrowError(/errors while compiling/i)
 
       describe 'data', ->
 
@@ -571,7 +572,7 @@ describe 'up.script', ->
         expect(compiler).toHaveBeenCalledWith($first[0])
         expect(compiler).toHaveBeenCalledWith($second[0])
 
-    describe 'up.script.clean', ->
+    describe 'up.script.clean()', ->
 
       it 'allows compilers to return a function to call when the compiled element is cleaned', ->
         destructor = jasmine.createSpy('destructor')
@@ -640,9 +641,21 @@ describe 'up.script', ->
 
       describe 'when a destructor throws an error', ->
 
+        it 'emits an error event but does not throw', ->
+          destroyError = new Error("error from crashing destructor")
+          crashingDestructor = -> throw destroyError
+
+          element = fixture('.element')
+          up.destructor(element, crashingDestructor)
+
+          await jasmine.expectGlobalError destroyError, ->
+            clean = -> up.script.clean(element)
+            expect(clean).not.toThrowError()
+
         it 'does not prevent other destructors from running', ->
           destructorBefore = jasmine.createSpy('destructor before')
-          crashingDestructor = -> throw new Error("error from crashing destructor")
+          destroyError = new Error("error from crashing destructor")
+          crashingDestructor = -> throw destroyError
           destructorAfter = jasmine.createSpy('destructor after')
 
           up.compiler '.element', -> return destructorBefore
@@ -652,9 +665,8 @@ describe 'up.script', ->
           element = fixture('.element')
           up.hello(element)
 
-          clean = -> up.script.clean(element)
-
-          expect(clean).toThrowError(/errors while destroying/i)
+          await jasmine.expectGlobalError destroyError, ->
+            up.script.clean(element)
 
           expect(destructorBefore).toHaveBeenCalled()
           expect(destructorAfter).toHaveBeenCalled()

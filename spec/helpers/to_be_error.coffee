@@ -11,8 +11,8 @@ match = (actual, args...) ->
     return (actual instanceof Error) && compareStrings(actual.name, expectedName) && compareStrings(actual.message, expectedMessage)
   else
     # If only a single arg is passed, it must match EITHER the error name or its message.
-    expectedNameOrMessage = args[0]
-    return (actual instanceof Error) && (compareStrings(actual.name, expectedNameOrMessage) || compareStrings(actual.message, expectedNameOrMessage))
+    expectedErrorOrNameOrMessage = args[0]
+    return (actual instanceof Error) && (actual == expectedErrorOrNameOrMessage) || (compareStrings(actual.name, expectedErrorOrNameOrMessage) || compareStrings(actual.message, expectedErrorOrNameOrMessage))
 
 # As a regular matcher
 beforeEach ->

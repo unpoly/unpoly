@@ -99,7 +99,6 @@ up.error = (function() {
     throwCritical,
     muteUncriticalRejection,
     muteUncriticalSync,
-    report,
     guard,
   }
 })()

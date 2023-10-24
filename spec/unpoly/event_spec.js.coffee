@@ -302,15 +302,11 @@ describe 'up.event', ->
 
           emit = -> up.emit('foo')
 
-          await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
-            # Errors in event handlers will be silenced (and not crash the dispatching emitter).
-            # However, the global error handler will still be called (and crash the test).
-            # https://makandracards.com/makandra/481395-error-handling-in-dom-event-listeners
+          # Errors in event handlers will be silenced (and not crash the dispatching emitter).
+          # However, the global error handler will still be called (and crash the test).
+          # https://makandracards.com/makandra/481395-error-handling-in-dom-event-listeners
+          await jasmine.expectGlobalError /error from crashing Unpoly callback/, ->
             expect(emit).not.toThrowError()
-            expect(globalErrorSpy).toHaveBeenCalled()
-            expect(globalErrorSpy.calls.argsFor(0)[0]).toBeError(/error from crashing Unpoly callback/)
-
-            Promise.resolve()
 
           expect(nativeCallbackBefore).toHaveBeenCalled()
           expect(upCallbackBefore).toHaveBeenCalled()

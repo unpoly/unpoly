@@ -546,14 +546,13 @@ describe 'up.fragment', ->
             up.compiler '.element', crashingCompiler
             fixture('.element', text: 'old text')
 
-            await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+            await jasmine.expectGlobalError compileError, ->
               promise = up.render({ fragment: '<div class="element">new text</div>' })
 
               await expectAsync(promise).toBeResolvedTo(jasmine.any(up.RenderResult))
-              expect('.element').toHaveText('new text')
 
-              expect(crashingCompiler).toHaveBeenCalled()
-              expect(globalErrorSpy).toHaveBeenCalledWith(compileError)
+            expect('.element').toHaveText('new text')
+            expect(crashingCompiler).toHaveBeenCalled()
 
           it 'emits an error event, but does not reject the up.render().finished promise', ->
             compileError = new Error('error from crashing compiler')
@@ -561,14 +560,13 @@ describe 'up.fragment', ->
             up.compiler '.element', crashingCompiler
             element = fixture('.element', text: 'old text')
 
-            await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+            await jasmine.expectGlobalError compileError, ->
               promise = up.render({ fragment: '<div class="element">new text</div>' })
 
               await expectAsync(promise.finished).toBeResolvedTo(jasmine.any(up.RenderResult))
-              expect('.element').toHaveText('new text')
 
-              expect(crashingCompiler).toHaveBeenCalled()
-              expect(globalErrorSpy).toHaveBeenCalledWith(compileError)
+            expect('.element').toHaveText('new text')
+            expect(crashingCompiler).toHaveBeenCalled()
 
           it 'does not call an { onError } callback', ->
             compileError = new Error("error from crashing compiler")
@@ -577,17 +575,12 @@ describe 'up.fragment', ->
             up.compiler '.element', crashingCompiler
             element = fixture('.element', text: 'old text')
 
-            await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+            await jasmine.expectGlobalError compileError, ->
               up.render({ fragment: '<div class="element">new text</div>', onError: errorCallback })
 
-              expect('.element').toHaveText('new text')
-
-              expect(crashingCompiler).toHaveBeenCalled()
-              expect(globalErrorSpy).toHaveBeenCalledWith(compileError)
-              expect(errorCallback).not.toHaveBeenCalled()
-
-              # Jasmine requires this function to be async, and CoffeeScript has no async keyword to force it so.
-              return Promise.resolve()
+            expect('.element').toHaveText('new text')
+            expect(crashingCompiler).toHaveBeenCalled()
+            expect(errorCallback).not.toHaveBeenCalled()
 
           it 'does not prevent other compilers on the same element', ->
             compileError = new Error("error from crashing compiler")
@@ -599,18 +592,14 @@ describe 'up.fragment', ->
             up.compiler '.element', compilerAfter
             fixture('.element', text: 'old text')
 
-            await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+            await jasmine.expectGlobalError compileError, ->
               up.render({ fragment: '<div class="element">new text</div>' })
 
-              expect('.element').toHaveText('new text')
+            expect('.element').toHaveText('new text')
 
-              expect(compilerBefore).toHaveBeenCalled()
-              expect(crashingCompiler).toHaveBeenCalled()
-              expect(compilerAfter).toHaveBeenCalled()
-              expect(globalErrorSpy).toHaveBeenCalledWith(compileError)
-
-              # Jasmine requires this function to be async, and CoffeeScript has no async keyword to force it so.
-              return Promise.resolve()
+            expect(compilerBefore).toHaveBeenCalled()
+            expect(crashingCompiler).toHaveBeenCalled()
+            expect(compilerAfter).toHaveBeenCalled()
 
           it 'still updates subsequent elements for a multi-step target', ->
             compileError = new Error("error from crashing compiler")
@@ -620,22 +609,18 @@ describe 'up.fragment', ->
             fixture('.secondary', text: 'old secondary')
             fixture('.tertiary', text: 'old tertiary')
 
-            await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+            await jasmine.expectGlobalError compileError, ->
               up.render('.primary, .secondary, .tertiary', document: """
                 <div class="primary">new primary</div>
                 <div class="secondary">new secondary</div>
                 <div class="tertiary">new tertiary</div>
               """)
 
-              expect('.primary').toHaveText('new primary')
-              expect('.secondary').toHaveText('new secondary')
-              expect('.tertiary').toHaveText('new tertiary')
+            expect('.primary').toHaveText('new primary')
+            expect('.secondary').toHaveText('new secondary')
+            expect('.tertiary').toHaveText('new tertiary')
 
-              expect(crashingCompiler).toHaveBeenCalled()
-              expect(globalErrorSpy).toHaveBeenCalledWith(compileError)
-
-              # Jasmine requires this function to be async, and CoffeeScript has no async keyword to force it so.
-              return Promise.resolve()
+            expect(crashingCompiler).toHaveBeenCalled()
 
           it 'still updates the target when failing to compile a hungry element on another layer', ->
             compileError = new Error("error from crashing compiler")
@@ -645,20 +630,16 @@ describe 'up.fragment', ->
 
             up.layer.open(fragment: '<div class="overlay">old secondary</div>')
 
-            await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+            await jasmine.expectGlobalError compileError, ->
               up.render('.overlay', document: """
                 <div class="root">new root</div>
                 <div class="overlay">new overlay</div>
               """)
 
-              expect('.root').toHaveText('new root')
-              expect('.overlay').toHaveText('new overlay')
+            expect('.root').toHaveText('new root')
+            expect('.overlay').toHaveText('new overlay')
 
-              expect(crashingCompiler).toHaveBeenCalled()
-              expect(globalErrorSpy).toHaveBeenCalledWith(compileError)
-
-              # Jasmine requires this function to be async, and CoffeeScript has no async keyword to force it so.
-              return Promise.resolve()
+            expect(crashingCompiler).toHaveBeenCalled()
 
           it 'still opens an overlay when failing to compile a hungry element on another layer', ->
             compileError = new Error("error from crashing compiler")
@@ -666,21 +647,16 @@ describe 'up.fragment', ->
             up.compiler '.root', crashingCompiler
             fixture('.root', text: 'root', 'up-hungry': '', 'up-if-layer': 'any')
 
-            await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+            await jasmine.expectGlobalError compileError, ->
               up.layer.open(target: '.overlay', document: """
                 <div class="root">new root</div>
                 <div class="overlay">new overlay</div>
               """)
 
-              expect(up.layer.isOverlay()).toBe(true)
-              expect('.root').toHaveText('new root')
-              expect('.overlay').toHaveText('new overlay')
-
-              expect(crashingCompiler).toHaveBeenCalled()
-              expect(globalErrorSpy).toHaveBeenCalledWith(compileError)
-
-              # Jasmine requires this function to be async, and CoffeeScript has no async keyword to force it so.
-              return Promise.resolve()
+            expect(up.layer.isOverlay()).toBe(true)
+            expect('.root').toHaveText('new root')
+            expect('.overlay').toHaveText('new overlay')
+            expect(crashingCompiler).toHaveBeenCalled()
 
           it 'does not prevent destructors', ->
             compileError = new Error("error from crashing compiler")
@@ -690,16 +666,12 @@ describe 'up.fragment', ->
             element = fixture('.element', text: 'old text')
             up.destructor(element, destructor)
 
-            await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+            await jasmine.expectGlobalError compileError, ->
               up.render({ fragment: '<div class="element">new text</div>' })
 
-              expect('.element').toHaveText('new text')
+            expect('.element').toHaveText('new text')
 
-              expect(crashingCompiler).toHaveBeenCalled()
-              expect(globalErrorSpy).toHaveBeenCalledWith(compileError)
-
-              # Jasmine requires this function to be async, and CoffeeScript has no async keyword to force it so.
-              return Promise.resolve()
+            expect(crashingCompiler).toHaveBeenCalled()
 
           it 'still processes a { scroll } option', ->
             compileError = new Error("error from crashing compiler")
@@ -709,17 +681,12 @@ describe 'up.fragment', ->
 
             spyOn(up, 'reveal')
 
-            await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+            await jasmine.expectGlobalError compileError, ->
               up.render({ fragment: '<div class="element">new text</div>', scroll: 'target' })
 
-              expect('.element').toHaveText('new text')
-              expect(up.reveal).toHaveBeenCalled()
-
-              expect(crashingCompiler).toHaveBeenCalled()
-              expect(globalErrorSpy).toHaveBeenCalledWith(compileError)
-
-              # Jasmine requires this function to be async, and CoffeeScript has no async keyword to force it so.
-              return Promise.resolve()
+            expect('.element').toHaveText('new text')
+            expect(up.reveal).toHaveBeenCalled()
+            expect(crashingCompiler).toHaveBeenCalled()
 
         describe 'when a destructor throws an error', ->
 
@@ -732,22 +699,17 @@ describe 'up.fragment', ->
 
             up.destructor(secondary, crashingDestructor)
 
-            await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+            await jasmine.expectGlobalError destroyError, ->
               up.render('.primary, .secondary, .tertiary', document: """
                 <div class="primary">new primary</div>
                 <div class="secondary">new secondary</div>
                 <div class="tertiary">new tertiary</div>
               """)
 
-              expect('.primary').toHaveText('new primary')
-              expect('.secondary').toHaveText('new secondary')
-              expect('.tertiary').toHaveText('new tertiary')
-
-              expect(crashingDestructor).toHaveBeenCalled()
-              expect(globalErrorSpy).toHaveBeenCalledWith(destroyError)
-
-              # Jasmine requires this function to be async, and CoffeeScript has no async keyword to force it so.
-              return Promise.resolve()
+            expect('.primary').toHaveText('new primary')
+            expect('.secondary').toHaveText('new secondary')
+            expect('.tertiary').toHaveText('new tertiary')
+            expect(crashingDestructor).toHaveBeenCalled()
 
           it 'removes the old element', ->
             destroyError = new Error("error from crashing destructor")
@@ -756,17 +718,12 @@ describe 'up.fragment', ->
 
             up.destructor(oldElement, crashingDestructor)
 
-            await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+            await jasmine.expectGlobalError destroyError, ->
               up.render('#element', document: '<div id="element" class="new"></div>')
 
-              expect(oldElement).toBeDetached()
-              expect('#element').toHaveClass('new')
-
-              expect(crashingDestructor).toHaveBeenCalled()
-              expect(globalErrorSpy).toHaveBeenCalledWith(destroyError)
-
-              # Jasmine requires this function to be async, and CoffeeScript has no async keyword to force it so.
-              return Promise.resolve()
+            expect(oldElement).toBeDetached()
+            expect('#element').toHaveClass('new')
+            expect(crashingDestructor).toHaveBeenCalled()
 
       describe 'with { url } option', ->
 
@@ -3208,19 +3165,15 @@ describe 'up.fragment', ->
 
               expect(up.layer.isOverlay()).toBe(true)
 
-              await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+              await jasmine.expectGlobalError destroyError, ->
                 up.render(
                   fragment: '<div class="root-element">new root</div>',
                   peel: true,
                   layer: 'root'
                 )
 
-                expect('.root-element').toHaveText('new root')
-                expect(up.layer.isOverlay()).toBe(false)
-                expect(globalErrorSpy).toHaveBeenCalledWith(destroyError)
-
-                # Jasmine requires this function to be async, and CoffeeScript has no async keyword to force it so.
-                return Promise.resolve()
+              expect('.root-element').toHaveText('new root')
+              expect(up.layer.isOverlay()).toBe(false)
 
         describe 'stacking a new overlay', ->
 
@@ -8265,29 +8218,41 @@ describe 'up.fragment', ->
 
       describe 'when a destructor crashes', ->
 
-        it 'removes the element before throwing', ->
+        it 'emits an error event but does not throw an exception', ->
+          destroyError = new Error('destructor error')
           element = fixture('.element')
-          up.destructor(element, -> throw "destructor error")
+          up.destructor(element, -> throw destroyError)
 
-          doDestroy = -> up.destroy(element)
-          expect(doDestroy).toThrowError(/errors while destroying/i)
+          await jasmine.expectGlobalError destroyError, ->
+            doDestroy = -> up.destroy(element)
+            expect(doDestroy).not.toThrowError()
+
+        it 'removes the element', ->
+          destroyError = new Error('destructor error')
+          element = fixture('.element')
+          up.destructor(element, -> throw destroyError)
+
+          await jasmine.expectGlobalError destroyError, ->
+            up.destroy(element)
 
           expect(element).toBeDetached()
 
         it 'removes the element after animation', ->
+          destroyError = new Error('destructor error')
           element = fixture('.element')
-          up.destructor(element, -> throw "destructor error")
+          up.destructor(element, -> throw destroyError)
 
           up.destroy(element, { animation: 'fade-out', duration: 50 })
 
           expect(element).not.toBeDetached()
 
           await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+            expect(globalErrorSpy).not.toHaveBeenCalled()
 
             await wait(150)
 
             expect(element).toBeDetached()
-            expect(globalErrorSpy).toHaveBeenCalledWith(jasmine.anyError(/errors while destroying/i))
+            expect(globalErrorSpy).toHaveBeenCalledWith(destroyError)
 
       describe 'pending requests', ->
 

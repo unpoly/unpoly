@@ -317,16 +317,12 @@ describe 'up.Layer.Overlay', ->
 
         expect(up.layer.isOverlay()).toBe(true)
 
-        await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+        await jasmine.expectGlobalError destroyError, ->
           up.layer.accept()
-          expect(up.layer.isOverlay()).toBe(false)
-          # Check that an half-completed change does not leave elements in the DOM.
-          expect(document).not.toHaveSelector('up-modal')
 
-          expect(globalErrorSpy).toHaveBeenCalledWith(destroyError)
-
-          # Jasmine requires this function to be async, and CoffeeScript has no async keyword to force it so.
-          return Promise.resolve()
+        expect(up.layer.isOverlay()).toBe(false)
+        # Check that an half-completed change does not leave elements in the DOM.
+        expect(document).not.toHaveSelector('up-modal')
 
       it 'still emits an up:layer:accepted event', ->
         acceptedListener = jasmine.createSpy('listener to up:layer:accepted')
@@ -338,14 +334,10 @@ describe 'up.Layer.Overlay', ->
 
         up.layer.open(fragment: '<div class="overlay-element"></div>', mode: 'modal')
 
-        await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+        await jasmine.expectGlobalError destroyError, ->
           up.layer.accept()
 
-          expect(acceptedListener).toHaveBeenCalled()
-          expect(globalErrorSpy).toHaveBeenCalledWith(destroyError)
-
-          # Jasmine requires this function to be async, and CoffeeScript has no async keyword to force it so.
-          return Promise.resolve()
+        expect(acceptedListener).toHaveBeenCalled()
 
       it 'still restores document scroll bars', ->
         overflowElement = up.viewport.rootOverflowElement()
@@ -361,15 +353,10 @@ describe 'up.Layer.Overlay', ->
 
         expect(getOverflowY()).toBe('hidden')
 
-        await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+        await jasmine.expectGlobalError destroyError, ->
           up.layer.accept()
 
-          expect(globalErrorSpy).toHaveBeenCalledWith(destroyError)
-
-          expect(getOverflowY()).not.toBe('hidden')
-
-          # Jasmine requires this function to be async, and CoffeeScript has no async keyword to force it so.
-          return Promise.resolve()
+        expect(getOverflowY()).not.toBe('hidden')
 
     describe 'with { response } option', ->
 

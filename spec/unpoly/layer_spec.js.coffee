@@ -35,28 +35,26 @@ describe 'up.layer', ->
 
         it 'still opens the layer if a destructor for an existing overlay crashes', ->
           destroyError = new Error('error from destructor')
+          destructor = jasmine.createSpy('crashing destructor').and.callFake -> throw destroyError
           up.compiler '.existing-overlay-element', ->
-            return -> throw destroyError
+            return destructor
 
           htmlFixture('<div class="root-element">new root</div>')
           up.layer.open(fragment: '<div class="existing-overlay-element"></div>')
 
           expect(up.layer.count).toBe(2)
 
-          await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+          await jasmine.expectGlobalError destroyError, ->
             up.layer.open(fragment: '<div class="new-overlay-element"></div>', baseLayer: 'root')
 
             # Peel destructors run in the next microtask because of implementation details in
             # up.Layer.Overlay#destroyElements().
-            await wait()
+            await wait(300)
 
-            expect(up.layer.count).toBe(2)
-            expect(up.layer.current.element).toHaveSelector('.new-overlay-element')
+            expect(destructor).toHaveBeenCalled()
 
-            expect(globalErrorSpy).toHaveBeenCalledWith(destroyError)
-
-            # Jasmine requires this function to be async, and CoffeeScript has no async keyword to force it so.
-            return Promise.resolve()
+          expect(up.layer.count).toBe(2)
+          expect(up.layer.current.element).toHaveSelector('.new-overlay-element')
 
       describe 'from a remote URL', ->
 

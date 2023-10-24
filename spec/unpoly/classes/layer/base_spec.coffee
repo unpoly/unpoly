@@ -148,12 +148,7 @@ describe 'up.Layer', ->
 
         expect(up.layer.count).toBe(3)
 
-        await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+        await jasmine.expectGlobalError destroyError, ->
           up.layer.root.peel()
 
-          expect(up.layer.count).toBe(1)
-
-          expect(globalErrorSpy).toHaveBeenCalledWith(destroyError)
-
-          # Jasmine requires this function to be async, and CoffeeScript has no async keyword to force it so.
-          return Promise.resolve()
+        expect(up.layer.count).toBe(1)
