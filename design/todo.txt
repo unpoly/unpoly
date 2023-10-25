@@ -7,16 +7,27 @@ Remaining V3 tasks
 Next release
 ============
 
-
+- GZ Layer Close Bug
+- Test: Clicked link targets the parent layer
+- A crashing destructor from a closing overlay will still crash the caller
+  - OK: peeling during updates
+  - OK: accept()
+  - OK: dismiss()
+  - OK: peel()
+  - OK: dismissOverlays()
+  - onAccepted
+  - onDismissed
+  - scroll handler
+  - focus handler
+  - watch handler
 - Is the [up-keep=false] pattern good to keep?
   - E.g. for flashes: We could interrupt a keep chain this way, but then the element can never again be keepable
-- [up-hungry][up-if-layer=subtree]: Test that the closest layer is chosen with many overlays and every second has [up-hungry]
-- [up-hungry]: Compress other steps
-  - Test that nested current steps are not inserted twice
-  - Test that nested other steps are not inserted twice
-- Change.DestroyFragment can have more private fields
-- Docs and CHANGELOG for new hungry options
+- Docs and CHANGELOG for changes in 3.5
   - up:fragment:hungry
+  - Document that errors from user code are reported on window and will not throw exceptions
+    - Either in /render-hooks or separate page for handling compiler errors
+    - Note in up.compiler doc page
+    - Note in up.destructor doc page
   - [up-hungry]: Document that if multiple hungry elements target the same new element, the layer closest to the updated layer is chosen.
   - Doc page for "Notification flashes"
     - Explain that user needs to merge herself
@@ -29,6 +40,9 @@ Next release
     - easing
     - must be experimental
   - Docs and Examples for up.layer.get()
+    - Document both { layer } and direct arg
+    - Document pass-through for up.Layer objects
+      - Same for up.element.get(), up.fragment.get()
   - Docs for [up-hungry] should mention
     - that an element from a response is only used once,
       - preferrably by an explict target
@@ -46,10 +60,12 @@ Next release
 Backlog
 =======
 
+- Remove 1.x-stable tag
 - consider having dev builds with debug terser
 - Docs: /accessibility page
   - But where does it go?
   - Top-level?
+- 2024: Replace up.error.emitGlobal() with window.reportError()
 - [v4] Document throws
   - But consider waiting until async compilers, as we're changing some method signatures
   - How do we document async rejections?
@@ -555,3 +571,5 @@ Decisions
   - [up-callouts] (Foundation, uncommon)
 - Do we want to support changing the renderOptions in up:fragment:hungry? In that case { renderOptions } need to be { nonHungryRenderOptions } or something
   => We can rename the options then. If we do support this we would no longer have { renderOptions }, we would use { targetRenderOptions, hungryRenderOptions }
+- Instead of ResponseDoc#commitSteps(), could up.radio.hungrySteps() just re-compress steps with uniqBy(steps, 'selector')?
+  => There is an edge case where different selectors could match the same elemnent
