@@ -5,11 +5,10 @@ up.Change.Addition = class Addition extends up.Change {
 
   constructor(options) {
     super(options)
-    this.responseDoc = options.responseDoc // TODO: Is this an actual option
-    this.acceptLayer = options.acceptLayer
-    this.dismissLayer = options.dismissLayer
-    this.eventPlans = options.eventPlans || []
-    this.response = options.response
+    this._acceptLayer = options.acceptLayer
+    this._dismissLayer = options.dismissLayer
+    this._eventPlans = options.eventPlans || []
+    this._response = options.response
   }
 
   handleLayerChangeRequests() {
@@ -42,7 +41,7 @@ up.Change.Addition = class Addition extends up.Change {
     //
     // A listener to such a server-sent event might also close the layer.
     this.layer.asCurrent(() => {
-      for (let eventPlan of this.eventPlans) {
+      for (let eventPlan of this._eventPlans) {
         up.emit({ ...eventPlan, ...this.responseOption() })
         this.abortWhenLayerClosed()
       }
@@ -51,15 +50,15 @@ up.Change.Addition = class Addition extends up.Change {
 
   tryAcceptLayerFromServer() {
     // When accepting without a value, the server will send X-Up-Accept-Layer: null
-    if (u.isDefined(this.acceptLayer) && this.layer.isOverlay()) {
-      this.layer.accept(this.acceptLayer, this.responseOption())
+    if (u.isDefined(this._acceptLayer) && this.layer.isOverlay()) {
+      this.layer.accept(this._acceptLayer, this.responseOption())
     }
   }
 
   tryDismissLayerFromServer() {
     // When dismissing without a value, the server will send X-Up-Dismiss-Layer: null
-    if (u.isDefined(this.dismissLayer) && this.layer.isOverlay()) {
-      this.layer.dismiss(this.dismissLayer, this.responseOption())
+    if (u.isDefined(this._dismissLayer) && this.layer.isOverlay()) {
+      this.layer.dismiss(this._dismissLayer, this.responseOption())
     }
   }
 
@@ -105,7 +104,7 @@ up.Change.Addition = class Addition extends up.Change {
   }
 
   responseOption() {
-    return { response: this.response }
+    return { response: this._response }
   }
 
   executeSteps(steps, responseDoc, noneOptions) {
