@@ -25,8 +25,6 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change.Removal {
     // removal animation.
     up.fragment.markAsDestroying(this._element)
 
-    console.debug("--- willAnimate %o => %o", this._animation, up.motion.willAnimate(this._element, this._animation, this.options))
-
     if (up.motion.willAnimate(this._element, this._animation, this.options)) {
       // If we're animating, we resolve *before* removing the element.
       // The destroy animation will then play out, but the destroying

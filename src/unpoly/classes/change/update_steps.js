@@ -111,14 +111,10 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
               // step.keepPlans.forEach(this.reviveKeepable)
               this._restoreKeepables(step)
 
-              console.debug("--- before")
-
               // In the case of [up-keep] descendants, keepable elements are now transferred
               // to step.newElement, leaving a clone in their old DOM Position.
               // up.hello() is aware of step.keepPlans and will not compile kept elements a second time.
               up.hello(step.newElement, step)
-
-              console.debug("--- after")
 
               this._addToResult(step.newElement)
             },
