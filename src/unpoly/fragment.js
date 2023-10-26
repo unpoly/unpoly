@@ -2047,7 +2047,7 @@ up.fragment = (function() {
   }
 
   function isGoodTarget(target, element, options = {}) {
-    return !element.isConnected || !config.verifyDerivedTarget || up.fragment.get(target, { layer: element, ...options }) === element
+    return !isAlive(element) || !config.verifyDerivedTarget || up.fragment.get(target, { layer: element, ...options }) === element
   }
 
   /*-

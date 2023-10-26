@@ -8594,7 +8594,7 @@ describe 'up.fragment', ->
         result = up.fragment.successKey('onFailFoo')
         expect(result).toEqual('onFoo')
 
-    describe 'up.fragment.toTarget', ->
+    describe 'up.fragment.toTarget()', ->
 
       it "prefers using the element's 'up-id' attribute to using the element's ID", ->
         element = fixture('div[up-id=up-id-value]#id-value')
@@ -8734,11 +8734,43 @@ describe 'up.fragment', ->
         expect(up.fragment.toTarget(element2)).toBe('#foo')
 
       it "uses a derived target that would match a different element if the given element is detached", ->
-        element1 = fixture('div#foo.foo')
-        element2 = up.element.createFromSelector('div#foo.bar')
+        rivalElement = fixture('div#foo.foo')
+        detachedElement = up.element.createFromSelector('div#foo.bar')
 
         expect(up.fragment.config.verifyDerivedTarget).toBe(true)
-        expect(up.fragment.toTarget(element2)).toBe('#foo')
+        expect(up.fragment.toTarget(detachedElement)).toBe('#foo')
+
+      it "uses a derived target that would match a different element if the given element is playing a destroy animation", ->
+        up.motion.config.enabled = true
+
+        rivalElement = fixture('div#foo.foo')
+        destroyingElement = fixture('div#foo.bar')
+
+        up.destroy(destroyingElement, { animation: 'fade-out', duration: 200 })
+
+        await wait(30)
+
+        expect(up.fragment.config.verifyDerivedTarget).toBe(true)
+        expect(document).toHaveSelector('#foo.bar.up-destroying')
+        expect(up.fragment.toTarget(destroyingElement)).toBe('#foo')
+
+      it "uses a derived target that would match a different element if the given element is in its closing layer's close animation", ->
+        up.motion.config.enabled = true
+
+        rivalElement = fixture('div#foo.foo')
+        overlay = await up.layer.open(target: '#foo', fragment: '<div id="foo" class="bar"></div')
+        expect(up.layer.isOverlay()).toBe(true)
+        elementInClosingOverlay = overlay.getFirstSwappableElement()
+
+        expect(elementInClosingOverlay.id).toBe('foo')
+
+        up.layer.accept(null, { animation: 'fade-out', duration: 200 })
+
+        await wait(30)
+        expect(document).toHaveSelector('up-modal.up-destroying')
+
+        expect(up.fragment.config.verifyDerivedTarget).toBe(true)
+        expect(up.fragment.toTarget(elementInClosingOverlay)).toBe('#foo')
 
       it 'distinguishes between types of link[rel=alternate]', ->
         atomLink = fixture('link[rel=alternate][type="application/atom+xml"][ref="/atom.xml"]')
