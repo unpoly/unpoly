@@ -37,6 +37,27 @@ describe('up.ResponseDoc', function() {
         expect(doc.select('.foo').id).toBe('foo2')
       })
 
+      it('rediscovers the given detached { origin } element in the new document and prefers to match in its vicinity', function() {
+        let origin = fixture('.origin')
+
+        // Detach origin before matching.
+        // A common situation is revalidation. If the initial render pass from cache swaps the origin element,
+        // the revalidation pass needs to handle a detached origin.
+        origin.remove()
+
+        let doc = new up.ResponseDoc({ origin, document: `
+          <html>
+            <body>
+              <div class="foo" id="foo1"></div>
+              <div class="foo" id="foo2"><span class="origin"></span></div>
+              <div class="foo" id="foo3"></div>
+            </body>
+          </html>  
+        `})
+
+        expect(doc.select('.foo').id).toBe('foo2')
+      })
+
       it('returns a missing value if no element matches', function() {
         let doc = new up.ResponseDoc({ document: `
           <html>
