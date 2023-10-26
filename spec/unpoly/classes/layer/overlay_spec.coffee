@@ -76,22 +76,25 @@ describe 'up.Layer.Overlay', ->
 
       expect(callback).toHaveBeenCalledWith(jasmine.objectContaining(value: 'acceptance value'))
 
-    it 'focuses the link that originally opened the overlay', asyncSpec (next) ->
+    it 'focuses the link that originally opened the overlay', ->
       opener = fixture('a[up-target=".element"][up-layer="new"][href="/overlay-path"]')
 
       Trigger.clickSequence(opener)
 
-      next =>
-        @respondWithSelector('.element', text: 'text')
+      await wait()
 
-      next ->
-        expect(up.layer.count).toBe(2)
-        expect(opener).not.toBeFocused()
+      jasmine.respondWithSelector('.element', text: 'text')
 
-        up.layer.current.accept()
+      await wait()
 
-      next ->
-        expect(opener).toBeFocused()
+      expect(up.layer.count).toBe(2)
+      expect(opener).not.toBeFocused()
+
+      up.layer.current.accept()
+
+      await wait()
+
+      expect(opener).toBeFocused()
 
     it 'pops this layer from the stack synchronously to prevent race conditions', ->
       makeLayers(2)

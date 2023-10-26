@@ -1291,6 +1291,34 @@ describe 'up.layer', ->
           element = e.createFromSelector('.element')
           expect(element).toBeDetached()
 
+          expect(up.layer.get(element)).toBeMissing()
+
+        it 'returns a missing value for an element attached to a closed layer', ->
+          overlay = await up.layer.open(fragment: '<div id="foo"></div')
+          expect(up.layer.isOverlay()).toBe(true)
+          elementInClosingOverlay = overlay.getFirstSwappableElement()
+          expect(elementInClosingOverlay.id).toBe('foo')
+
+          up.layer.accept(null, { animation: false })
+
+          await wait(50)
+
+          expect(document).not.toHaveSelector('up-modal')
+          expect(up.layer.get(elementInClosingOverlay)).toBeMissing()
+
+        it 'returns a missing value for an element attached to a closing layer that is still in its close animation', ->
+          overlay = await up.layer.open(fragment: '<div id="foo"></div')
+          expect(up.layer.isOverlay()).toBe(true)
+          elementInClosingOverlay = overlay.getFirstSwappableElement()
+          expect(elementInClosingOverlay.id).toBe('foo')
+
+          up.layer.accept(null, { animation: 'fade-out', duration: 200})
+
+          await wait(50)
+
+          expect(document).toHaveSelector('up-modal.up-destroying')
+          expect(up.layer.get(elementInClosingOverlay)).toBeMissing()
+
       describe 'for an up.Layer', ->
 
         it 'returns the given layer', ->

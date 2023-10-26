@@ -2283,32 +2283,115 @@ describe 'up.fragment', ->
 
         describe 'matching old fragments around the origin', ->
 
-          it 'prefers to match an element closest to origin', asyncSpec (next) ->
-            root = fixture('.element#root')
-            one = e.affix(root, '.element', text: 'old one')
-            two = e.affix(root, '.element', text: 'old two')
-            childOfTwo = e.affix(two, '.origin')
-            three = e.affix(root, '.element', text: 'old three')
+          it 'prefers to match an element closest to origin', ->
+            htmlFixture """
+              <div class="element" id="root">
+                <div class="element">old one</div>
+                <div class="element">
+                  old two
+                  <span class="origin"></span>
+                </div>
+                <div class="element">old three</div>
+              </div>
+            """
 
-            up.render('.element', origin: childOfTwo, content: 'new text')
+            origin = document.querySelector('.origin')
+            up.render('.element', origin: origin, content: 'new text')
 
-            next =>
-              elements = document.querySelectorAll('.element')
-              expect(elements.length).toBe(4)
+            await wait()
 
-              # While #root is an ancestor, two was closer
-              expect(elements[0]).toMatchSelector('#root')
+            elements = document.querySelectorAll('.element')
+            expect(elements.length).toBe(4)
 
-              # One is a sibling of two
-              expect(elements[1]).toHaveText('old one')
+            # While #root is an ancestor, two was closer
+            expect(elements[0]).toMatchSelector('#root')
+            expect(elements[0]).not.toHaveText('new text')
 
-              # Two is the closest match around the origin (childOfTwo)
-              expect(elements[2]).toHaveText('new text')
+            # One is a sibling of two
+            expect(elements[1]).toHaveText('old one')
 
-              # Three is a sibling of three
-              expect(elements[3]).toHaveText('old three')
+            # Two is the closest match around the origin
+            expect(elements[2]).toHaveText('new text')
 
-          it 'prefers to match a descendant selector in the vicinity of the origin', asyncSpec (next) ->
+            # Three is a sibling of three
+            expect(elements[3]).toHaveText('old three')
+
+          it 'prefers to match an element closest to origin when the origin was swapped and then revalidating (bugfix)', ->
+            up.request('/home', target: '.element', cache: true)
+
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            jasmine.respondWith """
+              <div class="element">
+                new text from cache
+                <span class="origin"></span>
+              </div>
+            """
+
+            await wait()
+
+            expect(url: '/home', target: '.element').toBeCached()
+
+            htmlFixture """
+              <div class="element" id="root">
+                <div class="element">old one</div>
+                <div class="element">
+                  old two
+                  <span class="origin"></span>
+                </div>
+                <div class="element">old three</div>
+              </div>
+            """
+
+            origin = document.querySelector('.origin')
+            up.render('.element', origin: origin, url: '/home', cache: true, revalidate: true)
+
+            await wait()
+
+            elements = document.querySelectorAll('.element')
+            expect(elements.length).toBe(4)
+
+            # While #root is an ancestor, two was closer
+            expect(elements[0]).toMatchSelector('#root')
+            expect(elements[0]).not.toHaveText('new text from cache')
+
+            # One is a sibling of two
+            expect(elements[1]).toHaveText('old one')
+
+            # Two is the closest match around the origin
+            expect(elements[2]).toHaveText('new text from cache')
+
+            # The origin was detached when two was swapped
+            expect(origin).toBeDetached()
+
+            # Three is a sibling of three
+            expect(elements[3]).toHaveText('old three')
+
+            expect(jasmine.Ajax.requests.count()).toBe(2)
+            jasmine.respondWith """
+              <div class="element">revalidated new text</div>
+            """
+
+            await wait()
+
+            elements = document.querySelectorAll('.element')
+            expect(elements.length).toBe(4)
+
+            # While #root is an ancestor, two was closer
+            expect(elements[0]).toMatchSelector('#root')
+            expect(elements[0]).not.toHaveText('revalidated new text')
+
+            # One is a sibling of two
+            expect(elements[1]).toHaveText('old one')
+
+            # Two is the closest match around the origin
+            expect(elements[2]).toHaveText('revalidated new text')
+
+            # Three is a sibling of three
+            expect(elements[3]).toHaveText('old three')
+
+          it 'prefers to match a descendant selector in the vicinity of the origin', ->
             element1 = fixture('.element')
             element1Child1 = e.affix(element1, '.child',         text: 'old element1Child1')
             element1Child2 = e.affix(element1, '.child.sibling', text: 'old element1Child2')
@@ -2323,16 +2406,70 @@ describe 'up.fragment', ->
               </div>
             """)
 
-            next =>
-              children = document.querySelectorAll('.child')
+            await wait()
 
-              expect(children.length).toBe(4)
+            children = document.querySelectorAll('.child')
 
-              expect(children[0]).toHaveText('old element1Child1')
-              expect(children[1]).toHaveText('old element1Child2')
+            expect(children.length).toBe(4)
 
-              expect(children[2]).toHaveText('old element2Child1')
-              expect(children[3]).toHaveText('new text')
+            expect(children[0]).toHaveText('old element1Child1')
+            expect(children[1]).toHaveText('old element1Child2')
+
+            expect(children[2]).toHaveText('old element2Child1')
+            expect(children[3]).toHaveText('new text')
+
+          it 'prefers to match a descendant selector in the vicinity of the origin when revalidating (bugfix)', ->
+            up.request(url: '/page', target: '.element .sibling', cache: true)
+
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+
+            jasmine.respondWith """
+              <div class="element">
+                <div class="child sibling">new text from cache</div>
+              </div>
+            """
+
+            await wait()
+
+            expect(url: '/page', target: '.element .sibling').toBeCached()
+
+            element1 = fixture('.element')
+            element1Child1 = e.affix(element1, '.child',         text: 'old element1Child1')
+            element1Child2 = e.affix(element1, '.child.sibling', text: 'old element1Child2')
+
+            element2 = fixture('.element')
+            element2Child1 = e.affix(element2, '.child',         text: 'old element2Child1')
+            element2Child2 = e.affix(element2, '.child.sibling', text: 'old element2Child2')
+
+            up.render('.element .sibling', url: 'page', origin: element2Child1, cache: true, revalidate: true)
+
+            await wait()
+
+            children = document.querySelectorAll('.child')
+            expect(children.length).toBe(4)
+            expect(children[0]).toHaveText('old element1Child1')
+            expect(children[1]).toHaveText('old element1Child2')
+            expect(children[2]).toHaveText('old element2Child1')
+            expect(children[3]).toHaveText('new text from cache')
+
+            expect(jasmine.Ajax.requests.count()).toBe(2)
+
+            jasmine.respondWith """
+              <div class="element">
+                <div class="child sibling">revalidated text</div>
+              </div>
+            """
+
+            await wait()
+
+            children = document.querySelectorAll('.child')
+            expect(children.length).toBe(4)
+            expect(children[0]).toHaveText('old element1Child1')
+            expect(children[1]).toHaveText('old element1Child2')
+            expect(children[2]).toHaveText('old element2Child1')
+            expect(children[3]).toHaveText('revalidated text')
 
           it 'allows ambiguous target derivation if it becomes clear given an origin', asyncSpec (next) ->
             root = fixture('.element#root')
@@ -3085,8 +3222,64 @@ describe 'up.fragment', ->
 
             up.render('.element', content: 'new text', layer: 'root', peel: false)
 
-            expect(up.layer.get(0)).toHaveText(/new text/)
-            expect(up.layer.get(1)).toHaveText(/old text in modal/)
+            expect(up.fragment.get('.element', layer: 0)).toHaveText(/new text/)
+            expect(up.fragment.get('.element', layer: 1)).toHaveText(/old text in modal/)
+
+          it 'updates the layer of the given { origin }', ->
+            makeLayers [
+              { target: '.element', content: 'old text in root' }
+              { target: '.element', content: 'old text in modal' }
+            ]
+
+            origin = fixture('.origin')
+
+            up.render('.element', content: 'new text', origin: origin, peel: false)
+
+            expect(up.fragment.get('.element', layer: 0)).toHaveText(/new text/)
+            expect(up.fragment.get('.element', layer: 1)).toHaveText(/old text in modal/)
+
+          it 'rejects when a detached { origin } is given, but no { layer } option', ->
+            makeLayers [
+              { target: '.element', content: 'old text in root' }
+              { target: '.element', content: 'old text in modal' }
+            ]
+
+            origin = fixture('.origin')
+            origin.remove()
+
+            promise = up.render('.element', content: 'new text', origin: origin, peel: false)
+
+            await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/Could not find.*layer.*detached/i))
+
+            expect(up.fragment.get('.element', layer: 0)).toHaveText(/old text in root/)
+            expect(up.fragment.get('.element', layer: 1)).toHaveText(/old text in modal/)
+
+          it 'ignores a detached { origin } for layer selection when there is also a { layer } option given', ->
+            makeLayers [
+              { target: '.element', content: 'old text in root' }
+              { target: '.element', content: 'old text in modal' }
+            ]
+
+            origin = fixture('.origin')
+            origin.remove()
+
+            up.render('.element', content: 'new text', origin: origin, layer: 1, peel: false)
+
+            expect(up.fragment.get('.element', layer: 0)).toHaveText(/old text in root/)
+            expect(up.fragment.get('.element', layer: 1)).toHaveText(/new text/)
+
+          it 'updates the given { layer } even if the given { origin } is in another layer', ->
+            makeLayers [
+              { target: '.element', content: 'old text in root' }
+              { target: '.element', content: 'old text in modal' }
+            ]
+
+            origin = up.fragment.get('.element', layer: 1)
+
+            up.render('.element', content: 'new text', origin: origin, layer: 'root', peel: false)
+
+            expect(up.fragment.get('.element', layer: 0)).toHaveText(/new text/)
+            expect(up.fragment.get('.element', layer: 1)).toHaveText(/old text in modal/)
 
           it 'updates the layer of the given target, if the target is given as an element (and not a selector)', ->
             makeLayers [
@@ -3095,7 +3288,7 @@ describe 'up.fragment', ->
               { target: '.element', content: 'old text in overlay 2' }
             ]
 
-            up.render(up.layer.get(1).getFirstSwappableElement(), content: 'new text in overlay 1')
+            up.render(up.layer.get(1).getFirstSwappableElement(), content: 'new text in overlay 1', peel: false)
 
             expect(up.layer.get(0)).toHaveText(/old text in root/)
             expect(up.layer.get(1)).toHaveText('new text in overlay 1')

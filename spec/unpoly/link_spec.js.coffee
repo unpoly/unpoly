@@ -1245,6 +1245,41 @@ describe 'up.link', ->
               expect('.document .target').toHaveText('new failure text from modal link')
               expect('up-modal .target').toHaveText('old modal text')
 
+          it 'does not crash when targeting and revalidating cached content in the parent layer (bugfix)', ->
+            up.motion.config.enabled = true
+            up.layer.config.modal.closeAnimation = 'fade-out'
+
+            fixture('main', text: 'old main')
+            up.navigate('main', url: '/page')
+
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            jasmine.respondWithSelector('main', text: 'new main')
+
+            await wait()
+
+            expect('main').toHaveText('new main')
+            expect(target: 'main', url: '/page').toBeCached()
+
+            up.layer.open(target: '#overlay', content: '<a id="overlay-link" up-layer="parent" href="/page">link label</a>')
+
+            expect(up.layer.isOverlay()).toBe(true)
+
+            up.cache.expire()
+            Trigger.clickSequence('#overlay-link')
+
+            await wait()
+
+            expect(up.layer.isOverlay()).toBe(false)
+
+            expect(jasmine.Ajax.requests.count()).toBe(2)
+            jasmine.respondWithSelector('main', text: 'revalidated main')
+
+            await wait()
+
+            expect('main').toHaveText('revalidated main')
+
       describe 'with [up-fail-target] modifier', ->
 
         beforeEach ->
