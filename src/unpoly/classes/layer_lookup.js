@@ -52,7 +52,7 @@ up.LayerLookup = class LayerLookup {
   }
 
   _forIndex(value) {
-    return this._stack[value]
+    return this._stack.at(value)
   }
 
   _resolveValue(value) {

@@ -1,11 +1,10 @@
 const u = up.util
 
-up.LayerStack = class LayerStack extends Array {
+up.LayerStack = class LayerStack {
 
   constructor() {
-    super()
     this._currentOverrides = []
-    this.push(this._buildRoot())
+    this.layers = [this._buildRoot()]
   }
 
   _buildRoot() {
@@ -13,7 +12,7 @@ up.LayerStack = class LayerStack extends Array {
   }
 
   remove(layer) {
-    u.remove(this, layer)
+    u.remove(this.layers, layer)
   }
 
   peel(layer, options) {
@@ -38,7 +37,7 @@ up.LayerStack = class LayerStack extends Array {
   }
 
   isOpen(layer) {
-    return u.contains(this, layer)
+    return u.contains(this.layers, layer)
   }
 
   isClosed(layer) {
@@ -46,16 +45,16 @@ up.LayerStack = class LayerStack extends Array {
   }
 
   parentOf(layer) {
-    return this[layer.index - 1]
+    return this.layers[layer.index - 1]
   }
 
   childOf(layer) {
-    return this[layer.index + 1]
+    return this.layers[layer.index + 1]
   }
 
   ancestorsOf(layer) {
     // Return closest ancestors first
-    return u.reverse(this.slice(0, layer.index))
+    return u.reverse(this.layers.slice(0, layer.index))
   }
 
   selfAndAncestorsOf(layer) {
@@ -64,15 +63,15 @@ up.LayerStack = class LayerStack extends Array {
   }
 
   descendantsOf(layer) {
-    return this.slice(layer.index + 1)
+    return this.layers.slice(layer.index + 1)
   }
 
   isRoot(layer) {
-    return this[0] === layer
+    return this.root === layer
   }
 
   isOverlay(layer) {
-    return !this.isRoot(layer)
+    return this.root !== layer
   }
 
   isCurrent(layer) {
@@ -92,7 +91,7 @@ up.LayerStack = class LayerStack extends Array {
   }
 
   sync() {
-    for (let layer of this) {
+    for (let layer of this.layers) {
       layer.sync()
     }
   }
@@ -107,7 +106,7 @@ up.LayerStack = class LayerStack extends Array {
   }
 
   reversed() {
-    return u.reverse(this)
+    return u.reverse(this.layers)
   }
 
   dismissOverlays(value = null, options = {}) {
@@ -117,17 +116,20 @@ up.LayerStack = class LayerStack extends Array {
     }
   }
 
-  // Used by up.util.reverse() and specs
-  [u.copy.key]() {
-    return u.copyArrayLike(this)
+  at(index) {
+    return this.layers[index]
+  }
+
+  indexOf(layer) {
+    return this.layers.indexOf(layer)
   }
 
   get count() {
-    return this.length
+    return this.layers.length
   }
 
   get root() {
-    return this[0]
+    return this.layers[0]
   }
 
   get overlays() {
@@ -141,7 +143,7 @@ up.LayerStack = class LayerStack extends Array {
   }
 
   get front() {
-    return u.last(this)
+    return u.last(this.layers)
   }
 
 }

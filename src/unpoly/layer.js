@@ -945,7 +945,7 @@ up.layer = (function() {
     closeCallbackAttr,
     anySelector,
     optionToString,
-    get stack() { return stack },
+    get stack() { return stack.layers },
     isWithinForeignOverlay
   }
 
