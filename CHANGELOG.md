@@ -85,7 +85,12 @@ e.g. by [notifying the user](/handling-asset-changes#notifying-the-user) or [loa
 - Allow revalidation when the { failLayer } is no longer open
 - No longer provide the response to compiler's meta argument; We cannot provide it for the initial page load and we want to progressively enhance
 - Log when rendering was aborted or had an error
-- When a compiler or destructor crashes during rendering, finish the render pass before throwing up.CannotCompile
+- When a compiler or destructor crashes during rendering, the error is reported on window and the operation succeeds
+- When a layer closing crashes due to a faulty compiler, the error is reported on window and the operation succeeds
+- up.destroy() will still remove the element if a destructor crashes
+- Destructors are called with the element being destroyed (docs!)
+- Updates for `[up-keep]` no longer need to also be `[up-keep]`. You can prevent keeping by setting `[up-keep=false]`. This allows you to set `[up-keep]` via a macro.
+- Many fixes for matching in closed layers, closing layers, destroying elements or detached elements
 
 
 ### Navigation feedback
@@ -201,7 +206,6 @@ The various ways to provide HTML to rendering functions are now summarized on a 
 
 ### Other changes
 
-- Updates for `[up-keep]` no longer need to also be `[up-keep]`. You can prevent keeping by setting `[up-keep=false]`. This allows you to set `[up-keep]` via a macro.
 - You can now use `[up-href]` without also setting `[up-follow]` or `[up-target]` (fixes #489).
 - Date inputs are again validated on `change` instead of `blur`.
 
