@@ -119,6 +119,10 @@ describe 'up.fragment', ->
 
           expect(up.layer.get(result)).toBe(up.layer.root)
 
+        it 'throws an exception if the { layer } option did not resolve to any layer', ->
+          doGet = -> up.fragment.get('.element', layer: 1)
+          expect(doGet).toThrowError(/unknown layer: 1/i)
+
       describe 'matching around the { origin }', ->
 
         it 'prefers to match an element closest to origin', ->

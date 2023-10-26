@@ -22,8 +22,12 @@ up.Selector = class Selector {
       // Some up.fragment function center around an element, like closest() or matches().
       options.layer ??= u.presence(elementOrDocument, u.isElement)
       this._layers = up.layer.getAll(options)
+
+      if (!this._layers.length) throw new up.CannotMatch(["Unknown layer: %o", options.layer])
+
       this._filters.push(match => u.some(this._layers, layer => layer.contains(match)))
       expandTargetLayer = this._layers[0]
+
     }
 
     let expandedTargets = up.fragment.expandTargets(selector, {...options, layer: expandTargetLayer})
