@@ -2224,7 +2224,7 @@ up.fragment = (function() {
   You can target the main element using the `:main` selector:
 
   ```html
-  <a href="/cards/5" up-follow>Load post</a>
+  <a href="/cards/5" up-target=":main">Load post</a>
 
   <main>
     Post will appear heare
