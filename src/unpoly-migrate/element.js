@@ -184,8 +184,8 @@ Returns whether the given element is attached to the DOM tree.
   Use `element.isConnected` instead.
 */
 up.element.isAttached = function(element) {
-  up.migrate.deprecated('up.element.isAttached()', 'element.isConnected')
-  return element.isConnected
+  up.migrate.deprecated('up.element.isAttached()', 'document.contains(element)')
+  return document.contains(element)
 }
 
 /*-
@@ -198,6 +198,6 @@ Returns whether the given element has been removed from the DOM tree.
   User `!element.isConnected` instead.
 */
 up.element.isDetached = function(element) {
-  up.migrate.deprecated('up.element.isDetached()', '!element.isConnected')
-  return !element.isConnected
+  up.migrate.deprecated('up.element.isDetached()', '!document.contains(element)')
+  return !up.element.isAttached(element)
 }
