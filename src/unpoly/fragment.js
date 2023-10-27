@@ -601,21 +601,33 @@ up.fragment = (function() {
     @see updating-history
 
   @param {string} [options.title]
-    An explicit document title to use after rendering.
+    An explicit document title to set before rendering.
 
     By default the title is extracted from the response's `<title>` tag.
-    You may also pass `{ title: false }` to explicitly prevent the title from being updated.
+
+    You may pass `{ title: false }` to explicitly prevent the title from being updated.
 
     Note that the browser's window title will only be updated it you also
     pass a [`{ history }`](#options.history) option.
 
   @param {string} [options.location]
-    An explicit URL to use after rendering.
+    An explicit browser location URL to set before rendering.
 
     By default Unpoly will use the `{ url }` or the final URL after the server redirected.
-    You may also pass `{ location: false }` to explicitly prevent the URL from being updated.
+
+    You may pass `{ location: false }` to explicitly prevent the URL from being updated.
 
     Note that the browser's URL will only be updated it you also
+    pass a [`{ history }`](#options.history) option.
+
+  @param {boolean|Array<Element>} [options.metaTags]
+    Whether to update [meta tags](/up-meta) before rendering.
+
+    By default Unpoly will extract meta tags from the response `<head>`.
+
+    You may pass `{ metaTags: false }` to explicitly prevent meta tags from being updated.
+
+    Note that meta tags will only be updated it you also
     pass a [`{ history }`](#options.history) option.
 
   @param {string} [options.transition]
