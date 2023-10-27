@@ -62,7 +62,7 @@ A history update comprises the following:
 
 - The URL shown in the browser's address bar.
 - The document title shown as the browser's window title.
-- Meta tags like `meta[name=description]`, `link[rel=canonical]`.
+- Meta tags like `meta[name=description]` or `link[rel=canonical]`.
 
 In the document below, the highlighted elements will be updated when history is changed, in additional to the location URL:
 
