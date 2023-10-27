@@ -39,13 +39,15 @@ e.g. by [notifying the user](/handling-asset-changes#notifying-the-user) or [loa
 - up.script.config.noAssetSelectors
 - [up-asset]
 
-### Automatic head reconciliation
+### Automatic updating of meta tags
 
 [History-related `<meta>` and `<link>` elements, like `meta[name=description]`, `link[rel=canonical]`.](/updating-history#history-state)
 
-- up.history.config.updateMetaElements
-- up.history.config.metaSelectors
-- up.history.config.noMetaSelectors
+- up.history.config.updateMetaTags
+- up.history.config.metaTagSelectors
+- up.history.config.noMetaTagSelectors
+- { metaTags }
+- [up-meta-tags]
 - [up-meta]
 
 
