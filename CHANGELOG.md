@@ -69,7 +69,9 @@ e.g. by [notifying the user](/handling-asset-changes#notifying-the-user) or [loa
 - Hungry elements with `[up-if-layer=any]` should not be able to take away from the explicit target
 - Hungry elements with `[up-if-layer=any]` are now updated from the discarded content if a render pass causes an overlay to cause
 - Hungry elements get `[up-on-hungry]`. Calling `event.preventDefault()` will prevent the hungry fragment from being updated.
-- Hungry elements can use any layer reference in [up-if-layer], .e.g `[up-if-layer="current child"]`
+- New event up:fragment:hungry. Prevent to prevent hungry from being updated.
+- Hungry elements can use any layer reference in `[up-if-layer]`, .e.g `[up-if-layer="current child"]`
+- Deprecated `[up-if-history]` modifier for hungry elements
  
 
 ### Preloading
@@ -80,19 +82,24 @@ e.g. by [notifying the user](/handling-asset-changes#notifying-the-user) or [loa
 ### Rendering
 
 - up:fragment:aborted new experimental property { newLayer }.
-- Fatal render errors are now logged
 - Allow in-page rendering when initial page was loaded with non-GET, but the render pass does not change history
 - When revalidating a fallback target, don't log that we're "revalidating undefined"
 - Don't crash rendering early if a { failTarget } or { failLayer } cannot be resolved
 - Allow revalidation when the { failLayer } is no longer open
 - No longer provide the response to compiler's meta argument; We cannot provide it for the initial page load and we want to progressively enhance
-- Log when rendering was aborted or had an error
-- When a compiler or destructor crashes during rendering, the error is reported on window and the operation succeeds
-- When a layer closing crashes due to a faulty compiler, the error is reported on window and the operation succeeds
-- up.destroy() will still remove the element if a destructor crashes
 - Destructors are called with the element being destroyed (docs!)
 - Updates for `[up-keep]` no longer need to also be `[up-keep]`. You can prevent keeping by setting `[up-keep=false]`. This allows you to set `[up-keep]` via a macro.
 - Many fixes for matching in closed layers, closing layers, destroying elements or detached elements
+
+
+## Error handling
+
+- When a compiler or destructor crashes during rendering, the error is reported on window and the operation succeeds
+- When a layer closing crashes due to a faulty compiler, the error is reported on window and the operation succeeds
+- up.destroy() will still remove the element if a destructor crashes
+- Log when rendering was aborted or had an error
+- Errors in handlers like `{ scroll, focus }` no longer prevent the render pass
+- Errors in `{ onAccept, onAccepted, onDismiss, onDismissed }` no longer prevent the layer from closing. The error is reported on window and the operation succeeds 
 
 
 ### Navigation feedback
