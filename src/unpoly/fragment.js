@@ -600,35 +600,29 @@ up.fragment = (function() {
 
     @see updating-history
 
-  @param {string} [options.title]
+  @param {boolean|string} [options.title]
     An explicit document title to set before rendering.
 
     By default the title is extracted from the response's `<title>` tag.
+    To prevent the title from being updated, pass `{ title: false }`
 
-    You may pass `{ title: false }` to explicitly prevent the title from being updated.
+    This option is only used when [updating history](#options.history).
 
-    Note that the browser's window title will only be updated it you also
-    pass a [`{ history }`](#options.history) option.
-
-  @param {string} [options.location]
+  @param {boolean|string} [options.location]
     An explicit browser location URL to set before rendering.
 
     By default Unpoly will use the `{ url }` or the final URL after the server redirected.
+    To prevent the URL from being updated, pass `{ location: false }`.
 
-    You may pass `{ location: false }` to explicitly prevent the URL from being updated.
-
-    Note that the browser's URL will only be updated it you also
-    pass a [`{ history }`](#options.history) option.
+    This option is only used when [updating history](#options.history).
 
   @param {boolean|Array<Element>} [options.metaTags]
-    Whether to update [meta tags](/up-meta) before rendering.
+    Whether to update [meta tags](/up-meta) in the `<head>`.
 
-    By default Unpoly will extract meta tags from the response `<head>`.
+    By default Unpoly will extract meta tags from the response's `<head>`.
+    To prevent meta tags from being updated, pass `{ metaTags: false }`.
 
-    You may pass `{ metaTags: false }` to explicitly prevent meta tags from being updated.
-
-    Note that meta tags will only be updated it you also
-    pass a [`{ history }`](#options.history) option.
+    This option is only used when [updating history](#options.history).
 
   @param {string} [options.transition]
     The name of an [transition](/up.motion) to morph between the old and few fragment.

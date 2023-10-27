@@ -737,6 +737,26 @@ describe 'up.link', ->
         options = up.link.followOptions(link)
         expect(options.content).toBe('new text')
 
+      it 'parses an [up-history] attribute', ->
+        link = fixture('a[href="/foo"][up-history="false"]')
+        options = up.link.followOptions(link)
+        expect(options.history).toBe(false)
+
+      it 'parses an [up-title] attribute', ->
+        link = fixture('a[href="/foo"][up-title="false"]')
+        options = up.link.followOptions(link)
+        expect(options.title).toBe(false)
+
+      it 'parses an [up-location] attribute', ->
+        link = fixture('a[href="/foo"][up-location="false"]')
+        options = up.link.followOptions(link)
+        expect(options.location).toBe(false)
+
+      it 'parses an [up-meta-tags] attribute', ->
+        link = fixture('a[href="/foo"][up-meta-tags="false"]')
+        options = up.link.followOptions(link)
+        expect(options.metaTags).toBe(false)
+
       if up.migrate.loaded
         it 'parses an [up-reset-scroll] attribute', ->
           link = fixture('a[href="/foo"][up-reset-scroll]')

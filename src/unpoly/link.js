@@ -448,6 +448,7 @@ up.link = (function() {
     parser.booleanOrString('history')
     parser.booleanOrString('location')
     parser.booleanOrString('title')
+    parser.boolean('metaTags')
 
     // Motion options
     parser.include(up.motion.motionOptions)
@@ -985,22 +986,28 @@ up.link = (function() {
     @see updating-history
 
   @param [up-title]
-    An explicit document title to use after rendering.
+    An explicit document title to set before rendering.
 
     By default the title is extracted from the response's `<title>` tag.
-    You may also set `[up-title=false]` to explicitly prevent the title from being updated.
+    To prevent the title from being updated, set `[up-title=false]` to explicitly
 
-    Note that the browser's window title will only be updated it you also
-    set an `[up-history]` attribute.
+    This attribute is only used when [updating history](#up-history).
 
   @param [up-location]
-    An explicit URL to use after rendering.
+    An explicit URL to set before rendering.
 
     By default Unpoly will use the link's `[href]` or the final URL after the server redirected.
-    You may also set `[up-location=false]` to explicitly prevent the URL from being updated.
+    To prevent the URL from being updated, set `[up-location=false]`.
 
-    Note that the browser's URL will only be updated it you also
-    set an `[up-history]` attribute.
+    This attribute is only used when [updating history](#up-history).
+
+  @param [up-meta-tags]
+    Whether to update [meta tags](/up-meta) in the `<head>`.
+
+    By default Unpoly will extract meta tags from the response's `<head>`.
+    To prevent meta tags from being updated, set `[up-meta-tags=false]`.
+
+    This attribute is only used when [updating history](#up-history).
 
   @param [up-transition]
     The name of an [transition](/up.motion) to morph between the old and few fragment.
