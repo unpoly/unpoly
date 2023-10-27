@@ -143,7 +143,7 @@ up.Change.FromContent = class FromContent extends up.Change {
 
     this.options.title = this.improveHistoryValue(this.options.title, responseDoc.title)
 
-    this.options.metaElements = this.improveHistoryValue(this.options.metaElements, responseDoc.metaElements)
+    this.options.metaTags = this.improveHistoryValue(this.options.metaTags, responseDoc.metaTags)
   }
 
   _defaultPlacement() {

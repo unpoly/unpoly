@@ -4103,12 +4103,12 @@ describe 'up.fragment', ->
 
             observer.disconnect()
 
-      describe 'history-related <meta> and <link> elements in the <head>', ->
+      describe 'meta tags', ->
 
         beforeEach ->
           up.history.config.enabled = true
 
-        it "updates meta elements from the response", ->
+        it "updates meta tags from the response", ->
           e.affix(document.head, 'link[rel="canonical"][href="/old-canonical"]')
           e.affix(document.head, 'meta[name="description"][content="old description"]')
 
@@ -4138,7 +4138,7 @@ describe 'up.fragment', ->
           expect(document.head).not.toHaveSelector('meta[name="description"][content="old description"]')
           expect(document.head).toHaveSelector('meta[name="description"][content="new description"]')
 
-        it "does not update meta elements with [up-meta=false]", ->
+        it "does not update meta tags with [up-meta=false]", ->
           e.affix(document.head, 'link[rel="canonical"][href="/old-canonical"][up-meta="false"]')
           e.affix(document.head, 'meta[name="description"][content="old description"]')
 
@@ -4168,7 +4168,7 @@ describe 'up.fragment', ->
           expect(document.head).not.toHaveSelector('meta[name="description"][content="old description"]')
           expect(document.head).toHaveSelector('meta[name="description"][content="new description"]')
 
-        it 'does not update meta elements with { history: false }', ->
+        it 'does not update meta tags with { history: false }', ->
           e.affix(document.head, 'link[rel="canonical"][href="/old-canonical"]')
           e.affix(document.head, 'meta[name="description"][content="old description"]')
 
@@ -4196,8 +4196,8 @@ describe 'up.fragment', ->
           expect(document.head).toHaveSelector('link[rel="canonical"][href="/old-canonical"]')
           expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
 
-        it 'does not update meta elements with up.history.config.updateMetaElements = false', ->
-          up.history.config.updateMetaElements = false
+        it 'does not update meta tags with up.history.config.updateMetaTags = false', ->
+          up.history.config.updateMetaTags = false
 
           e.affix(document.head, 'link[rel="canonical"][href="/old-canonical"]')
           e.affix(document.head, 'meta[name="description"][content="old description"]')
@@ -4226,12 +4226,12 @@ describe 'up.fragment', ->
           expect(document.head).toHaveSelector('link[rel="canonical"][href="/old-canonical"]')
           expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
 
-        it 'does not update meta elements with { metaElements: false } option', ->
+        it 'does not update meta tags with { metaTags: false } option', ->
           e.affix(document.head, 'link[rel="canonical"][href="/old-canonical"]')
           e.affix(document.head, 'meta[name="description"][content="old description"]')
 
           fixture('.container', text: 'old container text')
-          up.render('.container', url: '/path', history: true, metaElements: false)
+          up.render('.container', url: '/path', history: true, metaTags: false)
 
           await wait()
 
@@ -4254,7 +4254,7 @@ describe 'up.fragment', ->
           expect(document.head).toHaveSelector('link[rel="canonical"][href="/old-canonical"]')
           expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
 
-        it 'does not render meta elements for a background layer, but saves them for later restoration', ->
+        it 'does not render meta tags for a background layer, but saves them for later restoration', ->
           e.affix(document.head, 'meta[name="description"][content="old root description"]')
           document.title = 'old root title'
 
@@ -4307,7 +4307,7 @@ describe 'up.fragment', ->
 
           await wait()
 
-          # Since we updated a background layer, the rendered meta elements are still those from the overlay.
+          # Since we updated a background layer, the rendered meta tags are still those from the overlay.
           expect(document.title).toBe('overlay title')
           expect(document.head).toHaveSelector('meta[name="description"][content="overlay description"]')
           expect(document.head).not.toHaveSelector('meta[name="description"][content="old root description"]')
@@ -4316,14 +4316,14 @@ describe 'up.fragment', ->
 
           await wait()
 
-          # Now that the root layer is revealed again, we see the meta elements saved from the last render pass.
+          # Now that the root layer is revealed again, we see the meta tags saved from the last render pass.
           expect(document.title).toBe('new root title')
           expect(document.head).not.toHaveSelector('meta[name="description"][content="overlay description"]')
           expect(document.head).not.toHaveSelector('meta[name="description"][content="old root description"]')
           expect(document.head).toHaveSelector('meta[name="description"][content="new root description"]')
 
 
-        it 'does not remove current meta elements if the response has no <head>', ->
+        it 'does not remove current meta tags if the response has no <head>', ->
           e.affix(document.head, 'link[rel="canonical"][href="/old-canonical"]')
           e.affix(document.head, 'meta[name="description"][content="old description"]')
 
@@ -4348,7 +4348,7 @@ describe 'up.fragment', ->
           expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
 
         if up.migrate.loaded
-          it "warns if an auto-update meta elements is also [up-hungry]", ->
+          it "warns if an auto-update meta tags is also [up-hungry]", ->
             e.affix(document.head, 'link[rel="canonical"][href="/old-canonical"][up-hungry]')
             warnSpy = spyOn(up.migrate, 'warn')
 
@@ -5762,7 +5762,7 @@ describe 'up.fragment', ->
           expect('.target').toHaveText('new text')
           expect('.target').toHaveAttribute('callback', "nonce-secret1 alert()")
 
-        it "ensures nonced callbacks still match the current page's nonce after a render pass that updates history (meta elements are part of history state) (bugfix)", ->
+        it "ensures nonced callbacks still match the current page's nonce after a render pass that updates history (meta tags are part of history state) (bugfix)", ->
           up.element.affix(document.head, 'meta#test-nonce[name="csp-nonce"][content="nonce-secret1"]')
           expect(up.protocol.cspNonce()).toBe('nonce-secret1')
 

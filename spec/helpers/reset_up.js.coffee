@@ -15,17 +15,17 @@ resetTitle = ->
   unless document.title == jasmine.titleBeforeSuite
     document.title = jasmine.titleBeforeSuite
 
-resetHeadMetas = ->
-  currentMetas = findHeadMetas()
+resetMetaTags = ->
+  currentMetaTags = findMetaTags()
 
-  unless u.isEqual(currentMetas, jasmine.headMetasBeforeSuite)
-    for meta in currentMetas
-      meta.remove()
+  unless u.isEqual(currentMetaTags, jasmine.metaTagsBeforeSuite)
+    for currentMetaTag in currentMetaTags
+      currentMetaTag.remove()
 
-    for savedMeta in jasmine.headMetasBeforeSuite
-      document.head.append(savedMeta)
+    for savedMetaTag in jasmine.metaTagsBeforeSuite
+      document.head.append(savedMetaTag)
 
-findHeadMetas = ->
+findMetaTags = ->
   document.head.querySelectorAll('meta, link:not([rel=stylesheet])')
 
 beforeAll ->
@@ -33,10 +33,10 @@ beforeAll ->
 
   jasmine.locationBeforeSuite = location.href
 
-  jasmine.headMetasBeforeSuite = findHeadMetas()
+  jasmine.metaTagsBeforeSuite = findMetaTags()
 
   # Ignore <meta> and <link> tags from the Jasmine runner
-  for meta in jasmine.headMetasBeforeSuite
+  for meta in jasmine.metaTagsBeforeSuite
     meta.setAttribute('up-meta', 'false')
 
 beforeEach ->
@@ -72,7 +72,7 @@ afterEach ->
     # Some resetting modules (like up.history) need to be called after the URL was been reset.
     resetLocation()
     resetTitle()
-    resetHeadMetas()
+    resetMetaTags()
 
     up.framework.reset()
 

@@ -121,8 +121,8 @@ up.ResponseDoc = class ResponseDoc {
     return head && fn(head)
   }
 
-  get metaElements() {
-    return this._fromHead(up.history.findMetas)
+  get metaTags() {
+    return this._fromHead(up.history.findMetaTags)
   }
 
   get assets() {

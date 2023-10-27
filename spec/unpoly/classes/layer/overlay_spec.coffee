@@ -223,7 +223,7 @@ describe 'up.Layer.Overlay', ->
       expect(up.layer.isRoot()).toBe(true)
       expect(document.title).toBe('Root title')
 
-    it "restores the parent layer's history-related <meta> and <link> elements", ->
+    it "restores the parent layer's meta tags", ->
       up.history.config.enabled = true
 
       e.affix(document.head, 'meta[name="description"][content="old description"]')

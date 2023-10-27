@@ -323,7 +323,7 @@ describe 'up.layer', ->
               expect(up.layer.history).toBe(true)
               expect(location.href).toMatchURL('/modal-location')
 
-          it "updates history-related <meta> and <link> elements from the response", ->
+          it "updates meta tags from the response", ->
             e.affix(document.head, 'meta[name="description"][content="old description"]')
 
             up.layer.open(

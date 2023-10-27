@@ -587,7 +587,7 @@ up.fragment = (function() {
     See [handling server errors](/failed-responses) for details.
 
   @param {boolean|string} [options.history]
-    Whether the browser URL, window title and meta elements will be [updated](/updating-history).
+    Whether the browser URL, window title and meta tags will be [updated](/updating-history).
 
     If set to `true`, the history will always be updated, using history
     the server response, or from given `{ title }` and `{ location }` options.

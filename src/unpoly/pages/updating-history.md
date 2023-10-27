@@ -1,7 +1,7 @@
 Updating history
 ================
 
-Unpoly will update the browser location, document title and other [history-related state](#history-state)
+Unpoly will update the browser location, document title and meta tags
 as the user [follows links](/a-up-follow) and [submits forms](/form-up-submit).
 
 
@@ -62,7 +62,7 @@ A history update comprises the following:
 
 - The URL shown in the browser's address bar.
 - The document title shown as the browser's window title.
-- History-related `<meta>` and `<link>` elements, like `meta[name=description]`, `link[rel=canonical]`.
+- Meta tags like `meta[name=description]`, `link[rel=canonical]`.
 
 In the document below, the highlighted elements will be updated when history is changed, in additional to the location URL:
 
@@ -79,7 +79,7 @@ In the document below, the highlighted elements will be updated when history is 
 
 The linked JavaScript and stylesheet are *not* part of history state and will not be updated.
 
-The updating of `<link>` and `<meta>` elements can be disabled with `up.history.config.updateMetaElements = false`.
+The updating of `<link>` and `<meta>` elements can be disabled with `up.history.config.updateMetaTags = false`.
 
 
 
@@ -99,9 +99,9 @@ Also see [History restoration in overlays](/restoring-history#overlays)
 ### Behavior of overlays with history
 
 When an overlay has visible history, its location and title are shown in the browser window while
-the overlay is open. Also [history-related meta elements](#history-state) from the overlay content will be appended to the `<head>`.  
+the overlay is open. Also [meta tags](#history-state) from the overlay content will be placed into the `<head>`.  
 
-When an overlay is closed, the URL, title and history-related meta elements from the background layer are restored.
+When an overlay is closed, the URL, title and meta tags from the background layer are restored.
 
 ### Behavior of overlays without history
 

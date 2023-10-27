@@ -36,47 +36,47 @@ up.history = (function() {
 
     If set to `false` Unpoly will never change history.
 
-  @param {boolean} [config.updateMetaElements=true]
+  @param {boolean} [config.updateMetaTags=true]
     Configures whether [history changes](/updating-history) update
-    [history-related meta elements](/updating-history#history-state) in addition
+    [meta tags](/updating-history#history-state) in addition
     to the document's title and URL.
 
-  @param {config.metaSelectors}
-    An array of CSS selectors matching default [meta elements](/up-meta)
+  @param {config.metaTagSelectors}
+    An array of CSS selectors matching default [meta tags](/up-meta)
     that are be updated during [history changes](/updating-history).
 
-    By default popular `<meta>` and certain `<link>` elements are considered meta elements.
+    By default popular `<meta>` and certain `<link>` elements are considered meta tags.
 
     Because of the [large number of `[rel]` attribute values](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/rel)
     Unpoly the most common `link[rel]` elements are matched by default.
-    You can [include additional elements](/up-meta#including-metas) by assigning an `[up-meta]` attribute
+    You can [include additional elements](/up-meta#including-meta-tags) by assigning an `[up-meta]` attribute
     or by pushing their selector into this configuration array.
 
     Only elements in the `<head>` can be matched. Elements in the `<body>` are never considered,
     even if they match one of the configured selectors.
 
-  @param {config.noMetaSelectors}
-    Exceptions to `up.history.config.metaSelectors`.
+  @param {config.noMetaTagSelectors}
+    Exceptions to `up.history.config.metaTagSelectors`.
 
-    Matching elements will *not* be considered [meta elements](/up-meta)
-    even if they match `up.history.config.metaSelectors`.
+    Matching elements will *not* be considered [meta tags](/up-meta)
+    even if they match `up.history.config.metaTagSelectors`.
 
   @stable
   */
   const config = new up.Config(() => ({
     enabled: true,
-    updateMetaElements: true,
+    updateMetaTags: true,
     // Prefer restoring the body instead of :main, in case the last fragment update
     // changed the page layout. See https://github.com/unpoly/unpoly/issues/237.
     restoreTargets: ['body'],
-    metaSelectors: [
+    metaTagSelectors: [
       'meta',
       'link[rel=alternate]',
       'link[rel=canonical]',
       'link[rel=icon]',
       '[up-meta]',
     ],
-    noMetaSelectors: [
+    noMetaTagSelectors: [
       'meta[http-equiv]',
       '[up-meta=false]',
       // Do not invalidate existing nonced callbacks.
@@ -407,14 +407,14 @@ up.history = (function() {
     }
   })
 
-  function findMetas(head = document.head) {
-    return e.filteredQuery(head, config.metaSelectors, config.noMetaSelectors)
+  function findMetaTags(head = document.head) {
+    return e.filteredQuery(head, config.metaTagSelectors, config.noMetaTagSelectors)
   }
 
   /*-
   Configures whether this `<head>` element is updated during [history changes](/updating-history).
 
-  By default popular `<meta>` and certain `<link>` elements in the `<head>` are considered meta elements.
+  By default popular `<meta>` and certain `<link>` elements in the `<head>` are considered meta tags.
   They will be updated when history is changed, in addition to the document's title and URL.
 
   ```html
@@ -428,7 +428,7 @@ up.history = (function() {
   The linked JavaScript and stylesheet are *not* part of history state and will not be updated
   during history changes.
 
-  ### Including additional elements {#including-metas}
+  ### Including additional elements {#including-meta-tags}
 
   To update additional `<head>` elements during history changes, mark them with an `[up-meta]` attribute:
 
@@ -438,9 +438,9 @@ up.history = (function() {
 
   Only elements in the `<head>` can be matched this way.
 
-  To include additional elements by default, configure `up.history.config.metaSelectors`.
+  To include additional elements by default, configure `up.history.config.metaTagSelectors`.
 
-  ### Excluding elements {#excluding-metas}
+  ### Excluding elements {#excluding-meta-tags}
 
   To preserve a `<head>` element during history, changes, set an `[up-meta=false]` attribute:
 
@@ -448,22 +448,22 @@ up.history = (function() {
   <meta charset="utf-8" up-meta="false">
   ```
 
-  To exclude elements by default, configure `up.history.config.noMetaSelectors`.
+  To exclude elements by default, configure `up.history.config.noMetaTagSelectors`.
 
   @selector [up-meta]
   @stable
   */
 
-  function updateMetaElements(newMetas) {
-    let oldMetas = findMetas()
-    for (let oldMeta of oldMetas) {
-      // We do not use up.destroy() as meta elements may be inserted/removed
+  function updateMetaTags(newMetaTags) {
+    let oldMetaTags = findMetaTags()
+    for (let oldMetaTag of oldMetaTags) {
+      // We do not use up.destroy() as meta tags may be inserted/removed
       // multiple times as we open and close an overlay.
-      oldMeta.remove()
+      oldMetaTag.remove()
     }
 
-    for (let newMeta of newMetas) {
-      document.head.append(newMeta)
+    for (let newMetaTag of newMetaTags) {
+      document.head.append(newMetaTag)
     }
   }
 
@@ -518,7 +518,7 @@ up.history = (function() {
     get previousLocation() { return previousLocation },
     normalizeURL,
     isLocation,
-    findMetas,
-    updateMetaElements,
+    findMetaTags,
+    updateMetaTags,
   }
 })()
