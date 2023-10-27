@@ -5540,6 +5540,29 @@ describe 'up.fragment', ->
                 expect(result.state).toBe('fulfilled')
                 done()
 
+        describe 'with a function passed as { scroll } option', ->
+
+          it 'calls the function', ->
+            scrollHandler = jasmine.createSpy('scroll handler')
+            fixture('.element', content: 'old text')
+
+            up.render('.element', content: 'new text', scroll: scrollHandler)
+
+            expect('.element').toHaveText('new text')
+            expect(scrollHandler).toHaveBeenCalled()
+
+          it 'does not crash the render pass and emits an error event if the function throws', ->
+            scrollError = new Error('error in scroll handler')
+            scrollHandler = jasmine.createSpy('scroll handler').and.throwError(scrollError)
+            fixture('.element', content: 'old text')
+
+            await jasmine.expectGlobalError scrollError, ->
+              job = up.render('.element', content: 'new text', scroll: scrollHandler)
+
+              await expectAsync(job).toBeResolvedTo(jasmine.any(up.RenderResult))
+              expect('.element').toHaveText('new text')
+              expect(scrollHandler).toHaveBeenCalled()
+
       describe 'execution of scripts', ->
 
         beforeEach ->
@@ -6397,7 +6420,6 @@ describe 'up.fragment', ->
               expect('.focused').toHaveText('new focused')
               expect('.focused').toBeFocused()
 
-
         describe 'without a { focus } option', ->
 
           it 'preserves focus of an element within the changed fragment', asyncSpec (next) ->
@@ -6415,6 +6437,29 @@ describe 'up.fragment', ->
             next ->
               expect('.focused').toHaveText('new focused')
               expect('.focused').toBeFocused()
+
+        describe 'with a function passed as { focus } option', ->
+
+          it 'calls the function', ->
+            focusHandler = jasmine.createSpy('focus handler')
+            fixture('.element', content: 'old text')
+
+            await up.render('.element', content: 'new text', focus: focusHandler)
+
+            expect('.element').toHaveText('new text')
+            expect(focusHandler).toHaveBeenCalled()
+
+          it 'does not crash the render pass and emits an error event if the function throws', ->
+            focusError = new Error('error in focus handler')
+            focusHandler = jasmine.createSpy('focus handler').and.throwError(focusError)
+            fixture('.element', content: 'old text')
+
+            await jasmine.expectGlobalError focusError, ->
+              job = up.render('.element', content: 'new text', focus: focusHandler)
+
+              await expectAsync(job).toBeResolvedTo(jasmine.any(up.RenderResult))
+              expect('.element').toHaveText('new text')
+              expect(focusHandler).toHaveBeenCalled()
 
         describe 'when rendering nothing', ->
 

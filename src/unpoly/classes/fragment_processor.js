@@ -26,7 +26,9 @@ up.FragmentProcessor = class FragmentProcessor extends up.Record {
     }
 
     if (u.isFunction(opt)) {
-      return this.tryProcess(opt(this.fragment, this.attributes()))
+      let result = up.error.guard(() => opt(this.fragment, this.attributes()))
+      // The function result can be another processable value.
+      return this.tryProcess(result)
     }
 
     if (u.isElement(opt)) {
