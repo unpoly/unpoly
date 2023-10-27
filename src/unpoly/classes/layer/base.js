@@ -175,12 +175,7 @@ up.Layer = class Layer extends up.Record {
     Whether the closing can be prevented by an event listener.
 
     @internal
-  @return {Promise}
-    A promise that fulfills when the overlay has been accepted
-    and its parent layer has become [current](/up.layer.current).
-
-    When the promise fulfills the accepted overlay may still be playing its close animation.
-    To run code after the animation has concluded, use [`{ onFinished }`](#options.onFinished).
+  @return
   @stable
   */
   accept() {
@@ -205,12 +200,7 @@ up.Layer = class Layer extends up.Record {
     ```
   @param {Object} [options]
     See options for `up.Layer#accept()`.
-  @return {Promise}
-    A promise that fulfills when the overlay has been dimissed
-    and its parent layer has become [current](/up.layer.current).
-
-    When the promise filfills the dismissed overlay may still be playing its close animation.
-    To run code after the animation has concluded, use [`{ onFinished }`](/up.Layer.prototype.accept#options.onFinished).
+  @return
   @stable
   */
   dismiss() {

@@ -63,18 +63,68 @@ describe 'up.Layer.Overlay', ->
       next ->
         expect(abortedURLs).toBeBlank()
 
-    it 'takes an acceptance value that is passed to onAccepted handlers', ->
-      callback = jasmine.createSpy('onAccepted handler')
+    it 'takes an acceptance value that is passed to onAccept handlers', ->
+      onAccept = jasmine.createSpy('onAccept handler')
 
       makeLayers [
         { }
-        { onAccepted: callback }
+        { onAccept }
       ]
-      expect(callback).not.toHaveBeenCalled()
+      expect(onAccept).not.toHaveBeenCalled()
 
       up.layer.current.accept('acceptance value')
 
-      expect(callback).toHaveBeenCalledWith(jasmine.objectContaining(value: 'acceptance value'))
+      expect(onAccept).toHaveBeenCalledWith(jasmine.objectContaining(value: 'acceptance value'))
+
+    it 'does not close the overlay if an onAccept handler prevents the event', ->
+      onAccept = jasmine.createSpy('onAccept handler').and.callFake (event) -> event.preventDefault()
+      onAccepted = jasmine.createSpy('onAccepted handler')
+
+      makeLayers [
+        { }
+        { onAccept, onAccepted }
+      ]
+      expect(onAccept).not.toHaveBeenCalled()
+
+      doAccept = -> up.layer.current.accept('acceptance value')
+      expect(doAccept).toThrowError(/prevented/i)
+
+      expect(onAccept).toHaveBeenCalledWith(jasmine.objectContaining(value: 'acceptance value'))
+      expect(onAccepted).not.toHaveBeenCalled()
+      expect(up.layer.isOverlay()).toBe(true)
+
+    it 'still closes the overlay if an onAccept handler crashes', ->
+      acceptError = new Error('errror in onAccept handler')
+      onAccept = jasmine.createSpy('onAccept handler').and.throwError(acceptError)
+      onAccepted = jasmine.createSpy('onAccepted handler')
+
+      makeLayers [
+        { }
+        { onAccept, onAccepted }
+      ]
+      expect(onAccept).not.toHaveBeenCalled()
+      expect(onAccepted).not.toHaveBeenCalled()
+
+      await jasmine.expectGlobalError acceptError, ->
+        up.layer.current.accept('acceptance value')
+
+      expect(onAccept).toHaveBeenCalled()
+      expect(onAccepted).toHaveBeenCalled()
+      expect(up.layer.isRoot()).toBe(true)
+      expect(document).not.toHaveSelector('up-modal')
+
+    it 'takes an acceptance value that is passed to onAccepted handlers', ->
+      onAccepted = jasmine.createSpy('onAccepted handler')
+
+      makeLayers [
+        { }
+        { onAccepted }
+      ]
+      expect(onAccepted).not.toHaveBeenCalled()
+
+      up.layer.current.accept('acceptance value')
+
+      expect(onAccepted).toHaveBeenCalledWith(jasmine.objectContaining(value: 'acceptance value'))
 
     it 'focuses the link that originally opened the overlay', ->
       opener = fixture('a[up-target=".element"][up-layer="new"][href="/overlay-path"]')

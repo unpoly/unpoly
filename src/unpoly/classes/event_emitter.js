@@ -32,7 +32,7 @@ up.EventEmitter = class EventEmitter extends up.Record {
       document.dispatchEvent(this.event)
     }
 
-    this.callback?.(this.event)
+    up.error.guard(() => this.callback?.(this.event))
   }
 
   assertEmitted() {
