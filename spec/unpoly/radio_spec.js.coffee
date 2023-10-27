@@ -1665,7 +1665,6 @@ describe 'up.radio', ->
       it 'reloads the element periodically', asyncSpec (next) ->
         interval = 150
         timingTolerance = interval / 3
-
         up.radio.config.pollInterval = interval
 
         element = up.hello(fixture('.element[up-poll]', text: 'old text'))
@@ -1690,6 +1689,13 @@ describe 'up.radio', ->
 
         next.after (interval + timingTolerance), ->
           expect(jasmine.Ajax.requests.count()).toBe(3)
+
+      it 'does not reload an element with [up-poll=false]', ->
+        up.hello(fixture('.element[up-poll=false][up-interval=50][up-source="/source-path"]', text: 'old text'))
+
+        await wait(120)
+
+        expect(jasmine.Ajax.requests.count()).toBe(0)
 
       it 'does not make additional requests while a previous requests is still in flight', asyncSpec (next) ->
         deferred = u.newDeferred()
@@ -1841,25 +1847,53 @@ describe 'up.radio', ->
         next.after 75, ->
           expect(reloadSpy.calls.count()).toBe(1)
 
-      it 'stops polling when the server responds without an [up-poll] attribute', asyncSpec (next) ->
+      it 'stops polling when the server responds without an [up-poll] attribute', ->
         up.radio.config.pollInterval = interval = 150
         timingTolerance = interval / 3
 
         element = up.hello(fixture('.element[up-poll]', text: 'old text'))
 
-        next.after timingTolerance, ->
-          expect('.element').toHaveText('old text')
-          expect(jasmine.Ajax.requests.count()).toBe(0)
+        await wait(timingTolerance)
 
-        next.after interval, ->
-          expect(jasmine.Ajax.requests.count()).toBe(1)
-          jasmine.respondWithSelector('.element', text: 'new text')
+        expect('.element').toHaveText('old text')
+        expect(jasmine.Ajax.requests.count()).toBe(0)
 
-        next ->
-          expect('.element').toHaveText('new text')
+        await wait(interval)
 
-        next.after (timingTolerance + interval), ->
-          expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        jasmine.respondWithSelector('.element', text: 'new text')
+
+        await wait()
+
+        expect('.element').toHaveText('new text')
+
+        await wait(timingTolerance + interval)
+
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+
+      it 'stops polling when the server responds without an [up-poll=false] attribute', ->
+        up.radio.config.pollInterval = interval = 150
+        timingTolerance = interval / 3
+
+        element = up.hello(fixture('.element[up-poll]', text: 'old text'))
+
+        await wait(timingTolerance)
+
+        expect('.element').toHaveText('old text')
+        expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        await wait(interval)
+
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        jasmine.respondWithSelector('.element[up-poll=false]', text: 'new text')
+
+        await wait()
+
+        expect('.element').toHaveText('new text')
+
+        await wait(timingTolerance + interval)
+
+        expect(jasmine.Ajax.requests.count()).toBe(1)
 
       it 'lets the server change the [up-source] (bugfix)', asyncSpec (next) ->
         up.radio.config.pollInterval = interval = 150

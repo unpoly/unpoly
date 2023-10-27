@@ -407,6 +407,7 @@ up.radio = (function() {
   There are two reasons for polling to stop:
 
   - The fragment from the server response no longer has an `[up-poll]` attribute.
+  - The fragment from the server response has an `[up-poll="false"]` attribute.
   - Client-side code has called `up.radio.stopPolling()` with the polling element.
 
   @selector [up-poll]
@@ -434,7 +435,7 @@ up.radio = (function() {
     Defaults to the closest `[up-source]` attribute of an ancestor element.
   @stable
   */
-  up.compiler('[up-poll]', function(fragment) {
+  up.compiler('[up-poll]:not([up-poll=false])', function(fragment) {
     up.FragmentPolling.forFragment(fragment).onPollAttributeObserved()
   })
 
