@@ -7,20 +7,6 @@ Remaining V3 tasks
 Next release
 ============
 
-- Warn when compilers emit unsupported values
-- A crashing destructor from a closing overlay will still crash the caller
-  - OK: peeling during updates
-  - OK: accept()
-  - OK: dismiss()
-  - OK: peel()
-  - OK: dismissOverlays()
-  - onAccepted
-  - onDismissed
-  - scroll handler
-  - focus handler
-  - watch handler
-- Is the [up-keep=false] pattern good to keep?
-  - E.g. for flashes: We could interrupt a keep chain this way, but then the element can never again be keepable
 - Docs and CHANGELOG for changes in 3.5
   - up:fragment:hungry
   - Document that errors from user code are reported on window and will not throw exceptions
@@ -62,6 +48,12 @@ Next release
 Backlog
 =======
 
+- Async compiler functions
+  - See separate doc
+  - Don't need to delay this until V4 as destructors no longer throw
+- Is the [up-keep=false] pattern good to keep?
+  - E.g. for flashes: We could interrupt a keep chain this way, but then the element can never again be keepable
+  => It's the same for polling
 - Remove 1.x-stable tag
 - consider having dev builds with debug terser
 - Docs: /accessibility page
@@ -72,8 +64,6 @@ Backlog
   - But consider waiting until async compilers, as we're changing some method signatures
   - How do we document async rejections?
     - up.link.preload documents in @return
-- [v4] Async compiler functions
-  - See separate doc
 - Publish up.util.sprintf()
   - But rename it to something else, as sprintf() is something else
 - Docs: Custom input elements
