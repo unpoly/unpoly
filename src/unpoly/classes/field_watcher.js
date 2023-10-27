@@ -85,11 +85,11 @@ up.FieldWatcher = class FieldWatcher {
 
       const callbackReturnValues = []
       if (this._batch) {
-        callbackReturnValues.push(this._callback(diff, callbackOptions))
+        callbackReturnValues.push(this._runCallback(diff, callbackOptions))
       } else {
         for (let name in diff) {
           const value = diff[name]
-          callbackReturnValues.push(this._callback(value, name, callbackOptions))
+          callbackReturnValues.push(this._runCallback(value, name, callbackOptions))
         }
       }
 
@@ -106,6 +106,10 @@ up.FieldWatcher = class FieldWatcher {
 
       this._requestCallback()
     }
+  }
+
+  _runCallback(...args) {
+    return up.error.guard(() => this._callback(...args))
   }
 
   _changedValues(previous, next) {

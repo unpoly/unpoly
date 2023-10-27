@@ -366,6 +366,50 @@ describe 'up.form', ->
                 expect(callback).toHaveBeenCalled()
                 expect(input).not.toBeDisabled()
 
+            describe 'when the callback throws an error', ->
+
+              it 'emits an error event', ->
+                form = fixture('form')
+                input = e.affix(form, 'input[name=email]')
+
+                callbackError = new Error('error from watch callback')
+                callback = jasmine.createSpy('watch callback').and.throwError(callbackError)
+
+                console.debug("--- callback spy is %o", callback)
+
+                up.watch(input, callback)
+
+                input.value = 'value2'
+
+                await jasmine.expectGlobalError callbackError, ->
+                  Trigger[eventType](input)
+
+                  # Watcher waits for at least 1 task to group multiple updates with the same end value
+                  await wait()
+
+              it 'keeps watching', ->
+                form = fixture('form')
+                input = e.affix(form, 'input[name=email]')
+
+                callbackError = new Error('error from watch callback')
+                callback = jasmine.createSpy('watch callback').and.throwError(callbackError)
+
+                up.watch(input, callback)
+
+                input.value = 'value2'
+                await jasmine.expectGlobalError callbackError, ->
+                  Trigger[eventType](input)
+
+                  # Watcher waits for at least 1 task to group multiple updates with the same end value
+                  await wait()
+
+                input.value = 'value3'
+                await jasmine.expectGlobalError callbackError, ->
+                  Trigger[eventType](input)
+
+                  # Watcher waits for at least 1 task to group multiple updates with the same end value
+                  await wait()
+
         describe 'with a checkbox', ->
 
           it 'runs the callback when the checkbox changes its checked state', asyncSpec (next) ->
