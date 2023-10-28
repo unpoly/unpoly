@@ -757,6 +757,11 @@ describe 'up.link', ->
         options = up.link.followOptions(link)
         expect(options.metaTags).toBe(false)
 
+      it 'parses an [up-match] attribute', ->
+        link = fixture('a[href="/foo"][up-match="first"]')
+        options = up.link.followOptions(link)
+        expect(options.match).toBe('first')
+
       if up.migrate.loaded
         it 'parses an [up-reset-scroll] attribute', ->
           link = fixture('a[href="/foo"][up-reset-scroll]')

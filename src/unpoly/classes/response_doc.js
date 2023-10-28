@@ -3,7 +3,7 @@ const e = up.element
 
 up.ResponseDoc = class ResponseDoc {
 
-  constructor({ document, fragment, content, target, origin, cspNonces }) {
+  constructor({ document, fragment, content, target, origin, cspNonces, match }) {
     if (document) {
       this._parseDocument(document)
     } else if (fragment) {
@@ -29,6 +29,8 @@ up.ResponseDoc = class ResponseDoc {
         this._rediscoveredOrigin = this.select(originSelector)
       }
     }
+
+    this._match = match
   }
 
   _parseDocument(document) {
@@ -144,6 +146,7 @@ up.ResponseDoc = class ResponseDoc {
       selector: selector,
       origin: this._rediscoveredOrigin,
       document: this._document,
+      match: this._match,
     })
     return finder.find()
   }

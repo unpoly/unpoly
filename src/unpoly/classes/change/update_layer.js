@@ -160,7 +160,8 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       const finder = new up.FragmentFinder({
         selector: step.selector,
         origin: step.origin,
-        layer: step.layer
+        layer: step.layer,
+        match: step.match,
       })
       // const finder = new up.FragmentFinder(step)
       // Try to find fragments matching step.selector within step.layer.

@@ -9,15 +9,16 @@ up.FragmentFinder = class FragmentFinder {
     this._selector = options.selector
     // This option is for matching fragments in detached content, as needed by up.ResponseDoc.
     this._document = options.document || window.document
+    this._match = options.match ?? up.fragment.config.match
   }
 
   find() {
-    return this._findAroundOrigin() || this._findInLayer()
+    return this._findInRegion() || this._findFirst()
   }
 
-  _findAroundOrigin() {
-    if (this._origin && up.fragment.config.matchAroundOrigin && this._origin.isConnected) {
-      return this._findClosest() || this._findInVicinity()
+  _findInRegion() {
+    if (this._match === 'region' && this._origin?.isConnected) {
+      return this._findClosest() || this._findDescendantInRegion()
     }
   }
 
@@ -25,7 +26,7 @@ up.FragmentFinder = class FragmentFinder {
     return up.fragment.closest(this._origin, this._selector, this._options)
   }
 
-  _findInVicinity() {
+  _findDescendantInRegion() {
     let parts = this._selector.match(DESCENDANT_SELECTOR)
     if (parts) {
       let parent = up.fragment.closest(this._origin, parts[1], this._options)
@@ -35,7 +36,7 @@ up.FragmentFinder = class FragmentFinder {
     }
   }
 
-  _findInLayer() {
+  _findFirst() {
     return up.fragment.getDumb(this._document, this._selector, this._options)
   }
 }

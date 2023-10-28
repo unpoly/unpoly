@@ -176,9 +176,9 @@ Sometimes there are multiple components with the same selector on the page:
 <div class="card">...</div>
 ```
 
-While you can [set `[id]` attributes to uniquely identify an element on the page](/target-derivation), this may not be necessary. When an ambiguous selector like `.card` matches more than one element, Unpoly will prefer to match a fragment in the *proximity* of the a link or form that the user interacted with. If there is no match in the proximity, Unpoly will update the first match in the [layer](/up.layer).
+While you can [set `[id]` attributes to uniquely identify an element on the page](/target-derivation), this may not be necessary. When an ambiguous selector like `.card` matches more than one element, Unpoly will prefer to match a fragment near the a link or form that the user interacted with (the *origin*). If there is no match in close proximity, Unpoly will update the first match in the [layer](/up.layer).
 
-Note that when rendering programmatically, you can pass the interaction's origin element as [`{ origin }`](/up.render#options.origin) option.
+When rendering programmatically, you can pass the interaction's origin element as [`{ origin }`](/up.render#options.origin) option.
 
 Below you can find examples of targeting elements with ambiguous selectors, which Unpoly resolves by proximity to the interaction origin. A more elaborate example is the [Tasks list](https://demo.unpoly.com/tasks) of the [Unpoly Demo App](https://demo.unpoly.com/).
 
@@ -222,6 +222,15 @@ The interaction origin can only be considered in the current page, but not in th
 When clicking on *"Show full card #2"*, Unpoly will replace the `.card-text` within the second card.
 
 The interaction origin can only be considered in the current page, but not in the server response. In the example above the server is expected to only render a single `.card` element.
+
+
+### Disabling region-aware fragment matching
+
+If matching fragments around the origin does not work for you, you can tell Unpoly to use the fragment matching the target selector:
+
+- Pass a `{ match: 'first' }` option to a function that matches a fragment.
+- Set an `[up-match=first]` option on a link or form that matches a fragment.
+- Configure `up.fragment.config.match = 'first` to disable region-aware fragment matching for all functions and elements. You can then opt in again with `{ match: 'region' }` or `[up-link=region]`.
 
 
 ## Dealing with missing targets

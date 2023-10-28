@@ -125,7 +125,7 @@ describe 'up.fragment', ->
 
       describe 'matching around the { origin }', ->
 
-        it 'prefers to match an element closest to origin', ->
+        it 'prefers to match an element closest to origin when no { match } option is given', ->
           root = fixture('.element#root')
           one = e.affix(root, '.element', text: 'old one')
           two = e.affix(root, '.element', text: 'old two')
@@ -136,7 +136,18 @@ describe 'up.fragment', ->
 
           expect(result).toBe(two)
 
-        it 'prefers to match a descendant selector in the vicinity of the origin', ->
+        it 'prefers to match an element closest to origin with { match: "region" }', ->
+          root = fixture('.element#root')
+          one = e.affix(root, '.element', text: 'old one')
+          two = e.affix(root, '.element', text: 'old two')
+          childOfTwo = e.affix(two, '.origin')
+          three = e.affix(root, '.element', text: 'old three')
+
+          result = up.fragment.get('.element', origin: childOfTwo, match: 'region')
+
+          expect(result).toBe(two)
+
+        it 'prefers to match a descendant selector in the region of the origin', ->
           element1 = fixture('.element')
           element1Child1 = e.affix(element1, '.child',         text: 'old element1Child1')
           element1Child2 = e.affix(element1, '.child.sibling', text: 'old element1Child2')
@@ -148,6 +159,29 @@ describe 'up.fragment', ->
           result = up.fragment.get('.element .sibling', origin: element2Child1)
 
           expect(result).toBe(element2Child2)
+
+        it 'ignores the origin with { match: "first" }', ->
+          root = fixture('.element#root')
+          one = e.affix(root, '.element', text: 'old one')
+          two = e.affix(root, '.element', text: 'old two')
+          childOfTwo = e.affix(two, '.origin')
+          three = e.affix(root, '.element', text: 'old three')
+
+          result = up.fragment.get('.element', origin: childOfTwo, match: 'first')
+
+          expect(result).toBe(root)
+
+        it 'ignores the origin with up.fragment.config.match = "first"', ->
+          root = fixture('.element#root')
+          one = e.affix(root, '.element', text: 'old one')
+          two = e.affix(root, '.element', text: 'old two')
+          childOfTwo = e.affix(two, '.origin')
+          three = e.affix(root, '.element', text: 'old three')
+
+          up.fragment.config.match = 'first'
+          result = up.fragment.get('.element', origin: childOfTwo)
+
+          expect(result).toBe(root)
 
     describe 'up.fragment.all()', ->
 
@@ -2316,6 +2350,30 @@ describe 'up.fragment', ->
             # Three is a sibling of three
             expect(elements[3]).toHaveText('old three')
 
+          it 'updates the first matching element with { match: "first" }', ->
+            htmlFixture """
+              <div id="root">
+                <div class="element">old one</div>
+                <div class="element">
+                  old two
+                  <span class="origin"></span>
+                </div>
+                <div class="element">old three</div>
+              </div>
+            """
+
+            origin = document.querySelector('.origin')
+            up.render('.element', origin: origin, content: 'new text', match: 'first')
+
+            await wait()
+
+            elements = document.querySelectorAll('.element')
+            expect(elements.length).toBe(3)
+
+            expect(elements[0]).toHaveText('new text')
+            expect(elements[1]).toHaveText('old two')
+            expect(elements[2]).toHaveText('old three')
+
           it 'prefers to match an element closest to origin when the origin was swapped and then revalidating (bugfix)', ->
             up.request('/home', target: '.element', cache: true)
 
@@ -2391,7 +2449,7 @@ describe 'up.fragment', ->
             # Three is a sibling of three
             expect(elements[3]).toHaveText('old three')
 
-          it 'prefers to match a descendant selector in the vicinity of the origin', ->
+          it 'prefers to match a descendant selector in the region of the origin', ->
             element1 = fixture('.element')
             element1Child1 = e.affix(element1, '.child',         text: 'old element1Child1')
             element1Child2 = e.affix(element1, '.child.sibling', text: 'old element1Child2')
@@ -2418,7 +2476,7 @@ describe 'up.fragment', ->
             expect(children[2]).toHaveText('old element2Child1')
             expect(children[3]).toHaveText('new text')
 
-          it 'prefers to match a descendant selector in the vicinity of the origin when revalidating (bugfix)', ->
+          it 'prefers to match a descendant selector in the region of the origin when revalidating (bugfix)', ->
             up.request(url: '/page', target: '.element .sibling', cache: true)
 
             await wait()

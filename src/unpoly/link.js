@@ -398,6 +398,7 @@ up.link = (function() {
     parser.string('confirm', { attr: ['up-confirm', 'data-confirm'] })
     parser.string('target')
     parser.booleanOrString('fallback')
+    parser.string('match')
     parser.string('content')
     parser.string('fragment')
     parser.string('document')
@@ -918,6 +919,16 @@ up.link = (function() {
     If set to `true` Unpoly will attempt to replace a [main target](/up-main) instead.
 
     If set to `false` Unpoly will immediately reject the render promise.
+
+  @param [up-match='region']
+    Controls which fragment to update when the [`[up-target]`](#up-target) selector yields multiple results.
+
+    When set to `'region'` Unpoly will prefer to update fragments in the
+    [region](/targeting-fragments#resolving-ambiguous-selectors) of the [origin element](/up.render#options.origin).
+
+    If set to `'first'` Unpoly will always update the first matching fragment.
+
+    Defaults to `up.fragment.config.match`, which defaults to `'region'`.
 
   @param [up-method='get']
     The HTTP method to use for the request.

@@ -21,7 +21,7 @@ describe('up.ResponseDoc', function() {
         expect(doc.select('.bar')).toHaveText('bar text')
       })
 
-      it('rediscovers the given { origin } element in the new document and prefers to match in its vicinity', function() {
+      it('rediscovers the given { origin } element in the new document and prefers to match in its region', function() {
         let origin = fixture('.origin')
 
         let doc = new up.ResponseDoc({ origin, document: `
@@ -37,7 +37,7 @@ describe('up.ResponseDoc', function() {
         expect(doc.select('.foo').id).toBe('foo2')
       })
 
-      it('rediscovers the given detached { origin } element in the new document and prefers to match in its vicinity', function() {
+      it('rediscovers the given detached { origin } element in the new document and prefers to match in its region', function() {
         let origin = fixture('.origin')
 
         // Detach origin before matching.

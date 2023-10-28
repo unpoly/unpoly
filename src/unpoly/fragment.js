@@ -95,11 +95,13 @@ up.fragment = (function() {
   @param {Object} [config.navigateOptions]
     An object of default options to apply when [navigating](/navigation).
 
-  @param {boolean} [config.matchAroundOrigin]
-    Whether to match an existing fragment around the triggered link.
+  @param {string} [config.match='region']
+    How to match fragments when a [target selector](/targeting-fragments) yields multiple results.
 
-    If set to `false` Unpoly will replace the first fragment
-    matching the given target selector in the link's [layer](/up.layer).
+    When set to `'region'` Unpoly will prefer to match fragments in the
+    [region](/targeting-fragments#resolving-ambiguous-selectors) of the [origin element](/up.render#options.origin).
+
+    If set to `'first'` Unpoly will always use the first matching fragment.
 
   @param {Array<string>} [config.autoHistoryTargets]
     When an updated fragments contain an element matching one of the given [target selectors](/targeting-fragments),
@@ -219,7 +221,7 @@ up.fragment = (function() {
       peel: true,
     },
 
-    matchAroundOrigin: true,
+    match: 'region',
     runScripts: true,
     autoHistoryTargets: [':main'],
     autoFocus: ['hash', 'autofocus', 'main-if-main', 'keep', 'target-if-lost'],
@@ -523,6 +525,16 @@ up.fragment = (function() {
     If set to `false` Unpoly will immediately reject the render promise.
 
     Also see [Dealing with missing targets](/targeting-fragments#dealing-with-missing-targets).
+
+  @param {string} [options.match='region']
+    Controls which fragment to update when the [`{ target }`](#options.target) selector yields multiple results.
+
+    When set to `'region'` Unpoly will prefer to update fragments in the
+    [region](/targeting-fragments#resolving-ambiguous-selectors) of the [origin element](/up.render#options.origin).
+
+    If set to `'first'` Unpoly will always update the first matching fragment.
+
+    Defaults to `up.fragment.config.match`, which defaults to `'region'`.
 
   @param {boolean} [options.navigate=false]
     Whether this fragment update is considered [navigation](/navigation).
@@ -1300,7 +1312,8 @@ up.fragment = (function() {
     Pass a `{ layer }`option to match elements in other layers.
   - This function ignores elements that are being [destroyed](/up.destroy) or that are being
     removed by a [transition](/up.morph).
-  - This function prefers to match elements in the vicinity of a given `{ origin }` element (optional).
+  - This function prefers to match elements in the [region](/targeting-fragments#resolving-ambiguous-selectors)
+    of a given `{ origin }` element (optional).
   - This function supports non-standard CSS selectors like `:main` and `:has()`.
 
   If no element matches these conditions, `undefined` is returned.
@@ -1397,7 +1410,7 @@ up.fragment = (function() {
   @param {Element|jQuery|Document} [root=document]
     The root element for the search. Only the root's children will be matched.
 
-    May be omitted to search through all elements in the `document`.
+    May be omitted to search through all elements in the current `document`.
   @param {string} selector
     The selector to match.
   @param {string} [options.layer='current']
@@ -1407,10 +1420,20 @@ up.fragment = (function() {
 
     If a root element was passed as first argument, this option is ignored and the
     root element's layer is searched.
+  @param {string} [options.match='region']
+    Controls which fragment to return when the [`{ target }`](#options.target) selector yields multiple results.
+
+    When set to `'region'` Unpoly will prefer to match fragments in the
+    [region](/targeting-fragments#resolving-ambiguous-selectors) of the [origin element](#options.origin).
+
+    If set to `'first'` Unpoly will always return the first matching fragment.
+
+    Defaults to `up.fragment.config.match`, which defaults to `'region'`.
+
   @param {Element|jQuery} [options.origin]
     The origin element that triggered this fragment lookup, e.g. a button that was clicked.
 
-    Unpoly will prefer to match fragments in the [vicinity](/targeting-fragments#resolving-ambiguous-selectors)
+    Unpoly will prefer to match fragments in the [region](/targeting-fragments#resolving-ambiguous-selectors)
     of the origin element.
 
     The `selector` argument may refer to the origin as `:origin`.
@@ -1436,12 +1459,13 @@ up.fragment = (function() {
     }
 
     // If we don't have a root element we will use a context-sensitive lookup strategy
-    // that tries to match elements in the vicinity of { origin } before going through
+    // that tries to match elements in the region of { origin } before going through
     // the entire layer.
     return new up.FragmentFinder({
       selector,
       origin: options.origin,
-      layer: options.layer
+      layer: options.layer,
+      match: options.match,
     }).find()
   }
 
@@ -1508,7 +1532,7 @@ up.fragment = (function() {
   @param {string|Element|jQuery} [options.origin]
     The origin element that triggered this fragment lookup, e.g. a button that was clicked.
 
-    Unpoly will prefer to match fragments in the [vicinity](/targeting-fragments#resolving-ambiguous-selectors)
+    Unpoly will prefer to match fragments in the [region](/targeting-fragments#resolving-ambiguous-selectors)
     of the origin element.
 
     The `selector` argument may refer to the origin as `:origin`.
@@ -2422,7 +2446,7 @@ up.fragment = (function() {
   > Ensuring an origin is set may improve the precision of fragment lookup, even if
   > a [target selector](/targeting-fragments) doesn't contain an `:origin` reference.
   > In the example above, Unpoly would prefer to match `.preview` in the
-  > [vicinity](/targeting-fragments#resolving-ambiguous-selectors) of the origin.
+  > [region](/targeting-fragments#resolving-ambiguous-selectors) of the origin.
   > If no origin is known, Unpoly will always match the first `.preview` in the
   > current [layer](/up.layer).
 

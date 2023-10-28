@@ -11,6 +11,18 @@ up.migrate.renamedProperty(up.fragment.config, 'fallbacks', 'mainTargets')
 
 up.migrate.handleResponseDocOptions = docOptions => up.migrate.fixKey(docOptions, 'html', 'document')
 
+let matchAroundOriginDeprecated = () => up.migrate.deprecated('up.fragment.config.matchAroundOrigin', 'up.fragment.config.match')
+Object.defineProperty(up.fragment.config, 'matchAroundOrigin', {
+  get: function() {
+    matchAroundOriginDeprecated()
+    return this.match === 'closest'
+  },
+  set: function(value) {
+    matchAroundOriginDeprecated()
+    this.match = value ? 'region' : 'first'
+  }
+})
+
 /*-
 Replaces elements on the current page with corresponding elements
 from a new page fetched from the server.
@@ -87,7 +99,7 @@ Returns `undefined` if no element matches these conditions.
 @param {Element|jQuery} [root=document]
   The root element for the search. Only the root's children will be matched.
 
-  May be omitted to search through all elements in the `document`.
+  May be omitted to search through all elements in the current `document`.
 @param {string} selector
   The selector to match
 @param {string} [options.layer='current']

@@ -82,7 +82,7 @@ up.Change.FromResponse = class FromResponse extends up.Change {
     let effectiveTarget = renderResult.target
 
     // Our { origin } may have been detached in the original render pass.
-    // However the { origin } may be required for choice of layer and vicinity matching.
+    // However the { origin } may be required for choice of layer and region matching.
     // Hence try to rediscover a detached element with the same target in the new fragments.
     let rediscoveredOrigin = this._rediscoverDetachedOrigin(renderResult, originalRenderOptions)
 
