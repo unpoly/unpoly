@@ -375,8 +375,6 @@ describe 'up.form', ->
                 callbackError = new Error('error from watch callback')
                 callback = jasmine.createSpy('watch callback').and.throwError(callbackError)
 
-                console.debug("--- callback spy is %o", callback)
-
                 up.watch(input, callback)
 
                 input.value = 'value2'

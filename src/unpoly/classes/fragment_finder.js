@@ -10,10 +10,17 @@ up.FragmentFinder = class FragmentFinder {
     // This option is for matching fragments in detached content, as needed by up.ResponseDoc.
     this._document = options.document || window.document
     this._match = options.match ?? up.fragment.config.match
+    this._preferOldElements = options.preferOldElements
   }
 
   find() {
-    return this._findInRegion() || this._findFirst()
+    return this._findInPreferredElements() || this._findInRegion() || this._findFirst()
+  }
+
+  _findInPreferredElements() {
+    if (this._preferOldElements) {
+      return this._preferOldElements.find((preferOldElement) => this._document.contains(preferOldElement) && up.fragment.matches(preferOldElement, this._selector))
+    }
   }
 
   _findInRegion() {

@@ -157,13 +157,8 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   _matchOldElements() {
     this._steps = this._steps.filter((step) => {
 
-      const finder = new up.FragmentFinder({
-        selector: step.selector,
-        origin: step.origin,
-        layer: step.layer,
-        match: step.match,
-      })
-      // const finder = new up.FragmentFinder(step)
+      const finder = new up.FragmentFinder(u.pick(step, ['selector', 'origin', 'layer', 'match', 'preferOldElements']))
+
       // Try to find fragments matching step.selector within step.layer.
       // Note that step.oldElement might already have been set by up.radio.hungrySteps().
       step.oldElement ||= finder.find()

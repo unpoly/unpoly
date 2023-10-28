@@ -2449,6 +2449,86 @@ describe 'up.fragment', ->
             # Three is a sibling of three
             expect(elements[3]).toHaveText('old three')
 
+          it 'prefers to match an element closest to origin when the origin was swapped and then revalidating when the origin has no derivable target (bugfix)', ->
+            up.request('/home', target: '.element', cache: true)
+
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            jasmine.respondWith """
+              <div class="element">
+                new text from cache
+                <span>origin</span>
+              </div>
+            """
+
+            await wait()
+
+            expect(url: '/home', target: '.element').toBeCached()
+
+            htmlFixture """
+              <div class="element" id="root">
+                <div class="element">old one</div>
+                <div class="element">
+                  old two
+                  <span>origin</span>
+                </div>
+                <div class="element">old three</div>
+              </div>
+            """
+
+            origin = document.querySelector('.element .element span')
+            expect(origin).not.toBeTargetable()
+
+            up.render('.element', origin: origin, url: '/home', cache: true, revalidate: true)
+
+            await wait()
+
+            elements = document.querySelectorAll('.element')
+            expect(elements.length).toBe(4)
+
+            # While #root is an ancestor, two was closer
+            expect(elements[0]).toMatchSelector('#root')
+            expect(elements[0]).not.toHaveText('new text from cache')
+
+            # One is a sibling of two
+            expect(elements[1]).toHaveText('old one')
+
+            # Two is the closest match around the origin
+            expect(elements[2]).toHaveText('new text from cache origin')
+
+            # The origin was detached when two was swapped
+            expect(origin).toBeDetached()
+
+            # Three is a sibling of three
+            expect(elements[3]).toHaveText('old three')
+
+            expect(jasmine.Ajax.requests.count()).toBe(2)
+            jasmine.respondWith """
+              <div class="element">
+                revalidated new text
+                <span>origin</span>
+              </div>
+            """
+
+            await wait()
+
+            elements = document.querySelectorAll('.element')
+            expect(elements.length).toBe(4)
+
+            # While #root is an ancestor, two was closer
+            expect(elements[0]).toMatchSelector('#root')
+            expect(elements[0]).not.toHaveText('revalidated new text')
+
+            # One is a sibling of two
+            expect(elements[1]).toHaveText('old one')
+
+            # Two is the closest match around the origin
+            expect(elements[2]).toHaveText('revalidated new text origin')
+
+            # Three is a sibling of three
+            expect(elements[3]).toHaveText('old three')
+
           it 'prefers to match a descendant selector in the region of the origin', ->
             element1 = fixture('.element')
             element1Child1 = e.affix(element1, '.child',         text: 'old element1Child1')

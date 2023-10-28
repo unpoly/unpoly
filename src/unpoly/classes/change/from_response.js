@@ -81,19 +81,13 @@ up.Change.FromResponse = class FromResponse extends up.Change {
     // It never contains ':before' or ':after'.
     let effectiveTarget = renderResult.target
 
-    // Our { origin } may have been detached in the original render pass.
-    // However the { origin } may be required for choice of layer and region matching.
-    // Hence try to rediscover a detached element with the same target in the new fragments.
-    let rediscoveredOrigin = this._rediscoverDetachedOrigin(renderResult, originalRenderOptions)
-
-    // let target = originalRenderOptions.target || renderResult.target
     if (/:(before|after)/.test(inputTarget)) {
       up.warn('up.render()', 'Cannot revalidate cache when prepending/appending (target %s)', inputTarget)
     } else {
       up.puts('up.render()', 'Revalidating cached response for target "%s"', effectiveTarget)
       let verifyResult = await up.reload(effectiveTarget, {
         ...originalRenderOptions,
-        origin: rediscoveredOrigin,
+        preferOldElements: renderResult.fragments, // ensure we match the same fragments when initial render pass matched around { origin } and { origin } has been detached
         layer: renderResult.layer, // if the original render opened a layer, we now update it
         onFinished: null, // we're delaying the finish event here
         scroll: false,
@@ -120,22 +114,6 @@ up.Change.FromResponse = class FromResponse extends up.Change {
     }
 
     return renderResult
-  }
-
-  _rediscoverDetachedOrigin(renderResult, originalRenderOptions) {
-    let { origin } = originalRenderOptions
-
-    // If the original render had no { origin } we don't need an origin for revalidation.
-    if (!origin) return
-
-    // If the origin wasn't swapped out it will be a good origin for revalidation.
-    if (origin.isConnected) return origin
-
-    // If the origin was detached we try to rediscover an element with the same target in the new fragments.
-    let target = up.fragment.tryToTarget(origin, { layer: renderResult.layer })
-    if (target) {
-      return renderResult.fragments.find((fragment) => up.fragment.get(fragment, target))
-    }
   }
 
   _loadedEventProps() {
