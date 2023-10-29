@@ -508,7 +508,7 @@ up.fragment = (function() {
     matching in both old and new content will be used.
 
     Instead of passing the target as the first argument, you may also pass it as
-    a [´{ target }`](#options.target) option..
+    a [`{ target }`](#options.target) option..
 
   @param {string|Element|jQuery|Array<string>} [options.target]
     The [target selector](/targeting-fragments) to update.
@@ -905,7 +905,7 @@ up.fragment = (function() {
     will also be set as the `{ origin }` option.
 
     Instead of passing the target as the first argument, you may also pass it as
-    [´{ target }` option](/up.render#options.target).
+    [`{ target }` option](/up.render#options.target).
   @param {string} [options.url]
     The URL to navigate to.
   @param {Object} [options]
