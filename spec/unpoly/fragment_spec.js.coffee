@@ -2157,7 +2157,15 @@ describe 'up.fragment', ->
 
         it 'uses a selector given as first argument'
 
-        it 'derives a selector from an element given as first argument'
+        it 'derives a selector from an element given as first argument', ->
+          element = fixture('#element')
+
+          up.render(element, url: '/path')
+
+          await wait()
+
+          expect(jasmine.lastRequest().url).toMatchURL('/path')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#element')
 
         it 'uses a default target for the layer that is being updated if no other option suggests a target'
 
