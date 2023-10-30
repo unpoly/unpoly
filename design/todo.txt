@@ -7,6 +7,7 @@ Remaining V3 tasks
 Next release
 ============
 
+- Deprecate { mode } without { layer: 'new' }
 - Docs and CHANGELOG for changes in 3.5
   - up:fragment:hungry
   - Document that errors from user code are reported on window and will not throw exceptions
@@ -48,6 +49,7 @@ Next release
 Backlog
 =======
 
+- up.ResponseDoc: Only re-discover the origin when match is 'region'
 - Async compiler functions
   - See separate doc
   - Don't need to delay this until V4 as destructors no longer throw
@@ -151,7 +153,7 @@ Backlog
   - E.g. up.on('up:request:loaded', ({ response }) => { response.etag ||= sha1(response.body) })
   - Should this even be a default?
   => People can already set response.headers['ETag'], although that's not documented
-- Matching in the vicinity of ancestors should use subtree, not just descendants of the ancestor
+- Matching in the region of ancestors should use subtree, not just descendants of the ancestor
   - In a form we should always be able to say form:has(:origin) .descendant, even if the origin turns out to be the form itself
     - But :has() does not work like that?
 - [up-on-accepted-reload], { onAcceptedReload }
