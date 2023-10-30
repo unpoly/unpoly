@@ -1386,7 +1386,7 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 #### Quality of live improvements
 
 - Unpoly now ships with a bandwidth-friendly [polling implementation](/up-poll) that handles many edge cases.
-- The position of a clicked link is considered when deciding which element to replace. If possible, Unpoly will update an selector in the vicinity of the link that triggered the fragment update. This helps with multiple self-contained components (with the same selector) on the same page.
+- The position of a clicked link is considered when deciding which element to replace. If possible, Unpoly will update an selector in the region of the link that triggered the fragment update. This helps with multiple self-contained components (with the same selector) on the same page.
 - The [log](/up.log) output is more much more compact and has a calmer formatting.
 - New fragments are no longer revealed by default. Instead Unpoly scrolls to the top when the [main target](/up-main) has changed, but does not scroll otherwise.
 - History is no longer changed by default. Instead Unpoly updates history only when a [main target](/up-main) has changed.
