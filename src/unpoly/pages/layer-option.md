@@ -27,7 +27,7 @@ To match within the [root layer](/up.layer.root), pass `{ layer: 'root' }`.
 
 ### Matching any overlay
 
-To match within any layer that is not the root layer, pass `{ pass: 'overlay' }`.
+To match within any layer that is not the root layer, pass `{ layer: 'overlay' }`.
 
 ### Matching the current or frontmost layer
 
