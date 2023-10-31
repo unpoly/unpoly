@@ -23,6 +23,11 @@ a server-rendered web application:
 - Fragments [know the URL from where they were loaded](/up.fragment.source).
   They can be [reloaded](/up.reload) or [polled periodically](/up-poll).
 
+### Differences to `up.element`
+
+Functions in `up.fragment` by default only see elements on the [current layer](/up.layer.current).
+They also support non-standard CSS extensions like `:main` or `:has()`.
+
 For low-level DOM utilities that complement the browser's native API, see `up.element`.
 
 @see navigation
@@ -1314,7 +1319,7 @@ up.fragment = (function() {
     removed by a [transition](/up.morph).
   - This function prefers to match elements in the [region](/targeting-fragments#resolving-ambiguous-selectors)
     of a given `{ origin }` element (optional).
-  - This function supports non-standard CSS selectors like `:main` and `:has()`.
+  - This function supports non-standard CSS extensions like `:main` and `:has()`.
 
   If no element matches these conditions, `undefined` is returned.
 

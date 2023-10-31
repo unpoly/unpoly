@@ -9,15 +9,16 @@ The `up.element` module offers functions for DOM manipulation and traversal.
 It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_obj_all.asp) and works across all [supported browsers](/up.framework.isSupported).
 
 
-
 ### Differences to `up.fragment`
 
-`up.element` is a low-level API to work with DOM elements directly we recommend using `up.fragment`:
-
+`up.element` is a low-level API to work with DOM elements directly. Unpoly also a higher-level API in `up.fragment`:
 
 - By default `up.fragment` functions will only see elements from the [current layer](/up.layer.current).
   `up.element` is not aware of layers and always sees the entire DOM.
-- `up.fragment` functions will ignore elements that are being destroyed, but are still finishing an exit [animation](/up.motion) (e.g. fading out).
+- `up.fragment` functions will ignore elements that are [being destroyed](/up-destroying),
+  but are still finishing an exit [animation](/up.motion) (e.g. fading out).
+- Functions in `up.fragment` support non-standard CSS extensions like `:main` or `:has()`.
+  Functions in `up.element` only understands the CSS selectors supported by the current browser.
 
 @module up.element
 */
