@@ -108,6 +108,9 @@ up.element = (function() {
   /*-
   Returns the native [Element](https://developer.mozilla.org/en-US/docs/Web/API/Element) for the given value.
 
+  This function is not aware of [layers](/up.layer) or [transitions](/up-destroying)
+  and does not support non-standard selectors like `:main`. For this use `up.fragment.get()`.
+
   ### Casting rules
 
   - If given an element, returns that element.
@@ -115,6 +118,14 @@ up.element = (function() {
   - If given a jQuery collection , returns the first element in the collection.
     Throws an error if the collection contains more than one element.
   - If given any other argument (`undefined`, `null`, `document`, `window`…), returns the argument unchanged.
+
+  ### Example
+
+  Passing a CSS selector will return the first matching element:
+
+  ```js
+  up.element.get('.foo') // returns the first matching element
+  ```
 
   @function up.element.get
   @param {Element} [parent=document]

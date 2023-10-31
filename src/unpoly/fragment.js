@@ -1318,7 +1318,7 @@ up.fragment = (function() {
 
   If no element matches these conditions, `undefined` is returned.
 
-  ### Example: Matching a selector in a layer
+  ### Matching a selector in a layer
 
   To select the first element with the selector `.foo` on the [current layer](/up.layer.current):
 
@@ -1332,7 +1332,7 @@ up.fragment = (function() {
   let foo = up.fragment.get('.foo', { layer: 'any' })
   ```
 
-  ### Example: Matching the descendant of an element
+  ### Matching the descendant of an element
 
   To only select in the descendants of an element, pass a root element as the first argument:
 
@@ -1341,10 +1341,10 @@ up.fragment = (function() {
   let fooInContainer = up.fragment.get(container, '.foo')
   ```
 
-  ### Example: Matching around an origin element
+  ### Matching in the origin's region
 
-  When processing a user interaction, it is often helpful to match elements around the link
-  that's being clicked or the form field that's being changed. In this case you may pass
+  When processing a user interaction, it is often helpful to match elements in the region of the link
+  that's being clicked or of the form field that's being changed. In this case you may pass
   the triggering element as `{ origin }` element.
 
   Assume the following HTML:
@@ -1370,7 +1370,7 @@ up.fragment = (function() {
   When the link's does not have an ancestor matching `.element`,
   Unpoly will search the entire layer for `.element`.
 
-  ### Example: Matching an origin sibling
+  ### Matching an origin sibling
 
   When processing a user interaction, it is often helpful to match elements
   within the same container as the the link that's being clicked or the form field that's
@@ -1400,6 +1400,15 @@ up.fragment = (function() {
   Only when the link's `.element` container does not have a child `.inner`,
   Unpoly will search the entire layer for `.element .inner`.
 
+  ### Elements are returned unchanged
+
+  Passing an existing element will return it unchanged:
+
+  ```js
+  let element = document.querySelector(...)
+  up.fragment.get(element) // returns the given element
+  ```
+
   ### Similar features
 
   - The [`.up-destroying`](/up-destroying) class is assigned to elements during their removal animation.
@@ -1411,7 +1420,7 @@ up.fragment = (function() {
     The root element for the search. Only the root's children will be matched.
 
     May be omitted to search through all elements in the current `document`.
-  @param {string} selector
+  @param {string|Element} selector
     The selector to match.
   @param {string} [options.layer='current']
     The layer in which to select elements.
