@@ -1000,10 +1000,64 @@ up.layer = (function() {
   */
 
   /*-
-  Returns an `up.Layer` object for the given [layer option](/layer-option).
+  Returns an `up.Layer` object for the given element or [layer option](/layer-option).
+
+
+  ### Looking up the layer of an element
+
+  Passing an element will return the layer containing that element:
+
+  ```js
+  let element = document.querySelector(...)
+  up.layer.get(element) // returns the element's layer
+  ```
+
+  If the given element is detached, or part of a closing overlay, `undefined` is returned.
+
+  ### Getting the nth layer
+
+  Pass a number to return the `up.Layer` object at that index:
+
+  ```js
+  up.layer.get(0) // returns the root layer
+  up.layer.get(1) // returns the first overlay
+  ```
+
+  ### Resolving a layer option
+
+  Pass any [layer option](/layer-option) to return the `up.Layer` object
+  of the first layer matching that option:
+
+  ```js
+  up.layer.get('front') // returns the front layer
+  ```
+
+  To look up one of multiple layer options, separate the values using `or`:
+
+  ```js
+  // returns the parent layer, or the root if we're already on root:
+  up.layer.get('parent or root')
+  ```
+
+  ### Existing `up.Layer` objects are returned
+
+  Passing an existing `up.Layer` object will return it unchanged:
+
+  ```js
+  let layer = up.layer.root
+  up.layer.get(layer) // returns the given layer
+  ```
+
+  ### Missing values return the current layer
+
+  Passing `null` or `undefined` will return the [current layer](/up.layer.current):
+
+  ```js
+  up.layer.get(undefined) // returns the current layer
+  ```
 
   @function up.layer.get
-  @param {string|up.Layer|number} [layer='current']
+  @param {string|up.Layer|number} [value='current']
     The [layer option](/layer-option) to look up.
   @return {up.Layer|undefined}
     The layer matching the given option.
