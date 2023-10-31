@@ -454,9 +454,49 @@ up.radio = (function() {
   */
 
   /*-
-  TODO
+  Use an `[up-flashes]` element to show confirmations, alerts or warnings.
+
+  ![A confirmation flash, an error flash and a warning flash](images/flashes.png){:width='480'}
+
+  You application layout should have an empty `[up-flashes]` element to indicate where flash messages
+should be inserted:
+
+  ```html
+  <nav>
+    Navigation items ...
+  </nav>
+  <div up-flashes></div> <!-- mark-line -->
+  <main>
+    Main page content ...
+  </main>
+  ```
+
+  To render a flash message, include an `[up-flashes]` element in your response.
+  The element's content should be the messages you want to render:
+
+  ```html
+  <div up-flashes>
+    <strong>User was updated!</strong>
+  </div>
+
+  <main>
+    Main response content ...
+  </main>
+  ```
+
+  See [notification flashes](/flashes) for more details and examples.
 
   @selector [up-flashes]
+  @param [up-transition]
+    The name of an [transition](/up.motion) to morph between the old and few notification flashes.
+  @param [up-duration]
+    The duration of the transition (in millisconds).
+
+  @param [up-easing]
+    The timing function that accelerates the transition.
+
+    See [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
+    for a list of available timing functions.
   @experimental
   */
   up.macro('[up-flashes]', function(fragment) {
@@ -471,15 +511,6 @@ up.radio = (function() {
       if (!e.isEmpty(event.newFragment)) event.preventDefault()
     })
   })
-
-  /*-
-  TODO: Docs
-
-  @selector [up-flashes]
-  @param [up-transition]
-  @param [up-duration]
-  @param [up-easing]
-  */
 
   up.on('up:framework:reset', reset)
 

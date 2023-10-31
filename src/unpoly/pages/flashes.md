@@ -1,7 +1,7 @@
 Notification flashes
 ====================
 
-Use an `[up-flashes]` element to show confirmations, alerts or warnings.
+This page explains how to implement notification flashes for confirmations, errors or warnings.
 
 ![A confirmation flash, an error flash and a warning flash](images/flashes.png){:width='480'}
 
