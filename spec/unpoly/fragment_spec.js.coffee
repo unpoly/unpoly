@@ -7392,60 +7392,134 @@ describe 'up.fragment', ->
             next ->
               expect('.target').toHaveText('verified text')
 
-          it 'delays { onFinished } callback until the fragment was verified', asyncSpec (next) ->
-            finishedCallback = jasmine.createSpy('finished callback')
-
-            up.render('.target', { url: '/cached-path', cache: true, revalidate: true, onFinished: finishedCallback })
-
-            next ->
-              expect('.target').toHaveText('cached text')
-              expect(finishedCallback).not.toHaveBeenCalled()
-
-              expect(up.network.isBusy()).toBe(true)
-
-              jasmine.respondWithSelector('.target', text: 'verified text')
-
-            next ->
-              expect(up.network.isBusy()).toBe(false)
-              expect('.target').toHaveText('verified text')
-              expect(finishedCallback).toHaveBeenCalledWith(jasmine.any(up.RenderResult))
-
-          it 'delays up.render().finished promise until the fragment was verified', asyncSpec (next) ->
+          it 'delays up.render().finished promise until the fragment was verified', ->
             finishedCallback = jasmine.createSpy('finished callback')
 
             job = up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
             job.finished.then(finishedCallback)
 
-            next ->
-              expect('.target').toHaveText('cached text')
-              expect(finishedCallback).not.toHaveBeenCalled()
+            await wait()
 
-              expect(up.network.isBusy()).toBe(true)
+            expect('.target').toHaveText('cached text')
+            expect(finishedCallback).not.toHaveBeenCalled()
 
-              jasmine.respondWithSelector('.target', text: 'verified text')
+            expect(up.network.isBusy()).toBe(true)
 
-            next ->
-              expect(up.network.isBusy()).toBe(false)
-              expect('.target').toHaveText('verified text')
-              expect(finishedCallback).toHaveBeenCalledWith(jasmine.any(up.RenderResult))
+            jasmine.respondWithSelector('.target', text: 'verified text')
+
+            await wait()
+
+            expect(up.network.isBusy()).toBe(false)
+            expect('.target').toHaveText('verified text')
+            expect(finishedCallback).toHaveBeenCalledWith(jasmine.any(up.RenderResult))
+
+          it 'delays an { onFinished } callback until the fragment was verified', ->
+            finishedCallback = jasmine.createSpy('finished callback')
+
+            job = up.render('.target', { url: '/cached-path', cache: true, revalidate: true, onFinished: finishedCallback })
+
+            await wait()
+
+            expect('.target').toHaveText('cached text')
+            expect(finishedCallback).not.toHaveBeenCalled()
+
+            expect(up.network.isBusy()).toBe(true)
+
+            jasmine.respondWithSelector('.target', text: 'verified text')
+
+            await wait()
+
+            expect(up.network.isBusy()).toBe(false)
+            expect('.target').toHaveText('verified text')
+            expect(finishedCallback).toHaveBeenCalledWith(jasmine.any(up.RenderResult))
 
           it 'rejects up.render().finished promise if the revalidation failed', ->
-            jasmine.clock().install()
-
             job = up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
 
             await job
 
             expect('.target').toHaveText('cached text')
 
+            await expectAsync(job).toBeResolvedTo(jasmine.any(up.RenderResult))
             await expectAsync(job.finished).toBePending()
+
             expect(up.network.isBusy()).toBe(true)
 
-            jasmine.lastRequest().responseTimeout()
+            jasmine.lastRequest().responseError()
 
             await expectAsync(job.finished).toBeRejectedWith(jasmine.any(up.Offline))
             expect(up.network.isBusy()).toBe(false)
             expect('.target').toHaveText('cached text')
+
+          it 'rejects up.render().finished promise if the revalidation failed and there also is an { onFinished } callback (bugfix)', ->
+            onFinished = jasmine.createSpy('onFinished callback').and.callFake -> console.debug('--- onFinished called')
+            job = up.render('.target', { url: '/cached-path', cache: true, revalidate: true, onFinished: onFinished })
+
+            await job
+
+            expect('.target').toHaveText('cached text')
+
+            await expectAsync(job).toBeResolvedTo(jasmine.any(up.RenderResult))
+            await expectAsync(job.finished).toBePending()
+
+            expect(up.network.isBusy()).toBe(true)
+
+            jasmine.lastRequest().responseError()
+
+            await expectAsync(job.finished).toBeRejectedWith(jasmine.any(up.Offline))
+            expect(up.network.isBusy()).toBe(false)
+            expect('.target').toHaveText('cached text')
+
+            expect(onFinished).not.toHaveBeenCalled()
+
+          # Cannot get this spec to work in both Chrome and Safari. See comment in up.RenderJob.
+          xit 'reports an unhandled rejection if the revalidation failed with an network error, but no catch() handler is attached to the up.render().finished promise', ->
+            job = up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
+
+            await job
+
+            expect('.target').toHaveText('cached text')
+
+            await wait()
+
+            # Still revalidating
+            expect(up.network.isBusy()).toBe(true)
+
+            await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+
+              jasmine.lastRequest().responseError()
+
+              await wait()
+
+              expect(up.network.isBusy()).toBe(false)
+              expect('.target').toHaveText('cached text')
+
+              # Browsers wait a bit before emitting an unhandledrejection event.
+              await wait(100)
+
+              expect(globalErrorSpy).toHaveBeenCalledWith(jasmine.any(up.Offline))
+
+          it 'logs to the error console if the revalidation failed and there also is an { onFinished } callback (bugfix)', ->
+            onFinished = jasmine.createSpy('onFinished callback').and.callFake -> console.debug('--- onFinished called')
+            job = up.render('.target', { url: '/cached-path', cache: true, revalidate: true, onFinished: onFinished })
+            logErrorSpy = spyOn(up, 'puts').and.callThrough()
+
+            await job
+
+            expect('.target').toHaveText('cached text')
+
+            await expectAsync(job).toBeResolvedTo(jasmine.any(up.RenderResult))
+            await expectAsync(job.finished).toBePending()
+
+            expect(up.network.isBusy()).toBe(true)
+
+            jasmine.lastRequest().responseError()
+
+            await expectAsync(job.finished).toBeRejectedWith(jasmine.any(up.Offline))
+            expect(up.network.isBusy()).toBe(false)
+            expect('.target').toHaveText('cached text')
+
+            expect(logErrorSpy.calls.mostRecent().args[1]).toMatch(/Cannot load request/i)
 
           it 'runs the { onRendered } a second time for the second render pass', asyncSpec (next) ->
             onRendered = jasmine.createSpy('onRendered callback')

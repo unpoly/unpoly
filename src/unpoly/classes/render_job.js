@@ -57,14 +57,41 @@ up.RenderJob = class RenderJob {
     // (2) No fragment could be matched (return value is up.CannotMatch)
     // (3) We're preloading (early return value is up.Request)
     if (result instanceof up.RenderResult) {
+      let { onRendered, onFinished } = result.options
+
       // We call result.options.onRendered() instead of this.options.onRendered()
       // as this will call the correct options.onRendered() or onFailRendered()
       // depending on options.failOptions.
-      if (!result.none) result.options.onRendered?.(result)
+      if (!result.none) up.error.guard(() => onRendered?.(result))
 
       // Run an { onFinished } callback if revalidation succeeds.
       // There is no callback for a failed revalidation.
-      result.finished.then(result.options.onFinished, up.error.throwCritical)
+      //
+      // We need to pay attention to not creating unnecessary promises that will fail with unhandled rejections:
+      //
+      // (1) Only access result.finished through this.finished to avoid creating new promises
+      // (2) The then() will create a new chain, and we don't want to fail that
+
+      let guardedOnFinished = function(result) {
+        up.error.guard(() => onFinished?.(result))
+      }
+
+      // Handling errors with `u.noop` prevents Chrome from logging an `unhandledrejection` event
+      // to the error console, hiding details about a failed revalidation. We could fix this by
+      // handling errors with `up.error.throwCritical` instead.
+      //
+      // However, handling errors with `up.error.throwCritical` will cause Safari (not Chrome)
+      // to emit an `unhandledrejection` event whenever there is a critical error, even if there are
+      // other error handlers registered via `job.finished.catch()`.
+      //
+      // I think Safari is in the right here, as every individual `then()` chain should require
+      // an error handler or log an `unhandledrejection` event when an error is thrown. However I cannot
+      // find a solution that has the same behavior in both Safari and Chrome.
+      //
+      // Although Chrome will fail to log error traces that way, we still log the error name and message
+      // in _handleError().
+      this.finished.then(guardedOnFinished, u.noop)
+
       return true
     }
   }

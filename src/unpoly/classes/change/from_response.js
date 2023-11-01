@@ -89,7 +89,7 @@ up.Change.FromResponse = class FromResponse extends up.Change {
         ...originalRenderOptions,
         preferOldElements: renderResult.fragments, // ensure we match the same fragments when initial render pass matched around { origin } and { origin } has been detached
         layer: renderResult.layer, // if the original render opened a layer, we now update it
-        onFinished: null, // we're delaying the finish event here
+        onFinished: null, // the earlier onFinished handler will already be honored by the up.RenderJob that called us
         scroll: false,
         focus: 'keep',
         transition: false, // offerring something like { verifyTransition } would mean we need to delay { onFinished } even further
