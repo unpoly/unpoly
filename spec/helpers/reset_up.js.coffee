@@ -80,18 +80,15 @@ afterEach ->
     # then start the next example.
     await wait()
 
-    # Make some final checks that we have reset successfully
-    overlays = document.querySelectorAll('up-modal, up-popup, up-cover, up-drawer')
-    if overlays.length > 0
-      throw new Error("Overlays survived reset!")
+  # Make some final checks that we have reset successfully
+  overlays = document.querySelectorAll('up-modal, up-popup, up-cover, up-drawer')
+  if overlays.length > 0
+    throw new Error("Overlays survived reset!")
 
-    if document.querySelector('up-progress-bar')
-      throw new Error('Progress bar survived reset!')
+  if document.querySelector('up-progress-bar')
+    throw new Error('Progress bar survived reset!')
 
-#    # Remove styles from a crashed up.BodyShifter
-#    document.body.removeAttribute('style')
+  # Scroll to the top
+  document.scrollingElement.scrollTop = 0
 
-    # Scroll to the top
-    document.scrollingElement.scrollTop = 0
-
-    up.puts('specs', 'Framework was reset')
+  up.puts('specs', 'Framework was reset')
