@@ -98,8 +98,8 @@ up.RenderJob = class RenderJob {
 
   _handleError(error) {
     let prefix = error instanceof up.Aborted ? 'Rendering was aborted' : 'Error while rendering'
-    up.puts('up.render()', `${prefix}: ${error.message}`)
-    this.options.onError?.(error)
+    up.puts('up.render()', `${prefix}: ${error.name}: ${error.message}`)
+    up.error.guard(() => this.options.onError?.(error))
   }
 
   /*-
