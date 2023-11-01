@@ -76,7 +76,7 @@ Instead of including an optional target in your target selector, you can also se
 <a href="/card/5" up-target=".content">...</a>
 ```
 
-Common use cases for `[up-hungry]` are unread message counters, notification flashes or page-specific subnavigation bars. Such elements often live in the application layout, outside of the fragment that is being targeted.
+Common use cases for `[up-hungry]` are unread message counters or page-specific subnavigation bars. Such elements often live in the application layout, outside of the fragment that is being targeted.
 
 
 ### Targeting the main element

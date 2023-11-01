@@ -200,16 +200,23 @@ up.radio = (function() {
 
   ### Use cases
 
-  Common use cases for `[up-hungry]` are elements live in the application layout,
-  outside of the fragment that is typically being targeted. Some examples:
+  Common use cases for `[up-hungry]` are elements that live in the application layout,
+  outside of the fragment that is typically being targeted:
 
   - Unread message counters
-  - Notification flashes
   - Page-specific subnavigation
+  - 
 
   Instead of explicitly including such elements in every [target selector](/targeting-fragments)
-  (e.g. `.content, .flashes:maybe`) we can mark as `[up-hungry]`.
-  They will then be added to target selectors automatically.
+  (e.g. `.content, .unread-messages:maybe`) we can mark the element as `[up-hungry]`:
+
+  ```html
+  <div class="unread-messages" up-hungry>
+    You have no unread messages
+  </div>
+  ```
+
+  An selector for the hungry element (`.unread-messages`) will be added to target selectors automatically.
 
   ### Derivable target required {#derivable-target-required}
 
