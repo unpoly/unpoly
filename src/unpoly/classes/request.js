@@ -666,8 +666,8 @@ up.Request = class Request extends up.Record {
 
     let message = 'Cannot load request to ' + this.description + (reason ? ': ' + reason : '')
     this.state = 'offline'
-    this.deferred.reject(new up.Offline(message))
     this.emit('up:request:offline', { log: message })
+    this.deferred.reject(new up.Offline(message))
   }
 
   respondWith(response) {
