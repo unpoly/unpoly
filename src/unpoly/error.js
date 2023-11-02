@@ -94,12 +94,17 @@ up.error = (function() {
     }
   }
 
+  function guardFn(fn) {
+    return (...args) => guard(() => fn(...args))
+  }
+
   return {
     fail,
     throwCritical,
     muteUncriticalRejection,
     muteUncriticalSync,
     guard,
+    guardFn,
   }
 })()
 

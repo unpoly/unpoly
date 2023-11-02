@@ -5291,6 +5291,50 @@ describe 'up.fragment', ->
             next =>
               expect(swapDirectlySpy).toHaveBeenCalled()
 
+        describe 'when the transition function throws an error', ->
+
+          it 'emits an error event on window, but does not reject the render job', ->
+            transitionError = new Error("error from crashing transition")
+            crashingTransition = jasmine.createSpy('crashing transition').and.throwError(transitionError)
+            up.transition 'crashing', crashingTransition
+
+            fixture('.target', text: 'old target')
+
+            await jasmine.expectGlobalError transitionError, ->
+              job = up.render(transition: crashingTransition, fragment: """
+                <div class="target">new target</div>
+              """)
+
+              expect('.target').toHaveText('new target')
+
+              expect(crashingTransition).toHaveBeenCalled()
+
+              await expectAsync(job).toBeResolvedTo(jasmine.any(up.RenderResult))
+
+          it 'still updates subsequent elements for a multi-step target', ->
+            transitionError = new Error("error from crashing transition")
+            crashingTransition = jasmine.createSpy('crashing transition').and.throwError(transitionError)
+            up.transition 'crashing', crashingTransition
+
+            fixture('.primary', text: 'old primary')
+            fixture('.secondary', text: 'old secondary')
+            fixture('.tertiary', text: 'old tertiary')
+
+            await jasmine.spyOnGlobalErrorsAsync ->
+              up.render('.primary, .secondary, .tertiary', transition: 'crashing', document: """
+                <div class="primary">new primary</div>
+                <div class="secondary">new secondary</div>
+                <div class="tertiary">new tertiary</div>
+              """)
+
+              expect(crashingTransition).toHaveBeenCalled()
+
+              expect('.primary').toHaveText('new primary')
+              expect('.secondary').toHaveText('new secondary')
+              expect('.tertiary').toHaveText('new tertiary')
+
+              await Promise.resolve()
+
       describe 'scrolling', ->
 
         mockRevealBeforeEach = ->

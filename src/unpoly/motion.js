@@ -186,10 +186,10 @@ up.motion = (function() {
     element = up.fragment.get(element)
     options = u.options(options)
 
-    const animationFn = findAnimationFn(animation)
-
+    let animationFn = findAnimationFn(animation)
     // willAnimate() also sets a default { duration } and { easing }.
     const willRun = willAnimate(element, animation, options)
+    animationFn = up.error.guardFn(animationFn)
 
     if (willRun) {
       // up.puts 'up.animate()', Animating %o with animation %o', element, animation
@@ -365,8 +365,10 @@ up.motion = (function() {
     oldElement = up.fragment.get(oldElement)
     newElement = up.fragment.get(newElement)
 
-    const transitionFn = findTransitionFn(transitionObject)
+    let transitionFn = findTransitionFn(transitionObject)
+    // willAnimate() also sets a default { duration } and { easing }.
     const willMorph = willAnimate(oldElement, transitionFn, options)
+    transitionFn = up.error.guardFn(transitionFn)
 
     // Remove callbacks from our options hash in case transitionFn calls morph() recursively.
     // If we passed on these callbacks, we might call destructors, events, etc. multiple times.
@@ -456,7 +458,7 @@ up.motion = (function() {
         return findTransitionFn(namedTransition)
       }
     } else {
-      return up.fail("Unknown transition %o", object)
+      up.fail("Unknown transition %o", object)
     }
   }
 
@@ -483,7 +485,7 @@ up.motion = (function() {
     } else if (u.isOptions(object)) {
       return (element, options) => animateNow(element, object, options)
     } else {
-      return up.fail('Unknown animation %o', object)
+      up.fail('Unknown animation %o', object)
     }
   }
 
