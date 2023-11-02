@@ -93,7 +93,7 @@ up.motion = (function() {
   }))
 
   function pickDefault(registry) {
-    return u.pickBy(registry, value => value.isDefault)
+    return u.pickBy(registry, 'isDefault')
   }
 
   function reset() {
