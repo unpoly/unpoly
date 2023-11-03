@@ -1696,7 +1696,7 @@ up.fragment = (function() {
   /*-
   Destroys the given element or selector.
 
-  All [`up.compiler()`](/up.compiler) destructors, if any, are called.
+  All registered [destructors](/up.compiler#destructor) are called.
   The element is then removed from the DOM.
 
   Unfinished requests targeting the destroyed fragment or its descendants are [aborted](/aborting-requests).
@@ -1716,6 +1716,15 @@ up.fragment = (function() {
 
   Elements that are about to be destroyed (but still animating) are ignored by all
   functions that lookup fragments, like `up.fragment.all()`, `up.fragment.get()` or `up.fragment.closest()`.
+
+  ### Detecting destructor errors
+
+  If a [destructor](/up.compiler#destructor) throws an error, `up.destroy()` will still remove the element and *not* throw an error.
+
+  Instead compiler errors will print to the [error console](https://developer.mozilla.org/en-US/docs/Web/API/console/error)
+  and emit an [`error` event on `window`](https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event).
+
+  See [errors in user code](/render-hooks#errors-in-user-code) for details.
 
   @function up.destroy
   @param {string|Element|jQuery} target

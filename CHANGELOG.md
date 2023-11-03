@@ -87,13 +87,12 @@ You can now freely control when an hungry element is updated:
   for when an hungry element should be updated:
 
   ```js
-  element.addEventListener('up:fragment:select', function(event) {
-    if (event.newFragment.classList('is-empty')) {
+  element.addEventListener('up:fragment:hungry', function(event) {
+    if (event.newFragment.classList.contains('is-empty')) {
       console.log('Ignoring a fragment with an .is-empty class')
       event.preventDefault()
     }
   })
-
   ```
 - Hungry elements get `[up-on-hungry]`. Calling `event.preventDefault()` will prevent the hungry fragment from being updated.
 - Deprecated the `[up-if-history]` modifier for hungry elements.
@@ -119,8 +118,8 @@ Instead an [`error` event on `window`](https://developer.mozilla.org/en-US/docs/
 and the operation succeeds successfully:
 
 ```js
-window.addEventListener('error', function(error) {
-  alert("Got an error " + error.name)
+window.addEventListener('error', function(event) {
+  alert("Got an error " + event.error.name)
 })
 
 up.compiler('.element', function() {
@@ -2153,10 +2152,10 @@ To help working with form values and request parameters, an experimental module 
 ### Compilers
 
 - To improve performance, Unpoly no longer parses [`[up-data]`](/up-data) attributes when a [compiler function](/up.compiler) does not require a second `data` argument.
-- Compilers that return [destructor functions](/up.compiler#cleaning-up-after-yourself) now run slightly faster.
+- Compilers that return [destructor functions](/up.compiler#destructor) now run slightly faster.
 - [Compilers](/up.compiler) with `{ batch: true }` now receive an array of [`[up-data]`](/up-data) objects as their second `data` argument.
 - [Compilers](/up.compiler) with `{ batch: true }` can no longer return destructor functions. Previously the behavior of batch destructors was undefined, now it throws an error.
-- Returning an array of [destructor functions](/up.compiler#cleaning-up-after-yourself) from [`up.compiler()`](/up.compiler) is now deprecated. Please return a single destructor function instead.
+- Returning an array of [destructor functions](/up.compiler#destructor) from [`up.compiler()`](/up.compiler) is now deprecated. Please return a single destructor function instead.
 - [`up.syntax.data()`](/up.syntax.data) now returns `undefined` if the given object has no (or an empty) [`[up-data]`](/up-data) attribute. It previously returned an empty object.
 
 
@@ -2651,7 +2650,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Compatible changes
 
-- Fix a bug where [replacing](/up.replace) the `<body>` element would not trigger [destructor functions](/up.compiler#cleaning-up-after-yourself) in the old `<body>`.
+- Fix a bug where [replacing](/up.replace) the `<body>` element would not trigger [destructor functions](/up.compiler#destructor) in the old `<body>`.
 - Fix a bug where [`[up-layer]`](/up-layer) attributes or `{ layer }` options were ignored.
 - [`a[up-target]`](/a-up-target) and [`form[up-target]`] get a new modifying attribute `[up-fail-layer]`.
   Use it to set the layer to update if the server sends a non-200 status code. Valid values are `auto`, `page`, `modal` and `popup`.
@@ -3065,7 +3064,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 - Fix a bug where [`up.ajax()`](/up.ajax) would incorrectly re-use form responses even if the form data differed
 - Fix a bug with the [`up-observe`](/up-observe) UJS attribute throwing an error when used
-- Fix a bug where if multiple compilers with [destructors](/up.compiler#cleaning-up-after-yourself)
+- Fix a bug where if multiple compilers with [destructors](/up.compiler#destructor)
   are applied to the same element and the element is removed, only the last destructor was called.
 
 

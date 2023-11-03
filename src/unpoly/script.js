@@ -138,7 +138,7 @@ up.script = (function() {
   })
   ```
 
-  ### Cleaning up after yourself
+  ### Cleaning up after yourself {#destructor}
 
   If your compiler returns a function, Unpoly will use this as a *destructor* to
   clean up if the element leaves the DOM. Note that in Unpoly the same DOM and JavaScript environment
@@ -190,6 +190,18 @@ up.script = (function() {
   ```
 
   See [attaching data to elements](/data) for more details and examples.
+
+
+  ### Throwing exceptions from compilers
+
+  It is safe to throw exceptions from a compiler or its [destructor](#destructor).
+  A crashing compiler will *not* interrupt a render pass, or prevent other compilers on the same element.
+
+  Exceptions thrown by compiler functions are logged to the browser's [error console](https://developer.mozilla.org/en-US/docs/Web/API/console/error).
+  Unpoly also emits an [`error` event on `window`](https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event).
+
+  See [errors in user code](/render-hooks#errors-in-user-code) for details.
+
 
   ### Accessing information about the render pass
 
@@ -243,7 +255,7 @@ up.script = (function() {
     2. Any [attached data](/data).
     3. [Information about the current render pass](#accessing-information-about-the-render-pass).
 
-    The function may return a [destructor](/up.destructor) function that [cleans the compiled object](#cleaning-up-after-yourself)
+    The function may return a [destructor](/up.destructor) function that [cleans the compiled object](#destructor)
     before it is removed from the DOM. The destructor function is called with the compiled element.
   @stable
   */
@@ -397,7 +409,7 @@ up.script = (function() {
   closes, or when `up.destroy()` is called on the element or its container.
 
   An alternative way to register a destructor function is to
-  [`return` it from your compiler function](/up.compiler#cleaning-up-after-yourself).
+  [`return` it from your compiler function](/up.compiler#destructor).
 
   ### Example
 
@@ -500,6 +512,8 @@ up.script = (function() {
 
   up.hello(element)
   ```
+
+  See [errors in user code](/render-hooks#errors-in-user-code) for details.
 
   @function up.hello
   @param {Element|jQuery|string} element
