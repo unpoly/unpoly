@@ -47,73 +47,6 @@ up.radio = (function() {
     config.reset()
   }
 
-  // function hungryStepsOld(renderOptions) {
-  //   let { useHungry, origin, layer } = renderOptions
-  //   let steps = { current: [], other: [] }
-  //
-  //   if (!useHungry) return steps
-  //
-  //   let hungrySelector = config.hungrySelectors.join()
-  //   // Start by finding hungries on all layers. We will filter them below.
-  //   let hungries = up.fragment.all(hungrySelector, { layer: 'any' })
-  //
-  //   for (let element of hungries) {
-  //     let selector = up.fragment.tryToTarget(element, { origin })
-  //     if (!selector) {
-  //       up.warn('[up-hungry]', 'Ignoring untargetable fragment %o', element)
-  //       continue
-  //     }
-  //
-  //     let elementLayer = up.layer.get(element)
-  //     let ifLayer = e.attr(element, 'up-if-layer')
-  //     let applicableLayers = ifLayer ? up.layer.getAll(ifLayer, { baseLayer: elementLayer }) : [elementLayer]
-  //
-  //     let motionOptions = up.motion.motionOptions(element)
-  //
-  //     // We cannot emit up:fragment:hungry here as we don't know { newElement } yet.
-  //     let selectEvent = up.event.build('up:fragment:hungry', { log: false })
-  //     let selectCallback = e.callbackAttr(element, 'up-on-hungry', { exposedKeys: ['newFragment', 'renderOptions'] })
-  //
-  //     let step = {
-  //       selector,            // The selector for a single step is { selector }
-  //       oldElement: element, // The match on the current page
-  //       layer: elementLayer, // May be different from { layer } when we found an [up-hungry][up-if-layer=any]
-  //       origin,              // The { origin } passed into the fn. will be used to match { newElement } later.
-  //       ...motionOptions,    // The hungry element defines its own transition, duration, easing.
-  //       placement: 'swap',   // Hungry elements are always swapped, never appended
-  //       useKeep: true,       // Always honor [up-keep] in hungry elements. Set here because we don't inherit default render options.
-  //       maybe: true,         // Don't fail if we cannot match { newElement } later.
-  //       selectEvent,         // Used by up.ResponseDoc#selectStep()
-  //       selectCallback,      // Used by up.ResponseDoc#selectStep()
-  //       // The step also gets a reference to the original render options.
-  //       // Although these render options are not used to render the hungry step, it will be
-  //       // passed to up:fragment:hungry listener to e.g. only update hungry elements if the
-  //       // original render pass would update history.
-  //       originalRenderOptions: renderOptions,
-  //     }
-  //
-  //     if (applicableLayers.includes(layer)) {
-  //       let list = layer === elementLayer ? steps.current : steps.other
-  //       list.push(step)
-  //     }
-  //
-  //   }
-  //
-  //   // Remove nested steps on other layers.
-  //   // Note that `steps.current` is already compressed by up.Change.UpdateLayer once it's been mixed with
-  //   // the explicit target steps. So we're not doing it again here.
-  //   steps.other = up.fragment.compressNestedSteps(steps.other)
-  //
-  //   // When multiple steps target the same new selector, we're updating the layer
-  //   // that's closer to the layer of the render pass.
-  //   //
-  //   // In this case two steps will match the same { newElement }. Hence this case is
-  //   // not covered by step compression (which looks at { oldElement }).
-  //   steps.other.sort((leftStep, rightStep) => (layer.index - leftStep.layer.index) - (layer.index - rightStep.layer.index))
-  //
-  //   return steps
-  // }
-
   function hungrySteps(renderOptions) {
     let { useHungry, origin, layer: renderLayer } = renderOptions
     let steps = { current: [], other: [] }
@@ -182,13 +115,44 @@ up.radio = (function() {
     return steps
   }
 
-  // function hungryOptions(element, options, parserOptions) {
-  //   let parser = new up.OptionsParser(element, options, parserOptions)
-  //   parser.string('ifLayer')
-  //   parser.boolean('ifHistory')
-  //   parser.include(up.motion.motionOptions)
-  //   return options
-  // }
+  /*-
+  Before an `[up-hungry]` is added to a render pass, a event `up:fragment:hungry` is emitted on the element.
+
+  ### Preventing hungry elements from being updated
+
+  You may prevent the `up:fragment:hungry` event to exclude an hungry element from the render pass.
+  Use this to define arbitrary conditions for when an hungry element should be updated.
+
+  For example, the following would update an hungry element only for render passes that [update history](/updating-history):
+
+  ```js
+  element.addEventListener('up:fragment:hungry', function(event) {
+    if (!event.renderOptions.history) event.preventDefault()
+  })
+  ```
+
+  You may also define conditions based on the *new* element that a hungry element would be swapped with.
+  The following would skip an update if the new element has a class `.is-empty`:
+
+  ```js
+  element.addEventListener('up:fragment:hungry', function(event) {
+    if (event.newFragment.classList.contains('is-empty')) {
+      event.preventDefault()
+    }
+  })
+  ```
+
+  @event up:fragment:hungry
+  @param {Element} event.target
+    The hungry element that is about to be swapped.
+  @param {Element} event.newFragment
+    The fragment in the new content that this hungry element would be swapped with.
+  @param {Object} event.renderOptions
+    The [render options](/up.render#parameters) for the current render pass.
+  @param event.preventDefault()
+    Prevents the hungry element from being targeted in the current render pass.
+  @experimental
+  */
 
   /*-
   Elements with an `[up-hungry]` attribute are updated whenever the server
