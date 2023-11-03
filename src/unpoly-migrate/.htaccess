@@ -61,3 +61,4 @@ RedirectPermanent /back-button /restoring-history
 RedirectPermanent /notifications /flashes
 RedirectPermanent /notification-flashes /flashes
 
+RedirectPermanent /layer-reference /layer-option
