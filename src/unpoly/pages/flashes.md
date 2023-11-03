@@ -99,5 +99,23 @@ up.compiler('[up-flashes] > *', function(message) {
 > The empty flashes container must remain in the layout to indicate where future flashes should be [placed](#placement).
 
 
+Building a custom flashes container
+-----------------------------------
+
+If you cannot work with the behavior of `[up-flashes]`, consider building your own custom flashes container.
+
+You can use the implementation of `[up-flashes]` as a template, which looks like this:
+
+```html
+<div
+  id="flashes"
+  role="alert"
+  up-hungry
+  up-if-layer="subtree"
+  up-keep
+  up-on-keep="if (!up.element.isEmpty(event.newFragment)) event.preventDefault()"
+>
+</div>
+```
 
 @page flashes

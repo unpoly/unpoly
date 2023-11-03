@@ -45,7 +45,9 @@ Below you can find some popular ways to handle new asset versions.
 ### Notifying the user of new app versions {#notifying-the-user}
 
 A friendly way to handle new asset version is to show a notification banner informing that a new app version is available.
-The user can then choose to reload at their convenience, by clicking on the notification.
+The user can then choose to reload at their convenience, by clicking on the notification:
+
+![Notification for a new app version](images/assets-changed-notification.png){:width='305'}
 
 The code below inserts a clickable `<div id="new-version">` banner when assets change:
 

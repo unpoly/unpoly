@@ -205,7 +205,7 @@ up.radio = (function() {
 
   - Unread message counters
   - Page-specific subnavigation
-  - 
+  -
 
   Instead of explicitly including such elements in every [target selector](/targeting-fragments)
   (e.g. `.content, .unread-messages:maybe`) we can mark the element as `[up-hungry]`:
@@ -386,6 +386,7 @@ up.radio = (function() {
   ### Controlling the target selector
 
   A target selector will be [derived](/target-derivation) from the polling element.
+
 
   ### Skipping updates on the client
 

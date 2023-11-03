@@ -119,12 +119,15 @@ To demonstrate control flow in case of error, the code below handles many differ
 
 ```js
 try {
+  window.addEventListener('error', function(event) {
+    console.log('Compiler threw error', event.error)
+  })
+  
   let result = await up.render({
     url: '/path',
     target: '.target',    // selector to replace for 200 OK status
     failTarget: '.errors' // selector to replace for non-200 status
   })
-  console.log("Updated .target with", result.fragments)
 } catch (error) {
   if (error instanceof up.RenderResult) {
     // Server sent HTML with a non-200 status code

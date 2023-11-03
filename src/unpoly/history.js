@@ -41,6 +41,11 @@ up.history = (function() {
     [meta tags](/updating-history#history-state) in addition
     to the document's title and URL.
 
+    Instead of disabling meta tag synchronization globally you may also disable it
+    per render pass. To do so pass a [`{ metaTags: false }`](/up.render#options.metaTags) option
+    or set an [`[up-meta-tags="false"]`](/up-follow#up-meta-tags) attribute
+    on a link.
+
   @param {config.metaTagSelectors}
     An array of CSS selectors matching default [meta tags](/up-meta)
     that are be updated during [history changes](/updating-history).

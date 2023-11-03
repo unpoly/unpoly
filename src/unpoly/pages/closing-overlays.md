@@ -8,8 +8,8 @@ to the parent layer. This is useful to branch off a complex user interaction int
 then resume the original scenario when you're done.
 
 
-Distinguishing close intents
-----------------------------
+Distinguishing close intents {#intents}
+---------------------------------------
 
 When closing an [overlay](/up.layer), Unpoly distinguishes between two kinds close intents:
 
@@ -22,8 +22,11 @@ Accepting an overlay will usually continue a larger interaction in the parent la
 Dismissal usually means cancelation. When you're waiting for a [subinteraction](/subinteractions)
 to finish successfully you're interested layer acceptance, but not dismissal.
 
+
+## Running code when an overlay closes {#callbacks}
+
 When opening a layer you may pass separate `{ onAccepted }` and `{ onDismissed }` callbacks
-to handle both cases:
+to handle both [close intents](#intents):
 
 ```js
 up.layer.open({
@@ -74,6 +77,16 @@ The acceptance value may also be accessed when you're opening layers from HTML:
 ```
 
 Result values are useful to branch out a complex screen into a [subinteraction](/subinteractions).
+
+
+### Dismissal reasons
+
+When an overlay is dimissed, the result value can indicate the reason for dismissal.
+For instance, closing an overlay by clicking on the `×` symbol will dismiss with the value `` 
+
+See the table under [customizing dismiss controls](#customizing-dismiss-controls) for
+a list of default dismissal values.
+
 
 
 Close conditions
@@ -152,9 +165,12 @@ The `[up-flashes]` element addresses this by picking up flashes from a closing o
 ### Using the discarded response
 
 When a server response causes an overlay to closes, no content from that response is rendered.
-
 Sometimes you need to access the discarded response, e.g. to render its content in another layer.
-For this you can access response via the `{ response }` property of the `up:layer:accepted` and `up:layer:dismissed` events.
+
+One way to achieve this is to use an `[up-hungry]` element with an `[up-if-layer=subtree]` attribute
+on a parent layer. A matching element would be updated with the discarded response of a closing overlay.
+
+If you need more control, you may also access response via the `{ response }` property of the `up:layer:accepted` and `up:layer:dismissed` events.
 
 For example, the link link opens an overlay with a form to create a new company (`/companies/new`).
 After successful creation the form redirects to the list of companies (`/companies`). In that case
@@ -251,7 +267,7 @@ Customizing dismiss controls
 ----------------------------
 
 By default the user can dismiss an overlay user by pressing `Escape`, by clicking outside the overlay box
-or by pressing an "X" icon in the top-right corner.
+or by pressing an `×` icon in the top-right corner.
 
 You may customize the dismiss methods available to the user by passing a `{ dismissable }` option
 or `[up-dismissable]` attribute when opening an overlay.
@@ -259,10 +275,10 @@ or `[up-dismissable]` attribute when opening an overlay.
 The option value should contain the name of one or more dismiss controls:
 
 | Method    | Effect                                           | Dismiss value |
-| --------- | ------------------------------------------------ | ------------- |
+| --------- |--------------------------------------------------| ------------- |
 | `key`     | Enables dimissing with `Escape` key              | `:key`        |
 | `outside` | Enables dismissing by clicking on the background | `:outside`    |
-| `button`  | Adds an "X" button to the layer                  | `:button`     |
+| `button`  | Adds an `×` button to the layer                  | `:button`     |
 
 Regardless of what is configured here, an overlay may always be dismissed by
 using the `up.layer.dismiss()` method or `a[up-dismiss]` attribute.
@@ -287,7 +303,17 @@ for the acceptance value, which you can [`await`](https://developer.mozilla.org/
 
 ```js
 let user = await up.layer.ask({ url: '/users/new' })
-console.log('Got user ', user)
+console.log('Got user:', user)
+```
+
+If the overlay is dismissed instead of accepted, the promise will be rejected with the dismissal value:
+
+```js
+try {
+  await up.layer.ask({ url: '/users/new' })
+} catch (reason) {
+  console.log('Overlay was dismissed:', reason)
+}
 ```
 
 

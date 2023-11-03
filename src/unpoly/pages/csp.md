@@ -31,7 +31,7 @@ up.on('up:link:follow', '.alert-on-loaded', (event) => {
 ```
 
 
-### Solution 2: Prefix a CSP nonce
+### Solution 2: Prefix a CSP nonce {#nonceable-attributes}
 
 Unpoly lets you work around this by prefixing your callback with a [CSP nonce](https://content-security-policy.com/nonce/):
 

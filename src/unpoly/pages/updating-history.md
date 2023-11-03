@@ -25,7 +25,7 @@ To cause auto-history to trigger on fragments other than main elements, add a se
 
 ### Forcing a history change
 
-To force a location change, use one of the following: 
+To force a change of history state, use one of the following: 
 
 - Set an `[up-history=true]` attribute on your link or form.
 - Pass a `{ history: true }` option when rendering a fragment [programmatically](/up.fragment).
@@ -34,7 +34,7 @@ To force a location change, use one of the following:
 
 ### Preventing a history change 
 
-To prevent a location change after rendering a major fragment, use one of the following:
+To prevent changing history-related state after rendering a major fragment, use one of the following:
 
 - Set an `[up-history=false]` attribute on your link or form.
 - Pass a `{ history: false }` option when rendering a fragment [programmatically](/up.fragment).
@@ -47,12 +47,22 @@ Only requests with a `GET` method are egible to change browser history.
 This is because only `GET` requests can be reloaded and restored safely.
 This behavior cannot be configured.
 
+
 ### Changing history after a form submission
 
 Form submissions with methods like `POST`, `PUT` or `PATCH` never change history. 
 However, if a successful form submssion redirects to a `GET` URL, that new request is
 again egible to change history.
 
+
+### Changing history during programmatic rendering
+
+When your JavaScript updates a fragment using `up.render()`, history is never changed by default.
+You may opt into history changes using one of the following:
+
+- Pass a `{ history: true }` option to force a history change.
+- Pass a `{ history: 'auto' }` option to update history if updating a major fragment.
+- Use `up.navigate()` instead of `up.render()` to inherit [navigation defaults](/navigation#navigation-defaults).
 
 
 
@@ -79,7 +89,13 @@ In the document below, the highlighted elements will be updated when history is 
 
 The linked JavaScript and stylesheet are *not* part of history state and will not be updated.
 
-The updating of `<link>` and `<meta>` elements can be disabled with `up.history.config.updateMetaTags = false`.
+### Partial history updates
+
+You may choose to only update some history-related state, but keep others unchanged:
+
+- Meta tag synchronization can be disabled by setting [`[up-meta-tags="false"]`](/up-follow#up-meta-tags) on a link or form, or by passing [`{ metaTags: false }`](/up.render#options.metaTags) to a rendering function.
+- Location changes can be disabled by setting [`[up-location="false"]`](/up-follow#up-location) on a link or form, or by passing [`{ location: false }`](/up.render#options.location) to a rendering function.
+- Title changes can be disabled by setting [`[up-title="false"]`](/up-follow#up-title) on a link or form, or by passing [`{ title: false }`](/up.render#options.location) to a rendering function.
 
 
 
@@ -112,16 +128,6 @@ on this page. You can access an overlay's current location using `up.layer.locat
 
 When an overlay without history opens *another* overlay, the nested overlay cannot have history,
 even with `{ history: true }`.
-
-
-## History for programmatic updates
-
-When your JavaScript updates a fragment using `up.render()`, history is never changed by default.
-You may opt into history changes using one of the following:
-
-- Pass a `{ history: true }` option to force a history change.
-- Pass a `{ history: 'auto' }` option to update history if updating a major fragment.
-- Use `up.navigate()` instead of `up.render()` to inherit [navigation defaults](/navigation#navigation-defaults).
 
 
 ## Supporting the back button

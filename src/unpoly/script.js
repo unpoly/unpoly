@@ -234,7 +234,7 @@ up.script = (function() {
     If set to `true` and a fragment insertion contains multiple
     elements matching `selector`, the `compiler` function is only called once
     with all these elements.
-  @param {Function(element, data, meta)} compiler
+  @param {Function(element, data, meta): Function(element)} compiler
     The function to call when an element matching `selector` is inserted.
 
     The function may accept up to three arguments:
@@ -243,8 +243,8 @@ up.script = (function() {
     2. Any [attached data](/data).
     3. [Information about the current render pass](#accessing-information-about-the-render-pass).
 
-    The function may return a destructor function that [cleans the compiled object](#cleaning-up-after-yourself)
-    before it is removed from the DOM.
+    The function may return a [destructor](/up.destructor) function that [cleans the compiled object](#cleaning-up-after-yourself)
+    before it is removed from the DOM. The destructor function is called with the compiled element.
   @stable
   */
   function registerCompiler(...args) {
@@ -391,24 +391,39 @@ up.script = (function() {
 
   /*-
   Registers a function to be called when the given element
-  is [destroyed](/up.destroy).
+  is destroyed.
+
+  Elements are destroyed when they are swapped during render pass, when their [layer](/up.layer)
+  closes, or when `up.destroy()` is called on the element or its container.
 
   An alternative way to register a destructor function is to
   [`return` it from your compiler function](/up.compiler#cleaning-up-after-yourself).
 
   ### Example
 
+  The code below will log a message when `element` exits the DOM:
+
   ```js
-  up.compiler('.current-time', function(element) {
-    let update = () => element.textContent = new Date().toString()
-    setInterval(update, 1000)
-    up.destructor(element, () => clearInterval(update))
-  })
+  let element = document.querySelector('.element')
+  up.destructor(element, () => console.log('Element was destroyed!'))
+  ```
+
+  ### Reusing destructor functions
+
+  You may reuse the same destructor function for multiple element.
+  The destructor function is called with the element being destroyed:
+
+  ```js
+  let destructor = (element) => console.log('Element %o was destroyed', element)
+
+  for (let element of document.querySelector('div')) {
+    up.destructor(element)
+  }
   ```
 
   @function up.destructor
   @param {Element} element
-  @param {Function|Array<Function>} destructor
+  @param {Function(Element)|Array<Function(Element)>} destructor
     One or more destructor functions.
   @stable
   */
@@ -470,6 +485,21 @@ up.script = (function() {
 
   If a new compiler is registered after initial compilation,
   that new compiler is [run automatically on current elements](/up.compiler#registering-compilers-after-booting).
+
+  ### Detecting compiler errors
+
+  If a compiler function throws an error, `up.hello()` will still finish the compilation and *not* throw an error.
+
+  Instead compiler errors will print to the [error console](https://developer.mozilla.org/en-US/docs/Web/API/console/error)
+  and emit an [`error` event on `window`](https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event):
+
+  ```js
+  window.addEventListener('error', function(error) {
+    alert("Got an error " + error.name)
+  })
+
+  up.hello(element)
+  ```
 
   @function up.hello
   @param {Element|jQuery|string} element
