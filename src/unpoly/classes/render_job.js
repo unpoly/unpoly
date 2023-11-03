@@ -32,7 +32,7 @@ up.RenderJob = class RenderJob {
   }
 
   /*-
-  The [render options](/up.render) for this job.
+  The [render options](/up.render#parameters) for this job.
 
   @property up.RenderJob#options
   @param {Object} options

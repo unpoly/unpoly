@@ -259,7 +259,7 @@ up.form = (function() {
     Unpoly will search its ancestors for the [closest](/up.fragment.closest) form.
 
   @param {Object} [options]
-    [Render options](/up.render) that should be used for submitting the form.
+    [render options](/up.render#parameters) that should be used for submitting the form.
 
     Unpoly will parse render options from the given form's attributes
     like `[up-target]` or `[up-transition]`. See `form[up-submit]` for a list
@@ -581,7 +581,7 @@ up.form = (function() {
 
   ### Changing render options
 
-  Listeners may inspect and manipulate [render options](/up.render) for the coming fragment update.
+  Listeners may inspect and manipulate [render options](/up.render#parameters) for the coming fragment update.
 
   The code below will use a custom [transition](/a-up-transition)
   when a form submission [fails](/failed-responses):
@@ -605,7 +605,7 @@ up.form = (function() {
     If no button was pressed directly (e.g. the user pressed `Enter` inside a focused text field),
     this returns the first submit button.
   @param {Object} event.renderOptions
-    An object with [render options](/up.render) for the fragment update.
+    An object with [render options](/up.render#parameters) for the fragment update.
 
     Listeners may inspect and modify these options.
   @param event.preventDefault()
@@ -1073,7 +1073,7 @@ up.form = (function() {
 
     @experimental
   @param {Object} event.renderOptions
-    An object with [render options](/up.render) for the fragment update
+    An object with [render options](/up.render#parameters) for the fragment update
     that will show the validation results.
 
     Listeners may inspect and modify these options.

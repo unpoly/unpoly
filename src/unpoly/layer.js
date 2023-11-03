@@ -404,7 +404,7 @@ up.layer = (function() {
   @function up.layer.open
 
   @param {Object} [options]
-    All [render options](/up.render) may be used.
+    All [render options](/up.render#parameters) may be used.
 
     You may configure default layer attributes in `up.layer.config`.
 

@@ -301,7 +301,7 @@ up.link = (function() {
     The link to follow.
 
   @param {Object} [options]
-    [Render options](/up.render) that should be used for following the link.
+    [render options](/up.render#parameters) that should be used for following the link.
 
     Unpoly will parse render options from the given link's attributes
     like `[up-target]` or `[up-transition]`. See `a[up-follow]` for a list
@@ -469,7 +469,7 @@ up.link = (function() {
 
   ### Changing render options
 
-  Listeners may inspect and manipulate [render options](/up.render) for the coming fragment update.
+  Listeners may inspect and manipulate [render options](/up.render#parameters) for the coming fragment update.
 
   The code below will open all form-contained links in an overlay, as to not
   lose the user's form data:
@@ -486,7 +486,7 @@ up.link = (function() {
   @param {Element} event.target
     The link element that will be followed.
   @param {Object} event.renderOptions
-    An object with [render options](/up.render) for the coming fragment update.
+    An object with [render options](/up.render#parameters) for the coming fragment update.
 
     Listeners may inspect and modify these options.
   @param event.preventDefault()
@@ -557,7 +557,7 @@ up.link = (function() {
   @param {Element} event.target
     The link element that will be preloaded.
   @param {Object} event.renderOptions
-    An object with [render options](/up.render) for the preloading.
+    An object with [render options](/up.render#parameters) for the preloading.
 
     Listeners may inspect and modify these options.
   @param event.preventDefault()

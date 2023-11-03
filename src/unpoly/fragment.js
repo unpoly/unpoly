@@ -1250,7 +1250,7 @@ up.fragment = (function() {
   @param {Object} event.newData
     The [data](/data) attached to the discarded element.
   @param {Object} event.renderOptions
-    An object with [render options](/up.render) for the current fragment update.
+    An object with [render options](/up.render#parameters) for the current fragment update.
   @stable
   */
 

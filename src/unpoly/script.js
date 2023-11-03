@@ -831,7 +831,7 @@ up.script = (function() {
   @param {List<Element>} event.oldAssets
     A list of [assets](/up-asset) in the `<head>` of the current page.
   @param {Object} event.renderOptions
-    The [render options](/up.render) for the current render pass.
+    The [render options](/up.render#parameters) for the current render pass.
   @param event.preventDefault()
     Aborts this render pass before new content is inserted.
 
