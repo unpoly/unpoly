@@ -8,124 +8,267 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
-3.4.0
+3.5.0
 -----
+
+This is the developer happiness release ❤️
+
+Unpoly 3.5 brings major quality-of-life improvements and addresses numerous edge cases in existing functionality.
+
 
 ### Notification flashes
 
-- New doc page /notification-flashes
-- New selector [up-flashes]
+You can now use an `[up-flashes]` element to show confirmations, alerts or warnings:
 
-### Network
+![A confirmation flash, an error flash and a warning flash](images/flashes.png){:width='480'}
 
-Removed behavior on slow network throughput:
+An `[up-flashes]` element comes with useful default behavior for rendering notifications:
 
-- Removed `up.network.shouldReduceRequests()`
-- Removed `up.radio.config.stretchPollInterval`
-- Removed `up.network.config.badDownlink`
-- Removed `up.network.config.badRTT`
+- Flashes will always be updated when rendering, even if they aren't targeted directly (like `[up-hungry]`).
+- Flashes are kept until new messages are rendered. They will not be cleared by an empty `[up-flashes]` container.
+- You are free to place the flashes anywhere in your layout, inside or outside the [main](/main) element you're usually updating.
+- You can have a single flashes container on your [root layer](/up.layer), or one on each layer.
+- When a response [causes an overlay to close](/closing-overlays#close-conditions), the flashes from the discarded response
+  will be shown on a parent layer.
 
-Unpoly keeps all other features for dealing with [network issues](/network-issues).
-
-### Handling asset changes
-
-When rendering new fragments, Unpoly compares scripts and stylesheets in the `<head>`
-and emits an `up:assets:changed` event if anything changed.
-
-It is up to your code to [handle changes in frontend code](/handling-asset-changes),
-e.g. by [notifying the user](/handling-asset-changes#notifying-the-user) or [loading new assets](/handling-asset-changes#loading-new-assets).
-
-- up.script.config.assetSelectors
-- up.script.config.noAssetSelectors
-- [up-asset]
-
-### Automatic updating of meta tags
-
-[History-related `<meta>` and `<link>` elements, like `meta[name=description]`, `link[rel=canonical]`.](/updating-history#history-state)
-
-- up.history.config.updateMetaTags
-- up.history.config.metaTagSelectors
-- up.history.config.noMetaTagSelectors
-- { metaTags }
-- [up-meta-tags]
-- [up-meta]
+See [notification flashes](/flashes) for more details and examples.
 
 
-### Polling
+### Detection of changed scripts and styles
 
-- Resume polling immediately if an entire interval was spent on a background layer
-- Resume polling immediately if an entire interval was spent on an inactive tab
-  - Use this to automatically reload when the user returns for a while
-- No longer timers in inactive tabs, saves energy
-- Fix a bug where polling in a background layer would not resume when the layer was uncovered
-- Remove `up.radio.config.pollEnabled`. Prevent `up:fragment:poll` instead.
-- Elements with `[up-poll]` can now set `[up-if-layer="any"]` to keep polling on a background layer.
+Unpoly now detects changes in your JavaScripts and stylesheets after deploying a new version of your application.
+While rendering new content, Unpoly compares script and style elements in the `<head>` and emits an `up:assets:changed` event if anything changed.
+
+It is up to you to handle new frontend code revisions, e.g. by [notifying the user](/handling-asset-changes#notifying-the-user) or [loading new assets](/handling-asset-changes#loading-new-assets).
+
+![Notification for a new app version](images/assets-changed-notification.png){:width='305'}
+
+See [handling asset changes](/handling-asset-changes) for more details and examples.
+
+
+### Automatic update of meta tags {#meta-tags}
+
+Render passes that update history [now synchronize meta tags](/updating-history#history-state) (like `meta[name=description]`, `link[rel=canonical]`) automatically.
+
+Existing hacks using `[up-hungry]` can be removed from your application code.
+Other than `[up-hungry]` the new implementation can deal with meta tags that only exist on some pages.
+
+Overlays with history update meta tags when opening. When the overlay closes the parent layer's meta tags are restored.
+
+See `[up-meta]` for ways to include or exclude head elements from synchronization.
+
+You can disable the synchronization of meta tags [globally](/up.history.config#config.updateMetaTags) or [per render pass](/up.render#options.metaTags).
 
 
 ### Hungry elements
 
-- Hungry elements get `[up-duration]`, `[up-easing]`
-- Hungry elements with transitions now delay the up.render().finished promise
-- Hungry elements with `[up-if-layer=any]` should not be able to take away from the explicit target
-- Hungry elements with `[up-if-layer=any]` are now updated from the discarded content if a render pass causes an overlay to cause
+There is now defined behavior when multiple targets want to render the same new fragments from a server response:
+
+- When both a [target selector](/targeting-fragments) and a hungry elements target the same fragment in the response, only the direct render target will be updated.
+- Hungry elements can be be nested. Note that we recommend to not over-use the hungry mechanism, and prefer to explicit render targets instead.
+
+Many edge cases have been addressed for render passes that affect multiple layers:
+
+- When a server response reaches a [close condition](/closing-overlays#close-conditions) and causes an overlay to close,
+  the discarded response can now be rendered into matching hungry elements on other layers.
+- Hungry elements on other layers are now updated *before* [`{ onAccepted }` and `{ onDismissed }` callbacks](/closing-overlays#callbacks) fire.
+  This allows callbacks to observe all fragment changes made by a closing overlay.
+- When multiple hungry elements with `[up-if-layer=any]` target the same fragment in the response,
+  the layer closest to the rendering layer will be chosen.
+- Hungry elements can use arbitrary [layer references](/layer-option) in [`[up-if-layer]`](/up-hungry#up-if-layer).
+  For example, `[up-if-layer="current child"]` would only piggy-back on render passes for the current layer or its direct overlay.
+
+You can now freely control when an hungry element is updated:
+
+- Before a hungry element is added to a render pass, a new event `up:fragment:hungry` is now emitted on the element.
+  The event has properties for the old and new element, and information about the current render pass.
+
+  You may prevent this event to exclude the hungry element from the render pass. Use this to define arbitrary conditions
+  for when an hungry element should be updated:
+
+  ```js
+  element.addEventListener('up:fragment:select', function(event) {
+    if (event.newFragment.classList('is-empty')) {
+      console.log('Ignoring a fragment with an .is-empty class')
+      event.preventDefault()
+    }
+  })
+
+  ```
 - Hungry elements get `[up-on-hungry]`. Calling `event.preventDefault()` will prevent the hungry fragment from being updated.
-- New event up:fragment:hungry. Prevent to prevent hungry from being updated.
-- Hungry elements can use any layer reference in `[up-if-layer]`, .e.g `[up-if-layer="current child"]`
-- Deprecated `[up-if-history]` modifier for hungry elements
- 
+- Deprecated the `[up-if-history]` modifier for hungry elements.
 
-### Preloading
+  This functionality is now covered by the more generic `[up-on-hungry]` attribute. Also its main use case was synchronizing meta tags,
+  and that is now [supported out of the box](#meta-tags).
 
-- Remove `up.link.config.preloadEnabled`. Prevent `up:link:preload` instead.
+Some improvements have been to hungry elements with animated transitions:
+
+- Hungry elements can now control their transition using `[up-duration]` and `[up-easing]` attributes.
+- Hungry elements with transitions now delay the [`up.render().finished`](/render-hooks#awaiting-postprocessing) promise.
+
+
+### Error handling
+
+This version changes how Unpoly handles exceptions thrown from user code, like compilers, transition functions or callbacks like `{ onAccepted }`.
+
+Earlier errors in user code could crash Unpoly. This would sometimes leave the page in a corrupted state. For example,
+a render pass would only update some fragments, fail to scroll, or fail to run destuctors.
+
+Starting with this version, exceptions from user code are no longer bubble up into framework.
+Instead an [`error` event on `window`](https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event) is emitted
+and the operation succeeds successfully:
+
+```js
+window.addEventListener('error', function(error) {
+  alert("Got an error " + error.name)
+})
+
+up.compiler('.element', function() {
+  throw new Error('broken compiler')
+})
+
+let element = up.element.affix(document.body, '.element')
+
+up.hello(element) // no error is thrown, but an error event is emitted
+```
+
+This behavior is consistent with how the web platform handles [errors in event listeners](https://makandracards.com/makandra/481395-error-handling-in-dom-event-listeners)
+and custom elements.
+
+Exceptions in user code are also printed to the browser's [error console](https://developer.mozilla.org/en-US/docs/Web/API/console/error).
+This way you can still access the stack trace or [detect JavaScript errors in E2E tests](https://makandracards.com/makandra/55056-raising-javascript-errors-in-ruby-e2e-tests-rspec-cucumber).
+
+Some test runners like [Jasmine](https://jasmine.github.io/) already listen to the `error` event and fail your test if any uncaught exception is observed.
+In Jasmine you may use [`jasmine.spyOnGlobalErrorsAsync()`](https://makandracards.com/makandra/559289-jasmine-prevent-unhandled-promise-rejection-from-failing-your-test) to make assertions on the unhandled error.
+
+
+### Improved polling behavior
+
+Unpoly has always paused [polling](/up-poll) when the user minimizes the window or switches to another tab.
+This behavior has been improved by the following:
+
+- When at least one poll interval was spent paused in the background and the user then returns to the tab, Unpoly will now immediately reload the fragment.
+
+- You can use this to load recent data when the user returns to your app after working on something else for a while. For example, the following
+  would reload your [main](/main) element after an absence of 5 minutes or more:
+
+  ```html
+  <main up-poll up-interval="300_000">
+    ...
+  </main>
+   ```
+
+- Polling now unschedules all JavaScript timers while polling is paused This allows browser to keep the inactive window suspended, saving battery life.
+
+Unpoly also pauses [polling](/up-poll) for fragments that are covered by an overlay. This behavior has been improved by the following:
+
+- When at least one poll interval was spent paused on a background layer and the layer is then brought to the [front](/up.layer.front) again,
+  Unpoly will now immediately reload the fragment.
+- You can now keep polling on a background layer by setting an `[up-if-layer="any"]` attribute on an `[up-poll]` fragment.
+- Fix a bug where polling on a background layer would not resume when the layer was brought to the [front](/up.layer.front) again.
+
+The following changes were also made:
+
+- The server can now stop polling by rendering a new fragment with `[up-poll=false]`. The previous method of omitting the `[up-poll]` attribute remains supported.
+- Remove the configuration `up.radio.config.pollEnabled`. To disable polling, prevent the `up:fragment:poll` event instead.
 
 
 ### Rendering
 
-- up:fragment:aborted new experimental property { newLayer }.
-- Allow in-page rendering when initial page was loaded with non-GET, but the render pass does not change history
-- When revalidating a fallback target, don't log that we're "revalidating undefined"
-- Don't crash rendering early if a { failTarget } or { failLayer } cannot be resolved
-- Allow revalidation when the { failLayer } is no longer open
-- No longer provide the response to compiler's meta argument; We cannot provide it for the initial page load and we want to progressively enhance
-- Destructors are called with the element being destroyed (docs!)
+Unpoly's render engine has been reworked to address a number of edge cases:
+
+- Rendering no longer forces a full page load when the initial page was loaded with non-GET, but the render pass does not change history.
+- Fix a bug where, when revalidating a [fallback target](/targeting-fragments#providing-a-fallback-target), we would log that we're `"revalidating undefined"`
+- Rendering successful responses no longer crashes if a `{ failTarget }` or `{ failLayer }` cannot be resolved.
+- [Revalidation](/caching#revalidation) now succeeds when the `{ failLayer }` is no longer open.
 - Updates for `[up-keep]` no longer need to also be `[up-keep]`. You can prevent keeping by setting `[up-keep=false]`. This allows you to set `[up-keep]` via a macro.
-- Many fixes for matching in closed layers, closing layers, destroying elements or detached elements
+- Revalidation now update the correct element when the initial render pass matched in the [region of the clicked link](/targeting-fragments#resolving-ambiguous-selectors) and that link has since been detached.
+- Many fixes for matching fragments in closed layers, or closing layers in their exit animation.
+- Many fixes for matching fragments in detached elements, or destroyed elements in their exit animation.
+- Unpoly now [logs](/up.log) when rendering was aborted or threw an internal error.
 
 
-## Error handling
+### Fragment API
 
-- When a compiler or destructor crashes during rendering, the error is reported on window and the operation succeeds
-- When a layer closing crashes due to a faulty compiler, the error is reported on window and the operation succeeds
-- up.destroy() will still remove the element if a destructor crashes
-- Log when rendering was aborted or had an error
-- Errors in handlers like `{ scroll, focus }` no longer prevent the render pass
-- Errors in `{ onAccept, onAccepted, onDismiss, onDismissed }` no longer prevent the layer from closing. The error is reported on window and the operation succeeds 
+- The event `up:fragment:aborted` received new experimental property `{ newLayer }`. It returns whether the fragment was aborted by a [new overlay opening](/opening-overlays).
+- The boolean configuration `up.fragment.config.matchAroundOrigin` has been replaced by `up.fragment.config.match`. Its values are `'region'` (default) and `'first'`. 
+- You now have fine-grained control over disabling [matching fragments in the origin's region](/targeting-fragments#resolving-ambiguous-selectors):
+  - Pass a `{ match: 'first' }` option to a function that matches a fragment.
+  - Set an `[up-match=first]` option on a link or form that matches a fragment.
+- The event `up:fragment:keep` received a new property `{ renderOptions }`. It contains the render options for the current render pass.
+- New experimental function `up.fragment.contains()`. It returns whether the given `root` matches or contains the given selector or element. Other than `Element#contains()` it only matches fragments on the same layer. It also ignores destroyed fragments in an exit animation.
+- Many functions in the fragment API now also support a `Document` as the search root:
+  - `up.fragment.get()`
+  - `up.fragment.all()`
+  - `up.fragment.contains()`
+- `up.fragment.toTarget()` no longer crashes when deriving targets for destroyed elements that are still in their exit animation.
+- Fix a bug where reloading a fragment that was rendered from local content would be reloaded from path `"/true"` (sic).
+- Fragment lookup functions now crash with a better error message when the given `{ layer }` does not exist or has been closed.
+- Passing an element to `up.fragment.get()` now returns that element unchanged.
 
 
-### Navigation feedback
+### Scripting
 
-- Allow compilers to see updated .up-current classes for the current render pass
+- Compilers now see updated [navigation feedback](/up.feedback) for the current render pass. In particular `.up-current` classes are updated before compilers are called.
+- ️️⚠️ Unpoly 3.0.0 introduced a [third `meta` argument for compilers](/up.compiler#accessing-information-about-the-render-pass)
+  containing information about the current render pass.
+
+  Compilers can no longer access the current response via the `{ response }` of that `meta` argument.
+
+  We realized this would to bad patterns where fragments would compile differently for the initial page load vs. subsequent fragment updates.
+- Destructors are now called with the element being destroyed. This allows you to [reuse the same destructor function](/up.destructor#reusing-destructor-functions) for multiple elements.
+- The `up.syntax` package has been renamed to `up.script`.
+
+
+### Network quality is no longer measured
+
+Previous versions of Unpoly changed their behavior when it detected high latency or low network throughput.
+Due to cross-browser support for the [Network Information API](https://developer.mozilla.org/en-US/docs/Web/API/Network_Information_API),
+measuring of network quality was removed:
+
+- Unpoly no longer doubles [poll](/up-poll) intervals on slow connections. The configuration `up.radio.config.stretchPollInterval` was removed.
+- Unpoly no longer prevents [preloading](/a-up-preload) on slow connections. The configuration `up.link.config.preloadEnabled = 'auto'` was removed.
+- The configuration `up.network.config.badDownlink` was remoed.
+- The configuration `up.network.config.badRTT` was removed.
+- The function `up.network.shouldReduceRequests()` was removed.
+
+Unpoly retains all other functionality for dealing with [network issues](/network-issues).
+In particular Unpoly still emits `up:fragment:offline` during disconnects or flaky connections.
 
 
 ### Layers
 
-- onAccepted / onDismissed handlers now see the effects of `[up-hungry][up-if-layer="any"]`
+- You may now use a new [layer reference](/layer-option) `subtree` in your `{ layer }` options or `[up-layer]` attributes.
+  This matches fragments in either the current layer or its descendant overlays.
+- `up.Layer` objects now support a new method [`#subtree()`](/up.Layer.prototype.subtree). It returns an array of `up.Layer` containing this layer and its descendant overlays.
+- Fix a bug where the layer stack would sometimes be corrupted by after looking up ancestors or descendants.
 
 
-### Various
+### Links
 
-- The `up.syntax` package has been renamed to `up.script`.
-- Build is now compiled using ES2021 (up from ES2020). The ES6 build remains available.
-- `up.element.isEmpty()`
-- [up-on-offline] can be nonced
-- Event `up:link:preload` gets `{ renderOptions }` property
-- Function `up.link.followOptions()` gets second options argument
-- Event `up:fragment:keep` gets `{ renderOptions }` prop
-- Many fragment API functions also support a `Document`as the search root
-  - `up.fragment.get()`
-  - `up.fragment.all()`
-  - `up.fragment.contains()`
- 
+- The [`[up-on-offline]`](/a-up-follow#up-on-offline) attribute now supports a [CSP nonce](/csp#nonceable-attributes).
+- The function `up.link.followOptions()` now takes an `Object` as a second argument. It will override any options parsed from the link attributes.
+- The `up:link:preload` event received a new property `{ renderOptions }`. It contains the render options for the current render pass.
+- The configuration `up.link.config.preloadEnabled` was removed. To disable preloading, prevent `up:link:preload`.
+
+
+### DOM helpers
+
+- A new experimental function `up.element.isEmpty()` was added. It returns whether an element has neither child elements nor non-whitespace text.
+
+
+### `unpoly-migrate.js`
+
+- The polyfills for the `up.element.isAttached()` and `up.element.isDetached()` functions were changed so they behave
+  like their deprecated versions. The functions now only consider attachment in `window.document`, but not to other `Documents`.
+
+
+### Build
+
+- `unpoly.js` is now compiled using ES2021 (up from ES2020). The ES6 build remains available.
+- Improve compression of minified builds. In particular private object properties are now prefixed with an underscore (`_`)
+  [so they can be mangled safely](https://makandracards.com/makandra/608582-minifying-object-properties-in-javascript-files).
+
 
 3.3.0
 -----
@@ -197,9 +340,9 @@ we can use the HTML from the response and render it into the parent layer:
 
 The `{ response }` property is available whenever a server response causes an overlay to close:
 
-- When a [server-sent event](/X-Up-Events) matches a [close condition](#close-conditions).
-- When the new location matches a [close condition](#close-conditions).
-- When the server [explicitly closes](#closing-from-the-server) an overlay using an HTTP header.
+- When a [server-sent event](/X-Up-Events) matches a [close condition](/closing-overlays#close-conditions).
+- When the new location matches a [close condition](/closing-overlays#close-conditions).
+- When the server [explicitly closes](/closing-overlays#closing-from-the-server) an overlay using an HTTP header.
 
 ### Rendering `up.Response` objects
 
