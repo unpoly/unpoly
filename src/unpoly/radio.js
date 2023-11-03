@@ -165,11 +165,11 @@ up.radio = (function() {
   ### Use cases
 
   Common use cases for `[up-hungry]` are elements that live in the application layout,
-  outside of the fragment that is typically being targeted:
+  outside of the fragment that is typically being targeted. Examples include:
 
   - Unread message counters
   - Page-specific subnavigation
-  -
+  - Account-wide notifications (e.g. about an expired credit card)
 
   Instead of explicitly including such elements in every [target selector](/targeting-fragments)
   (e.g. `.content, .unread-messages:maybe`) we can mark the element as `[up-hungry]`:
@@ -193,13 +193,22 @@ up.radio = (function() {
 
   ### Behavior with multiple layers
 
-  By default only hungry elements on the targeted layer are updated.
+  By default only hungry elements on the targeted [layer](/up.layer) are updated.
 
   To match a hungry element when updating other layers, set an [`[up-if-layer]`](#up-if-layer) attribute.
+  For example, a hungry element with `[up-if-layer="subtree"]` will piggy-back on render passes for both
+  its own layer and any overlay covering it.
 
-  An element can only be rendered once per render pass.
-  If an element has already been rendered into a layer, it will cannot be matched again
-  by an `[up-hungry]` element on another layer.
+  ### Conflict resolution
+
+  When Unpoly renders new content, each element in that content can only be inserted once.
+  When multiple hungry elements conflict with each other or with the the [primary render target](/targeting-fragment),
+  that conflict is resolved using the following rules:
+
+  1. When both a [target selector](/targeting-fragments) and a hungry elements target the same fragment in the response, only the direct render target will be updated.
+  2. When hungry elements are nested within each other, the outmost fragment will be updated. Note that we recommend to not over-use the hungry mechanism, and prefer to explicit render targets instead.
+  3. When hungry elements on different layers target the same fragment in the response,
+     the layer closest to the rendering layer will be chosen.
 
   ### Disabling
 
