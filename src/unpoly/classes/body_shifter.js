@@ -51,13 +51,11 @@ up.BodyShifter = class BodyShifter {
     const bodyRightPadding = e.styleNumber(body, 'paddingRight')
     const bodyRightShift = scrollbarWidth + bodyRightPadding
 
-    this._changeStyle(body, {paddingRight: bodyRightShift})
-
-    for (let anchor of up.viewport.anchoredRight()) {
-      const elementRight = e.styleNumber(anchor, 'right')
-      const elementRightShift = scrollbarWidth + elementRight
-      this._changeStyle(anchor, {right: elementRightShift})
-    }
+    body.classList.add('up-shifted')
+    this._changeStyle(body, {
+      paddingRight: bodyRightShift,
+      '--up-scrollbar-width': scrollbarWidth + 'px',
+    })
   }
 
   _changeStyle(element, styles) {

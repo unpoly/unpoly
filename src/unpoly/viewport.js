@@ -94,14 +94,11 @@ up.viewport = (function() {
     config.reset()
   }
 
-  /*-
-  @function up.viewport.anchoredRight
-  @internal
-  */
-  function anchoredRight() {
-    const selector = config.anchoredRight.join()
-    return f.all(selector, { layer: 'root' })
+  function anchoredRightSelector() {
+    return config.anchoredRight.join()
   }
+
+  up.macro(anchoredRightSelector, (element) => element.setAttribute('up-anchored', 'right'))
 
   /*-
   Scrolls the given element's viewport so the first rows of the
