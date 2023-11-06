@@ -292,13 +292,13 @@ up.script = (function() {
   ```
 
   We can define the `[content-link]` attribute by registering a macro that
-  sets the `[up-target]`, `[up-transition]` and `[up-duration]` attributes for us:
+  sets the `[up-layer]`, `[up-class]` and `[up-animation]` attributes for us:
 
   ```js
   up.macro('[smooth-link]', function(link) {
-    link.setAttribute('up-target', '.content')
-    link.setAttribute('up-transition', 'cross-fade')
-    link.setAttribute('up-duration', '300')
+    link.setAttribute('up-layer', 'new modal')
+    link.setAttribute('up-class', 'warning')
+    link.setAttribute('up-animation', 'shake')
   })
   ```
 
