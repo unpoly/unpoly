@@ -23,6 +23,19 @@ You can now use an `[up-flashes]` element to render confirmations, alerts or war
 
 ![A confirmation flash, an error flash and a warning flash](images/flashes.png){:width='480'}
 
+To render a flash message, include an `[up-flashes]` element in your response.
+The element's content should be the messages you want to render:
+
+```html
+<div up-flashes>
+  <strong>User was updated!</strong> <!-- mark-line -->
+</div>
+
+<main>
+  Main response content ...
+</main>
+```
+
 An `[up-flashes]` element comes with useful default behavior for rendering notifications:
 
 - Flashes will always be updated when rendering, even if they aren't targeted directly (like `[up-hungry]`).

@@ -83,10 +83,10 @@ them into the parent layer.
 Clearing flashes
 ----------------
 
-By default flash messages are shown until they are replaced by new messages.
+By default flash messages are [kept](/up-keep) until they are replaced by new messages.
 
-In other words, an [empty](/up.element.isEmpty) `[up-flashes]` element will not clear existing messages.
-It is safe to always render an `[up-flashes]` element in your application layout to indicate
+An [empty](/up.element.isEmpty) `[up-flashes]` element will **not** clear existing messages.
+Hence it is safe to always include an empty `[up-flashes]` element in your application layout to indicate
 where future flashes should be placed.
 
 
