@@ -426,10 +426,10 @@ up.script = (function() {
   The destructor function is called with the element being destroyed:
 
   ```js
-  let destructor = (element) => console.log('Element %o was destroyed', element)
+  let fn = (element) => console.log('Element %o was destroyed', element)
 
   for (let element of document.querySelector('div')) {
-    up.destructor(element)
+    up.destructor(fn)
   }
   ```
 

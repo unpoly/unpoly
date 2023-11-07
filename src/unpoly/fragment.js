@@ -1375,6 +1375,12 @@ up.fragment = (function() {
   When the link's does not have an ancestor matching `.element`,
   Unpoly will search the entire layer for `.element`.
 
+  To [disable region-aware fragment matching](/targeting-fragments#disabling-region-aware-fragment-matching), pass a `{ match: 'first' }` option:
+
+  ```js
+  up.fragment.get('.element', { origin: link, match: 'first' })
+  ```
+
   ### Matching an origin sibling
 
   When processing a user interaction, it is often helpful to match elements

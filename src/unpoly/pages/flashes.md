@@ -40,8 +40,8 @@ For styling reasons you may also wish to place the `[up-flashes]` container insi
 </main>
 ```
 
-Not that this may cause a second `[up-flashes]` element
-when you open an overlay. In that case flashes from overlay content will be rendered into
+This style will usually cause multiple `[up-flashes]` containers
+to be attached when you [open an overlay](/opening-overlays). In this case any flash messages from overlay content will be rendered into
 the overlay preferrably. Only when the overlay is closing, its
 [flashes will be rendered into the parent layer](#from-closing-overlays) (instead of being discarded).
 
@@ -54,7 +54,7 @@ The element's content should be the messages you want to render:
 
 ```html
 <div up-flashes>
-  <strong>User was updated!</strong>
+  <strong>User was updated!</strong> <!-- mark-line -->
 </div>
 
 <main>
@@ -68,11 +68,12 @@ The flashes will always be updated, even if they aren't [targeted](/targeting-fr
 In the example above, rendering `main` would also update the `[up-flashes]` element.
 
 
-### Flashes from closing overlays are shown on the parent layer {#from-closing-overlays}
+### Flashes from closing overlays are shown on a parent layer {#from-closing-overlays}
 
 Sometimes a fragment update will cause an overlay to [close](/closing-overlays), e.g. when a
 [close condition](/closing-overlays#close-conditions) is reached. In that case no new elements
-will be rendered into the closing overlay. Any confirmation flashes would be lost.
+will be rendered into the closing overlay. Any confirmation flashes from the final overlay interaction
+would be lost.
 
 The `[up-flashes]` element addresses this by picking up flashes from a closing overlay and rendering
 them into the parent layer.
@@ -83,20 +84,30 @@ Clearing flashes
 ----------------
 
 By default flash messages are shown until they are replaced by new messages.
-An [empty](/up.element.isEmpty) `[up-flashes]` element will not clear existing messages.
+
+In other words, an [empty](/up.element.isEmpty) `[up-flashes]` element will not clear existing messages.
+It is safe to always render an `[up-flashes]` element in your application layout to indicate
+where future flashes should be placed.
+
+
+### Removing messages after a delay {#clearing-after-delay}
 
 Typically you want to clear flash messages after some time.
-This [compiler](/up.compiler) removes child elements of your `[up-flashes]` container after 7 seconds: 
+This [compiler](/up.compiler) removes child elements of your `[up-flashes]` container after 5 seconds: 
+
 
 ```js
 up.compiler('[up-flashes] > *', function(message) {
-  setTimeout(() => up.destroy(message), 7000)
+  setTimeout(() => up.destroy(message), 5000)
 })
 ```
 
 > [important]
 > We're only removing the contents of `[up-flashes]`, but not the container itself.
 > The empty flashes container must remain in the layout to indicate where future flashes should be [placed](#placement).
+
+
+To animate the removal, pass an [`{ animation }`](/up.destroy#options.animation) option to `up.destroy()`.
 
 
 Building a custom flashes container

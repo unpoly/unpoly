@@ -11,13 +11,18 @@ e.g. by [notifying the user](#notifying-the-user) or [loading new assets](#loadi
 ## Tracking assets
 
 To detect changes in your frontend code, Unpoly must track your application's *assets*.
-An *asset* is either a script or a stylesheet with a remote source:
+By default an *asset* is either a script or a stylesheet with a remote source.
+
+In the example document below, the highlighted elements are considered to be *assets*:
 
 ```html
 <html>
   <head>
+    <title>AcmeCorp</title>
     <link rel="stylesheet" href="/assets/frontend-5f3aa101.css"> <!-- mark-line -->
     <script src="/assets/frontend-81ba23a9.js"></script> <!-- mark-line -->
+    <script>console.log('loaded!')</script>
+    <link rel="canonical" href="https://example.com/dresses/green-dresses">
   </head>
   <body>
     ...
@@ -25,8 +30,8 @@ An *asset* is either a script or a stylesheet with a remote source:
 </html>
 ```
 
-See `[up-asset]` for ways to exclude elements from asset tracking, or how
-to track non-default assets.
+Note how the inline `<script>` is not considered an asset by default.
+See `[up-asset]` for ways to include or exclude elements for asset tracking.
 
 
 ## Handling new asset versions {#handling-changed-assets}
@@ -92,14 +97,19 @@ function isLoadPageSafe({ url, layer }) {
 The `up:assets:changed` event has `{ oldAssets, newAssets }` properties that you can use to manually
 insert the new assets into the page.
 
-There are two challenges when loading additional assets into an existing page:
+A major challenge here is that JavaScript cannot be unloaded by removing its `<script>` tag. There are three ways to work around this:
 
-1. JavaScript cannot be unloaded by removing its `<script>` tag.
-   New scripts must always be additive to the scripts we already have.
-2. Asset paths often contain a version hash to allow heavy caching, e.g. `application-c80fd51c.js`.
-   This makes is harder to re-identify a script that was changed between two render passes.
+1. Scripts must be idempotent, e.g. by detecting whether they have run before. This requires a change to many of your scripts,
+   and is impractical for external libraries.
+2. We must avoid re-inserting existing scripts.
+
+The solution below will go with the latter and only insert scripts that we haven't seen before. 
 
 #### Version hash conventions
+
+If we want to match assets by their URL, we must solve another challenge.
+Asset paths often contain a version hash to allow heavy caching, e.g. `application-c80fd51c.js`.
+This makes is harder to re-identify a script that was changed between two render passes.
 
 Different bundlers have different conventions for version hashes.
 Here are some examples we have seen in the wild:

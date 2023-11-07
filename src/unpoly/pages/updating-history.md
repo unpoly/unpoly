@@ -99,7 +99,7 @@ You may choose to only update some history-related state, but keep others unchan
 
 
 
-## History in overlays
+## History in overlays {#overlays}
 
 By default modals and overlays will have visible history if their initial fragment is a [main element](/main).
 To override this default, use one of the following:

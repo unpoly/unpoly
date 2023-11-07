@@ -360,18 +360,31 @@ up.radio = (function() {
 
   A target selector will be [derived](/target-derivation) from the polling element.
 
+  ### Polling is paused in the background
+
+  By default polling will pause while the fragment's [layer](/up.layer) is covered by an overlay.
+  When the layer is uncovered, polling will resume.
+  To keep polling on background layers, set [`[up-if-layer=any]`](#up-if-layer).
+
+  Polling will also pause automatically while the browser tab is hidden.
+  When the browser tab is re-activated, polling will resume.
+
+  When at least one poll interval was spent paused in the background and the user
+  then returns to the layer or tab, Unpoly will immediately reload the fragment.
+  You can use this to load recent data when the user returns to your app after working on something else for a while. For example, the following
+  would reload your [main](/main) element after an absence of 5 minutes or more:
+
+  ```html
+  <main up-poll up-interval="300_000">
+    ...
+  </main>
+   ```
 
   ### Skipping updates on the client
 
   Client-side code may skip an update by preventing an `up:fragment:poll` event
   on the polling fragment.
 
-  Polling will pause while the browser tab is hidden.
-  When the browser tab is re-activated, polling will resume.
-
-  By default polling will pause while the fragment's [layer](/up.layer) is covered by an overlay.
-  When the layer is uncovered, polling will resume.
-  To keep polling on background layers, set [`[up-if-layer=any]`](#up-if-layer).
 
   ### Skipping updates on the server
 

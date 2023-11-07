@@ -120,23 +120,17 @@ When a user-provided function throws an exception, Unpoly instead an emits [`err
 The operation then succeeds successfully:
 
 ```js
-window.addEventListener('error', function(event) {
-  alert("Got an error " + event.error.name)
-})
-
-up.compiler('.element', function() {
-  throw new Error('Exception from broken compiler')
-})
-
+up.compiler('.element', () => { throw new Error('broken compiler') })
 let element = up.element.affix(document.body, '.element')
-
-up.hello(element) // no error is thrown, but an error event is emitted
+up.hello(element) // no error is thrown
 ```
 
 This behavior is consistent with how the web platform handles [errors in event listeners](https://makandracards.com/makandra/481395-error-handling-in-dom-event-listeners)
 and custom elements.
 
-Exceptions in user code are also printed to the browser's [error console](https://developer.mozilla.org/en-US/docs/Web/API/console/error).
+#### Debugging and testing
+
+Exceptions in user code are also logged to the browser's [error console](https://developer.mozilla.org/en-US/docs/Web/API/console/error).
 This way you can still access the stack trace or [detect JavaScript errors in E2E tests](https://makandracards.com/makandra/55056-raising-javascript-errors-in-ruby-e2e-tests-rspec-cucumber).
 
 Some test runners like [Jasmine](https://jasmine.github.io/) already listen to the `error` event and fail your test if any uncaught exception is observed.

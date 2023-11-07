@@ -4,9 +4,9 @@ up.on('up:assets:changed', function() {
   if (document.querySelector('#new-version')) return
    
   // Append a <div id="new-version"> notification to the <body>
-  up.element.affix(document.body, '#new-version', {
+  up.element.affix(document.body, 'button#new-version', {
     text: 'A new app version is available. Click to reload.',
-    onclick: () => location.reload()
+    onclick: 'location.reload()',
   })
 })
 ```
