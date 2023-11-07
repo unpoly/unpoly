@@ -98,7 +98,7 @@ up.viewport = (function() {
     return config.anchoredRight.join()
   }
 
-  up.macro(anchoredRightSelector, (element) => element.setAttribute('up-anchored', 'right'))
+  up.compiler(anchoredRightSelector, (element) => element.setAttribute('up-anchored', 'right'))
 
   /*-
   Scrolls the given element's viewport so the first rows of the
@@ -945,7 +945,6 @@ up.viewport = (function() {
     resetScroll,
     saveFocus,
     restoreFocus,
-    anchoredRight,
     absolutize,
     focus: doFocus,
     tryFocus,

@@ -1249,8 +1249,9 @@ up.element = (function() {
       const { style } = element
       for (let key in props) {
         let value = props[key]
+        key = u.camelToKebabCase(key)
         value = normalizeStyleValueForWrite(key, value)
-        style[key] = value
+        style.setProperty(key, value)
       }
     }
   }

@@ -51,7 +51,8 @@ up.BodyShifter = class BodyShifter {
     const bodyRightPadding = e.styleNumber(body, 'paddingRight')
     const bodyRightShift = scrollbarWidth + bodyRightPadding
 
-    body.classList.add('up-shifted')
+    this._unshiftFns.push(e.addTemporaryClass(body, 'up-shifted'))
+
     this._changeStyle(body, {
       paddingRight: bodyRightShift,
       '--up-scrollbar-width': scrollbarWidth + 'px',
