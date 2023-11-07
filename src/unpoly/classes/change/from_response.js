@@ -136,7 +136,9 @@ up.Change.FromResponse = class FromResponse extends up.Change {
     //     That includes the request and response.
     //
     // (3) Another property { layer } will be assigned by up.hello().
-    return { revalidating: !!this.options.expiredResponse }
+    let meta = { revalidating: !!this.options.expiredResponse }
+    up.migrate.processCompilerPassMeta?.(meta, this._response)
+    return meta
   }
 
   _augmentOptionsFromResponse(renderOptions) {

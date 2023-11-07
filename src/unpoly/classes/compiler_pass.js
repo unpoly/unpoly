@@ -13,7 +13,11 @@ up.CompilerPass = class CompilerPass {
     this._data = data
     this._dataMap = dataMap
 
-    this._meta = { layer, ...meta }
+    // The meta object may have a getter on { response }, defined by unpoly-migrate.js.
+    // Hence we cannot make a new object here.
+    meta ||= {}
+    meta.layer = layer
+    this._meta = meta
   }
 
   run() {

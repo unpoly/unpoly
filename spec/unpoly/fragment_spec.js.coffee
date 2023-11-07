@@ -576,6 +576,27 @@ describe 'up.fragment', ->
               )
             )
 
+        if up.migrate.loaded
+          it 'calls compilers with a third argument containing the { response } for the current render pass', asyncSpec (next) ->
+            compiler = jasmine.createSpy('compiler')
+            up.compiler('.element', compiler)
+
+            fixture('.element', text: 'old content')
+            up.render('.element', url: '/path')
+
+            next ->
+              jasmine.respondWithSelector('.element', text: 'new content')
+
+            next ->
+              expect('.element').toHaveText('new content')
+              expect(compiler).toHaveBeenCalledWith(
+                jasmine.any(Element),
+                jasmine.any(Object),
+                jasmine.objectContaining(
+                  response: jasmine.any(up.Response)
+                )
+              )
+
         describe 'when a compiler throws an error', ->
 
           it 'emits an error event, but does not reject the up.render() promise', ->
