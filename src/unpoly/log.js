@@ -111,7 +111,7 @@ up.log = (function() {
     let text = ""
 
     if (!up.migrate.loaded) {
-      text += "Load unpoly-migrate.js to enable deprecated APIs.\n\n"
+      text += "Load unpoly-migrate.js to polyfill deprecated APIs.\n\n"
     }
 
     if (config.enabled) {
