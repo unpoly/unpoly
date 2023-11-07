@@ -441,14 +441,6 @@ up.element = (function() {
   // element is <div style="color: red"></div>
   ```
 
-  ### Adding event listeners
-
-  To quickly register an event listener, pass a function value with any property that begins with `on...`:
-
-  ```js
-  element = up.element.createFromSelector('.button', { onclick: () => alert("Clicked") }) // mark-phrase "onclick"
-  ```
-
   @function up.element.createFromSelector
   @param {string} selector
     The CSS selector from which to create an element.
@@ -463,10 +455,7 @@ up.element = (function() {
     of the created element. The given object may use kebab-case or camelCase keys.
 
     You may also pass a string with semicolon-separated styles.
-  @param {Function} [attrs.on...]
-    An [event listener](#adding-event-listeners) to register on the created element.
 
-    You can register multiple event listeners by passing multiple properties that begin with `on...`.
   @return {Element}
     The created element.
   @stable
@@ -520,9 +509,6 @@ up.element = (function() {
         rootElement.textContent = value
       } else if (key === 'content') {
         rootElement.innerHTML = value
-      } else if (key.startsWith('on') && u.isFunction(value)) {
-        let eventType = key.substring(2)
-        rootElement.addEventListener(eventType, value)
       } else {
         rootElement.setAttribute(key, value)
       }
@@ -679,10 +665,6 @@ up.element = (function() {
     of the created element.
 
     The given object may use kebab-case or camelCase keys.
-  @param {Function} [attrs.on...]
-    An [event listener](/up.element.createFromSelector#adding-event-listeners) to register on the created element.
-
-    You can register multiple event listeners by passing multiple properties that begin with `on...`.
   @return {Element}
     The created element.
   @stable

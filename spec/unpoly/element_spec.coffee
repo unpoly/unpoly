@@ -508,14 +508,6 @@ describe 'up.element', ->
       element = up.element.createFromSelector('.foo', text: '<script>alert("foo")</script>')
       expect(element).toHaveText('<script>alert("foo")</script>')
 
-    it 'adds a function value as an event listener if the option is prefixed with { on* }', ->
-      clickSpy = jasmine.createSpy('click spy')
-      element = up.element.createFromSelector('.foo', onclick: clickSpy)
-
-      expect(clickSpy).not.toHaveBeenCalled()
-      Trigger.click(element)
-      expect(clickSpy).toHaveBeenCalled()
-
   describe 'up.element.affix()', ->
 
     it 'creates an element from the given selector and attaches it to the given container', ->
