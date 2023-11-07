@@ -1310,10 +1310,10 @@ describe 'up.radio', ->
         describe 'with [up-if-history]', ->
 
           it 'only updates a hungry fragment when updating history', asyncSpec (next) ->
-            $fixture('.hungry[up-hungry]').text('old hungry').attr('up-if-history', '')
+            up.hello $fixture('.hungry[up-hungry]').text('old hungry').attr('up-if-history', '')
             $fixture('.target').text('target version 1')
 
-            up.render('.target', url: '/other')
+            up.render('.target', url: '/other', history: false)
 
             next ->
               jasmine.respondWith """
