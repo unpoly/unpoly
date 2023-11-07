@@ -91,7 +91,55 @@ up.render('.element', { url: '/path', history: true, metaTags: false }) // mark-
 ```
 
 
+
+### Forgiving error handling
+
+In earlier versions, errors in user code would often crash Unpoly. This would sometimes leave the page in a corrupted state. For example,
+a render pass would only update some fragments, fail to scroll, or fail to run destuctors.
+
+This version changes how Unpoly handles exceptions thrown from user code, like compilers, transition functions or callbacks like `{ onAccepted }`.
+
+
+#### User errors are no longer thrown
+
+Starting with this version, Unpoly functions generally succeed despite exceptions from user code.
+
+The code below will successfully [compile](/up.hello) an element despite a broken [compiler](/up.compiler):
+
+```js
+up.compiler('.element', () => { throw new Error('broken compiler') })
+let element = up.element.affix(document.body, '.element')
+up.hello(element) // no error is thrown
+```
+
+Instead an [`error` event on `window`](https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event) is emitted:
+
+
+```js
+window.addEventListener('error', function(event) {
+  alert("Got an error " + event.error.name)
+})
+```
+
+This behavior is consistent with how the web platform handles [errors in event listeners](https://makandracards.com/makandra/481395-error-handling-in-dom-event-listeners)
+and custom elements.
+
+#### Debugging and testing
+
+Exceptions in user code are also logged to the browser's [error console](https://developer.mozilla.org/en-US/docs/Web/API/console/error).
+This way you can still access the stack trace or [detect JavaScript errors in E2E tests](https://makandracards.com/makandra/55056-raising-javascript-errors-in-ruby-e2e-tests-rspec-cucumber).
+
+Some test runners like [Jasmine](https://jasmine.github.io/) already listen to the `error` event and fail your test if any uncaught exception is observed.
+In Jasmine you may use [`jasmine.spyOnGlobalErrorsAsync()`](https://makandracards.com/makandra/559289-jasmine-prevent-unhandled-promise-rejection-from-failing-your-test) to make assertions on the unhandled error.
+
+
+
 ### Hungry elements
+
+Element with an `[up-hungry]` attribute are updated whenever the server
+sends a matching element, even if the element isn't [targeted](/targeting-fragments).
+This release addresses many issues and requests concerning hungry elements: 
+
 
 #### Conflict resolution
 
@@ -144,46 +192,6 @@ Some improvements have been to [hungry elements with animated transitions](/up-h
 - Hungry elements can now control their transition using `[up-duration]` and `[up-easing]` attributes.
 - Hungry elements with transitions now delay the [`up.render().finished`](/render-hooks#awaiting-postprocessing) promise.
 
-
-### Forgiving error handling
-
-In earlier versions, errors in user code would often crash Unpoly. This would sometimes leave the page in a corrupted state. For example,
-a render pass would only update some fragments, fail to scroll, or fail to run destuctors.
-
-This version changes how Unpoly handles exceptions thrown from user code, like compilers, transition functions or callbacks like `{ onAccepted }`.
-
-
-#### User errors are no longer thrown
-
-Starting with this version, Unpoly functions generally succeed despite exceptions from user code.
-
-The code below will successfully [compile](/up.hello) an element despite a broken [compiler](/up.compiler):
-
-```js
-up.compiler('.element', () => { throw new Error('broken compiler') })
-let element = up.element.affix(document.body, '.element')
-up.hello(element) // no error is thrown
-```
-
-Instead an [`error` event on `window`](https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event) is emitted:
-
-
-```js
-window.addEventListener('error', function(event) {
-  alert("Got an error " + event.error.name)
-})
-```
-
-This behavior is consistent with how the web platform handles [errors in event listeners](https://makandracards.com/makandra/481395-error-handling-in-dom-event-listeners)
-and custom elements.
-
-#### Debugging and testing
-
-Exceptions in user code are also logged to the browser's [error console](https://developer.mozilla.org/en-US/docs/Web/API/console/error).
-This way you can still access the stack trace or [detect JavaScript errors in E2E tests](https://makandracards.com/makandra/55056-raising-javascript-errors-in-ruby-e2e-tests-rspec-cucumber).
-
-Some test runners like [Jasmine](https://jasmine.github.io/) already listen to the `error` event and fail your test if any uncaught exception is observed.
-In Jasmine you may use [`jasmine.spyOnGlobalErrorsAsync()`](https://makandracards.com/makandra/559289-jasmine-prevent-unhandled-promise-rejection-from-failing-your-test) to make assertions on the unhandled error.
 
 
 ### Polling
