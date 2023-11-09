@@ -4,9 +4,9 @@ up.feedback.config.currentClasses.push('active')
 
 up.feedback.config.navSelectors.push('.nav', '.navbar')
 
-up.viewport.config.fixedTop.push('.navbar.fixed-top')
-up.viewport.config.fixedBottom.push('.navbar.fixed-bottom')
-up.viewport.config.anchoredRight.push('.navbar.fixed-top', '.navbar.fixed-bottom')
+up.viewport.config.fixedTopSelectors.push('.navbar.fixed-top')
+up.viewport.config.fixedBottomSelectors.push('.navbar.fixed-bottom')
+up.viewport.config.anchoredRightSelectors.push('.navbar.fixed-top', '.navbar.fixed-bottom')
 
 // We would really like to provide a nice default for up.form.config.groupSelectors.
 // Unfortunately Bootstrap 5 no longer has a selector like ".form-group" to group labels

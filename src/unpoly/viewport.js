@@ -38,17 +38,17 @@ up.viewport = (function() {
 
     Matching elements must have a [derivable target selector](/target-derivation).
 
-  @param {Array} [config.fixedTop]
+  @param {Array} [config.fixedTopSelectors]
     An array of CSS selectors that find elements fixed to the
     top edge of the screen (using `position: fixed`).
 
     See [`[up-fixed="top"]`](/up-fixed-top) for details.
-  @param {Array} [config.fixedBottom]
+  @param {Array} [config.fixedBottomSelectors]
     An array of CSS selectors that match elements fixed to the
     bottom edge of the screen (using `position: fixed`).
 
     See [`[up-fixed="bottom"]`](/up-fixed-bottom) for details.
-  @param {Array} [config.anchoredRight]
+  @param {Array} [config.anchoredRightSelectors]
     An array of CSS selectors that find elements anchored to the
     right edge of the screen (using `right:0` with `position: fixed` or `position: absolute`).
 
@@ -81,9 +81,9 @@ up.viewport = (function() {
   */
   const config = new up.Config(() => ({
     viewportSelectors: ['[up-viewport]', '[up-fixed]'],
-    fixedTop: ['[up-fixed~=top]'],
-    fixedBottom: ['[up-fixed~=bottom]'],
-    anchoredRight: ['[up-anchored~=right]', '[up-fixed~=top]', '[up-fixed~=bottom]', '[up-fixed~=right]'],
+    fixedTopSelectors: ['[up-fixed~=top]'],
+    fixedBottomSelectors: ['[up-fixed~=bottom]'],
+    anchoredRightSelectors: ['[up-anchored~=right]', '[up-fixed~=top]', '[up-fixed~=bottom]', '[up-fixed~=right]'],
     revealSnap: 200,
     revealPadding: 0,
     revealTop: false,
@@ -97,7 +97,7 @@ up.viewport = (function() {
   }
 
   function fullAnchoredRightSelector() {
-    return config.anchoredRight.join()
+    return config.anchoredRightSelectors.join()
   }
 
   up.compiler(fullAnchoredRightSelector, function(element) {
@@ -118,7 +118,7 @@ up.viewport = (function() {
   To make `up.reveal()` aware of fixed elements you can either:
 
   - give the element an attribute [`up-fixed="top"`](/up-fixed-top) or [`up-fixed="bottom"`](/up-fixed-bottom)
-  - [configure default options](/up.viewport.config) for `fixedTop` or `fixedBottom`
+  - [configure default options](/up.viewport.config) for `{ fixedTopSelectors }` or `{ fixedBottomSelectors }`
 
   @function up.reveal
 
@@ -450,7 +450,7 @@ up.viewport = (function() {
   @internal
   */
   function fixedElements(root = document) {
-    const queryParts = ['[up-fixed]'].concat(config.fixedTop).concat(config.fixedBottom)
+    const queryParts = ['[up-fixed]'].concat(config.fixedTopSelectors).concat(config.fixedBottomSelectors)
     return root.querySelectorAll(queryParts.join())
   }
 
@@ -787,7 +787,7 @@ up.viewport = (function() {
   Unpoly will then scroll the viewport far enough that the revealed element is fully visible.
 
   Instead of using this attribute,
-  you can also configure a selector in `up.viewport.config.fixedTop`.
+  you can also configure a selector in `up.viewport.config.fixedTopSelectors`.
 
   ### Example
 
@@ -807,7 +807,7 @@ up.viewport = (function() {
   Unpoly will then scroll the viewport far enough that the revealed element is fully visible.
 
   Instead of using this attribute,
-  you can also configure a selector in `up.viewport.config.fixedBottom`.
+  you can also configure a selector in `up.viewport.config.fixedBottomSelectors`.
 
   ### Example
 
@@ -831,7 +831,7 @@ up.viewport = (function() {
   with a CSS of `right: 0` with `position: fixed` or `position:absolute`.
 
   Instead of giving this attribute to any affected element,
-  you can also configure a selector in `up.viewport.config.anchoredRight`.
+  you can also configure a selector in `up.viewport.config.anchoredRightSelectors`.
 
   ### Example
 

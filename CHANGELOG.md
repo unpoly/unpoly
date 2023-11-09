@@ -375,6 +375,13 @@ a link's `[up-target]` could match multiple fragments, the fragment closest to t
 - A new experimental function `up.element.isEmpty()` was added. It returns whether an element has neither child elements nor non-whitespace text.
 
 
+### Viewports
+
+- Renamed configuration `up.viewport.config.anchoredRight` to `up.viewport.config.anchoredRightSelectors`
+- Renamed configuration `up.viewport.config.fixedTop` to `up.viewport.config.fixedTopSelectors`
+- Renamed configuration `up.viewport.config.fixedBottom` to `up.viewport.config.fixedBottomSelectors`
+
+
 ### `unpoly-migrate.js`
 
 - The polyfills for the `up.element.isAttached()` and `up.element.isDetached()` functions were changed so they behave

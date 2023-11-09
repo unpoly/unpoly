@@ -6,9 +6,9 @@ up.feedback.config.navSelectors.push('.nav', '.navbar')
 
 up.form.config.groupSelectors.unshift('.form-group')
 
-up.viewport.config.fixedTop.push('.navbar-fixed-top')
-up.viewport.config.fixedBottom.push('.navbar-fixed-bottom')
-up.viewport.config.anchoredRight.push('.navbar-fixed-top', '.navbar-fixed-bottom')
+up.viewport.config.fixedTopSelectors.push('.navbar-fixed-top')
+up.viewport.config.fixedBottomSelectors.push('.navbar-fixed-bottom')
+up.viewport.config.anchoredRightSelectors.push('.navbar-fixed-top', '.navbar-fixed-bottom')
 
 up.fragment.config.badTargetClasses.push(
   'row',

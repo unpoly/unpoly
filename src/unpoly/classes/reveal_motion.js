@@ -15,8 +15,8 @@ up.RevealMotion = class RevealMotion {
     this._top     = this._options.top     ?? this._options.revealTop     ?? viewportConfig.revealTop
     this._max     = this._options.max     ?? this._options.revealMax     ?? viewportConfig.revealMax
 
-    this._topObstructions = viewportConfig.fixedTop
-    this._bottomObstructions = viewportConfig.fixedBottom
+    this._topObstructions = viewportConfig.fixedTopSelectors
+    this._bottomObstructions = viewportConfig.fixedBottomSelectors
   }
 
   start() {

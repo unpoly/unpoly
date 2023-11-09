@@ -27,8 +27,8 @@ or `[up-fixed=bottom]` attribute. Unpoly will then adjust scroll positions so a
 revealed element is fully visible.
 
 Instead of assigning an `[up-fixed]` attribute you may also add the selector
-of an obstructing layout element to the `up.viewport.config.fixedTop` or
-`up.viewport.config.fixedBottom` array.
+of an obstructing layout element to the `up.viewport.config.fixedTopSelectors` or
+`up.viewport.config.fixedBottomSelectors` array.
 
 
 ### Snapping to the screen edge
