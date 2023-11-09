@@ -12,8 +12,6 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 3.5.0
 -----
 
-This is the developer happiness release ❤️
-
 Unpoly 3.5 brings major quality-of-life improvements and addresses numerous edge cases in existing functionality.
 
 
@@ -297,8 +295,9 @@ Unpoly retains [all other functionality for dealing with network issues](/networ
 When [targeting fragments](/targeting-fragments), Unpoly will prefer to
 [match fragments in the region of the user interaction](/targeting-fragments#resolving-ambiguous-selectors). For example, when
 a link's `[up-target]` could match multiple fragments, the fragment closest to the link is updated.
+In cases where you don't want this behavior, you now have more options:
 
-- You now have fine-grained control over disabling region-aware fragment matching:
+- You can now disable region-aware fragment matching for individual function calls or elements:
   - Pass a `{ match: 'first' }` option to any function that matches or renders a fragment.
   - Set an `[up-match=first]` option on a link or form that matches or renders a fragment.
 - The boolean configuration `up.fragment.config.matchAroundOrigin` has been replaced by `up.fragment.config.match`. Its values are `'region'` (default) and `'first'`.
