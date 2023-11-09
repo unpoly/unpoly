@@ -1,7 +1,5 @@
 up.Layer.OverlayWithViewport = class OverlayWithViewport extends up.Layer.Overlay {
 
-  static bodyShifter = new up.BodyShifter()
-
   // For stubbing in tests
   static getParentElement() {
     // Always make a fresh lookup of the <body>, since the <body>
@@ -14,7 +12,7 @@ up.Layer.OverlayWithViewport = class OverlayWithViewport extends up.Layer.Overla
   @internal
   */
   createElements() {
-    this._shiftBody()
+    up.viewport.bodyShifter.raiseStack()
     this.createElement(this.constructor.getParentElement())
     if (this.backdrop) { this.createBackdropElement(this.element) }
     this.createViewportElement(this.element)
@@ -23,15 +21,7 @@ up.Layer.OverlayWithViewport = class OverlayWithViewport extends up.Layer.Overla
   }
 
   onElementsRemoved() {
-    this._unshiftBody()
-  }
-
-  _shiftBody() {
-    this.constructor.bodyShifter.shift()
-  }
-
-  _unshiftBody() {
-    this.constructor.bodyShifter.unshift()
+    up.viewport.bodyShifter.lowerStack()
   }
 
   sync() {

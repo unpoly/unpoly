@@ -11,64 +11,81 @@ up.BodyShifter = class BodyShifter {
 
   constructor() {
     this._unshiftFns = []
-    this._reset()
+    this._anchoredElements = new Set()
+    this._stack = 0
   }
 
-  _reset() {
-    this._unshiftNow()
-    this._shiftCount = 0
-  }
-
-  shift() {
-    this._shiftCount++
-
-    if (this._shiftCount > 1) {
-      return
+  lowerStack() {
+    this._stack--
+    if (this._stack === 0) {
+      this._unshiftNow()
     }
+  }
+
+  raiseStack() {
+    this._stack++
+
+    if (this._stack === 1) {
+      this._shiftNow()
+    }
+  }
+
+  onAnchoredElementInserted(element) {
+    this._anchoredElements.add(element)
+
+    // If the new element was inserted after we shifted, we must now shift its { right }.
+    if (this._isShifted()) {
+      this._shiftAnchoredElement(element)
+    }
+
+    // Destructor
+    return () => this._anchoredElements.delete(element)
+  }
+
+  _isShifted() {
+    // If the scrollbar never took space away from the main viewport's client width,
+    // we do not need to change any styles.
+    return this._scrollbarTookSpace && this._stack > 0
+  }
+
+  _shiftNow() {
+    this._scrollbarWidth = up.viewport.scrollbarWidth()
 
     // Remember whether the root viewport has a visible scrollbar at rest.
     // It will disappear when we set overflow-y: hidden below.
-    const scrollbarTookSpace = up.viewport.rootHasReducedWidthFromScrollbar()
+    this._scrollbarTookSpace = up.viewport.rootHasReducedWidthFromScrollbar()
+    if (!this._scrollbarTookSpace) return
 
+    this._shiftBody()
+
+    for (let element of this._anchoredElements) {
+      this._shiftAnchoredElement(element)
+    }
+  }
+
+  _shiftBody() {
     // Even if root viewport has no scroll bar, we still want to give overflow-y: hidden
     // to the <body> element. Otherwise the user could scroll the underlying page by
     // scrolling over the dimmed backdrop (observable with touch emulation in Chrome DevTools).
     // Note that some devices don't show a vertical scrollbar at rest for a viewport, even
     // when it can be scrolled.
     const overflowElement = up.viewport.rootOverflowElement()
-    this._changeStyle(overflowElement, {overflowY: 'hidden'})
-
-    // If the scrollbar never took space away from the main viewport's client width,
-    // we do not need to run the code below that would pad it on the right.
-    if (!scrollbarTookSpace) {
-      return
-    }
+    this._changeStyle(overflowElement, { overflowY: 'hidden' })
 
     const { body } = document
-
-    const scrollbarWidth = up.viewport.scrollbarWidth()
-
     const bodyRightPadding = e.styleNumber(body, 'paddingRight')
-    const bodyRightShift = scrollbarWidth + bodyRightPadding
+    const bodyRightShift = this._scrollbarWidth + bodyRightPadding
+    this._changeStyle(body, { paddingRight: bodyRightShift })
+  }
 
-    this._changeStyle(body, {paddingRight: bodyRightShift})
-
-    for (let anchor of up.viewport.anchoredRight()) {
-      const elementRight = e.styleNumber(anchor, 'right')
-      const elementRightShift = scrollbarWidth + elementRight
-      this._changeStyle(anchor, {right: elementRightShift})
-    }
+  _shiftAnchoredElement(element) {
+    const elementRight = e.styleNumber(element, 'right')
+    const elementRightShift = this._scrollbarWidth + elementRight
+    this._changeStyle(element, { right: elementRightShift })
   }
 
   _changeStyle(element, styles) {
     this._unshiftFns.push(e.setTemporaryStyle(element, styles))
-  }
-
-  unshift() {
-    this._shiftCount--
-    if (this._shiftCount === 0) {
-      this._unshiftNow()
-    }
   }
 
   _unshiftNow() {

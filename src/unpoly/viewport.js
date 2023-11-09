@@ -90,18 +90,19 @@ up.viewport = (function() {
     revealMax() { return 0.5 * window.innerHeight },
   }))
 
+  const bodyShifter = new up.BodyShifter()
+
   function reset() {
     config.reset()
   }
 
-  /*-
-  @function up.viewport.anchoredRight
-  @internal
-  */
-  function anchoredRight() {
-    const selector = config.anchoredRight.join()
-    return f.all(selector, { layer: 'root' })
+  function fullAnchoredRightSelector() {
+    return config.anchoredRight.join()
   }
+
+  up.compiler(fullAnchoredRightSelector, function(element) {
+    return bodyShifter.onAnchoredElementInserted(element)
+  })
 
   /*-
   Scrolls the given element's viewport so the first rows of the
@@ -948,13 +949,13 @@ up.viewport = (function() {
     resetScroll,
     saveFocus,
     restoreFocus,
-    anchoredRight,
     absolutize,
     focus: doFocus,
     tryFocus,
     newStateCache,
     focusedElementWithin,
     copyCursorProps,
+    bodyShifter,
   }
 })()
 

@@ -359,6 +359,7 @@ a link's `[up-target]` could match multiple fragments, the fragment closest to t
   This matches fragments in either the current layer or its descendant overlays.
 - `up.Layer` objects now support a new method [`#subtree()`](/up.Layer.prototype.subtree). It returns an array of `up.Layer` containing this layer and its descendant overlays.
 - Fix a bug where the layer stack would sometimes be corrupted by after looking up ancestors or descendants.
+- Fix a visual issue where, when [fixed elements](/up-fixed-top) were created after an overlay was opened, the fixed element would be position too far to the right.
 
 
 ### Links
