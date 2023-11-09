@@ -56,6 +56,10 @@ up-focus-trap
   &:focus-visible
     outline: none
 
+%min-full-height
+  min-height: 100vh
+  min-height: 100dvh
+
 %overlay-with-viewport
   @extend %maximize
   @extend %no-focus-outline
@@ -199,7 +203,7 @@ up-drawer-viewport
 up-drawer-box
   @extend %overlay-box
   @extend %large-shadow
-  min-height: 100vh
+  @extend %min-full-height
 
   up-drawer[size=small] &
     width: 150px
@@ -234,8 +238,8 @@ up-cover-viewport
 
 up-cover-box
   @extend %overlay-box
+  @extend %min-full-height
   width: 100%
-  min-height: 100vh
 
   // We assume the developer wants to embed a full application layout
   // into a cover overlay. That layout will either want to touch the screen
