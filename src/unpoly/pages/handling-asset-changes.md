@@ -75,12 +75,12 @@ up.on('up:assets:changed', function() {
 })
 
 up.on('up:link:follow', function(event) {
-  if (assetsChanged && isLoadPageSafe(renderOptions)) {
+  if (assetsChanged && isLoadPageSafe(event.renderOptions)) {
     // Prevent the render pass
     event.preventDefault()
 
     // Make full page load without Unpoly
-    up.network.loadPage(renderOptions)
+    up.network.loadPage(event.renderOptions)
   }
 })
 
