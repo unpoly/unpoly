@@ -449,7 +449,7 @@ up.layer = (function() {
     If set to `'auto'` history will be visible if the initial overlay
     content matches a [main target](/up-main).
 
-    See [History in overlays](/updating-history#history-in-overlays).
+    See [History in overlays](/updating-history#overlays).
 
   @param {string|Function} [options.animation]
     The opening animation.
@@ -734,7 +734,7 @@ up.layer = (function() {
     See [overlay classes](/customizing-overlays#overlay-classes).
 
   @param [up-history]
-    Whether history of the overlay content is [visible](/updating-history#history-in-overlays).
+    Whether history of the overlay content is [visible](/updating-history#overlays).
 
     If set to `true` the overlay location, title and meta tags will be shown
     while the overlay is open. When the overlay is closed, the parent layer's history is restored.
@@ -742,7 +742,7 @@ up.layer = (function() {
     If set to `'auto'` history will be visible if the initial overlay
     content matches a [main target](/up-main).
 
-    See [Updating history in overlays](/updating-history#history-in-overlays).
+    See [Updating history in overlays](/updating-history#overlays).
 
   @param [up-dismissable]
     How the overlay may be [dismissed](/closing-overlays) by the user.

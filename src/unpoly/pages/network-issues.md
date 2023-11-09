@@ -2,7 +2,7 @@ Handling network issues
 =======================
 
 Unpoly lets you handle many types of connection problems.
-The objective is to keep your application accessible as the user's connection becomes [slow](#low-bandwidth), [flaky](#flaky-connections) or [goes away entirely](#disconnects).
+The objective is to keep your application accessible as the user's connection becomes [flaky](#flaky-connections) or [goes away entirely](#disconnects).
 
 
 Disconnects

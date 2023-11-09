@@ -125,7 +125,7 @@ A promise for an aborted request will reject with an `up.AbortError`.
 Rendering functions like `up.render()`, `up.follow()` or `up.submit()` return a promise that rejects when the server
 sends a failed response, or when there is another error.
 
-See [render error handling example](/render-hooks#full-error-handling-example).
+See [render error handling example](/render-hooks#error-handling-example).
 
 
 @page failed-responses

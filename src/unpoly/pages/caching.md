@@ -93,7 +93,7 @@ You can disable cache revalidation while navigating like so:
 up.fragment.config.navigateOptions.revalidate = false
 ```
 
-If you want to keep the navigation default, but disable revalidation for some responses, configure `up.network.config.autoRevalidate`:
+If you want to keep the navigation default, but disable revalidation for some responses, configure `up.fragment.config.autoRevalidate`:
 
 ```js
 up.fragment.config.autoRevalidate = (response) => response.expired && response.url != '/dashboard'

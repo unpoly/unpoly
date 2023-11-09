@@ -53,12 +53,11 @@ up.network = (function() {
     Additional requests are queued. [Preload](/a-up-preload) requests are
     always queued behind non-preload requests.
 
+    By default Unpoly allows 6 concurrent requests.
     You might find it useful to set a concurrency of `1` in end-to-end tests
     to prevent race conditions.
 
-    By default Unpoly allows 6 concurrent requests. Under [low bandwidth](/network-issues#low-bandwidth)
-    the default is lowered to 3. Your browser may impose additional concurrency
-    limits  regardless of what you configure here.
+    Your browser may impose additional concurrency limits  regardless of what you configure here.
 
   @param {boolean} [config.wrapMethod]
     Whether to wrap non-standard HTTP methods in a POST request.

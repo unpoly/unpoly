@@ -93,9 +93,9 @@ The linked JavaScript and stylesheet are *not* part of history state and will no
 
 You may choose to only update some history-related state, but keep others unchanged:
 
-- Meta tag synchronization can be disabled by setting [`[up-meta-tags="false"]`](/up-follow#up-meta-tags) on a link or form, or by passing [`{ metaTags: false }`](/up.render#options.metaTags) to a rendering function.
-- Location changes can be disabled by setting [`[up-location="false"]`](/up-follow#up-location) on a link or form, or by passing [`{ location: false }`](/up.render#options.location) to a rendering function.
-- Title changes can be disabled by setting [`[up-title="false"]`](/up-follow#up-title) on a link or form, or by passing [`{ title: false }`](/up.render#options.location) to a rendering function.
+- Meta tag synchronization can be disabled by setting [`[up-meta-tags="false"]`](/a-up-follow#up-meta-tags) on a link or form, or by passing [`{ metaTags: false }`](/up.render#options.metaTags) to a rendering function.
+- Location changes can be disabled by setting [`[up-location="false"]`](/a-up-follow#up-location) on a link or form, or by passing [`{ location: false }`](/up.render#options.location) to a rendering function.
+- Title changes can be disabled by setting [`[up-title="false"]`](/a-up-follow#up-title) on a link or form, or by passing [`{ title: false }`](/up.render#options.location) to a rendering function.
 
 
 

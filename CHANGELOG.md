@@ -1059,7 +1059,7 @@ That said, the following changes were made:
 
 #### Handling connection loss
 
-Unpoly lets you handle many types of [connection problems](/network-issues). The objective is to keep your application accessible as the user's connection becomes [slow](/network-issues#low-bandwidth), [flaky](/network-issues#flaky-connections) or [goes away entirely](/network-issues#disconnects).
+Unpoly lets you handle many types of [connection problems](/network-issues). The objective is to keep your application accessible as the user's connection becomes slow, [flaky](/network-issues#flaky-connections) or [goes away entirely](/network-issues#disconnects).
 
 Unpoly 3 lets you handle [connection loss](/network-issues#connection-loss) with an `{ onOffline }` or `[up-on-offline]` callback:
 

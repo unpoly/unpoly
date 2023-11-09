@@ -43,7 +43,7 @@ up.history = (function() {
 
     Instead of disabling meta tag synchronization globally you may also disable it
     per render pass. To do so pass a [`{ metaTags: false }`](/up.render#options.metaTags) option
-    or set an [`[up-meta-tags="false"]`](/up-follow#up-meta-tags) attribute
+    or set an [`[up-meta-tags="false"]`](/a-up-follow#up-meta-tags) attribute
     on a link.
 
   @param {config.metaTagSelectors}

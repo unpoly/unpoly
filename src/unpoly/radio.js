@@ -202,7 +202,7 @@ up.radio = (function() {
   ### Conflict resolution
 
   When Unpoly renders new content, each element in that content can only be inserted once.
-  When multiple hungry elements conflict with each other or with the the [primary render target](/targeting-fragment),
+  When multiple hungry elements conflict with each other or with the the [primary render target](/targeting-fragments),
   that conflict is resolved using the following rules:
 
   1. When both a [target selector](/targeting-fragments) and a hungry elements target the same fragment in the response, only the direct render target will be updated.
