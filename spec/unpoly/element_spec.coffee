@@ -525,7 +525,7 @@ describe 'up.element', ->
       element.remove()
 
 
-  describe 'up.element.createBrokenDocumentFromHTML', ->
+  describe 'up.element.createDocumentFromHTML', ->
 
     it 'parses a string that contains a serialized HTML document', ->
       string = """
@@ -540,7 +540,7 @@ describe 'up.element', ->
         </html>
         """
 
-      element = up.element.createBrokenDocumentFromHTML(string)
+      element = up.element.createDocumentFromHTML(string)
 
       expect(element.querySelector('head title').textContent).toEqual('document title')
       expect(element.querySelector('body').getAttribute('data-env')).toEqual('production')
@@ -557,7 +557,7 @@ describe 'up.element', ->
         </html>\r
         """
 
-      $element = up.element.createBrokenDocumentFromHTML(string)
+      $element = up.element.createDocumentFromHTML(string)
       expect($element.querySelector('body')).toBeGiven()
       expect($element.querySelector('body div').textContent).toEqual('line')
 
@@ -593,7 +593,7 @@ describe 'up.element', ->
           </body>
         </html>
         """
-      element = up.element.createBrokenDocumentFromHTML(html)
+      element = up.element.createDocumentFromHTML(html)
       expect(element.querySelector("title")).toBeMissing()
       expect(element.querySelector("h1").textContent).toEqual('Full story')
 
@@ -605,7 +605,7 @@ describe 'up.element', ->
           </body>
         </html>
         """
-      element = up.element.createBrokenDocumentFromHTML(html)
+      element = up.element.createDocumentFromHTML(html)
       expect(element.querySelector("title")).toBeMissing()
       expect(element.querySelector("h1").textContent).toEqual('Full story')
 
@@ -613,7 +613,7 @@ describe 'up.element', ->
       html = """
         <h1>Full story</h1>
         """
-      element = up.element.createBrokenDocumentFromHTML(html)
+      element = up.element.createDocumentFromHTML(html)
       expect(element.querySelector("title")).toBeMissing()
       expect(element.querySelector("h1").textContent).toEqual('Full story')
 

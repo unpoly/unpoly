@@ -733,51 +733,27 @@ up.element = (function() {
   }
 
   /*-
-  Parses a new `Document` instance from the given HTML.
+  Parses the given HTML document.
 
-  This function always creates a full document with a <html> root,
-  even if the given `html` string only contains a fragment.
-
-  Due to quirks in the `DOMParser` spec, `<script>` and `<noscript>`
-  elements in the returned document will be inert. To make them active,
-  use `up.element.fixScriptish()`.
+  This function always creates `<html>` element, even if the given `html` string only contains a fragment.
+  Fragments can be parsed faster using `up.element.createFromHTML()`.
 
   @function up.element.createBrokenDocumentFromHTML
   @param {string} html
-  @return {Document}
+  @return {Element}
+    An `<html>` wrapping the given HTML.
   @internal
   */
-  function createBrokenDocumentFromHTML(html) {
-    return new DOMParser().parseFromString(html, 'text/html')
-  }
-
-  /*-
-  Fixes `<script>` and `<noscript>` elements in documents parsed by `up.element.createBrokenDocumentFromHTML()`.
-
-  This addresses two [quirks in the `DOMParser` spec](http://w3c.github.io/DOM-Parsing/#dom-domparser-parsefromstring):
-
-  1. Children of a <nonscript> tag are expected to be a verbatim text node in a scripting-capable browser.
-     However, `DOMParser` parses children into actual DOM nodes.
-     This confuses libraries that work with <noscript> tags, such as lazysizes.
-  2. <script> elements are inert and will not run code when inserted into the main `document`.
-
-  @function up.element.fixScriptish
-  @param {Element} scriptish
-    A `<script>` or `<noscript>` element.
-  @internal
-  */
-  function fixScriptish(scriptish) {
-    let clone = document.createElement(scriptish.tagName)
-    for (let { name, value } of scriptish.attributes) {
-      clone.setAttribute(name, value)
-    }
-
-    clone.textContent = scriptish.innerHTML
-    scriptish.replaceWith(clone)
+  function createDocumentFromHTML(html) {
+    let htmlElement = document.createElement('html')
+    htmlElement.innerHTML = html
+    return htmlElement
   }
 
   /*-
   Creates an element from the given HTML fragment string.
+
+  This function cannot parse HTML strings containing `<body>`, `<head>` or `<html>` tags.
 
   Use `up.hello()` to activate [JavaScript behavior](/up.script) within the created element.
 
@@ -1411,8 +1387,7 @@ up.element = (function() {
     isSingleton, // internal
     attrSelector, // internal
     tagName: elementTagName,
-    createBrokenDocumentFromHTML, // internal
-    fixScriptish,
+    createDocumentFromHTML, // internal
     createFromHTML, // practical for element creation
     get root() { return getRoot() }, // internal
     paint, // internal

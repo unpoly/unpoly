@@ -15,10 +15,8 @@ up.ResponseDoc = class ResponseDoc {
     }
 
     // If the user doesn't want to run scripts in the new fragment, we disable all <script> elements.
-    // While <script> elements parsed by `DOMParser` are inert anyway, we also _parse HTML through
-    // other methods, which do create non-inert <script> elements.
     if (!up.fragment.config.runScripts) {
-      this._document.querySelectorAll('script').forEach((e) => e.remove())
+      this._pluckElement.querySelectorAll('script').forEach((e) => e.remove())
     }
 
     this._cspNonces = cspNonces
@@ -34,13 +32,7 @@ up.ResponseDoc = class ResponseDoc {
   }
 
   _parseDocument(document) {
-    document = this._parse(document, e.createBrokenDocumentFromHTML)
-
-    // Remember that we need to fix <script> and <noscript> elements later.
-    // We could fix these elements right now for the entire document, but since we will only use
-    // a fragment, this would cause excessive work.
-    this._scriptishNeedFix = true
-
+    document = this._parse(document, e.createDocumentFromHTML)
     this._useParseResult(document)
   }
 
@@ -75,24 +67,25 @@ up.ResponseDoc = class ResponseDoc {
   }
 
   _useParseResult(node) {
-    if (node instanceof Document) {
-      this._document = node
+    this._rootElement = node
+
+    if (node instanceof HTMLHtmlElement) {
+      this._pluckElement = node
     } else {
       // We're creating a faux document to append our fragment root to.
       // This way, when a step selects the fragment root it will no longer be available
       // for selection by a later step.
-      this._document = document.createElement('up-document')
-      this._document.append(node)
-      this._document.documentElement = node
+      this._pluckElement = document.createElement('up-document')
+      this._pluckElement.append(node)
     }
   }
 
   rootSelector() {
-    return up.fragment.toTarget(this._document.documentElement)
+    return up.fragment.toTarget(this._rootElement)
   }
 
   get title() {
-    // We get it from the <head> instead of this._document.title.
+    // We retrieve the title by looking up the <head> element explicitly.
     // We want to distinguish between a parsed document that does not have a <head> or <title>
     // and a given, but empty title.
     return this._fromHead(this._getTitleText)
@@ -108,7 +101,7 @@ up.ResponseDoc = class ResponseDoc {
   _getHead() {
     // The root may be a `Document` (which always has a `#head`, even if it wasn't present in the HTML)
     // or an `Element` (which never has a `#head`).
-    let { head } = this._document
+    let head = this._pluckElement.querySelector('head')
 
     // DocumentParser also produces a document with a <head>, even if the initial HTML
     // has no <head> element. To work around this we consider the head to be missing
@@ -145,7 +138,7 @@ up.ResponseDoc = class ResponseDoc {
     let finder = new up.FragmentFinder({
       selector: selector,
       origin: this._rediscoveredOrigin,
-      document: this._document,
+      document: this._pluckElement,
       match: this._match,
     })
     return finder.find()
@@ -161,7 +154,7 @@ up.ResponseDoc = class ResponseDoc {
     return steps.filter((step) => {
       // If multiple steps want to match the same new element, the first step will remain in the left.
       // This will happen when multiple layers have the same hungry element with [up-if-layer=any].
-      if (this._document.contains(step.newElement)) {
+      if (this._pluckElement.contains(step.newElement)) {
         step.newElement.remove()
         return true
       }
@@ -205,10 +198,6 @@ up.ResponseDoc = class ResponseDoc {
   finalizeElement(element) {
     // Rewrite per-request CSP nonces to match that of the current page.
     up.NonceableCallback.adoptNonces(element, this._cspNonces)
-
-    if (this._scriptishNeedFix) {
-      element.querySelectorAll('noscript, script').forEach(e.fixScriptish)
-    }
   }
 
   static {
