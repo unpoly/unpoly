@@ -556,7 +556,7 @@ describe 'up.layer', ->
           expect(up.layer.isOverlay()).toBe(true)
           expect(document).toHaveSelector('up-modal .target-from-config-dot-modal')
 
-      describe 'close conditions', ->
+      describe 'closing', ->
 
         beforeEach ->
           up.motion.config.enabled = false
@@ -1041,6 +1041,9 @@ describe 'up.layer', ->
 
         describe '{ acceptLocation }', ->
 
+          beforeEach ->
+            up.history.config.enabled = true
+
           it 'accepts the layer when the layer has reached the given location', ->
             callback = jasmine.createSpy('onAccepted callback')
             up.layer.open({
@@ -1152,7 +1155,77 @@ describe 'up.layer', ->
 
             expect(callback).not.toHaveBeenCalled()
 
-          it 'immediately accepts a layer that was opened at the given location'
+          it 'immediately accepts a layer when its initial location matches the given location', ->
+            up.history.replace('/root-path')
+            expect(up.history.location).toMatchURL('/root-path')
+
+            callback = jasmine.createSpy('onAccepted callback')
+
+            compiler = jasmine.createSpy('compiler')
+            up.compiler('.overlay-content', compiler)
+
+            openPromise = up.layer.open({
+              target: '.overlay-content',
+              history: true,
+              onAccepted: callback,
+              url: '/overlay-path',
+              acceptLocation: '/overlay-path',
+            })
+
+            await wait()
+
+            expect(up.layer.mode).toBe('root')
+            expect(callback).not.toHaveBeenCalled()
+
+            jasmine.respondWithSelector('.overlay-content', text: 'initial content')
+
+            await wait()
+
+            await expectAsync(openPromise).toBeRejectedWith(jasmine.any(up.Aborted))
+            expect(callback).toHaveBeenCalled()
+            expect(up.layer.mode).toBe('root')
+            expect(up.history.location).toMatchURL('/root-path')
+
+            expect(document).not.toHaveSelector('.overlay-content')
+            expect(compiler).not.toHaveBeenCalled()
+
+          it 'does not immediately accept a layer if its parent layer is already on the given location (bugfix)', ->
+            up.history.replace('/root-path')
+            expect(up.history.location).toMatchURL('/root-path')
+
+            callback = jasmine.createSpy('onAccepted callback')
+
+            up.layer.open({
+              target: '.overlay-content',
+              history: true,
+              onAccepted: callback,
+              url: '/overlay-path',
+              acceptLocation: '/root-path',
+            })
+
+            await wait()
+
+            expect(up.layer.mode).toBe('root')
+            expect(callback).not.toHaveBeenCalled()
+
+            jasmine.respondWithSelector('.overlay-content', text: 'initial content')
+
+            await wait()
+
+            expect(callback).not.toHaveBeenCalled()
+            expect(up.layer.mode).toBe('modal')
+            expect(up.history.location).toMatchURL('/overlay-path')
+
+            navigatePromise = up.navigate(url: '/root-path')
+
+            await wait()
+
+            jasmine.respondWithSelector('.overlay-content', text: 'next content')
+
+            await expectAsync(navigatePromise).toBeRejectedWith(jasmine.any(up.Aborted))
+            expect(callback).toHaveBeenCalled()
+            expect(up.layer.mode).toBe('root')
+            expect(up.history.location).toMatchURL('/root-path')
 
           it 'makes the discarded response available to up:layer:accepted listeners as a { response } property', ->
             callback = jasmine.createSpy('onAccepted callback')
@@ -1185,6 +1258,9 @@ describe 'up.layer', ->
             expect(callback.calls.mostRecent().args[0].response.text).toBe('<div class="overlay-content">closing content</div>')
 
         describe '{ dismissLocation }', ->
+
+          beforeEach ->
+            up.history.config.enabled = true
 
           it 'dismisses the layer when the layer has reached the given location', ->
             callback = jasmine.createSpy('onDismissed callback')

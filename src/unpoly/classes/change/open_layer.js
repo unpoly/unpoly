@@ -102,6 +102,10 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
   }
 
   _renderOverlayContent() {
+    // (1) Change history before compilation, so new fragments see the new location.
+    // (2) Change history before checking { acceptLocation, dismissLocation }, so we check the overlay's location and not the parent layer's location.
+    this._handleHistory()
+
     // The server may trigger multiple signals that may cause the overlay to close immediately:
     //
     // - Close the layer directly through X-Up-Accept-Layer or X-Up-Dismiss-Layer
@@ -129,9 +133,6 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
       fragments: [this._content],
       target: this.target,
     })
-
-    // Change history before compilation, so new fragments see the new location.
-    this._handleHistory()
 
     // Compile the entire layer, not just the user content.
     // E.g. [up-dismiss] in the layer elements needs to go through a macro.
