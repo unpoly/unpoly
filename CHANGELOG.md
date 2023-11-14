@@ -9,6 +9,17 @@ Changes handled by `unpoly-migrate.js` are not considered breaking changes.
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+3.5.1
+-----
+
+This releases fixes two regressions introduced by [3.5.0](https://unpoly.com/changes/3.5.0):
+
+- Fix a bug where a [new overlay](/opening-overlays) would immediately close if the *parent* layer's location
+  happened to match the overlay's location-based close condition.
+- When a new overlay's initial location matches its [location-based close condition](/closing-overlays#closing-when-a-location-is-reached),
+  the overlay again immediately closes without rendering its initial content.
+
+
 3.5.0
 -----
 
