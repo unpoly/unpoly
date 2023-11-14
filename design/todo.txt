@@ -1,54 +1,27 @@
-Remaining V3 tasks
-==================
-
-- Do a podcast
-
-
-Next release
-============
-
-- Deprecate { mode } without { layer: 'new' }
-- Docs and CHANGELOG for changes in 3.5
-  - up:fragment:hungry
-  - Document that errors from user code are reported on window and will not throw exceptions
-    - Either in /render-hooks or separate page for handling compiler errors
-    - Note in up.compiler doc page
-    - Note in up.destructor doc page
-  - [up-hungry]: Document that if multiple hungry elements target the same new element, the layer closest to the updated layer is chosen.
-  - Doc page for "Notification flashes"
-    - Explain that user needs to merge herself
-    - Explain that user needs to remove herself
-    - Fix existing docs that mention "Notification flash"
-  - [up-flashes]
-    - Should mostly link to /notification-flashes
-    - transition
-    - duration
-    - easing
-    - must be experimental
-  - Docs and Examples for up.layer.get()
-    - Document both { layer } and direct arg
-    - Document pass-through for up.Layer objects
-      - Same for up.element.get(), up.fragment.get()
-  - Docs for [up-hungry] should mention
-    - that an element from a response is only used once,
-      - preferrably by an explict target
-    - hungry elements are merged into an explicit target
-  - up.fragment should explain that it supports CSS extensions like :has() or :main. up.element should explain that it does not.
-- Test in Firefox
-- Test in Safari
-- Test in Edge
-- CHANGELOG
-  - Make screenshot for reload prompt
-- Remove cookie banner from {v1,v2,v3}.unpoly.com
-- Release as 3.5
-- Deploy unpoly-demo changes
-  - Use flashes
-  - Make screenshot of assets-changed prompt
-
-
 Backlog
 =======
 
+
+- Hide focus ring for up-instant links
+- Explain that nonce-prefixing only works for [up-on] attributes
+  - In /csp
+  - In unpoly-rails README
+  - OR we could also support nonce rewriting for arbitrary attributes, e.g. up.safe_callback('124321321', '432423423')
+    - But then we would need to know all the attributes we're rewriting to query them quickly
+  - OR we could support [up-on] with an event name and a nonce
+- Swapped body looks funny in Safari (has .up-destroying class and is grayed out with old content in inspector)
+- Consider adding a class to elements focused by Unpoly
+- Do we need to call document.importNode() on new content
+  - To get rid of noscript fix
+  - To fix Safari not loading new video elements.
+- Introduce up:history:restore event
+  - With { renderOptions }
+  - Preventable for custom history handling
+- Docs for https://unpoly.com/up:form:validate#options.renderOptions should point out that the render pass might be batched
+- Allow to disable batching in validations
+- inlineStyle, setInlineStyle should work with custom properties
+- Jasmine matchers no longer get a `customEqualityTesters` argument
+- I think form[up-watch] cannot deal with dynamically inserted fields
 - up.ResponseDoc: Only re-discover the origin when match is 'region'
 - Async compiler functions
   - See separate doc
