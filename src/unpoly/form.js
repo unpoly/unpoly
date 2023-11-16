@@ -982,7 +982,7 @@ up.form = (function() {
   @param {string|Element|jQuery} element
     The field or fragment that should be rendered on the server.
 
-    Sxee [controlling what is updated](#controlling-what-is-updated).
+    See [controlling what is updated](#controlling-what-is-updated).
   @param {string} [options.target=element]
     The [target selector](/targeting-fragments) to render.
 
