@@ -105,15 +105,19 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
               up.fragment.markAsDestroying(step.oldElement)
             },
             afterInsert: () => {
+              // Restore keepable before finalizing. Finalizing will rewrite elements that DOMParser broke,
+              // causing a keepPlans's newElement to point to a rewritten element that is now detached.
+              // Hence we lose the original position of the keepable.
+              this._restoreKeepables(step)
+
               // Adopt CSP nonces and fix broken script tags
               this.responseDoc.finalizeElement(step.newElement)
 
-              // step.keepPlans.forEach(this.reviveKeepable)
-              this._restoreKeepables(step)
+              // Remove the .up-keeping classes.
+              this._unmarkKeepables(step)
 
-              // In the case of [up-keep] descendants, keepable elements are now transferred
-              // to step.newElement, leaving a clone in their old DOM Position.
-              // up.hello() is aware of step.keepPlans and will not compile kept elements a second time.
+              // up.hello() tracks which compilers have been called for which elements.
+              // Because of this we do not need to worry about [up-keep] elements being compiled twice.
               up.hello(step.newElement, step)
 
               this._addToResult(step.newElement)
@@ -260,6 +264,14 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
           const keepableClone = keepable.cloneNode(true)
           keepable.insertAdjacentElement('beforebegin', keepableClone)
 
+          // Mark the original keepable to up.ResponseDoc#finalizeElement() knows to skip it.
+          keepable.classList.add('up-keeping')
+
+          // When the newElement from the response has a response, it will be inserted
+          // into the DOM during the transition. Only at the end it will be replaced by the keepable.
+          // To prevent the execution of these placeholder-scripts, we change their { type }.
+          u.each(e.subtree(keepPlan.newElement, 'script'), e.disableScript)
+
           // Attaching a viewport to another element will cause it to loose
           // its scroll position, even if both parents are in the same document.
           let viewports = up.viewport.subtree(keepPlan.oldElement)
@@ -299,6 +311,12 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
       for (let reviver of keepPlan.revivers) {
         reviver()
       }
+    }
+  }
+
+  _unmarkKeepables(step) {
+    for (let keepPlan of step.keepPlans) {
+      keepPlan.oldElement.classList.remove('up-keeping')
     }
   }
 

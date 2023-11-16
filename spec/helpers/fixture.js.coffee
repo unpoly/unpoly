@@ -14,7 +14,7 @@ afterEach ->
     up.destroy(element)
 
 getCreatedFixtureContainer = ->
-  fixtureContainer ||= e.affix(document.body, '.fixtures')
+  fixtureContainer ||= e.affix(document.body, '#fixtures')
   return fixtureContainer
 
 createFixtureFromSelector = (args...) ->

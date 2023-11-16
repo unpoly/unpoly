@@ -5,4 +5,5 @@ beforeEach ->
   jasmine.addMatchers
     toMatchSelector: (util, customEqualityTesters) ->
       compare: (actualElement, expectedSelector) ->
-        pass: $(actualElement).is(expectedSelector)
+        actualElement = up.element.get(actualElement) # unwrap jQuery
+        pass: actualElement.matches(expectedSelector)

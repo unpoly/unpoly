@@ -36,10 +36,10 @@ up.ResponseDoc = class ResponseDoc {
   _parseDocument(document) {
     document = this._parse(document, e.createBrokenDocumentFromHTML)
 
-    // Remember that we need to fix <script> and <noscript> elements later.
+    // Remember that we need to fix <script>, <noscript> and media elements later.
     // We could fix these elements right now for the entire document, but since we will only use
     // a fragment, this would cause excessive work.
-    this._scriptishNeedFix = true
+    this._isDocumentBroken = true
 
     this._useParseResult(document)
   }
@@ -206,8 +206,9 @@ up.ResponseDoc = class ResponseDoc {
     // Rewrite per-request CSP nonces to match that of the current page.
     up.NonceableCallback.adoptNonces(element, this._cspNonces)
 
-    if (this._scriptishNeedFix) {
-      element.querySelectorAll('noscript, script').forEach(e.fixScriptish)
+    if (this._isDocumentBroken) {
+      let brokenElements = e.subtree(element, ':is(noscript,script,audio,video):not(.up-keeping, .up-keeping *)')
+      u.each(brokenElements, e.fixParserDamage)
     }
   }
 

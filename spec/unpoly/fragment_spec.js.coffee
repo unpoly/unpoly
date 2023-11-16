@@ -5842,7 +5842,7 @@ describe 'up.fragment', ->
           beforeEach ->
             up.fragment.config.runScripts = true
 
-          it 'executes inline script tags inside the updated fragment', asyncSpec (next) ->
+          it 'executes inline script tags inside the updated fragment', ->
             fixture('.target', text: 'old text')
 
             up.render fragment: """
@@ -5854,11 +5854,25 @@ describe 'up.fragment', ->
               </div>
               """
 
-            next.after 100, =>
-              expect(window.scriptTagExecuted).toHaveBeenCalled()
-              expect(document).toHaveSelector('.target')
-              expect(document).toHaveSelector('.target script')
-              expect('.target').toHaveVisibleText(/new text/)
+            await wait()
+
+            expect(window.scriptTagExecuted).toHaveBeenCalled()
+            expect(document).toHaveSelector('.target')
+            expect(document).toHaveSelector('.target script')
+            expect('.target').toHaveVisibleText(/new text/)
+
+          it 'executes inline script tags that are itself the target', ->
+            fixture('script#target', text: 'true')
+
+            up.render fragment: """
+              <script id="target">
+                window.scriptTagExecuted()
+              </script>
+              """
+
+            await wait()
+
+            expect(window.scriptTagExecuted).toHaveBeenCalled()
 
           it 'does not execute inline script tags outside the updated fragment', asyncSpec (next) ->
             fixture('.target', text: 'old text')
@@ -5899,19 +5913,39 @@ describe 'up.fragment', ->
             fixture('.target')
             up.render('.target', url: '/path')
 
-            next =>
-              @respondWith """
-                <div class="target">
-                  <noscript>
-                    <img src="foo.png">
-                  </noscript>
-                </div>
-                """
+            await wait()
 
-            next =>
-              $noscript = $('.target noscript')
-              text = $noscript.text().trim()
-              expect(text).toEqual('<img src="foo.png">')
+            jasmine.respondWith """
+              <div class="target">
+                <noscript>
+                  <img src="foo.png">
+                </noscript>
+              </div>
+              """
+
+            await wait()
+
+            noscript = document.querySelector('.target noscript')
+            expect(noscript).toHaveText('<img src="foo.png">')
+
+          it 'parses <noscript> contents as text, not DOM nodes when the <noscript> itself is the target', asyncSpec (next) ->
+            fixture('noscript#target')
+            up.render('#target', url: '/path')
+
+            await wait()
+
+            jasmine.respondWith """
+              <div>
+                <noscript id='target'>
+                  <img src="foo.png">
+                </noscript>
+              </div>
+              """
+
+            await wait()
+
+            noscript = document.querySelector('#target')
+            expect(noscript).toHaveText('<img src="foo.png">')
 
           it 'parses <noscript> contents with multiple lines as text, not DOM nodes', asyncSpec (next) ->
             fixture('.target')
@@ -5955,6 +5989,30 @@ describe 'up.fragment', ->
               text1 = $noscripts[1].textContent.trim()
               expect(text0).toEqual('<img src="foo.png">')
               expect(text1).toEqual('<img src="bar.png">')
+
+      describe 'media elements', ->
+
+        # https://github.com/unpoly/unpoly/issues/432
+        it 'inserts an auto-playing <video> element (bugfix for Safari)', (done) ->
+          fixture('#target')
+
+          # Must render from a { url } or { document } so DOMParser is involved.
+          up.render('#target', url: '/video')
+
+          u.task ->
+            jasmine.respondWith """
+              <div id='target'>
+                <video width="400" controls loop muted autoplay>
+                  <source src="/spec/files/video.mp4" type="video/mp4">
+                </video>
+              </div>
+            """
+
+            u.task ->
+              video = document.querySelector('#target video')
+              expect(video).toBeGiven()
+              specDone = -> done()
+              video.addEventListener('timeupdate', specDone, { once: true })
 
       describe 'CSP nonces', ->
 
@@ -7517,7 +7575,7 @@ describe 'up.fragment', ->
             expect('.target').toHaveText('cached text')
 
           it 'rejects up.render().finished promise if the revalidation failed and there also is an { onFinished } callback (bugfix)', ->
-            onFinished = jasmine.createSpy('onFinished callback').and.callFake -> console.debug('--- onFinished called')
+            onFinished = jasmine.createSpy('onFinished callback')
             job = up.render('.target', { url: '/cached-path', cache: true, revalidate: true, onFinished: onFinished })
 
             await job
@@ -7565,7 +7623,7 @@ describe 'up.fragment', ->
               expect(globalErrorSpy).toHaveBeenCalledWith(jasmine.any(up.Offline))
 
           it 'logs to the error console if the revalidation failed and there also is an { onFinished } callback (bugfix)', ->
-            onFinished = jasmine.createSpy('onFinished callback').and.callFake -> console.debug('--- onFinished called')
+            onFinished = jasmine.createSpy('onFinished callback')
             job = up.render('.target', { url: '/cached-path', cache: true, revalidate: true, onFinished: onFinished })
             logErrorSpy = spyOn(up, 'puts').and.callThrough()
 
@@ -8052,50 +8110,224 @@ describe 'up.fragment', ->
           expect(viewport).toBeAttached()
           expect(viewport.scrollTop).toBe(100)
 
-        it 'preserves the playback state of a kept media element', (done) ->
-          container = fixture('.container')
-          playerHTML = """
-            <div id="player">
-              <video width="400" controls loop muted up-keep id="video">
-                <source src="/spec/files/video.mp4" type="video/mp4">
-              </video>
-            </div>
-          """
+        describe 'media elements', ->
 
-          onPlaying = ->
-            expect(video.paused).toBe(false)
+          it 'keeps a <video> element when rendering with DOMparser (bugfix)', ->
+            html = """
+              <div id="container">
+                <video id="video" up-keep></video>
+              </div>
+            """
 
-            # Playback state is only lost when the update is form a URL (== async?),
-            # not when updating from a local string (which is sync).
-            promise = up.render(target: '#player', url: '/video2')
+            htmlFixture(html)
+            videoBeforeRender = document.querySelector('#video')
+
+            # Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
+            up.render('#container', document: html)
 
             await wait()
 
-            jasmine.respondWith(playerHTML)
+            expect(document.querySelector('#video')).toBe(videoBeforeRender)
 
-            await expectAsync(promise).toBeResolvedTo(jasmine.any(up.RenderResult))
+          it 'keeps the position of a <video> element within the DOM hierarchy when rendering with DOMparser (bugfix)', ->
+            html = """
+              <div id="container">
+                <video id="video" up-keep></video>
+              </div>
+            """
 
-            expect(video).toBeAttached()
-            expect(video.paused).toBe(false)
-            expect(document.querySelectorAll('video').length).toBe(1)
+            container = htmlFixture(html)
+            document.querySelector('#video')
 
-            # We cannot pass `done` to addEventListener() directly. I think the event argument
-            # causes Jasmine to fail the test
-            onUpdate = -> done()
+            # Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
+            up.render('#container', document: html)
 
-            # Check that we video is still playing
-            video.addEventListener('timeupdate', onUpdate, { once: true })
+            await wait()
 
-          container.innerHTML = playerHTML
-          video = container.querySelector('video')
-          expect(video.paused).toBe(true)
+            video = document.querySelector('#video')
+            expect(video).toMatchSelector('#fixtures > #container > #video')
 
-          # We're waiting for a timeupdate event in addition to checking !video.paused
-          # since an unpaused video may not actually be playing.
-          video.addEventListener('timeupdate', onPlaying, { once: true })
-          video.play()
+          it 'keeps a <audio> element when rendering with DOMparser (bugfix)', ->
+            html = """
+              <div id="container">
+                <audio id="audio" up-keep></audio>
+              </div>
+            """
 
-          return
+            htmlFixture(html)
+            audioBeforeRender = document.querySelector('#audio')
+
+            # Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
+            up.render('#container', document: html)
+
+            await wait()
+
+            expect(document.querySelector('#audio')).toBe(audioBeforeRender)
+
+          it 'preserves the playback state of a kept media element', (done) ->
+            container = fixture('.container')
+            playerHTML = """
+              <div id="player">
+                <video width="400" controls loop muted up-keep id="video">
+                  <source src="/spec/files/video.mp4" type="video/mp4">
+                </video>
+              </div>
+            """
+
+            onPlaying = ->
+              expect(video.paused).toBe(false)
+
+              # Playback state is only lost when the update is from a URL, but not when updating
+              # from a local string (which is sync).
+              #
+              # This may have two reasons:
+              #
+              # 1. Rendering from a URL is async, rendering a local string is sync
+              # 2. Rendering from a URL uses DOMParser and fixParserDamage(), rendering from a local string
+              #    creates elements within the current browsing context.
+              promise = up.render(target: '#player', url: '/video2')
+
+              await wait()
+
+              jasmine.respondWith(playerHTML)
+
+              await expectAsync(promise).toBeResolvedTo(jasmine.any(up.RenderResult))
+
+              expect(video).toBeAttached()
+              expect(video.paused).toBe(false)
+              expect(document.querySelectorAll('video').length).toBe(1)
+
+              # We cannot pass `done` to addEventListener() directly. I think the event argument
+              # causes Jasmine to fail the test
+              onUpdate = -> done()
+
+              # Check that we video is still playing
+              video.addEventListener('timeupdate', onUpdate, { once: true })
+
+            container.innerHTML = playerHTML
+            video = container.querySelector('video')
+            expect(video.paused).toBe(true)
+
+            # We're waiting for a timeupdate event in addition to checking !video.paused
+            # since an unpaused video may not actually be playing.
+            video.addEventListener('timeupdate', onPlaying, { once: true })
+            video.play()
+
+            return
+
+        describe 'scripts', ->
+
+          it 'keeps a <script> element (bugfix)', ->
+            html = """
+              <div id="container">
+                <script id="script" up-keep></script>
+              </div>
+            """
+
+            htmlFixture(html)
+            scriptBeforeRender = document.querySelector('#script')
+
+            # Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
+            up.render('#container', document: html)
+
+            await wait()
+
+            expect(document.querySelector('#script')).toBe(scriptBeforeRender)
+
+          it 'keeps a <script> element, but allows to replace it in a non-keeping render pass later (bugfix)', ->
+            window.keepSpy = jasmine.createSpy('spy called from keepable script')
+
+            html = """
+              <div id="container">
+                <script id="script" up-keep>window.keepSpy()</script>
+              </div>
+            """
+
+            htmlFixture(html)
+            scriptBeforeRender = document.querySelector('#script')
+
+            expect(window.keepSpy.calls.count()).toBe(1)
+
+            # Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
+            up.render('#container', document: html)
+
+            await wait()
+
+            expect(document.querySelector('#script')).toBe(scriptBeforeRender)
+            expect(window.keepSpy.calls.count()).toBe(1)
+
+            # Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
+            up.render('#container', document: html, useKeep: false)
+
+            await wait()
+
+            expect(document.querySelector('#script')).not.toBe(scriptBeforeRender)
+            expect(window.keepSpy.calls.count()).toBe(2)
+
+            delete window.keepSpy
+
+          it 'does not re-run a kept <script> element when rendering with DOMParser (bugfix)', ->
+            window.specSpy = jasmine.createSpy('specSpy() function')
+            expect(window.specSpy.calls.count()).toBe(0)
+
+            html = """
+              <div id="container">
+                <script id="script" up-keep>window.specSpy()</script>
+              </div>
+            """
+
+            htmlFixture(html)
+            expect(window.specSpy.calls.count()).toBe(1)
+
+            # Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
+            up.render('#container', document: html)
+
+            await wait()
+
+            expect(window.specSpy.calls.count()).toBe(1)
+
+            delete window.specSpy
+
+          it 'does not re-run a kept <script> element when rendering without DOMParser (bugfix)', ->
+            window.specSpy = jasmine.createSpy('specSpy() function')
+            expect(window.specSpy.calls.count()).toBe(0)
+
+            html = """
+              <div id="container">
+                <script id="script" up-keep>window.specSpy()</script>
+              </div>
+            """
+
+            htmlFixture(html)
+            expect(window.specSpy.calls.count()).toBe(1)
+
+            document.querySelector('#container #script').classList.add('the-original-one')
+
+            # Rendering from { fragment } does *not* use DOMParser to parse HTML
+            up.render(fragment: html)
+
+            await wait()
+
+            expect(window.specSpy.calls.count()).toBe(1)
+
+            delete window.specSpy
+
+          it 'keeps a <noscript> element (bugfix)', ->
+            html = """
+              <div id="container">
+                <noscript id="noscript" up-keep></noscript>
+              </div>
+            """
+
+            htmlFixture(html)
+            noscriptBeforeRender = document.querySelector('#noscript')
+
+            # Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
+            up.render('#container', document: html)
+
+            await wait()
+
+            expect(document.querySelector('#noscript')).toBe(noscriptBeforeRender)
 
         describe 'if an [up-keep] element is itself a direct replacement target', ->
 

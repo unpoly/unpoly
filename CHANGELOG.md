@@ -9,6 +9,17 @@ Changes handled by `unpoly-migrate.js` are not considered breaking changes.
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+Unreleased
+----------
+
+- Allow to keep `<script>` element
+- Allow to keep `<noscript>` element
+- Execute `<script>` elements that are targeted directly
+- Fix `<noscript>` elements that are targeted directly
+- Fix a bug where script elements within `[up-keep]` would be run a second time
+- Load `<video>` elements in Safari
+
+
 3.5.1
 -----
 
