@@ -9,15 +9,16 @@ Changes handled by `unpoly-migrate.js` are not considered breaking changes.
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
-Unreleased
-----------
+3.5.2
+-----
 
-- Allow to keep `<script>` element
-- Allow to keep `<noscript>` element
-- Execute `<script>` elements that are targeted directly
-- Fix `<noscript>` elements that are targeted directly
-- Fix a bug where script elements within `[up-keep]` would be run a second time
-- Load `<video>` elements in Safari
+Continuing our focus on stability, this release addresses some long-standing issues:
+
+- Fix a bug where `<video>` and `<audio>` elements would render incorrectly in Safari ([#432](https://github.com/unpoly/unpoly/issues/432)).
+- Fix a bug where `<script up-keep>` elements would re-run during subsequent render passes.
+- Fix a bug where `<script>` elements would not run when [targeted](/targeting-fragments) directly.
+- Fix a bug where `<noscript up-keep>` elements would not be persisted during fragment updated.
+- Fix a bug where `<noscript>` elements would lose their text content when targeted directly.
 
 
 3.5.1
