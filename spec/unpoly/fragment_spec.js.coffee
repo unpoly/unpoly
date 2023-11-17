@@ -123,7 +123,7 @@ describe 'up.fragment', ->
           doGet = -> up.fragment.get('.element', layer: 1)
           expect(doGet).toThrowError(/unknown layer: 1/i)
 
-      describe 'matching around the { origin }', ->
+      describe 'matching in the region of { origin }', ->
 
         it 'prefers to match an element closest to origin when no { match } option is given', ->
           root = fixture('.element#root')
@@ -182,6 +182,71 @@ describe 'up.fragment', ->
           result = up.fragment.get('.element', origin: childOfTwo)
 
           expect(result).toBe(root)
+
+      describe 'expansion of :main', ->
+
+        it 'returns an element matching the configured main target selectors', ->
+          one = fixture('.one')
+          two = fixture('.two')
+          three = fixture('.three')
+
+          up.fragment.config.mainTargets = ['.two']
+
+          result = up.fragment.get(':main')
+          expect(result).toBe(two)
+
+        it 'returns a missing value if the user has configured no main targets', ->
+          up.fragment.config.mainTargets = []
+
+          result = up.fragment.get(':main')
+          expect(result).toBeMissing()
+
+        it 'prioritizes earlier main targets', ->
+          one = fixture('.one')
+          two = fixture('.two')
+          three = fixture('.three')
+          four = fixture('.four')
+
+          up.fragment.config.mainTargets = ['.three', '.one', '.four']
+
+          result = up.fragment.get(':main')
+          expect(result).toBe(three)
+
+        it 'matches a secondary main target if a primary main target does not exist', ->
+          secondary = fixture('#secondary')
+
+          up.fragment.config.mainTargets = ['#primary', '#secondary']
+
+          result = up.fragment.get(':main')
+          expect(result).toBe(secondary)
+
+        it 'ignores an origin when matching :main', ->
+          container = fixture('#container')
+          nav = e.affix(container, '#nav')
+          navItem = e.affix(nav, '#nav-item')
+          main = e.affix(container, '#main')
+
+          # Mimic our defaults, which look like ['[up-main]', 'body'].
+          # We always want to match an earlier main target, even if the user clicks outside it.
+          up.fragment.config.mainTargets = ['#main', '#container']
+
+          result = up.fragment.get(':main', origin: navItem)
+          expect(result).toBe(main)
+
+        it 'ignores an origin when matching a descendant of :main', ->
+          container = fixture('#container')
+          containerTarget = e.affix(container, '.target')
+          nav = e.affix(container, '#nav')
+          navItem = e.affix(nav, '#nav-item')
+          main = e.affix(container, '#main')
+          mainTarget = e.affix(main, '.target')
+
+          # Mimic our defaults, which look like ['[up-main]', 'body'].
+          # We always want to match an earlier main target, even if the user clicks outside it.
+          up.fragment.config.mainTargets = ['#main', '#container']
+
+          result = up.fragment.get(':main .target', origin: navItem)
+          expect(result).toBe(mainTarget)
 
     describe 'up.fragment.all()', ->
 
@@ -9596,6 +9661,12 @@ describe 'up.fragment', ->
         expanded = up.fragment.expandTargets(targets, layer: up.layer.root)
         expect(expanded).toEqual ['.before', '.main1', '.main2', '.after']
 
+      it "expands a descendant selector rooted at ':main'", ->
+        targets = ['.before .child', ':main .child', '.after .child']
+        up.layer.config.root.mainTargets = ['.main1', '.main2']
+        expanded = up.fragment.expandTargets(targets, layer: up.layer.root)
+        expect(expanded).toEqual ['.before .child', '.main1 .child', '.main2 .child', '.after .child']
+
       it "expands true to the given layer mode's main targets (useful because { fallback } is often passed as a target)", ->
         targets = ['.before', true, '.after']
         up.layer.config.root.mainTargets = ['.main1', '.main2']
@@ -9606,6 +9677,11 @@ describe 'up.fragment', ->
         targets = ['.before', ':layer', '.after']
         expanded = up.fragment.expandTargets(targets, layer: up.layer.root)
         expect(expanded).toEqual ['.before', 'body', '.after']
+
+      it "expands a descendant selector rooted at ':layer'", ->
+        targets = ['.before .child', ':layer .child', '.after .child']
+        expanded = up.fragment.expandTargets(targets, layer: up.layer.root)
+        expect(expanded).toEqual ['.before .child', 'body .child', '.after .child']
 
       it "expands ':main' to the given layer mode's main targets if a main target is itself ':layer'", ->
         targets = ['.before', ':main', '.after']
@@ -9625,6 +9701,13 @@ describe 'up.fragment', ->
         up.layer.config.root.mainTargets = [':layer']
         expanded = up.fragment.expandTargets(targets, layer: up.layer.root, origin: origin)
         expect(expanded).toEqual ['.before', '#foo .child', '.after']
+
+      it 'expands multiple non-standard pseudo selectors in a single target', ->
+        targets = ['#before', ':layer :main :origin .child', '#after']
+        origin = fixture('#origin')
+        up.layer.config.root.mainTargets = ['#main']
+        expanded = up.fragment.expandTargets(targets, layer: up.layer.root, origin: origin)
+        expect(expanded).toEqual ['#before', 'body #main #origin .child', '#after']
 
       if up.migrate.loaded
         it "expands the ampersand character '&' to a selector for { origin }", ->

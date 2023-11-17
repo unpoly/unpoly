@@ -2165,18 +2165,12 @@ up.fragment = (function() {
     return u.filter(element.classList, isGood)
   }
 
-  function modernResolveOrigin(target, { origin } = {}) {
-    return target.replace(/:origin\b/, function(match) {
-      if (origin) {
-        return toTarget(origin)
-      } else {
-        up.fail('Missing { origin } element to resolve "%s" reference (found in %s)', match, target)
-      }
-    })
-  }
+  const MAIN_PSEUDO = /:main\b/
+  const LAYER_PSEUDO = /:layer\b/
+  const ORIGIN_PSEUDO = /:origin\b/
 
-  function resolveOrigin(...args) {
-    return (up.migrate.resolveOrigin || modernResolveOrigin)(...args)
+  function containsMainPseudo(target) {
+    return MAIN_PSEUDO.test(target)
   }
 
   function expandTargets(targets, options = {}) {
@@ -2191,38 +2185,50 @@ up.fragment = (function() {
     const expanded = []
 
     while (targets.length) {
-      const target = targets.shift()
+      let target = targets.shift()
+      if (target === true) target = ':main'
 
-      if (target === ':main' || target === true) {
-        // const mode = layer === 'new' ? options.mode : layer.mode
-
-        let mode
-
-        if (layer === 'new') {
-          mode = options.mode || up.fail('Must pass a { mode } option together with { layer: "new" }')
-        } else {
-          mode = layer.mode
-        }
-
-        targets.unshift(...up.layer.mainTargets(mode))
-      } else if (target === ':layer') {
+      if (containsMainPseudo(target)) {
+        let mode = resolveMode(options)
+        let replaced = up.layer.mainTargets(mode).map((mainTarget) => target.replace(MAIN_PSEUDO, mainTarget))
+        targets.unshift(...replaced)
+      } else if (LAYER_PSEUDO.test(target)) {
         // Discard this target for new layers, which don't have a first-swappable-element.
         // Also don't && the layer check into the `else if` condition above, or it will
         // be returned as a verbatim string below.
-        if (layer !== 'new' && !layer.opening) {
-          targets.unshift(layer.getFirstSwappableElement())
-        }
+        if (layer === 'new' || layer.opening) continue
+        let firstSwappableTarget = toTarget(layer.getFirstSwappableElement(), options)
+        targets.unshift(target.replace(LAYER_PSEUDO, firstSwappableTarget))
       } else if (u.isElementish(target)) {
         expanded.push(toTarget(target, options))
       } else if (u.isString(target)) {
         expanded.push(resolveOrigin(target, options))
-      } else {
-        // @buildPlans() might call us with { target: false } or { target: nil }
-        // In that case we don't add a plan.
       }
     }
 
     return u.uniq(expanded)
+  }
+
+  function resolveMode({ layer, mode }) {
+    if (layer === 'new') {
+      return mode || up.fail('Must pass a { mode } option together with { layer: "new" }')
+    } else {
+      return layer.mode
+    }
+  }
+
+  function modernResolveOrigin(target, { origin } = {}) {
+    return target.replace(ORIGIN_PSEUDO, function(match) {
+      if (origin) {
+        return toTarget(origin)
+      } else {
+        up.fail('Missing { origin } element to resolve "%s" reference (found in %s)', match, target)
+      }
+    })
+  }
+
+  function resolveOrigin(...args) {
+    return (up.migrate.resolveOrigin || modernResolveOrigin)(...args)
   }
 
   function splitTarget(target) {
@@ -2839,6 +2845,7 @@ up.fragment = (function() {
     isNotDestroying,
     targetForSteps,
     compressNestedSteps,
+    containsMainPseudo,
     // timer: scheduleTimer
   }
 })()

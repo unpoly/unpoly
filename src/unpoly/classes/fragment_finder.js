@@ -24,7 +24,7 @@ up.FragmentFinder = class FragmentFinder {
   }
 
   _findInRegion() {
-    if (this._match === 'region' && this._origin?.isConnected) {
+    if (this._match === 'region' && !up.fragment.containsMainPseudo(this._selector) && this._origin?.isConnected) {
       return this._findClosest() || this._findDescendantInRegion()
     }
   }

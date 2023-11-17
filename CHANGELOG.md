@@ -9,6 +9,14 @@ Changes handled by `unpoly-migrate.js` are not considered breaking changes.
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+Unreleased
+----------
+
+- Fix a bug where following a navigation item outside a main element would focus the `<body>` instead of the main element.
+- Targeting `:main` will no longer match in the region of the interaction origin. It will always use the first matching selector in `up.fragment.config.mainTargets`.
+- Fix a bug where pseudo selectors like `:main` or `:layer` could not be used in a compound target, e.g. `:main .child`.
+
+
 3.5.2
 -----
 
