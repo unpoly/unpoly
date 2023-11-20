@@ -15,6 +15,7 @@ Unreleased
 - Fix a bug where following a navigation item outside a main element would focus the `<body>` instead of the main element.
 - Targeting `:main` will no longer match in the region of the interaction origin. It will always use the first matching selector in `up.fragment.config.mainTargets`.
 - Fix a bug where pseudo selectors like `:main` or `:layer` could not be used in a compound target, e.g. `:main .child`.
+- Fix a bug where `up:assets:changed` would be emitted for every response when configuring `up.fragment.config.runScripts = false`.
 
 
 3.5.2

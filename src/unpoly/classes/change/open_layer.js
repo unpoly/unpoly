@@ -117,6 +117,9 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // if any of these options cause the layer to close.
     this.handleLayerChangeRequests()
 
+    // Preprocess content element before insertion.
+    this.responseDoc.commitElement(this._content)
+
     // Only if handleLayerChangeRequests() does not abort, we insert the content in the overlay.
     // If it does abort we want to use the content for [up-hungry][up-if-layer=any] elements
     // on background layers.

@@ -776,6 +776,10 @@ up.element = (function() {
     scriptElement.type = 'up-disabled-script'
   }
 
+  function disableScriptsInSubtree(root) {
+    u.each(subtree(root, 'script'), disableScript)
+  }
+
   /*-
   Creates an element from the given HTML fragment string.
 
@@ -1447,5 +1451,6 @@ up.element = (function() {
     filteredQuery,
     isEmpty,
     disableScript,
+    disableScriptsInSubtree,
   }
 })()

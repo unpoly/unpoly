@@ -14,12 +14,7 @@ up.ResponseDoc = class ResponseDoc {
       this._parseContent(content || '', target)
     }
 
-    // If the user doesn't want to run scripts in the new fragment, we disable all <script> elements.
-    // While <script> elements parsed by `DOMParser` are inert anyway, we also _parse HTML through
-    // other methods, which do create non-inert <script> elements.
-    if (!up.fragment.config.runScripts) {
-      this._document.querySelectorAll('script').forEach((e) => e.remove())
-    }
+
 
     this._cspNonces = cspNonces
 
@@ -158,14 +153,9 @@ up.ResponseDoc = class ResponseDoc {
   }
 
   commitSteps(steps) {
-    return steps.filter((step) => {
-      // If multiple steps want to match the same new element, the first step will remain in the left.
-      // This will happen when multiple layers have the same hungry element with [up-if-layer=any].
-      if (this._document.contains(step.newElement)) {
-        step.newElement.remove()
-        return true
-      }
-    })
+    // If multiple steps want to match the same new element, the first step will remain in the left.
+    // This will happen when multiple layers have the same hungry element with [up-if-layer=any].
+    return steps.filter((step) => this.commitElement(step.newElement))
   }
 
   _trySelectStep(step) {
@@ -202,10 +192,27 @@ up.ResponseDoc = class ResponseDoc {
     }
   }
 
+  commitElement(element) {
+    if (this._document.contains(element)) {
+      // If the user doesn't want to run scripts in the new fragment, we disable all <script> elements.
+      // While <script> elements parsed by `DOMParser` are inert anyway, we also parse HTML through
+      // other methods, which do create non-inert <script> elements.
+      if (!up.fragment.config.runScripts) {
+        e.disableScriptsInSubtree(element)
+      }
+
+      // Ensure that the element cannot be matched for subsequent selects().
+      element.remove()
+      return true
+    }
+  }
+
   finalizeElement(element) {
     // Rewrite per-request CSP nonces to match that of the current page.
     up.NonceableCallback.adoptNonces(element, this._cspNonces)
 
+    // Now that these elements is attached to the current document, we can re-create them
+    // in the correct browsing context.
     if (this._isDocumentBroken) {
       let brokenElements = e.subtree(element, ':is(noscript,script,audio,video):not(.up-keeping, .up-keeping *)')
       u.each(brokenElements, e.fixParserDamage)

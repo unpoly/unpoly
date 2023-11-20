@@ -4723,6 +4723,65 @@ describe 'up.fragment', ->
 
           expect(listener).not.toHaveBeenCalled()
 
+        it 'does not emit up:assets:changed if the <link> and <meta> elements did not change', ->
+          listener = jasmine.createSpy('up:assets:changed listener')
+          up.on('up:assets:changed', listener)
+
+          style = e.createFromSelector('script[src="scripts.js"]')
+          registerFixture(style)
+          document.head.append(style)
+
+          fixture('.container', text: 'old container text')
+
+          up.render('.container', location: '/path', history: true, document: """
+            <html>
+              <head>
+                <script src='scripts.js'></script>
+              </head>
+              <body>
+                <div class='container'>
+                  new container text
+                </div>
+              </body>
+            </html>
+          """)
+
+          await wait()
+
+          expect('.container').toHaveText('new container text')
+
+          expect(listener).not.toHaveBeenCalled()
+
+        it 'does not emit up:assets:changed when a script is disabled through up.fragmentconfig.runScripts = false', ->
+          up.fragment.config.runScripts = false
+          listener = jasmine.createSpy('up:assets:changed listener')
+          up.on('up:assets:changed', listener)
+
+          style = e.createFromSelector('script[src="scripts.js"]')
+          registerFixture(style)
+          document.head.append(style)
+
+          fixture('.container', text: 'old container text')
+
+          up.render('.container', location: '/path', history: true, document: """
+            <html>
+              <head>
+                <script src='scripts.js'></script>
+              </head>
+              <body>
+                <div class='container'>
+                  new container text
+                </div>
+              </body>
+            </html>
+          """)
+
+          await wait()
+
+          expect('.container').toHaveText('new container text')
+
+          expect(listener).not.toHaveBeenCalled()
+
         it 'does not emit up:assets:changed if the updated <link> and <meta> elements are not asset-related', ->
           listener = jasmine.createSpy('up:assets:changed listener')
           up.on('up:assets:changed', listener)
@@ -5853,7 +5912,7 @@ describe 'up.fragment', ->
           beforeEach ->
             up.fragment.config.runScripts = false
 
-          it 'does not execute inline script tags', asyncSpec (next) ->
+          it 'does not execute inline script tags from a fragment response', asyncSpec (next) ->
             fixture('.target', text: 'old text')
 
             up.render fragment: """
@@ -5868,8 +5927,45 @@ describe 'up.fragment', ->
             next.after 100, =>
               expect(window.scriptTagExecuted).not.toHaveBeenCalled()
               expect(document).toHaveSelector('.target')
-              expect(document).not.toHaveSelector('.target script')
+              expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
               expect('.target').toHaveVisibleText('new text')
+
+          it 'does not execute inline script tags from a document response', asyncSpec (next) ->
+            fixture('.target', text: 'old text')
+
+            up.render '.target', document: """
+              <html>
+                <body>
+                  <div class="target">
+                    new text
+                    <script type="text/javascript">
+                      window.scriptTagExecuted()
+                    </script>
+                  </div>
+                </body>
+              </html>
+              """
+
+            next.after 100, =>
+              expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+              expect(document).toHaveSelector('.target')
+              expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
+              expect('.target').toHaveVisibleText('new text')
+
+          it 'does not execute inline script tags when opening a new overlay', asyncSpec (next) ->
+            up.layer.open fragment: """
+              <div class="target">
+                new text
+                <script type="text/javascript">
+                  window.scriptTagExecuted()
+                </script>
+              </div>
+              """
+
+            next.after 100, =>
+              expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+              expect(up.layer.count).toBe(2)
+              expect(up.layer.current).toHaveVisibleText('new text')
 
           it 'does not crash when the new fragment contains inline script tag that is followed by another sibling (bugfix)', asyncSpec (next) ->
             fixture('.target')
@@ -5886,7 +5982,7 @@ describe 'up.fragment', ->
             next.after 100, =>
               expect(window.scriptTagExecuted).not.toHaveBeenCalled()
               expect(document).toHaveSelector('.target')
-              expect(document).not.toHaveSelector('.target script')
+              expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
               expect('.target').toHaveVisibleText('before after')
 
           it 'does not execute linked scripts to prevent re-inclusion of javascript inserted before the closing body tag', asyncSpec (next) ->
@@ -5900,7 +5996,7 @@ describe 'up.fragment', ->
             next.after 100, =>
               expect(window.scriptTagExecuted).not.toHaveBeenCalled()
               expect(document).toHaveSelector('.target')
-              expect(document).not.toHaveSelector('.target script')
+              expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
 
         describe 'with up.fragment.config.runScripts = true (default)', ->
 
@@ -5923,7 +6019,7 @@ describe 'up.fragment', ->
 
             expect(window.scriptTagExecuted).toHaveBeenCalled()
             expect(document).toHaveSelector('.target')
-            expect(document).toHaveSelector('.target script')
+            expect(document).toHaveSelector('.target script[type="text/javascript"]')
             expect('.target').toHaveVisibleText(/new text/)
 
           it 'executes inline script tags that are itself the target', ->
@@ -5956,7 +6052,7 @@ describe 'up.fragment', ->
             next.after 100, =>
               expect(window.scriptTagExecuted).not.toHaveBeenCalled()
               expect(document).toHaveSelector('.target')
-              expect(document).not.toHaveSelector('.target script')
+              expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
               expect('.target').toHaveVisibleText('new text')
 
           it 'executes linked scripts', asyncSpec (next) ->

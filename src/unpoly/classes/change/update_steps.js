@@ -270,7 +270,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
           // When the newElement from the response has a response, it will be inserted
           // into the DOM during the transition. Only at the end it will be replaced by the keepable.
           // To prevent the execution of these placeholder-scripts, we change their { type }.
-          u.each(e.subtree(keepPlan.newElement, 'script'), e.disableScript)
+          e.disableScriptsInSubtree(keepPlan.newElement)
 
           // Attaching a viewport to another element will cause it to loose
           // its scroll position, even if both parents are in the same document.
