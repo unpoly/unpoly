@@ -195,6 +195,12 @@ The parsed data will be passed to your event handler as a third argument:
     If `true` the listener will automatically be unbound
     after the first invocation.
 
+  @param {boolean} [options.capture=false]
+    Whether the listener should run before the event is emitted on the element.
+
+    See [event capturing](https://javascript.info/bubbling-and-capturing#capturing) for more information
+    about DOM event processing phases.
+
   @param {Function(event, [element], [data])} listener
     The listener function that should be called.
 
@@ -422,7 +428,7 @@ The parsed data will be passed to your event handler as a third argument:
   }
 
   function fork(originalEvent, newType, copyKeys = []) {
-    const newEvent = up.event.build(newType, u.pick(originalEvent, copyKeys))
+    const newEvent = up.event.build(newType, { ...u.pick(originalEvent, copyKeys) })
     newEvent.originalEvent = originalEvent; // allow users to access other props through event.originalEvent.prop
 
     ['stopPropagation', 'stopImmediatePropagation', 'preventDefault'].forEach(function(key) {

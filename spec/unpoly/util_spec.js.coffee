@@ -2085,7 +2085,7 @@ describe 'up.util', ->
           autoDefault = 'auto default'
           expect(up.util.evalAutoOption('auto', autoDefault)).toBe('auto default')
 
-        it 'calls the second argument if it is a function', ->
+        it 'calls the second argument if it is a function, passing the 3rd...nth argument as function arguments', ->
           sum = (a, b) -> a + b
           expect(up.util.evalAutoOption('auto', sum, 2, 5)).toBe(7)
 

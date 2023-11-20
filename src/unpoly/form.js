@@ -131,13 +131,25 @@ up.form = (function() {
   }))
 
   /*-
-   @function up.form.fieldSelector
-   @internal
-   */
+  @function up.form.fieldSelector
+  @internal
+  */
   function fieldSelector(suffix = '') {
     return config.fieldSelectors.map(field => field + suffix).join()
   }
 
+  /*-
+  Returns whether the given element is a form field, such as `input` or `select`.
+
+  To configure what Unpoly considers a form field, use `up.form.config.formSelectors`.
+
+  @function up.form.isField
+  @param {Element} element
+    The element to check.
+  @return {boolean}
+    Whether the given element is a form field.
+  @stable
+  */
   function isField(element) {
     return element.matches(fieldSelector())
   }

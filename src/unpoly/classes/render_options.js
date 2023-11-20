@@ -114,6 +114,7 @@ up.RenderOptions = (function() {
       // Remember the defaults in a { default } prop so we can re-use it
       // later in deriveFailOptions() and finalize().
       { defaults },
+      { focusDevice: up.viewport.focusDevice },
       options,
       preloadOverrides(options)
     )

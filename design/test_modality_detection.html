@@ -1,0 +1,34 @@
+<html>
+<body>
+
+<input type="text">
+<a href="#" id="link">link</a>
+<input type="text">
+
+<script>
+  var lastModalities = ['unknown']
+
+  function setModality(newModality) {
+    console.log('>> modality: %o', newModality)
+    lastModalities.push(newModality)
+    setTimeout(() => {
+      console.log('<< modality: %o', newModality)
+      lastModalities.pop()
+    })
+  }
+
+  for (let keyboardEvent of ['keydown', 'keyup']) {
+    document.addEventListener(keyboardEvent, () => { setModality('keyboard') }, { capture: true })
+  }
+
+  for (let pointingEvent of ['mousedown', 'mouseup', 'touchstart', 'touchend']) {
+    document.addEventListener(pointingEvent, () => { setModality('pointingDevice') }, { capture: true })
+  }
+
+  document.addEventListener('click', function(event) {
+    console.log("Click event sees modality: %o", lastModalities)
+  })
+</script>
+
+</body>
+</html>

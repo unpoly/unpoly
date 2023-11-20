@@ -8,7 +8,8 @@ up.FragmentFocus = class FragmentFocus extends up.FragmentProcessor {
   keys() {
     return super.keys().concat([
       'hash',
-      'focusCapsule'
+      'focusCapsule',
+      'focusDevice',
     ])
   }
 
@@ -74,7 +75,7 @@ up.FragmentFocus = class FragmentFocus extends up.FragmentProcessor {
 
   _focusElement(element) {
     if (element) {
-      up.focus(element, { force: true, ...PREVENT_SCROLL_OPTIONS })
+      up.focus(element, { force: true, ...PREVENT_SCROLL_OPTIONS, focusDevice: this.focusDevice })
       return true
     }
   }

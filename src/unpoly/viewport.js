@@ -77,6 +77,8 @@ up.viewport = (function() {
     Whether to always scroll a [revealing](/up.reveal) element to the top.
 
     By default Unpoly will scroll as little as possible to make the element visible.
+  @param {Function(): boolean} [config.autoFocusVisible]
+    TODO: Docs
   @stable
   */
   const config = new up.Config(() => ({
@@ -88,6 +90,7 @@ up.viewport = (function() {
     revealPadding: 0,
     revealTop: false,
     revealMax() { return 0.5 * window.innerHeight },
+    autoFocusVisible({ element, focusDevice }) { return up.form.isField(element) || focusDevice === 'key' }
   }))
 
   const bodyShifter = new up.BodyShifter()
@@ -194,17 +197,48 @@ up.viewport = (function() {
 
     @experimental
 
+  @param {boolean} [options.focusDevice]
+    TODO: DOcs
+
+    @experimental
+
+  @param {boolean} [options.focusVisible='auto']
+    TODO: DOcs
+
+    @experimental
+
   @experimental
   */
-  function doFocus(element, options = {}) {
-    if (options.force) {
-      makeFocusable(element)
+  function doFocus(element, { preventScroll, force, focusDevice, focusVisible } = {}) {
+    if (force) {
+      // (1) Element#tabIndex is -1 for all non-interactive elements,
+      //     whether or not the element has an [tabindex=-1] attribute.
+      // (2) Element#tabIndex is 0 for interactive elements, like links,
+      //     inputs or buttons. [up-clickable] elements also get a [tabindex=0].
+      //     to participate in the regular tab order.
+      if (!element.hasAttribute('tabindex') && element.tabIndex === -1) {
+        element.setAttribute('tabindex', '-1')
+      }
     }
 
-    // First focus without scrolling, since we're going to use our custom scrolling logic below.
-    element.focus({ preventScroll: true })
+    focusDevice ??= getFocusDevice()
+    focusVisible ??= 'auto'
+    focusVisible = u.evalAutoOption(focusVisible, config.autoFocusVisible, { element, focusDevice })
 
-    if (!options.preventScroll) {
+    element.focus({
+      preventScroll: true, // Focus without scrolling, since we're going to use our custom scrolling logic below.
+      focusVisible,        // Control native :focus-visible for browsers that support this option
+    })
+
+    // Don't rely on the `blur` event to remove our focus classes, to cover
+    // an edge case where the element focused multiple times with different focus devices.
+    const removeFocusClasses = () => element.classList.remove('up-focus-hidden', 'up-focus-visible')
+    removeFocusClasses()
+
+    element.classList.add(focusVisible ? 'up-focus-visible' : 'up-focus-hidden')
+    element.addEventListener('blur', removeFocusClasses, { once: true })
+
+    if (!preventScroll) {
       // Use up.reveal() which scrolls far enough to ignore fixed nav bars
       // obstructing the focused element.
       return reveal(element)
@@ -214,20 +248,6 @@ up.viewport = (function() {
   function tryFocus(element, options) {
     doFocus(element, options)
     return element === document.activeElement
-  }
-
-  function makeFocusable(element) {
-    // (1) Element#tabIndex is -1 for all non-interactive elements,
-    //     whether or not the element has an [tabindex=-1] attribute.
-    // (2) Element#tabIndex is 0 for interactive elements, like links,
-    //     inputs or buttons. [up-clickable] elements also get a [tabindex=0].
-    //     to participate in the regular tab order.
-    if (!element.hasAttribute('tabindex') && element.tabIndex === -1) {
-      element.setAttribute('tabindex', '-1')
-
-      // A11Y: OK to hide the focus ring of a non-interactive element.
-      element.classList.add('up-focusable-content')
-    }
   }
 
   /*-
@@ -896,6 +916,20 @@ up.viewport = (function() {
     return to
   }
 
+  let focusDevices = ['unknown']
+
+  function getFocusDevice() {
+    return u.last(focusDevices)
+  }
+
+  function observeFocusDevice(newModality) {
+    focusDevices.push(newModality)
+    setTimeout(() => focusDevices.pop())
+  }
+
+  up.on('keydown keyup', { capture: true }, () => observeFocusDevice('key'))
+  up.on('pointerdown pointerup', { capture: true }, () => observeFocusDevice('pointer'))
+
   let userScrolled = false
   up.on('scroll', { once: true, beforeBoot: true }, () => userScrolled = true)
 
@@ -946,6 +980,7 @@ up.viewport = (function() {
     focusedElementWithin,
     copyCursorProps,
     bodyShifter,
+    get focusDevice() { return getFocusDevice() }
   }
 })()
 

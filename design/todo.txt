@@ -6,35 +6,47 @@ Autosubmit/Watch rework
 
 
 
-Reduce render callbacks
-=======================
+focus-visible
+=============
 
-- Motivation
-  - It is too hard to do something when the render job settles. There is onRendered, onFinished, onError etc. However there are always cases that are covered by no callback.
-  - We need to maintain and communicate two styles of callbacks
-- Expose { renderJob } on guard events
-- New event up:fragment:render / [up-on-render] that gets { renderOptions, renderJob }
-  - There is no need to offer { onRender }, as the return value of up.render() is already a RenderJob
-- Deprecate callbacks
-  - { onFinished }
-  - { onRendered }
-- Update docs
-  - https://unpoly.com/render-hooks#preventing-a-render-pass
-  - https://unpoly.com/render-hooks#changing-options-before-rendering
+- A better implementation without [up-focus-device]
+  - Use .up-focus-hidden and .up-focus.visible
+  - up.focus() gets option { focusVisible: 'auto' }
+    - Options: true, false, 'auto', null
+  - Add up.viewport.config.autoFocusVisible.
+    - Defaults to focusDevice == 'keyboard' || up.form.isField(element)
+      - Called with { focusDevice, element }
+  - Pass { focusVisible } options for browsers that support it
+  - Publish up.form.isField(element)
+- Rework existing /focus so it does not just talk about option values
+   - Talk about the focus ring
 
+    Show focus ring:
+
+    :focus-visible:not(.up-focus-hidden), .up-focus-visible {
+      outline: 1px solid royalblue;
+    }
+
+    Hide existing focus ring:
+
+    :focus:not(:focus-visible), .up-focus-hidden {
+      outline: none;
+    }
 
 
 Backlog
 =======
 
-- *Hard*: Hide focus ring for up-instant links
-  - If we solve this with an .up-hidden-focus class or similiar, we must make sure it goes away after we blur the field. A follow-up focus using keyboard should work.
-- Event up:fragment:poll should support mutatable `event.renderOptions`
-  - The property does not currently exist. It is not a { guardEvent }.
-- Consider supporting programmatic setting of [up-href] and [up-alias]
-  - Run macros before .up-current update?
-  - No longer cache { upFeedbackURLs }? What's the performance impact?
-- [up-disable] should disable links
+- Docs: Mention that [up-href], [up-alias] cannot be set by a macro
+- Docs: Explain how to convert JSON responses to HTML responses (discussion #562)
+- Convert .sass files to .scss
+- When morphing, disable pointer events on old element
+- Support { onLoaded }, [up-on-loaded] for polling fragments
+  - Test: Can be used to skip() a polling response, polling then continues
+  - Test: Can be used to preventDefault() a polling response, polling then continues
+- Check if we can offer more exclusion selectors
+  - noNavSelectors, [up-nav=false]
+- [up-disable] should disable links (discussion #561)
   - Within the form
   - As a stand-alone link
   - How to mark disabled links? .up-disabled ? Just [disabled]?
@@ -43,6 +55,7 @@ Backlog
   - Prevent with JS? pointer-events?
     - Also prevent keyboard focus with temporary [tabindex=-1]
   - Bootstrap already has a.disabled
+- Consider [up-on] for arbitrary, nonceable attribute event handlers
 - Copy important up.render() options to up.layer.open() and a[up-layer=new]
   - In particular { content, fragment, url, document }
 - Nonces for remote scripts
@@ -581,18 +594,19 @@ Decisions
   - Note that we used to emit this event in the past, so fix unpoly-migrate
   - Preventable for custom history handling
   => We already have this in up:location:restore
-- Watchers (like autosubmit) do not notice if fields are added/removed dynamically
-  - Consider also watching for up:fragment:inserted and up:fragment:destroyed
-  - Or make this an option [up-watch-mutation]
-  => Maybe the exiesting behavior is OK as the form should result in the same response anyway, even if the dependent field isn't updated yet
-  => Users can already configure additional events now
-- Consider waiting with the form submission until the validator is idle
-  - Do we need to support disable while waiting?
-  - Waiting for idle-state should be abortable
-  - Do we need to configure this?
-    - e.g. [up-await-validate]
-    - e.g. up.form.config.submitAwaitValidate
-  => What's the exact use case here? As the form holds the entire state (+ dependent fields are resolved server-side), the next submission should result in the same response, whether or not the validation succeeded
-- up.validate(element, { target: '.target' }) should update .target and use `element` as the origin (that adds field inputs?)
-  - Make a test case.
-  => It works as intended
+- Reduce render callbacks
+  - Motivation
+    - It is too hard to do something when the render job settles. There is onRendered, onFinished, onError etc. However there are always cases that are covered by no callback.
+    - We need to maintain and communicate two styles of callbacks
+  - Expose { renderJob } on guard events
+  - New event up:fragment:render / [up-on-render] that gets { renderOptions, renderJob }
+    - There is no need to offer { onRender }, as the return value of up.render() is already a RenderJob
+  - Deprecate callbacks
+    - { onFinished }
+    - { onRendered }
+  - Update docs
+    - https://unpoly.com/render-hooks#preventing-a-render-pass
+    - https://unpoly.com/render-hooks#changing-options-before-rendering
+  => No, don't do that.
+    - While we can return a RenderJob, it's inner promise is not yet set to a RenderResult
+    - We also have { onFinished } in other places, e.g. in dismiss() and accept(). There is no CloseJob or similiar there.

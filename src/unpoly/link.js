@@ -701,6 +701,8 @@ up.link = (function() {
       // Ignore that event and only process if we would still hit the
       // expect layers at the click coordinates.
       } else if (layer.wasHitByMouseEvent(event) && !didUserDragAway(event)) {
+        // Event is a `PointerEvent` with an { pointerType } property.
+        // Its values are 'mouse', 'pen', 'touch' or '' (unknown, meaning synthetic or keyboard).
         forkEventAsUpClick(event)
       }
 

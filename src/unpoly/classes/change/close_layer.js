@@ -116,6 +116,7 @@ up.Change.CloseLayer = class CloseLayer extends up.Change.Removal {
     formerParent.overlayFocus?.moveToFront()
     // A11Y: Focus the element that originally opened this layer.
     let newFocusElement = this._layer.origin || formerParent.element
-    newFocusElement.focus({ preventScroll: true })
+
+    up.focus(newFocusElement, { preventScroll: true })
   }
 }

@@ -6,6 +6,71 @@ describe 'up.viewport', ->
 
   describe 'JavaScript functions', ->
 
+    describe 'up.focus()', ->
+
+      fdescribe 'focus ring', ->
+
+        useMouse = ->
+          Trigger.clickSequence(document.body)
+          expect(up.viewport.focusDevice).toBe('pointer')
+
+        useKeyboard = ->
+          Trigger.keySequence(document.body, 'Enter')
+          expect(up.viewport.focusDevice).toBe('key')
+
+        describe 'with { focusVisible: true }', ->
+
+          describe 'when using the mouse', ->
+            beforeEach(useMouse)
+
+            it 'shows a focus ring for a non-field element', ->
+              div = fixture('div', text: 'text')
+              up.focus(div, { focusVisible: true, force: true })
+
+              expect(div).toBeFocused()
+              expect(div).toHaveOutline()
+
+        describe 'with { focusVisible: false }', ->
+
+          describe 'when using the keyboard', ->
+            beforeEach(useKeyboard)
+
+            it 'hides a focus ring for a field element', ->
+              input = fixture('input[type=text]', value: 'text')
+              up.focus(input, { focusVisible: false })
+
+              expect(input).toBeFocused()
+              expect(input).not.toHaveOutline()
+
+        describe 'with { focusVisible: "auto" }', ->
+
+          describe 'when using the mouse', ->
+            beforeEach(useMouse)
+
+            it 'hides a focus ring for a non-field element', ->
+              div = fixture('div', text: 'text')
+              up.focus(div, { focusVisible: 'auto', force: true })
+
+              expect(div).toBeFocused()
+              expect(div).not.toHaveOutline()
+
+            it 'shows a focus ring for a field element', ->
+              input = fixture('input[type=text]', value: 'text')
+              up.focus(input, { focusVisible: 'auto' })
+
+              expect(input).toBeFocused()
+              expect(input).toHaveOutline()
+
+          describe 'when using the keyboard', ->
+            beforeEach(useKeyboard)
+
+            it 'shows a focus ring for a non-field element', ->
+              div = fixture('div', text: 'text')
+              up.focus(div, { focusVisible: 'auto', force: true })
+
+              expect(div).toBeFocused()
+              expect(div).toHaveOutline()
+
     describe 'up.viewport.focusedElementWithin()', ->
 
       it 'returns the focused element if it is contained by the given root', ->

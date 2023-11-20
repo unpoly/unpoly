@@ -9,6 +9,12 @@ Changes handled by `unpoly-migrate.js` are not considered breaking changes.
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+Unreleased
+----------
+
+- `up.on()` takes a `{ capture: true }` option to register a listener that runs before the event is emitted on the element.
+
+
 3.6.1
 -----
 

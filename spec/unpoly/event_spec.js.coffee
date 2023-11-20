@@ -351,6 +351,20 @@ describe 'up.event', ->
 
           expect(listener.calls.count()).toBe(1)
 
+      describe 'with { capture } option', ->
+
+        fit 'registers an event listener that will be called during the capture phase', ->
+          # See https://javascript.info/bubbling-and-capturing
+          element = fixture('.element')
+          emissions = []
+          up.on(element, 'my:event', -> emissions.push('target phase'))
+          up.on(document.body, 'my:event', -> emissions.push('bubbling phase'))
+          up.on(document.body, 'my:event', { capture: true }, -> emissions.push('capture phase'))
+
+          up.emit(element, 'my:event')
+
+          expect(emissions).toEqual ['capture phase', 'target phase', 'bubbling phase']
+
       describe 'passing of [up-data]', ->
 
         it 'parses an [up-data] attribute as JSON and passes the parsed object as a third argument to the listener', asyncSpec (next) ->
@@ -789,7 +803,7 @@ describe 'up.event', ->
 
         expect(fooListener).toHaveBeenCalled()
 
-      it 'is focusable for keyboard users', ->
+      fit 'is focusable for keyboard users', ->
         link = up.hello(fixture("a[up-emit='foo']", text: 'label'))
         expect(link).toBeKeyboardFocusable()
 

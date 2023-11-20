@@ -1,0 +1,21 @@
+<html>
+<body>
+
+<a href="/foo" id="link">link</a>
+
+<script>
+document.addEventListener('click', function(event) {
+  console.log("Got event %o (type %o) with pointerType %o on target %o", event, event.type, event.pointerType, event.target)
+})
+
+document.addEventListener('mousedown', function(event) {
+  console.log("Got event %o (type %o) with pointerType %o on target %o", event, event.type, event.pointerType, event.target)
+})
+
+let link = document.querySelector('#link')
+link.addEventListener('click', (event) => { console.log("got click on link!"); event.preventDefault() })
+</script>
+
+</body>
+</html>
+

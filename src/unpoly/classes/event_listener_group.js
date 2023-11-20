@@ -6,12 +6,14 @@ up.EventListenerGroup = class EventListenerGroup extends up.Record {
     return [
       'elements',
       'eventTypes',
+
       'selector',
       'callback',
       'guard',
       'baseLayer',
       'passive',
       'once',
+      'capture',
       'beforeBoot',
     ]
   }

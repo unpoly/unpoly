@@ -267,9 +267,19 @@ describe 'up.layer', ->
 
       describe 'focus', ->
 
-        it "focuses the new overlay's element", (done) ->
+        it "focuses the new overlay's box", (done) ->
           assertFocus = ->
-            expect(up.layer.current).toBeFocused()
+            expect(up.layer.current.getBoxElement()).toBeFocused()
+            done()
+
+          up.layer.open(target: '.element', onFinished: assertFocus)
+
+          return
+
+        fit "hides a focus ring on the new overlay's box", (done) ->
+          assertFocus = ->
+            expect(up.layer.current.getBoxElement()).toBeFocused()
+            expect(up.layer.current.getBoxElement()).not.toHaveOutline()
             done()
 
           up.layer.open(target: '.element', onFinished: assertFocus)
@@ -625,6 +635,46 @@ describe 'up.layer', ->
                   jasmine.anything()
                 )
 
+            fit 'returns focus to the link that opened the overlay, hiding a focus ring as it is a mouse interaction', ->
+              opener = fixture('a[href="/overlay"][up-layer="new"][up-target="#content"][up-dismissable="button"]')
+              Trigger.clickSequence(opener)
+
+              await wait()
+
+              jasmine.respondWithSelector('#content', text: 'overlay content')
+
+              await wait()
+
+              expect(up.layer.current).toBeOverlay()
+
+              Trigger.clickSequence('up-modal-dismiss')
+
+              await wait()
+
+              expect(up.layer.current).not.toBeOverlay()
+              expect(opener).toHaveFocus()
+              expect(opener).not.toHaveOutline()
+
+            fit 'returns focus to the link that opened the overlay, showing a focus ring when the button was activated with a keyboard', ->
+              opener = fixture('a[href="/overlay"][up-layer="new"][up-target="#content"][up-dismissable="button"]')
+              Trigger.clickSequence(opener)
+
+              await wait()
+
+              jasmine.respondWithSelector('#content', text: 'overlay content')
+
+              await wait()
+
+              expect(up.layer.current).toBeOverlay()
+
+              Trigger.clickLinkWithKeyboard('up-modal-dismiss')
+
+              await wait()
+
+              expect(up.layer.current).not.toBeOverlay()
+              expect(opener).toHaveFocus()
+              expect(opener).toHaveOutline()
+
           describe 'without { dismissable: "button" }', ->
 
             it 'does not add a button that dimisses the layer', ->
@@ -643,6 +693,26 @@ describe 'up.layer', ->
 
               next ->
                 expect(up.layer.isOverlay()).toBe(false)
+
+            fit 'returns focus to the link that opened the overlay, showing a focus ring as it is a keyboard interaction', ->
+              opener = fixture('a[href="/overlay"][up-target="#content"][up-layer="new"][up-dismissable="key"]')
+              Trigger.clickSequence(opener)
+
+              await wait()
+
+              jasmine.respondWithSelector('#content', text: 'overlay content')
+
+              await wait()
+
+              expect(up.layer.current).toBeOverlay()
+
+              Trigger.escapeSequence(document.body)
+
+              await wait()
+
+              expect(up.layer.current).not.toBeOverlay()
+              expect(opener).toHaveFocus()
+              expect(opener).toHaveOutline()
 
             it 'emits an up:layer:dismissed event with { value: ":key" } and other details', asyncSpec (next) ->
               up.layer.open(dismissable: 'key', mode: 'modal')

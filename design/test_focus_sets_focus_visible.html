@@ -1,0 +1,52 @@
+<html>
+<body>
+
+<input type="text" id="input">
+
+<a href="/foo" id="link">link</a>
+
+<div id="div">content</div>
+
+<script>
+  let delay = 200
+
+  setTimeout(function() {
+    console.log("Init. activeElement is %o, :focus-visible is %o", document.activeElement, document.activeElement?.matches(':focus-visible'))
+  }, (delay += 200))
+
+  setTimeout(function() {
+    let link = document.querySelector('#link')
+    link.focus()
+    console.log("Focused link. activeElement is %o, :focus-visible is %o", document.activeElement, document.activeElement?.matches(':focus-visible'))
+  }, (delay += 200))
+
+  setTimeout(function() {
+    let link = document.querySelector('#link')
+    link.blur()
+    console.log("Blured link. activeElement is %o, :focus-visible is %o", document.activeElement, document.activeElement?.matches(':focus-visible'))
+  }, (delay += 200))
+
+  setTimeout(function() {
+    let input = document.querySelector('#input')
+    input.focus()
+    console.log("Focused input. activeElement is %o, :focus-visible is %o", document.activeElement, document.activeElement?.matches(':focus-visible'))
+  }, (delay += 200))
+
+  setTimeout(function() {
+    let div = document.querySelector('#div')
+    div.setAttribute('tabindex', '-1')
+    div.focus()
+    console.log("Focused div. activeElement is %o, :focus-visible is %o", document.activeElement, document.activeElement?.matches(':focus-visible'))
+  }, (delay += 200))
+
+  setTimeout(function() {
+    let link = document.querySelector('#link')
+    link.focus()
+    console.log("Focused link. activeElement is %o, :focus-visible is %o", document.activeElement, document.activeElement?.matches(':focus-visible'))
+  }, (delay += 200))
+
+</script>
+
+</body>
+</html>
+

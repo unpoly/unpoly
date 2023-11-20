@@ -126,7 +126,7 @@ describe 'up.Layer.Overlay', ->
 
       expect(onAccepted).toHaveBeenCalledWith(jasmine.objectContaining(value: 'acceptance value'))
 
-    it 'focuses the link that originally opened the overlay', ->
+    fit 'focuses the link that originally opened the overlay', ->
       opener = fixture('a[up-target=".element"][up-layer="new"][href="/overlay-path"]')
 
       Trigger.clickSequence(opener)
@@ -581,7 +581,7 @@ describe 'up.Layer.Overlay', ->
       unless document.hasFocus()
         throw "The Jasmine spec runner must be focused for focus-related specs to pass"
 
-    it 'cycles focus within the overlay', asyncSpec (next) ->
+    fit 'cycles focus within the overlay', asyncSpec (next) ->
       makeLayers(2)
 
       next =>
@@ -618,7 +618,7 @@ describe 'up.Layer.Overlay', ->
       next =>
         expect(@dismisser).toBeFocused()
 
-    it 'recaptures focus outside the overlay', asyncSpec (next) ->
+    fit 'recaptures focus outside the overlay', asyncSpec (next) ->
       rootInput = fixture('input[name=email][type=text]')
       rootInput.focus()
       expect(rootInput).toBeFocused()
@@ -634,7 +634,7 @@ describe 'up.Layer.Overlay', ->
       next ->
         expect(up.layer.current).toBeFocused()
 
-    it 'does not trap focus within a foreign overlay', asyncSpec (next) ->
+    fit 'does not trap focus within a foreign overlay', asyncSpec (next) ->
       up.layer.config.foreignOverlaySelectors = ['.foreign-overlay']
 
       rootInput = fixture('input[name=email][type=text]')
@@ -669,7 +669,7 @@ describe 'up.Layer.Overlay', ->
 
     describe 'for an input[type=text]', ->
 
-      it 'focuses the input in the same layer as the label', asyncSpec (next) ->
+      fit 'focuses the input in the same layer as the label', asyncSpec (next) ->
         form = """
           <form>
             <label for="foo">label</label>

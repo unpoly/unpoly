@@ -6,12 +6,14 @@ up.EventListener = class EventListener extends up.Record {
     return [
       'element',
       'eventType',
+
       'selector',
       'callback',
       'guard',
       'baseLayer',
       'passive',
       'once',
+      'capture',
       'beforeBoot',
     ]
   }
@@ -47,7 +49,7 @@ up.EventListener = class EventListener extends up.Record {
     // Avoid setting a default { passive: false } since some browsers have non-false
     // defaults for some event types like `touchstart`.
     // See https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#parameters
-    let options = u.compactObject(u.pick(this, ['once', 'passive']))
+    let options = u.compactObject(u.pick(this, ['once', 'passive', 'capture']))
     return [this.eventType, this.nativeCallback, options]
   }
 
