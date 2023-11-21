@@ -916,6 +916,11 @@ describe 'up.link', ->
         link = fixture('a[up-follow][href="javascript:foo()"]')
         expect(up.link.isFollowable(link)).toBe(false)
 
+      it 'returns false for a link with [up-follow] that also matches up.link.config.noFollowSelectors', ->
+        up.link.config.noFollowSelectors.push('.foo')
+        link = fixture('a.foo[up-follow][href="/foo"]')
+        expect(up.link.isFollowable(link)).toBe(false)
+
     describe 'up.link.preload', ->
 
       beforeEach ->
@@ -1877,15 +1882,28 @@ describe 'up.link', ->
             next =>
               expect(@followSpy).toHaveBeenCalled()
 
-          it 'allows individual links to opt out with [up-instant=false]', asyncSpec (next) ->
-            @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+          it 'allows individual links to opt out with [up-instant=false]', ->
+            followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
             link = fixture('a[up-follow][href="/foo"][up-instant=false].link')
             up.link.config.instantSelectors.push('.link')
 
             Trigger.mousedown(link)
 
-            next =>
-              expect(@followSpy).not.toHaveBeenCalled()
+            await wait()
+
+            expect(followSpy).not.toHaveBeenCalled()
+
+          it 'allows to configure exceptions in up.link.config.noInstantSelectors', ->
+            up.link.config.instantSelectors.push('.include')
+            up.link.config.noInstantSelectors.push('.exclude')
+            followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+            link = fixture('a.include.exclude[up-follow][href="/foo"]')
+
+            Trigger.mousedown(link)
+
+            await wait()
+
+            expect(followSpy).not.toHaveBeenCalled()
 
           it 'allows individual links to opt out of all Unpoly link handling with [up-follow=false]', asyncSpec (next) ->
             @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
@@ -2447,14 +2465,28 @@ describe 'up.link', ->
           next ->
             expect(jasmine.Ajax.requests.count()).toEqual(1)
 
-        it 'allows individual links to opt out with [up-preload=false]', asyncSpec (next) ->
+        it 'allows individual links to opt out with [up-preload=false]', ->
           up.link.config.preloadSelectors.push('.link')
           link = fixture('a[up-follow][href="/foo"][up-preload=false].link')
           up.hello(link)
 
           Trigger.hoverSequence(link)
-          next ->
-            expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+        it 'allows to configure exceptions in up.link.config.noPreloadSelectors', ->
+          up.link.config.preloadSelectors.push('.include')
+          up.link.config.noPreloadSelectors.push('.exclude')
+          link = fixture('a.include.exclude[up-follow][href="/foo"]')
+          up.hello(link)
+
+          Trigger.hoverSequence(link)
+
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toEqual(0)
 
         it 'allows individual links to opt out of all Unpoly link handling with [up-follow=false]', asyncSpec (next) ->
           up.link.config.preloadSelectors.push('.link')

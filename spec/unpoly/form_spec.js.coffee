@@ -2101,6 +2101,11 @@ describe 'up.form', ->
         form = fixture('form[action="/path"][up-submit=false]')
         expect(up.form.isSubmittable(form)).toBe(false)
 
+      it 'returns false for a form with [up-submit] that also matches up.form.config.noSubmitSelectors', ->
+        up.form.config.noSubmitSelectors.push('.foo')
+        form = fixture('form.foo[action="/path"][up-submit]')
+        expect(up.form.isSubmittable(form)).toBe(false)
+
   describe 'unobtrusive behavior', ->
 
     describe 'form[up-submit]', ->

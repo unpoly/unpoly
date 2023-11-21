@@ -392,6 +392,12 @@ describe 'up.element', ->
       expect(element.tagName).toEqual('UL')
       expect(element.getAttribute('foo')).toEqual('bar')
 
+    it 'parses attribute names containing a dash', ->
+      element = up.element.createFromSelector('ul[data-foo=bar]')
+      expect(element).toBeElement()
+      expect(element.tagName).toEqual('UL')
+      expect(element.getAttribute('data-foo')).toEqual('bar')
+
     it 'allows to quote attribute values in single quotes', ->
       element = up.element.createFromSelector("ul[foo='bar']")
       expect(element).toBeElement()

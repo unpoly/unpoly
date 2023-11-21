@@ -106,6 +106,67 @@ describe 'up.history', ->
         up.history.replace('/double-replaced-location')
         expect(up.history.previousLocation).toMatchURL(initialLocation)
 
+    describe 'up.history.findMetaTags()', ->
+
+      it 'finds a meta[name=description]', ->
+        head = document.createElement('head')
+        meta = e.affix(head, 'meta[name="description"][content="content"]')
+        expect(up.history.findMetaTags(head)).toEqual [meta]
+
+      it 'finds a link[rel=alternate]', ->
+        head = document.createElement('head')
+        link = e.affix(head, 'link[rel="alternate"][type="application/rss+xml"][title="RSS Feed"][href="/feed"]')
+        expect(up.history.findMetaTags(head)).toEqual [link]
+
+      it 'finds a link[rel=canonical]', ->
+        head = document.createElement('head')
+        link = e.affix(head, 'link[rel="canonical"][href="/home"]')
+        expect(up.history.findMetaTags(head)).toEqual [link]
+
+      it 'finds a link[rel=icon]', ->
+        head = document.createElement('head')
+        link = e.affix(head, 'link[rel="icon"][href="/favicon.png"]')
+        expect(up.history.findMetaTags(head)).toEqual [link]
+
+      it 'does not find a link[rel=stylesheet]', ->
+        head = document.createElement('head')
+        link = e.affix(head, 'link[rel="stylesheet"][href="/styles.css"]')
+        expect(up.history.findMetaTags(head)).toEqual []
+
+      it 'finds an arbitrary element with [up-meta]', ->
+        head = document.createElement('head')
+        base = e.affix(head, 'base[href="/pages"]')
+        expect(up.history.findMetaTags(head)).toEqual []
+
+        base.setAttribute('up-meta', '')
+        expect(up.history.findMetaTags(head)).toEqual [base]
+
+      it 'does not find a meta[http-equiv]', ->
+        head = document.createElement('head')
+        meta = e.affix(head, 'meta[http-equiv="content-type"][content="text/html; charset=UTF-8"]')
+        expect(up.history.findMetaTags(head)).toEqual []
+
+      it 'allows to opt out with [up-meta=false]', ->
+        head = document.createElement('head')
+        meta = e.affix(head, 'meta[name="description"][content="content"][up-meta="false"]')
+        expect(up.history.findMetaTags(head)).toEqual []
+
+      it 'allows to opt out by configuring up.history.config.noMetaTagSelectors', ->
+        head = document.createElement('head')
+        up.history.config.noMetaTagSelectors.push('meta[name="excluded"]')
+        meta = e.affix(head, 'meta[name="excluded"][content="content"]')
+        expect(up.history.findMetaTags(head)).toEqual []
+
+      it 'does not match a meta[name=csp-nonce] so we do not invalidate existing nonced callbacks', ->
+        head = document.createElement('head')
+        meta = e.affix(head, 'meta[name="csp-nonce"][conce="nonce-123"]')
+        expect(up.history.findMetaTags(head)).toEqual []
+
+      it 'does not find a script[src]', ->
+        head = document.createElement('head')
+        meta = e.affix(head, 'script[src="/foo.js"]')
+        expect(up.history.findMetaTags(head)).toEqual []
+
   describe 'unobtrusive behavior', ->
 
     describe 'back button', ->

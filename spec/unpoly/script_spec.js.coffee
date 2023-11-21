@@ -670,3 +670,55 @@ describe 'up.script', ->
 
           expect(destructorBefore).toHaveBeenCalled()
           expect(destructorAfter).toHaveBeenCalled()
+
+    describe 'up.script.findAssets()', ->
+
+      it 'finds a link[rel=stylesheet] in the head', ->
+        link = e.affix(document.head, 'link[rel="stylesheet"][href="/styles.css"]')
+        registerFixture(link)
+        expect(up.script.findAssets()).toContain(link)
+
+      it 'does not find a link[rel=stylesheet] in the body', ->
+        link = e.affix(document.body, 'link[rel="stylesheet"][href="/styles.css"]')
+        registerFixture(link)
+        expect(up.script.findAssets()).not.toContain(link)
+
+      it 'does not find a link[rel=alternate]', ->
+        link = e.affix(document.body, 'link[rel="alternate"][type="application/rss+xml"][title="RSS Feed"][href="/feed"]')
+        registerFixture(link)
+        expect(up.script.findAssets()).not.toContain(link)
+
+      it 'finds a script[src] in the head', ->
+        link = e.affix(document.head, 'script[src="/foo.js"]')
+        registerFixture(link)
+        expect(up.script.findAssets()).toContain(link)
+
+      it 'does not find a script[src] in the body', ->
+        link = e.affix(document.body, 'script[src="/foo.js"]')
+        registerFixture(link)
+        expect(up.script.findAssets()).not.toContain(link)
+
+      it 'does not find an inline script in the head', ->
+        link = e.affix(document.head, 'script', text: 'console.log("hello from inline script")')
+        registerFixture(link)
+        expect(up.script.findAssets()).not.toContain(link)
+
+      it 'finds an arbitrary element in the head with [up-asset]', ->
+        base = e.affix(document.head, 'base[href="/pages"]')
+        registerFixture(base)
+        expect(up.script.findAssets()).toEqual []
+
+        base.setAttribute('up-asset', '')
+        expect(up.script.findAssets()).toEqual [base]
+
+      it 'allows to opt out with [up-asset=false]', ->
+        link = e.affix(document.head, 'link[rel="stylesheet"][href="/styles.css"][up-asset="false"]')
+        registerFixture(link)
+        expect(up.script.findAssets()).not.toContain(link)
+
+      it 'allows to opt out by configuring up.script.config.noAssetSelectors', ->
+        link = e.affix(document.head, 'link[rel="stylesheet"][href="/excluded.css"]')
+        registerFixture(link)
+        up.script.config.noAssetSelectors.push('link[href="/excluded.css"]')
+        expect(up.script.findAssets()).not.toContain(link)
+
