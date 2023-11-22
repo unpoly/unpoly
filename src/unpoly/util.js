@@ -1162,12 +1162,13 @@ up.util = (function() {
   If `value` is an array, this returns whether `subValue` is an element of `value`.
 
   @function up.util.contains
-  @param {Array|string} value
-  @param {Array|string} subValue
+  @param {Array|NodeList|string} value
+  @param {any} subValue
   @stable
   */
   function contains(value, subValue) {
-    return value.indexOf(subValue) >= 0
+    let indexOf = value.indexOf || Array.prototype.indexOf
+    return indexOf.call(value, subValue) >= 0
   }
 
   /*-

@@ -1114,6 +1114,32 @@ describe 'up.util', ->
         returned = up.util.remove(array, 'd')
         expect(returned).toBeUndefined()
 
+    describe 'up.util.contains()', ->
+
+      describe 'for a string', ->
+
+        it 'returns true if the given string contains the given substring', ->
+          expect(up.util.contains('foobar', 'oba')).toBe(true)
+
+        it 'returns false if the given string does not contain the given substring', ->
+          expect(up.util.contains('foobar', 'baz')).toBe(false)
+
+      describe 'for an array', ->
+
+        it 'returns true if the given array contains the given element', ->
+          expect(up.util.contains(['foo', 'bar', 'baz'], 'bar')).toBe(true)
+
+        it 'returns false if the given array does not contain the given element', ->
+          expect(up.util.contains(['foo', 'bar', 'baz'], 'qux')).toBe(false)
+
+      describe 'for a NodeList', ->
+
+        it 'returns true if the given NodeList contains the given element', ->
+          expect(up.util.contains(document.querySelectorAll('body'), document.body)).toBe(true)
+
+        it 'returns false if the given NodeList does not contain the given element', ->
+          expect(up.util.contains(document.querySelectorAll('div'), document.body)).toBe(false)
+
     describe 'up.util.unresolvablePromise', ->
 
       it 'return a pending promise', (done) ->
