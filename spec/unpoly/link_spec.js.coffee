@@ -899,9 +899,33 @@ describe 'up.link', ->
         up.link.config.followSelectors.push('.hyperlink')
         expect(up.link.isFollowable(link)).toBe(true)
 
-      it 'returns true if the given link matches a custom up.link.config.followSelectors, but also has [up-follow=false]', ->
+      it 'returns false if the given link matches a custom up.link.config.followSelectors, but also has [up-follow=false]', ->
         link = fixture('a.hyperlink[href="/foo"][up-follow="false"]')
         up.link.config.followSelectors.push('.hyperlink')
+        expect(up.link.isFollowable(link)).toBe(false)
+
+      it 'returns false for a link with a [href] to another host', ->
+        link = fixture('a[up-follow][href="https://other-host/path"]')
+        expect(up.link.isFollowable(link)).toBe(false)
+
+      it 'returns true for a link with a [href] to a fully qualified URL on this host', ->
+        link = fixture("a[up-follow][href=//#{location.host}/path]")
+        expect(up.link.isFollowable(link)).toBe(true)
+
+      it 'returns false for a link with a [href] to this host, but another port', ->
+        link = fixture("a[up-follow][href=//#{location.host}:97334/path]")
+        expect(up.link.isFollowable(link)).toBe(false)
+
+      it 'returns false for a link with a [up-href] to another host', ->
+        link = fixture('a[up-follow][href="/path"][up-href="https://other-host/path"]')
+        expect(up.link.isFollowable(link)).toBe(false)
+
+      it 'returns true for a link with a [up-href] to a fully qualified URL on this host', ->
+        link = fixture("a[up-follow][href='/path'][up-href=//#{location.host}/path]")
+        expect(up.link.isFollowable(link)).toBe(true)
+
+      it 'returns false for a link with a [up-href] to this host, but another port', ->
+        link = fixture("a[up-follow][href='/path'][up-href=//#{location.host}:97334/path]")
         expect(up.link.isFollowable(link)).toBe(false)
 
       it 'returns false for an #anchor link without a path, even if the link has [up-follow]', ->

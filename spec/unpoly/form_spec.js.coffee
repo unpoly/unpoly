@@ -2106,6 +2106,18 @@ describe 'up.form', ->
         form = fixture('form.foo[action="/path"][up-submit]')
         expect(up.form.isSubmittable(form)).toBe(false)
 
+      it 'returns false for a form to another host', ->
+        link = fixture('form[up-submit][action="https://other-host/path"]')
+        expect(up.form.isSubmittable(link)).toBe(false)
+
+      it 'returns true for a form to a fully qualified URL on this host', ->
+        link = fixture("form[up-submit][action=//#{location.host}/path]")
+        expect(up.form.isSubmittable(link)).toBe(true)
+
+      it 'returns false for a form to this host, but another port', ->
+        link = fixture("form[up-submit][action=//#{location.host}:97334/path]")
+        expect(up.form.isSubmittable(link)).toBe(false)
+
   describe 'unobtrusive behavior', ->
 
     describe 'form[up-submit]', ->
