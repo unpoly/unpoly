@@ -53,6 +53,7 @@ up.event = (function() {
   - You may register a listener to multiple events by passing a space-separated list of event name (e.g. `"click mousedown"`)
   - You may register a listener to multiple elements in a single `up.on()` call, by passing a [list](/up.util.isList) of elements.
   - Any [data attached to the observed element](/data) will be passed as a third argument to your handler function.
+  - You can prevent the event from being processed further with [up.event.halt(event)](/up.event.halt).
 
   ### Basic example
 
