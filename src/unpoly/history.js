@@ -413,7 +413,7 @@ up.history = (function() {
   })
 
   function findMetaTags(head = document.head) {
-    return e.filteredQuery(head, config.metaTagSelectors, config.noMetaTagSelectors)
+    return head.querySelectorAll(config.selector('metaTagSelectors'))
   }
 
   /*-

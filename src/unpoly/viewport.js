@@ -96,11 +96,7 @@ up.viewport = (function() {
     config.reset()
   }
 
-  function fullAnchoredRightSelector() {
-    return config.anchoredRightSelectors.join()
-  }
-
-  up.compiler(fullAnchoredRightSelector, function(element) {
+  up.compiler(config.selectorFn('anchoredRightSelectors'), function(element) {
     return bodyShifter.onAnchoredElementInserted(element)
   })
 

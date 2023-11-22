@@ -121,7 +121,7 @@ up.form = (function() {
     groupSelectors: ['[up-form-group]', 'fieldset', 'label', 'form'],
     fieldSelectors: ['select', 'input:not([type=submit]):not([type=image])', 'button[type]:not([type=submit])', 'textarea'],
     submitSelectors: up.link.combineFollowableSelectors(['form'], ATTRIBUTES_SUGGESTING_SUBMIT),
-    noSubmitSelectors: ['[up-submit=false]', '[target]'],
+    noSubmitSelectors: ['[up-submit=false]', '[target]', e.crossOriginSelector('action')],
     submitButtonSelectors: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])'],
     // Although we only need to bind to `input`, we always also bind to `change`
     // in case another script manually triggers it.
@@ -129,10 +129,6 @@ up.form = (function() {
     watchInputDelay: 0,
     watchChangeEvents: ['change'],
   }))
-
-  function fullSubmitSelector() {
-    return config.submitSelectors.join()
-  }
 
   function reset() {
     config.reset()
@@ -227,7 +223,7 @@ up.form = (function() {
   @internal
   */
   function submitButtonSelector() {
-    return config.submitButtonSelectors.join()
+    return config.selector('submitButtonSelectors')
   }
 
   /*-
@@ -1220,13 +1216,7 @@ up.form = (function() {
   */
   function isSubmittable(form) {
     form = up.fragment.get(form)
-    return form.matches(fullSubmitSelector()) && !isSubmitDisabled(form)
-  }
-
-  function isSubmitDisabled(form) {
-    // We also don't want to handle cross-origin forms.
-    // That will be handled in `up.Change.FromURL#newPageReason`.
-    return form.matches(config.noSubmitSelectors.join())
+    return config.matches(form, 'submitSelectors')
   }
 
   /*-
@@ -1295,12 +1285,10 @@ up.form = (function() {
   @stable
   */
 
-  up.on('submit', fullSubmitSelector, function(event, form) {
+  up.on('submit', config.selectorFn('submitSelectors'), function(event, form) {
     // Users may configure up.form.config.submitSelectors.push('form')
     // and then opt out individual forms with [up-submit=false].
-    if (event.defaultPrevented || isSubmitDisabled(form)) {
-      return
-    }
+    if (event.defaultPrevented) return
 
     up.event.halt(event, { log: true })
     up.error.muteUncriticalRejection(submit(form))

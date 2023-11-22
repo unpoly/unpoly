@@ -46,7 +46,7 @@ up.on('up:framework:boot', function() {
 // up.compiler('[up-hungry]')
 
 up.migrate.warnOfHungryMetaTags = function(metaTags) {
-  let fullHungrySelector = up.radio.config.hungrySelectors.join()
+  let fullHungrySelector = up.radio.config.selector('hungrySelectors')
   let hungryMetaTags = up.util.filter(metaTags, (meta) => meta.matches(fullHungrySelector))
   if (hungryMetaTags.length) {
     up.migrate.warn('Meta tags in the <head> are now updated automatically. Remove the [up-hungry] attribute from %o.', hungryMetaTags)

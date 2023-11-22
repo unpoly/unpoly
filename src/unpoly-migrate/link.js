@@ -2,12 +2,15 @@
 @module up.link
 */
 
-up.migrate.renamedAttribute('up-flavor', 'up-mode', { scope: up.link.followSelector })
-up.migrate.renamedAttribute('up-closable', 'up-dismissable', { scope: up.link.followSelector })
-up.migrate.removedAttribute('up-width', { scope: up.link.followSelector, replacement: '[up-size] or [up-class]' })
-up.migrate.removedAttribute('up-height', { scope: up.link.followSelector, replacement: '[up-size] or [up-class]' })
-up.migrate.renamedAttribute('up-history-visible', 'up-history', { scope: up.link.followSelector })
-up.migrate.renamedAttribute('up-clear-cache', 'up-expire-cache', { scope: up.link.followSelector })
+const followSelectorFn = up.link.config.selectorFn('followSelectors')
+const preloadSelectorFn = up.link.config.selectorFn('preloadSelectors')
+
+up.migrate.renamedAttribute('up-flavor', 'up-mode', { scope: followSelectorFn })
+up.migrate.renamedAttribute('up-closable', 'up-dismissable', { scope: followSelectorFn })
+up.migrate.removedAttribute('up-width', { scope: followSelectorFn, replacement: '[up-size] or [up-class]' })
+up.migrate.removedAttribute('up-height', { scope: followSelectorFn, replacement: '[up-size] or [up-class]' })
+up.migrate.renamedAttribute('up-history-visible', 'up-history', { scope: followSelectorFn })
+up.migrate.renamedAttribute('up-clear-cache', 'up-expire-cache', { scope: followSelectorFn })
 
 up.migrate.transformAttribute('up-solo', function(link, solo) {
   switch (solo) {
@@ -112,7 +115,7 @@ This is shorthand for:
 */
 up.migrate.targetMacro('up-dash', { 'up-preload': '', 'up-instant': '' }, () => up.migrate.deprecated('a[up-dash]', 'up.link.config.instantSelectors and up.link.config.preloadSelectors'))
 
-up.migrate.renamedAttribute('up-delay', 'up-preload-delay', { scope: up.link.preloadSelector })
+up.migrate.renamedAttribute('up-delay', 'up-preload-delay', { scope: preloadSelectorFn })
 
 up.link.config.preloadEnabled = true
 let preloadEnabledRef = up.migrate.removedProperty(up.link.config, 'preloadEnabled', 'The configuration up.link.config.preloadEnabled has been removed. To disable preloading, prevent up:link:preload instead.')

@@ -1342,14 +1342,6 @@ up.element = (function() {
     }
   }
 
-  function filteredQuery(parent, includeSelectors, excludeSelectors) {
-    let fullIncludeSelector = includeSelectors.join()
-    let fullExcludeSelector = excludeSelectors.join()
-    let elements = parent.querySelectorAll(fullIncludeSelector)
-    let isExcluded = (element) => element.matches(fullExcludeSelector)
-    return u.reject(elements, isExcluded)
-  }
-
   /*-
   Returns whether the given element has no content.
 
@@ -1391,6 +1383,10 @@ up.element = (function() {
   */
   function isEmpty(element) {
     return !element.children.length > 0 && !element.innerText.trim()
+  }
+
+  function crossOriginSelector(attr) {
+    return `[${attr}*="//"]:not([${attr}*="//${location.host}/"])`
   }
 
   return {
@@ -1448,9 +1444,9 @@ up.element = (function() {
     setTemporaryAttr,
     cleanJQuery,
     parseSelector,
-    filteredQuery,
     isEmpty,
     disableScript,
     disableScriptsInSubtree,
+    crossOriginSelector,
   }
 })()

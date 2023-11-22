@@ -15,8 +15,8 @@ up.RevealMotion = class RevealMotion {
     this._top     = this._options.top     ?? this._options.revealTop     ?? viewportConfig.revealTop
     this._max     = this._options.max     ?? this._options.revealMax     ?? viewportConfig.revealMax
 
-    this._topObstructions = viewportConfig.fixedTopSelectors
-    this._bottomObstructions = viewportConfig.fixedBottomSelectors
+    this._topObstructionSelector = viewportConfig.selector('fixedTopSelectors')
+    this._bottomObstructionSelector = viewportConfig.selector('fixedBottomSelectors')
   }
 
   start() {
@@ -88,13 +88,13 @@ up.RevealMotion = class RevealMotion {
     elementRect.height += 2 * this._padding
   }
 
-  _selectObstructions(selectors) {
-    let elements = up.fragment.all(selectors.join(), { layer: this._obstructionsLayer })
+  _selectObstructions(selector) {
+    let elements = up.fragment.all(selector, { layer: this._obstructionsLayer })
     return u.filter(elements, e.isVisible)
   }
 
   _substractObstructions(viewportRect) {
-    for (let obstruction of this._selectObstructions(this._topObstructions)) {
+    for (let obstruction of this._selectObstructions(this._topObstructionSelector)) {
       let obstructionRect = up.Rect.fromElement(obstruction)
       let diff = obstructionRect.bottom - viewportRect.top
       if (diff > 0) {
@@ -103,7 +103,7 @@ up.RevealMotion = class RevealMotion {
       }
     }
 
-    for (let obstruction of this._selectObstructions(this._bottomObstructions)) {
+    for (let obstruction of this._selectObstructions(this._bottomObstructionSelector)) {
       let obstructionRect = up.Rect.fromElement(obstruction)
       let diff = viewportRect.bottom - obstructionRect.top
       if (diff > 0) {

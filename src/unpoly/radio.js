@@ -53,7 +53,7 @@ up.radio = (function() {
 
     if (!useHungry) return steps
 
-    let hungrySelector = config.hungrySelectors.join()
+    let hungrySelector = config.selector('hungrySelectors')
 
     // When multiple steps target the same new selector, we're updating the layer
     // that's closer to the layer of the render pass.

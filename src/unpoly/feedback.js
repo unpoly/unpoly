@@ -117,7 +117,7 @@ up.feedback = (function() {
   const SELECTOR_LINK = 'a, [up-href]'
 
   function navSelector() {
-    return config.navSelectors.join()
+    return config.selector('navSelectors')
   }
 
   function normalizeURL(url) {

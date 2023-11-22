@@ -25,7 +25,6 @@ for details.
 up.script = (function() {
 
   const u = up.util
-  const e = up.element
 
   /*-
   Configures defaults for script handling.
@@ -714,7 +713,7 @@ up.script = (function() {
   }
 
   function findAssets(head = document.head) {
-    return e.filteredQuery(head, config.assetSelectors, config.noAssetSelectors)
+    return head.querySelectorAll(config.selector('assetSelectors'))
   }
 
   /*-

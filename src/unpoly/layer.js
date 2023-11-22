@@ -693,7 +693,7 @@ up.layer = (function() {
   }
 
   function isWithinForeignOverlay(element) {
-    let selector = config.foreignOverlaySelectors.join()
+    let selector = config.selector('foreignOverlaySelectors')
     return !!(selector && element.closest(selector))
   }
 

@@ -197,7 +197,7 @@ up.link = (function() {
     //     Many web developers are used to give JavaScript-handled links an [href="#"]
     //     attribute. Also frameworks like Bootstrap only style links if they have an [href].
     // (3) We don't want to handle <a href="javascript:foo()"> links.
-    noFollowSelectors: ['[up-follow=false]', 'a[download]', 'a[target]', 'a[href^="#"]:not([up-content]):not([up-fragment]):not([up-document])', 'a[href^="javascript:"]'],
+    noFollowSelectors: ['[up-follow=false]', 'a[download]', 'a[target]', 'a[href^="#"]:not([up-content]):not([up-fragment]):not([up-document])', 'a[href^="javascript:"]', 'a[href^="mailto:"]', e.crossOriginSelector('href'), e.crossOriginSelector('up-href')],
 
     instantSelectors: ['[up-instant]'],
     noInstantSelectors: ['[up-instant=false]', '[onclick]'],
@@ -207,44 +207,8 @@ up.link = (function() {
     preloadDelay: 90,
   }))
 
-  function fullFollowSelector() {
-    return config.followSelectors.join()
-  }
-
-  function fullPreloadSelector() {
-    return config.preloadSelectors.join()
-  }
-
-  function fullInstantSelector() {
-    return config.instantSelectors.join()
-  }
-
-  function fullClickableSelector() {
-    return config.clickableSelectors.join()
-  }
-
-  /*-
-  Returns whether the link was explicitly marked up as not followable,
-  e.g. through `[up-follow=false]`.
-
-  This differs from `config.followSelectors` in that we want users to configure
-  simple selectors, but let users make exceptions. We also have a few built-in
-  exceptions of our own, e.g. to never follow an `<a href="javascript:...">` link.
-
-  @function isFollowDisabled
-  @param {Element} link
-  @return {boolean}
-  @internal
-  */
-  function isFollowDisabled(link) {
-    return link.matches(config.noFollowSelectors.join()) || u.isCrossOrigin(link)
-  }
-
   function isPreloadDisabled(link) {
-    return !up.browser.canPushState() ||
-      link.matches(config.noPreloadSelectors.join()) ||
-      isFollowDisabled(link) ||
-      !willCache(link)
+    return !up.browser.canPushState() || !isFollowable(link) || !willCache(link)
   }
 
   function willCache(link) {
@@ -256,10 +220,6 @@ up.link = (function() {
       const request = new up.Request(options)
       return request.willCache()
     }
-  }
-
-  function isInstantDisabled(link) {
-    return link.matches(config.noInstantSelectors.join()) || isFollowDisabled(link)
   }
 
   function reset() {
@@ -617,7 +577,7 @@ up.link = (function() {
   */
   function isFollowable(link) {
     link = up.fragment.get(link)
-    return link.matches(fullFollowSelector()) && !isFollowDisabled(link)
+    return config.matches(link, 'followSelectors')
   }
 
   /*-
@@ -674,12 +634,12 @@ up.link = (function() {
   @selector [up-clickable]
   @experimental
   */
-  up.macro(fullClickableSelector, makeClickable)
+  up.macro(config.selectorFn('clickableSelectors'), makeClickable)
 
   function shouldFollowEvent(event, link) {
     // Users may configure up.link.config.followSelectors.push('a')
     // and then opt out individual links with [up-follow=false].
-    if (event.defaultPrevented || isFollowDisabled(link)) {
+    if (event.defaultPrevented) {
       return false
     }
 
@@ -691,10 +651,18 @@ up.link = (function() {
   }
 
   function isInstant(linkOrDescendant) {
-    const element = linkOrDescendant.closest(fullInstantSelector())
+    const element = linkOrDescendant.closest(config.selector('instantSelectors'))
     // Allow users to configure up.link.config.instantSelectors.push('a')
-    // but opt out individual links with [up-instant=false].
+    // but opt out individual links with [up-follow=false].
     return element && !isInstantDisabled(element)
+  }
+
+  function isInstantDisabled(link) {
+    // (1) We cannot resolve config.noInstantSelectors via a :not() selector because
+    //     convertClicks() needs to check if a given link is instant.
+    // (2) We cannot implement this as !isFollowable(link) because [up-clickable] can add
+    //     instant support for non-followable elements.
+    return config.matches(link, 'noInstantSelectors') || config.matches(link, 'noFollowSelectors')
   }
 
   /*-
@@ -1266,7 +1234,7 @@ up.link = (function() {
 
   @stable
   */
-  up.on('up:click', fullFollowSelector, function(event, link) {
+  up.on('up:click', config.selectorFn('followSelectors'), function(event, link) {
     if (shouldFollowEvent(event, link)) {
       up.event.halt(event, { log: true })
 
@@ -1459,7 +1427,7 @@ up.link = (function() {
     Defaults to `up.link.config.preloadDelay`.
   @stable
   */
-  up.compiler(fullPreloadSelector, function(link) {
+  up.compiler(config.selectorFn('preloadSelectors'), function(link) {
     if (!isPreloadDisabled(link)) {
       linkPreloader.watchLink(link)
     }
@@ -1480,8 +1448,6 @@ up.link = (function() {
     convertClicks,
     config,
     combineFollowableSelectors,
-    preloadSelector: fullPreloadSelector,
-    followSelector: fullFollowSelector,
     preloadIssue,
   }
 })()
