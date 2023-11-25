@@ -25,6 +25,7 @@ for details.
 up.script = (function() {
 
   const u = up.util
+  const e = up.element
 
   /*-
   Configures defaults for script handling.
@@ -48,6 +49,21 @@ up.script = (function() {
     Matching elements will *not* be considered [assets](/up-asset)
     even if they match `up.script.config.assetSelectors`.
 
+  @param [config.scriptSelectors]
+    An array of CSS selectors matching elements that run JavaScript.
+
+    By default this matches all `<script>` tags.
+
+    Matching elements will be removed from new page fragments with `up.fragment.config.runScripts = false`.
+
+    This configuration does not affect what Unpoly considers an [assets](/up-asset).
+    For this configure `up.fragment.config.assetSelectors`.
+
+    @experimental
+  @param [config.noScriptSelectors]
+    Exceptions to `up.fragment.config.scriptSelectors`.
+
+    @experimental
   @property up.script.config
   @stable
   */
@@ -70,6 +86,12 @@ up.script = (function() {
       'up-on-error',
       'up-on-offline',
     ],
+    scriptSelectors: [
+      'script'
+    ],
+    noScriptSelectors: [
+      'script[type="application/ld+json"]'
+    ]
   }))
 
   const SYSTEM_MACRO_PRIORITIES = {
@@ -852,6 +874,15 @@ up.script = (function() {
   @stable
   */
 
+  function disableScript(scriptElement) {
+    scriptElement.type = 'up-disabled-script'
+  }
+
+  function disableScriptsInSubtree(root) {
+    let selector = config.selector('scriptSelectors')
+    u.each(e.subtree(root, selector), disableScript)
+  }
+
   /*
   Resets the list of registered compiler directives to the
   moment when the framework was booted.
@@ -874,6 +905,7 @@ up.script = (function() {
     data: readData,
     findAssets,
     assertAssetsOK,
+    disableSubtree: disableScriptsInSubtree,
   }
 })()
 

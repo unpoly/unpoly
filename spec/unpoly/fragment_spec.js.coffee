@@ -4579,6 +4579,50 @@ describe 'up.fragment', ->
           expect(document.head).toHaveSelector('link[rel="canonical"][href="/old-canonical"]')
           expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
 
+
+        fit 'updates a script[type="application/ld+json"] from the response with up.fragment.config.runScripts = false (bugfix)', ->
+          up.fragment.config.runScripts = false
+
+          json = """
+              {
+                "@context": "https://schema.org/",
+                "@type": "Recipe",
+                "name": "Party Coffee Cake",
+                "author": {
+                  "@type": "Person",
+                  "name": "Mary Stone"
+                },
+                "datePublished": "2018-03-10",
+                "description": "This coffee cake is awesome and perfect for parties.",
+                "prepTime": "PT20M"
+              }
+            """
+
+          fixture('.container', text: 'old container text')
+          up.render('.container', url: '/path', history: true)
+
+          await wait()
+
+          jasmine.respondWith """
+              <html>
+                <head>
+                  <script type="application/ld+json">#{json}</script>
+                </head>
+                <body>
+                  <div class='container'>
+                    new container text
+                  </div>
+                </body>
+              </html>
+            """
+
+          await wait()
+
+          expect('.container').toHaveText('new container text')
+          expect(document.head).toHaveSelector('script[type="application/ld+json"]')
+          expect(document.head.querySelector('script[type="application/ld+json"]')).toHaveText(json)
+
+
         if up.migrate.loaded
           it "warns if an auto-update meta tags is also [up-hungry]", ->
             e.affix(document.head, 'link[rel="canonical"][href="/old-canonical"][up-hungry]')
@@ -4752,7 +4796,7 @@ describe 'up.fragment', ->
 
           expect(listener).not.toHaveBeenCalled()
 
-        it 'does not emit up:assets:changed when a script is disabled through up.fragmentconfig.runScripts = false', ->
+        it 'does not emit up:assets:changed after a script in the <body> was disabled through up.fragmentconfig.runScripts = false (bugfix)', ->
           up.fragment.config.runScripts = false
           listener = jasmine.createSpy('up:assets:changed listener')
           up.on('up:assets:changed', listener)
@@ -4825,9 +4869,9 @@ describe 'up.fragment', ->
           listener = jasmine.createSpy('up:assets:changed listener')
           up.on('up:assets:changed', listener)
 
-          style = e.createFromSelector('script[src="scripts-1.js"]')
-          registerFixture(style)
-          document.head.append(style)
+          script = e.createFromSelector('script[src="scripts-1.js"]')
+          registerFixture(script)
+          document.head.append(script)
 
           fixture('.container', text: 'old container text')
           up.render('.container', location: '/path', history: true, document: """
@@ -6025,6 +6069,36 @@ describe 'up.fragment', ->
               expect(window.scriptTagExecuted).not.toHaveBeenCalled()
               expect(document).toHaveSelector('.target')
               expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
+
+          fit 'keeps script[type="application/ld+json"]', ->
+            json = """
+              {
+                "@context": "https://schema.org/",
+                "@type": "Recipe",
+                "name": "Party Coffee Cake",
+                "author": {
+                  "@type": "Person",
+                  "name": "Mary Stone"
+                },
+                "datePublished": "2018-03-10",
+                "description": "This coffee cake is awesome and perfect for parties.",
+                "prepTime": "PT20M"
+              }
+            """
+
+            fixture('#target')
+
+            up.render fragment: """
+              <div id="target">
+                <script type="application/ld+json">
+                  #{json}
+                </script>
+              </div>
+            """
+
+            expect(document.querySelector('#target')).toHaveSelector('script[type="application/ld+json"]')
+            expect(document.querySelector('#target script[type="application/ld+json"]')).toHaveText(json)
+
 
         describe 'with up.fragment.config.runScripts = true (default)', ->
 

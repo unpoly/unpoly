@@ -80,6 +80,7 @@ up.history = (function() {
       'link[rel=canonical]',
       'link[rel=icon]',
       '[up-meta]',
+      'script[type="application/ld+json"]',
     ],
     noMetaTagSelectors: [
       'meta[http-equiv]',

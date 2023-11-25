@@ -167,6 +167,24 @@ describe 'up.history', ->
         meta = e.affix(head, 'script[src="/foo.js"]')
         expect(up.history.findMetaTags(head)).toEqual []
 
+      fit 'finds a script[type="application/ld+json"]', ->
+        head = document.createElement('head')
+        script = e.affix(head, 'script[type="application/ld+json"]', text: """
+          {
+            "@context": "https://schema.org/",
+            "@type": "Recipe",
+            "name": "Party Coffee Cake",
+            "author": {
+              "@type": "Person",
+              "name": "Mary Stone"
+            },
+            "datePublished": "2018-03-10",
+            "description": "This coffee cake is awesome and perfect for parties.",
+            "prepTime": "PT20M"
+          }
+        """)
+        expect(up.history.findMetaTags(head)).toEqual [script]
+
   describe 'unobtrusive behavior', ->
 
     describe 'back button', ->

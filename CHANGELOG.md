@@ -19,6 +19,9 @@ Unreleased
 - Fix a bug where `up:assets:changed` would be emitted for every response when configuring `up.fragment.config.runScripts = false`.
 - `up.util.contains()` now works on `NodeList` objects.
 - `up.form.isSubmittable()` returns `false` for forms with a cross-origin URL in their `[action]` attribute.
+- Structured data in script[type="application/ld+json"] is considered meta tags that will be [updated with history changes](/updating-history#history-state).
+- Preserve `script[type="application/ld+json"]` in new fragments with `up.fragment.config.runScripts = false`.
+- You can now configure which elements are removed by `up.fragment.config.runScripts = false`. Use `up.script.config.scriptSelectors` and `up.script.config.noScriptSelectors`.
 
 
 3.5.2

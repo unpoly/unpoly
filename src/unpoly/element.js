@@ -772,14 +772,6 @@ up.element = (function() {
     scriptish.replaceWith(clone)
   }
 
-  function disableScript(scriptElement) {
-    scriptElement.type = 'up-disabled-script'
-  }
-
-  function disableScriptsInSubtree(root) {
-    u.each(subtree(root, 'script'), disableScript)
-  }
-
   /*-
   Creates an element from the given HTML fragment string.
 
@@ -1445,8 +1437,6 @@ up.element = (function() {
     cleanJQuery,
     parseSelector,
     isEmpty,
-    disableScript,
-    disableScriptsInSubtree,
     crossOriginSelector,
   }
 })()

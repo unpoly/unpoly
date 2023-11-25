@@ -198,7 +198,7 @@ up.ResponseDoc = class ResponseDoc {
       // While <script> elements parsed by `DOMParser` are inert anyway, we also parse HTML through
       // other methods, which do create non-inert <script> elements.
       if (!up.fragment.config.runScripts) {
-        e.disableScriptsInSubtree(element)
+        up.script.disableSubtree(element)
       }
 
       // Ensure that the element cannot be matched for subsequent selects().
