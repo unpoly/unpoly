@@ -4580,7 +4580,7 @@ describe 'up.fragment', ->
           expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
 
 
-        fit 'updates a script[type="application/ld+json"] from the response with up.fragment.config.runScripts = false (bugfix)', ->
+        it 'updates a script[type="application/ld+json"] from the response with up.fragment.config.runScripts = false (bugfix)', ->
           up.fragment.config.runScripts = false
 
           json = """
@@ -4890,7 +4890,7 @@ describe 'up.fragment', ->
 
           expect(listener).not.toHaveBeenCalled()
 
-        fit 'does not emit up:assets:changed if inline scripts in the <head> changed', ->
+        it 'does not emit up:assets:changed if inline scripts in the <head> changed', ->
           listener = jasmine.createSpy('up:assets:changed listener')
           up.on('up:assets:changed', listener)
 
@@ -6070,7 +6070,7 @@ describe 'up.fragment', ->
               expect(document).toHaveSelector('.target')
               expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
 
-          fit 'keeps script[type="application/ld+json"]', ->
+          it 'keeps script[type="application/ld+json"]', ->
             json = """
               {
                 "@context": "https://schema.org/",

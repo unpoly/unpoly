@@ -167,7 +167,7 @@ describe 'up.history', ->
         meta = e.affix(head, 'script[src="/foo.js"]')
         expect(up.history.findMetaTags(head)).toEqual []
 
-      fit 'finds a script[type="application/ld+json"]', ->
+      it 'finds a script[type="application/ld+json"]', ->
         head = document.createElement('head')
         script = e.affix(head, 'script[type="application/ld+json"]', text: """
           {
