@@ -2,3 +2,5 @@
 - Remove up.form.config.watchChangeEvents
 - Use Array#toReversed() in up.LayerStack
 - Async compiler functions (see separate doc)
+- Check browser support for Element#focus({ focusVisible }) option
+- Consider requiring elements for functions that work with elements, not selectors or jQuery collections

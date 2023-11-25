@@ -1,23 +1,28 @@
-Backlog
+Current
 =======
 
-
-- Hide focus ring for up-instant links
+- Prevent overly long X-Up-Validate headers
+- Test and DOCUMENT that we don't set role=link for buttons
 - Explain that nonce-prefixing only works for [up-on] attributes
   - In /csp
   - In unpoly-rails README
-  - OR we could also support nonce rewriting for arbitrary attributes, e.g. up.safe_callback('124321321', '432423423')
-    - But then we would need to know all the attributes we're rewriting to query them quickly
+- Docs for https://unpoly.com/up:form:validate#options.renderOptions should point out that the render pass might be batched
+- *Hard*: Hide focus ring for up-instant links
+  - If we solve this with an .up-hidden-focus class or similiar, we must make sure it goes away after we blur the field. A follow-up focus using keyboard should work.
+
+
+Backlog
+=======
+
+- Nonces for remote scripts
+  - Rewrite nonces before comparing
+- Look within :origin first
+  - Remove similiar logic in up.FragmentProcessor: findSelector()
+- Remove [up-validate] from individual fields https://unpoly.com/up-validate#validating-multiple-fields
+- Support nonce rewriting for arbitrary attributes, e.g. up.safe_callback('124321321', '432423423')
+  - But then we would need to know all the attributes we're rewriting to query them quickly
   - OR we could support [up-on] with an event name and a nonce
 - Swapped body looks funny in Safari (has .up-destroying class and is grayed out with old content in inspector)
-- Consider adding a class to elements focused by Unpoly
-- Do we need to call document.importNode() on new content
-  - To get rid of noscript fix
-  - To fix Safari not loading new video elements.
-- Introduce up:history:restore event
-  - With { renderOptions }
-  - Preventable for custom history handling
-- Docs for https://unpoly.com/up:form:validate#options.renderOptions should point out that the render pass might be batched
 - Allow to disable batching in validations
 - inlineStyle, setInlineStyle should work with custom properties
 - Jasmine matchers no longer get a `customEqualityTesters` argument
@@ -540,3 +545,8 @@ Decisions
   => We can rename the options then. If we do support this we would no longer have { renderOptions }, we would use { targetRenderOptions, hungryRenderOptions }
 - Instead of ResponseDoc#commitSteps(), could up.radio.hungrySteps() just re-compress steps with uniqBy(steps, 'selector')?
   => There is an edge case where different selectors could match the same elemnent
+- Introduce up:history:restore event
+  - With { renderOptions }
+  - Note that we used to emit this event in the past, so fix unpoly-migrate
+  - Preventable for custom history handling
+  => We already have this in up:location:restore
