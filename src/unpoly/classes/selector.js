@@ -33,10 +33,13 @@ up.Selector = class Selector {
     let expandedTargets = up.fragment.expandTargets(selector, {...options, layer: expandTargetLayer})
 
     this._selectors = expandedTargets.map((target) => {
-      target = target.replace(CSS_HAS_SUFFIX_PATTERN, (match, descendantSelector) => {
-        this._filters.push(element => element.querySelector(descendantSelector))
-        return ''
-      })
+      if (!up.browser.canHasSelector()) {
+        target = target.replace(CSS_HAS_SUFFIX_PATTERN, (match, descendantSelector) => {
+          this._filters.push(element => element.querySelector(descendantSelector))
+          return ''
+        })
+      }
+
       return target || '*'
     })
 

@@ -290,13 +290,25 @@ describe 'up.fragment', ->
         results = up.fragment.all('html')
         expect(results).toEqual [document.documentElement]
 
-      it 'supports the custom :has() selector', ->
-        match = fixture('.match')
-        otherMatch = fixture('.match')
-        otherMatchChild = up.element.affix(otherMatch, '.child')
+      describeCapability 'canHasSelector', ->
 
-        results = up.fragment.all('.match:has(.child)')
-        expect(results).toEqual [otherMatch]
+        it 'supports the :has() selector', ->
+          match = fixture('.match')
+          otherMatch = fixture('.match')
+          otherMatchChild = up.element.affix(otherMatch, '.child')
+
+          results = up.fragment.all('.match:has(.child)')
+          expect(results).toEqual [otherMatch]
+
+      describeFallback 'canHasSelector', ->
+
+        it 'supports the :has() selector', ->
+          match = fixture('.match')
+          otherMatch = fixture('.match')
+          otherMatchChild = up.element.affix(otherMatch, '.child')
+
+          results = up.fragment.all('.match:has(.child)')
+          expect(results).toEqual [otherMatch]
 
       describe 'expansion of :main', ->
 
@@ -355,15 +367,27 @@ describe 'up.fragment', ->
           expect(results.length).toBe(1)
           expect(up.layer.get(results[0])).toBe(up.layer.root)
 
-        it 'supports the custom :has() selector', ->
-          container = fixture('.container')
+        describeCapability 'canHasSelector', ->
+          it 'supports the :has() selector', ->
+            container = fixture('.container')
 
-          match = e.affix(container, '.match')
-          otherMatch = e.affix(container, '.match')
-          otherMatchChild = e.affix(otherMatch, '.child')
+            match = e.affix(container, '.match')
+            otherMatch = e.affix(container, '.match')
+            otherMatchChild = e.affix(otherMatch, '.child')
 
-          results = up.fragment.all(container, '.match:has(.child)')
-          expect(results).toEqual [otherMatch]
+            results = up.fragment.all(container, '.match:has(.child)')
+            expect(results).toEqual [otherMatch]
+
+        describeFallback 'canHasSelector', ->
+          it 'supports the :has() selector', ->
+            container = fixture('.container')
+
+            match = e.affix(container, '.match')
+            otherMatch = e.affix(container, '.match')
+            otherMatchChild = e.affix(otherMatch, '.child')
+
+            results = up.fragment.all(container, '.match:has(.child)')
+            expect(results).toEqual [otherMatch]
 
       describe 'when given a root Document for the search', ->
 
@@ -2804,28 +2828,29 @@ describe 'up.fragment', ->
 
           describe ':has()', ->
 
-            it 'matches elements with a given descendant', asyncSpec (next) ->
+            it 'matches elements with a given descendant', ->
               $first = $fixture('.boxx#first')
               $firstChild = $('<span class="first-child">old first</span>').appendTo($first)
               $second = $fixture('.boxx#second')
               $secondChild = $('<span class="second-child">old second</span>').appendTo($second)
 
-              promise = up.navigate('.boxx:has(.second-child)', url: '/path')
+              up.navigate('.boxx:has(.second-child)', url: '/path')
 
-              next =>
-                @respondWith """
-                  <div class="boxx" id="first">
-                    <span class="first-child">new first</span>
-                  </div>
-                  <div class="boxx" id="second">
-                    <span class="second-child">new second</span>
-                  </div>
-                  """
-                next.await(promise)
+              await wait()
 
-              next =>
-                expect('#first span').toHaveText('old first')
-                expect('#second span').toHaveText('new second')
+              jasmine.respondWith """
+                <div class="boxx" id="first">
+                  <span class="first-child">new first</span>
+                </div>
+                <div class="boxx" id="second">
+                  <span class="second-child">new second</span>
+                </div>
+                """
+
+              await wait()
+
+              expect('#first span').toHaveText('old first')
+              expect('#second span').toHaveText('new second')
 
           describe ':layer', ->
 

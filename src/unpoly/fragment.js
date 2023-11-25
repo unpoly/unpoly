@@ -1585,7 +1585,7 @@ up.fragment = (function() {
   }
 
   /*-
-  Your [target selectors](/targeting-fragments) may use this pseudo-selector
+  Your [target selectors](/targeting-fragments) may use this pseudo-class
   to replace an element with an descendant matching the given selector.
 
   ### Example
@@ -1604,8 +1604,7 @@ up.fragment = (function() {
   ### Compatibility
 
   As a [level 4 CSS selector](https://drafts.csswg.org/selectors-4/#relational),
-  `:has()` is [currrently being implemented](https://caniuse.com/#feat=css-has)
-  in native browser functions like [`document.querySelectorAll()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/querySelectorAll).
+  `:has()` is [currrently implemented](https://caniuse.com/#feat=css-has) in many modern browsers.
 
   Unpoly polyfills `:has()` so you can use it in [target selectors](/targeting-fragments) in all [supported browsers](/up.framework.isSupported).
 

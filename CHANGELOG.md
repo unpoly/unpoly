@@ -12,6 +12,7 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 Unreleased
 ----------
 
+- Use native `:has()` [where available](https://developer.mozilla.org/en-US/docs/Web/CSS/:has).
 - Improve performance of element lookups, by handling them via CSS selectors vs. JavaScript.
 - Fix a bug where following a navigation item outside a main element would focus the `<body>` instead of the main element.
 - Targeting `:main` will no longer match in the region of the interaction origin. It will always use the first matching selector in `up.fragment.config.mainTargets`.
