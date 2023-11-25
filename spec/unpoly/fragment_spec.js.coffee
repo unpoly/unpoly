@@ -4846,6 +4846,34 @@ describe 'up.fragment', ->
 
           expect(listener).not.toHaveBeenCalled()
 
+        fit 'does not emit up:assets:changed if inline scripts in the <head> changed', ->
+          listener = jasmine.createSpy('up:assets:changed listener')
+          up.on('up:assets:changed', listener)
+
+          script = e.createFromSelector('script', text: 'console.log("hello from old inline scripts")')
+          registerFixture(script)
+          document.head.append(script)
+
+          fixture('.container', text: 'old container text')
+          up.render('.container', location: '/path', history: true, document: """
+            <html>
+              <head>
+                <script>console.log("hello from new inline script")</script>
+              </head>
+              <body>
+                <div class='container'>
+                  new container text
+                </div>
+              </body>
+            </html>
+          """)
+
+          await wait()
+
+          expect('.container').toHaveText('new container text')
+
+          expect(listener).not.toHaveBeenCalled()
+
         it 'aborts the render pass if the up:assets:changed event is prevented', ->
           listener = jasmine.createSpy('up:assets:changed listener').and.callFake (event) -> event.preventDefault()
           up.on('up:assets:changed', listener)
