@@ -621,6 +621,13 @@ up.protocol = (function() {
   X-Up-Target: .preview
   ```
 
+  ### When too many fields are validated
+
+  Validating a long form may cause the `X-Up-Validate` header to become excessively long.
+  This may cause web infrastructure from rejecting the request with an `413 Entity Too Large` error.
+
+  To prevent this, the header value is set to `:unknown` if its length exceeds `up.protocol.config.maxHeaderSize`.
+
   @header X-Up-Validate
   @stable
   */
@@ -987,6 +994,14 @@ up.protocol = (function() {
 
     _method=PUT
     ```
+
+  @param {number} [config.maxHeaderSize]
+    The preferred maximum length of an `X-Up`-prefixed header's value.
+
+    This is currently only honored for `X-Up-Validate`.
+
+    @experimental
+
   @stable
   */
   const config = new up.Config(() => ({
@@ -995,6 +1010,7 @@ up.protocol = (function() {
     csrfToken() { return e.metaContent('csrf-token') },
     cspNonce() { return e.metaContent('csp-nonce') },
     csrfHeader: 'X-CSRF-Token', // Used by Rails. Other frameworks use different headers.
+    maxHeaderSize: 2048,
   }))
 
   function csrfHeader() {

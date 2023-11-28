@@ -23,6 +23,8 @@ Unreleased
 - Structured data in script[type="application/ld+json"] is considered meta tags that will be [updated with history changes](/updating-history#history-state).
 - Preserve `script[type="application/ld+json"]` in new fragments with `up.fragment.config.runScripts = false`.
 - You can now configure which elements are removed by `up.fragment.config.runScripts = false`. Use `up.script.config.scriptSelectors` and `up.script.config.noScriptSelectors`.
+- When the `X-Up-Validate` header value exceeds 2048 characters, it is now set to `:unknown`.
+  This is to prevent web infrastructure from rejecting an overly long request line with an `413 Entity Too Large` error.
 
 
 3.5.2

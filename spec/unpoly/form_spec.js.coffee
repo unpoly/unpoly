@@ -1445,7 +1445,7 @@ describe 'up.form', ->
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
             expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
 
-        it 'names all contained field in X-Up-Validate header', asyncSpec (next) ->
+        it 'names all contained field in X-Up-Validate header', ->
           form = fixture('form[action=/path]')
           container = e.affix(form, '.container')
           input1 = e.affix(container, 'input[name=foo]')
@@ -1454,9 +1454,22 @@ describe 'up.form', ->
 
           up.validate(container)
 
-          next ->
-            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo bar')
-            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.container')
+          await wait()
+
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo bar')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.container')
+
+        it 'sends `X-Up-Validate: :unknown` if the names of all contained fields are too long for an HTTP header', ->
+          form = fixture('form[action=/path]')
+          container = e.affix(form, '.container')
+          input1 = e.affix(container, "input[name=#{'a'.repeat(5000)}]")
+          input2 = e.affix(container, "input[name=#{'b'.repeat(5000)}]")
+
+          up.validate(container)
+
+          await wait()
+
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual(':unknown')
 
         it 'may be called with an entire form (bugfix)', asyncSpec (next) ->
           form = fixture('form[action=/path] input[name=foo]')

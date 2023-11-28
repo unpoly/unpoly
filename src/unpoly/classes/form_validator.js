@@ -193,7 +193,7 @@ up.FormValidator = class FormValidator {
 
     // Make sure the X-Up-Validate header is present, so the server-side
     // knows that it should not persist the form submission
-    options.headers[up.protocol.headerize('validate')] = dirtyNames.join(' ') || ':unknown'
+    this._addValidateHeader(options.headers, dirtyNames)
 
     // The guardEvent will be be emitted on the render pass' { origin }, so the form in this case.
     // The guardEvent will also be assigned a { renderOptions } attribute in up.render()
@@ -237,6 +237,13 @@ up.FormValidator = class FormValidator {
       // If no pending solutions are found, the method will return immediately.
       this._renderDirtySolutions()
     }
+  }
+
+  _addValidateHeader(headers, names) {
+    let key = up.protocol.headerize('validate')
+    let value = names.join(' ')
+    if (!value || value.length > up.protocol.config.maxHeaderSize) value = ':unknown'
+    headers[key] = value
   }
 
   _buildDataMap(solutions) {
