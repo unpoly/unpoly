@@ -12,19 +12,33 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 Unreleased
 ----------
 
-- Use native `:has()` [where available](https://developer.mozilla.org/en-US/docs/Web/CSS/:has).
-- Improve performance of element lookups, by handling them via CSS selectors vs. JavaScript.
+### Targeting fragments
+
 - Fix a bug where following a navigation item outside a main element would focus the `<body>` instead of the main element.
 - Targeting `:main` will no longer match in the region of the interaction origin. It will always use the first matching selector in `up.fragment.config.mainTargets`.
 - Fix a bug where pseudo selectors like `:main` or `:layer` could not be used in a compound target, e.g. `:main .child`.
+
+### Performance improvements
+
+- Use native `:has()` [where available](https://developer.mozilla.org/en-US/docs/Web/CSS/:has).
+- Improve performance of element lookups, by handling them via CSS selectors vs. JavaScript.
+
+
+### Support for [structured data markup](https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data)
+
+- Structured data in script[type="application/ld+json"] is considered meta tags that will be [updated with history changes](/updating-history#history-state).
+- Preserve `script[type="application/ld+json"]` in new fragments with `up.fragment.config.runScripts = false`.
+
+### Bugs and small fixes
+
 - Fix a bug where `up:assets:changed` would be emitted for every response when configuring `up.fragment.config.runScripts = false`.
 - `up.util.contains()` now works on `NodeList` objects.
 - `up.form.isSubmittable()` returns `false` for forms with a cross-origin URL in their `[action]` attribute.
-- Structured data in script[type="application/ld+json"] is considered meta tags that will be [updated with history changes](/updating-history#history-state).
-- Preserve `script[type="application/ld+json"]` in new fragments with `up.fragment.config.runScripts = false`.
 - You can now configure which elements are removed by `up.fragment.config.runScripts = false`. Use `up.script.config.scriptSelectors` and `up.script.config.noScriptSelectors`.
 - When the `X-Up-Validate` header value exceeds 2048 characters, it is now set to `:unknown`.
   This is to prevent web infrastructure from rejecting an overly long request line with an `413 Entity Too Large` error.
+
+
 
 
 3.5.2
