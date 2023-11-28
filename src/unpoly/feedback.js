@@ -108,7 +108,6 @@ up.feedback = (function() {
   }))
 
   function reset() {
-    config.reset()
     up.layer.root.feedbackLocation = null
   }
 

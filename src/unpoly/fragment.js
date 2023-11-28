@@ -239,10 +239,6 @@ up.fragment = (function() {
   // as up.fragment.config.mainTargets instead of up.layer.config.any.mainTargets.
   u.delegate(config, ['mainTargets'], () => up.layer.config.any)
 
-  function reset() {
-    config.reset()
-  }
-
   function defaultSkipResponse({ response, expiredResponse }) {
     return !response.text || response.text === expiredResponse?.text
   }
@@ -2803,8 +2799,6 @@ up.fragment = (function() {
       return up.warn('Cannot push history changes. Next fragment update will load in a new page.')
     }
   })
-
-  up.on('up:framework:reset', reset)
 
   return {
     config,

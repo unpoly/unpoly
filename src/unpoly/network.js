@@ -285,7 +285,6 @@ up.network = (function() {
   function reset() {
     abortRequests()
     queue.reset()
-    config.reset()
     cache.reset()
     progressBar?.destroy()
     progressBar = null

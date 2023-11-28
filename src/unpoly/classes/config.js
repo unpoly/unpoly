@@ -5,6 +5,8 @@ up.Config = class Config {
   constructor(blueprintFn = (() => ({}))) {
     this._blueprintFn = blueprintFn
     this.reset()
+
+    document.addEventListener('up:framework:reset', () => this.reset())
   }
 
   reset() {

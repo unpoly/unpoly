@@ -890,7 +890,6 @@ up.script = (function() {
   function reset() {
     registeredCompilers = u.filter(registeredCompilers, 'isDefault')
     registeredMacros = u.filter(registeredMacros, 'isDefault')
-    config.reset()
   }
 
   up.on('up:framework:reset', reset)

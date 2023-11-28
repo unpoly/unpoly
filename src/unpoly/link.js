@@ -224,7 +224,6 @@ up.link = (function() {
 
   function reset() {
     lastMousedownTarget = null
-    config.reset()
     linkPreloader.reset()
   }
 

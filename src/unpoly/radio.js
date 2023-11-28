@@ -43,10 +43,6 @@ up.radio = (function() {
     pollInterval: 30000,
   }))
 
-  function reset() {
-    config.reset()
-  }
-
   function hungrySteps(renderOptions) {
     let { useHungry, origin, layer: renderLayer } = renderOptions
     let steps = { current: [], other: [] }
@@ -505,8 +501,6 @@ should be inserted:
       if (!e.isEmpty(event.newFragment)) event.preventDefault()
     })
   })
-
-  up.on('up:framework:reset', reset)
 
   return {
     config,

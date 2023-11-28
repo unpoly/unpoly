@@ -196,12 +196,6 @@ up.migrate = (function() {
     return promise
   }
 
-  function reset() {
-    config.reset()
-  }
-
-  up.on('up:framework:reset', reset)
-
   return {
     deprecated,
     renamedPackage,

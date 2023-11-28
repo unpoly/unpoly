@@ -130,10 +130,6 @@ up.form = (function() {
     watchChangeEvents: ['change'],
   }))
 
-  function reset() {
-    config.reset()
-  }
-
   /*-
    @function up.form.fieldSelector
    @internal
@@ -1958,8 +1954,6 @@ up.form = (function() {
   @stable
   */
   up.compiler('[up-autosubmit]', (formOrField) => autosubmit(formOrField))
-
-  up.on('up:framework:reset', reset)
 
   return {
     config,

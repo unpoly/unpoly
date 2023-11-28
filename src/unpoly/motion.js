@@ -100,7 +100,6 @@ up.motion = (function() {
     motionController.reset()
     namedAnimations = pickDefault(namedAnimations)
     namedTransitions = pickDefault(namedTransitions)
-    config.reset()
   }
 
   /*-

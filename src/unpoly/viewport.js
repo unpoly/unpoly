@@ -92,10 +92,6 @@ up.viewport = (function() {
 
   const bodyShifter = new up.BodyShifter()
 
-  function reset() {
-    config.reset()
-  }
-
   up.compiler(config.selectorFn('anchoredRightSelectors'), function(element) {
     return bodyShifter.onAnchoredElementInserted(element)
   })
@@ -922,8 +918,6 @@ up.viewport = (function() {
   })
 
   up.on(window, 'hashchange', () => revealHash())
-
-  up.on('up:framework:reset', reset)
 
   return {
     reveal,

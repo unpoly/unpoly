@@ -41,9 +41,6 @@ up.log = (function() {
   */
   const config = new up.LogConfig()
 
-  function reset() {
-    config.reset()
-  }
 
   /*-
   Prints a logging message to the browser console.
@@ -130,8 +127,6 @@ up.log = (function() {
   }
 
   up.on('up:framework:boot', printBanner)
-
-  up.on('up:framework:reset', reset)
 
 
   /*-

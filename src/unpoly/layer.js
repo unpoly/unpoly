@@ -384,7 +384,6 @@ up.layer = (function() {
   }
 
   function reset() {
-    config.reset()
     stack.reset()
     handlers = u.filter(handlers, 'isDefault')
   }

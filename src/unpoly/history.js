@@ -104,7 +104,6 @@ up.history = (function() {
   let nextPreviousLocation
 
   function reset() {
-    config.reset()
     previousLocation = undefined
     nextPreviousLocation = undefined
     trackCurrentLocation()

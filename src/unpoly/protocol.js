@@ -1051,15 +1051,8 @@ up.protocol = (function() {
     return 'POST'
   }
 
-  function reset() {
-    config.reset()
-  }
-
-  up.on('up:framework:reset', reset)
-
   return {
     config,
-    reset,
     locationFromXHR,
     titleFromXHR,
     targetFromXHR,
