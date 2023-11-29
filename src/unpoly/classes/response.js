@@ -215,7 +215,7 @@ up.Response = class Response extends up.Record {
   @internal
   */
   get cspNonces() {
-    return up.protocol.cspNoncesFromHeader(this.header('Content-Security-Policy'))
+    return up.protocol.cspNoncesFromHeader(this.header('Content-Security-Policy') || this.header('Content-Security-Policy-Report-Only'))
   }
 
   /*-

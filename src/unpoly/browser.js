@@ -60,17 +60,6 @@ up.browser = (function() {
     return !!window.jQuery
   }
 
-  const canEval = u.memoize(function() {
-    try {
-      // Don't use eval() which would prevent minifiers from compressing local variables.
-      return new Function('return true')()
-    } catch {
-      // With a strict CSP this will be an error like:
-      // Uncaught EvalError: call to Function() blocked by CSP
-      return false
-    }
-  })
-
   const canHasSelector = u.memoize(() => CSS.supports('selector(:has(*))'))
 
   function popCookie(name) {
@@ -100,7 +89,6 @@ up.browser = (function() {
     submitForm,
     canPushState,
     canJQuery,
-    canEval,
     assertConfirmed,
     popCookie,
     canHasSelector,

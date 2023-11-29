@@ -23,20 +23,20 @@ Unreleased
 - Use native `:has()` [where available](https://developer.mozilla.org/en-US/docs/Web/CSS/:has).
 - Improve performance of element lookups, by handling them via CSS selectors vs. JavaScript.
 
-
 ### Support for [structured data markup](https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data)
 
 - Structured data in script[type="application/ld+json"] is considered meta tags that will be [updated with history changes](/updating-history#history-state).
 - Preserve `script[type="application/ld+json"]` in new fragments with `up.fragment.config.runScripts = false`.
 
-### Bugs and small fixes
+### Bugfixes and minor improvements
 
-- Fix a bug where `up:assets:changed` would be emitted for every response when configuring `up.fragment.config.runScripts = false`.
-- `up.util.contains()` now works on `NodeList` objects.
-- `up.form.isSubmittable()` returns `false` for forms with a cross-origin URL in their `[action]` attribute.
-- You can now configure which elements are removed by `up.fragment.config.runScripts = false`. Use `up.script.config.scriptSelectors` and `up.script.config.noScriptSelectors`.
+- CSP nonces [embedded into attribute callbacks](https://unpoly.com/csp#nonceable-attributes) now work with [`Content-Security-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy-Report-Only).
 - When the `X-Up-Validate` header value exceeds 2048 characters, it is now set to `:unknown`.
   This is to prevent web infrastructure from rejecting an overly long request line with an `413 Entity Too Large` error.
+- Fix a bug where `up:assets:changed` would be emitted for every response when configuring `up.fragment.config.runScripts = false`.
+- `up.form.isSubmittable()` returns `false` for forms with a cross-origin URL in their `[action]` attribute.
+- `up.util.contains()` now works on `NodeList` objects.
+- You can now configure which elements are removed by `up.fragment.config.runScripts = false`. Use `up.script.config.scriptSelectors` and `up.script.config.noScriptSelectors`.
 
 
 

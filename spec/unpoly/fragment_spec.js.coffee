@@ -6324,6 +6324,23 @@ describe 'up.fragment', ->
           expect('.target').toHaveText('new text')
           expect('.target').toHaveAttribute('callback', "nonce-secret1 alert()")
 
+        it "rewrites nonceable callbacks to use the current page's nonce with Content-Security-Policy-Report-Only header", ->
+          spyOn(up.protocol, 'cspNonce').and.returnValue('secret1')
+          fixture('.target')
+          up.render('.target', url: '/path')
+
+          await wait()
+
+          jasmine.respondWith(
+            responseText: '<div class="target" callback="nonce-secret2 alert()">new text</div>'
+            responseHeaders: { 'Content-Security-Policy-Report-Only': "script-src: 'nonce-secret2'"}
+          )
+
+          await wait()
+
+          expect('.target').toHaveText('new text')
+          expect('.target').toHaveAttribute('callback', "nonce-secret1 alert()")
+
         it "rewrites nonceable callbacks to use the current page's nonce when opening a new overlay (bugfix)", ->
           spyOn(up.protocol, 'cspNonce').and.returnValue('secret1')
           up.render('.target', url: '/path', layer: 'new')

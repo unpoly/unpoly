@@ -28,25 +28,19 @@ up.NonceableCallback = class NonceableCallback {
   @internal
   */
   toFunction(...argNames) {
-    if (up.browser.canEval()) {
-      return new Function(...argNames, this.script)
-    } else if (this.nonce) {
+    if (this.nonce) {
       // Don't return a bound function so callers can re-bind to a different this.
       let callbackThis = this
       return function(...args) {
         return callbackThis._runAsNoncedFunction(this, argNames, args)
       }
     } else {
-      return this._cannotRun.bind(this)
+      return new Function(...argNames, this.script)
     }
   }
 
   toString() {
     return `nonce-${this.nonce} ${this.script}`
-  }
-
-  _cannotRun() {
-    throw new Error(`Your Content Security Policy disallows inline JavaScript (${this.script}). See https://unpoly.com/csp for solutions.`)
   }
 
   _runAsNoncedFunction(thisArg, argNames, args) {
