@@ -57,11 +57,11 @@ up.script = (function() {
     Matching elements will be removed from new page fragments with `up.fragment.config.runScripts = false`.
 
     This configuration does not affect what Unpoly considers an [assets](/up-asset).
-    For this configure `up.fragment.config.assetSelectors`.
+    For this configure `up.script.config.assetSelectors`.
 
     @experimental
   @param [config.noScriptSelectors]
-    Exceptions to `up.fragment.config.scriptSelectors`.
+    Exceptions to `up.script.config.scriptSelectors`.
 
     @experimental
   @property up.script.config
