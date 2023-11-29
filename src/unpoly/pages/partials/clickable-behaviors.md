@@ -1,4 +1,4 @@
-To make the link-like element as accessible as possible, it gains the following behaviors:
+When the element is not an `<a>` or `<button>`, it gains the following behaviors to make it more accessible:
 
 - The element is given an [`[role=link]`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/link_role)
   attribute so screen readers announce it as link.
