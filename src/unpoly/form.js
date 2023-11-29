@@ -1057,6 +1057,7 @@ up.form = (function() {
     The [form parameters](/up.Params) that will be sent as the form's request payload.
 
     Listeners may inspect and modify params before they are sent.
+    Note that the request may be a [batch of multiple validations](/up.validate#batching).
   @param {Element} event.fields
     The form fields that triggered this validation pass.
 
@@ -1069,6 +1070,7 @@ up.form = (function() {
     that will show the validation results.
 
     Listeners may inspect and modify these options.
+    Note that the request may be a [batch of multiple validations](/up.validate#batching).
   @param event.preventDefault()
     Prevents the validation request from being sent to the server.
   @stable

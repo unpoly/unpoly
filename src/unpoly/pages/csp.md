@@ -41,6 +41,9 @@ Unpoly lets you work around this by prefixing your callback with a [CSP nonce](h
 
 The `nonce-` prefix is static, followed by your random nonce in Base64, followed by a space and your original JavaScript code.
 
+> [note]
+> Prefixing nonces only works for `[up-on...]` attributes. You cannot use it for native HTML attributes like `[onclick]`.
+
 The embedded nonce must match a `script-src` nonce of the response that you're currently rendering:
 
 ```http
