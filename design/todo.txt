@@ -5,9 +5,38 @@ Current
   - If we solve this with an .up-hidden-focus class or similiar, we must make sure it goes away after we blur the field. A follow-up focus using keyboard should work.
 
 
+Reduce render callbacks
+=======================
+
+- Motivation
+  - It is too hard to do something when the render job settles. There is onRendered, onFinished, onError etc. However there are always cases that are covered by no callback.
+  - We need to maintain and communicate two styles of callbacks
+- Expose { renderJob } on guard events
+- New event up:fragment:render / [up-on-render] that gets { renderOptions, renderJob }
+  - There is no need to offer { onRender }, as the return value of up.render() is already a RenderJob
+- Deprecate callbacks
+  - { onFinished }
+  - { onRendered }
+- Update docs
+  - https://unpoly.com/render-hooks#preventing-a-render-pass
+  - https://unpoly.com/render-hooks#changing-options-before-rendering
+
+
 Backlog
 =======
 
+- [up-disable] should disable links
+  - Within the form
+  - As a stand-alone link
+  - How to mark disabled links? .up-disabled ? Just [disabled]?
+  - CSS: { cursor: not-allowed }
+  - Also [aria-disabled=true]
+  - Prevent with JS? pointer-events?
+    - Also prevent keyboard focus with temporary [tabindex=-1]
+  - Bootstrap already has a.disabled
+
+- Copy important up.render() options to up.layer.open() and a[up-layer=new]
+  - In particular { content, fragment, url, document }
 - Nonces for remote scripts
   - Rewrite nonces before comparing
 - Look within :origin first
