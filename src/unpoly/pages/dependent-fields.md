@@ -22,7 +22,7 @@ We can implement this form with three `[up-validate]` attributes and no addition
 ```html
 <form method="post" action="/purchases">
   <fieldset>
-    <label for="content">Continent</label>
+    <label for="continent">Continent</label>
     <select name="continent" id="continent" up-validate="#country">...</select> <!-- mark-phrase "up-validate" -->
   </fieldset>
   
