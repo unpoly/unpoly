@@ -216,7 +216,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // We update the history with { history: 'auto' } when at least
     // one targeted fragment has auto-history.
     const oldFragments = u.map(this._steps, 'oldElement')
-    return u.some(oldFragments, up.fragment.hasAutoHistory)
+    return up.fragment.hasAutoHistory(oldFragments, this.layer)
   }
 
   _getEffectiveRenderOptions() {

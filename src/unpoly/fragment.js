@@ -2267,13 +2267,20 @@ up.fragment = (function() {
     return steps
   }
 
-  function hasAutoHistory(fragment) {
-    if (contains(fragment, config.autoHistoryTargets)) {
-      return true
-    } else {
-      up.puts('up.render()', "Will not auto-update history because fragment doesn't contain a selector from up.fragment.config.autoHistoryTargets")
-      return false
+  function hasAutoHistory(newFragments, layer) {
+    // We cannot use up.fragment.contains(fragment, config.autoHistoryTargets)
+    // because fragment is not yet attached when we are called from up.Change.OpenLayer.
+
+    let vanillaSelector = expandTargets(config.autoHistoryTargets, { layer }).join()
+
+    for (let newFragment of newFragments) {
+      if (e.subtree(newFragment, vanillaSelector).length) {
+        return true
+      }
     }
+
+    up.puts('up.render()', "Will not auto-update history because fragment doesn't contain a selector from up.fragment.config.autoHistoryTargets")
+    return false
   }
 
   /*-
