@@ -436,6 +436,16 @@ describe 'up.layer', ->
               expect(up.layer.mode).toEqual('modal')
               expect(up.layer.history).toBe(true)
 
+          it 'does not give the layer history if initial overlay content is not a main selector', asyncSpec (next) ->
+            up.layer.config.modal.history = 'auto'
+            up.fragment.config.mainTargets = ['.main']
+
+            up.layer.open(mode: 'modal', history: 'auto', target: '.other')
+
+            next ->
+              expect(up.layer.mode).toEqual('modal')
+              expect(up.layer.history).toBe(false)
+
           it 'gives the layer history if the initial overlay content is a main selector configured for the new layer mode', asyncSpec (next) ->
             up.layer.config.modal.history = 'auto'
             up.fragment.config.mainTargets = ['.main']
@@ -447,11 +457,12 @@ describe 'up.layer', ->
               expect(up.layer.mode).toEqual('drawer')
               expect(up.layer.history).toBe(true)
 
-          it 'does not give the layer history if initial overlay content is not a main selector', asyncSpec (next) ->
+          it 'does not give the layer history if the initial overlay content is a main selector configured for another layer mode', asyncSpec (next) ->
             up.layer.config.modal.history = 'auto'
             up.fragment.config.mainTargets = ['.main']
+            up.layer.config.drawer.mainTargets = ['.main-for-drawer']
 
-            up.layer.open(mode: 'modal', history: 'auto', target: '.other')
+            up.layer.open(mode: 'modal', history: 'auto', target: '.main-for-drawer')
 
             next ->
               expect(up.layer.mode).toEqual('modal')
