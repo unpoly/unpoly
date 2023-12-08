@@ -9,6 +9,12 @@ Changes handled by `unpoly-migrate.js` are not considered breaking changes.
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+3.6.1
+-----
+
+- Fix a bug where new overlays would not have history if the initial fragment matches a layer-specific main target like `[up-main=modal]`.
+
+
 3.6.0
 -----
 
