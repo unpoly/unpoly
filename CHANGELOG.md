@@ -12,7 +12,7 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 3.6.1
 -----
 
-- Fix a bug where new overlays would not have history if the initial fragment matches a layer-specific main target like `[up-main=modal]`.
+- Fix a bug where [new overlays](/opening-overlays) would not have history if the initial fragment matches a [layer-specific main target](https://unpoly.com/up-main#overlays-can-use-different-main-targets) like `[up-main=modal]`.
 
 
 3.6.0
