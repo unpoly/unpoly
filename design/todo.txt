@@ -22,6 +22,25 @@ Reduce render callbacks
   - https://unpoly.com/render-hooks#changing-options-before-rendering
 
 
+Validate/autosubmit concurrency complex
+=======================================
+
+- up.validate(element, { target: '.target' }) should update .target and use `element` as the origin (that adds field inputs?)
+  - Make a test case.
+- Scenario: A form with both [up-autosubmit] and dependent fields
+  - Problem: The dependent field submission is aborting the autosubmit, although its targets do not overlap
+    - This shouldn't happen. Make a test case.
+  - Problem: Watchers (like autosubmit) do not notice if fields are added/removed dynamically
+    - Consider also watching for up:fragment:inserted and up:fragment:destroyed
+    - Or make this an option [up-watch-mutation]
+  - Consider waiting with the form submission until the validator is idle
+    - Do we need to support disable while waiting?
+    - Waiting for idle-state should be abortable
+    - Do we need to configure this?
+      - e.g. [up-await-validate]
+      - e.g. up.form.config.submitAwaitValidate
+
+
 Backlog
 =======
 
