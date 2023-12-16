@@ -883,7 +883,7 @@ up.fragment = (function() {
   */
   const render = up.mockable((...args) => {
     let options = parseTargetAndOptions(args)
-    return new up.RenderJob(options)
+    return new up.RenderJob(options).execute()
   })
 
   /*-

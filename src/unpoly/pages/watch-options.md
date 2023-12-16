@@ -86,7 +86,7 @@ or passing `{ delay }` option:
 For watchers of `input` the default delay is `up.form.config.watchInputDelay` (which defaults to `0`).
 For watchers of other events there is no default delay.
 
-If the watched field or its container is [aborted](/aborting-requests) or destroyed while waiting for a delay,
+If the field's form is [aborted](/aborting-requests) or destroyed while waiting for a delay,
 the callback is unscheduled.
 
 > [INFO]

@@ -292,8 +292,12 @@ up.form = (function() {
   @stable
   */
   const submit = up.mockable((form, options) => {
-    return up.render(submitOptions(form, options))
+    return buildSubmitJob(form, options).execute()
   })
+
+  function buildSubmitJob(form, options) {
+    return new up.RenderJob(submitOptions(form, options))
+  }
 
   /*-
   Parses the [render](/up.render) options that would be used to
@@ -358,6 +362,10 @@ up.form = (function() {
     parser.include(up.link.followOptions)
 
     return options
+  }
+
+  function getPreflightFragments(form) {
+    return buildSubmitJob(form).getPreflightFragments()
   }
 
   function watchOptions(field, options, parserOptions = {}) {
@@ -737,6 +745,7 @@ up.form = (function() {
   @stable
   */
   function watch(container, ...args) {
+    const form = getForm(container)
     const fields = findFields(container)
     const unnamedFields = u.reject(fields, 'name')
     if (unnamedFields.length) {
@@ -750,7 +759,7 @@ up.form = (function() {
     const callback = u.extractCallback(args) || watchCallbackFromElement(container) || up.fail('No callback given for up.watch()')
     let options = u.extractOptions(args)
 
-    const watch = new up.FieldWatcher(fields, options, callback)
+    const watch = new up.FieldWatcher(form, fields, options, callback)
     watch.start()
     return () => watch.stop()
   }
@@ -771,15 +780,18 @@ up.form = (function() {
   @param {string|Element|jQuery} target
     The field or form to watch.
   @param {Object} [options]
-    See options for [`up.watch()`](/up.watch#parameters)
+    See options for [`up.watch()`](/up.watch#parameters).
   @return {Function()}
     A destructor function that stops auto-submitting when called.
 
     Auto-submitting will stop automatically when the observed fields are removed from the DOM.
   @stable
   */
-  function autosubmit(target, options) {
-    return watch(target, options, (_value, _name, renderOptions) => submit(target, renderOptions))
+  function autosubmit(target, options = {}) {
+    const form = getForm(target)
+    options.abortable ??= [form, ...getPreflightFragments(form)]
+    const onChange = (_value, _name, renderOptions) => submit(target, renderOptions)
+    return watch(target, options, onChange)
   }
 
   function getGroupSelectors() {
@@ -1951,6 +1963,9 @@ up.form = (function() {
     See [which events to watch](/watch-options#which-events-to-watch).
   @param [up-watch-delay]
     The number of miliseconds to wait after a change before submitting the form.
+
+    If either the form or [its target](/form-up-submit#up-target) is [aborted](/aborting-requests) or
+    destroyed during the delay, the submission is canceled.
 
     See [debouncing callbacks](/watch-options#debouncing-callbacks).
   @stable

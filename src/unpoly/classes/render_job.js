@@ -28,7 +28,15 @@ up.RenderJob = class RenderJob {
 
   constructor(options) {
     this.options = up.RenderOptions.preprocess(options)
-    this._rendered = this._execute()
+  }
+
+  execute() {
+    this._rendered = this._executePromise()
+    return this
+  }
+
+  getPreflightFragments() {
+    return this._getChange().getPreflightProps().fragments
   }
 
   /*-
@@ -39,9 +47,10 @@ up.RenderJob = class RenderJob {
   @stable
   */
 
-  async _execute() {
+  async _executePromise() {
     try {
-      let result = await this._makeChange()
+      this._guardRender()
+      let result = await this._getChange().execute()
       this._handleResult(result)
       return result
     } catch (resultOrError) {
@@ -133,21 +142,17 @@ up.RenderJob = class RenderJob {
     }
   }
 
-  _makeChange() {
-    this._guardRender()
-
+  _getChange() {
     if (this.options.url) {
       let onRequest = (request) => this._handleAbortOption(request)
-      this.change = new up.Change.FromURL({ ...this.options, onRequest })
+      return new up.Change.FromURL({ ...this.options, onRequest })
     } else if (this.options.response) {
-      this.change = new up.Change.FromResponse(this.options)
-      this._handleAbortOption(null)
+      let onRender = () => this._handleAbortOption(null)
+      return new up.Change.FromResponse({ ...this.options, onRender })
     } else {
-      this.change = new up.Change.FromContent(this.options)
-      this._handleAbortOption(null)
+      let onRender = () => this._handleAbortOption(null)
+      return new up.Change.FromContent({ ...this.options, onRender })
     }
-
-    return this.change.execute()
   }
 
   _guardRender() {
@@ -175,7 +180,7 @@ up.RenderJob = class RenderJob {
 
     if (!abort || !up.network.isBusy()) return
 
-    let { fragments, layer, origin, newLayer } = this.change.getPreflightProps()
+    let { fragments, layer, origin, newLayer } = this._getChange().getPreflightProps()
 
     let abortOptions = {
       except: request, // don't abort the request we just made
@@ -230,7 +235,8 @@ up.RenderJob = class RenderJob {
     u.delegate(this.prototype, ['then', 'catch', 'finally'], function() { return this._rendered })
 
     u.memoizeMethod(this.prototype, {
-      _awaitFinished: true
+      _awaitFinished: true,
+      _getChange: true,
     })
   }
 

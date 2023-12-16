@@ -2,11 +2,12 @@ const u = up.util
 
 up.FieldWatcher = class FieldWatcher {
 
-  constructor(fields, options, callback) {
+  constructor(form, fields, options, callback) {
     this._callback = callback
     this._fields = fields
     this._options = options
     this._batch = options.batch
+    this._abortable = u.wrapList(options.abortable ?? form)
     this._unbindFns = []
   }
 
@@ -24,12 +25,19 @@ up.FieldWatcher = class FieldWatcher {
     for (let field of this._fields) {
       this._watchField(field)
     }
+
+    for (let abortableElement of this._abortable) {
+      if (abortableElement !== false) {
+        this._unbindFns.push(up.fragment.onAborted(abortableElement, () => {
+          this._cancelTimer()
+        }))
+      }
+    }
   }
 
   _watchField(field) {
     let _fieldOptions = this._fieldOptions(field)
     this._unbindFns.push(up.on(field, _fieldOptions.event, (event) => this._check(event, _fieldOptions)))
-    this._unbindFns.push(up.fragment.onAborted(field, () => this._cancelTimer()))
   }
 
   stop() {
