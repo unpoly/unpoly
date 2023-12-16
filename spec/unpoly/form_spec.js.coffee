@@ -2569,10 +2569,8 @@ describe 'up.form', ->
 
     describe 'form[up-autosubmit]', ->
 
-      beforeEach ->
-        up.form.config.watchInputDelay = 0
-
       it 'submits the form when a change is observed in any of its fields', asyncSpec (next) ->
+        up.form.config.watchInputDelay = 0
         $form = $fixture('form[up-autosubmit]')
         $field = $form.affix('input[name="input-name"][value="old-value"]')
         up.hello($form)
@@ -2580,6 +2578,26 @@ describe 'up.form', ->
         $field.val('new-value')
         Trigger.change($field)
         next => expect(submitSpy).toHaveBeenCalled()
+
+      it 'is does not abort the submission by a dependent field with [up-validate] in the same form (bugfix)', ->
+        abortedListener = jasmine.createSpy('up:request:aborted listener')
+        up.on('up:request:aborted', abortedListener)
+
+        up.form.config.watchInputDelay = 50
+        form = fixture('form[up-autosubmit][method="post"][action="/action"][up-target="#form-target"]')
+        input1 = e.affix(form, 'input[name="input1"][value="initial-value"][up-validate="#dependent-field"]')
+        dependentField = e.affix(form, '#dependent-field')
+        fixture('#form-target')
+
+        up.hello(form)
+
+        input1.value = 'changed-value'
+        Trigger.change(input1)
+
+        await wait(100)
+
+        expect(jasmine.Ajax.requests.count()).toBe(2)
+        expect(abortedListener.calls.count()).toBe(0)
 
       describe 'with [up-watch-delay] modifier', ->
 

@@ -27,9 +27,11 @@ Validate/autosubmit concurrency complex
 
 - up.validate(element, { target: '.target' }) should update .target and use `element` as the origin (that adds field inputs?)
   - Make a test case.
+  => It works as intended
 - Scenario: A form with both [up-autosubmit] and dependent fields
   - Problem: The dependent field submission is aborting the autosubmit, although its targets do not overlap
     - This shouldn't happen. Make a test case.
+    => It does not happen.
   - Problem: Watchers (like autosubmit) do not notice if fields are added/removed dynamically
     - Consider also watching for up:fragment:inserted and up:fragment:destroyed
     - Or make this an option [up-watch-mutation]
