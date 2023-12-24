@@ -2586,7 +2586,7 @@ describe 'up.form', ->
         up.form.config.watchInputDelay = 50
         form = fixture('form[up-autosubmit][method="post"][action="/action"][up-target="#form-target"]')
         input1 = e.affix(form, 'input[name="input1"][value="initial-value"][up-validate="#dependent-field"]')
-        dependentField = e.affix(form, '#dependent-field')
+        dependentField = e.affix(form, 'input#dependent-field[name="dependent-field"]')
         fixture('#form-target')
 
         up.hello(form)
