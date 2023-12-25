@@ -360,6 +360,12 @@ up.form = (function() {
     return options
   }
 
+  function formTargetFragments(form) {
+    let options = submitOptions(form)
+    options = up.RenderOptions.preprocess(options)
+    return new up.Change.FromURL(options).getPreflightProps().fragments
+  }
+
   function watchOptions(field, options, parserOptions = {}) {
     options = u.options(options)
 
@@ -737,6 +743,7 @@ up.form = (function() {
   @stable
   */
   function watch(container, ...args) {
+    const form = getForm(container)
     const fields = findFields(container)
     const unnamedFields = u.reject(fields, 'name')
     if (unnamedFields.length) {
@@ -750,7 +757,7 @@ up.form = (function() {
     const callback = u.extractCallback(args) || watchCallbackFromElement(container) || up.fail('No callback given for up.watch()')
     let options = u.extractOptions(args)
 
-    const watch = new up.FieldWatcher(fields, options, callback)
+    const watch = new up.FieldWatcher(form, fields, options, callback)
     watch.start()
     return () => watch.stop()
   }
@@ -778,8 +785,11 @@ up.form = (function() {
     Auto-submitting will stop automatically when the observed fields are removed from the DOM.
   @stable
   */
-  function autosubmit(target, options) {
-    return watch(target, options, (_value, _name, renderOptions) => submit(target, renderOptions))
+  function autosubmit(target, options = {}) {
+    const form = getForm(target)
+    options.abortable ??= formTargetFragments(form)
+    const onChange = (_value, _name, renderOptions) => submit(target, renderOptions)
+    return watch(target, options, onChange)
   }
 
   function getGroupSelectors() {

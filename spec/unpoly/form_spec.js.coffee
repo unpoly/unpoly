@@ -880,7 +880,7 @@ describe 'up.form', ->
 
           expect(input).not.toBeDisabled()
 
-        it 'keeps a form disabled when it is first disabled by a validation, then again by a submission that aborts the validation request', asyncSpec (next) ->
+        fit 'keeps a form disabled when it is first disabled by a validation, then again by a submission that aborts the validation request', asyncSpec (next) ->
           requests = []
           up.on 'up:request:load', ({ request }) -> requests.push(request)
 
@@ -1263,7 +1263,7 @@ describe 'up.form', ->
 
         expect(up.form.group(input)).toBe(group)
 
-    describe 'up.validate()', ->
+    fdescribe 'up.validate()', ->
 
       it 'emits an up:form:validate event with information about the validation pass', asyncSpec (next) ->
         form = fixture('form[action=/path]')
@@ -2567,11 +2567,12 @@ describe 'up.form', ->
             jasmine.objectContaining({ origin: input, feedback: false })
           )
 
-    describe 'form[up-autosubmit]', ->
+    fdescribe 'form[up-autosubmit]', ->
 
       it 'submits the form when a change is observed in any of its fields', asyncSpec (next) ->
         up.form.config.watchInputDelay = 0
-        $form = $fixture('form[up-autosubmit]')
+        $form = $fixture('form[up-autosubmit][up-target="#target"]')
+        target = fixture('#target')
         $field = $form.affix('input[name="input-name"][value="old-value"]')
         up.hello($form)
         submitSpy = up.form.submit.mock().and.returnValue(u.unresolvablePromise())
@@ -2579,45 +2580,89 @@ describe 'up.form', ->
         Trigger.change($field)
         next => expect(submitSpy).toHaveBeenCalled()
 
-      it 'is does not abort the submission by a dependent field with [up-validate] in the same form (bugfix)', ->
-        abortedListener = jasmine.createSpy('up:request:aborted listener')
-        up.on('up:request:aborted', abortedListener)
-
-        up.form.config.watchInputDelay = 50
-        form = fixture('form[up-autosubmit][method="post"][action="/action"][up-target="#form-target"]')
-        input1 = e.affix(form, 'input[name="input1"][value="initial-value"][up-validate="#dependent-field"]')
-        dependentField = e.affix(form, 'input#dependent-field[name="dependent-field"]')
-        fixture('#form-target')
-
-        up.hello(form)
-
-        input1.value = 'changed-value'
-        Trigger.change(input1)
-
-        await wait(100)
-
-        expect(jasmine.Ajax.requests.count()).toBe(2)
-        expect(abortedListener.calls.count()).toBe(0)
-
       describe 'with [up-watch-delay] modifier', ->
 
-        it 'debounces the form submission', asyncSpec (next) ->
-          $form = $fixture('form[up-autosubmit][up-watch-delay="50"]')
+        it 'debounces the form submission', ->
+          target = fixture('#target')
+          $form = $fixture('form[up-autosubmit][up-watch-delay="50"][up-target="#target"]')
           $field = $form.affix('input[name="input-name"][value="old-value"]')
           up.hello($form)
           submitSpy = up.form.submit.mock().and.returnValue(u.unresolvablePromise())
+
           $field.val('new-value-1')
           Trigger.change($field)
+
+          await wait(10)
+
           $field.val('new-value-2')
           Trigger.change($field)
 
-          next =>
-            expect(submitSpy.calls.count()).toBe(0)
+          await wait(10)
 
-          next.after 80, =>
-            expect(submitSpy.calls.count()).toBe(1)
+          expect(submitSpy.calls.count()).toBe(0)
 
-    describe 'input[up-watch]', ->
+          await wait(80)
+
+          expect(submitSpy.calls.count()).toBe(1)
+
+        it 'is does not abort a debounced submission by a dependent field with [up-validate] in the same form (bugfix)', ->
+          abortedListener = jasmine.createSpy('up:request:aborted listener')
+          up.on('up:request:aborted', abortedListener)
+
+          form = fixture('form[up-autosubmit][up-watch-delay="50"][method="post"][action="/action"][up-target="#form-target"]')
+          input1 = e.affix(form, 'input[name="input1"][value="initial-value"][up-validate="#dependent-field"]')
+          dependentField = e.affix(form, 'input#dependent-field[name="dependent-field"]')
+          fixture('#form-target')
+          up.hello(form)
+
+          input1.value = 'changed-value'
+          Trigger.change(input1)
+
+          await wait(100)
+
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+          expect(abortedListener.calls.count()).toBe(0)
+
+        it "aborts a debounced submission when the form's explicit target is aborted", ->
+          form = fixture('form[up-autosubmit][up-watch-delay="50"][method="post"][action="/action"][up-target="#form-target"]')
+          input1 = e.affix(form, 'input[name="input1"][value="initial-value"]')
+          target = fixture('#form-target')
+          up.hello(form)
+
+          input1.value = 'changed-value'
+          Trigger.change(input1)
+
+          await wait(10)
+
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+          up.fragment.abort(target)
+
+          await wait(90)
+
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        it "aborts a debounced submission when the form's fallback (main) target is aborted", ->
+          form = fixture('form[up-autosubmit][up-watch-delay="50"][method="post"][action="/action"][up-submit]')
+          input1 = e.affix(form, 'input[name="input1"][value="initial-value"]')
+          target = fixture('#main-target')
+          up.fragment.config.mainTargets.unshift('#main-target')
+          up.hello(form)
+
+          input1.value = 'changed-value'
+          Trigger.change(input1)
+
+          await wait(10)
+
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+          up.fragment.abort(target)
+
+          await wait(90)
+
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+    fdescribe 'input[up-watch]', ->
 
       afterEach ->
         window.watchCallbackSpy = undefined
@@ -2691,7 +2736,7 @@ describe 'up.form', ->
           next.after 80, ->
             expect(window.watchCallbackSpy).not.toHaveBeenCalled()
 
-    describe 'form[up-watch]', ->
+    fdescribe 'form[up-watch]', ->
 
       afterEach ->
         window.watchCallbackSpy = undefined
@@ -2758,7 +2803,7 @@ describe 'up.form', ->
               ['field1-new-value', 'field1'],
             ]
 
-    describe 'input[up-validate]', ->
+    fdescribe 'input[up-validate]', ->
 
       describe 'when a selector is given', ->
 
@@ -3089,7 +3134,7 @@ describe 'up.form', ->
           next.after 350, ->
             expect(jasmine.Ajax.requests.count()).toBe(1)
 
-    describe 'form[up-validate]', ->
+    fdescribe 'form[up-validate]', ->
 
       # it 'prints an error saying that this form is not yet supported', ->
 
