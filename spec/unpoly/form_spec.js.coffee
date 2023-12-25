@@ -137,7 +137,7 @@ describe 'up.form', ->
         result = up.form.submitButtons(form)
         expect(result).toEqual(jasmine.arrayWithExactContents([submitButton, submitInput]))
 
-    describe 'up.watch()', ->
+    fdescribe 'up.watch()', ->
 
       beforeEach ->
         up.form.config.watchInputDelay = 0
@@ -244,22 +244,21 @@ describe 'up.form', ->
                 next.after 150, ->
                   expect(callback).not.toHaveBeenCalled()
 
-              it 'does not run the callback if the field was aborted during the delay', asyncSpec (next) ->
+              it 'does not run the callback if the form was aborted during the delay', asyncSpec (next) ->
                 form = fixture('form')
-                container = e.affix(form, '.container')
-                input = e.affix(container, 'input[name="input-name"][value="old-value"]')
+                input = e.affix(form, 'input[name="input-name"][value="old-value"]')
                 callback = jasmine.createSpy('watcher callback')
                 up.watch(input, { delay: 150 }, callback)
                 input.value = 'new-value'
                 Trigger[eventType](input)
 
                 next.after 50, ->
-                  up.fragment.abort(container)
+                  up.fragment.abort(form)
 
                 next.after 150, ->
                   expect(callback).not.toHaveBeenCalled()
 
-            it 'delays a callback if a previous async callback is taking long to execute', asyncSpec (next) ->
+            it 'delays a callback if a previous async callback is taking long to execute', ->
               form = fixture('form')
               input = e.affix(form, 'input[name="input-name"][value="old-value"]')
               callbackCount = 0
@@ -270,19 +269,88 @@ describe 'up.form', ->
               input.value = 'new-value-1'
               Trigger[eventType](input)
 
-              next.after 30, ->
-                # Callback has been called and takes 100 ms to complete
-                expect(callbackCount).toEqual(1)
-                input.value = 'new-value-2'
-                Trigger[eventType](input)
+              await wait(30)
 
-              next.after 30, ->
-                # Second callback is triggerd, but waits for first callback to complete
-                expect(callbackCount).toEqual(1)
+              # Callback has been called and takes 100 ms to complete
+              expect(callbackCount).toEqual(1)
+              input.value = 'new-value-2'
+              Trigger[eventType](input)
 
-              next.after 90, ->
-                # After 150 ms the first callback should be finished and the queued 2nd callback has executed
-                expect(callbackCount).toEqual(2)
+              await wait(30)
+
+              # Second callback is triggerd, but waits for first callback to complete
+              expect(callbackCount).toEqual(1)
+
+              await wait(90)
+
+              # After 150 ms the first callback should be finished and the queued 2nd callback has executed
+              expect(callbackCount).toEqual(2)
+
+            it 'does not run a callback if the form was aborted while a previous callback was still running', asyncSpec (next) ->
+              form = fixture('form')
+              input = e.affix(form, 'input[name="input-name"][value="old-value"]')
+              callbackCount = 0
+              callback = ->
+                callbackCount += 1
+                return up.specUtil.promiseTimer(100)
+              up.watch(input, { delay: 1 }, callback)
+              input.value = 'new-value-1'
+              Trigger[eventType](input)
+
+              await wait(30)
+
+              # Callback has been called and takes 100 ms to complete
+              expect(callbackCount).toEqual(1)
+              input.value = 'new-value-2'
+              Trigger[eventType](input)
+
+              await wait(30)
+
+              # Second callback is triggerd, but waits for first callback to complete
+              expect(callbackCount).toEqual(1)
+
+              await wait(10)
+
+              # Aborting the form will unqueue the second callback.
+              up.fragment.abort(form)
+
+              await wait(80)
+
+              # After 150 ms the first callback should be finished. The 2nd callback has been unqueued because the form was aborted.
+              expect(callbackCount).toEqual(1)
+
+            it 'does not run a callback if the form was detached while a previous callback was still running', asyncSpec (next) ->
+              form = fixture('form')
+              input = e.affix(form, 'input[name="input-name"][value="old-value"]')
+              callbackCount = 0
+              callback = ->
+                callbackCount += 1
+                return up.specUtil.promiseTimer(100)
+              up.watch(input, { delay: 1 }, callback)
+              input.value = 'new-value-1'
+              Trigger[eventType](input)
+
+              await wait(30)
+
+              # Callback has been called and takes 100 ms to complete
+              expect(callbackCount).toEqual(1)
+              input.value = 'new-value-2'
+              Trigger[eventType](input)
+
+              await wait(30)
+
+              # Second callback is triggerd, but waits for first callback to complete
+              expect(callbackCount).toEqual(1)
+
+              await wait(10)
+
+              form.remove()
+
+              await wait(80)
+
+              # After 150 ms the first callback should be finished.
+              # The 2nd callback will not run because no field is attached.
+              expect(callbackCount).toEqual(1)
 
             it 'only runs the last callback when a previous long-running callback has been delaying multiple callbacks', asyncSpec (next) ->
               form = fixture('form')
