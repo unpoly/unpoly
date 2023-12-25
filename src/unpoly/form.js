@@ -292,8 +292,12 @@ up.form = (function() {
   @stable
   */
   const submit = up.mockable((form, options) => {
-    return up.render(submitOptions(form, options))
+    return buildSubmitJob(form, options).execute()
   })
+
+  function buildSubmitJob(form, options) {
+    return new up.RenderJob(submitOptions(form, options))
+  }
 
   /*-
   Parses the [render](/up.render) options that would be used to
@@ -360,10 +364,8 @@ up.form = (function() {
     return options
   }
 
-  function formTargetFragments(form) {
-    let options = submitOptions(form)
-    options = up.RenderOptions.preprocess(options)
-    return new up.Change.FromURL(options).getPreflightProps().fragments
+  function getPreflightFragments(form) {
+    return buildSubmitJob(form).getPreflightFragments()
   }
 
   function watchOptions(field, options, parserOptions = {}) {
@@ -787,7 +789,7 @@ up.form = (function() {
   */
   function autosubmit(target, options = {}) {
     const form = getForm(target)
-    options.abortable ??= formTargetFragments(form)
+    options.abortable ??= getPreflightFragments(form)
     const onChange = (_value, _name, renderOptions) => submit(target, renderOptions)
     return watch(target, options, onChange)
   }

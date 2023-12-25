@@ -29,7 +29,6 @@ up.FieldWatcher = class FieldWatcher {
     for (let abortableElement of this._abortable) {
       if (abortableElement !== false) {
         this._unbindFns.push(up.fragment.onAborted(abortableElement, () => {
-          console.debug("*** element %o was aborted", abortableElement)
           this._cancelTimer()
         }))
       }

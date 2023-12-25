@@ -7115,7 +7115,7 @@ describe 'up.fragment', ->
           expect(listener.calls.argsFor(0)[0].renderOptions.target).toEqual('.target')
           expect(listener.calls.argsFor(0)[0].renderOptions.guardEvent).toBeMissing()
 
-      describe 'with { abort } option', ->
+      fdescribe 'with { abort } option', ->
 
         describe 'with { abort: true }', ->
 
@@ -7158,19 +7158,20 @@ describe 'up.fragment', ->
               expect(up.network.queue.allRequests.length).toEqual(2)
 
           it 'aborts the request of an existing change if the new change is made from local content', asyncSpec (next) ->
-            fixture('.element')
+            fixture('.element1')
+            fixture('.element2')
 
             change1Error  = undefined
             change1Promise = undefined
 
-            change1Promise = up.render('.element', url: '/path1', abort: true)
+            change1Promise = up.render('.element1', url: '/path1', abort: true)
             change1Promise.catch (e) -> change1Error = e
 
             next ->
               expect(up.network.queue.allRequests.length).toEqual(1)
               expect(change1Error).toBeUndefined()
 
-              up.render('.element', content: 'local content', abort: true)
+              up.render('.element2', content: 'local content', abort: true)
 
             next ->
               expect(change1Error).toBeAbortError()

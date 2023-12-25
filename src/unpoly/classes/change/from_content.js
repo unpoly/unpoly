@@ -94,6 +94,7 @@ up.Change.FromContent = class FromContent extends up.Change {
     return !(error instanceof up.CannotMatch)
   }
 
+  // Final preparations before elements are being changed.
   _onPlanApplicable(plan) {
     let primaryPlan = this._getPlans()[0]
     if (plan !== primaryPlan) {
@@ -104,6 +105,9 @@ up.Change.FromContent = class FromContent extends up.Change {
     if (assets) {
       up.script.assertAssetsOK(assets, plan.options)
     }
+
+    // Used by up.RenderJob
+    this.options.onRender?.()
   }
 
   _getResponseDoc() {
