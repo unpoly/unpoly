@@ -1999,6 +1999,14 @@ describe 'up.util', ->
         tokens = up.util.parseTokens(array)
         expect(tokens).toEqual ['foo', 'bar']
 
+      it 'returns an empty array for undefined', ->
+        tokens = up.util.parseTokens(undefined)
+        expect(tokens).toEqual []
+
+      it 'returns an empty array for null', ->
+        tokens = up.util.parseTokens(null)
+        expect(tokens).toEqual []
+
       describe 'with { json: true }', ->
 
         it 'parses the string as JSON if it is enclosed in square brackets', ->

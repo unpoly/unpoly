@@ -230,7 +230,7 @@ describe 'up.form', ->
                   expect(callback.calls.count()).toEqual(2)
                   expect(callback.calls.mostRecent().args[0]).toEqual('new-value-3')
 
-              it 'does not run the callback if the field was detached during the delay', asyncSpec (next) ->
+              it 'does not run the callback if the form was detached during the delay', asyncSpec (next) ->
                 form = fixture('form')
                 input = e.affix(form, 'input[name="input-name"][value="old-value"]')
                 callback = jasmine.createSpy('watcher callback')
@@ -239,7 +239,7 @@ describe 'up.form', ->
                 Trigger[eventType](input)
 
                 next.after 50, ->
-                  up.destroy(input)
+                  up.destroy(form)
 
                 next.after 150, ->
                   expect(callback).not.toHaveBeenCalled()
@@ -609,6 +609,24 @@ describe 'up.form', ->
               Trigger[eventType](input)
               next =>
                 expect(callback).not.toHaveBeenCalled()
+
+            it 'detects a change in a field that was added dynamically later', ->
+              callback = jasmine.createSpy('change callback')
+              form = fixture('form')
+              target = fixture('#target')
+              field1 = e.affix(form, 'input[name="input1"][value="old-value"]')
+              up.watch(form, callback)
+              up.hello(form)
+
+              field2 = e.affix(form, 'input[name="input2"][value="old-value"]')
+              up.hello(field2)
+
+              field2.value = 'new-value'
+              Trigger.change(field2)
+
+              await wait()
+
+              expect(callback).toHaveBeenCalled()
 
       describe 'with an element containing fields', ->
 
@@ -2637,16 +2655,38 @@ describe 'up.form', ->
 
     fdescribe 'form[up-autosubmit]', ->
 
-      it 'submits the form when a change is observed in any of its fields', asyncSpec (next) ->
+      it 'submits the form when a change is observed in any of its fields', ->
         up.form.config.watchInputDelay = 0
-        $form = $fixture('form[up-autosubmit][up-target="#target"]')
+        form = fixture('form[up-autosubmit][up-target="#target"]')
         target = fixture('#target')
-        $field = $form.affix('input[name="input-name"][value="old-value"]')
-        up.hello($form)
+        field = e.affix(form, 'input[name="input-name"][value="old-value"]')
         submitSpy = up.form.submit.mock().and.returnValue(u.unresolvablePromise())
-        $field.val('new-value')
-        Trigger.change($field)
-        next => expect(submitSpy).toHaveBeenCalled()
+        up.hello(form)
+
+        field.value = 'new-value'
+        Trigger.change(field)
+
+        await wait()
+
+        expect(submitSpy).toHaveBeenCalled()
+
+      it 'detects a change in a field that was added dynamically later', ->
+        up.form.config.watchInputDelay = 0
+        form = fixture('form[up-autosubmit][up-target="#target"]')
+        target = fixture('#target')
+        field1 = e.affix(form, 'input[name="input1"][value="old-value"]')
+        submitSpy = up.form.submit.mock().and.returnValue(u.unresolvablePromise())
+        up.hello(form)
+
+        field2 = e.affix(form, 'input[name="input2"][value="old-value"]')
+        up.hello(field2)
+
+        field2.value = 'new-value'
+        Trigger.change(field2)
+
+        await wait()
+
+        expect(submitSpy).toHaveBeenCalled()
 
       describe 'with [up-watch-delay] modifier', ->
 

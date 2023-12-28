@@ -456,28 +456,35 @@ up.Params = class Params {
 
   Given this HTML form:
 
-      <form>
-        <input type="text" name="email" value="foo@bar.com">
-        <input type="password" name="pass" value="secret">
-      </form>
+  ```html
+  <form>
+    <input type="text" name="email" value="foo@bar.com">
+    <input type="password" name="pass" value="secret">
+  </form>
+  ```
 
   This would serialize the form into an array representation:
 
-      var params = up.Params.fromForm('input[name=email]')
-      var email = params.get('email') // email is now 'foo@bar.com'
-      var pass = params.get('pass') // pass is now 'secret'
+  ```js
+  let params = up.Params.fromForm('input[name=email]')
+  let email = params.get('email') // email is now 'foo@bar.com'
+  let pass = params.get('pass') // pass is now 'secret'
+  ```
 
   @function up.Params.fromForm
-  @param {Element|jQuery|string} form
-    A `<form>` element or a selector that matches a `<form>` element.
+  @param {Element} form
+    A `<form>` element.
   @return {up.Params}
     A new `up.Params` instance with values from the given form.
   @experimental
   */
   static fromForm(form) {
-    // If passed a selector, up.fragment.get() will prefer a match on the current layer.
-    form = up.fragment.get(form)
-    return this.fromFields(up.form.fields(form))
+    return this.fromContainer(form)
+  }
+
+  static fromContainer(container) {
+    let fields = up.form.fields(container)
+    return this.fromFields(fields)
   }
 
   /*-

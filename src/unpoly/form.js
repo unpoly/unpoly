@@ -745,23 +745,13 @@ up.form = (function() {
   @stable
   */
   function watch(container, ...args) {
-    const form = getForm(container)
-    const fields = findFields(container)
-    const unnamedFields = u.reject(fields, 'name')
-    if (unnamedFields.length) {
-      // (1) We do not need to exclude the unnamed fields for up.FieldWatcher, since that
-      //     parses values with up.Params.fromFields(), and that ignores unnamed fields.
-      // (2) Only warn, don't crash. There are some legitimate cases for having unnamed
-      //     a mix of named and unnamed fields in a form, and we don't want to prevent
-      //     <form up-watch> in that case.
-      up.puts('up.watch()', 'Will not watch fields without a [name]: %o', unnamedFields)
-    }
     const callback = u.extractCallback(args) || watchCallbackFromElement(container) || up.fail('No callback given for up.watch()')
     let options = u.extractOptions(args)
 
-    const watch = new up.FieldWatcher(form, fields, options, callback)
-    watch.start()
-    return () => watch.stop()
+    const watcher = new up.FieldWatcher(container, options, callback)
+
+    watcher.start()
+    return () => watcher.stop()
   }
 
   function watchCallbackFromElement(element) {

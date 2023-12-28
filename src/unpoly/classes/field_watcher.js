@@ -1,19 +1,16 @@
 const u = up.util
+const DEFAULT_EVENT_TYPE = 'input'
 
 up.FieldWatcher = class FieldWatcher {
 
-  constructor(form, fields, options, callback) {
-    this._callback = callback
-    this._fields = fields
+  constructor(container, options, callback) {
     this._options = options
+    this._container = container
+    this._form = up.form.get(container)
+    this._callback = callback
     this._batch = options.batch
-    this._abortable = u.wrapList(options.abortable ?? form)
-    this._unbindFns = []
-  }
-
-  _fieldOptions(field) {
-    let options = u.copy(this._options)
-    return up.form.watchOptions(field, options, { defaults: { event: 'input' } })
+    this._abortable = options.abortable
+    this._fieldOptionsCache = new Map()
   }
 
   start() {
@@ -21,30 +18,19 @@ up.FieldWatcher = class FieldWatcher {
     this._processedValues = this._readFieldValues()
     this._currentTimer = null
     this._callbackRunning = false
+    this._unbindFns = []
 
-    for (let field of this._fields) {
-      this._watchField(field)
+    for (let eventType of this._possibleEventTypes()) {
+      this._unbindFns.push(
+        this._watchEvent(eventType)
+      )
     }
 
-    for (let abortableElement of this._abortable) {
-      if (abortableElement !== false) {
-        this._unbindFns.push(
-          up.fragment.onAborted(abortableElement, () => {
-            this._abort()
-          })
-        )
-      }
+    for (let abortableElement of this._abortableElements()) {
+      this._unbindFns.push(
+        up.fragment.onAborted(abortableElement, () => this._abort())
+      )
     }
-  }
-
-  _abort() {
-    // This causes the next call to _requestCallback() to return early
-    this._scheduledValues = null
-  }
-
-  _watchField(field) {
-    let fieldOptions = this._fieldOptions(field)
-    this._unbindFns.push(up.on(field, fieldOptions.event, (event) => this._check(event, fieldOptions)))
   }
 
   stop() {
@@ -52,20 +38,70 @@ up.FieldWatcher = class FieldWatcher {
     for (let unbindFn of this._unbindFns) unbindFn()
   }
 
+  _fieldOptions(field) {
+    return this._cachedFieldOptions(field) || this._readAndCacheFieldOptions(field)
+  }
+
+  _cachedFieldOptions(field) {
+    return this._fieldOptionsCache.get(field)
+  }
+
+  _readAndCacheFieldOptions(field) {
+    let containerOptions = u.copy(this._options)
+    let fieldOptions = up.form.watchOptions(field, containerOptions, { defaults: { event: DEFAULT_EVENT_TYPE } })
+    this._fieldOptionsCache.set(field, fieldOptions)
+    return fieldOptions
+  }
+
+  _fieldEventTypes(field) {
+    let { event } = this._fieldOptions(field)
+    return u.parseTokens(event)
+  }
+
+  _possibleEventTypes() {
+    let fields = up.form.fields(this._container)
+    let types = u.flatMap(fields, (field) => this._fieldEventTypes(field))
+    if (types.length) {
+      return u.uniq(types)
+    } else {
+      return [DEFAULT_EVENT_TYPE]
+    }
+  }
+
+  _abortableElements() {
+    if (this._abortable === false) {
+      return []
+    } else {
+      return u.wrapList(this._abortable ?? this._form)
+    }
+  }
+
+  _watchEvent(type) {
+    return up.on(this._container, type, (event) => this._onEvent(event))
+  }
+
+  _onEvent({ type, target }) {
+    if (!up.form.isField(target)) return
+    let fieldOptions = this._fieldOptions(target)
+    let fieldEventTypes = u.parseTokens(fieldOptions.event)
+    if (!u.contains(fieldEventTypes, type)) return
+    this._check(fieldOptions)
+  }
+
+  _abort() {
+    // This causes the next call to _requestCallback() to return early
+    this._scheduledValues = null
+  }
+
   _cancelTimer() {
     clearTimeout(this._currentTimer)
     this._currentTimer = null
   }
 
-  _isAnyFieldAttached() {
-    return u.some(this._fields, 'isConnected')
-  }
-
-  _scheduleValues(values, event, fieldOptions) {
+  _scheduleValues(values,  fieldOptions) {
     this._cancelTimer()
     this._scheduledValues = values
-    let delay = u.evalOption(fieldOptions.delay, event)
-    this._currentTimer = u.timer(delay, () => {
+    this._currentTimer = u.timer(fieldOptions.delay, () => {
       this._currentTimer = null
       this._scheduledFieldOptions = fieldOptions
       this._requestCallback()
@@ -77,13 +113,13 @@ up.FieldWatcher = class FieldWatcher {
   }
 
   async _requestCallback() {
-    if (!this._isAnyFieldAttached()) {
+    if (!this._form.isConnected) {
       this._abort()
     }
 
     let fieldOptions = this._scheduledFieldOptions
 
-    if ((this._scheduledValues !== null) && !this._currentTimer && !this._callbackRunning && this._isAnyFieldAttached()) {
+    if ((this._scheduledValues !== null) && !this._currentTimer && !this._callbackRunning) {
       const diff = this._changedValues(this._processedValues, this._scheduledValues)
       this._processedValues = this._scheduledValues
       this._scheduledValues = null
@@ -140,13 +176,13 @@ up.FieldWatcher = class FieldWatcher {
   }
 
   _readFieldValues() {
-    return up.Params.fromFields(this._fields).toObject()
+    return up.Params.fromContainer(this._container).toObject()
   }
 
-  _check(event, fieldOptions) {
+  _check(fieldOptions) {
     const values = this._readFieldValues()
     if (this._isNewValues(values)) {
-      this._scheduleValues(values, event, fieldOptions)
+      this._scheduleValues(values, fieldOptions)
     }
   }
 }
