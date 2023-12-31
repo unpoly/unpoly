@@ -276,7 +276,7 @@ describe 'up.layer', ->
 
           return
 
-        fit "hides a focus ring on the new overlay's box", (done) ->
+        it "hides a focus ring on the new overlay's box", (done) ->
           assertFocus = ->
             expect(up.layer.current.getBoxElement()).toBeFocused()
             expect(up.layer.current.getBoxElement()).not.toHaveOutline()
@@ -635,7 +635,7 @@ describe 'up.layer', ->
                   jasmine.anything()
                 )
 
-            fit 'returns focus to the link that opened the overlay, hiding a focus ring as it is a mouse interaction', ->
+            it 'returns focus to the link that opened the overlay, hiding a focus ring as it is a mouse interaction', ->
               opener = fixture('a[href="/overlay"][up-layer="new"][up-target="#content"][up-dismissable="button"]')
               Trigger.clickSequence(opener)
 
@@ -655,7 +655,7 @@ describe 'up.layer', ->
               expect(opener).toHaveFocus()
               expect(opener).not.toHaveOutline()
 
-            fit 'returns focus to the link that opened the overlay, showing a focus ring when the button was activated with a keyboard', ->
+            it 'returns focus to the link that opened the overlay, showing a focus ring when the button was activated with a keyboard', ->
               opener = fixture('a[href="/overlay"][up-layer="new"][up-target="#content"][up-dismissable="button"]')
               Trigger.clickSequence(opener)
 
@@ -694,7 +694,7 @@ describe 'up.layer', ->
               next ->
                 expect(up.layer.isOverlay()).toBe(false)
 
-            fit 'returns focus to the link that opened the overlay, showing a focus ring as it is a keyboard interaction', ->
+            it 'returns focus to the link that opened the overlay, showing a focus ring as it is a keyboard interaction', ->
               opener = fixture('a[href="/overlay"][up-target="#content"][up-layer="new"][up-dismissable="key"]')
               Trigger.clickSequence(opener)
 

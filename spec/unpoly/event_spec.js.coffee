@@ -353,7 +353,7 @@ describe 'up.event', ->
 
       describe 'with { capture } option', ->
 
-        fit 'registers an event listener that will be called during the capture phase', ->
+        it 'registers an event listener that will be called during the capture phase', ->
           # See https://javascript.info/bubbling-and-capturing
           element = fixture('.element')
           emissions = []
@@ -803,7 +803,7 @@ describe 'up.event', ->
 
         expect(fooListener).toHaveBeenCalled()
 
-      fit 'is focusable for keyboard users', ->
+      it 'is focusable for keyboard users', ->
         link = up.hello(fixture("a[up-emit='foo']", text: 'label'))
         expect(link).toBeKeyboardFocusable()
 

@@ -8,7 +8,7 @@ describe 'up.viewport', ->
 
     describe 'up.focus()', ->
 
-      fdescribe 'focus ring', ->
+      describe 'focus ring', ->
 
         useMouse = ->
           Trigger.clickSequence(document.body)

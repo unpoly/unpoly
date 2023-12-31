@@ -148,7 +148,7 @@ describe 'up.form', ->
 
       describe 'with a field element', ->
 
-        fit "runs the callback with the field's default value when the form is reset", ->
+        it "runs the callback with the field's default value when the form is reset", ->
           form = fixture('form')
           input = e.affix(form, 'input[name=foo][value=default]')
           reset = e.affix(form, 'input[type=reset]')

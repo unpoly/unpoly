@@ -1336,7 +1336,7 @@ describe 'up.link', ->
 
           describe 'with [up-layer=new]', ->
 
-            fit 'opens the target in a new overlay', ->
+            it 'opens the target in a new overlay', ->
               link = fixture('a[href="/overlay"][up-layer=new][up-target="#content"]')
               Trigger.clickSequence(link)
 
@@ -1349,7 +1349,7 @@ describe 'up.link', ->
               expect(up.layer.current).toBeOverlay()
               expect(up.layer.current).toHaveText('overlay content')
 
-            fit 'focus the new overlay, but hides the focus ring when the link is activated with the mouse', ->
+            it 'focus the new overlay, but hides the focus ring when the link is activated with the mouse', ->
               link = fixture('a[href="/overlay"][up-layer=new][up-target="#content"]')
               Trigger.clickSequence(link)
 
@@ -1363,7 +1363,7 @@ describe 'up.link', ->
               expect(up.layer.current.getFocusElement()).toHaveFocus()
               expect(up.layer.current.getFocusElement()).not.toHaveOutline()
 
-            fit 'shows the focus ring for the new overlay when the link is activated with the keyboard', ->
+            it 'shows the focus ring for the new overlay when the link is activated with the keyboard', ->
               link = fixture('a[href="/overlay"][up-layer=new][up-target="#content"]', text: 'link')
 
               await wait()
@@ -1382,7 +1382,7 @@ describe 'up.link', ->
 
       describe 'with [up-focus] modifier', ->
 
-        fit 'focuses the given selector', ->
+        it 'focuses the given selector', ->
           fixture('div#focus')
           fixture('#target', text: 'old content')
           link = fixture('a[href="/path"][up-target="#target"][up-focus="#focus"]')
@@ -1397,7 +1397,7 @@ describe 'up.link', ->
           expect('#target').toHaveText('new content')
           expect('#focus').toHaveFocus()
 
-        fit 'hides the focus ring when the link is activated with the mouse', ->
+        it 'hides the focus ring when the link is activated with the mouse', ->
           fixture('div#focus')
           fixture('#target', text: 'old content')
           link = fixture('a[href="/path"][up-target="#target"][up-focus="#focus"]')
@@ -1412,7 +1412,7 @@ describe 'up.link', ->
           expect('#focus').toHaveFocus()
           expect('#focus').not.toHaveOutline()
 
-        fit 'shows the focus ring when the link is activated with the keyboard', ->
+        it 'shows the focus ring when the link is activated with the keyboard', ->
           fixture('div#focus', text: 'focus')
           fixture('#target', text: 'old content')
           link = fixture('a[href="/path"][up-target="#target"][up-focus="#focus"]')
@@ -1427,7 +1427,7 @@ describe 'up.link', ->
           expect('#focus').toHaveFocus()
           expect('#focus').toHaveOutline()
 
-        fit 'shows the focus ring when the link is activated with the mouse and the focused element is an input', ->
+        it 'shows the focus ring when the link is activated with the mouse and the focused element is an input', ->
           form = fixture('form')
           e.affix(form, 'input#focus[name="email"]')
           fixture('#target', text: 'old content')
@@ -1996,7 +1996,7 @@ describe 'up.link', ->
 
         describe 'focus', ->
 
-          fit 'focused the link after the click sequence (like a vanilla link)', ->
+          it 'focused the link after the click sequence (like a vanilla link)', ->
             followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
             link = up.hello fixture('a[href="/path"][up-instant]')
 
@@ -2005,7 +2005,7 @@ describe 'up.link', ->
             expect(followSpy).toHaveBeenCalled()
             expect(link).toBeFocused()
 
-          fit 'hides a focus ring when activated with the mouse', ->
+          it 'hides a focus ring when activated with the mouse', ->
             followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
             link = up.hello fixture('a[href="/path"][up-instant]')
             Trigger.clickSequence(link, focus: false)
@@ -2015,7 +2015,7 @@ describe 'up.link', ->
 
             expect(link).not.toHaveOutline()
 
-          fit 'shows a focus ring when activated with a non-pointing device (keyboard or unknown)', ->
+          it 'shows a focus ring when activated with a non-pointing device (keyboard or unknown)', ->
             followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
             link = up.hello fixture('a[href="/path"][up-instant]')
             Trigger.clickLinkWithKeyboard(link)
@@ -2025,7 +2025,7 @@ describe 'up.link', ->
 
             expect(link).toHaveOutline()
 
-          fit 'hides the focus ring when activated with the mouse, then shows the focus ring when activated with the keyboard', ->
+          it 'hides the focus ring when activated with the mouse, then shows the focus ring when activated with the keyboard', ->
             followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
             link = up.hello fixture('a[href="/path"][up-instant]')
 
@@ -2862,7 +2862,7 @@ describe 'up.link', ->
 
       expect(clickListener).toHaveBeenCalled()
 
-    fit 'makes the element focusable for keyboard users', ->
+    it 'makes the element focusable for keyboard users', ->
       fauxLink = up.hello(fixture('.hyperlink[up-clickable]'))
 
       expect(fauxLink).toBeKeyboardFocusable()
