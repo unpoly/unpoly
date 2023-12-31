@@ -244,7 +244,7 @@ describe 'up.element', ->
         result = up.element.closest($element[0], '.match')
         expect(result).toBeMissing()
 
-  fdescribe 'up.element.ancestor()', ->
+  describe 'up.element.ancestor()', ->
 
     it 'returns the closest ancestor of the given root that matches the given selector', ->
       $grandGrandMother = $fixture('.match')

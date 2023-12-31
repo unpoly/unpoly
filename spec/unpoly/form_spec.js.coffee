@@ -137,7 +137,7 @@ describe 'up.form', ->
         result = up.form.submitButtons(form)
         expect(result).toEqual(jasmine.arrayWithExactContents([submitButton, submitInput]))
 
-    fdescribe 'up.watch()', ->
+    describe 'up.watch()', ->
 
       beforeEach ->
         up.form.config.watchInputDelay = 0
@@ -984,7 +984,7 @@ describe 'up.form', ->
 
           expect(input).not.toBeDisabled()
 
-        fit 'keeps a form disabled when it is first disabled by a validation, then again by a submission that aborts the validation request', asyncSpec (next) ->
+        it 'keeps a form disabled when it is first disabled by a validation, then again by a submission that aborts the validation request', asyncSpec (next) ->
           requests = []
           up.on 'up:request:load', ({ request }) -> requests.push(request)
 
@@ -1367,7 +1367,7 @@ describe 'up.form', ->
 
         expect(up.form.group(input)).toBe(group)
 
-    fdescribe 'up.validate()', ->
+    describe 'up.validate()', ->
 
       it 'emits an up:form:validate event with information about the validation pass', asyncSpec (next) ->
         form = fixture('form[action=/path]')
@@ -2671,7 +2671,7 @@ describe 'up.form', ->
             jasmine.objectContaining({ origin: input, feedback: false })
           )
 
-    fdescribe 'form[up-autosubmit]', ->
+    describe 'form[up-autosubmit]', ->
 
       it 'submits the form when a change is observed in any of its fields', ->
         up.form.config.watchInputDelay = 0
@@ -2807,7 +2807,7 @@ describe 'up.form', ->
 
           expect(jasmine.Ajax.requests.count()).toBe(0)
 
-    fdescribe 'input[up-watch]', ->
+    describe 'input[up-watch]', ->
 
       afterEach ->
         window.watchCallbackSpy = undefined
@@ -2881,7 +2881,7 @@ describe 'up.form', ->
           next.after 80, ->
             expect(window.watchCallbackSpy).not.toHaveBeenCalled()
 
-    fdescribe 'form[up-watch]', ->
+    describe 'form[up-watch]', ->
 
       afterEach ->
         window.watchCallbackSpy = undefined
@@ -2948,7 +2948,7 @@ describe 'up.form', ->
               ['field1-new-value', 'field1'],
             ]
 
-    fdescribe 'input[up-validate]', ->
+    describe 'input[up-validate]', ->
 
       describe 'when a selector is given', ->
 
@@ -3279,7 +3279,7 @@ describe 'up.form', ->
           next.after 350, ->
             expect(jasmine.Ajax.requests.count()).toBe(1)
 
-    fdescribe 'form[up-validate]', ->
+    describe 'form[up-validate]', ->
 
       # it 'prints an error saying that this form is not yet supported', ->
 

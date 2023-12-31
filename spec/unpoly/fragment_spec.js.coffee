@@ -7115,7 +7115,7 @@ describe 'up.fragment', ->
           expect(listener.calls.argsFor(0)[0].renderOptions.target).toEqual('.target')
           expect(listener.calls.argsFor(0)[0].renderOptions.guardEvent).toBeMissing()
 
-      fdescribe 'with { abort } option', ->
+      describe 'with { abort } option', ->
 
         describe 'with { abort: true }', ->
 
