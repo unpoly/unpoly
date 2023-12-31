@@ -2537,10 +2537,10 @@ describe 'up.form', ->
 
       describe 'origin of submission', ->
 
-        lastOrigin = -> up.render.calls.mostRecent().args[0].origin
-
         beforeEach ->
-          spyOn(up, 'render').and.returnValue(Promise.resolve(new up.RenderResult()))
+          spyOn(up, 'RenderJob').and.callThrough()
+
+        lastOrigin = -> up.RenderJob.calls.mostRecent().args[0].origin
 
         it 'sets the origin to the clicked submit button', ->
           form = fixture('form[action="/path"][up-submit]')
