@@ -1,0 +1,13 @@
+<html>
+<body>
+
+<div id="viewport" style="background-color: yellow; height: 100px; overflow-y: scroll; scroll-behavior: smooth;">
+  <div id="before" style="height: 5000px"></div>
+  <div id="target" style="height: 100px; background-color: red"></div>
+</div>
+
+<a href="#" onclick="document.querySelector('#viewport').scrollTo({ top: 5000, behavior: 'instant' })">scroll</a>
+
+</body>
+</html>
+

@@ -566,6 +566,19 @@ describe 'up.viewport', ->
             expect(document.scrollingElement.scrollTop).toBeLessThan(19000)
             done()
 
+      describe 'without a { behavior } option', ->
+
+        it 'defaults to { behavior: "instant" } to ignore a scroll-behavior set in CSS', ->
+          viewport = fixture('#viewport[up-viewport]', style: { height: '100px', overflowY: 'scroll' })
+          before = e.affix(viewport, '#before', style: { height: 20000 })
+          target = e.affix(viewport, '#target', style: { height: 10 })
+
+          spyOn(viewport, 'scrollTo')
+
+          up.reveal(target)
+
+          expect(viewport.scrollTo).toHaveBeenCalledWith(jasmine.objectContaining(behavior: 'instant'))
+
     if up.migrate.loaded
       describe 'up.scroll()', ->
 

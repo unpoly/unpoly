@@ -144,6 +144,9 @@ up.viewport = (function() {
 
     When set to `'smooth'`, this will scroll smoothly to the new position.
 
+    When set to `'auto'`, the behavior is determined by the CSS property
+    [`scroll-behavior`](https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-behavior) of the viewport element.
+
   @param {number} [options.padding]
     The desired padding between the revealed element and the
     closest [viewport](/up.viewport) edge (in pixels).

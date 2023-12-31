@@ -5,15 +5,15 @@ up.RevealMotion = class RevealMotion {
 
   constructor(element, options = {}) {
     this._element = element
-    this._options = options
-    this._viewport = e.get(this._options.viewport) || up.viewport.get(this._element)
+    this._viewport = e.get(options.viewport) || up.viewport.get(this._element)
     this._obstructionsLayer = up.layer.get(this._viewport)
+    this._behavior = options.behavior ?? 'instant'
 
     const viewportConfig = up.viewport.config
-    this._snap    = this._options.snap    ?? this._options.revealSnap    ?? viewportConfig.revealSnap
-    this._padding = this._options.padding ?? this._options.revealPadding ?? viewportConfig.revealPadding
-    this._top     = this._options.top     ?? this._options.revealTop     ?? viewportConfig.revealTop
-    this._max     = this._options.max     ?? this._options.revealMax     ?? viewportConfig.revealMax
+    this._snap    = options.snap    ?? options.revealSnap    ?? viewportConfig.revealSnap
+    this._padding = options.padding ?? options.revealPadding ?? viewportConfig.revealPadding
+    this._top     = options.top     ?? options.revealTop     ?? viewportConfig.revealTop
+    this._max     = options.max     ?? options.revealMax     ?? viewportConfig.revealMax
 
     this._topObstructionSelector = viewportConfig.selector('fixedTopSelectors')
     this._bottomObstructionSelector = viewportConfig.selector('fixedBottomSelectors')
@@ -63,7 +63,7 @@ up.RevealMotion = class RevealMotion {
     }
 
     if (newScrollTop !== originalScrollTop) {
-      this._viewport.scrollTo({ ...this._options, top: newScrollTop })
+      this._viewport.scrollTo({ top: newScrollTop, behavior: this._behavior })
     }
   }
 
