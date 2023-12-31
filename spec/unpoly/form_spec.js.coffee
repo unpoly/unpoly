@@ -628,6 +628,24 @@ describe 'up.form', ->
 
               expect(callback).toHaveBeenCalled()
 
+            it 'detects a change in a field that was added dynamically later and that also has a custom [up-watch-event]', ->
+              callback = jasmine.createSpy('change callback')
+              form = fixture('form')
+              target = fixture('#target')
+              field1 = e.affix(form, 'input[name="input1"][value="old-value"]')
+              up.watch(form, callback)
+              up.hello(form)
+
+              field2 = e.affix(form, 'input[name="input2"][value="old-value"][up-watch-event="custom:event"]')
+              up.hello(field2)
+
+              field2.value = 'new-value'
+              up.emit(field2, 'custom:event')
+
+              await wait()
+
+              expect(callback).toHaveBeenCalled()
+
       describe 'with an element containing fields', ->
 
         u.each defaultInputEvents, (eventType) ->

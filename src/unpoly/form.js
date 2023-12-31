@@ -741,16 +741,18 @@ up.form = (function() {
   @return {Function()}
     A destructor function that unsubscribes the watcher when called.
 
-    Watching will stop automatically when the watched fields are [destroyed](/up.destroy).
+    Watching will stop automatically when the form is [destroyed](/up.destroy).
   @stable
   */
   function watch(container, ...args) {
+    container = up.element.get(container) // unwrap jQuery
     const callback = u.extractCallback(args) || watchCallbackFromElement(container) || up.fail('No callback given for up.watch()')
     let options = u.extractOptions(args)
 
     const watcher = new up.FieldWatcher(container, options, callback)
 
     watcher.start()
+
     return () => watcher.stop()
   }
 
