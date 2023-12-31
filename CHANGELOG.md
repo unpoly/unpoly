@@ -18,6 +18,7 @@ Unreleased
 - `up.focus()` sets `{ focusVisible: false }` during interactions with a pointing device to prevent `:focus-visible`. [Poor browser support](https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter).
 - New function up.form.isField()
 - Scrolling now defaults to { behavior: 'instant' } to prevent picking up a `scroll-behavior` CSS property. To do pick up the property, pass { behavior: 'auto' }
+- Watchers run when the form is reset
 
 
 3.6.1

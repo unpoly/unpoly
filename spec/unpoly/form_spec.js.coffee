@@ -148,6 +148,30 @@ describe 'up.form', ->
 
       describe 'with a field element', ->
 
+        fit "runs the callback with the field's default value when the form is reset", ->
+          form = fixture('form')
+          input = e.affix(form, 'input[name=foo][value=default]')
+          reset = e.affix(form, 'input[type=reset]')
+
+          callback = jasmine.createSpy('watch callback')
+
+          up.watch(input, callback)
+
+          input.value = 'changed'
+          Trigger.change(input)
+          await wait()
+
+          expect(callback.calls.count()).toBe(1)
+          expect(callback.calls.argsFor(0)[0]).toBe('changed')
+
+          reset.click()
+          await wait()
+          await wait() # We need to wait 1 task for the reset button to affect field values, then another task for a 0ms debounce delay.
+
+          expect(callback.calls.count()).toBe(2)
+          expect(callback.calls.argsFor(1)[0]).toBe('default')
+
+
         u.each defaultInputEvents, (eventType) ->
 
           describe "when the input receives a #{eventType} event", ->

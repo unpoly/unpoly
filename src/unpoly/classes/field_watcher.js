@@ -29,6 +29,10 @@ up.FieldWatcher = class FieldWatcher {
         up.fragment.onAborted(abortableElement, () => this._abort())
       )
     }
+
+    this._unbindFns.push(
+      up.on(this._form, 'reset', () => this._onFormReset())
+    )
   }
 
   stop() {
@@ -67,10 +71,11 @@ up.FieldWatcher = class FieldWatcher {
     this._scheduledValues = null
   }
 
-  _scheduleValues(values,  fieldOptions) {
+  _scheduleValues(values, fieldOptions) {
     clearTimeout(this._currentTimer) // debounce a previously set timer
     this._scheduledValues = values
-    this._currentTimer = u.timer(fieldOptions.delay, () => {
+    let delay = fieldOptions.delay || 0
+    this._currentTimer = u.timer(delay, () => {
       this._scheduledFieldOptions = fieldOptions
       this._requestCallback()
     })
@@ -150,10 +155,16 @@ up.FieldWatcher = class FieldWatcher {
     return up.Params.fromContainer(this._container).toObject()
   }
 
-  _check(fieldOptions) {
+  _check(fieldOptions = {}) {
     const values = this._readFieldValues()
+
     if (this._isNewValues(values)) {
       this._scheduleValues(values, fieldOptions)
     }
+  }
+
+  _onFormReset() {
+    // We need to wait 1 task for the reset button to affect field values
+    u.task(() => this._check())
   }
 }
