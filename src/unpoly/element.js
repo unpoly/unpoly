@@ -92,14 +92,7 @@ up.element = (function() {
   @internal
   */
   function ancestor(element, selector) {
-    let parentElement = element.parentElement
-    if (parentElement) {
-      if (parentElement.matches(selector)) {
-        return parentElement
-      } else {
-        return ancestor(parentElement, selector)
-      }
-    }
+    return element.parentNode?.closest(selector)
   }
 
   function around(element, selector) {
