@@ -1,5 +1,6 @@
 - Remove up.form.config.watchInputEvents
 - Remove up.form.config.watchChangeEvents
+- Remove doc section "Normalizing non-standard events"
 - Use Array#toReversed() in up.LayerStack
 - Async compiler functions (see separate doc)
 - Check browser support for Element#focus({ focusVisible }) option
