@@ -13,6 +13,11 @@ Unreleased
 ----------
 
 - `up.on()` takes a `{ capture: true }` option to register a listener that runs before the event is emitted on the element.
+- When an interaction with a pointing device focuses, an `.up-focus-hidden` class is set. You can use this to hide an unwanted focus ring for users of pointing devices. (experimental, docs).
+- When an interaction with the keyboard focuses, an `.up-focus-visible` class is set. (experimental, docs).
+- `up.focus()` sets `{ focusVisible: false }` during interactions with a pointing device to prevent `:focus-visible`. [Poor browser support](https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter).
+- New function up.form.isField()
+- Scrolling now defaults to { behavior: 'instant' } to prevent picking up a `scroll-behavior` CSS property. To do pick up the property, pass { behavior: 'auto' }
 
 
 3.6.1

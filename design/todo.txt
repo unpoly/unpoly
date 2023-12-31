@@ -9,15 +9,14 @@ Autosubmit/Watch rework
 focus-visible
 =============
 
-- A better implementation without [up-focus-device]
-  - Use .up-focus-hidden and .up-focus.visible
-  - up.focus() gets option { focusVisible: 'auto' }
-    - Options: true, false, 'auto', null
-  - Add up.viewport.config.autoFocusVisible.
-    - Defaults to focusDevice == 'keyboard' || up.form.isField(element)
-      - Called with { focusDevice, element }
-  - Pass { focusVisible } options for browsers that support it
-  - Publish up.form.isField(element)
+- Document up.focus({ focusVisible })
+  - Options true, false, 'auto' (default)
+  - Sets .up-focus-hidden or .up-focus-visible
+  - Also forces/prevents :focus-visible in the browser, but note weak browser support: https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter
+- Document up.viewport.config.autoFocusVisible.
+  - Used with `up.focus({ focusVisible: 'auto' })`
+  - Defaults to focusDevice == 'keyboard' || up.form.isField(element)
+  - Called with { focusDevice, element }
 - Rework existing /focus so it does not just talk about option values
    - Talk about the focus ring
 
@@ -32,6 +31,13 @@ focus-visible
     :focus:not(:focus-visible), .up-focus-hidden {
       outline: none;
     }
+- Docs for .up-focus-visible
+  - Stronger signal than :focus-visible
+- Docs for .up-focus-hidden
+  - Stronger signal than :focus-visible
+- [OK] Document up.on({ capture })
+- [OK] Publish up.form.isField(element)
+- Update CHANGELOG
 
 
 Backlog
