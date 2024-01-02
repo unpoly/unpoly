@@ -233,13 +233,10 @@ up.viewport = (function() {
       focusVisible,        // Control native :focus-visible for browsers that support this option
     })
 
-    // Don't rely on the `blur` event to remove our focus classes, to cover
+    // Don't rely on the `focusin` listener below to remove our focus classes, to cover
     // an edge case where the element focused multiple times with different focus devices.
-    const removeFocusClasses = () => element.classList.remove('up-focus-hidden', 'up-focus-visible')
-    removeFocusClasses()
-
+    removeFocusClasses(element)
     element.classList.add(focusVisible ? 'up-focus-visible' : 'up-focus-hidden')
-    element.addEventListener('blur', removeFocusClasses, { once: true })
 
     if (!preventScroll) {
       // Use up.reveal() which scrolls far enough to ignore fixed nav bars
@@ -247,6 +244,69 @@ up.viewport = (function() {
       return reveal(element)
     }
   }
+
+  function removeFocusClasses(element) {
+    element?.classList.remove('up-focus-hidden', 'up-focus-visible')
+  }
+
+  // Wait until another element is focused. Otherwise we would lose .up-focus-hidden
+  // when the user switches to another window, then returns to the app window (where
+  // a content element might still be :focus-visible).
+  up.on('focusin', function({ relatedTarget }) {
+    removeFocusClasses(relatedTarget)
+  })
+
+  /*-
+  This class is assigned to elements that were [focused by Unpoly](/focus) but should not
+  have a [visible focus ring](/focus-visibility).
+
+  ### Relation to `:focus-visible`
+
+  This `.up-focus-hidden` class may be set on elements that the browser considers to be
+  [`:focus-visible`](https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible).
+  The class is provided as a workaround until browsers allow scripts to [control `:focus-visible` state](https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter).
+
+  ### Example
+
+  To remove an unwanted focus ring, use CSS like this:
+
+  ```css
+  :focus:not(:focus-visible), .up-focus-hidden {
+    outline: none;
+  }
+  ```
+
+  ### Default style
+
+  Bye default Unpoly removes an `outline` CSS property from elements with an `.up-focus-hidden` class.
+
+  @selector .up-focus-hidden
+  @experimental
+  */
+
+  /*-
+  This class is assigned to elements that were [focused by Unpoly](/focus) and should
+  have a [visible focus ring](/focus-visibility).
+
+  ### Relation to `:focus-visible`
+
+  This `.up-focus-visible` class may be set on elements that the browser considers to *not* be
+  [`:focus-visible`](https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible).
+  The class is provided as a workaround until browsers allow scripts to [control `:focus-visible` state](https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter).
+
+  ### Example
+
+  To only set a focus ring on elements that should have evident focus, use CSS like this:
+
+  ```css
+  :focus-visible:not(.up-focus-hidden), .up-focus-visible {
+    outline: 1px solid royalblue;
+  }
+  ```
+
+  @selector .up-focus-visible
+  @experimental
+  */
 
   function tryFocus(element, options) {
     doFocus(element, options)

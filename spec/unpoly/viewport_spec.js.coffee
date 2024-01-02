@@ -30,6 +30,29 @@ describe 'up.viewport', ->
               expect(div).toBeFocused()
               expect(div).toHaveOutline()
 
+            it 'shows a focus ring when a non-field element is focused multiple times', ->
+              div = fixture('div', text: 'text')
+              up.focus(div, { focusVisible: true, force: true })
+
+              await wait()
+
+              up.focus(div, { focusVisible: true, force: true })
+
+              expect(div).toBeFocused()
+              expect(div).toHaveOutline()
+
+            it 'removes a focus ring when another element is focused afterwards', ->
+              div = fixture('div', text: 'text')
+              input = fixture('input[type=text][name=foo]')
+              up.focus(div, { focusVisible: true, force: true })
+
+              await wait()
+
+              up.focus(input, { focusVisible: true, force: true })
+
+              expect(input).toBeFocused()
+              expect(div).not.toHaveOutline()
+
         describe 'with { focusVisible: false }', ->
 
           describe 'when using the keyboard', ->
@@ -52,6 +75,22 @@ describe 'up.viewport', ->
               up.focus(div, { focusVisible: 'auto', force: true })
 
               expect(div).toBeFocused()
+              expect(div).not.toHaveOutline()
+
+            it 'keeps hiding the focus ring when the user focuses another window and then returns to the app window', ->
+              div = fixture('div', text: 'text')
+              up.focus(div, { focusVisible: 'auto', force: true })
+
+              expect(div).toBeFocused()
+              expect(div).not.toHaveOutline()
+
+              # Simulate browser behavior when the user switches to another window and then returns to the app window.
+              div.blur()
+              await wait()
+              div.focus({ focusVisible: true })
+
+              expect(div).toBeFocused()
+              expect(div).toMatchSelector(':focus-visible')
               expect(div).not.toHaveOutline()
 
             it 'shows a focus ring for a field element', ->
