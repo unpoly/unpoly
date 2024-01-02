@@ -12,11 +12,11 @@ describe 'up.viewport', ->
 
         useMouse = ->
           Trigger.clickSequence(document.body)
-          expect(up.viewport.focusDevice).toBe('pointer')
+          expect(up.event.inputDevice).toBe('pointer')
 
         useKeyboard = ->
           Trigger.keySequence(document.body, 'Enter')
-          expect(up.viewport.focusDevice).toBe('key')
+          expect(up.event.inputDevice).toBe('key')
 
         describe 'with { focusVisible: true }', ->
 

@@ -491,16 +491,38 @@ The parsed data will be passed to your event handler as a third argument:
     up.emit(element, forkedEvent)
   }
 
-  // function addCallback(options, property, newCallback) {
-  //   options[property] = u.sequence([options[property], newCallback])
-  // }
-
-//  abortable = ->
-//    signal = document.createElement('up-abort-signal')
-//    abort = -> up.emit(signal, 'abort')
-//    [abort, signal]
-
   on('up:click', 'a[up-emit]', executeEmitAttr)
+
+  let inputDevices = ['unknown']
+
+  /*-
+  The class of input device used to cause the current event.
+
+  It can assume one of the following values:
+
+  | Value        | Meaning                                                                 |
+  |--------------|-------------------------------------------------------------------------|
+  | `'key'`      | The event was caused by a keyboard interaction.                         |
+  | `'pointer'`  | The event was caused by an interaction with a mouse, touch or stylus.   |
+  | `'unknown'`  | The input device is unknown or this event was not caused by user input. |
+
+  @property up.event.inputDevice
+  @param inputDevice
+    A string describing the current input device class.
+  @experimental
+  */
+  function getInputDevice() {
+    return u.last(inputDevices)
+  }
+
+  function observeInputDevice(newModality) {
+    inputDevices.push(newModality)
+    setTimeout(() => inputDevices.pop())
+  }
+
+  on('keydown keyup', { capture: true }, () => observeInputDevice('key'))
+  on('pointerdown pointerup', { capture: true }, () => observeInputDevice('pointer'))
+
   on('up:framework:reset', reset)
 
   return {
@@ -514,6 +536,7 @@ The parsed data will be passed to your event handler as a third argument:
     isUnmodified,
     fork,
     keyModifiers,
+    get inputDevice() { return getInputDevice() }
     // addCallback,
   }
 })()

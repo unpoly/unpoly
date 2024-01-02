@@ -90,7 +90,7 @@ up.viewport = (function() {
     revealPadding: 0,
     revealTop: false,
     revealMax() { return 0.5 * window.innerHeight },
-    autoFocusVisible({ element, focusDevice }) { return up.form.isField(element) || focusDevice === 'key' }
+    autoFocusVisible({ element, inputDevice }) { return up.form.isField(element) || inputDevice === 'key' }
   }))
 
   const bodyShifter = new up.BodyShifter()
@@ -200,7 +200,7 @@ up.viewport = (function() {
 
     @experimental
 
-  @param {boolean} [options.focusDevice]
+  @param {boolean} [options.inputDevice]
     TODO: DOcs
 
     @experimental
@@ -212,7 +212,7 @@ up.viewport = (function() {
 
   @experimental
   */
-  function doFocus(element, { preventScroll, force, focusDevice, focusVisible } = {}) {
+  function doFocus(element, { preventScroll, force, inputDevice, focusVisible } = {}) {
     if (force) {
       // (1) Element#tabIndex is -1 for all non-interactive elements,
       //     whether or not the element has an [tabindex=-1] attribute.
@@ -224,9 +224,9 @@ up.viewport = (function() {
       }
     }
 
-    focusDevice ??= getFocusDevice()
+    inputDevice ??= up.event.inputDevice
     focusVisible ??= 'auto'
-    focusVisible = u.evalAutoOption(focusVisible, config.autoFocusVisible, { element, focusDevice })
+    focusVisible = u.evalAutoOption(focusVisible, config.autoFocusVisible, { element, inputDevice })
 
     element.focus({
       preventScroll: true, // Focus without scrolling, since we're going to use our custom scrolling logic below.
@@ -919,20 +919,6 @@ up.viewport = (function() {
     return to
   }
 
-  let focusDevices = ['unknown']
-
-  function getFocusDevice() {
-    return u.last(focusDevices)
-  }
-
-  function observeFocusDevice(newModality) {
-    focusDevices.push(newModality)
-    setTimeout(() => focusDevices.pop())
-  }
-
-  up.on('keydown keyup', { capture: true }, () => observeFocusDevice('key'))
-  up.on('pointerdown pointerup', { capture: true }, () => observeFocusDevice('pointer'))
-
   let userScrolled = false
   up.on('scroll', { once: true, beforeBoot: true }, () => userScrolled = true)
 
@@ -983,7 +969,6 @@ up.viewport = (function() {
     focusedElementWithin,
     copyCursorProps,
     bodyShifter,
-    get focusDevice() { return getFocusDevice() }
   }
 })()
 
