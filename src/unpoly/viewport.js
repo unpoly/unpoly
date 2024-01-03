@@ -14,6 +14,7 @@ An application may define additional viewports by giving the CSS property `{ ove
 @see scrolling
 @see scroll-tuning
 @see focus
+@see focus-visibility
 
 @see [up-viewport]
 @see [up-fixed=top]
@@ -90,7 +91,8 @@ up.viewport = (function() {
     The default configuration is implemented like this:
 
     ```js
-    up.viewport.config.autoFocusVisible = ({ element, inputDevice }) => inputDevice === 'key' || up.form.isField(element)
+    up.viewport.config.autoFocusVisible = ({ element, inputDevice }) =>
+      inputDevice === 'key' || up.form.isField(element)
     ```
 
     @experimental
@@ -285,6 +287,7 @@ up.viewport = (function() {
     removeFocusClasses(relatedTarget)
   })
 
+
   /*-
   This class is assigned to elements that were [focused by Unpoly](/focus) but should not
   have a [visible focus ring](/focus-visibility).
@@ -304,7 +307,7 @@ up.viewport = (function() {
   To remove an unwanted focus ring, use CSS like this:
 
   ```css
-  :focus:not(:focus-visible), .up-focus-hidden {
+  :focus:not(:focus-visible, .up-focus-visible), .up-focus-hidden {
     outline: none;
   }
   ```
@@ -312,6 +315,9 @@ up.viewport = (function() {
   ### Default style
 
   Bye default Unpoly removes an `outline` CSS property from elements with an `.up-focus-hidden` class.
+
+  Note that CSS frameworks might render focus rings using properties other than `outline`. For example,
+  Bootstrap uses a `box-shadow` to produce a blurred outline.
 
   @selector .up-focus-hidden
   @experimental

@@ -503,7 +503,7 @@ The parsed data will be passed to your event handler as a third argument:
   | Value        | Meaning                                                                 |
   |--------------|-------------------------------------------------------------------------|
   | `'key'`      | The event was caused by a keyboard interaction.                         |
-  | `'pointer'`  | The event was caused by an interaction with a mouse, touch or stylus.   |
+  | `'pointer'`  | The event was caused by an interaction via mouse, touch or stylus.      |
   | `'unknown'`  | The input device is unknown or this event was not caused by user input. |
 
   @property up.event.inputDevice
