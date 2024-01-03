@@ -9,11 +9,11 @@ Autosubmit/Watch rework
 focus-visible
 =============
 
-- Document up.focus({ focusVisible })
+- [OK] Document up.focus({ focusVisible })
   - Options true, false, 'auto' (default)
   - Sets .up-focus-hidden or .up-focus-visible
   - Also forces/prevents :focus-visible in the browser, but note weak browser support: https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter
-- Document up.viewport.config.autoFocusVisible.
+- [OK] Document up.viewport.config.autoFocusVisible.
   - Used with `up.focus({ focusVisible: 'auto' })`
   - Defaults to focusDevice == 'keyboard' || up.form.isField(element)
   - Called with { focusDevice, element }
@@ -31,10 +31,10 @@ focus-visible
     :focus:not(:focus-visible), .up-focus-hidden {
       outline: none;
     }
-- Docs for .up-focus-visible
-  - Stronger signal than :focus-visible
-- Docs for .up-focus-hidden
-  - Stronger signal than :focus-visible
+- [OK] Docs for .up-focus-visible
+  - May be set even if the element is not :focus-visible
+- [OK] Docs for .up-focus-hidden
+  - May be set even if the element is also :focus-visible
 - [OK] Document up.on({ capture })
 - [OK] Publish up.form.isField(element)
 - Update CHANGELOG
@@ -60,7 +60,7 @@ Backlog
   - Also [aria-disabled=true]
   - Prevent with JS? pointer-events?
     - Also prevent keyboard focus with temporary [tabindex=-1]
-  - Bootstrap already has a.disabled
+  - Bootstrap already has a.disabled and users would like to take over that styling
 - Consider [up-on] for arbitrary, nonceable attribute event handlers
 - Copy important up.render() options to up.layer.open() and a[up-layer=new]
   - In particular { content, fragment, url, document }
