@@ -77,8 +77,23 @@ up.viewport = (function() {
     Whether to always scroll a [revealing](/up.reveal) element to the top.
 
     By default Unpoly will scroll as little as possible to make the element visible.
-  @param {Function(): boolean} [config.autoFocusVisible]
-    TODO: Docs
+  @param {Function(Object): boolean} [config.autoFocusVisible]
+    Whether elements focused by Unpoly should have a [visible focus ring](/focus-visibility).
+
+    By default the focus ring will be visible if either the user [interacted with the keyboard](/up.event.inputDevice)
+    or the focused element is a [form field](/up.form.config#config.fieldSelectors).
+
+    The value is a function that accepts an object with `{ element, inputDevice }` properties and returns
+    a boolean. The `{ element }` property is the focused element. The `{ inputDevice }` property is a string
+    denoting the [interaction's input device](/up.event.inputDevice).
+
+    The default configuration is implemented like this:
+
+    ```js
+    up.viewport.config.autoFocusVisible = ({ element, inputDevice }) => inputDevice === 'key' || up.form.isField(element)
+    ```
+
+    @experimental
   @stable
   */
   const config = new up.Config(() => ({
@@ -90,7 +105,7 @@ up.viewport = (function() {
     revealPadding: 0,
     revealTop: false,
     revealMax() { return 0.5 * window.innerHeight },
-    autoFocusVisible({ element, inputDevice }) { return up.form.isField(element) || inputDevice === 'key' }
+    autoFocusVisible({ element, inputDevice }) { return inputDevice === 'key' || up.form.isField(element) }
   }))
 
   const bodyShifter = new up.BodyShifter()
@@ -195,18 +210,32 @@ up.viewport = (function() {
   @param {boolean} [options.preventScroll=false]
     Whether to prevent changes to the acroll position.
 
+  @param {string} [options.inputDevice]
+    The [input device](/up.event.inputDevice) used for the current interaction.
+
+    Accepts values `'key'`, `'pointer'` and `'unknown'`.
+
+    Defaults to the [current input device](up.event.inputDevice).
+
+    @internal
+
+  @param {boolean|string} [options.focusVisible='auto']
+    Whether the focused element should have a [visible focus ring](/focus-visibility).
+
+    If set to `true` the element will be assigned the `.up-focus-visible` class.
+
+    If set to `false` the element will be assigned the `.up-focus-hidden` class.
+
+    If set to `'auto'` (the default), focus will be visible if `up.viewport.config.autoFocusVisible()`
+    returns `true` for this element and [input device](#options.inputDevice).
+
+    The [`:focus-visible`](https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible) pseudo-class will also be set or removed accordingly
+    on [browsers that support it](https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter).
+
+    @experimental
+
   @param {boolean} [options.force=false]
     Whether to force focus even if `element` would otherwise not be a focusable element.
-
-    @experimental
-
-  @param {boolean} [options.inputDevice]
-    TODO: DOcs
-
-    @experimental
-
-  @param {boolean} [options.focusVisible='auto']
-    TODO: DOcs
 
     @experimental
 
@@ -260,6 +289,10 @@ up.viewport = (function() {
   This class is assigned to elements that were [focused by Unpoly](/focus) but should not
   have a [visible focus ring](/focus-visibility).
 
+  You can use this class to remove an unwanted focus outline that you inherited
+  from a [user agent stylesheet](https://bitsofco.de/a-look-at-css-resets-in-2018/) or from
+  a CSS framework like Bootstrap.
+
   ### Relation to `:focus-visible`
 
   This `.up-focus-hidden` class may be set on elements that the browser considers to be
@@ -303,6 +336,10 @@ up.viewport = (function() {
     outline: 1px solid royalblue;
   }
   ```
+
+  Note that elements often inherit a default focus outline
+  from a [user agent stylesheet](https://bitsofco.de/a-look-at-css-resets-in-2018/) or from
+  a CSS framework like Bootstrap.
 
   @selector .up-focus-visible
   @experimental
