@@ -1272,7 +1272,7 @@ describe 'up.layer', ->
 
             jasmine.respondWithSelector('.overlay-content', text: 'initial content')
 
-            await wait()
+            # await wait()
 
             await expectAsync(openPromise).toBeRejectedWith(jasmine.any(up.Aborted))
             expect(callback).toHaveBeenCalled()

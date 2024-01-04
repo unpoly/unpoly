@@ -119,22 +119,26 @@ describe 'up.motion', ->
 
       describe 'when up.animate() is called from inside an animation function', ->
 
-        it 'animates', (done) ->
+        it 'animates', ->
           $element = $fixture('.element').text('content')
 
           animation = ($element, options) ->
             e.setStyle($element, opacity: 0)
             up.animate($element, { opacity: 1 }, options)
 
-          up.animate($element, animation, duration: 400, easing: 'linear')
+          up.animate($element, animation, duration: 2000, easing: 'linear')
 
-          u.timer 10, ->
-            expect($element).toHaveOpacity(0.0, 0.25)
-          u.timer 200, ->
-            expect($element).toHaveOpacity(0.5, 0.25)
-          u.timer (400), ->
-            expect($element).toHaveOpacity(1.0, 0.25)
-            done()
+          await wait(5)
+
+          expect($element).toHaveOpacity(0.0, 0.25)
+
+          await wait(1000)
+
+          expect($element).toHaveOpacity(0.5, 0.25)
+
+          await wait(1000)
+
+          expect($element).toHaveOpacity(1.0, 0.25)
 
         it "finishes animations only once", (done) ->
           $element = $fixture('.element').text('content')

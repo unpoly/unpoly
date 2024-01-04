@@ -392,24 +392,25 @@ describe 'up.Layer.Overlay', ->
 
         expect(acceptedListener).toHaveBeenCalled()
 
-      it 'still restores document scroll bars', ->
-        overflowElement = up.viewport.rootOverflowElement()
-        getOverflowY = -> getComputedStyle(overflowElement).overflowY
+      if up.viewport.rootHasReducedWidthFromScrollbar()
+        it 'still restores document scroll bars', ->
+          overflowElement = up.viewport.rootOverflowElement()
+          getOverflowY = -> getComputedStyle(overflowElement).overflowY
 
-        destroyError = new Error('error from destructor')
-        up.compiler '.overlay-element', ->
-          return -> throw destroyError
+          destroyError = new Error('error from destructor')
+          up.compiler '.overlay-element', ->
+            return -> throw destroyError
 
-        up.layer.open(fragment: '<div class="overlay-element"></div>', mode: 'modal')
+          await up.layer.open(fragment: '<div class="overlay-element"></div>', mode: 'modal')
 
-        await wait()
+          await wait()
 
-        expect(getOverflowY()).toBe('hidden')
+          expect(getOverflowY()).toBe('hidden')
 
-        await jasmine.expectGlobalError destroyError, ->
-          up.layer.accept()
+          await jasmine.expectGlobalError destroyError, ->
+            up.layer.accept()
 
-        expect(getOverflowY()).not.toBe('hidden')
+          expect(getOverflowY()).not.toBe('hidden')
 
     describe 'with { response } option', ->
 

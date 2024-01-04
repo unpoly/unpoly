@@ -8,17 +8,18 @@ describe 'up.Layer.Drawer', ->
 
       expect(document.querySelector('up-drawer-box').offsetHeight).toBe(window.innerHeight)
 
-    it 'adds scrollbars to its viewport', ->
-      fixture('div', style: { height: '10000px' })
+    if up.viewport.rootHasReducedWidthFromScrollbar()
+      it 'adds scrollbars to its viewport', ->
+        fixture('div', style: { height: '10000px' })
 
-      up.layer.open(mode: 'drawer', content: '<div style="height: 10000px"></div>')
-      expect(up.layer.isOverlay()).toBe(true)
+        up.layer.open(mode: 'drawer', content: '<div style="height: 10000px"></div>')
+        expect(up.layer.isOverlay()).toBe(true)
 
-      expect(document.querySelector('html')).not.toHaveVerticalScrollbar()
-      expect(document.querySelector('body')).not.toHaveVerticalScrollbar()
-      expect(document.querySelector('up-drawer-viewport')).toHaveVerticalScrollbar()
-      expect(document.querySelector('up-drawer-box')).not.toHaveVerticalScrollbar()
-      expect(document.querySelector('up-drawer-content')).not.toHaveVerticalScrollbar()
+        expect(document.querySelector('html')).not.toHaveVerticalScrollbar()
+        expect(document.querySelector('body')).not.toHaveVerticalScrollbar()
+        expect(document.querySelector('up-drawer-viewport')).toHaveVerticalScrollbar()
+        expect(document.querySelector('up-drawer-box')).not.toHaveVerticalScrollbar()
+        expect(document.querySelector('up-drawer-content')).not.toHaveVerticalScrollbar()
 
     describe 'positioning', ->
 

@@ -1698,10 +1698,13 @@ describe 'up.radio', ->
         expect(jasmine.Ajax.requests.count()).toBe(0)
 
       it 'does not make additional requests while a previous requests is still in flight', asyncSpec (next) ->
-        deferred = u.newDeferred()
+        deferreds = []
 
         up.radio.config.pollInterval = 100
-        reloadSpy = spyOn(up, 'reload').and.returnValue(deferred)
+        reloadSpy = spyOn(up, 'reload').and.callFake ->
+          deferred = u.newDeferred()
+          deferreds.push(deferred)
+          return deferred
 
         up.hello(fixture('.element[up-poll]'))
 
@@ -1710,9 +1713,9 @@ describe 'up.radio', ->
 
         next.after 200, ->
           expect(reloadSpy.calls.count()).toBe(1)
-          deferred.resolve(new up.RenderResult())
+          u.last(deferreds).resolve(new up.RenderResult())
 
-        next.after 200, ->
+        next.after 150, ->
           expect(reloadSpy.calls.count()).toBe(2)
 
       it 'keeps the polling rhythm when the server responds with `X-Up-Target: :none` (bugfix)', asyncSpec (next) ->

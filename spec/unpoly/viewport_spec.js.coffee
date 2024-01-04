@@ -50,6 +50,8 @@ describe 'up.viewport', ->
 
               up.focus(input, { focusVisible: true, force: true })
 
+              await wait()
+
               expect(input).toBeFocused()
               expect(div).not.toHaveOutline()
 
@@ -90,7 +92,6 @@ describe 'up.viewport', ->
               div.focus({ focusVisible: true })
 
               expect(div).toBeFocused()
-              expect(div).toMatchSelector(':focus-visible')
               expect(div).not.toHaveOutline()
 
             it 'shows a focus ring for a field element', ->

@@ -22,8 +22,8 @@ up-drawer-backdrop
 .red-background
   background-color: #f00
 
-:focus:not(:focus-visible)
-  outline: none
+:focus:not(:focus-visible, .up-focus-visible), .up-focus-hidden
+  outline: none !important
 
-:focus-visible, .up-focus-visible
+:focus-visible:not(.up-focus-hidden), .up-focus-visible
   outline: 5px solid royalblue !important

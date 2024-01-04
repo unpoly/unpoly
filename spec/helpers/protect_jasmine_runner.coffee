@@ -8,9 +8,12 @@ window.safeHistory = new class
     @cursor = -1 # we don't know the initial state
     @stateIndexes = []
     @nextIndex = 1000
+    @actionTimes = []
 
   back: ->
     @log("safeHistory: back(), cursor before is %o, path before is %o", @cursor, location.pathname)
+    @observeAction()
+
     if @cursor > 0
       # This will trigger popstate, which we will handle and update @cursor
       oldBack.call(history)
@@ -19,6 +22,8 @@ window.safeHistory = new class
 
   forward: ->
     @log("safeHistory: forward()")
+    @observeAction()
+
     if @cursor < @stateIndexes.length - 1
       # This will trigger popstate, which we will handle and update @cursor
       oldForward.call(history)
@@ -26,6 +31,7 @@ window.safeHistory = new class
       up.fail('safeHistory: Tried to go too far forward in history (prevented)')
 
   pushState: (state, title, url) ->
+    @observeAction()
     state ||= { state }
     state._index = @nextIndex++
 
@@ -40,6 +46,7 @@ window.safeHistory = new class
     @log("safeHistory: @stateIndexes are now %o, cursor is %o, path is %o", u.copy(@stateIndexes), @cursor, location.pathname)
 
   replaceState: (state, title, url) ->
+    @observeAction()
     state ||= { state }
     state._index = @nextIndex++
 
@@ -69,18 +76,45 @@ window.safeHistory = new class
 
     @log("safeHistory: @stateIndexes are now %o, cursor is %o, path is %o", u.copy(@stateIndexes), @cursor, location.pathname)
 
+  observeAction: ->
+    @log("safeHistory: History API use observed: %o (%o total)", location.href, @actionTimes.length)
+    @actionTimes.push(new Date())
+
+  throttle: ->
+    # Using the pushState API too often will crash in Safari with the following error:
+    # SecurityError: Attempt to use history.replaceState() more than 100 times per 30 second.
+    maxActions = if AgentDetector.isSafari() then 100 else 1000
+    spaceForNextSpec = 10
+
+    while @truncateActionTimes().length > (maxActions - spaceForNextSpec)
+      @forceLog("safeHistory: Too many uses of the pushState API (%o). Waiting for throttle window to pass.", @actionTimes.length)
+      await wait(100)
+
+  truncateActionTimes: ->
+    windowEnd = new Date()
+    windowStart = new Date(windowEnd - ((30 + 1) * 1000))
+
+    @actionTimes = @actionTimes.filter((time) -> time >= windowStart)
+
+    return @actionTimes
+
   log: (args...) ->
     if @logEnabled
       console.debug(args...)
 
+  forceLog: (args...) ->
+    console.debug(args...)
+
   afterEach: ->
+    await @throttle()
+
     @cursor = 0
     @stateIndexes = [@stateIndexes[@cursor]]
 
-  reset: ->
-    @log("safeHistory: reset()")
-    @cursor = 0
-    @stateIndexes = [0]
+#  reset: ->
+#    @log("safeHistory: reset()")
+#    @cursor = 0
+#    @stateIndexes = [0]
 
 oldPushState = history.pushState
 oldReplaceState = history.replaceState
@@ -94,8 +128,8 @@ history.forward = (args...) -> safeHistory.forward(args...)
 
 window.addEventListener('popstate', (event) -> safeHistory.onPopState(event))
 
-afterEach ->
-  safeHistory.afterEach()
+# Use a longer timeout than the default 5000
+afterEach (-> await safeHistory.afterEach()), 30000
 
 willScrollWithinPage = (link) ->
   verbatimHREF = link.getAttribute('href')
