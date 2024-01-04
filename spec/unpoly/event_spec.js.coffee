@@ -736,6 +736,91 @@ describe 'up.event', ->
         event = Trigger.createMouseEvent('mousedown', metaKey: 2)
         expect(up.event.isUnmodified(event)).toBe(false)
 
+  describe 'up.event.inputDevice', ->
+
+    beforeEach ->
+      # Clear any lingering effect of a previous example
+      await wait()
+
+    describe 'if no input event was registered', ->
+
+      it 'defaults to "unknown"', ->
+        expect(up.event.inputDevice).toBe('unknown')
+
+    describe 'after a keyboard event was registered', ->
+
+      it 'is "key" while typing without explicit focus', ->
+        inputDeviceSpy = jasmine.createSpy('inputDevice spy')
+        document.body.addEventListener('keydown', -> inputDeviceSpy(up.event.inputDevice))
+
+        Trigger.keySequence(document.body, 'Enter')
+
+        expect(inputDeviceSpy).toHaveBeenCalledWith('key')
+
+      it 'reverts to "unknown" one task afterwards', ->
+        Trigger.keySequence(document.body, 'Enter')
+
+        expect(up.event.inputDevice).toBe('key')
+
+        await wait()
+
+        expect(up.event.inputDevice).toBe('unknown')
+
+      it 'is "key" while typing into an input field', ->
+        field = fixture('input[type=text][name=foo]')
+        inputDeviceSpy = jasmine.createSpy('inputDevice spy')
+        field.addEventListener('keydown', -> inputDeviceSpy(up.event.inputDevice))
+
+        field.focus()
+        Trigger.keySequence(field, 'X')
+
+        expect(inputDeviceSpy).toHaveBeenCalledWith('key')
+
+      it 'is "key" while a link is clicked with the keyboard', ->
+        link = fixture('a[href="#"]', text: 'label')
+        inputDeviceSpy = jasmine.createSpy('inputDevice spy')
+        link.addEventListener 'click', (event) ->
+          inputDeviceSpy(up.event.inputDevice)
+          event.preventDefault()
+
+        Trigger.clickLinkWithKeyboard(link)
+
+        expect(inputDeviceSpy).toHaveBeenCalledWith('key')
+
+    describe 'after a mouse event was registered', ->
+
+      it 'is "pointer" while clicking an element', ->
+        link = fixture('a[href="#"]', text: 'label')
+        inputDeviceSpy = jasmine.createSpy('inputDevice spy')
+        link.addEventListener 'click', (event) ->
+          inputDeviceSpy(up.event.inputDevice)
+          event.preventDefault()
+
+        Trigger.clickSequence(link)
+
+        expect(inputDeviceSpy).toHaveBeenCalledWith('pointer')
+
+      it 'reverts to "unknown" one task afterwards', ->
+        link = fixture('a[href="#"]', text: 'label')
+
+        Trigger.clickSequence(link)
+
+        expect(up.event.inputDevice).toBe('pointer')
+
+        await wait()
+
+        expect(up.event.inputDevice).toBe('unknown')
+
+      it 'is "pointer" during a pointerdown sequence on an element', ->
+        link = fixture('a[href="#"]', text: 'label')
+        inputDeviceSpy = jasmine.createSpy('inputDevice spy')
+        link.addEventListener 'mousedown', (_event) ->
+          inputDeviceSpy(up.event.inputDevice)
+
+        Trigger.pointerdownSequence(link)
+
+        expect(inputDeviceSpy).toHaveBeenCalledWith('pointer')
+
   describe 'unobtrusive behavior', ->
 
     describe 'a[up-emit]', ->

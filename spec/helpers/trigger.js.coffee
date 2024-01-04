@@ -177,6 +177,13 @@ window.Trigger = (->
     mouseup(element, options)
     click(element, options)
 
+  pointerdownSequence = (element, options = {}) ->
+    element = e.get(element)
+    pointerover(element, options)
+    mouseover(element, options)
+    pointerdown(element, options)
+    mousedown(element, options)
+
   hoverSequence = (element, options) ->
     element = e.get(element)
     mouseover(element, options)
@@ -305,6 +312,7 @@ window.Trigger = (->
   mouseleave: mouseleave
   click: click
   clickSequence: clickSequence
+  pointerdownSequence: pointerdownSequence
   touchstart: touchstart
   hoverSequence: hoverSequence
   unhoverSequence: unhoverSequence
