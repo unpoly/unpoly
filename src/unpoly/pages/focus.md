@@ -14,7 +14,7 @@ a `{ focus }` option or `[up-focus]` attribute.
 
 ### Defaults {#default-strategy}
 
-When you don't pass a `{ focus }` option, Unpoly has some defaults:
+When you don't pass a `{ focus }` option or set an `[up-focus]` attribute, Unpoly has some defaults:
 
 - When rendering without navigation Unpoly will default to [`{ focus: 'keep' }`](#preserving-focus). This will preserve focus in updated fragments. 
 - When [navigating](/navigation) Unpoly will default to [`{ focus: 'auto' }`](#automatic-focus-logic). In most cases this focuses the new fragment.
