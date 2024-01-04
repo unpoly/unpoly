@@ -12,7 +12,7 @@ Focus strategies
 When updating a fragment you may control how Unpoly moves focus by passing
 a `{ focus }` option or `[up-focus]` attribute.
 
-### Defaults
+### Defaults {#default-strategy}
 
 When you don't pass a `{ focus }` option, Unpoly has some defaults:
 

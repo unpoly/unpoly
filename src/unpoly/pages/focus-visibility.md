@@ -1,24 +1,49 @@
 Focus ring visibility
 =====================
 
-Unpoly lets you control when a [focused](/focus) fragment has a visible focus ring (outline).
+Unpoly lets you control when a [focused](/focus) fragment shows a visible focus ring.
 
-Focus rings are especially important for users of keyboards and screen readers.
-Mouse and touch users don't want focus rings most of the time.
-
-
-Default strategy
-----------------
-
-By default the focus ring will be visible if either the user [interacted with the keyboard](/up.event.inputDevice)
-or the focused element is a [form field](/up.form.config#config.fieldSelectors). If the user interacted with
-via mouse, touch or stylus, the focus ring will be hidden.
+Because Unpoly [often focuses new content](/focus#default-strategy), you may see focus outline appear in unexpected places.
+Try to resist an initial instinct to just remove focus rings globally using CSS.
+Focus rings are important for users of keyboards and screen readers to be able to orient themselves
+as the focus moves on the page. However, mouse and touch users don't want focus rings most of the time.
 
 
-### Customizing the default strategy
 
-You can set `up.viewport.config.autoFocusVisible` to a function that decides if a given element should have a visible
-focus ring when interacted with a given [input device class](/up.event.inputDevice).
+Styling
+-------
+
+To help your CSS show or hide focus rings in the right situation, Unpoly assigns CSS classes
+to the elements it focuses:
+
+- If the user [interacted with the keyboard](/up.event.inputDevice) or if the focused element is a [form field](/up.form.config#config.fieldSelectors), Unpoly will set
+  an `.up-focus-visible` class. 
+- If the user interacted with
+  via mouse, touch or stylus, Unpoly will set an `.up-focus-hidden` class instead.
+
+> [note]
+> The web platform uses the `:focus-visible` pseudo-class to indicate focus ring visibility.
+> However browsers often incorrectly apply `:focus-visible` during script-driven navigations like Unpoly.
+> 
+> Unpoly will try to force `:focus-visible` whenever it sets `.up-focus-visible`, but can only do so 
+> in [some browsers](https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter).
+
+
+### Hiding unwanted focus rings
+
+@include focus-ring-hide-example
+
+
+### Styling focus rings on new component
+
+@include focus-ring-show-example
+
+
+Customizing focus ring visibility
+---------------------------------
+
+You can set `up.viewport.config.autoFocusVisible` to a function that decides if a given element should
+get a `.up-focus-visible` or `.up-focus-hidden` class.
 
 The default strategy is implemented like this:
 
@@ -27,49 +52,7 @@ up.viewport.config.autoFocusVisible = ({ element, inputDevice }) =>
   inputDevice === 'key' || up.form.isField(element)
 ```
 
-
-Styling
--------
-
-In the web platform is `:focus-visible`. This causes `:focus-visible` to be set a in script-driven solutions like Unpoly.
-
-Until [browsers support scripts to control `:focus-visible`](https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter), Unpoly sets `.up-focus-visible` and `.up-focus-hidden` classes
-to help you show or hide focus rings using CSS.
-
-
-### Hiding unwanted focus rings
-
-When Unpoly focuses an element that should not have an evident focus, an `.up-focus-visible` is set.
-
-You can use this class to remove an unwanted focus outline that you inherited
-from a [user agent stylesheet](https://bitsofco.de/a-look-at-css-resets-in-2018/) or from
-a CSS framework like Bootstrap:
-
-```css
-:focus:not(:focus-visible, .up-focus-visible), .up-focus-hidden {
-  outline: none;
-}
-```
-
-Bye default Unpoly removes an `outline` CSS property from elements with an `.up-focus-hidden` class.
-
-Note that CSS frameworks might render focus rings using properties other than `outline`. For example,
-Bootstrap uses a `box-shadow` to produce a blurred outline.
-
-
-
-### Showing focus rings
-
-When Unpoly focuses an element that should make their focus evident, an `.up-focus-visible` is set.
-
-To only set a focus ring on elements that should have evident focus, use CSS like this:
-
-```css
-:focus-visible:not(.up-focus-hidden), .up-focus-visible {
-  outline: 1px solid royalblue;
-}
-```
-
+See `up.event.inputDevice` for a list of values for the `{ inputDevice }` property.
 
 
 

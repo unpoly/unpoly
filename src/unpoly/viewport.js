@@ -292,32 +292,18 @@ up.viewport = (function() {
   This class is assigned to elements that were [focused by Unpoly](/focus) but should not
   have a [visible focus ring](/focus-visibility).
 
-  You can use this class to remove an unwanted focus outline that you inherited
-  from a [user agent stylesheet](https://bitsofco.de/a-look-at-css-resets-in-2018/) or from
-  a CSS framework like Bootstrap.
+  You can use this class to [remove an unwanted focus outline](#example).
 
   ### Relation to `:focus-visible`
 
-  This `.up-focus-hidden` class may be set on elements that the browser considers to be
+  Unpoly will try to unset `:focus-visible` whenever it sets `.up-focus-visible`, but can only do so
+  in [some browsers](https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter).
+  Because of this the `.up-focus-hidden` class may be set on elements that the browser considers to be
   [`:focus-visible`](https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible).
-  The class is provided as a workaround until browsers allow scripts to [control `:focus-visible` state](https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter).
 
   ### Example
 
-  To remove an unwanted focus ring, use CSS like this:
-
-  ```css
-  :focus:not(:focus-visible, .up-focus-visible), .up-focus-hidden {
-    outline: none;
-  }
-  ```
-
-  ### Default style
-
-  Bye default Unpoly removes an `outline` CSS property from elements with an `.up-focus-hidden` class.
-
-  Note that CSS frameworks might render focus rings using properties other than `outline`. For example,
-  Bootstrap uses a `box-shadow` to produce a blurred outline.
+  @include focus-ring-hide-example
 
   @selector .up-focus-hidden
   @experimental
@@ -327,25 +313,19 @@ up.viewport = (function() {
   This class is assigned to elements that were [focused by Unpoly](/focus) and should
   have a [visible focus ring](/focus-visibility).
 
+  You can use this class to [give a new component a focus ring](#example) for keyboard users,
+  while not rendering a focus ring for mouse or touch users.
+
   ### Relation to `:focus-visible`
 
-  This `.up-focus-visible` class may be set on elements that the browser considers to *not* be
+  Unpoly will try to force `:focus-visible` whenever it sets `.up-focus-visible`, but can only do so
+  in [some browsers](https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter).
+  Because of this the `.up-focus-visible` class may be set on elements that the browser considers to *not* be
   [`:focus-visible`](https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible).
-  The class is provided as a workaround until browsers allow scripts to [control `:focus-visible` state](https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter).
 
   ### Example
 
-  To only set a focus ring on elements that should have evident focus, use CSS like this:
-
-  ```css
-  :focus-visible:not(.up-focus-hidden), .up-focus-visible {
-    outline: 1px solid royalblue;
-  }
-  ```
-
-  Note that elements often inherit a default focus outline
-  from a [user agent stylesheet](https://bitsofco.de/a-look-at-css-resets-in-2018/) or from
-  a CSS framework like Bootstrap.
+  @include focus-ring-show-example
 
   @selector .up-focus-visible
   @experimental
