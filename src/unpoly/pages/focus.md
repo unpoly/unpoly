@@ -134,6 +134,12 @@ The function is expected to either:
 - Do nothing
 
 
+Styling focus states
+--------------------
+
+Unpoly lets you control whether a fragment [shows a visible focus ring](/focus-visibility).
+
+
 Focus in overlays
 -----------------
 

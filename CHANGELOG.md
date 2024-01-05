@@ -9,16 +9,54 @@ Changes handled by `unpoly-migrate.js` are not considered breaking changes.
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
-Unreleased
-----------
+3.7.0
+-----
+
+### Focus ring visibility
+
+You can now control whether a focused fragment shows a [visible focus ring](/focus-visibility).
+
+Because Unpoly [often focuses new content](/focus#default-strategy), you may see focus outline appear in unexpected places.
+Focus rings are important for users of keyboards and screen readers to be able to orient themselves
+as the focus moves on the page. However, mouse and touch users often dislike the visual effect of a focus ring.
+
+To help your CSS show or hide focus rings in the right situation, Unpoly assigns CSS classes
+to the elements it focuses:
+
+- If the user [interacted with the keyboard](/up.event.inputDevice) or if the focused element is a [form field](/up.form.config#config.fieldSelectors), Unpoly will set
+  an `.up-focus-visible` class.
+- If the user interacted with
+  via mouse, touch or stylus, Unpoly will set an `.up-focus-hidden` class instead.
+
+You can use these classes to [hide unwanted focus rings](/focus-visibility#hide), or [style focus rings on new components](/focus-visibility#show).
+
+The following supporting changes have also been made:
+
+- You can set `up.viewport.config.autoFocusVisible` to a function that decides if an element should get a `.up-focus-visible` or `.up-focus-hidden` class.
+- Added a new property `up.event.inputDevice`. Its value is a string describing the class of input device used for the current task.
+- Unpoly will try to force or unset [`:focus-visible`](https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible) as it sets focus classes, but can only do so in [some browsers](https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter).
+- The `up.focus()` function accepts a new `{ focusVisible }` option to control whether `.up-focus-hidden` or `.up-focus-visible` is set on a focused element.
+
+See [Focus ring visibility](/focus-ring-visibility) for more details and examples.
+
+
+### Reacting to form changes
+
+This release addresses many edge cases with features that watch form fields for changes, in particular `[up-watch]`, `[up-autosubmit]` and `up.watch()`:
+
+- Watchers now detect changes in fields that were inserted dynamically later. This regression was introduced by Unpoly 3.0.
+- Watchers now detect changes when the form is [reset](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/reset).
+- Fix an issue where `[up-autosubmit]` would not work on forms that also have [dependent fields](/dependent-fields) using `[up-validate]`.
+- Watchers no longer run callbacks if the form was [aborted](/aborting-requests) or detached while [waiting for a previous async callback](/up-watch#async-callbacks).
+- Watchers now abort their [debounce delay](/watch-options#debouncing-callbacks) if the entire form is aborted. Previously it would abort the delay if any watched field was aborted.
+- `[up-autosubmit]` now aborts a debounce delay if either the form element or the [form's target](/form-up-submit#up-target) are aborted. It no longer aborts the delay if any watched field is aborted.
+
+
+### Other changes
 
 - `up.on()` takes a `{ capture: true }` option to register a listener that runs before the event is emitted on the element.
-- When an interaction with a pointing device focuses, an `.up-focus-hidden` class is set. You can use this to hide an unwanted focus ring for users of pointing devices. (experimental, docs).
-- When an interaction with the keyboard focuses, an `.up-focus-visible` class is set. (experimental, docs).
-- `up.focus()` sets `{ focusVisible: false }` during interactions with a pointing device to prevent `:focus-visible`. [Poor browser support](https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter).
-- New function up.form.isField()
-- Scrolling now defaults to { behavior: 'instant' } to prevent picking up a `scroll-behavior` CSS property. To do pick up the property, pass { behavior: 'auto' }
-- Watchers run when the form is reset
+- Scrolling now defaults to `{ behavior: 'instant' }` to prevent picking up a `scroll-behavior` CSS property. To do pick up the property, pass `{ behavior: 'auto' }`.
+- New function `up.form.isField()`. It returns whether the given element is a [form field](/up.form.config.fieldSelectors). 
 
 
 3.6.1

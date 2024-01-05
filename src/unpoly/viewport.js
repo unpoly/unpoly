@@ -229,7 +229,7 @@ up.viewport = (function() {
     If set to `false` the element will be assigned the `.up-focus-hidden` class.
 
     If set to `'auto'` (the default), focus will be visible if `up.viewport.config.autoFocusVisible()`
-    returns `true` for this element and [input device](#options.inputDevice).
+    returns `true` for the given element and [current input device](/up.event.inputDevice).
 
     The [`:focus-visible`](https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible) pseudo-class will also be set or removed accordingly
     on [browsers that support it](https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter).

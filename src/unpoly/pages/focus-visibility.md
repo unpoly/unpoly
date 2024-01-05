@@ -1,12 +1,12 @@
 Focus ring visibility
 =====================
 
-Unpoly lets you control when a [focused](/focus) fragment shows a visible focus ring.
+Unpoly lets you control whether a [focused](/focus) fragment shows a visible focus ring.
 
 Because Unpoly [often focuses new content](/focus#default-strategy), you may see focus outline appear in unexpected places.
 Try to resist an initial instinct to just remove focus rings globally using CSS.
 Focus rings are important for users of keyboards and screen readers to be able to orient themselves
-as the focus moves on the page. However, mouse and touch users don't want focus rings most of the time.
+as the focus moves on the page. However, mouse and touch users often dislike the visual effect of a focus ring.
 
 
 
@@ -29,12 +29,12 @@ to the elements it focuses:
 > in [some browsers](https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter).
 
 
-### Hiding unwanted focus rings
+### Hiding unwanted focus rings {#hide}
 
 @include focus-ring-hide-example
 
 
-### Styling focus rings on new component
+### Styling focus rings on new component {#show}
 
 @include focus-ring-show-example
 
