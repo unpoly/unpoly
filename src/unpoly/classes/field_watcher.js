@@ -2,10 +2,10 @@ const u = up.util
 
 up.FieldWatcher = class FieldWatcher {
 
-  constructor(container, options, callback) {
+  constructor(root, options, callback) {
     this._options = options
-    this._container = container
-    this._form = up.form.get(container)
+    this._root = root
+    this._container = up.form.getContainer(root)
     this._callback = callback
     this._batch = options.batch
     this._abortable = options.abortable
@@ -18,10 +18,10 @@ up.FieldWatcher = class FieldWatcher {
     this._callbackRunning = false
     this._unbindFns = []
 
-    this._watchFieldsWithin(this._container)
+    this._watchFieldsWithin(this._root)
 
-    this._container.addEventListener('up:fragment:inserted', ({ target }) => {
-      if (target !== this._container) this._watchFieldsWithin(target)
+    this._root.addEventListener('up:fragment:inserted', ({ target }) => {
+      if (target !== this._root) this._watchFieldsWithin(target)
     })
 
     for (let abortableElement of this._abortableElements()) {
@@ -31,7 +31,7 @@ up.FieldWatcher = class FieldWatcher {
     }
 
     this._unbindFns.push(
-      up.on(this._form, 'reset', () => this._onFormReset())
+      up.on(this._container, 'reset', () => this._onFormReset())
     )
   }
 
@@ -49,7 +49,7 @@ up.FieldWatcher = class FieldWatcher {
     if (this._abortable === false) {
       return []
     } else {
-      return u.wrapList(this._abortable ?? this._form)
+      return u.wrapList(this._abortable ?? this._container)
     }
   }
 
@@ -94,7 +94,7 @@ up.FieldWatcher = class FieldWatcher {
     if (this._callbackRunning) return
 
     // If the form was destroyed while a callback was scheduled, we don't run the callback.
-    if (!this._form.isConnected) return
+    if (!this._container.isConnected) return
 
     let fieldOptions = this._scheduledFieldOptions
     const diff = this._changedValues(this._processedValues, this._scheduledValues)
@@ -152,7 +152,7 @@ up.FieldWatcher = class FieldWatcher {
   }
 
   _readFieldValues() {
-    return up.Params.fromContainer(this._container).toObject()
+    return up.Params.fromContainer(this._root).toObject()
   }
 
   _check(fieldOptions = {}) {

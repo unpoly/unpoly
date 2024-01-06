@@ -756,12 +756,12 @@ up.form = (function() {
     Watching will stop automatically when the form is [destroyed](/up.destroy).
   @stable
   */
-  function watch(container, ...args) {
-    container = up.element.get(container) // unwrap jQuery
-    const callback = u.extractCallback(args) || watchCallbackFromElement(container) || up.fail('No callback given for up.watch()')
+  function watch(root, ...args) {
+    root = up.element.get(root) // unwrap jQuery
+    const callback = u.extractCallback(args) || watchCallbackFromElement(root) || up.fail('No callback given for up.watch()')
     let options = u.extractOptions(args)
 
-    const watcher = new up.FieldWatcher(container, options, callback)
+    const watcher = new up.FieldWatcher(root, options, callback)
 
     watcher.start()
 
@@ -1998,6 +1998,7 @@ up.form = (function() {
     groupSolution: findGroupSolution,
     groupSelectors: getGroupSelectors,
     get: getForm,
+    getContainer,
   }
 })()
 

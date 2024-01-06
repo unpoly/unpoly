@@ -171,7 +171,6 @@ describe 'up.form', ->
           expect(callback.calls.count()).toBe(2)
           expect(callback.calls.argsFor(1)[0]).toBe('default')
 
-
         u.each defaultInputEvents, (eventType) ->
 
           describe "when the input receives a #{eventType} event", ->
@@ -215,6 +214,17 @@ describe 'up.form', ->
                   'email',
                   jasmine.objectContaining({ origin: input, feedback: false })
                 )
+
+            it 'allows the observe a field without a containing <form>', ->
+              input = fixture('input[name="input-name"][value="old-value"]')
+              callback = jasmine.createSpy('change callback')
+              up.watch(input, callback)
+              input.value = 'new-value'
+              Trigger[eventType](input)
+
+              await wait()
+
+              expect(callback).toHaveBeenCalledWith('new-value', 'input-name', jasmine.anything())
 
             describe 'with { delay } option', ->
 
