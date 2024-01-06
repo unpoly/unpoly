@@ -2080,6 +2080,27 @@ describe 'up.form', ->
             expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('baz')
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-form-group]:has(input[name="baz"])')
 
+        it 'removes aborted solutions based on their target, not their origin', ->
+          form = fixture('form[action=/path]')
+          fooGroup = e.affix(form, '[up-form-group]')
+          fooField = e.affix(fooGroup, 'input[name=foo][up-validate="#foo-target"]')
+          fooTarget = e.affix(form, '#foo-target')
+          barGroup = e.affix(form, '[up-form-group]')
+          barField = e.affix(barGroup, 'input[name=bar][up-validate="#bar-target"]')
+          barTarget = e.affix(form, '#bar-target')
+
+          up.validate(fooField)
+          up.validate(barField)
+
+          up.fragment.abort(fooTarget)
+          up.fragment.abort(barField) # should not have an effect
+
+          await wait()
+
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('bar')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('#bar-target')
+
+
     describe 'up.form.disable()', ->
 
       it "disables the form's fields", ->
