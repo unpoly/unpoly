@@ -519,7 +519,7 @@ up.form = (function() {
 
     let missingOption = (key) => { up.fail("Cannot process { disable: '%s' } option without { %s }", disable, key) }
     let getOrigin = () => origin || missingOption('origin')
-    let getOriginForm = () => getContainer(getOrigin())
+    let getOriginForm = () => getScope(getOrigin())
 
     let containers
 
@@ -1104,7 +1104,7 @@ up.form = (function() {
         meta = ':unchecked'
       }
     } else if (field.matches('input[type=radio]')) {
-      const form = getContainer(field)
+      const form = getScope(field)
       const groupName = field.getAttribute('name')
       const checkedButton = form.querySelector(`input[type=radio]${e.attrSelector('name', groupName)}:checked`)
       if (checkedButton) {
@@ -1148,7 +1148,7 @@ up.form = (function() {
   */
   function switchTargets(switcher, options = {}) {
     const targetSelector = options.target || options.target || switcher.getAttribute('up-switch')
-    const form = getContainer(switcher)
+    const form = getScope(switcher)
     targetSelector || up.fail("No switch target given for %o", switcher)
     const fieldValues = switcherValues(switcher)
 
@@ -1183,7 +1183,7 @@ up.form = (function() {
   }
 
   function findSwitcherForTarget(target) {
-    const form = getContainer(target)
+    const form = getScope(target)
     const switchers = form.querySelectorAll('[up-switch]')
     const switcher = u.find(switchers, function(switcher) {
       const targetSelector = switcher.getAttribute('up-switch')
@@ -1201,7 +1201,7 @@ up.form = (function() {
 
   // Alternative to getForm() which falls back to the layer element for elements without a form.
   // Only works with elements. Does not support a selector as a first argument.
-  function getContainer(element, options) {
+  function getScope(element, options) {
     return getForm(element, options) || up.layer.get(element).element
   }
 
@@ -1998,7 +1998,7 @@ up.form = (function() {
     groupSolution: findGroupSolution,
     groupSelectors: getGroupSelectors,
     get: getForm,
-    getContainer,
+    getScope,
   }
 })()
 

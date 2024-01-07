@@ -5,7 +5,7 @@ up.FieldWatcher = class FieldWatcher {
   constructor(root, options, callback) {
     this._options = options
     this._root = root
-    this._container = up.form.getContainer(root)
+    this._scope = up.form.getScope(root)
     this._callback = callback
     this._batch = options.batch
     this._abortable = options.abortable
@@ -31,7 +31,7 @@ up.FieldWatcher = class FieldWatcher {
     }
 
     this._unbindFns.push(
-      up.on(this._container, 'reset', () => this._onFormReset())
+      up.on(this._scope, 'reset', () => this._onFormReset())
     )
   }
 
@@ -41,15 +41,15 @@ up.FieldWatcher = class FieldWatcher {
   }
 
   _fieldOptions(field) {
-    let containerOptions = u.copy(this._options)
-    return up.form.watchOptions(field, containerOptions, { defaults: { event: 'input' } })
+    let rootOptions = u.copy(this._options)
+    return up.form.watchOptions(field, rootOptions, { defaults: { event: 'input' } })
   }
 
   _abortableElements() {
     if (this._abortable === false) {
       return []
     } else {
-      return u.wrapList(this._abortable ?? this._container)
+      return u.wrapList(this._abortable ?? this._scope)
     }
   }
 
@@ -94,7 +94,7 @@ up.FieldWatcher = class FieldWatcher {
     if (this._callbackRunning) return
 
     // If the form was destroyed while a callback was scheduled, we don't run the callback.
-    if (!this._container.isConnected) return
+    if (!this._scope.isConnected) return
 
     let fieldOptions = this._scheduledFieldOptions
     const diff = this._changedValues(this._processedValues, this._scheduledValues)
