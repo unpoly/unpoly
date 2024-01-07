@@ -1,6 +1,19 @@
+3.7.0
+=====
+
+- Update CHANGELOG
+- Release unpoly
+- Release unpoly-rails
+- Update unpoly-demo
+- Update unpoly-site
+- Social media
+
+
 Backlog
 =======
 
+- Consider parsing scroll-margin-top, scroll-margin-bottom for revealing
+- Allow [up-emit] for buttons
 - Docs: Mention that [up-href], [up-alias] cannot be set by a macro
 - Docs: Explain how to convert JSON responses to HTML responses (discussion #562)
 - Convert .sass files to .scss
@@ -19,8 +32,7 @@ Backlog
   - Prevent with JS? pointer-events?
     - Also prevent keyboard focus with temporary [tabindex=-1]
   - Bootstrap already has a.disabled and users would like to take over that styling
-- Consider [up-on] for arbitrary, nonceable attribute event handlers
-- Copy important up.render() options to up.layer.open() and a[up-layer=new]
+- Docs: Copy important up.render() options to up.layer.open() and a[up-layer=new]
   - In particular { content, fragment, url, document }
 - Nonces for remote scripts
   - Rewrite nonces before comparing
@@ -42,26 +54,18 @@ Backlog
 - Is the [up-keep=false] pattern good to keep?
   - E.g. for flashes: We could interrupt a keep chain this way, but then the element can never again be keepable
   => It's the same for polling
-- Remove 1.x-stable tag
 - consider having dev builds with debug terser
 - Docs: /accessibility page
   - But where does it go?
   - Top-level?
 - 2024: Replace up.error.emitGlobal() with window.reportError()
-- [v4] Document throws
-  - But consider waiting until async compilers, as we're changing some method signatures
-  - How do we document async rejections?
-    - up.link.preload documents in @return
 - Publish up.util.sprintf()
   - But rename it to something else, as sprintf() is something else
 - Docs: Custom input elements
   - Have your custom element expose `{ name }` and { value }` properties (AFAIK Shoelance components already do)
   - Also `{ disable }`
   - Make Unpoly aware of custom elements by pushing a selector to [`up.form.config.fieldSelectors`](https://unpoly.com/up.form.config#config.fieldSelectors).
-  - Checks for .checked and .selected are still hard-coded
-- [v4] Consider removing X-Up-Title, [up-title] and { title } since we now auto-update head elements
-- [v4] Consider moving history-related methods from up.Layer.Base to up.history
-  - All other packages work by taking a { layer } option, why not history-related?
+  - Limitation: One value per field. Checks for groups (.checked and .selected) are still hard-coded
 - Test that system compilers always run before user compilers
   => We already have macros if compilers need to use others?
 - Concepts [up-feedback] and [up-background] are overlapping
@@ -79,8 +83,6 @@ Backlog
     - Must be the same element in :start / :stop, even if the DOM has changed in between
   => With .up-validating we have different points where feedback starts and ends.
     - This class does not exist. It was an idea detailled further down.
-- Consider parsing scroll-margin-top, scroll-margin-bottom for revealing
-- Allow [up-emit] for buttons
 - Do we want a preventable up:request:reuse event?
   - Maybe even :reused since there is no :loaded for cached requests
 - Experiment with property mangling vs. public API

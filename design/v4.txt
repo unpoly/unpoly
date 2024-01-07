@@ -6,4 +6,10 @@
 - Check browser support for Element#focus({ focusVisible }) option
 - Consider requiring elements for functions that work with elements, not selectors or jQuery collections
 - [up-instant] and [up-preload] should listen on pointerdown instead of mousedown
-
+- [v4] Document throws
+  - But consider waiting until async compilers, as we're changing some method signatures
+  - How do we document async rejections?
+    - up.link.preload documents in @return
+- [v4] Consider removing X-Up-Title, [up-title] and { title } since we now auto-update head elements
+- [v4] Consider moving history-related methods from up.Layer.Base to up.history
+  - All other packages work by taking a { layer } option, why not history-related?
