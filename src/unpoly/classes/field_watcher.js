@@ -74,9 +74,9 @@ up.FieldWatcher = class FieldWatcher {
   _scheduleValues(values, fieldOptions) {
     clearTimeout(this._currentTimer) // debounce a previously set timer
     this._scheduledValues = values
+    this._scheduledFieldOptions = fieldOptions
     let delay = fieldOptions.delay || 0
     this._currentTimer = u.timer(delay, () => {
-      this._scheduledFieldOptions = fieldOptions
       this._requestCallback()
     })
   }

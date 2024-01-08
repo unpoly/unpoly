@@ -320,6 +320,36 @@ describe 'up.form', ->
               # After 150 ms the first callback should be finished and the queued 2nd callback has executed
               expect(callbackCount).toEqual(2)
 
+            it 'does not throw an error if a debounce delay finishes after an async callback finishes (bugfix)', ->
+              form = fixture('form')
+              input = e.affix(form, 'input[name="input-name"][value="old-value"]')
+              callbackCount = 0
+
+              callback = ->
+                callbackCount += 1
+                return up.specUtil.promiseTimer(100)
+
+              up.watch(input, { delay: 200 }, callback)
+              input.value = 'new-value-1'
+              Trigger[eventType](input)
+
+              await wait(250)
+
+              # After 200 ms the callback has been called and takes 100 ms to complete
+              expect(callbackCount).toEqual(1)
+
+              # A new callback is scheduled in 200 ms
+              input.value = 'new-value-2'
+              Trigger[eventType](input)
+
+              # First callback is still running
+              await wait(30)
+              expect(callbackCount).toEqual(1)
+
+              # First callback has finished, second callback debounce delay is over
+              await wait(250)
+              expect(callbackCount).toEqual(2)
+
             it 'does not run a callback if the form was aborted while a previous callback was still running', asyncSpec (next) ->
               form = fixture('form')
               input = e.affix(form, 'input[name="input-name"][value="old-value"]')
