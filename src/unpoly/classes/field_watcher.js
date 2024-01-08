@@ -72,11 +72,12 @@ up.FieldWatcher = class FieldWatcher {
   }
 
   _scheduleValues(values, fieldOptions) {
-    clearTimeout(this._currentTimer) // debounce a previously set timer
     this._scheduledValues = values
     this._scheduledFieldOptions = fieldOptions
     let delay = fieldOptions.delay || 0
+    clearTimeout(this._currentTimer) // debounce a previously set timer
     this._currentTimer = u.timer(delay, () => {
+      this._currentTimer = null
       this._requestCallback()
     })
   }
@@ -92,6 +93,11 @@ up.FieldWatcher = class FieldWatcher {
     // We don't run callbacks when a prior async callback is still running.
     // We will call _requestCallback() again once the prior callback terminates.
     if (this._callbackRunning) return
+
+    // When we re-called _requestCallback() after waiting for a prior callback, another
+    // debounce delay may have started while waiting for the prior callback.
+    // We must not shorted that debounce delay.
+    if (this._currentTimer) return
 
     // If the form was destroyed while a callback was scheduled, we don't run the callback.
     if (!this._scope.isConnected) return
@@ -129,6 +135,7 @@ up.FieldWatcher = class FieldWatcher {
 
     this._callbackRunning = false
 
+    // A debounce delay may have finished and returned earlier while a priour async callback was still running.
     this._requestCallback()
   }
 

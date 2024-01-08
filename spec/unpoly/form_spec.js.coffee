@@ -350,6 +350,34 @@ describe 'up.form', ->
               await wait(250)
               expect(callbackCount).toEqual(2)
 
+            it 'waits for the full debounce delay if a previous async callback finishes faster than the delay (bugfix)', ->
+              form = fixture('form')
+              input = e.affix(form, 'input[name="input-name"][value="old-value"]')
+              callbackCount = 0
+
+              callback = ->
+                callbackCount += 1
+                return up.specUtil.promiseTimer(100)
+
+              up.watch(input, { delay: 100 }, callback)
+              input.value = 'new-value-1'
+              Trigger[eventType](input)
+
+              await wait(170)
+
+              expect(callbackCount).toEqual(1)
+
+              input.value = 'new-value-2'
+              Trigger[eventType](input)
+
+              await wait(50)
+
+              expect(callbackCount).toEqual(1)
+
+              await wait(100)
+
+              expect(callbackCount).toEqual(2)
+
             it 'does not run a callback if the form was aborted while a previous callback was still running', asyncSpec (next) ->
               form = fixture('form')
               input = e.affix(form, 'input[name="input-name"][value="old-value"]')
