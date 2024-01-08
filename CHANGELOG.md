@@ -9,6 +9,15 @@ Changes handled by `unpoly-migrate.js` are not considered breaking changes.
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+3.7.1
+-----
+
+This change fixes two regressions for form field watchers, introduced by [3.7.0](https://unpoly.com/changes/3.7.0):
+
+- When a change is detected while waiting for an async callback, prevent the new callback from crashing with `Cannot destructure property { disable } of null`.
+- When a change is detected while waiting for an async callback, the full debounce delay of that new change is honored.
+
+
 3.7.0
 -----
 
