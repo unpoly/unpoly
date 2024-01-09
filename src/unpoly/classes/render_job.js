@@ -35,10 +35,6 @@ up.RenderJob = class RenderJob {
     return this
   }
 
-  getPreflightFragments() {
-    return this._getChange().getPreflightProps().fragments
-  }
-
   /*-
   The [render options](/up.render#parameters) for this job.
 

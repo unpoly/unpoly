@@ -304,12 +304,8 @@ up.form = (function() {
   @stable
   */
   const submit = up.mockable((form, options) => {
-    return buildSubmitJob(form, options).execute()
+    return up.render(submitOptions(form, options))
   })
-
-  function buildSubmitJob(form, options) {
-    return new up.RenderJob(submitOptions(form, options))
-  }
 
   /*-
   Parses the [render](/up.render) options that would be used to
@@ -374,10 +370,6 @@ up.form = (function() {
     parser.include(up.link.followOptions)
 
     return options
-  }
-
-  function getPreflightFragments(form) {
-    return buildSubmitJob(form).getPreflightFragments()
   }
 
   function watchOptions(field, options, parserOptions = {}) {
@@ -792,10 +784,8 @@ up.form = (function() {
   @stable
   */
   function autosubmit(target, options = {}) {
-    const form = getForm(target)
-    options.abortable ??= [form, ...getPreflightFragments(form)]
-    const onChange = (_value, _name, renderOptions) => submit(target, renderOptions)
-    return watch(target, options, onChange)
+    const onChange = (_diff, renderOptions) => submit(target, renderOptions)
+    return watch(target, { options, batch: true }, onChange)
   }
 
   function getGroupSelectors() {
@@ -1968,7 +1958,7 @@ up.form = (function() {
   @param [up-watch-delay]
     The number of miliseconds to wait after a change before submitting the form.
 
-    If either the form or [its target](/form-up-submit#up-target) is [aborted](/aborting-requests) or
+    If the form element is [aborted](/aborting-requests) or
     destroyed during the delay, the submission is canceled.
 
     See [debouncing callbacks](/watch-options#debouncing-callbacks).

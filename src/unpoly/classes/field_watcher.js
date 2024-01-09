@@ -24,11 +24,9 @@ up.FieldWatcher = class FieldWatcher {
       if (target !== this._root) this._watchFieldsWithin(target)
     })
 
-    for (let abortableElement of this._abortableElements()) {
-      this._unbindFns.push(
-        up.fragment.onAborted(abortableElement, () => this._abort())
-      )
-    }
+    this._unbindFns.push(
+      up.fragment.onAborted(this._scope, () => this._abort())
+    )
 
     this._unbindFns.push(
       up.on(this._scope, 'reset', () => this._onFormReset())
@@ -43,14 +41,6 @@ up.FieldWatcher = class FieldWatcher {
   _fieldOptions(field) {
     let rootOptions = u.copy(this._options)
     return up.form.watchOptions(field, rootOptions, { defaults: { event: 'input' } })
-  }
-
-  _abortableElements() {
-    if (this._abortable === false) {
-      return []
-    } else {
-      return u.wrapList(this._abortable ?? this._scope)
-    }
   }
 
   _watchFieldsWithin(container) {

@@ -2751,6 +2751,46 @@ describe 'up.form', ->
         Trigger.change($field)
         next => expect(submitSpy).toHaveBeenCalled()
 
+      it 'queues changes while a prior form autosubmission is still loading (bugfix)', ->
+        form = fixture('form[method="post"][action="/endpoint"][up-target="#target"]')
+        field = e.affix(form, 'input[up-autosubmit][name="input-name"][value="value1"]')
+        target = fixture('#target', text: 'initial text')
+        up.hello(form)
+
+        field.value = 'value2'
+        Trigger.change(field)
+
+        await wait()
+
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#target')
+        expect(jasmine.lastRequest().data()['input-name']).toEqual(['value2'])
+
+        # Make another change while the previous request is still loading
+        field.value = 'value3'
+        Trigger.change(field)
+
+        await wait()
+
+        # Still waiting for the previous request
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+
+        jasmine.respondWithSelector('#target', text: 'response for value2')
+
+        await wait()
+
+        expect('#target').toHaveText('response for value2')
+
+        expect(jasmine.Ajax.requests.count()).toBe(2)
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#target')
+        expect(jasmine.lastRequest().data()['input-name']).toEqual(['value3'])
+
+        jasmine.respondWithSelector('#target', text: 'response for value3')
+
+        await wait()
+
+        expect('#target').toHaveText('response for value3')
+
       it 'submits the form when a change is observed on a container for a radio button group', asyncSpec (next) ->
         form = fixture('form')
         group = e.affix(form, '.group[up-autosubmit][up-delay=0]')
@@ -2876,45 +2916,6 @@ describe 'up.form', ->
           expect(jasmine.Ajax.requests.count()).toBe(0)
 
           up.fragment.abort(form)
-
-          await wait(90)
-
-          expect(jasmine.Ajax.requests.count()).toBe(0)
-
-        it "aborts a debounced submission when the form's explicit target is aborted", ->
-          form = fixture('form[up-autosubmit][up-watch-delay="50"][method="post"][action="/action"][up-target="#form-target"]')
-          input1 = e.affix(form, 'input[name="input1"][value="initial-value"]')
-          target = fixture('#form-target')
-          up.hello(form)
-
-          input1.value = 'changed-value'
-          Trigger.change(input1)
-
-          await wait(10)
-
-          expect(jasmine.Ajax.requests.count()).toBe(0)
-
-          up.fragment.abort(target)
-
-          await wait(90)
-
-          expect(jasmine.Ajax.requests.count()).toBe(0)
-
-        it "aborts a debounced submission when the form's fallback (main) target is aborted", ->
-          form = fixture('form[up-autosubmit][up-watch-delay="50"][method="post"][action="/action"][up-submit]')
-          input1 = e.affix(form, 'input[name="input1"][value="initial-value"]')
-          target = fixture('#main-target')
-          up.fragment.config.mainTargets.unshift('#main-target')
-          up.hello(form)
-
-          input1.value = 'changed-value'
-          Trigger.change(input1)
-
-          await wait(10)
-
-          expect(jasmine.Ajax.requests.count()).toBe(0)
-
-          up.fragment.abort(target)
 
           await wait(90)
 
