@@ -9,6 +9,15 @@ Changes handled by `unpoly-migrate.js` are not considered breaking changes.
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+3.7.2
+-----
+
+This change fixes two regressions for `[up-autosubmit]`, introduced by [3.7.0](https://unpoly.com/changes/3.7.0):
+
+- When the user changes a form field while a previous autosubmission is still loading, prevent that new change from being lost.
+- A debounce delay is now aborted if the form element is aborted. It no longer aborts the delay when the form's target is aborted. 
+
+
 3.7.1
 -----
 
