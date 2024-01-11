@@ -505,7 +505,7 @@ describe 'up.radio', ->
 
         await expectAsync(promise).toBeRejectedWith(jasmine.any(up.RenderResult))
         await expectAsync(promise).toBeRejectedWith(jasmine.objectContaining(
-          target: '.failure-target',
+          target: '.failure-target, .hungry',
           fragments: [e.get('.failure-target'), e.get('.hungry')],
         ))
 
@@ -603,7 +603,7 @@ describe 'up.radio', ->
 
             await expectAsync(job.finished).toBeResolvedTo(jasmine.any(up.RenderResult))
             await expectAsync(job.finished).toBeResolvedTo(jasmine.objectContaining(
-              target: '#target',
+              target: '#target, #hungry',
               fragments: [document.querySelector('#target.new'), document.querySelector('#hungry.new')],
               layer: up.layer.root,
             ))
@@ -635,7 +635,7 @@ describe 'up.radio', ->
 
             await expectAsync(finished).toBeRejectedWith(jasmine.any(up.RenderResult))
             await expectAsync(finished).toBeRejectedWith(jasmine.objectContaining(
-              target: '#target',
+              target: '#target, #hungry',
               fragments: [document.querySelector('#target.new'), document.querySelector('#hungry.new')],
               layer: up.layer.root,
             ))

@@ -142,6 +142,15 @@ up.protocol = (function() {
 
   Also see [skipping unnecessary rendering](/skipping-rendering).
 
+
+  ### Optional targets
+
+  An optional selector part (`:maybe` suffix) will be omitted from an `X-Up-Target` header unless it
+  matches in the current page.
+
+  Required selector parts are always included in `X-Up-Target`.
+
+
   @header X-Up-Target
   @stable
   */

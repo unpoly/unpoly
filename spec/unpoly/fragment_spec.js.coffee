@@ -2415,7 +2415,7 @@ describe 'up.fragment', ->
               expect('.foo').toHaveText('old foo')
               expect('.bar').toHaveText('new bar')
 
-          it 'does not impede the render pass if the :maybe target is missing from the current page', asyncSpec (next) ->
+          it 'does not impede the render pass if the :maybe target is missing from the current page', ->
             fixture('.bar', text: 'old bar')
 
             promise = up.render '.foo:maybe, .bar', document: """
@@ -2423,13 +2423,31 @@ describe 'up.fragment', ->
               <div class="bar">new bar</div>
             """
 
-            next ->
-              next.await promiseState(promise)
+            await expectAsync(promise).toBeResolved()
 
-            next ({ state }) ->
-              expect(state).toBe('fulfilled')
-              expect(document).not.toHaveSelector('.foo')
-              expect('.bar').toHaveText('new bar')
+            expect(document).not.toHaveSelector('.foo')
+            expect('.bar').toHaveText('new bar')
+
+          it 'includes a :maybe target in the X-Up-Target header if it can be matched in the current page', ->
+            fixture('.foo', text: 'old foo')
+            fixture('.bar', text: 'old bar')
+
+            promise = up.render '.foo:maybe, .bar', url: '/my-page'
+
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.foo, .bar')
+
+          it 'omits a :maybe target from the X-Up-Target header if it cannot be matched in the current page', ->
+            fixture('.bar', text: 'old bar')
+
+            promise = up.render '.foo:maybe, .bar', url: '/some-page'
+
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.bar')
 
           it 'allows to combine :maybe and :after pseudo-selectors'
 

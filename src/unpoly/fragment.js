@@ -1617,6 +1617,9 @@ up.fragment = (function() {
   When [updating multiple fragments](/targeting-fragments#updating-multiple-fragments)
   you may combine required and optional selectors in a single target string.
 
+  An optional selector will be omitted from an `X-Up-Target` header unless it
+  matches in the current page.
+
   ### Example
 
   This link will update the fragments `.content` (required) and `.details` (optional):
@@ -2565,8 +2568,8 @@ up.fragment = (function() {
   }
 
   function targetForSteps(steps) {
-    let requiredSteps = u.reject(steps, 'maybe')
-    let selectors = u.map(requiredSteps, 'selector')
+    let bestSteps = steps.filter((step) => !step.maybe || step.oldElement?.isConnected)
+    let selectors = u.map(bestSteps, 'selector')
     return selectors.join(', ') || ':none'
   }
 
