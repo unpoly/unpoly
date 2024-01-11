@@ -12,10 +12,28 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 3.7.2
 -----
 
-This change fixes two regressions for `[up-autosubmit]`, introduced by [3.7.0](https://unpoly.com/changes/3.7.0):
+### Validation
+
+This change addresses multiple edge cases with concurrent user input during [form validations](/validation):
+
+- It is now possible to queue a validation for a fragment while a validation request for the same target is still loading.
+- Validations no longer throw an error if a targeted fragment is destroyed while a validation request is loading. Instead Unpoly will only update the fragments that are still present on the page (if any).
+- Validations are now aborted if the entire `<form>` element is [aborted](/aborting-requests). Previously individual validations were aborted when their target was aborted.
+- `up.validate()` now rejects with an `up.Aborted` error if a debounce delay was aborted (by aborting the `<form>` element).
+- When a new validation is queued while a previous validation request is still loading, the full debounce delay of the new validation is now honored.
+
+
+### Autosubmit fixes
+
+This change fixes two more regressions for `[up-autosubmit]`, introduced by [3.7.0](https://unpoly.com/changes/3.7.0):
 
 - When the user changes a form field while a previous autosubmission is still loading, prevent that new change from being lost.
-- A debounce delay is now aborted if the form element is aborted. It no longer aborts the delay when the form's target is aborted. 
+- A debounce delay is now aborted if the entire `<form>` element is aborted. It no longer aborts the delay when the form's target is aborted.
+
+### Fragment API
+
+- [Optional target selectors](/targeting-fragments#optional-targets) (with `:maybe` suffix) are now included in the `X-Up-Target` header if they match in the current page. Previously optional selector parts were always omitted from `X-Up-Target`.
+- The event `up:fragment:aborted` now has a new `{ reason }` property. Its a value is a string describing the reason for the fragment being aborted.
 
 
 3.7.1
