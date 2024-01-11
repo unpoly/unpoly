@@ -1834,8 +1834,8 @@ describe 'up.form', ->
 
       describe 'request sequence', ->
 
-        it 'only sends a single concurrent request and queues new validations while a validation request is in flight', asyncSpec (next) ->
-          form = fixture('form[up-watch-disable]')
+        it 'only sends a single concurrent request and queues new validations while a validation request is in flight', ->
+          form = fixture('form[method="post"][action="/endpoint"]')
           group1 = e.affix(form, '[up-form-group]')
           input1 = e.affix(group1, 'input[name=email]')
           group2 = e.affix(form, '[up-form-group]')
@@ -1843,21 +1843,92 @@ describe 'up.form', ->
 
           up.validate(input1)
 
-          next ->
-            expect(jasmine.Ajax.requests.count()).toBe(1)
-            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('[up-form-group]:has(input[name="email"])')
+          await wait()
 
-            up.validate(input2)
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(jasmine.lastRequest().url).toMatchURL('/endpoint')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('[up-form-group]:has(input[name="email"])')
 
-          next ->
-            expect(jasmine.Ajax.requests.count()).toBe(1)
+          up.validate(input2)
 
-            jasmine.respondWithSelector('[up-form-group] input[name="email"]')
+          await wait()
 
-          next ->
-            expect(jasmine.Ajax.requests.count()).toBe(2)
+          # See that validations of input2 are queued. No second request is sent yet.
+          expect(jasmine.Ajax.requests.count()).toBe(1)
 
-            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('[up-form-group]:has(input[name="password"])')
+          jasmine.respondWithSelector('[up-form-group] input[name="email"]')
+
+          await wait()
+
+          # Now that the first validation request has concluded, a second request is sent.
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+          expect(jasmine.lastRequest().url).toMatchURL('/endpoint')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('[up-form-group]:has(input[name="password"])')
+
+        it 'does not shorten the { delay } of a queued validations when the prior request finishes (bugfix)', ->
+          form = fixture('form[method="post"][action="/endpoint"]')
+          group1 = e.affix(form, '[up-form-group]')
+          input1 = e.affix(group1, 'input[name=email]')
+          group2 = e.affix(form, '[up-form-group]')
+          input2 = e.affix(group2, 'input[name=password]')
+
+          up.validate(input1, { delay: 0 })
+
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(jasmine.lastRequest().url).toMatchURL('/endpoint')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('[up-form-group]:has(input[name="email"])')
+
+          up.validate(input2, { delay: 130 })
+
+          await wait()
+
+          # See that validations of input2 are queued. No second request is sent yet.
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          jasmine.respondWithSelector('[up-form-group] input[name="email"]')
+
+          await wait()
+
+          # The delay is still running
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          await wait(200)
+
+          # Now that the delay is over, a second request is sent.
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+          expect(jasmine.lastRequest().url).toMatchURL('/endpoint')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('[up-form-group]:has(input[name="password"])')
+
+        it 'aborts queued validations when the form element is aborted', ->
+          form = fixture('form[method="post"][action="/endpoint"]')
+          group1 = e.affix(form, '[up-form-group]')
+          input1 = e.affix(group1, 'input[name=email]')
+          group2 = e.affix(form, '[up-form-group]')
+          input2 = e.affix(group2, 'input[name=password]')
+
+          up.validate(input1)
+
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(jasmine.lastRequest().url).toMatchURL('/endpoint')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('[up-form-group]:has(input[name="email"])')
+
+          up.validate(input2)
+
+          await wait()
+
+          # See that validations of input2 are queued. No second request is sent yet.
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          up.fragment.abort(form)
+
+          await wait()
+
+          # No second request was made
+          expect(jasmine.Ajax.requests.count()).toBe(1)
 
       describe 'disabling', ->
 
@@ -1949,7 +2020,6 @@ describe 'up.form', ->
           next ->
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('[up-form-group]:has(input[name="email"])')
             expect(group).not.toHaveClass('up-loading')
-
 
       describe 'batching', ->
 
@@ -2102,25 +2172,68 @@ describe 'up.form', ->
             expect(barDataSpy.calls.count()).toBe(2)
             expect(barDataSpy.calls.argsFor(1)[0]).toEqual(key: 2)
 
-        it 'removes destroyed elements from a pending batch', asyncSpec (next) ->
+        it 'does not crash if an origin for a pending batch is destroyed', ->
           form = fixture('form[action=/path]')
-          fooGroup = e.affix(form, '[up-form-group]')
-          fooField = e.affix(fooGroup, 'input[name=foo]')
-          barGroup = e.affix(form, '[up-form-group]')
-          barField = e.affix(barGroup, 'input[name=bar]')
-          bazGroup = e.affix(form, '[up-form-group]')
-          bazField = e.affix(bazGroup, 'input[name=baz]')
+          fooField = e.affix(form, 'input[name=foo][up-validate="#foo-target"]')
+          fooTarget = e.affix(form, '#foo-target')
+          barField = e.affix(form, 'input[name=bar][up-validate="#bar-target"]')
+          barTarget = e.affix(form, '#bar-target')
 
           up.validate(fooField)
-          up.validate(bazField)
+          up.validate(barField)
 
-          up.destroy(fooGroup)
+          up.destroy(fooField)
 
-          next ->
-            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('baz')
-            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-form-group]:has(input[name="baz"])')
+          await wait()
 
-        it 'removes aborted fragments from a pending batch', asyncSpec (next) ->
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo bar')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('#foo-target, #bar-target')
+
+        it 'does not crash if an target for a pending batch is destroyed before the validation request is sent', ->
+          form = fixture('form[action=/path]')
+          fooField = e.affix(form, 'input[name=foo][up-validate="#foo-target"]')
+          fooTarget = e.affix(form, '#foo-target')
+          barField = e.affix(form, 'input[name=bar][up-validate="#bar-target"]')
+          barTarget = e.affix(form, '#bar-target')
+
+          up.validate(fooField)
+          up.validate(barField)
+
+          up.destroy(fooTarget)
+
+          await wait()
+
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo bar')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('#bar-target')
+
+        it 'does not crash if an target for a pending batch is destroyed while the validation request is loading', ->
+          form = fixture('form[action=/path]')
+          fooField = e.affix(form, 'input[name=foo][up-validate="#foo-target"]')
+          fooTarget = e.affix(form, '#foo-target', text: 'old foo target')
+          barField = e.affix(form, 'input[name=bar][up-validate="#bar-target"]')
+          barTarget = e.affix(form, '#bar-target', text: 'new bar target')
+
+          up.validate(fooField)
+          up.validate(barField)
+
+          await wait()
+
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo bar')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('#foo-target, #bar-target')
+
+          up.destroy(fooTarget)
+
+          jasmine.respondWith """
+            <div id="foo-target">new foo target</div>
+            <div id="bar-target">new bar target</div>
+          """
+
+          await wait()
+
+          expect(document).not.toHaveSelector('#foo-target')
+          expect('#bar-target').toHaveText('new bar target')
+
+        it 'keeps validation targets from aborted fragments for a pending batch (as the fragment may have been updated with a new version)', ->
           form = fixture('form[action=/path]')
           fooGroup = e.affix(form, '[up-form-group]')
           fooField = e.affix(fooGroup, 'input[name=foo]')
@@ -2134,30 +2247,46 @@ describe 'up.form', ->
 
           up.fragment.abort(fooGroup)
 
-          next ->
-            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('baz')
-            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-form-group]:has(input[name="baz"])')
+          await wait()
 
-        it 'removes aborted solutions based on their target, not their origin', ->
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo baz')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-form-group]:has(input[name="foo"]), [up-form-group]:has(input[name="baz"])')
+
+        it 'removes a pending batch when the entire form element is destroyed', ->
           form = fixture('form[action=/path]')
           fooGroup = e.affix(form, '[up-form-group]')
-          fooField = e.affix(fooGroup, 'input[name=foo][up-validate="#foo-target"]')
-          fooTarget = e.affix(form, '#foo-target')
+          fooField = e.affix(fooGroup, 'input[name=foo]')
           barGroup = e.affix(form, '[up-form-group]')
-          barField = e.affix(barGroup, 'input[name=bar][up-validate="#bar-target"]')
-          barTarget = e.affix(form, '#bar-target')
+          barField = e.affix(barGroup, 'input[name=bar]')
+          bazGroup = e.affix(form, '[up-form-group]')
+          bazField = e.affix(bazGroup, 'input[name=baz]')
 
           up.validate(fooField)
-          up.validate(barField)
+          up.validate(bazField)
 
-          up.fragment.abort(fooTarget)
-          up.fragment.abort(barField) # should not have an effect
+          up.destroy(form)
 
           await wait()
 
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('bar')
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('#bar-target')
+          expect(jasmine.Ajax.requests.count()).toBe(0)
 
+        it 'removes a pending batch when the entire form element is aborted', ->
+          form = fixture('form[action=/path]')
+          fooGroup = e.affix(form, '[up-form-group]')
+          fooField = e.affix(fooGroup, 'input[name=foo]')
+          barGroup = e.affix(form, '[up-form-group]')
+          barField = e.affix(barGroup, 'input[name=bar]')
+          bazGroup = e.affix(form, '[up-form-group]')
+          bazField = e.affix(bazGroup, 'input[name=baz]')
+
+          up.validate(fooField)
+          up.validate(bazField)
+
+          up.fragment.abort(form)
+
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(0)
 
     describe 'up.form.disable()', ->
 
@@ -3333,6 +3462,49 @@ describe 'up.form', ->
           expect(jasmine.lastRequest().url).toMatchURL('/render-path')
           expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toBeMissing()
 
+      it 'queues changes while a prior validation is still loading when two elements target the same element (bugfix)', ->
+        form = fixture('form[method="post"][action="/endpoint"]')
+        field1 = e.affix(form, 'input[up-validate][name="field1"][value="value1"][up-validate="#preview"]')
+        field2 = e.affix(form, 'input[up-validate][name="field2"][value="value1"][up-validate="#preview"]')
+        preview = e.affix(form, '#preview', text: 'version 1')
+        up.hello(form)
+
+        field1.value = 'value2'
+        Trigger.change(field1)
+
+        await wait(20)
+
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#preview')
+        expect(jasmine.lastRequest().data()['field1']).toEqual(['value2'])
+        expect(jasmine.lastRequest().data()['field2']).toEqual(['value1'])
+
+        # Make another change while the previous request is still loading
+        field2.value = 'value2'
+        Trigger.change(field2)
+
+        await wait(20)
+
+        # Still waiting for the previous request
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+
+        jasmine.respondWithSelector('#preview', text: 'version 2')
+
+        await wait()
+
+        expect('#preview').toHaveText('version 2')
+
+        expect(jasmine.Ajax.requests.count()).toBe(2)
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#preview')
+        expect(jasmine.lastRequest().data()['field1']).toEqual(['value2'])
+        expect(jasmine.lastRequest().data()['field2']).toEqual(['value2'])
+
+        jasmine.respondWithSelector('#preview', text: 'version 3')
+
+        await wait()
+
+        expect('#preview').toHaveText('version 3')
+
       it "does not use form attributes intended for submission results, like [up-scroll] or [up-confirm] (bugfix)", asyncSpec (next) ->
         renderSpy = spyOn(up, 'render').and.returnValue(u.unresolvablePromise())
         form = fixture('form[up-submit][action="/path"]')
@@ -3379,7 +3551,7 @@ describe 'up.form', ->
 
       describe 'with [up-watch-delay]', ->
 
-        it 'delays the validation by the given number of milliseconds', asyncSpec (next) ->
+        it 'delays the validation by the given number of milliseconds', ->
           form = fixture('form[up-submit][action="/path"]')
           textField = e.affix(form, 'input[type=text][name=email][up-validate][up-watch-delay="200"]')
           up.hello(form)
@@ -3387,11 +3559,31 @@ describe 'up.form', ->
           textField.value = 'changed'
           Trigger.change(textField)
 
-          next ->
-            expect(jasmine.Ajax.requests.count()).toBe(0)
+          await wait()
 
-          next.after 350, ->
-            expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+          await wait(350)
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+        it 'aborts the debounce timer when the form is aborted', ->
+          form = fixture('form[up-submit][action="/path"]')
+          textField = e.affix(form, 'input[type=text][name=email][up-validate][up-watch-delay="200"]')
+          up.hello(form)
+
+          textField.value = 'changed'
+          Trigger.change(textField)
+
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+          up.fragment.abort(form)
+
+          await wait(350)
+
+          expect(jasmine.Ajax.requests.count()).toBe(0)
 
     describe 'form[up-validate]', ->
 
@@ -3527,6 +3719,7 @@ describe 'up.form', ->
           expect(jasmine.Ajax.requests.count()).toEqual(1)
           expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('password')
           expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.result')
+
 
     describe '[up-switch]', ->
 

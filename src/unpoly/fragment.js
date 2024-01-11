@@ -2235,6 +2235,7 @@ up.fragment = (function() {
 
   function parseTargetSteps(target, options = {}) {
     let defaultPlacement = options.defaultPlacement || 'swap'
+    let defaultMaybe = options.defaultMaybe ?? false
 
     let steps = []
     let simpleSelectors = splitTarget(target)
@@ -2243,7 +2244,7 @@ up.fragment = (function() {
       if (selector === ':none') continue
 
       let placement = defaultPlacement
-      let maybe = false
+      let maybe = defaultMaybe
 
       selector = selector.replace(/\b::?(before|after)\b/, (_match, customPlacement) => {
         placement = customPlacement
@@ -2789,10 +2790,8 @@ up.fragment = (function() {
     A function that unsubscribes the callback.
   @experimental
   */
-  function onAborted(fragment, ...args) {
-    let callback = u.extractCallback(args)
-    let options = u.extractOptions(args)
-    let guard = (event) => event.target.contains(fragment) || (options.around && fragment.contains(event.target))
+  function onAborted(fragment, callback) {
+    let guard = (event) => event.target.contains(fragment)
     let unsubscribe = up.on('up:fragment:aborted', { guard }, callback)
     // Since we're binding to an element that is an ancestor of the fragment,
     // we need to unregister the event listener when the form is removed.

@@ -10244,19 +10244,6 @@ describe 'up.fragment', ->
 
         expect(callback).not.toHaveBeenCalled()
 
-      describe 'with { around } option', ->
-
-        it "also runs the callback when the fragment's descendant is aborted", ->
-          fragment = fixture('.fragment')
-          descendant = e.affix(fragment, '.descendant')
-          callback = jasmine.createSpy('aborted callback')
-          up.fragment.onAborted(fragment, { around: true }, callback)
-          expect(callback).not.toHaveBeenCalled()
-
-          up.fragment.abort(descendant)
-
-          expect(callback).toHaveBeenCalled()
-
   describe 'up.fragment.parseTargetSteps()', ->
 
     it 'parses a single target', ->

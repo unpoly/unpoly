@@ -77,7 +77,7 @@ up.FieldWatcher = class FieldWatcher {
   }
 
   async _requestCallback() {
-    // When aborted we clear out _scheduledValues to cancel a scheduled callback.
+    // When aborted we nullify _scheduledValues to cancel a scheduled callback.
     if (!this._scheduledValues) return
 
     // We don't run callbacks when a prior async callback is still running.
