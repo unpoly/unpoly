@@ -1022,9 +1022,12 @@ up.form = (function() {
     A promise that fulfills when the server-side validation is received
     and the form was updated.
 
-    The promise will reject if the server sends an error status,
-    if there is a [network issue](/network-issues), or if [targets](/targeting-fragments)
-    could not be matched.
+    The promise rejects when one of the following conditions occur:
+
+    - the form element was [aborted](/aborting-requests)
+    - the server sends an error status
+    - there is a [network issue](/network-issues)
+    - [targets](/targeting-fragments) could not be matched
   @stable
   */
   function validate(...args) {

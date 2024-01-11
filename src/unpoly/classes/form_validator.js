@@ -12,7 +12,15 @@ up.FormValidator = class FormValidator {
   }
 
   _honorAbort() {
-    up.fragment.onAborted(this._form, () => this._dirtySolutions = [])
+    up.fragment.onAborted(this._form, (event) => this._onAborted(event))
+  }
+
+  _onAborted(event) {
+    if (this._dirtySolutions.length) {
+      this._dirtySolutions = []
+      this._nextRenderPromise.reject(new up.Aborted(event.reason))
+      this._resetNextRenderPromise()
+    }
   }
 
   _resetNextRenderPromise() {

@@ -2709,7 +2709,7 @@ up.fragment = (function() {
       //     a message "Change with { abort } option will abort other requests' before
       //     we abort the first request. This is done via an { logOnce } option that
       //     this function passes on to up.network.abort().
-      up.emit(element, 'up:fragment:aborted', { newLayer, log: false })
+      up.emit(element, 'up:fragment:aborted', { reason, newLayer, log: false })
     }
   }
 
@@ -2757,6 +2757,10 @@ up.fragment = (function() {
   @event up:fragment:aborted
   @param {Element} event.target
     The element for which requests were aborted.
+  @param {string} event.reason
+    A string describing the reason for aborting this fragment.
+
+    @experimental
   @param {boolean} event.newLayer
     Whether the fragment was aborted by a [new overlay opening](/opening-overlays).
 

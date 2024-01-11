@@ -1810,7 +1810,6 @@ describe 'up.form', ->
             expect(state).toBe('fulfilled')
             expect(value).toEqual(jasmine.any(up.RenderResult))
 
-
         it 'returns a Promise that rejects with an up.RenderResult when the server responds to validation with an error code', ->
           form = fixture('form[action=/form]')
           element = e.affix(form, '.element', text: 'old text')
@@ -1831,6 +1830,41 @@ describe 'up.form', ->
           expect('.element').toHaveText('new text')
 
           await expectAsync(promise).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+        it 'returns a Promise that rejects with up.Aborted when the validation request is aborted', ->
+          form = fixture('form[action=/form]')
+          element = e.affix(form, '.element', text: 'old text')
+
+          promise = up.validate(element)
+
+          await wait()
+
+          expect('.element').toHaveText('old text')
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
+
+          await expectAsync(promise).toBePending()
+
+          up.network.abort()
+
+          await expectAsync(promise).toBeRejectedWith(jasmine.any(up.Aborted))
+
+        it 'returns a Promise that rejects with up.Aborted when the form is aborted before a debounce { delay } has elapsed', ->
+          form = fixture('form[action=/form]')
+          element = e.affix(form, '.element', text: 'old text')
+
+          promise = up.validate(element, { delay: 1000 })
+
+          await wait()
+
+          expect('.element').toHaveText('old text')
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+          await expectAsync(promise).toBePending()
+
+          up.fragment.abort(form)
+
+          await expectAsync(promise).toBeRejectedWith(jasmine.any(up.Aborted))
 
       describe 'request sequence', ->
 
@@ -1916,7 +1950,7 @@ describe 'up.form', ->
           expect(jasmine.lastRequest().url).toMatchURL('/endpoint')
           expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('[up-form-group]:has(input[name="email"])')
 
-          up.validate(input2)
+          validateInput2Promise = up.validate(input2)
 
           await wait()
 
@@ -1924,6 +1958,8 @@ describe 'up.form', ->
           expect(jasmine.Ajax.requests.count()).toBe(1)
 
           up.fragment.abort(form)
+
+          await expectAsync(validateInput2Promise).toBeRejectedWith(jasmine.any(up.Aborted))
 
           await wait()
 
@@ -2261,28 +2297,15 @@ describe 'up.form', ->
           bazGroup = e.affix(form, '[up-form-group]')
           bazField = e.affix(bazGroup, 'input[name=baz]')
 
-          up.validate(fooField)
-          up.validate(bazField)
+          validateFooPromise = up.validate(fooField)
+          validateBarPromise = up.validate(bazField)
+
+          # Two validations in the same batch return the same Promise reference
+          expect(validateFooPromise).toBe(validateBarPromise)
 
           up.destroy(form)
 
-          await wait()
-
-          expect(jasmine.Ajax.requests.count()).toBe(0)
-
-        it 'removes a pending batch when the entire form element is aborted', ->
-          form = fixture('form[action=/path]')
-          fooGroup = e.affix(form, '[up-form-group]')
-          fooField = e.affix(fooGroup, 'input[name=foo]')
-          barGroup = e.affix(form, '[up-form-group]')
-          barField = e.affix(barGroup, 'input[name=bar]')
-          bazGroup = e.affix(form, '[up-form-group]')
-          bazField = e.affix(bazGroup, 'input[name=baz]')
-
-          up.validate(fooField)
-          up.validate(bazField)
-
-          up.fragment.abort(form)
+          await expectAsync(validateFooPromise).toBeRejectedWith(jasmine.any(up.Aborted))
 
           await wait()
 
