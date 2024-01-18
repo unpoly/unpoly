@@ -1,6 +1,6 @@
 {
   "name": "unpoly",
-  "version": "3.7.2",
+  "version": "3.7.3-rc1",
   "description": "Unobtrusive JavaScript framework",
   "main": "unpoly.js",
   "style": "unpoly.css",

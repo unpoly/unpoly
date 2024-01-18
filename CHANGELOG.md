@@ -9,6 +9,13 @@ Changes handled by `unpoly-migrate.js` are not considered breaking changes.
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+3.7.3
+-----
+
+- Fix a bug where Unpoly would not revalidate updates for multiple fragments
+- [Targeting sibling elements](/targeting-fragments#targeting-a-sibling-element) not works with comma-separated union selectors
+
+
 3.7.2
 -----
 
