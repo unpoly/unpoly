@@ -12,8 +12,9 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 3.7.3
 -----
 
-- Fix a bug where Unpoly would not revalidate updates for multiple fragments
-- [Targeting sibling elements](/targeting-fragments#targeting-a-sibling-element) not works with comma-separated union selectors
+- Fix a bug where, when rendering multiple fragments from a [cached](/caching) response, the new fragments would not be [revalidated](/caching#revalidation).
+  This also affected render passes with `[up-hungry]` fragments.
+- [Targeting sibling elements](/targeting-fragments#targeting-a-sibling-element) now supports union selectors like `.parent .foo, .parent .bar`.
 
 
 3.7.2
