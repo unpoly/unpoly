@@ -1,12 +1,6 @@
-3.7.0
-=====
+Priority
+========
 
-- Update CHANGELOG
-- Release unpoly
-- Release unpoly-rails
-- Update unpoly-demo
-- Update unpoly-site
-- Social media
 
 
 Backlog
@@ -65,6 +59,7 @@ Backlog
   - Have your custom element expose `{ name }` and { value }` properties (AFAIK Shoelance components already do)
   - Also `{ disable }`
   - Make Unpoly aware of custom elements by pushing a selector to [`up.form.config.fieldSelectors`](https://unpoly.com/up.form.config#config.fieldSelectors).
+  - Make Unpoly aware of custom submitt buttons by pushing a selector to [`up.form.config.submitButtonSelectors`](https://unpoly.com/up.form.config#config.submitButtonSelectors).
   - Limitation: One value per field. Checks for groups (.checked and .selected) are still hard-coded
 - Test that system compilers always run before user compilers
   => We already have macros if compilers need to use others?
