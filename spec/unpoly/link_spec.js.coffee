@@ -1213,6 +1213,99 @@ describe 'up.link', ->
           expect('.target').toHaveText('new text')
           expect(location.pathname).toEqual('/other/path')
 
+      describe 'caching', ->
+
+        it 'instantly shows cached content', ->
+          fixture('#target', text: 'initial target')
+          up.request('/path', target: '#target', cache: true)
+
+          await wait()
+
+          jasmine.respondWithSelector('#target', text: 'cached target')
+
+          await wait()
+
+          expect(url: '/path', target: '#target').toBeCached()
+
+          link = fixture('a[href="/path"][up-target="#target"][up-revalidate="false"]')
+
+          Trigger.clickSequence(link)
+
+          await wait()
+
+          expect('#target').toHaveText('cached target')
+          expect(up.network.isBusy()).toBe(false)
+
+        it 'revalidates cached content', ->
+          fixture('#target', text: 'initial target')
+          up.request('/path', target: '#target', cache: true)
+
+          await wait()
+
+          jasmine.respondWithSelector('#target', text: 'cached target')
+
+          await wait()
+
+          expect(url: '/path', target: '#target').toBeCached()
+
+          link = fixture('a[href="/path"][up-target="#target"][up-revalidate="true"]')
+
+          Trigger.clickSequence(link)
+
+          await wait()
+
+          expect('#target').toHaveText('cached target')
+          expect(up.network.isBusy()).toBe(true)
+          expect(jasmine.lastRequest().url).toMatchURL('/path')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#target')
+
+          jasmine.respondWithSelector('#target', text: 'revalidated target')
+
+          await wait()
+
+          expect('#target').toHaveText('revalidated target')
+          expect(up.network.isBusy()).toBe(false)
+
+        it 'revalidates cached content including hungry fragments (E2E)', ->
+          fixture('#target', text: 'initial target')
+          fixture('#hungry[up-hungry]', text: 'initial hungry')
+
+          up.request('/path', target: '#target', cache: true)
+
+          await wait()
+
+          jasmine.respondWith """
+            <div id="target">cached target</div>
+            <div id="hungry">cached hungry</div>
+          """
+
+          await wait()
+
+          expect(url: '/path', target: '#target').toBeCached()
+
+          link = fixture('a[href="/path"][up-target="#target"][up-revalidate="true"]')
+
+          Trigger.clickSequence(link)
+
+          await wait()
+
+          expect('#target').toHaveText('cached target')
+          expect('#hungry').toHaveText('cached hungry')
+          expect(up.network.isBusy()).toBe(true)
+          expect(jasmine.lastRequest().url).toMatchURL('/path')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#target, #hungry')
+
+          jasmine.respondWith """
+            <div id="target">revalidated target</div>
+            <div id="hungry">revalidated hungry</div>
+          """
+
+          await wait()
+
+          expect('#target').toHaveText('revalidated target')
+          expect('#hungry').toHaveText('revalidated hungry')
+          expect(up.network.isBusy()).toBe(false)
+
       describe 'choice of target layer', ->
 
         beforeEach ->

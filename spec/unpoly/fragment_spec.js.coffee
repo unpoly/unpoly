@@ -147,6 +147,14 @@ describe 'up.fragment', ->
 
           expect(result).toBe(two)
 
+        it 'does not throw an error when we cannot parse a selector with spaces and commas as attribute values (bugfix)', ->
+          parent = fixture('.parent')
+          parent.setAttribute('foo', 'a b, c d')
+          child = e.affix(parent, '.child')
+          origin = e.affix(parent, '.origin')
+          doGet = -> up.fragment.get('.parent[foo="a b, c d"] .child', origin: origin, match: 'region')
+          expect(doGet).not.toThrowError()
+
         it 'prefers to match a descendant selector in the region of the origin', ->
           element1 = fixture('.element')
           element1Child1 = e.affix(element1, '.child',         text: 'old element1Child1')
@@ -159,6 +167,19 @@ describe 'up.fragment', ->
           result = up.fragment.get('.element .sibling', origin: element2Child1)
 
           expect(result).toBe(element2Child2)
+
+        it 'prefers to match a union of descendant selectors in the region of the origin', ->
+          element1 = fixture('.element')
+          element1Child1 = e.affix(element1, '.child',         text: 'old element1Child1')
+          element1Child2 = e.affix(element1, '.child.sibling', text: 'old element1Child2')
+
+          element2 = fixture('.element')
+          element2Child1 = e.affix(element2, '.child',         text: 'old element2Child1')
+          element2Child2 = e.affix(element2, '.child.sibling', text: 'old element2Child2')
+
+          result = up.fragment.get('.foo, .element .sibling, .baz', origin: element2Child1)
+
+          expect(result.innerText).toBe('old element2Child2')
 
         it 'ignores the origin with { match: "first" }', ->
           root = fixture('.element#root')
@@ -7720,7 +7741,13 @@ describe 'up.fragment', ->
 
             await wait()
 
-            jasmine.respondWithSelector('.target', text: 'cached text')
+            jasmine.respondWithSelector('.target',
+              text: 'cached text',
+              responseHeaders: {
+                'Etag': 'W/"0123456789"',
+                'Last-Modified': 'Wed, 21 Oct 2015 18:14:00 GMT'
+              }
+            )
 
             await wait()
 
@@ -7742,6 +7769,122 @@ describe 'up.fragment', ->
 
             expect(up.network.isBusy()).toBe(false)
             expect('.target').toHaveText('verified text')
+
+          it 'reloads multiple targets', ->
+            fixture('#foo', text: 'initial foo')
+            fixture('#bar', text: 'initial bar')
+
+            up.request('/multi-cached-path', { cache: true })
+
+            await wait()
+
+            jasmine.respondWith("""
+              <div id="foo">cached foo</div>
+              <div id="bar">cached bar</div>
+            """)
+
+            await wait()
+
+            expect(url: '/multi-cached-path').toBeCached()
+
+            up.render('#foo, #bar', { url: '/multi-cached-path', cache: true, revalidate: true })
+
+            await wait()
+
+            expect('#foo').toHaveText('cached foo')
+            expect('#bar').toHaveText('cached bar')
+
+            expect(up.network.isBusy()).toBe(true)
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#foo, #bar')
+
+            jasmine.respondWith("""
+              <div id="foo">verified foo</div>
+              <div id="bar">verified bar</div>
+            """)
+
+            await wait()
+
+            expect(up.network.isBusy()).toBe(false)
+            expect('#foo').toHaveText('verified foo')
+            expect('#bar').toHaveText('verified bar')
+
+          it 'reloads multiple targets when an { origin } is given (bugfix)', ->
+            fixture('#foo', text: 'initial foo')
+            fixture('#bar', text: 'initial bar')
+            origin = fixture('#origin', text: 'origin')
+
+            up.request('/multi-cached-path', { cache: true })
+
+            await wait()
+
+            jasmine.respondWith("""
+              <div id="foo">cached foo</div>
+              <div id="bar">cached bar</div>
+            """)
+
+            await wait()
+
+            expect(url: '/multi-cached-path').toBeCached()
+
+            up.render('#foo, #bar', { url: '/multi-cached-path', cache: true, revalidate: true, origin: origin }).finished
+
+            await wait()
+
+            expect('#foo').toHaveText('cached foo')
+            expect('#bar').toHaveText('cached bar')
+
+            expect(up.network.isBusy()).toBe(true)
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#foo, #bar')
+
+            jasmine.respondWith("""
+              <div id="foo">verified foo</div>
+              <div id="bar">verified bar</div>
+            """)
+
+            await wait()
+
+            expect(up.network.isBusy()).toBe(false)
+            expect('#foo').toHaveText('verified foo')
+            expect('#bar').toHaveText('verified bar')
+
+          it 'reloads hungry targets that piggy-backed on the initial request when an { origin } is given (bugfix)', ->
+            fixture('#foo', text: 'initial foo')
+            fixture('#bar[up-hungry]', text: 'initial bar')
+            origin = fixture('#origin', text: 'origin')
+
+            up.request('/multi-cached-path', { cache: true })
+
+            await wait()
+
+            jasmine.respondWith("""
+              <div id="foo">cached foo</div>
+              <div id="bar">cached bar</div>
+            """)
+
+            await wait()
+
+            expect(url: '/multi-cached-path').toBeCached()
+
+            up.render('#foo', { url: '/multi-cached-path', cache: true, revalidate: true, origin: origin })
+
+            await wait()
+
+            expect('#foo').toHaveText('cached foo')
+            expect('#bar').toHaveText('cached bar')
+
+            expect(up.network.isBusy()).toBe(true)
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#foo, #bar')
+
+            jasmine.respondWith("""
+              <div id="foo">verified foo</div>
+              <div id="bar">verified bar</div>
+            """)
+
+            await wait()
+
+            expect(up.network.isBusy()).toBe(false)
+            expect('#foo').toHaveText('verified foo')
+            expect('#bar').toHaveText('verified bar')
 
           it 'does not verify a fragment rendered from a recent cached response with { revalidate: "auto" }', asyncSpec (next) ->
             up.fragment.config.autoRevalidate = (response) => response.age >= 10 * 1000
@@ -8131,6 +8274,25 @@ describe 'up.fragment', ->
                   revalidating: true
                 )
               ]
+
+          it 'resends ETag and Last-Modified since headers from the cached response', ->
+            up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
+
+            await wait()
+
+            expect('.target').toHaveText('cached text')
+
+            expect(up.network.isBusy()).toBe(true)
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.target')
+            expect(jasmine.lastRequest().requestHeaders['If-None-Match']).toBe('W/"0123456789"')
+            expect(jasmine.lastRequest().requestHeaders['If-Modified-Since']).toBe('Wed, 21 Oct 2015 18:14:00 GMT')
+
+            jasmine.respondWithSelector('.target', text: 'verified text')
+
+            await wait()
+
+            expect(up.network.isBusy()).toBe(false)
+            expect('.target').toHaveText('verified text')
 
           describe 'if revalidation responded with 304 Not Modified', ->
 
@@ -9630,6 +9792,40 @@ describe 'up.fragment', ->
 
         next =>
           expect('.element').toHaveText('new text')
+
+      describe 'reloading multiple fragments', ->
+
+        it 'reloads multiple fragments', ->
+          foo = fixture('#foo[up-source="/path"]', text: 'old foo')
+          bar = fixture('#bar[up-source="/path"]', text: 'old bar')
+
+          up.reload('#foo, #bar')
+
+          await wait()
+
+          expect(jasmine.lastRequest().url).toMatchURL('/path')
+
+          jasmine.respondWith """
+            <div id="foo">new foo</div>
+            <div id="bar">new bar</div>
+            """
+
+          await wait()
+
+          expect('#foo').toHaveText('new foo')
+          expect('#bar').toHaveText('new bar')
+
+        it 'uses source URL, ETag and last modifiction time from the first matching fragment', ->
+          foo = fixture('#foo[up-source="/foo-source"][up-etag="foo-etag"][up-time="1704067200"]', text: 'old foo')
+          bar = fixture('#bar[up-source="/bar-source"][up-etag="bar-etag"][up-time="1735689600"]', text: 'old bar')
+
+          up.reload('#foo, #bar')
+
+          await wait()
+
+          expect(jasmine.lastRequest().url).toMatchURL('/foo-source')
+          expect(jasmine.lastRequest().requestHeaders['If-None-Match']).toMatchURL('foo-etag')
+          expect(jasmine.lastRequest().requestHeaders['If-Modified-Since']).toMatchURL(new Date(1704067200 * 1000).toUTCString())
 
     describe 'up.fragment.source()', ->
 

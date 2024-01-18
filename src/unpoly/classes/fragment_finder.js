@@ -1,3 +1,4 @@
+const u = up.util
 const DESCENDANT_SELECTOR = /^([^ >+(]+) (.+)$/
 
 up.FragmentFinder = class FragmentFinder {
@@ -34,13 +35,17 @@ up.FragmentFinder = class FragmentFinder {
   }
 
   _findDescendantInRegion() {
-    let parts = this._selector.match(DESCENDANT_SELECTOR)
-    if (parts) {
-      let parent = up.fragment.closest(this._origin, parts[1], this._options)
-      if (parent) {
-        return up.fragment.getDumb(parent, parts[2])
+    let simpleSelectors = up.fragment.splitTarget(this._selector)
+
+    return u.findResult(simpleSelectors, (simpleSelector) => {
+      let parts = simpleSelector.match(DESCENDANT_SELECTOR)
+      if (parts) {
+        let parent = up.fragment.closest(this._origin, parts[1], this._options)
+        if (parent) {
+          return up.fragment.getDumb(parent, parts[2])
+        }
       }
-    }
+    })
   }
 
   _findFirst() {
