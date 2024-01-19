@@ -578,7 +578,9 @@ up.form = (function() {
   /*-
   This event is [emitted](/up.emit) when a form is [submitted](/up.submit) through Unpoly.
 
-  The event is emitted on the `<form>` element.
+  The event is emitted on the element that caused the form submission.
+  This is usually a submit button or a focused field. If the element is not known, the event is emitted
+  on the `<form>` element.
 
   When the form is being [validated](/up-validate), this event is not emitted.
   Instead an `up:form:validate` event is emitted.
@@ -598,7 +600,7 @@ up.form = (function() {
 
   @event up:form:submit
   @param {Element} event.target
-    The `<form>` element that will be submitted.
+    The element that caused the form submission.
   @param {up.Params} event.params
     The [form parameters](/up.Params) that will be send as the form's request payload.
 
