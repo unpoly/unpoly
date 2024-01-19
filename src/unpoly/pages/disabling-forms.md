@@ -13,7 +13,7 @@ To fully prevent access to the form while it is submitting, you need to disable 
 For this pass `{ disable: true }` or set an empty `[up-disable]` attribute on the `<form>` element:
 
 ```html
-<form up-disable action="/session">
+<form up-submit up-disable action="/session">
   <input type="text" name="email">        <!-- will be disabled -->
   <input type="password" name="password"> <!-- will be disabled -->
   <button type="submit">Sign in</button>  <!-- will be disabled -->
@@ -28,7 +28,7 @@ To only disable some form controls, set the value of `[up-disable]` to any selec
 In the example below we disable all `<button>` elements by setting an `[up-disable="button"]` attribute on the form: 
 
 ```html
-<form up-disable="button" action="/session">
+<form up-submit up-disable="button" action="/session">
   <input type="text" name="email">         <!-- will NOT be disabled -->
   <input type="password" name="password">  <!-- will NOT be disabled -->
   <button type="submit">Sign in</button>   <!-- will be disabled -->
@@ -39,7 +39,7 @@ In the example below we disable all `<button>` elements by setting an `[up-disab
 Instead of targeting form controls directly, you may also pass a selector for a container element. All fields and buttons within that container will be disabled:
 
 ```html
-<form up-disable=".buttons" action="/session">
+<form up-submit up-disable=".buttons" action="/session">
   <input type="text" name="email">           <!-- will NOT be disabled -->
   <input type="password" name="password">    <!-- will NOT be disabled -->
   <div class="buttons">
