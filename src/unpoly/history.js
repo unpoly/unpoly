@@ -46,7 +46,7 @@ up.history = (function() {
     or set an [`[up-meta-tags="false"]`](/a-up-follow#up-meta-tags) attribute
     on a link.
 
-  @param {config.metaTagSelectors}
+  @param {Array<string>} [config.metaTagSelectors]
     An array of CSS selectors matching default [meta tags](/up-meta)
     that are be updated during [history changes](/updating-history).
 
@@ -60,7 +60,7 @@ up.history = (function() {
     Only elements in the `<head>` can be matched. Elements in the `<body>` are never considered,
     even if they match one of the configured selectors.
 
-  @param {config.noMetaTagSelectors}
+  @param {Array<string>} [config.noMetaTagSelectors]
     Exceptions to `up.history.config.metaTagSelectors`.
 
     Matching elements will *not* be considered [meta tags](/up-meta)
