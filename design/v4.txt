@@ -1,15 +1,82 @@
-- Remove up.form.config.watchInputEvents
-- Remove up.form.config.watchChangeEvents
-- Remove doc section "Normalizing non-standard events"
-- Use Array#toReversed() in up.LayerStack
+Draft for Unpoly 4
+==================
+
+Focus
+-----
+
+- Focus on removal and simplification.
+- Use browser-native functionality where possible.
+- Focus on cleaning up mistakes.
+- Don't do [up-frame] in V4. Users deserve a break from disrupting API changes.
+
+
+Changes to consider
+-------------------
+
+- Consider removing all up.migrate polyfill (and library hooks!) except changes v3 => v4
+- Remove up.rails
+  - This is only for co-existence with rails-ujs
+  - We could also offer this as an optional file
+  - Unpoly core already parses [data-confirm] and [data-method]
+- Consider removing up.Record & friends
+  - up.Record
+  - up.copy.key [poll users]
+  - up.isEqual.key [poll users]
+- Consider removing layer context [poll users]
+- Replace up.URLPattern with URLPattern
+  - https://caniuse.com/mdn-api_urlpattern
+- Replace up.Tether with CSS anchor positioning / [anchor-name]
+  - https://blog.logrocket.com/use-css-anchor-positioning/
+  - Not even on caniuse yet: https://github.com/Fyrd/caniuse/issues/6471
+- Remove :has() polyfill
+  - Also many docs mention this
+  - Need to wait until December 2025 to have it in Firefox for 2 years
+    - Maybe we can just wait until all current ESR versions support :has()
+      - This is in Q4 2024 https://whattrainisitnow.com/calendar/
+  - We can also do this later as it's not a breaking change
+- Once we use native :has(), can we get replace up.Selector with CSS selector expansion?
+  - Excluding .up-destroying would just be :is(original-selector):not(.up-destroying, .up-destroying *)
+  - Matching layers would require a longer selector
+    - :is(original-selector):is([up-layer-index=3], [up-layer-index=3] * [up-layer-index=4])
+- Consider making secondary targets optional by default
+- Remove event mapping
+  - Remove up.form.config.watchInputEvents
+  - Remove up.form.config.watchChangeEvents
+    - Why do we still have a test for date inputs being watched on blur instead of change?
+  - Remove doc section "Normalizing non-standard events"
+- Implement up.motion with the web animations API
+  - We can also remove up.CSSTransition
+- up.animate() and up.morph() could return an Animation object
+  - For what?
+  - If people manually call Animate#finish() etc. this may make it harder to enforce our motion logic
+- Reconsider objects that also serve as their own promises
+  - up.Request, await up.request().loaded
+  - up.RenderJob, await up.render().rendered
+  - Instead the promise could be returned by a property like #loaded or #rendered
+  - This would be more in sync with how the Animation API works
+    - But otherwise it's worse econonomics
+  - This *might* make it easier to compose with standard promises
+    - Challange that with actual code
+  - We could polyfill it
+- Replace up.util.reverse() with Array#toReversed()
+  - https://caniuse.com/mdn-javascript_builtins_array_toreversed
 - Async compiler functions (see separate doc)
 - Check browser support for Element#focus({ focusVisible }) option
-- Consider requiring elements for functions that work with elements, not selectors or jQuery collections
+  - This could let us remove .up-focus-visible and .up-focus-hidden
+  - https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter
+  - What { focusVisible } cannot do is stickiness: Switch to other window, switch back
+    - Maybe that's OK
+- Remove selector/element/jQuery argument normalization
+  - Consider requiring elements for functions that work with elements, not selectors or jQuery collections
+  - Consider removing all remaining jQuery support
+    - The same polyfill that checks for selector removal could print a warning for jQuery
 - [up-instant] and [up-preload] should listen on pointerdown instead of mousedown
-- [v4] Document throws
+- Document throws
   - But consider waiting until async compilers, as we're changing some method signatures
   - How do we document async rejections?
-    - up.link.preload documents in @return
-- [v4] Consider removing X-Up-Title, [up-title] and { title } since we now auto-update head elements
-- [v4] Consider moving history-related methods from up.Layer.Base to up.history
+    - up.link.preload() documents in @return
+- Consider removing X-Up-Title, [up-title] and { title } since we now auto-update head elements
+- Consider moving history-related methods from up.Layer.Base to up.history
   - All other packages work by taking a { layer } option, why not history-related?
+  - This change would require a lot more design
+

@@ -1,11 +1,43 @@
 Priority
 ========
 
+- I think revalidation now loses :maybe marks
+  - Case 1 => I think this is implemented
+    - We're loading ".foo, .bar:maybe"
+    - Server only renders ".foo"
+    - Revalidation should just be for ".foo", or for ".foo, .bar:maybe"
+    - It should be OK if revalidation response only contains ".foo"
+  - Case 3 => I could live without this.
+    => Or should we allow reavalidation with defaultMaybe: true ?
+    - We're loading ".foo, .bar:maybe"
+    - Server renders ".foo, .bar"
+    - Revalidation should just be for ".foo", or for ".foo, .bar:maybe"
+    - It should be OK if revalidation response only contains ".foo"
+  - Case 2 => I think this is implemented
+    - We're loading ".foo, .bar:maybe"
+    - Server renders ".foo, .bar"
+    - While we're loading .bar was removed from the page
+    - Revalidation should just be for ".foo", or for ".foo, .bar:maybe"
+    - It should be OK if revalidation response only contains ".foo"
 
 
 Backlog
 =======
 
+- The log message "Could not match primary target" should not appear when we're only working with fallback targets, and we happen to use the second one. E.g. first one is [up-main=modal], second one is [up-main].
+- [up-partial]
+- Print a warning when we can find no better form group than the <form> itself
+- Run macros (but not compilers) *before* history changes
+- Give layers an [index] attribute so users don't style based on [nesting]
+  - Do we give root an [index] as well?
+    - We cannot use [index] here
+- Docs should show DOM structure of all layer modes
+- Simplify animation API implementation with Element.animate()
+  - Animation finishing could be implemented with Element#getAnimations()
+- Don't allow a request payload for DELETE requests
+  - Maybe make this configuratable as opinions vary here.
+    - e.g. up.network.config.payloadMethods
+  - Is this really important?
 - Consider parsing scroll-margin-top, scroll-margin-bottom for revealing
 - Allow [up-emit] for buttons
 - Docs: Mention that [up-href], [up-alias] cannot be set by a macro
@@ -28,19 +60,17 @@ Backlog
   - Bootstrap already has a.disabled and users would like to take over that styling
 - Docs: Copy important up.render() options to up.layer.open() and a[up-layer=new]
   - In particular { content, fragment, url, document }
-- Nonces for remote scripts
-  - Rewrite nonces before comparing
 - Look within :origin first
   - Remove similiar logic in up.FragmentProcessor: findSelector()
 - Remove [up-validate] from individual fields https://unpoly.com/up-validate#validating-multiple-fields
 - Support nonce rewriting for arbitrary attributes, e.g. up.safe_callback('124321321', '432423423')
   - But then we would need to know all the attributes we're rewriting to query them quickly
+    - Or find them with XPath
   - OR we could support [up-on] with an event name and a nonce
 - Swapped body looks funny in Safari (has .up-destroying class and is grayed out with old content in inspector)
 - Allow to disable batching in validations
 - inlineStyle, setInlineStyle should work with custom properties
 - Jasmine matchers no longer get a `customEqualityTesters` argument
-- I think form[up-watch] cannot deal with dynamically inserted fields
 - up.ResponseDoc: Only re-discover the origin when match is 'region'
 - Async compiler functions
   - See separate doc
@@ -78,6 +108,7 @@ Backlog
     - Must be the same element in :start / :stop, even if the DOM has changed in between
   => With .up-validating we have different points where feedback starts and ends.
     - This class does not exist. It was an idea detailled further down.
+  => Or we could have a single up:feedback event with a promise for the duration
 - Do we want a preventable up:request:reuse event?
   - Maybe even :reused since there is no :loaded for cached requests
 - Experiment with property mangling vs. public API
@@ -97,7 +128,6 @@ Backlog
   - Is there any case other than [up-target], where we already have [up-fallback] ?
 - Should animations force painting?
   - I don't understand how the transitions work when we set both the first and final frame in the same JavaScript task
-- Reconciliation of <head> elements
 - Maybe auto-submit should not navigate by default
   - How to restore this?
   - up-navigate ?
@@ -114,11 +144,6 @@ Backlog
   - Now that we have *some* opinion about the defaults { abort: 'target', focus: 'keep', revalidate: 'auto' }, users may want to deactivate
 - Try to have a 'hash' strategy in overlays
   - Also update doc page /focus
-- Use native `:has` where available
-  - This is actualy more code until we can drop :has() emulation entirely
-    - Currently blocked by Safari (2 years support window reached in early 2024)
-    - Currently blocked by Firefox (behind a flag)
-      - No news for Firefox 116 (to be released on August 01 2023)
 - Split JavaScript => Do this after asset reconciliation
 - input.setCustomValidity() should block submission
 - Replace symlinks in dist/ with copied files
