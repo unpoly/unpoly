@@ -51,6 +51,7 @@ require('esbuild')
     color: true,
     // watch: watch && { onRebuild: handleError },
     minify: optimize, // Note: When minifying, CSS sourcemaps may be incorrect. This seems to be a bug in esbuild.
+    mangleProps: /^_/,
     sourcemap: true,
     target,
     loader: {
