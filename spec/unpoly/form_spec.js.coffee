@@ -3438,10 +3438,11 @@ describe 'up.form', ->
             expect($labels[0]).not.toHaveText('Validation message')
             expect($labels[1]).toHaveText('Validation message')
 
-      it 'does not send a validation request if the input field is blurred by clicking the submit button (bugfix)', asyncSpec (next) ->
+      fit 'does not send a validation request if the input field is blurred by clicking the submit button (bugfix)', ->
         container = fixture('.container')
-        form = e.affix(container, 'form[action="/path"][up-target=".container"]')
-        textField = e.affix(form, 'input[type=text][name=input][up-validate]')
+        form = e.affix(container, 'form[method="post"][action="/action"][up-target=".container"]')
+        formGroup = e.affix(form, '[up-form-group]')
+        textField = e.affix(formGroup, 'input[type=text][name=input][up-validate]')
         submitButton = e.affix(form, 'input[type=submit]')
         up.hello(form)
 
@@ -3449,9 +3450,28 @@ describe 'up.form', ->
         Trigger.change(textField)
         Trigger.clickSequence(submitButton)
 
-        next ->
-          expect(jasmine.Ajax.requests.count()).toBe(1)
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toBeMissing()
+        await wait(10)
+
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(jasmine.lastRequest().url).toMatchURL('/action')
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toBeMissing()
+
+      fit 'does not send a validation request if the input field is blurred by clicking the submit button and the validation would update the entire form (bugfix)', ->
+        container = fixture('.container')
+        form = e.affix(container, 'form[method="post"][action="/action"][up-target=".container"]')
+        textField = e.affix(form, 'input[type=text][name=input][up-validate="form"]')
+        submitButton = e.affix(form, 'input[type=submit]')
+        up.hello(form)
+
+        textField.value = "foo"
+        Trigger.change(textField)
+        Trigger.clickSequence(submitButton)
+
+        await wait(10)
+
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(jasmine.lastRequest().url).toMatchURL('/action')
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toBeMissing()
 
       it 'does not send a validation request if the input field is blurred by following an [up-instant] link (bugfix)', asyncSpec (next) ->
         container = fixture('.container')
