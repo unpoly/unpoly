@@ -10,14 +10,14 @@ Focus
 - Don't do [up-frame] in V4. Users deserve a break from disrupting API changes.
 
 
-Changes to consider
--------------------
+Strong candidates
+-----------------
 
 - Consider removing all up.migrate polyfill (and library hooks!) except changes v3 => v4
 - Remove up.rails
   - This is only for co-existence with rails-ujs
-  - We could also offer this as an optional file
-  - Unpoly core already parses [data-confirm] and [data-method]
+  - We could also offer this as an optional file (unpoly-rails-ujs.js)
+  - Unpoly core already parses [data-confirm] and [data-method]. No additional support is needed just to use { method } and { confirm } options.
 - Consider removing up.Record & friends
   - up.Record
   - up.copy.key [poll users]
@@ -46,21 +46,11 @@ Changes to consider
   - Remove doc section "Normalizing non-standard events"
 - Implement up.motion with the web animations API
   - We can also remove up.CSSTransition
-- up.animate() and up.morph() could return an Animation object
-  - For what?
-  - If people manually call Animate#finish() etc. this may make it harder to enforce our motion logic
-- Reconsider objects that also serve as their own promises
-  - up.Request, await up.request().loaded
-  - up.RenderJob, await up.render().rendered
-  - Instead the promise could be returned by a property like #loaded or #rendered
-  - This would be more in sync with how the Animation API works
-    - But otherwise it's worse econonomics
-  - This *might* make it easier to compose with standard promises
-    - Challange that with actual code
-  - We could polyfill it
 - Replace up.util.reverse() with Array#toReversed()
   - https://caniuse.com/mdn-javascript_builtins_array_toreversed
-- Async compiler functions (see separate doc)
+- Async compiler functions
+  - Many edge cases
+  - See separate doc
 - Check browser support for Element#focus({ focusVisible }) option
   - This could let us remove .up-focus-visible and .up-focus-hidden
   - https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter
@@ -76,7 +66,51 @@ Changes to consider
   - How do we document async rejections?
     - up.link.preload() documents in @return
 - Consider removing X-Up-Title, [up-title] and { title } since we now auto-update head elements
+
+
+Low confidence / Much design work needed
+----------------------------------------
+
+- up.animate() and up.morph() could return an Animation object
+  - For what?
+  - If people manually call Animate#finish() etc. this may make it harder to enforce our motion logic
+- Reconsider objects that also serve as their own promises
+  - up.Request, await up.request().loaded
+  - up.RenderJob, await up.render().rendered
+  - Instead the promise could be returned by a property like #loaded or #rendered
+  - This would be more in sync with how the Animation API works
+    - But otherwise it's worse econonomics
+  - This *might* make it easier to compose with standard promises
+    - Challange that with actual code
+  - We could polyfill it
 - Consider moving history-related methods from up.Layer.Base to up.history
   - All other packages work by taking a { layer } option, why not history-related?
   - This change would require a lot more design
+- MutationObserver
+  - Needs to be async?
+    - Effects of insertion could not be observed until 1 task later
+    - This would make up.destroy() async
+  - Performance?
+  - Possibly disable observing while we are rendering content ourselves
+    - Compilers should still insert elements and see them auto-compiled
+    - Maybe like this:
+      ```
+      disableObserver()
+      insertElements()
+      enableObserver()
+      compileElements
+      ```
+  - Edge cases
+    - Macros can insert elements with other macros
+      - Do we want this?
+      - Do we still need macros with auto-compilation?
+    - Compilers can insert elements and see them auto-compiled
+    - React
+      - Compilers that change the DOM should not cause React to permanently re-render a subtree (the VDOM didn't change, but the DOM did)
+      - Compilers that change the DOM should not cause React to undo these DOM changes
+      - We should not cause hydration errors when pre-rendering on the server
+        - The compiler might only run on the client
+      - https://legacy.reactjs.org/docs/integrating-with-other-libraries.html
+      - https://preactjs.com/guide/v10/external-dom-mutations/
+    - Maybe we need a way to disable Unpoly for a subtree ([up-ignore])
 

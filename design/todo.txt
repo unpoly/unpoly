@@ -1,7 +1,7 @@
 Priority
 ========
 
-- I think revalidation now loses :maybe marks
+- I think revalidation now loses :maybe marks. We should have more tests.
   - Case 1 => I think this is implemented
     - We're loading ".foo, .bar:maybe"
     - Server only renders ".foo"
@@ -24,13 +24,22 @@ Priority
 Backlog
 =======
 
+- Per-link animation options for new layers
+  - Support mutatable animation options for up:layer:dismiss, up:layer:accept
+  - Parse [up-close-animation] for links that open a new layer
+  - Parse [up-open-animation] as an alias for [up-animation]
 - The log message "Could not match primary target" should not appear when we're only working with fallback targets, and we happen to use the second one. E.g. first one is [up-main=modal], second one is [up-main].
 - [up-partial]
+  - Merge the X-Up-Target when attaching to an existing request
+  - Default to its own URL?
+  - Should it get a header?
+    - Users can also do [up-headers] on the link
 - Print a warning when we can find no better form group than the <form> itself
 - Run macros (but not compilers) *before* history changes
 - Give layers an [index] attribute so users don't style based on [nesting]
   - Do we give root an [index] as well?
     - We cannot use [index] here
+    - [up-layer-index] would maybe a good default
 - Docs should show DOM structure of all layer modes
 - Simplify animation API implementation with Element.animate()
   - Animation finishing could be implemented with Element#getAnimations()
@@ -41,9 +50,10 @@ Backlog
 - Consider parsing scroll-margin-top, scroll-margin-bottom for revealing
 - Allow [up-emit] for buttons
 - Docs: Mention that [up-href], [up-alias] cannot be set by a macro
+  - Or run macros before updating history
 - Docs: Explain how to convert JSON responses to HTML responses (discussion #562)
 - Convert .sass files to .scss
-- When morphing, disable pointer events on old element
+- While morphing or destroying, disable pointer events on old element
 - Support { onLoaded }, [up-on-loaded] for polling fragments
   - Test: Can be used to skip() a polling response, polling then continues
   - Test: Can be used to preventDefault() a polling response, polling then continues
