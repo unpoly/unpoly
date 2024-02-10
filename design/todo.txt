@@ -24,6 +24,11 @@ Priority
 Backlog
 =======
 
+- Should [up-poll] and up.reload() render failed responses if they match the target?
+  - At least for reloading the element may actually have entered the DOM from a failed response
+  - In no case do we want to use fallbacks when reloading or polling
+- Consider supporting { transition: 'view' }
+- Site: Scrollbar styling https://makandracards.com/makandra/617528-chrome-121+-no-longer-supports-non-standard-scrollbar-styling
 - Per-link animation options for new layers
   - Support mutatable animation options for up:layer:dismiss, up:layer:accept
   - Parse [up-close-animation] for links that open a new layer

@@ -13,27 +13,45 @@ Focus
 Strong candidates
 -----------------
 
-- Consider removing all up.migrate polyfill (and library hooks!) except changes v3 => v4
-- Remove up.rails
-  - This is only for co-existence with rails-ujs
+- Consider removing all up.migrate polyfills (and library hooks!) except changes from v3 => v4
+  - Users would need to upgrade to v3 before upgrading to v4
+  - Users could no longer stay on unpoly-migrate forever without updating their code
+  => Check impact before we do this
+- Deprecate [up-id] in favor of just [id]
+  - This is required if we ever want to use something like idiomorph, which relies on [id] heavily
+- Replace up.URLPattern with standard URLPattern
+  - Not yet supported by Firefox and Safari: https://caniuse.com/mdn-api_urlpattern
+  - Polyfillable: https://github.com/kenchris/urlpattern-polyfill
+  - Existing $syntax for matching digits would need to be replaced with regexes
+  - A migrate warning would be possible
+- Remove up.rails package
+  - This was only needed for co-existence with rails-ujs. Modern Rails apps no longer include this.
   - We could also offer this as an optional file (unpoly-rails-ujs.js)
   - Unpoly core already parses [data-confirm] and [data-method]. No additional support is needed just to use { method } and { confirm } options.
-- Consider removing up.Record & friends
-  - up.Record
-  - up.copy.key [poll users]
-  - up.isEqual.key [poll users]
-- Consider removing layer context [poll users]
-- Replace up.URLPattern with URLPattern
-  - https://caniuse.com/mdn-api_urlpattern
-- Replace up.Tether with CSS anchor positioning / [anchor-name]
-  - https://blog.logrocket.com/use-css-anchor-positioning/
-  - Not even on caniuse yet: https://github.com/Fyrd/caniuse/issues/6471
+- Internals: Consider replacing up.Record with custom constructors
+- Consider removing up.copy.key && up.isEqual.key
+  - poll users
+  - currently used by up.Params
+- Consider removing transitions/morphing with ViewTransitions (single-document)
+  - Not yet supported by Firefox and Safari: https://caniuse.com/view-transitions
+  - This would also let us remove up.viewport.absolutize()
+  - We could ship some default transitions in CSS, or just rely on the standard cross-fade with documented examples
+  - Maybe users want to run code before a transition starts, to set the #transitionName of participating elements
+  - We could no longer support this transition function signature: customTransition(old, new, options)
+- Consider removing layer context
+  - I think users find it sufficient to look at X-Up-Mode instead
+  - [poll users]
+- Popups
+  - Consider extraction into its own plugin
+  - Replace up.Tether with CSS anchor positioning / [anchor-name]
+    - https://blog.logrocket.com/use-css-anchor-positioning/
+    - Not even on caniuse yet: https://github.com/Fyrd/caniuse/issues/6471
+  - Consider requiring an external library for tethering (e.g. "Floating UI")
 - Remove :has() polyfill
-  - Also many docs mention this
-  - Need to wait until December 2025 to have it in Firefox for 2 years
-    - Maybe we can just wait until all current ESR versions support :has()
-      - This is in Q4 2024 https://whattrainisitnow.com/calendar/
+  - Firefox ESR should get :has() support in Q4/2024
+    - This is in Q4 2024 https://whattrainisitnow.com/calendar/
   - We can also do this later as it's not a breaking change
+  - Also many docs mention this as a key difference between up.element and up.fragment
 - Once we use native :has(), can we get replace up.Selector with CSS selector expansion?
   - Excluding .up-destroying would just be :is(original-selector):not(.up-destroying, .up-destroying *)
   - Matching layers would require a longer selector
@@ -51,6 +69,11 @@ Strong candidates
 - Async compiler functions
   - Many edge cases
   - See separate doc
+- Remove up.reveal()
+  - Users could set scroll-margin in their CSS instead
+  - This also lets us remove up.RevealMotion, up.Rect, [up-fixed]
+  - We still need [up-anchored=right]
+- Replace .up-focus-visible and .up-focus-hidden classes with Element#focus({ focusVisible })
 - Check browser support for Element#focus({ focusVisible }) option
   - This could let us remove .up-focus-visible and .up-focus-hidden
   - https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter
@@ -71,6 +94,9 @@ Strong candidates
 Low confidence / Much design work needed
 ----------------------------------------
 
+- Check if we can replace up.Params with FormData and a few helper methods
+  - We already tried this a few years ago and gave up. Maybe FormData API is nicer now.
+  - There's also URLSearchParams as a new type...
 - up.animate() and up.morph() could return an Animation object
   - For what?
   - If people manually call Animate#finish() etc. this may make it harder to enforce our motion logic
@@ -86,7 +112,8 @@ Low confidence / Much design work needed
 - Consider moving history-related methods from up.Layer.Base to up.history
   - All other packages work by taking a { layer } option, why not history-related?
   - This change would require a lot more design
-- MutationObserver
+- Automatic up.hello() with MutationObserver
+  - This seems to make more problems than solutions whenever another DOM manipulating library is involved :(
   - Needs to be async?
     - Effects of insertion could not be observed until 1 task later
     - This would make up.destroy() async
