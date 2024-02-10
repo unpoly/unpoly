@@ -1163,6 +1163,8 @@ up.link = (function() {
     | `this`     | The link being followed                       |
     | `event`    | A preventable `up:fragment:loaded` event      |
 
+    The snippet will also run for [failed responses](/failed-responses).
+
   @param [up-on-rendered]
     A JavaScript snippet that is executed when Unpoly has updated fragments.
 

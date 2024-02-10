@@ -820,6 +820,8 @@ up.fragment = (function() {
 
     The callback argument is a preventable `up:fragment:loaded` event.
 
+    This callback will also run for [failed responses](/failed-responses).
+
   @param {Function(up.RenderResult)} [options.onRendered]
     A function to call when Unpoly has updated fragments.
 
