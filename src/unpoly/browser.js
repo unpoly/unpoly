@@ -60,6 +60,10 @@ up.browser = (function() {
     return !!window.jQuery
   }
 
+  function canViewTransition() {
+    return !!document.startViewTransition
+  }
+
   const canHasSelector = u.memoize(() => CSS.supports('selector(:has(*))'))
 
   function popCookie(name) {
@@ -92,5 +96,6 @@ up.browser = (function() {
     assertConfirmed,
     popCookie,
     canHasSelector,
+    canViewTransition,
   }
 })()

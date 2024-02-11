@@ -612,7 +612,7 @@ up.motion = (function() {
   */
   function isNone(animationOrTransition) {
     // false, undefined, '', null and the string "none" are all ways to skip animations
-    return !animationOrTransition || animationOrTransition === 'none'
+    return !animationOrTransition || animationOrTransition === 'none' || animationOrTransition === 'view'
   }
 
   function registerOpacityAnimation(name, from, to) {

@@ -36,8 +36,15 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     //     the viewport height through element insertions.
     this._steps.reverse()
 
-    const motionEndPromises = this._steps.map(step => this._executeStep(step))
-    this.renderResult.finished = this._finish(motionEndPromises)
+    let motionEndPromise
+
+    if (this._steps[0].transition === 'view' && up.browser.canViewTransition()) {
+      motionEndPromise = document.startViewTransition(() => this._executeSteps())
+    } else {
+      motionEndPromise = this._executeSteps()
+    }
+
+    this.renderResult.finished = this._finish(motionEndPromise)
 
     return this.renderResult
   }
@@ -49,8 +56,13 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     return up.RenderResult.buildNone()
   }
 
-  async _finish(motionEndPromises) {
-    await Promise.all(motionEndPromises)
+  _executeSteps() {
+    const motionEndPromises = this._steps.map(step => this._executeStep(step))
+    return Promise.all(motionEndPromises)
+  }
+
+  async _finish(motionEndPromise) {
+    await motionEndPromise
 
     // If our layer was closed while animations are running, don't finish
     // and reject with an up.AbortError.
