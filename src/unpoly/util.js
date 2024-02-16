@@ -999,10 +999,6 @@ up.util = (function() {
     return filterList(array, isGiven)
   }
 
-  function filterMap(list, mapping) {
-    return filterList(map(list, mapping), isDefined)
-  }
-
   function compactObject(object) {
     return pickBy(object, isGiven)
   }
@@ -1990,7 +1986,6 @@ up.util = (function() {
     normalizeMethod,
     methodAllowsPayload,
     copy,
-    copyArrayLike,
     merge,
     mergeDefined,
     options: newOptions,
@@ -2004,7 +1999,6 @@ up.util = (function() {
     every,
     find: findInList,
     filter: filterList,
-    filterMap: filterMap,
     reject,
     intersect,
     compact,

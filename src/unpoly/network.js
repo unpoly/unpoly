@@ -509,6 +509,8 @@ up.network = (function() {
         queue.promoteToForeground(cachedRequest)
       }
 
+      cachedRequest.mergeIfUnsent(newRequest)
+
       // We cannot simply return `cachedRequest`, since that might have a different #hash property.
       // While two requests with a different #hash have the same cache key, they are
       // not the same object.

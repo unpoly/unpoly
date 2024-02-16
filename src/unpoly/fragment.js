@@ -2805,6 +2805,37 @@ up.fragment = (function() {
     return unsubscribe
   }
 
+  function onFirstIntersect(origin, callback) {
+    // IntersectionObserver has some ms lag until it reports intersection entries.
+    // This lag also exists for the initial intersection check.
+    //
+    // This is too slow for us when rendering an [up-partial][up-load-on="reveal"]
+    // that both (1) already cached and (2) scrolled into viewport when inserted.
+    // In that case we want to immediately render the cached content and not show
+    // a flash of unloaded partial. The same is true when revalidating such a partial.
+    if (e.isIntersectingWindow(origin)) {
+      callback()
+      return
+    }
+
+    // This function will be called (1) for the initial intersection check
+    // and (2) whenever the intersection state changes.
+    function processIntersectEntries(entries) {
+      for (let entry of entries) {
+        if (entry.isIntersecting) {
+          disconnect()
+          callback()
+          return // just in case we have multiple entries queued
+        }
+      }
+    }
+
+    let observer = new IntersectionObserver(processIntersectEntries)
+    let disconnect = () => observer.disconnect()
+    observer.observe(origin)
+    onAborted(origin, disconnect)
+  }
+
   up.on('up:framework:boot', function() {
     const { documentElement } = document
     documentElement.setAttribute('up-source', u.normalizeURL(location.href, { hash: false }))
@@ -2847,6 +2878,7 @@ up.fragment = (function() {
     shouldRevalidate,
     abort,
     onAborted,
+    onFirstIntersect,
     splitTarget,
     parseTargetSteps,
     isAlive,

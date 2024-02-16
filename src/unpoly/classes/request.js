@@ -295,7 +295,6 @@ up.Request = class Request extends up.Record {
       'wrapMethod',
       'contentType',
       'payload',
-      'onQueued',
       'onLoading',
       'fail',
       'abortable',
@@ -370,7 +369,7 @@ up.Request = class Request extends up.Record {
 
     // this.uid = u.uid()
 
-    this._addAutoHeaders()
+    this._setAutoHeaders()
   }
 
   /*-
@@ -407,7 +406,7 @@ up.Request = class Request extends up.Record {
     // evictExpensitveAttrs()) but did we receive a `{ target }`,we find matching elements here.
     if (this._fragments) {
       return this._fragments
-    } else if (this.target) {
+    } else {
       let steps = up.fragment.parseTargetSteps(this.target)
       let selectors = u.map(steps, 'selector')
       let lookupOpts = { origin: this.origin, layer: this.layer }
@@ -509,8 +508,6 @@ up.Request = class Request extends up.Record {
 
   runQueuedCallbacks() {
     u.always(this, () => this._evictExpensiveAttrs())
-
-    this.onQueued?.(this)
   }
 
   load() {
@@ -524,7 +521,7 @@ up.Request = class Request extends up.Record {
       // Listeners to up:request:load may have mutated properties that need to be
       // re-normalized and/or are part of a cache key.
       //
-      // To be correct we would also need to re-run _addAutoHeaders() here. However since
+      // To be correct we would also need to re-run _setAutoHeaders() here. However since
       // this is costly and also rare that listeners mutate properties like #target or #layer,
       // we leave it to the listener to update headers.
       this._normalize()
@@ -775,10 +772,6 @@ up.Request = class Request extends up.Record {
   }
 
   isPartOfSubtree(subtreeElements) {
-    if (!this.fragments || !subtreeElements) {
-      return false
-    }
-
     subtreeElements = u.wrapList(subtreeElements)
 
     return u.some(this.fragments, function(fragment) {
@@ -794,25 +787,29 @@ up.Request = class Request extends up.Record {
     return this.headers[name]
   }
 
-  _addAutoHeaders() {
+  _setAutoHeaders() {
     // Add information about the response's intended use, so the server may
     // customize or shorten its response.
     for (let key of ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']) {
-      this._addAutoHeader(
-        up.protocol.headerize(key),
-        this[key]
-      )
+      this._setPropertyHeader(key)
     }
 
     let csrfHeader, csrfToken
     if ((csrfHeader = this.csrfHeader()) && (csrfToken = this.csrfToken())) {
-      this._addAutoHeader(csrfHeader, csrfToken)
+      this._setAutoHeader(csrfHeader, csrfToken)
     }
 
-    this._addAutoHeader(up.protocol.headerize('version'), up.version)
+    this._setAutoHeader(up.protocol.headerize('version'), up.version)
   }
 
-  _addAutoHeader(name, value) {
+  _setPropertyHeader(key) {
+    this._setAutoHeader(
+      up.protocol.headerize(key),
+      this[key]
+    )
+  }
+
+  _setAutoHeader(name, value) {
     if (u.isMissing(value)) {
       return
     }
@@ -821,6 +818,22 @@ up.Request = class Request extends up.Record {
       value = u.safeStringifyJSON(value)
     }
     this.headers[name] = value
+  }
+
+  mergeIfUnsent(trackingRequest) {
+    // We can only merge a tracking request if the original request has not been sent to the network.
+    // This can happen if multiple [up-partial] requests are sent.
+    if (this.state !== 'new') return
+
+    // Only merge requests with a target. Otherwise we could inadvertently change a request
+    // without target (expecting a full page response) to a request with a target (allowing
+    // a fragment response).
+    if (!this.target || !trackingRequest.target) return
+
+    this.target = u.uniq([this.target, trackingRequest.target]).join(', ')
+    this._setPropertyHeader('target') // X-Up-Target header was set in the response
+
+    this._fragments = u.uniq([...this.fragments, ...trackingRequest.fragments])
   }
 
   static tester(condition, { except } = {}) {

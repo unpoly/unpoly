@@ -1157,6 +1157,32 @@ describe 'up.link', ->
 
           expect(up.network.isBusy()).toBe(false)
 
+    describe 'up.partial.load()', ->
+
+      it 'loads a partial that deferred loading to the user with [up-load-on="manual"]', ->
+        partial = fixture('a#slow[up-partial][href="/slow-path"][up-load-on="manual"]')
+        up.hello(partial)
+
+        await wait()
+
+        expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+        up.partial.load(partial)
+
+        await wait()
+
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
+        expect(jasmine.lastRequest().url).toMatchURL('/slow-path')
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#slow')
+
+        jasmine.respondWithSelector('#slow', text: 'partial content')
+
+        await wait()
+
+        expect('#slow').toHaveText('partial content')
+
+      it 'returns an up.RenderJob that resolves with the render pass'
+
   describe 'unobtrusive behavior', ->
 
     describe 'a[up-target]', ->
@@ -2442,21 +2468,21 @@ describe 'up.link', ->
         next.after 90, =>
           expect(jasmine.Ajax.requests.count()).toEqual(0)
 
-      it 'does not send a request if the link was detached before the delay is over', asyncSpec (next) ->
+      it 'does not send a request if the link was destroyed before the delay is over', asyncSpec (next) ->
         up.link.config.preloadDelay = 100
 
-        $fixture('.target').text('old text')
+        fixture('.target', text: 'old text')
 
-        $link = $fixture('a[href="/foo"][up-target=".target"][up-preload]')
-        up.hello($link)
+        link = fixture('a[href="/foo"][up-target=".target"][up-preload]')
+        up.hello(link)
 
-        Trigger.hoverSequence($link)
+        Trigger.hoverSequence(link)
 
         next.after 40, =>
           # It's still too early
           expect(jasmine.Ajax.requests.count()).toEqual(0)
 
-          $link.remove()
+          up.destroy(link)
 
         next.after 90, =>
           expect(jasmine.Ajax.requests.count()).toEqual(0)
@@ -2757,218 +2783,739 @@ describe 'up.link', ->
           next ->
             expect(jasmine.Ajax.requests.count()).toEqual(0)
 
+      describe 'with [up-load-on] modifier', ->
 
-  describe 'up:click', ->
+        describe "with [up-load-on='insert']", ->
 
-    describe 'on a link that is not [up-instant]', ->
+          it 'preloads the link as soon as it is inserted into the DOM', ->
+            link = fixture('a[href="/foo"][up-follow][up-preload][up-load-on="insert"]', text: 'label')
+            up.hello(link)
 
-      it 'emits an up:click event on click', ->
-        link = fixture('a[href="/path"]')
-        listener = jasmine.createSpy('up:click listener')
-        link.addEventListener('up:click', listener)
-        Trigger.click(link)
-        expect(listener).toHaveBeenCalled()
-        expect(link).toHaveBeenDefaultFollowed()
+            await wait()
 
-      it 'does not crash with a synthetic click event that may not have all properties defined (bugfix)', ->
-        link = fixture('a[href="/path"]')
-        listener = jasmine.createSpy('up:click listener')
-        link.addEventListener('up:click', listener)
-        Trigger.click(link, {
-          clientX: undefined,
-          clientY: undefined,
-          screenX: undefined,
-          screenY: undefined,
-        })
-        expect(listener).toHaveBeenCalled()
-        expect(link).toHaveBeenDefaultFollowed()
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            expect(jasmine.lastRequest().url).toMatchURL('/foo')
 
-      it 'prevents the click event when the up:click event is prevented', ->
-        clickEvent = null
-        link = fixture('a[href="/path"]')
-        link.addEventListener('click', (event) -> clickEvent = event)
-        link.addEventListener('up:click', (event) -> event.preventDefault())
-        Trigger.click(link)
-        expect(clickEvent.defaultPrevented).toBe(true)
+        describe "with [up-load-on='reveal']", ->
 
-      it 'does not emit an up:click event if an element has covered the click coordinates on mousedown, which would cause browsers to create a click event on body', asyncSpec (next) ->
-        link = fixture('a[href="/path"]')
-        listener = jasmine.createSpy('up:click listener')
-        link.addEventListener('up:click', listener)
-        link.addEventListener('mousedown', ->
-          up.layer.open(mode: 'cover', content: 'cover text')
-        )
-        Trigger.mousedown(link)
+          # MutationObserver does not fire within a task
+          MUTATION_OBSERVER_LAG = 30
 
-        next ->
-          expect(up.layer.mode).toBe('cover')
+          it 'preloads the link when it is scrolled into the document viewport', ->
+            before = fixture('#before', text: 'before', style: 'height: 50000px')
+
+            link = fixture('a[href="/foo"][up-follow][up-preload][up-load-on="reveal"]', text: 'label')
+            up.hello(link)
+
+            await wait(MUTATION_OBSERVER_LAG)
+
+            expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+            link.scrollIntoView()
+
+            await wait(MUTATION_OBSERVER_LAG)
+
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            expect(jasmine.lastRequest().url).toMatchURL('/foo')
+
+          it 'immediately preloads that link that is already visible within the document viewport', ->
+            link = fixture('a[href="/foo"][up-follow][up-preload][up-load-on="reveal"]', text: 'label')
+            up.hello(link)
+
+            # MutationObserver has a delay even for the initial intersection check.
+            # We have additional code in place to call it synchronously during compilation,
+            # so we don't get a "flash of empty partial" when the content is already cached.
+            await wait(0)
+
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            expect(jasmine.lastRequest().url).toMatchURL('/foo')
+
+          it 'only sends a single request as the link enters and leaves the viewport repeatedly', ->
+            before = fixture('#before', text: 'before', style: 'height: 50000px')
+
+            link = fixture('a[href="/foo"][up-follow][up-preload][up-load-on="reveal"]', text: 'label')
+            up.hello(link)
+
+            await wait(MUTATION_OBSERVER_LAG)
+
+            expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+            link.scrollIntoView()
+
+            await wait(MUTATION_OBSERVER_LAG)
+
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+            # Abort the request so we can observe whether another request will be sent.
+            up.network.abort()
+            await wait(MUTATION_OBSERVER_LAG)
+
+            document.scrollingElement.scrollTop = 0
+            await wait(MUTATION_OBSERVER_LAG)
+            link.scrollIntoView()
+            await wait(MUTATION_OBSERVER_LAG)
+
+            # No additional request was sent
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+          it 'detects visibility for a link in an element with scroll overflow', ->
+            viewport = fixture('#viewport', style: 'height: 500px; width: 300px; overflow-y: scroll')
+            before = e.affix(viewport, '#before', text: 'before', style: 'height: 50000px')
+
+            link = e.affix(viewport, 'a[href="/foo"][up-follow][up-preload][up-load-on="reveal"]', text: 'label')
+            up.hello(link)
+
+            await wait(MUTATION_OBSERVER_LAG)
+
+            expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+            link.scrollIntoView()
+
+            await wait(MUTATION_OBSERVER_LAG)
+
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+        describe "with [up-load-on='hover']", ->
+
+          it 'preloads the link when the user hovers over it for a while (default)'
+
+    describe '[up-partial]', ->
+
+      it 'loads the partial in a new request and replaces itself', ->
+        partial = fixture('a#slow[up-partial][href="/slow-path"]')
+        up.hello(partial)
+
+        await wait()
+
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
+        expect(jasmine.lastRequest().url).toMatchURL('/slow-path')
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#slow')
+
+        jasmine.respondWithSelector('#slow', text: 'partial content')
+
+        await wait()
+
+        expect('#slow').toHaveText('partial content')
+
+      it 'loads the partial in a new request and replaces a selector from [up-target] attribute', ->
+        target = fixture('#target', text: 'old target')
+        partial = fixture('a#slow[up-partial][href="/slow-path"][up-target="#target"]')
+        up.hello(partial)
+
+        await wait()
+
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
+        expect(jasmine.lastRequest().url).toMatchURL('/slow-path')
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#target')
+
+        jasmine.respondWithSelector('#target', text: 'new target')
+
+        await wait()
+
+        expect('#target').toHaveText('new target')
+
+      it 'makes a background request', ->
+        partial = fixture('a#slow[up-partial][href="/slow-path"]')
+        up.hello(partial)
+
+        event = await jasmine.nextEvent('up:request:load')
+
+        expect(event.request.background).toBe(true)
+
+      it 'does not update history, even when targeting an auto-history-target', ->
+        up.history.config.enabled = true
+        up.fragment.config.autoHistoryTargets.unshift('#slow')
+        up.history.replace('/original-path')
+
+        expect(up.history.location).toMatchURL('/original-path')
+
+        partial = fixture('a#slow[up-partial][href="/slow-path"]')
+        up.hello(partial)
+
+        await wait()
+
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
+        jasmine.respondWithSelector('#slow', text: 'partial content')
+
+        await wait()
+
+        expect('#slow').toHaveText('partial content')
+        expect(up.history.location).toMatchURL('/original-path')
+
+      it 'works on a div[up-href][up-partial]', ->
+        partial = fixture('div#slow[up-partial][up-href="/slow-path"]')
+        up.hello(partial)
+
+        await wait()
+
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
+        expect(jasmine.lastRequest().url).toMatchURL('/slow-path')
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#slow')
+
+        jasmine.respondWithSelector('#slow', text: 'partial content')
+
+        await wait()
+
+        expect('#slow').toHaveText('partial content')
+
+      it 'aborts the partial loading when another render pass targets the link container', ->
+        container = fixture('#container')
+        partial = e.affix(container, 'a#slow[up-partial][href="/slow-path"]', text: 'initial content')
+        up.hello(partial)
+
+        await wait()
+
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
+        expect(jasmine.lastRequest().url).toMatchURL('/slow-path')
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#slow')
+
+        up.fragment.abort(container)
+
+        await wait()
+
+        expect(up.network.isBusy()).toBe(false)
+        expect('#slow').toHaveText('initial content')
+
+      it 'does not update the main element if the response has no matching elements', ->
+        up.fragment.config.mainTargets = ['#main']
+        fixture('#main', text: 'old main content')
+
+        partial = fixture('a#partial[up-partial][href="/partial-path"]', text: 'old partial content')
+        up.hello(partial)
+
+        await wait()
+
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
+        expect(jasmine.lastRequest().url).toMatchURL('/partial-path')
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#partial')
+
+        await jasmine.expectGlobalError 'up.CannotMatch', ->
+          # Server unexpectedly responds with #main instead of #partial
+          jasmine.respondWithSelector('#main', text: 'new main content')
+
+          # For some reason we need to wait a second task to be able to observe the global error.
+          await jasmine.waitTasks(2)
+
+        expect('#partial').toHaveText('old partial content')
+        expect('#main').toHaveText('old main content')
+
+      describe 'when the URL is already cached', ->
+
+        it 'does not show a flash of unloaded partial and immediately renders the cached content', ->
+          await jasmine.populateCache('/slow-path', '<div id="partial">partial content</div>')
+
+          partial = fixture('a#partial[up-partial][href="/slow-path"]')
+          up.hello(partial)
+
+          # Rendering from cached content happens after a chain of microtasks.
+          # We do not know the length of that chain. We only care that happens before the next paint.
+          await jasmine.waitMicrotasks(5)
+
+          expect('div#partial').toHaveText('partial content')
+
+          await wait()
+
+          # No additional request was made
+          expect(up.network.isBusy()).toBe(false)
+
+        it 'revalidates the cached content', ->
+          up.network.config.cacheExpireAge = 5
+          await jasmine.populateCache('/slow-path', '<div id="partial">cached partial</div>')
+
+          # Let the cache entry expire
+          await wait(30)
+          expect(up.cache.get({ url: '/slow-path' }).response.expired).toBe(true)
+
+          partial = fixture('a#partial[up-partial][href="/slow-path"]')
+          up.hello(partial)
+
+          # Rendering from cached content happens after a chain of microtasks.
+          # We do not know the length of that chain. We only care that happens before the next paint.
+          await jasmine.waitMicrotasks(5)
+
+          expect('div#partial').toHaveText('cached partial')
+
+          await wait()
+
+          expect(up.network.isBusy()).toBe(true)
+          jasmine.respondWith('<div id="partial">revalidated partial</div>')
+
+          await wait()
+
+          expect('div#partial').toHaveText('revalidated partial')
+
+        it 'does not use the cache with [up-cache=false]', ->
+          await jasmine.populateCache('/slow-path', '<div id="partial">partial content</div>')
+
+          partial = fixture('a#partial[up-partial][href="/slow-path"][up-cache="false"]', text: 'initial content')
+          up.hello(partial)
+
+          await wait()
+
+          expect('#partial').toHaveText('initial content')
+          expect(up.network.isBusy()).toBe(true)
+
+          jasmine.respondWithSelector('#partial', text: 'fresh content')
+
+          await wait()
+
+          expect('div#partial').toHaveText('fresh content')
+          expect(up.network.isBusy()).toBe(false)
+
+      describe 'multiple partials in a single render pass', ->
+
+        it 'makes a single request with merged targets to the same URL', ->
+          container = fixture('#container')
+          e.affix(container, 'a#partial1[up-partial][href="/slow-path"]')
+          e.affix(container, 'a#partial2[up-partial][href="/slow-path"]')
+          up.hello(container)
+
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(jasmine.lastRequest().url).toMatchURL('/slow-path')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#partial1, #partial2')
+
+          jasmine.respondWith """
+            <div id="partial1">partial1 content</div>
+            <div id="partial2">partial2 content</div>
+          """
+
+          await wait()
+
+          expect('#partial1').toHaveText('partial1 content')
+          expect('#partial2').toHaveText('partial2 content')
+
+        it 'makes separate requests to different URLs', ->
+          container = fixture('#container')
+          e.affix(container, 'a#partial1[up-partial][href="/partial1-path"]')
+          e.affix(container, 'a#partial2[up-partial][href="/partial2-path"]')
+          up.hello(container)
+
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toEqual(2)
+          expect(jasmine.Ajax.requests.at(0).url).toMatchURL('/partial1-path')
+          expect(jasmine.Ajax.requests.at(0).requestHeaders['X-Up-Target']).toBe('#partial1')
+          expect(jasmine.Ajax.requests.at(1).url).toMatchURL('/partial2-path')
+          expect(jasmine.Ajax.requests.at(1).requestHeaders['X-Up-Target']).toBe('#partial2')
+
+          jasmine.Ajax.requests.at(0).respondWith(responseText: '<div id="partial1">partial1 content</div>')
+          jasmine.Ajax.requests.at(1).respondWith(responseText: '<div id="partial2">partial2 content</div>')
+
+          await wait()
+
+          expect('#partial1').toHaveText('partial1 content')
+          expect('#partial2').toHaveText('partial2 content')
+
+      describe 'navigation feedback', ->
+
+        it 'receives an .up-active class while loading', ->
+          partial = fixture('a#slow[up-partial][href="/slow-path"]')
+          up.hello(partial)
+
+          await wait()
+
+          expect('#slow').toHaveClass('up-active')
+
+          jasmine.respondWithSelector('#slow', text: 'partial content')
+
+          await wait()
+
+          expect('#slow').toHaveText('partial content')
+          expect('#slow').not.toHaveClass('up-active')
+
+        it 'receives no .up-active class with [up-feedback=false]', ->
+          partial = fixture('a#slow[up-partial][href="/slow-path"][up-feedback="false"]')
+          up.hello(partial)
+
+          await wait()
+
+          expect('#slow').not.toHaveClass('up-active')
+
+      describe 'with [up-load-on] modifier', ->
+
+        describe "with [up-load-on='insert']", ->
+
+          it 'loads the partial as soon as it is inserted into the DOM (default)', ->
+            partial = fixture('a#slow[up-partial][href="/slow-path"][up-load-on="insert"]')
+            up.hello(partial)
+
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            expect(jasmine.lastRequest().url).toMatchURL('/slow-path')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#slow')
+
+            jasmine.respondWithSelector('#slow', text: 'partial content')
+
+            await wait()
+
+            expect('#slow').toHaveText('partial content')
+
+        describe "with [up-load-on='reveal']", ->
+
+          # MutationObserver does not fire within a task
+          MUTATION_OBSERVER_LAG = 30
+
+          it 'loads the partial when it is scrolled into the document viewport', ->
+            before = fixture('#before', text: 'before', style: 'height: 50000px')
+            partial = fixture('a#slow[up-partial][href="/slow-path"][up-load-on="reveal"]')
+            up.hello(partial)
+
+            await wait(MUTATION_OBSERVER_LAG)
+
+            expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+            partial.scrollIntoView()
+
+            await wait(MUTATION_OBSERVER_LAG)
+
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+            jasmine.respondWithSelector('#slow', text: 'partial content')
+
+            await wait()
+
+            expect('#slow').toHaveText('partial content')
+
+          it 'immediately loads a partial that is already visible within the document viewport', ->
+            partial = fixture('a#slow[up-partial][href="/slow-path"][up-load-on="reveal"]')
+            up.hello(partial)
+
+            # MutationObserver has a delay even for the initial intersection check.
+            # We have additional code in place to call it synchronously during compilation,
+            # so we don't get a "flash of empty partial" when the content is already cached.
+            await wait(0)
+
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            expect(jasmine.lastRequest().url).toMatchURL('/slow-path')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#slow')
+
+            jasmine.respondWithSelector('#slow', text: 'partial content')
+
+            await wait()
+
+            expect('#slow').toHaveText('partial content')
+
+          it 'only sends a single request as the partial enters and leaves the viewport repeatedly', ->
+            before = fixture('#before', text: 'before', style: 'height: 50000px')
+
+            partial = fixture('a#slow[up-partial][href="/slow-path"][up-load-on="reveal"]')
+            up.hello(partial)
+
+            await wait(MUTATION_OBSERVER_LAG)
+
+            expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+            partial.scrollIntoView()
+
+            await wait(MUTATION_OBSERVER_LAG)
+
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+            # Abort the request so we can observe whether another request will be sent.
+            up.network.abort()
+            await wait(MUTATION_OBSERVER_LAG)
+
+            document.scrollingElement.scrollTop = 0
+            await wait(MUTATION_OBSERVER_LAG)
+            partial.scrollIntoView()
+            await wait(MUTATION_OBSERVER_LAG)
+
+            # No additional request was sent
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+          it 'detects visibility for a partial in an element with scroll overflow', ->
+            viewport = fixture('#viewport', style: 'height: 500px; width: 300px; overflow-y: scroll')
+            before = e.affix(viewport, '#before', text: 'before', style: 'height: 50000px')
+
+            partial = e.affix(viewport, 'a#slow[up-partial][href="/slow-path"][up-load-on="reveal"]')
+            up.hello(partial)
+
+            await wait(MUTATION_OBSERVER_LAG)
+
+            expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+            partial.scrollIntoView()
+
+            await wait(MUTATION_OBSERVER_LAG)
+
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+        describe "with [up-load-on='manual']", ->
+
+          it 'does not load the partial by default', ->
+            partial = fixture('a#slow[up-partial][href="/slow-path"][up-load-on="manual"]')
+            up.hello(partial)
+
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+      describe 'up:partial:load event', ->
+
+        it 'emits an up:partial:load event before hitting the network', ->
+          listener = jasmine.createSpy('up:partial:load listener').and.callFake ->
+            expect(jasmine.Ajax.requests.count()).toEqual(0)
+          up.on('up:partial:load', listener)
+
+          partial = fixture('a#slow[up-partial][href="/slow-path"]')
+          up.hello(partial)
+
+          await wait()
+
+          expect(listener).toHaveBeenCalled()
+
+        it 'does not load the partial when up:partial:load is prevented', ->
+          listener = jasmine.createSpy('up:partial:load listener').and.callFake (event) ->
+            event.preventDefault()
+          up.on('up:partial:load', listener)
+
+          partial = fixture('a#slow[up-partial][href="/slow-path"]')
+          up.hello(partial)
+
+          await wait()
+
+          expect(listener).toHaveBeenCalled()
+          expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+        it 'allows listener to change render options', ->
+          listener = jasmine.createSpy('up:partial:load listener').and.callFake (event) ->
+            event.renderOptions.url = '/other-path'
+            event.renderOptions.target = '#other'
+
+          up.on('up:partial:load', listener)
+
+          fixture('#other')
+          partial = fixture('a#slow[up-partial][href="/slow-path"]', text: 'initial content')
+          up.hello(partial)
+
+          await wait()
+
+          expect(listener).toHaveBeenCalled()
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(jasmine.lastRequest().url).toMatchURL('/other-path')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#other')
+
+          jasmine.respondWithSelector('#other', text: 'partial content')
+
+          await wait()
+
+          expect('#slow').toHaveText('initial content')
+          expect('#other').toHaveText('partial content')
+
+    describe 'up:click', ->
+
+      describe 'on a link that is not [up-instant]', ->
+
+        it 'emits an up:click event on click', ->
+          link = fixture('a[href="/path"]')
+          listener = jasmine.createSpy('up:click listener')
+          link.addEventListener('up:click', listener)
           Trigger.click(link)
-
-        next ->
-          expect(listener).not.toHaveBeenCalled()
+          expect(listener).toHaveBeenCalled()
           expect(link).toHaveBeenDefaultFollowed()
 
-      it 'does not emit an up:click event if the right mouse button is used', asyncSpec (next) ->
-        link = fixture('a[href="/path"]')
-        listener = jasmine.createSpy('up:click listener')
-        link.addEventListener('up:click', listener)
-        Trigger.click(link, button: 2)
-        next ->
-          expect(listener).not.toHaveBeenCalled()
+        it 'does not crash with a synthetic click event that may not have all properties defined (bugfix)', ->
+          link = fixture('a[href="/path"]')
+          listener = jasmine.createSpy('up:click listener')
+          link.addEventListener('up:click', listener)
+          Trigger.click(link, {
+            clientX: undefined,
+            clientY: undefined,
+            screenX: undefined,
+            screenY: undefined,
+          })
+          expect(listener).toHaveBeenCalled()
           expect(link).toHaveBeenDefaultFollowed()
 
-      it 'does not emit an up:click event if shift is pressed during the click', asyncSpec (next) ->
-        link = fixture('a[href="/path"]')
-        listener = jasmine.createSpy('up:click listener')
-        link.addEventListener('up:click', listener)
-        Trigger.click(link, shiftKey: true)
-        next ->
+        it 'prevents the click event when the up:click event is prevented', ->
+          clickEvent = null
+          link = fixture('a[href="/path"]')
+          link.addEventListener('click', (event) -> clickEvent = event)
+          link.addEventListener('up:click', (event) -> event.preventDefault())
+          Trigger.click(link)
+          expect(clickEvent.defaultPrevented).toBe(true)
+
+        it 'does not emit an up:click event if an element has covered the click coordinates on mousedown, which would cause browsers to create a click event on body', asyncSpec (next) ->
+          link = fixture('a[href="/path"]')
+          listener = jasmine.createSpy('up:click listener')
+          link.addEventListener('up:click', listener)
+          link.addEventListener('mousedown', ->
+            up.layer.open(mode: 'cover', content: 'cover text')
+          )
+          Trigger.mousedown(link)
+
+          next ->
+            expect(up.layer.mode).toBe('cover')
+            Trigger.click(link)
+
+          next ->
+            expect(listener).not.toHaveBeenCalled()
+            expect(link).toHaveBeenDefaultFollowed()
+
+        it 'does not emit an up:click event if the right mouse button is used', asyncSpec (next) ->
+          link = fixture('a[href="/path"]')
+          listener = jasmine.createSpy('up:click listener')
+          link.addEventListener('up:click', listener)
+          Trigger.click(link, button: 2)
+          next ->
+            expect(listener).not.toHaveBeenCalled()
+            expect(link).toHaveBeenDefaultFollowed()
+
+        it 'does not emit an up:click event if shift is pressed during the click', asyncSpec (next) ->
+          link = fixture('a[href="/path"]')
+          listener = jasmine.createSpy('up:click listener')
+          link.addEventListener('up:click', listener)
+          Trigger.click(link, shiftKey: true)
+          next ->
+            expect(listener).not.toHaveBeenCalled()
+            expect(link).toHaveBeenDefaultFollowed()
+
+        it 'does not emit an up:click event if ctrl is pressed during the click', asyncSpec (next) ->
+          link = fixture('a[href="/path"]')
+          listener = jasmine.createSpy('up:click listener')
+          link.addEventListener('up:click', listener)
+          Trigger.click(link, ctrlKey: true)
+          next ->
+            expect(listener).not.toHaveBeenCalled()
+            expect(link).toHaveBeenDefaultFollowed()
+
+        it 'does not emit an up:click event if meta is pressed during the click', asyncSpec (next) ->
+          link = fixture('a[href="/path"]')
+          listener = jasmine.createSpy('up:click listener')
+          link.addEventListener('up:click', listener)
+          Trigger.click(link, metaKey: true)
+          next ->
+            expect(listener).not.toHaveBeenCalled()
+            expect(link).toHaveBeenDefaultFollowed()
+
+        it 'emits a prevented up:click event if the click was already prevented', asyncSpec (next) ->
+          link = fixture('a[href="/path"]')
+          link.addEventListener('click', (event) -> event.preventDefault())
+          listener = jasmine.createSpy('up:click listener')
+          link.addEventListener('up:click', listener)
+          Trigger.click(link)
+          expect(listener).toHaveBeenCalled()
+          expect(listener.calls.argsFor(0)[0].defaultPrevented).toBe(true)
+
+      describe 'on a link that is [up-instant]', ->
+
+        it 'emits an up:click event on mousedown', ->
+          link = fixture('a[href="/path"][up-instant]')
+          listener = jasmine.createSpy('up:click listener')
+          link.addEventListener('up:click', listener)
+          Trigger.mousedown(link)
+          expect(listener).toHaveBeenCalled()
+
+        it 'does not emit an up:click event on click if there was an earlier mousedown event that was default-prevented', ->
+          link = fixture('a[href="/path"][up-instant]')
+          listener = jasmine.createSpy('up:click listener')
+          Trigger.mousedown(link)
+          link.addEventListener('up:click', listener)
+          Trigger.click(link)
           expect(listener).not.toHaveBeenCalled()
-          expect(link).toHaveBeenDefaultFollowed()
 
-      it 'does not emit an up:click event if ctrl is pressed during the click', asyncSpec (next) ->
-        link = fixture('a[href="/path"]')
-        listener = jasmine.createSpy('up:click listener')
-        link.addEventListener('up:click', listener)
-        Trigger.click(link, ctrlKey: true)
-        next ->
+        it 'prevents a click event if there was an earlier mousedown event that was converted to an up:click', ->
+          link = fixture('a[href="/path"][up-instant]')
+          clickListener = jasmine.createSpy('click listener')
+          link.addEventListener('click', clickListener)
+          Trigger.mousedown(link)
+          Trigger.click(link)
+          expect(clickListener.calls.argsFor(0)[0].defaultPrevented).toBe(true)
+
+        it 'does not emit multiple up:click events in a click sequence', ->
+          link = fixture('a[href="/path"][up-instant]')
+          listener = jasmine.createSpy('up:click listener')
+          link.addEventListener('up:click', listener)
+          Trigger.clickSequence(link)
+          expect(listener.calls.count()).toBe(1)
+
+        it "does emit an up:click event on click if there was an earlier mousedown event that was not default-prevented (happens when the user CTRL+clicks and Unpoly won't follow)", ->
+          link = fixture('a[href="/path"][up-instant]')
+          listener = jasmine.createSpy('up:click listener')
+          link.addEventListener('up:click', listener)
+          Trigger.mousedown(link)
+          Trigger.click(link)
+          expect(listener).toHaveBeenCalled()
+
+        it 'does emit an up:click event if there was a click without mousedown (happens when a link is activated with the Enter key)', ->
+          link = fixture('a[href="/path"][up-instant]')
+          listener = jasmine.createSpy('up:click listener')
+          link.addEventListener('up:click', listener)
+          Trigger.click(link)
+          expect(listener).toHaveBeenCalled()
+
+        it 'prevents the mousedown event when the up:click event is prevented', ->
+          mousedownEvent = null
+          link = fixture('a[href="/path"][up-instant]')
+          link.addEventListener('mousedown', (event) -> mousedownEvent = event)
+          link.addEventListener('up:click', (event) -> event.preventDefault())
+          Trigger.mousedown(link)
+          expect(mousedownEvent.defaultPrevented).toBe(true)
+
+      describe 'on an non-link element that is [up-instant]', ->
+
+        it 'emits an up:click event on mousedown', ->
+          div = fixture('div[up-instant]')
+          listener = jasmine.createSpy('up:click listener')
+          div.addEventListener('up:click', listener)
+          Trigger.mousedown(div)
+          expect(listener).toHaveBeenCalled()
+
+      describe 'on an non-link element that is not [up-instant]', ->
+
+        it 'emits an up:click event on click', ->
+          div = fixture('div')
+          listener = jasmine.createSpy('up:click listener')
+          div.addEventListener('up:click', listener)
+          Trigger.click(div)
+          expect(listener).toHaveBeenCalled()
+
+        it 'does not emit an up:click event on ANY element if the user has dragged away between mousedown and mouseup', ->
+          div = fixture('div')
+          other = fixture('div')
+          listener = jasmine.createSpy('up:click listener')
+          up.on('up:click', listener) # use up.on() instead of addEventListener(), since up.on() cleans up after each test
+          Trigger.mousedown(other)
+          Trigger.mouseup(div)
+          Trigger.click(document.body) # this is the behavior of Chrome and Firefox
           expect(listener).not.toHaveBeenCalled()
-          expect(link).toHaveBeenDefaultFollowed()
 
-      it 'does not emit an up:click event if meta is pressed during the click', asyncSpec (next) ->
-        link = fixture('a[href="/path"]')
-        listener = jasmine.createSpy('up:click listener')
-        link.addEventListener('up:click', listener)
-        Trigger.click(link, metaKey: true)
-        next ->
-          expect(listener).not.toHaveBeenCalled()
-          expect(link).toHaveBeenDefaultFollowed()
+        it 'prevents the click event when the up:click event is prevented', ->
+          clickEvent = null
+          div = fixture('div')
+          div.addEventListener('click', (event) -> clickEvent = event)
+          div.addEventListener('up:click', (event) -> event.preventDefault())
+          Trigger.click(div)
+          expect(clickEvent.defaultPrevented).toBe(true)
 
-      it 'emits a prevented up:click event if the click was already prevented', asyncSpec (next) ->
-        link = fixture('a[href="/path"]')
-        link.addEventListener('click', (event) -> event.preventDefault())
-        listener = jasmine.createSpy('up:click listener')
-        link.addEventListener('up:click', listener)
-        Trigger.click(link)
-        expect(listener).toHaveBeenCalled()
-        expect(listener.calls.argsFor(0)[0].defaultPrevented).toBe(true)
+    describe '[up-clickable]', ->
 
-    describe 'on a link that is [up-instant]', ->
+      it 'makes the element emit up:click events on Enter', ->
+        fauxLink = up.hello(fixture('.hyperlink[up-clickable]'))
+        clickListener = jasmine.createSpy('up:click listener')
+        fauxLink.addEventListener('up:click', clickListener)
 
-      it 'emits an up:click event on mousedown', ->
-        link = fixture('a[href="/path"][up-instant]')
-        listener = jasmine.createSpy('up:click listener')
-        link.addEventListener('up:click', listener)
-        Trigger.mousedown(link)
-        expect(listener).toHaveBeenCalled()
+        Trigger.keySequence(fauxLink, 'Enter')
 
-      it 'does not emit an up:click event on click if there was an earlier mousedown event that was default-prevented', ->
-        link = fixture('a[href="/path"][up-instant]')
-        listener = jasmine.createSpy('up:click listener')
-        Trigger.mousedown(link)
-        link.addEventListener('up:click', listener)
-        Trigger.click(link)
-        expect(listener).not.toHaveBeenCalled()
+        expect(clickListener).toHaveBeenCalled()
 
-      it 'prevents a click event if there was an earlier mousedown event that was converted to an up:click', ->
-        link = fixture('a[href="/path"][up-instant]')
-        clickListener = jasmine.createSpy('click listener')
-        link.addEventListener('click', clickListener)
-        Trigger.mousedown(link)
-        Trigger.click(link)
-        expect(clickListener.calls.argsFor(0)[0].defaultPrevented).toBe(true)
+      it 'makes the element focusable for keyboard users', ->
+        fauxLink = up.hello(fixture('.hyperlink[up-clickable]'))
 
-      it 'does not emit multiple up:click events in a click sequence', ->
-        link = fixture('a[href="/path"][up-instant]')
-        listener = jasmine.createSpy('up:click listener')
-        link.addEventListener('up:click', listener)
-        Trigger.clickSequence(link)
-        expect(listener.calls.count()).toBe(1)
+        expect(fauxLink).toBeKeyboardFocusable()
 
-      it "does emit an up:click event on click if there was an earlier mousedown event that was not default-prevented (happens when the user CTRL+clicks and Unpoly won't follow)", ->
-        link = fixture('a[href="/path"][up-instant]')
-        listener = jasmine.createSpy('up:click listener')
-        link.addEventListener('up:click', listener)
-        Trigger.mousedown(link)
-        Trigger.click(link)
-        expect(listener).toHaveBeenCalled()
+      it 'gives the element a pointer cursor', ->
+        fauxLink = up.hello(fixture('.hyperlink[up-clickable]'))
 
-      it 'does emit an up:click event if there was a click without mousedown (happens when a link is activated with the Enter key)', ->
-        link = fixture('a[href="/path"][up-instant]')
-        listener = jasmine.createSpy('up:click listener')
-        link.addEventListener('up:click', listener)
-        Trigger.click(link)
-        expect(listener).toHaveBeenCalled()
+        expect(getComputedStyle(fauxLink).cursor).toEqual('pointer')
 
-      it 'prevents the mousedown event when the up:click event is prevented', ->
-        mousedownEvent = null
-        link = fixture('a[href="/path"][up-instant]')
-        link.addEventListener('mousedown', (event) -> mousedownEvent = event)
-        link.addEventListener('up:click', (event) -> event.preventDefault())
-        Trigger.mousedown(link)
-        expect(mousedownEvent.defaultPrevented).toBe(true)
+      it 'makes other selectors clickable via up.link.config.clickableSelectors', ->
+        up.link.config.clickableSelectors.push('.foo')
+        fauxLink = up.hello(fixture('.foo'))
 
-    describe 'on an non-link element that is [up-instant]', ->
-
-      it 'emits an up:click event on mousedown', ->
-        div = fixture('div[up-instant]')
-        listener = jasmine.createSpy('up:click listener')
-        div.addEventListener('up:click', listener)
-        Trigger.mousedown(div)
-        expect(listener).toHaveBeenCalled()
-
-    describe 'on an non-link element that is not [up-instant]', ->
-
-      it 'emits an up:click event on click', ->
-        div = fixture('div')
-        listener = jasmine.createSpy('up:click listener')
-        div.addEventListener('up:click', listener)
-        Trigger.click(div)
-        expect(listener).toHaveBeenCalled()
-
-      it 'does not emit an up:click event on ANY element if the user has dragged away between mousedown and mouseup', ->
-        div = fixture('div')
-        other = fixture('div')
-        listener = jasmine.createSpy('up:click listener')
-        up.on('up:click', listener) # use up.on() instead of addEventListener(), since up.on() cleans up after each test
-        Trigger.mousedown(other)
-        Trigger.mouseup(div)
-        Trigger.click(document.body) # this is the behavior of Chrome and Firefox
-        expect(listener).not.toHaveBeenCalled()
-
-      it 'prevents the click event when the up:click event is prevented', ->
-        clickEvent = null
-        div = fixture('div')
-        div.addEventListener('click', (event) -> clickEvent = event)
-        div.addEventListener('up:click', (event) -> event.preventDefault())
-        Trigger.click(div)
-        expect(clickEvent.defaultPrevented).toBe(true)
-
-  describe '[up-clickable]', ->
-
-    it 'makes the element emit up:click events on Enter', ->
-      fauxLink = up.hello(fixture('.hyperlink[up-clickable]'))
-      clickListener = jasmine.createSpy('up:click listener')
-      fauxLink.addEventListener('up:click', clickListener)
-
-      Trigger.keySequence(fauxLink, 'Enter')
-
-      expect(clickListener).toHaveBeenCalled()
-
-    it 'makes the element focusable for keyboard users', ->
-      fauxLink = up.hello(fixture('.hyperlink[up-clickable]'))
-
-      expect(fauxLink).toBeKeyboardFocusable()
-
-    it 'gives the element a pointer cursor', ->
-      fauxLink = up.hello(fixture('.hyperlink[up-clickable]'))
-
-      expect(getComputedStyle(fauxLink).cursor).toEqual('pointer')
-
-    it 'makes other selectors clickable via up.link.config.clickableSelectors', ->
-      up.link.config.clickableSelectors.push('.foo')
-      fauxLink = up.hello(fixture('.foo'))
-
-      expect(fauxLink).toBeKeyboardFocusable()
-      expect(getComputedStyle(fauxLink).cursor).toEqual('pointer')
-      expect(fauxLink).toHaveAttribute('up-clickable')
+        expect(fauxLink).toBeKeyboardFocusable()
+        expect(getComputedStyle(fauxLink).cursor).toEqual('pointer')
+        expect(fauxLink).toHaveAttribute('up-clickable')

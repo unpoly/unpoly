@@ -1,3 +1,12 @@
+Partial
+=======
+
+- Do we really need to abort requests in LinkPreloader
+- Document [up-load-on] for [up-preload]
+- Test: Hovering multiple times over [up-preload] does not cause multiple requests
+- Test: We don't preload unsafe links, even with [up-preload] or preloadSelectors
+
+
 Priority
 ========
 
@@ -24,10 +33,9 @@ Priority
 Backlog
 =======
 
+- Don't use the default duration for animations and transitions with { duration: 0 }
 - Should [up-poll] and up.reload() render failed responses if they match the target?
   - At least for reloading the element may actually have entered the DOM from a failed response
-  - In no case do we want to use fallbacks when reloading or polling
-- Consider supporting { transition: 'view' }
 - Site: Scrollbar styling https://makandracards.com/makandra/617528-chrome-121+-no-longer-supports-non-standard-scrollbar-styling
 - Per-link animation options for new layers
   - Support mutatable animation options for up:layer:dismiss, up:layer:accept
@@ -428,6 +436,7 @@ Icebox
 - Consider delaying appending of new layer elements until we have constructed all children https://github.com/unpoly/unpoly/discussions/314
 - Publish { onQueued }
   - We're currently only using onQueued to get the request of a rander job, so we can abort it
+    - This may be removed!
   - More canonic would be if RenderJob had an abort() method
 - Wir aborten bereits laufende [up-validate] wenn das Formular submitted, wird, aber laufende Watcher-Delays warten können danach noch Dinge tun
   - Wie wäre "submit stoppt das delay"?

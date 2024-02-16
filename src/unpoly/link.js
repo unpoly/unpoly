@@ -88,8 +88,6 @@ up.link = (function() {
   const u = up.util
   const e = up.element
 
-  const linkPreloader = new up.LinkPreloader()
-
   let lastMousedownTarget = null
 
   // Links with attribute-provided HTML are always followable.
@@ -172,7 +170,7 @@ up.link = (function() {
     - Links with an [unsafe method](/up.link.isSafe).
     - When the link destination [cannot be cached](/up.network.config#config.autoCache).
 
-  @param {number} [config.preloadDelay=75]
+  @param {number} [config.preloadDelay=90]
     The number of milliseconds to wait before [`[up-preload]`](/a-up-preload)
     starts preloading.
 
@@ -208,6 +206,10 @@ up.link = (function() {
   }))
 
   function isPreloadDisabled(link) {
+    // (1) Don't preload when we cannot change history. Following such a link will make a full page load ignoring our cache.
+    // (2) Don't preload when the link isn't going to be handled by Unpoly.
+    // (3) Don't preload when we're not going to cache the content according to up.network.config.autoCache.
+    //     By default this only caches safe links.
     return !up.browser.canPushState() || !isFollowable(link) || !willCache(link)
   }
 
@@ -224,7 +226,6 @@ up.link = (function() {
 
   function reset() {
     lastMousedownTarget = null
-    linkPreloader.reset()
   }
 
   /*-
@@ -282,8 +283,8 @@ up.link = (function() {
 
   @stable
   */
-  const follow = up.mockable(function(link, options) {
-    return up.render(followOptions(link, options))
+  const follow = up.mockable(function(link, options, parserOptions) {
+    return up.render(followOptions(link, options, parserOptions))
   })
 
   function parseRequestOptions(link, options, parserOptions) {
@@ -416,7 +417,7 @@ up.link = (function() {
     // This is the event that may be prevented to stop the follow.
     // up.form.submit() changes this to be up:form:submit instead.
     // The guardEvent will also be assigned a { renderOptions } property in up.render()
-    if (!options.guardEvent) { options.guardEvent = up.event.build('up:link:follow', {log: 'Following link'}) }
+    options.guardEvent ??= up.event.build('up:link:follow', { log: ['Following link %o', link] })
 
     return options
   }
@@ -493,7 +494,7 @@ up.link = (function() {
       return Promise.reject(new up.Error(issue))
     }
 
-    const guardEvent = up.event.build('up:link:preload', {log: ['Preloading link %o', link]})
+    const guardEvent = up.event.build('up:link:preload', { log: ['Preloading link %o', link] })
 
     return follow(link, {
       abortable: false,
@@ -807,6 +808,70 @@ up.link = (function() {
     const method = followMethod(link)
     return up.network.isSafeMethod(method)
   }
+
+  function onLoadCondition(link, defaultCondition, callback) {
+    let condition = e.attr(link, 'up-load-on') ?? defaultCondition
+
+    switch (condition) {
+      case 'insert':
+        callback()
+        break
+      case 'reveal':
+        up.fragment.onFirstIntersect(link, callback)
+        break
+      case 'hover':
+        new up.LinkFollowIntent(link, callback)
+        break
+      case 'manual':
+        // Wait for explicit call of up.partial.load().
+        break
+    }
+  }
+
+  function loadPartial(link, options) {
+    let guardEvent = up.event.build('up:partial:load', { log: ['Loading partial %o', link] })
+
+    // These options override up.link.follow() behavior
+    let forcedOptions = {
+      navigate: false,
+      guardEvent,
+      ...options,
+    }
+
+    // These defaults can be overridden using [up-...] attributes.
+    let defaults = {
+      background: true,
+      target: ':origin',
+      cache: 'auto',
+      revalidate: 'auto',
+      feedback: true,
+    }
+
+    return follow(link, forcedOptions, { defaults })
+  }
+
+  /*-
+  TODO: DOcs
+
+  - Must have good target like an #id
+  - Most [up-follow] options can be used
+  - Gets .up-active
+  - You can have multiple partials targeting the same URL. Targets will be merged.
+
+  @selector [up-partial]
+  @param [up-load-on='insert']
+  */
+  // TODO: Test that it runs if already intersecting on load
+  // TODO: Test that it runs in viewports
+  // TODO: Test that it targets itself by default
+  // TODO: Test that it makes a background request
+  // TODO: Test that it does not flicker during revalidation when already cached
+  // TODO: Test that it gets .up-active by default
+  // TODO: Test that we don't see navigation effects
+  up.compiler('[up-partial]', function(link) {
+    let doLoad = () => up.error.muteUncriticalRejection(loadPartial(link))
+    onLoadCondition(link, 'insert', doLoad)
+  })
 
   /*-
   [Follows](/up.follow) this link with JavaScript and updates a fragment with the server response.
@@ -1432,7 +1497,8 @@ up.link = (function() {
   */
   up.compiler(config.selectorFn('preloadSelectors'), function(link) {
     if (!isPreloadDisabled(link)) {
-      linkPreloader.watchLink(link)
+      let doPreload = () => up.error.muteUncriticalRejection(preload(link))
+      onLoadCondition(link, 'hover', doPreload)
     }
   })
 
@@ -1443,16 +1509,15 @@ up.link = (function() {
     followOptions,
     preload,
     makeFollowable,
-    makeClickable,
     isSafe,
     isFollowable,
     shouldFollowEvent,
-    followMethod,
     convertClicks,
     config,
     combineFollowableSelectors,
-    preloadIssue,
+    loadPartial,
   }
 })()
 
 up.follow = up.link.follow
+up.partial = { load: up.link.loadPartial }
