@@ -295,7 +295,6 @@ up.Request = class Request extends up.Record {
       'wrapMethod',
       'contentType',
       'payload',
-      'onQueued',
       'onLoading',
       'fail',
       'abortable',
@@ -509,8 +508,6 @@ up.Request = class Request extends up.Record {
 
   runQueuedCallbacks() {
     u.always(this, () => this._evictExpensiveAttrs())
-
-    this.onQueued?.(this)
   }
 
   load() {

@@ -88,8 +88,6 @@ up.link = (function() {
   const u = up.util
   const e = up.element
 
-  const linkPreloader = new up.LinkPreloader()
-
   let lastMousedownTarget = null
 
   // Links with attribute-provided HTML are always followable.
@@ -172,7 +170,7 @@ up.link = (function() {
     - Links with an [unsafe method](/up.link.isSafe).
     - When the link destination [cannot be cached](/up.network.config#config.autoCache).
 
-  @param {number} [config.preloadDelay=75]
+  @param {number} [config.preloadDelay=90]
     The number of milliseconds to wait before [`[up-preload]`](/a-up-preload)
     starts preloading.
 
@@ -208,6 +206,10 @@ up.link = (function() {
   }))
 
   function isPreloadDisabled(link) {
+    // (1) Don't preload when we cannot change history. Following such a link will make a full page load ignoring our cache.
+    // (2) Don't preload when the link isn't going to be handled by Unpoly.
+    // (3) Don't preload when we're not going to cache the content according to up.network.config.autoCache.
+    //     By default this only caches safe links.
     return !up.browser.canPushState() || !isFollowable(link) || !willCache(link)
   }
 
@@ -224,7 +226,6 @@ up.link = (function() {
 
   function reset() {
     lastMousedownTarget = null
-    linkPreloader.reset()
   }
 
   /*-
@@ -807,6 +808,42 @@ up.link = (function() {
     const method = followMethod(link)
     return up.network.isSafeMethod(method)
   }
+
+  function onLoadCondition(link, condition, callback) {
+    switch (condition) {
+      case 'insert':
+        callback()
+        break
+      case 'reveal':
+        up.fragment.onFirstIntersect(link, callback)
+        break
+      case 'hover':
+        new up.LinkFollowIntent(link, callback)
+        break
+    }
+  }
+
+  /*-
+  TODO: DOcs
+
+  - Must have good target like an #id
+  - Most [up-follow] options can be used
+  - Gets .up-active
+  */
+  // TODO: Test that it runs if already intersecting on load
+  // TODO: Test that it runs in viewports
+  // TODO: Test that it targets itself by default
+  // TODO: Test that it makes a background request
+  // TODO: Test that it does not flicker during revalidation when already cached
+  // TODO: Test that it gets .up-active by default
+  // TODO: Test that we don't see navigation effects
+  up.compiler('[up-partial]', function(link) {
+    let loadCondition = e.attr(link, 'up-load-on') || 'insert'
+    let target = e.attr(link, 'up-target') || ':origin'
+    let loadPartial = () => up.link.follow(link, { target, navigate: false, background: true })
+    onLoadCondition(link, loadCondition, loadPartial)
+  })
+
 
   /*-
   [Follows](/up.follow) this link with JavaScript and updates a fragment with the server response.
@@ -1432,7 +1469,9 @@ up.link = (function() {
   */
   up.compiler(config.selectorFn('preloadSelectors'), function(link) {
     if (!isPreloadDisabled(link)) {
-      linkPreloader.watchLink(link)
+      let loadCondition = e.attr(link, 'up-load-on') || 'hover'
+      let preload = () => up.link.preload(link)
+      onLoadCondition(link, loadCondition, preload)
     }
   })
 

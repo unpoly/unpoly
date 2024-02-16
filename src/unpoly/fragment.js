@@ -2805,6 +2805,20 @@ up.fragment = (function() {
     return unsubscribe
   }
 
+  function onFirstIntersect(origin, callback) {
+    let observer = new IntersectionObserver((entries) => {
+      for (let entry of entries) {
+        if (entry.isIntersecting) {
+          disconnect()
+          callback()
+        }
+      }
+    })
+    let disconnect = () => observer.disconnect()
+    observer.observe(origin)
+    onAborted(origin, disconnect)
+  }
+
   up.on('up:framework:boot', function() {
     const { documentElement } = document
     documentElement.setAttribute('up-source', u.normalizeURL(location.href, { hash: false }))
@@ -2847,6 +2861,7 @@ up.fragment = (function() {
     shouldRevalidate,
     abort,
     onAborted,
+    onFirstIntersect,
     splitTarget,
     parseTargetSteps,
     isAlive,
