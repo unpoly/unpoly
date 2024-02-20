@@ -861,13 +861,6 @@ up.link = (function() {
   @selector [up-partial]
   @param [up-load-on='insert']
   */
-  // TODO: Test that it runs if already intersecting on load
-  // TODO: Test that it runs in viewports
-  // TODO: Test that it targets itself by default
-  // TODO: Test that it makes a background request
-  // TODO: Test that it does not flicker during revalidation when already cached
-  // TODO: Test that it gets .up-active by default
-  // TODO: Test that we don't see navigation effects
   up.compiler('[up-partial]', function(link) {
     let doLoad = () => up.error.muteUncriticalRejection(loadPartial(link))
     onLoadCondition(link, 'insert', doLoad)
