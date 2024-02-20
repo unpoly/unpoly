@@ -5,6 +5,17 @@ Partial
 - Document [up-load-on] for [up-preload]
 - Test: Hovering multiple times over [up-preload] does not cause multiple requests
 - Test: We don't preload unsafe links, even with [up-preload] or preloadSelectors
+- Test that two [up-partial] to the same URL will only load one request with merged targets
+- Test that requests with merged targets are aborted by targeting a fragment of either
+- Test Request#fragments returns empty array if no #target is set
+- Consider whether we want to abort preloading requests on unhover
+- Consider whether Request#target, Request#context etc. should be setters that auto-set the corresponding header.
+  - Would save code in mergeIfUnsent()
+  - Would save code in setAutoHeaders()
+  - We could also make #headers or #header() hallucinate new headers
+    - Maybe hard since we allow write access headers[key] = value
+      - Would be easier with header() and setHeader()
+      - Still need to iterate over the whole thing for passing over headers to xhr
 
 
 Priority
