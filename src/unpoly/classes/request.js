@@ -825,16 +825,15 @@ up.Request = class Request extends up.Record {
     // This can happen if multiple [up-partial] requests are sent.
     if (this.state !== 'new') return
 
-    let mergedTarget = u.uniq(u.compact([this.target, trackingRequest.target])).join()
-    // If neither request had a target, we should not set an empty target.
-    if (mergedTarget) {
-      this.target = mergedTarget
-      this._setPropertyHeader('target')
+    // Only merge requests with a target. Otherwise we could inadvertently change a request
+    // without target (expecting a full page response) to a request with a target (allowing
+    // a fragment response).
+    if (!this.target || !trackingRequest.target) return
 
-    }
+    this.target = u.uniq([this.target, trackingRequest.target]).join(', ')
+    this._setPropertyHeader('target') // X-Up-Target header was set in the response
 
-    // When no #target is set, #fragments returns an empty array
-    this.fragments = u.uniq([...this.fragments, ...trackingRequest.fragments])
+    this._fragments = u.uniq([...this.fragments, ...trackingRequest.fragments])
   }
 
   static tester(condition, { except } = {}) {

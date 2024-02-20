@@ -927,6 +927,61 @@ describe('up.network', function() {
 
         })
 
+        fdescribe('merging unsent requests', function() {
+
+          it('merges the #target of a new request into an unsent request', function() {
+            let request1 = up.request({ url: '/path', cache: true, target: '.foo' })
+
+            expect(request1.target).toBe('.foo')
+            expect(request1.header('X-Up-Target')).toBe('.foo')
+
+            let request2 = up.request({ url: '/path', cache: true, target: '.bar' })
+
+            expect(request1.target).toBe('.foo, .bar')
+            expect(request1.header('X-Up-Target')).toBe('.foo, .bar')
+          })
+
+          it('merges the #fragments of a new request into an unsent request', function() {
+            let foo = fixture('.foo')
+            let bar = fixture('.bar')
+
+            let request1 = up.request({ url: '/path', cache: true, target: '.foo' })
+
+            expect(request1.fragments).toEqual([foo])
+
+            let request2 = up.request({ url: '/path', cache: true, target: '.bar' })
+
+            expect(request1.fragments).toMatchList([foo, bar])
+          })
+
+          it('does not merge the #target into a request that was already sent', async function() {
+            let request1 = up.request({ url: '/path', cache: true, target: '.foo' })
+
+            expect(request1.target).toBe('.foo')
+            expect(request1.header('X-Up-Target')).toBe('.foo')
+
+            await jasmine.nextEvent('up:request:load')
+
+            let request2 = up.request({ url: '/path', cache: true, target: '.bar' })
+
+            expect(request1.target).toBe('.foo')
+            expect(request1.header('X-Up-Target')).toBe('.foo')
+          })
+
+          it('does not merge the #target into a request without a #target (which might narrow a full page response into a fragment response)', function() {
+            let request1 = up.request({ url: '/path', cache: true })
+
+            expect(request1.target).toBeUndefined()
+            expect(request1.headers).not.toHaveKey('X-Up-Target')
+
+            let request2 = up.request({ url: '/path', cache: true, target: '.bar' })
+
+            expect(request1.target).toBeUndefined()
+            expect(request1.headers).not.toHaveKey('X-Up-Target')
+          })
+
+        })
+
         describe('with { cache: "auto" }', function() {
 
           describe('default autoCache behavior', function() {

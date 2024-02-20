@@ -829,6 +829,7 @@ up.link = (function() {
   - Must have good target like an #id
   - Most [up-follow] options can be used
   - Gets .up-active
+  - You can have multiple partials targeting the same URL. Targets will be merged.
 
   @selector [up-partial]
   @param [up-load-on='insert']
