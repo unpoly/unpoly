@@ -829,6 +829,9 @@ up.link = (function() {
   - Must have good target like an #id
   - Most [up-follow] options can be used
   - Gets .up-active
+
+  @selector [up-partial]
+  @param [up-load-on='insert']
   */
   // TODO: Test that it runs if already intersecting on load
   // TODO: Test that it runs in viewports

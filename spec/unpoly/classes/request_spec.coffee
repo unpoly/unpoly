@@ -108,9 +108,9 @@ describe 'up.Request', ->
         request = new up.Request(url: '/path', target: '.element, .other-element', layer: 'root')
         expect(request.fragments).toEqual [element, otherElement]
 
-    it 'returns undefined if neither { target, fragments } were passed to the constructor', ->
+    it 'returns an empty array if neither { target, fragments } were passed to the constructor', ->
       request = new up.Request(url: '/path')
-      expect(request.fragments).toBeUndefined()
+      expect(request.fragments).toEqual []
 
   describe '#abort', ->
 

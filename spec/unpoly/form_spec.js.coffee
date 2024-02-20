@@ -3438,7 +3438,7 @@ describe 'up.form', ->
             expect($labels[0]).not.toHaveText('Validation message')
             expect($labels[1]).toHaveText('Validation message')
 
-      fit 'does not send a validation request if the input field is blurred by clicking the submit button (bugfix)', ->
+      it 'does not send a validation request if the input field is blurred by clicking the submit button (bugfix)', ->
         container = fixture('.container')
         form = e.affix(container, 'form[method="post"][action="/action"][up-target=".container"]')
         formGroup = e.affix(form, '[up-form-group]')
@@ -3456,7 +3456,7 @@ describe 'up.form', ->
         expect(jasmine.lastRequest().url).toMatchURL('/action')
         expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toBeMissing()
 
-      fit 'does not send a validation request if the input field is blurred by clicking the submit button and the validation would update the entire form (bugfix)', ->
+      it 'does not send a validation request if the input field is blurred by clicking the submit button and the validation would update the entire form (bugfix)', ->
         container = fixture('.container')
         form = e.affix(container, 'form[method="post"][action="/action"][up-target=".container"]')
         textField = e.affix(form, 'input[type=text][name=input][up-validate="form"]')

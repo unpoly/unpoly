@@ -2442,21 +2442,21 @@ describe 'up.link', ->
         next.after 90, =>
           expect(jasmine.Ajax.requests.count()).toEqual(0)
 
-      it 'does not send a request if the link was detached before the delay is over', asyncSpec (next) ->
+      it 'does not send a request if the link was destroyed before the delay is over', asyncSpec (next) ->
         up.link.config.preloadDelay = 100
 
-        $fixture('.target').text('old text')
+        fixture('.target', text: 'old text')
 
-        $link = $fixture('a[href="/foo"][up-target=".target"][up-preload]')
-        up.hello($link)
+        link = fixture('a[href="/foo"][up-target=".target"][up-preload]')
+        up.hello(link)
 
-        Trigger.hoverSequence($link)
+        Trigger.hoverSequence(link)
 
         next.after 40, =>
           # It's still too early
           expect(jasmine.Ajax.requests.count()).toEqual(0)
 
-          $link.remove()
+          up.destroy(link)
 
         next.after 90, =>
           expect(jasmine.Ajax.requests.count()).toEqual(0)

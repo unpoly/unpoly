@@ -6,11 +6,15 @@ up.LinkFollowIntent = class LinkFollowIntent {
   constructor(link, callback) {
     this._link = link
     this._callback = callback
-    up.on(this._link, 'mouseenter pointerdown', (event) => this._scheduleCallback(event))
-    up.on(this._link, 'mouseleave', () => this._unscheduleCallback())
+    this._on('mouseenter mousedown touchstart', (event) => this._scheduleCallback(event))
+    this._on('mouseleave', () => this._unscheduleCallback())
     // Don't preload if the link was removed from the DOM while we were waiting for the timer.
     // This also happens in specs, when the timer terminates after a spec has ended.
     up.fragment.onAborted(this._link, () => this._unscheduleCallback())
+  }
+
+  _on(eventType, callback) {
+    up.on(this._link, eventType, { passive: true }, callback)
   }
 
   _scheduleCallback(event) {
@@ -32,6 +36,11 @@ up.LinkFollowIntent = class LinkFollowIntent {
 
   _unscheduleCallback() {
     clearTimeout(this._timer)
+
+    // Only abort if the request is still preloading.
+    // If the user has clicked on the link while the request was in flight,
+    // and then unhovered the link, we do not abort the navigation.
+    up.network.abort((request) => (request.origin === this._link) && request.background)
   }
 
   _parseDelay() {
