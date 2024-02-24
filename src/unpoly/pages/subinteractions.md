@@ -49,7 +49,7 @@ Starting a subinteraction
 - Open an overlay with an [acceptance condition](/closing-overlays#close-conditions) and callback.
 - When the condition is fulfilled, the overlay closes automatically, optionally with a [result value](/closing-overlays#overlay-result-values).
 - The acceptance callback is called with the result value.
-- The parent layer may change itself, e.g. by [reloading](/up.reload) a [fragment](/up.fragment)..
+- The parent layer may change itself, e.g. by [reloading](/up.reload) a [fragment](/up.fragment).
 
 See [closing overlays](/closing-overlays) for an extensive explanation.
 
