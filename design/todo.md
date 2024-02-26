@@ -1,14 +1,31 @@
 Partial
 =======
 
-- Do we really need to abort requests in LinkPreloader
-- Document [up-load-on] for [up-preload]
-- Test: Hovering multiple times over [up-preload] does not cause multiple requests
-- Test: We don't preload unsafe links, even with [up-preload] or preloadSelectors
-- Test that two [up-partial] to the same URL will only load one request with merged targets
-- Test that requests with merged targets are aborted by targeting a fragment of either
-- Test Request#fragments returns empty array if no #target is set
-- Consider whether we want to abort preloading requests on unhover
+- Request merging
+  - Document with up.request() and /caching 
+  - Test that requests with merged targets are aborted by targeting a fragment of either
+- [up-preload]
+  - Document [up-load-on] for [up-preload]
+    - Both modifier param and prose.
+    - Maybe do a preloading doc page
+  - Test: Hovering multiple times over [up-preload] does not cause multiple requests
+  - Test: We don't preload unsafe links, even with [up-preload] or preloadSelectors
+- [up-partial]
+  - Docs
+  - Tests
+    - Test that it runs if already intersecting on load
+    - Test that it runs in viewports
+    - Test that it targets itself by default
+    - Test that it makes a background request
+    - Test that it does not flicker during revalidation when already cached
+    - Test that it gets .up-active by default
+    - Test that we don't see navigation effects
+    - Test that two [up-partial] to the same URL will only load one request with merged targets
+
+Refactoring opportunities
+-------------------------
+
+- Do we really need to abort requests in LinkPreloader?
 - Consider whether Request#target, Request#context etc. should be setters that auto-set the corresponding header.
   - Would save code in mergeIfUnsent()
   - Would save code in setAutoHeaders()
