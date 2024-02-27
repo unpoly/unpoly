@@ -927,7 +927,7 @@ describe('up.network', function() {
 
         })
 
-        fdescribe('merging unsent requests', function() {
+        describe('merging unsent requests', function() {
 
           it('merges the #target of a new request into an unsent request', function() {
             let request1 = up.request({ url: '/path', cache: true, target: '.foo' })

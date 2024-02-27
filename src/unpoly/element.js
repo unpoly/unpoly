@@ -1374,6 +1374,12 @@ up.element = (function() {
     return `[${attr}*="//"]:not([${attr}*="//${location.host}/"])`
   }
 
+  function isIntersectingWindow(element) {
+    const rect = element.getBoundingClientRect()
+    return (rect.bottom > 0) && (rect.top  < window.innerHeight) &&
+      (rect.right  > 0) && (rect.left < window.innerWidth)
+  }
+
   return {
     subtree, // practical
     contains,
@@ -1431,5 +1437,6 @@ up.element = (function() {
     parseSelector,
     isEmpty,
     crossOriginSelector,
+    isIntersectingWindow,
   }
 })()
