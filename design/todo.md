@@ -13,12 +13,7 @@ Partial
 - [up-partial]
   - Docs
   - Tests
-    - Test that it runs if already intersecting on load
-    - Test that it runs in viewports
-    - Test that it targets itself by default
-    - Test that it makes a background request
     - Test that it does not flicker during revalidation when already cached
-    - Test that it gets .up-active by default
     - Test that we don't see navigation effects
     - Test that two [up-partial] to the same URL will only load one request with merged targets
 
@@ -38,6 +33,11 @@ Refactoring opportunities
 Priority
 ========
 
+
+Backlog
+=======
+
+- I think we can replace up.Rect.fromElement() with just element.getBoundingClientRect() 
 - I think revalidation now loses :maybe marks. We should have more tests.
   - Case 1 => I think this is implemented
     - We're loading ".foo, .bar:maybe"
@@ -56,11 +56,7 @@ Priority
     - While we're loading .bar was removed from the page
     - Revalidation should just be for ".foo", or for ".foo, .bar:maybe"
     - It should be OK if revalidation response only contains ".foo"
-
-
-Backlog
-=======
-
+- Preserve text selection ranges when reloading / polling / revalidating
 - Don't use the default duration for animations and transitions with { duration: 0 }
 - Should [up-poll] and up.reload() render failed responses if they match the target?
   - At least for reloading the element may actually have entered the DOM from a failed response
