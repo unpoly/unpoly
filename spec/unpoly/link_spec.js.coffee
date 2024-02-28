@@ -2936,7 +2936,7 @@ describe 'up.link', ->
       describe 'when the URL is already cached', ->
 
         it 'does not show a flash of unloaded partial and immediately renders the cached content', ->
-          
+
 
         it 'does not show a flash of unloaded partial during revalidation of a container element'
 
