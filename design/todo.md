@@ -37,6 +37,7 @@ Priority
 Backlog
 =======
 
+- Unpoly Rails needs to ignore pseudo-elements
 - I think we can replace up.Rect.fromElement() with just element.getBoundingClientRect() 
 - I think revalidation now loses :maybe marks. We should have more tests.
   - Case 1 => I think this is implemented
