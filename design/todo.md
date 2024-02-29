@@ -37,6 +37,11 @@ Priority
 Backlog
 =======
 
+- 
+- Allow to keep elements *without* remembering to mark elements as [up-keep]
+  - config.keepSelectors
+  - Allow { useKeep: '[up-keep], .search-input' } to keep additional elements
+  - Elements can still opt out with [up-keep=false]
 - Unpoly Rails needs to ignore pseudo-elements
 - I think we can replace up.Rect.fromElement() with just element.getBoundingClientRect() 
 - I think revalidation now loses :maybe marks. We should have more tests.
@@ -645,3 +650,5 @@ Decisions
   => No, don't do that.
     - While we can return a RenderJob, it's inner promise is not yet set to a RenderResult
     - We also have { onFinished } in other places, e.g. in dismiss() and accept(). There is no CloseJob or similiar there.
+- Do we need a way to show a spinner for a while?
+  - Maybe, but you can already do in CSS: .container:has(.up-active) .spinner { ... }
