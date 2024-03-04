@@ -11,11 +11,12 @@ Partial
   - Test: Hovering multiple times over [up-preload] does not cause multiple requests
   - Test: We don't preload unsafe links, even with [up-preload] or preloadSelectors
 - [up-partial]
-  - Docs
-  - Tests
-    - Test that it does not flicker during revalidation when already cached
-    - Test that we don't see navigation effects
-    - Test that two [up-partial] to the same URL will only load one request with merged targets
+    - Should this be up:link:follow or up:partial:follow
+    - Docs
+    - Tests
+      - Test that it does not flicker during revalidation when already cached
+      - Test that we don't see navigation effects
+      - Test that two [up-partial] to the same URL will only load one request with merged targets
 
 Refactoring opportunities
 -------------------------
@@ -37,7 +38,10 @@ Priority
 Backlog
 =======
 
-- 
+- Allow "true" and "false" values for all attributes
+  - Check if we can offer more exclusion selectors
+    - noNavSelectors, [up-nav=false]
+    - [up-expand=false]
 - Allow to keep elements *without* remembering to mark elements as [up-keep]
   - config.keepSelectors
   - Allow { useKeep: '[up-keep], .search-input' } to keep additional elements
@@ -100,8 +104,6 @@ Backlog
 - Support { onLoaded }, [up-on-loaded] for polling fragments
   - Test: Can be used to skip() a polling response, polling then continues
   - Test: Can be used to preventDefault() a polling response, polling then continues
-- Check if we can offer more exclusion selectors
-  - noNavSelectors, [up-nav=false]
 - [up-disable] should disable links (discussion #561)
   - Within the form
   - As a stand-alone link
