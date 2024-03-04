@@ -837,10 +837,9 @@ up.link = (function() {
   up.compiler('[up-partial]', function(link) {
     let loadCondition = e.attr(link, 'up-load-on') || 'insert'
     let target = e.attr(link, 'up-target') || ':origin'
-    let loadPartial = () => up.link.follow(link, { target, navigate: false, background: true })
+    let loadPartial = () => up.link.follow(link, { target, navigate: false, background: true, cache: 'auto' })
     onLoadCondition(link, loadCondition, loadPartial)
   })
-
 
   /*-
   [Follows](/up.follow) this link with JavaScript and updates a fragment with the server response.

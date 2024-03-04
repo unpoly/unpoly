@@ -2915,7 +2915,7 @@ describe 'up.link', ->
         expect('#slow').toHaveText('partial content')
         expect(up.history.location).toMatchURL('/original-path')
 
-      it 'works on a div[up-href][up-partial]'
+      it 'works on a div[up-href][up-partial]', ->
         partial = fixture('div#slow[up-partial][up-href="/slow-path"]')
         up.hello(partial)
 
@@ -2936,7 +2936,20 @@ describe 'up.link', ->
       describe 'when the URL is already cached', ->
 
         it 'does not show a flash of unloaded partial and immediately renders the cached content', ->
+          await jasmine.populateCache('/slow-path', '<div id="partial">partial content</div>')
 
+          partial = fixture('a#partial[up-partial][href="/slow-path"]')
+          up.hello(partial)
+
+          # Rendering from cached content happens after a chain of microtasks.
+          # We do not know the length of that chain. We only care that happens before the next paint.
+          await Promise.resolve()
+          await Promise.resolve()
+          await Promise.resolve()
+          await Promise.resolve()
+          await Promise.resolve()
+
+          expect('div#partial').toHaveText('partial content')
 
         it 'does not show a flash of unloaded partial during revalidation of a container element'
 
