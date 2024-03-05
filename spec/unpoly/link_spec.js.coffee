@@ -2977,9 +2977,49 @@ describe 'up.link', ->
 
       describe 'multiple partials in a single render pass', ->
 
-        it 'makes a single request with merged targets to the same URL'
+        it 'makes a single request with merged targets to the same URL', ->
+          container = fixture('#container')
+          e.affix(container, 'a#partial1[up-partial][href="/slow-path"]')
+          e.affix(container, 'a#partial2[up-partial][href="/slow-path"]')
+          up.hello(container)
 
-        it 'makes separate requests to different URLs'
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(jasmine.lastRequest().url).toMatchURL('/slow-path')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#partial1, #partial2')
+
+          jasmine.respondWith """
+            <div id="partial1">partial1 content</div>
+            <div id="partial2">partial2 content</div>
+          """
+
+          await wait()
+
+          expect('#partial1').toHaveText('partial1 content')
+          expect('#partial2').toHaveText('partial2 content')
+
+        it 'makes separate requests to different URLs', ->
+          container = fixture('#container')
+          e.affix(container, 'a#partial1[up-partial][href="/partial1-path"]')
+          e.affix(container, 'a#partial2[up-partial][href="/partial2-path"]')
+          up.hello(container)
+
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toEqual(2)
+          expect(jasmine.Ajax.requests.at(0).url).toMatchURL('/partial1-path')
+          expect(jasmine.Ajax.requests.at(0).requestHeaders['X-Up-Target']).toBe('#partial1')
+          expect(jasmine.Ajax.requests.at(1).url).toMatchURL('/partial2-path')
+          expect(jasmine.Ajax.requests.at(1).requestHeaders['X-Up-Target']).toBe('#partial2')
+
+          jasmine.Ajax.requests.at(0).respondWith(responseText: '<div id="partial1">partial1 content</div>')
+          jasmine.Ajax.requests.at(1).respondWith(responseText: '<div id="partial2">partial2 content</div>')
+
+          await wait()
+
+          expect('#partial1').toHaveText('partial1 content')
+          expect('#partial2').toHaveText('partial2 content')
 
       describe 'navigation feedback', ->
 
