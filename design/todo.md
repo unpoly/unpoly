@@ -11,8 +11,18 @@ Partial
   - Test: Hovering multiple times over [up-preload] does not cause multiple requests
   - Test: We don't preload unsafe links, even with [up-preload] or preloadSelectors
 - [up-partial]
-    - Should this be up:link:follow or up:partial:follow
+    - Should this be up:link:follow or up:partial:load
+      - up:link:follow feels super weird!
+      - We probably need an up:fragment:render event to modify renderOptions for all kind of passes
+        - We have so many guardEvents now
+        - Test that we can still modify event.renderOptions
+        - Possibly offer originalEvent or something?
+          - No! We would need to check their renderOptions for mutation. Who is interested in other events can use them.
+        - Update docs: Render Flowchart
+        - Update docs: Manipulate render options
     - Docs
+      - Support without JS important? 
+      - Also SEO 
     - Tests
       - Test that it does not flicker during revalidation when already cached
       - Test that we don't see navigation effects
@@ -38,6 +48,7 @@ Priority
 Backlog
 =======
 
+- Move custom spec helpers out of `jasmine.foo()` to `specs.foo()`
 - Allow "true" and "false" values for all attributes
   - Check if we can offer more exclusion selectors
     - noNavSelectors, [up-nav=false]
