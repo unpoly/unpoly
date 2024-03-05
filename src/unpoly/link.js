@@ -837,7 +837,14 @@ up.link = (function() {
   up.compiler('[up-partial]', function(link) {
     let loadCondition = e.attr(link, 'up-load-on') || 'insert'
     let target = e.attr(link, 'up-target') || ':origin'
-    let loadPartial = () => up.link.follow(link, { target, navigate: false, background: true, cache: 'auto' })
+    let followOptions = {
+      target,
+      navigate: false,
+      background: true,
+      cache: 'auto',
+      revalidate: 'auto',
+    }
+    let loadPartial = () => up.link.follow(link, followOptions)
     onLoadCondition(link, loadCondition, loadPartial)
   })
 

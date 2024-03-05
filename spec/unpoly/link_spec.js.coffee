@@ -2933,6 +2933,8 @@ describe 'up.link', ->
 
       it 'aborts the partial loading when another render pass targets the container'
 
+      it 'does not abort its own render pass when targeted directly'
+
       describe 'when the URL is already cached', ->
 
         it 'does not show a flash of unloaded partial and immediately renders the cached content', ->
@@ -2943,17 +2945,35 @@ describe 'up.link', ->
 
           # Rendering from cached content happens after a chain of microtasks.
           # We do not know the length of that chain. We only care that happens before the next paint.
-          await Promise.resolve()
-          await Promise.resolve()
-          await Promise.resolve()
-          await Promise.resolve()
-          await Promise.resolve()
+          await jasmine.waitMicrotasks(5)
 
           expect('div#partial').toHaveText('partial content')
 
-        it 'does not show a flash of unloaded partial during revalidation of a container element'
+        it 'revalidates the cached content', ->
+          up.network.config.cacheExpireAge = 5
+          await jasmine.populateCache('/slow-path', '<div id="partial">cached partial</div>')
 
-        it 'revalidates the cached content'
+          # Let the cache entry expire
+          await wait(30)
+          expect(up.cache.get({ url: '/slow-path' }).response.expired).toBe(true)
+
+          partial = fixture('a#partial[up-partial][href="/slow-path"]')
+          up.hello(partial)
+
+          # Rendering from cached content happens after a chain of microtasks.
+          # We do not know the length of that chain. We only care that happens before the next paint.
+          await jasmine.waitMicrotasks(5)
+
+          expect('div#partial').toHaveText('cached partial')
+
+          await wait()
+
+          expect(up.network.isBusy()).toBe(true)
+          jasmine.respondWith('<div id="partial">revalidated partial</div>')
+
+          await wait()
+
+          expect('div#partial').toHaveText('revalidated partial')
 
       describe 'multiple partials in a single render pass', ->
 
