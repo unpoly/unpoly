@@ -22,11 +22,14 @@ Partial
         - Update docs: Manipulate render options
     - Docs
       - Support without JS important? 
-      - Also SEO 
+      - Also SEO
+      - Targets for the same URL are merged
+    - up.request() docs should mention target merging
     - Tests
       - Test that it does not flicker during revalidation when already cached
       - Test that we don't see navigation effects
       - Test that two [up-partial] to the same URL will only load one request with merged targets
+      
 
 Refactoring opportunities
 -------------------------
@@ -48,6 +51,10 @@ Priority
 Backlog
 =======
 
+- Docs: https://unpoly.com/closing-overlays#closing-by-targeting-the-parent-layer should mention that targeting a layer *dismisses* with a `:peel` value (#598) 
+- { dismissLabel } should be able to contain HTML
+- Allow variations of official layer modes
+- lightbox Layer mode
 - Move custom spec helpers out of `jasmine.foo()` to `specs.foo()`
 - Allow "true" and "false" values for all attributes
   - Check if we can offer more exclusion selectors
