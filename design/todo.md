@@ -51,6 +51,7 @@ Priority
 Backlog
 =======
 
+- Docs: https://unpoly.com/X-Up-Method signal that a change of HTTP method happened
 - Docs: https://unpoly.com/closing-overlays#closing-by-targeting-the-parent-layer should mention that targeting a layer *dismisses* with a `:peel` value (#598) 
 - { dismissLabel } should be able to contain HTML
 - Allow variations of official layer modes
