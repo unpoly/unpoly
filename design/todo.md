@@ -5,43 +5,36 @@ Partial
   - Document with up.request() and /caching 
   - Test that requests with merged targets are aborted by targeting a fragment of either
 - [up-preload]
+  - Do a preloading doc page
   - Document [up-load-on] for [up-preload]
     - Both modifier param and prose.
-    - Maybe do a preloading doc page
   - Test: Hovering multiple times over [up-preload] does not cause multiple requests
   - Test: We don't preload unsafe links, even with [up-preload] or preloadSelectors
 - [up-partial]
-    - Should this be up:link:follow or up:partial:load
-      - up:link:follow feels super weird!
-      - We probably need an up:fragment:render event to modify renderOptions for all kind of passes
-        - We have so many guardEvents now
-        - Test that we can still modify event.renderOptions
-        - Possibly offer originalEvent or something?
-          - No! We would need to check their renderOptions for mutation. Who is interested in other events can use them.
-        - Update docs: Render Flowchart
-        - Update docs: Manipulate render options
+    - Event up:partial:load
+      - Test that it can be prevented
+      - Test that it can change URL
+    - Do we need a programmatic API e.g. up.partial.load()?
+      - Then we would also need [up-load-on="manual"]
     - Docs
+      - Consider a doc page "Lazy loading content"
+      - Note caching benefits like Turbo frames does: https://turbo.hotwired.dev/handbook/frames#cache-benefits-to-loading-frames
+      - For [up-partial]
+        - Note that all attributes for [up-follow] can be used 
+      - For up:partial:load
+      - For up.partial.load()
+        - Second options arg supports all render options 
       - Support without JS important? 
-      - Also SEO
+      - SEO
+        - Use link to be indexed
+        - Use div to not be indexed
       - Targets for the same URL are merged
-    - up.request() docs should mention target merging
+      - up.request() docs should mention target merging
     - Tests
       - Test that it does not flicker during revalidation when already cached
       - Test that we don't see navigation effects
       - Test that two [up-partial] to the same URL will only load one request with merged targets
-      
 
-Refactoring opportunities
--------------------------
-
-- Do we really need to abort requests in LinkPreloader?
-- Consider whether Request#target, Request#context etc. should be setters that auto-set the corresponding header.
-  - Would save code in mergeIfUnsent()
-  - Would save code in setAutoHeaders()
-  - We could also make #headers or #header() hallucinate new headers
-    - Maybe hard since we allow write access headers[key] = value
-      - Would be easier with header() and setHeader()
-      - Still need to iterate over the whole thing for passing over headers to xhr
 
 
 Priority
@@ -51,6 +44,21 @@ Priority
 Backlog
 =======
 
+- Consider whether Request#target, Request#context etc. should be setters that auto-set the corresponding header.
+  - Would save code in mergeIfUnsent()
+  - Would save code in setAutoHeaders()
+  - We could also make #headers or #header() hallucinate new headers
+    - Maybe hard since we allow write access headers[key] = value
+      - Would be easier with header() and setHeader()
+      - Still need to iterate over the whole thing for passing over headers to xhr
+
+- Consider an up:fragment:render event to modify renderOptions for all kind of passes
+  - We have so many guardEvents now
+  - Test that we can still modify event.renderOptions
+  - Possibly offer originalEvent or something?
+    - No! We would need to check their renderOptions for mutation. Who is interested in other events can use them.
+  - Update docs: Render Flowchart
+  - Update docs: Manipulate render options
 - Docs: https://unpoly.com/X-Up-Method signal that a change of HTTP method happened
 - Docs: https://unpoly.com/closing-overlays#closing-by-targeting-the-parent-layer should mention that targeting a layer *dismisses* with a `:peel` value (#598) 
 - { dismissLabel } should be able to contain HTML
@@ -673,3 +681,5 @@ Decisions
     - We also have { onFinished } in other places, e.g. in dismiss() and accept(). There is no CloseJob or similiar there.
 - Do we need a way to show a spinner for a while?
   - Maybe, but you can already do in CSS: .container:has(.up-active) .spinner { ... }
+- Do we really need to abort requests in LinkPreloader?
+  => Yes, aborted requests can be seen in the network tab. We also found a shorter way to write it. 

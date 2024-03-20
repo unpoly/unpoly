@@ -417,7 +417,7 @@ up.link = (function() {
     // This is the event that may be prevented to stop the follow.
     // up.form.submit() changes this to be up:form:submit instead.
     // The guardEvent will also be assigned a { renderOptions } property in up.render()
-    if (!options.guardEvent) { options.guardEvent = up.event.build('up:link:follow', {log: 'Following link'}) }
+    options.guardEvent ??= up.event.build('up:link:follow', { log: ['Following link %o', link] })
 
     return options
   }
@@ -494,7 +494,7 @@ up.link = (function() {
       return Promise.reject(new up.Error(issue))
     }
 
-    const guardEvent = up.event.build('up:link:preload', {log: ['Preloading link %o', link]})
+    const guardEvent = up.event.build('up:link:preload', { log: ['Preloading link %o', link] })
 
     return follow(link, {
       abortable: false,
@@ -809,7 +809,9 @@ up.link = (function() {
     return up.network.isSafeMethod(method)
   }
 
-  function onLoadCondition(link, condition, callback) {
+  function onLoadCondition(link, defaultCondition, callback) {
+    let condition = e.attr(link, 'up-load-on') ?? defaultCondition
+
     switch (condition) {
       case 'insert':
         callback()
@@ -820,7 +822,27 @@ up.link = (function() {
       case 'hover':
         new up.LinkFollowIntent(link, callback)
         break
+      case 'manual':
+        // Wait for explicit call of up.partial.load().
+        break
     }
+  }
+
+  function loadPartial(link, options) {
+    let target = e.attr(link, 'up-target') || ':origin'
+    let guardEvent = up.event.build('up:partial:load', { log: ['Loading partial %o', link] })
+
+    let followOptions = {
+      target,
+      navigate: false,
+      background: true,
+      cache: 'auto',
+      revalidate: 'auto',
+      guardEvent,
+      ...options,
+    }
+
+    up.link.follow(link, followOptions)
   }
 
   /*-
@@ -835,17 +857,7 @@ up.link = (function() {
   @param [up-load-on='insert']
   */
   up.compiler('[up-partial]', function(link) {
-    let loadCondition = e.attr(link, 'up-load-on') || 'insert'
-    let target = e.attr(link, 'up-target') || ':origin'
-    let followOptions = {
-      target,
-      navigate: false,
-      background: true,
-      cache: 'auto',
-      revalidate: 'auto',
-    }
-    let loadPartial = () => up.link.follow(link, followOptions)
-    onLoadCondition(link, loadCondition, loadPartial)
+    onLoadCondition(link, 'insert', () => loadPartial(link))
   })
 
   /*-
@@ -1472,9 +1484,7 @@ up.link = (function() {
   */
   up.compiler(config.selectorFn('preloadSelectors'), function(link) {
     if (!isPreloadDisabled(link)) {
-      let loadCondition = e.attr(link, 'up-load-on') || 'hover'
-      let preload = () => up.link.preload(link)
-      onLoadCondition(link, loadCondition, preload)
+      onLoadCondition(link, 'hover', () => preload(link))
     }
   })
 
@@ -1485,16 +1495,15 @@ up.link = (function() {
     followOptions,
     preload,
     makeFollowable,
-    makeClickable,
     isSafe,
     isFollowable,
     shouldFollowEvent,
-    followMethod,
     convertClicks,
     config,
     combineFollowableSelectors,
-    preloadIssue,
+    loadPartial,
   }
 })()
 
 up.follow = up.link.follow
+up.partial = { load: up.link.loadPartial }
