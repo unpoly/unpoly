@@ -283,8 +283,8 @@ up.link = (function() {
 
   @stable
   */
-  const follow = up.mockable(function(link, options) {
-    return up.render(followOptions(link, options))
+  const follow = up.mockable(function(link, options, parserOptions) {
+    return up.render(followOptions(link, options, parserOptions))
   })
 
   function parseRequestOptions(link, options, parserOptions) {
@@ -829,20 +829,23 @@ up.link = (function() {
   }
 
   function loadPartial(link, options) {
-    let target = e.attr(link, 'up-target') || ':origin'
     let guardEvent = up.event.build('up:partial:load', { log: ['Loading partial %o', link] })
 
-    let followOptions = {
-      target,
+    let forcedOptions = {
       navigate: false,
-      background: true,
-      cache: 'auto',
-      revalidate: 'auto',
       guardEvent,
       ...options,
     }
 
-    up.link.follow(link, followOptions)
+    let defaults = {
+      background: true,
+      target: ':origin',
+      cache: 'auto',
+      revalidate: 'auto',
+      feedback: true,
+    }
+
+    return follow(link, forcedOptions, { defaults })
   }
 
   /*-
@@ -857,7 +860,8 @@ up.link = (function() {
   @param [up-load-on='insert']
   */
   up.compiler('[up-partial]', function(link) {
-    onLoadCondition(link, 'insert', () => loadPartial(link))
+    let doLoad = () => up.error.muteUncriticalRejection(loadPartial(link))
+    onLoadCondition(link, 'insert', doLoad)
   })
 
   /*-

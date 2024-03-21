@@ -1157,6 +1157,32 @@ describe 'up.link', ->
 
           expect(up.network.isBusy()).toBe(false)
 
+    describe 'up.partial.load()', ->
+
+      it 'loads a partial that deferred loading to the user with [up-load-on="manual"]', ->
+        partial = fixture('a#slow[up-partial][href="/slow-path"][up-load-on="manual"]')
+        up.hello(partial)
+
+        await wait()
+
+        expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+        up.partial.load(partial)
+
+        await wait()
+
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
+        expect(jasmine.lastRequest().url).toMatchURL('/slow-path')
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#slow')
+
+        jasmine.respondWithSelector('#slow', text: 'partial content')
+
+        await wait()
+
+        expect('#slow').toHaveText('partial content')
+
+      it 'returns an up.RenderJob that resolves with the render pass'
+
   describe 'unobtrusive behavior', ->
 
     describe 'a[up-target]', ->
@@ -2935,6 +2961,8 @@ describe 'up.link', ->
 
       it 'does not abort its own render pass when targeted directly'
 
+      it 'does not update the main element if the response has no matching elements'
+
       describe 'when the URL is already cached', ->
 
         it 'does not show a flash of unloaded partial and immediately renders the cached content', ->
@@ -2948,6 +2976,11 @@ describe 'up.link', ->
           await jasmine.waitMicrotasks(5)
 
           expect('div#partial').toHaveText('partial content')
+
+          await wait()
+
+          # No additional request was made
+          expect(up.network.isBusy()).toBe(false)
 
         it 'revalidates the cached content', ->
           up.network.config.cacheExpireAge = 5
@@ -2974,6 +3007,24 @@ describe 'up.link', ->
           await wait()
 
           expect('div#partial').toHaveText('revalidated partial')
+
+        it 'does not use the cache with [up-cache=false]', ->
+          await jasmine.populateCache('/slow-path', '<div id="partial">partial content</div>')
+
+          partial = fixture('a#partial[up-partial][href="/slow-path"][up-cache="false"]', text: 'initial content')
+          up.hello(partial)
+
+          await wait()
+
+          expect('#partial').toHaveText('initial content')
+          expect(up.network.isBusy()).toBe(true)
+
+          jasmine.respondWithSelector('#partial', text: 'fresh content')
+
+          await wait()
+
+          expect('div#partial').toHaveText('fresh content')
+          expect(up.network.isBusy()).toBe(false)
 
       describe 'multiple partials in a single render pass', ->
 
@@ -3023,9 +3074,28 @@ describe 'up.link', ->
 
       describe 'navigation feedback', ->
 
-        it 'receives an .up-active class while loading'
+        it 'receives an .up-active class while loading', ->
+          partial = fixture('a#slow[up-partial][href="/slow-path"]')
+          up.hello(partial)
 
-        it 'receives no .up-active class with [up-feedback=false]'
+          await wait()
+
+          expect('#slow').toHaveClass('up-active')
+
+          jasmine.respondWithSelector('#slow', text: 'partial content')
+
+          await wait()
+
+          expect('#slow').toHaveText('partial content')
+          expect('#slow').not.toHaveClass('up-active')
+
+        it 'receives no .up-active class with [up-feedback=false]', ->
+          partial = fixture('a#slow[up-partial][href="/slow-path"][up-feedback="false"]')
+          up.hello(partial)
+
+          await wait()
+
+          expect('#slow').not.toHaveClass('up-active')
 
       describe 'with [up-load-on] modifier', ->
 
@@ -3048,19 +3118,65 @@ describe 'up.link', ->
 
         describe "with [up-load-on='manual']", ->
 
-          it 'does not load the partial by default'
+          it 'does not load the partial by default', ->
+            partial = fixture('a#slow[up-partial][href="/slow-path"][up-load-on="manual"]')
+            up.hello(partial)
 
-          it 'loads the partial when the user calls up.partial.load()'
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toEqual(0)
 
       describe 'up:partial:load event', ->
 
-        it 'emits an up:partial:load event before hitting the network'
+        it 'emits an up:partial:load event before hitting the network', ->
+          listener = jasmine.createSpy('up:partial:load listener').and.callFake ->
+            expect(jasmine.Ajax.requests.count()).toEqual(0)
+          up.on('up:partial:load', listener)
 
-        it 'does not load the partial when up:partial:load is prevented'
+          partial = fixture('a#slow[up-partial][href="/slow-path"]')
+          up.hello(partial)
 
-        it 'allows listener to load the partial from a different URL'
+          await wait()
 
-        it 'allows listener to change the target selector'
+          expect(listener).toHaveBeenCalled()
+
+        it 'does not load the partial when up:partial:load is prevented', ->
+          listener = jasmine.createSpy('up:partial:load listener').and.callFake (event) ->
+            event.preventDefault()
+          up.on('up:partial:load', listener)
+
+          partial = fixture('a#slow[up-partial][href="/slow-path"]')
+          up.hello(partial)
+
+          await wait()
+
+          expect(listener).toHaveBeenCalled()
+          expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+        it 'allows listener to change render options', ->
+          listener = jasmine.createSpy('up:partial:load listener').and.callFake (event) ->
+            event.renderOptions.url = '/other-path'
+            event.renderOptions.target = '#other'
+
+          up.on('up:partial:load', listener)
+
+          fixture('#other')
+          partial = fixture('a#slow[up-partial][href="/slow-path"]', text: 'initial content')
+          up.hello(partial)
+
+          await wait()
+
+          expect(listener).toHaveBeenCalled()
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(jasmine.lastRequest().url).toMatchURL('/other-path')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#other')
+
+          jasmine.respondWithSelector('#other', text: 'partial content')
+
+          await wait()
+
+          expect('#slow').toHaveText('initial content')
+          expect('#other').toHaveText('partial content')
 
     describe 'up:click', ->
 
