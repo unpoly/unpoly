@@ -2823,7 +2823,8 @@ describe 'up.link', ->
             up.hello(link)
 
             # MutationObserver has a delay even for the initial intersection check.
-            # We have additional code in place to call it synchronously during compilation.
+            # We have additional code in place to call it synchronously during compilation,
+            # so we don't get a "flash of empty partial" when the content is already cached.
             await wait(0)
 
             expect(jasmine.Ajax.requests.count()).toEqual(1)
@@ -2845,9 +2846,9 @@ describe 'up.link', ->
 
             expect(jasmine.Ajax.requests.count()).toEqual(1)
 
-            await jasmine.expectGlobalError /aborted/i, ->
-              up.network.abort()
-              await wait(MUTATION_OBSERVER_LAG)
+            # Abort the request so we can observe whether another request will be sent.
+            up.network.abort()
+            await wait(MUTATION_OBSERVER_LAG)
 
             document.scrollingElement.scrollTop = 0
             await wait(MUTATION_OBSERVER_LAG)
@@ -2957,11 +2958,46 @@ describe 'up.link', ->
 
         expect('#slow').toHaveText('partial content')
 
-      it 'aborts the partial loading when another render pass targets the container'
+      it 'aborts the partial loading when another render pass targets the link container', ->
+        container = fixture('#container')
+        partial = e.affix(container, 'a#slow[up-partial][href="/slow-path"]', text: 'initial content')
+        up.hello(partial)
 
-      it 'does not abort its own render pass when targeted directly'
+        await wait()
 
-      it 'does not update the main element if the response has no matching elements'
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
+        expect(jasmine.lastRequest().url).toMatchURL('/slow-path')
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#slow')
+
+        up.fragment.abort(container)
+
+        await wait()
+
+        expect(up.network.isBusy()).toBe(false)
+        expect('#slow').toHaveText('initial content')
+
+      it 'does not update the main element if the response has no matching elements', ->
+        up.fragment.config.mainTargets = ['#main']
+        fixture('#main', text: 'old main content')
+
+        partial = fixture('a#partial[up-partial][href="/partial-path"]', text: 'old partial content')
+        up.hello(partial)
+
+        await wait()
+
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
+        expect(jasmine.lastRequest().url).toMatchURL('/partial-path')
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#partial')
+
+        await jasmine.expectGlobalError 'up.CannotMatch', ->
+          # Server unexpectedly responds with #main instead of #partial
+          jasmine.respondWithSelector('#main', text: 'new main content')
+
+          # For some reason we need to wait a second task to be able to observe the global error.
+          await jasmine.waitTasks(2)
+
+        expect('#partial').toHaveText('old partial content')
+        expect('#main').toHaveText('old main content')
 
       describe 'when the URL is already cached', ->
 
@@ -3101,20 +3137,111 @@ describe 'up.link', ->
 
         describe "with [up-load-on='insert']", ->
 
-          it 'loads the partial as soon as it is inserted into the DOM (default)'
+          it 'loads the partial as soon as it is inserted into the DOM (default)', ->
+            partial = fixture('a#slow[up-partial][href="/slow-path"][up-load-on="insert"]')
+            up.hello(partial)
+
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            expect(jasmine.lastRequest().url).toMatchURL('/slow-path')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#slow')
+
+            jasmine.respondWithSelector('#slow', text: 'partial content')
+
+            await wait()
+
+            expect('#slow').toHaveText('partial content')
 
         describe "with [up-load-on='reveal']", ->
 
           # MutationObserver does not fire within a task
           MUTATION_OBSERVER_LAG = 30
 
-          it 'loads the partial when it is scrolled into the document viewport'
+          it 'loads the partial when it is scrolled into the document viewport', ->
+            before = fixture('#before', text: 'before', style: 'height: 50000px')
+            partial = fixture('a#slow[up-partial][href="/slow-path"][up-load-on="reveal"]')
+            up.hello(partial)
 
-          it 'immediately loads a partial that is already visible within the document viewport'
+            await wait(MUTATION_OBSERVER_LAG)
 
-          it 'only sends a single request as the partial enters and leaves the viewport repeatedly'
+            expect(jasmine.Ajax.requests.count()).toEqual(0)
 
-          it 'detects visibility for a partial in an element with scroll overflow'
+            partial.scrollIntoView()
+
+            await wait(MUTATION_OBSERVER_LAG)
+
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+            jasmine.respondWithSelector('#slow', text: 'partial content')
+
+            await wait()
+
+            expect('#slow').toHaveText('partial content')
+
+          it 'immediately loads a partial that is already visible within the document viewport', ->
+            partial = fixture('a#slow[up-partial][href="/slow-path"][up-load-on="reveal"]')
+            up.hello(partial)
+
+            # MutationObserver has a delay even for the initial intersection check.
+            # We have additional code in place to call it synchronously during compilation,
+            # so we don't get a "flash of empty partial" when the content is already cached.
+            await wait(0)
+
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            expect(jasmine.lastRequest().url).toMatchURL('/slow-path')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#slow')
+
+            jasmine.respondWithSelector('#slow', text: 'partial content')
+
+            await wait()
+
+            expect('#slow').toHaveText('partial content')
+
+          it 'only sends a single request as the partial enters and leaves the viewport repeatedly', ->
+            before = fixture('#before', text: 'before', style: 'height: 50000px')
+
+            partial = fixture('a#slow[up-partial][href="/slow-path"][up-load-on="reveal"]')
+            up.hello(partial)
+
+            await wait(MUTATION_OBSERVER_LAG)
+
+            expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+            partial.scrollIntoView()
+
+            await wait(MUTATION_OBSERVER_LAG)
+
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+            # Abort the request so we can observe whether another request will be sent.
+            up.network.abort()
+            await wait(MUTATION_OBSERVER_LAG)
+
+            document.scrollingElement.scrollTop = 0
+            await wait(MUTATION_OBSERVER_LAG)
+            partial.scrollIntoView()
+            await wait(MUTATION_OBSERVER_LAG)
+
+            # No additional request was sent
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+          it 'detects visibility for a partial in an element with scroll overflow', ->
+            viewport = fixture('#viewport', style: 'height: 500px; width: 300px; overflow-y: scroll')
+            before = e.affix(viewport, '#before', text: 'before', style: 'height: 50000px')
+
+            partial = e.affix(viewport, 'a#slow[up-partial][href="/slow-path"][up-load-on="reveal"]')
+            up.hello(partial)
+
+            await wait(MUTATION_OBSERVER_LAG)
+
+            expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+            partial.scrollIntoView()
+
+            await wait(MUTATION_OBSERVER_LAG)
+
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
 
         describe "with [up-load-on='manual']", ->
 

@@ -831,12 +831,14 @@ up.link = (function() {
   function loadPartial(link, options) {
     let guardEvent = up.event.build('up:partial:load', { log: ['Loading partial %o', link] })
 
+    // These options override up.link.follow() behavior
     let forcedOptions = {
       navigate: false,
       guardEvent,
       ...options,
     }
 
+    // These defaults can be overridden using [up-...] attributes.
     let defaults = {
       background: true,
       target: ':origin',
@@ -1488,7 +1490,8 @@ up.link = (function() {
   */
   up.compiler(config.selectorFn('preloadSelectors'), function(link) {
     if (!isPreloadDisabled(link)) {
-      onLoadCondition(link, 'hover', () => preload(link))
+      let doPreload = () => up.error.muteUncriticalRejection(preload(link))
+      onLoadCondition(link, 'hover', doPreload)
     }
   })
 
