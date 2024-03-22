@@ -44,6 +44,8 @@ Priority
 Backlog
 =======
 
+- In a multi-step render pass, let compilers see all updated fragments
+  - This would require us to delay compilation until all fragments are inserted 
 - Consider whether Request#target, Request#context etc. should be setters that auto-set the corresponding header.
   - Would save code in mergeIfUnsent()
   - Would save code in setAutoHeaders()
