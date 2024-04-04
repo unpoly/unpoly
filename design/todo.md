@@ -1,39 +1,66 @@
 Partial
 =======
 
+- New cache
+  - In an offline case, the revalidation request is killing our existing cache entry (which may be expired but does have a response)
+  - Maybe get() needs a purpose?
+  - Maybe keep entries with a response until we have a better response
 - Request merging
-  - Document with up.request() and /caching 
-  - Test that requests with merged targets are aborted by targeting a fragment of either
+  - BLOCKER: Merged requests can no longer match with Vary 
+  - Document with up.request() and X-Up-Target
+  - Test that the request is aborted when either fragment is aborted
+  - Test merging of two multi-fragment requests
 - [up-preload]
   - Do a preloading doc page
   - Document [up-load-on] for [up-preload]
     - Both modifier param and prose.
-  - Test: Hovering multiple times over [up-preload] does not cause multiple requests
-  - Test: We don't preload unsafe links, even with [up-preload] or preloadSelectors
 - [up-partial]
-    - Event up:partial:load
-      - Test that it can be prevented
-      - Test that it can change URL
-    - Do we need a programmatic API e.g. up.partial.load()?
-      - Then we would also need [up-load-on="manual"]
     - Docs
       - Consider a doc page "Lazy loading content"
       - Note caching benefits like Turbo frames does: https://turbo.hotwired.dev/handbook/frames#cache-benefits-to-loading-frames
       - For [up-partial]
-        - Note that all attributes for [up-follow] can be used 
+        - Note that all attributes for [up-follow] can be used
+        - Document the render options for which we set a default
       - For up:partial:load
       - For up.partial.load()
         - Second options arg supports all render options 
+        - Document the render options for which we set a default
       - Support without JS important? 
       - SEO
         - Use link to be indexed
         - Use div to not be indexed
       - Targets for the same URL are merged
-      - up.request() docs should mention target merging
-    - Tests
-      - Test that it does not flicker during revalidation when already cached
-      - Test that we don't see navigation effects
-      - Test that two [up-partial] to the same URL will only load one request with merged targets
+
+
+
+Ideas for cache misses after request merging
+--------------------------------------------
+
+### Delete request merging
+
+- It's less code!
+
+### Accept the cache misses
+
+- This would only affect the rare case where requests would (1) respond with Vary and (2) sometimes be merged, sometimes not
+- The situation *before* the merging logic was not without flaws either.
+  - We would attach to the previous request, but lie to the server about what targets we're requesting
+    - If the server responds with the wrong optimization, we will make another request
+  - Requests were not aborted if the wrong fragment was targeted
+
+### Make a toggle
+
+- `up.network.config.mergeRequestTargets`
+
+
+### Rework the cache
+
+- Make a bucket of cache entries for each method/URL
+- When looking for a hit, get all matches and pick the most recent one
+- Evicting/expiring a request will evict/expire the entire bucket (all requests for this method/GET)
+- When would we override a bucket entry?
+  - A hard limit?
+  - Combination of all influencing headers? => Yes. Change up.Request.Tester so, with a Request argument, it compares descriptions
 
 
 
@@ -41,9 +68,22 @@ Priority
 ========
 
 
+
 Backlog
 =======
 
+- In an offline case, the revalidation request is killing our existing cache entry (which may be expired but does have a response)
+- Add a config to disable validate merging
+- Docs for up:link:follow should note that, when mutating render options, it's a good idea to also mutate in up:link:preload
+- Docs for up:fragment:loaded should not in params that renderOptions may be mutated
+- Allow "true" and "false" values for all attributes
+  - Check if we can offer more exclusion selectors
+    - noNavSelectors, [up-nav=false]
+    - [up-expand=false]
+- up.history.config.restoreTargets has weird default documented: config.restoreTargets=[]
+- Touch events can scroll the background of a drawer overlay on https://unpoly.com/
+- Maybe [up-clickable] should set a `button` role by default
+  - But keep a `link` role on `a:not([href])` elements, to match `<a up-content>`  
 - In a multi-step render pass, let compilers see all updated fragments
   - This would require us to delay compilation until all fragments are inserted 
 - Consider whether Request#target, Request#context etc. should be setters that auto-set the corresponding header.
@@ -64,13 +104,11 @@ Backlog
 - Docs: https://unpoly.com/X-Up-Method signal that a change of HTTP method happened
 - Docs: https://unpoly.com/closing-overlays#closing-by-targeting-the-parent-layer should mention that targeting a layer *dismisses* with a `:peel` value (#598) 
 - { dismissLabel } should be able to contain HTML
+  - Maybe rename to { dismissContent } or something?
 - Allow variations of official layer modes
 - lightbox Layer mode
+  - Where are we going to put the margin around the box, if we're not having a viewport? 
 - Move custom spec helpers out of `jasmine.foo()` to `specs.foo()`
-- Allow "true" and "false" values for all attributes
-  - Check if we can offer more exclusion selectors
-    - noNavSelectors, [up-nav=false]
-    - [up-expand=false]
 - Allow to keep elements *without* remembering to mark elements as [up-keep]
   - config.keepSelectors
   - Allow { useKeep: '[up-keep], .search-input' } to keep additional elements
@@ -119,6 +157,7 @@ Backlog
 - Docs should show DOM structure of all layer modes
 - Simplify animation API implementation with Element.animate()
   - Animation finishing could be implemented with Element#getAnimations()
+  - This should also fix a regression for: Animations that fly in an element from the screen edge (move-from-top, move-from-left, etc.) no longer leave a transform style on the animated element. By @triskweline.
 - Don't allow a request payload for DELETE requests
   - Maybe make this configuratable as opinions vary here.
     - e.g. up.network.config.payloadMethods
