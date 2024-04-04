@@ -2058,6 +2058,37 @@ describe 'up.util', ->
           tokens = up.util.parseTokens(str, separator: 'comma')
           expect(tokens).toEqual ['foo or bar or baz']
 
+    describe 'up.util.objectContains()', ->
+
+      it 'returns true if the first object has all properties of the second object, and then some more', ->
+        expect(up.util.objectContains({ a: 1, b: 2 }, { a: 1 })).toBe(true)
+
+      it 'returns true if both objects have the same properties', ->
+        expect(up.util.objectContains({ a: 1, b: 2 }, { a: 1, b: 2 })).toBe(true)
+
+      it 'returns false if a property value differs', ->
+        expect(up.util.objectContains({ a: 1, b: 2 }, { a: 3 })).toBe(false)
+
+      it 'returns false if the second object has additional keys', ->
+        expect(up.util.objectContains({ a: 1, b: 2 }, { a: 1, d: 3 })).toBe(false)
+
+    describe 'up.util.containsAll()', ->
+
+      it 'returns true if the first array has all elements of the second array, and then some more', ->
+        expect(up.util.containsAll(['a', 'b'], ['b'])).toBe(true)
+
+      it 'returns true if the second array is empty', ->
+        expect(up.util.containsAll(['a', 'b'], [])).toBe(true)
+
+      it 'returns true if both arrays have the same elements', ->
+        expect(up.util.containsAll(['a', 'b'], ['a', 'b'])).toBe(true)
+
+      it 'ignores element order', ->
+        expect(up.util.containsAll(['a', 'b'], ['b', 'a'])).toBe(true)
+
+      it 'returns false if the second array has additional elements', ->
+        expect(up.util.containsAll(['a', 'b'], ['a', 'b', 'c'])).toBe(false)
+
     describe 'up.util.evalOption()', ->
 
       it 'returns the given primitive value', ->

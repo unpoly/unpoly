@@ -958,7 +958,7 @@ describe('up.network', function() {
               expect({ url: '/path', target: '.a' }).toBeCached()
               expect({ url: '/path', target: '.b' }).toBeCached()
 
-              jasmine.respondWith("content", { responseHeaders: { Vary: 'X-Up-Target' } })
+              jasmine.respondWith("<div class='a'>content</div>", { responseHeaders: { Vary: 'X-Up-Target' } })
 
               await wait()
 
@@ -967,15 +967,52 @@ describe('up.network', function() {
               expect({ url: '/path' }).not.toBeCached()
             })
 
-            it('reuses a multi-target response for a new request targeting only one of the cached selectors')
+            it('reuses a multi-target response for a new request targeting only some of the cached selectors', async function() {
+              await jasmine.populateCache(
+                { url: '/path', target: '.a, .b, .c' },
+                { responseHeaders: { Vary: 'X-Up-Target'} }
+              )
 
-            it('reuses a multi-target response for a new request targeting only some of the cached selectors')
+              expect({ url: '/path', target: '.a, .b, .c' }).toBeCached()
+              expect({ url: '/path', target: '.a, .b' }).toBeCached()
+              expect({ url: '/path', target: '.a, .c' }).toBeCached()
+              expect({ url: '/path', target: '.b, .c' }).toBeCached()
+              expect({ url: '/path', target: '.a' }).toBeCached()
+              expect({ url: '/path', target: '.b' }).toBeCached()
+              expect({ url: '/path', target: '.c' }).toBeCached()
+            })
 
-            it('does not reuse a multi-target response for a new request targeting additional selectors')
+            it('does not reuse a multi-target response for a new request targeting additional selectors', async function() {
+              await jasmine.populateCache(
+                { url: '/path', target: '.a, .b, .c' },
+                { responseHeaders: { Vary: 'X-Up-Target'} }
+              )
 
-            it('reuses a response without a target for a new request with a target')
+              expect({ url: '/path', target: '.a, .b, .c' }).toBeCached()
+              expect({ url: '/path', target: '.a, .b, .c, .d' }).not.toBeCached()
+              expect({ url: '/path', target: '.a, .d' }).not.toBeCached()
+              expect({ url: '/path', target: '.d' }).not.toBeCached()
+            })
 
-            it('does not reuse a response with a target for a new request without a target')
+            it('reuses a response without a target for a new request with a target', async function() {
+              await jasmine.populateCache(
+                { url: '/path' },
+                { responseHeaders: { Vary: 'X-Up-Target'} }
+              )
+
+              expect({ url: '/path', target: '.a' }).toBeCached()
+              expect({ url: '/path', target: '.b' }).toBeCached()
+            })
+
+            it('does not reuse a response tailored to a target for a new request without a target', async function() {
+              await jasmine.populateCache(
+                { url: '/path', target: '.a' },
+                { responseHeaders: { Vary: 'X-Up-Target'} }
+              )
+
+              expect({ url: '/path', target: '.a' }).toBeCached()
+              expect({ url: '/path' }).not.toBeCached()
+            })
 
           }) // Vary response header
 

@@ -39,7 +39,25 @@ class Route {
     if (cachedRequest === newRequest) return true
 
     return u.every(this.varyHeaders, (varyHeader) => {
-      return cachedRequest.header(varyHeader) === newRequest.header(varyHeader)
+      let cachedValue = cachedRequest.header(varyHeader)
+      let newValue = newRequest.header(varyHeader)
+
+      if (varyHeader === 'X-Up-Target' || varyHeader === 'X-Up-Fail-Target') {
+        // A response that was not tailored to a target is a match for all targets
+        if (!cachedValue) return true
+
+        // A response tailored to a target is never a match for a response without a target
+        if (!newValue) return false
+
+        let cachedTokens = u.parseTokens(cachedValue, { separator: 'comma' })
+        let newTokens = u.parseTokens(newValue, { separator: 'comma' })
+
+        console.debug({ cachedTokens, newTokens })
+
+        return u.containsAll(cachedTokens, newTokens)
+      } else {
+        return cachedValue === newValue
+      }
     })
   }
 }
