@@ -540,7 +540,9 @@ up.network = (function() {
     // This way additional requests to the same endpoint will hit and track this request.
     if (request.willCache()) {
       cache.put(request)
-      request.onLoading = () => cache.put(request)
+
+      // If the request changed its URL or params in up:request:load, the cache needs to re-index.
+      request.onLoading = () => cache.reindex(request)
     }
 
     // Once we receive a response we honor options/headers for eviction/expiration,
@@ -570,6 +572,7 @@ up.network = (function() {
       // (2) An un-cacheable request should still update an existing cache entry
       //     (written by a earlier, cacheable request with the same cache key)
       //     since the later response will be fresher.
+      // (3) Now that we have a response the cache needs to be updated with Vary info.
       if (cache.get(request)) {
         cache.put(request)
       }
@@ -805,7 +808,9 @@ up.network = (function() {
     if (request.cache && response.url && request.url !== response.url) {
       const newRequest = u.variant(request, {
         method: response.method,
-        url: response.url
+        url: response.url,
+        // TODO: Consider dropping the cacheRoute prop
+        cacheRoute: null,
       })
       cache.alias(request, newRequest)
     }
