@@ -3,8 +3,17 @@ Partial
 
 - New cache
   - In an offline case, the revalidation request is killing our existing cache entry (which may be expired but does have a response)
-  - Maybe get() needs a purpose?
-  - Maybe keep entries with a response until we have a better response
+    - Or is it? Because we don't really cache the second request until we get the response? 
+    - Maybe get() needs a purpose?
+    - Maybe keep entries with a response until we have a better response
+  - Document cache matching rules
+    - In /caching and/or /Vary  
+    - Default is method + URL + query params
+    - If Vary headers are set
+      - All Vary headers must be the same
+      - Special case for X-Up-Target and X-Up-Fail-Target: All selectors must be contained in the cache
+      - A document without a target is a match for all targets
+      - A document with a target is not a match for all targets
 - Request merging
   - BLOCKER: Merged requests can no longer match with Vary 
   - Document with up.request() and X-Up-Target
