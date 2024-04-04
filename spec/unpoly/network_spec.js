@@ -967,6 +967,16 @@ describe('up.network', function() {
               expect({ url: '/path' }).not.toBeCached()
             })
 
+            fit('partitions the cache separately for varying X-Up-Target and X-Up-Fail-Target headers', async function() {
+              await jasmine.populateCache(
+                { url: '/path', target: '.a, .b', failTarget: '.c, .d' },
+                { responseHeaders: { Vary: 'X-Up-Target, X-Up-Fail-Target'} }
+              )
+
+              expect({ url: '/path', target: '.a', failTarget: '.c' }).toBeCached()
+              expect({ url: '/path', target: '.a', failTarget: '.e' }).not.toBeCached()
+            })
+
             it('reuses a multi-target response for a new request targeting only some of the cached selectors', async function() {
               await jasmine.populateCache(
                 { url: '/path', target: '.a, .b, .c' },
