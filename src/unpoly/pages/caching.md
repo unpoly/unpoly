@@ -216,25 +216,102 @@ request header value gets a separate cache entries.
 
 ### Example
 
-The user makes a request to `/sitemap` in order to updates a fragment `.menu`.
-Unpoly makes a request like this:
+@include vary-header-example
 
-```http
-GET /sitemap HTTP/1.1
-X-Up-Target: .menu
-```
 
-The server may choose to [optimize its response](/optimizing-responses) by only render only the HTML for
-the `.menu` fragment. It responds with the following HTTP:
+### How cache entries are matched
 
-```http
-Vary: X-Up-Target
+By default cached responses will match all requests to the same URL.
 
-<div class="menu">...</div>
-```
+When a response has a `Vary` header, matching requests must additionally have the same values for all listed headers:
 
-After observing the `Vary: X-Up-Target` header, Unpoly will partition cache entries to `/sitemap` by `X-Up-Target` value.
-That means a request targeting `.menu` is no longer a cache hit for a request targeting a different selector.
+<table>
+  <tr>
+    <th class="split-table-head">
+    </th>
+    <th>
+      🠦 <code>X-Up-Target: .foo</code><br>
+      🠤 <code>Vary: X-Up-Target</code>
+    </th>
+  </tr>  
+  <tr>
+    <th>🠦 <code>X-Up-Target: .foo</code></th>
+    <td>✔️ cache hit</td>
+  </tr>
+  <tr>
+    <th>🠦 <code>X-Up-Target: .bar</code></th>
+    <td>❌ cache miss</td>
+  </tr>
+  <tr>
+    <th>🠦 <i>No <code autolink="false">X-Up-Target</code></i></th>
+    <td>❌ cache miss</td>
+  </tr>
+</table>
+
+
+When a response has *no* `Vary` header, that response is a cache hit for <i>all</i> requests to the URL, regardless of target:
+
+<table>
+  <tr>
+    <th class="split-table-head">
+    </th>
+    <th>
+      🠦 <code>X-Up-Target: .foo</code><br>
+      🠤 <i>No <code autolink="false">Vary</code></i>
+    </th>
+  </tr>  
+  <tr>
+    <th>🠦 <code>X-Up-Target: .foo</code></th>
+    <td>✔️ cache hit</td>
+  </tr>
+  <tr>
+    <th>🠦 <code>X-Up-Target: .bar</code></th>
+    <td>✔️ cache hit</td>
+  </tr>
+  <tr>
+    <th>🠦 <i>No <code autolink="false">X-Up-Target</code></i></th>
+    <td>✔️ cache hit</td>
+  </tr>
+</table>
+
+
+Requests can [target multiple fragments](/targeting-fragments#updating-multiple-fragments) by separating selectors
+with a comma. If the server replies with `Vary: X-Up-Target`, that response is a cache hit for each individual selector:
+
+<table>
+  <tr>
+    <th class="split-table-head">
+    </th>
+    <th>
+      🠦 <code>X-Up-Target: .foo, .bar</code><br>
+      🠤 <code>Vary: X-Up-Target</code>
+    </th>
+  </tr>  
+  <tr>
+    <th>🠦 <code>X-Up-Target: .foo</code></th>
+    <td>✔️ cache hit</td>
+  </tr>
+  <tr>
+    <th>🠦 <code>X-Up-Target: .bar</code></th>
+    <td>✔️ cache hit</td>
+  </tr>
+  <tr>
+    <th>🠦 <code>X-Up-Target: .foo, .bar</code></th>
+    <td>✔️ cache hit</td>
+  </tr>
+  <tr>
+    <th>🠦 <code>X-Up-Target: .baz</code></th>
+    <td>❌ cache miss</td>
+  </tr>
+  <tr>
+    <th>🠦 <code>X-Up-Target: .foo, .baz</code></th>
+    <td>❌ cache miss</td>
+  </tr>
+  <tr>
+    <th>🠦 <i>No <code autolink="false">X-Up-Target</code></i></th>
+    <td>❌ cache miss</td>
+  </tr>
+</table>
 
 
 Caching after redirects
@@ -243,8 +320,9 @@ Caching after redirects
 - When a request `GET /foo` redirects to `GET /bar`, the response to `/bar` will be cached for both `GET /foo/` and `GET /bar`.
 - For technical reasons Unpoly cannot read from the cache when an request to an uncached URL redirects to a cached URL.
   For example, when a form submission makes a request to `POST /action`, and the response redirects to `GET /path`,
-  the browser will make a fresh request to `GET /path` even if `GET /path` was cached before. Unpoly cannot render
-  content before that 
+  the browser will make a fresh request to `GET /path` even if `GET /path` was cached before.
+- For technical reason Unpoly cannot detect redirects to the same URL, but using a different method. For example, when a request
+  to `POST /users` redirects to `GET /users`. You can address this by including an `X-Up-Method` header in your responses.
 
 
 @page caching

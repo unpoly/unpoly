@@ -9,6 +9,23 @@ Changes handled by `unpoly-migrate.js` are not considered breaking changes.
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+3.8.0
+-----
+
+### Partials
+
+
+### Request merging
+
+
+### New cache
+
+- Varying responses to multi-target requests are now a cache hit for each selector
+- No longer evicting cache entries, useful for offline:
+  - When a request (or revalidation) fails due to network issue
+  - When the server responds with an empty response (to any request or revalidation)
+
+
 3.7.3
 -----
 

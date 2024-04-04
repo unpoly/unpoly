@@ -43,6 +43,10 @@ module.exports = {
         "it": "readonly",
         "expect": "readonly",
         "fixture": "readonly",
+        "wait": "readonly",
+        "beforeEach": "readonly",
+        "afterEach": "readonly",
+        "asyncSpec": "readonly",
       }
     }
   ]

@@ -168,14 +168,6 @@ up.Response = class Response extends up.Record {
     return !this.text
   }
 
-  isCacheable() {
-    // (1) Uncache responses that have failed. We have no control over the server,
-    //     and another request with the same properties may succeed.
-    // (2) Uncache responses that have an empty body, in particular 304 Not Modified.
-    //     Another request with a different ETag may produce a body.
-    return this.ok && !this.none
-  }
-
   /*-
   Returns the HTTP header value with the given name.
 
@@ -193,8 +185,13 @@ up.Response = class Response extends up.Record {
     return this.headers[name] || this.xhr?.getResponseHeader(name)
   }
 
-  get ownInfluncingHeaders() {
-    let influencingHeaders = up.protocol.influencingHeadersFromResponse(this)
+  // TODO: Do we need this? Why don't we take all the Vary info that we have?
+  //  => Because network infrastructure may set additional Vary headers we don't care about
+  //  => But why doesn't the test crash? (`ignores Vary for headers that were set outside Unpoly`)
+  //     => Because our own requests will not have values for infrastructure-set Vary headers
+  get ownInfluencingHeaderNames() {
+    let influencingHeaders = up.protocol.influencingHeaderNamesFromResponse(this)
+    // Only return the header names that actually had a value in the request.
     return u.filter(influencingHeaders, (headerName) => this.request.header(headerName))
   }
 

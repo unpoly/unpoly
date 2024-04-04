@@ -1160,12 +1160,29 @@ up.util = (function() {
   @function up.util.contains
   @param {Array|NodeList|string} value
   @param {any} subValue
+  @return {boolean} Whether the value is contained.
   @stable
   */
   function contains(value, subValue) {
     let indexOf = value.indexOf || Array.prototype.indexOf
     return indexOf.call(value, subValue) >= 0
   }
+
+  /*-
+  Returns whether the first list contains all elements of the second list.
+
+  Element order is ignored for this check.
+
+  @function up.util.containsAll
+  @param {Array|NodeList|string} values
+  @param {Array|NodeList|string} subValues
+  @return {boolean} Whether all values are contained.
+  @internal
+  */
+  function containsAll(values, subValues) {
+    return every(subValues, (subValue) => contains(values, subValue))
+  }
+
 
   /*-
   Returns whether `object`'s entries are a superset
@@ -2032,6 +2049,7 @@ up.util = (function() {
     isRegExp,
     timer: scheduleTimer,
     contains,
+    containsAll,
     objectContains,
     toArray,
     pick,

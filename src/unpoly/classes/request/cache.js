@@ -1,5 +1,65 @@
 const u = up.util
 
+// One route per method and URL (`request.description`).
+class Route {
+
+  // A list of `Vary` header names that we have seen in responses
+  // to earlier requests with this route's method and URL.
+  varyHeaders = new Set()
+
+  // Cached requests for this route's method and URL.
+  requests = []
+
+  // TODO: Get rid of debug description arg
+  constructor(description) {
+    this.description = description
+  }
+
+  matchBest(newRequest) {
+    let matches = this.requests.filter((cachedRequest) => this.satisfies(cachedRequest, newRequest))
+    // Newer requests are always appended
+    return u.last(matches)
+  }
+
+  delete(request) {
+    u.remove(this.requests, request)
+  }
+
+  put(request) {
+    this.requests.push(request)
+  }
+
+  updateVary(response) {
+    for (let headerName of up.protocol.influencingHeaderNamesFromResponse(response)) {
+      this.varyHeaders.add(headerName)
+    }
+  }
+
+  satisfies(cachedRequest, newRequest) {
+    if (cachedRequest === newRequest) return true
+
+    return u.every(this.varyHeaders, (varyHeader) => {
+      let cachedValue = cachedRequest.header(varyHeader)
+      let newValue = newRequest.header(varyHeader)
+
+      if (varyHeader === 'X-Up-Target' || varyHeader === 'X-Up-Fail-Target') {
+        // A response that was not tailored to a target is a match for all targets
+        if (!cachedValue) return true
+
+        // A response tailored to a target is never a match for a response without a target
+        if (!newValue) return false
+
+        let cachedTokens = u.parseTokens(cachedValue, { separator: 'comma' })
+        let newTokens = u.parseTokens(newValue, { separator: 'comma' })
+
+        return u.containsAll(cachedTokens, newTokens)
+      } else {
+        return cachedValue === newValue
+      }
+    })
+  }
+}
+
 up.Request.Cache = class Cache {
 
   constructor() {
@@ -7,83 +67,53 @@ up.Request.Cache = class Cache {
   }
 
   reset() {
-    this._varyInfo = {}
-    this._map = new Map()
-  }
-
-  _cacheKey(request) {
-    let influencingHeaders = this._getPreviousInfluencingHeaders(request)
-    let varyPart = u.flatMap(influencingHeaders, (headerName) => [headerName, request.header(headerName)])
-    return [request.description, ...varyPart].join(':')
-  }
-
-  _getPreviousInfluencingHeaders(request) {
-    // Returns a list of `Vary` header names that we have seen
-    // in responses to earlier requests with the same method and URL.
-    // This is how we know how fine we must segment our cache buckets.
-    return (this._varyInfo[request.description] ||= new Set())
+    this._routes = {}
+    this._requests = []
   }
 
   get(request) {
     request = this._wrap(request)
-    let cacheKey = this._cacheKey(request)
-    let cachedRequest = this._map.get(cacheKey)
+    let route = this._getRoute(request)
 
+    let cachedRequest = route.matchBest(request)
     if (cachedRequest) {
       if (this._isUsable(cachedRequest)) {
         return cachedRequest
       } else {
-        this._map.delete(cacheKey)
+        // Cache hit, but too old
+        this._delete(request, route)
       }
     }
-  }
-
-  get _capacity() {
-    return up.network.config.cacheSize
-
-  }
-
-  _isUsable(request) {
-    return request.age < up.network.config.cacheEvictAge
   }
 
   async put(request) {
     request = this._wrap(request)
-    this._makeRoom()
-    let cacheKey = this._updateCacheKey(request)
-    this._map.set(cacheKey, request)
-  }
+    let route = this._getRoute(request)
 
-  _updateCacheKey(request) {
-    let oldCacheKey = this._cacheKey(request)
+    // put() is called both (1) before the request was made and (2) when the response was received.
+    // A response may carry new Vary headers that we need to respect for future cache lookups.
     let { response } = request
+    if (response) route.updateVary(response)
 
-    if (response) {
-      this._mergePreviousHeaderNames(request, response)
-      let newCacheKey = this._cacheKey(request)
-      this._renameMapKey(oldCacheKey, newCacheKey)
-      return newCacheKey
-    } else {
-      // If we haven't expanded our cache key above, use the old cache key.
-      return oldCacheKey
-    }
-  }
+    // Delete all cached requests for which this newer request is also a match.
+    // This could also match an earlier entry for the same request.
+    let superseded = route.requests.filter((oldRequest) => route.satisfies(request, oldRequest))
+    // Delete in two steps so we (1) don't change the list we're iterating over and
+    // (2) only rewrite the requests array if necessary.
+    for (let r of superseded) { this._delete(r) }
 
-  _renameMapKey(oldKey, newKey) {
-    if (oldKey !== newKey && this._map.has(oldKey)) {
-      this._map.set(newKey, this._map.get(oldKey))
-      this._map.delete(oldKey)
-    }
-  }
+    // Wait for deletion above before we set request.cacheRoute.
+    // We are often going to match and delete our own request, and this clears request.cacheRoute.
+    request.cacheRoute = route
 
-  _mergePreviousHeaderNames(request, response) {
-    let headersInfluencingResponse = response.ownInfluncingHeaders
-    if (headersInfluencingResponse.length) {
-      let previousInfluencingHeaders = this._getPreviousInfluencingHeaders(request)
-      for (let headerName of headersInfluencingResponse) {
-        previousInfluencingHeaders.add(headerName)
-      }
-    }
+    // Store the request with the route for fast lookup.
+    route.put(request)
+
+    // Store the request in a global list for quick iteration over all cache entries.
+    this._requests.push(request)
+
+    // Make sure that our size doesn't exceed our capacity.
+    this._limitSize()
   }
 
   alias(existingCachedRequest, newRequest) {
@@ -114,7 +144,7 @@ up.Request.Cache = class Cache {
     let value = await u.always(existingRequest)
 
     if (value instanceof up.Response) {
-      if (options.force || this._isCacheCompatible(existingRequest, newRequest)) {
+      if (options.force || existingRequest.cacheRoute.satisfies(existingRequest, newRequest)) {
         // Remember that newRequest was settles from cache.
         // This makes it a candidate for cache revalidation.
         newRequest.fromCache = true
@@ -149,14 +179,9 @@ up.Request.Cache = class Cache {
     }
   }
 
+  // Used by up.Request.Tester
   willHaveSameResponse(existingRequest, newRequest) {
     return existingRequest === newRequest || existingRequest === newRequest.trackedRequest
-  }
-
-  _delete(request) {
-    request = this._wrap(request)
-    let cacheKey = this._cacheKey(request)
-    this._map.delete(cacheKey)
   }
 
   evict(condition = true, testerOptions) {
@@ -181,10 +206,40 @@ up.Request.Cache = class Cache {
     )
   }
 
-  _makeRoom() {
-    while (this._map.size >= this._capacity) {
-      let oldestKey = this._map.keys().next().value
-      this._map.delete(oldestKey)
+  reindex(request) {
+    this._delete(request)
+    this.put(request)
+  }
+
+  _delete(request) {
+    u.remove(this._requests, request)
+    request.cacheRoute.delete(request)
+    // In the case of reindex(), the cacheRoute is about to change because the request
+    // changed URL or params in up:request:load.
+    delete request.cacheRoute
+  }
+
+  _getRoute(request) {
+    return request.cacheRoute || (this._routes[request.description] ||= new Route(request.description))
+  }
+
+  _isUsable(request) {
+    return request.age < up.network.config.cacheEvictAge
+  }
+
+  get _size() {
+    return this._requests.length
+  }
+
+  get _capacity() {
+    return up.network.config.cacheSize
+
+  }
+
+  _limitSize() {
+    for (let i = 0; i < (this._size - this._capacity); i++) {
+      // The _requests array is in insertion order, so the oldest entry will be first
+      this._delete(this._requests[0])
     }
   }
 
@@ -192,13 +247,9 @@ up.Request.Cache = class Cache {
     let tester = up.Request.tester(condition, testerOptions)
 
     // Copy results so evict() can delete from the list we're iterating over
-    let results = u.filter(this._map.values(), tester)
+    let results = u.filter(this._requests, tester)
 
     u.each(results, fn)
-  }
-
-  _isCacheCompatible(request1, request2) {
-    return this._cacheKey(request1) === this._cacheKey(request2)
   }
 
   _wrap(requestOrOptions) {
