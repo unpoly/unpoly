@@ -1,39 +1,35 @@
 Partial
 =======
 
+- New cache
+  - Run specs with old cache impl to know what really changed 
+  - Is it useful that up.cache.evict(request) only evicts that one instance vs. all matching requests like .get()?
+  - Public API only takes a string so we're free to change what we want here
+  - Consider holding pending requests in a separate place outside the cahce, so we don't have to restore displaced requests
 - Request merging
-  - Document with up.request() and /caching 
-  - Test that requests with merged targets are aborted by targeting a fragment of either
+  - Document with up.request() and X-Up-Target
+  - Test that the request is aborted when either fragment is aborted
+  - Test merging of two multi-fragment requests
 - [up-preload]
   - Do a preloading doc page
   - Document [up-load-on] for [up-preload]
     - Both modifier param and prose.
-  - Test: Hovering multiple times over [up-preload] does not cause multiple requests
-  - Test: We don't preload unsafe links, even with [up-preload] or preloadSelectors
 - [up-partial]
-    - Event up:partial:load
-      - Test that it can be prevented
-      - Test that it can change URL
-    - Do we need a programmatic API e.g. up.partial.load()?
-      - Then we would also need [up-load-on="manual"]
     - Docs
       - Consider a doc page "Lazy loading content"
       - Note caching benefits like Turbo frames does: https://turbo.hotwired.dev/handbook/frames#cache-benefits-to-loading-frames
       - For [up-partial]
-        - Note that all attributes for [up-follow] can be used 
+        - Note that all attributes for [up-follow] can be used
+        - Document the render options for which we set a default
       - For up:partial:load
       - For up.partial.load()
         - Second options arg supports all render options 
+        - Document the render options for which we set a default
       - Support without JS important? 
       - SEO
         - Use link to be indexed
         - Use div to not be indexed
       - Targets for the same URL are merged
-      - up.request() docs should mention target merging
-    - Tests
-      - Test that it does not flicker during revalidation when already cached
-      - Test that we don't see navigation effects
-      - Test that two [up-partial] to the same URL will only load one request with merged targets
 
 
 
@@ -41,9 +37,24 @@ Priority
 ========
 
 
+
 Backlog
 =======
 
+- Have a better error when Unpoly is loaded twice
+- In an offline case, the revalidation request is killing our existing cache entry (which may be expired but does have a response)
+  - Is this true? Since we're only putting into the cache after we have a response if cache: false? 
+- Add a config to disable validate merging
+- Docs for up:link:follow should note that, when mutating render options, it's a good idea to also mutate in up:link:preload
+- Docs for up:fragment:loaded should not in params that renderOptions may be mutated
+- Allow "true" and "false" values for all attributes
+  - Check if we can offer more exclusion selectors
+    - noNavSelectors, [up-nav=false]
+    - [up-expand=false]
+- up.history.config.restoreTargets has weird default documented: config.restoreTargets=[]
+- Touch events can scroll the background of a drawer overlay on https://unpoly.com/
+- Maybe [up-clickable] should set a `button` role by default
+  - But keep a `link` role on `a:not([href])` elements, to match `<a up-content>`  
 - In a multi-step render pass, let compilers see all updated fragments
   - This would require us to delay compilation until all fragments are inserted 
 - Consider whether Request#target, Request#context etc. should be setters that auto-set the corresponding header.
@@ -61,16 +72,13 @@ Backlog
     - No! We would need to check their renderOptions for mutation. Who is interested in other events can use them.
   - Update docs: Render Flowchart
   - Update docs: Manipulate render options
-- Docs: https://unpoly.com/X-Up-Method signal that a change of HTTP method happened
 - Docs: https://unpoly.com/closing-overlays#closing-by-targeting-the-parent-layer should mention that targeting a layer *dismisses* with a `:peel` value (#598) 
 - { dismissLabel } should be able to contain HTML
+  - Maybe rename to { dismissContent } or something?
 - Allow variations of official layer modes
 - lightbox Layer mode
+  - Where are we going to put the margin around the box, if we're not having a viewport? 
 - Move custom spec helpers out of `jasmine.foo()` to `specs.foo()`
-- Allow "true" and "false" values for all attributes
-  - Check if we can offer more exclusion selectors
-    - noNavSelectors, [up-nav=false]
-    - [up-expand=false]
 - Allow to keep elements *without* remembering to mark elements as [up-keep]
   - config.keepSelectors
   - Allow { useKeep: '[up-keep], .search-input' } to keep additional elements
@@ -119,6 +127,7 @@ Backlog
 - Docs should show DOM structure of all layer modes
 - Simplify animation API implementation with Element.animate()
   - Animation finishing could be implemented with Element#getAnimations()
+  - This should also fix a regression for: Animations that fly in an element from the screen edge (move-from-top, move-from-left, etc.) no longer leave a transform style on the animated element. By @triskweline.
 - Don't allow a request payload for DELETE requests
   - Maybe make this configuratable as opinions vary here.
     - e.g. up.network.config.payloadMethods
