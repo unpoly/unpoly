@@ -527,10 +527,15 @@ up.protocol = (function() {
   This assumption is correct for redirects with status codes 301, 302 and 303,
   and incorrect for the [less common codes 307 and 308](https://makandracards.com/makandra/501468-modern-http-status-codes-for-redirecting).
 
+  Also for technical reason Unpoly cannot detect redirects to the same URL, but using a different method. For example, when a request
+  to `POST /users` redirects to `GET /users`.
+
+  You can address both edge cases by including an `X-Up-Method` header in your responses.
+
   ### Example
 
   ```http
-  X-Up-Location: /current-url
+  X-Up-Location: /users
   X-Up-Method: GET
   ```
 
@@ -902,26 +907,9 @@ up.protocol = (function() {
 
   ### Example
 
-  The user makes a request to `/sitemap` in order to updates a fragment `.menu`.
-  Unpoly makes a request like this:
+  @include vary-header-example
 
-  ```http
-  GET /sitemap HTTP/1.1
-  X-Up-Target: .menu
-  ```
-
-  The server may choose to [optimize its response](/optimizing-responses) by only render only the HTML for
-  the `.menu` fragment. It responds with the HTTP seen below. Note that it includes a `Vary` header
-  indicating that the `X-Up-Target` header has influenced the response body:
-
-  ```http
-  Vary: X-Up-Target
-
-  <div class="menu">...</div>
-  ```
-
-  After observing the `Vary: X-Up-Target` header, Unpoly will partition cache entries to `/sitemap` by `X-Up-Target` value.
-  That means a request targeting `.menu` is no longer a cache hit for a request targeting a different selector.
+  See [How cache entries are matched](/caching#how-cache-entries-are-matched) for more examples.
 
   ### Resources
 
