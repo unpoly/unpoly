@@ -2,20 +2,11 @@ Partial
 =======
 
 - New cache
-  - In an offline case, the revalidation request is killing our existing cache entry (which may be expired but does have a response)
-    - Or is it? Because we don't really cache the second request until we get the response? 
-    - Maybe get() needs a purpose?
-    - Maybe keep entries with a response until we have a better response
-  - Document cache matching rules
-    - In /caching and/or /Vary  
-    - Default is method + URL + query params
-    - If Vary headers are set
-      - All Vary headers must be the same
-      - Special case for X-Up-Target and X-Up-Fail-Target: All selectors must be contained in the cache
-      - A document without a target is a match for all targets
-      - A document with a target is not a match for all targets
+  - Run specs with old cache impl to know what really changed 
+  - Is it useful that up.cache.evict(request) only evicts that one instance vs. all matching requests like .get()?
+  - Public API only takes a string so we're free to change what we want here
+  - Consider holding pending requests in a separate place outside the cahce, so we don't have to restore displaced requests
 - Request merging
-  - BLOCKER: Merged requests can no longer match with Vary 
   - Document with up.request() and X-Up-Target
   - Test that the request is aborted when either fragment is aborted
   - Test merging of two multi-fragment requests
@@ -42,37 +33,6 @@ Partial
 
 
 
-Ideas for cache misses after request merging
---------------------------------------------
-
-### Delete request merging
-
-- It's less code!
-
-### Accept the cache misses
-
-- This would only affect the rare case where requests would (1) respond with Vary and (2) sometimes be merged, sometimes not
-- The situation *before* the merging logic was not without flaws either.
-  - We would attach to the previous request, but lie to the server about what targets we're requesting
-    - If the server responds with the wrong optimization, we will make another request
-  - Requests were not aborted if the wrong fragment was targeted
-
-### Make a toggle
-
-- `up.network.config.mergeRequestTargets`
-
-
-### Rework the cache
-
-- Make a bucket of cache entries for each method/URL
-- When looking for a hit, get all matches and pick the most recent one
-- Evicting/expiring a request will evict/expire the entire bucket (all requests for this method/GET)
-- When would we override a bucket entry?
-  - A hard limit?
-  - Combination of all influencing headers? => Yes. Change up.Request.Tester so, with a Request argument, it compares descriptions
-
-
-
 Priority
 ========
 
@@ -81,7 +41,9 @@ Priority
 Backlog
 =======
 
+- Have a better error when Unpoly is loaded twice
 - In an offline case, the revalidation request is killing our existing cache entry (which may be expired but does have a response)
+  - Is this true? Since we're only putting into the cache after we have a response if cache: false? 
 - Add a config to disable validate merging
 - Docs for up:link:follow should note that, when mutating render options, it's a good idea to also mutate in up:link:preload
 - Docs for up:fragment:loaded should not in params that renderOptions may be mutated
@@ -110,7 +72,6 @@ Backlog
     - No! We would need to check their renderOptions for mutation. Who is interested in other events can use them.
   - Update docs: Render Flowchart
   - Update docs: Manipulate render options
-- Docs: https://unpoly.com/X-Up-Method signal that a change of HTTP method happened
 - Docs: https://unpoly.com/closing-overlays#closing-by-targeting-the-parent-layer should mention that targeting a layer *dismisses* with a `:peel` value (#598) 
 - { dismissLabel } should be able to contain HTML
   - Maybe rename to { dismissContent } or something?
