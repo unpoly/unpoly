@@ -64,8 +64,8 @@ describe('up.network', function() {
             expect(response.request.target).toEqual('.target')
             expect(response.request.hash).toBeBlank()
 
-            expect(response.url).toMatchURL('/url'); // If the server signaled a redirect with X-Up-Location, this would be reflected here
-            expect(response.method).toEqual('POST'); // If the server sent a X-Up-Method header, this would be reflected here
+            expect(response.url).toMatchURL('/url') // If the server signaled a redirect with X-Up-Location, this would be reflected here
+            expect(response.method).toEqual('POST') // If the server sent a X-Up-Method header, this would be reflected here
             expect(response.text).toEqual('response-text')
             expect(response.status).toEqual(201)
             expect(response.xhr).toBePresent()
@@ -265,7 +265,7 @@ describe('up.network', function() {
 
             await wait()
 
-            jasmine.clock().install(); // required by responseTimeout()
+            jasmine.clock().install() // required by responseTimeout()
             this.lastRequest().responseTimeout()
 
             await expectAsync(request).toBeRejectedWith(jasmine.anyError('up.Offline', /time ?out/i))
@@ -415,7 +415,7 @@ describe('up.network', function() {
         if (FormData.prototype.entries) {
 
           it("does not explode if the original request's { params } is a FormData object", asyncSpec(function(next) {
-            up.request('/foo', {method: 'post', params: new FormData()}); // POST requests are not cached
+            up.request('/foo', {method: 'post', params: new FormData()}) // POST requests are not cached
 
             next(() => {
               expect(jasmine.Ajax.requests.count()).toEqual(1)
@@ -735,35 +735,128 @@ describe('up.network', function() {
           // })
         }))
 
-        it('does not cache responses with an error status', asyncSpec(function(next) {
-          next(() => up.request({url: '/foo', cache: true}))
-          next(() => jasmine.respondWith({status: 500, contentType: 'text/html', responseText: 'foo'}))
-          next(() => expect({url: '/foo'}).not.toBeCached())
-        }))
+        describe('when the server responds with an error status code', function() {
 
-        it('evicts requests that caused a fatal network error', asyncSpec(function(next) {
-          next(() => up.request({url: '/foo', cache: true}))
-          next(() => jasmine.lastRequest().responseError())
-          next(() => expect({url: '/foo'}).not.toBeCached())
-        }))
+          it('does not cache the response', async function() {
+            up.request({url: '/foo', cache: true})
 
-        it('does not cache responses with a status of 304 (Not Modified)', asyncSpec(function(next) {
-          next(() => up.request({url: '/foo', cache: true}))
-          next(() => jasmine.respondWith({ status: 304 }))
-          next(() => expect({ url: '/foo' }).not.toBeCached())
-        }))
+            await wait()
 
-        it('does not cache responses with a status of 204 (No Content)', asyncSpec(function(next) {
-          next(() => up.request({url: '/foo', cache: true}))
-          next(() => jasmine.respondWith({ status: 204 }))
-          next(() => expect({ url: '/foo' }).not.toBeCached())
-        }))
+            jasmine.respondWith({status: 500, responseText: 'foo'})
 
-        it('does not cache responses with an empty body', asyncSpec(function(next) {
-          next(() => up.request({url: '/foo', cache: true}))
-          next(() => jasmine.respondWith({ status: 200, responseText: '', responseHeaders: { 'X-Up-Accept-Layer': "123" } }))
-          next(() => expect({ url: '/foo' }).not.toBeCached())
-        }))
+            await wait()
+
+            expect({url: '/foo'}).not.toBeCached()
+          })
+
+          it('evicts an earlier cache entry with a successful response (as we now know a better state, even if that state is an error page, and the next request should retry)', async function() {
+            // populateCache() uses up.request({ cache: true }) internally
+            await jasmine.populateCache({ url: '/path' }, { status: 200, responseText: 'success text' })
+
+            // Make a second request that does not cache, like revalidation would do.
+            // However that still manipulates the cache if it sees that the request has a cache entry.
+            up.request({ url: '/path', cache: false })
+
+            await wait()
+
+            jasmine.respondWith({ status: 500, responseText: 'error text' })
+
+            await wait()
+
+            expect({ url: '/path' }).not.toBeCached()
+          })
+
+        })
+
+        describe('when the request failed due to a fatal network errror', function() {
+
+          it('does not cache the response (so the next request will retry) ', async function() {
+            up.request({ url: '/foo', cache: true })
+
+            await wait()
+
+            jasmine.lastRequest().responseError()
+
+            await wait()
+
+            expect({ url: '/foo' }).not.toBeCached()
+          })
+
+          it('keeps an earlier cache entry with a successful response (which may be expired but still useful when offline)', async function() {
+            // populateCache() uses up.request({ cache: true }) internally
+            await jasmine.populateCache({ url: '/path' }, { status: 200, responseText: 'success text' })
+
+            // Make a second request that does not cache, like revalidation would do.
+            // However that still manipulates the cache if it sees that the request has a cache entry.
+            up.request({ url: '/path', cache: false })
+
+            await wait()
+
+            jasmine.lastRequest().responseError()
+
+            await wait()
+
+            expect({ url: '/path' }).toBeCachedWithResponse({ text: 'success text'})
+          })
+
+        })
+
+        describe('when the server responds without content', function() {
+
+          it('does not cache responses with a status of 304 (Not Modified)', async function() {
+            up.request({url: '/foo', cache: true})
+
+            await wait()
+
+            jasmine.respondWith({ status: 304 })
+
+            await wait()
+
+            expect({ url: '/foo' }).not.toBeCached()
+          })
+
+          it('does not cache responses with a status of 204 (No Content)', async function() {
+            up.request({url: '/foo', cache: true})
+
+            await wait()
+
+            jasmine.respondWith({ status: 204 })
+
+            await wait()
+
+            expect({ url: '/foo' }).not.toBeCached()
+          })
+
+          it('does not cache responses with an empty body', async function() {
+            up.request({url: '/foo', cache: true})
+
+            await wait()
+
+            jasmine.respondWith({ status: 200, responseText: '', responseHeaders: { 'X-Up-Accept-Layer': "123" } })
+
+            await wait()
+
+            expect({ url: '/foo' }).not.toBeCached()
+          })
+
+          it('keeps an earlier cache entry with a contentful response (which we need when rendering that response later)', async function() {
+            // populateCache() uses up.request({ cache: true }) internally
+            await jasmine.populateCache({ url: '/path' }, { status: 200, responseText: 'success text' })
+
+            // Make a second request that does not cache, like revalidation would do.
+            // However that still manipulates the cache if it sees that the request has a cache entry.
+            up.request({ url: '/path', cache: false })
+
+            await wait()
+
+            jasmine.respondWith({ status: 304 })
+
+            await wait()
+
+            expect({ url: '/path' }).toBeCachedWithResponse({ text: 'success text'})
+          })
+
+        })
 
         it("does not lose a request's #hash when re-using a cached request without a #hash (bugfix)", function() {
           const request1 = up.request({url: '/url#foo', cache: true})
@@ -772,7 +865,7 @@ describe('up.network', function() {
 
           const request2 = up.request({url: '/url#bar', cache: true})
           expect(request2.hash).toEqual('#bar')
-          expect(request1.hash).toEqual('#foo'); // also make sure that the first request was not mutated
+          expect(request1.hash).toEqual('#foo') // also make sure that the first request was not mutated
           expect({url: '/url#bar'}).toBeCached()
         })
 
@@ -837,17 +930,29 @@ describe('up.network', function() {
             expect(jasmine.Ajax.requests.count()).toEqual(1)
           })
 
-          it("doesn't reuse responses when asked for the same path, but different query params", asyncSpec(function (next) {
-            next(() => up.request({ url: '/path', params: { query: 'foo' }, cache: true }))
-            next(() => up.request({ url: '/path', params: { query: 'bar' }, cache: true }))
-            next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
-          }))
+          it("doesn't reuse responses when asked for the same path, but different query params", async function() {
+            up.request({ url: '/path', params: { query: 'foo' }, cache: true })
 
-          it("never reuses responses for different paths, even if all other headers match", asyncSpec(function (next) {
-            next(() => up.request({ url: '/foo', cache: true, target: '.target' }))
-            next(() => up.request({ url: '/bar', cache: true, target: '.target' }))
-            next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
-          }))
+            await wait()
+
+            up.request({ url: '/path', params: { query: 'bar' }, cache: true })
+
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toEqual(2)
+          })
+
+          it("never reuses responses for different paths, even if all other headers match", async function() {
+            up.request({ url: '/foo', cache: true, target: '.target' })
+
+            await wait()
+
+            up.request({ url: '/bar', cache: true, target: '.target' })
+
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toEqual(2)
+          })
 
           describe('Vary response header', function() {
 
@@ -967,7 +1072,7 @@ describe('up.network', function() {
               expect({ url: '/path' }).not.toBeCached()
             })
 
-            fit('partitions the cache separately for varying X-Up-Target and X-Up-Fail-Target headers', async function() {
+            it('partitions the cache separately for varying X-Up-Target and X-Up-Fail-Target headers', async function() {
               await jasmine.populateCache(
                 { url: '/path', target: '.a, .b', failTarget: '.c, .d' },
                 { responseHeaders: { Vary: 'X-Up-Target, X-Up-Fail-Target'} }
@@ -1706,7 +1811,7 @@ describe('up.network', function() {
 
           next(() => {
             expect(jasmine.Ajax.requests.count()).toEqual(1)
-          }); // only one request was made
+          }) // only one request was made
 
           next(() => {
             this.respondWith('first response', {request: jasmine.Ajax.requests.at(0)})
@@ -1715,7 +1820,7 @@ describe('up.network', function() {
           next(() => {
             expect(responses).toEqual(['first response'])
             expect(jasmine.Ajax.requests.count()).toEqual(2)
-          }); // a second request was made
+          }) // a second request was made
 
           next(() => {
             this.respondWith('second response', {request: jasmine.Ajax.requests.at(1)})
@@ -2080,7 +2185,7 @@ describe('up.network', function() {
           })
 
           next(() => {
-            jasmine.clock().install(); // required by responseTimeout()
+            jasmine.clock().install() // required by responseTimeout()
             this.lastRequest().responseTimeout()
           })
 

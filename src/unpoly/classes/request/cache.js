@@ -52,8 +52,6 @@ class Route {
         let cachedTokens = u.parseTokens(cachedValue, { separator: 'comma' })
         let newTokens = u.parseTokens(newValue, { separator: 'comma' })
 
-        console.debug({ cachedTokens, newTokens })
-
         return u.containsAll(cachedTokens, newTokens)
       } else {
         return cachedValue === newValue
@@ -92,8 +90,6 @@ up.Request.Cache = class Cache {
     request = this._wrap(request)
     let route = this._getRoute(request)
 
-    console.debug("put(%o) into route %o (prop route is %o)", request.url, route.description, request.cacheRoute?.description)
-
     // put() is called both (1) before the request was made and (2) when the response was received.
     // A response may carry new Vary headers that we need to respect for future cache lookups.
     let { response } = request
@@ -121,8 +117,6 @@ up.Request.Cache = class Cache {
   }
 
   alias(existingCachedRequest, newRequest) {
-    console.debug("alias(%o => %o)", existingCachedRequest.url, newRequest.url)
-
     // Check if we have a cached copy of the given up.Request or request options.
     // Only the cached copy will have the correct promise that will resolve to a response,
     // even if all other properties match.
@@ -213,13 +207,11 @@ up.Request.Cache = class Cache {
   }
 
   reindex(request) {
-    console.debug("reindex(%o)", request.url)
     this._delete(request)
     this.put(request)
   }
 
   _delete(request) {
-    console.debug("delete(%o)", request.url)
     u.remove(this._requests, request)
     request.cacheRoute.delete(request)
     // In the case of reindex(), the cacheRoute is about to change because the request

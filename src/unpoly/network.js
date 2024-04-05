@@ -536,9 +536,22 @@ up.network = (function() {
   }
 
   function handleCaching(request) {
-    // Cache the request before it is queued and loaded.
-    // This way additional requests to the same endpoint will hit and track this request.
+    // Several code paths lead here:
+    //
+    // (1) A request with { cache: true } when there was a cache miss.
+    // (2) A request with { cache: false }. This may still update the cache if we end up with a fresher response,
+    //     but should keep a good cache entry if we end up with a network error.
+    //
+    // A code path that does *never* lead here:
+    //
+    // (3) A request with { cache: true } when there was a cache hit.
+
     if (request.willCache()) {
+      // Here we have a request with { request: true } and a cache miss.
+      //
+      // Cache the request before it is queued and loaded.
+      // This way additional requests to the same endpoint will hit and track this request.
+      // Since nothing was cached for this request, we're not overriding an existing cache entry.
       cache.put(request)
 
       // If the request changed its URL or params in up:request:load, the cache needs to re-index.
@@ -568,17 +581,31 @@ up.network = (function() {
         cache.evict(evictCache, { except: request })
       }
 
-      // (1) Re-cache a cacheable request in case we evicted the entire cache above
-      // (2) An un-cacheable request should still update an existing cache entry
-      //     (written by a earlier, cacheable request with the same cache key)
-      //     since the later response will be fresher.
-      // (3) Now that we have a response the cache needs to be updated with Vary info.
-      if (cache.get(request)) {
-        cache.put(request)
-      }
+      let hasCacheEntry = cache.get(request)
+      let isResponse = responseOrError instanceof up.Response
+      let isNetworkError = !isResponse
+      let isSuccessResponse = isResponse && responseOrError.ok
+      let isErrorResponse = isResponse && !responseOrError.ok
+      let isEmptyResponse = isResponse && responseOrError.none
 
-      if (!responseOrError.isCacheable?.()) {
+      if (isErrorResponse) {
+        // Evict an earlier cache entry with a successful response (as we now know a better state, even if that state is an error page).
+        cache.evict(request.url)
+      } else if (isNetworkError || isEmptyResponse) {
+        // Only evict this one request instance in case we put it into the cache at the start of this function.
+        // We want to keep other cache entries for the same URL because:
+        //
+        // (1) If the request failed due to a
         cache.evict(request)
+      } else if (isSuccessResponse && hasCacheEntry) {
+        // We now re-put the request into the cache, regardless of its { cache } setting, for multiple reasons:
+        //
+        // (1) In case we evicted the entire cache above, we must re-cache a cacheable request.
+        // (2) An un-cacheable request should still update an existing cache entry
+        //     (written by a earlier, cacheable request with the same cache key)
+        //     since the later response will be fresher.
+        // (3) Now that we have a response the cache needs to be updated with Vary info.
+        cache.put(request)
       }
     })
   }

@@ -168,14 +168,6 @@ up.Response = class Response extends up.Record {
     return !this.text
   }
 
-  isCacheable() {
-    // (1) Uncache responses that have failed. We have no control over the server,
-    //     and another request with the same properties may succeed.
-    // (2) Uncache responses that have an empty body, in particular 304 Not Modified.
-    //     Another request with a different ETag may produce a body.
-    return this.ok && !this.none
-  }
-
   /*-
   Returns the HTTP header value with the given name.
 
