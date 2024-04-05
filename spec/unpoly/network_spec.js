@@ -1186,6 +1186,23 @@ describe('up.network', function() {
             expect(request1.headers).not.toHaveKey('X-Up-Target')
           })
 
+          it('merges to requests targeting multiple selectors each', function() {
+            let foo1 = fixture('.foo1')
+            let foo2 = fixture('.foo2')
+            let bar1 = fixture('.bar1')
+            let bar2 = fixture('.bar2')
+
+            let request1 = up.request({ url: '/path', cache: true, target: '.foo1, .foo2' })
+
+            expect(request1.fragments).toEqual([foo1, foo2])
+
+            let request2 = up.request({ url: '/path', cache: true, target: '.bar1, .bar2' })
+
+            expect(request1.target).toBe('.foo1, .foo2, .bar1, .bar2')
+            expect(request1.header('X-Up-Target')).toBe('.foo1, .foo2, .bar1, .bar2')
+            expect(request1.fragments).toMatchList([foo1, foo2, bar1, bar2])
+          })
+
         })
 
         describe('with { cache: "auto" }', function() {
