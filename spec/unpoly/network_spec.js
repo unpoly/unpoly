@@ -1203,6 +1203,44 @@ describe('up.network', function() {
             expect(request1.fragments).toMatchList([foo1, foo2, bar1, bar2])
           })
 
+          it("aborts both requests if the earlier request's fragment is aborted", async function() {
+            let foo = fixture('.foo')
+            let bar = fixture('.bar')
+
+            let request1 = up.request({ url: '/path', cache: true, target: '.foo' })
+            let request2 = up.request({ url: '/path', cache: true, target: '.bar' })
+
+            expect(request1.fragments).toEqual([foo, bar])
+
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+
+            up.fragment.abort(foo)
+
+            await expectAsync(request1).toBeRejectedWith(jasmine.any(up.Aborted))
+            await expectAsync(request2).toBeRejectedWith(jasmine.any(up.Aborted))
+          })
+
+          it("aborts both requests if a later request's fragment is aborted", async function() {
+            let foo = fixture('.foo')
+            let bar = fixture('.bar')
+
+            let request1 = up.request({ url: '/path', cache: true, target: '.foo' })
+            let request2 = up.request({ url: '/path', cache: true, target: '.bar' })
+
+            expect(request1.fragments).toEqual([foo, bar])
+
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+
+            up.fragment.abort(bar)
+
+            await expectAsync(request1).toBeRejectedWith(jasmine.any(up.Aborted))
+            await expectAsync(request2).toBeRejectedWith(jasmine.any(up.Aborted))
+          })
+
         })
 
         describe('with { cache: "auto" }', function() {
