@@ -8,6 +8,7 @@ You can validate forms [after submission](#validating-after-submission),
 [after changing a field](#validating-after-changing-a-field) or
 [while the user is typing](#validating-while-typing).
 
+
 Validating after submission
 ---------------------------
 

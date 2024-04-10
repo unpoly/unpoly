@@ -12,6 +12,11 @@ up.reload(element) // Derives the target '#foo' from the given element
 
 Popular features that must derive targets are `[up-poll]`,  `[up-hungry]`, `[up-viewport]`, [`up.reload(Element)`](/up.reload) and [`up.render(Element)`](/up.render).
 
+
+
+Identifying properties
+----------------------
+
 To build a good selector, the element needs an **identifying property** that distinguishes it from other elements on the same [layer](/up.layer). The most important properties that Unpoly looks for are the following:
 
 - The element's `[id]` or `[up-id]` attribute
