@@ -467,7 +467,7 @@ up.link = (function() {
   Preload requests are considered [background requests](/up.render#options.background)
   and will not show the [progress bar](/loading-indicators#progress-bar).
 
-  Preloading a link will [enable caching](/caching#enabling-caching) for that link automatically.
+  Preloaded content will be stored in the [cache](/caching).
 
   @function up.link.preload
   @param {string|Element|jQuery} link
@@ -1475,7 +1475,7 @@ up.link = (function() {
   Preload requests are considered [background requests](/up.render#options.background)
   and will not show the [progress bar](/loading-indicators#progress-bar).
 
-  Preloading a link will [enable caching](/caching#enabling-caching) for that link automatically.
+  Preloaded content will be stored in the [cache](/caching).
 
   Unpoly will only preload [links with safe methods](/up.link.isSafe).
 
