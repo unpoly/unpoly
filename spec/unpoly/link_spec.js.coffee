@@ -2611,20 +2611,49 @@ describe 'up.link', ->
           # The target is replaced instantly
           expect('.target').toHaveText('new text')
 
-      it 'does not cache a failed response', asyncSpec (next) ->
-        up.link.config.preloadDelay = 0
+      describe 'caching', ->
 
-        $fixture('.target').text('old text')
+        it 'caches the preloaded content', ->
+          up.link.config.preloadDelay = 0
 
-        $link = $fixture('a[href="/foo"][up-target=".target"][up-preload]')
-        up.hello($link)
+          fixture('.target', text: 'old text')
 
-        Trigger.hoverSequence($link)
+          link = fixture('a[href="/foo"][up-target=".target"][up-preload]')
+          up.hello(link)
+          cacheEntry = { url: '/foo' }
 
-        next.after 50, =>
+          await wait()
+
+          expect(cacheEntry).not.toBeCached()
+
+          Trigger.hoverSequence(link)
+
+          await wait(30)
+
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(cacheEntry).toBeCachedWithoutResponse()
+
+          jasmine.respondWith('<div class="target">new text</div>')
+
+          await wait()
+
+          expect(cacheEntry).toBeCachedWithResponse(text: '<div class="target">new text</div>')
+
+        it 'does not cache a failed response', ->
+          up.link.config.preloadDelay = 0
+
+          fixture('.target', text: 'old text')
+
+          link = fixture('a[href="/foo"][up-target=".target"][up-preload]')
+          up.hello(link)
+
+          Trigger.hoverSequence(link)
+
+          await wait(30)
+
           expect(jasmine.Ajax.requests.count()).toEqual(1)
 
-          @respondWith
+          jasmine.respondWith
             status: 500
             responseText: """
               <div class="target">
@@ -2632,19 +2661,90 @@ describe 'up.link', ->
               </div>
               """
 
-        next =>
+          await wait()
+
           # We only preloaded, so the target isn't replaced yet.
           expect('.target').toHaveText('old text')
 
-          Trigger.click($link)
+          Trigger.click(link)
 
-        next =>
+          await wait()
+
           # Since the preloading failed, we send another request
           expect(jasmine.Ajax.requests.count()).toEqual(2)
 
           # Since there isn't anyone who could handle the rejection inside
           # the event handler, our handler mutes the rejection.
           # Jasmine will fail if there are unhandled promise rejections
+
+        describe 'when the link destination is already cached', ->
+
+          it 'does not send a request if the link destination is already cached', ->
+            up.link.config.preloadDelay = 0
+
+            await jasmine.populateCache('/destination', '<div class="target">new text</div>')
+
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+            fixture('.target', text: 'old text')
+
+            link = fixture('a[href="/destination"][up-target=".target"][up-preload]')
+            up.hello(link)
+
+            await wait()
+
+            Trigger.hoverSequence(link)
+
+            await wait(30)
+
+            # No additional request was sent
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            expect(up.network.isBusy()).toBe(false)
+
+          it 'waits for revalidation of stale content until the link is clicked', ->
+            up.link.config.preloadDelay = 0
+
+            # Create an expired cache entry
+            cacheEntry = { url: '/destination' }
+            await jasmine.populateCache(cacheEntry, '<div class="target">new text</div>')
+            up.cache.expire(cacheEntry)
+            expect(cacheEntry).toBeCached()
+            expect(cacheEntry).toBeExpired()
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+            fixture('.target', text: 'old text')
+
+            link = fixture('a[href="/destination"][up-target=".target"][up-preload]')
+            up.hello(link)
+
+            await wait()
+
+            Trigger.hoverSequence(link)
+
+            await wait(30)
+
+            # No revalidation request was sent
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            expect(up.network.isBusy()).toBe(false)
+
+            Trigger.clickSequence(link)
+            await wait()
+
+            # The stale content is rendered immediately
+            expect('.target').toHaveText('new text')
+
+            # Now that the link is clicked we're revalidating
+            expect(jasmine.Ajax.requests.count()).toEqual(2)
+            expect(up.network.isBusy()).toBe(true)
+
+            jasmine.respondWith('<div class="target">revalidated text</div>')
+
+            await wait()
+
+            expect('.target').toHaveText('revalidated text')
+
+            expect(cacheEntry).toBeCached()
+            expect(cacheEntry).not.toBeExpired()
 
       describe 'exemptions from preloading', ->
 

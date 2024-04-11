@@ -10,6 +10,15 @@ beforeEach ->
 
         pass: !!cached
 
+    toBeCachedWithoutResponse: (util, customEqualityTesters) ->
+      compare: (optionsOrRequest) ->
+        request = u.wrapValue(up.Request, optionsOrRequest)
+        cached = up.cache.get(request)
+
+        pass = cached && !cached.response
+
+        { pass }
+
     toBeCachedWithResponse: (util, customEqualityTesters) ->
       compare: (optionsOrRequest, expectedResponseProps = {}) ->
         request = u.wrapValue(up.Request, optionsOrRequest)
