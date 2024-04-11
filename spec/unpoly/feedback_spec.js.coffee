@@ -544,16 +544,35 @@ describe 'up.feedback', ->
           expect('.main').toHaveText('new-text')
           expect($link).not.toHaveClass('up-active')
 
-      it 'removes .up-active from a clicked link if the request fails (bugfix)', asyncSpec (next) ->
-        $link = $fixture('a[href="/foo"][up-target=".main"]')
-        fixture('.main')
-        Trigger.clickSequence($link)
+      it 'removes .up-active when the server responds with an error code', ->
+        link = fixture('a[href="/foo"][up-target="#main"][up-fail-target="#main"]')
+        fixture('#main')
+        Trigger.clickSequence(link)
 
-        next =>
-          expect($link).toHaveClass('up-active')
-#            @respondWith
-#              responseText: '<div class="main">failed</div>'
-#              status: 400
-#
-#          next =>
-#            expect($link).not.toHaveClass('up-active')
+        await wait()
+
+        expect(link).toHaveClass('up-active')
+
+        jasmine.respondWith(
+          responseText: '<div id="main">failed</div>'
+          status: 400
+        )
+
+        await wait()
+
+        expect(link).not.toHaveClass('up-active')
+
+      it 'removes .up-active when the request fails due to a fatal network issue', ->
+        link = fixture('a[href="/foo"][up-target="#main"]')
+        fixture('#main')
+        Trigger.clickSequence(link)
+
+        await wait()
+
+        expect(link).toHaveClass('up-active')
+
+        await jasmine.expectGlobalError 'up.Offline', ->
+          jasmine.lastRequest().responseError()
+          await wait(10) # waiting for a single task does not work for some reason
+
+        expect(link).not.toHaveClass('up-active')
