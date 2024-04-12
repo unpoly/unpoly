@@ -92,7 +92,7 @@ up.migrate.transformAttribute('up-restore-scroll', function(link, restoreScroll)
 This is done by:
 
 - [Following the link through AJAX](/a-up-follow) instead of a full page load
-- [Preloading the link's destination URL](/a-up-preload)
+- [Preloading the link's destination URL](/preloading)
 - [Triggering the link on `mousedown`](/a-up-instant) instead of on `click`
 
 ### Example

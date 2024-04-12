@@ -46,7 +46,7 @@ You may move a request into the background by passing
 an [`{ background: true }`](/up.render#options.background) option
 or setting an [`[up-background]`](/a-up-follow#up-background) attribute.
 
-Requests from [preloading](/a-up-preload) or [polling](/up-poll) are automatically
+Requests from [preloading](/preloading) or [polling](/up-poll) are automatically
 marked as background requests.
 
 

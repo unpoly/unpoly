@@ -169,7 +169,7 @@ up.Request.prototype.navigate = function() {
 
 
 /*-
-Whether this request is [preloading](/a-up-preload) content.
+Whether this request is [preloading](/preloading) content.
 
 @property up.Request#preload
 @param {boolean} [preload=false]
