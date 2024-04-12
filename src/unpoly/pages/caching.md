@@ -67,6 +67,11 @@ When re-visiting pages, Unpoly often renders twice:
 1. An initial render pass from the cache (which may be expired)
 2. A second render pass from the server (which is always fresh)
 
+> [note]
+> Revalidation only happens after expired content was rendered into the page.
+> No revalidation occurs when expired cache entries are accessed without rendering (e. g. when [preloading](/preloading) a cached URL).
+
+
 
 ### Enabling revalidation
 
@@ -125,7 +130,7 @@ This gives you a chance to inspect the response or DOM state right before a frag
 ```js
 up.on('up:fragment:loaded', function(event) {
   // Don't insert fresh content if the user has started a video
-  // after the stale content was rendered.
+  // after the expired content was rendered.
   if (event.revalidating && !event.request.fragment.querySelector('video')?.paused) {
     // Finish the render pass with no changes.
     event.skip()
@@ -158,7 +163,7 @@ up.compiler('[track-page-view]', function(element, data, meta) { // mark-phrase 
 Expiration
 ----------
 
-Cached content automatically expires after 15 seconds. This can be configured in `up.network.config.cacheExpireAge`. The configured age should at least cover the average time between [preloading](/a-up-preload) and following a link.
+Cached content automatically expires after 15 seconds. This can be configured in `up.network.config.cacheExpireAge`. The configured age should at least cover the average time between [preloading](/preloading) and following a link.
 
 After expiring, cached content is kept in the cache, but will trigger [revalidation](#revalidation) when used. Expired pages also [remain accessible](/network-issues#offline-cache) after a [connection loss](/network-issues#disconnects).
 

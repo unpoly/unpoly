@@ -66,3 +66,5 @@ RedirectPermanent /focus-visible /focus-visibility
 RedirectPermanent /focus-ring /focus-visibility
 RedirectPermanent /focus-outline /focus-visibility
 
+RedirectPermanent /preloading-links /preloading
+RedirectPermanent /preloading-content /preloading

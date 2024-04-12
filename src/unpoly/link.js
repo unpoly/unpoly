@@ -74,6 +74,7 @@ new page is loading.
 @see targeting-fragments
 @see handling-everything
 @see failed-responses
+@see preloading
 
 @see a[up-follow]
 @see a[up-instant]
@@ -153,7 +154,7 @@ up.link = (function() {
     - Links that are [not followable](#config.noFollowSelectors).
 
   @param {Array<string>} config.preloadSelectors
-    An array of CSS selectors matching links that are [preloaded on hover](/a-up-preload).
+    An array of CSS selectors matching links that are [preloaded on hover](/preloading#on-hover).
 
     You can customize this property to preload *all* links on `mousedown` without requiring an `[up-preload]` attribute.
     See [Handling all links and forms](/handling-everything).
@@ -161,7 +162,7 @@ up.link = (function() {
   @param {Array<string>} config.noPreloadSelectors
     Exceptions to `up.link.config.preloadSelectors`.
 
-    Matching links will *not* be [preloaded on hover](/a-up-preload), even if they match `up.link.config.preloadSelectors`.
+    Matching links will *not* be [preloaded on hover](/preloading#on-hover), even if they match `up.link.config.preloadSelectors`.
 
     By default Unpoly excludes:
 
@@ -171,8 +172,7 @@ up.link = (function() {
     - When the link destination [cannot be cached](/up.network.config#config.autoCache).
 
   @param {number} [config.preloadDelay=90]
-    The number of milliseconds to wait before [`[up-preload]`](/a-up-preload)
-    starts preloading.
+    The number of milliseconds to wait before [preloading on hover](/preloading#on-hover).
 
   @param {Array<string>} [config.clickableSelectors]
     A list of CSS selectors matching elements that should behave like links or buttons.
@@ -437,10 +437,25 @@ up.link = (function() {
   ```js
   up.on('up:link:follow', function(event, link) {
     if (link.closest('form')) {
-      event.renderOptions.layer = 'new'
+      event.renderOptions.layer = 'new modal'
     }
   })
   ```
+
+  When changing render options for a [preloaded link](/preloading), consider making the
+  same change for `up:link:preload` so the [preload request](/preloading#preload-request-behavior) sends the same [HTTP headers](/up.protocol).
+
+  In the example above we want to ensure a `X-Up-Mode: modal` header to be sent, so we modify
+  both events:
+
+  ```js
+  up.on('up:link:follow up:link:preload', function(event, link) {
+    if (link.closest('form')) {
+      event.renderOptions.layer = 'new modal'
+    }
+  })
+  ```
+
 
   @event up:link:follow
   @param {Element} event.target
@@ -448,26 +463,22 @@ up.link = (function() {
   @param {Object} event.renderOptions
     An object with [render options](/up.render#parameters) for the coming fragment update.
 
-    Listeners may inspect and modify these options.
+    Listeners may inspect and modify these options. It is recommended to
+    change render options for `up:link:preload` in the same way.
   @param event.preventDefault()
     Prevents the link from being followed.
   @stable
   */
 
   /*-
-  Preloads the given link.
+  [Preloads](/preloading) the given link.
 
   When the link is clicked later, the response will already be [cached](/caching),
   making the interaction feel instant.
 
-  You may use this function to programmatically populate the cache
+  You may use this function to [programmatically populate the cache](/preloading#scripted)
   with pages the user is likely to click or requires
   [accessible while offline](/network-issues#offline-cache).
-
-  Preload requests are considered [background requests](/up.render#options.background)
-  and will not show the [progress bar](/loading-indicators#progress-bar).
-
-  Preloaded content will be stored in the [cache](/caching).
 
   @function up.link.preload
   @param {string|Element|jQuery} link
@@ -511,7 +522,28 @@ up.link = (function() {
   }
 
   /*-
-  This event is [emitted](/up.emit) before a link is [preloaded](/a-up-preload).
+  This event is [emitted](/up.emit) before a link is [preloaded](/preloading).
+
+  Listeners may prevent this event to stop the link from being preloaded,
+  or [change render options](/up:link:follow#changing-render-options) for the preload request.
+
+  ### Example
+
+  The following would disable preloading on slow 2G connections:
+
+  ```js
+  function isSlowConnection() {
+    // https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation
+    return navigator.connection && navigator.connection.effectiveType.include('2g')
+  }
+
+
+  up.on('up:link:preload', function(event) {
+    if (isSlowConnection()) {
+      event.preventDefault()
+    }
+  })
+  ```
 
   @event up:link:preload
   @param {Element} event.target
@@ -519,7 +551,7 @@ up.link = (function() {
   @param {Object} event.renderOptions
     An object with [render options](/up.render#parameters) for the preloading.
 
-    Listeners may inspect and modify these options.
+    Listeners may inspect and [modify](/up:link:follow#changing-render-options) these options.
   @param event.preventDefault()
     Prevents the link from being preloaded.
   @stable
@@ -799,9 +831,13 @@ up.link = (function() {
   Returns whether the given link has a [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
   HTTP method like `GET`.
 
+  You can configure links to use unsafe methods like `POST` or `DELETE` by setting an [`[up-method]`](/a-up-follow#up-method) attribute.
+
   @function up.link.isSafe
   @param {Element} link
+    The link to test.
   @return {boolean}
+    Whether the link will be followed using a safe HTTP method.
   @stable
   */
   function isSafe(link) {
@@ -1373,10 +1409,9 @@ up.link = (function() {
   AJAX request will be triggered right way, the interaction will
   appear faster.
 
-  > [INFO]
-  > With `[up-instant]` users can no longer cancel a click by dragging the pressed mouse away from the link.
-  > However, for navigation actions this isn't needed. E.g. many operation systems switch tabs on `mousedown`
-  > instead of `click`.
+  Links with the `[up-instant]` attribute are always [followed by Unpoly](/a-up-follow) and will not make a full page load.
+
+  To [follow all links on `mousedown`](/handling-everything#following-all-links-on-mousedown), configure `up.link.config.instantSelectors`.
 
   ### Example
 
@@ -1386,8 +1421,11 @@ up.link = (function() {
 
   ### Accessibility
 
-  If the user activates an element using their keyboard, the `up:click` event will be emitted
-  on `click`, even if the element has an `[up-instant]` attribute.
+  Links with `[up-instant]` can still be activated with the keyboard.
+
+  With `[up-instant]` users can no longer cancel a click by dragging the pressed mouse away from the link.
+  However, for navigation actions this isn't needed. E.g. many operation systems switch tabs on `mousedown`
+  instead of `click`.
 
   @selector a[up-instant]
   @stable
@@ -1463,27 +1501,46 @@ up.link = (function() {
   })
 
   /*-
-  Preloads this link when the user hovers over it.
-
-  When the link is clicked later the response will already be cached,
+  [Preloads](/preloading) this link before the user clicks it.
+  When the link is clicked, the response will already be [cached](/caching),
   making the interaction feel instant.
 
-  Preloading a link will *not* [abort](/aborting-requests) pending requests
-  [targeting](/targeting-fragments) the same fragments. Only when the link is clicked later
-  conflicting requests are aborted.
+  Unpoly will only preload [links with safe methods](/up.link.isSafe). The `[up-preload]` attribute
+  has no effect on unsafe links.
 
-  Preload requests are considered [background requests](/up.render#options.background)
-  and will not show the [progress bar](/loading-indicators#progress-bar).
+  Links with the `[up-preload]` attribute are always [followed by Unpoly](/a-up-follow) and will not make a full page load.
 
-  Preloaded content will be stored in the [cache](/caching).
+  See [preloading links](/preloading) for more details and examples.
 
-  Unpoly will only preload [links with safe methods](/up.link.isSafe).
+  ### Example
+
+  ```html
+  <a href="/path" up-preload>Hover over me to preload my content</a>
+  ```
 
   @selector a[up-preload]
+  @params-note
+    All attributes for `a[up-follow]` may also be used.
+  @param [up-load-on='hover']
+    When to preload this link.
+
+    When set to `'hover'` (the default), preloading will start when the user hovers
+    over this link [for a while](#up-preload-delay). On touch devices preloading will
+    begin when the user places her finger on the link. Also see [preloading on hover](/preloading#on-hover).
+
+    When set to `'insert'`, preloading will start immediatedly when this
+    link is inserted into the DOM. Also see [eagerly preloading on insertion](/preloading#on-insert).
+
+    When set to `'reveal'`, preloading will start when the link is scrolled
+    into the [viewport](/up-viewport). If the link is already visible when
+    inserted, preloading will start immediately.  Also see [preloading when a link becomes visible](/preloading#on-reveal).
+
   @param [up-preload-delay]
     The number of milliseconds to wait between hovering
     and preloading. Increasing this will lower the load in your server,
     but will also make the interaction feel less instant.
+
+    Only available for [`[up-load-on="hover"]`](#up-load-on).
 
     Defaults to `up.link.config.preloadDelay`.
   @stable

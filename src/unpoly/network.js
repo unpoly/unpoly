@@ -11,7 +11,7 @@ that is used for all requests made through Unpoly.
 
 The HTTP client offers many quality-of-life improvements, for example:
 
-- Requests may be [cached](/caching) to re-use responses and enable [preloading](/a-up-preload).
+- Requests may be [cached](/caching) to re-use responses and enable [preloading](/preloading).
   Cached content is [revalidated](/caching#revalidation) after rendering, so the user never
   sees stale content.
 - You may [handle network issues](/network-issues), such as disconnects, flaky connections or low bandwidth.
@@ -50,7 +50,7 @@ up.network = (function() {
   @param {number|Function(): number} [config.concurrency]
     The maximum number of concurrently loading requests.
 
-    Additional requests are queued. [Preload](/a-up-preload) requests are
+    Additional requests are queued. [Preload](/preloading) requests are
     always queued behind non-preload requests.
 
     By default Unpoly allows 6 concurrent requests.
@@ -105,7 +105,7 @@ up.network = (function() {
   @param {number} [config.cacheExpireAge=15_000]
     The number of milliseconds after which a cache entry is considered [expired](/caching#expiration) and will trigger [revalidation](/caching#revalidation) when used.
 
-    The configured age should at least cover the average time between [preloading](/a-up-preload) and following a link.
+    The configured age should at least cover the average time between [preloading](/preloading) and following a link.
 
     Defaults to 15 seconds.
 

@@ -77,7 +77,7 @@ Unpoly handles the following edge cases, which sometimes require requests to be 
   any request targeting this fragment is aborted. This is regardless of the `{ abort }` option used.
 - When a layer is closed, all pending requests targeting that layer are aborted.
   This is regardless of the `{ abort }` option used.
-- The mere act of [preloading a link](/a-up-preload) does not abort pending requests. Only when actually rendering
+- The mere act of [preloading a link](/preloading) does not abort pending requests. Only when actually rendering
   from a preloaded response, requests targeting the same fragment are aborted.
 - When two requests attempt to [open a new layer](/a-up-layer-new), the first request will be aborted by the second request.
 - A request to open a new layer is also aborted when the base layer's [main element](/main) is targeted by a second request.
