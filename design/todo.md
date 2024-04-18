@@ -1,23 +1,18 @@
 Partial
 =======
 
-- New cache
-  - Run specs with old cache impl to know what really changed 
-  - Is it useful that up.cache.evict(request) only evicts that one instance vs. all matching requests like .get()?
-  - Public API only takes a string so we're free to change what we want here
-  - Consider holding pending requests in a separate place outside the cahce, so we don't have to restore displaced requests
 - Request merging
-  - Document with up.request() and X-Up-Target
-  - Test that the request is aborted when either fragment is aborted
-  - Test merging of two multi-fragment requests
-- [up-preload]
-  - Do a preloading doc page
-  - Document [up-load-on] for [up-preload]
-    - Both modifier param and prose.
+  - Document with up.request({ target }) and X-Up-Target
+  - Currently only available for cached requests
 - [up-partial]
     - Docs
       - Consider a doc page "Lazy loading content"
+        - on load
+        - on reveal
       - Note caching benefits like Turbo frames does: https://turbo.hotwired.dev/handbook/frames#cache-benefits-to-loading-frames
+      - SEO
+        - Use link to be indexed
+        - Use div to not be indexed
       - For [up-partial]
         - Note that all attributes for [up-follow] can be used
         - Document the render options for which we set a default
@@ -26,9 +21,6 @@ Partial
         - Second options arg supports all render options 
         - Document the render options for which we set a default
       - Support without JS important? 
-      - SEO
-        - Use link to be indexed
-        - Use div to not be indexed
       - Targets for the same URL are merged
 
 
@@ -41,6 +33,12 @@ Priority
 Backlog
 =======
 
+- Form-related events are often emitted on the origin, not the form. It would be helpful if the event objects get a { form } property.
+- Docs for up.validate({ data }): Not that element must have a derivable target
+- Meta-Tag-Updating should also update html[lang], even though it's not an element
+  - Also test a case where the attribute is added or removed 
+    - e.toggleAttr(document.documentElement, 'html', responseDoc.lang, !!responseDoc.lang)
+  - Update and restore as overlays are opened/closed 
 - Have a better error when Unpoly is loaded twice
 - In an offline case, the revalidation request is killing our existing cache entry (which may be expired but does have a response)
   - Is this true? Since we're only putting into the cache after we have a response if cache: false? 
