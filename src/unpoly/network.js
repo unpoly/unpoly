@@ -411,6 +411,8 @@ up.network = (function() {
   @param {string} [options.target='body']
     The CSS selector that will be sent as an `X-Up-Target` header.
 
+    The targets of concurrent requests to to same URL [may be merged](/X-Up-Target#merging-of-request-targets).
+
   @param {string} [options.failTarget='body']
     The CSS selector that will be sent as an `X-Up-Fail-Target` header.
 

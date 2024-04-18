@@ -6,7 +6,7 @@ Linking to fragments
 
 The `up.link` module lets you build links that update fragments instead of entire pages.
 
-### Motivation
+## Motivation
 
 In a traditional web application, the entire page is destroyed and re-created when the
 user follows a link:
@@ -35,7 +35,7 @@ Pages also load much faster since the DOM, CSS and JavaScript environments do no
 destroyed and recreated for every request.
 
 
-### Example
+## Example
 
 Let's say we are rendering three pages with a tabbed navigation to switch between screens:
 

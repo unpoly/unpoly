@@ -4,8 +4,6 @@ Custom JavaScript
 
 The `up.script` package lets you pair HTML elements with JavaScript behavior.
 
-### Migrating existing JavaScript code
-
 Unpoly encourages you to migrate all your custom JavaScript from `DOMContentLoaded`
 callbacks to [compilers](/up.compiler). This will make sure they run both at page load and
 when a new fragment is inserted later. See [Migrating legacy JavaScripts](/legacy-scripts)
@@ -456,6 +454,7 @@ up.script = (function() {
 
   @function up.destructor
   @param {Element} element
+    The element to observe.
   @param {Function(Element)|Array<Function(Element)>} destructor
     One or more destructor functions.
   @stable
