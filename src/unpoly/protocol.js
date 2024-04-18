@@ -151,6 +151,26 @@ up.protocol = (function() {
   Required selector parts are always included in `X-Up-Target`.
 
 
+  ### Merging of request targets
+
+  When two [caching](/caching) requests are sent to the same URL within the same [microtask](https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide),
+  only a single request is sent. The request will contain both targets in its `X-Up-Target` header.
+
+  For example, these two render passes render different selectors from `/path`:
+
+  ```js
+  up.render('.foo', { url: '/path', cache: true })
+  up.render('.bar', { url: '/path', cache: true })
+  ```
+
+  Unpoly will send a single request with both targets:
+
+  ```http
+  GET /path HTTP/1.1
+  X-Up-Target: .foo, .bar
+  ```
+
+
   @header X-Up-Target
   @stable
   */
