@@ -12,6 +12,8 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 3.8.0
 -----
 
+New guide pages
+
 ### Partials
 
 
@@ -21,9 +23,17 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 ### New cache
 
 - Varying responses to multi-target requests are now a cache hit for each selector
+  - See /caching#how-cache-entries-are-matched 
 - No longer evicting cache entries, useful for offline:
   - When a request (or revalidation) fails due to network issue
   - When the server responds with an empty response (to any request or revalidation)
+
+### New preloading trigger factors
+
+- Lazy on reveal
+- Eager on insert
+- New /preloading page
+
 
 
 3.7.3
@@ -450,7 +460,7 @@ Due to cross-browser support for the [Network Information API](https://developer
 measuring of network quality was removed:
 
 - Unpoly no longer doubles [poll](/up-poll) intervals on slow connections. The configuration `up.radio.config.stretchPollInterval` was removed.
-- Unpoly no longer prevents [preloading](/a-up-preload) on slow connections. The configuration `up.link.config.preloadEnabled = 'auto'` was removed.
+- Unpoly no longer prevents [preloading](/preloading) on slow connections. The configuration `up.link.config.preloadEnabled = 'auto'` was removed.
 
   To disable preloading based on your own metrics, you can still prevent the `up:link:preload` event.
 - The configuration `up.network.config.badDownlink` was removed.
@@ -3469,7 +3479,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 - Fix [`up.util.trim()`](/up.util.trim) not working properly.
 - [`up.morph()`](/up.morph) no longer throws an error if called without an `options` object
 - Custom transitions can now call [`up.morph()`](/up.morph) to refer to other transitions
-- Fix a bug where following a link to a [preloaded](/a-up-preload) destination would keep the
+- Fix a bug where following a link to a [preloaded](/preloading) destination would keep the
   link marked with a [up-active](/a.up-active) class forever.
 
 
@@ -3509,7 +3519,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 ### Compatible changes
 
 - Fix a bug where using the `up-confirm` attribute would result in an infinite loop
-- Unpoly no longer displays confirmation dialogs when [preloading](/a-up-preload) a link that
+- Unpoly no longer displays confirmation dialogs when [preloading](/preloading) a link that
   has both [`up-preload`](/a-up-preload) and `up-confirm` attributes.
 
 
