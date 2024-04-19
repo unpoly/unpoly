@@ -39,7 +39,7 @@ To preload a link as soon as it appears in the DOM, set an [`[up-load-on="insert
 This is useful for links with a high probability of being clicked, like a navigation menu:
 
 ```html
-<a href="/menu" up-layer="new drawer" up-preload up-load-on="insert">≡ Menu</a>
+<a href="/menu" up-layer="new drawer" up-preload up-load-on="insert">≡ Menu</a> <!-- mark-phrase "up-preload" -->
 ```
 
 When an eagerly preloaded fragment is rendered multiple times, only a single request is made.
@@ -56,17 +56,17 @@ This is useful when an element is [below the fold](https://www.optimizely.com/op
 and is unlikely to be clicked until the the user scrolls:
 
 ```html
-<a href="/stories/106" up-preload up-load-on="reveal">Full story</a>
+<a href="/stories/106" up-preload up-load-on="reveal">Full story</a> <!-- mark-phrase "reveal" -->
 ```
 
 When a lazy preloading link enters and exit its viewport repeatedly, only a single request is made.
 
 
 
-Preloading from JavaScript {#scripted}
---------------------------
+Controlling the load timing with JavaScript {#scripted}
+-------------------------------------------------------
 
-To programmatically preload any link element, use the `up.link.preload()` function:
+To programmatically preload any link element at a time of your choosing, use the `up.link.preload()` function:
 
 ```js
 up.compiler('link[rel=next]', (link) => up.link.preload(link))

@@ -75,6 +75,7 @@ new page is loading.
 @see handling-everything
 @see failed-responses
 @see preloading
+@see lazy-loading
 
 @see a[up-follow]
 @see a[up-instant]
@@ -263,7 +264,7 @@ up.link = (function() {
   @param {Object} [options]
     [render options](/up.render#parameters) that should be used for following the link.
 
-    Unpoly will parse render options from the given link's attributes
+    Unpoly will parse render options from the given link's attributes,
     like `[up-target]` or `[up-transition]`. See `a[up-follow]` for a list
     of supported attributes.
 
@@ -864,6 +865,30 @@ up.link = (function() {
     }
   }
 
+  /*-
+  Loads a [manually loading](/lazy-loading#scripted) `[up-partial]` placeholder.
+
+  @function up.partial.load
+
+  @param {Element} placeholder
+    The `[up-partial]` placeholder to load.
+
+  @param {Object} [options]
+    [render options](/up.render#parameters) that should be used for loading the partial.
+
+    Unpoly will parse render options from the given placeholder's attributes,
+    like `[up-target]` or `[up-cache]`. See `a[up-follow]` for a list
+    of supported attributes.
+
+    You may pass this additional `options` object to supplement or override
+    options parsed from the placeholder attributes.
+
+  @return {up.RenderJob}
+    A promise that fulfills with an `up.RenderResult` once the partial
+    has been loaded and rendered.
+
+  @experimental
+  */
   function loadPartial(link, options) {
     let guardEvent = up.event.build('up:partial:load', { log: ['Loading partial %o', link] })
 
@@ -887,15 +912,61 @@ up.link = (function() {
   }
 
   /*-
-  TODO: DOcs
+  A placeholder for content that is loaded later from another URL.
 
-  - Must have good target like an #id
-  - Most [up-follow] options can be used
-  - Gets .up-active
-  - You can have multiple partials targeting the same URL. Targets will be merged.
+  By moving expensive but non-[critical](https://developer.mozilla.org/en-US/docs/Web/Performance/Critical_rendering_path) fragments into partials,
+  you can paint critical content earlier.
+
+  See [lazy loading content](/lazy-loading) for details.
+
+  ## Example
+
+  @include partial-example
 
   @selector [up-partial]
+
+  @params-note
+    All attributes for `a[up-follow]` may also be used.
+
+  @param [up-href]
+    The URL from which to load the partial.
+
+    If your `[up-partial]` element is a [standard hyperlink](/lazy-loading#seo), you can use an `[href]` attribute instead.
+
   @param [up-load-on='insert']
+    When to load and render the partial.
+
+    When set to `'insert'` (the default), the partial will load immediatedly when
+    the `[up-partial]` element is inserted into the DOM.
+
+    When set to `'reveal'`, the partial will load when the `[up-partial]` element is scrolled
+    into the [viewport](/up-viewport). If the element is already visible when
+    inserted, loading will start immediately.  Also see [loading as the placeholder becomes visible](/lazy-loading#on-reveal).
+
+    When set to `'manual'` the partial will not load on its own.
+    You can control the load timing by calling `up.partial.load()` from your own JavaScripts.
+
+  @param [up-cache='auto']
+    Whether to cache the loaded partial's content.
+
+  @param [up-target=':origin']
+    A selector for the fragment to render the content in.
+
+    By default the `[up-partial]` element itself will be replaced with the loaded content.
+    For this the element must have a [derivable target selector](/target-derivation).
+
+    Partials can target one or [multiple](/targeting-fragments#updating-multiple-fragments) fragments.
+    To target the partial itself, you can use `:origin` target instead of spelling out a selector.
+
+  @param [up-background='true']
+    Whether to load the partial [in the background](/up.render#options.background).
+
+    Background requests will not show [loading indicators](/loading-indicators).
+
+  @param [up-feedback='true']
+    Whether the `[up-partial]` element is assigned an `.up-active` class while loading its content.
+
+  @experimental
   */
   up.compiler('[up-partial]', function(link) {
     let doLoad = () => up.error.muteUncriticalRejection(loadPartial(link))
@@ -1392,6 +1463,7 @@ up.link = (function() {
 
   - When you want to *prevent* the user from opening a link in a new tab.
   - When the element cannot be wrapped in an `<a>`, e.g. a `<tr>`.
+  - When you want a link to not be followed by crawlers like Google.
 
   @selector [up-href]
   @param [up-href]

@@ -1,6 +1,9 @@
 Customizing overlays
 ====================
 
+Overlays ship with minimal styling and common default behavior. That look and feel can be customized using CSS and JavaScript.
+
+
 Understanding the HTML structure
 --------------------------------
 
