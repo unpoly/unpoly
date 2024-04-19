@@ -1392,6 +1392,7 @@ up.link = (function() {
 
   - When you want to *prevent* the user from opening a link in a new tab.
   - When the element cannot be wrapped in an `<a>`, e.g. a `<tr>`.
+  - When you want a link to not be followed by crawlers like Google.
 
   @selector [up-href]
   @param [up-href]
