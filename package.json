@@ -1,7 +1,7 @@
 {
   "name": "unpoly",
   "version": "3.7.3",
-  "description": "Unobtrusive JavaScript framework",
+  "description": "Progressive enhancement for HTML",
   "main": "unpoly.js",
   "style": "unpoly.css",
   "files": [
