@@ -394,7 +394,7 @@ up.radio = (function() {
 
   ### Stopping polling
 
-  There are two reasons for polling to stop:
+  There are multiple ways to stop the polling interval:
 
   - The fragment from the server response no longer has an `[up-poll]` attribute.
   - The fragment from the server response has an `[up-poll="false"]` attribute.
