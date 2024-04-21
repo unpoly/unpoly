@@ -1,10 +1,12 @@
 [Unpoly 3](https://unpoly.com)
 ==============================
 
-Unobtrusive JavaScript framework for server-side applications
--------------------------------------------------------------
+Progressive enhancement for HTML
+--------------------------------
 
-[Unpoly](https://unpoly.com) enables fast and flexible frontends with minimal changes to your server-side code.
+[Unpoly](https://unpoly.com) enhances your HTML with attributes to build dynamic UI on the server.
+
+Unpoly works with any language or framework. It plays nice with existing code, and gracefully degrades without JavaScript.
 
 This branch tracks the current major version, Unpoly **3.x**.\
 If you're using Unpoly **2.x**, use the [`2.x-stable`](https://github.com/unpoly/unpoly/tree/2.x-stable) branch.\
