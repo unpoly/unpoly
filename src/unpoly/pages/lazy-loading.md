@@ -1,39 +1,19 @@
 Lazy loading content
 ====================
 
-Unpoly lets you [lazy load](https://developer.mozilla.org/en-US/docs/Web/Performance/Lazy_loading) fragments.
+Unpoly lets you [lazy load](https://developer.mozilla.org/en-US/docs/Web/Performance/Lazy_loading) fragments as they enter the DOM or viewport.
+
+By extracting non-[critical](https://developer.mozilla.org/en-US/docs/Web/Performance/Critical_rendering_path) fragments into partials
+with a separate URL, you can paint important content earlier.
+
 
 
 
 ## Example {#on-insert}
 
-With `[up-partial]` with empty content.
+@include partial-example
 
-```html
-<div id="menu" up-partial up-href="/path"></div>
-```
-
-As soon as the content is rendered.
-
-Makes a request to the `/path` URL from `[up-href]`:
-
-```
-GET /path HTTP/1.1
-X-Up-Target: #menu
-```
-
-The server is now expected to respond with a page containing `#menu` with content:
-
-```html
-<div id="menu">
-  Menu content
-</div>
-```
-
-The server is free to send additional elements or even a full HTML document.
-Only `#menu` will be updated on the page. Other elements from the response will be discarded.
-
-## Loading as the partial becomes visible {#on-reveal}
+## Loading as the placeholder becomes visible {#on-reveal}
 
 
 
@@ -55,9 +35,11 @@ user to click on the wrong element.
 Layout shift is less of a problem if lazy loaded content appears below the fold, or if has positioning that doesn't affect many other elements.
 
 
-## SEO considerations
+## SEO considerations {#seo}
 
 Partials will not be followed.
+
+May not be indexed.
 
 If you want to reveal your partial to crawlers and non-JavaScript clients, you can use a standard hyperlink instead:
 
@@ -85,6 +67,11 @@ Merged
 ## Events
 
 `up:partial:load`.
+
+
+## Lazy preloading of link destinations
+
+
 
 
 @page lazy-loading
