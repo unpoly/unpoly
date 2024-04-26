@@ -1,4 +1,4 @@
-Identify fragments that are expensive to render on the server, but not immediately required.
+Identify fragments that are expensive to render on the server, but aren't immediately required.
 For example, you may have a large navigation menu that only appears once the user clicks a menu icon:
 
 ```html
@@ -14,7 +14,7 @@ Also set an `[up-href]` attribute with the URL from which to load the partial's 
 
 ```html
 <div id="menu" up-partial up-href="/menu"> <!-- mark-phrase "up-partial" -->
-  Loading...  
+  Loading...
 </div>
 ```
 
@@ -23,13 +23,14 @@ The placeholder content is not important. It can be empty or a show a pending st
 When the `[up-partial]` placeholder is rendered, it will immediately make a request to fetch
 its content from `/menu`:
 
-```
+```http
 GET /path HTTP/1.1
 X-Up-Target: #menu
 ```
 
-Note how the placeholder is targeting itself (`#menu`).
-For this the element must have a [derivable target selector](/target-derivation).
+> [note]
+> By default the placeholder is [targeting](/targeting-fragments) itself (`#menu`).
+> For this the element must have a [derivable target selector](/target-derivation).
 
 The server is now expected to respond with a page containing `#menu` with content:
 

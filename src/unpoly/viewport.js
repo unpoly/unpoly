@@ -15,6 +15,7 @@ An application may define additional viewports by giving the CSS property `{ ove
 @see scroll-tuning
 @see focus
 @see focus-visibility
+@see infinite-scrolling
 
 @see [up-viewport]
 @see [up-fixed=top]

@@ -917,7 +917,7 @@ up.link = (function() {
   By moving expensive but non-[critical](https://developer.mozilla.org/en-US/docs/Web/Performance/Critical_rendering_path) fragments into partials,
   you can paint critical content earlier.
 
-  See [lazy loading content](/lazy-loading) for details and examples.
+  See [lazy loading content](/lazy-loading) for details.
 
   ## Example
 
@@ -954,6 +954,9 @@ up.link = (function() {
 
     By default the `[up-partial]` element itself will be replaced with the loaded content.
     For this the element must have a [derivable target selector](/target-derivation).
+
+    Partials can target one or [multiple](/targeting-fragments#updating-multiple-fragments) fragments.
+    To target the partial itself, you can use `:origin` target instead of spelling out a selector.
 
   @param [up-background='true']
     Whether to load the partial [in the background](/up.render#options.background).
