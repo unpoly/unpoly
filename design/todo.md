@@ -1,30 +1,41 @@
 Partial
 =======
 
-- [up-partial]
-    - Docs
-      - Consider a doc page "Lazy loading content"
-        - on load
-        - on reveal
-        - Performance considerations
-          - Content earlier
-          - Layout shift later
-        - Note caching benefits like Turbo frames does: https://turbo.hotwired.dev/handbook/frames#cache-benefits-to-loading-frames
-          - On the server
-          - On the client (Unpoly cache)
-        - SEO
-          - Use link to be indexed
-          - Use div to not be indexed
-            - Support without JS important?
-        - Targets for the same URL are merged
-      - For [up-partial]
-        - Note that all attributes for [up-follow] can be used
-        - Document the render options for which we set a default
-      - For up:partial:load
-      - For up.partial.load()
-        - Second options arg supports all render options 
-        - Document the render options for which we set a default
-
+- Consider the "partial" name one last time
+  - [up-partial]        up:partial:load   up.partial.load()
+  - [up-loader]
+  - [up-trigger]
+  - [up-placeholder]
+  - [up-slot]
+  - [up-autofollow]
+  - [up-deferred]        up:deferred:load     up.deferred.load() 
+  - [up-staggered]
+  - [up-future]          up:future:load       up.future.load())
+- Docs
+  - Do we want to support a single-digit [up-intersect-margin] ?
+    - Also needs to work for the synchronous check
+  - Consider a doc page "Lazy loading content"
+    - on load
+    - on reveal
+    - Performance considerations
+      - Content earlier
+      - Layout shift later
+    - Note caching benefits like Turbo frames does: https://turbo.hotwired.dev/handbook/frames#cache-benefits-to-loading-frames
+      - On the server
+      - On the client (Unpoly cache)
+    - SEO
+      - Use link to be indexed
+      - Use div to not be indexed
+        - Support without JS important?
+    - Targets for the same URL are merged
+  - For [up-partial]
+    - Note that all attributes for [up-follow] can be used
+    - Document the render options for which we set a default
+  - For up:partial:load
+  - For up.partial.load()
+    - Second options arg supports all render options 
+    - Document the render options for which we set a default
+  - Finish "infinite scrolling" doc page 
 
 
 Priority
@@ -35,6 +46,12 @@ Priority
 Backlog
 =======
 
+- Docs: [up-transition] should docment params [up-duration], [up-easing]
+- Docs. up.transition() should document options.duration, options.easing
+- Docs: URLs like /up-transition should redirect to /a-up-transition 
+- BodyShifter could use a class to shift elements
+  - scrollbar-width could be custom property 
+- Check if the BodyShifter can disable itself with supported scrollbar-gutter: stable
 - Doc page for polling
 - Replace `up.util.microtask()` with `queueMicrotask()`
 - Form-related events are often emitted on the origin, not the form. It would be helpful if the event objects get a { form } property.
