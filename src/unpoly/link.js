@@ -846,9 +846,7 @@ up.link = (function() {
     return up.network.isSafeMethod(method)
   }
 
-  function onLoadCondition(link, defaultCondition, callback) {
-    let condition = e.attr(link, 'up-load-on') ?? defaultCondition
-
+  function onLoadCondition(condition, link, callback) {
     switch (condition) {
       case 'insert':
         callback()
@@ -860,18 +858,18 @@ up.link = (function() {
         new up.LinkFollowIntent(link, callback)
         break
       case 'manual':
-        // Wait for explicit call of up.partial.load().
+        // Wait for explicit call of up.deferred.load().
         break
     }
   }
 
   /*-
-  Loads a [manually loading](/lazy-loading#scripted) `[up-partial]` placeholder.
+  Loads a [manually loading](/lazy-loading#scripted) `[up-defer]` placeholder.
 
-  @function up.partial.load
+  @function up.deferred.load
 
   @param {Element} placeholder
-    The `[up-partial]` placeholder to load.
+    The `[up-defer]` placeholder to load.
 
   @param {Object} [options]
     [render options](/up.render#parameters) that should be used for loading the partial.
@@ -889,8 +887,8 @@ up.link = (function() {
 
   @experimental
   */
-  function loadPartial(link, options) {
-    let guardEvent = up.event.build('up:partial:load', { log: ['Loading partial %o', link] })
+  function loadDeferred(link, options) {
+    let guardEvent = up.event.build('up:deferred:load', { log: ['Loading deferred %o', link] })
 
     // These options override up.link.follow() behavior
     let forcedOptions = {
@@ -921,56 +919,58 @@ up.link = (function() {
 
   ## Example
 
-  @include partial-example
+  @include defer-example
 
-  @selector [up-partial]
+  @selector [up-defer]
 
   @params-note
     All attributes for `a[up-follow]` may also be used.
 
-  @param [up-href]
-    The URL from which to load the partial.
+  @param [up-defer='insert']
+    When to load and render the deferred content.
 
-    If your `[up-partial]` element is a [standard hyperlink](/lazy-loading#seo), you can use an `[href]` attribute instead.
+    When set to `'insert'` (the default), the deferred content will load immediatedly when
+    the `[up-defer]` element is inserted into the DOM.
 
-  @param [up-load-on='insert']
-    When to load and render the partial.
-
-    When set to `'insert'` (the default), the partial will load immediatedly when
-    the `[up-partial]` element is inserted into the DOM.
-
-    When set to `'reveal'`, the partial will load when the `[up-partial]` element is scrolled
+    When set to `'reveal'`, the deferred content will load when the `[up-defer]` placeholder is scrolled
     into the [viewport](/up-viewport). If the element is already visible when
     inserted, loading will start immediately.  Also see [loading as the placeholder becomes visible](/lazy-loading#on-reveal).
 
-    When set to `'manual'` the partial will not load on its own.
-    You can control the load timing by calling `up.partial.load()` from your own JavaScripts.
+    When set to `'manual'` the deferred content will not load on its own.
+    You can control the load timing by calling `up.deferred.load()` from your own JavaScripts.
+
+  @param [up-href]
+    The URL from which to load the deferred content.
+
+    If your `[up-defer]` placeholder is a [standard hyperlink](/lazy-loading#seo), you can use an `[href]` attribute instead.
 
   @param [up-cache='auto']
-    Whether to cache the loaded partial's content.
+    Whether to cache the deferred content.
 
   @param [up-target=':origin']
     A selector for the fragment to render the content in.
 
-    By default the `[up-partial]` element itself will be replaced with the loaded content.
+    By default the `[up-defer]` element itself will be replaced with the loaded content.
     For this the element must have a [derivable target selector](/target-derivation).
 
-    Partials can target one or [multiple](/targeting-fragments#updating-multiple-fragments) fragments.
-    To target the partial itself, you can use `:origin` target instead of spelling out a selector.
+    You may target one or [multiple](/targeting-fragments#updating-multiple-fragments) fragments.
+    To target the placeholder itself, you can use `:origin` target instead of spelling out a selector.
 
   @param [up-background='true']
-    Whether to load the partial [in the background](/up.render#options.background).
+    Whether to load the deferred content [in the background](/up.render#options.background).
 
     Background requests will not show [loading indicators](/loading-indicators).
 
   @param [up-feedback='true']
-    Whether the `[up-partial]` element is assigned an `.up-active` class while loading its content.
+    Whether the `[up-defer]` placeholder is assigned an `.up-active` class while loading its content.
 
   @experimental
   */
-  up.compiler('[up-partial]', function(link) {
-    let doLoad = () => up.error.muteUncriticalRejection(loadPartial(link))
-    onLoadCondition(link, 'insert', doLoad)
+  up.compiler('[up-defer]', function(link) {
+    let doLoad = () => up.error.muteUncriticalRejection(loadDeferred(link))
+    // Default using || instead of ?? because we want to set a default for the empty value
+    let condition = e.attr(link, 'up-defer') || 'insert'
+    onLoadCondition(condition, link, doLoad)
   })
 
   /*-
@@ -1593,7 +1593,7 @@ up.link = (function() {
   @selector a[up-preload]
   @params-note
     All attributes for `a[up-follow]` may also be used.
-  @param [up-load-on='hover']
+  @param [up-preload='hover']
     When to preload this link.
 
     When set to `'hover'` (the default), preloading will start when the user hovers
@@ -1612,7 +1612,7 @@ up.link = (function() {
     and preloading. Increasing this will lower the load in your server,
     but will also make the interaction feel less instant.
 
-    Only available for [`[up-load-on="hover"]`](#up-load-on).
+    Only available for [`[up-preload="hover"]`](#up-preload).
 
     Defaults to `up.link.config.preloadDelay`.
   @stable
@@ -1620,7 +1620,9 @@ up.link = (function() {
   up.compiler(config.selectorFn('preloadSelectors'), function(link) {
     if (!isPreloadDisabled(link)) {
       let doPreload = () => up.error.muteUncriticalRejection(preload(link))
-      onLoadCondition(link, 'hover', doPreload)
+      // Default using || instead of ?? because we want to set a default for the empty value
+      let condition = e.attr(link, 'up-preload') || 'hover'
+      onLoadCondition(condition, link, doPreload)
     }
   })
 
@@ -1637,9 +1639,9 @@ up.link = (function() {
     convertClicks,
     config,
     combineFollowableSelectors,
-    loadPartial,
+    loadDeferred,
   }
 })()
 
 up.follow = up.link.follow
-up.partial = { load: up.link.loadPartial }
+up.deferred = { load: up.link.loadDeferred }

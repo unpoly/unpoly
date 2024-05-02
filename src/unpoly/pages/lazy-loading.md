@@ -3,59 +3,63 @@ Lazy loading content
 
 Unpoly lets you [lazy load](https://developer.mozilla.org/en-US/docs/Web/Performance/Lazy_loading) fragments as they enter the DOM or viewport.
 
-By extracting non-[critical](https://developer.mozilla.org/en-US/docs/Web/Performance/Critical_rendering_path) fragments into partials
+By deferring the loading of non-[critical](https://developer.mozilla.org/en-US/docs/Web/Performance/Critical_rendering_path) fragments
 with a separate URL, you can paint important content earlier.
 
 
-## Extracting partials {#on-insert}
+## Extracting deferred partials {#on-insert}
 
-@include partial-example
+@include defer-example
 
 ## Loading as the placeholder becomes visible {#on-reveal}
 
-Instead of loading the partial right away, you may also wait until the partial is scrolled into its [viewport](/up.viewport).
+Instead of loading deferred content right away, you may also wait until the placeholder is scrolled into its [viewport](/up.viewport).
 
-For this set an `[up-load-on="reveal"]` attribute:
+For this set an `[up-defer="reveal"]` attribute:
 
 ```html
-<div id="menu" up-partial up-href="/menu" up-load-on="reveal"> <!-- mark-phrase "up-load-on" -->
+<div id="menu" up-defer="reveal" up-href="/menu"> <!-- mark-phrase "reveal" -->
   Loading...
 </div>
 ```
 
-Partials that load when revealed can [implement infinite scrolling](/infinite-scrolling) without custom JavaScript.
+You can use the loading of deferred placeholders to [implement infinite scrolling](/infinite-scrolling) without custom JavaScript.
 
 
 
 ## Controlling the load timing with JavaScript {#scripted}
 
-By setting an `[up-load-on="manual"]` attribute, the partial will not load on its own.:
+By setting an `[up-defer="manual"]` attribute, the deferred content will not load on its own:
 
 ```html
-<div up-partial id="menu" up-load-on="manual">
+<div up-defer="manual" id="menu">
 </div>
 ```
 
-You can now control the load timing by calling `up.partial.load()` from your own JavaScripts.
+You can now control the load timing by calling `up.deferred.load()` from your own JavaScripts.
 The code below uses a [compiler](/up.compiler) to load the partial after two seconds:
 
 ```js
-up.compiler('#menu[up-partial]', function(placeholder) {
-  setTimeout(() => up.partial.load(placeholder), 2000)
+up.compiler('#menu[up-defer]', function(placeholder) {
+  setTimeout(() => up.deferred.load(placeholder), 2000)
 })
 ```
 
 
 ## Lazy loading cached content
 
-Will be rendered immediately.
+When the deferred content is already [cached](/caching), it is rendered synchronously.
+The placeholder will never appear in the DOM.
 
-Placeholder will not be visible in the DOM.
+This means Unpoly will cache complete pages, including any deferred partials. Navigating to such pages will render them instantly.
+Such pages will also remain accessible in the event of [network issues](/network-issues).
+ 
+Deferred content that is rendered from the cache will be [revalidated](/caching#revalidation) unless you also set an `[up-revalidate=false]` attribute.
 
 
 ## Performance considerations
 
-By moving expensive but non-[critical](https://developer.mozilla.org/en-US/docs/Web/Performance/Critical_rendering_path) fragments into partials,
+By deferring the loading of expensive but non-[critical](https://developer.mozilla.org/en-US/docs/Web/Performance/Critical_rendering_path) fragments,
 you can paint critical content earlier. This will generally improve metrics like 
 [First Contentful Paint](https://developer.chrome.com/docs/lighthouse/performance/first-contentful-paint) (FCP) and 
 [Interaction to Next Paint](https://web.dev/articles/inp) (INP).
@@ -77,7 +81,7 @@ Partials will not be followed.
 If you want to reveal your partial to crawlers and non-JavaScript clients, you can use a standard hyperlink instead:
 
 ```html
-<a id="menu" up-partial href="/path">load menu</a>
+<a id="menu" up-defer href="/path">load menu</a>
 ```
 
 
@@ -85,7 +89,7 @@ If you want to reveal your partial to crawlers and non-JavaScript clients, you c
 
 It is hard to efficiently cache pages that mix content specific to a some users with content shared by many users.
 While you can use complex cache keys to capture all differences, this may duplicate logic and cause frequent cache misses.
-By instead extracting user-specific fragments into partials, you can improve the cacheability of a large page or component.
+By instead extracting user-specific fragments into deferred partials, you can improve the cacheability of a larger page or component.
 
 For example, the `<article>` below almost has the some content for all users. However, only administrators
 get buttons to edit or delete the article:
@@ -103,13 +107,13 @@ get buttons to edit or delete the article:
 </article>
 ```
 
-By extracting the admin-only buttons into a separate partial, we can easily cache the entire `<article>`
+By extracting the admin-only buttons into a separate fragment, we can easily cache the entire `<article>`
 element:
 
 ```html
 <article>
   <h1>Article title</h1>
-  <nav id="controls" up-partial up-href="/articles/123/controls"></nav> <!-- mark-line -->
+  <nav id="controls" up-defer up-href="/articles/123/controls"></nav> <!-- mark-line -->
   <p>Lorem ipsum dolor sit amet ...</p>
 </article>
 ```
@@ -127,19 +131,31 @@ Set `[id]` or `[up-id]` attribute.
 
 ### Multiple partials on the same page
 
-Partials can target one or [multiple](/targeting-fragments#updating-multiple-fragments) fragments.
+Deferred placeholders can target one or [multiple](/targeting-fragments#updating-multiple-fragments) fragments:
 
-To target the partial itself, you can use `:origin` target instead of spelling out a selector.
+```html
+<a id="next-page" href="/items?page=3" up-defer="reveal" up-target="#next-page, #pages:after"> <!-- mark-phrase "#next-page, #pages:after" -->
+  load next page
+</div>
+```
 
+To target the placeholder itself, you can use `:origin` target instead of spelling out a selector.
+
+
+```html
+<a id="next-page" href="/items?page=3" up-defer="reveal" up-target=":origin, #pages:after">
+  load next page
+</div>
+```
 
 
 ## Events
 
-`up:partial:load`.
+`up:deferred:load`.
 
 Can be prevented.
 
-Will not be attempted again (but you can use `up.partial.load()`).
+Will not be attempted again (but you can use `up.deferred.load()`).
 
 
 

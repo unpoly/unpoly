@@ -2805,11 +2805,13 @@ up.fragment = (function() {
     return unsubscribe
   }
 
+  // This function lives in up.fragment (not up.element)
+  // because we stop the observe via up.fragment.onAborted().
   function onFirstIntersect(origin, callback) {
     // IntersectionObserver has some ms lag until it reports intersection entries.
     // This lag also exists for the initial intersection check.
     //
-    // This is too slow for us when rendering an [up-partial][up-load-on="reveal"]
+    // This is too slow for us when rendering an [up-defer="reveal"]
     // that both (1) already cached and (2) scrolled into viewport when inserted.
     // In that case we want to immediately render the cached content and not show
     // a flash of unloaded partial. The same is true when revalidating such a partial.

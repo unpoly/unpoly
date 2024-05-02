@@ -10,7 +10,7 @@ without custom JavaScript.
   <div class="page">items for page 1</div>
 </div>
 
-<a id="next-page" href="/items?page=2" up-partial up-load-on="reveal" up-target="#next-page, #pages:after">
+<a id="next-page" href="/items?page=2" up-defer="reveal" up-target="#next-page, #pages:after">
   load next page
 </div>
 ```
@@ -35,7 +35,7 @@ The server responds with HTML containing both targeted elements:
   <div class="page">items for page 2</div>
 </div>
 
-<a id="next-page" href="/items?page=3" up-partial up-load-on="reveal" up-target="#next-page, #pages:after">
+<a id="next-page" href="/items?page=3" up-defer="reveal" up-target="#next-page, #pages:after">
   load next page
 </div>
 ```
@@ -48,7 +48,7 @@ This is stitched together:
   <div class="page">items for page 2</div>
 </div>
 
-<a id="next-page" href="/items?page=3" up-partial up-load-on="reveal" up-target="#next-page, #pages:after">
+<a id="next-page" href="/items?page=3" up-defer="reveal" up-target="#next-page, #pages:after">
   load next page
 </div>
 ```

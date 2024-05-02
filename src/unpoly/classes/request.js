@@ -822,7 +822,7 @@ up.Request = class Request extends up.Record {
 
   mergeIfUnsent(trackingRequest) {
     // We can only merge a tracking request if the original request has not been sent to the network.
-    // This can happen if multiple [up-partial] requests are sent.
+    // This can happen if multiple [up-defer] requests are sent during the same render pass.
     if (this.state !== 'new') return
 
     // Only merge requests with a target. Otherwise we could inadvertently change a request
