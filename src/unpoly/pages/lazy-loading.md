@@ -46,6 +46,13 @@ up.compiler('#menu[up-partial]', function(placeholder) {
 ```
 
 
+## Lazy loading cached content
+
+Will be rendered immediately.
+
+Placeholder will not be visible in the DOM.
+
+
 ## Performance considerations
 
 By moving expensive but non-[critical](https://developer.mozilla.org/en-US/docs/Web/Performance/Critical_rendering_path) fragments into partials,
