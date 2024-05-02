@@ -56,4 +56,17 @@ This is stitched together:
 Note that we're using [standard links](#seo) to allow sharing of pages and also to follow
 [Google's recommendation](https://developers.google.com/search/docs/crawling-indexing/javascript/lazy-loading#paginated-infinite-scroll).
 
+On the last page render an empty #next-page container to remove the button:
+
+The server responds with HTML containing both targeted elements:
+
+```html
+<div id="pages">
+  <div class="page">items for last page</div>
+</div>
+
+<div id="next-page">You've reached the end.</div>
+```
+
+
 @page infinite-scrolling
