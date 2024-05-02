@@ -1157,17 +1157,17 @@ describe 'up.link', ->
 
           expect(up.network.isBusy()).toBe(false)
 
-    describe 'up.partial.load()', ->
+    describe 'up.deferred.load()', ->
 
-      it 'loads a partial that deferred loading to the user with [up-load-on="manual"]', ->
-        partial = fixture('a#slow[up-partial][href="/slow-path"][up-load-on="manual"]')
+      it 'loads a partial that deferred loading to the user with [up-defer="manual"]', ->
+        partial = fixture('a#slow[href="/slow-path"][up-defer="manual"]')
         up.hello(partial)
 
         await wait()
 
         expect(jasmine.Ajax.requests.count()).toEqual(0)
 
-        up.partial.load(partial)
+        up.deferred.load(partial)
 
         await wait()
 
@@ -2410,44 +2410,48 @@ describe 'up.link', ->
 
     describe '[up-preload]', ->
 
-      it 'preloads the link destination when hovering, after a delay', asyncSpec (next) ->
+      it 'preloads the link destination when hovering, after a delay', ->
         up.link.config.preloadDelay = 100
 
-        $fixture('.target').text('old text')
+        fixture('.target', text: 'old text')
 
-        $link = $fixture('a[href="/foo"][up-target=".target"][up-preload]')
-        up.hello($link)
+        link = fixture('a[href="/foo"][up-target=".target"][up-preload]')
+        up.hello(link)
 
-        Trigger.hoverSequence($link)
+        Trigger.hoverSequence(link)
 
-        next.after 50, =>
-          # It's still too early
-          expect(jasmine.Ajax.requests.count()).toEqual(0)
+        await wait(50)
 
-        next.after 75, =>
-          expect(jasmine.Ajax.requests.count()).toEqual(1)
-          expect(@lastRequest().url).toMatchURL('/foo')
-          expect(@lastRequest()).toHaveRequestMethod('GET')
-          expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.target')
+        # It's still too early
+        expect(jasmine.Ajax.requests.count()).toEqual(0)
 
-          @respondWith """
-            <div class="target">
-              new text
-            </div>
-            """
+        await wait(75)
 
-        next =>
-          # We only preloaded, so the target isn't replaced yet.
-          expect('.target').toHaveText('old text')
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
+        expect(jasmine.lastRequest().url).toMatchURL('/foo')
+        expect(jasmine.lastRequest()).toHaveRequestMethod('GET')
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.target')
 
-          Trigger.clickSequence($link)
+        jasmine.respondWith """
+          <div class="target">
+            new text
+          </div>
+          """
 
-        next =>
-          # No additional request has been sent since we already preloaded
-          expect(jasmine.Ajax.requests.count()).toEqual(1)
+        await wait()
+        # We only preloaded, so the target isn't replaced yet.
 
-          # The target is replaced instantly
-          expect('.target').toHaveText('new text')
+        expect('.target').toHaveText('old text')
+
+        Trigger.clickSequence(link)
+
+        await wait()
+
+        # No additional request has been sent since we already preloaded
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+        # The target is replaced instantly
+        expect('.target').toHaveText('new text')
 
       it 'does not send a request if the user stops hovering before the delay is over', asyncSpec (next) ->
         up.link.config.preloadDelay = 100
@@ -2883,12 +2887,12 @@ describe 'up.link', ->
           next ->
             expect(jasmine.Ajax.requests.count()).toEqual(0)
 
-      describe 'with [up-load-on] modifier', ->
+      describe 'defining when to preload', ->
 
-        describe "with [up-load-on='insert']", ->
+        describe "with [up-preload='insert']", ->
 
           it 'preloads the link as soon as it is inserted into the DOM', ->
-            link = fixture('a[href="/foo"][up-follow][up-preload][up-load-on="insert"]', text: 'label')
+            link = fixture('a[href="/foo"][up-follow][up-preload="insert"]', text: 'label')
             up.hello(link)
 
             await wait()
@@ -2896,7 +2900,7 @@ describe 'up.link', ->
             expect(jasmine.Ajax.requests.count()).toEqual(1)
             expect(jasmine.lastRequest().url).toMatchURL('/foo')
 
-        describe "with [up-load-on='reveal']", ->
+        describe "with [up-preload='reveal']", ->
 
           # MutationObserver does not fire within a task
           MUTATION_OBSERVER_LAG = 30
@@ -2904,7 +2908,7 @@ describe 'up.link', ->
           it 'preloads the link when it is scrolled into the document viewport', ->
             before = fixture('#before', text: 'before', style: 'height: 50000px')
 
-            link = fixture('a[href="/foo"][up-follow][up-preload][up-load-on="reveal"]', text: 'label')
+            link = fixture('a[href="/foo"][up-follow][up-preload="reveal"]', text: 'label')
             up.hello(link)
 
             await wait(MUTATION_OBSERVER_LAG)
@@ -2919,7 +2923,7 @@ describe 'up.link', ->
             expect(jasmine.lastRequest().url).toMatchURL('/foo')
 
           it 'immediately preloads that link that is already visible within the document viewport', ->
-            link = fixture('a[href="/foo"][up-follow][up-preload][up-load-on="reveal"]', text: 'label')
+            link = fixture('a[href="/foo"][up-follow][up-preload="reveal"]', text: 'label')
             up.hello(link)
 
             # MutationObserver has a delay even for the initial intersection check.
@@ -2933,7 +2937,7 @@ describe 'up.link', ->
           it 'only sends a single request as the link enters and leaves the viewport repeatedly', ->
             before = fixture('#before', text: 'before', style: 'height: 50000px')
 
-            link = fixture('a[href="/foo"][up-follow][up-preload][up-load-on="reveal"]', text: 'label')
+            link = fixture('a[href="/foo"][up-follow][up-preload="reveal"]', text: 'label')
             up.hello(link)
 
             await wait(MUTATION_OBSERVER_LAG)
@@ -2962,7 +2966,7 @@ describe 'up.link', ->
             viewport = fixture('#viewport', style: 'height: 500px; width: 300px; overflow-y: scroll')
             before = e.affix(viewport, '#before', text: 'before', style: 'height: 50000px')
 
-            link = e.affix(viewport, 'a[href="/foo"][up-follow][up-preload][up-load-on="reveal"]', text: 'label')
+            link = e.affix(viewport, 'a[href="/foo"][up-follow][up-preload="reveal"]', text: 'label')
             up.hello(link)
 
             await wait(MUTATION_OBSERVER_LAG)
@@ -2975,14 +2979,30 @@ describe 'up.link', ->
 
             expect(jasmine.Ajax.requests.count()).toEqual(1)
 
-        describe "with [up-load-on='hover']", ->
+        describe "with [up-preload='hover']", ->
 
-          it 'preloads the link when the user hovers over it for a while (default)'
+          it 'preloads the link when the user hovers over it for a while (default)', ->
+            up.link.config.preloadDelay = 20
 
-    describe '[up-partial]', ->
+            fixture('.target', text: 'old text')
 
-      it 'loads the partial in a new request and replaces itself', ->
-        partial = fixture('a#slow[up-partial][href="/slow-path"]')
+            link = fixture('a[href="/foo"][up-target=".target"][up-preload="hover"]')
+            up.hello(link)
+
+            Trigger.hoverSequence(link)
+
+            await wait(60)
+
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            expect(jasmine.lastRequest().url).toMatchURL('/foo')
+            expect(jasmine.lastRequest()).toHaveRequestMethod('GET')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.target')
+
+
+    describe '[up-defer]', ->
+
+      it 'loads a partial in a new request and replaces itself', ->
+        partial = fixture('a#slow[up-defer][href="/slow-path"]')
         up.hello(partial)
 
         await wait()
@@ -2997,9 +3017,9 @@ describe 'up.link', ->
 
         expect('#slow').toHaveText('partial content')
 
-      it 'loads the partial in a new request and replaces a selector from [up-target] attribute', ->
+      it 'loads a partial in a new request and replaces a selector from [up-target] attribute', ->
         target = fixture('#target', text: 'old target')
-        partial = fixture('a#slow[up-partial][href="/slow-path"][up-target="#target"]')
+        partial = fixture('a#slow[up-defer][href="/slow-path"][up-target="#target"]')
         up.hello(partial)
 
         await wait()
@@ -3015,7 +3035,7 @@ describe 'up.link', ->
         expect('#target').toHaveText('new target')
 
       it 'makes a background request', ->
-        partial = fixture('a#slow[up-partial][href="/slow-path"]')
+        partial = fixture('a#slow[up-defer][href="/slow-path"]')
         up.hello(partial)
 
         event = await jasmine.nextEvent('up:request:load')
@@ -3029,7 +3049,7 @@ describe 'up.link', ->
 
         expect(up.history.location).toMatchURL('/original-path')
 
-        partial = fixture('a#slow[up-partial][href="/slow-path"]')
+        partial = fixture('a#slow[up-defer][href="/slow-path"]')
         up.hello(partial)
 
         await wait()
@@ -3042,8 +3062,8 @@ describe 'up.link', ->
         expect('#slow').toHaveText('partial content')
         expect(up.history.location).toMatchURL('/original-path')
 
-      it 'works on a div[up-href][up-partial]', ->
-        partial = fixture('div#slow[up-partial][up-href="/slow-path"]')
+      it 'works on a div[up-href][up-defer]', ->
+        partial = fixture('div#slow[up-defer][up-href="/slow-path"]')
         up.hello(partial)
 
         await wait()
@@ -3058,9 +3078,9 @@ describe 'up.link', ->
 
         expect('#slow').toHaveText('partial content')
 
-      it 'aborts the partial loading when another render pass targets the link container', ->
+      it 'aborts loading the deferred when another render pass targets the link container', ->
         container = fixture('#container')
-        partial = e.affix(container, 'a#slow[up-partial][href="/slow-path"]', text: 'initial content')
+        partial = e.affix(container, 'a#slow[up-defer][href="/slow-path"]', text: 'initial content')
         up.hello(partial)
 
         await wait()
@@ -3080,7 +3100,7 @@ describe 'up.link', ->
         up.fragment.config.mainTargets = ['#main']
         fixture('#main', text: 'old main content')
 
-        partial = fixture('a#partial[up-partial][href="/partial-path"]', text: 'old partial content')
+        partial = fixture('a#partial[up-defer][href="/partial-path"]', text: 'old partial content')
         up.hello(partial)
 
         await wait()
@@ -3104,7 +3124,7 @@ describe 'up.link', ->
         it 'does not show a flash of unloaded partial and immediately renders the cached content', ->
           await jasmine.populateCache('/slow-path', '<div id="partial">partial content</div>')
 
-          partial = fixture('a#partial[up-partial][href="/slow-path"]')
+          partial = fixture('a#partial[up-defer][href="/slow-path"]')
           up.hello(partial)
 
           # Rendering from cached content happens after a chain of microtasks.
@@ -3126,7 +3146,7 @@ describe 'up.link', ->
           await wait(30)
           expect(up.cache.get({ url: '/slow-path' }).response.expired).toBe(true)
 
-          partial = fixture('a#partial[up-partial][href="/slow-path"]')
+          partial = fixture('a#partial[up-defer][href="/slow-path"]')
           up.hello(partial)
 
           # Rendering from cached content happens after a chain of microtasks.
@@ -3147,7 +3167,7 @@ describe 'up.link', ->
         it 'does not use the cache with [up-cache=false]', ->
           await jasmine.populateCache('/slow-path', '<div id="partial">partial content</div>')
 
-          partial = fixture('a#partial[up-partial][href="/slow-path"][up-cache="false"]', text: 'initial content')
+          partial = fixture('a#partial[up-defer][href="/slow-path"][up-cache="false"]', text: 'initial content')
           up.hello(partial)
 
           await wait()
@@ -3166,8 +3186,8 @@ describe 'up.link', ->
 
         it 'makes a single request with merged targets to the same URL', ->
           container = fixture('#container')
-          e.affix(container, 'a#partial1[up-partial][href="/slow-path"]')
-          e.affix(container, 'a#partial2[up-partial][href="/slow-path"]')
+          e.affix(container, 'a#partial1[up-defer][href="/slow-path"]')
+          e.affix(container, 'a#partial2[up-defer][href="/slow-path"]')
           up.hello(container)
 
           await wait()
@@ -3188,8 +3208,8 @@ describe 'up.link', ->
 
         it 'makes separate requests to different URLs', ->
           container = fixture('#container')
-          e.affix(container, 'a#partial1[up-partial][href="/partial1-path"]')
-          e.affix(container, 'a#partial2[up-partial][href="/partial2-path"]')
+          e.affix(container, 'a#partial1[up-defer][href="/partial1-path"]')
+          e.affix(container, 'a#partial2[up-defer][href="/partial2-path"]')
           up.hello(container)
 
           await wait()
@@ -3211,7 +3231,7 @@ describe 'up.link', ->
       describe 'navigation feedback', ->
 
         it 'receives an .up-active class while loading', ->
-          partial = fixture('a#slow[up-partial][href="/slow-path"]')
+          partial = fixture('a#slow[up-defer][href="/slow-path"]')
           up.hello(partial)
 
           await wait()
@@ -3226,153 +3246,151 @@ describe 'up.link', ->
           expect('#slow').not.toHaveClass('up-active')
 
         it 'receives no .up-active class with [up-feedback=false]', ->
-          partial = fixture('a#slow[up-partial][href="/slow-path"][up-feedback="false"]')
+          partial = fixture('a#slow[up-defer][href="/slow-path"][up-feedback="false"]')
           up.hello(partial)
 
           await wait()
 
           expect('#slow').not.toHaveClass('up-active')
 
-      describe 'with [up-load-on] modifier', ->
+      describe "with [up-defer='insert']", ->
 
-        describe "with [up-load-on='insert']", ->
+        it 'loads the partial as soon as it is inserted into the DOM (default)', ->
+          partial = fixture('a#slow[up-defer="insert"][href="/slow-path"]')
+          up.hello(partial)
 
-          it 'loads the partial as soon as it is inserted into the DOM (default)', ->
-            partial = fixture('a#slow[up-partial][href="/slow-path"][up-load-on="insert"]')
-            up.hello(partial)
+          await wait()
 
-            await wait()
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(jasmine.lastRequest().url).toMatchURL('/slow-path')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#slow')
 
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
-            expect(jasmine.lastRequest().url).toMatchURL('/slow-path')
-            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#slow')
+          jasmine.respondWithSelector('#slow', text: 'partial content')
 
-            jasmine.respondWithSelector('#slow', text: 'partial content')
+          await wait()
 
-            await wait()
+          expect('#slow').toHaveText('partial content')
 
-            expect('#slow').toHaveText('partial content')
+      describe "with [up-defer='reveal']", ->
 
-        describe "with [up-load-on='reveal']", ->
+        # MutationObserver does not fire within a task
+        MUTATION_OBSERVER_LAG = 30
 
-          # MutationObserver does not fire within a task
-          MUTATION_OBSERVER_LAG = 30
+        it 'loads the partial when it is scrolled into the document viewport', ->
+          before = fixture('#before', text: 'before', style: 'height: 50000px')
+          partial = fixture('a#slow[up-defer="reveal"][href="/slow-path"]')
+          up.hello(partial)
 
-          it 'loads the partial when it is scrolled into the document viewport', ->
-            before = fixture('#before', text: 'before', style: 'height: 50000px')
-            partial = fixture('a#slow[up-partial][href="/slow-path"][up-load-on="reveal"]')
-            up.hello(partial)
+          await wait(MUTATION_OBSERVER_LAG)
 
-            await wait(MUTATION_OBSERVER_LAG)
+          expect(jasmine.Ajax.requests.count()).toEqual(0)
 
+          partial.scrollIntoView()
+
+          await wait(MUTATION_OBSERVER_LAG)
+
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+          jasmine.respondWithSelector('#slow', text: 'partial content')
+
+          await wait()
+
+          expect('#slow').toHaveText('partial content')
+
+        it 'immediately loads a partial that is already visible within the document viewport', ->
+          partial = fixture('a#slow[up-defer="reveal"][href="/slow-path"]')
+          up.hello(partial)
+
+          # MutationObserver has a delay even for the initial intersection check.
+          # We have additional code in place to call it synchronously during compilation,
+          # so we don't get a "flash of empty partial" when the content is already cached.
+          await wait(0)
+
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(jasmine.lastRequest().url).toMatchURL('/slow-path')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#slow')
+
+          jasmine.respondWithSelector('#slow', text: 'partial content')
+
+          await wait()
+
+          expect('#slow').toHaveText('partial content')
+
+        it 'only sends a single request as the partial enters and leaves the viewport repeatedly', ->
+          before = fixture('#before', text: 'before', style: 'height: 50000px')
+
+          partial = fixture('a#slow[up-defer="reveal"][href="/slow-path"]')
+          up.hello(partial)
+
+          await wait(MUTATION_OBSERVER_LAG)
+
+          expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+          partial.scrollIntoView()
+
+          await wait(MUTATION_OBSERVER_LAG)
+
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+          # Abort the request so we can observe whether another request will be sent.
+          up.network.abort()
+          await wait(MUTATION_OBSERVER_LAG)
+
+          document.scrollingElement.scrollTop = 0
+          await wait(MUTATION_OBSERVER_LAG)
+          partial.scrollIntoView()
+          await wait(MUTATION_OBSERVER_LAG)
+
+          # No additional request was sent
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+        it 'detects visibility for a partial in an element with scroll overflow', ->
+          viewport = fixture('#viewport', style: 'height: 500px; width: 300px; overflow-y: scroll')
+          before = e.affix(viewport, '#before', text: 'before', style: 'height: 50000px')
+
+          partial = e.affix(viewport, 'a#slow[up-defer="reveal"][href="/slow-path"]')
+          up.hello(partial)
+
+          await wait(MUTATION_OBSERVER_LAG)
+
+          expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+          partial.scrollIntoView()
+
+          await wait(MUTATION_OBSERVER_LAG)
+
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+      describe "with [up-defer='manual']", ->
+
+        it 'does not load the partial by default', ->
+          partial = fixture('a#slow[up-defer="manual"][href="/slow-path"]')
+          up.hello(partial)
+
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+      describe 'up:deferred:load event', ->
+
+        it 'emits an up:deferred:load event before hitting the network', ->
+          listener = jasmine.createSpy('up:deferred:load listener').and.callFake ->
             expect(jasmine.Ajax.requests.count()).toEqual(0)
+          up.on('up:deferred:load', listener)
 
-            partial.scrollIntoView()
-
-            await wait(MUTATION_OBSERVER_LAG)
-
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
-
-            jasmine.respondWithSelector('#slow', text: 'partial content')
-
-            await wait()
-
-            expect('#slow').toHaveText('partial content')
-
-          it 'immediately loads a partial that is already visible within the document viewport', ->
-            partial = fixture('a#slow[up-partial][href="/slow-path"][up-load-on="reveal"]')
-            up.hello(partial)
-
-            # MutationObserver has a delay even for the initial intersection check.
-            # We have additional code in place to call it synchronously during compilation,
-            # so we don't get a "flash of empty partial" when the content is already cached.
-            await wait(0)
-
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
-            expect(jasmine.lastRequest().url).toMatchURL('/slow-path')
-            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#slow')
-
-            jasmine.respondWithSelector('#slow', text: 'partial content')
-
-            await wait()
-
-            expect('#slow').toHaveText('partial content')
-
-          it 'only sends a single request as the partial enters and leaves the viewport repeatedly', ->
-            before = fixture('#before', text: 'before', style: 'height: 50000px')
-
-            partial = fixture('a#slow[up-partial][href="/slow-path"][up-load-on="reveal"]')
-            up.hello(partial)
-
-            await wait(MUTATION_OBSERVER_LAG)
-
-            expect(jasmine.Ajax.requests.count()).toEqual(0)
-
-            partial.scrollIntoView()
-
-            await wait(MUTATION_OBSERVER_LAG)
-
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
-
-            # Abort the request so we can observe whether another request will be sent.
-            up.network.abort()
-            await wait(MUTATION_OBSERVER_LAG)
-
-            document.scrollingElement.scrollTop = 0
-            await wait(MUTATION_OBSERVER_LAG)
-            partial.scrollIntoView()
-            await wait(MUTATION_OBSERVER_LAG)
-
-            # No additional request was sent
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
-
-          it 'detects visibility for a partial in an element with scroll overflow', ->
-            viewport = fixture('#viewport', style: 'height: 500px; width: 300px; overflow-y: scroll')
-            before = e.affix(viewport, '#before', text: 'before', style: 'height: 50000px')
-
-            partial = e.affix(viewport, 'a#slow[up-partial][href="/slow-path"][up-load-on="reveal"]')
-            up.hello(partial)
-
-            await wait(MUTATION_OBSERVER_LAG)
-
-            expect(jasmine.Ajax.requests.count()).toEqual(0)
-
-            partial.scrollIntoView()
-
-            await wait(MUTATION_OBSERVER_LAG)
-
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
-
-        describe "with [up-load-on='manual']", ->
-
-          it 'does not load the partial by default', ->
-            partial = fixture('a#slow[up-partial][href="/slow-path"][up-load-on="manual"]')
-            up.hello(partial)
-
-            await wait()
-
-            expect(jasmine.Ajax.requests.count()).toEqual(0)
-
-      describe 'up:partial:load event', ->
-
-        it 'emits an up:partial:load event before hitting the network', ->
-          listener = jasmine.createSpy('up:partial:load listener').and.callFake ->
-            expect(jasmine.Ajax.requests.count()).toEqual(0)
-          up.on('up:partial:load', listener)
-
-          partial = fixture('a#slow[up-partial][href="/slow-path"]')
+          partial = fixture('a#slow[up-defer][href="/slow-path"]')
           up.hello(partial)
 
           await wait()
 
           expect(listener).toHaveBeenCalled()
 
-        it 'does not load the partial when up:partial:load is prevented', ->
-          listener = jasmine.createSpy('up:partial:load listener').and.callFake (event) ->
+        it 'does not load the partial when up:deferred:load is prevented', ->
+          listener = jasmine.createSpy('up:deferred:load listener').and.callFake (event) ->
             event.preventDefault()
-          up.on('up:partial:load', listener)
+          up.on('up:deferred:load', listener)
 
-          partial = fixture('a#slow[up-partial][href="/slow-path"]')
+          partial = fixture('a#slow[up-defer][href="/slow-path"]')
           up.hello(partial)
 
           await wait()
@@ -3381,14 +3399,14 @@ describe 'up.link', ->
           expect(jasmine.Ajax.requests.count()).toEqual(0)
 
         it 'allows listener to change render options', ->
-          listener = jasmine.createSpy('up:partial:load listener').and.callFake (event) ->
+          listener = jasmine.createSpy('up:deferred:load listener').and.callFake (event) ->
             event.renderOptions.url = '/other-path'
             event.renderOptions.target = '#other'
 
-          up.on('up:partial:load', listener)
+          up.on('up:deferred:load', listener)
 
           fixture('#other')
-          partial = fixture('a#slow[up-partial][href="/slow-path"]', text: 'initial content')
+          partial = fixture('a#slow[up-defer][href="/slow-path"]', text: 'initial content')
           up.hello(partial)
 
           await wait()
