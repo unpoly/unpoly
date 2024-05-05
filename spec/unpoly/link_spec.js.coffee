@@ -3316,6 +3316,67 @@ describe 'up.link', ->
 
           expect('#slow').toHaveText('partial content')
 
+        describe 'with [up-intersect-margin]', ->
+
+          it 'allows to load the partial earlier with a positive [up-intersect-margin]', ->
+            beforeHeight = 50_000
+            clientHeight = up.viewport.rootHeight()
+            partial = fixture('a#slow[up-defer="reveal"][href="/slow-path"]',
+              text: 'label',
+              style: "position: absolute; top: #{beforeHeight}px; height: 100px; background-color: green;",
+              'up-intersect-margin': '20'
+            )
+            up.hello(partial)
+
+            await wait(MUTATION_OBSERVER_LAG)
+
+            expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+            up.viewport.root.scrollTop = beforeHeight - clientHeight - 10
+
+            await wait(MUTATION_OBSERVER_LAG)
+
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+          it 'immediately honors the [up-intersect-margin] if the element is already in the viewport', ->
+            clientHeight = up.viewport.rootHeight()
+            partial = fixture('a#slow[up-defer="reveal"][href="/slow-path"]',
+              text: 'label',
+              style: "position: absolute; top: #{clientHeight + 10}px; height: 100px; background-color: green;",
+              'up-intersect-margin': '20'
+            )
+            up.hello(partial)
+
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+          it 'allows to load the partial later with a negative [up-intersect-margin]', ->
+            beforeHeight = 50_000
+            clientHeight = up.viewport.rootHeight()
+            partial = fixture('a#slow[up-defer="reveal"][href="/slow-path"]',
+              text: 'label',
+              style: "position: absolute; top: #{beforeHeight}px; height: 100px; background-color: green;",
+              'up-intersect-margin': '-20'
+            )
+            up.hello(partial)
+
+            await wait(MUTATION_OBSERVER_LAG)
+
+            expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+            up.viewport.root.scrollTop = beforeHeight - clientHeight + 10
+
+            await wait(MUTATION_OBSERVER_LAG)
+
+            expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+            up.viewport.root.scrollTop = beforeHeight - clientHeight + 30
+
+            await wait(MUTATION_OBSERVER_LAG)
+
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+
         it 'only sends a single request as the partial enters and leaves the viewport repeatedly', ->
           before = fixture('#before', text: 'before', style: 'height: 50000px')
 

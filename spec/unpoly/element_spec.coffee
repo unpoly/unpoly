@@ -853,6 +853,10 @@ describe 'up.element', ->
       element = up.element.createFromHTML('<div foo="123_000">/div>')
       expect(up.element.numberAttr(element, 'foo')).toBe(123000)
 
+    it "parses a negative number", ->
+      element = up.element.createFromHTML('<div foo="-123">/div>')
+      expect(up.element.numberAttr(element, 'foo')).toBe(-123)
+
   describe 'up.element.jsonAttr', ->
 
     it "returns the given attribute's value parsed as JSON", ->

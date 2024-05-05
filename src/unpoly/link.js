@@ -851,9 +851,11 @@ up.link = (function() {
       case 'insert':
         callback()
         break
-      case 'reveal':
-        up.fragment.onFirstIntersect(link, callback)
+      case 'reveal': {
+        let margin = e.numberAttr(link, 'up-intersect-margin')
+        up.fragment.onFirstIntersect(link, callback, { margin })
         break
+      }
       case 'hover':
         new up.LinkFollowIntent(link, callback)
         break
@@ -963,6 +965,16 @@ up.link = (function() {
 
   @param [up-feedback='true']
     Whether the `[up-defer]` placeholder is assigned an `.up-active` class while loading its content.
+
+  @param [up-intersect-margin='0']
+    With `[up-defer=reveal]`, this enlarges the viewport by the given number of pixels before
+    computing the intersection.
+
+    A positive number will load the deferred content some pixels before it becomes visible.
+
+    A negative number will require the user to scroll some pixels into the element before it is loaded.
+
+    @experimental
 
   @experimental
   */
@@ -1608,13 +1620,20 @@ up.link = (function() {
     inserted, preloading will start immediately.  Also see [preloading when a link becomes visible](/preloading#on-reveal).
 
   @param [up-preload-delay]
-    The number of milliseconds to wait between hovering
-    and preloading. Increasing this will lower the load in your server,
-    but will also make the interaction feel less instant.
-
-    Only available for [`[up-preload="hover"]`](#up-preload).
+    [`[up-preload="hover"]`](#up-preload), this requires the user to hover
+    for the given number of milliseconds before the link is preloaded.
 
     Defaults to `up.link.config.preloadDelay`.
+
+  @param [up-intersect-margin='0']
+    With `[up-preload=reveal]`, this enlarges the viewport by the given number of pixels before
+    computing the intersection.
+
+    A positive number will load the deferred content some pixels before it becomes visible.
+
+    A negative number will require the user to scroll some pixels into the element before it is loaded.
+
+    @experimental
   @stable
   */
   up.compiler(config.selectorFn('preloadSelectors'), function(link) {
