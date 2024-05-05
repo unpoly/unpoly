@@ -1043,7 +1043,7 @@ up.element = (function() {
     let value = element.getAttribute(attribute)
     if (value) {
       value = value.replace(/_/g, '')
-      if (value.match(/^[\d.]+$/)) {
+      if (value.match(/^-?[\d.]+$/)) {
         return parseFloat(value)
       }
     }
@@ -1374,8 +1374,10 @@ up.element = (function() {
     return `[${attr}*="//"]:not([${attr}*="//${location.host}/"])`
   }
 
-  function isIntersectingWindow(element) {
-    const rect = element.getBoundingClientRect()
+  function isIntersectingWindow(element, { margin = 0 } = {}) {
+    const rect = up.Rect.fromElement(element)
+    rect.grow(margin)
+
     return (rect.bottom > 0) && (rect.top  < window.innerHeight) &&
       (rect.right  > 0) && (rect.left < window.innerWidth)
   }

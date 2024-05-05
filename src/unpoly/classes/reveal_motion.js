@@ -27,7 +27,7 @@ up.RevealMotion = class RevealMotion {
       elementRect.height = Math.min(elementRect.height, maxPixels)
     }
 
-    this._addPadding(elementRect)
+    elementRect.grow(this._padding)
     this._substractObstructions(viewportRect)
 
     // Cards test (topics dropdown) throw an error when we also fail at zero
@@ -81,11 +81,6 @@ up.RevealMotion = class RevealMotion {
     } else {
       return up.Rect.fromElement(this._viewport)
     }
-  }
-
-  _addPadding(elementRect) {
-    elementRect.top -= this._padding
-    elementRect.height += 2 * this._padding
   }
 
   _selectObstructions(selector) {
