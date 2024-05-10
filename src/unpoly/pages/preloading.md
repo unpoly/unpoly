@@ -46,7 +46,7 @@ When an eagerly preloaded fragment is rendered multiple times, only a single req
 All subsequent render passes will render from the [cache](/caching).
 
 
-Preloading when a link becomes visible {#on-reveal}
+Preloading when a link scrolls into view {#on-reveal}
 ------------------------------------------
 
 To "lazy preload" a link when it is scrolled into the [viewport](/up-viewport),
@@ -63,8 +63,8 @@ When a lazy preloading link enters and exit its viewport repeatedly, only a sing
 
 
 
-Controlling the load timing with JavaScript {#scripted}
--------------------------------------------------------
+Custom preload timing {#scripted}
+----------------------------------
 
 To programmatically preload any link element at a time of your choosing, use the `up.link.preload()` function:
 
@@ -115,7 +115,6 @@ function isSlowConnection() {
   // https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation
   return navigator.connection && navigator.connection.effectiveType.include('2g')  
 }
-
 
 up.on('up:link:preload', function(event) {
   if (isSlowConnection()) {
