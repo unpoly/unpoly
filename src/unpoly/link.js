@@ -866,7 +866,9 @@ up.link = (function() {
   }
 
   /*-
-  Loads a [manually loading](/lazy-loading#scripted) `[up-defer]` placeholder.
+  Loads a [`[up-defer="manual"]`](/up-defer) placeholder.
+
+  See [custom load timing for deferred content](/lazy-loading#scripted) for details and examples.
 
   @function up.deferred.load
 
@@ -912,6 +914,24 @@ up.link = (function() {
   }
 
   /*-
+  This event is emitted before an `[up-defer]` placeholder loads its deferred content.
+
+  The event can be [prevented](#event.preventDefault) to stop the network request.
+  The loading will not be attempted again, but you can use `up.deferred.load()` to manually load afterwards.
+
+  @event up:deferred:load
+  @param {Element} event.target
+    The `[up-defer]` placeholder that is about to load its content.
+  @param {Object} event.renderOptions
+    An object with [render options](/up.render#parameters) for the coming fragment update.
+
+    Listeners may inspect and modify these options.
+  @param event.preventDefault()
+    Prevents the deferred content from being loaded.
+  @experimental
+  */
+
+  /*-
   A placeholder for content that is loaded later from another URL.
 
   By moving expensive but non-[critical](https://developer.mozilla.org/en-US/docs/Web/Performance/Critical_rendering_path) fragments into partials,
@@ -941,10 +961,23 @@ up.link = (function() {
     When set to `'manual'` the deferred content will not load on its own.
     You can control the load timing by calling `up.deferred.load()` from your own JavaScripts.
 
+  @param [up-intersect-margin='0']
+    With `[up-defer=reveal]`, this enlarges the viewport by the given number of pixels before
+    computing the intersection.
+
+    A positive number will load the deferred content some pixels before it becomes visible.
+
+    A negative number will require the user to scroll some pixels into the element before it is loaded.
+
+    @experimental
+
   @param [up-href]
     The URL from which to load the deferred content.
 
     If your `[up-defer]` placeholder is a [standard hyperlink](/lazy-loading#seo), you can use an `[href]` attribute instead.
+
+  @param [up-headers]
+    A JSON object with additional request headers.
 
   @param [up-cache='auto']
     Whether to cache the deferred content.
@@ -965,16 +998,6 @@ up.link = (function() {
 
   @param [up-feedback='true']
     Whether the `[up-defer]` placeholder is assigned an `.up-active` class while loading its content.
-
-  @param [up-intersect-margin='0']
-    With `[up-defer=reveal]`, this enlarges the viewport by the given number of pixels before
-    computing the intersection.
-
-    A positive number will load the deferred content some pixels before it becomes visible.
-
-    A negative number will require the user to scroll some pixels into the element before it is loaded.
-
-    @experimental
 
   @experimental
   */
