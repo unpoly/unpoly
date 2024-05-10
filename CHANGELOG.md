@@ -17,13 +17,19 @@ New guide pages
 ### Partials
 
 
+### Infinite scrolling
+
+
 ### Request merging
 
 
-### New cache
+### More cache hits for optimized responses
 
 - Varying responses to multi-target requests are now a cache hit for each selector
   - See /caching#how-cache-entries-are-matched 
+
+### Fix cache retention
+
 - No longer evicting cache entries, useful for offline:
   - When a request (or revalidation) fails due to network issue
   - When the server responds with an empty response (to any request or revalidation)
@@ -33,6 +39,10 @@ New guide pages
 - Lazy on reveal
 - Eager on insert
 - New /preloading page
+
+### Others
+
+- `up.element.numberAttr()` parses negative numbers
 
 
 
