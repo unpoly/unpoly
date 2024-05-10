@@ -170,7 +170,6 @@ up.protocol = (function() {
   X-Up-Target: .foo, .bar
   ```
 
-
   @header X-Up-Target
   @stable
   */

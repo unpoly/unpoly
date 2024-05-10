@@ -7,11 +7,11 @@ By deferring the loading of non-[critical](https://developer.mozilla.org/en-US/d
 with a separate URL, you can paint important content earlier.
 
 
-## Extracting deferred partials {#on-insert}
+## Extracting deferred fragments {#on-insert}
 
 @include defer-example
 
-## Loading as the placeholder becomes visible {#on-reveal}
+## Loading as the placeholder scrolls into view {#on-reveal}
 
 Instead of loading deferred content right away, you may also wait until the placeholder is scrolled into its [viewport](/up.viewport).
 
@@ -23,11 +23,12 @@ For this set an `[up-defer="reveal"]` attribute:
 </div>
 ```
 
+To shift the load timing to an earlier or later moment, set an `[up-intersect-margin]` attribute.
+
 You can use the loading of deferred placeholders to [implement infinite scrolling](/infinite-scrolling) without custom JavaScript.
 
 
-
-## Controlling the load timing with JavaScript {#scripted}
+## Custom load timing {#scripted}
 
 By setting an `[up-defer="manual"]` attribute, the deferred content will not load on its own:
 
@@ -37,24 +38,13 @@ By setting an `[up-defer="manual"]` attribute, the deferred content will not loa
 ```
 
 You can now control the load timing by calling `up.deferred.load()` from your own JavaScripts.
-The code below uses a [compiler](/up.compiler) to load the partial after two seconds:
+The code below uses a [compiler](/up.compiler) to load the fragment after two seconds:
 
 ```js
 up.compiler('#menu[up-defer]', function(placeholder) {
   setTimeout(() => up.deferred.load(placeholder), 2000)
 })
 ```
-
-
-## Lazy loading cached content
-
-When the deferred content is already [cached](/caching), it is rendered synchronously.
-The placeholder will never appear in the DOM.
-
-This means Unpoly will cache complete pages, including any deferred partials. Navigating to such pages will render them instantly.
-Such pages will also remain accessible in the event of [network issues](/network-issues).
- 
-Deferred content that is rendered from the cache will be [revalidated](/caching#revalidation) unless you also set an `[up-revalidate=false]` attribute.
 
 
 ## Performance considerations
@@ -74,22 +64,42 @@ or when it has absolute positioning that removes it from the flow.
 
 ## SEO considerations {#seo}
 
-May not be indexed.
+Search engines may not realiably index lazy loaded content. Avoid lazy loading heavily optimized keywords,
+or [use Google's URL inspection tool to test your implementation](https://developers.google.com/search/docs/crawling-indexing/javascript/lazy-loading). 
 
-Partials will not be followed.
-
-If you want to reveal your partial to crawlers and non-JavaScript clients, you can use a standard hyperlink instead:
+To allow crawlers to discover and index lazy loaded content *as a separate URL*, you can use `[up-defer]` on a standard hyperlink:
 
 ```html
-<a id="menu" up-defer href="/path">load menu</a>
+<a id="menu" up-defer href="/menu">load menu</a>
 ```
 
+Since this will index `/menu` as a separate page, it should render with a full application layout. You can optionally
+omit the layout if an `X-Up-Target` header is present on the request.
 
-## Better caching with partials
 
-It is hard to efficiently cache pages that mix content specific to a some users with content shared by many users.
-While you can use complex cache keys to capture all differences, this may duplicate logic and cause frequent cache misses.
-By instead extracting user-specific fragments into deferred partials, you can improve the cacheability of a larger page or component.
+
+## Caching considerations {#caching}
+
+
+### Cached partials are rendered instantly
+
+Unpoly caches [responses to GET requests](/caching) on the client. When deferred content is already cached, it is rendered synchronously.
+The `[up-defer]` placeholder will never appear in the DOM.
+
+This means Unpoly will cache complete pages, including any lazy-loaded fragments. Navigating to such pages will render them instantly,
+without showing a flash of unloaded state. Such pages will also remain accessible in the event of [network issues](/network-issues).
+
+Deferred content that is rendered from the cache will be [revalidated](/caching#revalidation) unless you also set an
+[`[up-revalidate=false]`](/a-up-follow#up-revalidate) attribute.
+
+
+### Improving cacheability on the server
+
+Many apps have a server-side cache with HTML that is expensive to render.
+
+It can be challenging to cache pages that mix content specific to a some users with content shared by many users.
+While you can use complex cache keys to capture all the differences, this may duplicate logic and cause frequent cache misses.
+By [extracting user-specific fragments into deferred partials](#on-insert), you can improve the cacheability of a larger page or component.
 
 For example, the `<article>` below almost has the some content for all users. However, only administrators
 get buttons to edit or delete the article:
@@ -119,44 +129,51 @@ element:
 ```
 
 
-## Targeting
 
+## Loading multiple fragments from the same URL
 
-### Identifying the partial in new content
-
-Must have derivable target.
-
-Set `[id]` or `[up-id]` attribute.
-
-
-### Multiple partials on the same page
-
-Deferred placeholders can target one or [multiple](/targeting-fragments#updating-multiple-fragments) fragments:
-
-```html
-<a id="next-page" href="/items?page=3" up-defer="reveal" up-target="#next-page, #pages:after"> <!-- mark-phrase "#next-page, #pages:after" -->
-  load next page
-</div>
-```
-
-To target the placeholder itself, you can use `:origin` target instead of spelling out a selector.
+Deferred placeholders may be scattered throughout the page, but load from the same URL:
 
 
 ```html
-<a id="next-page" href="/items?page=3" up-defer="reveal" up-target=":origin, #pages:after">
-  load next page
+<div id="editorial-controls" up-defer up-href="/articles/123/deferred"></div> <!-- mark-phrase "#editorial-controls" -->
+
+... other HTML ...
+
+<div id="analytics-controls" up-defer up-href="/articles/123/deferred"></div> <!-- mark-phrase "#analytics-controls" -->
+```
+
+When loading the deferred content, Unpoly will send a *single request* with both targets:
+
+```http
+GET /articles/123/deferred HTTP/1.1
+X-Up-Target: #editorial-controls, #analytics-controls
+```
+
+
+## Triggering distant updates
+
+Instead of replacing itself, a placeholder can target one or [multiple](/targeting-fragments#updating-multiple-fragments) other fragments.
+To do so, set an `[up-target]` attribute matching the elements you want to update.
+
+The following placeholder would update the fragments `#editorial-controls` and `#analytics-controls` when
+the placeholder is scrolled into view:
+
+```html
+<a href="/articles/123/controls" up-defer="reveal" up-target="#editorial-controls, #analytics-controls"> <!-- mark-phrase "up-target" -->
+  load controls
 </div>
 ```
+
+See [infinite scrolling](/infinite-scrolling) for another example of this technique.
 
 
 ## Events
 
-`up:deferred:load`.
+Before a placeholder loads its deferred content, an `up:deferred:load` event is emitted.
 
-Can be prevented.
-
-Will not be attempted again (but you can use `up.deferred.load()`).
-
+The event can be [prevented](/up:deferred:load#event.preventDefault) to stop the network request.
+The loading will not be attempted again, but you can use `up.deferred.load()` to manually load afterwards.
 
 
 
