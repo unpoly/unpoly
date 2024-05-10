@@ -1,41 +1,16 @@
-Partial
-=======
+3.8 release
+===========
 
-- Consider the "partial" name one last time
-  - [up-partial]        up:partial:load   up.partial.load()
-  - [up-loader]
-  - [up-trigger]
-  - [up-placeholder]
-  - [up-slot]
-  - [up-autofollow]
-  - [up-deferred]        up:deferred:load     up.deferred.load() 
-  - [up-staggered]
-  - [up-future]          up:future:load       up.future.load())
 - Docs
-  - Do we want to support a single-digit [up-intersect-margin] ?
-    - Also needs to work for the synchronous check
-  - Consider a doc page "Lazy loading content"
-    - on load
-    - on reveal
-    - Performance considerations
-      - Content earlier
-      - Layout shift later
-    - Note caching benefits like Turbo frames does: https://turbo.hotwired.dev/handbook/frames#cache-benefits-to-loading-frames
-      - On the server
-      - On the client (Unpoly cache)
-    - SEO
-      - Use link to be indexed
-      - Use div to not be indexed
-        - Support without JS important?
-    - Targets for the same URL are merged
-  - For [up-partial]
+  - For [up-defer]
     - Note that all attributes for [up-follow] can be used
     - Document the render options for which we set a default
-  - For up:partial:load
-  - For up.partial.load()
+    - Consider documenting [up-headers]
+  - For up:deferred:load
+  - For up.deferred.load()
     - Second options arg supports all render options 
     - Document the render options for which we set a default
-  - Finish "infinite scrolling" doc page 
+- Test upgrade with real app
 
 
 Priority
@@ -46,11 +21,13 @@ Priority
 Backlog
 =======
 
+- Docs: Explain { origin } in the docs
 - Docs: [up-transition] should docment params [up-duration], [up-easing]
 - Docs. up.transition() should document options.duration, options.easing
 - Docs: URLs like /up-transition should redirect to /a-up-transition 
 - BodyShifter could use a class to shift elements
-  - scrollbar-width could be custom property 
+  - scrollbar-width could be custom property
+  - or margin-right: calc(100vw - 100%) (and remove scrollBarWidth measiruing)
 - Check if the BodyShifter can disable itself with supported scrollbar-gutter: stable
 - Doc page for polling
 - Replace `up.util.microtask()` with `queueMicrotask()`
@@ -133,11 +110,6 @@ Backlog
   - Parse [up-close-animation] for links that open a new layer
   - Parse [up-open-animation] as an alias for [up-animation]
 - The log message "Could not match primary target" should not appear when we're only working with fallback targets, and we happen to use the second one. E.g. first one is [up-main=modal], second one is [up-main].
-- [up-partial]
-  - Merge the X-Up-Target when attaching to an existing request
-  - Default to its own URL?
-  - Should it get a header?
-    - Users can also do [up-headers] on the link
 - Print a warning when we can find no better form group than the <form> itself
 - Run macros (but not compilers) *before* history changes
 - Give layers an [index] attribute so users don't style based on [nesting]
