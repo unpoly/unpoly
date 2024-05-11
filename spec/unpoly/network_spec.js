@@ -14,7 +14,7 @@ describe('up.network', function() {
 
       it('makes a request with the given URL and params', function(done) {
         up.request('/foo', {params: {key: 'value'}, method: 'post'})
-        u.microtask(function() {
+        queueMicrotask(function() {
           const request = jasmine.lastRequest()
           expect(request.url).toMatchURL('/foo')
           expect(request.data()).toEqual({key: ['value']})
@@ -25,7 +25,7 @@ describe('up.network', function() {
 
       it('also allows to pass the URL as a { url } option instead', function(done) {
         up.request({url: '/foo', params: {key: 'value'}, method: 'post'})
-        u.microtask(function() {
+        queueMicrotask(function() {
           const request = jasmine.lastRequest()
           expect(request.url).toMatchURL('/foo')
           expect(request.data()).toEqual({key: ['value']})
@@ -2537,11 +2537,24 @@ describe('up.network', function() {
 
     describe('up.cache.evict()', function() {
 
-      it('removes all cache entries', function() {
+      it('removes all cache entries', async function() {
         up.request({url: '/foo', cache: true})
         expect({url: '/foo'}).toBeCached()
         up.cache.evict()
         expect({url: '/foo'}).not.toBeCached()
+      })
+
+      it('it does not crash if the cache is evicted before a caching request starts loading (bugfix)', async function() {
+        up.request({url: '/foo', cache: true})
+        up.cache.evict()
+
+        await wait()
+
+        jasmine.respondWith('content')
+
+        await wait()
+
+        expect({url: '/foo'}).toBeCached()
       })
 
       it('accepts an URL pattern that determines which entries are purged', function() {

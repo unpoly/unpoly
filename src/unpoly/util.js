@@ -1113,29 +1113,12 @@ up.util = (function() {
 
   Equivalent to calling `setTimeout(fn, 0)`.
 
-  Also see `up.util.microtask()`.
-
   @function up.util.task
   @param {Function()} block
   @stable
   */
   function queueTask(task) {
     return setTimeout(task)
-  }
-
-  /*-
-  Pushes the given function to the [JavaScript microtask queue](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/).
-
-  @function up.util.microtask
-  @param {Function()} task
-  @return {Promise}
-    A promise that is resolved with the return value of `task`.
-
-    If `task` throws an error, the promise is rejected with that error.
-  @experimental
-  */
-  function queueMicrotask(task) {
-    return Promise.resolve().then(task)
   }
 
   /*-
@@ -2076,7 +2059,6 @@ up.util = (function() {
     isBasicObjectProperty,
     isCrossOrigin,
     task: queueTask,
-    microtask: queueMicrotask,
     isEqual,
     parseTokens,
     wrapList,

@@ -25,7 +25,7 @@ up.Request.Queue = class Queue {
     // make its own check whether a request in the queue is considered slow.
     this._scheduleSlowTimer(request)
     this._queueRequest(request)
-    u.microtask(() => this._poke())
+    queueMicrotask(() => this._poke())
   }
 
   // Promotes a background request to a non-background request.
@@ -99,7 +99,7 @@ up.Request.Queue = class Queue {
     // Check if we can emit up:network:recover after a previous up:network:late event.
     this._checkLate()
 
-    u.microtask(() => this._poke())
+   queueMicrotask(() => this._poke())
   }
 
   _poke() {

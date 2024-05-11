@@ -120,3 +120,19 @@ up.util.values = function(...args) {
   up.migrate.deprecated('up.util.values()', 'Object.values()')
   return Object.values(...args)
 }
+
+/*-
+Pushes the given function to the [JavaScript microtask queue](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/).
+
+@function up.util.microtask
+@param {Function()} task
+@return {Promise}
+  A promise that is resolved with the return value of `task`.
+
+  If `task` throws an error, the promise is rejected with that error.
+@deprecated
+  Use [`queueMicrotask()`](https://developer.mozilla.org/en-US/docs/Web/API/queueMicrotask) instead.
+*/
+up.util.microtask = window.queueMicrotask
+
+

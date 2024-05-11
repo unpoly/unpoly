@@ -213,7 +213,7 @@ up.Request.Cache = class Cache {
 
   _delete(request) {
     u.remove(this._requests, request)
-    request.cacheRoute.delete(request)
+    request.cacheRoute?.delete(request)
     // In the case of reindex(), the cacheRoute is about to change because the request
     // changed URL or params in up:request:load.
     delete request.cacheRoute
