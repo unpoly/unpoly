@@ -876,17 +876,17 @@ up.link = (function() {
     The `[up-defer]` placeholder to load.
 
   @param {Object} [options]
-    [render options](/up.render#parameters) that should be used for loading the partial.
+    [Render options](/up.render#parameters) that should be used for loading the partial.
 
     Unpoly will parse render options from the given placeholder's attributes,
-    like `[up-target]` or `[up-cache]`. See `a[up-follow]` for a list
+    like `[up-target]` or `[up-cache]`. See `[up-defer]` and `a[up-follow]` for a list
     of supported attributes.
 
     You may pass this additional `options` object to supplement or override
     options parsed from the placeholder attributes.
 
   @return {up.RenderJob}
-    A promise that fulfills with an `up.RenderResult` once the partial
+    A promise that fulfills with an `up.RenderResult` once the deferred content
     has been loaded and rendered.
 
   @experimental
