@@ -25,6 +25,12 @@ resetMetaTags = ->
     for savedMetaTag in jasmine.metaTagsBeforeSuite
       document.head.append(savedMetaTag)
 
+resetLang = ->
+  if jasmine.langBeforeSuite
+    document.documentElement.setAttribute('lang', jasmine.langBeforeSuite)
+  else
+    document.documentElement.removeAttribute('lang')
+
 findMetaTags = ->
   document.head.querySelectorAll('meta, link:not([rel=stylesheet])')
 
@@ -32,6 +38,8 @@ beforeAll ->
   jasmine.titleBeforeSuite = document.title
 
   jasmine.locationBeforeSuite = location.href
+
+  jasmine.langBeforeSuite = document.documentElement.lang
 
   jasmine.metaTagsBeforeSuite = findMetaTags()
 
@@ -73,6 +81,7 @@ afterEach ->
     resetLocation()
     resetTitle()
     resetMetaTags()
+    resetLang()
 
     up.framework.reset()
 

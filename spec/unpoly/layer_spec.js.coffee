@@ -362,6 +362,28 @@ describe 'up.layer', ->
             expect(document.head).not.toHaveSelector('meta[name="description"][content="old description"]')
             expect(document.head).toHaveSelector('meta[name="description"][content="new description"]')
 
+          it 'updates the html[lang] attribute from the response', ->
+            document.documentElement.setAttribute('lang', 'it')
+
+            up.layer.open(
+              location: '/modal-location'
+              history: true
+              target: '.element',
+              document: """
+                <html lang='fr'>
+                  <body>
+                    <div class='element'>
+                      overlay text
+                    </div>
+                  </body>
+                </html>
+              """
+            )
+
+            await wait()
+
+            expect(document.documentElement).toHaveAttribute('lang', 'fr')
+
           it 'does not emit up:layer:location:changed when the overlay opens', asyncSpec (next) ->
             changedListener = jasmine.createSpy('up:layer:location:changed listener')
             up.on('up:layer:location:changed', changedListener)

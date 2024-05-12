@@ -311,6 +311,37 @@ describe 'up.Layer.Overlay', ->
       expect(document.head).not.toHaveSelector('meta[name="description"][content="new description"]')
       expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
 
+    it "restores the parent layer's html[lang] attribute", ->
+      up.history.config.enabled = true
+      document.documentElement.setAttribute('lang', 'it')
+
+      up.layer.open(
+        location: '/modal-location'
+        history: true
+        target: '.element'
+        document: """
+          <html lang='fr'>
+            <body>
+              <div class='element'>
+                overlay text
+              </div>
+            </body>
+          </html>
+        """
+      )
+
+      await wait()
+
+      expect(up.layer.isOverlay()).toBe(true)
+      expect(up.layer.history).toBe(true)
+      expect(document.documentElement).toHaveAttribute('lang', 'fr')
+
+      up.layer.current.accept()
+
+      await wait()
+
+      expect(document.documentElement).toHaveAttribute('lang', 'it')
+
     it "does not restore the parent layer's location if the parent layer does not render history", ->
       up.history.config.enabled = true
 

@@ -1,6 +1,8 @@
 const u = up.util
 const e = up.element
 
+const FULL_DOCUMENT_PATTERN = /^\s*<(html|!DOCTYPE)\b/i
+
 up.ResponseDoc = class ResponseDoc {
 
   constructor({ document, fragment, content, target, origin, cspNonces, match }) {
@@ -14,8 +16,6 @@ up.ResponseDoc = class ResponseDoc {
       this._parseContent(content || '', target)
     }
 
-
-
     this._cspNonces = cspNonces
 
     if (origin) {
@@ -28,58 +28,54 @@ up.ResponseDoc = class ResponseDoc {
     this._match = match
   }
 
-  _parseDocument(document) {
-    document = this._parse(document, e.createBrokenDocumentFromHTML)
-
-    // Remember that we need to fix <script>, <noscript> and media elements later.
-    // We could fix these elements right now for the entire document, but since we will only use
-    // a fragment, this would cause excessive work.
-    this._isDocumentBroken = true
-
-    this._useParseResult(document)
+  _parseDocument(value) {
+    if (value instanceof Document) {
+      this._document = value
+      this._isFullDocument = true
+    } else if (u.isString(value)) {
+      this._document = e.createBrokenDocumentFromHTML(value)
+      this._isFullDocument = FULL_DOCUMENT_PATTERN.test(value)
+      // Remember that we need to fix <script>, <noscript> and media elements later.
+      // We could fix these elements right now for the entire document, but since we will only use
+      // a fragment, this would cause excessive work.
+      this._isDocumentBroken = true
+    } else {
+      this._document = this._buildFauxDocument(value)
+      this._isFullDocument = value.matches('html')
+    }
   }
 
-  _parseFragment(fragment) {
-    fragment = this._parse(fragment, e.createFromHTML)
-    this._useParseResult(fragment)
+  _parseFragment(value) {
+    let parsed = u.isString(value) ? e.createFromHTML(value) : value
+    this._document = this._buildFauxDocument(parsed)
   }
 
-  _parseContent(content, target) {
-    if(!target) up.fail("must pass a { target } when passing { content }")
+  _parseContent(value, target) {
+    if (!target) up.fail("must pass a { target } when passing { content }")
 
-    target = u.map(up.fragment.parseTargetSteps(target), 'selector').join()
+    let simplifiedTarget = u.map(up.fragment.parseTargetSteps(target), 'selector').join()
 
     // Conjure an element that will later match target in @select()
-    const matchingElement = e.createFromSelector(target)
+    const matchingElement = e.createFromSelector(simplifiedTarget)
 
-    if (u.isString(content)) {
-      // Don't use e.createFromHTML() here, since content may be a text node.
-      matchingElement.innerHTML = content
-    } else {
-      matchingElement.appendChild(content)
-    }
-
-    this._useParseResult(matchingElement)
-  }
-
-  _parse(value, parseFn) {
     if (u.isString(value)) {
-      value = parseFn(value)
+      // Don't use e.createFromHTML() here, since content may be a text node.
+      matchingElement.innerHTML = value
+    } else {
+      matchingElement.appendChild(value)
     }
-    return value
+
+    this._document = this._buildFauxDocument(matchingElement)
   }
 
-  _useParseResult(node) {
-    if (node instanceof Document) {
-      this._document = node
-    } else {
-      // We're creating a faux document to append our fragment root to.
-      // This way, when a step selects the fragment root it will no longer be available
-      // for selection by a later step.
-      this._document = document.createElement('up-document')
-      this._document.append(node)
-      this._document.documentElement = node
-    }
+  _buildFauxDocument(node) {
+    // We're creating a faux document to append our fragment root to.
+    // This way, when a step selects the fragment root it will no longer be available
+    // for selection by a later step.
+    let fauxDocument = document.createElement('up-document')
+    fauxDocument.append(node)
+    fauxDocument.documentElement = node
+    return fauxDocument
   }
 
   rootSelector() {
@@ -103,13 +99,8 @@ up.ResponseDoc = class ResponseDoc {
   _getHead() {
     // The root may be a `Document` (which always has a `#head`, even if it wasn't present in the HTML)
     // or an `Element` (which never has a `#head`).
-    let { head } = this._document
-
-    // DocumentParser also produces a document with a <head>, even if the initial HTML
-    // has no <head> element. To work around this we consider the head to be missing
-    // if it has no child nodes.
-    if (head && head.childNodes.length > 0) {
-      return head
+    if (this._isFullDocument) {
+      return this._document.head
     }
   }
 
@@ -124,6 +115,15 @@ up.ResponseDoc = class ResponseDoc {
 
   get assets() {
     return this._fromHead(up.script.findAssets)
+  }
+
+  get lang() {
+    // Although DOMParser always produces a document with <html> element, we must
+    // only use the [lang] attribute if the initial document contained a <html> element.
+    // Otherwise Unpoly would delete the attribute from the current page.
+    if (this._isFullDocument) {
+      return up.history.getLang(this._document)
+    }
   }
 
   _getTitleText(head) {

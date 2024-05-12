@@ -600,6 +600,7 @@ up.Layer = class Layer extends up.Record {
       this.savedTitle = document.title
       this.savedMetaTags = up.history.findMetaTags()
       this.savedLocation = up.history.location
+      this.savedLang = up.history.getLang()
     }
   }
 
@@ -621,6 +622,10 @@ up.Layer = class Layer extends up.Record {
 
     if (this.savedMetaTags) {
       up.history.updateMetaTags(this.savedMetaTags)
+    }
+
+    if (u.isString(this.savedLang)) {
+      up.history.updateLang(this.savedLang)
     }
   }
 
@@ -657,6 +662,11 @@ up.Layer = class Layer extends up.Record {
     // Set unless { title: false }
     if (u.isString(options.title)) {
       this.title = options.title
+    }
+
+    // Set unless { lang: false }
+    if (u.isString(options.lang)) {
+      this.lang = options.lang
     }
   }
 
@@ -712,6 +722,22 @@ up.Layer = class Layer extends up.Record {
 
     if (this.showsLiveHistory()) {
       up.history.updateMetaTags(metaTags)
+    }
+  }
+
+  get lang() {
+    if (this.showsLiveHistory()) {
+      return up.history.getLang()
+    } else {
+      return this.savedLang
+    }
+  }
+
+  set lang(lang) {
+    this.savedLang = lang
+
+    if (this.showsLiveHistory()) {
+      up.history.updateLang(lang)
     }
   }
 

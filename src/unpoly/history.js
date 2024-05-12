@@ -472,6 +472,18 @@ up.history = (function() {
     }
   }
 
+  function getLang(doc = document) {
+    // return e.attr(doc.documentElement, 'lang')
+    let { documentElement } = doc
+    if (documentElement.matches('html')) {
+      return doc.documentElement.lang
+    }
+  }
+
+  function updateLang(newLang) {
+    e.toggleAttr(e.root, 'lang', newLang, !!newLang)
+  }
+
   /*-
   Changes the link's destination so it points to the previous URL.
 
@@ -525,5 +537,7 @@ up.history = (function() {
     isLocation,
     findMetaTags,
     updateMetaTags,
+    getLang,
+    updateLang,
   }
 })()

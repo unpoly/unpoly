@@ -896,24 +896,86 @@ describe 'up.fragment', ->
 
       describe 'with { url } option', ->
 
-        it 'replaces the given selector with the same selector from a freshly fetched page', asyncSpec (next) ->
+        it 'replaces the given selector with the same selector from a freshly fetched page', ->
           fixture('.before', text: 'old-before')
           fixture('.middle', text: 'old-middle')
           fixture('.after', text: 'old-after')
 
           up.render('.middle', url: '/path')
 
-          next =>
-            @respondWith """
-              <div class="before">new-before</div>
-              <div class="middle">new-middle</div>
-              <div class="after">new-after</div>
-              """
+          await wait()
 
-          next =>
-            expect('.before').toHaveText('old-before')
-            expect('.middle').toHaveText('new-middle')
-            expect('.after').toHaveText('old-after')
+          jasmine.respondWith """
+            <div class="before">new-before</div>
+            <div class="middle">new-middle</div>
+            <div class="after">new-after</div>
+            """
+
+          await wait()
+
+          expect('.before').toHaveText('old-before')
+          expect('.middle').toHaveText('new-middle')
+          expect('.after').toHaveText('old-after')
+
+        it 'parses a full HTML page', ->
+          fixture('.before', text: 'old-before')
+          fixture('.middle', text: 'old-middle')
+          fixture('.after', text: 'old-after')
+
+          up.render('.middle', url: '/path')
+
+          await wait()
+
+          jasmine.respondWith """
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <title>Document title</title>
+              </head>
+              <body>
+                <div class="before">new-before</div>
+                <div class="middle">new-middle</div>
+                <div class="after">new-after</div>
+              </body>
+            </html>
+            """
+
+          await wait()
+
+          expect('.before').toHaveText('old-before')
+          expect('.middle').toHaveText('new-middle')
+          expect('.after').toHaveText('old-after')
+
+
+        it 'parses a full HTML page with uppercase tag names', ->
+          fixture('.before', text: 'old-before')
+          fixture('.middle', text: 'old-middle')
+          fixture('.after', text: 'old-after')
+
+          up.render('.middle', url: '/path')
+
+          await wait()
+
+          jasmine.respondWith """
+            <!DOCTYPE html>
+            <HTML>
+              <HEAD>
+                <TITLE>Document title</TITLE>
+              </HEAD>
+              <BODY>
+                <DIV class="before">new-before</DIV>
+                <DIV class="middle">new-middle</DIV>
+                <DIV class="after">new-after</DIV>
+              </BODY>
+            </HTML>
+            """
+
+          await wait()
+
+          expect('.before').toHaveText('old-before')
+          expect('.middle').toHaveText('new-middle')
+          expect('.after').toHaveText('old-after')
+
 
         it 'returns a promise that fulfills the server response was received and the fragments were swapped', asyncSpec (next) ->
           fixture('.target')
@@ -4629,13 +4691,9 @@ describe 'up.fragment', ->
           await wait()
 
           jasmine.respondWith """
-              <html>
-                <body>
-                  <div class='container'>
-                    new container text
-                  </div>
-                </body>
-              </html>
+              <div class='container'>
+                new container text
+              </div>
             """
 
           await wait()
@@ -4717,6 +4775,113 @@ describe 'up.fragment', ->
 
             expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('Remove the [up-hungry] attribute'), jasmine.anything())
 
+      describe 'html[lang]', ->
+
+        it 'updates the html[lang] attribute with the language from the response', ->
+          document.documentElement.setAttribute('lang', 'it')
+          fixture('.container', text: 'old container text')
+          up.render('.container', url: '/path', history: true)
+
+          await wait()
+
+          jasmine.respondWith """
+              <html lang='fr'>
+                <body>
+                  <div class='container'>
+                    new container text
+                  </div>
+                </body>
+              </html>
+            """
+
+          await wait()
+
+          expect('.container').toHaveText('new container text')
+          expect(document.documentElement).toHaveAttribute('lang', 'fr')
+
+        it 'removes the html[lang] attribute if the response has a <html> element without a [lang] attribute', ->
+          document.documentElement.setAttribute('lang', 'it')
+          fixture('.container', text: 'old container text')
+          up.render('.container', url: '/path', history: true)
+
+          await wait()
+
+          jasmine.respondWith """
+              <html>
+                <body>
+                  <div class='container'>
+                    new container text
+                  </div>
+                </body>
+              </html>
+            """
+
+          await wait()
+
+          expect('.container').toHaveText('new container text')
+          expect(document.documentElement).not.toHaveAttribute('lang')
+
+        it 'does not remove the html[lang] attribute if the response has no <html> element', ->
+          document.documentElement.setAttribute('lang', 'it')
+          fixture('.container', text: 'old container text')
+          up.render('.container', url: '/path', history: true)
+
+          await wait()
+
+          jasmine.respondWith """
+              <div class='container'>
+                new container text
+              </div>
+            """
+
+          await wait()
+
+          expect('.container').toHaveText('new container text')
+          expect(document.documentElement).toHaveAttribute('lang', 'it')
+
+        it 'does not update the html[lang] attribute with { lang: false }', ->
+          document.documentElement.setAttribute('lang', 'it')
+          fixture('.container', text: 'old container text')
+          up.render('.container', url: '/path', history: true, lang: false)
+
+          await wait()
+
+          jasmine.respondWith """
+              <html lang='fr'>
+                <body>
+                  <div class='container'>
+                    new container text
+                  </div>
+                </body>
+              </html>
+            """
+
+          await wait()
+
+          expect('.container').toHaveText('new container text')
+          expect(document.documentElement).toHaveAttribute('lang', 'it')
+
+        it 'does not update the html[lang] attribute when not updating history', ->
+          document.documentElement.setAttribute('lang', 'it')
+          fixture('.container', text: 'old container text')
+          up.render('.container', url: '/path', history: false)
+
+          await wait()
+
+          jasmine.respondWith """
+              <html lang='fr'>
+                <body>
+                  <div class='container'>
+                    new container text
+                  </div>
+                </body>
+              </html>
+            """
+
+          await wait()
+
+          expect('.container').toHaveText('new container text')
+          expect(document.documentElement).toHaveAttribute('lang', 'it')
 
       describe 'assets in the head', ->
 
@@ -4939,13 +5104,9 @@ describe 'up.fragment', ->
 
           fixture('.container', text: 'old container text')
           up.render('.container', location: '/path', history: true, document: """
-            <html>
-              <body>
-                <div class='container'>
-                  new container text
-                </div>
-              </body>
-            </html>
+            <div class='container'>
+              new container text
+            </div>
           """)
 
           await wait()
