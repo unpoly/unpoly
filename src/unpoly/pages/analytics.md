@@ -15,7 +15,7 @@ These *in-page navigations* may be missing from your statistics.
 Below you find multiple approaches to track in-page navigations. 
 Choose and adapt the strategy that fits the amount of data you want to track.
 
-All code examples assume that a function `trackView(url)` is used to track a page view.
+All code examples assume that a function `trackPageView(url)` is used to track a page view.
 The implementation differs between analytics tools. For instance, in Matomo you
 would use:
 
@@ -32,10 +32,10 @@ The most straightforward solution is observing the `up:location:changed` event:
 
 ```js
 // Track initial page load. Your old tracking code may already do this.
-trackView(location.href)
+trackPageView(location.href)
 
 // Track a visit when the address bar changes.
-up.on('up:location:changed', ({ location }) => trackView(location))
+up.on('up:location:changed', ({ location }) => trackPageView(location))
 ```
 
 This behavior is close to that of classic tracking codes from tools like Google Analytics.
@@ -50,17 +50,17 @@ If you want to track navigation within overlays, observe `up:layer:location:chan
 
 ```js
 // Track initial page load. Your old tracking code may already do this.
-trackView(location.href)
+trackPageView(location.href)
 
 // Track when a layer changes its location.
 // This includes location changes on the root layer. 
-up.on('up:layer:location:changed', ({ location }) => trackView(location))
+up.on('up:layer:location:changed', ({ location }) => trackPageView(location))
 
 // When an overlay opens, track the overlay's initial location.
 up.on('up:layer:opened', ({ layer }) => {
   // Don't track overlays that were opened from local string content.
   if (layer.location) {
-    trackView(layer.location)
+    trackPageView(layer.location)
   }
 })
 ```
@@ -131,12 +131,12 @@ To track *all* fragment updates, observe the `up:fragment:loaded` event:
 
 ```js
 // Track initial page load. Your old tracking code may already do this.
-trackView(location.href)
+trackPageView(location.href)
 
 up.on('up:fragment:loaded', (event) => {
   // Don't track revalidation of cached content. 
   if (!event.revalidating) {
-    trackView(event.response.url)
+    trackPageView(event.response.url)
   }
 })
 ```
