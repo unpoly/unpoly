@@ -243,8 +243,8 @@ up.motion = (function() {
   }
 
   function applyConfig(options) {
-    options.easing ||= config.easing
-    options.duration ||= config.duration
+    options.easing ??= config.easing
+    options.duration ??= config.duration
   }
 
   function findNamedAnimation(name) {

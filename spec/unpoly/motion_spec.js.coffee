@@ -8,7 +8,7 @@ describe 'up.motion', ->
 
   describe 'JavaScript functions', ->
 
-    describe 'up.animate', ->
+    describe 'up.animate()', ->
 
       it 'animates the given element', (done) ->
         $element = $fixture('.element').text('content')
@@ -106,6 +106,39 @@ describe 'up.motion', ->
         next.after (1000 + (tolerance = 250)), =>
           expect(parseFloat($element.css('fontSize'))).toBeAround(100, 20)
           expect(parseFloat($element.css('height'))).toBeAround(200, 40)
+
+      fdescribe '{ duration } option', ->
+
+        it 'uses the given duration', ->
+          # Use a vastly different default so we see that the given { duration } is used instead
+          up.motion.config.duration = 5000
+
+          element = fixture('.element', text: 'content')
+          up.animate(element, 'fade-in', duration: 200, easing: 'linear')
+
+          await wait(100)
+
+          expect(element).toHaveOpacity(0.5, 0.3)
+
+        it 'defaults to up.motion.config.duration if no { duration } is given', ->
+          up.motion.config.duration = 200
+
+          element = fixture('.element', text: 'content')
+          up.animate(element, 'fade-in', easing: 'linear')
+
+          await wait(100)
+
+          expect(element).toHaveOpacity(0.5, 0.3)
+
+        it 'animates instantly with { duration: 0 }', ->
+          up.motion.config.duration = 200
+
+          element = fixture('.element', text: 'content')
+          up.animate(element, 'fade-in', easing: 'linear', duration: 0)
+
+          await wait()
+
+          expect(element).toHaveOpacity(1.0)
 
       describe 'with an animation that flies in the element from the screen edge', ->
 
