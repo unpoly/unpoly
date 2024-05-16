@@ -709,7 +709,7 @@ up.element = (function() {
   }
 
   function idSelector(id) {
-    if (id.match(/^[a-z0-9\-_]+$/i)) {
+    if (id.match(/^[a-z][a-z0-9\-_]*$/i)) {
       return `#${id}`
     } else {
       return attrSelector('id', id)
