@@ -18,12 +18,12 @@ To restore a history entry, Unpoly goes through the following steps:
 
 Listeners may prevent `up:location:restore` and substitute their own restoration behavior:
 
-  ```js
-  up.on('up:location:restore', function(event) {
-    event.preventDefault()
-    document.body.innerText = `Restored content for ${event.location}!`
-  })
-  ```
+```js
+up.on('up:location:restore', function(event) {
+  event.preventDefault()
+  document.body.innerText = `Restored content for ${event.location}!`
+})
+```
 
 See `up:location:restore` for details.
 
