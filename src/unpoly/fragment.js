@@ -966,7 +966,7 @@ up.fragment = (function() {
   })
   ```
 
-  ### Example: Changing render options
+  ### Example: Changing render options {#changing-render-options}
 
   Instead of preventing the update, listeners may also access the `event.renderOptions` object
   to mutate options to the `up.render()` call that will process the server response:
@@ -1072,6 +1072,7 @@ up.fragment = (function() {
   @param {Object} event.renderOptions
     Options for the `up.render()` call that will process the server response.
 
+    Listeners may inspect or [modify](#changing-render-options) these options.
   @stable
   */
 

@@ -553,7 +553,7 @@ up.link = (function() {
   @param {Object} event.renderOptions
     An object with [render options](/up.render#parameters) for the preloading.
 
-    Listeners may inspect and [modify](/up:link:follow#changing-render-options) these options.
+    Listeners may inspect or [modify](/up:link:follow#changing-render-options) these options.
   @param event.preventDefault()
     Prevents the link from being preloaded.
   @stable
