@@ -914,16 +914,16 @@ describe 'up.link', ->
         up.link.config.followSelectors.push('.hyperlink')
         expect(up.link.isFollowable(link)).toBe(false)
 
-      it 'returns false for a link with a [href] to another host', ->
+      it 'returns false for a link with a [href] to another host ("cross origin")', ->
         link = fixture('a[up-follow][href="https://other-host/path"]')
         expect(up.link.isFollowable(link)).toBe(false)
 
-      it 'returns true for a link with a [href] to a fully qualified URL on this host', ->
-        link = fixture("a[up-follow][href=//#{location.host}/path]")
+      it 'returns true for a link with a [href] to this host when it also includes this port explicitly', ->
+        link = fixture("a[up-follow][href=//#{location.hostname}:#{location.port}/path]")
         expect(up.link.isFollowable(link)).toBe(true)
 
       it 'returns false for a link with a [href] to this host, but another port', ->
-        link = fixture("a[up-follow][href=//#{location.host}:97334/path]")
+        link = fixture("a[up-follow][href=//#{location.hostname}:97334/path]")
         expect(up.link.isFollowable(link)).toBe(false)
 
       it 'returns false for a link with a [up-href] to another host', ->
