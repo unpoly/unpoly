@@ -10159,7 +10159,7 @@ describe 'up.fragment', ->
         element = fixture('div#id-value[name=name-value]')
         expect(up.fragment.toTarget(element)).toBe("#id-value")
 
-      fit "uses an attribute selector if the element's ID starts with a digit", ->
+      it "uses an attribute selector if the element's ID starts with a digit", ->
         element = fixture('div')
         element.id = '123-foo'
         expect(up.fragment.toTarget(element)).toBe('[id="123-foo"]')
