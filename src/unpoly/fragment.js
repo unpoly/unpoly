@@ -637,6 +637,15 @@ up.fragment = (function() {
 
     This option is only used when [updating history](#options.history).
 
+  @param {boolean|Array<Element>} [options.lang]
+    An explicit language code to set as the [`html[lang]`](https://www.tpgi.com/using-the-html-lang-attribute/) attribute.
+
+    By default Unpoly will extract the language from the response and update the `html[lang]`
+    attribute in the current page.
+    To prevent the attrribute from being changed, pass `{ lang: false }`.
+
+    This option is only used when [updating history](#options.history).
+
   @param {string} [options.transition]
     The name of an [transition](/up.motion) to morph between the old and few fragment.
 

@@ -757,6 +757,16 @@ describe 'up.link', ->
         options = up.link.followOptions(link)
         expect(options.metaTags).toBe(false)
 
+      it 'parses an [up-lang=false] attribute as boolean', ->
+        link = fixture('a[href="/foo"][up-lang="false"]')
+        options = up.link.followOptions(link)
+        expect(options.lang).toBe(false)
+
+      it 'parses an [up-lang="string"] attribute as string', ->
+        link = fixture('a[href="/foo"][up-lang="fr"]')
+        options = up.link.followOptions(link)
+        expect(options.lang).toBe('fr')
+
       it 'parses an [up-match] attribute', ->
         link = fixture('a[href="/foo"][up-match="first"]')
         options = up.link.followOptions(link)

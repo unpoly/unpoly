@@ -74,10 +74,10 @@ A history update comprises the following:
 - The document title shown as the browser's window title.
 - Meta tags like `meta[name=description]` or `link[rel=canonical]`.
 
-In the document below, the highlighted elements will be updated when history is changed, in additional to the location URL:
+In the document below, the highlighted nodes will be updated when history is changed, in additional to the location URL:
 
 ```html
-<head>
+<head lang="en"> <!-- mark-phrase "en" -->
   <title>AcmeCorp</title> <!-- mark-line -->
   <link rel="canonical" href="https://example.com/dresses/green-dresses"> <!-- mark-line -->
   <meta name="description" content="About the AcmeCorp team"> <!-- mark-line -->
@@ -96,7 +96,7 @@ You may choose to only update some history-related state, but keep others unchan
 - Meta tag synchronization can be disabled by setting [`[up-meta-tags="false"]`](/a-up-follow#up-meta-tags) on a link or form, or by passing [`{ metaTags: false }`](/up.render#options.metaTags) to a rendering function.
 - Location changes can be disabled by setting [`[up-location="false"]`](/a-up-follow#up-location) on a link or form, or by passing [`{ location: false }`](/up.render#options.location) to a rendering function.
 - Title changes can be disabled by setting [`[up-title="false"]`](/a-up-follow#up-title) on a link or form, or by passing [`{ title: false }`](/up.render#options.location) to a rendering function.
-
+- Changes to the [`html[lang]`](https://www.tpgi.com/using-the-html-lang-attribute/) attribute can be disabled by setting [`[up-lang="false"]`](/a-up-follow#up-title) on a link or form, or by passing [`{ title: false }`](/up.render#options.location) to a rendering function.
 
 
 ## History in overlays {#overlays}
