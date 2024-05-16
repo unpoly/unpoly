@@ -211,7 +211,8 @@ up.FormValidator = class FormValidator {
     options.guardEvent = up.event.build('up:form:validate', {
       fields: dirtyFields,
       log: 'Validating form',
-      params: options.params
+      params: options.params,
+      form: this._form,
     })
 
     // We don't render concurrently. If additional fields want to validate

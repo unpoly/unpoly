@@ -359,7 +359,8 @@ up.form = (function() {
     options.guardEvent ||= up.event.build('up:form:submit', {
       submitButton: options.submitButton,
       log: 'Submitting form',
-      params: options.params
+      params: options.params,
+      form,
     })
 
     options.origin ||= up.viewport.focusedElementWithin(form) || options.submitButton || form
@@ -578,10 +579,6 @@ up.form = (function() {
   /*-
   This event is [emitted](/up.emit) when a form is [submitted](/up.submit) through Unpoly.
 
-  The event is emitted on the element that caused the form submission.
-  This is usually a submit button or a focused field. If the element is not known, the event is emitted
-  on the `<form>` element.
-
   When the form is being [validated](/up-validate), this event is not emitted.
   Instead an `up:form:validate` event is emitted.
 
@@ -593,29 +590,41 @@ up.form = (function() {
   when a form submission [fails](/failed-responses):
 
   ```js
-  up.on('up:form:submit', function(event, form) {
+  up.on('up:form:submit', function(event) {
     event.renderOptions.failTransition = 'shake'
   })
   ```
 
   @event up:form:submit
+
   @param {Element} event.target
     The element that caused the form submission.
+
+    This is usually a submit button or a focused field. If the element is not known, the event is emitted
+    on the `<form>` element.
+
+  @param {Element} event.form
+    The form that is being submitted.
+
   @param {up.Params} event.params
     The [form parameters](/up.Params) that will be send as the form's request payload.
 
     Listeners may inspect and modify params before they are sent.
+
   @param {Element} [event.submitButton]
     The button used to submit the form.
 
     If no button was pressed directly (e.g. the user pressed `Enter` inside a focused text field),
     this returns the first submit button.
+
   @param {Object} event.renderOptions
     An object with [render options](/up.render#parameters) for the fragment update.
 
     Listeners may inspect and modify these options.
+
   @param event.preventDefault()
     Prevents the form from being submitted.
+
   @stable
   */
 
@@ -1062,28 +1071,37 @@ up.form = (function() {
   This event is emitted before a form is being [validated](/up-validate).
 
   @event up:form:validate
+
   @param {Element} event.target
     The form that is being validated.
+
+  @param {Element} event.form
+    The form that is being validated.
+
   @param {up.Params} event.params
     The [form parameters](/up.Params) that will be sent as the form's request payload.
 
     Listeners may inspect and modify params before they are sent.
     Note that the request may be a [batch of multiple validations](/up.validate#batching).
+
   @param {Element} event.fields
     The form fields that triggered this validation pass.
 
     When multiple fields are validating within the same [task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/),
-    Unpoly will make a single validation request with multiple targets.
+    Unpoly will make a [single validation request with multiple targets](/up.validate#batching).
 
     @experimental
+
   @param {Object} event.renderOptions
     An object with [render options](/up.render#parameters) for the fragment update
     that will show the validation results.
 
     Listeners may inspect and modify these options.
     Note that the request may be a [batch of multiple validations](/up.validate#batching).
+
   @param event.preventDefault()
     Prevents the validation request from being sent to the server.
+
   @stable
   */
 

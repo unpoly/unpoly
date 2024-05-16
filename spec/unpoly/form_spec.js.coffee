@@ -1461,38 +1461,44 @@ describe 'up.form', ->
 
     describe 'up.validate()', ->
 
-      it 'emits an up:form:validate event with information about the validation pass', asyncSpec (next) ->
-        form = fixture('form[action=/path]')
-        input = e.affix(form, 'input[name=foo][value=foo-value]')
-        submitListener = jasmine.createSpy('up:form:submit listener')
-        validateListener = jasmine.createSpy('up:form:validate listener')
-        up.on('up:form:submit', submitListener)
-        up.on('up:form:validate', validateListener)
+      describe 'up:form:validate event', ->
 
-        up.validate(input)
+        fit 'is emitted with information about the validation pass', ->
+          form = fixture('form[action=/path]')
+          input = e.affix(form, 'input[name=foo][value=foo-value]')
+          submitListener = jasmine.createSpy('up:form:submit listener')
+          validateListener = jasmine.createSpy('up:form:validate listener')
+          up.on('up:form:submit', submitListener)
+          up.on('up:form:validate', validateListener)
 
-        next ->
+          up.validate(input)
+
+          await wait()
+
           expect(submitListener).not.toHaveBeenCalled()
           expect(validateListener).toHaveBeenCalled()
           validateEvent = validateListener.calls.argsFor(0)[0]
           expect(validateEvent).toBeEvent('up:form:validate')
           expect(validateEvent.fields).toEqual([input])
+          expect(validateEvent.form).toBe(form)
+          # Cannot emit on the origin because we're batching validations from multiple origins
+          expect(validateEvent.target).toBe(form)
           expect(validateEvent.params).toMatchParams(foo: 'foo-value')
 
-      it 'lets up:form:validate listeners mutate params before submission', asyncSpec (next) ->
-        form = fixture('form[action="/form-target"][method="put"][up-target=".response"]')
-        input = e.affix(form, 'input[name="foo"][value="one"]')
+        it 'lets listeners mutate params before submission', asyncSpec (next) ->
+          form = fixture('form[action="/form-target"][method="put"][up-target=".response"]')
+          input = e.affix(form, 'input[name="foo"][value="one"]')
 
-        listener = (event) ->
-          expect(event.params.get('foo')).toBe("one")
-          event.params.set('foo', 'two')
+          listener = (event) ->
+            expect(event.params.get('foo')).toBe("one")
+            event.params.set('foo', 'two')
 
-        up.on('up:form:validate', listener)
+          up.on('up:form:validate', listener)
 
-        up.validate(input)
+          up.validate(input)
 
-        next ->
-          expect(jasmine.lastRequest().data()['foo']).toEqual ['two']
+          next ->
+            expect(jasmine.lastRequest().data()['foo']).toEqual ['two']
 
       it 'allows to override the { data } for the new element', asyncSpec (next) ->
         form = fixture('form[action="/path"]')
@@ -2532,39 +2538,56 @@ describe 'up.form', ->
         next =>
           expect('.response').toHaveText('new text')
 
-      it 'emits an up:form:submit event with information about the form submission', ->
-        form = fixture('form[action="/form-target"][method="put"][up-target=".response"]')
-        e.affix(form, 'input[name="field1"][value="value1"]')
-        e.affix(form, 'input[name="field2"][value="value2"]')
-        submitButton = e.affix(form, 'input[type="submit"][name="submit-button"][value="submit-button-value"]')
-        up.hello(form)
+      describe 'up:form:submit event', ->
 
-        submitEvent = null
-        form.addEventListener('up:form:submit', (event) => submitEvent = event)
+        fit 'is emitted with information about the form submission', ->
+          form = fixture('form[action="/form-target"][method="put"][up-target=".response"]')
+          e.affix(form, 'input[name="field1"][value="value1"]')
+          e.affix(form, 'input[name="field2"][value="value2"]')
+          submitButton = e.affix(form, 'input[type="submit"][name="submit-button"][value="submit-button-value"]')
+          up.hello(form)
 
-        Trigger.clickSequence(submitButton)
+          submitEvent = null
+          form.addEventListener('up:form:submit', (event) => submitEvent = event)
 
-        expect(submitEvent).toBeEvent('up:form:submit')
-        expect(submitEvent.params).toEqual(jasmine.any(up.Params))
-        expect(submitEvent.params.get('field1')).toEqual('value1')
-        expect(submitEvent.params.get('field2')).toEqual('value2')
-        expect(submitEvent.submitButton).toBe(submitButton)
+          Trigger.clickSequence(submitButton)
 
-      it 'lets up:form:submit listeners mutate params before submission', asyncSpec (next) ->
-        form = fixture('form[action="/form-target"][method="put"][up-target=".response"]')
-        e.affix(form, 'input[name="foo"][value="one"]')
-        submitButton = e.affix(form, 'input[type="submit"]')
+          expect(submitEvent).toBeEvent('up:form:submit')
+          expect(submitEvent.params).toEqual(jasmine.any(up.Params))
+          expect(submitEvent.params.get('field1')).toEqual('value1')
+          expect(submitEvent.params.get('field2')).toEqual('value2')
+          expect(submitEvent.submitButton).toBe(submitButton)
+          expect(submitEvent.form).toBe(form)
 
-        listener = (event) ->
-          expect(event.params.get('foo')).toBe("one")
-          event.params.set('foo', 'two')
+        it 'lets listeners mutate params before submission', asyncSpec (next) ->
+          form = fixture('form[action="/form-target"][method="put"][up-target=".response"]')
+          e.affix(form, 'input[name="foo"][value="one"]')
+          submitButton = e.affix(form, 'input[type="submit"]')
 
-        up.on('up:form:submit', listener)
+          listener = (event) ->
+            expect(event.params.get('foo')).toBe("one")
+            event.params.set('foo', 'two')
 
-        Trigger.clickSequence(submitButton)
+          up.on('up:form:submit', listener)
 
-        next ->
-          expect(jasmine.lastRequest().data()['foo']).toEqual ['two']
+          Trigger.clickSequence(submitButton)
+
+          next ->
+            expect(jasmine.lastRequest().data()['foo']).toEqual ['two']
+
+        fit 'emits on the element that triggered the submission', ->
+          form = fixture('form[action="/form-target"][up-submit]')
+          submitButton = e.affix(form, 'input[type="submit"]')
+          up.hello(form)
+
+          submitEvent = null
+          form.addEventListener('up:form:submit', (event) => submitEvent = event)
+
+          Trigger.clickSequence(submitButton)
+          await wait()
+
+          expect(submitEvent).toBeEvent('up:form:submit', { target: submitButton })
+
 
       it 'allows to refer to the origin as ":origin" in the target selector', asyncSpec (next) ->
         $form = $fixture('form.my-form[action="/form-target"][up-target="form:has(:origin)"]').text('old form text')
