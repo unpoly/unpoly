@@ -1463,7 +1463,7 @@ describe 'up.form', ->
 
       describe 'up:form:validate event', ->
 
-        fit 'is emitted with information about the validation pass', ->
+        it 'is emitted with information about the validation pass', ->
           form = fixture('form[action=/path]')
           input = e.affix(form, 'input[name=foo][value=foo-value]')
           submitListener = jasmine.createSpy('up:form:submit listener')
@@ -2540,7 +2540,7 @@ describe 'up.form', ->
 
       describe 'up:form:submit event', ->
 
-        fit 'is emitted with information about the form submission', ->
+        it 'is emitted with information about the form submission', ->
           form = fixture('form[action="/form-target"][method="put"][up-target=".response"]')
           e.affix(form, 'input[name="field1"][value="value1"]')
           e.affix(form, 'input[name="field2"][value="value2"]')
@@ -2575,7 +2575,7 @@ describe 'up.form', ->
           next ->
             expect(jasmine.lastRequest().data()['foo']).toEqual ['two']
 
-        fit 'emits on the element that triggered the submission', ->
+        it 'emits on the element that triggered the submission', ->
           form = fixture('form[action="/form-target"][up-submit]')
           submitButton = e.affix(form, 'input[type="submit"]')
           up.hello(form)
