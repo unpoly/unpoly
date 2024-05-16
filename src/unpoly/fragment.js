@@ -1121,7 +1121,7 @@ up.fragment = (function() {
 
   Emits the [`up:fragment:keep`](/up:fragment:keep) event.
 
-  ### Example
+  ## Example
 
   A common use case is to preserve the playback state of media elements:
 
@@ -1136,17 +1136,27 @@ up.fragment = (function() {
   its playback state will be the same before and after the update. All other elements (like the `<p>`)
   will be updated with new content.
 
-  ### Controlling if an element will be kept
+  ## Controlling if an element will be kept
 
   Unpoly will **only** keep an existing element if:
 
   - The existing element has an `[up-keep]` attribute
   - The response contains an element matching the [derived target](/target-derivation) of the existing element
-  - The matching element has *no* `[up-keep=false]` attribute
-  - The [`up:fragment:keep`](/up:fragment:keep) event that is [emitted](/up.emit) on the existing element
-    is not prevented.
-  - The [`up:fragment:keep`](/up:fragment:keep) event that is passed to an [`[up-on-keep]`](#up-on-keep)
-    callback on the existing element is not prevented.
+
+  The element has multiple methods to veto against being kept:
+
+  - By setting a `[up-keep=false]` attribute on the new element version.
+  - By setting a different `[id]` or `[up-id]` attribute so its [derived target](/target-derivation) no longer matches the existing element.
+  - By preventing the [`up:fragment:keep`](/up:fragment:keep) event that is [emitted](/up.emit) on the existing element.
+  - By preventing the [`up:fragment:keep`](/up:fragment:keep) event that is passed to an [`[up-on-keep]`](#up-on-keep)
+    callback on the element.
+
+  You can also choose to render without keeping elements:
+
+  - Link or forms can force a swap of `[up-keep]` elements by setting an [`[up-use-keep=false]`](a-up-follow#up-use-keep) attribute.
+  - Rendering functions can force a swap of `[up-keep]` elements by passing an [`{ useKeep: false }`](/up.render#options.useKeep) option.
+
+  ### Example for conditional keeping
 
   Let's say we want only keep an `<audio up-keep>` element as long as it plays
   the same song (as identified by the tag's `src` attribute).
@@ -1162,7 +1172,7 @@ up.fragment = (function() {
   })
   ```
 
-  ### Updating data for kept elements
+  ## Updating data for kept elements
 
   Even when keeping elements, you may reconcile its [data object](/data) with the data
   from the new element that was discarded.
@@ -1202,7 +1212,7 @@ up.fragment = (function() {
   > Instead of keeping an element and update its data you may also
   > [preserve an element's data through reloads](/data#preserving-data-through-reloads).
 
-  ### Limitations
+  ## Limitations
 
   - The `[up-keep]` attribute is only supported for elements within the `<body>`.
   - If an `<audio up-keep>` or `<video up-keep>` element is a *direct* child of the `<body>`,
