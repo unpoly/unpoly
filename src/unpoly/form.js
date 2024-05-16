@@ -1023,10 +1023,12 @@ up.form = (function() {
   @param {Object} [options.data]
     Overrides properties from the new fragment's `[up-data]`
     with the given [data object](/data).
+
+    To assign data the validating element must have a [derivable target selector](/target-derivation).
   @param {boolean} [options.keepData]
     [Preserve](/data#preserving-data-through-reloads) the reloaded fragment's [data object](/data).
 
-    Properties from the new fragment's `[up-data]`  are overridden with the old fragment's `[up-data]`.
+    Properties from the new fragment's `[up-data]` are overridden with the old fragment's `[up-data]`.
   @param {Object} [options]
     Additional [render options](/up.render#parameters) for the validation request.
   @return {up.RenderJob}
