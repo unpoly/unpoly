@@ -637,9 +637,11 @@ up.link = (function() {
       return
     }
 
+    let role = link.matches('a') ? 'link' : 'button'
+
     e.setMissingAttrs(link, {
       tabindex: '0',     // Make them part of the natural tab order
-      role: 'link',      // Make screen readers pronounce "link"
+      role,              // Make screen readers pronounce "button" or "link"
       'up-clickable': '' // Get pointer pointer from link.css
     })
 

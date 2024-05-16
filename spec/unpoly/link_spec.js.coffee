@@ -3683,28 +3683,55 @@ describe 'up.link', ->
     describe '[up-clickable]', ->
 
       it 'makes the element emit up:click events on Enter', ->
-        fauxLink = up.hello(fixture('.hyperlink[up-clickable]'))
+        fauxButton = up.hello(fixture('.hyperlink[up-clickable]'))
         clickListener = jasmine.createSpy('up:click listener')
-        fauxLink.addEventListener('up:click', clickListener)
+        fauxButton.addEventListener('up:click', clickListener)
 
-        Trigger.keySequence(fauxLink, 'Enter')
+        Trigger.keySequence(fauxButton, 'Enter')
 
         expect(clickListener).toHaveBeenCalled()
 
       it 'makes the element focusable for keyboard users', ->
-        fauxLink = up.hello(fixture('.hyperlink[up-clickable]'))
+        fauxButton = up.hello(fixture('.hyperlink[up-clickable]'))
 
-        expect(fauxLink).toBeKeyboardFocusable()
+        expect(fauxButton).toBeKeyboardFocusable()
 
       it 'gives the element a pointer cursor', ->
-        fauxLink = up.hello(fixture('.hyperlink[up-clickable]'))
+        fauxButton = up.hello(fixture('.hyperlink[up-clickable]'))
 
-        expect(getComputedStyle(fauxLink).cursor).toEqual('pointer')
+        expect(getComputedStyle(fauxButton).cursor).toEqual('pointer')
 
       it 'makes other selectors clickable via up.link.config.clickableSelectors', ->
         up.link.config.clickableSelectors.push('.foo')
-        fauxLink = up.hello(fixture('.foo'))
+        fauxButton = up.hello(fixture('.foo'))
 
-        expect(fauxLink).toBeKeyboardFocusable()
-        expect(getComputedStyle(fauxLink).cursor).toEqual('pointer')
-        expect(fauxLink).toHaveAttribute('up-clickable')
+        expect(fauxButton).toBeKeyboardFocusable()
+        expect(getComputedStyle(fauxButton).cursor).toEqual('pointer')
+        expect(fauxButton).toHaveAttribute('up-clickable')
+
+      describe '[role] attribute', ->
+
+        it 'sets [role=button] on a non-interactive element', ->
+          fauxButton = up.hello(fixture('.hyperlink[up-clickable]'))
+          expect(fauxButton).toHaveAttribute('role', 'button')
+
+        it 'does not override an existing [role] attribute', ->
+          fauxButton = up.hello(fixture('.hyperlink[up-clickable][role="existing-role"]'))
+          expect(fauxButton).toHaveAttribute('role', 'existing-role')
+
+        it 'sets [role=link] for an a:not([href]) element, like a[up-content]', ->
+          fauxLink = up.hello(fixture('a[up-content="inner"][up-target="#target"]'))
+          expect(fauxLink).toHaveAttribute('role', 'link')
+
+      describe 'on an element that is already interactive', ->
+
+        it 'does not set attributes on an a[href] element', ->
+          realLink = up.hello(fixture('a[href="/path"][up-clickable]'))
+          expect(realLink).not.toHaveAttribute('role')
+          expect(realLink).not.toHaveAttribute('tabindex')
+
+        it 'does not set attributes on a button element', ->
+          realButton = up.hello(fixture('button[up-clickable]'))
+          expect(realButton).not.toHaveAttribute('role')
+          expect(realButton).not.toHaveAttribute('tabindex')
+
