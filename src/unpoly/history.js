@@ -23,7 +23,7 @@ up.history = (function() {
   Configures behavior when the user goes back or forward in browser history.
 
   @property up.history.config
-  @param {Array} [config.restoreTargets=[]]
+  @param {Array} [config.restoreTargets=['body']]
     A list of possible CSS selectors to [replace](/up.render)
     when the user [goes back or forward in history](/restoring-history).
 
