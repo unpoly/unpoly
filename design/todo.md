@@ -1,15 +1,6 @@
 3.8 release
 ===========
 
-- Docs
-  - For [up-defer]
-    - Note that all attributes for [up-follow] can be used
-    - Document the render options for which we set a default
-    - Consider documenting [up-headers]
-  - For up:deferred:load
-  - For up.deferred.load()
-    - Second options arg supports all render options 
-    - Document the render options for which we set a default
 - Test upgrade with real app
 
 
@@ -21,6 +12,10 @@ Priority
 Backlog
 =======
 
+- Docs: Extract new doc page "Preserving state" from [up-keep] and /data#preserving-data-through-reloads
+- Docs: https://unpoly.com/up-keep#controlling-if-an-element-will-be-kept should mention useKeep: false, [up-use-keep=false]
+- Docs: Installation methods may be unmaintained; Go through methods and focus on installing frontend assets
+- Should up.layer.open({ data }) set the data on the root element, not the layer element?
 - Docs: Explain { origin } in the docs
 - Docs: [up-transition] should docment params [up-duration], [up-easing]
 - Docs. up.transition() should document options.duration, options.easing
@@ -30,12 +25,11 @@ Backlog
   - or margin-right: calc(100vw - 100%) (and remove scrollBarWidth measiruing)
 - Check if the BodyShifter can disable itself with supported scrollbar-gutter: stable
 - Doc page for polling
-- Replace `up.util.microtask()` with `queueMicrotask()`
 - Form-related events are often emitted on the origin, not the form. It would be helpful if the event objects get a { form } property.
 - Docs for up.validate({ data }): Not that element must have a derivable target
 - Meta-Tag-Updating should also update html[lang], even though it's not an element
   - Also test a case where the attribute is added or removed 
-    - e.toggleAttr(document.documentElement, 'html', responseDoc.lang, !!responseDoc.lang)
+    - e.toggleAttr(document.documentElement, 'lang', responseDoc.lang, !!responseDoc.lang)
   - Update and restore as overlays are opened/closed 
 - Have a better error when Unpoly is loaded twice
 - In an offline case, the revalidation request is killing our existing cache entry (which may be expired but does have a response)
