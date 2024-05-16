@@ -82,7 +82,7 @@ Result values are useful to branch out a complex screen into a [subinteraction](
 ### Dismissal reasons
 
 When an overlay is dimissed, the result value can indicate the reason for dismissal.
-For instance, closing an overlay by clicking on the `×` symbol will dismiss with the value `` 
+For instance, closing an overlay by clicking on the `×` symbol will dismiss with the value `":button"`. 
 
 See the table under [customizing dismiss controls](#customizing-dismiss-controls) for
 a list of default dismissal values.
@@ -246,11 +246,11 @@ To *dismiss* an overlay once an element clicked, use the `[up-dismiss]` attribut
 Closing by targeting the parent layer
 -------------------------------------
 
-When a link or form targets a parent layer, the current layer will close when the parent layer is updated.
+When a link or form targets a parent layer, the current layer will [dismiss](#intents) when the parent layer is updated.
 This behavior is called *peeling*.
 
 The example below uses an [`[up-layer]` attribute](/layer-option) to update the parent layer
-after a successful form submission. This will automatically close the form's own overlay:
+after a successful form submission:
 
 ```html
 <form method="post" action="/users" up-layer="parent">
@@ -259,8 +259,12 @@ after a successful form submission. This will automatically close the form's own
 </form>
 ```
 
-Note that the form will still update its own layer when the [server responds with an error code](/failed-responses)
-due to a validation error. To target another layer in this case, set an `[up-fail-layer]` attribute.
+A successful submission will now dismiss the form's own overlay with a [dismissal value](#overlay-result-values) of `":peel"`.
+
+
+> [note]
+> The form will still update its own layer when the [server responds with an error code](/failed-responses)
+> due to a validation error. To target another layer in this case, set an `[up-fail-layer]` attribute.
 
 
 Customizing dismiss controls
@@ -276,9 +280,9 @@ The option value should contain the name of one or more dismiss controls:
 
 | Method    | Effect                                           | Dismiss value |
 | --------- |--------------------------------------------------| ------------- |
-| `key`     | Enables dimissing with `Escape` key              | `:key`        |
-| `outside` | Enables dismissing by clicking on the background | `:outside`    |
-| `button`  | Adds an `×` button to the layer                  | `:button`     |
+| `key`     | Enables dimissing with `Escape` key              | `":key"`      |
+| `outside` | Enables dismissing by clicking on the background | `":outside"`  |
+| `button`  | Adds an `×` button to the layer                  | `":button"`   |
 
 Regardless of what is configured here, an overlay may always be dismissed by
 using the `up.layer.dismiss()` method or `a[up-dismiss]` attribute.
