@@ -107,7 +107,7 @@ describe 'up.motion', ->
           expect(parseFloat($element.css('fontSize'))).toBeAround(100, 20)
           expect(parseFloat($element.css('height'))).toBeAround(200, 40)
 
-      fdescribe '{ duration } option', ->
+      describe '{ duration } option', ->
 
         it 'uses the given duration', ->
           # Use a vastly different default so we see that the given { duration } is used instead
