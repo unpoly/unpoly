@@ -921,10 +921,6 @@ up.element = (function() {
     return wrapper
   }
 
-  function isWrapper(element) {
-    return element.matches('up-wrapper')
-  }
-
   function preservingFocus(fn) {
     const oldFocusElement = document.activeElement
     try {
@@ -1129,11 +1125,6 @@ up.element = (function() {
   function addTemporaryClass(element, klass) {
     element.classList.add(klass)
     return () => element.classList.remove(klass)
-  }
-
-  function setTemporaryAttr(element, attr, value) {
-    element.setAttribute(attr, value)
-    return () => element.removeAttribute(element, attr)
   }
 
   /*-
@@ -1416,7 +1407,6 @@ up.element = (function() {
     setMissingAttr, // internal
     unwrap, // practical for jQuery migration
     wrapChildren,
-    isWrapper,
     // presentAttr: presentAttr # experimental
     attr: stringAttr,
     booleanAttr, // it's practical, but i cannot find a good name. people might expect it to cast to number, too. but i don't need that for my own code. maybe booleanAttr?
@@ -1434,7 +1424,6 @@ up.element = (function() {
     upClasses,
     toggleAttr,
     addTemporaryClass,
-    setTemporaryAttr,
     cleanJQuery,
     parseSelector,
     isEmpty,
