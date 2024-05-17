@@ -97,6 +97,9 @@ afterEach ->
   if document.querySelector('up-progress-bar')
     throw new Error('Progress bar survived reset!')
 
+  if document.querySelector('.up-scrollbar-away')
+    throw new Error('Shifted elements survived reset!')
+
   # Scroll to the top
   document.scrollingElement.scrollTop = 0
 

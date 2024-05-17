@@ -3,3 +3,10 @@ up-bounds
 
 .up-focus-hidden:focus-visible
   outline: none !important
+
+body.up-scrollbar-away
+  overflow-y: hidden !important
+  padding-right: calc(var(--up-scrollbar-width) + var(--up-original-padding-right)) !important
+
+  .up-scrollbar-away
+    right: calc(var(--up-scrollbar-width) + var(--up-original-right)) !important

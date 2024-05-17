@@ -466,79 +466,9 @@ up.viewport = (function() {
     return element === getRoot()
   }
 
-  /*-
-  Returns whether the root viewport is currently showing a vertical scrollbar.
-
-  Note that this returns `false` if the root viewport scrolls vertically but the browser
-  shows no visible scroll bar at rest, e.g. on mobile devices that only overlay a scroll
-  indicator while scrolling.
-
-  @function up.viewport.rootHasReducedWidthFromScrollbar
-  @internal
-  */
-  function rootHasReducedWidthFromScrollbar() {
-    // We could also check if scrollHeight > offsetHeight for the document viewport.
-    // However, we would also need to check overflow-y for that element.
-    // Also we have no control whether developers set the property on <body> or <html>.
-    // https://tylercipriani.com/blog/2014/07/12/crossbrowser-javascript-scrollbar-detection/
-    return window.innerWidth > document.documentElement.offsetWidth
+  function rootScrollbarWidth() {
+    return window.innerWidth - rootWidth()
   }
-
-  /*-
-  Returns the element that controls the `overflow-y` behavior for the
-  [document viewport](/up.viewport.root()).
-
-  @function up.viewport.rootOverflowElement
-  @internal
-  */
-  function rootOverflowElement() {
-    const { body } = document
-    const html = document.documentElement
-
-    const element = u.find([html, body], wasChosenAsOverflowingElement)
-    return element || getRoot()
-  }
-
-  /*-
-  Returns whether the given element was chosen as the overflowing
-  element by the developer.
-
-  We have no control whether developers set the property on <body> or
-  <html>. The developer also won't know what is going to be the
-  [scrolling element](/up.viewport.root) on the user's browser.
-
-  @function wasChosenAsOverflowingElement
-  @internal
-  */
-  function wasChosenAsOverflowingElement(element) {
-    const overflowY = e.style(element, 'overflow-y')
-    return overflowY === 'auto' || overflowY === 'scroll'
-  }
-
-  /*-
-  Returns the width of a scrollbar.
-
-  This only runs once per page load.
-
-  @function up.viewport.scrollbarWidth
-  @internal
-  */
-  const scrollbarWidth = u.memoize(function() {
-    // This is how Bootstrap does it also:
-    // https://github.com/twbs/bootstrap/blob/c591227602996c542b9fd0cb65cff3cc9519bdd5/dist/js/bootstrap.js#L1187
-    const outerStyle = {
-      position:  'absolute',
-      top:       '0',
-      left:      '0',
-      width:     '100px',
-      height:    '100px', // Firefox needs at least 100px to show a scrollbar
-      overflowY: 'scroll'
-    }
-    const outer = up.element.affix(document.body, '[up-viewport]', { style: outerStyle })
-    const width = outer.offsetWidth - outer.clientWidth
-    outer.remove()
-    return width
-  })
 
   function scrollTopKey(viewport) {
     return up.fragment.tryToTarget(viewport)
@@ -890,7 +820,9 @@ up.viewport = (function() {
 
   ### Example
 
-      <div class="top-nav" up-fixed="top">...</div>
+  ```html
+  <div class="top-nav" up-fixed="top">...</div>
+  ```
 
   @selector [up-fixed=top]
   @stable
@@ -910,7 +842,9 @@ up.viewport = (function() {
 
   ### Example
 
-      <div class="bottom-nav" up-fixed="bottom">...</div>
+  ```html
+  <div class="bottom-nav" up-fixed="bottom">...</div>
+  ```
 
   @selector [up-fixed=bottom]
   @stable
@@ -926,11 +860,11 @@ up.viewport = (function() {
   closes. Applying this attribute to anchored elements will make Unpoly
   aware of the issue and adjust the `right` property accordingly.
 
-  You should give this attribute to layout elements
-  with a CSS of `right: 0` with `position: fixed` or `position:absolute`.
-
   Instead of giving this attribute to any affected element,
   you can also configure a selector in `up.viewport.config.anchoredRightSelectors`.
+
+  > [note]
+  > Elements with `[up-fixed=top]` or `[up-fixed=bottom]` are also considered to be right-anchored.
 
   ### Example
 
@@ -954,6 +888,49 @@ up.viewport = (function() {
 
   @selector [up-anchored=right]
   @stable
+  */
+
+  /*-
+  This class is assigned to the `<body>` and [right-anchored](/up-anchored-right)
+  elements while an [overlay](/up.layer) with a scrolling viewport is open.
+
+  Overlays temporarily hide the document's main scroll bar, to prevent multiple scrollbars from being rendered.
+  Without a scrollbar, the `<body>` becomes wider. This may cause elements to jump in width as the overlay opens and
+  closes. Elements can use this class to compensate by setting a larger `right` or `margin-right` style in their CSS.
+
+  ### Example
+
+  This element is fixed to the upper part of the screen, keeping a 20px margin from the window edge:
+
+  ```css
+  .top-nav {
+    position: fixed;
+    left: 20px;
+    top: 20px;
+    right: 20px;
+  }
+  ```
+
+  While a scrolling overlay is open we want to add the scrollbar width to the `right`
+  so it position remains stable:
+
+  ```css
+  .top-nav.up-scrollbar-away {
+    right: calc(20px + var(--up-scrollbar-width)) !important
+  }
+  ```
+
+  The `var(--up-scrollbar-width)` property is provided by Unpoly. It contains the width of the main document scrollbar,
+  e.g. `15px`.
+
+  ### Default styles
+
+  Unpoly sets some default styles for `.up-scrollbar-away` that will usually stabilize
+  the width of absolutely positioned elements. You can inspect the default styles
+  in [`viewport.sass`](https://github.com/unpoly/unpoly/blob/master/src/unpoly/viewport.sass).
+
+  @selector .up-scrollbar-away
+  @experimental
   */
 
   /*-
@@ -1037,10 +1014,8 @@ up.viewport = (function() {
     get root() { return getRoot() },
     rootWidth,
     rootHeight,
-    rootHasReducedWidthFromScrollbar,
-    rootOverflowElement,
     isRoot,
-    scrollbarWidth,
+    rootScrollbarWidth,
     saveScroll,
     restoreScroll,
     resetScroll,

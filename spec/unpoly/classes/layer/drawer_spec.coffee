@@ -8,7 +8,7 @@ describe 'up.Layer.Drawer', ->
 
       expect(document.querySelector('up-drawer-box').offsetHeight).toBe(window.innerHeight)
 
-    if up.viewport.rootHasReducedWidthFromScrollbar()
+    if up.specUtil.rootHasReducedWidthFromScrollbar()
       it 'adds scrollbars to its viewport', ->
         fixture('div', style: { height: '10000px' })
 

@@ -2036,13 +2036,13 @@ describe 'up.radio', ->
         element = fixture('.unread[up-poll][up-interval=100][up-if-layer=any]')
         up.hello(element) # start polling
 
-        await wait(125)
+        await wait(150)
 
         expect(reloadSpy.calls.count()).toBe(1)
 
         up.layer.open()
 
-        await wait(125)
+        await wait(100)
 
         expect(reloadSpy.calls.count()).toBe(2)
 

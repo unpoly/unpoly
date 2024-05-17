@@ -24,7 +24,7 @@ describe 'up.Layer.Modal', ->
       expect(box.offsetWidth).toBeLessThan(viewport.clientWidth - 100)
       expect(boxRect.left).toBeAround((viewport.clientWidth - box.offsetWidth) * 0.5, 1)
 
-    if up.viewport.rootHasReducedWidthFromScrollbar()
+    if up.specUtil.rootHasReducedWidthFromScrollbar()
       describe 'scrollbars while an overlay is open', ->
 
         beforeEach ->

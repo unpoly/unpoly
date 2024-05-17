@@ -423,9 +423,9 @@ describe 'up.Layer.Overlay', ->
 
         expect(acceptedListener).toHaveBeenCalled()
 
-      if up.viewport.rootHasReducedWidthFromScrollbar()
+      if up.specUtil.rootHasReducedWidthFromScrollbar()
         it 'still restores document scroll bars', ->
-          overflowElement = up.viewport.rootOverflowElement()
+          overflowElement = up.specUtil.rootOverflowElement()
           getOverflowY = -> getComputedStyle(overflowElement).overflowY
 
           destroyError = new Error('error from destructor')

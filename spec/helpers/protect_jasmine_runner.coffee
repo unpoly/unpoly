@@ -220,10 +220,14 @@ afterEach ->
     console.debug("Restoring <body> that was swapped by a spec")
     # Restore the Jasmine test runner that we just nuked
     document.body.replaceWith(originalBody)
+
     # The body get an .up-destroying class when it was swapped. We must remove it
     # or up.fragment will ignore everything within the body from now on.
     document.body.classList.remove('up-destroying')
     document.body.removeAttribute('aria-hidden')
+
+    # When the body was swapped while an overlay was open, it has this class.
+    document.body.classList.remove('up-scrollbar-away')
 
 findAssets = ->
   document.head.querySelectorAll('link[rel=stylesheet], script[src]')

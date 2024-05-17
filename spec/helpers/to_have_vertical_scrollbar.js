@@ -16,7 +16,7 @@ beforeEach(function() {
           //   pass: movedScrollTop !== originalScrollTop
           // }
 
-          let overflowElement = viewport === up.viewport.root ? up.viewport.rootOverflowElement() : viewport
+          let overflowElement = viewport === up.viewport.root ? up.specUtil.rootOverflowElement() : viewport
           let overflow = getComputedStyle(overflowElement).overflowY
 
           return {
