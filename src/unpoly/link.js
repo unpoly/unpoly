@@ -1599,7 +1599,7 @@ up.link = (function() {
     If omitted, the first link in this element will be expanded.
   @stable
   */
-  up.macro('[up-expand]:not([up-expand=false])', function(area) {
+  up.macro('[up-expand]', function(area) {
     const selector = area.getAttribute('up-expand') || 'a, [up-href]'
 
     let childLink = e.get(area, selector)
