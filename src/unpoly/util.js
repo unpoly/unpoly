@@ -706,12 +706,6 @@ up.util = (function() {
     return Object.prototype.toString.call(value) === '[object Arguments]'
   }
 
-  function nullToUndefined(value) {
-    if (!isNull(value)) {
-      return value
-    }
-  }
-
   /*-
   Returns the given value if it is [array-like](/up.util.isList), otherwise
   returns an array with the given value as its only element.
@@ -1754,11 +1748,13 @@ up.util = (function() {
 //      unprefixed[key] = value
 //    unprefixed
 
-//  replaceValue = (value, matchValue, replaceValueFn) ->
-//    if value == matchValue
-//      return replaceValueFn()
-//    else
-//      return value
+   function replaceValue(value, matchValue, replacementValue) {
+     if (value === matchValue) {
+       return replacementValue
+     } else {
+       return value
+     }
+   }
 
   function renameKeys(object, renameKeyFn) {
     const renamed = {}
@@ -2072,7 +2068,7 @@ up.util = (function() {
     // prefixCamelCase,
     // unprefixCamelCase,
     camelToKebabCase,
-    nullToUndefined,
+    replaceValue,
     sprintf,
     renameKeys,
     negate,

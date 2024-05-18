@@ -944,7 +944,8 @@ up.element = (function() {
   @stable
   */
   function stringAttr(element, attribute) {
-    return u.nullToUndefined(element.getAttribute(attribute))
+    let value = element.getAttribute(attribute)
+    return u.replaceValue(value, null, undefined)
   }
 
   /*-
