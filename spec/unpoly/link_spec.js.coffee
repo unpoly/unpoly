@@ -2323,6 +2323,12 @@ describe 'up.link', ->
         next ->
           expect('main').toHaveText('new text')
 
+      it 'does not enlarge an area with [up-expand=false]', ->
+        area = fixture('div[up-expand=false] a[href="/path"]')
+        up.hello(area)
+
+        expect(area).not.toBeFollowable()
+
       it 'copies up-related attributes of a contained link', ->
         $area = $fixture('div[up-expand] a[href="/path"][up-target="selector"][up-instant][up-preload]')
         up.hello($area)
@@ -2330,7 +2336,7 @@ describe 'up.link', ->
         expect($area.attr('up-instant')).toEqual('')
         expect($area.attr('up-preload')).toEqual('')
 
-      it "renames a contained link's href attribute to up-href so the container is considered a link", ->
+      it "renames a contained link's [href] attribute to [up-href] so the container is considered a link", ->
         $area = $fixture('div[up-expand] a[up-follow][href="/path"]')
         up.hello($area)
         expect($area.attr('up-href')).toEqual('/path')
