@@ -94,17 +94,23 @@ up.feedback = (function() {
 
   @property up.feedback.config
 
-  @param {Array<string>} [config.currentClasses]
+  @param {Array<string>} [config.currentClasses=['up-current']]
     An array of classes to set on [links that point the current location](/a.up-current).
 
-  @param {Array<string>} [config.navSelectors]
-    An array of CSS selectors that match [navigation components](/up-nav).
+  @param {Array<string>} [config.navSelectors=['[up-nav]', 'nav']]
+    An array of CSS selectors that match [navigational containers](/up-nav).
+
+    Links within navigational containers are assigned `.up-current` if they point to the current URL.
+
+  @param {Array<string>} [config.noNavSelectors=['[up-nav=false]']]
+    Exceptions to `up.feedback.config.navSelectors`.
 
   @stable
   */
   const config = new up.Config(() => ({
     currentClasses: ['up-current'],
     navSelectors: ['[up-nav]', 'nav'],
+    noNavSelectors: ['[up-nav=false]'],
   }))
 
   function reset() {
@@ -343,19 +349,12 @@ up.feedback = (function() {
   When a link within an `[up-nav]` element points to [its layer's location](/up.layer.location),
   it is assigned the [`.up-current`](/a.up-current) class. When the browser navigates to another location, the class is removed automatically.
 
-  You may also assign `[up-nav]` to an individual link instead of an navigational container.
-
-  Standard [`<nav>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/nav) elements are always
-  navigational containers and do not need an `[up-nav]` attribute.
-  You can configure additional selectors to automatically match your navigation components in `up.feedback.config.navSelectors`.
-
-
   ### Example
 
   Let's take a simple menu with two links. The menu has been marked with the `[up-nav]` attribute:
 
   ```html
-  <div up-nav>
+  <div up-nav> <!-- mark-phrase "up-nav" -->
     <a href="/foo">Foo</a>
     <a href="/bar">Bar</a>
   </div>
@@ -365,7 +364,7 @@ up.feedback = (function() {
 
   ```html
   <div up-nav>
-    <a href="/foo" class="up-current">Foo</a>
+    <a href="/foo" class="up-current">Foo</a> <!-- mark-phrase "up-current" -->
     <a href="/bar">Bar</a>
   </div>
   ```
@@ -376,9 +375,52 @@ up.feedback = (function() {
   ```html
   <div up-nav>
     <a href="/foo">Foo</a>
-    <a href="/bar" class="up-current">Bar</a>
+    <a href="/bar" class="up-current">Bar</a> <!-- mark-phrase "up-current" -->
   </div>
   ```
+
+  ### Marking navigational containers
+
+  The `[up-nav]` attribute can be assigned to any container that contains links:
+
+  ```html
+  <div up-nav> <!-- mark-phrase "up-nav" -->
+    <a href="/foo">Foo</a>
+    <a href="/bar">Bar</a>
+  </div>
+  ```
+
+  Standard [`<nav>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/nav) elements are always
+  navigational containers and do not need an `[up-nav]` attribute:
+
+  ```html
+  <nav>
+    <a href="/foo">Foo</a>
+    <a href="/bar">Bar</a>
+  </nav>
+  ```
+
+  You can configure additional selectors to automatically match your navigation components
+  in `up.feedback.config.navSelectors`.
+
+  Matching containers can opt *out* of `.up-current` assignment by setting an `[up-nav=false]` attribute:
+
+  ```html
+  <nav up-nav="false">
+    <a href="/foo">Foo</a>
+    <a href="/bar">Bar</a>
+  </nav>
+  ```
+
+  You may also assign `[up-nav]` to an individual link instead of an navigational container:
+
+  ```html
+  <a href="/foo" up-nav>Foo</a> <!-- mark-phrase "up-nav" -->
+  ```
+
+
+
+
 
   ### When is a link "current"?
 

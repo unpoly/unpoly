@@ -170,7 +170,7 @@ describe 'up.feedback', ->
         expect($currentLink).toHaveClass('highlight2')
         expect($currentLink).toHaveClass('up-current')
 
-      it 'allows to configure additional nav selectors', ->
+      it 'allows to configure additional nav selectors in up.feedback.config.navSelectors', ->
         replaceURL('/foo')
         up.feedback.config.navSelectors.push('.navi')
         $nav = $fixture('div.navi')
@@ -179,6 +179,15 @@ describe 'up.feedback', ->
         up.hello($nav)
         expect($currentLink).toHaveClass('up-current')
         expect($otherLink).not.toHaveClass('up-current')
+
+      it 'does not process containers with [up-nav=false], even if they match up.feedback.config.navSelectors', ->
+        replaceURL('/foo')
+        up.feedback.config.navSelectors.push('.navi')
+        noNav = fixture('div.navi[up-nav=false]')
+        currentLink = e.affix(noNav, 'a[href="/foo"]')
+        up.hello(noNav)
+
+        expect(currentLink).not.toHaveClass('up-current')
 
       it 'marks a link as .up-current if the current URL is "/" (bugfix)', ->
         replaceURL('/')
