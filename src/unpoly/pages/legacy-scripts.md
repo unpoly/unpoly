@@ -24,7 +24,7 @@ This may cause some of the following issues:
 The cleanest solution to these issues is to call all your JavaScript
 from an [Unpoly compiler](/up.compiler).
 
-### Migrating legacy scripts to a compiler
+## Migrating legacy scripts to a compiler
 
 The legacy code below waits for the page to load, then selects all links with a
 `.lightbox` class and calls `lightboxify()` for each of these links:
@@ -52,28 +52,41 @@ When the page initially loads, Unpoly will call this compiler for every element
 matching `a.lightbox`. When a fragment is updated later, Unpoly will call this compiler
 for new matches within the new fragment.
 
-### Running inline `<script>` tags
+> [important]
+> Compilers should only process the given element and its children.
+> It should not use `document.querySelectorAll()` to process elements
+> elsewhere on the page, since these may already have been compiled.
 
-By default Unpoly does not execute `<script>` tags in an updated fragment to prevent
-unwanted side effects.
-This means that your `<script>` tag will only be executed during the initial page
-load, but not when navigating to a new page via an `a[up-follow]` link.
+## Running inline `<script>` tags
 
-It is recommended to move all your JavaScript from `<script>` tags into a compiler.
-This ensures your code is called after both page loads and fragment updats.
-A compiler also enables you to scope   the side effects of your code to the DOM
-fragment that was updated.
+`<script>` tags will run if they are part of the updated fragment.
 
-If you cannot migrate your `<script>` tags to a compiler, you you can also configure
-Unpoly to run `<script>` tags in updated fragments:
+Mind that the `<body>` element is a default [main target](/main).
+If you are including your global application scripts
+at the end of your `<body>` for performance reasons, swapping the `<body>` will re-execute these scripts:
 
-```js
-up.fragment.config.runScripts = true
+```html
+<html>
+  <body>
+    <p>Content here</p>
+    <script src="app.js"></script> <!-- will run every time `body` is updated -->
+  </body>
+</html>
 ```
 
-If you do this, mind that the `<body>` element is a default [main target](/up-main). If you are including your global application scripts
-at the end of your `<body>` for performance reasons, swapping the `<body>` will re-execute these scripts.
-In that case you must configure a different main target that does not include
-your application scripts.
+A better solution is so move the `<script>` to head and [give it an `[defer]` attribute](https://makandracards.com/makandra/504104-you-should-probably-load-your-javascript-with-script-defer
+):
+
+```html
+<html>
+  <head>
+    <script src="app.js" defer></script> <!-- mark-phrase "defer" -->
+  </head>
+  <body>
+    <p>Content here</p>
+  </body>
+</html>
+```
+
 
 @page legacy-scripts
