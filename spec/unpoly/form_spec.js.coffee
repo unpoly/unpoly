@@ -2917,14 +2917,41 @@ describe 'up.form', ->
       beforeEach ->
         up.form.config.watchInputDelay = 0
 
-      it 'submits the form when a change is observed in the given form field', asyncSpec (next) ->
-        $form = $fixture('form')
-        $field = $form.affix('input[up-autosubmit][name="input-name"][value="old-value"]')
-        up.hello($field)
+      it 'submits the form when a change is observed in the given form field', ->
+        form = fixture('form')
+        field = e.affix(form, 'input[up-autosubmit][name="input-name"][value="old-value"]')
+        up.hello(field)
         submitSpy = up.form.submit.mock().and.returnValue(Promise.resolve(new up.RenderResult()))
-        $field.val('new-value')
-        Trigger.change($field)
-        next => expect(submitSpy).toHaveBeenCalled()
+        field.value = 'new-value'
+        Trigger.change(field)
+
+        await wait()
+
+        expect(submitSpy).toHaveBeenCalled()
+
+      it 'auto-submits with [up-autosubmit=true]', ->
+        form = fixture('form')
+        field = e.affix(form, 'input[up-autosubmit=true][name="input-name"][value="old-value"]')
+        up.hello(field)
+        submitSpy = up.form.submit.mock().and.returnValue(Promise.resolve(new up.RenderResult()))
+        field.value = 'new-value'
+        Trigger.change(field)
+
+        await wait()
+
+        expect(submitSpy).toHaveBeenCalled()
+
+      it 'does not auto-submit with [up-autosubmit=false]', ->
+        form = fixture('form')
+        field = e.affix(form, 'input[up-autosubmit=false][name="input-name"][value="old-value"]')
+        up.hello(field)
+        submitSpy = up.form.submit.mock().and.returnValue(Promise.resolve(new up.RenderResult()))
+        field.value = 'new-value'
+        Trigger.change(field)
+
+        await wait()
+
+        expect(submitSpy).not.toHaveBeenCalled()
 
       it 'queues changes while a prior form autosubmission is still loading (bugfix)', ->
         form = fixture('form[method="post"][action="/endpoint"][up-target="#target"]')
@@ -3101,16 +3128,28 @@ describe 'up.form', ->
       afterEach ->
         window.watchCallbackSpy = undefined
 
-      it 'calls the JavaScript code in the attribute value when a change is observed in the field', asyncSpec (next) ->
-        $form = $fixture('form')
+      it 'calls the JavaScript code in the attribute value when a change is observed in the field', ->
+        form = fixture('form')
         window.watchCallbackSpy = jasmine.createSpy('watch callback')
-        $field = $form.affix('input[name="input-name"][value="old-value"][up-watch="window.watchCallbackSpy(this, value, name)"]')
-        up.hello($form)
-        $field.val('new-value')
-        Trigger.change($field)
+        field = e.affix(form, 'input[name="input-name"][value="old-value"][up-watch="window.watchCallbackSpy(this, value, name)"]')
+        up.hello(form)
+        field.value = 'new-value'
+        Trigger.change(field)
 
-        next =>
-          expect(window.watchCallbackSpy).toHaveBeenCalledWith($field.get(0), 'new-value', 'input-name')
+        await wait()
+        expect(window.watchCallbackSpy).toHaveBeenCalledWith(field, 'new-value', 'input-name')
+
+      it 'does not watch a field with [up-watch=false]', ->
+        await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+          form = fixture('form')
+          window.watchCallbackSpy = jasmine.createSpy('watch callback')
+          field = e.affix(form, 'input[name="input-name"][value="old-value"][up-watch="false"]')
+          up.hello(form)
+          field.value = 'new-value'
+          Trigger.change(field)
+
+          await wait()
+          expect(globalErrorSpy).not.toHaveBeenCalledWith()
 
       it 'runs the callback only once for multiple changes in the same task', asyncSpec (next) ->
         $form = $fixture('form')
@@ -3414,10 +3453,9 @@ describe 'up.form', ->
 
       describe 'when no selector is given', ->
 
-        it 'automatically finds a form group around the input field and only updates that', asyncSpec (next) ->
-          container = fixture('.container')
-          container.innerHTML = """
-            <form action="/users" id="registration">
+        it 'automatically finds a form group enclosing the field and only updates that', ->
+          form = htmlFixture """
+            <form action="/users">
 
               <div up-form-group>
                 <input type="text" name="email" up-validate />
@@ -3429,37 +3467,83 @@ describe 'up.form', ->
 
             </form>
           """
-          up.hello(container)
+          up.hello(form)
 
-          $passwordInput = $('#registration input[name=password]')
-          $passwordInput.val('secret5555')
-          Trigger.change($passwordInput)
+          passwordInput = form.querySelector('input[name=password]')
+          passwordInput.value = 'secret5555'
+          Trigger.change(passwordInput)
 
-          next =>
-            request = @lastRequest()
-            expect(request.requestHeaders['X-Up-Validate']).toEqual('password')
-            expect(request.requestHeaders['X-Up-Target']).toEqual('[up-form-group]:has(input[name="password"])')
+          await wait()
 
-            @respondWith """
-              <form action="/users" id="registration">
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('password')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-form-group]:has(input[name="password"])')
 
-                <div up-form-group>
-                  Validation message
-                  <input type="text" name="email" up-validate />
-                </div>
+          jasmine.respondWith """
+            <form action="/users" id="registration">
 
-                <div up-form-group>
-                  Validation message
-                  <input type="password" name="password" up-validate />
-                </div>
+              <div up-form-group>
+                Validation message
+                <input type="text" name="email" up-validate />
+              </div>
 
-              </form>
-            """
+              <div up-form-group>
+                Validation message
+                <input type="password" name="password" up-validate />
+              </div>
 
-          next =>
-            $labels = $('#registration [up-form-group]')
-            expect($labels[0]).not.toHaveText('Validation message')
-            expect($labels[1]).toHaveText('Validation message')
+            </form>
+          """
+
+          await wait()
+
+          groups = form.querySelectorAll('[up-form-group]')
+          expect(groups[0]).not.toHaveText('Validation message')
+          expect(groups[1]).toHaveText('Validation message')
+
+      describe 'with [up-validate=true]', ->
+
+        it 'validates an enclosing form group', ->
+          form = htmlFixture """
+            <form action="/users">
+
+              <div up-form-group>
+                <input type="text" name="email" up-validate="true" />
+              </div>
+
+            </form>
+          """
+          up.hello(form)
+
+          emailInput = form.querySelector('input[name=email]')
+          emailInput.value = 'foo@bar.com'
+          Trigger.change(emailInput)
+
+          await wait()
+
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-form-group]:has(input[name="email"])')
+
+      describe 'with [up-validate=false]', ->
+
+        it 'does not validate when the field is changed', ->
+          form = htmlFixture """
+            <form action="/users">
+
+              <div up-form-group>
+                <input type="text" name="email" up-validate="false" />
+              </div>
+
+            </form>
+          """
+          up.hello(form)
+
+          emailInput = form.querySelector('input[name=email]')
+          emailInput.value = 'foo@bar.com'
+          Trigger.change(emailInput)
+
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(0)
 
       it 'does not send a validation request if the input field is blurred by clicking the submit button (bugfix)', ->
         container = fixture('.container')

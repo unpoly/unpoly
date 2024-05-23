@@ -1,4 +1,5 @@
 const u = up.util
+const e = up.element
 
 up.FormValidator = class FormValidator {
 
@@ -74,7 +75,7 @@ up.FormValidator = class FormValidator {
   }
 
   _getTargetSelectorSolutions({ target, origin }) {
-    if (u.isString(target) && target) {
+    if (u.isString(target)) {
       up.puts('up.validate()', 'Validating target "%s"', target)
       let simpleSelectors = up.fragment.splitTarget(target)
       return u.compact(simpleSelectors.map(function(simpleSelector) {
@@ -107,7 +108,7 @@ up.FormValidator = class FormValidator {
     let containerWithAttr = field.closest('[up-validate]')
 
     if (containerWithAttr) {
-      let target = containerWithAttr.getAttribute('up-validate')
+      let target = e.booleanOrStringAttr(containerWithAttr, 'up-validate')
       return this._getTargetSelectorSolutions({ target, origin: field })
     }
   }

@@ -1016,10 +1016,13 @@ up.element = (function() {
     The element from which to retrieve the attribute value.
   @param {string} attribute
     The attribute name.
+  @param {any} [trueValue=true]
+    The value to return if the attribute value is `''`, `'true'` or equal to the attribute name.
   @internal
   */
-  function booleanOrStringAttr(element, attribute) {
-    return booleanAttr(element, attribute, true)
+  function booleanOrStringAttr(element, attribute, trueValue = true) {
+    let value = booleanAttr(element, attribute, true)
+    return value === true ? trueValue : value
   }
 
   /*-
@@ -1374,6 +1377,12 @@ up.element = (function() {
       (rect.right  > 0) && (rect.left < window.innerWidth)
   }
 
+  function unionSelector(includes, excludes) {
+    let selector = `:is(${includes.join()})`
+    if (u.isPresent(excludes)) selector += `:not(${excludes.join()})`
+    return selector
+  }
+
   return {
     subtree, // practical
     contains,
@@ -1430,5 +1439,6 @@ up.element = (function() {
     isEmpty,
     crossOriginSelector,
     isIntersectingWindow,
+    unionSelector,
   }
 })()

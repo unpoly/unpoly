@@ -239,8 +239,8 @@ describe 'up.radio', ->
     describe '[up-hungry]', ->
 
       it "replaces the element when it is found in a response, even when the element wasn't targeted", ->
-        $fixture('.hungry[up-hungry]').text('old hungry')
-        $fixture('.target').text('old target')
+        fixture('.hungry[up-hungry]', text: 'old hungry')
+        fixture('.target', text: 'old target')
 
         up.render('.target', url: '/path')
 
@@ -262,6 +262,50 @@ describe 'up.radio', ->
 
         expect('.target').toHaveText('new target')
         expect('.hungry').toHaveText('new hungry')
+
+      it "updates elements with [up-hungry=true]", ->
+        fixture('.hungry[up-hungry=true]', text: 'old hungry')
+        fixture('.target', text: 'old target')
+
+        up.render('.target', url: '/path')
+
+        await wait()
+
+        jasmine.respondWith """
+          <div class="target">
+            new target
+          </div>
+          <div class="hungry">
+            new hungry
+          </div>
+        """
+
+        await wait()
+
+        expect('.target').toHaveText('new target')
+        expect('.hungry').toHaveText('new hungry')
+
+      it "does not updates elements with [up-hungry=false]", ->
+        fixture('.hungry[up-hungry=false]', text: 'old hungry')
+        fixture('.target', text: 'old target')
+
+        up.render('.target', url: '/path')
+
+        await wait()
+
+        jasmine.respondWith """
+          <div class="target">
+            new target
+          </div>
+          <div class="hungry">
+            new hungry
+          </div>
+        """
+
+        await wait()
+
+        expect('.target').toHaveText('new target')
+        expect('.hungry').toHaveText('old hungry')
 
       it "does not impede replacements when the element is not part of a response", ->
         $fixture('.hungry[up-hungry]').text('old hungry')
@@ -1662,33 +1706,53 @@ describe 'up.radio', ->
 
     describe '[up-poll]', ->
 
-      it 'reloads the element periodically', asyncSpec (next) ->
+      it 'reloads the element periodically', ->
         interval = 150
         timingTolerance = interval / 3
         up.radio.config.pollInterval = interval
 
         element = up.hello(fixture('.element[up-poll]', text: 'old text'))
 
-        next.after timingTolerance, ->
-          expect(element).toHaveText('old text')
-          expect(jasmine.Ajax.requests.count()).toBe(0)
+        await wait(timingTolerance)
 
-        next.after interval, ->
-          expect(jasmine.Ajax.requests.count()).toBe(1)
-          jasmine.respondWithSelector('.element[up-poll]', text: 'new text')
+        expect(element).toHaveText('old text')
+        expect(jasmine.Ajax.requests.count()).toBe(0)
 
-        next ->
-          expect('.element').toHaveText('new text')
+        await wait(interval)
 
-        next.after (interval + timingTolerance), ->
-          expect(jasmine.Ajax.requests.count()).toBe(2)
-          jasmine.respondWithSelector('.element[up-poll]', text: 'newer text')
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        jasmine.respondWithSelector('.element[up-poll]', text: 'new text')
 
-        next ->
-          expect('.element').toHaveText('newer text')
+        await wait()
 
-        next.after (interval + timingTolerance), ->
-          expect(jasmine.Ajax.requests.count()).toBe(3)
+        expect('.element').toHaveText('new text')
+
+        await wait(interval + timingTolerance)
+
+        expect(jasmine.Ajax.requests.count()).toBe(2)
+        jasmine.respondWithSelector('.element[up-poll]', text: 'newer text')
+
+        await wait()
+
+        expect('.element').toHaveText('newer text')
+
+        await wait(interval + timingTolerance)
+        expect(jasmine.Ajax.requests.count()).toBe(3)
+
+      it 'polls an element with [up-poll=true]', ->
+        interval = 150
+        timingTolerance = interval / 3
+        up.radio.config.pollInterval = interval
+
+        up.hello(fixture('.element[up-poll=true]', text: 'old text'))
+
+        await wait(timingTolerance)
+
+        expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        await wait(interval)
+
+        expect(jasmine.Ajax.requests.count()).toBe(1)
 
       it 'does not reload an element with [up-poll=false]', ->
         up.hello(fixture('.element[up-poll=false][up-interval=50][up-source="/source-path"]', text: 'old text'))

@@ -1771,15 +1771,27 @@ describe 'up.link', ->
 
     describe 'a[up-follow]', ->
 
-      it "calls up.follow with the clicked link", asyncSpec (next) ->
-        @$link = $fixture('a[href="/follow-path"][up-follow]')
-        @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+      it "calls up.follow with the clicked link", ->
+        link = fixture('a[href="/follow-path"][up-follow]')
+        followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
 
-        Trigger.click(@$link)
+        Trigger.clickSequence(link)
 
-        next =>
-          expect(@followSpy).toHaveBeenCalledWith(@$link[0])
-          expect(@$link).not.toHaveBeenDefaultFollowed()
+        await wait()
+
+        expect(followSpy).toHaveBeenCalledWith(link)
+        expect(link).not.toHaveBeenDefaultFollowed()
+
+      it 'follows a link with [up-follow=true]', ->
+        link = fixture('a[href="/follow-path"][up-follow=true]')
+        followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+
+        Trigger.clickSequence(link)
+
+        await wait()
+
+        expect(followSpy).toHaveBeenCalledWith(link)
+        expect(link).not.toHaveBeenDefaultFollowed()
 
       describe 'exemptions from following', ->
 
@@ -1934,13 +1946,21 @@ describe 'up.link', ->
 
       describe 'with [up-instant] modifier', ->
 
-        it 'follows a link on mousedown (instead of on click)', asyncSpec (next) ->
-          @$link = $fixture('a[href="/follow-path"][up-follow][up-instant]')
-          @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+        it 'follows a link on mousedown (instead of on click)', ->
+          link = fixture('a[href="/follow-path"][up-follow][up-instant]')
+          followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
 
-          Trigger.mousedown(@$link)
+          Trigger.mousedown(link)
 
-          next => expect(@followSpy.calls.mostRecent().args[0]).toEqual(@$link[0])
+          expect(followSpy.calls.mostRecent().args[0]).toEqual(link)
+
+        it 'follows a link on mousedown with [up-instant=true]', ->
+          link = fixture('a[href="/follow-path"][up-follow][up-instant]')
+          followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+
+          Trigger.mousedown(link)
+
+          expect(followSpy.calls.mostRecent().args[0]).toEqual(link)
 
         it 'does nothing on mouseup', asyncSpec (next)->
           @$link = $fixture('a[href="/follow-path"][up-follow][up-instant]')
@@ -2907,7 +2927,7 @@ describe 'up.link', ->
 
       describe 'defining when to preload', ->
 
-        describe "with [up-preload='insert']", ->
+        describe "with [up-preload=insert]", ->
 
           it 'preloads the link as soon as it is inserted into the DOM', ->
             link = fixture('a[href="/foo"][up-follow][up-preload="insert"]', text: 'label')
@@ -2918,7 +2938,7 @@ describe 'up.link', ->
             expect(jasmine.Ajax.requests.count()).toEqual(1)
             expect(jasmine.lastRequest().url).toMatchURL('/foo')
 
-        describe "with [up-preload='reveal']", ->
+        describe "with [up-preload=reveal]", ->
 
           # MutationObserver does not fire within a task
           MUTATION_OBSERVER_LAG = 30
@@ -2997,7 +3017,7 @@ describe 'up.link', ->
 
             expect(jasmine.Ajax.requests.count()).toEqual(1)
 
-        describe "with [up-preload='hover']", ->
+        describe "with [up-preload=hover]", ->
 
           it 'preloads the link when the user hovers over it for a while (default)', ->
             up.link.config.preloadDelay = 20
@@ -3005,6 +3025,25 @@ describe 'up.link', ->
             fixture('.target', text: 'old text')
 
             link = fixture('a[href="/foo"][up-target=".target"][up-preload="hover"]')
+            up.hello(link)
+
+            Trigger.hoverSequence(link)
+
+            await wait(60)
+
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            expect(jasmine.lastRequest().url).toMatchURL('/foo')
+            expect(jasmine.lastRequest()).toHaveRequestMethod('GET')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.target')
+
+        describe "with [up-preload=true]", ->
+
+          it 'preloads the link when the user hovers over it for a while (default)', ->
+            up.link.config.preloadDelay = 20
+
+            fixture('.target', text: 'old text')
+
+            link = fixture('a[href="/foo"][up-target=".target"][up-preload="true"]')
             up.hello(link)
 
             Trigger.hoverSequence(link)
@@ -3281,7 +3320,7 @@ describe 'up.link', ->
 
           expect('#slow').not.toHaveClass('up-active')
 
-      describe "with [up-defer='insert']", ->
+      describe "with [up-defer=insert]", ->
 
         it 'loads the partial as soon as it is inserted into the DOM (default)', ->
           partial = fixture('a#slow[up-defer="insert"][href="/slow-path"]')
@@ -3299,7 +3338,25 @@ describe 'up.link', ->
 
           expect('#slow').toHaveText('partial content')
 
-      describe "with [up-defer='reveal']", ->
+      describe "with [up-defer=true]", ->
+
+        it 'loads the partial as soon as it is inserted into the DOM (default)', ->
+          partial = fixture('a#slow[up-defer="true"][href="/slow-path"]')
+          up.hello(partial)
+
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(jasmine.lastRequest().url).toMatchURL('/slow-path')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#slow')
+
+          jasmine.respondWithSelector('#slow', text: 'partial content')
+
+          await wait()
+
+          expect('#slow').toHaveText('partial content')
+
+      describe "with [up-defer=reveal]", ->
 
         # MutationObserver does not fire within a task
         MUTATION_OBSERVER_LAG = 30
@@ -3450,10 +3507,20 @@ describe 'up.link', ->
 
           expect(jasmine.Ajax.requests.count()).toEqual(1)
 
-      describe "with [up-defer='manual']", ->
+      describe "with [up-defer=manual]", ->
 
         it 'does not load the partial by default', ->
           partial = fixture('a#slow[up-defer="manual"][href="/slow-path"]')
+          up.hello(partial)
+
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+      describe "with [up-defer=false]", ->
+
+        it 'does not load the partial by default', ->
+          partial = fixture('a#slow[up-defer="false"][href="/slow-path"]')
           up.hello(partial)
 
           await wait()

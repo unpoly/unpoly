@@ -335,15 +335,16 @@ up.script = (function() {
     registerProcessor(args, { macro: true })
   }
 
-  function registerAttrCompiler(attr, { defaultValue, macro }, valueCallback) {
+  function registerAttrCompiler(...args) {
+    let [attr, options, valueCallback] = parseProcessorArgs(args)
+
     let selector = `[${attr}]`
     let callback = (element) => {
-      let value = e.booleanOrStringAttr(element, attr)
-      if (value === false) return
-      if (value === true || value === '') value = defaultValue
+      let value = e.booleanOrStringAttr(element, attr, options.defaultValue)
+      if (!value) return
       return valueCallback(element, value)
     }
-    registerProcessor([selector, { macro }, callback])
+    registerProcessor([selector, options, callback])
   }
 
   function detectSystemMacroPriority(macroSelector) {
@@ -372,7 +373,7 @@ up.script = (function() {
 
   }
 
-  const parseCompilerArgs = function(args) {
+  const parseProcessorArgs = function(args) {
     const defaults = u.extractOptions(args)
     const selector = args.shift()
     const callback = args.pop()
@@ -381,7 +382,7 @@ up.script = (function() {
   }
 
   function buildProcessor(args, overrides) {
-    let [selector, options, callback] = parseCompilerArgs(args)
+    let [selector, options, callback] = parseProcessorArgs(args)
 
     options = u.options(options, {
       selector,

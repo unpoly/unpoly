@@ -1003,10 +1003,8 @@ up.link = (function() {
 
   @experimental
   */
-  up.compiler('[up-defer]', function(link) {
+  up.attribute('up-defer', { defaultValue: 'insert' }, function(link, condition) {
     let doLoad = () => up.error.muteUncriticalRejection(loadDeferred(link))
-    // Default using || instead of ?? because we want to set a default for the empty value
-    let condition = e.attr(link, 'up-defer') || 'insert'
     onLoadCondition(condition, link, doLoad)
   })
 
@@ -1671,8 +1669,16 @@ up.link = (function() {
   up.compiler(config.selectorFn('preloadSelectors'), function(link) {
     if (!isPreloadDisabled(link)) {
       let doPreload = () => up.error.muteUncriticalRejection(preload(link))
-      // Default using || instead of ?? because we want to set a default for the empty value
-      let condition = e.attr(link, 'up-preload') || 'hover'
+      // We need to map several cases here:
+      //
+      // (1) <a up-preload>              => 'hover'
+      // (2) <a up-preload="">           => 'hover'
+      // (3) <a up-preload="true">       => 'hover'
+      // (3) <a up-preload="up-preload"> => 'hover'
+      // (4) <a up-preload="insert">     => 'insert
+      //
+      // The case <a up-preload=false> is already excluded by config.noPreloadSelectors above.
+      let condition = e.booleanOrStringAttr(link, 'up-preload', null) ?? 'hover'
       onLoadCondition(condition, link, doPreload)
     }
   })

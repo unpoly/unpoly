@@ -1654,7 +1654,9 @@ up.form = (function() {
   })
 
   function validatingFieldSelector() {
-    return config.fieldSelectors.map((selector) => `${selector}[up-validate], [up-validate] ${selector}`).join(', ')
+    let includes = config.fieldSelectors.map((selector) => `${selector}[up-validate], [up-validate] ${selector}`)
+    let excludes = ['[up-validate=false]']
+    return e.unionSelector(includes, excludes)
   }
 
   /*-
@@ -1928,7 +1930,7 @@ up.form = (function() {
   @stable
   */
 
-  up.compiler('[up-watch]', (formOrField) => watch(formOrField))
+  up.attribute('up-watch', (formOrField) => watch(formOrField))
 
   /*-
   Automatically submits a form when a field changes.
@@ -1989,7 +1991,7 @@ up.form = (function() {
     See [debouncing callbacks](/watch-options#debouncing-callbacks).
   @stable
   */
-  up.compiler('[up-autosubmit]', (formOrField) => autosubmit(formOrField))
+  up.attribute('up-autosubmit', (formOrField) => autosubmit(formOrField))
 
   return {
     config,

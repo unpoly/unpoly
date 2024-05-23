@@ -9143,12 +9143,13 @@ describe 'up.fragment', ->
             expect(barDestructor.calls.allArgs()).toEqual [['old-bar']]
 
         it "keeps an element even if the new element is no longer [up-keep]", ->
-          $container = $fixture('.container')
-          $container.html """
-            <div class='foo'>old-foo</div>
-            <div class='bar' up-keep>old-bar</div>
+          container = htmlFixture """
+            <div class='container'>
+              <div class='foo'>old-foo</div>
+              <div class='bar' up-keep>old-bar</div>
+            </div>
             """
-          up.hello($container)
+          up.hello(container)
 
           up.render fragment: """
             <div class='container'>
@@ -9191,6 +9192,44 @@ describe 'up.fragment', ->
 
             expect(barCompiler.calls.allArgs()).toEqual [['old-bar'], ['new-bar']]
             expect(barDestructor.calls.allArgs()).toEqual [['old-bar']]
+
+        it 'keeps an element with [up-keep=true]', ->
+          container = htmlFixture """
+            <div class='container'>
+              <div class='foo'>old-foo</div>
+              <div class='bar' up-keep='true'>old-bar</div>
+            </div>
+            """
+          up.hello(container)
+
+          up.render fragment: """
+            <div class='container'>
+              <div class='foo'>new-foo</div>
+              <div class='bar' up-keep='true'>new-bar</div>
+            </div>
+            """
+
+          expect('.container .foo').toHaveText('new-foo')
+          expect('.container .bar').toHaveText('old-bar')
+
+        it 'updates an element with [up-keep=false], even if a matching element in the response has [up-keep]', ->
+          container = htmlFixture """
+            <div class='container'>
+              <div class='foo'>old-foo</div>
+              <div class='bar' up-keep='false'>old-bar</div>
+            </div>
+            """
+          up.hello(container)
+
+          up.render fragment: """
+            <div class='container'>
+              <div class='foo'>new-foo</div>
+              <div class='bar' up-keep>new-bar</div>
+            </div>
+            """
+
+          expect('.container .foo').toHaveText('new-foo')
+          expect('.container .bar').toHaveText('new-bar')
 
         it 'moves a kept element to the ancestry position of the matching element in the response', asyncSpec (next) ->
           $container = $fixture('.container')
@@ -9245,6 +9284,20 @@ describe 'up.fragment', ->
 
             expect(document.querySelector('#player').src).toMatchURL('bar.mp3')
             expect(document.querySelector('#player').dataset.tag).toBe('2')
+
+          it 'does not print a deprecation warning for [up-keep=true]', ->
+            warnSpy = spyOn(up.migrate, 'warn')
+
+            container = htmlFixture """
+              <div class='container'>
+                <div class='foo'>old-foo</div>
+                <div class='bar' up-keep='true'>old-bar</div>
+              </div>
+              """
+            up.hello(container)
+
+            expect(warnSpy).not.toHaveBeenCalled()
+
 
         it 'does not compile a kept element a second time', asyncSpec (next) ->
           compiler = jasmine.createSpy('compiler')

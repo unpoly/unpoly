@@ -33,6 +33,9 @@ up.radio = (function() {
 
     For this to work hungry elements [must have a derivable target selector](/up-hungry#derivable-target-required).
 
+  @param {Array<string>} [config.noHungrySelectors=['[up-hungry=false]']]
+    Exceptions to `up.feedback.config.hungrySelectors`.
+
   @param {number} [config.pollInterval=30000]
     The default [polling](/up-poll) interval in milliseconds.
 
@@ -40,6 +43,7 @@ up.radio = (function() {
   */
   const config = new up.Config(() => ({
     hungrySelectors: ['[up-hungry]'],
+    noHungrySelectors: ['[up-hungry=false]'],
     pollInterval: 30000,
   }))
 
@@ -425,7 +429,7 @@ up.radio = (function() {
     Defaults to the closest `[up-source]` attribute of an ancestor element.
   @stable
   */
-  up.compiler('[up-poll]:not([up-poll=false])', function(fragment) {
+  up.attribute('up-poll', function(fragment) {
     up.FragmentPolling.forFragment(fragment).onPollAttributeObserved()
   })
 

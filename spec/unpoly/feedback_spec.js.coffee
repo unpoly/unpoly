@@ -222,6 +222,15 @@ describe 'up.feedback', ->
         expect(link).toHaveClass('up-current')
         expect(wrapper).toHaveClass('up-current')
 
+      it 'works with [up-nav=true]', ->
+        replaceURL('/foo')
+        $nav = $fixture('div[up-nav=true]')
+        $currentLink = $nav.affix('a[href="/foo"]')
+        $otherLink = $nav.affix('a[href="/bar"]')
+        up.hello($nav)
+        expect($currentLink).toHaveClass('up-current')
+        expect($otherLink).not.toHaveClass('up-current')
+
       describe 'updating .up-current marks when the URL changes', ->
 
         it 'marks an existing link as .up-current as it becomes current', ->

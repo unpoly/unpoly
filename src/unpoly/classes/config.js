@@ -1,4 +1,5 @@
 const u = up.util
+const e = up.element
 
 up.Config = class Config {
 
@@ -20,9 +21,7 @@ up.Config = class Config {
   selector(prop) {
     let includes = this[prop]
     let excludes = this['no' + u.upperCaseFirst(prop)]
-    let selector = `:is(${includes.join()})`
-    if (u.isPresent(excludes)) selector += `:not(${excludes.join()})`
-    return selector
+    return e.unionSelector(includes, excludes)
   }
 
   selectorFn(prop) {
