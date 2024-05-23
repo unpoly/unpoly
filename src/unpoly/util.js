@@ -2071,7 +2071,6 @@ up.util = (function() {
     replaceValue,
     sprintf,
     renameKeys,
-    negate,
     memoizeMethod,
     safeStringifyJSON,
     // groupBy,

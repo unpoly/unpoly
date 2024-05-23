@@ -1598,20 +1598,18 @@ up.link = (function() {
     If omitted, the first link in this element will be expanded.
   @stable
   */
-  up.macro('[up-expand]:not([up-expand=false])', function(area) {
-    const selector = area.getAttribute('up-expand') || 'a, [up-href]'
-
-    let childLink = e.get(area, selector)
+  up.attribute('up-expand', { defaultValue: 'a, [up-href]', macro: true }, function(area, childLinkSelector) {
+    let childLink = e.get(area, childLinkSelector)
     if (childLink) {
-      const areaAttrs = e.upAttrs(childLink)
-      areaAttrs['up-href'] ||= childLink.getAttribute('href')
-      e.setMissingAttrs(area, areaAttrs)
+      e.setMissingAttrs(area, {
+        'up-href': e.attr(childLink, 'href'),
+        ...e.upAttrs(childLink)
+      })
 
-      const areaClasses = e.upClasses(childLink)
-      area.classList.add(...areaClasses)
+      area.classList.add(...e.upClasses(childLink))
 
       makeFollowable(area)
-      // We could also consider making the area clickable, via makeClickable().
+      // A11y: We could also consider making the area clickable, via makeClickable().
       // However, since the original link is already present within the area,
       // we would not add accessibility benefits. We might also confuse screen readers
       // with a nested link.

@@ -279,8 +279,7 @@ up.script = (function() {
   @stable
   */
   function registerCompiler(...args) {
-    const compiler = buildCompiler(args)
-    return insertCompiler(registeredCompilers, compiler)
+    registerProcessor(args)
   }
 
   /*-
@@ -333,24 +332,44 @@ up.script = (function() {
   @stable
   */
   function registerMacro(...args) {
-    const macro = buildCompiler(args)
+    registerProcessor(args, { macro: true })
+  }
 
-    if (up.framework.evaling) {
-      // Don't allow the default priority (0) for Unpoly's own macros.
-      macro.priority ||= detectSystemMacroPriority(macro.selector) ||
-        up.fail('Unregistered priority for system macro %o', macro.selector)
+  function registerAttrCompiler(attr, { defaultValue, macro }, valueCallback) {
+    let selector = `[${attr}]`
+    let callback = (element) => {
+      let value = e.booleanOrStringAttr(element, attr)
+      if (value === false) return
+      if (value === true || value === '') value = defaultValue
+      return valueCallback(element, value)
     }
-    return insertCompiler(registeredMacros, macro)
+    registerProcessor([selector, { macro }, callback])
   }
 
   function detectSystemMacroPriority(macroSelector) {
     macroSelector = u.evalOption(macroSelector)
     for (let substr in SYSTEM_MACRO_PRIORITIES) {
-      const priority = SYSTEM_MACRO_PRIORITIES[substr]
       if (macroSelector.indexOf(substr) >= 0) {
-        return priority
+        return SYSTEM_MACRO_PRIORITIES[substr]
       }
     }
+    up.fail('Unregistered priority for system macro %o', macroSelector)
+  }
+
+  function registerProcessor(args, overrides = {}) {
+    let processor = buildProcessor(args, overrides)
+
+    if (processor.macro) {
+      if (up.framework.evaling) {
+        // Don't allow the default priority (0) for Unpoly's own macros.
+        processor.priority ||= detectSystemMacroPriority(processor.selector)
+
+      }
+      insertProcessor(registeredMacros, processor)
+    } else {
+      insertProcessor(registeredCompilers, processor)
+    }
+
   }
 
   const parseCompilerArgs = function(args) {
@@ -361,7 +380,7 @@ up.script = (function() {
     return [selector, options, callback]
   }
 
-  function buildCompiler(args) {
+  function buildProcessor(args, overrides) {
     let [selector, options, callback] = parseCompilerArgs(args)
 
     options = u.options(options, {
@@ -370,10 +389,10 @@ up.script = (function() {
       priority: 0,
       batch: false,
     })
-    return Object.assign(callback, options)
+    return Object.assign(callback, options, overrides)
   }
 
-  function insertCompiler(queue, newCompiler) {
+  function insertProcessor(queue, newCompiler) {
     let existingCompiler
     let index = 0
     while ((existingCompiler = queue[index]) && (existingCompiler.priority >= newCompiler.priority)) {
@@ -897,6 +916,7 @@ up.script = (function() {
     config,
     compiler: registerCompiler,
     macro: registerMacro,
+    attrCompiler: registerAttrCompiler,
     destructor: registerDestructor,
     hello,
     clean,
@@ -912,3 +932,5 @@ up.destructor = up.script.destructor
 up.macro = up.script.macro
 up.data = up.script.data
 up.hello = up.script.hello
+up.attribute = up.script.attrCompiler
+

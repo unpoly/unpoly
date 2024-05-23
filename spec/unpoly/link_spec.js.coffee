@@ -2305,7 +2305,7 @@ describe 'up.link', ->
 
     describe '[up-expand]', ->
 
-      it 'makes the element followable to the same destination as the first contained link', asyncSpec (next) ->
+      it 'makes the element followable to the same destination as the first contained link', ->
         up.fragment.config.mainTargets = ['main']
         fixture('main', text: 'old text')
         area = fixture('div[up-expand] a[href="/path"]')
@@ -2315,13 +2315,15 @@ describe 'up.link', ->
 
         Trigger.clickSequence(area)
 
-        next ->
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('main')
+        await wait()
 
-          jasmine.respondWithSelector('main', text: 'new text')
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('main')
 
-        next ->
-          expect('main').toHaveText('new text')
+        jasmine.respondWithSelector('main', text: 'new text')
+
+        await wait()
+
+        expect('main').toHaveText('new text')
 
       it 'does not enlarge an area with [up-expand=false]', ->
         area = fixture('div[up-expand=false] a[href="/path"]')
@@ -2348,7 +2350,7 @@ describe 'up.link', ->
         up.hello($area)
         expect($area.attr('up-href')).toEqual('/path1')
 
-      it "copies an contained non-link element with up-href attribute", ->
+      it "copies an contained non-link element with [up-href] attribute", ->
         $area = $fixture('div[up-expand] span[up-follow][up-href="/path"]')
         up.hello($area)
         expect($area.attr('up-href')).toEqual('/path')
