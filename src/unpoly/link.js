@@ -906,7 +906,6 @@ up.link = (function() {
 
     // These defaults can be overridden using [up-...] attributes.
     let defaults = {
-      background: true,
       target: ':origin',
       cache: 'auto',
       revalidate: 'auto',
@@ -994,13 +993,13 @@ up.link = (function() {
     You may target one or [multiple](/targeting-fragments#updating-multiple-fragments) fragments.
     To target the placeholder itself, you can use `:origin` target instead of spelling out a selector.
 
-  @param [up-background='true']
+  @param [up-feedback='true']
+    Whether the `[up-defer]` placeholder is assigned an `.up-active` class while loading its content.
+
+  @param [up-background='false']
     Whether to load the deferred content [in the background](/up.render#options.background).
 
     Background requests will not show [loading indicators](/loading-indicators).
-
-  @param [up-feedback='true']
-    Whether the `[up-defer]` placeholder is assigned an `.up-active` class while loading its content.
 
   @experimental
   */

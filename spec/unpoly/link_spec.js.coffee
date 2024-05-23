@@ -3050,13 +3050,23 @@ describe 'up.link', ->
 
         expect('#target').toHaveText('new target')
 
-      it 'makes a background request', ->
-        partial = fixture('a#slow[up-defer][href="/slow-path"]')
-        up.hello(partial)
+      describe 'progress bar', ->
 
-        event = await jasmine.nextEvent('up:request:load')
+        it 'makes a foreground request by default', ->
+          partial = fixture('a#slow[up-defer][href="/slow-path"]')
+          up.hello(partial)
 
-        expect(event.request.background).toBe(true)
+          event = await jasmine.nextEvent('up:request:load')
+
+          expect(event.request.background).not.toBe(true)
+
+        it 'makes a background request with [up-background=true]', ->
+          partial = fixture('a#slow[up-defer][href="/slow-path"][up-background=true]')
+          up.hello(partial)
+
+          event = await jasmine.nextEvent('up:request:load')
+
+          expect(event.request.background).toBe(true)
 
       it 'does not update history, even when targeting an auto-history-target', ->
         up.history.config.enabled = true
