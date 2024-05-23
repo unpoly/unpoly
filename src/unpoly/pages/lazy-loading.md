@@ -130,6 +130,21 @@ element:
 
 
 
+## Displaying a fallback while content is loading {#pending}
+
+The initial children of an `[up-defer]` element are shown while its deferred content is loading:
+
+```html
+<div id="menu" up-defer up-href="/menu">
+  Loading... <!-- mark-phrase "Loading..." -->
+</div>
+```
+
+> [note]
+> If the deferred content is already [cached](/caching), the fallback will [immediately be replaced](##cached-partials-are-rendered-instantly) by the cached content. 
+
+
+
 ## Loading multiple fragments from the same URL
 
 Deferred placeholders may be scattered throughout the page, but load from the same URL:
