@@ -84,10 +84,15 @@ up.on('up:link:follow', function(event) {
   }
 })
 
-function isLoadPageSafe({ url, layer }) {
+function isLoadPageSafe({ url, layer, method }) {
+  // Default to 'GET' and uppercase the method string
+  let isSafeRequest = url && up.util.normalizeMethod(method) === 'GET'
+
    // To prevent any overlays from closing, we only make a full page load
    // when the link is changing the root layer.
-   return url && up.layer.current.isRoot() && layer !== 'new'
+  let isRootLayer = up.layer.current.isRoot() && layer !== 'new'
+
+   return isSafeRequest && isRootLayer
 }
 ```
 
@@ -168,7 +173,7 @@ function getPathWithoutHash(asset) {
 ## Detecting new versions without a user interaction
 
 If you want to detect asset changes without a user interaction, use [polling](/up-poll)
-to reload an empty fragments every few minutes.
+to reload an empty fragment every few minutes.
 
 This will reload an empty fragment `#version-detector` from a URL `/version` every 2 minutes:
 
