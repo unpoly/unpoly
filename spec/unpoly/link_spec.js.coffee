@@ -732,6 +732,11 @@ describe 'up.link', ->
         options = up.link.followOptions(link)
         expect(options.scroll).toBe('reset')
 
+      it 'parses an [up-scroll-behavior] attribute', ->
+        link = fixture('a[href="/foo"][up-scroll-behavior="instant"]')
+        options = up.link.followOptions(link)
+        expect(options.scrollBehavior).toBe('instant')
+
       it 'parses an [up-content] attribute', ->
         link = fixture('a[href="/foo"][up-content="new text"]')
         options = up.link.followOptions(link)
