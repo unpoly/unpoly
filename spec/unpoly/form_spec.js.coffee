@@ -2510,12 +2510,10 @@ describe 'up.form', ->
 
     describe 'form[up-submit]', ->
 
-      it 'submits the form with AJAX and replaces the [up-target] selector', asyncSpec (next) ->
-        up.history.config.enabled = true
-
+      it 'submits the form with AJAX and replaces the [up-target] selector', ->
         $fixture('.response').text('old text')
 
-        $form = $fixture('form[action="/form-target"][method="put"][up-target=".response"]')
+        $form = $fixture('form[action="/form-target"][method="put"][up-submit][up-target=".response"]')
         $form.append('<input name="field1" value="value1">')
         $form.append('<input name="field2" value="value2">')
         $submitButton = $form.affix('input[type="submit"][name="submit-button"][value="submit-button-value"]')
@@ -2523,20 +2521,38 @@ describe 'up.form', ->
 
         Trigger.clickSequence($submitButton)
 
-        next =>
-          params = @lastRequest().data()
-          expect(params['field1']).toEqual(['value1'])
-          expect(params['field2']).toEqual(['value2'])
+        await wait()
 
-        next =>
-          @respondWith """
-            <div class="response">
-              new text
-            </div>
-          """
+        params = jasmine.lastRequest().data()
+        expect(params['field1']).toEqual(['value1'])
+        expect(params['field2']).toEqual(['value2'])
 
-        next =>
-          expect('.response').toHaveText('new text')
+        await wait()
+
+        jasmine.respondWith """
+          <div class="response">
+            new text
+          </div>
+        """
+
+        await wait()
+
+        expect('.response').toHaveText('new text')
+
+      it 'submits a form with [up-submit=true]', ->
+        fixture('main', text: 'old text')
+
+        $form = $fixture('form[action="/form-target"][method="put"][up-submit="true"]')
+        $form.append('<input name="field" value="value">')
+        $submitButton = $form.affix('input[type="submit"]')
+        up.hello($form)
+
+        Trigger.clickSequence($submitButton)
+
+        await wait()
+
+        expect(jasmine.lastRequest().data()['field']).toEqual(['value'])
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('main')
 
       describe 'up:form:submit event', ->
 
