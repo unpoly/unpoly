@@ -119,7 +119,7 @@ up.network = (function() {
   @param {Function(up.Request): boolean} [config.autoCache]
     Whether to [cache](/caching) the given request with `{ cache: 'auto' }`.
 
-    By default Unpoly will auto-cache requests with [safe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP methods.
+    By default Unpoly will auto-cache requests with [safe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP methods like `GET`.
 
     You may change this default to prevent auto-caching of some of your routes. For example, this will prevent auto-caching
     of requests to URLs ending with `/edit`:

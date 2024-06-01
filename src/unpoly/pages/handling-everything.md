@@ -20,7 +20,7 @@ up.link.config.followSelectors.push('a[href]')
 
 There are some exceptions when links will still make a full page load under this setting:
 
-- Links with an `[up-follow=false]` attribute.
+- Links with an `[up-follow=false]` attribute. Also see [boolean attributes](/attributes-and-options#boolean-attributes).
 - Links that cannot be followed through JavaScript,
   like links with an `[download]` attribute or with a cross-origin `[href]`.
 - You have configured additional exceptions in `up.link.config.noFollowSelectors`.

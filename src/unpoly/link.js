@@ -71,6 +71,7 @@ With these [`[up-target]`](/a-up-follow#up-target) annotations Unpoly only updat
 The JavaScript environment will persist and the user will not see a white flash while the
 new page is loading.
 
+@see attributes-and-options
 @see targeting-fragments
 @see handling-everything
 @see failed-responses
@@ -1228,7 +1229,7 @@ up.link = (function() {
     Unpoly will make a request and cache the server response.
 
     With `[up-cache=auto]` Unpoly will use the cache only if `up.network.config.autoCache`
-    returns `true` for the request.
+    returns `true` for the request. By default this only caches `GET` requests.
 
     With `[up-cache=false]` Unpoly will always make a network request.
 

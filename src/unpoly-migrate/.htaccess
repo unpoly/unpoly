@@ -68,3 +68,11 @@ RedirectPermanent /focus-outline /focus-visibility
 
 RedirectPermanent /preloading-links /preloading
 RedirectPermanent /preloading-content /preloading
+
+RedirectPermanent /attributes /attributes-and-options
+RedirectPermanent /attrs /attributes-and-options
+RedirectPermanent /options /attributes-and-options
+RedirectPermanent /opts /attributes-and-options
+RedirectPermanent /configuration /attributes-and-options
+RedirectPermanent /config /attributes-and-options
+RedirectPermanent /attributes-options /attributes-and-options
