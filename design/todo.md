@@ -2,6 +2,7 @@
 ===========
 
 - Test upgrade with real app
+- Test with Safari
 
 
 Priority
@@ -12,39 +13,27 @@ Priority
 Backlog
 =======
 
+- Remove isNull() and isUndefined()
+- Allow to keep elements *without* remembering to mark elements as [up-keep]
+  - config.keepSelectors
+  - Allow { useKeep: '[up-keep], .search-input' } to keep additional elements
+  - Elements can still opt out with [up-keep=false]
+- Docs: [up-transition] should document params [up-duration], [up-easing]. Same with [up-animation]?
+- Docs: up.morph() should document options.duration, options.easing. Same with up.animate()?
+- Allow up.reload() to reload multiple, potentially optional elements
+  - Startin in 3.8 we could also use 3 times up.reload() and make a single request 
+- Consider publishing { defaultMaybe: true } with a better name
 - Docs: Extract new doc page "Preserving state" from [up-keep] and /data#preserving-data-through-reloads
-- Docs: https://unpoly.com/up-keep#controlling-if-an-element-will-be-kept should mention useKeep: false, [up-use-keep=false]
 - Docs: Installation methods may be unmaintained; Go through methods and focus on installing frontend assets
-- Should up.layer.open({ data }) set the data on the root element, not the layer element?
-- Docs: Explain { origin } in the docs
-- Docs: [up-transition] should docment params [up-duration], [up-easing]
-- Docs. up.transition() should document options.duration, options.easing
 - Docs: URLs like /up-transition should redirect to /a-up-transition 
-- BodyShifter could use a class to shift elements
-  - scrollbar-width could be custom property
-  - or margin-right: calc(100vw - 100%) (and remove scrollBarWidth measiruing)
-- Check if the BodyShifter can disable itself with supported scrollbar-gutter: stable
-- Doc page for polling
-- Form-related events are often emitted on the origin, not the form. It would be helpful if the event objects get a { form } property.
-- Docs for up.validate({ data }): Not that element must have a derivable target
-- Meta-Tag-Updating should also update html[lang], even though it's not an element
-  - Also test a case where the attribute is added or removed 
-    - e.toggleAttr(document.documentElement, 'lang', responseDoc.lang, !!responseDoc.lang)
-  - Update and restore as overlays are opened/closed 
+- Should up.layer.open({ data }) set the data on the root element, not the layer element?
+  - Users can still "compile" the layer element by observing up:layer:open 
+- Docs: Extract /polling page from [up-poll]
 - Have a better error when Unpoly is loaded twice
-- In an offline case, the revalidation request is killing our existing cache entry (which may be expired but does have a response)
-  - Is this true? Since we're only putting into the cache after we have a response if cache: false? 
+  - We cannot do this when booting
+  - Throw in namespace.js
 - Add a config to disable validate merging
-- Docs for up:link:follow should note that, when mutating render options, it's a good idea to also mutate in up:link:preload
-- Docs for up:fragment:loaded should not in params that renderOptions may be mutated
-- Allow "true" and "false" values for all attributes
-  - Check if we can offer more exclusion selectors
-    - noNavSelectors, [up-nav=false]
-    - [up-expand=false]
-- up.history.config.restoreTargets has weird default documented: config.restoreTargets=[]
 - Touch events can scroll the background of a drawer overlay on https://unpoly.com/
-- Maybe [up-clickable] should set a `button` role by default
-  - But keep a `link` role on `a:not([href])` elements, to match `<a up-content>`  
 - In a multi-step render pass, let compilers see all updated fragments
   - This would require us to delay compilation until all fragments are inserted 
 - Consider whether Request#target, Request#context etc. should be setters that auto-set the corresponding header.
@@ -54,7 +43,6 @@ Backlog
     - Maybe hard since we allow write access headers[key] = value
       - Would be easier with header() and setHeader()
       - Still need to iterate over the whole thing for passing over headers to xhr
-
 - Consider an up:fragment:render event to modify renderOptions for all kind of passes
   - We have so many guardEvents now
   - Test that we can still modify event.renderOptions
@@ -63,17 +51,12 @@ Backlog
     - No! We would need to check their renderOptions for mutation. Who is interested in other events can use them.
   - Update docs: Render Flowchart
   - Update docs: Manipulate render options
-- Docs: https://unpoly.com/closing-overlays#closing-by-targeting-the-parent-layer should mention that targeting a layer *dismisses* with a `:peel` value (#598) 
 - { dismissLabel } should be able to contain HTML
-  - Maybe rename to { dismissContent } or something?
+  - Maybe rename to { dismissButtonContent } or something?
 - Allow variations of official layer modes
 - lightbox Layer mode
   - Where are we going to put the margin around the box, if we're not having a viewport? 
 - Move custom spec helpers out of `jasmine.foo()` to `specs.foo()`
-- Allow to keep elements *without* remembering to mark elements as [up-keep]
-  - config.keepSelectors
-  - Allow { useKeep: '[up-keep], .search-input' } to keep additional elements
-  - Elements can still opt out with [up-keep=false]
 - Unpoly Rails needs to ignore pseudo-elements
 - I think we can replace up.Rect.fromElement() with just element.getBoundingClientRect() 
 - I think revalidation now loses :maybe marks. We should have more tests.
@@ -95,7 +78,6 @@ Backlog
     - Revalidation should just be for ".foo", or for ".foo, .bar:maybe"
     - It should be OK if revalidation response only contains ".foo"
 - Preserve text selection ranges when reloading / polling / revalidating
-- Don't use the default duration for animations and transitions with { duration: 0 }
 - Should [up-poll] and up.reload() render failed responses if they match the target?
   - At least for reloading the element may actually have entered the DOM from a failed response
 - Site: Scrollbar styling https://makandracards.com/makandra/617528-chrome-121+-no-longer-supports-non-standard-scrollbar-styling
