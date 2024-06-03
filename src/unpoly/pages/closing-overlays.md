@@ -82,7 +82,7 @@ Result values are useful to branch out a complex screen into a [subinteraction](
 ### Dismissal reasons
 
 When an overlay is dimissed, the result value can indicate the reason for dismissal.
-For instance, closing an overlay by clicking on the `×` symbol will dismiss with the value `":button"`. 
+For instance, closing an overlay by clicking on the `×` symbol will dismiss with the value `":button"`.
 
 See the table under [customizing dismiss controls](#customizing-dismiss-controls) for
 a list of default dismissal values.

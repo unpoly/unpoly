@@ -185,14 +185,9 @@ up.Response = class Response extends up.Record {
     return this.headers[name] || this.xhr?.getResponseHeader(name)
   }
 
-  // TODO: Do we need this? Why don't we take all the Vary info that we have?
-  //  => Because network infrastructure may set additional Vary headers we don't care about
-  //  => But why doesn't the test crash? (`ignores Vary for headers that were set outside Unpoly`)
-  //     => Because our own requests will not have values for infrastructure-set Vary headers
-  get ownInfluencingHeaderNames() {
-    let influencingHeaders = up.protocol.influencingHeaderNamesFromResponse(this)
-    // Only return the header names that actually had a value in the request.
-    return u.filter(influencingHeaders, (headerName) => this.request.header(headerName))
+  get varyHeaderNames() {
+    let varyHeaderValue = this.header('Vary')
+    return u.parseTokens(varyHeaderValue, { separator: 'comma' })
   }
 
   /*-

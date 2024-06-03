@@ -87,7 +87,7 @@ up.request('/menu', { cache: true, background: true })
 Preload request behavior
 ------------------------
 
-Requests sent when preloading behave somewhat different to requests sent when following a link directly: 
+Requests sent when preloading behave somewhat different to requests sent when following a link directly:
 
 - Preloading will not change elements ("render").
 - Preloading a link will *not* [abort](/aborting-requests) pending requests
@@ -99,7 +99,7 @@ Requests sent when preloading behave somewhat different to requests sent when fo
 - When a link destination is already cached, preloading will *not* make another request, even if the cache entry is [expired](/caching#expiration).
   When the link is clicked and the cached content is rendered into page, the fragment will be [revalidated](/caching#revalidation)
   if the cache entry is expired.
-   
+
 
 
 Events

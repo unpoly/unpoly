@@ -10,11 +10,6 @@ class Route {
   // Cached requests for this route's method and URL.
   requests = []
 
-  // TODO: Get rid of debug description arg
-  constructor(description) {
-    this.description = description
-  }
-
   matchBest(newRequest) {
     let matches = this.requests.filter((cachedRequest) => this.satisfies(cachedRequest, newRequest))
     // Newer requests are always appended
@@ -30,7 +25,7 @@ class Route {
   }
 
   updateVary(response) {
-    for (let headerName of up.protocol.influencingHeaderNamesFromResponse(response)) {
+    for (let headerName of response.varyHeaderNames) {
       this.varyHeaders.add(headerName)
     }
   }
@@ -220,7 +215,7 @@ up.Request.Cache = class Cache {
   }
 
   _getRoute(request) {
-    return request.cacheRoute || (this._routes[request.description] ||= new Route(request.description))
+    return request.cacheRoute || (this._routes[request.description] ||= new Route())
   }
 
   _isUsable(request) {

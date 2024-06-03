@@ -2,7 +2,7 @@ Dependent fields
 ================
 
 Using the `[up-validate]` attribute you can implement forms where the state of some fields
-depend on the value of other fields.  
+depend on the value of other fields.
 
 Declaring dependencies
 ----------------------

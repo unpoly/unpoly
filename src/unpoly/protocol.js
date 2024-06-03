@@ -903,12 +903,6 @@ up.protocol = (function() {
   @stable
   */
 
-  // TODO: Move to up.Response#varyHeaderNames
-  function influencingHeaderNamesFromResponse(response) {
-    let varyHeaderValue = response.header('Vary')
-    return u.parseTokens(varyHeaderValue, { separator: 'comma' })
-  }
-
   /*-
   Request headers that influenced a response should be listed in a `Vary` response header.
 
@@ -1088,6 +1082,5 @@ up.protocol = (function() {
     headerize,
     wrapMethod,
     cspNoncesFromHeader,
-    influencingHeaderNamesFromResponse,
   }
 })()
