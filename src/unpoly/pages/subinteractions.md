@@ -92,6 +92,22 @@ Another common callback reloads `<select>` options and selects the new foreign k
 This example uses `up.validate()` to preview a form submission without persisting the results.
 
 
+### Navigating away
+
+You may also want to navigate to a new screen once an overlay was accepted:
+
+```html
+<a href="/companies/new"
+  up-layer="new"
+  up-accept-location="/companies/$id"
+  up-on-accepted="up.navigate({ url: '/projects/new?company_id=' + value.id' })"> <!-- mark-line -->
+  New company
+</a>
+```
+
+
+
+
 Reusing existing screens
 ------------------------
 

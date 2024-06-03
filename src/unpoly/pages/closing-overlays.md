@@ -52,7 +52,13 @@ In HTML you may use `[up-on-accepted]` and `[up-on-dismissed]` attributes for th
 Overlay result values
 ---------------------
 
-Overlays in Unpoly may be closed with an optional *result value*.
+Overlays in Unpoly may be closed with an optional *result value*. The result value
+is communicated back to the layer that opened the overlay. Result values can be used to
+[augment a select](/subinteractions#adding-options-to-an-existing-select)
+or [navigate to another screen](/subinteractions#navigating-away).
+
+
+### Acceptance values
 
 E.g. if the user selects a value, creates a record or confirms an action,
 we consider the overlay to be **accepted with that value**.
@@ -62,7 +68,7 @@ You can access the acceptance value from an `{ onAccepted }` callback:
 ```js
 up.layer.open({
   url: '/select-user',
-  onAccepted: (event) => console.log('Got user ', event.value)
+  onAccepted: (event) => console.log('Got user', event.value)
 })
 ```
 
@@ -71,12 +77,10 @@ The acceptance value may also be accessed when you're opening layers from HTML:
 ```html
 <a href="/select-user"
   up-layer="new"
-  up-on-accepted="console.log('Got user ', value)">
+  up-on-accepted="console.log('Got user', value)">
   ...
 </a>
 ```
-
-Result values are useful to branch out a complex screen into a [subinteraction](/subinteractions).
 
 
 ### Dismissal reasons
@@ -84,8 +88,26 @@ Result values are useful to branch out a complex screen into a [subinteraction](
 When an overlay is dimissed, the result value can indicate the reason for dismissal.
 For instance, closing an overlay by clicking on the `×` symbol will dismiss with the value `":button"`.
 
-See the table under [customizing dismiss controls](#customizing-dismiss-controls) for
-a list of default dismissal values.
+The reason can be accessed from an `{ onDismissed }` callback or `[up-on-dismissed]` attribute:
+
+```html
+<a href="/select-user"
+  up-layer="new"
+  up-on-dismissed="console.log('Dismissal reason is', value)">
+  ...
+</a>
+```
+
+You can provide a dismissal reason when closing an overlay using `up.layer.dismiss()` or `[up-dismiss]`.
+
+If the overlay is closed using a [standard dismiss control](#customizing-dismiss-controls), the following
+default reasons are set:
+
+| User interaction                                    | Dismissal reason |
+| --------- ------------------------------------------| ---------------- |
+| User presses the `Escape` key                       | `":key"`         |
+| User clicks on the background ("light dismiss")     | `":outside"`     |
+| User clicks on the `×` button in the overlay corner | `":button"`      |
 
 
 
