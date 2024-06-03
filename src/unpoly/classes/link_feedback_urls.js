@@ -25,10 +25,15 @@ up.LinkFeedbackURLs = class LinkFeedbackURLs {
   }
 
   isCurrent(normalizedLocation) {
+    // In overlays without history no link is considered current.
+    if (!normalizedLocation) {
+      return false
+    }
+
     // It is important to return false instead of a falsey value.
     // up.feedback feeds the return value to element.classList.toggle(),
     // which would use a default for undefined.
-    return this._isSafe && !!(
+    return !!(
       this.href === normalizedLocation ||
       this._upHREF === normalizedLocation ||
       this._aliasPattern?.test?.(normalizedLocation, false)

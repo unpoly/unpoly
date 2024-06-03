@@ -392,7 +392,7 @@ describe 'up.script', ->
 
         expect(data1).toBe(data2)
 
-    describe 'up.hello', ->
+    describe 'up.hello()', ->
 
       it 'calls compilers with the given element', ->
         compiler = jasmine.createSpy('compiler')

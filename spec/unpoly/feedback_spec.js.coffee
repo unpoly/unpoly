@@ -4,18 +4,105 @@ $ = jQuery
 
 describe 'up.feedback', ->
 
+  replaceURL = (url) ->
+    # Don't use up.history.replace() since that fires up:location:changed
+    # which up.feedback listens to.
+    history.replaceState({}, 'title', url)
+
   beforeEach ->
     up.history.config.enabled = true
     up.motion.config.enabled = false
 
+  describe 'JavaScript functions', ->
+
+    describe 'up.hello() updating .up-current', ->
+
+      it 'sets .up-current classes on nav links that refer to the current URL', ->
+        replaceURL('/bar')
+
+        [container, link1, link2, link3] = htmlFixtureList """
+          <nav>
+            <a href='/foo'></a>
+            <a href='/bar'></a>
+            <a href='/baz'></a>
+          </nav>
+        """
+
+        expect(link1).not.toHaveClass('up-current')
+        expect(link2).not.toHaveClass('up-current')
+        expect(link3).not.toHaveClass('up-current')
+
+        up.hello(container)
+
+        expect(link1).not.toHaveClass('up-current')
+        expect(link2).toHaveClass('up-current')
+        expect(link3).not.toHaveClass('up-current')
+
+      it 'sets .up-current classes when links have changed within an unchanged navigational container', ->
+        replaceURL('/bar')
+
+        [container, link] = htmlFixtureList """
+          <nav>
+            <a href='/bar'></a>
+          </nav>
+        """
+
+        expect(link).not.toHaveClass('up-current')
+
+        up.hello(link)
+
+        expect(link).toHaveClass('up-current')
+
+      it "removes .up-current classes on nav links that don't refer to the current URL", ->
+        replaceURL('/bar')
+
+        [container, link] = htmlFixtureList """
+          <nav>
+            <a href='/qux' class='up-current'></a>
+          </nav>
+        """
+
+        expect(link).toHaveClass('up-current')
+
+        up.hello(container)
+
+        expect(link).not.toHaveClass('up-current')
+
+      it "removes .up-current classes on unsafe nav links, even if they refer to the current URL", ->
+        replaceURL('/bar')
+
+        [container, link] = htmlFixtureList """
+          <nav>
+            <a href='/bar' up-method="post" class='up-current'></a>
+          </nav>
+        """
+
+        expect(link).toHaveClass('up-current')
+
+        up.hello(container)
+
+        expect(link).not.toHaveClass('up-current')
+
+      it 'removes .up-current classes from all nav links in overlays without history', ->
+        overlay = await up.layer.open history: false, content: """
+          <nav>
+            <a id="overlay-link" href='/bar'></a>
+          </nav>
+        """
+
+        link = overlay.element.querySelector('#overlay-link')
+
+        # Manually add the class as up.layer.open() would remove it from the given { content }.
+        link.classList.add('up-current')
+        expect(link).toHaveClass('up-current')
+
+        up.hello(overlay.element)
+
+        expect(link).not.toHaveClass('up-current')
+
   describe 'unobtrusive behavior', ->
 
     describe '[up-nav]', ->
-
-      replaceURL = (url) ->
-        # Don't use up.history.replace() since that fires up:location:changed
-        # which up.feedback listens to.
-        history.replaceState({}, 'title', url)
 
       it 'marks a child link as .up-current if it links to the current URL', ->
         replaceURL('/foo')
@@ -39,7 +126,7 @@ describe 'up.feedback', ->
 
         return undefined
 
-      it 'marks the element as .up-current if it is also a link to the current URL', ->
+      it 'marks the element as .up-current if itself is a link to the current URL', ->
         replaceURL('/foo')
         $currentLink = $fixture('a[href="/foo"][up-nav]')
         $otherLink = $fixture('a[href="/bar"][up-nav]')

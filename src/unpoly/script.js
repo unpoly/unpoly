@@ -525,7 +525,7 @@ up.script = (function() {
 
   ```js
   let element = document.createElement('div')
-  element.innerHTML = '...'
+  element.innerHTML = '<a href="/path" up-follow>click me</a>'
   // The element is not compiled yet. We must compile it manually:
   up.hello(element)
   ```

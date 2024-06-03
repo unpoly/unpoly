@@ -121,10 +121,6 @@ up.feedback = (function() {
   const CLASS_LOADING = 'up-loading'
   const SELECTOR_LINK = 'a, [up-href]'
 
-  function navSelector() {
-    return config.selector('navSelectors')
-  }
-
   function normalizeURL(url) {
     if (url) {
       return u.normalizeURL(url, { trailingSlash: false, hash: false })
@@ -138,57 +134,42 @@ up.feedback = (function() {
     return link.upFeedbackURLs ||= new up.LinkFeedbackURLs(link)
   }
 
-  function updateFragment(fragment) {
-    const layerOption = { layer: up.layer.get(fragment) }
+  /*-
+  Forces the toggling of `.up-current` classes for the given fragment.
 
-    if (up.fragment.closest(fragment, navSelector(), layerOption)) {
-      // If the new fragment is an [up-nav], or if the new fragment is a child of an [up-nav],
-      // all links in the new fragment are considered links that we need to update.
-      //
-      // Note that:
-      //
-      // - The [up-nav] element might not be part of this update.
-      //   It might already be in the DOM, and only a child was updated.
-      // - The fragment might be a link itself.
-      // - We do not need to update sibling links of fragment that have been processed before.
-      // - The fragment may be the <body> element which contains all other overlays.
-      //   But we only want to update the <body>.
-      const links = up.fragment.subtree(fragment, SELECTOR_LINK, layerOption)
-      updateLinks(links, layerOption)
-    } else {
-      updateLinksWithinNavs(fragment, layerOption)
+  @function updateFragment
+  @param {Element} fragment
+  @internal
+  */
+  function updateFragment(fragment, { layer } = {}) {
+    layer ||= up.layer.get(fragment)
+
+    // An overlay might not have a { location } property, e.g. if it was created
+    // from local { content }. In this case we remove .up-current from all links.
+    let layerLocation = getNormalizedLayerLocation(layer)
+
+    // We need to match both an `a[href]` within an `[up-nav]` *and* and `a[href][up-nav]
+    // This should return a selector like `:is([up-nav], nav):not([up-nav=false]) :is(a, [up-href]), :is([up-nav], nav):not([up-nav=false]):is(a, [up-href])`
+    const navSelector = config.selector('navSelectors')
+    const navLinkSelector = `${navSelector} :is(${SELECTOR_LINK}), ${navSelector}:is(${SELECTOR_LINK})`
+
+    // The fragment may be the <body> element which contains all other overlays.
+    // But we only want to update the <body>. Hence the { layer } option.
+    const links = up.fragment.all(navLinkSelector, { layer })
+
+    for (let link of links) {
+      const isCurrent = linkURLs(link).isCurrent(layerLocation)
+      for (let currentClass of config.currentClasses) {
+        link.classList.toggle(currentClass, isCurrent)
+      }
+      e.toggleAttr(link, 'aria-current', 'page', isCurrent)
     }
-  }
-
-  function updateLinksWithinNavs(fragment, options) {
-    const navs = up.fragment.subtree(fragment, navSelector(), options)
-    const links = u.flatMap(navs, nav => e.subtree(nav, SELECTOR_LINK))
-    updateLinks(links, options)
   }
 
   function getNormalizedLayerLocation(layer) {
     // Don't re-use layer.feedbackLocation since the current layer returns
     // location.href in case someone changed the history using the pushState API.
     return layer.feedbackLocation || normalizeURL(layer.location)
-  }
-
-  function updateLinks(links, options = {}) {
-    if (!links.length) { return }
-
-    const layer = options.layer || up.layer.get(links[0])
-
-    // An overlay might not have a { location } property, e.g. if it was created
-    // from local { content }. In this case we do not set .up-current.
-    let layerLocation = getNormalizedLayerLocation(layer)
-    if (layerLocation) {
-      for (let link of links) {
-        const isCurrent = linkURLs(link).isCurrent(layerLocation)
-        for (let currentClass of config.currentClasses) {
-          link.classList.toggle(currentClass, isCurrent)
-        }
-        e.toggleAttr(link, 'aria-current', 'page', isCurrent)
-      }
-    }
   }
 
   /*-
@@ -419,9 +400,6 @@ up.feedback = (function() {
   ```
 
 
-
-
-
   ### When is a link "current"?
 
   When no [overlay](/up.layer) is open, the current location is the URL displayed
@@ -436,6 +414,16 @@ up.feedback = (function() {
   - the URL pattern in the link's [`[up-alias]`](/a-up-alias) attribute
 
   Any `#hash` fragments in the link's or current URLs will be ignored.
+
+
+  ### Updating `.up-current` classes
+
+  The `.up-current` class is toggled automatically within all content that Unpoly renders.
+  For example, when Unpoly [follows a link](/a-up-follow), [submits a form](/form-up-submit)
+  or [renders from a script](/up.render), any newly inserted hyperlinks will get `.up-current`
+  if they point to the current URL.
+
+  To toggle `.up-current` on content that you manually inserted without Unpoly, use `up.hello()`.
 
   @selector [up-nav]
   @stable
@@ -468,6 +456,9 @@ up.feedback = (function() {
 
   To set other classes on current links, configure `up.feedback.config.currentClasses`.
 
+  This class is toggled automatically for any HTML that Unpoly renders.
+  To set that class on content that you manually inserted without Unpoly, use `up.hello()`.
+
   See [`[up-nav]`](/up-nav) for more documentation and examples.
 
   @selector a.up-current
@@ -486,7 +477,7 @@ up.feedback = (function() {
     // the last processed location.
     if (!processedLocation || (processedLocation !== layerLocation)) {
       layer.feedbackLocation = layerLocation
-      updateLinksWithinNavs(layer.element, { layer })
+      updateFragment(layer.element, { layer })
     }
   }
 

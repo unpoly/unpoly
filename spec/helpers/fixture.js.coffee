@@ -25,6 +25,13 @@ createFixtureFromHTML = (html) ->
   getCreatedFixtureContainer().append(element)
   return element
 
+collectElements = (element) ->
+  [element, u.flatMap(element.children, collectElements)...]
+
+createFixtureListFromHTML = (html) ->
+  root = createFixtureFromHTML(html)
+  return collectElements(root)
+
 registerExternalFixture = (element) ->
   externalFixtures.push(element)
   return element
@@ -34,6 +41,7 @@ createJQueryFixture = (args...) ->
 
 window.fixture = createFixtureFromSelector
 window.htmlFixture = createFixtureFromHTML
+window.htmlFixtureList = createFixtureListFromHTML
 window.$fixture = createJQueryFixture
 window.registerFixture = registerExternalFixture
 
