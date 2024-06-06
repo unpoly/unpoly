@@ -66,10 +66,14 @@ When a lazy preloading link enters and exit its viewport repeatedly, only a sing
 Custom preload timing {#scripted}
 ----------------------------------
 
-To programmatically preload any link element at a time of your choosing, use the `up.link.preload()` function:
+To programmatically preload any link element at a time of your choosing, use the `up.link.preload()` function.
+
+The following [compiler](/up.compiler) would preload a link with a `[rel=next]` attribute 500 milliseconds after it was inserted:
 
 ```js
-up.compiler('link[rel=next]', (link) => up.link.preload(link))
+up.compiler('link[rel=next]', (link) => {
+  setTimeout(() => up.link.preload(link), 500)
+})
 ```
 
 A link that is preloaded in that fashion does not require an `[up-preload]` attribute.

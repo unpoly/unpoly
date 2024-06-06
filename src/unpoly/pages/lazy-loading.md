@@ -1,7 +1,7 @@
 Lazy loading content
 ====================
 
-Unpoly lets you load additional fragments until a placeholder enters the DOM or viewport.
+Unpoly lets you load additional fragments when a placeholder enters the DOM or viewport.
 
 By deferring the loading of non-[critical](https://developer.mozilla.org/en-US/docs/Web/Performance/Critical_rendering_path) fragments
 with a separate URL, you can paint important content earlier.

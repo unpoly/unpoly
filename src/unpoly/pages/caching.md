@@ -302,6 +302,10 @@ with a comma. If the server replies with `Vary: X-Up-Target`, that response is a
     <td>✔️ cache hit</td>
   </tr>
   <tr>
+    <th>🠦 <code>X-Up-Target: .bar, .foo</code></th>
+    <td>✔️ cache hit</td>
+  </tr>
+  <tr>
     <th>🠦 <code>X-Up-Target: .baz</code></th>
     <td>❌ cache miss</td>
   </tr>

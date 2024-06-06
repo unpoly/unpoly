@@ -48,6 +48,11 @@ While offline, [cache revalidation](/caching#revalidation) of expired content wi
 When revalidation fails, or when accessing uncached content, Unpoly will run `onOffline()` callbacks and emit `up:fragment:offline`. The page will not be changed unless your code says so.
 
 
+### Preloading links before disconnects
+
+You can use `[up-preload=insert]`
+
+
 ### Limitations to offline support
 
 While Unpoly lets you [handle disconnects](#disconnects), some parts are missing for full "offline" support:

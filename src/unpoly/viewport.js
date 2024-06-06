@@ -859,6 +859,7 @@ up.viewport = (function() {
   elements anchored to the right appear to jump when the dialog opens or
   closes. Applying this attribute to anchored elements will make Unpoly
   aware of the issue and adjust the `right` property accordingly.
+  You may customize this behavior by styling the `.up-scrollbar-away` class.
 
   Instead of giving this attribute to any affected element,
   you can also configure a selector in `up.viewport.config.anchoredRightSelectors`.
@@ -898,15 +899,26 @@ up.viewport = (function() {
   Without a scrollbar, the `<body>` becomes wider. This may cause elements to jump in width as the overlay opens and
   closes. Elements can use this class to compensate by setting a larger `right` or `margin-right` style in their CSS.
 
-  ### Example
+  ### Default styles
 
-  This element is fixed to the upper part of the screen, keeping a 20px margin from the window edge:
+  Unpoly sets some default styles for `.up-scrollbar-away` that will usually stabilize
+  the width of absolutely positioned elements without additional CSS:
+
+  - The right padding of the `<body>` element is increased by the scrollbar width
+  - The `right` property of [right-anchored](/up-anchored-right) elements is increased by the scrollbar width.
+
+  You can inspect the default styles
+  in [`viewport.sass`](https://github.com/unpoly/unpoly/blob/master/src/unpoly/viewport.sass).
+
+  ### Customizing styles
+
+  A chat support box is fixed to the bottom-right part of the screen, keeping a distance of 20 pixels from the window corner:
 
   ```css
-  .top-nav {
+  .chat {
     position: fixed;
-    left: 20px;
-    top: 20px;
+    bottom: 20px;
+    right: 20px;
     right: 20px;
   }
   ```
@@ -915,19 +927,13 @@ up.viewport = (function() {
   so it position remains stable:
 
   ```css
-  .top-nav.up-scrollbar-away {
+  .chat.up-scrollbar-away {
     right: calc(20px + var(--up-scrollbar-width)) !important
   }
   ```
 
-  The `var(--up-scrollbar-width)` property is provided by Unpoly. It contains the width of the main document scrollbar,
-  e.g. `15px`.
-
-  ### Default styles
-
-  Unpoly sets some default styles for `.up-scrollbar-away` that will usually stabilize
-  the width of absolutely positioned elements. You can inspect the default styles
-  in [`viewport.sass`](https://github.com/unpoly/unpoly/blob/master/src/unpoly/viewport.sass).
+  The `var(--up-scrollbar-width)` property is provided by Unpoly. It contains the width of the main document scrollbar
+  that is now hidden, e.g. `15px`.
 
   @selector .up-scrollbar-away
   @experimental

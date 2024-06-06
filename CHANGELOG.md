@@ -12,37 +12,258 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 3.8.0
 -----
 
-New guide pages
 
-### Partials
+### Lazy loading content
+
+You can now [lazy load additional fragments](/lazy-loading) when a placeholder enters the DOM or viewport.
+By deferring the loading of non-[critical](https://developer.mozilla.org/en-US/docs/Web/Performance/Critical_rendering_path) fragments with a separate URL, you can paint important content earlier.
+
+For example, you may have a large navigation menu that only appears once the user clicks a menu icon:
+
+```html
+<div id="menu">
+  Hundreds of links here
+</div>
+```
+
+To remove the menu from the initial render pass, extract its contents to its own route, like `/menu`.
+
+In the initial view, only leave a placeholder element and mark it with an `[up-defer]` attribute.
+Also set an `[up-href]` attribute with the URL from which to load the deferred content:
+
+```html
+<div id="menu" up-defer up-href="/menu"> <!-- mark-phrase "up-defer" -->
+  Loading...
+</div>
+```
+
+When the `[up-defer]` placeholder is rendered, it will immediately make a request to fetch
+its content from `/menu`. You may also delay the request until the placeholder is
+[scrolled into the viewport](/lazy-loading#on-reveal) or [control the timing from JavaScript](/lazy-loading#scripted).
+
+See [lazy loading content](/lazy-loading) for a full example and more details.
 
 
 ### Infinite scrolling
 
+[Deferred fragments](/lazy-loading) that [load when revealed](/lazy-loading#on-reveal)
+can implement [infinite scrolling](infinite-scrolling)
+without custom JavaScript.
+
+All you need is an HTML structure like this:
+
+```html
+<div id="pages">
+  <div class="page">items for page 1</div>
+</div>
+
+<a id="next-page" href="/items?page=2" up-defer="reveal" up-target="#next-page, #pages:after">
+  load next page
+</div>
+```
+
+See [infinite scrolling](/infinite-scrolling) for a full example and more details.
+
 
 ### Request merging
 
+When queueing multiple requests to the same URL, Unpoly will now send a single request with a [merged `X-Up-Target` header](/X-Up-Target#merging-of-request-targets).
 
-### More cache hits for optimized responses
+For example, these two render passes render different selectors from `/path`:
 
-- Varying responses to multi-target requests are now a cache hit for each selector
-  - See /caching#how-cache-entries-are-matched 
+```js
+up.render('.foo', { url: '/path', cache: true })
+up.render('.bar', { url: '/path', cache: true })
+```
 
-### Fix cache retention
+Unpoly will send a single request with both targets:
 
-- No longer evicting cache entries, useful for offline:
-  - When a request (or revalidation) fails due to network issue
-  - When the server responds with an empty response (to any request or revalidation)
+```http
+GET /path HTTP/1.1
+X-Up-Target: .foo, .bar
+```
 
-### New preloading trigger factors
+This allows you to have multiple [deferred placeholders](/lazy-loading#loading-multiple-fragments-from-the-same-url) that load from the same URL efficiently.
 
-- Lazy on reveal
-- Eager on insert
-- New /preloading page
 
-### Others
+### More cache hits for tailored responses
 
-- `up.element.numberAttr()` parses negative numbers
+The following is a change for server routes that use the `Vary` header to optimize their responses to only include the requested `X-Up-Target`. 
+
+When requests [target multiple fragments](/targeting-fragments#updating-multiple-fragments) and the server responds with a `Vary` header, that response is now a cache hit for each individual selector:
+
+<table>
+  <tr>
+    <th class="split-table-head">
+    </th>
+    <th>
+      🠦 <code>X-Up-Target: .foo, .bar</code><br>
+      🠤 <code>Vary: X-Up-Target</code>
+    </th>
+  </tr>  
+  <tr>
+    <th>🠦 <code>X-Up-Target: .foo</code></th>
+    <td>✔️ cache hit</td>
+  </tr>
+  <tr>
+    <th>🠦 <code>X-Up-Target: .bar</code></th>
+    <td>✔️ cache hit</td>
+  </tr>
+  <tr>
+    <th>🠦 <code>X-Up-Target: .foo, .bar</code></th>
+    <td>✔️ cache hit</td>
+  </tr>
+  <tr>
+    <th>🠦 <code>X-Up-Target: .bar, .foo</code></th>
+    <td>✔️ cache hit</td>
+  </tr>
+  <tr>
+    <th>🠦 <code>X-Up-Target: .baz</code></th>
+    <td>❌ cache miss</td>
+  </tr>
+  <tr>
+    <th>🠦 <code>X-Up-Target: .foo, .baz</code></th>
+    <td>❌ cache miss</td>
+  </tr>
+  <tr>
+    <th>🠦 <i>No <code autolink="false">X-Up-Target</code></i></th>
+    <td>❌ cache miss</td>
+  </tr>
+</table>
+
+
+See [how cache entries are matched](/caching#how-cache-entries-are-matched) for a detailed example.
+
+
+
+### Preloading links eagerly or lazily
+
+For many years Unpoly has supported the `[up-preload]` attribute. This would preload a link when the user [hovers](https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseover_event)
+over it:
+
+```html
+<a href="/path" up-preload>Hover over me to preload my content</a>
+ ```
+
+You can now preload a link *as soon as it appears in the DOM*, by setting an [`[up-preload="insert"]`](/a-up-preload#up-preload) attribute.
+This is useful for links with a high probability of being clicked, like a navigation menu:
+
+```html
+<a href="/menu" up-layer="new drawer" up-preload="insert">≡ Menu</a> <!-- mark-phrase "insert" -->
+```
+
+To "lazy preload" a link when it is scrolled into the [viewport](/up-viewport),
+you can now set an [`[up-preload="reveal"]`](/a-up-preload#up-preload) attribute. This is useful when an element is [below the fold](https://www.optimizely.com/optimization-glossary/below-the-fold/)
+and is unlikely to be clicked until the the user scrolls:
+
+```html
+<a href="/stories/106" up-preload="reveal">Full story</a> <!-- mark-phrase "reveal" -->
+```
+
+
+### Cached content is retained while offline
+
+This release fixes some long-standing issues where the cache was evicted when a request
+failed due to [network issues](/network-issues), or when the server responds with an empty response.
+
+This fix restores the indented behavior that, even without a connection,
+[cached content](/caching) will remain navigatable for [90 minutes](/up.network.config#config.cacheEvictAge).
+This means that an offline user can instantly access pages that they already visited this session.
+
+
+### Enabling or disabling Unpoly features with boolean attributes
+
+Most Unpoly attributes can now be enabled with a value `"true"` and be disabled with a value `"false"`:
+
+```html
+<a href="/path" up-follow="true">Click for single-page navigation</a> <!-- mark-phrase "true" -->
+<a href="/path" up-follow="false">Click for full page load</a> <!-- mark-phrase "false" -->
+```
+
+Instead of setting a `true` you can also set an empty value:
+
+```html
+<a href="/path" up-follow>Click for single-page navigation</a>
+<a href="/path" up-follow="">Click for single-page navigation</a>
+<a href="/path" up-follow="true">Click for single-page navigation</a>
+```
+
+Boolean values can be helpful with a server-side templating language like ERB, Liquid or Haml, when the attribute value is
+set from a boolean variable:
+
+```erb
+<a href="/path" up-follow="<%= is_signed_in %>">Click me</a> <%# mark-phrase "is_signed_in" %>
+```
+
+This can also help when you're generating HTML from a different programming language and want to pass a `true` literal
+as an attribute value:
+
+```ruby
+link_to 'Click me', '/path', 'up-follow': true
+```
+
+This behavior is available for most attributes:
+
+- `[up-follow]`
+- `[up-submit]`
+- `[up-instant]`
+- `[up-preload]`
+- `[up-nav]`
+- `[up-expand]`
+- `[up-keep]`
+- `[up-hungry]`
+- `[up-poll]`
+- `[up-defer]`
+- `[up-validate]`
+- `[up-autosubmit]`
+- `[up-watch]`
+
+
+### Quick access to the form element in form events
+
+Form-related events like `up:form:submit` and `up:form:validate` are emitted on the element that caused the event.
+For example, `up:form:submit` is emitted on the submit button that was pressed.
+
+This made it somewhat inconvenient to access the form element:
+
+```js
+up.on('up:form:submit', function(event) {
+  let form = event.target.closest('form')
+  console.log("form is", form)
+})
+```
+
+You can now access the form element through a `{ form }` property on the event object: 
+
+```js
+up.on('up:form:submit', function({ form }) {
+  console.log("form is", form)
+})
+```
+
+
+### Other changes
+
+- `up.element.numberAttr()` now parses negative numbers.
+- When [updating history](/updating-history), the `html[lang]` is now also updated. This can be prevented by setting an `[up-lang=false]` attribute or passing a `{ lang: false }` option.
+- The function `up.util.microtask()` was deprecated. Use the browser's built-in [`queueMicrotask()`](https://developer.mozilla.org/en-US/docs/Web/API/queueMicrotask) instead.
+- [Right-anchored](http://localhost:4567/up-anchored-right) can now control their appearance while a scrolling overlay is open, by styling the `.up-scrollbar-away` class.
+- Fix a bug where the back button did not work after following a link that contains an anchor starting with a number (fixes #603).
+- Clickable elements now get an ARIA role of `button`. In earlier versions these elements received a link `link` role. 
+- Fix a bug where animating with `{ duration: 0 }` would apply the default duration instead of skipping the animation (fixes #588).
+- You can now exclude navigational containers from applying `.up-current` by adding a selector to `up.feedback.config.noNavSelectors`.
+
+
+
+### Reworked unpoly.com
+
+New colors, margins and type, table of contents.
+
+/attributes-and-options
+/preloading
+/lazy-loading
+/infinite-scrolling
+/up-scrollbar-away
 
 
 

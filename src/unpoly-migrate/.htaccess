@@ -38,8 +38,8 @@ RedirectPermanent /input-up-autosubmit /up-autosubmit
 RedirectPermanent /up.observe /up.watch
 
 RedirectPermanent /server-errors /failed-responses
-RedirectPermanent /offline /disconnects
-RedirectPermanent /handling-disconnects /disconnects
+RedirectPermanent /offline /network-issues
+RedirectPermanent /handling-disconnects /network-issues
 RedirectPermanent /cache /caching
 RedirectPermanent /targeting-elements /targeting-fragments
 

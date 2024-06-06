@@ -121,13 +121,27 @@ Most Unpoly attributes can be enabled with a value `"true"` and be disabled with
 <a href="/path" up-follow="false">Click for full page load</a> <!-- mark-phrase "false" -->
 ```
 
-This can be helpful with a server-side templating language like ERB, Liquid or Haml, when the attribute value is 
+Instead of setting a `true` you can also set an empty value:
+
+```html
+<a href="/path" up-follow>Click for single-page navigation</a>
+<a href="/path" up-follow="">Click for single-page navigation</a>
+<a href="/path" up-follow="true">Click for single-page navigation</a>
+```
+
+Boolean values can be helpful with a server-side templating language like ERB, Liquid or Haml, when the attribute value is 
 set from a boolean variable:
 
 ```erb
 <a href="/path" up-follow="<%= is_signed_in %>">Click me</a> <%# mark-phrase "is_signed_in" %>
 ```
 
+This can also help when you're generating HTML from a different programming language and want to pass a `true` literal
+as an attribute value:  
+
+```ruby
+link_to 'Click me', '/path', 'up-follow': true
+```
 
 
 
