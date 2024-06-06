@@ -1,6 +1,6 @@
 {
   "name": "unpoly",
-  "version": "3.7.3",
+  "version": "3.8.0-rc1",
   "description": "Progressive enhancement for HTML",
   "main": "unpoly.js",
   "style": "unpoly.css",
