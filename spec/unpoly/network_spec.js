@@ -1089,9 +1089,20 @@ describe('up.network', function() {
               )
 
               expect({ url: '/path', target: '.a, .b, .c' }).toBeCached()
+              expect({ url: '/path', target: '.a, .c, .b' }).toBeCached()
+              expect({ url: '/path', target: '.b, .a, .c' }).toBeCached()
+              expect({ url: '/path', target: '.b, .c, .a' }).toBeCached()
+              expect({ url: '/path', target: '.c, .a, .b' }).toBeCached()
+              expect({ url: '/path', target: '.c, .b, .a' }).toBeCached()
+              expect({ url: '/path', target: '.a, .a' }).toBeCached()
               expect({ url: '/path', target: '.a, .b' }).toBeCached()
               expect({ url: '/path', target: '.a, .c' }).toBeCached()
+              expect({ url: '/path', target: '.b, .a' }).toBeCached()
+              expect({ url: '/path', target: '.b, .b' }).toBeCached()
               expect({ url: '/path', target: '.b, .c' }).toBeCached()
+              expect({ url: '/path', target: '.c, .a' }).toBeCached()
+              expect({ url: '/path', target: '.c, .b' }).toBeCached()
+              expect({ url: '/path', target: '.c, .c' }).toBeCached()
               expect({ url: '/path', target: '.a' }).toBeCached()
               expect({ url: '/path', target: '.b' }).toBeCached()
               expect({ url: '/path', target: '.c' }).toBeCached()
@@ -1186,7 +1197,7 @@ describe('up.network', function() {
             expect(request1.headers).not.toHaveKey('X-Up-Target')
           })
 
-          it('merges to requests targeting multiple selectors each', function() {
+          it('merges two requests targeting multiple selectors each', function() {
             let foo1 = fixture('.foo1')
             let foo2 = fixture('.foo2')
             let bar1 = fixture('.bar1')
@@ -1201,6 +1212,21 @@ describe('up.network', function() {
             expect(request1.target).toBe('.foo1, .foo2, .bar1, .bar2')
             expect(request1.header('X-Up-Target')).toBe('.foo1, .foo2, .bar1, .bar2')
             expect(request1.fragments).toMatchList([foo1, foo2, bar1, bar2])
+          })
+
+          it('merges two requests targeting the same selectors, but in a different order', function() {
+            let foo = fixture('.foo')
+            let bar = fixture('.bar')
+
+            let request1 = up.request({ url: '/path', cache: true, target: '.foo, .bar' })
+
+            expect(request1.fragments).toEqual([foo, bar])
+
+            let request2 = up.request({ url: '/path', cache: true, target: '.bar, .foo' })
+
+            expect(request1.target).toBe('.foo, .bar')
+            expect(request1.header('X-Up-Target')).toBe('.foo, .bar')
+            expect(request1.fragments).toMatchList([foo, bar])
           })
 
           it("aborts both requests if the earlier request's fragment is aborted", async function() {

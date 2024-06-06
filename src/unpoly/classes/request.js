@@ -830,7 +830,8 @@ up.Request = class Request extends up.Record {
     // a fragment response).
     if (!this.target || !trackingRequest.target) return
 
-    this.target = u.uniq([this.target, trackingRequest.target]).join(', ')
+    let targetAtoms = up.fragment.splitTarget(this.target + ',' + trackingRequest.target)
+    this.target = u.uniq(targetAtoms).join(', ')
     this._setPropertyHeader('target') // X-Up-Target header was set in the response
 
     this._fragments = u.uniq([...this.fragments, ...trackingRequest.fragments])
