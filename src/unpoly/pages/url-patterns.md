@@ -55,6 +55,14 @@ You may also place and asterisk in the middle of an URL pattern to match URLs wi
 
 The above URL pattern will match `/users/123/edit`, `/users/David/edit`, `/users/123/name/edit/`, etc.
 
+By putting the asterisk after `?` (the start of the querystring) you can match for urls with a querystring:
+
+```text
+/users/?*
+```
+
+The above URL pattern will match `/users/?sort=username`, `/users/?page=3` etc.
+
 ### Example
 
 Here is an example of a URL pattern with a wildcard suffix:
