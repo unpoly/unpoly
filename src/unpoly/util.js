@@ -1729,32 +1729,13 @@ up.util = (function() {
     return copy(list).reverse()
   }
 
-//  ###**
-//  Returns a copy of the given `object` with the given `prefix` removed
-//  from its camel-cased keys.
-//
-//  @function up.util.unprefixKeys
-//  @param {Object} object
-//  @param {string} prefix
-//  @return {Object}
-//  @internal
-//  ###
-//  unprefixKeys = (object, prefix) ->
-//    unprefixed = {}
-//    prefixLength = prefix.length
-//    for key, value of object
-//      if key.indexOf(prefix) == 0
-//        key = unprefixCamelCase(key, prefixLength)
-//      unprefixed[key] = value
-//    unprefixed
-
-   function replaceValue(value, matchValue, replacementValue) {
-     if (value === matchValue) {
-       return replacementValue
-     } else {
-       return value
-     }
-   }
+  function replaceValue(value, matchValue, replacementValue) {
+    if (value === matchValue) {
+      return replacementValue
+    } else {
+      return value
+    }
+  }
 
   function renameKeys(object, renameKeyFn) {
     const renamed = {}
