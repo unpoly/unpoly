@@ -150,7 +150,7 @@ up.motion = (function() {
   up.animate(warning, { opacity: 1 })
   ```
 
-  CSS properties must be given in `kebab-case`, not `camelCase`.
+  CSS properties must be given using `kebab-case` keys.
 
   ### Multiple animations on the same element
 

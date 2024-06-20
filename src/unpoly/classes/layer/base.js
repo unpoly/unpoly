@@ -826,7 +826,7 @@ up.Layer = class Layer extends up.Record {
     An object of CSS properties that will be set as the inline style
     of the created element.
 
-    The given object may use kebab-case or camelCase keys.
+    The given object must use kebab-case keys.
   @experimental
   */
   affix(...args) {

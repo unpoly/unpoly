@@ -445,7 +445,7 @@ up.element = (function() {
     The [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML) of the created element.
   @param {Object|string} [attrs.style]
     An object of CSS properties that will be set as the inline style
-    of the created element. The given object may use kebab-case or camelCase keys.
+    of the created element. The given object must use kebab-case keys.
 
     You may also pass a string with semicolon-separated styles.
 
@@ -657,7 +657,7 @@ up.element = (function() {
     An object of CSS properties that will be set as the inline style
     of the created element.
 
-    The given object may use kebab-case or camelCase keys.
+    The given object must use kebab-case keys.
   @return {Element}
     The created element.
   @stable
@@ -1152,7 +1152,7 @@ up.element = (function() {
   @function up.element.style
   @param {Element} element
   @param {string|Array} propOrProps
-    One or more CSS property names in kebab-case or camelCase.
+    One or more CSS property names in kebab-case.
   @return {string|Object}
   @stable
   */
@@ -1185,7 +1185,7 @@ up.element = (function() {
   @function up.element.styleNumber
   @param {Element} element
   @param {string} prop
-    A single property name in kebab-case or camelCase.
+    A single property name in kebab-case.
   @return {number|undefined|NaN}
   @stable
   */
@@ -1206,7 +1206,7 @@ up.element = (function() {
   @function up.element.inlineStyle
   @param {Element} element
   @param {string|Array} propOrProps
-    One or more CSS property names in kebab-case or camelCase.
+    One or more CSS property names in kebab-case.
   @return {string|Object}
   @internal
   */
@@ -1231,7 +1231,7 @@ up.element = (function() {
   @function up.element.setStyle
   @param {Element} element
   @param {Object} props
-    One or more CSS properties with kebab-case keys or camelCase keys.
+    One or more CSS properties with kebab-case keys.
   @stable
   */
   function setInlineStyle(element, props, unit = '') {
