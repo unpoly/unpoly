@@ -7,9 +7,9 @@ describe 'up.Layer.OverlayWithTether', ->
 
     it 'dismisses the overlay when its viewport has been removed', asyncSpec (next) ->
       viewport = fixture('.viewport', style: {
-        width: 300,
-        height: 200,
-        overflowY: 'scroll'
+        'width': '300px',
+        'height': '200px',
+        'overflow-y': 'scroll'
       })
       opener = e.affix(viewport, '.opener')
       up.layer.open(origin: opener, mode: 'popup', animation: false)

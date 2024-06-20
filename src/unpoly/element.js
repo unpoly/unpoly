@@ -829,7 +829,7 @@ up.element = (function() {
   @internal
   */
   function concludeCSSTransition(element) {
-    const undo = setTemporaryStyle(element, {transition: 'none'})
+    const undo = setTemporaryStyle(element, { transition: 'none' })
     // Browsers need to paint at least one frame without a transition to stop the
     // animation. In theory we could just wait until the next paint, but in case
     // someone will set another transition after us, let's force a repaint here.
@@ -841,19 +841,13 @@ up.element = (function() {
   Returns whether the given element has a CSS transition set.
 
   @function up.element.hasCSSTransition
+  @param {Object} styleHash
   @return {boolean}
   @internal
   */
-  function hasCSSTransition(elementOrStyleHash) {
-    let styleHash
-    if (u.isOptions(elementOrStyleHash)) {
-      styleHash = elementOrStyleHash
-    } else {
-      styleHash = computedStyle(elementOrStyleHash)
-    }
-
-    const prop = styleHash.transitionProperty
-    const duration = styleHash.transitionDuration
+  function hasCSSTransition(styleHash) {
+    const prop = styleHash['transition-property']
+    const duration = styleHash['transition-duration']
     // The default transition for elements is actually "all 0s ease 0s"
     // instead of "none", although that has the same effect as "none".
     const noTransition = ((prop === 'none') || ((prop === 'all') && (duration === 0)))
@@ -873,8 +867,8 @@ up.element = (function() {
     const offsetParentRect = element.offsetParent.getBoundingClientRect()
 
     setInlineStyle(element, {
-      left: elementRectAsFixed.left - computedStyleNumber(element, 'margin-left') - offsetParentRect.left,
-      top: elementRectAsFixed.top - computedStyleNumber(element, 'margin-top') - offsetParentRect.top,
+      left: (elementRectAsFixed.left - computedStyleNumber(element, 'margin-left') - offsetParentRect.left) + 'px',
+      top: (elementRectAsFixed.top - computedStyleNumber(element, 'margin-top') - offsetParentRect.top) + 'px',
       right: '',
       bottom: ''
     })
@@ -1121,6 +1115,8 @@ up.element = (function() {
   @internal
   */
   function setTemporaryStyle(element, newStyles) {
+    ensureKebabProps(newStyles)
+
     const oldStyles = inlineStyle(element, Object.keys(newStyles))
     setInlineStyle(element, newStyles)
     return () => setInlineStyle(element, oldStyles)
@@ -1135,17 +1131,23 @@ up.element = (function() {
   Receives [computed CSS styles](https://developer.mozilla.org/en-US/docs/Web/API/Window/getComputedStyle)
   for the given element.
 
+  If a property is not set, it will be returned as an empty string.
+
   ### Examples
 
   When requesting a single CSS property, its value will be returned as a string:
 
-      value = up.element.style(element, 'font-size')
-      // value is '16px'
+  ```js
+  let value = up.element.style(element, 'font-size')
+  // value is '16px'
+  ```
 
   When requesting multiple CSS properties, the function returns an object of property names and values:
 
-      value = up.element.style(element, ['font-size', 'margin-top'])
-      // value is { 'font-size': '16px', 'margin-top': '10px' }
+  ```js
+  let value = up.element.style(element, ['font-size', 'margin-top'])
+  // value is { 'font-size': '16px', 'margin-top': '10px' }
+  ```
 
   @function up.element.style
   @param {Element} element
@@ -1155,6 +1157,8 @@ up.element = (function() {
   @stable
   */
   function computedStyle(element, props) {
+    ensureKebabProps(props)
+
     const style = window.getComputedStyle(element)
     return extractFromStyleObject(style, props)
   }
@@ -1166,35 +1170,38 @@ up.element = (function() {
   The value is casted by removing the property's [unit](https://www.w3schools.com/cssref/css_units.asp) (which is usually `px` for computed properties).
   The result is then parsed as a floating point number.
 
-  Returns `undefined` if the property value is missing, or if it cannot
-  be parsed as a number.
+  Returns `undefined` if the property value is missing. Returns `NaN` if the value cannot parsed as a number.
 
   ### Examples
 
-  When requesting a single CSS property, its value will be returned as a string:
+  ```js
+  let value = up.element.style(element, 'font-size')
+  // value is '16px'
 
-      value = up.element.style(element, 'font-size')
-      // value is '16px'
-
-      value = up.element.styleNumber(element, 'font-size')
-      // value is 16
+  let value = up.element.styleNumber(element, 'font-size')
+  // value is 16
+  ```
 
   @function up.element.styleNumber
   @param {Element} element
   @param {string} prop
     A single property name in kebab-case or camelCase.
-  @return {number|undefined}
+  @return {number|undefined|NaN}
   @stable
   */
   function computedStyleNumber(element, prop) {
+    ensureKebabProps(prop)
+
     const rawValue = computedStyle(element, prop)
-    if (u.isGiven(rawValue)) {
+    if (u.isPresent(rawValue)) {
       return parseFloat(rawValue)
     }
   }
 
   /*-
   Gets the given inline style(s) from the given element's `[style]` attribute.
+
+  If a property is not set, it will be returned as an empty string.
 
   @function up.element.inlineStyle
   @param {Element} element
@@ -1204,15 +1211,17 @@ up.element = (function() {
   @internal
   */
   function inlineStyle(element, props) {
+    ensureKebabProps(props)
+
     const { style } = element
     return extractFromStyleObject(style, props)
   }
 
   function extractFromStyleObject(style, keyOrKeys) {
     if (u.isString(keyOrKeys)) {
-      return style[keyOrKeys]
+      return style.getPropertyValue(keyOrKeys)
     } else { // array
-      return u.pick(style, keyOrKeys)
+      return u.mapObject(keyOrKeys, (key) => [key, style.getPropertyValue(key)])
     }
   }
 
@@ -1223,54 +1232,104 @@ up.element = (function() {
   @param {Element} element
   @param {Object} props
     One or more CSS properties with kebab-case keys or camelCase keys.
-  @return {string|Object}
   @stable
   */
-  function setInlineStyle(element, props) {
+  function setInlineStyle(element, props, unit = '') {
+    ensureKebabProps(props)
+    if (!unit) ensureUnits(props)
+
     if (u.isString(props)) {
       element.setAttribute('style', props)
     } else {
       const { style } = element
       for (let key in props) {
         let value = props[key]
-        value = normalizeStyleValueForWrite(key, value)
-        style[key] = value
+        // value = normalizeStyleValueForWrite(key, value)
+        style.setProperty(key, value + unit)
       }
     }
   }
 
-  function normalizeStyleValueForWrite(key, value) {
-    if (u.isMissing(value)) {
-      value = ''
-    } else if (CSS_LENGTH_PROPS.has(key.toLowerCase().replace(/-/, ''))) {
-      value = cssLength(value)
+  // TODO: Extract to up.migrate
+  function ensureKebabProps(props) {
+    if (u.isString(props)) {
+      ensureKebabProp(props)
+    } else if (u.isArray(props)) {
+      props.forEach(ensureKebabProp)
+    } else if (u.isObject(props)) {
+      Object.keys(props).forEach(ensureKebabProp)
     }
-    return value
   }
 
-  const CSS_LENGTH_PROPS = new Set([
+  // TODO: Extract to up.migrate
+  function ensureKebabProp(prop) {
+    if (/[A-Z]/.test(prop)) {
+      throw new Error(`up.element functions require CSS property names in kebab-case, but got camelCase ("${prop}")`)
+    }
+  }
+
+  const CSS_LENGTH_PROPS = [
     'top', 'right', 'bottom', 'left',
-    'padding', 'paddingtop', 'paddingright', 'paddingbottom', 'paddingleft',
-    'margin', 'margintop', 'marginright', 'marginbottom', 'marginleft',
-    'borderwidth', 'bordertopwidth', 'borderrightwidth', 'borderbottomwidth', 'borderleftwidth',
+    'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
+    'margin', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
+    'border-width', 'border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width',
     'width', 'height',
-    'maxwidth', 'maxheight',
-    'minwidth', 'minheight',
-  ])
+    'max-width', 'max-height',
+    'min-width', 'min-height',
+  ]
 
-  /*-
-  Converts the given value to a CSS length value, adding a `px` unit if required.
-
-  @function cssLength
-  @internal
-  */
-  function cssLength(obj) {
-    if (u.isNumber(obj) || (u.isString(obj) && /^\d+$/.test(obj))) {
-      return obj.toString() + "px"
-    } else {
-      return obj
+  function ensureUnits(props) {
+    for (let key in props) {
+      let value = props[key]
+      if (CSS_LENGTH_PROPS.includes(key) && /^[\d.]+$/.test(value)) {
+        throw new Error(`Unpoly requires CSS lengths to have a unit, but got "${key}: ${value}". Use "${key}: ${value}px" instead.`)
+      }
     }
   }
+
+  // function normalizeStyleValueForWrite(key, value) {
+  //   if (u.isMissing(value)) {
+  //     value = ''
+  //   } else if (CSS_LENGTH_PROPS.has(key.toLowerCase().replace(/-/, ''))) {
+  //     value = cssLength(value)
+  //   }
+  //   return value
+  // }
+  //
+  // let key = 'foo'
+  //
+  // let p1 = /(min-|max-|)(width|height)/
+  // let p2 = /border(-top|-right|-bottom|-left|)-width/
+  // let p3 = /(margin|padding)(-top|-right|-bottom|-left|)/
+  // let p4 = /(top|right|bottom|left)/
+  //
+  //
+  //
+  // const CSS_LENGTH_PROPS = new Set([
+  //   'top', 'right', 'bottom', 'left',
+  //   'padding', 'paddingtop', 'paddingright', 'paddingbottom', 'paddingleft',
+  //   'margin', 'margintop', 'marginright', 'marginbottom', 'marginleft',
+  //
+  //   'borderwidth', 'bordertopwidth', 'borderrightwidth', 'borderbottomwidth', 'borderleftwidth',
+  //
+  //   'width', 'height',
+  //   'maxwidth', 'maxheight',
+  //   'minwidth', 'minheight',
+  // ])
+  //
+  // /*-
+  // Converts the given value to a CSS length value, adding a `px` unit if required.
+  //
+  // @function cssLength
+  // @internal
+  // */
+  // function cssLength(obj) {
+  //   if (u.isNumber(obj) || (u.isString(obj) && /^\d+$/.test(obj))) {
+  //     return obj.toString() + "px"
+  //   } else {
+  //     return obj
+  //   }
+  // }
 
   /*-
   Returns whether the given element is currently visible.

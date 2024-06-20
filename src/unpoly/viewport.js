@@ -725,7 +725,7 @@ up.viewport = (function() {
     const moveBounds = function(diffX, diffY) {
       boundsRect.left += diffX
       boundsRect.top += diffY
-      return e.setStyle(bounds, boundsRect)
+      return e.setStyle(bounds, boundsRect, 'px')
     }
 
     // Position the bounds initially

@@ -486,11 +486,6 @@ describe 'up.element', ->
       expect(element.getAttribute('foo')).toEqual('one')
       expect(element.getAttribute('bar')).toEqual('two')
 
-    it 'sets inline styles from a { style } object with camelCase keys', ->
-      element = up.element.createFromSelector('div', style: { fontSize: '100px', marginTop: '200px' })
-      expect(element.style.fontSize).toEqual('100px')
-      expect(element.style.marginTop).toEqual('200px')
-
     it 'sets inline styles from a { style } object with kebab-case keys', ->
       element = up.element.createFromSelector('div', style: { 'font-size': '100px', 'margin-top': '200px' })
       expect(element.style.fontSize).toEqual('100px')
@@ -907,10 +902,47 @@ describe 'up.element', ->
 
     it "does not restore inherited styles", ->
       div = fixture('div[class="red-background"]')
-      restore = up.element.setTemporaryStyle(div, { backgroundColor: 'blue' })
+      restore = up.element.setTemporaryStyle(div, { 'background-color': 'blue' })
       expect(div.getAttribute('style')).toContain('background-color: blue')
       restore()
       expect(div.getAttribute('style')).not.toContain('background-color')
+
+    it "sets and restores the given custom properties as inline styles", ->
+      div = fixture('div')
+      restore = up.element.setTemporaryStyle(div, { '--custom-prop': 'custom-value' })
+
+      expect(div.getAttribute('style')).toContain('--custom-prop: custom-value')
+      expect(div.style.getPropertyValue('--custom-prop')).toBe('custom-value')
+
+      restore()
+
+      expect(div.getAttribute('style')).not.toContain('--custom-prop')
+      expect(div.style.getPropertyValue('--custom-prop')).toBeBlank()
+
+  describe 'up.element.styleNumber()', ->
+
+    it 'returns the computed style for the given element and property, parsed as a number', ->
+      element = fixture('div')
+      element.style.marginRight = '125px'
+
+      expect(up.element.styleNumber(element, 'margin-right')).toBe(125.0)
+
+    it 'returns undefined if the element has no such style', ->
+      element = fixture('div')
+
+      expect(up.element.styleNumber(element, 'unknown-prop')).toBeUndefined()
+
+    it 'an inherited style, parsed as a number', ->
+      container = fixture('div', style: { 'font-size': '40px' })
+      element = up.element.affix(container, 'div')
+
+      expect(up.element.styleNumber(element, 'font-size')).toBe(40.0)
+
+    it 'returns NaN if the style value cannot be parsed as a number', ->
+      element = fixture('div')
+      element.style.fontFamily = 'Arial'
+
+      expect(up.element.styleNumber(element, 'font-family')).toBeNaN()
 
   describe 'up.element.inlineStyle', ->
 
@@ -918,9 +950,9 @@ describe 'up.element', ->
 
       it 'returns a CSS value string from an inline [style] attribute', ->
         div = $fixture('div').attr('style', 'background-color: #ff0000')[0]
-        style = up.element.inlineStyle(div, 'backgroundColor')
+        style = up.element.inlineStyle(div, 'background-color')
         # Browsers convert colors to rgb() values, even IE11
-        expect(style).toEqual('rgb(255, 0, 0)')
+        expect(style).toBe('rgb(255, 0, 0)')
 
       it 'returns a blank value if the element does not have the given property in the [style] attribute', ->
         div = $fixture('div').attr('style', 'background-color: red')[0]
@@ -929,39 +961,54 @@ describe 'up.element', ->
 
       it 'returns a blank value the given property is a computed property, but not in the [style] attribute', ->
         div = $fixture('div[class="red-background"]')[0]
-        inlineStyle = up.element.inlineStyle(div, 'backgroundColor')
-        computedStyle = up.element.style(div, 'backgroundColor')
+        inlineStyle = up.element.inlineStyle(div, 'background-color')
+        computedStyle = up.element.style(div, 'background-color')
         expect(computedStyle).toEqual('rgb(255, 0, 0)')
         expect(inlineStyle).toBeBlank()
+
+      it 'returns a custom property from a [style] attribute', ->
+        div = fixture('div')
+        div.setAttribute('style', 'background-color: #ff0000; --custom-property: custom-value;')
+        style = up.element.inlineStyle(div, '--custom-property')
+        expect(style).toBe('custom-value')
 
     describe 'with an array as second argument', ->
 
       it 'returns an object with the given inline [style] properties', ->
         div = $fixture('div').attr('style', 'background-color: #ff0000; color: #0000ff')[0]
-        style = up.element.inlineStyle(div, ['backgroundColor', 'color'])
+        style = up.element.inlineStyle(div, ['background-color', 'color'])
         expect(style).toEqual
-          backgroundColor: 'rgb(255, 0, 0)'
+          'background-color': 'rgb(255, 0, 0)'
           color: 'rgb(0, 0, 255)'
 
       it 'returns blank keys if the element does not have the given property in the [style] attribute', ->
         div = $fixture('div').attr('style', 'background-color: #ff0000')[0]
-        style = up.element.inlineStyle(div, ['backgroundColor', 'color'])
+        style = up.element.inlineStyle(div, ['background-color', 'color'])
         expect(style).toHaveOwnProperty('color')
         expect(style.color).toBeBlank()
 
       it 'returns a blank value the given property is a computed property, but not in the [style] attribute', ->
         div = fixture('div[class="red-background"]')
-        inlineStyleHash = up.element.inlineStyle(div, ['backgroundColor'])
-        computedBackground = up.element.style(div, 'backgroundColor')
+        inlineStyleHash = up.element.inlineStyle(div, ['background-color'])
+        computedBackground = up.element.style(div, 'background-color')
         expect(computedBackground).toEqual('rgb(255, 0, 0)')
-        expect(inlineStyleHash).toHaveOwnProperty('backgroundColor')
-        expect(inlineStyleHash.backgroundColor).toBeBlank()
+        expect(inlineStyleHash).toHaveOwnProperty('background-color')
+        expect(inlineStyleHash['background-color']).toBeBlank()
+
+      it 'supports custom properties', ->
+        div = fixture('div')
+        div.setAttribute('style', 'background-color: #ff0000; --custom-property: custom-value; color: #00ff00;')
+        style = up.element.inlineStyle(div, ['--custom-property', 'color'])
+        expect(style).toEqual({
+          '--custom-property': 'custom-value',
+          'color': 'rgb(0, 255, 0)',
+        })
 
   describe 'up.element.setStyle', ->
 
     it "sets the given style properties as the given element's [style] attribute", ->
       div = fixture('div')
-      up.element.setStyle(div, { color: 'red', 'background-color': 'blue' })
+      up.element.setStyle(div, { 'color': 'red', 'background-color': 'blue' })
       style = div.getAttribute('style')
       expect(style).toContain('color: red')
       expect(style).toContain('background-color: blue')
@@ -973,51 +1020,62 @@ describe 'up.element', ->
       expect(style).toContain('color: red')
       expect(style).toContain('background-color: blue')
 
-    it "converts the values of known length properties to px values automatically (with kebab-case)", ->
-      div = fixture('div')
-      up.element.setStyle(div, { 'padding-top': 100 })
-      style = div.getAttribute('style')
-      expect(style).toContain('padding-top: 100px')
+#    it "converts the values of known length properties to px values automatically (with kebab-case)", ->
+#      div = fixture('div')
+#      up.element.setStyle(div, { 'padding-top': 100 })
+#      style = div.getAttribute('style')
+#      expect(style).toContain('padding-top: 100px')
+#
+#    it "converts the values of known length properties to px values automatically (with camelCase)", ->
+#      div = fixture('div')
+#      up.element.setStyle(div, { 'paddingTop': 100 })
+#      style = div.getAttribute('style')
+#      expect(style).toContain('padding-top: 100px')
 
-    it "converts the values of known length properties to px values automatically (with camelCase)", ->
+    it 'sets a custom property', ->
       div = fixture('div')
-      up.element.setStyle(div, { 'paddingTop': 100 })
-      style = div.getAttribute('style')
-      expect(style).toContain('padding-top: 100px')
-
-    it "accepts CSS property names in camelCase", ->
-      div = fixture('div')
-      up.element.setStyle(div, { 'backgroundColor': 'blue' })
-      style = div.getAttribute('style')
-      expect(style).toContain('background-color: blue')
+      up.element.setStyle(div, { '--custom-property': 'custom-value' })
+      expect(div.getAttribute('style')).toContain('--custom-property: custom-value')
+      expect(div.style.getPropertyValue('--custom-property')).toBe('custom-value')
 
   describe 'up.element.style', ->
 
-    it 'returns the computed style for the given CSS property in kebab-case', ->
+    it 'returns the computed style for the given CSS property', ->
       div = fixture('div')
       div.style.paddingTop = '10px'
       value = up.element.style(div, 'padding-top')
       expect(value).toEqual('10px')
 
-    it 'returns the computed style for the given CSS property in camelCase', ->
+    it 'returns an empty string if the element has no such property (like getPropertyValue())', ->
       div = fixture('div')
-      div.style.paddingTop = '10px'
-      value = up.element.style(div, 'paddingTop')
-      expect(value).toEqual('10px')
+      value = up.element.style(div, 'missing-property')
+      expect(value).toBe('')
 
-    it 'returns the computed style for multiple CSS properties in kebab-case', ->
+    it 'returns the computed style for the given custom property', ->
       div = fixture('div')
-      div.style.paddingTop = '10px'
-      div.style.paddingBottom = '20px'
-      value = up.element.style(div, ['padding-top', 'padding-bottom'])
-      expect(value).toEqual { 'padding-top': '10px', 'padding-bottom': '20px' }
+      div.setAttribute('style', '--custom-property: custom-value')
+      value = up.element.style(div, '--custom-property')
+      expect(value).toEqual('custom-value')
 
-    it 'returns the computed style for multiple CSS properties in camelCase', ->
-      div = fixture('div')
-      div.style.paddingTop = '10px'
-      div.style.paddingBottom = '20px'
-      value = up.element.style(div, ['paddingTop', 'paddingBottom'])
-      expect(value).toEqual { 'paddingTop': '10px', 'paddingBottom': '20px' }
+    describe 'with an array of multiple property names', ->
+
+      it 'returns the computed styles as an object', ->
+        div = fixture('div')
+        div.setAttribute('style', '--foo-property: foo-value; --bar-property: bar-value;')
+        value = up.element.style(div, ['--foo-property', '--bar-property'])
+        expect(value).toEqual({
+          '--foo-property': 'foo-value',
+          '--bar-property': 'bar-value'
+        })
+
+      it 'returns unset properties as empty strings', ->
+        div = fixture('div')
+        div.style.paddingTop = '10px'
+        value = up.element.style(div, ['padding-top', 'missing-prop'])
+        expect(value).toEqual(
+          'padding-top': '10px',
+          'missing-prop': '',
+        )
 
   describe 'up.element.isVisible', ->
 

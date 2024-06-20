@@ -442,13 +442,15 @@ up.Layer = class Layer extends up.Record {
 
   ### Example
 
-      let rootLayer = up.layer.root
-      let overlay = await up.layer.open()
+  ```js
+  let rootLayer = up.layer.root
+  let overlay = await up.layer.open()
 
-      rootLayer.on('foo', (event) => console.log('Listener called'))
+  rootLayer.on('foo', (event) => console.log('Listener called'))
 
-      rootLayer.emit('foo') // logs "Listener called"
-      overlay.emit('foo')   // listener is not called
+  rootLayer.emit('foo') // logs "Listener called"
+  overlay.emit('foo')   // listener is not called
+  ```
 
   ### Most Unpoly events have a layer reference
 
@@ -457,16 +459,18 @@ up.Layer = class Layer extends up.Record {
 
   E.g. to listen to all [requests](/up.request) originating from a given layer:
 
-      let rootLayer = up.layer.root
-      let rootLink = rootLayer.affix('a[href=/foo]')
+  ```js
+  let rootLayer = up.layer.root
+  let rootLink = rootLayer.affix('a[href=/foo]')
 
-      let overlay = await up.layer.open()
-      let overlayLink = overlay.affix('a[href=/bar]')
+  let overlay = await up.layer.open()
+  let overlayLink = overlay.affix('a[href=/bar]')
 
-      rootLayer.on('up:request:load', (event) => console.log('Listener called'))
+  rootLayer.on('up:request:load', (event) => console.log('Listener called'))
 
-      up.follow(rootLink)    // logs "Listener called"
-      up.follow(overlayLink) // listener is not called
+  up.follow(rootLink)    // logs "Listener called"
+  up.follow(overlayLink) // listener is not called
+  ```
 
   @function up.Layer#on
 

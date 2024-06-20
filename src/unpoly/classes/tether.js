@@ -52,10 +52,10 @@ up.Tether = class Tether {
     const elementBox = this._element.getBoundingClientRect()
 
     const elementMargin = {
-      top:    e.styleNumber(this._element, 'marginTop'),
-      right:  e.styleNumber(this._element, 'marginRight'),
-      bottom: e.styleNumber(this._element, 'marginBottom'),
-      left:   e.styleNumber(this._element, 'marginLeft')
+      top:    e.styleNumber(this._element, 'margin-top'),
+      right:  e.styleNumber(this._element, 'margin-right'),
+      bottom: e.styleNumber(this._element, 'margin-bottom'),
+      left:   e.styleNumber(this._element, 'margin-left')
     }
 
     const anchorBox = this._anchor.getBoundingClientRect()
@@ -168,6 +168,6 @@ up.Tether = class Tether {
   _setOffset(left, top) {
     this.offsetLeft = left
     this.offsetTop = top
-    e.setStyle(this._element, { left, top })
+    e.setStyle(this._element, { left, top }, 'px')
   }
 }

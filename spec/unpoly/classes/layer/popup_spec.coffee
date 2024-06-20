@@ -13,12 +13,12 @@ describe 'up.Layer.Popup', ->
 
     openPopup = (popupOptions = {}) ->
       origin = fixture('.origin', style: {
-        position: 'absolute',
-        left: 30,
-        width: 50,
-        top: 70,
-        height: 20,
-        backgroundColor: 'red'
+        'position': 'absolute',
+        'left': '30px',
+        'width': '50px',
+        'top': '70px',
+        'height': '20px',
+        'background-color': 'red'
       })
 
       popupOptions = u.options(popupOptions, mode: 'popup', origin: origin, content: 'popup content')

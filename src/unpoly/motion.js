@@ -237,6 +237,13 @@ up.motion = (function() {
   @internal
   */
   function animateNow(element, lastFrame, options) {
+    // TODO: Extract to up.migrate
+    for (let key of Object.keys(lastFrame)) {
+      if (/[A-Z]/.test(key)) {
+        throw new Error(`Animation frames must be in kebab-case, but got camelCase ("${key}")`)
+      }
+    }
+
     options = { ...options, finishEvent: motionController.finishEvent }
     const cssTransition = new up.CSSTransition(element, lastFrame, options)
     return cssTransition.start()
@@ -631,7 +638,7 @@ up.motion = (function() {
   }
 
   function noTranslateCSS() {
-    return { transform: null }
+    return { transform: '' }
   }
 
   function untranslatedBox(element) {

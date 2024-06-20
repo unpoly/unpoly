@@ -413,9 +413,9 @@ describe 'up.viewport', ->
         it 'ignores a bottom-fixed obstruction that is not visible (bugfix)', asyncSpec (next) ->
           bottomNav = fixture('[up-fixed=bottom]', style: {
             position: 'fixed'
-            bottom: '0'
-            left: '0'
-            right: '0'
+            bottom: '0px'
+            left: '0px'
+            right: '0px'
             height: '100px'
             display: 'none'
           })
@@ -594,7 +594,7 @@ describe 'up.viewport', ->
       describe 'with { behavior: "smooth" }', ->
 
         it 'animates the scroll motion', (done) ->
-          fixture('.between', text: 'between', style: { height: 20000 })
+          fixture('.between', text: 'between', style: { height: '20000px' })
           destination = fixture('.destination', text: 'destination')
 
           expect(document.scrollingElement.scrollTop).toBe(0)
@@ -609,9 +609,9 @@ describe 'up.viewport', ->
       describe 'without a { behavior } option', ->
 
         it 'defaults to { behavior: "instant" } to ignore a scroll-behavior set in CSS', ->
-          viewport = fixture('#viewport[up-viewport]', style: { height: '100px', overflowY: 'scroll' })
-          before = e.affix(viewport, '#before', style: { height: 20000 })
-          target = e.affix(viewport, '#target', style: { height: 10 })
+          viewport = fixture('#viewport[up-viewport]', style: { 'height': '100px', 'overflow-y': 'scroll' })
+          before = e.affix(viewport, '#before', style: { 'height': '20000px' })
+          target = e.affix(viewport, '#target', style: { 'height': '10px' })
 
           spyOn(viewport, 'scrollTo')
 
@@ -905,7 +905,7 @@ describe 'up.viewport', ->
         location.hash = ''
         highElement = fixture('.high', style: { height: '10000px' }) # ensure we can scroll
         element = fixture('#element', text: 'content', style: { position: 'absolute', top: '5000px' })
-        obstruction = fixture('.obstruction[up-fixed=top]', text: 'obstructions', style: { position: 'fixed', top: '0', height: '30px', backgroundColor: 'blue' })
+        obstruction = fixture('.obstruction[up-fixed=top]', text: 'obstructions', style: { 'position': 'fixed', 'top': '0px', 'height': '30px', 'background-color': 'blue' })
         location.hash = "#element"
         next ->
           expect(up.viewport.root.scrollTop).toBe(5000 - 30)

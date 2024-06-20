@@ -5605,8 +5605,8 @@ describe 'up.fragment', ->
             'height': '200px'
             'overflow-y': 'scroll'
             'position': 'fixed'
-            'left': 0,
-            'top': 0
+            'left': '0px',
+            'top': '0px',
           $element = $fixture('.element').appendTo($container).css(height: '600px')
 
           $container.scrollTop(300)
@@ -8821,8 +8821,8 @@ describe 'up.fragment', ->
         it 'keeps the scroll position of an [up-viewport] within a kept element', ->
           container = fixture('.container')
           keepable = e.affix(container, '.keepable[up-keep]')
-          viewport = e.affix(keepable, '.viewport[up-viewport]', style: { height: '100px', overflowY: 'scroll' })
-          viewportContent = e.affix(viewport, '.viewport-content', style: { height: '500px' })
+          viewport = e.affix(keepable, '.viewport[up-viewport]', style: { 'height': '100px', 'overflow-y': 'scroll' })
+          viewportContent = e.affix(viewport, '.viewport-content', style: { 'height': '500px' })
           unkeeptSibling = e.affix(container, '.other', text: 'old other text')
 
           viewport.scrollTop = 100

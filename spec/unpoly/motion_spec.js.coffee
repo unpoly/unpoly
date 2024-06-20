@@ -146,7 +146,7 @@ describe 'up.motion', ->
         it 'does not leave a `transform` CSS property once the animation finishes, as to not affect the positioning of child elements', ->
           element = fixture('.element')
 
-          await up.animate(element, 'move-from-left', { duration: 10 })
+          await up.animate(element, 'move-from-left', { duration: 50 })
 
           expect(element.style.transform).toBeBlank()
 
