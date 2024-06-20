@@ -201,3 +201,4 @@ up.element.isDetached = function(element) {
   up.migrate.deprecated('up.element.isDetached()', '!document.contains(element)')
   return !up.element.isAttached(element)
 }
+

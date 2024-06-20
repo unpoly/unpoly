@@ -4748,7 +4748,7 @@ describe 'up.fragment', ->
         if up.migrate.loaded
           it "warns if an auto-update meta tags is also [up-hungry]", ->
             e.affix(document.head, 'link[rel="canonical"][href="/old-canonical"][up-hungry]')
-            warnSpy = spyOn(up.migrate, 'warn')
+            warnSpy = up.migrate.warn.mock()
 
             fixture('.container', text: 'old container text')
             up.render('.container', url: '/path', history: true)
@@ -9286,7 +9286,7 @@ describe 'up.fragment', ->
             expect(document.querySelector('#player').dataset.tag).toBe('2')
 
           it 'does not print a deprecation warning for [up-keep=true]', ->
-            warnSpy = spyOn(up.migrate, 'warn')
+            warnSpy = up.migrate.warn.mock()
 
             container = htmlFixture """
               <div class='container'>

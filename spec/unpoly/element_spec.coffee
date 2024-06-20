@@ -486,28 +486,50 @@ describe 'up.element', ->
       expect(element.getAttribute('foo')).toEqual('one')
       expect(element.getAttribute('bar')).toEqual('two')
 
-    it 'sets inline styles from a { style } object with kebab-case keys', ->
-      element = up.element.createFromSelector('div', style: { 'font-size': '100px', 'margin-top': '200px' })
-      expect(element.style.fontSize).toEqual('100px')
-      expect(element.style.marginTop).toEqual('200px')
-
-    it 'sets inline styles from a { style } string with semicolon-separated styles', ->
-      element = up.element.createFromSelector('div', style: 'font-size: 100px; margin-top: 200px')
-      expect(element.style.fontSize).toEqual('100px')
-      expect(element.style.marginTop).toEqual('200px')
-
     it 'adds an addition class from a { class } option', ->
       element = up.element.createFromSelector('.foo', class: 'bar')
       expect(element).toHaveClass('foo')
       expect(element).toHaveClass('bar')
 
-    it 'sets the element text from a { text } option', ->
-      element = up.element.createFromSelector('.foo', text: 'text')
-      expect(element).toHaveText('text')
+    describe 'with { style } option', ->
 
-    it 'escapes HTML from a { text } option', ->
-      element = up.element.createFromSelector('.foo', text: '<script>alert("foo")</script>')
-      expect(element).toHaveText('<script>alert("foo")</script>')
+      it 'sets inline styles from a { style } object with kebab-case keys', ->
+        element = up.element.createFromSelector('div', style: { 'font-size': '100px', 'margin-top': '200px' })
+        expect(element.style.fontSize).toEqual('100px')
+        expect(element.style.marginTop).toEqual('200px')
+
+      it 'sets inline styles from a { style } string with semicolon-separated styles', ->
+        element = up.element.createFromSelector('div', style: 'font-size: 100px; margin-top: 200px')
+        expect(element.style.fontSize).toEqual('100px')
+        expect(element.style.marginTop).toEqual('200px')
+
+      if up.migrate.loaded
+        it 'sets inline styles from a { style } object with camelCase keys', ->
+          warnSpy = up.migrate.warn.mock()
+          element = up.element.createFromSelector('div', style: { fontSize: '100px', marginTop: '200px' })
+
+          expect(element.style.fontSize).toEqual('100px')
+          expect(element.style.marginTop).toEqual('200px')
+          expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('CSS property names must be in kebab-case'))
+
+        it 'adds a px unit to unit-less length properties', ->
+          warnSpy = up.migrate.warn.mock()
+          element = up.element.createFromSelector('div', style: { 'height': '100', 'margin-top': '200' })
+
+          expect(element.style.height).toEqual('100px')
+          expect(element.style.marginTop).toEqual('200px')
+          expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('CSS length values must have a unit'))
+
+    describe 'with { text } option', ->
+
+      it 'sets the element text from a { text } option', ->
+        element = up.element.createFromSelector('.foo', text: 'text')
+        expect(element).toHaveText('text')
+
+      it 'escapes HTML from a { text } option', ->
+        element = up.element.createFromSelector('.foo', text: '<script>alert("foo")</script>')
+        expect(element).toHaveText('<script>alert("foo")</script>')
+
 
   describe 'up.element.affix()', ->
 
@@ -944,6 +966,15 @@ describe 'up.element', ->
 
       expect(up.element.styleNumber(element, 'font-family')).toBeNaN()
 
+    if up.migrate.loaded
+      it 'returns the computed style for a property in camel-case', ->
+        warnSpy = up.migrate.warn.mock()
+        element = fixture('div')
+        element.style.marginRight = '125px'
+
+        expect(up.element.styleNumber(element, 'marginRight')).toBe(125.0)
+        expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('CSS property names must be in kebab-case'))
+
   describe 'up.element.inlineStyle', ->
 
     describe 'with a string as second argument', ->
@@ -1020,17 +1051,36 @@ describe 'up.element', ->
       expect(style).toContain('color: red')
       expect(style).toContain('background-color: blue')
 
-#    it "converts the values of known length properties to px values automatically (with kebab-case)", ->
-#      div = fixture('div')
-#      up.element.setStyle(div, { 'padding-top': 100 })
-#      style = div.getAttribute('style')
-#      expect(style).toContain('padding-top: 100px')
-#
-#    it "converts the values of known length properties to px values automatically (with camelCase)", ->
-#      div = fixture('div')
-#      up.element.setStyle(div, { 'paddingTop': 100 })
-#      style = div.getAttribute('style')
-#      expect(style).toContain('padding-top: 100px')
+    if up.migrate.loaded
+      it 'sets the given style properties in camelCase', ->
+        warnSpy = up.migrate.warn.mock()
+        div = fixture('div')
+        up.element.setStyle(div, { fontFamily: 'Roboto', backgroundColor: 'blue' })
+
+        style = div.getAttribute('style')
+        expect(style).toContain('font-family: Roboto')
+        expect(style).toContain('background-color: blue')
+        expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('CSS property names must be in kebab-case'))
+
+      it "converts the values of known length properties to px values automatically (with kebab-case)", ->
+        warnSpy = up.migrate.warn.mock()
+        div = fixture('div')
+        up.element.setStyle(div, { 'padding-top': 100 })
+
+        style = div.getAttribute('style')
+        expect(style).toContain('padding-top: 100px')
+
+        expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('CSS length values must have a unit'))
+
+      it "converts the values of known length properties to px values automatically (with camelCase)", ->
+        warnSpy = up.migrate.warn.mock()
+        div = fixture('div')
+        up.element.setStyle(div, { 'paddingTop': 100 })
+
+        style = div.getAttribute('style')
+        expect(style).toContain('padding-top: 100px')
+
+        expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('CSS length values must have a unit'))
 
     it 'sets a custom property', ->
       div = fixture('div')
@@ -1056,6 +1106,17 @@ describe 'up.element', ->
       div.setAttribute('style', '--custom-property: custom-value')
       value = up.element.style(div, '--custom-property')
       expect(value).toEqual('custom-value')
+
+    if up.migrate.loaded
+      it 'returns the computed style for a CSS property given in camelCase', ->
+        warnSpy = up.migrate.warn.mock()
+        div = fixture('div')
+        div.style.paddingTop = '10px'
+
+        value = up.element.style(div, 'paddingTop')
+        expect(value).toEqual('10px')
+
+        expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('CSS property names must be in kebab-case'))
 
     describe 'with an array of multiple property names', ->
 

@@ -102,7 +102,7 @@ if (up.migrate.loaded) {
     describe('up.migrate.renamedPackage()', function() {
 
       it('prints a warning and forwards the call to the new module', function() {
-        const warnSpy = spyOn(up.log, 'warn')
+        const warnSpy = up.migrate.warn.mock()
         const value = up.dom
         expect(warnSpy).toHaveBeenCalled()
         expect(value).toBe(up.fragment)

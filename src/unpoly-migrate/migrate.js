@@ -173,13 +173,13 @@ up.migrate = (function() {
 
   const warnedMessages = {}
 
-  function warn(message, ...args) {
+  const warn = up.mockable((message, ...args) => {
     const formattedMessage = u.sprintf(message, ...args)
     if (!warnedMessages[formattedMessage]) {
       warnedMessages[formattedMessage] = true
       up.log[config.logLevel]('unpoly-migrate', message, ...args)
     }
-  }
+  })
 
   function deprecated(deprecatedExpression, replacementExpression) {
     warn(`${deprecatedExpression} has been deprecated. Use ${replacementExpression} instead.`)
@@ -196,6 +196,54 @@ up.migrate = (function() {
     return promise
   }
 
+  const CSS_LENGTH_PROPS = [
+    'top', 'right', 'bottom', 'left',
+    'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
+    'margin', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
+    'border-width', 'border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width',
+    'width', 'height',
+    'max-width', 'max-height',
+    'min-width', 'min-height',
+  ]
+
+  function fixStylePropName(prop) {
+    if (/[A-Z]/.test(prop)) {
+      warn(`CSS property names must be in kebab-case, but got camelCase "${prop}"`)
+      return u.camelToKebabCase(prop)
+    } else {
+      return prop
+    }
+  }
+
+  function fixStylePropValue(prop, value, unit) {
+    if (!unit && CSS_LENGTH_PROPS.includes(prop) && /^[\d.]+$/.test(value)) {
+      warn(`CSS length values must have a unit, but got "${prop}: ${value}". Use "${prop}: ${value}px" instead.`)
+      return value + "px"
+    } else {
+      return value
+    }
+  }
+
+  function fixStyleProps(arg, unit) {
+    let transformed
+
+    if (u.isString(arg)) {
+      transformed = fixStylePropName(arg)
+    } else if (u.isArray(arg)) {
+      transformed = arg.map(fixStylePropName)
+    } else if (u.isObject(arg)) {
+      transformed = {}
+      for (let name in arg) {
+        let value = arg[name]
+        name = fixStylePropName(name)
+        value = fixStylePropValue(name, value, unit)
+        transformed[name] = value
+      }
+    }
+
+    return transformed
+  }
+
   return {
     deprecated,
     renamedPackage,
@@ -208,6 +256,7 @@ up.migrate = (function() {
     formerlyAsync,
     renamedEvent,
     removedEvent,
+    fixStyleProps,
     fixEventTypes,
     fixKey,
     warn,

@@ -1115,8 +1115,6 @@ up.element = (function() {
   @internal
   */
   function setTemporaryStyle(element, newStyles) {
-    ensureKebabProps(newStyles)
-
     const oldStyles = inlineStyle(element, Object.keys(newStyles))
     setInlineStyle(element, newStyles)
     return () => setInlineStyle(element, oldStyles)
@@ -1157,8 +1155,6 @@ up.element = (function() {
   @stable
   */
   function computedStyle(element, props) {
-    ensureKebabProps(props)
-
     const style = window.getComputedStyle(element)
     return extractFromStyleObject(style, props)
   }
@@ -1190,8 +1186,6 @@ up.element = (function() {
   @stable
   */
   function computedStyleNumber(element, prop) {
-    ensureKebabProps(prop)
-
     const rawValue = computedStyle(element, prop)
     if (u.isPresent(rawValue)) {
       return parseFloat(rawValue)
@@ -1211,13 +1205,13 @@ up.element = (function() {
   @internal
   */
   function inlineStyle(element, props) {
-    ensureKebabProps(props)
-
     const { style } = element
     return extractFromStyleObject(style, props)
   }
 
   function extractFromStyleObject(style, keyOrKeys) {
+    if (up.migrate.loaded) keyOrKeys = up.migrate.fixStyleProps(keyOrKeys)
+
     if (u.isString(keyOrKeys)) {
       return style.getPropertyValue(keyOrKeys)
     } else { // array
@@ -1235,8 +1229,7 @@ up.element = (function() {
   @stable
   */
   function setInlineStyle(element, props, unit = '') {
-    ensureKebabProps(props)
-    if (!unit) ensureUnits(props)
+    if (up.migrate.loaded) props = up.migrate.fixStyleProps(props, unit)
 
     if (u.isString(props)) {
       element.setAttribute('style', props)
@@ -1249,87 +1242,6 @@ up.element = (function() {
       }
     }
   }
-
-  // TODO: Extract to up.migrate
-  function ensureKebabProps(props) {
-    if (u.isString(props)) {
-      ensureKebabProp(props)
-    } else if (u.isArray(props)) {
-      props.forEach(ensureKebabProp)
-    } else if (u.isObject(props)) {
-      Object.keys(props).forEach(ensureKebabProp)
-    }
-  }
-
-  // TODO: Extract to up.migrate
-  function ensureKebabProp(prop) {
-    if (/[A-Z]/.test(prop)) {
-      throw new Error(`up.element functions require CSS property names in kebab-case, but got camelCase ("${prop}")`)
-    }
-  }
-
-  const CSS_LENGTH_PROPS = [
-    'top', 'right', 'bottom', 'left',
-    'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
-    'margin', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
-    'border-width', 'border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width',
-    'width', 'height',
-    'max-width', 'max-height',
-    'min-width', 'min-height',
-  ]
-
-  function ensureUnits(props) {
-    for (let key in props) {
-      let value = props[key]
-      if (CSS_LENGTH_PROPS.includes(key) && /^[\d.]+$/.test(value)) {
-        throw new Error(`Unpoly requires CSS lengths to have a unit, but got "${key}: ${value}". Use "${key}: ${value}px" instead.`)
-      }
-    }
-  }
-
-  // function normalizeStyleValueForWrite(key, value) {
-  //   if (u.isMissing(value)) {
-  //     value = ''
-  //   } else if (CSS_LENGTH_PROPS.has(key.toLowerCase().replace(/-/, ''))) {
-  //     value = cssLength(value)
-  //   }
-  //   return value
-  // }
-  //
-  // let key = 'foo'
-  //
-  // let p1 = /(min-|max-|)(width|height)/
-  // let p2 = /border(-top|-right|-bottom|-left|)-width/
-  // let p3 = /(margin|padding)(-top|-right|-bottom|-left|)/
-  // let p4 = /(top|right|bottom|left)/
-  //
-  //
-  //
-  // const CSS_LENGTH_PROPS = new Set([
-  //   'top', 'right', 'bottom', 'left',
-  //   'padding', 'paddingtop', 'paddingright', 'paddingbottom', 'paddingleft',
-  //   'margin', 'margintop', 'marginright', 'marginbottom', 'marginleft',
-  //
-  //   'borderwidth', 'bordertopwidth', 'borderrightwidth', 'borderbottomwidth', 'borderleftwidth',
-  //
-  //   'width', 'height',
-  //   'maxwidth', 'maxheight',
-  //   'minwidth', 'minheight',
-  // ])
-  //
-  // /*-
-  // Converts the given value to a CSS length value, adding a `px` unit if required.
-  //
-  // @function cssLength
-  // @internal
-  // */
-  // function cssLength(obj) {
-  //   if (u.isNumber(obj) || (u.isString(obj) && /^\d+$/.test(obj))) {
-  //     return obj.toString() + "px"
-  //   } else {
-  //     return obj
-  //   }
-  // }
 
   /*-
   Returns whether the given element is currently visible.

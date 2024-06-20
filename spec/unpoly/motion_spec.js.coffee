@@ -10,17 +10,56 @@ describe 'up.motion', ->
 
     describe 'up.animate()', ->
 
-      it 'animates the given element', (done) ->
-        $element = $fixture('.element').text('content')
-        up.animate($element, 'fade-in', duration: 200, easing: 'linear')
+      it 'animates the given element with a predefined animation', ->
+        element = fixture('.element', text: 'content')
+        up.animate(element, 'fade-in', duration: 200, easing: 'linear')
 
-        u.timer 1, ->
-          expect($element).toHaveOpacity(0.0, 0.15)
-        u.timer 100, ->
-          expect($element).toHaveOpacity(0.5, 0.3)
-        u.timer 260, ->
-          expect($element).toHaveOpacity(1.0, 0.15)
-          done()
+        await wait(1)
+
+        expect(element).toHaveOpacity(0.0, 0.15)
+
+        await wait(100)
+
+        expect(element).toHaveOpacity(0.5, 0.3)
+
+        await wait(260)
+
+        expect(element).toHaveOpacity(1.0, 0.15)
+
+      it 'animates the given element to a frame of kebab-case CSS properties', ->
+        element = fixture('.element', text: 'content', style: { opacity: 0 })
+        up.animate(element, { opacity: 1 }, duration: 200, easing: 'linear')
+
+        await wait(1)
+
+        expect(element).toHaveOpacity(0.0, 0.15)
+
+        await wait(100)
+
+        expect(element).toHaveOpacity(0.5, 0.3)
+
+        await wait(260)
+
+        expect(element).toHaveOpacity(1.0, 0.15)
+
+      if up.migrate.loaded
+        it 'animates the given element to a frame of camelCase CSS properties', ->
+          warnSpy = up.migrate.warn.mock()
+          element = fixture('.element', text: 'content', style: { 'font-size': '0px' })
+          up.animate(element, { fontSize: '100px' }, duration: 200, easing: 'linear')
+
+          await wait(1)
+
+          expect(up.element.styleNumber(element, 'font-size')).toBeAround(0, 15)
+          expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('CSS property names must be in kebab-case'))
+
+          await wait(100)
+
+          expect(up.element.styleNumber(element, 'font-size')).toBeAround(50, 30)
+
+          await wait(260)
+
+          expect(up.element.styleNumber(element, 'font-size')).toBeAround(100, 15)
 
       it 'returns a promise that is fulfilled when the animation has completed', (done) ->
         $element = $fixture('.element').text('content')

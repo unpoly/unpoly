@@ -1413,7 +1413,7 @@ describe 'up.layer', ->
       if up.migrate.loaded
         it 'prints a deprecation warning if the user configured { historyVisible } (which is now { history })', ->
           up.layer.config.overlay.historyVisible = false
-          warnSpy = spyOn(up.log, 'warn')
+          warnSpy = up.migrate.warn.mock()
           up.layer.build(mode: 'drawer')
           expect(warnSpy).toHaveBeenCalled()
 
