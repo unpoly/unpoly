@@ -37,7 +37,8 @@ You can use the loading of deferred placeholders to [implement infinite scrollin
 By setting an `[up-defer="manual"]` attribute, the deferred content will not load on its own:
 
 ```html
-<div up-defer="manual" id="menu">
+<div up-defer="manual" id="menu" up-href="/menu">
+  Loading...
 </div>
 ```
 
