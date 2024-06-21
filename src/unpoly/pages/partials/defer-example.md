@@ -18,7 +18,7 @@ Also set an `[up-href]` attribute with the URL from which to load the deferred c
 </div>
 ```
 
-The placeholder content is not important. It can be empty or a show a pending state.
+The placeholder content can show a pending state while the full content is loading.
 
 When the `[up-defer]` placeholder is rendered, it will immediately make a request to fetch
 its content from `/menu`:

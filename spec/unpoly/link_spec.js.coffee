@@ -3499,7 +3499,7 @@ describe 'up.link', ->
           viewport = fixture('#viewport', style: 'height: 500px; width: 300px; overflow-y: scroll')
           before = e.affix(viewport, '#before', text: 'before', style: 'height: 50000px')
 
-          partial = e.affix(viewport, 'a#slow[up-defer="reveal"][href="/slow-path"]')
+          partial = e.affix(viewport, 'a#slow[up-defer="reveal"][href="/slow-path"]', text: 'label')
           up.hello(partial)
 
           await wait(MUTATION_OBSERVER_LAG)

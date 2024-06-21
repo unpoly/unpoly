@@ -27,6 +27,10 @@ To shift the load timing to an earlier or later moment, set an `[up-intersect-ma
 
 You can use the loading of deferred placeholders to [implement infinite scrolling](/infinite-scrolling) without custom JavaScript.
 
+> [note]
+> Safari requires an `[up-defer="reveal"]` element to have a non-zero width and height to be able to
+> track its scrolling position.
+
 
 ## Custom load timing {#scripted}
 
