@@ -309,11 +309,9 @@ up.history = (function() {
 
     let location = currentLocation()
 
-    if (up.emit('up:location:restore', { location, log: `Restoring location ${location}` }).defaultPrevented) {
-      return
-    }
-
     up.render({
+      guardEvent: up.event.build('up:location:restore', { location, log: `Restoring location ${location}` }),
+
       // The browser has already restored the URL, but hasn't changed content
       // four our synthetic history state. We're now fetching the content for the restored URL.
       url: location,
@@ -338,7 +336,8 @@ up.history = (function() {
 
       // We won't usually have a cache hit for config.restoreTargets ('body')
       // since most earlier cache entries are for a main target. But it doesn't hurt to try.
-      cache: true,
+      cache: 'auto',
+      revalidate: 'auto',
 
       // We already saved view state in onPop()
       saveScroll: false,
@@ -352,27 +351,22 @@ up.history = (function() {
   This event is emitted when the user is [restoring a previous history entry](/restoring-history),
   usually by pressing the back button.
 
-  Listeners may prevent `up:location:restore` and substitute their own restoration behavior:
-
-  ```js
-  up.on('up:location:restore', function(event) {
-    event.preventDefault()
-    document.body.innerText = `Restored content for ${event.location}!`
-  })
-  ```
-
-  Preventing the event will *not* prevent the browser from restoring the URL in the address bar.
-
-  > [important]
-  > Custom restoration code should avoid pushing new history entries.
+  Listeners may prevent `up:location:restore` or mutate `event.renderOptions`
+  to [customize the restoration behavior](/restoring-history#custom-restoration-behavior).
 
   @event up:location:restore
   @param {string} event.location
     The URL for the restored history entry.
+  @param {Object} event.renderOptions
+    An object with [render options](/up.render#parameters) for the render pass
+    that will restore content for this history entry.
+
+    Listeners may inspect and modify these options.
+    Render options cannot stop the browser from restoring the URL in the address bar.
   @param event.preventDefault()
     Prevent Unpoly from restoring content for this history entry.
 
-    Preventing the event will *not* prevent the browser from restoring the URL in the address bar.
+    Preventing the event will *not* stop the browser from restoring the URL in the address bar.
   @stable
   */
 

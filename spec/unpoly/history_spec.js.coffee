@@ -339,29 +339,150 @@ describe 'up.history', ->
         next =>
           expect(destructorSpy).toHaveBeenCalled()
 
-      it 'emits an up:location:restore event that users can prevent and substitute their own restoration logic', asyncSpec (next) ->
-        waitForBrowser = 100
-        main = fixture('main#main', text: 'original content')
-        up.history.config.restoreTargets = [':main']
-        restoreListener = jasmine.createSpy('up:location:restore listener').and.callFake -> main.innerText = 'manually restored content'
-        up.on('up:location:restore', restoreListener)
+      describe 'up:location:restore event', ->
 
-        up.history.push("/page1")
+        it 'emits an up:location:restore event that users can prevent and substitute their own restoration logic', asyncSpec (next) ->
+          waitForBrowser = 100
+          main = fixture('main#main', text: 'original content')
+          up.history.config.restoreTargets = [':main']
+          restoreListener = jasmine.createSpy('up:location:restore listener').and.callFake -> main.innerText = 'manually restored content'
+          up.on('up:location:restore', restoreListener)
 
-        next ->
+          up.history.push("/page1")
+
+          next ->
+            up.history.push("/page2")
+
+          next ->
+            expect(up.history.location).toMatchURL('/page2')
+            expect(restoreListener).not.toHaveBeenCalled()
+
+            history.back()
+
+          next.after waitForBrowser, ->
+            expect(up.history.location).toMatchURL('/page1')
+            expect(restoreListener).toHaveBeenCalled()
+
+            expect(main).toHaveText('manually restored content')
+
+        it 'lets users mutate event.renderOptions to customize the restoration pass', ->
+          waitForBrowser = 100
+          fixture('#main', text: 'original main')
+          fixture('#other', text: 'original other')
+          up.history.config.restoreTargets = ['#main']
+          restoreListener = jasmine.createSpy('up:location:restore listener').and.callFake (event) ->
+            event.renderOptions.target = '#other'
+
+          up.on('up:location:restore', restoreListener)
+
+          up.history.push("/page1")
+
+          await wait()
+
           up.history.push("/page2")
 
-        next ->
+          await wait()
+
           expect(up.history.location).toMatchURL('/page2')
           expect(restoreListener).not.toHaveBeenCalled()
 
           history.back()
 
-        next.after waitForBrowser, ->
+          await wait(waitForBrowser)
+
           expect(up.history.location).toMatchURL('/page1')
           expect(restoreListener).toHaveBeenCalled()
 
-          expect(main).toHaveText('manually restored content')
+          await wait()
+
+          jasmine.respondWith """
+            <div id='container'>
+              <div id='main'>restored main</div>
+              <div id='other'>restored other</div>
+            </div>
+          """
+          await wait()
+
+          expect('#main').toHaveText('original main')
+          expect('#other').toHaveText('restored other')
+
+
+      describe 'caching', ->
+
+        it 'restores a page from cache', ->
+          waitForBrowser = 100
+          fixture('main', text: 'original content')
+          up.history.config.restoreTargets = [':main']
+
+          up.navigate({ target: 'main', url: '/path1' })
+          await wait()
+          jasmine.respondWithSelector('main', text: 'path1 content')
+          await wait()
+
+          expect(up.history.location).toMatchURL('/path1')
+          expect('main').toHaveText('path1 content')
+
+          up.navigate({ target: 'main', url: '/path2' })
+          await wait()
+          jasmine.respondWithSelector('main', text: 'path2 content')
+          await wait()
+
+          expect(up.history.location).toMatchURL('/path2')
+          expect('main').toHaveText('path2 content')
+
+          history.back()
+          await wait(waitForBrowser)
+
+          # History was restored
+          expect(up.history.location).toMatchURL('/path1')
+          expect('main').toHaveText('path1 content')
+          # No additional request was made
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+
+        it 'revalidates expired cache entries after restoration', ->
+          waitForBrowser = 100
+          up.network.config.cacheExpireAge = 1
+          fixture('main', text: 'original content')
+          up.history.config.restoreTargets = [':main']
+
+          up.navigate({ target: 'main', url: '/path1' })
+          await wait()
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          jasmine.respondWithSelector('main', text: 'path1 content')
+          await wait()
+
+          expect(up.history.location).toMatchURL('/path1')
+          expect('main').toHaveText('path1 content')
+
+          up.navigate({ target: 'main', url: '/path2' })
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+
+          jasmine.respondWithSelector('main', text: 'path2 content')
+          await wait()
+
+          expect(up.history.location).toMatchURL('/path2')
+          expect('main').toHaveText('path2 content')
+
+          history.back()
+          await wait(waitForBrowser)
+
+          # History was restored
+          expect(up.history.location).toMatchURL('/path1')
+          expect('main').toHaveText('path1 content')
+          # No additional request was made
+          expect(jasmine.Ajax.requests.count()).toBe(3)
+
+          jasmine.respondWithSelector('main', text: 'revalidated path1 content')
+          await wait()
+
+          expect(up.history.location).toMatchURL('/path1')
+          expect('main').toHaveText('revalidated path1 content')
+          # No additional request was made
+          expect(jasmine.Ajax.requests.count()).toBe(3)
+
 
       describe 'focus restoration', ->
 

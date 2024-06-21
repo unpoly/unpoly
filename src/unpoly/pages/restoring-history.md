@@ -16,16 +16,36 @@ To restore a history entry, Unpoly goes through the following steps:
 
 ## Custom restoration behavior
 
-Listeners may prevent `up:location:restore` and substitute their own restoration behavior:
+Listeners to `up:location:restore` may mutate the `event.renderOptions`
+event to customize the render pass that is about to restore content:
 
 ```js
 up.on('up:location:restore', function(event) {
+  // Update a different fragment when restoring /special-path  
+  if (event.location === '/special-path') {
+    event.renderOptions.target = '#other'
+  }
+})
+```
+
+You may also substitute Unpoly's render pass with your own restoration behavior,
+by preventing `up:location:restore`. This will prevent Unpoly from changing any element.
+Your event handler can then restore the page with your own custom code:
+
+```js
+up.on('up:location:restore', function(event) {
+  // Stop Unpoly from rendering anything
   event.preventDefault()
+  
+  // We will render ourselves
   document.body.innerText = `Restored content for ${event.location}!`
 })
 ```
 
-See `up:location:restore` for details.
+Neither preventing or mutating `up:location:restore` will stop the
+browser from restoring the URL in the address bar.
+
+Custom restoration code should avoid pushing new history entries.
 
 
 ## History restoration with overlays {#overlays}

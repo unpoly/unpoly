@@ -14,6 +14,7 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 
 This release brings many changes that were requested by the [community](/community).
 
+
 Breaking changes can be found with the [Reworked style helpers](#reworked-style-helpers).
 Existing calls are polyfilled by [`unpoly-migrate.js`](/changes/upgrading).
 
@@ -246,6 +247,49 @@ up.on('up:form:submit', function({ form }) {
 })
 ```
 
+### Improvements to history restoration
+
+Several improvements have been made to the way Unpoly handles the browser's "back" button.
+
+
+#### Ensuring fresh content
+
+In earlier versions, when the user pressed the back button, Unpoly would sometimes
+restore the page with stale content.
+
+Starting with 3.8.0, restored content is now [revalidated](/caching#revalidation) with the server.
+This ensures that content is shown with the most recent data.
+
+
+#### Custom restoration behavior
+
+Listeners to `up:location:restore` may now mutate the `event.renderOptions`
+event to customize the render pass that is about to restore content:
+
+```js
+up.on('up:location:restore', function(event) {
+  // Update a different fragment when restoring /special-path  
+  if (event.location === '/special-path') {
+    event.renderOptions.target = '#other'
+  }
+})
+```
+
+As a reminder, you can also completely substitute Unpoly's render pass with your own restoration behavior,
+by preventing `up:location:restore`. This will prevent Unpoly from changing any element.
+Your event handler can then restore the page with your own custom code:
+
+```js
+up.on('up:location:restore', function(event) {
+  // Stop Unpoly from rendering anything
+  event.preventDefault()
+  
+  // We will render ourselves
+  document.body.innerText = `Restored content for ${event.location}!`
+})
+```
+
+
 ### Reworked style helpers
 
 This release reworks all functions that work with CSS properties: 
@@ -289,7 +333,7 @@ up.element.setStyle(div, { 'background-color': 'red' })
 To help with upgrading, [`unpoly-migrate.js`](/changes/upgrading) Unpoly will rename camelCase keys for you.
 
 
-### Length values must have a unit
+#### Length values must have a unit
 
 CSS requires length values (like `width`, `top` or `margin`) to have a unit, e.g. `width: 200px`.
 In earlier versions Unpoly silently added a `px` unit to length values that were missing a unit.
