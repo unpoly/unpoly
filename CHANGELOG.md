@@ -48,6 +48,32 @@ its content from `/menu`. You may also delay the request until the placeholder i
 See [lazy loading content](/lazy-loading) for a full example and more details.
 
 
+
+### Preloading links eagerly or lazily
+
+For many years Unpoly has supported the `[up-preload]` attribute. This would preload a link when the user [hovers](https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseover_event)
+over it:
+
+```html
+<a href="/path" up-preload>Hover over me to preload my content</a>
+ ```
+
+You can now preload a link *as soon as it appears in the DOM*, by setting an [`[up-preload="insert"]`](/a-up-preload#up-preload) attribute.
+This is useful for links with a high probability of being clicked, like a navigation menu:
+
+```html
+<a href="/menu" up-layer="new drawer" up-preload="insert">≡ Menu</a> <!-- mark-phrase "insert" -->
+```
+
+To "lazy preload" a link when it is scrolled into the [viewport](/up-viewport),
+you can now set an [`[up-preload="reveal"]`](/a-up-preload#up-preload) attribute. This is useful when an element is [below the fold](https://www.optimizely.com/optimization-glossary/below-the-fold/)
+and is unlikely to be clicked until the the user scrolls:
+
+```html
+<a href="/stories/106" up-preload="reveal">Full story</a> <!-- mark-phrase "reveal" -->
+```
+
+
 ### Infinite scrolling
 
 [Deferred fragments](/lazy-loading) that [load when revealed](/lazy-loading#on-reveal)
@@ -67,6 +93,54 @@ All you need is an HTML structure like this:
 ```
 
 See [infinite scrolling](/infinite-scrolling) for a full example and more details.
+
+
+### Enabling or disabling Unpoly features with boolean attributes
+
+Most Unpoly attributes can now be enabled with a value `"true"` and be disabled with a value `"false"`:
+
+```html
+<a href="/path" up-follow="true">Click for single-page navigation</a> <!-- mark-phrase "true" -->
+<a href="/path" up-follow="false">Click for full page load</a> <!-- mark-phrase "false" -->
+```
+
+Instead of setting a `true` you can also set an empty value:
+
+```html
+<a href="/path" up-follow>Click for single-page navigation</a>
+<a href="/path" up-follow="">Click for single-page navigation</a>
+<a href="/path" up-follow="true">Click for single-page navigation</a>
+```
+
+Boolean values can be helpful with a server-side templating language like ERB, Liquid or Haml, when the attribute value is
+set from a boolean variable:
+
+```erb
+<a href="/path" up-follow="<%= is_signed_in %>">Click me</a> <%# mark-phrase "is_signed_in" %>
+```
+
+This can also help when you're generating HTML from a different programming language and want to pass a `true` literal
+as an attribute value:
+
+```ruby
+link_to 'Click me', '/path', 'up-follow': true
+```
+
+This behavior is available for most attributes:
+
+- `[up-follow]`
+- `[up-submit]`
+- `[up-instant]`
+- `[up-preload]`
+- `[up-nav]`
+- `[up-expand]`
+- `[up-keep]`
+- `[up-hungry]`
+- `[up-poll]`
+- `[up-defer]`
+- `[up-validate]`
+- `[up-autosubmit]`
+- `[up-watch]`
 
 
 ### Request merging
@@ -139,32 +213,6 @@ When requests [target multiple fragments](/targeting-fragments#updating-multiple
 See [how cache entries are matched](/caching#how-cache-entries-are-matched) for a detailed example.
 
 
-
-### Preloading links eagerly or lazily
-
-For many years Unpoly has supported the `[up-preload]` attribute. This would preload a link when the user [hovers](https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseover_event)
-over it:
-
-```html
-<a href="/path" up-preload>Hover over me to preload my content</a>
- ```
-
-You can now preload a link *as soon as it appears in the DOM*, by setting an [`[up-preload="insert"]`](/a-up-preload#up-preload) attribute.
-This is useful for links with a high probability of being clicked, like a navigation menu:
-
-```html
-<a href="/menu" up-layer="new drawer" up-preload="insert">≡ Menu</a> <!-- mark-phrase "insert" -->
-```
-
-To "lazy preload" a link when it is scrolled into the [viewport](/up-viewport),
-you can now set an [`[up-preload="reveal"]`](/a-up-preload#up-preload) attribute. This is useful when an element is [below the fold](https://www.optimizely.com/optimization-glossary/below-the-fold/)
-and is unlikely to be clicked until the the user scrolls:
-
-```html
-<a href="/stories/106" up-preload="reveal">Full story</a> <!-- mark-phrase "reveal" -->
-```
-
-
 ### Cached content is retained while offline
 
 This release fixes some long-standing issues where the cache was evicted when a request
@@ -173,54 +221,6 @@ failed due to [network issues](/network-issues), or when the server responds wit
 This fix restores the indented behavior that, even without a connection,
 [cached content](/caching) will remain navigatable for [90 minutes](/up.network.config#config.cacheEvictAge).
 This means that an offline user can instantly access pages that they already visited this session.
-
-
-### Enabling or disabling Unpoly features with boolean attributes
-
-Most Unpoly attributes can now be enabled with a value `"true"` and be disabled with a value `"false"`:
-
-```html
-<a href="/path" up-follow="true">Click for single-page navigation</a> <!-- mark-phrase "true" -->
-<a href="/path" up-follow="false">Click for full page load</a> <!-- mark-phrase "false" -->
-```
-
-Instead of setting a `true` you can also set an empty value:
-
-```html
-<a href="/path" up-follow>Click for single-page navigation</a>
-<a href="/path" up-follow="">Click for single-page navigation</a>
-<a href="/path" up-follow="true">Click for single-page navigation</a>
-```
-
-Boolean values can be helpful with a server-side templating language like ERB, Liquid or Haml, when the attribute value is
-set from a boolean variable:
-
-```erb
-<a href="/path" up-follow="<%= is_signed_in %>">Click me</a> <%# mark-phrase "is_signed_in" %>
-```
-
-This can also help when you're generating HTML from a different programming language and want to pass a `true` literal
-as an attribute value:
-
-```ruby
-link_to 'Click me', '/path', 'up-follow': true
-```
-
-This behavior is available for most attributes:
-
-- `[up-follow]`
-- `[up-submit]`
-- `[up-instant]`
-- `[up-preload]`
-- `[up-nav]`
-- `[up-expand]`
-- `[up-keep]`
-- `[up-hungry]`
-- `[up-poll]`
-- `[up-defer]`
-- `[up-validate]`
-- `[up-autosubmit]`
-- `[up-watch]`
 
 
 ### Quick access to the form element in form events
@@ -247,7 +247,7 @@ up.on('up:form:submit', function({ form }) {
 
 ### Improvements to history restoration
 
-Several improvements have been made to the way Unpoly handles the browser's "back" button.
+Several improvements have been made to the way Unpoly [handles the browser's "back" button](/history-restoration).
 
 
 #### Ensuring fresh content
