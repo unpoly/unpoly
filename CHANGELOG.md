@@ -12,11 +12,9 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 3.8.0
 -----
 
-This release brings many changes that were requested by the [community](/community).
+This release brings many improvements that were requested by the [community](/community).
 
-
-Breaking changes can be found with the [Reworked style helpers](#reworked-style-helpers).
-Existing calls are polyfilled by [`unpoly-migrate.js`](/changes/upgrading).
+The vast majority of these changes are backward compatible. Some breaking changes can be found with the [Reworked style helpers](#reworked-style-helpers). Existing calls are polyfilled by [`unpoly-migrate.js`](/changes/upgrading).
 
 
 ### Lazy loading content
@@ -353,19 +351,6 @@ To help with upgrading, [`unpoly-migrate.js`](/changes/upgrading) Unpoly will ad
 
 
 
-### Other changes
-
-- `up.element.numberAttr()` now parses negative numbers.
-- When [updating history](/updating-history), the `html[lang]` is now also updated. This can be prevented by setting an `[up-lang=false]` attribute or passing a `{ lang: false }` option.
-- The function `up.util.microtask()` was deprecated. Use the browser's built-in [`queueMicrotask()`](https://developer.mozilla.org/en-US/docs/Web/API/queueMicrotask) instead.
-- [Right-anchored](http://localhost:4567/up-anchored-right) can now control their appearance while a scrolling overlay is open, by styling the `.up-scrollbar-away` class.
-- Fix a bug where the back button did not work after following a link that contains an anchor starting with a number (fixes #603).
-- Clickable elements now get an ARIA role of `button`. In earlier versions these elements received a link `link` role. 
-- Fix a bug where animating with `{ duration: 0 }` would apply the default duration instead of skipping the animation (fixes #588).
-- You can now exclude navigational containers from applying `.up-current` by adding a selector to `up.feedback.config.noNavSelectors`.
-
-
-
 ### Rebrushed unpoly.com
 
 The design of [unpoly.com](https://unpoly.com) was reworked with fresh colors, better spacing and clearer fonts.
@@ -378,6 +363,19 @@ Several new guides were also added:
 - [Preloading](/preloading)
 - [Lazy loading](/lazy-loading)
 - [Infinite scrolling](/infinite-scrolling)
+
+
+
+### Other changes
+
+- `up.element.numberAttr()` now parses negative numbers.
+- When [updating history](/updating-history), the `html[lang]` is now also updated. This can be prevented by setting an `[up-lang=false]` attribute or passing a `{ lang: false }` option.
+- The function `up.util.microtask()` was deprecated. Use the browser's built-in [`queueMicrotask()`](https://developer.mozilla.org/en-US/docs/Web/API/queueMicrotask) instead.
+- [Right-anchored](http://localhost:4567/up-anchored-right) can now control their appearance while a scrolling overlay is open, by styling the `.up-scrollbar-away` class.
+- Fix a bug where the back button did not work after following a link that contains an anchor starting with a number (fixes #603).
+- Clickable elements now get an ARIA role of `button`. In earlier versions these elements received a link `link` role.
+- Fix a bug where animating with `{ duration: 0 }` would apply the default duration instead of skipping the animation (fixes #588).
+- You can now exclude navigational containers from applying `.up-current` by adding a selector to `up.feedback.config.noNavSelectors`.
 
 
 
