@@ -3,8 +3,7 @@ Changelog
 
 Changes to this project will be documented in this file.
 
-If you're upgrading from an older Unpoly version you should load [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading) to polyfill deprecated APIs.
-Changes handled by `unpoly-migrate.js` are not considered breaking changes.
+If you're upgrading from an older Unpoly version you should load [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading) to polyfill deprecated APIs. Changes handled by `unpoly-migrate.js` are not considered breaking changes.
 
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
@@ -19,8 +18,7 @@ The vast majority of these changes are backward compatible. Some breaking change
 
 ### Lazy loading content
 
-You can now [lazy load additional fragments](/lazy-loading) when a placeholder enters the DOM or viewport.
-By deferring the loading of non-[critical](https://developer.mozilla.org/en-US/docs/Web/Performance/Critical_rendering_path) fragments with a separate URL, you can paint important content earlier.
+You can now [lazy load additional fragments](/lazy-loading) when a placeholder enters the DOM or viewport. By deferring the loading of non-[critical](https://developer.mozilla.org/en-US/docs/Web/Performance/Critical_rendering_path) fragments with a separate URL, you can paint important content earlier.
 
 For example, you may have a large navigation menu that only appears once the user clicks a menu icon:
 
@@ -32,8 +30,7 @@ For example, you may have a large navigation menu that only appears once the use
 
 To remove the menu from the initial render pass, extract its contents to its own route, like `/menu`.
 
-In the initial view, only leave a placeholder element and mark it with an `[up-defer]` attribute.
-Also set an `[up-href]` attribute with the URL from which to load the deferred content:
+In the initial view, only leave a placeholder element and mark it with an `[up-defer]` attribute. Also set an `[up-href]` attribute with the URL from which to load the deferred content:
 
 ```html
 <div id="menu" up-defer up-href="/menu"> <!-- mark-phrase "up-defer" -->
@@ -41,9 +38,7 @@ Also set an `[up-href]` attribute with the URL from which to load the deferred c
 </div>
 ```
 
-When the `[up-defer]` placeholder is rendered, it will immediately make a request to fetch
-its content from `/menu`. You may also delay the request until the placeholder is
-[scrolled into the viewport](/lazy-loading#on-reveal) or [control the timing from JavaScript](/lazy-loading#scripted).
+When the `[up-defer]` placeholder is rendered, it will immediately make a request to fetch its content from `/menu`. You may also delay the request until the placeholder is [scrolled into the viewport](/lazy-loading#on-reveal) or [control the timing from JavaScript](/lazy-loading#scripted).
 
 See [lazy loading content](/lazy-loading) for a full example and more details.
 
@@ -51,23 +46,19 @@ See [lazy loading content](/lazy-loading) for a full example and more details.
 
 ### Preloading links eagerly or lazily
 
-For many years Unpoly has supported the `[up-preload]` attribute. This would preload a link when the user [hovers](https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseover_event)
-over it:
+For many years Unpoly has supported the `[up-preload]` attribute. This would preload a link when the user [hovers](https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseover_event) over it:
 
 ```html
 <a href="/path" up-preload>Hover over me to preload my content</a>
  ```
 
-You can now preload a link *as soon as it appears in the DOM*, by setting an [`[up-preload="insert"]`](/a-up-preload#up-preload) attribute.
-This is useful for links with a high probability of being clicked, like a navigation menu:
+You can now preload a link *as soon as it appears in the DOM*, by setting an [`[up-preload="insert"]`](/a-up-preload#up-preload) attribute. This is useful for links with a high probability of being clicked, like a navigation menu:
 
 ```html
 <a href="/menu" up-layer="new drawer" up-preload="insert">≡ Menu</a> <!-- mark-phrase "insert" -->
 ```
 
-To "lazy preload" a link when it is scrolled into the [viewport](/up-viewport),
-you can now set an [`[up-preload="reveal"]`](/a-up-preload#up-preload) attribute. This is useful when an element is [below the fold](https://www.optimizely.com/optimization-glossary/below-the-fold/)
-and is unlikely to be clicked until the the user scrolls:
+To "lazy preload" a link when it is scrolled into the [viewport](/up-viewport), you can now set an [`[up-preload="reveal"]`](/a-up-preload#up-preload) attribute. This is useful when an element is [below the fold](https://www.optimizely.com/optimization-glossary/below-the-fold/) and is unlikely to be clicked until the the user scrolls:
 
 ```html
 <a href="/stories/106" up-preload="reveal">Full story</a> <!-- mark-phrase "reveal" -->
@@ -76,9 +67,7 @@ and is unlikely to be clicked until the the user scrolls:
 
 ### Infinite scrolling
 
-[Deferred fragments](/lazy-loading) that [load when revealed](/lazy-loading#on-reveal)
-can implement [infinite scrolling](infinite-scrolling)
-without custom JavaScript.
+[Deferred fragments](/lazy-loading) that [load when revealed](/lazy-loading#on-reveal) can implement [infinite scrolling](infinite-scrolling) without custom JavaScript.
 
 All you need is an HTML structure like this:
 
@@ -112,15 +101,13 @@ Instead of setting a `true` you can also set an empty value:
 <a href="/path" up-follow="true">Click for single-page navigation</a>
 ```
 
-Boolean values can be helpful with a server-side templating language like ERB, Liquid or Haml, when the attribute value is
-set from a boolean variable:
+Boolean values can be helpful with a server-side templating language like ERB, Liquid or Haml, when the attribute value is set from a boolean variable:
 
 ```erb
 <a href="/path" up-follow="<%= is_signed_in %>">Click me</a> <%# mark-phrase "is_signed_in" %>
 ```
 
-This can also help when you're generating HTML from a different programming language and want to pass a `true` literal
-as an attribute value:
+This can also help when you're generating HTML from a different programming language and want to pass a `true` literal as an attribute value:
 
 ```ruby
 link_to 'Click me', '/path', 'up-follow': true
@@ -174,37 +161,37 @@ When requests [target multiple fragments](/targeting-fragments#updating-multiple
   <tr>
     <th class="split-table-head">
     </th>
-    <th>
+    <th align="left">
       🠦 <code>X-Up-Target: .foo, .bar</code><br>
       🠤 <code>Vary: X-Up-Target</code>
     </th>
   </tr>  
   <tr>
-    <th>🠦 <code>X-Up-Target: .foo</code></th>
+    <th align="left">🠦 <code>X-Up-Target: .foo</code></th>
     <td>✔️ cache hit</td>
   </tr>
   <tr>
-    <th>🠦 <code>X-Up-Target: .bar</code></th>
+    <th align="left">🠦 <code>X-Up-Target: .bar</code></th>
     <td>✔️ cache hit</td>
   </tr>
   <tr>
-    <th>🠦 <code>X-Up-Target: .foo, .bar</code></th>
+    <th align="left">🠦 <code>X-Up-Target: .foo, .bar</code></th>
     <td>✔️ cache hit</td>
   </tr>
   <tr>
-    <th>🠦 <code>X-Up-Target: .bar, .foo</code></th>
+    <th align="left">🠦 <code>X-Up-Target: .bar, .foo</code></th>
     <td>✔️ cache hit</td>
   </tr>
   <tr>
-    <th>🠦 <code>X-Up-Target: .baz</code></th>
+    <th align="left">🠦 <code>X-Up-Target: .baz</code></th>
     <td>❌ cache miss</td>
   </tr>
   <tr>
-    <th>🠦 <code>X-Up-Target: .foo, .baz</code></th>
+    <th align="left">🠦 <code>X-Up-Target: .foo, .baz</code></th>
     <td>❌ cache miss</td>
   </tr>
   <tr>
-    <th>🠦 <i>No <code autolink="false">X-Up-Target</code></i></th>
+    <th align="left">🠦 <i>No <code autolink="false">X-Up-Target</code></i></th>
     <td>❌ cache miss</td>
   </tr>
 </table>
@@ -215,18 +202,14 @@ See [how cache entries are matched](/caching#how-cache-entries-are-matched) for 
 
 ### Cached content is retained while offline
 
-This release fixes some long-standing issues where the cache was evicted when a request
-failed due to [network issues](/network-issues), or when the server responds with an empty response.
+This release fixes some long-standing issues where the cache was evicted when a request failed due to [network issues](/network-issues), or when the server responds with an empty response.
 
-This fix restores the indented behavior that, even without a connection,
-[cached content](/caching) will remain navigatable for [90 minutes](/up.network.config#config.cacheEvictAge).
-This means that an offline user can instantly access pages that they already visited this session.
+This fix restores the indented behavior that, even without a connection, [cached content](/caching) will remain navigatable for [90 minutes](/up.network.config#config.cacheEvictAge). This means that an offline user can instantly access pages that they already visited this session.
 
 
 ### Quick access to the form element in form events
 
-Form-related events like `up:form:submit` and `up:form:validate` are emitted on the element that caused the event.
-For example, `up:form:submit` is emitted on the submit button that was pressed.
+Form-related events like `up:form:submit` and `up:form:validate` are emitted on the element that caused the event. For example, `up:form:submit` is emitted on the submit button that was pressed.
 
 This made it somewhat inconvenient to access the form element:
 
@@ -252,17 +235,14 @@ Several improvements have been made to the way Unpoly [handles the browser's "ba
 
 #### Ensuring fresh content
 
-In earlier versions, when the user pressed the back button, Unpoly would sometimes
-restore the page with stale content.
+In earlier versions, when the user pressed the back button, Unpoly would sometimes restore the page with stale content.
 
-Starting with 3.8.0, restored content is now [revalidated](/caching#revalidation) with the server.
-This ensures that content is shown with the most recent data.
+Starting with 3.8.0, restored content is now [revalidated](/caching#revalidation) with the server. This ensures that content is shown with the most recent data.
 
 
 #### Custom restoration behavior
 
-Listeners to `up:location:restore` may now mutate the `event.renderOptions`
-event to customize the render pass that is about to restore content:
+Listeners to `up:location:restore` may now mutate the `event.renderOptions` event to customize the render pass that is about to restore content:
 
 ```js
 up.on('up:location:restore', function(event) {
@@ -273,9 +253,7 @@ up.on('up:location:restore', function(event) {
 })
 ```
 
-As a reminder, you can also completely substitute Unpoly's render pass with your own restoration behavior,
-by preventing `up:location:restore`. This will prevent Unpoly from changing any element.
-Your event handler can then restore the page with your own custom code:
+As a reminder, you can also completely substitute Unpoly's render pass with your own restoration behavior, by preventing `up:location:restore`. This will prevent Unpoly from changing any element. Your event handler can then restore the page with your own custom code:
 
 ```js
 up.on('up:location:restore', function(event) {
@@ -314,9 +292,7 @@ up.element.setStyle(div, { '--custom-prop': 'value' })
 
 #### Property names must be in kebab-case
 
-In earlier versions Unpoly functions accepted property names in either
-[camelCase](https://developer.mozilla.org/en-US/docs/Glossary/Camel_case) or
-[kebab-case](https://developer.mozilla.org/en-US/docs/Glossary/Kebab_case).
+In earlier versions Unpoly functions accepted property names in either [camelCase](https://developer.mozilla.org/en-US/docs/Glossary/Camel_case) or [kebab-case](https://developer.mozilla.org/en-US/docs/Glossary/Kebab_case).
 
 As custom properties don't have a camelCase equivalent, now only kebab-case is supported:
 
@@ -333,11 +309,9 @@ To help with upgrading, [`unpoly-migrate.js`](/changes/upgrading) Unpoly will re
 
 #### Length values must have a unit
 
-CSS requires length values (like `width`, `top` or `margin`) to have a unit, e.g. `width: 200px`.
-In earlier versions Unpoly silently added a `px` unit to length values that were missing a unit.
+CSS requires length values (like `width`, `top` or `margin`) to have a unit, e.g. `width: 200px`. In earlier versions Unpoly silently added a `px` unit to length values that were missing a unit.
 
-This approach required Unpoly to keep a list of CSS properties that denote lengths, which was unsustainable.
-You now always need to pass length values with a unit: 
+This approach required Unpoly to keep a list of CSS properties that denote lengths, which was unsustainable. You now always need to pass length values with a unit: 
 
 ```js
 // ❌ Length values without unit is uo longer supported
@@ -371,7 +345,7 @@ Several new guides were also added:
 - `up.element.numberAttr()` now parses negative numbers.
 - When [updating history](/updating-history), the `html[lang]` is now also updated. This can be prevented by setting an `[up-lang=false]` attribute or passing a `{ lang: false }` option.
 - The function `up.util.microtask()` was deprecated. Use the browser's built-in [`queueMicrotask()`](https://developer.mozilla.org/en-US/docs/Web/API/queueMicrotask) instead.
-- [Right-anchored](http://localhost:4567/up-anchored-right) can now control their appearance while a scrolling overlay is open, by styling the `.up-scrollbar-away` class.
+- [Right-anchored](/up-anchored-right) can now control their appearance while a scrolling overlay is open, by styling the `.up-scrollbar-away` class.
 - Fix a bug where the back button did not work after following a link that contains an anchor starting with a number (fixes #603).
 - Clickable elements now get an ARIA role of `button`. In earlier versions these elements received a link `link` role.
 - Fix a bug where animating with `{ duration: 0 }` would apply the default duration instead of skipping the animation (fixes #588).
