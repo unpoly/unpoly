@@ -12,6 +12,11 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 3.8.0
 -----
 
+This release brings many changes that were requested by the [community](/community).
+
+Breaking changes can be found with the [Reworked style helpers](#reworked-style-helpers).
+Existing calls are polyfilled by [`unpoly-migrate.js`](/changes/upgrading).
+
 
 ### Lazy loading content
 
@@ -241,6 +246,68 @@ up.on('up:form:submit', function({ form }) {
 })
 ```
 
+### Reworked style helpers
+
+This release reworks all functions that work with CSS properties: 
+
+- `up.element.setStyle(element, props)`
+- `up.element.styleNumber(element, prop)`
+- `up.element.style(element, propOrProps)`
+- `up.element.createFromSelector(selector, { style })`
+- `up.element.affix(container, selector, { style })`
+- `up.animate(element, lastFrameProps)`
+
+
+#### Support for custom properties
+
+All functions that work with CSS properties now also support [custom properties](https://developer.mozilla.org/en-US/docs/Web/CSS/--*) ("CSS variables"):
+
+```js
+// Returns the computed value of the `--custom-prop` property.
+up.element.style(div, '--custom-prop')
+
+// Sets the `--custom-prop` property as an inline `[style]` attribute
+up.element.setStyle(div, { '--custom-prop': 'value' })
+```
+
+#### Property names must be in kebab-case
+
+In earlier versions Unpoly functions accepted property names in either
+[camelCase](https://developer.mozilla.org/en-US/docs/Glossary/Camel_case) or
+[kebab-case](https://developer.mozilla.org/en-US/docs/Glossary/Kebab_case).
+
+As custom properties don't have a camelCase equivalent, now only kebab-case is supported:
+
+```js
+// ❌ camelCase property names are no longer supported
+up.element.setStyle(div, { backgroundColor: 'red' })
+
+// ✔️ Property names must now be in kebab-case
+up.element.setStyle(div, { 'background-color': 'red' })
+```
+
+To help with upgrading, [`unpoly-migrate.js`](/changes/upgrading) Unpoly will rename camelCase keys for you.
+
+
+### Length values must have a unit
+
+CSS requires length values (like `width`, `top` or `margin`) to have a unit, e.g. `width: 200px`.
+In earlier versions Unpoly silently added a `px` unit to length values that were missing a unit.
+
+This approach required Unpoly to keep a list of CSS properties that denote lengths, which was unsustainable.
+You now always need to pass length values with a unit: 
+
+```js
+// ❌ Length values without unit is uo longer supported
+up.element.setStyle(div, { height: 50 })
+
+// ✔️ Length values now require a unit
+up.element.setStyle(div, { height: '50px' })
+```
+
+To help with upgrading, [`unpoly-migrate.js`](/changes/upgrading) Unpoly will add `px` units to unit-less length values.
+
+
 
 ### Other changes
 
@@ -255,15 +322,18 @@ up.on('up:form:submit', function({ form }) {
 
 
 
-### Reworked unpoly.com
+### Rebrushed unpoly.com
 
-New colors, margins and type, table of contents.
+The design of [unpoly.com](https://unpoly.com) was reworked with fresh colors, better spacing and clearer fonts.
 
-/attributes-and-options
-/preloading
-/lazy-loading
-/infinite-scrolling
-/up-scrollbar-away
+All documentation pages now have a table of contents to quickly find the section you're looking for.
+
+Several new guides were also added:
+
+- [Attributes and options](/attributes-and-options)
+- [Preloading](/preloading)
+- [Lazy loading](/lazy-loading)
+- [Infinite scrolling](/infinite-scrolling)
 
 
 
