@@ -24,173 +24,197 @@ describe 'up.Layer.Modal', ->
       expect(box.offsetWidth).toBeLessThan(viewport.clientWidth - 100)
       expect(boxRect.left).toBeAround((viewport.clientWidth - box.offsetWidth) * 0.5, 1)
 
-    if up.specUtil.rootHasReducedWidthFromScrollbar()
-      describe 'scrollbars while an overlay is open', ->
+    describe 'scrollbars while an overlay is open', ->
 
-        beforeEach ->
-          spyOn(up.viewport, 'scrollbarWidth').and.returnValue(25)
+      beforeEach ->
+        unless up.specUtil.rootHasReducedWidthFromScrollbar()
+          # Delay skipping until beforeEach() so the stylesheet that controls the scroll bar is loaded
+          pending("Skipping test on browser without visible scroll bars")
 
-        it "replaces the document scrollbar with a new scrollbar on its viewport element", ->
-          fixture('div', style: { height: '10000px' })
+      it "replaces the document scrollbar with a new scrollbar on its viewport element", ->
+        fixture('div', style: { height: '10000px' })
 
-          expect(up.viewport.root).toHaveVerticalScrollbar()
+        expect(up.viewport.root).toHaveVerticalScrollbar()
 
-          up.layer.open(mode: 'modal', content: '<div style="height: 10000px"></div>')
-          expect(up.layer.isOverlay()).toBe(true)
+        up.layer.open(mode: 'modal', content: '<div style="height: 10000px"></div>')
+        expect(up.layer.isOverlay()).toBe(true)
 
-          expect(document.querySelector('up-modal-viewport').offsetLeft).toBe(0)
-          expect(document.querySelector('up-modal-viewport').offsetTop).toBe(0)
-          expect(document.querySelector('up-modal-viewport').offsetWidth).toBe(window.innerWidth)
-          expect(document.querySelector('up-modal-viewport').offsetHeight).toBe(window.innerHeight)
+        expect(document.querySelector('up-modal-viewport').offsetLeft).toBe(0)
+        expect(document.querySelector('up-modal-viewport').offsetTop).toBe(0)
+        expect(document.querySelector('up-modal-viewport').offsetWidth).toBe(window.innerWidth)
+        expect(document.querySelector('up-modal-viewport').offsetHeight).toBe(window.innerHeight)
 
-          expect(up.viewport.root).not.toHaveVerticalScrollbar()
-          expect('up-modal-viewport').toHaveVerticalScrollbar()
-          expect('up-modal-box').not.toHaveVerticalScrollbar()
-          expect('up-modal-content').not.toHaveVerticalScrollbar()
+        expect(up.viewport.root).not.toHaveVerticalScrollbar()
+        expect('up-modal-viewport').toHaveVerticalScrollbar()
+        expect('up-modal-box').not.toHaveVerticalScrollbar()
+        expect('up-modal-content').not.toHaveVerticalScrollbar()
 
-        it "gives the body additional padding on the right so the hidden scrollbar won't enlarge the client area, causing a layout shift", ->
-          unsetBodyStyle = e.setTemporaryStyle(document.body, { paddingRight: '40px' })
+      it "gives the body additional padding on the right so the hidden scrollbar won't enlarge the client area, causing a layout shift", ->
+        spyOn(up.viewport, 'rootScrollbarWidth').and.returnValue(25)
+        unsetBodyStyle = e.setTemporaryStyle(document.body, { 'padding-right': '40px' })
 
-          up.layer.open(mode: 'modal', content: 'modal content')
-          expect(up.viewport.root).not.toHaveVerticalScrollbar()
-          expect(document.body).toHaveComputedStyle({ paddingRight: '65px' })
+        up.layer.open(mode: 'modal', content: 'modal content')
+        expect(up.viewport.root).not.toHaveVerticalScrollbar()
+        expect(document.body).toHaveComputedStyle({ 'padding-right': '65px' })
 
-          up.layer.dismiss()
+        up.layer.dismiss()
 
-          await wait()
+        await wait()
 
-          unsetBodyStyle()
+        unsetBodyStyle()
 
-        it 'does not change elements if viewport root never had a scrollbar', ->
-          unsetBodyStyle = e.setTemporaryStyle(document.body, { overflowY: 'hidden', paddingRight: '30px' })
-          expect(up.viewport.root).not.toHaveVerticalScrollbar()
+      it 'does not change elements if viewport root never had a scrollbar', ->
+        unsetBodyStyle = e.setTemporaryStyle(document.body, { 'overflow-y': 'hidden', 'padding-right': '30px' })
+        expect(up.viewport.root).not.toHaveVerticalScrollbar()
 
-          up.layer.open(modal: 'modal', content: '<div style="height: 10000px"></div>')
+        up.layer.open(modal: 'modal', content: '<div style="height: 10000px"></div>')
 
-          await wait()
+        await wait()
 
-          expect(up.layer.isOverlay()).toBe(true)
-          expect(document.body).toHaveComputedStyle(paddingRight: '30px')
-          expect(up.viewport.root).not.toHaveVerticalScrollbar()
-          expect('up-modal-viewport').toHaveVerticalScrollbar()
+        expect(up.layer.isOverlay()).toBe(true)
+        expect(document.body).toHaveComputedStyle('padding-right': '30px')
+        expect(up.viewport.root).not.toHaveVerticalScrollbar()
+        expect('up-modal-viewport').toHaveVerticalScrollbar()
 
-          unsetBodyStyle()
+        unsetBodyStyle()
 
-          expect(document.querySelector('up-modal-viewport')).toHaveVerticalScrollbar()
+        expect(document.querySelector('up-modal-viewport')).toHaveVerticalScrollbar()
 
-        it 'shifts right-anchored elements to the left', ->
-          anchored = fixture('div[up-anchored=right]', style: { position: 'fixed', top: '0px', right: '70px' })
-          up.hello(anchored)
+      it 'shifts right-anchored elements to the left', ->
+        spyOn(up.viewport, 'rootScrollbarWidth').and.returnValue(25)
+        anchored = fixture('div[up-anchored=right]', style: { position: 'fixed', top: '0px', right: '70px' })
+        up.hello(anchored)
 
-          up.layer.open(mode: 'modal', content: 'modal content')
-          expect(anchored).toHaveComputedStyle({ right: '95px' })
+        up.layer.open(mode: 'modal', content: 'modal content')
+        expect(anchored).toHaveComputedStyle({ right: '95px' })
 
-          up.layer.dismiss()
+        up.layer.dismiss()
 
-          await wait()
+        await wait()
 
-          expect(anchored).toHaveComputedStyle({ right: '70px' })
+        expect(anchored).toHaveComputedStyle({ right: '70px' })
 
-        it 'considers [up-fixed=top] elements as right-anchored', ->
-          anchored = fixture('div[up-fixed=top]', style: { position: 'fixed', top: '0px', right: '70px' })
-          up.hello(anchored)
+      it 'considers [up-fixed=top] elements as right-anchored', ->
+        spyOn(up.viewport, 'rootScrollbarWidth').and.returnValue(25)
+        anchored = fixture('div[up-fixed=top]', style: { position: 'fixed', top: '0px', right: '70px' })
+        up.hello(anchored)
 
-          up.layer.open(mode: 'modal', content: 'modal content')
-          expect(anchored).toHaveComputedStyle({ right: '95px' })
+        up.layer.open(mode: 'modal', content: 'modal content')
+        expect(anchored).toHaveComputedStyle({ right: '95px' })
 
-          up.layer.dismiss()
+        up.layer.dismiss()
 
-          await wait()
+        await wait()
 
-          expect(anchored).toHaveComputedStyle({ right: '70px' })
+        expect(anchored).toHaveComputedStyle({ right: '70px' })
 
-        it 'consistently shifts and unshifts if multiple overlays are opened and closed concurrently', ->
-          up.motion.config.enabled = true
+      it 'consistently shifts and unshifts if multiple overlays are opened and closed concurrently', ->
+        spyOn(up.viewport, 'rootScrollbarWidth').and.returnValue(25)
+        up.motion.config.enabled = true
 
-          fixture('div', style: { height: '10000px' })
-          expect(up.viewport.root).toHaveVerticalScrollbar()
+        fixture('div', style: { height: '10000px' })
+        expect(up.viewport.root).toHaveVerticalScrollbar()
 
-          openModal = (duration) -> up.layer.open(mode: 'modal', content: '<div style="height: 10000px"></div>', animation: 'fade-in', duration: duration)
-          dismissModal = (duration) -> up.layer.dismiss(null, animation: 'fade-out', duration: duration)
+        openModal = (duration) -> up.layer.open(mode: 'modal', content: '<div style="height: 10000px"></div>', animation: 'fade-in', duration: duration)
+        dismissModal = (duration) -> up.layer.dismiss(null, animation: 'fade-out', duration: duration)
 
-          openModal(300)
-          expect(up.layer.count).toBe(2)
-          expect(up.viewport.root).not.toHaveVerticalScrollbar()
+        openModal(300)
+        expect(up.layer.count).toBe(2)
+        expect(up.viewport.root).not.toHaveVerticalScrollbar()
 
-          openModal(0)
-          expect(up.layer.count).toBe(3)
-          expect(up.viewport.root).not.toHaveVerticalScrollbar()
+        openModal(0)
+        expect(up.layer.count).toBe(3)
+        expect(up.viewport.root).not.toHaveVerticalScrollbar()
 
-          openModal(100)
-          expect(up.layer.count).toBe(4)
-          expect(up.viewport.root).not.toHaveVerticalScrollbar()
+        openModal(100)
+        expect(up.layer.count).toBe(4)
+        expect(up.viewport.root).not.toHaveVerticalScrollbar()
 
-          await wait(10)
+        await wait(10)
 
-          expect(up.layer.count).toBe(4)
-          expect(up.viewport.root).not.toHaveVerticalScrollbar()
+        expect(up.layer.count).toBe(4)
+        expect(up.viewport.root).not.toHaveVerticalScrollbar()
 
-          await wait(150)
-          expect(up.layer.count).toBe(4)
-          expect(up.viewport.root).not.toHaveVerticalScrollbar()
+        await wait(150)
+        expect(up.layer.count).toBe(4)
+        expect(up.viewport.root).not.toHaveVerticalScrollbar()
 
-          dismissModal(300)
-          await wait()
+        dismissModal(300)
+        await wait()
 
-          expect(up.layer.count).toBe(3)
-          expect(up.viewport.root).not.toHaveVerticalScrollbar()
+        expect(up.layer.count).toBe(3)
+        expect(up.viewport.root).not.toHaveVerticalScrollbar()
 
-          await wait(10)
+        await wait(10)
 
-          dismissModal(0)
-          expect(up.layer.count).toBe(2)
-          expect(up.viewport.root).not.toHaveVerticalScrollbar()
+        dismissModal(0)
+        expect(up.layer.count).toBe(2)
+        expect(up.viewport.root).not.toHaveVerticalScrollbar()
 
-          dismissModal(100)
+        dismissModal(100)
 
-          expect(up.layer.count).toBe(1)
-          expect(up.viewport.root).not.toHaveVerticalScrollbar()
+        expect(up.layer.count).toBe(1)
+        expect(up.viewport.root).not.toHaveVerticalScrollbar()
 
-          await wait(300)
+        await wait(300)
 
-          expect(up.layer.count).toBe(1)
-          expect(up.viewport.root).toHaveVerticalScrollbar()
+        expect(up.layer.count).toBe(1)
+        expect(up.viewport.root).toHaveVerticalScrollbar()
 
-        it "shifts right-anchored elements only once if multiple nested overlays are opened", ->
-          anchored = fixture('div[up-fixed=top]', style: { position: 'fixed', top: '0px', right: '70px' })
-          up.hello(anchored)
+      it "shifts right-anchored elements only once if multiple nested overlays are opened", ->
+        spyOn(up.viewport, 'rootScrollbarWidth').and.returnValue(25)
+        anchored = fixture('div[up-fixed=top]', style: { position: 'fixed', top: '0px', right: '70px' })
+        up.hello(anchored)
 
-          up.layer.open(mode: 'modal', content: 'modal content')
-          expect(up.layer.count).toBe(2)
-          expect(anchored).toHaveComputedStyle({ right: '95px' })
+        up.layer.open(mode: 'modal', content: 'modal content')
+        expect(up.layer.count).toBe(2)
+        expect(anchored).toHaveComputedStyle({ right: '95px' })
 
-          up.layer.open(mode: 'modal', content: 'modal content')
-          expect(up.layer.count).toBe(3)
-          expect(anchored).toHaveComputedStyle({ right: '95px' })
+        up.layer.open(mode: 'modal', content: 'modal content')
+        expect(up.layer.count).toBe(3)
+        expect(anchored).toHaveComputedStyle({ right: '95px' })
 
-          up.layer.dismiss()
+        up.layer.dismiss()
 
-          await wait()
+        await wait()
 
-          expect(up.layer.count).toBe(2)
-          expect(anchored).toHaveComputedStyle({ right: '95px' })
+        expect(up.layer.count).toBe(2)
+        expect(anchored).toHaveComputedStyle({ right: '95px' })
 
-          up.layer.dismiss()
+        up.layer.dismiss()
 
-          await wait()
+        await wait()
 
-          expect(up.layer.count).toBe(1)
-          expect(anchored).toHaveComputedStyle({ right: '70px' })
+        expect(up.layer.count).toBe(1)
+        expect(anchored).toHaveComputedStyle({ right: '70px' })
 
-        it 'shifts dynamically inserted right-anchored elements to the left', ->
-          up.layer.open(mode: 'modal', content: 'modal content')
+      it 'shifts dynamically inserted right-anchored elements to the left', ->
+        spyOn(up.viewport, 'rootScrollbarWidth').and.returnValue(25)
+        up.layer.open(mode: 'modal', content: 'modal content')
 
-          anchored = fixture('div[up-anchored=right]', style: { position: 'fixed', top: '0px', right: '70px' })
-          up.hello(anchored)
-          expect(anchored).toHaveComputedStyle({ right: '95px' })
+        anchored = fixture('div[up-anchored=right]', style: { position: 'fixed', top: '0px', right: '70px' })
+        up.hello(anchored)
+        expect(anchored).toHaveComputedStyle({ right: '95px' })
 
-          up.layer.dismiss()
+        up.layer.dismiss()
 
-          await wait()
+        await wait()
 
-          expect(anchored).toHaveComputedStyle({ right: '70px' })
+        expect(anchored).toHaveComputedStyle({ right: '70px' })
+
+      it 'does not leave inline custom properties after the overlay was closed', ->
+        spyOn(up.viewport, 'rootScrollbarWidth').and.returnValue(25)
+        anchored = fixture('div[up-anchored=right]', style: { position: 'fixed', top: '0px', right: '70px' })
+        up.hello(anchored)
+
+        up.layer.open(mode: 'modal', content: 'modal content')
+
+        await wait()
+
+        up.layer.dismiss()
+
+        await wait()
+
+        expect(document.documentElement.getAttribute('style')).not.toContain('--up')
+        expect(document.body.getAttribute('style')).not.toContain('--up-')
+        expect(anchored).not.toContain('--up-')

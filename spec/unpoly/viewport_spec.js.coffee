@@ -623,7 +623,7 @@ describe 'up.viewport', ->
       describe 'up.scroll()', ->
 
         it 'scrolls the given viewport to the given Y position', ->
-          viewport = fixture('.viewport[up-viewport]', style: { height: '100px', overflowY: 'scroll' })
+          viewport = fixture('.viewport[up-viewport]', style: { height: '100px', 'overflow-y': 'scroll' })
           content = e.affix(viewport, '.content', style: { height: '1000px' })
 
           expect(viewport.scrollTop).toBe(0)
