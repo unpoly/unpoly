@@ -34,7 +34,7 @@ up.radio = (function() {
     For this to work hungry elements [must have a derivable target selector](/up-hungry#derivable-target-required).
 
   @param {Array<string>} [config.noHungrySelectors=['[up-hungry=false]']]
-    Exceptions to `up.feedback.config.hungrySelectors`.
+    Exceptions to `up.radio.config.hungrySelectors`.
 
   @param {number} [config.pollInterval=30000]
     The default [polling](/up-poll) interval in milliseconds.

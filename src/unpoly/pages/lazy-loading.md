@@ -145,7 +145,7 @@ The initial children of an `[up-defer]` element are shown while its deferred con
 ```
 
 > [note]
-> If the deferred content is already [cached](/caching), the fallback will [immediately be replaced](##cached-partials-are-rendered-instantly) by the cached content.
+> If the deferred content is already [cached](/caching), the fallback will [immediately be replaced](#cached-partials-are-rendered-instantly) by the cached content.
 
 A [progress bar](/loading-indicators) will show while deferred content is loading. This can be disabled by setting an `[up-background=true]` attribute.
 

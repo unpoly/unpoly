@@ -5,7 +5,7 @@ You can preload links in advance.
 When a preloaded link is clicked the response will already be [cached](/caching),
 making the interaction feel instant.
 
-[Eager preloading](/#on-insert) may also be used to populate the cache and keep
+[Eager preloading](#on-insert) may also be used to populate the cache and keep
 links [accessible while offline](/network-issues#offline-cache).
 
 

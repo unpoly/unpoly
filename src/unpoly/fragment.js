@@ -1153,7 +1153,7 @@ up.fragment = (function() {
 
   You can also choose to render without keeping elements:
 
-  - Link or forms can force a swap of `[up-keep]` elements by setting an [`[up-use-keep=false]`](a-up-follow#up-use-keep) attribute.
+  - Link or forms can force a swap of `[up-keep]` elements by setting an [`[up-use-keep=false]`](/a-up-follow#up-use-keep) attribute.
   - Rendering functions can force a swap of `[up-keep]` elements by passing an [`{ useKeep: false }`](/up.render#options.useKeep) option.
 
   ### Example for conditional keeping
