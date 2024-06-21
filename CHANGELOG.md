@@ -143,7 +143,7 @@ This behavior is available for most attributes:
 - `[up-watch]`
 
 
-### Request merging
+### Request batching
 
 When queueing multiple requests to the same URL, Unpoly will now send a single request with a [merged `X-Up-Target` header](/X-Up-Target#merging-of-request-targets).
 
