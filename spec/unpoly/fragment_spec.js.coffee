@@ -3639,6 +3639,28 @@ describe 'up.fragment', ->
             expect(up.fragment.get('.element', layer: 0)).toHaveText(/new text/)
             expect(up.fragment.get('.element', layer: 1)).toHaveText(/old text in modal/)
 
+          it 'updates the layer of the given { origin } if the origin was detached after the request was sent', ->
+            makeLayers [
+              { target: '.element', content: 'old text in root' }
+              { target: '.element', content: 'old text in modal' }
+            ]
+
+            origin = fixture('.origin')
+
+            up.render('.element', url: '/path', origin: origin, peel: false)
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+
+            # Detach the origin
+            origin.remove()
+
+            jasmine.respondWithSelector('.element', text: 'new text')
+            await wait()
+
+            expect(up.fragment.get('.element', layer: 0)).toHaveText(/new text/)
+            expect(up.fragment.get('.element', layer: 1)).toHaveText(/old text in modal/)
+
           it 'updates the layer of the given target, if the target is given as an element (and not a selector)', ->
             makeLayers [
               { target: '.element', content: 'old text in root' }
