@@ -1503,7 +1503,7 @@ up.form = (function() {
   Unpoly will always consider a validation request to be successful, even if the
   server responds with a non-200 status code.
 
-  Upon seeing an `X-Up-Validate` hader, the server now renders a new state form from request parameters,
+  Upon seeing an `X-Up-Validate` header, the server now renders a new state form from request parameters,
   showing eventual validation errors and updating [dependent fields](/dependent-fields):
 
   ```html
