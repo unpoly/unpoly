@@ -1420,7 +1420,7 @@ up.form = (function() {
   ### Backend protocol
 
   When the user changes the `email` field in the registration form above,
-  the following request willbe sent:
+  the following request will be sent:
 
   ```http
   POST /users HTTP/1.1
