@@ -161,6 +161,9 @@ up.util = (function() {
     // Convert "/foo/" to ["/foo/", "/foo"]
     if (patternAtom.endsWith('/')) return [patternAtom, patternAtom.slice(0, -1)]
 
+    // Convert "/foo/?" to ["/foo/?", "/foo?"]
+    if (patternAtom.includes('/?')) return [patternAtom, patternAtom.replace('/?', '?')]
+
     // Convert "/foo/*" to ["/foo/*", "/foo", "/foo?*"]
     if (patternAtom.endsWith('/*')) return [patternAtom, patternAtom.slice(0, -2), patternAtom.slice(0, -2) + '?*']
 

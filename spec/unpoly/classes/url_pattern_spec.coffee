@@ -33,6 +33,22 @@ describe 'up.URLPattern', ->
       pattern = new up.URLPattern('/foo/*')
       expect(pattern.test('/foo/?whatever')).toBe(true)
 
+    it 'returns true if the tested URL has an extra trailing slash', ->
+      pattern = new up.URLPattern('/foo')
+      expect(pattern.test('/foo/')).toBe(true)
+
+    it 'returns true if the tested URL has an extra trailing slash, and a matching query string', ->
+      pattern = new up.URLPattern('/foo?foo=1')
+      expect(pattern.test('/foo/?foo=1')).toBe(true)
+
+    it 'returns true if the pattern URL has an extra trailing slash', ->
+      pattern = new up.URLPattern('/foo/')
+      expect(pattern.test('/foo')).toBe(true)
+
+    it 'returns true if the pattern URL has an extra trailing slash, and a matching query string', ->
+      pattern = new up.URLPattern('/foo/?foo=1')
+      expect(pattern.test('/foo?foo=1')).toBe(true)
+
     it 'returns false if a prefix pattern matches in the middle of the given URL', ->
       pattern = new up.URLPattern('/foo/*')
       expect(pattern.test('/namespace/foo/123')).toBe(false)
