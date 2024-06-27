@@ -77,14 +77,19 @@ A history update comprises the following:
 In the document below, the highlighted nodes will be updated when history is changed, in additional to the location URL:
 
 ```html
-<head lang="en"> <!-- mark-phrase "en" -->
-  <title>AcmeCorp</title> <!-- mark-line -->
-  <link rel="canonical" href="https://example.com/dresses/green-dresses"> <!-- mark-line -->
-  <meta name="description" content="About the AcmeCorp team"> <!-- mark-line -->
-  <meta prop="og:image" content="https://app.com/og.jpg"> <!-- mark-line -->
-  <script src="/assets/app.js"></script>
-  <link rel="stylesheet" href="/assets/app.css">  
-</head>
+<html lang="en"> <!-- mark-phrase "en" -->
+  <head>
+    <title>AcmeCorp</title> <!-- mark-line -->
+    <link rel="canonical" href="https://example.com/dresses/green-dresses"> <!-- mark-line -->
+    <meta name="description" content="About the AcmeCorp team"> <!-- mark-line -->
+    <meta prop="og:image" content="https://app.com/og.jpg"> <!-- mark-line -->
+    <script src="/assets/app.js"></script>
+    <link rel="stylesheet" href="/assets/app.css">
+  </head>
+  <body>
+    ...
+  </body>
+</html>
 ```
 
 The linked JavaScript and stylesheet are *not* part of history state and will not be updated.
