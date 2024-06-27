@@ -25,6 +25,10 @@ describe 'up.URLPattern', ->
       pattern = new up.URLPattern('/foo/bar')
       expect(pattern.test('/foo')).toBe(false)
 
+    it 'returns false if the given URL has the same path, but another hostname', ->
+      pattern = new up.URLPattern('/foo')
+      expect(pattern.test('https://other.com/foo')).toBe(false)
+
     it 'returns true if the given URL test a pattern with a wildcard (*)', ->
       pattern = new up.URLPattern('/foo/*/baz')
       expect(pattern.test('/foo/bar/baz')).toBe(true)
