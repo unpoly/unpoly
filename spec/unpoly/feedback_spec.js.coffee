@@ -153,10 +153,17 @@ describe 'up.feedback', ->
         expect($currentLink).toHaveClass('up-current')
         expect($otherLink).not.toHaveClass('up-current')
 
-      it 'matches the current and destination URLs if they only differ by a trailing slash', ->
+      it 'matches the current and link URLs if they only the link URL has a trailing slash', ->
         replaceURL('/foo')
         $nav = $fixture('div[up-nav]')
         $currentLink = $nav.affix('span[up-href="/foo/"]')
+        up.hello($nav)
+        expect($currentLink).toHaveClass('up-current')
+
+      it 'matches the current and link URLs if they only the current URL has a trailing slash', ->
+        replaceURL('/bar/')
+        $nav = $fixture('div[up-nav]')
+        $currentLink = $nav.affix('span[up-href="/bar"]')
         up.hello($nav)
         expect($currentLink).toHaveClass('up-current')
 
@@ -167,7 +174,7 @@ describe 'up.feedback', ->
         up.hello($nav)
         expect($currentLink).not.toHaveClass('up-current')
 
-      it 'marks any link as .up-current if any of its space-separated up-alias values matches the current URL', ->
+      it 'marks any link as .up-current if any of its space-separated [up-alias] values matches the current URL', ->
         replaceURL('/foo')
         $nav = $fixture('div[up-nav]')
         $currentLink = $nav.affix('a[href="/x"][up-alias="/aaa /foo /bbb"]')
@@ -176,9 +183,16 @@ describe 'up.feedback', ->
         expect($currentLink).toHaveClass('up-current')
         expect($otherLink).not.toHaveClass('up-current')
 
-      it 'does not throw if the current location does not match an up-alias wildcard (bugfix)', ->
+      it 'does not throw if the current location does not match an [up-alias] wildcard (bugfix)', ->
         inserter = -> up.hello(fixture('a[up-nav][up-alias="/qqqq*"]'))
         expect(inserter).not.toThrow()
+
+      it 'has an [up-alias] ending in "/*" match a query string (#542)', ->
+        replaceURL('/test/?whatever')
+        nav = fixture('div[up-nav]')
+        currentLink = e.affix(nav, 'a[href="/foo"][up-alias="/test/*"]')
+        up.hello(nav)
+        expect(currentLink).toHaveClass('up-current')
 
       it 'does not highlight a link to "#" (commonly used for JS-only buttons)', ->
         $nav = $fixture('div[up-nav]')

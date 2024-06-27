@@ -771,7 +771,7 @@ up.Layer = class Layer extends up.Record {
 
   set location(location) {
     const previousLocation = this.location
-    location = up.history.normalizeURL(location)
+    location = u.normalizeURL(location)
 
     // When opening, we always need to store the location to have an initial value.
     if (previousLocation !== location || this.opening) {

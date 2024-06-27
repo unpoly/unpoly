@@ -56,10 +56,6 @@ up.util = (function() {
     }
   }
 
-  const NORMALIZE_URL_DEFAULTS = {
-    host: 'cross-domain',
-  }
-
   /*-
   Returns a normalized version of the given URL string.
 
@@ -119,7 +115,7 @@ up.util = (function() {
   @experimental
   */
   function normalizeURL(url, options) {
-    options = newOptions(options, NORMALIZE_URL_DEFAULTS)
+    options = newOptions(options, { host: 'cross-domain' })
 
     const parts = parseURL(url)
     let normalized = ''
@@ -133,6 +129,7 @@ up.util = (function() {
     }
 
     let { pathname } = parts
+
     if (options.trailingSlash === false && pathname !== '/') {
       pathname = pathname.replace(/\/$/, '')
     }
@@ -149,8 +146,25 @@ up.util = (function() {
     return normalized
   }
 
-  function matchURLs(leftURL, rightURL) {
-    return normalizeURL(leftURL) === normalizeURL(rightURL)
+  function matchURLs(leftURL, rightURL, options) {
+    return matchableURL(leftURL, options) === matchableURL(rightURL, options)
+  }
+
+  // Normalize the URL so it is better suited for path comparison.
+  // In particular it strips the hash and trailing slash.
+  function matchableURL(url, options) {
+    if (!url) return
+    return normalizeURL(url, { hash: false, trailingSlash: false, ...options })
+  }
+
+  function matchableURLPatternAtom(patternAtom) {
+    // Convert "/foo/" to ["/foo/", "/foo"]
+    if (patternAtom.endsWith('/')) return [patternAtom, patternAtom.slice(0, -1)]
+
+    // Convert "/foo/*" to ["/foo/*", "/foo", "/foo?*"]
+    if (patternAtom.endsWith('/*')) return [patternAtom, patternAtom.slice(0, -2), patternAtom.slice(0, -2) + '?*']
+
+    return patternAtom
   }
 
   // We're calling isCrossOrigin() a lot.
@@ -1959,6 +1973,8 @@ up.util = (function() {
   return {
     parseURL,
     normalizeURL,
+    matchableURL,
+    matchableURLPatternAtom,
     matchURLs,
     normalizeMethod,
     methodAllowsPayload,

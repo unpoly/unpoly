@@ -80,8 +80,10 @@ up.Change.Addition = class Addition extends up.Change {
 
     // (1) Don't set a source if { false } is passed.
     // (2) Don't set a source if the element HTML already has an [up-source] attribute.
+    // (3) Don't use u.matchableURL() here. We need to keep a trailing slash
+    //     to support backends that care about trailing slashes.
     if (source) {
-      e.setMissingAttr(newElement, 'up-source', u.normalizeURL(source, { hash: false }))
+      e.setMissingAttr(newElement, 'up-source', up.fragment.normalizeSource(source))
     }
   }
 

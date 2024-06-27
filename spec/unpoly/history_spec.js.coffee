@@ -200,7 +200,7 @@ describe 'up.history', ->
             </div>
             """
 
-        normalize = up.history.normalizeURL
+        normalize = up.util.normalizeURL
 
         events = []
         up.on 'up:location:changed', (event) ->

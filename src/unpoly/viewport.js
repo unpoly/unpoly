@@ -655,7 +655,7 @@ up.viewport = (function() {
   }
 
   function newStateCache() {
-    return new up.FIFOCache({ capacity: 30, normalizeKey: up.history.normalizeURL })
+    return new up.FIFOCache({ capacity: 30, normalizeKey: u.matchableURL })
   }
 
   function parseOptions(args) {

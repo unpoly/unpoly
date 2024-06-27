@@ -109,16 +109,6 @@ up.history = (function() {
     trackCurrentLocation()
   }
 
-  const DEFAULT_NORMALIZE_OPTIONS = { hash: true }
-
-  function normalizeURL(url, options) {
-    // The reason why we this takes an { options } object is that
-    // isCurrentLocation() ignores a trailing slash. This is used to check whether
-    // we're already at the given URL before pushing a history state.
-    options = u.merge(DEFAULT_NORMALIZE_OPTIONS, options)
-    return u.normalizeURL(url, options)
-  }
-
   /*-
   Returns a normalized URL for the current browser location.
 
@@ -134,8 +124,8 @@ up.history = (function() {
   @param {string} location
   @experimental
   */
-  function currentLocation(normalizeOptions) {
-    return normalizeURL(location.href, normalizeOptions)
+  function currentLocation() {
+    return u.normalizeURL(location.href)
   }
 
   /*-
@@ -155,11 +145,6 @@ up.history = (function() {
 
   trackCurrentLocation()
 
-  // Some web frameworks care about a trailing slash, some consider it optional.
-  // Only for the equality test ("is this the current URL?") we consider it optional.
-  // Note that we inherit { hash: true } from DEFAULT_NORMALIZE_OPTIONS.
-  const ADDITIONAL_NORMALIZE_OPTIONS_FOR_COMPARISON = { trailingSlash: false  }
-
   /*-
   Returns whether the given URL matches the [current browser location](/up.history.location).
 
@@ -169,9 +154,16 @@ up.history = (function() {
   location.hostname // => '/path'
 
   up.history.isLocation('/path') // => true
-  up.history.isLocation('/path?query') // => false
-  up.history.isLocation('/path#hash') // => false
   up.history.isLocation('/other') // => false
+  ```
+
+  By default, a trailing `#hash` will be ignored for the comparison. A `?query` string will not:
+
+  ```js
+  location.hostname // => '/path'
+
+  up.history.isLocation('/path#hash') // => true
+  up.history.isLocation('/path?query') // => false
   ```
 
   The given URL is [normalized](/up.util.normalizeURL), so any URL string pointing to the browser location
@@ -199,8 +191,7 @@ up.history = (function() {
   @experimental
   */
   function isLocation(url, options) {
-    options = u.merge(ADDITIONAL_NORMALIZE_OPTIONS_FOR_COMPARISON, options)
-    return normalizeURL(url, options) === currentLocation(options)
+    return u.matchURLs(url, location.href, { hash: true, ...options })
   }
 
   /*-
@@ -221,7 +212,7 @@ up.history = (function() {
   @internal
   */
   function replace(location, options = {}) {
-    location = normalizeURL(location)
+    location = u.normalizeURL(location)
     if (manipulate('replaceState', location) && (options.event !== false)) {
       emitLocationChanged({ location, reason: 'replace', log: `Replaced state for ${location}` })
     }
@@ -247,7 +238,7 @@ up.history = (function() {
   @experimental
   */
   function push(location) {
-    location = normalizeURL(location)
+    location = u.normalizeURL(location)
     if (!isLocation(location) && manipulate('pushState', location)) {
       emitLocationChanged({ location, reason: 'push', log: `Advanced to location ${location}` })
     }
@@ -527,7 +518,6 @@ up.history = (function() {
     replace,
     get location() { return currentLocation() },
     get previousLocation() { return previousLocation },
-    normalizeURL,
     isLocation,
     findMetaTags,
     updateMetaTags,

@@ -121,12 +121,6 @@ up.feedback = (function() {
   const CLASS_LOADING = 'up-loading'
   const SELECTOR_LINK = 'a, [up-href]'
 
-  function normalizeURL(url) {
-    if (url) {
-      return u.normalizeURL(url, { trailingSlash: false, hash: false })
-    }
-  }
-
   function linkURLs(link) {
     // Check if we have computed the URLs before.
     // Computation is sort of expensive (multiplied by number of links),
@@ -146,7 +140,7 @@ up.feedback = (function() {
 
     // An overlay might not have a { location } property, e.g. if it was created
     // from local { content }. In this case we remove .up-current from all links.
-    let layerLocation = getNormalizedLayerLocation(layer)
+    let layerLocation = getMatchableLayerLocation(layer)
 
     // We need to match both an `a[href]` within an `[up-nav]` *and* and `a[href][up-nav]
     // This should return a selector like `:is([up-nav], nav):not([up-nav=false]) :is(a, [up-href]), :is([up-nav], nav):not([up-nav=false]):is(a, [up-href])`
@@ -166,10 +160,10 @@ up.feedback = (function() {
     }
   }
 
-  function getNormalizedLayerLocation(layer) {
+  function getMatchableLayerLocation(layer) {
     // Don't re-use layer.feedbackLocation since the current layer returns
     // location.href in case someone changed the history using the pushState API.
-    return layer.feedbackLocation || normalizeURL(layer.location)
+    return layer.feedbackLocation || u.matchableURL(layer.location)
   }
 
   /*-
@@ -468,7 +462,7 @@ up.feedback = (function() {
   function updateLayerIfLocationChanged(layer) {
     const processedLocation = layer.feedbackLocation
 
-    const layerLocation = getNormalizedLayerLocation(layer.location)
+    const layerLocation = getMatchableLayerLocation(layer.location)
 
     // A history change might call this function multiple times,
     // since we listen to both up:location:changed and up:layer:location:changed.
@@ -510,6 +504,5 @@ up.feedback = (function() {
   return {
     config,
     showAroundRequest,
-    normalizeURL,
   }
 })()

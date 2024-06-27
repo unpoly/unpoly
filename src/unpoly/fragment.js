@@ -276,6 +276,12 @@ up.fragment = (function() {
     return e.closestAttr(element, 'up-source')
   }
 
+  function normalizeSource(source) {
+    // Don't use u.matchableURL() here. We need to keep the trailing slash here,
+    // to support backends that care about trailing slashes.
+    return u.normalizeURL(source, { hash: false })
+  }
+
   /*-
   Returns the last modification time of the content in the given element.
 
@@ -2860,7 +2866,7 @@ up.fragment = (function() {
 
   up.on('up:framework:boot', function() {
     const { documentElement } = document
-    documentElement.setAttribute('up-source', u.normalizeURL(location.href, { hash: false }))
+    documentElement.setAttribute('up-source', normalizeSource(location.href))
     up.hello(documentElement)
 
     if (!up.browser.canPushState()) {
@@ -2881,6 +2887,7 @@ up.fragment = (function() {
     contains,
     closest,
     source: sourceOf,
+    normalizeSource,
     visit,
     markAsDestroying: markFragmentAsDestroying,
     emitInserted: emitFragmentInserted,

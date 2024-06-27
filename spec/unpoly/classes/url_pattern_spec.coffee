@@ -29,6 +29,10 @@ describe 'up.URLPattern', ->
       pattern = new up.URLPattern('/foo/*/baz')
       expect(pattern.test('/foo/bar/baz')).toBe(true)
 
+    it 'has a trailing wildcard match a query string', ->
+      pattern = new up.URLPattern('/foo/*')
+      expect(pattern.test('/foo/?whatever')).toBe(true)
+
     it 'returns false if a prefix pattern matches in the middle of the given URL', ->
       pattern = new up.URLPattern('/foo/*')
       expect(pattern.test('/namespace/foo/123')).toBe(false)
