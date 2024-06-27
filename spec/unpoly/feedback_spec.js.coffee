@@ -395,6 +395,23 @@ describe 'up.feedback', ->
           next =>
             expect($link).toHaveClass('up-current')
 
+        it 'marks a link as .up-current if it links to the current URL, but is missing a trailing slash, and has a matching query string', asyncSpec (next) ->
+          $nav = $fixture('div[up-nav]')
+          $link = $nav.affix('a[href="/fork?foo=1"][up-target=".main"][up-history]')
+          fixture('.main')
+          up.hello($nav)
+
+          next =>
+            Trigger.clickSequence($link)
+
+          next =>
+            @respondWith
+              responseHeaders: { 'X-Up-Location': '/fork/?foo=1' }
+              responseText: '<div class="main">new-text</div>'
+
+          next =>
+            expect($link).toHaveClass('up-current')
+
         it 'marks a link as .up-current if it links to the current URL, but has an extra trailing slash', asyncSpec (next) ->
           $nav = $fixture('div[up-nav]')
           $link = $nav.affix('a[href="/foo/"][up-target=".main"][up-history]')
@@ -406,6 +423,22 @@ describe 'up.feedback', ->
           next =>
             @respondWith
               responseHeaders: { 'X-Up-Location': '/foo' }
+              responseText: '<div class="main">new-text</div>'
+
+          next =>
+            expect($link).toHaveClass('up-current')
+
+        it 'marks a link as .up-current if it links to the current URL, but has an extra trailing slash, and has a matching query string', asyncSpec (next) ->
+          $nav = $fixture('div[up-nav]')
+          $link = $nav.affix('a[href="/foo/?foo=1"][up-target=".main"][up-history]')
+          up.hello($nav)
+
+          fixture('.main')
+          Trigger.clickSequence($link)
+
+          next =>
+            @respondWith
+              responseHeaders: { 'X-Up-Location': '/foo?foo=1' }
               responseText: '<div class="main">new-text</div>'
 
           next =>
