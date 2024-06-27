@@ -970,6 +970,80 @@ describe 'up.form', ->
           expect(result.value.fragments).toEqual([document.querySelector('.one'), document.querySelector('.three')])
           expect(result.value.layer).toBe(up.layer.root)
 
+      describe 'when the server responds with an error', ->
+
+        it 'replaces the form', ->
+          formSelector = 'form#form[action="/form-action"][method="put"][up-submit]'
+          form = fixture(formSelector)
+          input = e.affix(form, 'input[name=foo]')
+          input.focus()
+
+          up.hello(form)
+
+          expect(document.activeElement).toBe(input)
+
+          up.submit(form)
+
+          await wait()
+
+          jasmine.respondWithSelector(formSelector, text: 'failure text', status: 400)
+
+          await wait()
+
+          expect('#form').toHaveText('failure text')
+
+        it 'replaces the form if the focused element is within a shadow root (bugfix)', ->
+          formSelector = 'form#form[action="/form-action"][method="put"][up-submit]'
+          form = fixture(formSelector)
+          host = e.affix(form, "#host")
+          shadow = host.attachShadow({ mode: "open" })
+          input = document.createElement('input')
+          input.name = "foo"
+          shadow.appendChild(input)
+          input.focus()
+
+          up.hello(form)
+
+          expect(document.activeElement).toBe(host)
+          expect(shadow.activeElement).toBe(input)
+
+          up.submit(form)
+
+          await wait()
+
+          jasmine.respondWithSelector(formSelector, text: 'failure text', status: 400)
+
+          await wait()
+
+          expect('#form').toHaveText('failure text')
+
+        it 'replaces the form if the focused element is within a shadow root (bugfix) and the form is in an overlay', ->
+          overlay = await up.layer.open()
+
+          formSelector = 'form#form[action="/form-action"][method="put"][up-submit]'
+          form = overlay.affix(formSelector)
+          host = e.affix(form, "#host")
+          shadow = host.attachShadow({ mode: "open" })
+          input = document.createElement('input')
+          input.name = "foo"
+          shadow.appendChild(input)
+          input.focus()
+
+          up.hello(form)
+
+          expect(document.activeElement).toBe(host)
+          expect(shadow.activeElement).toBe(input)
+
+          up.submit(form)
+
+          await wait()
+
+          jasmine.respondWithSelector(formSelector, text: 'failure text', status: 400)
+
+          await wait()
+
+          expect('#form').toHaveText('failure text')
+
       describe 'with { disable } option', ->
 
         describe 'with { disable: "form" }', ->
