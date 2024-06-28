@@ -8,21 +8,15 @@ up.Change.FromContent = class FromContent extends up.Change {
     // Only extract options required for step building, since #execute() will be called with an
     // postflightOptions argument once the response is received and has provided refined
     // options.
-    this._origin = this.options.origin
-    this._preview = this.options.preview
-
-    // // When we're swapping elements in origin's layer, we can be choose a fallback
-    // // replacement zone close to the origin instead of looking up a selector in the
-    // // entire layer (where it might match unrelated elements).
-    // if (this._origin) {
-    //   this.originLayer = up.layer.get(this._origin)
-    // }
+    this._origin = options.origin
+    this._preview = options.preview
+    this._layers = options.layers
   }
 
   _getPlans() {
     let plans = []
 
-    this._lookupLayers()
+    this._filterLayers()
     this._improveOptionsFromResponseDoc()
 
     // First seek { target } in all layers, then seek { fallback } in all layers.
@@ -36,20 +30,7 @@ up.Change.FromContent = class FromContent extends up.Change {
     return (layer === 'new') || layer.isOpen()
   }
 
-  _lookupLayers() {
-    // (1) If we're rendering a fragment from a { url }, options.layer will already
-    //     be an array of up.Layer objects, set by up.Change.FromURL. It looks up the
-    //     layer eagerly because in case of { layer: 'origin' } (default for navigation)
-    //     the { origin } element may get removed while the request was in flight.
-    //     From that given array we need to remove layers that have been closed while
-    //     the request was in flight.
-    //
-    // (2) If we're rendering a fragment from local content ({ document, fragment, content }),
-    //     options.layer will be a layer name like "current" and needs to be looked up.
-    //
-    // (3) If we end up having no renderable layers, don't throw here.
-    //     seekPlan() and its up.CannotMatch handling may not be active yet.
-    this._layers = up.layer.getAll(this.options)
+  _filterLayers() {
     this._layers = u.filter(this._layers, this._isRenderableLayer)
   }
 

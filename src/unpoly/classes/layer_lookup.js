@@ -4,9 +4,6 @@ const e = up.element
 up.LayerLookup = class LayerLookup {
 
   constructor(stack, options) {
-    console.debug("!! new LayerLookup(layer: %o, baseLayer: %o)", options.layer, options.baseLayer)
-    // console.debug("!! new LayerLookup for %o (baseLayer %o)", this._values[0], options.baseLayer)
-
     this._stack = stack
 
     // Options normalization might change `options` relevant to the lookup:
@@ -31,21 +28,13 @@ up.LayerLookup = class LayerLookup {
   static all(stack, ...args) {
     const options = u.parseArgIntoOptions(args, 'layer')
 
-    // We can process some very frequent calls like all(up.Layer) or all('current')
+    // We can process some very frequent calls like all(up.Layer)
     // without going through a full lookup, which would require layer options normalization etc.
 
-    const { layer, baseLayer } = options
-
-
-    if (u.isArray(layer)) console.trace()
+    const { layer } = options
 
     if (layer instanceof up.Layer) {
       return [layer]
-    }
-
-    if (layer === 'current') {
-      if (!baseLayer) return [stack.current]
-      if (baseLayer instanceof up.Layer) return [baseLayer]
     }
 
     // We need a full lookup

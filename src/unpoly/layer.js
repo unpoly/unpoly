@@ -333,9 +333,6 @@ up.layer = (function() {
       options.layer = stack.get(options.target, { normalizeLayerOptions: false })
     } else if (options.origin) {
       // Links update their own layer by default.
-      // console.debug("Setting options.layer from origin %o (connected %o)", options.origin, options.origin.isConnected)
-      // options.layer = up.layer.get(options.origin, { normalizeLayerOptions: false })
-      // console.debug("  => got %o", options.layer)
       options.layer = 'origin'
     } else {
       // If nothing is given, we assume the current layer
