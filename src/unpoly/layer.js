@@ -291,7 +291,9 @@ up.layer = (function() {
     }
   }
 
-  function normalizeOptions(options) {
+  function normalizeLayerOption(options) {
+    if (options.layer instanceof up.Layer) return
+
     up.migrate.handleLayerOptions?.(options)
 
     if (u.isGiven(options.layer)) { // might be the number 0, which is falsy
@@ -319,34 +321,39 @@ up.layer = (function() {
           options.baseLayer = 'root'
         }
       }
+    // If no options.layer is given we still want to avoid updating "any" layer.
+    // Other options might have a hint for a more appropriate layer.
+    } else if (options.mode) {
+      // If user passes a { mode } option without a { layer } option
+      // we assume they want to open a new layer.
+      options.layer = 'new'
+    } else if (u.isElementish(options.target)) {
+      // If we are targeting an actual Element or jQuery collection (and not
+      // a selector string) we operate in that element's layer.
+      options.layer = stack.get(options.target, { normalizeLayerOptions: false })
+    } else if (options.origin) {
+      // Links update their own layer by default.
+      options.layer = 'origin'
     } else {
-      // If no options.layer is given we still want to avoid updating "any" layer.
-      // Other options might have a hint for a more appropriate layer.
-
-      if (options.mode) {
-        // If user passes a { mode } option without a { layer } option
-        // we assume they want to open a new layer.
-        options.layer = 'new'
-      } else if (u.isElementish(options.target)) {
-        // If we are targeting an actual Element or jQuery collection (and not
-        // a selector string) we operate in that element's layer.
-        options.layer = stack.get(options.target, { normalizeLayerOptions: false })
-      } else if (options.origin) {
-        // Links update their own layer by default.
-        options.layer = 'origin'
-      } else {
-        // If nothing is given, we assume the current layer
-        options.layer = 'current'
-      }
+      // If nothing is given, we assume the current layer
+      options.layer = 'current'
     }
+  }
 
-    if (!options.context) { options.context = {} }
+  function setBaseLayerOption(options) {
+    if (options.baseLayer instanceof up.Layer) return
 
     // Remember the layer that was current when the request was made,
     // so changes with `{ layer: 'new' }` will know what to stack on.
     // Note if options.baseLayer is given, up.layer.get('current', options) will
     // return the resolved version of that.
     options.baseLayer = stack.get('current', { ...options, normalizeLayerOptions: false })
+  }
+
+  function normalizeOptions(options) {
+    normalizeLayerOption(options)
+    options.context ??= {}
+    setBaseLayerOption(options)
   }
 
   function build(options, beforeNew) {

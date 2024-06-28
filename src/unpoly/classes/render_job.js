@@ -27,7 +27,7 @@ console.log(finalResult.fragment) // logs the revalidated fragment
 up.RenderJob = class RenderJob {
 
   constructor(options) {
-    this.options = up.RenderOptions.preprocess(options)
+    this.options = options
   }
 
   execute() {
@@ -46,6 +46,7 @@ up.RenderJob = class RenderJob {
   async _executePromise() {
     try {
       this._guardRender()
+      this.options = up.RenderOptions.preprocess(this.options)
       let result = await this._getChange().execute()
       this._handleResult(result)
       return result

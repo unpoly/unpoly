@@ -3,9 +3,8 @@ const e = up.element
 
 up.LayerLookup = class LayerLookup {
 
-  constructor(stack, ...args) {
+  constructor(stack, options) {
     this._stack = stack
-    const options = u.parseArgIntoOptions(args, 'layer')
 
     // Options normalization might change `options` relevant to the lookup:
     // (1) It will default { layer } to 'origin' if an { origin } element is given.
@@ -15,28 +14,8 @@ up.LayerLookup = class LayerLookup {
       up.layer.normalizeOptions(options)
     }
 
+    this._options = options
     this._values = u.parseTokens(options.layer)
-
-    this._origin = options.origin
-    this._baseLayer = options.baseLayer || this._originLayer() || this._stack.current
-
-    if (u.isString(this._baseLayer)) {
-      // The { baseLayer } option may itself be a string like "parent".
-      // In this case we look it up using a new up.LayerLookup instance, using
-      // up.layer.current as the { baseLayer } for that second lookup.
-      const recursiveOptions = { ...options, baseLayer: this._stack.current, normalizeLayerOptions: false }
-      this._baseLayer = new this.constructor(this._stack, this._baseLayer, recursiveOptions).first()
-    }
-  }
-
-  _originLayer() {
-    if (this._origin) {
-      return this._forElement(this._origin)
-    }
-  }
-
-  first() {
-    return this.all()[0]
   }
 
   all() {
@@ -44,6 +23,22 @@ up.LayerLookup = class LayerLookup {
     results = u.compact(results)
     results = u.uniq(results)
     return results
+  }
+
+  static all(stack, ...args) {
+    const options = u.parseArgIntoOptions(args, 'layer')
+
+    // We can process some very frequent calls like all(up.Layer)
+    // without going through a full lookup, which would require layer options normalization etc.
+
+    const { layer } = options
+
+    if (layer instanceof up.Layer) {
+      return [layer]
+    }
+
+    // We need a full lookup
+    return new this(stack, options).all()
   }
 
   _forElement(element) {
@@ -76,23 +71,23 @@ up.LayerLookup = class LayerLookup {
       case 'any':
         // Return all layers, but prefer a layer that's either the current
         // layer, or closer to the front.
-        return [this._baseLayer, ...this._stack.reversed()]
+        return [this._getBaseLayer(), ...this._stack.reversed()]
       case 'current':
-        return this._baseLayer
+        return this._getBaseLayer()
       case 'closest':
-        return this._stack.selfAndAncestorsOf(this._baseLayer)
+        return this._stack.selfAndAncestorsOf(this._getBaseLayer())
       case 'parent':
-        return this._baseLayer.parent
+        return this._getBaseLayer().parent
       case 'ancestor':
       case 'ancestors':
-        return this._baseLayer.ancestors
+        return this._getBaseLayer().ancestors
       case 'child':
-        return this._baseLayer.child
+        return this._getBaseLayer().child
       case 'descendant':
       case 'descendants':
-        return this._baseLayer.descendants
+        return this._getBaseLayer().descendants
       case 'subtree':
-        return this._baseLayer.subtree
+        return this._getBaseLayer().subtree
       case 'new':
         return 'new' // pass-through
       case 'root':
@@ -103,9 +98,39 @@ up.LayerLookup = class LayerLookup {
       case 'front':
         return this._stack.front
       case 'origin':
-        return this._originLayer()
+        return this._getOriginLayer()
       default:
         return up.fail("Unknown { layer } option: %o", value)
     }
   }
+
+  _getOriginLayer() {
+    let { origin } = this._options
+
+    if (origin) {
+      return this._forElement(origin)
+    }
+  }
+
+  _getBaseLayer() {
+    let { baseLayer } = this._options
+
+    if (u.isString(baseLayer)) {
+      // The { baseLayer } option may itself be a string like "parent".
+      // In this case we look it up using a new up.LayerLookup instance, using
+      // up.layer.current as the { baseLayer } for that second lookup.
+      const recursiveOptions = { ...this._options, baseLayer: this._stack.current, normalizeLayerOptions: false, layer: baseLayer }
+      return this.constructor.all(this._stack, recursiveOptions)[0]
+    } else {
+      return baseLayer || this._getOriginLayer() || this._stack.current
+    }
+  }
+
+  static {
+    u.memoizeMethod(this.prototype, {
+      _getBaseLayer: true,
+      _getOriginLayer: true,
+    })
+  }
+
 }

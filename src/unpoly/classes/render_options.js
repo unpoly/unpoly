@@ -65,6 +65,7 @@ up.RenderOptions = (function() {
     'source',       // No strong opinions about that one. Wouldn't one always have a source? Might as well not be an option.
     'saveScroll',   // No strong opinions about that one. Wouldn't one always want to saveScroll? Might as wellnot be an option.
     'navigate',     // Also set navigate defaults for fail options
+    'baseLayer',
   ])
 
   // At least one of these properties must be given for Unpoly to render content.
@@ -116,8 +117,22 @@ up.RenderOptions = (function() {
       { defaults },
       { inputDevice: up.event.inputDevice },
       options,
+      lookupLayers(options),
       preloadOverrides(options)
     )
+  }
+
+  // Look up layers *before* we make the request.
+  // In case of { layer: 'origin' } the { origin } element may get removed while the request was in flight,
+  // making up.Change.FromContent#execute() fail with a message like "layer { origin } does not exist" or
+  // "Could not find a layer to render in. You may have passed an unmatchable layer reference, or a detached element.".
+  function lookupLayers(options) {
+    // up.layer.normalizeOptions(options)
+
+    return {
+      layers: up.layer.getAll(options),
+      normalizeLayerOptions: false,
+    }
   }
 
   function finalize(preprocessedOptions, lateDefaults) {
@@ -154,12 +169,16 @@ up.RenderOptions = (function() {
   }
 
   function deriveFailOptions(preprocessedOptions) {
+    let overrides = failOverrides(preprocessedOptions)
+    let layers = lookupLayers(overrides)
+
     if (preprocessedOptions.failOptions) {
       return {
         ...preprocessedOptions.defaults,
         // Only a few keys are shared between success and failure cases.
         ...u.pick(preprocessedOptions, SHARED_KEYS),
-        ...failOverrides(preprocessedOptions),
+        ...overrides,
+        ...layers,
         // We sometimes want to log that fail-prefixed options were used, to alert the
         // user of the fact that there are different option sets for success and failure.
         ...{ failPrefixForced: true }
@@ -171,7 +190,8 @@ up.RenderOptions = (function() {
         // We still allow to override individual options.
         // This is relevant for up.validate() which does not use fail options,
         // but lets users still override individual options for the failure case.
-        ...failOverrides(preprocessedOptions),
+        ...overrides,
+        ...layers,
       }
     }
   }

@@ -25,4 +25,9 @@ up.Record = class Record {
   [u.isEqual.key](other) {
     return (this.constructor === other.constructor) && u.isEqual(this.attributes(), other.attributes())
   }
+
+  // static is(value) {
+  //   return value instanceof this
+  // }
+
 }

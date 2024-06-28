@@ -986,7 +986,7 @@ describe 'up.form', ->
 
           await wait()
 
-          jasmine.respondWithSelector(formSelector, text: 'failure text', status: 400)
+          jasmine.respondWithSelector(formSelector, text: 'failure text', status: 422)
 
           await wait()
 
@@ -1011,7 +1011,7 @@ describe 'up.form', ->
 
           await wait()
 
-          jasmine.respondWithSelector(formSelector, text: 'failure text', status: 400)
+          jasmine.respondWithSelector(formSelector, text: 'failure text', status: 422)
 
           await wait()
 
@@ -1038,7 +1038,7 @@ describe 'up.form', ->
 
           await wait()
 
-          jasmine.respondWithSelector(formSelector, text: 'failure text', status: 400)
+          jasmine.respondWithSelector(formSelector, text: 'failure text', status: 422)
 
           await wait()
 
@@ -1903,7 +1903,7 @@ describe 'up.form', ->
 
           await expectAsync(promise).toBePending()
 
-          jasmine.respondWithSelector('.element', text: 'new text', status: 400)
+          jasmine.respondWithSelector('.element', text: 'new text', status: 422)
 
           await wait()
 
@@ -2833,6 +2833,28 @@ describe 'up.form', ->
           next =>
             expect('.target').toHaveText('old target text')
             expect('.my-form').toHaveText('new form text')
+
+        it 'replaces the form if it was submitted by a submit button that was immediately removed (as Shoelace does when pressing Enter within an <sl-input>) (discussion #643)', ->
+          formSelector = 'form#form[action="/form-action"][method="put"][up-submit]'
+          form = fixture(formSelector)
+          up.hello(form)
+
+          # This is how Shoelace submits a form:
+          # https://github.com/shoelace-style/shoelace/blob/96edd854f3cf8a79da5eff3f86f1489a7e3e9f75/src/internal/form.ts#L364-L366
+          button = e.affix(form, 'button[type=submit]')
+          console.debug("spec clicking")
+          button.click()
+          console.debug("spec removing")
+          button.remove()
+
+          await wait()
+
+          jasmine.respondWithSelector(formSelector, text: 'failure text', status: 422)
+
+          await wait()
+
+          expect('#form').toHaveText('failure text')
+
 
       describe 'submit buttons', ->
 

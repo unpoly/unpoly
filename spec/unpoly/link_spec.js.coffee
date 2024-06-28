@@ -110,7 +110,7 @@ describe 'up.link', ->
 #          # Assert that focus did not change
 #          expect(input).toBeFocused()
 
-      describe 'events', ->
+      describe 'up:link:follow events', ->
 
         it 'emits a preventable up:link:follow event', ->
           link = fixture('a[href="/destination"][up-target=".response"]')
@@ -130,6 +130,84 @@ describe 'up.link', ->
 
           # No request should be made because we prevented the event
           expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+        it 'allows listeners to mutate event.renderOptions', ->
+          fixture('#foo', text: 'old foo')
+          fixture('#bar', text: 'old bar')
+
+          link = fixture('a[href="/path"][up-target="#foo"]')
+
+          listener = jasmine.createSpy('follow listener').and.callFake (event) ->
+            expect(event.renderOptions.target).toBe('#foo')
+            event.renderOptions.target = '#bar'
+
+          link.addEventListener('up:link:follow', listener)
+
+          up.follow(link)
+
+          await wait()
+
+          expect(listener).toHaveBeenCalled()
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#bar')
+
+          jasmine.respondWithSelector('#bar', text: 'new bar')
+
+          await wait()
+
+          expect('#foo').toHaveText('old foo')
+          expect('#bar').toHaveText('new bar')
+
+        it 'allows listeners to open a new layer, using the shorthand { layer: "new" } with an implicit mode', ->
+          fixture('#foo', text: 'old foo in root')
+          link = fixture('a[href="/path"][up-target="#foo"]')
+
+          listener = jasmine.createSpy('follow listener').and.callFake (event) ->
+            event.renderOptions.layer = 'new'
+
+          link.addEventListener('up:link:follow', listener)
+
+          up.follow(link)
+
+          await wait()
+
+          expect(listener).toHaveBeenCalled()
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Mode']).toBe('modal')
+
+          jasmine.respondWithSelector('#foo', text: 'new foo in overlay')
+
+          await wait()
+
+          expect(up.layer.count).toBe(2)
+          expect(up.fragment.get('#foo', layer: 0)).toHaveText('old foo in root')
+          expect(up.fragment.get('#foo', layer: 1)).toHaveText('new foo in overlay')
+
+        it 'allows listeners to open a new layer for a failed response', ->
+          fixture('#foo', text: 'old foo in root')
+          link = fixture('a[href="/path"][up-target="#foo"][up-fail-target="#foo"]')
+
+          listener = jasmine.createSpy('follow listener').and.callFake (event) ->
+            event.renderOptions.failLayer = 'new'
+
+          link.addEventListener('up:link:follow', listener)
+
+          up.follow(link)
+
+          await wait()
+
+          expect(listener).toHaveBeenCalled()
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Mode']).toBe('root')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Fail-Mode']).toBe('modal')
+
+          jasmine.respondWithSelector('#foo', text: 'new foo in overlay', status: 422)
+
+          await wait()
+
+          expect(up.layer.count).toBe(2)
+          expect(up.fragment.get('#foo', layer: 0)).toHaveText('old foo in root')
+          expect(up.fragment.get('#foo', layer: 1)).toHaveText('new foo in overlay')
 
       describe 'history', ->
 
@@ -1514,6 +1592,19 @@ describe 'up.link', ->
               expect(up.layer.current.getFocusElement()).toHaveFocus()
               expect(up.layer.current.getFocusElement()).toHaveOutline()
 
+            it 'opens a failed response in a new overlay with [up-fail-layer="new"]', ->
+              link = fixture('a[href="/overlay"][up-target="#content"][up-fail-target="#content"][up-fail-layer="new"]')
+              Trigger.clickSequence(link)
+
+              await wait()
+
+              jasmine.respondWithSelector('#content', text: ' overlay content', status: 422)
+
+              await wait()
+
+              expect(up.layer.current).toBeOverlay()
+              expect(up.layer.current).toHaveText('overlay content')
+
       describe 'with [up-focus] modifier', ->
 
         it 'focuses the given selector', ->
@@ -1797,6 +1888,46 @@ describe 'up.link', ->
 
         expect(followSpy).toHaveBeenCalledWith(link)
         expect(link).not.toHaveBeenDefaultFollowed()
+
+      it 'follows a link that is immediately removed after clicking', ->
+        fixture('#main')
+        link = fixture('a[href="/follow-path"][up-follow=true][up-target="#main"]')
+
+        Trigger.clickSequence(link)
+        link.remove()
+
+        await wait()
+
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        jasmine.respondWithSelector('#main', text: 'link content')
+
+        await wait()
+
+        expect('#main').toHaveText('link content')
+
+      describe 'when the server reponds with an error', ->
+
+        it 'updates the [up-fail-target] instead'
+
+        it 'updates a main target if no [up-fail-target] is given'
+
+        it 'updates the [up-fail-target] if the link is immediately removed after clicking', ->
+          fixture('#success', text: 'initial content')
+          fixture('#failure', text: 'initial content')
+          link = fixture('a[href="/follow-path"][up-follow=true][up-target="#success"][up-fail-target="#failure"]')
+
+          Trigger.clickSequence(link)
+          link.remove()
+
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          jasmine.respondWithSelector('#failure', text: 'link content', status: 422)
+
+          await wait()
+
+          expect('#success').toHaveText('initial content')
+          expect('#failure').toHaveText('link content')
 
       describe 'exemptions from following', ->
 
