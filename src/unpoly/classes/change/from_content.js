@@ -44,13 +44,13 @@ up.Change.FromContent = class FromContent extends up.Change {
     //     From that given array we need to remove layers that have been closed while
     //     the request was in flight.
     //
-    // (2) If we're rendering a framgent from local content ({ document, fragment, content }),
+    // (2) If we're rendering a fragment from local content ({ document, fragment, content }),
     //     options.layer will be a layer name like "current" and needs to be looked up.
     //
     // (3) If we end up having no renderable layers, don't throw here.
     //     seekPlan() and its up.CannotMatch handling may not be active yet.
-    this._allLayers = up.layer.getAll(this.options)
-    this._layers = u.filter(this._allLayers, this._isRenderableLayer)
+    this._layers = up.layer.getAll(this.options)
+    this._layers = u.filter(this._layers, this._isRenderableLayer)
   }
 
   _expandIntoPlans(plans, layers, targets) {

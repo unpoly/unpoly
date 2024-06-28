@@ -5,11 +5,13 @@ up.Change.FromURL = class FromURL extends up.Change {
   constructor(options) {
     super(options)
 
+    console.debug("FromURL constructor")
+
     // Look up layers *before* we make the request.
-    // In case of { layer: 'origin' } (default for navigation) the { origin }
-    // element may get removed while the request was in flight, making
-    // up.Change.FromContent#execute() fail with "layer { origin } does not exist".
+    // In case of { layer: 'origin' } the { origin } element may get removed while the request was in flight,
+    // making up.Change.FromContent#execute() fail with "layer { origin } does not exist".
     this.options.layer = up.layer.getAll(this.options)
+    this.options.failLayer = up.layer.getAll({ ...this.options, layer: this.options.failLayer })
 
     // Since up.layer.getAll() already normalizes layer options,
     // we don't need to normalize again in up.Change.FromContent.
@@ -61,8 +63,6 @@ up.Change.FromURL = class FromURL extends up.Change {
 
   _getRequestAttrs() {
     const successAttrs = this._preflightPropsForRenderOptions(this.options)
-
-
     const failAttrs = this._preflightPropsForRenderOptions(this.deriveFailOptions(), { optional: true })
 
     return {

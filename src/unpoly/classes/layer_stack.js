@@ -87,7 +87,7 @@ up.LayerStack = class LayerStack {
   }
 
   getAll(...args) {
-    return new up.LayerLookup(this, ...args).all()
+    return up.LayerLookup.all(this, ...args)
   }
 
   sync() {

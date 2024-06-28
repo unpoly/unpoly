@@ -1798,6 +1798,46 @@ describe 'up.link', ->
         expect(followSpy).toHaveBeenCalledWith(link)
         expect(link).not.toHaveBeenDefaultFollowed()
 
+      it 'follows a link that is immediately removed after clicking', ->
+        fixture('#main')
+        link = fixture('a[href="/follow-path"][up-follow=true][up-target="#main"]')
+
+        Trigger.clickSequence(link)
+        link.remove()
+
+        await wait()
+
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        jasmine.respondWithSelector('#main', text: 'link content')
+
+        await wait()
+
+        expect('#main').toHaveText('link content')
+
+      describe 'when the server reponds with an error', ->
+
+        it 'updates the [up-fail-target] instead'
+
+        it 'updates a main target if no [up-fail-target] is given'
+
+        it 'updates the [up-fail-target] if the link is immediately removed after clicking', ->
+          fixture('#success', text: 'initial content')
+          fixture('#failure', text: 'initial content')
+          link = fixture('a[href="/follow-path"][up-follow=true][up-target="#success"][up-fail-target="#failure"]')
+
+          Trigger.clickSequence(link)
+          link.remove()
+
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          jasmine.respondWithSelector('#failure', text: 'link content', status: 400)
+
+          await wait()
+
+          expect('#success').toHaveText('initial content')
+          expect('#failure').toHaveText('link content')
+
       describe 'exemptions from following', ->
 
         it 'never follows a link with [download] (which opens a save-as-dialog)', asyncSpec (next) ->
