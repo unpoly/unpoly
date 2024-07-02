@@ -654,7 +654,7 @@ describe('up.element', function() {
       expect(element.parentElement).toBe(document.body)
 
       // Since this is not a fixture that would auto-remove itself after the test, remove it manually.
-      return element.remove()
+      element.remove()
     })
   })
 
@@ -789,11 +789,11 @@ describe('up.element', function() {
 
       document.body.appendChild(element)
 
-      return next.after(100, function() {
+      next.after(100, function() {
         expect(window.scriptTagExecuted).toHaveBeenCalled()
 
         element.remove()
-        return delete window.scriptTagExecuted
+        delete window.scriptTagExecuted
       })
     }))
 

@@ -177,7 +177,7 @@ describe('up.script', function() {
 
             expect(window.compileSpy.calls.count()).toBe(1)
 
-            return delete window.compileSpy
+            delete window.compileSpy
           })
         })
       })
@@ -472,7 +472,7 @@ describe('up.script', function() {
         up.compiler('.foo', () => layerSpy(up.layer.current))
         makeLayers(2)
 
-        return next(function() {
+        next(function() {
           const rootElement = fixture('.foo.in-root')
           const overlayElement = up.layer.get(1).affix('.foo.in-overlay')
 
@@ -491,7 +491,7 @@ describe('up.script', function() {
         up.compiler('.foo', () => layerSpy(up.layer.current))
         makeLayers(2)
 
-        return next(function() {
+        next(function() {
           expect(up.layer.current.isOverlay()).toBe(true)
 
           const element = up.element.createFromSelector('.foo')
@@ -533,7 +533,7 @@ describe('up.script', function() {
           up.compiler('.element', crashingCompiler)
           const element = fixture('.element')
 
-          return await jasmine.expectGlobalError(compileError, function() {
+          await jasmine.expectGlobalError(compileError, function() {
             const hello = () => up.hello(element)
             expect(hello).not.toThrowError()
           })
@@ -718,7 +718,7 @@ describe('up.script', function() {
           const element = fixture('.element')
           up.destructor(element, crashingDestructor)
 
-          return await jasmine.expectGlobalError(destroyError, function() {
+          await jasmine.expectGlobalError(destroyError, function() {
             const clean = () => up.script.clean(element)
             expect(clean).not.toThrowError()
           })
