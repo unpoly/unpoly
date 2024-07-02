@@ -54,6 +54,7 @@ module.exports = {
         "registerFixture": "readonly",
         "makeLayers": "readonly",
         "Trigger": "readonly",
+        "promiseState": "readonly",
       },
       "rules": {
         "@typescript-eslint/no-unused-vars": "off"
