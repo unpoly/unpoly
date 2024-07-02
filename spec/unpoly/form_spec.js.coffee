@@ -986,7 +986,7 @@ describe 'up.form', ->
 
           await wait()
 
-          jasmine.respondWithSelector(formSelector, text: 'failure text', status: 400)
+          jasmine.respondWithSelector(formSelector, text: 'failure text', status: 422)
 
           await wait()
 
@@ -1011,7 +1011,7 @@ describe 'up.form', ->
 
           await wait()
 
-          jasmine.respondWithSelector(formSelector, text: 'failure text', status: 400)
+          jasmine.respondWithSelector(formSelector, text: 'failure text', status: 422)
 
           await wait()
 
@@ -1038,7 +1038,7 @@ describe 'up.form', ->
 
           await wait()
 
-          jasmine.respondWithSelector(formSelector, text: 'failure text', status: 400)
+          jasmine.respondWithSelector(formSelector, text: 'failure text', status: 422)
 
           await wait()
 
@@ -1903,7 +1903,7 @@ describe 'up.form', ->
 
           await expectAsync(promise).toBePending()
 
-          jasmine.respondWithSelector('.element', text: 'new text', status: 400)
+          jasmine.respondWithSelector('.element', text: 'new text', status: 422)
 
           await wait()
 
@@ -2849,7 +2849,7 @@ describe 'up.form', ->
 
           await wait()
 
-          jasmine.respondWithSelector(formSelector, text: 'failure text', status: 400)
+          jasmine.respondWithSelector(formSelector, text: 'failure text', status: 422)
 
           await wait()
 

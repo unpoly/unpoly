@@ -588,13 +588,35 @@ describe 'up.feedback', ->
         await wait()
 
         expect('.target').toHaveClass('up-loading')
-        jasmine.respondWithSelector('.fail-target', text: 'new text', status: 400)
+        jasmine.respondWithSelector('.fail-target', text: 'new text', status: 422)
 
         await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
 
         expect('.fail-target').toHaveText('new text')
         expect('.target').not.toHaveClass('up-loading')
         expect('.fail-target').not.toHaveClass('up-loading')
+
+      it 'assigns .load-loading on the correct element if a guard event listeners changes target', ->
+        fixture('#foo', text: 'old foo')
+        fixture('#bar', text: 'old bar')
+
+        link = fixture('a[href="/path"][up-target="#foo"]')
+
+        listener = jasmine.createSpy('follow listener').and.callFake (event) ->
+          event.renderOptions.target = '#bar'
+
+        link.addEventListener('up:link:follow', listener)
+
+        up.follow(link)
+
+        await wait()
+
+        expect(listener).toHaveBeenCalled()
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+        expect('#foo').not.toHaveClass('up-loading')
+        expect('#bar').toHaveClass('up-loading')
+
 
     describe '.up-active', ->
 
@@ -707,7 +729,7 @@ describe 'up.feedback', ->
 
         jasmine.respondWith(
           responseText: '<div id="main">failed</div>'
-          status: 400
+          status: 422
         )
 
         await wait()
