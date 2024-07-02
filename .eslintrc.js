@@ -26,7 +26,7 @@ module.exports = {
       "varsIgnorePattern": "^_"
     }],
     "@typescript-eslint/no-empty-function": "off",
-    "@typescript-eslint/no-this-alias": "off"
+    "@typescript-eslint/no-this-alias": "off",
   },
   "globals": {
     "up": "writable",
@@ -42,12 +42,22 @@ module.exports = {
         "describe": "readonly",
         "it": "readonly",
         "expect": "readonly",
-        "fixture": "readonly",
-        "wait": "readonly",
         "beforeEach": "readonly",
         "afterEach": "readonly",
+        "spyOn": "readonly",
+        "spyOnProperty": "readonly",
         "asyncSpec": "readonly",
-      }
+        "fixture": "readonly",
+        "fixtureStyle": "readonly",
+        "$fixture": "readonly",
+        "wait": "readonly",
+        "registerFixture": "readonly",
+        "makeLayers": "readonly",
+        "Trigger": "readonly",
+      },
+      "rules": {
+        "@typescript-eslint/no-unused-vars": "off"
+      },
     }
   ]
 
