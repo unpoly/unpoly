@@ -482,7 +482,7 @@ should be inserted:
 
   @selector [up-flashes]
   @param [up-transition]
-    The name of an [transition](/up.motion) to morph between the old and few notification flashes.
+    The name of a [transition](/up.motion) to morph between the old and new notification flashes.
   @param [up-duration]
     The duration of the transition (in millisconds).
 
