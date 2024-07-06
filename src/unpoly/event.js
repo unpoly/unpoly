@@ -427,6 +427,14 @@ The parsed data will be passed to your event handler as a third argument:
       !u.some(keyModifiers, modifier => event[modifier])
   }
 
+  /*-
+  @function up.event.isSyntheticClick
+  @internal
+  */
+  function isSyntheticClick(event) {
+    return u.isMissing(event.clientX)
+  }
+
   function fork(originalEvent, newType, copyKeys = []) {
     const newEvent = up.event.build(newType, u.pick(originalEvent, copyKeys))
     newEvent.originalEvent = originalEvent; // allow users to access other props through event.originalEvent.prop
@@ -534,6 +542,7 @@ The parsed data will be passed to your event handler as a third argument:
     onEscape,
     halt,
     isUnmodified,
+    isSyntheticClick,
     fork,
     keyModifiers,
     get inputDevice() { return getInputDevice() }

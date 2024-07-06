@@ -547,8 +547,8 @@ up.Layer = class Layer extends up.Record {
     return this.contains(event.target)
   }
 
-  wasHitByMouseEvent(event) {
-    const hittableElement = document.elementFromPoint(event.clientX, event.clientY)
+  wasHitByMouseEvent({ clientX, clientY }) {
+    const hittableElement = document.elementFromPoint(clientX, clientY)
     return !hittableElement || this.contains(hittableElement)
   }
 

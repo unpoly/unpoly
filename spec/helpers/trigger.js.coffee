@@ -59,24 +59,34 @@ window.Trigger = (->
     event = createSimpleEvent('touchstart', u.merge({ element }, options))
     dispatch(element, event)
 
-  click = (element, options) ->
+  click = (element, options = {}) ->
     element = e.get(element)
-    event = createMouseEvent('click', u.merge({ element }, options))
+    options = u.merge({ element }, options)
+
+    # The `click` event is a PointerEvent in Chrome, but a MouseEvent in Firefox and Safari.
+    # `mousedown` and `mouseup` events are a MouseEvent in every browser.
+    if AgentDetector.isSafari() || AgentDetector.isFirefox()
+      event = createMouseEvent('click', options)
+    else
+      event = createPointerEvent('click', options)
+
     dispatch(element, event)
 
   clickLinkWithKeyboard = (link, options) ->
     link = e.get(link)
     link.focus({ preventScroll: true })
     # When a `click` event is emitted by pressing Return on a focused link,
-    # the event is a PointerEvent with an unknown { pointerType }.
-    # See https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/pointerType
+    # the event is either a PointerEvent with a { pointerType: "" } (on Chrome)
+    # or a MouseEvent (on Firefox, Safari).
     #
-    # However we cannot emit a PointerEvent programmatically, as this causes the link
+    # In both cases it has { clientX: 0, clientY: 0 } properties.
+    #
+    # To emulate e keyboard click, we cannot emit a PointerEvent programmatically, as this causes the link
     # to follow immediately, without emitting a `click` event that can be processed by JavaScript.
     key = "Return"
     keydown(link, key, options)
     keypress(link, key, options)
-    click(link, u.merge(options, { pointerType: '' }))
+    click(link, u.merge(options, { pointerType: '', clientX: 0, clientY: 0 }))
     keyup(link, key, options)
 
   focus = (element, options) ->
@@ -208,58 +218,58 @@ window.Trigger = (->
     event.initEvent(type, options.bubbles, options.cancelable)
     event
 
-  # Can't use the new MouseEvent constructor in IE11 because computer.
-  # http://www.codeproject.com/Tips/893254/JavaScript-Triggering-Event-Manually-in-Internet-E
-  createMouseEvent = (type, options = {}) ->
-    rect = options.element?.getBoundingClientRect()
-
+  buildMouseEventOptions = (type, options = {}) ->
     defaults =
-      view: window,
-      cancelable: true,
-      bubbles: true,
-      detail: 0,
-      screenX: 0, # from browser viewport origin, even within an iframe
-      screenY: 0, # from browser viewport origin, even within an iframe
-      clientX: rect?.x,
-      clientY: rect?.y,
+      cancelable: true, # https://developer.mozilla.org/en-US/docs/Web/API/Event/Event
+      bubbles: true,    # https://developer.mozilla.org/en-US/docs/Web/API/Event/Event
+      view: window, # https://developer.mozilla.org/en-US/docs/Web/API/UIEvent/UIEvent
       ctrlKey: false,
       altKey: false,
       shiftKey: false,
       metaKey: false,
-      button: 0,
+      button: 0, # main button pressed or un-initialized
       relatedTarget: null
 
-    # If we get an { element } options we can derive the { clientX } and { screenY } properties
-    # from the element's center coordinates.
-    if element = options.element
+    # Defaults for { detail }.
+    if type == 'click' || type == 'mousedown' || type == 'mouseup'
+      defaults.detail = 1
+    else if type = 'dblclick'
+      defaults.detail = 2
+    else
+      defaults.detail = 0
+
+    # Defaults for { clientX, clientY }.
+    if element = (options.element || options.target)
       elementRect = element.getBoundingClientRect()
+      # If we get an { element } options we can derive the { clientX } and { clientY } properties
+      # from the element's center coordinates.
       defaults.clientX = elementRect.left + (0.5 * elementRect.width)
       defaults.clientY = elementRect.top + (0.5 * elementRect.height)
+    else
+      defaults.clientX = 0
+      defaults.clientY = 0
 
-    options = u.options(options, defaults)
+    # Merge defaults and given options .
+    options = { defaults..., options... }
+
+    # Derive { buttons } from { button }.
+    buttonToButtons = { 0: 1, 1: 4, 2: 2 }
+    options.buttons ?= buttonToButtons[options.button]
 
     # If { screenX, screenY } are not given we can derive it from { clientX, clientY }.
-    options.screenX ?= options.clientX + window.screenX
-    options.screenY ?= options.clientY + window.screenY
+    options.screenX ?= options.clientX + document.documentElement.scrollLeft
+    options.screenY ?= options.clientY + document.documentElement.scrollTop
 
-    event = buildEvent('MouseEvent')
-    event.initMouseEvent(type,
-      options.bubbles,
-      options.cancelable,
-      options.view,
-      options.detail,
-      options.screenX,
-      options.screenY,
-      options.clientX,
-      options.clientY,
-      options.ctrlKey,
-      options.altKey,
-      options.shiftKey,
-      options.metaKey,
-      options.button,
-      options.relatedTarget
-    )
-    event
+    return options
+
+  createMouseEvent = (type, options = {}) ->
+    options = buildMouseEventOptions(type, options)
+    return new MouseEvent(type, options)
+
+  createPointerEvent = (type, options = {}) ->
+    pointerEventDefault = { pointerType: "mouse", isPrimary: true }
+    options = buildMouseEventOptions(type, { pointerEventDefault..., options... })
+    return new PointerEvent(type, options)
 
   createKeyboardEvent = (type, options) ->
     options = u.options(options,

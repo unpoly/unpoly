@@ -3728,15 +3728,12 @@ describe 'up.link', ->
           expect(link).toHaveBeenDefaultFollowed()
 
         it 'does not crash with a synthetic click event that may not have all properties defined (bugfix)', ->
-          link = fixture('a[href="/path"]')
+          link = fixture('a[href="/path"]', text: 'label')
           listener = jasmine.createSpy('up:click listener')
           link.addEventListener('up:click', listener)
-          Trigger.click(link, {
-            clientX: undefined,
-            clientY: undefined,
-            screenX: undefined,
-            screenY: undefined,
-          })
+          event = new Event('click', { bubbles: true, cancelable: true })
+          link.dispatchEvent(event)
+
           expect(listener).toHaveBeenCalled()
           expect(link).toHaveBeenDefaultFollowed()
 
@@ -3764,6 +3761,20 @@ describe 'up.link', ->
           next ->
             expect(listener).not.toHaveBeenCalled()
             expect(link).toHaveBeenDefaultFollowed()
+
+        it 'emits an up:click event when an element within a popup overlay is clicked with the keyboard', ->
+          anchor = fixture('span', text: 'label')
+          layer = await up.layer.open({ mode: 'popup', text: 'initial text', origin: anchor })
+          link = layer.affix('a[href="/path"]', text: 'label')
+          listener = jasmine.createSpy('up:click listener')
+          link.addEventListener('up:click', listener)
+
+          Trigger.clickLinkWithKeyboard(link)
+
+          await wait()
+
+          expect(link).toHaveBeenDefaultFollowed()
+          expect(listener).toHaveBeenCalled()
 
         it 'does not emit an up:click event if the right mouse button is used', asyncSpec (next) ->
           link = fixture('a[href="/path"]')

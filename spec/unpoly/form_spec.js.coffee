@@ -2842,9 +2842,7 @@ describe 'up.form', ->
           # This is how Shoelace submits a form:
           # https://github.com/shoelace-style/shoelace/blob/96edd854f3cf8a79da5eff3f86f1489a7e3e9f75/src/internal/form.ts#L364-L366
           button = e.affix(form, 'button[type=submit]')
-          console.debug("spec clicking")
           button.click()
-          console.debug("spec removing")
           button.remove()
 
           await wait()

@@ -738,7 +738,7 @@ up.link = (function() {
       // Chrome will emit an event with { target: document.body } on click.
       // Ignore that event and only process if we would still hit the
       // expect layers at the click coordinates.
-      } else if (layer.wasHitByMouseEvent(event) && !didUserDragAway(event)) {
+      } else if (up.event.inputDevice === 'key' || up.event.isSyntheticClick(event) || (layer.wasHitByMouseEvent(event) && !didUserDragAway(event))) {
         // Event is a `PointerEvent` with an { pointerType } property.
         // Its values are 'mouse', 'pen', 'touch' or '' (unknown, meaning synthetic or keyboard).
         forkEventAsUpClick(event)
