@@ -76,3 +76,5 @@ RedirectPermanent /opts /attributes-and-options
 RedirectPermanent /configuration /attributes-and-options
 RedirectPermanent /config /attributes-and-options
 RedirectPermanent /attributes-options /attributes-and-options
+
+RedirectPermanent /a-up-emit /up-emit

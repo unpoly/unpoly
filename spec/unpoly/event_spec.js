@@ -952,14 +952,44 @@ describe('up.event', function() {
 
   describe('unobtrusive behavior', function() {
 
-    describe('a[up-emit]', function() {
+    describe('[up-emit]', function() {
 
-      it('emits an event of the given type when the link is clicked', function() {
+      it('emits an event of the given type when its link is clicked', function() {
         const link = up.hello(fixture("a[up-emit='foo']", {text: 'label'}))
         const fooListener = jasmine.createSpy('fooListener')
         link.addEventListener('foo', fooListener)
 
         Trigger.clickSequence(link)
+
+        expect(fooListener).toHaveBeenCalled()
+      })
+
+      it('emits an event of the given type when its button is clicked', function() {
+        const button = up.hello(fixture("button[up-emit='foo']", {text: 'label'}))
+        const fooListener = jasmine.createSpy('fooListener')
+        button.addEventListener('foo', fooListener)
+
+        Trigger.clickSequence(button)
+
+        expect(fooListener).toHaveBeenCalled()
+      })
+
+      it('emits an event of the given type when its input[type=button] is clicked', function() {
+        const input = up.hello(fixture("input[type=button][up-emit='foo']", {text: 'label'}))
+        const fooListener = jasmine.createSpy('fooListener')
+        input.addEventListener('foo', fooListener)
+
+        Trigger.clickSequence(input)
+
+        expect(fooListener).toHaveBeenCalled()
+      })
+
+      it('emits an event of the given type when its [up-clickable] is clicked', function() {
+        const clickable = up.hello(fixture("span[up-clickable][up-emit='foo']", {text: 'label'}))
+        const fooListener = jasmine.createSpy('fooListener')
+        clickable.addEventListener('foo', fooListener)
+
+        Trigger.clickSequence(clickable)
 
         expect(fooListener).toHaveBeenCalled()
       })

@@ -457,12 +457,10 @@ The parsed data will be passed to your event handler as a third argument:
   }
 
   /*-
-  Emits the given event when this link is clicked.
+  Emits the given event when this element is clicked.
 
-  When the emitted event's default' is prevented, the original `click` event's default is also prevented.
-
-  You may use this attribute to emit events when clicking on areas that are no hyperlinks,
-  by setting it on an `<a>` element without a `[href]` attribute.
+  When the emitted event's default' is prevented, the original
+  `click` event's default is also prevented.
 
   ### Example
 
@@ -483,7 +481,7 @@ The parsed data will be passed to your event handler as a third argument:
   </script>
   ```
 
-  @selector a[up-emit]
+  @selector [up-emit]
   @param up-emit
     The type of the event to be emitted.
   @param [up-emit-props='{}']
@@ -499,7 +497,7 @@ The parsed data will be passed to your event handler as a third argument:
     up.emit(element, forkedEvent)
   }
 
-  on('up:click', 'a[up-emit]', executeEmitAttr)
+  on('up:click', '[up-emit]', executeEmitAttr)
 
   let inputDevices = ['unknown']
 
