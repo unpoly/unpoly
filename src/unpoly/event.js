@@ -343,8 +343,7 @@ The parsed data will be passed to your event handler as a third argument:
     const props = u.extractOptions(args)
     const type = args[0] || props.type || up.fail('Expected event type to be passed as string argument or { type } property')
 
-    const event = document.createEvent('Event')
-    event.initEvent(type, true, true) // name, bubbles, cancelable
+    const event = new Event(type, { bubbles: true, cancelable: true })
     Object.assign(event, u.omit(props, ['type', 'target']))
 
     return event
