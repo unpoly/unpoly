@@ -77,6 +77,7 @@ new page is loading.
 @see failed-responses
 @see preloading
 @see lazy-loading
+@see faux-interactive-elements
 
 @see a[up-follow]
 @see a[up-instant]
@@ -654,19 +655,52 @@ up.link = (function() {
   }
 
   /*-
-  Enables keyboard interaction for elements that represent links or buttons.
+  Enables [keyboard interaction and other accessibility behaviors](/faux-interactive-elements#accessibility)
+  for non-interactive elements that represent clickable buttons.
 
-  To define the element's effect when activated, handle the `up:click` event.
-  If you want Unpoly to treat this element like a hyperlink, set an `[up-href]` attribute.
+  It's up to you make the element appear interactive visually, e.g. by assigning a `.button` class from your design system.
 
-  ### Accessibility
+  See [Clicking on non-interactive elements](/faux-interactive-elements) for an overview of similiar techniques.
 
-  @include clickable-behaviors
+  ### Example
+
+  Add the `[up-clickable]` attribute to a non-interactive element, like a `<span>`:
+
+  ```html
+  <span id="faux-button" up-clickable>Click me</span> <!-- mark-phrase "up-clickable" -->
+  ```
+
+  To react the element's effect when activated, handle the `up:click` event:
+
+  ```js
+  let button = document.querySelector('#faux-button')
+
+  button.addEventListener('up:click', function(event) {
+    console.log('Click on faux button!')
+  })
+  ```
+
+  ### Act on press
+
+  To activate the element on `mousedown` instead of `click`, also set an `[up-instant]` attribute:
+
+    ```html
+  <span id="faux-button" up-clickable up-instant>Click me</span> <!-- mark-phrase "up-instant" -->
+  ```
 
   ### Unobtrusive use
 
-  To add these behaviors to existing elements without setting the `[up-clickable]`,
-  push a selector into [`up.link.config.clickableSelectors`](/up.link.config#config.clickableSelectors).
+  To make elements clickable without an explicit `[up-clickable]` attribute, configure `up.link.config.clickableSelectors`:
+
+  ```js
+  up.link.config.clickableSelectors.push('.button')
+  ```
+
+  Any matching element will now gain [keyboard interaction and other accessibility behaviors](/faux-interactive-elements#accessibility):
+
+  ```html
+  <span class="button">I can be used with the keyboard</span>
+  ```
 
   @selector [up-clickable]
   @experimental
@@ -1025,10 +1059,40 @@ up.link = (function() {
 
   If no `[up-target]` attribute is set, the [main target](/up-main) is updated.
 
+  ### Following all links automatically
+
+  You can configure Unpoly to follow *all* links on a page without requiring an `[up-follow]` attribute.
+
+  See [Handling all links and forms](/handling-everything).
+
+  ### Preventing Unpoly from following links
+
+  You can tell Unpoly to ignore clicks on an `a[up-follow]` link, causing the link to be non-interactive.
+  Use one of the following methods:
+
+  - Prevent the `up:link:follow` event on the link element
+  - Prevent the `up:click` event on the link element
+
+  To force a [full page load](/up.network.loadPage) when a followable link is clicked:
+
+  - Set an `[up-follow=false]` attribute on the link element
+  - Prevent the `up:link:follow` event and call `up.network.loadPage(event.renderOptions)`.
+
+  ### Making non-interactive elements act as hyperlinks
+
+  You can set an `[up-follow]` attribute on any non-interactive element to make it behave like a hyperlink:
+
+  ```html
+  <span up-follow up-href="/details">Read more</span>
+  ```
+
+  See [Acting like a hyperlink](/faux-interactive-elements) for details.
+
   ### Advanced fragment changes
 
-  See [fragment placement](/targeting-fragments) for advanced use cases
-  like updating multiple fragments or appending content to an existing element.
+  Links can update multiple fragments or append content to an existing element.
+
+  See [Fragment placement](/targeting-fragments) for details.
 
   ### Short notation
 
@@ -1042,20 +1106,6 @@ up.link = (function() {
   - `[up-document]`
 
   Such a link will still be followed through Unpoly.
-
-  ### Following all links automatically
-
-  You can configure Unpoly to follow *all* links on a page without requiring an `[up-follow]` attribute.
-
-  See [Handling all links and forms](/handling-everything).
-
-  ### Preventing Unpoly from following links
-
-  To prevent Unpoly from following an `a[up-follow]` link, use one of the following options:
-
-  - Prevent the `up:link:follow` event on the link element
-  - Prevent the `up:click` event on the link element
-  - Set an `[up-follow=false]` attribute on the link element
 
   @selector a[up-follow]
 
@@ -1519,7 +1569,7 @@ up.link = (function() {
   */
 
   /*-
-  Follows this link on `mousedown` instead of `click`.
+  Follows this link on `mousedown` instead of `click` ("Act on press").
 
   This will save precious milliseconds that otherwise spent
   on waiting for the user to release the mouse button. Since an
@@ -1533,7 +1583,7 @@ up.link = (function() {
   ### Example
 
   ```html
-  <a href="/users" up-follow up-instant>User list</a>
+  <a href="/users" up-follow up-instant>User list</a> <!-- mark-phrase "up-instant" -->
   ```
 
   ### Accessibility
@@ -1541,7 +1591,7 @@ up.link = (function() {
   Links with `[up-instant]` can still be activated with the keyboard.
 
   With `[up-instant]` users can no longer cancel a click by dragging the pressed mouse away from the link.
-  However, for navigation actions this isn't needed. E.g. many operation systems switch tabs on `mousedown`
+  However, for navigation actions this isn't required. E.g. many operation systems switch tabs on `mousedown`
   instead of `click`.
 
   @selector a[up-instant]

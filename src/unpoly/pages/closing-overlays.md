@@ -123,7 +123,7 @@ By defining a close condition, the overlay content does not need to be aware tha
 in an overlay. The overlay interaction is decoupled from the interaction in the parent layer.
 
 
-### Closing when a location is reached
+### Closing when a location is reached {#location-condition}
 
 The following will open an overlay that closes once a URL like `/companies/123` is reached:
 
@@ -142,7 +142,7 @@ become the overlay's *acceptance value*.
 To *dismiss* an overlay once a given location is reached, use `[up-dismiss-location]` and `[up-on-dismissed]` in the same fashion.
 
 
-### Closing when an event is emitted
+### Closing when an event is emitted {#event-condition}
 
 Instead of waiting for a location to be reached,
 you may accept an overlay\
@@ -172,6 +172,8 @@ To emit an event, use one of the following methods:
 | `X-Up-Events`        | HTTP header sent from the server |
 | [`Element#dispatchEvent()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/dispatchEvent) | Standard DOM API to emit an event on an element |
 
+When an event causes an overlay to close, its default is prevented. You can use `[up-emit]` with a [fallback URL](/a-up-emit#fallback)
+to make a link that emits a closing event in an overlay, but navigates to a different page on the [root layer](/up.layer.root).
 
 
 ### Rendering discarded notification flashes

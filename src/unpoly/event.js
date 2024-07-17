@@ -258,12 +258,12 @@ The parsed data will be passed to your event handler as a third argument:
   }
 
   /*-
-  Emits a event with the given name and properties.
+  Emits a custom event with the given name and properties.
 
-  The event will be triggered as an event on `document` or on the given element.
+  The event will be dispatched on the `document` or on the given element.
 
-  Other code can subscribe to events with that name using
-  [`Element#addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener)
+  You can listen to events of that type using
+  [`addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener)
   or [`up.on()`](/up.on).
 
   ### Example
@@ -456,33 +456,82 @@ The parsed data will be passed to your event handler as a third argument:
   }
 
   /*-
-  Emits the given event when this element is clicked.
+  Emits a custom event when this element is clicked.
 
-  When the emitted event's default' is prevented, the original
-  `click` event's default is also prevented.
+  The event is emitted on this element and bubbles up the `document`.
+  To listen to the event, use [`addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener) or `up.on()`
+  on the element, or on its ancestors.
+
+  While the `[up-emit]` attribute is often used with an `<a>` or `<button>` element,
+  you can also apply to to non-interactive elements, like a `<span>`.
+  See [clicking on non-interactive elements](/faux-interactive-elements) for details and
+  accessibility considerations.
 
   ### Example
 
-  This hyperlink will emit an `user:select` event when clicked:
+  This button will emit a `menu:open` event when pressed:
 
   ```html
-  <a href='/users/5'
+  <button type="button" up-emit='user:select'>Alice</button>
+  ```
+
+  The event can be handled by a listener:
+
+  ```js
+  document.addEventListener('user:select', function(event) {
+    up.reload('#user-details')
+  })
+  ```
+
+  ### Event properties
+
+  By default `[up-emit]` will emit an event with only basic properties like [`{ target }`](https://developer.mozilla.org/en-US/docs/Web/API/Event/target).
+
+  To set custom properties on the event object, encode them as JSON in an `[up-emit-props]` attribute:
+
+  ```html
+  <button type="button"
     up-emit='user:select'
     up-emit-props='{ "id": 5, "firstName": "Alice" }'>
     Alice
-  </a>
+  </button>
 
   <script>
-    up.on('a', 'user:select', function(event) {
+    up.on('user:select', function(event) {
+      console.log(event.id)        // logs 5
       console.log(event.firstName) // logs "Alice"
-      event.preventDefault()       // will prevent the link from being followed
     })
   </script>
   ```
 
+  ### Fallback URLs {#fallback}
+
+  Use `[up-emit]` on a link to define a fallback URL that is rendered in case no listener handles the event:
+
+  ```html
+  <a href="/menu" up-emit='menu:open'>Menu</a>
+  ```
+
+  When a listener has handled the `menu:open` event, it should call `event.preventDefault()`.
+  This also prevents the original `click` event, causing the link to no longer be followed:
+
+  ```js
+  document.addEventListener('menu:open', function(event) {
+    event.preventDefault() // prevent the link from being followed
+  })
+  ```
+
+  If no listener prevents the `menu:open` event, the browser will [navigate](/a-up-follow)
+  to the `/menu` path.
+
+  > [tip]
+  > When an [event closes an overlay](/closing-overlays#event-condition) via `[up-accept-event]` or `[up-dismiss-event]`, its default is prevented.
+  > You can use fallback URLs to make a link that emits a closing event in an overlay, but navigates to a different page on the [root layer](/up.layer.root).
+
+
   @selector [up-emit]
   @param up-emit
-    The type of the event to be emitted.
+    The [type](https://developer.mozilla.org/en-US/docs/Web/API/Event/type) of the event to be emitted, e.g. `my:event`.
   @param [up-emit-props='{}']
     The event properties, serialized as JSON.
   @stable
