@@ -448,14 +448,18 @@ up.layer = (function() {
     Passing `true` or `false` will enable or disable all dismiss controls.
 
   @param {boolean|string} [options.history]
-    Whether the [history state](/updating-history#history-state) of the overlay content is visible.
+    Whether the overlay has [visible history](/history-in-overlays).
 
-    If set to `true` the overlay's location, title and meta tags will be shown in browser UI.
+    If set to `true` the overlay location, title and meta tags will be shown
+    while the overlay is open. When the overlay is closed, the parent layer's history is restored.
 
     If set to `'auto'` history will be visible if the initial overlay
     content matches a [main target](/up-main).
 
-    See [History in overlays](/updating-history#overlays).
+    If set to `false`, fragments changes within the overlay will *never* update the address bar.
+    You can still access the overlay's current location using `up.layer.location`.
+
+    See [History in overlays](/history-in-overlays).
 
   @param {string|Function} [options.animation]
     The opening animation.
@@ -740,15 +744,18 @@ up.layer = (function() {
     See [overlay classes](/customizing-overlays#overlay-classes).
 
   @param [up-history]
-    Whether history of the overlay content is [visible](/updating-history#overlays).
+    Whether the overlay has [visible history](/history-in-overlays).
 
-    If set to `true` the overlay location, title and meta tags will be shown
+    If set to `'true'` the overlay location, title and meta tags will be shown
     while the overlay is open. When the overlay is closed, the parent layer's history is restored.
 
     If set to `'auto'` history will be visible if the initial overlay
     content matches a [main target](/up-main).
 
-    See [Updating history in overlays](/updating-history#overlays).
+    If set to `'false'`, fragments changes within the overlay will *never* update the address bar.
+    You can still access the overlay's current location using `up.layer.location`.
+
+    See [History in overlays](/history-in-overlays).
 
   @param [up-dismissable]
     How the overlay may be [dismissed](/closing-overlays) by the user.

@@ -48,20 +48,10 @@ browser from restoring the URL in the address bar.
 Custom restoration code should avoid pushing new history entries.
 
 
-## History restoration with overlays {#overlays}
+## History restoration with overlays
 
-When a previous history is restored while an [overlay](/up.layer) is open, all overlays
-will be closed. The restored URL will be rendered in the [root layer](/up.layer.root).
+See [History restoration with overlays](/history-in-overlays#restoration)
 
-This behavior may cause overlay content to display as a full pages. In a canonic Unpoly app this
-is a good default, as Unpoly encourages all server routes to be prepared to render full HTML pages.
-In particular [subinteractions](/subinteractions) make it easy to implement interactions
-that work both on the root layer, and in an overlay.
-
-If you absolutely cannot work with the way Unpoly restores history with overlays, you have the following options:
-
-- Configure overlays to have no visible history by setting `up.layer.config.overlay.history = false`.
-- Implement a [custom restoration behavior](#custom-restoration-behavior).
 
 
 @page restoring-history

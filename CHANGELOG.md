@@ -580,7 +580,7 @@ The linked JavaScript and stylesheet are *not* part of history state and will no
 
 #### Consistent behavior in overlays
 
-[Overlays with history](/updating-history#overlays) now update meta tags when opening. When the overlay closes the parent layer's meta tags are restored.
+[Overlays with history](/history-in-overlays) now update meta tags when opening. When the overlay closes the parent layer's meta tags are restored.
 
 
 #### Deprecating `[up-hungry]` in the `<head>` 

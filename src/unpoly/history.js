@@ -10,6 +10,7 @@ The `up.history` module helps you work with the browser history.
 
 @see updating-history
 @see restoring-history
+@see history-in-overlays
 @see analytics
 
 @module up.history

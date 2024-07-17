@@ -30,6 +30,7 @@ To force a change of history state, use one of the following:
 - Set an `[up-history=true]` attribute on your link or form.
 - Pass a `{ history: true }` option when rendering a fragment [programmatically](/up.fragment).
 - Set `up.fragment.config.navigateOptions.history = true`. This will be the new default for all links and forms.
+- Listeners to `up:link:follow` or `up:form:submit` may set `event.renderOptions.history = true`.
 
 
 ### Preventing a history change 
@@ -39,6 +40,8 @@ To prevent changing history-related state after rendering a major fragment, use 
 - Set an `[up-history=false]` attribute on your link or form.
 - Pass a `{ history: false }` option when rendering a fragment [programmatically](/up.fragment).
 - Set `up.fragment.config.navigateOptions.history = false`. This will be the new default for all links and forms.
+- Listeners to `up:link:follow` or `up:form:submit` may set `event.renderOptions.history = false`.
+- Set `up.history.config.enabled = false` to globally prevent Unpoly from making history changes. 
 
 
 ### Only `GET` requests change history
@@ -73,6 +76,7 @@ A history update comprises the following:
 - The URL shown in the browser's address bar.
 - The document title shown as the browser's window title.
 - Meta tags like `meta[name=description]` or `link[rel=canonical]`.
+- The `[lang]` attribute of the root `<html>` element.
 
 In the document below, the highlighted nodes will be updated when history is changed, in additional to the location URL:
 
@@ -98,46 +102,13 @@ The linked JavaScript and stylesheet are *not* part of history state and will no
 
 You may choose to only update some history-related state, but keep others unchanged:
 
-- Meta tag synchronization can be disabled by setting [`[up-meta-tags="false"]`](/a-up-follow#up-meta-tags) on a link or form, or by passing [`{ metaTags: false }`](/up.render#options.metaTags) to a rendering function.
 - Location changes can be disabled by setting [`[up-location="false"]`](/a-up-follow#up-location) on a link or form, or by passing [`{ location: false }`](/up.render#options.location) to a rendering function.
 - Title changes can be disabled by setting [`[up-title="false"]`](/a-up-follow#up-title) on a link or form, or by passing [`{ title: false }`](/up.render#options.location) to a rendering function.
+- Meta tag synchronization can be disabled by setting [`[up-meta-tags="false"]`](/a-up-follow#up-meta-tags) on a link or form, or by passing [`{ metaTags: false }`](/up.render#options.metaTags) to a rendering function.
 - Changes to the [`html[lang]`](https://www.tpgi.com/using-the-html-lang-attribute/) attribute can be disabled by setting [`[up-lang="false"]`](/a-up-follow#up-title) on a link or form, or by passing [`{ title: false }`](/up.render#options.location) to a rendering function.
 
-
-## History in overlays {#overlays}
-
-By default modals and overlays will have visible history if their initial fragment is a [main element](/main).
-To override this default, use one of the following:
-
-- Set an `[up-history]` attribute on a link or form that opens an overlay.
-- Pass a `{ history }` option to `up.layer.open()` or `up.layer.ask()`.
-- Configure [`up.layer.config.overlay.history`](/up.layer.config#config.overlay.history). This will be the new
-  default for new overlays. You may also configure different defaults for different [layer modes](/layer-terminology),
-  e.g. by setting `up.layer.configure.popup.history`. 
-
-Also see [History restoration in overlays](/restoring-history#overlays)
-
-### Behavior of overlays with history
-
-When an overlay has visible history, its location and title are shown in the browser window while
-the overlay is open. Also [meta tags](#history-state) from the overlay content will be placed into the `<head>`.  
-
-When an overlay is closed, the URL, title and meta tags from the background layer are restored.
-
-### Behavior of overlays without history
-
-If visible history is disabled, it will remain disabled for the lifetime of the overlay.
- 
-Even when an overlay doesn't have visible history, is still tracks its location using the rules described
-on this page. You can access an overlay's current location using `up.layer.location`.
-
-When an overlay without history opens *another* overlay, the nested overlay cannot have history,
-even with `{ history: true }`.
-
-
-## Supporting the back button
-
-See [Restoring history](/restoring-history).
+> [note]
+> Options like `{ location }` will only be honored [when a render pass is changing history](#when-history-is-changed).
 
 
 @page updating-history
