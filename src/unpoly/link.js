@@ -94,17 +94,9 @@ up.link = (function() {
 
   let lastMousedownTarget = null
 
-  // Links with attribute-provided HTML are always followable.
-  const LINKS_WITH_LOCAL_HTML = ['a[up-content]', 'a[up-fragment]', 'a[up-document]']
-
-  // Links with remote HTML are followable if there is one additional attribute
-  // suggesting "follow me through Unpoly".
-  const LINKS_WITH_REMOTE_HTML = ['a[href]', '[up-href]']
-  const ATTRIBUTES_SUGGESTING_FOLLOW = ['[up-follow]', '[up-target]', '[up-layer]', '[up-transition]', '[up-preload]', '[up-instant]', '[up-href]']
-
-  function combineFollowableSelectors(elementSelectors, attributeSelectors) {
-    return u.flatMap(elementSelectors, elementSelector => attributeSelectors.map(attrSelector => elementSelector + attrSelector))
-  }
+  const ATTRS_WITH_LOCAL_HTML = '[up-content], [up-fragment], [up-document]'
+  const ATTRS_SUGGESTING_FOLLOW = `${ATTRS_WITH_LOCAL_HTML}, [up-target], [up-layer], [up-transition], [up-preload]`
+  const DEFAULT_INTERACTIVE_ELEMENT = 'a[href], button'
 
   /*-
   Configures defaults for link handling.
@@ -180,15 +172,17 @@ up.link = (function() {
   @param {Array<string>} [config.clickableSelectors]
     A list of CSS selectors matching elements that should behave like links or buttons.
 
-    @include clickable-behaviors
-
-    @see [up-clickable]
-    @see [up-href]
+    See [Clicking on non-interactive elements](/faux-interactive-elements).
     @experimental
   @stable
   */
   const config = new up.Config(() => ({
-    followSelectors: combineFollowableSelectors(LINKS_WITH_REMOTE_HTML, ATTRIBUTES_SUGGESTING_FOLLOW).concat(LINKS_WITH_LOCAL_HTML),
+    // (1) We want to follow all elements with an [up-follow] attribute.
+    //     This can be an <a up-follow href="/path"> or an <span up-follow up-href="/path">
+    // (2) Users expect a link to be followable if it uses a signature attribute
+    //     like [up-target] or [up-transition], even without an [up-href] attribute.
+    // (3) We sometimes allow <a> links without an [href], e.g. <a up-target=".foo" up-content="html">.
+    followSelectors: ['[up-follow]', `a:is(${ATTRS_SUGGESTING_FOLLOW})`],
 
     // (1) We don't want to follow <a href="#anchor"> links without a path. Instead
     //     we will let the browser change the current location's anchor and up.reveal()
@@ -198,13 +192,20 @@ up.link = (function() {
     //     Many web developers are used to give JavaScript-handled links an [href="#"]
     //     attribute. Also frameworks like Bootstrap only style links if they have an [href].
     // (3) We don't want to handle <a href="javascript:foo()"> links.
-    noFollowSelectors: ['[up-follow=false]', 'a[download]', 'a[target]', 'a[href^="#"]:not([up-content]):not([up-fragment]):not([up-document])', 'a[href^="javascript:"]', 'a[href^="mailto:"]', e.crossOriginSelector('href'), e.crossOriginSelector('up-href')],
+    noFollowSelectors: ['[up-follow=false]', 'a[download]', 'a[target]', 'a[href^="javascript:"]', 'a[href^="mailto:"]', `a[href^="#"]:not(${ATTRS_WITH_LOCAL_HTML})`, e.crossOriginSelector('href'), e.crossOriginSelector('up-href')],
 
     instantSelectors: ['[up-instant]'],
     noInstantSelectors: ['[up-instant=false]', '[onclick]'],
-    preloadSelectors: combineFollowableSelectors(LINKS_WITH_REMOTE_HTML, ['[up-preload]']),
+
+    preloadSelectors: ['[up-preload]'],
     noPreloadSelectors: ['[up-preload=false]'],
-    clickableSelectors: LINKS_WITH_LOCAL_HTML.concat(['[up-emit]', '[up-accept]', '[up-dismiss]', '[up-clickable]']),
+
+    // (1) Users can explicitly add A11Y behavior to non-interactive elements with [up-clickable]
+    // (2) We have some elements like [up-emit] or [up-accept] which may or may not be interactive elements
+    // (3) When a link is followable, is should also be clickable. Even a <span up-follow> or a <a up-content>.
+    // (4) Prevent unnecessary compilation of elements that are already interactive (a[href], button).
+    clickableSelectors: ['[up-clickable]', `:not(${DEFAULT_INTERACTIVE_ELEMENT}):is([up-follow], [up-emit], [up-accept], [up-dismiss], ${ATTRS_SUGGESTING_FOLLOW})`],
+
     preloadDelay: 90,
   }))
 
@@ -634,21 +635,26 @@ up.link = (function() {
     }
   }
 
-  function makeClickable(link) {
-    if (link.matches('a[href], button')) {
-      return
-    }
+  function makeClickable(element) {
+    // Don't register unnecessary behavior on elements that already have A11Y behavior
+    if (element.matches(DEFAULT_INTERACTIVE_ELEMENT)) return
 
-    let role = link.matches('a') ? 'link' : 'button'
+    // We default to a button role, except if the element looks link-ish
+    let role = element.matches('a, [up-follow]') ? 'link' : 'button'
 
-    e.setMissingAttrs(link, {
+    // We set some defaults for interactivity and A11y, but preserve any existing attributes set by the user.
+    e.setMissingAttrs(element, {
       tabindex: '0',     // Make them part of the natural tab order
       role,              // Make screen readers pronounce "button" or "link"
       'up-clickable': '' // Get pointer pointer from link.css
     })
 
-    link.addEventListener('keydown', function(event) {
-      if ((event.key === 'Enter') || (event.key === 'Space')) {
+    element.addEventListener('keydown', function(event) {
+      // (1) Buttons are expected to be triggered using the Space or Enter key
+      // (2) Links are expected to be triggered using the Enter key
+      // (3) We use the element's current role (instead of the `role` variable above)
+      //     to honor any custom [role] attribute set by the user.
+      if ((event.key === 'Enter') || (element.role === 'button' && event.key === 'Space')) {
         return forkEventAsUpClick(event)
       }
     })
@@ -716,7 +722,7 @@ up.link = (function() {
 
     // If user clicked on a child link of $link, or in an <input> within an [up-expand][up-href]
     // we want those other elements handle the click.
-    const betterTargetSelector = `a, [up-href], ${up.form.fieldSelector()}`
+    const betterTargetSelector = `a, [up-follow], ${up.form.fieldSelector()}`
     const betterTarget = event.target.closest(betterTargetSelector)
     return !betterTarget || (betterTarget === link)
   }
@@ -1526,49 +1532,6 @@ up.link = (function() {
   })
 
   /*-
-  Makes any element behave like a hyperlink.
-
-  ### Example
-
-  The following `<span>` element will [navigate](/a-up-follow) to `/details` when clicked:
-
-  ```html
-  <span up-href="/details">Read more</span>
-  ```
-
-  ### Accessibility
-
-  @include clickable-behaviors
-
-  The link-like element cannot be opened in a new tab.
-
-  ### Advantages of `<a>` elements
-
-  In general you should prefer using regular hyperlinks (`a[href]`) over elements with `[up-href]`:
-
-  - Only regular links allow the user to open the destination in a new tab
-  - Regular links still work when JavaScript is unavailable.
-  - Regular links can be followed from crawlers like Google
-
-  `<a>` elements are also exceptional in that they may [contain block elements](https://makandracards.com/makandra/43549-it-s-ok-to-put-block-elements-inside-an-a-tag).
-
-  ### Use cases of `[up-href]`
-
-  There are some use cases for `[up-href]`:
-
-  - When you want to *prevent* the user from opening a link in a new tab.
-  - When the element cannot be wrapped in an `<a>`, e.g. a `<tr>`.
-  - When you want a link to not be followed by crawlers like Google.
-
-  @selector [up-href]
-  @param [up-href]
-    The URL to load when activated.
-  @params-note
-    All attributes for `a[up-follow]` may be used.
-  @stable
-  */
-
-  /*-
   Follows this link on `mousedown` instead of `click` ("Act on press").
 
   This will save precious milliseconds that otherwise spent
@@ -1746,7 +1709,6 @@ up.link = (function() {
     shouldFollowEvent,
     convertClicks,
     config,
-    combineFollowableSelectors,
     loadDeferred,
   }
 })()

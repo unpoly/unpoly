@@ -1,2 +1,8 @@
-[up-href], [up-clickable]
+[up-clickable][role=link]
+  cursor: pointer
+
+// Expanded link areas are not announced to screen readers, as they
+// already announce the expanding link. However, we still want the expanded areas
+// to show a pointer cursor for visually abled mouse users.
+[up-expand]:not([role]), [up-expand][role=link]
   cursor: pointer

@@ -6,6 +6,9 @@ logResetting = ->
   console.debug("%c#{RESET_MESSAGE}", 'color: #2244aa')
 
 resetLocation = ->
+  if location.hash
+    location.hash = ''
+
   # Webkit ignores replaceState() calls after 100 calls / 30 sec.
   # Hence we only call it when the history was actually changed.
   unless up.util.matchURLs(location.href, jasmine.locationBeforeSuite)

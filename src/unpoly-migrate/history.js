@@ -2,7 +2,9 @@
 @module up.history
 */
 
-up.migrate.renamedProperty(up.history.config, 'popTargets', 'restoreTargets')
+up.history.config.patch(function(config) {
+  up.migrate.renamedProperty(config, 'popTargets', 'restoreTargets')
+})
 
 /*-
 Returns a normalized URL for the current history entry.
@@ -25,20 +27,23 @@ up.migrate.renamedEvent('up:history:replaced', 'up:location:changed')
 
 up.migrate.removedEvent('up:fragment:kept', 'up:fragment:keep')
 
-let updateMetaTags = up.history.config.updateMetaTags
-let updateMetaTagsSet = false
-Object.defineProperty(up.history.config, 'updateMetaTags', {
-  get() {
-    return updateMetaTags
-  },
-  set(value) {
-    updateMetaTags = value
-    updateMetaTagsSet = true
-  }
+up.history.config.patch(function() {
+  this.updateMetaTagsValue = this.updateMetaTags
+  this.updateMetaTagsSet = false
+
+  Object.defineProperty(this, 'updateMetaTags', {
+    get() {
+      return this.updateMetaTagsValue
+    },
+    set(value) {
+      this.updateMetaTagsValue = value
+      this.updateMetaTagsSet = true
+    }
+  })
 })
 
 up.on('up:framework:boot', function() {
-  if (!updateMetaTagsSet) {
+  if (!up.history.config.updateMetaTagsSet) {
     up.migrate.warn('Meta tags in the <head> are now updated automatically. Configure up.history.config.updateMetaTags to remove this warning.')
   }
 })

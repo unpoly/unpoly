@@ -261,6 +261,6 @@ up.migrate = (function() {
     fixKey,
     warn,
     loaded: true,
-    config
+    config,
   }
 })()

@@ -17,27 +17,31 @@ up.migrate.renamedEvent('up:request:late',   'up:network:late')    // renamed in
 up.migrate.renamedEvent('up:request:recover', 'up:network:recover') // renamed in 3.0.0
 
 // The `config.preloadDelay` configuration was defined on up.proxy in V1. It was moved to up.link in V2.
-const preloadDelayMoved = () => up.migrate.deprecated('up.proxy.config.preloadDelay', 'up.link.config.preloadDelay')
-Object.defineProperty(up.network.config, 'preloadDelay', {
-  get() {
-    preloadDelayMoved()
-    return up.link.config.preloadDelay
-  },
-  set(value) {
-    preloadDelayMoved()
-    up.link.config.preloadDelay = value
-  }
+up.network.config.patch(function(config) {
+  const preloadDelayMoved = () => up.migrate.deprecated('up.proxy.config.preloadDelay', 'up.link.config.preloadDelay')
+  Object.defineProperty(config, 'preloadDelay', {
+    get() {
+      preloadDelayMoved()
+      return up.link.config.preloadDelay
+    },
+    set(value) {
+      preloadDelayMoved()
+      up.link.config.preloadDelay = value
+    }
+  })
 })
 
-up.migrate.renamedProperty(up.network.config, 'maxRequests', 'concurrency')
-up.migrate.renamedProperty(up.network.config, 'slowDelay', 'badResponseTime')
-up.migrate.renamedProperty(up.network.config, 'cacheExpiry', 'cacheExpireAge', 'The configuration up.network.config.cacheExpiry has been renamed to up.network.config.cacheExpireAge. Note that Unpoly 3+ automatically reloads cached content after rendering to ensure users always see fresh data ("cache revalidation"). Setting a custom expiry may no longer be necessary.')
-up.migrate.renamedProperty(up.network.config, 'clearCache', 'expireCache')
-up.migrate.forbiddenPropertyValue(up.network.config, 'cacheSize', 0, 'Disabling the cache with up.network.config.cacheSize = 0 is no longer supported. To disable automatic caching during navigation, set up.fragment.config.navigateOptions.cache = false instead.')
+up.network.config.patch(function(config) {
+  up.migrate.renamedProperty(config, 'maxRequests', 'concurrency')
+  up.migrate.renamedProperty(config, 'slowDelay', 'badResponseTime')
+  up.migrate.renamedProperty(config, 'cacheExpiry', 'cacheExpireAge', 'The configuration up.network.config.cacheExpiry has been renamed to up.network.config.cacheExpireAge. Note that Unpoly 3+ automatically reloads cached content after rendering to ensure users always see fresh data ("cache revalidation"). Setting a custom expiry may no longer be necessary.')
+  up.migrate.renamedProperty(config, 'clearCache', 'expireCache')
+  up.migrate.forbiddenPropertyValue(config, 'cacheSize', 0, 'Disabling the cache with up.network.config.cacheSize = 0 is no longer supported. To disable automatic caching during navigation, set up.fragment.config.navigateOptions.cache = false instead.')
 
-// Provide a default for the removed property, in case someone pushes into that.
-up.network.config.requestMetaKeys = []
-up.migrate.removedProperty(up.network.config, 'requestMetaKeys', 'The configuration up.network.config.requestMetaKeys has been removed. Servers that optimize responses based on request headers should instead set a Vary response header.')
+  // Provide a default for the removed property, in case someone pushes into that.
+  up.network.config.requestMetaKeys = []
+  up.migrate.removedProperty(config, 'requestMetaKeys', 'The configuration up.network.config.requestMetaKeys has been removed. Servers that optimize responses based on request headers should instead set a Vary response header.')
+})
 
 up.migrate.handleRequestOptions = function(options) {
   up.migrate.fixKey(options, 'clearCache', 'expireCache')
@@ -233,9 +237,8 @@ function mayHaveCustomIndicator() {
 }
 
 const progressBarDefault = up.network.config.progressBar
-
-function disableProgressBarIfCustomIndicator() {
-  up.network.config.progressBar = function() {
+up.network.config.patch(function(config) {
+  config.progressBar = function() {
     if (mayHaveCustomIndicator()) {
       up.migrate.warn('Disabled the default progress bar as may have built a custom loading indicator with your up:network:late listener. Please set up.network.config.progressBar to true or false.')
       return false
@@ -243,15 +246,14 @@ function disableProgressBarIfCustomIndicator() {
       return progressBarDefault
     }
   }
-}
-
-disableProgressBarIfCustomIndicator()
-up.on('up:framework:reset', disableProgressBarIfCustomIndicator)
+})
 
 up.network.shouldReduceRequests = function() {
   up.migrate('up.network.shouldReduceRequests() has been removed without replacement')
   return false
 }
 
-up.migrate.removedProperty(up.network.config, 'badRTT')
-up.migrate.removedProperty(up.network.config, 'badDownlink')
+up.network.config.patch(function(config) {
+  up.migrate.removedProperty(config, 'badRTT')
+  up.migrate.removedProperty(config, 'badDownlink')
+})

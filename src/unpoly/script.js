@@ -94,7 +94,7 @@ up.script = (function() {
 
   const SYSTEM_MACRO_PRIORITIES = {
     '[up-back]': -100,        // sets [up-href] to previous URL
-    '[up-content]': -200,     // A11y for link-like elements
+    '[up-clickable]': -200,   // A11y for link-like elements
     '[up-drawer]': -200,      //
     '[up-modal]': -200,       //
     '[up-cover]': -200,       //

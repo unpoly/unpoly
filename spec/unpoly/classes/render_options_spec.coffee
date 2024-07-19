@@ -94,16 +94,16 @@ describe 'up.RenderOptions', ->
 
         up.RenderOptions.preprocess(options)
 
-        expect(options).toEqual { history: 'auto', location: '/foo' }
+        expect(options).toEqual(jasmine.objectContaining(history: 'auto', location: '/foo'))
         expect(warnSpy).toHaveBeenCalled()
 
-      it 'does nothing for { history: "auto" }', ->
+      it 'does not migrate a { history: "auto" } string value into the { location } option', ->
         options = { location: '/foo' }
         warnSpy = up.migrate.warn.mock()
 
         up.RenderOptions.preprocess(options)
 
-        expect(options).toEqual { location: '/foo' }
+        expect(options).toEqual(jasmine.objectContaining(location: '/foo'))
         expect(warnSpy).not.toHaveBeenCalled()
 
   describe '.deriveFailOptions()', ->

@@ -117,11 +117,59 @@ up.migrate.targetMacro('up-dash', { 'up-preload': '', 'up-instant': '' }, () => 
 
 up.migrate.renamedAttribute('up-delay', 'up-preload-delay', { scope: preloadSelectorFn })
 
-up.link.config.preloadEnabled = true
-let preloadEnabledRef = up.migrate.removedProperty(up.link.config, 'preloadEnabled', 'The configuration up.link.config.preloadEnabled has been removed. To disable preloading, prevent up:link:preload instead.')
+let preloadEnabledRef
+up.link.config.patch(function(config) {
+  config.preloadEnabled = true
+  preloadEnabledRef = up.migrate.removedProperty(config, 'preloadEnabled', 'The configuration up.link.config.preloadEnabled has been removed. To disable preloading, prevent up:link:preload instead.')
+})
 
 up.on('up:link:preload', function(event) {
   if (!preloadEnabledRef[0]) {
     event.preventDefault()
   }
+})
+
+  /*-
+  Makes any element [behave like a hyperlink](/faux-interactive-elements).
+
+  ### Example
+
+  The following `<span>` element will [navigate](/a-up-follow) to `/details` when clicked:
+
+  ```html
+  <span up-href="/details">Read more</span>
+  ```
+
+  @selector [up-href]
+  @param [up-href]
+    The URL to load when activated.
+  @params-note
+    All attributes for `a[up-follow]` may be used.
+  @deprecated
+    You must also set an `[up-follow]` attribute on the same link.
+  */
+
+const LEGACY_UP_HREF_FOLLOW_SELECTOR = '[up-href]:not([up-follow], [up-poll], [up-defer], [up-expand])'
+
+up.link.config.patch(function(config) {
+  config.clickableSelectors.push(LEGACY_UP_HREF_FOLLOW_SELECTOR)
+  config.followSelectors.push(LEGACY_UP_HREF_FOLLOW_SELECTOR)
+})
+
+up.compiler(LEGACY_UP_HREF_FOLLOW_SELECTOR, function(element) {
+  up.migrate.warn('Following links with only [up-href] has been deprecated. You must now also set an [up-follow] on the same link (found in %o).', element)
+})
+
+
+// We used to follow links with just an [up-instant] attribute.
+// Now that [up-instant] is also a way to make generic clickable elements "act on press"
+// we require users to set an [up-follow] attribute.
+const LEGACY_UP_INSTANT_FOLLOW_INTENT_SELECTOR = `[up-instant]:is(a[href], ${LEGACY_UP_HREF_FOLLOW_SELECTOR})`
+
+up.link.config.patch(function(config) {
+  config.followSelectors.push(LEGACY_UP_INSTANT_FOLLOW_INTENT_SELECTOR)
+})
+
+up.compiler(LEGACY_UP_HREF_FOLLOW_SELECTOR, function(element) {
+  up.migrate.warn('Following links with only [up-instant] has been deprecated. You must now also set an [up-follow] on the same link (found in %o).', element)
 })

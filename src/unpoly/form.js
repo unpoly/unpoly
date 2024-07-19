@@ -22,8 +22,6 @@ up.form = (function() {
   const u = up.util
   const e = up.element
 
-  const ATTRIBUTES_SUGGESTING_SUBMIT = ['[up-submit]', '[up-target]', '[up-layer]', '[up-transition]']
-
   /*-
   Sets default options for form submission and validation.
 
@@ -120,7 +118,7 @@ up.form = (function() {
   const config = new up.Config(() => ({
     groupSelectors: ['[up-form-group]', 'fieldset', 'label', 'form'],
     fieldSelectors: ['select', 'input:not([type=submit]):not([type=image])', 'button[type]:not([type=submit])', 'textarea'],
-    submitSelectors: up.link.combineFollowableSelectors(['form'], ATTRIBUTES_SUGGESTING_SUBMIT),
+    submitSelectors: ['form:is([up-submit], [up-target], [up-layer], [up-transition])'],
     noSubmitSelectors: ['[up-submit=false]', '[target]', e.crossOriginSelector('action')],
     submitButtonSelectors: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])'],
     // Although we only need to bind to `input`, we always also bind to `change`

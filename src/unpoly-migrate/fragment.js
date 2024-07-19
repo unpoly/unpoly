@@ -7,20 +7,24 @@ const u = up.util
 up.migrate.renamedPackage('flow', 'fragment')
 up.migrate.renamedPackage('dom', 'fragment')
 
-up.migrate.renamedProperty(up.fragment.config, 'fallbacks', 'mainTargets')
+up.fragment.config.patch(function(config) {
+  up.migrate.renamedProperty(config, 'fallbacks', 'mainTargets')
+})
 
 up.migrate.handleResponseDocOptions = docOptions => up.migrate.fixKey(docOptions, 'html', 'document')
 
-let matchAroundOriginDeprecated = () => up.migrate.deprecated('up.fragment.config.matchAroundOrigin', 'up.fragment.config.match')
-Object.defineProperty(up.fragment.config, 'matchAroundOrigin', {
-  get: function() {
-    matchAroundOriginDeprecated()
-    return this.match === 'closest'
-  },
-  set: function(value) {
-    matchAroundOriginDeprecated()
-    this.match = value ? 'region' : 'first'
-  }
+up.fragment.config.patch(function(config) {
+  let matchAroundOriginDeprecated = () => up.migrate.deprecated('up.fragment.config.matchAroundOrigin', 'up.fragment.config.match')
+  Object.defineProperty(config, 'matchAroundOrigin', {
+    get: function() {
+      matchAroundOriginDeprecated()
+      return this.match === 'closest'
+    },
+    set: function(value) {
+      matchAroundOriginDeprecated()
+      this.match = value ? 'region' : 'first'
+    }
+  })
 })
 
 /*-
@@ -236,20 +240,23 @@ up.migrate.resolveOrigin = function(target, { origin } = {}) {
 
 up.migrate.removedEvent('up:fragment:kept', 'up:fragment:keep')
 
-let runScripts = up.fragment.config.runScripts
-let runScriptsSet = false
-Object.defineProperty(up.fragment.config, 'runScripts', {
-  get() {
-    return runScripts
-  },
-  set(value) {
-    runScripts = value
-    runScriptsSet = true
-  }
+up.fragment.config.patch(function() {
+  this.runScriptsValue = this.runScripts
+  this.runScriptsSet = false
+
+  Object.defineProperty(this, 'runScripts', {
+    get() {
+      return this.runScriptsValue
+    },
+    set(value) {
+      this.runScriptsValue = value
+      this.runScriptsSet = true
+    }
+  })
 })
 
 up.on('up:framework:boot', function() {
-  if (!runScriptsSet) {
+  if (!up.fragment.config.runScriptsSet) {
     up.migrate.warn('Scripts within fragments are now executed. Configure up.fragment.config.runScripts to remove this warning.')
   }
 })

@@ -1028,7 +1028,7 @@ describe('up.event', function() {
       )
 
       it('emits the event on mousedown when the link is [up-instant]', asyncSpec(function(next) {
-          const link = up.hello(fixture("a[up-emit='foo'][up-instant]", {text: 'label'}))
+          const link = up.hello(fixture("a[href='#'][up-emit='foo'][up-instant]", { text: 'label' }))
           const fooListener = jasmine.createSpy('fooListener')
           link.addEventListener('foo', fooListener)
 
@@ -1036,7 +1036,7 @@ describe('up.event', function() {
 
           next(() => expect(fooListener.calls.count()).toBe(1))
 
-          // Trigger.click(link)
+          Trigger.click(link)
 
           next(() => expect(fooListener.calls.count()).toBe(1))
         })

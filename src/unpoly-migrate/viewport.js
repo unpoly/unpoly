@@ -4,12 +4,14 @@
 
 up.migrate.renamedPackage('layout', 'viewport')
 
-up.migrate.renamedProperty(up.viewport.config, 'viewports', 'viewportSelectors')
-up.migrate.renamedProperty(up.viewport.config, 'fixedTop', 'fixedTopSelectors')
-up.migrate.renamedProperty(up.viewport.config, 'fixedBottom', 'fixedBottomSelectors')
-up.migrate.renamedProperty(up.viewport.config, 'anchoredRight', 'anchoredRightSelectors')
-up.migrate.renamedProperty(up.viewport.config, 'snap', 'revealSnap')
-up.migrate.removedProperty(up.viewport.config, 'scrollSpeed')
+up.viewport.config.patch(function(config) {
+  up.migrate.renamedProperty(config, 'viewports', 'viewportSelectors')
+  up.migrate.renamedProperty(config, 'fixedTop', 'fixedTopSelectors')
+  up.migrate.renamedProperty(config, 'fixedBottom', 'fixedBottomSelectors')
+  up.migrate.renamedProperty(config, 'anchoredRight', 'anchoredRightSelectors')
+  up.migrate.renamedProperty(config, 'snap', 'revealSnap')
+  up.migrate.removedProperty(config, 'scrollSpeed')
+})
 
 /*-
 Returns the scrolling container for the given element.

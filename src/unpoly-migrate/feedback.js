@@ -3,4 +3,7 @@
 */
 
 up.migrate.renamedPackage('navigation', 'feedback')
-up.migrate.renamedProperty(up.feedback.config, 'navs', 'navSelectors')
+
+up.feedback.config.patch(function(config) {
+  up.migrate.renamedProperty(config, 'navs', 'navSelectors')
+})

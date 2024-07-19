@@ -927,14 +927,14 @@ describe 'up.link', ->
     describe 'up.link.isFollowable', ->
 
       it 'returns true for an [up-target] link', ->
-        $link = $fixture('a[href="/foo"][up-target=".target"]')
-        up.hello $link
-        expect(up.link.isFollowable($link)).toBe(true)
+        link = fixture('a[href="/foo"][up-target=".target"]')
+        up.hello link
+        expect(up.link.isFollowable(link)).toBe(true)
 
       it 'returns true for an [up-follow] link', ->
-        $link = $fixture('a[href="/foo"][up-follow]')
-        up.hello $link
-        expect(up.link.isFollowable($link)).toBe(true)
+        link = fixture('a[href="/foo"][up-follow]')
+        up.hello link
+        expect(up.link.isFollowable(link)).toBe(true)
 
       it 'returns true for an [up-layer] link', ->
         $link = $fixture('a[href="/foo"][up-layer="modal"]')
@@ -951,10 +951,22 @@ describe 'up.link', ->
         up.hello $link
         expect(up.link.isFollowable($link)).toBe(true)
 
-      it 'returns true for an [up-instant] link', ->
-        $link = $fixture('a[href="/foo"][up-instant]')
-        up.hello $link
-        expect(up.link.isFollowable($link)).toBe(true)
+      if up.migrate.loaded
+        it 'returns true for an [up-instant][href] link', ->
+          $link = $fixture('a[href="/foo"][up-instant]')
+          up.hello $link
+          debugger
+          expect(up.link.isFollowable($link)).toBe(true)
+
+        it 'returns true for a faux [up-instant][up-href] link', ->
+          $link = $fixture('span[up-href="/foo"][up-instant]')
+          up.hello $link
+          expect(up.link.isFollowable($link)).toBe(true)
+      else
+        it 'returns false for an [up-instant] link (because we also have a[up-emit][up-instant])', ->
+          $link = $fixture('a[href="/foo"][up-instant]')
+          up.hello $link
+          expect(up.link.isFollowable($link)).toBe(false)
 
       if up.migrate.loaded
         it 'returns true for an [up-modal] link', ->
@@ -972,10 +984,11 @@ describe 'up.link', ->
           up.hello $link
           expect(up.link.isFollowable($link)).toBe(true)
 
-      it 'returns true for an [up-target] span with [up-href]', ->
-        $link = $fixture('span[up-href="/foo"][up-target=".target"]')
-        up.hello $link
-        expect(up.link.isFollowable($link)).toBe(true)
+      if up.migrate.loaded
+        it 'returns true for an [up-target] span with [up-href]', ->
+          $link = $fixture('span[up-href="/foo"][up-target=".target"]')
+          up.hello $link
+          expect(up.link.isFollowable($link)).toBe(true)
 
       it 'returns false if the given link will be handled by the browser', ->
         $link = $fixture('a[href="/foo"]')
@@ -1820,14 +1833,31 @@ describe 'up.link', ->
 
       describe 'with [up-content] modifier', ->
 
-        it 'updates a fragment with the given inner HTML string', asyncSpec (next) ->
+        it 'updates a fragment with the given inner HTML string', ->
           target = fixture('.target', text: 'old content')
-          link = fixture('a[up-target=".target"][up-content="new content"]')
+          link = up.hello(fixture('a[up-target=".target"][up-content="new content"]'))
 
           Trigger.clickSequence(link)
+          await wait()
 
-          next ->
-            expect('.target').toHaveText('new content')
+          expect('.target').toHaveText('new content')
+
+        it 'gives the link a pointer cursor', ->
+          target = fixture('.target', text: 'old content')
+          link = up.hello(fixture('a[up-target=".target"][up-content="new content"]'))
+
+          expect(link).toHaveCursorStyle('pointer')
+
+        it 'enables keyboard interaction for the link', ->
+          target = fixture('.target', text: 'old content')
+          link = up.hello(fixture('a[up-target=".target"][up-content="new content"]'))
+
+          expect(link).toBeKeyboardFocusable()
+
+          Trigger.clickLinkWithKeyboard(link)
+          await wait()
+
+          expect('.target').toHaveText('new content')
 
         it 'updates a fragment with the given inner HTML string when the element also has an [href="#"] attribute (bugfix)', asyncSpec (next) ->
           target = fixture('.target', text: 'old content')
@@ -2283,7 +2313,7 @@ describe 'up.link', ->
 
           it 'focused the link after the click sequence (like a vanilla link)', ->
             followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
-            link = up.hello fixture('a[href="/path"][up-instant]')
+            link = up.hello fixture('a[href="/path"][up-follow][up-instant]')
 
             Trigger.clickSequence(link, focus: false)
 
@@ -2292,7 +2322,7 @@ describe 'up.link', ->
 
           it 'hides a focus ring when activated with the mouse', ->
             followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
-            link = up.hello fixture('a[href="/path"][up-instant]')
+            link = up.hello fixture('a[href="/path"][up-follow][up-instant]')
             Trigger.clickSequence(link, focus: false)
 
             expect(followSpy).toHaveBeenCalled()
@@ -2302,7 +2332,7 @@ describe 'up.link', ->
 
           it 'shows a focus ring when activated with a non-pointing device (keyboard or unknown)', ->
             followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
-            link = up.hello fixture('a[href="/path"][up-instant]')
+            link = up.hello fixture('a[href="/path"][up-follow][up-instant]')
             Trigger.clickLinkWithKeyboard(link)
 
             expect(followSpy).toHaveBeenCalled()
@@ -2312,7 +2342,7 @@ describe 'up.link', ->
 
           it 'hides the focus ring when activated with the mouse, then shows the focus ring when activated with the keyboard', ->
             followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
-            link = up.hello fixture('a[href="/path"][up-instant]')
+            link = up.hello fixture('a[href="/path"][up-follow][up-instant]')
 
             Trigger.clickSequence(link, focus: false)
             expect(followSpy.calls.count()).toBe(1)
@@ -2367,46 +2397,78 @@ describe 'up.link', ->
             next =>
               expect(@followSpy).not.toHaveBeenCalled()
 
-    describe '[up-href]', ->
 
-      it 'makes any element behave like an a[up-follow] link', asyncSpec (next) ->
-        link = fixture('span[up-href="/follow-path"][up-target=".target"]')
-        up.hello(link)
-        fixture('.target', text: 'old text')
+      describe 'following non-interactive elements with [up-href]', ->
 
-        Trigger.click(link)
+        it 'makes any element behave like an a[up-follow] link', ->
+          link = fixture('span[up-follow][up-href="/follow-path"][up-target=".target"]')
+          up.hello(link)
+          fixture('.target', text: 'old text')
 
-        next ->
+          Trigger.click(link)
+          await wait()
+
           expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.target')
 
           jasmine.respondWithSelector('.target', text: 'new text')
+          await wait()
 
-        next ->
           expect('.target').toHaveText('new text')
 
-      it 'gives the element a pointer cursor', asyncSpec (next) ->
-        link = fixture('span[up-href="/follow-path"][up-target=".target"]')
-        up.hello(link)
+        it 'gives the element a pointer cursor', ->
+          link = fixture('span[up-follow][up-href="/follow-path"][up-target=".target"]')
+          up.hello(link)
 
-        expect(link).toHaveCursorStyle('pointer')
+          expect(link).toHaveCursorStyle('pointer')
 
-      it 'can be used without also setting [up-target] or [up-follow]', asyncSpec (next) ->
-        up.fragment.config.mainTargets = ['main']
-        link = fixture('span[up-href="/follow-path"]')
-        up.hello(link)
-        fixture('main', text: 'old text')
+        it 'gives the element a [role=link] so screen readers announce it as interactive', ->
+          link = fixture('span[up-follow][up-href="/follow-path"][up-target=".target"]')
+          up.hello(link)
 
-        expect(link).toBeFollowable()
+          expect(link.role).toBe('link')
 
-        Trigger.click(link)
+        it 'enables keyboard interaction for the element', ->
+          link = fixture('span[up-follow][up-href="/follow-path"][up-target=".target"]')
+          up.hello(link)
+          fixture('.target', text: 'old text')
 
-        next ->
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('main')
+          expect(link).toBeKeyboardFocusable()
 
-          jasmine.respondWithSelector('main', text: 'new text')
+          Trigger.clickLinkWithKeyboard(link)
 
-        next ->
-          expect('main').toHaveText('new text')
+          await wait()
+
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.target')
+
+          jasmine.respondWithSelector('.target', text: 'new text')
+          await wait()
+
+          expect('.target').toHaveText('new text')
+
+    describe '[up-href] without [up-follow]', ->
+      if up.migrate.loaded
+
+        it 'is made followable', ->
+          fauxLink = up.hello(fixture('span[up-href="/path"]'))
+          expect(fauxLink).toBeFollowable()
+
+        it 'is keyboard focusable', ->
+          fauxLink = up.hello(fixture('span[up-href="/path"]'))
+          expect(fauxLink).toBeKeyboardFocusable()
+
+      else
+
+        it 'is not followable', ->
+          fauxLink = up.hello(fixture('span[up-href="/path"]'))
+          expect(fauxLink).not.toBeFollowable()
+
+        it 'gets no pointer cursor', ->
+          fauxLink = up.hello(fixture('span[up-href="/path"]'))
+          expect(fauxLink).toHaveCursorStyle('auto')
+
+        it 'is not keyboard focusable', ->
+          fauxLink = up.hello(fixture('span[up-href="/path"]'))
+          expect(fauxLink).not.toBeKeyboardFocusable()
 
     if up.migrate.loaded
 
@@ -2480,6 +2542,21 @@ describe 'up.link', ->
         await wait()
 
         expect('main').toHaveText('new text')
+
+      it 'is not keyboard-accessible, as screen readers will already announce the contained link', ->
+        area = fixture('div[up-expand]')
+        link = e.affix(area, 'a[href="/path1"]')
+        up.hello(area)
+
+        expect(area).not.toBeKeyboardFocusable()
+        expect(area.role).toBeBlank()
+
+      it 'has a pointer cursor for visually abled mouse users', ->
+        area = fixture('div[up-expand]')
+        link = e.affix(area, 'a[href="/path1"]')
+        up.hello(area)
+
+        expect(area).toHaveCursorStyle('pointer')
 
       it 'does not enlarge an area with [up-expand=false]', ->
         area = fixture('div[up-expand=false] a[href="/path"]')
@@ -3863,7 +3940,9 @@ describe 'up.link', ->
 
         it 'does emit an up:click event if there was a click without mousedown (happens when a link is activated with the Enter key)', ->
           link = fixture('a[href="/path"][up-instant]')
-          listener = jasmine.createSpy('up:click listener')
+          listener = jasmine.createSpy('up:click listener').and.callFake (event) ->
+            # With unpoly-migrate.js this would a followable link. We don't want to follow in this test.
+            event.preventDefault()
           link.addEventListener('up:click', listener)
           Trigger.click(link)
           expect(listener).toHaveBeenCalled()
@@ -3928,18 +4007,28 @@ describe 'up.link', ->
 
         expect(fauxButton).toBeKeyboardFocusable()
 
-      it 'gives the element a pointer cursor', ->
-        fauxButton = up.hello(fixture('.hyperlink[up-clickable]'))
+      it 'gives the element a pointer cursor if it has [up-follow] and hence looks like a link', ->
+        fauxButton = up.hello(fixture('.hyperlink[up-clickable][up-follow]'))
 
         expect(getComputedStyle(fauxButton).cursor).toEqual('pointer')
+
+      it 'gives the element a pointer cursor if it has [role=link] and hence looks like a link', ->
+        fauxButton = up.hello(fixture('.hyperlink[up-clickable][role=link]'))
+
+        expect(getComputedStyle(fauxButton).cursor).toEqual('pointer')
+
+      it 'gives the element a default cursor if it does not look like a link', ->
+        fauxButton = up.hello(fixture('.hyperlink[up-clickable]'))
+
+        expect(getComputedStyle(fauxButton).cursor).toEqual('auto')
 
       it 'makes other selectors clickable via up.link.config.clickableSelectors', ->
         up.link.config.clickableSelectors.push('.foo')
         fauxButton = up.hello(fixture('.foo'))
 
         expect(fauxButton).toBeKeyboardFocusable()
-        expect(getComputedStyle(fauxButton).cursor).toEqual('pointer')
         expect(fauxButton).toHaveAttribute('up-clickable')
+        expect(fauxButton.role).toBe('button')
 
       describe '[role] attribute', ->
 
@@ -3953,6 +4042,10 @@ describe 'up.link', ->
 
         it 'sets [role=link] for an a:not([href]) element, like a[up-content]', ->
           fauxLink = up.hello(fixture('a[up-content="inner"][up-target="#target"]'))
+          expect(fauxLink).toHaveAttribute('role', 'link')
+
+        it 'sets [role=link] for an [up-follow][up-href] element', ->
+          fauxLink = up.hello(fixture('a[up-follow][up-href="/path"]'))
           expect(fauxLink).toHaveAttribute('role', 'link')
 
       describe 'on an element that is already interactive', ->

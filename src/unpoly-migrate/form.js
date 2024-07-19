@@ -2,10 +2,12 @@
 @module up.form
 */
 
-up.migrate.renamedProperty(up.form.config, 'fields', 'fieldSelectors')
-up.migrate.renamedProperty(up.form.config, 'submitButtons', 'submitButtonSelectors')
-up.migrate.renamedProperty(up.form.config, 'validateTargets', 'groupSelectors')
-up.migrate.renamedProperty(up.form.config, 'observeDelay', 'watchInputDelay')
+up.form.config.patch(function(config) {
+  up.migrate.renamedProperty(config, 'fields', 'fieldSelectors')
+  up.migrate.renamedProperty(config, 'submitButtons', 'submitButtonSelectors')
+  up.migrate.renamedProperty(config, 'validateTargets', 'groupSelectors')
+  up.migrate.renamedProperty(config, 'observeDelay', 'watchInputDelay')
+})
 
 up.migrate.migratedFormGroupSelectors = function() {
   return up.form.config.groupSelectors.map((originalSelector) => {
