@@ -10,7 +10,7 @@ RedirectPermanent /up-nav-a.up-current /a.up-current
 RedirectPermanent /up-observe /form-up-observe
 RedirectPermanent /input-up-validate /up-validate
 RedirectPermanent /form-up-validate /up-validate
-RedirectPermanent /up-back /a-up-back
+RedirectPermanent /a-up-back /up-back
 RedirectPermanent /input-up-switch /up-switch
 RedirectPermanent /select-up-switch /up-switch
 RedirectPermanent /up.proxy /up.network

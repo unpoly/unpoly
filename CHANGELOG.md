@@ -2040,7 +2040,7 @@ The layer associated with the request can now be accessed through `event.layer`.
 
 ### Various changes
 
-- Fix a bug with [`a[up-back]`](/a-up-back) where Unpoly would follow the link's default `[href]` instead of visiting the previous URL.
+- Fix a bug with `[up-back]` where Unpoly would follow the link's default `[href]` instead of visiting the previous URL.
 - Fix a bug where the [URL pattern](/url-patterns) `*` would not match most URLs when the current location is multiple directories deep.
 - When a target cannot be found and a fallback target is used, Unpoly now [logs](/up.log) a message.
 - When a [compiler](/up.compiler) is registered after [booting](/up.boot), Unpoly now explains in the log that the compiler will only run for fragments inserted in the future.
