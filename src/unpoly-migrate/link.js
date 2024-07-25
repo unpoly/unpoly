@@ -129,25 +129,25 @@ up.on('up:link:preload', function(event) {
   }
 })
 
-  /*-
-  Makes any element [behave like a hyperlink](/faux-interactive-elements).
+/*-
+Makes any element [behave like a hyperlink](/faux-interactive-elements).
 
-  ### Example
+### Example
 
-  The following `<span>` element will [navigate](/a-up-follow) to `/details` when clicked:
+The following `<span>` element will [navigate](/a-up-follow) to `/details` when clicked:
 
-  ```html
-  <span up-href="/details">Read more</span>
-  ```
+```html
+<span up-href="/details">Read more</span>
+```
 
-  @selector [up-href]
-  @param [up-href]
-    The URL to load when activated.
-  @params-note
-    All attributes for `a[up-follow]` may be used.
-  @deprecated
-    You must also set an `[up-follow]` attribute on the same link.
-  */
+@selector [up-href]
+@param [up-href]
+  The URL to load when activated.
+@params-note
+  All attributes for `a[up-follow]` may be used.
+@deprecated
+  You must also set an `[up-follow]` attribute on the same link.
+*/
 
 const LEGACY_UP_HREF_FOLLOW_SELECTOR = '[up-href]:not([up-follow], [up-poll], [up-defer], [up-expand])'
 
