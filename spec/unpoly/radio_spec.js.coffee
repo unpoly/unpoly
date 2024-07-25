@@ -162,28 +162,59 @@ describe 'up.radio', ->
         next.after interval, ->
           expect(jasmine.Ajax.requests.count()).toBe(1)
 
-      it 'can override an [up-source] attribute from an [up-poll] element', asyncSpec (next) ->
+      it 'can override an [up-source] attribute with a { url } option', ->
         up.radio.config.pollInterval = interval = 150
         timingTolerance = interval / 3
 
         element = up.hello(fixture('.element[up-poll][up-source="/one"]'))
 
-        next ->
-          up.radio.startPolling(element, { url: '/two' })
+        await wait()
 
-        next.after timingTolerance, ->
-          expect(jasmine.Ajax.requests.count()).toBe(0)
+        up.radio.startPolling(element, { url: '/two' })
 
-        next.after interval, ->
-          expect(jasmine.Ajax.requests.count()).toBe(1)
-          expect(jasmine.lastRequest().url).toMatchURL('/two')
+        await wait(timingTolerance)
 
-          jasmine.respondWithSelector('.element[up-poll][up-source="/one"]')
+        expect(jasmine.Ajax.requests.count()).toBe(0)
 
-        next.after (interval + timingTolerance), ->
-          expect(jasmine.Ajax.requests.count()).toBe(2)
-          # Assert that the { url } option is passed to the new up.FragmentPolling instance.
-          expect(jasmine.lastRequest().url).toMatchURL('/two')
+        await wait(interval)
+
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(jasmine.lastRequest().url).toMatchURL('/two')
+
+        jasmine.respondWithSelector('.element[up-poll][up-source="/one"]')
+
+        await wait(interval + timingTolerance)
+
+        expect(jasmine.Ajax.requests.count()).toBe(2)
+        # Assert that the { url } option is passed to the new up.FragmentPolling instance.
+        expect(jasmine.lastRequest().url).toMatchURL('/two')
+
+      it 'can override an [up-href] attribute with a { url } option', ->
+        up.radio.config.pollInterval = interval = 150
+        timingTolerance = interval / 3
+
+        element = up.hello(fixture('.element[up-poll][up-href="/one"]'))
+
+        await wait()
+
+        up.radio.startPolling(element, { url: '/two' })
+
+        await wait(timingTolerance)
+
+        expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        await wait(interval)
+
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(jasmine.lastRequest().url).toMatchURL('/two')
+
+        jasmine.respondWithSelector('.element[up-poll][up-href="/one"]')
+
+        await wait(interval + timingTolerance)
+
+        expect(jasmine.Ajax.requests.count()).toBe(2)
+        # Assert that the { url } option is passed to the new up.FragmentPolling instance.
+        expect(jasmine.lastRequest().url).toMatchURL('/two')
 
       it 'polls with the given { interval }', asyncSpec (next) ->
         defaultInterval = 100
@@ -1962,28 +1993,6 @@ describe 'up.radio', ->
 
         expect(jasmine.Ajax.requests.count()).toBe(1)
 
-      it 'lets the server change the [up-source] (bugfix)', asyncSpec (next) ->
-        up.radio.config.pollInterval = interval = 150
-        timingTolerance = interval / 3
-
-        up.hello(fixture('.element[up-poll][up-source="/one"]', text: 'old text'))
-
-        next.after timingTolerance, ->
-          expect('.element').toHaveText('old text')
-          expect(jasmine.Ajax.requests.count()).toBe(0)
-
-        next.after interval, ->
-          expect(jasmine.Ajax.requests.count()).toBe(1)
-          expect(jasmine.lastRequest().url).toMatchURL('/one')
-          jasmine.respondWithSelector('.element[up-poll][up-source="/two"]', text: 'new text')
-
-        next ->
-          expect('.element').toHaveText('new text')
-
-        next.after (timingTolerance + interval), ->
-          expect(jasmine.Ajax.requests.count()).toBe(2)
-          expect(jasmine.lastRequest().url).toMatchURL('/two')
-
       it 'lets the server change the [up-interval] (bugfix)', asyncSpec (next) ->
         up.radio.config.pollInterval = initialInterval = 150
         timingTolerance = initialInterval / 3
@@ -2037,12 +2046,6 @@ describe 'up.radio', ->
 
         next.after 90, ->
           expect(reloadSpy).toHaveBeenCalled()
-
-      it 'allows to change the URL with an [up-source] attribute', asyncSpec (next) ->
-        up.hello(fixture('.element[up-poll][up-source="/optimized-path"][up-interval=2]'))
-
-        next.after 20, =>
-          expect(@lastRequest().url).toMatchURL('/optimized-path')
 
       it 'pauses polling when an up:fragment:poll event is prevented', asyncSpec (next) ->
         up.radio.config.pollInterval = interval = 150
@@ -2146,6 +2149,97 @@ describe 'up.radio', ->
           expect(jasmine.Ajax.requests.count()).toBe(0)
           expect(warnSpy).toHaveBeenCalled()
           expect(warnSpy.calls.argsFor(0)[1]).toMatch(/untargetable fragment/i)
+
+      it 'adds params from an [up-params] attribute', ->
+        interval = 50
+        timingTolerance = 20
+        up.radio.config.pollInterval = interval
+
+        element = htmlFixture """
+          <div id='element' up-poll up-source='/path' up-params='{ "foo": "bar" }'>
+          </div>
+        """
+        up.hello(element)
+
+        await wait(interval + timingTolerance)
+
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(jasmine.lastRequest().url).toMatchURL('/path?foo=bar')
+
+      it 'adds headers from an [up-headers] attribute', ->
+        interval = 50
+        timingTolerance = 20
+        up.radio.config.pollInterval = interval
+
+        element = htmlFixture """
+          <div id='element' up-poll up-source='/path' up-headers='{ "App-Header": "header-value" }'>
+          </div>
+        """
+        up.hello(element)
+
+        await wait(interval + timingTolerance)
+
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(jasmine.lastRequest().requestHeaders['App-Header']).toBe('header-value')
+
+      describe 'controlling the reload URL', ->
+
+        it 'uses a URL from an [up-source] attribute on the [up-poll] element', ->
+          up.hello(fixture('.element[up-poll][up-source="/optimized-path"][up-interval=2]'))
+
+          await wait(29)
+
+          expect(jasmine.lastRequest().url).toMatchURL('/optimized-path')
+
+        it 'uses a URL from an [up-source] attribute an an ancestor element', ->
+          [grandMother, mother, element] = htmlFixtureList """
+            <div id="grand-mother" up-source='/grand-mother-path'>
+              <div id="mother">
+                <div id="element" up-poll up-interval='2'>
+                  Content
+                </div>
+              </div>
+            </div>
+          """
+
+          up.hello(grandMother)
+
+          await wait(29)
+
+          expect(jasmine.lastRequest().url).toMatchURL('/grand-mother-path')
+
+        it 'prefers an explicit [up-href] attribute over the (automatically set) [up-source] attribute', ->
+          up.hello(fixture('.element[up-poll][up-source="/up-source-path"][up-href="/up-href-path"][up-interval=2]'))
+
+          await wait(29)
+
+          expect(jasmine.lastRequest().url).toMatchURL('/up-href-path')
+
+        it 'lets the server change the [up-source] between reloads (bugfix)', ->
+          up.radio.config.pollInterval = interval = 150
+          timingTolerance = interval / 3
+
+          up.hello(fixture('.element[up-poll][up-source="/one"]', text: 'old text'))
+
+          await wait(timingTolerance)
+
+          expect('.element').toHaveText('old text')
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+          await wait(interval)
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(jasmine.lastRequest().url).toMatchURL('/one')
+          jasmine.respondWithSelector('.element[up-poll][up-source="/two"]', text: 'new text')
+
+          await wait()
+
+          expect('.element').toHaveText('new text')
+
+          await wait(timingTolerance + interval)
+
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+          expect(jasmine.lastRequest().url).toMatchURL('/two')
 
       describe 'with [up-keep-data] attribute', ->
 

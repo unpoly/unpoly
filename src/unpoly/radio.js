@@ -272,6 +272,11 @@ up.radio = (function() {
   @function up.radio.startPolling
   @param {Element} fragment
     The fragment to reload periodically.
+  @param {Object} [options]
+    Options for reloading the fragment.
+
+    By default Unpoly will parse options from the fragment's attributes like ([`[up-interval]`](/up-poll#up-interval)).
+    You may pass this additional options object to [supplement or override](/attributes-and-options#options) options parsed from the fragment's attributes.
   @param {number} [options.interval]
     The reload interval in milliseconds.
 
@@ -279,7 +284,24 @@ up.radio = (function() {
   @param {string} [options.url]
     The URL from which to reload the fragment.
 
-    Defaults to the closest `[up-source]` attribute of an ancestor element.
+    Defaults to the URL this fragment was [originally loaded from](/up-source).
+  @param {string} [options.method='get']
+    The HTTP method used to reload the fragment.
+
+    @experimental
+  @param {string} [options.headers={}]
+    A JSON object with additional request headers.
+  @param {string} [options.params={}]
+    A JSON object with additional [parameters](/up.Params) that should be sent as the request's
+    [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
+
+    When making a `GET` request to a URL with a query string, the given `{ params }` will be added
+    to the query parameters.
+  @param [options.keepData=false]
+    Whether to [preserve](/data#preserving-data-through-reloads) the polling fragment's
+    [data object](/data) through reloads.
+
+    @experimental
   @param {string} [options.ifLayer='front']
     Controls polling while the fragment's [layer](/up.layer) is covered by an overlay.
 
@@ -308,9 +330,11 @@ up.radio = (function() {
   }
 
   function pollOptions(fragment, options = {}) {
-    const parser = new up.OptionsParser(fragment, options)
+    const defaults = { background: true }
+    const parser = new up.OptionsParser(fragment, options, { defaults })
     parser.number('interval', { default: config.pollInterval })
     parser.string('ifLayer', { default: 'front' })
+    parser.include(up.link.requestOptions)
     return options
   }
 
@@ -408,7 +432,28 @@ up.radio = (function() {
   @param [up-interval]
     The reload interval in milliseconds.
 
-    Defaults to `up.radio.config.pollInterval`.
+    Defaults to `up.radio.config.pollInterval`, which defaults to 30 seconds.
+  @param [up-href]
+    The URL from which to reload the fragment.
+
+    Defaults to the URL this fragment was [originally loaded from](/up-source).
+  @param [up-method='get']
+    The HTTP method used to reload the fragment.
+
+    @experimental
+  @param [up-headers]
+    A JSON object with additional request headers.
+  @param [up-params]
+    A JSON object with additional [parameters](/up.Params) that should be sent as the request's
+    [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
+
+    When making a `GET` request to a URL with a query string, the given `{ params }` will be added
+    to the query parameters.
+  @param [up-keep-data]
+    Whether to [preserve](/data#preserving-data-through-reloads) the polling fragment's
+    [data object](/data) through reloads.
+
+    @experimental
   @param [up-if-layer='front']
     Controls polling while the fragment's [layer](/up.layer) is covered by an overlay.
 
@@ -418,15 +463,6 @@ up.radio = (function() {
     When set to `'any'`, polling will continue on background layers.
 
     @experimental
-  @param [up-keep-data]
-    [Preserve](/data#preserving-data-through-reloads) the polling fragment's
-    [data object](/data) through reloads.
-
-    @experimental
-  @param [up-source]
-    The URL from which to reload the fragment.
-
-    Defaults to the closest `[up-source]` attribute of an ancestor element.
   @stable
   */
   up.attribute('up-poll', function(fragment) {

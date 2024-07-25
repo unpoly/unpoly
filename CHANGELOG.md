@@ -22,6 +22,10 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 - Process failed responses when submit button is detached after submission
 - Clickable elements can now be activated with keyboard inside popups (#653)
 - [up-emit] works on any kind of element, in particular button (#416)
+- [up-poll] prefers a custom URL in [up-href]. The old method in [up-source] is still supported.
+- [up-poll] supports [up-method]
+- [up-poll] supports [up-params]
+- [up-poll] supports [up-headers]
 
 
 

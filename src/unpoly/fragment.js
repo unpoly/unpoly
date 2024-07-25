@@ -396,30 +396,18 @@ up.fragment = (function() {
   */
 
   /*-
-  Sets this element's source URL for [reloading](/up.reload) and [polling](/up-poll)
+  When Unpoly inserts a fragment, the `[up-source]` attribute is automatically set
+  to the URL from which the fragment's HTML was loaded.
 
-  When an element is reloaded, Unpoly will make a request from the URL
-  that originally brought the element into the DOM. You may use `[up-source]` to
-  use another URL instead.
+  When an element is [reloaded](/up.reload), Unpoly will request the URL from the closest
+  `[up-source]` attribute. You may manually set `[up-source]` attribute to indicate a different
+  source URL for a fragment or a fragment's descendant.
 
-  ### Example
-
-  Assume an application layout with an unread message counter.
-  You use `[up-poll]` to refresh the counter every 30 seconds.
-
-  By default this would make a request to the URL that originally brought the
-  counter element into the DOM. To save the server from rendering a lot of
-  unused HTML, you may poll from a different URL like so:
-
-  ```html
-  <div class="unread-count" up-poll up-source="/unread-count">
-    2 new messages
-  </div>
-  ```
+  To access the source URL from JavaScript, use `up.fragment.source()`.
 
   @selector [up-source]
   @param {string} up-source
-    The URL from which to reload this element.
+    The URL from which this element and its descendants were initially requested.
   @stable
   */
 

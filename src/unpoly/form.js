@@ -261,13 +261,13 @@ up.form = (function() {
     Unpoly will search its ancestors for the [closest](/up.fragment.closest) form.
 
   @param {Object} [options]
-    [render options](/up.render#parameters) that should be used for submitting the form.
+    [Render options](/up.render#parameters) that should be used for submitting the form.
 
     Unpoly will parse render options from the given form's attributes
     like `[up-target]` or `[up-transition]`. See `form[up-submit]` for a list
     of supported attributes.
 
-    You may pass this additional `options` object to supplement or override
+    You may pass this additional `options` object to [supplement or override](/attributes-and-options#options)
     options parsed from the form attributes.
 
   @param {boolean} [options.navigate=true]

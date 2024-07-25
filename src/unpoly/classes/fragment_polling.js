@@ -151,12 +151,6 @@ up.FragmentPolling = class FragmentPolling {
     // The timeout will be re-scheduled by this._onReloadSuccess() or this._onReloadFailure().
     this._clearReloadTimer()
 
-    let reloadOptions = {
-      url: this._options.url,
-      fail: false,
-      background: true,
-    }
-
     let oldAbortable = this._abortable
 
     try {
@@ -166,7 +160,7 @@ up.FragmentPolling = class FragmentPolling {
       // Don't schedule timers while we're loading. _onReloadSuccess() and _onReloadFailure() will do that for us.
       this._loading = true
 
-      up.reload(this._fragment, reloadOptions).then(
+      up.reload(this._fragment, this._options).then(
         this._onReloadSuccess.bind(this),
         this._onReloadFailure.bind(this)
       )

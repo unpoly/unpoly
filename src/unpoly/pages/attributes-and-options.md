@@ -12,7 +12,7 @@ instead of replacing the full page:
 ```
 
 
-### Modifying attributes
+### Modifying attributes #{attributes}
 
 Most Unpoly attributes have *modifying attributes* to fine-tune their behavior.
 For example, the `[up-transition]` attribute causes an `[up-follow]` to swap
@@ -26,7 +26,7 @@ Modifying attributes are documented with the main attribute they're modifying.
 For example, see [modifying attributes for `[up-follow]`](/a-up-follow#attributes).
 
 
-## Configuring default behavior for all elements
+## Configuring default behavior for all elements #{defaults}
 
 Instead of configuring the same attributes on many elements, you can configure
 Unpoly to apply behavior to all elements matching a given CSS selector.
@@ -60,7 +60,7 @@ You can still make exceptions by setting an `[up-follow=false]` attribute:
 
 
 
-## Overriding attributes with JavaScript options
+## Overriding attributes with JavaScript options #{options}
 
 Most Unpoly attributes come with matching JavaScript functions that trigger the same behavior programmatically. 
 
@@ -84,7 +84,7 @@ with camel-cased keys. So we're implicitly making the following call:
 up.follow(link, { url: '/path', metaTags: false })
 ```
 
-If you pass other options, these will override any options parsed from the link's attributes:
+If you pass other options, these will override (or supplement) any options parsed from the link's attributes:
 
 ```js
 // This overrides the [up-meta-tags=false] attribute

@@ -265,13 +265,13 @@ up.link = (function() {
     The link to follow.
 
   @param {Object} [options]
-    [render options](/up.render#parameters) that should be used for following the link.
+    [Render options](/up.render#parameters) that should be used for following the link.
 
     Unpoly will parse render options from the given link's attributes,
     like `[up-target]` or `[up-transition]`. See `a[up-follow]` for a list
     of supported attributes.
 
-    You may pass this additional `options` object to supplement or override
+    You may pass this additional `options` object to [supplement or override](/attributes-and-options#options)
     options parsed from the link attributes.
 
   @param {boolean} [options.navigate=true]
@@ -358,7 +358,7 @@ up.link = (function() {
     // Fragment options
     options.origin ||= link
     parser.boolean('fail')
-    parser.boolean('navigate', {default: true})
+    parser.boolean('navigate', { default: true })
     parser.string('confirm', { attr: ['up-confirm', 'data-confirm'] })
     parser.string('target')
     parser.booleanOrString('fallback')
@@ -926,7 +926,7 @@ up.link = (function() {
     like `[up-target]` or `[up-cache]`. See `[up-defer]` and `a[up-follow]` for a list
     of supported attributes.
 
-    You may pass this additional `options` object to supplement or override
+    You may pass this additional `options` object to [supplement or override](/attributes-and-options#options)
     options parsed from the placeholder attributes.
 
   @return {up.RenderJob}
@@ -1702,6 +1702,7 @@ up.link = (function() {
   return {
     follow,
     followOptions,
+    requestOptions: parseRequestOptions,
     preload,
     makeFollowable,
     isSafe,
