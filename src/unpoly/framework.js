@@ -5,7 +5,7 @@ Framework initialization
 The `up.framework` module lets you customize Unpoly's [initialization sequence](/install#initialization).
 
 @see up.boot
-@see script[up-boot=manual]
+@see [up-boot=manual]
 @see up.framework.isSupported
 
 @module up.framework
@@ -150,7 +150,7 @@ up.framework = (function() {
   ```
   You may then call `up.boot()` to manually boot Unpoly at a later time.
 
-  @selector script[up-boot=manual]
+  @selector [up-boot=manual]
   @experimental
   */
 

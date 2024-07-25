@@ -81,3 +81,5 @@ RedirectPermanent /a-up-emit /up-emit
 
 RedirectPermanent /up-href /clicking-non-interactive-elements
 
+RedirectPermanent /script-up-boot-manual /up-boot-manual
+
