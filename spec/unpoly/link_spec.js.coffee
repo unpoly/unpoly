@@ -4030,6 +4030,21 @@ describe 'up.link', ->
         expect(fauxButton).toHaveAttribute('up-clickable')
         expect(fauxButton.role).toBe('button')
 
+      describe 'when applied on a link (which is already interactive)', ->
+
+        it 'does not set a [role] attribute', ->
+          link = up.hello(fixture('a[href="/path"][up-clickable]', text: 'label'))
+          expect(link).not.toHaveAttribute('role')
+
+        it 'does not cause duplicate up:click events when activated with the keyboard', ->
+          link = up.hello(fixture('a[href="/path"][up-clickable]', text: 'label'))
+          listener = jasmine.createSpy('up:click listener').and.callFake((event) -> event.preventDefault())
+          link.addEventListener('up:click', listener)
+
+          Trigger.clickLinkWithKeyboard(link)
+
+          expect(listener.calls.count()).toBe(1)
+
       describe '[role] attribute', ->
 
         it 'sets [role=button] on a non-interactive element', ->
