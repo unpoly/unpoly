@@ -8,6 +8,23 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+3.9.0
+-----
+
+- Making non-interactive elements behave like hyperlink requires [up-follow] in addition to [up-href].
+- Links with just [up-instant] are no longer followable by default. They also require [up-follow]
+- Faux-interactive elements can now be activated by the Space button if they have a button role. Activation with Enter remains for both faux-buttons and faux-links.
+- Faux-interactive elements with [up-follow] now default to the [link] role (instead of [button]).
+- Faux-interactive elements with a button role no longer have the "hand" cursor.
+- Fix: up-alias not matching URL query string with asterix after shash (#542)
+- Reduce layer lookups
+- Run guardEvents before preprocessing so they can use shorthands in event.renderOptions
+- Process failed responses when submit button is detached after submission
+- Clickable elements can now be activated with keyboard inside popups (#653)
+- [up-emit] works on any kind of element, in particular button (#416)
+
+
+
 3.8.0
 -----
 
