@@ -769,6 +769,8 @@ describe('up.history', function() {
         expect(element).toBeFollowable()
       })
 
+      it('restores the previous URL when clicked')
+
       it('does not overwrite an existing up-href or up-restore-scroll attribute')
 
       it('does not set an up-href attribute if there is no previous URL')
