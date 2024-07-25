@@ -5,8 +5,8 @@ RedirectPermanent /up-instant /a-up-instant
 RedirectPermanent /up-preload /a-up-preload
 RedirectPermanent /a.up-active /up-active
 RedirectPermanent /form.up-active /up-active
-RedirectPermanent /up-current /a.up-current
-RedirectPermanent /up-nav-a.up-current /a.up-current
+RedirectPermanent /a.up-current /up-current
+RedirectPermanent /up-nav-a.up-current /up-current
 RedirectPermanent /up-observe /form-up-observe
 RedirectPermanent /input-up-validate /up-validate
 RedirectPermanent /form-up-validate /up-validate

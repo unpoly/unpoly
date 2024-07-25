@@ -1964,7 +1964,7 @@ This is a maintenance release while we're working on the next major feature upda
 - The event `up:form:submit` has a new property `{ submitButton }`. It points to the `<button>` or `<input>` element used to submit the form, if the form was submitted with a button.
 - The event `up:form:submit` has a new property `{ params }`. It points to an editable `up.Params` object for the form's data payload.
 - Fix a bug where `[up-validate]` would use form attributes intended for the final form submission, like `[up-scroll]` or `[up-confirm]`.
-- Fix a bug where an [`.up-current`](/a.up-current) class would sometimes match an `[up-alias]` pattern in the middle of the current URL. This happened when `[up-alias]` contained multiple patterns and the last pattern is a prefix (e.g. `/foo/*`).
+- Fix a bug where an `.up-current` class would sometimes match an `[up-alias]` pattern in the middle of the current URL. This happened when `[up-alias]` contained multiple patterns and the last pattern is a prefix (e.g. `/foo/*`).
 - New option `up.log.config.format` lets you disable colors from log messages (thanks @stefanfisk!).
 - Elements with `[up-keep]` are now preserved when going back/forward in history (#293).
 - The function `up.element.createFromHTML()` now creates an element if the given HTML string begins with whitespace.
@@ -2878,12 +2878,12 @@ To help working with form values and request parameters, an experimental module 
 
 This release includes major performance improvements and a new animation engine.
 
-Beware of the breaking change with [`.up-current`](/up-nav-a.up-current)!
+Beware of the breaking change with `.up-current`!
 
 
 ### Navigation feedback
 
-Maintaining the [`.up-current`](/up-nav-a.up-current) on all links turned out to be a major performance bottleneck, so we had to make some breaking changes:
+Maintaining the `.up-current` class on all links turned out to be a major performance bottleneck, so we had to make some breaking changes:
 
 - The [`.up-current`](/up-nav-a.up-current) class is now only assigned to links with an [`[up-nav]`](/up-nav) attribute, or to links within a container with an [`[up-nav]`](/up-nav) attribute. You should assign the [`[up-nav]`](/up-nav) attribute to all navigational elements that rely on `.up-current` for styling`.
 - You can also globally configure selectors for your navigational elements in `up.feedback.config.navs`:
@@ -3223,7 +3223,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Links
 
-- Links with unsafe HTTP methods like `POST` are no longer marked as [`.up-current`](/a.up-current), even if their `[href]` matches the current URL.
+- Links with unsafe HTTP methods like `POST` are no longer marked as `.up-current`, even if their `[href]` matches the current URL.
 - New experimental function [`up.link.isSafe()`](/up.link.isSafe). It returns whether the given link has a [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1) HTTP method like `GET`.
 
 ### Fragment updates
@@ -3656,7 +3656,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 - Tooltips now open and close much quicker.
 - Popups now open and close much quicker.
-- [`.up-current`](/a.up-current) now considers two URLs different if they have different query strings.
+- `.up-current` now considers two URLs different if they have different query strings.
 
 
 

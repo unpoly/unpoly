@@ -22,7 +22,7 @@ Let's say we have an `<nav>` element with two links, pointing to `/foo` and `/ba
 By giving the navigation bar the `[up-nav]` attribute, links pointing to the current browser address are highlighted
 as we navigate through the site.
 
-While the current URL is `/foo`, the first link is automatically marked with an [`.up-current`](/a.up-current) class.
+While the current URL is `/foo`, the first link is automatically marked with an `.up-current` class.
 We also assign an [`[aria-current]`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-current) attribute
 to convey the highlighted link to assistive technologies:
 
@@ -48,7 +48,7 @@ for the server to respond. The [targeted](/targeting-fragments) fragment (the `<
 ```
 
 Once the response is received the `.up-active` and `.up-loading` classes are removed.
-Since the new URL is `/bar`, the [`.up-current`](/a.up-current) class has been moved to the "Bar" link.
+Since the new URL is `/bar`, the `.up-current` class has been moved to the "Bar" link.
 
 ```html
 <nav up-nav>
@@ -78,7 +78,7 @@ while an async callback is running.
 
 
 @see [up-nav]
-@see a.up-current
+@see .up-current
 @see .up-active
 @see .up-loading
 
@@ -95,7 +95,7 @@ up.feedback = (function() {
   @property up.feedback.config
 
   @param {Array<string>} [config.currentClasses=['up-current']]
-    An array of classes to set on [links that point the current location](/a.up-current).
+    An array of classes to set on [links that point the current location](/up-current).
 
   @param {Array<string>} [config.navSelectors=['[up-nav]', 'nav']]
     An array of CSS selectors that match [navigational containers](/up-nav).
@@ -199,7 +199,7 @@ up.feedback = (function() {
   ```
 
   Once the link destination has loaded and rendered, the `.up-active` class
-  is removed and the [`.up-current`](/a.up-current) class is added:
+  is removed and the `.up-current` class is added:
 
   ```html
   <a href="/foo" up-follow class="up-current" aria-current="page">Foo</a>
@@ -425,7 +425,7 @@ up.feedback = (function() {
 
   /*-
   Links within `[up-nav]` may use the `[up-alias]` attribute to pass a [URL pattern](/url-patterns) for which they
-  should also be highlighted as [`.up-current`](/a.up-current).
+  should also be highlighted as `.up-current`.
 
   ### Example
 
@@ -455,7 +455,7 @@ up.feedback = (function() {
 
   See [`[up-nav]`](/up-nav) for more documentation and examples.
 
-  @selector a.up-current
+  @selector .up-current
   @stable
   */
 
