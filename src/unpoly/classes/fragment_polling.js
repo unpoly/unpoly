@@ -119,13 +119,6 @@ up.FragmentPolling = class FragmentPolling {
       return
     }
 
-    if (up.emit(this._fragment, 'up:fragment:poll', { log: ['Polling fragment', this._fragment] }).defaultPrevented) {
-      up.puts('[up-poll]', 'User prevented up:fragment:poll event')
-      this._satisfyInterval() // Block polling for a full interval
-      this._scheduleRemainingTime() // There is no event that would re-schedule for us
-      return
-    }
-
     this._reloadNow()
   }
 
@@ -147,7 +140,7 @@ up.FragmentPolling = class FragmentPolling {
   }
 
   _reloadNow() {
-    // If we were called manually (not by a timeout), clear a scheeduled timeout to prevent concurrency.
+    // If we were called manually (not by a timeout), clear a scheduled timeout to prevent concurrency.
     // The timeout will be re-scheduled by this._onReloadSuccess() or this._onReloadFailure().
     this._clearReloadTimer()
 
@@ -160,7 +153,7 @@ up.FragmentPolling = class FragmentPolling {
       // Don't schedule timers while we're loading. _onReloadSuccess() and _onReloadFailure() will do that for us.
       this._loading = true
 
-      up.reload(this._fragment, this._options).then(
+      up.reload(this._fragment, this._reloadOptions()).then(
         this._onReloadSuccess.bind(this),
         this._onReloadFailure.bind(this)
       )
@@ -169,6 +162,11 @@ up.FragmentPolling = class FragmentPolling {
       // we can resume listening to abort signals.
       this._abortable = oldAbortable
     }
+  }
+
+  _reloadOptions() {
+    let guardEvent = up.event.build('up:fragment:poll', { log: ['Polling fragment', this._fragment] })
+    return { ...this._options, guardEvent }
   }
 
   _onFragmentAborted({ newLayer }) {

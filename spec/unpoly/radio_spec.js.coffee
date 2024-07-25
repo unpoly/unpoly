@@ -2048,8 +2048,8 @@ describe 'up.radio', ->
           expect(reloadSpy).toHaveBeenCalled()
 
       it 'pauses polling when an up:fragment:poll event is prevented', asyncSpec (next) ->
-        up.radio.config.pollInterval = interval = 150
-        timingTolerance = interval / 3
+        up.radio.config.pollInterval = interval = 70
+        timingTolerance = 20
 
         up.hello(fixture('.element[up-poll]'))
         eventCount = 0
@@ -2072,6 +2072,20 @@ describe 'up.radio', ->
         next.after (interval + timingTolerance), ->
           expect(eventCount).toBe(2)
           expect(jasmine.Ajax.requests.count()).toBe(1)
+
+      it 'lets up:fragment:poll listeners mutate render options for the reload pass', ->
+        up.radio.config.pollInterval = interval = 50
+        timingTolerance = 20
+
+        up.hello(fixture('.element[up-poll][up-href="/path"]'))
+
+        up.on 'up:fragment:poll', (event) ->
+          event.renderOptions.url = '/mutated-path'
+
+        await wait(interval + timingTolerance)
+
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(jasmine.lastRequest().url).toMatchURL('/mutated-path')
 
       it "pauses polling while the element's layer is in the background", ->
         reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve(new up.RenderResult())

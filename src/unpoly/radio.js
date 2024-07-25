@@ -478,6 +478,10 @@ up.radio = (function() {
   @event up:fragment:poll
   @param {Element} event.target
     The polling fragment.
+  @param {Object} event.renderOptions
+    An object with [render options](/up.render#parameters) for the render pass that reloads the polling fragment.
+
+    Listeners may inspect and modify these options.
   @param event.preventDefault()
     Prevents the fragment from being reloaded.
   @experimental
