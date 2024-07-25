@@ -27,6 +27,7 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 - [up-poll] supports [up-method]
 - [up-poll] supports [up-params]
 - [up-poll] supports [up-headers]
+- New doc page "Clicking non-interactive elements"
 
 
 
