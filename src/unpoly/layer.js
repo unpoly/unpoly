@@ -495,7 +495,7 @@ up.layer = (function() {
     The [overlay result value](/closing-overlays#overlay-result-values)
     is the event object that caused the overlay to close.
 
-    See [Closing when an event is emitted](/closing-overlays#closing-when-an-event-is-emitted).
+    See [Closing when an event is emitted](/closing-overlays#event-condition).
 
   @param {string|Array<string>} [options.dismissEvent]
     One or more event types that will cause this overlay to automatically be
@@ -504,7 +504,7 @@ up.layer = (function() {
     The [overlay result value](/closing-overlays#overlay-result-values)
     is the event object that caused the overlay to close.
 
-    See [Closing when an event is emitted](/closing-overlays#closing-when-an-event-is-emitted).
+    See [Closing when an event is emitted](/closing-overlays#event-condition).
 
   @param {string|Array<string>} [options.acceptLocation]
     One or more [URL patterns](/url-patterns) that will cause this overlay to automatically be
@@ -514,7 +514,7 @@ up.layer = (function() {
     is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
     by the URL pattern.
 
-    See [Closing when a location is reached](/closing-overlays#closing-when-a-location-is-reached).
+    See [Closing when a location is reached](/closing-overlays#event-condition).
 
   @param {string|Array<string>} [options.dismissLocation]
     One or more [URL patterns](/url-patterns) that will cause this overlay to automatically be
@@ -524,7 +524,7 @@ up.layer = (function() {
     is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
     by the URL pattern.
 
-    See [Closing when a location is reached](/closing-overlays#closing-when-a-location-is-reached).
+    See [Closing when a location is reached](/closing-overlays#location-condition).
 
   @param {Object} [options.context={}]
     The initial [context](/up.layer.context) object for the new overlay.
@@ -814,7 +814,7 @@ up.layer = (function() {
     The [overlay result value](/closing-overlays#overlay-result-values)
     is the event object that caused the overlay to close.
 
-    See [Closing when an event is emitted](/closing-overlays#closing-when-an-event-is-emitted).
+    See [Closing when an event is emitted](/closing-overlays#event-condition).
 
   @param [up-dismiss-event]
     One or more space-separated event types that will cause this overlay to automatically be
@@ -823,7 +823,7 @@ up.layer = (function() {
     The [overlay result value](/closing-overlays#overlay-result-values)
     is the event object that caused the overlay to close.
 
-    See [Closing when an event is emitted](/closing-overlays#closing-when-an-event-is-emitted).
+    See [Closing when an event is emitted](/closing-overlays#event-condition).
 
   @param [up-accept-location]
     One or more space-separated [URL patterns](/url-patterns) that will cause this overlay to automatically be
@@ -833,7 +833,7 @@ up.layer = (function() {
     is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
     by the URL pattern.
 
-    See [Closing when a location is reached](/closing-overlays#closing-when-a-location-is-reached).
+    See [Closing when a location is reached](/closing-overlays#location-condition).
 
   @param [up-dismiss-location]
     One or more space-separated [URL patterns](/url-patterns) that will cause this overlay to automatically be
@@ -843,7 +843,7 @@ up.layer = (function() {
     is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
     by the URL pattern.
 
-    See [Closing when a location is reached](/closing-overlays#closing-when-a-location-is-reached).
+    See [Closing when a location is reached](/closing-overlays#location-condition).
 
   @param [up-context]
     The new overlay's [context](/up.layer.context) object, encoded as JSON.

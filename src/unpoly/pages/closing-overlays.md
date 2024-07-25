@@ -172,7 +172,7 @@ To emit an event, use one of the following methods:
 | `X-Up-Events`        | HTTP header sent from the server |
 | [`Element#dispatchEvent()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/dispatchEvent) | Standard DOM API to emit an event on an element |
 
-When an event causes an overlay to close, its default is prevented. You can use `[up-emit]` with a [fallback URL](/a-up-emit#fallback)
+When an event causes an overlay to close, its default is prevented. You can use `[up-emit]` with a [fallback URL](/up-emit#fallback)
 to make a link that emits a closing event in an overlay, but navigates to a different page on the [root layer](/up.layer.root).
 
 

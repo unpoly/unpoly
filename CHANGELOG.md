@@ -528,7 +528,7 @@ This releases fixes two regressions introduced by [3.5.0](https://unpoly.com/cha
 
 - Fix a bug where a [new overlay](/opening-overlays) would immediately close if the *parent* layer's location
   happened to match the overlay's location-based close condition.
-- When a new overlay's initial location matches its [location-based close condition](/closing-overlays#closing-when-a-location-is-reached),
+- When a new overlay's initial location matches its [location-based close condition](/closing-overlays#location-condition),
   the overlay again immediately closes without rendering its initial content.
 
 

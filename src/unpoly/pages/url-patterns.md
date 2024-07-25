@@ -142,7 +142,7 @@ up.layer.open({ acceptLocation: "/users/* /users/456" })
 ## Capturing named segments
 
 Sometimes it's useful to capture the value of the wildcard that was matched.
-For example, when closing an overlay [once a location is reached](/closing-overlays#closing-when-a-location-is-reached),
+For example, when closing an overlay [once a location is reached](/closing-overlays#location-condition),
 you can use a part of the URL as the overlay's [result value](/closing-overlays#overlay-result-values).
 
 To define a captured segment, prefix it with a `:` like this:
