@@ -500,7 +500,7 @@ up.history = (function() {
   @selector a[up-back]
   @stable
   */
-  up.macro('a[up-back], [up-href][up-back]', function(link) {
+  up.macro('[up-back]', function(link) {
     if (previousLocation) {
       e.setMissingAttrs(link, {
         'up-href': previousLocation,
