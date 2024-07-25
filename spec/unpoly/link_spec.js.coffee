@@ -3342,22 +3342,6 @@ describe 'up.link', ->
         expect('#slow').toHaveText('partial content')
         expect(up.history.location).toMatchURL('/original-path')
 
-      it 'works on a div[up-href][up-defer]', ->
-        partial = fixture('div#slow[up-defer][up-href="/slow-path"]')
-        up.hello(partial)
-
-        await wait()
-
-        expect(jasmine.Ajax.requests.count()).toEqual(1)
-        expect(jasmine.lastRequest().url).toMatchURL('/slow-path')
-        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#slow')
-
-        jasmine.respondWithSelector('#slow', text: 'partial content')
-
-        await wait()
-
-        expect('#slow').toHaveText('partial content')
-
       it 'aborts loading the deferred when another render pass targets the link container', ->
         container = fixture('#container')
         partial = e.affix(container, 'a#slow[up-defer][href="/slow-path"]', text: 'initial content')
@@ -3398,6 +3382,30 @@ describe 'up.link', ->
 
         expect('#partial').toHaveText('old partial content')
         expect('#main').toHaveText('old main content')
+
+      describe 'on a non-interactive element', ->
+
+        it 'works on a div[up-href][up-defer]', ->
+          partial = fixture('div#slow[up-defer][up-href="/slow-path"]')
+          up.hello(partial)
+
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(jasmine.lastRequest().url).toMatchURL('/slow-path')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#slow')
+
+          jasmine.respondWithSelector('#slow', text: 'partial content')
+
+          await wait()
+
+          expect('#slow').toHaveText('partial content')
+
+        it 'does not have a pointer cursor from an [up-href] attribute', ->
+          partial = fixture('span#slow[up-defer=manual][up-href="/slow-path"]')
+          up.hello(partial)
+
+          expect(partial).not.toHaveCursorStyle('pointer')
 
       describe 'when the URL is already cached', ->
 
