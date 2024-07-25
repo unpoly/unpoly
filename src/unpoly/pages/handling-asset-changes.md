@@ -102,73 +102,30 @@ function isLoadPageSafe({ url, layer, method }) {
 The `up:assets:changed` event has `{ oldAssets, newAssets }` properties that you can use to manually
 insert the new assets into the page.
 
-A major challenge here is that JavaScript cannot be unloaded by removing its `<script>` tag. There are three ways to work around this:
-
-1. Scripts must be idempotent, e.g. by detecting whether they have run before. This requires a change to many of your scripts,
-   and is impractical for external libraries.
-2. We must avoid re-inserting existing scripts.
-
-The solution below will go with the latter and only insert scripts that we haven't seen before. 
-
-#### Version hash conventions
-
-If we want to match assets by their URL, we must solve another challenge.
-Asset paths often contain a version hash to allow heavy caching, e.g. `application-c80fd51c.js`.
-This makes is harder to re-identify a script that was changed between two render passes.
-
-Different bundlers have different conventions for version hashes.
-Here are some examples we have seen in the wild:
-
-| Bundler    | Path example                      | Comment                       |
-|------------|-----------------------------------|-------------------------------|
-| Webpack    | `/assets/application-4a83f506.js` | dash and lowercase hexdecimal |
-| esbuild    | `/assets/application-C2AU6HVK.js` | full alphabet but uppercase   |
-| Vite       | `/assets/application.5753e9b0.js` | dot and lowercase hexdcimal   |
-| Sprockets  | `/assets/application-c80fd51c.js` | dash and lowercase hexdecimal |
-| No hash    | `/assets/application.js`          |                               |
-
-Note that the id/version separators (like `.` or `-`) are often configurable, but
-most examples choose dots or dashes.
-
-
-#### Example implementation
-
-The code below will append new assets to the page `<head>` unless they are already appended.
-It ignores version hashes from asset paths, so changed assets are not re-inserted.
-
+The code below will update all `<link rel="stylesheet">` elements whenever there is a change:
 
 ```js
+function isStylesheet(asset) {
+  return asset.matches('link[rel=stylesheet]')
+}
+
 up.on('up:assets:changed', function({ oldAssets, newAssets }) {
-  for (let newAsset of newAssets) {
-    if (!isAssetLoaded(oldAssets, newAsset)) {
-      document.head.append(newAsset)
-    }
+  let oldStylesheets = up.util.filter(oldAssets, isStylesheet)
+  for (let oldStylesheet of oldStylesheets) {
+    oldStylesheet.remove()
+  }
+  
+  let newStylesheets = up.util.filter(newAssets, isStylesheet)
+  for (let newStylesheet of newStylesheets) {
+    document.head.append(newStylesheet)
   }
 })
-
-/*
-Returns whether the given `newAsset` has a match in the given `oldAssets` array.
-
-If an existing asset has the same base name, but a different content hash,
-it is still be considered to be "loaded".
-*/
-function isAssetLoaded(oldAssets, newAsset) {
-  return oldAssets.find(function(oldAsset) {
-    return getPathWithoutHash(oldAsset) === getPathWithoutHash(newAsset)
-  })
-}
-
-/*
-Return the given asset's path with its hash removed, e.g. "app.js" from "app.344af1ca.js".
-*/
-function getPathWithoutHash(asset) {
-  // It's <script src="app.js"> but <link rel="stylesheet" href="app.css">
-  const path = asset.src || asset.href
-  const hashedPathPattern = /^(.+)[\.\-]([a-f0-9]+|[A-Z0-9]+)(\.\w+)$/
-  const [match, base, hash, extension] = hashedPathPattern.exec(path)
-  return match ? (base + extension) : path
-}
 ```
+
+Unfortunately updating `<script>` elements in that fashion is not as straightforward.
+Scripts cannot be "unloaded" by removing a `<script>` element.
+For this reason, script changes are better handled using one of the other techniques demonstrated above.
+
 
 ## Detecting new versions without a user interaction
 
