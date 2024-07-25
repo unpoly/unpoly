@@ -1052,9 +1052,43 @@ describe('up.event', function() {
         expect(fooListener).toHaveBeenCalled()
       })
 
-      it('is focusable for keyboard users', function() {
+      it('has a pointer cursor on an <a> element', function() {
         const link = up.hello(fixture("a[up-emit='foo']", {text: 'label'}))
-        expect(link).toBeKeyboardFocusable()
+        expect(link).toHaveCursorStyle('pointer')
+      })
+
+      describe('on a non-interactive element', function() {
+
+        it('is focusable for keyboard users', function() {
+          const fauxButton = up.hello(fixture("a[up-emit='foo']", {text: 'label'}))
+          expect(fauxButton).toBeKeyboardFocusable()
+        })
+
+        it('gets a [role] attribute', function() {
+          const fauxButton = up.hello(fixture("span[up-emit='foo']", {text: 'label'}))
+          expect(fauxButton).toHaveAttribute('role', 'button')
+        })
+
+        it('emits an event on Enter for keyboard users', function() {
+          const fauxButton = up.hello(fixture("span[up-emit='foo']", {text: 'label'}))
+          const fooListener = jasmine.createSpy('fooListener')
+          fauxButton.addEventListener('foo', fooListener)
+
+          Trigger.keySequence(fauxButton, 'Enter')
+
+          expect(fooListener).toHaveBeenCalled()
+        })
+
+        it('emits an event on Space for keyboard users', function() {
+          const fauxButton = up.hello(fixture("span[up-emit='foo']", {text: 'label'}))
+          const fooListener = jasmine.createSpy('fooListener')
+          fauxButton.addEventListener('foo', fooListener)
+
+          Trigger.keySequence(fauxButton, 'Space')
+
+          expect(fooListener).toHaveBeenCalled()
+        })
+
       })
 
       describe('when the emitted event is prevented', function() {
