@@ -1973,6 +1973,82 @@ up.util = (function() {
     return variant
   }
 
+  // /*-
+  // [Assigns](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign) the given properties to the given object.
+  //
+  // Returns a function that restores the object's properties to the value they had before assignment.
+  //
+  // ### Example
+  //
+  // ```js
+  // let obj = { a: 1, b: 2, c: 3, d: 4 }
+  // let undo = up.util.assignTemp(obj, { b: 20, c: 30 })
+  // console.log(obj) // logs { a: 1, b: 20, c: 30, d: 4 }
+  //
+  // undo()
+  // console.log(obj) // logs { a: 1, b: 2, c: 3, d: 4 }
+  // ```
+  //
+  // ### Limitations
+  //
+  // The returned function can only restore properties that existed before re-assignment.
+  //
+  // @function up.util.assignTemp
+  // @param {Object} target
+  //   The target object to mutate.
+  // @param {Object} props
+  //   An object containing the properties you want to apply.
+  //
+  //   All enumerable own properties of `props` will be copied to `object`.
+  // @return {Function}
+  //   A function that undoes the mutation of `target` when called.
+  //
+  //   Only properties listed in `props` will be restored.
+  // @experimental
+  // */
+  // function assignTemp(target, props) {
+  //   let oldProps = pick(target, Object.keys(props))
+  //   Object.assign(target, props)
+  //   return () => Object.assign(target, oldProps)
+  // }
+
+  function scanFunctions(...values) {
+    return values.flat().filter(isFunction)
+  }
+
+  function cleaner() {
+    let fns = []
+
+    let track = function(values, transform) {
+      values = scanFunctions(...values).map(transform)
+      fns.push(...scanFunctions(...values))
+    }
+
+    let api = function(...values) {
+      track(values, identity)
+    }
+
+    api.guard = function(...values) {
+      track(values, up.error.guardFn)
+    }
+
+    api.clean = function(...args) {
+      let fn
+      // Popping instead have sequence(..args) has two (theoretical) advantages:
+      // (1) We're cleaning in the reverse order, which may be useful for previews
+      // (2) Should a callback schedule more cleanup tasks, we will also clean that.
+      while (fn = fns.pop()) fn(...args)
+    }
+
+    return api
+  }
+
+  async function waitMicrotasks(count = 1) {
+    for (let i = 0; i < count; i++) {
+      await Promise.resolve()
+    }
+  }
+
   return {
     parseURL,
     normalizeURL,
@@ -2075,5 +2151,8 @@ up.util = (function() {
     safeStringifyJSON,
     // groupBy,
     variant,
+    cleaner,
+    waitMicrotasks,
+    scanFunctions,
   }
 })()

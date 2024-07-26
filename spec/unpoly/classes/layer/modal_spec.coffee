@@ -103,7 +103,7 @@ describe 'up.Layer.Modal', ->
 
       it "gives the body additional padding on the right so the hidden scrollbar won't enlarge the client area, causing a layout shift", ->
         spyOn(up.viewport, 'rootScrollbarWidth').and.returnValue(25)
-        unsetBodyStyle = e.setTemporaryStyle(document.body, { 'padding-right': '40px' })
+        unsetBodyStyle = e.setStyleTemp(document.body, { 'padding-right': '40px' })
 
         up.layer.open(mode: 'modal', content: 'modal content')
         expect(document).not.toHaveVerticalScrollbar()
@@ -116,7 +116,7 @@ describe 'up.Layer.Modal', ->
         unsetBodyStyle()
 
       it 'does not change elements if viewport root never had a scrollbar', ->
-        unsetBodyStyle = e.setTemporaryStyle(document.body, { 'overflow-y': 'hidden', 'padding-right': '30px' })
+        unsetBodyStyle = e.setStyleTemp(document.body, { 'overflow-y': 'hidden', 'padding-right': '30px' })
         expect(document).not.toHaveVerticalScrollbar()
 
         up.layer.open(modal: 'modal', content: '<div style="height: 10000px"></div>')

@@ -32,6 +32,7 @@ up.history.config.patch(function() {
   this.updateMetaTagsSet = false
 
   Object.defineProperty(this, 'updateMetaTags', {
+    configurable: true,
     get() {
       return this.updateMetaTagsValue
     },

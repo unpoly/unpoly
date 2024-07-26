@@ -204,10 +204,7 @@ up.element = (function() {
   @stable
   */
   function hide(element) {
-    // Set an attribute that the user can style with custom "hidden" styles.
-    // E.g. certain JavaScript components cannot initialize properly within a
-    // { display: none }, as such an element has no width or height.
-    element.setAttribute('hidden', '')
+    setVisible(element, false)
   }
 
   /*-
@@ -266,13 +263,38 @@ up.element = (function() {
   @stable
   */
   function show(element) {
-    // Remove the attribute set by `up.element.hide()`.
-    element.removeAttribute('hidden')
+    setVisible(element, true)
+  }
 
-    // In case the element was manually hidden through an inline style
-    // of `display: none`, we also remove that.
-    if (element.style.display === 'none') {
-      element.style.display = ''
+  function showTemp(element) {
+    return setVisibleTemp(element, true)
+  }
+
+  function hideTemp(element) {
+    return setVisibleTemp(element, false)
+  }
+
+  function setVisibleTemp(element, newVisible) {
+    if (newVisible === isVisible(element)) return u.noop
+    setVisible(element, newVisible)
+    return () => setVisible(element, !newVisible)
+  }
+
+  function setVisible(element, newVisible) {
+    if (newVisible) {
+      // Remove the attribute set by `up.element.hide()`.
+      element.removeAttribute('hidden')
+
+      // In case the element was manually hidden through an inline style
+      // of `display: none`, we also remove that.
+      if (element.style.display === 'none') {
+        element.style.display = ''
+      }
+    } else {
+      // Set an attribute that the user can style with custom "hidden" styles.
+      // E.g. certain JavaScript components cannot initialize properly within a
+      // { display: none }, as such an element has no width or height.
+      element.setAttribute('hidden', '')
     }
   }
 
@@ -287,14 +309,30 @@ up.element = (function() {
     If omitted, the element will be hidden if shown and shown if hidden.
   @stable
   */
-  function toggle(element, newVisible) {
-    if (newVisible == null) { newVisible = !isVisible(element) }
-    (newVisible ? show : hide)(element)
+  function toggle(element, newVisible = !isVisible(element)) {
+    setVisible(element, newVisible)
   }
 
+  // /*-
+  // [Toggles](/up.element.toggle) the visibility of the given element.
+  //
+  // Returns a function that undoes the change in visibility.
+  //
+  // @function up.element.toggleTemp
+  // @param {Element} element
+  // @param {boolean} [newVisible]
+  //   Pass `true` to show the element or `false` to hide it.
+  //
+  //   If omitted, the element will be hidden if shown and shown if hidden.
+  // @return {Function}
+  //   Returns a function that undoes the change in visibility.
+  // @experimental
+  // */
+  // function toggleTemp(element, newVisible = !isVisible(element)) {
+  //   return setVisibleTemp(element, newVisible)
+  // }
 
-  function toggleAttr(element, attr, value, newPresent) {
-    if (newPresent == null) { newPresent = !element.hasAttribute(attr) }
+  function setAttrPresence(element, attr, value, newPresent) {
     if (newPresent) {
       return element.setAttribute(attr, value)
     } else {
@@ -303,17 +341,26 @@ up.element = (function() {
   }
 
   /*-
-  Sets all key/values from the given object as attributes on the given element.
+  Sets properties from the given object as attributes on the given element.
 
   ### Example
 
-      up.element.setAttrs(element, { title: 'Tooltip', tabindex: 1 })
+  ```js
+  up.element.setAttrs(element, { title: 'Tooltip', tabindex: 1 })
+
+  element.getAttribute('title') // => "Tooltip"
+  element.getAttribute('tabindex') // => "1"
+  ```
 
   @function up.element.setAttrs
   @param {Element} element
     The element on which to set attributes.
   @param {Object} attributes
-    An object of attributes to set.
+    An object of attribute names and values to set.
+
+    To set an empty attribute, pass an empty string value.
+
+    To remove an attribute, use a value of `null` or `undefined`.
   @stable
   */
   function setAttrs(element, attrs) {
@@ -327,11 +374,40 @@ up.element = (function() {
     }
   }
 
-  function setTemporaryAttrs(element, attrs) {
-    const oldAttrs = {}
-    for (let key of Object.keys(attrs)) {
-      oldAttrs[key] = element.getAttribute(key)
-    }
+  /*-
+  Temporarily sets attributes on the given element.
+
+  Returns a function that restores the attributes to their value before the change.
+
+  ### Example
+
+  ```js
+  let element = up.element.createFromSelector("div[title='Original']")
+  element.getAttribute('title') // => "Original"
+
+  let undo = up.element.setAttrsTemp(element, { title: 'Changed' })
+  element.getAttribute('title') // => "Changed"
+
+  undo()
+  element.getAttribute('title') // => "Original"
+  ```
+
+  @function up.element.setAttrsTemp
+  @param {Element} element
+    The element on which to set attributes.
+  @param {Object} attributes
+    An object of attribute names and values to set.
+
+    To set an empty attribute, pass an empty string value.
+
+    To remove an attribute, use a value of `null` or `undefined`.
+  @return {Function}
+    A function that restores the attributes to their value before the change.
+  @internal
+  */
+  function setAttrsTemp(element, attrs) {
+    let keys = Object.keys(attrs)
+    let oldAttrs = pickAttrs(element, keys)
     setAttrs(element, attrs)
     return () => setAttrs(element, oldAttrs)
   }
@@ -639,12 +715,8 @@ up.element = (function() {
     The parent to which to attach the created element.
   @param {string} [position='beforeend']
     The position of the new element in relation to `parent`.
-    Can be one of the following values:
 
-    - `'beforebegin'`: Before `parent`, as a new sibling.
-    - `'afterbegin'`: Just inside `parent`, before its first child.
-    - `'beforeend'`: Just inside `parent`, after its last child.
-    - `'afterend'`: After `parent`, as a new sibling.
+    @include adjacent-positions
   @param {string} selector
     The CSS selector from which to create an element.
   @param {Object} [attrs]
@@ -829,7 +901,7 @@ up.element = (function() {
   @internal
   */
   function concludeCSSTransition(element) {
-    const undo = setTemporaryStyle(element, { transition: 'none' })
+    const undo = setStyleTemp(element, { transition: 'none' })
     // Browsers need to paint at least one frame without a transition to stop the
     // animation. In theory we could just wait until the next paint, but in case
     // someone will set another transition after us, let's force a repaint here.
@@ -1093,34 +1165,30 @@ up.element = (function() {
   }
 
   /*-
-  Temporarily sets the inline CSS styles on the given element.
+  Temporarily adds a CSS class to the given element.
 
-  Returns a function that restores the original inline styles when called.
+  Returns a function that restores the original class list when called.
 
   ### Example
 
-      element = document.querySelector('div')
-      unhide = up.element.setTemporaryStyle(element, { 'visibility': 'hidden' })
-      // do things while element is invisible
-      unhide()
-      // element is visible again
+  ```js
+  let element = up.element.createFromSelector('.foo')
+  element.className // => 'foo'
 
-  @function up.element.setTemporaryStyle
-  @param {Element} element
-    The element to style.
-  @param {Object} styles
-    An object of CSS property names and values.
-  @return {Function()}
-    A function that restores the original inline styles when called.
+  let undo = up.element.addClassTemp('bar')
+  element.className // => 'foo bar'
+
+  undo()
+  element.className // => 'foo'
+  ```
+
+  @function up.element.addClassTemp
+  @return {Function}
+    A function that restores the original class list when called.
   @internal
   */
-  function setTemporaryStyle(element, newStyles) {
-    const oldStyles = inlineStyle(element, Object.keys(newStyles))
-    setInlineStyle(element, newStyles)
-    return () => setInlineStyle(element, oldStyles)
-  }
-
-  function addTemporaryClass(element, klass) {
+  function addClassTemp(element, klass) {
+    if (element.classList.contains(klass)) return u.noop
     element.classList.add(klass)
     return () => element.classList.remove(klass)
   }
@@ -1244,6 +1312,39 @@ up.element = (function() {
   }
 
   /*-
+  Temporarily sets inline CSS styles on the given element.
+
+  Returns a function that restores the original inline styles when called.
+
+  ### Example
+
+  ```js
+  let element = document.querySelector('div')
+  getComputedStyle(element).fontSize // => '12px'
+
+  let undo = up.element.setStyleTemp(element, { 'font-size': '50px' })
+  getComputedStyle(element).fontSize // => '50px'
+
+  undo()
+  getComputedStyle(element).fontSize // => '12px'
+  ```
+
+  @function up.element.setStyleTemp
+  @param {Element} element
+    The element to style.
+  @param {Object} styles
+    One or more CSS properties with kebab-case keys.
+  @return {Function()}
+    A function that restores the original inline styles when called.
+  @internal
+  */
+  function setStyleTemp(element, newStyles) {
+    const oldStyles = inlineStyle(element, Object.keys(newStyles))
+    setInlineStyle(element, newStyles)
+    return () => setInlineStyle(element, oldStyles)
+  }
+
+  /*-
   Returns whether the given element is currently visible.
 
   An element is considered visible if it consumes space in the document.
@@ -1266,9 +1367,13 @@ up.element = (function() {
     return /^up-/.test(string)
   }
 
-  function upAttrs(element) {
-    let attrNames = u.filter(element.getAttributeNames(), isUpPrefixed)
+  function pickAttrs(element, attrNames) {
     return u.mapObject(attrNames, (name) => [name, element.getAttribute(name)])
+  }
+
+  function upAttrs(element) {
+    let attrNames = element.getAttributeNames().filter(isUpPrefixed)
+    return pickAttrs(element, attrNames)
   }
 
   function upClasses(element) {
@@ -1354,62 +1459,73 @@ up.element = (function() {
     return selector
   }
 
+  function wrap(elementOrHTML, parser = createFromHTML) {
+    if (u.isString(elementOrHTML)) {
+      return parser(elementOrHTML)
+    } else {
+      return elementOrHTML
+    }
+  }
+
   return {
-    subtree, // practical
+    subtree,
     contains,
     closestAttr,
-    ancestor, // not practical. we use it in up.feedback
+    ancestor,
     around,
-    get: getOne, // practical for code that also works with jQuery
-    list: getList, // practical for composing multiple collections, or wrapping.
-    toggle, // practical
-    hide, // practical
-    show, // practical
-    metaContent, // internal
-    insertBefore, // internal shortcut, people can use insertAdjacentElement and i don't want to support insertAfter when I don't need it.
-    createFromSelector, // practical for element creation.
-    setAttrs, // practical
-    setTemporaryAttrs,
-    affix, // practical for element creation
+    get: getOne,
+    list: getList,
+    toggle,
+    // toggleTemp,
+    hide,
+    hideTemp,
+    show,
+    showTemp,
+    metaContent,
+    insertBefore,
+    createFromSelector,
+    setAttrs,
+    setAttrsTemp,
+    affix,
     idSelector,
     classSelector,
-    isSingleton, // internal
-    attrSelector, // internal
+    isSingleton,
+    attrSelector,
     tagName: elementTagName,
-    createBrokenDocumentFromHTML, // internal
+    createBrokenDocumentFromHTML,
     fixParserDamage,
-    createFromHTML, // practical for element creation
-    get root() { return getRoot() }, // internal
-    paint, // internal
-    concludeCSSTransition, // internal
-    hasCSSTransition, // internal
-    fixedToAbsolute, // internal
-    setMissingAttrs, // internal
-    setMissingAttr, // internal
-    unwrap, // practical for jQuery migration
+    createFromHTML,
+    get root() { return getRoot() },
+    paint,
+    concludeCSSTransition,
+    hasCSSTransition,
+    fixedToAbsolute,
+    setMissingAttrs,
+    setMissingAttr,
+    unwrap,
     wrapChildren,
-    // presentAttr: presentAttr # experimental
     attr: stringAttr,
-    booleanAttr, // it's practical, but i cannot find a good name. people might expect it to cast to number, too. but i don't need that for my own code. maybe booleanAttr?
-    numberAttr, // practical
-    jsonAttr, // practical
+    booleanAttr,
+    numberAttr,
+    jsonAttr,
     callbackAttr,
     booleanOrStringAttr,
-    setTemporaryStyle, // practical
-    style: computedStyle, // practical.
-    styleNumber: computedStyleNumber, // practical.
-    inlineStyle, // internal
-    setStyle: setInlineStyle, // practical.
-    isVisible, // practical
+    setStyleTemp,
+    style: computedStyle,
+    styleNumber: computedStyleNumber,
+    inlineStyle,
+    setStyle: setInlineStyle,
+    isVisible,
     upAttrs,
     upClasses,
-    toggleAttr,
-    addTemporaryClass,
+    setAttrPresence,
+    addClassTemp,
     cleanJQuery,
     parseSelector,
     isEmpty,
     crossOriginSelector,
     isIntersectingWindow,
     unionSelector,
+    wrap,
   }
 })()

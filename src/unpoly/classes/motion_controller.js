@@ -66,7 +66,7 @@ up.MotionController = class MotionController {
   /*-
   @function finish
   @param {List<Element>} [elements]
-    If no element is given, finishes all animations in the documnet.
+    If no element is given, finishes all animations in the document.
     If an element is given, only finishes animations in its subtree and ancestors.
   @return {Promise} A promise that fulfills when animations have finished.
   */

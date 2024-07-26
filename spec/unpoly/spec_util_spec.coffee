@@ -5,8 +5,8 @@ describe 'up.specUtil', ->
     beforeEach ->
       @body = document.body
       @html = document.documentElement
-      @restoreBodyOverflowY = e.setTemporaryStyle(@body, 'overflow-y': 'visible')
-      @restoreHTMLOverflowY = e.setTemporaryStyle(@html, 'overflow-y': 'visible')
+      @restoreBodyOverflowY = e.setStyleTemp(@body, 'overflow-y': 'visible')
+      @restoreHTMLOverflowY = e.setStyleTemp(@html, 'overflow-y': 'visible')
 
     afterEach ->
       @restoreBodyOverflowY()

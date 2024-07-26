@@ -16,6 +16,7 @@ up.RenderOptions = (function() {
     abort: false,
     confirm: false,
     feedback: false,
+    preview: false,
     cache: true,
     background: true,
   }
