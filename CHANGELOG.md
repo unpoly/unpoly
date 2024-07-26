@@ -3469,7 +3469,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 - Fix a bug where [`up.reveal()`](/up.reveal) would not scroll to an element at the bottom edge of the visible area
   if [`up.layout.config.snap`](/up.layout.config) is set.
 - Several features have been promoted from experimental API to stable API:
-  - [`[up-drawer]`](/a-up-drawer)
+  - `[up-drawer]`
   - [`up.syntax.data()`](/up.syntax.data)
   - [`up.extract()`](/up.extract)
 - When [targeting](/up-target) an URL with a #hash, the viewport will now scroll to the first row of an element

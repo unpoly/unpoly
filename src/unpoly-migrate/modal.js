@@ -183,4 +183,4 @@ the given selector in a modal drawer that slides in from the edge of the screen.
 @deprecated
   Use `[up-layer="new drawer"]` instead.
 */
-up.migrate.targetMacro('up-drawer', { 'up-layer': 'new drawer' }, () => up.migrate.deprecated('a[up-drawer]', '[up-layer="new drawer"]'))
+up.migrate.targetMacro('up-drawer', { 'up-layer': 'new drawer' }, () => up.migrate.deprecated('[up-drawer]', '[up-layer="new drawer"]'))
