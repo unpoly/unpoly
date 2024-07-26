@@ -28,7 +28,7 @@ RedirectPermanent /up.layer.context /up.context
 
 RedirectPermanent /up.cache /caching
 RedirectPermanent /up-follow /a-up-follow
-RedirectPermanent /up-submit /form-up-submit
+RedirectPermanent /form-up-submit /up-submit
 RedirectPermanent /a-up-target /a-up-follow
 RedirectPermanent /form-up-target /form-up-follow
 RedirectPermanent /form-up-observe /up-watch

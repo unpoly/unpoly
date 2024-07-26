@@ -12,7 +12,7 @@ In a vanilla HTML document, clicking a link while offline will replace your app 
 
 ![Browser error when offline](images/browser-offline.png){:width='500'}
 
-Interacting with an Unpoly-enhanced [link](/a-up-follow) or [form](/form-up-submit) while offline will *not* change the page. Instead Unpoly lets you define your own disconnect handling. E.g. you may choose to display an error, or to offer a button that retries the failed request.
+Interacting with an Unpoly-enhanced [link](/a-up-follow) or [form](/up-submit) while offline will *not* change the page. Instead Unpoly lets you define your own disconnect handling. E.g. you may choose to display an error, or to offer a button that retries the failed request.
 
 To handle connection loss, pass an `{ onOffline }` option or set an `[up-on-offline]` attribute. When the device gets disconnected before or during a request, the callback is called with an `up:fragment:offline` argument:
 

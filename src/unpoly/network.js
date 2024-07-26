@@ -27,7 +27,7 @@ The HTTP client offers many quality-of-life improvements, for example:
   This prevents exhausting the user's bandwidth and limits race conditions in end-to-end tests.
 
 Unpoly's HTTP client is used automatically when rendering, e.g. when [following a link](/a-up-follow)
-or [submitting a form](/form-up-submit). To use the client from your own JavaScripts, use `up.request()`.
+or [submitting a form](/up-submit). To use the client from your own JavaScripts, use `up.request()`.
 
 @see caching
 @see aborting-requests

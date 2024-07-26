@@ -11,7 +11,7 @@ without affecting scroll positions, browser, history, etc.
 
 ## Navigating features
 
-[Following a link](/a-up-follow), [submitting a form](/form-up-submit) or
+[Following a link](/a-up-follow), [submitting a form](/up-submit) or
 [opening an overlay](/up.layer.open) is considered navigation by default.
 You may opt *out of* navigation defaults by passing a `{ navigate: false }` option
 or setting an `[up-navigate=false]` attribute.
@@ -20,19 +20,19 @@ Other features like [validation](/up-validate) or `up.render()` are *not*
 considered navigation by default. You may opt *into* navigation by passing a
 `{ navigate: true }` option or setting an `[up-navigate=true]` attribute.
 
-| Feature            | Navigates by default? |
-|--------------------|-----------------------|
-| `a[up-follow]`     | yes                   |
-| `up.follow()`      | yes                   |
-| `up.navigate()`    | yes                   |
-| `[up-layer=new]`   | yes                   |
-| `up.layer.open()`  | yes                   |
-| `form[up-submit]`  | yes                   |
-| `up.submit()`      | yes                   |
-| `up.render()`      | no                    |
-| `[up-validate]`    | no                    |
-| `up.validate()`    | no                    |
-| `[up-poll]`        | no                    |
+| Feature           | Navigates by default? |
+|-------------------|-----------------------|
+| `a[up-follow]`    | yes                   |
+| `up.follow()`     | yes                   |
+| `up.navigate()`   | yes                   |
+| `[up-layer=new]`  | yes                   |
+| `up.layer.open()` | yes                   |
+| `[up-submit]`     | yes                   |
+| `up.submit()`     | yes                   |
+| `up.render()`     | no                    |
+| `[up-validate]`   | no                    |
+| `up.validate()`   | no                    |
+| `[up-poll]`       | no                    |
 
 ## Navigation defaults
 

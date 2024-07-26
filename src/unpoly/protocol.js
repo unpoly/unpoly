@@ -193,7 +193,7 @@ up.protocol = (function() {
 
   ### Signaling failed form submissions
 
-  When [submitting a form via AJAX](/form-up-submit)
+  When [submitting a form via AJAX](/up-submit)
   Unpoly needs to know whether the form submission has failed (to update the form with
   validation errors) or succeeded (to update the `[up-target]` selector).
 

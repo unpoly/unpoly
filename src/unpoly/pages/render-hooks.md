@@ -3,7 +3,7 @@ Render lifecycle hooks
 
 You may hook into specific stages of the rendering process in order to change the result or handle error cases.
 
-The techniques below apply to all functions that render, most notably `up.render()`, `up.follow()`, `up.submit()` and `up.reload()`. For brevity we only use `up.render()` in examples. Most callbacks also have an equivalent HTML attribute for use in [links](/a-up-follow) or [forms](/form-up-submit), e.g. `[up-on-loaded]` for `{ onLoaded }`.
+The techniques below apply to all functions that render, most notably `up.render()`, `up.follow()`, `up.submit()` and `up.reload()`. For brevity we only use `up.render()` in examples. Most callbacks also have an equivalent HTML attribute for use in [links](/a-up-follow) or [forms](/up-submit), e.g. `[up-on-loaded]` for `{ onLoaded }`.
 
 
 ## Running code after rendering
@@ -33,7 +33,7 @@ it is the result from the initial render pass.
 The promise rejects when there is any error during the initial render pass or during revalidation.
 
 Instead of awaiting a promise you may also pass an [`{ onFinished }`](/up.render#options.onRendered) callback.\
-In HTML you can set an [`[up-on-finished]`](/a-up-follow#up-on-finished) attribute on a [link](/a-up-follow) or [form](/form-up-submit).
+In HTML you can set an [`[up-on-finished]`](/a-up-follow#up-on-finished) attribute on a [link](/a-up-follow) or [form](/up-submit).
 
 
 ### Running code after each render pass
@@ -45,7 +45,7 @@ This callback may be called zero, one or two times:
 - When the server rendered a matching fragment, it will be updated on the page. `{ onRendered }` is called with the [result](/up.RenderResult).
 - When [revalidation](/caching#revalidation) renders a second time, `{ onRendered }` is called again with the final result.
 
-In HTML you can set an [`[up-on-rendered]`](/a-up-follow#up-on-rendered) attribute on a [link](/a-up-follow) or [form](/form-up-submit):
+In HTML you can set an [`[up-on-rendered]`](/a-up-follow#up-on-rendered) attribute on a [link](/a-up-follow) or [form](/up-submit):
 
 ```html
 <a

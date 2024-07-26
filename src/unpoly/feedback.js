@@ -413,7 +413,7 @@ up.feedback = (function() {
   ### Updating `.up-current` classes
 
   The `.up-current` class is toggled automatically within all content that Unpoly renders.
-  For example, when Unpoly [follows a link](/a-up-follow), [submits a form](/form-up-submit)
+  For example, when Unpoly [follows a link](/a-up-follow), [submits a form](/up-submit)
   or [renders from a script](/up.render), any newly inserted hyperlinks will get `.up-current`
   if they point to the current URL.
 

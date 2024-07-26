@@ -14,7 +14,7 @@ Validating after submission
 
 When a server-side app could not commit a form submission due to invalid user input,
 it will usually re-render the form with validation errors. This pattern can also be
-used for forms that are [submitted through Unpoly](/form-up-submit).
+used for forms that are [submitted through Unpoly](/up-submit).
 
 Let's look at a standard registration form that asks for an e-mail and password:
 
@@ -116,7 +116,7 @@ HTML5 added a number of validations through attributes like
 [`[pattern]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/pattern).
 These validations are checked on the client when the form is submitted.
 
-You may also use HTML5 validation attributes for forms that are [submitted through Unpoly](/form-up-submit).
+You may also use HTML5 validation attributes for forms that are [submitted through Unpoly](/up-submit).
 A failed HTML5 validation will prevent the form from being submitted.
 
 > [CAUTION]

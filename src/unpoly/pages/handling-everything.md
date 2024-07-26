@@ -62,7 +62,7 @@ There are some exceptions when links will not be preloaded under this setting:
 
 ## Handling all forms
 
-To handle *all* forms on a page without requiring an [`[up-submit]`](/form-up-submit) attribute:
+To handle *all* forms on a page without requiring an [`[up-submit]`](/up-submit) attribute:
 
 ```js
 up.form.config.submitSelectors.push(['form'])
@@ -87,7 +87,7 @@ See [Making JavaScripts work with fragment updates](/legacy-scripts).
 
 ## Customizing navigation defaults
 
-[Following a link](/a-up-follow) or [submitting a form](/form-up-submit) is considered
+[Following a link](/a-up-follow) or [submitting a form](/up-submit) is considered
 [navigation](/navigation) by default.
 
 When navigating Unpoly will use defaults to satisfy the user's expectation regarding

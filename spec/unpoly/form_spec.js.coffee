@@ -2582,7 +2582,7 @@ describe 'up.form', ->
 
   describe 'unobtrusive behavior', ->
 
-    describe 'form[up-submit]', ->
+    describe '[up-submit]', ->
 
       it 'submits the form with AJAX and replaces the [up-target] selector', ->
         $fixture('.response').text('old text')

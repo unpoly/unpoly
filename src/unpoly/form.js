@@ -9,7 +9,7 @@ The `up.form` module helps you work with non-trivial forms.
 @see disabling-forms
 @see watch-options
 
-@see form[up-submit]
+@see [up-submit]
 @see [up-validate]
 @see [up-switch]
 @see [up-autosubmit]
@@ -28,7 +28,7 @@ up.form = (function() {
   @property up.form.config
 
   @param {Array<string>} [config.submitSelectors]
-    An array of CSS selectors matching forms that will be [submitted through Unpoly](/form-up-submit).
+    An array of CSS selectors matching forms that will be [submitted through Unpoly](/up-submit).
 
     You can configure Unpoly to handle *all* forms on a page without requiring an `[up-submit]` attribute:
 
@@ -42,7 +42,7 @@ up.form = (function() {
   @param {Array<string>} [config.noSubmitSelectors]
     Exceptions to `up.form.config.submitSelectors`.
 
-    Matching forms will *not* be [submitted through Unpoly](/form-up-submit),
+    Matching forms will *not* be [submitted through Unpoly](/up-submit),
     even if they match `up.form.config.submitSelectors`.
 
   @param {Array<string>} [config.groupSelectors=['[up-form-group]', 'fieldset', 'label', 'form']]
@@ -239,7 +239,7 @@ up.form = (function() {
   The response is parsed for a CSS selector and the matching elements will
   replace corresponding elements on the current page.
 
-  The unobtrusive variant of this is the `form[up-submit]` selector.
+  The unobtrusive variant of this is the `[up-submit]` selector.
   See its documentation to learn how form submissions work in Unpoly.
 
   Submitting a form is considered [navigation](/navigation).
@@ -264,7 +264,7 @@ up.form = (function() {
     [Render options](/up.render#parameters) that should be used for submitting the form.
 
     Unpoly will parse render options from the given form's attributes
-    like `[up-target]` or `[up-transition]`. See `form[up-submit]` for a list
+    like `[up-target]` or `[up-transition]`. See `[up-submit]` for a list
     of supported attributes.
 
     You may pass this additional `options` object to [supplement or override](/attributes-and-options#options)
@@ -438,7 +438,7 @@ up.form = (function() {
   Disabling a focused control may cause focus to be reset. To prevent this, Unpoly will
   focus the closest [form group](/up-form-group) around the disabled control.
 
-  To automatically disable a form when it is submitted, add the [`[up-disable]`](/form-up-submit#up-disable)
+  To automatically disable a form when it is submitted, add the [`[up-disable]`](/up-submit#up-disable)
   property to the `<form>` element.
 
   ### Dealing with focus loss
@@ -850,7 +850,7 @@ up.form = (function() {
   /*-
   Marks this element as a from group, which (usually) contains a label, input and error message.
 
-  You are not required to use form groups to [submit forms through Unpoly](/form-up-submit).
+  You are not required to use form groups to [submit forms through Unpoly](/up-submit).
   However, structuring your form into groups will help Unpoly to make smaller changes to the DOM when
   working with complex form. For instance, when [validating](/validation#validating-after-changing-a-field) a field,
   Unpoly will re-render the [closest](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest)
@@ -1229,7 +1229,7 @@ up.form = (function() {
   By default Unpoly will follow forms if the element has
   one of the following attributes:
 
-  - [`[up-submit]`](/form-up-submit)
+  - [`[up-submit]`](/up-submit)
   - [`[up-target]`](/a-up-follow#up-target)
   - [`[up-layer]`](/a-up-follow#up-layer)
   - [`[up-transition]`](/a-up-transition)
@@ -1291,7 +1291,7 @@ up.form = (function() {
 
   See [Handling all links and forms](/handling-everything).
 
-  @selector form[up-submit]
+  @selector [up-submit]
 
   @params-note
     All attributes for `a[up-follow]` may be used.

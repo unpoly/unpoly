@@ -15,7 +15,7 @@ match in the [current layer](/up.layer.current).
 
 The one exception is that when a DOM element is passed as `{ target }` or `{ origin }` option,
 Unpoly will use that element's layer. Clicking an Unpoly-enabled [link](/a-up-follow) or
-[form](/form-up-submit) will automatically set that link or form as the `{ origin }`.
+[form](/up-submit) will automatically set that link or form as the `{ origin }`.
 
 ### Disabling layer isolation
 
@@ -63,7 +63,7 @@ When a DOM element is passed as `{ target }` or `{ origin }` option,
 Unpoly will use that element's layer.
 
 Clicking an Unpoly-enabled [link](/a-up-follow) or
-[form](/form-up-submit) will automatically set that link or form as the `{ origin }`.
+[form](/up-submit) will automatically set that link or form as the `{ origin }`.
 
 ### Matching a layer by index
 

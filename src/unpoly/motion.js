@@ -714,7 +714,7 @@ up.motion = (function() {
   */
 
   /*-
-  [Submits](/form-up-submit) this form and swaps in the new fragment
+  [Submits](/up-submit) this form and swaps in the new fragment
   with an animated transition.
 
   ### Example
@@ -729,7 +729,7 @@ up.motion = (function() {
 
   @selector form[up-transition]
   @params-note
-    All attributes for `form[up-submit]` may also be used.
+    All attributes for `[up-submit]` may also be used.
   @param [up-transition]
     The [name of a transition](/predefined-transitions).
   @param [up-fail-transition]

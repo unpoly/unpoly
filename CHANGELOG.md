@@ -461,7 +461,7 @@ This release addresses many edge cases with features that watch form fields for 
 - Fix an issue where `[up-autosubmit]` would not work on forms that also have [dependent fields](/dependent-fields) using `[up-validate]`.
 - Watchers no longer run callbacks if the form was [aborted](/aborting-requests) or detached while [waiting for a previous async callback](/up-watch#async-callbacks).
 - Watchers now abort their [debounce delay](/watch-options#debouncing-callbacks) if the entire form is aborted. Previously it would abort the delay if any watched field was aborted.
-- `[up-autosubmit]` now aborts a debounce delay if either the form element or the [form's target](/form-up-submit#up-target) are aborted. It no longer aborts the delay if any watched field is aborted.
+- `[up-autosubmit]` now aborts a debounce delay if either the form element or the [form's target](/up-submit#up-target) are aborted. It no longer aborts the delay if any watched field is aborted.
 
 
 ### Other changes
@@ -788,7 +788,7 @@ This release addresses many many errors when matching fragments in closed layers
 - Unpoly now [logs](/up.log) when rendering was aborted or threw an internal error.
 - [Cache revalidation](/caching#revalidation) now updates the correct element when the initial render pass matched in the [region of the clicked link](/targeting-fragments#resolving-ambiguous-selectors) and that link has since been detached.
 - Rendering no longer forces a full page load when the initial page was loaded with non-GET, but the render pass does not change history.
-  This allows to use `[up-validate]` in forms that are not [submitted through Unpoly](/form-up-submit).
+  This allows to use `[up-validate]` in forms that are not [submitted through Unpoly](/up-submit).
 - Updates for `[up-keep]` no longer need to also be `[up-keep]`. You can prevent keeping by setting `[up-keep=false]`. This allows you to set `[up-keep]` via a [macro](/up.macro).
 - Fix a bug where reloading a fragment that was rendered from local content would be reloaded from path `"/true"` (sic).
 - Fix a bug where, when revalidating a [fallback target](/targeting-fragments#providing-a-fallback-target), we would log that we're `"revalidating undefined"`
