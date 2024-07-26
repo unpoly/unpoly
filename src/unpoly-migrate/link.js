@@ -91,7 +91,7 @@ up.migrate.transformAttribute('up-restore-scroll', function(link, restoreScroll)
 
 This is done by:
 
-- [Following the link through AJAX](/a-up-follow) instead of a full page load
+- [Following the link through AJAX](/up-follow) instead of a full page load
 - [Preloading the link's destination URL](/preloading)
 - [Triggering the link on `mousedown`](/up-instant) instead of on `click`
 
@@ -134,7 +134,7 @@ Makes any element [behave like a hyperlink](/faux-interactive-elements).
 
 ### Example
 
-The following `<span>` element will [navigate](/a-up-follow) to `/details` when clicked:
+The following `<span>` element will [navigate](/up-follow) to `/details` when clicked:
 
 ```html
 <span up-href="/details">Read more</span>
@@ -144,7 +144,7 @@ The following `<span>` element will [navigate](/a-up-follow) to `/details` when 
 @param [up-href]
   The URL to load when activated.
 @params-note
-  All attributes for `a[up-follow]` may be used.
+  All attributes for `[up-follow]` may be used.
 @deprecated
   You must also set an `[up-follow]` attribute on the same link.
 */

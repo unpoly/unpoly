@@ -66,7 +66,7 @@ Since the new URL is `/bar`, the `.up-current` class has been moved to the "Bar"
 Navigation feedback is enabled per default when [navigating](/navigation).
 
 When rendering without navigation, you may enable feedback by setting an
-[`[up-feedback]`](/a-up-follow#up-feedback) attribute or by passing a
+[`[up-feedback]`](/up-follow#up-feedback) attribute or by passing a
 [`{ feedback }`](/up.render#options.feedback) option:
 
 ```js
@@ -413,7 +413,7 @@ up.feedback = (function() {
   ### Updating `.up-current` classes
 
   The `.up-current` class is toggled automatically within all content that Unpoly renders.
-  For example, when Unpoly [follows a link](/a-up-follow), [submits a form](/up-submit)
+  For example, when Unpoly [follows a link](/up-follow), [submits a form](/up-submit)
   or [renders from a script](/up.render), any newly inserted hyperlinks will get `.up-current`
   if they point to the current URL.
 

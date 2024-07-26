@@ -216,7 +216,7 @@ up.radio = (function() {
   You can disable the processing of hungry fragments using one of the following methods:
 
   - Rendering with an [`{ useHungry: false }`](/up.render#options.useHungry) option will not process any hungry fragments.
-  - Setting an [`[up-use-hungry="false"]`](/a-up-follow#up-use-hungry) attribute on a link or form will not update hungry fragments when the element is activated.
+  - Setting an [`[up-use-hungry="false"]`](/up-follow#up-use-hungry) attribute on a link or form will not update hungry fragments when the element is activated.
   - Preventing an `up:fragment:hungry` event will prevent the hungry fragment
     from being updated.
   - Calling `event.preventDefault()` in an `[up-on-hungry]` attribute handler will prevent the hungry fragment

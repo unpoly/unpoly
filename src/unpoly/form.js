@@ -1230,8 +1230,8 @@ up.form = (function() {
   one of the following attributes:
 
   - [`[up-submit]`](/up-submit)
-  - [`[up-target]`](/a-up-follow#up-target)
-  - [`[up-layer]`](/a-up-follow#up-layer)
+  - [`[up-target]`](/up-follow#up-target)
+  - [`[up-layer]`](/up-follow#up-layer)
   - [`[up-transition]`](/a-up-transition)
 
   To consider other selectors to be submittable, see `up.form.config.submitSelectors`.
@@ -1294,7 +1294,7 @@ up.form = (function() {
   @selector [up-submit]
 
   @params-note
-    All attributes for `a[up-follow]` may be used.
+    All attributes for `[up-follow]` may be used.
 
   @param [up-target]
     The [target selector](/targeting-fragments) to update for a successful form submission.

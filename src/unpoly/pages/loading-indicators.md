@@ -39,12 +39,12 @@ Unpoly will show the progress bar when a request is taking longer to respond
 than `up.network.config.badResponseTime`.
 
 You may override this per-request by using the [`{ badResponseTime }`](/up.render#options.badResponseTime)
-option or [`[up-bad-response-time]`](/a-up-follow#up-bad-response-time) attribute.
+option or [`[up-bad-response-time]`](/up-follow#up-bad-response-time) attribute.
 
 Requests that are loading in the background should never show the progress bar. 
 You may move a request into the background by passing
 an [`{ background: true }`](/up.render#options.background) option
-or setting an [`[up-background]`](/a-up-follow#up-background) attribute.
+or setting an [`[up-background]`](/up-follow#up-background) attribute.
 
 Requests from [preloading](/preloading) or [polling](/up-poll) are automatically
 marked as background requests.

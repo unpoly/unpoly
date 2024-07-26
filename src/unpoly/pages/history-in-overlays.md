@@ -18,7 +18,7 @@ A render pass will only update the address bar if it *both* [changes history](/u
 | no                    | no                         | ❌ no                 |
 
 > [note]
-> When a link [updates another layer](/a-up-follow#up-layer), only the history visibility of the targeted layer is considered.
+> When a link [updates another layer](/up-follow#up-layer), only the history visibility of the targeted layer is considered.
 > Settings for the link's *own* layer is not relevant.
 
 ## Configuring history visibility {#configuring-visibility}

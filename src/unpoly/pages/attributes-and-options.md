@@ -4,7 +4,7 @@ Attributes and options
 ## Unpoly attributes
 
 Unpoly provides `up-`prefixed attributes that enable additional behavior on HTML elements.
-For example, the [`[up-follow]`](/a-up-follow) attribute will cause a clicked link to swap the `<main>` or `<body>` element
+For example, the [`[up-follow]`](/up-follow) attribute will cause a clicked link to swap the `<main>` or `<body>` element
 instead of replacing the full page:
 
 ```html
@@ -23,7 +23,7 @@ using an [animated transition](/up.motion):
 ```
 
 Modifying attributes are documented with the main attribute they're modifying.
-For example, see [modifying attributes for `[up-follow]`](/a-up-follow#attributes).
+For example, see [modifying attributes for `[up-follow]`](/up-follow#attributes).
 
 
 ## Configuring default behavior for all elements {#defaults}
@@ -96,7 +96,7 @@ up.follow(link, { metaTags: true })
 
 Some attributes default to a value `"auto"`. This indicates a more complex default.
 
-For example, the [`[up-cache=auto]`](/a-up-follow#up-cache) attribute caches all links with a `GET` method:
+For example, the [`[up-cache=auto]`](/up-follow#up-cache) attribute caches all links with a `GET` method:
 
 ```
 <a href="/path" up-follow up-cache="auto">Click me</a> <!-- mark-phrase "auto" -->

@@ -95,7 +95,7 @@ This means Unpoly will cache complete pages, including any lazy-loaded fragments
 without showing a flash of [fallback state](#pending). Such pages will also remain accessible in the event of [network issues](/network-issues).
 
 Deferred content that is rendered from the cache will be [revalidated](/caching#revalidation) unless you also set an
-[`[up-revalidate=false]`](/a-up-follow#up-revalidate) attribute.
+[`[up-revalidate=false]`](/up-follow#up-revalidate) attribute.
 
 
 ### Improving cacheability on the server

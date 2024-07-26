@@ -12,7 +12,7 @@ It also explains how to configure smart defaults that work for most of your link
 
 ## Following all links
 
-To follow *all* links on a page without requiring an [`[up-follow]`](/a-up-follow) attribute:
+To follow *all* links on a page without requiring an [`[up-follow]`](/up-follow) attribute:
 
 ```js
 up.link.config.followSelectors.push('a[href]')
@@ -33,7 +33,7 @@ To follow links on `mousedown` instead of `click` without an `[up-instant]` attr
 up.link.config.instantSelectors.push('a[href]')
 ```
 
-Note that an instant link must also by [followable](/up.link.isFollowable), usually by giving it an [`[up-follow]`](/a-up-follow) attribute or by configuring `up.link.config.followSelectors`.
+Note that an instant link must also by [followable](/up.link.isFollowable), usually by giving it an [`[up-follow]`](/up-follow) attribute or by configuring `up.link.config.followSelectors`.
 
 There are some exceptions when links still activate on `click` under this setting:
 
@@ -87,7 +87,7 @@ See [Making JavaScripts work with fragment updates](/legacy-scripts).
 
 ## Customizing navigation defaults
 
-[Following a link](/a-up-follow) or [submitting a form](/up-submit) is considered
+[Following a link](/up-follow) or [submitting a form](/up-submit) is considered
 [navigation](/navigation) by default.
 
 When navigating Unpoly will use defaults to satisfy the user's expectation regarding

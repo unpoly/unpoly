@@ -23,7 +23,7 @@ This makes for an unfriendly experience:
 - The user sees a "flash" as the browser loads and renders the new page,
   even if large portions of the old and new page are the same (navigation, layout, etc.).
 
-Unpoly fixes this by letting you annotate links with an [`[up-target]`](/a-up-follow#up-target)
+Unpoly fixes this by letting you annotate links with an [`[up-target]`](/up-follow#up-target)
 attribute. The value of this attribute is a CSS selector that indicates which page
 fragment to update. The server **still renders full HTML pages**, but we only use
 the targeted fragments and discard the rest:
@@ -67,7 +67,7 @@ with an `up-target` attribute:
 > [NOTE]
 > Instead of `article` you can use any other CSS selector like `#main .article`.
 
-With these [`[up-target]`](/a-up-follow#up-target) annotations Unpoly only updates the targeted part of the screen.
+With these [`[up-target]`](/up-follow#up-target) annotations Unpoly only updates the targeted part of the screen.
 The JavaScript environment will persist and the user will not see a white flash while the
 new page is loading.
 
@@ -79,7 +79,7 @@ new page is loading.
 @see lazy-loading
 @see faux-interactive-elements
 
-@see a[up-follow]
+@see [up-follow]
 @see [up-instant]
 @see [up-preload]
 @see up.follow
@@ -107,7 +107,7 @@ up.link = (function() {
   @property up.link.config
 
   @param {Array<string>} config.followSelectors
-    An array of CSS selectors matching links that will be [followed through Unpoly](/a-up-follow).
+    An array of CSS selectors matching links that will be [followed through Unpoly](/up-follow).
 
     You can customize this property to automatically follow *all* links on a page without requiring an `[up-follow]` attribute.
     See [Handling all links and forms](/handling-everything).
@@ -115,7 +115,7 @@ up.link = (function() {
   @param {Array<string>} config.noFollowSelectors
     Exceptions to `up.link.config.followSelectors`.
 
-    Matching links will *not* be [followed through Unpoly](/a-up-follow), even if they match `up.link.config.followSelectors`.
+    Matching links will *not* be [followed through Unpoly](/up-follow), even if they match `up.link.config.followSelectors`.
 
     By default Unpoly excludes:
 
@@ -136,7 +136,7 @@ up.link = (function() {
     See [Handling all links and forms](/handling-everything).
 
     Note that an instant link must also by [followable](/up.link.isFollowable), usually by giving it an
-    [`[up-follow]`](/a-up-follow) attribute or by configuring `up.link.config.followSelectors`.
+    [`[up-follow]`](/up-follow) attribute or by configuring `up.link.config.followSelectors`.
 
   @param {Array<string>} config.noInstantSelectors
     Exceptions to `up.link.config.instantSelectors`.
@@ -268,7 +268,7 @@ up.link = (function() {
     [Render options](/up.render#parameters) that should be used for following the link.
 
     Unpoly will parse render options from the given link's attributes,
-    like `[up-target]` or `[up-transition]`. See `a[up-follow]` for a list
+    like `[up-target]` or `[up-transition]`. See `[up-follow]` for a list
     of supported attributes.
 
     You may pass this additional `options` object to [supplement or override](/attributes-and-options#options)
@@ -622,7 +622,7 @@ up.link = (function() {
   by Unpoly instead of making a full page load.
 
   If the link is not already [followable](/up.link.isFollowable), the link
-  will receive an `a[up-follow]` attribute.
+  will receive an `[up-follow]` attribute.
 
   @function up.link.makeFollowable
   @param {Element|jQuery|string} link
@@ -846,7 +846,7 @@ up.link = (function() {
 
   You may cancel an `up:click` event using `event.preventDefault()`.
 
-  Canceling `up:click` on a hyperlink will prevent any Unpoly from [following](/a-up-follow) that link.
+  Canceling `up:click` on a hyperlink will prevent any Unpoly from [following](/up-follow) that link.
 
   The underlying `click` or `mousedown` event will also be canceled.
 
@@ -876,7 +876,7 @@ up.link = (function() {
   Returns whether the given link has a [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
   HTTP method like `GET`.
 
-  You can configure links to use unsafe methods like `POST` or `DELETE` by setting an [`[up-method]`](/a-up-follow#up-method) attribute.
+  You can configure links to use unsafe methods like `POST` or `DELETE` by setting an [`[up-method]`](/up-follow#up-method) attribute.
 
   @function up.link.isSafe
   @param {Element} link
@@ -923,7 +923,7 @@ up.link = (function() {
     [Render options](/up.render#parameters) that should be used for loading the partial.
 
     Unpoly will parse render options from the given placeholder's attributes,
-    like `[up-target]` or `[up-cache]`. See `[up-defer]` and `a[up-follow]` for a list
+    like `[up-target]` or `[up-cache]`. See `[up-defer]` and `[up-follow]` for a list
     of supported attributes.
 
     You may pass this additional `options` object to [supplement or override](/attributes-and-options#options)
@@ -989,7 +989,7 @@ up.link = (function() {
   @selector [up-defer]
 
   @params-note
-    All attributes for `a[up-follow]` may also be used.
+    All attributes for `[up-follow]` may also be used.
 
   @param [up-defer='insert']
     When to load and render the deferred content.
@@ -1073,7 +1073,7 @@ up.link = (function() {
 
   ### Preventing Unpoly from following links
 
-  You can tell Unpoly to ignore clicks on an `a[up-follow]` link, causing the link to be non-interactive.
+  You can tell Unpoly to ignore clicks on an `[up-follow]` link, causing the link to be non-interactive.
   Use one of the following methods:
 
   - Prevent the `up:link:follow` event on the link element
@@ -1113,7 +1113,7 @@ up.link = (function() {
 
   Such a link will still be followed through Unpoly.
 
-  @selector a[up-follow]
+  @selector [up-follow]
 
   @param [up-navigate='true']
     Whether this fragment update is considered [navigation](/navigation).
@@ -1539,7 +1539,7 @@ up.link = (function() {
   AJAX request will be triggered right way, the interaction will
   appear faster.
 
-  Links with the `[up-instant]` attribute are always [followed by Unpoly](/a-up-follow) and will not make a full page load.
+  Links with the `[up-instant]` attribute are always [followed by Unpoly](/up-follow) and will not make a full page load.
 
   To [follow all links on `mousedown`](/handling-everything#following-all-links-on-mousedown), configure `up.link.config.instantSelectors`.
 
@@ -1636,7 +1636,7 @@ up.link = (function() {
   Unpoly will only preload [links with safe methods](/up.link.isSafe). The `[up-preload]` attribute
   has no effect on unsafe links.
 
-  Links with the `[up-preload]` attribute are always [followed by Unpoly](/a-up-follow) and will not make a full page load.
+  Links with the `[up-preload]` attribute are always [followed by Unpoly](/up-follow) and will not make a full page load.
 
   See [preloading links](/preloading) for more details and examples.
 
@@ -1648,7 +1648,7 @@ up.link = (function() {
 
   @selector [up-preload]
   @params-note
-    All attributes for `a[up-follow]` may also be used.
+    All attributes for `[up-follow]` may also be used.
   @param [up-preload='hover']
     When to preload this link.
 

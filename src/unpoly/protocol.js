@@ -671,7 +671,7 @@ up.protocol = (function() {
 
   /*-
   The server may set this response header to [emit events](/up.emit) with the
-  requested [fragment update](/a-up-follow).
+  requested [fragment update](/up-follow).
 
   The header value is a [JSON](https://en.wikipedia.org/wiki/JSON) array.
   Each element in the array is a JSON object representing an event to be emitted
@@ -978,7 +978,7 @@ up.protocol = (function() {
     for the initial page that [booted](/up.boot) Unpoly.
 
     The nonce let Unpoly run JavaScript in HTML attributes like
-    [`[up-on-loaded]`](/a-up-follow#up-on-loaded) or [`[up-on-accepted]`](/up-layer-new#up-on-accepted).
+    [`[up-on-loaded]`](/up-follow#up-on-loaded) or [`[up-on-accepted]`](/up-layer-new#up-on-accepted).
     See [Working with a strict Content Security Policy](/csp).
 
     The nonce can either be configured as a string or as function that returns the nonce.

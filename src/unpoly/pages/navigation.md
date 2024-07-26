@@ -11,7 +11,7 @@ without affecting scroll positions, browser, history, etc.
 
 ## Navigating features
 
-[Following a link](/a-up-follow), [submitting a form](/up-submit) or
+[Following a link](/up-follow), [submitting a form](/up-submit) or
 [opening an overlay](/up.layer.open) is considered navigation by default.
 You may opt *out of* navigation defaults by passing a `{ navigate: false }` option
 or setting an `[up-navigate=false]` attribute.
@@ -22,7 +22,7 @@ considered navigation by default. You may opt *into* navigation by passing a
 
 | Feature           | Navigates by default? |
 |-------------------|-----------------------|
-| `a[up-follow]`    | yes                   |
+| `[up-follow]`     | yes                   |
 | `up.follow()`     | yes                   |
 | `up.navigate()`   | yes                   |
 | `[up-layer=new]`  | yes                   |

@@ -14,7 +14,7 @@ When no `{ layer }` option or `[up-layer]` attribute is given, Unpoly will gener
 match in the [current layer](/up.layer.current).
 
 The one exception is that when a DOM element is passed as `{ target }` or `{ origin }` option,
-Unpoly will use that element's layer. Clicking an Unpoly-enabled [link](/a-up-follow) or
+Unpoly will use that element's layer. Clicking an Unpoly-enabled [link](/up-follow) or
 [form](/up-submit) will automatically set that link or form as the `{ origin }`.
 
 ### Disabling layer isolation
@@ -62,7 +62,7 @@ You may use common tree terminology to match a layer relative to the current lay
 When a DOM element is passed as `{ target }` or `{ origin }` option,
 Unpoly will use that element's layer.
 
-Clicking an Unpoly-enabled [link](/a-up-follow) or
+Clicking an Unpoly-enabled [link](/up-follow) or
 [form](/up-submit) will automatically set that link or form as the `{ origin }`.
 
 ### Matching a layer by index

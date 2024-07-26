@@ -810,7 +810,7 @@ up.viewport = (function() {
   Marks this element as being fixed to the top edge of the screen
   using `position: fixed`.
 
-  When [following a fragment link](/a-up-follow), the viewport is scrolled
+  When [following a fragment link](/up-follow), the viewport is scrolled
   so the targeted element becomes visible. By using this attribute you can make
   Unpoly aware of fixed elements that are obstructing the viewport contents.
   Unpoly will then scroll the viewport far enough that the revealed element is fully visible.
@@ -832,7 +832,7 @@ up.viewport = (function() {
   Marks this element as being fixed to the bottom edge of the screen
   using `position: fixed`.
 
-  When [following a fragment link](/a-up-follow), the viewport is scrolled
+  When [following a fragment link](/up-follow), the viewport is scrolled
   so the targeted element becomes visible. By using this attribute you can make
   Unpoly aware of fixed elements that are obstructing the viewport contents.
   Unpoly will then scroll the viewport far enough that the revealed element is fully visible.

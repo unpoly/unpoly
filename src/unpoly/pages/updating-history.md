@@ -2,7 +2,7 @@ Updating history
 ================
 
 Unpoly will update the browser location, document title and meta tags
-as the user [follows links](/a-up-follow) and [submits forms](/up-submit).
+as the user [follows links](/up-follow) and [submits forms](/up-submit).
 
 
 
@@ -102,10 +102,10 @@ The linked JavaScript and stylesheet are *not* part of history state and will no
 
 You may choose to only update some history-related state, but keep others unchanged:
 
-- Location changes can be disabled by setting [`[up-location="false"]`](/a-up-follow#up-location) on a link or form, or by passing [`{ location: false }`](/up.render#options.location) to a rendering function.
-- Title changes can be disabled by setting [`[up-title="false"]`](/a-up-follow#up-title) on a link or form, or by passing [`{ title: false }`](/up.render#options.location) to a rendering function.
-- Meta tag synchronization can be disabled by setting [`[up-meta-tags="false"]`](/a-up-follow#up-meta-tags) on a link or form, or by passing [`{ metaTags: false }`](/up.render#options.metaTags) to a rendering function.
-- Changes to the [`html[lang]`](https://www.tpgi.com/using-the-html-lang-attribute/) attribute can be disabled by setting [`[up-lang="false"]`](/a-up-follow#up-title) on a link or form, or by passing [`{ title: false }`](/up.render#options.location) to a rendering function.
+- Location changes can be disabled by setting [`[up-location="false"]`](/up-follow#up-location) on a link or form, or by passing [`{ location: false }`](/up.render#options.location) to a rendering function.
+- Title changes can be disabled by setting [`[up-title="false"]`](/up-follow#up-title) on a link or form, or by passing [`{ title: false }`](/up.render#options.location) to a rendering function.
+- Meta tag synchronization can be disabled by setting [`[up-meta-tags="false"]`](/up-follow#up-meta-tags) on a link or form, or by passing [`{ metaTags: false }`](/up.render#options.metaTags) to a rendering function.
+- Changes to the [`html[lang]`](https://www.tpgi.com/using-the-html-lang-attribute/) attribute can be disabled by setting [`[up-lang="false"]`](/up-follow#up-title) on a link or form, or by passing [`{ title: false }`](/up.render#options.location) to a rendering function.
 
 > [note]
 > Options like `{ location }` will only be honored [when a render pass is changing history](#when-history-is-changed).

@@ -708,7 +708,7 @@ up.layer = (function() {
   }
 
   /*-
-  [Follows](/a-up-follow) this link and [opens the result in a new overlay](/opening-overlays).
+  [Follows](/up-follow) this link and [opens the result in a new overlay](/opening-overlays).
 
   ### Example
 
@@ -719,7 +719,7 @@ up.layer = (function() {
   @selector [up-layer=new]
 
   @params-note
-    All attributes for `a[up-follow]` may also be used.
+    All attributes for `[up-follow]` may also be used.
 
     You may configure default layer attributes in `up.layer.config`.
 

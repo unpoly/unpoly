@@ -5,7 +5,7 @@ This page shows how to track page views using web analytics tools like
 [Matomo](https://matomo.org/) or [Google Analytics](https://analytics.google.com/).
 
 Web analytics tools usually track a page visit during the initial page load.
-When you [follow links with Unpoly](/a-up-follow) your app only has a single page load when the user begins her session.
+When you [follow links with Unpoly](/up-follow) your app only has a single page load when the user begins her session.
 After that [only fragments are updated](/up.link) within the same page and no additional visits are tracked.
 These *in-page navigations* may be missing from your statistics.
 

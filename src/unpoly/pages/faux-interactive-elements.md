@@ -11,7 +11,7 @@ Add an `[up-follow]` attribute on any non-interactive element to make it behave 
 The element will support keyboard navigation and many other [behaviors for accessibility](#accessibility).
 
 The link's destination URL can be set as an `[up-href]` attribute.
-For example, the following `<span>` element will [navigate](/a-up-follow) to `/details` when clicked:
+For example, the following `<span>` element will [navigate](/up-follow) to `/details` when clicked:
 
 ```html
 <span up-follow up-href="/details">Read more</span>

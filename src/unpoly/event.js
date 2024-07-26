@@ -521,7 +521,7 @@ The parsed data will be passed to your event handler as a third argument:
   })
   ```
 
-  If no listener prevents the `menu:open` event, the browser will [navigate](/a-up-follow)
+  If no listener prevents the `menu:open` event, the browser will [navigate](/up-follow)
   to the `/menu` path.
 
   > [tip]

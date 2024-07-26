@@ -1895,7 +1895,7 @@ describe 'up.link', ->
           expect('.target').toHaveText('new text')
           expect(location.pathname).toEqual(oldPathname)
 
-    describe 'a[up-follow]', ->
+    describe '[up-follow]', ->
 
       it "calls up.follow with the clicked link", ->
         link = fixture('a[href="/follow-path"][up-follow]')
@@ -2400,7 +2400,7 @@ describe 'up.link', ->
 
       describe 'following non-interactive elements with [up-href]', ->
 
-        it 'makes any element behave like an a[up-follow] link', ->
+        it 'makes any element behave like an [up-follow] link', ->
           link = fixture('span[up-follow][up-href="/follow-path"][up-target=".target"]')
           up.hello(link)
           fixture('.target', text: 'old text')

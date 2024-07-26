@@ -143,7 +143,7 @@ When you don't write the callback manually (`up.autosubmit()`, `up.validate()`) 
 worry about returning a promise.
 
 > [TIP]
-To show navigation feedback while *submitting* (instead of while watching), use [`[up-feedback]`](/a-up-follow#up-feedback) instead.
+To show navigation feedback while *submitting* (instead of while watching), use [`[up-feedback]`](/up-follow#up-feedback) instead.
 
 
 Setting options for multiple fields

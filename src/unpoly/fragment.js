@@ -13,7 +13,7 @@ A fragment is an element with some additional properties that are useful in the 
 a server-rendered web application:
 
 - Fragments are [identified by a CSS selector](/target-derivation), like a `.class` or `#id`.
-- Fragments are usually updated by a [link](/a-up-follow) for [form](/up-submit) that targets their selector.
+- Fragments are usually updated by a [link](/up-follow) for [form](/up-submit) that targets their selector.
   When the server renders HTML with a matching element, the fragment is swapped with a new version.
 - As fragments enter the page they are automatically [compiled](/up.compiler) to activate [JavaScript behavior](/up.script).
 - Fragment changes may be [animated](/up.motion).
@@ -1147,7 +1147,7 @@ up.fragment = (function() {
 
   You can also choose to render without keeping elements:
 
-  - Link or forms can force a swap of `[up-keep]` elements by setting an [`[up-use-keep=false]`](/a-up-follow#up-use-keep) attribute.
+  - Link or forms can force a swap of `[up-keep]` elements by setting an [`[up-use-keep=false]`](/up-follow#up-use-keep) attribute.
   - Rendering functions can force a swap of `[up-keep]` elements by passing an [`{ useKeep: false }`](/up.render#options.useKeep) option.
 
   ### Example for conditional keeping

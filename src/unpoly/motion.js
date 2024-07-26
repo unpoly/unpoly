@@ -685,7 +685,7 @@ up.motion = (function() {
   registerTransition('move-down', ['move-to-bottom', 'move-from-top'])
 
   /*-
-  [Follows](/a-up-follow) this link and swaps in the new fragment
+  [Follows](/up-follow) this link and swaps in the new fragment
   with an animated transition.
 
   > [NOTE]
@@ -703,7 +703,7 @@ up.motion = (function() {
 
   @selector a[up-transition]
   @params-note
-    All attributes for `a[up-follow]` may also be used.
+    All attributes for `[up-follow]` may also be used.
   @param [up-transition]
     The [name of a transition](/predefined-transitions).
   @param [up-fail-transition]

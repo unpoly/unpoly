@@ -887,7 +887,7 @@ In cases where you don't want this behavior, you now have more options:
 ### Links
 
 - The `up:link:preload` event received a new property `{ renderOptions }`. It contains the render options for the current render pass.
-- The [`[up-on-offline]`](/a-up-follow#up-on-offline) attribute now supports a [CSP nonce](/csp#nonceable-attributes).
+- The [`[up-on-offline]`](/up-follow#up-on-offline) attribute now supports a [CSP nonce](/csp#nonceable-attributes).
 - The function `up.link.followOptions()` now takes an `Object` as a second argument. It will override any options parsed from the link attributes.
 - The configuration `up.link.config.preloadEnabled` was deprecated. To disable preloading, prevent `up:link:preload`.
 
@@ -2005,7 +2005,7 @@ This is a maintenance release while we're working on the next major feature upda
 
 ### Compatibility with strict Content Security Policies (CSP)
 
-When your [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) disallows `eval()`, Unpoly cannot directly run JavaScript code in HTML attributes. This affects `[up-on-...]` attributes like [`[up-on-loaded]`](/a-up-follow#up-on-loaded) or [`[up-on-accepted]`](/up-layer-new#up-on-accepted).
+When your [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) disallows `eval()`, Unpoly cannot directly run JavaScript code in HTML attributes. This affects `[up-on-...]` attributes like [`[up-on-loaded]`](/up-follow#up-on-loaded) or [`[up-on-accepted]`](/up-layer-new#up-on-accepted).
 
 Unpoly 2.3 lets your work around this by prefixing your callback with a [CSP nonce](https://content-security-policy.com/nonce/):
 
@@ -2023,9 +2023,9 @@ Also see our new [guide to working with strict Content Security Policies](/csp).
 
 ### New options for existing features
 
-- `a[up-follow]` links may now pass the fragment's new [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML) using an `[up-content]` attribute. To pass the outer HTML, use the `[up-fragment]` attribute.
+- `[up-follow]` links may now pass the fragment's new [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML) using an `[up-content]` attribute. To pass the outer HTML, use the `[up-fragment]` attribute.
 - New option `{ solo }` for `up.render()` and `up.request()` lets you quickly abort all previous requests before making the new request. This is a default [navigation option](/navigation).
-- New attribute `[up-solo]` for `a[up-follow]` lets you quickly abort all previous requests before making the new request. This is a default [navigation option](/navigation).
+- New attribute `[up-solo]` for `[up-follow]` lets you quickly abort all previous requests before making the new request. This is a default [navigation option](/navigation).
 - The `{ clearCache }` option for `up.render()` and `up.request()` now accepts a boolean value, a [URL pattern](/url-patterns) or a function.
 
 
@@ -2105,7 +2105,7 @@ This step will allow Unpoly to use modern web APIs and reduce its bundle size ev
   The progress bar is enabled by default. If you're using [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading), the progress bar is disabled if you have an `up:request:late` listener, assuming that you have built a custom loading indicator.
 - For new layers, the `[up-history-visible]` and `[up-history]` options have been unified into a single `[up-history]` option. This reverts to the old behavior of Unpoly 1.0. The separation into two options was introduced in Unpoly 2.0, but turned out to be confusing to users.
 - [Layer configuration](/up.layer.config) may now set mode-specific defaults for [`{ scroll }`](/scrolling) and [`{ focus }`](/focus). These take precendence to defaults in [`up.fragment.config.navigateOptions`](/up.fragment.config#config.navigateOptions).
-- Links with an `[up-instant]` attribute are now followed automatically, even if they don't also have an [`[up-follow]`](/a-up-follow) attribute.
+- Links with an `[up-instant]` attribute are now followed automatically, even if they don't also have an [`[up-follow]`](/up-follow) attribute.
 
 
 1.0.1
@@ -2262,7 +2262,7 @@ This is another maintenance release while we're finishing [the next major versio
 Community members were involved in every change of this release:
 
 - [`up.submit()`](/up.submit) has a new options `{ params }`. It may be used to pass extra form [parameters](/up.Params) that will be submitted in addition to the parameters from the form. (fix by @robinvdvleuten)
-- `[up-modal]` will now honor an [`[up-cache]`](/a-up-target#up-cache) attribute on the same link. (fix by @adam12)
+- `[up-modal]` will now honor an [`[up-cache]`](/up-follow#up-cache) attribute on the same link. (fix by @adam12)
 - Prevent destructor function from being called twice if [`up.destroy()`](/up.destroy) is called twice with the same element (reported by @kratob)
 - On devices that don't show a vertical scrollbar, users can no longer scroll the underlying page while a [modal overlay](/up.modal) is open. (reported by @msurdi)
 
@@ -2361,7 +2361,7 @@ In the example below, changing the `email` input would only validate the first f
 0.60.1
 ------
 
-- When user does not confirm an [`[up-confirm]`](/a-up-target#up-confirm) link,
+- When user does not confirm an [`[up-confirm]`](/up-follow#up-confirm) link,
   the link's `.up-active` class is now removed (fixes #89)
 
 
@@ -2890,7 +2890,7 @@ Maintaining the `.up-current` class on all links turned out to be a major perfor
 
       up.feedback.config.navs.push('.my-nav-bar')
 - The normalized URLs of [`[up-nav]`](/up-nav) links are now cached for performance reasons.
-- [`[up-nav]`](/up-nav) links are only updated once when multiple fragments are updated in a single [replacement](/a-up-target).
+- [`[up-nav]`](/up-nav) links are only updated once when multiple fragments are updated in a single [replacement](/up-follow).
 
 
 ### Animation
@@ -3004,7 +3004,7 @@ This release contains no new features, but will help you when using tools like B
 
 ### Linking to fragments
 
-* When a [link is followed](/a-up-target) you can now consistently refer to that link element as `&` in CSS selectors ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
+* When a [link is followed](/up-follow) you can now consistently refer to that link element as `&` in CSS selectors ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
 
   This affects CSS selectors in the following HTML attributes:
 
@@ -3048,7 +3048,7 @@ This release contains no new features, but will help you when using tools like B
 
 ### Preloading
 
-- Fix a bug where [preloading](/a-up-target) would not always be aborted when stopping to hover before [`up.proxy.config.preloadDelay`](/up.proxy.config#config.preloadDelay).
+- Fix a bug where [preloading](/preloading) would not always be aborted when stopping to hover before [`up.proxy.config.preloadDelay`](/up.proxy.config#config.preloadDelay).
 
 
 0.53.1
@@ -3079,7 +3079,7 @@ This release contains no new features, but will help you when using tools like B
 The work-in-progress package [`up.radio`](/up.radio) will contain functionality to
 passively receive updates from the server. Currently the following functionality is implemented:
 
-- Elements with an [`[up-hungry]`](/up-hungry) attribute are [updated](/up.replace) whenever there is a matching element found in a successful response. The element is replaced even when it isn't [targeted](/a-up-target) directly.
+- Elements with an [`[up-hungry]`](/up-hungry) attribute are [updated](/up.replace) whenever there is a matching element found in a successful response. The element is replaced even when it isn't [targeted](/targeting-fragments) directly.
 
   Use cases for this are unread message counters or notification flashes. Such elements often live in the layout, outside of the content area that is being replaced.
 - When a reserver response contains a `<meta name="csrf-param">` or `<meta name="csrf-token">` element, it is automatically updated in the current page.
@@ -3204,7 +3204,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 - jQuery 3 is now supported in addition to jQuery 1.9+ and jQuery 2.
 - Unpoly now uses [native Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises) instead of jQuery deferreds.
-- You can now help improve Unpoly's documentation by clicking an *Edit this page* link on any [unpoly.com](https://unpoly.com/) subpage (like [`a[up-target]`](/a-up-target)).
+- You can now help improve Unpoly's documentation by clicking an *Edit this page* link on any [unpoly.com](https://unpoly.com/) subpage (like `[up-follow]`).
 
 ### Browser support
 
@@ -3233,7 +3233,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### History
 
-- Clicking a link with an [`[up-restore-scroll]`](/a-up-target#up-restore-scroll) attribute will no longer crash if no previous scroll position for given URL is known ([#25](https://github.com/unpoly/unpoly/issues/25))
+- Clicking a link with an [`[up-restore-scroll]`](/up-follow#up-restore-scroll) attribute will no longer crash if no previous scroll position for given URL is known ([#25](https://github.com/unpoly/unpoly/issues/25))
 - Fix a bug where going back in history would sometimes not call destructors ([#24](https://github.com/unpoly/unpoly/issues/24))
 
 ### Forms
@@ -3302,7 +3302,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 - Fix a bug where [replacing](/up.replace) the `<body>` element would not trigger [destructor functions](/up.compiler#destructor) in the old `<body>`.
 - Fix a bug where [`[up-layer]`](/up-layer) attributes or `{ layer }` options were ignored.
-- [`a[up-target]`](/a-up-target) and [`form[up-target]`] get a new modifying attribute `[up-fail-layer]`.
+- [`[up-target]`](/up-follow#up-target) and [`form[up-target]`](/up-submit#up-target) get a new modifying attribute `[up-fail-layer]`.
   Use it to set the layer to update if the server sends a non-200 status code. Valid values are `auto`, `page`, `modal` and `popup`.
 - JavaScript functions like [`up.replace()`](/up.replace) or [`up.submit()`](/up.submit) now have a `{ failLayer }` option.
 
@@ -3428,7 +3428,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
   A `{ fallback }` option has been added to all JavaScript functions that update fragments, like [`up.replace()`](/up.replace).
 
-  Also an `[up-fallback]` attribute has been added to all CSS selectors that update fragments, like for [`a[up-target]`](/a-up-target).
+  Also an `[up-fallback]` attribute has been added to all CSS selectors that update fragments, like for `[up-follow]`.
 
   You can also define fallbacks globally using the [`up.dom.config`](/up.dom.config) property.
 - Unpoly no longer crashes when a request fails due to a timeout or network problem. In such cases, async functions (like [`up.replace()`](/up.replace)) will leave the page unchanged and  reject the returned promise.
@@ -3947,7 +3947,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
   request and response.
 - [`up.follow()`](/up.follow) and [`up.replace()`](/up.replace) now have an option `{ failTarget }`.
   Use it to define the selector to replace if the server responds with an error.
-- [`[up-target]`](/a-up-target) and [`up-follow`](/a-up-follow) now have a modifying attribute `up-fail-target`.
+- [`[up-target]`](/up-follow#up-target) and `[up-follow]` now have a modifying attribute `[up-fail-target]`.
   Use it to define the selector to replace if the server responds with an error.
 - New utility method [`up.util.reject()`](/up.util.reject)
 - New utility method [`up.util.only()`](/up.util.only)
@@ -4265,7 +4265,7 @@ Refactored internals. No API changes.
   [`up.follow()`](/up.follow),
   [`up.visit()`](/up.visit),
   [`form[up-target]`](/form-up-target) and
-  [`a[up-target]`](/a-up-target).
+  [`a[up-target]`](/up-follow#up-target).
 
 
 0.10.1
@@ -4283,7 +4283,7 @@ Refactored internals. No API changes.
 
 - Viewport scroll positions are saved when the URL changes and restored when the user hits the back/forward button
 - Allow to link to the previous page using [`[up-back]`](/a-up-back)
-- Allow to restore previous scroll state using [`[up-restore-scroll]`](/a-up-target)
+- Allow to restore previous scroll state using [`[up-restore-scroll]`](/up-follow#up-restore-scroll)
 - Instead of saying `<tag up-something="true">` you can now simply say `<tag up-something>`.
 - Create this Changelog.
 

@@ -1,7 +1,7 @@
 Providing content to render
 ===========================
 
-When you [render](/up.render) content with a function like `up.render()` or an attribute like `a[up-follow]`, there are several methods to provide that content.
+When you [render](/up.render) content with a function like `up.render()` or an attribute like `[up-follow]`, there are several methods to provide that content.
 
 A rendering function (or element) must be passed exactly one of the following options:
 
@@ -70,7 +70,7 @@ After HTML was inserted from a string, it is [compiled](/up.compiler).
 
 ### Replacing a fragment's children {#content}
 
-To only replace an element's children, pass the new [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML) as a [`{ content }`](/up.render#options.content) option or as an [`[up-content]`](/a-up-follow#up-content) attribute.
+To only replace an element's children, pass the new [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML) as a [`{ content }`](/up.render#options.content) option or as an [`[up-content]`](/up-follow#up-content) attribute.
 
 For example, take the following HTML:
 
@@ -110,7 +110,7 @@ This is useful to show overlays without going through the server:
 
 ### Rendering a string that only contains the fragment {#fragment}
 
-To render a string of HTML comprising *only* the new fragment's [outer HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/outerHTML), pass it as a [`{ fragment }`](/up.render#options.fragment) option or as an [`[up-fragment]`](/a-up-follow#up-fragment) attribute.
+To render a string of HTML comprising *only* the new fragment's [outer HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/outerHTML), pass it as a [`{ fragment }`](/up.render#options.fragment) option or as an [`[up-fragment]`](/up-follow#up-fragment) attribute.
 
 In this variant you can omit a `{ target }` option or `[up-target]` attribute.
 The target will be [derived](/target-derivation) from the root element in the given HTML:
