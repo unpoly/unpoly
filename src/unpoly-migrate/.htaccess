@@ -87,3 +87,4 @@ RedirectPermanent /a-up-popup /up-popup
 RedirectPermanent /a-up-modal /up-modal
 RedirectPermanent /a-up-layer-new /up-layer-new
 RedirectPermanent /a-up-drawer /up-drawer
+RedirectPermanent /a-up-dismiss /up-dismiss

@@ -309,7 +309,7 @@ The option value should contain the name of one or more dismiss controls:
 | `button`  | Adds an `×` button to the layer                  | `":button"`   |
 
 Regardless of what is configured here, an overlay may always be dismissed by
-using the `up.layer.dismiss()` method or `a[up-dismiss]` attribute.
+using the `up.layer.dismiss()` method or `[up-dismiss]` attribute.
 
 
 

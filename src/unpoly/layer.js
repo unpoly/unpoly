@@ -887,7 +887,7 @@ up.layer = (function() {
 
   You can also omit the `[href]` attribute to make a link that only works in overlays.
 
-  @selector a[up-dismiss]
+  @selector [up-dismiss]
   @param [up-dismiss]
     The overlay's [dismissal value](/closing-overlays#overlay-result-values) as a JSON string.
   @param [up-confirm]

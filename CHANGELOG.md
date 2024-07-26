@@ -1953,7 +1953,7 @@ This maintenance release contains two fixes:
 
 This maintenance release contains a single fix:
 
-- Fix a bug where the value was lost when clicking on a descendant element of an `a[up-accept]` or `a[up-dismiss]`.
+- Fix a bug where the value was lost when clicking on a descendant element of an `[up-accept]` or `[up-dismiss]` button.
 
 
 2.5.0
