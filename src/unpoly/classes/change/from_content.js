@@ -9,7 +9,7 @@ up.Change.FromContent = class FromContent extends up.Change {
     // postflightOptions argument once the response is received and has provided refined
     // options.
     this._origin = options.origin
-    this._preview = options.preview
+    this._preflight = options.preflight
     this._layers = up.layer.getAll(options)
   }
 
@@ -92,7 +92,7 @@ up.Change.FromContent = class FromContent extends up.Change {
   }
 
   _getResponseDoc() {
-    if (this._preview) return
+    if (this._preflight) return
 
     const docOptions = u.pick(this.options, [
       'target',
@@ -116,7 +116,7 @@ up.Change.FromContent = class FromContent extends up.Change {
   }
 
   _improveOptionsFromResponseDoc() {
-    if (this._preview) return
+    if (this._preflight) return
 
     let responseDoc = this._getResponseDoc()
 

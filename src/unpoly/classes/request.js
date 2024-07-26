@@ -299,6 +299,7 @@ up.Request = class Request extends up.Record {
       'fail',
       'abortable',
       'badResponseTime',
+      'previews',
     ]
   }
 
@@ -309,6 +310,7 @@ up.Request = class Request extends up.Record {
       headers: {},
       timeout: up.network.config.timeout,
       builtAt: new Date(),
+      previews: [],
     }
   }
 
@@ -358,16 +360,14 @@ up.Request = class Request extends up.Record {
 
     // This up.Request object is also promise for its up.Response.
     // We delegate all promise-related methods (then, catch, finally) to an internal
-    // deferred object.
-    this.deferred = u.newDeferred()
+    // _deferred object.
+    this._deferred = u.newDeferred()
 
     // (1) We want to set the default after all other properties are initialized,
     //     in case up.network.config.badResponseTime is a function that inspects this request.
     // (2) We want to set the default once and then keep the value immutable. Otherwise
     //     the timer logic for up:network:late/:recover gets inconvenient edge cases.
     this.badResponseTime ??= u.evalOption(up.network.config.badResponseTime, this)
-
-    // this.uid = u.uid()
 
     this._setAutoHeaders()
   }
@@ -550,10 +550,23 @@ up.Request = class Request extends up.Record {
     }
   }
 
+  showPreviews(previews, renderOptions) {
+    if (!this._isSettled() && !this.fromCache) {
+      this._revertPreviews = up.feedback.showPreviews(previews, this, renderOptions)
+    }
+  }
+
   _emitLoad() {
     let event = this.emit('up:request:load', { log: ['Loading %s', this.description] })
     return !event.defaultPrevented
   }
+
+  // _emitLoad() {
+  //   if (this.customLoadEvent) {
+  //
+  //   }
+  //   return !event.defaultPrevented
+  // }
 
   /*-
   Loads this request object as a full-page request, replacing the entire browser environment
@@ -651,7 +664,7 @@ up.Request = class Request extends up.Record {
 
     let message = 'Aborted request to ' + this.description + (reason ? ': ' + reason : '')
     this.state = 'aborted'
-    this.deferred.reject(new up.Aborted(message))
+    this._reject(new up.Aborted(message))
     this.emit('up:request:aborted', { log: message })
 
     // Return true so callers know we didn't return early without actually aborting anything.
@@ -664,7 +677,7 @@ up.Request = class Request extends up.Record {
     let message = 'Cannot load request to ' + this.description + (reason ? ': ' + reason : '')
     this.state = 'offline'
     this.emit('up:request:offline', { log: message })
-    this.deferred.reject(new up.Offline(message))
+    this._reject(new up.Offline(message))
   }
 
   respondWith(response) {
@@ -674,10 +687,26 @@ up.Request = class Request extends up.Record {
     this.state = 'loaded'
 
     if (response.ok) {
-      this.deferred.resolve(response)
+      this._resolve(response)
     } else {
-      this.deferred.reject(response)
+      this._reject(response)
     }
+  }
+
+  _resolve(response) {
+    this._onSettle()
+    this._deferred.resolve(response)
+  }
+
+  _reject(responseOrError) {
+    this._onSettle()
+    this._deferred.reject(responseOrError)
+  }
+
+  _onSettle() {
+    // Do this sync so previews are reverted before another DOM mutation.
+    // awaiting the response would delay this for too long.
+    this._revertPreviews?.()
   }
 
   _isSettled() {
@@ -891,6 +920,6 @@ up.Request = class Request extends up.Record {
   */
   static {
     // A request is also a promise ("thenable") for its response.
-    u.delegate(this.prototype, ['then', 'catch', 'finally'], function() { return this.deferred })
+    u.delegate(this.prototype, ['then', 'catch', 'finally'], function() { return this._deferred })
   }
 }

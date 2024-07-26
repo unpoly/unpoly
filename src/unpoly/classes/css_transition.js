@@ -107,7 +107,7 @@ up.CSSTransition = class CSSTransition {
       if (oldTransition['transition-property'] !== 'all') {
         const oldTransitionProperties = oldTransition['transition-property'].split(/\s*,\s*/)
         const oldTransitionFrame = e.style(this._element, oldTransitionProperties)
-        this._setOldTransitionTargetFrame = e.setTemporaryStyle(this._element, oldTransitionFrame)
+        this._setOldTransitionTargetFrame = e.setStyleTemp(this._element, oldTransitionFrame)
       }
 
       // Stop the existing CSS transition so it does not emit transitionEnd events

@@ -16,6 +16,7 @@ up.migrate.handleResponseDocOptions = docOptions => up.migrate.fixKey(docOptions
 up.fragment.config.patch(function(config) {
   let matchAroundOriginDeprecated = () => up.migrate.deprecated('up.fragment.config.matchAroundOrigin', 'up.fragment.config.match')
   Object.defineProperty(config, 'matchAroundOrigin', {
+    configurable: true,
     get: function() {
       matchAroundOriginDeprecated()
       return this.match === 'closest'
@@ -245,6 +246,7 @@ up.fragment.config.patch(function() {
   this.runScriptsSet = false
 
   Object.defineProperty(this, 'runScripts', {
+    configurable: true,
     get() {
       return this.runScriptsValue
     },

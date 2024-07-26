@@ -930,6 +930,8 @@ up.network = (function() {
 
   return {
     request: makeRequest,
+    // buildRequest,
+    // processRequest,
     cache,
     isBusy,
     isSafeMethod,

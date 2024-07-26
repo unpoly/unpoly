@@ -827,7 +827,7 @@ describe 'up.link', ->
         await expectAsync(promise).toBeResolvedTo(jasmine.any(up.RenderResult))
         expect('.target').toHaveText('new text')
 
-    describe 'up.link.followOptions()', ->
+    fdescribe 'up.link.followOptions()', ->
 
       it 'parses the render options that would be used to follow the given link', ->
         link = fixture('a[href="/path"][up-method="PUT"][up-layer="new"]')
@@ -938,6 +938,16 @@ describe 'up.link', ->
         link = fixture('a[href="/foo"][up-match="first"]')
         options = up.link.followOptions(link)
         expect(options.match).toBe('first')
+
+      it 'parses an [up-preview] attribute', ->
+        link = fixture('a[href="/foo"][up-preview="foo bar"]')
+        options = up.link.followOptions(link)
+        expect(options.preview).toBe('foo bar')
+
+      it 'parses an [up-preview=false] attribute as boolean', ->
+        link = fixture('a[href="/foo"][up-preview="false"]')
+        options = up.link.followOptions(link)
+        expect(options.preview).toBe(false)
 
       if up.migrate.loaded
         it 'parses an [up-reset-scroll] attribute', ->
