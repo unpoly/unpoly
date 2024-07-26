@@ -30,7 +30,7 @@ RedirectPermanent /up.cache /caching
 RedirectPermanent /up-follow /a-up-follow
 RedirectPermanent /form-up-submit /up-submit
 RedirectPermanent /a-up-target /a-up-follow
-RedirectPermanent /form-up-target /form-up-follow
+RedirectPermanent /form-up-target /form-up-submit
 RedirectPermanent /form-up-observe /up-watch
 RedirectPermanent /input-up-observe /up-watch
 RedirectPermanent /form-up-autosubmit /up-autosubmit
