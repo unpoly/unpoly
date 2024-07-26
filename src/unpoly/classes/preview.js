@@ -26,7 +26,12 @@ up.Preview = class Preview {
   }
 
   get layer() {
-    return this.request.layer
+    // TODO: Is this work really not done anywhere else already?
+    if (this.renderOptions.layer === 'new') {
+      return 'new'
+    } else {
+      return this.request.layer
+    }
   }
 
   swap(oldElement, newElement) {
@@ -35,7 +40,7 @@ up.Preview = class Preview {
     up.hello(newElement)
     this._cleaner.track(() => {
       up.script.clean(newElement)
-      newElement.replace(oldElement)
+      newElement.replaceWith(oldElement)
     })
   }
 
@@ -47,8 +52,9 @@ up.Preview = class Preview {
     }
   }
 
-  openLayer(content) {
-    let layer = up.layer.open({ content })
+  async openLayer(content) {
+    let overlayStyles = u.pick(this.renderOptions, ['mode', 'size', 'position', 'dismissable', 'align'])
+    let layer = await up.layer.open({ content, ...overlayStyles })
     this._cleaner.track(() => {
       if (layer.isOpen()) {
         layer.dismiss({ preventable: false })

@@ -324,8 +324,8 @@ up.feedback = (function() {
     return fns
   }
 
-  function findPreviewFn(name) {
-    return namedPreviewFns[name] || up.fail('Unknown preview "%s"', name)
+  function findPreviewFn(value) {
+    return u.presence(value, u.isFunction) || namedPreviewFns[value] || up.fail('Unknown preview "%s"', value)
   }
 
   function getActiveElement(origin) {
@@ -541,3 +541,5 @@ up.feedback = (function() {
     preview: registerPreview
   }
 })()
+
+up.preview = up.feedback.preview
