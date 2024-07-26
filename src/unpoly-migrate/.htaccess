@@ -89,3 +89,4 @@ RedirectPermanent /a-up-layer-new /up-layer-new
 RedirectPermanent /a-up-drawer /up-drawer
 RedirectPermanent /a-up-dismiss /up-dismiss
 RedirectPermanent /a-up-close /up-close
+RedirectPermanent /a-up-accept /up-accept
