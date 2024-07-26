@@ -3746,7 +3746,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 - When opening a modal while another modal is open, the first modal will be closed (with animation) before the second modal opens (with animation)
 - When opening a popup while another popup is open, the first popup will be closed (with animation) before the second popup opens (with animation)
 - User-defined macros are now always run *before* built-in macros.
-  This way you can set [`a[up-dash]`](/a-up-dash) and [`[up-expand]`](/up-expand) from your own macros.
+  This way you can set `[up-dash]` and `[up-expand]` from your own macros.
 
 
 0.24.1
@@ -3850,7 +3850,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
   had an [`up-dash`](/a-up-dash) attribute without a value and also an `up-target` attribute.
 - Fix a bug where a link would be followed multiple times if the link's
   click area was expanded using [`[up-expand]`](/up-expand) and if the
-  link also had an [`up-dash`](/a-up-dash) attribute.
+  link also had an `[up-dash]` attribute.
 - [`up.destroy()`](/up.destroy) now returns a resolved deferred if the given selector or jQuery collection does not exist
 
 

@@ -105,7 +105,7 @@ This is shorthand for:
 
     <a href="/users" up-target=".main" up-instant up-preload>User list</a>
 
-@selector a[up-dash]
+@selector [up-dash]
 @param [up-dash='body']
   The CSS selector to replace
 
@@ -113,7 +113,7 @@ This is shorthand for:
 @deprecated
   To accelerate all links use `up.link.config.instantSelectors` and `up.link.config.preloadSelectors`.
 */
-up.migrate.targetMacro('up-dash', { 'up-preload': '', 'up-instant': '' }, () => up.migrate.deprecated('a[up-dash]', 'up.link.config.instantSelectors and up.link.config.preloadSelectors'))
+up.migrate.targetMacro('up-dash', { 'up-preload': '', 'up-instant': '' }, () => up.migrate.deprecated('[up-dash]', 'up.link.config.instantSelectors and up.link.config.preloadSelectors'))
 
 up.migrate.renamedAttribute('up-delay', 'up-preload-delay', { scope: preloadSelectorFn })
 

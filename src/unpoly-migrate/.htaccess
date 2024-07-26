@@ -1,6 +1,6 @@
 # These Apache directives are included in the .htaccess for unpoly.com (repo unpoly-site)
 
-RedirectPermanent /up-dash /a-up-dash
+RedirectPermanent /a-up-dash /up-dash
 RedirectPermanent /up-instant /a-up-instant
 RedirectPermanent /up-preload /a-up-preload
 RedirectPermanent /a.up-active /up-active
