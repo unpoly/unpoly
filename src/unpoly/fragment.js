@@ -588,10 +588,11 @@ up.fragment = (function() {
   @param {boolean|Function(up.Response): boolean} [options.fail]
     Whether the server response should be considered failed.
 
-    By [default](/up.network.config#config.fail) any HTTP status code other than 2xx or 304 is considered an error code.
-
     For failed responses Unpoly will use options prefixed with `fail`, e.g. `{ failTarget }`.
     See [handling server errors](/failed-responses) for details.
+
+    By [default](/up.network.config#config.fail) any HTTP status code other than 2xx or 304 is considered an error code.
+    Pass `{ fail: false }` to handle *any* response as successful, even with a 4xx or 5xx status code.
 
   @param {boolean|string} [options.history]
     Whether the browser URL, window title and meta tags will be [updated](/updating-history).
