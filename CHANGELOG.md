@@ -2105,7 +2105,7 @@ This step will allow Unpoly to use modern web APIs and reduce its bundle size ev
   The progress bar is enabled by default. If you're using [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading), the progress bar is disabled if you have an `up:request:late` listener, assuming that you have built a custom loading indicator.
 - For new layers, the `[up-history-visible]` and `[up-history]` options have been unified into a single `[up-history]` option. This reverts to the old behavior of Unpoly 1.0. The separation into two options was introduced in Unpoly 2.0, but turned out to be confusing to users.
 - [Layer configuration](/up.layer.config) may now set mode-specific defaults for [`{ scroll }`](/scrolling) and [`{ focus }`](/focus). These take precendence to defaults in [`up.fragment.config.navigateOptions`](/up.fragment.config#config.navigateOptions).
-- Links with an [`[up-instant]`](/a-up-instant) attribute are now followed automatically, even if they don't also have an [`[up-follow]`](/a-up-follow) attribute.
+- Links with an `[up-instant]` attribute are now followed automatically, even if they don't also have an [`[up-follow]`](/a-up-follow) attribute.
 
 
 1.0.1
@@ -3322,7 +3322,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 - [npm package](/install/npm) now expresses Unpoly's dependency on `jquery`.
 - [Modals](/up.modal) no longer close when clicking an element that exists outside the modal's DOM hierarchy.
-- Fix a bug on IE11 where modals would immediately close after opening if the opening link had an [`[up-instant]`](/a-up-instant) attribute and the destination page was already cached.
+- Fix a bug on IE11 where modals would immediately close after opening if the opening link had an `[up-instant]` attribute and the destination page was already cached.
 
 
 0.36.0
@@ -3979,8 +3979,8 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 - When used with the [Ruby on Rails unobtrusive scripting adapter](https://github.com/rails/jquery-ujs) (`rails_ujs.js`),
   now prevents duplicate form submission when Unpoly attributes are mixed with `data-method` attributes.
-- [`a[up-instant]`](/a-up-instant) now works with modals and popups
-- [`[up-expand]`](/up-expand) now works with modals and popups
+- `[up-instant]` now works with modals and popups
+- `[up-expand]` now works with modals and popups
 
 ### Breaking changes
 

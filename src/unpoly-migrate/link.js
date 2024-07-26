@@ -93,7 +93,7 @@ This is done by:
 
 - [Following the link through AJAX](/a-up-follow) instead of a full page load
 - [Preloading the link's destination URL](/preloading)
-- [Triggering the link on `mousedown`](/a-up-instant) instead of on `click`
+- [Triggering the link on `mousedown`](/up-instant) instead of on `click`
 
 ### Example
 

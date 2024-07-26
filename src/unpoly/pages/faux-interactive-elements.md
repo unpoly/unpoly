@@ -89,7 +89,7 @@ To prevent this, Unpoly adds the following behaviors to elements with `[up-follo
 - Link-like elements show a [`pointer`](https://developer.mozilla.org/en-US/docs/Web/CSS/cursor) cursor when hovered over.
 - The element gets a [`[tabindex=0]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/tabindex) attribute so it can be focused with the keyboard. An existing `[tabindex]` attribute will be preserved.
 - The element emits an `up:click` event when activated.
-- You may also assign an [`[up-instant]`](/a-up-instant) attribute to make the element activate on `mousedown` instead of `click` ("Act on press").
+- You may also assign an `[up-instant]` attribute to make the element activate on `mousedown` instead of `click` ("Act on press").
 
 > [note]
 > No additional behaviors will be added to `<a>` or `<button>` elements, as these are accessible by default.

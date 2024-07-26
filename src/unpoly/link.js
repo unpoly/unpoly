@@ -80,7 +80,7 @@ new page is loading.
 @see faux-interactive-elements
 
 @see a[up-follow]
-@see a[up-instant]
+@see [up-instant]
 @see a[up-preload]
 @see up.follow
 
@@ -129,7 +129,7 @@ up.link = (function() {
       in an `[up-document]`, `[up-fragment]` or `[up-content]` attribute.
 
   @param {Array<string>} config.instantSelectors
-    An array of CSS selectors matching links that are [followed on `mousedown`](/a-up-instant)
+    An array of CSS selectors matching links that are [followed on `mousedown`](/up-instant)
     instead of on `click`.
 
     You can customize this property to follow *all* links on `mousedown` without requiring an `[up-instant]` attribute.
@@ -141,7 +141,7 @@ up.link = (function() {
   @param {Array<string>} config.noInstantSelectors
     Exceptions to `up.link.config.instantSelectors`.
 
-    Matching links will *not* be [followed on `mousedown`](/a-up-instant), even if they match `up.link.config.instantSelectors`.
+    Matching links will *not* be [followed on `mousedown`](/up-instant), even if they match `up.link.config.instantSelectors`.
 
     By default Unpoly excludes:
 
@@ -817,7 +817,7 @@ up.link = (function() {
   }
 
   /*-
-  A `click` event that honors the [`[up-instant]`](/a-up-instant) attribute.
+  A `click` event that honors the `[up-instant]` attribute.
 
   This event is generally emitted when an element is clicked. However, for elements
   with an [`[up-instant]`](/a-up-instant) attribute this event is emitted on `mousedown` instead.
@@ -1508,13 +1508,13 @@ up.link = (function() {
       up.event.halt(event, { log: true })
 
       // When the user clicks an hyperlink, the browser will focus the link element on `click`.
-      // However, for an `a[up-instant]` link we will emit `up:click` on `mousedown` and halt the `click` event.
+      // However, for an `[up-instant]` link we will emit `up:click` on `mousedown` and halt the `click` event.
       // Without a `click` event the browser won't focus the link.
       //
       // This also has an unfortunate effect on `input[up-validate]`:
       //
       // - User types into a text field
-      // - With focus still on the text field, the user clicks on an `a[up-instant]`.
+      // - With focus still on the text field, the user clicks on an `[up-instant]`.
       // - The link is being followed, causing a request for the new fragment.
       // - When the response is received, Unpoly will update the targeted fragment.
       // - This causes the text field (probably being replaced) from losing focus, causing a `change` event,
@@ -1557,7 +1557,7 @@ up.link = (function() {
   However, for navigation actions this isn't required. E.g. many operation systems switch tabs on `mousedown`
   instead of `click`.
 
-  @selector a[up-instant]
+  @selector [up-instant]
   @stable
   */
 
@@ -1566,7 +1566,7 @@ up.link = (function() {
   descendant link.
 
   `[up-expand]` honors all the Unppoly attributes in expanded links, like
-  `a[up-target]`, `a[up-instant]` or `a[up-preload]`.
+  [`[up-target]`](/up-follow#up-target), `[up-instant]` or `a[up-preload]`.
 
   ### Example
 
