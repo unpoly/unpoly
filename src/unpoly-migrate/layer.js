@@ -52,7 +52,7 @@ a fallback destination on the root layer:
 
     <a href="/fallback" up-close>Okay</a>
 
-@selector a[up-close]
+@selector [up-close]
 @deprecated
   Use `[up-dismiss]` instead.
 */
