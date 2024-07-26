@@ -89,6 +89,8 @@ up.feedback = (function() {
   const u = up.util
   const e = up.element
 
+  let namedPreviewFns = {}
+
   /*-
   Sets default options for this package.
 
@@ -115,6 +117,7 @@ up.feedback = (function() {
 
   function reset() {
     up.layer.root.feedbackLocation = null
+    namedPreviewFns = u.pickBy(namedPreviewFns, 'isDefault')
   }
 
   const CLASS_ACTIVE = 'up-active'
@@ -156,7 +159,7 @@ up.feedback = (function() {
       for (let currentClass of config.currentClasses) {
         link.classList.toggle(currentClass, isCurrent)
       }
-      e.toggleAttr(link, 'aria-current', 'page', isCurrent)
+      e.setAttrPresence(link, 'aria-current', 'page', isCurrent)
     }
   }
 
@@ -291,28 +294,74 @@ up.feedback = (function() {
   @stable
   */
 
-  function showAroundRequest(request, options) {
-    if (!options.feedback) {
-      return
+  // function showAroundRequest(request, renderOptions) {
+  //   let preview = new up.Preview({ request, renderOptions: u.copy(renderOptions) })
+  //   let previewFns = getPreviewFns(renderOptions)
+  //   for (let previewFn of previewFns) {
+  //     preview.run(previewFn)
+  //   }
+  //   u.always(request, () => preview.revert())
+  // }
+
+  function showPreviews(previews, request, renderOptions) {
+    let preview = new up.Preview({ request, renderOptions: u.copy(renderOptions) })
+    for (let nameOrFn of u.compact(previews)) {
+      preview.run(nameOrFn)
+    }
+    return () => preview.revert()
+  }
+
+  up.on('up:fragment:load', function({ previews, renderOptions: { feedback, preview } }) {
+    // Turn { feedback } option into a named preview
+    if (feedback) {
+      previews.push(classesFeedbackFn)
     }
 
-    let clean = (fn) => u.always(request, fn)
-
-    let activeElement = getActiveElementFromRenderOptions(request)
-    if (activeElement) {
-      clean(e.addTemporaryClass(activeElement, CLASS_ACTIVE))
+    if (preview) {
+      // Parse { preview } option into one or more preview names or functions
+      let previewTokens = u.parseTokens(preview)
+      previews.push(...previewTokens)
     }
+  })
 
-    for (let fragment of request.fragments) {
-      clean(e.addTemporaryClass(fragment, CLASS_LOADING))
+  // function getPreviewFns(renderOptions) {
+  //   let fns = []
+  //
+  //   if (renderOptions.feedback) {
+  //     fns.push(getPreviewFn('classes'))
+  //   }
+  //
+  //   let previewTokens = u.parseTokens(renderOptions.preview)
+  //   let previewFns = previewTokens.map(getPreviewFn)
+  //   fns.push(...previewFns)
+  //
+  //   return fns
+  // }
+
+  function getPreviewFn(value) {
+    return u.presence(value, u.isFunction) || namedPreviewFns[value] || up.fail('Unknown preview "%s"', value)
+  }
+
+  function getActiveElement(origin) {
+    if (origin) {
+      // If the link area was grown with [up-expand], we highlight the [up-expand] container.
+      return findActivatableArea(origin)
     }
   }
 
-  function getActiveElementFromRenderOptions(request) {
-    let activeElement = request.origin
+  function registerPreview(name, previewFn) {
+    previewFn.isDefault = up.framework.evaling
+    namedPreviewFns[name] = previewFn
+  }
+
+  function classesFeedbackFn(preview) {
+    let activeElement = getActiveElement(preview.origin)
     if (activeElement) {
-      // If the link area was grown with [up-expand], we highlight the [up-expand] container.
-      return findActivatableArea(activeElement)
+      preview.addClass(activeElement, CLASS_ACTIVE)
+    }
+
+    for (let fragment of preview.fragments) {
+      preview.addClass(fragment, CLASS_LOADING)
     }
   }
 
@@ -501,6 +550,11 @@ up.feedback = (function() {
 
   return {
     config,
-    showAroundRequest,
+    // showAroundRequest,
+    preview: registerPreview,
+    getPreviewFn,
+    showPreviews,
   }
 })()
+
+up.preview = up.feedback.preview

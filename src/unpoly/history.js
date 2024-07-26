@@ -467,7 +467,7 @@ up.history = (function() {
   }
 
   function updateLang(newLang) {
-    e.toggleAttr(e.root, 'lang', newLang, !!newLang)
+    e.setAttrPresence(e.root, 'lang', newLang, !!newLang)
   }
 
   /*-

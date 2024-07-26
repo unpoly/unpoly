@@ -363,9 +363,6 @@ up.link = (function() {
 
     parser.include(parseRequestOptions)
 
-    // Feedback options
-    parser.boolean('feedback')
-
     // Fragment options
     options.origin ||= link
     parser.boolean('fail')
@@ -406,6 +403,10 @@ up.link = (function() {
     parser.string('acceptLocation')
     parser.string('dismissLocation')
     parser.booleanOrString('history')
+
+    // Feedback options
+    parser.boolean('feedback')
+    parser.booleanOrString('preview')
 
     // Viewport options
     parser.booleanOrString('focus')

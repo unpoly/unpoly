@@ -480,17 +480,17 @@ up.script = (function() {
   @stable
   */
   function registerDestructor(element, destructor) {
-    let destructors = element.upDestructors
-    if (!destructors) {
-      destructors = []
-      element.upDestructors = destructors
-      element.classList.add('up-can-clean')
-    }
-    if (u.isArray(destructor)) {
-      destructors.push(...destructor)
-    } else {
-      destructors.push(destructor)
-    }
+    let fns = u.scanFunctions(destructor)
+    if (!fns.length) return
+
+    let registry = (element.upDestructors ||= buildDestructorRegistry(element))
+    registry.guard(fns)
+  }
+
+  function buildDestructorRegistry(element) {
+    let registry = u.cleaner()
+    registry(e.addClassTemp(element, 'up-can-clean'))
+    return registry
   }
 
   /*-

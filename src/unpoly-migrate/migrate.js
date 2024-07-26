@@ -34,6 +34,7 @@ up.migrate = (function() {
     const doWarn = u.memoize(() => warning ? warn(warning) : warn('Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object))
 
     Object.defineProperty(object, oldKey, {
+      configurable: true,
       get() {
         doWarn()
         return this[newKey]
@@ -53,6 +54,7 @@ up.migrate = (function() {
     let valueRef = [object[key]]
 
     Object.defineProperty(object, key, {
+      configurable: true,
       get() {
         doWarn()
         return valueRef[0]
@@ -70,6 +72,7 @@ up.migrate = (function() {
     let value = object[key]
 
     Object.defineProperty(object, key, {
+      configurable: true,
       get() {
         return value
       },
@@ -164,6 +167,7 @@ up.migrate = (function() {
 
   function renamedPackage(oldName, newName) {
     Object.defineProperty(up, oldName, {
+      configurable: true,
       get() {
         warn(`up.${oldName} has been renamed to up.${newName}`)
         return up[newName]
