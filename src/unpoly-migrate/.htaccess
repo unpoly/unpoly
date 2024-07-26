@@ -7,7 +7,6 @@ RedirectPermanent /a.up-active /up-active
 RedirectPermanent /form.up-active /up-active
 RedirectPermanent /a.up-current /up-current
 RedirectPermanent /up-nav-a.up-current /up-current
-RedirectPermanent /up-observe /form-up-observe
 RedirectPermanent /input-up-validate /up-validate
 RedirectPermanent /form-up-validate /up-validate
 RedirectPermanent /a-up-back /up-back
@@ -30,7 +29,7 @@ RedirectPermanent /up.cache /caching
 RedirectPermanent /a-up-follow /up-follow
 RedirectPermanent /form-up-submit /up-submit
 RedirectPermanent /a-up-target /up-follow
-RedirectPermanent /form-up-target /form-up-submit
+RedirectPermanent /form-up-target /up-submit
 RedirectPermanent /form-up-observe /up-watch
 RedirectPermanent /input-up-observe /up-watch
 RedirectPermanent /form-up-autosubmit /up-autosubmit
