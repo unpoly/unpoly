@@ -405,7 +405,7 @@ up.feedback = (function() {
 
   - the link's `[href]` attribute
   - the link's `[up-href]` attribute
-  - the URL pattern in the link's [`[up-alias]`](/a-up-alias) attribute
+  - the URL pattern in the link's `[up-alias]` attribute
 
   Any `#hash` fragments in the link's or current URLs will be ignored.
 
@@ -439,7 +439,7 @@ up.feedback = (function() {
 
   To pass more than one alternative URLs, use a [URL pattern](/url-patterns).
 
-  @selector a[up-alias]
+  @selector [up-alias]
   @param up-alias
     A [URL pattern](/url-patterns) with alternative URLs.
   @stable
