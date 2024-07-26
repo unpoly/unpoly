@@ -13,7 +13,7 @@ Preloading on hover {#on-hover}
 -------------------
 
 To preload a link when the user [hovers](https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseover_event)
-over it, set an [`[up-preload]`](/a-up-preload) attribute:
+over it, set an `[up-preload]` attribute:
 
 ```html
 <a href="/path" up-preload>Hover over me to preload my content</a>
@@ -34,7 +34,7 @@ To [preload all links on hover](/handling-everything#preloading-all-links), conf
 Eager preloading on insertion {#on-insert} 
 ----------------------------
 
-To preload a link as soon as it appears in the DOM, set an [`[up-preload="insert"]`](/a-up-preload#up-preload) attribute.
+To preload a link as soon as it appears in the DOM, set an [`[up-preload="insert"]`](/up-preload#up-preload) attribute.
 
 This is useful for links with a high probability of being clicked, like a navigation menu:
 
@@ -50,7 +50,7 @@ Preloading when a link scrolls into view {#on-reveal}
 ------------------------------------------
 
 To "lazy preload" a link when it is scrolled into the [viewport](/up-viewport),
-set an [`[up-preload="reveal"]`](/a-up-preload#up-preload) attribute.
+set an [`[up-preload="reveal"]`](/up-preload#up-preload) attribute.
 
 This is useful when an element is [below the fold](https://www.optimizely.com/optimization-glossary/below-the-fold/)
 and is unlikely to be clicked until the the user scrolls:

@@ -2,7 +2,7 @@
 
 RedirectPermanent /a-up-dash /up-dash
 RedirectPermanent /a-up-instant /up-instant
-RedirectPermanent /up-preload /a-up-preload
+RedirectPermanent /a-up-preload /up-preload
 RedirectPermanent /a.up-active /up-active
 RedirectPermanent /form.up-active /up-active
 RedirectPermanent /a.up-current /up-current

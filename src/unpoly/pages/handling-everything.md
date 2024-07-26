@@ -46,7 +46,7 @@ no longer be called. You need to bind these listeners to `mousedown` or, better,
 
 ### Preloading all links
 
-To preload *all* links on when hovering over them, without requiring an [`[up-preload]`](/a-up-preload) attribute:
+To preload *all* links on when hovering over them, without requiring an `[up-preload]` attribute:
 
 ```js
 up.link.config.preloadSelectors.push('a[href]')

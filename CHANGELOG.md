@@ -76,13 +76,13 @@ For many years Unpoly has supported the `[up-preload]` attribute. This would pre
 <a href="/path" up-preload>Hover over me to preload my content</a>
  ```
 
-You can now preload a link *as soon as it appears in the DOM*, by setting an [`[up-preload="insert"]`](/a-up-preload#up-preload) attribute. This is useful for links with a high probability of being clicked, like a navigation menu:
+You can now preload a link *as soon as it appears in the DOM*, by setting an [`[up-preload="insert"]`](/up-preload#up-preload) attribute. This is useful for links with a high probability of being clicked, like a navigation menu:
 
 ```html
 <a href="/menu" up-layer="new drawer" up-preload="insert">≡ Menu</a> <!-- mark-phrase "insert" -->
 ```
 
-To "lazy preload" a link when it is scrolled into the [viewport](/up-viewport), you can now set an [`[up-preload="reveal"]`](/a-up-preload#up-preload) attribute. This is useful when an element is [below the fold](https://www.optimizely.com/optimization-glossary/below-the-fold/) and is unlikely to be clicked until the the user scrolls:
+To "lazy preload" a link when it is scrolled into the [viewport](/up-viewport), you can now set an [`[up-preload="reveal"]`](/up-preload#up-preload) attribute. This is useful when an element is [below the fold](https://www.optimizely.com/optimization-glossary/below-the-fold/) and is unlikely to be clicked until the the user scrolls:
 
 ```html
 <a href="/stories/106" up-preload="reveal">Full story</a> <!-- mark-phrase "reveal" -->
@@ -3180,7 +3180,7 @@ passively receive updates from the server. Currently the following functionality
 
 ### Network
 
-- [`a[up-preload]`](/a-up-preload) will no longer preload a link when the user holds the Shift, Ctrl or Meta key while hovering.
+- `[up-preload]` will no longer preload a link when the user holds the Shift, Ctrl or Meta key while hovering.
 
 
 0.50.1

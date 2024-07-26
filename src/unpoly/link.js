@@ -81,7 +81,7 @@ new page is loading.
 
 @see a[up-follow]
 @see [up-instant]
-@see a[up-preload]
+@see [up-preload]
 @see up.follow
 
 @module up.link
@@ -1566,7 +1566,7 @@ up.link = (function() {
   descendant link.
 
   `[up-expand]` honors all the Unppoly attributes in expanded links, like
-  [`[up-target]`](/up-follow#up-target), `[up-instant]` or `a[up-preload]`.
+  [`[up-target]`](/up-follow#up-target), `[up-instant]` or `[up-preload]`.
 
   ### Example
 
@@ -1646,7 +1646,7 @@ up.link = (function() {
   <a href="/path" up-preload>Hover over me to preload my content</a>
   ```
 
-  @selector a[up-preload]
+  @selector [up-preload]
   @params-note
     All attributes for `a[up-follow]` may also be used.
   @param [up-preload='hover']
