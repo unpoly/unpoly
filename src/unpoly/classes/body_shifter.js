@@ -13,11 +13,11 @@ up.BodyShifter = class BodyShifter {
   constructor() {
     this._anchoredElements = new Set()
     this._stack = 0
-    this._cleaners = []
+    this._cleaner = new up.Cleaner()
   }
 
   lowerStack() {
-    if (--this._stack === 0) this._unshiftNow()
+    if (--this._stack === 0) this._cleaner.clean()
   }
 
   raiseStack() {
@@ -47,7 +47,7 @@ up.BodyShifter = class BodyShifter {
 
     // Always publish on the <html> element for consistency, even if the scrolling element
     // is sometimes <body>. The property will be inherited
-    this._cleaners.push(e.setTemporaryStyle(e.root, {
+    this._cleaner.track(e.setTemporaryStyle(e.root, {
       '--up-scrollbar-width': this._rootScrollbarWidth + 'px'
     }))
 
@@ -63,17 +63,10 @@ up.BodyShifter = class BodyShifter {
 
     // viewport.sass wants to add the scrollbar with to the value, so we store it in a separate property.
     let originalValue = e.style(element, styleProp)
-    this._cleaners.push(
-      e.setTemporaryStyle(element, { ['--up-original-' + styleProp]: originalValue }),
+    this._cleaner.track(
+      e.setTemporaryStyle(e.root, { ['--up-original-' + styleProp]: originalValue }),
       e.addTemporaryClass(element, SHIFT_CLASS),
     )
-  }
-
-  _unshiftNow() {
-    let cleaner
-    while(cleaner = this._cleaners.pop()) {
-      cleaner()
-    }
   }
 
 }

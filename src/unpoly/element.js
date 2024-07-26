@@ -1121,6 +1121,7 @@ up.element = (function() {
   }
 
   function addTemporaryClass(element, klass) {
+    if (element.classList.contains(klass)) return u.noop
     element.classList.add(klass)
     return () => element.classList.remove(klass)
   }

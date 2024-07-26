@@ -89,6 +89,8 @@ up.feedback = (function() {
   const u = up.util
   const e = up.element
 
+  let namedPreviewFns = {}
+
   /*-
   Sets default options for this package.
 
@@ -115,6 +117,7 @@ up.feedback = (function() {
 
   function reset() {
     up.layer.root.feedbackLocation = null
+    namedPreviewFns = u.pickBy(namedPreviewFns, 'isDefault')
   }
 
   const CLASS_ACTIVE = 'up-active'
@@ -291,30 +294,63 @@ up.feedback = (function() {
   @stable
   */
 
-  function showAroundRequest(request, options) {
-    if (!options.feedback) {
-      return
+  function showAroundRequest(request, renderOptions) {
+    let preview = new up.Preview({ request, renderOptions: u.copy(renderOptions) })
+    let previewFns = getPreviewFns(renderOptions)
+    for (let previewFn of previewFns) {
+      preview.run(previewFn)
     }
-
-    let clean = (fn) => u.always(request, fn)
-
-    let activeElement = getActiveElementFromRenderOptions(request)
-    if (activeElement) {
-      clean(e.addTemporaryClass(activeElement, CLASS_ACTIVE))
-    }
-
-    for (let fragment of request.fragments) {
-      clean(e.addTemporaryClass(fragment, CLASS_LOADING))
-    }
+    u.always(request, () => preview.undo())
   }
 
-  function getActiveElementFromRenderOptions(request) {
-    let activeElement = request.origin
-    if (activeElement) {
+  function getPreviewFns(renderOptions) {
+    let fns = []
+    if (renderOptions.feedback) {
+      fns.push(findPreviewFn('classes'))
+    }
+
+    if (renderOptions.preview) {
+      fns.push(findPreviewFn(renderOptions.preview))
+
+      // Allowing animation with previews opens up new edge cases.
+      // E.g. the response is arrived while the preview is still animating.
+      // We will handle this eventually, but it will require decoupling
+      // up.fragment.abort() from the request queue, and introducing a
+      // generic queue of abortable tasks.
+      renderOptions.transition = false     // for swapping fragments
+      renderOptions.animation = false      // for prepending/appending fragments
+      renderOptions.openAnimation = false  // for opening new layers
+    }
+    return fns
+  }
+
+  function findPreviewFn(name) {
+    return namedPreviewFns[name] || up.fail('Unknown preview "%s"', name)
+  }
+
+  function getActiveElement(origin) {
+    if (origin) {
       // If the link area was grown with [up-expand], we highlight the [up-expand] container.
-      return findActivatableArea(activeElement)
+      return findActivatableArea(origin)
     }
   }
+
+  function registerPreview(name, previewFn) {
+    previewFn.isDefault = up.framework.evaling
+    namedPreviewFns[name] = previewFn
+  }
+
+  registerPreview('classes', function(preview) {
+    let activeElement = getActiveElement(preview.origin)
+    if (activeElement) {
+      preview.addClass(activeElement, CLASS_ACTIVE)
+    }
+
+    for (let fragment of preview.fragments) {
+      preview.addClass(fragment, CLASS_LOADING)
+    }
+
+  })
 
   /*-
   Marks this element as a navigation component, such as a menu or navigation bar.
@@ -502,5 +538,6 @@ up.feedback = (function() {
   return {
     config,
     showAroundRequest,
+    preview: registerPreview
   }
 })()
