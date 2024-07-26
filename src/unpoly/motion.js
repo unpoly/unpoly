@@ -8,7 +8,7 @@ When you [update a page fragment](/up.link) you can animate the change.
 
 When we morph between an old and a new element, we call it a *transition*.
 
-For instance, you may add an [`[up-transition]`](/a-up-transition) attribute to your
+For instance, you may add an `[up-transition]` attribute to your
 links or forms to smoothly fade out the old element while fading in the new element:
 
 ```html
@@ -685,39 +685,32 @@ up.motion = (function() {
   registerTransition('move-down', ['move-to-bottom', 'move-from-top'])
 
   /*-
-  [Follows](/up-follow) this link and swaps in the new fragment
-  with an animated transition.
+  Swaps a fragment with an animated transition.
+
+  You can use a [predefined transition](/predefined-transitions) or [define your own](/up.transition).
 
   > [NOTE]
   > Transitions are not possible when replacing the `<body>` element.
 
-  ### Example
+  ### Following a link with animation
+
+  The link will load the fragment `#story` from the URL `/page2`.
+  Once the response is received, the old fragment version will fly out to the left, while the new
+  version will fly in from the right.
 
   ```html
   <a href="/page2"
-    up-target=".story"
+    up-target="#story"
     up-transition="move-left">
     Next page
   </a>
   ```
 
-  @selector a[up-transition]
-  @params-note
-    All attributes for `[up-follow]` may also be used.
-  @param [up-transition]
-    The [name of a transition](/predefined-transitions).
-  @param [up-fail-transition]
-    The transition to use when the server responds with an error code.
+  ### Submitting a link with animation
 
-    @see failed-responses
-  @stable
-  */
-
-  /*-
-  [Submits](/up-submit) this form and swaps in the new fragment
-  with an animated transition.
-
-  ### Example
+  The form will load the fragment `.content` from the URL `/tasks`.
+  Once the response is received, the old fragment version will fade out, while the new
+  version will fade in.
 
   ```html
   <form action="/tasks"
@@ -727,9 +720,9 @@ up.motion = (function() {
   </form>
   ```
 
-  @selector form[up-transition]
+  @selector [up-transition]
   @params-note
-    All attributes for `[up-submit]` may also be used.
+    All attributes for `[up-follow]` (links) or `[up-submit]` forms may also be used.
   @param [up-transition]
     The [name of a transition](/predefined-transitions).
   @param [up-fail-transition]

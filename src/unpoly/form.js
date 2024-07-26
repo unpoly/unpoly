@@ -584,7 +584,7 @@ up.form = (function() {
 
   Listeners may inspect and manipulate [render options](/up.render#parameters) for the coming fragment update.
 
-  The code below will use a custom [transition](/a-up-transition)
+  The code below will use a custom [transition](/up-transition)
   when a form submission [fails](/failed-responses):
 
   ```js
@@ -1232,7 +1232,7 @@ up.form = (function() {
   - [`[up-submit]`](/up-submit)
   - [`[up-target]`](/up-follow#up-target)
   - [`[up-layer]`](/up-follow#up-layer)
-  - [`[up-transition]`](/a-up-transition)
+  - `[up-transition]`
 
   To consider other selectors to be submittable, see `up.form.config.submitSelectors`.
 

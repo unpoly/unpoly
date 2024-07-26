@@ -90,3 +90,6 @@ RedirectPermanent /a-up-drawer /up-drawer
 RedirectPermanent /a-up-dismiss /up-dismiss
 RedirectPermanent /a-up-close /up-close
 RedirectPermanent /a-up-accept /up-accept
+RedirectPermanent /a-up-transition /up-transition
+RedirectPermanent /form-up-transition /up-transition
+

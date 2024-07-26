@@ -252,7 +252,7 @@ up.radio = (function() {
     `this` (the hungry element), `newFragment` and `renderOptions`.
 
   @param [up-transition]
-    The [animated transition](/a-up-transition) to apply when this element is updated.
+    The [animated transition](/up-transition) to apply when this element is updated.
   @param [up-duration]
     The duration of the transition or animation (in millisconds).
 

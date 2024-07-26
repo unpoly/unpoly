@@ -56,7 +56,7 @@ up.RenderResult = class RenderResult extends up.Record {
 
   In particular:
 
-  - [Animations](/up.motion) have concluded and [transitioned](https://unpoly.com/a-up-transition) elements were removed from the DOM tree.
+  - [Animations](/up.motion) have concluded and [transitioned](/up-transition) elements were removed from the DOM tree.
   - A [cached response](#options.cache) was [revalidated with the server](/caching#revalidation).
     If the server has responded with new content, this content has also been rendered.
 
