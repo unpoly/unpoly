@@ -978,7 +978,7 @@ up.protocol = (function() {
     for the initial page that [booted](/up.boot) Unpoly.
 
     The nonce let Unpoly run JavaScript in HTML attributes like
-    [`[up-on-loaded]`](/a-up-follow#up-on-loaded) or [`[up-on-accepted]`](/a-up-layer-new#up-on-accepted).
+    [`[up-on-loaded]`](/a-up-follow#up-on-loaded) or [`[up-on-accepted]`](/up-layer-new#up-on-accepted).
     See [Working with a strict Content Security Policy](/csp).
 
     The nonce can either be configured as a string or as function that returns the nonce.

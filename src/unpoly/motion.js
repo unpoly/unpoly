@@ -25,7 +25,7 @@ In contrast, when we animate a new element without simultaneously removing an
 old element, we call it an *animation*.
 
 An example for an animation is opening a new overlay. We can animate the appearance
-of the dialog by adding an [`[up-animation]`](/a-up-layer-new#up-animation) attribute to the opening link:
+of the dialog by adding an [`[up-animation]`](/up-layer-new#up-animation) attribute to the opening link:
 
 ```html
 <a href="/users"

@@ -120,10 +120,10 @@ the given selector in a popup overlay.
 
 @selector [up-popup]
 @params-note
-  All attributes for `a[up-layer=new]` may also be used.
+  All attributes for `[up-layer=new]` may also be used.
 @param {string} up-popup
   The CSS selector that will be extracted from the response and displayed in a popup overlay.
 @deprecated
-  Use `a[up-layer="new popup"]` instead.
+  Use `[up-layer="new popup"]` instead.
 */
 up.migrate.targetMacro('up-popup', { 'up-layer': 'new popup' }, () => up.migrate.deprecated('[up-popup]', '[up-layer="new popup"]'))

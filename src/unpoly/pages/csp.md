@@ -1,7 +1,7 @@
 Working with strict Content Security Policies
 =============================================
 
-When your [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) disallows `eval()`, Unpoly cannot directly run JavaScript code in HTML attributes. This affects `[up-on-...]` attributes like [`[up-on-loaded]`](/a-up-follow#up-on-loaded) or [`[up-on-accepted]`](/a-up-layer-new#up-on-accepted).
+When your [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) disallows `eval()`, Unpoly cannot directly run JavaScript code in HTML attributes. This affects `[up-on-...]` attributes like [`[up-on-loaded]`](/a-up-follow#up-on-loaded) or [`[up-on-accepted]`](/up-layer-new#up-on-accepted).
 
 For example, the following callback would crash the fragment update with an error like `Uncaught EvalError: call to Function() blocked by CSP`:
 

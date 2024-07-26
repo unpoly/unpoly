@@ -20,7 +20,7 @@ Available modes
 | `popup`   | A popup menu anchored to a link       | yes      |
 | `cover`   | An overlay covering the entire screen | yes      |
 
-The default mode for [new overlays](/a-up-layer-new) is `modal`.
+The default mode for [new overlays](/up-layer-new) is `modal`.
 You can change this in `up.layer.config.mode`.
 
 You may configure default attributes for each layer mode in `up.layer.config`.

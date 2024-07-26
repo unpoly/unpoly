@@ -28,7 +28,7 @@ The intent is to reveal the location of significant content to the user, but hid
 
 To override this default, use one of the following methods:
 
-- Set an [`[up-history]`](/a-up-layer-new#up-history) attribute on a link or form that opens an overlay.
+- Set an [`[up-history]`](/up-layer-new#up-history) attribute on a link or form that opens an overlay.
   For example, a link with `[up-history=false]` will open an overlay that never changes the address bar. 
 - Configure [`up.layer.config.overlay.history`](/up.layer.config#config.overlay.history). This will be the default for future overlays. The default can
   be overridden with an `[up-history]` attribute or `{ history }` option.

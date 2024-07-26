@@ -2005,7 +2005,7 @@ This is a maintenance release while we're working on the next major feature upda
 
 ### Compatibility with strict Content Security Policies (CSP)
 
-When your [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) disallows `eval()`, Unpoly cannot directly run JavaScript code in HTML attributes. This affects `[up-on-...]` attributes like [`[up-on-loaded]`](/a-up-follow#up-on-loaded) or [`[up-on-accepted]`](/a-up-layer-new#up-on-accepted).
+When your [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) disallows `eval()`, Unpoly cannot directly run JavaScript code in HTML attributes. This affects `[up-on-...]` attributes like [`[up-on-loaded]`](/a-up-follow#up-on-loaded) or [`[up-on-accepted]`](/up-layer-new#up-on-accepted).
 
 Unpoly 2.3 lets your work around this by prefixing your callback with a [CSP nonce](https://content-security-policy.com/nonce/):
 

@@ -181,6 +181,6 @@ the given selector in a modal drawer that slides in from the edge of the screen.
 @param {string} up-drawer
   The CSS selector that will be extracted from the response and displayed in a modal dialog.
 @deprecated
-  Use `a[up-layer="new drawer"]` instead.
+  Use `[up-layer="new drawer"]` instead.
 */
-up.migrate.targetMacro('up-drawer', { 'up-layer': 'new drawer' }, () => up.migrate.deprecated('a[up-drawer]', 'a[up-layer="new drawer"]'))
+up.migrate.targetMacro('up-drawer', { 'up-layer': 'new drawer' }, () => up.migrate.deprecated('a[up-drawer]', '[up-layer="new drawer"]'))

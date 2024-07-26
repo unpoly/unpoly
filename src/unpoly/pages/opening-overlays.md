@@ -3,7 +3,7 @@ Opening overlays
 
 Fragment updates will render within the [current layer](/up.layer.current) by default.
 
-Use an [`[up-layer=new]`](/a-up-layer-new) attribute to open the fragment in a new overlay instead:
+Use an [`[up-layer=new]`](/up-layer-new) attribute to open the fragment in a new overlay instead:
 
 ```html
 <a href="/users/new/" up-layer="new">

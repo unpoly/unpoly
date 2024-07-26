@@ -28,7 +28,7 @@ Once the subinteraction is *done*, the overlay is closed and a result value is c
 @see customizing-overlays
 @see context
 
-@see a[up-layer=new]
+@see [up-layer=new]
 @see up.layer.current
 @see up.layer.on
 @see up.layer.ask
@@ -49,7 +49,7 @@ up.layer = (function() {
   Configures default attributes for new overlays.
 
   All options for `up.layer.open()` may be configured.
-  The configuration will also be used for `a[up-layer=new]` links.
+  The configuration will also be used for `[up-layer=new]` links.
 
   Defaults are configured separately for each [layer mode](/layer-terminology):
 
@@ -716,7 +716,7 @@ up.layer = (function() {
   <a href="/menu" up-layer="new">Open menu</a>
   ```
 
-  @selector a[up-layer=new]
+  @selector [up-layer=new]
 
   @params-note
     All attributes for `a[up-follow]` may also be used.

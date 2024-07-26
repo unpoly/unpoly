@@ -85,4 +85,5 @@ RedirectPermanent /script-up-boot-manual /up-boot-manual
 RedirectPermanent /a-up-alias /up-alias
 RedirectPermanent /a-up-popup /up-popup
 RedirectPermanent /a-up-modal /up-modal
+RedirectPermanent /a-up-layer-new /up-layer-new
 

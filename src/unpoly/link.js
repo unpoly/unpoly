@@ -237,7 +237,7 @@ up.link = (function() {
 
   By default the layer's [main element](/up-main)
   will be replaced. Attributes like `a[up-target]`
-  or `a[up-layer]` will be honored.
+  or `[up-layer]` will be honored.
 
   Following a link is considered [navigation](/navigation) by default.
 
@@ -1353,7 +1353,7 @@ up.link = (function() {
     See [layer option](/layer-option) for a list of allowed values.
 
     To [open the fragment in a new overlay](/opening-overlays), pass `[up-layer=new]`.
-    In this case attributes for `a[up-layer=new]` may also be used.
+    In this case attributes for `[up-layer=new]` may also be used.
 
   @param [up-peel='true']
     Whether to close overlays obstructing the updated layer when the fragment is updated.
