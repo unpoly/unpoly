@@ -161,15 +161,15 @@ up.migrate.renamedEvent('up:modal:closed', 'up:layer:dismissed')
 Clicking this link will load the destination via AJAX and open
 the given selector in a modal overlay.
 
-@selector a[up-modal]
+@selector [up-modal]
 @params-note
-  All attributes for `a[up-layer=new]` may also be used.
+  All attributes for `[up-layer=new]` may also be used.
 @param {string} up-modal
   The CSS selector that will be extracted from the response and displayed in a modal dialog.
 @deprecated
-  Use `a[up-layer="new modal"]` instead.
+  Use `[up-layer="new modal"]` instead.
 */
-up.migrate.targetMacro('up-modal', { 'up-layer': 'new modal' }, () => up.migrate.deprecated('a[up-modal]', 'a[up-layer="new modal"]'))
+up.migrate.targetMacro('up-modal', { 'up-layer': 'new modal' }, () => up.migrate.deprecated('[up-modal]', '[up-layer="new modal"]'))
 
 /*-
 Clicking this link will load the destination via AJAX and open

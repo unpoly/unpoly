@@ -6,7 +6,7 @@ if up.migrate.loaded
 
     describe 'unobtrusive behavior', ->
 
-      describe 'a[up-modal]', ->
+      describe '[up-modal]', ->
 
         it 'is converted to [up-layer="new modal"][up-follow] without target', ->
           link = fixture('a[href="/path"][up-modal]')

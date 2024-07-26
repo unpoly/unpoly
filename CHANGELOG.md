@@ -2262,7 +2262,7 @@ This is another maintenance release while we're finishing [the next major versio
 Community members were involved in every change of this release:
 
 - [`up.submit()`](/up.submit) has a new options `{ params }`. It may be used to pass extra form [parameters](/up.Params) that will be submitted in addition to the parameters from the form. (fix by @robinvdvleuten)
-- [`a[up-modal]`](/a-up-modal) will now honor an [`[up-cache]`](/a-up-target#up-cache) attribute on the same link. (fix by @adam12)
+- `[up-modal]` will now honor an [`[up-cache]`](/a-up-target#up-cache) attribute on the same link. (fix by @adam12)
 - Prevent destructor function from being called twice if [`up.destroy()`](/up.destroy) is called twice with the same element (reported by @kratob)
 - On devices that don't show a vertical scrollbar, users can no longer scroll the underlying page while a [modal overlay](/up.modal) is open. (reported by @msurdi)
 
@@ -3260,7 +3260,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 ### Modals
 
 - [`up.follow()`](/up.follow) will now open a modal if the given link has an [`[up-modal]`](/a-up-modal) attribute
-- [`a[up-modal]`](/a-up-modal) links can now have an `[up-fail-target]` attribute to indicate which selector to replace for an non-200 response
+- `[up-modal]` links can now have an `[up-fail-target]` attribute to indicate which selector to replace for an non-200 response
 - Fix a bug where preloading an up-modal link would create an invisible .up-modal container in the DOM.
 
 ### Popups
