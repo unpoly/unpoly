@@ -76,11 +76,7 @@ up.CompilerPass = class CompilerPass {
     }
 
     const result = this._applyCompilerFunction(compiler, element, compileArgs)
-
-    let destructorOrDestructors = this._destructorPresence(result)
-    if (destructorOrDestructors) {
-      up.destructor(element, destructorOrDestructors)
-    }
+    up.destructor(element, result)
   }
 
   _compileBatch(compiler, elements) {
@@ -95,7 +91,7 @@ up.CompilerPass = class CompilerPass {
 
     const result = this._applyCompilerFunction(compiler, elements, compileArgs)
 
-    if (this._destructorPresence(result)) {
+    if (result) {
       up.fail('Compilers with { batch: true } cannot return destructors')
     }
   }
@@ -103,14 +99,6 @@ up.CompilerPass = class CompilerPass {
   _applyCompilerFunction(compiler, elementOrElements, compileArgs) {
     // return compiler.apply(elementOrElements, compileArgs)
     return up.error.guard(() => compiler.apply(elementOrElements, compileArgs))
-  }
-
-  _destructorPresence(result) {
-    // Check if the result value looks like a destructor to filter out
-    // unwanted implicit returns in CoffeeScript.
-    if (u.isFunction(result) || (u.isArray(result) && (u.every(result, u.isFunction)))) {
-      return result
-    }
   }
 
   _select(selector) {

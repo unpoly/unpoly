@@ -20,6 +20,7 @@ up.migrate.renamedEvent('up:request:recover', 'up:network:recover') // renamed i
 up.network.config.patch(function(config) {
   const preloadDelayMoved = () => up.migrate.deprecated('up.proxy.config.preloadDelay', 'up.link.config.preloadDelay')
   Object.defineProperty(config, 'preloadDelay', {
+    configurable: true,
     get() {
       preloadDelayMoved()
       return up.link.config.preloadDelay

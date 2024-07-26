@@ -19,15 +19,15 @@ up.EventListenerGroup = class EventListenerGroup extends up.Record {
   }
 
   bind() {
-    const unbindFns = []
+    const cleaner = u.cleaner()
 
     this._eachListenerAttributes(function(attrs) {
       const listener = new up.EventListener(attrs)
       listener.bind()
-      return unbindFns.push(listener.unbind.bind(listener))
+      return cleaner(listener.unbind.bind(listener))
     })
 
-    return u.sequence(unbindFns)
+    return cleaner.clean
   }
 
   _eachListenerAttributes(fn) {

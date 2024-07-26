@@ -2,30 +2,40 @@ const u = up.util
 
 up.Change.FromURL = class FromURL extends up.Change {
 
-  execute() {
-    let _newPageReason = this._newPageReason()
-    if (_newPageReason) {
-      up.puts('up.render()', _newPageReason)
+  async execute() {
+    let newPageReason = this._newPageReason()
+    if (newPageReason) {
+      up.puts('up.render()', newPageReason)
       up.network.loadPage(this.options)
       // Prevent our caller from executing any further code, since we're already
       // navigating away from this JavaScript environment.
       return u.unresolvablePromise()
     }
 
+
     this.request = up.request(this._getRequestAttrs())
-    this.options.onRequest?.(this.request)
-
-    up.feedback.showAroundRequest(this.request, this.options)
-
-    up.form.disableWhile(this.request, this.options)
 
     if (this.options.preload) {
       return this.request
     }
 
+    this._onRequestProcessed()
+
     // Use always() since _onRequestSettled() will decide whether the promise
     // will be fulfilled or rejected.
-    return u.always(this.request, responseOrError => this._onRequestSettled(responseOrError))
+    return await u.always(this.request, responseOrError => this._onRequestSettled(responseOrError))
+  }
+
+  _onRequestProcessed() {
+    this.options.onRequestProcessed?.(this.request) // used by up.RenderJob to delay aborting until a new request instance is known.
+
+    let previews = []
+
+    if (this.request.emit('up:fragment:load', { previews, renderOptions: this.options }).defaultPrevented) {
+      this.request.abort({ reason: 'Fragment load was prevented' })
+    }
+
+    this.request.showPreviews(previews, this.options)
   }
 
   _newPageReason() {
@@ -52,21 +62,27 @@ up.Change.FromURL = class FromURL extends up.Change {
     return {
       ...this.options, // contains preflight keys relevant for the request, e.g. { url, method }
       ...successAttrs, // contains meta information for an successful update, e.g. { layer, mode, context, target }
-      ...u.renameKeys(failAttrs, up.fragment.failKey) // contains meta information for a failed update, e.g. { failTarget }
+      ...u.renameKeys(failAttrs, up.fragment.failKey), // contains meta information for a failed update, e.g. { failTarget },
+      onProcessed: this._onRequestProcessed.bind(this), // handled by up.network after either queuing a request or reusing a cache hit
+
     }
   }
+
+  // _onRequestLoad(request) {
+  //   request.emit('up:fragment:load')
+  // }
 
   // This is required by up.RenderJob to handle { abort: 'target' }.
   getPreflightProps() {
     return this._getRequestAttrs()
   }
 
-  _preflightPropsForRenderOptions(renderOptions, requestAttributesOptions) {
-    const preview = new up.Change.FromContent({ ...renderOptions, preview: true })
+  _preflightPropsForRenderOptions(renderOptions, getPreflightPropsOptions) {
+    const preflightChange = new up.Change.FromContent({ ...renderOptions, preflight: true })
     // #getPreflightProps() will return meta information about the change that is most
     // likely before the request was dispatched.
     // This might change postflight if the response does not contain the desired target.
-    return preview.getPreflightProps(requestAttributesOptions)
+    return preflightChange.getPreflightProps(getPreflightPropsOptions)
   }
 
   _onRequestSettled(response) {

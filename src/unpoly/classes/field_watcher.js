@@ -16,7 +16,7 @@ up.FieldWatcher = class FieldWatcher {
     this._processedValues = this._readFieldValues()
     this._currentTimer = null
     this._callbackRunning = false
-    this._unbindFns = []
+    this._cleaner = u.cleaner()
 
     this._watchFieldsWithin(this._root)
 
@@ -24,18 +24,18 @@ up.FieldWatcher = class FieldWatcher {
       if (target !== this._root) this._watchFieldsWithin(target)
     })
 
-    this._unbindFns.push(
+    this._cleaner(
       up.fragment.onAborted(this._scope, () => this._abort())
     )
 
-    this._unbindFns.push(
+    this._cleaner(
       up.on(this._scope, 'reset', () => this._onFormReset())
     )
   }
 
   stop() {
     this._abort()
-    for (let unbindFn of this._unbindFns) unbindFn()
+    this._cleaner.clean()
   }
 
   _fieldOptions(field) {
@@ -51,7 +51,7 @@ up.FieldWatcher = class FieldWatcher {
 
   _watchField(field) {
     let fieldOptions = this._fieldOptions(field)
-    this._unbindFns.push(
+    this._cleaner(
       up.on(field, fieldOptions.event, () => this._check(fieldOptions))
     )
   }
@@ -99,18 +99,13 @@ up.FieldWatcher = class FieldWatcher {
     this._callbackRunning = true
     this._scheduledFieldOptions = null
 
-    // If any callback returns a promise, we will handle { disable } below.
-    // We set { disable: false } so callbacks that *do* forward options
-    // to up.render() don't unnecessarily disable a second time.
-    let callbackOptions = { ...fieldOptions, disable: false }
-
     const callbackReturnValues = []
     if (this._batch) {
-      callbackReturnValues.push(this._runCallback(diff, callbackOptions))
+      callbackReturnValues.push(this._runCallback(diff, fieldOptions))
     } else {
       for (let name in diff) {
         const value = diff[name]
-        callbackReturnValues.push(this._runCallback(value, name, callbackOptions))
+        callbackReturnValues.push(this._runCallback(value, name, fieldOptions))
       }
     }
 
@@ -119,7 +114,7 @@ up.FieldWatcher = class FieldWatcher {
     // attrs so callbacks don't have to handle this.
     if (u.some(callbackReturnValues, u.isPromise)) {
       let callbackDone = Promise.allSettled(callbackReturnValues)
-      up.form.disableWhile(callbackDone, fieldOptions)
+      // up.form.disableWhile(callbackDone, fieldOptions)
       await callbackDone
     }
 
@@ -130,7 +125,7 @@ up.FieldWatcher = class FieldWatcher {
   }
 
   _runCallback(...args) {
-    return up.error.guard(() => this._callback(...args))
+    return up.error.guard(this._callback, ...args)
   }
 
   _changedValues(previous, next) {

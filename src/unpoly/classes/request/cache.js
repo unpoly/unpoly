@@ -136,11 +136,16 @@ up.Request.Cache = class Cache {
     newRequest.trackedRequest = existingRequest
     newRequest.state = 'tracking'
 
-    let value = await u.always(existingRequest)
+    let value
+
+    if (existingRequest._isSettled() && existingRequest.response)
+      value = existingRequest.response
+    else
+      value = await u.always(existingRequest)
 
     if (value instanceof up.Response) {
       if (options.force || existingRequest.cacheRoute.satisfies(existingRequest, newRequest)) {
-        // Remember that newRequest was settles from cache.
+        // Remember that newRequest was settled from cache.
         // This makes it a candidate for cache revalidation.
         newRequest.fromCache = true
 
@@ -170,7 +175,7 @@ up.Request.Cache = class Cache {
       // Copy terminal state like 'offline' or 'aborted'
       newRequest.state = existingRequest.state
       // If we did not get an up.Response, it must be an error
-      newRequest.deferred.reject(value)
+      newRequest._reject(value)
     }
   }
 

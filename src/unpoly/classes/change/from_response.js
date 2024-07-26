@@ -97,6 +97,7 @@ up.Change.FromResponse = class FromResponse extends up.Change {
         confirm: false,
         feedback: false,
         abort: false,
+        preview: false,
         expiredResponse: this._response, // flag will be forwarded to up:fragment:loaded
         // The guardEvent was already plucked from render options in up.RenderJob#guardRender().
       })
