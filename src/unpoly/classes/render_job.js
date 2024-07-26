@@ -11,7 +11,7 @@ and how to handle errors.
 
 ## Example
 
-```
+```js
 let job = up.render('.foo', url: '/users')
 console.log(job.options.target) // logs ".foo"
 console.log(job.options.url) // logs "/users"
@@ -141,8 +141,8 @@ up.RenderJob = class RenderJob {
 
   _getChange() {
     if (this.options.url) {
-      let onRequest = (request) => this._handleAbortOption(request)
-      return new up.Change.FromURL({ ...this.options, onRequest })
+      let onRequestProcessed = (request) => this._handleAbortOption(request)
+      return new up.Change.FromURL({ ...this.options, onRequestProcessed })
     } else if (this.options.response) {
       let onRender = () => this._handleAbortOption(null)
       return new up.Change.FromResponse({ ...this.options, onRender })

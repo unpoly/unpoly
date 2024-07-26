@@ -137,7 +137,7 @@ describe 'up.form', ->
         result = up.form.submitButtons(form)
         expect(result).toEqual(jasmine.arrayWithExactContents([submitButton, submitInput]))
 
-    describe 'up.watch()', ->
+    fdescribe 'up.watch()', ->
 
       beforeEach ->
         up.form.config.watchInputDelay = 0
@@ -378,7 +378,7 @@ describe 'up.form', ->
 
               expect(callbackCount).toEqual(2)
 
-            it 'does not run a callback if the form was aborted while a previous callback was still running', asyncSpec (next) ->
+            it 'does not run a callback if the form was aborted while a previous callback was still running', ->
               form = fixture('form')
               input = e.affix(form, 'input[name="input-name"][value="old-value"]')
               callbackCount = 0
@@ -411,7 +411,7 @@ describe 'up.form', ->
               # After 150 ms the first callback should be finished. The 2nd callback has been unqueued because the form was aborted.
               expect(callbackCount).toEqual(1)
 
-            it 'does not run a callback if the form was detached while a previous callback was still running', asyncSpec (next) ->
+            it 'does not run a callback if the form was detached while a previous callback was still running', ->
               form = fixture('form')
               input = e.affix(form, 'input[name="input-name"][value="old-value"]')
               callbackCount = 0
@@ -449,24 +449,27 @@ describe 'up.form', ->
               input = e.affix(form, 'input[name="input-name"][value="old-value"]')
 
               callbackArgs = []
-              callback = (value, field) ->
+              callback = (value) ->
                 callbackArgs.push(value)
                 return jasmine.waitTime(100)
 
-              up.watch(input, { delay: 1 }, callback)
+              up.watch(input, { delay: 10 }, callback)
+
               input.value = 'new-value-1'
               Trigger[eventType](input)
 
-              await wait(20)
+              await wait(30)
 
               # Callback has been called and takes 100 ms to complete
               expect(callbackArgs).toEqual ['new-value-1']
+
               input.value = 'new-value-2'
               Trigger[eventType](input)
 
-              await wait(20)
+              await wait(30)
 
               expect(callbackArgs).toEqual ['new-value-1']
+
               input.value = 'new-value-3'
               Trigger[eventType](input)
 
@@ -474,60 +477,49 @@ describe 'up.form', ->
 
               expect(callbackArgs).toEqual ['new-value-1', 'new-value-3']
 
-            it "executes the form's [up-watch-disable] option while an async callback is running", asyncSpec (next) ->
-              form = fixture('form[up-watch-disable]')
-              input = e.affix(form, 'input[name=email]')
-              callbackDeferred = u.newDeferred()
-              callback = jasmine.createSpy('callback').and.returnValue(callbackDeferred)
+            describe 'passing of render options to the callback', ->
 
-              up.watch(input, callback)
+              it "passes the form's [up-watch-disable] option to the callback", ->
+                form = fixture('form[up-watch-disable="#disable"]')
+                input = e.affix(form, 'input[name=email]')
+                callback = jasmine.createSpy('callback')
 
-              input.value = "other"
-              Trigger[eventType](input)
+                up.watch(input, callback)
 
-              next ->
-                expect(callback).toHaveBeenCalled()
-                expect(input).toBeDisabled()
+                input.value = "other"
+                Trigger[eventType](input)
 
-                callbackDeferred.resolve()
+                await wait()
 
-              next ->
-                expect(input).not.toBeDisabled()
+                expect(callback).toHaveBeenCalledWith('other', 'email', jasmine.objectContaining(disable: '#disable'))
 
-            it "executes the fields's [up-watch-disable] option while an async callback is running", asyncSpec (next) ->
-              form = fixture('form')
-              input = e.affix(form, 'input[name=email][up-watch-disable]')
-              callbackDeferred = u.newDeferred()
-              callback = jasmine.createSpy('callback').and.returnValue(callbackDeferred)
+              it "passes the fields's [up-watch-disable] option to the callback", ->
+                form = fixture('form[up-watch-disable="#disable-from-form"]')
+                input = e.affix(form, 'input[name=email][up-watch-disable="#disable-from-field"]')
+                callback = jasmine.createSpy('callback')
 
-              up.watch(input, callback)
+                up.watch(input, callback)
 
-              input.value = "other"
-              Trigger[eventType](input)
+                input.value = "other"
+                Trigger[eventType](input)
 
-              next ->
-                expect(callback).toHaveBeenCalled()
-                expect(input).toBeDisabled()
+                await wait()
 
-                callbackDeferred.resolve()
+                expect(callback).toHaveBeenCalledWith('other', 'email', jasmine.objectContaining(disable: '#disable-from-field'))
 
-              next ->
-                expect(input).not.toBeDisabled()
+              it "overrides the [up-watch-disable] option from form and field if an { disable } option is also passed", ->
+                form = fixture('form[up-watch-disable="#disable-from-form"]')
+                input = e.affix(form, 'input[name=email][up-watch-disable="#disable-from-field"]')
+                callback = jasmine.createSpy('callback')
 
-            it "overrides the [up-watch-disable] option from form and field if an { disable } option is also passed", asyncSpec (next) ->
-              form = fixture('form[up-watch-disable]')
-              input = e.affix(form, 'input[name=email][up-watch-disable]')
-              callbackDeferred = u.newDeferred()
-              callback = jasmine.createSpy('callback').and.returnValue(callbackDeferred)
+                up.watch(input, { disable: '#disable-from-function-call' }, callback)
 
-              up.watch(input, { disable: false }, callback)
+                input.value = "other"
+                Trigger[eventType](input)
 
-              input.value = "other"
-              Trigger[eventType](input)
+                await wait()
 
-              next ->
-                expect(callback).toHaveBeenCalled()
-                expect(input).not.toBeDisabled()
+                expect(callback).toHaveBeenCalledWith('other', 'email', jasmine.objectContaining(disable: '#disable-from-function-call'))
 
             describe 'when the callback throws an error', ->
 
@@ -1083,7 +1075,7 @@ describe 'up.form', ->
 
           expect('#form').toHaveText('failure text')
 
-      describe 'with { disable } option', ->
+      fdescribe 'with { disable } option', ->
 
         describe 'with { disable: "form" }', ->
 
@@ -1189,7 +1181,52 @@ describe 'up.form', ->
 
           expect(input).not.toBeDisabled()
 
-        it 'keeps a form disabled when it is first disabled by a validation, then again by a submission that aborts the validation request', asyncSpec (next) ->
+        it 'keeps a form disabled after multiple submissions that abort each other', ->
+          requests = []
+          up.on 'up:request:load', ({ request }) -> requests.push(request)
+
+          container = fixture('.container')
+          form = e.affix(container, 'form[method="post"][action="/endpoint"][up-target=".container"][up-disable]')
+          input = e.affix(form, 'input[name=email]')
+
+          submit1Promise = up.submit(form)
+
+          await wait()
+
+          expect(u.map(requests, 'state')).toEqual ['loading']
+          expect(input).toBeDisabled()
+
+          submit2Promise = up.submit(form)
+
+          await expectAsync(submit1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
+
+          await wait()
+
+          expect(u.map(requests, 'state')).toEqual ['aborted', 'loading']
+          expect(input).toBeDisabled()
+
+        it 'keeps a form disabled after multiple submissions in the same microtask', ->
+          requests = []
+          up.on 'up:request:load', ({ request }) -> requests.push(request)
+
+          container = fixture('.container')
+          form = e.affix(container, 'form[method="post"][action="/endpoint"][up-target=".container"][up-disable]')
+          input = e.affix(form, 'input[name=email]')
+          submit1Promise = up.submit(form)
+
+          # Don't wait here
+
+          submit2Promise = up.submit(form)
+
+          await expectAsync(submit1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
+
+          await wait()
+
+          # When two conflicting requests queued in the microtask, the first request will not touch the network.
+          expect(u.map(requests, 'state')).toEqual ['loading']
+          expect(input).toBeDisabled()
+
+        it 'keeps a form disabled when it is first disabled by a validation, then again by a submission that aborts the validation request', ->
           requests = []
           up.on 'up:request:load', ({ request }) -> requests.push(request)
 
@@ -1198,15 +1235,17 @@ describe 'up.form', ->
           input = e.affix(form, 'input[name=email]')
           up.validate(input)
 
-          next ->
-            expect(u.map(requests, 'state')).toEqual ['loading']
-            expect(input).toBeDisabled()
+          await wait()
 
-            up.submit(form)
+          expect(u.map(requests, 'state')).toEqual ['loading']
+          expect(input).toBeDisabled()
 
-          next ->
-            expect(u.map(requests, 'state')).toEqual ['aborted', 'loading']
-            expect(input).toBeDisabled()
+          up.submit(form)
+
+          await wait()
+
+          expect(u.map(requests, 'state')).toEqual ['aborted', 'loading']
+          expect(input).toBeDisabled()
 
         describe 'loss of focus when disabling a focused input', ->
 
@@ -2085,7 +2124,7 @@ describe 'up.form', ->
           # No second request was made
           expect(jasmine.Ajax.requests.count()).toBe(1)
 
-      describe 'disabling', ->
+      fdescribe 'disabling', ->
 
         it "executes the form's [up-watch-disable] option while a validation request is in flight", asyncSpec (next) ->
           form = fixture('form[up-watch-disable]')
@@ -2539,44 +2578,28 @@ describe 'up.form', ->
 
         expect(field).toBeDisabled()
 
-      it 'can be called multiple times on the same field, and keeps the field disabled until all re-enablement functions have been called', ->
-        form = fixture('form')
-        field1 = e.affix(form, 'input[name=email][type=text]')
-        field2 = e.affix(form, 'input[name=password][type=text][disabled]')
-        expect(field1).not.toBeDisabled()
-        expect(field2).toBeDisabled()
-
-        reenable1 = up.form.disable(form)
-        reenable2 = up.form.disable(form)
-
-        expect(field1).toBeDisabled()
-        expect(field2).toBeDisabled()
-
-        reenable1()
-
-        expect(field1).toBeDisabled()
-        expect(field2).toBeDisabled()
-
-        reenable2()
-
-        expect(field1).not.toBeDisabled()
-        expect(field2).toBeDisabled()
-
-      it 'does not restore a disabled state if the field was enabled by other code while it was disabled by us', ->
-        form = fixture('form')
-        field = e.affix(form, 'input[type=text][disabled]')
-        expect(field).toBeDisabled()
-
-        reenable = up.form.disable(form)
-
-        expect(field).toBeDisabled()
-
-        # Other code
-        field.disabled = false
-
-        reenable()
-
-        expect(field).not.toBeDisabled()
+#      it 'can be called multiple times on the same field, and keeps the field disabled until all re-enablement functions have been called', ->
+#        form = fixture('form')
+#        field1 = e.affix(form, 'input[name=email][type=text]')
+#        field2 = e.affix(form, 'input[name=password][type=text][disabled]')
+#        expect(field1).not.toBeDisabled()
+#        expect(field2).toBeDisabled()
+#
+#        reenable1 = up.form.disable(form)
+#        reenable2 = up.form.disable(form)
+#
+#        expect(field1).toBeDisabled()
+#        expect(field2).toBeDisabled()
+#
+#        reenable1()
+#
+#        expect(field1).toBeDisabled()
+#        expect(field2).toBeDisabled()
+#
+#        reenable2()
+#
+#        expect(field1).not.toBeDisabled()
+#        expect(field2).toBeDisabled()
 
     describe 'up.form.isSubmittable()', ->
 

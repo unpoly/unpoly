@@ -729,15 +729,15 @@ describe 'up.viewport', ->
 
         it 'falls back to the scrolling element if <body> is configured to scroll (fix for Edge)', ->
           element = fixture('.element', style: { height: '3000px' })
-          @resetHTMLCSS = e.setTemporaryStyle(document.documentElement, 'overflow-y': 'hidden')
-          @resetBodyCSS = e.setTemporaryStyle(document.body, 'overflow-y': 'scroll')
+          @resetHTMLCSS = e.setStyleTemp(document.documentElement, 'overflow-y': 'hidden')
+          @resetBodyCSS = e.setStyleTemp(document.body, 'overflow-y': 'scroll')
           result = up.viewport.get(element)
           expect(result).toBe(document.scrollingElement)
 
         it 'falls back to the scrolling element if <html> is configured to scroll (fix for Edge)', ->
           element = fixture('.element', style: { height: '3000px' })
-          @resetHTMLCSS = e.setTemporaryStyle(document.documentElement, 'overflow-y': 'scroll')
-          @resetBodyCSS = e.setTemporaryStyle(document.body, 'overflow-y': 'hidden')
+          @resetHTMLCSS = e.setStyleTemp(document.documentElement, 'overflow-y': 'scroll')
+          @resetBodyCSS = e.setStyleTemp(document.body, 'overflow-y': 'hidden')
           result = up.viewport.get(element)
           expect(result).toBe(document.scrollingElement)
 

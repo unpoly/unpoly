@@ -1,4 +1,5 @@
 const e = up.element
+const u = up.util
 const SHIFT_CLASS = 'up-scrollbar-away'
 
 // Gives `<body>` a right padding in the width of a scrollbar.
@@ -13,11 +14,11 @@ up.BodyShifter = class BodyShifter {
   constructor() {
     this._anchoredElements = new Set()
     this._stack = 0
-    this._cleaners = []
+    this._cleaner = u.cleaner()
   }
 
   lowerStack() {
-    if (--this._stack === 0) this._unshiftNow()
+    if (--this._stack === 0) this._cleaner.clean()
   }
 
   raiseStack() {
@@ -47,7 +48,7 @@ up.BodyShifter = class BodyShifter {
 
     // Always publish on the <html> element for consistency, even if the scrolling element
     // is sometimes <body>. The property will be inherited
-    this._cleaners.push(e.setTemporaryStyle(e.root, {
+    this._cleaner(e.setStyleTemp(e.root, {
       '--up-scrollbar-width': this._rootScrollbarWidth + 'px'
     }))
 
@@ -63,17 +64,11 @@ up.BodyShifter = class BodyShifter {
 
     // viewport.sass wants to add the scrollbar with to the value, so we store it in a separate property.
     let originalValue = e.style(element, styleProp)
-    this._cleaners.push(
-      e.setTemporaryStyle(element, { ['--up-original-' + styleProp]: originalValue }),
-      e.addTemporaryClass(element, SHIFT_CLASS),
-    )
-  }
 
-  _unshiftNow() {
-    let cleaner
-    while(cleaner = this._cleaners.pop()) {
-      cleaner()
-    }
+    this._cleaner(
+      e.setStyleTemp(element, { ['--up-original-' + styleProp]: originalValue }),
+      e.addClassTemp(element, SHIFT_CLASS),
+    )
   }
 
 }

@@ -117,6 +117,7 @@ up.Request.Queue = class Queue {
     let conditions = args[0] ?? true
 
     let tester = up.Request.tester(conditions, { except })
+
     for (let list of [this._currentRequests, this._queuedRequests]) {
       const abortableRequests = u.filter(list, tester)
       for (let abortableRequest of abortableRequests) {
