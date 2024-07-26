@@ -3265,7 +3265,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Popups
 
-- [`up.follow()`](/up.follow) will now open a popup if the given link has [`[up-popup]`](/a-up-popup) attribute
+- `up.follow()` will now open a popup if the given link has `[up-popup]` attribute
 - up-popup links can now have an up-fail-target attribute to indicate which selector to replace for an non-200 response
 - Fix a bug where preloading an up-popup link would create an invisible .up-popup container in the DOM.
 - [`up.popup.attach()`](/up.popup.attach) now throws an error if neither `{ url }` nor `{ html }` options are given.
