@@ -223,9 +223,7 @@ up.feedback = (function() {
   consider highlighting active links and submit buttons in your CSS:
 
   ```css
-  a.up-active,
-  input[type=submit].up-active,
-  button[type=submit].up-active  {
+  .up-active:is(a, [up-follow], input[type=submit], button[type=submit], button:not([type])) {
     outline: 2px solid blue;
   }
   ```
@@ -322,7 +320,7 @@ up.feedback = (function() {
   Marks this element as a navigation component, such as a menu or navigation bar.
 
   When a link within an `[up-nav]` element points to [its layer's location](/up.layer.location),
-  it is assigned the [`.up-current`](/a.up-current) class. When the browser navigates to another location, the class is removed automatically.
+  it is assigned the `.up-current` class. When the browser navigates to another location, the class is removed automatically.
 
   ### Example
 

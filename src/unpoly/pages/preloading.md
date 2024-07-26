@@ -22,7 +22,7 @@ over it, set an `[up-preload]` attribute:
 By default Unpoly will wait for 90 milliseconds of hovering before making the preload request.
 This prevents accidental preloading when mouse moves over the link with no intention to click it.
 
-The delay can be controlled by setting an [`[up-preload-delay]`](/a-up-preload#up-preload-delay) attribute
+The delay can be controlled by setting an [`[up-preload-delay]`](/up-preload#up-preload-delay) attribute
 or configuring `up.link.config.preloadDelay`. Increasing the delay will lower the load in your server,
 but will also make the interaction feel less instant.
 

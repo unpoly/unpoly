@@ -175,9 +175,9 @@ up.migrate.targetMacro('up-modal', { 'up-layer': 'new modal' }, () => up.migrate
 Clicking this link will load the destination via AJAX and open
 the given selector in a modal drawer that slides in from the edge of the screen.
 
-@selector a[up-drawer]
+@selector [up-drawer]
 @params-note
-  All attributes for `a[up-layer=new]` may also be used.
+  All attributes for `[up-layer=new]` may also be used.
 @param {string} up-drawer
   The CSS selector that will be extracted from the response and displayed in a modal dialog.
 @deprecated

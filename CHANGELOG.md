@@ -2275,7 +2275,7 @@ We encourage everyone to upgrade to this release in order to better support user
 
 The following changes are included:
 
-- Links with an [`[up-instant]`](/a-up-instant) attribute can now be followed with the keyboard.
+- Links with an `[up-instant]` attribute can now be followed with the keyboard.
 - Fragments that are being [destroyed](/up.destroy) now get an [`[aria-hidden=true]`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques/Using_the_aria-hidden_attribute)
   attribute while its disappearance is being animated. When a fragment is being swapped with a new version, the old fragment version is also
   given `[aria-hidden=true]` while it's disappearing.
@@ -2982,7 +2982,7 @@ This release contains no new features, but will help you when using tools like B
 
 ### Forms
 
-- When a [form is submitted](/form-up-target) you can now consistently refer to that form element as `&` in CSS selectors ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
+- When a [form is submitted](/up.submit) you can now consistently refer to that form element as `&` in CSS selectors ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
 
   E.g. to reveal the first error message within a failed form submission:
 
@@ -3259,7 +3259,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Modals
 
-- [`up.follow()`](/up.follow) will now open a modal if the given link has an [`[up-modal]`](/a-up-modal) attribute
+- [`up.follow()`](/up.follow) will now open a modal if the given link has an [`[up-modal]`](/up-modal) attribute
 - `[up-modal]` links can now have an `[up-fail-target]` attribute to indicate which selector to replace for an non-200 response
 - Fix a bug where preloading an up-modal link would create an invisible .up-modal container in the DOM.
 
@@ -3334,7 +3334,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
   contained input field changes.
 - Fix a bug where `[up-autosubmit]` didn't honor an `[up-delay]` attribute if
   used on a form.
-- When [submitting a form](/form-up-target), the `name` and `value` of the submit button is now included with the form parameters.
+- When [submitting a form](/up-submit), the `name` and `value` of the submit button is now included with the form parameters.
 - [Going back in history](/up.history) after a [fragment update](/up.link) now always restores elements the page layer, never a selector in [modals](/up.modal) or [popups](/up.popup).
 - [Going back in history](/up.history) now always closes a [modal](/up.modal) or [popup](/up.popup).
 - Switch to [unpkg](https://unpkg.com) as our [CDN](/install/cdn).
@@ -3499,7 +3499,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Compatible changes
 
-- Drawers are now a built-in modal flavor! Use the [`[up-drawer]`](/a-up-drawer) attribute to open page fragements
+- Drawers are now a built-in modal flavor! Use the `[up-drawer]` attribute to open page fragements
   in a modal drawer that slides in from the edge of the screen.
 
 
@@ -3667,7 +3667,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 - Popups anchored to fixed elements are now positioned correctly if the document is scrolled
 - Tooltips can now be anchored to fixed elements
-- [`up-modal`](/a-up-modal) and [`up-popup`](/a-up-popup) now support an `up-method` modifier.
+- `[up-modal]` and `[up-popup]` now support an `[up-method]` modifier.
 
 
 
@@ -3703,7 +3703,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Compatible changes
 
-- Fix a bug where [submitting a form](/form-up-target) with file uploads would throw an error `"Cannot convert FormData into a query string"`
+- Fix a bug where [submitting a form](/up-submit) with file uploads would throw an error `"Cannot convert FormData into a query string"`
 
 
 
@@ -3821,7 +3821,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 - [`up.morph()`](/up.morph) no longer throws an error if called without an `options` object
 - Custom transitions can now call [`up.morph()`](/up.morph) to refer to other transitions
 - Fix a bug where following a link to a [preloaded](/preloading) destination would keep the
-  link marked with a [up-active](/a.up-active) class forever.
+  link marked with a [up-active](/up-active) class forever.
 
 
 0.23.0
@@ -3847,7 +3847,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 - Fix a bug where the document title wasn't restored when using the back
   and forward buttons
 - Fix a bug where links would be followed multiple times if the link
-  had an [`up-dash`](/a-up-dash) attribute without a value and also an `up-target` attribute.
+  had an `[up-dash]` attribute without a value and also an `[up-target]` attribute.
 - Fix a bug where a link would be followed multiple times if the link's
   click area was expanded using [`[up-expand]`](/up-expand) and if the
   link also had an `[up-dash]` attribute.
@@ -3861,7 +3861,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 - Fix a bug where using the `up-confirm` attribute would result in an infinite loop
 - Unpoly no longer displays confirmation dialogs when [preloading](/preloading) a link that
-  has both [`up-preload`](/a-up-preload) and `up-confirm` attributes.
+  has both [`up-preload`](/up-preload) and `up-confirm` attributes.
 
 
 ### Breaking changes
@@ -4030,7 +4030,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Compatible changes
 
-- New function [`up.autosubmit()`](/up.autosubmit) and selector [`[up-autosubmit]`](/form-up-autosubmit) to
+- New function `up.autosubmit()` and selector `[up-autosubmit]` to
   observe a form or field and submit the form when a value changes.
 - [`up.observe()`](/up.observe) and [`[up-observe]`](/up-observe) can now be applied
   to `<form>` tags. The callback is run when any field in the form changes.
@@ -4264,7 +4264,7 @@ Refactored internals. No API changes.
   [`up.submit()`](/up.submit),
   [`up.follow()`](/up.follow),
   [`up.visit()`](/up.visit),
-  [`form[up-target]`](/form-up-target) and
+  [`form[up-target]`](/up-submit#up-target) and
   [`a[up-target]`](/up-follow#up-target).
 
 
@@ -4282,7 +4282,7 @@ Refactored internals. No API changes.
 ### Compatible changes
 
 - Viewport scroll positions are saved when the URL changes and restored when the user hits the back/forward button
-- Allow to link to the previous page using [`[up-back]`](/a-up-back)
+- Allow to link to the previous page using `[up-back]`
 - Allow to restore previous scroll state using [`[up-restore-scroll]`](/up-follow#up-restore-scroll)
 - Instead of saying `<tag up-something="true">` you can now simply say `<tag up-something>`.
 - Create this Changelog.

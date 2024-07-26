@@ -164,12 +164,12 @@ To *dismiss* an overlay once a given event is observed, use the `[up-dismiss-eve
 
 To emit an event, use one of the following methods:
 
-| Method               | Description             |
-|----------------------|-------------------------|
-| `up.emit()`          | JavaScript function to emit an event on any element |
-| `up.layer.emit()`    | JavaScript function to emit an event on the [current layer](/up.layer.current) |
-| `a[up-emit]`         | HTML attribute to emit an event on click |
-| `X-Up-Events`        | HTTP header sent from the server |
+| Method            | Description             |
+|-------------------|-------------------------|
+| `up.emit()`       | JavaScript function to emit an event on any element |
+| `up.layer.emit()` | JavaScript function to emit an event on the [current layer](/up.layer.current) |
+| `[up-emit]`       | HTML attribute to emit an event on click |
+| `X-Up-Events`     | HTTP header sent from the server |
 | [`Element#dispatchEvent()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/dispatchEvent) | Standard DOM API to emit an event on an element |
 
 When an event causes an overlay to close, its default is prevented. You can use `[up-emit]` with a [fallback URL](/up-emit#fallback)

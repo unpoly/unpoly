@@ -236,8 +236,8 @@ up.link = (function() {
   Follows the given link with JavaScript and updates a fragment with the server response.
 
   By default the layer's [main element](/up-main)
-  will be replaced. Attributes like `a[up-target]`
-  or `[up-layer]` will be honored.
+  will be replaced. Attributes like [`[up-target]`](/up-follow#up-target)
+  or [`[up-layer]`](/up-follow#up-layer) will be honored.
 
   Following a link is considered [navigation](/navigation) by default.
 
@@ -245,7 +245,7 @@ up.link = (function() {
 
   ### Examples
 
-  Assume we have a link with an `a[up-target]` attribute:
+  Assume we have a link with an [`[up-target]`](/up-follow#up-target) attribute:
 
   ```html
   <a href="/users" up-target=".main">Users</a>
@@ -820,7 +820,7 @@ up.link = (function() {
   A `click` event that honors the `[up-instant]` attribute.
 
   This event is generally emitted when an element is clicked. However, for elements
-  with an [`[up-instant]`](/a-up-instant) attribute this event is emitted on `mousedown` instead.
+  with an `[up-instant]` attribute this event is emitted on `mousedown` instead.
 
   This is useful to listen to links being activated, without needing to know whether
   a link is `[up-instant]`.

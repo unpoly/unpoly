@@ -49,7 +49,7 @@ You can define custom animations using `up.transition()` and
 @see predefined-transitions
 @see motion-tuning
 
-@see a[up-transition]
+@see [up-transition]
 @see up.animation
 @see up.transition
 
