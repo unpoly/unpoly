@@ -64,7 +64,7 @@ up.framework = (function() {
   There are only two cases when you would boot manually:
 
   - When you load Unpoly with `<script async>`
-  - When you explicitly ask to manually boot by loading Unpoly with [`<script up-boot="manual">`](/script-up-boot-manual).
+  - When you explicitly ask to manually boot by loading Unpoly with [`<script up-boot="manual">`](/up-boot-manual).
 
   Before you manually boot, Unpoly should be configured and compilers should be registered.
   Booting will cause Unpoly to [compile](/up.hello) the initial page.
@@ -194,7 +194,7 @@ up.framework = (function() {
   The support check is very cursory. While it will exclude most legacy browsers
   like Internet Explorer, there may be cases where `up.framework.isSupported()`
   returns `true` on a browser with other support issues.
-  To use your own conditions for browser support, [boot manually](/script-up-boot-manual).
+  To use your own conditions for browser support, [boot manually](/up-boot-manual).
 
   ### Browser support
 

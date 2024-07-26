@@ -91,7 +91,7 @@ To "lazy preload" a link when it is scrolled into the [viewport](/up-viewport), 
 
 ### Infinite scrolling
 
-[Deferred fragments](/lazy-loading) that [load when revealed](/lazy-loading#on-reveal) can implement [infinite scrolling](infinite-scrolling) without custom JavaScript.
+[Deferred fragments](/lazy-loading) that [load when revealed](/lazy-loading#on-reveal) can implement [infinite scrolling](/infinite-scrolling) without custom JavaScript.
 
 All you need is an HTML structure like this:
 
@@ -254,7 +254,7 @@ up.on('up:form:submit', function({ form }) {
 
 ### Improvements to history restoration
 
-Several improvements have been made to the way Unpoly [handles the browser's "back" button](/history-restoration).
+Several improvements have been made to the way Unpoly [handles the browser's "back" button](/restoring-history).
 
 
 #### Ensuring fresh content
@@ -449,7 +449,7 @@ The following supporting changes have also been made:
 - Unpoly will try to force or unset [`:focus-visible`](https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible) as it sets focus classes, but can only do so in [some browsers](https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter).
 - The `up.focus()` function accepts a new `{ focusVisible }` option to control whether `.up-focus-hidden` or `.up-focus-visible` is set on a focused element.
 
-See [Focus ring visibility](/focus-ring-visibility) for more details and examples.
+See [Focus ring visibility](/focus-visibility) for more details and examples.
 
 
 ### Reacting to form changes
@@ -468,7 +468,7 @@ This release addresses many edge cases with features that watch form fields for 
 
 - `up.on()` takes a `{ capture: true }` option to register a listener that runs before the event is emitted on the element.
 - Scrolling now defaults to `{ behavior: 'instant' }` to prevent picking up a `scroll-behavior` CSS property. To do pick up the property, pass `{ behavior: 'auto' }`.
-- New function `up.form.isField()`. It returns whether the given element is a [form field](/up.form.config.fieldSelectors). 
+- New function `up.form.isField()`. It returns whether the given element is a [form field](/up.form.config#config.fieldSelectors). 
 
 
 3.6.1
@@ -483,7 +483,7 @@ This release addresses many edge cases with features that watch form fields for 
 ### Targeting fragments
 
 - Unpoly-specific pseudo selectors like `:main` or `:layer` can now be used in a compound target, e.g. `:main .child`.
-- Targeting `:main` will no longer [match in the region of the interaction origin]((/targeting-fragments#resolving-ambiguous-selectors)). It will now always use the first matching selector in `up.fragment.config.mainTargets`.
+- Targeting `:main` will no longer [match in the region of the interaction origin](/targeting-fragments#resolving-ambiguous-selectors)). It will now always use the first matching selector in `up.fragment.config.mainTargets`.
 - Fix a bug where following a navigation item outside a [main](/main) element would focus the `<body>` instead of the main element.
 
 ### Performance improvements
@@ -504,7 +504,7 @@ This release addresses many edge cases with features that watch form fields for 
 - Fix a bug where `up:assets:changed` would be emitted for every response when configuring `up.fragment.config.runScripts = false`.
 - `up.form.isSubmittable()` now returns `false` for forms with a cross-origin URL in their `[action]` attribute.
 - `up.util.contains()` now works on `NodeList` objects.
-- You can now [configure](up.script.config.scriptSelectors) which elements are removed by `up.fragment.config.runScripts = false`.
+- You can now [configure](/up.script.config#config.scriptSelectors) which elements are removed by `up.fragment.config.runScripts = false`.
 
 
 
@@ -1127,7 +1127,7 @@ That said, Unpoly 3 makes the following changes to the way conflicting fragment 
 
 - The render option `{ solo }` was replaced with a new option `{ abort }`.
 - The HTML attribute `[up-solo]` was replaced with a new attribute `[up-abort]`.
-- A new default render option is `{ abort: 'target' }`. This [aborts earlier requests](/aborting-reqeusts)
+- A new default render option is `{ abort: 'target' }`. This [aborts earlier requests](/aborting-requests)
   targeting fragments within *your* targeted fragments.
 
   For instance, the following would abort all requests targeting `.region` (or a descendant of `.region`) when the link is clicked:
@@ -1568,7 +1568,7 @@ That said, the following changes were made:
 
 - Unpoly now supports [conditional requests](/conditional-requests). This allows your server to skip rendering and send an empty response if the underlying data has not changed. 
 
-  Common use cases for conditional requests are [polling](/#up-poll) or [cache revalidation](#cache-revalidation). 
+  Common use cases for conditional requests are [polling](/up-poll) or [cache revalidation](/caching#revalidation). 
 - Unpoly now remembers the standard `Last-Modified` and `E-Tag` headers a fragment was delivered with.
   
   Header values are set as `[up-time]` and `[up-etag]` attributes on updated fragment. Users can also set these attributes manually in their views, to use different ETags for individually reloadable fragments.
@@ -1583,7 +1583,7 @@ That said, the following changes were made:
 
 Unpoly lets you handle many types of [connection problems](/network-issues). The objective is to keep your application accessible as the user's connection becomes slow, [flaky](/network-issues#flaky-connections) or [goes away entirely](/network-issues#disconnects).
 
-Unpoly 3 lets you handle [connection loss](/network-issues#connection-loss) with an `{ onOffline }` or `[up-on-offline]` callback:
+Unpoly 3 lets you handle [connection loss](/network-issues#disconnects) with an `{ onOffline }` or `[up-on-offline]` callback:
 
 ```html
 <a href="..." up-on-offline="if (confirm('You are offline. Retry?')) event.retry()">Post bid</a>
