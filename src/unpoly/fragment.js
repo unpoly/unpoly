@@ -2670,7 +2670,7 @@ up.fragment = (function() {
     @experimental
   @experimental
   */
-  function abort(...args) {
+  async function abort(...args) {
     let options = parseTargetAndOptions(args)
 
     // The function that checks whether a given function will be aborted.
@@ -2853,13 +2853,91 @@ up.fragment = (function() {
     onAborted(origin, disconnect)
   }
 
+  /*-
+  Inserts the given `element` at a given `position` relative to the `reference` element.
+
+  The new element will be [compiled](/up.hello), unless it is already compiled.
+
+  Returns a function that [destroys](/up.destroy) the inserted element and removes it from the DOM.
+
+  ### Example
+
+  ```js
+  let element = document.createElement('div')
+  element.parentElement // => null
+
+  let undo = up.fragment.insertTemp(document.body, element)
+  element.parentElement // => <body>
+
+  undo()
+  element.parentElement // => null
+  ```
+
+  ### Inserting a string of HTML
+
+  Instead of passing an `Element` value, you may also pass a string of HTML.
+  The string will be [parsed into an element](/up.element.createFromHTML) and then inserted:
+
+  ```js
+  let undo = up.fragment.insertTemp(document.body, '<div class="foo"></div>')
+  element.parentElement // => <body>
+  ```
+
+  @function up.fragment.insertTemp
+
+  @param {Element} reference
+    The reference element relative to which the new element will be inserted.
+
+  @param {string} [position='beforeend']
+    The insert position relative to the `reference` element:
+
+    @include adjacent-positions
+
+  @param {Element|string} newElement
+    The element to insert.
+
+    You may also pass a string of HTML, which will be [parsed into an element](/up.element.createFromHTML).
+
+    The new element will be [compiled](/up.hello), unless it is already compiled.
+
+  @return {Function}
+    A function that [destroys](/up.destroy) the inserted element and removes it from the DOM.
+
+  @internal
+  */
+  function insertTemp(reference, ...args) {
+    let newElement = e.wrap(args.pop())
+    let position = args[0] || 'beforeend'
+    reference.insertAdjacentElement(position, newElement)
+    up.hello(newElement)
+    return () => up.destroy(newElement)
+  }
+
+  // /*-
+  // @function up.fragment.swapTemp
+  // @param {Element} oldElement
+  // @param {Element|string} newElement
+  // @return {Function}
+  //   A function that undoes the swap when called.
+  // @internal
+  // */
+  // function swapTemp(oldElement, newElement) {
+  //   newElement = e.wrap(newElement)
+  //   oldElement.replaceWith(newElement)
+  //   up.hello(newElement)
+  //   return () => {
+  //     up.script.clean(newElement)
+  //     newElement.replaceWith(oldElement)
+  //   }
+  // }
+
   up.on('up:framework:boot', function() {
     const { documentElement } = document
     documentElement.setAttribute('up-source', normalizeSource(location.href))
     up.hello(documentElement)
 
     if (!up.browser.canPushState()) {
-      return up.warn('Cannot push history changes. Next fragment update will load in a new page.')
+      return up.warn('Cannot push history changes. Next render pass with history will load a full page.')
     }
   })
 
@@ -2904,6 +2982,8 @@ up.fragment = (function() {
     targetForSteps,
     compressNestedSteps,
     containsMainPseudo,
+    insertTemp,
+    // swapTemp,
     // timer: scheduleTimer
   }
 })()

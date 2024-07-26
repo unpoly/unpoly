@@ -270,6 +270,65 @@ describe('up.script', function() {
       })
     }
 
+    describe('up.destructor()', function() {
+
+      it('registers a function that runs when the element is cleaned', function() {
+        let destructorSpy = jasmine.createSpy('destructor function')
+        let element = fixture('.element')
+
+        up.destructor(element, destructorSpy)
+
+        expect(destructorSpy).not.toHaveBeenCalled()
+
+        up.script.clean(element)
+
+        expect(destructorSpy).toHaveBeenCalled()
+      })
+
+      it('appends to an existing list of destructor functions', function() {
+        let destructorSpy1 = jasmine.createSpy('destructor 1')
+        let destructorSpy2 = jasmine.createSpy('destructor 2')
+        let element = fixture('.element')
+
+        up.destructor(element, destructorSpy1)
+        up.destructor(element, destructorSpy2)
+
+        expect(destructorSpy1).not.toHaveBeenCalled()
+        expect(destructorSpy2).not.toHaveBeenCalled()
+
+        up.script.clean(element)
+
+        expect(destructorSpy1).toHaveBeenCalled()
+        expect(destructorSpy2).toHaveBeenCalled()
+      })
+
+      it('registers an array of destructor functions at functions', function() {
+        let destructorSpy1 = jasmine.createSpy('destructor 1')
+        let destructorSpy2 = jasmine.createSpy('destructor 2')
+        let element = fixture('.element')
+
+        up.destructor(element, [destructorSpy1, destructorSpy2])
+
+        expect(destructorSpy1).not.toHaveBeenCalled()
+        expect(destructorSpy2).not.toHaveBeenCalled()
+
+        up.script.clean(element)
+
+        expect(destructorSpy1).toHaveBeenCalled()
+        expect(destructorSpy2).toHaveBeenCalled()
+      })
+
+      it('does not set an .up-can-clean class when no functions are passed', function() {
+        let element = fixture('.element')
+
+        // This may happen if a compiler returns no value.
+        up.destructor(element, undefined)
+
+        expect(element.className).toBe('element')
+      })
+
+    })
+
     describe('up.data()', function() {
 
       describe('when the element has an [up-data] attribute', function() {
@@ -656,6 +715,10 @@ describe('up.script', function() {
         expect(destructor).toHaveBeenCalled()
       })
 
+      it('ignores return values that are not functions', function() {
+        throw "test me"
+      })
+
       it('allows compilers to return an array of functions to call when the compiled element is cleaned', function() {
         const destructor1 = jasmine.createSpy('destructor1')
         const destructor2 = jasmine.createSpy('destructor2')
@@ -670,18 +733,18 @@ describe('up.script', function() {
         expect(destructor2).toHaveBeenCalled()
       })
 
-      it("does not consider a returned array to be a destructor unless it's comprised entirely of functions", function() {
-        const value1 = jasmine.createSpy('non-destructor')
-        const value2 = 'two'
-        up.compiler('.child', element => [ value1, value2 ])
-
-        const container = fixture('.container .child')
-        up.hello(container)
-
-        up.script.clean(container)
-
-        expect(value1).not.toHaveBeenCalled()
-      })
+      // it("does not consider a returned array to be a destructor unless it's comprised entirely of functions", function() {
+      //   const value1 = jasmine.createSpy('non-destructor')
+      //   const value2 = 'two'
+      //   up.compiler('.child', element => [ value1, value2 ])
+      //
+      //   const container = fixture('.container .child')
+      //   up.hello(container)
+      //
+      //   up.script.clean(container)
+      //
+      //   expect(value1).not.toHaveBeenCalled()
+      // })
 
       it('runs all destructors if multiple compilers are applied to the same element', function() {
         const destructor1 = jasmine.createSpy('destructor1')

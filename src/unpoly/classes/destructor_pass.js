@@ -9,13 +9,10 @@ up.DestructorPass = class DestructorPass {
 
   run() {
     for (let cleanable of this._selectCleanables()) {
-      let destructors = u.pluckKey(cleanable, 'upDestructors')
-      if (destructors) {
-        for (let destructor of destructors) {
-          this._applyDestructorFunction(destructor, cleanable)
-        }
-      }
-      cleanable.classList.remove('up-can-clean')
+      // In the case of [up-keep] elements we may run on a clone that is [up-keep]
+      // but has no { upDestructors } property.
+      let registry = u.pluckKey(cleanable, 'upDestructors')
+      registry?.clean(cleanable)
     }
   }
 
@@ -25,7 +22,4 @@ up.DestructorPass = class DestructorPass {
     return up.fragment.subtree(this._fragment, '.up-can-clean', selectOptions)
   }
 
-  _applyDestructorFunction(destructor, element) {
-    up.error.guard(() => destructor(element))
-  }
 }

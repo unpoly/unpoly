@@ -430,11 +430,10 @@ up.form = (function() {
   /*-
   Disables all [fields](/up.form.fields) and [submit buttons](/up.form.submitButtons) within the given element.
 
-  Disabling a focused control may cause focus to be reset. To prevent this, Unpoly will
-  focus the closest [form group](/up-form-group) around the disabled control.
-
   To automatically disable a form when it is submitted, add the [`[up-disable]`](/up-submit#up-disable)
   property to the `<form>` element.
+
+  Returns a function that re-enables the elements that were disabled.
 
   ### Dealing with focus loss
 
@@ -449,16 +448,16 @@ up.form = (function() {
     A function that re-enables the elements that were disabled.
   @internal
   */
+
   function disableContainer(container) {
     let focusedElement = document.activeElement
     let focusFallback
     let controls = [...findFields(container), ...findSubmitButtons(container)]
+    controls = u.reject(controls, 'disabled')
 
     for (let control of controls) {
-      if (control === focusedElement) {
-        focusFallback = findGroup(focusedElement)
-      }
-      raiseDisableStack(control)
+      if (control === focusedElement) focusFallback = findGroup(focusedElement)
+      control.disabled = true
     }
 
     if (focusFallback) {
@@ -466,58 +465,60 @@ up.form = (function() {
     }
 
     return function() {
-      controls.forEach(lowerDisableStack)
+      for (let control of controls) {
+        control.disabled = false
+      }
     }
   }
 
-  function raiseDisableStack(control) {
-    if (!control.upDisableCount) {
-      control.upDisableCount ||= 0
-      control.upOriginalDisabled = control.disabled
-    }
+  // function disableWhile(request, options) {
+  //   let undoDisable = handleDisableOption(options)
+  //
+  //   u.always(request, undoDisable)
+  // }
 
-    control.upDisableCount++
-    control.disabled = true
-  }
+  up.on('up:fragment:load', function({ previews, renderOptions }) {
+    previews.push(getDisablePreviewFn(renderOptions))
+  })
 
-  function lowerDisableStack(control) {
-    if (control.upDisableCount) {
-      if (!control.disabled) {
-        // In this case external code has re-enabled this field.
-        // We abort our own disablement stack.
-        control.upDisableCount = 0
-      } else {
-        control.upDisableCount--
-        if (!control.upDisableCount) {
-          control.disabled = control.upOriginalDisabled
+  function getDisablePreviewFn({ disable, origin }) {
+    return function(preview) {
+      if (!disable) return
+
+      let missingOption = (key) => { up.fail("Cannot process { disable: '%s' } option without { %s }", disable, key) }
+      let getOrigin = () => origin || missingOption('origin')
+      let getOriginForm = () => getScope(getOrigin())
+
+      if (disable === true) {
+        preview.disable(getOriginForm())
+      } else if (u.isString(disable)) {
+        // Disable all elements matching the given selector, but within the form
+        let formParts = up.fragment.subtree(getOriginForm(), disable, { origin })
+        for (let formPart of formParts) {
+          preview.disable(formPart)
         }
       }
     }
   }
 
-  function disableWhile(promise, options) {
-    let undoDisable = handleDisableOption(options)
-    u.always(promise, undoDisable)
-  }
-
-  function handleDisableOption({ disable, origin }) {
-    if (!disable) return u.noop
-
-    let missingOption = (key) => { up.fail("Cannot process { disable: '%s' } option without { %s }", disable, key) }
-    let getOrigin = () => origin || missingOption('origin')
-    let getOriginForm = () => getScope(getOrigin())
-
-    let containers
-
-    if (disable === true) {
-      containers = [getOriginForm()]
-    } else if (u.isString(disable)) {
-      // Disable all elements matching the given selector, but within the form
-      containers = up.fragment.subtree(getOriginForm(), disable, { origin })
-    }
-
-    return u.sequence(containers.map(disableContainer))
-  }
+  // function handleDisableOption({ disable, origin }) {
+  //   if (!disable) return u.noop
+  //
+  //   let missingOption = (key) => { up.fail("Cannot process { disable: '%s' } option without { %s }", disable, key) }
+  //   let getOrigin = () => origin || missingOption('origin')
+  //   let getOriginForm = () => getScope(getOrigin())
+  //
+  //   let containers
+  //
+  //   if (disable === true) {
+  //     containers = [getOriginForm()]
+  //   } else if (u.isString(disable)) {
+  //     // Disable all elements matching the given selector, but within the form
+  //     containers = up.fragment.subtree(getOriginForm(), disable, { origin })
+  //   }
+  //
+  //   return u.sequence(containers.map(disableContainer))
+  // }
 
   // This was extracted from submitOptions().
   // Validation needs to submit a form without options intended for the final submission,
@@ -662,7 +663,7 @@ up.form = (function() {
   | ---------- | --------- | ------------------------------------- |
   | `value`    | `string`  | The changed field value               |
   | `name`     | `string`  | The `[name]` of the changed field     |
-  | `options`  | `Object`  | Render options for the change (`{ origin, feedback }`) |
+  | `options`  | `Object`  | Render options for the change (`{ origin, feedback, disable }`) |
 
   ### Watching multiple fields
 
@@ -1995,8 +1996,10 @@ up.form = (function() {
     submitButtons: findSubmitButtons,
     focusedField,
     switchTarget,
-    disableWhile,
+    // disableWhile,
     disable: disableContainer,
+    getDisablePreviewFn,
+    // handleDisableOption,
     group: findGroup,
     groupSolution: findGroupSolution,
     groupSelectors: getGroupSelectors,
