@@ -54,7 +54,7 @@ up.Preview = class Preview {
 
   async openLayer(content) {
     let overlayStyles = u.pick(this.renderOptions, ['mode', 'size', 'position', 'dismissable', 'align'])
-    let layer = await up.layer.open({ content, ...overlayStyles })
+    let layer = await up.layer.open({ content, abort: false, ...overlayStyles })
     this._cleaner.track(() => {
       if (layer.isOpen()) {
         layer.dismiss({ preventable: false })

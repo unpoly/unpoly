@@ -186,6 +186,8 @@ up.RenderJob = class RenderJob {
       origin,
     }
 
+    console.debug("*** handleAbortOption: %o", abort)
+
     if (abort === 'target') {
       // Abort requests in the subtree of the targeted fragment
       up.fragment.abort(fragments, abortOptions)

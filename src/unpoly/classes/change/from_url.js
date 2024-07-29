@@ -15,9 +15,9 @@ up.Change.FromURL = class FromURL extends up.Change {
     this.request = up.request(this._getRequestAttrs())
     this.options.onRequest?.(this.request)
 
-    up.feedback.showAroundRequest(this.request, this.options)
-
+    // TODO: Don't do this work if we're rendering a cached request
     up.form.disableWhile(this.request, this.options)
+    up.feedback.showAroundRequest(this.request, this.options)
 
     if (this.options.preload) {
       return this.request
@@ -62,11 +62,11 @@ up.Change.FromURL = class FromURL extends up.Change {
   }
 
   _preflightPropsForRenderOptions(renderOptions, requestAttributesOptions) {
-    const preview = new up.Change.FromContent({ ...renderOptions, preview: true })
+    const preflightChange = new up.Change.FromContent({ ...renderOptions, preflight: true })
     // #getPreflightProps() will return meta information about the change that is most
     // likely before the request was dispatched.
     // This might change postflight if the response does not contain the desired target.
-    return preview.getPreflightProps(requestAttributesOptions)
+    return preflightChange.getPreflightProps(requestAttributesOptions)
   }
 
   _onRequestSettled(response) {
