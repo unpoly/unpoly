@@ -94,6 +94,24 @@ describe 'up.Layer.Modal', ->
 
         expect(anchored).toHaveComputedStyle({ right: '70px' })
 
+      it 'adjusts the { right } property of multiple right-anchored elements with varying { right } values', ->
+        spyOn(up.viewport, 'rootScrollbarWidth').and.returnValue(20)
+        anchored1 = fixture('#one[up-anchored=right]', style: { position: 'fixed', top: '0px', right: '33px' })
+        up.hello(anchored1)
+        anchored2 = fixture('#two[up-anchored=right]', style: { position: 'fixed', top: '0px', right: '44px' })
+        up.hello(anchored2)
+
+        up.layer.open(mode: 'modal', content: 'modal content')
+        expect(anchored1).toHaveComputedStyle({ right: '53px' })
+        expect(anchored2).toHaveComputedStyle({ right: '64px' })
+
+        up.layer.dismiss()
+
+        await wait()
+
+        expect(anchored1).toHaveComputedStyle({ right: '33px' })
+        expect(anchored2).toHaveComputedStyle({ right: '44px' })
+
       it 'considers [up-fixed=top] elements as right-anchored', ->
         spyOn(up.viewport, 'rootScrollbarWidth').and.returnValue(25)
         anchored = fixture('div[up-fixed=top]', style: { position: 'fixed', top: '0px', right: '70px' })
