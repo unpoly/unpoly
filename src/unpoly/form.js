@@ -203,25 +203,8 @@ up.form = (function() {
     return e.subtree(root, submitButtonSelector())
   }
 
-  /*-
-  @function up.form.submittingButton
-  @param {Element} form
-  @internal
-  */
-  function submittingButton(form) {
-    const selector = submitButtonSelector()
-    const focusedElement = document.activeElement
-
-    // Use focused element only if it is a part of the submitted form.
-    if (focusedElement && focusedElement.form === form) {
-      // It must match the submit button selector as well.
-      if (focusedElement.matches(selector)) {
-        return focusedElement
-      }
-    }
-
-    // If no button is focused, we assume the first button in the form.
-    return e.get(form, selector)
+  function isSubmitButton(element) {
+    return element?.matches(submitButtonSelector())
   }
 
   /*-
@@ -294,6 +277,18 @@ up.form = (function() {
     - The [button clicked to submit the form](/up:form:submit#event.submitButton).
     - The first submit button
     - The `<form>` element
+
+  @param {Object|up.Params|FormData|string|Array} [options.params]
+    Additional [Form parameters](/up.Params) that should be sent as the request's
+    [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
+
+    The given value will be added to params parsed from the form's input field.
+
+  @param {Element|false} [options.submitButton]
+    The submit button used to submit the form.
+
+    By default the form's first submit button will be assumed.
+    Pass `{ submitButton: false }` to not assume any submit button.
 
   @return {up.RenderJob}
     A promise that fulfills with an `up.RenderResult`
@@ -538,9 +533,12 @@ up.form = (function() {
     // Parse params from form fields.
     const params = up.Params.fromForm(form)
 
-    const submitButton = submittingButton(form)
+    // (1) When processing a `submit` event, we may have received a { submitButton: event.submitter } option.
+    // (2) When the user submits the form from a focused input via Enter, the browser will also submit
+    //     with the first submit button set as submitter.
+    // (3) For pragmatic calls of up.submit(), we assume the first submit button.
+    const submitButton = (options.submitButton ??= findSubmitButtons(form)[0])
     if (submitButton) {
-      options.submitButton = submitButton
       // Submit buttons with a [name] attribute will add to the params.
       // Note that addField() will only add an entry if the given button has a [name] attribute.
       params.addField(submitButton)
@@ -625,18 +623,6 @@ up.form = (function() {
 
   @stable
   */
-
-  // MacOS does not focus buttons on click.
-  // That means that submittingButton() cannot rely on document.activeElement.
-  // See https://github.com/unpoly/unpoly/issues/103
-  up.on('up:click', submitButtonSelector, function (event, button) {
-    // Don't mess with focus unless we know that we're going to handle the form.
-    // https://groups.google.com/g/unpoly/c/wsiATxepVZk
-    const form = getForm(button)
-    if (form && isSubmittable(form)) {
-      button.focus()
-    }
-  })
 
   /*-
   Watches form fields and runs a callback when a value changes.
@@ -1317,8 +1303,10 @@ up.form = (function() {
     // and then opt out individual forms with [up-submit=false].
     if (event.defaultPrevented) return
 
+    const submitButton = u.presence(event.submitter, isSubmitButton)
+
     up.event.halt(event, { log: true })
-    up.error.muteUncriticalRejection(submit(form))
+    up.error.muteUncriticalRejection(submit(form, { submitButton }))
   })
 
   /*-

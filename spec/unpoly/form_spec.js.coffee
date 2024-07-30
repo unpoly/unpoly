@@ -970,6 +970,42 @@ describe 'up.form', ->
           expect(result.value.fragments).toEqual([document.querySelector('.one'), document.querySelector('.three')])
           expect(result.value.layer).toBe(up.layer.root)
 
+      describe 'params', ->
+
+        it 'makes a request with params from the form fields', ->
+          form = fixture('form[action="/action"][method="post"]')
+          fooInput = e.affix(form, 'input[type="text"][name="foo"][value="foo-value"]')
+          barInput = e.affix(form, 'input[type="text"][name="bar"][value="bar-value"]')
+
+          up.submit(form)
+          await wait()
+
+          expect(jasmine.lastRequest().url).toMatchURL('/action')
+          expect(jasmine.lastRequest().data()).toMatchParams({ foo: 'foo-value', bar: 'bar-value' })
+
+        it 'adds the [name] and [value] from the first submit button to the params', ->
+          form = fixture('form[action="/action"][method="post"]')
+          fooInput = e.affix(form, 'input[type="text"][name="foo"][value="foo-value"]')
+          submit1 = e.affix(form, 'button[type="submit"][name="submit1"][value="submit1-value"]', text: 'Submit1')
+          submit2 = e.affix(form, 'button[type="submit"][name="submit2"][value="submit1-value"]', text: 'Submit2')
+
+          up.submit(form)
+          await wait()
+
+          expect(jasmine.lastRequest().url).toMatchURL('/action')
+          expect(jasmine.lastRequest().data()).toMatchParams({ foo: 'foo-value', submit1: 'submit1-value' })
+
+        it 'does not include the submit button in the params with { submitButton: false }', ->
+          form = fixture('form[action="/action"][method="post"]')
+          fooInput = e.affix(form, 'input[type="text"][name="foo"][value="foo-value"]')
+          submit = e.affix(form, 'button[type="submit"][name="submit"][value="submit-value"]', text: 'Submit')
+
+          up.submit(form, submitButton: false)
+          await wait()
+
+          expect(jasmine.lastRequest().url).toMatchURL('/action')
+          expect(jasmine.lastRequest().data()).toMatchParams({ foo: 'foo-value' })
+
       describe 'when the server responds with an error', ->
 
         it 'replaces the form', ->
@@ -2627,6 +2663,18 @@ describe 'up.form', ->
 
         expect(jasmine.lastRequest().data()['field']).toEqual(['value'])
         expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('main')
+
+      it 'does not focus the submit button when pressing Enter within an input (discussion #658)', ->
+        form = fixture('form[up-submit][action="/action"]')
+        input = e.affix(form, 'input[type=text][name="foo"]')
+        submitButton = e.affix(form, 'button[type=submit]', text: 'Submit')
+
+        Trigger.submitFormWithEnter(input)
+
+        await wait()
+
+        expect(submitButton).not.toBeFocused()
+        expect(input).toBeFocused()
 
       describe 'up:form:submit event', ->
 

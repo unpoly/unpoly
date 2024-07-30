@@ -204,6 +204,19 @@ window.Trigger = (->
     mouseout(element, options)
     mouseleave(element, options)
 
+  submitButtons = (form) ->
+    form.querySelectorAll('input[type=submit], input[type=image], button[type=submit], button:not([type])')
+
+  submitFormWithEnter = (input) ->
+    focus(input)
+    keySequence(input, 'Enter')
+    form = input.closest('form')
+    defaultButton = submitButtons(form)[0]
+    # From the HTML Spec:
+    # If the user agent supports letting the user submit a form implicitly (for example, on some platforms hitting the "enter" key while a text control is focused implicitly submits the form), then doing so for a form, whose default button has activation behavior and is not disabled, must cause the user agent to fire a click event at that default button.
+    # https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission
+    defaultButton.click()
+
   buildEvent = (klass) ->
     return document.createEvent(klass)
 
@@ -338,6 +351,7 @@ window.Trigger = (->
   createSimpleEvent: createSimpleEvent
   createMouseEvent: createMouseEvent
   createKeyboardEvent: createKeyboardEvent
-  clickLinkWithKeyboard: clickLinkWithKeyboard
+  clickLinkWithKeyboard: clickLinkWithKeyboard,
+  submitFormWithEnter: submitFormWithEnter,
 
 )()
