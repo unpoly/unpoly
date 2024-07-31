@@ -9,13 +9,8 @@ up.DestructorPass = class DestructorPass {
 
   run() {
     for (let cleanable of this._selectCleanables()) {
-      let destructors = u.pluckKey(cleanable, 'upDestructors')
-      if (destructors) {
-        for (let destructor of destructors) {
-          this._applyDestructorFunction(destructor, cleanable)
-        }
-      }
-      cleanable.classList.remove('up-can-clean')
+      let registry = u.pluckKey(cleanable, 'upDestructors')
+      this._applyDestructorFunction(registry.clean, cleanable)
     }
   }
 

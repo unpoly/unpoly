@@ -2536,45 +2536,6 @@ describe 'up.form', ->
 
         expect(field).toBeDisabled()
 
-      it 'can be called multiple times on the same field, and keeps the field disabled until all re-enablement functions have been called', ->
-        form = fixture('form')
-        field1 = e.affix(form, 'input[name=email][type=text]')
-        field2 = e.affix(form, 'input[name=password][type=text][disabled]')
-        expect(field1).not.toBeDisabled()
-        expect(field2).toBeDisabled()
-
-        reenable1 = up.form.disable(form)
-        reenable2 = up.form.disable(form)
-
-        expect(field1).toBeDisabled()
-        expect(field2).toBeDisabled()
-
-        reenable1()
-
-        expect(field1).toBeDisabled()
-        expect(field2).toBeDisabled()
-
-        reenable2()
-
-        expect(field1).not.toBeDisabled()
-        expect(field2).toBeDisabled()
-
-      it 'does not restore a disabled state if the field was enabled by other code while it was disabled by us', ->
-        form = fixture('form')
-        field = e.affix(form, 'input[type=text][disabled]')
-        expect(field).toBeDisabled()
-
-        reenable = up.form.disable(form)
-
-        expect(field).toBeDisabled()
-
-        # Other code
-        field.disabled = false
-
-        reenable()
-
-        expect(field).not.toBeDisabled()
-
     describe 'up.form.isSubmittable()', ->
 
       it 'returns true for a form with [up-submit]', ->

@@ -1,4 +1,5 @@
 const e = up.element
+const u = up.util
 const SHIFT_CLASS = 'up-scrollbar-away'
 
 // Gives `<body>` a right padding in the width of a scrollbar.
@@ -13,7 +14,7 @@ up.BodyShifter = class BodyShifter {
   constructor() {
     this._anchoredElements = new Set()
     this._stack = 0
-    this._cleaner = new up.Cleaner()
+    this._cleaner = u.cleaner()
   }
 
   lowerStack() {
@@ -47,7 +48,7 @@ up.BodyShifter = class BodyShifter {
 
     // Always publish on the <html> element for consistency, even if the scrolling element
     // is sometimes <body>. The property will be inherited
-    this._cleaner.track(e.setTemporaryStyle(e.root, {
+    this._cleaner(e.setTemporaryStyle(e.root, {
       '--up-scrollbar-width': this._rootScrollbarWidth + 'px'
     }))
 
@@ -66,7 +67,7 @@ up.BodyShifter = class BodyShifter {
 
     console.debug("setting temporary style")
 
-    this._cleaner.track(
+    this._cleaner(
       e.setTemporaryStyle(element, { ['--up-original-' + styleProp]: originalValue }),
       e.addTemporaryClass(element, SHIFT_CLASS),
     )

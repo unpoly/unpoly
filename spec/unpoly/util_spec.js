@@ -2468,6 +2468,38 @@ describe('up.util', () => {
       })
     })
 
+    describe('up.util.assignTemp()', function() {
+
+      it('assigns the given properties to the given object', function() {
+        let obj = { a: 1, b: 2, c: 3, d: 4 }
+        up.util.assignTemp(obj, { b: 20, c: 30 })
+        expect(obj).toEqual({ a: 1, b: 20, c: 30, d: 4 })
+      })
+
+      it("returns a function that restores the object's original properties", function() {
+        let obj = { a: 1, b: 2, c: 3, d: 4 }
+        let undo = up.util.assignTemp(obj, { b: 20, c: 30 })
+        expect(obj).toEqual({ a: 1, b: 20, c: 30, d: 4 })
+
+        undo()
+
+        expect(obj).toEqual({ a: 1, b: 2, c: 3, d: 4 })
+      })
+
+      it("only restores properties that were re-assigned", function() {
+        let obj = { a: 1, b: 2, c: 3 }
+        let undo = up.util.assignTemp(obj, { b: 20 })
+        expect(obj).toEqual({ a: 1, b: 20, c: 3 })
+
+        obj.c = 30
+
+        undo()
+
+        expect(obj).toEqual({ a: 1, b: 2, c: 30 })
+      })
+
+    })
+
     describe('up.util.evalOption()', function() {
 
       it('returns the given primitive value', () => expect(up.util.evalOption('foo')).toBe('foo'))

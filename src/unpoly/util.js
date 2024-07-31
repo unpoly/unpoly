@@ -1973,6 +1973,27 @@ up.util = (function() {
     return variant
   }
 
+  function assignTemp(obj, props) {
+    let oldProps = u.pick(obj, Object.keys(props))
+    Object.assign(obj, props)
+    return () => Object.assign(obj, oldProps)
+  }
+
+  function cleaner() {
+    let fns = []
+
+    let api = function(...values) {
+      values = values.flat().filter(isFunction)
+      fns.push(...values)
+    }
+
+    api.clean = function(...args) {
+      let fn
+      while (fn = fns.pop()) fn(...args)
+    }
+    return api
+  }
+
   return {
     parseURL,
     normalizeURL,
@@ -2075,5 +2096,7 @@ up.util = (function() {
     safeStringifyJSON,
     // groupBy,
     variant,
+    assignTemp,
+    cleaner,
   }
 })()

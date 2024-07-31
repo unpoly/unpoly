@@ -21,7 +21,6 @@ require('./unpoly/classes/options_parser')
 require('./unpoly/classes/fifo_cache')
 require('./unpoly/classes/rect')
 
-require('./unpoly/classes/cleaner')
 require('./unpoly/classes/body_shifter')
 require('./unpoly/classes/change/change')
 require('./unpoly/classes/change/addition')
