@@ -199,12 +199,6 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
         step.scroll = false
         step.focus = false
       }
-
-      if ((step.placement === 'swap') || (step.placement === 'content')) {
-        // We cannot animate scrolling when we're morphing between two elements.
-        // The placements 'append', 'prepend' animate (instead of morphing) and can allow scrolling.
-        step.scrollBehavior = 'instant'
-      }
     })
   }
 

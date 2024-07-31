@@ -6133,7 +6133,7 @@ describe 'up.fragment', ->
             next =>
               expect(@revealOptions.scrollBehavior).toEqual('smooth')
 
-          it 'does not animate the revealing when swapping out an element', asyncSpec (next) ->
+          it 'animates the revealing when swapping out an element', asyncSpec (next) ->
             fixture('.element', text: 'version 1')
             up.render('.element',
               document: '<div class="element">version 2</div>',
@@ -6141,7 +6141,7 @@ describe 'up.fragment', ->
               scrollBehavior: 'smooth'
             )
             next =>
-              expect(@revealOptions.scrollBehavior).toEqual('instant')
+              expect(@revealOptions.scrollBehavior).toEqual('smooth')
 
         describe 'with { scroll: "restore" } option', ->
 
