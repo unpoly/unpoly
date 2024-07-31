@@ -3,9 +3,9 @@ const u = up.util
 up.Change.FromURL = class FromURL extends up.Change {
 
   execute() {
-    let _newPageReason = this._newPageReason()
-    if (_newPageReason) {
-      up.puts('up.render()', _newPageReason)
+    let newPageReason = this._newPageReason()
+    if (newPageReason) {
+      up.puts('up.render()', newPageReason)
       up.network.loadPage(this.options)
       // Prevent our caller from executing any further code, since we're already
       // navigating away from this JavaScript environment.

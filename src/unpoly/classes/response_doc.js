@@ -46,7 +46,7 @@ up.ResponseDoc = class ResponseDoc {
   }
 
   _parseFragment(value) {
-    let parsed = u.isString(value) ? e.createFromHTML(value) : value
+    let parsed = e.parse(value)
     this._document = this._buildFauxDocument(parsed)
   }
 

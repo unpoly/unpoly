@@ -1355,6 +1355,14 @@ up.element = (function() {
     return selector
   }
 
+  function wrap(elementOrHTML, parser = createFromHTML) {
+    if (u.isString(elementOrHTML)) {
+      return parser(elementOrHTML)
+    } else {
+      return elementOrHTML
+    }
+  }
+
   return {
     subtree, // practical
     contains,
@@ -1412,5 +1420,6 @@ up.element = (function() {
     crossOriginSelector,
     isIntersectingWindow,
     unionSelector,
+    wrap,
   }
 })()

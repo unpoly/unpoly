@@ -11,7 +11,7 @@ and how to handle errors.
 
 ## Example
 
-```
+```js
 let job = up.render('.foo', url: '/users')
 console.log(job.options.target) // logs ".foo"
 console.log(job.options.url) // logs "/users"
@@ -185,8 +185,6 @@ up.RenderJob = class RenderJob {
       newLayer,
       origin,
     }
-
-    console.debug("*** handleAbortOption: %o", abort)
 
     if (abort === 'target') {
       // Abort requests in the subtree of the targeted fragment
