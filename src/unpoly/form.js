@@ -433,6 +433,8 @@ up.form = (function() {
   To automatically disable a form when it is submitted, add the [`[up-disable]`](/up-submit#up-disable)
   property to the `<form>` element.
 
+  Returns a function that re-enables the elements that were disabled.
+
   ### Dealing with focus loss
 
   When a focus field is disabled, it will lose focus.
@@ -444,76 +446,43 @@ up.form = (function() {
     The element within which fields and buttons should be disabled.
   @return {Function}
     A function that re-enables the elements that were disabled.
-  @experimental
+  @internal
   */
+
   function disableContainer(container) {
     let focusedElement = document.activeElement
     let focusFallback
     let controls = [...findFields(container), ...findSubmitButtons(container)]
-    // Don't return an undo function for functions that are already disabled.
-    controls = u.reject(controls, 'disabled')
-
-    let cleaner = u.cleaner()
 
     for (let control of controls) {
-      if (control === focusedElement) {
-        focusFallback = findGroup(focusedElement)
-      }
-      cleaner(u.assignTemp(control, { disabled: true }))
+      if (control === focusedElement) focusFallback = findGroup(focusedElement)
+      raiseDisableStack(control)
     }
 
     if (focusFallback) {
       up.focus(focusFallback, { force: true, preventScroll: true })
     }
 
-    return cleaner.clean
+    return function() {
+      controls.forEach(lowerDisableStack)
+    }
   }
 
-  // function disableContainerOld(container) {
-  //   let focusedElement = document.activeElement
-  //   let focusFallback
-  //   let controls = [...findFields(container), ...findSubmitButtons(container)]
-  //
-  //   for (let control of controls) {
-  //     if (control === focusedElement) {
-  //       focusFallback = findGroup(focusedElement)
-  //     }
-  //     raiseDisableStack(control)
-  //   }
-  //
-  //   if (focusFallback) {
-  //     up.focus(focusFallback, { force: true, preventScroll: true })
-  //   }
-  //
-  //   return function() {
-  //     controls.forEach(lowerDisableStack)
-  //   }
-  // }
-  //
-  // function raiseDisableStack(control) {
-  //   if (!control.upDisableCount) {
-  //     control.upDisableCount ||= 0
-  //     control.upOriginalDisabled = control.disabled
-  //   }
-  //
-  //   control.upDisableCount++
-  //   control.disabled = true
-  // }
-  //
-  // function lowerDisableStack(control) {
-  //   if (control.upDisableCount) {
-  //     if (!control.disabled) {
-  //       // In this case external code has re-enabled this field.
-  //       // We abort our own disablement stack.
-  //       control.upDisableCount = 0
-  //     } else {
-  //       control.upDisableCount--
-  //       if (!control.upDisableCount) {
-  //         control.disabled = control.upOriginalDisabled
-  //       }
-  //     }
-  //   }
-  // }
+  function raiseDisableStack(control) {
+    if (!control.upDisableCount) {
+      control.upDisableCount ||= 0
+      control.upOriginalDisabled = control.disabled
+    }
+
+    control.upDisableCount++
+    control.disabled = true
+  }
+
+  function lowerDisableStack(control) {
+    if (!(--control.upDisableCount)) {
+      control.disabled = control.upOriginalDisabled
+    }
+  }
 
   function disableWhile(promise, options) {
     let undoDisable = handleDisableOption(options)

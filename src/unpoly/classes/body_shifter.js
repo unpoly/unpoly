@@ -48,7 +48,7 @@ up.BodyShifter = class BodyShifter {
 
     // Always publish on the <html> element for consistency, even if the scrolling element
     // is sometimes <body>. The property will be inherited
-    this._cleaner(e.setTemporaryStyle(e.root, {
+    this._cleaner(e.setStyleTemp(e.root, {
       '--up-scrollbar-width': this._rootScrollbarWidth + 'px'
     }))
 
@@ -68,8 +68,8 @@ up.BodyShifter = class BodyShifter {
     console.debug("setting temporary style")
 
     this._cleaner(
-      e.setTemporaryStyle(element, { ['--up-original-' + styleProp]: originalValue }),
-      e.addTemporaryClass(element, SHIFT_CLASS),
+      e.setStyleTemp(element, { ['--up-original-' + styleProp]: originalValue }),
+      e.addClassTemp(element, SHIFT_CLASS),
     )
   }
 

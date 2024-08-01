@@ -481,12 +481,13 @@ up.script = (function() {
   */
   function registerDestructor(element, destructor) {
     let registry = (element.upDestructors ||= buildDestructorRegistry(element))
-    registry(destructor)
+    registry(up.error.guardFn(destructor))
   }
 
   function buildDestructorRegistry(element) {
+    console.debug("building registry for %o", element)
     let registry = u.cleaner()
-    registry(e.addTemporaryClass(element, 'up-can-clean'))
+    registry(e.addClassTemp(element, 'up-can-clean'))
     return registry
   }
 

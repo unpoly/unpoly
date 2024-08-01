@@ -375,6 +375,58 @@ describe('up.element', function() {
     })
   })
 
+  // describe('up.element.toggleTemp()', function() {
+  //
+  //   it('hides the given element if it is visible', function() {
+  //     const element = fixture('.element')
+  //     up.element.toggleTemp(element)
+  //     expect(element).toBeHidden()
+  //   })
+  //
+  //   it('shows the given element if it is hidden', function() {
+  //     const element = fixture('.element', {style: { display: 'none' }})
+  //     up.element.toggleTemp(element)
+  //     expect(element).toBeVisible()
+  //   })
+  //
+  //   it('hides the given element if the second argument is false', function() {
+  //     const element = fixture('.element')
+  //     expect(element).toBeVisible()
+  //     up.element.toggleTemp(element, false)
+  //     expect(element).toBeHidden()
+  //   })
+  //
+  //   it('shows the given element if the second argument is true', function() {
+  //     const element = fixture('.element')
+  //     element.style.display = 'none'
+  //     expect(element).toBeHidden()
+  //     up.element.toggleTemp(element, true)
+  //     expect(element).toBeVisible()
+  //   })
+  //
+  //   it('returns a function that toggles the element a second time', function() {
+  //     const element = fixture('.element')
+  //     expect(element).toBeVisible()
+  //
+  //     let undo = up.element.toggleTemp(element)
+  //     expect(element).toBeHidden()
+  //
+  //     undo()
+  //     expect(element).toBeVisible()
+  //   })
+  //
+  //   it('does not re-toggle an element that already had the forced visibility', function() {
+  //     const element = fixture('.element')
+  //     expect(element).toBeVisible()
+  //
+  //     let undo = up.element.toggleTemp(element, true)
+  //     expect(element).toBeVisible()
+  //
+  //     undo()
+  //     expect(element).toBeVisible()
+  //   })
+  // })
+
   if (up.migrate.loaded) {
     describe('up.element.toggleClass()', function() {
 
@@ -1080,11 +1132,116 @@ describe('up.element', function() {
     })
   })
 
-  describe('up.element.setTemporaryStyle', function() {
+  describe('up.element.setAttrs()', function() {
+    it('sets properties from the given object as attributes on the given element', function() {
+      let element = document.createElement('div')
+      up.element.setAttrs(element, { 'foo-name': 'foo-value', 'bar-name': 'bar-value' })
+
+      expect(element).toHaveAttribute('foo-name', 'foo-value')
+      expect(element).toHaveAttribute('bar-name', 'bar-value')
+    })
+
+    it('overrides an existing attribute', function() {
+      let element = up.element.createFromSelector('div[foo=original]')
+      expect(element).toHaveAttribute('foo', 'original')
+
+      up.element.setAttrs(element, { 'foo': 'changed' })
+      expect(element).toHaveAttribute('foo', 'changed')
+    })
+
+    it('sets an empty attribute with an empty string as a property value', function() {
+      let element = document.createElement('div')
+      up.element.setAttrs(element, { 'foo': '' })
+
+      expect(element).toHaveAttribute('foo', '')
+    })
+
+    it('removes an attribute when passed a null property value', function() {
+      let element = up.element.createFromSelector('div[foo=original]')
+      expect(element).toHaveAttribute('foo', 'original')
+
+      up.element.setAttrs(element, { 'foo': null })
+      expect(element).not.toHaveAttribute('foo')
+    })
+
+    it('removes an attribute when passed an undefined property value', function() {
+      let element = up.element.createFromSelector('div[foo=original]')
+      expect(element).toHaveAttribute('foo', 'original')
+
+      up.element.setAttrs(element, { 'foo': undefined })
+      expect(element).not.toHaveAttribute('foo')
+    })
+  })
+
+  describe('up.element.setAttrsTemp()', function() {
+
+    it('returns a function that restores the original attribute values', function() {
+      let element = up.element.createFromSelector('div[foo=original]')
+      expect(element).toHaveAttribute('foo', 'original')
+
+      let undo = up.element.setAttrsTemp(element, { 'foo': 'changed' })
+      expect(element).toHaveAttribute('foo', 'changed')
+
+      undo()
+      expect(element).toHaveAttribute('foo', 'original')
+    })
+
+    it('removes an attribute that was not set before the change', function() {
+      let element = up.element.createFromSelector('div')
+      expect(element).not.toHaveAttribute('foo')
+
+      let undo = up.element.setAttrsTemp(element, { 'foo': 'changed' })
+      expect(element).toHaveAttribute('foo', 'changed')
+
+      undo()
+      expect(element).not.toHaveAttribute('foo')
+    })
+
+  })
+
+  describe('up.element.addClassTemp()', function() {
+
+    it('adds the given class to the given element', function() {
+      let element = up.element.createFromSelector('.foo')
+      expect(element.className).toBe('foo')
+
+      up.element.addClassTemp(element, 'bar')
+      expect(element.className).toBe('foo bar')
+    })
+
+    describe('returned function', function() {
+
+      it('restores the class list before the change', function() {
+        let element = up.element.createFromSelector('.foo')
+        expect(element.className).toBe('foo')
+
+        let undo = up.element.addClassTemp(element, 'bar')
+        expect(element.className).toBe('foo bar')
+
+        undo()
+        expect(element.className).toBe('foo')
+      })
+
+      it('does not remove a class that was already present before the change', function() {
+        let element = up.element.createFromSelector('.foo')
+        expect(element.className).toBe('foo')
+
+        let undo = up.element.addClassTemp(element, 'foo')
+        expect(element.className).toBe('foo')
+
+        undo()
+        expect(element.className).toBe('foo')
+      })
+
+    })
+
+  })
+
+  describe('up.element.setStyleTemp()', function() {
 
     it("sets the given inline styles and returns a function that will restore the previous inline styles", function() {
       const div = fixture('div[style="color: red"]')
-      const restore = up.element.setTemporaryStyle(div, { color: 'blue' })
+      const restore = up.element.setStyleTemp(div, { color: 'blue' })
       expect(div.getAttribute('style')).toContain('color: blue')
       expect(div.getAttribute('style')).not.toContain('color: red')
       restore()
@@ -1094,7 +1251,7 @@ describe('up.element', function() {
 
     it("does not restore inherited styles", function() {
       const div = fixture('div[class="red-background"]')
-      const restore = up.element.setTemporaryStyle(div, { 'background-color': 'blue' })
+      const restore = up.element.setStyleTemp(div, { 'background-color': 'blue' })
       expect(div.getAttribute('style')).toContain('background-color: blue')
       restore()
       expect(div.getAttribute('style')).not.toContain('background-color')
@@ -1102,7 +1259,7 @@ describe('up.element', function() {
 
     it("sets and restores the given custom properties as inline styles", function() {
       const div = fixture('div')
-      const restore = up.element.setTemporaryStyle(div, { '--custom-prop': 'custom-value' })
+      const restore = up.element.setStyleTemp(div, { '--custom-prop': 'custom-value' })
 
       expect(div.getAttribute('style')).toContain('--custom-prop: custom-value')
       expect(div.style.getPropertyValue('--custom-prop')).toBe('custom-value')

@@ -2888,15 +2888,10 @@ up.fragment = (function() {
   @param {Element} reference
     The reference element relative to which the new element will be inserted.
 
-  @param {string} position
+  @param {string} [position='beforeend']
     The insert position relative to the `reference` element:
 
-    | Value           | Insert position                                  |
-    |-----------------|--------------------------------------------------|
-    | `'beforebegin'` | Insert before `reference`, as a new sibling.     |
-    | `'afterbegin'`  | Prepend to `reference`, before its first child.  |
-    | `'beforeend'`   | Append to `reference` , after its last child.    |
-    | `'afterend'`    | Insert after `reference`, as a new sibling.      |
+    @include adjacent-positions
 
   @param {Element|string} newElement
     The element to insert.
@@ -2908,12 +2903,32 @@ up.fragment = (function() {
   @return {Function}
     A function that [destroys](/up.destroy) the inserted element and removes it from the DOM.
 
-  @experimental
+  @internal
   */
-  function insertTemp(reference, position, newElement) {
+  function insertTemp(reference, ...args) {
+    let newElement = e.wrap(args.pop())
+    let position = args[0] || 'beforeend'
     reference.insertAdjacentElement(position, newElement)
     up.hello(newElement)
     return () => up.destroy(newElement)
+  }
+
+  /*-
+  @function up.fragment.swapTemp
+  @param {Element} oldElement
+  @param {Element|string} newElement
+  @return {Function}
+    A function that undoes the swap when called.
+  @internal
+  */
+  function swapTemp(oldElement, newElement) {
+    newElement = e.wrap(newElement)
+    oldElement.replaceWith(newElement)
+    up.hello(newElement)
+    return () => {
+      up.script.clean(newElement)
+      newElement.replaceWith(oldElement)
+    }
   }
 
   up.on('up:framework:boot', function() {
@@ -2968,6 +2983,7 @@ up.fragment = (function() {
     compressNestedSteps,
     containsMainPseudo,
     insertTemp,
+    swapTemp,
     // timer: scheduleTimer
   }
 })()

@@ -10598,6 +10598,126 @@ describe 'up.fragment', ->
         element = e.affix(parent, '.element[up-etag=false]')
         expect(up.fragment.etag(element)).toBeUndefined()
 
+    describe 'up.fragment.insertTemp()', ->
+
+      it 'inserts a new element relative to the given reference element', ->
+        reference = fixture('#reference')
+        newElement = document.createElement('div')
+        up.fragment.insertTemp(reference, newElement)
+
+        expect(reference.children[0]).toBe(newElement)
+
+      it 'allows to choose a different position relative to the reference element', ->
+        reference = fixture('#reference')
+        newElement = document.createElement('div')
+        up.fragment.insertTemp(reference, 'beforebegin', newElement)
+
+        expect(reference.previousElementSibling).toBe(newElement)
+
+      it 'compiles the given element', ->
+        reference = fixture('#reference')
+        compilerFunction = jasmine.createSpy('compiler function')
+        up.compiler('my-element', compilerFunction)
+        newElement = document.createElement('my-element')
+        up.fragment.insertTemp(reference, newElement)
+
+        expect(compilerFunction).toHaveBeenCalledWith(newElement, jasmine.anything(), jasmine.anything())
+
+      it 'parses a string of HTML', ->
+        reference = fixture('#reference')
+        newElementHTML = '<my-element></my-element>'
+        up.fragment.insertTemp(reference, newElementHTML)
+
+        expect(reference.children[0]).toBeElement()
+        expect(reference.children[0]).toMatchSelector('my-element')
+
+      describe 'returned undo function', ->
+
+        it 'detaches the element', ->
+          reference = fixture('#reference')
+          newElement = document.createElement('div')
+          undo = up.fragment.insertTemp(reference, newElement)
+
+          expect(newElement).toBeAttached()
+
+          undo()
+
+          expect(newElement).toBeDetached()
+
+        it 'calls destructors on the element', ->
+          reference = fixture('#reference')
+          destructorFunction = jasmine.createSpy('destructor function')
+          up.compiler('my-element', (element) -> destructorFunction)
+          newElement = document.createElement('my-element')
+          undo = up.fragment.insertTemp(reference, newElement)
+
+          expect(destructorFunction).not.toHaveBeenCalled()
+
+          undo()
+
+          expect(destructorFunction).toHaveBeenCalledWith(newElement)
+
+    describe 'up.fragment.swapTemp()', ->
+
+      it 'replaces the reference element with a new element', ->
+        container = fixture('#container')
+        reference = e.affix(container, '#reference')
+        newElement = document.createElement('div')
+        up.fragment.swapTemp(reference, newElement)
+
+        expect(container.children[0]).toBe(newElement)
+        expect(reference).toBeDetached()
+
+      it 'compiles the given element', ->
+        container = fixture('#container')
+        reference = e.affix(container, '#reference')
+        compilerFunction = jasmine.createSpy('compiler function')
+        up.compiler('my-element', compilerFunction)
+        newElement = document.createElement('my-element')
+        up.fragment.swapTemp(reference, newElement)
+
+        expect(compilerFunction).toHaveBeenCalledWith(newElement, jasmine.anything(), jasmine.anything())
+
+      it 'parses a string of HTML', ->
+        container = fixture('#container')
+        reference = e.affix(container, '#reference')
+        newElementHTML = '<my-element></my-element>'
+        up.fragment.swapTemp(reference, newElementHTML)
+
+        expect(container.children[0]).toMatchSelector('my-element')
+        expect(reference).toBeDetached()
+
+      describe 'returned undo function', ->
+
+        it 'replaces the new element with the original reference element', ->
+          container = fixture('#container')
+          reference = e.affix(container, '#reference')
+          newElement = document.createElement('div')
+          undo = up.fragment.swapTemp(reference, newElement)
+
+          expect(newElement).toBeAttached()
+          expect(container.children[0]).toBe(newElement)
+
+          undo()
+
+          expect(newElement).toBeDetached()
+          expect(container.children[0]).toBe(reference)
+
+        it 'calls destructors on the element', ->
+          container = fixture('#container')
+          reference = e.affix(container, '#reference')
+          destructorFunction = jasmine.createSpy('destructor function')
+          up.compiler('my-element', (element) -> destructorFunction)
+          newElement = document.createElement('my-element')
+          undo = up.fragment.swapTemp(reference, newElement)
+
+          expect(destructorFunction).not.toHaveBeenCalled()
+
+          undo()
+
+          expect(destructorFunction).toHaveBeenCalledWith(newElement)
+
+
     describe 'up.fragment.abort()', ->
 
       beforeEach (done) ->

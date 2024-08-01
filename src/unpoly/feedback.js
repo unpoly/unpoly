@@ -159,7 +159,7 @@ up.feedback = (function() {
       for (let currentClass of config.currentClasses) {
         link.classList.toggle(currentClass, isCurrent)
       }
-      e.toggleAttr(link, 'aria-current', 'page', isCurrent)
+      e.setAttrPresence(link, 'aria-current', 'page', isCurrent)
     }
   }
 
@@ -300,7 +300,7 @@ up.feedback = (function() {
     for (let previewFn of previewFns) {
       preview.run(previewFn)
     }
-    u.always(request, () => preview.undo())
+    u.always(request, () => preview.revert())
   }
 
   function getPreviewFns(renderOptions) {
