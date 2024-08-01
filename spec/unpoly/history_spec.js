@@ -396,7 +396,10 @@ describe('up.history', function() {
           const waitForBrowser = 100
           const main = fixture('main#main', {text: 'original content'})
           up.history.config.restoreTargets = [':main']
-          const restoreListener = jasmine.createSpy('up:location:restore listener').and.callFake(() => main.innerText = 'manually restored content')
+          const restoreListener = jasmine.createSpy('up:location:restore listener').and.callFake((event) => {
+            event.preventDefault()
+            main.innerText = 'manually restored content'
+          })
           up.on('up:location:restore', restoreListener)
 
           up.history.push("/page1")

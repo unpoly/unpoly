@@ -301,7 +301,7 @@ up.history = (function() {
 
     let location = currentLocation()
 
-    up.render({
+    up.error.muteUncriticalRejection(up.render({
       guardEvent: up.event.build('up:location:restore', { location, log: `Restoring location ${location}` }),
 
       // The browser has already restored the URL, but hasn't changed content
@@ -336,7 +336,7 @@ up.history = (function() {
       scroll: ['restore', 'auto'],
       saveFocus: false,
       focus: ['restore', 'auto'],
-    })
+    }))
   }
 
   /*-
