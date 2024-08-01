@@ -173,7 +173,17 @@ up.link = (function() {
     A list of CSS selectors matching elements that should behave like links or buttons.
 
     See [Clicking on non-interactive elements](/faux-interactive-elements).
+
     @experimental
+
+  @param {Array<string>} [config.noClickableSelectors]
+    Exceptions to `up.link.config.clickableSelectors`.
+
+    Matching elements will *not* be receive [interactive behavior](/up-follow),
+    even if they match `up.link.config.clickableSelectors`.
+
+    @experimental
+
   @stable
   */
   const config = new up.Config(() => ({
@@ -204,7 +214,8 @@ up.link = (function() {
     // (2) We have some elements like [up-emit] or [up-accept] which may or may not be interactive elements
     // (3) When a link is followable, is should also be clickable. Even a <span up-follow> or a <a up-content>.
     // (4) Prevent unnecessary compilation of elements that are already interactive (a[href], button).
-    clickableSelectors: ['[up-clickable]', `:not(${DEFAULT_INTERACTIVE_ELEMENT}):is([up-follow], [up-emit], [up-accept], [up-dismiss], ${ATTRS_SUGGESTING_FOLLOW})`],
+    clickableSelectors: ['[up-clickable]', '[up-follow]', '[up-emit]', '[up-accept]', '[up-dismiss]', ATTRS_SUGGESTING_FOLLOW],
+    noClickableSelectors: ['[up-clickable=false]', DEFAULT_INTERACTIVE_ELEMENT],
 
     preloadDelay: 90,
   }))
@@ -636,9 +647,6 @@ up.link = (function() {
   }
 
   function makeClickable(element) {
-    // Don't register unnecessary behavior on elements that already have A11Y behavior
-    if (element.matches(DEFAULT_INTERACTIVE_ELEMENT)) return
-
     // We default to a button role, except if the element looks link-ish
     let role = element.matches('a, [up-follow]') ? 'link' : 'button'
 

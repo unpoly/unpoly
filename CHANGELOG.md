@@ -34,6 +34,7 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 - Fix a bug where an overlay with viewport would not correctly shift multiple right-fixed elements
 - Fix smooth scrolling when prepending/appending content
 - Allow smooth scrolling when swapping a fragment
+- Introduce up.link.config.noClickableSelectors and [up-clickable=false]
 
 
 3.8.0

@@ -1060,7 +1060,7 @@ describe('up.event', function() {
       describe('on a non-interactive element', function() {
 
         it('is focusable for keyboard users', function() {
-          const fauxButton = up.hello(fixture("a[up-emit='foo']", {text: 'label'}))
+          const fauxButton = up.hello(fixture("span[up-emit='foo']", {text: 'label'}))
           expect(fauxButton).toBeKeyboardFocusable()
         })
 
@@ -1087,6 +1087,23 @@ describe('up.event', function() {
           Trigger.keySequence(fauxButton, 'Space')
 
           expect(fooListener).toHaveBeenCalled()
+        })
+
+        it('has a pointer cursor as an a:not([href]) element', function() {
+          const fauxButton = up.hello(fixture("a[up-emit='foo']", {text: 'label'}))
+          expect(fauxButton).toHaveCursorStyle('pointer')
+        })
+
+        describe('with [up-clickable=false]', function() {
+          it('has no pointer cursor as an a:not([href]) element', function() {
+            const fauxButton = up.hello(fixture("a[up-emit='foo'][up-clickable='false']", {text: 'label'}))
+            expect(fauxButton).toHaveCursorStyle('auto')
+          })
+
+          it('is not focusable for keyboard users', function() {
+            const fauxButton = up.hello(fixture("a[up-emit='foo'][up-clickable='false']", {text: 'label'}))
+            expect(fauxButton).not.toBeKeyboardFocusable()
+          })
         })
 
       })
