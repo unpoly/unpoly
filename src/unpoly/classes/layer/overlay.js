@@ -260,7 +260,9 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   _onOutsideClicked(event, halt) {
     up.log.putsEvent(event)
     if (halt) up.event.halt(event)
-    this.dismiss(':outside', { origin: event.target })
+    up.error.muteUncriticalSync(() =>
+      this.dismiss(':outside', { origin: event.target })
+    )
   }
 
   onEscapePressed(event) {
@@ -276,7 +278,9 @@ up.Layer.Overlay = class Overlay extends up.Layer {
         field.blur()
       } else if (this._supportsDismissMethod('key')) {
         up.event.halt(event, { log: true })
-        this.dismiss(':key')
+        up.error.muteUncriticalSync(() =>
+          this.dismiss(':key')
+        )
       }
     }
   }
@@ -306,7 +310,9 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     if (!eventTypes) { return }
     return this.on(eventTypes, event => {
       event.preventDefault()
-      closeFn.call(this, event, { response: event.response })
+      up.error.muteUncriticalSync(() =>
+        closeFn.call(this, event, { response: event.response })
+      )
     })
   }
 
@@ -325,7 +331,9 @@ up.Layer.Overlay = class Overlay extends up.Layer {
       // '/decks/:deckId/cards/:cardId' is matched against
       // '/decks/123/cards/456' resolution is { deckId: 123, cardId: 456 }.
       const closeValue = { ...resolution, location }
-      closeFn.call(this, closeValue, options)
+      up.error.muteUncriticalSync(() =>
+        closeFn.call(this, closeValue, options)
+      )
     }
   }
 

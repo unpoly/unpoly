@@ -35,7 +35,8 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 - Fix smooth scrolling when prepending/appending content
 - Allow smooth scrolling when swapping a fragment
 - Introduce up.link.config.noClickableSelectors and [up-clickable=false]
-- Mute an error `AbortError: Rendering was prevented by up:location:restore listener` when up:location:restore is prevented
+- Mute an error `Uncaught AbortError: Rendering was prevented by up:location:restore listener` when the user presses the back button and up:location:restore is prevented
+- Mute an error `Uncaught AbortError: Close event was prevented` when up:layer:dimiss or up:layer:accept is prevented, but was not triggered by a JavaScript function
 
 
 3.8.0

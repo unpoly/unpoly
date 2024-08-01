@@ -657,6 +657,19 @@ describe 'up.layer', ->
                   jasmine.anything()
                 )
 
+            it 'does not emit a global error if the button is clicked and up:layer:dismiss is prevented', ->
+              up.layer.open(dismissable: 'button', mode: 'modal')
+              up.on('up:layer:dismiss', (event) -> event.preventDefault())
+
+              await wait()
+
+              await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+                buttonElement = up.fragment.get('up-modal-dismiss')
+                Trigger.clickSequence(buttonElement, { clientX: 0, clientY: 0 })
+
+                await wait()
+                expect(globalErrorSpy).not.toHaveBeenCalled()
+
             it 'returns focus to the link that opened the overlay, hiding a focus ring as it is a mouse interaction', ->
               opener = fixture('a[href="/overlay"][up-layer="new"][up-target="#content"][up-dismissable="button"]')
               Trigger.clickSequence(opener)
@@ -705,7 +718,7 @@ describe 'up.layer', ->
 
           describe 'with { dismissable: "key" }', ->
 
-            it 'lets the user close the layer by pressing escape', asyncSpec (next) ->
+            it 'lets the user close the layer by pressing Escape', asyncSpec (next) ->
               up.layer.open(dismissable: "key")
 
               next ->
@@ -715,6 +728,18 @@ describe 'up.layer', ->
 
               next ->
                 expect(up.layer.isOverlay()).toBe(false)
+
+            it 'does not emit a global error when Escape is pressed and up:layer:dismiss is prevented', ->
+              up.layer.open(dismissable: "key")
+              up.on('up:layer:dismiss', (event) -> event.preventDefault())
+
+              await wait()
+
+              await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+                Trigger.escapeSequence(document.body)
+
+                await wait()
+                expect(globalErrorSpy).not.toHaveBeenCalled()
 
             it 'returns focus to the link that opened the overlay, showing a focus ring as it is a keyboard interaction', ->
               opener = fixture('a[href="/overlay"][up-target="#content"][up-layer="new"][up-dismissable="key"]')
@@ -803,6 +828,19 @@ describe 'up.layer', ->
                     jasmine.anything(),
                     jasmine.anything()
                   )
+
+              it 'does not emit a global error when the viewport is clicked and up:layer:dismiss is prevented', ->
+                up.layer.open(dismissable: "outside", mode: 'modal')
+                up.on('up:layer:dismiss', (event) -> event.preventDefault())
+
+                await wait()
+
+                await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+                  viewportElement = up.layer.current.viewportElement
+                  Trigger.clickSequence(viewportElement, { clientX: 0, clientY: 0 })
+
+                  await wait()
+                  expect(globalErrorSpy).not.toHaveBeenCalled()
 
               it 'does not dismiss the overlay when the user clicks on the parent layer, but within a foreign overlay', asyncSpec (next) ->
                 up.layer.config.foreignOverlaySelectors = ['.foreign-overlay']
@@ -1103,17 +1141,17 @@ describe 'up.layer', ->
 
         describe '{ dismissEvent }', ->
 
-          it 'dismisses the layer when an event of the given type was emitted on the layer', asyncSpec (next) ->
+          it 'dismisses the layer when an event of the given type was emitted on the layer', ->
             callback = jasmine.createSpy('onDismissed callback')
             up.layer.open({ onDismissed: callback, dismissEvent: 'foo' })
+            await wait()
 
-            next ->
-              expect(callback).not.toHaveBeenCalled()
+            expect(callback).not.toHaveBeenCalled()
 
-              up.layer.emit('foo')
+            up.layer.emit('foo')
+            await wait()
 
-            next ->
-              expect(callback).toHaveBeenCalled()
+            expect(callback).toHaveBeenCalled()
 
           it 'uses the event object as the dismissal value', asyncSpec (next) ->
             fooEvent = up.event.build('foo')
@@ -1153,6 +1191,20 @@ describe 'up.layer', ->
 
             next ->
               expect(callback).toHaveBeenCalled()
+
+          it 'does emit a global error when an event of the given type was emitted on the layer and up:layer:dismiss is prevented', ->
+            up.on('up:layer:dismiss', (event) => event.preventDefault())
+
+            up.layer.open({ dismissEvent: 'foo' })
+            await wait()
+
+            await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+              up.layer.emit('foo')
+              await wait()
+
+              expect(up.layer.isOverlay()).toBe(true)
+              expect(globalErrorSpy).not.toHaveBeenCalled()
+
 
         describe '{ acceptLocation }', ->
 
@@ -2130,6 +2182,20 @@ describe 'up.layer', ->
         Trigger.clickSequence(link)
 
         expect(overlay.accept).toHaveBeenCalledWith(undefined, jasmine.objectContaining(animation: 'move-to-right', duration: 654))
+
+      it 'does not emit a global error when clicked and up:layer:accept is prevented', ->
+        up.on('up:layer:accept', (event) -> event.preventDefault())
+
+        makeLayers(2)
+
+        expect(up.layer.isOverlay()).toBe(true)
+        link = up.layer.affix('a[href="#"][up-accept]')
+        Trigger.clickSequence(link)
+
+        await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+          await wait()
+          expect(up.layer.isOverlay()).toBe(true)
+          expect(globalErrorSpy).not.toHaveBeenCalled()
 
       describe 'with [up-confirm]', ->
 

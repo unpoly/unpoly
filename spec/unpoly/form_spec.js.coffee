@@ -3307,7 +3307,7 @@ describe 'up.form', ->
           Trigger.change(field)
 
           await wait()
-          expect(globalErrorSpy).not.toHaveBeenCalledWith()
+          expect(globalErrorSpy).not.toHaveBeenCalled()
 
       it 'runs the callback only once for multiple changes in the same task', asyncSpec (next) ->
         $form = $fixture('form')
