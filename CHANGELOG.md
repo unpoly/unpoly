@@ -8,8 +8,8 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
-3.9.0
------
+3.9.0 (unreleased)
+------------------
 
 - Making non-interactive elements behave like hyperlink requires [up-follow] in addition to [up-href].
 - Links with just [up-instant] are no longer followable by default. They also require [up-follow]
@@ -29,7 +29,11 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 - [up-poll] supports [up-headers]
 - New doc page "Clicking non-interactive elements"
 - Listeners to up:fragment:poll can now inspect or mutate event.renderOptions
-
+- Don't focus submit button when submitting with Enter in a focused field
+- up.submit() includes default submit button in params. Can be prevented with up.submit(form, { submitButton: false })
+- Fix a bug where an overlay with viewport would not correctly shift multiple right-fixed elements
+- Fix smooth scrolling when prepending/appending content
+- Allow smooth scrolling when swapping a fragment
 
 
 3.8.0
