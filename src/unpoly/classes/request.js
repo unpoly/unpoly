@@ -367,8 +367,6 @@ up.Request = class Request extends up.Record {
     //     the timer logic for up:network:late/:recover gets inconvenient edge cases.
     this.badResponseTime ??= u.evalOption(up.network.config.badResponseTime, this)
 
-    this.addSettleListener = u.cleaner()
-
     this._setAutoHeaders()
   }
 
@@ -681,12 +679,10 @@ up.Request = class Request extends up.Record {
   }
 
   _resolve(response) {
-    this.addSettleListener.clean()
     this._deferred.resolve(response)
   }
 
   _reject(responseOrError) {
-    this.addSettleListener.clean()
     this._deferred.reject(responseOrError)
   }
 

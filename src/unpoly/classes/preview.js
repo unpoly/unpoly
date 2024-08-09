@@ -15,6 +15,8 @@ up.Preview = class Preview {
 
   get fragment() {
     if (this.layer !== 'new') {
+      // For new layers, the request will bind to the main element of the base layer.
+      // This is not what we want to expose as a (potentially swappable) target fragment in a preview.
       return this.request.fragment
     }
   }
@@ -29,12 +31,6 @@ up.Preview = class Preview {
 
   get layer() {
     return this.renderOptions.layers[0]
-    // // TODO: Is this work really not done anywhere else already?
-    // if (this.renderOptions.layer === 'new') {
-    //   return 'new'
-    // } else {
-    //   return this.request.layer
-    // }
   }
 
   run(fn) {
