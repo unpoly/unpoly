@@ -621,8 +621,6 @@ describe('up.feedback', function() {
 
         await wait()
 
-        console.debug("spec: expectation on .up-loading")
-
         expect('.target').toHaveClass('up-loading')
       })
 

@@ -471,28 +471,10 @@ up.form = (function() {
     }
   }
 
-  let disableCount = 0
-
   function disableWhile(request, options) {
-    disableCount++
-
-    let myDisableCount = disableCount
-
-    console.debug(`disableWhile %s start`, myDisableCount)
-    let undoDisableOrig = handleDisableOption(options)
-
-    let undoDisable = function() {
-      console.debug(`disableWhile %s stop`, myDisableCount)
-      undoDisableOrig()
-    }
+    let undoDisable = handleDisableOption(options)
 
     u.always(request, undoDisable)
-
-    // if (request instanceof up.Request) {
-    //   request.addSettleListener(undoDisable)
-    // } else {
-    //   u.always(request, undoDisable)
-    // }
   }
 
   function handleDisableOption({ disable, origin }) {

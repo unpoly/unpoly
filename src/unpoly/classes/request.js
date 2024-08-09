@@ -369,11 +369,7 @@ up.Request = class Request extends up.Record {
 
     this.addSettleListener = u.cleaner()
 
-    // this.uid = u.uid()
-
     this._setAutoHeaders()
-
-    console.debug("Constructed new request to %o", this.method)
   }
 
   /*-
@@ -643,8 +639,6 @@ up.Request = class Request extends up.Record {
   @experimental
   */
   abort({ reason } = {}) {
-    console.debug("up.Request#abort()")
-
     // _setAbortedState() must be called before xhr.abort(), since xhr's event handlers
     // will call _setAbortedState() a second time, without a message.
     if (this._setAbortedState(reason) && this._xhr) {

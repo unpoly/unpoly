@@ -2182,13 +2182,10 @@ describe 'up.form', ->
           group = e.affix(form, '[up-form-group]')
           input = e.affix(group, 'input[name=email]')
 
-          console.debug("spec: before up.validate()")
           up.validate(input)
-          console.debug("spec: after up.validate()")
 
           next ->
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('[up-form-group]:has(input[name="email"])')
-            console.debug("spec: asserting up-loading class")
             expect(group).toHaveClass('up-loading')
 
             jasmine.respondWithSelector('[up-form-group] input[name="email"]')

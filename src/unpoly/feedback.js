@@ -294,23 +294,13 @@ up.feedback = (function() {
   @stable
   */
 
-  let feedbackCount = 0
-
   function showAroundRequest(request, renderOptions) {
-    feedbackCount++
-    let myFeedbackCount = feedbackCount
     let preview = new up.Preview({ request, renderOptions: u.copy(renderOptions) })
     let previewFns = getPreviewFns(renderOptions)
     for (let previewFn of previewFns) {
-      console.debug(`showAroundRequest #${myFeedbackCount} start`)
       preview.run(previewFn)
     }
-    u.always(request, () => {
-      console.debug(`showAroundRequest #${myFeedbackCount} stop`)
-      preview.revert()
-    })
-    // request.addSettleListener(() => preview.revert())
-
+    u.always(request, () => preview.revert())
   }
 
   function getPreviewFns(renderOptions) {

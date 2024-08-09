@@ -14,16 +14,7 @@ up.Change.FromURL = class FromURL extends up.Change {
 
     this.request = up.request(this._getRequestAttrs())
     // Used by up.RenderJob to delay aborting until a new request instance is known
-
-    console.debug("onRequest() will abort? %o", this.options.onRequest)
-
     this.options.onRequest?.(this.request)
-
-    // await queueMicrotask(u.noop)
-    // await queueMicrotask(u.noop)
-    // await queueMicrotask(u.noop)
-    // await queueMicrotask(u.noop)
-    // await queueMicrotask(u.noop)
 
     if (this.options.preload) {
       return this.request
@@ -39,18 +30,15 @@ up.Change.FromURL = class FromURL extends up.Change {
   }
 
   async _considerPreviews() {
-    console.debug("u.waitMicrotasks(10) before")
+    // We must ensure that aborted previews have reverted before we run another preview.
+    // The timing here is complicated. Even though onRequest() above has aborted the request,
+    // any preview-reverting catch() handlers that await request rejection will take some
+    // microtasks to execute.
     await u.waitMicrotasks(4)
-    console.debug("u.waitMicrotasks(10) after")
 
     if (!this.request._isSettled()) {
-      console.debug("considerPreviews: request is NOT settled")
-
-      // TODO: Don't do this work if we're rendering a cached request
       up.form.disableWhile(this.request, this.options)
       up.feedback.showAroundRequest(this.request, this.options)
-    } else {
-      console.debug("considerPreviews: request WAS settled")
     }
   }
 
