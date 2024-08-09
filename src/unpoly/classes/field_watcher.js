@@ -16,7 +16,7 @@ up.FieldWatcher = class FieldWatcher {
     this._processedValues = this._readFieldValues()
     this._currentTimer = null
     this._callbackRunning = false
-    this._unbindFns = []
+    this._cleaner = u.cleaner()
 
     this._watchFieldsWithin(this._root)
 
@@ -24,18 +24,18 @@ up.FieldWatcher = class FieldWatcher {
       if (target !== this._root) this._watchFieldsWithin(target)
     })
 
-    this._unbindFns.push(
+    this._cleaner(
       up.fragment.onAborted(this._scope, () => this._abort())
     )
 
-    this._unbindFns.push(
+    this._cleaner(
       up.on(this._scope, 'reset', () => this._onFormReset())
     )
   }
 
   stop() {
     this._abort()
-    for (let unbindFn of this._unbindFns) unbindFn()
+    this._cleaner.clean()
   }
 
   _fieldOptions(field) {
@@ -51,7 +51,7 @@ up.FieldWatcher = class FieldWatcher {
 
   _watchField(field) {
     let fieldOptions = this._fieldOptions(field)
-    this._unbindFns.push(
+    this._cleaner(
       up.on(field, fieldOptions.event, () => this._check(fieldOptions))
     )
   }

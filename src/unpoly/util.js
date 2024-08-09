@@ -2030,6 +2030,9 @@ up.util = (function() {
 
     api.clean = function(...args) {
       let fn
+      // Popping instead have sequence(..args) has two (theoretical) advantages:
+      // (1) We're cleaning in the reverse order, which may be useful for previews
+      // (2) Should a callback schedule more cleanup tasks, we will also clean that.
       while (fn = fns.pop()) fn(...args)
     }
 
