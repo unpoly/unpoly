@@ -40,7 +40,7 @@ up.Change.FromURL = class FromURL extends up.Change {
 
   async _considerPreviews() {
     console.debug("u.waitMicrotasks(10) before")
-    await u.waitMicrotasks(10)
+    await u.waitMicrotasks(4)
     console.debug("u.waitMicrotasks(10) after")
 
     if (!this.request._isSettled()) {

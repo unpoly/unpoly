@@ -614,52 +614,55 @@ describe('up.feedback', function() {
 
     describe('.up-loading', function() {
 
-      it('gives the loading element an .up-loading class', asyncSpec(function(next) {
+      it('gives the loading element an .up-loading class', async function() {
         fixture('.target')
 
         up.render('.target', {url: '/path', feedback: true})
 
-        next(() => expect('.target').toHaveClass('up-loading'))
-      })
-      )
+        await wait()
 
-      it('does not assign the .up-loading class when preloading', asyncSpec(function(next) {
+        console.debug("spec: expectation on .up-loading")
+
+        expect('.target').toHaveClass('up-loading')
+      })
+
+      it('does not assign the .up-loading class when preloading', async function() {
         fixture('.target')
 
         up.render('.target', {url: '/path', feedback: true, preload: true})
+        await wait()
 
-        next(() => expect('.target').not.toHaveClass('up-loading'))
+        expect('.target').not.toHaveClass('up-loading')
       })
-      )
 
-      it('does not assign the .up-loading class without a { feedback } option', asyncSpec(function(next) {
+      it('does not assign the .up-loading class without a { feedback } option', async function() {
         fixture('.target')
 
         up.render('.target', {url: '/path'})
 
-        next(() => expect('.target').not.toHaveClass('up-loading'))
-      })
-      )
+        await wait()
 
-      it('removes the .up-loading class when the fragment was updated', asyncSpec(function(next) {
+        expect('.target').not.toHaveClass('up-loading')
+      })
+
+      it('removes the .up-loading class when the fragment was updated', async function() {
         fixture('.target')
 
         up.render('.target', {url: '/path', feedback: true})
 
-        next(function() {
-          expect('.target').toHaveClass('up-loading')
+        await wait()
 
-          jasmine.respondWithSelector('.target', {text: 'new text'})
-        })
+        expect('.target').toHaveClass('up-loading')
 
-        next(function() {
-          expect('.target').toHaveText('new text')
-          expect('.target').not.toHaveClass('up-loading')
-        })
+        jasmine.respondWithSelector('.target', {text: 'new text'})
+
+        await wait()
+
+        expect('.target').toHaveText('new text')
+        expect('.target').not.toHaveClass('up-loading')
       })
-      )
 
-      it('removes the .up-loading class when another fragment was updated due to a failed response', asyncSpec(async function(next) {
+      it('removes the .up-loading class when another fragment was updated due to a failed response', async function() {
         fixture('.target')
         fixture('.fail-target')
 
@@ -676,7 +679,6 @@ describe('up.feedback', function() {
         expect('.target').not.toHaveClass('up-loading')
         expect('.fail-target').not.toHaveClass('up-loading')
       })
-      )
 
       it('assigns .load-loading on the correct element if a guard event listeners changes target', async function() {
         fixture('#foo', {text: 'old foo'})
