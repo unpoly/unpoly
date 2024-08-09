@@ -270,6 +270,65 @@ describe('up.script', function() {
       })
     }
 
+    describe('up.destructor()', function() {
+
+      it('registers a function that runs when the element is cleaned', function() {
+        let destructorSpy = jasmine.createSpy('destructor function')
+        let element = fixture('.element')
+
+        up.destructor(element, destructorSpy)
+
+        expect(destructorSpy).not.toHaveBeenCalled()
+
+        up.script.clean(element)
+
+        expect(destructorSpy).toHaveBeenCalled()
+      })
+
+      it('appends to an existing list of destructor functions', function() {
+        let destructorSpy1 = jasmine.createSpy('destructor 1')
+        let destructorSpy2 = jasmine.createSpy('destructor 2')
+        let element = fixture('.element')
+
+        up.destructor(element, destructorSpy1)
+        up.destructor(element, destructorSpy2)
+
+        expect(destructorSpy1).not.toHaveBeenCalled()
+        expect(destructorSpy2).not.toHaveBeenCalled()
+
+        up.script.clean(element)
+
+        expect(destructorSpy1).toHaveBeenCalled()
+        expect(destructorSpy2).toHaveBeenCalled()
+      })
+
+      it('registers an array of destructor functions at functions', function() {
+        let destructorSpy1 = jasmine.createSpy('destructor 1')
+        let destructorSpy2 = jasmine.createSpy('destructor 2')
+        let element = fixture('.element')
+
+        up.destructor(element, [destructorSpy1, destructorSpy2])
+
+        expect(destructorSpy1).not.toHaveBeenCalled()
+        expect(destructorSpy2).not.toHaveBeenCalled()
+
+        up.script.clean(element)
+
+        expect(destructorSpy1).toHaveBeenCalled()
+        expect(destructorSpy2).toHaveBeenCalled()
+      })
+
+      it('does not set an .up-can-clean class when no functions are passed', function() {
+        let element = fixture('.element')
+
+        // This may happen if a compiler returns no value.
+        up.destructor(element, undefined)
+
+        expect(element.className).toBe('element')
+      })
+
+    })
+
     describe('up.data()', function() {
 
       describe('when the element has an [up-data] attribute', function() {

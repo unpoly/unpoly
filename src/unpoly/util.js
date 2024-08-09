@@ -2012,12 +2012,16 @@ up.util = (function() {
   //   return () => Object.assign(target, oldProps)
   // }
 
+  function scanFunctions(...values) {
+    return values.flat().filter(isFunction)
+  }
+
   function cleaner() {
     let fns = []
 
     let track = function(values, transform) {
-      values = values.flat().filter(isFunction).map(transform)
-      fns.push(...values)
+      values = scanFunctions(...values).map(transform)
+      fns.push(...scanFunctions(...values))
     }
 
     let api = function(...values) {
@@ -2037,16 +2041,6 @@ up.util = (function() {
     }
 
     return api
-  }
-
-  function nextTick(callback) {
-    const channel = new MessageChannel()
-    channel.port1.onmessage = callback
-    channel.port2.postMessage(undefined)
-  }
-
-  function whenNextTick() {
-    return new Promise(nextTick)
   }
 
   async function waitMicrotasks(count = 1) {
@@ -2158,8 +2152,7 @@ up.util = (function() {
     // groupBy,
     variant,
     cleaner,
-    nextTick,
-    whenNextTick,
     waitMicrotasks,
+    scanFunctions,
   }
 })()

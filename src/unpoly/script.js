@@ -480,9 +480,11 @@ up.script = (function() {
   @stable
   */
   function registerDestructor(element, destructor) {
+    let fns = u.scanFunctions(destructor)
+    if (!fns.length) return
+
     let registry = (element.upDestructors ||= buildDestructorRegistry(element))
-    // TODO: We should not build a registry (or add .up.can-clean) when we're not going to register a destructor
-    registry.guard(destructor)
+    registry.guard(fns)
   }
 
   function buildDestructorRegistry(element) {
