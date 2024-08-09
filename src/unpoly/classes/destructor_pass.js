@@ -13,6 +13,7 @@ up.DestructorPass = class DestructorPass {
       // In the case of [up-keep] elements we may run on a clone that is [up-keep]
       // but has no { upDestructors } property.
       let registry = u.pluckKey(cleanable, 'upDestructors')
+      console.debug("DestructorPass: registry.clean(%o)", cleanable)
       registry?.clean(cleanable)
     }
   }

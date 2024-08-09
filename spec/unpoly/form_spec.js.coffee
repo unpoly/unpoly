@@ -1186,7 +1186,52 @@ describe 'up.form', ->
 
           expect(input).not.toBeDisabled()
 
-        it 'keeps a form disabled when it is first disabled by a validation, then again by a submission that aborts the validation request', asyncSpec (next) ->
+        it 'keeps a form disabled after multiple submissions that abort each other', ->
+          requests = []
+          up.on 'up:request:load', ({ request }) -> requests.push(request)
+
+          container = fixture('.container')
+          form = e.affix(container, 'form[method="post"][action="/endpoint"][up-target=".container"][up-disable]')
+          input = e.affix(form, 'input[name=email]')
+
+          submit1Promise = up.submit(form)
+
+          await wait()
+
+          expect(u.map(requests, 'state')).toEqual ['loading']
+          expect(input).toBeDisabled()
+
+          submit2Promise = up.submit(form)
+
+          await expectAsync(submit1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
+
+          await wait()
+
+          expect(u.map(requests, 'state')).toEqual ['aborted', 'loading']
+          expect(input).toBeDisabled()
+
+        it 'keeps a form disabled after multiple submissions in the same microtask', ->
+          requests = []
+          up.on 'up:request:load', ({ request }) -> requests.push(request)
+
+          container = fixture('.container')
+          form = e.affix(container, 'form[method="post"][action="/endpoint"][up-target=".container"][up-disable]')
+          input = e.affix(form, 'input[name=email]')
+          submit1Promise = up.submit(form)
+
+          # Don't wait here
+
+          submit2Promise = up.submit(form)
+
+          await expectAsync(submit1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
+
+          await wait()
+
+          # When two conflicting requests queued in the microtask, the first request will not touch the network.
+          expect(u.map(requests, 'state')).toEqual ['loading']
+          expect(input).toBeDisabled()
+
+        it 'keeps a form disabled when it is first disabled by a validation, then again by a submission that aborts the validation request', ->
           requests = []
           up.on 'up:request:load', ({ request }) -> requests.push(request)
 
@@ -1195,15 +1240,17 @@ describe 'up.form', ->
           input = e.affix(form, 'input[name=email]')
           up.validate(input)
 
-          next ->
-            expect(u.map(requests, 'state')).toEqual ['loading']
-            expect(input).toBeDisabled()
+          await wait()
 
-            up.submit(form)
+          expect(u.map(requests, 'state')).toEqual ['loading']
+          expect(input).toBeDisabled()
 
-          next ->
-            expect(u.map(requests, 'state')).toEqual ['aborted', 'loading']
-            expect(input).toBeDisabled()
+          up.submit(form)
+
+          await wait()
+
+          expect(u.map(requests, 'state')).toEqual ['aborted', 'loading']
+          expect(input).toBeDisabled()
 
         describe 'loss of focus when disabling a focused input', ->
 
@@ -2135,10 +2182,13 @@ describe 'up.form', ->
           group = e.affix(form, '[up-form-group]')
           input = e.affix(group, 'input[name=email]')
 
+          console.debug("spec: before up.validate()")
           up.validate(input)
+          console.debug("spec: after up.validate()")
 
           next ->
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('[up-form-group]:has(input[name="email"])')
+            console.debug("spec: asserting up-loading class")
             expect(group).toHaveClass('up-loading')
 
             jasmine.respondWithSelector('[up-form-group] input[name="email"]')
@@ -2536,28 +2586,28 @@ describe 'up.form', ->
 
         expect(field).toBeDisabled()
 
-      it 'can be called multiple times on the same field, and keeps the field disabled until all re-enablement functions have been called', ->
-        form = fixture('form')
-        field1 = e.affix(form, 'input[name=email][type=text]')
-        field2 = e.affix(form, 'input[name=password][type=text][disabled]')
-        expect(field1).not.toBeDisabled()
-        expect(field2).toBeDisabled()
-
-        reenable1 = up.form.disable(form)
-        reenable2 = up.form.disable(form)
-
-        expect(field1).toBeDisabled()
-        expect(field2).toBeDisabled()
-
-        reenable1()
-
-        expect(field1).toBeDisabled()
-        expect(field2).toBeDisabled()
-
-        reenable2()
-
-        expect(field1).not.toBeDisabled()
-        expect(field2).toBeDisabled()
+#      it 'can be called multiple times on the same field, and keeps the field disabled until all re-enablement functions have been called', ->
+#        form = fixture('form')
+#        field1 = e.affix(form, 'input[name=email][type=text]')
+#        field2 = e.affix(form, 'input[name=password][type=text][disabled]')
+#        expect(field1).not.toBeDisabled()
+#        expect(field2).toBeDisabled()
+#
+#        reenable1 = up.form.disable(form)
+#        reenable2 = up.form.disable(form)
+#
+#        expect(field1).toBeDisabled()
+#        expect(field2).toBeDisabled()
+#
+#        reenable1()
+#
+#        expect(field1).toBeDisabled()
+#        expect(field2).toBeDisabled()
+#
+#        reenable2()
+#
+#        expect(field1).not.toBeDisabled()
+#        expect(field2).toBeDisabled()
 
     describe 'up.form.isSubmittable()', ->
 

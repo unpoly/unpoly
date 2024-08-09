@@ -170,7 +170,7 @@ up.Request.Cache = class Cache {
       // Copy terminal state like 'offline' or 'aborted'
       newRequest.state = existingRequest.state
       // If we did not get an up.Response, it must be an error
-      newRequest.deferred.reject(value)
+      newRequest._reject(value)
     }
   }
 

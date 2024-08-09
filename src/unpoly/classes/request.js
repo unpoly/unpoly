@@ -358,8 +358,8 @@ up.Request = class Request extends up.Record {
 
     // This up.Request object is also promise for its up.Response.
     // We delegate all promise-related methods (then, catch, finally) to an internal
-    // deferred object.
-    this.deferred = u.newDeferred()
+    // _deferred object.
+    this._deferred = u.newDeferred()
 
     // (1) We want to set the default after all other properties are initialized,
     //     in case up.network.config.badResponseTime is a function that inspects this request.
@@ -367,9 +367,13 @@ up.Request = class Request extends up.Record {
     //     the timer logic for up:network:late/:recover gets inconvenient edge cases.
     this.badResponseTime ??= u.evalOption(up.network.config.badResponseTime, this)
 
+    this.addSettleListener = u.cleaner()
+
     // this.uid = u.uid()
 
     this._setAutoHeaders()
+
+    console.debug("Constructed new request to %o", this.method)
   }
 
   /*-
@@ -639,6 +643,8 @@ up.Request = class Request extends up.Record {
   @experimental
   */
   abort({ reason } = {}) {
+    console.debug("up.Request#abort()")
+
     // _setAbortedState() must be called before xhr.abort(), since xhr's event handlers
     // will call _setAbortedState() a second time, without a message.
     if (this._setAbortedState(reason) && this._xhr) {
@@ -651,7 +657,7 @@ up.Request = class Request extends up.Record {
 
     let message = 'Aborted request to ' + this.description + (reason ? ': ' + reason : '')
     this.state = 'aborted'
-    this.deferred.reject(new up.Aborted(message))
+    this._reject(new up.Aborted(message))
     this.emit('up:request:aborted', { log: message })
 
     // Return true so callers know we didn't return early without actually aborting anything.
@@ -664,7 +670,7 @@ up.Request = class Request extends up.Record {
     let message = 'Cannot load request to ' + this.description + (reason ? ': ' + reason : '')
     this.state = 'offline'
     this.emit('up:request:offline', { log: message })
-    this.deferred.reject(new up.Offline(message))
+    this._reject(new up.Offline(message))
   }
 
   respondWith(response) {
@@ -674,10 +680,20 @@ up.Request = class Request extends up.Record {
     this.state = 'loaded'
 
     if (response.ok) {
-      this.deferred.resolve(response)
+      this._resolve(response)
     } else {
-      this.deferred.reject(response)
+      this._reject(response)
     }
+  }
+
+  _resolve(response) {
+    this.addSettleListener.clean()
+    this._deferred.resolve(response)
+  }
+
+  _reject(responseOrError) {
+    this.addSettleListener.clean()
+    this._deferred.reject(responseOrError)
   }
 
   _isSettled() {
@@ -891,6 +907,6 @@ up.Request = class Request extends up.Record {
   */
   static {
     // A request is also a promise ("thenable") for its response.
-    u.delegate(this.prototype, ['then', 'catch', 'finally'], function() { return this.deferred })
+    u.delegate(this.prototype, ['then', 'catch', 'finally'], function() { return this._deferred })
   }
 }

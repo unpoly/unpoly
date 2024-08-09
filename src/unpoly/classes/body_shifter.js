@@ -65,8 +65,6 @@ up.BodyShifter = class BodyShifter {
     // viewport.sass wants to add the scrollbar with to the value, so we store it in a separate property.
     let originalValue = e.style(element, styleProp)
 
-    console.debug("setting temporary style")
-
     this._cleaner(
       e.setStyleTemp(element, { ['--up-original-' + styleProp]: originalValue }),
       e.addClassTemp(element, SHIFT_CLASS),

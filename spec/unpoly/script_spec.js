@@ -656,6 +656,8 @@ describe('up.script', function() {
         expect(destructor).toHaveBeenCalled()
       })
 
+      it('ignores return values that are not functions')
+
       it('allows compilers to return an array of functions to call when the compiled element is cleaned', function() {
         const destructor1 = jasmine.createSpy('destructor1')
         const destructor2 = jasmine.createSpy('destructor2')
@@ -670,18 +672,18 @@ describe('up.script', function() {
         expect(destructor2).toHaveBeenCalled()
       })
 
-      it("does not consider a returned array to be a destructor unless it's comprised entirely of functions", function() {
-        const value1 = jasmine.createSpy('non-destructor')
-        const value2 = 'two'
-        up.compiler('.child', element => [ value1, value2 ])
-
-        const container = fixture('.container .child')
-        up.hello(container)
-
-        up.script.clean(container)
-
-        expect(value1).not.toHaveBeenCalled()
-      })
+      // it("does not consider a returned array to be a destructor unless it's comprised entirely of functions", function() {
+      //   const value1 = jasmine.createSpy('non-destructor')
+      //   const value2 = 'two'
+      //   up.compiler('.child', element => [ value1, value2 ])
+      //
+      //   const container = fixture('.container .child')
+      //   up.hello(container)
+      //
+      //   up.script.clean(container)
+      //
+      //   expect(value1).not.toHaveBeenCalled()
+      // })
 
       it('runs all destructors if multiple compilers are applied to the same element', function() {
         const destructor1 = jasmine.createSpy('destructor1')

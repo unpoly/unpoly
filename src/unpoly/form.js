@@ -453,10 +453,11 @@ up.form = (function() {
     let focusedElement = document.activeElement
     let focusFallback
     let controls = [...findFields(container), ...findSubmitButtons(container)]
+    controls = u.reject(controls, 'disabled')
 
     for (let control of controls) {
       if (control === focusedElement) focusFallback = findGroup(focusedElement)
-      raiseDisableStack(control)
+      control.disabled = true
     }
 
     if (focusFallback) {
@@ -464,29 +465,34 @@ up.form = (function() {
     }
 
     return function() {
-      controls.forEach(lowerDisableStack)
+      for (let control of controls) {
+        control.disabled = false
+      }
     }
   }
 
-  function raiseDisableStack(control) {
-    if (!control.upDisableCount) {
-      control.upDisableCount ||= 0
-      control.upOriginalDisabled = control.disabled
+  let disableCount = 0
+
+  function disableWhile(request, options) {
+    disableCount++
+
+    let myDisableCount = disableCount
+
+    console.debug(`disableWhile %s start`, myDisableCount)
+    let undoDisableOrig = handleDisableOption(options)
+
+    let undoDisable = function() {
+      console.debug(`disableWhile %s stop`, myDisableCount)
+      undoDisableOrig()
     }
 
-    control.upDisableCount++
-    control.disabled = true
-  }
+    u.always(request, undoDisable)
 
-  function lowerDisableStack(control) {
-    if (!(--control.upDisableCount)) {
-      control.disabled = control.upOriginalDisabled
-    }
-  }
-
-  function disableWhile(promise, options) {
-    let undoDisable = handleDisableOption(options)
-    u.always(promise, undoDisable)
+    // if (request instanceof up.Request) {
+    //   request.addSettleListener(undoDisable)
+    // } else {
+    //   u.always(request, undoDisable)
+    // }
   }
 
   function handleDisableOption({ disable, origin }) {

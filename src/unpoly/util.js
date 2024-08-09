@@ -2015,16 +2015,41 @@ up.util = (function() {
   function cleaner() {
     let fns = []
 
-    let api = function(...values) {
-      values = values.flat().filter(isFunction)
+    let track = function(values, transform) {
+      values = values.flat().filter(isFunction).map(transform)
       fns.push(...values)
+    }
+
+    let api = function(...values) {
+      track(values, identity)
+    }
+
+    api.guard = function(...values) {
+      track(values, up.error.guardFn)
     }
 
     api.clean = function(...args) {
       let fn
       while (fn = fns.pop()) fn(...args)
     }
+
     return api
+  }
+
+  function nextTick(callback) {
+    const channel = new MessageChannel()
+    channel.port1.onmessage = callback
+    channel.port2.postMessage(undefined)
+  }
+
+  function whenNextTick() {
+    return new Promise(nextTick)
+  }
+
+  async function waitMicrotasks(count = 1) {
+    for (let i = 0; i < count; i++) {
+      await Promise.resolve()
+    }
   }
 
   return {
@@ -2130,5 +2155,8 @@ up.util = (function() {
     // groupBy,
     variant,
     cleaner,
+    nextTick,
+    whenNextTick,
+    waitMicrotasks,
   }
 })()

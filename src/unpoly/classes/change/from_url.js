@@ -2,7 +2,7 @@ const u = up.util
 
 up.Change.FromURL = class FromURL extends up.Change {
 
-  execute() {
+  async execute() {
     let newPageReason = this._newPageReason()
     if (newPageReason) {
       up.puts('up.render()', newPageReason)
@@ -14,21 +14,44 @@ up.Change.FromURL = class FromURL extends up.Change {
 
     this.request = up.request(this._getRequestAttrs())
     // Used by up.RenderJob to delay aborting until a new request instance is known
+
+    console.debug("onRequest() will abort? %o", this.options.onRequest)
+
     this.options.onRequest?.(this.request)
+
+    // await queueMicrotask(u.noop)
+    // await queueMicrotask(u.noop)
+    // await queueMicrotask(u.noop)
+    // await queueMicrotask(u.noop)
+    // await queueMicrotask(u.noop)
 
     if (this.options.preload) {
       return this.request
     }
 
     if (!this.request.fromCache) {
-      // TODO: Don't do this work if we're rendering a cached request
-      up.form.disableWhile(this.request, this.options)
-      up.feedback.showAroundRequest(this.request, this.options)
+      this._considerPreviews()
     }
 
     // Use always() since _onRequestSettled() will decide whether the promise
     // will be fulfilled or rejected.
-    return u.always(this.request, responseOrError => this._onRequestSettled(responseOrError))
+    return await u.always(this.request, responseOrError => this._onRequestSettled(responseOrError))
+  }
+
+  async _considerPreviews() {
+    console.debug("u.waitMicrotasks(10) before")
+    await u.waitMicrotasks(10)
+    console.debug("u.waitMicrotasks(10) after")
+
+    if (!this.request._isSettled()) {
+      console.debug("considerPreviews: request is NOT settled")
+
+      // TODO: Don't do this work if we're rendering a cached request
+      up.form.disableWhile(this.request, this.options)
+      up.feedback.showAroundRequest(this.request, this.options)
+    } else {
+      console.debug("considerPreviews: request WAS settled")
+    }
   }
 
   _newPageReason() {

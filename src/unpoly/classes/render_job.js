@@ -188,22 +188,22 @@ up.RenderJob = class RenderJob {
 
     if (abort === 'target') {
       // Abort requests in the subtree of the targeted fragment
-      up.fragment.abort(fragments, abortOptions)
+      return up.fragment.abort(fragments, abortOptions)
     } else if (abort === 'layer') {
       // Abort requests targeting any fragment in the targeted layer
-      up.fragment.abort({ ...abortOptions, layer })
+      return up.fragment.abort({ ...abortOptions, layer })
     } else if (abort === 'all' || abort === true) {
       // Abort requests targeting any fragment in any layer
-      up.fragment.abort({ ...abortOptions, layer: 'any' })
+      return up.fragment.abort({ ...abortOptions, layer: 'any' })
     } else if (u.isFunction(abort)) {
       // Required by unpoly-migrate to convert { solo: URLPatternString } and { solo: Function(up.Request): boolean }.
       // We don't advertise this variant as aborting arbitrary requests cannot support
       // up:fragment:aborted events or the up.fragment.onAborted() function.
-      abort(abortOptions)
+      return abort(abortOptions)
     } else {
       // (1) Abort requests in the subtree of a given selector (string)
       // (2) Abort requests targeting a given element
-      up.fragment.abort(abort, { ...abortOptions, layer })
+      return up.fragment.abort(abort, { ...abortOptions, layer })
     }
   }
 
