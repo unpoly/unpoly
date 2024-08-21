@@ -6,7 +6,11 @@ up.Preview = class Preview {
   constructor({ request, renderOptions }) {
     this.request = request
     this.renderOptions = renderOptions
-    this.undo = u.cleaner()
+    this._cleaner = u.cleaner()
+  }
+
+  undo(...args) {
+    this._cleaner.guard(...args)
   }
 
   get target() {
@@ -34,11 +38,11 @@ up.Preview = class Preview {
   }
 
   run(fn) {
-    this.undo(fn(this))
+    this.undo(up.error.guard(fn, this))
   }
 
   revert() {
-    this.undo.clean()
+    this._cleaner.clean()
   }
 
   setAttrs(...args) {

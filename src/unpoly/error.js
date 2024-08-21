@@ -86,9 +86,9 @@ up.error = (function() {
     window.dispatchEvent(event)
   }
 
-  function guard(fn) {
+  function guard(fn, ...args) {
     try {
-      return fn()
+      return fn(...args)
     } catch (error) {
       report(error)
     }

@@ -305,22 +305,15 @@ up.feedback = (function() {
 
   function getPreviewFns(renderOptions) {
     let fns = []
+
     if (renderOptions.feedback) {
       fns.push(findPreviewFn('classes'))
     }
 
-    if (renderOptions.preview) {
-      fns.push(findPreviewFn(renderOptions.preview))
+    let previewTokens = u.parseTokens(renderOptions.preview)
+    let previewFns = previewTokens.map(findPreviewFn)
+    fns.push(...previewFns)
 
-      // Allowing animation with previews opens up new edge cases.
-      // E.g. the response is arrived while the preview is still animating.
-      // We will handle this eventually, but it will require decoupling
-      // up.fragment.abort() from the request queue, and introducing a
-      // generic queue of abortable tasks.
-      renderOptions.transition = false     // for swapping fragments
-      renderOptions.animation = false      // for prepending/appending fragments
-      renderOptions.openAnimation = false  // for opening new layers
-    }
     return fns
   }
 

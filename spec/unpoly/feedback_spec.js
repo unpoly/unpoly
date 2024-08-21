@@ -106,6 +106,198 @@ describe('up.feedback', function() {
         expect(link).not.toHaveClass('up-current')
       })
     })
+
+
+    describe('up.render()', function() {
+
+      describe('with { preview } option', function() {
+
+        it('runs a named preview', async function() {
+          let previewFn = jasmine.createSpy('preview function')
+          up.preview('my-preview', previewFn)
+
+          up.render({ preview: 'my-preview', url: '/path', target: 'body' })
+
+          await jasmine.waitMicrotasks(10)
+
+          expect(previewFn).toHaveBeenCalledWith(jasmine.any(up.Preview))
+        })
+
+        it('runs multiple named previews, separated by a space', async function() {
+          let preview1Fn = jasmine.createSpy('preview1')
+          up.preview('preview1', preview1Fn)
+          let preview2Fn = jasmine.createSpy('preview2')
+          up.preview('preview2', preview2Fn)
+
+          up.render({ preview: 'preview1 preview2', url: '/path', target: 'body' })
+
+          await jasmine.waitMicrotasks(10)
+
+          expect(preview1Fn).toHaveBeenCalledWith(jasmine.any(up.Preview))
+          expect(preview2Fn).toHaveBeenCalledWith(jasmine.any(up.Preview))
+        })
+
+        it('runs an array of named previews', async function() {
+          let preview1Fn = jasmine.createSpy('preview1')
+          up.preview('preview1', preview1Fn)
+          let preview2Fn = jasmine.createSpy('preview2')
+          up.preview('preview2', preview2Fn)
+
+          up.render({ preview: ['preview1', 'preview2'], url: '/path', target: 'body' })
+
+          await jasmine.waitMicrotasks(10)
+
+          expect(preview1Fn).toHaveBeenCalledWith(jasmine.any(up.Preview))
+          expect(preview2Fn).toHaveBeenCalledWith(jasmine.any(up.Preview))
+        })
+
+        it('runs an anonymous preview function', async function() {
+          let previewFn = jasmine.createSpy('preview function')
+
+          up.render({ preview: previewFn, url: '/path', target: 'body' })
+
+          await jasmine.waitMicrotasks(10)
+
+          expect(previewFn).toHaveBeenCalledWith(jasmine.any(up.Preview))
+        })
+
+        it('runs an array of anonymous preview functions', async function() {
+          let preview1Fn = jasmine.createSpy('preview1')
+          let preview2Fn = jasmine.createSpy('preview2')
+
+          up.render({ preview: [preview1Fn, preview2Fn], url: '/path', target: 'body' })
+
+          await jasmine.waitMicrotasks(10)
+
+          expect(preview1Fn).toHaveBeenCalledWith(jasmine.any(up.Preview))
+          expect(preview2Fn).toHaveBeenCalledWith(jasmine.any(up.Preview))
+        })
+
+        it('considers the return value of a preview function to be a revertible effect')
+
+        it('reverts an preview before rendering', async function() {
+          fixture('#target', { text: 'old target' })
+          let revertSpy = jasmine.createSpy('revert fn')
+
+          up.render({ url: '/path', target: '#target', preview: ((preview) => revertSpy) })
+          await wait()
+
+          expect(revertSpy).not.toHaveBeenCalled()
+
+          jasmine.respondWithSelector('#target', { text: 'new target' })
+          await wait()
+
+          expect(revertSpy).toHaveBeenCalled()
+        })
+
+        it('reverts a preview when a fragment is aborted', async function() {
+          fixture('#target', { text: 'old target' })
+          let revertSpy = jasmine.createSpy('revert fn')
+
+          let renderPromise = up.render({ url: '/path', target: '#target', preview: ((preview) => revertSpy) })
+          await wait()
+
+          expect(revertSpy).not.toHaveBeenCalled()
+
+          up.fragment.abort('#target')
+          await expectAsync(renderPromise).toBeRejectedWith(jasmine.any(up.Aborted))
+
+          expect(revertSpy).toHaveBeenCalled()
+        })
+
+        it('does not apply a preview when the response is already cached', async function() {
+          fixture('#target', { text: 'old target' })
+          await jasmine.populateCache('/path', '<div id="target">cached target</div>')
+          let previewFn = jasmine.createSpy('preview function')
+
+          up.render({ preview: previewFn, url: '/path', target: '#target', cache: true })
+
+          await jasmine.waitMicrotasks(10)
+
+          expect('#target').toHaveText('cached target')
+          expect(previewFn).not.toHaveBeenCalled()
+        })
+
+        it('does not crash the render pass if a preview throws an error', async function() {
+          let error = new Error("Error during preview")
+          let previewFn = () => { throw error }
+
+          let renderPromise = up.render({ preview: previewFn, url: '/path', target: 'body' })
+
+          await jasmine.spyOnGlobalErrorsAsync(async function(globalErrorSpy) {
+            await jasmine.waitMicrotasks(10)
+            await expectAsync(renderPromise).toBePending()
+            expect(globalErrorSpy).toHaveBeenCalledWith(error)
+          })
+        })
+
+        it('does not crash the render pass if reverting a preview throws an error', async function() {
+          fixture('#target', { text: 'old target' })
+
+          let error = new Error("Error during revert")
+          let previewFn = () => {
+            return () => { throw error }
+          }
+
+          let renderPromise = up.render({ preview: previewFn, url: '/path', target: 'body' })
+
+          await wait()
+
+          await jasmine.spyOnGlobalErrorsAsync(async function(globalErrorSpy) {
+            expect(globalErrorSpy).not.toHaveBeenCalled()
+            jasmine.respondWithSelector('#target', { text: 'new target' })
+            await wait()
+            await expectAsync(renderPromise).toBePending()
+            expect(globalErrorSpy).toHaveBeenCalledWith(error)
+          })
+        })
+
+        it('reverts a previous preview before a new preview is applied to the same fragment', async function() {
+          fixture('#target', { text: 'old target' })
+
+          let actions = []
+
+          let preview1Fn = () => {
+            actions.push('apply1')
+            return () => actions.push('revert1')
+          }
+
+          let preview2Fn = () => {
+            actions.push('apply2')
+            return () => actions.push('revert2')
+          }
+
+          let render1Promise = up.render({ preview: [preview1Fn], url: '/path', target: '#target' })
+          await jasmine.waitMicrotasks(10)
+
+          expect(actions).toEqual(['apply1'])
+
+          let render2Promise = up.render({ preview: [preview2Fn], url: '/path', target: '#target' })
+          await expectAsync(render1Promise).toBeRejectedWith(jasmine.any(up.Error))
+          await jasmine.waitMicrotasks(10)
+
+          expect(actions).toEqual(['apply1', 'revert1', 'apply2'])
+
+          jasmine.respondWithSelector('#target', { text: 'new target' })
+
+          await wait()
+
+          expect('#target').toHaveText('new target')
+          expect(actions).toEqual(['apply1', 'revert1', 'apply2', 'revert2'])
+        })
+
+        it('reverts a previous preview before a preview-less render pass updates the same fragment')
+
+      })
+
+    })
+
+    describe('up.preview()', function() {
+
+      it('registers a named preview')
+
+    })
+
   })
 
   describe('unobtrusive behavior', function() {

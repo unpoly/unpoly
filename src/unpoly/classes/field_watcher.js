@@ -130,7 +130,7 @@ up.FieldWatcher = class FieldWatcher {
   }
 
   _runCallback(...args) {
-    return up.error.guard(() => this._callback(...args))
+    return up.error.guard(this._callback, ...args)
   }
 
   _changedValues(previous, next) {
