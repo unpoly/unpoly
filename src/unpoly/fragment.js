@@ -2709,7 +2709,7 @@ up.fragment = (function() {
     }
 
     let testFnWithAbortable = (request) => request.abortable && testFn(request)
-    let abortPromise = up.network.abort(testFnWithAbortable, { ...options, reason })
+    up.network.abort(testFnWithAbortable, { ...options, reason })
 
     // We *always* emit an `up:fragment:aborted` event, even when there is no
     // request being aborted. This event serves for *any* async code that may want
@@ -2728,8 +2728,6 @@ up.fragment = (function() {
       //     this function passes on to up.network.abort().
       up.emit(element, 'up:fragment:aborted', { reason, newLayer, log: false })
     }
-
-    await abortPromise
   }
 
   /*-

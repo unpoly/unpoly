@@ -110,14 +110,13 @@ up.Request.Queue = class Queue {
   }
 
   // Aborting a request will cause its promise to reject, which will also uncache it
-  async abort(...args) {
+  abort(...args) {
     let options = u.extractOptions(args)
     let { except, reason, logOnce } = options
 
     let conditions = args[0] ?? true
 
     let tester = up.Request.tester(conditions, { except })
-    let abortedRequests = []
 
     for (let list of [this._currentRequests, this._queuedRequests]) {
       const abortableRequests = u.filter(list, tester)
@@ -129,13 +128,8 @@ up.Request.Queue = class Queue {
         abortableRequest.abort({ reason })
         // Avoid changing the list we're iterating over.
         u.remove(list, abortableRequest)
-
-        abortedRequests.push(abortableRequest)
       }
     }
-
-    // TODO: Remove tracking of aborted requests when we're not awaiting them anymore
-    await Promise.allSettled(abortedRequests)
   }
 
   _checkLate() {
