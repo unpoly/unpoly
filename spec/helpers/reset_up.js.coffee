@@ -39,11 +39,8 @@ findMetaTags = ->
 
 beforeAll ->
   jasmine.titleBeforeSuite = document.title
-
   jasmine.locationBeforeSuite = location.href
-
   jasmine.langBeforeSuite = document.documentElement.lang
-
   jasmine.metaTagsBeforeSuite = findMetaTags()
 
   # Ignore <meta> and <link> tags from the Jasmine runner
@@ -66,6 +63,10 @@ afterEach ->
     # the timeout below will actually happen.
     jasmine.clock().uninstall()
 
+    hadRequests = (jasmine.Ajax.requests.count() > 0)
+    hadLayers = (up.layer.count > 0)
+    waitMore = hadRequests || hadLayers
+
     # Abort all requests so any cancel handlers can run and do async things.
     up.network.abort(reason: RESET_MESSAGE)
 
@@ -77,7 +78,7 @@ afterEach ->
     # Wait one more frame so pending callbacks have a chance to run.
     # Pending callbacks might change the URL or cause errors that bleed into
     # the next example.
-    await wait()
+    await wait() if waitMore
 
     # Reset browser location and meta/link elements to those from before the suite.
     # Some resetting modules (like up.history) need to be called after the URL was been reset.
@@ -88,9 +89,7 @@ afterEach ->
 
     up.framework.reset()
 
-    # Give async reset behavior another frame to play out,
-    # then start the next example.
-    await wait()
+    await wait() if waitMore
 
   # Make some final checks that we have reset successfully
   overlays = document.querySelectorAll('up-modal, up-popup, up-cover, up-drawer')
