@@ -62,13 +62,15 @@ up.Params = class Params {
 
   ### Example
 
-      var params = new up.Params('foo=bar&baz=bam')
-      var object = params.toObject()
+  ```js
+  var params = new up.Params('foo=bar&baz=bam')
+  var object = params.toObject()
 
-      // object is now: {
-      //   foo: 'bar',
-      //   baz: 'bam'
-      // ]
+  // object is now: {
+  //   foo: 'bar',
+  //   baz: 'bam'
+  // ]
+  ```
 
   @function up.Params#toObject
   @return {Object}
@@ -98,13 +100,15 @@ up.Params = class Params {
 
   ### Example
 
-      var params = new up.Params('foo=bar&baz=bam')
-      var array = params.toArray()
+  ```js
+  var params = new up.Params('foo=bar&baz=bam')
+  var array = params.toArray()
 
-      // array is now: [
-      //   { name: 'foo', value: 'bar' },
-      //   { name: 'baz', value: 'bam' }
-      // ]
+  // array is now: [
+  //   { name: 'foo', value: 'bar' },
+  //   { name: 'baz', value: 'bam' }
+  // ]
+  ```
 
   @function up.Params#toArray
   @return {Array}
@@ -120,11 +124,13 @@ up.Params = class Params {
 
   ### Example
 
-      var params = new up.Params('foo=bar&baz=bam')
-      var formData = params.toFormData()
+  ```js
+  var params = new up.Params('foo=bar&baz=bam')
+  var formData = params.toFormData()
 
-      formData.get('foo') // 'bar'
-      formData.get('baz') // 'bam'
+  formData.get('foo') // 'bar'
+  formData.get('baz') // 'bam'
+  ```
 
   @function up.Params#toFormData
   @return {FormData}
@@ -152,10 +158,12 @@ up.Params = class Params {
 
   ### Example
 
-      var params = new up.Params({ foo: 'bar', baz: 'bam' })
-      var query = params.toQuery()
+  ```js
+  var params = new up.Params({ foo: 'bar', baz: 'bam' })
+  var query = params.toQuery()
 
-      // query is now: 'foo=bar&baz=bam'
+  // query is now: 'foo=bar&baz=bam'
+  ```
 
   @function up.Params#toQuery
   @param {Object|FormData|string|Array|undefined} params
@@ -236,11 +244,13 @@ up.Params = class Params {
 
   ### Example
 
-      var params = new up.Params()
-      params.add('foo', 'fooValue')
+  ```js
+  var params = new up.Params()
+  params.add('foo', 'fooValue')
 
-      var foo = params.get('foo')
-      // foo is now 'fooValue'
+  var foo = params.get('foo')
+  // foo is now 'fooValue'
+  ```
 
   @function up.Params#add
   @param {string} name
@@ -364,18 +374,20 @@ up.Params = class Params {
 
   ### Example
 
-      var params = new up.Params({ foo: 'fooValue', bar: 'barValue' })
-      var params = new up.Params([
-        { name: 'foo', value: 'fooValue' }
-        { name: 'bar[]', value: 'barValue1' }
-        { name: 'bar[]', value: 'barValue2' })
-      ]})
+  ```js
+  var params = new up.Params({ foo: 'fooValue', bar: 'barValue' })
+  var params = new up.Params([
+    { name: 'foo', value: 'fooValue' }
+    { name: 'bar[]', value: 'barValue1' }
+    { name: 'bar[]', value: 'barValue2' })
+  ]})
 
-      var foo = params.get('foo')
-      // foo is now 'fooValue'
+  var foo = params.get('foo')
+  // foo is now 'fooValue'
 
-      var bar = params.get('bar')
-      // bar is now ['barValue1', 'barValue2']
+  var bar = params.get('bar')
+  // bar is now ['barValue1', 'barValue2']
+  ```
 
   @function up.Params#get
   @param {string} name
@@ -566,9 +578,11 @@ up.Params = class Params {
 
   ### Example
 
-      var params = up.Params.fromURL('http://foo.com?foo=fooValue&bar=barValue')
-      var foo = params.get('foo')
-      // foo is now: 'fooValue'
+  ```js
+  var params = up.Params.fromURL('http://foo.com?foo=fooValue&bar=barValue')
+  var foo = params.get('foo')
+  // foo is now: 'fooValue'
+  ```
 
   @function up.Params.fromURL
   @param {string} url
@@ -593,8 +607,10 @@ up.Params = class Params {
 
   ### Example
 
-      var url = up.Params.stripURL('http://foo.com?key=value')
-      // url is now: 'http://foo.com'
+  ```js
+  var url = up.Params.stripURL('http://foo.com?key=value')
+  // url is now: 'http://foo.com'
+  ```
 
   @function up.Params.stripURL
   @param {string} url
