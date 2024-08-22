@@ -307,17 +307,17 @@ up.feedback = (function() {
     let fns = []
 
     if (renderOptions.feedback) {
-      fns.push(findPreviewFn('classes'))
+      fns.push(getPreviewFn('classes'))
     }
 
     let previewTokens = u.parseTokens(renderOptions.preview)
-    let previewFns = previewTokens.map(findPreviewFn)
+    let previewFns = previewTokens.map(getPreviewFn)
     fns.push(...previewFns)
 
     return fns
   }
 
-  function findPreviewFn(value) {
+  function getPreviewFn(value) {
     return u.presence(value, u.isFunction) || namedPreviewFns[value] || up.fail('Unknown preview "%s"', value)
   }
 
@@ -531,7 +531,8 @@ up.feedback = (function() {
   return {
     config,
     showAroundRequest,
-    preview: registerPreview
+    preview: registerPreview,
+    getPreviewFn,
   }
 })()
 

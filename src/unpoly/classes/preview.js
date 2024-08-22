@@ -45,7 +45,8 @@ up.Preview = class Preview {
     return this.renderOptions.layers[0]
   }
 
-  run(fn) {
+  run(nameOrFn) {
+    let fn = up.feedback.getPreviewFn(nameOrFn)
     this.undo(up.error.guard(fn, this))
   }
 

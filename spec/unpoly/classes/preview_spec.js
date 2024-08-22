@@ -581,17 +581,59 @@ describe('up.Preview', function() {
 
   describe('#run(String)', function() {
 
-    it('runs another named preview')
+    it('runs another named preview', async function() {
+      let preview2Fn = jasmine.createSpy('preview2Fn')
+      let preview1Fn = jasmine.createSpy('preview1Fn').and.callFake(function(preview) {
+        preview.run('preview2')
+      })
 
-    it('also reverts the effects of the other preview')
+      up.preview('preview1', preview1Fn)
+      up.preview('preview2', preview2Fn)
+
+      up.render({ preview: preview1Fn, url: '/url', target: 'body' })
+      await wait()
+
+      expect(preview1Fn).toHaveBeenCalledWith(jasmine.any(up.Preview))
+      expect(preview2Fn).toHaveBeenCalledWith(preview1Fn.calls.mostRecent().args[0])
+    })
+
+    it('also reverts the effects of the other preview', async function() {
+      fixture('#target')
+
+      let preview2Undo = jasmine.createSpy('preview2 undo')
+      let preview2Apply = jasmine.createSpy('preview2 apply').and.returnValue(preview2Undo)
+
+      let preview1Undo = jasmine.createSpy('preview1 undo')
+      let preview1Apply = jasmine.createSpy('preview1 apply').and.callFake(function(preview) {
+        preview.run('preview2')
+        return preview1Undo
+      })
+
+      up.preview('preview1', preview1Apply)
+      up.preview('preview2', preview2Apply)
+
+      up.render({ preview: preview1Apply, url: '/url', target: '#target' })
+      await wait()
+
+      expect(preview1Apply).toHaveBeenCalled()
+      expect(preview1Undo).not.toHaveBeenCalled()
+      expect(preview2Apply).toHaveBeenCalled()
+      expect(preview2Undo).not.toHaveBeenCalled()
+
+      jasmine.respondWithSelector('#target')
+      await wait()
+
+      expect(preview1Undo).toHaveBeenCalled()
+      expect(preview2Undo).toHaveBeenCalled()
+    })
 
   })
 
   describe('#run(Function)', function() {
 
     it('runs another preview function', async function() {
-      let preview2Fn = jasmine.createSpy('preview2')
-      let preview1Fn = jasmine.createSpy('preview1').and.callFake(function(preview) {
+      let preview2Fn = jasmine.createSpy('preview2Fn')
+      let preview1Fn = jasmine.createSpy('preview1Fn').and.callFake(function(preview) {
         preview.run(preview2Fn)
       })
 
@@ -599,16 +641,73 @@ describe('up.Preview', function() {
       await wait()
 
       expect(preview1Fn).toHaveBeenCalledWith(jasmine.any(up.Preview))
-      expect(preview2Fn).toHaveBeenCalled(preview1Fn.calls.mostRecent().args[0])
+      expect(preview2Fn).toHaveBeenCalledWith(preview1Fn.calls.mostRecent().args[0])
     })
 
-    it('also reverts the effects of the other preview')
+    it('does not crash the render pass when the other preview function crashes', async function() {
+      let preview2Error = new Error('preview2 error')
+      let preview2Fn = jasmine.createSpy('preview2Fn').and.throwError(preview2Error)
+      let preview1Fn = jasmine.createSpy('preview1Fn').and.callFake(function(preview) {
+        preview.run(preview2Fn)
+      })
+
+      let renderPromise = up.render({ preview: preview1Fn, url: '/url', target: 'body' })
+
+      await jasmine.expectGlobalError(preview2Error, async function() {
+        await wait()
+        await expectAsync(renderPromise).toBePending()
+      })
+    })
+
+    it('also reverts the effects of the other preview', async function() {
+      fixture('#target')
+
+      let preview2Undo = jasmine.createSpy('preview2 undo')
+      let preview2Apply = jasmine.createSpy('preview2 apply').and.returnValue(preview2Undo)
+
+      let preview1Undo = jasmine.createSpy('preview1 undo')
+      let preview1Apply = jasmine.createSpy('preview1 apply').and.callFake(function(preview) {
+        preview.run(preview2Apply)
+        return preview1Undo
+      })
+
+      up.render({ preview: preview1Apply, url: '/url', target: '#target' })
+      await wait()
+
+      expect(preview1Apply).toHaveBeenCalled()
+      expect(preview1Undo).not.toHaveBeenCalled()
+      expect(preview2Apply).toHaveBeenCalled()
+      expect(preview2Undo).not.toHaveBeenCalled()
+
+      jasmine.respondWithSelector('#target')
+      await wait()
+
+      expect(preview1Undo).toHaveBeenCalled()
+      expect(preview2Undo).toHaveBeenCalled()
+    })
 
   })
 
   describe('#undo()', function() {
 
-    it('tracks a function to run when the preview is reverted')
+    it('tracks a function to run when the preview is reverted', async function() {
+      fixture('#target')
+      let undoFn = jasmine.createSpy('undo fn')
+      let previewFn = jasmine.createSpy('preview apply').and.callFake(function(preview) {
+        preview.undo(undoFn)
+      })
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(previewFn).toHaveBeenCalled()
+      expect(undoFn).not.toHaveBeenCalled()
+
+      jasmine.respondWithSelector('#target')
+      await wait()
+
+      expect(undoFn).toHaveBeenCalled()
+    })
 
   })
 
