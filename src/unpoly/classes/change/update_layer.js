@@ -17,14 +17,17 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // This will throw up.CannotMatch if { target } cannot be found in { layer }.
     this._matchPreflight()
 
+    let fragments = this._getFragments()
+
     return {
       layer: this.layer,
+      bindLayer: this.layer,
       mode: this.layer.mode,
       context: u.merge(this.layer.context, this._context),
       origin: this.options.origin,
       target: this._bestPreflightSelector(),
-      fragments: this._getFragments(),
-      newLayer: false,
+      fragments,
+      bindFragments: fragments,
     }
   }
 

@@ -92,13 +92,6 @@ describe 'up.Request', ->
         request = new up.Request(url: '/path', target: '.element, .other-element')
         expect(request.fragments).toEqual [element, otherElement]
 
-      it 'does not cache the results to prevent memory leaks', ->
-        element = fixture('.element')
-        request = new up.Request(url: '/path', target: '.element')
-        expect(request.fragments).toEqual [element]
-        expect(request._fragments).toBeBlank()
-        expect(request).not.toHaveRecursiveValue((value) -> value == element)
-
       it 'looks up the { target } selector in a different { layer }', ->
         element = fixture('.element')
         otherElement = fixture('.other-element')
