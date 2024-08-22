@@ -7516,7 +7516,7 @@ describe 'up.fragment', ->
 
         describe 'with { abort: "layer" }', ->
 
-          it "aborts all requests on the targeted fragment's layer ", asyncSpec (next) ->
+          it "aborts all requests on the targeted fragment's layer", asyncSpec (next) ->
             layers = makeLayers(3)
 
             layers[1].affix('.element')
