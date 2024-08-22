@@ -27,14 +27,14 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
       // We associate this request to our base layer so up:request events may be emitted on something
       // more specific than the document. This will also abort this request when
       // `up.fragment.abort({ layer })` is called for the base layer.
-      layer: this._baseLayer,
+      bindLayer: this._baseLayer,
+      layer: 'new',
 
       // We associate this request with the base layer's main element. This way the request
       // will be aborted if the base layer receives a major navigation, but not when a
       // minor fragment is updated.
-      fragments: u.compact([up.fragment.get(':main', { layer: this._baseLayer })]),
-
-      newLayer: true,
+      bindFragments: u.compact([up.fragment.get(':main', { layer: this._baseLayer })]),
+      fragments: [],
     }
   }
 

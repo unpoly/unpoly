@@ -2691,7 +2691,7 @@ up.fragment = (function() {
       // If we're given an element or selector, we abort all requests
       // targeting that subtree.
       elements = getAll(options.target, options)
-      testFn = (request) => request.isPartOfSubtree(elements)
+      testFn = (request) => request.isBoundToSubtrees(elements)
       reason ||= 'Aborting requests within fragment'
     } else {
       // If we're not given an element or selector, we abort all layers
@@ -2704,7 +2704,7 @@ up.fragment = (function() {
       // that layer, even requests with a target outside of main, e.g. a nav bar.
       let layers = up.layer.getAll(options)
       elements = u.map(layers, 'element')
-      testFn = (request) => u.contains(layers, request.layer)
+      testFn = (request) => request.isBoundToLayers(layers)
       reason ||= 'Aborting requests within ' + layers.join(', ')
     }
 
