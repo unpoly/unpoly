@@ -13,12 +13,16 @@ up.Preview = class Preview {
     this._cleaner.guard(...args)
   }
 
+  get newLayer() {
+    return this.layer === 'new'
+  }
+
   get target() {
     return this.renderOptions.target
   }
 
   get fragment() {
-    if (this.layer !== 'new') {
+    if (!this.newLayer) {
       // For new layers, the request will bind to the main element of the base layer.
       // This is not what we want to expose as a (potentially swappable) target fragment in a preview.
       return this.request.fragment
@@ -30,7 +34,11 @@ up.Preview = class Preview {
   }
 
   get fragments() {
-    return this.request.fragments
+    if (!this.newLayer) {
+      return this.request.fragments
+    } else {
+      return []
+    }
   }
 
   get layer() {

@@ -1,66 +1,205 @@
 describe('up.Preview', function() {
 
-  describe('target', function() {
+  describe('#target', function() {
 
-    it('returns the target selector')
+    it('returns the target selector', async function() {
+      fixture('#target')
+      let spy = jasmine.createSpy('spy')
+      let previewFn = (preview) => spy(preview.target)
 
-    it('returns a resolved selector for :main')
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
 
-  })
+      expect(spy).toHaveBeenCalledWith('#target')
+    })
 
-  describe('fragment', function() {
+    it('returns the full target for a multi-fragment update', async function() {
+      fixture('#one')
+      fixture('#two')
+      let spy = jasmine.createSpy('spy')
+      let previewFn = (preview) => spy(preview.target)
 
-    it('returns the element that is being replaced')
+      up.render({ preview: previewFn, url: '/url', target: '#one, #two' })
+      await wait()
 
-    it('returns the first element for a multi-target update')
-
-    it('returns a missing value when opening a new layer')
-
-  })
-
-  describe('fragments', function() {
-
-    it('returns an array of all targeted elements')
-
-    it('returns a missing value when opening a new layer')
-
-  })
-
-  describe('orgin', function() {
-
-    it('returns the { origin } element (e.g. the link being followed)')
+      expect(spy).toHaveBeenCalledWith('#one, #two')
+    })
 
   })
 
-  describe('layer', function() {
+  describe('#fragment', function() {
 
-    it('returns the resolved up.Layer object that is being targeted')
+    it('returns the element that is being replaced', async function() {
+      let target = fixture('#target')
+      let spy = jasmine.createSpy('spy')
+      let previewFn = (preview) => spy(preview.fragment)
 
-    it('returns the first layer in an update that might match multiple layers')
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
 
-    it('returns the string "new" when opening a new layer')
+      expect(spy).toHaveBeenCalledWith(target)
+    })
+
+    it('returns the first element for a multi-target update', async function() {
+      let one = fixture('#one')
+      let two = fixture('#two')
+      let spy = jasmine.createSpy('spy')
+      let previewFn = (preview) => spy(preview.fragment)
+
+      up.render({ preview: previewFn, url: '/url', target: '#one, #two' })
+      await wait()
+
+      expect(spy).toHaveBeenCalledWith(one)
+    })
+
+    it('returns a missing value when opening a new layer', async function() {
+      let spy = jasmine.createSpy('spy')
+      let previewFn = (preview) => spy(preview.fragment)
+
+      up.render({ preview: previewFn, url: '/url', target: '#target', layer: 'new modal' })
+      await wait()
+
+      expect(spy).toHaveBeenCalled()
+      expect(spy.calls.mostRecent().args[0]).toBeMissing()
+    })
 
   })
 
-  describe('setAttrs()', function() {
+  describe('#fragments', function() {
+
+    it('returns an array of all targeted elements', async function() {
+      let one = fixture('#one')
+      let two = fixture('#two')
+      let spy = jasmine.createSpy('spy')
+      let previewFn = (preview) => spy(preview.fragments)
+
+      up.render({ preview: previewFn, url: '/url', target: '#one, #two' })
+      await wait()
+
+      expect(spy).toHaveBeenCalledWith([one, two])
+    })
+
+    it('returns an empty array when opening a new layer', async function() {
+      let spy = jasmine.createSpy('spy')
+      let previewFn = (preview) => spy(preview.fragments)
+
+      up.render({ preview: previewFn, url: '/url', target: '#target', layer: 'new modal' })
+      await wait()
+
+      expect(spy).toHaveBeenCalled()
+      expect(spy.calls.mostRecent().args[0]).toEqual([])
+    })
+
+  })
+
+  describe('#orgin', function() {
+
+    it('returns the { origin } element (e.g. the link being followed)', async function() {
+      let link = fixture('a[href="/url"][up-target=":main"]')
+      let spy = jasmine.createSpy('spy')
+      let previewFn = (preview) => spy(preview.origin)
+
+      up.follow(link, { preview: previewFn })
+      await wait()
+
+      expect(spy).toHaveBeenCalledWith(link)
+    })
+
+  })
+
+  describe('#layer', function() {
+
+    it('returns the resolved up.Layer object that is being targeted', async function() {
+      makeLayers(2)
+      expect(up.layer.current).toBeOverlay()
+
+      up.layer.current.affix('#target')
+      let spy = jasmine.createSpy('spy')
+      let previewFn = (preview) => spy(preview.layer)
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(spy).toHaveBeenCalledWith(jasmine.any(up.Layer))
+      expect(spy).toHaveBeenCalledWith(up.layer.current)
+    })
+
+    it('returns a targeted background layer', async function() {
+      fixture('#target')
+      makeLayers(2)
+      expect(up.layer.current).toBeOverlay()
+
+      let spy = jasmine.createSpy('spy')
+      let previewFn = (preview) => spy(preview.layer)
+
+      up.render({ preview: previewFn, url: '/url', target: '#target', layer: 'root' })
+      await wait()
+
+      expect(spy).toHaveBeenCalledWith(jasmine.any(up.Layer))
+      expect(spy).toHaveBeenCalledWith(up.layer.root)
+    })
+
+    it('returns the first layer in an update that might match multiple layers', async function() {
+      makeLayers([
+        { target: '.target' },
+        { target: '.target' },
+      ])
+      expect(up.layer.current).toBeOverlay()
+
+      let spy = jasmine.createSpy('spy')
+      let previewFn = (preview) => spy(preview.layer)
+
+      up.render({ preview: previewFn, url: '/url', target: '.target', layer: 'any' })
+      await wait()
+
+      expect(spy).toHaveBeenCalledWith(jasmine.any(up.Layer))
+      // Looking up "any" layers will return the current layer first.
+      expect(spy).toHaveBeenCalledWith(up.layer.current)
+    })
+
+    it('returns the string "new" when opening a new layer', async function() {
+      let spy = jasmine.createSpy('spy')
+      let previewFn = (preview) => spy(preview.layer)
+
+      up.render({ preview: previewFn, url: '/url', target: '#target', layer: 'new modal' })
+      await wait()
+
+      expect(spy).toHaveBeenCalledWith('new')
+    })
+
+  })
+
+  describe('#renderOptions', function() {
+
+    it('returns the options for the render pass being previewed')
+
+  })
+
+  describe('#request', function() {
+
+    it('returns the up.Request object that is being previewed')
+
+  })
+
+  describe('#setAttrs()', function() {
 
     it('temporarily sets attributes on an element')
 
   })
 
-  describe('addClass()', function() {
+  describe('#addClass()', function() {
 
     it('temporarily adds a class to an element')
 
   })
 
-  describe('setStyle()', function() {
+  describe('#setStyle()', function() {
 
     it('temporarily sets inline styles on an element')
 
   })
 
-  describe('setStyle()', function() {
+  describe('#setStyle()', function() {
 
     it('temporarily disables an input field')
 
@@ -70,7 +209,7 @@ describe('up.Preview', function() {
 
   })
 
-  describe('insert()', function() {
+  describe('#insert()', function() {
 
     it('temporarily appends the given element to the children of the given reference')
 
@@ -82,7 +221,7 @@ describe('up.Preview', function() {
 
   })
 
-  describe('swap()', function() {
+  describe('#swap()', function() {
 
     it('temporarily swaps an element with another')
 
@@ -94,7 +233,7 @@ describe('up.Preview', function() {
 
   })
 
-  describe('show()', function() {
+  describe('#show()', function() {
 
     it('temporarily shows a hidden element')
 
@@ -102,7 +241,7 @@ describe('up.Preview', function() {
 
   })
 
-  describe('show()', function() {
+  describe('#hide()', function() {
 
     it('temporarily hides a visible element')
 
@@ -110,7 +249,7 @@ describe('up.Preview', function() {
 
   })
 
-  describe('run(String)', function() {
+  describe('#run(String)', function() {
 
     it('runs another named preview')
 
@@ -118,7 +257,7 @@ describe('up.Preview', function() {
 
   })
 
-  describe('run(Function)', function() {
+  describe('#run(Function)', function() {
 
     it('runs another preview function')
 
@@ -126,7 +265,7 @@ describe('up.Preview', function() {
 
   })
 
-  describe('undo()', function() {
+  describe('#undo()', function() {
 
     it('tracks a function to run when the preview is reverted')
 
