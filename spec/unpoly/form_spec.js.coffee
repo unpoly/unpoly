@@ -444,32 +444,35 @@ describe 'up.form', ->
               # The 2nd callback will not run because no field is attached.
               expect(callbackCount).toEqual(1)
 
-            it 'only runs the last callback when a previous long-running callback has been delaying multiple callbacks', asyncSpec (next) ->
+            it 'only runs the last callback when a previous long-running callback has been delaying multiple callbacks', ->
               form = fixture('form')
               input = e.affix(form, 'input[name="input-name"][value="old-value"]')
 
               callbackArgs = []
               callback = (value, field) ->
                 callbackArgs.push(value)
-                return up.specUtil.promiseTimer(100)
+                return jasmine.waitTime(100)
 
               up.watch(input, { delay: 1 }, callback)
               input.value = 'new-value-1'
               Trigger[eventType](input)
 
-              next.after 10, ->
-                # Callback has been called and takes 100 ms to complete
-                expect(callbackArgs).toEqual ['new-value-1']
-                input.value = 'new-value-2'
-                Trigger[eventType](input)
+              await wait(10)
 
-              next.after 10, ->
-                expect(callbackArgs).toEqual ['new-value-1']
-                input.value = 'new-value-3'
-                Trigger[eventType](input)
+              # Callback has been called and takes 100 ms to complete
+              expect(callbackArgs).toEqual ['new-value-1']
+              input.value = 'new-value-2'
+              Trigger[eventType](input)
 
-              next.after 100, ->
-                expect(callbackArgs).toEqual ['new-value-1', 'new-value-3']
+              await wait(10)
+
+              expect(callbackArgs).toEqual ['new-value-1']
+              input.value = 'new-value-3'
+              Trigger[eventType](input)
+
+              await wait(120)
+
+              expect(callbackArgs).toEqual ['new-value-1', 'new-value-3']
 
             it "executes the form's [up-watch-disable] option while an async callback is running", asyncSpec (next) ->
               form = fixture('form[up-watch-disable]')
