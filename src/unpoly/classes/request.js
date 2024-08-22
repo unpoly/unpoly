@@ -158,10 +158,12 @@ up.Request = class Request extends up.Record {
 
   Setting the `{ layer }` property will automatically derive `{ context }` and `{ mode }` properties.
 
+  When this request will [open a new overlay](/opening-overlays), the string `"new"` is returned.
+
   To prevent memory leaks, this property is removed shortly after the response is received.
 
   @property up.Request#layer
-  @param {up.Layer} layer
+  @param {up.Layer|string} layer
   @experimental
   */
 
@@ -290,7 +292,6 @@ up.Request = class Request extends up.Record {
       'failMode',    // we would love to delegate @failMode to @failLayer.mode, but @failLayer might be the string "new"
       'failContext', // we would love to delegate @failContext to @failLayer.mode, but @failLayer might be the string "new"
       'origin',
-      'fragments',
       'builtAt',
       'wrapMethod',
       'contentType',
@@ -356,6 +357,14 @@ up.Request = class Request extends up.Record {
       this.failMode ||= this.failLayer?.mode
     }
 
+    this.bindLayer = options.bindLayer || this.layer
+
+    this._fragments = options.fragments
+
+    // We don't want to default this to this.fragments here, because
+    // that may be an expensive getter, so we do it lazily.
+    this._bindFragments = options.bindFragments
+
     // This up.Request object is also promise for its up.Response.
     // We delegate all promise-related methods (then, catch, finally) to an internal
     // _deferred object.
@@ -386,6 +395,8 @@ up.Request = class Request extends up.Record {
   /*-
   Returns the fragments matched by this request's [target selector](/up.Request.prototype.target).
 
+  When this request will [open a new overlay](/opening-overlays), an empty array is returned.
+
   @see up.RenderResult.prototype.fragments
 
   @property up.Request#fragments
@@ -394,28 +405,27 @@ up.Request = class Request extends up.Record {
   */
   get fragments() { // eslint-disable-line getter-return
     // This property is required for `up.fragment.abort()` to select requests within
-    // the subtree that we're cancling.
+    // the subtree that we're canceling.
     //
     // We allow users to pass in pre-matched `{ fragments }` in the constructor.
     // We use this in `up.Change.FromURL` since we already know the element's we're trying
     // to replace.
     //
     // If we haven't received a `{ fragments }` property (or if it has been deleted by
-    // evictExpensitveAttrs()) but did we receive a `{ target }`,we find matching elements here.
-    if (this._fragments) {
-      return this._fragments
-    } else {
-      let steps = up.fragment.parseTargetSteps(this.target)
-      let selectors = u.map(steps, 'selector')
-      let lookupOpts = { origin: this.origin, layer: this.layer }
-
-      // Don't cache the results to prevent memory leaks
-      return u.compact(u.map(selectors, (selector) => up.fragment.get(selector, lookupOpts)))
-    }
+    // evictExpensitveAttrs()) but did we receive a `{ target }`, we find matching elements here.
+    return (this._fragments ||= this._findFragments())
   }
 
-  set fragments(value) {
-    this._fragments = value
+  _findFragments() {
+    let steps = up.fragment.parseTargetSteps(this.target)
+    let selectors = u.map(steps, 'selector')
+    let lookupOpts = { origin: this.origin, layer: this.layer }
+
+    return u.compact(u.map(selectors, (selector) => up.fragment.get(selector, lookupOpts)))
+  }
+
+  get bindFragments() {
+    return this._bindFragments || this.fragments
   }
 
   /*-
@@ -423,6 +433,8 @@ up.Request = class Request extends up.Record {
 
   When [multiple fragments](/targeting-fragments#updating-multiple-fragments) were inserted, the first fragment is returned.
   To get a list of all inserted fragments, use the [`{ fragments }`](/up.Request.prototype.fragments) property.
+
+  When this request will [open a new overlay](/opening-overlays), `undefined` is returned.
 
   @see up.RenderResult.prototype.fragment
 
@@ -457,6 +469,7 @@ up.Request = class Request extends up.Record {
       // we have already copied all layer-relevant properties, e.g. this.mode, this.context.
       this.layer = undefined
       this.failLayer = undefined
+      this._bindLayer = undefined
 
       // We want to provide the triggering element as { origin } to the function
       // providing the CSRF function. We now evict this property, since
@@ -464,7 +477,8 @@ up.Request = class Request extends up.Record {
       // from garbage collection while the response is cached by up.network.
       this.origin = undefined
 
-      this.fragments = undefined
+      this._fragments = undefined
+      this._bindFragments = undefined
     })
   }
 
@@ -759,7 +773,7 @@ up.Request = class Request extends up.Record {
     // This request has an optional { layer } attribute, which is used by
     // EventEmitter.
     return up.EventEmitter.fromEmitArgs(args, {
-      layer: this.layer,
+      layer: this.bindLayer,
       request: this,
       origin: this.origin
     })
@@ -777,12 +791,16 @@ up.Request = class Request extends up.Record {
     return this.method + ' ' + this.url
   }
 
-  isPartOfSubtree(subtreeElements) {
-    subtreeElements = u.wrapList(subtreeElements)
+  isBoundToSubtrees(subtreeRoots) {
+    subtreeRoots = u.wrapList(subtreeRoots)
 
-    return u.some(this.fragments, function(fragment) {
-      return u.some(subtreeElements, (subtreeElement) => subtreeElement.contains(fragment))
+    return u.some(this.bindFragments, function(fragment) {
+      return u.some(subtreeRoots, (subtreeElement) => subtreeElement.contains(fragment))
     })
+  }
+
+  isBoundToLayers(layers) {
+    return u.contains(layers, this.bindLayer)
   }
 
   get age() {
