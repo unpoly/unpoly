@@ -1,8 +1,18 @@
 const u = up.util
 const e = up.element
 
+/*-
+The `up.Preview` class allows to describe revertible preview effects.
+
+@class up.Preview
+@parent up.feedback
+*/
 up.Preview = class Preview {
 
+  /*-
+  @constructor up.Preview
+  @internal
+  */
   constructor({ request, renderOptions }) {
     this.request = request
     this.renderOptions = renderOptions
