@@ -134,6 +134,7 @@ up.Request.Queue = class Queue {
       }
     }
 
+    // TODO: Remove tracking of aborted requests when we're not awaiting them anymore
     await Promise.allSettled(abortedRequests)
   }
 
