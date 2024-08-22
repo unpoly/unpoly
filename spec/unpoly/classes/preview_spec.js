@@ -1,3 +1,6 @@
+const e = up.element
+const u = up.util
+
 describe('up.Preview', function() {
 
   describe('#target', function() {
@@ -171,63 +174,334 @@ describe('up.Preview', function() {
 
   describe('#renderOptions', function() {
 
-    it('returns the options for the render pass being previewed')
+    it('returns the options for the render pass being previewed', async function() {
+      let spy = jasmine.createSpy('spy')
+      let previewFn = (preview) => spy(preview.renderOptions)
+
+      up.render({ preview: previewFn, url: '/url', target: 'body', scroll: '#scroll', focus: '#focus' })
+      await wait()
+
+      expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({ scroll: '#scroll', focus: '#focus' }))
+    })
 
   })
 
   describe('#request', function() {
 
-    it('returns the up.Request object that is being previewed')
+    it('returns the up.Request object that is being previewed', async function() {
+      let spy = jasmine.createSpy('spy')
+      let previewFn = (preview) => spy(preview.request)
+
+      up.render({ preview: previewFn, url: '/url', method: 'DELETE', target: 'body' })
+      await wait()
+
+      expect(spy).toHaveBeenCalledWith(jasmine.any(up.Request))
+      expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({ url: '/url', method: 'DELETE' }))
+    })
 
   })
 
   describe('#setAttrs()', function() {
 
-    it('temporarily sets attributes on an element')
+    it('temporarily sets attributes on an element', async function() {
+      fixture('#target')
+      let element = fixture('#element[foo="old-foo"]')
+      let previewFn = (preview) => preview.setAttrs(element, { foo: 'new-foo', bar: 'new-bar' })
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(element).toHaveAttribute('foo', 'new-foo')
+      expect(element).toHaveAttribute('bar', 'new-bar')
+
+      jasmine.respondWithSelector('#target')
+      await wait()
+
+      expect(element).toHaveAttribute('foo', 'old-foo')
+      expect(element).not.toHaveAttribute('bar')
+    })
 
   })
 
   describe('#addClass()', function() {
 
-    it('temporarily adds a class to an element')
+    it('temporarily adds a class to an element', async function() {
+      fixture('#target')
+      let element = fixture('#element.foo')
+      let previewFn = (preview) => preview.addClass(element, 'bar')
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(element).toHaveClass('foo')
+      expect(element).toHaveClass('bar')
+
+      jasmine.respondWithSelector('#target')
+      await wait()
+
+      expect(element).toHaveClass('foo')
+      expect(element).not.toHaveClass('bar')
+    })
 
   })
 
   describe('#setStyle()', function() {
 
-    it('temporarily sets inline styles on an element')
+    it('temporarily sets inline styles on an element', async function() {
+      fixture('#target')
+      let element = fixture('#element', { style: { 'font-size': '10px' }})
+      let previewFn = (preview) => preview.setStyle(element, { 'font-size': '15px', 'margin-top': '20px' })
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(element).toHaveInlineStyle({ 'font-size': '15px', 'margin-top': '20px' })
+
+      jasmine.respondWithSelector('#target')
+      await wait()
+
+      expect(element).toHaveInlineStyle({ 'font-size': '10px' })
+      expect(element).not.toHaveInlineStyle('margin-top')
+    })
 
   })
 
-  describe('#setStyle()', function() {
+  describe('#disable()', function() {
 
-    it('temporarily disables an input field')
+    it('temporarily disables an input field', async function() {
+      fixture('#target')
+      let input = fixture('input[type=text][name=foo]')
+      let previewFn = (preview) => preview.disable(input)
 
-    it('temporarily disables a container of input fields')
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
 
-    it('does not re-enable fields that were already disabled before the preview')
+      expect(input).toBeDisabled()
+
+      jasmine.respondWithSelector('#target')
+      await wait()
+
+      expect(input).not.toBeDisabled()
+    })
+
+    it('temporarily disables a container of input fields', async function() {
+      fixture('#target')
+
+      const [container, input1, input2] = htmlFixtureList(`
+        <div id="container">
+          <input type="text" name="foo"> 
+          <input type="text" name="bar">
+        </div> 
+      `)
+
+      let previewFn = (preview) => preview.disable(container)
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(input1).toBeDisabled()
+      expect(input2).toBeDisabled()
+
+      jasmine.respondWithSelector('#target')
+      await wait()
+
+      expect(input1).not.toBeDisabled()
+      expect(input2).not.toBeDisabled()
+    })
+
+    it('does not re-enable fields that were already disabled before the preview', async function() {
+      fixture('#target')
+
+      const [container, input1, input2] = htmlFixtureList(`
+        <div id="container">
+          <input type="text" name="foo" disabled> 
+          <input type="text" name="bar">
+        </div> 
+      `)
+
+      let previewFn = (preview) => preview.disable(container)
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(input1).toBeDisabled()
+      expect(input2).toBeDisabled()
+
+      jasmine.respondWithSelector('#target')
+      await wait()
+
+      expect(input1).toBeDisabled()
+      expect(input2).not.toBeDisabled()
+    })
 
   })
 
   describe('#insert()', function() {
 
-    it('temporarily appends the given element to the children of the given reference')
+    it('temporarily appends the given element to the children of the given reference', async function() {
+      fixture('#target')
+      let reference = fixture('#reference')
+      let newChild = e.createFromSelector('#new-child')
+      let previewFn = (preview) => preview.insert(reference, newChild)
 
-    it('accepts a position relative to the given reference')
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
 
-    it('parses a new element from a string of HTML')
+      expect(newChild).toBeAttached()
+      expect(newChild.parentElement).toBe(reference)
 
-    it('compiles and cleans the temporary element as it enters and exits the DOM')
+      jasmine.respondWithSelector('#target')
+      await wait()
+
+      expect(newChild).toBeDetached()
+    })
+
+    it('accepts a position relative to the given reference', async function() {
+      fixture('#target')
+      let reference = fixture('#reference')
+      let newChild = e.createFromSelector('#new-child')
+      let previewFn = (preview) => preview.insert(reference, 'beforebegin', newChild)
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(newChild).toBeAttached()
+      expect(newChild.nextElementSibling).toBe(reference)
+
+      jasmine.respondWithSelector('#target')
+      await wait()
+
+      expect(newChild).toBeDetached()
+    })
+
+    it('parses a new element from a string of HTML', async function() {
+      fixture('#target')
+      let reference = fixture('#reference')
+      let previewFn = (preview) => preview.insert(reference, '<div id="new-child"></div>')
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(document).toHaveSelector('#new-child')
+      let newChild = document.querySelector('#new-child')
+      expect(newChild).toBeAttached()
+      expect(newChild.parentElement).toBe(reference)
+
+      jasmine.respondWithSelector('#target')
+      await wait()
+
+      expect(newChild).toBeDetached()
+    })
+
+    it('compiles and cleans the temporary element as it enters and exits the DOM', async function() {
+      let compileSpy = jasmine.createSpy('compile spy')
+      let cleanSpy = jasmine.createSpy('clean spy')
+      up.compiler('#new-child', function(element) {
+        compileSpy(element)
+        return () => cleanSpy(element)
+      })
+
+      fixture('#target')
+      let reference = fixture('#reference')
+      let newChild = e.createFromSelector('#new-child')
+      let previewFn = (preview) => preview.insert(reference, newChild)
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(newChild).toBeAttached()
+      expect(compileSpy).toHaveBeenCalledWith(newChild)
+      expect(cleanSpy).not.toHaveBeenCalled()
+
+      jasmine.respondWithSelector('#target')
+      await wait()
+
+      expect(newChild).toBeDetached()
+      expect(cleanSpy).toHaveBeenCalledWith(newChild)
+    })
 
   })
 
   describe('#swap()', function() {
 
-    it('temporarily swaps an element with another')
+    it('temporarily swaps an element with another', async function() {
+      fixture('#target')
+      let container = fixture('#container')
+      let reference = e.affix(container, '#reference')
+      let replacement = e.createFromSelector('#new-child')
+      let previewFn = (preview) => preview.swap(reference, replacement)
 
-    it('compiles and cleans the temporary element as it enters and exits the DOM')
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
 
-    it('does not clean or re-compile the original element while it is detached')
+      expect(reference).toBeDetached()
+      expect(replacement).toBeAttached()
+      expect(replacement.parentElement).toBe(container)
+
+      jasmine.respondWithSelector('#target')
+      await wait()
+
+      expect(replacement).toBeDetached()
+      expect(reference).toBeAttached()
+      expect(reference.parentElement).toBe(container)
+    })
+
+    it('compiles and cleans the temporary element as it enters and exits the DOM', async function() {
+      let compileSpy = jasmine.createSpy('compile spy')
+      let cleanSpy = jasmine.createSpy('clean spy')
+      up.compiler('#new-child', function(element) {
+        compileSpy(element)
+        return () => cleanSpy(element)
+      })
+
+      fixture('#target')
+      let container = fixture('#container')
+      let reference = e.affix(container, '#reference')
+      let replacement = e.createFromSelector('#new-child')
+      let previewFn = (preview) => preview.swap(reference, replacement)
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(replacement).toBeAttached()
+      expect(compileSpy).toHaveBeenCalledWith(replacement)
+      expect(cleanSpy).not.toHaveBeenCalled()
+
+      jasmine.respondWithSelector('#target')
+      await wait()
+
+      expect(replacement).toBeDetached()
+      expect(cleanSpy).toHaveBeenCalledWith(replacement)
+    })
+
+    it('does not clean or re-compile the original element while it is detached', async function() {
+      let compileSpy = jasmine.createSpy('compile spy')
+      let cleanSpy = jasmine.createSpy('clean spy')
+      up.compiler('#reference', function(element) {
+        compileSpy(element)
+        return () => cleanSpy(element)
+      })
+
+      fixture('#target')
+      let container = fixture('#container')
+      let reference = e.affix(container, '#reference')
+      let replacement = e.createFromSelector('#new-child')
+      let previewFn = (preview) => preview.swap(reference, replacement)
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(replacement).toBeAttached()
+      expect(compileSpy).not.toHaveBeenCalled()
+      expect(cleanSpy).not.toHaveBeenCalled()
+
+      jasmine.respondWithSelector('#target')
+      await wait()
+
+      expect(replacement).toBeDetached()
+      expect(compileSpy).not.toHaveBeenCalled()
+      expect(cleanSpy).not.toHaveBeenCalled()
+    })
 
     // it('transfers an .up-loading class to the new element')
 
@@ -235,17 +509,73 @@ describe('up.Preview', function() {
 
   describe('#show()', function() {
 
-    it('temporarily shows a hidden element')
+    it('temporarily shows a hidden element', async function() {
+      fixture('#target')
+      let element = fixture('#element[hidden]')
+      let previewFn = (preview) => preview.show(element)
 
-    it('does not re-hide element that was visible before the preview')
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(element).toBeVisible()
+
+      jasmine.respondWithSelector('#target')
+      await wait()
+
+      expect(element).toBeHidden()
+    })
+
+    it('does not re-hide element that was visible before the preview', async function() {
+      fixture('#target')
+      let element = fixture('#element')
+      let previewFn = (preview) => preview.show(element)
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(element).toBeVisible()
+
+      jasmine.respondWithSelector('#target')
+      await wait()
+
+      expect(element).toBeVisible()
+    })
 
   })
 
   describe('#hide()', function() {
 
-    it('temporarily hides a visible element')
+    it('temporarily hides a visible element', async function() {
+      fixture('#target')
+      let element = fixture('#element')
+      let previewFn = (preview) => preview.hide(element)
 
-    it('does not re-show element that was hidden before the preview')
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(element).toBeHidden()
+
+      jasmine.respondWithSelector('#target')
+      await wait()
+
+      expect(element).toBeVisible()
+    })
+
+    it('does not re-show element that was hidden before the preview', async function() {
+      fixture('#target')
+      let element = fixture('#element[hidden]')
+      let previewFn = (preview) => preview.hide(element)
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(element).toBeHidden()
+
+      jasmine.respondWithSelector('#target')
+      await wait()
+
+      expect(element).toBeHidden()
+    })
 
   })
 
@@ -259,7 +589,18 @@ describe('up.Preview', function() {
 
   describe('#run(Function)', function() {
 
-    it('runs another preview function')
+    it('runs another preview function', async function() {
+      let preview2Fn = jasmine.createSpy('preview2')
+      let preview1Fn = jasmine.createSpy('preview1').and.callFake(function(preview) {
+        preview.run(preview2Fn)
+      })
+
+      up.render({ preview: preview1Fn, url: '/url', target: 'body' })
+      await wait()
+
+      expect(preview1Fn).toHaveBeenCalledWith(jasmine.any(up.Preview))
+      expect(preview2Fn).toHaveBeenCalled(preview1Fn.calls.mostRecent().args[0])
+    })
 
     it('also reverts the effects of the other preview')
 
