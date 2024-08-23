@@ -29,6 +29,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
       // `up.fragment.abort({ layer })` is called for the base layer.
       bindLayer: this._baseLayer,
       layer: 'new',
+      layerOptions: this.options,
 
       // We associate this request with the base layer's main element. This way the request
       // will be aborted if the base layer receives a major navigation, but not when a

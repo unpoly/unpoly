@@ -44,56 +44,9 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   @stable
   */
 
-  keys() {
-    return super.keys().concat([
-      'position',
-      'align',
-      'size',
-      'origin', // for tethered anchor element
-      'class',
-      'backdrop',
-      'openAnimation',
-      'closeAnimation',
-      'openDuration',
-      'closeDuration',
-      'openEasing',
-      'closeEasing',
-      'backdropOpenAnimation',
-      'backdropCloseAnimation',
-      'dismissable',
-      'dismissLabel',
-      'dismissAriaLabel',
-      'onOpened',
-      'onAccept',
-      'onAccepted',
-      'onDismiss',
-      'onDismissed',
-      'acceptEvent',
-      'dismissEvent',
-      'acceptLocation',
-      'dismissLocation',
-      'opening' // internal flag to know that the layer is being opened
-    ])
-  }
-
   constructor(options) {
     super(options)
-
-    if (this.dismissable === true) {
-      this.dismissable = ['button', 'key', 'outside']
-    } else if (this.dismissable === false) {
-      this.dismissable = []
-    } else {
-      this.dismissable = u.parseTokens(this.dismissable)
-    }
-
-    if (this.acceptLocation) {
-      this.acceptLocation = new up.URLPattern(this.acceptLocation)
-    }
-
-    if (this.dismissLocation) {
-      this.dismissLocation = new up.URLPattern(this.dismissLocation)
-    }
+    this.opening = true
   }
 
   callback(name) {

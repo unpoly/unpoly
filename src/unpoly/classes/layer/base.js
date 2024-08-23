@@ -77,11 +77,9 @@ up.Layer = class Layer extends up.Record {
 
   keys() {
     return [
+      ...up.layer.OPTION_KEYS,
       'element',
       'stack',
-      'history',
-      'mode',
-      'context',
       'lastScrollTops',
       'lastFocusCapsules',
     ]
@@ -100,6 +98,22 @@ up.Layer = class Layer extends up.Record {
 
     if (!this.mode) {
       throw "missing { mode } option"
+    }
+
+    if (this.dismissable === true) {
+      this.dismissable = ['button', 'key', 'outside']
+    } else if (this.dismissable === false) {
+      this.dismissable = []
+    } else {
+      this.dismissable = u.parseTokens(this.dismissable)
+    }
+
+    if (this.acceptLocation) {
+      this.acceptLocation = new up.URLPattern(this.acceptLocation)
+    }
+
+    if (this.dismissLocation) {
+      this.dismissLocation = new up.URLPattern(this.dismissLocation)
     }
   }
 

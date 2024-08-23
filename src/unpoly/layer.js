@@ -37,6 +37,38 @@ Once the subinteraction is *done*, the overlay is closed and a result value is c
 */
 up.layer = (function() {
 
+  const OPTION_KEYS = [
+    'history',
+    'mode',
+    'context',
+    'position',
+    'align',
+    'size',
+    'origin', // for tethered anchor element
+    'class',
+    'backdrop',
+    'openAnimation',
+    'closeAnimation',
+    'openDuration',
+    'closeDuration',
+    'openEasing',
+    'closeEasing',
+    'backdropOpenAnimation',
+    'backdropCloseAnimation',
+    'dismissable',
+    'dismissLabel',
+    'dismissAriaLabel',
+    'onOpened',
+    'onAccept',
+    'onAccepted',
+    'onDismiss',
+    'onDismissed',
+    'acceptEvent',
+    'dismissEvent',
+    'acceptLocation',
+    'dismissLocation',
+  ]
+
   const LAYER_CLASSES = [
     up.Layer.Root,
     up.Layer.Modal,
@@ -959,7 +991,8 @@ up.layer = (function() {
     anySelector,
     optionToString,
     get stack() { return stack.layers },
-    isWithinForeignOverlay
+    isWithinForeignOverlay,
+    OPTION_KEYS,
   }
 
   /*-
