@@ -131,6 +131,66 @@ describe 'up.link', ->
           # No request should be made because we prevented the event
           expect(jasmine.Ajax.requests.count()).toEqual(0)
 
+        it 'allows listeners to inspect event.renderOptions', ->
+          link = fixture('a[href="/destination"][up-target=".response"][up-scroll=".scroll"][up-focus=".focus"]')
+          listener = jasmine.createSpy('follow listener')
+          link.addEventListener('up:link:follow', listener)
+
+          up.follow(link)
+          await wait()
+
+          expect(listener).toHaveBeenCalledWith(
+            jasmine.objectContaining(
+              renderOptions: jasmine.objectContaining(
+                target: '.response',
+                scroll: '.scroll',
+                focus: '.focus',
+              )
+            )
+          )
+
+#        it 'allows listeners to inspect event.renderLayer when updating an existing layer', ->
+#          makeLayers([
+#            { target: '#target' },
+#            { target: '#target' },
+#            { target: '#target' },
+#          ])
+#          expect(up.layer.current).toBeOverlay()
+#
+#          link = up.layer.current.affix('a[href="/destination"][up-target="#target"][up-layer="parent"]')
+#          expect(up.layer.get(link).index).toBe(2)
+#
+#          listener = jasmine.createSpy('follow listener')
+#          link.addEventListener('up:link:follow', listener)
+#
+#          up.follow(link)
+#          await wait()
+#
+#          expect(listener).toHaveBeenCalledWith(
+#            jasmine.objectContaining(
+#              renderLayer: up.layer.get(1)
+#            )
+#          )
+#
+#        it 'allows listeners to inspect event.renderLayer when opening a new layer', ->
+#          link = fixture('a[href="/destination"][up-target="#target"][up-layer="new drawer"]')
+#          expect(up.layer.get(link).index).toBe(2)
+#
+#          listener = jasmine.createSpy('follow listener')
+#          link.addEventListener('up:link:follow', listener)
+#
+#          up.follow(link)
+#          await wait()
+#
+#          expect(listener).toHaveBeenCalledWith(
+#            jasmine.objectContaining(
+#              renderLayer: 'new',
+#              renderOptions: jasmine.objectContaining(
+#                mode: 'drawer',
+#              )
+#            )
+#          )
+
         it 'allows listeners to mutate event.renderOptions', ->
           fixture('#foo', text: 'old foo')
           fixture('#bar', text: 'old bar')
@@ -157,6 +217,30 @@ describe 'up.link', ->
 
           expect('#foo').toHaveText('old foo')
           expect('#bar').toHaveText('new bar')
+
+        it 'allows listeners to update another layer by mutating event.renderOptions.layer', ->
+          makeLayers([
+            { target: '.target', content: 'old text' },
+            { target: '.target', content: 'old text' },
+          ])
+
+          link = fixture('a[href="/path"][up-target=".target"]')
+
+          listener = jasmine.createSpy('follow listener').and.callFake (event) ->
+            event.renderOptions.layer = 1
+
+          link.addEventListener('up:link:follow', listener)
+
+          up.follow(link, peel: false)
+
+          await wait()
+
+          jasmine.respondWithSelector('.target', text: 'new text')
+
+          await wait()
+
+          expect(up.fragment.get('.target', layer: 0)).toHaveText('old text')
+          expect(up.fragment.get('.target', layer: 1)).toHaveText('new text')
 
         it 'allows listeners to open a new layer, using the shorthand { layer: "new" } with an implicit mode', ->
           fixture('#foo', text: 'old foo in root')
