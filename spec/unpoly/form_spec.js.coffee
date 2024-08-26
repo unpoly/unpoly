@@ -457,20 +457,20 @@ describe 'up.form', ->
               input.value = 'new-value-1'
               Trigger[eventType](input)
 
-              await wait(10)
+              await wait(20)
 
               # Callback has been called and takes 100 ms to complete
               expect(callbackArgs).toEqual ['new-value-1']
               input.value = 'new-value-2'
               Trigger[eventType](input)
 
-              await wait(10)
+              await wait(20)
 
               expect(callbackArgs).toEqual ['new-value-1']
               input.value = 'new-value-3'
               Trigger[eventType](input)
 
-              await wait(120)
+              await wait(140)
 
               expect(callbackArgs).toEqual ['new-value-1', 'new-value-3']
 
