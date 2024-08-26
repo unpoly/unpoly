@@ -53,7 +53,7 @@ beforeEach ->
 
 afterEach ->
   # Wait 1 more frame for async errors to (correctly) fail the test.
-  await wait()
+  await jasmine.waitMessageChannel()
 
   # Ignore errors while the framework is being reset.
   await jasmine.spyOnGlobalErrorsAsync (_globalErrorSpy) ->
@@ -78,7 +78,7 @@ afterEach ->
     # Wait one more frame so pending callbacks have a chance to run.
     # Pending callbacks might change the URL or cause errors that bleed into
     # the next example.
-    await wait() if waitMore
+    await jasmine.waitMessageChannel() if waitMore
 
     # Reset browser location and meta/link elements to those from before the suite.
     # Some resetting modules (like up.history) need to be called after the URL was been reset.
@@ -89,7 +89,7 @@ afterEach ->
 
     up.framework.reset()
 
-    await wait() if waitMore
+    await jasmine.waitMessageChannel() if waitMore
 
   # Make some final checks that we have reset successfully
   overlays = document.querySelectorAll('up-modal, up-popup, up-cover, up-drawer')
