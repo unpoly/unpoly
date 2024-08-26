@@ -26,3 +26,21 @@ async function waitTasks(count = 1) {
 }
 
 jasmine.waitTasks = waitTasks
+
+async function waitMessageChannel() {
+  return new Promise(function(resolve) {
+    const channel = new MessageChannel()
+    channel.port1.onmessage = resolve
+    channel.port2.postMessage(0)
+  })
+}
+
+jasmine.waitMessageChannel = waitMessageChannel
+
+async function waitAnimationFrame() {
+  return new Promise(function(resolve) {
+    requestAnimationFrame(resolve)
+  })
+}
+
+jasmine.waitAnimationFrame = waitAnimationFrame
