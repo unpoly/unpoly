@@ -69,7 +69,7 @@ This release improves the handling of faux-interactive elements:
 
 - Fix: up-alias not matching URL query string with asterix after shash (#542)
 - Fix a bug where an overlay with viewport would not correctly shift multiple right-fixed elements
-- [up-defer][up-href] elements no longer have a hand cursor
+- `[up-defer]` elements no longer have a hand cursor
 - Events like `up:link:follow` can now [open a layer with a given mode](/opening-overlays#overlay-modes) using the shorthand notation `event.renderOptions.layer = "new drawer"`.
 - Avoid logging `Uncaught AbortError` when the user presses the back button, but a script prevents the `up:location:restore` event.
 - Aboid logging `Uncaught AbortError` when the user closes the overlay, but a script prevents the `up:layer:dismiss` or `up:layer:accept` event.
