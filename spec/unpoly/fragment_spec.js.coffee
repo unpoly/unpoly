@@ -1587,6 +1587,10 @@ describe 'up.fragment', ->
               expect(onFinished).not.toHaveBeenCalled()
               expect(onOffline).toHaveBeenCalled()
 
+        describe 'up:fragment:load event', ->
+
+
+
         describe 'up:fragment:loaded event', ->
 
           it 'emits an up:fragment:loaded event that contains information about the request, response and render options', asyncSpec (next) ->
