@@ -5801,17 +5801,20 @@ describe 'up.fragment', ->
 
       describe 'scrolling', ->
 
+        mockReveal = ->
+          @revealedHTML = []
+          @revealedText = []
+          @revealOptions = {}
+
+          @revealMock = spyOn(up, 'reveal').and.callFake (element, options) =>
+            @revealedHTML.push element.outerHTML
+            @revealedText.push element.textContent.trim()
+            @revealOptions = options
+            Promise.resolve()
+
         mockRevealBeforeEach = ->
           beforeEach ->
-            @revealedHTML = []
-            @revealedText = []
-            @revealOptions = {}
-
-            @revealMock = spyOn(up, 'reveal').and.callFake (element, options) =>
-              @revealedHTML.push element.outerHTML
-              @revealedText.push element.textContent.trim()
-              @revealOptions = options
-              Promise.resolve()
+            mockReveal.apply(this)
 
         describe 'with { scroll: false }', ->
 
@@ -6111,37 +6114,48 @@ describe 'up.fragment', ->
 
         describe 'with { scrollBehavior } option', ->
 
-          mockRevealBeforeEach()
+          it 'animates the revealing when prepending an element', ->
+            mockReveal.apply(this)
 
-          it 'animates the revealing when prepending an element', asyncSpec (next) ->
             fixture('.element', text: 'version 1')
             up.render('.element:before',
               document: '<div class="element">version 2</div>',
               scroll: 'target',
               scrollBehavior: 'smooth'
             )
-            next =>
-              expect(@revealOptions.scrollBehavior).toEqual('smooth')
 
-          it 'animates the revealing when appending an element', asyncSpec (next) ->
+            await wait()
+
+            expect(@revealOptions.scrollBehavior).toEqual('smooth')
+
+          it 'animates the revealing when appending an element', ->
+            mockReveal.apply(this)
+
             fixture('.element', text: 'version 1')
             up.render('.element:after',
               document: '<div class="element">version 2</div>',
               scroll: 'target',
               scrollBehavior: 'smooth'
             )
-            next =>
-              expect(@revealOptions.scrollBehavior).toEqual('smooth')
 
-          it 'animates the revealing when swapping out an element', asyncSpec (next) ->
+            await wait()
+
+            expect(@revealOptions.scrollBehavior).toEqual('smooth')
+
+          it 'animates the revealing when swapping out an element', ->
+            fixture('.before', text: 'before', style: { height: '20000px' })
+
             fixture('.element', text: 'version 1')
             up.render('.element',
               document: '<div class="element">version 2</div>',
               scroll: 'target',
               scrollBehavior: 'smooth'
             )
-            next =>
-              expect(@revealOptions.scrollBehavior).toEqual('smooth')
+
+            await wait(80)
+
+            expect(document.scrollingElement.scrollTop).toBeGreaterThan(10)
+            expect(document.scrollingElement.scrollTop).toBeLessThan(19000)
 
         describe 'with { scroll: "restore" } option', ->
 

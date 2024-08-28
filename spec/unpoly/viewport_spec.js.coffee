@@ -593,7 +593,7 @@ describe 'up.viewport', ->
 
       describe 'with { behavior: "smooth" }', ->
 
-        it 'animates the scroll motion', (done) ->
+        it 'animates the scroll motion', ->
           fixture('.between', text: 'between', style: { height: '20000px' })
           destination = fixture('.destination', text: 'destination')
 
@@ -601,10 +601,10 @@ describe 'up.viewport', ->
 
           up.reveal(destination, behavior: 'smooth')
 
-          u.timer 80, ->
-            expect(document.scrollingElement.scrollTop).toBeGreaterThan(10)
-            expect(document.scrollingElement.scrollTop).toBeLessThan(19000)
-            done()
+          await wait(80)
+
+          expect(document.scrollingElement.scrollTop).toBeGreaterThan(10)
+          expect(document.scrollingElement.scrollTop).toBeLessThan(19000)
 
       describe 'without a { behavior } option', ->
 
