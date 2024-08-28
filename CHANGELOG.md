@@ -74,7 +74,7 @@ This release improves the handling of faux-interactive elements:
 - [up-defer][up-href] elements no longer have a hand cursor
 - Events like `up:link:follow` can now [open a layer with a given mode](/opening-overlays#overlay-modes) using the shorthand notation `event.renderOptions.layer = "new drawer"`.
 - Avoid logging `Uncaught AbortError` when the user presses the back button, but a script prevents the `up:location:restore` event.
-- Aboid logging `Uncaught AbortError` when the user closes the overlay, but a script prevents the `up:layer:dimiss` or `up:layer:accept` event.
+- Aboid logging `Uncaught AbortError` when the user closes the overlay, but a script prevents the `up:layer:dismiss` or `up:layer:accept` event.
 - Reduce the number of [layer lookups](/up.layer.get) during a render pass.
 
 
