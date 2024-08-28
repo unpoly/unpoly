@@ -92,3 +92,5 @@ RedirectPermanent /a-up-accept /up-accept
 RedirectPermanent /a-up-transition /up-transition
 RedirectPermanent /form-up-transition /up-transition
 
+RedirectPermanent /fragment-placement /targeting-fragments
+

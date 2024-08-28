@@ -8,35 +8,75 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
-3.9.0 (unreleased)
-------------------
+3.9.0
+-----
 
-- Making non-interactive elements behave like hyperlink requires [up-follow] in addition to [up-href].
-- Links with just [up-instant] are no longer followable by default. They also require [up-follow]
-- Faux-interactive elements can now be activated by the Space button if they have a button role. Activation with Enter remains for both faux-buttons and faux-links.
-- Faux-interactive elements with [up-follow] now default to the [link] role (instead of [button]).
-- Faux-interactive elements with a button role no longer have the "hand" cursor.
+This release brings many fixes and quality-of-life improvements that were requested by the [community](/community).
+
+The vast majority of these changes are backward compatible. One breaking change can be found with [making links followable](#making-links-followable). Existing usage is polyfilled by [`unpoly-migrate.js`](/changes/upgrading).
+
+
+### Emitting events on buttons
+
+- You can now use `[up-emit]` to emit an event when any element is clicked. In particular this works with a `<button>` or any [faux-interactive element](/faux-interactive-elements) (issue #416).
+
+
+### Improvements to faux-interactive elements
+
+Sometimes you need to add a `click` listener to non-interactive elements (like `<span>`). Unpoly helps you [prevent accessibility issues](/faux-interactive-elements#accessibility)
+with such "faux-interactive" elements, by offering the `[up-clickable]` attribute and `up.link.config.clickableSelectors` configuration.
+Unpoly also leverages this for its own faux-interactive elements, such as `[up-emit]` or `[up-dismiss]`.
+
+This release improves the handling of faux-interactive elements:
+
+- A new documentation guide [Clicking non-interactive elements](/faux-interactive-elements) details all the methods to emulate interactivity on non-interactive elements like `<span>` or `<div>`.
+- You can now define exceptions to `up.link.config.clickableSelectors`, by setting an `[up-clickable=false]` attribute or configuring `up.link.config.noClickableSelectors`.
+- Adjustae the handling of keyboard input to better match the behavior of real buttons and links. In particular, faux-interactive elements with a [button role](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/button_role) (default) can be activated with both `Space` and `Enter` keys. Faux-interactive elements with a `[role=link]` can only be activated with the `Enter` key.
+- Faux-interactive elements that also have the `[up-follow]` attribute now default to `[role=link]` (instead of the default `[role=button]`).
+- Faux-interactive elements with a button role no longer have the "hand" (or "pointer") cursor.
+- Fix a bug where faux-interactive elements inside popups could not be activated with the keyboard (#653).
+
+
+### Making links followable
+
+- Links with only an `[up-href]` attribute are no longer followable by default. They also require an `[up-follow]` attribute or a match in `up.link.config.followSelectors`. This change was made to remove confusion with other features that use `[up-href]`, such as `[up-defer]` and (since this release) `[up-poll]`.
+- Links with only an `[up-instant]` attribute are no longer followable by default. They also require an `[up-follow]` attribute or a match in `up.link.config.followSelectors`. This change was made to remove confusion with other features that use `[up-instant]`, in particular `up:click` on [faux-interactive elements](/faux-interactive-elements).
+
+
+
+### Polling
+
+- Listeners to the `up:fragment:poll` event can now inspect or mutate `event.renderOptions`. This allows more control over the polling request and sub-sequent render passes.
+- `[up-poll]` elements can now use the `[up-href]` attribute to poll from a different URL. By default Unpoly will poll the URL from which the element was originally loaded. The old method over overriding `[up-source]` is still supported, but `[up-href]` is the preferred way of doing this going forward.
+- `[up-poll]` elements can now use the `[up-method]` attribute to choose a different HTTP method for polling requests.
+- `[up-poll]` elements can now use the `[up-params]` attribute to add custom params to polling requests.
+- `[up-poll]` elements can now use the `[up-headers]` attribute to add custom headers to polling requests.
+
+
+### Forms
+
+- Focus is now preserved when submitting a form by pressing `Enter` from a focused field ([discussion #658](https://github.com/unpoly/unpoly/discussions/658)).
+- The `up.submit()` now includes the `[name]` and `[value]` of the default submit button in the submitted params. By default the form's first submit button will be assumed. You can prevent this with `{ submitButton: false }`, or pass a different button element as `{ submitButton }`.
+- Fix an interop issue with the [Shoelace](https://shoelace.style/) web component library, where a failed response could not be processed when the form was submitted with an `<sl-button>` ([discussion #643](https://github.com/unpoly/unpoly/discussions/643)).
+
+
+
+### Smooth scrolling
+
+- Support [smooth scrolling](/scroll-tuning#animating-the-scroll-motion) when swapping a fragment.
+- Fix smooth scrolling when [prepending or appending](/targeting-fragments#appending-or-prepending) content.
+
+
+### Various
+
 - Fix: up-alias not matching URL query string with asterix after shash (#542)
-- Reduce layer lookups
-- Run guardEvents before preprocessing so they can use shorthands in event.renderOptions
-- Process failed responses when submit button is detached after submission
-- Clickable elements can now be activated with keyboard inside popups (#653)
-- [up-defer][up-href] elements no longer have a hand cursor
-- [up-emit] works on any kind of element, in particular button (#416)
-- [up-poll] prefers a custom URL in [up-href]. The old method in [up-source] is still supported.
-- [up-poll] supports [up-method]
-- [up-poll] supports [up-params]
-- [up-poll] supports [up-headers]
-- New doc page "Clicking non-interactive elements"
-- Listeners to up:fragment:poll can now inspect or mutate event.renderOptions
-- Don't focus submit button when submitting with Enter in a focused field
-- up.submit() includes default submit button in params. Can be prevented with up.submit(form, { submitButton: false })
 - Fix a bug where an overlay with viewport would not correctly shift multiple right-fixed elements
-- Fix smooth scrolling when prepending/appending content
-- Allow smooth scrolling when swapping a fragment
-- Introduce up.link.config.noClickableSelectors and [up-clickable=false]
-- Mute an error `Uncaught AbortError: Rendering was prevented by up:location:restore listener` when the user presses the back button and up:location:restore is prevented
-- Mute an error `Uncaught AbortError: Close event was prevented` when up:layer:dimiss or up:layer:accept is prevented, but was not triggered by a JavaScript function
+- [up-defer][up-href] elements no longer have a hand cursor
+- Events like `up:link:follow` can now [open a layer with a given mode](/opening-overlays#overlay-modes) using the shorthand notation `event.renderOptions.layer = "new drawer"`.
+- Avoid logging `Uncaught AbortError` when the user presses the back button, but a script prevents the `up:location:restore` event.
+- Aboid logging `Uncaught AbortError` when the user closes the overlay, but a script prevents the `up:layer:dimiss` or `up:layer:accept` event.
+- Reduce the number of [layer lookups](/up.layer.get) during a render pass.
+
 
 
 3.8.0

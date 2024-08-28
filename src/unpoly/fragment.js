@@ -644,12 +644,12 @@ up.fragment = (function() {
   @param {string} [options.transition]
     The name of an [transition](/up.motion) to morph between the old and few fragment.
 
-    If you are [prepending or appending content](/targeting-fragments#appending-or-prepending-content),
+    If you are [prepending or appending content](/targeting-fragments#appending-or-prepending),
     use the `{ animation }` option instead.
 
   @param {string} [options.animation]
     The name of an [animation](/up.motion) to reveal a new fragment when
-    [prepending or appending content](/targeting-fragments#appending-or-prepending-content).
+    [prepending or appending content](/targeting-fragments#appending-or-prepending).
 
     If you are replacing content (the default), use the `{ transition }` option instead.
 
@@ -768,7 +768,7 @@ up.fragment = (function() {
 
   @param {string} [options.scrollBehavior='instant']
     Whether to [animate the scroll motion](/scroll-tuning#animating-the-scroll-motion)
-    when [prepending or appending](/targeting-fragments#appending-or-prepending-content) content.
+    when [prepending or appending](/targeting-fragments#appending-or-prepending) content.
 
   @param {number} [options.revealSnap]
     When to [snap to the top](/scroll-tuning#snapping-to-the-screen-edge)

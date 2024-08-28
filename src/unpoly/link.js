@@ -1267,12 +1267,12 @@ up.link = (function() {
   @param [up-transition]
     The name of an [transition](/up.motion) to morph between the old and few fragment.
 
-    If you are [prepending or appending content](/targeting-fragments#appending-or-prepending-content),
+    If you are [prepending or appending content](/targeting-fragments#appending-or-prepending),
     use the `[up-animation]` attribute instead.
 
   @param [up-animation]
     The name of an [animation](/up.motion) to reveal a new fragment when
-    [prepending or appending content](/targeting-fragments#appending-or-prepending-content).
+    [prepending or appending content](/targeting-fragments#appending-or-prepending).
 
     If you are replacing content (the default), use the `[up-transition]` attribute instead.
 
@@ -1382,7 +1382,7 @@ up.link = (function() {
 
   @param [up-scroll-behavior='instant']
     Whether to [animate the scroll motion](/scroll-tuning#animating-the-scroll-motion)
-    when [prepending or appending](/targeting-fragments#appending-or-prepending-content) content.
+    when [prepending or appending](/targeting-fragments#appending-or-prepending) content.
 
   @param [up-reveal-snap]
     When to [snap to the top](/scroll-tuning#snapping-to-the-screen-edge)

@@ -22,7 +22,7 @@ Note the following:
 - All pages are children of a container (`#pages`).
 - The *"load next page"* link is an `[up-defer]` placeholder that loads content [when it enters the viewport](/lazy-loading#on-reveal)
 - The partial targets itself (`#next-pages`) and the list of pages (`#pages`), using an [`[up-target]`](/up-defer#up-target) attribute.
-- Instead of [swapping](/targeting-fragments#swapping-a-fragment) the pages container, we're [appending content](/targeting-fragments#appending-or-prepending-content) to it
+- Instead of [swapping](/targeting-fragments#swapping-a-fragment) the pages container, we're [appending content](/targeting-fragments#appending-or-prepending) to it
 
 ## Loading the next page
 

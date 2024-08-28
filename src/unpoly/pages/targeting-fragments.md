@@ -113,11 +113,9 @@ up.reload(element) // Derives the target '#foo' from the given element
 See [target derivation](/target-derivation) for more details and examples.
 
 
-## Changing a fragment's content
+## Appending or prepending children {#appending-or-prepending}
 
-### Appending or prepending content
-
-Instead of swapping an entire fragment you may *append* content to an existing fragment by using the
+Instead of swapping an entire fragment you may *append* children to an existing fragment by using the
 `:after` pseudo selector. In the same fashion, you can use `:before` to *prepend* the loaded content.
 
 A practical example would be a paginated list of items. Below the list is
@@ -138,7 +136,7 @@ by using `:after` in the `[up-target]` selector like this:
 
 The server is still expected to render an entire `<ul class="tasks">`, but only its `<li>` children are used to extend the existing list.
 
-### Replacing an element's inner HTML
+## Replacing all children {#content}
 
 If you would like to preserve the target element, but replace all of its child content,
 use the `:content` pseudo selector:

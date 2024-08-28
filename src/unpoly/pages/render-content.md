@@ -44,7 +44,7 @@ In HTML you can pass the URL as a standard `[href]` attribute of a hyperlink (or
 
 > [tip]
 > See [targeting fragments](/targeting-fragments) for ways of controlling how the
-> new fragment is inserted. For instance, you can choose to [append](/targeting-fragments#appending-or-prepending-content)
+> new fragment is inserted. For instance, you can choose to [append](/targeting-fragments#appending-or-prepending)
 > the fragment instead of swapping it.
 
 

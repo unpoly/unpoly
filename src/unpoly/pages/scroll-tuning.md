@@ -17,7 +17,7 @@ When `{ scrollBehavior: 'auto' }` is passed, the behavior is determined by the C
 
 > [important]
 > When [swapping a fragment](/targeting-fragments#swapping-a-fragment), the scroll motion cannot be animated.
-> You *can* animate the scroll motion when [prepending, appending](/targeting-fragments#appending-or-prepending-content)
+> You *can* animate the scroll motion when [prepending, appending](/targeting-fragments#appending-or-prepending)
 > or [destroying](/up.destroy) a fragment.
 
 
