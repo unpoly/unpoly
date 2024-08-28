@@ -955,7 +955,6 @@ describe 'up.link', ->
         it 'returns true for an [up-instant][href] link', ->
           $link = $fixture('a[href="/foo"][up-instant]')
           up.hello $link
-          debugger
           expect(up.link.isFollowable($link)).toBe(true)
 
         it 'returns true for a faux [up-instant][up-href] link', ->
