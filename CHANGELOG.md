@@ -23,15 +23,13 @@ The vast majority of these changes are backward compatible. One breaking change 
 
 ### Improvements to faux-interactive elements
 
-Sometimes you need to add a `click` listener to non-interactive elements (like `<span>`). Unpoly helps you [prevent accessibility issues](/faux-interactive-elements#accessibility)
-with such "faux-interactive" elements, by offering the `[up-clickable]` attribute and `up.link.config.clickableSelectors` configuration.
-Unpoly also leverages this for its own faux-interactive elements, such as `[up-emit]` or `[up-dismiss]`.
-
+Sometimes you need to add a `click` listener to non-interactive elements (like `<span>`). Unpoly helps you [prevent accessibility issues](/faux-interactive-elements#accessibility) with such "faux-interactive" elements, by offering the `[up-clickable]` attribute and `up.link.config.clickableSelectors` configuration.
+Unpoly also leverages this for its own faux-interactive elements, such as `[up-emit]` or `[up-dismiss]`. 
 This release improves the handling of faux-interactive elements:
 
 - A new documentation guide [Clicking non-interactive elements](/faux-interactive-elements) details all the methods to emulate interactivity on non-interactive elements like `<span>` or `<div>`.
 - You can now define exceptions to `up.link.config.clickableSelectors`, by setting an `[up-clickable=false]` attribute or configuring `up.link.config.noClickableSelectors`.
-- Adjustae the handling of keyboard input to better match the behavior of real buttons and links. In particular, faux-interactive elements with a [button role](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/button_role) (default) can be activated with both `Space` and `Enter` keys. Faux-interactive elements with a `[role=link]` can only be activated with the `Enter` key.
+- Adjusted the handling of keyboard input to better match the behavior of real buttons and links. In particular, faux-interactive elements with a [button role](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/button_role) (default) can be activated with both `Space` and `Enter` keys. Faux-interactive elements with a `[role=link]` can only be activated with the `Enter` key.
 - Faux-interactive elements that also have the `[up-follow]` attribute now default to `[role=link]` (instead of the default `[role=button]`).
 - Faux-interactive elements with a button role no longer have the "hand" (or "pointer") cursor.
 - Fix a bug where faux-interactive elements inside popups could not be activated with the keyboard (#653).
