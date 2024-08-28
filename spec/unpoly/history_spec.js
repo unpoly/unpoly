@@ -113,8 +113,6 @@ describe('up.history', function() {
 
         up.history.replace('/location3')
         expect(up.history.previousLocation).toMatchURL('/location2#hash')
-
-        console.log(1)
       })
 
       it('returns the last previous location that is different from the current URL', function() {
