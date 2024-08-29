@@ -58,8 +58,6 @@ up.Layer.Overlay = class Overlay extends up.Layer {
       'closeDuration',
       'openEasing',
       'closeEasing',
-      'backdropOpenAnimation',
-      'backdropCloseAnimation',
       'dismissable',
       'dismissLabel',
       'dismissAriaLabel',
@@ -389,9 +387,13 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   }
 
   async startOpenAnimation(options = {}) {
+    let boxAnimation = options.animation ?? this.evalOption(this.openAnimation)
+    // Only animate the backdrop if we're animating the box
+    let backdropAnimation = boxAnimation && 'fade-in'
+
     await this._startAnimation({
-      boxAnimation: options.animation ?? this.evalOption(this.openAnimation),
-      backdropAnimation: 'fade-in',
+      boxAnimation,
+      backdropAnimation,
       easing: options.easing || this.openEasing,
       duration: options.duration || this.openDuration
     })
@@ -399,9 +401,13 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   }
 
   startCloseAnimation(options = {}) {
+    let boxAnimation =  this.wasEverVisible && (options.animation ?? this.evalOption(this.closeAnimation))
+    // Only animate the backdrop if we're animating the box
+    let backdropAnimation = boxAnimation && 'fade-out'
+
     return this._startAnimation({
-      boxAnimation: this.wasEverVisible && (options.animation ?? this.evalOption(this.closeAnimation)),
-      backdropAnimation: this.wasEverVisible && 'fade-out',
+      boxAnimation,
+      backdropAnimation,
       easing: options.easing || this.closeEasing,
       duration: options.duration || this.closeDuration
     })

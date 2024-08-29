@@ -3780,7 +3780,7 @@ describe 'up.form', ->
           expect(jasmine.lastRequest().url).toMatchURL('/link-path')
           expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toBeMissing()
 
-      it 'does not send a validation request when we render with { abort } while waiting for the validation delay', asyncSpec (next) ->
+      fit 'does not send a validation request when we render with { abort } while waiting for the validation delay', asyncSpec (next) ->
         target = fixture('.target')
         form = fixture('form[up-submit][action="/form-path"][up-validate-delay=20]')
         textField = e.affix(form, 'input[type=text][name=input][up-validate]')

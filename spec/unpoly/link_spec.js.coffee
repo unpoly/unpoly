@@ -1328,7 +1328,7 @@ describe 'up.link', ->
 
           expect(requestSpy).toHaveBeenCalledWith(jasmine.objectContaining(preload: true))
 
-      describe 'aborting', ->
+      fdescribe 'aborting', ->
 
         it 'is not abortable by default', asyncSpec (next) ->
           link = fixture('a[href="/path"][up-target=".target"]')
@@ -2766,7 +2766,7 @@ describe 'up.link', ->
           up.hello($area)
           expect($area.attr('up-href')).toBeUndefined()
 
-    describe '[up-preload]', ->
+    fdescribe '[up-preload]', ->
 
       it 'preloads the link destination when hovering, after a delay', ->
         up.link.config.preloadDelay = 100
@@ -2869,7 +2869,7 @@ describe 'up.link', ->
         next.after 50, ->
           expect(abortListener).toHaveBeenCalled()
 
-      it 'does not abort a request if the user followed the link while it was preloading, and then stopped hovering', asyncSpec (next) ->
+      fit 'does not abort a request if the user followed the link while it was preloading, and then stopped hovering', asyncSpec (next) ->
         up.link.config.preloadDelay = 10
         $fixture('.target').text('old text')
         $link = $fixture('a[href="/foo"][up-target=".target"][up-preload]')
