@@ -1356,6 +1356,20 @@ describe 'up.link', ->
 
           expect(up.network.isBusy()).toBe(false)
 
+        it 'does not abort other requests for the same target', ->
+          link1 = fixture('a[href="/path1"][up-target=".target"]')
+          link2 = fixture('a[href="/path2"][up-target=".target"]')
+
+          up.link.follow(link1)
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          preloadJob = up.link.preload(link2)
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+
     describe 'up.deferred.load()', ->
 
       it 'loads a partial that deferred loading to the user with [up-defer="manual"]', ->
