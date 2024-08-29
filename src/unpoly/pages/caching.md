@@ -8,7 +8,7 @@ To ensure that the user never sees stale content, cached content is [revalidated
 Cached pages also [remain accessible](/network-issues#offline-cache) after a [disconnect](/network-issues#disconnects).
 
 
-Enabling caching
+Enabling caching {#enabling}
 ----------------
 
 You can enable caching with `{ cache: 'auto' }`, which caches all responses to GET requests.
@@ -23,16 +23,22 @@ When [navigating](/navigation) the `{ cache: 'auto' }` option is already set by 
 To force caching regardless of HTTP method, pass `{ cache: true }`.
 
 
-Disabling caching
+Disabling caching {#disabling}
 -----------------
+
+You can disable the caching mechanism globally or selectively.
+
+### Disabling the cache globally {#diabling-globally} 
 
 [Navigation](/navigation) is the only moment when Unpoly caches by default.
 
-You can disable caching while navigating like so:
+You can disable caching globally like so:
 
 ```js
 up.fragment.config.navigateOptions.cache = false
 ```
+
+### Disabling the cache for selected routes {#disabling-route}
 
 If you want to keep the navigation default, but disable auto-caching for some URLs, configure `up.network.config.autoCache`: 
 
@@ -43,11 +49,15 @@ up.network.config.autoCache = function(request) {
 }
 ```
 
+### Disabling the cache for a link {#disabling-link}
+
 If you want to keep the default, but disable caching for an individual link, use an `[up-cache=false]` attribute:
 
 ```html
 <a href="/stock-charts" up-cache="false">View latest prices</a>
 ```
+
+### Disabling the cache for a function call {#disabling-function-call}
 
 If you want to keep the default, but disable caching for a function call that would otherwise navigate,
 pass an `{ cache: false }` option:
