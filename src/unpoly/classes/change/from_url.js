@@ -29,12 +29,10 @@ up.Change.FromURL = class FromURL extends up.Change {
   _onRequestProcessed() {
     this.options.onRequestProcessed?.(this.request) // used by up.RenderJob to delay aborting until a new request instance is known.
 
-    let previews = []
-
-    if (this.request.emit('up:fragment:load', { previews, renderOptions: this.options }).defaultPrevented) {
-      this.request.abort({ reason: 'Fragment load was prevented' })
-    }
-
+    let previews = [
+      ...up.feedback.getPreviews(this.options),
+      up.form.getDisablePreview(this.options),
+    ]
     this.request.showPreviews(previews, this.options)
   }
 
@@ -67,10 +65,6 @@ up.Change.FromURL = class FromURL extends up.Change {
 
     }
   }
-
-  // _onRequestLoad(request) {
-  //   request.emit('up:fragment:load')
-  // }
 
   // This is required by up.RenderJob to handle { abort: 'target' }.
   getPreflightProps() {
