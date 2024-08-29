@@ -1587,9 +1587,6 @@ describe 'up.fragment', ->
               expect(onFinished).not.toHaveBeenCalled()
               expect(onOffline).toHaveBeenCalled()
 
-        describe 'up:fragment:load event', ->
-
-
 
         describe 'up:fragment:loaded event', ->
 

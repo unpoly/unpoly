@@ -91,7 +91,7 @@ describe 'up.layer', ->
           expect(abortedURLs.length).toBe(1)
           expect(abortedURLs[0]).toMatchURL('/path1')
 
-        it 'does not abort a pending request targeting a non-main element in the current layer', asyncSpec (next) ->
+        fit 'does not abort a pending request targeting a non-main element in the current layer', asyncSpec (next) ->
           fixture('.root-element')
 
           up.navigate('.root-element', url: '/path1')

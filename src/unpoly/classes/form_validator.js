@@ -233,7 +233,7 @@ up.FormValidator = class FormValidator {
     // Disabling the same elements multiple time is not an issue since up.form.disable()
     // only sees enabled elements.
     options.disable = false
-    options.preview = dirtySolutions.map((solution) => up.form.getDisablePreviewFn({ disable: solution.renderOptions.disable, origin: solution.origin }))
+    options.preview = dirtySolutions.map((solution) => up.form.getDisablePreview({ disable: solution.renderOptions.disable, origin: solution.origin }))
 
     try {
       // Resolve all promises we have handed out for the now-rendered solutions.
