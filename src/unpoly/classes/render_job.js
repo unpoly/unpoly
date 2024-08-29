@@ -143,12 +143,13 @@ up.RenderJob = class RenderJob {
     if (this.options.url) {
       let onRequestProcessed = (request) => this._handleAbortOption(request)
       return new up.Change.FromURL({ ...this.options, onRequestProcessed })
-    } else if (this.options.response) {
-      let onRender = () => this._handleAbortOption(null)
-      return new up.Change.FromResponse({ ...this.options, onRender })
     } else {
       let onRender = () => this._handleAbortOption(null)
-      return new up.Change.FromContent({ ...this.options, onRender })
+      if (this.options.response) {
+        return new up.Change.FromResponse({ ...this.options, onRender })
+      } else {
+        return new up.Change.FromContent({ ...this.options, onRender })
+      }
     }
   }
 
