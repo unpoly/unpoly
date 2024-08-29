@@ -268,27 +268,6 @@ describe('up.feedback', function() {
 
         })
 
-
-        // it('allows to concurrently render a fragment that is detached while previewing, as long as the preview has a similar selector', async function() {
-        //   fixture('#target', { text: 'old text' })
-        //   let previewFn = (preview) => preview.swap(preview.fragment, '<div id="target">preview text</div>')
-        //   let render1Promise = up.render({ target: '#target', url: '/path1', preview: previewFn })
-        //
-        //   await wait()
-        //
-        //   expect('#target').toHaveText('preview text')
-        //
-        //   up.render({ target: '#target', url: '/path2' })
-        //
-        //   await expectAsync(render1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
-        //
-        //   jasmine.respondWithSelector('#target', { text: 'text from render2' })
-        //
-        //   await wait()
-        //
-        //   expect('#target').toHaveText('text from render2')
-        // })
-
         describe('reverting preview effects', function() {
 
           it('considers the return value of a preview function to be a revertible effect')

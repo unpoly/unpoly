@@ -96,4 +96,10 @@ up.Preview = class Preview {
     this.undo(e.hideTemp(...args))
   }
 
+  hideChildren(parent) {
+    for (let child of parent.children) {
+      this.hide(parent)
+    }
+  }
+
 }

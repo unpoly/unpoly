@@ -471,17 +471,7 @@ up.form = (function() {
     }
   }
 
-  // function disableWhile(request, options) {
-  //   let undoDisable = handleDisableOption(options)
-  //
-  //   u.always(request, undoDisable)
-  // }
-
-  up.on('up:fragment:load', function({ previews, renderOptions }) {
-    previews.push(getDisablePreviewFn(renderOptions))
-  })
-
-  function getDisablePreviewFn({ disable, origin }) {
+  function getDisablePreview({ disable, origin }) {
     return function(preview) {
       if (!disable) return
 
@@ -1998,7 +1988,7 @@ up.form = (function() {
     switchTarget,
     // disableWhile,
     disable: disableContainer,
-    getDisablePreviewFn,
+    getDisablePreview,
     // handleDisableOption,
     group: findGroup,
     groupSolution: findGroupSolution,

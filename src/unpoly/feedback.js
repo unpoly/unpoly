@@ -304,14 +304,22 @@ up.feedback = (function() {
   // }
 
   function showPreviews(previews, request, renderOptions) {
-    let preview = new up.Preview({ request, renderOptions: u.copy(renderOptions) })
+    let preview = new up.Preview({ request, renderOptions })
     for (let nameOrFn of u.compact(previews)) {
       preview.run(nameOrFn)
     }
     return () => preview.revert()
   }
 
-  up.on('up:fragment:load', function({ previews, renderOptions: { feedback, preview } }) {
+  /*-
+  Returns an array of preview (names or functions) for the given render options.
+
+  @function up.feedback.previews
+  @internal
+  */
+  function getPreviews({ feedback, preview }) {
+    let previews = []
+
     // Turn { feedback } option into a named preview
     if (feedback) {
       previews.push(classesFeedbackFn)
@@ -322,7 +330,9 @@ up.feedback = (function() {
       let previewTokens = u.parseTokens(preview)
       previews.push(...previewTokens)
     }
-  })
+
+    return previews
+  }
 
   // function getPreviewFns(renderOptions) {
   //   let fns = []
@@ -553,6 +563,7 @@ up.feedback = (function() {
     // showAroundRequest,
     preview: registerPreview,
     getPreviewFn,
+    getPreviews,
     showPreviews,
   }
 })()
