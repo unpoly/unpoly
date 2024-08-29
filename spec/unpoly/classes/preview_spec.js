@@ -184,6 +184,32 @@ fdescribe('up.Preview', function() {
       expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({ scroll: '#scroll', focus: '#focus' }))
     })
 
+    it('allows a preview function to change preview.renderOptions', async function() {
+      fixture('#foo', { text: 'old foo' })
+      fixture('#bar', { text: 'old bar' })
+
+      let previewFn = jasmine.createSpy('preview fn').and.callFake(({ renderOptions }) => renderOptions.target = '#bar')
+
+      up.render({ preview: previewFn, target: '#foo', url: '/path' })
+      await wait()
+
+      expect(jasmine.Ajax.requests.count()).toEqual(1)
+      expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Target']).toBe('#foo')
+      expect(previewFn).toHaveBeenCalled()
+
+      jasmine.respondWith(`
+            <main>
+              <div id="foo">new foo</div>
+              <div id="bar">new bar</div>
+            </main>
+          `)
+
+      await wait()
+
+      expect('#foo').toHaveText('old foo')
+      expect('#bar').toHaveText('new bar')
+    })
+
   })
 
   describe('#request', function() {
@@ -575,6 +601,27 @@ fdescribe('up.Preview', function() {
       await wait()
 
       expect(element).toBeHidden()
+    })
+
+    it('allows to concurrently render a fragment that is hidden while previewing', async function() {
+      fixture('#target', { text: 'old text' })
+      let previewFn = (preview) => preview.hide(preview.fragment)
+      let render1Promise = up.render({ target: '#target', url: '/path1', preview: previewFn })
+
+      await wait()
+
+      expect('#target').toBeHidden()
+
+      up.render({ target: '#target', url: '/path2' })
+
+      await expectAsync(render1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
+
+      jasmine.respondWithSelector('#target', { text: 'text from render2' })
+
+      await wait()
+
+      expect('#target').toHaveText('text from render2')
+      expect('#target').toBeVisible()
     })
 
   })
