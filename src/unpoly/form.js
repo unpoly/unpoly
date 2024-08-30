@@ -346,8 +346,6 @@ up.form = (function() {
     // submitting is navigation, and { fallback: true } is a navigation default.
     parser.string('failTarget', { default: up.fragment.tryToTarget(form) })
 
-    parser.booleanOrString('disable')
-
     // The guardEvent will also be assigned an { renderOptions } property in up.render()
     options.guardEvent ||= up.event.build('up:form:submit', {
       submitButton: options.submitButton,

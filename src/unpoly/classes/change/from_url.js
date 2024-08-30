@@ -33,6 +33,7 @@ up.Change.FromURL = class FromURL extends up.Change {
       ...up.feedback.getPreviews(this.options),
       up.form.getDisablePreview(this.options),
     ]
+
     this.request.showPreviews(previews, this.options)
   }
 
