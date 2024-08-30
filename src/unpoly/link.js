@@ -404,9 +404,13 @@ up.link = (function() {
     parser.string('dismissLocation')
     parser.booleanOrString('history')
 
+    // Layer options that also work for links
+    parser.booleanOrString('disable')
+
     // Feedback options
     parser.boolean('feedback')
     parser.booleanOrString('preview')
+    parser.booleanOrString('skeleton')
 
     // Viewport options
     parser.booleanOrString('focus')

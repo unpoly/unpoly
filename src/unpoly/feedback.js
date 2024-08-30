@@ -294,15 +294,6 @@ up.feedback = (function() {
   @stable
   */
 
-  // function showAroundRequest(request, renderOptions) {
-  //   let preview = new up.Preview({ request, renderOptions: u.copy(renderOptions) })
-  //   let previewFns = getPreviewFns(renderOptions)
-  //   for (let previewFn of previewFns) {
-  //     preview.run(previewFn)
-  //   }
-  //   u.always(request, () => preview.revert())
-  // }
-
   function showPreviews(previews, request, renderOptions) {
     let preview = new up.Preview({ request, renderOptions })
     for (let nameOrFn of u.compact(previews)) {
@@ -314,15 +305,19 @@ up.feedback = (function() {
   /*-
   Returns an array of preview (names or functions) for the given render options.
 
-  @function up.feedback.previews
+  @function up.feedback.getPreviews
   @internal
   */
-  function getPreviews({ feedback, preview }) {
+  function getPreviews({ feedback, preview, skeleton }) {
     let previews = []
 
     // Turn { feedback } option into a named preview
     if (feedback) {
-      previews.push(classesFeedbackFn)
+      previews.push(classesPreviewFn)
+    }
+
+    if (skeleton) {
+      previews.push(getSkeletonPreview(skeleton))
     }
 
     if (preview) {
@@ -334,19 +329,25 @@ up.feedback = (function() {
     return previews
   }
 
-  // function getPreviewFns(renderOptions) {
-  //   let fns = []
-  //
-  //   if (renderOptions.feedback) {
-  //     fns.push(getPreviewFn('classes'))
-  //   }
-  //
-  //   let previewTokens = u.parseTokens(renderOptions.preview)
-  //   let previewFns = previewTokens.map(getPreviewFn)
-  //   fns.push(...previewFns)
-  //
-  //   return fns
-  // }
+  function getSkeletonPreview(skeleton) {
+    return function(preview) {
+      preview.showSkeleton(skeleton)
+    }
+  }
+
+  function buildSkeleton(value) {
+    if (u.isString(value)) {
+      if (value.startsWith('<')) {
+        value = e.createFromHTML(value)
+      } else {
+        value = document.querySelector(value) || up.fail('Unknown skeleton %s', value)
+      }
+    }
+
+    if (value.matches('template')) value = e.cloneTemplate(value)
+
+    return value
+  }
 
   function getPreviewFn(value) {
     return u.presence(value, u.isFunction) || namedPreviewFns[value] || up.fail('Unknown preview "%s"', value)
@@ -364,7 +365,7 @@ up.feedback = (function() {
     namedPreviewFns[name] = previewFn
   }
 
-  function classesFeedbackFn(preview) {
+  function classesPreviewFn(preview) {
     let activeElement = getActiveElement(preview.origin)
     if (activeElement) {
       preview.addClass(activeElement, CLASS_ACTIVE)
@@ -565,6 +566,7 @@ up.feedback = (function() {
     getPreviewFn,
     getPreviews,
     showPreviews,
+    buildSkeleton,
   }
 })()
 
