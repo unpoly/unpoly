@@ -44,24 +44,32 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   @stable
   */
 
+  static VISUAL_KEYS = [
+    'mode',
+    'position',
+    'align',
+    'size',
+    'origin', // for tethered anchor element
+    'class',
+    'backdrop',
+    'dismissable',
+    'dismissLabel',
+    'dismissAriaLabel',
+    'openAnimation',
+    'closeAnimation',
+    'openDuration',
+    'closeDuration',
+    'openEasing',
+    'closeEasing',
+    'trapFocus',
+  ]
+
   keys() {
-    return super.keys().concat([
-      'position',
-      'align',
-      'size',
-      'origin', // for tethered anchor element
-      'class',
-      'backdrop',
-      'openAnimation',
-      'closeAnimation',
-      'openDuration',
-      'closeDuration',
-      'openEasing',
-      'closeEasing',
-      'dismissable',
-      'dismissLabel',
-      'dismissAriaLabel',
-      'trapFocus',
+    return [
+      ...super.keys(),
+      ...this.constructor.VISUAL_KEYS,
+
+      // Events and close conditions
       'onOpened',
       'onAccept',
       'onAccepted',
@@ -71,8 +79,10 @@ up.Layer.Overlay = class Overlay extends up.Layer {
       'dismissEvent',
       'acceptLocation',
       'dismissLocation',
+
+      // Internal state
       'opening' // internal flag to know that the layer is being opened
-    ])
+    ]
   }
 
   constructor(options) {
@@ -389,8 +399,8 @@ up.Layer.Overlay = class Overlay extends up.Layer {
 
   async startOpenAnimation(options = {}) {
     let boxAnimation = options.animation ?? this.evalOption(this.openAnimation)
-    // Only animate the backdrop if we're animating the box
-    let backdropAnimation = boxAnimation && 'fade-in'
+    // _startAnimation() will ignore this animation unless the box is also animating
+    let backdropAnimation = 'fade-in'
 
     await this._startAnimation({
       boxAnimation,
@@ -403,8 +413,8 @@ up.Layer.Overlay = class Overlay extends up.Layer {
 
   startCloseAnimation(options = {}) {
     let boxAnimation =  this.wasEverVisible && (options.animation ?? this.evalOption(this.closeAnimation))
-    // Only animate the backdrop if we're animating the box
-    let backdropAnimation = boxAnimation && 'fade-out'
+    // _startAnimation() will ignore this animation unless the box is also animating
+    let backdropAnimation = 'fade-out'
 
     return this._startAnimation({
       boxAnimation,
