@@ -1467,6 +1467,10 @@ up.element = (function() {
     }
   }
 
+  function cloneTemplate(template) {
+    return template.content.cloneNode(true).children[0]
+  }
+
   return {
     subtree,
     contains,
@@ -1527,5 +1531,6 @@ up.element = (function() {
     isIntersectingWindow,
     unionSelector,
     wrap,
+    cloneTemplate,
   }
 })()
