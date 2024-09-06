@@ -1,6 +1,6 @@
 const u = up.util
 
-up.Change.CloseLayer = class CloseLayer extends up.Change.Removal {
+up.Change.CloseLayer = class CloseLayer extends up.Change {
 
   constructor(options) {
     super(options)
