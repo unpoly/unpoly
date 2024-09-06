@@ -937,6 +937,8 @@ up.fragment = (function() {
   to do something else instead.
 
   The event is emitted on the targeted layer.
+  When [opening an overlay](/opening-overlays), the event is emitted on the parent layer
+  of the new overlay.
 
   ### Example: Making a full page load instead
 
