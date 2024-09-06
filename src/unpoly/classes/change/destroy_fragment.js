@@ -1,4 +1,4 @@
-up.Change.DestroyFragment = class DestroyFragment extends up.Change.Removal {
+up.Change.DestroyFragment = class DestroyFragment extends up.Change {
 
   constructor(options) {
     super(options)
