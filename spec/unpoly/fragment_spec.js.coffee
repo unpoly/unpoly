@@ -1588,7 +1588,7 @@ describe 'up.fragment', ->
               expect(onOffline).toHaveBeenCalled()
 
 
-        describe 'up:fragment:loaded event', ->
+        fdescribe 'up:fragment:loaded event', ->
 
           it 'emits an up:fragment:loaded event that contains information about the request, response and render options', asyncSpec (next) ->
             origin = fixture('.origin')
@@ -1790,6 +1790,41 @@ describe 'up.fragment', ->
             expect(event).toBeGiven()
             expect(event.request).toEqual(jasmine.any(up.Request))
             expect(event.request.url).toMatchURL('/url')
+
+          describe 'emission target', ->
+
+            it 'is emitted on the element of the updating layer', ->
+              makeLayers(2)
+              expect(up.layer.current.isOverlay()).toBe(true)
+
+              one = up.layer.current.affix('#one')
+
+              spy = jasmine.createSpy('event.target spy')
+              up.on('up:fragment:loaded', (event) -> spy(event.target))
+
+              up.render(target: '#one', url: '/url')
+              await wait()
+
+              jasmine.respondWithSelector('#one')
+              await wait()
+
+              expect(spy).toHaveBeenCalledWith(up.layer.current.element)
+
+            it 'is emitted on the element of the base layer when opening a new overlay', ->
+              makeLayers(2)
+              baseLayer = up.layer.current
+              expect(baseLayer.isOverlay()).toBe(true)
+
+              spy = jasmine.createSpy('event.target spy')
+              up.on('up:fragment:loaded', (event) -> spy(event.target))
+
+              up.render(target: '#one', url: '/url', layer: 'new modal')
+              await wait()
+
+              jasmine.respondWithSelector('#one')
+              await wait()
+
+              expect(spy).toHaveBeenCalledWith(baseLayer.element)
 
         describe 'when the server sends an X-Up-Events header', ->
 
@@ -8787,7 +8822,7 @@ describe 'up.fragment', ->
 
               await expectAsync(job.finished).toBeRejectedWith(jasmine.any(up.Aborted))
 
-            it 'lets listeners prevent insertion of revalidated content by *skipping* the second up:fragment:loaded event, fulfilling the { finished } promise', ->
+            fit 'lets listeners prevent insertion of revalidated content by *skipping* the second up:fragment:loaded event, fulfilling the { finished } promise', ->
               up.on 'up:fragment:loaded', (event) ->
                 if event.revalidating
                   event.skip()
