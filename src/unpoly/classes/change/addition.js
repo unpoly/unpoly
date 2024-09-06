@@ -14,21 +14,21 @@ up.Change.Addition = class Addition extends up.Change {
   handleLayerChangeRequests() {
     if (this.layer.isOverlay()) {
       // The server may send an HTTP header `X-Up-Accept-Layer: value`
-      this.tryAcceptLayerFromServer()
+      this._tryAcceptLayerFromServer()
       this.abortWhenLayerClosed()
 
       // A close condition { acceptLocation: '/path' } might have been
       // set when the layer was opened.
-      this.layer.tryAcceptForLocation(this.responseOption())
+      this.layer.tryAcceptForLocation(this._responseOptions())
       this.abortWhenLayerClosed()
 
       // The server may send an HTTP header `X-Up-Dismiss-Layer: value`
-      this.tryDismissLayerFromServer()
+      this._tryDismissLayerFromServer()
       this.abortWhenLayerClosed()
 
       // A close condition { dismissLocation: '/path' } might have been
       // set when the layer was opened.
-      this.layer.tryDismissForLocation(this.responseOption())
+      this.layer.tryDismissForLocation(this._responseOptions())
       this.abortWhenLayerClosed()
     }
 
@@ -42,23 +42,23 @@ up.Change.Addition = class Addition extends up.Change {
     // A listener to such a server-sent event might also close the layer.
     this.layer.asCurrent(() => {
       for (let eventPlan of this._eventPlans) {
-        up.emit({ ...eventPlan, ...this.responseOption() })
+        up.emit({ ...eventPlan, ...this._responseOptions() })
         this.abortWhenLayerClosed()
       }
     })
   }
 
-  tryAcceptLayerFromServer() {
+  _tryAcceptLayerFromServer() {
     // When accepting without a value, the server will send X-Up-Accept-Layer: null
     if (u.isDefined(this._acceptLayer) && this.layer.isOverlay()) {
-      this.layer.accept(this._acceptLayer, this.responseOption())
+      this.layer.accept(this._acceptLayer, this._responseOptions())
     }
   }
 
-  tryDismissLayerFromServer() {
+  _tryDismissLayerFromServer() {
     // When dismissing without a value, the server will send X-Up-Dismiss-Layer: null
     if (u.isDefined(this._dismissLayer) && this.layer.isOverlay()) {
-      this.layer.dismiss(this._dismissLayer, this.responseOption())
+      this.layer.dismiss(this._dismissLayer, this._responseOptions())
     }
   }
 
@@ -70,7 +70,7 @@ up.Change.Addition = class Addition extends up.Change {
     }
   }
 
-  setSource({ oldElement, newElement, source }) {
+  _setSource({ oldElement, newElement, source }) {
     // (1) When the server responds with an error, or when the request method is not
     //     reloadable (not GET), we keep the same source as before.
     // (2) Don't set a source if someone tries to 'keep' when opening a new layer
@@ -87,25 +87,25 @@ up.Change.Addition = class Addition extends up.Change {
     }
   }
 
-  setTime({ newElement, time }) {
+  _setTime({ newElement, time }) {
     // If the server didn't send a Last-Modified header, tag the element
     // with [up-time=false] to indicate that we cannot use an ancestor's [up-time].
     e.setMissingAttr(newElement, 'up-time', time ? time.toUTCString() : false)
   }
 
-  setETag({ newElement, etag }) {
+  _setETag({ newElement, etag }) {
     // If the server didn't send an Etag header, tag the element
     // with [up-etag=false] to indicate that we cannot use an ancestor's [up-etag].
     e.setMissingAttr(newElement, 'up-etag', etag || false)
   }
 
   setReloadAttrs(options) {
-    this.setSource(options)
-    this.setTime(options)
-    this.setETag(options)
+    this._setSource(options)
+    this._setTime(options)
+    this._setETag(options)
   }
 
-  responseOption() {
+  _responseOptions() {
     return { response: this._response }
   }
 

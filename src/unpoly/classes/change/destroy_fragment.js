@@ -6,6 +6,7 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change {
     this._element = this.options.element
     this._animation = this.options.animation
     this._log = this.options.log
+    this._onFinished = this.options.onFinished
   }
 
   execute() {
@@ -39,14 +40,14 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change {
     this._emitDestroyed()
     await this._animate()
     this._wipe()
-    this.onFinished()
+    this._onFinished?.()
   }
 
   _destroyNow() {
     // If we're not animating, we can remove the element before emitting up:fragment:destroyed.
     this._wipe()
     this._emitDestroyed()
-    this.onFinished()
+    this._onFinished?.()
   }
 
   _animate() {
@@ -66,4 +67,5 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change {
     // Emits up:fragment:destroyed.
     up.fragment.emitDestroyed(this._element, { parent: this._parent, log: this._log })
   }
+
 }
