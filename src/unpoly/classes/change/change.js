@@ -10,10 +10,6 @@ up.Change = class Change {
     throw new up.NotImplemented()
   }
 
-  onFinished(renderResult) {
-    return this.options.onFinished?.(renderResult)
-  }
-
   // Values we want to keep:
   // - false (no update)
   // - string (forced update)
