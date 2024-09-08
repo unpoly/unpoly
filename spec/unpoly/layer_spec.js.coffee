@@ -189,12 +189,13 @@ describe 'up.layer', ->
           expect(element).toBeGiven()
           expect(element.innerText).toBeBlank()
 
-        it 'has a sync effect', ->
+        fit 'manipulates the stack synchronously', ->
           expect(up.layer.count).toBe(1)
 
           up.layer.open(target: '.element', content: '')
 
           expect(up.layer.count).toBe(2)
+          expect(up.layer.current.isOverlay()).toBe(true)
 
       describe 'animation', ->
 

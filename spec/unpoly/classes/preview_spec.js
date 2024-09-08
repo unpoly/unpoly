@@ -1129,8 +1129,6 @@ fdescribe('up.Preview', function() {
 
   })
 
-
-
   describe('#undo()', function() {
 
     it('tracks a function to run when the preview is reverted', async function() {
