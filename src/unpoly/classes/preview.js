@@ -129,7 +129,7 @@ up.Preview = class Preview {
 
     // The new overlay is already in the stack. However, this function must be be sync and cannot
     // wait a microtask for (the fulfilled) up.layer.open() promise.
-    let overlay = up.layer.current
+    let overlay = up.layer.front
 
     this.undo(() => overlay.dismiss(undoDismissValue, { preventable: false }))
 
