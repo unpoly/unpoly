@@ -6,4 +6,12 @@ beforeEach ->
     toHaveCursorStyle: (util, customEqualityTesters) ->
       compare: (element, expectedStyle) ->
         element = up.element.get(element)
-        pass: element && getComputedStyle(element).cursor == expectedStyle
+        actualStyle = element && getComputedStyle(element).cursor
+        pass = (actualStyle == expectedStyle)
+
+        if pass
+          message = "Expected element to not have cursor style \"#{expectedStyle}\""
+        else
+          message = "Expected element to have cursor style \"#{expectedStyle}\", but its cursor style was \"#{actualStyle}\""
+
+        return { pass, message }

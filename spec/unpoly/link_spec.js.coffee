@@ -8,7 +8,7 @@ describe 'up.link', ->
 
   describe 'JavaScript functions', ->
 
-    describe 'up.follow', ->
+    describe 'up.follow()', ->
 
       it 'loads the given link via AJAX and replaces the response in the given target', asyncSpec (next) ->
         fixture('.before', text: 'old-before')
@@ -4108,6 +4108,15 @@ describe 'up.link', ->
 
     describe '[up-clickable]', ->
 
+      it 'makes the element emit up:click events on click', ->
+        fauxButton = up.hello(fixture('.hyperlink[up-clickable]'))
+        clickListener = jasmine.createSpy('up:click listener')
+        fauxButton.addEventListener('up:click', clickListener)
+
+        Trigger.clickSequence(fauxButton)
+
+        expect(clickListener.calls.count()).toBe(1)
+
       it 'makes the element emit up:click events on Enter', ->
         fauxButton = up.hello(fixture('.hyperlink[up-clickable]'))
         clickListener = jasmine.createSpy('up:click listener')
@@ -4145,21 +4154,6 @@ describe 'up.link', ->
         expect(fauxButton).toHaveAttribute('up-clickable')
         expect(fauxButton.role).toBe('button')
 
-      describe 'when applied on a link (which is already interactive)', ->
-
-        it 'does not set a [role] attribute', ->
-          link = up.hello(fixture('a[href="/path"][up-clickable]', text: 'label'))
-          expect(link).not.toHaveAttribute('role')
-
-        it 'does not cause duplicate up:click events when activated with the keyboard', ->
-          link = up.hello(fixture('a[href="/path"][up-clickable]', text: 'label'))
-          listener = jasmine.createSpy('up:click listener').and.callFake((event) -> event.preventDefault())
-          link.addEventListener('up:click', listener)
-
-          Trigger.clickLinkWithKeyboard(link)
-
-          expect(listener.calls.count()).toBe(1)
-
       describe '[role] attribute', ->
 
         it 'sets [role=button] on a non-interactive element', ->
@@ -4178,6 +4172,20 @@ describe 'up.link', ->
           fauxLink = up.hello(fixture('a[up-follow][up-href="/path"]'))
           expect(fauxLink).toHaveAttribute('role', 'link')
 
+      fdescribe 'with [up-instant]', ->
+
+        it 'emits up:click on mousedown instead of click', ->
+          fauxButton = up.hello(fixture('.hyperlink[up-clickable][up-instant]'))
+          clickListener = jasmine.createSpy('up:click listener')
+          fauxButton.addEventListener('up:click', clickListener)
+
+          Trigger.mousedown(fauxButton)
+          expect(clickListener.calls.count()).toBe(1)
+
+          # No additional up:click is emitted
+          Trigger.click(fauxButton)
+          expect(clickListener.calls.count()).toBe(1)
+
       describe 'on an element that is already interactive', ->
 
         it 'does not set attributes on an a[href] element', ->
@@ -4189,4 +4197,184 @@ describe 'up.link', ->
           realButton = up.hello(fixture('button[up-clickable]'))
           expect(realButton).not.toHaveAttribute('role')
           expect(realButton).not.toHaveAttribute('tabindex')
+
+        it 'does not cause duplicate up:click events when activated with the keyboard', ->
+          link = up.hello(fixture('a[href="/path"][up-clickable]', text: 'label'))
+          listener = jasmine.createSpy('up:click listener').and.callFake((event) -> event.preventDefault())
+          link.addEventListener('up:click', listener)
+
+          Trigger.clickLinkWithKeyboard(link)
+
+          expect(listener.calls.count()).toBe(1)
+
+      fdescribe 'with [up-disabled]', ->
+
+        it 'does not emit up:click when clicked', ->
+          fauxButton = up.hello(fixture('.hyperlink[up-clickable][up-disabled]'))
+          clickListener = jasmine.createSpy('up:click listener')
+          fauxButton.addEventListener('up:click', clickListener)
+
+          Trigger.clickSequence(fauxButton)
+
+          expect(clickListener).not.toHaveBeenCalled()
+
+    fdescribe 'a[up-disable]', ->
+
+      describe 'without an attribute value', ->
+
+        it 'disables a link while it is loading, preventing duplicate clicks', ->
+          fixture('#target', text: 'old text')
+          clickSpy = jasmine.createSpy('up:click listener')
+          link = fixture('a[href="/path"][up-target="#target"][up-disable][up-cache=false]', text: 'label')
+          up.on(link, 'up:click', clickSpy)
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect(clickSpy.calls.count()).toBe(1)
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect(clickSpy.calls.count()).toBe(1)
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          jasmine.respondWithSelector('#target', text: 'new text')
+          await wait()
+
+          expect('#target').toHaveText('new text')
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect(clickSpy.calls.count()).toBe(2)
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+
+        it 'disables an [up-instant] link while it is loading, preventing duplicate clicks', ->
+          fixture('#target', text: 'old text')
+          clickSpy = jasmine.createSpy('up:click listener')
+          link = fixture('a[href="/path"][up-target="#target"][up-instant][up-disable][up-cache=false]', text: 'label')
+          up.on(link, 'up:click', clickSpy)
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect(clickSpy.calls.count()).toBe(1)
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect(clickSpy.calls.count()).toBe(1)
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          jasmine.respondWithSelector('#target', text: 'new text')
+          await wait()
+
+          expect('#target').toHaveText('new text')
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect(clickSpy.calls.count()).toBe(2)
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+
+        it 'gives the link a `cursor: not-allowed` while loading', ->
+          fixture('#target', text: 'old text')
+          link = fixture('a[href="/path"][up-target="#target"][up-disable]', text: 'label')
+          expect(link).toHaveCursorStyle('pointer')
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect(link).toHaveCursorStyle('not-allowed')
+
+          jasmine.respondWithSelector('#target', text: 'new text')
+          await wait()
+
+          expect('#target').toHaveText('new text')
+          expect(link).toHaveCursorStyle('pointer')
+
+        it 'gives the link an [aria-disabled="true"] attribute while loading', ->
+          fixture('#target', text: 'old text')
+          link = fixture('a[href="/path"][up-target="#target"][up-disable]', text: 'label')
+          expect(link).not.toHaveAttribute('aria-disabled')
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect(link).toHaveAttribute('aria-disabled', 'true')
+
+          jasmine.respondWithSelector('#target', text: 'new text')
+          await wait()
+
+          expect('#target').toHaveText('new text')
+          expect(link).not.toHaveAttribute('aria-disabled')
+
+        it 're-enables the link if the request fails due to a network issue', ->
+          fixture('#target', text: 'old text')
+          link = fixture('a[href="/path"][up-target="#target"][up-disable]', text: 'label')
+          expect(link).not.toHaveAttribute('aria-disabled')
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect(link).toHaveAttribute('aria-disabled', 'true')
+
+          await jasmine.expectGlobalError 'up.Offline', ->
+            jasmine.lastRequest().responseError()
+            await wait(10)
+
+          expect(link).not.toHaveAttribute('aria-disabled')
+
+        it 're-enables the link if the request is aborted', ->
+          fixture('#target', text: 'old text')
+          link = fixture('a[href="/path"][up-target="#target"][up-disable]', text: 'label')
+          expect(link).not.toHaveAttribute('aria-disabled')
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect(link).toHaveAttribute('aria-disabled', 'true')
+
+          up.network.abort()
+          await wait()
+
+          expect(link).not.toHaveAttribute('aria-disabled')
+
+        it 'does not disable fields of an enclosing form by default (difference to form[up-disable])', ->
+          fixture('#target', text: 'old text')
+          form = fixture('#form')
+          input = e.affix(form, 'input[type=next][name=foo]')
+          link = e.affix(form, 'a[href="/path"][up-target="#target"][up-disable]', text: 'label')
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(input).not.toBeDisabled()
+
+      describe 'with a selector value', ->
+
+        it 'disables fields and buttons within the given selector', ->
+          fixture('#target', text: 'old text')
+          form = fixture('#form')
+          input = e.affix(form, 'input[type=next][name=foo]')
+          button = e.affix(form, 'button[type=submit]', text: 'button label')
+          link = fixture('a[href="/path"][up-target="#target"][up-disable="#form"]', text: 'label')
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(input).toBeDisabled()
+          expect(button).toBeDisabled()
+
+          jasmine.respondWithSelector('#target', text: 'new text')
+          await wait()
+
+          expect('#target').toHaveText('new text')
+          expect(input).not.toBeDisabled()
+          expect(button).not.toBeDisabled()
 
