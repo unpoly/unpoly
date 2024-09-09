@@ -265,7 +265,7 @@ up.form = (function() {
 
     @see failed-responses
 
-  @param {boolean|string} [options.disable]
+  @param {boolean|string|Element} [options.disable]
     Whether to [disable form controls](/disabling-forms) while the form is submitting.
 
   @param {Element} [options.origin]
@@ -355,6 +355,10 @@ up.form = (function() {
     })
 
     options.origin ||= up.viewport.focusedElementWithin(form) || options.submitButton || form
+
+    // The { defaultDisableScope } option controls what to disable with { disable: true }.
+    // The { disable } option is parsed by up.link.followOptions.
+    options.defaultDisableScope = form
 
     // Now that we have extracted everything form-specific into options, we can call
     // up.link.followOptions(). This will also parse the myriads of other options
@@ -448,65 +452,48 @@ up.form = (function() {
   */
 
   function disableContainer(container) {
-    let focusedElement = document.activeElement
-    let focusFallback
     let controls = [...findFields(container), ...findSubmitButtons(container)]
-    controls = u.reject(controls, 'disabled')
 
-    for (let control of controls) {
-      if (control === focusedElement) focusFallback = findGroup(focusedElement)
+    return u.sequence([
+      ...u.map(controls, disableControl),
+      up.link.disableLinkish(container),
+    ])
+  }
+
+  function disableControl(control) {
+    if (control.disabled) return
+
+    if (control === document.activeElement) {
+      let focusFallback = findGroup(control)
+      control.disabled = true
+      up.focus(focusFallback, { force: true, preventScroll: true })
+    } else {
       control.disabled = true
     }
 
-    if (focusFallback) {
-      up.focus(focusFallback, { force: true, preventScroll: true })
-    }
-
-    return function() {
-      for (let control of controls) {
-        control.disabled = false
-      }
-    }
+    return () => control.disabled = false
   }
 
-  function getDisablePreview({ disable, origin }) {
+  function getDisablePreview({ disable, defaultDisableScope, origin }) {
     return function(preview) {
-      if (!disable) return
+      let givenOrigin = () => origin || up.fail('Missing { origin }')
+      let originScope = () => getScope(givenOrigin())
 
-      let missingOption = (key) => { up.fail("Cannot process { disable: '%s' } option without { %s }", disable, key) }
-      let getOrigin = () => origin || missingOption('origin')
-      let getOriginForm = () => getScope(getOrigin())
+      let containers = []
 
       if (disable === true) {
-        preview.disable(getOriginForm())
+        containers = [defaultDisableScope || originScope()]
+      } else if (u.isElement(disable)) {
+        containers = [disable]
       } else if (u.isString(disable)) {
-        // Disable all elements matching the given selector, but within the form
-        let formParts = up.fragment.subtree(getOriginForm(), disable, { origin })
-        for (let formPart of formParts) {
-          preview.disable(formPart)
-        }
+        containers = up.fragment.subtree(originScope(), disable, { origin })
+      }
+
+      for (let container of containers) {
+        preview.disable(container)
       }
     }
   }
-
-  // function handleDisableOption({ disable, origin }) {
-  //   if (!disable) return u.noop
-  //
-  //   let missingOption = (key) => { up.fail("Cannot process { disable: '%s' } option without { %s }", disable, key) }
-  //   let getOrigin = () => origin || missingOption('origin')
-  //   let getOriginForm = () => getScope(getOrigin())
-  //
-  //   let containers
-  //
-  //   if (disable === true) {
-  //     containers = [getOriginForm()]
-  //   } else if (u.isString(disable)) {
-  //     // Disable all elements matching the given selector, but within the form
-  //     containers = up.fragment.subtree(getOriginForm(), disable, { origin })
-  //   }
-  //
-  //   return u.sequence(containers.map(disableContainer))
-  // }
 
   // This was extracted from submitOptions().
   // Validation needs to submit a form without options intended for the final submission,
@@ -717,7 +704,7 @@ up.form = (function() {
     The number of miliseconds to wait between an observed event and running the callback.
 
     See [debouncing callbacks](/watch-options#debouncing-callbacks).
-  @param {boolean|string} [options.disable]
+  @param {boolean|string|Element} [options.disable]
     Whether to disable fields while an async callback is running.
 
     See [disabling fields while working](/watch-options#disabling-fields-while-working).
@@ -970,7 +957,7 @@ up.form = (function() {
 
     By default the given `element` will be rendered.
     If `element` is a field, its form group or `[up-validate]` target will be rendered.
-  @param {string|Element|jQuery} [options.formGroup = true]
+  @param {boolean} [options.formGroup = true]
     Whether, when a field is given as `element`,
     the field's closest [form group](/up-form-group) should be targeted.
   @param {Element} [options.origin=element]
@@ -981,15 +968,15 @@ up.form = (function() {
     The event types to observe.
 
     See [which events to watch](/watch-options#which-events-to-watch).
-  @param {string|Element|jQuery} [options.delay]
+  @param {number} [options.delay]
     The number of miliseconds to wait between an observed event and validating.
 
     See [debouncing callbacks](/watch-options#debouncing-callbacks).
-  @param {string|Element|jQuery} [options.disable]
+  @param {boolean|string|Element} [options.disable]
     Whether to disable fields while waiting for the server response.
 
     See [disabling fields while working](/watch-options#disabling-fields-while-working).
-  @param {string|Element|jQuery} [options.feedback]
+  @param {boolean} [options.feedback]
     Whether to show navigation feedback while waiting for the server response.
 
     See [showing feedback while working](/watch-options#showing-feedback-while-working).
