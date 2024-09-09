@@ -1079,33 +1079,71 @@ describe 'up.form', ->
 
         describe 'with { disable: "form" }', ->
 
-          it 'disables all fields and buttons while submitting', asyncSpec (next) ->
+          it 'disables all fields and buttons while submitting', ->
             form = fixture('form')
             input = e.affix(form, 'input[name=email]')
             submitButton = e.affix(form, 'input[type=submit]')
 
             up.submit(form, { disable: 'form' })
+            await wait()
 
-            next =>
-              expect(input).toBeDisabled()
-              expect(submitButton).toBeDisabled()
+            expect(input).toBeDisabled()
+            expect(submitButton).toBeDisabled()
+
+          it 'disables links while submitting', ->
+            form = fixture('form')
+            link = e.affix(form, 'a[href="/foo"]')
+
+            up.submit(form, { disable: 'form' })
+            await wait()
+
+            expect(link).toHaveAttribute('aria-disabled', 'true')
 
         describe 'with { disable: true }', ->
 
-          it 'disables all fields and buttons while submitting', asyncSpec (next) ->
+          it 'disables all fields and buttons while submitting', ->
             form = fixture('form')
             input = e.affix(form, 'input[name=email]')
             submitButton = e.affix(form, 'input[type=submit]')
 
             up.submit(form, { disable: true })
+            await wait()
 
-            next =>
-              expect(input).toBeDisabled()
-              expect(submitButton).toBeDisabled()
+            expect(input).toBeDisabled()
+            expect(submitButton).toBeDisabled()
+
+          it 'does not disable fields in another form', ->
+            form = fixture('form')
+            formInput = e.affix(form, 'input[name=foo]')
+
+            otherForm = fixture('form')
+            otherFormInput = e.affix(otherForm, 'input[name=bar]')
+
+            up.submit(form, { disable: true })
+            await wait()
+
+            expect(formInput).toBeDisabled()
+            expect(otherFormInput).not.toBeDisabled()
+
+        describe 'with an Element', ->
+
+          it "disables fields within the given container element while submitting", ->
+            form = fixture('form')
+
+            group = e.affix(form, '.one')
+            input = e.affix(group, 'input[name=email]')
+            otherGroup = e.affix(form, '.two')
+            otherInput = e.affix(otherGroup, 'input[name=password]')
+
+            up.submit(form, { disable: group })
+            await wait()
+
+            expect(input).toBeDisabled()
+            expect(otherInput).not.toBeDisabled()
 
         describe 'with a CSS selector', ->
 
-          it "disables fields within the given selector while submitting", asyncSpec (next) ->
+          it "disables fields within the given selector while submitting", ->
             form = fixture('form')
 
             group = e.affix(form, '.one')
@@ -1114,12 +1152,12 @@ describe 'up.form', ->
             otherInput = e.affix(otherGroup, 'input[name=password]')
 
             up.submit(form, { disable: '.one' })
+            await wait()
 
-            next =>
-              expect(input).toBeDisabled()
-              expect(otherInput).not.toBeDisabled()
+            expect(input).toBeDisabled()
+            expect(otherInput).not.toBeDisabled()
 
-          it 'disables within all (not just the first) match of the given selector', asyncSpec (next) ->
+          it 'disables within all (not just the first) match of the given selector', ->
             form = fixture('form')
 
             group = e.affix(form, '.group')
@@ -1128,12 +1166,12 @@ describe 'up.form', ->
             alsoInput = e.affix(alsoGroup, 'input[name=email]')
 
             up.submit(form, { disable: '.group' })
+            await wait()
 
-            next =>
-              expect(input).toBeDisabled()
-              expect(alsoInput).toBeDisabled()
+            expect(input).toBeDisabled()
+            expect(alsoInput).toBeDisabled()
 
-          it 'does not disable matches outside of the form', asyncSpec (next) ->
+          it 'does not disable matches outside of the form', ->
             form = fixture('form')
             groupInside = e.affix(form, '.group')
             inputInside = e.affix(groupInside, 'input[name=email]')
@@ -1144,24 +1182,25 @@ describe 'up.form', ->
 
             up.submit(form, { disable: '.group' })
 
-            next =>
-              expect(inputInside).toBeDisabled()
-              expect(inputOutside).not.toBeDisabled()
+            await wait()
 
-        it 're-enables the form when the submission ends in a successful response', asyncSpec (next) ->
+            expect(inputInside).toBeDisabled()
+            expect(inputOutside).not.toBeDisabled()
+
+        it 're-enables the form when the submission ends in a successful response', ->
           fixture('.target')
           form = fixture('form[up-target=".target"]')
           input = e.affix(form, 'input[name=email]')
 
           up.submit(form, { disable: true })
+          await wait()
 
-          next ->
-            expect(input).toBeDisabled()
+          expect(input).toBeDisabled()
 
-            jasmine.respondWithSelector('.target')
+          jasmine.respondWithSelector('.target')
+          await wait()
 
-          next ->
-            expect(input).not.toBeDisabled()
+          expect(input).not.toBeDisabled()
 
         it 're-enables fields when the submission ends in a failed response', ->
           fixture('.success-target')
@@ -2578,7 +2617,115 @@ describe 'up.form', ->
 
         expect(field).toBeDisabled()
 
-#      it 'can be called multiple times on the same field, and keeps the field disabled until all re-enablement functions have been called', ->
+      fdescribe 'disabling of links and clickables', ->
+
+        it "prevents followable links from being followed on click", ->
+          fixture('#target')
+          link = fixture('a[href="/path"][up-target="#target"]', text: 'label')
+
+          reenable = up.form.disable(link)
+
+          Trigger.click(link)
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+          reenable()
+          Trigger.click(link)
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+        it 'prevents followable [up-instant] links from being followed on mousedown', ->
+          fixture('#target')
+          link = fixture('a[href="/path"][up-target="#target"][up-instant]', text: 'label')
+
+          reenable = up.form.disable(link)
+
+          Trigger.mousedown(link)
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+          reenable()
+          Trigger.mousedown(link)
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+        it "prevents vanilla links from default-following on click", ->
+          fixture('#target')
+          link = fixture('a[href="/path"]', text: 'label')
+          expect(link).not.toBeFollowable()
+
+          reenable = up.form.disable(link)
+
+          Trigger.click(link)
+          await wait()
+
+          expect(link).not.toHaveBeenDefaultFollowed()
+
+          reenable()
+          Trigger.click(link)
+          await wait()
+
+          expect(link).toHaveBeenDefaultFollowed()
+
+        it 'prevents faux-interactive buttons ("clickables") from emitting up:click', ->
+          clickSpy = jasmine.createSpy('up:click listener')
+          link = fixture('span[up-clickable]', text: 'label')
+          up.hello(link)
+          up.on(link, 'up:click', clickSpy)
+
+          reenable = up.form.disable(link)
+          Trigger.click(link)
+          expect(clickSpy.calls.count()).toBe(0)
+
+          reenable()
+          Trigger.click(link)
+          expect(clickSpy.calls.count()).toBe(1)
+
+        it 'gives links a `cursor: not-allowed` when hovering', ->
+          fixture('#target')
+          link = fixture('a[href="/path"]', text: 'label')
+
+          reenable = up.form.disable(link)
+          expect(link).toHaveCursorStyle('not-allowed')
+
+          reenable()
+          expect(link).toHaveCursorStyle('pointer')
+
+        it 'gives faux-interactive buttons ("clickable") a not-allowed cursor when hovering', ->
+          fixture('#target')
+          link = fixture('span[up-clickable]', text: 'label')
+
+          reenable = up.form.disable(link)
+          expect(link).toHaveCursorStyle('not-allowed')
+
+          reenable()
+          expect(link).toHaveCursorStyle('auto')
+
+        it 'gives links an [aria-disabled="true"] attribute', ->
+          fixture('#target')
+          link = fixture('a[href="/path"]', text: 'label')
+
+          reenable = up.form.disable(link)
+          expect(link).toHaveAttribute('aria-disabled', 'true')
+
+          reenable()
+          expect(link).not.toHaveAttribute('aria-disabled')
+
+        it 'does not re-enable links that were already disabled before the call', ->
+          fixture('#target')
+          link = fixture('a[href="/path"][up-disabled][aria-disabled="true"]', text: 'label')
+          up.hello(link)
+
+          expect(link).toHaveAttribute('aria-disabled', 'true')
+
+          reenable = up.form.disable(link)
+          expect(link).toHaveAttribute('aria-disabled', 'true')
+
+    #      it 'can be called multiple times on the same field, and keeps the field disabled until all re-enablement functions have been called', ->
 #        form = fixture('form')
 #        field1 = e.affix(form, 'input[name=email][type=text]')
 #        field2 = e.affix(form, 'input[name=password][type=text][disabled]')
