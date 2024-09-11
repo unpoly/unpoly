@@ -85,7 +85,7 @@ up.EventEmitter = class EventEmitter extends up.Record {
 
     // If we are passed an element or layer as a first argument, this is the event
     // target. We remove it from the argument list and store it in options.
-    if (u.isElementish(args[0])) {
+    if (u.isElementLike(args[0])) {
       options.target = e.get(args.shift())
     } else if (args[0] instanceof up.Layer) {
       options.layer = args.shift()
