@@ -1,7 +1,7 @@
 const e = up.element
 const u = up.util
 
-fdescribe('up.Preview', function() {
+describe('up.Preview', function() {
 
   describe('#target', function() {
 
