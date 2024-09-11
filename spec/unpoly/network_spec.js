@@ -57,7 +57,7 @@ describe('up.network', function() {
             responseText: 'response-text'
           })
 
-          promise.then(function (response) {
+          promise.then(function(response) {
             expect(response.request.url).toMatchURL('/url')
             expect(response.request.params).toEqual(new up.Params({key: 'value'}))
             expect(response.request.method).toEqual('POST')
@@ -85,7 +85,7 @@ describe('up.network', function() {
           })
         })
 
-        promise.then(function (response) {
+        promise.then(function(response) {
           expect(response.header('foo')).toEqual('bar')
 
           // Lookup is case-insensitive
@@ -104,7 +104,7 @@ describe('up.network', function() {
 
           this.respondWith('response-text')
 
-          promise.then(function (response) {
+          promise.then(function(response) {
             expect(response.request.url).toMatchURL('/url')
             expect(response.request.hash).toEqual('#hash')
             expect(response.url).toMatchURL('/url')
@@ -283,7 +283,7 @@ describe('up.network', function() {
 
       describe('when the server responds with an X-Up-Method header', function() {
 
-        it('updates the { method } property in the response object', function (done) {
+        it('updates the { method } property in the response object', function(done) {
           const promise = up.request({
             url: '/url',
             params: { key: 'value' },
@@ -299,7 +299,7 @@ describe('up.network', function() {
               }
             })
 
-            promise.then(function (response) {
+            promise.then(function(response) {
               expect(response.request.url).toMatchURL('/url')
               expect(response.request.method).toEqual('POST')
               expect(response.url).toMatchURL('/redirect')
@@ -323,7 +323,7 @@ describe('up.network', function() {
               }
             })
 
-            promise.then(function (response) {
+            promise.then(function(response) {
               expect(response.request.url).toMatchURL('/request-url')
               expect(response.request.hash).toEqual('#request-hash')
               expect(response.url).toMatchURL('/response-url')
@@ -451,7 +451,7 @@ describe('up.network', function() {
               responseURL: '/response-url'
             })
 
-            promise.then(function (response) {
+            promise.then(function(response) {
               expect(response.request.url).toMatchURL('/request-url')
               expect(response.request.hash).toEqual('#request-hash')
               expect(response.url).toMatchURL('/response-url')
@@ -468,7 +468,7 @@ describe('up.network', function() {
               responseURL: '/response-url'
             })
 
-            promise.then(function (response) {
+            promise.then(function(response) {
               expect(response.url).toMatchURL('/response-url')
               expect(response.method).toEqual('GET')
               done()
@@ -484,7 +484,7 @@ describe('up.network', function() {
               responseURL: '/request-url'
             })
 
-            promise.then(function (response) {
+            promise.then(function(response) {
               expect(response.url).toMatchURL('/request-url')
               expect(response.method).toEqual('POST')
               done()
@@ -501,7 +501,7 @@ describe('up.network', function() {
               responseHeaders: {'X-Up-Method': 'GET'}
             })
 
-            promise.then(function (response) {
+            promise.then(function(response) {
               expect(response.url).toMatchURL('/request-url')
               expect(response.method).toEqual('GET')
               done()
@@ -664,7 +664,7 @@ describe('up.network', function() {
 
             this.respondWith('response-text')
 
-            promise.then(function (response) {
+            promise.then(function(response) {
               // See that the response object has been updated by moving the data options
               // to the URL. This is important for up.fragment code that works on response.request.
               expect(response.request.url).toMatchURL('/path?foo-key=foo-value&bar-key=bar-value')
@@ -911,7 +911,7 @@ describe('up.network', function() {
 
         describe('matching requests', function() {
 
-          it('reuses a request with the same URL but a different #hash', async function () {
+          it('reuses a request with the same URL but a different #hash', async function() {
             const request1 = up.request({ url: '/url#foo', cache: true })
             expect(request1.hash).toEqual('#foo')
 
@@ -1055,7 +1055,7 @@ describe('up.network', function() {
               expect(up.network.isBusy()).toBe(false)
             })
 
-            it('starts partitioning a method/URL pair once it receives a Vary header', async function () {
+            it('starts partitioning a method/URL pair once it receives a Vary header', async function() {
               up.request({ url: '/path', target: '.a', cache: true })
 
               await wait()
@@ -1273,7 +1273,7 @@ describe('up.network', function() {
 
           describe('default autoCache behavior', function() {
 
-            u.each(['GET', 'HEAD', 'OPTIONS'], function (safeMethod) {
+            u.each(['GET', 'HEAD', 'OPTIONS'], function(safeMethod) {
 
               it(`caches ${safeMethod} requests`, asyncSpec(function(next) {
                 next(() => up.request({url: '/foo', method: safeMethod, cache: 'auto'}))
@@ -1374,7 +1374,7 @@ describe('up.network', function() {
 
       describe('cache eviction', function() {
 
-        it('evicts all cache entries with { evictCache: true }', asyncSpec(function (next) {
+        it('evicts all cache entries with { evictCache: true }', asyncSpec(function(next) {
           up.request({ url: '/foo', cache: true })
           expect({ url: '/foo' }).toBeCached()
 
@@ -1390,7 +1390,7 @@ describe('up.network', function() {
           })
         }))
 
-        it('keeps this new request in the cache with { cache: true, evictCache: true }', asyncSpec(function (next) {
+        it('keeps this new request in the cache with { cache: true, evictCache: true }', asyncSpec(function(next) {
           up.request({ url: '/foo', cache: true })
           expect({ url: '/foo' }).toBeCached()
 
@@ -1406,7 +1406,7 @@ describe('up.network', function() {
           })
         }))
 
-        it('accepts an URL pattern as { evictCache } option', asyncSpec(function (next) {
+        it('accepts an URL pattern as { evictCache } option', asyncSpec(function(next) {
           up.request({ url: '/foo/1', cache: true })
           up.request({ url: '/foo/2', cache: true })
           up.request({ url: '/bar/1', cache: true })
@@ -1427,7 +1427,7 @@ describe('up.network', function() {
             })
           })
 
-          next(function () {
+          next(function() {
             expect({ url: '/foo/1' }).not.toBeCached()
             expect({ url: '/foo/2' }).not.toBeCached()
             expect({ url: '/bar/1' }).toBeCached()
@@ -1456,7 +1456,7 @@ describe('up.network', function() {
             })
           })
 
-          next(function () {
+          next(function() {
             expect({ url: '/foo/1' }).not.toBeCached()
             expect({ url: '/foo/2' }).not.toBeCached()
             expect({ url: '/bar/1' }).toBeCached()
@@ -1485,7 +1485,7 @@ describe('up.network', function() {
             })
           })
 
-          next(function () {
+          next(function() {
             expect({ url: '/foo/1' }).not.toBeCached()
             expect({ url: '/foo/2' }).not.toBeCached()
             expect({ url: '/bar/1' }).toBeCached()
@@ -1518,8 +1518,8 @@ describe('up.network', function() {
         }))
 
 
-        it('defaults to a rule in up.network.config.evictCache() if neither request nor server set a { evictCache } option', asyncSpec(function (next) {
-          up.network.config.evictCache = function (request, response) {
+        it('defaults to a rule in up.network.config.evictCache() if neither request nor server set a { evictCache } option', asyncSpec(function(next) {
+          up.network.config.evictCache = function(request, response) {
             expect(request).toEqual(jasmine.any(up.Request))
             expect(response).toEqual(jasmine.any(up.Response))
 
@@ -1538,7 +1538,7 @@ describe('up.network', function() {
 
           next(() => jasmine.Ajax.requests.at(0).respondWith({ status: 200, responseText: 'foo response' }))
 
-          next(function () {
+          next(function() {
             expect({ url: '/foo' }).toBeCached()
             expect({ url: '/bar' }).toBeCached()
             expect({ url: '/baz' }).toBeCached()
@@ -1546,7 +1546,7 @@ describe('up.network', function() {
             jasmine.Ajax.requests.at(1).respondWith({ status: 200, responseText: 'bar response' })
           })
 
-          next(function () {
+          next(function() {
             expect({ url: '/foo' }).toBeCached()
             expect({ url: '/bar' }).toBeCached()
             expect({ url: '/baz' }).toBeCached()
@@ -1554,7 +1554,7 @@ describe('up.network', function() {
             jasmine.Ajax.requests.at(2).respondWith({ status: 200, responseText: 'baz response' })
           })
 
-          next(function () {
+          next(function() {
             // Only the URL pattern returned by config.evictCache() is evicted
             expect({ url: '/foo' }).not.toBeCached()
             expect({ url: '/bar' }).toBeCached()
@@ -1566,7 +1566,7 @@ describe('up.network', function() {
 
       describe('cache expiration', function() {
 
-        it('expires all cache entries with { expireCache: true }', asyncSpec(function (next) {
+        it('expires all cache entries with { expireCache: true }', asyncSpec(function(next) {
           up.request({ url: '/foo', cache: true })
           expect({ url: '/foo' }).toBeCached()
 
@@ -1581,7 +1581,7 @@ describe('up.network', function() {
           })
         }))
 
-        it('keeps a fresh cache entry for this new request with { cache: true, expireCache: true }', asyncSpec(function (next) {
+        it('keeps a fresh cache entry for this new request with { cache: true, expireCache: true }', asyncSpec(function(next) {
           up.request({ url: '/foo', cache: true })
           expect({ url: '/foo' }).toBeCached()
 
@@ -1598,7 +1598,7 @@ describe('up.network', function() {
           })
         }))
 
-        it('accepts an URL pattern as { expireCache } option', asyncSpec(function (next) {
+        it('accepts an URL pattern as { expireCache } option', asyncSpec(function(next) {
           up.request({ url: '/foo/1', cache: true })
           up.request({ url: '/foo/2', cache: true })
           up.request({ url: '/bar/1', cache: true })
@@ -1619,7 +1619,7 @@ describe('up.network', function() {
             })
           })
 
-          next(function () {
+          next(function() {
             expect({ url: '/foo/1' }).toBeExpired()
             expect({ url: '/foo/2' }).toBeExpired()
             expect({ url: '/bar/1' }).not.toBeExpired()
@@ -1648,7 +1648,7 @@ describe('up.network', function() {
             })
           })
 
-          next(function () {
+          next(function() {
             expect({ url: '/foo/1' }).toBeExpired()
             expect({ url: '/foo/2' }).toBeExpired()
             expect({ url: '/bar/1' }).not.toBeExpired()
@@ -1677,7 +1677,7 @@ describe('up.network', function() {
             })
           })
 
-          next(function () {
+          next(function() {
             expect({ url: '/foo/1' }).toBeExpired()
             expect({ url: '/foo/2' }).toBeExpired()
             expect({ url: '/bar/1' }).not.toBeExpired()
@@ -1710,8 +1710,8 @@ describe('up.network', function() {
         }))
 
 
-        it('defaults to a rule in up.network.config.expireCache() if neither request nor server set a { expireCache } option', asyncSpec(function (next) {
-          up.network.config.expireCache = function (request, response) {
+        it('defaults to a rule in up.network.config.expireCache() if neither request nor server set a { expireCache } option', asyncSpec(function(next) {
+          up.network.config.expireCache = function(request, response) {
             expect(request).toEqual(jasmine.any(up.Request))
             expect(response).toEqual(jasmine.any(up.Response))
 
@@ -1730,7 +1730,7 @@ describe('up.network', function() {
 
           next(() => jasmine.Ajax.requests.at(0).respondWith({ status: 200, responseText: 'foo response' }))
 
-          next(function () {
+          next(function() {
             expect({ url: '/foo' }).not.toBeExpired()
             expect({ url: '/bar' }).not.toBeExpired()
             expect({ url: '/baz' }).not.toBeExpired()
@@ -1738,7 +1738,7 @@ describe('up.network', function() {
             jasmine.Ajax.requests.at(1).respondWith({ status: 200, responseText: 'bar response' })
           })
 
-          next(function () {
+          next(function() {
             expect({ url: '/foo' }).not.toBeExpired()
             expect({ url: '/bar' }).not.toBeExpired()
             expect({ url: '/baz' }).not.toBeExpired()
@@ -1746,7 +1746,7 @@ describe('up.network', function() {
             jasmine.Ajax.requests.at(2).respondWith({ status: 200, responseText: 'baz response' })
           })
 
-          next(function () {
+          next(function() {
             // Only the URL pattern returned by config.expireCache() is exppired
             expect({ url: '/foo' }).toBeExpired()
             expect({ url: '/bar' }).not.toBeExpired()
@@ -1754,7 +1754,7 @@ describe('up.network', function() {
           })
         }))
 
-        u.each(['POST', 'PUT', 'DELETE'], function (unsafeMethod) {
+        u.each(['POST', 'PUT', 'DELETE'], function(unsafeMethod) {
 
           it(`expires the entire cache if a ${unsafeMethod} request is made`, asyncSpec(function(next) {
             const safeRequestAttrs = { method: 'GET', url: '/foo', cache: true }
@@ -1909,7 +1909,7 @@ describe('up.network', function() {
 
           next(() => {
             expect(responses).toEqual(['first response', 'second response'])
-          });
+          })
         }))
       })
 
@@ -1936,7 +1936,7 @@ describe('up.network', function() {
         }))
 
         it('allows up:request:load listeners to prevent the request (useful to cancel all requests when stopping a test scenario)', async function() {
-          const listener = jasmine.createSpy('listener').and.callFake(function (event) {
+          const listener = jasmine.createSpy('listener').and.callFake(function(event) {
             expect(jasmine.Ajax.requests.count()).toEqual(0)
             event.preventDefault()
           })
@@ -1953,7 +1953,7 @@ describe('up.network', function() {
         it('does not block the queue when an up:request:load event was prevented', function(done) {
           up.network.config.concurrency = 1
 
-          const listener = jasmine.createSpy('listener').and.callFake(function (event) {
+          const listener = jasmine.createSpy('listener').and.callFake(function(event) {
             // only prevent the first request
             if (event.request.url.indexOf('/path1') >= 0) {
               event.preventDefault()
@@ -2014,8 +2014,8 @@ describe('up.network', function() {
           })
         })
 
-        it('allows up:request:load listeners to access the xhr request object', function (done) {
-          const listener = jasmine.createSpy('listener').and.callFake(function (event) {
+        it('allows up:request:load listeners to access the xhr request object', function(done) {
+          const listener = jasmine.createSpy('listener').and.callFake(function(event) {
             expect(jasmine.Ajax.requests.count()).toEqual(0)
             expect(event.request.xhr).toBeDefined()
           })
@@ -2349,7 +2349,7 @@ describe('up.network', function() {
             expect(jasmine.Ajax.requests.count()).toEqual(1)
             this.respondWith('response-text')
 
-            promise.then(function (text) {
+            promise.then(function(text) {
               expect(text).toEqual('response-text')
 
               done()
@@ -2482,7 +2482,7 @@ describe('up.network', function() {
 
         next.await(() => promiseState(request))
 
-        next(function (result) {
+        next(function(result) {
           expect(result.state).toBe('fulfilled')
           expect(result.value).toEqual(jasmine.any(up.Response))
           expect(listener).not.toHaveBeenCalled()
@@ -2492,7 +2492,7 @@ describe('up.network', function() {
 
         next.await(() => promiseState(request))
 
-        next(function (result) {
+        next(function(result) {
           expect(result.state).toBe('fulfilled')
           expect(result.value).toEqual(jasmine.any(up.Response))
           expect(listener).not.toHaveBeenCalled()
