@@ -725,13 +725,13 @@ up.link = (function() {
   */
   up.macro(config.selectorFn('clickableSelectors'), makeClickable)
 
-  function disableLinkishContainer(container) {
-    let linkish = up.fragment.subtree(container, config.selector('clickableSelectors') + ', a[href]')
-    return u.sequence(u.map(linkish, disableOneLinkish))
+  function disableLinkLikeContainer(container) {
+    let linkLike = up.fragment.subtree(container, config.selector('clickableSelectors') + ', a[href]')
+    return u.sequence(u.map(linkLike, disableOneLinkLike))
   }
 
-  function disableOneLinkish(linkish) {
-    return e.setAttrsTemp(linkish, {
+  function disableOneLinkLike(linkLike) {
+    return e.setAttrsTemp(linkLike, {
       'up-disabled': '',
       'aria-disabled': 'true',
     })
@@ -1740,7 +1740,7 @@ up.link = (function() {
     convertClicks,
     config,
     loadDeferred,
-    disableLinkish: disableLinkishContainer,
+    disableLinkLike: disableLinkLikeContainer,
   }
 })()
 

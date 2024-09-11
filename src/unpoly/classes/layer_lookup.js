@@ -63,7 +63,7 @@ up.LayerLookup = class LayerLookup {
       return this._forIndex(Number(value))
     }
 
-    if (u.isElementish(value)) {
+    if (u.isElementLike(value)) {
       return this._forElement(value)
     }
 
