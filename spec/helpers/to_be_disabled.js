@@ -1,4 +1,4 @@
-u = up.util
+const u = up.util
 
 beforeEach(function() {
   jasmine.addMatchers({

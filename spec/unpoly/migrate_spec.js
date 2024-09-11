@@ -32,7 +32,7 @@ if (up.migrate.loaded) {
         expect(callback).toHaveBeenCalledWith(element, 'value')
       })
 
-      describe('with { scope } option', function () {
+      describe('with { scope } option', function() {
 
         it('only sees an element when it has both the given attribute and it also matches the given scope selector', function() {
           let callback = jasmine.createSpy('callback')
