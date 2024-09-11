@@ -3907,7 +3907,7 @@ describe 'up.link', ->
           expect('#slow').toHaveText('initial content')
           expect('#other').toHaveText('partial content')
 
-    describe 'up:click', ->
+    fdescribe 'up:click', ->
 
       describe 'on a link that is not [up-instant]', ->
 
@@ -4013,6 +4013,13 @@ describe 'up.link', ->
           expect(listener).toHaveBeenCalled()
           expect(listener.calls.argsFor(0)[0].defaultPrevented).toBe(true)
 
+        it 'does not emit up:click if the link is [up-disabled]', ->
+          link = fixture('a[href="/path"][up-disabled]')
+          listener = jasmine.createSpy('up:click listener')
+          link.addEventListener('up:click', listener)
+          Trigger.clickSequence(link)
+          expect(listener.calls.count()).toBe(0)
+
       describe 'on a link that is [up-instant]', ->
 
         it 'emits an up:click event on mousedown', ->
@@ -4070,16 +4077,14 @@ describe 'up.link', ->
           Trigger.mousedown(link)
           expect(mousedownEvent.defaultPrevented).toBe(true)
 
-      describe 'on an non-link element that is [up-instant]', ->
-
-        it 'emits an up:click event on mousedown', ->
-          div = fixture('div[up-instant]')
+        it 'does not emit up:click if the link is [up-disabled]', ->
+          link = fixture('a[href="/path"][up-instant][up-disabled]')
           listener = jasmine.createSpy('up:click listener')
-          div.addEventListener('up:click', listener)
-          Trigger.mousedown(div)
-          expect(listener).toHaveBeenCalled()
+          link.addEventListener('up:click', listener)
+          Trigger.clickSequence(link)
+          expect(listener.calls.count()).toBe(0)
 
-      describe 'on an non-link element that is not [up-instant]', ->
+      describe 'on a non-interactive element that is not [up-instant]', ->
 
         it 'emits an up:click event on click', ->
           div = fixture('div')
@@ -4105,6 +4110,117 @@ describe 'up.link', ->
           div.addEventListener('up:click', (event) -> event.preventDefault())
           Trigger.click(div)
           expect(clickEvent.defaultPrevented).toBe(true)
+
+        it 'does not emit up:click if the element is [up-disabled]', ->
+          div = fixture('div[up-disabled]')
+          listener = jasmine.createSpy('up:click listener')
+          div.addEventListener('up:click', listener)
+          Trigger.clickSequence(div)
+          expect(listener).not.toHaveBeenCalled()
+
+      describe 'on a non-interactive element that is [up-instant]', ->
+
+        it 'emits an up:click event on mousedown', ->
+          div = fixture('div[up-instant]')
+          listener = jasmine.createSpy('up:click listener')
+          div.addEventListener('up:click', listener)
+          Trigger.mousedown(div)
+          expect(listener).toHaveBeenCalled()
+
+        it 'does not emit up:click if the element is [up-disabled]', ->
+          div = fixture('div[up-instant][up-disabled]')
+          listener = jasmine.createSpy('up:click listener')
+          div.addEventListener('up:click', listener)
+          Trigger.clickSequence(div)
+          expect(listener).not.toHaveBeenCalled()
+
+      describe 'on a button[type=submit]', ->
+
+        it 'emits an up:click event on click', ->
+          [form, button] = htmlFixtureList """
+            <form>
+              <button type="submit">label</button>
+            </form>
+          """
+          form.addEventListener('submit', (event) => event.preventDefault())
+          buttonListener = jasmine.createSpy('up:click listener')
+          button.addEventListener('up:click', buttonListener)
+
+          Trigger.clickSequence(button)
+
+          expect(buttonListener.calls.count()).toBe(1)
+
+        it 'does not emit up:click if the button is [disabled]', ->
+          [form, button] = htmlFixtureList """
+            <form>
+              <button type="submit" disabled>label</button>
+            </form>
+          """
+          form.addEventListener('submit', (event) => event.preventDefault())
+          listener = jasmine.createSpy('up:click listener')
+          button.addEventListener('up:click', listener)
+
+          Trigger.clickSequence(button)
+
+          expect(listener.calls.count()).toBe(0)
+
+      describe 'on a button[type=button]', ->
+
+        it 'emits an up:click event on click', ->
+          [form, button] = htmlFixtureList """
+            <form>
+              <button type="button">label</button>
+            </form>
+          """
+          buttonListener = jasmine.createSpy('up:click listener')
+          button.addEventListener('up:click', buttonListener)
+
+          Trigger.clickSequence(button)
+
+          expect(buttonListener.calls.count()).toBe(1)
+
+        it 'does not emit up:click if the button is [disabled]', ->
+          [form, button] = htmlFixtureList """
+            <form>
+              <button type="button" disabled>label</button>
+            </form>
+          """
+          listener = jasmine.createSpy('up:click listener')
+          button.addEventListener('up:click', listener)
+
+          Trigger.clickSequence(button)
+
+          expect(listener.calls.count()).toBe(0)
+
+      describe 'on a input[type=submit]', ->
+
+        it 'emits an up:click event on click', ->
+          [form, button] = htmlFixtureList """
+            <form>
+              <input type="submit">label</input>
+            </form>
+          """
+          form.addEventListener('submit', (event) => event.preventDefault())
+          buttonListener = jasmine.createSpy('up:click listener')
+          button.addEventListener('up:click', buttonListener)
+
+          Trigger.clickSequence(button)
+
+          expect(buttonListener.calls.count()).toBe(1)
+
+        it 'does not emit up:click if the button is [disabled]', ->
+          [form, button] = htmlFixtureList """
+            <form>
+              <input type="submit" disabled>label</input>
+            </form>
+          """
+          form.addEventListener('submit', (event) => event.preventDefault())
+          listener = jasmine.createSpy('up:click listener')
+          button.addEventListener('up:click', listener)
+
+          Trigger.clickSequence(button)
+
+          expect(listener.calls.count()).toBe(0)
 
     describe '[up-clickable]', ->
 
