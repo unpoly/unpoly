@@ -27,6 +27,11 @@ module.exports = {
     }],
     "@typescript-eslint/no-empty-function": "off",
     "@typescript-eslint/no-this-alias": "off",
+    "@typescript-eslint/space-before-function-paren": ["error", {
+      "anonymous": "never",
+      "named": "never",
+      "asyncArrow": "always"
+    }]
   },
   "globals": {
     "up": "writable",
@@ -44,12 +49,14 @@ module.exports = {
         "expect": "readonly",
         "expectAsync": "readonly",
         "beforeEach": "readonly",
+        "beforeAll": "readonly",
         "afterEach": "readonly",
         "spyOn": "readonly",
         "spyOnProperty": "readonly",
         "asyncSpec": "readonly",
         "fixture": "readonly",
         "fixtureStyle": "readonly",
+        "fixtureStyleSheet": "readonly",
         "htmlFixtureList": "readonly",
         "$fixture": "readonly",
         "wait": "readonly",
@@ -57,6 +64,7 @@ module.exports = {
         "makeLayers": "readonly",
         "Trigger": "readonly",
         "promiseState": "readonly",
+        "raceThenables": "readonly",
       },
       "rules": {
         "@typescript-eslint/no-unused-vars": "off"

@@ -998,7 +998,7 @@ up.viewport = (function() {
     // In Chrome, when reloading, the browser behavior happens before DOMContentLoaded.
     // However, when we follow a link with an #anchor URL, the browser
     // behavior happens *after* DOMContentLoaded. Hence we wait one more task.
-    u.task(function () {
+    u.task(function() {
       // If the user has scrolled while the page was loading, we will
       // not reset their scroll position by revealing the #anchor fragment.
       if (!userScrolled) {

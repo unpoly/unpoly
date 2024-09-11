@@ -1,4 +1,4 @@
-u = up.util
+const u = up.util
 
 describe('up.error', function() {
 
