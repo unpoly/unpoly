@@ -110,7 +110,7 @@ describe('up.feedback', function() {
 
     describe('up.render()', function() {
 
-      fdescribe('with { preview } option', function() {
+      describe('with { preview } option', function() {
 
         describe('call variants', function() {
 
@@ -964,7 +964,7 @@ describe('up.feedback', function() {
       })
     })
 
-    fdescribe('.up-loading', function() {
+    describe('.up-loading', function() {
 
       it('gives the loading element an .up-loading class', async function() {
         fixture('.target')
@@ -1053,7 +1053,7 @@ describe('up.feedback', function() {
     })
 
 
-    fdescribe('.up-active', function() {
+    describe('.up-active', function() {
 
       it('marks clicked links as .up-active until the request finishes', asyncSpec(function(next) {
         const $link = $fixture('a[href="/foo"][up-target=".main"]')

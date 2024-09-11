@@ -1588,7 +1588,7 @@ describe 'up.fragment', ->
               expect(onOffline).toHaveBeenCalled()
 
 
-        fdescribe 'up:fragment:loaded event', ->
+        describe 'up:fragment:loaded event', ->
 
           it 'emits an up:fragment:loaded event that contains information about the request, response and render options', asyncSpec (next) ->
             origin = fixture('.origin')
@@ -7470,7 +7470,7 @@ describe 'up.fragment', ->
           expect(listener.calls.argsFor(0)[0].renderOptions.target).toEqual('.target')
           expect(listener.calls.argsFor(0)[0].renderOptions.guardEvent).toBeMissing()
 
-      fdescribe 'with { abort } option', ->
+      describe 'with { abort } option', ->
 
         describe 'with { abort: true }', ->
 
@@ -8815,7 +8815,7 @@ describe 'up.fragment', ->
 
               await expectAsync(job.finished).toBeRejectedWith(jasmine.any(up.Aborted))
 
-            fit 'lets listeners prevent insertion of revalidated content by *skipping* the second up:fragment:loaded event, fulfilling the { finished } promise', ->
+            it 'lets listeners prevent insertion of revalidated content by *skipping* the second up:fragment:loaded event, fulfilling the { finished } promise', ->
               up.on 'up:fragment:loaded', (event) ->
                 if event.revalidating
                   event.skip()
