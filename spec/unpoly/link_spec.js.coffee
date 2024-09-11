@@ -827,7 +827,7 @@ describe 'up.link', ->
         await expectAsync(promise).toBeResolvedTo(jasmine.any(up.RenderResult))
         expect('.target').toHaveText('new text')
 
-    fdescribe 'up.link.followOptions()', ->
+    describe 'up.link.followOptions()', ->
 
       it 'parses the render options that would be used to follow the given link', ->
         link = fixture('a[href="/path"][up-method="PUT"][up-layer="new"]')
@@ -1328,7 +1328,7 @@ describe 'up.link', ->
 
           expect(requestSpy).toHaveBeenCalledWith(jasmine.objectContaining(preload: true))
 
-      fdescribe 'aborting', ->
+      describe 'aborting', ->
 
         it 'is not abortable by default', asyncSpec (next) ->
           link = fixture('a[href="/path"][up-target=".target"]')
@@ -2766,7 +2766,7 @@ describe 'up.link', ->
           up.hello($area)
           expect($area.attr('up-href')).toBeUndefined()
 
-    fdescribe '[up-preload]', ->
+    describe '[up-preload]', ->
 
       it 'preloads the link destination when hovering, after a delay', ->
         up.link.config.preloadDelay = 100
@@ -2869,7 +2869,7 @@ describe 'up.link', ->
         next.after 50, ->
           expect(abortListener).toHaveBeenCalled()
 
-      fit 'does not abort a request if the user followed the link while it was preloading, and then stopped hovering', asyncSpec (next) ->
+      it 'does not abort a request if the user followed the link while it was preloading, and then stopped hovering', asyncSpec (next) ->
         up.link.config.preloadDelay = 10
         $fixture('.target').text('old text')
         $link = $fixture('a[href="/foo"][up-target=".target"][up-preload]')
@@ -3907,7 +3907,7 @@ describe 'up.link', ->
           expect('#slow').toHaveText('initial content')
           expect('#other').toHaveText('partial content')
 
-    fdescribe 'up:click', ->
+    describe 'up:click', ->
 
       describe 'on a link that is not [up-instant]', ->
 
@@ -4309,7 +4309,7 @@ describe 'up.link', ->
           fauxLink = up.hello(fixture('a[up-follow][up-href="/path"]'))
           expect(fauxLink).toHaveAttribute('role', 'link')
 
-      fdescribe 'with [up-instant]', ->
+      describe 'with [up-instant]', ->
 
         it 'emits up:click on mousedown instead of click', ->
           fauxButton = up.hello(fixture('.hyperlink[up-clickable][up-instant]'))
@@ -4344,7 +4344,7 @@ describe 'up.link', ->
 
           expect(listener.calls.count()).toBe(1)
 
-      fdescribe 'with [up-disabled]', ->
+      describe 'with [up-disabled]', ->
 
         it 'does not emit up:click when clicked', ->
           fauxButton = up.hello(fixture('.hyperlink[up-clickable][up-disabled]'))
@@ -4355,7 +4355,7 @@ describe 'up.link', ->
 
           expect(clickListener).not.toHaveBeenCalled()
 
-    fdescribe 'a[up-disable]', ->
+    describe 'a[up-disable]', ->
 
       describe 'without an attribute value', ->
 
