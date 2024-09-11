@@ -364,46 +364,46 @@ describe('up.util', () => {
       })
     })
 
-    describe('up.util.isElementish', function() {
+    describe('up.util.isElementLike', function() {
 
       it('returns true for an element', function() {
         const value = document.body
-        expect(up.util.isElementish(value)).toBe(true)
+        expect(up.util.isElementLike(value)).toBe(true)
       })
 
       it('returns true for a jQuery collection', function() {
         const value = $('body')
-        expect(up.util.isElementish(value)).toBe(true)
+        expect(up.util.isElementLike(value)).toBe(true)
       })
 
       it('returns true for a NodeList', function() {
         const value = document.querySelectorAll('body')
-        expect(up.util.isElementish(value)).toBe(true)
+        expect(up.util.isElementLike(value)).toBe(true)
       })
 
       it('returns true for an array of elements', function() {
         const value = [document.body]
-        expect(up.util.isElementish(value)).toBe(true)
+        expect(up.util.isElementLike(value)).toBe(true)
       })
 
       it('returns false for an array of non-element values', function() {
         const value = ['foo']
-        expect(up.util.isElementish(value)).toBe(false)
+        expect(up.util.isElementLike(value)).toBe(false)
       })
 
       it('returns false for undefined', function() {
         const value = undefined
-        expect(up.util.isElementish(value)).toBe(false)
+        expect(up.util.isElementLike(value)).toBe(false)
       })
 
       it('returns true for the document', function() {
         const value = document
-        expect(up.util.isElementish(value)).toBe(true)
+        expect(up.util.isElementLike(value)).toBe(true)
       })
 
       it('returns true for the window', function() {
         const value = window
-        expect(up.util.isElementish(value)).toBe(true)
+        expect(up.util.isElementLike(value)).toBe(true)
       })
     })
 
