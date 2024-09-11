@@ -1150,6 +1150,29 @@ describe('up.Preview', function() {
       expect(undoFn).toHaveBeenCalled()
     })
 
+    it('does not let undo functions schedule more undo functions', async function() {
+      fixture('#target')
+      let recursiveFn = jasmine.createSpy('recursive undo fn')
+      let undoFn = jasmine.createSpy('undo fn')
+      let previewFn = jasmine.createSpy('preview apply').and.callFake(function(preview) {
+        preview.undo(undoFn)
+        preview.undo(function() {
+          preview.undo(recursiveFn)
+        })
+      })
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(previewFn).toHaveBeenCalled()
+
+      jasmine.respondWithSelector('#target')
+      await wait()
+
+      expect(undoFn).toHaveBeenCalled()
+      expect(recursiveFn).not.toHaveBeenCalled()
+    })
+
   })
 
 })
