@@ -137,7 +137,7 @@ describe 'up.form', ->
         result = up.form.submitButtons(form)
         expect(result).toEqual(jasmine.arrayWithExactContents([submitButton, submitInput]))
 
-    fdescribe 'up.watch()', ->
+    describe 'up.watch()', ->
 
       beforeEach ->
         up.form.config.watchInputDelay = 0
@@ -1075,7 +1075,7 @@ describe 'up.form', ->
 
           expect('#form').toHaveText('failure text')
 
-      fdescribe 'with { disable } option', ->
+      describe 'with { disable } option', ->
 
         describe 'with { disable: "form" }', ->
 
@@ -2163,7 +2163,7 @@ describe 'up.form', ->
           # No second request was made
           expect(jasmine.Ajax.requests.count()).toBe(1)
 
-      fdescribe 'disabling', ->
+      describe 'disabling', ->
 
         it "executes the form's [up-watch-disable] option while a validation request is in flight", asyncSpec (next) ->
           form = fixture('form[up-watch-disable]')
@@ -2617,7 +2617,7 @@ describe 'up.form', ->
 
         expect(field).toBeDisabled()
 
-      fdescribe 'disabling of links and clickables', ->
+      describe 'disabling of links and clickables', ->
 
         it "prevents followable links from being followed on click", ->
           fixture('#target')
@@ -3927,7 +3927,7 @@ describe 'up.form', ->
           expect(jasmine.lastRequest().url).toMatchURL('/link-path')
           expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toBeMissing()
 
-      fit 'does not send a validation request when we render with { abort } while waiting for the validation delay', asyncSpec (next) ->
+      it 'does not send a validation request when we render with { abort } while waiting for the validation delay', asyncSpec (next) ->
         target = fixture('.target')
         form = fixture('form[up-submit][action="/form-path"][up-validate-delay=20]')
         textField = e.affix(form, 'input[type=text][name=input][up-validate]')
