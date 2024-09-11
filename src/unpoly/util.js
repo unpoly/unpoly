@@ -610,12 +610,12 @@ up.util = (function() {
   }
 
   /*-
-  @function up.util.isElementish
+  @function up.util.isElementLike
   @param object
   @return {boolean}
   @internal
   */
-  function isElementish(object) {
+  function isElementLike(object) {
     return !!(object && (object.addEventListener || object[0]?.addEventListener))
   }
 
@@ -2093,7 +2093,7 @@ up.util = (function() {
     isNumber,
     isElement,
     isJQuery,
-    isElementish,
+    isElementLike,
     isPromise,
     isOptions,
     isArray,

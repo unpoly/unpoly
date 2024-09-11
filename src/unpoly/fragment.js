@@ -1481,7 +1481,7 @@ up.fragment = (function() {
     const selector = args.pop()
     const root = args[0]
 
-    if (u.isElementish(selector)) {
+    if (u.isElementLike(selector)) {
       // up.fragment.get(root: Element, element: Element, [options]) should just return element.
       // The given root and options are ignored. We also don't check if it's destroying.
       // We do use e.get() to unwrap a jQuery collection.
@@ -2216,7 +2216,7 @@ up.fragment = (function() {
         if (layer === 'new' || layer.opening) continue
         let firstSwappableTarget = toTarget(layer.getFirstSwappableElement(), options)
         targets.unshift(target.replace(LAYER_PSEUDO, firstSwappableTarget))
-      } else if (u.isElementish(target)) {
+      } else if (u.isElementLike(target)) {
         expanded.push(toTarget(target, options))
       } else if (u.isString(target)) {
         expanded.push(resolveOrigin(target, options))

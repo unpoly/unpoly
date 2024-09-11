@@ -456,7 +456,7 @@ up.form = (function() {
 
     return u.sequence([
       ...u.map(controls, disableControl),
-      up.link.disableLinkish(container),
+      up.link.disableLinkLike(container),
     ])
   }
 
