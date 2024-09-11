@@ -91,7 +91,7 @@ describe 'up.layer', ->
           expect(abortedURLs.length).toBe(1)
           expect(abortedURLs[0]).toMatchURL('/path1')
 
-        fit 'does not abort a pending request targeting a non-main element in the current layer', asyncSpec (next) ->
+        it 'does not abort a pending request targeting a non-main element in the current layer', asyncSpec (next) ->
           fixture('.root-element')
 
           up.navigate('.root-element', url: '/path1')
@@ -189,7 +189,7 @@ describe 'up.layer', ->
           expect(element).toBeGiven()
           expect(element.innerText).toBeBlank()
 
-        fit 'manipulates the stack synchronously', ->
+        it 'manipulates the stack synchronously', ->
           expect(up.layer.count).toBe(1)
 
           up.layer.open(target: '.element', content: '')
@@ -1918,7 +1918,7 @@ describe 'up.layer', ->
             up.layer.normalizeOptions(options)
             expect(options).toEqual jasmine.objectContaining(layer: 'root')
 
-        fdescribe 'when only { mode } is passed, but no { layer }', ->
+        describe 'when only { mode } is passed, but no { layer }', ->
 
           it 'sets { layer: "new" }', ->
             options = { mode: 'drawer' }
