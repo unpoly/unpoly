@@ -6,6 +6,132 @@ describe('up.util', () => {
 
   describe('JavaScript functions', function() {
 
+    describe('up.util.cleaner()', function() {
+
+      it('returns a function that collects clean-up action, which are executed when { clean } is called', function() {
+        let cleaner = up.util.cleaner()
+        let action1 = jasmine.createSpy('action 1')
+        let action2 = jasmine.createSpy('action 2')
+        cleaner(action1)
+        cleaner(action2)
+
+        expect(action1).not.toHaveBeenCalled()
+        expect(action2).not.toHaveBeenCalled()
+
+        cleaner.clean()
+
+        expect(action1).toHaveBeenCalled()
+        expect(action2).toHaveBeenCalled()
+      })
+
+      it('binds the returned { clean } function', function() {
+        let cleaner = up.util.cleaner()
+        let action = jasmine.createSpy('action')
+        cleaner(action)
+
+        let clean = cleaner.clean
+        clean()
+
+        expect(action).toHaveBeenCalled()
+      })
+
+      it("runs clean-up actions in the reverse order that they've been scheduled in", function() {
+        let actions = []
+        let cleaner = up.util.cleaner()
+        cleaner(() => actions.push('one'))
+        cleaner(() => actions.push('two'))
+
+        cleaner.clean()
+
+        expect(actions).toEqual(['two', 'one'])
+      })
+
+      it('accepts multiple clean-up actions as multiple arguments', function() {
+        let cleaner = up.util.cleaner()
+        let action1 = jasmine.createSpy('action 1')
+        let action2 = jasmine.createSpy('action 2')
+        cleaner(action1, action2)
+
+        expect(action1).not.toHaveBeenCalled()
+        expect(action2).not.toHaveBeenCalled()
+
+        cleaner.clean()
+
+        expect(action1).toHaveBeenCalled()
+        expect(action2).toHaveBeenCalled()
+      })
+
+      it('accepts multiple clean-up actions as a single Array argument', function() {
+        let cleaner = up.util.cleaner()
+        let action1 = jasmine.createSpy('action 1')
+        let action2 = jasmine.createSpy('action 2')
+        cleaner([action1, action2])
+
+        expect(action1).not.toHaveBeenCalled()
+        expect(action2).not.toHaveBeenCalled()
+
+        cleaner.clean()
+
+        expect(action1).toHaveBeenCalled()
+        expect(action2).toHaveBeenCalled()
+      })
+
+      it('ignores non-Function arguments', function() {
+        let cleaner = up.util.cleaner()
+        let action1 = jasmine.createSpy('action 1')
+        let action2 = jasmine.createSpy('action 2')
+        cleaner([action1, null, action2])
+
+        expect(action1).not.toHaveBeenCalled()
+        expect(action2).not.toHaveBeenCalled()
+
+        let doClean = () => cleaner.clean()
+        expect(doClean).not.toThrowError()
+
+        expect(action1).toHaveBeenCalled()
+        expect(action2).toHaveBeenCalled()
+      })
+
+      it('does not let clean-up actions schedule more clean-up actions', function() {
+        let cleaner = up.util.cleaner()
+
+        let recursiveAction = jasmine.createSpy('recursive action')
+        let action = jasmine.createSpy('clean-up action').and.callFake(() => {
+          cleaner(recursiveAction)
+        })
+
+        cleaner(action)
+
+        expect(action).not.toHaveBeenCalled()
+        expect(recursiveAction).not.toHaveBeenCalled()
+
+        let doClean = () => cleaner.clean()
+        expect(doClean).not.toThrowError()
+
+        expect(action).toHaveBeenCalled()
+        expect(recursiveAction).not.toHaveBeenCalled()
+      })
+
+      it('allows to re-use a cleaner function after cleaning, restarting with an empty list of clean-up actions', function() {
+        let cleaner = up.util.cleaner()
+        let action1 = jasmine.createSpy('action 1')
+        let action2 = jasmine.createSpy('action 2')
+
+        cleaner(action1)
+        cleaner.clean()
+
+        expect(action1.calls.count()).toBe(1)
+        expect(action2.calls.count()).toBe(0)
+
+        cleaner(action2)
+        cleaner.clean()
+
+        expect(action1.calls.count()).toBe(1)
+        expect(action2.calls.count()).toBe(1)
+      })
+
+    })
+
     describe('up.util.isEqual', function() {
 
       describe('for an Element', function() {
