@@ -1,7 +1,7 @@
 const u = up.util
 const $ = jQuery
 
-beforeEach(function () {
+beforeEach(function() {
   jasmine.addMatchers({
     toMatchSelector(util, customEqualityTesters) {
       return {

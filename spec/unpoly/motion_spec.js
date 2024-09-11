@@ -202,7 +202,7 @@ describe('up.motion', function() {
       })
 
       describe('with an animation that flies in the element from the screen edge', () => {
-        it('does not leave a `transform` CSS property once the animation finishes, as to not affect the positioning of child elements', async function () {
+        it('does not leave a `transform` CSS property once the animation finishes, as to not affect the positioning of child elements', async function() {
           // https://github.com/unpoly/unpoly/issues/439
           const element = fixture('.element')
 

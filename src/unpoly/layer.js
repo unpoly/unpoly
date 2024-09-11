@@ -676,7 +676,7 @@ up.layer = (function() {
   @stable
   */
   function ask(options) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
       options = {
         ...options,
         onAccepted: (event) => resolve(event.value),
