@@ -30,6 +30,12 @@ up.migrate.handleLayerOptions = function(options) {
     up.migrate.warn(`Option { layer: '${options.layer}' } has been removed. Did you mean { layer: 'overlay' }?`)
     options.layer = 'overlay'
   }
+
+  if (up.util.isMissing(options.layer) && up.util.isGiven(options.mode)) {
+    up.migrate.warn('Opening a layer with only a { mode } option is deprecated. Pass { layer: "new", mode } instead.')
+    options.layer = 'new'
+  }
+
 }
 
 up.migrate.handleTetherOptions = function(options) {
