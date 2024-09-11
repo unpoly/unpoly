@@ -3812,13 +3812,6 @@ describe 'up.fragment', ->
 
             expect(up.layer.current.mode).toEqual('drawer')
 
-          it 'opens a new layer if given a { mode } but no { layer }', ->
-            up.render('.element', content: 'new text', mode: 'drawer')
-
-            expect(up.layer.count).toBe(2)
-            expect(up.layer.current.mode).toEqual('drawer')
-            expect(up.layer.current).toHaveText('new text')
-
         describe 'with { layer: "swap" }', ->
 
           it 'replaces the current overlay with the new overlay', ->

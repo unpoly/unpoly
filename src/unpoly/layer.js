@@ -323,10 +323,6 @@ up.layer = (function() {
       }
     // If no options.layer is given we still want to avoid updating "any" layer.
     // Other options might have a hint for a more appropriate layer.
-    } else if (options.mode) {
-      // If user passes a { mode } option without a { layer } option
-      // we assume they want to open a new layer.
-      options.layer = 'new'
     } else if (u.isElementLike(options.target)) {
       // If we are targeting an actual Element or jQuery collection (and not
       // a selector string) we operate in that element's layer.

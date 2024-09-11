@@ -1918,6 +1918,13 @@ describe 'up.layer', ->
             up.layer.normalizeOptions(options)
             expect(options).toEqual jasmine.objectContaining(layer: 'root')
 
+        fdescribe 'when only { mode } is passed, but no { layer }', ->
+
+          it 'sets { layer: "new" }', ->
+            options = { mode: 'drawer' }
+            up.layer.normalizeOptions(options)
+            expect(options).toEqual jasmine.objectContaining(layer: 'new', mode: 'drawer')
+
       describe 'for { layer: "new" }', ->
 
         it 'sets a default mode from up.layer.config.mode', ->
