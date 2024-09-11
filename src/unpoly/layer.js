@@ -327,7 +327,7 @@ up.layer = (function() {
       // If user passes a { mode } option without a { layer } option
       // we assume they want to open a new layer.
       options.layer = 'new'
-    } else if (u.isElementish(options.target)) {
+    } else if (u.isElementLike(options.target)) {
       // If we are targeting an actual Element or jQuery collection (and not
       // a selector string) we operate in that element's layer.
       options.layer = stack.get(options.target, { normalizeLayerOptions: false })
