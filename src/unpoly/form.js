@@ -79,7 +79,12 @@ up.form = (function() {
     When you add custom JavaScript controls to this list, matching elements should respond to the properties `{ name, value, disabled }`.
 
   @param {string} [config.submitButtonSelectors]
-    An array of CSS selectors that represent submit buttons, such as `input[type=submit]`.
+    An array of CSS selectors that represent submit buttons, such as `input[type=submit]` or `button[type=submit]`.
+
+  @param {string} [config.genericButtonSelectors]
+    An array of CSS selectors that represent push buttons with no default behavior, such as `input[type=button]` or `button[type=button]`.
+
+    @experimental
 
   @param {number} [config.watchInputDelay=0]
     The number of milliseconds to [wait before running a watcher callback](/watch-options#debouncing-callbacks).
@@ -117,10 +122,11 @@ up.form = (function() {
    */
   const config = new up.Config(() => ({
     groupSelectors: ['[up-form-group]', 'fieldset', 'label', 'form'],
-    fieldSelectors: ['select', 'input:not([type=submit]):not([type=image])', 'button[type]:not([type=submit])', 'textarea'],
+    fieldSelectors: ['select', 'input:not([type=submit], [type=image], [type=button])', 'button[type]:not([type=submit], [type=button])', 'textarea'],
     submitSelectors: ['form:is([up-submit], [up-target], [up-layer], [up-transition])'],
     noSubmitSelectors: ['[up-submit=false]', '[target]', e.crossOriginSelector('action')],
     submitButtonSelectors: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])'],
+    genericButtonSelectors: ['input[type=button]', 'button[type=button]'],
     // Although we only need to bind to `input`, we always also bind to `change`
     // in case another script manually triggers it.
     watchInputEvents: ['input', 'change'],
@@ -201,6 +207,10 @@ up.form = (function() {
   */
   function findSubmitButtons(root) {
     return e.subtree(root, submitButtonSelector())
+  }
+
+  function findGenericButtons(root) {
+    return e.subtree(root, config.selector('genericButtonSelectors'))
   }
 
   function isSubmitButton(element) {
@@ -452,7 +462,11 @@ up.form = (function() {
   */
 
   function disableContainer(container) {
-    let controls = [...findFields(container), ...findSubmitButtons(container)]
+    let controls = [
+      ...findFields(container),
+      ...findSubmitButtons(container),
+      ...findGenericButtons(container),
+    ]
 
     return u.sequence([
       ...u.map(controls, disableControl),
