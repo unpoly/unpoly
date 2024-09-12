@@ -187,7 +187,6 @@ up.RenderOptions = (function() {
 
   function deriveFailOptions(preprocessedOptions) {
     let overrides = failOverrides(preprocessedOptions)
-    let layers = rememberOriginLayer(overrides)
 
     if (preprocessedOptions.failOptions) {
       return {
@@ -195,7 +194,6 @@ up.RenderOptions = (function() {
         // Only a few keys are shared between success and failure cases.
         ...u.pick(preprocessedOptions, SHARED_KEYS),
         ...overrides,
-        ...layers,
         // We sometimes want to log that fail-prefixed options were used, to alert the
         // user of the fact that there are different option sets for success and failure.
         ...{ failPrefixForced: true }
@@ -208,7 +206,6 @@ up.RenderOptions = (function() {
         // This is relevant for up.validate() which does not use fail options,
         // but lets users still override individual options for the failure case.
         ...overrides,
-        ...layers,
       }
     }
   }
