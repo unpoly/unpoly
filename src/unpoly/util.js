@@ -2045,12 +2045,6 @@ up.util = (function() {
     return api
   }
 
-  async function waitMicrotasks(count = 1) {
-    for (let i = 0; i < count; i++) {
-      await Promise.resolve()
-    }
-  }
-
   return {
     parseURL,
     normalizeURL,
@@ -2154,7 +2148,6 @@ up.util = (function() {
     // groupBy,
     variant,
     cleaner,
-    waitMicrotasks,
     scanFunctions,
   }
 })()
