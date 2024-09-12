@@ -42,7 +42,7 @@ up.Preview = class Preview {
   }
 
   get layer() {
-    return this.renderOptions.layers[0]
+    return this.renderOptions.resolvedLayers[0]
   }
 
   run(nameOrFn) {
