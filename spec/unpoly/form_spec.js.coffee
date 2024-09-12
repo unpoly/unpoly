@@ -3123,6 +3123,50 @@ describe 'up.form', ->
             expect(submitSpy).not.toHaveBeenCalled()
             expect(form).toHaveBeenDefaultSubmitted()
 
+      describe 'with [up-preview] modifier', ->
+
+        it 'shows a preview effect while the form is loading', ->
+          target = fixture('#target', text: 'old target')
+          spinnerContainer = fixture('#other')
+
+          up.preview 'my:preview', (preview) ->
+            preview.insert(spinnerContainer, '<div id="spinner"></div>')
+
+          form = fixture('form[action="/foo"][up-submit][up-target="#target"][up-preview="my:preview"]', text: 'label')
+          submitButton = e.affix(form, 'input[type=submit]', text: 'label')
+
+          expect(spinnerContainer).not.toHaveSelector('#spinner')
+
+          Trigger.clickSequence(submitButton)
+          await wait()
+
+          expect(spinnerContainer).toHaveSelector('#spinner')
+
+          jasmine.respondWithSelector('#target', text: 'new target')
+          await wait()
+
+          expect(spinnerContainer).not.toHaveSelector('#spinner')
+
+      describe 'with [up-skeleton] modifier', ->
+
+        it 'shows a UI skeleton while the form is loading', ->
+          fixture('#target', content: '<p>old target</p>')
+          form = fixture('form[action="/foo"][up-submit][up-target="#target"][up-skeleton="<p>skeleton</p>"]', text: 'label')
+          submitButton = e.affix(form, 'input[type=submit]', text: 'label')
+
+          expect('#target').toHaveVisibleText('old target')
+
+          Trigger.clickSequence(submitButton)
+          await wait()
+
+          expect('#target').toHaveVisibleText('skeleton')
+
+          jasmine.respondWithSelector('#target', content: '<p>new target</p>')
+          await wait()
+
+          expect('#target').toHaveVisibleText('new target')
+
+
     describe 'input[up-autosubmit]', ->
 
       beforeEach ->
