@@ -138,6 +138,8 @@ up.Request.Cache = class Cache {
 
     let value
 
+    // up.Request#showPreviews() must synchronously know if it's already settled and fromCache.
+    // Awaiting the existing request would be too late, even if it's just 1 microtask later.
     if (existingRequest._isSettled() && existingRequest.response)
       value = existingRequest.response
     else
