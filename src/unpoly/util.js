@@ -1805,6 +1805,14 @@ up.util = (function() {
     }
   }
 
+  function delegatePromise(object, promiseProp) {
+    return defineDelegates(
+      object,
+      ['then', 'catch', 'finally'],
+      function() { return this[promiseProp] }
+    )
+  }
+
   // function defineTemporaryDelegates(object, props, targetProvider) {
   //   let undo = sequence(props.map((prop) => {
   //     let oldDescriptor = Object.getOwnPropertyDescriptor(object, prop)
@@ -2135,6 +2143,7 @@ up.util = (function() {
     upperCaseFirst,
     lowerCaseFirst,
     delegate: defineDelegates,
+    delegatePromise,
     // temporaryDelegate: defineTemporaryDelegates,
     reverse,
     // prefixCamelCase,
