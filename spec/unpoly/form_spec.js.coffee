@@ -2617,6 +2617,26 @@ describe 'up.form', ->
 
         expect(field).toBeDisabled()
 
+      describe 'disabling of non-submit buttons', ->
+
+        it 'disables a button[type=button]', ->
+          form = fixture('form')
+          button = e.affix(form, 'button[type=button]', text: 'label')
+          expect(button).not.toBeDisabled()
+
+          up.form.disable(form)
+
+          expect(button).toBeDisabled()
+
+        it 'disables an input[type=button]', ->
+          form = fixture('form')
+          button = e.affix(form, 'input[type=button]', value: 'label')
+          expect(button).not.toBeDisabled()
+
+          up.form.disable(form)
+
+          expect(button).toBeDisabled()
+
       describe 'disabling of links and clickables', ->
 
         it "prevents followable links from being followed on click", ->
