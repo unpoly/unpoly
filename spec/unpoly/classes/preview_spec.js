@@ -771,6 +771,34 @@ describe('up.Preview', function() {
         expect('#child2').toBeVisible()
       })
 
+      it('accepts a CSS selector to look up the reference', async function() {
+        fixture('#target')
+        let parent = htmlFixture(`
+          <div id="parent">
+            <div id="child1"></div>
+            <div id="child2"></div>
+          </div>
+        `)
+
+        let skeleton = e.createFromSelector('#skeleton')
+        let previewFn = (preview) => preview.showSkeleton('#parent', skeleton)
+
+        up.render({ preview: previewFn, url: '/url', target: '#target' })
+        await wait()
+
+        expect('#parent').toBeVisible()
+        expect(skeleton.parentElement).toBe(parent)
+        expect('#child1').toBeHidden()
+        expect('#child2').toBeHidden()
+
+        jasmine.respondWithSelector('#target')
+        await wait()
+
+        expect('#parent').toBeVisible()
+        expect('#child1').toBeVisible()
+        expect('#child2').toBeVisible()
+      })
+
       it('shows the skeleton within the targeted fragment if no reference is given', async function() {
         let target = htmlFixture(`
           <div id="target">
@@ -895,7 +923,38 @@ describe('up.Preview', function() {
         expect('#child').toBeVisible()
       })
 
-      // it('accepts a selector for the skeleton element')
+      it('accepts a selector for the skeleton element', async function() {
+        let skeletonCompiler = jasmine.createSpy('skeleton compiler')
+        up.compiler('#skeleton', skeletonCompiler)
+
+        fixture('#target')
+        let parent = htmlFixture(`
+          <div id="parent">
+            <div id="child"></div>
+          </div>
+        `)
+
+        htmlFixture(`
+          <template id="skeleton-template">
+            <div id="skeleton">skeleton</div>
+          </template>
+        `)
+        let previewFn = (preview) => preview.showSkeleton(parent, '#skeleton-template')
+
+        up.render({ preview: previewFn, url: '/url', target: '#target' })
+        await wait()
+
+        expect('#parent').toHaveSelector('#skeleton')
+        expect('#parent').not.toHaveSelector('#skeleton-template')
+        expect('#child').toBeHidden()
+        expect(skeletonCompiler).toHaveBeenCalledWith(jasmine.elementMatchingSelector('#skeleton'), jasmine.anything(), jasmine.anything())
+
+        jasmine.respondWithSelector('#target')
+        await wait()
+
+        expect('#parent').not.toHaveSelector('#skeleton')
+        expect('#child').toBeVisible()
+      })
 
     })
 
