@@ -2459,50 +2459,50 @@ describe 'up.link', ->
             expect(followSpy.calls.count()).toBe(2)
             expect(link).toHaveOutline()
 
-        describe 'handling of up.link.config.instantSelectors', ->
+          describe 'handling of up.link.config.instantSelectors', ->
 
-          it 'follows matching links without an [up-instant] attribute', asyncSpec (next) ->
-            @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
-            link = fixture('a[up-follow][href="/foo"].link')
-            up.link.config.instantSelectors.push('.link')
+            it 'follows matching links without an [up-instant] attribute', asyncSpec (next) ->
+              @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+              link = fixture('a[up-follow][href="/foo"].link')
+              up.link.config.instantSelectors.push('.link')
 
-            Trigger.mousedown(link)
+              Trigger.mousedown(link)
 
-            next =>
-              expect(@followSpy).toHaveBeenCalled()
+              next =>
+                expect(@followSpy).toHaveBeenCalled()
 
-          it 'allows individual links to opt out with [up-instant=false]', ->
-            followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
-            link = fixture('a[up-follow][href="/foo"][up-instant=false].link')
-            up.link.config.instantSelectors.push('.link')
+            it 'allows individual links to opt out with [up-instant=false]', ->
+              followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+              link = fixture('a[up-follow][href="/foo"][up-instant=false].link')
+              up.link.config.instantSelectors.push('.link')
 
-            Trigger.mousedown(link)
+              Trigger.mousedown(link)
 
-            await wait()
+              await wait()
 
-            expect(followSpy).not.toHaveBeenCalled()
+              expect(followSpy).not.toHaveBeenCalled()
 
-          it 'allows to configure exceptions in up.link.config.noInstantSelectors', ->
-            up.link.config.instantSelectors.push('.include')
-            up.link.config.noInstantSelectors.push('.exclude')
-            followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
-            link = fixture('a.include.exclude[up-follow][href="/foo"]')
+            it 'allows to configure exceptions in up.link.config.noInstantSelectors', ->
+              up.link.config.instantSelectors.push('.include')
+              up.link.config.noInstantSelectors.push('.exclude')
+              followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+              link = fixture('a.include.exclude[up-follow][href="/foo"]')
 
-            Trigger.mousedown(link)
+              Trigger.mousedown(link)
 
-            await wait()
+              await wait()
 
-            expect(followSpy).not.toHaveBeenCalled()
+              expect(followSpy).not.toHaveBeenCalled()
 
-          it 'allows individual links to opt out of all Unpoly link handling with [up-follow=false]', asyncSpec (next) ->
-            @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
-            link = fixture('a[up-follow][href="/foo"][up-follow=false].link')
-            up.link.config.instantSelectors.push('.link')
+            it 'allows individual links to opt out of all Unpoly link handling with [up-follow=false]', asyncSpec (next) ->
+              @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+              link = fixture('a[up-follow][href="/foo"][up-follow=false].link')
+              up.link.config.instantSelectors.push('.link')
 
-            Trigger.mousedown(link)
+              Trigger.mousedown(link)
 
-            next =>
-              expect(@followSpy).not.toHaveBeenCalled()
+              next =>
+                expect(@followSpy).not.toHaveBeenCalled()
 
 
       describe 'following non-interactive elements with [up-href]', ->
@@ -2552,30 +2552,30 @@ describe 'up.link', ->
 
           expect('.target').toHaveText('new text')
 
-    describe '[up-href] without [up-follow]', ->
-      if up.migrate.loaded
+      describe '[up-href] without [up-follow]', ->
+        if up.migrate.loaded
 
-        it 'is made followable', ->
-          fauxLink = up.hello(fixture('span[up-href="/path"]'))
-          expect(fauxLink).toBeFollowable()
+          it 'is made followable', ->
+            fauxLink = up.hello(fixture('span[up-href="/path"]'))
+            expect(fauxLink).toBeFollowable()
 
-        it 'is keyboard focusable', ->
-          fauxLink = up.hello(fixture('span[up-href="/path"]'))
-          expect(fauxLink).toBeKeyboardFocusable()
+          it 'is keyboard focusable', ->
+            fauxLink = up.hello(fixture('span[up-href="/path"]'))
+            expect(fauxLink).toBeKeyboardFocusable()
 
-      else
+        else
 
-        it 'is not followable', ->
-          fauxLink = up.hello(fixture('span[up-href="/path"]'))
-          expect(fauxLink).not.toBeFollowable()
+          it 'is not followable', ->
+            fauxLink = up.hello(fixture('span[up-href="/path"]'))
+            expect(fauxLink).not.toBeFollowable()
 
-        it 'gets no pointer cursor', ->
-          fauxLink = up.hello(fixture('span[up-href="/path"]'))
-          expect(fauxLink).toHaveCursorStyle('auto')
+          it 'gets no pointer cursor', ->
+            fauxLink = up.hello(fixture('span[up-href="/path"]'))
+            expect(fauxLink).toHaveCursorStyle('auto')
 
-        it 'is not keyboard focusable', ->
-          fauxLink = up.hello(fixture('span[up-href="/path"]'))
-          expect(fauxLink).not.toBeKeyboardFocusable()
+          it 'is not keyboard focusable', ->
+            fauxLink = up.hello(fixture('span[up-href="/path"]'))
+            expect(fauxLink).not.toBeKeyboardFocusable()
 
     if up.migrate.loaded
 
