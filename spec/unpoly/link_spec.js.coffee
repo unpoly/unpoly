@@ -2505,6 +2505,46 @@ describe 'up.link', ->
                 expect(@followSpy).not.toHaveBeenCalled()
 
 
+      describe 'with [up-preview] modifier', ->
+
+        it 'shows a preview effect while the link is loading', ->
+          target = fixture('#target', text: 'old target')
+          spinnerContainer = fixture('#other')
+
+          up.preview 'my:preview', (preview) ->
+            preview.insert(spinnerContainer, '<div id="spinner"></div>')
+
+          link = fixture('a[href="/foo"][up-follow][up-target="#target"][up-preview="my:preview"]', text: 'label')
+
+          expect(spinnerContainer).not.toHaveSelector('#spinner')
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect(spinnerContainer).toHaveSelector('#spinner')
+
+          jasmine.respondWithSelector('#target', text: 'new target')
+          await wait()
+
+          expect(spinnerContainer).not.toHaveSelector('#spinner')
+
+      describe 'with [up-skeleton] modifier', ->
+
+        it 'shows a UI skeleton while the link is loading', ->
+          fixture('#target', content: '<p>old target</p>')
+          link = fixture('a[href="/foo"][up-follow][up-target="#target"][up-skeleton="<p>skeleton</p>"]', text: 'label')
+          expect('#target').toHaveVisibleText('old target')
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect('#target').toHaveVisibleText('skeleton')
+
+          jasmine.respondWithSelector('#target', content: '<p>new target</p>')
+          await wait()
+
+          expect('#target').toHaveVisibleText('new target')
+
       describe 'following non-interactive elements with [up-href]', ->
 
         it 'makes any element behave like an [up-follow] link', ->
