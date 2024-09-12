@@ -406,7 +406,6 @@ up.link = (function() {
 
     // Status effects
     parser.booleanOrString('disable')
-    options.defaultDisableScope = link // what to disable with { disable: true }
     parser.boolean('feedback')
     parser.booleanOrString('preview')
     parser.booleanOrString('skeleton')
@@ -725,18 +724,6 @@ up.link = (function() {
   */
   up.macro(config.selectorFn('clickableSelectors'), makeClickable)
 
-  function disableLinkLikeContainer(container) {
-    let linkLike = up.fragment.subtree(container, config.selector('clickableSelectors') + ', a[href]')
-    return u.sequence(u.map(linkLike, disableOneLinkLike))
-  }
-
-  function disableOneLinkLike(linkLike) {
-    return e.setAttrsTemp(linkLike, {
-      'up-disabled': '',
-      'aria-disabled': 'true',
-    })
-  }
-
   function shouldFollowEvent(event, link) {
     // Users may configure up.link.config.followSelectors.push('a')
     // and then opt out individual links with [up-follow=false].
@@ -835,13 +822,9 @@ up.link = (function() {
   }
 
   function forkEventAsUpClick(originalEvent) {
-    if (originalEvent.target.matches('[up-disabled]')) {
-      originalEvent.preventDefault()
-    } else {
-      let forwardedProps = ['clientX', 'clientY', 'button', ...up.event.keyModifiers]
-      const newEvent = up.event.fork(originalEvent, 'up:click', forwardedProps)
-      up.emit(originalEvent.target, newEvent, { log: false })
-    }
+    let forwardedProps = ['clientX', 'clientY', 'button', ...up.event.keyModifiers]
+    const newEvent = up.event.fork(originalEvent, 'up:click', forwardedProps)
+    up.emit(originalEvent.target, newEvent, { log: false })
   }
 
   /*-
@@ -1740,7 +1723,6 @@ up.link = (function() {
     convertClicks,
     config,
     loadDeferred,
-    disableLinkLike: disableLinkLikeContainer,
   }
 })()
 
