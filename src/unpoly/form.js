@@ -366,10 +366,6 @@ up.form = (function() {
 
     options.origin ||= up.viewport.focusedElementWithin(form) || options.submitButton || form
 
-    // The { defaultDisableScope } option controls what to disable with { disable: true }.
-    // The { disable } option is parsed by up.link.followOptions.
-    options.defaultDisableScope = form
-
     // Now that we have extracted everything form-specific into options, we can call
     // up.link.followOptions(). This will also parse the myriads of other options
     // that are possible on both <form> and <a> elements.
@@ -468,10 +464,7 @@ up.form = (function() {
       ...findGenericButtons(container),
     ]
 
-    return u.sequence([
-      ...u.map(controls, disableControl),
-      up.link.disableLinkLike(container),
-    ])
+    return u.sequence(u.map(controls, disableControl))
   }
 
   function disableControl(control) {
@@ -488,7 +481,7 @@ up.form = (function() {
     return () => control.disabled = false
   }
 
-  function getDisablePreview({ disable, defaultDisableScope, origin }) {
+  function getDisablePreview({ disable, origin }) {
     return function(preview) {
       let givenOrigin = () => origin || up.fail('Missing { origin }')
       let originScope = () => getScope(givenOrigin())
@@ -496,7 +489,7 @@ up.form = (function() {
       let containers = []
 
       if (disable === true) {
-        containers = [defaultDisableScope || originScope()]
+        containers = [originScope()]
       } else if (u.isElement(disable)) {
         containers = [disable]
       } else if (u.isString(disable)) {
