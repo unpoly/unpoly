@@ -93,6 +93,9 @@ up.Preview = class Preview {
     let explicitParent = args[0]
 
     if (explicitParent) {
+      // Look-up the parent in case we received a CSS selector.
+      // If we received an Element, up.fragment.get() will return that unchanged.
+      explicitParent = up.fragment.get(explicitParent, { layer: this.layer })
       this._swapContent(explicitParent, skeleton)
     } else if (this.layer === 'new') {
       this.openLayer(skeleton, { closeAnimation: false })
