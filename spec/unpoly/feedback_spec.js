@@ -120,7 +120,7 @@ describe('up.feedback', function() {
 
             up.render({ preview: 'my-preview', url: '/path', target: 'body' })
 
-            await jasmine.waitMicrotasks(10)
+            await wait()
 
             expect(previewFn).toHaveBeenCalledWith(jasmine.any(up.Preview))
           })
@@ -133,7 +133,7 @@ describe('up.feedback', function() {
 
             up.render({ preview: 'preview1 preview2', url: '/path', target: 'body' })
 
-            await jasmine.waitMicrotasks(10)
+            await wait()
 
             expect(preview1Fn).toHaveBeenCalledWith(jasmine.any(up.Preview))
             expect(preview2Fn).toHaveBeenCalledWith(jasmine.any(up.Preview))
@@ -147,7 +147,7 @@ describe('up.feedback', function() {
 
             up.render({ preview: ['preview1', 'preview2'], url: '/path', target: 'body' })
 
-            await jasmine.waitMicrotasks(10)
+            await wait()
 
             expect(preview1Fn).toHaveBeenCalledWith(jasmine.any(up.Preview))
             expect(preview2Fn).toHaveBeenCalledWith(jasmine.any(up.Preview))
@@ -158,7 +158,7 @@ describe('up.feedback', function() {
 
             up.render({ preview: previewFn, url: '/path', target: 'body' })
 
-            await jasmine.waitMicrotasks(10)
+            await wait()
 
             expect(previewFn).toHaveBeenCalledWith(jasmine.any(up.Preview))
           })
@@ -169,7 +169,7 @@ describe('up.feedback', function() {
 
             up.render({ preview: [preview1Fn, preview2Fn], url: '/path', target: 'body' })
 
-            await jasmine.waitMicrotasks(10)
+            await wait()
 
             expect(preview1Fn).toHaveBeenCalledWith(jasmine.any(up.Preview))
             expect(preview2Fn).toHaveBeenCalledWith(jasmine.any(up.Preview))
@@ -224,7 +224,7 @@ describe('up.feedback', function() {
 
             up.render({ preview: previewFn, url: '/path', target: '#target', cache: true })
 
-            await jasmine.waitMicrotasks(10)
+            await wait()
 
             expect('#target').toHaveText('cached target')
 
@@ -388,7 +388,7 @@ describe('up.feedback', function() {
             })
 
             let render1Promise = up.render({ preview: previewFn, url: '/path1', target: '#target' })
-            await jasmine.waitMicrotasks(10)
+            await wait()
 
             expect(actions).toEqual(['preview:apply'])
 
