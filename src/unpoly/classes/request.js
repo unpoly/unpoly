@@ -938,6 +938,6 @@ up.Request = class Request extends up.Record {
   */
   static {
     // A request is also a promise ("thenable") for its response.
-    u.delegate(this.prototype, ['then', 'catch', 'finally'], function() { return this._deferred })
+    u.delegatePromise(this.prototype, '_deferred')
   }
 }
