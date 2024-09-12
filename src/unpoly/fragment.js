@@ -1448,6 +1448,8 @@ up.fragment = (function() {
     May be omitted to search through all elements in the current `document`.
   @param {string|Element} selector
     The selector to match.
+
+    If passed an `Element` instead of a string, that element is returned without further lookups.
   @param {string} [options.layer='current']
     The layer in which to select elements.
 
