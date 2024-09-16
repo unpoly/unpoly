@@ -13,10 +13,11 @@ up.Preview = class Preview {
   @constructor up.Preview
   @internal
   */
-  constructor({ request, renderOptions }) {
+  constructor({ fragment, request, renderOptions, cleaner }) {
+    this.fragment = fragment
     this.request = request
     this.renderOptions = renderOptions
-    this._cleaner = u.cleaner()
+    this._cleaner = cleaner
   }
 
   undo(...args) {
@@ -27,27 +28,18 @@ up.Preview = class Preview {
     return this.renderOptions.target
   }
 
-  get fragment() {
-    // Returns undefined with { layer: 'new' }
-    return this.request.fragment
-  }
-
   get origin() {
     return this.request.origin
-  }
-
-  get fragments() {
-    // Returns an empty list with { layer: 'new' }
-    return this.request.fragments
   }
 
   get layer() {
     return this.renderOptions.resolvedLayers[0]
   }
 
-  run(nameOrFn) {
-    let fn = up.feedback.getPreviewFn(nameOrFn)
-    this.undo(up.error.guard(fn, this))
+  run(value) {
+    for (let fn of up.feedback.resolvePreviewFns(value)) {
+      this.undo(up.error.guard(fn, this))
+    }
   }
 
   revert() {

@@ -200,7 +200,7 @@ describe 'up.form', ->
               callback = jasmine.createSpy('up.watch() callback')
 
               form = fixture('form')
-              input = e.affix(form, 'input[name=email][up-watch-feedback=false]')
+              input = e.affix(form, 'input[name=email][up-watch-disable="#disable"][up-watch-feedback="false"][up-watch-preview="my-preview"][up-watch-skeleton="#skeleton"]')
               up.hello(form)
 
               up.watch(input, callback)
@@ -212,7 +212,13 @@ describe 'up.form', ->
                 expect(callback).toHaveBeenCalledWith(
                   'other',
                   'email',
-                  jasmine.objectContaining({ origin: input, feedback: false })
+                  jasmine.objectContaining({
+                    origin: input,
+                    disable: '#disable',
+                    feedback: false,
+                    preview: 'my-preview',
+                    skeleton: '#skeleton',
+                  })
                 )
 
             it 'allows the observe a field without a containing <form>', ->
@@ -479,8 +485,8 @@ describe 'up.form', ->
 
             describe 'passing of render options to the callback', ->
 
-              it "passes the form's [up-watch-disable] option to the callback", ->
-                form = fixture('form[up-watch-disable="#disable"]')
+              it "parses [up-watch-] prefixed status options from the form and passes them to the callback", ->
+                form = fixture('form[up-watch-disable="#disable"][up-watch-feedback="false"][up-watch-preview="my-preview"][up-watch-skeleton="#skeleton"]')
                 input = e.affix(form, 'input[name=email]')
                 callback = jasmine.createSpy('callback')
 
@@ -491,11 +497,20 @@ describe 'up.form', ->
 
                 await wait()
 
-                expect(callback).toHaveBeenCalledWith('other', 'email', jasmine.objectContaining(disable: '#disable'))
+                expect(callback).toHaveBeenCalledWith(
+                  'other',
+                  'email',
+                  jasmine.objectContaining(
+                    disable: '#disable',
+                    feedback: false,
+                    preview: 'my-preview',
+                    skeleton: '#skeleton',
+                  )
+                )
 
-              it "passes the fields's [up-watch-disable] option to the callback", ->
-                form = fixture('form[up-watch-disable="#disable-from-form"]')
-                input = e.affix(form, 'input[name=email][up-watch-disable="#disable-from-field"]')
+              it "parses [up-watch-] prefixed status options from the field and passes them to the callback, overriding options from the form", ->
+                form = fixture('form[up-watch-disable="#disable-from-form"][up-watch-feedback="true"][up-watch-preview="preview-from-form"][up-watch-skeleton="#skeleton-from-form"]')
+                input = e.affix(form, 'input[name=email][up-watch-disable="#disable-from-field"][up-watch-feedback="false"][up-watch-preview="preview-from-field"][up-watch-skeleton="#skeleton-from-field"]')
                 callback = jasmine.createSpy('callback')
 
                 up.watch(input, callback)
@@ -505,7 +520,16 @@ describe 'up.form', ->
 
                 await wait()
 
-                expect(callback).toHaveBeenCalledWith('other', 'email', jasmine.objectContaining(disable: '#disable-from-field'))
+                expect(callback).toHaveBeenCalledWith(
+                  'other',
+                  'email',
+                  jasmine.objectContaining(
+                    disable: '#disable-from-field',
+                    feedback: false,
+                    preview: 'preview-from-field',
+                    skeleton: '#skeleton-from-field',
+                  )
+                )
 
               it "overrides the [up-watch-disable] option from form and field if an { disable } option is also passed", ->
                 form = fixture('form[up-watch-disable="#disable-from-form"]')
@@ -877,6 +901,22 @@ describe 'up.form', ->
         options = up.form.watchOptions(field, {}, { defaults: { disable: true, feedback: true }})
 
         expect(options).toEqual(jasmine.objectContaining(disable: false, feedback: true))
+
+      it 'parses status effect options with an [up-watch-] prefix', ->
+        form = fixture('form')
+        container = e.affix(form, 'div[up-watch-disable="#disable"][up-watch-feedback="false"][up-watch-preview="my-preview"][up-watch-skeleton="#skeleton"]')
+        field = e.affix(container, 'input[type="text"][name="foo"]')
+
+        options = up.form.watchOptions(field)
+
+        expect(options).toEqual(
+          jasmine.objectContaining(
+            disable: '#disable'
+            feedback: false
+            preview: 'my-preview'
+            skeleton: '#skeleton'
+          )
+        )
 
       it 'prioritizes the closest [up-watch-] prefixed attribute', ->
         form = fixture('form[up-watch-delay=1000]')
@@ -2264,24 +2304,7 @@ describe 'up.form', ->
             expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo baz')
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-form-group]:has(input[name="foo"]), [up-form-group]:has(input[name="baz"])')
 
-        it 'picks up changed field values between multiple up.validate() calls (bugfix)', asyncSpec (next) ->
-          form = fixture('form[action=/path][method=post]')
-          fooGroup = e.affix(form, '[up-form-group]')
-          fooField = e.affix(fooGroup, 'input[name=foo]')
-          barGroup = e.affix(form, '[up-form-group]')
-          barField = e.affix(barGroup, 'input[name=bar]')
-
-          fooField.value = 'one'
-          up.validate(fooField)
-
-          barField.value = 'two'
-          up.validate(barField)
-
-          next ->
-            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo bar')
-            expect(jasmine.lastRequest().data()).toMatchParams({ foo: 'one', bar: 'two' })
-
-        it 'honors the { disable } option of each batched validation', asyncSpec (next) ->
+        it 'honors the { disable } option of each batched validation, resolving the :origin for each field', ->
           form = fixture('form[action=/path][up-watch-disable=":origin"]')
           fooField = e.affix(form, 'input[name=foo]')
           barField = e.affix(form, 'input[name=bar]')
@@ -2290,25 +2313,145 @@ describe 'up.form', ->
           up.validate(fooField)
           up.validate(bazField)
 
-          next ->
-            expect(fooField).toBeDisabled()
-            expect(barField).not.toBeDisabled()
-            expect(bazField).toBeDisabled()
+          await wait()
 
-            jasmine.respondWith """
-              <form action="/path">
-                <input name='foo'>
+          expect(fooField).toBeDisabled()
+          expect(barField).not.toBeDisabled()
+          expect(bazField).toBeDisabled()
+
+          jasmine.respondWith """
+            <form action="/path">
+              <input name='foo'>
+              <input name='bar'>
+              <input name='baz'>
+            </form>
+          """
+
+          await wait()
+
+          expect(fooField).not.toBeDisabled()
+          expect(barField).not.toBeDisabled()
+          expect(bazField).not.toBeDisabled()
+
+        it 'applies the { preview } of each batched validation to only its respective targeted fragment', ->
+          undo1Fn = jasmine.createSpy('preview1 undo fn')
+          preview1Fn = jasmine.createSpy('preview1 apply fn').and.returnValue(undo1Fn)
+          undo2Fn = jasmine.createSpy('preview2 undo fn')
+          preview2Fn = jasmine.createSpy('preview2 apply fn').and.returnValue(undo2Fn)
+
+          up.preview('preview1', preview1Fn)
+          up.preview('preview2', preview2Fn)
+
+          [form, fooGroup, fooField, barGroup, barField, bazGroup, bazField] = htmlFixtureList """
+            <form action="/path">
+              <fieldset>
+                <input name='foo' up-watch-preview='preview1'>
+              </fieldset>
+              <fieldset>
                 <input name='bar'>
+              </fieldset>
+              <fieldset>
+                <input name='baz' up-watch-preview='preview2'>
+              </fieldset>
+            </form>
+          """
+
+          up.validate(fooField)
+          up.validate(barField)
+          up.validate(bazField)
+
+          await wait()
+
+          expect(preview1Fn.calls.count()).toBe(1)
+          expect(preview1Fn).toHaveBeenCalledWith(jasmine.objectContaining(fragment: fooGroup))
+          expect(undo1Fn.calls.count()).toBe(0)
+
+          expect(preview2Fn.calls.count()).toBe(1)
+          expect(preview2Fn).toHaveBeenCalledWith(jasmine.objectContaining(fragment: bazGroup))
+          expect(undo2Fn.calls.count()).toBe(0)
+
+          jasmine.respondWith """
+            <form action="/path">
+              <fieldset>
+                <input name='foo'>
+              </fieldset>
+              <fieldset>
+                <input name='bar'>
+              </fieldset>
+              <fieldset>
                 <input name='baz'>
-              </form>
-            """
+              </fieldset>
+            </form>
+          """
 
-          next ->
-            expect(fooField).not.toBeDisabled()
-            expect(barField).not.toBeDisabled()
-            expect(bazField).not.toBeDisabled()
+          await wait()
 
-        it 'honors the { focus } option of the last batched validation with a { focus } option', asyncSpec (next) ->
+          expect(preview1Fn.calls.count()).toBe(1)
+          expect(undo1Fn.calls.count()).toBe(1)
+          expect(preview2Fn.calls.count()).toBe(1)
+          expect(undo2Fn.calls.count()).toBe(1)
+
+        it 'applies the { skeleton } of each batched validation to only its respective targeted fragment', ->
+          [form, fooGroup, fooField, barGroup, barField, bazGroup, bazField, skeletonTemplate] = htmlFixtureList """
+            <form action="/path">
+              <fieldset>
+                <input name='foo' up-watch-skeleton='#skeleton-template'>
+              </fieldset>
+              <fieldset>
+                <input name='bar'>
+              </fieldset>
+              <fieldset>
+                <input name='baz' up-watch-skeleton='#skeleton-template'>
+              </fieldset>
+
+              <template id='skeleton-template'>
+                <div class='skeleton'>loading...</div>
+              </template>
+            </form>
+          """
+
+          up.validate(fooField)
+          up.validate(barField)
+          up.validate(bazField)
+
+          await wait()
+
+          expect('fieldset:has(input[name=foo])').toHaveSelector('.skeleton')
+          expect('input[name=foo]').toBeHidden()
+
+          expect('fieldset:has(input[name=bar])').not.toHaveSelector('.skeleton')
+          expect('input[name=bar]').not.toBeHidden()
+
+          expect('fieldset:has(input[name=baz])').toHaveSelector('.skeleton')
+          expect('input[name=baz]').toBeHidden()
+
+          jasmine.respondWith """
+            <form action="/path">
+              <fieldset>
+                <input name='foo'>
+              </fieldset>
+              <fieldset>
+                <input name='bar'>
+              </fieldset>
+              <fieldset>
+                <input name='baz'>
+              </fieldset>
+            </form>
+          """
+
+          await wait()
+
+          expect('fieldset:has(input[name=foo])').not.toHaveSelector('.skeleton')
+          expect('input[name=foo]').not.toBeHidden()
+
+          expect('fieldset:has(input[name=bar])').not.toHaveSelector('.skeleton')
+          expect('input[name=bar]').not.toBeHidden()
+
+          expect('fieldset:has(input[name=baz])').not.toHaveSelector('.skeleton')
+          expect('input[name=baz]').not.toBeHidden()
+
+
+        it 'uses the { focus } option of the last batched validation with a { focus } option', asyncSpec (next) ->
           form = fixture('form[action=/path]')
           fooField = e.affix(form, 'input[name=foo]')
           barField = e.affix(form, 'input[name=bar]')
@@ -2360,7 +2503,7 @@ describe 'up.form', ->
             expect(jasmine.lastRequest().requestHeaders['Baz']).toBe('baz-value')
             expect(jasmine.lastRequest().requestHeaders['Bam']).toBe('bam-value')
 
-        it 'honors the { data } option of each batched validation', asyncSpec (next) ->
+        it 'honors the { data } option of each batched validation, mapping each data to its respective targeted fragment', asyncSpec (next) ->
           form = fixture('form[action=/path]')
           fooField = e.affix(form, 'input[name=foo]')
           barField = e.affix(form, 'input[name=bar]')
@@ -2396,108 +2539,128 @@ describe 'up.form', ->
             expect(barDataSpy.calls.count()).toBe(2)
             expect(barDataSpy.calls.argsFor(1)[0]).toEqual(key: 2)
 
-        it 'does not crash if an origin for a pending batch is destroyed', ->
-          form = fixture('form[action=/path]')
-          fooField = e.affix(form, 'input[name=foo][up-validate="#foo-target"]')
-          fooTarget = e.affix(form, '#foo-target')
-          barField = e.affix(form, 'input[name=bar][up-validate="#bar-target"]')
-          barTarget = e.affix(form, '#bar-target')
+        describe 'concurrency', ->
 
-          up.validate(fooField)
-          up.validate(barField)
+          it 'picks up changed field values between multiple up.validate() calls (bugfix)', ->
+            form = fixture('form[action=/path][method=post]')
+            fooGroup = e.affix(form, '[up-form-group]')
+            fooField = e.affix(fooGroup, 'input[name=foo]')
+            barGroup = e.affix(form, '[up-form-group]')
+            barField = e.affix(barGroup, 'input[name=bar]')
 
-          up.destroy(fooField)
+            fooField.value = 'one'
+            up.validate(fooField)
 
-          await wait()
+            barField.value = 'two'
+            up.validate(barField)
 
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo bar')
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('#foo-target, #bar-target')
+            await wait()
 
-        it 'does not crash if an target for a pending batch is destroyed before the validation request is sent', ->
-          form = fixture('form[action=/path]')
-          fooField = e.affix(form, 'input[name=foo][up-validate="#foo-target"]')
-          fooTarget = e.affix(form, '#foo-target')
-          barField = e.affix(form, 'input[name=bar][up-validate="#bar-target"]')
-          barTarget = e.affix(form, '#bar-target')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo bar')
+            expect(jasmine.lastRequest().data()).toMatchParams({ foo: 'one', bar: 'two' })
 
-          up.validate(fooField)
-          up.validate(barField)
+          it 'does not crash if an origin for a pending batch is destroyed', ->
+            form = fixture('form[action=/path]')
+            fooField = e.affix(form, 'input[name=foo][up-validate="#foo-target"]')
+            fooTarget = e.affix(form, '#foo-target')
+            barField = e.affix(form, 'input[name=bar][up-validate="#bar-target"]')
+            barTarget = e.affix(form, '#bar-target')
 
-          up.destroy(fooTarget)
+            up.validate(fooField)
+            up.validate(barField)
 
-          await wait()
+            up.destroy(fooField)
 
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo bar')
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('#bar-target')
+            await wait()
 
-        it 'does not crash if an target for a pending batch is destroyed while the validation request is loading', ->
-          form = fixture('form[action=/path]')
-          fooField = e.affix(form, 'input[name=foo][up-validate="#foo-target"]')
-          fooTarget = e.affix(form, '#foo-target', text: 'old foo target')
-          barField = e.affix(form, 'input[name=bar][up-validate="#bar-target"]')
-          barTarget = e.affix(form, '#bar-target', text: 'new bar target')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo bar')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('#foo-target, #bar-target')
 
-          up.validate(fooField)
-          up.validate(barField)
+          it 'does not crash if an target for a pending batch is destroyed before the validation request is sent', ->
+            form = fixture('form[action=/path]')
+            fooField = e.affix(form, 'input[name=foo][up-validate="#foo-target"]')
+            fooTarget = e.affix(form, '#foo-target')
+            barField = e.affix(form, 'input[name=bar][up-validate="#bar-target"]')
+            barTarget = e.affix(form, '#bar-target')
 
-          await wait()
+            up.validate(fooField)
+            up.validate(barField)
 
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo bar')
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('#foo-target, #bar-target')
+            up.destroy(fooTarget)
 
-          up.destroy(fooTarget)
+            await wait()
 
-          jasmine.respondWith """
-            <div id="foo-target">new foo target</div>
-            <div id="bar-target">new bar target</div>
-          """
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo bar')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('#bar-target')
 
-          await wait()
+          it 'does not crash if an target for a pending batch is destroyed while the validation request is loading', ->
+            form = fixture('form[action=/path]')
+            fooField = e.affix(form, 'input[name=foo][up-validate="#foo-target"]')
+            fooTarget = e.affix(form, '#foo-target', text: 'old foo target')
+            barField = e.affix(form, 'input[name=bar][up-validate="#bar-target"]')
+            barTarget = e.affix(form, '#bar-target', text: 'new bar target')
 
-          expect(document).not.toHaveSelector('#foo-target')
-          expect('#bar-target').toHaveText('new bar target')
+            up.validate(fooField)
+            up.validate(barField)
 
-        it 'keeps validation targets from aborted fragments for a pending batch (as the fragment may have been updated with a new version)', ->
-          form = fixture('form[action=/path]')
-          fooGroup = e.affix(form, '[up-form-group]')
-          fooField = e.affix(fooGroup, 'input[name=foo]')
-          barGroup = e.affix(form, '[up-form-group]')
-          barField = e.affix(barGroup, 'input[name=bar]')
-          bazGroup = e.affix(form, '[up-form-group]')
-          bazField = e.affix(bazGroup, 'input[name=baz]')
+            await wait()
 
-          up.validate(fooField)
-          up.validate(bazField)
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo bar')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('#foo-target, #bar-target')
 
-          up.fragment.abort(fooGroup)
+            up.destroy(fooTarget)
 
-          await wait()
+            jasmine.respondWith """
+              <div id="foo-target">new foo target</div>
+              <div id="bar-target">new bar target</div>
+            """
 
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo baz')
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-form-group]:has(input[name="foo"]), [up-form-group]:has(input[name="baz"])')
+            await wait()
 
-        it 'removes a pending batch when the entire form element is destroyed', ->
-          form = fixture('form[action=/path]')
-          fooGroup = e.affix(form, '[up-form-group]')
-          fooField = e.affix(fooGroup, 'input[name=foo]')
-          barGroup = e.affix(form, '[up-form-group]')
-          barField = e.affix(barGroup, 'input[name=bar]')
-          bazGroup = e.affix(form, '[up-form-group]')
-          bazField = e.affix(bazGroup, 'input[name=baz]')
+            expect(document).not.toHaveSelector('#foo-target')
+            expect('#bar-target').toHaveText('new bar target')
 
-          validateFooPromise = up.validate(fooField)
-          validateBarPromise = up.validate(bazField)
+          it 'keeps validation targets from aborted fragments for a pending batch (as the fragment may have been updated with a new version)', ->
+            form = fixture('form[action=/path]')
+            fooGroup = e.affix(form, '[up-form-group]')
+            fooField = e.affix(fooGroup, 'input[name=foo]')
+            barGroup = e.affix(form, '[up-form-group]')
+            barField = e.affix(barGroup, 'input[name=bar]')
+            bazGroup = e.affix(form, '[up-form-group]')
+            bazField = e.affix(bazGroup, 'input[name=baz]')
 
-          # Two validations in the same batch return the same Promise reference
-          expect(validateFooPromise).toBe(validateBarPromise)
+            up.validate(fooField)
+            up.validate(bazField)
 
-          up.destroy(form)
+            up.fragment.abort(fooGroup)
 
-          await expectAsync(validateFooPromise).toBeRejectedWith(jasmine.any(up.Aborted))
+            await wait()
 
-          await wait()
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo baz')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-form-group]:has(input[name="foo"]), [up-form-group]:has(input[name="baz"])')
 
-          expect(jasmine.Ajax.requests.count()).toBe(0)
+          it 'removes a pending batch when the entire form element is destroyed', ->
+            form = fixture('form[action=/path]')
+            fooGroup = e.affix(form, '[up-form-group]')
+            fooField = e.affix(fooGroup, 'input[name=foo]')
+            barGroup = e.affix(form, '[up-form-group]')
+            barField = e.affix(barGroup, 'input[name=bar]')
+            bazGroup = e.affix(form, '[up-form-group]')
+            bazField = e.affix(bazGroup, 'input[name=baz]')
+
+            validateFooPromise = up.validate(fooField)
+            validateBarPromise = up.validate(bazField)
+
+            # Two validations in the same batch return the same Promise reference
+            expect(validateFooPromise).toBe(validateBarPromise)
+
+            up.destroy(form)
+
+            await expectAsync(validateFooPromise).toBeRejectedWith(jasmine.any(up.Aborted))
+
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(0)
 
     describe 'up.form.disable()', ->
 
@@ -3378,6 +3541,57 @@ describe 'up.form', ->
 
           expect(jasmine.Ajax.requests.count()).toBe(0)
 
+      describe 'with [up-watch-preview] modifier', ->
+
+        it 'runs the preview with the element targeted by the form', ->
+          undoFn = jasmine.createSpy('undo preview')
+          previewFn = jasmine.createSpy('apply preview').and.returnValue(undoFn)
+          up.preview('my:preview', previewFn)
+
+          [form, input] = htmlFixtureList("""
+            <form up-autosubmit up-watch-delay="5" up-watch-preview="my:preview" method="post" action="/action" up-target="#target">
+              <input name="input1" value="initial-value">
+            </form>
+          """)
+          up.hello(form)
+          target = fixture('#target', text: 'old target')
+
+          input.value = 'changed-value'
+          Trigger.change(input)
+
+          await wait(40)
+
+          expect(previewFn).toHaveBeenCalledWith(jasmine.objectContaining(fragment: target))
+          expect(undoFn).not.toHaveBeenCalled()
+
+          jasmine.respondWithSelector('#target', text: 'new target')
+
+          await wait()
+
+          expect('#target').toHaveText('new target')
+          expect(undoFn).toHaveBeenCalled()
+
+      describe 'with [up-watch-skeleton] modifier', ->
+
+        it 'replaces the targeted element with the given skeleton', ->
+          [form, input, skeletonTemplate] = htmlFixtureList("""
+            <form up-autosubmit up-watch-delay="5" up-watch-skeleton="#skeleton-template" method="post" action="/action" up-target="#target">
+              <input name="input1" value="initial-value">
+              <template id='skeleton-template'>
+                <div class='skeleton'>loading...</div>
+              </template>
+            </form>
+          """)
+          up.hello(form)
+          fixture('#target', text: 'old target')
+
+          input.value = 'changed-value'
+          Trigger.change(input)
+
+          await wait(40)
+
+          expect('#target').toHaveSelector('.skeleton')
+
     describe 'input[up-watch]', ->
 
       afterEach ->
@@ -3989,6 +4203,12 @@ describe 'up.form', ->
           await wait(350)
 
           expect(jasmine.Ajax.requests.count()).toBe(0)
+
+      describe 'with [up-watch-preview]', ->
+
+        it 'shows a preview'
+
+        it 'shows multiple previews'
 
     describe 'form[up-validate]', ->
 
