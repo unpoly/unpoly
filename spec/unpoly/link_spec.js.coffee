@@ -4037,6 +4037,12 @@ describe 'up.link', ->
         expect(fauxButton).toHaveAttribute('up-clickable')
         expect(fauxButton.role).toBe('button')
 
+      it 'does not set clickable-related attributes on a form with an [up-target] attribute (bugfix)', ->
+        form = fixture('form[method=post][action="/action"][up-target="#target"]')
+        up.hello(form)
+        expect(form).not.toHaveAttribute('role')
+        expect(form).not.toHaveAttribute('up-clickable')
+
       describe 'when applied on a link (which is already interactive)', ->
 
         it 'does not set a [role] attribute', ->

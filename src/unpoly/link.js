@@ -214,7 +214,7 @@ up.link = (function() {
     // (2) We have some elements like [up-emit] or [up-accept] which may or may not be interactive elements
     // (3) When a link is followable, is should also be clickable. Even a <span up-follow> or a <a up-content>.
     // (4) Prevent unnecessary compilation of elements that are already interactive (a[href], button).
-    clickableSelectors: ['[up-clickable]', '[up-follow]', '[up-emit]', '[up-accept]', '[up-dismiss]', ATTRS_SUGGESTING_FOLLOW],
+    clickableSelectors: ['[up-clickable]', '[up-follow]', '[up-emit]', '[up-accept]', '[up-dismiss]', `a:is(${ATTRS_SUGGESTING_FOLLOW})`],
     noClickableSelectors: ['[up-clickable=false]', DEFAULT_INTERACTIVE_ELEMENT],
 
     preloadDelay: 90,
