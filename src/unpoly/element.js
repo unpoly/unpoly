@@ -973,7 +973,7 @@ up.element = (function() {
       const parent = wrapper.parentNode
       const wrappedNodes = u.toArray(wrapper.childNodes)
       u.each(wrappedNodes, wrappedNode => parent.insertBefore(wrappedNode, wrapper))
-      parent.removeChild(wrapper)
+      parent.removeChild(wrapper) // TODO: wrapper.remove()
     })
   }
 
