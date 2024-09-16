@@ -294,42 +294,61 @@ up.feedback = (function() {
   @stable
   */
 
-  function showPreviews(previews, request, renderOptions) {
-    let preview = new up.Preview({ request, renderOptions })
-    for (let nameOrFn of u.compact(previews)) {
-      preview.run(nameOrFn)
-    }
-    return () => preview.revert()
+  function showPreviews(request, renderOptions) {
+    let { fragments, origin } = request
+    let cleaner = u.cleaner()
+
+    u.each(fragments, (fragment, index) => {
+      let fns = [
+        ...choosePreviewFns(fragment, index, renderOptions.preview,  renderOptions.previewMap,  getPreviewFn),
+        ...choosePreviewFns(fragment, index, renderOptions.skeleton, renderOptions.skeletonMap, getSkeletonPreviewFn),
+        ...choosePreviewFns(fragment, index, renderOptions.feedback, null,                      () => getClassesPreviewFn(fragments)),
+        ...choosePreviewFns(fragment, index, renderOptions.disable,  null,                      (value) => up.form.getDisablePreviewFn(value, origin)),
+      ]
+
+      let previewObject = new up.Preview({ fragment, request, renderOptions })
+      for (let fn of fns) {
+        previewObject.runFn(fn)
+      }
+
+      cleaner(() => previewObject.revert())
+    })
+
+    return cleaner.clean
   }
 
-  /*-
-  Returns an array of preview (names or functions) for the given render options.
 
-  @function up.feedback.getPreviews
-  @internal
-  */
-  function getPreviews({ feedback, preview, skeleton }) {
-    let previews = []
 
-    // Turn { feedback } option into a named preview
-    if (feedback) {
-      previews.push(classesPreviewFn)
+  function choosePreviewFns(fragment, index, firstFragmentOption, mapOption, mapping) {
+    let actions = []
+
+    // Most status effects (like { skeleton }) run either once, or only on the first fragment
+    if (firstFragmentOption && index === 0) {
+      actions.push(firstFragmentOption)
     }
 
-    if (skeleton) {
-      previews.push(getSkeletonPreview(skeleton))
+    // Some status effects have a map variant (like { skeletonMap }) will run on all
+    // matching fragments.
+    if (mapOption) {
+      actions.push(...matchSelectorMap(mapOption, fragment))
     }
 
-    if (preview) {
-      // Parse { preview } option into one or more preview names or functions
-      let previewTokens = u.parseTokens(preview)
-      previews.push(...previewTokens)
-    }
-
-    return previews
+    return u.map(actions, mapping)
   }
 
-  function getSkeletonPreview(skeleton) {
+  function matchSelectorMap(selectorMap, element) {
+    let matches = []
+
+    for (let [selector, value] of Object.entries(selectorMap)) {
+      if (element.matches(selector)) {
+        matches.push(value)
+      }
+    }
+
+    return matches
+  }
+
+  function getSkeletonPreviewFn(skeleton) {
     return function(preview) {
       preview.showSkeleton(skeleton)
     }
@@ -365,15 +384,27 @@ up.feedback = (function() {
     namedPreviewFns[name] = previewFn
   }
 
-  function classesPreviewFn(preview) {
-    let activeElement = getActiveElement(preview.origin)
-    if (activeElement) {
-      preview.addClass(activeElement, CLASS_ACTIVE)
-    }
+  function getClassesPreviewFn(fragments) {
+    return function(preview) {
+      let activeElement = getActiveElement(preview.origin)
+      if (activeElement) {
+        preview.addClass(activeElement, CLASS_ACTIVE)
+      }
 
-    for (let fragment of preview.fragments) {
-      preview.addClass(fragment, CLASS_LOADING)
+      for (let fragment of fragments) {
+        preview.addClass(fragment, CLASS_LOADING)
+      }
     }
+  }
+
+  function statusOptions(element, options, parserOptions) {
+    options = u.options(options)
+    const parser = new up.OptionsParser(element, options, parserOptions)
+    parser.booleanOrString('disable')
+    parser.boolean('feedback')
+    parser.booleanOrString('preview')
+    parser.booleanOrString('skeleton')
+    return options
   }
 
   /*-
@@ -564,9 +595,9 @@ up.feedback = (function() {
     // showAroundRequest,
     preview: registerPreview,
     getPreviewFn,
-    getPreviews,
     showPreviews,
     buildSkeleton,
+    statusOptions,
   }
 })()
 

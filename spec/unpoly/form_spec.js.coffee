@@ -200,7 +200,7 @@ describe 'up.form', ->
               callback = jasmine.createSpy('up.watch() callback')
 
               form = fixture('form')
-              input = e.affix(form, 'input[name=email][up-watch-feedback=false]')
+              input = e.affix(form, 'input[name=email][up-watch-disable="#disable"][up-watch-feedback="false"][up-watch-preview="my-preview"][up-watch-skeleton="#skeleton"]')
               up.hello(form)
 
               up.watch(input, callback)
@@ -212,7 +212,13 @@ describe 'up.form', ->
                 expect(callback).toHaveBeenCalledWith(
                   'other',
                   'email',
-                  jasmine.objectContaining({ origin: input, feedback: false })
+                  jasmine.objectContaining({
+                    origin: input,
+                    disable: '#disable',
+                    feedback: false,
+                    preview: 'my-preview',
+                    skeleton: '#skeleton',
+                  })
                 )
 
             it 'allows the observe a field without a containing <form>', ->
@@ -479,8 +485,8 @@ describe 'up.form', ->
 
             describe 'passing of render options to the callback', ->
 
-              it "passes the form's [up-watch-disable] option to the callback", ->
-                form = fixture('form[up-watch-disable="#disable"]')
+              it "parses [up-watch-] prefixed status options from the form and passes them to the callback", ->
+                form = fixture('form[up-watch-disable="#disable"][up-watch-feedback="false"][up-watch-preview="my-preview"][up-watch-skeleton="#skeleton"]')
                 input = e.affix(form, 'input[name=email]')
                 callback = jasmine.createSpy('callback')
 
@@ -491,11 +497,20 @@ describe 'up.form', ->
 
                 await wait()
 
-                expect(callback).toHaveBeenCalledWith('other', 'email', jasmine.objectContaining(disable: '#disable'))
+                expect(callback).toHaveBeenCalledWith(
+                  'other',
+                  'email',
+                  jasmine.objectContaining(
+                    disable: '#disable',
+                    feedback: false,
+                    preview: 'my-preview',
+                    skeleton: '#skeleton',
+                  )
+                )
 
-              it "passes the fields's [up-watch-disable] option to the callback", ->
-                form = fixture('form[up-watch-disable="#disable-from-form"]')
-                input = e.affix(form, 'input[name=email][up-watch-disable="#disable-from-field"]')
+              it "parses [up-watch-] prefixed status options from the field and passes them to the callback, overriding options from the form", ->
+                form = fixture('form[up-watch-disable="#disable-from-form"][up-watch-feedback="true"][up-watch-preview="preview-from-form"][up-watch-skeleton="#skeleton-from-form"]')
+                input = e.affix(form, 'input[name=email][up-watch-disable="#disable-from-field"][up-watch-feedback="false"][up-watch-preview="preview-from-field"][up-watch-skeleton="#skeleton-from-field"]')
                 callback = jasmine.createSpy('callback')
 
                 up.watch(input, callback)
@@ -505,7 +520,16 @@ describe 'up.form', ->
 
                 await wait()
 
-                expect(callback).toHaveBeenCalledWith('other', 'email', jasmine.objectContaining(disable: '#disable-from-field'))
+                expect(callback).toHaveBeenCalledWith(
+                  'other',
+                  'email',
+                  jasmine.objectContaining(
+                    disable: '#disable-from-field',
+                    feedback: false,
+                    preview: 'preview-from-field',
+                    skeleton: '#skeleton-from-field',
+                  )
+                )
 
               it "overrides the [up-watch-disable] option from form and field if an { disable } option is also passed", ->
                 form = fixture('form[up-watch-disable="#disable-from-form"]')
@@ -877,6 +901,22 @@ describe 'up.form', ->
         options = up.form.watchOptions(field, {}, { defaults: { disable: true, feedback: true }})
 
         expect(options).toEqual(jasmine.objectContaining(disable: false, feedback: true))
+
+      it 'parses status effect options with an [up-watch-] prefix', ->
+        form = fixture('form')
+        container = e.affix(form, 'div[up-watch-disable="#disable"][up-watch-feedback="false"][up-watch-preview="my-preview"][up-watch-skeleton="#skeleton"]')
+        field = e.affix(container, 'input[type="text"][name="foo"]')
+
+        options = up.form.watchOptions(field)
+
+        expect(options).toEqual(
+          jasmine.objectContaining(
+            disable: '#disable'
+            feedback: false
+            preview: 'my-preview'
+            skeleton: '#skeleton'
+          )
+        )
 
       it 'prioritizes the closest [up-watch-] prefixed attribute', ->
         form = fixture('form[up-watch-delay=1000]')
@@ -2281,7 +2321,7 @@ describe 'up.form', ->
             expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo bar')
             expect(jasmine.lastRequest().data()).toMatchParams({ foo: 'one', bar: 'two' })
 
-        it 'honors the { disable } option of each batched validation', asyncSpec (next) ->
+        it 'honors the { disable } option of each batched validation, resolving the :origin for each field', ->
           form = fixture('form[action=/path][up-watch-disable=":origin"]')
           fooField = e.affix(form, 'input[name=foo]')
           barField = e.affix(form, 'input[name=bar]')
@@ -2290,23 +2330,62 @@ describe 'up.form', ->
           up.validate(fooField)
           up.validate(bazField)
 
-          next ->
-            expect(fooField).toBeDisabled()
-            expect(barField).not.toBeDisabled()
-            expect(bazField).toBeDisabled()
+          await wait()
 
-            jasmine.respondWith """
-              <form action="/path">
-                <input name='foo'>
-                <input name='bar'>
-                <input name='baz'>
-              </form>
-            """
+          expect(fooField).toBeDisabled()
+          expect(barField).not.toBeDisabled()
+          expect(bazField).toBeDisabled()
 
-          next ->
-            expect(fooField).not.toBeDisabled()
-            expect(barField).not.toBeDisabled()
-            expect(bazField).not.toBeDisabled()
+          jasmine.respondWith """
+            <form action="/path">
+              <input name='foo'>
+              <input name='bar'>
+              <input name='baz'>
+            </form>
+          """
+
+          await wait()
+
+          expect(fooField).not.toBeDisabled()
+          expect(barField).not.toBeDisabled()
+          expect(bazField).not.toBeDisabled()
+
+        it 'runs the { preview } of each batched validation, but only runs a preview once', ->
+          preview1Fn = jasmine.createSpy('preview1 apply fn')
+          undo1Fn = jasmine.createSpy('preview1 undo fn')
+          preview2Fn = jasmine.createSpy('preview2 apply fn')
+          undo2Fn = jasmine.createSpy('preview2 undo fn')
+
+          form = fixture('form[action=/path]')
+          fooField = e.affix(form, 'input[name=foo][up-watch-preview="preview1"]')
+          barField = e.affix(form, 'input[name=bar][up-watch-preview="preview1"]')
+          bazField = e.affix(form, 'input[name=baz][up-watch-preview="preview2"]')
+
+          up.validate(fooField)
+          up.validate(barField)
+          up.validate(bazField)
+
+          await wait()
+
+          expect(preview1Fn.calls.count()).toBe(1)
+          expect(undo1Fn.calls.count()).toBe(0)
+          expect(preview2Fn.calls.count()).toBe(1)
+          expect(undo2Fn.calls.count()).toBe(0)
+
+          jasmine.respondWith """
+            <form action="/path">
+              <input name='foo'>
+              <input name='bar'>
+              <input name='baz'>
+            </form>
+          """
+
+          await wait()
+
+          expect(preview1Fn.calls.count()).toBe(1)
+          expect(undo1Fn.calls.count()).toBe(1)
+          expect(preview2Fn.calls.count()).toBe(1)
+          expect(undo2Fn.calls.count()).toBe(1)
 
         it 'honors the { focus } option of the last batched validation with a { focus } option', asyncSpec (next) ->
           form = fixture('form[action=/path]')
@@ -3989,6 +4068,12 @@ describe 'up.form', ->
           await wait(350)
 
           expect(jasmine.Ajax.requests.count()).toBe(0)
+
+      describe 'with [up-watch-preview]', ->
+
+        it 'shows a preview'
+
+        it 'shows multiple previews'
 
     describe 'form[up-validate]', ->
 

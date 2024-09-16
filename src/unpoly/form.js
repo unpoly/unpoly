@@ -415,8 +415,7 @@ up.form = (function() {
 
     let parser = new up.OptionsParser(field, options, { ...parserOptions, closest: true, attrPrefix: 'up-watch-' })
 
-    parser.boolean('feedback')
-    parser.booleanOrString('disable')
+    parser.include(up.feedback.statusOptions)
     parser.string('event')
     parser.number('delay')
 
@@ -481,21 +480,28 @@ up.form = (function() {
     return () => control.disabled = false
   }
 
-  function getDisablePreview({ disable, origin }) {
+  function getDisableContainers(disable, origin) {
+    console.debug("getDisableContainers(%o)", disable)
+
+    let givenOrigin = () => origin || up.fail('Missing { origin }')
+    let originScope = () => getScope(givenOrigin())
+
+    if (disable === true) {
+      return [originScope()]
+    } else if (u.isElement(disable)) {
+      return [disable]
+    } else if (u.isString(disable)) {
+      return up.fragment.subtree(originScope(), disable, { origin })
+    } else if (u.isArray(disable)) {
+      return u.flatMap(disable, (d) => getDisableContainers(d, origin))
+    } else {
+      return []
+    }
+  }
+
+  function getDisablePreviewFn(disable, origin) {
     return function(preview) {
-      let givenOrigin = () => origin || up.fail('Missing { origin }')
-      let originScope = () => getScope(givenOrigin())
-
-      let containers = []
-
-      if (disable === true) {
-        containers = [originScope()]
-      } else if (u.isElement(disable)) {
-        containers = [disable]
-      } else if (u.isString(disable)) {
-        containers = up.fragment.subtree(originScope(), disable, { origin })
-      }
-
+      let containers = getDisableContainers(disable, origin)
       for (let container of containers) {
         preview.disable(container)
       }
@@ -1980,7 +1986,7 @@ up.form = (function() {
     switchTarget,
     // disableWhile,
     disable: disableContainer,
-    getDisablePreview,
+    getDisablePreviewFn,
     // handleDisableOption,
     group: findGroup,
     groupSolution: findGroupSolution,
