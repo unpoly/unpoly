@@ -254,15 +254,26 @@ describe('up.feedback', function() {
             expect('#target').toHaveText('new target')
           })
 
-          it('does not apply a preview with { preview: false }', async function() {
+          it('does not apply an [up-preview] function when the rendering function overrides with { preview: false }', async function() {
+            fixture('#target')
             let previewFn = jasmine.createSpy('preview function')
             up.preview('my:preview', previewFn)
-            let link = fixture('a[href="/path"][up-preview="my:preview"]')
+            let link = fixture('a[href="/path"][up-preview="my:preview"][up-target="#target"]')
 
             up.link.follow(link, { preview: false })
             await wait()
 
             expect(jasmine.Ajax.requests.count()).toEqual(1)
+            expect(previewFn).not.toHaveBeenCalled()
+          })
+
+          it('does not apply a preview if no element matches the target', async function() {
+            let previewFn = jasmine.createSpy('preview function')
+            up.preview('my:preview', previewFn)
+
+            let renderPromise = up.render({ url: '/path', target: '#missing' })
+
+            await expectAsync(renderPromise).toBeRejectedWith(jasmine.any(up.CannotMatch))
             expect(previewFn).not.toHaveBeenCalled()
           })
 
