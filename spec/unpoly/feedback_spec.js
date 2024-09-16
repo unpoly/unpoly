@@ -419,8 +419,6 @@ describe('up.feedback', function() {
 
         })
 
-
-
         describe('error handling', function() {
 
           it('does not crash the render pass if a preview throws an error', async function() {
@@ -457,6 +455,57 @@ describe('up.feedback', function() {
             })
           })
 
+        })
+
+      })
+
+      describe('with { skeleton } option', function() {
+
+        it('renders a UI skeleton as the content of the first targeted fragment', async function() {
+          htmlFixture(`
+            <main>
+              <div id="target1">
+                <span class="content">old target1</span>
+              </div>
+              <div id="target2">
+                <span class="content">old target2</span>
+              </div>
+              <div id="hungry" up-hungry>
+                <span class="content">old hungry</span>
+              </div>
+              <template id="skeleton-template">
+                <div class="skeleton">loading...</div>
+              </template>
+            </main>
+          `)
+
+          up.render({ url: '/path', target: '#target1, #target2', skeleton: '#skeleton-template' })
+
+          await wait()
+
+          expect('#target1').toHaveSelector('.skeleton')
+          expect('#target2').not.toHaveSelector('.skeleton')
+          expect('#hungry').not.toHaveSelector('.skeleton')
+
+          jasmine.respondWith(`
+            <main>
+              <div id="target1">
+                <span class="content">new target1</span>
+              </div>
+              <div id="target2">
+                <span class="content">new target2</span>
+              </div>
+              <div id="hungry" up-hungry>
+                <span class="content">new hungry</span>
+              </div>
+            </main>
+          `)
+
+          await wait()
+
+          expect('#target1').toHaveText('new target1')
+          expect('#target2').toHaveText('new target2')
+          expect('#hungry').toHaveText('new hungry')
         })
 
       })
