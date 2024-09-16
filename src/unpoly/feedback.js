@@ -294,42 +294,34 @@ up.feedback = (function() {
   @stable
   */
 
-  function showPreviews(previews, request, renderOptions) {
-    let preview = new up.Preview({ request, renderOptions })
-    for (let nameOrFn of u.compact(previews)) {
-      preview.run(nameOrFn)
+  function showPreviews(request, renderOptions) {
+    let { fragment, fragments, origin } = request
+    let cleaner = u.cleaner()
+
+    // Some preview effects only run once per render pass.
+    // The { fragment } for these previews will be the first fragment,
+    // or null if there is no first fragment (when opening a layer).
+    let singlePreview = new up.Preview({ fragment, request, renderOptions, cleaner })
+    singlePreview.run(resolvePreviewFns(renderOptions.preview))
+    singlePreview.run(getSkeletonPreviewFn(renderOptions.skeleton))
+    singlePreview.run(getFeedbackClassesPreviewFn(renderOptions.feedback, fragments))
+    singlePreview.run(up.form.getDisablePreviewFn(renderOptions.disable, origin))
+
+    // Other fragment effects run once per targeted fragment.
+    // This is useful for batched validations, where we may update multiple fragments,
+    // but each with individual preview effects.
+    for (let fragment of fragments) {
+      let eachPreview = new up.Preview({ fragment, request, renderOptions, cleaner })
+      eachPreview.run(e.matchSelectorMap(renderOptions.previewMap, fragment))
+      eachPreview.run(e.matchSelectorMap(renderOptions.skeletonMap, fragment).flatMap(getSkeletonPreviewFn))
     }
-    return () => preview.revert()
+
+    return cleaner.clean
   }
 
-  /*-
-  Returns an array of preview (names or functions) for the given render options.
+  function getSkeletonPreviewFn(skeleton) {
+    if (!skeleton) return
 
-  @function up.feedback.getPreviews
-  @internal
-  */
-  function getPreviews({ feedback, preview, skeleton }) {
-    let previews = []
-
-    // Turn { feedback } option into a named preview
-    if (feedback) {
-      previews.push(classesPreviewFn)
-    }
-
-    if (skeleton) {
-      previews.push(getSkeletonPreview(skeleton))
-    }
-
-    if (preview) {
-      // Parse { preview } option into one or more preview names or functions
-      let previewTokens = u.parseTokens(preview)
-      previews.push(...previewTokens)
-    }
-
-    return previews
-  }
-
-  function getSkeletonPreview(skeleton) {
     return function(preview) {
       preview.showSkeleton(skeleton)
     }
@@ -349,8 +341,20 @@ up.feedback = (function() {
     return value
   }
 
-  function getPreviewFn(value) {
-    return u.presence(value, u.isFunction) || namedPreviewFns[value] || up.fail('Unknown preview "%s"', value)
+  function resolvePreviewFns(value) {
+    if (u.isFunction(value)) {
+      return [value]
+    } else if (u.isString(value)) {
+      return u.parseTokens(value).map(getNamedPreviewFn)
+    } else if (u.isArray(value)) {
+      return value.flatMap(resolvePreviewFns)
+    } else {
+      return []
+    }
+  }
+
+  function getNamedPreviewFn(name) {
+    return namedPreviewFns[name] || up.fail('Unknown preview "%s"', name)
   }
 
   function getActiveElement(origin) {
@@ -365,15 +369,29 @@ up.feedback = (function() {
     namedPreviewFns[name] = previewFn
   }
 
-  function classesPreviewFn(preview) {
-    let activeElement = getActiveElement(preview.origin)
-    if (activeElement) {
-      preview.addClass(activeElement, CLASS_ACTIVE)
-    }
+  function getFeedbackClassesPreviewFn(feedbackOption, fragments) {
+    if (!feedbackOption) return
 
-    for (let fragment of preview.fragments) {
-      preview.addClass(fragment, CLASS_LOADING)
+    return function(preview) {
+      let activeElement = getActiveElement(preview.origin)
+      if (activeElement) {
+        preview.addClass(activeElement, CLASS_ACTIVE)
+      }
+
+      for (let fragment of fragments) {
+        preview.addClass(fragment, CLASS_LOADING)
+      }
     }
+  }
+
+  function statusOptions(element, options, parserOptions) {
+    options = u.options(options)
+    const parser = new up.OptionsParser(element, options, parserOptions)
+    parser.booleanOrString('disable')
+    parser.boolean('feedback')
+    parser.booleanOrString('preview')
+    parser.booleanOrString('skeleton')
+    return options
   }
 
   /*-
@@ -563,10 +581,10 @@ up.feedback = (function() {
     config,
     // showAroundRequest,
     preview: registerPreview,
-    getPreviewFn,
-    getPreviews,
+    resolvePreviewFns,
     showPreviews,
     buildSkeleton,
+    statusOptions,
   }
 })()
 

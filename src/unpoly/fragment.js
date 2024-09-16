@@ -2246,8 +2246,10 @@ up.fragment = (function() {
     })
   }
 
-  function resolveOrigin(...args) {
-    return (up.migrate.resolveOrigin || modernResolveOrigin)(...args)
+  function resolveOrigin(target, options) {
+    // up.FormValidator sometimes calls resolveOrigin(undefined)
+    if (!u.isString(target)) return target
+    return (up.migrate.resolveOrigin || modernResolveOrigin)(target, options)
   }
 
   function splitTarget(target) {

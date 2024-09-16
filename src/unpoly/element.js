@@ -1471,6 +1471,20 @@ up.element = (function() {
     return template.content.cloneNode(true).children[0]
   }
 
+  function matchSelectorMap(selectorMap, element) {
+    let matches = []
+
+    if (selectorMap) {
+      for (let [selector, value] of Object.entries(selectorMap)) {
+        if (u.isDefined(value) && element.matches(selector)) {
+          matches.push(value)
+        }
+      }
+    }
+
+    return matches
+  }
+
   return {
     subtree,
     contains,
@@ -1532,5 +1546,6 @@ up.element = (function() {
     unionSelector,
     wrap,
     cloneTemplate,
+    matchSelectorMap,
   }
 })()

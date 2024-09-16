@@ -28,13 +28,7 @@ up.Change.FromURL = class FromURL extends up.Change {
 
   _onRequestProcessed() {
     this.options.onRequestProcessed?.(this.request) // used by up.RenderJob to delay aborting until a new request instance is known.
-
-    let previews = [
-      ...up.feedback.getPreviews(this.options),
-      up.form.getDisablePreview(this.options),
-    ]
-
-    this.request.showPreviews(previews, this.options)
+    this.request.showPreviews(this.options)
   }
 
   _newPageReason() {

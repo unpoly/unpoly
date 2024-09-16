@@ -68,33 +68,6 @@ describe('up.Preview', function() {
 
   })
 
-  describe('#fragments', function() {
-
-    it('returns an array of all targeted elements', async function() {
-      let one = fixture('#one')
-      let two = fixture('#two')
-      let spy = jasmine.createSpy('spy')
-      let previewFn = (preview) => spy(preview.fragments)
-
-      up.render({ preview: previewFn, url: '/url', target: '#one, #two' })
-      await wait()
-
-      expect(spy).toHaveBeenCalledWith([one, two])
-    })
-
-    it('returns an empty array when opening a new layer', async function() {
-      let spy = jasmine.createSpy('spy')
-      let previewFn = (preview) => spy(preview.fragments)
-
-      up.render({ preview: previewFn, url: '/url', target: '#target', layer: 'new modal' })
-      await wait()
-
-      expect(spy).toHaveBeenCalled()
-      expect(spy.calls.mostRecent().args[0]).toEqual([])
-    })
-
-  })
-
   describe('#orgin', function() {
 
     it('returns the { origin } element (e.g. the link being followed)', async function() {
