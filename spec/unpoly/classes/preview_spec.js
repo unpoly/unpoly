@@ -744,6 +744,31 @@ describe('up.Preview', function() {
         expect('#child2').toBeVisible()
       })
 
+      it('can show a skeleton when the reference contains text node children', async function() {
+        fixture('#target')
+        let parent = htmlFixture(`
+          <div id="parent">
+            text
+            <div id="child">element</div>
+          </div>
+        `)
+
+        expect('#parent').toHaveVisibleText('text element')
+
+        let skeleton = e.createFromSelector('#skeleton', { text: 'skeleton' })
+        let previewFn = (preview) => preview.showSkeleton(parent, skeleton)
+
+        up.render({ preview: previewFn, url: '/url', target: '#target' })
+        await wait()
+
+        expect('#parent').toHaveVisibleText('skeleton')
+
+        jasmine.respondWithSelector('#target')
+        await wait()
+
+        expect('#parent').toHaveVisibleText('text element')
+      })
+
       it('accepts a CSS selector to look up the reference', async function() {
         fixture('#target')
         let parent = htmlFixture(`
@@ -1026,6 +1051,32 @@ describe('up.Preview', function() {
       expect('#parent').toBeVisible()
       expect('#child1').toBeVisible()
       expect('#child2').toBeVisible()
+    })
+
+    it('can hide text nodes', async function() {
+      fixture('#target')
+      let parent = htmlFixture(`
+        <div id="parent">
+          text1
+          <span>element1</span>
+          text2
+          <span>element2</span>
+        </div>
+      `)
+
+      expect('#parent').toHaveVisibleText('text1 element1 text2 element2')
+
+      let previewFn = (preview) => preview.hideContent(parent)
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect('#parent').toHaveVisibleText('')
+
+      jasmine.respondWithSelector('#target')
+      await wait()
+
+      expect('#parent').toHaveVisibleText('text1 element1 text2 element2')
     })
 
   })
