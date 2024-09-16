@@ -1,1 +1,8 @@
-{}
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "target": "es2021",
+    "removeComments": true,
+  }
+}

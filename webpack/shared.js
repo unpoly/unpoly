@@ -68,19 +68,9 @@ function scriptPipeline({ es, lint = true }) {
     loader: 'ts-loader',
     options: {
       appendTsSuffixTo: [/.*/],
-      transpileOnly: true,
+      // transpileOnly: true,
       compilerOptions: {
-        allowJs: true,
-        checkJs: true,
-        // importHelpers: true,
-        // module: "ES2020",
-        target: es,
-        // The entirety of Unpoly's documentation is embedded in the source files.
-        // Even when we're not minifying, we want to remove these massive comments.
-        // This reduces the file size of unminified unpoly.js from ~1 MB to ~300 KB, which
-        // in turn reduces the size of the npm packages (and Ruby gems) that we publish.
-        // It also helps making Unpoly not appear epicly huge in bundle size analyzers.
-        removeComments: true
+        target: es, // overrides tsconfig.json
       }
 
     }
