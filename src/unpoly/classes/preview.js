@@ -75,9 +75,9 @@ up.Preview = class Preview {
   }
 
   hideContent(parent) {
-    for (let child of parent.children) {
-      this.hide(child)
-    }
+    let wrapper = e.wrapChildren(parent)
+    e.hide(wrapper)
+    this.undo(() => e.unwrap(wrapper))
   }
 
   showSkeleton(...args) {
