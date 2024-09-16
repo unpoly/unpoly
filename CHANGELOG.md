@@ -8,6 +8,12 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+3.9.1
+-----
+
+- Fix a bug where any `form[up-target]` would receive a `[role=button]` attribute (issue #668).
+
+
 3.9.0
 -----
 
