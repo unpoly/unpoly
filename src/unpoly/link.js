@@ -405,10 +405,7 @@ up.link = (function() {
     parser.booleanOrString('history')
 
     // Status effects
-    parser.booleanOrString('disable')
-    parser.boolean('feedback')
-    parser.booleanOrString('preview')
-    parser.booleanOrString('skeleton')
+    parser.include(up.feedback.statusOptions)
 
     // Viewport options
     parser.booleanOrString('focus')

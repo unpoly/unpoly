@@ -48,10 +48,13 @@ up.FormValidator = class FormValidator {
       || this._getElementSolutions(options.origin)
 
     for (let solution of solutions) {
+      // Remember solution-specific render options from
+      // (1) the given options object
+      // (2) any [up-watch-] prefixed attributes parsed from the origin
       solution.renderOptions = this._originOptions(solution.origin, options)
 
-      // Resolve :origin selector here. We can't delegate to up.render({ origin })
-      // as that only takes a single origin, even with multiple targets.
+      // Resolve :origin pseudo here, as a batched validation will only
+      // have a single { origin } (set to the form).
       solution.target = up.fragment.resolveOrigin(solution.target, solution)
     }
 
@@ -145,9 +148,31 @@ up.FormValidator = class FormValidator {
     // We must not shorted that debounce delay.
     if (this._nextRenderTimer) return
 
-    let dirtySolutions = this._dirtySolutions // u.uniqBy(this._dirtySolutions, 'element')
+    let options = this._mergeRenderOptions(this._dirtySolutions)
     this._dirtySolutions = []
 
+    // We don't render concurrently. If additional fields want to validate
+    // while our request is in flight, they add to a new @dirtySolutions array.
+    this._rendering = true
+
+    // Just like we're gathering new dirty solutions for our next render pass,
+    // we now pass out a new validate() promise for that next pass.
+    let renderingPromise = this._nextRenderPromise
+    this._resetNextRenderPromise()
+
+    try {
+      // Resolve all promises we have handed out for the now-rendered solutions.
+      renderingPromise.resolve(up.render(options))
+      await renderingPromise
+    } finally {
+      this._rendering = false
+      // Additional solutions may have become dirty while we were _rendering so we check again.
+      // If no pending solutions are found, the method will return immediately.
+      this._renderDirtySolutions()
+    }
+  }
+
+  _mergeRenderOptions(dirtySolutions) {
     // Dirty fields are the fields that triggered the validation, not the fields contained
     // by the solution elements. This is not the same thing in a scenario like this:
     //
@@ -160,21 +185,16 @@ up.FormValidator = class FormValidator {
     let dirtyOrigins = u.map(dirtySolutions, 'origin')
     let dirtyFields = u.flatMap(dirtyOrigins, up.form.fields)
     let dirtyNames = u.uniq(u.map(dirtyFields, 'name'))
-    let dataMap = this._buildDataMap(dirtySolutions)
     let dirtyRenderOptionsList = u.map(dirtySolutions, 'renderOptions')
 
     // Merge together all render options for all origins.
     let options = u.mergeDefined(
       ...dirtyRenderOptionsList,
-      { dataMap },
       up.form.destinationOptions(this._form),
     )
 
     // Update the collected targets of all solutions.
     options.target = u.map(dirtySolutions, 'target').join(', ')
-
-    // If any solution wants feedback, they all get it.
-    options.feedback = u.some(dirtyRenderOptionsList, 'feedback')
 
     // Since we may render multiple dirty elements we cannot have individual origins
     // for each. We already resolved an :origin selector in getSolution(), so we don't
@@ -194,18 +214,56 @@ up.FormValidator = class FormValidator {
     // { fail: false }.
     options.failOptions = false
 
+    // Re-rendering forms may cause dependent fields to disappear.
+    // Let's not blow up the render pass in that case.
     options.defaultMaybe = true
 
+    // We can receive params from
+    // (1) A <form up-params="..."> JSON attribute, obtained by up.form.destinationOptions() above
+    // (2) one or more up.validate({ params }) calls
     options.params = up.Params.merge(
-      options.params, // form field params we obtained from up.form.destinationOptions() above
-      ...u.map(dirtyRenderOptionsList, 'params') // each validate() call can pass a a custom { params } option
+      options.params,
+      ...u.map(dirtyRenderOptionsList, 'params')
     )
 
-    options.headers = u.merge(...u.map(dirtyRenderOptionsList, 'headers'))
+    // We can receive headers from
+    // (1) A <form up-headers="..."> JSON attribute, obtained by up.form.destinationOptions() above
+    // (2) one or more up.validate({ headers }) calls
+    options.headers = u.merge(
+      options.headers,
+      ...u.map(dirtyRenderOptionsList, 'headers')
+    )
 
     // Make sure the X-Up-Validate header is present, so the server-side
     // knows that it should not persist the form submission
     this._addValidateHeader(options.headers, dirtyNames)
+
+    // If any solution wants feedback, they all get it.
+    options.feedback = u.some(dirtyRenderOptionsList, 'feedback')
+
+    // Each up.validate({ data }) call should only apply to the targeted element,
+    options.data = undefined
+    options.dataMap = u.mapObject(dirtySolutions, ({ target, element, renderOptions: { data, keepData }}) => [
+      target,
+      keepData ? up.data(element) : data
+    ])
+
+    // Each up.validate({ preview }) call should only apply to the targeted element,
+    options.preview = undefined
+    options.previewMap = u.mapObject(dirtySolutions, ({ target, renderOptions: { preview }}) => [target, preview])
+
+    // Each up.validate({ skeleton }) call should only apply to the targeted element,
+    options.skeleton = undefined
+    options.skeletonMap = u.mapObject(dirtySolutions, ({ target, renderOptions: { skeleton }}) => [target, skeleton])
+
+    // We may render multiple solutions with { disable } options, and most disable options
+    // are specific to an { origin }, e.g. `{ disable: '.form-group:has(:origin)'}
+    // Since up.render() can only take a single { origin },
+    // we resolve it here.
+    //
+    // Disabling the same elements multiple time is not an issue since up.form.disable()
+    // only sees enabled elements.
+    options.disable = dirtySolutions.map((solution) => up.fragment.resolveOrigin(solution.renderOptions.disable, solution))
 
     // The guardEvent will be be emitted on the render pass' { origin }, so the form in this case.
     // The guardEvent will also be assigned a { renderOptions } attribute in up.render()
@@ -216,35 +274,7 @@ up.FormValidator = class FormValidator {
       form: this._form,
     })
 
-    // We don't render concurrently. If additional fields want to validate
-    // while our request is in flight, they add to a new @dirtySolutions array.
-    this._rendering = true
-
-    // Just like we're gathering new dirty solutions for our next render pass,
-    // we now pass out a new validate() promise for that next pass.
-    let renderingPromise = this._nextRenderPromise
-    this._resetNextRenderPromise()
-
-    // We may render multiple solutions with { disable } options, and most delay options
-    // are specific to an { origin }. For instance, { disable: 'form-group' } disables the closest
-    // form group around the origin. Since up.render({ disable }) can only take a single
-    // value for { disable, origin }, we disable each solution outside of _rendering.
-    //
-    // Disabling the same elements multiple time is not an issue since up.form.disable()
-    // only sees enabled elements.
-    options.disable = false
-    options.preview = dirtySolutions.map((solution) => up.form.getDisablePreview({ disable: solution.renderOptions.disable, origin: solution.origin }))
-
-    try {
-      // Resolve all promises we have handed out for the now-rendered solutions.
-      renderingPromise.resolve(up.render(options))
-      await renderingPromise
-    } finally {
-      this._rendering = false
-      // Additional solutions may have become dirty while we were _rendering so we check again.
-      // If no pending solutions are found, the method will return immediately.
-      this._renderDirtySolutions()
-    }
+    return options
   }
 
   _addValidateHeader(headers, names) {
@@ -252,24 +282,6 @@ up.FormValidator = class FormValidator {
     let value = names.join(' ')
     if (!value || value.length > up.protocol.config.maxHeaderSize) value = ':unknown'
     headers[key] = value
-  }
-
-  _buildDataMap(solutions) {
-    let dataMap = {}
-
-    for (let solution of solutions) {
-      let data = u.pluckKey(solution.renderOptions, 'data')
-      let keepData = u.pluckKey(solution.renderOptions, 'keepData')
-      if (keepData) {
-        data = up.data(solution.element)
-      }
-
-      if (data) {
-        dataMap[solution.target] = data
-      }
-    }
-
-    return dataMap
   }
 
   static forElement(element) {
