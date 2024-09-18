@@ -2255,7 +2255,7 @@ describe 'up.radio', ->
           expect(jasmine.Ajax.requests.count()).toBe(2)
           expect(jasmine.lastRequest().url).toMatchURL('/two')
 
-      describe 'with [up-keep-data] attribute', ->
+      describe 'with [up-keep-data]', ->
 
         it "persists the polling element's data through reloading", asyncSpec (next) ->
           counterSpy = jasmine.createSpy(counterSpy)
@@ -2283,3 +2283,74 @@ describe 'up.radio', ->
           next ->
             expect(counterSpy.calls.count()).toBe(2)
             expect(counterSpy.calls.argsFor(1)[0]).toBe(6)
+
+      describe 'with [up-preview]', ->
+
+        it 'shows a preview while the fragment is reloading', ->
+          interval = 5
+          timingTolerance = 30
+          up.radio.config.pollInterval = interval
+
+          previewUndo = jasmine.createSpy('preview undo')
+          previewApply = jasmine.createSpy('preview apply').and.returnValue(previewUndo)
+          up.preview('my:preview', previewApply)
+
+          element = up.hello(fixture('.element[up-poll][up-preview="my:preview"]', text: 'old text'))
+
+          await wait(interval + timingTolerance)
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(previewApply.calls.count()).toBe(1)
+          expect(previewApply).toHaveBeenCalledWith(jasmine.objectContaining(fragment: element))
+          expect(previewUndo.calls.count()).toBe(0)
+
+          jasmine.respondWithSelector('.element[up-poll][up-preview="my:preview"]', text: 'new text')
+          await wait()
+
+          expect('.element').toHaveText('new text')
+
+          await wait(interval + timingTolerance)
+
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+          expect(previewApply.calls.count()).toBe(2)
+          expect(previewUndo.calls.count()).toBe(1)
+
+          jasmine.respondWithSelector('.element[up-poll][up-preview="my:preview"]', text: 'newer text')
+
+          await wait()
+
+          expect('.element').toHaveText('newer text')
+
+          expect(previewApply.calls.count()).toBe(2)
+          expect(previewUndo.calls.count()).toBe(2)
+
+      describe 'with [up-skeleton]', ->
+
+        it 'shows a UI skeleton while the fragment is loading', ->
+          interval = 5
+          timingTolerance = 30
+          up.radio.config.pollInterval = interval
+
+          element = up.hello(fixture('.element[up-poll][up-skeleton="<span>skeleton text</span>"]', text: 'old text'))
+          expect('.element').toHaveVisibleText('old text')
+
+          await wait(interval + timingTolerance)
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect('.element').toHaveVisibleText('skeleton text')
+
+          jasmine.respondWithSelector('.element[up-poll][up-skeleton="<span>skeleton text</span>"]', text: 'new text')
+          await wait()
+
+          expect('.element').toHaveText('new text')
+
+          await wait(interval + timingTolerance)
+
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+          expect('.element').toHaveVisibleText('skeleton text')
+
+          jasmine.respondWithSelector('.element[up-poll][up-skeleton="<span>skeleton text</span>"]', text: 'newer text')
+
+          await wait()
+
+          expect('.element').toHaveText('newer text')
