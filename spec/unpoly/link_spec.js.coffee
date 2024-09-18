@@ -3903,6 +3903,99 @@ describe 'up.link', ->
 
           expect(jasmine.Ajax.requests.count()).toEqual(0)
 
+      describe 'with [up-preview]', ->
+
+        it 'shows previews while the deferred is loading', ->
+          undoFn = jasmine.createSpy('apply preview')
+          previewFn = jasmine.createSpy('apply preview').and.returnValue(undoFn)
+          up.preview('my:preview', previewFn)
+
+          partial = fixture('a#partial[up-defer="manual"][href="/slow-path"][up-preview="my:preview"]', text: 'old text')
+          up.hello(partial)
+
+          await wait()
+
+          expect('#partial').toHaveText('old text')
+          expect(jasmine.Ajax.requests.count()).toEqual(0)
+          expect(previewFn).not.toHaveBeenCalled()
+
+          up.deferred.load(partial)
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(previewFn).toHaveBeenCalledWith(jasmine.objectContaining(fragment: partial))
+          expect(undoFn).not.toHaveBeenCalled()
+
+          jasmine.respondWithSelector('#partial', text: 'new text')
+          await wait()
+
+          expect(undoFn).toHaveBeenCalled()
+          expect('#partial').toHaveText('new text')
+
+        it 'shows previews when merging selectors into a single request', ->
+          undo1Fn = jasmine.createSpy('preview1 undo fn')
+          preview1Fn = jasmine.createSpy('preview1 apply fn').and.returnValue(undo1Fn)
+          up.preview('preview1', preview1Fn)
+          undo2Fn = jasmine.createSpy('preview2 undo fn')
+          preview2Fn = jasmine.createSpy('preview2 apply fn').and.returnValue(undo2Fn)
+          up.preview('preview2', preview2Fn)
+
+          container = fixture('#container')
+          partial1 = e.affix(container, 'a#partial1[up-defer="manual"][href="/slow-path"][up-preview="preview1"]')
+          partial2 = e.affix(container, 'a#partial2[up-defer="manual"][href="/slow-path"][up-preview="preview2"]')
+          up.hello(container)
+
+          await wait()
+
+          expect(preview1Fn).not.toHaveBeenCalled()
+          expect(preview2Fn).not.toHaveBeenCalled()
+
+          up.deferred.load(partial1)
+          up.deferred.load(partial2)
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(jasmine.lastRequest().url).toMatchURL('/slow-path')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#partial1, #partial2')
+          expect(preview1Fn).toHaveBeenCalledWith(jasmine.objectContaining(fragment: partial1))
+          expect(preview2Fn).toHaveBeenCalledWith(jasmine.objectContaining(fragment: partial2))
+          expect(undo1Fn).not.toHaveBeenCalled()
+          expect(undo2Fn).not.toHaveBeenCalled()
+
+          jasmine.respondWith """
+            <div id="partial1">partial1 content</div>
+            <div id="partial2">partial2 content</div>
+          """
+
+          await wait()
+
+          expect('#partial1').toHaveText('partial1 content')
+          expect('#partial2').toHaveText('partial2 content')
+          expect(undo1Fn).toHaveBeenCalled()
+          expect(undo2Fn).toHaveBeenCalled()
+
+      describe 'with [up-skeleton]', ->
+
+        it 'shows a skeleton while the deferred is loading', ->
+          partial = fixture('a#partial[up-defer="manual"][href="/slow-path"][up-skeleton="<span>skeleton text</span>"]', text: 'initial text')
+          up.hello(partial)
+
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toEqual(0)
+          expect('#partial').toHaveVisibleText('initial text')
+
+          up.deferred.load(partial)
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect('#partial').toHaveVisibleText('skeleton text')
+
+          jasmine.respondWithSelector('#partial', text: 'new text')
+          await wait()
+
+          expect('#partial').toHaveVisibleText('new text')
+
       describe 'up:deferred:load event', ->
 
         it 'emits an up:deferred:load event before hitting the network', ->
