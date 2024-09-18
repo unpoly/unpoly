@@ -797,16 +797,6 @@ describe 'up.link', ->
             expect(window.confirm).not.toHaveBeenCalled()
             expect(up.render).toHaveBeenCalled()
 
-        it 'does not show a confirmation dialog when preloading', asyncSpec (next) ->
-          spyOn(up, 'render').and.returnValue(Promise.resolve())
-          spyOn(window, 'confirm')
-          link = fixture('a[href="/danger"][up-target=".middle"]')
-          up.follow(link, confirm: 'Are you sure?', preload: true)
-
-          next =>
-            expect(window.confirm).not.toHaveBeenCalled()
-            expect(up.render).toHaveBeenCalled()
-
     describe "when the link's [href] is '#'", ->
 
       it 'does not follow the link', ->
@@ -3423,6 +3413,52 @@ describe 'up.link', ->
             expect(jasmine.lastRequest()).toHaveRequestMethod('GET')
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.target')
 
+      describe 'overriding default render options', ->
+
+        it 'does not show a confirmation dialog when preloading', ->
+          up.link.config.preloadDelay = 0
+
+          spyOn(window, 'confirm').and.returnValue(true)
+          fixture('#target')
+          link = up.hello(fixture('a[href="/danger"][up-target="#target"][up-preload][up-confirm="Really?"]'))
+
+          Trigger.hoverSequence(link)
+
+          await wait(10)
+
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(window.confirm).not.toHaveBeenCalled()
+
+        it 'does not show a preview when preloading', ->
+          up.link.config.preloadDelay = 0
+
+          previewFn = jasmine.createSpy('preview fn')
+          up.preview('my:preview', previewFn)
+
+          spyOn(window, 'confirm')
+          fixture('#target')
+          link = up.hello(fixture('a[href="/slow"][up-target="#target"][up-preload][up-preview="my:preview"]'))
+
+          Trigger.hoverSequence(link)
+
+          await wait(10)
+
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(previewFn).not.toHaveBeenCalled()
+
+        it 'does not show a preview when preloading', ->
+          up.link.config.preloadDelay = 0
+
+          spyOn(window, 'confirm')
+          fixture('#target', text: 'old text')
+          link = up.hello(fixture('a[href="/slow"][up-target="#target"][up-preload][up-skeleton="<span>skeleton text</span>"]'))
+
+          Trigger.hoverSequence(link)
+
+          await wait(5)
+
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect('#target').toHaveVisibleText('old text')
 
     describe '[up-defer]', ->
 

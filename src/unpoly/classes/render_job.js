@@ -45,8 +45,20 @@ up.RenderJob = class RenderJob {
 
   async _executePromise() {
     try {
-      this._guardRender()
+      this._emitGuardEvent()
+
+      // Do this after emitting { guardEvent }, in case listeners want to augment render options
+      // that are shortcuts (e.g. { layer: 'new modal' }) or that affect other options.
       this.options = up.RenderOptions.preprocess(this.options)
+
+      // Throw if { confirm } is given and the user rejects the dialog.
+      // Do this after emitting { guardEvent }, in case listeners want to augment render options.
+      up.browser.assertConfirmed(this.options)
+
+      // Ensure we have either { url, content, fragment, document } option.
+      // Do this after emitting { guardEvent }, in case listeners want to augment render options.
+      up.RenderOptions.assertContentGiven(this.options)
+
       let result = await this._getChange().execute()
       this._handleResult(result)
       return result
@@ -153,9 +165,7 @@ up.RenderJob = class RenderJob {
     }
   }
 
-  _guardRender() {
-    up.browser.assertConfirmed(this.options)
-
+  _emitGuardEvent() {
     let guardEvent = u.pluckKey(this.options, 'guardEvent')
     if (guardEvent) {
       // Allow guard event handlers to manipulate render options for the default behavior.
@@ -168,8 +178,6 @@ up.RenderJob = class RenderJob {
         throw new up.Aborted(`Rendering was prevented by ${guardEvent.type} listener`)
       }
     }
-
-    up.RenderOptions.assertContentGiven(this.options)
   }
 
   _handleAbortOption(request) {
