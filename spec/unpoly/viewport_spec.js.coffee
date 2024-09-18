@@ -22,6 +22,7 @@ describe 'up.viewport', ->
 
           describe 'when using the mouse', ->
             beforeEach(useMouse)
+            beforeEach(up.specUtil.assertTabFocused)
 
             it 'shows a focus ring for a non-field element', ->
               div = fixture('div', text: 'text')
