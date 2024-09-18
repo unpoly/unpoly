@@ -268,6 +268,8 @@ describe 'up.layer', ->
 
       describe 'focus', ->
 
+        beforeEach(up.specUtil.assertTabFocused)
+
         it "focuses the new overlay's box", (done) ->
           assertFocus = ->
             expect(up.layer.current.getBoxElement()).toBeFocused()
