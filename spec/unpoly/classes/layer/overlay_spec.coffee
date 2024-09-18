@@ -609,9 +609,7 @@ describe 'up.Layer.Overlay', ->
 
   describe 'focus', ->
 
-    beforeEach ->
-      unless document.hasFocus()
-        throw "The Jasmine spec runner must be focused for focus-related specs to pass"
+    beforeEach(up.specUtil.assertTabFocused)
 
     it 'cycles focus within the overlay', asyncSpec (next) ->
       makeLayers(2)
