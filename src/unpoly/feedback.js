@@ -366,7 +366,10 @@ up.feedback = (function() {
 
   function registerPreview(name, previewFn) {
     previewFn.isDefault = up.framework.evaling
-    namedPreviewFns[name] = previewFn
+    namedPreviewFns[name] = function(preview) {
+      up.puts('[up-preview]', 'Showing preview %o', name)
+      return previewFn(preview)
+    }
   }
 
   function getFeedbackClassesPreviewFn(feedbackOption, fragments) {
