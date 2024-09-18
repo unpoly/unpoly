@@ -1682,6 +1682,8 @@ describe 'up.link', ->
               expect(up.layer.current).toHaveText('overlay content')
 
             it 'focus the new overlay, but hides the focus ring when the link is activated with the mouse', ->
+              up.specUtil.assertTabFocused()
+
               link = fixture('a[href="/overlay"][up-layer=new][up-target="#content"]')
               Trigger.clickSequence(link)
 
@@ -1696,6 +1698,8 @@ describe 'up.link', ->
               expect(up.layer.current.getFocusElement()).not.toHaveOutline()
 
             it 'shows the focus ring for the new overlay when the link is activated with the keyboard', ->
+              up.specUtil.assertTabFocused()
+
               link = fixture('a[href="/overlay"][up-layer=new][up-target="#content"]', text: 'link')
 
               await wait()
@@ -1726,6 +1730,8 @@ describe 'up.link', ->
               expect(up.layer.current).toHaveText('overlay content')
 
       describe 'with [up-focus] modifier', ->
+
+        beforeEach(up.specUtil.assertTabFocused)
 
         it 'focuses the given selector', ->
           fixture('div#focus')
@@ -2417,6 +2423,8 @@ describe 'up.link', ->
             expect(link).toHaveBeenDefaultFollowed()
 
         describe 'focus', ->
+
+          beforeEach(up.specUtil.assertTabFocused)
 
           it 'focused the link after the click sequence (like a vanilla link)', ->
             followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())

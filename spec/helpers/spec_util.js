@@ -75,6 +75,12 @@ up.specUtil = (function() {
     return overflowY === 'auto' || overflowY === 'scroll'
   }
 
+  function assertTabFocused() {
+    if (!document.hasFocus()) {
+      throw "The Jasmine spec runner must be focused for focus-related specs to pass"
+    }
+  }
+
   return {
     isDetached,
     isAttached,
@@ -84,5 +90,6 @@ up.specUtil = (function() {
     findElementContainingText,
     rootHasReducedWidthFromScrollbar,
     rootOverflowElement,
+    assertTabFocused,
   }
 })()
