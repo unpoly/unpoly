@@ -552,7 +552,30 @@ describe('up.feedback', function() {
 
     describe('up.preview()', function() {
 
-      it('registers a named preview')
+      it('registers a named preview that can be referred to in a render pass', async function() {
+        let undoFn = jasmine.createSpy('undo function')
+        let previewFn = jasmine.createSpy('preview function').and.returnValue(undoFn)
+        up.preview('my:preview', previewFn)
+        fixture('#target', { text: 'old text' })
+        await wait()
+
+        expect(previewFn).not.toHaveBeenCalled()
+        expect(undoFn).not.toHaveBeenCalled()
+
+        up.render({ target: '#target', preview: 'my:preview', url: '/url' })
+
+        await wait()
+
+        expect(previewFn).toHaveBeenCalled()
+        expect(undoFn).not.toHaveBeenCalled()
+
+        jasmine.respondWithSelector('#target', { text: 'new text' })
+        await wait()
+
+        expect(undoFn).toHaveBeenCalled()
+
+        expect('#target').toHaveText('new text')
+      })
 
     })
 
