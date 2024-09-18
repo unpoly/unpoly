@@ -81,8 +81,11 @@ up.Preview = class Preview {
   }
 
   showSkeleton(...args) {
-    let skeleton = up.feedback.buildSkeleton(args.pop())
+    let skeletonReference = args.pop()
+    let skeleton = up.feedback.buildSkeleton(skeletonReference)
     let explicitParent = args[0]
+
+    up.puts('[up-skeleton]', 'Showing skeleton %o', skeletonReference)
 
     if (explicitParent) {
       // Look-up the parent in case we received a CSS selector.
@@ -130,5 +133,6 @@ up.Preview = class Preview {
 
     return overlay
   }
+
 
 }
