@@ -254,6 +254,44 @@ describe('up.feedback', function() {
             expect('#target').toHaveText('new target')
           })
 
+          it('applies and reverts each preview when we track a cached, but pending request that also has previews', async function() {
+            let undo1Fn = jasmine.createSpy('preview1 undo fn')
+            let preview1Fn = jasmine.createSpy('preview1 apply fn').and.returnValue(undo1Fn)
+            let undo2Fn = jasmine.createSpy('preview2 undo fn')
+            let preview2Fn = jasmine.createSpy('preview2 apply fn').and.returnValue(undo2Fn)
+
+            fixture('#target1', { text: 'old target1' })
+            fixture('#target2', { text: 'old target2' })
+
+            up.render({ preview: preview1Fn, url: '/path', target: '#target1', cache: true })
+            await wait()
+
+            // The initial request has been sent and its preview is showing
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            expect(preview1Fn).toHaveBeenCalled()
+
+            up.render({ preview: preview2Fn, url: '/path', target: '#target2', cache: true })
+            await wait()
+
+            // We are tracking the existing request
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            expect(preview2Fn).toHaveBeenCalled()
+
+            jasmine.respondWith(`
+              <main>
+                <div id="target1">new target1</div>
+                <div id="target2">new target2</div>
+              </main>
+            `)
+            await wait()
+
+            expect(undo1Fn).toHaveBeenCalled()
+            expect(undo2Fn).toHaveBeenCalled()
+
+            expect('#target1').toHaveText('new target1')
+            expect('#target2').toHaveText('new target2')
+          })
+
           it('does not apply an [up-preview] function when the rendering function overrides with { preview: false }', async function() {
             fixture('#target')
             let previewFn = jasmine.createSpy('preview function')
