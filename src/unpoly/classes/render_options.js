@@ -35,9 +35,13 @@ up.RenderOptions = (function() {
     'abortable',
     'confirm',
     'feedback',
+    'disable',
+    'skeleton',
+    'preview',
     'origin',
     'originLayer',
     'baseLayer',
+    'navigate',     // Also set navigate defaults for fail options
     'fail',
     'onError',
   ]
@@ -65,9 +69,7 @@ up.RenderOptions = (function() {
     'hungry',       // If I want to opportunistically update [up-hungry] elements, I also want it for the fail case.
     'history',      // Note that regardless of setting, we only set history for reloadable responses (GET).
     'source',       // No strong opinions about that one. Wouldn't one always have a source? Might as well not be an option.
-    'saveScroll',   // No strong opinions about that one. Wouldn't one always want to saveScroll? Might as wellnot be an option.
-    'navigate',     // Also set navigate defaults for fail options
-    'baseLayer',
+    'saveScroll',   // No strong opinions about that one. Wouldn't one always want to saveScroll? Might as well not be an option.
   ])
 
   // At least one of these properties must be given for Unpoly to render content.
