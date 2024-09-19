@@ -2,7 +2,7 @@
 
 <p>
   <img alt="jsDelivr hits (npm)" src="https://img.shields.io/jsdelivr/npm/hy/unpoly">
-  <img alt="NPM Downloads" src="https://img.shields.io/npm/dy/unpoly">
+  <img alt="NPM Downloads" src="https://img.shields.io/npm/dy/unpoly?label=npm">
 </p>
 
 
