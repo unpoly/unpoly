@@ -6,17 +6,20 @@ up.Selector = class Selector {
   constructor(selector, elementOrDocument, options = {}) {
     this._filters = []
 
-    if (!options.destroying) {
+    // If we're given an element that is detached *or* from another document
+    // (think up.ResponseDoc) we are not filtering by element layer.
+    let matchingInExternalDocument = elementOrDocument && !document.contains(elementOrDocument)
+
+    if (!matchingInExternalDocument && !options.destroying) {
       this._filters.push(up.fragment.isNotDestroying)
     }
 
-    // If we're given an element that is detached *or* from another document
-    // (think up.ResponseDoc) we are not filtering by element layer.
-    this._matchingInExternalDocument = elementOrDocument && !document.contains(elementOrDocument)
+    this._ignoreLayers = matchingInExternalDocument || options.layer === 'any' || up.layer.count === 1
 
     let expandTargetLayer
 
-    if (this._matchingInExternalDocument || options.layer === 'any') {
+    if (this._ignoreLayers) {
+      // Use the root layer to expand layer-specific selectors like `:main` or `:layer`
       expandTargetLayer = up.layer.root
     } else {
       // Some up.fragment function center around an element, like up.fragment.closest(element, selector).
@@ -24,17 +27,15 @@ up.Selector = class Selector {
       options.layer ??= u.presence(elementOrDocument, u.isElement)
 
       this._layers = up.layer.getAll(options)
-
       if (!this._layers.length) throw new up.CannotMatch(["Unknown layer: %o", options.layer])
 
-      if (up.layer.count > 1) {
-        this._filters.push(match => u.some(this._layers, layer => layer.contains(match)))
-      }
+      this._filters.push(match => u.some(this._layers, layer => layer.contains(match)))
 
+      // Use the first layer to expand layer-specific selectors like `:main` or `:layer`
       expandTargetLayer = this._layers[0]
     }
 
-    this._selectors = up.fragment.expandTargets(selector, {...options, layer: expandTargetLayer})
+    this._selectors = up.fragment.expandTargets(selector, { ...options, layer: expandTargetLayer })
 
     // If the user has set config.mainTargets = [] then a selector :main
     // will resolve to an empty array.
@@ -42,7 +43,7 @@ up.Selector = class Selector {
   }
 
   matches(element) {
-    return u.isElement(element) && element.matches(this._unionSelector) && this._passesFilter(element)
+    return e.elementLikeMatches(element, this._unionSelector) && this._passesFilter(element)
   }
 
   closest(element) {
@@ -54,38 +55,33 @@ up.Selector = class Selector {
   }
 
   firstDescendant(root) {
-    if (root || this._matchingInExternalDocument) {
+    // We make multiple queries here:
+    //
+    // (1) When we expand a selector into multiple native selectors, earlier selectors should match first.
+    //    E.g. `up.fragment.config.mainTargets` may match multiple elements in a layer
+    //    (like .container and body), but up.fragment.get(':main') should prefer to match .container.
+    //
+    // (2) When we match within multiple layers, earlier layers should match first.
+    //     E.g. `up.fragment.get('main', { layer: 'current root' }` may match a main element in both
+    //    layers, but we should return the match in `'current'`.
+    if (root || this._ignoreLayers) {
       root ||= document
-      // We don't need to filter in an external document:
-      // (1) An external document will not have layers.
-      // (2) An external document will not have .up-destroying classes.
-      return u.findResult(this._selectors, (selector) => {
-        return this._filterMany(
-          root.querySelectorAll(selector)
-        )[0]
-      })
+      return this._firstSelectorMatch((selector) => root.querySelectorAll(selector))
     } else {
-      // We make multiple queries here:
-      //
-      // (1) When we expand a selector into multiple native selectors, earlier selectors should match first.
-      //    E.g. `up.fragment.config.mainTargets` may match multiple elements in a layer
-      //    (like .container and body), but up.fragment.get(':main') should prefer to match .container.
-      //
-      // (2) When we match within multiple layers, earlier layers should match first.
-      //     E.g. `up.fragment.get('main', { layer: 'current root' }` may match a main element in both
-      //    layers, but we should return the match in `'current'`.
       return u.findResult(this._layers, (layer) => {
-        return u.findResult(this._selectors, (selector) => {
-          return this._filterMany(
-            e.subtree(layer.element, selector)
-          )[0]
-        })
+        return this._firstSelectorMatch((selector) => e.subtree(layer.element, selector))
       })
     }
   }
 
   subtree(root) {
     return this._filterMany(e.subtree(root, this._unionSelector))
+  }
+
+  _firstSelectorMatch(fn) {
+    return u.findResult(this._selectors, (selector) => {
+      return this._filterMany(fn(selector))[0]
+    })
   }
 
   _passesFilter(element) {
