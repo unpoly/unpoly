@@ -123,6 +123,18 @@ describe 'up.fragment', ->
           doGet = -> up.fragment.get('.element', layer: 1)
           expect(doGet).toThrowError(/unknown layer: 1/i)
 
+        it 'matches in earlier layers first if multiple layers are given', ->
+          makeLayers [
+            { target: '.element' }, # 0
+            { target: '.element' }, # 1
+            { target: '.element' }, # 2
+            { target: '.element' }, # 3
+            { target: '.element' }, # 4
+          ]
+
+          result = up.fragment.get('.element', layer: '1 3')
+          expect(up.layer.get(result)).toBe(up.layer.get(1))
+
       describe 'matching in the region of { origin }', ->
 
         it 'prefers to match an element closest to origin when no { match } option is given', ->
@@ -349,16 +361,16 @@ describe 'up.fragment', ->
           results = up.fragment.all(':main')
           expect(results).toEqual []
 
-        it 'matches earlier main targets first', ->
-          one = fixture('.one')
-          two = fixture('.two')
-          three = fixture('.three')
-          four = fixture('.four')
-
-          up.fragment.config.mainTargets = ['.three', '.one', '.four']
-
-          results = up.fragment.all(':main')
-          expect(results).toEqual [three, one, four]
+#        it 'matches earlier main targets first', ->
+#          one = fixture('.one')
+#          two = fixture('.two')
+#          three = fixture('.three')
+#          four = fixture('.four')
+#
+#          up.fragment.config.mainTargets = ['.three', '.one', '.four']
+#
+#          results = up.fragment.all(':main')
+#          expect(results).toEqual [three, one, four]
 
       describe 'when given a root element for the search', ->
 

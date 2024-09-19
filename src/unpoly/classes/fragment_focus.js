@@ -67,7 +67,7 @@ up.FragmentFocus = class FragmentFocus extends up.FragmentProcessor {
   }
 
   _autofocus() {
-    let autofocusElement = this.fragment && e.subtree(this.fragment, '[autofocus]')[0]
+    let autofocusElement = this.fragment && e.subtreeFirst(this.fragment, '[autofocus]')
     if (autofocusElement) {
       return this._focusElement(autofocusElement)
     }

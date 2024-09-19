@@ -327,12 +327,13 @@ up.feedback = (function() {
     }
   }
 
-  function buildSkeleton(value) {
+  function buildSkeleton(value, origin) {
     if (u.isString(value)) {
       if (value.startsWith('<')) {
         value = e.createFromHTML(value)
       } else {
-        value = document.querySelector(value) || up.fail('Unknown skeleton %s', value)
+        let layers = up.layer.getAll('closest', { origin })
+        value = up.fragment.get(value, { layer: layers }) || up.fail('Unknown skeleton %s', value)
       }
     }
 
