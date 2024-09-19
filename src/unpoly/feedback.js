@@ -332,8 +332,7 @@ up.feedback = (function() {
       if (value.startsWith('<')) {
         value = e.createFromHTML(value)
       } else {
-        let layers = up.layer.getAll('closest', { origin })
-        value = up.fragment.get(value, { layer: layers }) || up.fail('Unknown skeleton %s', value)
+        value = up.fragment.get(value, { layer: 'closest', origin }) || up.fail('Unknown skeleton %s', value)
       }
     }
 
