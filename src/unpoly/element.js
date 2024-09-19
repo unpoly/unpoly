@@ -1556,5 +1556,6 @@ up.element = (function() {
     wrap,
     cloneTemplate,
     matchSelectorMap,
+    elementLikeMatches,
   }
 })()
