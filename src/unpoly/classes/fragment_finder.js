@@ -42,13 +42,13 @@ up.FragmentFinder = class FragmentFinder {
       if (parts) {
         let parent = up.fragment.closest(this._origin, parts[1], this._options)
         if (parent) {
-          return up.fragment.getDumb(parent, parts[2])
+          return up.fragment.getFirstDescendant(parent, parts[2])
         }
       }
     })
   }
 
   _findFirst() {
-    return up.fragment.getDumb(this._document, this._selector, this._options)
+    return up.fragment.getFirstDescendant(this._document, this._selector, this._options)
   }
 }
