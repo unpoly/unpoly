@@ -1484,20 +1484,21 @@ up.fragment = (function() {
     const root = args[0]
 
     if (u.isElementLike(selector)) {
-      // up.fragment.get(root: Element, element: Element, [options]) should just return element.
-      // The given root and options are ignored. We also don't check if it's destroying.
-      // We do use e.get() to unwrap a jQuery collection.
+      // (1) up.fragment.get(root: Element, element: Element, [options]) should just return element.
+      //     The given root and options are ignored. We also don't check if it's destroying.
+      // (2) We do use e.get() to unwrap a jQuery collection.
       return e.get(selector)
     }
 
     if (root) {
       // We don't match around { origin } if we're given a root for the search.
-      return getDumb(root, selector, options)
+      return getFirstDescendant(root, selector, options)
     }
 
-    // If we don't have a root element we will use a context-sensitive lookup strategy
-    // that tries to match elements in the region of { origin } before going through
-    // the entire layer.
+    // (1) If we don't have a root element we will use a context-sensitive lookup strategy
+    //     that tries to match elements in the region of { origin } before going through
+    //     the entire layer.
+    // (2) We must not pass a { document } option to up.FragmentFinder.
     return new up.FragmentFinder({
       selector,
       origin: options.origin,
@@ -1506,8 +1507,13 @@ up.fragment = (function() {
     }).find()
   }
 
-  function getDumb(...args) {
-    return getAll(...args)[0]
+  function getFirstDescendant(...args) {
+    const options = u.extractOptions(args)
+    const selectorString = args.pop()
+    const root = args[0]
+
+    let selector = new up.Selector(selectorString, root, options)
+    return selector.firstDescendant(root)
   }
 
   /*-
@@ -1580,7 +1586,7 @@ up.fragment = (function() {
   */
   function getAll(...args) {
     const options = u.extractOptions(args)
-    let selectorString = args.pop()
+    const selectorString = args.pop()
     const root = args[0]
 
     // (0) up.fragment.all(element) or up.fragment.all(element, element) should return an array of that element.
@@ -2954,7 +2960,7 @@ up.fragment = (function() {
     render,
     navigate,
     get: getSmart,
-    getDumb,
+    getFirstDescendant,
     all: getAll,
     subtree: getSubtree,
     contains,

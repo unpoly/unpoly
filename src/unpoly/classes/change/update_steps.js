@@ -230,7 +230,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
       // to use custom selectors like ":main" or "&" we use up.fragment.get().
       partner = up.fragment.get(newElement, partnerSelector, lookupOpts)
     } else {
-      partner = up.fragment.subtree(newElement, partnerSelector, lookupOpts)[0]
+      partner = e.subtreeFirst(newElement, partnerSelector, lookupOpts)
     }
 
     // (1) The partner must be matched
