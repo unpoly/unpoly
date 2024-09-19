@@ -64,13 +64,21 @@ up.element = (function() {
   function subtree(root, selector) {
     const results = []
 
-    if (root.matches(selector)) {
+    if (elementLikeMatches(root, selector)) {
       results.push(root)
     }
 
     results.push(...root.querySelectorAll(selector))
 
     return results
+  }
+
+  function subtreeFirst(root, selector) {
+    return elementLikeMatches(root, selector) ? root : root.querySelector(selector)
+  }
+
+  function elementLikeMatches(elementLike, selector) {
+    return u.isElement(elementLike) && elementLike.matches(selector)
   }
 
   /*-
@@ -1487,6 +1495,7 @@ up.element = (function() {
 
   return {
     subtree,
+    subtreeFirst,
     contains,
     closestAttr,
     ancestor,
