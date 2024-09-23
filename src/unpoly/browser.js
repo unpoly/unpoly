@@ -60,8 +60,6 @@ up.browser = (function() {
     return !!window.jQuery
   }
 
-  const canHasSelector = u.memoize(() => CSS.supports('selector(:has(*))'))
-
   function popCookie(name) {
     let value = document.cookie.match(new RegExp(name+"=(\\w+)"))?.[1]
     if (value) {
@@ -91,6 +89,5 @@ up.browser = (function() {
     canJQuery,
     assertConfirmed,
     popCookie,
-    canHasSelector,
   }
 })()
