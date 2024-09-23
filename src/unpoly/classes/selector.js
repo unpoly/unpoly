@@ -64,7 +64,7 @@ up.Selector = class Selector {
     // (2) When we match within multiple layers, earlier layers should match first.
     //     E.g. `up.fragment.get('main', { layer: 'current root' }` may match a main element in both
     //    layers, but we should return the match in `'current'`.
-    if (root || this._ignoreLayers) {
+    if (this._ignoreLayers) {
       root ||= document
       return this._firstSelectorMatch((selector) => root.querySelectorAll(selector))
     } else {
