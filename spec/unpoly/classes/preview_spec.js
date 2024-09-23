@@ -1400,7 +1400,23 @@ describe('up.Preview', function() {
       expect(up.layer.count).toBe(1)
     })
 
-    it('does not allow up:layer:dismiss listeners to prevent closing the overlay')
+    it('does not allow up:layer:dismiss listeners to prevent closing the overlay', async function() {
+      fixture('#target', { text: 'old target' })
+      let previewFn = (preview) => preview.openLayer('overlay content')
+      up.on('up:layer:dismiss', (event) => event.preventDefault())
+
+      up.render({ preview: previewFn, url: '/url', target: '#target', layer: 'current' })
+      await wait()
+
+      expect(up.layer.count).toBe(2)
+
+      jasmine.respondWithSelector('#target', { text: 'new target' })
+
+      await wait()
+
+      expect(up.layer.count).toBe(1)
+      expect('#target').toHaveText('new target')
+    })
 
   })
 
