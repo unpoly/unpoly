@@ -8273,11 +8273,12 @@ describe 'up.fragment', ->
           it 'does not use options like { confirm } or { feedback } when verifying', asyncSpec (next) ->
             confirmSpy = spyOn(window, 'confirm').and.returnValue(true)
 
-            up.render('.target', { url: '/cached-path', cache: true, revalidate: true, confirm: true })
+            up.render('.target', { url: '/cached-path', cache: true, revalidate: true, confirm: true, feedback: true })
             expect(confirmSpy.calls.count()).toBe(1)
 
             next ->
               expect('.target').toHaveText('cached text')
+              expect('.target').not.toHaveClass('up-loading')
               expect(up.network.isBusy()).toBe(true)
 
               expect(confirmSpy.calls.count()).toBe(1)
