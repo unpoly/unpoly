@@ -708,6 +708,27 @@ describe('up.element', function() {
       // Since this is not a fixture that would auto-remove itself after the test, remove it manually.
       element.remove()
     })
+
+    it('attaches an element with the attributes', function() {
+      const container = fixture('.container')
+      const element = up.element.affix(container, 'span', { 'foo-key': 'foo-value', 'bar-key': 'bar-value' })
+      expect(element).toHaveAttribute('foo-key', 'foo-value')
+      expect(element).toHaveAttribute('bar-key', 'bar-value')
+    })
+
+    it('attaches an element at an adjacent position', function() {
+      const sibling = fixture('.container')
+      const element = up.element.affix(sibling, 'beforebegin', 'span')
+      expect(element.nextElementSibling).toBe(sibling)
+    })
+
+    it('attaches an element at an adjacent position and with attributes', function() {
+      const sibling = fixture('.container')
+      const element = up.element.affix(sibling, 'beforebegin', 'span', { 'foo-key': 'foo-value', 'bar-key': 'bar-value' })
+      expect(element).toHaveAttribute('foo-key', 'foo-value')
+      expect(element).toHaveAttribute('bar-key', 'bar-value')
+    })
+
   })
 
 
