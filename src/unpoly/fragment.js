@@ -218,7 +218,6 @@ up.fragment = (function() {
     navigateOptions: {
       cache: 'auto',
       revalidate: 'auto',
-      feedback: true,
       fallback: true,
       focus: 'auto',
       scroll: 'auto',
