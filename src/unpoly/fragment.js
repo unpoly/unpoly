@@ -98,7 +98,11 @@ up.fragment = (function() {
     Also see [Derived target verification](/target-derivation#derived-target-verification).
 
   @param {Object} [config.navigateOptions]
-    An object of default options to apply when [navigating](/navigation).
+    An object of default render options to apply when [navigating](/navigation).
+
+  @param {Object} [config.renderOptions]
+    An object of default render options to always apply, even when not [navigating](/navigation).
+    @experimental
 
   @param {string} [config.match='region']
     How to match fragments when a [target selector](/targeting-fragments) yields multiple results.
@@ -212,6 +216,17 @@ up.fragment = (function() {
     ],
 
     verifyDerivedTarget: true,
+
+    renderOptions: {
+      useHungry: true,
+      useKeep: true,
+      saveScroll: true,
+      saveFocus: true,
+      focus: 'keep',
+      abort: 'target',
+      failOptions: true,
+      feedback: true,
+    },
 
     // These defaults will be set to both success and fail options
     // if { navigate: true } is given.
