@@ -220,6 +220,29 @@ describe('up.Preview', function() {
       expect(element).not.toHaveAttribute('bar')
     })
 
+    it('accepts an selector for the element', async function() {
+      fixture('#target')
+      let element = fixture('#element[foo="old-foo"]')
+      let previewFn = (preview) => preview.setAttrs('#element', { foo: 'new-foo', bar: 'new-bar' })
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(element).toHaveAttribute('foo', 'new-foo')
+      expect(element).toHaveAttribute('bar', 'new-bar')
+    })
+
+    it('assumes the targeted fragment if no element is given', async function() {
+      let target = fixture('#target[foo=old-foo]')
+      let previewFn = (preview) => preview.setAttrs({ foo: 'new-foo', bar: 'new-bar' })
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(target).toHaveAttribute('foo', 'new-foo')
+      expect(target).toHaveAttribute('bar', 'new-bar')
+    })
+
   })
 
   describe('#addClass()', function() {
@@ -242,6 +265,29 @@ describe('up.Preview', function() {
       expect(element).not.toHaveClass('bar')
     })
 
+    it('accepts an selector for the element', async function() {
+      fixture('#target')
+      let element = fixture('#element.foo')
+      let previewFn = (preview) => preview.addClass('#element', 'bar')
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(element).toHaveClass('foo')
+      expect(element).toHaveClass('bar')
+    })
+
+    it('assumes the targeted fragment if no element is given', async function() {
+      let target = fixture('#target.foo')
+      let previewFn = (preview) => preview.addClass('bar')
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(target).toHaveClass('foo')
+      expect(target).toHaveClass('bar')
+    })
+
   })
 
   describe('#setStyle()', function() {
@@ -261,6 +307,27 @@ describe('up.Preview', function() {
 
       expect(element).toHaveInlineStyle({ 'font-size': '10px' })
       expect(element).not.toHaveInlineStyle('margin-top')
+    })
+
+    it('accepts an selector for the element', async function() {
+      fixture('#target')
+      let element = fixture('#element', { style: { 'font-size': '10px' }})
+      let previewFn = (preview) => preview.setStyle('#element', { 'font-size': '15px', 'margin-top': '20px' })
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(element).toHaveInlineStyle({ 'font-size': '15px', 'margin-top': '20px' })
+    })
+
+    it('assumes the targeted fragment if no element is given', async function() {
+      let target = fixture('#target', { style: { 'font-size': '10px' }})
+      let previewFn = (preview) => preview.setStyle({ 'font-size': '15px', 'margin-top': '20px' })
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(target).toHaveInlineStyle({ 'font-size': '15px', 'margin-top': '20px' })
     })
 
   })
@@ -331,6 +398,27 @@ describe('up.Preview', function() {
 
       expect(input1).toBeDisabled()
       expect(input2).not.toBeDisabled()
+    })
+
+    it('accepts an selector for the element', async function() {
+      fixture('#target')
+      let input = fixture('input#input[type=text][name=foo]')
+      let previewFn = (preview) => preview.disable('#input')
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(input).toBeDisabled()
+    })
+
+    it('assumes the targeted fragment if no element is given', async function() {
+      let input = fixture('input#input[type=text][name=foo]')
+      let previewFn = (preview) => preview.disable()
+
+      up.render({ preview: previewFn, url: '/url', target: '#input' })
+      await wait()
+
+      expect(input).toBeDisabled()
     })
 
   })
@@ -417,6 +505,31 @@ describe('up.Preview', function() {
 
       expect(newChild).toBeDetached()
       expect(cleanSpy).toHaveBeenCalledWith(newChild)
+    })
+
+    it('accepts an selector for the element', async function() {
+      fixture('#target')
+      let reference = fixture('#reference')
+      let newChild = e.createFromSelector('#new-child')
+      let previewFn = (preview) => preview.insert('#reference', newChild)
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(newChild).toBeAttached()
+      expect(newChild.parentElement).toBe(reference)
+    })
+
+    it('assumes the targeted fragment if no element is given', async function() {
+      let reference = fixture('#reference')
+      let newChild = e.createFromSelector('#new-child')
+      let previewFn = (preview) => preview.insert(newChild)
+
+      up.render({ preview: previewFn, url: '/url', target: '#reference' })
+      await wait()
+
+      expect(newChild).toBeAttached()
+      expect(newChild.parentElement).toBe(reference)
     })
 
   })
@@ -540,6 +653,27 @@ describe('up.Preview', function() {
       expect(element).toBeVisible()
     })
 
+    it('accepts an selector for the element', async function() {
+      fixture('#target')
+      let element = fixture('#element[hidden]')
+      let previewFn = (preview) => preview.show('#element')
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(element).toBeVisible()
+    })
+
+    it('assumes the targeted fragment if no element is given', async function() {
+      let target = fixture('#target[hidden]')
+      let previewFn = (preview) => preview.show()
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(target).toBeVisible()
+    })
+
   })
 
   describe('#hide()', function() {
@@ -595,6 +729,27 @@ describe('up.Preview', function() {
 
       expect('#target').toHaveText('text from render2')
       expect('#target').toBeVisible()
+    })
+
+    it('accepts an selector for the element', async function() {
+      fixture('#target')
+      let element = fixture('#element')
+      let previewFn = (preview) => preview.hide('#element')
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(element).toBeHidden()
+    })
+
+    it('assumes the targeted fragment if no element is given', async function() {
+      let target = fixture('#target')
+      let previewFn = (preview) => preview.hide()
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(target).toBeHidden()
     })
 
   })
@@ -1077,6 +1232,43 @@ describe('up.Preview', function() {
       await wait()
 
       expect('#parent').toHaveVisibleText('text1 element1 text2 element2')
+    })
+
+    it('accepts an selector for the element', async function() {
+      fixture('#target')
+      let parent = htmlFixture(`
+        <div id="parent">
+          <div id="child1"></div>
+          <div id="child2"></div>
+        </div>
+      `)
+
+      let previewFn = (preview) => preview.hideContent('#parent')
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect('#parent').toBeVisible()
+      expect('#child1').toBeHidden()
+      expect('#child2').toBeHidden()
+    })
+
+    it('assumes the targeted fragment if no element is given', async function() {
+      let parent = htmlFixture(`
+        <div id="parent">
+          <div id="child1"></div>
+          <div id="child2"></div>
+        </div>
+      `)
+
+      let previewFn = (preview) => preview.hideContent()
+
+      up.render({ preview: previewFn, url: '/url', target: '#parent' })
+      await wait()
+
+      expect('#parent').toBeVisible()
+      expect('#child1').toBeHidden()
+      expect('#child2').toBeHidden()
     })
 
   })
