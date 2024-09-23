@@ -374,10 +374,9 @@ up.script = (function() {
   }
 
   const parseProcessorArgs = function(args) {
-    const defaults = u.extractOptions(args)
     const selector = args.shift()
     const callback = args.pop()
-    const options = { ...defaults, ...u.extractOptions(args) }
+    const options = u.extractOptions(args)
     return [selector, options, callback]
   }
 
