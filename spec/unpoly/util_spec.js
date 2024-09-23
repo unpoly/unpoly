@@ -6,6 +6,70 @@ describe('up.util', () => {
 
   describe('JavaScript functions', function() {
 
+    describe('up.util.args()', function() {
+
+      describe('val slots', function() {
+
+        it('parses args', function() {
+          let args = [0, 1, 2]
+          let results = up.util.args(args, 'val', 'val', 'val')
+          expect(results).toEqual([0, 1, 2])
+        })
+
+        it('parses args from the right if there are more args than specs', function() {
+          let args = [0, 1, 2, 3]
+          let results = up.util.args(args, 'val', 'val')
+          expect(results).toEqual([2, 3])
+        })
+
+        it('returns undefined for positions that have a spec, but no arg', function() {
+          let args = [0, 1]
+          let results = up.util.args(args, 'val', 'val', 'val')
+          expect(results).toEqual([undefined, 0, 1])
+        })
+
+      })
+
+      describe('options slots', function() {
+
+        it('parses a trailing options object', function() {
+          let args = [0, 1, { foo: 'bar'} ]
+          let results = up.util.args(args, 'val', 'val', 'options')
+          expect(results).toEqual([0, 1, { foo: 'bar' }])
+        })
+
+        it('parses an empty object is no options object is trailing', function() {
+          let args = [0, 1]
+          let results = up.util.args(args, 'val', 'val', 'options')
+          expect(results).toEqual([0, 1, { }])
+        })
+
+        it('parses options in the middle of a spec list', function() {
+          expect(up.util.args([0, 1], 'val', 'options', 'val')).toEqual([0, {}, 1])
+          expect(up.util.args([0, { foo: 'bar' }, 1], 'val', 'options', 'val')).toEqual([0, { foo: 'bar' }, 1])
+        })
+
+      })
+
+      describe('callback slot', function() {
+
+        it('parses a trailing function', function() {
+          let fn = function() { console.log("fn!") }
+          let args = [0, 1, fn]
+          let results = up.util.args(args, 'val', 'val', 'callback')
+          expect(results).toEqual([0, 1, fn])
+        })
+
+        it('parses undefined if no function is trailing', function() {
+          let args = [0, 1]
+          let results = up.util.args(args, 'val', 'val', 'callback')
+          expect(results).toEqual([0, 1, undefined])
+        })
+
+      })
+
+    })
+
     describe('up.util.cleaner()', function() {
 
       it('returns a function that collects clean-up action, which are executed when { clean } is called', function() {

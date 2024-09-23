@@ -723,6 +723,10 @@ up.util = (function() {
     return Object.prototype.toString.call(value) === '[object Arguments]'
   }
 
+  function isAdjacentPosition(value) {
+    return /^(before|after)/.test(value)
+  }
+
   /*-
   Returns the given value if it is [array-like](/up.util.isList), otherwise
   returns an array with the given value as its only element.
@@ -898,10 +902,9 @@ up.util = (function() {
   }
 
   function parseArgIntoOptions(args, argKey) {
-    let options = extractOptions(args)
-    if (isDefined(args[0])) {
-      options = copy(options)
-      options[argKey] = args[0]
+    let [positionalArg, options] = parseArgs(args, 'val', 'options')
+    if (isDefined(positionalArg)) {
+      options[argKey] = positionalArg
     }
     return options
   }
@@ -1981,6 +1984,38 @@ up.util = (function() {
     return variant
   }
 
+  function parseArgs(args, ...specs) {
+    let results = []
+
+    // let originalArgs = copy(args)
+    // let originalSpecs = copy(specs)
+
+    while (specs.length) {
+      let lastSpec = specs.pop()
+
+      if (lastSpec === 'options') {
+        results.unshift(extractOptions(args))
+      } else if (lastSpec === 'callback') {
+        results.unshift(extractCallback(args))
+      } else if (lastSpec === 'val') {
+        results.unshift(args.pop())
+      } else if (isFunction(lastSpec)) {
+        let value = lastSpec(last(args)) ? args.pop() : undefined
+        // Write undefined if the tester failed. This makes the result order deterministic.
+        // The caller can set a default liike this:
+        //
+        //     let [foo = 'default'] = up.util.args(args, tester)
+        results.unshift(value)
+      }
+    }
+
+    // if (args.length) {
+    //   throw new up.CannotParse(['Invalid argument list (%o vs. %o), left is %o', originalArgs, originalSpecs, args])
+    // }
+
+    return results
+  }
+
   // /*-
   // [Assigns](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign) the given properties to the given object.
   //
@@ -2106,6 +2141,7 @@ up.util = (function() {
     // isArguments,
     isList,
     isRegExp,
+    isAdjacentPosition,
     timer: scheduleTimer,
     contains,
     containsAll,
@@ -2158,5 +2194,6 @@ up.util = (function() {
     variant,
     cleaner,
     scanFunctions,
+    args: parseArgs,
   }
 })()

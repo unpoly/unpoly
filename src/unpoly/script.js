@@ -374,10 +374,7 @@ up.script = (function() {
   }
 
   const parseProcessorArgs = function(args) {
-    const selector = args.shift()
-    const callback = args.pop()
-    const options = u.extractOptions(args)
-    return [selector, options, callback]
+    return u.args(args, 'val', 'options', 'callback')
   }
 
   function buildProcessor(args, overrides) {
