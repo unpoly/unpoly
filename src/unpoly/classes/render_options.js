@@ -2,17 +2,6 @@ const u = up.util
 
 up.RenderOptions = (function() {
 
-  const GLOBAL_DEFAULTS = {
-    useHungry: true,
-    useKeep: true,
-    saveScroll: true,
-    saveFocus: true,
-    focus: 'keep',
-    abort: 'target',
-    failOptions: true,
-    feedback: true,
-  }
-
   const PRELOAD_OVERRIDES = {
     abort: false,
     confirm: false,
@@ -121,7 +110,7 @@ up.RenderOptions = (function() {
     up.migrate.preprocessRenderOptions?.(options)
 
     const defaults = u.merge(
-      GLOBAL_DEFAULTS,
+      up.fragment.config.renderOptions,
       navigateDefaults(options)
     )
 
