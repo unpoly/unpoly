@@ -492,6 +492,22 @@ describe 'up.fragment', ->
           result = up.fragment.get(match, layer: 'root')
           expect(result).toBe(match)
 
+    describe 'up.fragment.matches()', ->
+
+      it 'returns whether the fragment matches the selector', ->
+        fragment = fixture('.foo')
+        expect(up.fragment.matches(fragment, '.foo')).toBe(true)
+        expect(up.fragment.matches(fragment, '.bar')).toBe(false)
+
+      it 'supports non-standard pseudos like :main', ->
+        foo = fixture('.foo')
+        bar = fixture('.bar')
+        up.fragment.config.mainTargets = ['.foo']
+
+        expect(up.fragment.matches(foo, ':main')).toBe(true)
+        expect(up.fragment.matches(bar, ':main')).toBe(false)
+
+
     describe 'up.fragment.closest()', ->
 
       it 'returns the closest ancestor of the given root that matches the given selector', ->
