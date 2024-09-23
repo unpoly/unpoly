@@ -1479,9 +1479,7 @@ up.fragment = (function() {
   @stable
   */
   function getSmart(...args) {
-    const options = u.extractOptions(args)
-    const selector = args.pop()
-    const root = args[0]
+    let [root, selector, options] = parseGetArgs(args)
 
     if (u.isElementLike(selector)) {
       // (1) up.fragment.get(root: Element, element: Element, [options]) should just return element.
@@ -1508,12 +1506,14 @@ up.fragment = (function() {
   }
 
   function getFirstDescendant(...args) {
-    const options = u.extractOptions(args)
-    const selectorString = args.pop()
-    const root = args[0]
+    let [root, selectorString, options] = parseGetArgs(args)
 
     let selector = new up.Selector(selectorString, root, options)
     return selector.firstDescendant(root)
+  }
+
+  function parseGetArgs(args) {
+    return u.args(args, 'val', 'val', 'options')
   }
 
   /*-
@@ -1585,9 +1585,7 @@ up.fragment = (function() {
   @stable
   */
   function getAll(...args) {
-    const options = u.extractOptions(args)
-    const selectorString = args.pop()
-    const root = args[0]
+    let [root, selectorString, options] = parseGetArgs(args)
 
     // (0) up.fragment.all(element) or up.fragment.all(element, element) should return an array of that element.
     if (u.isElement(selectorString)) {
@@ -2917,9 +2915,9 @@ up.fragment = (function() {
 
   @internal
   */
-  function insertTemp(reference, ...args) {
-    let newElement = e.wrap(args.pop())
-    let position = args[0] || 'beforeend'
+  function insertTemp(...args) {
+    let [reference, position = 'beforeend', newElement] = u.args(args, 'val', u.isAdjacentPosition, 'val')
+    newElement = e.wrap(newElement)
     reference.insertAdjacentElement(position, newElement)
     up.hello(newElement)
     return () => up.destroy(newElement)

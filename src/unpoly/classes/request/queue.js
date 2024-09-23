@@ -111,10 +111,7 @@ up.Request.Queue = class Queue {
 
   // Aborting a request will cause its promise to reject, which will also uncache it
   abort(...args) {
-    let options = u.extractOptions(args)
-    let { except, reason, logOnce } = options
-
-    let conditions = args[0] ?? true
+    let [conditions = true, { except, reason, logOnce }] = u.args(args, 'val', 'options')
 
     let tester = up.Request.tester(conditions, { except })
 

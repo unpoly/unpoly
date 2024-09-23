@@ -659,11 +659,13 @@ up.viewport = (function() {
   }
 
   function parseOptions(args) {
-    const options = u.copy(u.extractOptions(args))
+    const [reference, options] = u.args(args, 'val', 'options')
+
     options.layer = up.layer.get(options)
+
     let viewports
-    if (args[0]) {
-      viewports = [closest(args[0], options)]
+    if (reference) {
+      viewports = [closest(reference, options)]
     } else if (options.around) {
       // This is relevant when updating a fragment with { scroll: 'restore' | 'reset' }.
       // In tht case we restore / reset the scroll tops of all viewports around the fragment.

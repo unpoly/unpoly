@@ -730,10 +730,11 @@ up.form = (function() {
     Watching will stop automatically when the form is [destroyed](/up.destroy).
   @stable
   */
-  function watch(root, ...args) {
+  function watch(...args) {
+    let [root, options, callback] = u.args(args, 'val', 'options', 'callback')
+
     root = up.element.get(root) // unwrap jQuery
-    const callback = u.extractCallback(args) || watchCallbackFromElement(root) || up.fail('No callback given for up.watch()')
-    let options = u.extractOptions(args)
+    callback ||= watchCallbackFromElement(root) || up.fail('No callback given for up.watch()')
 
     const watcher = new up.FieldWatcher(root, options, callback)
 

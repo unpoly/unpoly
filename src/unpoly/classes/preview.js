@@ -47,56 +47,50 @@ up.Preview = class Preview {
   }
 
   setAttrs(...args) {
-    let attrs = args.pop()
-    let element = this._getElementArg(args[0])
+    let [element, attrs] = this._parseMutatorArgs(args, 'val', 'val')
     this.undo(e.setAttrsTemp(element, attrs))
   }
 
   addClass(...args) {
-    let klass = args.pop()
-    let element = this._getElementArg(args[0])
+    let [element, klass] = this._parseMutatorArgs(args, 'val', 'val')
     this.undo(e.addClassTemp(element, klass))
   }
 
   setStyle(...args) {
-    let styles = args.pop()
-    let element = this._getElementArg(args[0])
+    let [element, styles] = this._parseMutatorArgs(args, 'val', 'val')
     this.undo(e.setStyleTemp(element, styles))
   }
 
-  disable(element) {
-    element = this._getElementArg(element)
+  disable(...args) {
+    let [element] = this._parseMutatorArgs(args, 'val')
     this.undo(up.form.disable(element))
   }
 
   insert(...args) {
-    let newElement = args.pop()
-    let position = (/^(before|after)/.test(u.last(args))) ? args.pop() : null
-    let reference = this._getElementArg(args[0])
+    let [reference, position = 'beforeend', newElement] = this._parseMutatorArgs(args, 'val', u.isAdjacentPosition, 'val')
     this.undo(up.fragment.insertTemp(reference, position, newElement))
   }
 
-  show(element) {
-    element = this._getElementArg(element)
+  show(...args) {
+    let [element] = this._parseMutatorArgs(args, 'val')
     this.undo(e.showTemp(element))
   }
 
-  hide(element) {
-    element = this._getElementArg(element)
+  hide(...args) {
+    let [element] = this._parseMutatorArgs(args, 'val')
     this.undo(e.hideTemp(element))
   }
 
   hideContent(...args) {
-    let parent = args.pop() || this.fragment
+    let [parent] = this._parseMutatorArgs(args, 'val')
     let wrapper = e.wrapChildren(parent)
     e.hide(wrapper)
     this.undo(() => e.unwrap(wrapper))
   }
 
   showSkeleton(...args) {
-    let skeletonReference = args.pop()
+    let [parent, skeletonReference] = this._parseMutatorArgs(args, 'val', 'val')
     let skeleton = up.feedback.buildSkeleton(skeletonReference, this.origin)
-    let parent = this._getElementArg(args[0])
 
     up.puts('[up-skeleton]', 'Showing skeleton %o', skeletonReference)
 
@@ -111,11 +105,13 @@ up.Preview = class Preview {
     }
   }
 
-  _getElementArg(arg) {
+  _parseMutatorArgs(args, ...specs) {
+    let [element, ...rest] = u.args(args, ...specs)
     // (1) up.fragment.get(undefined) returns undefined
     // (2) up.fragment.get(Element) returns the element
     // (3) this.fragment is undefined when opening a new layer
-    return up.fragment.get(arg, { layer: this.layer }) || this.fragment
+    element = up.fragment.get(element, { layer: this.layer }) || this.fragment
+    return [element, ...rest]
   }
 
   _swapContent(parent, newContent) {

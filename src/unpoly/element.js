@@ -43,8 +43,7 @@ up.element = (function() {
   @internal
   */
   function first(...args) {
-    const selector = args.pop()
-    const root = args[0] || document
+    let [root = document, selector] = u.args(args, 'val', 'val')
     return root.querySelector(selector)
   }
 
@@ -742,20 +741,9 @@ up.element = (function() {
     The created element.
   @stable
   */
-  function affix(parent, ...args) {
-    let position, selector
-    const attributes = u.extractOptions(args)
-
-    if (args.length === 2) {
-      [position, selector] = args
-    } else {
-      position = 'beforeend'
-      selector = args[0]
-    }
-
+  function affix(...args) {
+    let [parent, position = 'beforeend', selector, attributes] = u.args(args, 'val', u.isAdjacentPosition, 'val', 'options')
     const element = createFromSelector(selector, attributes)
-    // https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentElement
-
     parent.insertAdjacentElement(position, element)
     return element
   }
