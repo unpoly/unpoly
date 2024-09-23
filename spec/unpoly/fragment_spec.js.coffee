@@ -120,8 +120,9 @@ describe 'up.fragment', ->
           expect(up.layer.get(result)).toBe(up.layer.root)
 
         it 'throws an exception if the { layer } option did not resolve to any layer', ->
-          doGet = -> up.fragment.get('.element', layer: 1)
-          expect(doGet).toThrowError(/unknown layer: 1/i)
+          makeLayers(2)
+          doGet = -> up.fragment.get('.element', layer: 3)
+          expect(doGet).toThrowError(/unknown layer: 3/i)
 
         it 'matches in earlier layers first if multiple layers are given', ->
           makeLayers [
@@ -2782,6 +2783,8 @@ describe 'up.fragment', ->
 
             # Three is a sibling of three
             expect(elements[3]).toHaveText('old three')
+
+            await wait()
 
             expect(jasmine.Ajax.requests.count()).toBe(2)
             jasmine.respondWith """
