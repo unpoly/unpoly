@@ -1109,6 +1109,49 @@ describe('up.Preview', function() {
         expect('#child').toBeVisible()
       })
 
+      it('prefers a skeleton selector match in the origin layer', async function() {
+        makeLayers(2)
+        let rootSkeleton = e.createFromSelector('template.skeleton-template', { content: '<span>root skeleton</span>' })
+        document.body.prepend(rootSkeleton)
+        registerFixture(rootSkeleton)
+
+        let originSkeleton = up.layer.get(1).affix('template.skeleton-template', { content: '<span>origin skeleton</span>' })
+
+        expect(rootSkeleton.compareDocumentPosition(originSkeleton)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+
+        up.layer.get(1).affix('#target', { text: 'old target' })
+
+        let previewFn = (preview) => preview.showSkeleton('#target', '.skeleton-template')
+
+        up.render({ preview: previewFn, url: '/url', target: '#target', origin: up.layer.current.element })
+        await wait()
+
+        expect('#target').toHaveVisibleText('origin skeleton')
+
+        jasmine.respondWithSelector('#target', { text: 'new target' })
+        await wait()
+
+        expect('#target').toHaveVisibleText('new target')
+      })
+
+      it("matches a skeleton selector in the root layer if it doesn't match in the origin layer", async function() {
+        makeLayers(2)
+        up.layer.get(0).affix('template.skeleton-template', { content: '<span>root skeleton</span>' })
+        up.layer.get(1).affix('#target', { text: 'old target' })
+
+        let previewFn = (preview) => preview.showSkeleton('#target', '.skeleton-template')
+
+        up.render({ preview: previewFn, url: '/url', target: '#target', origin: up.layer.current.element })
+        await wait()
+
+        expect('#target').toHaveVisibleText('root skeleton')
+
+        jasmine.respondWithSelector('#target', { text: 'new target' })
+        await wait()
+
+        expect('#target').toHaveVisibleText('new target')
+      })
+
     })
 
     describe('when previewing a new overlay', function() {
