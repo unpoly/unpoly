@@ -47,34 +47,47 @@ up.Preview = class Preview {
   }
 
   setAttrs(...args) {
-    this.undo(e.setAttrsTemp(...args))
+    let attrs = args.pop()
+    let element = this._getElementArg(args[0])
+    this.undo(e.setAttrsTemp(element, attrs))
   }
 
   addClass(...args) {
-    this.undo(e.addClassTemp(...args))
+    let klass = args.pop()
+    let element = this._getElementArg(args[0])
+    this.undo(e.addClassTemp(element, klass))
   }
 
   setStyle(...args) {
-    this.undo(e.setStyleTemp(...args))
+    let styles = args.pop()
+    let element = this._getElementArg(args[0])
+    this.undo(e.setStyleTemp(element, styles))
   }
 
-  disable(...args) {
-    this.undo(up.form.disable(...args))
+  disable(element) {
+    element = this._getElementArg(element)
+    this.undo(up.form.disable(element))
   }
 
   insert(...args) {
-    this.undo(up.fragment.insertTemp(...args))
+    let newElement = args.pop()
+    let position = (/^(before|after)/.test(u.last(args))) ? args.pop() : null
+    let reference = this._getElementArg(args[0])
+    this.undo(up.fragment.insertTemp(reference, position, newElement))
   }
 
-  show(...args) {
-    this.undo(e.showTemp(...args))
+  show(element) {
+    element = this._getElementArg(element)
+    this.undo(e.showTemp(element))
   }
 
-  hide(...args) {
-    this.undo(e.hideTemp(...args))
+  hide(element) {
+    element = this._getElementArg(element)
+    this.undo(e.hideTemp(element))
   }
 
-  hideContent(parent) {
+  hideContent(...args) {
+    let parent = args.pop() || this.fragment
     let wrapper = e.wrapChildren(parent)
     e.hide(wrapper)
     this.undo(() => e.unwrap(wrapper))
@@ -82,25 +95,27 @@ up.Preview = class Preview {
 
   showSkeleton(...args) {
     let skeletonReference = args.pop()
-    let skeleton = up.feedback.buildSkeleton(skeletonReference)
-    let explicitParent = args[0]
+    let skeleton = up.feedback.buildSkeleton(skeletonReference, this.origin)
+    let parent = this._getElementArg(args[0])
 
     up.puts('[up-skeleton]', 'Showing skeleton %o', skeletonReference)
 
-    if (explicitParent) {
-      // Look-up the parent in case we received a CSS selector.
-      // If we received an Element, up.fragment.get() will return that unchanged.
-      explicitParent = up.fragment.get(explicitParent, { layer: this.layer })
-      this._swapContent(explicitParent, skeleton)
+    if (parent) {
+      this._swapContent(parent, skeleton)
     } else if (this.layer === 'new') {
       this.openLayer(skeleton, { closeAnimation: false })
       // Now that the renderOptions have served as defaults for openLayer(),
       // we can disable animations for the upcoming render pass. This way
       // we don't see flickering when another overlay opens with the final content.
       this.renderOptions.openAnimation = false
-    } else {
-      this._swapContent(this.fragment, skeleton)
     }
+  }
+
+  _getElementArg(arg) {
+    // (1) up.fragment.get(undefined) returns undefined
+    // (2) up.fragment.get(Element) returns the element
+    // (3) this.fragment is undefined when opening a new layer
+    return up.fragment.get(arg, { layer: this.layer }) || this.fragment
   }
 
   _swapContent(parent, newContent) {
