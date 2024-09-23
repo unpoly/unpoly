@@ -10,6 +10,7 @@ up.RenderOptions = (function() {
     focus: 'keep',
     abort: 'target',
     failOptions: true,
+    feedback: true,
   }
 
   const PRELOAD_OVERRIDES = {
