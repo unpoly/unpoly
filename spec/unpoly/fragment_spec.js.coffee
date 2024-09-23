@@ -126,15 +126,27 @@ describe 'up.fragment', ->
 
         it 'matches in earlier layers first if multiple layers are given', ->
           makeLayers [
-            { target: '.element' }, # 0
-            { target: '.element' }, # 1
-            { target: '.element' }, # 2
-            { target: '.element' }, # 3
-            { target: '.element' }, # 4
+            { target: '.element#a' }, # 0
+            { target: '.element#b' }, # 1
+            { target: '.element#c' }, # 2
+            { target: '.element#d' }, # 3
+            { target: '.element#e' }, # 4
           ]
 
           result = up.fragment.get('.element', layer: '1 3')
-          expect(up.layer.get(result)).toBe(up.layer.get(1))
+          expect(result.id).toBe('b')
+
+        it 'matches in earlier layers first if multiple layers are given and the layer priority is the reverse DOM order', ->
+          makeLayers [
+            { target: '.element#a' }, # 0
+            { target: '.element#b' }, # 1
+            { target: '.element#c' }, # 2
+            { target: '.element#d' }, # 3
+            { target: '.element#e' }, # 4
+          ]
+
+          result = up.fragment.get('.element', layer: '3 1')
+          expect(result.id).toBe('d')
 
       describe 'matching in the region of { origin }', ->
 
