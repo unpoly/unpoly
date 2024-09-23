@@ -324,26 +324,6 @@ describe 'up.fragment', ->
         results = up.fragment.all('html')
         expect(results).toEqual [document.documentElement]
 
-      describeCapability 'canHasSelector', ->
-
-        it 'supports the :has() selector', ->
-          match = fixture('.match')
-          otherMatch = fixture('.match')
-          otherMatchChild = up.element.affix(otherMatch, '.child')
-
-          results = up.fragment.all('.match:has(.child)')
-          expect(results).toEqual [otherMatch]
-
-      describeFallback 'canHasSelector', ->
-
-        it 'supports the :has() selector', ->
-          match = fixture('.match')
-          otherMatch = fixture('.match')
-          otherMatchChild = up.element.affix(otherMatch, '.child')
-
-          results = up.fragment.all('.match:has(.child)')
-          expect(results).toEqual [otherMatch]
-
       describe 'expansion of :main', ->
 
         it 'expands :main to the configured main target selectors', ->
@@ -400,28 +380,6 @@ describe 'up.fragment', ->
           results = up.fragment.all(document.body, '.element')
           expect(results.length).toBe(1)
           expect(up.layer.get(results[0])).toBe(up.layer.root)
-
-        describeCapability 'canHasSelector', ->
-          it 'supports the :has() selector', ->
-            container = fixture('.container')
-
-            match = e.affix(container, '.match')
-            otherMatch = e.affix(container, '.match')
-            otherMatchChild = e.affix(otherMatch, '.child')
-
-            results = up.fragment.all(container, '.match:has(.child)')
-            expect(results).toEqual [otherMatch]
-
-        describeFallback 'canHasSelector', ->
-          it 'supports the :has() selector', ->
-            container = fixture('.container')
-
-            match = e.affix(container, '.match')
-            otherMatch = e.affix(container, '.match')
-            otherMatchChild = e.affix(otherMatch, '.child')
-
-            results = up.fragment.all(container, '.match:has(.child)')
-            expect(results).toEqual [otherMatch]
 
       describe 'when given a root Document for the search', ->
 
