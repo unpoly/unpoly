@@ -1106,10 +1106,10 @@ describe('up.feedback', function() {
         expect('.target').not.toHaveClass('up-loading')
       })
 
-      it('does not assign the .up-loading class without a { feedback } option', async function() {
+      it('does not assign the .up-loading class with { feedback: false }', async function() {
         fixture('.target')
 
-        up.render('.target', { url: '/path' })
+        up.render('.target', { url: '/path', feedback: false })
 
         await wait()
 
