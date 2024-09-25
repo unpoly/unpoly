@@ -127,7 +127,7 @@ up.network = (function() {
     ```js
     let defaultAutoCache = up.network.config.autoCache
     up.network.config.autoCache = function(request) {
-      defaultAutoCache(request) && !request.url.endsWith('/edit')
+      return defaultAutoCache(request) && !request.url.endsWith('/edit')
     }
     ```
 
