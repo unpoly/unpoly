@@ -246,8 +246,8 @@ up.script = (function() {
   | `meta.revalidating`    | `boolean`     | <span class="tag is_light_gray">optional</span> | Whether the element was reloaded for the purpose of [cache revalidation](/caching#revalidation). |
 
   > [note]
-  > Properties related to requests and responses are `undefined`
-  > when rendering from an [HTML string](/render-content#local) instead of a URL.
+  > Properties related to requests and responses are `undefined` for the initial page load,
+  > or when rendering from an [HTML string](/render-content#local) instead of a URL.
 
   ### Registering compilers after booting
 
