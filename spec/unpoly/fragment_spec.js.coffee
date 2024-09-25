@@ -665,25 +665,51 @@ describe 'up.fragment', ->
 
           expect(childCompiler).toHaveBeenCalledWith('SPAN', 'child')
 
-        it 'calls compilers with a third argument containing information about the render pass', asyncSpec (next) ->
+        it 'calls compilers with a third "meta" argument containing information about the render pass', ->
           compiler = jasmine.createSpy('compiler')
           up.compiler('.element', compiler)
-
           fixture('.element', text: 'old content')
+
           up.render('.element', url: '/path')
+          await wait()
 
-          next ->
-            jasmine.respondWithSelector('.element', text: 'new content')
+          jasmine.respondWithSelector('.element', text: 'new content')
+          await wait()
 
-          next ->
-            expect('.element').toHaveText('new content')
-            expect(compiler).toHaveBeenCalledWith(
-              jasmine.any(Element),
-              jasmine.any(Object),
-              jasmine.objectContaining(
-                response: jasmine.any(up.Response),
-                layer: up.layer.root)
-            )
+          expect('.element').toHaveText('new content')
+          expect(compiler).toHaveBeenCalledWith(
+            jasmine.any(Element),
+            jasmine.any(Object),
+            jasmine.objectContaining(
+              response: jasmine.any(up.Response),
+              layer: up.layer.root)
+          )
+
+        it 'calls compilers with a third "meta" argument for hungry elements (bugfix)', ->
+          compiler = jasmine.createSpy('hungry compiler')
+          up.compiler('.hungry', compiler)
+
+          fixture('.element', text: 'old element')
+          fixture('.hungry[up-hungry]', text: 'old hungry')
+
+          up.render('.element', url: '/path')
+          await wait()
+
+          jasmine.respondWith """
+            <div class="element">new element</div>
+            <div class="hungry">new hungry</div>
+          """
+          await wait()
+
+          expect('.element').toHaveText('new element')
+          expect('.hungry').toHaveText('new hungry')
+          expect(compiler).toHaveBeenCalledWith(
+            jasmine.any(Element),
+            jasmine.any(Object),
+            jasmine.objectContaining(
+              response: jasmine.any(up.Response),
+              layer: up.layer.root)
+          )
 
         describe 'when a compiler throws an error', ->
 
