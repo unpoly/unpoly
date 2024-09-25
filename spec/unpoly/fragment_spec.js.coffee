@@ -1456,6 +1456,44 @@ describe 'up.fragment', ->
             expect(listener.calls.count()).toBe(1)
             expect('.target').toHaveText('new text')
 
+          it 'allows up:fragment:offline listeners to retry the rendering by calling event.retry() when relative URLs are used and the based has changed since rendering', ->
+            up.history.config.enabled = true
+            up.history.replace('/base1/')
+            listener = jasmine.createSpy('onOffline callback')
+
+            fixture('.target', text: 'old text')
+            promise = up.render('.target', url: 'relative', onOffline: listener)
+
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(jasmine.lastRequest().url).toMatchURL('/base1/relative')
+            expect(listener).not.toHaveBeenCalled()
+
+            jasmine.lastRequest().responseError()
+
+            await expectAsync(promise).toBeRejectedWith(jasmine.any(up.Offline))
+
+            up.history.replace('/base2/')
+
+            expect('.target').toHaveText('old text')
+            expect(listener.calls.count()).toBe(1)
+            event = listener.calls.argsFor(0)[0]
+            event.retry()
+
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(2)
+            expect(jasmine.lastRequest().url).toMatchURL('/base1/relative')
+
+            jasmine.respondWithSelector('.target', text: 'new text')
+
+            await wait()
+
+            # The listener was not called again
+            expect(listener.calls.count()).toBe(1)
+            expect('.target').toHaveText('new text')
+
           it 'allows up:fragment:offline listeners to override render options when retrying', ->
             listener = jasmine.createSpy('onOffline callback')
 
@@ -7951,7 +7989,7 @@ describe 'up.fragment', ->
             expect(url: '/cached-path').toBeCached()
             expect('.target').toHaveText('initial text') # We only made the request. We did not render.
 
-          it 'reloads a fragment that was rendered from an older cached response', ->
+          it 'reloads a fragment that was rendered from an expired cached response', ->
             up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
 
             await wait()
@@ -8356,6 +8394,34 @@ describe 'up.fragment', ->
 
             expect(up.network.isBusy()).toBe(false)
             expect('.target').toHaveText('verified text')
+
+          it 'reloads the correct path when when rendering a relative URL, and does not use its own location as a new base', ->
+            up.history.config.enabled = true
+
+            await jasmine.populateCache({ url: '/sub1/sub2/index.html' }, { status: 200, responseText: '<div class="target">cached text</div>' })
+            up.cache.expire()
+
+            up.history.replace('/sub1/')
+
+            up.render('.target', { url: 'sub2/index.html', cache: true, revalidate: true, history: true })
+
+            await wait()
+
+            expect('.target').toHaveText('cached text')
+            expect(up.history.location).toMatchURL('/sub1/sub2/index.html')
+
+            expect(up.network.isBusy()).toBe(true)
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.target')
+            expect(jasmine.lastRequest().url).toMatchURL('/sub1/sub2/index.html')
+            jasmine.respondWithSelector('.target', text: 'verified text')
+
+            await wait()
+
+            expect(up.network.isBusy()).toBe(false)
+            expect('.target').toHaveText('verified text')
+            expect(jasmine.lastRequest().url).toMatchURL('/sub1/sub2/index.html')
+
+            expect(up.history.location).toMatchURL('/sub1/sub2/index.html')
 
           it 'calls compilers with a third argument containing a { revalidating } property', asyncSpec (next) ->
             compiler = jasmine.createSpy('compiler')

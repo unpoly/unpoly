@@ -91,6 +91,21 @@ up.RenderOptions = (function() {
     }
   }
 
+  function normalizeURL({ url }) {
+    // Absolutize a relative URL in case render options are re-used later,
+    // after the location base changed. For example:
+    //
+    // (1) We're navigating to a relative URL (which changes history) and the fragment
+    //     is revalidated. Then revalidation should not use its own changed location as a new base.
+    //
+    // (2) There is a network issue, which emits up:fragment:offline.
+    //     Then the location changes for some reason. Then a listener calls event.retry(),
+    //     which renders with the original render options.
+    if (url) {
+      return { url: u.normalizeURL(url) }
+    }
+  }
+
   function preloadOverrides(options) {
     if (options.preload) {
       return PRELOAD_OVERRIDES
@@ -117,6 +132,7 @@ up.RenderOptions = (function() {
       { defaults },
       { inputDevice: up.event.inputDevice },
       options,
+      normalizeURL(options),
       lookupLayers(options),
       preloadOverrides(options)
     )
