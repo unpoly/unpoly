@@ -681,8 +681,8 @@ describe 'up.fragment', ->
               jasmine.any(Element),
               jasmine.any(Object),
               jasmine.objectContaining(
-                layer: up.layer.root
-              )
+                response: jasmine.any(up.Response),
+                layer: up.layer.root)
             )
 
         describe 'when a compiler throws an error', ->
