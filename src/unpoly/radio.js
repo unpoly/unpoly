@@ -48,7 +48,7 @@ up.radio = (function() {
   }))
 
   function hungrySteps(renderOptions) {
-    let { useHungry, origin, layer: renderLayer } = renderOptions
+    let { useHungry, origin, layer: renderLayer, meta } = renderOptions
     let steps = { current: [], other: [] }
 
     if (!useHungry) return steps
@@ -90,6 +90,7 @@ up.radio = (function() {
           placement: 'swap',   // Hungry elements are always swapped, never appended
           useKeep: true,       // Always honor [up-keep] in hungry elements. Set here because we don't inherit default render options.
           maybe: true,         // Don't fail if we cannot match { newElement } later.
+          meta,
           selectEvent,         // Used by up.ResponseDoc#selectStep()
           selectCallback,      // Used by up.ResponseDoc#selectStep()
           // The step also gets a reference to the original render options.
