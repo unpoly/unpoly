@@ -2111,48 +2111,41 @@ describe('up.network', function() {
           })
         }))
 
-        it('does not emit an up:network:late event for background requests', asyncSpec(function(next) {
-          next(() => {
-            // A background request doesn't make us busy.
-            up.request({url: '/foo', cache: true, background: true})
+        it('does not emit an up:network:late event for background requests', async function() {
+          // A background request doesn't make us busy.
+          up.request({url: '/foo', cache: true, background: true})
+          await wait()
+
+          expect(this.events).toEqual([
+            'up:request:load'
+          ])
+
+          // The same request in the foreground does trigger up:network:late.
+          up.request({url: '/foo', cache: true})
+
+          await wait(20)
+
+          expect(this.events).toEqual([
+            'up:request:load',
+            'up:network:late'
+          ])
+
+          // The response resolves both promises and emits up:network:recover.
+          jasmine.Ajax.requests.at(0).respondWith({
+            status: 200,
+            contentType: 'text/html',
+            responseText: 'foo'
           })
 
-          next(() => {
-            expect(this.events).toEqual([
-              'up:request:load'
-            ])
-          })
+          await wait(10)
 
-          next(() => {
-            // The same request in the foreground does trigger up:network:late.
-            up.request({url: '/foo', cache: true})
-          })
-
-          next.after(10, () => {
-            expect(this.events).toEqual([
-              'up:request:load',
-              'up:network:late'
-            ])
-          })
-
-          next(() => {
-            // The response resolves both promises and emits up:network:recover.
-            jasmine.Ajax.requests.at(0).respondWith({
-              status: 200,
-              contentType: 'text/html',
-              responseText: 'foo'
-            })
-          })
-
-          next(() => {
-            expect(this.events).toEqual([
-              'up:request:load',
-              'up:network:late',
-              'up:request:loaded',
-              'up:network:recover'
-            ])
-          })
-        }))
+          expect(this.events).toEqual([
+            'up:request:load',
+            'up:network:late',
+            'up:request:loaded',
+            'up:network:recover'
+          ])
+        })
 
         it('can delay the up:network:late event to prevent flickering of spinners', asyncSpec(function(next) {
           next(() => {
@@ -2183,7 +2176,7 @@ describe('up.network', function() {
             this.respondWith('foo')
           })
 
-          next(() => {
+          next.after(10, () => {
             expect(this.events).toEqual([
               'up:request:load',
               'up:network:late',
@@ -2241,7 +2234,7 @@ describe('up.network', function() {
             })
           })
 
-          next(() => {
+          next.after(10, () => {
             expect(this.events).toEqual([
               'up:request:load',
               'up:network:late',
@@ -2270,7 +2263,8 @@ describe('up.network', function() {
             this.lastRequest().responseTimeout()
           })
 
-          next(() => {
+          next.after(10, () => {
+            jasmine.clock().tick(10)
             expect(this.events).toEqual([
               'up:request:load',
               'up:network:late',
@@ -2298,7 +2292,7 @@ describe('up.network', function() {
             up.network.abort(this.request)
           })
 
-          next(() => {
+          next.after(10, () => {
             expect(this.events).toEqual([
               'up:request:load',
               'up:network:late',
@@ -2326,7 +2320,7 @@ describe('up.network', function() {
             this.lastRequest().responseError()
           })
 
-          next(() => {
+          next.after(10, () => {
             expect(this.events).toEqual([
               'up:request:load',
               'up:network:late',
@@ -2335,6 +2329,50 @@ describe('up.network', function() {
             ])
           })
         }))
+
+        it('delays up:network:recover until the foreground queue is completely empty', async function() {
+          up.network.config.badResponseTime = 50
+
+          // Make a chain of requests, like a queued watcher diff.
+          let request1, request2
+          request1 = up.request('/path1')
+          request1.then(() => request2 = up.request('/path2'))
+
+          await wait()
+
+          expect(this.events).toEqual([
+            'up:request:load'
+          ])
+
+          await wait(100)
+          expect(this.events).toEqual([
+            'up:request:load',
+            'up:network:late',
+          ])
+
+          jasmine.respondWith('response 1')
+          await wait()
+
+          expect(this.events).toEqual([
+            'up:request:load',
+            'up:network:late',
+            'up:request:loaded',
+            'up:request:load',
+          ])
+
+          jasmine.respondWith('response 2')
+          await wait()
+
+          expect(this.events).toEqual([
+            'up:request:load',
+            'up:network:late',
+            'up:request:loaded',
+            'up:request:load',
+            'up:request:loaded',
+            'up:network:recover',
+          ])
+
+        })
 
       })
 
