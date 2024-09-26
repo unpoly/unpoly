@@ -290,4 +290,14 @@ up.Response = class Response extends up.Record {
     return `HTTP ${this.status} response to ${this.request.description}`
   }
 
+  /*-
+  TODO: Docs
+  @property up.Response#rtt
+  @param {number} rtt
+  @experimental
+  */
+  get rtt() {
+    return Math.max(this.loadedAt - this.request.builtAt, 0)
+  }
+
 }
