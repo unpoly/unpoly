@@ -90,15 +90,13 @@ up.Change.FromResponse = class FromResponse extends up.Change {
         preferOldElements: renderResult.fragments, // ensure we match the same fragments when initial render pass matched around { origin } and { origin } has been detached
         layer: renderResult.layer, // if the original render opened a layer, we now update it
         onFinished: null, // the earlier onFinished handler will already be honored by the up.RenderJob that called us
-        scroll: false,
-        focus: 'keep',
-        transition: false, // offerring something like { verifyTransition } would mean we need to delay { onFinished } even further
-        cache: false, // this implies { revalidate: false }
-        confirm: false,
-        feedback: false,
-        abort: false,
-        preview: false,
         expiredResponse: this._response, // flag will be forwarded to up:fragment:loaded
+        abort: false,
+        cache: false, // This implies { revalidate: false }. We will still update the expired cache entry.
+        background: true,
+        ...up.RenderOptions.NO_MOTION, // offering something like { verifyTransition } would mean we need to delay { onFinished } even further
+        ...up.RenderOptions.NO_INPUT_INTERFERENCE,
+        ...up.RenderOptions.NO_PREVIEWS,
         // The guardEvent was already plucked from render options in up.RenderJob#guardRender().
       })
 

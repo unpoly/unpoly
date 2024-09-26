@@ -72,21 +72,6 @@ describe 'up.RenderOptions', ->
       expect(options.useHungry).toBe(false)
       expect(options.source).toBe('/other-source')
 
-    describe 'with { preload: true }', ->
-
-      it 'disables features inappropriate when preloading, regardless of given options', ->
-        givenOptions = { preload: true, abort: true, confirm: true, feedback: true, url: '/path' }
-        options = up.RenderOptions.preprocess(givenOptions)
-
-        expect(options.abort).toBe(false)
-        expect(options.confirm).toBe(false)
-        expect(options.feedback).toBe(false)
-        expect(options.cache).toBe(true)
-        expect(options.background).toBe(true)
-
-        # Other options are left unchanged
-        expect(options.url).toBe('/path')
-
     if up.migrate.loaded
       it 'moves an URL string from the { history } option (legacy syntax) to the { location } option (next syntax)', ->
         options = { history: '/foo' }
