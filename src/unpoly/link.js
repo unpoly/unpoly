@@ -524,10 +524,15 @@ up.link = (function() {
     const guardEvent = up.event.build('up:link:preload', { log: ['Preloading link %o', link] })
 
     return follow(link, {
+      abort: false,
       abortable: false,
+      background: true,
+      cache: true,
+      ...up.RenderOptions.NO_INPUT_INTERFERENCE,
+      ...up.RenderOptions.NO_PREVIEWS,
       ...options,
       guardEvent,
-      preload: true
+      preload: true, // hint to up.Change.FromURL to stop execution after sending the request
     })
   }
 
