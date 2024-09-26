@@ -2,13 +2,27 @@ const u = up.util
 
 up.RenderOptions = (function() {
 
-  const PRELOAD_OVERRIDES = {
-    abort: false,
-    confirm: false,
-    feedback: false,
+  // Sometimes we need to use given render options, but disable preview effects.
+  const NO_PREVIEWS = {
     preview: false,
-    cache: true,
-    background: true,
+    disable: false,
+    skeleton: false,
+    feedback: false,
+  }
+
+  // Sometimes we need to use given render options, but disable meddling with user control.
+  const NO_INPUT_INTERFERENCE = {
+    scroll: false,
+    focus: 'keep',
+    confirm: false,
+  }
+
+  // Sometimes we need to use given render options, but disable animation.
+  const NO_MOTION = {
+    transition: false,
+    animation: false,
+    openAnimation: false,
+    closeAnimation: false,
   }
 
   // These properties are used before the request is sent.
@@ -38,7 +52,7 @@ up.RenderOptions = (function() {
 
   // These properties are used between success options and fail options.
   // There's a lot of room to think differently about what should be shared and what
-  // should explictely be set separately for both cases. An argument can always be
+  // should explicitly be set separately for both cases. An argument can always be
   // that it's either convenient to share, or better to be explicit.
   //
   // Generally we have decided to share:
@@ -100,12 +114,6 @@ up.RenderOptions = (function() {
     }
   }
 
-  function preloadOverrides(options) {
-    if (options.preload) {
-      return PRELOAD_OVERRIDES
-    }
-  }
-
   function preprocess(options) {
     up.migrate.preprocessRenderOptions?.(options)
 
@@ -128,7 +136,6 @@ up.RenderOptions = (function() {
       options,
       normalizeURL(options),
       rememberOriginLayer(options),
-      preloadOverrides(options)
     )
   }
 
@@ -207,5 +214,8 @@ up.RenderOptions = (function() {
     finalize,
     assertContentGiven,
     deriveFailOptions,
+    NO_PREVIEWS,
+    NO_MOTION,
+    NO_INPUT_INTERFERENCE,
   }
 })()

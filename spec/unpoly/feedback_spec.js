@@ -1100,9 +1100,11 @@ describe('up.feedback', function() {
       it('does not assign the .up-loading class when preloading', async function() {
         fixture('.target')
 
-        up.render('.target', {url: '/path', feedback: true, preload: true})
+        let link = fixture('a[href="/path"][up-follow][up-feedback="true"]', { text: 'label' })
+        up.link.preload(link)
         await wait()
 
+        expect(up.network.isBusy()).toBe(true)
         expect('.target').not.toHaveClass('up-loading')
       })
 
@@ -1193,18 +1195,31 @@ describe('up.feedback', function() {
       })
       )
 
-      it('does not mark a link as .up-active while it is preloading', asyncSpec(function(next) {
-        const $link = $fixture('a[href="/foo"][up-target=".main"]')
+      it('does not mark a link as .up-active while it is preloading', async function() {
+        const link = fixture('a[href="/foo"][up-target=".main"]')
         fixture('.main')
 
-        up.link.preload($link)
+        up.link.preload(link)
+        await wait()
 
-        next(() => {
-          expect(jasmine.Ajax.requests.count()).toEqual(1)
-          expect($link).not.toHaveClass('up-active')
-        })
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
+        expect(link).not.toHaveClass('up-active')
       })
-      )
+
+      it('does not mark a link as .up-active while revalidating', async function() {
+        await jasmine.populateCache('/foo', '<div id="target">cached target</div>')
+        up.cache.expire()
+
+        const target = fixture('#target')
+        const link = fixture('a[href="/foo"][up-target="#target"]')
+
+        Trigger.clickSequence(link)
+        await wait()
+
+        expect('#target').toHaveText('cached target')
+        expect(up.network.isBusy()).toBe(true)
+        expect(link).not.toHaveClass('up-active')
+      })
 
       it('does not mark a link as .up-active with [up-feedback=false] attribute', asyncSpec(function(next) {
         const $link = $fixture('a[href="/foo"][up-target=".main"][up-feedback=false]')

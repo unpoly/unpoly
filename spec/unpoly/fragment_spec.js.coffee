@@ -7538,7 +7538,7 @@ describe 'up.fragment', ->
               expect(change1Error).toBeAbortError()
               expect(up.network.queue.allRequests.length).toEqual(0)
 
-          it "does not abort an existing change's request when preloading", asyncSpec (next) ->
+          it 'aborts an existing request when a preload request gets promoted to the foreground', ->
             fixture('.element')
 
             change1Error  = undefined
@@ -7547,42 +7547,27 @@ describe 'up.fragment', ->
             change1Promise = up.render('.element', url: '/path1', abort: true)
             change1Promise.catch (e) -> change1Error = e
 
-            next ->
-              expect(up.network.queue.allRequests.length).toEqual(1)
-              expect(change1Error).toBeUndefined()
+            change2Link = fixture('a[href="/path2"][up-target=".element"][up-abort="true"]')
 
-              up.render('.element', url: '/path2', preload: true, abort: true)
+            # Give the initial up.render() time to dispatch a request
+            await wait()
 
-            next ->
-              expect(change1Error).toBeUndefined()
-              expect(up.network.queue.allRequests.length).toEqual(2)
+            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(change1Error).toBeUndefined()
 
-          it 'aborts an existing request when a preload request gets promoted to the foreground', asyncSpec (next) ->
-            fixture('.element')
+            # Preloading a conflicting link will not abort change1
+            up.link.preload(change2Link)
+            await wait()
+            expect(change1Error).toBeUndefined()
+            expect(up.network.queue.allRequests.length).toEqual(2)
 
-            change1Error  = undefined
-            change1Promise = undefined
+            # Following a conflicting link *will* abort change1
+            up.link.follow(change2Link)
+            await wait()
+            expect(change1Error).toBeAbortError()
+            expect(up.network.queue.allRequests.length).toEqual(1)
 
-            change1Promise = up.render('.element', url: '/path1', abort: true)
-            change1Promise.catch (e) -> change1Error = e
-
-            next ->
-              expect(up.network.queue.allRequests.length).toEqual(1)
-              expect(change1Error).toBeUndefined()
-
-              up.render('.element', url: '/path2', cache: true, preload: true, abort: true)
-
-            next ->
-              expect(change1Error).toBeUndefined()
-              expect(up.network.queue.allRequests.length).toEqual(2)
-
-              up.render('.element', url: '/path2', cache: true, preload: false, abort: true)
-
-            next ->
-              expect(change1Error).toBeAbortError()
-              expect(up.network.queue.allRequests.length).toEqual(1)
-
-          it 'does not cancel its own pending preload request (bugfix)', asyncSpec (next) ->
+          it 'does not cancel its own pending preload request (bugfix)',  ->
             fixture('.element')
 
             change1Error  = undefined
@@ -7590,20 +7575,23 @@ describe 'up.fragment', ->
             change1Promise = undefined
             change2Promise = undefined
 
-            change1Promise = up.render('.element', url: '/path', preload: true)
+            changeLink = fixture('a[href="/path"][up-target=".element"]')
+
+            change1Promise = up.link.preload(changeLink)
             change1Promise.catch (e) -> change1Error = e
 
-            next =>
-              expect(up.network.queue.allRequests.length).toEqual(1)
-              expect(change1Error).toBeUndefined()
+            await wait()
 
-              change2Promise = up.render('.element', url: '/path', abort: true, cache: true)
-              change2Promise.catch (e) -> change2Error = e
+            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(change1Error).toBeUndefined()
 
-            next =>
-              expect(change1Error).toBeUndefined()
-              expect(change2Error).toBeUndefined()
-              expect(up.network.queue.allRequests.length).toEqual(1)
+            change2Promise = up.follow(changeLink)
+            change2Promise.catch (e) -> change2Error = e
+            await wait()
+
+            expect(change1Error).toBeUndefined()
+            expect(change2Error).toBeUndefined()
+            expect(up.network.queue.allRequests.length).toEqual(1)
 
           it "aborts an existing change's request that was queued with { abort: false }", asyncSpec (next) ->
             fixture('.element')
@@ -7745,31 +7733,21 @@ describe 'up.fragment', ->
 
             await expectAsync(parentChangePromise).toBePending()
 
-          it 'does not abort its own preloading request', (done) ->
+          it 'does not abort its own preloading request', ->
             fixture('.element')
-            preloadPromise = up.render('.element', url: '/path', preload: true)
+            link = fixture('a[href="/path"][up-target=".element"]')
+
+            preloadPromise = up.link.preload(link)
+            await wait()
 
             expect(up.network.queue.allRequests.length).toBe(1)
 
-            up.render('.element', url: '/path', abort: 'target', cache: true)
+            followPromise = up.link.follow(link)
+            await wait()
 
-            u.task ->
-              promiseState(preloadPromise).then (result) ->
-                expect(result.state).toBe('pending')
-                expect(up.network.queue.allRequests.length).toBe(1)
-                done()
-
-          it 'does not let multiple preload requests for the same target abort each other', (done) ->
-            fixture('.element')
-            preloadPromise1 = up.render('.element', url: '/path1', abort: 'target', preload: true)
-            preloadPromise2 = up.render('.element', url: '/path2', abort: 'target', preload: true)
-
-            u.task ->
-              Promise.all([promiseState(preloadPromise1), promiseState(preloadPromise2)]).then ([result1, result2]) ->
-                expect(result1.state).toBe('pending')
-                expect(result2.state).toBe('pending')
-                expect(up.network.queue.allRequests.length).toBe(2)
-                done()
+            await expectAsync(preloadPromise).toBePending()
+            await expectAsync(followPromise).toBePending()
+            expect(up.network.queue.allRequests.length).toBe(1)
 
         describe 'with { abort: false }', ->
 
@@ -7856,47 +7834,29 @@ describe 'up.fragment', ->
               expect(change1Error).toBeAbortError()
               expect(up.network.queue.allRequests.length).toEqual(0)
 
-          it "does not abort an existing change's request when preloading", asyncSpec (next) ->
+          it 'does not cancel its own pending preload request (bugfix)', ->
             fixture('.element')
-
-            change1Error  = undefined
-            change1Promise = undefined
-            change2Promise = undefined
-
-            change1Promise = up.render('.element', url: '/path1', solo: true).catch (e) -> change1Error = e
-
-            next =>
-              expect(up.network.queue.allRequests.length).toEqual(1)
-              expect(change1Error).toBeUndefined()
-
-              change2Promise = up.render('.element', url: '/path2', preload: true, solo: true)
-
-            next =>
-              expect(change1Error).toBeUndefined()
-              expect(up.network.queue.allRequests.length).toEqual(2)
-
-          it 'does not cancel its own pending preload request (bugfix)', asyncSpec (next) ->
-            fixture('.element')
+            changeLink = fixture('a[href="/path"][up-target=".element"]')
 
             change1Error  = undefined
             change2Error  = undefined
             change1Promise = undefined
             change2Promise = undefined
 
-            change1Promise = up.render('.element', url: '/path', preload: true)
+            change1Promise = up.link.preload(change1Link)
             change1Promise.catch (e) -> change1Error = e
+            await wait()
 
-            next =>
-              expect(up.network.queue.allRequests.length).toEqual(1)
-              expect(change1Error).toBeUndefined()
+            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(change1Error).toBeUndefined()
 
-              change2Promise = up.render('.element', url: '/path', solo: true, cache: true)
-              change2Promise.catch (e) -> change2Error = e
+            change2Promise = up.follow(link, { solo: true })
+            change2Promise.catch (e) -> change2Error = e
+            await wait()
 
-            next =>
-              expect(change1Error).toBeUndefined()
-              expect(change2Error).toBeUndefined()
-              expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(change1Error).toBeUndefined()
+            expect(change2Error).toBeUndefined()
+            expect(up.network.queue.allRequests.length).toEqual(1)
 
           it "aborts an existing change's request that was queued with { solo: false }", asyncSpec (next) ->
             fixture('.element')

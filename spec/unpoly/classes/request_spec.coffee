@@ -23,8 +23,8 @@ describe 'up.Request', ->
 
   describe '#xhr', ->
 
-    it 'lazily initializes an XMLHttpRequest instance', ->
-      request = new up.Request(url: '/foo', preload: true, cache: false)
+    it 'returns an XMLHttpRequest instance', ->
+      request = new up.Request(url: '/foo')
       expect(request.xhr).toEqual(jasmine.any(XMLHttpRequest))
 
   describe '#url', ->
