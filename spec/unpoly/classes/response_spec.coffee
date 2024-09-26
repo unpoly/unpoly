@@ -59,6 +59,44 @@ describe 'up.Response', ->
       expect(fooResponse.ok).toBe(false)
       expect(barResponse.ok).toBe(true)
 
+  describe '#rtt', ->
+
+    it 'returns the number of milliseconds between queuing the request and the time the response was received', ->
+      request = up.request('/foo')
+
+      await wait(50)
+      jasmine.respondWith('foo')
+
+      await wait(50)
+
+      response = await request
+      expect(response.rtt).toBeAround(50, 20)
+
+    it 'returns the partial RTT when tracking a pending, cached request', ->
+      request1 = up.request('/foo', cache: true)
+      await wait(50)
+
+      request2 = up.request('/foo', cache: true)
+      await wait(50)
+
+      jasmine.respondWith('foo')
+
+      response1 = await request1
+      response2 = await request2
+      expect(response1.rtt).toBeAround(100, 20)
+      expect(response2.rtt).toBeAround(50, 20)
+
+    it 'is zero for a fulfilled, cached request', ->
+      request1 = up.request('/foo', cache: true)
+      await wait(100)
+      jasmine.respondWith('foo')
+
+      await wait(100)
+
+      request2 = up.request('/foo', cache: true)
+      response2 = await request2
+      expect(response2.rtt).toBe(0)
+
   describe '#header()', ->
 
     it 'returns the header with the given name', asyncSpec (next) ->
