@@ -1134,7 +1134,7 @@ describe 'up.link', ->
         link = fixture('a.foo[up-follow][href="/foo"]')
         expect(up.link.isFollowable(link)).toBe(false)
 
-    describe 'up.link.preload', ->
+    describe 'up.link.preload()', ->
 
       beforeEach ->
         @requestTarget = => @lastRequest().requestHeaders['X-Up-Target']
@@ -1307,7 +1307,7 @@ describe 'up.link', ->
 
           expect('up-modal .content').toBeAttached()
 
-        it 'calls up.request() with a { preload: true } option', ->
+        it 'calls up.request() with a { background: true } option', ->
           requestSpy = spyOn(up, 'request').and.callThrough()
 
           $link = $fixture('a[href="/path"][up-target=".target"][up-layer="new modal"]')
@@ -1316,7 +1316,7 @@ describe 'up.link', ->
 
           await wait()
 
-          expect(requestSpy).toHaveBeenCalledWith(jasmine.objectContaining(preload: true))
+          expect(requestSpy).toHaveBeenCalledWith(jasmine.objectContaining(background: true))
 
       describe 'aborting', ->
 
@@ -1346,11 +1346,25 @@ describe 'up.link', ->
 
           expect(up.network.isBusy()).toBe(false)
 
-        it 'does not abort other requests for the same target', ->
+        it 'does not abort other follow requests for the same target', ->
           link1 = fixture('a[href="/path1"][up-target=".target"]')
           link2 = fixture('a[href="/path2"][up-target=".target"]')
 
           up.link.follow(link1)
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          preloadJob = up.link.preload(link2)
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+
+        it 'does not abort other preload requests for the same target', ->
+          link1 = fixture('a[href="/path1"][up-target=".target"]')
+          link2 = fixture('a[href="/path2"][up-target=".target"]')
+
+          up.link.preload(link1)
           await wait()
 
           expect(jasmine.Ajax.requests.count()).toBe(1)
@@ -2553,6 +2567,45 @@ describe 'up.link', ->
           await wait()
 
           expect('#target').toHaveVisibleText('new target')
+
+        it 'does not show a UI skeleton while preloading', ->
+          skeletonCompilerFn = jasmine.createSpy('skeleton compiler fn')
+          up.compiler('#skeleton', skeletonCompilerFn)
+
+          fixture('#target', content: '<p>old target</p>')
+          link = fixture('a[href="/foo"][up-follow][up-target="#target"][up-skeleton="<p id=\'skeleton\'>skeleton</p>"]', text: 'label')
+          expect('#target').toHaveVisibleText('old target')
+
+          up.link.preload(link)
+          await wait()
+
+          expect('#target').toHaveVisibleText('old target')
+          expect(skeletonCompilerFn).not.toHaveBeenCalled()
+
+        it 'does not show a UI skeleton while revalidating', ->
+          await jasmine.populateCache('/foo', '<div id="target">expired target</div>')
+          up.cache.expire()
+
+          skeletonCompilerFn = jasmine.createSpy('skeleton compiler fn')
+          up.compiler('#skeleton', skeletonCompilerFn)
+
+          fixture('#target', content: '<p>old target</p>')
+          link = fixture('a[href="/foo"][up-follow][up-target="#target"][up-skeleton="<p id=\'skeleton\'>skeleton</p>"]', text: 'label')
+          expect('#target').toHaveVisibleText('old target')
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect('#target').toHaveVisibleText('expired target')
+          expect(skeletonCompilerFn).not.toHaveBeenCalled()
+          expect(up.network.isBusy()).toBe(true)
+
+          jasmine.respondWithSelector('#target', text: 'revalidated target')
+          await wait()
+
+          expect('#target').toHaveVisibleText('revalidated target')
+          expect(skeletonCompilerFn).not.toHaveBeenCalled()
+          expect(up.network.isBusy()).toBe(false)
 
       describe 'following non-interactive elements with [up-href]', ->
 
@@ -4510,7 +4563,7 @@ describe 'up.link', ->
 
         it 'disables fields of an enclosing form', ->
           fixture('#target', text: 'old text')
-          form = fixture('#form')
+          form = fixture('form#form')
           input = e.affix(form, 'input[type=next][name=foo]')
           link = e.affix(form, 'a[href="/path"][up-target="#target"][up-disable]', text: 'label')
 
@@ -4524,7 +4577,7 @@ describe 'up.link', ->
 
         it 'disables fields and buttons within the given selector', ->
           fixture('#target', text: 'old text')
-          form = fixture('#form')
+          form = fixture('form#form')
           input = e.affix(form, 'input[type=next][name=foo]')
           button = e.affix(form, 'button[type=submit]', text: 'button label')
           link = fixture('a[href="/path"][up-target="#target"][up-disable="#form"]', text: 'label')
@@ -4542,4 +4595,40 @@ describe 'up.link', ->
           expect('#target').toHaveText('new text')
           expect(input).not.toBeDisabled()
           expect(button).not.toBeDisabled()
+
+        it 'does not disable controls when preloading', ->
+          fixture('#target', text: 'old text')
+          form = fixture('form#form')
+          input = e.affix(form, 'input[type=next][name=foo]')
+          button = e.affix(form, 'button[type=submit]', text: 'button label')
+          link = fixture('a[href="/path"][up-target="#target"][up-disable="#form"]', text: 'label')
+
+          up.link.preload(link)
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(input).not.toBeDisabled()
+          expect(button).not.toBeDisabled()
+
+        it 'does not disable controls when revalidating', ->
+          await jasmine.populateCache('/path', '<div id="target">expired target</div>')
+          up.cache.expire()
+
+          fixture('#target', text: 'old target')
+          form = fixture('form#form')
+          input = e.affix(form, 'input[type=next][name=foo]')
+          button = e.affix(form, 'button[type=submit]', text: 'button label')
+          link = fixture('a[href="/path"][up-target="#target"][up-disable="#form"]', text: 'label')
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect('#target').toHaveText('expired target')
+          expect(up.network.isBusy()).toBe(true)
+          expect(input).not.toBeDisabled()
+          expect(button).not.toBeDisabled()
+
+          jasmine.respondWithSelector('#target', text: 'revalidated target')
+          await wait()
+          expect('#target').toHaveText('revalidated target')
 
