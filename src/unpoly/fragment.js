@@ -2019,6 +2019,12 @@ up.fragment = (function() {
     The element for which to create a selector.
 
     When a string is given, it is returned unchanged.
+  @param {Element} [options.verify]
+    Whether to verify that the derived selector matches the given element.
+
+    Defaults to `up.fragment.config.verifyDerivedTarget`.
+
+    @experimental
   @param {Element} [options.origin]
     The origin used to [resolve an ambiguous selector](/targeting-fragments#resolving-ambiguous-selectors)
     during [target verification](/target-derivation#derived-target-verification).
@@ -2143,7 +2149,8 @@ up.fragment = (function() {
   }
 
   function isGoodTarget(target, element, options = {}) {
-    return !isAlive(element) || !config.verifyDerivedTarget || up.fragment.get(target, { layer: element, ...options }) === element
+    let verify = options.verify ?? config.verifyDerivedTarget
+    return !isAlive(element) || !verify || up.fragment.get(target, { layer: element, ...options }) === element
   }
 
   /*-
