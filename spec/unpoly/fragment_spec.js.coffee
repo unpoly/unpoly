@@ -10496,6 +10496,18 @@ describe 'up.fragment', ->
         up.fragment.config.verifyDerivedTarget = false
         expect(up.fragment.toTarget(element2)).toBe('#foo')
 
+      it "allows to override up.fragment.config.verifyDerivedTarget with a { verify } option", ->
+        element1 = fixture('div#foo.foo')
+        element2 = fixture('div#foo.bar')
+
+        # Show that the option overrides the config default.
+        up.fragment.config.verifyDerivedTarget = false
+        expect(up.fragment.toTarget(element2, { verify: true })).toBe('.bar')
+
+        # Show that the option overrides the config default.
+        up.fragment.config.verifyDerivedTarget = true
+        expect(up.fragment.toTarget(element2, { verify: false })).toBe('#foo')
+
       it "uses a derived target that would match a different element if the given element is detached", ->
         rivalElement = fixture('div#foo.foo')
         detachedElement = up.element.createFromSelector('div#foo.bar')
