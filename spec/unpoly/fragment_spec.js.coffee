@@ -676,15 +676,14 @@ describe 'up.fragment', ->
           jasmine.respondWithSelector('.element', text: 'new content')
           await wait()
 
-          next ->
-            expect('.element').toHaveText('new content')
-            expect(compiler).toHaveBeenCalledWith(
-              jasmine.any(Element),
-              jasmine.any(Object),
-              jasmine.objectContaining(
-                layer: up.layer.root
-              )
+          expect('.element').toHaveText('new content')
+          expect(compiler).toHaveBeenCalledWith(
+            jasmine.any(Element),
+            jasmine.any(Object),
+            jasmine.objectContaining(
+              layer: up.layer.root
             )
+          )
 
         if up.migrate.loaded
           it 'calls compilers with a third argument containing the { response } for the current render pass', asyncSpec (next) ->
