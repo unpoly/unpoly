@@ -34,7 +34,7 @@ up.network.config.patch(function(config) {
 
 up.network.config.patch(function(config) {
   up.migrate.renamedProperty(config, 'maxRequests', 'concurrency')
-  up.migrate.renamedProperty(config, 'slowDelay', 'badResponseTime')
+  up.migrate.renamedProperty(config, 'slowDelay', 'lateTime')
   up.migrate.renamedProperty(config, 'cacheExpiry', 'cacheExpireAge', 'The configuration up.network.config.cacheExpiry has been renamed to up.network.config.cacheExpireAge. Note that Unpoly 3+ automatically reloads cached content after rendering to ensure users always see fresh data ("cache revalidation"). Setting a custom expiry may no longer be necessary.')
   up.migrate.renamedProperty(config, 'clearCache', 'expireCache')
   up.migrate.forbiddenPropertyValue(config, 'cacheSize', 0, 'Disabling the cache with up.network.config.cacheSize = 0 is no longer supported. To disable automatic caching during navigation, set up.fragment.config.navigateOptions.cache = false instead.')
@@ -172,7 +172,6 @@ up.Request.prototype.navigate = function() {
   this.loadPage()
 }
 
-
 /*-
 Whether this request is [preloading](/preloading) content.
 
@@ -182,6 +181,19 @@ Whether this request is [preloading](/preloading) content.
   Use `up.Request#background` instead.
 */
 up.migrate.renamedProperty(up.Request.prototype, 'preload', 'background')
+
+/*-
+The number of milliseconds after which this request can cause
+an `up:network:late` event and show the [progress bar](/loading-indicators#progress-bar).
+
+Defaults to `up.network.config.lateTime`.
+
+@property up.Request#badResponseTime
+@param {number} [badResponseTime]
+@deprecated
+  Use `up.Response#lateTime` instead.
+*/
+up.migrate.renamedProperty(up.Request.prototype, 'badResponseTime', 'lateTime')
 
 /*-
 @class up.Response
@@ -257,4 +269,5 @@ up.network.shouldReduceRequests = function() {
 up.network.config.patch(function(config) {
   up.migrate.removedProperty(config, 'badRTT')
   up.migrate.removedProperty(config, 'badDownlink')
+  up.migrate.renamedProperty(config, 'badResponseTime', 'lateTime')
 })
