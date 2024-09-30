@@ -68,6 +68,27 @@ describe('up.Preview', function() {
 
   })
 
+  describe('#params', function() {
+
+    it('returns the params of a form submission', async function() {
+      let spy = jasmine.createSpy('spy')
+      let previewFn = (preview) => spy(preview.params)
+
+      let form = htmlFixture(`
+        <form method="post" up-submit action="/action">
+          <input type="text" name="email" value="foo@bar.com">
+        </form>
+      `)
+
+      up.submit(form, { preview: previewFn })
+      await wait()
+
+      expect(spy.calls.mostRecent().args[0]).toEqual(jasmine.any(up.Params))
+      expect(spy.calls.mostRecent().args[0].get('email')).toBe('foo@bar.com')
+    })
+
+  })
+
   describe('#orgin', function() {
 
     it('returns the { origin } element (e.g. the link being followed)', async function() {
