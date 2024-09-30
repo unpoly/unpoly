@@ -1296,6 +1296,44 @@ describe('up.element', function() {
 
   })
 
+  describe('up.element.removeClassTemp()', function() {
+
+    it('adds the given class to the given element', function() {
+      let element = up.element.createFromSelector('.foo.bar')
+      expect(element.className).toBe('foo bar')
+
+      up.element.removeClassTemp(element, 'bar')
+      expect(element.className).toBe('foo')
+    })
+
+    describe('returned function', function() {
+
+      it('restores the class list before the change', function() {
+        let element = up.element.createFromSelector('.foo.bar')
+        expect(element.className).toBe('foo bar')
+
+        let undo = up.element.removeClassTemp(element, 'bar')
+        expect(element.className).toBe('foo')
+
+        undo()
+        expect(element.className).toBe('foo bar')
+      })
+
+      it('does not remove a class that was never present before the change', function() {
+        let element = up.element.createFromSelector('.foo')
+        expect(element.className).toBe('foo')
+
+        let undo = up.element.removeClassTemp(element, 'bar')
+        expect(element.className).toBe('foo')
+
+        undo()
+        expect(element.className).toBe('foo')
+      })
+
+    })
+
+  })
+
   describe('up.element.setStyleTemp()', function() {
 
     it("sets the given inline styles and returns a function that will restore the previous inline styles", function() {
