@@ -405,7 +405,8 @@ up.history = (function() {
   /*-
   Configures whether this `<head>` element is updated during [history changes](/updating-history).
 
-  By [default](/up.history.config#config.metaTagSelectors) popular `<meta>` and certain `<link>` elements in the `<head>` are considered meta tags.
+  By [default](/up.history.config#config.metaTagSelectors) popular `<meta>` and certain `<link>`
+  elements in the `<head>` are considered meta tags.
   They will be updated when history is changed, in addition to the document's title and URL.
 
   ```html

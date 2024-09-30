@@ -11,6 +11,7 @@ up.migrate.removedAttribute('up-width', { scope: followSelectorFn, replacement: 
 up.migrate.removedAttribute('up-height', { scope: followSelectorFn, replacement: '[up-size] or [up-class]' })
 up.migrate.renamedAttribute('up-history-visible', 'up-history', { scope: followSelectorFn })
 up.migrate.renamedAttribute('up-clear-cache', 'up-expire-cache', { scope: followSelectorFn })
+up.migrate.renamedAttribute('up-bad-response-time', 'up-late-time')
 
 up.migrate.transformAttribute('up-solo', function(link, solo) {
   switch (solo) {
