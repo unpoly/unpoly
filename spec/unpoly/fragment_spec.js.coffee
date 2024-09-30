@@ -686,32 +686,27 @@ describe 'up.fragment', ->
               )
             )
 
-                    it 'calls compilers with a third "meta" argument for hungry elements (bugfix)', ->
-          compiler = jasmine.createSpy('hungry compiler')
-          up.compiler('.hungry', compiler)
+        if up.migrate.loaded
+          it 'calls compilers with a third argument containing the { response } for the current render pass', asyncSpec (next) ->
+            compiler = jasmine.createSpy('compiler')
+            up.compiler('.element', compiler)
 
-          fixture('.element', text: 'old element')
-          fixture('.hungry[up-hungry]', text: 'old hungry')
+            fixture('.element', text: 'old content')
+            up.render('.element', url: '/path')
 
-          up.render('.element', url: '/path')
-          await wait()
+            next ->
+              jasmine.respondWithSelector('.element', text: 'new content')
 
-          jasmine.respondWith """
-            <div class="element">new element</div>
-            <div class="hungry">new hungry</div>
-          """
-          await wait()
+            next ->
+              expect('.element').toHaveText('new content')
+              expect(compiler).toHaveBeenCalledWith(
+                jasmine.any(Element),
+                jasmine.any(Object),
+                jasmine.objectContaining(
+                  response: jasmine.any(up.Response)
+                )
+              )
 
-          expect('.element').toHaveText('new element')
-          expect('.hungry').toHaveText('new hungry')
-          expect(compiler).toHaveBeenCalledWith(
-            jasmine.any(Element),
-            jasmine.any(Object),
-            jasmine.objectContaining(
-              response: jasmine.any(up.Response),
-              layer: up.layer.root)
-          )
- 
         describe 'when a compiler throws an error', ->
 
           it 'emits an error event, but does not reject the up.render() promise', ->
