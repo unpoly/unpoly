@@ -32,6 +32,10 @@ up.Preview = class Preview {
     return this.request.origin
   }
 
+  get params() {
+    return this.request.params
+  }
+
   get layer() {
     return this.renderOptions.resolvedLayers[0]
   }
