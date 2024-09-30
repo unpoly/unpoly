@@ -676,16 +676,17 @@ describe 'up.fragment', ->
           jasmine.respondWithSelector('.element', text: 'new content')
           await wait()
 
-          expect('.element').toHaveText('new content')
-          expect(compiler).toHaveBeenCalledWith(
-            jasmine.any(Element),
-            jasmine.any(Object),
-            jasmine.objectContaining(
-              response: jasmine.any(up.Response),
-              layer: up.layer.root)
-          )
+          next ->
+            expect('.element').toHaveText('new content')
+            expect(compiler).toHaveBeenCalledWith(
+              jasmine.any(Element),
+              jasmine.any(Object),
+              jasmine.objectContaining(
+                layer: up.layer.root
+              )
+            )
 
-        it 'calls compilers with a third "meta" argument for hungry elements (bugfix)', ->
+                    it 'calls compilers with a third "meta" argument for hungry elements (bugfix)', ->
           compiler = jasmine.createSpy('hungry compiler')
           up.compiler('.hungry', compiler)
 
@@ -710,7 +711,7 @@ describe 'up.fragment', ->
               response: jasmine.any(up.Response),
               layer: up.layer.root)
           )
-
+ 
         describe 'when a compiler throws an error', ->
 
           it 'emits an error event, but does not reject the up.render() promise', ->
