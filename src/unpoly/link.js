@@ -318,7 +318,7 @@ up.link = (function() {
     parser.boolean('abortable')
     parser.boolean('background')
     parser.string('contentType')
-    parser.number('badResponseTime')
+    parser.booleanOrNumber('lateTime')
     parser.number('timeout')
 
     return options
@@ -1348,11 +1348,11 @@ up.link = (function() {
     Background requests also won't emit `up:network:late` events and won't trigger
     the [progress bar](/loading-indicators#progress-bar).
 
-  @param [up-bad-response-time]
+  @param [up-late-time]
     The number of milliseconds after which this request can cause
     an `up:network:late` event.
 
-    Defaults to `up.network.config.badResponseTime`.
+    Defaults to `up.network.config.lateTime`.
 
     @experimental
 
