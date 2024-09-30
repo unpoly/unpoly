@@ -469,15 +469,21 @@ up.form = (function() {
   function disableControl(control) {
     if (control.disabled) return
 
-    if (control === document.activeElement) {
-      let focusFallback = findGroup(control)
+    let focusFallback
+    if (document.activeElement === control) {
+      focusFallback = findGroup(control)
       control.disabled = true
       up.focus(focusFallback, { force: true, preventScroll: true })
     } else {
       control.disabled = true
     }
 
-    return () => control.disabled = false
+    return () => {
+      control.disabled = false
+      if (focusFallback && document.activeElement === focusFallback && control.isConnected) {
+        up.focus(control, { preventScroll: true })
+      }
+    }
   }
 
   function getDisableContainers(disable, origin) {

@@ -7095,6 +7095,11 @@ describe 'up.fragment', ->
               baaaaaaaaaaaz
               baaaaaaaaaaam
               quuuuuuuuuuux
+              foooooooooooo
+              baaaaaaaaaaar
+              baaaaaaaaaaaz
+              baaaaaaaaaaam
+              quuuuuuuuuuux
             """
             oldFocused = e.affix(container, 'textarea[name=prose][wrap=off][rows=3][cols=6]', text: longText)
 
