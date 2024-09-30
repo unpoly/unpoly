@@ -1219,9 +1219,17 @@ up.element = (function() {
   @internal
   */
   function addClassTemp(element, klass) {
-    if (element.classList.contains(klass)) return u.noop
-    element.classList.add(klass)
-    return () => element.classList.remove(klass)
+    return setClassStateTemp(element, klass, true)
+  }
+
+  function removeClassTemp(element, klass) {
+    return setClassStateTemp(element, klass, false)
+  }
+
+  function setClassStateTemp(element, klass, targetState) {
+    if (element.classList.contains(klass) === targetState) return u.noop
+    element.classList.toggle(klass, targetState)
+    return () => element.classList.toggle(klass, !targetState)
   }
 
   /*-
@@ -1571,6 +1579,7 @@ up.element = (function() {
     upClasses,
     setAttrPresence,
     addClassTemp,
+    removeClassTemp,
     cleanJQuery,
     parseSelector,
     isEmpty,
