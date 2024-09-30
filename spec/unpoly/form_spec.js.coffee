@@ -1319,7 +1319,7 @@ describe 'up.form', ->
 
         describe 'loss of focus when disabling a focused input', ->
 
-          it 'focuses the form', asyncSpec (next) ->
+          it 'focuses the form', ->
             form = fixture('form')
             input = e.affix(form, 'input[name=email]')
             input.focus()
@@ -1327,12 +1327,11 @@ describe 'up.form', ->
             expect(input).toBeFocused()
 
             up.submit(form, { disable: true })
+            await wait(10)
 
-            next =>
-              unless document.activeElement == input
-                expect(form).toBeFocused()
+            expect(form).toBeFocused()
 
-          it 'focuses the closest form group', asyncSpec (next) ->
+          it 'focuses the closest form group', ->
             form = fixture('form')
             group = e.affix(form, 'fieldset')
             input = e.affix(group, 'input[name=email]')
@@ -1341,10 +1340,9 @@ describe 'up.form', ->
             expect(input).toBeFocused()
 
             up.submit(form, { disable: true })
+            await wait(10)
 
-            next =>
-              unless document.activeElement == input
-                expect(group).toBeFocused()
+            expect(group).toBeFocused()
 
       describe 'content type', ->
 
@@ -2700,51 +2698,6 @@ describe 'up.form', ->
         expect(submitInput).toBeDisabled()
         expect(selectButton).toBeDisabled()
 
-      it "sets focus on the form if focus was lost from the disabled element", ->
-        form = fixture('form')
-        field = e.affix(form, 'input[name=email][type=text]')
-        field.focus()
-        expect(field).toBeFocused()
-
-        up.form.disable(form)
-
-        unless document.activeElement == field
-          expect(form).toBeFocused()
-
-      it "sets focus on the closest form group if focus was lost from the disabled element", ->
-        form = fixture('form')
-        group = e.affix(form, '[up-form-group]')
-        field = e.affix(group, 'input[name=email][type=text]')
-        field.focus()
-        expect(field).toBeFocused()
-
-        up.form.disable(field)
-
-        unless document.activeElement == field
-          expect(group).toBeFocused()
-
-      it "sets focus on the form group closest to the previously focused field when disabling the entire form", ->
-        form = fixture('form')
-        group = e.affix(form, '[up-form-group]')
-        field = e.affix(group, 'input[name=email][type=text]')
-        field.focus()
-        expect(field).toBeFocused()
-
-        up.form.disable(form)
-
-        unless document.activeElement == field
-          expect(group).toBeFocused()
-
-      it "does not change focus if focus wasn't lost", ->
-        form = fixture('form')
-        fieldOutsideForm = fixture('input[name=email][type=text]')
-        fieldOutsideForm.focus()
-        expect(fieldOutsideForm).toBeFocused()
-
-        up.form.disable(form)
-
-        expect(fieldOutsideForm).toBeFocused()
-
       it 'returns a function that re-enables the fields that were disabled', ->
         form = fixture('form')
         field = e.affix(form, 'input[name=email][type=text]')
@@ -2770,6 +2723,131 @@ describe 'up.form', ->
         reenable()
 
         expect(field).toBeDisabled()
+
+      describe 'focus', ->
+
+        it "sets focus on the form if focus was lost from the disabled element", ->
+          form = fixture('form')
+          field = e.affix(form, 'input[name=email][type=text]')
+          field.focus()
+          expect(field).toBeFocused()
+
+          up.form.disable(form)
+          await wait(10)
+
+          expect(form).toBeFocused()
+
+        it "sets focus on the closest form group if focus was lost from the disabled element", ->
+          form = fixture('form')
+          group = e.affix(form, '[up-form-group]')
+          field = e.affix(group, 'input[name=email][type=text]')
+          field.focus()
+          expect(field).toBeFocused()
+
+          up.form.disable(field)
+          await wait(10)
+
+          expect(group).toBeFocused()
+
+        it "sets focus on the form group closest to the previously focused field when disabling the entire form", ->
+          form = fixture('form')
+          group = e.affix(form, '[up-form-group]')
+          field = e.affix(group, 'input[name=email][type=text]')
+          field.focus()
+          expect(field).toBeFocused()
+
+          up.form.disable(form)
+          await wait(10)
+
+          expect(group).toBeFocused()
+
+        it "does not change focus if focus wasn't lost", ->
+          form = fixture('form')
+          fieldOutsideForm = fixture('input[name=email][type=text]')
+          fieldOutsideForm.focus()
+          expect(fieldOutsideForm).toBeFocused()
+
+          up.form.disable(form)
+          await wait(10)
+
+          expect(fieldOutsideForm).toBeFocused()
+
+        it 'restores focus when re-enabling', ->
+          form = fixture('form')
+          group = e.affix(form, '[up-form-group]')
+          field = e.affix(group, 'input[name=email][type=text]')
+          field.focus()
+          expect(field).toBeFocused()
+
+          undo = up.form.disable(field)
+          await wait(10)
+
+          expect(group).toBeFocused()
+
+          undo()
+          await wait(10)
+
+          expect(field).toBeFocused()
+
+        it 'restores scroll position and selection range when re-enabling', ->
+          longText = """
+              foooooooooooo
+              baaaaaaaaaaar
+              baaaaaaaaaaaz
+              baaaaaaaaaaam
+              quuuuuuuuuuux
+              foooooooooooo
+              baaaaaaaaaaar
+              baaaaaaaaaaaz
+              baaaaaaaaaaam
+              quuuuuuuuuuux
+            """
+
+          form = fixture('form')
+          group = e.affix(form, '[up-form-group]')
+          field = e.affix(group, 'textarea[name=prose][wrap=off][rows=3][cols=6]', text: longText)
+          field.selectionStart = 10
+          field.selectionEnd = 11
+          field.scrollTop = 12
+          field.scrollLeft = 13
+          field.focus()
+          expect(field).toBeFocused()
+
+          undo = up.form.disable(field)
+          await wait(10)
+
+          expect(group).toBeFocused()
+
+          undo()
+          await wait(10)
+
+          expect(field).toBeFocused()
+          expect(field.selectionStart).toBeAround(10, 2)
+          expect(field.selectionEnd).toBeAround(11, 2)
+          expect(field.scrollTop).toBeAround(12, 2)
+          expect(field.scrollLeft).toBeAround(13, 2)
+
+        it 'does not restore focus when re-enabling when some other control has been focused in the meantime', ->
+          form = fixture('form')
+          group = e.affix(form, '[up-form-group]')
+          field = e.affix(group, 'input[name=email][type=text]')
+          field.focus()
+          otherField = e.affix(group, 'input[name=address][type=text]')
+          expect(field).toBeFocused()
+
+          undo = up.form.disable(field)
+          await wait(10)
+
+          expect(group).toBeFocused()
+
+          otherField.focus()
+          await wait(10)
+
+          undo()
+
+          await wait(10)
+
+          expect(otherField).toBeFocused()
 
       describe 'disabling of non-submit buttons', ->
 
