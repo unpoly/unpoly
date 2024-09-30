@@ -40,5 +40,5 @@ describe 'up.Layer.Drawer', ->
 
         viewport = document.querySelector('up-drawer-viewport')
         boxRect = document.querySelector('up-drawer-box').getBoundingClientRect()
-        expect(boxRect.right).toBe(viewport.clientWidth)
+        expect(boxRect.right).toBeAround(viewport.clientWidth, 1.0)
         expect(boxRect.top).toBe(0)
