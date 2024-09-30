@@ -123,3 +123,9 @@ up.$macro = function(...definitionArgs) {
   })
 }
 
+up.migrate.processCompilerPassMeta = function(meta, response) {
+  Object.defineProperty(meta, 'response', { get() {
+    up.migrate.warn('Accessing meta.response from a compiler has been deprecated without replacement. Avoid fragments that compile differently for the initial page load vs. subsequent fragment updates.')
+      return response
+  }})
+}
