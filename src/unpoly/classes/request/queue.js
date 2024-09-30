@@ -134,8 +134,6 @@ up.Request.Queue = class Queue {
   }
 
   _checkForLate() {
-    console.debug("effectiveLateTimes: %o", u.map(this._timedRequests, 'effectiveLateTime'))
-
     if (!this._emittedLate && this._hasLateTimedRequests()) {
       this._emittedLate = true
       up.emit('up:network:late', { log: 'Server is slow to respond' })
