@@ -1041,6 +1041,10 @@ up.element = (function() {
     The element from which to retrieve the attribute value.
   @param {string} attribute
     The attribute name.
+  @param {boolean} [pass=false]
+    Whether to return a non-boolean value unparsed.
+
+    @internal
   @return {boolean|undefined}
     The cast attribute value.
   @stable
@@ -1084,7 +1088,34 @@ up.element = (function() {
   */
   function booleanOrStringAttr(element, attribute, trueValue = true) {
     let value = booleanAttr(element, attribute, true)
-    return value === true ? trueValue : value
+    if (value === true) {
+      return trueValue
+    } else {
+      return value
+    }
+  }
+
+  /*-
+  Returns the given attribute value cast as boolean.
+
+  If the attribute value cannot be cast to a boolean, tries to cast the the attribute value to a number.
+
+  If the attribute value cannot be cast to either boolean or number, returns `undefined`.
+
+  @function up.element.booleanOrNumberAttr
+  @param {Element} element
+    The element from which to retrieve the attribute value.
+  @param {string} attribute
+    The attribute name.
+  @internal
+  */
+  function booleanOrNumberAttr(element, attribute) {
+    let value = booleanAttr(element, attribute, true)
+    if (u.isBoolean(value)) {
+      return value
+    } else {
+      return tryParseFloat(value)
+    }
   }
 
   /*-
@@ -1103,7 +1134,11 @@ up.element = (function() {
   */
   function numberAttr(element, attribute) {
     let value = element.getAttribute(attribute)
-    if (value) {
+    return tryParseFloat(value)
+  }
+
+  function tryParseFloat(value) {
+    if (u.isString(value)) {
       value = value.replace(/_/g, '')
       if (value.match(/^-?[\d.]+$/)) {
         return parseFloat(value)
@@ -1525,6 +1560,7 @@ up.element = (function() {
     jsonAttr,
     callbackAttr,
     booleanOrStringAttr,
+    booleanOrNumberAttr,
     setStyleTemp,
     style: computedStyle,
     styleNumber: computedStyleNumber,

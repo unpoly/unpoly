@@ -16,10 +16,6 @@ up.Request.Queue = class Queue {
     return this._currentRequests.concat(this._queuedRequests)
   }
 
-  get _foregroundRequests() {
-    return u.reject(this.allRequests, 'background')
-  }
-
   asap(request) {
     request.runQueuedCallbacks()
     u.always(request, responseOrError => this._onRequestSettled(request, responseOrError))
@@ -42,16 +38,18 @@ up.Request.Queue = class Queue {
     if (request.background) {
       request.background = false
 
-      // If the request has been loading longer than its badResponseTime, we have
+      // If the request has been loading longer than its lateTime, we have
       // already ignored its up:network:late event. Hence we schedule another check.
       this._scheduleSlowTimer(request)
     }
   }
 
   _scheduleSlowTimer(request) {
+    if (!request.isTimed()) return
+
     // In case the request was loading in the background before it was promoted to
-    // the foreground, the request may have less time left than request.badResponseTime.
-    let timeUntilLate = Math.max(request.badResponseTime - request.age)
+    // the foreground, the request may have less time left than request.lateTime.
+    let timeUntilLate = Math.max(request.effectiveLateTime - request.age)
 
     // We may have multiple timers running concurrently.
     // Nonethess we don't emit duplicate events due to the check in @_checkLate().
@@ -136,30 +134,41 @@ up.Request.Queue = class Queue {
   }
 
   _checkForLate() {
-    if (!this._emittedLate && this._isForegroundLate()) {
+    console.debug("effectiveLateTimes: %o", u.map(this._timedRequests, 'effectiveLateTime'))
+
+    if (!this._emittedLate && this._hasLateTimedRequests()) {
       this._emittedLate = true
       up.emit('up:network:late', { log: 'Server is slow to respond' })
     }
   }
 
   _checkForRecover() {
-    if (this._emittedLate && this._isForegroundIdle()) {
+    // We we ever emitted "late" (and probably are showing a progress bar), we wait for the
+    // entire queue to clear before we emit "recover". This includes waiting for non-late requests.
+    // This is to show a continuous progress bar for a chain of queued requests, e.g.
+    // when a pending watch callback waits for a previous callback to finish.
+    if (this._emittedLate && !this._timedRequests.length) {
       this._emittedLate = false
       up.emit('up:network:recover', { log: 'Slow requests were loaded' })
     }
   }
 
-  _isForegroundLate() {
-    // If badResponseTime is 200, we're scheduling the _checkLate() timer after 200 ms.
+  get _timedRequests() {
+    // Exclude requests that return false.
+    // These are requests that were initialized with { lateTime: false } or { background: true }.
+    return this.allRequests.filter((request) => request.isTimed())
+  }
+
+  // Returns queued requests that are (1) timed (effectiveLateTime not false)
+  // and (2) have been longer queued than their effectiveLateTime.
+  _hasLateTimedRequests() {
+    // If lateTime is 200, we're scheduling the _checkLate() timer after 200 ms.
     // The request must be slow when _checkLate() is called, or we will never look
     // at it again. Since the JavaScript setTimeout() is inaccurate, we allow a request
     // to "be slow" a few ms earlier than actually configured.
     const timerTolerance = 1
-
-    return u.some(this._foregroundRequests, (request) => request.age >= (request.badResponseTime - timerTolerance))
+    const isLate = (request) => request.age >= (request.effectiveLateTime - timerTolerance)
+    return u.some(this._timedRequests, isLate)
   }
 
-  _isForegroundIdle() {
-    return !this._foregroundRequests.length
-  }
 }

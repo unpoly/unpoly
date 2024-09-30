@@ -36,18 +36,18 @@ up-progress-bar {
 ### Controlling when the progress bar appears
 
 Unpoly will show the progress bar when a request is taking longer to respond
-than `up.network.config.badResponseTime`.
+than `up.network.config.lateTime`.
 
-You may override this per-request by using the [`{ badResponseTime }`](/up.render#options.badResponseTime)
-option or [`[up-bad-response-time]`](/up-follow#up-bad-response-time) attribute.
+You may override this per-request by using the [`{ lateTime }`](/up.render#options.lateTime)
+option or [`[up-late-time]`](/up-follow#up-late-time) attribute. Passing `{ lateTime: false }` will
+never show a progress bar for that request.
 
 Requests that are loading in the background should never show the progress bar. 
-You may move a request into the background by passing
-an [`{ background: true }`](/up.render#options.background) option
-or setting an [`[up-background]`](/up-follow#up-background) attribute.
-
-Requests from [preloading](/preloading) or [polling](/up-poll) are automatically
+You may move a request into the background by passing an [`{ background: true }`](/up.render#options.background) option
+or setting an [`[up-background]`](/up-follow#up-background) attribute.  Requests from [preloading](/preloading) or [polling](/up-poll) are automatically
 marked as background requests.
+
+To disable the progress bar globally, configure `up.network.config.progressBar = false`.
 
 
 Custom loading indicators
@@ -56,10 +56,6 @@ Custom loading indicators
 If you don't like the default progress bar, you can observe the `up:network:late`
 and [`up:network:recover`](/up:network:recover) events to implement a custom
 loading indicator that appears during long-running requests.
-
-To implement a fully custom loading indicator instead,
-observe the `up:network:late` and `up:network:recover` events.
-
 
 To build a custom loading indicator, place an element like this in your application layout:
 
@@ -87,6 +83,10 @@ up.compiler('loading-indicator', function(indicator) {
 })
 ```
 
+When you have implemented a custom loading indicator, you may want to disable the default progress bar
+by configuring `up.network.config.progressBar = false`.
+
+
 
 Styling loading elements
 ------------------------
@@ -100,7 +100,15 @@ See [Navigation feedback](/up.feedback) for details.
 Signaling severe network problems
 ----------------------------------
 
-See [Handling network issues](/network-issues).
+Unpoly provides additional events to handle network issues like disconnects or flaky connections:
+
+```js
+up.on('up:fragment:offline', function(event) { // mark-phrase "up:fragment:offline"
+  if (confirm('You are offline. Retry?')) event.retry()
+})
+```
+
+See [Handling network issues](/network-issues) for details and examples.
 
 
 @page loading-indicators
