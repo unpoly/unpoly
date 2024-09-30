@@ -939,6 +939,20 @@ describe 'up.link', ->
         options = up.link.followOptions(link)
         expect(options.preview).toBe(false)
 
+      it 'parses an [up-late-time=Number] attribute as a number', ->
+        link = fixture('a[href="/foo"][up-late-time=123]')
+        up.hello(link)
+
+        options = up.link.followOptions(link)
+        expect(options.lateTime).toBe(123)
+
+      it 'parses an [up-late-time=false] attribute as a boolean', ->
+        link = fixture('a[href="/foo"][up-late-time=false]')
+        up.hello(link)
+
+        options = up.link.followOptions(link)
+        expect(options.lateTime).toBe(false)
+
       if up.migrate.loaded
         it 'parses an [up-reset-scroll] attribute', ->
           link = fixture('a[href="/foo"][up-reset-scroll]')
@@ -960,6 +974,13 @@ describe 'up.link', ->
 
           options = up.link.followOptions(link)
           expect(options.scroll).toBe(false)
+
+        it 'parses an [up-bad-response-time=Number] attribute as a number', ->
+          link = fixture('a[href="/foo"][up-bad-response-time=123]')
+          up.hello(link)
+
+          options = up.link.followOptions(link)
+          expect(options.badResponseTime).toBe(123)
 
     describe 'up.link.shouldFollowEvent', ->
 

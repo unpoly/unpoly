@@ -1079,6 +1079,44 @@ describe('up.element', function() {
     })
   })
 
+  describe('up.element.booleanOrNumberAttr', function() {
+
+    it('returns true if the attribute value is empty', function() {
+      const element = up.element.createFromHTML('<div foo></div>')
+      expect(up.element.booleanOrNumberAttr(element, 'foo')).toBe(true)
+    })
+
+    it('returns true if the attribute value is the string "true"', function() {
+      const element = up.element.createFromHTML('<div foo="true"></div>')
+      expect(up.element.booleanOrNumberAttr(element, 'foo')).toBe(true)
+    })
+
+    it('returns true if the attribute value is the name of the attribute', function() {
+      const element = up.element.createFromHTML('<div foo="foo"></div>')
+      expect(up.element.booleanOrNumberAttr(element, 'foo')).toBe(true)
+    })
+
+    it('returns false if the attribute value is the string "false"', function() {
+      const element = up.element.createFromHTML('<div foo="false"></div>')
+      expect(up.element.booleanOrNumberAttr(element, 'foo')).toBe(false)
+    })
+
+    it('returns undefined if the element has no such attribute', function() {
+      const element = up.element.createFromHTML('<div></div>')
+      expect(up.element.booleanOrNumberAttr(element, 'foo')).toBeUndefined()
+    })
+
+    it('casts the attribute value to a number if it cannot be cast to a boolean', function() {
+      const element = up.element.createFromHTML('<div foo="-12.34"></div>')
+      expect(up.element.booleanOrNumberAttr(element, 'foo')).toBe(-12.34)
+    })
+
+    it('returns undefined if the attribute value cannot be cast as either boolean or number', function() {
+      const element = up.element.createFromHTML('<div foo="bar"></div>')
+      expect(up.element.booleanOrNumberAttr(element, 'foo')).toBeUndefined()
+    })
+  })
+
   describe('up.element.numberAttr', function() {
 
     it("returns the given attribute's value parsed as an integer", function() {

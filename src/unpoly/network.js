@@ -73,13 +73,14 @@ up.network = (function() {
 
     If the size is exceeded, the oldest responses will be dropped from the cache.
 
-  @param {number|Function(up.Request): number} [config.badResponseTime=400]
-    How long to wait before emitting the [`up:network:late` event](/up:network:late).
+  @param {number|Function(up.Request): number|boolean} [config.lateTime=400]
+    The number of milliseconds to wait before emitting the [`up:network:late` event](/up:network:late) and showing
+    the [progress bar](/loading-indicators#progress-bar).
 
     Requests exceeding this response time will also cause a [progress bar](/loading-indicators#progress-bar)
     to appear at the top edge of the screen.
 
-    The value is given in milliseconds.
+    To never consider a request to be late, configure a function that returns `false` for that request.
 
     @experimental
   @param {number|undefined} [config.timeout=90_000]
@@ -153,7 +154,7 @@ up.network = (function() {
 
   @param {boolean|Function(): boolean} [config.progressBar]
     Whether to show a [progress bar](/loading-indicators#progress-bar)
-    for [late requests](#config.badResponseTime).
+    for [late requests](#config.lateTime).
 
   @stable
   */
@@ -163,7 +164,7 @@ up.network = (function() {
     cacheSize: 70,
     cacheExpireAge: 15 * 1000,
     cacheEvictAge: 90 * 60 * 1000,
-    badResponseTime: 400,
+    lateTime: 400,
     fail(response) { return (response.status < 200 || response.status > 299) && response.status !== 304 },
     autoCache(request) { return request.isSafe() },
     expireCache(request, _response) { return !request.isSafe() },
@@ -457,11 +458,11 @@ up.network = (function() {
     Background requests also won't emit `up:network:late` events and won't trigger
     the [progress bar](/loading-indicators#progress-bar).
 
-  @param {number} [options.badResponseTime]
+  @param {number} [options.lateTime]
     The number of milliseconds after which this request can cause
     an `up:network:late` event.
 
-    Defaults to `up.network.config.badResponseTime`.
+    Defaults to `up.network.config.lateTime`.
 
     @experimental
 
@@ -781,7 +782,7 @@ up.network = (function() {
   before emitting `up:network:late`. You may configure this delay like this:
 
   ```js
-  up.network.config.badResponseTime = 1000 // milliseconds
+  up.network.config.lateTime = 1000 // milliseconds
   ```
 
   Once all responses have been received, an [`up:network:recover`](/up:network:recover)

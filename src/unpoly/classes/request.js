@@ -255,12 +255,12 @@ up.Request = class Request extends up.Record {
 
   /*-
   The number of milliseconds after which this request can cause
-  an `up:network:late` event.
+  an `up:network:late` event and show the [progress bar](/loading-indicators#progress-bar).
 
-  Defaults to `up.network.config.badResponseTime`.
+  Defaults to `up.network.config.lateTime`.
 
-  @property up.Request#badResponseTime
-  @param {number} [badResponseTime]
+  @property up.Request#lateTime
+  @param {number|boolean} [lateTime]
   @experimental
   */
 
@@ -299,7 +299,7 @@ up.Request = class Request extends up.Record {
       'onLoading',
       'fail',
       'abortable',
-      'badResponseTime',
+      'lateTime',
       'previews',
     ]
   }
@@ -372,13 +372,19 @@ up.Request = class Request extends up.Record {
     // _deferred object.
     this._deferred = u.newDeferred()
 
-    // (1) We want to set the default after all other properties are initialized,
-    //     in case up.network.config.badResponseTime is a function that inspects this request.
-    // (2) We want to set the default once and then keep the value immutable. Otherwise
-    //     the timer logic for up:network:late/:recover gets inconvenient edge cases.
-    this.badResponseTime ??= u.evalOption(up.network.config.badResponseTime, this)
-
     this._setAutoHeaders()
+  }
+
+  get effectiveLateTime() {
+    if (this.background) {
+      return false
+    } else {
+      return this.lateTime ?? u.evalOption(up.network.config.lateTime, this)
+    }
+  }
+
+  isTimed() {
+    return u.isNumber(this.effectiveLateTime)
   }
 
   /*-
