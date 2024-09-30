@@ -56,6 +56,11 @@ up.Preview = class Preview {
     this.undo(e.addClassTemp(element, klass))
   }
 
+  removeClass(...args) {
+    let [element, klass] = this._parseMutatorArgs(args, 'val', 'val')
+    this.undo(e.removeClassTemp(element, klass))
+  }
+
   setStyle(...args) {
     let [element, styles] = this._parseMutatorArgs(args, 'val', 'val')
     this.undo(e.setStyleTemp(element, styles))

@@ -290,6 +290,51 @@ describe('up.Preview', function() {
 
   })
 
+  describe('#removeClass()', function() {
+
+    it('temporarily removes a class from an element', async function() {
+      fixture('#target')
+      let element = fixture('#element.foo.bar')
+      let previewFn = (preview) => preview.removeClass(element, 'bar')
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(element).toHaveClass('foo')
+      expect(element).not.toHaveClass('bar')
+
+      jasmine.respondWithSelector('#target')
+      await wait()
+
+      expect(element).toHaveClass('foo')
+      expect(element).toHaveClass('bar')
+    })
+
+    it('accepts an selector for the element', async function() {
+      fixture('#target')
+      let element = fixture('#element.foo.bar')
+      let previewFn = (preview) => preview.removeClass('#element', 'bar')
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(element).toHaveClass('foo')
+      expect(element).not.toHaveClass('bar')
+    })
+
+    it('assumes the targeted fragment if no element is given', async function() {
+      let target = fixture('#target.foo.bar')
+      let previewFn = (preview) => preview.removeClass('bar')
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(target).toHaveClass('foo')
+      expect(target).not.toHaveClass('bar')
+    })
+
+  })
+
   describe('#setStyle()', function() {
 
     it('temporarily sets inline styles on an element', async function() {
