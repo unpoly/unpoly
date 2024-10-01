@@ -365,6 +365,7 @@ up.form = (function() {
     })
 
     options.origin ||= up.viewport.focusedElementWithin(form) || options.submitButton || form
+    options.activeElements = u.uniq([options.origin, form])
 
     // Now that we have extracted everything form-specific into options, we can call
     // up.link.followOptions(). This will also parse the myriads of other options

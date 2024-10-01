@@ -1178,183 +1178,264 @@ describe('up.feedback', function() {
 
     describe('.up-active', function() {
 
-      it('marks clicked links as .up-active until the request finishes', asyncSpec(function(next) {
-        const $link = $fixture('a[href="/foo"][up-target=".main"]')
-        fixture('.main')
-        Trigger.clickSequence($link)
+      describe('for a link', function() {
 
-        next(() => {
-          expect($link).toHaveClass('up-active')
-
-          this.respondWith('<div class="main">new-text</div>')
-        })
-
-        next(() => {
-          expect($link).not.toHaveClass('up-active')
-        })
-      })
-      )
-
-      it('does not mark a link as .up-active while it is preloading', async function() {
-        const link = fixture('a[href="/foo"][up-target=".main"]')
-        fixture('.main')
-
-        up.link.preload(link)
-        await wait()
-
-        expect(jasmine.Ajax.requests.count()).toEqual(1)
-        expect(link).not.toHaveClass('up-active')
-      })
-
-      it('does not mark a link as .up-active while revalidating', async function() {
-        await jasmine.populateCache('/foo', '<div id="target">cached target</div>')
-        up.cache.expire()
-
-        const target = fixture('#target')
-        const link = fixture('a[href="/foo"][up-target="#target"]')
-
-        Trigger.clickSequence(link)
-        await wait()
-
-        expect('#target').toHaveText('cached target')
-        expect(up.network.isBusy()).toBe(true)
-        expect(link).not.toHaveClass('up-active')
-      })
-
-      it('does not mark a link as .up-active with [up-feedback=false] attribute', asyncSpec(function(next) {
-        const $link = $fixture('a[href="/foo"][up-target=".main"][up-feedback=false]')
-        fixture('.main')
-
-        Trigger.clickSequence($link)
-
-        next(() => {
-          expect(jasmine.Ajax.requests.count()).toEqual(1)
-          expect($link).not.toHaveClass('up-active')
-        })
-      })
-      )
-
-      it('marks links with [up-instant] on mousedown as .up-active until the request finishes', asyncSpec(function(next) {
-        const $link = $fixture('a[href="/foo"][up-instant][up-target=".main"]')
-        fixture('.main')
-        Trigger.mousedown($link)
-
-        next(() => expect($link).toHaveClass('up-active'))
-        next(() => this.respondWith('<div class="main">new-text</div>'))
-        next(() => expect($link).not.toHaveClass('up-active'))
-      })
-      )
-
-      it('prefers to mark an enclosing [up-expand] click area', asyncSpec(function(next) {
-        const $area = $fixture('div[up-expand] a[href="/foo"][up-target=".main"]')
-        up.hello($area)
-        const $link = $area.find('a')
-        fixture('.main')
-        Trigger.clickSequence($link)
-
-        next(() => {
-          expect($link).not.toHaveClass('up-active')
-          expect($area).toHaveClass('up-active')
-        })
-        next(() => {
-          this.respondWith('<div class="main">new-text</div>')
-        })
-        next(() => {
-          expect($area).not.toHaveClass('up-active')
-        })
-      })
-      )
-
-      it('removes .up-active when a link with [up-confirm] was not confirmed', asyncSpec(function(next) {
-        const $link = $fixture('a[href="/foo"][up-target=".main"][up-confirm="Really follow?"]')
-        spyOn(up.browser, 'assertConfirmed').and.throwError(new up.Aborted('User aborted'))
-
-        Trigger.clickSequence($link)
-
-        next(() => {
-          expect($link).not.toHaveClass('up-active')
-        })
-      })
-      )
-
-      it('marks clicked modal openers as .up-active while the modal is loading', asyncSpec(function(next) {
-        const $link = $fixture('a[href="/foo"][up-target=".main"]')
-        fixture('.main')
-        Trigger.clickSequence($link)
-
-        next(() => expect($link).toHaveClass('up-active'))
-        next(() => this.respondWith('<div class="main">new-text</div>'))
-        next(() => expect($link).not.toHaveClass('up-active'))
-      })
-      )
-
-      it('removes .up-active from a clicked modal opener if the target is already preloaded (bugfix)', asyncSpec(function(next) {
-        const $link = $fixture('a[href="/foo"][up-target=".main"][up-layer="new modal"]')
-        up.hello($link)
-        up.link.preload($link)
-
-        next(() => {
-          this.respondWith('<div class="main">new-text</div>')
-        })
-        next(() => {
+        it('marks clicked links as .up-active until the request finishes', asyncSpec(function(next) {
+          const $link = $fixture('a[href="/foo"][up-target=".main"]')
+          fixture('.main')
           Trigger.clickSequence($link)
+
+          next(() => {
+            expect($link).toHaveClass('up-active')
+
+            this.respondWith('<div class="main">new-text</div>')
+          })
+
+          next(() => {
+            expect($link).not.toHaveClass('up-active')
+          })
         })
-        next(() => {
-          expect('up-modal .main').toHaveText('new-text')
-          expect($link).not.toHaveClass('up-active')
-        })
-      })
-      )
+        )
 
-      it('removes .up-active from a clicked link if the target is already preloaded (bugfix)', asyncSpec(function(next) {
-        const $link = $fixture('a[href="/foo"][up-target=".main"]')
-        fixture('.main')
-        up.link.preload($link)
+        it('does not mark a link as .up-active while it is preloading', async function() {
+          const link = fixture('a[href="/foo"][up-target=".main"]')
+          fixture('.main')
 
-        next(() => this.respondWith('<div class="main">new-text</div>'))
-        next(() => Trigger.clickSequence($link))
-        next(() => {
-          expect('.main').toHaveText('new-text')
-          expect($link).not.toHaveClass('up-active')
-        })
-      })
-      )
+          up.link.preload(link)
+          await wait()
 
-      it('removes .up-active when the server responds with an error code', async function() {
-        const link = fixture('a[href="/foo"][up-target="#main"][up-fail-target="#main"]')
-        fixture('#main')
-        Trigger.clickSequence(link)
-
-        await wait()
-
-        expect(link).toHaveClass('up-active')
-
-        jasmine.respondWith({
-          responseText: '<div id="main">failed</div>',
-          status: 422
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(link).not.toHaveClass('up-active')
         })
 
-        await wait()
+        it('does not mark a link as .up-active while revalidating', async function() {
+          await jasmine.populateCache('/foo', '<div id="target">cached target</div>')
+          up.cache.expire()
 
-        expect(link).not.toHaveClass('up-active')
+          const target = fixture('#target')
+          const link = fixture('a[href="/foo"][up-target="#target"]')
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect('#target').toHaveText('cached target')
+          expect(up.network.isBusy()).toBe(true)
+          expect(link).not.toHaveClass('up-active')
+        })
+
+        it('does not mark a link as .up-active with [up-feedback=false] attribute', asyncSpec(function(next) {
+          const $link = $fixture('a[href="/foo"][up-target=".main"][up-feedback=false]')
+          fixture('.main')
+
+          Trigger.clickSequence($link)
+
+          next(() => {
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            expect($link).not.toHaveClass('up-active')
+          })
+        })
+        )
+
+        it('marks links with [up-instant] on mousedown as .up-active until the request finishes', asyncSpec(function(next) {
+          const $link = $fixture('a[href="/foo"][up-instant][up-target=".main"]')
+          fixture('.main')
+          Trigger.mousedown($link)
+
+          next(() => expect($link).toHaveClass('up-active'))
+          next(() => this.respondWith('<div class="main">new-text</div>'))
+          next(() => expect($link).not.toHaveClass('up-active'))
+        })
+        )
+
+        it('prefers to mark an enclosing [up-expand] click area', asyncSpec(function(next) {
+          const $area = $fixture('div[up-expand] a[href="/foo"][up-target=".main"]')
+          up.hello($area)
+          const $link = $area.find('a')
+          fixture('.main')
+          Trigger.clickSequence($link)
+
+          next(() => {
+            expect($link).not.toHaveClass('up-active')
+            expect($area).toHaveClass('up-active')
+          })
+          next(() => {
+            this.respondWith('<div class="main">new-text</div>')
+          })
+          next(() => {
+            expect($area).not.toHaveClass('up-active')
+          })
+        })
+        )
+
+        it('removes .up-active when a link with [up-confirm] was not confirmed', asyncSpec(function(next) {
+          const $link = $fixture('a[href="/foo"][up-target=".main"][up-confirm="Really follow?"]')
+          spyOn(up.browser, 'assertConfirmed').and.throwError(new up.Aborted('User aborted'))
+
+          Trigger.clickSequence($link)
+
+          next(() => {
+            expect($link).not.toHaveClass('up-active')
+          })
+        })
+        )
+
+        it('marks clicked modal openers as .up-active while the modal is loading', asyncSpec(function(next) {
+          const $link = $fixture('a[href="/foo"][up-target=".main"]')
+          fixture('.main')
+          Trigger.clickSequence($link)
+
+          next(() => expect($link).toHaveClass('up-active'))
+          next(() => this.respondWith('<div class="main">new-text</div>'))
+          next(() => expect($link).not.toHaveClass('up-active'))
+        })
+        )
+
+        it('removes .up-active from a clicked modal opener if the target is already preloaded (bugfix)', asyncSpec(function(next) {
+          const $link = $fixture('a[href="/foo"][up-target=".main"][up-layer="new modal"]')
+          up.hello($link)
+          up.link.preload($link)
+
+          next(() => {
+            this.respondWith('<div class="main">new-text</div>')
+          })
+          next(() => {
+            Trigger.clickSequence($link)
+          })
+          next(() => {
+            expect('up-modal .main').toHaveText('new-text')
+            expect($link).not.toHaveClass('up-active')
+          })
+        })
+        )
+
+        it('removes .up-active from a clicked link if the target is already preloaded (bugfix)', asyncSpec(function(next) {
+          const $link = $fixture('a[href="/foo"][up-target=".main"]')
+          fixture('.main')
+          up.link.preload($link)
+
+          next(() => this.respondWith('<div class="main">new-text</div>'))
+          next(() => Trigger.clickSequence($link))
+          next(() => {
+            expect('.main').toHaveText('new-text')
+            expect($link).not.toHaveClass('up-active')
+          })
+        })
+        )
+
+        it('removes .up-active when the server responds with an error code', async function() {
+          const link = fixture('a[href="/foo"][up-target="#main"][up-fail-target="#main"]')
+          fixture('#main')
+          Trigger.clickSequence(link)
+
+          await wait()
+
+          expect(link).toHaveClass('up-active')
+
+          jasmine.respondWith({
+            responseText: '<div id="main">failed</div>',
+            status: 422
+          })
+
+          await wait()
+
+          expect(link).not.toHaveClass('up-active')
+        })
+
+        it('removes .up-active when the request fails due to a fatal network issue', async function() {
+          const link = fixture('a[href="/foo"][up-target="#main"]')
+          fixture('#main')
+          Trigger.clickSequence(link)
+
+          await wait()
+
+          expect(link).toHaveClass('up-active')
+
+          await jasmine.expectGlobalError('up.Offline', async function() {
+            jasmine.lastRequest().responseError()
+            await wait(10)
+          }) // waiting for a single task does not work for some reason
+
+          expect(link).not.toHaveClass('up-active')
+        })
+
       })
 
-      it('removes .up-active when the request fails due to a fatal network issue', async function() {
-        const link = fixture('a[href="/foo"][up-target="#main"]')
-        fixture('#main')
-        Trigger.clickSequence(link)
+      describe('for a form', function() {
 
-        await wait()
+        it('marks the form as .up-active while it is submitting', async function() {
+          fixture('#target', { text: 'old target' })
 
-        expect(link).toHaveClass('up-active')
+          const form = htmlFixture(`
+            <form method="post" action="/action" up-submit up-target="#target">
+              <input type="text" name="email">
+              <button type="submit">Submit</button>
+            </form>
+          `)
 
-        await jasmine.expectGlobalError('up.Offline', async function() {
-          jasmine.lastRequest().responseError()
-          await wait(10)
-        }) // waiting for a single task does not work for some reason
+          up.submit(form)
+          await wait()
 
-        expect(link).not.toHaveClass('up-active')
+          expect(form).toHaveClass('up-active')
+
+          jasmine.respondWithSelector('#target', { text: 'new target' })
+          await wait()
+
+          expect(form).not.toHaveClass('up-active')
+          expect('#target').toHaveText('new target')
+        })
+
+        it('also marks the clicked submit button as .up-active', async function() {
+          fixture('#target', { text: 'old target' })
+
+          const [form, input, submitButton] = htmlFixtureList(`
+            <form method="post" action="/action" up-submit up-target="#target">
+              <input type="text" name="email">
+              <button type="submit">Submit</button>
+            </form>
+          `)
+
+          Trigger.clickSequence(submitButton)
+          await wait()
+
+          expect(form).toHaveClass('up-active')
+          expect(input).not.toHaveClass('up-active')
+          expect(submitButton).toHaveClass('up-active')
+
+          jasmine.respondWithSelector('#target', { text: 'new target' })
+          await wait()
+
+          expect(form).not.toHaveClass('up-active')
+          expect(submitButton).not.toHaveClass('up-active')
+          expect('#target').toHaveText('new target')
+        })
+
+        it('also marks the focused input as .up-active when submitting the form with the Enter key', async function() {
+          fixture('#target', { text: 'old target' })
+
+          const [form, input, submitButton] = htmlFixtureList(`
+            <form method="post" action="/action" up-submit up-target="#target">
+              <input type="text" name="email">
+              <button type="submit">Submit</button>
+            </form>
+          `)
+
+          Trigger.submitFormWithEnter(input)
+          await wait()
+
+          expect(form).toHaveClass('up-active')
+          expect(input).toHaveClass('up-active')
+          expect(submitButton).not.toHaveClass('up-active')
+
+          jasmine.respondWithSelector('#target', { text: 'new target' })
+          await wait()
+
+          expect(form).not.toHaveClass('up-active')
+          expect(input).not.toHaveClass('up-active')
+          expect('#target').toHaveText('new target')
+        })
+
       })
+
     })
   })
 })
