@@ -186,7 +186,7 @@ up.feedback = (function() {
 
   The `.up-active` class is removed once the new content has been loaded and rendered.
 
-  ### Example
+  ### Example: Active link
 
   We have a link:
 
@@ -198,7 +198,7 @@ up.feedback = (function() {
   while the request is loading:
 
   ```html
-  <a href="/foo" up-follow class="up-active">Foo</a>
+  <a href="/foo" up-follow class="up-active">Foo</a> <!-- mark-phrase "up-active" -->
   ```
 
   Once the link destination has loaded and rendered, the `.up-active` class
@@ -210,6 +210,37 @@ up.feedback = (function() {
 
   > [NOTE]
   > Links do *not* need an `[up-nav]` container to get the `.up-active` class while loading.
+
+  ### Example: Active form
+
+  We have a form:
+
+  ```html
+  <form action="/action" up-submit>
+    <input type="text" name="email">
+    <button type="submit">Submit</button>
+  </form>
+  ```
+
+  When the user clicks the submit button, both the button and the form are marked as `.up-active`
+  while the form is submitting:
+
+  ```html
+  <form action="/action" up-submit class="up-active"> <!-- mark-phrase "up-active" -->
+    <input type="text" name="email">
+    <button type="submit" class="up-active">Submit</button> <!-- mark-phrase "up-active" -->
+  </form>
+  ```
+
+  When the user submits by pressing `Return` inside the focused text field, both the text field
+  and the form  are marked as `.up-active`:
+
+  ```html
+  <form action="/action" up-submit class="up-active"> <!-- mark-phrase "up-active" -->
+    <input type="text" name="email" class="up-active"> <!-- mark-phrase "up-active" -->
+    <button type="submit">Submit</button>
+  </form>
+  ```
 
   ### Default origins
 
@@ -357,11 +388,10 @@ up.feedback = (function() {
     return namedPreviewFns[name] || up.fail('Unknown preview "%s"', name)
   }
 
-  function getActiveElement(origin) {
-    if (origin) {
-      // If the link area was grown with [up-expand], we highlight the [up-expand] container.
-      return findActivatableArea(origin)
-    }
+  function getActiveElements({ origin, activeElements }) {
+    activeElements ||= u.wrapList(origin)
+    // If the link area was grown with [up-expand], we highlight the [up-expand] container.
+    return activeElements.map(findActivatableArea)
   }
 
   function registerPreview(name, previewFn) {
@@ -376,8 +406,7 @@ up.feedback = (function() {
     if (!feedbackOption) return
 
     return function(preview) {
-      let activeElement = getActiveElement(preview.origin)
-      if (activeElement) {
+      for (let activeElement of getActiveElements(preview.renderOptions)) {
         preview.addClass(activeElement, CLASS_ACTIVE)
       }
 
