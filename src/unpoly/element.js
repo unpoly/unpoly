@@ -994,6 +994,17 @@ up.element = (function() {
     }
   }
 
+  function parseAttr(element, attribute, ...parsers) {
+    // The document does not respond to #hasAttribute()
+    if (!element.hasAttribute?.(attribute)) return undefined
+    let rawValue = element.getAttribute(attribute)
+
+    for (let parser of parsers) {
+      let parserResult = parser(rawValue, attribute, element)
+      if (u.isDefined(parserResult)) return parserResult
+    }
+  }
+
   /*-
   Returns the given `attribute` value for the given `element`.
 
@@ -1006,9 +1017,10 @@ up.element = (function() {
   @stable
   */
   function stringAttr(element, attribute) {
-    let value = element.getAttribute(attribute)
-    return u.replaceValue(value, null, undefined)
+    return parseAttr(element, attribute, tryParseString)
   }
+
+  let tryParseString = u.identity
 
   /*-
   Returns the value of the given attribute on the given element, cast as a boolean value.
@@ -1049,25 +1061,20 @@ up.element = (function() {
     The cast attribute value.
   @stable
   */
-  function booleanAttr(element, attribute, pass) {
-    if (!element.hasAttribute(attribute)) return
+  function booleanAttr(element, attribute) {
+    return parseAttr(element, attribute, tryParseBoolean)
+  }
 
-    const value = stringAttr(element, attribute)
+  function tryParseBoolean(value, attribute) {
     switch (value) {
       case 'false': {
         return false
       }
       case 'true':
-      case '':
-      case attribute: {
+      case '':        // Empty attribute value, as in <button disabled> or <button disabled=""> (equivalent)
+      case attribute: // The attribute name itself, e.g. <input checked="checked">
+      {
         return true
-      }
-      default: {
-        if (pass) {
-          return value
-        } else {
-          return true
-        }
       }
     }
   }
@@ -1086,13 +1093,8 @@ up.element = (function() {
     The value to return if the attribute value is `''`, `'true'` or equal to the attribute name.
   @internal
   */
-  function booleanOrStringAttr(element, attribute, trueValue = true) {
-    let value = booleanAttr(element, attribute, true)
-    if (value === true) {
-      return trueValue
-    } else {
-      return value
-    }
+  function booleanOrStringAttr(element, attribute) {
+    return parseAttr(element, attribute, tryParseBoolean, tryParseString)
   }
 
   /*-
@@ -1110,12 +1112,12 @@ up.element = (function() {
   @internal
   */
   function booleanOrNumberAttr(element, attribute) {
-    let value = booleanAttr(element, attribute, true)
-    if (u.isBoolean(value)) {
-      return value
-    } else {
-      return tryParseFloat(value)
-    }
+    return parseAttr(element, attribute, tryParseBoolean, tryParseNumber)
+  }
+
+  function booleanOrCallbackOrStringAttr(element, attribute, callbackOptions) {
+    let myParseCallback = (value) => tryParseInvocationCallback(value, element, callbackOptions)
+    return parseAttr(element, attribute, tryParseBoolean, myParseCallback, tryParseString)
   }
 
   /*-
@@ -1133,23 +1135,20 @@ up.element = (function() {
   @stable
   */
   function numberAttr(element, attribute) {
-    let value = element.getAttribute(attribute)
-    return tryParseFloat(value)
+    return parseAttr(element, attribute, tryParseNumber)
   }
 
-  function tryParseFloat(value) {
-    if (u.isString(value)) {
-      value = value.replace(/_/g, '')
-      if (value.match(/^-?[\d.]+$/)) {
-        return parseFloat(value)
-      }
+  function tryParseNumber(value) {
+    value = value.replaceAll('_', '')
+    if (value.match(/^-?[\d.]+$/)) {
+      return parseFloat(value)
     }
   }
 
   /*-
   Reads the given attribute from the element, parsed as [JSON](https://www.json.org/).
 
-  Returns `undefined` if the attribute value is [blank](/up.util.isBlank).
+  Returns `undefined` if the attribute value is [blank](/up.util.isBlank) or only consists of whitespace.
 
   Throws a `SyntaxError` if the attribute value is an invalid JSON string.
 
@@ -1163,35 +1162,44 @@ up.element = (function() {
   @stable
   */
   function jsonAttr(element, attribute) {
-    // The document does not respond to #getAttribute()
-    let json = element.getAttribute?.(attribute)?.trim()
-    if (json) {
-      return JSON.parse(json)
+    return parseAttr(element, attribute, tryParseJSON)
+  }
+
+  function tryParseJSON(value) {
+    if (value?.trim()) {
+      return JSON.parse(value)
+    }
+ }
+
+  function callbackAttr(link, attr, callbackOptions) {
+    return parseAttr(link, attr, (value) => tryParseCallback(value, link, callbackOptions))
+  }
+
+  function tryParseInvocationCallback(link, code, callbackOptions) {
+    if (/(?<!:)[\w+]\([^)]+\)/i.test(code)) {
+      return tryParseCallback(code, link, callbackOptions)
     }
   }
 
-  function callbackAttr(link, attr, { exposedKeys = [], mainKey = 'event' } = {}) {
-    let code = link.getAttribute(attr)
-    if (code) {
-      // Users can prefix a CSP nonce like this: <a href="/path" up-on-loaded="nonce-kO52Iphm8B alert()">
-      // In up.ResponseDoc#finalizeElement() we have rewritten the attribute nonce to the current page's nonce
-      // IFF the attribute nonce matches the fragment response's nonce.
-      const callback = up.NonceableCallback.fromString(code).toFunction(mainKey, ...exposedKeys)
-      return function(event) {
-        // Allow callbacks to refer to an exposed property directly instead of through `event.value`.
-        const exposedValues = Object.values(u.pick(event, exposedKeys))
+  function tryParseCallback(code, link, { exposedKeys = [], mainKey = 'event' } = {}) {
+    // Users can prefix a CSP nonce like this: <a href="/path" up-on-loaded="nonce-kO52Iphm8B alert()">
+    // In up.ResponseDoc#finalizeElement() we have rewritten the attribute nonce to the current page's nonce
+    // IFF the attribute nonce matches the fragment response's nonce.
+    const callback = up.NonceableCallback.fromString(code).toFunction(mainKey, ...exposedKeys)
+    return function(event) {
+      // Allow callbacks to refer to an exposed property directly instead of through `event.value`.
+      const exposedValues = Object.values(u.pick(event, exposedKeys))
 
-        // Emulate the behavior of the `onclick` attribute,
-        // where `this` refers to the clicked element.
-        return callback.call(link, event, ...exposedValues)
-      }
+      // Emulate the behavior of the `onclick` attribute,
+      // where `this` refers to the clicked element.
+      return callback.call(link, event, ...exposedValues)
     }
   }
 
-  function closestAttr(element, attr, parseFn = stringAttr) {
+  function closestAttr(element, attr, readAttrFn = stringAttr) {
     let match = element.closest('[' + attr + ']')
     if (match) {
-      return parseFn(match, attr)
+      return readAttrFn(match, attr)
     }
   }
 
@@ -1569,6 +1577,7 @@ up.element = (function() {
     callbackAttr,
     booleanOrStringAttr,
     booleanOrNumberAttr,
+    booleanOrCallbackOrStringAttr,
     setStyleTemp,
     style: computedStyle,
     styleNumber: computedStyleNumber,

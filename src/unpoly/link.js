@@ -1702,11 +1702,12 @@ up.link = (function() {
       // (1) <a up-preload>              => 'hover'
       // (2) <a up-preload="">           => 'hover'
       // (3) <a up-preload="true">       => 'hover'
-      // (3) <a up-preload="up-preload"> => 'hover'
-      // (4) <a up-preload="insert">     => 'insert
-      //
-      // The case <a up-preload=false> is already excluded by config.noPreloadSelectors above.
-      let condition = e.booleanOrStringAttr(link, 'up-preload', null) ?? 'hover'
+      // (4) <a up-preload="up-preload"> => 'hover'
+      // (5) <a up-preload="insert">     => 'insert
+      // (6) <a up-preload="false">      => do nothing (already excluded by config.noPreloadSelectors)
+      // (7) <a>                         => only do something if we have it in config.preloadSelectors
+      let condition = e.booleanOrStringAttr(link, 'up-preload')
+      if (condition === true || u.isUndefined(condition)) condition = 'hover'
       onLoadCondition(condition, link, doPreload)
     }
   })
