@@ -116,7 +116,7 @@ up.Preview = class Preview {
     up.puts('[up-skeleton]', 'Showing skeleton %o', skeletonReference)
 
     if (parent) {
-      this._swapContent(parent, skeleton)
+      this.swapContent(parent, skeleton)
     } else if (this.layer === 'new') {
       this.openLayer(skeleton, { closeAnimation: false })
       // Now that the renderOptions have served as defaults for openLayer(),
@@ -135,7 +135,7 @@ up.Preview = class Preview {
     return [element, ...rest]
   }
 
-  _swapContent(parent, newContent) {
+  swapContent(parent, newContent) {
     this.hideContent(parent)
     this.insert(parent, newContent)
   }
