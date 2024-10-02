@@ -427,7 +427,7 @@ up.feedback = (function() {
     parser.booleanOrString('disable')
     parser.boolean('feedback')
     parser.booleanOrString('preview')
-    parser.booleanOrString('skeleton')
+    parser.booleanOrCallbackOrString('skeleton')
     return options
   }
 

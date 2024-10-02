@@ -339,9 +339,18 @@ up.script = (function() {
     let [attr, options, valueCallback] = parseProcessorArgs(args)
 
     let selector = `[${attr}]`
+    let { defaultValue } = options
+
     let callback = (element) => {
-      let value = e.booleanOrStringAttr(element, attr, options.defaultValue)
-      if (!value) return
+      let value = e.booleanOrStringAttr(element, attr)
+
+      // Do nothing in a case like [up-defer=false]
+      if (value === false) return
+
+      // Some attributes have a default value in case no value is given.
+      // E.g. [up-defer=""] or [up-defer="true"] defaults to [up-defer="insert"].
+      if (u.isDefined(defaultValue) && value === true) value = defaultValue
+
       return valueCallback(element, value)
     }
     registerProcessor([selector, options, callback])
