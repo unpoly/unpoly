@@ -99,6 +99,12 @@ up.feedback = (function() {
   @param {Array<string>} [config.currentClasses=['up-current']]
     An array of classes to set on [links that point the current location](/up-current).
 
+  @param {Array<string>} [config.activeClasses=['up-active']]
+    An array of classes to set on [activated links or form elements](/up-active).
+
+  @param {Array<string>} [config.loadingClasses=['up-loading']]
+    An array of classes to on [loading fragments](/up-loading).
+
   @param {Array<string>} [config.navSelectors=['[up-nav]', 'nav']]
     An array of CSS selectors that match [navigational containers](/up-nav).
 
@@ -111,6 +117,8 @@ up.feedback = (function() {
   */
   const config = new up.Config(() => ({
     currentClasses: ['up-current'],
+    activeClasses: ['up-active'],
+    loadingClasses: ['up-loading'],
     navSelectors: ['[up-nav]', 'nav'],
     noNavSelectors: ['[up-nav=false]'],
   }))
@@ -120,8 +128,6 @@ up.feedback = (function() {
     namedPreviewFns = u.pickBy(namedPreviewFns, 'isDefault')
   }
 
-  const CLASS_ACTIVE = 'up-active'
-  const CLASS_LOADING = 'up-loading'
   const SELECTOR_LINK = 'a, [up-href]'
 
   function linkURLs(link) {
@@ -181,10 +187,12 @@ up.feedback = (function() {
   }
 
   /*-
-  While rendering [with navigation feedback](/up.feedback#enabling-navigation-feedback), the `.up-active` class is added to the [origin](/origin)
-  element that triggered the change.
+  While rendering [with navigation feedback](/up.feedback#enabling-navigation-feedback),
+  the `.up-active` class is added to the [origin](/origin) element that triggered the change.
 
   The `.up-active` class is removed once the new content has been loaded and rendered.
+
+  To set additional classes on activated elements, configure `up.feedback.config.activeClasses`.
 
   ### Example: Active link
 
@@ -274,6 +282,8 @@ up.feedback = (function() {
   [targeted fragments](/targeting-fragments) are assigned the `.up-loading` class.
 
   The `.up-loading` class is removed once the fragment was updated.
+
+  To set additional classes on loading fragments, configure `up.feedback.config.loadingClasses`.
 
   ### Example
 
@@ -406,13 +416,8 @@ up.feedback = (function() {
     if (!feedbackOption) return
 
     return function(preview) {
-      for (let activeElement of getActiveElements(preview.renderOptions)) {
-        preview.addClass(activeElement, CLASS_ACTIVE)
-      }
-
-      for (let fragment of fragments) {
-        preview.addClass(fragment, CLASS_LOADING)
-      }
+      preview.addClassBatch(getActiveElements(preview.renderOptions), config.activeClasses)
+      preview.addClassBatch(fragments, config.loadingClasses)
     }
   }
 
@@ -556,7 +561,7 @@ up.feedback = (function() {
   /*-
   When a link within an `[up-nav]` element points to the current location, it is assigned the `.up-current` class.
 
-  To set other classes on current links, configure `up.feedback.config.currentClasses`.
+  To set additional classes on current links, configure `up.feedback.config.currentClasses`.
 
   This class is toggled automatically for any HTML that Unpoly renders.
   To set that class on content that you manually inserted without Unpoly, use `up.hello()`.
