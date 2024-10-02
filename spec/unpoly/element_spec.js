@@ -1035,15 +1035,11 @@ describe('up.element', function() {
       expect(up.element.booleanAttr(element, 'foo')).toBeUndefined()
     })
 
-    it('returns true if the attribute value is an unknown string', function() {
+    it('returns undefined if the attribute value is an unknown string', function() {
       const element = up.element.createFromHTML('<div foo="some text"></div>')
-      expect(up.element.booleanAttr(element, 'foo')).toBe(true)
+      expect(up.element.booleanAttr(element, 'foo')).toBeUndefined()
     })
 
-    it('returns the raw attribute value is it is an unknown string and the third `pass` argument is true', function() {
-      const element = up.element.createFromHTML('<div foo="some text"></div>')
-      expect(up.element.booleanAttr(element, 'foo', true)).toBe('some text')
-    })
   })
 
   describe('up.element.booleanOrStringAttr', function() {
