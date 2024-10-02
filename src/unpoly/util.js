@@ -1749,14 +1749,6 @@ up.util = (function() {
     return copy(list).reverse()
   }
 
-  function replaceValue(value, matchValue, replacementValue) {
-    if (value === matchValue) {
-      return replacementValue
-    } else {
-      return value
-    }
-  }
-
   function renameKeys(object, renameKeyFn) {
     const renamed = {}
     for (let key in object) {
@@ -2185,7 +2177,6 @@ up.util = (function() {
     // prefixCamelCase,
     // unprefixCamelCase,
     camelToKebabCase,
-    replaceValue,
     sprintf,
     renameKeys,
     memoizeMethod,
