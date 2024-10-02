@@ -60,6 +60,18 @@ up.Preview = class Preview {
     this.undo(e.addClassTemp(element, klass))
   }
 
+  /*-
+  @function up.Preview.prototype.addClassBatch
+  @internal
+  */
+  addClassBatch(elements, classes) {
+    for (let element of elements) {
+      for (let klass of classes) {
+        this.addClass(element, klass)
+      }
+    }
+  }
+
   removeClass(...args) {
     let [element, klass] = this._parseMutatorArgs(args, 'val', 'val')
     this.undo(e.removeClassTemp(element, klass))
@@ -153,6 +165,5 @@ up.Preview = class Preview {
 
     return overlay
   }
-
 
 }

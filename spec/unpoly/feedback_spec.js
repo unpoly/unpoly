@@ -1173,6 +1173,20 @@ describe('up.feedback', function() {
         expect('#foo').not.toHaveClass('up-loading')
         expect('#bar').toHaveClass('up-loading')
       })
+
+
+      it('allows to set additional loading classes via up.feedback.config.loadingClasses', async function() {
+        up.feedback.config.loadingClasses.push('custom-loading')
+        fixture('.target')
+
+        up.render('.target', {url: '/path', feedback: true})
+
+        await wait()
+
+        expect('.target').toHaveClass('up-loading')
+        expect('.target').toHaveClass('custom-loading')
+      })
+
     })
 
 
@@ -1180,22 +1194,20 @@ describe('up.feedback', function() {
 
       describe('for a link', function() {
 
-        it('marks clicked links as .up-active until the request finishes', asyncSpec(function(next) {
-          const $link = $fixture('a[href="/foo"][up-target=".main"]')
+        it('marks clicked links as .up-active until the request finishes', async function() {
+          const link = fixture('a[href="/foo"][up-target=".main"]')
           fixture('.main')
-          Trigger.clickSequence($link)
 
-          next(() => {
-            expect($link).toHaveClass('up-active')
+          Trigger.clickSequence(link)
+          await wait()
 
-            this.respondWith('<div class="main">new-text</div>')
-          })
+          expect(link).toHaveClass('up-active')
 
-          next(() => {
-            expect($link).not.toHaveClass('up-active')
-          })
+          jasmine.respondWithSelector('.main')
+          await wait()
+
+          expect(link).not.toHaveClass('up-active')
         })
-        )
 
         it('does not mark a link as .up-active while it is preloading', async function() {
           const link = fixture('a[href="/foo"][up-target=".main"]')
@@ -1266,6 +1278,24 @@ describe('up.feedback', function() {
           })
         })
         )
+
+        it('allows to set additional active classes via up.feedback.config.activeClasses', async function() {
+          up.feedback.config.activeClasses.push('working')
+          const link = fixture('a[href="/foo"][up-target=".main"]')
+          fixture('.main')
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect(link).toHaveClass('up-active')
+          expect(link).toHaveClass('working')
+
+          jasmine.respondWithSelector('.main')
+          await wait()
+
+          expect(link).not.toHaveClass('up-active')
+          expect(link).not.toHaveClass('working')
+        })
 
         it('removes .up-active when a link with [up-confirm] was not confirmed', asyncSpec(function(next) {
           const $link = $fixture('a[href="/foo"][up-target=".main"][up-confirm="Really follow?"]')
