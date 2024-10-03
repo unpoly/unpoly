@@ -217,6 +217,5 @@ up.RenderOptions = (function() {
     finalize,
     assertContentGiven,
     deriveFailOptions,
-    lookupLayers: rememberOriginLayer,
   }
 })()
