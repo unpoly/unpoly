@@ -155,11 +155,11 @@ describe 'up.RenderOptions', ->
       expect(options.history).toBe(true)
 
     it 'does not inherit non-shared keys from success options', ->
-      givenOptions = { layer: 'new', mode: 'popup', scroll: '.selector' }
+      givenOptions = { layer: 'new', mode: 'popup', scroll: '.selector', focus: 'restore' }
       options = preprocessAndDerive(givenOptions)
 
-      expect(options.layer).toBe('current')
       expect(options.scroll).toBeUndefined()
+      expect(options.focus).toBe('keep')
 
     it 'overrides defaults with given fail-prefixed options', ->
       givenOptions = { failTarget: '.fail', failSource: '/fail-source', failMode: 'popup' }

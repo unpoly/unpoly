@@ -105,7 +105,11 @@ up.LayerLookup = class LayerLookup {
   }
 
   _getOriginLayer() {
-    let { origin } = this._options
+    let { origin, originLayer } = this._options
+
+    if (originLayer) {
+      return originLayer
+    }
 
     if (origin) {
       return this._forElement(origin)

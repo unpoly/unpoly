@@ -10,7 +10,7 @@ up.Change.FromContent = class FromContent extends up.Change {
     // options.
     this._origin = options.origin
     this._preview = options.preview
-    this._layers = options.layers
+    this._layers = up.layer.getAll(options)
   }
 
   _getPlans() {

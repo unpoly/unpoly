@@ -35,6 +35,7 @@ up.RenderOptions = (function() {
     'confirm',
     'feedback',
     'origin',
+    'originLayer',
     'baseLayer',
     'fail',
     'onError',
@@ -133,21 +134,20 @@ up.RenderOptions = (function() {
       { inputDevice: up.event.inputDevice },
       options,
       normalizeURL(options),
-      lookupLayers(options),
+      rememberOriginLayer(options),
       preloadOverrides(options)
     )
   }
 
-  // Look up layers *before* we make the request.
+  // Look up the origin layers*before* we make the request.
   // In case of { layer: 'origin' } the { origin } element may get removed while the request was in flight,
   // making up.Change.FromContent#execute() fail with a message like "layer { origin } does not exist" or
   // "Could not find a layer to render in. You may have passed an unmatchable layer reference, or a detached element.".
-  function lookupLayers(options) {
-    // up.layer.normalizeOptions(options)
-
-    return {
-      layers: up.layer.getAll(options),
-      normalizeLayerOptions: false,
+  function rememberOriginLayer({ origin, originLayer }) {
+    if (origin && !originLayer) {
+      return {
+        originLayer: up.layer.get(origin),
+      }
     }
   }
 
@@ -186,7 +186,7 @@ up.RenderOptions = (function() {
 
   function deriveFailOptions(preprocessedOptions) {
     let overrides = failOverrides(preprocessedOptions)
-    let layers = lookupLayers(overrides)
+    let layers = rememberOriginLayer(overrides)
 
     if (preprocessedOptions.failOptions) {
       return {
@@ -217,5 +217,6 @@ up.RenderOptions = (function() {
     finalize,
     assertContentGiven,
     deriveFailOptions,
+    lookupLayers: rememberOriginLayer,
   }
 })()

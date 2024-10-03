@@ -1660,23 +1660,75 @@ describe 'up.fragment', ->
 
                   done()
 
-          it 'allows listeners to mutate up.render() options before the fragment is updated', asyncSpec (next) ->
+          it 'allows listeners to mutate up.render() options to target another fragment', ->
             fixture('.one', text: 'old one')
             fixture('.two', text: 'old two')
 
             up.on('up:fragment:loaded', (e) -> e.renderOptions.target = '.two')
 
             up.render(target: '.one', url: '/url')
+            await wait()
 
-            next =>
-              @respondWith """
-                <div class="one">new one</div>
-                <div class="two">new two</div>
-                """
+            jasmine.respondWith """
+              <div class="one">new one</div>
+              <div class="two">new two</div>
+              """
+            await wait()
 
-            next ->
-              expect('.one').toHaveText('old one')
-              expect('.two').toHaveText('new two')
+            expect('.one').toHaveText('old one')
+            expect('.two').toHaveText('new two')
+
+          it 'allows listeners to mutate up.render() options to target another fragment with a failed response', ->
+            fixture('.one', text: 'old one')
+            fixture('.two', text: 'old two')
+
+            up.on('up:fragment:loaded', (e) -> e.renderOptions.failTarget = '.two')
+
+            up.render(target: '.one', url: '/url')
+            await wait()
+
+            jasmine.respondWith status: 500, responseText: """
+              <div class="one">new one</div>
+              <div class="two">new two</div>
+              """
+            await wait()
+
+            expect('.one').toHaveText('old one')
+            expect('.two').toHaveText('new two')
+
+          it 'allows listeners to mutate up.render() options and render into a new layer', ->
+            fixture('.one', text: 'old one')
+
+            up.on 'up:fragment:loaded', (event) ->
+              event.renderOptions.layer = 'new'
+
+            up.render(target: '.one', url: '/url')
+            await wait()
+
+            jasmine.respondWith """
+              <div class="one">new one</div>
+              """
+            await wait()
+
+            expect(up.layer.isOverlay()).toBe(true)
+            expect(up.fragment.get('.one', { layer: 'overlay' })).toHaveText('new one')
+
+          it 'allows listeners to mutate up.render() options and render into a new layer with a failed response', ->
+            fixture('.one', text: 'old one')
+
+            up.on 'up:fragment:loaded', (event) ->
+              event.renderOptions.failLayer = 'new'
+
+            up.render(target: '.one', failTarget: '.one', url: '/url')
+            await wait()
+
+            jasmine.respondWith status: 500, responseText: """
+              <div class="one">new one</div>
+              """
+            await wait()
+
+            expect(up.layer.isOverlay()).toBe(true)
+            expect(up.fragment.get('.one', { layer: 'overlay' })).toHaveText('new one')
 
           it 'allows listeners to mutate up.render() options before the fragment is updated when the server responds with an error code (bugfix)', ->
             fixture('.one', text: 'old one')
