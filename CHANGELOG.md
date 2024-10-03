@@ -8,6 +8,12 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+3.9.2
+-----
+
+- Fix a bug where `up:fragment:loaded` listeners could not open a new layer by setting `event.renderOptions.layer = "new"`.
+
+
 3.9.1
 -----
 
