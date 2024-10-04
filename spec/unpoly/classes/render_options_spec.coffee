@@ -9,6 +9,12 @@ describe 'up.RenderOptions', ->
       expect(options.useKeep).toBe(true)
       expect(options.abort).toBe('target')
 
+    it 'normalizes a { layer } shortcut like "new drawer"', ->
+      givenOptions = { layer: 'new drawer' }
+      options = up.RenderOptions.preprocess(givenOptions)
+      expect(options.layer).toBe('new')
+      expect(options.mode).toBe('drawer')
+
     describe 'with { navigate: true }', ->
 
       it 'sets defaults appropriate for user navigation', ->
