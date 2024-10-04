@@ -1439,29 +1439,29 @@ describe('up.feedback', function() {
           expect('#target').toHaveText('new target')
         })
 
-        it('also marks the focused input as .up-active when submitting the form with the Enter key', async function() {
+        it('also marks the focused input and the default submit button as .up-active when submitting the form with the Enter key', async function() {
           fixture('#target', { text: 'old target' })
 
-          const [form, input, submitButton] = htmlFixtureList(`
+          let activeElements = () => [...document.querySelectorAll('.up-active')]
+
+          const [form, input1, input2, submitButton1, submitButton2] = htmlFixtureList(`
             <form method="post" action="/action" up-submit up-target="#target">
-              <input type="text" name="email">
-              <button type="submit">Submit</button>
+              <input type="text" name="foo">
+              <input type="text" name="bar">
+              <button type="submit">Submit1</button>
+              <button type="submit">Submit2</button>
             </form>
           `)
 
-          Trigger.submitFormWithEnter(input)
+          Trigger.submitFormWithEnter(input2)
           await wait()
 
-          expect(form).toHaveClass('up-active')
-          expect(input).toHaveClass('up-active')
-          expect(submitButton).not.toHaveClass('up-active')
+          expect(activeElements()).toEqual([form, input2, submitButton1])
 
           jasmine.respondWithSelector('#target', { text: 'new target' })
           await wait()
 
-          expect(form).not.toHaveClass('up-active')
-          expect(input).not.toHaveClass('up-active')
-          expect('#target').toHaveText('new target')
+          expect(activeElements()).toEqual([])
         })
 
       })

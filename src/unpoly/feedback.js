@@ -240,13 +240,13 @@ up.feedback = (function() {
   </form>
   ```
 
-  When the user submits by pressing `Return` inside the focused text field, both the text field
-  and the form  are marked as `.up-active`:
+  When the user submits by pressing `Return` inside the focused text field, that text field
+  is marked as `.up-active` in addition to the form and its default submit button:
 
   ```html
   <form action="/action" up-submit class="up-active"> <!-- mark-phrase "up-active" -->
     <input type="text" name="email" class="up-active"> <!-- mark-phrase "up-active" -->
-    <button type="submit">Submit</button>
+    <button type="submit">Submit</button> <!-- mark-phrase "up-active" -->
   </form>
   ```
 
