@@ -200,7 +200,7 @@ describe 'up.form', ->
               callback = jasmine.createSpy('up.watch() callback')
 
               form = fixture('form')
-              input = e.affix(form, 'input[name=email][up-watch-disable="#disable"][up-watch-feedback="false"][up-watch-preview="my-preview"][up-watch-skeleton="#skeleton"]')
+              input = e.affix(form, 'input[name=email][up-watch-disable="#disable"][up-watch-feedback="false"][up-watch-preview="my-preview"][up-watch-placeholder="#placeholder"]')
               up.hello(form)
 
               up.watch(input, callback)
@@ -217,7 +217,7 @@ describe 'up.form', ->
                     disable: '#disable',
                     feedback: false,
                     preview: 'my-preview',
-                    skeleton: '#skeleton',
+                    placeholder: '#placeholder',
                   })
                 )
 
@@ -486,7 +486,7 @@ describe 'up.form', ->
             describe 'passing of render options to the callback', ->
 
               it "parses [up-watch-] prefixed status options from the form and passes them to the callback", ->
-                form = fixture('form[up-watch-disable="#disable"][up-watch-feedback="false"][up-watch-preview="my-preview"][up-watch-skeleton="#skeleton"]')
+                form = fixture('form[up-watch-disable="#disable"][up-watch-feedback="false"][up-watch-preview="my-preview"][up-watch-placeholder="#placeholder"]')
                 input = e.affix(form, 'input[name=email]')
                 callback = jasmine.createSpy('callback')
 
@@ -504,13 +504,13 @@ describe 'up.form', ->
                     disable: '#disable',
                     feedback: false,
                     preview: 'my-preview',
-                    skeleton: '#skeleton',
+                    placeholder: '#placeholder',
                   )
                 )
 
               it "parses [up-watch-] prefixed status options from the field and passes them to the callback, overriding options from the form", ->
-                form = fixture('form[up-watch-disable="#disable-from-form"][up-watch-feedback="true"][up-watch-preview="preview-from-form"][up-watch-skeleton="#skeleton-from-form"]')
-                input = e.affix(form, 'input[name=email][up-watch-disable="#disable-from-field"][up-watch-feedback="false"][up-watch-preview="preview-from-field"][up-watch-skeleton="#skeleton-from-field"]')
+                form = fixture('form[up-watch-disable="#disable-from-form"][up-watch-feedback="true"][up-watch-preview="preview-from-form"][up-watch-placeholder="#placeholder-from-form"]')
+                input = e.affix(form, 'input[name=email][up-watch-disable="#disable-from-field"][up-watch-feedback="false"][up-watch-preview="preview-from-field"][up-watch-placeholder="#placeholder-from-field"]')
                 callback = jasmine.createSpy('callback')
 
                 up.watch(input, callback)
@@ -527,7 +527,7 @@ describe 'up.form', ->
                     disable: '#disable-from-field',
                     feedback: false,
                     preview: 'preview-from-field',
-                    skeleton: '#skeleton-from-field',
+                    placeholder: '#placeholder-from-field',
                   )
                 )
 
@@ -904,7 +904,7 @@ describe 'up.form', ->
 
       it 'parses status effect options with an [up-watch-] prefix', ->
         form = fixture('form')
-        container = e.affix(form, 'div[up-watch-disable="#disable"][up-watch-feedback="false"][up-watch-preview="my-preview"][up-watch-skeleton="#skeleton"]')
+        container = e.affix(form, 'div[up-watch-disable="#disable"][up-watch-feedback="false"][up-watch-preview="my-preview"][up-watch-placeholder="#placeholder"]')
         field = e.affix(container, 'input[type="text"][name="foo"]')
 
         options = up.form.watchOptions(field)
@@ -914,7 +914,7 @@ describe 'up.form', ->
             disable: '#disable'
             feedback: false
             preview: 'my-preview'
-            skeleton: '#skeleton'
+            placeholder: '#placeholder'
           )
         )
 
@@ -2389,21 +2389,21 @@ describe 'up.form', ->
           expect(preview2Fn.calls.count()).toBe(1)
           expect(undo2Fn.calls.count()).toBe(1)
 
-        it 'applies the { skeleton } of each batched validation to only its respective targeted fragment', ->
-          [form, fooGroup, fooField, barGroup, barField, bazGroup, bazField, skeletonTemplate] = htmlFixtureList """
+        it 'applies the { placeholder } of each batched validation to only its respective targeted fragment', ->
+          [form, fooGroup, fooField, barGroup, barField, bazGroup, bazField, placeholderTemplate] = htmlFixtureList """
             <form action="/path">
               <fieldset>
-                <input name='foo' up-watch-skeleton='#skeleton-template'>
+                <input name='foo' up-watch-placeholder='#placeholder-template'>
               </fieldset>
               <fieldset>
                 <input name='bar'>
               </fieldset>
               <fieldset>
-                <input name='baz' up-watch-skeleton='#skeleton-template'>
+                <input name='baz' up-watch-placeholder='#placeholder-template'>
               </fieldset>
 
-              <template id='skeleton-template'>
-                <div class='skeleton'>loading...</div>
+              <template id='placeholder-template'>
+                <div class='placeholder'>loading...</div>
               </template>
             </form>
           """
@@ -2414,13 +2414,13 @@ describe 'up.form', ->
 
           await wait()
 
-          expect('fieldset:has(input[name=foo])').toHaveSelector('.skeleton')
+          expect('fieldset:has(input[name=foo])').toHaveSelector('.placeholder')
           expect('input[name=foo]').toBeHidden()
 
-          expect('fieldset:has(input[name=bar])').not.toHaveSelector('.skeleton')
+          expect('fieldset:has(input[name=bar])').not.toHaveSelector('.placeholder')
           expect('input[name=bar]').not.toBeHidden()
 
-          expect('fieldset:has(input[name=baz])').toHaveSelector('.skeleton')
+          expect('fieldset:has(input[name=baz])').toHaveSelector('.placeholder')
           expect('input[name=baz]').toBeHidden()
 
           jasmine.respondWith """
@@ -2439,13 +2439,13 @@ describe 'up.form', ->
 
           await wait()
 
-          expect('fieldset:has(input[name=foo])').not.toHaveSelector('.skeleton')
+          expect('fieldset:has(input[name=foo])').not.toHaveSelector('.placeholder')
           expect('input[name=foo]').not.toBeHidden()
 
-          expect('fieldset:has(input[name=bar])').not.toHaveSelector('.skeleton')
+          expect('fieldset:has(input[name=bar])').not.toHaveSelector('.placeholder')
           expect('input[name=bar]').not.toBeHidden()
 
-          expect('fieldset:has(input[name=baz])').not.toHaveSelector('.skeleton')
+          expect('fieldset:has(input[name=baz])').not.toHaveSelector('.placeholder')
           expect('input[name=baz]').not.toBeHidden()
 
 
@@ -3388,11 +3388,11 @@ describe 'up.form', ->
 
           expect(spinnerContainer).not.toHaveSelector('#spinner')
 
-      describe 'with [up-skeleton] modifier', ->
+      describe 'with [up-placeholder] modifier', ->
 
-        it 'shows a UI skeleton while the form is loading', ->
+        it 'shows a UI placeholder while the form is loading', ->
           fixture('#target', content: '<p>old target</p>')
-          form = fixture('form[action="/foo"][up-submit][up-target="#target"][up-skeleton="<p>skeleton</p>"]', text: 'label')
+          form = fixture('form[action="/foo"][up-submit][up-target="#target"][up-placeholder="<p>placeholder</p>"]', text: 'label')
           submitButton = e.affix(form, 'input[type=submit]', text: 'label')
 
           expect('#target').toHaveVisibleText('old target')
@@ -3400,7 +3400,7 @@ describe 'up.form', ->
           Trigger.clickSequence(submitButton)
           await wait()
 
-          expect('#target').toHaveVisibleText('skeleton')
+          expect('#target').toHaveVisibleText('placeholder')
 
           jasmine.respondWithSelector('#target', content: '<p>new target</p>')
           await wait()
@@ -3649,14 +3649,14 @@ describe 'up.form', ->
           expect('#target').toHaveText('new target')
           expect(undoFn).toHaveBeenCalled()
 
-      describe 'with [up-watch-skeleton] modifier', ->
+      describe 'with [up-watch-placeholder] modifier', ->
 
-        it 'replaces the targeted element with the given skeleton', ->
-          [form, input, skeletonTemplate] = htmlFixtureList("""
-            <form up-autosubmit up-watch-delay="5" up-watch-skeleton="#skeleton-template" method="post" action="/action" up-target="#target">
+        it 'replaces the targeted element with the given placeholder', ->
+          [form, input, placeholderTemplate] = htmlFixtureList("""
+            <form up-autosubmit up-watch-delay="5" up-watch-placeholder="#placeholder-template" method="post" action="/action" up-target="#target">
               <input name="input1" value="initial-value">
-              <template id='skeleton-template'>
-                <div class='skeleton'>loading...</div>
+              <template id='placeholder-template'>
+                <div class='placeholder'>loading...</div>
               </template>
             </form>
           """)
@@ -3668,7 +3668,7 @@ describe 'up.form', ->
 
           await wait(40)
 
-          expect('#target').toHaveSelector('.skeleton')
+          expect('#target').toHaveSelector('.placeholder')
 
     describe 'input[up-watch]', ->
 
