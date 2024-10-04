@@ -116,6 +116,7 @@ up.RenderOptions = (function() {
 
   function preprocess(options) {
     up.migrate.preprocessRenderOptions?.(options)
+    up.layer.normalizeOptions(options)
 
     const defaults = u.merge(
       up.fragment.config.renderOptions,

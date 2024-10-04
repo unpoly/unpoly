@@ -106,63 +106,82 @@ describe('up.Preview', function() {
 
   describe('#layer', function() {
 
-    it('returns the resolved up.Layer object that is being targeted', async function() {
-      makeLayers(2)
-      expect(up.layer.current).toBeOverlay()
+    describe('when updating an existing layer', function() {
 
-      up.layer.current.affix('#target')
-      let spy = jasmine.createSpy('spy')
-      let previewFn = (preview) => spy(preview.layer)
+      it('returns the resolved up.Layer object that is being targeted', async function() {
+        makeLayers(2)
+        expect(up.layer.current).toBeOverlay()
 
-      up.render({ preview: previewFn, url: '/url', target: '#target' })
-      await wait()
+        up.layer.current.affix('#target')
+        let spy = jasmine.createSpy('spy')
+        let previewFn = (preview) => spy(preview.layer)
 
-      expect(spy).toHaveBeenCalledWith(jasmine.any(up.Layer))
-      expect(spy).toHaveBeenCalledWith(up.layer.current)
+        up.render({ preview: previewFn, url: '/url', target: '#target' })
+        await wait()
+
+        expect(spy).toHaveBeenCalledWith(jasmine.any(up.Layer))
+        expect(spy).toHaveBeenCalledWith(up.layer.current)
+      })
+
+      it('returns a targeted background layer', async function() {
+        fixture('#target')
+        makeLayers(2)
+        expect(up.layer.current).toBeOverlay()
+
+        let spy = jasmine.createSpy('spy')
+        let previewFn = (preview) => spy(preview.layer)
+
+        up.render({ preview: previewFn, url: '/url', target: '#target', layer: 'root' })
+        await wait()
+
+        expect(spy).toHaveBeenCalledWith(jasmine.any(up.Layer))
+        expect(spy).toHaveBeenCalledWith(up.layer.root)
+      })
+
+      it('returns the first layer in an update that might match multiple layers', async function() {
+        makeLayers([
+          { target: '.target' },
+          { target: '.target' },
+        ])
+        expect(up.layer.current).toBeOverlay()
+
+        let spy = jasmine.createSpy('spy')
+        let previewFn = (preview) => spy(preview.layer)
+
+        up.render({ preview: previewFn, url: '/url', target: '.target', layer: 'any' })
+        await wait()
+
+        expect(spy).toHaveBeenCalledWith(jasmine.any(up.Layer))
+        // Looking up "any" layers will return the current layer first.
+        expect(spy).toHaveBeenCalledWith(up.layer.current)
+      })
+
     })
 
-    it('returns a targeted background layer', async function() {
-      fixture('#target')
-      makeLayers(2)
-      expect(up.layer.current).toBeOverlay()
+    describe('when opening a new layer', function() {
 
-      let spy = jasmine.createSpy('spy')
-      let previewFn = (preview) => spy(preview.layer)
+      it('returns the string "new"', async function() {
+        let spy = jasmine.createSpy('spy')
+        let previewFn = (preview) => spy(preview.layer)
 
-      up.render({ preview: previewFn, url: '/url', target: '#target', layer: 'root' })
-      await wait()
+        up.render({ preview: previewFn, url: '/url', target: '#target', layer: 'new' })
+        await wait()
 
-      expect(spy).toHaveBeenCalledWith(jasmine.any(up.Layer))
-      expect(spy).toHaveBeenCalledWith(up.layer.root)
+        expect(spy).toHaveBeenCalledWith('new')
+      })
+
+      it('return the string "new" when opening with a shortcut like { layer: "new drawer" }', async function() {
+        let spy = jasmine.createSpy('spy')
+        let previewFn = (preview) => spy(preview.layer, preview.renderOptions.mode)
+
+        up.render({ preview: previewFn, url: '/url', target: '#target', layer: 'new drawer' })
+        await wait()
+
+        expect(spy).toHaveBeenCalledWith('new', 'drawer')
+      })
+
     })
 
-    it('returns the first layer in an update that might match multiple layers', async function() {
-      makeLayers([
-        { target: '.target' },
-        { target: '.target' },
-      ])
-      expect(up.layer.current).toBeOverlay()
-
-      let spy = jasmine.createSpy('spy')
-      let previewFn = (preview) => spy(preview.layer)
-
-      up.render({ preview: previewFn, url: '/url', target: '.target', layer: 'any' })
-      await wait()
-
-      expect(spy).toHaveBeenCalledWith(jasmine.any(up.Layer))
-      // Looking up "any" layers will return the current layer first.
-      expect(spy).toHaveBeenCalledWith(up.layer.current)
-    })
-
-    it('returns the string "new" when opening a new layer', async function() {
-      let spy = jasmine.createSpy('spy')
-      let previewFn = (preview) => spy(preview.layer)
-
-      up.render({ preview: previewFn, url: '/url', target: '#target', layer: 'new modal' })
-      await wait()
-
-      expect(spy).toHaveBeenCalledWith('new')
-    })
 
   })
 
