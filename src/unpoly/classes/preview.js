@@ -109,16 +109,16 @@ up.Preview = class Preview {
     this.undo(() => e.unwrap(wrapper))
   }
 
-  showSkeleton(...args) {
-    let [parent, skeletonReference] = this._parseMutatorArgs(args, 'val', 'val')
-    let skeleton = up.feedback.buildSkeleton(skeletonReference, this.origin)
+  showPlaceholder(...args) {
+    let [parent, placeholderReference] = this._parseMutatorArgs(args, 'val', 'val')
+    let placeholder = up.feedback.buildPlaceholder(placeholderReference, this.origin)
 
-    up.puts('[up-skeleton]', 'Showing skeleton %o', skeletonReference)
+    up.puts('[up-placeholder]', 'Showing placeholder %o', placeholderReference)
 
     if (parent) {
-      this.swapContent(parent, skeleton)
+      this.swapContent(parent, placeholder)
     } else if (this.layer === 'new') {
-      this.openLayer(skeleton, { closeAnimation: false })
+      this.openLayer(placeholder, { closeAnimation: false })
       // Now that the renderOptions have served as defaults for openLayer(),
       // we can disable animations for the upcoming render pass. This way
       // we don't see flickering when another overlay opens with the final content.

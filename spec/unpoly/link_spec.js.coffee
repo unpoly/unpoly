@@ -2572,60 +2572,60 @@ describe 'up.link', ->
 
           expect(spinnerContainer).not.toHaveSelector('#spinner')
 
-      describe 'with [up-skeleton] modifier', ->
+      describe 'with [up-placeholder] modifier', ->
 
-        it 'shows a UI skeleton while the link is loading', ->
+        it 'shows a UI placeholder while the link is loading', ->
           fixture('#target', content: '<p>old target</p>')
-          link = fixture('a[href="/foo"][up-follow][up-target="#target"][up-skeleton="<p>skeleton</p>"]', text: 'label')
+          link = fixture('a[href="/foo"][up-follow][up-target="#target"][up-placeholder="<p>placeholder</p>"]', text: 'label')
           expect('#target').toHaveVisibleText('old target')
 
           Trigger.clickSequence(link)
           await wait()
 
-          expect('#target').toHaveVisibleText('skeleton')
+          expect('#target').toHaveVisibleText('placeholder')
 
           jasmine.respondWithSelector('#target', content: '<p>new target</p>')
           await wait()
 
           expect('#target').toHaveVisibleText('new target')
 
-        it 'does not show a UI skeleton while preloading', ->
-          skeletonCompilerFn = jasmine.createSpy('skeleton compiler fn')
-          up.compiler('#skeleton', skeletonCompilerFn)
+        it 'does not show a UI placeholder while preloading', ->
+          placeholderCompilerFn = jasmine.createSpy('placeholder compiler fn')
+          up.compiler('#placeholder', placeholderCompilerFn)
 
           fixture('#target', content: '<p>old target</p>')
-          link = fixture('a[href="/foo"][up-follow][up-target="#target"][up-skeleton="<p id=\'skeleton\'>skeleton</p>"]', text: 'label')
+          link = fixture('a[href="/foo"][up-follow][up-target="#target"][up-placeholder="<p id=\'placeholder\'>placeholder</p>"]', text: 'label')
           expect('#target').toHaveVisibleText('old target')
 
           up.link.preload(link)
           await wait()
 
           expect('#target').toHaveVisibleText('old target')
-          expect(skeletonCompilerFn).not.toHaveBeenCalled()
+          expect(placeholderCompilerFn).not.toHaveBeenCalled()
 
-        it 'does not show a UI skeleton while revalidating', ->
+        it 'does not show a UI placeholder while revalidating', ->
           await jasmine.populateCache('/foo', '<div id="target">expired target</div>')
           up.cache.expire()
 
-          skeletonCompilerFn = jasmine.createSpy('skeleton compiler fn')
-          up.compiler('#skeleton', skeletonCompilerFn)
+          placeholderCompilerFn = jasmine.createSpy('placeholder compiler fn')
+          up.compiler('#placeholder', placeholderCompilerFn)
 
           fixture('#target', content: '<p>old target</p>')
-          link = fixture('a[href="/foo"][up-follow][up-target="#target"][up-skeleton="<p id=\'skeleton\'>skeleton</p>"]', text: 'label')
+          link = fixture('a[href="/foo"][up-follow][up-target="#target"][up-placeholder="<p id=\'placeholder\'>placeholder</p>"]', text: 'label')
           expect('#target').toHaveVisibleText('old target')
 
           Trigger.clickSequence(link)
           await wait()
 
           expect('#target').toHaveVisibleText('expired target')
-          expect(skeletonCompilerFn).not.toHaveBeenCalled()
+          expect(placeholderCompilerFn).not.toHaveBeenCalled()
           expect(up.network.isBusy()).toBe(true)
 
           jasmine.respondWithSelector('#target', text: 'revalidated target')
           await wait()
 
           expect('#target').toHaveVisibleText('revalidated target')
-          expect(skeletonCompilerFn).not.toHaveBeenCalled()
+          expect(placeholderCompilerFn).not.toHaveBeenCalled()
           expect(up.network.isBusy()).toBe(false)
 
       describe 'following non-interactive elements with [up-href]', ->
@@ -3536,7 +3536,7 @@ describe 'up.link', ->
 
           spyOn(window, 'confirm')
           fixture('#target', text: 'old text')
-          link = up.hello(fixture('a[href="/slow"][up-target="#target"][up-preload][up-skeleton="<span>skeleton text</span>"]'))
+          link = up.hello(fixture('a[href="/slow"][up-target="#target"][up-preload][up-placeholder="<span>placeholder text</span>"]'))
 
           Trigger.hoverSequence(link)
 
@@ -4095,10 +4095,10 @@ describe 'up.link', ->
           expect(undo1Fn).toHaveBeenCalled()
           expect(undo2Fn).toHaveBeenCalled()
 
-      describe 'with [up-skeleton]', ->
+      describe 'with [up-placeholder]', ->
 
-        it 'shows a skeleton while the deferred is loading', ->
-          partial = fixture('a#partial[up-defer="manual"][href="/slow-path"][up-skeleton="<span>skeleton text</span>"]', text: 'initial text')
+        it 'shows a placeholder while the deferred is loading', ->
+          partial = fixture('a#partial[up-defer="manual"][href="/slow-path"][up-placeholder="<span>placeholder text</span>"]', text: 'initial text')
           up.hello(partial)
 
           await wait()
@@ -4110,7 +4110,7 @@ describe 'up.link', ->
           await wait()
 
           expect(jasmine.Ajax.requests.count()).toEqual(1)
-          expect('#partial').toHaveVisibleText('skeleton text')
+          expect('#partial').toHaveVisibleText('placeholder text')
 
           jasmine.respondWithSelector('#partial', text: 'new text')
           await wait()
