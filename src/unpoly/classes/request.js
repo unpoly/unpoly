@@ -571,7 +571,7 @@ up.Request = class Request extends up.Record {
   }
 
   showPreviews(renderOptions) {
-    if (!this._isSettled() && !this.fromCache) {
+    if (!this.settled && !this.fromCache) {
       this._revertPreviews = up.feedback.showPreviews(this, renderOptions)
     }
   }
@@ -680,7 +680,7 @@ up.Request = class Request extends up.Record {
   }
 
   _setAbortedState(reason) {
-    if (this._isSettled()) return
+    if (this.settled) return
 
     let message = 'Aborted request to ' + this.description + (reason ? ': ' + reason : '')
     this.state = 'aborted'
@@ -692,7 +692,7 @@ up.Request = class Request extends up.Record {
   }
 
   _setOfflineState(reason) {
-    if (this._isSettled()) return
+    if (this.settled) return
 
     let message = 'Cannot load request to ' + this.description + (reason ? ': ' + reason : '')
     this.state = 'offline'
@@ -703,7 +703,7 @@ up.Request = class Request extends up.Record {
   respondWith(response) {
     this.response = response
 
-    if (this._isSettled()) return
+    if (this.settled) return
     this.state = 'loaded'
 
     if (response.ok) {
@@ -729,7 +729,22 @@ up.Request = class Request extends up.Record {
     this._revertPreviews?.()
   }
 
-  _isSettled() {
+  /*-
+  Returns whether this request is no longer waiting for the network.
+
+  A request is considered settled if:
+
+  - Its response has been loaded.
+  - It has been [aborted](/aborting-requests).
+  - It failed due to a [network issue](/network-issues).
+  - It failed due to a timeout.
+
+  @property up.Request#settled
+  @param {boolean} settled
+    Whether is request has settled.
+  @experimental
+  */
+  get settled() {
     return (this.state !== 'new') && (this.state !== 'loading') && (this.state !== 'tracking')
   }
 
