@@ -28,14 +28,17 @@ up.NonceableCallback = class NonceableCallback {
   @internal
   */
   toFunction(...argNames) {
+    let scriptExpression = this.script
+    if (!/\b(;|return|throw)\b/.test(scriptExpression)) scriptExpression = `return ${scriptExpression}`
+
     if (this.nonce) {
       // Don't return a bound function so callers can re-bind to a different this.
       let callbackThis = this
       return function(...args) {
-        return callbackThis._runAsNoncedFunction(this, argNames, args)
+        return callbackThis._runAsNoncedFunction(scriptExpression, this, argNames, args)
       }
     } else {
-      return new Function(...argNames, this.script)
+      return new Function(...argNames, scriptExpression)
     }
   }
 
@@ -43,21 +46,21 @@ up.NonceableCallback = class NonceableCallback {
     return `nonce-${this.nonce} ${this.script}`
   }
 
-  _runAsNoncedFunction(thisArg, argNames, args) {
+  _runAsNoncedFunction(script, thisArg, argNames, args) {
     let wrappedScript = `
       try {
         up.noncedEval.value = (function(${argNames.join()}) {
-          ${this.script}
+          ${script}
         }).apply(up.noncedEval.thisArg, up.noncedEval.args)
       } catch (error) {
         up.noncedEval.error = error
       }
     `
 
-    let script
+    let scriptElement
     try {
       up.noncedEval = { args, thisArg: thisArg }
-      script = up.element.affix(document.body, 'script', { nonce: this.nonce, text: wrappedScript })
+      scriptElement = up.element.affix(document.body, 'script', { nonce: this.nonce, text: wrappedScript })
       if (up.noncedEval.error) {
         throw up.noncedEval.error
       } else {
@@ -65,8 +68,8 @@ up.NonceableCallback = class NonceableCallback {
       }
     } finally {
       up.noncedEval = undefined
-      if (script) {
-        script.remove()
+      if (scriptElement) {
+        scriptElement.remove()
       }
     }
   }

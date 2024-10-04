@@ -1115,8 +1115,8 @@ up.element = (function() {
     return parseAttr(element, attribute, tryParseBoolean, tryParseNumber)
   }
 
-  function booleanOrCallbackOrStringAttr(element, attribute, callbackOptions) {
-    let myParseCallback = (value) => tryParseInvocationCallback(value, element, callbackOptions)
+  function booleanOrInvocationOrStringAttr(element, attribute, callbackOptions) {
+    let myParseCallback = (value) => tryParseInvocation(value, element, callbackOptions)
     return parseAttr(element, attribute, tryParseBoolean, myParseCallback, tryParseString)
   }
 
@@ -1175,7 +1175,7 @@ up.element = (function() {
     return parseAttr(link, attr, (value) => tryParseCallback(value, link, callbackOptions))
   }
 
-  function tryParseInvocationCallback(link, code, callbackOptions) {
+  function tryParseInvocation(code, link, callbackOptions) {
     if (/(?<!:)[\w+]\([^)]+\)/i.test(code)) {
       return tryParseCallback(code, link, callbackOptions)
     }
@@ -1186,6 +1186,7 @@ up.element = (function() {
     // In up.ResponseDoc#finalizeElement() we have rewritten the attribute nonce to the current page's nonce
     // IFF the attribute nonce matches the fragment response's nonce.
     const callback = up.NonceableCallback.fromString(code).toFunction(mainKey, ...exposedKeys)
+
     return function(event) {
       // Allow callbacks to refer to an exposed property directly instead of through `event.value`.
       const exposedValues = Object.values(u.pick(event, exposedKeys))
@@ -1577,7 +1578,7 @@ up.element = (function() {
     callbackAttr,
     booleanOrStringAttr,
     booleanOrNumberAttr,
-    booleanOrCallbackOrStringAttr,
+    booleanOrInvocationOrStringAttr,
     setStyleTemp,
     style: computedStyle,
     styleNumber: computedStyleNumber,
