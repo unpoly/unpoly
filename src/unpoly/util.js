@@ -1400,9 +1400,11 @@ up.util = (function() {
 //    return (callArgs...) ->
 //      fn.apply(this, fixedArgs.concat(callArgs))
 //
-//  partialRight = (fn, fixedArgs...) ->
-//    return (callArgs...) ->
-//      fn.apply(this, callArgs.concat(fixedArgs))
+//   function partialRight(fn, ...fixedArgs) {
+//     return function(...callArgs) {
+//       return fn.apply(this, [...callArgs, ...fixedArgs])
+//     }
+//   }
 
 //function throttle(callback, limit) { // From https://jsfiddle.net/jonathansampson/m7G64/
 //  var wait = false                   // Initially, we're not waiting
@@ -2186,5 +2188,6 @@ up.util = (function() {
     cleaner,
     scanFunctions,
     args: parseArgs,
+    // partialRight,
   }
 })()
