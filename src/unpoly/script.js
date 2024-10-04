@@ -76,6 +76,9 @@ up.script = (function() {
     ],
     nonceableAttributes: [
       'up-watch',
+      'up-on-keep',
+      'up-on-hungry',
+      'up-on-opened',
       'up-on-accepted',
       'up-on-dismissed',
       'up-on-loaded',
