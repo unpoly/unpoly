@@ -933,11 +933,11 @@ describe('up.Preview', function() {
 
   })
 
-  describe('#showSkeleton()', function() {
+  describe('#showPlaceholder()', function() {
 
     describe('reference argument', function() {
 
-      it('inserts the given skeleton element as a child of the given reference element, hiding its other children', async function() {
+      it('inserts the given placeholder element as a child of the given reference element, hiding its other children', async function() {
         fixture('#target')
         let parent = htmlFixture(`
           <div id="parent">
@@ -946,14 +946,14 @@ describe('up.Preview', function() {
           </div>
         `)
 
-        let skeleton = e.createFromSelector('#skeleton')
-        let previewFn = (preview) => preview.showSkeleton(parent, skeleton)
+        let placeholder = e.createFromSelector('#placeholder')
+        let previewFn = (preview) => preview.showPlaceholder(parent, placeholder)
 
         up.render({ preview: previewFn, url: '/url', target: '#target' })
         await wait()
 
         expect('#parent').toBeVisible()
-        expect(skeleton.parentElement).toBe(parent)
+        expect(placeholder.parentElement).toBe(parent)
         expect('#child1').toBeHidden()
         expect('#child2').toBeHidden()
 
@@ -965,7 +965,7 @@ describe('up.Preview', function() {
         expect('#child2').toBeVisible()
       })
 
-      it('can show a skeleton when the reference contains text node children', async function() {
+      it('can show a placeholder when the reference contains text node children', async function() {
         fixture('#target')
         let parent = htmlFixture(`
           <div id="parent">
@@ -976,13 +976,13 @@ describe('up.Preview', function() {
 
         expect('#parent').toHaveVisibleText('text element')
 
-        let skeleton = e.createFromSelector('#skeleton', { text: 'skeleton' })
-        let previewFn = (preview) => preview.showSkeleton(parent, skeleton)
+        let placeholder = e.createFromSelector('#placeholder', { text: 'placeholder' })
+        let previewFn = (preview) => preview.showPlaceholder(parent, placeholder)
 
         up.render({ preview: previewFn, url: '/url', target: '#target' })
         await wait()
 
-        expect('#parent').toHaveVisibleText('skeleton')
+        expect('#parent').toHaveVisibleText('placeholder')
 
         jasmine.respondWithSelector('#target')
         await wait()
@@ -999,14 +999,14 @@ describe('up.Preview', function() {
           </div>
         `)
 
-        let skeleton = e.createFromSelector('#skeleton')
-        let previewFn = (preview) => preview.showSkeleton('#parent', skeleton)
+        let placeholder = e.createFromSelector('#placeholder')
+        let previewFn = (preview) => preview.showPlaceholder('#parent', placeholder)
 
         up.render({ preview: previewFn, url: '/url', target: '#target' })
         await wait()
 
         expect('#parent').toBeVisible()
-        expect(skeleton.parentElement).toBe(parent)
+        expect(placeholder.parentElement).toBe(parent)
         expect('#child1').toBeHidden()
         expect('#child2').toBeHidden()
 
@@ -1018,15 +1018,15 @@ describe('up.Preview', function() {
         expect('#child2').toBeVisible()
       })
 
-      it('shows the skeleton within the targeted fragment if no reference is given', async function() {
+      it('shows the placeholder within the targeted fragment if no reference is given', async function() {
         let target = htmlFixture(`
           <div id="target">
             <div id="old-child">old child</div>
           </div>
         `)
 
-        let skeleton = e.createFromSelector('#skeleton')
-        let previewFn = (preview) => preview.showSkeleton(skeleton)
+        let placeholder = e.createFromSelector('#placeholder')
+        let previewFn = (preview) => preview.showPlaceholder(placeholder)
 
         up.render({ preview: previewFn, url: '/url', target: '#target', feedback: true })
         await wait()
@@ -1034,7 +1034,7 @@ describe('up.Preview', function() {
         expect('#target').toBeVisible()
         expect('#target').toBeAttached()
         expect('#target').toHaveClass('up-loading')
-        expect(skeleton.parentElement).toBe(target)
+        expect(placeholder.parentElement).toBe(target)
         expect('#old-child').toBeHidden()
 
         jasmine.respondWith(`
@@ -1055,11 +1055,11 @@ describe('up.Preview', function() {
       // it('resolves the selector in the { bindLayer }')
     })
 
-    describe('skeleton argument', function() {
+    describe('placeholder argument', function() {
 
-      it('compiles the given skeleton element', async function() {
-        let skeletonCompiler = jasmine.createSpy('skeleton compiler')
-        up.compiler('#skeleton', skeletonCompiler)
+      it('compiles the given placeholder element', async function() {
+        let placeholderCompiler = jasmine.createSpy('placeholder compiler')
+        up.compiler('#placeholder', placeholderCompiler)
 
         fixture('#target')
         let parent = htmlFixture(`
@@ -1068,27 +1068,27 @@ describe('up.Preview', function() {
           </div>
         `)
 
-        let skeleton = htmlFixture(`<div id="skeleton">skeleton</div>`)
-        let previewFn = (preview) => preview.showSkeleton(parent, skeleton)
+        let placeholder = htmlFixture(`<div id="placeholder">placeholder</div>`)
+        let previewFn = (preview) => preview.showPlaceholder(parent, placeholder)
 
         up.render({ preview: previewFn, url: '/url', target: '#target' })
         await wait()
 
-        expect('#parent').toHaveSelector('#skeleton')
-        expect('#parent').not.toHaveSelector('#skeleton-template')
+        expect('#parent').toHaveSelector('#placeholder')
+        expect('#parent').not.toHaveSelector('#placeholder-template')
         expect('#child').toBeHidden()
-        expect(skeletonCompiler).toHaveBeenCalledWith(skeleton, jasmine.anything(), jasmine.anything())
+        expect(placeholderCompiler).toHaveBeenCalledWith(placeholder, jasmine.anything(), jasmine.anything())
 
         jasmine.respondWithSelector('#target')
         await wait()
 
-        expect('#parent').not.toHaveSelector('#skeleton')
+        expect('#parent').not.toHaveSelector('#placeholder')
         expect('#child').toBeVisible()
       })
 
-      it('clones a template element passed as a skeleton', async function() {
-        let skeletonCompiler = jasmine.createSpy('skeleton compiler')
-        up.compiler('#skeleton', skeletonCompiler)
+      it('clones a template element passed as a placeholder', async function() {
+        let placeholderCompiler = jasmine.createSpy('placeholder compiler')
+        up.compiler('#placeholder', placeholderCompiler)
 
         fixture('#target')
         let parent = htmlFixture(`
@@ -1097,29 +1097,29 @@ describe('up.Preview', function() {
           </div>
         `)
 
-        let skeletonTemplate = htmlFixture(`
-          <template id="skeleton-template">
-            <div id="skeleton">skeleton</div>
+        let placeholderTemplate = htmlFixture(`
+          <template id="placeholder-template">
+            <div id="placeholder">placeholder</div>
           </template>
         `)
-        let previewFn = (preview) => preview.showSkeleton(parent, skeletonTemplate)
+        let previewFn = (preview) => preview.showPlaceholder(parent, placeholderTemplate)
 
         up.render({ preview: previewFn, url: '/url', target: '#target' })
         await wait()
 
-        expect('#parent').toHaveSelector('#skeleton')
-        expect('#parent').not.toHaveSelector('#skeleton-template')
+        expect('#parent').toHaveSelector('#placeholder')
+        expect('#parent').not.toHaveSelector('#placeholder-template')
         expect('#child').toBeHidden()
-        expect(skeletonCompiler).toHaveBeenCalledWith(jasmine.elementMatchingSelector('#skeleton'), jasmine.anything(), jasmine.anything())
+        expect(placeholderCompiler).toHaveBeenCalledWith(jasmine.elementMatchingSelector('#placeholder'), jasmine.anything(), jasmine.anything())
 
         jasmine.respondWithSelector('#target')
         await wait()
 
-        expect('#parent').not.toHaveSelector('#skeleton')
+        expect('#parent').not.toHaveSelector('#placeholder')
         expect('#child').toBeVisible()
       })
 
-      it('accepts the skeleton as a string of HTML (needs to start with "<")', async function() {
+      it('accepts the placeholder as a string of HTML (needs to start with "<")', async function() {
         fixture('#target')
         let parent = htmlFixture(`
           <div id="parent">
@@ -1127,24 +1127,24 @@ describe('up.Preview', function() {
           </div>
         `)
 
-        let previewFn = (preview) => preview.showSkeleton(parent, `<div id="skeleton">skeleton</div>`)
+        let previewFn = (preview) => preview.showPlaceholder(parent, `<div id="placeholder">placeholder</div>`)
 
         up.render({ preview: previewFn, url: '/url', target: '#target' })
         await wait()
 
-        expect('#parent').toHaveSelector('#skeleton')
+        expect('#parent').toHaveSelector('#placeholder')
         expect('#child').toBeHidden()
 
         jasmine.respondWithSelector('#target')
         await wait()
 
-        expect('#parent').not.toHaveSelector('#skeleton')
+        expect('#parent').not.toHaveSelector('#placeholder')
         expect('#child').toBeVisible()
       })
 
-      it('accepts a selector for the skeleton element', async function() {
-        let skeletonCompiler = jasmine.createSpy('skeleton compiler')
-        up.compiler('#skeleton', skeletonCompiler)
+      it('accepts a selector for the placeholder element', async function() {
+        let placeholderCompiler = jasmine.createSpy('placeholder compiler')
+        up.compiler('#placeholder', placeholderCompiler)
 
         fixture('#target')
         let parent = htmlFixture(`
@@ -1154,45 +1154,45 @@ describe('up.Preview', function() {
         `)
 
         htmlFixture(`
-          <template id="skeleton-template">
-            <div id="skeleton">skeleton</div>
+          <template id="placeholder-template">
+            <div id="placeholder">placeholder</div>
           </template>
         `)
-        let previewFn = (preview) => preview.showSkeleton(parent, '#skeleton-template')
+        let previewFn = (preview) => preview.showPlaceholder(parent, '#placeholder-template')
 
         up.render({ preview: previewFn, url: '/url', target: '#target' })
         await wait()
 
-        expect('#parent').toHaveSelector('#skeleton')
-        expect('#parent').not.toHaveSelector('#skeleton-template')
+        expect('#parent').toHaveSelector('#placeholder')
+        expect('#parent').not.toHaveSelector('#placeholder-template')
         expect('#child').toBeHidden()
-        expect(skeletonCompiler).toHaveBeenCalledWith(jasmine.elementMatchingSelector('#skeleton'), jasmine.anything(), jasmine.anything())
+        expect(placeholderCompiler).toHaveBeenCalledWith(jasmine.elementMatchingSelector('#placeholder'), jasmine.anything(), jasmine.anything())
 
         jasmine.respondWithSelector('#target')
         await wait()
 
-        expect('#parent').not.toHaveSelector('#skeleton')
+        expect('#parent').not.toHaveSelector('#placeholder')
         expect('#child').toBeVisible()
       })
 
-      it('prefers a skeleton selector match in the origin layer', async function() {
+      it('prefers a placeholder selector match in the origin layer', async function() {
         makeLayers(2)
-        let rootSkeleton = e.createFromSelector('template.skeleton-template', { content: '<span>root skeleton</span>' })
-        document.body.prepend(rootSkeleton)
-        registerFixture(rootSkeleton)
+        let rootPlaceholder = e.createFromSelector('template.placeholder-template', { content: '<span>root placeholder</span>' })
+        document.body.prepend(rootPlaceholder)
+        registerFixture(rootPlaceholder)
 
-        let originSkeleton = up.layer.get(1).affix('template.skeleton-template', { content: '<span>origin skeleton</span>' })
+        let originPlaceholder = up.layer.get(1).affix('template.placeholder-template', { content: '<span>origin placeholder</span>' })
 
-        expect(rootSkeleton.compareDocumentPosition(originSkeleton)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+        expect(rootPlaceholder.compareDocumentPosition(originPlaceholder)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
 
         up.layer.get(1).affix('#target', { text: 'old target' })
 
-        let previewFn = (preview) => preview.showSkeleton('#target', '.skeleton-template')
+        let previewFn = (preview) => preview.showPlaceholder('#target', '.placeholder-template')
 
         up.render({ preview: previewFn, url: '/url', target: '#target', origin: up.layer.current.element })
         await wait()
 
-        expect('#target').toHaveVisibleText('origin skeleton')
+        expect('#target').toHaveVisibleText('origin placeholder')
 
         jasmine.respondWithSelector('#target', { text: 'new target' })
         await wait()
@@ -1200,17 +1200,17 @@ describe('up.Preview', function() {
         expect('#target').toHaveVisibleText('new target')
       })
 
-      it("matches a skeleton selector in the root layer if it doesn't match in the origin layer", async function() {
+      it("matches a placeholder selector in the root layer if it doesn't match in the origin layer", async function() {
         makeLayers(2)
-        up.layer.get(0).affix('template.skeleton-template', { content: '<span>root skeleton</span>' })
+        up.layer.get(0).affix('template.placeholder-template', { content: '<span>root placeholder</span>' })
         up.layer.get(1).affix('#target', { text: 'old target' })
 
-        let previewFn = (preview) => preview.showSkeleton('#target', '.skeleton-template')
+        let previewFn = (preview) => preview.showPlaceholder('#target', '.placeholder-template')
 
         up.render({ preview: previewFn, url: '/url', target: '#target', origin: up.layer.current.element })
         await wait()
 
-        expect('#target').toHaveVisibleText('root skeleton')
+        expect('#target').toHaveVisibleText('root placeholder')
 
         jasmine.respondWithSelector('#target', { text: 'new target' })
         await wait()
@@ -1222,10 +1222,10 @@ describe('up.Preview', function() {
 
     describe('when previewing a new overlay', function() {
 
-      it("shows the skeleton in a new overlay with the same visual layer options as the current render pass", async function() {
-        let skeleton = e.createFromHTML('<div id="skeleton">skeleton content</div>')
+      it("shows the placeholder in a new overlay with the same visual layer options as the current render pass", async function() {
+        let placeholder = e.createFromHTML('<div id="placeholder">placeholder content</div>')
 
-        up.render({ skeleton, url: '/url', target: '#target', layer: 'new', mode: 'drawer', size: 'large', position: 'right' })
+        up.render({ placeholder, url: '/url', target: '#target', layer: 'new', mode: 'drawer', size: 'large', position: 'right' })
         await wait()
 
         expect(up.layer.count).toBe(2)
@@ -1233,7 +1233,7 @@ describe('up.Preview', function() {
         expect(up.layer.current.size).toBe('large')
         expect(up.layer.current.position).toBe('right')
         expect(up.layer.current.getFirstSwappableElement()).toMatchSelector('#target')
-        expect(up.layer.current.getFirstSwappableElement().children[0]).toBe(skeleton)
+        expect(up.layer.current.getFirstSwappableElement().children[0]).toBe(placeholder)
 
         jasmine.respondWithSelector('#target', { text: 'server content' })
         await wait()
@@ -1264,7 +1264,7 @@ describe('up.Preview', function() {
 
         let animateSpy = spyOn(up, 'animate').and.callFake(fakeAnimate)
 
-        let previewFn = (preview) => preview.showSkeleton('<div>preview content</div>')
+        let previewFn = (preview) => preview.showPlaceholder('<div>preview content</div>')
 
         up.render({ preview: previewFn, url: '/url', target: '#target', layer: 'new' })
         await wait(100)

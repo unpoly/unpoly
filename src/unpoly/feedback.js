@@ -344,7 +344,7 @@ up.feedback = (function() {
     // or null if there is no first fragment (when opening a layer).
     let singlePreview = new up.Preview({ fragment, request, renderOptions, cleaner })
     singlePreview.run(resolvePreviewFns(renderOptions.preview))
-    singlePreview.run(getSkeletonPreviewFn(renderOptions.skeleton))
+    singlePreview.run(getPlaceholderPreviewFn(renderOptions.placeholder))
     singlePreview.run(getFeedbackClassesPreviewFn(renderOptions.feedback, fragments))
     singlePreview.run(up.form.getDisablePreviewFn(renderOptions.disable, origin))
 
@@ -354,26 +354,26 @@ up.feedback = (function() {
     for (let fragment of fragments) {
       let eachPreview = new up.Preview({ fragment, request, renderOptions, cleaner })
       eachPreview.run(e.matchSelectorMap(renderOptions.previewMap, fragment))
-      eachPreview.run(e.matchSelectorMap(renderOptions.skeletonMap, fragment).flatMap(getSkeletonPreviewFn))
+      eachPreview.run(e.matchSelectorMap(renderOptions.placeholderMap, fragment).flatMap(getPlaceholderPreviewFn))
     }
 
     return cleaner.clean
   }
 
-  function getSkeletonPreviewFn(skeleton) {
-    if (!skeleton) return
+  function getPlaceholderPreviewFn(placeholder) {
+    if (!placeholder) return
 
     return function(preview) {
-      preview.showSkeleton(skeleton)
+      preview.showPlaceholder(placeholder)
     }
   }
 
-  function buildSkeleton(value, origin) {
+  function buildPlaceholder(value, origin) {
     if (u.isString(value)) {
       if (value.startsWith('<')) {
         value = e.createFromHTML(value)
       } else {
-        value = up.fragment.get(value, { layer: 'closest', origin }) || up.fail('Unknown skeleton %s', value)
+        value = up.fragment.get(value, { layer: 'closest', origin }) || up.fail('Unknown placeholder %s', value)
       }
     }
 
@@ -427,7 +427,7 @@ up.feedback = (function() {
     parser.booleanOrString('disable')
     parser.boolean('feedback')
     parser.booleanOrString('preview')
-    parser.booleanOrCallbackOrString('skeleton')
+    parser.booleanOrCallbackOrString('placeholder')
     return options
   }
 
@@ -620,7 +620,7 @@ up.feedback = (function() {
     preview: registerPreview,
     resolvePreviewFns,
     showPreviews,
-    buildSkeleton,
+    buildPlaceholder,
     statusOptions,
   }
 })()
