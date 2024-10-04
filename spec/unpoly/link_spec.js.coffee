@@ -2561,6 +2561,26 @@ describe 'up.link', ->
 
           expect(spinnerContainer).not.toHaveSelector('#spinner')
 
+        it 'accepts a code snippet that is called with the preview and produces a placeholder element', ->
+          fixture('#target', content: '<p>old target</p>')
+          other = fixture('#other')
+          placeholderElement = up.element.createFromHTML("<p>placeholder</p>")
+          link = fixture('a[href="/foo"][up-follow][up-target="#target"][up-preview="this.previewFn(preview)"]', text: 'label')
+          link.previewFn = jasmine.createSpy('previewFn fn').and.callFake((preview) -> preview.hide(other))
+
+          expect('#target').toHaveVisibleText('old target')
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect(link.previewFn).toHaveBeenCalledWith(jasmine.any(up.Preview))
+          expect(other).toBeHidden()
+
+          jasmine.respondWithSelector('#target', content: '<p>new target</p>')
+          await wait()
+
+          expect(other).toBeVisible()
+
       describe 'with [up-placeholder] modifier', ->
 
         it 'shows a UI placeholder while the link is loading', ->
@@ -2616,6 +2636,25 @@ describe 'up.link', ->
           expect('#target').toHaveVisibleText('revalidated target')
           expect(placeholderCompilerFn).not.toHaveBeenCalled()
           expect(up.network.isBusy()).toBe(false)
+
+        it 'accepts a code snippet that is called with the preview and produces a placeholder element', ->
+          fixture('#target', content: '<p>old target</p>')
+          placeholderElement = up.element.createFromHTML("<p>placeholder</p>")
+          link = fixture('a[href="/foo"][up-follow][up-target="#target"][up-placeholder="this.placeholderFn(preview)"]', text: 'label')
+          link.placeholderFn = jasmine.createSpy('placeholder fn').and.callFake(() -> placeholderElement)
+
+          expect('#target').toHaveVisibleText('old target')
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect(link.placeholderFn).toHaveBeenCalledWith(jasmine.any(up.Preview))
+          expect('#target').toHaveVisibleText('placeholder')
+
+          jasmine.respondWithSelector('#target', content: '<p>new target</p>')
+          await wait()
+
+          expect('#target').toHaveVisibleText('new target')
 
       describe 'following non-interactive elements with [up-href]', ->
 

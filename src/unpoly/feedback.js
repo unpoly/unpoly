@@ -368,20 +368,6 @@ up.feedback = (function() {
     }
   }
 
-  function buildPlaceholder(value, origin) {
-    if (u.isString(value)) {
-      if (value.startsWith('<')) {
-        value = e.createFromHTML(value)
-      } else {
-        value = up.fragment.get(value, { layer: 'closest', origin }) || up.fail('Unknown placeholder %s', value)
-      }
-    }
-
-    if (value.matches('template')) value = e.cloneTemplate(value)
-
-    return value
-  }
-
   function resolvePreviewFns(value) {
     if (u.isFunction(value)) {
       return [value]
@@ -426,8 +412,8 @@ up.feedback = (function() {
     const parser = new up.OptionsParser(element, options, parserOptions)
     parser.booleanOrString('disable')
     parser.boolean('feedback')
-    parser.booleanOrString('preview')
-    parser.booleanOrCallbackOrString('placeholder')
+    parser.booleanOrInvocationOrString('preview', { mainKey: 'preview' })
+    parser.booleanOrInvocationOrString('placeholder', { mainKey: 'preview' })
     return options
   }
 
@@ -620,7 +606,6 @@ up.feedback = (function() {
     preview: registerPreview,
     resolvePreviewFns,
     showPreviews,
-    buildPlaceholder,
     statusOptions,
   }
 })()

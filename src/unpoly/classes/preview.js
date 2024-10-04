@@ -111,7 +111,7 @@ up.Preview = class Preview {
 
   showPlaceholder(...args) {
     let [parent, placeholderReference] = this._parseMutatorArgs(args, 'val', 'val')
-    let placeholder = up.feedback.buildPlaceholder(placeholderReference, this.origin)
+    let placeholder = this._buildPlaceholder(placeholderReference)
 
     up.puts('[up-placeholder]', 'Showing placeholder %o', placeholderReference)
 
@@ -124,6 +124,22 @@ up.Preview = class Preview {
       // we don't see flickering when another overlay opens with the final content.
       this.renderOptions.openAnimation = false
     }
+  }
+
+  _buildPlaceholder(value) {
+    value = u.evalOption(value, this)
+
+    if (u.isString(value)) {
+      if (value.startsWith('<')) {
+        value = e.createFromHTML(value)
+      } else {
+        value = up.fragment.get(value, { layer: 'closest', origin: this.origin }) || up.fail('Unknown placeholder %s', value)
+      }
+    }
+
+    if (value.matches('template')) value = e.cloneTemplate(value)
+
+    return value
   }
 
   _parseMutatorArgs(args, ...specs) {

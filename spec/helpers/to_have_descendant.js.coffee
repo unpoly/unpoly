@@ -6,5 +6,3 @@ beforeEach ->
     toHaveDescendant: (util, customEqualityTesters) ->
       compare: (element, expectedDescendant) ->
         pass: $(element).find(expectedDescendant).length
-
-
