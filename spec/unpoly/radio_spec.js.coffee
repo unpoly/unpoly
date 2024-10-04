@@ -2324,22 +2324,22 @@ describe 'up.radio', ->
           expect(previewApply.calls.count()).toBe(2)
           expect(previewUndo.calls.count()).toBe(2)
 
-      describe 'with [up-skeleton]', ->
+      describe 'with [up-placeholder]', ->
 
-        it 'shows a UI skeleton while the fragment is loading', ->
+        it 'shows a UI placeholder while the fragment is loading', ->
           interval = 5
           timingTolerance = 30
           up.radio.config.pollInterval = interval
 
-          element = up.hello(fixture('.element[up-poll][up-skeleton="<span>skeleton text</span>"]', text: 'old text'))
+          element = up.hello(fixture('.element[up-poll][up-placeholder="<span>placeholder text</span>"]', text: 'old text'))
           expect('.element').toHaveVisibleText('old text')
 
           await wait(interval + timingTolerance)
 
           expect(jasmine.Ajax.requests.count()).toBe(1)
-          expect('.element').toHaveVisibleText('skeleton text')
+          expect('.element').toHaveVisibleText('placeholder text')
 
-          jasmine.respondWithSelector('.element[up-poll][up-skeleton="<span>skeleton text</span>"]', text: 'new text')
+          jasmine.respondWithSelector('.element[up-poll][up-placeholder="<span>placeholder text</span>"]', text: 'new text')
           await wait()
 
           expect('.element').toHaveText('new text')
@@ -2347,9 +2347,9 @@ describe 'up.radio', ->
           await wait(interval + timingTolerance)
 
           expect(jasmine.Ajax.requests.count()).toBe(2)
-          expect('.element').toHaveVisibleText('skeleton text')
+          expect('.element').toHaveVisibleText('placeholder text')
 
-          jasmine.respondWithSelector('.element[up-poll][up-skeleton="<span>skeleton text</span>"]', text: 'newer text')
+          jasmine.respondWithSelector('.element[up-poll][up-placeholder="<span>placeholder text</span>"]', text: 'newer text')
 
           await wait()
 

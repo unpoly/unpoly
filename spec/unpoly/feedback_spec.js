@@ -497,9 +497,9 @@ describe('up.feedback', function() {
 
       })
 
-      describe('with { skeleton } option', function() {
+      describe('with { placeholder } option', function() {
 
-        it('renders a UI skeleton as the content of the first targeted fragment', async function() {
+        it('renders a UI placeholder as the content of the first targeted fragment', async function() {
           htmlFixture(`
             <main>
               <div id="target1">
@@ -511,19 +511,19 @@ describe('up.feedback', function() {
               <div id="hungry" up-hungry>
                 <span class="content">old hungry</span>
               </div>
-              <template id="skeleton-template">
-                <div class="skeleton">loading...</div>
+              <template id="placeholder-template">
+                <div class="placeholder">loading...</div>
               </template>
             </main>
           `)
 
-          up.render({ url: '/path', target: '#target1, #target2', skeleton: '#skeleton-template' })
+          up.render({ url: '/path', target: '#target1, #target2', placeholder: '#placeholder-template' })
 
           await wait()
 
-          expect('#target1').toHaveSelector('.skeleton')
-          expect('#target2').not.toHaveSelector('.skeleton')
-          expect('#hungry').not.toHaveSelector('.skeleton')
+          expect('#target1').toHaveSelector('.placeholder')
+          expect('#target2').not.toHaveSelector('.placeholder')
+          expect('#hungry').not.toHaveSelector('.placeholder')
 
           jasmine.respondWith(`
             <main>

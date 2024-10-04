@@ -6,7 +6,7 @@ up.RenderOptions = (function() {
   const NO_PREVIEWS = {
     preview: false,
     disable: false,
-    skeleton: false,
+    placeholder: false,
     feedback: false,
   }
 
@@ -40,7 +40,7 @@ up.RenderOptions = (function() {
     'confirm',
     'feedback',
     'disable',
-    'skeleton',
+    'placeholder',
     'preview',
     'origin',
     'originLayer',
