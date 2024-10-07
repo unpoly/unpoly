@@ -21,6 +21,7 @@ up.Preview = class Preview {
   }
 
   undo(...args) {
+    if (this.ended) up.fail('Preview used after end of request')
     this._cleaner.guard(...args)
   }
 
@@ -38,6 +39,10 @@ up.Preview = class Preview {
 
   get layer() {
     return this.request.layer
+  }
+
+  get ended() {
+    return this.request.ended
   }
 
   run(value) {
