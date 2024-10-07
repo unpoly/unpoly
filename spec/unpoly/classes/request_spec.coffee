@@ -21,6 +21,66 @@ describe 'up.Request', ->
           expect(request.layer).toBeMissing()
           expect(request.context).toBeMissing()
 
+  describe '#ended', ->
+
+    it 'is false while the request is queued', ->
+      up.network.config.concurrency = 1
+      request1 = up.request('/foo')
+      request2 = up.request('/bar') # queued but not sent
+      await wait()
+
+      expect(up.network.isBusy()).toBe(true)
+      expect(request2.ended).toBe(false)
+
+    it 'is false while the request is loading', ->
+      request = up.request('/foo')
+      await wait()
+
+      expect(up.network.isBusy()).toBe(true)
+      expect(request.ended).toBe(false)
+
+    it 'turns true synchronously after the request has received a successful response', ->
+      request = up.request('/foo')
+      await wait()
+
+      expect(request.ended).toBe(false)
+      jasmine.respondWith('foo')
+      # don't wait()
+
+      expect(request.ended).toBe(true)
+
+    it 'turns true synchronously after the request has received a failed response', ->
+      request = up.request('/foo')
+      await wait()
+
+      expect(request.ended).toBe(false)
+
+      jasmine.respondWith(responseText: 'error', status: 500)
+      # don't wait()
+
+      expect(request.ended).toBe(true)
+
+    it 'turns true synchronously after the request failed due to a network issue', ->
+      request = up.request('/foo')
+      await wait()
+
+      expect(request.ended).toBe(false)
+
+      jasmine.lastRequest().responseError()
+      # don't wait()
+
+      expect(request.ended).toBe(true)
+
+    it 'turns true synchronously after the request has been aborted', ->
+      request = up.request('/foo')
+      await wait()
+
+      expect(request.ended).toBe(false)
+      request.abort()
+      # don't wait()
+
+      expect(request.ended).toBe(true)
+
   describe '#xhr', ->
 
     it 'returns an XMLHttpRequest instance', ->
