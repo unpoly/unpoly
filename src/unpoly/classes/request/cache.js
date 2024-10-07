@@ -138,9 +138,9 @@ up.Request.Cache = class Cache {
 
     let value
 
-    // up.Request#runPreviews() must synchronously know if it's already settled and fromCache.
+    // up.Request#runPreviews() must synchronously know if it's already ended and fromCache.
     // Awaiting the existing request would be too late, even if it's just 1 microtask later.
-    if (existingRequest.settled && existingRequest.response)
+    if (existingRequest.ended && existingRequest.response)
       value = existingRequest.response
     else
       value = await u.always(existingRequest)
