@@ -570,9 +570,9 @@ up.Request = class Request extends up.Record {
     }
   }
 
-  showPreviews(renderOptions) {
+  runPreviews(renderOptions) {
     if (!this.settled && !this.fromCache) {
-      this._revertPreviews = up.feedback.showPreviews(this, renderOptions)
+      this._revertPreviews = up.feedback.runPreviews(this, renderOptions)
     }
   }
 
