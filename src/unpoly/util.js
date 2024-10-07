@@ -1105,17 +1105,30 @@ up.util = (function() {
   }
 
   /*-
-  Waits for the given number of milliseconds, the runs the given callback.
+  Waits for the given number of milliseconds, then runs the given callback.
+
+  This function works like the built-in [`setTimeout()`](https://developer.mozilla.org/en-US/docs/Web/API/setTimeout), except that the argument order is flipped for
+  ergonomic reasons.
 
   Instead of `up.util.timer(0, fn)` you can also use [`up.util.task(fn)`](/up.util.task).
 
+  ### Example
+
+  ```js
+  up.util.timer(3000, function() {
+    console.log("Look, it's 3 seconds later!")
+  })
+  ```
+
   @function up.util.timer
   @param {number} millis
+    The time interval to wait in milliseconds.
   @param {Function()} callback
+    The function to call after waiting.
   @return {number}
     The ID of the scheduled timeout.
 
-    You may pass this ID to `clearTimeout()` to un-schedule the timeout.
+    To unschedule the task, pass this ID to [`clearTimeout()`](https://developer.mozilla.org/en-US/docs/Web/API/clearTimeout).
   @stable
   */
   function scheduleTimer(millis, callback) {
