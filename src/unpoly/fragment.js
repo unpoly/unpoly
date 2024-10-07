@@ -738,13 +738,13 @@ up.fragment = (function() {
     Background requests also won't emit `up:network:late` events and won't trigger
     the [progress bar](/loading-indicators#progress-bar).
 
-  @param {number|boolean} [options.lateTime]
+  @param {number|boolean} [options.lateDelay]
     The number of milliseconds after which this request can cause
     an `up:network:late` event and show the [progress bar](/loading-indicators#progress-bar).
 
-    To prevent the event and progress bar, pass `{ lateTime: false }`.
+    To prevent the event and progress bar, pass `{ lateDelay: false }`.
 
-    Defaults to `up.network.config.lateTime`.
+    Defaults to `up.network.config.lateDelay`.
 
     @experimental
 
