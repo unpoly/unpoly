@@ -1533,6 +1533,16 @@ up.element = (function() {
     return matches
   }
 
+  function documentPosition(element) {
+    let nextSibling = element.nextElementSibling
+    if (nextSibling) {
+      return [nextSibling, 'beforebegin']
+    } else {
+      // We're the only or last child of our parent.
+      return [element.parentElement, 'beforeend']
+    }
+  }
+
   return {
     subtree,
     subtreeFirst,
@@ -1600,5 +1610,6 @@ up.element = (function() {
     cloneTemplate,
     matchSelectorMap,
     elementLikeMatches,
+    documentPosition,
   }
 })()
