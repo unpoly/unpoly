@@ -38,7 +38,7 @@ up.Request.Queue = class Queue {
     if (request.background) {
       request.background = false
 
-      // If the request has been loading longer than its lateTime, we have
+      // If the request has been loading longer than its lateDelay, we have
       // already ignored its up:network:late event. Hence we schedule another check.
       this._scheduleSlowTimer(request)
     }
@@ -48,7 +48,7 @@ up.Request.Queue = class Queue {
     if (!request.isTimed()) return
 
     // In case the request was loading in the background before it was promoted to
-    // the foreground, the request may have less time left than request.lateTime.
+    // the foreground, the request may have less time left than request.lateDelay.
     let timeUntilLate = Math.max(request.effectiveLateTime - request.age)
 
     // We may have multiple timers running concurrently.
@@ -153,14 +153,14 @@ up.Request.Queue = class Queue {
 
   get _timedRequests() {
     // Exclude requests that return false.
-    // These are requests that were initialized with { lateTime: false } or { background: true }.
+    // These are requests that were initialized with { lateDelay: false } or { background: true }.
     return this.allRequests.filter((request) => request.isTimed())
   }
 
   // Returns queued requests that are (1) timed (effectiveLateTime not false)
   // and (2) have been longer queued than their effectiveLateTime.
   _hasLateTimedRequests() {
-    // If lateTime is 200, we're scheduling the _checkLate() timer after 200 ms.
+    // If lateDelay is 200, we're scheduling the _checkLate() timer after 200 ms.
     // The request must be slow when _checkLate() is called, or we will never look
     // at it again. Since the JavaScript setTimeout() is inaccurate, we allow a request
     // to "be slow" a few ms earlier than actually configured.

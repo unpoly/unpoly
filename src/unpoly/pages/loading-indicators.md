@@ -36,10 +36,10 @@ up-progress-bar {
 ### Controlling when the progress bar appears
 
 Unpoly will show the progress bar when a request is taking longer to respond
-than `up.network.config.lateTime`.
+than `up.network.config.lateDelay`.
 
-You may override this per-request by using the [`{ lateTime }`](/up.render#options.lateTime)
-option or [`[up-late-time]`](/up-follow#up-late-time) attribute. Passing `{ lateTime: false }` will
+You may override this per-request by using the [`{ lateDelay }`](/up.render#options.lateDelay)
+option or [`[up-late-delay]`](/up-follow#up-late-delay) attribute. Passing `{ lateDelay: false }` will
 never show a progress bar for that request.
 
 Requests that are loading in the background should never show the progress bar. 

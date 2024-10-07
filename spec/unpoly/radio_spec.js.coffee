@@ -237,7 +237,7 @@ describe 'up.radio', ->
 
       it 'does not emit up:network:late if the server is slow to respond', asyncSpec (next) ->
         element = up.hello(fixture('.element'))
-        up.network.config.lateTime = 20
+        up.network.config.lateDelay = 20
         lateListener = jasmine.createSpy('up:network:late listener')
         up.on('up:network:late', lateListener)
 

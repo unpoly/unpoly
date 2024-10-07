@@ -172,7 +172,7 @@ up.migrate.preprocessRenderOptions = function(options) {
   up.migrate.fixKey(options, 'keep', 'useKeep')
   up.migrate.fixKey(options, 'hungry', 'useHungry')
   up.migrate.fixKey(options, 'failOnFinished', 'onFailFinished')
-  up.migrate.fixKey(options, 'badResponseTime', 'lateTime')
+  up.migrate.fixKey(options, 'badResponseTime', 'lateDelay')
 
   // Rewrite deprecated { reveal } option (it had multiple variants)
   if (u.isString(options.reveal)) {
