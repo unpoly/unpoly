@@ -335,7 +335,7 @@ up.feedback = (function() {
   @stable
   */
 
-  function showPreviews(request, renderOptions) {
+  function runPreviews(request, renderOptions) {
     let { fragment, fragments, origin } = request
     let cleaner = u.cleaner()
 
@@ -605,7 +605,7 @@ up.feedback = (function() {
     // showAroundRequest,
     preview: registerPreview,
     resolvePreviewFns,
-    showPreviews,
+    runPreviews,
     statusOptions,
   }
 })()
