@@ -939,19 +939,19 @@ describe 'up.link', ->
         options = up.link.followOptions(link)
         expect(options.preview).toBe(false)
 
-      it 'parses an [up-late-time=Number] attribute as a number', ->
-        link = fixture('a[href="/foo"][up-late-time=123]')
+      it 'parses an [up-late-delay=Number] attribute as a number', ->
+        link = fixture('a[href="/foo"][up-late-delay=123]')
         up.hello(link)
 
         options = up.link.followOptions(link)
-        expect(options.lateTime).toBe(123)
+        expect(options.lateDelay).toBe(123)
 
-      it 'parses an [up-late-time=false] attribute as a boolean', ->
-        link = fixture('a[href="/foo"][up-late-time=false]')
+      it 'parses an [up-late-delay=false] attribute as a boolean', ->
+        link = fixture('a[href="/foo"][up-late-delay=false]')
         up.hello(link)
 
         options = up.link.followOptions(link)
-        expect(options.lateTime).toBe(false)
+        expect(options.lateDelay).toBe(false)
 
       if up.migrate.loaded
         it 'parses an [up-reset-scroll] attribute', ->

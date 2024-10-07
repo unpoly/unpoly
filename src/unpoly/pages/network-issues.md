@@ -85,7 +85,7 @@ Slow server responses
 
 Even with a great network connection, your server make take long to render expensive pages.
 
-When requests are taking [too long to respond](/up.network.config#config.lateTime),
+When requests are taking [too long to respond](/up.network.config#config.lateDelay),
 an animated [progress bar](/loading-indicators#progress-bar) is shown.
 
 You may also [style fragments while they are loading](/up.feedback).
