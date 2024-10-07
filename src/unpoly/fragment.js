@@ -2939,11 +2939,19 @@ up.fragment = (function() {
   @internal
   */
   function insertTemp(...args) {
-    let [reference, position = 'beforeend', newElement] = u.args(args, 'val', u.isAdjacentPosition, 'val')
-    newElement = e.wrap(newElement)
-    reference.insertAdjacentElement(position, newElement)
-    up.hello(newElement)
-    return () => up.destroy(newElement)
+    let [reference, position = 'beforeend', tempElement] = u.args(args, 'val', u.isAdjacentPosition, 'val')
+    tempElement = e.wrap(tempElement)
+    let oldPosition = document.contains(tempElement) && e.documentPosition(tempElement)
+    reference.insertAdjacentElement(position, tempElement)
+    if (oldPosition) {
+      // Don't compile or destroy an element if it was connected to the document before the move.
+      return () => {
+        oldPosition[0].insertAdjacentElement(oldPosition[1], tempElement)
+      }
+    } else {
+      up.hello(tempElement)
+      return () => up.destroy(tempElement)
+    }
   }
 
   // /*-
