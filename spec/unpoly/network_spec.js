@@ -2051,7 +2051,7 @@ describe('up.network', function() {
       describe('up:network:late and up:network:recover events', function() {
 
         beforeEach(function() {
-          up.network.config.lateTime = 0
+          up.network.config.lateDelay = 0
           this.events = []
           u.each(['up:request:load', 'up:request:loaded', 'up:network:late', 'up:network:recover', 'up:request:offline', 'up:request:aborted'], (eventType) => {
             up.on(eventType, () => {
@@ -2064,7 +2064,7 @@ describe('up.network', function() {
           let lateListener = jasmine.createSpy('up:network:late listener')
           up.on('up:network:late', lateListener)
 
-          up.network.config.lateTime = 70
+          up.network.config.lateDelay = 70
 
           up.request({ url: '/foo' })
 
@@ -2077,12 +2077,12 @@ describe('up.network', function() {
           })
         }))
 
-        it('allows to configure request-specific response times as a function in up.network.config.lateTime', asyncSpec(function(next) {
+        it('allows to configure request-specific response times as a function in up.network.config.lateDelay', asyncSpec(function(next) {
           let lateListener = jasmine.createSpy('up:network:late listener')
           up.on('up:network:late', lateListener)
 
-          let badResponseTimeFn = jasmine.createSpy('lateTime').and.callFake((request) => request.url === '/foo' ? 70 : 0)
-          up.network.config.lateTime = badResponseTimeFn
+          let badResponseTimeFn = jasmine.createSpy('lateDelay').and.callFake((request) => request.url === '/foo' ? 70 : 0)
+          up.network.config.lateDelay = badResponseTimeFn
 
           up.request({ url: '/foo' })
 
@@ -2096,12 +2096,12 @@ describe('up.network', function() {
           })
         }))
 
-        it('honors an up.request({ lateTime }) option', async function() {
-          up.network.config.lateTime = 5
+        it('honors an up.request({ lateDelay }) option', async function() {
+          up.network.config.lateDelay = 5
           let lateListener = jasmine.createSpy('up:network:late listener')
           up.on('up:network:late', lateListener)
 
-          up.request({ url: '/foo', lateTime: 70 })
+          up.request({ url: '/foo', lateDelay: 70 })
           await wait(40)
 
           expect(lateListener).not.toHaveBeenCalled()
@@ -2110,12 +2110,12 @@ describe('up.network', function() {
           expect(lateListener).toHaveBeenCalled()
         })
 
-        it('never emits an up:network:late event for requests with { lateTime: false }', async function() {
-          up.network.config.lateTime = 5
+        it('never emits an up:network:late event for requests with { lateDelay: false }', async function() {
+          up.network.config.lateDelay = 5
           let lateListener = jasmine.createSpy('up:network:late listener')
           up.on('up:network:late', lateListener)
 
-          up.request({ url: '/foo', lateTime: false })
+          up.request({ url: '/foo', lateDelay: false })
           await wait(70)
 
           expect(lateListener).not.toHaveBeenCalled()
@@ -2159,7 +2159,7 @@ describe('up.network', function() {
 
         it('can delay the up:network:late event to prevent flickering of spinners', asyncSpec(function(next) {
           next(() => {
-            up.network.config.lateTime = 50
+            up.network.config.lateDelay = 50
             up.request({url: '/foo'})
           })
 
@@ -2198,7 +2198,7 @@ describe('up.network', function() {
 
         it('does not emit up:network:recover if a delayed up:network:late was never emitted due to a fast response', asyncSpec(function(next) {
           next(() => {
-            up.network.config.lateTime = 200
+            up.network.config.lateDelay = 200
             up.request({url: '/foo'})
           })
 
@@ -2255,7 +2255,7 @@ describe('up.network', function() {
         }))
 
         it('emits up:network:recover if a request timed out', asyncSpec(function(next) {
-          up.network.config.lateTime = 10
+          up.network.config.lateDelay = 10
 
           next(() => {
             up.request({url: '/foo'})
@@ -2285,7 +2285,7 @@ describe('up.network', function() {
         }))
 
         it('emits up:network:recover if a request was aborted', asyncSpec(function(next) {
-          up.network.config.lateTime = 10
+          up.network.config.lateDelay = 10
 
           next(() => {
             this.request = up.request({url: '/foo'})
@@ -2313,7 +2313,7 @@ describe('up.network', function() {
         }))
 
         it('emits up:network:recover if a request failed fatally', asyncSpec(function(next) {
-          up.network.config.lateTime = 10
+          up.network.config.lateDelay = 10
 
           next(() => {
             this.request = up.request({url: '/foo'})
@@ -2341,7 +2341,7 @@ describe('up.network', function() {
         }))
 
         it('delays up:network:recover until the foreground queue is completely empty', async function() {
-          up.network.config.lateTime = 50
+          up.network.config.lateDelay = 50
 
           // Make a chain of requests, like a queued watcher diff.
           let request1, request2
@@ -2798,7 +2798,7 @@ describe('up.network', function() {
     describe('progress bar', function() {
 
       it('shows an animated progress when requests are late', asyncSpec(function(next) {
-        up.network.config.lateTime = 200
+        up.network.config.lateDelay = 200
         let lastWidth = null
 
         up.request('/slow')
@@ -2824,7 +2824,7 @@ describe('up.network', function() {
       }))
 
       it('shows no progress bar when requests finish fast enough', asyncSpec(function(next) {
-        up.network.config.lateTime = 300
+        up.network.config.lateDelay = 300
 
         up.request('/slow')
 
@@ -2839,7 +2839,7 @@ describe('up.network', function() {
       it('delays removal of the progress bar as more pending requests become late')
 
       it('does not show a progress bar with up.network.config.progressBar = false', asyncSpec(function(next) {
-        up.network.config.lateTime = 10
+        up.network.config.lateDelay = 10
         up.network.config.progressBar = false
         up.request('/slow')
 
@@ -2849,7 +2849,7 @@ describe('up.network', function() {
       if (up.migrate.loaded) {
 
         it('does not show a progress bar when an up:network:late listener is registered', asyncSpec(function(next) {
-          up.network.config.lateTime = 30
+          up.network.config.lateDelay = 30
           up.on('up:network:late', () => console.log("custom loading indicator"))
           up.request('/slow')
 
@@ -2857,7 +2857,7 @@ describe('up.network', function() {
         }))
 
         it('shows a progress bar when no up:network:late listener is registered', asyncSpec(function(next) {
-          up.network.config.lateTime = 10
+          up.network.config.lateDelay = 10
           up.request('/slow')
 
           next.after(100, () => expect(document).toHaveSelector('up-progress-bar'))
@@ -2866,7 +2866,7 @@ describe('up.network', function() {
       } else {
 
         it('shows a progress bar even when an up:network:late listener is registered', asyncSpec(function(next) {
-          up.network.config.lateTime = 10
+          up.network.config.lateDelay = 10
           up.request('/slow')
 
           up.on('up:network:late', () => console.log("custom loading indicator"))
