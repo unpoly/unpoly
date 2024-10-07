@@ -140,7 +140,7 @@ up.Request.Cache = class Cache {
 
     // In case existingRequest is already settled, we need to settle newRequest sync, not one microtask later.
     // This is required to reliably revert active previews before making a new request.
-    if (existingRequest.settled && existingRequest.response) {
+    if (existingRequest.ended && existingRequest.response) {
       value = existingRequest.response
     } else {
       // Wait until existingRequest responds or errors.
