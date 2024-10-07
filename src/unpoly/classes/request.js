@@ -257,10 +257,10 @@ up.Request = class Request extends up.Record {
   The number of milliseconds after which this request can cause
   an `up:network:late` event and show the [progress bar](/loading-indicators#progress-bar).
 
-  Defaults to `up.network.config.lateTime`.
+  Defaults to `up.network.config.lateDelay`.
 
-  @property up.Request#lateTime
-  @param {number|boolean} [lateTime]
+  @property up.Request#lateDelay
+  @param {number|boolean} [lateDelay]
   @experimental
   */
 
@@ -299,7 +299,7 @@ up.Request = class Request extends up.Record {
       'onLoading',
       'fail',
       'abortable',
-      'lateTime',
+      'lateDelay',
       'previews',
     ]
   }
@@ -379,7 +379,7 @@ up.Request = class Request extends up.Record {
     if (this.background) {
       return false
     } else {
-      return this.lateTime ?? u.evalOption(up.network.config.lateTime, this)
+      return this.lateDelay ?? u.evalOption(up.network.config.lateDelay, this)
     }
   }
 
