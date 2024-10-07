@@ -10759,6 +10759,7 @@ describe 'up.fragment', ->
         compilerFunction = jasmine.createSpy('compiler function')
         up.compiler('my-element', compilerFunction)
         newElement = document.createElement('my-element')
+
         up.fragment.insertTemp(reference, newElement)
 
         expect(compilerFunction).toHaveBeenCalledWith(newElement, jasmine.anything(), jasmine.anything())
@@ -10796,6 +10797,85 @@ describe 'up.fragment', ->
           undo()
 
           expect(destructorFunction).toHaveBeenCalledWith(newElement)
+
+      describe 'with a previously attached element', ->
+
+        it 'moves the element to the temporary position', ->
+          reference = fixture('#reference')
+          newElement = fixture('my-element')
+
+          up.fragment.insertTemp(reference, newElement)
+
+          expect(newElement.parentElement).toBe(reference)
+
+        it 'does not run compilers', ->
+          reference = fixture('#reference')
+          compilerFunction = jasmine.createSpy('compiler function')
+          up.compiler('my-element', compilerFunction)
+          newElement = fixture('my-element')
+
+          up.fragment.insertTemp(reference, newElement)
+
+          expect(compilerFunction).not.toHaveBeenCalled()
+
+        describe 'returned undo function', ->
+
+          it 'does not run destructors', ->
+            reference = fixture('#reference')
+            destructorFunction = jasmine.createSpy('destructor function')
+            compilerFunction = jasmine.createSpy('compiler function').and.returnValue(destructorFunction)
+            up.compiler('my-element', compilerFunction)
+            newElement = fixture('my-element')
+
+            undo = up.fragment.insertTemp(reference, newElement)
+            expect(compilerFunction).not.toHaveBeenCalled()
+            expect(destructorFunction).not.toHaveBeenCalled()
+
+            undo()
+            expect(compilerFunction).not.toHaveBeenCalled()
+            expect(destructorFunction).not.toHaveBeenCalled()
+
+          it 'moves it back to its original precision as an only child', ->
+            reference = fixture('#reference')
+            oldContainer = fixture('#container')
+            tempElement = e.affix(oldContainer, '#movee')
+
+            undo = up.fragment.insertTemp(reference, tempElement)
+            expect(tempElement.parentElement).toBe(reference)
+
+            undo()
+
+            expect(tempElement.parentElement).toBe(oldContainer)
+
+          it 'moves it back to its original precision when it has a next sibling', ->
+            reference = fixture('#reference')
+            oldContainer = fixture('#container')
+            tempElement = e.affix(oldContainer, '#movee')
+            oldNextSibling = e.affix(oldContainer, '#sibling')
+
+            undo = up.fragment.insertTemp(reference, tempElement)
+
+            expect(tempElement.parentElement).toBe(reference)
+
+            undo()
+
+            expect(tempElement.parentElement).toBe(oldContainer)
+            expect(tempElement.nextElementSibling).toBe(oldNextSibling)
+
+          it 'moves it back to its original precision when it has a previous sibling', ->
+            reference = fixture('#reference')
+            oldContainer = fixture('#container')
+            oldPreviousSibling = e.affix(oldContainer, '#sibling')
+            tempElement = e.affix(oldContainer, '#movee')
+
+            undo = up.fragment.insertTemp(reference, tempElement)
+
+            expect(tempElement.parentElement).toBe(reference)
+
+            undo()
+
+            expect(tempElement.parentElement).toBe(oldContainer)
+            expect(tempElement.previousElementSibling).toBe(oldPreviousSibling)
 
 #    describe 'up.fragment.swapTemp()', ->
 #
