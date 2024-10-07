@@ -1087,7 +1087,7 @@ describe('up.Preview', function() {
           </div>
         `)
 
-        let placeholder = htmlFixture(`<div id="placeholder">placeholder</div>`)
+        let placeholder = up.element.createFromHTML(`<div id="placeholder">placeholder</div>`)
         let previewFn = (preview) => preview.showPlaceholder(parent, placeholder)
 
         up.render({ preview: previewFn, url: '/url', target: '#target' })
