@@ -287,4 +287,4 @@ describe 'up.Layer.Modal', ->
 
         expect(document.documentElement.getAttribute('style')).not.toContain('--up')
         expect(document.body.getAttribute('style')).not.toContain('--up-')
-        expect(anchored).not.toContain('--up-')
+        expect(anchored.getAttribute('style')).not.toContain('--up-')

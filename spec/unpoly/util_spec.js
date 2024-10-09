@@ -6,6 +6,67 @@ describe('up.util', () => {
 
   describe('JavaScript functions', function() {
 
+    describe('up.util.wrapList()', function() {
+
+      describe('with null', function() {
+
+        it('returns an empty array', function() {
+          let result = up.util.wrapList(null)
+          expect(result).toBeArray([])
+          expect(result).toEqual([])
+        })
+
+      })
+
+      describe('with undefined', function() {
+
+        it('returns an empty array', function() {
+          let result = up.util.wrapList(undefined)
+          expect(result).toBeArray([])
+          expect(result).toEqual([])
+        })
+
+      })
+
+      describe('with a boolean value', function() {
+
+        it('returns an array containing only that value', function() {
+          expect(up.util.wrapList(true)).toEqual([true])
+          expect(up.util.wrapList(false)).toEqual([false])
+        })
+
+      })
+
+      describe('with a string', function() {
+
+        it('returns an array containing only that string', function() {
+          let result = up.util.wrapList('foo')
+          expect(result).toBeArray([])
+          expect(result).toEqual(['foo'])
+        })
+
+      })
+
+      describe('for an array', function() {
+
+        it('returns the array reference as it is', function() {
+          let array = [1, 2, 3]
+          expect(up.util.wrapList(array)).toBe(array)
+        })
+
+      })
+
+      describe('for a NodeList', function() {
+
+        it('returns the NodeList reference as it is', function() {
+          let nodeList = document.querySelectorAll('div')
+          expect(up.util.wrapList(nodeList)).toBe(nodeList)
+        })
+
+      })
+
+    })
+
     describe('up.util.args()', function() {
 
       describe('val slots', function() {
@@ -564,21 +625,6 @@ describe('up.util', () => {
       it('returns true for a jQuery collection', function() {
         const value = $('body')
         expect(up.util.isElementLike(value)).toBe(true)
-      })
-
-      it('returns true for a NodeList', function() {
-        const value = document.querySelectorAll('body')
-        expect(up.util.isElementLike(value)).toBe(true)
-      })
-
-      it('returns true for an array of elements', function() {
-        const value = [document.body]
-        expect(up.util.isElementLike(value)).toBe(true)
-      })
-
-      it('returns false for an array of non-element values', function() {
-        const value = ['foo']
-        expect(up.util.isElementLike(value)).toBe(false)
       })
 
       it('returns false for undefined', function() {

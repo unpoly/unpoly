@@ -426,10 +426,10 @@ up.Request = class Request extends up.Record {
 
   _findFragments() {
     let steps = up.fragment.parseTargetSteps(this.target)
-    let selectors = u.map(steps, 'selector')
     let lookupOpts = { origin: this.origin, layer: this.layer }
-
-    return u.compact(u.map(selectors, (selector) => up.fragment.get(selector, lookupOpts)))
+    // Look for one match per step.
+    let matches = u.map(steps, (step) => up.fragment.get(step.selector, lookupOpts))
+    return u.compact(matches)
   }
 
   get bindFragments() {

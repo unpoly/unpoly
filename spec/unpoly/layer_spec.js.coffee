@@ -15,9 +15,22 @@ describe 'up.layer', ->
         value = await up.layer.open()
         expect(value).toEqual(jasmine.any(up.Layer))
 
-      it 'opens a layer with empty content when neither { url, document, fragment, content } option is given', ->
-        layer = await up.layer.open()
-        expect(layer).toHaveText('')
+      it 'opens an empty overlay if neither { target, url, document, fragment, content } is given', ->
+        await up.layer.open()
+
+        expect(up.layer.count).toBe(2)
+
+        element = document.querySelector('up-modal up-modal-content')
+        expect(element).toBeGiven()
+        expect(element.innerText).toBeBlank()
+
+      it 'manipulates the stack synchronously', ->
+        expect(up.layer.count).toBe(1)
+
+        up.layer.open(target: '.element', content: '')
+
+        expect(up.layer.count).toBe(2)
+        expect(up.layer.current.isOverlay()).toBe(true)
 
       describe 'if there are existing overlays over the { baseLayer }', ->
 
@@ -25,6 +38,18 @@ describe 'up.layer', ->
           [root, overlay1, overlay2] = makeLayers(3)
 
           up.layer.open(baseLayer: overlay1)
+
+          expect(up.layer.count).toBe(3)
+
+          expect(up.layer.get(0)).toBe(root)
+          expect(up.layer.get(1)).toBe(overlay1)
+          expect(up.layer.get(2)).not.toBe(overlay2)
+          expect(overlay2).toBeClosed()
+
+        it 'closes existing overlays over the { baseLayer }, ignoring a { peel: false } option', ->
+          [root, overlay1, overlay2] = makeLayers(3)
+
+          up.layer.open(baseLayer: overlay1, peel: false)
 
           expect(up.layer.count).toBe(3)
 
@@ -56,9 +81,9 @@ describe 'up.layer', ->
           expect(up.layer.count).toBe(2)
           expect(up.layer.current.element).toHaveSelector('.new-overlay-element')
 
-      describe 'from a remote URL', ->
+      describe 'with { url } option', ->
 
-        it 'opens a new overlay loaded from a remote { url }', asyncSpec (next) ->
+        it 'loads HTML from the server and opens an overlay', asyncSpec (next) ->
           up.layer.open(target: '.element', url: '/path')
 
           next =>
@@ -121,6 +146,23 @@ describe 'up.layer', ->
           expect(abortedURLs.length).toBe(1)
           expect(abortedURLs[0]).toMatchURL('/path1')
 
+        it 'runs a { preview } function while the server request is loading', ->
+          undoFn = jasmine.createSpy('undo fn')
+          previewFn = jasmine.createSpy('preview function').and.returnValue(undoFn)
+
+          fixture('#target')
+          up.render({ preview: previewFn, url: '/path', target: '#target' })
+
+          await wait()
+
+          expect(previewFn).toHaveBeenCalledWith(jasmine.any(up.Preview))
+          expect(undoFn).not.toHaveBeenCalled()
+
+          jasmine.respondWithSelector('#target')
+          await wait()
+
+          expect(undoFn).toHaveBeenCalled()
+
         describe 'when the server sends an X-Up-Events header', ->
 
           it 'emits these events', asyncSpec (next) ->
@@ -140,7 +182,7 @@ describe 'up.layer', ->
               expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining(event1Plan))
               expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining(event2Plan))
 
-      describe 'from a string of HTML', ->
+      describe 'with { document } option', ->
 
         it 'opens a new overlay with matching HTML extracted from the given as { document }', ->
           await up.layer.open(
@@ -155,6 +197,8 @@ describe 'up.layer', ->
           expect(element).toHaveClass('other-class')
           expect(element).toHaveText('element text')
 
+      describe 'with { fragment } option', ->
+
         it 'derives a new overlay with a selector and outer HTML derived from the given { fragment } option', ->
           await up.layer.open(
             fragment: '<div class="element">element text</div>'
@@ -166,10 +210,12 @@ describe 'up.layer', ->
           expect(element).toBeGiven()
           expect(element).toHaveText('element text')
 
-        it 'opens a new overlay from inner HTML given as { content }, constructing a container matching the { target }', ->
+      describe 'with { content } option', ->
+
+        it 'opens a new overlay from the given inner HTML string, constructing a container matching the { target }', ->
           await up.layer.open(
             target: '.element',
-            content: 'element text'
+            content: '<p>element text</p>'
           )
 
           expect(up.layer.count).toBe(2)
@@ -178,24 +224,67 @@ describe 'up.layer', ->
           expect(element).toBeGiven()
           expect(element).toHaveText('element text')
 
-        it 'opens an empty overlay if neither { document } nor { fragment } nor { content } is given', ->
+        it 'opens a new overlay from a mixed element/text HTML string without a single root', ->
           await up.layer.open(
-            target: '.element'
+            target: '.element',
+            content: 'foo <b>bar</b> baz'
           )
 
           expect(up.layer.count).toBe(2)
 
           element = document.querySelector('up-modal .element')
           expect(element).toBeGiven()
-          expect(element.innerText).toBeBlank()
+          expect(element).toHaveText('foo bar baz')
 
-        it 'manipulates the stack synchronously', ->
-          expect(up.layer.count).toBe(1)
+        it 'opens a new overlay from a given Element', ->
+          givenElement = up.element.createFromHTML('<p>element text</p>')
 
-          up.layer.open(target: '.element', content: '')
+          await up.layer.open(
+            target: '.element',
+            content: givenElement
+          )
 
           expect(up.layer.count).toBe(2)
-          expect(up.layer.current.isOverlay()).toBe(true)
+
+          renderedElement = document.querySelector('up-modal .element')
+          expect(renderedElement).toBeGiven()
+          expect(renderedElement).toHaveText('element text')
+          expect(renderedElement.children).toEqual [givenElement]
+
+        it 'opens a new overlay from a given Text node', ->
+          givenNode = new Text('foo')
+
+          await up.layer.open(
+            target: '.element',
+            content: givenNode
+          )
+
+          expect(up.layer.count).toBe(2)
+
+          renderedElement = document.querySelector('up-modal .element')
+          expect(renderedElement).toBeGiven()
+          expect(renderedElement).toHaveText('foo')
+          expect(renderedElement.childNodes).toEqual [givenNode]
+
+        it 'opens a new overlay from a given NodeList with mixed Text and Element nodes', ->
+          givenNodes = [...up.element.parseNodesFromHTML('foo <b>bar</b> baz')]
+          expect(givenNodes).toHaveLength(3)
+          expect(givenNodes[0]).toBeTextNode()
+          expect(givenNodes[1]).toBeElement()
+          expect(givenNodes[2]).toBeTextNode()
+
+          await up.layer.open(
+            target: '.element',
+            content: givenNodes
+          )
+
+          expect(up.layer.count).toBe(2)
+
+          renderedElement = document.querySelector('up-modal .element')
+          expect(renderedElement).toBeGiven()
+          expect(renderedElement).toHaveText('foo bar baz')
+          expect(renderedElement.childNodes).toEqual(givenNodes)
+
 
       describe 'animation', ->
 

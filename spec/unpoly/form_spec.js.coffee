@@ -2008,17 +2008,6 @@ describe 'up.form', ->
             # See that the validation of .match is still sent
             expect(jasmine.Ajax.requests.count()).toBe(1)
 
-      describe 'with an array of multiple elements', ->
-
-        it 'throws an error as this signature is not supported', ->
-          form = fixture('form[action=/form]')
-          field1 = e.affix(form, 'input[name=email]')
-          field2 = e.affix(form, 'input[name=password]')
-
-          validate = -> up.validate([field1, field2])
-
-          expect(validate).toThrowError()
-
       describe 'return value', ->
 
         it 'returns a Promise that fulfills when the server responds to validation with an 200 OK status code', asyncSpec (next) ->

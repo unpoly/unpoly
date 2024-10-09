@@ -97,8 +97,14 @@ up.Preview = class Preview {
   }
 
   insert(...args) {
-    let [reference, position = 'beforeend', newElement] = this._parseMutatorArgs(args, 'val', u.isAdjacentPosition, 'val')
-    this.undo(up.fragment.insertTemp(reference, position, newElement))
+    // tempValue can have on of the following forms:
+    // - A string of HTML
+    // - A CSS selector string
+    // - An Element node
+    // - A Text node
+    // - A NodeList with mixed Element and Text nodes
+    let [reference, position = 'beforeend', tempValue] = this._parseMutatorArgs(args, 'val', u.isAdjacentPosition, 'val')
+    this.undo(up.fragment.insertTemp(reference, position, tempValue))
   }
 
   show(...args) {
@@ -113,6 +119,7 @@ up.Preview = class Preview {
 
   hideContent(...args) {
     let [parent] = this._parseMutatorArgs(args, 'val')
+    // Place all children in a wrapper so we can hide text nodes.
     let wrapper = e.wrapChildren(parent)
     e.hide(wrapper)
     this.undo(() => e.unwrap(wrapper))
@@ -120,35 +127,22 @@ up.Preview = class Preview {
 
   showPlaceholder(...args) {
     let [parent, placeholderReference] = this._parseMutatorArgs(args, 'val', 'val')
-    let placeholder = this._buildPlaceholder(placeholderReference)
+
+    // We do not need to wrap a NodeList of mixed Text and Element nodes.
+    // Both swapContent() and openLayer() can deal with that.
+    let placeholderNodes = up.fragment.provideNodes(placeholderReference, { callbackArgs: [this], origin: this.origin })
 
     up.puts('[up-placeholder]', 'Showing placeholder %o', placeholderReference)
 
     if (parent) {
-      this.swapContent(parent, placeholder)
+      this.swapContent(parent, placeholderNodes)
     } else if (this.layer === 'new') {
-      this.openLayer(placeholder, { closeAnimation: false })
+      this.openLayer(placeholderNodes, { closeAnimation: false })
       // Now that the renderOptions have served as defaults for openLayer(),
       // we can disable animations for the upcoming render pass. This way
       // we don't see flickering when another overlay opens with the final content.
       this.renderOptions.openAnimation = false
     }
-  }
-
-  _buildPlaceholder(value) {
-    value = u.evalOption(value, this)
-
-    if (u.isString(value)) {
-      if (value.startsWith('<')) {
-        value = e.createFromHTML(value)
-      } else {
-        value = up.fragment.get(value, { layer: 'closest', origin: this.origin }) || up.fail('Unknown placeholder %s', value)
-      }
-    }
-
-    if (value.matches('template')) value = e.cloneTemplate(value)
-
-    return value
   }
 
   _parseMutatorArgs(args, ...specs) {
