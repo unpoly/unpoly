@@ -336,6 +336,10 @@ up.feedback = (function() {
   */
 
   function runPreviews(request, renderOptions) {
+    return request.bindLayer.asCurrent(() => doRunPreviews(request, renderOptions))
+  }
+
+  function doRunPreviews(request, renderOptions) {
     let { fragment, fragments, origin } = request
     let cleaner = u.cleaner()
 
@@ -412,8 +416,10 @@ up.feedback = (function() {
     const parser = new up.OptionsParser(element, options, parserOptions)
     parser.booleanOrString('disable')
     parser.boolean('feedback')
-    parser.booleanOrInvocationOrString('preview', { mainKey: 'preview' })
-    parser.booleanOrInvocationOrString('placeholder', { mainKey: 'preview' })
+    parser.string('preview')
+    parser.callback('preview', { attr: 'up-preview-fn', mainKey: 'preview' })
+    parser.string('placeholder')
+    parser.callback('placeholder', { attr: 'up-placeholder-fn', mainKey: 'preview' })
     return options
   }
 

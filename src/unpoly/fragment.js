@@ -2900,6 +2900,29 @@ up.fragment = (function() {
     onAborted(origin, disconnect)
   }
 
+  const SELECTOR_PATTERN = /^([\w-]+|\*)?(#|\.|:[a-z]{3,})/
+
+  function provideNodes(value, { origin, originLayer, callbackArgs = [] } = {}) {
+    // A function can return a string of HTML, an Element or a selector string.
+    if (u.isFunction(value)) {
+      value = value(...callbackArgs)
+    }
+
+    if (u.isString(value) && SELECTOR_PATTERN.test(value)) {
+      value = up.fragment.get(value, { layer: 'closest', origin, originLayer }) || up.fail(`Cannot find template "%s"`, value)
+    }
+
+    if (u.isElement(value) && value.matches('template')) {
+      value = value.innerHTML
+    }
+
+    if (u.isString(value)) {
+      value = up.element.parseNodesFromHTML(value)
+    }
+
+    return u.wrapList(value)
+  }
+
   /*-
   Inserts the given `element` at a given `position` relative to the `reference` element.
 
@@ -2945,6 +2968,13 @@ up.fragment = (function() {
 
     You may also pass a string of HTML, which will be [parsed into an element](/up.element.createFromHTML).
 
+    You may also pass a CSS selector matching the new element.
+
+    If the element is a `<template>`, it will be cloned before insertion.
+
+    If the element is attached to the document before assertion, it will be moved back to its original place
+    when reverting the temporary insertion.
+
     The new element will be [compiled](/up.hello), unless it is already compiled.
 
   @return {Function}
@@ -2953,10 +2983,20 @@ up.fragment = (function() {
   @internal
   */
   function insertTemp(...args) {
-    let [reference, position = 'beforeend', tempElement] = u.args(args, 'val', u.isAdjacentPosition, 'val')
-    tempElement = e.wrap(tempElement)
+    let [reference, position = 'beforeend', tempValue] = u.args(args, 'val', u.isAdjacentPosition, 'val')
+
+    let tempNodes = provideNodes(tempValue, { origin: reference })
+    // We may be given a NodeList, or a HTML string without a single root Element.
+    // In these cases we wrap it in an <up-wrapper> so we have a root Element we
+    // can pass into Element#insertAdjacentElement(), up.hello() or up.destroy().
+    let tempElement = e.wrapIfRequired(tempNodes)
+
+    // In case the element was already attached to this document, we need to remember
+    // its position so we can return it when reverting.
     let oldPosition = document.contains(tempElement) && e.documentPosition(tempElement)
+
     reference.insertAdjacentElement(position, tempElement)
+
     if (oldPosition) {
       // Don't compile or destroy an element if it was connected to the document before the move.
       return () => {
@@ -3038,6 +3078,7 @@ up.fragment = (function() {
     compressNestedSteps,
     containsMainPseudo,
     insertTemp,
+    provideNodes,
     // swapTemp,
     // timer: scheduleTimer
   }
