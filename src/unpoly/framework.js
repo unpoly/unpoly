@@ -231,6 +231,12 @@ up.framework = (function() {
     if (document.compatMode === 'BackCompat') {
       return 'Browser is in quirks mode (missing DOCTYPE?)'
     }
+
+    for (let selector of [':is(*)', ':has(*)']) {
+      if (!CSS.supports(`selector(${selector})`)) {
+        return `Browser doesn't support the ${selector} selector`
+      }
+    }
   }
 
   return {
