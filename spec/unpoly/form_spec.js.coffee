@@ -72,7 +72,7 @@ describe 'up.form', ->
           target: '#foo-form'
         ))
 
-      it 'returns the form if a good selector can be derived from neither group nor input', ->
+      it 'returns the form if a strong selector can be derived from neither group nor input', ->
         form = fixture('form#foo-form')
         container = e.affix(form, '[up-form-group]')
         input = e.affix(container, 'input')
@@ -82,6 +82,18 @@ describe 'up.form', ->
         expect(groupSolution).toEqual(jasmine.objectContaining(
           element: form,
           target: '#foo-form'
+        ))
+
+      it "does not consider a form group's [class] to be a strong selector and prefers to :has()", ->
+        form = fixture('form#foo-form')
+        container = e.affix(form, '[up-form-group].form-group')
+        input = e.affix(container, 'input[name=foo]')
+
+        groupSolution = up.form.groupSolution(input)
+
+        expect(groupSolution).toEqual(jasmine.objectContaining(
+          element: container,
+          target: '[up-form-group]:has(input[name="foo"])'
         ))
 
       it 'does not append a :has(...) if the given element is already a group', ->

@@ -10354,7 +10354,7 @@ describe 'up.fragment', ->
 
     describe 'up.fragment.toTarget()', ->
 
-      it "prefers using the element's 'up-id' attribute to using the element's ID", ->
+      it "prefers using the element's [up-id] attribute to using the element's ID", ->
         element = fixture('div[up-id=up-id-value]#id-value')
         expect(up.fragment.toTarget(element)).toBe('[up-id="up-id-value"]')
 
@@ -10480,73 +10480,6 @@ describe 'up.fragment', ->
 
         expect(up.fragment.toTarget(element)).toBe('[custom-attr="value"]')
 
-      it "does not use a derived target that would match a different element", ->
-        element1 = fixture('div#foo.foo')
-        element2 = fixture('div#foo.bar')
-
-        expect(up.fragment.toTarget(element2)).toBe('.bar')
-
-      it "uses a derived target that would match a different element with up.fragment.config.verifyDerivedTarget = false", ->
-        element1 = fixture('div#foo.foo')
-        element2 = fixture('div#foo.bar')
-
-        expect(up.fragment.config.verifyDerivedTarget).toBe(true)
-        expect(up.fragment.toTarget(element2)).toBe('.bar')
-
-        up.fragment.config.verifyDerivedTarget = false
-        expect(up.fragment.toTarget(element2)).toBe('#foo')
-
-      it "allows to override up.fragment.config.verifyDerivedTarget with a { verify } option", ->
-        element1 = fixture('div#foo.foo')
-        element2 = fixture('div#foo.bar')
-
-        # Show that the option overrides the config default.
-        up.fragment.config.verifyDerivedTarget = false
-        expect(up.fragment.toTarget(element2, { verify: true })).toBe('.bar')
-
-        # Show that the option overrides the config default.
-        up.fragment.config.verifyDerivedTarget = true
-        expect(up.fragment.toTarget(element2, { verify: false })).toBe('#foo')
-
-      it "uses a derived target that would match a different element if the given element is detached", ->
-        rivalElement = fixture('div#foo.foo')
-        detachedElement = up.element.createFromSelector('div#foo.bar')
-
-        expect(up.fragment.config.verifyDerivedTarget).toBe(true)
-        expect(up.fragment.toTarget(detachedElement)).toBe('#foo')
-
-      it "uses a derived target that would match a different element if the given element is playing a destroy animation", ->
-        up.motion.config.enabled = true
-
-        rivalElement = fixture('div#foo.foo')
-        destroyingElement = fixture('div#foo.bar')
-
-        up.destroy(destroyingElement, { animation: 'fade-out', duration: 200 })
-
-        await wait(30)
-
-        expect(up.fragment.config.verifyDerivedTarget).toBe(true)
-        expect(document).toHaveSelector('#foo.bar.up-destroying')
-        expect(up.fragment.toTarget(destroyingElement)).toBe('#foo')
-
-      it "uses a derived target that would match a different element if the given element is in its closing layer's close animation", ->
-        up.motion.config.enabled = true
-
-        rivalElement = fixture('div#foo.foo')
-        overlay = await up.layer.open(target: '#foo', fragment: '<div id="foo" class="bar"></div')
-        expect(up.layer.isOverlay()).toBe(true)
-        elementInClosingOverlay = overlay.getFirstSwappableElement()
-
-        expect(elementInClosingOverlay.id).toBe('foo')
-
-        up.layer.accept(null, { animation: 'fade-out', duration: 200 })
-
-        await wait(30)
-        expect(document).toHaveSelector('up-modal.up-destroying')
-
-        expect(up.fragment.config.verifyDerivedTarget).toBe(true)
-        expect(up.fragment.toTarget(elementInClosingOverlay)).toBe('#foo')
-
       it 'distinguishes between types of link[rel=alternate]', ->
         atomLink = fixture('link[rel=alternate][type="application/atom+xml"][ref="/atom.xml"]')
         rssLink = fixture('link[rel=alternate][type="application/rss+xml"][href="/feed.rss"]')
@@ -10566,6 +10499,108 @@ describe 'up.fragment', ->
 
       it 'returns a given string unchanged', ->
         expect(up.fragment.toTarget('.foo')).toBe('.foo')
+
+      describe 'verification', ->
+
+        it "does not use a derived target that would match a different element", ->
+          element1 = fixture('div#foo.foo')
+          element2 = fixture('div#foo.bar')
+
+          expect(up.fragment.toTarget(element2)).toBe('.bar')
+
+        it "uses a derived target that would match a different element with up.fragment.config.verifyDerivedTarget = false", ->
+          element1 = fixture('div#foo.foo')
+          element2 = fixture('div#foo.bar')
+
+          expect(up.fragment.config.verifyDerivedTarget).toBe(true)
+          expect(up.fragment.toTarget(element2)).toBe('.bar')
+
+          up.fragment.config.verifyDerivedTarget = false
+          expect(up.fragment.toTarget(element2)).toBe('#foo')
+
+        it "allows to override up.fragment.config.verifyDerivedTarget with a { verify } option", ->
+          element1 = fixture('div#foo.foo')
+          element2 = fixture('div#foo.bar')
+
+          # Show that the option overrides the config default.
+          up.fragment.config.verifyDerivedTarget = false
+          expect(up.fragment.toTarget(element2, { verify: true })).toBe('.bar')
+
+          # Show that the option overrides the config default.
+          up.fragment.config.verifyDerivedTarget = true
+          expect(up.fragment.toTarget(element2, { verify: false })).toBe('#foo')
+
+        it "uses a derived target that would match a different element if the given element is detached", ->
+          rivalElement = fixture('div#foo.foo')
+          detachedElement = up.element.createFromSelector('div#foo.bar')
+
+          expect(up.fragment.config.verifyDerivedTarget).toBe(true)
+          expect(up.fragment.toTarget(detachedElement)).toBe('#foo')
+
+        it "uses a derived target that would match a different element if the given element is playing a destroy animation", ->
+          up.motion.config.enabled = true
+
+          rivalElement = fixture('div#foo.foo')
+          destroyingElement = fixture('div#foo.bar')
+
+          up.destroy(destroyingElement, { animation: 'fade-out', duration: 200 })
+
+          await wait(30)
+
+          expect(up.fragment.config.verifyDerivedTarget).toBe(true)
+          expect(document).toHaveSelector('#foo.bar.up-destroying')
+          expect(up.fragment.toTarget(destroyingElement)).toBe('#foo')
+
+        it "uses a derived target that would match a different element if the given element is in its closing layer's close animation", ->
+          up.motion.config.enabled = true
+
+          rivalElement = fixture('div#foo.foo')
+          overlay = await up.layer.open(target: '#foo', fragment: '<div id="foo" class="bar"></div')
+          expect(up.layer.isOverlay()).toBe(true)
+          elementInClosingOverlay = overlay.getFirstSwappableElement()
+
+          expect(elementInClosingOverlay.id).toBe('foo')
+
+          up.layer.accept(null, { animation: 'fade-out', duration: 200 })
+
+          await wait(30)
+          expect(document).toHaveSelector('up-modal.up-destroying')
+
+          expect(up.fragment.config.verifyDerivedTarget).toBe(true)
+          expect(up.fragment.toTarget(elementInClosingOverlay)).toBe('#foo')
+
+      describe 'with { strong: true }', ->
+
+        it "uses the element's [up-id] attribute", ->
+          element = fixture('div[up-id=up-id-value]')
+          expect(up.fragment.toTarget(element, { strong: true })).toBe('[up-id="up-id-value"]')
+
+        it "uses the element's ID to using the element's name", ->
+          element = fixture('div#id-value')
+          expect(up.fragment.toTarget(element, { strong: true })).toBe("#id-value")
+
+        it "uses the element's tagname if it is the <body> element", ->
+          element = document.body
+          expect(up.fragment.toTarget(element, { strong: true })).toBe("body")
+
+        it "uses the element's tagname if it is the <html> element", ->
+          element = document.documentElement
+          expect(up.fragment.toTarget(element, { strong: true })).toBe("html")
+
+        it "does not use the element's tagname if it is any non-singleton element", ->
+          element = fixture('my-element')
+          toTarget = () -> up.fragment.toTarget(element, { strong: true })
+          expect(toTarget).toThrowError(up.CannotTarget)
+
+        it "does not use the element's [class]", ->
+          element = fixture('div.class')
+          toTarget = () -> up.fragment.toTarget(element, { strong: true })
+          expect(toTarget).toThrowError(up.CannotTarget)
+
+        it "does not use the element's [name] attribute", ->
+          element = fixture('input[name=name-value]')
+          toTarget = () -> up.fragment.toTarget(element, { strong: true })
+          expect(toTarget).toThrowError(up.CannotTarget)
 
     describe 'up.fragment.expandTargets', ->
 
