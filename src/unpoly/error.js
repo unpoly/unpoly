@@ -105,6 +105,7 @@ up.error = (function() {
     muteUncriticalSync,
     guard,
     guardFn,
+    report,
   }
 })()
 
