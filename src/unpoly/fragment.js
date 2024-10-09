@@ -53,6 +53,14 @@ up.fragment = (function() {
     }
   }
 
+  const STRONG_TARGET_DERIVERS = [
+    '[up-id]',
+    '[id]',
+    'html',
+    'head',
+    'body',
+  ]
+
   /*-
   Configures defaults for fragment updates.
 
@@ -192,12 +200,10 @@ up.fragment = (function() {
   const config = new up.Config(() => ({
     badTargetClasses: [/^up-/],
 
+    strongTargetDerivers: STRONG_TARGET_DERIVERS,
+
     targetDerivers: [
-      '[up-id]',
-      '[id]',
-      'html',
-      'head',
-      'body',
+      ...STRONG_TARGET_DERIVERS,
       'main',
       '[up-main]',
       upTagName,
@@ -2026,6 +2032,12 @@ up.fragment = (function() {
 
     Defaults to `up.fragment.config.verifyDerivedTarget`.
 
+  @param {Element} [options.strong=false]
+    Whether to provide a more unique selector by only considering the element's `[id]` and `[up-id]` attributes.
+
+    Weaker target derivers, like the element's class, are not considered in strong mode.
+    The element's tag name is only considered for singleton elements like `<html>` or `<body>`.
+
     @experimental
   @param {Element} [options.origin]
     The origin used to [resolve an ambiguous selector](/targeting-fragments#resolving-ambiguous-selectors)
@@ -2056,8 +2068,10 @@ up.fragment = (function() {
     throw new up.CannotTarget(untargetableMessage(element))
   }
 
-  function tryToTarget(element, options) {
-    return u.findResult(config.targetDerivers, function(deriver) {
+  function tryToTarget(element, options = {}) {
+    let derivers = options.strong ? config.strongTargetDerivers : config.targetDerivers
+
+    return u.findResult(derivers, function(deriver) {
       let target = deriveTarget(element, deriver)
 
       if (target && isGoodTarget(target, element, options)) {
