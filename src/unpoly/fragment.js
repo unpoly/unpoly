@@ -2900,6 +2900,44 @@ up.fragment = (function() {
     onAborted(origin, disconnect)
   }
 
+  const SELECTOR_PATTERN = /^([\w-]+|\*)?(#|\.|:[a-z]{3,})/
+  const HTML_PATTERN = /^<[^>]+>/
+
+  function provideElement(value, { origin, wrapperSelector, callbackArgs = [] } = {}) {
+    value = e.evalOption(value, ...callbackArgs)
+
+    if (u.isString(value)) {
+      // Strip whitespace to simplify our patterns.
+      value = value.trim()
+
+      if (SELECTOR_PATTERN.test(value)) {
+        value = up.fragment.get(value, { layer: 'closest', origin })
+      } else if (HTML_PATTERN.test(value)) {
+        value = up.element.createFromHTML(value)
+      } else {
+        let textNodeWrapperSelector = wrapperSelector || 'span'
+        // Don't post-process after this. We don't want a second wrapper.
+        return up.element.createFromSelector(textNodeWrapperSelector, { content: value })
+      }
+    }
+
+    if (u.isElement(value)) {
+      // (1) Clone the element if it is a <template>
+      // (2) Do not clone other attached elements, so users can temporarily move a fragment into an overlay.
+      if (value.matches('template')) {
+        value = e.cloneTemplate(value)
+      }
+
+      // Callers can ask us to wrap the element in a container that matches `wrapperSelector`.
+      // This is used by up.ResponseDoc to provide a matching element when we only receive { content }.
+      if (wrapperSelector) {
+        value = e.createFromSelector(wrapperSelector, { content: value })
+      }
+    }
+
+    return value
+  }
+
   /*-
   Inserts the given `element` at a given `position` relative to the `reference` element.
 
@@ -2954,7 +2992,7 @@ up.fragment = (function() {
   */
   function insertTemp(...args) {
     let [reference, position = 'beforeend', tempElement] = u.args(args, 'val', u.isAdjacentPosition, 'val')
-    tempElement = e.wrap(tempElement)
+    tempElement = provideElement(tempElement)
     let oldPosition = document.contains(tempElement) && e.documentPosition(tempElement)
     reference.insertAdjacentElement(position, tempElement)
     if (oldPosition) {
@@ -3038,6 +3076,7 @@ up.fragment = (function() {
     compressNestedSteps,
     containsMainPseudo,
     insertTemp,
+    provideElement,
     // swapTemp,
     // timer: scheduleTimer
   }

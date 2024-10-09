@@ -929,15 +929,44 @@ describe 'up.link', ->
         options = up.link.followOptions(link)
         expect(options.match).toBe('first')
 
-      it 'parses an [up-preview] attribute', ->
+      it 'parses an [up-preview] attribute as a string', ->
         link = fixture('a[href="/foo"][up-preview="foo bar"]')
         options = up.link.followOptions(link)
         expect(options.preview).toBe('foo bar')
+
+      it 'parses an [up-preview] attribute with invocations as a function', ->
+        link = fixture('a[href="/foo"][up-preview="this.callback(preview, 123)"]')
+        link.callback = jasmine.createSpy('callback')
+        options = up.link.followOptions(link)
+        expect(options.preview).toEqual(jasmine.any(Function))
+        options.preview('preview')
+        expect(link.callback).toHaveBeenCalledWith('preview', 123)
+
+      it 'parses an [up-preview] attribute with embedded nonce and invocations as a function', ->
+        link = fixture('a[href="/foo"][up-preview="nonce-kO52Iphm8B this.callback(preview, 123)"]')
+        link.callback = jasmine.createSpy('callback')
+        options = up.link.followOptions(link)
+        expect(options.preview).toEqual(jasmine.any(Function))
+        options.preview('preview')
+        expect(link.callback).toHaveBeenCalledWith('preview', 123)
 
       it 'parses an [up-preview=false] attribute as boolean', ->
         link = fixture('a[href="/foo"][up-preview="false"]')
         options = up.link.followOptions(link)
         expect(options.preview).toBe(false)
+
+      it 'parses an [up-skeleton] attribute as a string', ->
+        link = fixture('a[href="/foo"][up-skeleton="foo bar"]')
+        options = up.link.followOptions(link)
+        expect(options.skeleton).toBe('foo bar')
+
+      it 'parses an [up-skeleton] attribute with invocations as a function', ->
+        link = fixture('a[href="/foo"][up-skeleton="this.callback(preview, 123)"]')
+        link.callback = jasmine.createSpy('callback')
+        options = up.link.followOptions(link)
+        expect(options.skeleton).toEqual(jasmine.any(Function))
+        options.skeleton('preview')
+        expect(link.callback).toHaveBeenCalledWith('preview', 123)
 
       it 'parses an [up-late-delay=Number] attribute as a number', ->
         link = fixture('a[href="/foo"][up-late-delay=123]')

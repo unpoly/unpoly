@@ -584,7 +584,11 @@ up.element = (function() {
       } else if (key === 'text') {
         rootElement.textContent = value
       } else if (key === 'content') {
-        rootElement.innerHTML = value
+        if (u.isString(value)) {
+          rootElement.innerHTML = value
+        } else {
+          rootElement.append(value)
+        }
       } else {
         rootElement.setAttribute(key, value)
       }
@@ -1507,14 +1511,6 @@ up.element = (function() {
     return selector
   }
 
-  function wrap(elementOrHTML, parser = createFromHTML) {
-    if (u.isString(elementOrHTML)) {
-      return parser(elementOrHTML)
-    } else {
-      return elementOrHTML
-    }
-  }
-
   function cloneTemplate(template) {
     return template.content.cloneNode(true).children[0]
   }
@@ -1606,7 +1602,6 @@ up.element = (function() {
     crossOriginSelector,
     isIntersectingWindow,
     unionSelector,
-    wrap,
     cloneTemplate,
     matchSelectorMap,
     elementLikeMatches,

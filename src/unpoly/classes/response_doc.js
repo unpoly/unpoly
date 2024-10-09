@@ -9,11 +9,11 @@ up.ResponseDoc = class ResponseDoc {
     if (document) {
       this._parseDocument(document)
     } else if (fragment) {
-      this._parseFragment(fragment)
+      this._parseFragment(fragment, origin)
     } else {
       // Parsing { inner } is the last option we try. It should always succeed in case someone
       // tries `up.layer.open()` without any args. Hence we default the innerHTML to an empty string.
-      this._parseContent(content || '', target)
+      this._parseContent(content || '', origin, target)
     }
 
     this._cspNonces = cspNonces
@@ -45,25 +45,18 @@ up.ResponseDoc = class ResponseDoc {
     }
   }
 
-  _parseFragment(value) {
-    let parsed = e.wrap(value)
+  _parseFragment(value, origin) {
+    let parsed = up.fragment.provideElement(value, { origin })
     this._document = this._buildFauxDocument(parsed)
   }
 
-  _parseContent(value, target) {
+  _parseContent(value, origin, target) {
     if (!target) up.fail("must pass a { target } when passing { content }")
 
+    // We are only provided with child content.
+    // To simplify other code we wrap it in an element matching { target }.
     let simplifiedTarget = u.map(up.fragment.parseTargetSteps(target), 'selector').join()
-
-    // Conjure an element that will later match target in @select()
-    const matchingElement = e.createFromSelector(simplifiedTarget)
-
-    if (u.isString(value)) {
-      // Don't use e.createFromHTML() here, since content may be a text node.
-      matchingElement.innerHTML = value
-    } else {
-      matchingElement.appendChild(value)
-    }
+    let matchingElement = up.fragment.provideElement(value, { origin, wrapperSelector: simplifiedTarget })
 
     this._document = this._buildFauxDocument(matchingElement)
   }

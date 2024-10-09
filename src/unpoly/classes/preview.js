@@ -136,19 +136,8 @@ up.Preview = class Preview {
   }
 
   _buildPlaceholder(value) {
-    value = u.evalOption(value, this)
-
-    if (u.isString(value)) {
-      if (value.startsWith('<')) {
-        value = e.createFromHTML(value)
-      } else {
-        value = up.fragment.get(value, { layer: 'closest', origin: this.origin }) || up.fail('Unknown placeholder %s', value)
-      }
-    }
-
-    if (value.matches('template')) value = e.cloneTemplate(value)
-
-    return value
+    return up.fragment.provideElement(value, { origin: this.origin, callbackArgs: [this] })
+      || up.fail('Unknown placeholder %s', value)
   }
 
   _parseMutatorArgs(args, ...specs) {

@@ -11216,6 +11216,56 @@ describe 'up.fragment', ->
         jasmine.objectContaining(selector: '.one', maybe: true, placement: 'before'),
       ]
 
+  describe 'up.fragment.provideElement()', ->
+
+    describe 'with undefined', ->
+
+      it 'returns undefined'
+
+    describe 'with null', ->
+
+      it 'returns null'
+
+    describe 'with false', ->
+
+      it 'returns false'
+
+    describe 'with a string', ->
+
+      it 'looks up a selector'
+
+      it 'looks up a selector in the given { origin } before looking at other layers'
+
+      it 'parses a HTML fragment'
+
+      it 'parses a HTML fragment and wraps it in { wrapperSelector }'
+
+      it 'parses inner HTML content and returns a <span> wrapper'
+
+      it 'parses inner HTML content and wraps it in { wrapperSelector } instead of using a <span></span>'
+
+    describe 'with a non-template element', ->
+
+      it 'returns the element without making a copy, so users can temporarily move an element into an overlay'
+
+       it 'wraps the element in a container matching { wrapperSelector }'
+
+    describe 'with a template element', ->
+
+      it 'copies the template and returns the copy'
+
+    describe 'with a function', ->
+
+      it 'returns an element returned by the function'
+
+      it 'calls the function with { callbackArgs }'
+
+      it 'looks up a selector returned by the function'
+
+      it 'parses HTML returned by the function'
+
+      it 'returns a null value returned by that function'
+
   describe 'up.fragment.contains()', ->
 
     it 'returns whether the given element is an ancestor of an element matching the given selector', ->
