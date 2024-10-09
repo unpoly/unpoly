@@ -1637,11 +1637,13 @@ describe('up.Preview', function() {
 
       expect(previewFn).toHaveBeenCalled()
 
-      jasmine.respondWithSelector('#target')
-      await wait()
+      await jasmine.expectGlobalError('Preview used after end of request', async function() {
+        jasmine.respondWithSelector('#target')
+        await wait()
 
-      expect(undoFn).toHaveBeenCalled()
-      expect(recursiveFn).not.toHaveBeenCalled()
+        expect(undoFn).toHaveBeenCalled()
+        expect(recursiveFn).not.toHaveBeenCalled()
+      })
     })
 
   })
