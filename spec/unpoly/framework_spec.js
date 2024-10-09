@@ -22,14 +22,25 @@ describe('up.framework', function() {
         }
       })
 
-      it('returns false if window.Proxy is missing', function() {
-        // Cannot use spyOnProperty() for window.Promise, as window does not return a property descriptor.
-        let oldProxy = window.Proxy
+      it('returns false if window.FormData is missing', function() {
+        // Cannot use spyOnProperty() for window.FormData, as window does not return a property descriptor.
+        let oldFormData = window.FormData
         try {
-          window.Proxy = undefined
+          window.FormData = undefined
           expect(up.framework.isSupported()).toBe(false)
        } finally {
-          window.Proxy = oldProxy
+          window.FormData = oldFormData
+        }
+      })
+
+      it('returns false if window.DOMParser is missing', function() {
+        // Cannot use spyOnProperty() for window.DOMParser, as window does not return a property descriptor.
+        let oldDOMParser = window.DOMParser
+        try {
+          window.DOMParser = undefined
+          expect(up.framework.isSupported()).toBe(false)
+       } finally {
+          window.DOMParser = oldDOMParser
         }
       })
 
