@@ -59,6 +59,32 @@ describe('up.framework', function() {
         }
       })
 
+      it('returns false if the browser does not support the :has() selector', function() {
+        let oldSupports = CSS.supports
+        spyOn(CSS, 'supports').and.callFake((selector) => {
+          if (selector.includes(':has(')) {
+            return false
+          } else {
+            oldSupports.call(this, selector)
+          }
+        })
+
+        expect(up.framework.isSupported()).toBe(false)
+      })
+
+      it('returns false if the browser does not support the :is() selector', function() {
+        let oldSupports = CSS.supports
+        spyOn(CSS, 'supports').and.callFake((selector) => {
+          if (selector.includes(':has(')) {
+            return false
+          } else {
+            oldSupports.call(this, selector)
+          }
+        })
+
+        expect(up.framework.isSupported()).toBe(false)
+      })
+
     })
 
   })
