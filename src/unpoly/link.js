@@ -371,9 +371,9 @@ up.link = (function() {
     parser.string('target')
     parser.booleanOrString('fallback')
     parser.string('match')
-    parser.string('content')
-    parser.string('fragment')
     parser.string('document')
+    parser.string('fragment')
+    parser.string('content')
     parser.boolean('useKeep')
     parser.boolean('useHungry')
 
