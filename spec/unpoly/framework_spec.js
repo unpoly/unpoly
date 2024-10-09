@@ -65,7 +65,7 @@ describe('up.framework', function() {
           if (selector.includes(':has(')) {
             return false
           } else {
-            oldSupports.call(this, selector)
+            return oldSupports.call(this, selector)
           }
         })
 
@@ -78,7 +78,7 @@ describe('up.framework', function() {
           if (selector.includes(':has(')) {
             return false
           } else {
-            oldSupports.call(this, selector)
+            return oldSupports.call(this, selector)
           }
         })
 
