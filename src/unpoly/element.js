@@ -432,8 +432,9 @@ up.element = (function() {
   @function up.element.insertBefore
   @internal
   */
-  function insertBefore(existingElement, newElement) {
-    existingElement.insertAdjacentElement('beforebegin', newElement)
+  function insertBefore(existingNode, newNode) {
+    // We're not using insertAdjacentElement() because that does not work with Text nodes
+    existingNode.parentNode.insertBefore(newNode, existingNode)
   }
 
   /*-
@@ -587,7 +588,7 @@ up.element = (function() {
         if (u.isString(value)) {
           rootElement.innerHTML = value
         } else {
-          rootElement.append(value)
+          rootElement.append(...u.wrapList(value))
         }
       } else {
         rootElement.setAttribute(key, value)
@@ -859,6 +860,32 @@ up.element = (function() {
   @stable
   */
   function createFromHTML(html) {
+    return extractSingular(parseNodesFromHTML(html))
+  }
+
+  /*-
+  Checks if the given list contains a single `Element` and returns that element.
+
+  Throws an error if the given list contains more than one node.
+  Throws an error if the given list only contains a `Text` node.
+
+  @function up.element.extractSingular
+  @param {List<Node>}
+  @return {Element}
+  @internal
+  */
+  function extractSingular(nodes) {
+    if (nodes.length === 1 && u.isElement(nodes[0])) {
+      return nodes[0]
+    } else {
+      up.fail('HTML must have a single root element')
+    }
+  }
+
+  function parseNodesFromHTML(html) {
+    // Prevent all-whitespace text nodes at the beginning or end
+    html = html.trim()
+
     // (1) We cannot use createBrokenDocumentFromHTML() here, since up.ResponseDoc
     //     needs to create <noscript> elements, and DOMParser cannot create those.
     //     Also it always parses a full document, and we would need to rediscover our element
@@ -870,12 +897,8 @@ up.element = (function() {
     //     innerHTML on Chrome. See https://jsben.ch/QQngJ
     const range = document.createRange()
     range.setStart(document.body, 0)
-    const fragment = range.createContextualFragment(html.trim())
-    let elements = fragment.childNodes
-    if (elements.length !== 1) {
-      throw new Error('HTML must have a single root element')
-    }
-    return elements[0]
+    const fragment = range.createContextualFragment(html)
+    return fragment.childNodes
   }
 
   /*-
@@ -970,20 +993,41 @@ up.element = (function() {
   */
   function unwrap(wrapper) {
     preservingFocus(function() {
-      const parent = wrapper.parentNode
-      const wrappedNodes = u.toArray(wrapper.childNodes)
-      u.each(wrappedNodes, wrappedNode => parent.insertBefore(wrappedNode, wrapper))
-      parent.removeChild(wrapper) // TODO: wrapper.remove()
+      // Make a copy as it is a live list and we to iterate over it while also mutating it.
+      let childNodes = [...wrapper.childNodes]
+      for (let child of childNodes) insertBefore(wrapper, child)
+      wrapper.remove()
     })
   }
 
-  function wrapChildren(element) {
-    let childNode
+  function wrapNodes(nodeOrNodes) {
     const wrapper = document.createElement('up-wrapper')
-    while ((childNode = element.firstChild)) {
-      wrapper.appendChild(childNode)
+    wrapper.append(...u.wrapList(nodeOrNodes))
+    return wrapper
+  }
+
+  function wrapIfRequired(nodes) {
+    if (nodes.length === 1 && u.isElement(nodes[0])) {
+      return nodes[0]
+    } else {
+      // There are multiple cases when we want to create a wrapper:
+      // (1) We have multiple nodes, possibly a mix of Element and Text nodes
+      // (2) We have a single Text node
+      // (39 We have an empty list
+      return wrapNodes(nodes)
     }
-    element.appendChild(wrapper)
+  }
+
+  // function wrapSelf(element) {
+  //   let wrapper = createWrapper()
+  //   insertBefore(element, wrapper)
+  //   wrapper.append(element)
+  //   return wrapper
+  // }
+
+  function wrapChildren(element) {
+    const wrapper = wrapNodes(element.childNodes)
+    element.append(wrapper)
     return wrapper
   }
 
@@ -1119,11 +1163,6 @@ up.element = (function() {
     return parseAttr(element, attribute, tryParseBoolean, tryParseNumber)
   }
 
-  function booleanOrInvocationOrStringAttr(element, attribute, callbackOptions) {
-    let myParseCallback = (value) => tryParseInvocation(value, element, callbackOptions)
-    return parseAttr(element, attribute, tryParseBoolean, myParseCallback, tryParseString)
-  }
-
   /*-
   Returns the value of the given attribute on the given element, cast to a number.
 
@@ -1177,12 +1216,6 @@ up.element = (function() {
 
   function callbackAttr(link, attr, callbackOptions) {
     return parseAttr(link, attr, (value) => tryParseCallback(value, link, callbackOptions))
-  }
-
-  function tryParseInvocation(code, link, callbackOptions) {
-    if (/(?<!:)[\w+]\([^)]+\)/i.test(code)) {
-      return tryParseCallback(code, link, callbackOptions)
-    }
   }
 
   function tryParseCallback(code, link, { exposedKeys = [], mainKey = 'event' } = {}) {
@@ -1511,10 +1544,6 @@ up.element = (function() {
     return selector
   }
 
-  function cloneTemplate(template) {
-    return template.content.cloneNode(true).children[0]
-  }
-
   function matchSelectorMap(selectorMap, element) {
     let matches = []
 
@@ -1567,7 +1596,9 @@ up.element = (function() {
     tagName: elementTagName,
     createBrokenDocumentFromHTML,
     fixParserDamage,
+    parseNodesFromHTML,
     createFromHTML,
+    extractSingular,
     get root() { return getRoot() },
     paint,
     concludeCSSTransition,
@@ -1577,6 +1608,7 @@ up.element = (function() {
     setMissingAttr,
     unwrap,
     wrapChildren,
+    wrapIfRequired,
     attr: stringAttr,
     booleanAttr,
     numberAttr,
@@ -1584,7 +1616,6 @@ up.element = (function() {
     callbackAttr,
     booleanOrStringAttr,
     booleanOrNumberAttr,
-    booleanOrInvocationOrStringAttr,
     setStyleTemp,
     style: computedStyle,
     styleNumber: computedStyleNumber,
@@ -1602,7 +1633,6 @@ up.element = (function() {
     crossOriginSelector,
     isIntersectingWindow,
     unionSelector,
-    cloneTemplate,
     matchSelectorMap,
     elementLikeMatches,
     documentPosition,

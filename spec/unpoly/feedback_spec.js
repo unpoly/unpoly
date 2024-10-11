@@ -110,7 +110,7 @@ describe('up.feedback', function() {
 
     describe('up.render()', function() {
 
-      describe('with { preview } option', function() {
+      fdescribe('with { preview } option', function() {
 
         describe('call variants', function() {
 
@@ -497,7 +497,7 @@ describe('up.feedback', function() {
 
       })
 
-      describe('with { placeholder } option', function() {
+      fdescribe('with { placeholder } option', function() {
 
         // Also see specs for up.Preview#showPlaceholer()
         it('renders a UI placeholder as the content of the first targeted fragment', async function() {

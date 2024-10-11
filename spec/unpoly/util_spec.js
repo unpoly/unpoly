@@ -6,6 +6,22 @@ describe('up.util', () => {
 
   describe('JavaScript functions', function() {
 
+    fdescribe('up.util.wrapList()', function() {
+
+      it('needs tests', function() {
+        throw "test me"
+      })
+
+    })
+
+    fdescribe('up.util.wrapArray()', function() {
+
+      it('needs tests', function() {
+        throw "test me"
+      })
+
+    })
+
     describe('up.util.args()', function() {
 
       describe('val slots', function() {

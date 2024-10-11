@@ -46,17 +46,18 @@ up.ResponseDoc = class ResponseDoc {
   }
 
   _parseFragment(value, origin) {
-    let parsed = up.fragment.provideElement(value, { origin })
+    let parsed = e.extractSingular(up.fragment.provideNodes(value, { origin }))
     this._document = this._buildFauxDocument(parsed)
   }
 
   _parseContent(value, origin, target) {
     if (!target) up.fail("must pass a { target } when passing { content }")
 
-    // We are only provided with child content.
+    // We are only provided with inner child content.
     // To simplify other code we wrap it in an element matching { target }.
     let simplifiedTarget = u.map(up.fragment.parseTargetSteps(target), 'selector').join()
-    let matchingElement = up.fragment.provideElement(value, { origin, wrapperSelector: simplifiedTarget })
+    let nodes = up.fragment.provideNodes(value, { origin })
+    let matchingElement = e.createFromSelector(simplifiedTarget, { content: nodes })
 
     this._document = this._buildFauxDocument(matchingElement)
   }

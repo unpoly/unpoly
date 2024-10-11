@@ -2901,42 +2901,92 @@ up.fragment = (function() {
   }
 
   const SELECTOR_PATTERN = /^([\w-]+|\*)?(#|\.|:[a-z]{3,})/
-  const HTML_PATTERN = /^<[^>]+>/
 
-  function provideElement(value, { origin, wrapperSelector, callbackArgs = [] } = {}) {
-    value = e.evalOption(value, ...callbackArgs)
+  function provideNodes(value, { origin, originLayer, callbackArgs = [] } = {}) {
+
+    // A function can return a piece of HTML, or a selector.
+    if (u.isFunction(value)) {
+      value = value(...callbackArgs)
+    }
+
+    if (u.isString(value) && SELECTOR_PATTERN.test(value)) {
+      // TODO: Do we need { origin, originLayer } if every caller sets it up.layer.current?
+      value = up.fragment.get(value, { layer: 'closest', origin, originLayer })
+    }
+
+    if (u.isElement(value) && value.matches('template')) {
+      value = value.innerHTML
+    }
 
     if (u.isString(value)) {
-      // Strip whitespace to simplify our patterns.
-      value = value.trim()
-
-      if (SELECTOR_PATTERN.test(value)) {
-        value = up.fragment.get(value, { layer: 'closest', origin })
-      } else if (HTML_PATTERN.test(value)) {
-        value = up.element.createFromHTML(value)
-      } else {
-        let textNodeWrapperSelector = wrapperSelector || 'span'
-        // Don't post-process after this. We don't want a second wrapper.
-        return up.element.createFromSelector(textNodeWrapperSelector, { content: value })
-      }
+      value = up.element.parseNodesFromHTML(value)
     }
 
-    if (u.isElement(value)) {
-      // (1) Clone the element if it is a <template>
-      // (2) Do not clone other attached elements, so users can temporarily move a fragment into an overlay.
-      if (value.matches('template')) {
-        value = e.cloneTemplate(value)
-      }
+    return u.wrapList(value)
 
-      // Callers can ask us to wrap the element in a container that matches `wrapperSelector`.
-      // This is used by up.ResponseDoc to provide a matching element when we only receive { content }.
-      if (wrapperSelector) {
-        value = e.createFromSelector(wrapperSelector, { content: value })
-      }
-    }
-
-    return value
+    // const wrap = (list) => e.createFromSelector(wrapperSelector, { content: list })
+    //
+    // value = u.wrapList(value)
+    //
+    // if (u.some(value, u.isTextNode)) {
+    //   throw "render({ content }) wants the raw nodes"
+    //
+    //   // Nothing in Unpoly can deal with Text nodes. If we have at least one Text node,
+    //   // we need to return a wrapped Element that we can insert(), hide(), etc.
+    //   return wrap(value)
+    // } else if (value.length === 1) {
+    //   // Most Unpoly functions prefer to work with a single Element.
+    //   // If we have a single Element, we can return it without further processing.
+    //   return value[0]
+    // } else if (multipleMode === 'throw') {
+    //   // Some Unpoly features (like render({ fragment })) must receive a single Element
+    //   // to do their job. In that case we will throw if we receive zero or multiple Elements.
+    //   up.fail('Expected HTML with a single root node, but got: %s', value)
+    // } else if (multipleMode === 'wrap') {
+    //   // Some Unpoly features (like render({ content }) or render({ placeholder })
+    //   return wrap(value)
+    // } else if (multipleMode === 'return') {
+    //   return value
+    // }
   }
+
+  // const HTML_PATTERN = /^<[^>]+>/
+  //
+  // function provideElementOld(value, { origin, wrapperSelector, callbackArgs = [] } = {}) {
+  //   // A function can return a piece of HTML, or a selector.
+  //   value = u.evalOption(value, ...callbackArgs)
+  //
+  //   if (u.isString(value)) {
+  //     // Strip whitespace to simplify our patterns.
+  //     value = value.trim()
+  //
+  //     if (SELECTOR_PATTERN.test(value)) {
+  //       value = up.fragment.get(value, { layer: 'closest', origin })
+  //     } else if (HTML_PATTERN.test(value)) {
+  //       value = up.element.createFromHTML(value)
+  //     } else {
+  //       let textNodeWrapperSelector = wrapperSelector || 'span'
+  //       // Don't post-process after this. We don't want a second wrapper.
+  //       return up.element.createFromSelector(textNodeWrapperSelector, { content: value })
+  //     }
+  //   }
+  //
+  //   if (u.isElement(value)) {
+  //     // (1) Clone the element if it is a <template>
+  //     // (2) Do not clone other attached elements, so users can temporarily move a fragment into an overlay.
+  //     if (value.matches('template')) {
+  //       value = e.cloneTemplate(value)
+  //     }
+  //
+  //     // Callers can ask us to wrap the element in a container that matches `wrapperSelector`.
+  //     // This is used by up.ResponseDoc to provide a matching element when we only receive { content }.
+  //     if (wrapperSelector) {
+  //       value = e.createFromSelector(wrapperSelector, { content: value })
+  //     }
+  //   }
+  //
+  //   return value
+  // }
 
   /*-
   Inserts the given `element` at a given `position` relative to the `reference` element.
@@ -2983,6 +3033,13 @@ up.fragment = (function() {
 
     You may also pass a string of HTML, which will be [parsed into an element](/up.element.createFromHTML).
 
+    You may also pass a CSS selector matching the new element.
+
+    If the element is a `<template>`, it will be cloned before insertion.
+
+    If the element is attached to the document before assertion, it will be moved back to its original place
+    when reverting the temporary insertion.
+
     The new element will be [compiled](/up.hello), unless it is already compiled.
 
   @return {Function}
@@ -2991,10 +3048,20 @@ up.fragment = (function() {
   @internal
   */
   function insertTemp(...args) {
-    let [reference, position = 'beforeend', tempElement] = u.args(args, 'val', u.isAdjacentPosition, 'val')
-    tempElement = provideElement(tempElement)
+    let [reference, position = 'beforeend', tempValue] = u.args(args, 'val', u.isAdjacentPosition, 'val')
+
+    let tempNodes = provideNodes(tempValue, { origin: reference })
+    // We may be given a NodeList, or a HTML string without a single root Element.
+    // In these cases we wrap it in an <up-wrapper> so we have a root Element we
+    // can pass into Element#insertAdjacentElement(), up.hello() or up.destroy().
+    let tempElement = e.wrapIfRequired(tempNodes)
+
+    // In case the element was already attached to this document, we need to remember
+    // its position so we can return it when reverting.
     let oldPosition = document.contains(tempElement) && e.documentPosition(tempElement)
+
     reference.insertAdjacentElement(position, tempElement)
+
     if (oldPosition) {
       // Don't compile or destroy an element if it was connected to the document before the move.
       return () => {
@@ -3076,7 +3143,7 @@ up.fragment = (function() {
     compressNestedSteps,
     containsMainPseudo,
     insertTemp,
-    provideElement,
+    provideNodes,
     // swapTemp,
     // timer: scheduleTimer
   }

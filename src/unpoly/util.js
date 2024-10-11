@@ -574,6 +574,18 @@ up.util = (function() {
   }
 
   /*-
+  Returns whether the given argument is a [text node](https://developer.mozilla.org/en-US/docs/Web/API/Text).
+
+  @function up.util.isTextNode
+  @param object
+  @return {boolean}
+  @internal
+  */
+  function isTextNode(object) {
+    return object instanceof Text
+  }
+
+  /*-
   Returns whether the given argument is a [regular expression](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp).
 
   @function up.util.isRegExp
@@ -2138,6 +2150,7 @@ up.util = (function() {
     isBoolean,
     isNumber,
     isElement,
+    isTextNode,
     isJQuery,
     isElementLike,
     isPromise,

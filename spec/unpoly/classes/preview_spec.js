@@ -1,7 +1,7 @@
 const e = up.element
 const u = up.util
 
-describe('up.Preview', function() {
+fdescribe('up.Preview', function() {
 
   describe('#target', function() {
 
@@ -885,6 +885,14 @@ describe('up.Preview', function() {
 
       expect(preview1Undo).toHaveBeenCalled()
       expect(preview2Undo).toHaveBeenCalled()
+    })
+
+    it('runs with the correct up.layer.current when rendering in a background layer', function() {
+      throw "test me"
+    })
+
+    it('reports an error (but does not crash) when called with an unknown preview name', function() {
+      throw "test me"
     })
 
   })

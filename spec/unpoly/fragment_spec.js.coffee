@@ -2238,7 +2238,7 @@ describe 'up.fragment', ->
             expect('.target').toHaveText('new text')
             expect(location.href).toMatchURL('/response-url')
 
-      describe 'with { content } option', ->
+      fdescribe 'with { content } option', ->
 
         it 'replaces the given selector with a matching element that has the inner HTML from the given { content } string', asyncSpec (next) ->
           fixture('.target', text: 'old text')
@@ -2328,6 +2328,128 @@ describe 'up.fragment', ->
           next ->
             expect(container.innerHTML).toEqual('<div class="new-child"></div><div class="old-child"></div>')
 
+        it 'accepts a CSS selector for a <template> to clone', ->
+          template = htmlFixture("""
+            <template id="target-template">
+              <div id="child">
+                child from template
+              </div>
+            </template>
+          """)
+
+          target = htmlFixture("""
+            <div id="target">
+              <div id="child">
+                old child
+              </div>
+            </div>
+          """)
+
+          up.render({ target: '#target', content: '#target-template' })
+          await wait()
+
+          expect('#target').toHaveSelector('#child')
+          expect('#target').toHaveText('child from template')
+          # Make sure the element was cloned, not moved
+          expect(document.querySelector('#target').children[0]).not.toBe(template.content.children[0])
+
+        it 'can clone a template with multiple child nodes without a root element', ->
+          template = htmlFixture("""
+            <template id="target-template">
+              one
+              <div>two</div>
+              three
+            </template>
+          """)
+
+          target = htmlFixture("""
+            <div id="target">
+              old text
+            </div>
+          """)
+
+          up.render({ target: '#target', content: '#target-template' })
+          await wait()
+
+          expect('#target').toHaveVisibleText('one two three')
+
+        it 'can render a string containing a text node without an enclosing element', ->
+          target = htmlFixture("""
+            <div id="target">
+              old text
+            </div>
+          """)
+
+          up.render({ target: '#target', content: 'new text' })
+          await wait()
+
+          expect('#target').toHaveVisibleText('new text')
+
+        it 'can render a string containing multiple child nodes without an root element', ->
+          target = htmlFixture("""
+            <div id="target">
+              old text
+            </div>
+          """)
+
+          up.render({ target: '#target', content: """
+            one
+            <div>two</div>
+            three
+          """ })
+          await wait()
+
+          expect('#target').toHaveVisibleText('one two three')
+
+        it 'can render an Element value', ->
+          givenElement = up.element.createFromHTML('<div>foo bar baz</div>')
+
+          target = htmlFixture("""
+            <div id="target">
+              old text
+            </div>
+          """)
+
+          up.render({ target: '#target', content: givenElement })
+
+          await wait()
+
+          expect(document.querySelector('#target')).toHaveVisibleText('foo bar baz')
+          expect(document.querySelector('#target').children[0]).toBe(givenElement)
+
+        it 'can render an Text node value', ->
+          givenTextNode = new Text('foo bar baz')
+
+          target = htmlFixture("""
+            <div id="target">
+              old text
+            </div>
+          """)
+
+          up.render({ target: '#target', content: givenTextNode })
+          await wait()
+
+          expect(document.querySelector('#target')).toHaveVisibleText('foo bar baz')
+          expect(document.querySelector('#target').childNodes[0]).toBe(givenTextNode)
+
+
+        it 'can render an NodeList with mixed Element and Text nodes', ->
+          # Make a copy as it is a live list that we're going to mutate, then compare
+          givenNodes = [...up.element.parseNodesFromHTML('foo <b>bar</b> baz')]
+          expect(givenNodes).toHaveLength(3)
+
+          target = htmlFixture("""
+            <div id="target">
+              old text
+            </div>
+          """)
+
+          up.render({ target: '#target', content: givenNodes })
+          await wait()
+
+          expect(document.querySelector('#target')).toHaveText('foo bar baz')
+          expect(document.querySelector('#target').childNodes).toEqual(givenNodes)
+
       describe 'with { document } option', ->
 
         it 'replaces the given selector with a matching element that has the outer HTML from the given { document } string', asyncSpec (next) ->
@@ -2397,7 +2519,7 @@ describe 'up.fragment', ->
           expect('.target').toHaveText('new text')
           expect('.target').toHaveAttribute('up-etag', 'false')
 
-      describe 'with { fragment } option', ->
+      fdescribe 'with { fragment } option', ->
 
         it 'derives target and outer HTML from the given { fragment } string', asyncSpec (next) ->
           $fixture('.before').text('old-before')
@@ -2452,6 +2574,55 @@ describe 'up.fragment', ->
           next ->
             newTarget = document.querySelector('.target')
             expect(newTarget.innerHTML).toEqual('<div class="new-child"></div><div class="old-child"></div>')
+
+        it 'it accepts a CSS selector for a <template> to clone', ->
+          template = htmlFixture("""
+            <template id="target-template">
+              <div id="target">
+                target from template
+              </div>
+            </template>
+          """)
+
+          target = htmlFixture("""
+            <div id="target">
+              old target
+            </div>
+          """)
+
+          up.render({ fragment: '#target-template' })
+          await wait()
+
+          expect('#target').toHaveText('target from template')
+          # Make sure the element was cloned, not moved
+          expect(document.querySelector('#target').children[0]).not.toBe(template.content.children[0])
+
+        it 'compiles an element cloned from a <template>', ->
+          compilerFn = jasmine.createSpy('compiler fn')
+          up.compiler('#target', compilerFn)
+
+          template = htmlFixture("""
+              <template id="target-template">
+                <div id="target">
+                  target from template
+                </div>
+              </template>
+          """)
+
+          target = htmlFixture("""
+            <div id="target">
+              old target
+            </div>
+          """)
+
+          expect(compilerFn).not.toHaveBeenCalled()
+
+          up.render({ fragment: '#target-template' })
+          await wait()
+
+          expect('#target').toHaveText('target from template')
+          expect(compilerFn).toHaveBeenCalled()
+          expect(compilerFn.calls.mostRecent().args[0]).toMatchSelector('#target')
 
       describe 'choice of target', ->
 
@@ -10773,7 +10944,7 @@ describe 'up.fragment', ->
         element = e.affix(parent, '.element[up-etag=false]')
         expect(up.fragment.etag(element)).toBeUndefined()
 
-    describe 'up.fragment.insertTemp()', ->
+    fdescribe 'up.fragment.insertTemp()', ->
 
       it 'inserts a new element relative to the given reference element', ->
         reference = fixture('#reference')
@@ -10806,6 +10977,49 @@ describe 'up.fragment', ->
 
         expect(reference.children[0]).toBeElement()
         expect(reference.children[0]).toMatchSelector('my-element')
+
+      it 'looks up a CSS selector matching a <template> to clone', ->
+        template = htmlFixture """
+          <template id="my-template">
+            <div id="my-element">
+              element content
+            </div>
+          </template>
+        """
+
+        compilerFunction = jasmine.createSpy('compiler function')
+        up.compiler('#my-element', compilerFunction)
+
+        reference = fixture('#reference')
+
+        up.fragment.insertTemp(reference, '#my-template')
+        expect(reference.children.length).toBe(1)
+        expect(reference.children[0]).toMatchSelector('#my-element')
+        expect(reference.children[0]).toHaveText('element content')
+
+        # Test that the template content was cloned, not moved
+        expect(reference.children[0]).not.toBe(template.content.children[0])
+
+        # Test that the cloned element was compiled
+        expect(compilerFunction).toHaveBeenCalled()
+        expect(compilerFunction.calls.mostRecent().args[0]).toBe(reference.children[0])
+
+      it 'inserts a NodeList from mixed Element and Text nodes', ->
+        givenNodes = up.element.parseNodesFromHTML('foo <b>bar</b> baz')
+        expect(givenNodes.length).toBe(3)
+        # Make a copy because it's a live list and we're going to compare it below
+        givenNodes = u.copy(givenNodes)
+
+        reference = fixture('#reference')
+
+        up.fragment.insertTemp(reference, givenNodes)
+
+        expect(reference).toHaveText('foo bar baz')
+
+        # The given nodes are now contained in reference, albeit in an <up-wrapper>
+        expect(reference).toContain(givenNodes[0])
+        expect(reference).toContain(givenNodes[1])
+        expect(reference).toContain(givenNodes[2])
 
       describe 'returned undo function', ->
 
@@ -11216,7 +11430,9 @@ describe 'up.fragment', ->
         jasmine.objectContaining(selector: '.one', maybe: true, placement: 'before'),
       ]
 
-  describe 'up.fragment.provideElement()', ->
+  fdescribe 'up.fragment.provideElement()', ->
+
+    # TODO: Rewrite to returning NodeList
 
     describe 'with undefined', ->
 
@@ -11240,15 +11456,17 @@ describe 'up.fragment', ->
 
       it 'parses a HTML fragment and wraps it in { wrapperSelector }'
 
-      it 'parses inner HTML content and returns a <span> wrapper'
+      it 'parses text content and returns a <span> wrapper'
 
-      it 'parses inner HTML content and wraps it in { wrapperSelector } instead of using a <span></span>'
+      it 'parses multiple HTML elements without a single node and returns a <span> wrapper'
+
+      it 'parses text content and wraps it in { wrapperSelector } instead of using a <span></span>'
 
     describe 'with a non-template element', ->
 
       it 'returns the element without making a copy, so users can temporarily move an element into an overlay'
 
-       it 'wraps the element in a container matching { wrapperSelector }'
+      it 'wraps the element in a container matching { wrapperSelector }'
 
     describe 'with a template element', ->
 

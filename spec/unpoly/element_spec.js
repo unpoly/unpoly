@@ -667,7 +667,7 @@ describe('up.element', function() {
 
         it('adds a px unit to unit-less length properties', function() {
           const warnSpy = up.migrate.warn.mock()
-          const element = up.element.createFromSelector('div', {style: { 'height': '100', 'margin-top': '200' }})
+          const element = up.element.createFromSelector('div', { style: { 'height': '100', 'margin-top': '200' } })
 
           expect(element.style.height).toEqual('100px')
           expect(element.style.marginTop).toEqual('200px')
@@ -678,18 +678,42 @@ describe('up.element', function() {
 
     describe('with { text } option', function() {
 
-      it('sets the element text from a { text } option', function() {
-        const element = up.element.createFromSelector('.foo', {text: 'text'})
+      it('sets the element text', function() {
+        const element = up.element.createFromSelector('.foo', { text: 'text' })
         expect(element).toHaveText('text')
       })
 
-      it('escapes HTML from a { text } option', function() {
+      it('escapes HTML from the given text', function() {
         const element = up.element.createFromSelector('.foo', {text: '<script>alert("foo")</script>'})
         expect(element).toHaveText('<script>alert("foo")</script>')
       })
     })
-  })
 
+    fdescribe('with { content } option', function() {
+
+      it("sets the element's innerHTML", function() {
+        const element = up.element.createFromSelector('#element', { content: 'foo <b>bar</b> baz' })
+        expect(element).toHaveText('foo bar baz')
+        expect(element.innerHTML).toBe('foo <b>bar</b> baz')
+      })
+
+      it("accepts an Element", function() {
+        const givenChild = up.element.createFromSelector('#child')
+        const element = up.element.createFromSelector('#element', { content: givenChild })
+        expect(element.children).toEqual([givenChild])
+      })
+
+      it("accepts a NodeList of mixed Element and Text nodes", function() {
+        // Make a copy as it is a live list that we're going to mutate, then compare
+        const givenNodeList = [...up.element.parseNodesFromHTML('foo <b>bar</b> baz')]
+        expect(givenNodeList).toHaveLength(3)
+        const element = up.element.createFromSelector('#element', { content: givenNodeList })
+        expect(element.childNodes).toEqual(givenNodeList)
+      })
+
+    })
+
+  })
 
   describe('up.element.affix()', function() {
 
@@ -828,7 +852,20 @@ describe('up.element', function() {
     })
   })
 
-  describe('up.element.createFromHTML', function() {
+  fdescribe('up.element.parseNodesFromHTML()', function() {
+
+    it('parses a NodeList from the given HTML string', function() {
+      let nodes = up.element.parseNodesFromHTML('foo <b>bar</b> baz')
+      expect(nodes).toBeNodeList()
+      expect(nodes).toHaveLength(3)
+      expect(nodes[0]).toBeTextNode()
+      expect(nodes[1]).toBeElement()
+      expect(nodes[2]).toBeTextNode()
+    })
+
+  })
+
+  fdescribe('up.element.createFromHTML', function() {
 
     it('creates an element from the given HTML fragment', function() {
       const html = `
@@ -1783,6 +1820,60 @@ describe('up.element', function() {
 
       expect(parsed.excludeRaw).toEqual(':not(.bar)')
     })
+  })
+
+  fdescribe('up.element.unwrap()', function() {
+
+    it("attaches the element's children to its parent, then removes the element", function() {
+      let [container, wrapper, child1, child2] = htmlFixtureList(`
+        <div id="container">
+          <div id="wrapper">
+            <div id="child1"></div>
+            <div id="child2"></div>
+          </div>
+        </div>
+      `)
+
+      up.element.unwrap(wrapper)
+
+      expect(container.children).toEqual([child1, child2])
+      expect(wrapper).toBeDetached()
+    })
+
+    it('unwraps children that are Text nodes', function() {
+      let wrapper = up.element.createFromHTML(`
+        <div id="wrapper">
+          foo <b>bar</b> baz
+        </div>
+      `)
+
+      let container = document.createElement('div')
+      container.append(wrapper)
+
+      up.element.unwrap(wrapper)
+
+      expect(container.innerHTML.trim()).toBe('foo <b>bar</b> baz')
+      expect(wrapper).toBeDetached()
+    })
+
+    it('preserves focus in a child', function() {
+      let [container, wrapper, child] = htmlFixtureList(`
+        <div id="container">
+          <div id="wrapper">
+            <input id="child">
+          </div>
+        </div>
+      `)
+
+      child.focus()
+      expect(child).toBeFocused()
+
+      up.element.unwrap(wrapper)
+
+      expect(child.parentNode).toBe(container)
+      expect(child).toBeFocused()
+    })
+
   })
 
   if (up.migrate.loaded) {

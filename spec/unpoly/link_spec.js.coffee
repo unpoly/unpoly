@@ -817,7 +817,7 @@ describe 'up.link', ->
         await expectAsync(promise).toBeResolvedTo(jasmine.any(up.RenderResult))
         expect('.target').toHaveText('new text')
 
-    describe 'up.link.followOptions()', ->
+    fdescribe 'up.link.followOptions()', ->
 
       it 'parses the render options that would be used to follow the given link', ->
         link = fixture('a[href="/path"][up-method="PUT"][up-layer="new"]')
@@ -934,38 +934,33 @@ describe 'up.link', ->
         options = up.link.followOptions(link)
         expect(options.preview).toBe('foo bar')
 
-      it 'parses an [up-preview] attribute with invocations as a function', ->
-        link = fixture('a[href="/foo"][up-preview="this.callback(preview, 123)"]')
+      it 'parses an [up-preview-fn] attribute into { preview: Function }', ->
+        link = fixture('a[href="/foo"][up-preview-fn="this.callback(preview, 123)"]')
         link.callback = jasmine.createSpy('callback')
         options = up.link.followOptions(link)
         expect(options.preview).toEqual(jasmine.any(Function))
         options.preview('preview')
         expect(link.callback).toHaveBeenCalledWith('preview', 123)
 
-      it 'parses an [up-preview] attribute with embedded nonce and invocations as a function', ->
-        link = fixture('a[href="/foo"][up-preview="nonce-kO52Iphm8B this.callback(preview, 123)"]')
+      it 'parses an [up-preview-fn] attribute with embedded nonce into { preview: Function }', ->
+        link = fixture('a[href="/foo"][up-preview-fn="nonce-kO52Iphm8B this.callback(preview, 123)"]')
         link.callback = jasmine.createSpy('callback')
         options = up.link.followOptions(link)
         expect(options.preview).toEqual(jasmine.any(Function))
         options.preview('preview')
         expect(link.callback).toHaveBeenCalledWith('preview', 123)
 
-      it 'parses an [up-preview=false] attribute as boolean', ->
-        link = fixture('a[href="/foo"][up-preview="false"]')
+      it 'parses an [up-placeholder] attribute as a string', ->
+        link = fixture('a[href="/foo"][up-placeholder="loading..."]')
         options = up.link.followOptions(link)
-        expect(options.preview).toBe(false)
+        expect(options.placeholder).toBe('loading...')
 
-      it 'parses an [up-skeleton] attribute as a string', ->
-        link = fixture('a[href="/foo"][up-skeleton="foo bar"]')
-        options = up.link.followOptions(link)
-        expect(options.skeleton).toBe('foo bar')
-
-      it 'parses an [up-skeleton] attribute with invocations as a function', ->
-        link = fixture('a[href="/foo"][up-skeleton="this.callback(preview, 123)"]')
+      it 'parses an [up-placeholder-fn] attribute into { skeleton: Function }', ->
+        link = fixture('a[href="/foo"][up-placeholder-fn="this.callback(preview, 123)"]')
         link.callback = jasmine.createSpy('callback')
         options = up.link.followOptions(link)
-        expect(options.skeleton).toEqual(jasmine.any(Function))
-        options.skeleton('preview')
+        expect(options.placeholder).toEqual(jasmine.any(Function))
+        options.placeholder('preview')
         expect(link.callback).toHaveBeenCalledWith('preview', 123)
 
       it 'parses an [up-late-delay=Number] attribute as a number', ->
@@ -2567,7 +2562,7 @@ describe 'up.link', ->
                 expect(@followSpy).not.toHaveBeenCalled()
 
 
-      describe 'with [up-preview] modifier', ->
+      fdescribe 'with [up-preview] modifier', ->
 
         it 'shows a preview effect while the link is loading', ->
           target = fixture('#target', text: 'old target')
@@ -2590,11 +2585,13 @@ describe 'up.link', ->
 
           expect(spinnerContainer).not.toHaveSelector('#spinner')
 
-        it 'accepts a code snippet that is called with the preview and produces a placeholder element', ->
+      describe 'with [up-preview-fn] modifier', ->
+
+        it 'calls a code snippet with the `preview`', ->
           fixture('#target', content: '<p>old target</p>')
           other = fixture('#other')
           placeholderElement = up.element.createFromHTML("<p>placeholder</p>")
-          link = fixture('a[href="/foo"][up-follow][up-target="#target"][up-preview="this.previewFn(preview)"]', text: 'label')
+          link = fixture('a[href="/foo"][up-follow][up-target="#target"][up-preview-fn="this.previewFn(preview)"]', text: 'label')
           link.previewFn = jasmine.createSpy('previewFn fn').and.callFake((preview) -> preview.hide(other))
 
           expect('#target').toHaveVisibleText('old target')
@@ -2610,7 +2607,7 @@ describe 'up.link', ->
 
           expect(other).toBeVisible()
 
-      describe 'with [up-placeholder] modifier', ->
+      fdescribe 'with [up-placeholder] modifier', ->
 
         it 'shows a UI placeholder while the link is loading', ->
           fixture('#target', content: '<p>old target</p>')
@@ -2666,10 +2663,12 @@ describe 'up.link', ->
           expect(placeholderCompilerFn).not.toHaveBeenCalled()
           expect(up.network.isBusy()).toBe(false)
 
-        it 'accepts a code snippet that is called with the preview and produces a placeholder element', ->
+      describe 'with [up-placeholder-fn]', ->
+
+        it 'produces a placeholder element by calling the given code snippet with a `preview` context', ->
           fixture('#target', content: '<p>old target</p>')
           placeholderElement = up.element.createFromHTML("<p>placeholder</p>")
-          link = fixture('a[href="/foo"][up-follow][up-target="#target"][up-placeholder="this.placeholderFn(preview)"]', text: 'label')
+          link = fixture('a[href="/foo"][up-follow][up-target="#target"][up-placeholder-fn="this.placeholderFn(preview)"]', text: 'label')
           link.placeholderFn = jasmine.createSpy('placeholder fn').and.callFake(() -> placeholderElement)
 
           expect('#target').toHaveVisibleText('old target')
