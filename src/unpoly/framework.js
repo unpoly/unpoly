@@ -222,7 +222,7 @@ up.framework = (function() {
   }
 
   function supportIssue() {
-    for (let feature of ['Promise', 'DOMParser', 'FormData']) {
+    for (let feature of ['Promise', 'DOMParser', 'FormData', 'reportError']) {
       if (!window[feature]) {
         return `Browser doesn't support the ${feature} API`
       }

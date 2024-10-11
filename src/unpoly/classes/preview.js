@@ -23,7 +23,7 @@ up.Preview = class Preview {
   undo(...args) {
     if (this.ended) {
       // TODO: undo now
-      up.error.report(new up.Error('Preview used after end of request'))
+      reportError(new up.Error('Preview used after end of request'))
     } else {
       this._cleaner.guard(...args)
     }
