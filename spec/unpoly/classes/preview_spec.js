@@ -887,12 +887,35 @@ fdescribe('up.Preview', function() {
       expect(preview2Undo).toHaveBeenCalled()
     })
 
-    it('runs with the correct up.layer.current when rendering in a background layer', function() {
-      throw "test me"
+    it('runs with the correct up.layer.current when rendering in a background layer', async function() {
+      makeLayers(2)
+      expect(up.layer.current).toBe(up.layer.get(1))
+
+      let layerSpy = jasmine.createSpy('layer spy')
+
+      let previewFn = jasmine.createSpy('previewFn').and.callFake(function(_preview) {
+        layerSpy(up.layer.current)
+      })
+
+      up.preview('preview', previewFn)
+
+      up.render({ preview: previewFn, url: '/url', target: 'body', layer: 'root' })
+      await wait()
+
+      expect(layerSpy).toHaveBeenCalledWith(up.layer.root)
     })
 
-    it('reports an error (but does not crash) when called with an unknown preview name', function() {
-      throw "test me"
+    it('reports an error (but does not crash) when called with an unknown preview name', async function() {
+      let previewFn = jasmine.createSpy('previewFn').and.callFake(function(preview) {
+        preview.run('typo')
+      })
+
+      up.preview('preview', previewFn)
+
+      await jasmine.expectGlobalError('Unknown preview "typo"', async function() {
+        up.render({ preview: previewFn, url: '/url', target: 'body' })
+        await wait()
+      })
     })
 
   })
