@@ -1632,7 +1632,8 @@ up.link = (function() {
         ...e.upAttrs(childLink)
       })
 
-      area.classList.add(...e.upClasses(childLink))
+      // This is our current workaround for expanded areas gaining an .up-current class from the contained link.
+      e.addClasses(area, e.upClasses(childLink))
 
       makeFollowable(area)
       // A11y: We could also consider making the area clickable, via makeClickable().
