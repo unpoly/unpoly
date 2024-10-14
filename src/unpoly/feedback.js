@@ -419,7 +419,6 @@ up.feedback = (function() {
     parser.string('preview')
     parser.callback('preview', { attr: 'up-preview-fn', mainKey: 'preview' })
     parser.string('placeholder')
-    parser.callback('placeholder', { attr: 'up-placeholder-fn', mainKey: 'preview' })
     return options
   }
 
