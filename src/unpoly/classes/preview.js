@@ -55,9 +55,9 @@ up.Preview = class Preview {
     return this.request.ended
   }
 
-  run(value) {
+  run(value, ...args) {
     for (let fn of up.feedback.resolvePreviewFns(value)) {
-      this.undo(up.error.guard(fn, this))
+      this.undo(up.error.guard(fn, this, ...args))
     }
   }
 
