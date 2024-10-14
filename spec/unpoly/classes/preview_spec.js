@@ -918,6 +918,21 @@ describe('up.Preview', function() {
       })
     })
 
+    it('accepts additional arguments that are passed on to the preview function', async function() {
+      let preview2Fn = jasmine.createSpy('preview2Fn')
+      let preview1Fn = jasmine.createSpy('preview1Fn').and.callFake(function(preview) {
+        preview.run('preview2', 1, 'two')
+      })
+
+      up.preview('preview1', preview1Fn)
+      up.preview('preview2', preview2Fn)
+
+      up.render({ preview: preview1Fn, url: '/url', target: 'body' })
+      await wait()
+
+      expect(preview2Fn).toHaveBeenCalledWith(jasmine.any(up.Preview), 1, 'two')
+    })
+
   })
 
   describe('#run(Function)', function() {
@@ -980,6 +995,19 @@ describe('up.Preview', function() {
       expect(preview1Undo).toHaveBeenCalled()
       expect(preview2Undo).toHaveBeenCalled()
     })
+
+    it('accepts additional arguments that are passed on to the preview function', async function() {
+      let preview2Fn = jasmine.createSpy('preview2Fn')
+      let preview1Fn = jasmine.createSpy('preview1Fn').and.callFake(function(preview) {
+        preview.run(preview2Fn, 1, 'two')
+      })
+
+      up.render({ preview: preview1Fn, url: '/url', target: 'body' })
+      await wait()
+
+      expect(preview2Fn).toHaveBeenCalledWith(jasmine.any(up.Preview), 1, 'two')
+    })
+
 
   })
 
