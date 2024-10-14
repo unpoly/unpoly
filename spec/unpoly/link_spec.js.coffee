@@ -2857,6 +2857,11 @@ describe 'up.link', ->
         expect($area.attr('up-instant')).toEqual('')
         expect($area.attr('up-preload')).toEqual('')
 
+#      it 'copies up-related classes of a contained link', ->
+#        area = fixture('div[up-expand] a[href="/path"].up-current')
+#        up.hello(area)
+#        expect(area.attr('up-target')).toEqual('selector')
+
       it "renames a contained link's [href] attribute to [up-href] so the container is considered a link", ->
         $area = $fixture('div[up-expand] a[up-follow][href="/path"]')
         up.hello($area)
