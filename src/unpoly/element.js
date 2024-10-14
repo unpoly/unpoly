@@ -545,7 +545,7 @@ up.element = (function() {
     let previousElement
 
     for (let includeSegment of includePath) {
-      let { tagName, id, classNames, attributes } = includeSegment
+      let { tagName } = includeSegment
 
       if (!tagName || tagName === '*') {
         tagName = 'div'
@@ -557,18 +557,7 @@ up.element = (function() {
         rootElement = depthElement
       }
 
-      if (id) {
-        depthElement.id = id
-      }
-
-      for (let className of classNames) {
-        depthElement.classList.add(className)
-      }
-
-      for (let attributeName in attributes) {
-        let attributeValue = attributes[attributeName]
-        depthElement.setAttribute(attributeName, attributeValue || '')
-      }
+      makeVariation(depthElement, includeSegment)
 
       previousElement?.appendChild(depthElement)
       previousElement = depthElement
@@ -577,9 +566,7 @@ up.element = (function() {
     for (let key in attrs) {
       let value = attrs[key]
       if (key === 'class') {
-        for (let klass of u.wrapList(value)) {
-          rootElement.classList.add(klass)
-        }
+        addClasses(rootElement, u.wrapList(value))
       } else if (key === 'style') {
         setInlineStyle(rootElement, value)
       } else if (key === 'text') {
@@ -596,6 +583,18 @@ up.element = (function() {
     }
 
     return rootElement
+  }
+
+  function makeVariation(element, { id, classNames, attributes }) {
+    if (id) {
+      element.id = id
+    }
+
+    for (let [name, value] of Object.entries(attributes)) {
+      element.setAttribute(name, value)
+    }
+
+    addClasses(element, classNames)
   }
 
   /*-
@@ -624,20 +623,19 @@ up.element = (function() {
   @function up.element.parseSelector
   @internal
   */
-  function parseSelector(selector) {
+  function parseSelector(rawSelector) {
     let excludeRaw
 
-    const includeRaw = selector.replace(/:not\([^)]+\)/, function(match) {
-      excludeRaw = match
+    const { selector: selectorWithoutAttrValues, restore: restoreAttrValues, parse: parsePlaceholderAttrs } = simplifyAttrSelectors(rawSelector)
+
+    const includeWithoutAttrValues = selectorWithoutAttrValues.replace(/:not\((\([^)]+\)|[^()])+\)/, function(match) {
+      excludeRaw = restoreAttrValues(match)
       return ''
     })
 
-    // Extract attribute values before we match the string.
-    // Attribute values might contain spaces, and then we would incorrectly
-    // split depths at that space.
-    const [includeSelectorWithoutAttrValues, attrValues] = removeAttrSelectorValues(includeRaw)
+    let includeRaw = restoreAttrValues(includeWithoutAttrValues)
 
-    const includeSegments = includeSelectorWithoutAttrValues.split(/[ >]+/)
+    const includeSegments = includeWithoutAttrValues.split(/[ >]+/)
 
     let includePath = includeSegments.map(function(depthSelector) {
       let parsed = {
@@ -664,15 +662,13 @@ up.element = (function() {
 
       // If we have stripped out attrValues at the beginning of the function,
       // they have been replaced with the attribute name only (as "[name]").
-      if (attrValues.length) {
-        depthSelector = replaceAttrSelectors(depthSelector, function({ name }) {
-          parsed.attributes[name] = attrValues.shift()
-          return ''
-        })
-      }
+      depthSelector = parsePlaceholderAttrs(depthSelector, function({ name, value }) {
+        parsed.attributes[name] = value
+        return ''
+      })
 
       if (depthSelector) {
-        up.fail('Cannot parse selector: ' + selector)
+        up.fail('Cannot parse selector: ' + rawSelector)
       }
 
       return parsed
@@ -685,24 +681,55 @@ up.element = (function() {
     }
   }
 
+  function splitSelector(rawSelector, separator) {
+    let { selector, restore } = simplifyAttrSelectors(rawSelector)
+    return selector.split(separator).map(restore)
+  }
+
   const ATTR_SELECTOR_PATTERN = /\[([\w-]+)(?:([~|^$*]?=)(["'])?([^\3\]]*?)\3)?]/g
 
   function replaceAttrSelectors(string, replacement) {
-    return string.replace(ATTR_SELECTOR_PATTERN, function(_match, name, operator, quote, value) {
+    return string.replace(ATTR_SELECTOR_PATTERN, function(raw, name, _operator, _quote, value) {
       if (value) {
         value = value.replace(/\\([\\"'])/, '$1')
+      } else {
+        value = ''
       }
-      return replacement({ name, operator, quote, value })
+      return replacement({ raw, name, value })
     })
   }
 
-  function removeAttrSelectorValues(selector) {
-    let values = []
-    selector = replaceAttrSelectors(selector, function({ name, value }) {
-      values.push(value)
-      return `[${name}]`
+  function simplifyAttrSelectors(rawSelector) {
+    let parseResults = {}
+    let i = 0
+
+    // Replace attribute expressions with placeholders, to make the resulting string safe for grepping:
+    //
+    //     simplifyAttrSelectors('.klass[key]>#id').selector         // => '.klass[$0]>#id'
+    //     simplifyAttrSelectors('.klass[key=value]>#id').selector   // => '.klass[$1]>#id'
+    //     simplifyAttrSelectors('.klass[key="value"]>#id').selector // => '.klass[$2]>#id'
+    let selector = replaceAttrSelectors(rawSelector, function(parseResult) {
+      let placeholder = `v${i++}`
+      parseResults[placeholder] = parseResult
+      return `[${placeholder}]`
     })
-    return [selector, values]
+
+    // Accepts a string that may contain placeholders and calls the given function
+    // with the selector properties parsed during simplifiction. The placeholders will
+    // be replaced with the callback result.
+    //
+    //     let { parse } = simplifyAttrSelectors('.klass[data-foo="value"]') // => '.klass[$0]'
+    //     parse('before [$0] after', ({ name, operator, value }) => name) // => 'data-foo'
+    let parse = (str, callback) => replaceAttrSelectors(str, ({ name }) => callback(parseResults[name]))
+
+    // Accepts a string that may contain placeholders and replaces each placeholder
+    // with its original attribute expression:
+    //
+    //     let { parse } = simplifyAttrSelectors('.klass[data-foo="value"]') // => '.klass[$0]'
+    //     restore('before [$0] after') // => 'before [data-foo="value"] after'
+    let restore = (str) => parse(str, ({ raw }) => raw)
+
+    return { selector, parse, restore }
   }
 
   /*-
@@ -1241,6 +1268,12 @@ up.element = (function() {
     }
   }
 
+  function addClasses(element, classes) {
+    // Don't use element.classList.add(...classes) because that sets an empty [class]
+    // attribute if classes is an empty array.
+    for (let klass of classes) element.classList.add(klass)
+  }
+
   /*-
   Temporarily adds a CSS class to the given element.
 
@@ -1625,10 +1658,13 @@ up.element = (function() {
     upAttrs,
     upClasses,
     setAttrPresence,
+    addClasses,
     addClassTemp,
     removeClassTemp,
     cleanJQuery,
     parseSelector,
+    splitSelector,
+    makeVariation,
     isEmpty,
     crossOriginSelector,
     isIntersectingWindow,

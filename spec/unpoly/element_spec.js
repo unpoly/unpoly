@@ -1783,6 +1783,17 @@ describe('up.element', function() {
       }])
     })
 
+    it('ignores control characters in quoted attribute value', function() {
+      const parsed = up.element.parseSelector('.klass[foo="#noid"][bar=".noclass"]')
+
+      expect(parsed.includePath).toEqual([{
+        tagName: null,
+        id: null,
+        classNames: ['klass'],
+        attributes: { foo: '#noid', bar: '.noclass' }
+      }])
+    })
+
     it('unescapes quotes in attribute values', function() {
       const parsed = up.element.parseSelector('[attr="foo\\"bar"]')
 
@@ -1819,6 +1830,19 @@ describe('up.element', function() {
       }])
 
       expect(parsed.excludeRaw).toEqual(':not(.bar)')
+    })
+
+    it('parses a :not() suffix containing an :is() expression', function() {
+      const parsed = up.element.parseSelector('.foo:not(.bar:is(.baz, .qux))')
+
+      expect(parsed.includePath).toEqual([{
+        tagName: null,
+        id: null,
+        classNames: ['foo'],
+        attributes: {}
+      }])
+
+      expect(parsed.excludeRaw).toEqual(':not(.bar:is(.baz, .qux))')
     })
   })
 
