@@ -11523,7 +11523,7 @@ describe 'up.fragment', ->
         expect(nodes[0]).toBeTextNode('foo')
         expect(nodes[1].outerHTML).toBe('<b>bar</b>')
 
-      describe 'variants with `with $variant-selector` suffix (sic)', ->
+      describe 'variants with `as $variant-selector` suffix (sic)', ->
 
         it 'gives the cloned element a class', ->
           template = htmlFixture("""
@@ -11531,7 +11531,7 @@ describe 'up.fragment', ->
               <div>cloned content</div>
             </template>
           """)
-          nodes = up.fragment.provideNodes('#my-template with .class')
+          nodes = up.fragment.provideNodes('#my-template as .class')
 
           expect(nodes).toHaveLength(1)
           expect(nodes[0]).toBeElement()
@@ -11543,7 +11543,7 @@ describe 'up.fragment', ->
               <div>cloned content</div>
             </template>
           """)
-          nodes = up.fragment.provideNodes('#my-template with [foo=one][bar="two"]')
+          nodes = up.fragment.provideNodes('#my-template as [foo=one][bar="two"]')
 
           expect(nodes).toHaveLength(1)
           expect(nodes[0]).toBeElement()
@@ -11555,19 +11555,19 @@ describe 'up.fragment', ->
               <div>cloned content</div>
             </template>
           """)
-          nodes = up.fragment.provideNodes('#my-template with [up-data=\'{ "foo": "one", "bar": "two" }\']')
+          nodes = up.fragment.provideNodes('#my-template as [up-data=\'{ "foo": "one", "bar": "two" }\']')
 
           expect(nodes).toHaveLength(1)
           expect(nodes[0]).toBeElement()
           expect(e.jsonAttr(nodes[0], 'up-data')).toEqual({ foo: 'one', bar: 'two' })
 
-        it 'ignores the `with` keyword in an attribute selector value', ->
+        it 'ignores the `as` keyword in an attribute selector value', ->
           template = htmlFixture("""
-            <template foo="bar with .baz">
+            <template foo="bar as .baz">
               <div>cloned content</div>
             </template>
           """)
-          nodes = up.fragment.provideNodes('[foo="bar with .baz"]')
+          nodes = up.fragment.provideNodes('[foo="bar as .baz"]')
 
           expect(nodes).toHaveLength(1)
           expect(nodes[0]).toBeElement()
