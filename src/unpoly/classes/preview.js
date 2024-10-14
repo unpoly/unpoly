@@ -22,7 +22,13 @@ up.Preview = class Preview {
 
   undo(...args) {
     if (this.ended) {
-      // TODO: undo now
+      // We might have the idea to immediately undo an effect when the preview has ended,
+      // but it might lead to infinite loops in cases like this:
+      //
+      //    up.preview('broken', function(preview) {
+      //      preview.show('#element')
+      //      return () => preview.hide('#element')
+      //    })
       reportError(new up.Error('Preview used after end of request'))
     } else {
       this._cleaner.guard(...args)
