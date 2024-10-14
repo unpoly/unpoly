@@ -955,14 +955,6 @@ describe 'up.link', ->
         options = up.link.followOptions(link)
         expect(options.placeholder).toBe('loading...')
 
-      it 'parses an [up-placeholder-fn] attribute into { skeleton: Function }', ->
-        link = fixture('a[href="/foo"][up-placeholder-fn="this.callback(preview, 123)"]')
-        link.callback = jasmine.createSpy('callback')
-        options = up.link.followOptions(link)
-        expect(options.placeholder).toEqual(jasmine.any(Function))
-        options.placeholder('preview')
-        expect(link.callback).toHaveBeenCalledWith('preview', 123)
-
       it 'parses an [up-late-delay=Number] attribute as a number', ->
         link = fixture('a[href="/foo"][up-late-delay=123]')
         up.hello(link)
@@ -2673,27 +2665,6 @@ describe 'up.link', ->
           expect('#target').toHaveVisibleText('revalidated target')
           expect(placeholderCompilerFn).not.toHaveBeenCalled()
           expect(up.network.isBusy()).toBe(false)
-
-      describe 'with [up-placeholder-fn]', ->
-
-        it 'produces a placeholder element by calling the given code snippet with a `preview` context', ->
-          fixture('#target', content: '<p>old target</p>')
-          placeholderElement = up.element.createFromHTML("<p>placeholder</p>")
-          link = fixture('a[href="/foo"][up-follow][up-target="#target"][up-placeholder-fn="this.placeholderFn(preview)"]', text: 'label')
-          link.placeholderFn = jasmine.createSpy('placeholder fn').and.callFake(() -> placeholderElement)
-
-          expect('#target').toHaveVisibleText('old target')
-
-          Trigger.clickSequence(link)
-          await wait()
-
-          expect(link.placeholderFn).toHaveBeenCalledWith(jasmine.any(up.Preview))
-          expect('#target').toHaveVisibleText('placeholder')
-
-          jasmine.respondWithSelector('#target', content: '<p>new target</p>')
-          await wait()
-
-          expect('#target').toHaveVisibleText('new target')
 
       describe 'following non-interactive elements with [up-href]', ->
 
