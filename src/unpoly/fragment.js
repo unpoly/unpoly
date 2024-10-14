@@ -2911,7 +2911,7 @@ up.fragment = (function() {
     }
 
     if (u.isString(value) && STARTS_WITH_SELECTOR.test(value)) {
-      let [templateSelector, variantSelector] = e.splitSelector(value, /\s+with\s+/)
+      let [templateSelector, variantSelector] = e.splitSelector(value, /\s+as\s+/)
 
       value = up.fragment.get(templateSelector, { layer: 'closest', origin, originLayer }) || up.fail(`Cannot find template "%s"`, value)
       if (variantSelector) {
