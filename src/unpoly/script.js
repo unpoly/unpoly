@@ -747,6 +747,7 @@ up.script = (function() {
     }
 
     return {
+      ...element.upTemplateData,
       ...element.dataset,
       ...parsedJSON,
       ...element.upCompileData,

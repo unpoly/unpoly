@@ -2851,6 +2851,35 @@ describe('up.util', () => {
 
     })
 
+    describe('up.util.extractTrailingJSON()', function() {
+
+      describe('if the string ends in a JSON object', function() {
+
+        it('returns a tuple of the initial string and the parsed JSON object', function() {
+          let str = 'foo bar { "baz": 3 }'
+          let result = up.util.extractTrailingJSON(str)
+          expect(result).toEqual(['foo bar', { baz: 3 }])
+        })
+
+        it('accepts unquoted property names and single quote strings', function() {
+          let str = 'foo bar { baz: 3 }'
+          let result = up.util.extractTrailingJSON(str)
+          expect(result).toEqual(['foo bar', { baz: 3 }])
+        })
+
+      })
+
+      describe('if the string does not end in a JSON object', function() {
+
+        it('returns a tuple of only the given string', function() {
+          let str = 'foo bar baz'
+          let result = up.util.extractTrailingJSON(str)
+          expect(result).toEqual(['foo bar baz'])
+        })
+
+      })
+
+    })
 
   })
 })
