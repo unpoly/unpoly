@@ -125,18 +125,15 @@ describe('up.feedback', function() {
             expect(previewFn).toHaveBeenCalledWith(jasmine.any(up.Preview))
           })
 
-          it('runs multiple named previews, separated by a space', async function() {
-            let preview1Fn = jasmine.createSpy('preview1')
-            up.preview('preview1', preview1Fn)
-            let preview2Fn = jasmine.createSpy('preview2')
-            up.preview('preview2', preview2Fn)
+          it('runs a named preview with a JSON argument', async function() {
+            let previewFn = jasmine.createSpy('preview function')
+            up.preview('my-preview', previewFn)
 
-            up.render({ preview: 'preview1 preview2', url: '/path', target: 'body' })
+            up.render({ preview: 'my-preview { foo: "bar", baz: [1, 2, 3] }', url: '/path', target: 'body' })
 
             await wait()
 
-            expect(preview1Fn).toHaveBeenCalledWith(jasmine.any(up.Preview))
-            expect(preview2Fn).toHaveBeenCalledWith(jasmine.any(up.Preview))
+            expect(previewFn).toHaveBeenCalledWith(jasmine.any(up.Preview), { foo: "bar", baz: [1, 2, 3] })
           })
 
           it('runs an array of named previews', async function() {

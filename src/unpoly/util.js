@@ -2117,13 +2117,18 @@ up.util = (function() {
   }
 
   function parseRelaxedJSON(str) {
-    let transformed = str.replace(/("(?:\\\\|\\"|[^"])*")|('(?:\\\\|\\'|[^'])*')|(true\b|false\b|null\b)|([a-z_$][\w$]*:)/gi, function(_match, doubleQuotedString, singleQuotedString, literalKeyword, unquotedProperty) {
-      return doubleQuotedString
-        || (singleQuotedString && singleToDoubleQuote(singleQuotedString))
-        || literalKeyword
-        || ('"' + unquotedProperty.slice(0, -1) + '":')
-    })
-    return JSON.parse(transformed)
+    let parser = new up.TextParser(str)
+    parser.stripDoubleQuotedStrings()
+    parser.stripSingleQuotedStrings(singleToDoubleQuote)
+    parser.transform(/([a-z_$][\w$]*:)/i, (unquotedProperty) => ('"' + unquotedProperty.slice(0, -1) + '":'))
+    return JSON.parse(parser.restore())
+  }
+
+  function splitWithJSON(str) {
+    let parser = new up.TextParser(str)
+    parser.stripStrings()
+    parser.stripObjects()
+    return parser.text.split(/\s+/, (atom) => parser.restore(atom))
   }
 
   function extractTrailingJSON(str) {
@@ -2137,6 +2142,48 @@ up.util = (function() {
       return [str]
     }
   }
+
+
+
+  function split4(str) {
+    let parser = new up.TextParser(str)
+    parser.strip(/"(?:\\\\|\\"|[^"])*"/g)
+    parser.strip(/'(?:\\\\|\\'|[^'])*'/g)
+    parser.strip(/{[^}]*}/g)
+    parser.restore(str)
+  }
+
+
+  function splitJSONFoo(str) {
+    let { str } = stripStrings(str)
+    let pattern = /
+
+      ([^{]+) |
+      ({ ([^{}] | { ([^}]* | {[^}]*})* })
+
+     /
+  }
+
+  function splitJSONFoo2(str) {
+    let { str } = stripStrings(str)
+    let pattern = /
+
+      ([^{]+) |
+      ({    ([^{}] | {[^}]+})   })
+
+     /
+  }
+
+  function splitJSONFoo3(str) {
+    let { str } = stripStrings(str)
+    let pattern = /
+
+    ([^{]+) |
+    ({ ([^{}] | { ([^}]* | {[^}]*})* })
+
+  /
+  }
+
 
   return {
     parseURL,
