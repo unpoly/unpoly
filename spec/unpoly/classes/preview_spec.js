@@ -1220,7 +1220,7 @@ describe('up.Preview', function() {
         expect('#child').toBeVisible()
       })
 
-      it('accepts a selector for the placeholder element', async function() {
+      it('accepts a selector for a placeholder <template>', async function() {
         let placeholderCompiler = jasmine.createSpy('placeholder compiler')
         up.compiler('#placeholder', placeholderCompiler)
 
@@ -1245,6 +1245,40 @@ describe('up.Preview', function() {
         expect('#parent').not.toHaveSelector('#placeholder-template')
         expect('#child').toBeHidden()
         expect(placeholderCompiler).toHaveBeenCalledWith(jasmine.elementMatchingSelector('#placeholder'), jasmine.anything(), jasmine.anything())
+
+        jasmine.respondWithSelector('#target')
+        await wait()
+
+        expect('#parent').not.toHaveSelector('#placeholder')
+        expect('#child').toBeVisible()
+      })
+
+      it('accepts a template selector and a JSON object that will become the compile data of the cloned element', async function() {
+        let placeholderCompiler = jasmine.createSpy('placeholder compiler')
+        up.compiler('#placeholder', placeholderCompiler)
+
+        fixture('#target')
+        let parent = htmlFixture(`
+          <div id="parent">
+            <div id="child"></div>
+          </div>
+        `)
+
+        htmlFixture(`
+          <template id="placeholder-template">
+            <div id="placeholder" data-key-from-template="foo">placeholder</div>
+          </template>
+        `)
+        let previewFn = (preview) => preview.showPlaceholder(parent, '#placeholder-template { keyFromMethod: "bar" }')
+
+        up.render({ preview: previewFn, url: '/url', target: '#target' })
+        await wait()
+
+        expect('#parent').toHaveSelector('#placeholder')
+        expect('#parent').not.toHaveSelector('#placeholder-template')
+        expect('#child').toBeHidden()
+        const expectedData = { keyFromTemplate: 'foo', keyFromMethod: 'bar'}
+        expect(placeholderCompiler).toHaveBeenCalledWith(jasmine.elementMatchingSelector('#placeholder'), expectedData, jasmine.anything())
 
         jasmine.respondWithSelector('#target')
         await wait()

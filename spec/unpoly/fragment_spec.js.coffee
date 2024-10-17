@@ -11554,57 +11554,6 @@ describe 'up.fragment', ->
         expect(nodes[0]).toBeTextNode('foo')
         expect(nodes[1].outerHTML).toBe('<b>bar</b>')
 
-      describe 'variants with `as $variant-selector` suffix (sic)', ->
-
-        it 'gives the cloned element a class', ->
-          template = htmlFixture("""
-            <template id="my-template">
-              <div>cloned content</div>
-            </template>
-          """)
-          nodes = up.fragment.provideNodes('#my-template as .class')
-
-          expect(nodes).toHaveLength(1)
-          expect(nodes[0]).toBeElement()
-          expect(nodes[0].outerHTML).toBe('<div class="class">cloned content</div>')
-
-        it 'sets attributes on the cloned element', ->
-          template = htmlFixture("""
-            <template id="my-template">
-              <div>cloned content</div>
-            </template>
-          """)
-          nodes = up.fragment.provideNodes('#my-template as [foo=one][bar="two"]')
-
-          expect(nodes).toHaveLength(1)
-          expect(nodes[0]).toBeElement()
-          expect(nodes[0].outerHTML).toBe('<div foo="one" bar="two">cloned content</div>')
-
-        it 'sets an [up-data] attribute with JSON content', ->
-          template = htmlFixture("""
-            <template id="my-template">
-              <div>cloned content</div>
-            </template>
-          """)
-          nodes = up.fragment.provideNodes('#my-template as [up-data=\'{ "foo": "one", "bar": "two" }\']')
-
-          expect(nodes).toHaveLength(1)
-          expect(nodes[0]).toBeElement()
-          expect(e.jsonAttr(nodes[0], 'up-data')).toEqual({ foo: 'one', bar: 'two' })
-
-        it 'ignores the `as` keyword in an attribute selector value', ->
-          template = htmlFixture("""
-            <template foo="bar as .baz">
-              <div>cloned content</div>
-            </template>
-          """)
-          nodes = up.fragment.provideNodes('[foo="bar as .baz"]')
-
-          expect(nodes).toHaveLength(1)
-          expect(nodes[0]).toBeElement()
-          expect(nodes[0].outerHTML).toBe('<div>cloned content</div>')
-
-
     describe 'with a function', ->
 
       it 'returns a list of elements returned by the function', ->

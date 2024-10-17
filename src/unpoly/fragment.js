@@ -2903,7 +2903,7 @@ up.fragment = (function() {
   const STARTS_WITH_SELECTOR = /^([\w-]+|\*)?(#|\.|[:[][a-z-]{3,})/
 
   function provideNodes(value, { origin, originLayer, callbackArgs = [] } = {}) {
-    let variant
+    let compileData
 
     // A function can return a string of HTML, an Element or a selector string.
     if (u.isFunction(value)) {
@@ -2911,12 +2911,11 @@ up.fragment = (function() {
     }
 
     if (u.isString(value) && STARTS_WITH_SELECTOR.test(value)) {
-      let [templateSelector, variantSelector] = e.splitSelector(value, /\s+as\s+/)
+      [value, compileData] = u.extractTrailingJSON(value)
 
-      value = up.fragment.get(templateSelector, { layer: 'closest', origin, originLayer }) || up.fail(`Cannot find template "%s"`, value)
-      if (variantSelector) {
-        variant = e.parseSelector(variantSelector).includePath[0]
-      }
+      debugger
+
+      value = up.fragment.get(value, { layer: 'closest', origin, originLayer }) || up.fail(`Cannot find template "%s"`, value)
     }
 
     if (u.isElement(value) && value.matches('template')) {
@@ -2929,10 +2928,10 @@ up.fragment = (function() {
 
     value = u.wrapList(value)
 
-    if (variant) {
+    if (compileData) {
       for (let node of value) {
         if (u.isElement(node)) {
-          e.makeVariation(node, variant)
+          node.upTemplateData = compileData
         }
       }
     }

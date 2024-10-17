@@ -2126,6 +2126,18 @@ up.util = (function() {
     return JSON.parse(transformed)
   }
 
+  function extractTrailingJSON(str) {
+    let braceIndex = str.indexOf('{')
+    if (braceIndex >= 0) {
+      return [
+        str.slice(0, braceIndex).trim(),
+        parseRelaxedJSON(str.slice(braceIndex))
+      ]
+    } else {
+      return [str]
+    }
+  }
+
   return {
     parseURL,
     normalizeURL,
@@ -2234,6 +2246,7 @@ up.util = (function() {
     scanFunctions,
     args: parseArgs,
     parseRelaxedJSON,
+    extractTrailingJSON,
     // partialRight,
   }
 })()
