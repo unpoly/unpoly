@@ -2266,7 +2266,7 @@ describe 'up.radio', ->
 
           element = fixture('.element'
             'up-poll': '',
-            'up-data': JSON.stringify(counter: 5),
+            'up-data': '{ counter: 5 }',
             'up-keep-data': '',
             'up-interval': '30'
           )
@@ -2278,7 +2278,7 @@ describe 'up.radio', ->
           next.after 80, ->
             expect(jasmine.Ajax.requests.count()).toBe(1)
 
-            jasmine.respondWithSelector('.element', 'up-data': JSON.stringify(counter: 99))
+            jasmine.respondWithSelector('.element', 'up-data': '{ counter: 99 }')
 
           next ->
             expect(counterSpy.calls.count()).toBe(2)

@@ -1185,6 +1185,11 @@ describe('up.element', function() {
       expect(up.element.jsonAttr(element, 'foo')).toEqual({ 'key': 'value'})
     })
 
+    it("parses unquoted property names", function() {
+      const element = up.element.createFromHTML('<div foo=\'{ key: "value" }\'></div>')
+      expect(up.element.jsonAttr(element, 'foo')).toEqual({ key: 'value'})
+    })
+
     it("returns undefined if the given attribute's value is blank", function() {
       const element = up.element.createFromHTML('<div foo=""></div>')
       expect(up.element.jsonAttr(element, 'foo')).toBeUndefined()

@@ -1848,6 +1848,23 @@ describe 'up.fragment', ->
             expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining(event1Plan))
             expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining(event2Plan))
 
+          it 'accepts unquoted property names in the header value', ->
+            fixture('.element')
+
+            up.render(target: '.element', url: '/path')
+
+            spyOn(up, 'emit').and.callThrough()
+
+            await wait()
+
+            jasmine.respondWith
+              responseHeaders: { 'X-Up-Events': '[{ type: "foo", prop: "bar" }]' }
+              responseText: '<div class="element"></div>'
+
+            await wait()
+
+            expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining({ type: "foo", prop: "bar" }))
+
           it 'emits these events for a failure response', ->
             fixture('.element')
 
@@ -5606,21 +5623,35 @@ describe 'up.fragment', ->
             expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Context']).toEqual(JSON.stringify({ rootKey: 'rootValue'}))
             expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Fail-Context']).toEqual(JSON.stringify({ overlayKey: 'overlayValue'}))
 
-        it 'lets the server update the context by responding with an X-Up-Context response header', asyncSpec (next) ->
+        it 'lets the server update the context by responding with an X-Up-Context response header', ->
           makeLayers [
             { target: '.target', context: { rootKey: 'rootValue' }},
             { target: '.target', context: { overlayKey: 'overlayValue' }}
           ]
 
-          next ->
-            up.render('.target', layer: up.layer.get(1), url: '/path1')
+          up.render('.target', layer: up.layer.get(1), url: '/path1')
+          await wait()
 
-          next =>
-            @respondWithSelector('.target', responseHeaders: { 'X-Up-Context': JSON.stringify({ newKey: 'newValue'})})
+          jasmine.respondWithSelector('.target', responseHeaders: { 'X-Up-Context': JSON.stringify({ newKey: 'newValue'})})
+          await wait()
 
-          next ->
-            expect(up.layer.get(0).context).toEqual({ rootKey: 'rootValue' })
-            expect(up.layer.get(1).context).toEqual({ overlayKey: 'overlayValue', newKey: 'newValue' })
+          expect(up.layer.get(0).context).toEqual({ rootKey: 'rootValue' })
+          expect(up.layer.get(1).context).toEqual({ overlayKey: 'overlayValue', newKey: 'newValue' })
+
+        it 'allows unquoted property names in the X-Up-Context response header', ->
+          makeLayers [
+            { target: '.target', context: { rootKey: 'rootValue' }},
+            { target: '.target', context: { overlayKey: 'overlayValue' }}
+          ]
+
+          up.render('.target', layer: up.layer.get(1), url: '/path1')
+          await wait()
+
+          jasmine.respondWithSelector('.target', responseHeaders: { 'X-Up-Context': '{ newKey: "newValue" }' })
+          await wait()
+
+          expect(up.layer.get(0).context).toEqual({ rootKey: 'rootValue' })
+          expect(up.layer.get(1).context).toEqual({ overlayKey: 'overlayValue', newKey: 'newValue' })
 
         it 'uses updates from an X-Up-Context header for failed responses', ->
           fixture('.success-target', text: 'success target')
