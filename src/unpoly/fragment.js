@@ -31,7 +31,7 @@ They also support non-standard CSS extensions like `:main` or `:has()`.
 For low-level DOM utilities that complement the browser's native API, see `up.element`.
 
 @see navigation
-@see render-content
+@see providing-html
 @see render-hooks
 @see skipping-rendering
 @see target-derivation
@@ -477,9 +477,9 @@ up.fragment = (function() {
 
   The new fragment content can be passed as one of the following options:
 
-  @include render-content-table
+  @include providing-html-table
 
-  See [providing content to render](/render-content) for more details and examples.
+  See [providing content to render](/providing-html) for more details and examples.
 
   ### Enabling side effects
 
@@ -557,9 +557,9 @@ up.fragment = (function() {
   @param {string} [options.url]
     The URL to fetch from the server.
 
-    See [loading content from a URL](/render-content#url).
+    See [loading content from a URL](/providing-html#url).
 
-    Instead of making a server request, you may also render an [existing string of HTML](/render-content#local).
+    Instead of making a server request, you may also render an [existing string of HTML](/providing-html#local).
 
   @param {string} [options.method='get']
     The HTTP method to use for the request.
@@ -585,7 +585,7 @@ up.fragment = (function() {
     The new [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML)
     for the targeted fragment.
 
-    See [Updating an element's inner HTML from a string](/render-content#content).
+    See [Updating an element's inner HTML from a string](/providing-html#content).
 
   @param {string|Element} [options.fragment]
     A string of HTML comprising only the new fragment's [outer HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/outerHTML).
@@ -593,17 +593,17 @@ up.fragment = (function() {
     When passing `{ fragment }` you can omit the `{ target }` option.
     The target will be [derived](/target-derivation) from the root element in the given HTML.
 
-    See [Rendering a string that only contains the fragment](/render-content#fragment).
+    See [Rendering a string that only contains the fragment](/providing-html#fragment).
 
   @param {string|Element|Document} [options.document]
     A string of HTML containing the targeted fragment.
 
-    See [Extracting an element's outer HTML from a larger HTML string](/render-content#document).
+    See [Extracting an element's outer HTML from a larger HTML string](/providing-html#document).
 
   @param {up.Response} [options.response]
     An `up.Response` object that contains the targeted fragments in its [text](/up.Response.prototype.text).
 
-    See [Rendering an up.Response object](/render-content#response).
+    See [Rendering an up.Response object](/providing-html#response).
 
   @param {boolean|Function(up.Response): boolean} [options.fail]
     Whether the server response should be considered failed.

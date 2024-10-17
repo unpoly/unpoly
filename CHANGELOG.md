@@ -1059,7 +1059,7 @@ let response = await up.request('/path')
 up.render({ target: '.target', response })
 ```
 
-The various ways to provide HTML to rendering functions are now summarized on a [new documentation page](/render-content).
+The various ways to provide HTML to rendering functions are now summarized on a [new documentation page](/providing-html).
 
 
 ### Other changes
