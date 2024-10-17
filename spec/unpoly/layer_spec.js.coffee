@@ -2216,6 +2216,20 @@ describe 'up.layer', ->
         expect(up.layer.isRoot()).toBe(true)
         expect(acceptListener.calls.mostRecent().args[0]).toBeEvent('up:layer:accept', value: { foo: 'bar' })
 
+      it 'allows unquoted property names and single-quotes in the acceptance value JSON', ->
+        acceptListener = jasmine.createSpy('accept listener')
+        up.on('up:layer:accept', acceptListener)
+
+        makeLayers(2)
+
+        expect(up.layer.isOverlay()).toBe(true)
+        link = up.layer.affix('a[href="#"]')
+        link.setAttribute('up-accept', "{ foo: 'bar' }")
+        Trigger.clickSequence(link)
+
+        expect(up.layer.isRoot()).toBe(true)
+        expect(acceptListener.calls.mostRecent().args[0]).toBeEvent('up:layer:accept', value: { foo: 'bar' })
+
       it 'parses the acceptance value if the user clicks on a descendant of the [up-accept] element (bugfix)', ->
         acceptListener = jasmine.createSpy('accept listener')
         up.on('up:layer:accept', acceptListener)

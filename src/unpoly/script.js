@@ -735,25 +735,15 @@ up.script = (function() {
   }
 
   function buildData(element) {
-    // up.on(document) and up.on(window) may call this with a non-element.
-    if (!element.getAttribute) {
-      return {}
-    }
+    let parsedJSON = e.jsonAttr(element, 'up-data') ?? {}
 
-    let rawJSON = element.getAttribute('up-data')
-    let parsedJSON
-
-    if (rawJSON) {
-      parsedJSON = JSON.parse(rawJSON)
-
-      // If the [up-data] JSON isn't an object then we cannot offer live merging
-      // of [up-data] and [data-...] attributes.
-      //
-      // It would be better to parse this lazily, but I don't want to pay
-      // the bytes for a second Proxy handler when dealing with this edge case.
-      if (!u.isOptions(parsedJSON)) {
-        return parsedJSON
-      }
+    // If the [up-data] JSON isn't an object then we cannot offer live merging
+    // of [up-data] and [data-...] attributes.
+    //
+    // It would be better to parse this lazily, but I don't want to pay
+    // the bytes for a second Proxy handler when dealing with this edge case.
+    if (!u.isOptions(parsedJSON)) {
+      return parsedJSON
     }
 
     return {

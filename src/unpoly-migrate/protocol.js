@@ -51,7 +51,7 @@ up.migrate.titleFromXHR = function(xhr) {
   if (value) {
     if (value === 'false') {
       return false
-    } else if (value[0] !== '"') {
+    } else if (value[0] !== '"' && value[0] !== "'") {
       up.migrate.warn('X-Up-Title must now be a JSON-encoded string')
       return value
     }

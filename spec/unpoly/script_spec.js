@@ -337,6 +337,17 @@ describe('up.script', function() {
           const element = fixture('.element', {'up-data': '{ "foo": 1, "bar": 2 }'})
           const data = up.data(element)
 
+          expect(data).toEqual(jasmine.any(Object))
+          expect(Object.keys(data)).toEqual(jasmine.arrayWithExactContents(['foo', 'bar']))
+          expect(data.foo).toBe(1)
+          expect(data.bar).toBe(2)
+        })
+
+        it('allows unquoted property names', function() {
+          const element = fixture('.element', {'up-data': '{ foo: 1, bar: 2 }'})
+          const data = up.data(element)
+
+          expect(data).toEqual(jasmine.any(Object))
           expect(Object.keys(data)).toEqual(jasmine.arrayWithExactContents(['foo', 'bar']))
           expect(data.foo).toBe(1)
           expect(data.bar).toBe(2)
@@ -492,6 +503,14 @@ describe('up.script', function() {
 
           expect(data).toEqual({foo: 'a', bar: 'c'})
         })
+      })
+
+      it('returns an empty object when called with window', function() {
+        expect(up.data(window)).toEqual({})
+      })
+
+      it('returns an empty object when called with document', function() {
+        expect(up.data(document)).toEqual({})
       })
 
       it('returns the same object for repeated calls, so we can use it as a state store', function() {
