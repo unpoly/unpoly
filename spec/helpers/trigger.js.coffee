@@ -353,5 +353,6 @@ window.Trigger = (->
   createKeyboardEvent: createKeyboardEvent
   clickLinkWithKeyboard: clickLinkWithKeyboard,
   submitFormWithEnter: submitFormWithEnter,
+  focus: focus,
 
 )()

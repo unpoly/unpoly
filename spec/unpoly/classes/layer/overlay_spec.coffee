@@ -650,6 +650,12 @@ describe 'up.Layer.Overlay', ->
       next =>
         expect(@dismisser).toBeFocused()
 
+    it 'sets [aria-modal="true"] to declare background elements inert', ->
+      await up.layer.open()
+
+      expect(up.layer.current).toBeOverlay()
+      expect(up.layer.current.getFocusElement()).toHaveAttribute('aria-modal', 'true')
+
     it 'recaptures focus outside the overlay', asyncSpec (next) ->
       rootInput = fixture('input[name=email][type=text]')
       rootInput.focus()
@@ -666,36 +672,76 @@ describe 'up.Layer.Overlay', ->
       next ->
         expect(up.layer.current).toBeFocused()
 
-    it 'does not trap focus within a foreign overlay', asyncSpec (next) ->
-      up.layer.config.foreignOverlaySelectors = ['.foreign-overlay']
+    describe 'within a foreign overlay', ->
 
-      rootInput = fixture('input[name=email][type=text]')
-      foreignOverlay = fixture('.foreign-overlay')
-      foreignInput = e.affix(foreignOverlay, 'input[name=email][type=text]')
-      foreignInput.focus()
-      expect(foreignInput).toBeFocused()
+      it 'does not trap focus within a foreign overlay', asyncSpec (next) ->
+        up.layer.config.foreignOverlaySelectors = ['.foreign-overlay']
 
-      up.layer.open()
-
-      next ->
-        expect(up.layer.isOverlay()).toBe(true)
-
-        # Do steal the focus from the foreign overlay, as opening an Unpoly overlay
-        # was the most recent user action.
-        expect(up.layer.current).toBeFocused()
-
+        rootInput = fixture('input[name=email][type=text]')
+        foreignOverlay = fixture('.foreign-overlay')
+        foreignInput = e.affix(foreignOverlay, 'input[name=email][type=text]')
         foreignInput.focus()
-
-      next ->
-        # See that the focus trap did not capture focus
         expect(foreignInput).toBeFocused()
 
-        rootInput.focus()
+        up.layer.open()
 
-      next ->
-        # See that moving from the foreign overlay to another input
-        # outside our Unpoly overlay does recapture focus.
+        next ->
+          expect(up.layer.isOverlay()).toBe(true)
+
+          # Do steal the focus from the foreign overlay, as opening an Unpoly overlay
+          # was the most recent user action.
+          expect(up.layer.current).toBeFocused()
+
+          foreignInput.focus()
+
+        next ->
+          # See that the focus trap did not capture focus
+          expect(foreignInput).toBeFocused()
+
+          rootInput.focus()
+
+        next ->
+          # See that moving from the foreign overlay to another input
+          # outside our Unpoly overlay does recapture focus.
+          expect(up.layer.current).toBeFocused()
+
+    describe 'with { trapFocus: false }', ->
+
+      it 'does not cycle focus within the overlay'
+
+      it 'does not recapture focus outside the overlay', ->
+        rootInput = fixture('input[name=email][type=text]')
+        rootInput.focus()
+        expect(rootInput).toBeFocused()
+
+        up.layer.open({ trapFocus: false })
+        await wait()
+
+        expect(up.layer.isOverlay()).toBe(true)
         expect(up.layer.current).toBeFocused()
+
+        rootInput.focus()
+        await wait()
+
+        expect(rootInput).toBeFocused()
+
+      it 'still focuses the overlay when opened', ->
+        rootInput = fixture('input[name=email][type=text]')
+        rootInput.focus()
+        expect(rootInput).toBeFocused()
+
+        up.layer.open({ trapFocus: false })
+        await wait()
+
+        expect(up.layer.isOverlay()).toBe(true)
+        expect(up.layer.current).toBeFocused()
+
+    it 'still sets [role=dialog], but [aria-modal="false"] (as background elements are non-inert)', ->
+      await up.layer.open({ trapFocus: false })
+
+      expect(up.layer.current).toBeOverlay()
+      expect(up.layer.current.getFocusElement()).toHaveAttribute('role', 'dialog')
+      expect(up.layer.current.getFocusElement()).toHaveAttribute('aria-modal', 'false')
 
   describe 'label[for] when an input with that ID exists in both overlay and parent layer', ->
 

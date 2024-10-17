@@ -203,3 +203,41 @@ describe 'up.Layer.Popup', ->
 
         expect(popupRect.right).toBe(originRect.left)
         expect(popupRect.top).toBe(originRect.top + 0.5 * (originRect.height - popupRect.height))
+
+  describe 'when a parent layer is dismissed', ->
+
+    humanClick = (element) ->
+      box = element.getBoundingClientRect()
+      elementFromCoordinates = () ->
+        element = document.elementFromPoint(box.x, box.y)
+        element = element.closest('[up-dismiss]') || element
+        element
+
+      Trigger.focus(elementFromCoordinates())
+      await wait()
+      # A focus trap would have focused the popup, which would scroll the viewport.
+      # This causes the click event to land on the wrong element.
+      Trigger.click(elementFromCoordinates())
+      await wait()
+
+    it 'also dismisses the popup', ->
+      modal = await up.layer.open({ mode: 'modal' })
+      opener = modal.affix('span')
+      popup = await up.layer.open({ mode: 'popup', origin: opener })
+
+      await humanClick(modal.dismissElement)
+
+      expect(popup).toBeClosed()
+      expect(modal).toBeClosed()
+
+    it 'also dismisses the popup when it is positioned below the fold (bugfix)', ->
+      modal = await up.layer.open({ mode: 'modal' })
+      opener = modal.affix('div', style: { height: '20000px'})
+      opener = modal.affix('span', text: 'opener')
+      popup = await up.layer.open({ mode: 'popup', origin: opener })
+      modal.viewportElement.scrollTop = 0
+
+      await humanClick(modal.dismissElement)
+
+      expect(popup).toBeClosed()
+      expect(modal).toBeClosed()

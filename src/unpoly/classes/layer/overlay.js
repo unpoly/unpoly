@@ -63,6 +63,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
       'dismissable',
       'dismissLabel',
       'dismissAriaLabel',
+      'trapFocus',
       'onOpened',
       'onAccept',
       'onAccepted',

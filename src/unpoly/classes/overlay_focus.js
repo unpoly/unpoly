@@ -6,13 +6,13 @@ up.OverlayFocus = class OverlayFocus {
   constructor(layer) {
     this._layer = layer
     this._focusElement = this._layer.getFocusElement()
+    this._trapFocus = this._layer.trapFocus
   }
 
   moveToFront() {
-    if (this._enabled) { return }
-    this._enabled = true
+    if (this._active) { return }
+    this._active = true
 
-    this._untrapFocus = up.on('focusin', event => this._onFocus(event))
     this._unsetAttrs = e.setTemporaryAttrs(this._focusElement, {
       // Make layer.element focusable.
       // It would be slightly nicer to give it [tabindex=-1] to make it focusable through JS,
@@ -23,10 +23,14 @@ up.OverlayFocus = class OverlayFocus {
       // Make screen readers speak "dialog field" as we focus layer.element.
       'role': 'dialog',
       // Tell modern screen readers to make all elements outside layer.element's subtree inert.
-      'aria-modal': 'true'
+      'aria-modal': this._trapFocus.toString()
     })
-    this._focusTrapBefore = e.affix(this._focusElement, 'beforebegin', 'up-focus-trap[tabindex=0]')
-    this._focusTrapAfter = e.affix(this._focusElement, 'afterend', 'up-focus-trap[tabindex=0]')
+
+    if (this._trapFocus) {
+      this._untrapFocus = up.on('focusin', event => this._onFocus(event))
+      this._focusTrapBefore = e.affix(this._focusElement, 'beforebegin', 'up-focus-trap[tabindex=0]')
+      this._focusTrapAfter = e.affix(this._focusElement, 'afterend', 'up-focus-trap[tabindex=0]')
+    }
   }
 
   moveToBack() {
@@ -34,16 +38,18 @@ up.OverlayFocus = class OverlayFocus {
   }
 
   teardown() {
-    if (!this._enabled) { return }
-    this._enabled = false
+    if (!this._active) { return }
+    this._active = false
 
-    this._untrapFocus()
     // Remove [aria-modal] attribute to not confuse screen readers with multiple
     // mutually exclusive [aria-modal] layers.
     this._unsetAttrs()
 
-    this._focusTrapBefore.remove()
-    this._focusTrapAfter.remove()
+    if (this._trapFocus) {
+      this._untrapFocus()
+      this._focusTrapBefore.remove()
+      this._focusTrapAfter.remove()
+    }
   }
 
   _onFocus(event) {

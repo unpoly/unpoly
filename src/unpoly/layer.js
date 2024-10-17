@@ -154,6 +154,11 @@ up.layer = (function() {
     If set to `true`, the overlay will always render history.
     If set to `false`, the overlay will never render history.
 
+  @param {boolean} config.overlay.trapFocus
+    Whether to [trap focus](/focus#overlay-focus-trap) within the overlay while it is in [front](/up.layer.front).
+
+    By default focus is trapped for all overlays except [popups](/layer-terminology#available-modes).
+
   @param {string} [config.overlay.class]
     An HTML class for the overlay's container element.
 
@@ -215,7 +220,8 @@ up.layer = (function() {
         dismissLabel: '×',
         dismissAriaLabel: 'Dismiss dialog',
         dismissable: true,
-        history: 'auto'
+        history: 'auto',
+        trapFocus: true,
       },
       cover: {
         mainTargets: ['[up-main~=cover]']
@@ -248,7 +254,8 @@ up.layer = (function() {
         position: 'bottom',
         size: 'medium',
         align: 'left',
-        dismissable: 'outside key'
+        dismissable: 'outside key',
+        trapFocus: false,
       },
       foreignOverlaySelectors: ['dialog']
     }
@@ -460,6 +467,11 @@ up.layer = (function() {
     You can still access the overlay's current location using `up.layer.location`.
 
     See [History in overlays](/history-in-overlays).
+
+  @param {boolean}[options.trapFocus]
+    Whether to [trap focus](/focus#overlay-focus-trap) within the overlay while it is in [front](/up.layer.front).
+
+    By default focus is trapped for all overlays except [popups](/layer-terminology#available-modes).
 
   @param {string|Function} [options.animation]
     The opening animation.
