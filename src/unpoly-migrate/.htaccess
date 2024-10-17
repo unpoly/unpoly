@@ -94,3 +94,5 @@ RedirectPermanent /form-up-transition /up-transition
 
 RedirectPermanent /fragment-placement /targeting-fragments
 
+RedirectPermanent /render-content /providing-html
+
