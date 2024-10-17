@@ -1237,7 +1237,7 @@ up.element = (function() {
 
   function tryParseJSON(value) {
     if (value?.trim()) {
-      return JSON.parse(value)
+      return u.parseRelaxedJSON(value)
     }
  }
 
