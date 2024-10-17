@@ -681,10 +681,10 @@ up.element = (function() {
     }
   }
 
-  function splitSelector(rawSelector, separator) {
-    let { selector, restore } = simplifyAttrSelectors(rawSelector)
-    return selector.split(separator).map(restore)
-  }
+  // function splitSelector(rawSelector, separator) {
+  //   let { selector, restore } = simplifyAttrSelectors(rawSelector)
+  //   return selector.split(separator).map(restore)
+  // }
 
   const ATTR_SELECTOR_PATTERN = /\[([\w-]+)(?:([~|^$*]?=)(["'])?([^\3\]]*?)\3)?]/g
 
@@ -1663,7 +1663,7 @@ up.element = (function() {
     removeClassTemp,
     cleanJQuery,
     parseSelector,
-    splitSelector,
+    // splitSelector,
     makeVariation,
     isEmpty,
     crossOriginSelector,

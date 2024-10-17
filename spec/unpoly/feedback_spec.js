@@ -499,7 +499,7 @@ describe('up.feedback', function() {
 
       describe('with { placeholder } option', function() {
 
-        // Also see specs for up.Preview#showPlaceholer()
+        // Also see specs for up.Preview#showPlaceholder()
         it('renders a UI placeholder as the content of the first targeted fragment', async function() {
           htmlFixture(`
             <main>
