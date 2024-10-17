@@ -87,7 +87,7 @@ up.script = (function() {
       'up-on-error',
       'up-on-offline',
       'up-placeholder',
-      'up-preview',
+      'up-preview-fn',
     ],
     scriptSelectors: [
       'script'
