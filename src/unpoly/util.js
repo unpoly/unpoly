@@ -2107,6 +2107,24 @@ up.util = (function() {
     return api
   }
 
+  function singleToDoubleQuote(str) {
+    let transformed = str.slice(1, -1).replace(/(\\\\)|(\\')|(")/g, function(_match, escapedBackslash, escapedSingleQuote, _doubleQuote) {
+      return escapedBackslash
+        || (escapedSingleQuote && "'")
+        || '\\"'
+    })
+    return '"' + transformed + '"'
+  }
+
+  function parseRelaxedJSON(str) {
+    let transformed = str.replace(/("(?:\\\\|\\"|[^"])*")|('(?:\\\\|\\'|[^'])*')|([a-z_$][\w$]*:)/gi, function(_match, doubleQuotedString, singleQuotedString, unquotedProperty) {
+      return doubleQuotedString
+        || (singleQuotedString && singleToDoubleQuote(singleQuotedString))
+        || ('"' + unquotedProperty.slice(0, -1) + '":')
+    })
+    return JSON.parse(transformed)
+  }
+
   return {
     parseURL,
     normalizeURL,
@@ -2214,6 +2232,7 @@ up.util = (function() {
     cleaner,
     scanFunctions,
     args: parseArgs,
+    parseRelaxedJSON,
     // partialRight,
   }
 })()

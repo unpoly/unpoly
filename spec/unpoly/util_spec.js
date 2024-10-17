@@ -2761,5 +2761,77 @@ describe('up.util', () => {
         })
       })
     })
+
+    describe('up.util.parseRelaxedJSON()', function() {
+
+      describe('standard JSON notation', function() {
+
+        it('parses an integer', function() {
+          let input = 5
+          expect(up.util.parseRelaxedJSON(JSON.stringify(input))).toEqual(input)
+        })
+
+        it('parses a float', function() {
+          let input = 1.23
+          expect(up.util.parseRelaxedJSON(JSON.stringify(input))).toEqual(input)
+        })
+
+        it('parses a string', function() {
+          let input = "foo"
+          expect(up.util.parseRelaxedJSON(JSON.stringify(input))).toEqual(input)
+        })
+
+        it('parses an array', function() {
+          let input = [1, "foo", 3, "baz"]
+          expect(up.util.parseRelaxedJSON(JSON.stringify(input))).toEqual(input)
+        })
+
+        it('parses an object', function() {
+          let input = { foo: 1, bar: "two" }
+          expect(up.util.parseRelaxedJSON(JSON.stringify(input))).toEqual(input)
+        })
+
+        it('parses a nested object', function() {
+          let input = { foo: [1, 2, { three: "three" }, 4], bar: ['bar'] }
+          expect(up.util.parseRelaxedJSON(JSON.stringify(input))).toEqual(input)
+        })
+
+      })
+
+      describe('relaxed JSON notation', function() {
+
+        it('parses a string with single quotes', function() {
+          expect(up.util.parseRelaxedJSON("'foo'")).toEqual("foo")
+        })
+
+        it('parses a string with single quotes that contains a double quote', function() {
+          expect(up.util.parseRelaxedJSON(`'foo"bar'`)).toEqual(`foo"bar`)
+        })
+
+        it('parses a property value with single quotes', function() {
+          expect(up.util.parseRelaxedJSON("{ 'foo': 1, 'bar': 2 }")).toEqual({ foo: 1, bar: 2})
+        })
+
+        it('does not change single quotes inside a double-quoted string', function() {
+          expect(up.util.parseRelaxedJSON(`"foo'bar'baz"`)).toEqual(`foo'bar'baz`)
+        })
+
+        it('respects escaped single quotes', function() {
+          expect(up.util.parseRelaxedJSON("'foo\\'bar'")).toEqual("foo'bar")
+        })
+
+        it('allows unquoted property names', function() {
+          expect(up.util.parseRelaxedJSON("{ foo: 1, bar: 2 }")).toEqual({ foo: 1, bar: 2})
+        })
+
+        it('does not change unquoted property names inside a string', function() {
+          expect(up.util.parseRelaxedJSON(`"{ foo: 1, bar: 2 }"`)).toEqual('{ foo: 1, bar: 2 }')
+        })
+
+      })
+
+    })
+
+
   })
 })
