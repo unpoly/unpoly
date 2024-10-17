@@ -2117,9 +2117,10 @@ up.util = (function() {
   }
 
   function parseRelaxedJSON(str) {
-    let transformed = str.replace(/("(?:\\\\|\\"|[^"])*")|('(?:\\\\|\\'|[^'])*')|([a-z_$][\w$]*:)/gi, function(_match, doubleQuotedString, singleQuotedString, unquotedProperty) {
+    let transformed = str.replace(/("(?:\\\\|\\"|[^"])*")|('(?:\\\\|\\'|[^'])*')|(true\b|false\b|null\b)|([a-z_$][\w$]*:)/gi, function(_match, doubleQuotedString, singleQuotedString, literalKeyword, unquotedProperty) {
       return doubleQuotedString
         || (singleQuotedString && singleToDoubleQuote(singleQuotedString))
+        || literalKeyword
         || ('"' + unquotedProperty.slice(0, -1) + '":')
     })
     return JSON.parse(transformed)
