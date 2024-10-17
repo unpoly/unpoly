@@ -443,7 +443,7 @@ up.protocol = (function() {
   */
 
   function contextFromXHR(xhr) {
-    return extractHeader(xhr, 'context', JSON.parse)
+    return extractHeader(xhr, 'context', u.parseRelaxedJSON)
   }
 
   /*-
@@ -569,7 +569,7 @@ up.protocol = (function() {
   @internal
   */
   function titleFromXHR(xhr) {
-    return up.migrate.titleFromXHR?.(xhr) ?? extractHeader(xhr, 'title', JSON.parse)
+    return up.migrate.titleFromXHR?.(xhr) ?? extractHeader(xhr, 'title', u.parseRelaxedJSON)
   }
 
   /*-
@@ -668,7 +668,7 @@ up.protocol = (function() {
   */
 
   function eventPlansFromXHR(xhr) {
-    return extractHeader(xhr, 'events', JSON.parse)
+    return extractHeader(xhr, 'events', u.parseRelaxedJSON)
   }
 
   /*-
@@ -719,7 +719,7 @@ up.protocol = (function() {
   function acceptLayerFromXHR(xhr) {
     // Even if acceptance has no value, the server will send
     // X-Up-Accept-Layer: null
-    return extractHeader(xhr, 'acceptLayer', JSON.parse)
+    return extractHeader(xhr, 'acceptLayer', u.parseRelaxedJSON)
   }
 
   /*-
@@ -770,7 +770,7 @@ up.protocol = (function() {
   function dismissLayerFromXHR(xhr) {
     // Even if dismissal has no value, the server will send
     // X-Up-Dismiss-Layer: null
-    return extractHeader(xhr, 'dismissLayer', JSON.parse)
+    return extractHeader(xhr, 'dismissLayer', u.parseRelaxedJSON)
   }
 
   /*-
