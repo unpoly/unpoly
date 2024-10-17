@@ -1735,7 +1735,7 @@ up.util = (function() {
     if (isString(value)) {
       value = value.trim()
       if (options.json && /^\[.*]$/.test(value)) {
-        return JSON.parse(value)
+        return parseRelaxedJSON(value)
       } else {
         let separator = options.separator || 'space/or'
         let pattern = PARSE_TOKEN_PATTERNS[separator]

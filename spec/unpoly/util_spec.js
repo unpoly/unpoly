@@ -2776,6 +2776,21 @@ describe('up.util', () => {
           expect(up.util.parseRelaxedJSON(JSON.stringify(input))).toEqual(input)
         })
 
+        it('parses true', function() {
+          let input = true
+          expect(up.util.parseRelaxedJSON(JSON.stringify(input))).toEqual(input)
+        })
+
+        it('parses false', function() {
+          let input = false
+          expect(up.util.parseRelaxedJSON(JSON.stringify(input))).toEqual(input)
+        })
+
+        it('parses null', function() {
+          let input = null
+          expect(up.util.parseRelaxedJSON(JSON.stringify(input))).toEqual(input)
+        })
+
         it('parses a string', function() {
           let input = "foo"
           expect(up.util.parseRelaxedJSON(JSON.stringify(input))).toEqual(input)
@@ -2792,7 +2807,7 @@ describe('up.util', () => {
         })
 
         it('parses a nested object', function() {
-          let input = { foo: [1, 2, { three: "three" }, 4], bar: ['bar'] }
+          let input = { foo: [1, true, { three: "three" }, null], bar: ['bar'] }
           expect(up.util.parseRelaxedJSON(JSON.stringify(input))).toEqual(input)
         })
 
@@ -2822,6 +2837,10 @@ describe('up.util', () => {
 
         it('allows unquoted property names', function() {
           expect(up.util.parseRelaxedJSON("{ foo: 1, bar: 2 }")).toEqual({ foo: 1, bar: 2})
+        })
+
+        it('allows unquoted property names starting with "true" or "null"', function() {
+          expect(up.util.parseRelaxedJSON("{ trueFoo: 1, nullBar: 2 }")).toEqual({ trueFoo: 1, nullBar: 2})
         })
 
         it('does not change unquoted property names inside a string', function() {
