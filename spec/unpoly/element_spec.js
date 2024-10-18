@@ -1799,21 +1799,40 @@ describe('up.element', function() {
       }])
     })
 
-    it('unescapes quotes in attribute values', function() {
+    it('unescapes quotes in double-quoted attribute values', function() {
       const parsed = up.element.parseSelector('[attr="foo\\"bar"]')
 
       expect(parsed.includePath[0].attributes).toEqual({ attr: 'foo"bar' })
     })
 
+    it('unescapes quotes in single-quoted attribute values', function() {
+      const parsed = up.element.parseSelector(`[attr='foo\\'bar']`)
+
+      expect(parsed.includePath[0].attributes).toEqual({ attr: "foo'bar" })
+    })
+
+    it('parses all ways to express an empty string value', function() {
+      expect(up.element.parseSelector(`[attr]`).includePath[0].attributes).toEqual({ attr: '' })
+      expect(up.element.parseSelector(`[attr=]`).includePath[0].attributes).toEqual({ attr: '' })
+      expect(up.element.parseSelector(`[attr=""]`).includePath[0].attributes).toEqual({ attr: '' })
+      expect(up.element.parseSelector(`[attr='']`).includePath[0].attributes).toEqual({ attr: '' })
+    })
+
+    it('parses an attribute value that contain literal quote characters inside the quote delimiters', function() {
+      const parsed = up.element.parseSelector(`[up-etag='"abc"']`) // double quotes are part of the ETag
+
+      expect(parsed.includePath[0].attributes).toEqual({ 'up-etag': '"abc"' })
+    })
+
     it('parses a descendant selector', function() {
-      const parsed = up.element.parseSelector('.content > form[action="/"]')
+      const parsed = up.element.parseSelector('.content[data-foo=bar] > form[action="/"]')
 
       expect(parsed.includePath).toEqual([
         {
           tagName: null,
           id: null,
           classNames: ['content'],
-          attributes: {}
+          attributes: { 'data-foo': 'bar' }
         },
         {
           tagName: 'form',
