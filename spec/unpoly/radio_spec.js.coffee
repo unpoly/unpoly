@@ -2301,7 +2301,7 @@ describe 'up.radio', ->
 
           expect(jasmine.Ajax.requests.count()).toBe(1)
           expect(previewApply.calls.count()).toBe(1)
-          expect(previewApply).toHaveBeenCalledWith(jasmine.objectContaining(fragment: element))
+          expect(previewApply).toHaveBeenCalledWith(jasmine.objectContaining(fragment: element), {})
           expect(previewUndo.calls.count()).toBe(0)
 
           jasmine.respondWithSelector('.element[up-poll][up-preview="my:preview"]', text: 'new text')
