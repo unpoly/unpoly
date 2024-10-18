@@ -2583,7 +2583,7 @@ describe 'up.link', ->
           fixture('#target', content: '<p>old target</p>')
           other = fixture('#other')
           placeholderElement = up.element.createFromHTML("<p>placeholder</p>")
-          link = fixture('a[href="/foo"][up-follow][up-target="#target"][up-preview-fn="this.previewFn(preview)"]', text: 'label')
+          link = fixture('a[href="/foo"][up-follow][up-target="#target"][up-preview-fn="this.previewFn(preview, `arg`)"]', text: 'label')
           link.previewFn = jasmine.createSpy('previewFn fn').and.callFake((preview) -> preview.hide(other))
 
           expect('#target').toHaveVisibleText('old target')
@@ -2591,7 +2591,7 @@ describe 'up.link', ->
           Trigger.clickSequence(link)
           await wait()
 
-          expect(link.previewFn).toHaveBeenCalledWith(jasmine.any(up.Preview))
+          expect(link.previewFn).toHaveBeenCalledWith(jasmine.any(up.Preview), 'arg')
           expect(other).toBeHidden()
 
           jasmine.respondWithSelector('#target', content: '<p>new target</p>')
@@ -4076,7 +4076,7 @@ describe 'up.link', ->
           await wait()
 
           expect(jasmine.Ajax.requests.count()).toEqual(1)
-          expect(previewFn).toHaveBeenCalledWith(jasmine.objectContaining(fragment: partial))
+          expect(previewFn).toHaveBeenCalledWith(jasmine.objectContaining(fragment: partial), {})
           expect(undoFn).not.toHaveBeenCalled()
 
           jasmine.respondWithSelector('#partial', text: 'new text')
@@ -4110,8 +4110,8 @@ describe 'up.link', ->
           expect(jasmine.Ajax.requests.count()).toEqual(1)
           expect(jasmine.lastRequest().url).toMatchURL('/slow-path')
           expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#partial1, #partial2')
-          expect(preview1Fn).toHaveBeenCalledWith(jasmine.objectContaining(fragment: partial1))
-          expect(preview2Fn).toHaveBeenCalledWith(jasmine.objectContaining(fragment: partial2))
+          expect(preview1Fn).toHaveBeenCalledWith(jasmine.objectContaining(fragment: partial1), {})
+          expect(preview2Fn).toHaveBeenCalledWith(jasmine.objectContaining(fragment: partial2), {})
           expect(undo1Fn).not.toHaveBeenCalled()
           expect(undo2Fn).not.toHaveBeenCalled()
 

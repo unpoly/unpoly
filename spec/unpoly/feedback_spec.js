@@ -122,7 +122,7 @@ describe('up.feedback', function() {
 
             await wait()
 
-            expect(previewFn).toHaveBeenCalledWith(jasmine.any(up.Preview))
+            expect(previewFn).toHaveBeenCalledWith(jasmine.any(up.Preview), {})
           })
 
           it('runs multiple named previews, separated by a space', async function() {
@@ -135,8 +135,8 @@ describe('up.feedback', function() {
 
             await wait()
 
-            expect(preview1Fn).toHaveBeenCalledWith(jasmine.any(up.Preview))
-            expect(preview2Fn).toHaveBeenCalledWith(jasmine.any(up.Preview))
+            expect(preview1Fn).toHaveBeenCalledWith(jasmine.any(up.Preview), {})
+            expect(preview2Fn).toHaveBeenCalledWith(jasmine.any(up.Preview), {})
           })
 
           it('runs an array of named previews', async function() {
@@ -149,8 +149,8 @@ describe('up.feedback', function() {
 
             await wait()
 
-            expect(preview1Fn).toHaveBeenCalledWith(jasmine.any(up.Preview))
-            expect(preview2Fn).toHaveBeenCalledWith(jasmine.any(up.Preview))
+            expect(preview1Fn).toHaveBeenCalledWith(jasmine.any(up.Preview), {})
+            expect(preview2Fn).toHaveBeenCalledWith(jasmine.any(up.Preview), {})
           })
 
           it('runs an anonymous preview function', async function() {
@@ -160,7 +160,7 @@ describe('up.feedback', function() {
 
             await wait()
 
-            expect(previewFn).toHaveBeenCalledWith(jasmine.any(up.Preview))
+            expect(previewFn).toHaveBeenCalledWith(jasmine.any(up.Preview), {})
           })
 
           it('runs an array of anonymous preview functions', async function() {
@@ -171,8 +171,8 @@ describe('up.feedback', function() {
 
             await wait()
 
-            expect(preview1Fn).toHaveBeenCalledWith(jasmine.any(up.Preview))
-            expect(preview2Fn).toHaveBeenCalledWith(jasmine.any(up.Preview))
+            expect(preview1Fn).toHaveBeenCalledWith(jasmine.any(up.Preview), {})
+            expect(preview2Fn).toHaveBeenCalledWith(jasmine.any(up.Preview), {})
           })
 
         })
