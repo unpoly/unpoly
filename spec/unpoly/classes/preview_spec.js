@@ -853,8 +853,8 @@ describe('up.Preview', function() {
       up.render({ preview: preview1Fn, url: '/url', target: 'body' })
       await wait()
 
-      expect(preview1Fn).toHaveBeenCalledWith(jasmine.any(up.Preview))
-      expect(preview2Fn).toHaveBeenCalledWith(preview1Fn.calls.mostRecent().args[0])
+      expect(preview1Fn).toHaveBeenCalledWith(jasmine.any(up.Preview), {})
+      expect(preview2Fn).toHaveBeenCalledWith(preview1Fn.calls.mostRecent().args[0], {})
     })
 
     it('also reverts the effects of the other preview', async function() {
@@ -918,10 +918,10 @@ describe('up.Preview', function() {
       })
     })
 
-    it('accepts additional arguments that are passed on to the preview function', async function() {
+    it('accepts an additional argument that is on to the preview function', async function() {
       let preview2Fn = jasmine.createSpy('preview2Fn')
       let preview1Fn = jasmine.createSpy('preview1Fn').and.callFake(function(preview) {
-        preview.run('preview2', 1, 'two')
+        preview.run('preview2', { key: 'value' })
       })
 
       up.preview('preview1', preview1Fn)
@@ -930,7 +930,7 @@ describe('up.Preview', function() {
       up.render({ preview: preview1Fn, url: '/url', target: 'body' })
       await wait()
 
-      expect(preview2Fn).toHaveBeenCalledWith(jasmine.any(up.Preview), 1, 'two')
+      expect(preview2Fn).toHaveBeenCalledWith(jasmine.any(up.Preview), { key: 'value' })
     })
 
   })
@@ -946,8 +946,8 @@ describe('up.Preview', function() {
       up.render({ preview: preview1Fn, url: '/url', target: 'body' })
       await wait()
 
-      expect(preview1Fn).toHaveBeenCalledWith(jasmine.any(up.Preview))
-      expect(preview2Fn).toHaveBeenCalledWith(preview1Fn.calls.mostRecent().args[0])
+      expect(preview1Fn).toHaveBeenCalledWith(jasmine.any(up.Preview), {})
+      expect(preview2Fn).toHaveBeenCalledWith(preview1Fn.calls.mostRecent().args[0], {})
     })
 
     it('does not crash the render pass when the other preview function crashes', async function() {
@@ -999,13 +999,13 @@ describe('up.Preview', function() {
     it('accepts additional arguments that are passed on to the preview function', async function() {
       let preview2Fn = jasmine.createSpy('preview2Fn')
       let preview1Fn = jasmine.createSpy('preview1Fn').and.callFake(function(preview) {
-        preview.run(preview2Fn, 1, 'two')
+        preview.run(preview2Fn, { foo: 'bar' })
       })
 
       up.render({ preview: preview1Fn, url: '/url', target: 'body' })
       await wait()
 
-      expect(preview2Fn).toHaveBeenCalledWith(jasmine.any(up.Preview), 1, 'two')
+      expect(preview2Fn).toHaveBeenCalledWith(jasmine.any(up.Preview), { foo: 'bar' })
     })
 
 

@@ -155,7 +155,7 @@ describe 'up.layer', ->
 
           await wait()
 
-          expect(previewFn).toHaveBeenCalledWith(jasmine.any(up.Preview))
+          expect(previewFn).toHaveBeenCalledWith(jasmine.any(up.Preview), {})
           expect(undoFn).not.toHaveBeenCalled()
 
           jasmine.respondWithSelector('#target')

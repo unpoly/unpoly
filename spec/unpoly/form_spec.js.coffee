@@ -2362,11 +2362,11 @@ describe 'up.form', ->
           await wait()
 
           expect(preview1Fn.calls.count()).toBe(1)
-          expect(preview1Fn).toHaveBeenCalledWith(jasmine.objectContaining(fragment: fooGroup))
+          expect(preview1Fn).toHaveBeenCalledWith(jasmine.objectContaining(fragment: fooGroup), {})
           expect(undo1Fn.calls.count()).toBe(0)
 
           expect(preview2Fn.calls.count()).toBe(1)
-          expect(preview2Fn).toHaveBeenCalledWith(jasmine.objectContaining(fragment: bazGroup))
+          expect(preview2Fn).toHaveBeenCalledWith(jasmine.objectContaining(fragment: bazGroup), {})
           expect(undo2Fn.calls.count()).toBe(0)
 
           jasmine.respondWith """
@@ -3640,7 +3640,7 @@ describe 'up.form', ->
 
           await wait(40)
 
-          expect(previewFn).toHaveBeenCalledWith(jasmine.objectContaining(fragment: target))
+          expect(previewFn).toHaveBeenCalledWith(jasmine.objectContaining(fragment: target), {})
           expect(undoFn).not.toHaveBeenCalled()
 
           jasmine.respondWithSelector('#target', text: 'new target')
