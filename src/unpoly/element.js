@@ -626,16 +626,19 @@ up.element = (function() {
   function parseSelector(rawSelector) {
     let excludeRaw
 
-    const { selector: selectorWithoutAttrValues, restore: restoreAttrValues, parse: parsePlaceholderAttrs } = simplifyAttrSelectors(rawSelector)
+    const {
+      masked: selectorWithoutAttrs,
+      restore: restoreAttrs,
+    } = maskAttrs(rawSelector)
 
-    const includeWithoutAttrValues = selectorWithoutAttrValues.replace(/:not\((\([^)]+\)|[^()])+\)/, function(match) {
-      excludeRaw = restoreAttrValues(match)
+    const includeWithoutAttrs = selectorWithoutAttrs.replace(/:not\((\([^)]+\)|[^()])+\)/, function(match) {
+      excludeRaw = restoreAttrs(match)
       return ''
     })
 
-    let includeRaw = restoreAttrValues(includeWithoutAttrValues)
+    let includeRaw = restoreAttrs(includeWithoutAttrs)
 
-    const includeSegments = includeWithoutAttrValues.split(/[ >]+/)
+    const includeSegments = includeWithoutAttrs.split(/[ >]+/)
 
     let includePath = includeSegments.map(function(depthSelector) {
       let parsed = {
@@ -660,10 +663,12 @@ up.element = (function() {
         return ''
       })
 
+
       // If we have stripped out attrValues at the beginning of the function,
       // they have been replaced with the attribute name only (as "[name]").
-      depthSelector = parsePlaceholderAttrs(depthSelector, function({ name, value }) {
-        parsed.attributes[name] = value
+      depthSelector = restoreAttrs(depthSelector, function(_raw, name, _operator, quote, value) {
+        quote ||= '"'
+        parsed.attributes[name] = value ? u.parseString(quote + value + quote) : ''
         return ''
       })
 
@@ -681,55 +686,11 @@ up.element = (function() {
     }
   }
 
-  // function splitSelector(rawSelector, separator) {
-  //   let { selector, restore } = simplifyAttrSelectors(rawSelector)
-  //   return selector.split(separator).map(restore)
-  // }
-
+  // Matches as [raw, name, operator, quote, value]
   const ATTR_SELECTOR_PATTERN = /\[([\w-]+)(?:([~|^$*]?=)(["'])?([^\3\]]*?)\3)?]/g
 
-  function replaceAttrSelectors(string, replacement) {
-    return string.replace(ATTR_SELECTOR_PATTERN, function(raw, name, _operator, _quote, value) {
-      if (value) {
-        value = value.replace(/\\([\\"'])/, '$1')
-      } else {
-        value = ''
-      }
-      return replacement({ raw, name, value })
-    })
-  }
-
-  function simplifyAttrSelectors(rawSelector) {
-    let parseResults = {}
-    let i = 0
-
-    // Replace attribute expressions with placeholders, to make the resulting string safe for grepping:
-    //
-    //     simplifyAttrSelectors('.klass[key]>#id').selector         // => '.klass[$0]>#id'
-    //     simplifyAttrSelectors('.klass[key=value]>#id').selector   // => '.klass[$1]>#id'
-    //     simplifyAttrSelectors('.klass[key="value"]>#id').selector // => '.klass[$2]>#id'
-    let selector = replaceAttrSelectors(rawSelector, function(parseResult) {
-      let placeholder = `v${i++}`
-      parseResults[placeholder] = parseResult
-      return `[${placeholder}]`
-    })
-
-    // Accepts a string that may contain placeholders and calls the given function
-    // with the selector properties parsed during simplifiction. The placeholders will
-    // be replaced with the callback result.
-    //
-    //     let { parse } = simplifyAttrSelectors('.klass[data-foo="value"]') // => '.klass[$0]'
-    //     parse('before [$0] after', ({ name, operator, value }) => name) // => 'data-foo'
-    let parse = (str, callback) => replaceAttrSelectors(str, ({ name }) => callback(parseResults[name]))
-
-    // Accepts a string that may contain placeholders and replaces each placeholder
-    // with its original attribute expression:
-    //
-    //     let { parse } = simplifyAttrSelectors('.klass[data-foo="value"]') // => '.klass[$0]'
-    //     restore('before [$0] after') // => 'before [data-foo="value"] after'
-    let restore = (str) => parse(str, ({ raw }) => raw)
-
-    return { selector, parse, restore }
+  function maskAttrs(str) {
+    return u.maskPattern(str, ATTR_SELECTOR_PATTERN)
   }
 
   /*-
@@ -1044,13 +1005,6 @@ up.element = (function() {
       return wrapNodes(nodes)
     }
   }
-
-  // function wrapSelf(element) {
-  //   let wrapper = createWrapper()
-  //   insertBefore(element, wrapper)
-  //   wrapper.append(element)
-  //   return wrapper
-  // }
 
   function wrapChildren(element) {
     const wrapper = wrapNodes(element.childNodes)
@@ -1663,8 +1617,6 @@ up.element = (function() {
     removeClassTemp,
     cleanJQuery,
     parseSelector,
-    // splitSelector,
-    makeVariation,
     isEmpty,
     crossOriginSelector,
     isIntersectingWindow,
