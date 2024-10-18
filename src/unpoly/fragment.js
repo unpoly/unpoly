@@ -2911,7 +2911,7 @@ up.fragment = (function() {
     }
 
     if (u.isString(value) && STARTS_WITH_SELECTOR.test(value)) {
-      [value, data] = u.extractTrailingJSON(value)
+      [value, data] = u.parseScalarJSONPairs(value)[0]
       value = up.fragment.get(value, { layer: 'closest', origin, originLayer }) || up.fail(`Cannot find template "%s"`, value)
     }
 

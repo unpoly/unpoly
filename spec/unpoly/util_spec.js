@@ -2762,6 +2762,26 @@ describe('up.util', () => {
       })
     })
 
+    describe('up.util.parseString()', function() {
+
+      it('parses a double-quoted string', function() {
+        expect(up.util.parseString(`"foo"`)).toBe(`foo`)
+      })
+
+      it('parses a double-quoted string with escape sequences', function() {
+        expect(up.util.parseString(`"foo\\\\bar\\"baz"`)).toBe(`foo\\bar"baz`)
+      })
+
+      it('parses a single-quoted string', function() {
+        expect(up.util.parseString(`'foo'`)).toBe(`foo`)
+      })
+
+      it('parses a single-quoted string with escape sequences', function() {
+        expect(up.util.parseString(`'foo\\\\bar\\'baz'`)).toBe(`foo\\bar'baz`)
+      })
+
+    })
+
     describe('up.util.parseRelaxedJSON()', function() {
 
       describe('standard JSON notation', function() {
@@ -2851,30 +2871,51 @@ describe('up.util', () => {
 
     })
 
-    describe('up.util.extractTrailingJSON()', function() {
+    describe('up.util.parseScalarJSONPairs()', function() {
 
       describe('if the string ends in a JSON object', function() {
 
         it('returns a tuple of the initial string and the parsed JSON object', function() {
           let str = 'foo bar { "baz": 3 }'
-          let result = up.util.extractTrailingJSON(str)
-          expect(result).toEqual(['foo bar', { baz: 3 }])
+          let result = up.util.parseScalarJSONPairs(str)
+          expect(result).toEqual([['foo bar', { baz: 3 }]])
         })
 
         it('accepts unquoted property names and single quote strings', function() {
           let str = 'foo bar { baz: 3 }'
-          let result = up.util.extractTrailingJSON(str)
-          expect(result).toEqual(['foo bar', { baz: 3 }])
+          let result = up.util.parseScalarJSONPairs(str)
+          expect(result).toEqual([['foo bar', { baz: 3 }]])
+        })
+
+        it('ignores braces in strings', function() {
+          let str = `foo "{ bar }" baz { "key": 'foo { bar } baz' }`
+          let result = up.util.parseScalarJSONPairs(str)
+          expect(result).toEqual([[`foo "{ bar }" baz`, { key: 'foo { bar } baz' }]])
+        })
+
+        it('parses nested objects', function() {
+          let str = 'foo bar { baz: { qux: 3 } }'
+          let result = up.util.parseScalarJSONPairs(str)
+          expect(result).toEqual([['foo bar', { baz: {qux: 3 } }]])
+        })
+
+        it('parses multiple pairs', function() {
+          let str = 'foo { bar: 1 } baz { qux: 2 }'
+          let result = up.util.parseScalarJSONPairs(str)
+          expect(result).toEqual([
+            ['foo', { bar: 1 }],
+            ['baz', { qux: 2 }]
+          ])
         })
 
       })
 
       describe('if the string does not end in a JSON object', function() {
 
-        it('returns a tuple of only the given string', function() {
+        it('returns an array of the given string and undefined', function() {
           let str = 'foo bar baz'
-          let result = up.util.extractTrailingJSON(str)
-          expect(result).toEqual(['foo bar baz'])
+          let result = up.util.parseScalarJSONPairs(str)
+          expect(result).toEqual([['foo bar baz', undefined]])
         })
 
       })
