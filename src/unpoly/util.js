@@ -2107,35 +2107,72 @@ up.util = (function() {
     return api
   }
 
-  function singleToDoubleQuote(str) {
-    let transformed = str.slice(1, -1).replace(/(\\\\)|(\\')|(")/g, function(_match, escapedBackslash, escapedSingleQuote, _doubleQuote) {
-      return escapedBackslash
-        || (escapedSingleQuote && "'")
-        || '\\"'
+  function maskPattern(str, pattern) {
+    let maskCount = 0
+    let maskPrefix = '§'
+    let maskPattern = new RegExp(maskPrefix + '(\\d+)', 'g')
+    let matches = []
+
+    let replace = (replacePattern) => {
+      str = str.replaceAll(replacePattern, function(...match) {
+        matches.push(match)
+        return maskPrefix + (maskCount++)
+      })
+    }
+
+    replace(maskPrefix)
+    replace(pattern)
+
+    let restore = (s, transform = identity) => {
+      return s.replace(maskPattern, (match, placeholderIndex) => transform(...matches[placeholderIndex]))
+    }
+
+    return { masked: str, restore }
+  }
+
+  const QUOTED_STRING = /'(?:\\\\|\\'|[^'])*'|"(?:\\\\|\\"|[^"])*"/g
+
+  function maskStrings(str) {
+    return maskPattern(str, QUOTED_STRING)
+  }
+
+  // ("foo") => ("foo")
+  // ('foo') => ("foo")
+  // ('foo"bar\'baz"') => ("foo\"bar'baz")
+  function ensureDoubleQuotes(str) {
+    // If we already have double-quoted string, there's nothing to do.
+    if (str[0] === '"') return str
+
+    str = str.slice(1, -1)
+
+    let transformed = str.replace(/(\\\\)|(\\')|(\\")|(")/g, function(_match, escapedBackslash, escapedSingleQuote, _doubleQuote) {
+      return escapedBackslash           // keep (\\)
+        || (escapedSingleQuote && "'")  // convert (\') to just (')
+        || '\\"'                        // convert (") to (\")
     })
     return '"' + transformed + '"'
   }
 
-  function parseRelaxedJSON(str) {
-    let transformed = str.replace(/("(?:\\\\|\\"|[^"])*")|('(?:\\\\|\\'|[^'])*')|(true\b|false\b|null\b)|([a-z_$][\w$]*:)/gi, function(_match, doubleQuotedString, singleQuotedString, literalKeyword, unquotedProperty) {
-      return doubleQuotedString
-        || (singleQuotedString && singleToDoubleQuote(singleQuotedString))
-        || literalKeyword
-        || ('"' + unquotedProperty.slice(0, -1) + '":')
-    })
-    return JSON.parse(transformed)
+  function parseString(value) {
+    return JSON.parse(ensureDoubleQuotes(value))
   }
 
-  function extractTrailingJSON(str) {
-    let braceIndex = str.indexOf('{')
-    if (braceIndex >= 0) {
-      return [
-        str.slice(0, braceIndex).trim(),
-        parseRelaxedJSON(str.slice(braceIndex))
-      ]
-    } else {
-      return [str]
-    }
+  function parseRelaxedJSON(str) {
+    let { masked, restore } = maskStrings(str)
+    masked = masked.replace(/([a-z_$][\w$]*:)/gi, (unquotedProperty) => ('"' + unquotedProperty.slice(0, -1) + '":'))
+    masked = restore(masked, ensureDoubleQuotes)
+    return JSON.parse(masked)
+  }
+
+  function parseScalarJSONPairs(str) {
+    let { masked, restore } = maskStrings(str)
+    let results = masked.matchAll(/([^{]+)({(?:[^{}]|{[^{}]*})*})?/g)
+
+    // results is an iterator, not an array. We can only loop over it once.
+    return map(results, ([_match, string, json]) => [
+      restore(string.trim()),
+      json && parseRelaxedJSON(restore(json))
+    ])
   }
 
   return {
@@ -2246,7 +2283,9 @@ up.util = (function() {
     scanFunctions,
     args: parseArgs,
     parseRelaxedJSON,
-    extractTrailingJSON,
+    parseScalarJSONPairs,
+    maskPattern,
+    parseString,
     // partialRight,
   }
 })()
