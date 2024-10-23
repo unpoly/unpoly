@@ -11388,7 +11388,21 @@ describe 'up.fragment', ->
 
         expect(callback).not.toHaveBeenCalled()
 
-  describe 'up.fragment.parseTargetSteps()', ->
+  fdescribe 'up.fragment.splitTarget()', ->
+
+    it 'returns an array containing a single target', ->
+      selectors = up.fragment.splitTarget('.one')
+      expect(selectors).toEqual ['.one']
+
+    it 'splits multiple targets at commas', ->
+      selectors = up.fragment.splitTarget('.one, .two')
+      expect(selectors).toEqual ['.one', '.two']
+
+    it 'parses multiple targets with commas within parentheses', ->
+      selectors = up.fragment.splitTarget('.one:has(.three, .four), .two')
+      expect(selectors).toEqual ['.one:has(.three, .four)', '.two']
+
+  fdescribe 'up.fragment.parseTargetSteps()', ->
 
     it 'parses a single target', ->
       steps = up.fragment.parseTargetSteps('.one')
@@ -11400,6 +11414,13 @@ describe 'up.fragment', ->
       steps = up.fragment.parseTargetSteps('.one, .two')
       expect(steps).toEqual [
         jasmine.objectContaining(selector: '.one'),
+        jasmine.objectContaining(selector: '.two'),
+      ]
+
+    it 'parses multiple targets with commas within parentheses', ->
+      steps = up.fragment.parseTargetSteps('.one:has(.three, .four), .two')
+      expect(steps).toEqual [
+        jasmine.objectContaining(selector: '.one:has(.three, .four)'),
         jasmine.objectContaining(selector: '.two'),
       ]
 

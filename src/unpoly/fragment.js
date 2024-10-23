@@ -2294,7 +2294,7 @@ up.fragment = (function() {
   }
 
   function splitTarget(target) {
-    return u.parseTokens(target, { separator: 'comma' })
+    return u.parseTokens(target, { separator: 'comma', complex: true })
   }
 
   function parseTargetSteps(target, options = {}) {
