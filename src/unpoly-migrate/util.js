@@ -135,4 +135,10 @@ Pushes the given function to the [JavaScript microtask queue](https://jakearchib
 */
 up.util.microtask = window.queueMicrotask
 
-
+up.migrate.splitAtOr = function(value) {
+  let parts = value.split(/\s+or\s+/)
+  if (parts.length >= 2) {
+    up.migrate.warn(`Separating tokens by \`or\` has been deprecated. Use a comma (\`,\`) instead. Found in "${value}".`)
+    return parts
+  }
+}

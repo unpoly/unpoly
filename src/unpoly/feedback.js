@@ -376,7 +376,7 @@ up.feedback = (function() {
     if (u.isFunction(value)) {
       return [value]
     } else if (u.isString(value)) {
-      return u.parseTokens(value).map(getNamedPreviewFn)
+      return resolvePreviewString(value)
     } else if (u.isArray(value)) {
       return value.flatMap(resolvePreviewFns)
     } else {
@@ -384,8 +384,14 @@ up.feedback = (function() {
     }
   }
 
-  function getNamedPreviewFn(name) {
-    return namedPreviewFns[name] || up.fail('Unknown preview "%s"', name)
+  function resolvePreviewString(str) {
+    return u.map(u.parseScalarJSONPairs(str), ([name, parsedOptions]) => {
+      let previewFn = namedPreviewFns[name] || up.fail('Unknown preview "%s"', name)
+      return function(preview, runOptions = parsedOptions) {
+        up.puts('[up-preview]', 'Showing preview %o', name)
+        previewFn(preview, runOptions)
+      }
+    })
   }
 
   function getActiveElements({ origin, activeElements }) {
@@ -396,9 +402,9 @@ up.feedback = (function() {
 
   function registerPreview(name, previewFn) {
     previewFn.isDefault = up.framework.evaling
-    namedPreviewFns[name] = function(preview, ...args) {
+    namedPreviewFns[name] = function(preview, options) {
       up.puts('[up-preview]', 'Showing preview %o', name)
-      return previewFn(preview, ...args)
+      return previewFn(preview, options)
     }
   }
 
