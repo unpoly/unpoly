@@ -627,16 +627,16 @@ up.element = (function() {
     let excludeRaw
 
     const {
-      masked: selectorWithoutAttrs,
-      restore: restoreAttrs,
-    } = maskAttrs(rawSelector)
+      masked: selectorOutline,
+      restore: restoreSelectorLiterals,
+    } = u.expressionOutline(rawSelector)
 
-    const includeWithoutAttrs = selectorWithoutAttrs.replace(/:not\((\([^)]+\)|[^()])+\)/, function(match) {
-      excludeRaw = restoreAttrs(match)
+    const includeWithoutAttrs = selectorOutline.replace(/:not\([^)]*\)/, function(match) {
+      excludeRaw = restoreSelectorLiterals(match)
       return ''
     })
 
-    let includeRaw = restoreAttrs(includeWithoutAttrs)
+    let includeRaw = restoreSelectorLiterals(includeWithoutAttrs)
 
     const includeSegments = includeWithoutAttrs.split(/[ >]+/)
 
@@ -664,9 +664,9 @@ up.element = (function() {
       })
 
 
-      // If we have stripped out attrValues at the beginning of the function,
-      // they have been replaced with the attribute name only (as "[name]").
-      depthSelector = restoreAttrs(depthSelector, function(_raw, name, _operator, quote, value) {
+      depthSelector = depthSelector.replace(/\[[^\]]*]/g, function(attr) {
+        attr = restoreSelectorLiterals(attr)
+        let [_raw, name, _operator, quote, value] = attr.match(/\[([\w-]+)(?:([~|^$*]?=)(["'])?([^\3\]]*?)\3)?]/)
         quote ||= '"'
         parsed.attributes[name] = value ? u.parseString(quote + value + quote) : ''
         return ''
@@ -684,13 +684,6 @@ up.element = (function() {
       includeRaw,
       excludeRaw,
     }
-  }
-
-  // Matches as [raw, name, operator, quote, value]
-  const ATTR_SELECTOR_PATTERN = /\[([\w-]+)(?:([~|^$*]?=)(["'])?([^\3\]]*?)\3)?]/g
-
-  function maskAttrs(str) {
-    return u.maskPattern(str, ATTR_SELECTOR_PATTERN)
   }
 
   /*-
