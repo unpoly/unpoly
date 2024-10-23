@@ -1725,25 +1725,57 @@ up.util = (function() {
     return (a.length === b.length) && every(a, (elem, index) => isEqual(elem, b[index]))
   }
 
+  // TODO: Remove
   const PARSE_TOKEN_PATTERNS = {
     'space/or': /\s+(?:or\s+)?/,
     'or': /\s+or\s+/,
     'comma': /\s*,\s*/
   }
 
-  function parseTokens(value, options = {}) {
-    if (isString(value)) {
-      value = value.trim()
-      if (options.json && /^\[.*]$/.test(value)) {
-        return parseRelaxedJSON(value)
-      } else {
-        let separator = options.separator || 'space/or'
-        let pattern = PARSE_TOKEN_PATTERNS[separator]
-        return value.split(pattern)
-      }
-    } else {
+  // TODO: Remove
+  function parseTokens(value, { separator = 'space/or', json = false, complex = false } = {}) {
+    let separatorPattern = PARSE_TOKEN_PATTERNS[separator]
+
+    if (!isString(value)) {
       return wrapList(value)
+    } else if (json && /^\[.*]$/.test(value)) {
+      return parseRelaxedJSON(value)
+    } else if (complex) {
+      let { masked, restore } = expressionOutline(value)
+      return masked.split(separatorPattern).map((s) => restore(s))
+    } else {
+      return value.split(separatorPattern)
     }
+  }
+
+  function getSimpleTokens(value, { json = false } = {}) {
+    if (!isString(value)) {
+      return wrapList(value)
+    } else if (json && /^\[.*]$/.test(value)) {
+      return parseRelaxedJSON(value)
+    } else {
+      return splitSimpleTokenString(value, /[,\s]/)
+    }
+  }
+
+  function splitSimpleTokenString(value, separator) {
+    let parts = up.migrate.splitAtOr?.(value) || value.split(separator)
+    return parts.map((s) => s.trim()).filter(identity)
+  }
+
+  function getComplexTokens(value) {
+    if (!isString(value)) {
+      return wrapList(value)
+    } else {
+      let { maskedTokens, restore } = complexTokenOutlines(value)
+      return maskedTokens.map((token) => restore(token))
+    }
+  }
+
+  function complexTokenOutlines(string) {
+    let { masked, restore } = expressionOutline(string)
+    let maskedTokens = splitSimpleTokenString(masked, ',')
+    return { maskedTokens, restore }
   }
 
   function wrapValue(constructor, ...args) {
@@ -2107,33 +2139,60 @@ up.util = (function() {
     return api
   }
 
-  function maskPattern(str, pattern) {
+  function maskPattern(str, patterns, { keepDelimiters = false } = {}) {
     let maskCount = 0
-    let maskPrefix = '§'
-    let maskPattern = new RegExp(maskPrefix + '(\\d+)', 'g')
+    let maskPattern = /§(\d+)/g
     let matches = []
+    let replaceLayers = 0
 
     let replace = (replacePattern) => {
-      str = str.replaceAll(replacePattern, function(...match) {
-        matches.push(match)
-        return maskPrefix + (maskCount++)
+      let didReplace = false
+
+      str = str.replaceAll(replacePattern, function(match) {
+        didReplace = true
+        let glyph = '§' + (maskCount++)
+
+        let mask
+        let masked
+
+        if (keepDelimiters) {
+          let startDelimiter = match[0]
+          let endDelimiter = match.slice(-1)
+          masked = match.slice(1, -1)
+          mask = startDelimiter + glyph + endDelimiter
+        } else {
+          masked = match
+          mask = glyph
+        }
+
+        matches.push(masked)
+        return mask
       })
+
+      if (didReplace) replaceLayers++
     }
 
-    replace(maskPrefix)
-    replace(pattern)
+    [maskPattern, ...patterns].forEach(replace)
 
     let restore = (s, transform = identity) => {
-      return s.replace(maskPattern, (match, placeholderIndex) => transform(...matches[placeholderIndex]))
+      for (let i = 0; i < replaceLayers; i++) {
+        s = s.replace(maskPattern, (match, placeholderIndex) => transform(matches[placeholderIndex]))
+      }
+      return s
     }
 
     return { masked: str, restore }
   }
 
-  const QUOTED_STRING = /'(?:\\\\|\\'|[^'])*'|"(?:\\\\|\\"|[^"])*"/g
+  const QUOTED_STRING_PATTERN = /'(?:\\\\|\\'|[^'])*'|"(?:\\\\|\\"|[^"])*"/g
+  // TODO: Remove
+  // const NESTED_BRACES = /{(?:[^{}]|{[^{}]*})*}/g
+  // const NESTED_PARENTHESES = /\((?:[^\(\)]|\([^\(\)]*\))*\)/g
+  // const NESTED_BRACKETS = /\[(?:[^\[\]]|\[[^\[\]]*\])*\]/g
+  const NESTED_GROUP_PATTERN = /{(?:[^{}]|{[^{}]*})*}|\((?:[^\(\)]|\([^\(\)]*\))*\)|\[(?:[^\[\]]|\[[^\[\]]*\])*\]/g
 
-  function maskStrings(str) {
-    return maskPattern(str, QUOTED_STRING)
+  function expressionOutline(str) {
+    return maskPattern(str, [QUOTED_STRING_PATTERN, NESTED_GROUP_PATTERN], { keepDelimiters: true })
   }
 
   // ("foo") => ("foo")
@@ -2158,15 +2217,16 @@ up.util = (function() {
   }
 
   function parseRelaxedJSON(str) {
-    let { masked, restore } = maskStrings(str)
+    let { masked, restore } = maskPattern(str, [QUOTED_STRING_PATTERN])
     masked = masked.replace(/([a-z_$][\w$]*:)/gi, (unquotedProperty) => ('"' + unquotedProperty.slice(0, -1) + '":'))
     masked = restore(masked, ensureDoubleQuotes)
     return JSON.parse(masked)
   }
 
   function parseScalarJSONPairs(str) {
-    let { masked, restore } = maskStrings(str)
-    let results = masked.matchAll(/([^{]+)({(?:[^{}]|{[^{}]*})*})?/g)
+    // TODO: Use complexTokenOutlines
+    let { masked, restore } = expressionOutline(str)
+    let results = masked.matchAll(/([^{,]+)({[^}]*})?/g)
 
     // results is an iterator, not an array. We can only loop over it once.
     return map(results, ([_match, string, json]) => [
@@ -2261,6 +2321,9 @@ up.util = (function() {
     task: queueTask,
     isEqual,
     parseTokens,
+    getSimpleTokens,
+    getComplexTokens,
+    complexTokenOutlines,
     wrapList,
     wrapValue,
     uid,
@@ -2285,6 +2348,7 @@ up.util = (function() {
     parseRelaxedJSON,
     parseScalarJSONPairs,
     maskPattern,
+    expressionOutline,
     parseString,
     // partialRight,
   }

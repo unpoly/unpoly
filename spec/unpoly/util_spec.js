@@ -2520,7 +2520,7 @@ describe('up.util', () => {
       })
     })
 
-    describe('up.util.parseTokens()', function() {
+    fdescribe('up.util.parseTokens()', function() {
 
       it('parses tokens separated by a space', function() {
         const str = 'foo bar baz'
@@ -2624,6 +2624,248 @@ describe('up.util', () => {
           expect(tokens).toEqual(['foo or bar or baz'])
         })
       })
+    })
+
+    fdescribe('up.util.getSimpleTokens()', function() {
+
+      describe('tokens separated by whitespace', function() {
+
+        it('parses tokens separated by a space', function() {
+          const str = 'foo bar baz'
+          const tokens = up.util.getSimpleTokens(str)
+          expect(tokens).toEqual(['foo', 'bar', 'baz'])
+        })
+
+        it('trims whitespace', function() {
+          const str = " foo \t  bar \r  baz   \n"
+          const tokens = up.util.getSimpleTokens(str)
+          expect(tokens).toEqual(['foo', 'bar', 'baz'])
+        })
+
+        it('does not parse a JSON array', function() {
+          const str = '["foo", "bar"]'
+          const tokens = up.util.getSimpleTokens(str)
+          expect(tokens).toEqual(['["foo"', '"bar"]'])
+        })
+
+        it('returns an array unchanged', function() {
+          const array = ['foo', 'bar']
+          const tokens = up.util.getSimpleTokens(array)
+          expect(tokens).toEqual(['foo', 'bar'])
+        })
+
+        it('returns an empty array for undefined', function() {
+          const tokens = up.util.getSimpleTokens(undefined)
+          expect(tokens).toEqual([])
+        })
+
+        it('returns an empty array for null', function() {
+          const tokens = up.util.getSimpleTokens(null)
+          expect(tokens).toEqual([])
+        })
+
+        it('returns an empty array for an empty string', function() {
+          const tokens = up.util.getSimpleTokens('')
+          expect(tokens).toEqual([])
+        })
+
+      })
+
+      describe('tokens separated by a comma', function() {
+
+        it('parses tokens separated by a comma', function() {
+          const str = 'foo, bar, baz'
+          const tokens = up.util.getSimpleTokens(str)
+          expect(tokens).toEqual(['foo', 'bar', 'baz'])
+        })
+
+        it('trims whitespace', function() {
+          const str = '\n foo   , \t bar  , \n baz  '
+          const tokens = up.util.getSimpleTokens(str)
+          expect(tokens).toEqual(['foo', 'bar', 'baz'])
+        })
+
+      })
+
+      describe('with { json: true }', function() {
+
+        it('parses the string as JSON if it is enclosed in square brackets', function() {
+          const str = '["foo", "bar"]'
+          const tokens = up.util.getSimpleTokens(str, { json: true })
+          expect(tokens).toEqual(['foo', 'bar'])
+        })
+
+        it("parses the string as space-separated tokens if it isn't enclosed in square brackets on both sides", function() {
+          const str = '[foo bar baz'
+          const tokens = up.util.getSimpleTokens(str, { json: true })
+          expect(tokens).toEqual(['[foo', 'bar', 'baz'])
+        })
+      })
+
+      if (up.migrate.loaded) {
+        describe('tokens separated by ` or `', function() {
+
+          it('parses tokens separated by " or "', function() {
+            const str = 'foo or bar or baz'
+            const tokens = up.util.getSimpleTokens(str)
+            expect(tokens).toEqual(['foo', 'bar', 'baz'])
+          })
+
+          it('trims whitespace', function() {
+            const str = '\n foo   or \t bar  or \n baz  '
+            const tokens = up.util.getSimpleTokens(str)
+            expect(tokens).toEqual(['foo', 'bar', 'baz'])
+          })
+
+          it('does not consider plain whitespace to be a separator if `or` is used anywhere', function() {
+            const str = 'foo bar or baz bam'
+            const tokens = up.util.getSimpleTokens(str)
+            expect(tokens).toEqual(['foo bar', 'baz bam'])
+          })
+
+          describe('deprecation warning', function() {
+
+            it('prints a deprecation warning', function() {
+              const warnSpy = up.migrate.warn.mock()
+              const str = 'foo or bar or baz'
+              const tokens = up.util.getSimpleTokens(str)
+              expect(tokens).toEqual(['foo', 'bar', 'baz'])
+              expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('Separating tokens by `or` has been deprecated'))
+            })
+
+            it('does not print a deprecation warning if the string did not contain an ` or `', function() {
+              const warnSpy = up.migrate.warn.mock()
+              const str = 'foo bar baz'
+              const tokens = up.util.getSimpleTokens(str)
+              expect(tokens).toEqual(['foo', 'bar', 'baz'])
+              expect(warnSpy).not.toHaveBeenCalled()
+            })
+
+          })
+
+        })
+      } else {
+
+        it('does not parse tokens separated by " or "', function() {
+          const str = 'foo or bar or baz'
+          const tokens = up.util.getSimpleTokens(str)
+          expect(tokens).toEqual(['foo', 'or', 'bar', 'or', 'baz'])
+        })
+
+      }
+
+    })
+
+    fdescribe('up.util.getComplexTokens()', function() {
+
+      describe('tokens separated by whitespace', function() {
+
+        it('does not separate tokens at whitespace', function() {
+          const str = 'foo bar baz'
+          const tokens = up.util.getComplexTokens(str)
+          expect(tokens).toEqual(['foo bar baz'])
+        })
+
+      })
+
+      describe('tokens separated by a comma', function() {
+
+        it('parses tokens separated by a comma', function() {
+          const str = 'foo, bar, baz'
+          const tokens = up.util.getComplexTokens(str)
+          expect(tokens).toEqual(['foo', 'bar', 'baz'])
+        })
+
+        it('trims whitespace', function() {
+          const str = '\n foo   , \t bar  , \n baz  '
+          const tokens = up.util.getComplexTokens(str)
+          expect(tokens).toEqual(['foo', 'bar', 'baz'])
+        })
+
+        it('ignores commas in single-quoted strings', function() {
+          const str = `.foo, .bar[attr='baz, bam'], .qux`
+          const tokens = up.util.getComplexTokens(str)
+          expect(tokens).toEqual([`.foo`, `.bar[attr='baz, bam']`, `.qux`])
+        })
+
+        it('ignores commas in double-quoted strings', function() {
+          const str = `.foo, .bar[attr="baz, bam"], .qux`
+          const tokens = up.util.getComplexTokens(str)
+          expect(tokens).toEqual([`.foo`, `.bar[attr="baz, bam"]`, `.qux`])
+        })
+
+        it('ignores commas in square brackets', function() {
+          const str = `foo, [bar, baz], bam`
+          const tokens = up.util.getComplexTokens(str)
+          expect(tokens).toEqual([`foo`, `[bar, baz]`, `bam`])
+        })
+
+        it('ignores commas in round parentheses', function() {
+          const str = `.foo, .bar:is(input, select), .qux`
+          const tokens = up.util.getComplexTokens(str)
+          expect(tokens).toEqual(['.foo', '.bar:is(input, select)', '.qux'])
+        })
+
+        it('ignores commas in curly braces', function() {
+          const str = `foo, { bar: 'baz', bam: 'qux' }, fred`
+          const tokens = up.util.getComplexTokens(str)
+          expect(tokens).toEqual([`foo`, `{ bar: 'baz', bam: 'qux' }`, `fred`])
+        })
+
+      })
+
+      if (up.migrate.loaded) {
+        describe('tokens separated by ` or `', function() {
+
+          it('parses tokens separated by " or "', function() {
+            const str = 'foo or bar or baz'
+            const tokens = up.util.getComplexTokens(str)
+            expect(tokens).toEqual(['foo', 'bar', 'baz'])
+          })
+
+          it('trims whitespace', function() {
+            const str = '\n foo   or \t bar  or \n baz  '
+            const tokens = up.util.getComplexTokens(str)
+            expect(tokens).toEqual(['foo', 'bar', 'baz'])
+          })
+
+          it('does not consider commas to be a separator if `or` is used anywhere', function() {
+            const str = 'foo bar or baz, bam'
+            const tokens = up.util.getComplexTokens(str)
+            expect(tokens).toEqual(['foo bar', 'baz, bam'])
+          })
+
+          describe('deprecation warning', function() {
+
+            it('prints a deprecation warning', function() {
+              const warnSpy = up.migrate.warn.mock()
+              const str = 'foo or bar or baz'
+              const tokens = up.util.getComplexTokens(str)
+              expect(tokens).toEqual(['foo', 'bar', 'baz'])
+              expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('Separating tokens by `or` has been deprecated'))
+            })
+
+            it('does not print a deprecation warning if the string did not contain an ` or `', function() {
+              const warnSpy = up.migrate.warn.mock()
+              const str = 'foo, bar, baz'
+              const tokens = up.util.getComplexTokens(str)
+              expect(tokens).toEqual(['foo', 'bar', 'baz'])
+              expect(warnSpy).not.toHaveBeenCalled()
+            })
+
+          })
+
+        })
+      } else {
+
+        it('does not parse tokens separated by " or "', function() {
+          const str = 'foo bar or baz, bam'
+          const tokens = up.util.getComplexTokens(str)
+          expect(tokens).toEqual(['foo bar or baz', 'bam'])
+        })
+
+      }
+
     })
 
     describe('up.util.objectContains()', function() {
@@ -2762,6 +3004,180 @@ describe('up.util', () => {
       })
     })
 
+    fdescribe('up.util.maskPattern()', function() {
+
+      it('replaces the given RegExp with a placeholder, then restores it with { restore } fn', function() {
+        let { masked, restore } = up.util.maskPattern('foo <bar> baz <bam> qux', [/<[^>]+>/g])
+        expect(masked).toBe('foo §0 baz §1 qux')
+
+        let restored = restore(masked)
+        expect(restored).toBe('foo <bar> baz <bam> qux')
+      })
+
+      it('allows to restore placeholders within a partial or transformed string', function() {
+        let { masked, restore } = up.util.maskPattern('foo <bar> baz <bam> qux', [/<[^>]+>/g])
+
+        let restored = restore('one §1 two')
+        expect(restored).toBe('one <bam> two')
+      })
+
+      it('correctly processes a placeholder control character within a masked string', function() {
+        let { masked, restore } = up.util.maskPattern('foo <bar§0baz> qux', [/<[^>]+>/g])
+        expect(masked).toBe('foo §1 qux')
+
+        let restored = restore(masked)
+        expect(restored).toBe('foo <bar§0baz> qux')
+      })
+
+      it('replaces multiple patterns')
+
+      describe('with { keepDelimiters: true }', function() {
+
+        it('does not mask the outer delimiters')
+
+      })
+
+    })
+
+    fdescribe('up.util.expressionOutline()', function() {
+
+      it('simplifies a complex CSS selector', function() {
+        let input = `input[foo="bar, ]baz"]:is(.control[qux]:not(.active)), .other:not(.mine)`
+        let { masked, restore } = up.util.expressionOutline(input)
+        expect(masked).toBe(`input[§1]:is(§2), .other:not(§3)`)
+
+        let restored = restore(masked)
+        expect(restored).toBe(input)
+      })
+
+      it('simplifies a string containing complex JavaScript object literals', function() {
+        let input = `foo { key: [1, 'two', { three: 4 }] }, bar { "a}b": 5 }`
+        let { masked, restore } = up.util.expressionOutline(input)
+        expect(masked).toBe(`foo {§2}, bar {§3}`)
+
+        let restored = restore(masked)
+        expect(restored).toBe(input)
+      })
+
+      describe('masking of strings', function() {
+
+        it('masks and restores content in quoted strings', function() {
+          let input = `foo "bar" baz 'qux' fred`
+          let { masked, restore } = up.util.expressionOutline(input)
+          expect(masked).toBe(`foo "§0" baz '§1' fred`)
+
+          let restored = restore(masked)
+          expect(restored).toBe(input)
+        })
+
+        it('honors an escaped quote', function() {
+          let input = `foo "bar\\"baz" qux`
+          let { masked, restore } = up.util.expressionOutline(input)
+          expect(masked).toBe(`foo "§0" qux`)
+
+          let restored = restore(masked)
+          expect(restored).toBe(input)
+        })
+
+        it('ignores a single quote within a double-quoted strings')
+
+      })
+
+      describe('masking of round parentheses', function() {
+
+        it('masks and restores content in parentheses', function() {
+          let input = `foo (bar) baz (qux) fred`
+          let { masked, restore } = up.util.expressionOutline(input)
+          expect(masked).toBe('foo (§0) baz (§1) fred')
+
+          let restored = restore(masked)
+          expect(restored).toBe(input)
+        })
+
+        it('masks and restores nested parentheses', function() {
+          let input = `foo (bar (baz) (qux)) fred`
+          let { masked, restore } = up.util.expressionOutline(input)
+          expect(masked).toBe('foo (§0) fred')
+
+          let restored = restore(masked)
+          expect(restored).toBe(input)
+        })
+
+        it('ignores a closing parentheses in a string', function() {
+          let input = `foo (bar "baz)qux") fred`
+          let { masked, restore } = up.util.expressionOutline(input)
+          expect(masked).toBe('foo (§1) fred')
+
+          let restored = restore(masked)
+          expect(restored).toBe(input)
+        })
+
+      })
+
+      describe('masking of square brackets', function() {
+
+        it('masks and restores content in brackets', function() {
+          let input = `foo [bar] baz [qux] fred`
+          let { masked, restore } = up.util.expressionOutline(input)
+          expect(masked).toBe('foo [§0] baz [§1] fred')
+
+          let restored = restore(masked)
+          expect(restored).toBe(input)
+        })
+
+        it('masks and restores nested brackets', function() {
+          let input = `foo [bar [baz] [qux]] fred`
+          let { masked, restore } = up.util.expressionOutline(input)
+          expect(masked).toBe('foo [§0] fred')
+
+          let restored = restore(masked)
+          expect(restored).toBe(input)
+        })
+
+        it('ignores a closing bracket in a string', function() {
+          let input = `foo [bar "baz]qux"] fred`
+          let { masked, restore } = up.util.expressionOutline(input)
+          expect(masked).toBe('foo [§1] fred')
+
+          let restored = restore(masked)
+          expect(restored).toBe(input)
+        })
+
+      })
+
+      describe('masking of curly braces', function() {
+
+        it('masks and restores content in braces', function() {
+          let input = `foo {bar} baz {qux} fred`
+          let { masked, restore } = up.util.expressionOutline(input)
+          expect(masked).toBe('foo {§0} baz {§1} fred')
+
+          let restored = restore(masked)
+          expect(restored).toBe(input)
+        })
+
+        it('masks and restores nested braces', function() {
+          let input = `foo {bar {baz} {qux}} fred`
+          let { masked, restore } = up.util.expressionOutline(input)
+          expect(masked).toBe('foo {§0} fred')
+
+          let restored = restore(masked)
+          expect(restored).toBe(input)
+        })
+
+        it('ignores a closing brace in a string', function() {
+          let input = `foo {bar "baz}qux"} fred`
+          let { masked, restore } = up.util.expressionOutline(input)
+          expect(masked).toBe('foo {§1} fred')
+
+          let restored = restore(masked)
+          expect(restored).toBe(input)
+        })
+
+      })
+
+    })
+
     describe('up.util.parseString()', function() {
 
       it('parses a double-quoted string', function() {
@@ -2871,7 +3287,7 @@ describe('up.util', () => {
 
     })
 
-    describe('up.util.parseScalarJSONPairs()', function() {
+    fdescribe('up.util.parseScalarJSONPairs()', function() {
 
       describe('if the string ends in a JSON object', function() {
 
@@ -2899,12 +3315,21 @@ describe('up.util', () => {
           expect(result).toEqual([['foo bar', { baz: {qux: 3 } }]])
         })
 
-        it('parses multiple pairs', function() {
-          let str = 'foo { bar: 1 } baz { qux: 2 }'
+        it('parses multiple pairs separated by comma', function() {
+          let str = 'foo { bar: 1 }, baz { qux: 2 }'
           let result = up.util.parseScalarJSONPairs(str)
           expect(result).toEqual([
             ['foo', { bar: 1 }],
             ['baz', { qux: 2 }]
+          ])
+        })
+
+        it('does not consider a comma within an object to be a pair separator', function() {
+          let str = 'foo { bar: 1, baz: 2 }, qux { fred: 3 }'
+          let result = up.util.parseScalarJSONPairs(str)
+          expect(result).toEqual([
+            ['foo', { bar: 1, baz: 2 }],
+            ['qux', { fred: 3 }]
           ])
         })
 
@@ -2916,6 +3341,12 @@ describe('up.util', () => {
           let str = 'foo bar baz'
           let result = up.util.parseScalarJSONPairs(str)
           expect(result).toEqual([['foo bar baz', undefined]])
+        })
+
+        it('returns an array of multiple comma-separated tokens', function() {
+          let str = 'foo bar, baz qux'
+          let result = up.util.parseScalarJSONPairs(str)
+          expect(result).toEqual([['foo bar', undefined], ['baz qux', undefined]])
         })
 
       })

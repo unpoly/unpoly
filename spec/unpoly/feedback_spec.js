@@ -139,6 +139,31 @@ describe('up.feedback', function() {
             expect(preview2Fn).toHaveBeenCalledWith(jasmine.any(up.Preview), {})
           })
 
+          it('runs a named preview with a JSON data object', async function() {
+            let previewFn = jasmine.createSpy('preview function')
+            up.preview('my-preview', previewFn)
+
+            up.render({ preview: 'my-preview { foo: 1, bar: 2 }', url: '/path', target: 'body' })
+
+            await wait()
+
+            expect(previewFn).toHaveBeenCalledWith(jasmine.any(up.Preview), { foo: 1, bar: 2 })
+          })
+
+          it('runs multiple named previews with an JSON data object each', async function() {
+            let preview1Fn = jasmine.createSpy('preview1')
+            up.preview('preview1', preview1Fn)
+            let preview2Fn = jasmine.createSpy('preview2')
+            up.preview('preview2', preview2Fn)
+
+            up.render({ preview: 'preview1 { foo: 1 } preview2 { bar: 2 }', url: '/path', target: 'body' })
+
+            await wait()
+
+            expect(preview1Fn).toHaveBeenCalledWith(jasmine.any(up.Preview), { foo: 1 })
+            expect(preview2Fn).toHaveBeenCalledWith(jasmine.any(up.Preview), { bar: 2 })
+          })
+
           it('runs an array of named previews', async function() {
             let preview1Fn = jasmine.createSpy('preview1')
             up.preview('preview1', preview1Fn)
