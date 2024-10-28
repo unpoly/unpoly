@@ -44,8 +44,8 @@ class Route {
         // A response tailored to a target is never a match for a response without a target
         if (!newValue) return false
 
-        let cachedTokens = u.parseTokens(cachedValue, { separator: 'comma' })
-        let newTokens = u.parseTokens(newValue, { separator: 'comma' })
+        let cachedTokens = up.fragment.splitTarget(cachedValue)
+        let newTokens = up.fragment.splitTarget(newValue)
 
         return u.containsAll(cachedTokens, newTokens)
       } else {
