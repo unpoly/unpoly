@@ -4425,7 +4425,7 @@ describe 'up.form', ->
           expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.result')
 
 
-    describe '[up-switch]', ->
+    fdescribe '[up-switch]', ->
 
       it 'only switches a target in the same form', ->
         form1 = fixture('form')
@@ -4457,29 +4457,53 @@ describe 'up.form', ->
           @$bazOption = @$select.affix('option[value="baz"]').text('Baz')
           @$phraseOption = @$select.affix('option[value="Some phrase"]').text('Some phrase')
 
-        it "shows the target element iff its up-show-for attribute contains the select value", asyncSpec (next) ->
+        it "shows the target element iff a space-separated [up-show-for] token contains the select value", ->
           $target = $fixture('.target[up-show-for="something bar other"]')
           up.hello(@$select)
+          await wait()
 
-          next =>
-            expect($target).toBeHidden()
-            @$select.val('bar')
-            Trigger.change(@$select)
+          expect($target).toBeHidden()
+          @$select.val('bar')
+          Trigger.change(@$select)
+          await wait()
 
-          next =>
-            expect($target).toBeVisible()
+          expect($target).toBeVisible()
 
-        it "shows the target element iff its up-hide-for attribute doesn't contain the select value", asyncSpec (next) ->
+        it "shows the target element iff a comma-separated [up-show-for] token contains the select value", ->
+          $target = $fixture('.target[up-show-for="something, bar, other"]')
+          up.hello(@$select)
+          await wait()
+
+          expect($target).toBeHidden()
+          @$select.val('bar')
+          Trigger.change(@$select)
+          await wait()
+
+          expect($target).toBeVisible()
+
+        it "shows the target element iff a space-separated [up-hide-for] attribute doesn't contain the select value", ->
           $target = $fixture('.target[up-hide-for="something bar other"]')
           up.hello(@$select)
+          await wait()
 
-          next =>
-            expect($target).toBeVisible()
-            @$select.val('bar')
-            Trigger.change(@$select)
+          expect($target).toBeVisible()
+          @$select.val('bar')
+          Trigger.change(@$select)
+          await wait()
 
-          next =>
-            expect($target).toBeHidden()
+          expect($target).toBeHidden()
+
+        it "shows the target element iff a comma-separated [up-hide-for] attribute doesn't contain the select value", ->
+          $target = $fixture('.target[up-hide-for="something, bar, other"]')
+          up.hello(@$select)
+          await wait()
+
+          expect($target).toBeVisible()
+          @$select.val('bar')
+          Trigger.change(@$select)
+          await wait()
+
+          expect($target).toBeHidden()
 
         it "shows the target element iff it has neither up-show-for nor up-hide-for and the select value is present", asyncSpec (next) ->
           $target = $fixture('.target')
