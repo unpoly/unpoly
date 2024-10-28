@@ -3033,7 +3033,13 @@ describe('up.util', () => {
 
       describe('with { keepDelimiters: true }', function() {
 
-        it('does not mask the outer delimiters')
+        it('does not mask the outer delimiters', function() {
+          let { masked, restore } = up.util.maskPattern('foo <bar> baz <bam> qux', [/<[^>]+>/g], { keepDelimiters: true })
+          expect(masked).toBe('foo <§0> baz <§1> qux')
+
+          let restored = restore(masked)
+          expect(restored).toBe('foo <bar> baz <bam> qux')
+        })
 
       })
 
