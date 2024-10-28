@@ -15,7 +15,7 @@ up.LayerLookup = class LayerLookup {
     }
 
     this._options = options
-    this._values = u.parseTokens(options.layer)
+    this._values = u.getSimpleTokens(options.layer)
   }
 
   all() {

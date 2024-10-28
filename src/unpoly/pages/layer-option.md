@@ -95,11 +95,11 @@ setTimeout(function() {
 ### Matching in multiple layers
 
 You can pass more than one layer reference as an array of options.
-Alternatively you may pass a a string of layer names separated by a space character or an `or` delimiter.
+Alternatively you may pass a a string of layer names separated by a space or comma character.
 
-For example `{ layer: 'current or parent' }` would match in either the current layer or the parent layer.
+For example `{ layer: 'current, parent' }` would match in either the current layer or the parent layer.
 
-If layers in the given list don't exist they will be ignored. For example, `'parent or root'` would first try
+If layers in the given list don't exist they will be ignored. For example, `'parent, root'` would first try
 to match within a parent layer. If there is no parent layer (because we're already in the root layer),
 Unpoly will match within the root layer.
 
