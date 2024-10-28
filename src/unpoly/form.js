@@ -1173,7 +1173,7 @@ up.form = (function() {
   })
 
   function parseSwitchTokens(str) {
-    return u.parseTokens(str, { json: true })
+    return u.getSimpleTokens(str, { json: true })
   }
 
   function findSwitcherForTarget(target) {
@@ -1672,7 +1672,7 @@ up.form = (function() {
     hidden for advancedness = basic
   </div>
 
-  <div class="target" up-show-for="advanced very-advanced">
+  <div class="target" up-show-for="advanced, very-advanced">
     shown for advancedness = advanced or very-advanced
   </div>
   ```
@@ -1741,7 +1741,7 @@ up.form = (function() {
     hidden for advancedness = basic
   </div>
 
-  <div class="target" up-show-for="advanced very-advanced">
+  <div class="target" up-show-for="advanced, very-advanced">
     shown for advancedness = advanced or very-advanced
   </div>
   ```
@@ -1779,9 +1779,10 @@ up.form = (function() {
 
   @selector [up-show-for]
   @param [up-show-for]
-    A space-separated list of input values for which this element should be shown.
+    A of input values for which this element should be shown.
 
-    If your values might contain spaces, you may also serialize them as a JSON array.
+    Multiple values can be separated by either a space (`foo bar`) or a comma (`foo, bar`).
+    If your values might contain spaces, you may also serialize them as a JSON array (`["foo", "bar"]`).
   @stable
   */
 
@@ -1792,9 +1793,10 @@ up.form = (function() {
 
   @selector [up-hide-for]
   @param [up-hide-for]
-    A space-separated list of input values for which this element should be hidden.
+    A list of input values for which this element should be hidden.
 
-    If your values might contain spaces, you may also serialize them as a JSON array.
+    Multiple values can be separated by either a space (`foo bar`) or a comma (`foo, bar`).
+    If your values might contain spaces, you may also serialize them as a JSON array (`["foo", "bar"]`).
   @stable
   */
   up.compiler('[up-switch]', (switcher) => {
