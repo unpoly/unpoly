@@ -2224,15 +2224,15 @@ up.util = (function() {
   }
 
   function parseScalarJSONPairs(str) {
-    // TODO: Use complexTokenOutlines
-    let { masked, restore } = expressionOutline(str)
-    let results = masked.matchAll(/([^{,]+)({[^}]*})?/g)
+    let { maskedTokens, restore } = complexTokenOutlines(str)
 
-    // results is an iterator, not an array. We can only loop over it once.
-    return map(results, ([_match, string, json]) => [
-      restore(string.trim()),
-      json && parseRelaxedJSON(restore(json))
-    ])
+    return maskedTokens.map((maskedToken) => {
+      let [_match, string, json] = maskedToken.match(/([^{]+)({[^}]*})?/)
+      return [
+        restore(string.trim()),
+        json && parseRelaxedJSON(restore(json))
+      ]
+    })
   }
 
   return {
