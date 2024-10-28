@@ -54,7 +54,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     'backdrop',
     'dismissable',
     'dismissLabel',
-    'dismissAriaLabel',
+    'dismissARIALabel',
     'openAnimation',
     'closeAnimation',
     'openDuration',
@@ -156,7 +156,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   createDismissElement(parentElement) {
     this.dismissElement = this.affixPart(parentElement, 'dismiss', {
       'up-dismiss': '":button"', // value must be JSON
-      'aria-label': this.dismissAriaLabel
+      'aria-label': this.dismissARIALabel
     })
     // Since the dismiss button already has an accessible [aria-label]
     // we hide the "X" label from screen readers.

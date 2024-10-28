@@ -740,6 +740,19 @@ describe 'up.layer', ->
               layer = await up.layer.open(dismissable: 'button')
               expect(layer.element).toHaveSelector('up-modal-dismiss[up-dismiss]')
 
+            it 'allows to customize the button using { dismissLabel, dismissARIALabel }', ->
+              layer = await up.layer.open(dismissable: 'button', dismissLabel: 'CLOSE ME', dismissARIALabel: 'Close this overlay')
+              button = layer.element.querySelector('up-modal-dismiss[up-dismiss]')
+              expect(button).toHaveText('CLOSE ME')
+              expect(button).toHaveAttribute('aria-label', 'Close this overlay')
+
+            if up.migrate.loaded
+              it 'allows to customize the button using { dismissLabel, dismissAriaLabel }', ->
+                layer = await up.layer.open(dismissable: 'button', dismissLabel: 'CLOSE ME', dismissAriaLabel: 'Close this overlay')
+                button = layer.element.querySelector('up-modal-dismiss[up-dismiss]')
+                expect(button).toHaveText('CLOSE ME')
+                expect(button).toHaveAttribute('aria-label', 'Close this overlay')
+
             it 'emits an up:layer:dismissed event with { value: ":button" } and other details', asyncSpec (next) ->
               up.layer.open(dismissable: 'button', mode: 'modal')
               buttonElement = null
