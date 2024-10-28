@@ -2299,7 +2299,6 @@ up.util = (function() {
     isEqual,
     getSimpleTokens,
     getComplexTokens,
-    complexTokenOutlines,
     wrapList,
     wrapValue,
     uid,
