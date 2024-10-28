@@ -1775,7 +1775,7 @@ describe('up.element', function() {
     })
   })
 
-  fdescribe('up.element.parseSelector()', function() {
+  describe('up.element.parseSelector()', function() {
 
     it('parses a selector with tag name, IDs, classes and attributes', function() {
       const parsed = up.element.parseSelector('tag-name#id.klass[attr=value]')

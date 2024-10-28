@@ -675,7 +675,7 @@ describe('up.network', function() {
         })
       })
 
-      fdescribe('with { cache } option', function() {
+      describe('with { cache } option', function() {
 
         it('caches server responses for the configured duration', asyncSpec(function(next) {
           up.network.config.cacheEvictAge = 200 // 1 second for test

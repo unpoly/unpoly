@@ -708,7 +708,7 @@ describe 'up.layer', ->
         beforeEach ->
           up.motion.config.enabled = false
 
-        fdescribe '{ dismissable }', ->
+        describe '{ dismissable }', ->
 
           describe 'with { dismissable: true }', ->
 
@@ -1733,7 +1733,7 @@ describe 'up.layer', ->
 
         expect(up.layer.count).toBe(2)
 
-    fdescribe 'up.layer.getAll()', ->
+    describe 'up.layer.getAll()', ->
 
       describe 'for "any"', ->
 

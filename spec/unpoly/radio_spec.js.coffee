@@ -1317,26 +1317,26 @@ describe 'up.radio', ->
 
           it 'only grabs updates from matching layers', ->
             makeLayers([
-              { content: '<div id="target">target1</div><div id="hungry" up-hungry up-if-layer="0 or 1">hungry1</div>' },
+              { content: '<div id="target">target1</div><div id="hungry" up-hungry up-if-layer="0, 1">hungry1</div>' },
               { content: '<div id="target">target1</div>' },
               { content: '<div id="target">target1</div>' },
             ])
 
             await wait()
 
-            up.render({ target: '#target', layer: 0, document: '<div id="target">target2</div><div id="hungry" up-hungry up-if-layer="0 or 1">hungry2</div>' })
+            up.render({ target: '#target', layer: 0, document: '<div id="target">target2</div><div id="hungry" up-hungry up-if-layer="0, 1">hungry2</div>' })
 
             await wait()
 
             expect(document.querySelector('#hungry')).toHaveText('hungry2')
 
-            up.render({ target: '#target', layer: 2, document: '<div id="target">target3</div><div id="hungry" up-hungry up-if-layer="0 or 1">hungry3</div>' })
+            up.render({ target: '#target', layer: 2, document: '<div id="target">target3</div><div id="hungry" up-hungry up-if-layer="0, 1">hungry3</div>' })
 
             await wait()
 
             expect(document.querySelector('#hungry')).toHaveText('hungry2')
 
-            up.render({ target: '#target', layer: 1, document: '<div id="target">target4</div><div id="hungry" up-hungry up-if-layer="0 or 1">hungry4</div>' })
+            up.render({ target: '#target', layer: 1, document: '<div id="target">target4</div><div id="hungry" up-hungry up-if-layer="0, 1">hungry4</div>' })
 
             await wait()
 

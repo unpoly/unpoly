@@ -1,4 +1,4 @@
-fdescribe 'up.URLPattern', ->
+describe 'up.URLPattern', ->
 
   describe '#test', ->
 

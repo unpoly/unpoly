@@ -4231,15 +4231,26 @@ describe 'up.fragment', ->
                 expect('.element').toHaveText(/new text/)
                 done()
 
-          it 'updates the next layer in an "or"-separated list of alternative layer names', (done) ->
+          it 'updates the next layer in a comma-separated list of alternative layer names', (done) ->
             fixture('.element', text: 'old text')
-            promise = up.render('.element', layer: 'parent or root', content: 'new text')
+            promise = up.render('.element', layer: 'parent, root', content: 'new text')
 
             u.task ->
               promiseState(promise).then (result) ->
                 expect(result.state).toEqual('fulfilled')
                 expect('.element').toHaveText(/new text/)
                 done()
+
+          if up.migrate.loaded
+            it 'updates the next layer in an "or"-separated list of alternative layer names', (done) ->
+              fixture('.element', text: 'old text')
+              promise = up.render('.element', layer: 'parent or root', content: 'new text')
+
+              u.task ->
+                promiseState(promise).then (result) ->
+                  expect(result.state).toEqual('fulfilled')
+                  expect('.element').toHaveText(/new text/)
+                  done()
 
       describe 'with { history } option', ->
 
@@ -6121,7 +6132,7 @@ describe 'up.fragment', ->
 
               await Promise.resolve()
 
-      fdescribe 'scrolling', ->
+      describe 'scrolling', ->
 
         mockReveal = ->
           @revealedHTML = []
@@ -7157,7 +7168,7 @@ describe 'up.fragment', ->
 
           expect(spy).toHaveBeenCalledWith('old text', $parent.get(0))
 
-      fdescribe 'focus', ->
+      describe 'focus', ->
 
         describe 'with { focus: "autofocus" }', ->
 
@@ -11417,7 +11428,7 @@ describe 'up.fragment', ->
 
         expect(callback).not.toHaveBeenCalled()
 
-  fdescribe 'up.fragment.splitTarget()', ->
+  describe 'up.fragment.splitTarget()', ->
 
     it 'returns an array containing a single target', ->
       selectors = up.fragment.splitTarget('.one')
@@ -11431,7 +11442,7 @@ describe 'up.fragment', ->
       selectors = up.fragment.splitTarget('.one:has(.three, .four), .two')
       expect(selectors).toEqual ['.one:has(.three, .four)', '.two']
 
-  fdescribe 'up.fragment.parseTargetSteps()', ->
+  describe 'up.fragment.parseTargetSteps()', ->
 
     it 'parses a single target', ->
       steps = up.fragment.parseTargetSteps('.one')
