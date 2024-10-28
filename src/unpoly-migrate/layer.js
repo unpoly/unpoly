@@ -6,6 +6,7 @@ up.migrate.handleLayerOptions = function(options) {
   up.migrate.fixKey(options, 'flavor', 'mode')
   up.migrate.fixKey(options, 'closable', 'dismissable')
   up.migrate.fixKey(options, 'closeLabel', 'dismissLabel')
+  up.migrate.fixKey(options, 'dismissAriaLabel', 'dismissARIALabel')
 
   for (let dimensionKey of ['width', 'maxWidth', 'height']) {
     if (options[dimensionKey]) {

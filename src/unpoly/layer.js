@@ -141,7 +141,7 @@ up.layer = (function() {
   @param {string} config.overlay.dismissLabel
     The symbol for the dismiss icon in the top-right corner.
 
-  @param {string} config.overlay.dismissAriaLabel
+  @param {string} config.overlay.dismissARIALabel
     The accessibility label for the dismiss icon in the top-right corner.
 
   @param {string|boolean} [config.overlay.history='auto']
@@ -218,7 +218,7 @@ up.layer = (function() {
         openAnimation: 'fade-in',
         closeAnimation: 'fade-out',
         dismissLabel: '×',
-        dismissAriaLabel: 'Dismiss dialog',
+        dismissARIALabel: 'Dismiss dialog',
         dismissable: true,
         history: 'auto',
         trapFocus: true,
