@@ -114,7 +114,7 @@ describe('up.feedback', function() {
 
         describe('call variants', function() {
 
-          it('runs a named preview', async function() {
+          it('runs a named preview with an empty data object', async function() {
             let previewFn = jasmine.createSpy('preview function')
             up.preview('my-preview', previewFn)
 
@@ -125,13 +125,13 @@ describe('up.feedback', function() {
             expect(previewFn).toHaveBeenCalledWith(jasmine.any(up.Preview), {})
           })
 
-          it('runs multiple named previews, separated by a space', async function() {
+          it('runs multiple named previews, separated by a comma', async function() {
             let preview1Fn = jasmine.createSpy('preview1')
             up.preview('preview1', preview1Fn)
             let preview2Fn = jasmine.createSpy('preview2')
             up.preview('preview2', preview2Fn)
 
-            up.render({ preview: 'preview1 preview2', url: '/path', target: 'body' })
+            up.render({ preview: 'preview1, preview2', url: '/path', target: 'body' })
 
             await wait()
 
@@ -150,13 +150,13 @@ describe('up.feedback', function() {
             expect(previewFn).toHaveBeenCalledWith(jasmine.any(up.Preview), { foo: 1, bar: 2 })
           })
 
-          it('runs multiple named previews with an JSON data object each', async function() {
+          it('runs multiple comma-separated named previews with an JSON data object each', async function() {
             let preview1Fn = jasmine.createSpy('preview1')
             up.preview('preview1', preview1Fn)
             let preview2Fn = jasmine.createSpy('preview2')
             up.preview('preview2', preview2Fn)
 
-            up.render({ preview: 'preview1 { foo: 1 } preview2 { bar: 2 }', url: '/path', target: 'body' })
+            up.render({ preview: 'preview1 { foo: 1 }, preview2 { bar: 2 }', url: '/path', target: 'body' })
 
             await wait()
 

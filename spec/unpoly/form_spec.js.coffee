@@ -4425,7 +4425,7 @@ describe 'up.form', ->
           expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.result')
 
 
-    fdescribe '[up-switch]', ->
+    describe '[up-switch]', ->
 
       it 'only switches a target in the same form', ->
         form1 = fixture('form')

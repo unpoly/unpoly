@@ -841,7 +841,7 @@ describe('up.Preview', function() {
 
   describe('#run(String)', function() {
 
-    it('runs another named preview', async function() {
+    it('runs another named preview with an empty data object', async function() {
       let preview2Fn = jasmine.createSpy('preview2Fn')
       let preview1Fn = jasmine.createSpy('preview1Fn').and.callFake(function(preview) {
         preview.run('preview2')

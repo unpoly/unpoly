@@ -93,7 +93,7 @@ describe 'up.Response', ->
         next (response) ->
           expect(response.getHeader('X-Course')).toBe('ruby-basics')
 
-  fdescribe '#varyHeaderNames', ->
+  describe '#varyHeaderNames', ->
 
     it 'returns an array of header names parsed from the `Vary` response header', ->
       request = up.request('/foo')
