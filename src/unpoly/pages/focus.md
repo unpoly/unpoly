@@ -100,10 +100,10 @@ Pass an array of focus option and Unpoly will use the first applicable value.
 E.g. `{ focus: ['hash', 'reset'] }` will first try to an element mathing the `#hash` in the URL.
 If the URL has no `#hash`, focus positions will be reset.
 
-In an `[up-focus]` attribute you may separate scroll options with an `or`:
+In an `[up-focus]` attribute you may separate scroll options with an comma:
 
 ```html
-<a href="/path#section" up-follow up-focus="hash or reset">Link label</a> 
+<a href="/path#section" up-follow up-focus="hash, reset">Link label</a>
 ```
 
 ### Automatic focus logic
