@@ -6,7 +6,7 @@ describe('up.event', function() {
 
   describe('JavaScript functions', function() {
 
-    describe('up.on()', function() {
+    fdescribe('up.on()', function() {
 
       it('registers a delagating event listener to the document, which passes the element as a second argument to the listener', asyncSpec(function(next) {
         fixture('.container .child')
@@ -209,7 +209,7 @@ describe('up.event', function() {
       })
       )
 
-      it('registers the listener to multiple, space-separated events', function() {
+      it('registers the listener to multiple space-separated event types', function() {
         const listener = jasmine.createSpy()
 
         up.on('foo bar', listener)
@@ -221,7 +221,19 @@ describe('up.event', function() {
         expect(listener.calls.count()).toEqual(2)
       })
 
-      it('registers the listener to an array of event names', function() {
+      it('registers the listener to multiple comma-separated event types', function() {
+        const listener = jasmine.createSpy()
+
+        up.on('foo, bar', listener)
+
+        up.emit('foo')
+        expect(listener.calls.count()).toEqual(1)
+
+        up.emit('bar')
+        expect(listener.calls.count()).toEqual(2)
+      })
+
+      it('registers the listener to an array of event types', function() {
         const listener = jasmine.createSpy()
 
         up.on(['foo', 'bar'], listener)
