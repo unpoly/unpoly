@@ -99,7 +99,7 @@ up.Request.Queue = class Queue {
     // Check if we can emit up:network:recover after a previous up:network:late event.
     this._checkLate()
 
-   queueMicrotask(() => this._poke())
+    queueMicrotask(() => this._poke())
   }
 
   _poke() {
