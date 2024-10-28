@@ -2189,7 +2189,7 @@ up.util = (function() {
   // const NESTED_BRACES = /{(?:[^{}]|{[^{}]*})*}/g
   // const NESTED_PARENTHESES = /\((?:[^\(\)]|\([^\(\)]*\))*\)/g
   // const NESTED_BRACKETS = /\[(?:[^\[\]]|\[[^\[\]]*\])*\]/g
-  const NESTED_GROUP_PATTERN = /{(?:[^{}]|{[^{}]*})*}|\((?:[^\(\)]|\([^\(\)]*\))*\)|\[(?:[^\[\]]|\[[^\[\]]*\])*\]/g
+  const NESTED_GROUP_PATTERN = /{(?:[^{}]|{[^{}]*})*}|\((?:[^\(\)]|\([^\(\)]*\))*\)|\[(?:[^\[\]]|\[[^\[\]]*\])*\]/g // eslint-disable-line no-useless-escape
 
   function expressionOutline(str) {
     return maskPattern(str, [QUOTED_STRING_PATTERN, NESTED_GROUP_PATTERN], { keepDelimiters: true })
