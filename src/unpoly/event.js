@@ -150,11 +150,11 @@ The parsed data will be passed to your event handler as a third argument:
 
   ### Binding to multiple event types
 
-  You may register a listener to multiple event types by passing a space-separated list of event types:
+  You may register a listener to multiple event types by separating types with a space or comma:
 
   ```js
   let element = document.querySelector(...)
-  up.on(element, 'mouseenter mouseleave', function(event) {
+  up.on(element, 'mouseenter, mouseleave', function(event) {
     console.log('Mouse entered or left')
   })
   ```
@@ -169,8 +169,8 @@ The parsed data will be passed to your event handler as a third argument:
   @param {string|Array<string>} types
     The event types to bind to.
 
-    Multiple event types may be passed as either a space-separated string
-    or as an array of types.
+    Multiple event types may be passed as either a space-separated string (`'foo bar'`), a comma-separated string (`'foo, bar'`)
+    or as an array of types (`['foo', 'bar']`).
 
   @param {string|Function():string} [selector]
     The selector of an element on which the event must be triggered.
