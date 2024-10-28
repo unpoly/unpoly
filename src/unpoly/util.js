@@ -1725,29 +1725,6 @@ up.util = (function() {
     return (a.length === b.length) && every(a, (elem, index) => isEqual(elem, b[index]))
   }
 
-  // TODO: Remove
-  const PARSE_TOKEN_PATTERNS = {
-    'space/or': /\s+(?:or\s+)?/,
-    'or': /\s+or\s+/,
-    'comma': /\s*,\s*/
-  }
-
-  // TODO: Remove
-  function parseTokens(value, { separator = 'space/or', json = false, complex = false } = {}) {
-    let separatorPattern = PARSE_TOKEN_PATTERNS[separator]
-
-    if (!isString(value)) {
-      return wrapList(value)
-    } else if (json && /^\[.*]$/.test(value)) {
-      return parseRelaxedJSON(value)
-    } else if (complex) {
-      let { masked, restore } = expressionOutline(value)
-      return masked.split(separatorPattern).map((s) => restore(s))
-    } else {
-      return value.split(separatorPattern)
-    }
-  }
-
   function getSimpleTokens(value, { json = false, separator = /[,\s]/ } = {}) {
     if (!isString(value)) {
       return wrapList(value)
@@ -2320,7 +2297,6 @@ up.util = (function() {
     isCrossOrigin,
     task: queueTask,
     isEqual,
-    parseTokens,
     getSimpleTokens,
     getComplexTokens,
     complexTokenOutlines,
