@@ -187,7 +187,7 @@ up.Response = class Response extends up.Record {
 
   get varyHeaderNames() {
     let varyHeaderValue = this.header('Vary')
-    return u.parseTokens(varyHeaderValue, { separator: 'comma' })
+    return u.getSimpleTokens(varyHeaderValue, { separator: ',' })
   }
 
   /*-

@@ -61,15 +61,14 @@ describe 'up.Response', ->
 
   describe '#header()', ->
 
-    it 'returns the header with the given name', asyncSpec (next) ->
+    it 'returns the header with the given name', ->
       request = up.request('/foo')
+      await wait()
 
-      next ->
-        jasmine.respondWith(status: 200, responseHeaders: { 'X-Course': 'ruby-basics' })
-        next.await(request)
+      jasmine.respondWith(status: 200, responseHeaders: { 'X-Course': 'ruby-basics' })
+      response = await request
 
-      next (response) ->
-        expect(response.header('X-Course')).toBe('ruby-basics')
+      expect(response.header('X-Course')).toBe('ruby-basics')
 
     it 'is case-insensitive', asyncSpec (next) ->
       request = up.request('/foo')
@@ -93,3 +92,24 @@ describe 'up.Response', ->
 
         next (response) ->
           expect(response.getHeader('X-Course')).toBe('ruby-basics')
+
+  fdescribe '#varyHeaderNames', ->
+
+    it 'returns an array of header names parsed from the `Vary` response header', ->
+      request = up.request('/foo')
+      await wait()
+
+      jasmine.respondWith(status: 200, responseHeaders: { 'Vary': 'X-Up-Target, X-Up-Mode' })
+      response = await request
+
+      expect(response.varyHeaderNames).toEqual(['X-Up-Target', 'X-Up-Mode'])
+
+    it 'returns an empty array if the response had no `Vary` response header', ->
+      request = up.request('/foo')
+      await wait()
+
+      jasmine.respondWith(status: 200)
+      response = await request
+
+      expect(response.varyHeaderNames).toEqual([])
+
