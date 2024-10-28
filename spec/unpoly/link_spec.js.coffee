@@ -934,22 +934,6 @@ describe 'up.link', ->
         options = up.link.followOptions(link)
         expect(options.preview).toBe('foo bar')
 
-      it 'parses an [up-preview-fn] attribute into { preview: Function }', ->
-        link = fixture('a[href="/foo"][up-preview-fn="this.callback(preview, 123)"]')
-        link.callback = jasmine.createSpy('callback')
-        options = up.link.followOptions(link)
-        expect(options.preview).toEqual(jasmine.any(Function))
-        options.preview('preview')
-        expect(link.callback).toHaveBeenCalledWith('preview', 123)
-
-      it 'parses an [up-preview-fn] attribute with embedded nonce into { preview: Function }', ->
-        link = fixture('a[href="/foo"][up-preview-fn="nonce-kO52Iphm8B this.callback(preview, 123)"]')
-        link.callback = jasmine.createSpy('callback')
-        options = up.link.followOptions(link)
-        expect(options.preview).toEqual(jasmine.any(Function))
-        options.preview('preview')
-        expect(link.callback).toHaveBeenCalledWith('preview', 123)
-
       it 'parses an [up-placeholder] attribute as a string', ->
         link = fixture('a[href="/foo"][up-placeholder="loading..."]')
         options = up.link.followOptions(link)
@@ -2587,28 +2571,6 @@ describe 'up.link', ->
           await wait()
 
           expect(spinnerContainer).not.toHaveSelector('#spinner')
-
-      describe 'with [up-preview-fn] modifier', ->
-
-        it 'calls a code snippet with the `preview`', ->
-          fixture('#target', content: '<p>old target</p>')
-          other = fixture('#other')
-          placeholderElement = up.element.createFromHTML("<p>placeholder</p>")
-          link = fixture('a[href="/foo"][up-follow][up-target="#target"][up-preview-fn="this.previewFn(preview, `arg`)"]', text: 'label')
-          link.previewFn = jasmine.createSpy('previewFn fn').and.callFake((preview) -> preview.hide(other))
-
-          expect('#target').toHaveVisibleText('old target')
-
-          Trigger.clickSequence(link)
-          await wait()
-
-          expect(link.previewFn).toHaveBeenCalledWith(jasmine.any(up.Preview), 'arg')
-          expect(other).toBeHidden()
-
-          jasmine.respondWithSelector('#target', content: '<p>new target</p>')
-          await wait()
-
-          expect(other).toBeVisible()
 
       describe 'with [up-placeholder] modifier', ->
 

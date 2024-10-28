@@ -421,7 +421,6 @@ up.feedback = (function() {
     parser.booleanOrString('disable')
     parser.boolean('feedback')
     parser.string('preview')
-    parser.callback('preview', { attr: 'up-preview-fn', mainKey: 'preview' })
     parser.string('placeholder')
     return options
   }
