@@ -2520,113 +2520,7 @@ describe('up.util', () => {
       })
     })
 
-    fdescribe('up.util.parseTokens()', function() {
-
-      it('parses tokens separated by a space', function() {
-        const str = 'foo bar baz'
-        const tokens = up.util.parseTokens(str)
-        expect(tokens).toEqual(['foo', 'bar', 'baz'])
-      })
-
-      it('parses tokens separated by " or "', function() {
-        const str = "foo or bar or baz"
-        const tokens = up.util.parseTokens(str)
-        expect(tokens).toEqual(['foo', 'bar', 'baz'])
-      })
-
-      it('trims whitespace', function() {
-        const str = " foo \t  bar   or   baz   \n"
-        const tokens = up.util.parseTokens(str)
-        expect(tokens).toEqual(['foo', 'bar', 'baz'])
-      })
-
-      it('does not parse a JSON array', function() {
-        const str = '["foo", "bar"]'
-        const tokens = up.util.parseTokens(str)
-        expect(tokens).toEqual(['["foo",', '"bar"]'])
-      })
-
-      it('returns an array unchanged', function() {
-        const array = ['foo', 'bar']
-        const tokens = up.util.parseTokens(array)
-        expect(tokens).toEqual(['foo', 'bar'])
-      })
-
-      it('returns an empty array for undefined', function() {
-        const tokens = up.util.parseTokens(undefined)
-        expect(tokens).toEqual([])
-      })
-
-      it('returns an empty array for null', function() {
-        const tokens = up.util.parseTokens(null)
-        expect(tokens).toEqual([])
-      })
-
-      describe('with { json: true }', function() {
-
-        it('parses the string as JSON if it is enclosed in square brackets', function() {
-          const str = '["foo", "bar"]'
-          const tokens = up.util.parseTokens(str, {json: true})
-          expect(tokens).toEqual(['foo', 'bar'])
-        })
-
-        it('parses the string as JSON if it is enclosed in square brackets after whitespace', function() {
-          const str = '  \n["foo", "bar"] \t\n '
-          const tokens = up.util.parseTokens(str, {json: true})
-          expect(tokens).toEqual(['foo', 'bar'])
-        })
-
-        it("parses the string as space-separated tokens if it isn't enclosed in square brackets", function() {
-          const str = '[foo bar baz'
-          const tokens = up.util.parseTokens(str, {json: true})
-          expect(tokens).toEqual(['[foo', 'bar', 'baz'])
-        })
-      })
-
-      describe('with { separator: "or" }', function() {
-
-        it('parses tokens separated by " or "', function() {
-          const str = 'foo or bar or baz'
-          const tokens = up.util.parseTokens(str)
-          expect(tokens).toEqual(['foo', 'bar', 'baz'])
-        })
-
-        it('trims whitespace', function() {
-          const str = '\n foo   or \t bar  or \n baz  '
-          const tokens = up.util.parseTokens(str)
-          expect(tokens).toEqual(['foo', 'bar', 'baz'])
-        })
-
-        it('does not consider plain whitespace to be a separator', function() {
-          const str = 'foo bar baz'
-          const tokens = up.util.parseTokens(str, {separator: 'or'})
-          expect(tokens).toEqual(['foo bar baz'])
-        })
-      })
-
-      describe('with { separator: "comma" }', function() {
-
-        it('parses tokens separated by a comma', function() {
-          const str = 'foo, bar, baz'
-          const tokens = up.util.parseTokens(str, {separator: 'comma'})
-          expect(tokens).toEqual(['foo', 'bar', 'baz'])
-        })
-
-        it('trims whitespace', function() {
-          const str = '\n foo   , \t bar  , \n baz  '
-          const tokens = up.util.parseTokens(str, {separator: 'comma'})
-          expect(tokens).toEqual(['foo', 'bar', 'baz'])
-        })
-
-        it('does not parse tokens separated by " or "', function() {
-          const str = 'foo or bar or baz'
-          const tokens = up.util.parseTokens(str, {separator: 'comma'})
-          expect(tokens).toEqual(['foo or bar or baz'])
-        })
-      })
-    })
-
-    fdescribe('up.util.getSimpleTokens()', function() {
+    describe('up.util.getSimpleTokens()', function() {
 
       describe('tokens separated by whitespace', function() {
 
@@ -2756,7 +2650,7 @@ describe('up.util', () => {
 
     })
 
-    fdescribe('up.util.getComplexTokens()', function() {
+    describe('up.util.getComplexTokens()', function() {
 
       describe('tokens separated by whitespace', function() {
 
@@ -3004,7 +2898,7 @@ describe('up.util', () => {
       })
     })
 
-    fdescribe('up.util.maskPattern()', function() {
+    describe('up.util.maskPattern()', function() {
 
       it('replaces the given RegExp with a placeholder, then restores it with { restore } fn', function() {
         let { masked, restore } = up.util.maskPattern('foo <bar> baz <bam> qux', [/<[^>]+>/g])
@@ -3045,7 +2939,7 @@ describe('up.util', () => {
 
     })
 
-    fdescribe('up.util.expressionOutline()', function() {
+    describe('up.util.expressionOutline()', function() {
 
       it('simplifies a complex CSS selector', function() {
         let input = `input[foo="bar, ]baz"]:is(.control[qux]:not(.active)), .other:not(.mine)`
@@ -3293,7 +3187,7 @@ describe('up.util', () => {
 
     })
 
-    fdescribe('up.util.parseScalarJSONPairs()', function() {
+    describe('up.util.parseScalarJSONPairs()', function() {
 
       describe('if the string ends in a JSON object', function() {
 

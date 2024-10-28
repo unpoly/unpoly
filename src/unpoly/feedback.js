@@ -387,9 +387,10 @@ up.feedback = (function() {
   function resolvePreviewString(str) {
     return u.map(u.parseScalarJSONPairs(str), ([name, parsedOptions]) => {
       let previewFn = namedPreviewFns[name] || up.fail('Unknown preview "%s"', name)
-      return function(preview, runOptions = parsedOptions) {
+
+      return function(preview, runOptions) {
         up.puts('[up-preview]', 'Showing preview %o', name)
-        previewFn(preview, runOptions)
+        return previewFn(preview, parsedOptions || runOptions)
       }
     })
   }
@@ -402,10 +403,7 @@ up.feedback = (function() {
 
   function registerPreview(name, previewFn) {
     previewFn.isDefault = up.framework.evaling
-    namedPreviewFns[name] = function(preview, options) {
-      up.puts('[up-preview]', 'Showing preview %o', name)
-      return previewFn(preview, options)
-    }
+    namedPreviewFns[name] = previewFn
   }
 
   function getFeedbackClassesPreviewFn(feedbackOption, fragments) {

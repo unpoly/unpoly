@@ -6,7 +6,7 @@ describe('up.event', function() {
 
   describe('JavaScript functions', function() {
 
-    fdescribe('up.on()', function() {
+    describe('up.on()', function() {
 
       it('registers a delagating event listener to the document, which passes the element as a second argument to the listener', asyncSpec(function(next) {
         fixture('.container .child')
