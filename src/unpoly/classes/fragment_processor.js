@@ -17,7 +17,7 @@ up.FragmentProcessor = class FragmentProcessor extends up.Record {
   }
 
   preprocess(opt) {
-    return u.parseTokens(opt, { separator: 'or' })
+    return u.getComplexTokens(opt)
   }
 
   tryProcess(opt) {
