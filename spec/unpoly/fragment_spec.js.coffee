@@ -11398,7 +11398,7 @@ describe 'up.fragment', ->
       selectors = up.fragment.splitTarget('.one, .two')
       expect(selectors).toEqual ['.one', '.two']
 
-    it 'parses multiple targets with commas within parentheses', ->
+    it 'does not split at commas within parentheses', ->
       selectors = up.fragment.splitTarget('.one:has(.three, .four), .two')
       expect(selectors).toEqual ['.one:has(.three, .four)', '.two']
 
