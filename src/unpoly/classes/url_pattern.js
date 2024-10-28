@@ -8,7 +8,7 @@ up.URLPattern = class URLPattern {
     const positiveList = []
     const negativeList = []
 
-    for (let pattern of u.parseTokens(fullPattern)) {
+    for (let pattern of u.getSimpleTokens(fullPattern)) {
       if (pattern[0] === '-') {
         negativeList.push(pattern.substring(1))
       } else {

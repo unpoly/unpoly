@@ -1,4 +1,4 @@
-describe 'up.URLPattern', ->
+fdescribe 'up.URLPattern', ->
 
   describe '#test', ->
 
@@ -73,14 +73,25 @@ describe 'up.URLPattern', ->
       pattern = new up.URLPattern('/users/$id')
       expect(pattern.test('/users/new')).toBe(false)
 
-    it 'returns true if the given URL test either of two space-separated URLs', ->
-      pattern = new up.URLPattern('/foo /bar')
-      expect(pattern.test('/foo')).toBe(true)
-      expect(pattern.test('/bar')).toBe(true)
+    describe 'multiple patterns', ->
 
-    it 'returns false if the given URL matchers neither of two space-separated URLs', ->
-      pattern = new up.URLPattern('/foo /bar')
-      expect(pattern.test('/baz')).toBe(false)
+      it 'returns true if the given URL test either of two space-separated URLs', ->
+        pattern = new up.URLPattern('/foo /bar')
+        expect(pattern.test('/foo')).toBe(true)
+        expect(pattern.test('/bar')).toBe(true)
+
+      it 'returns true if the given URL test either of two comma-separated URLs', ->
+        pattern = new up.URLPattern('/foo, /bar')
+        expect(pattern.test('/foo')).toBe(true)
+        expect(pattern.test('/bar')).toBe(true)
+
+      it 'returns false if the given URL matchers neither of two space-separated URLs', ->
+        pattern = new up.URLPattern('/foo /bar')
+        expect(pattern.test('/baz')).toBe(false)
+
+      it 'returns false if the given URL matchers neither of two comma-separated URLs', ->
+        pattern = new up.URLPattern('/foo, /bar')
+        expect(pattern.test('/baz')).toBe(false)
 
   describe '#recognize', ->
 
