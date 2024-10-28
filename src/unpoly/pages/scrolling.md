@@ -65,10 +65,10 @@ Pass an array of `{ scroll }` options and Unpoly will use the first applicable v
 E.g. `{ scroll: ['hash', 'reset'] }` will first try to an element mathing the `#hash` in the URL.
 If the URL has no `#hash`, scroll positions will be reset.
 
-In an `[up-scroll]` attribute you may separate scroll options with an `or`:
+In an `[up-scroll]` attribute you may separate scroll options with a comma:
 
 ```html
-<a href="/path#section" up-follow up-scroll="hash or reset">Link label</a> 
+<a href="/path#section" up-follow up-scroll="hash, reset">Link label</a>
 ```
 
 ### Automatic scrolling logic

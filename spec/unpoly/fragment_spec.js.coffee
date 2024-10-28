@@ -6121,7 +6121,7 @@ describe 'up.fragment', ->
 
               await Promise.resolve()
 
-      describe 'scrolling', ->
+      fdescribe 'scrolling', ->
 
         mockReveal = ->
           @revealedHTML = []
@@ -6364,15 +6364,34 @@ describe 'up.fragment', ->
             next =>
               expect(@revealedText).toEqual ['element text']
 
-        describe 'with a string of "or"-separated { scroll } options', ->
+        describe 'with a string of comma-separated { scroll } options', ->
 
           mockRevealBeforeEach()
 
-          it 'tries each option until one succeeds', asyncSpec (next) ->
+          it 'tries each option until one succeeds', ->
             fixture('.container')
-            up.render('.container', scroll: 'hash or .element or .container', content: "<div class='element'>element text</div>")
+            up.render('.container', scroll: 'hash, .element, .container', content: "<div class='element'>element text</div>")
+            await wait()
 
-            next =>
+            expect(@revealedText).toEqual ['element text']
+
+          it 'ignores commas in parentheses', ->
+            fixture('.container')
+            up.render('.container', scroll: 'hash, .other:not(input, select), .element:not(input, select), .container', content: "<div class='element'>element text</div>")
+            await wait()
+
+            expect(@revealedText).toEqual ['element text']
+
+        if up.migrate.load
+          describe 'with a string of "or"-separated { scroll } options', ->
+
+            mockRevealBeforeEach()
+
+            it 'tries each option until one succeeds', ->
+              fixture('.container')
+              up.render('.container', scroll: 'hash or .element or .container', content: "<div class='element'>element text</div>")
+              await wait()
+
               expect(@revealedText).toEqual ['element text']
 
         describe 'when the server responds with an error code', ->
@@ -7138,7 +7157,7 @@ describe 'up.fragment', ->
 
           expect(spy).toHaveBeenCalledWith('old text', $parent.get(0))
 
-      describe 'focus', ->
+      fdescribe 'focus', ->
 
         describe 'with { focus: "autofocus" }', ->
 
@@ -7458,13 +7477,23 @@ describe 'up.fragment', ->
             next ->
               expect('.container .element').toBeFocused()
 
-        describe 'with a string with "or"-separated { focus } options', ->
+        describe 'with a string with comma-separated { focus } options', ->
 
-          it 'tries each option until one succeeds', asyncSpec (next) ->
+          it 'tries each option until one succeeds', ->
             fixture('.container')
-            up.render('.container', focus: 'autofocus or .element or .container', content: "<div class='element'>element</div>")
+            up.render('.container', focus: 'autofocus, .element, .container', content: "<div class='element'>element</div>")
+            await wait()
 
-            next ->
+            expect('.container .element').toBeFocused()
+
+        if up.migrate.loaded
+          describe 'with a string with "or"-separated { focus } options', ->
+
+            it 'tries each option until one succeeds', asyncSpec (next) ->
+              fixture('.container')
+              up.render('.container', focus: 'autofocus or .element or .container', content: "<div class='element'>element</div>")
+              await wait()
+
               expect('.container .element').toBeFocused()
 
         describe 'with { focus: "restore" }', ->
