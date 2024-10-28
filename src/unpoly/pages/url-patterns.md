@@ -91,12 +91,12 @@ The above URL pattern will match `/users/123`, `/users/123/edit`, but not `/user
 
 ## Matching one of multiple alternatives
 
-To match one of multiple URL patterns, separate the URLs by a space character.
+To match one of multiple URL patterns, separate the URLs by a space or comma character.
 
 The URL pattern below will match either the `/users/123` or `/account` URLs:
 
 ```text
-/users/* /account
+/users/*, /account
 ```
 
 ### Examples
@@ -105,14 +105,15 @@ Here is an example of a URL pattern with alternatives:
 
 ```html
 <!-- Closes layer when user visits either /account or anything underneath "/users/" -->
-<a href="/users/" up-accept-location="/users/* /account" up-layer="new">Users</a>
+<a href="/users/" up-accept-location="/users/*, /account" up-layer="new">Users</a>
 ```
 
 JavaScript functions that URL patterns will accept multiple patterns
-as either a space-separated string or as an array of patterns:
+as either a space-separated string, a comma-separated string or as an array of patterns:
 
 ```js
 up.layer.open({ acceptLocation: "/users/* /account" })
+up.layer.open({ acceptLocation: "/users/*, /account" })
 up.layer.open({ acceptLocation: ["/users/*", "/account"] })
 ```
 
