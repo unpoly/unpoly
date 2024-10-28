@@ -1748,13 +1748,13 @@ up.util = (function() {
     }
   }
 
-  function getSimpleTokens(value, { json = false } = {}) {
+  function getSimpleTokens(value, { json = false, separator = /[,\s]/ } = {}) {
     if (!isString(value)) {
       return wrapList(value)
     } else if (json && /^\[.*]$/.test(value)) {
       return parseRelaxedJSON(value)
     } else {
-      return splitSimpleTokenString(value, /[,\s]/)
+      return splitSimpleTokenString(value, separator)
     }
   }
 
