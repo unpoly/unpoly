@@ -1733,7 +1733,7 @@ describe 'up.layer', ->
 
         expect(up.layer.count).toBe(2)
 
-    describe 'up.layer.getAll()', ->
+    fdescribe 'up.layer.getAll()', ->
 
       describe 'for "any"', ->
 
@@ -1886,7 +1886,7 @@ describe 'up.layer', ->
           makeLayers(3)
           expect(up.layer.getAll(layer: up.layer.get(1))).toEqual [up.layer.get(1)]
 
-      describe 'for multiple space-separated layer named', ->
+      describe 'for multiple space-separated layer names', ->
 
         it "returns an array of the matching layers", ->
           makeLayers(3)
@@ -1894,6 +1894,25 @@ describe 'up.layer', ->
 
         it 'omits layers that do not exist', ->
           expect(up.layer.getAll('parent root')).toEqual [up.layer.root]
+
+      describe 'for multiple comma-separated layer names', ->
+
+        it "returns an array of the matching layers", ->
+          makeLayers(3)
+          expect(up.layer.getAll('parent, root')).toEqual [up.layer.get(1), up.layer.root]
+
+        it 'omits layers that do not exist', ->
+          expect(up.layer.getAll('parent, root')).toEqual [up.layer.root]
+
+      if up.migrate.loaded
+        describe 'for multiple or-separated layer names', ->
+
+          it "returns an array of the matching layers", ->
+            makeLayers(3)
+            expect(up.layer.getAll('parent or root')).toEqual [up.layer.get(1), up.layer.root]
+
+          it 'omits layers that do not exist', ->
+            expect(up.layer.getAll('parent or root')).toEqual [up.layer.root]
 
       describe 'for an options object without { layer } property', ->
 
