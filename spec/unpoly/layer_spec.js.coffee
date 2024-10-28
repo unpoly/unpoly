@@ -708,7 +708,7 @@ describe 'up.layer', ->
         beforeEach ->
           up.motion.config.enabled = false
 
-        describe '{ dismissable }', ->
+        fdescribe '{ dismissable }', ->
 
           describe 'with { dismissable: true }', ->
 
@@ -721,6 +721,18 @@ describe 'up.layer', ->
             it 'sets all other dismissable options to false if passed { dismissable: false }', ->
               layer = await up.layer.open(dismissable: false)
               expect(layer.dismissable).toEqual []
+
+          describe 'with { dismissable } set to a space-separated string', ->
+
+            it 'sets only the given dismiss methods', ->
+              layer = await up.layer.open(dismissable: 'button outside')
+              expect(layer.dismissable).toMatchList ['button', 'outside']
+
+          describe 'with { dismissable } set to a comma-separated string', ->
+
+            it 'sets only the given dismiss methods', ->
+              layer = await up.layer.open(dismissable: 'button, outside')
+              expect(layer.dismissable).toMatchList ['button', 'outside']
 
           describe 'with { dismissable: "button" }', ->
 
