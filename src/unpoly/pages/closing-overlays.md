@@ -298,19 +298,31 @@ By default the user can dismiss an overlay user by pressing `Escape`, by clickin
 or by pressing an `×` icon in the top-right corner.
 
 You may customize the dismiss methods available to the user by passing a `{ dismissable }` option
-or `[up-dismissable]` attribute when opening an overlay.
+or `[up-dismissable]` attribute when opening an overlay. For example, the link below will open an overlay that
+has a close button (`×`), but cannot dismissed by pressing `Escape` or clicking on the background: 
 
-The option value should contain the name of one or more dismiss controls:
+```html
+<a href="/terms" up-layer="new" up-dismissable="button">Show terms</a>
+```
 
-| Method    | Effect                                           | Dismiss value |
-| --------- |--------------------------------------------------| ------------- |
-| `key`     | Enables dimissing with `Escape` key              | `":key"`      |
-| `outside` | Enables dismissing by clicking on the background | `":outside"`  |
-| `button`  | Adds an `×` button to the layer                  | `":button"`   |
+The following control names are available:
 
-Regardless of what is configured here, an overlay may always be dismissed by
+| Control name | Effect                                           | Dismiss value |
+|--------------|--------------------------------------------------| ------------- |
+| `key`        | Enables dimissing with `Escape` key              | `":key"`      |
+| `outside`    | Enables dismissing by clicking on the background | `":outside"`  |
+| `button`     | Adds a close button (`×`) to the layer           | `":button"`   |
+
+The close button can be configured further by setting `up.layer.config.overlay.dismissLabel` and `up.layer.config.overlay.dismissAriaLabel`.
+
+To enable multiple dismiss controls, separate their name by a comma or space character:
+
+```html
+<a href="/terms" up-layer="new" up-dismissable="button, key">Show terms</a>
+```
+
+Regardless of which dismiss controls are enabled, an overlay may always be dismissed by
 using the `up.layer.dismiss()` method or `[up-dismiss]` attribute.
-
 
 
 Close animation
