@@ -735,6 +735,20 @@ describe('up.network', function() {
           // })
         }))
 
+        it('tracks an existing request that is still pending', async function() {
+          let request0 = up.request({ url: '/path', cache: true })
+          await wait()
+
+          let request1 = up.request({ url: '/path', cache: true })
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          jasmine.respondWith({status: 200, responseText: 'ok'})
+
+          await expectAsync(request0).toBeResolvedTo(jasmine.any(up.Response))
+          await expectAsync(request1).toBeResolvedTo(jasmine.any(up.Response))
+        })
+
         describe('when the server responds with an error status code', function() {
 
           it('does not cache the response', async function() {
@@ -766,9 +780,22 @@ describe('up.network', function() {
             expect({ url: '/path' }).not.toBeCached()
           })
 
+          it('causes another tracking request to be rejected with the failed response (although the tracked request got evicted)', async function() {
+            let request0 = up.request({ url: '/path', cache: true })
+            await wait()
+
+            let request1 = up.request({ url: '/path', cache: true })
+            await wait()
+
+            jasmine.Ajax.requests.at(0).respondWith({status: 403, responseText: 'error'})
+
+            await expectAsync(request0).toBeRejectedWith(jasmine.any(up.Response))
+            await expectAsync(request1).toBeRejectedWith(jasmine.any(up.Response))
+          })
+
         })
 
-        describe('when the request failed due to a fatal network errror', function() {
+        describe('when the request failed due to a fatal network error', function() {
 
           it('does not cache the response (so the next request will retry) ', async function() {
             up.request({ url: '/foo', cache: true })

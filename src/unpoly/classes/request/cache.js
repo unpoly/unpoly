@@ -136,6 +136,8 @@ up.Request.Cache = class Cache {
     newRequest.trackedRequest = existingRequest
     newRequest.state = 'tracking'
 
+    // Wait until existingRequest responds or errors.
+    // Note that while we're waiting, existingRequest could be evicted, e.g. after a failed response.
     let value = await u.always(existingRequest)
 
     if (value instanceof up.Response) {
@@ -203,15 +205,17 @@ up.Request.Cache = class Cache {
 
   reindex(request) {
     this._delete(request)
+
+    // The cacheRoute is about to change because the request
+    // changed URL or params in up:request:load.
+    delete request.cacheRoute
+
     this.put(request)
   }
 
   _delete(request) {
     u.remove(this._requests, request)
     request.cacheRoute?.delete(request)
-    // In the case of reindex(), the cacheRoute is about to change because the request
-    // changed URL or params in up:request:load.
-    delete request.cacheRoute
   }
 
   _getRoute(request) {
