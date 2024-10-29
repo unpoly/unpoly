@@ -12,6 +12,8 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 
 This is a maintenance release that addresses some bugs while we're working on the next major feature update.
 
+### Changes
+
 - Fix an error being thrown when a caching request is tracking an existing request to the same URL, and that existing request responds with an [error status](/failed-responses) (issue #676).
 - Fix a bug where a modal overlay could not be closed when a child popup would be open below the screen fold.
 - Focus is no longer trapped in popup overlays. Focus remains trapped in all other overlay modes, but this can be disabled by setting `up.layer.config.overlay.trapFocus = false`.
