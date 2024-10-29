@@ -13,7 +13,7 @@ up.OverlayFocus = class OverlayFocus {
     if (this._active) { return }
     this._active = true
 
-    this._unsetAttrs = e.setTemporaryAttrs(this._focusElement, {
+    this._unsetAttrs = e.setAttrsTemp(this._focusElement, {
       // Make layer.element focusable.
       // It would be slightly nicer to give it [tabindex=-1] to make it focusable through JS,
       // but remove it from the keyboard tab sequence. However, then we would need additional
