@@ -48,6 +48,7 @@ you may infix an attribute with `fail`:
 
 ```text
 <form method="post" action="/action"
+  up-submit                 <!-- have Unpoly handle the form --> 
   up-target=".content"      <!-- when submission succeeds update '.content' -->
   up-fail-target="form"     <!-- when submission fails update the form -->
   up-scroll="auto"          <!-- when submission succeeds use default scroll behavior -->
@@ -56,7 +57,10 @@ you may infix an attribute with `fail`:
 </form>
 ```
 
-Also see [validating forms](/validation).
+> [tip]
+> When Unpoly handles a form, the default `[up-fail-target]` targets the itself.
+> This makes sure that any validation errors will appear within the `<form>` element.
+> See [validating forms](/validation) for examples.
 
 
 ### Ignoring HTTP error codes

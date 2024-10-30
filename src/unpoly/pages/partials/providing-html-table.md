@@ -1,9 +1,9 @@
-| Effect                                                                                                       | HTML attribute         | JavaScript option |
-|--------------------------------------------------------------------------------------------------------------|------------------------|-------------------|
-| Fetch a URL and [replace matching fragments](/providing-html#url) from the response                          | `[href]` or `[action]` | `{ url }`         | 
-| Update an element's inner HTML [from a string](/providing-html#content)                                      | `[up-content]`         | `{ content }`     | 
-| Replace an element [from  a string](/providing-html#fragment) or [`Element` object](/providing-html#element) | `[up-fragment]`        | `{ fragment }`    | 
-| Find a selector in a [a larger HTML string](/providing-html#document)                                        | `[up-document]`        | `{ document }`    | 
-| Render an [existing `up.Response` object](/providing-html#response)                                          | –                      | `{ response }`    | 
+| Effect                                                                 | HTML attribute         | JavaScript option |
+|------------------------------------------------------------------------|------------------------|-------------------|
+| Fetch a URL and update targeted fragments                              | `[href]` or `[action]` | `{ url }`         | 
+| Update a fragment's inner HTML from a string, `<template>` or `Element`                           | `[up-content]`         | `{ content }`     | 
+| Update a fragment's outer HTML from a string, `<template>` or `Element` | `[up-fragment]`        | `{ fragment }`    | 
+| Update targeted fragments from a larger HTML string                    | `[up-document]`        | `{ document }`    | 
+| Update targeted fragments from an existing `up.Response` object        | –                      | `{ response }`    | 
 
 @partial providing-html-table
