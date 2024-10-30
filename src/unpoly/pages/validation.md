@@ -105,8 +105,8 @@ you may [customize Unpoly's failure detection](/failed-responses#customizing-fai
 When Unpoly detects a failed form submission, it will ignore the form's [target](/targeting-fragments)
 and update the `<form>` element instead.
 
-To configure the rendering of failed form submissions,
-see [handling failed responses differently](/failed-responses#rendering-failed-responses-differently).
+To render a failed response somewhere else, set an [`[up-fail-target]`](/up-submit#up-fail-target) attribute on the `<form>` element.
+See [handling failed responses differently](/failed-responses#rendering-failed-responses-differently) for details.
 
 
 ### HTML5 validations
