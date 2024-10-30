@@ -479,7 +479,7 @@ up.fragment = (function() {
 
   @include providing-html-table
 
-  See [providing content to render](/providing-html) for more details and examples.
+  See [providing HTML to render](/providing-html) for more details and examples.
 
   ### Enabling side effects
 

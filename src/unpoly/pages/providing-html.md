@@ -13,6 +13,10 @@ To fetch content from a server when a hyperlink is clicked, pass the URL as a st
 
 ```html
 <a href="/path" up-target=".target">Click me</a> <!-- mark-phrase "href" -->
+
+<div class="target">
+  Content will appear here
+</div>
 ```
 
 The server is expected to respond with HTML that contains an element matching the [target selector](/targeting-fragments) (`.target`):
@@ -30,19 +34,32 @@ The server is expected to respond with HTML that contains an element matching th
 The server response may contain other HTML, but only the element matching `.target` will be extracted and placed into the page.
 Other elements will be discarded. To only render the targeted element, observe the `X-Up-Target` request header.
 
+
+> [tip]
+> See [targeting fragments](/targeting-fragments) for ways of controlling how the
+> new fragment is inserted. For instance, you can choose to [append](/targeting-fragments#appending-or-prepending)
+> the fragment instead of swapping it.
+
+
+### Usage in forms
+
 For a form, use the `[action]` attribute instead:
 
 ```html
 <form action="/path" up-target=".target"> <!-- mark-phrase "action" -->
   ...
 </form>
+
+<div class="target">
+  Content will appear here
+</div>
 ```
 
+The server response.
 
 > [tip]
-> See [targeting fragments](/targeting-fragments) for ways of controlling how the
-> new fragment is inserted. For instance, you can choose to [append](/targeting-fragments#appending-or-prepending)
-> the fragment instead of swapping it.
+
+
 
 
 ### Programmatic API
@@ -51,19 +68,6 @@ To render remote content from JavaScript, pass a `{ url }` option to any renderi
 
 ```js
 up.render({ url: '/path', target: '.target' })
-```
-
-
-Rendering a `<template>`
-------------------------
-
-```html
-<a up-fragment="#my-template">Click me</a>
-
-<template id="my-template">
-  
-</template>
-
 ```
 
 
@@ -160,6 +164,21 @@ up.render({ target: '.foo, .bar', document: html })
 The given `{ document }` can either be an entire HTML document or a HTML fragment that contains `.foo` and `.bar` somewhere.
 Only the targeted elements will be extracted and placed into the page.
 Other elements parsed from the document string will be discarded.
+
+
+Rendering a `<template>`
+------------------------
+
+```html
+<a up-fragment="#my-template">Click me</a>
+
+<template id="my-template">
+  
+</template>
+
+```
+
+
 
 
 ## Rendering an `Element` object {#element}
