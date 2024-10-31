@@ -856,7 +856,7 @@ up.element = (function() {
   @internal
   */
   function extractSingular(nodes) {
-    if (nodes.length === 1 && u.isElement(nodes[0])) {
+    if (nodes.length === 1 && u.isElementLike(nodes[0])) {
       return nodes[0]
     } else {
       up.fail('HTML must have a single root element')

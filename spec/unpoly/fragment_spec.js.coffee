@@ -2536,6 +2536,35 @@ describe 'up.fragment', ->
           expect('.target').toHaveText('new text')
           expect('.target').toHaveAttribute('up-etag', 'false')
 
+        it 'compiles a document cloned from a <template>', ->
+          up.history.config.enabled = true
+
+          template = htmlFixture("""
+            <template id="document-template">
+              <html>
+                <head>
+                  <title>Title from template</title>
+                </head>
+                <body>
+                  <div id="foo">new foo</div>
+                  <div id="bar">new bar</div>
+                  <div id="baz">new baz</div>
+                </body>
+              </html>
+            </template>
+          """)
+
+          htmlFixture('<div id="foo">old foo</div>')
+          htmlFixture('<div id="bar">old bar</div>')
+          htmlFixture('<div id="baz">old baz</div>')
+
+          up.render({ target: '#foo, #baz', document: '#document-template', history: true })
+          await wait()
+
+          expect('#foo').toHaveText('new foo')
+          expect('#bar').toHaveText('old bar')
+          expect('#baz').toHaveText('new baz')
+
       describe 'with { fragment } option', ->
 
         it 'derives target and outer HTML from the given { fragment } string', asyncSpec (next) ->
@@ -2640,6 +2669,34 @@ describe 'up.fragment', ->
           expect('#target').toHaveText('target from template')
           expect(compilerFn).toHaveBeenCalled()
           expect(compilerFn.calls.mostRecent().args[0]).toMatchSelector('#target')
+
+        it 'compiles an element cloned from a <template> with a custom data object', ->
+          compilerFn = jasmine.createSpy('compiler fn')
+          up.compiler('#target', compilerFn)
+
+          template = htmlFixture("""
+              <template id="target-template">
+                <div id="target">
+                  target from template
+                </div>
+              </template>
+          """)
+
+          target = htmlFixture("""
+            <div id="target">
+              old target
+            </div>
+          """)
+
+          expect(compilerFn).not.toHaveBeenCalled()
+
+          up.render({ fragment: '#target-template { foo: 1, bar: 2 }' })
+          await wait()
+
+          expect('#target').toHaveText('target from template')
+          expect(compilerFn).toHaveBeenCalled()
+          expect(compilerFn.calls.mostRecent().args[0]).toMatchSelector('#target')
+          expect(compilerFn.calls.mostRecent().args[1]).toEqual({ foo: 1, bar: 2 })
 
       describe 'choice of target', ->
 

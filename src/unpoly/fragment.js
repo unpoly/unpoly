@@ -2902,7 +2902,7 @@ up.fragment = (function() {
 
   const STARTS_WITH_SELECTOR = /^([\w-]+|\*)?(#|\.|[:[][a-z-]{3,})/
 
-  function provideNodes(value, { origin, originLayer, callbackArgs = [] } = {}) {
+  function provideNodes(value, { origin, originLayer, callbackArgs = [], htmlParser = e.parseNodesFromHTML } = {}) {
     let data
 
     // A function can return a string of HTML, an Element or a selector string.
@@ -2920,7 +2920,7 @@ up.fragment = (function() {
     }
 
     if (u.isString(value)) {
-      value = up.element.parseNodesFromHTML(value)
+      value = htmlParser(value)
     }
 
     value = u.wrapList(value)
@@ -2934,6 +2934,10 @@ up.fragment = (function() {
     }
 
     return value
+  }
+
+  function provideSingularNode(...args) {
+    return e.extractSingular(provideNodes(...args))
   }
 
   /*-
@@ -3092,6 +3096,7 @@ up.fragment = (function() {
     containsMainPseudo,
     insertTemp,
     provideNodes,
+    provideSingularNode,
     // swapTemp,
     // timer: scheduleTimer
   }
