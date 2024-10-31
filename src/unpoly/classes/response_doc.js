@@ -7,7 +7,7 @@ up.ResponseDoc = class ResponseDoc {
 
   constructor({ document, fragment, content, target, origin, cspNonces, match }) {
     if (document) {
-      this._parseDocument(document)
+      this._parseDocument(document, origin)
     } else if (fragment) {
       this._parseFragment(fragment, origin)
     } else {
@@ -28,25 +28,30 @@ up.ResponseDoc = class ResponseDoc {
     this._match = match
   }
 
-  _parseDocument(value) {
-    if (value instanceof Document) {
+  _parseDocument(value, origin) {
+    if (value instanceof Document) {  // Document
       this._document = value
       this._isFullDocument = true
-    } else if (u.isString(value)) {
-      this._document = e.createBrokenDocumentFromHTML(value)
-      this._isFullDocument = FULL_DOCUMENT_PATTERN.test(value)
+    } else if (u.isString(value)) { // String of HTML or maybe a <template> selector + ID
+      this._document = up.fragment.provideSingularNode(value, { origin, htmlParser: e.createBrokenDocumentFromHTML })
+
       // Remember that we need to fix <script>, <noscript> and media elements later.
       // We could fix these elements right now for the entire document, but since we will only use
       // a fragment, this would cause excessive work.
       this._isDocumentBroken = true
-    } else {
+
+      // Remember whether the HTML originally contained a full document.
+      // Asset comparison needs to know whether the document has a <head> because
+      // e.createBrokenDocumentFromHTML() always creates an (empty) <head> if missing in the HTML.
+      this._isFullDocument = FULL_DOCUMENT_PATTERN.test(value)
+    } else { // Element
       this._document = this._buildFauxDocument(value)
       this._isFullDocument = value.matches('html')
     }
   }
 
   _parseFragment(value, origin) {
-    let parsed = e.extractSingular(up.fragment.provideNodes(value, { origin }))
+    let parsed = up.fragment.provideSingularNode(value, { origin })
     this._document = this._buildFauxDocument(parsed)
   }
 
@@ -63,9 +68,12 @@ up.ResponseDoc = class ResponseDoc {
   }
 
   _buildFauxDocument(node) {
-    // We're creating a faux document to append our fragment root to.
-    // This way, when a step selects the fragment root it will no longer be available
-    // for selection by a later step.
+    // We're creating a faux document to wrap around a fragment root that is not already a `Document`.
+    // This has two motivations:
+    //
+    // (1) When a step plucks the fragment root it will no longer be available for selection by a later step.
+    // (2) We can select any element (including the fragment root) by fauxDocument.querySelector()
+    //     and do not use a more expensive subtree() operation.
     let fauxDocument = document.createElement('up-document')
     fauxDocument.append(node)
     fauxDocument.documentElement = node
