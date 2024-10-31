@@ -60,8 +60,6 @@ The server response.
 > [tip]
 
 
-
-
 ### Programmatic API
 
 To render remote content from JavaScript, pass a `{ url }` option to any rendering function:
@@ -177,8 +175,6 @@ Rendering a `<template>`
 </template>
 
 ```
-
-
 
 
 ## Rendering an `Element` object {#element}
