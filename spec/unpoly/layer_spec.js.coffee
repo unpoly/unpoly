@@ -426,7 +426,7 @@ describe 'up.layer', ->
               expect(location.href).toMatchURL('/modal-location')
 
           it "updates meta tags from the response", ->
-            e.affix(document.head, 'meta[name="description"][content="old description"]')
+            fixture(document.head, 'meta[name="description"][content="old description"]')
 
             up.layer.open(
               location: '/modal-location'
