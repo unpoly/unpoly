@@ -18,7 +18,14 @@ getCreatedFixtureContainer = ->
   return fixtureContainer
 
 createFixtureFromSelector = (args...) ->
-  return e.affix(getCreatedFixtureContainer(), args...)
+  if u.isElement(args[0])
+    container = args.shift()
+    element = e.affix(container, args...)
+    registerExternalFixture(element)
+  else
+    element = e.affix(getCreatedFixtureContainer(), args...)
+
+  return element
 
 createFixtureFromHTML = (html) ->
   element = e.createFromHTML(html)

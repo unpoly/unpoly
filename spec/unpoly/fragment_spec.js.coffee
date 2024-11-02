@@ -2537,20 +2537,11 @@ describe 'up.fragment', ->
           expect('.target').toHaveAttribute('up-etag', 'false')
 
         it 'compiles a document cloned from a <template>', ->
-          up.history.config.enabled = true
-
           template = htmlFixture("""
             <template id="document-template">
-              <html>
-                <head>
-                  <title>Title from template</title>
-                </head>
-                <body>
-                  <div id="foo">new foo</div>
-                  <div id="bar">new bar</div>
-                  <div id="baz">new baz</div>
-                </body>
-              </html>
+              <div id="foo">new foo</div>
+              <div id="bar">new bar</div>
+              <div id="baz">new baz</div>
             </template>
           """)
 
@@ -2558,12 +2549,13 @@ describe 'up.fragment', ->
           htmlFixture('<div id="bar">old bar</div>')
           htmlFixture('<div id="baz">old baz</div>')
 
-          up.render({ target: '#foo, #baz', document: '#document-template', history: true })
+          up.render({ target: '#foo, #baz', document: '#document-template' })
           await wait()
 
           expect('#foo').toHaveText('new foo')
           expect('#bar').toHaveText('old bar')
           expect('#baz').toHaveText('new baz')
+
 
       describe 'with { fragment } option', ->
 
@@ -4865,8 +4857,8 @@ describe 'up.fragment', ->
           up.history.config.enabled = true
 
         it "updates meta tags from the response", ->
-          e.affix(document.head, 'link[rel="canonical"][href="/old-canonical"]')
-          e.affix(document.head, 'meta[name="description"][content="old description"]')
+          fixture(document.head, 'link[rel="canonical"][href="/old-canonical"]')
+          fixture(document.head, 'meta[name="description"][content="old description"]')
 
           fixture('.container', text: 'old container text')
           up.render('.container', url: '/path', history: true)
@@ -4895,8 +4887,8 @@ describe 'up.fragment', ->
           expect(document.head).toHaveSelector('meta[name="description"][content="new description"]')
 
         it "does not update meta tags with [up-meta=false]", ->
-          e.affix(document.head, 'link[rel="canonical"][href="/old-canonical"][up-meta="false"]')
-          e.affix(document.head, 'meta[name="description"][content="old description"]')
+          fixture(document.head, 'link[rel="canonical"][href="/old-canonical"][up-meta="false"]')
+          fixture(document.head, 'meta[name="description"][content="old description"]')
 
           fixture('.container', text: 'old container text')
           up.render('.container', url: '/path', history: true)
@@ -4925,8 +4917,8 @@ describe 'up.fragment', ->
           expect(document.head).toHaveSelector('meta[name="description"][content="new description"]')
 
         it 'does not update meta tags with { history: false }', ->
-          e.affix(document.head, 'link[rel="canonical"][href="/old-canonical"]')
-          e.affix(document.head, 'meta[name="description"][content="old description"]')
+          fixture(document.head, 'link[rel="canonical"][href="/old-canonical"]')
+          fixture(document.head, 'meta[name="description"][content="old description"]')
 
           fixture('.container', text: 'old container text')
           up.render('.container', url: '/path', history: false)
@@ -4955,8 +4947,8 @@ describe 'up.fragment', ->
         it 'does not update meta tags with up.history.config.updateMetaTags = false', ->
           up.history.config.updateMetaTags = false
 
-          e.affix(document.head, 'link[rel="canonical"][href="/old-canonical"]')
-          e.affix(document.head, 'meta[name="description"][content="old description"]')
+          fixture(document.head, 'link[rel="canonical"][href="/old-canonical"]')
+          fixture(document.head, 'meta[name="description"][content="old description"]')
 
           fixture('.container', text: 'old container text')
           up.render('.container', url: '/path', history: true)
@@ -4983,8 +4975,8 @@ describe 'up.fragment', ->
           expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
 
         it 'does not update meta tags with { metaTags: false } option', ->
-          e.affix(document.head, 'link[rel="canonical"][href="/old-canonical"]')
-          e.affix(document.head, 'meta[name="description"][content="old description"]')
+          fixture(document.head, 'link[rel="canonical"][href="/old-canonical"]')
+          fixture(document.head, 'meta[name="description"][content="old description"]')
 
           fixture('.container', text: 'old container text')
           up.render('.container', url: '/path', history: true, metaTags: false)
@@ -5011,7 +5003,7 @@ describe 'up.fragment', ->
           expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
 
         it 'does not render meta tags for a background layer, but saves them for later restoration', ->
-          e.affix(document.head, 'meta[name="description"][content="old root description"]')
+          fixture(document.head, 'meta[name="description"][content="old root description"]')
           document.title = 'old root title'
 
           fixture('.container', text: 'old root container text')
@@ -5080,8 +5072,8 @@ describe 'up.fragment', ->
 
 
         it 'does not remove current meta tags if the response has no <head>', ->
-          e.affix(document.head, 'link[rel="canonical"][href="/old-canonical"]')
-          e.affix(document.head, 'meta[name="description"][content="old description"]')
+          fixture(document.head, 'link[rel="canonical"][href="/old-canonical"]')
+          fixture(document.head, 'meta[name="description"][content="old description"]')
 
           fixture('.container', text: 'old container text')
           up.render('.container', url: '/path', history: true)
@@ -5145,7 +5137,7 @@ describe 'up.fragment', ->
 
         if up.migrate.loaded
           it "warns if an auto-update meta tags is also [up-hungry]", ->
-            e.affix(document.head, 'link[rel="canonical"][href="/old-canonical"][up-hungry]')
+            fixture(document.head, 'link[rel="canonical"][href="/old-canonical"][up-hungry]')
             warnSpy = up.migrate.warn.mock()
 
             fixture('.container', text: 'old container text')

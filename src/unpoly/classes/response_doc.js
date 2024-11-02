@@ -95,7 +95,7 @@ up.ResponseDoc = class ResponseDoc {
   Returns the root's `<head>`, if it has one.
 
   Returns `undefined` if the root has no contentful `<head>`, e.g. if the root was
-  parsed from a fragment, or from a docuemnt without a `<head>` element.
+  parsed from a fragment, or from a document without a `<head>` element.
   */
   // eslint-disable-next-line getter-return
   _getHead() {
