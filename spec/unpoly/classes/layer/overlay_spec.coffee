@@ -276,7 +276,7 @@ describe 'up.Layer.Overlay', ->
     it "restores the parent layer's meta tags", ->
       up.history.config.enabled = true
 
-      e.affix(document.head, 'meta[name="description"][content="old description"]')
+      fixture(document.head, 'meta[name="description"][content="old description"]')
 
       up.layer.open(
         location: '/modal-location'

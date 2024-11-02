@@ -827,44 +827,37 @@ describe('up.script', function() {
     describe('up.script.findAssets()', function() {
 
       it('finds a link[rel=stylesheet] in the head', function() {
-        const link = e.affix(document.head, 'link[rel="stylesheet"][href="/styles.css"]')
-        registerFixture(link)
+        const link = fixture(document.head, 'link[rel="stylesheet"][href="/styles.css"]')
         expect(up.script.findAssets()).toContain(link)
       })
 
       it('does not find a link[rel=stylesheet] in the body', function() {
-        const link = e.affix(document.body, 'link[rel="stylesheet"][href="/styles.css"]')
-        registerFixture(link)
+        const link = fixture(document.body, 'link[rel="stylesheet"][href="/styles.css"]')
         expect(up.script.findAssets()).not.toContain(link)
       })
 
       it('does not find a link[rel=alternate]', function() {
-        const link = e.affix(document.body, 'link[rel="alternate"][type="application/rss+xml"][title="RSS Feed"][href="/feed"]')
-        registerFixture(link)
+        const link = fixture(document.body, 'link[rel="alternate"][type="application/rss+xml"][title="RSS Feed"][href="/feed"]')
         expect(up.script.findAssets()).not.toContain(link)
       })
 
       it('finds a script[src] in the head', function() {
-        const link = e.affix(document.head, 'script[src="/foo.js"]')
-        registerFixture(link)
-        expect(up.script.findAssets()).toContain(link)
+        const script = fixture(document.head, 'script[src="/foo.js"]')
+        expect(up.script.findAssets()).toContain(script)
       })
 
       it('does not find a script[src] in the body', function() {
-        const link = e.affix(document.body, 'script[src="/foo.js"]')
-        registerFixture(link)
-        expect(up.script.findAssets()).not.toContain(link)
+        const script = fixture(document.body, 'script[src="/foo.js"]')
+        expect(up.script.findAssets()).not.toContain(script)
       })
 
       it('does not find an inline script in the head', function() {
-        const link = e.affix(document.head, 'script', {text: 'console.log("hello from inline script")'})
-        registerFixture(link)
-        expect(up.script.findAssets()).not.toContain(link)
+        const script = fixture(document.head, 'script', {text: 'console.log("hello from inline script")'})
+        expect(up.script.findAssets()).not.toContain(script)
       })
 
       it('finds an arbitrary element in the head with [up-asset]', function() {
-        const base = e.affix(document.head, 'base[href="/pages"]')
-        registerFixture(base)
+        const base = fixture(document.head, 'base[href="/pages"]')
         expect(up.script.findAssets()).toEqual([])
 
         base.setAttribute('up-asset', '')
@@ -872,14 +865,12 @@ describe('up.script', function() {
       })
 
       it('allows to opt out with [up-asset=false]', function() {
-        const link = e.affix(document.head, 'link[rel="stylesheet"][href="/styles.css"][up-asset="false"]')
-        registerFixture(link)
+        const link = fixture(document.head, 'link[rel="stylesheet"][href="/styles.css"][up-asset="false"]')
         expect(up.script.findAssets()).not.toContain(link)
       })
 
       it('allows to opt out by configuring up.script.config.noAssetSelectors', function() {
-        const link = e.affix(document.head, 'link[rel="stylesheet"][href="/excluded.css"]')
-        registerFixture(link)
+        const link = fixture(document.head, 'link[rel="stylesheet"][href="/excluded.css"]')
         up.script.config.noAssetSelectors.push('link[href="/excluded.css"]')
         expect(up.script.findAssets()).not.toContain(link)
       })
