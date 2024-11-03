@@ -2613,82 +2613,155 @@ describe 'up.fragment', ->
             newTarget = document.querySelector('.target')
             expect(newTarget.innerHTML).toEqual('<div class="new-child"></div><div class="old-child"></div>')
 
-        it 'it accepts a CSS selector for a <template> to clone', ->
-          template = htmlFixture("""
-            <template id="target-template">
+        describe 'cloning a <template>', ->
+
+          it 'it accepts a CSS selector for a <template> to clone', ->
+            template = htmlFixture("""
+              <template id="target-template">
+                <div id="target">
+                  target from template
+                </div>
+              </template>
+            """)
+
+            target = htmlFixture("""
               <div id="target">
-                target from template
+                old target
               </div>
-            </template>
-          """)
+            """)
 
-          target = htmlFixture("""
-            <div id="target">
-              old target
-            </div>
-          """)
+            up.render({ fragment: '#target-template' })
+            await wait()
 
-          up.render({ fragment: '#target-template' })
-          await wait()
+            expect('#target').toHaveText('target from template')
+            # Make sure the element was cloned, not moved
+            expect(document.querySelector('#target').children[0]).not.toBe(template.content.children[0])
 
-          expect('#target').toHaveText('target from template')
-          # Make sure the element was cloned, not moved
-          expect(document.querySelector('#target').children[0]).not.toBe(template.content.children[0])
-
-        it 'compiles an element cloned from a <template>', ->
-          compilerFn = jasmine.createSpy('compiler fn')
-          up.compiler('#target', compilerFn)
-
-          template = htmlFixture("""
+          it 'it accepts the <template> as an Element option', ->
+            template = htmlFixture("""
               <template id="target-template">
                 <div id="target">
                   target from template
                 </div>
               </template>
-          """)
+            """)
 
-          target = htmlFixture("""
-            <div id="target">
-              old target
-            </div>
-          """)
+            target = htmlFixture("""
+              <div id="target">
+                old target
+              </div>
+            """)
 
-          expect(compilerFn).not.toHaveBeenCalled()
+            up.render({ fragment: template })
+            await wait()
 
-          up.render({ fragment: '#target-template' })
-          await wait()
+            expect('#target').toHaveText('target from template')
+            # Make sure the element was cloned, not moved
+            expect(document.querySelector('#target').children[0]).not.toBe(template.content.children[0])
 
-          expect('#target').toHaveText('target from template')
-          expect(compilerFn).toHaveBeenCalled()
-          expect(compilerFn.calls.mostRecent().args[0]).toMatchSelector('#target')
+          it 'compiles an element cloned from a <template>', ->
+            compilerFn = jasmine.createSpy('compiler fn')
+            up.compiler('#target', compilerFn)
 
-        it 'compiles an element cloned from a <template> with a custom data object', ->
-          compilerFn = jasmine.createSpy('compiler fn')
-          up.compiler('#target', compilerFn)
+            template = htmlFixture("""
+                <template id="target-template">
+                  <div id="target">
+                    target from template
+                  </div>
+                </template>
+            """)
 
-          template = htmlFixture("""
+            target = htmlFixture("""
+              <div id="target">
+                old target
+              </div>
+            """)
+
+            expect(compilerFn).not.toHaveBeenCalled()
+
+            up.render({ fragment: '#target-template' })
+            await wait()
+
+            expect('#target').toHaveText('target from template')
+            expect(compilerFn).toHaveBeenCalled()
+            expect(compilerFn.calls.mostRecent().args[0]).toMatchSelector('#target')
+
+          it 'compiles an element cloned from a <template> with a custom data object embedded into the { fragment } option', ->
+            compilerFn = jasmine.createSpy('compiler fn')
+            up.compiler('#target', compilerFn)
+
+            template = htmlFixture("""
               <template id="target-template">
                 <div id="target">
                   target from template
                 </div>
               </template>
-          """)
+            """)
 
-          target = htmlFixture("""
-            <div id="target">
-              old target
-            </div>
-          """)
+            target = htmlFixture("""
+              <div id="target">
+                old target
+              </div>
+            """)
 
-          expect(compilerFn).not.toHaveBeenCalled()
+            expect(compilerFn).not.toHaveBeenCalled()
 
-          up.render({ fragment: '#target-template { foo: 1, bar: 2 }' })
-          await wait()
+            up.render({ fragment: '#target-template { foo: 1, bar: 2 }' })
+            await wait()
 
-          expect('#target').toHaveText('target from template')
-          expect(compilerFn).toHaveBeenCalled()
-          expect(compilerFn.calls.mostRecent().args[0]).toMatchSelector('#target')
-          expect(compilerFn.calls.mostRecent().args[1]).toEqual({ foo: 1, bar: 2 })
+            expect('#target').toHaveText('target from template')
+            expect(compilerFn).toHaveBeenCalled()
+            expect(compilerFn.calls.mostRecent().args[0]).toMatchSelector('#target')
+            expect(compilerFn.calls.mostRecent().args[1]).toEqual({ foo: 1, bar: 2 })
+
+          it 'compiles an element cloned from a <template> with a custom data object in the { data } option', ->
+            compilerFn = jasmine.createSpy('compiler fn')
+            up.compiler('#target', compilerFn)
+
+            template = htmlFixture("""
+              <template id="target-template">
+                <div id="target">
+                  target from template
+                </div>
+              </template>
+            """)
+
+            target = htmlFixture("""
+              <div id="target">
+                old target
+              </div>
+            """)
+
+            expect(compilerFn).not.toHaveBeenCalled()
+
+            up.render({ fragment: '#target-template', data: { foo: 1, bar: 2 } })
+            await wait()
+
+            expect('#target').toHaveText('target from template')
+            expect(compilerFn).toHaveBeenCalled()
+            expect(compilerFn.calls.mostRecent().args[0]).toMatchSelector('#target')
+            expect(compilerFn.calls.mostRecent().args[1]).toEqual({ foo: 1, bar: 2 })
+
+          it 'compiles an element cloned from a <template> that can be manipulated with { onRendered }', ->
+            template = htmlFixture("""
+              <template id="target-template">
+                <div id="target">
+                  target from template
+                </div>
+              </template>
+            """)
+
+            target = htmlFixture("""
+              <div id="target">
+                old target
+              </div>
+            """)
+
+            up.render({ fragment: '#target-template', onRendered: ({ fragment }) -> fragment.classList.add('class-from-callback') })
+            await wait()
+
+            expect('#target').toHaveText('target from template')
+            expect('#target').toHaveClass('class-from-callback')
 
       describe 'choice of target', ->
 
