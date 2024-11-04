@@ -2,7 +2,7 @@ const u = up.util
 
 up.CompilerPass = class CompilerPass {
 
-  constructor(root, compilers, { layer, data, dataMap, meta }) {
+  constructor(root, compilers, { layer, data, dataRoot, dataMap, meta }) {
     // (1) If a caller has already looked up the layer we don't want to look it up again.
     // (2) Default to the current layer in case the user manually compiles a detached element.
     layer ||= up.layer.get(root) || up.layer.current
@@ -11,6 +11,7 @@ up.CompilerPass = class CompilerPass {
     this._compilers = compilers
     this._layer = layer
     this._data = data
+    this._dataRoot = dataRoot || root
     this._dataMap = dataMap
 
     // The meta object may have a getter on { response }, defined by unpoly-migrate.js.
@@ -34,7 +35,7 @@ up.CompilerPass = class CompilerPass {
 
   setCompileData() {
     if (this._data) {
-      this._root.upCompileData = this._data
+      this._dataRoot.upCompileData = this._data
     }
 
     if (this._dataMap) {
