@@ -210,6 +210,25 @@ describe 'up.layer', ->
           expect(element).toBeGiven()
           expect(element).toHaveText('element text')
 
+        it 'clones the initial overlay fragment from a <template>', ->
+          template = htmlFixture """
+            <template id="my-template">
+              <div id="my-element">
+                content from template
+              </div>
+            </template>
+          """
+
+          await up.layer.open(
+            fragment: '#my-template'
+          )
+
+          expect(up.layer.count).toBe(2)
+
+          element = document.querySelector('up-modal #my-element')
+          expect(element).toBeGiven()
+          expect(element).toHaveText('content from template')
+
       describe 'with { content } option', ->
 
         it 'opens a new overlay from the given inner HTML string, constructing a container matching the { target }', ->
@@ -228,6 +247,26 @@ describe 'up.layer', ->
           await up.layer.open(
             target: '.element',
             content: 'foo <b>bar</b> baz'
+          )
+
+          expect(up.layer.count).toBe(2)
+
+          element = document.querySelector('up-modal .element')
+          expect(element).toBeGiven()
+          expect(element).toHaveText('foo bar baz')
+
+        it 'clones the overlay content from a <template>', ->
+          template = htmlFixture """
+            <template id="my-template">
+              foo
+              <b>bar</b>
+              baz
+            </template>
+          """
+
+          await up.layer.open(
+            target: '.element',
+            content: '#my-template'
           )
 
           expect(up.layer.count).toBe(2)
