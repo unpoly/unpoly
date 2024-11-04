@@ -32,22 +32,27 @@ up.ResponseDoc = class ResponseDoc {
     if (value instanceof Document) {  // Document
       this._document = value
       this._isFullDocument = true
-    } else if (u.isString(value)) { // String of HTML or maybe a <template> selector + ID
-      this._document = up.fragment.provideSingularNode(value, { origin, htmlParser: e.createBrokenDocumentFromHTML })
-
-      // Remember that we need to fix <script>, <noscript> and media elements later.
-      // We could fix these elements right now for the entire document, but since we will only use
-      // a fragment, this would cause excessive work.
-      this._isDocumentBroken = true
-
-      // Remember whether the HTML originally contained a full document.
-      // Asset comparison needs to know whether the document has a <head> because
-      // e.createBrokenDocumentFromHTML() always creates an (empty) <head> if missing in the HTML.
-      this._isFullDocument = FULL_DOCUMENT_PATTERN.test(value)
+    } else if (u.isString(value)) { // String of HTML or maybe a <template> selector
+      this._document = up.fragment.provideSingularNode(value, { origin, htmlParser: this._parseDocumentFromHTML.bind(this) })
     } else { // Element
       this._document = this._buildFauxDocument(value)
       this._isFullDocument = value.matches('html')
     }
+  }
+
+  _parseDocumentFromHTML(html) {
+    // Remember that we need to fix <script>, <noscript> and media elements later.
+    // We could fix these elements right now for the entire document, but since we will only use
+    // a fragment, this would cause excessive work.
+    this._isDocumentBroken = true
+
+    // Remember whether the HTML originally contained a full document.
+    // Asset comparison needs to know whether the document has a <head> because
+    // e.createBrokenDocumentFromHTML() always creates an (empty) <head> if missing in the HTML.
+    this._isFullDocument = FULL_DOCUMENT_PATTERN.test(html)
+
+    // This function will always return a Document, even if `html` is multiple sibling nodes.
+    return e.createBrokenDocumentFromHTML(html)
   }
 
   _parseFragment(value, origin) {
