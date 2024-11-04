@@ -139,7 +139,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
 
     // Compile the entire layer, not just the user content.
     // E.g. [up-dismiss] in the layer elements needs to go through a macro.
-    up.hello(this.layer.element, { ...this.options, layer: this.layer })
+    up.hello(this.layer.element, { ...this.options, layer: this.layer, dataRoot: this._content })
 
     // Don't wait for the open animation to finish.
     // Otherwise a popup would start to open and only reveal itself after the animation.

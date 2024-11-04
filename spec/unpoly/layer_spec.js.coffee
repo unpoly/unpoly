@@ -325,6 +325,54 @@ describe 'up.layer', ->
           expect(renderedElement.childNodes).toEqual(givenNodes)
 
 
+      describe 'compilation', ->
+
+        it 'compiles the overlay content', ->
+          fooCompiler = jasmine.createSpy('.foo compiler')
+          up.compiler('.foo', fooCompiler)
+          barCompiler = jasmine.createSpy('.bar compiler')
+          up.compiler('.bar', barCompiler)
+
+          [container, foo, bar] = htmlFixtureList("""
+            <div class="container">
+              <div class='foo'>foo</div>
+              <div class='bar'>foo</div>
+            </div>
+          """)
+
+          expect(fooCompiler).not.toHaveBeenCalled()
+          expect(barCompiler).not.toHaveBeenCalled()
+
+          await up.layer.open(fragment: container)
+
+          expect(fooCompiler).toHaveBeenCalledWith(foo, jasmine.anything(), jasmine.anything())
+          expect(barCompiler).toHaveBeenCalledWith(bar, jasmine.anything(), jasmine.anything())
+
+        it "compiles the overlay's container element so a compiler can customize", ->
+          drawerCompiler = jasmine.createSpy('up-drawer compiler')
+          up.compiler('up-drawer', drawerCompiler)
+
+          expect(drawerCompiler).not.toHaveBeenCalled()
+
+          await up.layer.open(content: 'foo', mode: 'drawer')
+
+          expect(drawerCompiler).toHaveBeenCalledWith(jasmine.elementMatchingSelector('up-drawer'), jasmine.anything(), jasmine.anything())
+
+        it 'applies a { data } option to the topmost swappable element, not to the container element', ->
+          drawerCompiler = jasmine.createSpy('up-drawer compiler')
+          up.compiler('up-drawer', drawerCompiler)
+          expect(drawerCompiler).not.toHaveBeenCalled()
+
+          contentCompiler = jasmine.createSpy('.content compiler')
+          up.compiler('.content', contentCompiler)
+          expect(contentCompiler).not.toHaveBeenCalled()
+
+          await up.layer.open(fragment: '<div class="content">content</div>', mode: 'drawer', data: { foo: 123 })
+
+          expect(drawerCompiler).toHaveBeenCalledWith(jasmine.elementMatchingSelector('up-drawer'), {}, jasmine.anything())
+          expect(contentCompiler).toHaveBeenCalledWith(jasmine.elementMatchingSelector('.content'), { foo: 123 }, jasmine.anything())
+
+
       describe 'animation', ->
 
         it 'uses the configured open animation', asyncSpec (next) ->
