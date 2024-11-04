@@ -1155,6 +1155,14 @@ describe 'up.link', ->
         link = fixture('a.foo[up-follow][href="/foo"]')
         expect(up.link.isFollowable(link)).toBe(false)
 
+      it 'returns false for an [href="#"] link', ->
+        link = fixture('a[href="#"]')
+        expect(up.link.isFollowable(link)).toBe(false)
+
+      it 'returns true for an [href="#"] link that updates local content', ->
+        link = fixture('a[href="#"][up-content="foo"]')
+        expect(up.link.isFollowable(link)).toBe(true)
+
     describe 'up.link.preload()', ->
 
       beforeEach ->
