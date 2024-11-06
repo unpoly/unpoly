@@ -24,14 +24,14 @@ The `[up-follow]` element can be used with any hyperlink-related functionality, 
 
 ### Prefer regular hyperlinks
 
-In general you should prefer using regular hyperlinks (`a[href]`) over elements with `[up-href]`:
+In general you should prefer using regular hyperlinks:
 
 - Only regular links allow the user to open the destination in a new tab
 - Regular links still work when JavaScript is unavailable.
 - Regular links can be followed from crawlers like Google
 - Although `<a>` is an inline element, it may [contain block elements](https://makandracards.com/makandra/43549-it-s-ok-to-put-block-elements-inside-an-a-tag). Hence you can use `<a>` to make a large area clickable.
 
-There are also some use cases for `[up-href]`:
+There are also some use cases for faux links:
 
 - When you want to *prevent* the user from opening a link in a new tab.
 - When the element cannot be wrapped in an `<a>`, e.g. a `<tr>`.
