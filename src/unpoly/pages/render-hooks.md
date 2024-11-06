@@ -3,7 +3,18 @@ Render lifecycle hooks
 
 You may hook into specific stages of the rendering process in order to change the result or handle error cases.
 
-The techniques below apply to all functions that render, most notably `up.render()`, `up.follow()`, `up.submit()` and `up.reload()`. For brevity we only use `up.render()` in examples. Most callbacks also have an equivalent HTML attribute for use in [links](/up-follow) or [forms](/up-submit), e.g. `[up-on-loaded]` for `{ onLoaded }`.
+The techniques below apply to all functions or attributes that render, most notably `up.render()`, `[up-follow]` or `[up-submit]`.
+For brevity we only use `up.render()` in examples.
+
+
+
+
+Lifecycle diagram
+-----------------
+
+The diagram below visualizes the sequence of render steps, edge cases and error states.
+
+![Render lifecycle diagram](images/render-lifecycle.svg){:width='900'}
 
 
 ## Running code after rendering
@@ -237,16 +248,5 @@ up.on('up:link:follow', 'a[require-session]', async function(event) {
   }
 })
 ```
-
-
-
-
-
-Lifecycle diagram
------------------
-
-The diagram below attempts to visualize the sequence of render steps, edge cases and error states.
-
-![Render lifecycle diagram](images/render-lifecycle.svg){:width='900'}
 
 @page render-hooks
