@@ -25,11 +25,9 @@ console.log(finalResult.fragment) // logs the revalidated fragment
 @parent up.fragment
 */
 up.RenderJob = class RenderJob {
-
   constructor(options) {
     this.options = options
   }
-
   execute() {
     this._rendered = this._executePromise()
     return this
@@ -42,7 +40,6 @@ up.RenderJob = class RenderJob {
   @param {Object} options
   @stable
   */
-
   async _executePromise() {
     try {
       this._emitGuardEvent()
@@ -67,7 +64,6 @@ up.RenderJob = class RenderJob {
       throw resultOrError
     }
   }
-
   _handleResult(result) {
     // There may be multiple reasons why `result` is not an up.RenderResult:
     //
@@ -113,7 +109,6 @@ up.RenderJob = class RenderJob {
       return true
     }
   }
-
   _handleError(error) {
     let prefix = error instanceof up.Aborted ? 'Rendering was aborted' : 'Error while rendering'
     up.puts('up.render()', `${prefix}: ${error.name}: ${error.message}`)
@@ -137,7 +132,6 @@ up.RenderJob = class RenderJob {
   get finished() {
     return this._awaitFinished()
   }
-
   async _awaitFinished() {
     try {
       let result = await this._rendered
@@ -150,7 +144,6 @@ up.RenderJob = class RenderJob {
       }
     }
   }
-
   _getChange() {
     if (this.options.url) {
       let onRequestProcessed = (request) => this._handleAbortOption(request)
@@ -164,7 +157,6 @@ up.RenderJob = class RenderJob {
       }
     }
   }
-
   _emitGuardEvent() {
     let guardEvent = u.pluckKey(this.options, 'guardEvent')
     if (guardEvent) {
@@ -179,7 +171,6 @@ up.RenderJob = class RenderJob {
       }
     }
   }
-
   _handleAbortOption(request) {
     // When preloading up.RenderOptions forces { abort: false }.
     let { abort } = this.options
