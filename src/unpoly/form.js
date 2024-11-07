@@ -1779,7 +1779,7 @@ up.form = (function() {
 
   @selector [up-show-for]
   @param [up-show-for]
-    A of input values for which this element should be shown.
+    A list of input values for which this element should be shown.
 
     Multiple values can be separated by either a space (`foo bar`) or a comma (`foo, bar`).
     If your values might contain spaces, you may also serialize them as a JSON array (`["foo", "bar"]`).
