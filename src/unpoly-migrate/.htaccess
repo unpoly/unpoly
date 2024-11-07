@@ -96,3 +96,4 @@ RedirectPermanent /fragment-placement /targeting-fragments
 
 RedirectPermanent /render-content /providing-html
 
+RedirectPermanent /has https://developer.mozilla.org/en-US/docs/Web/CSS/:has
