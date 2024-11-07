@@ -5,8 +5,8 @@ describe 'up.RenderOptions', ->
     it 'sets global defaults', ->
       givenOptions = {}
       options = up.RenderOptions.preprocess(givenOptions)
-      expect(options.useHungry).toBe(true)
-      expect(options.useKeep).toBe(true)
+      expect(options.hungry).toBe(true)
+      expect(options.keep).toBe(true)
       expect(options.abort).toBe('target')
 
     it 'normalizes a { layer } shortcut like "new drawer"', ->
@@ -72,10 +72,10 @@ describe 'up.RenderOptions', ->
         expect(options.history).toBeFalsy()
 
     it 'overrides defaults with given options', ->
-      givenOptions = { navigate: false, useHungry: false, source: '/other-source' }
+      givenOptions = { navigate: false, hungry: false, source: '/other-source' }
       options = up.RenderOptions.preprocess(givenOptions)
 
-      expect(options.useHungry).toBe(false)
+      expect(options.hungry).toBe(false)
       expect(options.source).toBe('/other-source')
 
     if up.migrate.loaded
@@ -110,8 +110,8 @@ describe 'up.RenderOptions', ->
       givenOptions = {}
       options = preprocessAndDerive(givenOptions)
 
-      expect(options.useHungry).toBe(true)
-      expect(options.useKeep).toBe(true)
+      expect(options.hungry).toBe(true)
+      expect(options.keep).toBe(true)
 
     describe 'with { navigate: true }', ->
 
