@@ -43,7 +43,7 @@ There are also some use cases for faux links:
 You can use `[up-emit]` on any element to have it emit an event when clicked:
 
 ```html
-<span up-emit='user:select' up-emit-props='{ "user_id": 5 }'>
+<span up-emit="user:select" up-emit-props="{ user_id: 5 }">
   Alice
 </span>
 ```

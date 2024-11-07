@@ -1200,7 +1200,7 @@ up.fragment = (function() {
   is encoded using an `[up-data]` attribute:
 
   ```html
-  <div id='map' up-keep up-data='{ "lat": 50.86, "lng": 7.40 }'></div>
+  <div id="map" up-keep up-data="{ lat: 50.86, lng: 7.40 }"></div>
   ```
 
   We can initialize the map using a [compiler](/up.compiler) like this:
