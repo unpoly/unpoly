@@ -374,8 +374,9 @@ up.link = (function() {
     parser.string('document')
     parser.string('fragment')
     parser.string('content')
-    parser.boolean('useKeep')
-    parser.boolean('useHungry')
+    parser.boolean('keep', { attr: 'up-use-keep' }) // cannot be [up-keep] because it would affect the link itself
+    parser.boolean('hungry', { attr: 'up-use-hungry' }) // cannot be [up-hungry] because it would affect the link itself
+    parser.json('data', { attr: 'up-use-data' }) // cannot be [up-data] because it would affect the link itself
 
     // Lifecycle options
     parser.callback('onLoaded')
@@ -1212,6 +1213,9 @@ up.link = (function() {
     A string of HTML containing the targeted fragment.
 
     See [Extracting an element's outer HTML from a larger HTML string](/providing-html#document).
+
+  @param [up-use-data]
+    A JSON object that overrides properties from the new fragment's `[up-data]`.
 
   @param [up-fail]
     Whether the server response should be considered failed.

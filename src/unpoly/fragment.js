@@ -224,8 +224,8 @@ up.fragment = (function() {
     verifyDerivedTarget: true,
 
     renderOptions: {
-      useHungry: true,
-      useKeep: true,
+      hungry: true,
+      keep: true,
       saveScroll: true,
       saveFocus: true,
       focus: 'keep',
@@ -889,12 +889,12 @@ up.fragment = (function() {
 
     Also see [Handling errors](/render-hooks#handling-errors).
 
-  @param {boolean} [options.useKeep=true]
+  @param {boolean} [options.keep=true]
     Whether [`[up-keep]`](/up-keep) elements will be preserved in the updated fragment.
 
     @experimental
 
-  @param {boolean} [options.useHungry=true]
+  @param {boolean} [options.hungry=true]
     Whether [`[up-hungry]`](/up-hungry) elements outside the updated fragment will also be updated.
 
     @experimental
@@ -1173,7 +1173,7 @@ up.fragment = (function() {
   You can also choose to render without keeping elements:
 
   - Link or forms can force a swap of `[up-keep]` elements by setting an [`[up-use-keep=false]`](/up-follow#up-use-keep) attribute.
-  - Rendering functions can force a swap of `[up-keep]` elements by passing an [`{ useKeep: false }`](/up.render#options.useKeep) option.
+  - Rendering functions can force a swap of `[up-keep]` elements by passing an [`{ keep: false }`](/up.render#options.keep) option.
 
   ### Example for conditional keeping
 
