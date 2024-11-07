@@ -104,7 +104,7 @@ Using a compiler makes it easy to track custom event properties ("dimensions") a
 Encode it in an `[up-data]` attribute:
 
 ```html
-<main track-page-view up-data='{ "course": "ruby-basics", "page": 1 }'> // mark-phrase up-data
+<main track-page-view up-data="{ course: 'ruby-basics', page: 1 }"> // mark-phrase up-data
   ...
 </main>
 ```

@@ -98,10 +98,10 @@ up.event = (function() {
   For instance, this element has attached data in its `[up-data]` attribute:
 
   ```html
-  <span class='user' up-data='{ "age": 18, "name": "Bob" }'>Bob</span>
+  <span class="user" up-data="{ age: 18, name: 'Bob' }">Bob</span>
   ```
 
-The parsed data will be passed to your event handler as a third argument:
+  The parsed data will be passed to your event handler as a third argument:
 
   ```js
   up.on('click', '.user', function(event, element, data) {
@@ -487,12 +487,12 @@ The parsed data will be passed to your event handler as a third argument:
 
   By default `[up-emit]` will emit an event with only basic properties like [`{ target }`](https://developer.mozilla.org/en-US/docs/Web/API/Event/target).
 
-  To set custom properties on the event object, encode them as JSON in an `[up-emit-props]` attribute:
+  To set custom properties on the event object, encode them as [relaxed JSON](/relaxed-json) in an `[up-emit-props]` attribute:
 
   ```html
   <button type="button"
-    up-emit='user:select'
-    up-emit-props='{ "id": 5, "firstName": "Alice" }'>
+    up-emit="user:select"
+    up-emit-props="{ id: 5, firstName: 'Alice' }">
     Alice
   </button>
 
@@ -533,7 +533,7 @@ The parsed data will be passed to your event handler as a third argument:
   @param up-emit
     The [type](https://developer.mozilla.org/en-US/docs/Web/API/Event/type) of the event to be emitted, e.g. `my:event`.
   @param [up-emit-props='{}']
-    The event properties, serialized as JSON.
+    The event properties, serialized as [relaxed JSON](/relaxed-json).
   @stable
   */
   function executeEmitAttr(event, element) {

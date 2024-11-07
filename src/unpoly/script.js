@@ -199,7 +199,7 @@ up.script = (function() {
   or encoded as JSON in an `[up-data]` attribute:
 
   ```html
-  <span class='user' up-data='{ "age": 31, "name": "Alice" }'>Alice</span>
+  <span class="user" up-data="{ age: 31, name: 'Alice' }">Alice</span>
   ```
 
   An object with the element's attached data will be passed to your [compilers](/up.compiler)
@@ -626,7 +626,7 @@ up.script = (function() {
   You have an element with JSON data serialized into an `[up-data]` attribute:
 
   ```html
-  <span class='person' up-data='{ "age": 18, "name": "Bob" }'>Bob</span>
+  <span class="person" up-data="{ age: 18, name: 'Bob' }">Bob</span>
   ```
 
   Calling `up.script.data()` will deserialize the JSON string into a JavaScript object:
@@ -680,10 +680,10 @@ up.script = (function() {
   might attach the location and names of its marker pins:
 
   ```html
-  <div class='google-map' up-data='[
-    { "lat": 48.36, "lng": 10.99, "title": "Friedberg" },
-    { "lat": 48.75, "lng": 11.45, "title": "Ingolstadt" }
-  ]'></div>
+  <div class="google-map" up-data="[
+    { lat: 48.36, lng: 10.99, title: 'Friedberg' },
+    { lat: 48.75, lng: 11.45, title: 'Ingolstadt' }
+  ]"></div>
   ```
 
   The JSON will be parsed and handed to your compiler as a second argument:

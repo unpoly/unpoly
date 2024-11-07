@@ -574,7 +574,7 @@ up.protocol = (function() {
   /*-
   The server may set this optional response header to change the document title after a fragment update.
 
-  The title must be encoded as a JSON string.
+  The title must be encoded as a [relaxed JSON](/relaxed-json) string.
 
   Without this header Unpoly will extract the `<title>` from the server response.
 
@@ -674,8 +674,8 @@ up.protocol = (function() {
   The server may set this response header to [emit events](/up.emit) with the
   requested [fragment update](/up-follow).
 
-  The header value is a [JSON](https://en.wikipedia.org/wiki/JSON) array.
-  Each element in the array is a JSON object representing an event to be emitted
+  The header value is a [relaxed JSON](/relaxed-json) array.
+  Each element in the array is an object representing an event to be emitted
   on the `document`.
 
   The object property `{ "type" }` defines the event's [type](https://developer.mozilla.org/en-US/docs/Web/API/Event/type). Other properties become properties of the emitted
@@ -687,7 +687,7 @@ up.protocol = (function() {
 
   ```http
   Content-Type: text/html
-  X-Up-Events: [{ "type": "user:created", "id": 5012 }, { "type": "signup:completed" }]
+  X-Up-Events: [{ type: 'user:created', id: 5012 }, { type: 'signup:completed' }]
   ...
 
   <html>
@@ -699,11 +699,11 @@ up.protocol = (function() {
 
   Instead of emitting an event on the `document`, the server may also choose to
   [emit the event on the layer being updated](/up.layer.emit). To do so, add a property
-  `{ "layer": "current" }` to the JSON object of an event:
+  `{ layer: 'current' }` to the JSON object of an event:
 
   ```http
   Content-Type: text/html
-  X-Up-Events: [{ "type": "user:created", "name:" "foobar", "layer": "current" }]
+  X-Up-Events: [{ type: 'user:created', name: 'foobar', layer: 'current' }]
   ...
 
   <html>
@@ -729,18 +729,18 @@ up.protocol = (function() {
   If the root layer is targeted, the header is ignored and the fragment is updated with
   the response's HTML content.
 
-  The header value is the acceptance value serialized as a JSON object.
+  The header value is the acceptance value serialized as a [relaxed JSON](/relaxed-json) value.
   To accept an overlay without value, set the header value to the string `null`.
 
   @include unicode-header-values
 
   ### Example
 
-  The response below will accept the targeted overlay with the value `{user_id: 1012 }`:
+  The response below will accept the targeted overlay with the value `{ user_id: 1012 }`:
 
   ```http
   Content-Type: text/html
-  X-Up-Accept-Layer: {"user_id": 1012}
+  X-Up-Accept-Layer: { user_id: 1012 }
 
   <html>
     ...
@@ -758,7 +758,7 @@ up.protocol = (function() {
 
   ```http
   Content-Type: text/html
-  X-Up-Accept-Layer: {"user_id": 1012}
+  X-Up-Accept-Layer: { user_id: 1012 }
   X-Up-Target: :none
   ```
 
@@ -811,7 +811,7 @@ up.protocol = (function() {
   ```http
   HTTP/1.1 200 OK
   Content-Type: text/html
-  X-Up-Dismiss-Layer: {"user_id": 1012}
+  X-Up-Dismiss-Layer: { user_id: 1012 }
   X-Up-Target: :none
   ```
 
