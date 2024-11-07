@@ -138,7 +138,7 @@ up.viewport = (function() {
   @param {string|Element|jQuery} element
     The element to reveal.
 
-  @param {string} [options.revealSnap]
+  @param {string} [options.snap]
     When the the revealed element would be closer to the viewport's top edge
     than this value, Unpoly will scroll the viewport to the top.
 
@@ -170,12 +170,6 @@ up.viewport = (function() {
     closest [viewport](/up.viewport) edge (in pixels).
 
     Defaults to `up.viewport.config.revealPadding`.
-
-  @param {number|boolean} [options.snap]
-    Whether to snap to the top of the viewport if the new scroll position
-    after revealing the element is close to the top edge.
-
-    Defaults to `up.viewport.config.revealSnap`.
 
   @return {undefined}
 
