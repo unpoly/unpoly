@@ -1163,7 +1163,7 @@ up.element = (function() {
   }
 
   /*-
-  Reads the given attribute from the element, parsed as [JSON](https://www.json.org/).
+  Reads the given attribute from the element, parsed as [relaxed JSON](/relaxed-json).
 
   Returns `undefined` if the attribute value is [blank](/up.util.isBlank) or only consists of whitespace.
 

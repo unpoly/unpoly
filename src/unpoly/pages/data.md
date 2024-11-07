@@ -46,13 +46,13 @@ HTML5 data attributes cannot express structured data, like an array or object.
 Also their values are always strings.
 
 For a more powerful alternative you can set the `[up-data]` attribute to any
-[JSON](https://en.wikipedia.org/wiki/JSON) value:
+[relaxed JSON](/relaxed-json) value:
 
 ```html
-<div class='google-map' up-data='[
-  { "lat": 48.36, "lng": 10.99, "title": "Friedberg" },
-  { "lat": 48.75, "lng": 11.45, "title": "Ingolstadt" }
-]'></div>
+<div class="google-map" up-data="[
+  { lat: 48.36, lng: 10.99, title: 'Friedberg' },
+  { lat: 48.75, lng: 11.45, title: 'Ingolstadt' }
+]"></div>
 ```
 
 The JSON will be parsed and passed to your compiler function as a second argument:
@@ -72,7 +72,7 @@ Note how `[up-data]` allows us to a attach a multitude of value types, like arra
 The topmost expression may be any JSON-serializable value, like an object:
 
 ```html
-<span class='user' up-data='{ "name": "Bob", "age": 18 }'>Bob</span>
+<span class="user" up-data="{ name: 'Bob', age: 18 }">Bob</span>
 ```
 
 ```js
@@ -85,7 +85,7 @@ up.compiler('.user', function(element, data) {
 If `[up-data]` is a JSON object, any HTML5 data attributes will be merged into the parsed value:
 
 ```html
-<span class='user' data-name='Bob' up-data='{ "age": 18 }'>Bob</span>
+<span class="user" data-name="Bob" up-data="{ age: 18 }">Bob</span>
 ```
 
 ```js
@@ -128,7 +128,7 @@ Any attached data will also be passed to event handler registered with `up.on()`
 For instance, this element has attached data in its `[up-data]` attribute:
 
 ```html
-<span class='user' up-data='{ "age": 18, "name": "Bob" }'>Bob</span>
+<span class="user" up-data="{ age: 18, name: 'Bob' }">Bob</span>
 ```
 
 The data will be passed to your event handler as a third argument:

@@ -31,7 +31,7 @@ up.layer.open({ url: '/games/new', context: { lives: 3 } })
 Or from HTML:
 
 ```html
-<a href='/games/new' up-layer='new' up-context='{ "lives": 3 }'>
+<a href="/games/new" up-layer="new" up-context="{ lives: 3 }">
   Start a new game
 </a>
 ```

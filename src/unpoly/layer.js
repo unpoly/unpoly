@@ -854,7 +854,7 @@ up.layer = (function() {
     See [Closing when a location is reached](/closing-overlays#location-condition).
 
   @param [up-context]
-    The new overlay's [context](/up.layer.context) object, encoded as JSON.
+    The new overlay's [context](/up.layer.context) object, encoded as [relaxed JSON](/relaxed-json).
 
     @experimental
 
@@ -879,13 +879,13 @@ up.layer = (function() {
   /*-
   [Dismisses](/closing-overlays) the [current layer](/up.layer.current) when the link is clicked.
 
-  The JSON value of the `[up-accept]` attribute becomes the overlay's
+  The [relaxed JSON](/relaxed-json) value of the `[up-dismiss]` attribute becomes the overlay's
   [dismissal value](/closing-overlays#overlay-result-values).
 
   ### Example
 
   ```html
-  <a href='/dashboard' up-dismiss>Close</a>
+  <a href="/dashboard" up-dismiss="'sidebar-close'">Close</a>
   ```
 
   ### Fallback for the root layer
@@ -893,11 +893,11 @@ up.layer = (function() {
   The link's `[href]` will only be followed when this link is clicked in the [root layer](/up.layer).
   In an overlay the `click` event's default action is prevented.
 
-  You can also omit the `[href]` attribute to make a link that only works in overlays.
+  You can also [omit the `[href]` attribute](/providing-html#omitting-href) to make a link that only works in overlays.
 
   @selector [up-dismiss]
   @param [up-dismiss]
-    The overlay's [dismissal value](/closing-overlays#overlay-result-values) as a JSON string.
+    The overlay's [dismissal value](/closing-overlays#overlay-result-values) as a [relaxed JSON](/relaxed-json) value.
   @param [up-confirm]
     A message the user needs to confirm before the layer is closed.
   @param [up-animation]
@@ -920,7 +920,7 @@ up.layer = (function() {
   ### Example
 
   ```html
-  <a href='/users/5' up-accept='{ "id": 5 }'>Choose user #5</a>
+  <a href="/users/5" up-accept="{ id: 5 }">Choose user #5</a>
   ```
 
   ### Fallback for the root layer
@@ -932,7 +932,7 @@ up.layer = (function() {
 
   @selector [up-accept]
   @param [up-accept]
-    The overlay's [acceptance value](/closing-overlays#overlay-result-values) as a JSON string.
+    The overlay's [acceptance value](/closing-overlays#overlay-result-values) as a [relaxed JSON](/relaxed-json) value.
   @param [up-confirm]
     A message the user needs to confirm before the layer is closed.
   @param [up-duration]

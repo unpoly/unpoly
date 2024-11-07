@@ -245,10 +245,15 @@ up.Response = class Response extends up.Record {
   The parsed JSON object is cached with the response object,
   so multiple accesses will call `JSON.parse()` only once.
 
+  > [note]
+  > This method can only parse regular JSON values. [Relaxed JSON](/relaxed-json) is not supported here.
+
   ### Example
 
-      response = await up.request('/profile.json')
-      console.log("User name is " + response.json.name)
+  ```js
+  let response = await up.request('/profile.json')
+  console.log("User name is " + response.json.name)
+  ```
 
   @property up.Response#json
   @param {Object} json
