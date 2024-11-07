@@ -9311,7 +9311,7 @@ describe 'up.fragment', ->
           expect(result.fragments.length).toBe(1)
           expect(result.fragments[0]).toMatchSelector('.before')
 
-        it 'updates an [up-keep] element with { useKeep: false } option', asyncSpec (next) ->
+        it 'updates an [up-keep] element with { keep: false } option', asyncSpec (next) ->
           $container = $fixture('.container')
           $container.html """
             old-before
@@ -9320,7 +9320,7 @@ describe 'up.fragment', ->
             """
 
           up.render '.container',
-            useKeep: false
+            keep: false
             document: """
               <div class='container'>
                 new-before
@@ -9505,7 +9505,7 @@ describe 'up.fragment', ->
             expect(window.keepSpy.calls.count()).toBe(1)
 
             # Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
-            up.render('#container', document: html, useKeep: false)
+            up.render('#container', document: html, keep: false)
 
             await wait()
 

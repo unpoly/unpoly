@@ -48,10 +48,10 @@ up.radio = (function() {
   }))
 
   function hungrySteps(renderOptions) {
-    let { useHungry, origin, layer: renderLayer, meta } = renderOptions
+    let { hungry, origin, layer: renderLayer, meta } = renderOptions
     let steps = { current: [], other: [] }
 
-    if (!useHungry) return steps
+    if (!hungry) return steps
 
     let hungrySelector = config.selector('hungrySelectors')
 
@@ -88,7 +88,7 @@ up.radio = (function() {
           origin,              // The { origin } passed into the fn. will be used to match { newElement } later.
           ...motionOptions,    // The hungry element defines its own transition, duration, easing.
           placement: 'swap',   // Hungry elements are always swapped, never appended
-          useKeep: true,       // Always honor [up-keep] in hungry elements. Set here because we don't inherit default render options.
+          keep: true,          // Always honor [up-keep] in hungry elements. Set here because we don't inherit default render options.
           maybe: true,         // Don't fail if we cannot match { newElement } later.
           meta,
           selectEvent,         // Used by up.ResponseDoc#selectStep()
@@ -216,7 +216,7 @@ up.radio = (function() {
   By default hungry fragments are processed for all updates of the current layer.
   You can disable the processing of hungry fragments using one of the following methods:
 
-  - Rendering with an [`{ useHungry: false }`](/up.render#options.useHungry) option will not process any hungry fragments.
+  - Rendering with an [`{ hungry: false }`](/up.render#options.hungry) option will not process any hungry fragments.
   - Setting an [`[up-use-hungry="false"]`](/up-follow#up-use-hungry) attribute on a link or form will not update hungry fragments when the element is activated.
   - Preventing an `up:fragment:hungry` event will prevent the hungry fragment
     from being updated.
