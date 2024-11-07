@@ -859,15 +859,25 @@ describe 'up.link', ->
         options = up.link.followOptions(link)
         expect(options.background).toBe(true)
 
-      it 'parses an [up-use-keep] attribute', ->
+      it 'parses an [up-use-keep] attribute as { keep }', ->
         link = fixture('a[href="/foo"][up-use-keep="false"]')
         options = up.link.followOptions(link)
-        expect(options.useKeep).toBe(false)
+        expect(options.keep).toBe(false)
 
-      it 'parses an [up-use-hungry] attribute', ->
+      it 'parses an [up-use-hungry] attribute as { hungry }', ->
         link = fixture('a[href="/foo"][up-use-hungry="false"]')
         options = up.link.followOptions(link)
-        expect(options.useHungry).toBe(false)
+        expect(options.hungry).toBe(false)
+
+      it 'parses an [up-use-data] attribute as a { data } object', ->
+        link = fixture('a[href="/foo"][up-use-data="{ foo: 123 }"]')
+        options = up.link.followOptions(link)
+        expect(options.data).toEqual({ foo: 123 })
+
+      it 'does not default to an empty { data } object if no [up-use-data] is set', ->
+        link = fixture('a[href="/foo"]')
+        options = up.link.followOptions(link)
+        expect(options.data).toBeUndefined()
 
       it 'parses an [up-timeout] attribute', ->
         link = fixture('a[href="/foo"][up-timeout="20_000"]')

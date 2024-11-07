@@ -212,7 +212,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
   // @param {Element} options.newElement
   // @param {boolean} options.descendantsOnly
   _findKeepPlan(options) {
-    if (!options.useKeep) { return }
+    if (!options.keep) { return }
 
     const { oldElement, newElement } = options
 
@@ -255,7 +255,8 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
   // Returns an array of keepPlans.
   _preserveKeepables(step) {
     const keepPlans = []
-    if (step.useKeep) {
+
+    if (step.keep) {
       for (let keepable of step.oldElement.querySelectorAll('[up-keep]')) {
         let keepPlan = this._findKeepPlan({ ...step, oldElement: keepable, descendantsOnly: true })
         if (keepPlan) {
