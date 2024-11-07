@@ -190,6 +190,8 @@ let userText = document.querySelector('wysiwyg-textarea').value
 up.render({ fragment: '<div class=".foo">' + up.util.escapeHTML(userText) + '</div>' })
 ```
 
+We also recommend a [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP), which [plays nice with Unpoly](/csp).
+
 
 ### Extracting a fragment from a document {#document}
 
