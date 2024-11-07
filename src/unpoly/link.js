@@ -1034,7 +1034,7 @@ up.link = (function() {
     If your `[up-defer]` placeholder is a [standard hyperlink](/lazy-loading#seo), you can use an `[href]` attribute instead.
 
   @param [up-headers]
-    A JSON object with additional request headers.
+    A [relaxed JSON](/relaxed-json) object with additional request headers.
 
   @param [up-cache='auto']
     Whether to cache the deferred content.
@@ -1181,14 +1181,14 @@ up.link = (function() {
     their original method as a configurable [`_method` parameter](/up.protocol.config#config.methodParam).
 
   @param [up-params]
-    A JSON object with additional [parameters](/up.Params) that should be sent as the request's
+    A [relaxed JSON](/relaxed-json) object with additional [parameters](/up.Params) that should be sent as the request's
     [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
 
     When making a `GET` request to a URL with a query string, the given `{ params }` will be added
     to the query parameters.
 
   @param [up-headers]
-    A JSON object with additional request headers.
+    A [relaxed JSON](/relaxed-json) object with additional request headers.
 
     Unpoly will by default send a number of custom request headers.
     E.g. the `X-Up-Target` header includes the [target selector](/targeting-fragments).
@@ -1215,7 +1215,7 @@ up.link = (function() {
     See [Extracting an element's outer HTML from a larger HTML string](/providing-html#document).
 
   @param [up-use-data]
-    A JSON object that overrides properties from the new fragment's `[up-data]`.
+    A [relaxed JSON](/relaxed-json) object that overrides properties from the new fragment's `[up-data]`.
 
   @param [up-fail]
     Whether the server response should be considered failed.
@@ -1379,7 +1379,7 @@ up.link = (function() {
     This is only relevant when updating a layer that is not the [frontmost layer](/up.layer.front).
 
   @param [up-context]
-    A JSON object that will be merged into the [context](/context)
+    A [relaxed JSON](/relaxed-json) object that will be merged into the [context](/context)
     of the current layer once the fragment is rendered.
 
     @experimental

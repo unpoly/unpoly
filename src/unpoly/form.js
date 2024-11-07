@@ -1748,7 +1748,7 @@ up.form = (function() {
 
   ### Example: Values containing spaces
 
-  If your values might contain spaces, you may also serialize them as a JSON array:
+  If your values might contain spaces, you may also serialize them as a [relaxed JSON](/relaxed-json) array:
 
   ```html
   <select name='advancedness' up-switch='.target'>

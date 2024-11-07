@@ -444,9 +444,9 @@ up.radio = (function() {
 
     @experimental
   @param [up-headers]
-    A JSON object with additional request headers.
+    A [relaxed JSON](/relaxed-json) object with additional request headers.
   @param [up-params]
-    A JSON object with additional [parameters](/up.Params) that should be sent as the request's
+    A [relaxed JSON](/relaxed-json) object with additional [parameters](/up.Params) that should be sent as the request's
     [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
 
     When making a `GET` request to a URL with a query string, the given `{ params }` will be added
