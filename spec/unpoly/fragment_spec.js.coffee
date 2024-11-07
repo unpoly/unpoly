@@ -569,15 +569,7 @@ describe 'up.fragment', ->
 
         expect(results).toEqual [activeChild]
 
-      it 'supports non-standard selector extensions like :has()', ->
-        element = fixture('.element')
-        matchingChild = e.affix(element, '.child')
-        requiredGrandChild = e.affix(matchingChild, '.grand-child')
-        otherChild = e.affix(element, '.child.up-destroying')
-
-        results = up.fragment.subtree(element, '.child:has(.grand-child)')
-
-        expect(results).toEqual [matchingChild]
+      it 'supports non-standard selector extensions'
 
       it 'matches descendants in a detached tree', ->
         detachedTree = fixture('.element')

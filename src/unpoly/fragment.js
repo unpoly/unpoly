@@ -9,8 +9,10 @@ Fragment API
 
 The `up.fragment` module offers a high-level JavaScript API to work with DOM elements.
 
-A fragment is an element with some additional properties that are useful in the context of
-a server-rendered web application:
+## Anatomy of a fragment
+
+A fragment is a standard DOM [`Element`](https://developer.mozilla.org/en-US/docs/Web/API/Element)
+with some additional properties that are useful in the context of a server-rendered web application:
 
 - Fragments are [identified by a CSS selector](/target-derivation), like a `.class` or `#id`.
 - Fragments are usually updated by a [link](/up-follow) for [form](/up-submit) that targets their selector.
@@ -23,10 +25,18 @@ a server-rendered web application:
 - Fragments [know the URL from where they were loaded](/up.fragment.source).
   They can be [reloaded](/up.reload) or [polled periodically](/up-poll).
 
-### Differences to `up.element`
+> [note]
+> Unpoly uses regular [`Element`](https://developer.mozilla.org/en-US/docs/Web/API/Element) objects
+> to reference fragments and store client-side state. There is no separate component tree as in frameworks like React.
 
-Functions in `up.fragment` by default only see elements on the [current layer](/up.layer.current).
-They also support non-standard CSS extensions like `:main` or `:has()`.
+## Differences to the DOM API
+
+While `up.fragment` contains many functions to look up CSS selectors, their behavior
+differ from browser APIs like `document.querySelector()`:
+
+- Functions in `up.fragment` will only see elements on the [current layer](/up.layer.current). Other layers are only visible when an [`{ layer }` option](/layer-option) is passed explicitly.
+- Functions in `up.fragment` [ignore destroyed elements](/up-destroying) that are playing out their exit animation.
+- Functions in `up.fragment` can find elements using Unpoly-specific CSS selectors like `:main` or `:layer`.
 
 For low-level DOM utilities that complement the browser's native API, see `up.element`.
 
@@ -1356,7 +1366,7 @@ up.fragment = (function() {
     removed by a [transition](/up.morph).
   - This function prefers to match elements in the [region](/targeting-fragments#resolving-ambiguous-selectors)
     of a given `{ origin }` element (optional).
-  - This function supports non-standard CSS extensions like `:main` and `:has()`.
+  - This function supports non-standard CSS extensions like `:main` or `:layer`.
 
   If no element matches these conditions, `undefined` is returned.
 
@@ -1626,34 +1636,6 @@ up.fragment = (function() {
     let selector = new up.Selector(selectorString, root, options)
     return selector.descendants(root)
   }
-
-  /*-
-  Your [target selectors](/targeting-fragments) may use this pseudo-class
-  to replace an element with an descendant matching the given selector.
-
-  ### Example
-
-  `up.render('div:has(span)', { url: '...' })`  replaces the first `<div>` elements with at least one `<span>` among its descendants:
-
-  ```html
-  <div>
-    <span>Will be replaced</span>
-  </div>
-  <div>
-    Will NOT be replaced
-  </div>
-  ```
-
-  ### Compatibility
-
-  As a [level 4 CSS selector](https://drafts.csswg.org/selectors-4/#relational),
-  `:has()` is [currrently implemented](https://caniuse.com/#feat=css-has) in many modern browsers.
-
-  Unpoly polyfills `:has()` so you can use it in [target selectors](/targeting-fragments) in all [supported browsers](/up.framework.isSupported).
-
-  @selector :has()
-  @stable
-  */
 
   /*-
   Marks a target selector as optional.
