@@ -255,7 +255,7 @@ Since the target can be [derived](/target-derivation) from the cloned template's
 
 
 You can also refer to templates from rendering functions like `up.render()` or `up.submit()`.
-This is useful when you cannot ergonomically produce HTML in your JavaScript files.
+This is useful when you cannot ergonomically produce HTML in your JavaScript files:
 
 ```js
 up.render({ fragment: '#my-template' })
@@ -284,10 +284,20 @@ Below we will look at various ways to achieve this.
 
 #### Using callbacks
 
-You can use the [`{ onRendered }`](/up.render#options.onRendered) callback
-(or [`[up-on-rendered]`](/up-follow#up-on-rendered) attribute) to change the template element
-after it was cloned and inserted. The callback is called with an `up.RenderResult` which
+You can use the [`[up-on-rendered]`](/up-follow#up-on-rendered) attribute to change the template element
+after it was cloned and inserted. The callback is provided with an `up.RenderResult` which
 references the element we want to customize:
+
+```html
+<a
+  up-fragment="#my-template"
+  up-on-rendered="result.fragment.innerText = 'Buy toast'"
+>
+  Click me
+</a>
+```
+
+From JavaScripts we can use the [`{ onRendered }`](/up.render#options.onRendered) callback in the same fashion:
 
 ```js
 up.render({
@@ -308,18 +318,25 @@ up.compiler('.task', function(task, data) {
 })
 ```
 
-When we reference a template, we can also pass a data object for the cloned element:
+When we reference a template, we can also pass a data object for the cloned element as an
+[`[up-use-data]`](/up-follow#up-use-data) attribute:
 
-```js
-up.render({ fragment: '#task-template { description: "Buy toast" }' })
+```html
+<a up-fragment="#my-template" up-use-data="{ description: 'Buy toast' }">
+  Click me
+</a>
 ```
 
 When the compiler is called with the cloned element, it's `data` argument will be set to `{ description: 'Buy toast' }`.
 
-> [info]
-> For different methods of passing data to a new fragment,
-> see [`{ data }`](/up.render#options.data) and [`{ dataMap }`](/up.render#options.dataMap).
+From JavaScripts we can use the [`{ data }`](/up.render#options.onRendered) object in the same fashion:
 
+```js
+up.render({
+  fragment: '#task-template',
+  data: { description: "Buy toast" }
+})
+```
 
 
 
@@ -364,7 +381,6 @@ Template selectors are supported by most attributes and functions that process H
 | `[up-document="#my-template"]`    | `{ document: '#my-template' }`    | 
 | `[up-placeholder="#my-template"]` | `{ placeholder: '#my-template' }` | 
 
-All of these features also support an optional [data object](#dynamic-templates), .e.g `[up-placeholder="#my-template { key: 'value' }"]`.
 
 
 ### Opening an overlay from a `<template>`
