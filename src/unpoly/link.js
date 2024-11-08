@@ -1146,8 +1146,8 @@ up.link = (function() {
 
     Instead of making a server request, you may also render an [existing string of HTML](/providing-html#local).
 
-  @param [up-target]
-    The [target selector](/targeting-fragments) to update.
+  @param [up-target=':main']
+    The [target selector](/targeting-fragments) to update after a successful response.
 
     If omitted a [main target](/up-main) will be rendered.
 
@@ -1220,11 +1220,19 @@ up.link = (function() {
   @param [up-fail]
     Whether the server response should be considered failed.
 
-    For failed responses Unpoly will use attributes prefixed with `up-fail`, e.g. `[up-fail-target]`.
+    For failed responses Unpoly will use attributes prefixed with `up-fail`, e.g. [`[up-fail-target]`](#up-fail-target).
     See [handling server errors](/failed-responses) for details.
 
     By [default](/up.network.config#config.fail) any HTTP status code other than 2xx or [304](/skipping-rendering#rendering-nothing) is considered an error code.
     Set `[up-fail=false]` to handle *any* response as successful, even with a 4xx or 5xx status code.
+
+  @param [up-fail-target=':main']
+    The [target selector](/targeting-fragments) to update after a [failed response](/failed-responses).
+
+    See [Rendering failed responses differently](/failed-responses#rendering-failed-responses-differently) for details.
+
+    If omitted, a failed response will *not* update the [`[up-target]`](/up-target),
+    but update the [main target](/up-main) instead.
 
   @param [up-history='auto']
     Whether the browser URL, window title and meta tags will be [updated](/updating-history).
