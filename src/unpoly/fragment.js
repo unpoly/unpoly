@@ -977,6 +977,8 @@ up.fragment = (function() {
   When [opening an overlay](/opening-overlays), the event is emitted on the parent layer
   of the new overlay.
 
+  This event is also emitted when using a [cached](/caching) response.
+
   ### Example: Making a full page load instead
 
   Event listeners may call `event.preventDefault()` on an `up:fragment:loaded` event
