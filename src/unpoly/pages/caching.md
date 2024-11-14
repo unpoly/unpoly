@@ -77,52 +77,17 @@ When re-visiting pages, Unpoly often renders twice:
 1. An initial render pass from the cache (which may be expired)
 2. A second render pass from the server (which is always fresh)
 
+This has some benefits:
+
+- Because we revalidate cached content, the user always sees fresh content. E.g. if another user has added an item to a list that we have cached, we will see that new item after revalidation.
+- We can have long cache eviction times, allowing instant navigation for 90 minutes, even when offline or on a flaky connection.
+- We no longer need to clear the cache after a form submission. We just mark all cache entries as stale.
+
 > [note]
 > Revalidation only happens after expired content was rendered into the page.
 > No revalidation occurs when expired cache entries are accessed without rendering (e. g. when [preloading](/preloading) a cached URL).
 
 
-
-### Enabling revalidation
-
-You can enable revalidation with `{ revalidate: 'auto' }`, which revalidates [expired](/up.network.config#config.cacheExpireAge) cache entries. You can configure this default:
-
-```js
-up.network.config.cacheExpireAge = 20_000 // expire after 20 seconds
-up.fragment.config.autoRevalidate = (response) => response.expired
-```
-
-To force revalidation regardless of cache age, pass `{ revalidate: true }`.
-
-
-### Disabling revalidation
-
-[Navigation](/navigation) is the only moment when Unpoly revalidates by default.
-
-You can disable cache revalidation while navigating like so:
-
-```js
-up.fragment.config.navigateOptions.revalidate = false
-```
-
-If you want to keep the navigation default, but disable revalidation for some responses, configure `up.fragment.config.autoRevalidate`:
-
-```js
-up.fragment.config.autoRevalidate = (response) => response.expired && response.url != '/dashboard'
-```
-
-If you want to keep the default, but disable caching for an individual link, use an `[up-revalidate=false]` attribute:
-
-```html
-<a href="/" up-revalidate="false">Start page</a>
-```
-
-If you want to keep the default, but disable revalidation for a function call that would otherwise navigate,
-pass an `{ revalidate: false }` option:
-
-```js
-up.follow(link, { cache: true, revalidate: false })
-```
 
 ### When nothing changed
 
@@ -168,6 +133,51 @@ up.compiler('[track-page-view]', function(element, data, meta) { // mark-phrase 
   }
 })
 ```
+
+
+### Enabling revalidation
+
+When [navigating](/navigation), revalidation is enabled by default.
+
+When not navigating, you can enable revalidation by setting an `[up-revalidate="auto"]` attribute or passing an `{ revalidate: 'auto' }` option.
+This revalidates only [expired](/up.network.config#config.cacheExpireAge) cache entries. You can configure this default:
+
+```js
+up.network.config.cacheExpireAge = 20_000 // expire after 20 seconds
+up.fragment.config.autoRevalidate = (response) => response.expired
+```
+
+To force revalidation regardless of cache age, pass `{ revalidate: true }`.
+
+
+### Disabling revalidation
+
+[Navigation](/navigation) is the only moment when Unpoly revalidates by default.
+You can disable cache revalidation while navigating like so:
+
+```js
+up.fragment.config.navigateOptions.revalidate = false
+```
+
+If you want to keep the navigation default, but disable revalidation for some responses, configure `up.fragment.config.autoRevalidate`:
+
+```js
+up.fragment.config.autoRevalidate = (response) => response.expired && response.url != '/dashboard'
+```
+
+If you want to keep the default, but disable caching for an individual link, use an `[up-revalidate=false]` attribute:
+
+```html
+<a href="/" up-revalidate="false">Start page</a>
+```
+
+If you want to keep the default, but disable revalidation for a function call that would otherwise navigate,
+pass an `{ revalidate: false }` option:
+
+```js
+up.follow(link, { cache: true, revalidate: false })
+```
+
 
 
 Expiration
