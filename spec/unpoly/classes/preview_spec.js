@@ -240,6 +240,49 @@ describe('up.Preview', function() {
 
   })
 
+  describe('#revalidating', function() {
+
+    it('returns false when previewing an initial render pass', async function() {
+      let spy = jasmine.createSpy('spy')
+      let previewFn = (preview) => spy(preview.revalidating)
+
+      up.render({ preview: previewFn, url: '/url', target: 'body' })
+      await wait()
+
+      expect(spy).toHaveBeenCalledWith(false)
+    })
+
+    it('returns true when previewing a revalidation pass', async function() {
+      fixture('#target', { text: 'old target' })
+      await jasmine.populateCache('/path', '<div id="target">cached target</div>')
+      expect(jasmine.Ajax.requests.count()).toEqual(1)
+      expect(up.network.isBusy()).toBe(false)
+
+      up.cache.expire()
+
+      expect({ url: '/path' }).toBeCached()
+      expect({ url: '/path' }).toBeExpired()
+
+      let spy = jasmine.createSpy('spy')
+      let revalidatePreviewFn = (preview) => spy(preview.revalidating, preview.expiredResponse)
+
+      up.render({ revalidatePreview: revalidatePreviewFn, url: '/path', target: '#target', cache: true, revalidate: true })
+      await wait()
+
+      expect(jasmine.Ajax.requests.count()).toEqual(2)
+      expect(up.network.isBusy()).toBe(true)
+      expect('#target').toHaveText('cached target')
+
+      expect(spy).toHaveBeenCalledWith(true, jasmine.any(up.Response))
+
+      jasmine.respondWithSelector('#target', { text: 'revalidated target' })
+      await wait()
+
+      expect('#target').toHaveText('revalidated target')
+    })
+
+  })
+
   describe('#setAttrs()', function() {
 
     it('temporarily sets attributes on an element', async function() {

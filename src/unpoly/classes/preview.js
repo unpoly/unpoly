@@ -109,6 +109,26 @@ up.Preview = class Preview {
   /*-
   TODO: Docs
 
+  @property up.Preview#expiredResponse
+  @stable
+  */
+  get expiredResponse() {
+    return this.renderOptions.expiredResponse
+  }
+
+  /*-
+  TODO: Docs
+
+  @property up.Preview#revalidating
+  @stable
+  */
+  get revalidating() {
+    return !!this.expiredResponse
+  }
+
+  /*-
+  TODO: Docs
+
   @function up.Preview#run
   @experimental
   */
