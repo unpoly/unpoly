@@ -63,6 +63,11 @@ respond with `304 Not Modified`. No response body is required.
 HTTP/1.1 304 Not Modified
 ```
 
+> [tip]
+> Many web servers will automatically add a default `ETag` to your response, by hashing the response body.
+> With this, identical HTML will result in a short `304 Not Modified` response.
+
+
 
 ## Requesting content newer than a known modification time {#time-condition}
 
