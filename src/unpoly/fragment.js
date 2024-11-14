@@ -962,7 +962,7 @@ up.fragment = (function() {
   */
   const navigate = up.mockable((...args) => {
     const options = parseTargetAndOptions(args)
-    return render({...options, navigate: true})
+    return render({ ...options, navigate: true })
   })
 
   /*-
