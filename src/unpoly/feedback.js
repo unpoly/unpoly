@@ -346,11 +346,12 @@ up.feedback = (function() {
   function doRunPreviews(request, renderOptions) {
     let { fragment, fragments, origin } = request
     let cleaner = u.cleaner()
+    let previewForFragment = (fragment) => new up.Preview({ fragment, request, renderOptions, cleaner })
 
     // Some preview effects only run once per render pass.
     // The { fragment } for these previews will be the first fragment,
     // or null if there is no first fragment (when opening a layer).
-    let singlePreview = new up.Preview({ fragment, request, renderOptions, cleaner })
+    let singlePreview = previewForFragment(fragment)
     singlePreview.run(resolvePreviewFns(renderOptions.preview))
     singlePreview.run(getPlaceholderPreviewFn(renderOptions.placeholder))
     singlePreview.run(getFeedbackClassesPreviewFn(renderOptions.feedback, fragments))
@@ -360,7 +361,7 @@ up.feedback = (function() {
     // This is useful for batched validations, where we may update multiple fragments,
     // but each with individual preview effects.
     for (let fragment of fragments) {
-      let eachPreview = new up.Preview({ fragment, request, renderOptions, cleaner })
+      let eachPreview = previewForFragment(fragment)
       eachPreview.run(e.matchSelectorMap(renderOptions.previewMap, fragment))
       eachPreview.run(e.matchSelectorMap(renderOptions.placeholderMap, fragment).flatMap(getPlaceholderPreviewFn))
     }
