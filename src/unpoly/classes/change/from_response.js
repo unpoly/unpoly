@@ -87,16 +87,17 @@ up.Change.FromResponse = class FromResponse extends up.Change {
       up.puts('up.render()', 'Revalidating cached response for target "%s"', effectiveTarget)
       let verifyResult = await up.reload(effectiveTarget, {
         ...originalRenderOptions,
+        ...up.RenderOptions.NO_MOTION, // offering something like { verifyTransition } would mean we need to delay { onFinished } even further
+        ...up.RenderOptions.NO_INPUT_INTERFERENCE,
+        ...up.RenderOptions.NO_PREVIEWS,
         preferOldElements: renderResult.fragments, // ensure we match the same fragments when initial render pass matched around { origin } and { origin } has been detached
         layer: renderResult.layer, // if the original render opened a layer, we now update it
         onFinished: null, // the earlier onFinished handler will already be honored by the up.RenderJob that called us
         expiredResponse: this._response, // flag will be forwarded to up:fragment:loaded
+        preview: this._revalidatePreview(originalRenderOptions),
         abort: false,
         cache: false, // This implies { revalidate: false }. We will still update the expired cache entry.
         background: true,
-        ...up.RenderOptions.NO_MOTION, // offering something like { verifyTransition } would mean we need to delay { onFinished } even further
-        ...up.RenderOptions.NO_INPUT_INTERFERENCE,
-        ...up.RenderOptions.NO_PREVIEWS,
         // The guardEvent was already plucked from render options in up.RenderJob#guardRender().
       })
 
@@ -113,6 +114,14 @@ up.Change.FromResponse = class FromResponse extends up.Change {
     }
 
     return renderResult
+  }
+
+  _revalidatePreview({ preview, revalidatePreview }) {
+    if (revalidatePreview === true) {
+      return preview
+    } else {
+      return revalidatePreview
+    }
   }
 
   _loadedEventProps() {
