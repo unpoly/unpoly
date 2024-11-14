@@ -425,6 +425,7 @@ up.feedback = (function() {
     parser.booleanOrString('disable')
     parser.boolean('feedback')
     parser.string('preview')
+    parser.booleanOrString('revalidatePreview')
     parser.string('placeholder')
     return options
   }

@@ -1101,8 +1101,6 @@ up.element = (function() {
     The element from which to retrieve the attribute value.
   @param {string} attribute
     The attribute name.
-  @param {any} [trueValue=true]
-    The value to return if the attribute value is `''`, `'true'` or equal to the attribute name.
   @internal
   */
   function booleanOrStringAttr(element, attribute) {
