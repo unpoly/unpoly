@@ -944,6 +944,16 @@ describe 'up.link', ->
         options = up.link.followOptions(link)
         expect(options.preview).toBe('foo bar')
 
+      it 'parses an [up-revalidate-preview] attribute as a string', ->
+        link = fixture('a[href="/foo"][up-revalidate-preview="foo bar"]')
+        options = up.link.followOptions(link)
+        expect(options.revalidatePreview).toBe('foo bar')
+
+      it 'parses an [up-revalidate-preview] attribute as a boolean', ->
+        link = fixture('a[href="/foo"][up-revalidate-preview="true"]')
+        options = up.link.followOptions(link)
+        expect(options.revalidatePreview).toBe(true)
+
       it 'parses an [up-placeholder] attribute as a string', ->
         link = fixture('a[href="/foo"][up-placeholder="loading..."]')
         options = up.link.followOptions(link)
