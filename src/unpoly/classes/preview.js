@@ -20,6 +20,27 @@ up.Preview = class Preview {
     this._cleaner = cleaner
   }
 
+  /*-
+  TODO: Docs: Multi-fragment updates only preview the primary target
+
+  @property up.Preview#fragment
+  @stable
+  */
+
+  /*-
+  TODO: Docs
+
+  @property up.Preview#request
+  @stable
+  */
+
+  /*-
+  TODO: Docs
+
+  @property up.Preview#renderOptions
+  @stable
+  */
+
   undo(...args) {
     if (this.ended) {
       // We might have the idea to immediately undo an effect when the preview has ended,
@@ -35,48 +56,104 @@ up.Preview = class Preview {
     }
   }
 
+  /*-
+  TODO: Docs: Multi-fragment updates only preview the primary target
+
+  @property up.Preview#target
+  @stable
+  */
   get target() {
     return this.renderOptions.target
   }
 
+  /*-
+  TODO: Docs
+
+  @property up.Preview#origin
+  @stable
+  */
   get origin() {
     return this.request.origin
   }
 
+  /*-
+  TODO: Docs
+
+  @property up.Preview#params
+  @stable
+  */
   get params() {
     return this.request.params
   }
 
+  /*-
+  TODO: Docs
+
+  @property up.Preview#layer
+  @stable
+  */
   get layer() {
     return this.request.layer
   }
 
+  /*-
+  TODO: Docs
+
+  @property up.Preview#ended
+  @stable
+  */
   get ended() {
     return this.request.ended
   }
 
+  /*-
+  TODO: Docs
+
+  @function up.Preview#run
+  @experimental
+  */
   run(value, data = {}) {
     for (let fn of up.feedback.resolvePreviewFns(value)) {
       this.undo(up.error.guard(fn, this, data))
     }
   }
 
+  /*-
+  Reverts all effects of this preview.
+
+  @function up.Preview#run
+  @internal
+  */
   revert() {
     this._cleaner.clean()
   }
 
+  /*-
+  TODO: Docs
+
+  @function up.Preview#setAttrs
+  @stable
+  */
   setAttrs(...args) {
     let [element, attrs] = this._parseMutatorArgs(args, 'val', 'val')
     this.undo(e.setAttrsTemp(element, attrs))
   }
 
+  /*-
+  TODO: Docs
+
+  @function up.Preview#addClass
+  @stable
+  */
   addClass(...args) {
     let [element, klass] = this._parseMutatorArgs(args, 'val', 'val')
     this.undo(e.addClassTemp(element, klass))
   }
 
   /*-
-  @function up.Preview.prototype.addClassBatch
+  Adds one or more classes to one or more elements.
+
+  @function up.Preview#addClassBatch
   @internal
   */
   addClassBatch(elements, classes) {
@@ -87,21 +164,45 @@ up.Preview = class Preview {
     }
   }
 
+  /*-
+  TODO: Docs
+
+  @function up.Preview#removeClass
+  @stable
+  */
   removeClass(...args) {
     let [element, klass] = this._parseMutatorArgs(args, 'val', 'val')
     this.undo(e.removeClassTemp(element, klass))
   }
 
+  /*-
+  TODO: Docs
+
+  @function up.Preview#setStyle
+  @stable
+  */
   setStyle(...args) {
     let [element, styles] = this._parseMutatorArgs(args, 'val', 'val')
     this.undo(e.setStyleTemp(element, styles))
   }
 
+  /*-
+  TODO: Docs
+
+  @function up.Preview#disable
+  @stable
+  */
   disable(...args) {
     let [element] = this._parseMutatorArgs(args, 'val')
     this.undo(up.form.disable(element))
   }
 
+  /*-
+  TODO: Docs
+
+  @function up.Preview#addClass
+  @stable
+  */
   insert(...args) {
     // tempValue can have on of the following forms:
     // - A string of HTML
@@ -113,16 +214,34 @@ up.Preview = class Preview {
     this.undo(up.fragment.insertTemp(reference, position, tempValue))
   }
 
+  /*-
+  TODO: Docs
+
+  @function up.Preview#show
+  @stable
+  */
   show(...args) {
     let [element] = this._parseMutatorArgs(args, 'val')
     this.undo(e.showTemp(element))
   }
 
+  /*-
+  TODO: Docs
+
+  @function up.Preview#hide
+  @stable
+  */
   hide(...args) {
     let [element] = this._parseMutatorArgs(args, 'val')
     this.undo(e.hideTemp(element))
   }
 
+  /*-
+  TODO: Docs
+
+  @function up.Preview#hideContent
+  @experimental
+  */
   hideContent(...args) {
     let [parent] = this._parseMutatorArgs(args, 'val')
     // Place all children in a wrapper so we can hide text nodes.
@@ -131,6 +250,13 @@ up.Preview = class Preview {
     this.undo(() => e.unwrap(wrapper))
   }
 
+  /*-
+  TODO: Docs
+  TODO: Link to /placeholders
+
+  @function up.Preview#showPlaceholder
+  @experimental
+  */
   showPlaceholder(...args) {
     let [parent, placeholderReference] = this._parseMutatorArgs(args, 'val', 'val')
 
@@ -151,20 +277,23 @@ up.Preview = class Preview {
     }
   }
 
-  _parseMutatorArgs(args, ...specs) {
-    let [element, ...rest] = u.args(args, ...specs)
-    // (1) up.fragment.get(undefined) returns undefined
-    // (2) up.fragment.get(Element) returns the element
-    // (3) this.fragment is undefined when opening a new layer
-    element = up.fragment.get(element, { layer: this.layer }) || this.fragment
-    return [element, ...rest]
-  }
+  /*-
+  TODO: Docs
 
+  @function up.Preview#swapContent
+  @experimental
+  */
   swapContent(parent, newContent) {
     this.hideContent(parent)
     this.insert(parent, newContent)
   }
 
+  /*-
+  TODO: Docs
+
+  @function up.Preview#openLayer
+  @experimental
+  */
   openLayer(content, options = {}) {
     let undoDismissValue = ':undo-preview'
 
@@ -189,6 +318,15 @@ up.Preview = class Preview {
     this.undo(() => overlay.dismiss(undoDismissValue, { preventable: false }))
 
     return overlay
+  }
+
+  _parseMutatorArgs(args, ...specs) {
+    let [element, ...rest] = u.args(args, ...specs)
+    // (1) up.fragment.get(undefined) returns undefined
+    // (2) up.fragment.get(Element) returns the element
+    // (3) this.fragment is undefined when opening a new layer
+    element = up.fragment.get(element, { layer: this.layer }) || this.fragment
+    return [element, ...rest]
   }
 
 }

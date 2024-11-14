@@ -77,6 +77,10 @@ When watching fields you may [show navigation feedback](/watch-options#showing-f
 while an async callback is running.
 
 
+@see loading-state
+@see placeholders
+@see previews
+
 @see [up-nav]
 @see .up-current
 @see .up-active
