@@ -1473,7 +1473,7 @@ up.link = (function() {
     - When the server rendered a matching fragment, it will be updated on the page. `[up-on-rendered]` is called with the [result](/up.RenderResult).
     - When [revalidation](/caching#revalidation) renders a second time, `[up-on-rendered]` is called again with the final result.
 
-    Also see [Running code after rendering](/render-hooks#running-code-after-rendering).
+    Also see [Running code after rendering](/render-lifecycle#running-code-after-rendering).
 
   @param [up-on-finished]
     A JavaScript snippet that is execvuted when no further DOM changes will be caused by this render pass.
@@ -1493,7 +1493,7 @@ up.link = (function() {
     second render pass. If no revalidation was performed, or if revalidation yielded an [empty response](/caching#when-nothing-changed),
     it is the result from the initial render pass.
 
-    Also see [Awaiting postprocessing](/render-hooks#awaiting-postprocessing).
+    Also see [Awaiting postprocessing](/render-lifecycle#awaiting-postprocessing).
 
   @param [up-on-offline]
     A JavaScript snippet that is executed when the fragment could not be loaded
@@ -1515,7 +1515,7 @@ up.link = (function() {
     The callback is also called when the render pass fails due to [network issues](/network-issues),
     or [aborts](/aborting-requests).
 
-    Also see [Handling errors](/render-hooks#handling-errors).
+    Also see [Handling errors](/render-lifecycle#handling-errors).
 
   @param [up-use-keep='true']
     Whether [`[up-keep]`](/up-keep) elements will be preserved in the updated fragment.

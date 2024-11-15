@@ -813,7 +813,7 @@ You can now freely control when an hungry element is updated:
 Some improvements have been to [hungry elements with animated transitions](/up-hungry#up-transition):
 
 - Hungry elements can now control their transition using `[up-duration]` and `[up-easing]` attributes.
-- Hungry elements with transitions now delay the [`up.render().finished`](/render-hooks#awaiting-postprocessing) promise.
+- Hungry elements with transitions now delay the [`up.render().finished`](/render-lifecycle#awaiting-postprocessing) promise.
 
 
 
@@ -1304,7 +1304,7 @@ Unpoly often needs to [derive a target selector](/target-derivation) from an ele
 
 #### Extensive render hooks
 
-Unpoly 3 expands your options to [hook into specific stages](/render-hooks) of the rendering process in order to change the result or handle error cases:
+Unpoly 3 expands your options to [hook into specific stages](/render-lifecycle) of the rendering process in order to change the result or handle error cases:
 
 - Rendering functions now accept a wide range of callback functions. Using a callback you may intervene at many points in the rendering lifecycle:
 
@@ -1841,7 +1841,7 @@ In our ongoing efforts to evolve Unpoly's documentation from an API reference to
 - [Targeting fragments](/targeting-fragments)
 - [Target derivation](/target-derivation)
 - [Skipping unnecessary rendering](/skipping-rendering)
-- [Render hooks](/render-hooks)
+- [Render hooks](/render-lifecycle)
 - [Aborting requests](/aborting-requests)
 - [Handling failed responses](/failed-responses)
 - [Attaching data to elements](/data)

@@ -119,6 +119,8 @@ up.Preview = class Preview {
   /*-
   TODO: Docs
 
+  When revalidating, the preview will be called after the expired content has been rendered.
+
   @property up.Preview#revalidating
   @stable
   */
@@ -132,9 +134,9 @@ up.Preview = class Preview {
   @function up.Preview#run
   @experimental
   */
-  run(value, data = {}) {
+  run(value, options = {}) {
     for (let fn of up.feedback.resolvePreviewFns(value)) {
-      this.undo(up.error.guard(fn, this, data))
+      this.undo(up.error.guard(fn, this, options))
     }
   }
 
@@ -220,7 +222,7 @@ up.Preview = class Preview {
   /*-
   TODO: Docs
 
-  @function up.Preview#addClass
+  @function up.Preview#insert
   @stable
   */
   insert(...args) {
