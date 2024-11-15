@@ -11770,6 +11770,13 @@ describe 'up.fragment', ->
         expect(nodes[0]).toBeElement()
         expect(nodes[0].outerHTML).toBe('<div>root</div>')
 
+    describe 'with a list of elements', ->
+
+      it 'returns that list', ->
+        list = [document.head, document.body]
+        nodes = up.fragment.provideNodes(list)
+        expect(nodes).toEqual([document.head, document.body])
+
   describe 'up.fragment.contains()', ->
 
     it 'returns whether the given element is an ancestor of an element matching the given selector', ->
