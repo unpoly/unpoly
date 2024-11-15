@@ -223,7 +223,7 @@ up.script = (function() {
   Exceptions thrown by compiler functions are logged to the browser's [error console](https://developer.mozilla.org/en-US/docs/Web/API/console/error).
   Unpoly also emits an [`error` event on `window`](https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event).
 
-  See [errors in user code](/render-hooks#errors-in-user-code) for details.
+  See [errors in user code](/render-lifecycle#errors-in-user-code) for details.
 
 
   ### Accessing information about the render pass
@@ -562,7 +562,7 @@ up.script = (function() {
   up.hello(element)
   ```
 
-  See [errors in user code](/render-hooks#errors-in-user-code) for details.
+  See [errors in user code](/render-lifecycle#errors-in-user-code) for details.
 
   @function up.hello
   @param {Element|jQuery|string} element
@@ -866,7 +866,7 @@ up.script = (function() {
 
   ### Emission time
 
-  The event is emitted at a particular time in the [render lifecycle](/render-hooks):
+  The event is emitted at a particular time in the [render lifecycle](/render-lifecycle):
 
    - *after* new content has been loaded from the server
    - *before* any fragments have been changed on the page.

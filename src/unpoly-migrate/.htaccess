@@ -102,3 +102,6 @@ RedirectPermanent /preview /previews
 RedirectPermanent /placeholder /placeholders
 RedirectPermanent /skeleton /placeholders
 RedirectPermanent /skeletons /placeholders
+
+RedirectPermanent /render-hooks /render-lifecycle
+

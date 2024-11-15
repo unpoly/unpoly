@@ -90,7 +90,7 @@ will be updated with new content.
 
 ## Preventing a render pass before it starts
 
-You can [prevent or interrupt](/render-hooks#preventing-a-render-pass) a render pass before it requests content
+You can [prevent or interrupt](/render-lifecycle#preventing-a-render-pass) a render pass before it requests content
 by calling `event.preventDefault()` on an event like `up:link:follow` or `up:form:submit`.
 
 

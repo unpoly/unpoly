@@ -287,7 +287,7 @@ up.motion = (function() {
 
   > [IMPORTANT]
   > The `up:motion:finish` event does **not** signal the end of an animation.
-  > For this see [awaiting postprocessing](/render-hooks#awaiting-postprocessing).
+  > For this see [awaiting postprocessing](/render-lifecycle#awaiting-postprocessing).
 
   @event up:motion:finish
   @param {Element} event.target
