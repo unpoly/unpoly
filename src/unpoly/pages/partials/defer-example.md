@@ -40,9 +40,7 @@ The server is now expected to respond with a page containing `#menu` with conten
 </div>
 ```
 
-> [note]
-> Make sure that the response does not contain `up-defer` in the tag as that will trigger an
-> infinite reload.
+The element in the response should no longer have an `[up-defer]` attribute. This would cause infinite reloading.
 
 The server is free to send additional elements or even a full HTML document.
 Only `#menu` will be updated on the page. Other elements from the response will be discarded.
