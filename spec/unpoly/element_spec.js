@@ -1870,6 +1870,32 @@ describe('up.element', function() {
     })
   })
 
+  describe('up.element.extractSingular()', function() {
+
+    it('returns an Element for an array of only that Element', function() {
+      let array = [document.head]
+      expect(up.element.extractSingular(array)).toBe(document.head)
+    })
+
+    it('throws an error for an array of multiple Elements', function() {
+      let array = [document.head, document.body]
+      let doExtract = () => up.element.extractSingular(array)
+      expect(doExtract).toThrowError(/Expected a single element/)
+    })
+
+    it('throws an error for an empty array', function() {
+      let array = []
+      let doExtract = () => up.element.extractSingular(array)
+      expect(doExtract).toThrowError(/Expected a single element/)
+    })
+
+    it('returns a Document for an array of only that Document', function() {
+      let array = [document]
+      expect(up.element.extractSingular(array)).toBe(document)
+    })
+
+  })
+
   describe('up.element.unwrap()', function() {
 
     it("attaches the element's children to its parent, then removes the element", function() {
