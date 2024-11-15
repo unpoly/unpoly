@@ -89,19 +89,20 @@ up.protocol = (function() {
   */
 
   /*-
-  This request header contains the [target selector](/targeting-fragments) for a successful fragment update.
+  The `X-Up-Target` request and response headers allow the server [read](#read) or [change](#write)
+  the [target selector](/targeting-fragments) for a fragment update.
 
   Server-side code is free to [optimize its response](/optimizing-responses) by only rendering HTML
   that matches the selector. For example, you might prefer to not render an
   expensive sidebar if the sidebar is not targeted.
 
   Unpoly will usually update a different selector in case the request fails.
-  This selector is sent as a second header, `X-Up-Fail-Target`.
+  This selector is sent as a different request header, `X-Up-Fail-Target`.
 
-  ### Example
 
-  The user updates a fragment `.menu`.
-  Unpoly automatically includes the following request header:
+  ### Detecting the targeted fragment on the server {#read}
+
+  When the user updates a fragment `.menu`,  Unpoly automatically includes the following request header:
 
   ```http
   X-Up-Target: .menu
@@ -118,7 +119,7 @@ up.protocol = (function() {
 
   @include vary-header-note
 
-  ### Changing the render target from the server
+  ### Changing the render target from the server {#write}
 
   The server may change the render target context by including a CSS selector as an `X-Up-Target` header
   in its response.
