@@ -4,9 +4,9 @@ const u = up.util
 A queued render task.
 
 Rendering functions like `up.render()` or `up.submit()` return an `up.RenderJob`.
-Callers can inspect the job's [options](/up.RenderJob.prototype.options) or [`await` its completion](/render-hooks#running-code-after-rendering).
+Callers can inspect the job's [options](/up.RenderJob.prototype.options) or [`await` its completion](/render-lifecycle#running-code-after-rendering).
 
-See [render hooks](/render-hooks) for examples for awaiting rendering completion
+See [render hooks](/render-lifecycle) for examples for awaiting rendering completion
 and how to handle errors.
 
 ## Example
@@ -127,7 +127,7 @@ up.RenderJob = class RenderJob {
   The promise will reject when the server responds with a [failed HTTP status](/failed-responses),
   when any request is [aborted](/aborting-requests) or when there is [network issue](/network-issues).
 
-  See [render hooks](/render-hooks) for examples for awaiting rendering completion.
+  See [render hooks](/render-lifecycle) for examples for awaiting rendering completion.
 
   @property up.RenderJob#finished
   @param {Promise<up.RenderResult>} finished
@@ -226,7 +226,7 @@ up.RenderJob = class RenderJob {
   when the request is [aborted](/aborting-requests) or when there is
   [network issue](/network-issues).
 
-  See [render hooks](/render-hooks) for examples for awaiting rendering completion
+  See [render hooks](/render-lifecycle) for examples for awaiting rendering completion
   and how to handle errors.
 
   @function up.RenderJob#then

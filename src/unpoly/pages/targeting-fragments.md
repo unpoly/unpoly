@@ -270,7 +270,7 @@ The server may elect to render a different target by seting an `X-Up-Target` res
 
 Events like `up:link:follow`, `up:form:submit` and `up:fragment:loaded` also let you change the target
 by setting `event.renderOptions.target` to a new selector.
-See [Changing options before rendering](/render-hooks#changing-options-before-rendering) for an example.
+See [Changing options before rendering](/render-lifecycle#changing-options-before-rendering) for an example.
 
 
 @page targeting-fragments
