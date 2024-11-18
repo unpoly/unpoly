@@ -305,6 +305,8 @@ task.innerText = text
 preview.insert(form, 'afterend', task)
 ```
 
+Do we really need cloneTemplate when we (1) can also mention the template in insert() ? 
+
 
 ## Delaying previews
 

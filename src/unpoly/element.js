@@ -849,7 +849,7 @@ up.element = (function() {
     if (nodes.length === 1 && u.isElementLike(nodes[0])) {
       return nodes[0]
     } else {
-      up.fail('Expected a single element, but got %o', nodes)
+      up.fail('Expected a single element, but got %d elements', nodes.length)
     }
   }
 
