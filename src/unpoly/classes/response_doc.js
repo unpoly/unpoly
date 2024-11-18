@@ -49,7 +49,6 @@ up.ResponseDoc = class ResponseDoc {
       }
     } else { // Element
       this._document = this._buildFauxDocument(value)
-      this._isFullDocument = value.matches('html')
     }
   }
 
