@@ -5,15 +5,15 @@ const FULL_DOCUMENT_PATTERN = /^\s*<(html|!DOCTYPE)\b/i
 
 up.ResponseDoc = class ResponseDoc {
 
-  constructor({ document, fragment, content, target, origin, cspNonces, match }) {
+  constructor({ document, fragment, content, target, origin, data, cspNonces, match }) {
     if (document) {
-      this._parseDocument(document, origin)
+      this._parseDocument(document, origin, data)
     } else if (fragment) {
-      this._parseFragment(fragment, origin)
+      this._parseFragment(fragment, origin, data)
     } else {
       // Parsing { inner } is the last option we try. It should always succeed in case someone
       // tries `up.layer.open()` without any args. Hence we default the innerHTML to an empty string.
-      this._parseContent(content || '', origin, target)
+      this._parseContent(content || '', origin, target, data)
     }
 
     this._cspNonces = cspNonces
@@ -28,12 +28,18 @@ up.ResponseDoc = class ResponseDoc {
     this._match = match
   }
 
-  _parseDocument(value, origin) {
+  _parseDocument(value, origin, data) {
     if (value instanceof Document) {  // Document
       this._document = value
       this._isFullDocument = true
     } else if (u.isString(value)) { // String of HTML or maybe a <template> selector
-      this._document = up.fragment.provideSingularNode(value, { origin, htmlParser: this._parseDocumentFromHTML.bind(this) })
+      // TODO: This control flow is messed up. Maybe extract the full document parsing?
+      let nodes = up.fragment.provideNodes(value, { origin, data, htmlParser: this._parseDocumentFromHTML.bind(this) })
+      if (nodes[0] instanceof Document) {
+        this._document = nodes[0]
+      } else {
+        this._document = this._buildFauxDocument(nodes)
+      }
     } else { // Element
       this._document = this._buildFauxDocument(value)
       this._isFullDocument = value.matches('html')
@@ -55,24 +61,26 @@ up.ResponseDoc = class ResponseDoc {
     return e.createBrokenDocumentFromHTML(html)
   }
 
-  _parseFragment(value, origin) {
-    let parsed = up.fragment.provideSingularNode(value, { origin })
+  _parseFragment(value, origin, data) {
+    let parsed = up.fragment.provideSingularNode(value, { origin, data })
     this._document = this._buildFauxDocument(parsed)
   }
 
-  _parseContent(value, origin, target) {
+  _parseContent(value, origin, target, data) {
     if (!target) up.fail("must pass a { target } when passing { content }")
 
     // We are only provided with inner child content.
     // To simplify other code we wrap it in an element matching { target }.
     let simplifiedTarget = u.map(up.fragment.parseTargetSteps(target), 'selector').join()
-    let nodes = up.fragment.provideNodes(value, { origin })
+    let nodes = up.fragment.provideNodes(value, { origin, data })
     let matchingElement = e.createFromSelector(simplifiedTarget, { content: nodes })
 
     this._document = this._buildFauxDocument(matchingElement)
   }
 
-  _buildFauxDocument(node) {
+  _buildFauxDocument(nodes) {
+    nodes = u.wrapList(nodes)
+
     // We're creating a faux document to wrap around a fragment root that is not already a `Document`.
     // This has two motivations:
     //
@@ -80,13 +88,14 @@ up.ResponseDoc = class ResponseDoc {
     // (2) We can select any element (including the fragment root) by fauxDocument.querySelector()
     //     and do not use a more expensive subtree() operation.
     let fauxDocument = document.createElement('up-document')
-    fauxDocument.append(node)
-    fauxDocument.documentElement = node
+    fauxDocument.append(...nodes)
     return fauxDocument
   }
 
   rootSelector() {
-    return up.fragment.toTarget(this._document.documentElement)
+    // We want to say this._document.documentElement, but we sometimes have
+    // a faux document with multiple children.
+    return up.fragment.toTarget(this._document.children[0])
   }
 
   get title() {
