@@ -2908,12 +2908,10 @@ up.fragment = (function() {
     }
 
     if (u.isElement(value) && value.matches('template')) {
-      value = useTemplate(value, data)
+      value = useTemplate(value, data, { htmlParser })
     }
 
     value = u.wrapList(value)
-
-    console.debug("effective data: %o", data)
 
     // Only set node.upTemplateData when we have new data.
     // Otherwise we may remove data that has already been set, and this function would
@@ -2937,16 +2935,16 @@ up.fragment = (function() {
   @function useTemplate
   @internal
   */
-  function useTemplate(templateOrSelector, data = {}, { origin } = {}) {
+  function useTemplate(templateOrSelector, data = {}, { origin, htmlParser } = {}) {
     let template = getSmart(templateOrSelector, { origin })
     let event = up.emit(template, 'up:template:use', { data, nodes: null, log: ["Using template %o", templateOrSelector] })
-    let nodes = event.nodes ?? defaultTemplateNodes(template)
+    let nodes = event.nodes ?? defaultTemplateNodes(template, htmlParser)
     return nodes
   }
 
-  function defaultTemplateNodes(template) {
+  function defaultTemplateNodes(template, htmlParser = e.parseNodesFromHTML) {
     let templateText = template.innerHTML
-    return up.element.parseNodesFromHTML(templateText)
+    return htmlParser(templateText)
   }
 
   /*-

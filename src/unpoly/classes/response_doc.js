@@ -33,11 +33,18 @@ up.ResponseDoc = class ResponseDoc {
       this._document = value
       this._isFullDocument = true
     } else if (u.isString(value)) { // String of HTML or maybe a <template> selector
-      // TODO: This control flow is messed up. Maybe extract the full document parsing?
-      let nodes = up.fragment.provideNodes(value, { origin, data, htmlParser: this._parseDocumentFromHTML.bind(this) })
+      // Remember whether the HTML originally contained a full document.
+      // Asset comparison needs to know whether the document has a <head> because
+      // e.createBrokenDocumentFromHTML() always creates an (empty) <head> if missing in the HTML.
+      this._isFullDocument = FULL_DOCUMENT_PATTERN.test(value)
+
+      let nodes = up.fragment.provideNodes(value, { origin, data, htmlParser: e.createBrokenDocumentFromHTML })
+
       if (nodes[0] instanceof Document) {
         this._document = nodes[0]
       } else {
+        // If value is a template reference, a custom up:template:use handler
+        // may have passed us a non-document.
         this._document = this._buildFauxDocument(nodes)
       }
     } else { // Element
@@ -47,16 +54,6 @@ up.ResponseDoc = class ResponseDoc {
   }
 
   _parseDocumentFromHTML(html) {
-    // Remember that we need to fix <script>, <noscript> and media elements later.
-    // We could fix these elements right now for the entire document, but since we will only use
-    // a fragment, this would cause excessive work.
-    this._isDocumentBroken = true
-
-    // Remember whether the HTML originally contained a full document.
-    // Asset comparison needs to know whether the document has a <head> because
-    // e.createBrokenDocumentFromHTML() always creates an (empty) <head> if missing in the HTML.
-    this._isFullDocument = FULL_DOCUMENT_PATTERN.test(html)
-
     // This function will always return a Document, even if `html` is multiple sibling nodes.
     return e.createBrokenDocumentFromHTML(html)
   }
@@ -227,9 +224,11 @@ up.ResponseDoc = class ResponseDoc {
     // Rewrite per-request CSP nonces to match that of the current page.
     up.NonceableCallback.adoptNonces(element, this._cspNonces)
 
-    // Now that these elements is attached to the current document, we can re-create them
-    // in the correct browsing context.
-    if (this._isDocumentBroken) {
+    // If we plucked elements from a Document we assume that document was created by DOMParser,
+    // which operates in a different context and creates inert elements.
+    if (this._document instanceof Document) {
+      // Now that these elements is attached to the current document, we can re-create them
+      // in the correct browsing context.
       let brokenElements = e.subtree(element, ':is(noscript,script,audio,video):not(.up-keeping, .up-keeping *)')
       u.each(brokenElements, e.fixParserDamage)
     }
