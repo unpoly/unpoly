@@ -38,8 +38,12 @@ up.ResponseDoc = class ResponseDoc {
       // e.createBrokenDocumentFromHTML() always creates an (empty) <head> if missing in the HTML.
       this._isFullDocument = FULL_DOCUMENT_PATTERN.test(value)
 
-      let nodes = up.fragment.provideNodes(value, { origin, data, htmlParser: e.createBrokenDocumentFromHTML })
+      let htmlParser = (html) => [e.createBrokenDocumentFromHTML(html)]
+      let nodes = up.fragment.provideNodes(value, { origin, data, htmlParser })
 
+      // If value is HTML, e.createBrokenDocumentFromHTML() will parse it into a Document.
+      // Even if value is only a fragment, or multiple sibling nodes, it will always be
+      // wrapped into a Document.
       if (nodes[0] instanceof Document) {
         this._document = nodes[0]
       } else {
