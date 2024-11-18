@@ -2899,7 +2899,7 @@ up.fragment = (function() {
 
     if (u.isString(value) && STARTS_WITH_SELECTOR.test(value)) {
       let [parsedValue, parsedData] = u.parseScalarJSONPairs(value)[0]
-      if (parsedData) data = { ...data, ...parsedData }
+      data = { ...data, ...parsedData }
       value = up.fragment.get(parsedValue, { layer: 'closest', origin, originLayer }) || up.fail(`Cannot find template "%s"`, value)
     }
 
@@ -2911,20 +2911,7 @@ up.fragment = (function() {
       value = useTemplate(value, data, { htmlParser })
     }
 
-    value = u.wrapList(value)
-
-    // Only set node.upTemplateData when we have new data.
-    // Otherwise we may remove data that has already been set, and this function would
-    // no longer be idempotent.
-    if (data) {
-      for (let node of value) {
-        if (u.isElement(node)) {
-          node.upTemplateData = data
-        }
-      }
-    }
-
-    return value
+    return u.wrapList(value)
   }
 
   function provideSingularNode(...args) {
@@ -2936,9 +2923,12 @@ up.fragment = (function() {
   @internal
   */
   function useTemplate(templateOrSelector, data = {}, { origin, htmlParser } = {}) {
-    let template = getSmart(templateOrSelector, { origin })
+    let template = getSmart(templateOrSelector, { origin }) || up.fail('Template not found: %o', templateOrSelector)
     let event = up.emit(template, 'up:template:use', { data, nodes: null, log: ["Using template %o", templateOrSelector] })
     let nodes = event.nodes ?? defaultTemplateNodes(template, htmlParser)
+    for (let node of nodes) {
+      node.upTemplateData = data
+    }
     return nodes
   }
 
@@ -3104,6 +3094,7 @@ up.fragment = (function() {
     insertTemp,
     provideNodes,
     provideSingularNode,
+    useTemplate,
     // swapTemp,
     // timer: scheduleTimer
   }
@@ -3114,6 +3105,7 @@ up.destroy = up.fragment.destroy
 up.render = up.fragment.render
 up.navigate = up.fragment.navigate
 up.visit = up.fragment.visit
+up.template = { use: up.fragment.useTemplate }
 
 /*-
 Returns the current [context](/context).

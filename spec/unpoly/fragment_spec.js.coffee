@@ -11929,3 +11929,89 @@ describe 'up.fragment', ->
       step2 = { placement: 'swap', oldElement: element, selector: '.element', scroll: false }
 
       expect(up.fragment.compressNestedSteps([step1, step2])).toEqual [step1]
+
+  describe 'up.template.use()', ->
+
+    it 'clones the given <template> Element', ->
+      template = htmlFixture("""
+        <template id="my-template">
+          foo<b>bar</b>baz
+        </template>
+      """)
+      nodes = up.template.use(template)
+
+      expect(nodes[0]).toBeTextNode('foo')
+      expect(nodes[1].outerHTML).toBe('<b>bar</b>')
+      expect(nodes[2]).toBeTextNode('baz')
+
+      # Make sure we made a copy and did not re-attach existing nodes
+      expect(nodes[0]).not.toBe(template.content.childNodes[0])
+      expect(nodes[1]).not.toBe(template.content.childNodes[1])
+      expect(nodes[2]).not.toBe(template.content.childNodes[2])
+
+    it 'looks up a template by selector', ->
+      template = htmlFixture("""
+        <template id="my-template">
+          foo<b>bar</b>baz
+        </template>
+      """)
+      nodes = up.template.use('#my-template')
+
+      expect(nodes[0]).toBeTextNode('foo')
+      expect(nodes[1].outerHTML).toBe('<b>bar</b>')
+      expect(nodes[2]).toBeTextNode('baz')
+
+    it 'throws an error if the a template selector cannot be matched', ->
+      doUse = -> up.template.use('#my-template')
+      expect(doUse).toThrowError(/Template not found/i)
+
+    it 'allows to register a template engine with up:template:use', ->
+      template = htmlFixture("""
+        <template id="my-template" type='text/minimustache'>
+          Hello, <b>{{name}}</b>!
+        </template>
+      """)
+
+      templateHandler = jasmine.createSpy('up:template:use').and.callFake (event) ->
+        html = event.target.innerHTML
+        html = html.replace('{{name}}', event.data.name)
+        event.nodes = up.element.parseNodesFromHTML(html)
+
+      up.on('up:template:use', 'template[type="text/minimustache"]', templateHandler)
+
+      nodes = up.template.use('#my-template', { name: "Alice" })
+      expect(templateHandler).toHaveBeenCalledWith(jasmine.objectContaining(target: template, data: { name: "Alice" }), template, jasmine.anything())
+
+      expect(nodes[0]).toBeTextNode('Hello, ')
+      expect(nodes[1].outerHTML).toBe('<b>Alice</b>')
+      expect(nodes[2]).toBeTextNode('!')
+
+    it 'compiles an element cloned from a <template> with the second data argument', ->
+      compilerFn = jasmine.createSpy('compiler fn')
+      up.compiler('#target', compilerFn)
+
+      template = htmlFixture("""
+        <template id="target-template">
+          <div id="target">
+            target from template
+          </div>
+        </template>
+      """)
+
+      target = htmlFixture("""
+        <div id="target">
+          old target
+        </div>
+      """)
+
+      expect(compilerFn).not.toHaveBeenCalled()
+
+      nodes = up.template.use('#target-template', { foo: 1, bar: 2 })
+      up.render({ fragment: nodes })
+
+      await wait()
+
+      expect('#target').toHaveText('target from template')
+      expect(compilerFn).toHaveBeenCalled()
+      expect(compilerFn.calls.mostRecent().args[0]).toMatchSelector('#target')
+      expect(compilerFn.calls.mostRecent().args[1]).toEqual({ foo: 1, bar: 2 })
