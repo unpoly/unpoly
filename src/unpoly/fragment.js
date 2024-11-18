@@ -2891,29 +2891,33 @@ up.fragment = (function() {
 
   const STARTS_WITH_SELECTOR = /^([\w-]+|\*)?(#|\.|[:[][a-z-]{3,})/
 
-  function provideNodes(value, { origin, originLayer, callbackArgs = [], htmlParser = e.parseNodesFromHTML } = {}) {
-    let data
-
+  function provideNodes(value, { origin, originLayer, data, callbackArgs = [], htmlParser = e.parseNodesFromHTML } = {}) {
     // A function can return a string of HTML, an Element or a selector string.
     if (u.isFunction(value)) {
       value = value(...callbackArgs)
     }
 
     if (u.isString(value) && STARTS_WITH_SELECTOR.test(value)) {
-      [value, data] = u.parseScalarJSONPairs(value)[0]
-      value = up.fragment.get(value, { layer: 'closest', origin, originLayer }) || up.fail(`Cannot find template "%s"`, value)
-    }
-
-    if (u.isElement(value) && value.matches('template')) {
-      value = value.innerHTML
+      let [parsedValue, parsedData] = u.parseScalarJSONPairs(value)[0]
+      if (parsedData) data = { ...data, ...parsedData }
+      value = up.fragment.get(parsedValue, { layer: 'closest', origin, originLayer }) || up.fail(`Cannot find template "%s"`, value)
     }
 
     if (u.isString(value)) {
       value = htmlParser(value)
     }
 
+    if (u.isElement(value) && value.matches('template')) {
+      value = useTemplate(value, data)
+    }
+
     value = u.wrapList(value)
 
+    console.debug("effective data: %o", data)
+
+    // Only set node.upTemplateData when we have new data.
+    // Otherwise we may remove data that has already been set, and this function would
+    // no longer be idempotent.
     if (data) {
       for (let node of value) {
         if (u.isElement(node)) {
@@ -2927,6 +2931,22 @@ up.fragment = (function() {
 
   function provideSingularNode(...args) {
     return e.extractSingular(provideNodes(...args))
+  }
+
+  /*-
+  @function useTemplate
+  @internal
+  */
+  function useTemplate(templateOrSelector, data = {}, { origin } = {}) {
+    let template = getSmart(templateOrSelector, { origin })
+    let event = up.emit(template, 'up:template:use', { data, nodes: null, log: ["Using template %o", templateOrSelector] })
+    let nodes = event.nodes ?? defaultTemplateNodes(template)
+    return nodes
+  }
+
+  function defaultTemplateNodes(template) {
+    let templateText = template.innerHTML
+    return up.element.parseNodesFromHTML(templateText)
   }
 
   /*-

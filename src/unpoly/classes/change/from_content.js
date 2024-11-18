@@ -102,6 +102,7 @@ up.Change.FromContent = class FromContent extends up.Change {
       'html',
       'cspNonces',
       'origin',
+      'data',
     ])
     up.migrate.handleResponseDocOptions?.(docOptions)
 
