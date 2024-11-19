@@ -47,7 +47,7 @@ up.ResponseDoc = class ResponseDoc {
       if (nodes[0] instanceof Document) {
         this._document = nodes[0]
       } else {
-        // If value is a template reference, a custom up:template:use handler
+        // If value is a template reference, a custom up:template:clone handler
         // may have passed us a non-document.
         this._document = this._buildFauxDocument(nodes)
       }

@@ -299,6 +299,10 @@ up.Preview = class Preview {
     }
   }
 
+  cloneTemplate(selectorOrElement, data) {
+    return up.template.clone(selectorOrElement, data, { origin: this.origin })
+  }
+
   /*-
   TODO: Docs
 
