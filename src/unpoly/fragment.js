@@ -2908,7 +2908,7 @@ up.fragment = (function() {
     }
 
     if (u.isElement(value) && value.matches('template')) {
-      value = useTemplate(value, data, { htmlParser })
+      value = cloneTemplate(value, data, { htmlParser })
     }
 
     return u.wrapList(value)
@@ -2919,12 +2919,12 @@ up.fragment = (function() {
   }
 
   /*-
-  @function useTemplate
+  @function cloneTemplate
   @internal
   */
-  function useTemplate(templateOrSelector, data = {}, { origin, htmlParser } = {}) {
+  function cloneTemplate(templateOrSelector, data = {}, { origin, htmlParser } = {}) {
     let template = getSmart(templateOrSelector, { origin }) || up.fail('Template not found: %o', templateOrSelector)
-    let event = up.emit(template, 'up:template:use', { data, nodes: null, log: ["Using template %o", templateOrSelector] })
+    let event = up.emit(template, 'up:template:clone', { data, nodes: null, log: ["Using template %o", templateOrSelector] })
     let nodes = event.nodes ?? defaultTemplateNodes(template, htmlParser)
     for (let node of nodes) {
       node.upTemplateData = data
@@ -3094,7 +3094,7 @@ up.fragment = (function() {
     insertTemp,
     provideNodes,
     provideSingularNode,
-    useTemplate,
+    cloneTemplate,
     // swapTemp,
     // timer: scheduleTimer
   }
@@ -3105,7 +3105,7 @@ up.destroy = up.fragment.destroy
 up.render = up.fragment.render
 up.navigate = up.fragment.navigate
 up.visit = up.fragment.visit
-up.template = { use: up.fragment.useTemplate }
+up.template = { clone: up.fragment.cloneTemplate }
 
 /*-
 Returns the current [context](/context).
