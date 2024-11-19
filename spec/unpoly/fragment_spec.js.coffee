@@ -2751,7 +2751,7 @@ describe 'up.fragment', ->
 
             templateHandler = jasmine.createSpy('up:template:clone').and.callFake (event) ->
               html = event.target.innerHTML
-              html = html.replace('{{name}}', event.data.name)
+              html = html.replace(/{{(\w+)}}/g, (_match, variable) -> event.data[variable])
               event.nodes = up.element.parseNodesFromHTML(html)
 
             up.on('up:template:clone', 'template[type="text/minimustache"]', templateHandler)
@@ -11733,7 +11733,7 @@ describe 'up.fragment', ->
 
         templateHandler = jasmine.createSpy('up:template:clone').and.callFake (event) ->
           html = event.target.innerHTML
-          html = html.replace('{{name}}', event.data.name)
+          html = html.replace(/{{(\w+)}}/g, (_match, variable) -> event.data[variable])
           event.nodes = up.element.parseNodesFromHTML(html)
 
         up.on('up:template:clone', 'template[type="text/minimustache"]', templateHandler)
@@ -11974,7 +11974,7 @@ describe 'up.fragment', ->
 
       templateHandler = jasmine.createSpy('up:template:clone').and.callFake (event) ->
         html = event.target.innerHTML
-        html = html.replace('{{name}}', event.data.name)
+        html = html.replace(/{{(\w+)}}/g, (_match, variable) -> event.data[variable])
         event.nodes = up.element.parseNodesFromHTML(html)
 
       up.on('up:template:clone', 'template[type="text/minimustache"]', templateHandler)
