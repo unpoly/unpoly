@@ -2734,7 +2734,7 @@ describe 'up.fragment', ->
             expect(compilerFn.calls.mostRecent().args[0]).toMatchSelector('#target')
             expect(compilerFn.calls.mostRecent().args[1]).toEqual({ foo: 1, bar: 2 })
 
-          it 'passes a { data } option to a custom up:template:use handler', ->
+          it 'passes a { data } option to a custom up:template:clone handler', ->
             template = htmlFixture("""
               <template id="target-template" type='text/minimustache'>
                 <div id="target">
@@ -2749,12 +2749,12 @@ describe 'up.fragment', ->
               </div>
             """)
 
-            templateHandler = jasmine.createSpy('up:template:use').and.callFake (event) ->
+            templateHandler = jasmine.createSpy('up:template:clone').and.callFake (event) ->
               html = event.target.innerHTML
               html = html.replace('{{name}}', event.data.name)
               event.nodes = up.element.parseNodesFromHTML(html)
 
-            up.on('up:template:use', 'template[type="text/minimustache"]', templateHandler)
+            up.on('up:template:clone', 'template[type="text/minimustache"]', templateHandler)
 
             up.render({ fragment: '#target-template', data: { name: "Alice" } })
             await wait()
@@ -11724,19 +11724,19 @@ describe 'up.fragment', ->
         expect(nodes[1]).not.toBe(template.content.childNodes[1])
         expect(nodes[2]).not.toBe(template.content.childNodes[2])
 
-      it 'allows to register a template engine with up:template:use', ->
+      it 'allows to register a template engine with up:template:clone', ->
         template = htmlFixture("""
           <template id="my-template" type='text/minimustache'>
             Hello, <b>{{name}}</b>!
           </template>
         """)
 
-        templateHandler = jasmine.createSpy('up:template:use').and.callFake (event) ->
+        templateHandler = jasmine.createSpy('up:template:clone').and.callFake (event) ->
           html = event.target.innerHTML
           html = html.replace('{{name}}', event.data.name)
           event.nodes = up.element.parseNodesFromHTML(html)
 
-        up.on('up:template:use', 'template[type="text/minimustache"]', templateHandler)
+        up.on('up:template:clone', 'template[type="text/minimustache"]', templateHandler)
 
         nodes = up.fragment.provideNodes('#my-template { name: "Alice" }')
 
@@ -11930,7 +11930,7 @@ describe 'up.fragment', ->
 
       expect(up.fragment.compressNestedSteps([step1, step2])).toEqual [step1]
 
-  describe 'up.template.use()', ->
+  describe 'up.template.clone()', ->
 
     it 'clones the given <template> Element', ->
       template = htmlFixture("""
@@ -11938,7 +11938,7 @@ describe 'up.fragment', ->
           foo<b>bar</b>baz
         </template>
       """)
-      nodes = up.template.use(template)
+      nodes = up.template.clone(template)
 
       expect(nodes[0]).toBeTextNode('foo')
       expect(nodes[1].outerHTML).toBe('<b>bar</b>')
@@ -11955,31 +11955,31 @@ describe 'up.fragment', ->
           foo<b>bar</b>baz
         </template>
       """)
-      nodes = up.template.use('#my-template')
+      nodes = up.template.clone('#my-template')
 
       expect(nodes[0]).toBeTextNode('foo')
       expect(nodes[1].outerHTML).toBe('<b>bar</b>')
       expect(nodes[2]).toBeTextNode('baz')
 
     it 'throws an error if the a template selector cannot be matched', ->
-      doUse = -> up.template.use('#my-template')
+      doUse = -> up.template.clone('#my-template')
       expect(doUse).toThrowError(/Template not found/i)
 
-    it 'allows to register a template engine with up:template:use', ->
+    it 'allows to register a template engine with up:template:clone', ->
       template = htmlFixture("""
         <template id="my-template" type='text/minimustache'>
           Hello, <b>{{name}}</b>!
         </template>
       """)
 
-      templateHandler = jasmine.createSpy('up:template:use').and.callFake (event) ->
+      templateHandler = jasmine.createSpy('up:template:clone').and.callFake (event) ->
         html = event.target.innerHTML
         html = html.replace('{{name}}', event.data.name)
         event.nodes = up.element.parseNodesFromHTML(html)
 
-      up.on('up:template:use', 'template[type="text/minimustache"]', templateHandler)
+      up.on('up:template:clone', 'template[type="text/minimustache"]', templateHandler)
 
-      nodes = up.template.use('#my-template', { name: "Alice" })
+      nodes = up.template.clone('#my-template', { name: "Alice" })
       expect(templateHandler).toHaveBeenCalledWith(jasmine.objectContaining(target: template, data: { name: "Alice" }), template, jasmine.anything())
 
       expect(nodes[0]).toBeTextNode('Hello, ')
@@ -12006,7 +12006,7 @@ describe 'up.fragment', ->
 
       expect(compilerFn).not.toHaveBeenCalled()
 
-      nodes = up.template.use('#target-template', { foo: 1, bar: 2 })
+      nodes = up.template.clone('#target-template', { foo: 1, bar: 2 })
       up.render({ fragment: nodes })
 
       await wait()
