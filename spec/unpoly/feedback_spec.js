@@ -202,6 +202,46 @@ describe('up.feedback', function() {
 
         })
 
+        describe('setting up.layer.current', function() {
+
+          it('sets up.layer.current when applying a preview to a non-current layer', async function() {
+            makeLayers(2)
+            expect(up.layer.current).toBeOverlay()
+
+            let layerSpy = jasmine.createSpy('layer spy')
+            let previewFn = jasmine.createSpy('preview function').and.callFake(() => layerSpy(up.layer.current))
+            up.preview('my-preview', previewFn)
+
+            up.render({ preview: 'my-preview', url: '/path', target: 'body', layer: 'root' })
+            await wait()
+
+            expect(previewFn).toHaveBeenCalled()
+            expect(layerSpy).toHaveBeenCalledWith(up.layer.root)
+          })
+
+          it('sets up.layer.current when reverting a preview to a non-current layer', async function() {
+            makeLayers(2)
+            expect(up.layer.current).toBeOverlay()
+
+            let layerSpy = jasmine.createSpy('layer spy')
+            let undoFn = jasmine.createSpy('undo').and.callFake(() => layerSpy(up.layer.current))
+            let previewFn = jasmine.createSpy('preview function').and.callFake(() => undoFn)
+            up.preview('my-preview', previewFn)
+
+            let renderPromise = up.render({ preview: 'my-preview', url: '/path', target: 'body', layer: 'root' })
+            await wait()
+
+            expect(previewFn).toHaveBeenCalled()
+
+            up.network.abort()
+            await expectAsync(renderPromise).toBeRejectedWith(jasmine.any(up.Aborted))
+
+            expect(undoFn).toHaveBeenCalled()
+            expect(layerSpy).toHaveBeenCalledWith(up.layer.root)
+          })
+
+        })
+
         describe('reasons why previews are not shown', function() {
 
           it('does not show a preview when preloading a link with preview', async function() {
