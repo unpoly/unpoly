@@ -50,8 +50,33 @@ You can pass an option `[up-layer="swap"]` or `[up-layer="shatter"]` to replace 
 | `shatter`  | Closes all overlays and opens a new overlay.                           |
 
 
-Opening layers from JavaScript
-------------------------------
+Opening overlays from local content
+------------------------------------
+
+The `[up-content]` attribute lets you open an overlay without going through the server:
+
+```html
+<a up-layer="new popup" up-content="<p>Helpful instructions here</p>"> <!-- mark-phrase "up-content" -->
+  Help
+</a>
+```
+
+Instead of embedding a HTML string, you can also refer to a [template](/templates):
+
+```html
+<a up-layer="new popup" up-content="#help"> <!-- mark-phrase "up-content" -->
+  Help
+</a>
+
+<template id="help">
+  <p>Helpful instructions here</p>
+</template>
+```
+
+
+
+Opening overlays from JavaScript
+--------------------------------
 
 When rendering fragments from JavaScript, you can pass `{ layer: 'new' }` to open the fragment in a new overlay:
 

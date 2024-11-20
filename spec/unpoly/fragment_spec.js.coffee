@@ -2444,7 +2444,7 @@ describe 'up.fragment', ->
 
         it 'can render an NodeList with mixed Element and Text nodes', ->
           # Make a copy as it is a live list that we're going to mutate, then compare
-          givenNodes = [...up.element.parseNodesFromHTML('foo <b>bar</b> baz')]
+          givenNodes = [...up.element.createNodesFromHTML('foo <b>bar</b> baz')]
           expect(givenNodes).toHaveLength(3)
 
           target = htmlFixture("""
@@ -2752,7 +2752,7 @@ describe 'up.fragment', ->
             templateHandler = jasmine.createSpy('up:template:clone').and.callFake (event) ->
               html = event.target.innerHTML
               html = html.replace(/{{(\w+)}}/g, (_match, variable) -> event.data[variable])
-              event.nodes = up.element.parseNodesFromHTML(html)
+              event.nodes = up.element.createNodesFromHTML(html)
 
             up.on('up:template:clone', 'template[type="text/minimustache"]', templateHandler)
 
@@ -6757,6 +6757,24 @@ describe 'up.fragment', ->
               expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
               expect('.target').toHaveVisibleText('new text')
 
+          it 'does not execute a script[type=module]', asyncSpec (next) ->
+            fixture('.target', text: 'old text')
+
+            up.render fragment: """
+              <div class="target">
+                new text
+                <script type="module">
+                  window.scriptTagExecuted()
+                </script>
+              </div>
+              """
+
+            next.after 100, =>
+              expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+              expect(document).toHaveSelector('.target')
+              expect(document).not.toHaveSelector('.target script[type="module"]')
+              expect('.target').toHaveVisibleText('new text')
+
           it 'does not execute inline script tags from a document response', asyncSpec (next) ->
             fixture('.target', text: 'old text')
 
@@ -6877,6 +6895,26 @@ describe 'up.fragment', ->
             expect(window.scriptTagExecuted).toHaveBeenCalled()
             expect(document).toHaveSelector('.target')
             expect(document).toHaveSelector('.target script[type="text/javascript"]')
+            expect('.target').toHaveVisibleText(/new text/)
+
+          it 'executes a script[type=module] inside the updated fragment', ->
+            fixture('.target', text: 'old text')
+
+            up.render fragment: """
+              <div class="target">
+                new text
+                <script type="module">
+                  window.scriptTagExecuted()
+                </script>
+              </div>
+              """
+
+            # Timing is delayed
+            await wait(50)
+
+            expect(window.scriptTagExecuted).toHaveBeenCalled()
+            expect(document).toHaveSelector('.target')
+            expect(document).toHaveSelector('.target script[type="module"]')
             expect('.target').toHaveVisibleText(/new text/)
 
           it 'executes inline script tags that are itself the target', ->
@@ -11218,7 +11256,7 @@ describe 'up.fragment', ->
         expect(compilerFunction.calls.mostRecent().args[0]).toBe(reference.children[0])
 
       it 'inserts a NodeList from mixed Element and Text nodes', ->
-        givenNodes = up.element.parseNodesFromHTML('foo <b>bar</b> baz')
+        givenNodes = up.element.createNodesFromHTML('foo <b>bar</b> baz')
         expect(givenNodes.length).toBe(3)
         # Make a copy because it's a live list and we're going to compare it below
         givenNodes = u.copy(givenNodes)
@@ -11734,9 +11772,39 @@ describe 'up.fragment', ->
         templateHandler = jasmine.createSpy('up:template:clone').and.callFake (event) ->
           html = event.target.innerHTML
           html = html.replace(/{{(\w+)}}/g, (_match, variable) -> event.data[variable])
-          event.nodes = up.element.parseNodesFromHTML(html)
+          event.nodes = up.element.createNodesFromHTML(html)
 
         up.on('up:template:clone', 'template[type="text/minimustache"]', templateHandler)
+
+        nodes = up.fragment.provideNodes('#my-template { name: "Alice" }')
+
+        expect(templateHandler).toHaveBeenCalledWith(jasmine.objectContaining(target: template, data: { name: "Alice" }), jasmine.anything(), jasmine.anything())
+        expect(nodes[0]).toBeTextNode('Hello, ')
+        expect(nodes[1].outerHTML).toBe('<b>Alice</b>')
+        expect(nodes[2]).toBeTextNode('!')
+
+    describe 'with a script element', ->
+
+      it 'returns an list of the given element without making a copy', ->
+        element = up.element.createFromSelector('script[type="text/javascript"]')
+        nodes = up.fragment.provideNodes(element)
+
+        expect(nodes).toHaveLength(1)
+        expect(nodes[0]).toBe(element)
+
+      it 'clones a script that does not contain JavaScript, considerung it a custom template', ->
+        template = htmlFixture("""
+          <script id="my-template" type='text/minimustache'>
+            Hello, <b>{{name}}</b>!
+          </script>
+        """)
+
+        templateHandler = jasmine.createSpy('up:template:clone').and.callFake (event) ->
+          html = event.target.innerHTML
+          html = html.replace(/{{(\w+)}}/g, (_match, variable) -> event.data[variable])
+          event.nodes = up.element.createNodesFromHTML(html)
+
+        up.on('up:template:clone', 'script[type="text/minimustache"]', templateHandler)
 
         nodes = up.fragment.provideNodes('#my-template { name: "Alice" }')
 
@@ -11975,7 +12043,7 @@ describe 'up.fragment', ->
       templateHandler = jasmine.createSpy('up:template:clone').and.callFake (event) ->
         html = event.target.innerHTML
         html = html.replace(/{{(\w+)}}/g, (_match, variable) -> event.data[variable])
-        event.nodes = up.element.parseNodesFromHTML(html)
+        event.nodes = up.element.createNodesFromHTML(html)
 
       up.on('up:template:clone', 'template[type="text/minimustache"]', templateHandler)
 

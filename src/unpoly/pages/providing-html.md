@@ -83,7 +83,7 @@ up.navigate({ url: '/path', target: '.target' })
 ```
 
 
-Rendering a string of HTML {#local}
+Rendering a string of HTML {#string}
 -----------------------------------
 
 Sometimes you have to render a string of HTML that you already have. You may pass this string as a JavaScript variable or HTML attribute to render content without going through the server.
@@ -220,14 +220,11 @@ Only the targeted elements will be extracted and placed into the page.
 Other elements parsed from the document string will be discarded.
 
 
-Rendering a `<template>` {#template}
+Rendering a `<template>`
 ------------------------
 
-Instead of passing an HTML string, you may also refer to a [`<template>` element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template).
-This is useful for using the same HTML multiple times, or when you don't
-want to embed long HTML strings into attributes.
-
-To refer to a template, pass its CSS selector to any attribute or option that accepts HTML:
+Instead of passing an HTML string, you may also refer to a [`<template>` element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template)
+in any attribute or option that accepts HTML:
 
 
 ```html
@@ -244,162 +241,8 @@ To refer to a template, pass its CSS selector to any attribute or option that ac
 </template>
 ```
 
-When the link is clicked, Unpoly will look for a `<template>` matching `#my-template`.
-The template is cloned and the `.target` is updated with a matching element from the cloned template.
-All of this happens offline, without making a server request.
+See [Templates](/templates) for many more examples, including ways to define [dynamic templates](/templates#dynamic) with variables, loops or conditions.
 
-Since the target can be [derived](/target-derivation) from the cloned template's root element (`.target`), and since
-[we can  omit `[href]`](#omitting-href), we can shorten the link to this:
-
-```html
-<a up-fragment="#my-template">Click me</a>
-```
-
-
-You can also refer to templates from rendering functions like `up.render()` or `up.submit()`.
-This is useful when you cannot ergonomically produce HTML in your JavaScript files:
-
-```js
-up.render({ fragment: '#my-template' })
-```
-
-
-
-### Dynamic templates {#dynamic-templates}
-
-Sometimes we want to re-use a `<template>`, but with variations.
-For example, we may want to change a piece of text, or vary the size of a component.
-
-As an example, we have a simple `<template>` that renders a single element. We want to use
-this template in various places, but set a custom element text every time: 
-
-```html
-<template id="task-template">
-  <div class="task">
-    Custom task description here
-  </div>
-</template>
-```
-
-Below we will look at various ways to achieve this.
-
-
-#### Using callbacks
-
-You can use the [`[up-on-rendered]`](/up-follow#up-on-rendered) attribute to change the template element
-after it was cloned and inserted. The callback is provided with an `up.RenderResult` which
-references the element we want to customize:
-
-```html
-<a
-  up-fragment="#my-template"
-  up-on-rendered="result.fragment.innerText = 'Buy toast'"
->
-  Click me
-</a>
-```
-
-From JavaScripts we can use the [`{ onRendered }`](/up.render#options.onRendered) callback in the same fashion:
-
-```js
-up.render({
-  fragment: '#task-template',
-  onRendered(result) { result.fragment.innerText = "Buy toast") }
-})
-```
-
-#### Using a compiler
-
-Another approach is to register an [compiler](/up.compiler) that processes a [data object](/data) containing the description:
-
-```js
-up.compiler('.task', function(task, data) {
-  if (data.description) {
-    task.innerText = data.description
-  }
-})
-```
-
-When we reference a template, we can also pass a data object for the cloned element as an
-[`[up-use-data]`](/up-follow#up-use-data) attribute:
-
-```html
-<a up-fragment="#my-template" up-use-data="{ description: 'Buy toast' }">
-  Click me
-</a>
-```
-
-When the compiler is called with the cloned element, it's `data` argument will be set to `{ description: 'Buy toast' }`.
-
-From JavaScripts we can use the [`{ data }`](/up.render#options.onRendered) object in the same fashion:
-
-```js
-up.render({
-  fragment: '#task-template',
-  data: { description: "Buy toast" }
-})
-```
-
-
-
-### Template lookup {#lookup}
-
-When matching a `<template>` with its CSS selector, Unpoly will start looking in the [origin](/origin) [layer](/up.layer) first.
-The origin is the element that caused an update. In the example above, this would be the clicked hyperlink.
-
-If no template is found in the origin layer, Unpoly will look in ancestor layers, prefering closer layers.
-This means you can add global templates to your global application layout (typically rendered into the [root layer](/up.layer.root)),
-but override with more specific templates in overlays.
-
-```html
-<html>
-  <body>
-    <main>
-      Main content here
-    </main>
-
-    <template id="markdown-help">
-      Global template for markdown help
-    </template>
-
-    <template id="list-placeholder">
-      Global UI skeleton for list views
-    </template>
-  </body>
-</html>
-```
-
-You can also pass a `<template>` as an [`Element` reference](#element).
-
-
-### Features supporting `<template>` sources
-
-Template selectors are supported by most attributes and functions that process HTML:
-
-| HTML attribute                    | JavaScript option                 |
-|-----------------------------------|-----------------------------------|
-| `[up-content="#my-template"]`     | `{ content: '#my-template' }`     |
-| `[up-fragment="#my-template"]`    | `{ fragment: '#my-template' }`    | 
-| `[up-document="#my-template"]`    | `{ document: '#my-template' }`    | 
-| `[up-placeholder="#my-template"]` | `{ placeholder: '#my-template' }` | 
-
-
-
-### Opening an overlay from a `<template>`
-
-<span class="todo">Move this to /opening-overlays</span>
-
-The `[up-content]` attribute lets you open an overlay without going through the server:
-
-```html
-<a up-layer="new popup" up-content="#help"> <!-- mark-phrase "up-content" -->
-  Help
-</a>
-
-<template id="help">
-  Helpful instructions here
-</template>
-```
 
 ## Rendering an `Element` object {#element}
 
@@ -417,7 +260,7 @@ before rendering, it will be moved to the target position in the DOM tree.
 The element will be [compiled](/up.compiler) after insertion.
 If the element has been compiled before, it will [not be re-compiled](/up.hello#recompiling-elements).
 
-If the element is a [`<template>`](#template), it will be cloned before insertion.
+If the element is a [template](/templates), it will be cloned before insertion.
 
 
 
