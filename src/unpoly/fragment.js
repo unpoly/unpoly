@@ -2908,7 +2908,7 @@ up.fragment = (function() {
     }
 
     if (u.isElement(value) && value.matches('template')) {
-      value = cloneTemplate(value, data, { htmlParser })
+      value = cloneTemplate(value, data, { htmlParser }).nodes
     }
 
     return u.wrapList(value)
@@ -2920,7 +2920,7 @@ up.fragment = (function() {
 
   /*-
   @function cloneTemplate
-  @internal
+  @experimental
   */
   function cloneTemplate(templateOrSelector, data = {}, { origin, htmlParser } = {}) {
     let template = getSmart(templateOrSelector, { origin }) || up.fail('Template not found: %o', templateOrSelector)
@@ -2929,7 +2929,7 @@ up.fragment = (function() {
     for (let node of nodes) {
       node.upTemplateData = data
     }
-    return nodes
+    return { nodes }
   }
 
   function defaultTemplateNodes(template, htmlParser = e.parseNodesFromHTML) {
