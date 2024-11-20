@@ -705,7 +705,7 @@ describe('up.element', function() {
 
       it("accepts a NodeList of mixed Element and Text nodes", function() {
         // Make a copy as it is a live list that we're going to mutate, then compare
-        const givenNodeList = [...up.element.parseNodesFromHTML('foo <b>bar</b> baz')]
+        const givenNodeList = [...up.element.createNodesFromHTML('foo <b>bar</b> baz')]
         expect(givenNodeList).toHaveLength(3)
         const element = up.element.createFromSelector('#element', { content: givenNodeList })
         expect(element.childNodes).toEqual(givenNodeList)
@@ -852,10 +852,10 @@ describe('up.element', function() {
     })
   })
 
-  describe('up.element.parseNodesFromHTML()', function() {
+  describe('up.element.createNodesFromHTML()', function() {
 
     it('parses a NodeList from the given HTML string', function() {
-      let nodes = up.element.parseNodesFromHTML('foo <b>bar</b> baz')
+      let nodes = up.element.createNodesFromHTML('foo <b>bar</b> baz')
       expect(nodes).toBeNodeList()
       expect(nodes).toHaveLength(3)
       expect(nodes[0]).toBeTextNode()

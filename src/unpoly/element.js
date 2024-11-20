@@ -831,7 +831,7 @@ up.element = (function() {
   @stable
   */
   function createFromHTML(html) {
-    return extractSingular(parseNodesFromHTML(html))
+    return extractSingular(createNodesFromHTML(html))
   }
 
   /*-
@@ -853,7 +853,13 @@ up.element = (function() {
     }
   }
 
-  function parseNodesFromHTML(html) {
+  /*-
+  <span class="todo">Document me</span>
+
+  @function up.element.createNodesFromHTML
+  @experimental
+  */
+  function createNodesFromHTML(html) {
     // Prevent all-whitespace text nodes at the beginning or end
     html = html.trim()
 
@@ -1564,7 +1570,7 @@ up.element = (function() {
     tagName: elementTagName,
     createBrokenDocumentFromHTML,
     fixParserDamage,
-    parseNodesFromHTML,
+    createNodesFromHTML,
     createFromHTML,
     extractSingular,
     get root() { return getRoot() },

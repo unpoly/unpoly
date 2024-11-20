@@ -89,7 +89,10 @@ up.script = (function() {
       'up-placeholder',
     ],
     scriptSelectors: [
-      'script'
+      'script:not([type])',
+      'script[type="text/javascript"]',
+      'script[type="module"]',
+      'script[type="importmap"]',
     ],
     noScriptSelectors: [
       'script[type="application/ld+json"]'
@@ -902,6 +905,10 @@ up.script = (function() {
     u.each(e.subtree(root, selector), disableScript)
   }
 
+  function isScript(value) {
+    return config.matches(value, 'scriptSelectors')
+  }
+
   /*
   Resets the list of registered compiler directives to the
   moment when the framework was booted.
@@ -925,6 +932,7 @@ up.script = (function() {
     findAssets,
     assertAssetsOK,
     disableSubtree: disableScriptsInSubtree,
+    isScript,
   }
 })()
 
