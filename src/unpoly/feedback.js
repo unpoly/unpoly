@@ -340,7 +340,10 @@ up.feedback = (function() {
   */
 
   function runPreviews(request, renderOptions) {
-    return request.bindLayer.asCurrent(() => doRunPreviews(request, renderOptions))
+    let { bindLayer } = request
+    let runNow = () => doRunPreviews(request, renderOptions)
+    let clean = bindLayer.asCurrent(runNow)
+    return () => bindLayer.asCurrent(clean)
   }
 
   function doRunPreviews(request, renderOptions) {
