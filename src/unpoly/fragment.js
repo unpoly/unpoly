@@ -42,6 +42,7 @@ For low-level DOM utilities that complement the browser's native API, see `up.el
 
 @see navigation
 @see providing-html
+@see templates
 @see render-hooks
 @see skipping-rendering
 @see target-derivation
@@ -262,7 +263,7 @@ up.fragment = (function() {
     autoFocus: ['hash', 'autofocus', 'main-if-main', 'keep', 'target-if-lost'],
     autoScroll: ['hash', 'layer-if-main'],
     autoRevalidate: (response) => response.expired,
-    skipResponse: defaultSkipResponse
+    skipResponse: defaultSkipResponse,
   }))
 
   // Users who are not using layers will prefer settings default targets
@@ -2891,7 +2892,7 @@ up.fragment = (function() {
 
   const STARTS_WITH_SELECTOR = /^([\w-]+|\*)?(#|\.|[:[][a-z-]{3,})/
 
-  function provideNodes(value, { origin, originLayer, data, callbackArgs = [], htmlParser = e.parseNodesFromHTML } = {}) {
+  function provideNodes(value, { origin, originLayer, data, callbackArgs = [], htmlParser = e.createNodesFromHTML } = {}) {
     // A function can return a string of HTML, an Element or a selector string.
     if (u.isFunction(value)) {
       value = value(...callbackArgs)
@@ -2907,20 +2908,55 @@ up.fragment = (function() {
       value = htmlParser(value)
     }
 
-    if (u.isElement(value) && value.matches('template')) {
+    if (isTemplate(value)) {
       value = cloneTemplate(value, data, { htmlParser })
     }
 
     return u.wrapList(value)
   }
 
-  function provideSingularNode(...args) {
-    return e.extractSingular(provideNodes(...args))
+  function isTemplate(value) {
+    return u.isElement(value) && value.matches('template, script[type]') && !up.script.isScript(value)
   }
 
   /*-
-  @function cloneTemplate
-  @internal
+  Clones a [template](/template) element.
+
+  Emits the `up:template:clone` event. You can use that event to integrate [templating engines](/templates)
+  like Mustache, EJS or Handlebars.
+
+  ### Example
+
+  ```js
+  let { nodes } = up.template.clone('#table-placeholder')
+  up.render({ fragment: nodes })
+  ```
+
+  ### Passing variables
+
+  Any [template variables](#dynamic) can be passed as a second argument:
+
+  ```js
+  let { nodes } = up.template.clone('#table-placeholder', { rows: 10 })
+  ```
+
+  @function up.template.clone
+  @param {string|Element} template
+    The element to clone.
+
+    This is usually a `<template>` element or a `<script>` with a custom type.
+
+    You may also pass a selector for the element to clone.
+  @param {object} [data = {}]
+    An object with [template variables](/templates#dynamic).
+  @param {Element} [options.origin]
+    An optional [origin](/origin) element used for [template lookup](/templates#lookup).
+  @return {List<Node>}
+    [list](/up.util.isList) of [`Node`](https://developer.mozilla.org/en-US/docs/Web/API/Node) objects that represent
+    the cloned templates.
+
+    You can pass this link to any rendering function, like `up.render()` or `up.Preview#insert()`.
+  @experimental
   */
   function cloneTemplate(templateOrSelector, data = {}, { origin, htmlParser } = {}) {
     let template = getSmart(templateOrSelector, { origin }) || up.fail('Template not found: %o', templateOrSelector)
@@ -2932,7 +2968,51 @@ up.fragment = (function() {
     return nodes
   }
 
-  function defaultTemplateNodes(template, htmlParser = e.parseNodesFromHTML) {
+  /*-
+  This event is emitted before a [template is cloned](/templates).
+
+  ### Integrating template engines
+
+  Listeners can use this event to [integrate templating engines](/templates#dynamic) by following these steps:
+
+  - Listen to the `up:template:clone` event on selected `<template>` or `<script>` elements.
+  - Process the given template (`event.target`) and data (`event.data`).
+  - Set `event.nodes` to a [list](/up.util.isList) of [`Node`](https://developer.mozilla.org/en-US/docs/Web/API/Node) objects representing
+  the template results.
+
+  When no listener sets `event.nodes`, Unpoly will simply parse the template's inner HTML. Any variables in `event.data`
+  will be made available for [post-processing in a compiler](/templates#compiler-postprocessing).
+
+  ### Example: Integrating Mustache.js
+
+  We want to integrate [Mustache](https://github.com/janl/mustache.js) to enable templates like this:
+
+  ```html
+  <script id="greeter-template" type="text/mustache"> <!-- mark-phrase "text/mustache" -->
+    <div id="greeter">
+      Hello, {{name}}!
+    </div>
+  </script>
+  ```
+
+  An event handler for an integration would look like this:
+
+  ```js
+  up.on('up:template:clone', '[type="text/mustache"]', function(event) {
+    const template = event.target.innerHTML
+    const result = Mustache.render(template, event.data)
+    event.nodes = up.element.createNodesFromHTML(result)
+  })
+  ```
+  @event up:template:clone
+  @param {Element} event.target
+    The template element being cloned.
+  @param {null|List<Element>} event.nodes
+    A list of element and text nodes representing the cloned template result.
+  @experimental
+  */
+
+  function defaultTemplateNodes(template, htmlParser = e.createNodesFromHTML) {
     let templateText = template.innerHTML
     return htmlParser(templateText)
   }
@@ -3093,7 +3173,6 @@ up.fragment = (function() {
     containsMainPseudo,
     insertTemp,
     provideNodes,
-    provideSingularNode,
     cloneTemplate,
     // swapTemp,
     // timer: scheduleTimer

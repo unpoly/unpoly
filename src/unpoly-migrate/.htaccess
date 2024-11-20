@@ -105,3 +105,6 @@ RedirectPermanent /skeletons /placeholders
 
 RedirectPermanent /render-hooks /render-lifecycle
 
+RedirectPermanent /template /templates
+RedirectPermanent /templating /templates
+
