@@ -62,8 +62,8 @@ up.ResponseDoc = class ResponseDoc {
   }
 
   _parseFragment(value, origin, data) {
-    let parsed = up.fragment.provideSingularNode(value, { origin, data })
-    this._document = this._buildFauxDocument(parsed)
+    let element = e.extractSingular(up.fragment.provideNodes(value, { origin, data }))
+    this._document = this._buildFauxDocument(element)
   }
 
   _parseContent(value, origin, target, data) {

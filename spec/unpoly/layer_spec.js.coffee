@@ -306,7 +306,7 @@ describe 'up.layer', ->
           expect(renderedElement.childNodes).toEqual [givenNode]
 
         it 'opens a new overlay from a given NodeList with mixed Text and Element nodes', ->
-          givenNodes = [...up.element.parseNodesFromHTML('foo <b>bar</b> baz')]
+          givenNodes = [...up.element.createNodesFromHTML('foo <b>bar</b> baz')]
           expect(givenNodes).toHaveLength(3)
           expect(givenNodes[0]).toBeTextNode()
           expect(givenNodes[1]).toBeElement()
