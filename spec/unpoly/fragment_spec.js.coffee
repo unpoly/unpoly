@@ -11938,7 +11938,7 @@ describe 'up.fragment', ->
           foo<b>bar</b>baz
         </template>
       """)
-      { nodes } = up.template.clone(template)
+      nodes = up.template.clone(template)
 
       expect(nodes[0]).toBeTextNode('foo')
       expect(nodes[1].outerHTML).toBe('<b>bar</b>')
@@ -11955,7 +11955,7 @@ describe 'up.fragment', ->
           foo<b>bar</b>baz
         </template>
       """)
-      { nodes } = up.template.clone('#my-template')
+      nodes = up.template.clone('#my-template')
 
       expect(nodes[0]).toBeTextNode('foo')
       expect(nodes[1].outerHTML).toBe('<b>bar</b>')
@@ -11979,7 +11979,7 @@ describe 'up.fragment', ->
 
       up.on('up:template:clone', 'template[type="text/minimustache"]', templateHandler)
 
-      { nodes } = up.template.clone('#my-template', { name: "Alice" })
+      nodes = up.template.clone('#my-template', { name: "Alice" })
       expect(templateHandler).toHaveBeenCalledWith(jasmine.objectContaining(target: template, data: { name: "Alice" }), template, jasmine.anything())
 
       expect(nodes[0]).toBeTextNode('Hello, ')
@@ -12006,7 +12006,7 @@ describe 'up.fragment', ->
 
       expect(compilerFn).not.toHaveBeenCalled()
 
-      { nodes } = up.template.clone('#target-template', { foo: 1, bar: 2 })
+      nodes = up.template.clone('#target-template', { foo: 1, bar: 2 })
       up.render({ fragment: nodes })
 
       await wait()
