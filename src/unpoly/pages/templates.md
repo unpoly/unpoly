@@ -8,7 +8,7 @@ another server request.
 Rendering a template
 --------------------
 
-Instead of [rendering a HTML string](/providing-html#string), you may also refer to a [`<template>` element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template).
+Instead of [rendering an HTML string](/providing-html#string), you may also refer to a [`<template>` element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template).
 This is useful for using the same HTML multiple times, or when you don't
 want to embed long HTML strings into attributes.
 
@@ -78,10 +78,19 @@ this template in various places, but set a custom element text every time:
 Below we will look at various ways to achieve this.
 
 
-### By post-processing in a compiler {#compiler-postprocessing}
+### Option 1: Post-processing in a compiler {#compiler-postprocessing}
 
-You can clone a template with a [data object](/data),
-then process element and data in a [compiler](/up.compiler) function:
+When we reference a template, we can pass a [data object](/data) for the cloned element as an
+[`[up-use-data]`](/up-follow#up-use-data) attribute:
+
+```html
+<a up-fragment="#my-template" up-use-data="{ description: 'Buy toast' }">
+  Click me
+</a>
+```
+
+By defining a matching a [compiler](/up.compiler) function, we can post-process the cloned element
+and its data object. When the compiler below is called with the cloned element, it's `data` argument will be set to `{ description: 'Buy toast' }`.
 
 ```js
 up.compiler('.task', function(task, data) {
@@ -91,20 +100,8 @@ up.compiler('.task', function(task, data) {
 })
 ```
 
-When we reference a template, we can pass a data object for the cloned element as an
-[`[up-use-data]`](/up-follow#up-use-data) attribute:
-
-```html
-<a up-fragment="#my-template" up-use-data="{ description: 'Buy toast' }">
-  Click me
-</a>
-```
-
-When the compiler is called with the cloned element, it's `data` argument will be set to `{ description: 'Buy toast' }`.
-
 Sometimes we cannot use the `[up-use-data]` attribute, e.g. when configuring a [placeholder](/placeholders).
 In that case we can append the data object after the template selector:
-
 
 ```html
 <a href="/home" up-placeholder="#spinner { size: 'xl' }"> <!-- mark-phrase "#spinner { size: 'xl' }" -->
@@ -113,7 +110,7 @@ In that case we can append the data object after the template selector:
 ```
 
 
-### By using a templating engine {#templating-engine}
+### Option 2: Using a templating engine {#templating-engine}
 
 Sometimes we want to render a complex data object:
 
@@ -168,7 +165,7 @@ up.on('up:template:clone', '[type="text/mustache"]', function(event) {
 })
 ```
 
-### By modifying the element programmatically {#callback-postprocessing}
+### Option 3: Modifying the element programmatically {#callback-postprocessing}
 
 You can use the [`[up-on-rendered]`](/up-follow#up-on-rendered) attribute to change the template element
 after it was cloned and inserted. The callback is provided with an `up.RenderResult` which
