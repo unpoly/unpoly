@@ -613,7 +613,7 @@ up.Layer = class Layer extends up.Record {
       return
     }
 
-    // We may not have a #savedLocation when we were opened from a HTML string instead of a URL.
+    // We may not have a #savedLocation when we were opened from an HTML string instead of a URL.
     if (this.savedLocation) {
       // We cannot use the `this.title` setter as that does not
       // push a state if `newLocation === this.savedLocation`.

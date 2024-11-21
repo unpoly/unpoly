@@ -3080,7 +3080,7 @@ up.fragment = (function() {
     let [reference, position = 'beforeend', tempValue] = u.args(args, 'val', u.isAdjacentPosition, 'val')
 
     let tempNodes = provideNodes(tempValue, { origin: reference })
-    // We may be given a NodeList, or a HTML string without a single root Element.
+    // We may be given a NodeList, or an HTML string without a single root Element.
     // In these cases we wrap it in an <up-wrapper> so we have a root Element we
     // can pass into Element#insertAdjacentElement(), up.hello() or up.destroy().
     let tempElement = e.wrapIfRequired(tempNodes)
