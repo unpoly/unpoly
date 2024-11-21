@@ -61,7 +61,7 @@ The `[up-content]` attribute lets you open an overlay without going through the 
 </a>
 ```
 
-Instead of embedding a HTML string, you can also refer to a [template](/templates):
+Instead of embedding an HTML string, you can also refer to a [template](/templates):
 
 ```html
 <a up-layer="new popup" up-content="#help"> <!-- mark-phrase "up-content" -->
