@@ -108,3 +108,8 @@ RedirectPermanent /render-hooks /render-lifecycle
 RedirectPermanent /template /templates
 RedirectPermanent /templating /templates
 
+RedirectPermanent /nav-bars /navigation-bars
+RedirectPermanent /nav-bar /navigation-bars
+RedirectPermanent /navbars /navigation-bars
+RedirectPermanent /navbar /navigation-bars
+RedirectPermanent /nav /navigation-bars
