@@ -77,6 +77,7 @@ When watching fields you may [show navigation feedback](/watch-options#showing-f
 while an async callback is running.
 
 
+@see navigation-bars
 @see loading-state
 @see placeholders
 @see previews
@@ -110,9 +111,7 @@ up.feedback = (function() {
     An array of classes to on [loading fragments](/up-loading).
 
   @param {Array<string>} [config.navSelectors=['[up-nav]', 'nav']]
-    An array of CSS selectors that match [navigational containers](/up-nav).
-
-    Links within navigational containers are assigned `.up-current` if they point to the current URL.
+    An array of CSS selectors that match [navigational containers](/navigation-bars).
 
   @param {Array<string>} [config.noNavSelectors=['[up-nav=false]']]
     Exceptions to `up.feedback.config.navSelectors`.
@@ -221,7 +220,7 @@ up.feedback = (function() {
   ```
 
   > [NOTE]
-  > Links do *not* need an `[up-nav]` container to get the `.up-active` class while loading.
+  > Links do *not* require a [navigational container](/navigation-bars) to get the `.up-active` class while loading.
 
   ### Example: Active form
 
@@ -435,14 +434,16 @@ up.feedback = (function() {
   }
 
   /*-
-  Marks this element as a navigation component, such as a menu or navigation bar.
+  Marks this element as a [navigational container](/navigation-bars), such as a menu or navigation bar.
 
   When a link within an `[up-nav]` element points to [its layer's location](/up.layer.location),
   it is assigned the `.up-current` class. When the browser navigates to another location, the class is removed automatically.
 
+  See [Navigation bars](/navigation-bars) for details and examples.
+
   ### Example
 
-  Let's take a simple menu with two links. The menu has been marked with the `[up-nav]` attribute:
+  Let's look at a simple menu with two links:
 
   ```html
   <div up-nav> <!-- mark-phrase "up-nav" -->
@@ -451,7 +452,7 @@ up.feedback = (function() {
   </div>
   ```
 
-  If the browser location changes to `/foo`, the first link is marked as `.up-current`:
+  When the browser location changes to `/foo`, the first link is marked as `.up-current`:
 
   ```html
   <div up-nav>
@@ -460,7 +461,7 @@ up.feedback = (function() {
   </div>
   ```
 
-  If the browser location changes to `/bar`, the first link automatically loses its `.up-current` class.
+  When the browser location changes to `/bar`, the first link loses its `.up-current` class.
   Now the second link is marked as `.up-current`:
 
   ```html
@@ -470,90 +471,28 @@ up.feedback = (function() {
   </div>
   ```
 
-  ### Marking navigational containers
-
-  The `[up-nav]` attribute can be assigned to any container that contains links:
-
-  ```html
-  <div up-nav> <!-- mark-phrase "up-nav" -->
-    <a href="/foo">Foo</a>
-    <a href="/bar">Bar</a>
-  </div>
-  ```
-
-  Standard [`<nav>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/nav) elements are always
-  navigational containers and do not need an `[up-nav]` attribute:
-
-  ```html
-  <nav>
-    <a href="/foo">Foo</a>
-    <a href="/bar">Bar</a>
-  </nav>
-  ```
-
-  You can configure additional selectors to automatically match your navigation components
-  in `up.feedback.config.navSelectors`.
-
-  Matching containers can opt *out* of `.up-current` assignment by setting an `[up-nav=false]` attribute:
-
-  ```html
-  <nav up-nav="false">
-    <a href="/foo">Foo</a>
-    <a href="/bar">Bar</a>
-  </nav>
-  ```
-
-  You may also assign `[up-nav]` to an individual link instead of an navigational container:
-
-  ```html
-  <a href="/foo" up-nav>Foo</a> <!-- mark-phrase "up-nav" -->
-  ```
-
-
-  ### When is a link "current"?
-
-  When no [overlay](/up.layer) is open, the current location is the URL displayed
-  in the browser's address bar. When the link in question is placed in an overlay,
-  the current location is the [location of that overlay](/up.layer.location), even if that
-  overlay doesn't have [visible history](/history-in-overlays).
-
-  A link matches the current location (and is marked as `.up-current`) if it matches either:
-
-  - the link's `[href]` attribute
-  - the link's `[up-href]` attribute
-  - the URL pattern in the link's `[up-alias]` attribute
-
-  Any `#hash` fragments in the link's or current URLs will be ignored.
-
-
-  ### Updating `.up-current` classes
-
-  The `.up-current` class is toggled automatically within all content that Unpoly renders.
-  For example, when Unpoly [follows a link](/up-follow), [submits a form](/up-submit)
-  or [renders from a script](/up.render), any newly inserted hyperlinks will get `.up-current`
-  if they point to the current URL.
-
-  To toggle `.up-current` on content that you manually inserted without Unpoly, use `up.hello()`.
-
   @selector [up-nav]
   @stable
   */
 
   /*-
-  Links within `[up-nav]` may use the `[up-alias]` attribute to pass a [URL pattern](/url-patterns) for which they
+  Links within [navigational container](/navigation-bars)
+  may use the `[up-alias]` attribute to alternative URLs for which they
   should also be highlighted as `.up-current`.
+
+  See [Highlighting links for multiple URLs](/navigation-bars#aliases) for more documentation.
 
   ### Example
 
   The link below will be highlighted with `.up-current` at both `/profile` and `/profile/edit` locations:
 
   ```html
-  <div up-nav>
+  <nav>
     <a href="/profile" up-alias="/profile/edit">Profile</a>
-  </div>
+  </nav>
   ```
 
-  To pass more than one alternative URLs, use a [URL pattern](/url-patterns).
+  To configure multiple alternative URLs, use a [URL pattern](/url-patterns).
 
   @selector [up-alias]
   @param up-alias
@@ -562,14 +501,13 @@ up.feedback = (function() {
   */
 
   /*-
-  When a link within an `[up-nav]` element points to the current location, it is assigned the `.up-current` class.
+  When a link within a [navigational container](/navigation-bars) points to the current location, it is assigned the `.up-current` class.
 
-  To set additional classes on current links, configure `up.feedback.config.currentClasses`.
+  See [Navigation bars](/navigation-bars) for more documentation and examples.
 
-  This class is toggled automatically for any HTML that Unpoly renders.
-  To set that class on content that you manually inserted without Unpoly, use `up.hello()`.
+  ### Example
 
-  See [`[up-nav]`](/up-nav) for more documentation and examples.
+  @include nav-example
 
   @selector .up-current
   @stable
