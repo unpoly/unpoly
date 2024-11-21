@@ -295,17 +295,27 @@ up.preview('add-task', function(preview) {
 
 Server-side validation (uniquness)
 
-### Using `<template>`
+### Using templates
 
 Optimistic rendering often involves duplicating view logic.
 
+We can keep the view logic on the server by embedding template elements into our responses:
+
+```html
+<template id="task-template">
+  <div class="task"></div>
+</template>
+```
+
+
+
 ```js
-let task = preview.cloneTemplate('#task-template')
+let task = up.template.clone('#task-template')
 task.innerText = text
 preview.insert(form, 'afterend', task)
 ```
 
-Do we really need cloneTemplate when we (1) can also mention the template in insert() ? 
+See [Templates](/templates) for many more examples, including ways to define [dynamic templates](/templates#dynamic) with variables, loops or conditions.
 
 
 ## Delaying previews
