@@ -4,7 +4,7 @@
     <picture>
       <source media="(max-width: 500)" srcset="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/sponsored-by-makandra.png">
       <source media="(min-width: 500)" srcset="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/nil.png">
-      <img width="320" alt="Unpoly 3" role="heading" aria-level="1" src="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/sponsored-by-makandra.png">
+      <img align="right" width="200" alt="Sponsored by makandr" role="heading" aria-level="1" src="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/sponsored-by-makandra.png">
     </picture>
   </a>
 
