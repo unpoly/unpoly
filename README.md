@@ -1,9 +1,5 @@
 <a href="https://unpoly.com">
-  <picture>
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/unpoly/unpoly-brand/master/unpoly3/unpoly3.svg">
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/unpoly/unpoly-brand/master/unpoly3/unpoly3.white.svg">
-    <img width="320" alt="Unpoly 3" role="heading" aria-level="1" src="https://raw.githubusercontent.com/unpoly/unpoly-brand/master/unpoly3/unpoly3.svg">
-  </picture>
+  <img width="320" alt="Unpoly 3" role="heading" aria-level="1" src="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/marketing-banner.png">
 </a>
 
 <!--
