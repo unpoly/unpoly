@@ -1,4 +1,20 @@
-<a href="https://unpoly.com"><img src="https://raw.githubusercontent.com/unpoly/unpoly-brand/master/unpoly3/unpoly3.svg" alt="Unpoly 3" role="heading" aria-level="1" width="320" style="max-width: 100%"></a>
+<p>
+  <a href="https://makandra.de/">
+    <picture>
+      <source media="(prefers-color-scheme: light)" srcset="media/sponsored-by-makandra.light.svg">
+      <source media="(prefers-color-scheme: dark)" srcset="media/sponsored-by-makandra.dark.svg">
+      <img align="right" width="27%" alt="Sponsored by makandra" src="media/sponsored-by-makandra.light.svg">
+    </picture>
+  </a>
+
+  <a href="https://unpoly.com">
+    <picture>
+      <source media="(prefers-color-scheme: light)" srcset="media/unpoly-logo.light.svg">
+      <source media="(prefers-color-scheme: dark)" srcset="media/unpoly-logo.dark.svg">
+      <img width="330" alt="Unpoly 3" role="heading" aria-level="1" src="media/unpoly-logo.light.svg">
+    </picture>
+  </a>
+</p>
 
 <p>
   <img alt="jsDelivr hits (npm)" src="https://img.shields.io/jsdelivr/npm/hy/unpoly">
