@@ -1,5 +1,5 @@
-<a href="https://makandra.de/" align="right">
-  <img width="100" alt="Sponsored by makandra" src="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/sponsored-by-makandra.png">
+<a href="https://makandra.de/">
+  <img align="right" width="200" alt="Sponsored by makandra" src="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/sponsored-by-makandra.png">
 </a>
 
 <a href="https://unpoly.com">
