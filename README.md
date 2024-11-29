@@ -1,7 +1,7 @@
 <p>
   <a href="https://makandra.de/">
     <picture>
-      <source sizes="(max-width: 600px) 0px, 200px" srcset="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/sponsored-by-makandra.png">
+      <source sizes="(max-width: 600px) 0px, (min-width: 600px) 200px" srcset="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/sponsored-by-makandra.png">
       <img align="right" alt="Sponsored by makandra" src="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/sponsored-by-makandra.png">
     </picture>
   </a>
