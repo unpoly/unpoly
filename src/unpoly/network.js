@@ -856,6 +856,10 @@ up.network = (function() {
 
   The event is emitted on the layer that caused the request.
 
+  > [tip]
+  > If you're looking to influence a render pass after a server response,
+  > use `up:fragment:loaded` instead.
+
   @event up:request:loaded
 
   @param {up.Request} event.request
