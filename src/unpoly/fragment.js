@@ -971,14 +971,15 @@ up.fragment = (function() {
   the HTML is used to [change a fragment](/up.render).
 
   This gives you a chance to inspect the response or DOM state right before a fragment would be inserted.
-  You may then choose to [abort](#event.preventDefault) or [skip](#event.skip) the render pass
-  to do something else instead.
+  You may then choose to [change render options](#event.renderOptions) or [abort](#event.preventDefault)
+  the render pass to do something else instead.
 
   The event is emitted on the targeted layer.
   When [opening an overlay](/opening-overlays), the event is emitted on the parent layer
   of the new overlay.
 
   This event is also emitted when using a [cached](/caching) response.
+  This allows performing the same transformations to both cache hits and cache misses.
 
   ### Example: Making a full page load instead
 
