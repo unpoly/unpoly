@@ -1,5 +1,5 @@
 <a href="https://unpoly.com">
-  <img width="320" alt="Unpoly 3" role="heading" aria-level="1" src="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/marketing-banner.png">
+  <img width="700" alt="Unpoly 3" role="heading" aria-level="1" src="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/marketing-banner.png">
 </a>
 
 <!--
