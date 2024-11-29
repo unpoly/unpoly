@@ -13,11 +13,11 @@
    id="Ebene_1"
    x="0px"
    y="0px"
-   viewBox="0 0 600 250"
+   viewBox="0 0 600 235"
    xml:space="preserve"
    sodipodi:docname="sponsored-by-makandra.svg"
    width="600"
-   height="250"
+   height="235"
    inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"><metadata
    id="metadata45"><rdf:RDF><cc:Work
        rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
@@ -35,9 +35,9 @@
    inkscape:window-height="1151"
    id="namedview41"
    showgrid="false"
-   inkscape:zoom="0.38773022"
-   inkscape:cx="-673.79214"
-   inkscape:cy="-240.52887"
+   inkscape:zoom="1.0966667"
+   inkscape:cx="26.925545"
+   inkscape:cy="-40.09322"
    inkscape:window-x="1920"
    inkscape:window-y="0"
    inkscape:window-maximized="1"
@@ -50,10 +50,10 @@
 </style>
 <g
    id="g38"
-   transform="translate(0,35.24)">
+   transform="translate(0,35.240002)">
 	<polygon
    class="st0"
-   points="600,0.76 555.34,0.76 541.29,14.81 585.95,14.81 585.95,59.46 600,45.41 "
+   points="585.95,14.81 585.95,59.46 600,45.41 600,0.76 555.34,0.76 541.29,14.81 "
    id="polygon4"
    style="fill:#e61d47" />
 	<path
@@ -144,12 +144,12 @@
    id="g30">
 		<polygon
    class="st1"
-   points="184.48,73.98 216.05,105.56 235.93,105.56 204.35,73.98 235.93,42.41 216.05,42.41 "
+   points="204.35,73.98 235.93,42.41 216.05,42.41 184.48,73.98 216.05,105.56 235.93,105.56 "
    id="polygon26"
    style="fill:#141210" />
 		<polygon
    class="st1"
-   points="191.28,66.62 191.28,27.56 177.32,27.56 177.32,105.64 191.28,105.64 191.28,85.07 191.31,85.04 191.31,66.59 "
+   points="177.32,105.64 191.28,105.64 191.28,85.07 191.31,85.04 191.31,66.59 191.28,66.62 191.28,27.56 177.32,27.56 "
    id="polygon28"
    style="fill:#141210" />
 	</g>

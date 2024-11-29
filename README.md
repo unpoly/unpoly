@@ -10,7 +10,7 @@
     <picture>
       <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/unpoly3.svg">
       <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/unpoly3.white.svg">
-      <img width="320" alt="Unpoly 3" role="heading" aria-level="1" src="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/unpoly3.svg">
+      <img width="330" alt="Unpoly 3" role="heading" aria-level="1" src="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/unpoly3.svg">
     </picture>
   </a>
 </p>
