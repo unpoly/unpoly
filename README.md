@@ -2,9 +2,9 @@
 
   <a href="https://makandra.de/">
     <picture>
-      <source media="(min-width: 500px)" srcset="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/sponsored-by-makandra.png">
-      <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/nil.png">
-      <img align="right" width="200" alt="Sponsored by makandr" role="heading" aria-level="1" src="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/sponsored-by-makandra.png">
+      <source media="(min-width: 600px)" srcset="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/sponsored-by-makandra.png">
+      <source media="(max-width: 600px)" srcset="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/nil.png">
+      <img align="right" width="200" alt="Sponsored by makandra" src="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/sponsored-by-makandra.png">
     </picture>
   </a>
 
