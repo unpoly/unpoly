@@ -1,7 +1,8 @@
 <a href="https://unpoly.com">
-  <picture alt="Unpoly 3" role="heading" aria-level="1">
+  <picture>
     <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/unpoly/unpoly-brand/master/unpoly3/unpoly3.svg">
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/unpoly/unpoly-brand/master/unpoly3/unpoly3.white.svg">
+    <img src="https://raw.githubusercontent.com/unpoly/unpoly-brand/master/unpoly3/unpoly3.svg" alt="Unpoly 3" role="heading" aria-level="1">
   </picture>
 </a>
 
