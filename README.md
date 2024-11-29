@@ -1,4 +1,14 @@
-<a href="https://unpoly.com"><img src="https://raw.githubusercontent.com/unpoly/unpoly-brand/master/unpoly3/unpoly3.svg" alt="Unpoly 3" role="heading" aria-level="1" width="320" style="max-width: 100%"></a>
+<a href="https://unpoly.com">
+  <picture alt="Unpoly 3" role="heading" aria-level="1">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/unpoly/unpoly-brand/master/unpoly3/unpoly3.svg">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/unpoly/unpoly-brand/master/unpoly3/unpoly3.white.svg">
+  </picture>
+</a>
+
+
+<!--
+<img src="https://raw.githubusercontent.com/unpoly/unpoly-brand/master/unpoly3/unpoly3.svg" width="320" style="max-width: 100%"></a>
+-->
 
 <p>
   <img alt="jsDelivr hits (npm)" src="https://img.shields.io/jsdelivr/npm/hy/unpoly">
