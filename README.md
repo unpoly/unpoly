@@ -1,8 +1,8 @@
 <p>
   <a href="https://makandra.de/">
     <picture>
-      <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/sponsored-by-makandra2.png">
-      <img align="right" width="200" alt="Sponsored by makandra" src="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/sponsored-by-makandra2.png">
+      <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/sponsored-by-makandra.svg">
+      <img align="right" width="200" alt="Sponsored by makandra" src="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/sponsored-by-makandra.svg">
     </picture>
   </a>
 
