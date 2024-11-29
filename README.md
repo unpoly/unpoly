@@ -8,8 +8,10 @@
   </a>
 
   <a href="https://makandra.de/">
-    <img width="200" alt="Sponsored by makandra" src="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/sponsored-by-makandra.png">
+    <img width="200" float="right" alt="Sponsored by makandra" src="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/sponsored-by-makandra.png">
   </a>
+
+  &nbsp;
 
 </p>
 
