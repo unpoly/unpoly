@@ -81,6 +81,7 @@ while an async callback is running.
 @see loading-state
 @see placeholders
 @see previews
+@see optimistic-rendering
 
 @see [up-nav]
 @see .up-current
