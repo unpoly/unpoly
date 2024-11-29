@@ -1,14 +1,18 @@
 <p>
 
   <a href="https://makandra.de/">
-    <img width="200" align="right" alt="Sponsored by makandra" src="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/sponsored-by-makandra.png">
+    <picture>
+      <source media="(max-width: 500)" srcset="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/sponsored-by-makandra.png">
+      <source media="(min-width: 500)" srcset="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/nil.png">
+      <img width="320" alt="Unpoly 3" role="heading" aria-level="1" src="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/sponsored-by-makandra.png">
+    </picture>
   </a>
 
   <a href="https://unpoly.com">
     <picture>
-      <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/unpoly/unpoly-brand/master/unpoly3/unpoly3.svg">
-      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/unpoly/unpoly-brand/master/unpoly3/unpoly3.white.svg">
-      <img width="320" alt="Unpoly 3" role="heading" aria-level="1" src="https://raw.githubusercontent.com/unpoly/unpoly-brand/master/unpoly3/unpoly3.svg">
+      <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/unpoly3.svg">
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/unpoly3.white.svg">
+      <img width="320" alt="Unpoly 3" role="heading" aria-level="1" src="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/unpoly3.svg">
     </picture>
   </a>
 
@@ -17,7 +21,7 @@
 
 
 <!--
-<img src="https://raw.githubusercontent.com/unpoly/unpoly-brand/master/unpoly3/unpoly3.svg" width="320" style="max-width: 100%"></a>
+<img src="https://raw.githubusercontent.com/unpoly/unpoly/hk/readme-images/media/unpoly3.svg" width="320" style="max-width: 100%"></a>
 -->
 
 <p>
