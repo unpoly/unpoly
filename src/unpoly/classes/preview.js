@@ -347,7 +347,7 @@ up.Preview = class Preview {
     // (1) up.fragment.get(undefined) returns undefined
     // (2) up.fragment.get(Element) returns the element
     // (3) this.fragment is undefined when opening a new layer
-    element = up.fragment.get(element, { layer: this.layer }) || this.fragment
+    element = up.fragment.get(element, { layer: this.layer, origin: this.origin }) || this.fragment
     return [element, ...rest]
   }
 

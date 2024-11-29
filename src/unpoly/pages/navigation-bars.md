@@ -156,8 +156,8 @@ to convey the emphasis to assistive technologies:
 
 ```html
 <nav>
-  <a href="/foo" up-follow class="up-current" aria-current="page">Foo</a> <!-- mark-phrase "aria-current" -->
-  <a href="/bar" up-follow>Bar</a>
+  <a href="/foo" class="up-current" aria-current="page">Foo</a> <!-- mark-phrase "aria-current" -->
+  <a href="/bar">Bar</a>
 </nav>
 ```
 
