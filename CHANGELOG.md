@@ -7,6 +7,13 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
+
+3.9.4
+-----
+
+- Fix `.up-focus-hidden` style from causing flickering outlines when there is a `transition` on `outline-color` (by @foobear).
+
+
 3.9.3
 -----
 
