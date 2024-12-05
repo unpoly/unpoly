@@ -50,7 +50,7 @@ the [JavaScript code](https://github.com/unpoly/unpoly-demo/blob/master/app/asse
 will be the same in any language or framework.
 
 
-## Previewing form results
+## Previewing form submissions
 
 Let's take a closer look at how the [demo app](https://demo.unpoly.com) optimistically adds a task
 to the TODO list. This involves processing form data and rendering a major fragment on the client.
