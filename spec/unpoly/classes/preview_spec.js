@@ -1589,6 +1589,55 @@ describe('up.Preview', function() {
 
   })
 
+
+  describe('#swapContent()', function() {
+
+    it('temporarily swaps the child elements of the given parent element', async function () {
+      fixture('#target')
+      let parent = htmlFixture(`
+        <div id="parent">
+          <p>original text</p>
+        </div>
+      `)
+
+      expect('#parent').toHaveVisibleText('original text')
+
+      let previewFn = (preview) => preview.swapContent(parent, '<p>swapped text</p>')
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect('#parent').toBeVisible()
+      expect('#parent').toHaveVisibleText('swapped text')
+
+      jasmine.respondWithSelector('#target')
+      await wait()
+
+      expect('#parent').toHaveVisibleText('original text')
+    })
+
+    it('swaps children of the targeted fragment if no explicit parent is given', async function () {
+      let parent = htmlFixture(`
+        <div id="parent">
+          original text
+        </div>
+      `)
+
+      expect('#parent').toHaveVisibleText('original text')
+
+      let previewFn = (preview) => preview.swapContent('swapped text')
+      up.render({ preview: previewFn, url: '/url', target: '#parent' })
+      await wait()
+
+      expect('#parent').toHaveVisibleText('swapped text')
+
+      jasmine.respondWithSelector('#parent', { text: 'server text' })
+      await wait()
+
+      expect('#parent').toHaveVisibleText('server text')
+    })
+
+  })
+
   describe('#openLayer()', function() {
 
     it('opens a layer with the given content', async function() {
