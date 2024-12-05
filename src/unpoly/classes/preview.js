@@ -305,7 +305,8 @@ up.Preview = class Preview {
   @function up.Preview#swapContent
   @experimental
   */
-  swapContent(parent, newContent) {
+  swapContent(...args) {
+    let [parent, newContent] = this._parseMutatorArgs(args, 'val', 'val')
     this.hideContent(parent)
     this.insert(parent, newContent)
   }
