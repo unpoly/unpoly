@@ -1,30 +1,21 @@
-Loading indicators
-==================
-
-This page describes how to show loading indicators while waiting for the network.
-
-
 Progress bar
-------------
+============
 
-By default [late responses](/up:network:late) event will cause an animated
-progress bar to appear at the top edge of the screen:
+When requests are [taking long]((/up:network:late)) to load, Unpoly will show a thin progress bar at the top edge of the screen.
 
 ![Progress bar animation](images/progress-bar.gif)
 
-The progress bar can be disabled with `up.network.config.progressBar`.
+This mimics similiar loading indicators by browsers, which only appear during full page loads.
 
 
-### Styling the progress bar
+
+## Styling the progress bar
 
 The progress bar is implemented as a single `<up-progress-bar>` element.
 Unpoly will automatically insert and remove this element as requests
 are [late](/up:network:late) or [recovered](up:network:recover).
 
-Its default appearance is a simple blue bar at the top edge of the screen,
-mimicking the style of Chrome's native progress bar.
-
-You may customize the style using CSS:
+You may style the progress bar element using CSS:
 
 ```css
 up-progress-bar {
@@ -33,7 +24,7 @@ up-progress-bar {
 ```
 
 
-### Controlling when the progress bar appears
+## Controlling when the progress bar appears
 
 Unpoly will show the progress bar when a request is taking longer to respond
 than `up.network.config.lateDelay`.
@@ -48,6 +39,15 @@ or setting an [`[up-background]`](/up-follow#up-background) attribute.  Requests
 marked as background requests.
 
 To disable the progress bar globally, configure `up.network.config.progressBar = false`.
+
+## Disabling
+
+The progress bar can be disabled entirely:
+
+```js
+up.network.config.progressBar = false
+```
+
 
 
 Custom loading indicators
@@ -88,27 +88,12 @@ by configuring `up.network.config.progressBar = false`.
 
 
 
-Styling loading elements
-------------------------
+### Advanced loading state
 
-Unpoly adds CSS classes to fragments while they are loading over the network.
-You may style these classes to provide instant feedback to user interactions.
+Unpoly allows you to make arbitrary changes to individual fragments while they are loading.
 
-See [Navigation feedback](/up.feedback) for details.
+See [Loading state](/loading-state) for details.
 
 
-Signaling severe network problems
-----------------------------------
 
-Unpoly provides additional events to handle network issues like disconnects or flaky connections:
-
-```js
-up.on('up:fragment:offline', function(event) { // mark-phrase "up:fragment:offline"
-  if (confirm('You are offline. Retry?')) event.retry()
-})
-```
-
-See [Handling network issues](/network-issues) for details and examples.
-
-
-@page loading-indicators
+@page progress-bar
