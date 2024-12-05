@@ -1054,7 +1054,7 @@ up.link = (function() {
   @param [up-background='false']
     Whether to load the deferred content [in the background](/up.render#options.background).
 
-    Background requests will not show [loading indicators](/loading-indicators).
+    Background requests will not show the [global progress bar](/progress-bar).
 
   @experimental
   */
