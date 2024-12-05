@@ -341,9 +341,14 @@ up.feedback = (function() {
 
   function runPreviews(request, renderOptions) {
     let { bindLayer } = request
-    let runNow = () => doRunPreviews(request, renderOptions)
-    let clean = bindLayer.asCurrent(runNow)
-    return () => bindLayer.asCurrent(clean)
+    let focusCapsule = up.FocusCapsule.preserve(bindLayer)
+    let applyPreviews = () => doRunPreviews(request, renderOptions)
+    let revertPreviews = bindLayer.asCurrent(applyPreviews)
+    up.on('focusin', { once: true }, () => focusCapsule = null)
+    return () => {
+      bindLayer.asCurrent(revertPreviews)
+      focusCapsule?.restore(bindLayer, { preventScroll: true })
+    }
   }
 
   function doRunPreviews(request, renderOptions) {
