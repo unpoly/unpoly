@@ -50,8 +50,15 @@ Global progress bar
 Signaling severe network problems
 ---------------------------------
 
-- up:fragment:offline
+Unpoly provides events to handle network issues like disconnects or flaky connections:
 
+```js
+up.on('up:fragment:offline', function(event) { // mark-phrase "up:fragment:offline"
+  if (confirm('You are offline. Retry?')) event.retry()
+})
+```
+
+See [Handling network issues](/network-issues) for details and examples.
 
 
 
