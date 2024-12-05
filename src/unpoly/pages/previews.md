@@ -4,21 +4,42 @@ Previews
 Previews are temporary page changes while waiting for a network request.
 You can show arbitrary loading state (like spinners or placeholders) and even do optimistic rendering.
 
-Because previews immediately appear after a user interactions, their use
+Because previews immediately appear after a user interaction, their use
 increases the perceived responsiveness of your application.
 
-Once the server response is received, any change made by a preview is reverted.
-This ensures a consistent state in all cases, e.g. if the server [renders a error](/failed-responses),
-[updates a different fragment](/X-Up-Target) or when the request is [aborted](/aborting-requests).
+
+## Overview {#overview}
+
+Previews are small functions that can
+be attached to a [link](/up-follow), [form](/up-submit) or any [programmatic render pass](/up.render).
+
+When the user interacts with a link or form, its preview function is invoked immediately.
+The function will usually [mutate the DOM](#dom-mutations) in a way the user gets
+a preview of the interaction effect. For example, if the user is deleting an item from a list, the preview
+function could hide that item visually.
+
+When the request ends for *any* reason, all preview changes will be reverted before
+the server response is processed (usually by updating a fragment).
+This ensures a consistent state where we end up *not* updating the [targeted fragment](/targeting-fragments),
+such as:
+
+- when the server [renders an error code](/failed-responses#rendering-failed-responses-differently)
+- when the request encounters a [fatal error](/failed-responses#handling-fatal-network-errors), like a timeout or loss of network connectivity.
+- when the server [updates a different fragment](/X-Up-Target)
+- when the request is [aborted](/aborting-requests), e.g. by a different link targeting the same fragment
+- when an `up:fragment:loaded` listener chooses to open an overlay
+
+Unpoly provides utility functions to [make temporary DOM mutations](#basic-mutations) that automatically revert
+when the preview ends. For advanced cases you may also apply [arbitrary mutations](#advanced-mutations),
+as long as you revert them cleanly when the preview ends.
 
 
-
-## Changing the DOM from a preview {#dom-changes}
+## Mutating the DOM from a preview {#basic-mutations}
 
 For a simple example, we want to show a simple spinner animation
 within a button while it is loading:
 
-<video src="images/button-spinner.mp4" controls width="300"></video>
+<video src="images/button-spinner.mp4" controls loop width="350" aria-label="A button showing a spinning animation when pressed"></video>
 
 To achieve this effect, we define a *preview* named `link-spinner`:
 
@@ -79,7 +100,7 @@ up.preview('my-preview', function(preview) {
 ```
 
 
-## Arbitrary changes
+## Advanced mutations {#advanced-mutations}
 
 Instead of using an `up.Preview` method you can use arbitrary changes to the DOM.
 

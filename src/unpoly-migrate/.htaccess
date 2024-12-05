@@ -108,6 +108,12 @@ RedirectPermanent /render-hooks /render-lifecycle
 RedirectPermanent /template /templates
 RedirectPermanent /templating /templates
 
+RedirectPermanent /optimistic-updates /optimistic-rendering
+RedirectPermanent /optimistic-ui /optimistic-rendering
+RedirectPermanent /speculative-rendering /optimistic-rendering
+RedirectPermanent /opportunistic-rendering /optimistic-rendering
+RedirectPermanent /eager-rendering /optimistic-rendering
+
 RedirectPermanent /nav-bars /navigation-bars
 RedirectPermanent /nav-bar /navigation-bars
 RedirectPermanent /navbars /navigation-bars
