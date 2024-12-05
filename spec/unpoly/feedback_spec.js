@@ -632,6 +632,87 @@ describe('up.feedback', function() {
 
         })
 
+        describe('focus preservation', function() {
+
+          beforeEach(up.specUtil.assertTabFocused)
+
+          it('honors { focus: "keep" } when the focused element is temporarily detached by the preview', async function() {
+            let container = fixture('.container')
+            let oldFocused = e.affix(container, '.focused[tabindex=0]', { text: 'Old content' })
+            oldFocused.focus()
+            expect(oldFocused).toBeFocused()
+
+            let previewFn = function(preview) {
+              preview.swapContent('Previewing content')
+            }
+
+            up.render({ target: '.container', focus: 'keep', url: '/path', preview: previewFn })
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect('.container').toHaveVisibleText('Previewing content')
+            expect('.focused').not.toBeFocused()
+
+            jasmine.respondWith(`
+              <div class="container">
+                <div class="focused" tabindex="0">
+                   New content
+                 </div>
+              </div>
+            `)
+
+            await wait()
+
+            expect('.container').toHaveText('New content')
+            expect('.focused').toBeFocused()
+          })
+
+          it('honors { focus: "keep" } when the user focuses a new element while the preview is showing', async function() {
+            let [target, insideFocusable] = htmlFixtureList(`
+              <div id="target">
+                <div id="inside-focusable" tabindex="0">
+                  Old content
+                </div>
+              </div>
+            `)
+
+            insideFocusable.focus()
+            let outsideFocusable = fixture('#outside-focusable[tabindex=0]', { text: 'Outside focusable' })
+            expect(insideFocusable).toBeFocused()
+
+            let previewFn = function(preview) {
+              preview.swapContent('Previewing content')
+            }
+
+            up.render({ target: '#target', focus: 'keep', url: '/path', preview: previewFn })
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect('#target').toHaveVisibleText('Previewing content')
+
+            expect(insideFocusable).not.toBeFocused()
+            expect(outsideFocusable).not.toBeFocused()
+
+            // User focuses a jnew element while the preview is showing
+            Trigger.focusWithMouseSequence(outsideFocusable)
+            expect(outsideFocusable).toBeFocused()
+
+            jasmine.respondWith(`
+              <div id="target">
+                <div id="inside-focusable" tabindex="0">
+                  New content
+                </div>
+              </div>
+            `)
+
+            await wait()
+
+            expect('#target').toHaveText('New content')
+            expect(outsideFocusable).toBeFocused()
+          })
+
+        })
+
       })
 
       describe('with { placeholder } option', function() {
