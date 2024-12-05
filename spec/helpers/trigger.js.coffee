@@ -89,10 +89,6 @@ window.Trigger = (->
     click(link, u.merge(options, { pointerType: '', clientX: 0, clientY: 0 }))
     keyup(link, key, options)
 
-  focus = (element, options) ->
-    element = e.get(element)
-    element.focus()
-
   submit = (form, options) ->
     form = e.get(form)
     options = u.options(options,
@@ -149,6 +145,17 @@ window.Trigger = (->
       nextIndex = 0
 
     return focusables[nextIndex]
+
+  focus = (element, focusOptions = {}) ->
+    element = e.get(element)
+    element.focus(focusOptions)
+
+  focusWithMouseSequence = (element) ->
+    element = e.get(element)
+    mousedown(element)
+    focus(element, { preventScroll: true })
+    mouseup(element)
+    click(element)
 
   tabSequence = (options = {}) ->
     element = document.activeElement || document.body
@@ -354,5 +361,6 @@ window.Trigger = (->
   clickLinkWithKeyboard: clickLinkWithKeyboard,
   submitFormWithEnter: submitFormWithEnter,
   focus: focus,
+  focusWithMouseSequence: focusWithMouseSequence,
 
 )()
