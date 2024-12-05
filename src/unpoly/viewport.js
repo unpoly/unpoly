@@ -205,7 +205,7 @@ up.viewport = (function() {
     The element to focus.
 
   @param {boolean} [options.preventScroll=false]
-    Whether to prevent changes to the acroll position.
+    Whether to prevent changes to the scroll position.
 
   @param {string} [options.inputDevice]
     The [input device](/up.event.inputDevice) used for the current interaction.
