@@ -11,12 +11,12 @@ up.FocusCapsule = class FocusCapsule {
   }
 
   // up.FragmentFocus will check #wasLost() before calling restore()
-  restore(layer, options) {
+  restore(layer, focusOptions) {
     let rediscoveredElement = up.fragment.get(this._target, { layer })
     if (rediscoveredElement) {
       // Firefox needs focus-related props to be set *before* we focus the element
       up.viewport.copyCursorProps(this._cursorProps, rediscoveredElement)
-      up.focus(rediscoveredElement, options)
+      up.focus(rediscoveredElement, focusOptions)
 
       // Signals callers that we could restore.
       //
