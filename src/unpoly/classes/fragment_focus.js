@@ -88,7 +88,7 @@ up.FragmentFocus = class FragmentFocus extends up.FragmentProcessor {
   }
 
   _wasFocusLost() {
-    return !this.layer.hasFocus()
+    return this.focusCapsule?.wasLost()
   }
 
 }

@@ -84,6 +84,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     }
 
     if (this.options.saveFocus) {
+      // TODO: This creates the same up.FocusCapsule that we already built in _setScrollAndFocusOption()
       up.viewport.saveFocus({ layer: this.layer })
     }
 
