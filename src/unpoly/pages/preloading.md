@@ -63,28 +63,36 @@ When a lazy preloading link enters and exit its viewport repeatedly, only a sing
 
 
 
-Custom preload timing {#scripted}
+Custom preload conditions {#scripted}
 ----------------------------------
 
 To programmatically preload any link element at a time of your choosing, use the `up.link.preload()` function.
 
-The following [compiler](/up.compiler) would preload a link with a `[rel=next]` attribute 500 milliseconds after it was inserted:
+The following [compiler](/up.compiler) would preload a link with a `[rel=next]` attribute when
+the user hovers over a `main` element:
 
 ```js
 up.compiler('link[rel=next]', (link) => {
-  setTimeout(() => up.link.preload(link), 500)
+  return up.on('mouseenter', 'main', () => up.link.preload(link))
 })
 ```
 
 A link that is preloaded in that fashion does not require an `[up-preload]` attribute.
 
 
-### Preloading a URL
+Preloading a URL
+----------------
 
 To preload a given URL without a link element, you can make a [background](/up.render#options.background) request that [caches](/caching):
 
 ```js
 up.request('/menu', { cache: true, background: true })
+```
+
+The cached response will be used by any link to the same URL:
+
+```html
+<a href="/menu">Menu</a>
 ```
 
 

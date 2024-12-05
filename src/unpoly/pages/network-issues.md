@@ -50,7 +50,12 @@ When revalidation fails, or when accessing uncached content, Unpoly will run `on
 
 ### Preloading links before disconnects
 
-You can use `[up-preload=insert]`
+You can use an [`[up-preload=insert]`](/up-preload#up-preload) attribute
+to eagerly preload links as soon as they remain in the DOM. This way they remain navigatible while offline:
+
+```html
+<a href="/menu" up-layer="new drawer" up-preload="insert">≡ Menu</a>
+```
 
 
 ### Limitations to offline support
