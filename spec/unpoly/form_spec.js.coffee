@@ -2971,6 +2971,32 @@ describe 'up.form', ->
         expect(submitButton).not.toBeFocused()
         expect(input).toBeFocused()
 
+      it 'does not submit a form when a HTML5 validation constraint is violated', ->
+        fixture('main', text: 'old text')
+
+        [form, input, submitButton] = htmlFixtureList """
+          <form action="/form-target" method="post" up-submit>
+            <input name="field" required>
+            <input type="submit">
+          </form>
+        """
+
+        up.hello(form)
+
+        Trigger.clickSequence(submitButton)
+        await wait()
+
+        expect(input.validity.valid).toBe(false)
+        expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        input.value = "foo"
+
+        Trigger.clickSequence(submitButton)
+        await wait()
+
+        expect(input.validity.valid).toBe(true)
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+
       describe 'up:form:submit event', ->
 
         it 'is emitted with information about the form submission', ->
