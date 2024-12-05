@@ -128,8 +128,10 @@ Sometimes we want to render a complex data object:
 ```
 
 For this we need a more expressive template with variables, loops or conditions.
+
 There are [countless templating packages](https://awesome-javascript.js.org/resources/templating-engines.html) to choose from.
-For this example we're going to use [Mustache.js](https://github.com/janl/mustache.js):
+For this example we're going to use templates in the style of
+[Mustache.js](https://github.com/janl/mustache.js) or [Handlebars](https://handlebarsjs.com/):
 
 
 ```html
@@ -148,12 +150,18 @@ For this example we're going to use [Mustache.js](https://github.com/janl/mustac
 > We're using a `<script>` element here with a custom `[type]`, because strictly speaking `<template>` elements cannot have a `[type]` attribute.
 > Both are valid methods to embed HTML fragments into larger document, while largely being ignored by the browser.
 
-To parse a template expression:
+
+#### Parsing template expressions
+
+Unpoly does not ship with a templating engine, but makes it very easy to implement
+or integrate your own:
 
 - Listen to the `up:template:clone` event on your custom template elements.
-- Process the given template and data
+- Process the given template and data using a templating function of your choice.
 - Set `event.nodes` to a [list](/up.util.isList) of [`Node`](https://developer.mozilla.org/en-US/docs/Web/API/Node) objects representing
 the template results.
+
+#### Example integrations {#templating-engine-examples}
 
 An event handler for an Mustache integration would look like this:
 
@@ -164,6 +172,21 @@ up.on('up:template:clone', '[type="text/mustache"]', function(event) {
   event.nodes = up.element.createNodesFromHTML(result)
 })
 ```
+
+If you only care about simple `{{variable}}` replacements, you can also use JavaScript string functions,
+without adding a dependency. Here we define a very simple templating function for the `text/minimustache` type:
+
+```js
+up.on('up:template:clone', '[type="text/minimustache"]', function(event) { // mark-phrase "text/minimustache"
+  let template = event.target.innerHTML
+  let evaluate = (_match, variable) => up.util.escapeHTML(event.data[variable])
+  let filled = template.replace(/{{(\w+)}}/g, evaluate)
+  event.nodes = up.element.createNodesFromHTML(filled)
+})
+```
+
+
+
 
 ### Option 3: Modifying the element programmatically {#callback-postprocessing}
 
