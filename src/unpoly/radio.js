@@ -533,7 +533,7 @@ should be inserted:
 
     See [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
     for a list of available timing functions.
-  @experimental
+  @stable
   */
   up.macro('[up-flashes]', function(fragment) {
     e.setMissingAttrs(fragment, {
