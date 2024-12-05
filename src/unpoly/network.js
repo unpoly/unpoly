@@ -884,7 +884,7 @@ up.network = (function() {
 
   /*-
   This event is [emitted](/up.emit) when an [AJAX request](/up.request)
-  encounters fatal error like a [timeout](/up.network.config#config.timeout) or loss of network connectivity.
+  encounters a fatal error, like a [timeout](/up.network.config#config.timeout) or loss of network connectivity.
 
   > [NOTE]
   > This event will *not* be emitted when the server produces an
