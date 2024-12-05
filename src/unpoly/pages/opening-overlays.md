@@ -53,13 +53,15 @@ You can pass an option `[up-layer="swap"]` or `[up-layer="shatter"]` to replace 
 Opening overlays from local content
 ------------------------------------
 
-The `[up-content]` attribute lets you open an overlay without going through the server:
+The [`[up-content]`](/up-follow#up-content) attribute lets you open an overlay without going through the server:
 
 ```html
 <a up-layer="new popup" up-content="<p>Helpful instructions here</p>"> <!-- mark-phrase "up-content" -->
   Help
 </a>
 ```
+
+Since we didn't provide an `[up-target]` selector, it will be wrapped in a container matching the overlay's [main target](/main).
 
 Instead of embedding an HTML string, you can also refer to a [template](/templates):
 
