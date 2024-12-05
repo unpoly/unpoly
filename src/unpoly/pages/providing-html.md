@@ -120,20 +120,6 @@ The element node itself, including its attributes and event listeners, will rema
 
 
 
-### Opening an overlay from string content
-
-<span class="todo">Move this to /opening-overlays</span>
-
-The `[up-content]` attribute lets you open an overlay without going through the server:
-
-```html
-<a href="#" up-layer="new popup" up-content="Passwords must contain a special character"> <!-- mark-phrase "up-content" -->
-  Help
-</a>
-```
-
-Since we didn't provide an `[up-target]` selector, it will be wrapped in a container matching the overlay's [main target](/main). 
-
 
 ### Rendering a string that only contains the fragment {#fragment}
 
