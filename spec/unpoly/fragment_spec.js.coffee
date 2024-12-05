@@ -7455,7 +7455,7 @@ describe 'up.fragment', ->
 
         describe 'with { focus: "keep" }', ->
 
-          it 'preserves focus of an element within the changed fragment', asyncSpec (next) ->
+          it 'preserves focus of an element within the changed fragment', ->
             container = fixture('.container')
             oldFocused = e.affix(container, '.focused[tabindex=0]', text: 'old focused')
             oldFocused.focus()
@@ -7466,10 +7466,29 @@ describe 'up.fragment', ->
                 <div class="focused" tabindex="0">new focused</div>
               </div>
             """)
+            await wait()
 
-            next ->
-              expect('.focused').toHaveText('new focused')
-              expect('.focused').toBeFocused()
+            expect('.focused').toHaveText('new focused')
+            expect('.focused').toBeFocused()
+
+          it 'does not re-focus an unrelated element that never lost focus during the render pass', ->
+            fixture('.target', text: 'old target')
+            outside = fixture('.focused[tabindex=0]', text: 'old focused')
+            outside.focus()
+            expect(outside).toBeFocused()
+
+            focusSpy = spyOn(up, 'focus').and.callThrough()
+
+            up.render(focus: 'keep', fragment: """
+              <div class="target">
+                new target
+              </div>
+            """)
+            await wait()
+
+            expect('.target').toHaveText('new target')
+            expect(focusSpy).not.toHaveBeenCalled()
+            expect('.focused').toBeFocused()
 
           it 'does not crash if the focused element is not targetable (bugfix)', asyncSpec (next) ->
             container = fixture('.container')
