@@ -184,7 +184,7 @@ up.migrate.renamedProperty(up.Request.prototype, 'preload', 'background')
 
 /*-
 The number of milliseconds after which this request can cause
-an `up:network:late` event and show the [progress bar](/loading-indicators#progress-bar).
+an `up:network:late` event and show the [progress bar](/progress-bar).
 
 Defaults to `up.network.config.lateDelay`.
 

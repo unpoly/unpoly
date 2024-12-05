@@ -106,7 +106,7 @@ Requests sent when preloading behave somewhat different to requests sent when fo
   [targeting](/targeting-fragments) the same fragments. Only when the link is clicked later
   conflicting requests are aborted.
 - Preload requests are considered [background requests](/up.render#options.background)
-  and will not show the [progress bar](/loading-indicators#progress-bar).
+  and will not show the [progress bar](/progress-bar).
 - Preloaded content is placed into the [cache](/caching) automatically.
 - When a link destination is already cached, preloading will *not* make another request, even if the cache entry is [expired](/caching#expiration).
   When the link is clicked and the cached content is rendered into page, the fragment will be [revalidated](/caching#revalidation)

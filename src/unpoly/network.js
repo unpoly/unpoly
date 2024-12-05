@@ -15,8 +15,7 @@ The HTTP client offers many quality-of-life improvements, for example:
   Cached content is [revalidated](/caching#revalidation) after rendering, so the user never
   sees stale content.
 - You may [handle network issues](/network-issues), such as disconnects, flaky connections or low bandwidth.
-- A [progress bar](/loading-indicators) is shown when requests take too long to finish.
-  You may also implement a [custom loading indicator](/loading-indicators#custom-loading-indicators).
+- A [progress bar](/progress-bar) is shown when requests take too long to finish.
 - When two requests [target](/targeting-fragments) the same element,
   Unpoly will [abort the earlier request](/aborting-requests).
 - Requests send [additional HTTP headers](/up.protocol) that the server may use to [optimize its response](/optimizing-responses).
@@ -32,7 +31,7 @@ or [submitting a form](/up-submit). To use the client from your own JavaScripts,
 @see caching
 @see aborting-requests
 @see network-issues
-@see loading-indicators
+@see progress-bar
 
 @see up.request
 @see up.Response
@@ -75,10 +74,7 @@ up.network = (function() {
 
   @param {number|Function(up.Request): number|boolean} [config.lateDelay=400]
     The number of milliseconds to wait before emitting the [`up:network:late` event](/up:network:late) and showing
-    the [progress bar](/loading-indicators#progress-bar).
-
-    Requests exceeding this response time will also cause a [progress bar](/loading-indicators#progress-bar)
-    to appear at the top edge of the screen.
+    the [progress bar](/progress-bar).
 
     To never consider a request to be late, configure a function that returns `false` for that request.
 
@@ -153,8 +149,7 @@ up.network = (function() {
     ```
 
   @param {boolean|Function(): boolean} [config.progressBar]
-    Whether to show a [progress bar](/loading-indicators#progress-bar)
-    for [late requests](#config.lateDelay).
+    Whether to show a [progress bar](/progress-bar) for [late requests](#config.lateDelay).
 
   @stable
   */
@@ -456,7 +451,7 @@ up.network = (function() {
 
     Background requests deprioritized over foreground requests.
     Background requests also won't emit `up:network:late` events and won't trigger
-    the [progress bar](/loading-indicators#progress-bar).
+    the [progress bar](/progress-bar).
 
   @param {number} [options.lateDelay]
     The number of milliseconds after which this request can cause
@@ -792,7 +787,7 @@ up.network = (function() {
   > If additional requests are made while Unpoly is already busy  waiting,
   > **no** additional `up:network:late` events will be emitted.
 
-  Also see [Loading indicators](/loading-indicators).
+  Also see [Progress bar](/progress-bar).
 
   @event up:network:late
   @stable
