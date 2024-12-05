@@ -53,7 +53,7 @@ up.preview('link-spinner', function(preview) {
 We can use this preview in any link or form by setting an `[up-preview]` attribute:
 
 ```html
-<a href="/edit" up-follow up-preview="link-spinner">Edit page</a>
+<a href="/edit" up-follow up-preview="link-spinner">Edit page</a> <!-- mark-phrase "up-preview" -->
 ```
 
 When the link is followed, the preview will append the spinner element to the link label.
@@ -83,7 +83,7 @@ up.navigate({ url: '/edit', preview: 'link-spinner' })
 ```
 
 
-### Inspecting the preview context
+## Inspecting the preview context
 
 The `up.Preview` object provides getters to learn more about the current render pass:
 
@@ -98,6 +98,9 @@ up.preview('my-preview', function(preview) {
   preview.revalidating   // Whether we're previewing a cache revalidation
 })
 ```
+
+In particular `preview.params` is helpful to
+[preview the effects of a form submission](/optimistic-rendering#previewing-form-submissions).
 
 
 ## Advanced mutations {#advanced-mutations}
