@@ -1,10 +1,16 @@
 up.FocusCapsule = class FocusCapsule {
 
-  constructor(target, cursorProps) {
+  constructor(element, target, cursorProps) {
+    this._element = element
     this._target = target
     this._cursorProps = cursorProps
   }
 
+  wasLost() {
+    return document.activeElement !== this._element
+  }
+
+  // up.FragmentFocus will check #wasLost() before calling restore()
   restore(layer, options) {
     let rediscoveredElement = up.fragment.get(this._target, { layer })
     if (rediscoveredElement) {
@@ -28,7 +34,7 @@ up.FocusCapsule = class FocusCapsule {
     if (!target) return
 
     const cursorProps = up.viewport.copyCursorProps(focusedElement)
-    return new this(target, cursorProps)
+    return new this(focusedElement, target, cursorProps)
   }
 
 }
