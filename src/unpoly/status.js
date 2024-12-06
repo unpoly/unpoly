@@ -1,81 +1,11 @@
 /*-
-Navigation feedback
-===================
+Status effects
+==============
 
-The `up.status` module adds useful CSS classes to fragments while they are loading over the network.
+Unpoly can apply temporary status effects to your page as the user navigates through your site.
 
-By styling these classes you can provide instant feedback to user interactions,
-improving the perceived speed of your interface.
-
-
-### Example
-
-Let's say we have an `<nav>` element with two links, pointing to `/foo` and `/bar` respectively:
-
-```html
-<nav>
-  <a href="/foo" up-follow>Foo</a>
-  <a href="/bar" up-follow>Bar</a>
-</nav>
-```
-
-By giving the navigation bar the `[up-nav]` attribute, links pointing to the current browser address are highlighted
-as we navigate through the site.
-
-While the current URL is `/foo`, the first link is automatically marked with an `.up-current` class.
-We also assign an [`[aria-current]`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-current) attribute
-to convey the highlighted link to assistive technologies:
-
-```html
-<nav up-nav>
-  <a href="/foo" up-follow class="up-current" aria-current="page">Foo</a>
-  <a href="/bar" up-follow>Bar</a>
-</nav>
-```
-
-When the user clicks on the `/bar` link, the link will receive the `.up-active` class while it is waiting
-for the server to respond. The [targeted](/targeting-fragments) fragment (the `<main>` element) gets the `.up-loading` class:
-
-```
-<nav up-nav>
-  <a href="/foo" up-follow class="up-current" aria-current="page">Foo</a>
-  <a href="/bar" up-follow class="up-active">Bar</a>
-</div>
-
-<main class="up-loading">
-  Foo content
-</main>
-```
-
-Once the response is received the `.up-active` and `.up-loading` classes are removed.
-Since the new URL is `/bar`, the `.up-current` class has been moved to the "Bar" link.
-
-```html
-<nav up-nav>
-  <a href="/foo" up-follow>Foo</a>
-  <a href="/bar" up-follow class="up-current" aria-current="page">Bar</a>
-</nav>
-
-<main>
-  Bar content
-</main>
-```
-
-### Enabling navigation feedback
-
-Navigation feedback is enabled per default when [navigating](/navigation).
-
-When rendering without navigation, you may enable feedback by setting an
-[`[up-feedback]`](/up-follow#up-feedback) attribute or by passing a
-[`{ feedback }`](/up.render#options.feedback) option:
-
-```js
-up.render('.preview', { url: '/preview', feedback: true })
-```
-
-When watching fields you may [show navigation feedback](/watch-options#showing-feedback-while-working)
-while an async callback is running.
-
+For example, you can show arbitrary [loading state](/loading-state) while waiting for the server,
+implement [optimistic rendering](/optimistic-rendering) or highlight current links in [navigation bars](/navigation-bars).
 
 @see navigation-bars
 @see loading-state
