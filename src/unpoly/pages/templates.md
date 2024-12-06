@@ -129,7 +129,7 @@ Sometimes we want to render a complex data object:
 
 For this we need a more expressive template with variables, loops or conditions.
 
-There are [countless templating packages](https://awesome-javascript.js.org/resources/templating-engines.html) to choose from.
+There are [countless templating engines](https://awesome-javascript.js.org/resources/templating-engines.html) to choose from.
 For this example we're going to use templates in the style of
 [Mustache.js](https://github.com/janl/mustache.js) or [Handlebars](https://handlebarsjs.com/):
 
@@ -161,7 +161,7 @@ or integrate your own:
 - Set `event.nodes` to a [list](/up.util.isList) of [`Node`](https://developer.mozilla.org/en-US/docs/Web/API/Node) objects representing
 the template results.
 
-#### Example integrations {#templating-engine-examples}
+#### Example integrations {#templating-engines-examples}
 
 An event handler for an Mustache integration would look like this:
 
