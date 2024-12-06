@@ -1,10 +1,10 @@
 // Bootstrap uses the class `active` to highlight the current section of a navigation bar.
-up.feedback.config.currentClasses.push('active')
+up.status.config.currentClasses.push('active')
 
 // Bootstrap uses the class `active` to force a button's active state.
-up.feedback.config.activeClasses.push('active')
+up.status.config.activeClasses.push('active')
 
-up.feedback.config.navSelectors.push('.nav', '.navbar')
+up.status.config.navSelectors.push('.nav', '.navbar')
 
 up.form.config.groupSelectors.unshift('.form-group')
 

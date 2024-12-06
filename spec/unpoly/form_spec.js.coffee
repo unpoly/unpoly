@@ -2239,7 +2239,7 @@ describe 'up.form', ->
             expect(input).not.toBeDisabled()
 
 
-      describe 'feedback', ->
+      describe 'feedback classes', ->
 
         it "executes the form's [up-watch-feedback] option while a validation request is in flight", asyncSpec (next) ->
           form = fixture('form[up-watch-feedback]')

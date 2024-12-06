@@ -462,7 +462,7 @@ Several new guides were also added:
 - Fix a bug where the back button did not work after following a link that contains an anchor starting with a number (fixes #603).
 - Clickable elements now get an ARIA role of `button`. In earlier versions these elements received a link `link` role.
 - Fix a bug where animating with `{ duration: 0 }` would apply the default duration instead of skipping the animation (fixes #588).
-- You can now exclude navigational containers from applying `.up-current` by adding a selector to `up.feedback.config.noNavSelectors`.
+- You can now exclude navigational containers from applying `.up-current` by adding a selector to `up.status.config.noNavSelectors`.
 
 
 
@@ -859,7 +859,7 @@ Unpoly's rendering engine has been reworked to address many edge cases found in 
 
 #### More practical callback order
 
-- Compilers now see updated [navigation feedback](/up.feedback) for the current render pass. In particular `.up-current` classes are updated before compilers are called.
+- Compilers now see updated [navigation feedback](/up.status) for the current render pass. In particular `.up-current` classes are updated before compilers are called.
 - Hungry elements on other layers are now updated *before* [`{ onAccepted }` and `{ onDismissed }` callbacks](/closing-overlays#callbacks) fire.
   This allows callbacks to observe all fragment changes made by a closing overlay.
 
@@ -1562,7 +1562,7 @@ Various changes make it easier to watch fields for changes:
 - The attribute `[up-observe]` has been renamed to `[up-watch]`.
 - Added [many options](/watch-options) to control [watching](/up-watch), [validation](/validation) and [auto-submission](/up-autosubmit):
   - You can now control which events are observed by setting an `[up-watch-event]` attribute or by passing a `{ watch }` option.
-  - You can now control whether to show [navigation feedback](/up.feedback) while an async callback is working by setting an `[up-watch-feedback]` attribute or by passing a `{ feedback }` option.
+  - You can now control whether to show [navigation feedback](/up.status) while an async callback is working by setting an `[up-watch-feedback]` attribute or by passing a `{ feedback }` option.
   - You can now debounce callbacks by setting an `[up-watch-delay]` attribute or by passing a `{ delay }` option.
   - You can now [disable form fields](/watch-options#disabling-fields-while-working) while an async callback is working by setting an `[up-watch-deisable]` attribute or by passing a `{ disable }` option.
   - All these options can be used on individual fields or [set as default for multiple fields](/watch-options#setting-options-for-multiple-fields) or entire forms.  
@@ -2975,9 +2975,9 @@ Beware of the breaking change with `.up-current`!
 Maintaining the `.up-current` class on all links turned out to be a major performance bottleneck, so we had to make some breaking changes:
 
 - The [`.up-current`](/up-nav-a.up-current) class is now only assigned to links with an [`[up-nav]`](/up-nav) attribute, or to links within a container with an [`[up-nav]`](/up-nav) attribute. You should assign the [`[up-nav]`](/up-nav) attribute to all navigational elements that rely on `.up-current` for styling`.
-- You can also globally configure selectors for your navigational elements in `up.feedback.config.navs`:
+- You can also globally configure selectors for your navigational elements in `up.status.config.navs`:
 
-      up.feedback.config.navs.push('.my-nav-bar')
+      up.status.config.navs.push('.my-nav-bar')
 - The normalized URLs of [`[up-nav]`](/up-nav) links are now cached for performance reasons.
 - [`[up-nav]`](/up-nav) links are only updated once when multiple fragments are updated in a single [replacement](/up-follow).
 
@@ -3542,7 +3542,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 - [`up.replace()`](/up.replace) now returns a rejected promise if the server returns a non-200 status code.
 - `up.util.merge()` has been replaced with [`up.util.assign()`](/up.util.assign), which no longer makes exceptions for `null` and `undefined` property values. This behaves like [`Object.assign`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/assign).
 - The `up.flow` module has been renamed to [`up.dom`](/up.dom).
-- The `up.navigation` module has been renamed to [`up.feedback`](/up.feedback).
+- The `up.navigation` module has been renamed to [`up.status`](/up.status).
 - Functions that measure position, dimensions or margin now return floats instead of rounded integers.
 
 

@@ -49,10 +49,10 @@ Matching containers can opt *out* of `.up-current` assignment by setting an `[up
 ```
 
 You can configure additional selectors to automatically match your navigation components
-in `up.feedback.config.navSelectors`:
+in `up.status.config.navSelectors`:
 
 ```js
-up.feedback.config.navSelectors.push('.navbar')
+up.status.config.navSelectors.push('.navbar')
 ```
 
 
@@ -136,7 +136,7 @@ Unpoly applies no default styling to `.up-current` links. Use your own CSS inste
 If you have already have a CSS class for current links that you want to reuse, you can tell Unpoly about it:
 
 ```js
-up.feedback.config.currentClasses.push('.my-current')
+up.status.config.currentClasses.push('.my-current')
 ```
 
 Unpoly will set all configured classes on a current link:
