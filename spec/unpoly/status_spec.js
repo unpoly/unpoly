@@ -2,11 +2,11 @@ const u = up.util
 const e = up.element
 const $ = jQuery
 
-describe('up.feedback', function() {
+describe('up.status', function() {
 
   function replaceURL(url) {
     // Don't use up.history.replace() since that fires up:location:changed
-    // which up.feedback listens to.
+    // which up.status listens to.
     history.replaceState({}, 'title', url)
   }
 
@@ -964,7 +964,7 @@ describe('up.feedback', function() {
 
 
       it('allows to configure a custom "current" class in addition to .up-current', function() {
-        up.feedback.config.currentClasses.push('highlight')
+        up.status.config.currentClasses.push('highlight')
         replaceURL('/foo')
         const $nav = $fixture('div[up-nav]')
         const $currentLink = $nav.affix('a[href="/foo"]')
@@ -975,8 +975,8 @@ describe('up.feedback', function() {
       })
 
       it('allows to configure multiple additional "current" classes', function() {
-        up.feedback.config.currentClasses.push('highlight1')
-        up.feedback.config.currentClasses.push('highlight2')
+        up.status.config.currentClasses.push('highlight1')
+        up.status.config.currentClasses.push('highlight2')
         replaceURL('/foo')
         const $nav = $fixture('div[up-nav]')
         const $currentLink = $nav.affix('a[href="/foo"]')
@@ -987,9 +987,9 @@ describe('up.feedback', function() {
         expect($currentLink).toHaveClass('up-current')
       })
 
-      it('allows to configure additional nav selectors in up.feedback.config.navSelectors', function() {
+      it('allows to configure additional nav selectors in up.status.config.navSelectors', function() {
         replaceURL('/foo')
-        up.feedback.config.navSelectors.push('.navi')
+        up.status.config.navSelectors.push('.navi')
         const $nav = $fixture('div.navi')
         const $currentLink = $nav.affix('a[href="/foo"]')
         const $otherLink = $nav.affix('a[href="/bar"]')
@@ -998,9 +998,9 @@ describe('up.feedback', function() {
         expect($otherLink).not.toHaveClass('up-current')
       })
 
-      it('does not process containers with [up-nav=false], even if they match up.feedback.config.navSelectors', function() {
+      it('does not process containers with [up-nav=false], even if they match up.status.config.navSelectors', function() {
         replaceURL('/foo')
-        up.feedback.config.navSelectors.push('.navi')
+        up.status.config.navSelectors.push('.navi')
         const noNav = fixture('div.navi[up-nav=false]')
         const currentLink = e.affix(noNav, 'a[href="/foo"]')
         up.hello(noNav)
@@ -1394,8 +1394,8 @@ describe('up.feedback', function() {
       })
 
 
-      it('allows to set additional loading classes via up.feedback.config.loadingClasses', async function() {
-        up.feedback.config.loadingClasses.push('custom-loading')
+      it('allows to set additional loading classes via up.status.config.loadingClasses', async function() {
+        up.status.config.loadingClasses.push('custom-loading')
         fixture('.target')
 
         up.render('.target', {url: '/path', feedback: true})
@@ -1498,8 +1498,8 @@ describe('up.feedback', function() {
         })
         )
 
-        it('allows to set additional active classes via up.feedback.config.activeClasses', async function() {
-          up.feedback.config.activeClasses.push('working')
+        it('allows to set additional active classes via up.status.config.activeClasses', async function() {
+          up.status.config.activeClasses.push('working')
           const link = fixture('a[href="/foo"][up-target=".main"]')
           fixture('.main')
 

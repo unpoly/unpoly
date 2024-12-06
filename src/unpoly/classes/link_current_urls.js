@@ -1,6 +1,6 @@
 const u = up.util
 
-up.LinkFeedbackURLs = class LinkFeedbackURLs {
+up.LinkCurrentURLs = class LinkCurrentURLs {
 
   constructor(link) {
     // A link with an unsafe method will never be higlighted with .up-current.
@@ -31,7 +31,7 @@ up.LinkFeedbackURLs = class LinkFeedbackURLs {
     }
 
     // It is important to return false instead of a falsey value.
-    // up.feedback feeds the return value to element.classList.toggle(),
+    // up.status feeds the return value to element.classList.toggle(),
     // which would use a default for undefined.
     return !!(
       this._href === normalizedLocation ||

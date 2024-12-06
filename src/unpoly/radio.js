@@ -336,7 +336,7 @@ up.radio = (function() {
     parser.number('interval', { default: config.pollInterval })
     parser.string('ifLayer', { default: 'front' })
     parser.include(up.link.requestOptions)
-    parser.include(up.feedback.statusOptions)
+    parser.include(up.status.statusOptions)
     return options
   }
 

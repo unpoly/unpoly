@@ -5,7 +5,7 @@ const e = up.element
 The `up.Preview` class allows to describe revertible preview effects.
 
 @class up.Preview
-@parent up.feedback
+@parent up.status
 */
 up.Preview = class Preview {
 
@@ -135,7 +135,7 @@ up.Preview = class Preview {
   @experimental
   */
   run(value, options = {}) {
-    for (let fn of up.feedback.resolvePreviewFns(value)) {
+    for (let fn of up.status.resolvePreviewFns(value)) {
       this.undo(up.error.guard(fn, this, options))
     }
   }
