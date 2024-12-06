@@ -207,12 +207,16 @@ up.element = (function() {
   /*-
   Elements with this attribute are hidden from the page.
 
+  When Unpoly hides an element for any reason, it will set an `[hidden]` attribute
+  instead of using an inline style like `display: none`.
+  This allows users to tweak the hiding implementation using CSS.
+
+  ## Customizing the CSS
+
   While `[hidden]` is a [standard HTML attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/hidden)
   its default implementation is [not very useful](https://meowni.ca/hidden.is.a.lie.html).
   In particular it cannot hide elements with any `display` rule.
   Unpoly improves the default CSS styles of `[hidden]` so it can hide arbitrary elements.
-
-  ## Customizing the CSS
 
   Unpoly's default styles for `[hidden]` look like this:
 
