@@ -2001,6 +2001,17 @@ describe 'up.link', ->
             expect(followSpy).not.toHaveBeenCalled()
             expect(link).toHaveBeenDefaultFollowed()
 
+        it 'never follows a link with a "tel:..." [href] attribute', asyncSpec (next) ->
+          followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+          up.link.config.followSelectors.push('a[href]')
+          link = up.hello fixture('a[href="tel:+49123456"]')
+
+          Trigger.click(link)
+
+          next ->
+            expect(followSpy).not.toHaveBeenCalled()
+            expect(link).toHaveBeenDefaultFollowed()
+
         it 'never follows a link with a "whatsapp://..." attribute', asyncSpec (next) ->
           followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
           up.link.config.followSelectors.push('a[href]')
