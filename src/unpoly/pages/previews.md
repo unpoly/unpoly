@@ -2,10 +2,15 @@ Previews
 ========
 
 Previews are temporary page changes while waiting for a network request.
-You can show arbitrary loading state (like spinners or placeholders) and even do optimistic rendering.
+They signal that the app is working, or provide clues for how the page will ultimately look.
 
 Because previews immediately appear after a user interaction, their use
 increases the perceived responsiveness of your application.
+
+> [tip]
+> Previews are an advanced technique to describe arbitrary loading state or optimistic UI.
+> Unpoly also provides more accessible utilities for common use cases, implemented as previews internally.
+> See [loading state](/loading-state) for an overview.
 
 
 ## Overview {#overview}
@@ -18,16 +23,9 @@ The function will usually [mutate the DOM](#dom-mutations) in a way the user get
 a preview of the interaction effect. For example, if the user is deleting an item from a list, the preview
 function could hide that item visually.
 
-When the request ends for *any* reason, all preview changes will be reverted before
-the server response is processed (usually by updating a fragment).
-This ensures a consistent state where we end up *not* updating the [targeted fragment](/targeting-fragments),
-such as:
-
-- when the server [renders an error code](/failed-responses#rendering-failed-responses-differently)
-- when the request encounters a [fatal error](/failed-responses#handling-fatal-network-errors), like a timeout or loss of network connectivity.
-- when the server [updates a different fragment](/X-Up-Target)
-- when the request is [aborted](/aborting-requests), e.g. by a different link targeting the same fragment
-- when an `up:fragment:loaded` listener chooses to open an overlay
+When the request ends for [any reason](#ending), all preview changes will be reverted before
+the server response is processed. This ensures a consistent screen state in cases when
+a request is aborted, or when we end up updating a different fragment.
 
 Unpoly provides utility functions to [make temporary DOM mutations](#basic-mutations) that automatically revert
 when the preview ends. For advanced cases you may also apply [arbitrary mutations](#advanced-mutations),
@@ -101,6 +99,8 @@ up.preview('my-preview', function(preview) {
 
 In particular `preview.params` is helpful to
 [preview the effects of a form submission](/optimistic-rendering#previewing-form-submissions).
+
+
 
 
 ## Advanced mutations {#advanced-mutations}
@@ -233,6 +233,21 @@ up.navigate({
   preview: (preview) => preview.run('link-spinner', { size })
 })
 ```
+
+
+## How previews end {#ending}
+
+A preview ends when its associated request ends for *any* reason. Reasons include:
+
+- the server responds with new HTML
+- the server [renders an error code](/failed-responses#rendering-failed-responses-differently)
+- the request encounters a [fatal error](/failed-responses#handling-fatal-network-errors), like a timeout or loss of network connectivity.
+- the server [updates a different fragment](/X-Up-Target)
+- the request is [aborted](/aborting-requests), e.g. by a different link targeting the same fragment
+
+When the preview ends, all its page changes will be reverted before the server response is processed.
+
+To manually end a preview, [abort](/aborting-requests) its associated request.
 
 
 

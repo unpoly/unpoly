@@ -1,7 +1,8 @@
 Customizing overlays
 ====================
 
-Overlays ship with minimal styling and common default behavior. That look and feel can be customized using CSS and JavaScript.
+Overlays ship with minimal styling and common default behavior.
+That look and feel can be customized.
 
 
 Understanding the HTML structure
@@ -93,6 +94,17 @@ up-modal[size=medium] up-modal-box {
 Regardless of size, overlays never grow wider than the screen width.
 
 
+Customizing dismiss controls
+----------------------------
+
+By default the user can dismiss an overlay user by pressing `Escape`, by clicking outside the overlay box
+or by pressing an "X" icon in the top-right corner.
+
+You may [customize the dismiss controls](/closing-overlays#customizing-dismiss-controls)
+available to the user.
+
+
+
 Overlay classes
 ---------------
 
@@ -145,16 +157,6 @@ up.on('up:layer:opened', function(event) {
 ```
 
 Make sure to not remove any of the existing overlay elements or things will break.
-
-
-Customizing dismiss controls
-----------------------------
-
-By default the user can dismiss an overlay user by pressing `Escape`, by clicking outside the overlay box
-or by pressing an "X" icon in the top-right corner.
-
-You may [customize the dismiss controls](/closing-overlays#customizing-dismiss-controls)
-available to the user.
 
 
 Popup position
