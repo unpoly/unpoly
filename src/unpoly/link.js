@@ -202,7 +202,7 @@ up.link = (function() {
     //     Many web developers are used to give JavaScript-handled links an [href="#"]
     //     attribute. Also frameworks like Bootstrap only style links if they have an [href].
     // (3) We don't want to handle <a href="javascript:foo()"> links.
-    noFollowSelectors: ['[up-follow=false]', 'a[download]', 'a[target]', 'a[href^="javascript:"]', 'a[href^="mailto:"]', `a[href^="#"]:not(${ATTRS_WITH_LOCAL_HTML})`, e.crossOriginSelector('href'), e.crossOriginSelector('up-href')],
+    noFollowSelectors: ['[up-follow=false]', 'a[download]', 'a[target]', 'a[href^="javascript:"]', 'a[href^="mailto:"]', 'a[href^="tel:"]', `a[href^="#"]:not(${ATTRS_WITH_LOCAL_HTML})`, e.crossOriginSelector('href'), e.crossOriginSelector('up-href')],
 
     instantSelectors: ['[up-instant]'],
     noInstantSelectors: ['[up-instant=false]', '[onclick]'],
