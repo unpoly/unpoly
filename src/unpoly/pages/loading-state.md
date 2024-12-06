@@ -9,7 +9,7 @@ This increases the perceived responsiveness of your application.
 Styling active elements
 -----------------------
 
-(There is an example on up.feedback, but maybe leave nav/up-current out of it)
+(There is an example on up.status, but maybe leave nav/up-current out of it)
 
 - Links with .up-active
 - Forms with .up-active (form, origin element, submit button)

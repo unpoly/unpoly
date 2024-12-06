@@ -3825,7 +3825,7 @@ describe 'up.link', ->
           expect('#partial1').toHaveText('partial1 content')
           expect('#partial2').toHaveText('partial2 content')
 
-      describe 'navigation feedback', ->
+      describe 'feedback classes', ->
 
         it 'receives an .up-active class while loading', ->
           partial = fixture('a#slow[up-defer][href="/slow-path"]')

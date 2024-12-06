@@ -2,7 +2,7 @@
 Navigation feedback
 ===================
 
-The `up.feedback` module adds useful CSS classes to fragments while they are loading over the network.
+The `up.status` module adds useful CSS classes to fragments while they are loading over the network.
 
 By styling these classes you can provide instant feedback to user interactions,
 improving the perceived speed of your interface.
@@ -88,9 +88,9 @@ while an async callback is running.
 @see .up-active
 @see .up-loading
 
-@module up.feedback
+@module up.status
 */
-up.feedback = (function() {
+up.status = (function() {
 
   const u = up.util
   const e = up.element
@@ -100,7 +100,7 @@ up.feedback = (function() {
   /*-
   Sets default options for this package.
 
-  @property up.feedback.config
+  @property up.status.config
 
   @param {Array<string>} [config.currentClasses=['up-current']]
     An array of classes to set on [links that point the current location](/up-current).
@@ -115,7 +115,7 @@ up.feedback = (function() {
     An array of CSS selectors that match [navigational containers](/navigation-bars).
 
   @param {Array<string>} [config.noNavSelectors=['[up-nav=false]']]
-    Exceptions to `up.feedback.config.navSelectors`.
+    Exceptions to `up.status.config.navSelectors`.
 
   @stable
   */
@@ -134,11 +134,11 @@ up.feedback = (function() {
 
   const SELECTOR_LINK = 'a, [up-href]'
 
-  function linkURLs(link) {
+  function linkCurrentURLs(link) {
     // Check if we have computed the URLs before.
     // Computation is sort of expensive (multiplied by number of links),
     // so we cache the results in a link property
-    return link.upFeedbackURLs ||= new up.LinkFeedbackURLs(link)
+    return link.upCurrentURLs ||= new up.LinkCurrentURLs(link)
   }
 
   /*-
@@ -165,7 +165,7 @@ up.feedback = (function() {
     const links = up.fragment.all(navLinkSelector, { layer })
 
     for (let link of links) {
-      const isCurrent = linkURLs(link).isCurrent(layerLocation)
+      const isCurrent = linkCurrentURLs(link).isCurrent(layerLocation)
       for (let currentClass of config.currentClasses) {
         link.classList.toggle(currentClass, isCurrent)
       }
@@ -191,12 +191,12 @@ up.feedback = (function() {
   }
 
   /*-
-  While rendering [with navigation feedback](/up.feedback#enabling-navigation-feedback),
+  While rendering [with navigation feedback](/up.status#enabling-navigation-feedback),
   the `.up-active` class is added to the [origin](/origin) element that triggered the change.
 
   The `.up-active` class is removed once the new content has been loaded and rendered.
 
-  To set additional classes on activated elements, configure `up.feedback.config.activeClasses`.
+  To set additional classes on activated elements, configure `up.status.config.activeClasses`.
 
   ### Example: Active link
 
@@ -282,12 +282,12 @@ up.feedback = (function() {
   */
 
   /*-
-  While rendering [with navigation feedback](/up.feedback#enabling-navigation-feedback),
+  While rendering [with navigation feedback](/up.status#enabling-navigation-feedback),
   [targeted fragments](/targeting-fragments) are assigned the `.up-loading` class.
 
   The `.up-loading` class is removed once the fragment was updated.
 
-  To set additional classes on loading fragments, configure `up.feedback.config.loadingClasses`.
+  To set additional classes on loading fragments, configure `up.status.config.loadingClasses`.
 
   ### Example
 
@@ -571,4 +571,4 @@ up.feedback = (function() {
   }
 })()
 
-up.preview = up.feedback.preview
+up.preview = up.status.preview

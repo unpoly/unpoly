@@ -406,7 +406,7 @@ up.link = (function() {
     parser.booleanOrString('history')
 
     // Status effects
-    parser.include(up.feedback.statusOptions)
+    parser.include(up.status.statusOptions)
 
     // Viewport options
     parser.booleanOrString('focus')
@@ -1442,7 +1442,7 @@ up.link = (function() {
     Whether to give the link an `.up-active` class and the targeted element an `.up-loading` class
     while loading content.
 
-    See [navigation feedback](/up.feedback).
+    See [navigation feedback](/up.status).
 
   @param [up-on-loaded]
     A JavaScript snippet that is executed when the server responds with new HTML,

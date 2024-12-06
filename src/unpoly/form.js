@@ -416,7 +416,7 @@ up.form = (function() {
 
     let parser = new up.OptionsParser(field, options, { ...parserOptions, closest: true, attrPrefix: 'up-watch-' })
 
-    parser.include(up.feedback.statusOptions)
+    parser.include(up.status.statusOptions)
     parser.string('event')
     parser.number('delay')
 
@@ -1254,7 +1254,7 @@ up.form = (function() {
 
   ### Showing that the form is processing
 
-  See [navigation feedback](/up.feedback) and [disabling form controls while working](/disabling-forms).
+  See [navigation feedback](/up.status) and [disabling form controls while working](/disabling-forms).
 
   ### Short notation
 
@@ -1624,7 +1624,7 @@ up.form = (function() {
 
     See [disabling fields while working](/watch-options#disabling-fields-while-working).
   @param [up-watch-feedback]
-    Whether to give [navigation feedback](/up.feedback) while validating.
+    Whether to give [navigation feedback](/up.status) while validating.
 
     See [showing feedback while working](/watch-options#showing-feedback-while-working).
   @stable
