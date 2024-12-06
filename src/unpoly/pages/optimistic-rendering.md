@@ -6,14 +6,15 @@ without waiting for the server to respond. When the server eventually does respo
 is reverted and replaced by the server-confirmed content.
 
 
-## Good use cases {#use-cases}
+## Suitable use cases {#use-cases}
 
 Optimistic rendering in Unpoly is implemented using [previews](/previews).
-Use cases often involve heavier DOM mutations to produce a screen state resembling the eventual server response.
+Previews are temporary page changes that are reverted when a request ends.
 
-Because optimistic rendering requires additional code, we recommend to use
-it for interactions where the duplication is low, or where the extra effort adds significant value for the user.
-Some good use cases include:
+Rendering optimistically can involve heavy DOM mutations to produce a screen state resembling the ultimate server response.
+Since this requires additional code, we recommend to use
+optimistic rendering for interactions where the duplication is low, or where the extra effort adds significant value for the user.
+Some suitable use cases include:
 
 - Forms with few or simple validations (e.g. adding a todo)
 - Forms where users would expect an immediate effect (e.g. submitting a chat message)
@@ -152,10 +153,7 @@ In the example above, we would include a template with the rest of our markup:
 </script>
 ```
 
-> [tip]
-> This uses the minimal `text/minimustache` templating function
-> that you can [copy into your project](/templates#templating-engine-examples).
-> See [Dynamic templates](/templates#dynamic) for various strategies to evaluate template expressions.
+@include minimustache-tip
 
 By referring to the server-rendered template, we can now remove the HTML snippet from our JavaScript:
 
