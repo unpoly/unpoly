@@ -144,11 +144,10 @@ up.status = (function() {
   <a href="/foo" up-follow class="up-active">Foo</a> <!-- mark-phrase "up-active" -->
   ```
 
-  Once the link destination has loaded and rendered, the `.up-active` class
-  is removed and the `.up-current` class is added:
+  Once the link destination has loaded and rendered, the `.up-active` class is removed:
 
   ```html
-  <a href="/foo" up-follow class="up-current" aria-current="page">Foo</a>
+  <a href="/foo" up-follow>Foo</a>
   ```
 
   > [NOTE]

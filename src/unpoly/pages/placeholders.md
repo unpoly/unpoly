@@ -9,7 +9,7 @@ This can make long-loading interactions appear more responsive.
 
 <video src="images/placeholders.webm" controls width="600" aria-label="UI skeletons are shown while screens are loading"></video>
 
-Like with all [previews](/previews), placeholders only temporarily displace a fragment.
+Like all [preview effects](/previews), placeholders only temporarily displace a fragment.
 When the associated request [ends for any reason](/previews#ending), the placeholder is removed
 and the original screen state is restored before the response is processed.
 
