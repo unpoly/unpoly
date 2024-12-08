@@ -122,148 +122,30 @@ up.status = (function() {
   }
 
   /*-
-  While rendering [with navigation feedback](/up.status#enabling-navigation-feedback),
-  the `.up-active` class is added to the [origin](/origin) element that triggered the change.
+  While rendering, the `.up-active` class is added to the [origin](/origin) element that triggered the change.
 
-  The `.up-active` class is removed once the new content has been loaded and rendered.
+  The class remains set while the request is loading.
+  It is removed when the request [ends](/up.Request.prototype.ended) for any reason.
 
-  To set additional classes on activated elements, configure `up.status.config.activeClasses`.
+  See [Feedback classes](/feedback-classes) for details and examples.
 
-  ### Example: Active link
-
-  We have a link:
-
-  ```html
-  <a href="/foo" up-follow>Foo</a>
-  ```
-
-  When the user clicks on the link, the link is assigned the `.up-active` class
-  while the request is loading:
-
-  ```html
-  <a href="/foo" up-follow class="up-active">Foo</a> <!-- mark-phrase "up-active" -->
-  ```
-
-  Once the link destination has loaded and rendered, the `.up-active` class is removed:
-
-  ```html
-  <a href="/foo" up-follow>Foo</a>
-  ```
-
-  > [NOTE]
-  > Links do *not* require a [navigational container](/navigation-bars) to get the `.up-active` class while loading.
-
-  ### Example: Active form
-
-  We have a form:
-
-  ```html
-  <form action="/action" up-submit>
-    <input type="text" name="email">
-    <button type="submit">Submit</button>
-  </form>
-  ```
-
-  When the user clicks the submit button, both the button and the form are marked as `.up-active`
-  while the form is submitting:
-
-  ```html
-  <form action="/action" up-submit class="up-active"> <!-- mark-phrase "up-active" -->
-    <input type="text" name="email">
-    <button type="submit" class="up-active">Submit</button> <!-- mark-phrase "up-active" -->
-  </form>
-  ```
-
-  When the user submits by pressing `Return` inside the focused text field, that text field
-  is marked as `.up-active` in addition to the form and its default submit button:
-
-  ```html
-  <form action="/action" up-submit class="up-active"> <!-- mark-phrase "up-active" -->
-    <input type="text" name="email" class="up-active"> <!-- mark-phrase "up-active" -->
-    <button type="submit">Submit</button> <!-- mark-phrase "up-active" -->
-  </form>
-  ```
-
-  ### Default origins
-
-  The origin element is set automatically for many actions, for example:
-
-  @include default-origins
-
-  When rendering from JavaScript, you may set the origin by passing an
-  [`{ origin }`](/origin#setting-the-origin-programmatically) option.
-
-  ### Styling active elements
-
-  To improve the perceived responsiveness of your user interface,
-  consider highlighting active links and submit buttons in your CSS:
-
-  ```css
-  .up-active:is(a, [up-follow], input[type=submit], button[type=submit], button:not([type])) {
-    outline: 2px solid blue;
-  }
-  ```
-
-  If you're looking to style the [targeted](/targeting-fragments) fragment, use the `.up-loading` class
-  instead.
+  > [tip]
+  > If you're looking to style the [targeted](/targeting-fragments) fragment, see `.up-loading`.
 
   @selector .up-active
   @stable
   */
 
   /*-
-  While rendering [with navigation feedback](/up.status#enabling-navigation-feedback),
-  [targeted fragments](/targeting-fragments) are assigned the `.up-loading` class.
+  While rendering, [targeted fragments](/targeting-fragments) are assigned the `.up-loading` class.
 
-  The `.up-loading` class is removed once the fragment was updated.
+  The class remains set while the request is loading.
+  It is removed when the request [ends](/up.Request.prototype.ended) for any reason.
 
-  To set additional classes on loading fragments, configure `up.status.config.loadingClasses`.
+  See [Feedback classes](/feedback-classes) for details and examples.
 
-  ### Example
-
-  We have a fragment that we want to update:
-
-  ```html
-  <div class="foo">
-    Old content
-  </div>
-  ```
-
-  We now update the fragment with new content from the server:
-
-  ```js
-  up.render('.foo', { url: '/path', feedback: true })
-  ```
-
-  While the request is loading, the targeted element has the `.up-loading` class:
-
-  ```html
-  <div class="foo up-loading">
-    Old content
-  </div>
-  ```
-
-  Once the response was rendered, the `.up-loading` class is removed:
-
-  ```html
-  <div class="foo">
-    New content
-  </div>
-  ```
-
-  ### Styling targeted fragments
-
-  To improve the perceived responsiveness
-  of your user interface, consider styling loading fragments in your CSS:
-
-  ```css
-  .up-loading {
-    opacity: 0.6;
-  }
-  ```
-
-  If you're looking to style the link that targeted the fragment, use the
-  `.up-active` class instead.
+  > [tip]
+  > If you're looking to style the [origin](/origin) that targeted the fragment, see `.up-active`.
 
   @selector .up-loading
   @stable
