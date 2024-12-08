@@ -8,7 +8,7 @@ is reverted and replaced by the server-confirmed content.
 
 ## Suitable use cases {#use-cases}
 
-Optimistic rendering in Unpoly is implemented using [previews](/previews).
+Optimistic rendering is an application of [previews](/previews).
 Previews are temporary page changes that are reverted when a request ends.
 
 Rendering optimistically can involve heavy DOM mutations to produce a screen state resembling the ultimate server response.

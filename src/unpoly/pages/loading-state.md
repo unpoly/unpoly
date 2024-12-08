@@ -1,13 +1,15 @@
 Loading state
 =============
 
-After a user interaction, Unpoly offers many methods to provide instant feedback while waiting for the network.
+Unpoly offers many tools to instantly show loading state after a user interaction.
 
-This increases the perceived responsiveness of your application.
+By quickly signaling that the app is working, you can make your interface appear more responsive.
 
 
 Styling active elements
 -----------------------
+
+
 
 (There is an example on up.status, but maybe leave nav/up-current out of it)
 
