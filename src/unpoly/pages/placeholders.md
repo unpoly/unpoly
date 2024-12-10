@@ -14,7 +14,7 @@ When the associated request [ends for any reason](/previews#ending), the placeho
 and the original screen state is restored before the response is processed.
 
 
-Simple placeholders
+Basic placeholders {#basic-example}
 ------------------
 
 To show a placeholder while a link is loading, set an `[up-placeholder]` attribute
@@ -59,7 +59,7 @@ up.navigate({
 ```
 
 
-Placeholder from templates
+Placeholder from templates {#from-template}
 --------------------------
 
 Instead of passing the placeholder HTML directly, you can also refer to any [template](/templates)
@@ -80,7 +80,7 @@ as attribute value, or when you want to re-use the same placeholder multiple tim
 </template>
 ```
 
-### Dynamic templates
+### Dynamic templates {#dynamic}
 
 You may need to customize placeholder markup to better fit the targeted fragment.
 For example, a spinner animations should be larger when updating a larger content area.
@@ -114,7 +114,7 @@ that you can [copy into your project](/templates#templating-engines-examples):
 
 
 
-Placeholders for new overlays
+Placeholders for new overlays {#overlays}
 -----------------------------
 
 You can use placeholders with [links that open an overlay](/up-layer-new):
@@ -134,7 +134,7 @@ the placeholder overlay will be closed.
 
 
 
-Showing placeholders from a preview function
+Showing placeholders from a preview function {#from-preview}
 ---------------------------------------------
 
 [Previews](/previews) are a way to show arbitrary loading state.
