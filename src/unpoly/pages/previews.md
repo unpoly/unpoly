@@ -309,7 +309,7 @@ up.preview('delayed-spinner', (preview) => {
 > When a preview changes the DOM after the preview has ended, these changes will not be reverted. 
 
 
-## Multiple previews
+## Multiple previews {#multiple}
 
 A change can show multiple previews at once:
 
