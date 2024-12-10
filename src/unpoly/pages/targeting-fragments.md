@@ -29,7 +29,7 @@ up.render({ target: '.content', url: '/posts/5' })
 ```
 
 
-### Updating multiple fragments
+### Updating multiple fragments {#multiple}
 
 You can update multiple fragments from a single request by separating
 selectors with a comma.
