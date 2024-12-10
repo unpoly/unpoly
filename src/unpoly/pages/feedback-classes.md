@@ -1,7 +1,7 @@
 Feedback classes
 ================
 
-Unpoly can add CSS classes to interactive elements that are loading content,
+Unpoly adds CSS classes to interactive elements that are loading content,
 and to the fragments they are [targeting](/targeting-fragments).
 
 [Styling](#styling) these "feedback classes" is [one way](/loading-state) to instantly signal
