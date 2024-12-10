@@ -150,6 +150,22 @@ up.on('click', '.my-button', function(event) {
 ```
 
 
+## Custom feedback classes {#custom-classes}
+
+To set additional classes on activated [origins](/origin), push a class name to `up.status.config.activeClasses`:
+
+```js
+up.status.config.activeClasses.push('activated')
+```
+
+To set additional classes on targeted fragments that are loading new content, push
+a class name to `up.status.config.loadingClasses`:
+
+```js
+up.status.config.loadingClasses.push('fetching')
+```
+
+
 ## Disabling feedback classes
 
 To disable feedback classes, set an
