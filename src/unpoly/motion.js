@@ -4,7 +4,7 @@ Animation
 
 When you [update a page fragment](/up.link) you can animate the change.
 
-### Transitions
+## Transitions
 
 When we morph between an old and a new element, we call it a *transition*.
 
@@ -19,7 +19,7 @@ links or forms to smoothly fade out the old element while fading in the new elem
 </a>
 ```
 
-### Animations
+## Animations
 
 In contrast, when we animate a new element without simultaneously removing an
 old element, we call it an *animation*.
@@ -36,7 +36,7 @@ of the dialog by adding an [`[up-animation]`](/up-layer-new#up-animation) attrib
 </a>
 ```
 
-### Which animations are available?
+## Which animations are available?
 
 Unpoly ships with a number of [predefined transitions](/up.morph#named-transitions)
 and [predefined animations](/up.animate#named-animations).
@@ -691,8 +691,9 @@ up.motion = (function() {
 
   > [NOTE]
   > Transitions are not possible when replacing the `<body>` element.
+  > To transition the entire page, wrap it in a container element.
 
-  ### Following a link with animation
+  ## Following a link with animation
 
   The link will load the fragment `#story` from the URL `/page2`.
   Once the response is received, the old fragment version will fly out to the left, while the new
@@ -706,7 +707,7 @@ up.motion = (function() {
   </a>
   ```
 
-  ### Submitting a link with animation
+  ## Submitting a form with animation
 
   The form will load the fragment `.content` from the URL `/tasks`.
   Once the response is received, the old fragment version will fade out, while the new
