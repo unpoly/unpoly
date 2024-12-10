@@ -189,6 +189,85 @@ up.status = (function() {
     return cleaner.clean
   }
 
+  /*-
+  Links or forms can name a [preview function](/previews) that is called while
+  loading content from the server.
+
+  When the user interacts with a link or form, its preview function is invoked immediately.
+  The function will usually [mutate the DOM](#dom-mutations) to signal that the app is working,
+  or to provide clues for how the page will ultimately look.
+  For example, if the user is deleting an item from a list, the preview
+  function could hide that item visually.
+
+  See [Previews](/previews) for details and examples.
+
+  ## Usage
+
+  To refer to a preview function, set its name as an `[up-preview]` attribute:
+
+  ```html
+  <a href="/edit" up-follow up-preview="spinner">Edit page</a> <!-- mark-phrase "spinner" -->
+  ```
+
+  To [call multiple previews](/previews#multiple), separate their names with a comma:
+
+  ```html
+  <a href="/edit" up-follow up-preview="spinner, dim-page">Edit page</a> <!-- mark-phrase "spinner, dim-page" -->
+  ```
+
+  [Preview options](#parameters) can be appended after each preview name, encoded as [Relaxed JSON](/relaxed-json):
+
+  ```html
+  <a href="/edit"
+     up-follow
+     up-preview="spinner { size: 20 }, dim-page { animation: 'pulse' }"> <!-- mark-phrase "spinner { size: 20 }, dim-page { animation: 'pulse' }" -->
+    Edit page
+  </a>
+  ```
+
+  @selector [up-preview]
+  @param up-preview
+    The name of a preview function defined with `up.preview()`.
+
+    To call multiple previews, separate names with a comma.
+  @experimental
+  */
+
+  /*-
+  Links or forms can define a [placeholder](/placeholders) that will be shown within the targeted
+  fragment while loading content from the server.
+
+  All other children of the targeted fragment will be hidden while
+  the request is in flight.  When the requests [ends](/up.Request.prototype.ended) for any reason,
+  the placeholder will be removed and the original fragment children will be un-hidden.
+
+  When [targeting multiple fragments](/targeting-fragments#multiple),
+  the placeholder will be shown in the first fragment.
+
+  ## Example
+
+  This link will show the message *"Loading…"* within `#target` while its request is loading:
+
+  ```html
+  <a href="/path" up-target="#target" up-placeholder="<p>Loading…</p>">Show story</a> <!-- mark-phrase "<p>Loading…</p>" -->
+
+  <div id="#target">
+    Old content
+  </div>
+  ```
+
+  See [Placeholders](/placeholders) for details and elaborate examples.
+
+  @selector [up-placeholder]
+  @param up-placeholder
+    The HTML string for the placeholder.
+
+    You can also [use a template](/placeholders#from-template)
+    by setting this attribute to a CSS selector matching
+    a `<template>` or `<script>` element.
+  @experimental
+  */
+
   function getPlaceholderPreviewFn(placeholder) {
     if (!placeholder) return
 
