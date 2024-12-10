@@ -1,15 +1,15 @@
 Progress bar
 ============
 
-When requests are [taking long]((/up:network:late)) to load, Unpoly will show a thin progress bar at the top edge of the screen.
+When requests are [taking long](/up:network:late) to load, Unpoly will show a thin progress bar at the top edge of the screen.
 
 ![Progress bar animation](images/progress-bar.gif)
 
-This mimics similiar loading indicators by browsers, which only appear during full page loads.
+This mimics similar loading indicators by browsers, which only appear during full page loads.
+You can also [customize the style](#styling) or implement a [custom loading indicator](#custom-implementation).
 
 
-
-## Styling the progress bar
+## Styling the progress bar {#styling}
 
 The progress bar is implemented as a single `<up-progress-bar>` element.
 Unpoly will automatically insert and remove this element as requests
@@ -50,7 +50,7 @@ up.network.config.progressBar = false
 
 
 
-Custom loading indicators
+Custom loading indicators {#custom-implementation}
 -------------------------
 
 If you don't like the default progress bar, you can observe the `up:network:late`
