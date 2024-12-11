@@ -1393,7 +1393,6 @@ describe('up.status', function() {
         expect('#bar').toHaveClass('up-loading')
       })
 
-
       it('allows to set additional loading classes via up.status.config.loadingClasses', async function() {
         up.status.config.loadingClasses.push('custom-loading')
         fixture('.target')
