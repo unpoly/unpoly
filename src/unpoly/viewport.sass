@@ -2,6 +2,13 @@ up-bounds
   position: absolute
 
 .up-focus-hidden:focus-visible
+  // Some developers agent stylesheets will use a focus outline like `2px solid blue`.
+  // When there is also a transition on `outline-color`, we want to prevent
+  // a flash of color.
+  outline-color: transparent !important
+
+  // Browsers like MacOS Safari will default to `outline-style: auto`,
+  // which cannot be configured in width or color.
   outline-style: none !important
 
 body.up-scrollbar-away
