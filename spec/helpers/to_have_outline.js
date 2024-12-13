@@ -8,11 +8,15 @@ beforeEach(function() {
       return {
         compare: function(element) {
           element = up.element.get(element)
+          const style = up.element.style(element, 'outline-style')
           const widthNumber = up.element.styleNumber(element, 'outline-width')
           const colorString = up.element.style(element, 'outline-color')
 
+          // An auto style can not always be modified with color or width.
+          // E.g. on MacOS Safari the auto style is a rounded, semi-translucent
+          // rectangle that cannot be configured.
           return {
-            pass: widthNumber > 0 && !isTransparentColor(colorString)
+            pass: style === 'auto' || (style !== 'none' && widthNumber > 0 && !isTransparentColor(colorString))
           }
         }
       }
