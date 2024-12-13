@@ -27,14 +27,27 @@ describe 'up.Layer.Modal', ->
     describe 'scrollbars while an overlay is open', ->
 
       beforeEach ->
+        up.motion.config.enabled = false
+
         unless up.specUtil.rootHasReducedWidthFromScrollbar()
           # Delay skipping until beforeEach() so the stylesheet that controls the scroll bar is loaded
           pending("Skipping test on browser without visible scroll bars")
 
-      it "replaces the document scrollbar with a new scrollbar on its viewport element", ->
-        fixture('div', style: { height: '10000px' })
+      it "replaces a scrollbar on <body> with a new scrollbar on its viewport element", ->
+        fixtureStyle """
+          body {
+            overflow-y: scroll;
+          }
+        """
+        fixtureStyle """
+          html {
+            overflow-y: unset;
+          }
+        """
 
-        expect(up.viewport.root).toHaveVerticalScrollbar()
+        fixture('div', style: { height: '10000px', 'background-color': 'yellow' })
+
+        expect(document.body).toHaveVerticalScrollbar()
 
         up.layer.open(mode: 'modal', content: '<div style="height: 10000px"></div>')
         expect(up.layer.isOverlay()).toBe(true)
@@ -44,17 +57,56 @@ describe 'up.Layer.Modal', ->
         expect(document.querySelector('up-modal-viewport').offsetWidth).toBe(window.innerWidth)
         expect(document.querySelector('up-modal-viewport').offsetHeight).toBe(window.innerHeight)
 
-        expect(up.viewport.root).not.toHaveVerticalScrollbar()
+        expect(document.body).not.toHaveVerticalScrollbar()
+
         expect('up-modal-viewport').toHaveVerticalScrollbar()
         expect('up-modal-box').not.toHaveVerticalScrollbar()
         expect('up-modal-content').not.toHaveVerticalScrollbar()
+
+        await up.layer.dismiss()
+
+        expect(document.body).toHaveVerticalScrollbar()
+
+      it "replaces a scrollbar on <html> with a new scrollbar on its viewport element 2", ->
+        fixtureStyle """
+          body {
+            overflow-y: unset;
+          }
+        """
+        fixtureStyle """
+          html {
+            overflow-y: scroll;
+          }
+        """
+
+        fixture('div', style: { height: '10000px' })
+
+        expect(document.documentElement).toHaveVerticalScrollbar()
+
+        up.layer.open(mode: 'modal', content: '<div style="height: 10000px"></div>')
+        expect(up.layer.isOverlay()).toBe(true)
+
+        expect(document.querySelector('up-modal-viewport').offsetLeft).toBe(0)
+        expect(document.querySelector('up-modal-viewport').offsetTop).toBe(0)
+
+        expect(document.querySelector('up-modal-viewport').offsetWidth).toBe(window.innerWidth)
+        expect(document.querySelector('up-modal-viewport').offsetHeight).toBe(window.innerHeight)
+
+        expect(document.documentElement).not.toHaveVerticalScrollbar()
+        expect('up-modal-viewport').toHaveVerticalScrollbar()
+        expect('up-modal-box').not.toHaveVerticalScrollbar()
+        expect('up-modal-content').not.toHaveVerticalScrollbar()
+
+        await up.layer.dismiss()
+
+        expect(document.documentElement).toHaveVerticalScrollbar()
 
       it "gives the body additional padding on the right so the hidden scrollbar won't enlarge the client area, causing a layout shift", ->
         spyOn(up.viewport, 'rootScrollbarWidth').and.returnValue(25)
         unsetBodyStyle = e.setTemporaryStyle(document.body, { 'padding-right': '40px' })
 
         up.layer.open(mode: 'modal', content: 'modal content')
-        expect(up.viewport.root).not.toHaveVerticalScrollbar()
+        expect(document).not.toHaveVerticalScrollbar()
         expect(document.body).toHaveComputedStyle({ 'padding-right': '65px' })
 
         up.layer.dismiss()
@@ -65,7 +117,7 @@ describe 'up.Layer.Modal', ->
 
       it 'does not change elements if viewport root never had a scrollbar', ->
         unsetBodyStyle = e.setTemporaryStyle(document.body, { 'overflow-y': 'hidden', 'padding-right': '30px' })
-        expect(up.viewport.root).not.toHaveVerticalScrollbar()
+        expect(document).not.toHaveVerticalScrollbar()
 
         up.layer.open(modal: 'modal', content: '<div style="height: 10000px"></div>')
 
@@ -73,7 +125,7 @@ describe 'up.Layer.Modal', ->
 
         expect(up.layer.isOverlay()).toBe(true)
         expect(document.body).toHaveComputedStyle('padding-right': '30px')
-        expect(up.viewport.root).not.toHaveVerticalScrollbar()
+        expect(document).not.toHaveVerticalScrollbar()
         expect('up-modal-viewport').toHaveVerticalScrollbar()
 
         unsetBodyStyle()
@@ -131,53 +183,53 @@ describe 'up.Layer.Modal', ->
         up.motion.config.enabled = true
 
         fixture('div', style: { height: '10000px' })
-        expect(up.viewport.root).toHaveVerticalScrollbar()
+        expect(document).toHaveVerticalScrollbar()
 
         openModal = (duration) -> up.layer.open(mode: 'modal', content: '<div style="height: 10000px"></div>', animation: 'fade-in', duration: duration)
         dismissModal = (duration) -> up.layer.dismiss(null, animation: 'fade-out', duration: duration)
 
         openModal(300)
         expect(up.layer.count).toBe(2)
-        expect(up.viewport.root).not.toHaveVerticalScrollbar()
+        expect(document).not.toHaveVerticalScrollbar()
 
         openModal(0)
         expect(up.layer.count).toBe(3)
-        expect(up.viewport.root).not.toHaveVerticalScrollbar()
+        expect(document).not.toHaveVerticalScrollbar()
 
         openModal(100)
         expect(up.layer.count).toBe(4)
-        expect(up.viewport.root).not.toHaveVerticalScrollbar()
+        expect(document).not.toHaveVerticalScrollbar()
 
         await wait(10)
 
         expect(up.layer.count).toBe(4)
-        expect(up.viewport.root).not.toHaveVerticalScrollbar()
+        expect(document).not.toHaveVerticalScrollbar()
 
         await wait(150)
         expect(up.layer.count).toBe(4)
-        expect(up.viewport.root).not.toHaveVerticalScrollbar()
+        expect(document).not.toHaveVerticalScrollbar()
 
         dismissModal(300)
         await wait()
 
         expect(up.layer.count).toBe(3)
-        expect(up.viewport.root).not.toHaveVerticalScrollbar()
+        expect(document).not.toHaveVerticalScrollbar()
 
         await wait(10)
 
         dismissModal(0)
         expect(up.layer.count).toBe(2)
-        expect(up.viewport.root).not.toHaveVerticalScrollbar()
+        expect(document).not.toHaveVerticalScrollbar()
 
         dismissModal(100)
 
         expect(up.layer.count).toBe(1)
-        expect(up.viewport.root).not.toHaveVerticalScrollbar()
+        expect(document).not.toHaveVerticalScrollbar()
 
         await wait(300)
 
         expect(up.layer.count).toBe(1)
-        expect(up.viewport.root).toHaveVerticalScrollbar()
+        expect(document).toHaveVerticalScrollbar()
 
       it "shifts right-anchored elements only once if multiple nested overlays are opened", ->
         spyOn(up.viewport, 'rootScrollbarWidth').and.returnValue(25)

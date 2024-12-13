@@ -5,7 +5,9 @@ up-bounds
   outline-color: transparent !important
 
 body.up-scrollbar-away
-  overflow-y: hidden !important
+  &, html:has(>&)
+    overflow-y: hidden !important
+
   padding-right: calc(var(--up-scrollbar-width) + var(--up-original-padding-right)) !important
 
   .up-scrollbar-away

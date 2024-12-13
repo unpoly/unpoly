@@ -425,7 +425,7 @@ describe 'up.Layer.Overlay', ->
 
       if up.specUtil.rootHasReducedWidthFromScrollbar()
         it 'still restores document scroll bars', ->
-          overflowElement = up.specUtil.rootOverflowElement()
+          overflowElement = up.specUtil.documentOverflowElement()
           getOverflowY = -> getComputedStyle(overflowElement).overflowY
 
           destroyError = new Error('error from destructor')

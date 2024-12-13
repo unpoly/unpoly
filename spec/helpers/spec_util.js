@@ -48,10 +48,10 @@ up.specUtil = (function() {
   Returns the element that controls the `overflow-y` behavior for the
   [document viewport](/up.viewport.root()).
 
-  @function up.specUtil.rootOverflowElement
+  @function up.specUtil.documentOverflowElement
   @internal
   */
-  function rootOverflowElement() {
+  function documentOverflowElement() {
     const { body } = document
     const html = document.documentElement
 
@@ -83,6 +83,6 @@ up.specUtil = (function() {
     promiseTimer,
     findElementContainingText,
     rootHasReducedWidthFromScrollbar,
-    rootOverflowElement,
+    documentOverflowElement,
   }
 })()
