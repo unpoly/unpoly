@@ -158,7 +158,7 @@ or integrate your own:
 
 - Listen to the `up:template:clone` event on your custom template elements.
 - Process the given template and data using a templating function of your choice.
-- Set `event.nodes` to a [list](/up.util.isList) of [`Node`](https://developer.mozilla.org/en-US/docs/Web/API/Node) objects representing
+- Set `event.nodes` to a [list](/List) of [`Node`](https://developer.mozilla.org/en-US/docs/Web/API/Node) objects representing
 the template results.
 
 #### Example integrations {#templating-engines-examples}

@@ -51,7 +51,7 @@ up.event = (function() {
   - The [event target](https://developer.mozilla.org/en-US/docs/Web/API/Event/target) is automatically passed as a second argument.
   - Your event listener will not be called when Unpoly has not [booted](/up.boot) in an unsupported browser
   - You may register a listener to multiple events by passing a space-separated list of event name (e.g. `"click mousedown"`)
-  - You may register a listener to multiple elements in a single `up.on()` call, by passing a [list](/up.util.isList) of elements.
+  - You may register a listener to multiple elements in a single `up.on()` call, by passing a [list](/List) of elements.
   - Any [data attached to the observed element](/data) will be passed as a third argument to your handler function.
 
   You can prevent the event from being processed further with [up.event.halt(event)](/up.event.halt).
@@ -139,7 +139,7 @@ up.event = (function() {
 
   ### Binding to multiple elements
 
-  You may register a listener to multiple elements in a single `up.on()` call, by passing a [list](/up.util.isList) of elements:
+  You may register a listener to multiple elements in a single `up.on()` call, by passing a [list](/List) of elements:
 
   ```js
   let allForms = document.querySelectorAll('form')
