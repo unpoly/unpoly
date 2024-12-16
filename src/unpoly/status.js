@@ -18,6 +18,8 @@ implement [optimistic rendering](/optimistic-rendering) or highlight current lin
 @see .up-current
 @see .up-active
 @see .up-loading
+@see [up-placeholder]
+@see [up-preview]
 
 @module up.status
 */
