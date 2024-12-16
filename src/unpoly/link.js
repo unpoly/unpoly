@@ -1445,11 +1445,17 @@ up.link = (function() {
   @param [up-placeholder]
     A [placeholder](/placeholder) to show in the targeted fragment while new content is loading.
 
+    Existing children of the targeted fragment [will be hidden](#basic-example) during the request.
+    When the request ends for any reason, all changes will be reverted.
+
     You can either [pass a HTML string](/placeholders#basic-example)
-    or [refer to a template(/placeholders#from-template).
+    or [refer to a template](/placeholders#from-template), optionally with
+    [variables](/placeholders#dynamic-templates)
 
     If this link [opens a new overlay](/up-layer-new), the placeholder
     will be shown temporary overlay with the same [visual style](/customizing-overlays) and open animation.
+
+    @experimental
 
   @param [up-preview]
     The name of a [preview](/preview) that temporarily changes the page
@@ -1458,9 +1464,13 @@ up.link = (function() {
     The preview changes will be reverted automatically
     when the request ends for [any reason](/previews#ending).
 
+    @experimental
+
   @param [up-revalidate-preview]
     The name of a [preview](/preview) that runs
     while [revalidating cached content](/caching#revalidation).
+
+    @experimental
 
   @param [up-on-loaded]
     A JavaScript snippet that is executed when the server responds with new HTML,

@@ -74,10 +74,22 @@ The `preview` argument is an `up.Preview` instance that offers many utilities to
 | `up.Preview#openLayer()`       | Open an overlay                     |
 | `up.Preview#showPlaceholder()` | Show a [placeholder](/placeholders) |
 
+
+### From JavaScript
+
 From JavaScript you can pass the preview name as a `{ preview }` option:
 
 ```js
 up.navigate({ url: '/edit', preview: 'link-spinner' })
+```
+
+If you don't want to define a named preview using `up.preview()`, the JavaScript API also accepts an anonymous preview function:
+
+```js
+up.navigate({
+   url: '/edit',
+   preview: (preview) => preview.insert(preview.origin, '<img src="spinner.gif">')
+})
 ```
 
 
@@ -334,7 +346,16 @@ To pass [preview options](#parameters), append the options object after each pre
 From JavaScript, pass multiple previews as either a comma-separated string or as an array:
 
 ```js
+up.navigate({ url: '/edit', preview: 'spinner form-placeholder' })
 up.navigate({ url: '/edit', preview: ['spinner', 'form-placeholder'] })
+```
+
+You may also pass multiple anonymous preview functions as an array:
+
+```js
+let fn1 = (preview) => { ... }
+let fn2 = (preview) => { ... }
+up.navigate({ url: '/edit', preview: [fn1, fn2] })
 ```
 
 

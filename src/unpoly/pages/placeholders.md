@@ -61,6 +61,8 @@ up.navigate({
 })
 ```
 
+Instead of passing a HTML snippet you may also pass an `Element` or a [template reference](#from-template). 
+
 
 Placeholder from templates {#from-template}
 --------------------------
@@ -83,7 +85,7 @@ as attribute value, or when you want to re-use the same placeholder multiple tim
 </template>
 ```
 
-### Dynamic templates {#dynamic}
+### Dynamic templates {#dynamic-templates}
 
 You may need to customize placeholder markup to better fit the targeted fragment.
 For example, a spinner animations should be larger when updating a larger content area.
