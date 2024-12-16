@@ -249,7 +249,7 @@ up.util = (function() {
   }
 
   /*-
-  Translate all items in a [list](/up.util.isList) to new array of items.
+  Translate all items in a [list](/List) to new array of items.
 
   @function up.util.map
   @param {List|Iterator} list
@@ -287,7 +287,7 @@ up.util = (function() {
 
   /*-
   Calls the given function for each element (and, optional, index)
-  of the given [list](/up.util.isList) or iterator.
+  of the given [list](/List) or iterator.
 
   @function up.util.each
   @param {List|Iterator} list
@@ -670,7 +670,7 @@ up.util = (function() {
   }
 
   /*-
-  Converts the given [array-like value](/up.util.isList) into an array.
+  Converts the given [array-like value](/List) into an array.
 
   If the given value is already an array, it is returned unchanged.
 
@@ -684,14 +684,9 @@ up.util = (function() {
   }
 
   /*-
-  Returns whether the given argument is an array-like value.
+  Returns whether the given argument is an [array-like value](/List).
 
-  Return true for `Array`, a
-  [`NodeList`](https://developer.mozilla.org/en-US/docs/Web/API/NodeList),
-   the [arguments object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/arguments)
-   or a jQuery collection.
-
-  Use [`up.util.isArray()`](/up.util.isArray) to test whether a value is an actual `Array`.
+  To test whether a value is an actual `Array`, use [`up.util.isArray()`](/up.util.isArray).
 
   @function up.util.isList
   @param value
@@ -741,7 +736,7 @@ up.util = (function() {
   }
 
   /*-
-  Returns the given value if it is [array-like](/up.util.isList), otherwise
+  Returns the given value if it is [array-like](/List), otherwise
   returns an array with the given value as its only element.
 
   Returns an empty array if called with `null` or `undefined`.
@@ -775,7 +770,7 @@ up.util = (function() {
 
   ### Copying protocol
 
-  - By default `up.util.copy()` can copy [array-like values](/up.util.isList),
+  - By default `up.util.copy()` can copy [array-like values](/List),
     plain objects and `Date` instances.
   - Array-like objects are copied into new arrays.
   - Unsupported types of values are returned unchanged.
@@ -923,7 +918,7 @@ up.util = (function() {
   }
 
   /*-
-  Passes each element in the given [array-like value](/up.util.isList) to the given function.
+  Passes each element in the given [array-like value](/List) to the given function.
   Returns the first element for which the function returns a truthy value.
 
   If no object matches, returns `undefined`.
@@ -948,7 +943,7 @@ up.util = (function() {
 
   /*-
   Returns whether the given function returns a truthy value
-  for any element in the given [array-like value](/up.util.isList).
+  for any element in the given [array-like value](/List).
 
   @function up.util.some
   @param {List} list
@@ -990,7 +985,7 @@ up.util = (function() {
 
   /*-
   Returns whether the given function returns a truthy value
-  for all elements in the given [list](/up.util.isList) or iterator.
+  for all elements in the given [list](/List) or iterator.
 
   @function up.util.every
   @param {List|Iterator} list
@@ -1014,7 +1009,7 @@ up.util = (function() {
   }
 
   /*-
-  Returns all elements from the given [list](/up.util.isList) that are
+  Returns all elements from the given [list](/List) that are
   neither `null` or `undefined`.
 
   @function up.util.compact
@@ -1070,7 +1065,7 @@ up.util = (function() {
   }
 
   /*-
-  Returns all elements from the given [list](/up.util.isList) that return
+  Returns all elements from the given [list](/List) that return
   a truthy value when passed to the given function.
 
   @function up.util.filter
@@ -1091,7 +1086,7 @@ up.util = (function() {
   }
 
   /*-
-  Returns all elements from the given [array-like value](/up.util.isList) that do not return
+  Returns all elements from the given [array-like value](/List) that do not return
   a truthy value when passed to the given function.
 
   @function up.util.reject
@@ -1644,7 +1639,7 @@ up.util = (function() {
   ### Comparison protocol
 
   - By default `up.util.isEqual()` can compare strings, numbers,
-    [array-like values](/up.util.isList), plain objects and `Date` objects.
+    [array-like values](/List), plain objects and `Date` objects.
   - To make the copying protocol work with user-defined classes,
     see `up.util.isEqual.key`.
   - Objects without a defined comparison protocol are

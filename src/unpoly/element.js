@@ -861,6 +861,11 @@ up.element = (function() {
   <span class="todo">Document me</span>
 
   @function up.element.createNodesFromHTML
+  @param {string} html
+    A string of HTML to parse.
+  @return {List<Node>}
+    A list of `Element`, `Text` or `Comment` nodes.
+
   @experimental
   */
   function createNodesFromHTML(html) {

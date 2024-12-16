@@ -2675,11 +2675,11 @@ All functions that worked for arrays now also work for array-like values:
 
 - New experimental function `up.util.isList()`. It returns whether the given argument is an array-like value, like an `Array` or a
   [`NodeList`](https://developer.mozilla.org/en-US/docs/Web/API/NodeList).
-- `up.util.reject()` now works for all [array-like values](/up.util.isList), not just arrays.
-- `up.util.filter()` now works for all [array-like values](/up.util.isList), not just arrays.
-- `up.util.find()` now works for all [array-like values](/up.util.isList), not just arrays.
-- `up.util.some()` now works for all [array-like values](/up.util.isList), not just arrays.
-- `up.util.every()` now works for all [array-like values](/up.util.isList), not just arrays.
+- `up.util.reject()` now works for all [array-like values](/List), not just arrays.
+- `up.util.filter()` now works for all [array-like values](/List), not just arrays.
+- `up.util.find()` now works for all [array-like values](/List), not just arrays.
+- `up.util.some()` now works for all [array-like values](/List), not just arrays.
+- `up.util.every()` now works for all [array-like values](/List), not just arrays.
 
 And some minor changes:
 
