@@ -1373,58 +1373,6 @@ describe('up.Preview', function() {
         expect('#target').toHaveVisibleText('new target')
       })
 
-      it('accepts a function that produces the placeholder element', async function() {
-        fixture('#target')
-        let parent = htmlFixture(`
-          <div id="parent">
-            <div id="child"></div>
-          </div>
-        `)
-
-        let placeholderElement = up.element.createFromHTML(`<div id="placeholder">placeholder</div>`)
-        let placeholderFn = jasmine.createSpy('placeholderFn').and.callFake(() => placeholderElement)
-        let previewFn = (preview) => preview.showPlaceholder(parent, placeholderFn)
-
-        up.render({ preview: previewFn, url: '/url', target: '#target' })
-        await wait()
-
-        expect(placeholderFn).toHaveBeenCalledWith(jasmine.any(up.Preview))
-        expect(placeholderElement.parentElement).toBe(parent)
-        expect('#child').toBeHidden()
-
-        jasmine.respondWithSelector('#target')
-        await wait()
-
-        expect(placeholderElement).toBeDetached()
-        expect('#child').toBeVisible()
-      })
-
-      it('accepts a function that produces the placeholder HTML', async function() {
-        fixture('#target')
-        let parent = htmlFixture(`
-          <div id="parent">
-            <div id="child"></div>
-          </div>
-        `)
-
-        let placeholderHTML = `<div id="placeholder">placeholder</div>`
-        let placeholderFn = jasmine.createSpy('placeholderFn').and.callFake(() => placeholderHTML)
-        let previewFn = (preview) => preview.showPlaceholder(parent, placeholderFn)
-
-        up.render({ preview: previewFn, url: '/url', target: '#target' })
-        await wait()
-
-        expect(placeholderFn).toHaveBeenCalledWith(jasmine.any(up.Preview))
-        expect('#parent').toHaveSelector('#placeholder')
-        expect('#child').toBeHidden()
-
-        jasmine.respondWithSelector('#target')
-        await wait()
-
-        expect('#parent').not.toHaveSelector('#placeholder')
-        expect('#child').toBeVisible()
-      })
-
     })
 
     describe('when previewing a new overlay', function() {

@@ -11865,47 +11865,6 @@ describe 'up.fragment', ->
         expect(nodes[0]).toBeTextNode('foo')
         expect(nodes[1].outerHTML).toBe('<b>bar</b>')
 
-    describe 'with a function', ->
-
-      it 'returns a list of elements returned by the function', ->
-        element1 = document.createElement('div')
-        element2 = document.createElement('div')
-        fn = () -> [element1, element2]
-        nodes = up.fragment.provideNodes(fn)
-
-        expect(nodes).toEqual([element1, element2])
-
-      it 'wraps a single returned element in an array', ->
-        element = document.createElement('div')
-        fn = () -> element
-        nodes = up.fragment.provideNodes(fn)
-
-        expect(nodes).toEqual([element])
-
-      it 'calls the function with { callbackArgs }', ->
-        element = document.createElement('div')
-        fn = jasmine.createSpy('provider fn').and.returnValue(element)
-        nodes = up.fragment.provideNodes(fn, { callbackArgs: [1, 2] })
-
-        expect(fn).toHaveBeenCalledWith(1, 2)
-        expect(nodes).toEqual([element])
-
-      it 'looks up a selector returned by the function', ->
-        element1 = fixture('.my-element')
-        element2 = fixture('.my-element')
-        fn = () -> '.my-element'
-        nodes = up.fragment.provideNodes(fn)
-
-        expect(nodes).toEqual([element1])
-
-      it 'parses HTML returned by the function', ->
-        fn = () -> '<div>root</div>'
-        nodes = up.fragment.provideNodes(fn)
-
-        expect(nodes).toHaveLength(1)
-        expect(nodes[0]).toBeElement()
-        expect(nodes[0].outerHTML).toBe('<div>root</div>')
-
     describe 'with a list of elements', ->
 
       it 'returns that list', ->

@@ -2893,12 +2893,7 @@ up.fragment = (function() {
 
   const STARTS_WITH_SELECTOR = /^([\w-]+|\*)?(#|\.|[:[][a-z-]{3,})/
 
-  function provideNodes(value, { origin, originLayer, data, callbackArgs = [], htmlParser = e.createNodesFromHTML } = {}) {
-    // A function can return a string of HTML, an Element or a selector string.
-    if (u.isFunction(value)) {
-      value = value(...callbackArgs)
-    }
-
+  function provideNodes(value, { origin, originLayer, data, htmlParser = e.createNodesFromHTML } = {}) {
     if (u.isString(value) && STARTS_WITH_SELECTOR.test(value)) {
       let [parsedValue, parsedData] = u.parseScalarJSONPairs(value)[0]
       data = { ...data, ...parsedData }
