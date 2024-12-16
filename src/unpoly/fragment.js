@@ -2953,7 +2953,7 @@ up.fragment = (function() {
   @param {Element} [options.origin]
     An optional [origin](/origin) element used for [template lookup](/templates#lookup).
   @return {List<Node>}
-    [list](/up.util.isList) of [`Node`](https://developer.mozilla.org/en-US/docs/Web/API/Node) objects that represent
+    A [list](/List) of [`Node`](https://developer.mozilla.org/en-US/docs/Web/API/Node) objects that represent
     the cloned templates.
 
     You can pass this link to any rendering function, like `up.render()` or `up.Preview#insert()`.
@@ -2978,7 +2978,7 @@ up.fragment = (function() {
 
   - Listen to the `up:template:clone` event on selected `<template>` or `<script>` elements.
   - Process the given template (`event.target`) and data (`event.data`).
-  - Set `event.nodes` to a [list](/up.util.isList) of [`Node`](https://developer.mozilla.org/en-US/docs/Web/API/Node) objects representing
+  - Set `event.nodes` to a [list](/List) of [`Node`](https://developer.mozilla.org/en-US/docs/Web/API/Node) objects representing
   the template results.
 
   When no listener sets `event.nodes`, Unpoly will simply parse the template's inner HTML. Any variables in `event.data`
