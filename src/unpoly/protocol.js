@@ -90,18 +90,19 @@ up.protocol = (function() {
   */
 
   /*-
-  The `X-Up-Target` request and response headers allow the server [read](#read) or [change](#write)
+  The `X-Up-Target` request and response headers allow the server [read](#request) or [change](#response)
   the [target selector](/targeting-fragments) for a fragment update.
 
   Server-side code is free to [optimize its response](/optimizing-responses) by only rendering HTML
   that matches the selector. For example, you might prefer to not render an
   expensive sidebar if the sidebar is not targeted.
 
-  Unpoly will usually update a different selector in case the request fails.
-  This selector is sent as a different request header, `X-Up-Fail-Target`.
+  > [note]
+  > Unpoly will often [update a different selector in case the request fails](/failed-responses#rendering-failed-responses-differently).
+  > The target selector for failed responses is sent as a separate request header (`X-Up-Fail-Target`).
 
 
-  ### Detecting the targeted fragment on the server {#read}
+  ## Detecting the targeted fragment on the server {#request}
 
   When the user updates a fragment `.menu`,  Unpoly automatically includes the following request header:
 
@@ -118,9 +119,36 @@ up.protocol = (function() {
   <div class="menu">...</div>
   ```
 
+  ### Merging of request targets {#merging}
+
+  When two [caching](/caching) requests are sent to the same URL within the same [microtask](https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide),
+  only a single request is sent. The request will contain both targets in its `X-Up-Target` header.
+
+  For example, these two render passes render different selectors from `/path`:
+
+  ```js
+  up.render('.foo', { url: '/path', cache: true })
+  up.render('.bar', { url: '/path', cache: true })
+  ```
+
+  Unpoly will send a single request with both targets:
+
+  ```http
+  GET /path HTTP/1.1
+  X-Up-Target: .foo, .bar
+  ```
+
+  ### Optional targets are omitted {#optional-targets}
+
+  An optional selector part (`:maybe` suffix) will be omitted from an `X-Up-Target` header unless it
+  matches in the current page.
+
+  Required selector parts are always included in `X-Up-Target`.
+
   @include vary-header-note
 
-  ### Changing the render target from the server {#write}
+
+  ## Changing the render target from the server {#response}
 
   The server may change the render target context by including a CSS selector as an `X-Up-Target` header
   in its response.
@@ -145,32 +173,6 @@ up.protocol = (function() {
   Also see [skipping unnecessary rendering](/skipping-rendering).
 
 
-  ### Optional targets
-
-  An optional selector part (`:maybe` suffix) will be omitted from an `X-Up-Target` header unless it
-  matches in the current page.
-
-  Required selector parts are always included in `X-Up-Target`.
-
-
-  ### Merging of request targets
-
-  When two [caching](/caching) requests are sent to the same URL within the same [microtask](https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide),
-  only a single request is sent. The request will contain both targets in its `X-Up-Target` header.
-
-  For example, these two render passes render different selectors from `/path`:
-
-  ```js
-  up.render('.foo', { url: '/path', cache: true })
-  up.render('.bar', { url: '/path', cache: true })
-  ```
-
-  Unpoly will send a single request with both targets:
-
-  ```http
-  GET /path HTTP/1.1
-  X-Up-Target: .foo, .bar
-  ```
 
   @header X-Up-Target
   @stable
