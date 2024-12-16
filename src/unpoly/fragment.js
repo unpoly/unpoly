@@ -845,12 +845,39 @@ up.fragment = (function() {
 
     If the user does not confirm the render promise will reject and no fragments will be updated.
 
-  @param {boolean|Element} [options.feedback]
-    Whether to give the [`{ origin }`](#options.origin) element an `.up-active` class
-    and the targeted element an `.up-loading` class
+  @param {boolean} [options.feedback=true]
+    Whether to set [feedback classes](/feedback-classes)
     while loading content.
 
-    See [navigation feedback](/up.status).
+  @param {string|Element|List<Node>} [options.placeholder]
+    A [placeholder](/placeholder) to show within the targeted fragment while new content is loading.
+
+    Existing children of the targeted fragment [will be hidden](#basic-example) during the request.
+    When the request ends for any reason, all changes will be reverted.
+
+    The placeholder content can be provided in various forms:
+
+    - A string of HTML.
+    - A [template selector](/placeholders#from-template), optionally with [variables](/placeholders#dynamic-templates).
+    - An `Element` object.
+    - A mixed array of `Text` or `Element` objects.
+
+    @experimental
+
+  @param {string|Function(up.Preview)|Array} [options.preview]
+    One or more [previews](/preview) that temporarily change the page
+    while new content is loading.
+
+    The preview changes will be reverted automatically
+    when the request ends for [any reason](/previews#ending).
+
+    @experimental
+
+  @param {string|Function(up.Preview)} [options.revalidatePreview]
+    A [preview](/preview) that that runs
+    while [revalidating cached content](/caching#revalidation).
+
+    @experimental
 
   @param {Object} [options.data]
     Overrides properties from the new fragment's `[up-data]`
