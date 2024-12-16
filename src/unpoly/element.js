@@ -814,7 +814,7 @@ up.element = (function() {
   }
 
   /*-
-  Creates an element from the given HTML fragment string.
+  Parses an element from the given HTML fragment string.
 
   Use `up.hello()` to activate [JavaScript behavior](/up.script) within the created element.
 
@@ -858,7 +858,31 @@ up.element = (function() {
   }
 
   /*-
-  <span class="todo">Document me</span>
+  Parses a [list](/List) of [nodes](/Node) from a string of HTML.
+
+  The returned list can be a mixed list of `Element`, `Text` or `Comment` nodes.
+
+  ## Example
+
+  ```js
+  let list = up.element.createNodesFromHTML('foo <p>bar</p> baz') // => NodeList(3)
+  list.length // => 3
+  list[0] // => Text "foo "
+  list[1] // => Element "<p>bar</p>"
+  list[3] // => Text " bar"
+  ```
+
+  ## Whitespace trimming {#whitespace}
+
+  Before parsing, whitespace will be trimmed from the beginning and end of the string.
+  This prevents the creation all-whitespace `Text` nodes at the edges of the list:
+
+  ```js
+  let list = up.element.createNodesFromHTML('  <p>bar</p>  ') // => NodeList(1)
+  list.length // => 1
+  ```
+
+  No changes will be made to whitespace in the middle of the given string.
 
   @function up.element.createNodesFromHTML
   @param {string} html
