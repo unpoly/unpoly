@@ -137,7 +137,7 @@ up.status = (function() {
   */
 
   /*-
-  While rendering, [targeted fragments](/targeting-fragments) are assigned the `.up-loading` class.
+  While rendering, all [targeted fragments](/targeting-fragments) are assigned the `.up-loading` class.
 
   The class remains set while the request is loading.
   It is removed when the request [ends](/up.Request.prototype.ended) for any reason.

@@ -13,6 +13,9 @@ Like all [preview effects](/previews), placeholders only temporarily displace a 
 When the associated request [ends for any reason](/previews#ending), the placeholder is removed
 and the original screen state is restored before the response is processed.
 
+When [targeting multiple fragments](/targeting-fragments#multiple),
+the placeholder will be shown in the first fragment.
+
 
 Basic placeholders {#basic-example}
 ------------------
@@ -113,6 +116,29 @@ that you can [copy into your project](/templates#templating-engines-examples):
 ```
 
 
+Abitrary placeholder logic {#from-preview}
+--------------------------
+
+Sometimes we want something even more advanced than what [templates and variables](#dynamic) can give us:
+
+- Complex placeholder construction logic
+- Showing a placeholder in a fragment that wasn't targeted
+- Placeholders that affect multiple fragments
+
+In such cases we can fall back to using a [preview](/previews), which allow to define arbitrary loading state using JavaScript.
+
+In addition to allowing arbitrary setup and DOM manipulation, previews can use
+the `up.Preview#showPlaceholder()` method to apply the existing placeholder logic
+to any element:
+
+```js
+up.preview('loading-message', function(preview) {
+  // ...
+  preview.showPlaceholder(element, html)
+})
+```
+
+
 
 Placeholders for new overlays {#overlays}
 -----------------------------
@@ -132,21 +158,6 @@ the response content. To make that switch appear seamless to the user, animation
 In cases when the response ends up *not* opening an overlay (e.g. the server responds with an [error code](/failed-responses),
 the placeholder overlay will be closed.
 
-
-
-Showing placeholders from a preview function {#from-preview}
----------------------------------------------
-
-[Previews](/previews) are a way to show arbitrary loading state.
-When you want to re-use Unpoly's placeholder logic from a preview function,
-use the `up.Preview#showPlaceholder()` method:
-
-```js
-up.preview('loading-message', function(preview) {
-  // ...
-  preview.showPlaceholder('<p>Loading…</p>')
-})
-```
 
 
 @page placeholders
