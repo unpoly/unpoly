@@ -1068,9 +1068,9 @@ up.link = (function() {
 
   Following a link is considered [navigation](/navigation) by default.
 
-  ### Example
+  ## Example
 
-  This will update the fragment `<div class="content">` with the same element
+  This link will update the fragment `<div class="content">` with the same element
   fetched from `/posts/5`:
 
   ```html
@@ -1079,13 +1079,13 @@ up.link = (function() {
 
   If no `[up-target]` attribute is set, the [main target](/up-main) is updated.
 
-  ### Following all links automatically
+  ## Following all links automatically
 
   You can configure Unpoly to follow *all* links on a page without requiring an `[up-follow]` attribute.
 
   See [Handling all links and forms](/handling-everything).
 
-  ### Preventing Unpoly from following links
+  ## Preventing Unpoly from following links
 
   You can tell Unpoly to ignore clicks on an `[up-follow]` link, causing the link to be non-interactive.
   Use one of the following methods:
@@ -1095,10 +1095,10 @@ up.link = (function() {
 
   To force a [full page load](/up.network.loadPage) when a followable link is clicked:
 
-  - Set an `[up-follow=false]` attribute on the link element
+  - Set an [`[up-follow=false]`](/attributes-and-options#boolean-attributes) attribute on the link element
   - Prevent the `up:link:follow` event and call `up.network.loadPage(event.renderOptions)`.
 
-  ### Making non-interactive elements act as hyperlinks
+  ## Making non-interactive elements act as hyperlinks
 
   You can set an `[up-follow]` attribute on any non-interactive element to make it behave like a hyperlink:
 
@@ -1108,13 +1108,13 @@ up.link = (function() {
 
   See [Acting like a hyperlink](/faux-interactive-elements) for details.
 
-  ### Advanced fragment changes
+  ## Advanced fragment changes
 
   Links can update multiple fragments or append content to an existing element.
 
   See [Fragment placement](/targeting-fragments) for details.
 
-  ### Short notation
+  ## Short notation
 
   You may omit the `[up-follow]` attribute if the link has one of the following attributes:
 
@@ -1316,7 +1316,7 @@ up.link = (function() {
     With `[up-cache=false]` Unpoly will always make a network request.
 
   @param [up-revalidate='auto']
-    Whether to reload the [targeted fragment](/targeting-fragments)
+    Whether to [reload the targeted fragment](/caching#revalidation)
     after it was rendered from a cached response.
 
     With `[up-revalidate='auto']` Unpoly will revalidate if the `up.fragment.config.autoRevalidate(response)`
@@ -1439,10 +1439,28 @@ up.link = (function() {
     If the user does not confirm the render promise will reject and no fragments will be updated.
 
   @param [up-feedback='true']
-    Whether to give the link an `.up-active` class and the targeted element an `.up-loading` class
+    Whether to set [feedback classes](/feedback-classes)
     while loading content.
 
-    See [navigation feedback](/up.status).
+  @param [up-placeholder]
+    A [placeholder](/placeholder) to show in the targeted fragment while new content is loading.
+
+    You can either [pass a HTML string](/placeholders#basic-example)
+    or [refer to a template(/placeholders#from-template).
+
+    If this link [opens a new overlay](/up-layer-new), the placeholder
+    will be shown temporary overlay with the same [visual style](/customizing-overlays) and open animation.
+
+  @param [up-preview]
+    The name of a [preview](/preview) that temporarily changes the page
+    while new content is loading.
+
+    The preview changes will be reverted automatically
+    when the request ends for [any reason](/previews#ending).
+
+  @param [up-revalidate-preview]
+    The name of a [preview](/preview) that runs
+    while [revalidating cached content](/caching#revalidation).
 
   @param [up-on-loaded]
     A JavaScript snippet that is executed when the server responds with new HTML,
