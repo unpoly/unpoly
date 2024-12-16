@@ -1200,6 +1200,9 @@ up.link = (function() {
 
     See [Updating an element's inner HTML from a string](/providing-html#content).
 
+    Instead of passing an HTML string you can also [pass a template selector](/templates),
+    optionally with [variables](/placeholders#dynamic-templates).
+
   @param [up-fragment]
     A string of HTML comprising *only* the new fragment's
     [outer HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/outerHTML).
@@ -1209,10 +1212,16 @@ up.link = (function() {
 
     See [Rendering a string that only contains the fragment](/providing-html#fragment).
 
+    Instead of passing an HTML string you can also [pass a template selector](/templates),
+    optionally with [variables](/placeholders#dynamic-templates).
+
   @param [up-document]
     A string of HTML containing the targeted fragment.
 
     See [Extracting an element's outer HTML from a larger HTML string](/providing-html#document).
+
+    Instead of passing an HTML string you can also [pass a template selector](/templates),
+    optionally with [variables](/placeholders#dynamic-templates).
 
   @param [up-use-data]
     A [relaxed JSON](/relaxed-json) object that overrides properties from the new fragment's `[up-data]`.
@@ -1450,7 +1459,7 @@ up.link = (function() {
 
     You can either [pass a HTML string](/placeholders#basic-example)
     or [refer to a template](/placeholders#from-template), optionally with
-    [variables](/placeholders#dynamic-templates)
+    [variables](/placeholders#dynamic-templates).
 
     If this link [opens a new overlay](/up-layer-new), the placeholder
     will be shown temporary overlay with the same [visual style](/customizing-overlays) and open animation.
