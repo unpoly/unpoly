@@ -84,20 +84,24 @@ console.log("Effective option used: ", result.options)
 
 Functions like `up.render()` and `up.follow()` offer numerous options and [events](/up.event) that allow you to control the render process.
 
-| Intent                                | Hook                                              | Type               |
-| ------------------------------------- |---------------------------------------------------| ------------------ |
-| Inspect response before rendering     | [`{ onLoaded }`](/up.render#options.onLoaded)     | Callback           |
-| Inspect response before rendering     | `up:fragment:loaded`                              | Event              | 
-| Modify new elements                   | `up.compiler()`                                   | Component registry |
-| Modify new elements                   | [`{ onRendered }`](/up.render#options.onRendered) | Callback           |
-| Modify new elements                   | `up:fragment:inserted`                            | Event              |
-| Preserve elements within a fragment   | `[up-keep]`                                       | HTML attribute     |
-| Control scrolling                     | [`{ scroll }`](/scrolling)                        | Option             |
-| Control focus                         | [`{ focus }`](/focus)                             | Option             |
-| Control concurrency                   | [`{ abort }`](/aborting-requests)                 | Option             |
-| Control concurrency                   | [`{ disable }`](/disabling-forms)                 | Option             |
+| Intent                              | JavaScript                                                | HTML                                            |
+|-------------------------------------|-----------------------------------------------------------|-------------------------------------------------|
+| Intervene on interaction            | Guard events like<br>`up:link:follow` or `up:form:submit` | —                                               |
+| Control concurrency                 | [`{ abort }`](/aborting-requests)                         | [`[up-abort]`](/aborting-requests)              |
+| Control concurrency                 | [`{ abortable }`](/aborting-requests)                     | [`[up-abortable]`](/aborting-requests)          |
+| Change page during request          | [`{ disable }`](/disabling-forms)                         | [`[up-disable]`](/disabling-forms)              |
+| Change page during request          | [`{ placeholder }`](/placeholders)                        | [`[up-placeholder]`](/placeholders)             |
+| Change page during request          | [`{ preview }`](/previews)                                | [`[up-preview]`](/previews)                     |
+| Intervene before rendering          | [`{ onLoaded }`](/up.render#options.onLoaded)             | [`[up-on-loaded]`](/up-follow#up-on-loaded)     |
+| Intervene before rendering          | `up:fragment:loaded`                                      | —                                               | 
+| Modify new elements                 | [`{ onRendered }`](/up.render#options.onRendered)         | [`[up-on-rendered]`](/up-follow#up-on-rendered) |
+| Modify new elements                 | `up.compiler()`                                           | —                                               |
+| Modify new elements                 | `up:fragment:inserted`                                    | —                                               |
+| Preserve elements within a fragment | —                                                         | `[up-keep]`                                     |
+| Control scrolling                   | [`{ scroll }`](/scrolling)                                | [`[up-scroll]`](/scrolling)                     |
+| Control focus                       | [`{ focus }`](/focus)                                     | [`[up-focus]`](/focus)                          |
 
-For a full list of available options see [`up.render() parameters`](/up.render#parameters) and the [lifecycle diagram](#lifecycle-diagram) below.
+For a full list of available options see [`up.render() parameters`](/up.render#parameters) and the [lifecycle diagram](#lifecycle-diagram) above.
 
 
 
@@ -108,19 +112,19 @@ The promises returned by `up.render()` and [`up.render().finished`](/up.RenderJo
 
 You may handle the following error cases:
 
-| Error case                                                                         | Hook                                                                           | Type |
-|------------------------------------------------------------------------------------|--------------------------------------------------------------------------------| ------- |
-| Server responds with [non-200 HTTP status](/failed-responses) | [fail-prefixed options](/failed-responses)                                     | Options |
-| Server responds with [non-200 HTTP status](/failed-responses) | `up.RenderResult` (thrown)                                                     | Error |
-| Disconnect or timeout                                         | `up.Offline`                                                                   | Error |
-| Disconnect or timeout                                         | [`{ onOffline }`](/up.render#options.onOffline)                                | Callback |
-| Disconnect or timeout                                         | `up:fragment:offline`                                                          | Event |
-| Target selector not found                                     | `up.CannotMatch`                                                               | Error |
-| Compiler throws error                                         | [`error`](https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event) | Error |
-| Fragment update was [aborted](/aborting-requests)             | `up.AbortError`                                                                | Error |
-| Fragment update was [aborted](/aborting-requests)             | `up:fragment:aborted`                                                          | Event |
-| Any error thrown while rendering                              | [`{ onError }`](/up.render#options.onError)                                    | Callback |
-| Any error thrown while rendering                              | `up.Error`                                                                     | Error superclass |
+| Error case                                                    | JavaScript                                                                                  | HTML                                                                 |
+|---------------------------------------------------------------|---------------------------------------------------------------------------------------------|----------------------------------------------------------------------|
+| Server responds with [non-200 HTTP status](/failed-responses) | [`fail`-prefixed options](/failed-responses)                                                | [`up-fail`-prefixed Attributes](/failed-responses)                   |
+| Server responds with [non-200 HTTP status](/failed-responses) | `up.RenderResult` (thrown)                                                                  | —                                                                    |
+| Disconnect or timeout                                         | [`{ onOffline }`](/network-issues)                                                          | [`[up-on-offline]`](/network-issues)                                 |
+| Disconnect or timeout                                         | `up.Offline` (thrown)                                                                       | —                                                                    |
+| Disconnect or timeout                                         | `up:fragment:offline`                                                                       | —                                                                    |
+| Target selector not found                                     | [`{ fallback }`](/targeting-fragments#dealing-with-missing-targets)                                               | [`[up-fallback]`](/targeting-fragments#dealing-with-missing-targets) |
+| Target selector not found                                     | `up.CannotMatch` (thrown)                                                                   | —                                                                    |
+| Compiler throws error                                         | Global [`error`](https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event) event | —                                                                    |
+| Fragment update was [aborted](/aborting-requests)             | `up.AbortError`                                                                             | —                                                                    |
+| Fragment update was [aborted](/aborting-requests)             | `up:fragment:aborted`                                                                       | —                                                                    |
+| Any error thrown while rendering                              | [`{ onError }`](/up.render#options.onError)                                                 | [`[up-on-error]`](/up-follow#up-on-error)                            |
 
 
 ### Errors in user code
@@ -249,4 +253,4 @@ up.on('up:link:follow', 'a[require-session]', async function(event) {
 })
 ```
 
-@page render-hooks
+@page render-lifecycle

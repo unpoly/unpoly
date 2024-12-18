@@ -43,7 +43,7 @@ For low-level DOM utilities that complement the browser's native API, see `up.el
 @see navigation
 @see providing-html
 @see templates
-@see render-hooks
+@see render-lifecycle
 @see skipping-rendering
 @see target-derivation
 
