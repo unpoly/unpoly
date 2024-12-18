@@ -465,6 +465,16 @@ up.radio = (function() {
     When set to `'any'`, polling will continue on background layers.
 
     @experimental
+  @param [up-placeholder]
+    A [placeholder](/placeholder) to show while the fragment is reloading.
+
+    @experimental
+
+  @param [up-preview]
+    The name of a [preview](/preview) that temporarily changes the page
+    while the fragment is reloading.
+
+    @experimental
   @stable
   */
   up.attribute('up-poll', function(fragment) {
