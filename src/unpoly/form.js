@@ -995,8 +995,8 @@ up.form = (function() {
     Whether to disable fields while waiting for the server response.
 
     See [disabling fields while working](/watch-options#disabling-fields-while-working).
-  @param {boolean} [options.feedback]
-    Whether to show navigation feedback while waiting for the server response.
+  @param {boolean} [options.feedback=true]
+    Whether to show [feedback classes](/feedback-classes) while waiting for the server response.
 
     See [showing feedback while working](/watch-options#showing-feedback-while-working).
   @param {Object} [options.data]
@@ -1254,7 +1254,8 @@ up.form = (function() {
 
   ### Showing that the form is processing
 
-  See [navigation feedback](/up.status) and [disabling form controls while working](/disabling-forms).
+  See [Loading state](/loading-state) and [Disabling form controls while working](/disabling-forms).
+
 
   ### Short notation
 
@@ -1312,7 +1313,7 @@ up.form = (function() {
   which is expected to render a new form state from its current field values.
   The [form group](/up-form-group) around the changed field is updated with the server response.
 
-  This gives the user quick feedback whether their change is valid,
+  This quickly signals whether a change is valid,
   without the need to scroll for error messages or to backtrack to
   fields completed earlier.
 
@@ -1624,7 +1625,7 @@ up.form = (function() {
 
     See [disabling fields while working](/watch-options#disabling-fields-while-working).
   @param [up-watch-feedback]
-    Whether to give [navigation feedback](/up.status) while validating.
+    Whether to set [feedback classes](/feedback-classes) while validating.
 
     See [showing feedback while working](/watch-options#showing-feedback-while-working).
   @stable
@@ -1907,7 +1908,7 @@ up.form = (function() {
 
     See [disabling fields while working](/watch-options#disabling-fields-while-working).
   @param [up-watch-feedback]
-    Whether to show navigation feedback while an async callback is running.
+    Whether to set [feedback classes](/feedback-classes) while an async callback is running.
 
     See [showing feedback while working](/watch-options#showing-feedback-while-working).
   @stable

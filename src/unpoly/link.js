@@ -1049,7 +1049,10 @@ up.link = (function() {
     To target the placeholder itself, you can use `:origin` target instead of spelling out a selector.
 
   @param [up-feedback='true']
-    Whether the `[up-defer]` placeholder is assigned an `.up-active` class while loading its content.
+    Whether to assign [feedback classes](feedback-classes) class while loading the deferred content.
+
+    The `[up-defer]` placeholder will be assigned `.up-active`.
+    The target element (often also the placeholder) will be assigned `.up-loading`.
 
   @param [up-background='false']
     Whether to load the deferred content [in the background](/up.render#options.background).
