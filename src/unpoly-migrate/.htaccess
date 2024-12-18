@@ -17,6 +17,7 @@ RedirectPermanent /up.layout /up.viewport
 RedirectPermanent /up.layout.config /up.viewport.config
 RedirectPermanent /up.dom /up.fragment
 RedirectPermanent /up.dom.config /up.fragment.config
+RedirectPermanent /up.flow /up.fragment
 RedirectPermanent /up.syntax /up.script
 RedirectPermanent /up.script.data /up.data
 RedirectPermanent /up.bus /up.event
@@ -119,3 +120,7 @@ RedirectPermanent /nav-bar /navigation-bars
 RedirectPermanent /navbars /navigation-bars
 RedirectPermanent /navbar /navigation-bars
 RedirectPermanent /nav /navigation-bars
+
+RedirectPermanent /up.navigation /up.status
+RedirectPermanent /up.feedback /up.status
+

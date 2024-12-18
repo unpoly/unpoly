@@ -218,7 +218,7 @@ up.util = (function() {
 
     // We would prefer to use `new URL(url, location.href)` here, but that is 30% slower
     // than creating a link (see benchmark at https://jsbench.me/l7l2x9cruf/1).
-    // We're parsing a *lot* of URLs for [up-active], so this matters.
+    // We're parsing a *lot* of URLs for .up-active, so this matters.
     let link = document.createElement('a')
     link.href = url
     return link

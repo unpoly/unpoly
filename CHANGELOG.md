@@ -859,7 +859,7 @@ Unpoly's rendering engine has been reworked to address many edge cases found in 
 
 #### More practical callback order
 
-- Compilers now see updated [navigation feedback](/up.status) for the current render pass. In particular `.up-current` classes are updated before compilers are called.
+- Compilers now see updated [feedback classes](/feedback-classes) for the current render pass. In particular `.up-current` classes are updated before compilers are called.
 - Hungry elements on other layers are now updated *before* [`{ onAccepted }` and `{ onDismissed }` callbacks](/closing-overlays#callbacks) fire.
   This allows callbacks to observe all fragment changes made by a closing overlay.
 

@@ -126,7 +126,7 @@ set the value of `[up-watch-disable]` to any selector that matches fields or but
 Showing feedback while working
 ------------------------------
 
-<span class="todo">List all preview effects here</span>
+<span class="todo">List all preview effects here, rewrite [TIP]</span>
 
 To signal to users that you're processing changes, you can show [navigation feedback](/up.status)
 while an async callback is running. For this set an `[up-watch-feedback]` attribute or
