@@ -135,9 +135,9 @@ element:
 
 
 
-## Displaying a fallback while content is loading {#pending}
+## Showing a fallback for unloaded content {#pending}
 
-The initial children of an `[up-defer]` element are shown while its deferred content is loading:
+The initial children of an `[up-defer]` element are shown before its deferred content has loaded:
 
 ```html
 <div id="menu" up-defer up-href="/menu">
@@ -145,12 +145,11 @@ The initial children of an `[up-defer]` element are shown while its deferred con
 </div>
 ```
 
+If you need to implement advanced request effects, all [Loading state](/loading-state)
+techniques for regular hyperlinks are also applicable to `[up-defer]` elements.
+
 > [note]
-> If the deferred content is already [cached](/caching), the fallback will [immediately be replaced](#cached-partials-are-rendered-instantly) by the cached content.
-
-A [progress bar](/progress-bar) will show while deferred content is loading. This can be disabled by setting an `[up-background=true]` attribute.
-
-The `[up-defer]` placeholder is assigned an `.up-active` class while its content is loading.
+> If the deferred content is already [cached](/caching), its children will [immediately be replaced](#cached-partials-are-rendered-instantly) by the cached content.
 
 
 
