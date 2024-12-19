@@ -1334,8 +1334,11 @@ up.layer = (function() {
   See `up.Layer#on()` for more documentation.
 
   @function up.layer.on
-  @param {string} types
-    A space-separated list of event types to bind to.
+  @param {string|Array<string>} types
+    The event types to bind to.
+
+    Multiple event types may be passed as either a space-separated string (`'foo bar'`), a comma-separated string (`'foo, bar'`)
+    or as an array of types (`['foo', 'bar']`).
   @param {string|Function(): string} [selector]
     The selector of an element on which the event must be triggered.
   @param {Object} [options]

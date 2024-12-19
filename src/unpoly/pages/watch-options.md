@@ -72,8 +72,7 @@ Debouncing callbacks
 --------------------
 
 When observing the `input` event, you may want until to wait until the user has stopped
-typing before running a callback. You can do so by setting an `[up-watch-delay]` attribute
-or passing `{ delay }` option:
+typing before running a callback. You can do so by setting an `[up-watch-delay]` attribute:
 
 ```html
 <form action="/search">
@@ -81,7 +80,6 @@ or passing `{ delay }` option:
   <input name="query" up-autosubmit up-watch-delay="100"> <!-- mark-phrase "up-watch-delay" -->
 </form>
 ```
-
 
 For watchers of `input` the default delay is `up.form.config.watchInputDelay` (which defaults to `0`).
 For watchers of other events there is no default delay.
@@ -100,52 +98,50 @@ Disabling fields while working
 ------------------------------
 
 To prevent user input while processing changes, you may [disable form fields](/disabling-forms)
-while an async callback is running. For this set an `[up-watch-disable]` attribute or
-pass an `{ disable: true }` option.
+while an async callback is running.
 
-When you also pass a custom callback function it must return a promise that settles once the work concludes:
+For this set an `[up-watch-disable]` attribute on the form or field being watched:
 
-```js
-up.watch('input.query', { disable: true },  function(value, name, options) {
-  let url = '/search?query=' + escapeURIFragment(value)
-  return up.render('.results', { url, ...options }) // mark-phrase "return"
-})
+```html
+<form action="/search">
+  <!-- Wait until the user has stopped typing for 100 milliseconds -->
+  <input name="query" up-autosubmit up-watch-disable> <!-- mark-phrase "up-watch-disable" -->
+</form>
 ```
-
-When you don't write the callback manually (`up.autosubmit()`, `up.validate()`) you don't need to
-worry about returning a promise.
 
 By default, setting `[up-watch-disable]` will cause all fields in a form to be disabled while processing.
 To [only disable some form controls](/disabling-forms#disabling-some-controls-only),
 set the value of `[up-watch-disable]` to any selector that matches fields or buttons.
 
+From JavaScript you can pass a `{ disable }` option instead.
+
 > [TIP]
 > To disable fields while *submitting* (instead of while watching), use [`[up-disable]`](/disabling-forms) instead.
 
 
-Showing feedback while working
-------------------------------
+Showing loading state while working
+-----------------------------------
 
-<span class="todo">List all preview effects here, rewrite [TIP]</span>
+To signal to users that you're processing changes, you can show arbitrary [loading state](/loading-state)
+while an async callback is running.
 
-To signal to users that you're processing changes, you can show [navigation feedback](/up.status)
-while an async callback is running. For this set an `[up-watch-feedback]` attribute or
-pass an `{ feedback: true }` option.
+To apply a [preview](/previews), set an `[up-watch-preview]` attribute on the form or field being watched:
 
-When you also pass a custom callback function it must return a promise that settles once the work concludes:
-
-```js
-up.watch('input.query', { disable: true },  function(value, name, options) {
-  let url = '/search?query=' + escapeURIFragment(value)
-  return up.render('.results', { url, ...options }) // mark-phrase "return"
-})
+```html
+<form action="/search">
+  <input name="query" up-autosubmit up-watch-preview="spinner"> <!-- mark-phrase "up-watch-preview" -->
+</form>
 ```
 
-When you don't write the callback manually (`up.autosubmit()`, `up.validate()`) you don't need to
-worry about returning a promise.
+To show a [placeholder](/placeholders) while working, use an `[up-watch-placeholder]` attribute:
 
-> [TIP]
-To show navigation feedback while *submitting* (instead of while watching), use [`[up-feedback]`](/up-follow#up-feedback) instead.
+```html
+<form action="/search">
+  <input name="query" up-autosubmit up-watch-placeholder="#results-placeholder"> <!-- mark-phrase "up-watch-placeholder" -->
+</form>
+```
+
+From JavaScript you can pass a `{ preview }` or `{ placeholder }` option instead.
 
 
 Setting options for multiple fields
@@ -157,7 +153,7 @@ The [closest](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest) 
 By setting attributes on the `<form>` you can configure defaults for *all* watchers:
 
 ```html
-<form action="/search" up-watch-disable>
+<form action="/search" up-watch-disable> <!-- mark-phrase "up-watch-disable" -->
   <input name="query" up-autosubmit>
 </form>
 ```
@@ -165,14 +161,14 @@ By setting attributes on the `<form>` you can configure defaults for *all* watch
 Form-wide options can be overridden at the input level:
 
 ```html
-<form action="/search" up-watch-disable>
-  <input name="department" up-autosubmit>                     <!-- disables -->
-  <input name="query" up-autosubmit up-watch-disable="false"> <!-- does NOT disable -->
+<form action="/search" up-watch-disable> <!-- mark-phrase "up-watch-disable" -->
+  <input name="department" up-autosubmit>
+  <input name="query" up-autosubmit up-watch-disable="false"> <!-- mark-phrase "up-watch-disable" -->
 </form>
 ```
 
 You may also set options on any element containing fields.
-This is particularly useful for watching a group of radio buttons:
+This is particularly useful for [watching a group of radio buttons](/up-watch#watching-radio-buttons):
 
 ```html
 <form action="/search">

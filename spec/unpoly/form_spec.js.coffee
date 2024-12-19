@@ -65,7 +65,7 @@ describe 'up.form', ->
 
         await wait()
 
-        expect(submitSpy).toHaveBeenCalled()
+        expect(submitSpy).toHaveBeenCalledWith(field, jasmine.any(Object))
 
       it 'parses [up-watch...] prefixed attributes from the given field', ->
         form = fixture('form')
@@ -99,6 +99,24 @@ describe 'up.form', ->
         await wait()
 
         expect(submitSpy).toHaveBeenCalled()
+
+      it 'accepts additional options for the render pass', ->
+        form = fixture('form')
+        field = e.affix(form, 'input[name="input-name"][value="old-value"]')
+        up.autosubmit(field, { headers: { 'Custom-Header': 'Custom-Value' }, params: { 'custom-param': 'custom-value' }})
+        submitSpy = up.form.submit.mock().and.returnValue(Promise.resolve(new up.RenderResult()))
+        await wait()
+
+        expect(submitSpy).not.toHaveBeenCalled()
+
+        field.value = 'new-value'
+        Trigger.change(field)
+        await wait()
+
+        expect(submitSpy).toHaveBeenCalledWith(
+          field,
+          jasmine.objectContaining({ headers: { 'Custom-Header': 'Custom-Value' }, params: { 'custom-param': 'custom-value' }})
+        )
 
     describe 'up.form.groupSolution()', ->
 

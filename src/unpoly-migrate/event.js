@@ -52,7 +52,7 @@ up.$on('click', 'a', function(event, $link) {
 
   If no element is given, the listener is registered on the `document`.
 @param {string} events
-  A space-separated list of event names to bind to.
+  A space-separated list of types names to bind to.
 @param {string} [selector]
   The selector of an element on which the event must be triggered.
   Omit the selector to listen to all events with that name, regardless
