@@ -46,6 +46,60 @@ describe 'up.form', ->
         results = up.form.fields(form)
         expect(results).toMatchList([field])
 
+    describe 'up.autosubmit()', ->
+
+      beforeEach ->
+        up.form.config.watchInputDelay = 0
+
+      it 'submits the form when a change is observed in the given form field', ->
+        form = fixture('form')
+        field = e.affix(form, 'input[name="input-name"][value="old-value"]')
+        up.autosubmit(field)
+        submitSpy = up.form.submit.mock().and.returnValue(Promise.resolve(new up.RenderResult()))
+        await wait()
+
+        expect(submitSpy).not.toHaveBeenCalled()
+
+        field.value = 'new-value'
+        Trigger.change(field)
+
+        await wait()
+
+        expect(submitSpy).toHaveBeenCalled()
+
+      it 'parses [up-watch...] prefixed attributes from the given field', ->
+        form = fixture('form')
+        field = e.affix(form, 'input[name="input-name"][value="old-value"][up-watch-delay="40"]')
+        up.autosubmit(field)
+        submitSpy = up.form.submit.mock().and.returnValue(Promise.resolve(new up.RenderResult()))
+        await wait()
+
+        expect(submitSpy).not.toHaveBeenCalled()
+
+        field.value = 'new-value'
+        Trigger.change(field)
+        await wait()
+
+        expect(submitSpy).not.toHaveBeenCalled()
+        await wait(60)
+
+        expect(submitSpy).toHaveBeenCalled()
+
+      it 'accepts options to override [up-watch...] prefixed attributes parsed from the given field', ->
+        form = fixture('form')
+        field = e.affix(form, 'input[name="input-name"][value="old-value"][up-watch-delay="40"]')
+        up.autosubmit(field, { delay: 0 })
+        submitSpy = up.form.submit.mock().and.returnValue(Promise.resolve(new up.RenderResult()))
+        await wait()
+
+        expect(submitSpy).not.toHaveBeenCalled()
+
+        field.value = 'new-value'
+        Trigger.change(field)
+        await wait()
+
+        expect(submitSpy).toHaveBeenCalled()
+
     describe 'up.form.groupSolution()', ->
 
       it 'returns a solution for the form group closest to the given element, distinguishing the selector from other form groups by refering to the given element with :has()', ->

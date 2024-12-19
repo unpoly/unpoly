@@ -778,7 +778,7 @@ up.form = (function() {
   */
   function autosubmit(target, options = {}) {
     const onChange = (_diff, renderOptions) => submit(target, renderOptions)
-    return watch(target, { options, batch: true }, onChange)
+    return watch(target, { ...options, batch: true }, onChange)
   }
 
   function getGroupSelectors() {
