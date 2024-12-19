@@ -645,7 +645,7 @@ up.protocol = (function() {
 
   ```http
   X-Up-Validate: email password
-  X-Up-Target: fieldset:has(#password)
+  X-Up-Target: fieldset:has(#password), fieldset:has(#email)
   ```
 
   ### When no origin field is known
