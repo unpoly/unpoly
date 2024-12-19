@@ -756,7 +756,7 @@ up.form = (function() {
   function watchCallbackFromElement(element) {
     let rawCallback = element.getAttribute('up-watch')
     if (rawCallback) {
-      return up.NonceableCallback.fromString(rawCallback).toFunction('value', 'name').bind(element)
+      return up.NonceableCallback.fromString(rawCallback).toFunction('value', 'name', 'options').bind(element)
     }
   }
 
