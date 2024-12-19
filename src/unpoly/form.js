@@ -432,6 +432,9 @@ up.form = (function() {
 
     options.origin ||= field
 
+    // The callback to [up-watch] is not parsed here.
+    // It is parsed in watch(), which calls watchCallbackFromElement().
+
     return options
   }
 
