@@ -103,7 +103,7 @@ up.observe('input.query', function(value) {
   If set to `true`, the `onChange` callback will receive multiple
   detected changes in a single diff object as its argument.
 @param {number} [options.delay=up.form.config.observeDelay]
-  The number of miliseconds to wait before executing the callback
+  The number of milliseconds to wait before executing the callback
   after the input value changes. Use this to limit how often the callback
   will be invoked for a fast typist.
 @param {Function(value, name): string} onChange

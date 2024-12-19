@@ -628,12 +628,12 @@ up.form = (function() {
   using `up.watch()` comes with a number of quality of live improvements:
 
   - The callback only runs when a value was actually changed. Multiple events resulting in the same value will only run the callback once.
-  - The callback's execution frequency can be [debounced](/watch-options#debouncing-callbacks)
+  - The callback's execution frequency can be [debounced](/watch-options#debouncing-callbacks).
   - Guarantees that [only one async callback is running concurrently](#async-callbacks).
 
   The unobtrusive variant of this is the `[up-watch]` attribute.
 
-  ### Example
+  ## Example
 
   The following would print to the console whenever an input field changes:
 
@@ -643,9 +643,9 @@ up.form = (function() {
   })
   ```
 
-  ### Callback arguments
+  ## Callback arguments {#callback-arguments}
 
-  The callback may accept up to three arguments:
+  The watch callback may accept up to three arguments that describe the observed change:
 
     ```js
   up.watch('input.query', function(value, name, options) {
@@ -653,15 +653,22 @@ up.form = (function() {
   })
   ```
 
-  The three arguments are:
+  Here is a full description of the individual callback arguments:
 
-  | Name       | Type      | Description                           |
-  | ---------- | --------- | ------------------------------------- |
-  | `value`    | `string`  | The changed field value               |
-  | `name`     | `string`  | The `[name]` of the changed field     |
-  | `options`  | `Object`  | Render options for the change (`{ origin, feedback, disable }`) |
+  @include watch-callback-arguments
 
-  ### Watching multiple fields
+  When rendering from a watch callback, you should forward the `options` to the rendering function:
+
+  ```js
+  up.watch('input.query', function(value, name, options) { // mark-phrase "options"
+    return up.reload('main', { ...options, params: { query: value }) // mark-phrase "options"
+  })
+  ```
+
+  > [tip]
+  > A rendering watch callback can often be replaced with `[up-autosubmit]`.
+
+  ## Watching multiple fields
 
   Instead of a single form field, you can also pass multiple fields,
   a `<form>` or any container that contains form fields.
@@ -673,7 +680,7 @@ up.form = (function() {
   })
   ```
 
-  ### Async callbacks
+  ## Async callbacks
 
   When your callback does async work (like fetching data over the network) it should return a promise
   that settles once the work concludes:
@@ -689,7 +696,16 @@ up.form = (function() {
   If the form is changed while an async callback is still processing, Unpoly will wait
   until the callback concludes and then run it again with the latest field values.
 
-  ### Batching changes
+  You can also return a promise by using `async` / `await`:
+
+  ```js
+  up.watch('input.query', async function(value, name, options) { // mark-phrase "async"
+    let url = '/search?query=' + escapeURIFragment(value)
+    await up.render('.results', { url, ...options }) // mark-phrase "await"
+  })
+  ```
+
+  ## Batching changes
 
   You may also pass the `{ batch: true }` option to receive all
   changes since the last callback in a single object:
@@ -704,11 +720,13 @@ up.form = (function() {
   ```
 
   @function up.watch
+
   @param {Element|jQuery} element
     The form field that will be watched.
 
     You can pass a field, a `<form>` or any container that contains form fields.
     The callback will be run if any of the contained fields change.
+
   @param {boolean} [options.batch=false]
     If set to `true`, the `onChange` callback will receive multiple
     detected changes in a [single diff object as its argument](#batching-changes).
@@ -717,27 +735,31 @@ up.form = (function() {
     The object's values are the values of the changed fields.
 
     @experimental
+
   @param {string|Array<string>} [options.event='input']
     The types of event to observe.
 
     See [which events to watch](/watch-options#which-events-to-watch).
-  @param {number} [options.delay]
-    The number of miliseconds to wait between an observed event and running the callback.
+
+  @param {number} [options.delay=0]
+    The number of milliseconds to wait between an observed event and running the callback.
 
     See [debouncing callbacks](/watch-options#debouncing-callbacks).
-  @param {boolean|string|Element} [options.disable]
-    Whether to disable fields while an async callback is running.
 
-    See [disabling fields while working](/watch-options#disabling-fields-while-working).
   @param {Function(value, name, options): Promise|undefined} callback
     The callback to run when the field's value changes.
 
-    An async callback function should return a promise that settles when
+    The callback is called with [arguments](#callback-arguments) that
+    describe the change.
+
+    An [async callback function must return a promise](#async-callbacks) that settles when
     the callback completes.
+
   @return {Function()}
     A destructor function that unsubscribes the watcher when called.
 
     Watching will stop automatically when the form is [destroyed](/up.destroy).
+
   @stable
   */
   function watch(...args) {
@@ -766,14 +788,53 @@ up.form = (function() {
   The unobtrusive variant of this is the `[up-autosubmit]` attribute.
 
   @function up.autosubmit
+
   @param {string|Element|jQuery} target
     The field or form to watch.
+
+  @param {string|Array<string>} [options.event='change']
+    The event types to observe.
+
+    See [which events to watch](/watch-options#which-events-to-watch).
+
+  @param {number} [options.delay]
+    The number of milliseconds to wait between an observed event and validating.
+
+    See [debouncing callbacks](/watch-options#debouncing-callbacks).
+
+  @param {boolean|string|Element} [options.disable]
+    Whether to disable fields while waiting for the server response.
+
+    See [disabling fields while working](/watch-options#disabling-fields-while-working).
+
+  @param {string|Element|List<Node>} [options.placeholder]
+    A [placeholder](/placeholder) to show within the targeted fragment while it is loading.
+
+    See [showing loading state while working](/watch-options#showing-loading-state-while-working).
+
+    @experimental
+
+  @param {string|Function(up.Preview)|Array} [options.preview]
+    One or more [previews](/preview) that temporarily change the page
+    while the targeted fragment is loading.
+
+    See [showing loading state while working](/watch-options#showing-loading-state-while-working).
+
+    @experimental
+
+  @param {boolean} [options.feedback=true]
+    Whether to show [feedback classes](/feedback-classes) while waiting for the server response.
+
   @param {Object} [options]
-    See options for [`up.watch()`](/up.watch#parameters).
+    Additional [render options](/up.render#parameters) to use when the form is submitted.
+
+    See [options for `up.submit()`](/watch-options#showing-feedback-while-working).
+
   @return {Function()}
     A destructor function that stops auto-submitting when called.
 
     Auto-submitting will stop automatically when the observed fields are removed from the DOM.
+
   @stable
   */
   function autosubmit(target, options = {}) {
@@ -970,49 +1031,78 @@ up.form = (function() {
   Also see [preventing race conditions](/dependent-fields#preventing-race-conditions).
 
   @function up.validate
+
   @param {string|Element|jQuery} element
-    The field or fragment that should be rendered on the server.
+    The field or fragment that should be re-rendered on the server.
 
     See [controlling what is updated](#controlling-what-is-updated).
+
   @param {string} [options.target=element]
-    The [target selector](/targeting-fragments) to render.
+    The [target selector](/targeting-fragments) to re-render.
 
     By default the given `element` will be rendered.
     If `element` is a field, its form group or `[up-validate]` target will be rendered.
+
   @param {boolean} [options.formGroup = true]
     Whether, when a field is given as `element`,
     the field's closest [form group](/up-form-group) should be targeted.
+
   @param {Element} [options.origin=element]
     The element or field that caused this validation pass.
 
     The names of all fields contained within the origin will be passed as an `X-Up-Validate` request header.
+
   @param {string|Array<string>} [options.event='change']
     The event types to observe.
 
     See [which events to watch](/watch-options#which-events-to-watch).
+
   @param {number} [options.delay]
-    The number of miliseconds to wait between an observed event and validating.
+    The number of milliseconds to wait between an observed event and validating.
 
     See [debouncing callbacks](/watch-options#debouncing-callbacks).
-  @param {boolean|string|Element} [options.disable]
-    Whether to disable fields while waiting for the server response.
 
-    See [disabling fields while working](/watch-options#disabling-fields-while-working).
-  @param {boolean} [options.feedback=true]
-    Whether to show [feedback classes](/feedback-classes) while waiting for the server response.
-
-    See [showing feedback while working](/watch-options#showing-feedback-while-working).
   @param {Object} [options.data]
     Overrides properties from the new fragment's `[up-data]`
     with the given [data object](/data).
 
     To assign data the validating element must have a [derivable target selector](/target-derivation).
+
   @param {boolean} [options.keepData]
     [Preserve](/data#preserving-data-through-reloads) the reloaded fragment's [data object](/data).
 
     Properties from the new fragment's `[up-data]` are overridden with the old fragment's `[up-data]`.
+
+  @param {boolean|string|Element} [options.disable]
+    Whether to disable fields while waiting for the server response.
+
+    See [disabling fields while working](/watch-options#disabling-fields-while-working).
+
+  @param {string|Element|List<Node>} [options.placeholder]
+    A [placeholder](/placeholder) to show within the targeted fragment while it is loading.
+
+    @experimental
+
+  @param {string|Function(up.Preview)|Array} [options.preview]
+    One or more [previews](/preview) that temporarily change the page
+    while the targeted fragment is loading.
+
+    @experimental
+
+  @param {boolean} [options.feedback=true]
+    Whether to show [feedback classes](/feedback-classes) while waiting for the server response.
+
+    See [showing feedback while working](/watch-options#showing-feedback-while-working).
+
   @param {Object} [options]
-    Additional [render options](/up.render#parameters) for the validation request.
+    Additional [render options](/up.render#parameters) to use when re-rendering the targeted
+    fragment.
+
+    Note that validation requests may be [batched together](/up.validate#batching).
+    In this case Unpoly will try to merge render options where possible (e.g. `{ headers }`).
+    When a render option cannot be merged (e.g. `{ scroll }`),
+    the option from the last validation in the batch will be used.
+
   @return {up.RenderJob}
     A promise that fulfills when the server-side validation is received
     and the form was updated.
@@ -1023,6 +1113,7 @@ up.form = (function() {
     - the server sends an error status
     - there is a [network issue](/network-issues)
     - [targets](/targeting-fragments) could not be matched
+
   @stable
   */
   function validate(...args) {
@@ -1326,7 +1417,7 @@ up.form = (function() {
   > If you only need to [validate forms after submission](/validation#validating-after-submission),
   > you don't need `[up-validate]`.
 
-  ### Marking fields for validation
+  ## Marking fields for validation
 
   Let's look at a standard registration form that asks for an e-mail and password.
   The form is organized into [form groups](/up-form-group) of labels, inputs and
@@ -1402,7 +1493,7 @@ up.form = (function() {
   Whenever a field with `[up-validate]` changes, the form is submitted to its `[action]` path
   with an additional `X-Up-Validate` HTTP header.
 
-  ### Backend protocol
+  ## Backend protocol
 
   When the user changes the `email` field in the registration form above,
   the following request will be sent:
@@ -1509,7 +1600,7 @@ up.form = (function() {
   </form>
   ```
 
-  ### How validation results are displayed
+  ## How validation results are displayed
 
   `[up-validate]` always submits the entire form with its current field values to the form's
   `[action]` path. Typically only a fragment of the form is updated with the response.
@@ -1523,7 +1614,8 @@ up.form = (function() {
   If the form is not structured into groups, the entire
   form will be updated.
 
-  #### Updating a different fragment
+
+  ### Updating a different fragment
 
   If you don't want to update the field's form group, you can set the `[up-validate]`
   attribute to any [target selector](/targeting-fragments):
@@ -1540,7 +1632,7 @@ up.form = (function() {
   <input type="text" name="email" up-validate=".email-errors, .base-errors"> <!-- mark-phrase ".email-errors, .base-errors" -->
   ```
 
-  ### Updating dependent fields
+  ## Updating dependent fields
 
   The `[up-validate]` attribute is a useful tool to partially update a form
   when one fields depends on the value of another field.
@@ -1548,12 +1640,12 @@ up.form = (function() {
   See [dependent fields](/dependent-fields) for more details and examples.
 
 
-  ### Validating while typing
+  ## Validating while typing
 
   @include validating-while-typing
 
 
-  ### Preventing race conditions
+  ## Preventing race conditions
 
   Custom dynamic form implementations will often exhibit race conditions, e.g. when the user
   is quickly changing fields while requests are still in flight.
@@ -1562,7 +1654,7 @@ up.form = (function() {
 
   See [preventing race conditions](/dependent-fields#preventing-race-conditions) for more details.
 
-  ### Validating multiple fields
+  ## Validating multiple fields
 
   You can set `[up-validate]` on any element to validate *all contained fields* on change.
 
@@ -1587,7 +1679,7 @@ up.form = (function() {
   </form>
   ```
 
- #### Validating radio buttons
+ ### Validating radio buttons
 
   Multiple radio buttons with the same `[name]` produce a single value for the form.
 
@@ -1602,7 +1694,7 @@ up.form = (function() {
   </fieldset>
   ```
 
-  ### Programmatic validation
+  ## Programmatic validation
 
   To update form fragments from your JavaScript, use the [`up.validate()`](/up.validate) function.
   You may combine `[up-validate]` and `up.validate()` within the same form. Their updates
@@ -1611,26 +1703,47 @@ up.form = (function() {
 
 
   @selector [up-validate]
+
   @param [up-validate]
     The [target selector](/targeting-fragments) to update with the server response.
 
     Defaults the closest [form group](/up-form-group) around the validating field.
+
   @param [up-watch-event='change']
     The event types to observe.
 
     See [which events to watch](/watch-options#which-events-to-watch).
-  @param [up-watch-delay]
-    The number of miliseconds to wait between an observed event and validating.
+
+  @param [up-watch-delay=0]
+    The number of milliseconds to wait between an observed event and validating.
 
     See [debouncing callbacks](/watch-options#debouncing-callbacks).
+
   @param [up-watch-disable]
     Whether to [disable fields](/disabling-forms) while validation is running.
 
     See [disabling fields while working](/watch-options#disabling-fields-while-working).
-  @param [up-watch-feedback]
+
+  @param [up-watch-placeholder]
+    A [placeholder](/placeholder) to show within the targeted fragment while it is loading.
+
+    See [showing loading state while working](/watch-options#showing-loading-state-while-working).
+
+    @experimental
+
+  @param [up-watch-preview]
+    One or more [previews](/preview) that temporarily change the page
+    while the targeted fragment is loading.
+
+    See [showing loading state while working](/watch-options#showing-loading-state-while-working).
+
+    @experimental
+
+  @param [up-watch-feedback=true]
     Whether to set [feedback classes](/feedback-classes) while validating.
 
     See [showing feedback while working](/watch-options#showing-feedback-while-working).
+
   @stable
   */
   up.compiler(validatingFieldSelector, function(fieldOrForm) {
@@ -1822,25 +1935,21 @@ up.form = (function() {
 
   The programmatic variant of this is the [`up.watch()`](/up.watch) function.
 
-  ### Example
+  ## Example
 
-  The following would run a log whenever the `<input>` changes:
+  The following would log a message whenever the `<input>` changes:
 
   ```html
   <input name="query" up-watch="console.log('New value', value)">
   ```
 
-  ### Callback context
+  ## Callback context
 
   The script given to `[up-watch]` runs with the following context:
 
-  | Name     | Type      | Description                           |
-  | -------- | --------- | ------------------------------------- |
-  | `this`   | `Element` | The changed form field                |
-  | `name`   | `Element` | The `[name]` of the changed field     |
-  | `value`  | `string`  | The new value of the changed field    |
+  @include watch-callback-arguments
 
-  ### Watching multiple fields
+  ## Watching multiple fields
 
   You can set `[up-watch]` on any element to observe all contained fields.
   The `name` argument contains the name of the field that was changed:
@@ -1867,7 +1976,7 @@ up.form = (function() {
   </form>
   ```
 
-  #### Watching radio buttons
+  ### Watching radio buttons
 
   Multiple radio buttons with the same `[name]` produce a single value for the form.
 
@@ -1882,13 +1991,13 @@ up.form = (function() {
   </div>
   ```
 
-  ### Async callbacks
+  ## Async callbacks
 
-  When your callback does async work (like fetching data over the network) it should return a promise
+  When your callback does async work (like fetching data over the network) it must return a promise
   that settles once the work concludes:
 
     ```html
-  <input name="query" up-watch="return asyncWork()">
+  <input name="query" up-watch="return asyncWork()"> <!-- mark-phrase "return" -->
   ```
 
   Unpoly will guarantee that only one async callback is running concurrently.
@@ -1898,22 +2007,16 @@ up.form = (function() {
   @selector [up-watch]
   @param up-watch
     The code to run when any field's value changes.
+
+    See [callback context](#callback-context).
   @param [up-watch-event='input']
     The type of event to watch.
 
     See [which events to watch](/watch-options#which-events-to-watch).
-  @param [up-watch-delay]
-    The number of miliseconds to wait after a change before the code is run.
+  @param [up-watch-delay=0]
+    The number of milliseconds to wait after a change before the code is run.
 
     See [debouncing callbacks](/watch-options#debouncing-callbacks).
-  @param [up-watch-disable]
-    Whether to disable fields while an async callback is running.
-
-    See [disabling fields while working](/watch-options#disabling-fields-while-working).
-  @param [up-watch-feedback]
-    Whether to set [feedback classes](/feedback-classes) while an async callback is running.
-
-    See [showing feedback while working](/watch-options#showing-feedback-while-working).
   @stable
   */
 
@@ -1965,17 +2068,45 @@ up.form = (function() {
   ```
 
   @selector [up-autosubmit]
+
   @param [up-watch-event='input']
     The type of event to watch.
 
     See [which events to watch](/watch-options#which-events-to-watch).
-  @param [up-watch-delay]
-    The number of miliseconds to wait after a change before submitting the form.
+
+  @param [up-watch-delay=0]
+    The number of milliseconds to wait after a change before submitting the form.
 
     If the form element is [aborted](/aborting-requests) or
     destroyed during the delay, the submission is canceled.
 
     See [debouncing callbacks](/watch-options#debouncing-callbacks).
+
+  @param [up-watch-disable]
+    Whether to [disable fields](/disabling-forms) while submitting
+
+    See [disabling fields while working](/watch-options#disabling-fields-while-working).
+
+  @param [up-watch-placeholder]
+    A [placeholder](/placeholder) to show within the targeted fragment during submission.
+
+    See [showing loading state while working](/watch-options#showing-loading-state-while-working).
+
+    @experimental
+
+  @param [up-watch-preview]
+    One or more [previews](/preview) that temporarily change the page
+    during submission.
+
+    See [showing loading state while working](/watch-options#showing-loading-state-while-working).
+
+    @experimental
+
+  @param [up-watch-feedback=true]
+    Whether to set [feedback classes](/feedback-classes) during submission.
+
+    See [showing feedback while working](/watch-options#showing-feedback-while-working).
+
   @stable
   */
   up.attribute('up-autosubmit', (formOrField) => autosubmit(formOrField))
