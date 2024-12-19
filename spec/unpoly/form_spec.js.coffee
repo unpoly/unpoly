@@ -3699,12 +3699,14 @@ describe 'up.form', ->
 
     describe 'input[up-watch]', ->
 
+      beforeEach ->
+        window.watchCallbackSpy = jasmine.createSpy('watch callback')
+
       afterEach ->
         window.watchCallbackSpy = undefined
 
       it 'calls the JavaScript code in the attribute value when a change is observed in the field', ->
         form = fixture('form')
-        window.watchCallbackSpy = jasmine.createSpy('watch callback')
         field = e.affix(form, 'input[name="input-name"][value="old-value"][up-watch="window.watchCallbackSpy(this, value, name)"]')
         up.hello(form)
         field.value = 'new-value'
@@ -3716,7 +3718,6 @@ describe 'up.form', ->
       it 'does not watch a field with [up-watch=false]', ->
         await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
           form = fixture('form')
-          window.watchCallbackSpy = jasmine.createSpy('watch callback')
           field = e.affix(form, 'input[name="input-name"][value="old-value"][up-watch="false"]')
           up.hello(form)
           field.value = 'new-value'
@@ -3727,7 +3728,6 @@ describe 'up.form', ->
 
       it 'runs the callback only once for multiple changes in the same task', asyncSpec (next) ->
         $form = $fixture('form')
-        window.watchCallbackSpy = jasmine.createSpy('watch callback')
         $field = $form.affix('input[name="input-name"][value="old-value"][up-watch="window.watchCallbackSpy(value, name)"]')
         up.hello($form)
         $field.val('a')
@@ -3741,7 +3741,6 @@ describe 'up.form', ->
       it 'does not run the callback when the form is submitted immediately after a change, e.g. in a test', asyncSpec (next) ->
         container = fixture('.container[up-main]')
         form = e.affix(container, 'form[action="/path"]')
-        window.watchCallbackSpy = jasmine.createSpy('watch callback')
         field = e.affix(form, 'input[name="input-name"][value="old-value"][up-watch="window.watchCallbackSpy(value, name)"]')
         up.hello(form)
         field.value = 'new-value'
@@ -3750,6 +3749,23 @@ describe 'up.form', ->
 
         next =>
           expect(window.watchCallbackSpy).not.toHaveBeenCalled()
+
+      it 'passes any options parsed from [up-watch] attributes as `options`', ->
+        form = fixture('form')
+        field = e.affix(form, 'input[name=email][up-watch="window.watchCallbackSpy(options)"][up-watch-disable="#disable"][up-watch-feedback="false"][up-watch-preview="my-preview"][up-watch-placeholder="#placeholder"]')
+        up.hello(form)
+        field.value = 'new-value'
+        Trigger.change(field)
+
+        await wait()
+        expect(window.watchCallbackSpy).toHaveBeenCalledWith(
+          disable: '#disable',
+          feedback: false,
+          preview: 'my-preview',
+          placeholder: '#placeholder',
+          origin: field,
+        )
+
 
       describe 'with [up-watch-delay] modifier', ->
 
