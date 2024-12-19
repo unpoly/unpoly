@@ -8,7 +8,6 @@ up.FieldWatcher = class FieldWatcher {
     this._scope = up.form.getScope(root)
     this._callback = callback
     this._batch = options.batch
-    this._abortable = options.abortable
   }
 
   start() {
@@ -92,7 +91,10 @@ up.FieldWatcher = class FieldWatcher {
     // If the form was destroyed while a callback was scheduled, we don't run the callback.
     if (!this._scope.isConnected) return
 
-    let fieldOptions = this._scheduledFieldOptions
+    // Don't forward { event, delay } because
+    // (1) we have already processed them here and
+    // (2) those aren't render options.
+    let callbackOptions = u.omit(this._scheduledFieldOptions, ['event', 'delay'])
     const diff = this._changedValues(this._processedValues, this._scheduledValues)
     this._processedValues = this._scheduledValues
     this._scheduledValues = null
@@ -101,11 +103,11 @@ up.FieldWatcher = class FieldWatcher {
 
     const callbackReturnValues = []
     if (this._batch) {
-      callbackReturnValues.push(this._runCallback(diff, fieldOptions))
+      callbackReturnValues.push(this._runCallback(diff, callbackOptions))
     } else {
       for (let name in diff) {
         const value = diff[name]
-        callbackReturnValues.push(this._runCallback(value, name, fieldOptions))
+        callbackReturnValues.push(this._runCallback(value, name, callbackOptions))
       }
     }
 
