@@ -275,8 +275,8 @@ up.form = (function() {
 
     @see failed-responses
 
-  @param {boolean|string|Element} [options.disable]
-    Whether to [disable form controls](/disabling-forms) while the form is submitting.
+  @param {boolean|string|Element|Array} [options.disable]
+    [Disables form controls](/disabling-forms) while the form is submitting.
 
   @param {Element} [options.origin]
     The element that triggered the form submission.
@@ -802,8 +802,8 @@ up.form = (function() {
 
     See [debouncing callbacks](/watch-options#debouncing-callbacks).
 
-  @param {boolean|string|Element} [options.disable]
-    Whether to disable fields while waiting for the server response.
+  @param {boolean|string|Element|Array} [options.disable]
+    Disables fields while waiting for the server response.
 
     See [disabling fields while working](/watch-options#disabling-fields-while-working).
 
@@ -1073,8 +1073,8 @@ up.form = (function() {
 
     Properties from the new fragment's `[up-data]` are overridden with the old fragment's `[up-data]`.
 
-  @param {boolean|string|Element} [options.disable]
-    Whether to disable fields while waiting for the server response.
+  @param {boolean|string|Element|Array} [options.disable]
+    Disables fields while waiting for the server response.
 
     See [disabling fields while working](/watch-options#disabling-fields-while-working).
 
@@ -1383,7 +1383,7 @@ up.form = (function() {
     @see failed-responses
 
   @param [up-disable]
-    Whether to [disable form controls](/disabling-forms) while the form is submitting.
+    [Disables form controls](/disabling-forms) while the form is submitting.
 
   @stable
   */

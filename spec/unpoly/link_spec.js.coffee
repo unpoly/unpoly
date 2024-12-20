@@ -973,6 +973,20 @@ describe 'up.link', ->
         options = up.link.followOptions(link)
         expect(options.lateDelay).toBe(false)
 
+      it 'parses an [up-disable] attribute as a selector string', ->
+        link = fixture('a[href="/foo"][up-disable=".field"]')
+        up.hello(link)
+
+        options = up.link.followOptions(link)
+        expect(options.disable).toBe('.field')
+
+      it 'parses a value-less [up-disable] attribute as a true boolean', ->
+        link = fixture('a[href="/foo"][up-disable]')
+        up.hello(link)
+
+        options = up.link.followOptions(link)
+        expect(options.disable).toBe(true)
+
       if up.migrate.loaded
         it 'parses an [up-reset-scroll] attribute', ->
           link = fixture('a[href="/foo"][up-reset-scroll]')
