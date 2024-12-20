@@ -10,7 +10,7 @@ By disabling form controls you can prevent concurrent use of the form and provid
 
 To fully prevent access to the form while it is submitting, you need to disable all input fields and buttons.
 
-For this pass `{ disable: true }` or set an empty `[up-disable]` attribute on the `<form>` element:
+For this set an empty `[up-disable]` attribute on the `<form>` element:
 
 ```html
 <form up-submit up-disable action="/session"> <!-- mark-phrase "up-disable" -->
@@ -20,10 +20,16 @@ For this pass `{ disable: true }` or set an empty `[up-disable]` attribute on th
 </form>
 ```
 
+From JavaScript you can pass an `{ disable: true }` option:
+
+```js
+up.submit(form, { disable: true })
+```
+
 
 ## Disabling some controls only
 
-To only disable some form controls, set the value of `[up-disable]` to any selector that matches fields or buttons.
+To only disable some form controls, set the value of `[up-disable]` to any CSS selector. All matching fields and buttons will be disabled.
 
 In the example below we disable all `<button>` elements by setting an `[up-disable="button"]` attribute on the form: 
 
@@ -49,8 +55,15 @@ Instead of targeting form controls directly, you may also pass a selector for a 
 </form>
 ```
 
+From JavaScript you can also pass a selector, or an array of elements:
 
-## Disabling a form from a link
+```js
+up.submit(form, { disable: [button, field] })
+```
+
+
+
+## Disabling a form from a link {#from-link}
 
 Sometimes we want to disable form fields when the user activates a hyperlink.
 This prevents unwanted user input in the form while the link is navigating away.

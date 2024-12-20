@@ -851,9 +851,8 @@ up.fragment = (function() {
 
     If the user does not confirm the render promise will reject and no fragments will be updated.
 
-  @param {boolean} [options.feedback=true]
-    Whether to set [feedback classes](/feedback-classes)
-    while loading content.
+  @param {boolean|string|Element|Array} [options.disable]
+    [Disables form controls](/disabling-forms) while the form is submitting.
 
   @param {string|Element|List<Node>} [options.placeholder]
     A [placeholder](/placeholder) to show within the targeted fragment while new content is loading.
@@ -885,9 +884,9 @@ up.fragment = (function() {
 
     @experimental
 
-  @param {Object} [options.data]
-    Overrides properties from the new fragment's `[up-data]`
-    with the given [data object](/data).
+  @param {boolean} [options.feedback=true]
+    Whether to set [feedback classes](/feedback-classes)
+    while loading content.
 
   @param {Function(Event)} [options.onLoaded]
     A callback that will be run when the server responds with new HTML,
@@ -896,6 +895,10 @@ up.fragment = (function() {
     The callback argument is a preventable `up:fragment:loaded` event.
 
     This callback will also run for [failed responses](/failed-responses).
+
+  @param {Object} [options.data]
+    Overrides properties from the new fragment's `[up-data]`
+    with the given [data object](/data).
 
   @param {Function(up.RenderResult)} [options.onRendered]
     A function to call when Unpoly has updated fragments.
