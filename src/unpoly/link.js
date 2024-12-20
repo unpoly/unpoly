@@ -1444,10 +1444,6 @@ up.link = (function() {
 
     If the user does not confirm the render promise will reject and no fragments will be updated.
 
-  @param [up-feedback='true']
-    Whether to set [feedback classes](/feedback-classes)
-    while loading content.
-
   @param [up-placeholder]
     A [placeholder](/placeholder) to show in the targeted fragment while new content is loading.
 
@@ -1477,6 +1473,13 @@ up.link = (function() {
     while [revalidating cached content](/caching#revalidation).
 
     @experimental
+
+  @param [up-disable]
+    [Disables form controls](/disabling-forms#from-link) while the link is loading.
+
+  @param [up-feedback='true']
+    Whether to set [feedback classes](/feedback-classes)
+    while loading content.
 
   @param [up-on-loaded]
     A JavaScript snippet that is executed when the server responds with new HTML,
