@@ -982,10 +982,7 @@ up.viewport = (function() {
     return to
   }
 
-  let userScrolled = false
-  up.on('scroll', { once: true, beforeBoot: true }, () => userScrolled = true)
-
-  up.on('up:framework:boot', function() {
+  document.addEventListener('DOMContentLoaded', function() {
     // When the initial URL contains an #anchor link, the browser will automatically
     // reveal a matching fragment. We want to override that behavior with our own,
     // so we can honor configured obstructions. Since we cannot disable the automatic
@@ -994,13 +991,7 @@ up.viewport = (function() {
     // In Chrome, when reloading, the browser behavior happens before DOMContentLoaded.
     // However, when we follow a link with an #anchor URL, the browser
     // behavior happens *after* DOMContentLoaded. Hence we wait one more task.
-    u.task(function() {
-      // If the user has scrolled while the page was loading, we will
-      // not reset their scroll position by revealing the #anchor fragment.
-      if (!userScrolled) {
-        return revealHash()
-      }
-    })
+    u.task(revealHash)
   })
 
   up.on(window, 'hashchange', () => revealHash())
