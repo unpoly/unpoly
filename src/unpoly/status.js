@@ -307,6 +307,60 @@ up.status = (function() {
     return activeElements.map(findActivatableArea)
   }
 
+  /*-
+  Registers a named [preview](/previews) function.
+
+  Preview function are applied using the `[up-preview]` attribute or [`{ preview }`](/up.render#options.preview) option.
+  See [Previews](/previews) for an overview.
+
+  ## Example
+
+  This preview sets a temporary `[app-loading=true]` attribute on the targeted fragment:
+
+  ```js
+  up.preview('loading-attr', function(preview) {
+    preview.setAttrs({ 'app-loading': true })
+  })
+  ```
+
+  The `preview` argument is an `up.Preview` instance that offers many utilities to make temporary changes.
+  For example, you can use it to insert or move elements, add classes or set attributes.
+
+  We can use the `loading-attr` preview in any link or form by setting an `[up-preview]` attribute:
+
+  ```html
+  <a href="/edit" up-follow up-preview="loading-attr">Edit page</a> <!-- mark-phrase "up-preview" -->
+  ```
+
+  ## Accepting parameters {#parameters}
+
+  Preview functions can accept a data object as a second argument.
+  This is useful to define multiple variations of a preview effect.
+
+  For example, the following preview accepts a `{ size }` option to show a spinner of varying size:
+
+  ```js
+  up.preview('spinner', function(preview, { width = 50 }) {
+    let spinner = up.element.createFromSelector('img', { src: 'spinner.gif', width })
+    preview.insert(preview.fragment, spinner)
+  })
+  ```
+
+  From HTML you can append the options to the `[up-preview]` argument, after the preview name:
+
+  ```html
+  <a href="/edit" up-follow up-preview="spinner { size: 100 }">Edit page</a> <!-- mark-phrase "{ size: 100 }" -->
+  ```
+
+  @function up.preview
+  @param {string} name
+    The name of the preview.
+  @param {Function(up.Preview, Object)} callback
+    The function that applies the temporary page mutation.
+
+    Any [preview parameters](#parameters) will be passed as a second argument.
+  @stable
+  */
   function registerPreview(name, previewFn) {
     previewFn.isDefault = up.framework.evaling
     namedPreviewFns[name] = previewFn
