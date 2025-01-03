@@ -982,7 +982,7 @@ up.viewport = (function() {
     return to
   }
 
-  document.addEventListener('DOMContentLoaded', function() {
+  function revealHashAfterBrowser() {
     // When the initial URL contains an #anchor link, the browser will automatically
     // reveal a matching fragment. We want to override that behavior with our own,
     // so we can honor configured obstructions. Since we cannot disable the automatic
@@ -992,9 +992,11 @@ up.viewport = (function() {
     // However, when we follow a link with an #anchor URL, the browser
     // behavior happens *after* DOMContentLoaded. Hence we wait one more task.
     u.task(revealHash)
-  })
+  }
 
-  up.on(window, 'hashchange', () => revealHash())
+  document.addEventListener('DOMContentLoaded', revealHashAfterBrowser)
+
+  window.addEventListener('hashchange', revealHashAfterBrowser)
 
   return {
     reveal,
