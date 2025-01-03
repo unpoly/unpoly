@@ -641,13 +641,13 @@ describe 'up.viewport', ->
     describe 'up.viewport.revealHash()', ->
 
       it 'reveals an element with an ID matching the given #hash', asyncSpec (next) ->
-        revealSpy = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
+        revealSpy = up.reveal.mock().and.returnValue(Promise.resolve())
         $match = $fixture('div#hash')
         up.viewport.revealHash('#hash')
         next => expect(revealSpy).toHaveBeenCalledWith($match[0], jasmine.anything())
 
       it 'reveals a named anchor matching the given #hash', asyncSpec (next) ->
-        revealSpy = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
+        revealSpy = up.reveal.mock().and.returnValue(Promise.resolve())
         $match = $fixture('a[name="hash"]')
         up.viewport.revealHash('#hash')
         next => expect(revealSpy).toHaveBeenCalledWith($match[0], jasmine.anything())
@@ -661,7 +661,7 @@ describe 'up.viewport', ->
 
         it 'does not change the scroll position', asyncSpec (next) ->
           fixture('.high', style: { height: '10000px' }) # Ensure we have a vertical scroll bar
-          revealSpy = spyOn(up, 'reveal')
+          revealSpy = up.reveal.mock()
           up.viewport.root.scrollTop = 50
           up.viewport.revealHash('#hash')
           next ->
@@ -898,17 +898,95 @@ describe 'up.viewport', ->
 
   describe 'unobtrusive behavior', ->
 
-    describe 'on hashchange', ->
+    describe 'honoring obstructions when the location #hash changes', ->
 
-      it 'reveals the fragment matching the #hash, honoring configured obstructions', asyncSpec (next) ->
-        # The browser will only fire a hashchange event if the hash actually did change.
-        # In case someone re-runs this spec, reset the hash before we setup our test below.
-        location.hash = ''
-        highElement = fixture('.high', style: { height: '10000px' }) # ensure we can scroll
-        element = fixture('#element', text: 'content', style: { position: 'absolute', top: '5000px' })
-        obstruction = fixture('.obstruction[up-fixed=top]', text: 'obstructions', style: { 'position': 'fixed', 'top': '0px', 'height': '30px', 'background-color': 'blue' })
-        location.hash = "#element"
-        next ->
+      describe 'when the #hash is changed manually', ->
+
+        it 'reveals a matching fragment', ->
+          # The browser will only fire a hashchange event if the hash actually did change.
+          # In case someone re-runs this spec, reset the hash before we setup our test below.
+          location.hash = ''
+          await wait()
+
+          highElement = fixture('.high', style: { height: '10000px' }) # ensure we can scroll
+          element = fixture('#element', text: 'content', style: { position: 'absolute', top: '5000px' })
+          obstruction = fixture('.obstruction[up-fixed=top]', text: 'obstructions', style: { 'position': 'fixed', 'top': '0px', 'height': '30px', 'background-color': 'blue' })
+
+          location.hash = "#element"
+          await wait()
+
           expect(up.viewport.root.scrollTop).toBe(5000 - 30)
 
-      it 'does not reveal when the new #hash is empty'
+        it 'does not reveal when the new #hash is empty', ->
+          # The browser will only fire a hashchange event if the hash actually did change.
+          # In case someone re-runs this spec, reset the hash before we setup our test below.
+          location.hash = '#elsewhere'
+          await wait()
+
+          revealSpy = up.reveal.mock()
+
+          location.hash = ""
+          await wait()
+
+          expect(revealSpy).not.toHaveBeenCalled()
+
+      describe 'when an a[href^="#"] is clicked', ->
+
+        it "reveals a fragment matching the link's hash", ->
+          location.hash = ''
+          await wait()
+
+          highElement = fixture('.high', style: { height: '10000px' }) # ensure we can scroll
+          element = fixture('#element', text: 'content', style: { position: 'absolute', top: '5000px' })
+          obstruction = fixture('.obstruction[up-fixed=top]', text: 'obstructions', style: { 'position': 'fixed', 'top': '0px', 'height': '30px', 'background-color': 'blue' })
+          link = fixture('a', href: '#element')
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect(up.viewport.root.scrollTop).toBe(5000 - 30)
+          expect(location.hash).toBe('#element')
+
+        it "reveals a fragment when the location is already on the link's #hash", ->
+          location.hash = '#element'
+          await wait()
+
+          highElement = fixture('.high', style: { height: '10000px' }) # ensure we can scroll
+          element = fixture('#element', text: 'content', style: { position: 'absolute', top: '5000px' })
+          obstruction = fixture('.obstruction[up-fixed=top]', text: 'obstructions', style: { 'position': 'fixed', 'top': '0px', 'height': '30px', 'background-color': 'blue' })
+          link = fixture('a', href: '#element')
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect(up.viewport.root.scrollTop).toBe(5000 - 30)
+          expect(location.hash).toBe('#element')
+
+        it "does not reveal when no fragment matches the link's #hash", ->
+          location.hash = ''
+          await wait()
+
+          link = fixture('a', href: '#element')
+          revealSpy = up.reveal.mock()
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect(revealSpy).not.toHaveBeenCalled()
+          expect(location.hash).toBe('#element')
+
+        it "scrolls to the top if the link's hash is just the '#' symbol", ->
+          location.hash = ''
+          await wait()
+
+          highElement = fixture('.high', style: { height: '10000px' }) # ensure we can scroll
+          up.viewport.root.scrollTop = 3000
+          expect(up.viewport.root.scrollTop).toBe(3000)
+
+          link = fixture('a', href: '#')
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect(up.viewport.root.scrollTop).toBe(0)
+          expect(location.hash).toBe('')

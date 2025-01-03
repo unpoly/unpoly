@@ -598,7 +598,7 @@ describe 'up.link', ->
             $link = $fixture('a[href="/action"][up-target=".target"]')
             $target = $fixture('.target')
 
-            revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
+            revealStub = up.reveal.mock().and.returnValue(Promise.resolve())
 
             up.follow($link.get(0), scroll: 'target')
 
@@ -616,7 +616,7 @@ describe 'up.link', ->
             target = fixture('.target')
             failTarget = fixture('.fail-target')
 
-            revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
+            revealStub = up.reveal.mock().and.returnValue(Promise.resolve())
             renderJob = up.follow(link, failScroll: "target")
 
             await wait()
@@ -641,7 +641,7 @@ describe 'up.link', ->
             target = fixture('.target')
             other = fixture('.other')
 
-            revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
+            revealStub = up.reveal.mock().and.returnValue(Promise.resolve())
 
             up.follow(link, scroll: '.other')
 
@@ -665,7 +665,7 @@ describe 'up.link', ->
             failTarget = fixture('.fail-target')
             other = fixture('.other')
 
-            revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
+            revealStub = up.reveal.mock().and.returnValue(Promise.resolve())
             renderJob = up.follow(link, scroll: '.other', failTarget: '.fail-target')
 
             await wait()
@@ -690,7 +690,7 @@ describe 'up.link', ->
             other = fixture('.other')
             failOther = fixture('.fail-other')
 
-            revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
+            revealStub = up.reveal.mock().and.returnValue(Promise.resolve())
             renderJob = up.follow(link, reveal: '.other', failScroll: '.fail-other')
 
             await wait()

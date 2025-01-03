@@ -428,7 +428,7 @@ describe 'up.radio', ->
         $fixture('.hungry[up-hungry]').text('old hungry')
         $fixture('.target').text('old target')
 
-        revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
+        revealStub = up.reveal.mock().and.returnValue(Promise.resolve())
 
         up.navigate('.target', url: '/path', scroll: 'target')
 

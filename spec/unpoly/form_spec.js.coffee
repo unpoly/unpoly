@@ -1630,7 +1630,7 @@ describe 'up.form', ->
             $target = $fixture('.target')
             $other = $fixture('.other')
 
-            revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
+            revealStub = up.reveal.mock().and.returnValue(Promise.resolve())
 
             up.submit($form, scroll: '.other')
 
@@ -1651,7 +1651,7 @@ describe 'up.form', ->
           it 'allows to refer to the origin as ":origin" in the selector', asyncSpec (next) ->
             $form = $fixture('form#foo-form[action="/action"][up-target="#foo-form"]')
 
-            revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
+            revealStub = up.reveal.mock().and.returnValue(Promise.resolve())
 
             up.submit($form, scroll: ':origin .form-child')
 
@@ -1677,7 +1677,7 @@ describe 'up.form', ->
             $target = $fixture('.target')
             $other = $fixture('.other')
 
-            revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
+            revealStub = up.reveal.mock().and.returnValue(Promise.resolve())
 
             renderJob = up.submit($form, reveal: '.other', failScroll: '.error')
 
@@ -1700,7 +1700,7 @@ describe 'up.form', ->
             $form = $fixture('form#foo-form[action="/action"][up-target=".target"]')
             $target = $fixture('.target')
 
-            revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
+            revealStub = up.reveal.mock().and.returnValue(Promise.resolve())
 
             renderJob = up.submit($form, failScroll: ':origin .form-child')
 
@@ -4025,7 +4025,7 @@ describe 'up.form', ->
             # Jasmine will fail if there are unhandled promise rejections
 
         it 'does not reveal the updated fragment (bugfix)', asyncSpec (next) ->
-          revealSpy = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
+          revealSpy = up.reveal.mock().and.returnValue(Promise.resolve())
 
           $form = $fixture('form[action="/path/to"]')
           $group = $("""
