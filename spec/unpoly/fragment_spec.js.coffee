@@ -839,13 +839,13 @@ describe 'up.fragment', ->
             up.compiler '.element', crashingCompiler
             fixture('.element', text: 'old text')
 
-            spyOn(up, 'reveal')
+            revealSpy = up.reveal.mock()
 
             await jasmine.expectGlobalError compileError, ->
               up.render({ fragment: '<div class="element">new text</div>', scroll: 'target' })
 
             expect('.element').toHaveText('new text')
-            expect(up.reveal).toHaveBeenCalled()
+            expect(revealSpy).toHaveBeenCalled()
             expect(crashingCompiler).toHaveBeenCalled()
 
         describe 'when a destructor throws an error', ->
@@ -3604,7 +3604,7 @@ describe 'up.fragment', ->
               promise.then (result) => expect(result.state).toEqual('fulfilled')
 
           it 'does not lose a { scroll } option if the first selector was merged into a subsequent selector', asyncSpec (next) ->
-            revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
+            revealStub = up.reveal.mock().and.returnValue(Promise.resolve())
 
             $outer = $fixture('.outer').text('old outer text')
             $inner = $outer.affix('.inner').text('old inner text')
@@ -6281,7 +6281,7 @@ describe 'up.fragment', ->
           @revealedText = []
           @revealOptions = {}
 
-          @revealMock = spyOn(up, 'reveal').and.callFake (element, options) =>
+          @revealMock = up.reveal.mock().and.callFake (element, options) =>
             @revealedHTML.push element.outerHTML
             @revealedText.push element.textContent.trim()
             @revealOptions = options
@@ -10546,7 +10546,7 @@ describe 'up.fragment', ->
       it 'does not reveal by default', asyncSpec (next) ->
         element = fixture('.element[up-source="/source"]', text: 'old text')
 
-        spyOn(up, 'reveal').and.returnValue(Promise.resolve())
+        revealSpy = up.reveal.mock().and.returnValue(Promise.resolve())
 
         next ->
           up.reload('.element')
@@ -10556,7 +10556,7 @@ describe 'up.fragment', ->
 
         next ->
           expect('.element').toHaveText('new text')
-          expect(up.reveal).not.toHaveBeenCalled()
+          expect(revealSpy).not.toHaveBeenCalled()
 
       describe 'last modification time', ->
 
