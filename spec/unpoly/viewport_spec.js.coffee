@@ -900,7 +900,7 @@ describe 'up.viewport', ->
 
     describe 'on hashchange', ->
 
-      it 'reveals the fragment matching the #hash, honoring configured obstructions', ->
+      it 'reveals the fragment matching the #hash, honoring configured obstructions', asyncSpec (next) ->
         # The browser will only fire a hashchange event if the hash actually did change.
         # In case someone re-runs this spec, reset the hash before we setup our test below.
         location.hash = ''
@@ -908,9 +908,7 @@ describe 'up.viewport', ->
         element = fixture('#element', text: 'content', style: { position: 'absolute', top: '5000px' })
         obstruction = fixture('.obstruction[up-fixed=top]', text: 'obstructions', style: { 'position': 'fixed', 'top': '0px', 'height': '30px', 'background-color': 'blue' })
         location.hash = "#element"
-
-        await jasmine.waitTasks(2)
-
-        expect(up.viewport.root.scrollTop).toBe(5000 - 30)
+        next ->
+          expect(up.viewport.root.scrollTop).toBe(5000 - 30)
 
       it 'does not reveal when the new #hash is empty'
