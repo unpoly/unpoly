@@ -23,6 +23,7 @@ There are existing implementations for various web frameworks:
 - [Phoenix](https://elixirforum.com/t/unpoly-a-framework-like-turbolinks/3614/15) (Elixir)
 - [PHP](https://github.com/webstronauts/php-unpoly) (Symfony, Laravel, Stack)
 - [Python](https://gitlab.com/rocketduck/python-unpoly) (Python, including Django support)
+- [Rust](https://crates.io/crates/unpoly) (Rust, including Axum support)
 
 @see optimizing-responses
 @see conditional-requests
