@@ -764,6 +764,8 @@ up.link = (function() {
   - It is not emitted if the element has disappeared (or was overshadowed)
     between `mousedown` and `click`. This can happen if `mousedown` creates a new element
     that obstructs interaction with this element, or if a `mousedown` handler removes a handler.
+  - It is not emitted if the user clicks with a non-first mouse button.
+  - It is not emitted it the user holds a modifier key when clicking.
 
   Stopping an up:click event will also stop the underlying event.
 
