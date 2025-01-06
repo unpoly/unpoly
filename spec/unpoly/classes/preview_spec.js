@@ -194,7 +194,7 @@ describe('up.Preview', function() {
       up.render({ preview: previewFn, url: '/url', target: 'body', scroll: '#scroll', focus: '#focus' })
       await wait()
 
-      expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({ scroll: '#scroll', focus: '#focus' }))
+      expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({ target: 'body', scroll: '#scroll', focus: '#focus' }))
     })
 
     it('allows a preview function to change preview.renderOptions', async function() {
