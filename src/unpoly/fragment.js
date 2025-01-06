@@ -876,8 +876,6 @@ up.fragment = (function() {
     The preview changes will be reverted automatically
     when the request ends for [any reason](/previews#ending).
 
-    @experimental
-
   @param {string|Function(up.Preview)} [options.revalidatePreview]
     A [preview](/preview) that that runs
     while [revalidating cached content](/caching#revalidation).
@@ -2979,7 +2977,7 @@ up.fragment = (function() {
     This is usually a `<template>` element or a `<script>` with a custom type.
 
     You may also pass a selector for the element to clone.
-  @param {object} [data = {}]
+  @param {Object} [data = {}]
     An object with [template variables](/templates#dynamic).
   @param {Element} [options.origin]
     An optional [origin](/origin) element used for [template lookup](/templates#lookup).

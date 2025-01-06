@@ -820,8 +820,6 @@ up.form = (function() {
 
     See [showing loading state while working](/watch-options#showing-loading-state-while-working).
 
-    @experimental
-
   @param {boolean} [options.feedback=true]
     Whether to show [feedback classes](/feedback-classes) while waiting for the server response.
 
@@ -1086,8 +1084,6 @@ up.form = (function() {
   @param {string|Function(up.Preview)|Array} [options.preview]
     One or more [previews](/preview) that temporarily change the page
     while the targeted fragment is loading.
-
-    @experimental
 
   @param {boolean} [options.feedback=true]
     Whether to show [feedback classes](/feedback-classes) while waiting for the server response.

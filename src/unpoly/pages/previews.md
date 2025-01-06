@@ -48,7 +48,10 @@ up.preview('link-spinner', function(preview) {
 })
 ```
 
-We can use this preview in any link or form by setting an `[up-preview]` attribute:
+The `preview` argument is an `up.Preview` instance that offers many utilities to make temporary changes.
+For example, you can use it to insert or move elements, add classes or set attributes.
+
+We can use the `link-spinner` preview in any link or form by setting an `[up-preview]` attribute:
 
 ```html
 <a href="/edit" up-follow up-preview="link-spinner">Edit page</a> <!-- mark-phrase "up-preview" -->
@@ -56,23 +59,6 @@ We can use this preview in any link or form by setting an `[up-preview]` attribu
 
 When the link is followed, the preview will append the spinner element to the link label.
 When the server response is received, the spinner element will be removed automatically. 
-
-The `preview` argument is an `up.Preview` instance that offers many utilities to make temporary changes:
-
-| Method                         | Temporary effect                    |
-|--------------------------------|-------------------------------------|
-| `up.Preview#setAttrs()`        | Set attributes on an element        |
-| `up.Preview#addClass()`        | Add a class to an element           |
-| `up.Preview#removeClass()`     | Add a class to an element           |
-| `up.Preview#setStyle()`        | Set inline styles on an element     |
-| `up.Preview#disable()`         | Disable form controls               |
-| `up.Preview#insert()`          | Append or prepend an element        |
-| `up.Preview#hide()`            | Hide an element                     |
-| `up.Preview#show()`            | Show a hidden element               |
-| `up.Preview#hideContent()`     | Hide all children of an element     |
-| `up.Preview#swapContent()`     | Replace the content of an element   |
-| `up.Preview#openLayer()`       | Open an overlay                     |
-| `up.Preview#showPlaceholder()` | Show a [placeholder](/placeholders) |
 
 
 ### From JavaScript
@@ -220,7 +206,7 @@ up.preview('spinner', function(preview, { width = 50 }) {
 From HTML you can append the options to the `[up-preview]` argument, after the preview name:
 
 ```html
-<a href="/edit" up-follow up-preview="spinner { size: 100 }">Edit page</a>
+<a href="/edit" up-follow up-preview="spinner { size: 100 }">Edit page</a> <!-- mark-phrase "{ size: 100 }" -->
 ```
 
 ### Passing options from JavaScript
@@ -234,7 +220,8 @@ up.navigate({
 })
 ```
 
-As an alternative, you can also pass a function that calls `preview.run()` with a preview name and options.
+As an alternative, you can also pass a function that calls [`preview.run()`](/up.Preview.prototype.run)
+with a preview name and options.
 This makes it easier to pass option values that already exist in your scope:
 
 ```js
@@ -260,6 +247,9 @@ A preview ends when its associated request ends for *any* reason. Reasons includ
 When the preview ends, all its page changes will be reverted before the server response is processed.
 
 To manually end a preview, [abort](/aborting-requests) its associated request.
+
+To test whether a request has ended from an async [preview function](/up.preview),
+access the [`preview.ended`](/up.Preview.prototype.ended) property.
 
 
 
@@ -298,7 +288,7 @@ to a [true value](/attributes-and-options#boolean-attributes):
 ```
 
 
-## Delaying previews
+## Delaying previews {#delaying}
 
 When your backend responds quickly, a preview will only be shown for a short time
 before it is reverted. To avoid a flash of preview state, you may want to
