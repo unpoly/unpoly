@@ -439,7 +439,7 @@ up.form = (function() {
   }
 
   /*-
-  Disables all [fields](/up.form.fields) and [submit buttons](/up.form.submitButtons) within the given element.
+  Disables all fields and buttons within the given element.
 
   To automatically disable a form when it is submitted, add the [`[up-disable]`](/up-submit#up-disable)
   property to the `<form>` element.
