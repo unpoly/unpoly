@@ -474,7 +474,6 @@ up.radio = (function() {
     The name of a [preview](/preview) that temporarily changes the page
     while the fragment is reloading.
 
-    @experimental
   @stable
   */
   up.attribute('up-poll', function(fragment) {

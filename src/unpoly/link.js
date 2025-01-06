@@ -1468,8 +1468,6 @@ up.link = (function() {
     The preview changes will be reverted automatically
     when the request ends for [any reason](/previews#ending).
 
-    @experimental
-
   @param [up-revalidate-preview]
     The name of a [preview](/preview) that runs
     while [revalidating cached content](/caching#revalidation).
@@ -1588,7 +1586,7 @@ up.link = (function() {
       //   validation request there was nothing to abort.
       // - When the validation response is received, the text field is probably gone, causing error.
       //
-      // To preseve behavioral symmetry to standard links, we manually focus the link when it was activated
+      // To preserve behavioral symmetry to standard links, we manually focus the link when it was activated
       // on `mousedown`.
       up.focus(link, { preventScroll: true })
 

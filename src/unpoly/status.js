@@ -228,11 +228,13 @@ up.status = (function() {
   ```
 
   @selector [up-preview]
+
   @param up-preview
     The name of a preview function defined with `up.preview()`.
 
     To call multiple previews, separate names with a comma.
-  @experimental
+
+  @stable
   */
 
   /*-
@@ -334,7 +336,7 @@ up.status = (function() {
 
   ## Accepting parameters {#parameters}
 
-  Preview functions can accept a data object as a second argument.
+  Preview functions can accept an options object as a second argument.
   This is useful to define multiple variations of a preview effect.
 
   For example, the following preview accepts a `{ size }` option to show a spinner of varying size:
