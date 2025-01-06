@@ -2,7 +2,13 @@ const u = up.util
 const e = up.element
 
 /*-
-The `up.Preview` class allows to describe revertible preview effects.
+Instances of `up.Preview` can describe temporary changes to a page.
+
+You can use this to describe [arbitrary loading state](/previews) or [implement optimistic rendering](/optimistic-rendering).
+
+Previews are usually defined using `up.preview()` (lowercase)
+and then applied using the `[up-preview]` attribute or [`{ preview }`](/up.render#options.preview) option.
+See [Previews](/previews) for an overview.
 
 @class up.Preview
 @parent up.status
@@ -21,26 +27,88 @@ up.Preview = class Preview {
   }
 
   /*-
-  TODO: Docs: Multi-fragment updates only preview the primary target
+  The targeted `Element` that is being previewed.
+
+  When [updating multiple fragments](/targeting-fragments#multiple), the first targeted fragment will be previewed.
+
+  Also see [inspecting the preview context](/previews#inspecting-the-preview-context).
 
   @property up.Preview#fragment
+  @return {Element}
   @stable
   */
 
   /*-
-  TODO: Docs
+  The [request](/up.Request) that is loading.
+
+  When the request ends for [any reason](#ending), all preview changes will be reverted before
+  the server response is processed further.
+
+  Also see [inspecting the preview context](/previews#inspecting-the-preview-context).
 
   @property up.Preview#request
+  @return {up.Request}
   @stable
   */
 
   /*-
-  TODO: Docs
+  The [render options](/up.render#options) for this render pass.
+
+  Preview functions may mutate this object to influence
+  the render pass after the request ends. Note that the request has already been queued
+  when previews run. Thus setting request-related render options will have no effect.
+
+  Also see [inspecting the preview context](/previews#inspecting-the-preview-context).
 
   @property up.Preview#renderOptions
+  @return {Object}
   @stable
   */
 
+  /*-
+  Register a function that will revert this preview's effects
+  when the preview [ends](/previews#ending).
+
+  See [Advanced preview mutations](/previews#advanced-mutations) for an elaborate example.
+
+  ## Example
+
+  The preview below sets a `[foo]` attribute on the targeted fragment.
+  It uses `#undo()` to remove the attribute when the preview ends:
+
+  ```js
+  up.preview('my-preview', function(preview) {
+    if (preview.fragment.hasAttribute('foo')) return
+    preview.fragment.setAttribute('foo', 'foo-value')
+    preview.undo(() => preview.fragment.removeAttribute('foo'))
+  })
+  ```
+
+  Instead of registering a callback with `#undo()` a preview function can also return
+  a function:
+
+  ```js
+  up.preview('my-preview', function(preview) {
+    if (preview.fragment.hasAttribute('foo')) return
+    preview.fragment.setAttribute('foo', 'foo-value')
+    return () => preview.fragment.removeAttribute('foo')) // mark-phrase "return"
+  })
+  ```
+
+  Common DOM mutations can be expressed more concisely using an `up.Preview` method.
+  These methods automatically undo their changes, without you needing to call `#undo()`:
+
+  ```js
+  up.preview('my-preview', function(preview) {
+    preview.setAttrs({ foo: 'foo-value' })
+  })
+  ```
+
+  @function up.Preview#undo
+  @param {Function} undoFn
+    A function that will be called when the preview ends.
+  @stable
+  */
   undo(...args) {
     if (this.ended) {
       // We might have the idea to immediately undo an effect when the preview has ended,
@@ -57,19 +125,13 @@ up.Preview = class Preview {
   }
 
   /*-
-  TODO: Docs: Multi-fragment updates only preview the primary target
+  The [origin](/origin) element that triggered this render pass.
 
-  @property up.Preview#target
-  @stable
-  */
-  get target() {
-    return this.renderOptions.target
-  }
-
-  /*-
-  TODO: Docs
+  For example, when the user clicked a link with a preview effect, `preview.origin` will be the
+  clicked `a[href]` element.
 
   @property up.Preview#origin
+  @return {Element}
   @stable
   */
   get origin() {
@@ -77,9 +139,12 @@ up.Preview = class Preview {
   }
 
   /*-
-  TODO: Docs
+  Form data for the request being previewed.
+
+  See [Previewing form submissions](/optimistic-rendering#previewing-form-submissions) for an example.
 
   @property up.Preview#params
+  @return {up.Params}
   @stable
   */
   get params() {
@@ -87,9 +152,22 @@ up.Preview = class Preview {
   }
 
   /*-
-  TODO: Docs
+  The [layer](/up.layer) that the previewed render pass is going to update.
+
+  When [opening a new overlay](/opening-overlays), this property has the value `"new"`:
+
+  ```js
+  up.preview('my-preview', function(preview) {
+    if (preview.layer === 'new') {
+      console.log("Opening a layer with mode", preview.renderOptions.mode)
+    } else {
+      console.log("Updating layer", preview.layer)
+    }
+  })
+  ```
 
   @property up.Preview#layer
+  @return {up.Layer|string}
   @stable
   */
   get layer() {
@@ -97,9 +175,16 @@ up.Preview = class Preview {
   }
 
   /*-
-  TODO: Docs
+  Whether this preview has [ended](/previews#ending).
+
+  When a [preview function](/up.preview) is called, its associated
+  request has just been queued and `preview.ended` is always `false`.
+
+  Only if the preview function is async, `preview.ended` can be `true`.
+  See [Delaying previews](/previews#delaying) for an example.
 
   @property up.Preview#ended
+  @return {boolean}
   @stable
   */
   get ended() {
@@ -107,31 +192,123 @@ up.Preview = class Preview {
   }
 
   /*-
-  TODO: Docs
+  When [revalidating a cache entry](/up.Preview.prototype.revalidating),
+  this property is the cached response with expired content.
+
+  When not revalidating, this property is `undefined`.
 
   @property up.Preview#expiredResponse
-  @stable
+  @return {up.Response|undefined)
+  @experimental
   */
   get expiredResponse() {
     return this.renderOptions.expiredResponse
   }
 
   /*-
-  TODO: Docs
+  Whether the previewed render pass is a [revalidation an expired cache entry](/caching#revalidation).
 
-  When revalidating, the preview will be called after the expired content has been rendered.
+  Cache revalidation is only previewed when an
+  [`[up-revalidate-preview]`](/up-follow#up-revalidate-preview) attribute is set
+  or when a [`{ revalidatePreview: true }`](/up.render#options.revalidatePreview)
+  render option is passed.
+
+  When revalidating, the preview will be called *after* the expired content has been rendered
+  from the cache.
 
   @property up.Preview#revalidating
-  @stable
+  @return {boolean}
+  @experimental
   */
   get revalidating() {
     return !!this.expiredResponse
   }
 
   /*-
-  TODO: Docs
+  Runs another preview function.
+
+  ## Example
+
+  To run another preview function registered with `up.preview()`, pass it's
+  name:
+
+  ```js
+  up.preview('foo', function(preview) { // mark-phrase "'foo'"
+    // ...
+  })
+
+  up.preview('bar', function(preview) {
+    preview.run('foo') // mark-phrase "'foo'"
+  })
+  ```
+
+  ## Undo callbacks are merged
+
+  All [undo callbacks](/up.Preview.prototype.undo) from the other
+  preview will be added to this preview.
+
+  In the example below, `preview2` will call both `undo1()` and
+  `undo2()` when the preview [ends](/previews#ending):
+
+  ```js
+  function undo1() { ... }
+  function undo2() { ... }
+
+  up.preview('preview1', function(preview) {
+    preview.undo(undo1)
+  })
+
+  up.preview('preview2', function(preview) {
+    preview.run('preview1')
+    preview.undo(undo2)
+  })
+  ```
+
+  ## Passing options
+
+  To call a [preview with parameters](/previews#parameters),
+  pass an options object as a second argument:
+
+  ```js
+  up.preview('foo', function(preview, { size, speed }) {
+    // ...
+  })
+
+  up.preview('bar', function(preview) {
+    preview.run('foo', { size: 'large', speed: 'fast' })
+  })
+  ```
+
+  ## Sharing behavior between previews
+
+  Instead of running a preview by its registered name,
+  you can pass any function that accepts an `up.Preview` argument.
+
+  This is a way to share common behavior between multiple
+  preview functions:
+
+  ```js
+  function shared(preview) {
+    // ...
+  }
+
+  up.preview('foo', function(preview) {
+    preview.run(shared)
+  })
+
+  up.preview('bar', function(preview) {
+    preview.run(shared)
+  })
+  ```
+
+
 
   @function up.Preview#run
+  @param {string|Function(up.Preview, Object)} nameOrFn
+    Another preview function or its [registered name](/up.preview).
+  @param {Object} options
+    [Parameters](/previews#parameters) that will be passed
+    to the other preview function.
   @experimental
   */
   run(value, options = {}) {
@@ -143,7 +320,9 @@ up.Preview = class Preview {
   /*-
   Reverts all effects of this preview.
 
-  @function up.Preview#run
+  Called automatically when the previewed request ends.
+
+  @function up.Preview#revert
   @internal
   */
   revert() {
