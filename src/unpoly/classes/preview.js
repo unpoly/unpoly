@@ -330,9 +330,32 @@ up.Preview = class Preview {
   }
 
   /*-
-  TODO: Docs
+  Temporarily changes an element's attributes.
+
+  The element's original attributes will be restored
+  when whe preview [ends](/previews#ending).
+
+  ## Example
+
+  This preview sets a temporary `[app-loading=true]` attribute on the targeted fragment:
+
+  ```js
+  up.preview('loading-attr', function(preview) {
+    preview.setAttrs({ 'app-loading': true })
+  })
+  ```
 
   @function up.Preview#setAttrs
+  @param {Element|string} [element=this.fragment]
+    The element or selector to change.
+
+    If omitted, the [targeted fragment](/up.Preview.prototype.fragment) will be changed.
+  @param {Object} attributes
+    An object of attribute names and values to set.
+
+    To set an empty attribute, pass an empty string value.
+
+    To remove an attribute, use a value of `null` or `undefined`.
   @stable
   */
   setAttrs(...args) {
@@ -341,9 +364,27 @@ up.Preview = class Preview {
   }
 
   /*-
-  TODO: Docs
+  Temporarily adds a CSS class to an element.
+
+  The class will be removed once the preview [ends](/previews#ending).
+
+  ## Example
+
+  This preview sets a temporary `.loading` class to the targeted fragment:
+
+  ```js
+  up.preview('loading-attr', function(preview) {
+    preview.addClass('loading')
+  })
+  ```
 
   @function up.Preview#addClass
+  @param {Element|string} [element=this.fragment]
+    The element or selector to change.
+
+    If omitted, the [targeted fragment](/up.Preview.prototype.fragment) will be changed.
+  @param {string} className
+    The CSS class to add.
   @stable
   */
   addClass(...args) {
@@ -366,9 +407,17 @@ up.Preview = class Preview {
   }
 
   /*-
-  TODO: Docs
+  Temporarily removes a CSS class from an element.
+
+  The removed class will be restored once the preview [ends](/previews#ending).
 
   @function up.Preview#removeClass
+  @param {Element|string} [element=this.fragment]
+    The element or selector to change.
+
+    If omitted, the [targeted fragment](/up.Preview.prototype.fragment) will be changed.
+  @param {string} className
+    The CSS class to remove.
   @stable
   */
   removeClass(...args) {
@@ -377,9 +426,29 @@ up.Preview = class Preview {
   }
 
   /*-
-  TODO: Docs
+  Temporarily sets inline CSS styles on an element.
+
+  ## Example
+
+  This preview temporarily changes the background and foreground colors of
+  the targeted fragment:
+
+  ```js
+  up.preview('highlight', function(preview) {
+    preview.setStyle({
+      'color': 'yellow',
+      'background-color': 'red'
+    })
+  })
+  ```
 
   @function up.Preview#setStyle
+  @param {Element|string} [element=this.fragment]
+    The element or selector to change.
+
+    If omitted, the [targeted fragment](/up.Preview.prototype.fragment) will be changed.
+  @param {Object} styles
+    One or more CSS properties with kebab-case keys.
   @stable
   */
   setStyle(...args) {
@@ -388,8 +457,27 @@ up.Preview = class Preview {
   }
 
   /*-
-  TODO: Docs
+  Temporarily disables fields and buttons.
 
+  The disabled controls will be re-enabled when the preview [ends](/previews#ending).
+
+  Also see [Disabling forms while working](/disabling-forms).
+
+  ## Example
+
+  This preview disables an `input[name=email]` and all controls within a container matching `.button-bar`:
+
+  ```js
+  up.preview('.sign-in', function(preview) {
+    preview.disable('input[name=email]')
+    preview.disable('.button-bar')
+  })
+  ```
+
+  @param {Element|string} [element=this.fragment]
+    The element (or selector) within which fields and buttons should be disabled.
+
+    If omitted, fields and buttons within the [targeted fragment](/up.Preview.prototype.fragment) will be disabled.
   @function up.Preview#disable
   @stable
   */

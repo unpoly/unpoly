@@ -1,5 +1,5 @@
 Disabling forms while working
-================================
+=============================
 
 You may disable form fields and buttons during submission, by passing a `{ disable }` option or setting an `[up-disable]` attribute.
 
@@ -98,13 +98,27 @@ to a CSS selector that matches a form, fields, or any container that contains fi
 ```
 
 
-## Disabling fields while watching
+## Disabling controls while watching {#while-watching}
 
 Unpoly has a number of features that watch a form for changes, like `[up-validate]`, `[up-watch]` or `[up-autosubmit]`.
 You may disable form elements while a watcher is processing by setting an `[up-watch-disable]` attribute on a field, on the `<form>` or on any container that contains fields.
 
 See [watch options](/watch-options) for details.
 
+
+## Disabling controls from a preview {#from-preview}
+
+When [previewing a request](/previews), you can use the
+[`preview.disable()`](/up.Preview.prototype.disable) method to temporarily disable controls.
+
+For example, this preview disables an `input[name=email]` and all controls within a container matching `.button-bar`:
+
+```js
+up.preview('.sign-in', function(preview) {
+  preview.disable('input[name=email]')
+  preview.disable('.button-bar')
+})
+```
 
 
 @page disabling-forms
