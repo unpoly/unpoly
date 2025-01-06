@@ -3,33 +3,6 @@ const u = up.util
 
 describe('up.Preview', function() {
 
-  describe('#target', function() {
-
-    it('returns the target selector', async function() {
-      fixture('#target')
-      let spy = jasmine.createSpy('spy')
-      let previewFn = (preview) => spy(preview.target)
-
-      up.render({ preview: previewFn, url: '/url', target: '#target' })
-      await wait()
-
-      expect(spy).toHaveBeenCalledWith('#target')
-    })
-
-    it('returns the full target for a multi-fragment update', async function() {
-      fixture('#one')
-      fixture('#two')
-      let spy = jasmine.createSpy('spy')
-      let previewFn = (preview) => spy(preview.target)
-
-      up.render({ preview: previewFn, url: '/url', target: '#one, #two' })
-      await wait()
-
-      expect(spy).toHaveBeenCalledWith('#one, #two')
-    })
-
-  })
-
   describe('#fragment', function() {
 
     it('returns the element that is being replaced', async function() {
