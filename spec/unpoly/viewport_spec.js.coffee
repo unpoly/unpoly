@@ -898,6 +898,12 @@ describe 'up.viewport', ->
 
   describe 'unobtrusive behavior', ->
 
+    it 'does not add focus-related classes to the <html> or <body> element (bugfix)', ->
+      expect(document.body).not.toHaveClass('up-focus-hidden')
+      expect(document.body).not.toHaveClass('up-focus-visible')
+      expect(document.documentElement).not.toHaveClass('up-focus-hidden')
+      expect(document.documentElement).not.toHaveClass('up-focus-visible')
+
     describe 'honoring obstructions when the location #hash changes', ->
 
       describe 'when the #hash is changed manually', ->
