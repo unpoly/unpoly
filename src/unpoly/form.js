@@ -278,6 +278,8 @@ up.form = (function() {
   @param {boolean|string|Element|Array} [options.disable]
     [Disables form controls](/disabling-forms) while the form is submitting.
 
+    The values of disabled fields will still be included in the submitted form params.
+
   @param {Element} [options.origin]
     The element that triggered the form submission.
 
@@ -1380,6 +1382,8 @@ up.form = (function() {
 
   @param [up-disable]
     [Disables form controls](/disabling-forms) while the form is submitting.
+
+    The values of disabled fields will still be included in the submitted form params.
 
   @stable
   */
