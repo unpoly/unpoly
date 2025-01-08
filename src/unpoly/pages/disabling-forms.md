@@ -20,6 +20,12 @@ For this set an empty `[up-disable]` attribute on the `<form>` element:
 </form>
 ```
 
+When the form is submitted, all form fields will be disabled.
+When the server responds all fields will be re-enabled before the response is rendered.
+
+> [info]
+> The values of disabled fields will still be included in the submitted form params.
+
 From JavaScript you can pass an `{ disable: true }` option:
 
 ```js
