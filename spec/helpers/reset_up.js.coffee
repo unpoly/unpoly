@@ -34,6 +34,12 @@ resetLang = ->
   else
     document.documentElement.removeAttribute('lang')
 
+resetAttributes = ->
+  document.body.removeAttribute('class')
+  document.body.removeAttribute('style')
+  document.documentElement.removeAttribute('class')
+  document.documentElement.removeAttribute('style')
+
 findMetaTags = ->
   document.head.querySelectorAll('meta, link:not([rel=stylesheet])')
 
@@ -86,6 +92,7 @@ afterEach ->
     resetTitle()
     resetMetaTags()
     resetLang()
+    resetAttributes()
 
     up.framework.reset()
 
