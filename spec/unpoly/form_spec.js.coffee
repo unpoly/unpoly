@@ -1302,6 +1302,22 @@ describe 'up.form', ->
             expect(inputInside).toBeDisabled()
             expect(inputOutside).not.toBeDisabled()
 
+        it 'includes the disabled field params in the submission request', ->
+          fixture('.target')
+          form = fixture('form[up-target=".target"][action="/session"][method="post"]')
+          emailInput = e.affix(form, 'input[name="email"][value="foo@bar.com"]')
+          passwordInput = e.affix(form, 'input[name="password"][value="secret"]')
+
+          up.submit(form, { disable: true })
+          await wait()
+
+          expect(emailInput).toBeDisabled()
+          expect(passwordInput).toBeDisabled()
+
+          expect(jasmine.lastRequest().url).toMatchURL('/session')
+          expect(jasmine.lastRequest().method).toBe('POST')
+          expect(jasmine.lastRequest().data()).toMatchParams({ email: 'foo@bar.com', password: 'secret' })
+
         it 're-enables the form when the submission ends in a successful response', ->
           fixture('.target')
           form = fixture('form[up-target=".target"]')
