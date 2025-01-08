@@ -1012,6 +1012,28 @@ describe('up.Preview', function() {
       expect(preview2Undo).toHaveBeenCalled()
     })
 
+    it('does not run revert effects twice when a preview function is run from an auto-returning arrow expression', async function() {
+      fixture('#target')
+
+      let preview1Undo = jasmine.createSpy('preview1 undo')
+      let preview1Apply = jasmine.createSpy('preview1 apply').and.callFake(function(preview) {
+        return preview1Undo
+      })
+      let autoReturningExpression = (preview) => preview.run(preview1Apply)
+
+      up.render({ preview: autoReturningExpression, url: '/url', target: '#target' })
+      await wait()
+
+      expect(preview1Apply.calls.count()).toBe(1)
+      expect(preview1Undo.calls.count()).toBe(0)
+
+      jasmine.respondWithSelector('#target')
+      await wait()
+
+      expect(preview1Apply.calls.count()).toBe(1)
+      expect(preview1Undo.calls.count()).toBe(1)
+    })
+
     it('accepts additional arguments that are passed on to the preview function', async function() {
       let preview2Fn = jasmine.createSpy('preview2Fn')
       let preview1Fn = jasmine.createSpy('preview1Fn').and.callFake(function(preview) {
