@@ -175,8 +175,8 @@ up.script = (function() {
   ```js
   up.compiler('.current-time', function(element) {
     let update = () => element.textContent = new Date().toString()
-    setInterval(update, 1000)
-    return () => clearInterval(update)
+    let updateInterval = setInterval(update, 1000)
+    return () => clearInterval(updateInterval)
   })
   ```
 
