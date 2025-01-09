@@ -4,7 +4,7 @@ Layer option
 Unpoly lets you stack multiple screens in [layers](/up.layer).
 Layers are *isolated*, meaning that you cannot accidentally match a fragment in another layer.
 
-Must Unpoly features accept a `{ layer }` option or `[up-layer]` attribute to indicate
+Most Unpoly features accept a `{ layer }` option or `[up-layer]` attribute to indicate
 the layer in which a fragment should be rendered or in which a CSS selector should match elements.
 Elements in other layers are ignored.
 
