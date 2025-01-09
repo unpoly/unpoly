@@ -695,6 +695,9 @@ up.Preview = class Preview {
   })
   ```
 
+  For a more concise way to temporarily swap the children with a temporary element,
+  see the [`swapContent()`](/up.Preview.prototype.swapContent) method.
+
   @function up.Preview#hideContent
   @param {Element|string} [element=this.fragment]
     The element or selector to hide the children off.
@@ -750,7 +753,26 @@ up.Preview = class Preview {
   }
 
   /*-
-  TODO: Docs
+  Opens a temporary overlay.
+
+  When the preview ends, the overlay will be [dismissed](/closing-overlays)
+  with a [dismissal reason](/closing-overlays#dismissal-reasons) of `":undo-preview"`.
+
+  When the user dismisses the temporary overlay before the server responds,
+  the previewed request will be [aborted](/aborting-requests).
+
+  When previewing a render pass that is going to [open an overlay](/opening-overlays),
+  the temporary overlay will use the same [visual style](/customizing-overlays) and animations.
+
+  ## Example
+
+  This preview opens a temporary overlay with a loading message:
+
+  ```js
+  up.preview('spinner-overlay', function(preview) {
+    preview.openOverlay('Please wait...')
+  })
+  ```
 
   @function up.Preview#openLayer
   @experimental
