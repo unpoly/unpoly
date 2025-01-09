@@ -2964,7 +2964,7 @@ up.fragment = (function() {
 
   ### Passing variables
 
-  Any [template variables](#dynamic) can be passed as a second argument:
+  Any [template variables](/templates#parameters) can be passed as a second argument:
 
   ```js
   let { nodes } = up.template.clone('#table-placeholder', { rows: 10 })
@@ -3054,36 +3054,13 @@ up.fragment = (function() {
 
   Returns a function that [destroys](/up.destroy) the inserted element and removes it from the DOM.
 
-  ### Example
-
-  ```js
-  let element = document.createElement('div')
-  element.parentElement // => null
-
-  let undo = up.fragment.insertTemp(document.body, element)
-  element.parentElement // => <body>
-
-  undo()
-  element.parentElement // => null
-  ```
-
-  ### Inserting a string of HTML
-
-  Instead of passing an `Element` value, you may also pass a string of HTML.
-  The string will be [parsed into an element](/up.element.createFromHTML) and then inserted:
-
-  ```js
-  let undo = up.fragment.insertTemp(document.body, '<div class="foo"></div>')
-  element.parentElement // => <body>
-  ```
-
   @function up.fragment.insertTemp
 
   @param {Element} reference
     The reference element relative to which the new element will be inserted.
 
   @param {string} [position='beforeend']
-    The insert position relative to the `reference` element:
+    The insert position relative to the `reference` element.
 
     @include adjacent-positions
 
@@ -3096,10 +3073,10 @@ up.fragment = (function() {
 
     If the element is a `<template>`, it will be cloned before insertion.
 
-    If the element is attached to the document before assertion, it will be moved back to its original place
-    when reverting the temporary insertion.
-
     The new element will be [compiled](/up.hello), unless it is already compiled.
+
+    If the element is attached to the document before assertion, it will be moved back to its original place
+    when reverting the temporary insertion. Moved elements are not re-compiled or destroyed.
 
   @return {Function}
     A function that [destroys](/up.destroy) the inserted element and removes it from the DOM.
@@ -3111,8 +3088,9 @@ up.fragment = (function() {
 
     let tempNodes = provideNodes(tempValue, { origin: reference })
     // We may be given a NodeList, or an HTML string without a single root Element.
-    // In these cases we wrap it in an <up-wrapper> so we have a root Element we
+    // In these cases we wrap it in an <up-wrapper> so we have a single root Element we
     // can pass into Element#insertAdjacentElement(), up.hello() or up.destroy().
+    // This simplifies our code significantly.
     let tempElement = e.wrapIfRequired(tempNodes)
 
     // In case the element was already attached to this document, we need to remember
