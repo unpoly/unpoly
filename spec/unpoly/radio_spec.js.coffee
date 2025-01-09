@@ -1850,8 +1850,8 @@ describe 'up.radio', ->
           expect(jasmine.Ajax.requests.count()).toBe(2)
 
       it 'keeps polling if a request failed with a network issue', ->
-        up.radio.config.pollInterval = 75
-        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.reject(new up.Error('network error'))
+        up.radio.config.pollInterval = 100
+        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.reject(new up.Error('mocked network error'))
 
         up.hello(fixture('.element[up-poll]'))
 
@@ -1861,7 +1861,7 @@ describe 'up.radio', ->
           expect(reloadSpy.calls.count()).toBe(1)
           expect(globalErrorSpy.calls.count()).toBe(1)
 
-          await wait(75)
+          await wait(100)
 
           expect(reloadSpy.calls.count()).toBe(2)
           expect(globalErrorSpy.calls.count()).toBe(2)
