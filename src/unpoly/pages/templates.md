@@ -54,6 +54,8 @@ Rendering of template selectors is supported by most attributes and functions th
 | `up.render({ document: '#my-template' })`    | `[up-document="#my-template"]`    | 
 | `up.render({ placeholder: '#my-template' })` | `[up-placeholder="#my-template"]` | 
 | `up.Preview#insert()`                        | &ndash;                           | 
+| `up.Preview#swapContent()`                   | &ndash;                           | 
+| `up.Preview#showPlaceholder()`               | &ndash;                           | 
 
 
 

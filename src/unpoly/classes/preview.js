@@ -714,10 +714,51 @@ up.Preview = class Preview {
   }
 
   /*-
-  TODO: Docs
-  TODO: Link to /placeholders
+  Shows a temporary [placeholder](/placeholders) within an element.
+
+  The element's existing children will be hidden for the duration of this preview.
+  When the preview ends, the placeholder will be removed and the element's original children
+  are shown again.
+
+  If the previewed render pass [opens a new overlay](/opening-overlays), the placeholder
+  will be shown temporary overlay with the same [visual style](/customizing-overlays) and open animation.
+
+  ## Example
+
+  This preview below shows a `.skeleton` element within the [targeted fragment](/up.Preview.prototype.fragment).
+  Other children of the
+
+  ```js
+  up.preview('skeleton', function(preview) {
+    preview.showPlaceholder('<span class=".skeleton">...</span>')
+  })
+  ```
+
+  You may also clone a [template](/templates):
+
+  ```js
+  up.preview('skeleton', function(preview) {
+    preview.showPlaceholder('#skeleton-template')
+  })
+  ```
+
+  To show the placeholder within another element, pass it as a first reference argument:
+
+  ```js
+  up.preview('showPlaceholder', function(preview) {
+    preview.swapContent('body', '#skeleton-template')
+  })
+  ```
 
   @function up.Preview#showPlaceholder
+  @param {Element|string} [element=this.fragment]
+    The element within which to show a placeholder, or its selector.
+  @param {Element|string} newContent
+    The placeholder to insert.
+
+    You may pass an `Element`, a CSS selector or a snippet of HTML.
+
+    If the given element is a [template](/templates), it will be cloned before insertion.
   @experimental
   */
   showPlaceholder(...args) {

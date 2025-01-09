@@ -1456,7 +1456,7 @@ up.link = (function() {
     or [refer to a template](/placeholders#from-template), optionally with
     [variables](/placeholders#dynamic-templates).
 
-    If this link [opens a new overlay](/up-layer-new), the placeholder
+    If this link [opens a new overlay](/opening-overlays), the placeholder
     will be shown temporary overlay with the same [visual style](/customizing-overlays) and open animation.
 
     @experimental
