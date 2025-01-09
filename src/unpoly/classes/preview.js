@@ -741,9 +741,46 @@ up.Preview = class Preview {
   }
 
   /*-
-  TODO: Docs
+  Visually replaces the children of an element with new content for the duration of this preview.
+
+  The visual effect is achieved by [hidden existing children](/up.Preview.prototype.hideContent)
+   and [inserting a new element](/up.Preview.prototype.insert) as the
+   only visible child. When the preview [ends](/previews#ending) all changes will ber reverted.
+
+  > [tip]
+  > To visually remove elements during a preview, prefer hiding over detaching. See [Prefer additive changes](/previews#prefer-additive-changes).
+
+  ## Example
+
+  This preview (visually) replaces the children of the [targeted fragment](/up.Preview.prototype.fragment)
+  with a `.spinner` element:
+
+  ```js
+  up.preview('spinner', function(preview) {
+    preview.swapContent('<span class="spinner">Please wait...</span>')
+  })
+  ```
+
+  To swap the content of another element, pass it as a first reference argument:
+
+  ```js
+  up.preview('spinner', function(preview) {
+    preview.swapContent('body', '<span class="spinner">Please wait...</span>')
+  })
+  ```
 
   @function up.Preview#swapContent
+  @param {Element|string} [element=this.fragment]
+    The element or selector to visually swap children off.
+
+    If omitted, the children of the [targeted fragment](/up.Preview.prototype.fragment) will be swapped.
+  @param {Element|string} newContent
+    The new content to insert.
+
+    You may pass an `Element`, a CSS selector or a snippet of HTML.
+
+    If the given element is a [template](/templates), it will be cloned before insertion.
+
   @experimental
   */
   swapContent(...args) {
