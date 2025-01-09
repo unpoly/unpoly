@@ -86,14 +86,14 @@ up.FragmentPolling = class FragmentPolling {
   }
 
   _clearReloadTimer() {
-    clearTimeout(this.reloadTimer)
-    this.reloadTimer = null
+    clearTimeout(this._reloadTimer)
+    this._reloadTimer = null
   }
 
   _scheduleRemainingTime() {
-    if (!this.reloadTimer && !this._loading) {
+    if (!this._reloadTimer && !this._loading) {
       this._clearReloadTimer()
-      this.reloadTimer = setTimeout(
+      this._reloadTimer = setTimeout(
         this._onTimerReached.bind(this),
         this._getRemainingDelay()
       )
@@ -101,7 +101,7 @@ up.FragmentPolling = class FragmentPolling {
   }
 
   _onTimerReached() {
-    this.reloadTimer = null
+    this._reloadTimer = null
     this._tryReload()
   }
 
