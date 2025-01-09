@@ -2964,7 +2964,7 @@ up.fragment = (function() {
 
   ### Passing variables
 
-  Any [template variables](/templates#parameters) can be passed as a second argument:
+  Any [template variables](/templates#variables) can be passed as a second argument:
 
   ```js
   let { nodes } = up.template.clone('#table-placeholder', { rows: 10 })
