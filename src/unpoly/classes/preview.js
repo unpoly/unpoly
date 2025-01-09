@@ -534,7 +534,7 @@ up.Preview = class Preview {
   })
   ```
 
-  Any [template variables](/templates#parameters) can be appended after the
+  Any [template variables](/templates#variables) can be appended after the
   selector as [relaxed JSON](/relaxed-json):
 
   ```js

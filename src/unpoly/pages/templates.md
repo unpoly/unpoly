@@ -61,7 +61,7 @@ Rendering of template selectors is supported by most attributes and functions th
 
 
 
-## Dynamic templates with variables {#dynamic}
+## Dynamic templates with variables {#variables}
 
 Sometimes we want to clone a template, but with variations.
 For example, we may want to change a piece of text, or vary the size of a component.
