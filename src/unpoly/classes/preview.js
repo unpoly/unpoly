@@ -619,9 +619,25 @@ up.Preview = class Preview {
   }
 
   /*-
-  TODO: Docs
+  Temporarily [shows](/up.element.show) a hidden element.
+
+  The element will be [hidden](/up.element.hide) when the preview [ends](/previews#ending).
+
+  ## Example
+
+  This preview shows a hidden `#spinner` element while the request is loading:
+
+  ```js
+  up.preview('show-spinner', function(preview) {
+    preview.show('#spinner')
+  })
+  ```
 
   @function up.Preview#show
+  @param {Element|string} [element=this.fragment]
+    The element or selector to change.
+
+    If omitted, the [targeted fragment](/up.Preview.prototype.fragment) will be changed.
   @stable
   */
   show(...args) {
@@ -630,9 +646,28 @@ up.Preview = class Preview {
   }
 
   /*-
-  TODO: Docs
+  Temporarily [hides](/up.element.hide) an element.
+
+  The element will be [shown](/up.element.show) when the preview [ends](/previews#ending).
+
+  > [tip]
+  > To visually remove elements during a preview, prefer hiding over detaching. See [Prefer additive changes](/previews#prefer-additive-changes).
+
+  ## Example
+
+  This preview hides an element `#nav` while the request is loading:
+
+  ```js
+  up.preview('hide-nav', function(preview) {
+    preview.hide('#nav')
+  })
+  ```
 
   @function up.Preview#hide
+  @param {Element|string} [element=this.fragment]
+    The element or selector to change.
+
+    If omitted, the [targeted fragment](/up.Preview.prototype.fragment) will be changed.
   @stable
   */
   hide(...args) {
@@ -641,9 +676,30 @@ up.Preview = class Preview {
   }
 
   /*-
-  TODO: Docs
+  Temporarily [hides](/up.element.hide) the children of an element.
+
+  The children will be [shown](/up.element.show) when the preview [ends](/previews#ending).
+
+  > [tip]
+  > To visually remove elements during a preview, prefer hiding over detaching. See [Prefer additive changes](/previews#prefer-additive-changes).
+
+  ## Example
+
+  This preview (visually) replaces the children of the [targeted fragment](/up.Preview.prototype.fragment)
+  with a `.spinner` element:
+
+  ```js
+  up.preview('spinner', function(preview) {
+    preview.hideChildren()
+    preview.insert('<span class="spinner">Please wait...</span>')
+  })
+  ```
 
   @function up.Preview#hideContent
+  @param {Element|string} [element=this.fragment]
+    The element or selector to hide the children off.
+
+    If omitted, the children of the [targeted fragment](/up.Preview.prototype.fragment) will be hidden.
   @experimental
   */
   hideContent(...args) {
