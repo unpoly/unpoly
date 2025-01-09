@@ -487,18 +487,133 @@ up.Preview = class Preview {
   }
 
   /*-
-  TODO: Docs
+  Temporarily inserts an element.
+
+  The element will be removed when the preview [ends](/previews#ending).
+
+  ## Providing the new element
+
+  The new element is passed as the last argument to the `insert()` method.
+
+  For example, this preview will insert a `.spinner` element as the last child of the targeted fragment:
+
+  ```js
+  up.preview('spinner', function(preview) {
+    let spinnerElement = up.element.createFromHTML('<span class="spinner">Please wait...</span>')
+    preview.insert(spinnerElement)
+  })
+  ```
+
+  You may also pass a string of HTML:
+
+  ```js
+  up.preview('spinner', function(preview) {
+    preview.insert('<span class="spinner">Please wait...</span>')
+  })
+  ```
+
+  ## Cloning templates {#templates}
+
+  If the given element is a [template](/templates), it will be cloned before insertion.
+
+  Let's say we have a template for the spinner element:
+
+  ```html
+  <template id="spinner-template">
+    <span class="spinner">
+      Please wait ...
+    </span>
+  </template>
+  ```
+
+  We can pass a selector for the template to clone:
+
+  ```js
+  up.preview('spinner', function(preview) {
+    preview.insert('#spinner-template')
+  })
+  ```
+
+  Any [template variables](/templates#parameters) can be appended after the
+  selector as [relaxed JSON](/relaxed-json):
+
+  ```js
+  up.preview('spinner', function(preview) {
+    preview.insert('#spinner-template { message: "One moment..." }')
+  })
+  ```
+
+  For more control you may clone the template manually using `up.template.clone()`:
+
+  ```js
+  up.preview('spinner', function(preview) {
+    let spinnerElement = up.template.clone('#spinner-template', { message: "One moment..." }),
+    spinnerElement.classList.add('big')
+    preview.insert(spinnerElement)
+  })
+  ```
+
+  ## Controlling the insert position
+
+  You can control where the new element by providing a *reference element* and an *adjacent position* relative
+  to the reference argument.
+
+  For example, this preview will create a `.spinner` element as the *first* child of the `<body>`:
+
+  ```js
+  up.preview('spinner', function(preview) {
+    preview.insert(document.body, 'afterbegin', '<span class="spinner">Please wait...</span>')
+  })
+  ```
+
+  The following insert positions are supported:
+
+  @include adjacent-positions
+
+  If the reference element is omitted, the new element will be inserted relative to
+  the [targeted fragment](/up.Preview.prototype.fragment).
+
+  If the adjacent position is omitted, the new element will become the new last child
+  of the reference element (`'beforeend'`).
+
+  ## Compilation
+
+  When this function inserts a new element, it is [compiled](/up.compiler).\
+  When the preview [ends](/previews#ending), the element is [destroyed](/up.compiler#destructor).
+
+  ## Moving existing elements
+
+  When the last argument is an attached element, it is moved to the indicated position relative to the reference.
+  When the preview ends, the element is returned to its initial position.
+
+  Moved elements are neither [compiled nor destroyed](#compilation) by this function.
 
   @function up.Preview#insert
+
+  @param {Element|string} [reference=this.fragment]
+    The reference element relative to which the new element will be inserted.
+
+    You may pass an `Element` or a CSS selector.
+
+  @param {string} [position='beforeend']
+    The insert position relative to the `reference` element.
+
+  @param {Element|string} newElement
+    The element to insert.
+
+    You may pass an `Element`, a CSS selector or a snippet of HTML.
+
   @stable
   */
   insert(...args) {
-    // tempValue can have on of the following forms:
-    // - A string of HTML
-    // - A CSS selector string
-    // - An Element node
-    // - A Text node
-    // - A NodeList with mixed Element and Text nodes
+    // (1) tempValue can have on of the following forms:
+    //     - A string of HTML
+    //     - A CSS selector string matching a template
+    //     - An Element node
+    //     - A Text node
+    //     - A NodeList with mixed Element and Text nodes
+    // (2) When tempValue resolves to multiple nodes, it will be wrapped
+    //     in an <up-wrapper> container.
     let [reference, position = 'beforeend', tempValue] = this._parseMutatorArgs(args, 'val', u.isAdjacentPosition, 'val')
     this.undo(up.fragment.insertTemp(reference, position, tempValue))
   }
