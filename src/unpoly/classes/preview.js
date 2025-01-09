@@ -725,7 +725,7 @@ up.Preview = class Preview {
 
     // We do not need to wrap a NodeList of mixed Text and Element nodes.
     // Both swapContent() and openLayer() can deal with that.
-    let placeholderNodes = up.fragment.provideNodes(placeholderReference, { callbackArgs: [this], origin: this.origin })
+    let placeholderNodes = up.fragment.provideNodes(placeholderReference, { origin: this.origin })
 
     up.puts('[up-placeholder]', 'Showing placeholder %o', placeholderReference)
 
