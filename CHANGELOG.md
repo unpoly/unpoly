@@ -8,6 +8,157 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+3.10.0
+------
+
+This is a big release!
+
+### Progress bar
+
+- Progress bar timing during chains of requests
+
+- Renamed badResponseTime => lateDelay
+  - config.lateDelay
+  - { lateDelay }
+  - [up-late-delay]
+- Support { lateTime: false } to opt out of up:network:late as a foreground request
+
+
+### Showing arbitrary loading state with previews
+
+
+
+
+### Placeholders
+
+
+
+
+### Optimistic rendering
+
+- Optimistic rendering
+  - Overview
+  - Link to guide
+  - Explain that the demo tasks shows new optimistic rendering, check "Extra latency"
+
+
+
+### Native `:has()` required
+
+- https://caniuse.com/css-has
+- The app will not boot on browsers that don't support :is() or :has()
+
+
+### Relaxed JSON
+
+- Link to guide
+- Name examples for features
+- up.util.parseRelaxedJSON()
+
+
+### Better selector parsing
+
+- Explain that we are now smarter at splitting complex selectors
+- Commas in quotes or parentheses are ignored
+
+
+### Templates
+
+- Link to guide
+- Explain which featuers support template cloning
+- Explain that you can use templating engines with variables
+  - up:template:clone event
+
+
+### Rendering strings
+
+- [up-content] accepts mixed Element/Text string
+- { content } accepts List<Node> or mixed Element/Text string
+- { content, fragment } accept a CSS selector, can clone <template>
+
+
+### Watch options
+
+- up.watch() will no longer process a { disable } option. It is up to the callback. Any [up-watch-disable] option will be passed to the callback in a third `options` argument ({ disable }).
+- [up-watch] gets an `options` argument in the code snippet.
+- Don't forward { event, delay } as watch callback options
+- Fix a bug where up.autosubmit() options did not override options parsed from [up-watch-...] prefixed attribute
+
+
+### Target derivation
+
+- up.fragment.toTarget() gets a `{ strong: true }` option. 
+  - Whether to provide a more unique selector by only considering the element's [id] and [up-id] attributes.
+  - Weaker target derivers, like the element's class, are not considered in strong mode. The element's tag name is only considered for singleton elements like <html> or <body>.
+- Do not consider a form group's [class] to be a strong selector and prefer :has()
+
+
+### Disabling
+
+- We can disable forms from links
+  - Explain
+  - Link to goide
+- We can also disable non-submit buttons (test?)
+- up.form.config.genericButtonSelector
+- Re-focus the original control when the { disable } is reverted
+
+
+### Tokens are separated by comma
+
+- Explain that tokens now default to comma-separation
+- Comma is canonical
+- Space-separation still possible in most cases
+- or-separation is deprecated
+- Also make sure to update doc pages!
+- This affects
+  - [up-show-for]
+  - [up-hide-for]
+  - [up-scroll]
+  - [up-focus]
+  - [up-layer] or { layer }
+  - up.on()
+  - URLPatterns
+    - [up-alias]
+    - [up-dismissable], { dismissable }
+    - [up-accept-location]
+    - [up-dismiss-location]
+    - up.cache.expire()
+    - X-Up-Expire-Cache
+    - [up-expire-cache] { expireCache } 
+    - up.cache.evict()
+    - X-Up-Evict-Cache
+    - [up-evict-cache] { evictCache }
+
+
+### Feedback classes
+
+- Feedback classes are now always enabled by default (even when not navigating). They can still be disabled with { feedback: false } or [up-feedback=false].
+- Forms are also marked as .up-active, in addition to the submit button or field that caused the submission
+- When submitting a form from a focused input, also mark the default submit button as .up-active
+- Introduce config.activeClasses and config.loadingClasses
+
+
+
+### Mixed / Unoorted
+
+- Clicking a link with a page-local #hash will honor obstructions if the location is already on that #hash
+- When opening layer with { data }, apply that data to the topmost swappable element (not to the overlay container)
+- Rename layer option { dismissAriaLabel } to { dismissARIALabel }
+- Allow embedded CSP nonces in [up-on-keep], [up-on-hungry], [up-on-opened]
+- up.fragment.toTarget() gets { verify } option
+- Experimental config up.fragment.config.renderOptions.
+- New [up-use-data] attribute
+- up.Request#ended
+- When opening an overlay, set up.Request#layer to 'new' and #fragments to [] (instead of to the base layer)
+- Deprecate rendering into a new layer with only { mode } option, but without { layer }
+- Fix a bug where a link with [up-confirm] would show the dialog before preloading
+- up.fragment.get() looks in earlier layer options first when multiple layers are given
+- Fix crash with up.submit({ submitButton: false })
+- Rendering with { focus: 'keep' } should not re-focus elements that never lost focus; Improve -if-lost suffix implementation
+- Selector [up-flashes] is now stable (discussion #679)
+- up.feedback package has been renamed to up.status
+
+
 3.9.5
 -----
 
