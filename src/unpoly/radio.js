@@ -299,7 +299,7 @@ up.radio = (function() {
     When making a `GET` request to a URL with a query string, the given `{ params }` will be added
     to the query parameters.
   @param [options.keepData=false]
-    Whether to [preserve](/data#preserving-data-through-reloads) the polling fragment's
+    Whether to [preserve](/data#preserving) the polling fragment's
     [data object](/data) through reloads.
 
     @experimental
@@ -452,7 +452,7 @@ up.radio = (function() {
     When making a `GET` request to a URL with a query string, the given `{ params }` will be added
     to the query parameters.
   @param [up-keep-data]
-    Whether to [preserve](/data#preserving-data-through-reloads) the polling fragment's
+    Whether to [preserve](/data#preserving) the polling fragment's
     [data object](/data) through reloads.
 
     @experimental
@@ -466,12 +466,12 @@ up.radio = (function() {
 
     @experimental
   @param [up-placeholder]
-    A [placeholder](/placeholder) to show while the fragment is reloading.
+    A [placeholder](/placeholders) to show while the fragment is reloading.
 
     @experimental
 
   @param [up-preview]
-    The name of a [preview](/preview) that temporarily changes the page
+    The name of a [preview](/previews) that temporarily changes the page
     while the fragment is reloading.
 
   @stable

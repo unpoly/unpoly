@@ -58,7 +58,7 @@ For instance, when the continent is field is changed, the country field is updat
 Multiple dependent fragments
 -------------------------------------
 
-A field with `[up-validate]` may [update multiple fragments](/targeting-fragments#updating-multiple-fragments)
+A field with `[up-validate]` may [update multiple fragments](/targeting-fragments#multiple)
 by separating their target selectors with a comma.
 
 For instance, when the user changes the continent, the following would update the price preview
@@ -111,6 +111,6 @@ If you prefer to completely prevent user input during validation, give the form 
 
 You may also assign `[up-watch-disable]` to individual fields, or any element that contains fields.
 
-Also see [disabling fields while working](/watch-options#disabling-fields-while-working).
+Also see [disabling fields while working](/watch-options#disabling).
 
 @page dependent-fields

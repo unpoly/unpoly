@@ -4,7 +4,7 @@ Targeting fragments
 This page outlines ways to target and update fragments on your page.
 
 
-## Swapping a fragment
+## Swapping a fragment {#swapping}
 
 Unpoly uses CSS selectors like `.content` to match an element in the current page and server response:
 
@@ -152,7 +152,7 @@ The server is still expected to render an element matching `.card`, but only its
 For more advanced strategies for preserving elements, see `[up-keep]`.
 
 
-## Targeting nothing
+## Targeting nothing {#targeting-nothing}
 
 To make a server request without changing a fragment, target the `:none` selector:
 
@@ -164,7 +164,7 @@ To make a server request without changing a fragment, target the `:none` selecto
 > Event when a specific target like `.content` is used, the server can still decide to [render nothing](/skipping-rendering#rendering-nothing).
 
 
-## Resolving ambiguous selectors
+## Resolving ambiguous selectors {#ambiguous-selectors}
 
 Sometimes there are multiple components with the same selector on the page:
 
@@ -231,7 +231,7 @@ If matching fragments around the origin does not work for you, you can tell Unpo
 - Configure `up.fragment.config.match = 'first` to disable region-aware fragment matching for all functions and elements. You can then opt in again with `{ match: 'region' }` or `[up-link=region]`.
 
 
-## Dealing with missing targets
+## Dealing with missing targets {#missing-targets}
 
 By default Unpoly requires targets to match in both the current page and the server response. If no matching element is found in either, an error `up.CannotMatch` will be thrown.
 
@@ -264,7 +264,7 @@ up.render({ url: '/path', target: '.content', fallback: true })
 Falling back to the main target is the default when [navigating](/navigation). Therefore you don't need to include an empty `[up-fallback]` attribute with your links and forms, which are considered navigation by default.
 
 
-## Changing the target in-flight
+## Changing the target in-flight {#changing-target}
 
 The server may elect to render a different target by seting an `X-Up-Target` response header.
 

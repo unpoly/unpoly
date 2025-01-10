@@ -127,7 +127,7 @@ up.fragment = (function() {
     How to match fragments when a [target selector](/targeting-fragments) yields multiple results.
 
     When set to `'region'` Unpoly will prefer to match fragments in the
-    [region](/targeting-fragments#resolving-ambiguous-selectors) of the [origin element](/up.render#options.origin).
+    [region](/targeting-fragments#ambiguous-selectors) of the [origin element](/up.render#options.origin).
 
     If set to `'first'` Unpoly will always use the first matching fragment.
 
@@ -550,13 +550,13 @@ up.fragment = (function() {
 
     If set to `false` Unpoly will immediately reject the render promise.
 
-    Also see [Dealing with missing targets](/targeting-fragments#dealing-with-missing-targets).
+    Also see [Dealing with missing targets](/targeting-fragments#missing-targets).
 
   @param {string} [options.match='region']
     Controls which fragment to update when the [`{ target }`](#options.target) selector yields multiple results.
 
     When set to `'region'` Unpoly will prefer to update fragments in the
-    [region](/targeting-fragments#resolving-ambiguous-selectors) of the [origin element](/up.render#options.origin).
+    [region](/targeting-fragments#ambiguous-selectors) of the [origin element](/up.render#options.origin).
 
     If set to `'first'` Unpoly will always update the first matching fragment.
 
@@ -570,7 +570,7 @@ up.fragment = (function() {
 
     See [loading content from a URL](/providing-html#url).
 
-    Instead of making a server request, you may also render an [existing string of HTML](/providing-html#local).
+    Instead of making a server request, you may also render an [existing string of HTML](/providing-html#string).
 
   @param {string} [options.method='get']
     The HTTP method to use for the request.
@@ -785,7 +785,7 @@ up.fragment = (function() {
     The element that triggered the change.
 
     When multiple elements in the current page match the `{ target }`,
-    Unpoly will replace an element in the [origin's proximity](/targeting-fragments#resolving-ambiguous-selectors).
+    Unpoly will replace an element in the [origin's proximity](/targeting-fragments#ambiguous-selectors).
 
     The origin's selector will be substituted for `:origin` in a [target selector](/targeting-fragments).
 
@@ -855,9 +855,9 @@ up.fragment = (function() {
     [Disables form controls](/disabling-forms) while the form is submitting.
 
   @param {string|Element|List<Node>} [options.placeholder]
-    A [placeholder](/placeholder) to show within the targeted fragment while new content is loading.
+    A [placeholder](/placeholders) to show within the targeted fragment while new content is loading.
 
-    Existing children of the targeted fragment [will be hidden](#basic-example) during the request.
+    Existing children of the targeted fragment [will be hidden](/placeholders#basic-example) during the request.
     When the request ends for any reason, all changes will be reverted.
 
     The placeholder content can be provided in various forms:
@@ -870,14 +870,14 @@ up.fragment = (function() {
     @experimental
 
   @param {string|Function(up.Preview)|Array} [options.preview]
-    One or more [previews](/preview) that temporarily change the page
+    One or more [previews](/previews) that temporarily change the page
     while new content is loading.
 
     The preview changes will be reverted automatically
     when the request ends for [any reason](/previews#ending).
 
   @param {string|Function(up.Preview)} [options.revalidatePreview]
-    A [preview](/preview) that that runs
+    A [preview](/previews) that that runs
     while [revalidating cached content](/caching#revalidation).
 
     @experimental
@@ -1282,7 +1282,7 @@ up.fragment = (function() {
 
   > [TIP]
   > Instead of keeping an element and update its data you may also
-  > [preserve an element's data through reloads](/data#preserving-data-through-reloads).
+  > [preserve an element's data through reloads](/data#preserving).
 
   ## Limitations
 
@@ -1407,7 +1407,7 @@ up.fragment = (function() {
     Pass a `{ layer }`option to match elements in other layers.
   - This function ignores elements that are being [destroyed](/up.destroy) or that are being
     removed by a [transition](/up.morph).
-  - This function prefers to match elements in the [region](/targeting-fragments#resolving-ambiguous-selectors)
+  - This function prefers to match elements in the [region](/targeting-fragments#ambiguous-selectors)
     of a given `{ origin }` element (optional).
   - This function supports non-standard CSS extensions like `:main` or `:layer`.
 
@@ -1536,7 +1536,7 @@ up.fragment = (function() {
     Controls which fragment to return when the [`{ target }`](#options.target) selector yields multiple results.
 
     When set to `'region'` Unpoly will prefer to match fragments in the
-    [region](/targeting-fragments#resolving-ambiguous-selectors) of the [origin element](#options.origin).
+    [region](/targeting-fragments#ambiguous-selectors) of the [origin element](#options.origin).
 
     If set to `'first'` Unpoly will always return the first matching fragment.
 
@@ -1545,7 +1545,7 @@ up.fragment = (function() {
   @param {Element|jQuery} [options.origin]
     The origin element that triggered this fragment lookup, e.g. a button that was clicked.
 
-    Unpoly will prefer to match fragments in the [region](/targeting-fragments#resolving-ambiguous-selectors)
+    Unpoly will prefer to match fragments in the [region](/targeting-fragments#ambiguous-selectors)
     of the origin element.
 
     The `selector` argument may refer to the origin as `:origin`.
@@ -1650,7 +1650,7 @@ up.fragment = (function() {
   @param {string|Element|jQuery} [options.origin]
     The origin element that triggered this fragment lookup, e.g. a button that was clicked.
 
-    Unpoly will prefer to match fragments in the [region](/targeting-fragments#resolving-ambiguous-selectors)
+    Unpoly will prefer to match fragments in the [region](/targeting-fragments#ambiguous-selectors)
     of the origin element.
 
     The `selector` argument may refer to the origin as `:origin`.
@@ -1686,7 +1686,7 @@ up.fragment = (function() {
   If a `:maybe` selector is not found in the current page or the server response,
   Unpoly will skip rendering the fragment instead of throwing an error.
 
-  When [updating multiple fragments](/targeting-fragments#updating-multiple-fragments)
+  When [updating multiple fragments](/targeting-fragments#multiple)
   you may combine required and optional selectors in a single target string.
 
   An optional selector will be omitted from an `X-Up-Target` header unless it
@@ -1931,7 +1931,7 @@ up.fragment = (function() {
     with the given [data object](/data).
 
   @param {boolean} [options.keepData]
-    [Preserve](/data#preserving-data-through-reloads) the reloaded fragment's [data object](/data).
+    [Preserve](/data#preserving) the reloaded fragment's [data object](/data).
 
     Properties from the new fragment's `[up-data]`  are overridden with the old fragment's `[up-data]`.
 
@@ -2065,7 +2065,7 @@ up.fragment = (function() {
 
     @experimental
   @param {Element} [options.origin]
-    The origin used to [resolve an ambiguous selector](/targeting-fragments#resolving-ambiguous-selectors)
+    The origin used to [resolve an ambiguous selector](/targeting-fragments#ambiguous-selectors)
     during [target verification](/target-derivation#derived-target-verification).
   @stable
   */
@@ -2576,7 +2576,7 @@ up.fragment = (function() {
   > Ensuring an origin is set may improve the precision of fragment lookup, even if
   > a [target selector](/targeting-fragments) doesn't contain an `:origin` reference.
   > In the example above, Unpoly would prefer to match `.preview` in the
-  > [region](/targeting-fragments#resolving-ambiguous-selectors) of the origin.
+  > [region](/targeting-fragments#ambiguous-selectors) of the origin.
   > If no origin is known, Unpoly will always match the first `.preview` in the
   > current [layer](/up.layer).
 
@@ -2950,7 +2950,7 @@ up.fragment = (function() {
   }
 
   /*-
-  Clones a [template](/template) element.
+  Clones a [template](/templates) element.
 
   Emits the `up:template:clone` event. You can use that event to integrate [templating engines](/templates)
   like Mustache, EJS or Handlebars.
@@ -2964,7 +2964,7 @@ up.fragment = (function() {
 
   ### Passing variables
 
-  Any [template variables](/templates#variables) can be passed as a second argument:
+  Any [template variables](/templates#dynamic) can be passed as a second argument:
 
   ```js
   let { nodes } = up.template.clone('#table-placeholder', { rows: 10 })

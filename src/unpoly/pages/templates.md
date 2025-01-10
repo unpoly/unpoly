@@ -37,7 +37,7 @@ All of this happens locally, without making a server request.
 ### Shorthand
 
 Since the target can be [derived](/target-derivation) from the template's root element (`.target`), and since
-[we can  omit `[href]`](#omitting-href), we can shorten the link to this:
+[we can omit `[href]`](/providing-html#omitting-href), we can shorten the link to this:
 
 ```html
 <a up-fragment="#my-template">Click me</a>
@@ -61,7 +61,7 @@ Rendering of template selectors is supported by most attributes and functions th
 
 
 
-## Dynamic templates with variables {#variables}
+## Dynamic templates with variables {#dynamic}
 
 Sometimes we want to clone a template, but with variations.
 For example, we may want to change a piece of text, or vary the size of a component.
@@ -163,7 +163,7 @@ or integrate your own:
 - Set `event.nodes` to a [list](/List) of [`Node`](https://developer.mozilla.org/en-US/docs/Web/API/Node) objects representing
 the template results.
 
-#### Example integrations {#templating-engines-examples}
+#### Example integrations {#templating-engine-example}
 
 An event handler for an Mustache integration would look like this:
 
@@ -205,7 +205,7 @@ references the element we want to customize:
 </a>
 ```
 
-From JavaScript you can [manually clone](up.template.clone) a template and then modify the result:
+From JavaScript you can [manually clone](/up.template.clone) a template and then modify the result:
 
 ```js
 let [fragment] = up.template.clone('#task-template')

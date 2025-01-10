@@ -9,7 +9,7 @@ We can validate while the user is typing by setting an `[up-watch-event="input"]
 
 Note that we set some additional [watch options](/watch-options) to improve the experience:
 
-- The [`[up-watch-delay]`](/watch-options#debouncing-callbacks)
+- The [`[up-watch-delay]`](/watch-options#debouncing)
   attribute to delay validation until the user has stopped typing for 100 milliseconds.
 - The `[up-keep]` attribute to preserve additional user input while the validation request is in flight.
 

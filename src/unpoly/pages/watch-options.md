@@ -14,7 +14,7 @@ The options shown below apply to all features that watch form fields:
 
 
 
-Which events to watch
+Which events to watch {#events}
 ---------------------
 
 Most features watch the `input` event by default. Only [validation](/up-validate) watches the `change` event by default.
@@ -68,7 +68,7 @@ up.form.config.watchChangeEvents = function(field) {
 ```
 
 
-Debouncing callbacks
+Debouncing callbacks {#debouncing}
 --------------------
 
 When observing the `input` event, you may want until to wait until the user has stopped
@@ -94,7 +94,7 @@ the callback is unscheduled.
 
 
 
-Disabling fields while working
+Disabling fields while working {#disabling}
 ------------------------------
 
 To prevent user input while processing changes, you may [disable form fields](/disabling-forms)
@@ -119,7 +119,7 @@ From JavaScript you can pass a `{ disable }` option instead.
 > To disable fields while *submitting* (instead of while watching), use [`[up-disable]`](/disabling-forms) instead.
 
 
-Showing loading state while working
+Showing loading state while working {#loading-state}
 -----------------------------------
 
 To signal to users that you're processing changes, you can show arbitrary [loading state](/loading-state)
@@ -144,7 +144,7 @@ To show a [placeholder](/placeholders) while working, use an `[up-watch-placehol
 From JavaScript you can pass a `{ preview }` or `{ placeholder }` option instead.
 
 
-Setting options for multiple fields
+Setting options for multiple fields {#multiple-fields}
 ----------------------------------
 
 Instead of setting `[up-watch-...]` attributes on individual fields, you may also set them on any element containing fields.

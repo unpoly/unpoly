@@ -297,7 +297,7 @@ When a response has *no* `Vary` header, that response is a cache hit for <i>all<
 </table>
 
 
-Requests can [target multiple fragments](/targeting-fragments#updating-multiple-fragments) by separating selectors
+Requests can [target multiple fragments](/targeting-fragments#multiple) by separating selectors
 with a comma. If the server replies with `Vary: X-Up-Target`, that response is a cache hit for each individual selector:
 
 <table>

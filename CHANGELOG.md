@@ -245,7 +245,7 @@ This behavior is available for most attributes:
 
 ### Request batching
 
-When queueing multiple requests to the same URL, Unpoly will now send a single request with a [merged `X-Up-Target` header](/X-Up-Target#merging-of-request-targets).
+When queueing multiple requests to the same URL, Unpoly will now send a single request with a [merged `X-Up-Target` header](/X-Up-Target#merging).
 
 For example, these two render passes render different selectors from `/path`:
 
@@ -268,7 +268,7 @@ This allows you to have multiple [deferred placeholders](/lazy-loading#loading-m
 
 The following is a change for server routes that use the `Vary` header to optimize their responses to only include the requested `X-Up-Target`. 
 
-When requests [target multiple fragments](/targeting-fragments#updating-multiple-fragments) and the server responds with a `Vary` header, that response is now a cache hit for each individual selector:
+When requests [target multiple fragments](/targeting-fragments#multiple) and the server responds with a `Vary` header, that response is now a cache hit for each individual selector:
 
 <table>
   <tr>
@@ -549,7 +549,7 @@ This release addresses many edge cases with features that watch form fields for 
 - Watchers now detect changes when the form is [reset](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/reset).
 - Fix an issue where `[up-autosubmit]` would not work on forms that also have [dependent fields](/dependent-fields) using `[up-validate]`.
 - Watchers no longer run callbacks if the form was [aborted](/aborting-requests) or detached while [waiting for a previous async callback](/up-watch#async-callbacks).
-- Watchers now abort their [debounce delay](/watch-options#debouncing-callbacks) if the entire form is aborted. Previously it would abort the delay if any watched field was aborted.
+- Watchers now abort their [debounce delay](/watch-options#debouncing) if the entire form is aborted. Previously it would abort the delay if any watched field was aborted.
 - `[up-autosubmit]` now aborts a debounce delay if either the form element or the [form's target](/up-submit#up-target) are aborted. It no longer aborts the delay if any watched field is aborted.
 
 
@@ -572,7 +572,7 @@ This release addresses many edge cases with features that watch form fields for 
 ### Targeting fragments
 
 - Unpoly-specific pseudo selectors like `:main` or `:layer` can now be used in a compound target, e.g. `:main .child`.
-- Targeting `:main` will no longer [match in the region of the interaction origin](/targeting-fragments#resolving-ambiguous-selectors)). It will now always use the first matching selector in `up.fragment.config.mainTargets`.
+- Targeting `:main` will no longer [match in the region of the interaction origin](/targeting-fragments#ambiguous-selectors)). It will now always use the first matching selector in `up.fragment.config.mainTargets`.
 - Fix a bug where following a navigation item outside a [main](/main) element would focus the `<body>` instead of the main element.
 
 ### Performance improvements
@@ -875,7 +875,7 @@ This release addresses many many errors when matching fragments in closed layers
 #### General improvements
 
 - Unpoly now [logs](/up.log) when rendering was aborted or threw an internal error.
-- [Cache revalidation](/caching#revalidation) now updates the correct element when the initial render pass matched in the [region of the clicked link](/targeting-fragments#resolving-ambiguous-selectors) and that link has since been detached.
+- [Cache revalidation](/caching#revalidation) now updates the correct element when the initial render pass matched in the [region of the clicked link](/targeting-fragments#ambiguous-selectors) and that link has since been detached.
 - Rendering no longer forces a full page load when the initial page was loaded with non-GET, but the render pass does not change history.
   This allows to use `[up-validate]` in forms that are not [submitted through Unpoly](/up-submit).
 - Updates for `[up-keep]` no longer need to also be `[up-keep]`. You can prevent keeping by setting `[up-keep=false]`. This allows you to set `[up-keep]` via a [macro](/up.macro).
@@ -905,7 +905,7 @@ Unpoly retains [all other functionality for dealing with network issues](/networ
 #### More control over region-aware fragment matching
 
 When [targeting fragments](/targeting-fragments), Unpoly will prefer to
-[match fragments in the region of the user interaction](/targeting-fragments#resolving-ambiguous-selectors). For example, when
+[match fragments in the region of the user interaction](/targeting-fragments#ambiguous-selectors). For example, when
 a link's `[up-target]` could match multiple fragments, the fragment closest to the link is updated.
 In cases where you don't want this behavior, you now have more options:
 
@@ -1338,7 +1338,7 @@ Unpoly 3 expands your options to [hook into specific stages](/render-lifecycle) 
 #### Various changes
 
 - You may now target the origin origin using `:origin`. The previous shorthand `&` has been deprecated.
-- ⚠️ When Unpoly uses the `{ origin }` to [resolve ambiguous selectors](/targeting-fragments#resolving-ambiguous-selectors), that origin is now also rediscovered in the server response. If the origin could be rediscovered, Unpoly prefers matching new content closest to that.
+- ⚠️ When Unpoly uses the `{ origin }` to [resolve ambiguous selectors](/targeting-fragments#ambiguous-selectors), that origin is now also rediscovered in the server response. If the origin could be rediscovered, Unpoly prefers matching new content closest to that.
 - Added a new property `up.RenderResult#fragment` which returns the first updated fragment.
 - The property `up.RenderResult#fragments` now only contains newly rendered fragments. It will no longer contain:
   - [Kept](/up-keep) elements.
@@ -1564,8 +1564,8 @@ Various changes make it easier to watch fields for changes:
   - You can now control which events are observed by setting an `[up-watch-event]` attribute or by passing a `{ watch }` option.
   - You can now control whether to show [navigation feedback](/up.status) while an async callback is working by setting an `[up-watch-feedback]` attribute or by passing a `{ feedback }` option.
   - You can now debounce callbacks by setting an `[up-watch-delay]` attribute or by passing a `{ delay }` option.
-  - You can now [disable form fields](/watch-options#disabling-fields-while-working) while an async callback is working by setting an `[up-watch-deisable]` attribute or by passing a `{ disable }` option.
-  - All these options can be used on individual fields or [set as default for multiple fields](/watch-options#setting-options-for-multiple-fields) or entire forms.  
+  - You can now [disable form fields](/watch-options#disabling) while an async callback is working by setting an `[up-watch-deisable]` attribute or by passing a `{ disable }` option.
+  - All these options can be used on individual fields or [set as default for multiple fields](/watch-options#multiple-fields) or entire forms.  
 - Delayed callbacks no longer run when the watched field was *removed* from the DOM during the delay (e.g. by the user navigating away)
 - Delayed callbacks no longer run when the watched field was *aborted* during the delay (e.g. by the user submitting the containing form)
 - Sometimes fields emit non-standard events instead of `change` and `input`. You may now use `up.form.config.watchInputEvents` and `up.form.config.watchCangeEvents` to normalize field events so they become observable as `change` or `input`.
@@ -1854,7 +1854,7 @@ In our ongoing efforts to evolve Unpoly's documentation from an API reference to
 - [Caching](/caching)
 - [Handling network issues](/network-issues)
 - [Conditional requests](/conditional-requests)
-- [Loading indicators](/loading-indicators)
+- [Progress bar](/progress-bar)
 - [Tracking page views](/analytics)
 - [Updating history](/updating-history)
 - [Restoring history](/restoring-history)
@@ -1887,7 +1887,7 @@ All existing documentation pages from Unpoly 2 remain available:
 - Fix a up where `unpoly-migrate.js` would not rewrite the deprecated `{ reveal }` option when navigating.
 - ⚠️ The legacy option `up.render({ data })` and `up.request({ data })` is no longer renamed to `{ params }` (renamed in Unpoly 0.57).
 
-  Unpoly now uses the `{ data }` option to [preserve element data through reloads](/data#preserving-data-through-reloads).
+  Unpoly now uses the `{ data }` option to [preserve element data through reloads](/data#preserving).
 
 ### Framework
 

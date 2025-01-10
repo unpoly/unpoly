@@ -3,7 +3,7 @@ Providing HTML to render
 
 When you [render](/up.render) HTML using a function or attribute, you can provide that HTML in different ways.
 
-For example, you can [fetch HTML](#url) from the server, [render an existing string](#local) or 
+For example, you can [fetch HTML](#url) from the server, [render an existing string](#string) or 
 [clone a `<template>`](#template).
 
 
@@ -206,7 +206,7 @@ Only the targeted elements will be extracted and placed into the page.
 Other elements parsed from the document string will be discarded.
 
 
-Rendering a `<template>`
+Rendering a `<template>` {#template}
 ------------------------
 
 Instead of passing an HTML string, you may also refer to a [`<template>` element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template)

@@ -105,9 +105,9 @@ can append variables as a data object after the template selector:
 ```
 
 There are [many ways](/templates#dynamic) to process template variables, including
-the [use of compilers](/templates#compiler-postprocessing) or [templating engines](/templates#templating-engines).
+the [use of compilers](/templates#compiler-postprocessing) or [templating engines](/templates#templating-engine).
 This example uses the minimal `text/minimustache` templating function
-that you can [copy into your project](/templates#templating-engines-examples):
+that you can [copy into your project](/templates#templating-engine-example):
 
 ```html
 <script id="loading-template" type="text/minumustache">
@@ -121,7 +121,7 @@ that you can [copy into your project](/templates#templating-engines-examples):
 Abitrary placeholder logic {#from-preview}
 --------------------------
 
-Sometimes we want something even more advanced than what [templates and variables](#dynamic) can give us:
+Sometimes we want something even more advanced than what [templates and variables](#dynamic-templates) can give us:
 
 - Complex placeholder construction logic
 - Showing a placeholder in a fragment that wasn't targeted

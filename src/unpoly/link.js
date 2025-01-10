@@ -1047,7 +1047,7 @@ up.link = (function() {
     By default the `[up-defer]` element itself will be replaced with the loaded content.
     For this the element must have a [derivable target selector](/target-derivation).
 
-    You may target one or [multiple](/targeting-fragments#updating-multiple-fragments) fragments.
+    You may target one or [multiple](/targeting-fragments#multiple) fragments.
     To target the placeholder itself, you can use `:origin` target instead of spelling out a selector.
 
   @param [up-background='false']
@@ -1143,7 +1143,7 @@ up.link = (function() {
     To use a different URL when a link is followed through Unpoly (as opposed to a browser's full page load),
     set an `[up-href]` attribute.
 
-    Instead of making a server request, you may also render an [existing string of HTML](/providing-html#local).
+    Instead of making a server request, you may also render an [existing string of HTML](/providing-html#string).
 
   @param [up-target=':main']
     The [target selector](/targeting-fragments) to update after a successful response.
@@ -1163,7 +1163,7 @@ up.link = (function() {
     Controls which fragment to update when the [`[up-target]`](#up-target) selector yields multiple results.
 
     When set to `'region'` Unpoly will prefer to update fragments in the
-    [region](/targeting-fragments#resolving-ambiguous-selectors) of the [origin element](/up.render#options.origin).
+    [region](/targeting-fragments#ambiguous-selectors) of the [origin element](/up.render#options.origin).
 
     If set to `'first'` Unpoly will always update the first matching fragment.
 
@@ -1223,7 +1223,8 @@ up.link = (function() {
     optionally with [variables](/placeholders#dynamic-templates).
 
   @param [up-use-data]
-    A [relaxed JSON](/relaxed-json) object that overrides properties from the new fragment's `[up-data]`.
+    A [relaxed JSON](/relaxed-json) object that [overrides properties](/data#overriding)
+    from the new fragment's [data](/data).
 
   @param [up-fail]
     Whether the server response should be considered failed.
@@ -1239,7 +1240,7 @@ up.link = (function() {
 
     See [Rendering failed responses differently](/failed-responses#rendering-failed-responses-differently) for details.
 
-    If omitted, a failed response will *not* update the [`[up-target]`](/up-target),
+    If omitted, a failed response will *not* update the [`[up-target]`](#up-target),
     but update the [main target](/up-main) instead.
 
   @param [up-history='auto']
@@ -1366,7 +1367,7 @@ up.link = (function() {
 
     Background requests deprioritized over foreground requests.
     Background requests also won't emit `up:network:late` events and won't trigger
-    the [progress bar](/loading-indicators#progress-bar).
+    the [progress bar](/progress-bar).
 
   @param [up-late-delay]
     The number of milliseconds after which this request can cause
@@ -1447,9 +1448,9 @@ up.link = (function() {
     If the user does not confirm the render promise will reject and no fragments will be updated.
 
   @param [up-placeholder]
-    A [placeholder](/placeholder) to show in the targeted fragment while new content is loading.
+    A [placeholder](/placeholders) to show in the targeted fragment while new content is loading.
 
-    Existing children of the targeted fragment [will be hidden](#basic-example) during the request.
+    Existing children of the targeted fragment [will be hidden](/placeholders#basic-example) during the request.
     When the request ends for any reason, all changes will be reverted.
 
     You can either [pass a HTML string](/placeholders#basic-example)
@@ -1462,14 +1463,14 @@ up.link = (function() {
     @experimental
 
   @param [up-preview]
-    The name of a [preview](/preview) that temporarily changes the page
+    The name of a [preview](/previews) that temporarily changes the page
     while new content is loading.
 
     The preview changes will be reverted automatically
     when the request ends for [any reason](/previews#ending).
 
   @param [up-revalidate-preview]
-    The name of a [preview](/preview) that runs
+    The name of a [preview](/previews) that runs
     while [revalidating cached content](/caching#revalidation).
 
     @experimental
