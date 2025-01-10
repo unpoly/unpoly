@@ -199,7 +199,7 @@ up.script = (function() {
   ### Passing parameters to a compiler
 
   You may attach data to an element using HTML5 data attributes
-  or encoded as JSON in an `[up-data]` attribute:
+  or encoded as [relaxed JSON](/relaxed-json) in an `[up-data]` attribute:
 
   ```html
   <span class="user" up-data="{ age: 31, name: 'Alice' }">Alice</span>
