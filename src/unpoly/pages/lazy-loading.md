@@ -176,7 +176,7 @@ X-Up-Target: #editorial-controls, #analytics-controls
 
 ## Triggering distant updates
 
-Instead of replacing itself, a placeholder can target one or [multiple](/targeting-fragments#updating-multiple-fragments) other fragments.
+Instead of replacing itself, a placeholder can target one or [multiple](/targeting-fragments#multiple) other fragments.
 To do so, set an `[up-target]` attribute matching the elements you want to update.
 
 The following placeholder would update the fragments `#editorial-controls` and `#analytics-controls` when

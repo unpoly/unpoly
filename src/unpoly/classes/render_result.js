@@ -119,7 +119,7 @@ up.RenderResult = class RenderResult extends up.Record {
   /*-
   Returns the inserted fragment.
 
-  When [multiple fragments](/targeting-fragments#updating-multiple-fragments) were inserted, the first fragment is returned.
+  When [multiple fragments](/targeting-fragments#multiple) were inserted, the first fragment is returned.
   To get a list of all inserted fragments, use the [`{ fragments }`](/up.RenderResult.prototype.fragments) property.
 
   @see up.Request.prototype.fragment

@@ -87,13 +87,13 @@ up.form = (function() {
     @experimental
 
   @param {number} [config.watchInputDelay=0]
-    The number of milliseconds to [wait before running a watcher callback](/watch-options#debouncing-callbacks).
+    The number of milliseconds to [wait before running a watcher callback](/watch-options#debouncing).
 
-    This default delay is only applied when [watching the `input` event](/watch-options#which-events-to-watch).
+    This default delay is only applied when [watching the `input` event](/watch-options#events).
     There is no default delay when watching other types of events.
 
   @param {Array<string>|Function(Element): Array<string>} [config.watchInputEvents=['input', 'change']]
-    An array of events to substitute if [watching the `input` event](/watch-options#which-events-to-watch).
+    An array of events to substitute if [watching the `input` event](/watch-options#events).
 
     This can be used to watch [misbehaving fields](/watch-options#normalizing-non-standard-events)
     that don't emit the [standard `input` event](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/input_event)
@@ -106,7 +106,7 @@ up.form = (function() {
     a form field and returns an array of event types to watch for that field.
 
   @param {Array<string>|Function(Element): Array<string>} [config.watchChangeEvents=['change']]
-    An array of events to substitute if [watching the `change` event](/watch-options#which-events-to-watch).
+    An array of events to substitute if [watching the `change` event](/watch-options#events).
 
     This can be used to watch [misbehaving fields](/watch-options#normalizing-non-standard-events)
     that don't emit the [standard `change` event](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/change_event)
@@ -630,7 +630,7 @@ up.form = (function() {
   using `up.watch()` comes with a number of quality of live improvements:
 
   - The callback only runs when a value was actually changed. Multiple events resulting in the same value will only run the callback once.
-  - The callback's execution frequency can be [debounced](/watch-options#debouncing-callbacks).
+  - The callback's execution frequency can be [debounced](/watch-options#debouncing).
   - Guarantees that [only one async callback is running concurrently](#async-callbacks).
 
   The unobtrusive variant of this is the `[up-watch]` attribute.
@@ -741,12 +741,12 @@ up.form = (function() {
   @param {string|Array<string>} [options.event='input']
     The types of event to observe.
 
-    See [which events to watch](/watch-options#which-events-to-watch).
+    See [which events to watch](/watch-options#events).
 
   @param {number} [options.delay=0]
     The number of milliseconds to wait between an observed event and running the callback.
 
-    See [debouncing callbacks](/watch-options#debouncing-callbacks).
+    See [debouncing callbacks](/watch-options#debouncing).
 
   @param {Function(value, name, options): Promise|undefined} callback
     The callback to run when the field's value changes.
@@ -797,30 +797,30 @@ up.form = (function() {
   @param {string|Array<string>} [options.event='change']
     The event types to observe.
 
-    See [which events to watch](/watch-options#which-events-to-watch).
+    See [which events to watch](/watch-options#events).
 
   @param {number} [options.delay]
     The number of milliseconds to wait between an observed event and validating.
 
-    See [debouncing callbacks](/watch-options#debouncing-callbacks).
+    See [debouncing callbacks](/watch-options#debouncing).
 
   @param {boolean|string|Element|Array} [options.disable]
     Disables fields while waiting for the server response.
 
-    See [disabling fields while working](/watch-options#disabling-fields-while-working).
+    See [disabling fields while working](/watch-options#disabling).
 
   @param {string|Element|List<Node>} [options.placeholder]
-    A [placeholder](/placeholder) to show within the targeted fragment while it is loading.
+    A [placeholder](/placeholders) to show within the targeted fragment while it is loading.
 
-    See [showing loading state while working](/watch-options#showing-loading-state-while-working).
+    See [showing loading state while working](/watch-options#loading-state).
 
     @experimental
 
   @param {string|Function(up.Preview)|Array} [options.preview]
-    One or more [previews](/preview) that temporarily change the page
+    One or more [previews](/previews) that temporarily change the page
     while the targeted fragment is loading.
 
-    See [showing loading state while working](/watch-options#showing-loading-state-while-working).
+    See [showing loading state while working](/watch-options#loading-state).
 
   @param {boolean} [options.feedback=true]
     Whether to show [feedback classes](/feedback-classes) while waiting for the server response.
@@ -828,7 +828,7 @@ up.form = (function() {
   @param {Object} [options]
     Additional [render options](/up.render#parameters) to use when the form is submitted.
 
-    See [options for `up.submit()`](/watch-options#showing-feedback-while-working).
+    See [options for `up.submit()`](/up.submit#parameters).
 
   @return {Function()}
     A destructor function that stops auto-submitting when called.
@@ -1055,12 +1055,12 @@ up.form = (function() {
   @param {string|Array<string>} [options.event='change']
     The event types to observe.
 
-    See [which events to watch](/watch-options#which-events-to-watch).
+    See [which events to watch](/watch-options#events).
 
   @param {number} [options.delay]
     The number of milliseconds to wait between an observed event and validating.
 
-    See [debouncing callbacks](/watch-options#debouncing-callbacks).
+    See [debouncing callbacks](/watch-options#debouncing).
 
   @param {Object} [options.data]
     Overrides properties from the new fragment's `[up-data]`
@@ -1069,28 +1069,26 @@ up.form = (function() {
     To assign data the validating element must have a [derivable target selector](/target-derivation).
 
   @param {boolean} [options.keepData]
-    [Preserve](/data#preserving-data-through-reloads) the reloaded fragment's [data object](/data).
+    [Preserve](/data#preserving) the reloaded fragment's [data object](/data).
 
     Properties from the new fragment's `[up-data]` are overridden with the old fragment's `[up-data]`.
 
   @param {boolean|string|Element|Array} [options.disable]
     Disables fields while waiting for the server response.
 
-    See [disabling fields while working](/watch-options#disabling-fields-while-working).
+    See [disabling fields while working](/watch-options#disabling).
 
   @param {string|Element|List<Node>} [options.placeholder]
-    A [placeholder](/placeholder) to show within the targeted fragment while it is loading.
+    A [placeholder](/placeholders) to show within the targeted fragment while it is loading.
 
     @experimental
 
   @param {string|Function(up.Preview)|Array} [options.preview]
-    One or more [previews](/preview) that temporarily change the page
+    One or more [previews](/previews) that temporarily change the page
     while the targeted fragment is loading.
 
   @param {boolean} [options.feedback=true]
     Whether to show [feedback classes](/feedback-classes) while waiting for the server response.
-
-    See [showing feedback while working](/watch-options#showing-feedback-while-working).
 
   @param {Object} [options]
     Additional [render options](/up.render#parameters) to use when re-rendering the targeted
@@ -1625,7 +1623,7 @@ up.form = (function() {
   <div class="email-errors"></div>
   ```
 
-  You may also [update multiple fragments](/targeting-fragments#updating-multiple-fragments)
+  You may also [update multiple fragments](/targeting-fragments#multiple)
   by separating their target selectors with a comma:
 
   ```html
@@ -1712,37 +1710,35 @@ up.form = (function() {
   @param [up-watch-event='change']
     The event types to observe.
 
-    See [which events to watch](/watch-options#which-events-to-watch).
+    See [which events to watch](/watch-options#events).
 
-  @param [up-watch-delay=0]
+  @param [up-watch-delay="0"]
     The number of milliseconds to wait between an observed event and validating.
 
-    See [debouncing callbacks](/watch-options#debouncing-callbacks).
+    See [debouncing callbacks](/watch-options#debouncing).
 
   @param [up-watch-disable]
     Whether to [disable fields](/disabling-forms) while validation is running.
 
-    See [disabling fields while working](/watch-options#disabling-fields-while-working).
+    See [disabling fields while working](/watch-options#disabling).
 
   @param [up-watch-placeholder]
-    A [placeholder](/placeholder) to show within the targeted fragment while it is loading.
+    A [placeholder](/placeholders) to show within the targeted fragment while it is loading.
 
-    See [showing loading state while working](/watch-options#showing-loading-state-while-working).
+    See [showing loading state while working](/watch-options#loading-state).
 
     @experimental
 
   @param [up-watch-preview]
-    One or more [previews](/preview) that temporarily change the page
+    One or more [previews](/previews) that temporarily change the page
     while the targeted fragment is loading.
 
-    See [showing loading state while working](/watch-options#showing-loading-state-while-working).
+    See [showing loading state while working](/watch-options#loading-state).
 
     @experimental
 
-  @param [up-watch-feedback=true]
+  @param [up-watch-feedback='true']
     Whether to set [feedback classes](/feedback-classes) while validating.
-
-    See [showing feedback while working](/watch-options#showing-feedback-while-working).
 
   @stable
   */
@@ -2012,11 +2008,11 @@ up.form = (function() {
   @param [up-watch-event='input']
     The type of event to watch.
 
-    See [which events to watch](/watch-options#which-events-to-watch).
+    See [which events to watch](/watch-options#events).
   @param [up-watch-delay=0]
     The number of milliseconds to wait after a change before the code is run.
 
-    See [debouncing callbacks](/watch-options#debouncing-callbacks).
+    See [debouncing callbacks](/watch-options#debouncing).
   @stable
   */
 
@@ -2072,7 +2068,7 @@ up.form = (function() {
   @param [up-watch-event='input']
     The type of event to watch.
 
-    See [which events to watch](/watch-options#which-events-to-watch).
+    See [which events to watch](/watch-options#events).
 
   @param [up-watch-delay=0]
     The number of milliseconds to wait after a change before submitting the form.
@@ -2080,32 +2076,30 @@ up.form = (function() {
     If the form element is [aborted](/aborting-requests) or
     destroyed during the delay, the submission is canceled.
 
-    See [debouncing callbacks](/watch-options#debouncing-callbacks).
+    See [debouncing callbacks](/watch-options#debouncing).
 
   @param [up-watch-disable]
     Whether to [disable fields](/disabling-forms) while submitting
 
-    See [disabling fields while working](/watch-options#disabling-fields-while-working).
+    See [disabling fields while working](/watch-options#disabling).
 
   @param [up-watch-placeholder]
-    A [placeholder](/placeholder) to show within the targeted fragment during submission.
+    A [placeholder](/placeholders) to show within the targeted fragment during submission.
 
-    See [showing loading state while working](/watch-options#showing-loading-state-while-working).
+    See [showing loading state while working](/watch-options#loading-state).
 
     @experimental
 
   @param [up-watch-preview]
-    One or more [previews](/preview) that temporarily change the page
+    One or more [previews](/previews) that temporarily change the page
     during submission.
 
-    See [showing loading state while working](/watch-options#showing-loading-state-while-working).
+    See [showing loading state while working](/watch-options#loading-state).
 
     @experimental
 
-  @param [up-watch-feedback=true]
+  @param [up-watch-feedback='true']
     Whether to set [feedback classes](/feedback-classes) during submission.
-
-    See [showing feedback while working](/watch-options#showing-feedback-while-working).
 
   @stable
   */

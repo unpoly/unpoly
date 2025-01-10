@@ -19,7 +19,7 @@ Previews are small functions that can
 be attached to a [link](/up-follow), [form](/up-submit) or any [programmatic render pass](/up.render).
 
 When the user interacts with a link or form, its preview function is invoked immediately.
-The function will usually [mutate the DOM](#dom-mutations) in a way the user gets
+The function will usually [mutate the DOM](#basic-mutations) in a way the user gets
 a preview of the interaction effect. For example, if the user is deleting an item from a list, the preview
 function could hide that item visually.
 

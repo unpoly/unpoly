@@ -858,7 +858,7 @@ up.element = (function() {
   }
 
   /*-
-  Parses a [list](/List) of [nodes](/Node) from a string of HTML.
+  Parses a [list](/List) of [nodes](https://developer.mozilla.org/en-US/docs/Web/API/Node) from a string of HTML.
 
   The returned list can be a mixed list of `Element`, `Text` or `Comment` nodes.
 

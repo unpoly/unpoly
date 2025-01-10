@@ -196,7 +196,7 @@ up.status = (function() {
   loading content from the server.
 
   When the user interacts with a link or form, its preview function is invoked immediately.
-  The function will usually [mutate the DOM](#dom-mutations) to signal that the app is working,
+  The function will usually [mutate the DOM](/previews#basic-mutations) to signal that the app is working,
   or to provide clues for how the page will ultimately look.
   For example, if the user is deleting an item from a list, the preview
   function could hide that item visually.

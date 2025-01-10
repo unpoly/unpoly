@@ -439,7 +439,7 @@ up.Request = class Request extends up.Record {
   /*-
   Returns the fragment matched by this request's [target selector](/up.Request.prototype.target).
 
-  When [multiple fragments](/targeting-fragments#updating-multiple-fragments) were inserted, the first fragment is returned.
+  When [multiple fragments](/targeting-fragments#multiple) were inserted, the first fragment is returned.
   To get a list of all inserted fragments, use the [`{ fragments }`](/up.Request.prototype.fragments) property.
 
   When this request will [open a new overlay](/opening-overlays), `undefined` is returned.

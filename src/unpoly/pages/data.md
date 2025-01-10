@@ -145,7 +145,7 @@ up.on('click', '.user', function(event, element, data) {
 Use [`up.data(element)`](/up-data) to retrieve an object with the given element's data.
 
 
-## Overriding data for a render pass
+## Overriding data for a render pass {#overriding}
 
 When rendering a single fragment, you can override data keys
 from the server by using the `[up-use-data]` attribute:
@@ -157,7 +157,7 @@ from the server by using the `[up-use-data]` attribute:
 ```
 
 
-## Preserving data through reloads
+## Preserving data through reloads {#preserving}
 
 When [reloading](/up.reload) or [validating](/up.validate) an element,
 you may keep an existing data object by passing it as a [`{ data }`](/up.render#options.data) option.
@@ -181,8 +181,6 @@ To keep an entire element, you may also use `[up-keep]`.
 The `up:fragment:keep` event lets you inspect the old and new element
 with its old and new data. You may then decide whether to keep the existing element,
 swap it with the new version, or just update its data.
-
-
 
 
 @page data

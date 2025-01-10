@@ -52,7 +52,7 @@ up.Preview = class Preview {
   */
 
   /*-
-  The [render options](/up.render#options) for this render pass.
+  The [render options](/up.render#parameters) for this render pass.
 
   Preview functions may mutate this object to influence
   the render pass after the request ends. Note that the request has already been queued
@@ -534,7 +534,7 @@ up.Preview = class Preview {
   })
   ```
 
-  Any [template variables](/templates#variables) can be appended after the
+  Any [template variables](/templates#dynamic) can be appended after the
   selector as [relaxed JSON](/relaxed-json):
 
   ```js
