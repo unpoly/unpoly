@@ -1220,12 +1220,14 @@ describe 'up.form', ->
             form = fixture('form')
             input = e.affix(form, 'input[name=email]')
             submitButton = e.affix(form, 'input[type=submit]')
+            genericButton = e.affix(form, 'button[type=button]')
 
             up.submit(form, { disable: true })
             await wait()
 
             expect(input).toBeDisabled()
             expect(submitButton).toBeDisabled()
+            expect(genericButton).toBeDisabled()
 
           it 'does not disable fields in another form', ->
             form = fixture('form')
