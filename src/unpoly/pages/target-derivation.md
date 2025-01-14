@@ -64,7 +64,7 @@ If your deriver can't be expressed in a pattern string, you may also push a `Fun
 
 
 
-Derived target verification
+Derived target verification {#verification}
 ---------------------------
 
 Unpoly verifies if a derived targets will actually match the element. If another element is matched, the next applicable pattern in `up.fragment.config.targetDerivers` is tested.
@@ -84,7 +84,7 @@ element = up.element.createFromHTML('<span class="klass">...</span>')
 selector = up.fragment.toTarget(element) // returns '.klass'
 ```
 
-If no [verified](#derived-target-verification) target can be derived, an error `up.CannotTarget` is thrown.
+If no [verified](#verification) target can be derived, an error `up.CannotTarget` is thrown.
 
 To test if a selector can be derived from a target, use `up.fragment.isTargetable()`.
 

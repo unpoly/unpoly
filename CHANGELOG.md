@@ -64,99 +64,104 @@ This is a big release!
 
 ### Templates
 
-- Link to guide
-- Explain which featuers support template cloning
-- Explain that you can use templating engines with variables
-  - up:template:clone event
+- You can now pass a selector to a [template](/templates) to `[up-content]`, `[up-fragment]`, or `[up-document]`. The template will be cloned and its copy inserted into the page.
+- Support for [dynamic templates with variables](/templates#dynamic).
 
 
 ### Rendering strings
 
-- [up-content] accepts mixed Element/Text string
-- { content } accepts List<Node> or mixed Element/Text string
-- { content, fragment } accept a CSS selector, can clone <template>
+- `[up-content]` now longer requires a single node for its value. It now also accepts multiple elements, or a mix of elements and text nodes.
+- `{ content }` now accepts any `List<Node>`, e.g. the `NodeList` returned by `querySelectorAll()`.
 
 
-### Watch options
+### Watching fields for changes
 
-- up.watch() will no longer process a { disable } option. It is up to the callback. Any [up-watch-disable] option will be passed to the callback in a third `options` argument ({ disable }).
-- [up-watch] gets an `options` argument in the code snippet.
-- Don't forward { event, delay } as watch callback options
-- Fix a bug where up.autosubmit() options did not override options parsed from [up-watch-...] prefixed attribute
+- The `[up-watch]` callback can now use an `options` argument. It contains an object of all [watch options](/watch-options) parsed from that field, e.g. `{ disable, preview, placeholder }`.
+- The watch options `{ event, delay }` will no longer be passed to callbacks of `up.watch()` and `[up-watch]`, as these options have already been processed by Unpoly.
+- `up.watch()` and `[up-watch]` will no longer process an `[up-watch-disable]` attribute. Instead the attribute is only parsed and passed to the callback as a `{ disable }` option. It is up to the callback to forward the option it to any rendering function that supports `{ disable }`.
+- Fix a bug where `up.autosubmit()` options did not override options parsed from `[up-watch-...]` prefixed attributes. It is convention in Unpoly that JavaScript options [always take precedence](/attributes-and-options#options) over HTML attributes.
 
 
 ### Target derivation
 
-- up.fragment.toTarget() gets a `{ strong: true }` option. 
-  - Whether to provide a more unique selector by only considering the element's [id] and [up-id] attributes.
-  - Weaker target derivers, like the element's class, are not considered in strong mode. The element's tag name is only considered for singleton elements like <html> or <body>.
-- Do not consider a form group's [class] to be a strong selector and prefer :has()
+- [Deriving](/target-derivation#derivation-patterns) a target selector for an element using `up.fragment.toTarget()` now supports a `{ strong: true }` option. This produces a more unique selector by only considering the element's `[id]` and `[up-id]` attributes. Weaker [derivation patterns](/target-derivation#derivation-patterns), like the element's class, are not considered in strong mode. The element's tag name is only considered for singleton elements like `<html>` or `<body>`.
+- When a [validated](/validation#validating-after-changing-a-field) field wants to update its form group, that form group is no longer targeted by its `[class]`, which would often be ambigous. Instead the form group is only targeted by its `[id]` or `[up-id]` attribute. If the form group doesn't have an `[id]` or `[up-id]` attribute, it is targeted with a `.has()` selector referencing the changed field, e.g. `fieldset:has(#changed-field)`.
 
 
-### Disabling
+### Disabling form fields
 
-- We can disable forms from links
-  - Explain
-  - Link to goide
-- We can also disable non-submit buttons (test?)
-- up.form.config.genericButtonSelector
-- Re-focus the original control when the { disable } is reverted
+- When fields are [disabled](/disabling-forms) during a render pass, and a field loses its focus, that field is now re-focused when the field is re-renabled afterwards.
+- You can now [disable form fields when the user activates a hyperlink](/disabling-forms#from-link).
+- Disabling now also disable non-submit buttons, like an `button[type=button]` or `input[type=button]`.
+- New configuration `up.form.config.genericButtonSelectors`
 
 
 ### Tokens are separated by comma
 
-- Explain that tokens now default to comma-separation
-- Comma is canonical
-- Space-separation still possible in most cases
-- or-separation is deprecated
-- Also make sure to update doc pages!
-- This affects
-  - [up-show-for]
-  - [up-hide-for]
-  - [up-scroll]
-  - [up-focus]
-  - [up-layer] or { layer }
-  - up.on()
-  - URLPatterns
-    - [up-alias]
-    - [up-dismissable], { dismissable }
-    - [up-accept-location]
-    - [up-dismiss-location]
-    - up.cache.expire()
-    - X-Up-Expire-Cache
-    - [up-expire-cache] { expireCache } 
-    - up.cache.evict()
-    - X-Up-Evict-Cache
-    - [up-evict-cache] { evictCache }
+When a string contains multiple tokens, Unpoly used to separate those tokens with a space character.
+While this is still possible, the new canonical way is to separate tokens with a comma:
+
+| Old form (still valid) | New form |
+|------------|-----------|
+| ✅ `[up-layer="parent root"]` | ✅ `[up-parent="parent, root"]` |
+| ✅ `[up-show-for="value1 value2"]` | ✅ `[up-show-for="value1, value2"]` |
+| ✅ `[up-alias="/foo /bar"]` | ✅ `[up-alias="/foo, /bar"]` |
+| ✅`up.on('event1 event2', fn)` | ✅ `up.on('event1, event2', fn)` |
+
+In some cases tokens would be separated by an `or` operator. This is no longer supported.
+Use a comma instead:
+
+| Old form (now invalid) | New form |
+|------------|-----------|
+| ❌ `[up-scroll="target or main"]` | ✅ `[up-scroll="target, main"]` |
+| ❌ `[up-focus="target or main"]` | ✅ `[up-scroll="target, main"]` |
+
+
 
 
 ### Feedback classes
 
-- Feedback classes are now always enabled by default (even when not navigating). They can still be disabled with { feedback: false } or [up-feedback=false].
-- Forms are also marked as .up-active, in addition to the submit button or field that caused the submission
-- When submitting a form from a focused input, also mark the default submit button as .up-active
-- Introduce config.activeClasses and config.loadingClasses
+- The [feedback classes](/feedback-classes) `.up-active` and `.up-current`
+  are now always enabled by default (even when not navigating).
+  They can still disabled explicitly with an `[up-feedback=false]` attribute or a `{ feedback: false }` option.
+- When submitting a form, the `<form>` element now also receives the `.up-active` class (in addition to the submit button).
+- When submitting a form from a focused field, the default submit button now also receives the `.up-active` class (in addition to the field and the `<form>`).
+- Added a configuration `up.status.config.activeClasses`. This allows to set custom CSS classes for working links and forms.
+- Added a configuration `up.status.config.loadingClasses`. This allows to set custom CSS classes for targeted fragments that are loading new content.
 
 
+### Bootstrap plugin
 
-### Mixed / Unoorted
+- Clicked links and buttons now receive the `.active` class.
 
-- Clicking a link with a page-local #hash will honor obstructions if the location is already on that #hash
-- When opening layer with { data }, apply that data to the topmost swappable element (not to the overlay container)
-- Rename layer option { dismissAriaLabel } to { dismissARIALabel }
-- Allow embedded CSP nonces in [up-on-keep], [up-on-hungry], [up-on-opened]
-- up.fragment.toTarget() gets { verify } option
-- Experimental config up.fragment.config.renderOptions.
-- New [up-use-data] attribute
-- up.Request#ended
-- When opening an overlay, set up.Request#layer to 'new' and #fragments to [] (instead of to the base layer)
-- Deprecate rendering into a new layer with only { mode } option, but without { layer }
-- Fix a bug where a link with [up-confirm] would show the dialog before preloading
-- up.fragment.get() looks in earlier layer options first when multiple layers are given
-- Fix crash with up.submit({ submitButton: false })
-- Rendering with { focus: 'keep' } should not re-focus elements that never lost focus; Improve -if-lost suffix implementation
-- Selector [up-flashes] is now stable (discussion #679)
-- up.feedback package has been renamed to up.status
+
+### Fragment API
+
+- New configuration `up.fragment.config.renderOptions`. This is an object of default render options to always apply, even when not [navigating](/navigation).
+- `up.fragment.toTarget()` can now skip [target verifcation](/target-derivation#verification) by passing a `{ verify: false}` option.
+- New `[up-use-data]` attribute allows to [override data](/data#overriding) for the targeted fragment.
+- When calling `up.fragment.get()` with multiple search layers (e.g. `{ layer: "current, parent"}`), Unpoly will now search those layers in the given order.
+
+
+### Layers
+
+- The layer option `{ dismissAriaLabel }` has been renamed to `{ dismissARIALabel }`
+- When opening a new layer with `[up-use-data]` or `{ data }`, that data is now applied to the topmost swappable element (and not to the overlay container).
+- When [opening an overlay](/opening-overlays), the property `Request#layer` is now set to `'new'` (instead of to the parent layer). Also the `#fragments` property is now set to `[]` (instead of to the parent layer's main element)
+- Opening a new overlay with only a `{ mode }` option has been deprecated. Always pass a `{ layer: 'new' }` option.
+
+
+### Other changes
+
+- Clicking a link with a page-local `#hash` in the `[href]` will now honor fixed layout obstructions if the browser location is already on that `#hash`.
+- You can now [embed CSP nonces](/csp) into the attribute callbacks `[up-on-keep]`, `[up-on-hungry]` and `[up-on-opened]`.
+- New property `up.Request#ended` indicates whether this request is no longer waiting for the network. It is `true` when the server has responded or when the request
+  failed or was aborted.
+- Fix a bug where a link with `[up-confirm]` would show the confirmation dialog before [preloading](/preloading).
+- Fix a crash with `up.submit({ submitButton: false })`.
+- Fix a bug where rendering with `{ focus: 'keep' }` would sometimes re-focus elements that never lost focus.
+- The attribute `[up-flashes]` is now stable (discussion #679)
+- The `up.feedback` package has been renamed to `up.status`.
 
 
 3.9.5

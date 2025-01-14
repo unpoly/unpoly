@@ -114,14 +114,20 @@ up.fragment = (function() {
     When verification is disabled, the first applicable [derivation pattern](/target-derivation#derivation-patterns)
     will be used, even if the produced target would match another element on the page.
 
-    Also see [Derived target verification](/target-derivation#derived-target-verification).
+    Also see [Derived target verification](/target-derivation#verification).
+
+  @param {Object} [config.renderOptions]
+    An object of default render options to always apply.
+
+    When [navigating](/navigation), the defaults from `up.fragment.config.navigateOptions` will
+    also be applied.
+
+    @experimental
 
   @param {Object} [config.navigateOptions]
     An object of default render options to apply when [navigating](/navigation).
 
-  @param {Object} [config.renderOptions]
-    An object of default render options to always apply, even when not [navigating](/navigation).
-    @experimental
+    To set defaults for *all* render passes (when navigating or not), use `up.fragment.config.renderOptions`.
 
   @param {string} [config.match='region']
     How to match fragments when a [target selector](/targeting-fragments) yields multiple results.
@@ -2038,7 +2044,7 @@ up.fragment = (function() {
   /*-
   [Derives a CSS selector](/target-derivation) that matches the given element as good as possible.
 
-  If no target can be derived and [verified](/target-derivation#derived-target-verification), an error `up.CannotTarget` is thrown.
+  If no target can be derived and [verified](/target-derivation#verification), an error `up.CannotTarget` is thrown.
 
   ### Example
 
@@ -2066,7 +2072,7 @@ up.fragment = (function() {
     @experimental
   @param {Element} [options.origin]
     The origin used to [resolve an ambiguous selector](/targeting-fragments#ambiguous-selectors)
-    during [target verification](/target-derivation#derived-target-verification).
+    during [target verification](/target-derivation#verification).
   @stable
   */
   function toTarget(element, options) {

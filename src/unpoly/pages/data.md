@@ -148,13 +148,15 @@ Use [`up.data(element)`](/up-data) to retrieve an object with the given element'
 ## Overriding data for a render pass {#overriding}
 
 When rendering a single fragment, you can override data keys
-from the server by using the `[up-use-data]` attribute:
+from the server by using the [`[up-use-data]`](/up-follow#up-use-data) attribute:
 
 ```html
 <a href="/score" up-target=".score" up-use-data="{ startScore: 1500 }">
   Load score
 </a>
 ```
+
+From JavaScript, use the [`{ data }`](/up.render#options.data) option.
 
 
 ## Preserving data through reloads {#preserving}
