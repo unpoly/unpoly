@@ -3183,6 +3183,14 @@ describe('up.util', () => {
           expect(up.util.parseRelaxedJSON(`"{ foo: 1, bar: 2 }"`)).toEqual('{ foo: 1, bar: 2 }')
         })
 
+        it('allows trailing commas in object literals', function() {
+          expect(up.util.parseRelaxedJSON("{ foo: 1, bar: 2, }")).toEqual({ foo: 1, bar: 2})
+        })
+
+        it('allows trailing commas in array literals', function() {
+          expect(up.util.parseRelaxedJSON("[1, 2, ]")).toEqual([1, 2])
+        })
+
       })
 
     })
