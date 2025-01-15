@@ -2189,6 +2189,27 @@ up.util = (function() {
     return JSON.parse(ensureDoubleQuotes(value))
   }
 
+  /*-
+  Parses a string of [relaxed JSON](/relaxed-json) into a JavaScript value.
+
+  ## Example
+
+  ```js
+  let value = up.util.parseRelaxedJSON("{ foo: 'one', bar: 'two', }")
+  console.log(value) // logs an object { foo: 'one', bar: 'two' }
+  ```
+
+  ## Syntax errors
+
+  When the passed text is not in Relaxed JSON format, a `SyntaxError` is thrown.
+
+  @function up.util.parseRelaxedJSON
+  @param {string} text
+    The text to parse.
+  @return {Object|Array|string|number|boolean|null}
+    The parsed JSON value.
+  @experimental
+  */
   function parseRelaxedJSON(str) {
     let { masked, restore } = maskPattern(str, [QUOTED_STRING_PATTERN])
     masked = masked.replace(/([a-z_$][\w$]*:)/gi, (unquotedProperty) => ('"' + unquotedProperty.slice(0, -1) + '":'))
