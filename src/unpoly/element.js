@@ -314,25 +314,6 @@ up.element = (function() {
     setVisible(element, newVisible)
   }
 
-  // /*-
-  // [Toggles](/up.element.toggle) the visibility of the given element.
-  //
-  // Returns a function that undoes the change in visibility.
-  //
-  // @function up.element.toggleTemp
-  // @param {Element} element
-  // @param {boolean} [newVisible]
-  //   Pass `true` to show the element or `false` to hide it.
-  //
-  //   If omitted, the element will be hidden if shown and shown if hidden.
-  // @return {Function}
-  //   Returns a function that undoes the change in visibility.
-  // @experimental
-  // */
-  // function toggleTemp(element, newVisible = !isVisible(element)) {
-  //   return setVisibleTemp(element, newVisible)
-  // }
-
   function setAttrPresence(element, attr, value, newPresent) {
     if (newPresent) {
       return element.setAttribute(attr, value)
@@ -1104,10 +1085,6 @@ up.element = (function() {
     The element from which to retrieve the attribute value.
   @param {string} attribute
     The attribute name.
-  @param {boolean} [pass=false]
-    Whether to return a non-boolean value unparsed.
-
-    @internal
   @return {boolean|undefined}
     The cast attribute value.
   @stable
@@ -1585,7 +1562,6 @@ up.element = (function() {
     get: getOne,
     list: getList,
     toggle,
-    // toggleTemp,
     hide,
     hideTemp,
     show,

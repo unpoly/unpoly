@@ -375,58 +375,6 @@ describe('up.element', function() {
     })
   })
 
-  // describe('up.element.toggleTemp()', function() {
-  //
-  //   it('hides the given element if it is visible', function() {
-  //     const element = fixture('.element')
-  //     up.element.toggleTemp(element)
-  //     expect(element).toBeHidden()
-  //   })
-  //
-  //   it('shows the given element if it is hidden', function() {
-  //     const element = fixture('.element', {style: { display: 'none' }})
-  //     up.element.toggleTemp(element)
-  //     expect(element).toBeVisible()
-  //   })
-  //
-  //   it('hides the given element if the second argument is false', function() {
-  //     const element = fixture('.element')
-  //     expect(element).toBeVisible()
-  //     up.element.toggleTemp(element, false)
-  //     expect(element).toBeHidden()
-  //   })
-  //
-  //   it('shows the given element if the second argument is true', function() {
-  //     const element = fixture('.element')
-  //     element.style.display = 'none'
-  //     expect(element).toBeHidden()
-  //     up.element.toggleTemp(element, true)
-  //     expect(element).toBeVisible()
-  //   })
-  //
-  //   it('returns a function that toggles the element a second time', function() {
-  //     const element = fixture('.element')
-  //     expect(element).toBeVisible()
-  //
-  //     let undo = up.element.toggleTemp(element)
-  //     expect(element).toBeHidden()
-  //
-  //     undo()
-  //     expect(element).toBeVisible()
-  //   })
-  //
-  //   it('does not re-toggle an element that already had the forced visibility', function() {
-  //     const element = fixture('.element')
-  //     expect(element).toBeVisible()
-  //
-  //     let undo = up.element.toggleTemp(element, true)
-  //     expect(element).toBeVisible()
-  //
-  //     undo()
-  //     expect(element).toBeVisible()
-  //   })
-  // })
-
   if (up.migrate.loaded) {
     describe('up.element.toggleClass()', function() {
 

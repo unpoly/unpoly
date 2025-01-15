@@ -2748,7 +2748,7 @@ up.fragment = (function() {
     @experimental
   @experimental
   */
-  async function abort(...args) {
+  function abort(...args) {
     let options = parseTargetAndOptions(args)
 
     // The function that checks whether a given function will be aborted.
@@ -3115,24 +3115,6 @@ up.fragment = (function() {
       return () => up.destroy(tempElement)
     }
   }
-
-  // /*-
-  // @function up.fragment.swapTemp
-  // @param {Element} oldElement
-  // @param {Element|string} newElement
-  // @return {Function}
-  //   A function that undoes the swap when called.
-  // @internal
-  // */
-  // function swapTemp(oldElement, newElement) {
-  //   newElement = e.wrap(newElement)
-  //   oldElement.replaceWith(newElement)
-  //   up.hello(newElement)
-  //   return () => {
-  //     up.script.clean(newElement)
-  //     newElement.replaceWith(oldElement)
-  //   }
-  // }
 
   up.on('up:framework:boot', function() {
     const { documentElement } = document
