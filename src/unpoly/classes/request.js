@@ -581,13 +581,6 @@ up.Request = class Request extends up.Record {
     return !event.defaultPrevented
   }
 
-  // _emitLoad() {
-  //   if (this.customLoadEvent) {
-  //
-  //   }
-  //   return !event.defaultPrevented
-  // }
-
   /*-
   Loads this request object as a full-page request, replacing the entire browser environment
   with a new page from the server response.

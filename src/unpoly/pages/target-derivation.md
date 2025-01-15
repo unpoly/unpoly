@@ -63,7 +63,6 @@ Similarily the asterisk (`*`) will be expanded to the element's actual tag name.
 If your deriver can't be expressed in a pattern string, you may also push a `Function(Element): string?`.
 
 
-
 Derived target verification {#verification}
 ---------------------------
 
