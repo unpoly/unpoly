@@ -60,7 +60,7 @@ up.NonceableCallback = class NonceableCallback {
     let scriptElement
     try {
       up.noncedEval = { args, thisArg: thisArg }
-      scriptElement = up.element.affix(document.body, 'script', { nonce: this.nonce, text: wrappedScript })
+      scriptElement = e.affix(document.body, 'script', { nonce: this.nonce, text: wrappedScript })
       if (up.noncedEval.error) {
         throw up.noncedEval.error
       } else {

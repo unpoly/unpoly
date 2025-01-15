@@ -12,7 +12,7 @@ up.ProgressBar = class ProgressBar {
     this._moveTo(0)
     // The element must be painted at width: 0 before we apply the target width.
     // If the first paint sees the bar at the target width, we don't get an animated transition.
-    up.element.paint(this._element)
+    e.paint(this._element)
 
     this._width = 31
     this._nextStep()
