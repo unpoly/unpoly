@@ -2138,7 +2138,7 @@ up.fragment = (function() {
     // the element's tag name and attribute to form a more specific target.
     // E.g. a deriver '[up-id]' should result in a target '[up-id="messages"]'.
 
-    let { includePath, excludeRaw } = up.element.parseSelector(deriver)
+    let { includePath, excludeRaw } = e.parseSelector(deriver)
 
     if (includePath.length !== 1) {
       // It's not straightforward to improve a descendant selector like '.foo .bar' or '.foo > .bar'.

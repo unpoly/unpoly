@@ -130,7 +130,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
               up.script.clean(step.oldElement, { layer: step.layer })
             },
             afterDetach() {
-              up.element.cleanJQuery()
+              e.cleanJQuery()
               up.fragment.emitDestroyed(step.oldElement, { parent, log: false })
             },
             scrollNew: () => {
