@@ -1,7 +1,7 @@
 Relaxed JSON
 ============
 
-*Relaxed JSON* is a JSON dialect that allows unquoted property names and single-quoted strings.
+*Relaxed JSON* is a JSON dialect that that aims to be easier to write by humans.
 
 
 Example
@@ -23,9 +23,10 @@ Unpoly also accepts single-quoted strings and unquoted property names:
 Syntax rules
 -----------
 
-- Every JSON object is also a Relaxed JSON object
-- Relaxed JSON allows single-quoted strings, in addition to double-quoted strings
+- Every JSON object is also a Relaxed JSON object.
+- Relaxed JSON allows single-quoted strings, in addition to double-quoted strings.
 - Relaxed JSON allows unquoted property names, like JavaScript. It's also OK to double-quote property names.
+- Relaxed JSON allows [trailing commas](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Trailing_commas) in object literals and array literals.
 
 
 Postel's law

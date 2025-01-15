@@ -2192,6 +2192,7 @@ up.util = (function() {
   function parseRelaxedJSON(str) {
     let { masked, restore } = maskPattern(str, [QUOTED_STRING_PATTERN])
     masked = masked.replace(/([a-z_$][\w$]*:)/gi, (unquotedProperty) => ('"' + unquotedProperty.slice(0, -1) + '":'))
+    masked = masked.replace(/,\s*([}\]])/g, '$1')
     masked = restore(masked, ensureDoubleQuotes)
     return JSON.parse(masked)
   }
