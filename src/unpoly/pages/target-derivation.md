@@ -83,7 +83,7 @@ element = up.element.createFromHTML('<span class="klass">...</span>')
 selector = up.fragment.toTarget(element) // returns '.klass'
 ```
 
-If no [verified](#verification) target can be derived, an error `up.CannotTarget` is thrown.
+Also see [options for `up.fragment.toTarget()`](/up.fragment.toTarget#parameters).
 
 To test if a selector can be derived from a target, use `up.fragment.isTargetable()`.
 

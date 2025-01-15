@@ -93,7 +93,8 @@ This is a big release!
 - When fields are [disabled](/disabling-forms) during a render pass, and a field loses its focus, that field is now re-focused when the field is re-renabled afterwards.
 - You can now [disable form fields when the user activates a hyperlink](/disabling-forms#from-link).
 - Disabling now also disable non-submit buttons, like an `button[type=button]` or `input[type=button]`.
-- New configuration `up.form.config.genericButtonSelectors`
+- New configuration `up.form.config.genericButtonSelectors`.
+- The `{ disable }` option now also accepts an `Element` (or an array of elements) to disable.
 
 
 ### Tokens are separated by comma
@@ -141,6 +142,9 @@ Use a comma instead:
 - `up.fragment.toTarget()` can now skip [target verifcation](/target-derivation#verification) by passing a `{ verify: false}` option.
 - New `[up-use-data]` attribute allows to [override data](/data#overriding) for the targeted fragment.
 - When calling `up.fragment.get()` with multiple search layers (e.g. `{ layer: "current, parent"}`), Unpoly will now search those layers in the given order.
+- Calling `up.fragment.get()` with an `Element`, that element is returned without further lookups.
+- The render option `{ useHungry }` has been renamed to `{ hungry }`. The corresponding HTML attribut is still `[up-use-hungry]` as to not conflict with `[up-hungry]`.
+- The render option `{ useKeep }` has been renamed to `{ keep }`. The corresponding HTML attribut is still `[up-use-keep]` as to not conflict with `[up-keep]`.
 
 
 ### Layers
@@ -162,6 +166,7 @@ Use a comma instead:
 - Fix a bug where rendering with `{ focus: 'keep' }` would sometimes re-focus elements that never lost focus.
 - The attribute `[up-flashes]` is now stable (discussion #679)
 - The `up.feedback` package has been renamed to `up.status`.
+- Experimental function `up.element.createNodesFromHTML()`. This parses a [list](/List) of [nodes](https://developer.mozilla.org/en-US/docs/Web/API/Node) from a string of HTML.
 
 
 3.9.5
