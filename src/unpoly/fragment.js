@@ -3040,11 +3040,19 @@ up.fragment = (function() {
     event.nodes = up.element.createNodesFromHTML(result)
   })
   ```
+
+  Also see documentation for `up.element.createNodesFromHTML()`.
+
   @event up:template:clone
   @param {Element} event.target
     The template element being cloned.
+  @param {Object} event.data
+    Any [template variables](/templates#dynamic) that should be used when cloning.
   @param {null|List<Element>} event.nodes
     A list of element and text nodes representing the cloned template result.
+
+    The value is `null` initially and must be set by a listener.
+    When no listener sets `event.nodes`, Unpoly will parse the template's inner HTML.
   @experimental
   */
 
