@@ -2022,6 +2022,9 @@ up.fragment = (function() {
   successKey('failTarget')     // => 'target'
   successKey('onFailFinished') // => 'onFinished'
   ```
+
+  @function up.fragment.successKey
+  @internal
   */
   function successKey(key) {
     let match = KEY_PATTERN.exec(key)
@@ -2050,6 +2053,9 @@ up.fragment = (function() {
   failKey('failTarget')     // => undefined
   failKey('onFailFinished') // => undefined
   ```
+
+  @function up.fragment.failKey
+  @internal
   */
   function failKey(key) {
     let match = KEY_PATTERN.exec(key)
