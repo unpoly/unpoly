@@ -2930,7 +2930,7 @@ up.fragment = (function() {
 
   // This function lives in up.fragment (not up.element)
   // because we stop the observe via up.fragment.onAborted().
-  function onFirstIntersect(origin, callback, { margin = 0 } = {}) {
+  function onFirstIntersect(element, callback, { margin = 0 } = {}) {
     // IntersectionObserver has some ms lag until it reports intersection entries.
     // This lag also exists for the initial intersection check.
     //
@@ -2938,7 +2938,7 @@ up.fragment = (function() {
     // that both (1) already cached and (2) scrolled into viewport when inserted.
     // In that case we want to immediately render the cached content and not show
     // a flash of unloaded partial. The same is true when revalidating such a partial.
-    if (e.isIntersectingWindow(origin, { margin })) {
+    if (e.isIntersectingWindow(element, { margin })) {
       callback()
       return
     }
@@ -2957,8 +2957,8 @@ up.fragment = (function() {
 
     let observer = new IntersectionObserver(processIntersectEntries, { rootMargin: `${margin}px` })
     let disconnect = () => observer.disconnect()
-    observer.observe(origin)
-    onAborted(origin, disconnect)
+    observer.observe(element)
+    up.destructor(element, disconnect)
   }
 
   const STARTS_WITH_SELECTOR = /^([\w-]+|\*)?(#|\.|[:[][a-z-]{3,})/
