@@ -1622,13 +1622,30 @@ describe('up.util', () => {
       })
     })
 
-    describe('up.util.renameKey', () => it('renames a key in the given property', function() {
-      const object = { a: 'a value', b: 'b value'}
-      u.renameKey(object, 'a', 'c')
-      expect(object.a).toBeUndefined()
-      expect(object.b).toBe('b value')
-      expect(object.c).toBe('a value')
-    }))
+    describe('up.util.renameKey', function() {
+
+      it('renames a key in the given property', function() {
+        const object = { a: 'a value', b: 'b value'}
+        u.renameKey(object, 'a', 'c')
+        expect(object.b).toBe('b value')
+        expect(object.c).toBe('a value')
+      })
+
+      it('deletes a renamed key from the object', function() {
+        const object = { a: 'a value'}
+        u.renameKey(object, 'a', 'c')
+        expect(object.c).toBe('a value')
+        expect(object).not.toHaveKey('a')
+      })
+
+      it('does not create undefined keys when the original key was never on the object', function() {
+        const object = {}
+        u.renameKey(object, 'a', 'b')
+        expect(object).not.toHaveKey('a')
+        expect(object).not.toHaveKey('b')
+      })
+
+    })
 
     describe('up.util.isCrossOrigin', function() {
 
