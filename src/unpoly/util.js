@@ -1395,7 +1395,9 @@ up.util = (function() {
   }
 
   function renameKey(object, oldKey, newKey) {
-    return object[newKey] = pluckKey(object, oldKey)
+    if (oldKey in object) {
+      object[newKey] = pluckKey(object, oldKey)
+    }
   }
 
   function extractLastArg(args, tester) {
