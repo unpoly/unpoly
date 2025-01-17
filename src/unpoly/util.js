@@ -1783,6 +1783,17 @@ up.util = (function() {
     return copy(list).reverse()
   }
 
+  /*-
+  Returns a copy of the given object, with its key transformed by the given function.
+
+  If the given function returns `undefined` for a key, that key
+  will be omitted from the returned object.
+
+  @function up.util.withRenamedKeys
+  @param {Object} object
+  @param {Function(string): string|undefined) renameKeyFn
+  @internal
+  */
   function withRenamedKeys(object, renameKeyFn) {
     const renamed = {}
     for (let key in object) {
