@@ -3926,6 +3926,43 @@ describe 'up.link', ->
 
           expect('#slow').toHaveText('partial content')
 
+        it 'loads the partial when it is scrolled into the document viewport when an overlay is opened in between (bugfix)', ->
+          main = fixture('#main[up-main]')
+          before = e.affix(main, '#before', text: 'before', style: 'height: 50000px')
+          partial = e.affix(main, 'a#slow[up-defer="reveal"][href="/slow-path"]')
+          up.hello(partial)
+
+          await wait(MUTATION_OBSERVER_LAG)
+
+          expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+          up.layer.open({ target: '#overlay', url: '/overlay', openAnimation: false, closeAnimation: false })
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+          jasmine.respondWithSelector('#overlay', { text: 'overlay content' })
+          await wait()
+
+          expect(up.layer.current).toBeOverlay()
+
+          up.layer.dismiss({ animation: false })
+          await wait()
+
+          expect(up.layer.current).toBeRootLayer()
+
+          partial.scrollIntoView()
+
+          await wait(MUTATION_OBSERVER_LAG)
+
+          expect(jasmine.Ajax.requests.count()).toEqual(2)
+
+          jasmine.respondWithSelector('#slow', text: 'partial content')
+
+          await wait()
+
+          expect('#slow').toHaveText('partial content')
+
         it 'immediately loads a partial that is already visible within the document viewport', ->
           partial = fixture('a#slow[up-defer="reveal"][href="/slow-path"]')
           up.hello(partial)
