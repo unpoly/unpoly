@@ -31,7 +31,7 @@ This also confines HTML rendering to the server.
 
 ## Understanding the demo app
 
-For a demonstration of opportunistic rendering in Unpoly, check out the [*Tasks* tab](https://demo.unpoly.com/tasks)
+For a demonstration of optimistic rendering in Unpoly, check out the [*Tasks* tab](https://demo.unpoly.com/tasks)
 in the official [demo app](https://demo.unpoly.com). The entire TODO list is rendered optimistically.
 This includes the following interactions:
 
@@ -43,7 +43,9 @@ This includes the following interactions:
 To see how it behaves under high latency, check the `[×] Disable cache` and `[×] Extra server delay` options in the bottom bar.
 You will see that everything reacts instantly, despite an [RTT](https://en.wikipedia.org/wiki/Round-trip_delay)
 of ≈1200 ms (depending on your location). The `X tasks left` indicator is not rendering optimistically on purpose,
-so you see when an actual server response replaces the optimistic update.
+so you see when an actual server response replaces the optimistic update:
+
+<video src="images/optimistic-rendering-demo.mp4" controls width="600" aria-label="The demo app reacting instantly under high latency"></video>
 
 The code for the demo app is [available on GitHub](https://github.com/unpoly/unpoly-demo).
 Although it is a implemented as a Rails application,
