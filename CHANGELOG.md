@@ -11,58 +11,107 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 3.10.0
 ------
 
-This is a big release!
+### Arbitrary loading state with previews
 
-### Progress bar
+Unpoly 3.10 introduces [previews](/previews). Previews are temporary page changes while waiting for a network request.
+They signal that the app is working, or provide clues for how the page will ultimately look.
+Because previews immediately appear after a user interaction, their use
+increases the perceived responsiveness of your application.
 
-- Progress bar timing during chains of requests
+When the request ends for [any reason](#ending), all preview changes will be reverted before
+the server response is processed. This ensures a consistent screen state in cases when
+a request is aborted, or when we end up updating a different fragment.
 
-- Renamed badResponseTime => lateDelay
-  - config.lateDelay
-  - { lateDelay }
-  - [up-late-delay]
-- Support { lateTime: false } to opt out of up:network:late as a foreground request
-
-
-### Showing arbitrary loading state with previews
-
-
+You can use previews to implement arbitrary [loading state](/loading-state).
+Two common applications of previews are [placeholders](/placeholders) and [optimistic rendering](/optimistic-rendering).
 
 
 ### Placeholders
 
+Unpoly 3.10 supports [placeholders](/placeholders). Placeholders are a temporary spinners or UI skeletons shown while a fragment is loading.
+
+To show a placeholder while a link is loading, set an `[up-placeholder]` attribute
+with the placeholder's HTML as its value:
+
+```html
+<a href="/path" up-follow up-placeholder="<p>Loading…</p>">Show story</a> <!-- mark-phrase "up-placeholder" -->
+```
+
+Instead of passing the placeholder HTML directly, you can also refer to any [template](/templates)
+by its CSS selector:
+
+```html
+<a href="/path" up-follow up-placeholder="#loading-template">Show story</a> <!-- mark-phrase "#loading-message" -->
+
+<template id="loading-template">
+  <p>
+    Loading…
+  </p>
+</template>
+```
 
 
 
 ### Optimistic rendering
 
-- Optimistic rendering
-  - Overview
-  - Link to guide
-  - Explain that the demo tasks shows new optimistic rendering, check "Extra latency"
+Unpoly 3.10 supports [optimistic rendering](/optimistic-rendering) as an application of previews and templates.
+This is a pattern where we update the page without waiting for the server to respond. When the server eventually does respond, the optimistic change is reverted and replaced by the server-confirmed content.
+
+For example, this is the [*Tasks* tab](https://demo.unpoly.com/tasks) in the official [demo app](https://demo.unpoly.com) running with 1000 ms latency. Note how the UI updates instantly, without waiting for the server:
+
+<video src="images/optimistic-rendering-demo.mp4" controls width="600" aria-label="The demo app reacting instantly under high latency"></video>
+
+
+### Progress bar
+
+- The [progress bar](/progress-bar) will no longer restart its animation when a request is immediately followed by another request.
+ 
+  For example, when a user changes an `[up-autosubmit]` form that is already waiting for a request, a second request
+  is sent after the first request has loaded. The progress bar will now show one uninterrupted animation until all requests have loaded.
+
+- Old versions have used a "bad response time" setting to define the delay until the [progress bar](/progress-bar) is shown.
+  This setting has been renamed to "late delay" everywhere:
+
+  | Old name | New name |
+  |----------|----------|
+  | ❌ `[up-bad-response-time]` | ✅  `[up-late-delay]` |
+  | ❌ `{ badResponseTime }` | ✅  `{ lateDelay }` |
+  | ❌ `up.network.config.badResponseTime` | ✅  `up.network.config.lateDelay` |
+  | ❌ `up.Request.prototype.badResponseTime` | ✅  `up.Request.prototype.lateDelay` |
+  
+  
+- Foreground requests can now opt out of the progress bar (and `up:network:late` events) by setting `[up-late-delay="false"]` or `{ lateDelay: false }`.
 
 
 
-### Native `:has()` required
+### Native `:has()` selector
 
-- https://caniuse.com/css-has
-- The app will not boot on browsers that don't support :is() or :has()
+For almost 10 years Unpoly has polyfilled the [`:has()`](https://developer.mozilla.org/en-US/docs/Web/CSS/:has) pseudo-selector for all browsers. Since then the selector has been standardized and has received [great browser support](https://caniuse.com/css-has).
+
+Starting with this release, Unpoly will no longer include a polyfill and use the browser's native `:has()` support.
+Unpoly will no longer boot on old browsers that don't support `:has()` natively.
 
 
 ### Relaxed JSON
 
-- Link to guide
-- Name examples for features
-- up.util.parseRelaxedJSON()
+Unpoly now supports [relaxed JSON](/relaxed-json) in all attributes and options where it also accepts JSON.
+Relaxed JSON is a JSON dialect that that aims to be easier to write by humans. It supports syntactic sugar
+that you know from JavaScript [object literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Object_initializer):
+
+- Unquoted property names
+- Single-quoted strings
+- Trailing commas
+
+For example, you can now write `[up-data]` like this:
+
+```html
+<span class="user" up-data="{ name: 'Bob', age: 18 }">Bob</span>
+```
+
+When Unpoly outputs HTML (e.g. for the `X-Up-Context` header) it always produces regular JSON.
 
 
-### Better selector parsing
-
-- Explain that we are now smarter at splitting complex selectors
-- Commas in quotes or parentheses are ignored
-
-
-### Templates
+### Template support
 
 - You can now pass a selector to a [template](/templates) to `[up-content]`, `[up-fragment]`, or `[up-document]`. The template will be cloned and its copy inserted into the page.
 - Support for [dynamic templates with variables](/templates#dynamic).
@@ -97,6 +146,15 @@ This is a big release!
 - The `{ disable }` option now also accepts an `Element` (or an array of elements) to disable.
 
 
+### Better selector parsing
+
+Unpoly 3.10 is smarter when parsing values with structured grammar, and no longer relies
+on magic strings to split complex expressions.
+
+For example, Unpoly can now process more complex target selectors.
+Selectors like `.foo:has(.bar, .baz)` or `.foo[attr="one, two"]` used to cause   quirky behavior, but are now parsed correctly.
+
+
 ### Tokens are separated by comma
 
 When a string contains multiple tokens, Unpoly used to separate those tokens with a space character.
@@ -116,8 +174,6 @@ Use a comma instead:
 |------------|-----------|
 | ❌ `[up-scroll="target or main"]` | ✅ `[up-scroll="target, main"]` |
 | ❌ `[up-focus="target or main"]` | ✅ `[up-scroll="target, main"]` |
-
-
 
 
 ### Feedback classes
