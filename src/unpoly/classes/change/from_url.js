@@ -55,9 +55,8 @@ up.Change.FromURL = class FromURL extends up.Change {
     return {
       ...this.options, // contains preflight keys relevant for the request, e.g. { url, method }
       ...successAttrs, // contains meta information for an successful update, e.g. { layer, mode, context, target }
-      ...u.renameKeys(failAttrs, up.fragment.failKey), // contains meta information for a failed update, e.g. { failTarget },
+      ...u.withRenamedKeys(failAttrs, up.fragment.failKey), // contains meta information for a failed update, e.g. { failTarget },
       onProcessed: this._onRequestProcessed.bind(this), // handled by up.network after either queuing a request or reusing a cache hit
-
     }
   }
 
