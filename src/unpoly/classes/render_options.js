@@ -114,9 +114,27 @@ up.RenderOptions = (function() {
     }
   }
 
+  // Rename keys like { useData } to just { data }.
+  //
+  // When we parse render options from attributes, we need to infix some attributes
+  // with "-use-" to distinguish them from a similar attribute affecting the element itself.
+  // E.g. a[up-data] is a link's own structured data, but a[up-use-data] overrides data
+  // for the first fragment updated by the link once clicked.
+  //
+  // For reasons of aesthetics and conciseness, we still prefer the render option to just
+  // be { data, dataMap }, not { useData, useDataMap }. Because we otherwise have full symmetry
+  // between attributes and options, *except* for this one distinction, we also accept
+  // { useData } for { data }.
+  function removeUsePrefix(options) {
+    u.renameKey(options, 'useData', 'data')
+    u.renameKey(options, 'useHungry', 'hungry')
+    u.renameKey(options, 'useKeep', 'keep')
+  }
+
   function preprocess(options) {
     up.migrate.preprocessRenderOptions?.(options)
     up.layer.normalizeOptions(options)
+    removeUsePrefix(options)
 
     const defaults = u.merge(
       up.fragment.config.renderOptions,
