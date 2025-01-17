@@ -1781,10 +1781,13 @@ up.util = (function() {
     return copy(list).reverse()
   }
 
-  function renameKeys(object, renameKeyFn) {
+  function withRenamedKeys(object, renameKeyFn) {
     const renamed = {}
     for (let key in object) {
-      renamed[renameKeyFn(key)] = object[key]
+      let transformed = renameKeyFn(key)
+      if (isGiven(transformed)) {
+        renamed[transformed] = object[key]
+      }
     }
     return renamed
   }
@@ -2330,7 +2333,7 @@ up.util = (function() {
     // unprefixCamelCase,
     camelToKebabCase,
     sprintf,
-    renameKeys,
+    withRenamedKeys,
     memoizeMethod,
     safeStringifyJSON,
     // groupBy,

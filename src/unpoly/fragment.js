@@ -2009,6 +2009,20 @@ up.fragment = (function() {
 
   const KEY_PATTERN = /^(onFail|on|fail)?(.+)$/
 
+  /*-
+  Removes a "fail" prefix or infix from an options key.
+
+  Returns `undefined` if the given key has no "fail" prefix or infix.
+
+  ## Examples
+
+  ```js
+  successKey('target')         // => undefined
+  successKey('onFinished')     // => undefined
+  successKey('failTarget')     // => 'target'
+  successKey('onFailFinished') // => 'onFinished'
+  ```
+  */
   function successKey(key) {
     let match = KEY_PATTERN.exec(key)
     if (match) {
@@ -2020,11 +2034,23 @@ up.fragment = (function() {
         case 'fail':
           return u.lowerCaseFirst(suffix)
       }
-
-      // Return undefined for prefixes "on" and undefined
     }
   }
 
+  /*-
+  Adds a "fail" prefix or infix from an options key.
+
+  Returns `undefined` if the key already has a "fail" prefix or infix.
+
+  ## Examples
+
+  ```js
+  failKey('target')         // => 'failTarget'
+  failKey('onFinished')     // => 'onFailFinished'
+  failKey('failTarget')     // => undefined
+  failKey('onFailFinished') // => undefined
+  ```
+  */
   function failKey(key) {
     let match = KEY_PATTERN.exec(key)
     if (match) {
@@ -2036,8 +2062,6 @@ up.fragment = (function() {
         case undefined:
           return 'fail' + u.upperCaseFirst(suffix)
       }
-
-      // Return undefined for prefixes "onFail" and "fail"
     }
   }
 

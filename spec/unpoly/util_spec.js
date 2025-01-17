@@ -2349,21 +2349,37 @@ describe('up.util', () => {
       }))
     })
 
-    describe('up.util.renameKeys', function() {
+    describe('up.util.withRenamedKeys', function() {
 
       it('returns a copy of the given object, but with keys transformed by the given function', function() {
         const source = { foo: 1, bar: 2 }
         const upcase = str => str.toUpperCase()
-        const copy = up.util.renameKeys(source, upcase)
+        const copy = up.util.withRenamedKeys(source, upcase)
         expect(copy).toEqual({ FOO: 1, BAR: 2 })
       })
 
       it('does not change the given object', function() {
         const source = { foo: 1 }
         const upcase = str => str.toUpperCase()
-        up.util.renameKeys(source, upcase)
+        up.util.withRenamedKeys(source, upcase)
         expect(source).toEqual({ foo: 1  })
       })
+
+      it('omits keys for which the function returns undefined', function() {
+        const source = { foo: 1, bar: 2 }
+        const transformKey = str => {
+          if (str === 'bar') return str.toUpperCase()
+        }
+        expect(transformKey('foo')).toBe(undefined)
+        expect(transformKey('bar')).toBe('BAR')
+
+        const copy = up.util.withRenamedKeys(source, transformKey)
+
+        expect(copy).toEqual({ BAR: 2 })
+        expect(copy).not.toHaveKey('foo')
+        expect(copy).not.toHaveKey('undefined')
+      })
+
     })
 
 //    describe 'up.util.unprefixCamelCase', ->
