@@ -169,8 +169,6 @@ up.migrate.preprocessRenderOptions = function(options) {
     options.abort = false
   }
 
-  up.migrate.fixKey(options, 'useKeep', 'keep')
-  up.migrate.fixKey(options, 'useHungry', 'hungry')
   up.migrate.fixKey(options, 'failOnFinished', 'onFailFinished')
   up.migrate.fixKey(options, 'badResponseTime', 'lateDelay')
 

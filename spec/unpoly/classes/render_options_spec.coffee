@@ -15,6 +15,17 @@ describe 'up.RenderOptions', ->
       expect(options.layer).toBe('new')
       expect(options.mode).toBe('drawer')
 
+    it 'removes the "use" prefix from option keys', ->
+      givenOptions = { target: '#content', useHungry: false, useKeep: false, useData: { foo: 'bar' }}
+      options = up.RenderOptions.preprocess(givenOptions)
+      expect(options.target).toBe('#content')
+      expect(options.hungry).toBe(false)
+      expect(options).not.toHaveKey('useHungry')
+      expect(options.keep).toBe(false)
+      expect(options).not.toHaveKey('useKeep')
+      expect(options.data).toEqual({ foo: 'bar' })
+      expect(options).not.toHaveKey('useData')
+
     describe 'with { navigate: true }', ->
 
       it 'sets defaults appropriate for user navigation', ->
