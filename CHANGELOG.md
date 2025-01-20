@@ -279,7 +279,7 @@ Unpoly 3.10 makes it easier to render lists of mixed `Text` and `Element` nodes:
 - New property `up.Request#ended` indicates whether this request is no longer waiting for the network for any reason. It is `true` when the server has responded or when the request
   [failed](/failed-responses) or was [aborted](/aborting-requests).
 - The attribute `[up-flashes]` is now stable (discussion #679)
-- The `up.feedback` package has been renamed to `up.status`.
+- ❌ The `up.feedback` package has been renamed to `up.status`.
 - Fix a bug where a link with `[up-confirm]` would show the confirmation dialog before [preloading](/preloading).
 - Fix a crash with `up.submit({ submitButton: false })`.
 - Fix a bug where rendering with `{ focus: 'keep' }` would sometimes re-focus elements that never lost focus.
