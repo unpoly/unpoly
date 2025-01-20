@@ -2493,7 +2493,7 @@ up.fragment = (function() {
   <a href="/foo" up-target=".profile">...</a>
   ```
 
-  ### Overlays can use different main targets
+  ### Overlays can use different main targets {#overlays}
 
   Overlays often use a different default selector, e.g. to exclude a navigation bar.
 
