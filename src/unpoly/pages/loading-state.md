@@ -27,7 +27,7 @@ See [Feedback classes](/feedback-classes) for details and examples.
 Showing placeholders
 --------------------
 
-Placeholders are a temporary spinners or UI skeletons shown while a fragment is loading:
+Placeholders are temporary spinners or UI skeletons shown while a fragment is loading:
 
 ```html
 <a href="/path" up-target="#target" up-placeholder="Loading…">Show story</a> <!-- mark-phrase "Loading…" -->

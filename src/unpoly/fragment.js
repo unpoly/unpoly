@@ -2415,6 +2415,9 @@ up.fragment = (function() {
   /*-
   A pseudo-selector that matches the layer's [main content area](/up-main).
 
+  Use `:main` to only update the main page content, while keeping static layout elements around it.
+  To replace all visible elements of a layer, see `:layer`.
+
   ### Targeting the main element
 
   You can target the main element using the `:main` selector:
@@ -2624,19 +2627,37 @@ up.fragment = (function() {
   Your [target selectors](/targeting-fragments) may use this pseudo-selector
   to replace the layer's topmost swappable element.
 
-  The topmost swappable element is the first child of the layer's container element.
-  For the [root layer](/up.layer.root) it is the `<body>` element. For an overlay
-  it is the target with which the overlay was opened with.
+  The topmost swappable element is the first child of the layer's container element:
 
-  In canonical usage the topmost swappable element is often a [main element](/up-main).
+  - For the [root layer](/up.layer.root) it is the `<body>` element.
+  - For an overlay it is the `{ target }` that the overlay was opened with.
+  - If an overlay was opened with an explicit target, Unpoly will create a [main element](/up-main).
+    This main element becomes the topmost swappable target.
 
-  ### Example
+  Use `:layer` to replace all visible elements of a layer. To only update a layer's main content area
+  while keeping static layout elements around it, see `:main`.
 
-  The following will replace the `<body>` element in the root layer,
-  and the topmost swappable element in an overlay:
+  ## Example
+
+  We open an overlay with a target selector `#target`:
+
+  ```
+  up.layer.open({ target: '#foo', content: 'Hello from overlay' })
+  ```
+
+  The topmost swappable element is now `#foo`, which we can select with `:layer`:
 
   ```js
-  up.render(':layer', { url: '/page2' })
+  // targets '#foo`'
+  up.render({ target: ':layer', url: '/page2' })
+  ```
+
+  The resolution of `:target` depends on the targeted layer. For example, when rendering in
+  the root layer, `:target` will resolve to the `<body>`:
+
+  ```js
+  // targets the body
+  up.render({ target: ':layer', layer: 'root', url: '/page2' })
   ```
 
   @selector :layer

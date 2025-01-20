@@ -4,6 +4,9 @@ Templates
 By embedding `<template>` elements into your responses, your frontend can clone HTML fragments without making
 another server request.
 
+While Unpoly apps render on the server primarily, having client-side templates can be useful
+for [placeholders](/placeholders), small [overlays](/opening-overlays), or [optimistic rendering](/optimistic-rendering).
+
 
 Rendering a template
 --------------------
@@ -72,17 +75,22 @@ this template in various places, but set a custom element text every time:
 ```html
 <template id="task-template">
   <div class="task">
-    Custom task description here <!-- mark-phrase "Custom task description here" -->
+    {{taskDescription}} <!-- mark-phrase "{{taskDescription}}" -->
   </div>
 </template>
 ```
 
-Below we will look at various ways to achieve this.
+There are multiple methods to implement template variables, including [compilers](#compiler-postprocessing),
+[template engines](#template-engines) and post-processing [callbacks]({#callback-postprocessing}).
 
 
-### Option 1: Post-processing in a compiler {#compiler-postprocessing}
+### <em class="heading-prefix">Option 1</em> Processing compiler data {#compiler-postprocessing}
 
-When we reference a template, we can pass a [data object](/data) for the cloned element as an
+Templates can be cloned with a [data object](/data), which is passed to any compiler function
+that compiles the cloned element. This is a very low-tech way to implement template variables
+without using a [templating engine](#templating-engine).
+
+When we reference a template, we can pass a data object for the cloned element as an
 [`[up-use-data]`](/up-follow#up-use-data) attribute:
 
 ```html
@@ -112,7 +120,7 @@ In that case we can append the data object after the template selector:
 ```
 
 
-### Option 2: Using a templating engine {#templating-engine}
+### <em class="heading-prefix">Option 2</em> Using a templating engine {#templating-engine}
 
 Sometimes we want to render a complex data object:
 
@@ -187,10 +195,7 @@ up.on('up:template:clone', '[type="text/minimustache"]', function(event) { // ma
 })
 ```
 
-
-
-
-### Option 3: Modifying the element programmatically {#callback-postprocessing}
+### <em class="heading-prefix">Option 3</em> Modifying the element programmatically {#callback-postprocessing}
 
 You can use the [`[up-on-rendered]`](/up-follow#up-on-rendered) attribute to change the template element
 after it was cloned and inserted. The callback is provided with an `up.RenderResult` which

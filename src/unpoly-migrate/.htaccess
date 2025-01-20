@@ -42,6 +42,9 @@ RedirectPermanent /offline /network-issues
 RedirectPermanent /handling-disconnects /network-issues
 RedirectPermanent /cache /caching
 RedirectPermanent /targeting-elements /targeting-fragments
+RedirectPermanent /targeting /targeting-fragments
+RedirectPermanent /target /targeting-fragments
+RedirectPermanent /targets /targeting-fragments
 
 RedirectPermanent /focus-option /focus
 RedirectPermanent /focusing /focus
@@ -124,3 +127,5 @@ RedirectPermanent /nav /navigation-bars
 RedirectPermanent /up.navigation /up.status
 RedirectPermanent /up.feedback /up.status
 
+RedirectPermanent /navigate /navigation
+RedirectPermanent /navigating /navigation
