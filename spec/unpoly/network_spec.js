@@ -364,6 +364,25 @@ describe('up.network', function() {
             expect(jasmine.Ajax.requests.count()).toEqual(1)
           })
 
+          it('does not duplicate cache entries when the server redirects to a cached path, but uses a fully qualified URL', async function() {
+            up.request('/foo', { cache: true })
+
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            jasmine.respondWith({
+              responseHeaders: {
+                'X-Up-Location': `http://${location.host}/foo`,
+                'X-Up-Method': 'GET'
+              }
+            })
+
+            await wait()
+
+            expect(up.network.isBusy()).toBe(false)
+            expect(up.cache._size).toBe(1)
+          })
+
           it('does not considers a redirection URL an alias for the requested URL if the original request was never cached', asyncSpec(function(next) {
             up.request('/foo', {cache: false}) // POST requests are not cached
 

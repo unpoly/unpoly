@@ -884,7 +884,10 @@ up.protocol = (function() {
     // To prevent these these `_up` params from showing up in the browser URL,
     // the X-Up-Location header will omit these params while `xhr.responseURL`
     // will still contain them.
-    return extractHeader(xhr, 'location') || xhr.responseURL
+    let location = extractHeader(xhr, 'location') || xhr.responseURL
+    if (location) {
+      return u.normalizeURL(location)
+    }
   }
 
   /*-

@@ -1453,6 +1453,10 @@ describe('up.util', () => {
         expect(up.util.normalizeURL('/foo')).toBe("/foo")
       })
 
+      it('removes protocol, hostname and port for a URL from this host', () => {
+        expect(up.util.normalizeURL(`http://${location.host}/foo/bar`)).toBe('/foo/bar')
+      })
+
       it('preserves a protocol and hostname for a URL from another domain', () => {
         expect(up.util.normalizeURL('http://example.com/foo/bar')).toBe('http://example.com/foo/bar')
       })

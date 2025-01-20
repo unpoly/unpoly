@@ -284,6 +284,7 @@ Unpoly 3.10 makes it easier to render lists of mixed `Text` and `Element` nodes:
 - Fix a crash with `up.submit({ submitButton: false })`.
 - Fix a bug where rendering with `{ focus: 'keep' }` would sometimes re-focus elements that never lost focus.
 - Fix a bug where opening an overlay would stop infinite scrolling (discussion #694).
+- Fix a bug where Unpoly would create duplicate cache entries when the server redirects to a fully qualified URL (with protocol and hostname).
 
 
 
