@@ -81,14 +81,14 @@ this template in various places, but set a custom element text every time:
 ```
 
 There are multiple methods to implement template variables, including [compilers](#compiler-postprocessing),
-[template engines](#template-engines) and post-processing [callbacks]({#callback-postprocessing}).
+[template engines](#template-engine) and post-processing [callbacks](#callback-postprocessing).
 
 
 ### <em class="heading-prefix">Option 1</em> Processing compiler data {#compiler-postprocessing}
 
 Templates can be cloned with a [data object](/data), which is passed to any compiler function
 that compiles the cloned element. This is a very low-tech way to implement template variables
-without using a [templating engine](#templating-engine).
+without using a [template engine](#template-engine).
 
 When we reference a template, we can pass a data object for the cloned element as an
 [`[up-use-data]`](/up-follow#up-use-data) attribute:
@@ -120,7 +120,7 @@ In that case we can append the data object after the template selector:
 ```
 
 
-### <em class="heading-prefix">Option 2</em> Using a templating engine {#templating-engine}
+### <em class="heading-prefix">Option 2</em> Using a template engine {#template-engine}
 
 Sometimes we want to render a complex data object:
 
@@ -139,7 +139,7 @@ Sometimes we want to render a complex data object:
 
 For this we need a more expressive template with variables, loops or conditions.
 
-There are [countless templating engines](https://awesome-javascript.js.org/resources/templating-engines.html) to choose from.
+There are [countless template engines](https://awesome-javascript.js.org/resources/templating-engines.html) to choose from.
 For this example we're going to use templates in the style of
 [Mustache.js](https://github.com/janl/mustache.js) or [Handlebars](https://handlebarsjs.com/):
 
@@ -163,7 +163,7 @@ For this example we're going to use templates in the style of
 
 #### Parsing template expressions
 
-Unpoly does not ship with a templating engine, but makes it very easy to implement
+Unpoly does not ship with a template engine, but makes it very easy to implement
 or integrate your own:
 
 - Listen to the `up:template:clone` event on your custom template elements.
@@ -171,7 +171,7 @@ or integrate your own:
 - Set `event.nodes` to a [list](/List) of [`Node`](https://developer.mozilla.org/en-US/docs/Web/API/Node) objects representing
 the template results.
 
-#### Example integrations {#templating-engine-example}
+#### Example integrations {#template-engine-example}
 
 An event handler for an Mustache integration would look like this:
 

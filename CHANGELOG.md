@@ -95,7 +95,7 @@ To refer to a template, pass its CSS selector to any attribute or option that ac
 Sometimes we want to clone a template, but with variations. For example, we may want to change a piece of text, or vary the size of a component.
 
 Unpoly 3.10 offers many methods to implement [dynamic templates with variables](/templates#dynamic).
-You can even [integrate templating engines](/templates#templating-engine) like [Mustache.js](https://github.com/janl/mustache.js) or [Handlebars](https://handlebarsjs.com/):
+You can even [integrate template engines](/templates#template-engine) like [Mustache.js](https://github.com/janl/mustache.js) or [Handlebars](https://handlebarsjs.com/):
 
 ```html
 <script id="results-template" type="text/mustache"> <!-- mark-phrase "text/mustache" -->
@@ -393,7 +393,7 @@ This release improves the handling of faux-interactive elements:
 - Fix: up-alias not matching URL query string with asterix after shash (#542)
 - Fix a bug where an overlay with viewport would not correctly shift multiple right-fixed elements
 - `[up-defer]` elements no longer have a hand cursor
-- Events like `up:link:follow` can now [open a layer with a given mode](/opening-overlays#overlay-modes) using the shorthand notation `event.renderOptions.layer = "new drawer"`.
+- Events like `up:link:follow` can now [open a layer with a given mode](/opening-overlays#modes) using the shorthand notation `event.renderOptions.layer = "new drawer"`.
 - Avoid logging `Uncaught AbortError` when the user presses the back button, but a script prevents the `up:location:restore` event.
 - Avoid logging `Uncaught AbortError` when the user closes the overlay, but a script prevents the `up:layer:dismiss` or `up:layer:accept` event.
 - Reduce the number of [layer lookups](/up.layer.get) during a render pass.
@@ -842,7 +842,7 @@ This release addresses many edge cases with features that watch form fields for 
 3.6.1
 -----
 
-- Fix a bug where [new overlays](/opening-overlays) would not have history if the initial fragment matches a [layer-specific main target](https://unpoly.com/up-main#overlays-can-use-different-main-targets) like `[up-main=modal]`.
+- Fix a bug where [new overlays](/opening-overlays) would not have history if the initial fragment matches a [layer-specific main target](https://unpoly.com/up-main#overlays) like `[up-main=modal]`.
 
 
 3.6.0

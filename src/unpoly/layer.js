@@ -422,7 +422,7 @@ up.layer = (function() {
 
     The given `{ target }` must be matchable within the HTML provided by either `{ url }`, `{ content }`, `{ fragment }` or `{ document }` option.
 
-    If the `{ target }` option is emitted, Unpoly will use the first matching [main target](/up-main) configured for the overlay mode. E.g. the default selectors for modals are configured in `up.layer.config.modal.mainTargets`. See [main targets in overlays](/up-main#overlays-can-use-different-main-targets).
+    If the `{ target }` option is emitted, Unpoly will use the first matching [main target](/up-main) configured for the overlay mode. E.g. the default selectors for modals are configured in `up.layer.config.modal.mainTargets`. See [main targets in overlays](/up-main#overlays).
 
   @param {string} [options.url]
     The URL to fetch from the server.

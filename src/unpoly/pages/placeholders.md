@@ -105,9 +105,9 @@ can append variables as a data object after the template selector:
 ```
 
 There are [many ways](/templates#dynamic) to process template variables, including
-the [use of compilers](/templates#compiler-postprocessing) or [templating engines](/templates#templating-engine).
+the [use of compilers](/templates#compiler-postprocessing) or [template engines](/templates#template-engine).
 This example uses the minimal `text/minimustache` templating function
-that you can [copy into your project](/templates#templating-engine-example):
+that you can [copy into your project](/templates#template-engine-example):
 
 ```html
 <script id="loading-template" type="text/minumustache">

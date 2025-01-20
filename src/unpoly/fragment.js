@@ -3009,7 +3009,7 @@ up.fragment = (function() {
   /*-
   Clones a [template](/templates) element.
 
-  Emits the `up:template:clone` event. You can use that event to integrate [templating engines](/templates)
+  Emits the `up:template:clone` event. You can use that event to integrate [template engines](/templates)
   like Mustache, EJS or Handlebars.
 
   ### Example
@@ -3060,7 +3060,7 @@ up.fragment = (function() {
 
   ### Integrating template engines
 
-  Listeners can use this event to [integrate templating engines](/templates#dynamic) by following these steps:
+  Listeners can use this event to [integrate template engines](/templates#dynamic) by following these steps:
 
   - Listen to the `up:template:clone` event on selected `<template>` or `<script>` elements.
   - Process the given template (`event.target`) and data (`event.data`).
