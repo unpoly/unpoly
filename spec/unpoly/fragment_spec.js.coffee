@@ -8494,6 +8494,25 @@ describe 'up.fragment', ->
             expect(up.network.isBusy()).toBe(false)
             expect('.target').toHaveText('verified text')
 
+          it 'reloads expired content that was rendered into a new overlay', ->
+            up.render('.target', { layer: 'new', url: '/cached-path', cache: true, revalidate: true })
+
+            await wait()
+
+            expect(up.layer.current).toBeOverlay()
+            expect('up-modal .target').toHaveText('cached text')
+
+            expect(up.network.isBusy()).toBe(true)
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.target')
+
+            jasmine.respondWithSelector('.target', text: 'verified text')
+
+            await wait()
+
+            expect(up.network.isBusy()).toBe(false)
+            expect(up.layer.current).toBeOverlay()
+            expect('up-modal .target').toHaveText('verified text')
+
           it 'reloads multiple targets', ->
             fixture('#foo', text: 'initial foo')
             fixture('#bar', text: 'initial bar')
