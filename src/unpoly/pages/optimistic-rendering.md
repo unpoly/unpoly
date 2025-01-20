@@ -22,7 +22,7 @@ Some suitable use cases include:
 - High-value screens where every conversion matters
 
 To limit the duplication of view logic, you may [use templates](#templates).
-This also confines HTML rendering to the server.
+By embedding templates into your responses, the server stays in control of HTML rendering.
 
 > [note]
 > Optimistic rendering is a recent feature in Unpoly, and inherently difficult in a server-driven approach.

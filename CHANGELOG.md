@@ -11,34 +11,34 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 3.10.0
 ------
 
+Unpoly 3.10 is a major feature relase, adding support for [client-side templates](/templates), [arbitrary loading state](/loading-state) and [optimistic rendering](/optimistic-rendering). It also contains many bug fixes and quality-of-life improvements, like [Relaxed JSON](/relaxed-json).
+
+This release contains some minor breaking changes, which are marked with the ❌ emoji in this CHANGELOG. All breaking changes are polyfilled by [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading).
+
 ### Arbitrary loading state with previews
 
-Unpoly 3.10 introduces [previews](/previews). Previews are temporary page changes while waiting for a network request.
-They signal that the app is working, or provide clues for how the page will ultimately look.
-Because previews immediately appear after a user interaction, their use
-increases the perceived responsiveness of your application.
+[Previews](/previews) are temporary page changes while waiting for a network request. They signal that the app is working, or provide clues for how the page will ultimately look. Because previews immediately appear after a user interaction, their use increases the perceived responsiveness of your application.
 
-When the request ends for [any reason](#ending), all preview changes will be reverted before
-the server response is processed. This ensures a consistent screen state in cases when
-a request is aborted, or when we end up updating a different fragment.
+When the request ends for [any reason](/previews#ending), all preview changes will be reverted before the server response is processed. This ensures a consistent screen state in cases when a request is aborted, or when we end up updating a different fragment.
 
-You can use previews to implement arbitrary [loading state](/loading-state).
-Two common applications of previews are [placeholders](/placeholders) and [optimistic rendering](/optimistic-rendering).
+You can use previews to implement arbitrary [loading state](/loading-state). Two common applications of previews are [placeholders](/placeholders) and [optimistic rendering](/optimistic-rendering).
 
 
 ### Placeholders
 
-Unpoly 3.10 supports [placeholders](/placeholders). Placeholders are a temporary spinners or UI skeletons shown while a fragment is loading.
+[Placeholders](/placeholders) are temporary spinners or UI skeletons shown while a fragment is loading:
 
-To show a placeholder while a link is loading, set an `[up-placeholder]` attribute
-with the placeholder's HTML as its value:
+<video src="images/placeholders.webm" controls width="600" aria-label="UI skeletons are shown while screens are loading"></video>
+
+To show a placeholder while a link is loading, set an `[up-placeholder]` attribute with the placeholder's HTML as its value:
 
 ```html
 <a href="/path" up-follow up-placeholder="<p>Loading…</p>">Show story</a> <!-- mark-phrase "up-placeholder" -->
 ```
 
-Instead of passing the placeholder HTML directly, you can also refer to any [template](/templates)
-by its CSS selector:
+When the link is clicked, the targeted fragment's content is replaced by the placeholder markup temporarily. When the request ends for [any reason](/previews#ending), the placeholder is removed and the original page state restored.
+
+Instead of passing the placeholder HTML directly, you can also refer to any [template](/templates) by its CSS selector:
 
 ```html
 <a href="/path" up-follow up-placeholder="#loading-template">Show story</a> <!-- mark-phrase "#loading-message" -->
@@ -50,24 +50,90 @@ by its CSS selector:
 </template>
 ```
 
-
-
 ### Optimistic rendering
 
-Unpoly 3.10 supports [optimistic rendering](/optimistic-rendering) as an application of previews and templates.
-This is a pattern where we update the page without waiting for the server to respond. When the server eventually does respond, the optimistic change is reverted and replaced by the server-confirmed content.
+Unpoly 3.10 supports [optimistic rendering](/optimistic-rendering) as an application of previews and templates. This is a pattern where we update the page without waiting for the server to respond. When the server eventually does respond, the optimistic change is reverted and replaced by the server-confirmed content.
 
 For example, this is the [*Tasks* tab](https://demo.unpoly.com/tasks) in the official [demo app](https://demo.unpoly.com) running with 1000 ms latency. Note how the UI updates instantly, without waiting for the server:
 
 <video src="images/optimistic-rendering-demo.mp4" controls width="600" aria-label="The demo app reacting instantly under high latency"></video>
 
+Since optimistic rendering requires additional code, we recommend to use it for interactions where the duplication is low, or where the extra effort adds ignificant value for the user. Some suitable use cases include:
+
+- Forms with few or simple validations (e.g. adding a todo)
+- Forms where users would expect an immediate effect (e.g. submitting a chat message)
+- Re-ordering items with drag'n'drop (because most logic is already on the client)
+- High-value screens where every conversion matters
+
+To limit the duplication of view logic, you may [use templates](#client-side-templating). By embedding templates into your responses, the server stays in control of HTML rendering.
+
+
+### Client-side templating
+
+While Unpoly apps render on the server primarily, having client-side templates can be useful
+for [placeholders](/placeholders), small [overlays](/opening-overlays), or [optimistic rendering](/optimistic-rendering).
+
+To refer to a template, pass its CSS selector to any attribute or option that accepts HTML:
+
+
+```html
+<a href="#" up-target=".target" up-document="#my-template">Click me</a> <!-- mark-phrase "#my-template" -->
+
+<div class="target">
+  Old content
+</div>
+
+<template id="my-template"> <!-- mark-phrase "my-template" -->
+  <div class="target">
+    New content
+  </div>
+</template>
+```
+
+#### Template variables
+
+Sometimes we want to clone a template, but with variations. For example, we may want to change a piece of text, or vary the size of a component.
+
+Unpoly 3.10 offers many methods to implement [dynamic templates with variables](/templates#dynamic).
+You can even [integrate templating engines](/templates#templating-engine) like [Mustache.js](https://github.com/janl/mustache.js) or [Handlebars](https://handlebarsjs.com/):
+
+```html
+<script id="results-template" type="text/mustache"> <!-- mark-phrase "text/mustache" -->
+  <div id="game-results">
+    <h1>Results of game {{gameCount}}</h1>
+
+    {{#players}}
+      <p>{{name}} has scored {{score}} points.</p>
+    {{/players}}
+  </div>>
+</script>
+```
+
+
+### Relaxed JSON
+
+Unpoly now supports [relaxed JSON](/relaxed-json) in all attributes and options where it also accepts JSON. Relaxed JSON is a JSON dialect that that aims to be easier to write by humans. It supports syntactic sugar that you enjoy with JavaScript [object literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Object_initializer):
+
+- Unquoted property names
+- Single-quoted strings
+- Trailing commas
+
+For example, you can now write `[up-data]` like this:
+
+```html
+<span class="user" up-data="{ name: 'Bob', age: 18 }">Bob</span>
+```
+
+When Unpoly outputs HTML (e.g. for the `X-Up-Context` header) it always produces regular JSON.
+
 
 ### Progress bar
 
-- The [progress bar](/progress-bar) will no longer restart its animation when a request is immediately followed by another request.
+Improvements have been made to the [global progress bar](/progress-bar), which appears when requests are tooking long to load:
+
+- The progress bar will no longer restart its animation when a request is immediately followed by another request.
  
-  For example, when a user changes an `[up-autosubmit]` form that is already waiting for a request, a second request
-  is sent after the first request has loaded. The progress bar will now show one uninterrupted animation until all requests have loaded.
+  For example, when a user changes an `[up-autosubmit]` form that is already waiting for a request, a second request is sent after the first request has loaded. The progress bar will now show one uninterrupted animation until all requests have loaded.
 
 - Old versions have used a "bad response time" setting to define the delay until the [progress bar](/progress-bar) is shown.
   This setting has been renamed to "late delay" everywhere:
@@ -84,60 +150,11 @@ For example, this is the [*Tasks* tab](https://demo.unpoly.com/tasks) in the off
 
 
 
-### Native `:has()` selector
-
-For almost 10 years Unpoly has polyfilled the [`:has()`](https://developer.mozilla.org/en-US/docs/Web/CSS/:has) pseudo-selector for all browsers. Since then the selector has been standardized and has received [great browser support](https://caniuse.com/css-has).
-
-Starting with this release, Unpoly will no longer include a polyfill and use the browser's native `:has()` support.
-Unpoly will no longer boot on old browsers that don't support `:has()` natively.
-
-
-### Relaxed JSON
-
-Unpoly now supports [relaxed JSON](/relaxed-json) in all attributes and options where it also accepts JSON.
-Relaxed JSON is a JSON dialect that that aims to be easier to write by humans. It supports syntactic sugar
-that you know from JavaScript [object literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Object_initializer):
-
-- Unquoted property names
-- Single-quoted strings
-- Trailing commas
-
-For example, you can now write `[up-data]` like this:
-
-```html
-<span class="user" up-data="{ name: 'Bob', age: 18 }">Bob</span>
-```
-
-When Unpoly outputs HTML (e.g. for the `X-Up-Context` header) it always produces regular JSON.
-
-
-### Template support
-
-- You can now pass a selector to a [template](/templates) to `[up-content]`, `[up-fragment]`, or `[up-document]`. The template will be cloned and its copy inserted into the page.
-- Support for [dynamic templates with variables](/templates#dynamic).
-
-
-### Rendering strings
-
-- `[up-content]` now longer requires a single node for its value. It now also accepts multiple elements, or a mix of elements and text nodes.
-- `{ content }` now accepts any `List<Node>`, e.g. the `NodeList` returned by `querySelectorAll()`.
-
-
-### Watching fields for changes
-
-- The `[up-watch]` callback can now use an `options` argument. It contains an object of all [watch options](/watch-options) parsed from that field, e.g. `{ disable, preview, placeholder }`.
-- The watch options `{ event, delay }` will no longer be passed to callbacks of `up.watch()` and `[up-watch]`, as these options have already been processed by Unpoly.
-- `up.watch()` and `[up-watch]` will no longer process an `[up-watch-disable]` attribute. Instead the attribute is only parsed and passed to the callback as a `{ disable }` option. It is up to the callback to forward the option it to any rendering function that supports `{ disable }`.
-- Fix a bug where `up.autosubmit()` options did not override options parsed from `[up-watch-...]` prefixed attributes. It is convention in Unpoly that JavaScript options [always take precedence](/attributes-and-options#options) over HTML attributes.
-
-
-### Target derivation
-
-- [Deriving](/target-derivation#derivation-patterns) a target selector for an element using `up.fragment.toTarget()` now supports a `{ strong: true }` option. This produces a more unique selector by only considering the element's `[id]` and `[up-id]` attributes. Weaker [derivation patterns](/target-derivation#derivation-patterns), like the element's class, are not considered in strong mode. The element's tag name is only considered for singleton elements like `<html>` or `<body>`.
-- When a [validated](/validation#validating-after-changing-a-field) field wants to update its form group, that form group is no longer targeted by its `[class]`, which would often be ambigous. Instead the form group is only targeted by its `[id]` or `[up-id]` attribute. If the form group doesn't have an `[id]` or `[up-id]` attribute, it is targeted with a `.has()` selector referencing the changed field, e.g. `fieldset:has(#changed-field)`.
 
 
 ### Disabling form fields
+
+Unpoly 3.0 has added the `[up-disable]` attribute to [disable forms while working](/disabling-forms). This release adds the following features:
 
 - When fields are [disabled](/disabling-forms) during a render pass, and a field loses its focus, that field is now re-focused when the field is re-renabled afterwards.
 - You can now [disable form fields when the user activates a hyperlink](/disabling-forms#from-link).
@@ -145,14 +162,6 @@ When Unpoly outputs HTML (e.g. for the `X-Up-Context` header) it always produces
 - New configuration `up.form.config.genericButtonSelectors`.
 - The `{ disable }` option now also accepts an `Element` (or an array of elements) to disable.
 
-
-### Better selector parsing
-
-Unpoly 3.10 is smarter when parsing values with structured grammar, and no longer relies
-on magic strings to split complex expressions.
-
-For example, Unpoly can now process more complex target selectors.
-Selectors like `.foo:has(.bar, .baz)` or `.foo[attr="one, two"]` used to cause   quirky behavior, but are now parsed correctly.
 
 
 ### Tokens are separated by comma
@@ -167,7 +176,7 @@ While this is still possible, the new canonical way is to separate tokens with a
 | ✅ `[up-alias="/foo /bar"]` | ✅ `[up-alias="/foo, /bar"]` |
 | ✅`up.on('event1 event2', fn)` | ✅ `up.on('event1, event2', fn)` |
 
-In some cases tokens would be separated by an `or` operator. This is no longer supported.
+In some cases tokens used to be separated by an `or` operator. This is no longer supported.
 Use a comma instead:
 
 | Old form (now invalid) | New form |
@@ -176,53 +185,106 @@ Use a comma instead:
 | ❌ `[up-focus="target or main"]` | ✅ `[up-scroll="target, main"]` |
 
 
+
 ### Feedback classes
 
-- The [feedback classes](/feedback-classes) `.up-active` and `.up-current`
-  are now always enabled by default (even when not navigating).
-  They can still disabled explicitly with an `[up-feedback=false]` attribute or a `{ feedback: false }` option.
+Unpoly assigns the `.up-active` class to clicked links and submit buttons, and `.up-loading` to targeted fragments that are loading new content.
+
+These [feedback classes](/feedback-classes) have been reworked to make it easier to select working elements from CSS and JavaScript:
+
+- `.up-active` and `.up-loading` are now always enabled by default (even when not [navigating](/navigation)). They can still disabled explicitly with an `[up-feedback=false]` attribute or a `{ feedback: false }` option.
 - When submitting a form, the `<form>` element now also receives the `.up-active` class (in addition to the submit button).
 - When submitting a form from a focused field, the default submit button now also receives the `.up-active` class (in addition to the field and the `<form>`).
 - Added a configuration `up.status.config.activeClasses`. This allows to set custom CSS classes for working links and forms.
 - Added a configuration `up.status.config.loadingClasses`. This allows to set custom CSS classes for targeted fragments that are loading new content.
 
 
-### Bootstrap plugin
-
-- Clicked links and buttons now receive the `.active` class.
 
 
-### Fragment API
+### Better selector parsing
+
+Unpoly 3.10 is smarter when parsing values with structured grammar, and no longer relies
+on magic strings to split complex expressions.
+
+For example, Unpoly can now process more complex target selectors.
+Selectors like `.foo:has(.bar, .baz)` or `.foo[attr="one, two"]` used to cause   quirky behavior, but are now parsed correctly.
+
+
+### Native `:has()` selector
+
+For almost 10 years Unpoly has polyfilled the [`:has()`](https://developer.mozilla.org/en-US/docs/Web/CSS/:has) pseudo-selector for all browsers. Since then the selector has been standardized and has received [great browser support](https://caniuse.com/css-has).
+
+Starting with this release, Unpoly will no longer include a polyfill and use the browser's native `:has()` support. Unpoly will no longer boot on old browsers that don't support `:has()` natively.
+
+
+### Watching fields for changes
+
+Unpoly has several methods to detect and process changes in form fields, most notably `[up-watch]`, `[up-autosubmit]` and `[up-validate]`. This release includes the following changes:
+
+- The `[up-watch]` callback can now use an `options` argument. It contains an object of all [watch options](/watch-options) parsed from that field, e.g. `{ disable, preview, placeholder }`.
+- The watch options `{ event, delay }` will no longer be passed to callbacks of `up.watch()` and `[up-watch]`, as these options have already been processed by Unpoly.
+- ❌ `up.watch()` and `[up-watch]` will no longer process an `[up-watch-disable]` attribute. Instead the attribute is only parsed and passed to the callback as a `{ disable }` option. It is up to the callback to forward the option it to any rendering function that supports `{ disable }`.
+- Fix a bug where `up.autosubmit()` options did not override options parsed from `[up-watch-...]` prefixed attributes. It is convention in Unpoly that JavaScript options [always take precedence](/attributes-and-options#options) over HTML attributes.
+
+
+### Target derivation
+
+[Target derivation](/target-derivation#derivation-patterns) is the process of finding a discriminating CSS selector for an element.
+This release includes the following changes:
+
+- `up.fragment.toTarget()` now supports a `{ strong: true }` option. This produces a more unique selector by only considering the element's `[id]` and `[up-id]` attributes. Weaker [derivation patterns](/target-derivation#derivation-patterns), like the element's class, are not considered in strong mode. The element's tag name is only considered for singleton elements like `<html>` or `<body>`.
+- `up.fragment.toTarget()` can now skip [target verifcation](/target-derivation#verification) by passing a `{ verify: false }` option.
+- When a [validated](/validation#validating-after-changing-a-field) field wants to update its form group, that form group is no longer targeted by its `[class]`, which would often be ambigous. Instead the form group is only targeted by its `[id]` or `[up-id]` attribute. If the form group doesn't have an `[id]` or `[up-id]` attribute, it is targeted with a `.has()` selector referencing the changed field, e.g. `fieldset:has(#changed-field)`.
+
+
+
+
+### [Fragment API](/up.fragment)
 
 - New configuration `up.fragment.config.renderOptions`. This is an object of default render options to always apply, even when not [navigating](/navigation).
-- `up.fragment.toTarget()` can now skip [target verifcation](/target-derivation#verification) by passing a `{ verify: false}` option.
 - When calling `up.fragment.get()` with multiple search layers (e.g. `{ layer: "current, parent"}`), Unpoly will now search those layers in the given order.
 - Calling `up.fragment.get()` with an `Element`, that element is returned without further lookups.
 - New `[up-use-data]` attribute allows to [override data](/data#overriding) for the targeted fragment. The corresponding render options is `{ data }`.
-- The render option `{ useHungry }` has been renamed to `{ hungry }`, but `{ useHungry }` is still accepted as an alias. The corresponding HTML attribut remains `[up-use-hungry]` as to not conflict with `[up-hungry]`.
-- The render option `{ useKeep }` has been renamed to `{ keep }`, but `{ useKeep }` is still accepted as an alias. The corresponding HTML attribut remains `[up-use-keep]` as to not conflict with `[up-keep]`.
+- The render option `{ useHungry }` has been renamed to `{ hungry }`, but `{ useHungry }` is still accepted as an alias. The corresponding HTML attribute remains `[up-use-hungry]` as to not conflict with a link's or form's own `[up-hungry]` modifier.
+- The render option `{ useKeep }` has been renamed to `{ keep }`, but `{ useKeep }` is still accepted as an alias. The corresponding HTML attribute remains `[up-use-keep]` as to not conflict with a link's or form's own `[up-keep]` modifier.
 
 
-### Layers
+### [Layers](/up.layer)
 
+- Opening a new overlay with only a `{ mode }` option has been deprecated. Always pass a `{ layer: 'new' }` option in addition to `{ mode }`.
 - The layer option `{ dismissAriaLabel }` has been renamed to `{ dismissARIALabel }`
-- When opening a new layer with `[up-use-data]` or `{ data }`, that data is now applied to the topmost swappable element (and not to the overlay container).
+- When opening a new layer with `[up-use-data]` or `{ data }`, that data is now applied to the topmost swappable element (instead of to the overlay container). For example, `up.layer.open({ target: '#target', url: '/path', data: { ... }})` will apply the data object to the `#target` element.
 - When [opening an overlay](/opening-overlays), the property `Request#layer` is now set to `'new'` (instead of to the parent layer). Also the `#fragments` property is now set to `[]` (instead of to the parent layer's main element)
-- Opening a new overlay with only a `{ mode }` option has been deprecated. Always pass a `{ layer: 'new' }` option.
+
+
+### Working with node lists
+
+Many Unpoly functions have traditionally expected content with a single DOM element at its root.
+Unpoly 3.10 makes it easier to render lists of mixed `Text` and `Element` nodes:
+
+- `[up-content]` now also accepts multiple elements, or a mix of `Text` and `Element` siblings.
+- `{ content }` now accepts any `List<Node>`, e.g. the `NodeList` returned by `querySelectorAll()`.
+- New experimental function `up.element.createNodesFromHTML()`. This parses a [list](/List) of [nodes](https://developer.mozilla.org/en-US/docs/Web/API/Node) from a string of HTML. Unlike `up.element.createFromHTML()`, this new function does not require a single root element in the HTML. It can parse `Text` nodes, or a mixed list of `Text` and `Element` siblings.
+
+
+### Bootstrap plugin
+
+- Clicked links and submit buttons now receive the `.active` class.
 
 
 ### Other changes
 
-- Clicking a link with a page-local `#hash` in the `[href]` will now honor fixed layout obstructions if the browser location is already on that `#hash`.
+- Clicking a link with a page-local `#hash` in the `[href]` will now honor [fixed layout obstructions](/up-fixed-top) if the browser location is already on that `#hash`.
 - You can now [embed CSP nonces](/csp) into the attribute callbacks `[up-on-keep]`, `[up-on-hungry]` and `[up-on-opened]`.
-- New property `up.Request#ended` indicates whether this request is no longer waiting for the network. It is `true` when the server has responded or when the request
-  failed or was aborted.
+- New property `up.Request#ended` indicates whether this request is no longer waiting for the network for any reason. It is `true` when the server has responded or when the request
+  [failed](/failed-responses) or was [aborted](/aborting-requests).
+- The attribute `[up-flashes]` is now stable (discussion #679)
+- The `up.feedback` package has been renamed to `up.status`.
 - Fix a bug where a link with `[up-confirm]` would show the confirmation dialog before [preloading](/preloading).
 - Fix a crash with `up.submit({ submitButton: false })`.
 - Fix a bug where rendering with `{ focus: 'keep' }` would sometimes re-focus elements that never lost focus.
-- The attribute `[up-flashes]` is now stable (discussion #679)
-- The `up.feedback` package has been renamed to `up.status`.
-- Experimental function `up.element.createNodesFromHTML()`. This parses a [list](/List) of [nodes](https://developer.mozilla.org/en-US/docs/Web/API/Node) from a string of HTML.
+- Fix a bug where opening an overlay would stop infinite scrolling (discussion #694).
+
 
 
 3.9.5
@@ -4284,7 +4346,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 ### Compatible changes
 
 - When used with the [Ruby on Rails unobtrusive scripting adapter](https://github.com/rails/jquery-ujs) (`rails_ujs.js`),
-  now prevents duplicate form submission when Unpoly attributes are mixed with `data-method` attributes.
+  now prevents duplicate form submission when Unpoly attributes are mixed with `[data-method]` attributes.
 - `[up-instant]` now works with modals and popups
 - `[up-expand]` now works with modals and popups
 

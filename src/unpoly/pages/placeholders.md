@@ -1,7 +1,7 @@
 Placeholders
 ============
 
-Placeholders are a temporary spinners or UI skeletons shown while a fragment is loading.
+Placeholders are temporary spinners or UI skeletons shown while a fragment is loading.
 
 Placeholders appear instantly after a user interaction, without waiting for the server.
 They signal that the app is working, or by provide clues for how the page will ultimately look.

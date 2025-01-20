@@ -12,7 +12,7 @@ For example, the following callback would crash the fragment update with an erro
 This page outlines several solutions for this.
 
 
-### Solution 1: Move the callback into your JavaScript
+## <em class="heading-prefix">Option 1</em> Move the callback into your JavaScript
 
 One solution is to move the handler from the HTML to the JavaScript file that we loaded via an allowed `<script src>`.
 
@@ -31,7 +31,7 @@ up.on('up:link:follow', '.alert-on-loaded', (event) => {
 ```
 
 
-### Solution 2: Prefix a CSP nonce {#nonceable-attributes}
+## <em class="heading-prefix">Option 2</em> Prefix a CSP nonce {#nonceable-attributes}
 
 Unpoly lets you work around this by prefixing your callback with a [CSP nonce](https://content-security-policy.com/nonce/):
 
@@ -74,7 +74,7 @@ Neither to you need to update the `<meta>` tag with the latest nonce.
 > using the [`up.safe_callback()`](https://github.com/unpoly/unpoly-rails#allowing-callbacks-with-a-strict-csp) helper.
 
 
-### Solution 3: Relax your CSP
+## <em class="heading-prefix">Option 3</em> Relax your CSP
 
 Depending on your requirements, you may decide to prioritize developer convenience over a strict CSP.
 
