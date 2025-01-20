@@ -9,7 +9,7 @@ Use an [`[up-layer=new]`](/up-layer-new) attribute to open the fragment in a new
 <a href="/users/new/" up-layer="new">
 ```
 
-Overlay modes
+Overlay modes {#modes}
 -------------
 
 The overlay will open with the default [mode](/layer-terminology) (a modal dialog).
@@ -27,7 +27,7 @@ As a **shorthand** you may also append the layer mode to the `[up-layer=new]` at
 <a href="/users/new/" up-layer="new drawer">
 ```
 
-Close conditions
+Close conditions {#close-conditions}
 ----------------
 
 When opening an overlay, you may define a *condition* when the overlay interaction ends.
@@ -36,7 +36,7 @@ When the condition occurs, the overlay is automatically closed and a callback is
 See [close conditions](/closing-overlays#close-conditions) for details.
 
 
-Replacing existing overlays
+Replacing existing overlays {#replacing-existing-overlays}
 ---------------------------
 
 By default the new overlay will be stacked on top of the current layer. There is no limit for the number of stacked layers.
@@ -50,7 +50,7 @@ You can pass an option `[up-layer="swap"]` or `[up-layer="shatter"]` to replace 
 | `shatter`  | Closes all overlays and opens a new overlay.                           |
 
 
-Opening overlays from local content
+Opening overlays from local content {#string}
 ------------------------------------
 
 The [`[up-content]`](/up-follow#up-content) attribute lets you open an overlay without going through the server:
@@ -77,7 +77,7 @@ Instead of embedding an HTML string, you can also refer to a [template](/templat
 
 
 
-Opening overlays from JavaScript
+Opening overlays from JavaScript {#scripted}
 --------------------------------
 
 When rendering fragments from JavaScript, you can pass `{ layer: 'new' }` to open the fragment in a new overlay:

@@ -403,7 +403,7 @@ up.layer = (function() {
 
   Opening a layer is considered [navigation](/navigation) by default.
 
-  ### Example
+  ## Example
 
   ```js
   let layer = await up.layer.open({ url: '/contacts' })
@@ -416,6 +416,44 @@ up.layer = (function() {
     All [render options](/up.render#parameters) may be used.
 
     You may configure default layer attributes in `up.layer.config`.
+
+  @param {string} [options.target]
+    The selector of root element to place inside the overlay container.
+
+    The given `{ target }` must be matchable within the HTML provided by either `{ url }`, `{ content }`, `{ fragment }` or `{ document }` option.
+
+    If the `{ target }` option is emitted, Unpoly will use the first matching [main target](/up-main) configured for the overlay mode. E.g. the default selectors for modals are configured in `up.layer.config.modal.mainTargets`. See [main targets in overlays](/up-main#overlays-can-use-different-main-targets).
+
+  @param {string} [options.url]
+    The URL to fetch from the server.
+
+    Unpoly will select the given `{ target }` from the server response and place a matching element inside the overlay container. See [loading content from a URL](/providing-html#url).
+
+    Instead of making a server request, you may also render an [existing string of HTML](/providing-html#string) using the `{ content }`, `{ fragment }` or `{ document }` options.
+
+  @param {string|Element|List<Node>} [options.content]
+    The [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML) for the overlay container.
+
+    The given content will be wrapped in an element matching the given `{ target }`. If no target is given, a wrapper matching a main target will be used.
+
+    Instead of passing an HTML string you can also [refer to a template](/templates).
+
+  @param {string|Element} [options.fragment]
+    A string of HTML comprising only [outer HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/outerHTML) to place inside the overlay container.
+
+    When passing `{ fragment }` you can omit the `{ target }` option.
+    The target will be [derived](/target-derivation) from the root element in the given HTML.
+
+    See [Rendering a string that only contains the fragment](/providing-html#fragment).
+
+    Instead of passing an HTML string you can also [refer to a template](/templates).
+
+  @param {string|Element|Document} [options.document]
+    A string of HTML containing the targeted fragment.
+
+    See [Extracting an element's outer HTML from a larger HTML string](/providing-html#document).
+
+    Instead of passing an HTML string you can also [refer to a template](/templates).
 
   @param {string} [options.layer="new"]
     Whether to stack the new overlay or replace existing overlays.
