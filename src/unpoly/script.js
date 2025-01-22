@@ -86,7 +86,6 @@ up.script = (function() {
       'up-on-finished',
       'up-on-error',
       'up-on-offline',
-      'up-placeholder',
     ],
     scriptSelectors: [
       'script:not([type])',
