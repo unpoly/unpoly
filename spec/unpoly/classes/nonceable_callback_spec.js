@@ -58,28 +58,6 @@ describe('up.NonceableCallback', function() {
       expect(value).toBe(newThis)
     })
 
-    describe('auto-expressions', function() {
-
-      it('adds a missing return automatically', function() {
-        let callback = up.NonceableCallback.fromString('a + b')
-        let fn = callback.toFunction('a', 'b')
-        expect(fn(2, 3)).toBe(5)
-      })
-
-      it('does not add a return if the script already returns', function() {
-        let callback = up.NonceableCallback.fromString('a + b; return a + a')
-        let fn = callback.toFunction('a', 'b')
-        expect(fn(2, 3)).toBe(4)
-      })
-
-      it('does not add a return if the script throws', function() {
-        let callback = up.NonceableCallback.fromString('throw "error"')
-        let fn = callback.toFunction()
-        expect(fn).toThrow('error')
-      })
-
-    })
-
   })
 
 })

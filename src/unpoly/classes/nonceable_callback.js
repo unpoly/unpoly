@@ -28,17 +28,15 @@ up.NonceableCallback = class NonceableCallback {
   @internal
   */
   toFunction(...argNames) {
-    let scriptExpression = this.script
-    if (!/\b(;|return|throw)\b/.test(scriptExpression)) scriptExpression = `return ${scriptExpression}`
-
+    let script = this.script
     if (this.nonce) {
       // Don't return a bound function so callers can re-bind to a different this.
       let callbackThis = this
       return function(...args) {
-        return callbackThis._runAsNoncedFunction(scriptExpression, this, argNames, args)
+        return callbackThis._runAsNoncedFunction(script, this, argNames, args)
       }
     } else {
-      return new Function(...argNames, scriptExpression)
+      return new Function(...argNames, script)
     }
   }
 
