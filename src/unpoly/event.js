@@ -592,7 +592,6 @@ up.event = (function() {
     fork,
     keyModifiers,
     get inputDevice() { return getInputDevice() }
-    // addCallback,
   }
 })()
 

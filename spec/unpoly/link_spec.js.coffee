@@ -3039,29 +3039,76 @@ describe 'up.link', ->
         next.after 50, ->
           expect(abortListener).toHaveBeenCalled()
 
-      it 'does not abort a request if the user followed the link while it was preloading, and then stopped hovering', asyncSpec (next) ->
+      it 'does not abort a request if the user followed the link while it was preloading, and then stopped hovering', ->
         up.link.config.preloadDelay = 10
-        $fixture('.target').text('old text')
-        $link = $fixture('a[href="/foo"][up-target=".target"][up-preload]')
-        up.hello($link)
+        fixture('.target', text: 'old text')
+        link = fixture('a[href="/foo"][up-target=".target"][up-preload]')
+        up.hello(link)
         abortListener = jasmine.createSpy('up:request:aborted listener')
         up.on('up:request:aborted', abortListener)
 
-        Trigger.hoverSequence($link)
+        Trigger.hoverSequence(link)
+        await wait(50)
 
-        next.after 50, ->
-          expect(abortListener).not.toHaveBeenCalled()
-          expect(jasmine.Ajax.requests.count()).toEqual(1)
+        expect(abortListener).not.toHaveBeenCalled()
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
 
-          Trigger.click($link)
+        Trigger.click(link)
+        await wait()
 
-        next ->
-          expect(abortListener).not.toHaveBeenCalled()
+        expect(abortListener).not.toHaveBeenCalled()
 
-          Trigger.unhoverSequence($link)
+        Trigger.unhoverSequence(link)
+        await wait()
 
-        next ->
-          expect(abortListener).not.toHaveBeenCalled()
+        expect(abortListener).not.toHaveBeenCalled()
+
+      it 'does not abort a revalidation request when an [up-preload] link renders expired content instantly, then stops hovering (bugfix)', ->
+        fixture('#target', text: 'initial target')
+
+        await jasmine.populateCache('/foo', '<div id="target">expired target</div>')
+        expect(url: '/foo').toBeCached()
+        up.cache.expire('/foo')
+        expect(url: '/foo').toBeExpired()
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
+        expect(up.network.isBusy()).toBe(false)
+
+        abortListener = jasmine.createSpy('up:request:aborted listener')
+        up.on('up:request:aborted', abortListener)
+
+        link = fixture('a[href="/foo"][up-target="#target"][up-preload][up-preload-delay=0]')
+        up.hello(link)
+
+        Trigger.hoverSequence(link)
+        await wait(10)
+
+        # Because the destination is already cached (albeit expired), we don't send another request.
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
+        expect(up.network.isBusy()).toBe(false)
+
+        Trigger.clickSequence(link)
+        await wait(10)
+
+        expect('#target').toHaveText('expired target')
+
+        # Revalidation request for expired content
+        expect(jasmine.Ajax.requests.count()).toEqual(2)
+        expect(up.network.isBusy()).toBe(true)
+
+        Trigger.unhoverSequence(link)
+        await wait(10)
+
+        # Revalidation request for expired content
+        expect(jasmine.Ajax.requests.count()).toEqual(2)
+        expect(up.network.isBusy()).toBe(true)
+        expect(abortListener).not.toHaveBeenCalled()
+
+        jasmine.respondWithSelector('#target', text: 'revalidated target')
+        await wait()
+
+        expect('#target').toHaveText('revalidated target')
+        expect(up.network.isBusy()).toBe(false)
+        expect(abortListener).not.toHaveBeenCalled()
 
       it 'preloads the link destination on touchstart (without delay)', asyncSpec (next) ->
         up.link.config.preloadDelay = 100

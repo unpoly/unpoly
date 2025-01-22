@@ -47,7 +47,7 @@ up.error = (function() {
   })
   ```
 
-  Uncriticial errors include:
+  Uncritical errors include:
 
   - `AbortError`
   - A failed `up.Response`

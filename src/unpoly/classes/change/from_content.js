@@ -88,7 +88,7 @@ up.Change.FromContent = class FromContent extends up.Change {
     }
 
     // Used by up.RenderJob
-    this.options.onRender?.()
+    this.options.handleAbort?.(null)
   }
 
   _getResponseDoc() {

@@ -12,23 +12,17 @@ up.Change.FromURL = class FromURL extends up.Change {
       return u.unresolvablePromise()
     }
 
+    let request = this.request = up.request(this._getRequestAttrs())
+    this.options.onRequestKnown?.(request)
 
-    this.request = up.request(this._getRequestAttrs())
+    if (this.options.preload) return request
 
-    if (this.options.preload) {
-      return this.request
-    }
-
-    this._onRequestProcessed()
+    this.options.handleAbort?.(request)
+    request.runPreviews(this.options)
 
     // Use always() since _onRequestSettled() will decide whether the promise
     // will be fulfilled or rejected.
-    return await u.always(this.request, responseOrError => this._onRequestSettled(responseOrError))
-  }
-
-  _onRequestProcessed() {
-    this.options.onRequestProcessed?.(this.request) // used by up.RenderJob to delay aborting until a new request instance is known.
-    this.request.runPreviews(this.options)
+    return await u.always(request, responseOrError => this._onRequestSettled(responseOrError))
   }
 
   _newPageReason() {
@@ -56,7 +50,6 @@ up.Change.FromURL = class FromURL extends up.Change {
       ...this.options, // contains preflight keys relevant for the request, e.g. { url, method }
       ...successAttrs, // contains meta information for an successful update, e.g. { layer, mode, context, target }
       ...u.withRenamedKeys(failAttrs, up.fragment.failKey), // contains meta information for a failed update, e.g. { failTarget },
-      onProcessed: this._onRequestProcessed.bind(this), // handled by up.network after either queuing a request or reusing a cache hit
     }
   }
 

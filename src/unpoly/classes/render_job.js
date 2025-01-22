@@ -152,16 +152,24 @@ up.RenderJob = class RenderJob {
   }
 
   _getChange() {
-    if (this.options.url) {
-      let onRequestProcessed = (request) => this._handleAbortOption(request)
-      return new up.Change.FromURL({ ...this.options, onRequestProcessed })
+    // (1) With a given { url } we want to handle { abort } when the new request is known.
+    //     This way we can exclude the new request from aborting.
+    //     The { handleAbort } callback is called in up.Change.FromURL#_onRequestProcessed()
+    // (2) When rendering local content, we want to handle { abort } when we render.
+    //     This way we don't abort when the pass was aborted by { guardEvent }, { confirm }
+    //     or any other error on the way.
+    //     The { handleAbort } callback is called in up.Change.FromContent#_onPlanApplicable()
+    // (3) FromURL is eventually going to call FromContent.
+    //     We memoize the callback so we only run it once.
+    let handleAbort = u.memoize((request) => this._handleAbortOption(request))
+    let renderOptions = { ...this.options, handleAbort }
+
+    if (renderOptions.url) {
+      return new up.Change.FromURL(renderOptions)
+    } else if (renderOptions.response) {
+      return new up.Change.FromResponse(renderOptions)
     } else {
-      let onRender = () => this._handleAbortOption(null)
-      if (this.options.response) {
-        return new up.Change.FromResponse({ ...this.options, onRender })
-      } else {
-        return new up.Change.FromContent({ ...this.options, onRender })
-      }
+      return new up.Change.FromContent(renderOptions)
     }
   }
 

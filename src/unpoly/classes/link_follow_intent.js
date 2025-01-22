@@ -6,6 +6,7 @@ up.LinkFollowIntent = class LinkFollowIntent {
   constructor(link, callback) {
     this._link = link
     this._callback = callback
+    this._lastRequest = null
     this._on('mouseenter mousedown touchstart', (event) => this._scheduleCallback(event))
     this._on('mouseleave', () => this._unscheduleCallback())
     // Don't preload if the link was removed from the DOM while we were waiting for the timer.
@@ -13,8 +14,8 @@ up.LinkFollowIntent = class LinkFollowIntent {
     up.fragment.onAborted(this._link, () => this._unscheduleCallback())
   }
 
-  _on(eventType, callback) {
-    up.on(this._link, eventType, { passive: true }, callback)
+  _on(eventType, fn) {
+    up.on(this._link, eventType, { passive: true }, fn)
   }
 
   _scheduleCallback(event) {
@@ -40,7 +41,8 @@ up.LinkFollowIntent = class LinkFollowIntent {
     // Only abort if the request is still preloading.
     // If the user has clicked on the link while the request was in flight,
     // and then unhovered the link, we do not abort the navigation.
-    up.network.abort((request) => (request.origin === this._link) && request.background)
+    if (this._lastRequest?.background) this._lastRequest.abort()
+    this._lastRequest = null
   }
 
   _parseDelay() {
@@ -49,6 +51,11 @@ up.LinkFollowIntent = class LinkFollowIntent {
 
   _runCallback(event) {
     up.log.putsEvent(event)
-    up.error.muteUncriticalRejection(this._callback())
+
+    // (1) Remember the request when sent
+    // (2) All callbacks from up.link already mute uncritical rejections.
+    //     We cannot do it here, as the callbacks are also passed to other places,
+    //     like to onFirstIntersect().
+    this._callback({ onRequestKnown: (request) => this._lastRequest = request })
   }
 }

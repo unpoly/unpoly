@@ -1058,7 +1058,7 @@ up.link = (function() {
   @experimental
   */
   up.attribute('up-defer', { defaultValue: 'insert' }, function(link, condition) {
-    let doLoad = () => up.error.muteUncriticalRejection(loadDeferred(link))
+    let doLoad = (options) => up.error.muteUncriticalRejection(loadDeferred(link, options))
     onLoadCondition(condition, link, doLoad)
   })
 
@@ -1747,7 +1747,7 @@ up.link = (function() {
   */
   up.compiler(config.selectorFn('preloadSelectors'), function(link) {
     if (!isPreloadDisabled(link)) {
-      let doPreload = () => up.error.muteUncriticalRejection(preload(link))
+      let doPreload = (options) => up.error.muteUncriticalRejection(preload(link, options))
       // We need to map several cases here:
       //
       // (1) <a up-preload>              => 'hover'

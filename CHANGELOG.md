@@ -274,17 +274,18 @@ Unpoly 3.10 makes it easier to render lists of mixed `Text` and `Element` nodes:
 
 ### Other changes
 
-- Clicking a link with a page-local `#hash` in the `[href]` will now honor [fixed layout obstructions](/up-fixed-top) if the browser location is already on that `#hash`.
 - You can now [embed CSP nonces](/csp) into the attribute callbacks `[up-on-keep]`, `[up-on-hungry]` and `[up-on-opened]`.
 - New property `up.Request#ended` indicates whether this request is no longer waiting for the network for any reason. It is `true` when the server has responded or when the request
   [failed](/failed-responses) or was [aborted](/aborting-requests).
 - The attribute `[up-flashes]` is now stable (discussion #679)
 - ❌ The `up.feedback` package has been renamed to `up.status`.
+- Clicking a link with a page-local `#hash` in the `[href]` will now honor [fixed layout obstructions](/up-fixed-top) if the browser location is already on that `#hash`.
 - Fix a bug where a link with `[up-confirm]` would show the confirmation dialog before [preloading](/preloading).
 - Fix a crash with `up.submit({ submitButton: false })`.
 - Fix a bug where rendering with `{ focus: 'keep' }` would sometimes re-focus elements that never lost focus.
 - Fix a bug where opening an overlay would stop infinite scrolling (discussion #694).
 - Fix a bug where Unpoly would create duplicate cache entries when the server redirects to a fully qualified URL (with protocol and hostname).
+- Fix a bug where when a link with `[up-preload]` renders expired content from the cache, unhovering the link would abort the revalidation request.
 
 
 
