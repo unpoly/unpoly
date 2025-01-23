@@ -126,5 +126,16 @@ up.preview('.sign-in', function(preview) {
 })
 ```
 
+## Focus preservation
+
+Disabled fields cannot have focus. This is a browser limitation.
+
+When a focused field is disabled by `[up-disable]` or `{ disable }`, it will lose focus. In this case Unpoly will
+focus the closest [form group](/up-form-group) around the field. If the field is not within a form group, the containing `<form>` is focused.
+
+When the render pass ends, Unpoly will restore focus, selection range and scroll position of any element that lost focus through disabling.
+When the user focuses something else during the render pass, no focus-related state is restored after rendering.
+
+
 
 @page disabling-forms
