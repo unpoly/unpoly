@@ -943,12 +943,14 @@ describe 'up.viewport', ->
           await wait()
 
           highElement = fixture('.high', style: { height: '10000px' }) # ensure we can scroll
-          element = fixture('#element', text: 'content', style: { position: 'absolute', top: '5000px' })
+          element = fixture('#element', text: 'content', style: { position: 'absolute', top: '5000px', 'background-color': 'yellow' })
           obstruction = fixture('.obstruction[up-fixed=top]', text: 'obstructions', style: { 'position': 'fixed', 'top': '0px', 'height': '30px', 'background-color': 'blue' })
           link = fixture('a', href: '#element')
 
-          Trigger.clickSequence(link)
-          await wait()
+          # Firefox will only do native #anchor processing when we use link.click(),
+          # but not when we emit a synthetic 'click' event.
+          link.click()
+          await wait(100)
 
           expect(up.viewport.root.scrollTop).toBe(5000 - 30)
           expect(location.hash).toBe('#element')
@@ -962,8 +964,10 @@ describe 'up.viewport', ->
           obstruction = fixture('.obstruction[up-fixed=top]', text: 'obstructions', style: { 'position': 'fixed', 'top': '0px', 'height': '30px', 'background-color': 'blue' })
           link = fixture('a', href: '#element')
 
-          Trigger.clickSequence(link)
-          await wait()
+          # Firefox will only do native #anchor processing when we use link.click(),
+          # but not when we emit a synthetic 'click' event.
+          link.click()
+          await wait(100)
 
           expect(up.viewport.root.scrollTop).toBe(5000 - 30)
           expect(location.hash).toBe('#element')
@@ -975,8 +979,10 @@ describe 'up.viewport', ->
           link = fixture('a', href: '#element')
           revealSpy = up.reveal.mock()
 
-          Trigger.clickSequence(link)
-          await wait()
+          # Firefox will only do native #anchor processing when we use link.click(),
+          # but not when we emit a synthetic 'click' event.
+          link.click()
+          await wait(100)
 
           expect(revealSpy).not.toHaveBeenCalled()
           expect(location.hash).toBe('#element')
@@ -991,8 +997,10 @@ describe 'up.viewport', ->
 
           link = fixture('a', href: '#')
 
-          Trigger.clickSequence(link)
-          await wait()
+          # Firefox will only do native #anchor processing when we use link.click(),
+          # but not when we emit a synthetic 'click' event.
+          link.click()
+          await wait(100)
 
           expect(up.viewport.root.scrollTop).toBe(0)
           expect(location.hash).toBe('')

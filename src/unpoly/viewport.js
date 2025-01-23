@@ -943,7 +943,7 @@ up.viewport = (function() {
     if (hash = pureHash(hash)) {
       const selector = [
         // Match an <* id="hash">
-        e.attrSelector('id', hash),
+        e.idSelector(hash),
         // Match an <a name="hash">
         'a' + e.attrSelector('name', hash)
       ].join()
@@ -990,7 +990,7 @@ up.viewport = (function() {
 
     // When following a link to another URL with a #hash URL, Chrome's default
     // scrolling behavior happens *after* DOMContentLoaded. We wait one more task to
-    // fix the scroll position after the browserdid its thing.
+    // fix the scroll position after the browser did its thing.
     u.task(revealHash)
   })
 
