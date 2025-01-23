@@ -73,6 +73,8 @@ To limit the duplication of view logic, you may [use templates](#client-side-tem
 While Unpoly apps render on the server primarily, having client-side templates can be useful
 for [placeholders](/placeholders), small [overlays](/opening-overlays), or [optimistic rendering](/optimistic-rendering).
 
+Unpoly 3.10 allows your server to embed templates into your responses. Your frontend can then clone new fragments from these templates, without making another server request.
+
 To refer to a template, pass its CSS selector to any attribute or option that accepts HTML:
 
 

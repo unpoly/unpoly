@@ -1,7 +1,7 @@
 Templates
 =========
 
-By embedding `<template>` elements into your responses, your frontend can clone HTML fragments without making
+By embedding template elements into your responses, your frontend can clone HTML fragments without making
 another server request.
 
 While Unpoly apps render on the server primarily, having client-side templates can be useful
