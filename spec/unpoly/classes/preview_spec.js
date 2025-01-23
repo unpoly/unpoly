@@ -1827,7 +1827,7 @@ describe('up.Preview', function() {
     it('dismisses the overlay when the request fails due to a network issue', async function() {
       let previewFn = (preview) => preview.openLayer('overlay content')
 
-      up.render({ preview: previewFn, url: '/url', target: '#target', layer: 'new' })
+      let renderJob = up.render({ preview: previewFn, url: '/url', target: '#target', layer: 'new' })
       await wait()
 
       expect(up.layer.count).toBe(2)
@@ -1835,6 +1835,8 @@ describe('up.Preview', function() {
       expect(up.layer.current.getFirstSwappableElement()).toHaveText('overlay content')
 
       jasmine.lastRequest().responseError()
+
+      await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.Offline))
 
       expect(up.layer.count).toBe(1)
     })

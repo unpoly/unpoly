@@ -6772,7 +6772,7 @@ describe 'up.fragment', ->
           beforeEach ->
             up.fragment.config.runScripts = false
 
-          it 'does not execute inline script tags from a fragment response', asyncSpec (next) ->
+          it 'does not execute inline script tags from a fragment response', ->
             fixture('.target', text: 'old text')
 
             up.render fragment: """
@@ -6784,13 +6784,14 @@ describe 'up.fragment', ->
               </div>
               """
 
-            next.after 100, =>
-              expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-              expect(document).toHaveSelector('.target')
-              expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
-              expect('.target').toHaveVisibleText('new text')
+            await wait(200)
 
-          it 'does not execute a script[type=module]', asyncSpec (next) ->
+            expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+            expect(document).toHaveSelector('.target')
+            expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
+            expect('.target').toHaveVisibleText('new text')
+
+          it 'does not execute a script[type=module]', ->
             fixture('.target', text: 'old text')
 
             up.render fragment: """
@@ -6802,13 +6803,14 @@ describe 'up.fragment', ->
               </div>
               """
 
-            next.after 100, =>
-              expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-              expect(document).toHaveSelector('.target')
-              expect(document).not.toHaveSelector('.target script[type="module"]')
-              expect('.target').toHaveVisibleText('new text')
+            await wait(200)
 
-          it 'does not execute inline script tags from a document response', asyncSpec (next) ->
+            expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+            expect(document).toHaveSelector('.target')
+            expect(document).not.toHaveSelector('.target script[type="module"]')
+            expect('.target').toHaveVisibleText('new text')
+
+          it 'does not execute inline script tags from a document response', ->
             fixture('.target', text: 'old text')
 
             up.render '.target', document: """
@@ -6824,13 +6826,14 @@ describe 'up.fragment', ->
               </html>
               """
 
-            next.after 100, =>
-              expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-              expect(document).toHaveSelector('.target')
-              expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
-              expect('.target').toHaveVisibleText('new text')
+            await wait(200)
 
-          it 'does not execute inline script tags when opening a new overlay', asyncSpec (next) ->
+            expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+            expect(document).toHaveSelector('.target')
+            expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
+            expect('.target').toHaveVisibleText('new text')
+
+          it 'does not execute inline script tags when opening a new overlay', ->
             up.layer.open fragment: """
               <div class="target">
                 new text
@@ -6840,12 +6843,13 @@ describe 'up.fragment', ->
               </div>
               """
 
-            next.after 100, =>
-              expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-              expect(up.layer.count).toBe(2)
-              expect(up.layer.current).toHaveVisibleText('new text')
+            await wait(200)
 
-          it 'does not crash when the new fragment contains inline script tag that is followed by another sibling (bugfix)', asyncSpec (next) ->
+            expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+            expect(up.layer.count).toBe(2)
+            expect(up.layer.current).toHaveVisibleText('new text')
+
+          it 'does not crash when the new fragment contains inline script tag that is followed by another sibling (bugfix)', ->
             fixture('.target')
             up.render fragment: """
               <div class="target">
@@ -6857,13 +6861,14 @@ describe 'up.fragment', ->
               </div>
               """
 
-            next.after 100, =>
-              expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-              expect(document).toHaveSelector('.target')
-              expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
-              expect('.target').toHaveVisibleText('before after')
+            await wait(200)
 
-          it 'does not execute linked scripts to prevent re-inclusion of javascript inserted before the closing body tag', asyncSpec (next) ->
+            expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+            expect(document).toHaveSelector('.target')
+            expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
+            expect('.target').toHaveVisibleText('before after')
+
+          it 'does not execute linked scripts to prevent re-inclusion of javascript inserted before the closing body tag', ->
             fixture('.target')
             up.render fragment: """
               <div class="target">
@@ -6871,10 +6876,11 @@ describe 'up.fragment', ->
               </div>
               """
 
-            next.after 100, =>
-              expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-              expect(document).toHaveSelector('.target')
-              expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
+            await wait (1000)
+
+            expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+            expect(document).toHaveSelector('.target')
+            expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
 
           it 'keeps script[type="application/ld+json"]', ->
             json = """
@@ -6923,7 +6929,7 @@ describe 'up.fragment', ->
               </div>
               """
 
-            await wait()
+            await wait(200)
 
             expect(window.scriptTagExecuted).toHaveBeenCalled()
             expect(document).toHaveSelector('.target')
@@ -6943,7 +6949,7 @@ describe 'up.fragment', ->
               """
 
             # Timing is delayed
-            await wait(50)
+            await wait(200)
 
             expect(window.scriptTagExecuted).toHaveBeenCalled()
             expect(document).toHaveSelector('.target')
@@ -6959,11 +6965,11 @@ describe 'up.fragment', ->
               </script>
               """
 
-            await wait()
+            await wait(200)
 
             expect(window.scriptTagExecuted).toHaveBeenCalled()
 
-          it 'does not execute inline script tags outside the updated fragment', asyncSpec (next) ->
+          it 'does not execute inline script tags outside the updated fragment', ->
             fixture('.target', text: 'old text')
 
             up.render target: '.target', document: """
@@ -6977,13 +6983,14 @@ describe 'up.fragment', ->
               </div>
               """
 
-            next.after 100, =>
-              expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-              expect(document).toHaveSelector('.target')
-              expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
-              expect('.target').toHaveVisibleText('new text')
+            await wait(200)
 
-          it 'executes linked scripts', asyncSpec (next) ->
+            expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+            expect(document).toHaveSelector('.target')
+            expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
+            expect('.target').toHaveVisibleText('new text')
+
+          it 'executes linked scripts', ->
             fixture('.target')
             up.render fragment: """
               <div class="target">
@@ -6991,10 +6998,11 @@ describe 'up.fragment', ->
               </div>
               """
 
-            next.after 100, =>
-              expect(window.scriptTagExecuted).toHaveBeenCalled()
-              expect(document).toHaveSelector('.target')
-              expect(document).toHaveSelector('.target script')
+            await wait(1000)
+
+            expect(window.scriptTagExecuted).toHaveBeenCalled()
+            expect(document).toHaveSelector('.target')
+            expect(document).toHaveSelector('.target script')
 
         describe '<noscript> tags', ->
 
