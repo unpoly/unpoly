@@ -8728,6 +8728,42 @@ describe 'up.fragment', ->
 
           it 'allows to define which responses to verify in up.fragment.config.autoRevalidate'
 
+          it 'revalidates after the initial round of render callbacks', ->
+            fixture('#target', text: 'initial text')
+            await jasmine.populateCache('/foo', '<div id="target">expired text</div>')
+            up.cache.expire()
+
+            sequence = []
+            renderedCallback = () ->
+              sequence.push('renderedCallback')
+
+            renderedPromise = () ->
+              sequence.push('renderedPromise')
+
+            revalidateOption = () ->
+              sequence.push('revalidateOption')
+              true
+
+            up.on('up:request:load', () -> sequence.push('requestLoad'))
+
+            up.on('up:request:loaded', () -> sequence.push('requestLoaded'))
+
+            expect('#target').toHaveText('initial text')
+            expect(sequence).toEqual []
+
+            job = up.render({ target: '#target', url: '/foo', onRendered: renderedCallback, cache: true, revalidate: revalidateOption })
+            job.then(renderedPromise)
+            await wait()
+
+            expect('#target').toHaveText('expired text')
+            expect(sequence).toEqual ['renderedCallback', 'renderedPromise', 'revalidateOption', 'requestLoad']
+
+            jasmine.respondWithSelector('#target', text: 'revalidated text')
+            await wait()
+
+            expect('#target').toHaveText('revalidated text')
+            expect(sequence).toEqual ['renderedCallback', 'renderedPromise', 'revalidateOption', 'requestLoad', 'requestLoaded', 'renderedCallback']
+
           it 'does not use options like { confirm } or { feedback } when verifying', asyncSpec (next) ->
             confirmSpy = spyOn(window, 'confirm').and.returnValue(true)
 
