@@ -10,7 +10,11 @@ up.FocusCapsule = class FocusCapsule {
     return document.activeElement !== this._element
   }
 
-  // up.FragmentFocus will check #wasLost() before calling restore()
+  // This function restores focus, but does not test if the user focuses something else
+  // during the render pass (which would invalidate this capsule). This is handled elsewhere:
+  //
+  // (1) up.FragmentFocus will check #wasLost() before calling restore()
+  // (2) runPreviews() will listen to focusin and void this capsule manually.
   restore(layer, focusOptions) {
     let rediscoveredElement = up.fragment.get(this._target, { layer })
     if (rediscoveredElement) {

@@ -1488,6 +1488,29 @@ describe 'up.form', ->
             expect(field.scrollTop).toBeAround(12, 2)
             expect(field.scrollLeft).toBeAround(13, 2)
 
+          it 'does not restore focus when the user focused another element during the render pass', ->
+            form = fixture('form')
+            target = fixture('#target')
+            group = e.affix(form, 'fieldset')
+            input = e.affix(group, 'input[name=email]')
+            input.focus()
+
+            unrelatedInput = fixture('input[name=query]')
+
+            expect(input).toBeFocused()
+
+            up.submit(form, { disable: true, target: '#target' })
+            await wait(10)
+
+            expect(group).toBeFocused()
+
+            unrelatedInput.focus()
+
+            jasmine.respondWithSelector('#target', text: 'new target')
+            await wait()
+
+            expect(input).not.toBeFocused()
+            expect(unrelatedInput).toBeFocused()
 
       describe 'content type', ->
 
