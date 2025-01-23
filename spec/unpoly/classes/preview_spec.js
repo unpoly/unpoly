@@ -522,6 +522,51 @@ describe('up.Preview', function() {
       expect(input).toBeDisabled()
     })
 
+    it('restores an element that lost focus, and its scroll positions and selection range when reverting', async function() {
+      let target = fixture('#target')
+      let parent = fixture(`form#parent`)
+      let longText =
+        "foooooooooooo\n" +
+        "baaaaaaaaaaar\n" +
+        "baaaaaaaaaaaz\n" +
+        "baaaaaaaaaaam\n" +
+        "quuuuuuuuuuux\n" +
+        "foooooooooooo\n" +
+        "baaaaaaaaaaar\n" +
+        "baaaaaaaaaaaz\n" +
+        "baaaaaaaaaaam\n" +
+        "quuuuuuuuuuux\n"
+
+      let field = e.affix(parent, 'textarea[name=prose][wrap=off][rows=3][cols=6]', { text: longText })
+      field.focus()
+
+      field.selectionStart = 10
+      field.selectionEnd = 11
+      field.scrollTop = 12
+      field.scrollLeft = 13
+      expect(field).toBeFocused()
+
+      let previewFn = (preview) => preview.disable('#parent')
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(parent).toBeVisible()
+      expect(field).toBeVisible()
+      expect(field).toBeDisabled()
+
+      jasmine.respondWithSelector('#target')
+
+      expect(parent).toBeVisible()
+      expect(field).toBeVisible()
+      expect(field).not.toBeDisabled()
+      expect(field).toBeFocused()
+      expect(field.selectionStart).toBeAround(10, 2)
+      expect(field.selectionEnd).toBeAround(11, 2)
+      expect(field.scrollTop).toBeAround(12, 2)
+      expect(field.scrollLeft).toBeAround(13, 2)
+    })
+
   })
 
   describe('#insert()', function() {
@@ -1530,6 +1575,49 @@ describe('up.Preview', function() {
       expect('#child2').toBeHidden()
     })
 
+    it('restores an element that lost focus, and its scroll positions and selection range when reverting', async function() {
+      let target = fixture('#target')
+      let parent = fixture(`form#parent`)
+      let longText =
+        "foooooooooooo\n" +
+        "baaaaaaaaaaar\n" +
+        "baaaaaaaaaaaz\n" +
+        "baaaaaaaaaaam\n" +
+        "quuuuuuuuuuux\n" +
+        "foooooooooooo\n" +
+        "baaaaaaaaaaar\n" +
+        "baaaaaaaaaaaz\n" +
+        "baaaaaaaaaaam\n" +
+        "quuuuuuuuuuux\n"
+
+      let field = e.affix(parent, 'textarea[name=prose][wrap=off][rows=3][cols=6]', { text: longText })
+      field.focus()
+
+      field.selectionStart = 10
+      field.selectionEnd = 11
+      field.scrollTop = 12
+      field.scrollLeft = 13
+      expect(field).toBeFocused()
+
+      let previewFn = (preview) => preview.hideContent('#parent')
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(parent).toBeVisible()
+      expect(field).toBeHidden()
+
+      jasmine.respondWithSelector('#target')
+
+      expect(parent).toBeVisible()
+      expect(field).toBeVisible()
+      expect(field).toBeFocused()
+      expect(field.selectionStart).toBeAround(10, 2)
+      expect(field.selectionEnd).toBeAround(11, 2)
+      expect(field.scrollTop).toBeAround(12, 2)
+      expect(field.scrollLeft).toBeAround(13, 2)
+    })
+
   })
 
 
@@ -1577,6 +1665,49 @@ describe('up.Preview', function() {
       await wait()
 
       expect('#parent').toHaveVisibleText('server text')
+    })
+
+    it('restores an element that lost focus, and its scroll positions and selection range when reverting', async function() {
+      let target = fixture('#target')
+      let parent = fixture(`form#parent`)
+      let longText =
+        "foooooooooooo\n" +
+        "baaaaaaaaaaar\n" +
+        "baaaaaaaaaaaz\n" +
+        "baaaaaaaaaaam\n" +
+        "quuuuuuuuuuux\n" +
+        "foooooooooooo\n" +
+        "baaaaaaaaaaar\n" +
+        "baaaaaaaaaaaz\n" +
+        "baaaaaaaaaaam\n" +
+        "quuuuuuuuuuux\n"
+
+      let field = e.affix(parent, 'textarea[name=prose][wrap=off][rows=3][cols=6]', { text: longText })
+      field.focus()
+
+      field.selectionStart = 10
+      field.selectionEnd = 11
+      field.scrollTop = 12
+      field.scrollLeft = 13
+      expect(field).toBeFocused()
+
+      let previewFn = (preview) => preview.swapContent('#parent', 'temporary content')
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(parent).toBeVisible()
+      expect(field).toBeHidden()
+
+      jasmine.respondWithSelector('#target')
+
+      expect(parent).toBeVisible()
+      expect(field).toBeVisible()
+      expect(field).toBeFocused()
+      expect(field.selectionStart).toBeAround(10, 2)
+      expect(field.selectionEnd).toBeAround(11, 2)
+      expect(field.scrollTop).toBeAround(12, 2)
+      expect(field.scrollLeft).toBeAround(13, 2)
     })
 
   })

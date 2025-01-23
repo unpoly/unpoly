@@ -1446,6 +1446,49 @@ describe 'up.form', ->
 
             expect(group).toBeFocused()
 
+          it 'restores an element that lost focus, and its scroll positions and selection range when reverting', ->
+            target = fixture('#target')
+            parent = fixture('form#parent')
+            longText =
+              "foooooooooooo\n" +
+              "baaaaaaaaaaar\n" +
+              "baaaaaaaaaaaz\n" +
+              "baaaaaaaaaaam\n" +
+              "quuuuuuuuuuux\n" +
+              "foooooooooooo\n" +
+              "baaaaaaaaaaar\n" +
+              "baaaaaaaaaaaz\n" +
+              "baaaaaaaaaaam\n" +
+              "quuuuuuuuuuux\n"
+
+            field = e.affix(parent, 'textarea[name=prose][wrap=off][rows=3][cols=6]', { text: longText })
+            field.focus()
+
+            field.selectionStart = 10
+            field.selectionEnd = 11
+            field.scrollTop = 12
+            field.scrollLeft = 13
+            expect(field).toBeFocused()
+
+            up.render({ disable: '#parent', url: '/url', target: '#target' })
+            await wait()
+
+            expect(parent).toBeVisible()
+            expect(field).toBeVisible()
+            expect(field).toBeDisabled()
+
+            jasmine.respondWithSelector('#target')
+
+            expect(parent).toBeVisible()
+            expect(field).toBeVisible()
+            expect(field).not.toBeDisabled()
+            expect(field).toBeFocused()
+            expect(field.selectionStart).toBeAround(10, 2)
+            expect(field.selectionEnd).toBeAround(11, 2)
+            expect(field.scrollTop).toBeAround(12, 2)
+            expect(field.scrollLeft).toBeAround(13, 2)
+
+
       describe 'content type', ->
 
         it 'defaults to application/x-www-form-urlencoded in a form without file inputs', asyncSpec (next) ->
@@ -2862,83 +2905,6 @@ describe 'up.form', ->
           await wait(10)
 
           expect(fieldOutsideForm).toBeFocused()
-
-        it 'restores focus when re-enabling', ->
-          form = fixture('form')
-          group = e.affix(form, '[up-form-group]')
-          field = e.affix(group, 'input[name=email][type=text]')
-          field.focus()
-          expect(field).toBeFocused()
-
-          undo = up.form.disable(field)
-          await wait(10)
-
-          expect(group).toBeFocused()
-
-          undo()
-          await wait(10)
-
-          expect(field).toBeFocused()
-
-        it 'restores scroll position and selection range when re-enabling', ->
-          longText = """
-              foooooooooooo
-              baaaaaaaaaaar
-              baaaaaaaaaaaz
-              baaaaaaaaaaam
-              quuuuuuuuuuux
-              foooooooooooo
-              baaaaaaaaaaar
-              baaaaaaaaaaaz
-              baaaaaaaaaaam
-              quuuuuuuuuuux
-            """
-
-          form = fixture('form')
-          group = e.affix(form, '[up-form-group]')
-          field = e.affix(group, 'textarea[name=prose][wrap=off][rows=3][cols=6]', text: longText)
-          field.selectionStart = 10
-          field.selectionEnd = 11
-          field.scrollTop = 12
-          field.scrollLeft = 13
-          field.focus()
-          expect(field).toBeFocused()
-
-          undo = up.form.disable(field)
-          await wait(10)
-
-          expect(group).toBeFocused()
-
-          undo()
-          await wait(10)
-
-          expect(field).toBeFocused()
-          expect(field.selectionStart).toBeAround(10, 2)
-          expect(field.selectionEnd).toBeAround(11, 2)
-          expect(field.scrollTop).toBeAround(12, 2)
-          expect(field.scrollLeft).toBeAround(13, 2)
-
-        it 'does not restore focus when re-enabling when some other control has been focused in the meantime', ->
-          form = fixture('form')
-          group = e.affix(form, '[up-form-group]')
-          field = e.affix(group, 'input[name=email][type=text]')
-          field.focus()
-          otherField = e.affix(group, 'input[name=address][type=text]')
-          expect(field).toBeFocused()
-
-          undo = up.form.disable(field)
-          await wait(10)
-
-          expect(group).toBeFocused()
-
-          otherField.focus()
-          await wait(10)
-
-          undo()
-
-          await wait(10)
-
-          expect(otherField).toBeFocused()
 
       describe 'disabling of non-submit buttons', ->
 

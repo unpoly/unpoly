@@ -473,6 +473,8 @@ up.form = (function() {
   }
 
   function disableControl(control) {
+    // Ignore controls that were already disabled before us.
+    // This way we don't accidentally re-enable a control that we didn't change.
     if (control.disabled) return
 
     let focusFallback
@@ -484,17 +486,17 @@ up.form = (function() {
       control.disabled = true
     }
 
-    return () => {
-      control.disabled = false
-      if (focusFallback && document.activeElement === focusFallback && control.isConnected) {
-        up.focus(control, { preventScroll: true })
-      }
-    }
+    // (1) This function is only returned if we didn't early-return above
+    //     for a control that is already disabled.
+    // (2) In case our disabling caused focus loss: We don't care about restoring focus,
+    //     selection or scroll position here. The up.form.disable() function is *only*
+    //     used via up.Preview#disable(), and previews already use a FocusCapsule
+    //     to preserve and restore focus-related state.
+    return () => { control.disabled = false }
   }
 
   function getDisableContainers(disable, origin) {
-    let givenOrigin = () => origin || up.fail('Missing { origin }')
-    let originScope = () => getScope(givenOrigin())
+    let originScope = () => getScope(origin)
 
     if (disable === true) {
       return [originScope()]
@@ -1283,10 +1285,19 @@ up.form = (function() {
     return element.form || element.closest('form')
   }
 
-  // Alternative to getForm() which falls back to the layer element for elements without a form.
-  // Only works with elements. Does not support a selector as a first argument.
-  function getScope(element, options) {
-    return getForm(element, options) || up.layer.get(element).element
+  // Alternative to getForm() which always returns a likely scope:
+  //
+  // (1) Called with an origin within a form => Returns the closest form
+  // (2) Called with an origin outside a form => Returns the origin's layer element
+  // (3) Called without an origin element => Returns the current layer element
+  //
+  // Does not support a selector string as a first argument. Only works with Element arguments.
+  function getScope(origin, options) {
+    if (origin) {
+      return getForm(origin, options) || up.layer.get(origin).element
+    } else {
+      return up.layer.current.element
+    }
   }
 
   function focusedField() {

@@ -161,7 +161,7 @@ Unpoly 3.0 has added the `[up-disable]` attribute to [disable forms while workin
 - Disabling now also disable non-submit buttons, like an `button[type=button]` or `input[type=button]`.
 - New configuration `up.form.config.genericButtonSelectors`.
 - The `{ disable }` option now also accepts an `Element` (or an array of elements) to disable.
-
+- Fix a bug where rendering with `up.render({ disable })` would crash unless an `{ origin }` was also passed.
 
 
 ### Tokens are separated by comma
