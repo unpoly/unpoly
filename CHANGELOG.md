@@ -275,13 +275,23 @@ Unpoly 3.10 makes it easier to render lists of mixed `Text` and `Element` nodes:
 - Clicked links and submit buttons now receive the `.active` class.
 
 
+### `up.feedback` is now `up.status`
+
+The `up.feedback` package has been renamed to `up.status`. This package exposed no public JavaScript functions, but does have some configuration settings you need to rename:
+
+| Old name | New name |
+|------------|-----------|
+| ❌ `up.feedback.config.currentClasses` | ✅ `up.status.config.currentClasses` |
+| ❌ `up.feedback.config.navSelectors` | ✅ `up.status.config.navSelectors` |
+| ❌ `up.feedback.config.noNavSelectors` | ✅ `up.status.config.noNavSelectors` |
+
+
 ### Other changes
 
 - You can now [embed CSP nonces](/csp) into the attribute callbacks `[up-on-keep]`, `[up-on-hungry]` and `[up-on-opened]`.
 - New property `up.Request#ended` indicates whether this request is no longer waiting for the network for any reason. It is `true` when the server has responded or when the request
   [failed](/failed-responses) or was [aborted](/aborting-requests).
 - The attribute `[up-flashes]` is now stable (discussion #679)
-- ❌ The `up.feedback` package has been renamed to `up.status`.
 - Clicking a link with a page-local `#hash` in the `[href]` will now honor [fixed layout obstructions](/up-fixed-top) if the browser location is already on that `#hash`.
 - Fix a bug where a link with `[up-confirm]` would show the confirmation dialog before [preloading](/preloading).
 - Fix a crash with `up.submit({ submitButton: false })`.
