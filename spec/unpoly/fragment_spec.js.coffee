@@ -2845,6 +2845,39 @@ describe 'up.fragment', ->
 
         it 'replaces the body if asked to replace the "html" selector'
 
+        describe 'updating children', ->
+
+          it 'replaces the children with :content, but keeps the element itself', ->
+            oldTarget = fixture('#target', 'old-attr': '')
+            e.affix(target, '.child', text: 'old child')
+            up.render('#target:content', document: """
+              <div id='target' new-attr>
+                <div class='child'>new child</div>
+              </div>"
+              """
+            )
+
+            newTarget = document.querySelector('#target')
+            expect(newTarget).toBe(oldTarget)
+            expect(newTarget).toHaveAttribute('old-attr')
+
+            expect(newTarget).not.toHaveText('old child')
+            expect(newTarget).toHaveText('new child')
+
+          it 'returns an up.RenderResult with only the new children', ->
+            fixture('#target', 'old-attr': '')
+            e.affix(target, '.child', text: 'old child')
+            result = await up.render('#target:content', document: """
+              <div id='target' new-attr>
+                <div class='child'>new child</div>
+              </div>"
+              """
+            )
+
+            expect('#target').toHaveText('new child')
+            expect(result.fragments.length).toBe(1)
+            expect(result.fragments[0]).toMatchSelector('.child')
+
         describe 'appending and prepending', ->
 
           it 'prepends instead of replacing when the target has a :before pseudo-selector', asyncSpec (next) ->

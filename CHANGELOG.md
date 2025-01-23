@@ -241,6 +241,7 @@ This release includes the following changes:
 
 ### [Fragment API](/up.fragment)
 
+- You can now [update element's inner HTML](/targeting-fragments#content) using the `.element:content` pseudo-selector. This swaps all children of `.element`, while preserving the element itself. This feature was previously documented, but didn't work yet.
 - New configuration `up.fragment.config.renderOptions`. This is an object of default render options to always apply, even when not [navigating](/navigation).
 - When calling `up.fragment.get()` with multiple search layers (e.g. `{ layer: "current, parent"}`), Unpoly will now search those layers in the given order.
 - Calling `up.fragment.get()` with an `Element`, that element is returned without further lookups.
