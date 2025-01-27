@@ -234,7 +234,8 @@ up.Request.Cache = class Cache {
     return request.age < up.network.config.cacheEvictAge
   }
 
-  get _size() {
+  // Read by specs
+  get currentSize() {
     return this._requests.length
   }
 
@@ -244,7 +245,7 @@ up.Request.Cache = class Cache {
   }
 
   _limitSize() {
-    for (let i = 0; i < (this._size - this._capacity); i++) {
+    for (let i = 0; i < (this.currentSize - this._capacity); i++) {
       // The _requests array is in insertion order, so the oldest entry will be first
       this._delete(this._requests[0])
     }

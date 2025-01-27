@@ -1848,11 +1848,11 @@ up.util = (function() {
     }
   }
 
-  function delegatePromise(object, promiseProp) {
+  function delegatePromise(object, targetProvider) {
     return defineDelegates(
       object,
       ['then', 'catch', 'finally'],
-      function() { return this[promiseProp] }
+      targetProvider
     )
   }
 

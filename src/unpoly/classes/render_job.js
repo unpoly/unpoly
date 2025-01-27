@@ -246,7 +246,7 @@ up.RenderJob = class RenderJob {
   */
   static {
     // A request is also a promise ("thenable") for its initial render pass.
-    u.delegatePromise(this.prototype, '_rendered')
+    u.delegatePromise(this.prototype, function() { return this._rendered })
 
     u.memoizeMethod(this.prototype, {
       _awaitFinished: true,

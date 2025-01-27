@@ -380,7 +380,7 @@ describe('up.network', function() {
             await wait()
 
             expect(up.network.isBusy()).toBe(false)
-            expect(up.cache._size).toBe(1)
+            expect(up.cache.currentSize).toBe(1)
           })
 
           it('does not considers a redirection URL an alias for the requested URL if the original request was never cached', asyncSpec(function(next) {
