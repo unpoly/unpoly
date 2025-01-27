@@ -89,7 +89,7 @@ as attribute value, or when you want to re-use the same placeholder multiple tim
 
 You may need to customize placeholder markup to better fit the targeted fragment.
 For example, a spinner animations should be larger when updating a larger content area.
-Also when buildng a UI skeleton, its shapes must resemble the eventual screen state to be believable.
+Also when building a UI skeleton, its shapes must resemble the eventual screen state to be believable.
 
 To limit the proliferation of template variants, you can also make a few templates that are
 [customizable with variables](/templates#dynamic). When refering to a template, we
