@@ -8,7 +8,7 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
-3.11.0
+3.10.1
 ------
 
 This release fixes an error in the minified Javascript (`unpoly.min.js`) (issue #703).
