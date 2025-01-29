@@ -125,7 +125,7 @@ caused the submission. It is also marked as `.up-active`, in addition to the for
 ```html
 <form action="/action" up-submit class="up-active"> <!-- mark-phrase "up-active" -->
   <input type="text" name="email" class="up-active"> <!-- mark-phrase "up-active" -->
-  <button type="submit">Submit</button> <!-- mark-phrase "up-active" -->
+  <button type="submit" class="up-active">Submit</button> <!-- mark-phrase "up-active" -->
 </form>
 ```
 

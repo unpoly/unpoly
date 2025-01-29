@@ -4,8 +4,7 @@ Placeholders
 Placeholders are temporary spinners or UI skeletons shown while a fragment is loading.
 
 Placeholders appear instantly after a user interaction, without waiting for the server.
-They signal that the app is working, or by provide clues for how the page will ultimately look.
-This can make long-loading interactions appear more responsive.
+By providing clues for how the page will ultimately look, placeholders can make long-loading interactions appear more responsive.
 
 <video src="images/placeholders.webm" controls width="600" aria-label="UI skeletons are shown while screens are loading"></video>
 

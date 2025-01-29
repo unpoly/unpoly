@@ -63,7 +63,7 @@ Optimistic rendering
 --------------------
 
 Optimistic rendering is an advanced pattern where we update the page
-without waiting for the server to respond. When the server eventually does respond, the optimistic change
+without waiting for the server. When the server eventually does respond, the optimistic change
 is reverted and replaced by the server-confirmed content.
 
 See [Optimistic rendering](/previews) for details and examples.

@@ -58,7 +58,7 @@ Instead of passing the placeholder HTML directly, you can also refer to any [tem
 
 ### Optimistic rendering
 
-Unpoly 3.10 supports [optimistic rendering](/optimistic-rendering) as an application of previews and templates. This is a pattern where we update the page without waiting for the server to respond. When the server eventually does respond, the optimistic change is reverted and replaced by the server-confirmed content.
+Unpoly 3.10 supports [optimistic rendering](/optimistic-rendering) as an application of previews and templates. This is a pattern where we update the page without waiting for the server. When the server eventually does respond, the optimistic change is reverted and replaced by the server-confirmed content.
 
 For example, this is the [*Tasks* tab](https://demo.unpoly.com/tasks) in the official [demo app](https://demo.unpoly.com) running with 1000 ms latency. Note how the UI updates instantly, without waiting for the server:
 
