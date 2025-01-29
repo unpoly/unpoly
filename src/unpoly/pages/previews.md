@@ -48,8 +48,20 @@ up.preview('link-spinner', function(preview) {
 })
 ```
 
-The `preview` argument is an `up.Preview` instance that offers many utilities to make temporary changes.
-For example, you can use it to insert or move elements, add classes or set attributes.
+The `preview` argument is an `up.Preview` instance that offers many utilities to make temporary changes:
+
+| Function                                                       | Effect                          |
+|----------------------------------------------------------------|---------------------------------|
+| [`preview.insert()`](/up.Preview.prototype.insert)             | Inserts an element.             |
+| [`preview.addClass()`](/up.Preview.prototype.addClass)         | Adds a CSS class.               |
+| [`preview.removeClass()`](/up.Preview.prototype.removeClass)   | Removes a CSS class.            |
+| [`preview.setAttrs()`](/up.Preview.prototype.setAttrs)         | Change an element's attributes. |
+| [`preview.setStyle()`](/up.Preview.prototype.setStyle)         | Set inline CSS styles.          |
+| [`preview.swapContent()`](/up.Preview.prototype.swapContent)   | Replace an element's children.  |
+| [`preview.hide()`](/up.Preview.prototype.hide)                 | Hides an element.               |
+| [`preview.show()`](/up.Preview.prototype.show)                 | Shows a hidden element.         |
+| [`preview.openLayer()`](/up.Preview.prototype.openLayer)       | Opens an overlay.               |
+| [`preview.showLayer()`](/up.Preview.prototype.showPlaceholder) | Show a placeholder.             |
 
 We can use the `link-spinner` preview in any link or form by setting an `[up-preview]` attribute:
 
@@ -197,8 +209,8 @@ This is useful to define multiple variations of a preview effect.
 For example, the following preview accepts a `{ size }` option to show a spinner of varying size:
 
 ```js
-up.preview('spinner', function(preview, { width = 50 }) {
-  let spinner = up.element.createFromSelector('img', { src: 'spinner.gif', width })
+up.preview('spinner', function(preview, { size = 50 }) {
+  let spinner = up.element.createFromSelector('img', { src: 'spinner.gif', width: size })
   preview.insert(preview.fragment, spinner)
 })
 ```

@@ -73,6 +73,18 @@ To convey which parts of the page have a pending update, consider styling target
 }
 ```
 
+You can show a hidden loading message while a form is submitting:
+
+```css
+.spinner {
+  display: none;
+  
+  form.up-active & {
+    display: block;
+  }
+}
+```
+
 If these CSS rules are not enough, see [Loading state](/loading-state) for a variety
 of other strategies. In particular [previews](/previews) give you access to both the origin and
 targeted elements, and allow to make arbitrary changes to the page while a request loading.
