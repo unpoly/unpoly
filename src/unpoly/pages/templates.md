@@ -83,6 +83,10 @@ this template in various places, but set a custom element text every time:
 There are multiple methods to implement template variables, including [compilers](#compiler-postprocessing),
 [template engines](#template-engine) and post-processing [callbacks](#callback-postprocessing).
 
+> [note]
+> The variable syntax with the twin curly braces is only an example.
+> You can implement templates with arbitrary grammar.
+
 
 ### <em class="heading-prefix">Option 1</em> Processing compiler data {#compiler-postprocessing}
 
