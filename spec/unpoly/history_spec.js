@@ -220,7 +220,7 @@ describe('up.history', function() {
 
     describe('back button', function() {
 
-      it('emits up:location:changed events as the user goes forwards and backwards through history', asyncSpec(function(next) {
+      it('emits up:location:changed events as the user goes forwards and backwards through history', async function() {
         up.history.config.restoreTargets = ['.viewport']
 
         fixture('.viewport .content')
@@ -241,94 +241,84 @@ describe('up.history', function() {
 
         const tolerance = 150
 
-        next(() => {
-          respond()
-        })
+        await wait()
 
-        next(() => {
-          expect(events).toEqual([
-            ['push', normalize('/foo')]
-          ])
+        respond()
+        await wait()
 
-          up.navigate('.content', {url: '/bar', history: true})
-        })
+        expect(events).toEqual([
+          ['push', normalize('/foo')]
+        ])
 
-        next(() => {
-          respond()
-        })
+        up.navigate('.content', {url: '/bar', history: true})
+        await wait()
 
-        next(() => {
-          expect(events).toEqual([
-            ['push', normalize('/foo')],
-            ['push', normalize('/bar')]
-          ])
+        respond()
+        await wait()
 
-          up.navigate('.content', {url: '/baz', history: true})
-        })
+        expect(events).toEqual([
+          ['push', normalize('/foo')],
+          ['push', normalize('/bar')]
+        ])
 
-        next(() => {
-          respond()
-        })
+        up.navigate('.content', {url: '/baz', history: true})
+        await wait()
 
-        next(() => {
-          expect(events).toEqual([
-            ['push', normalize('/foo')],
-            ['push', normalize('/bar')],
-            ['push', normalize('/baz')]
-          ])
+        respond()
+        await wait()
 
-          history.back()
-        })
+        expect(events).toEqual([
+          ['push', normalize('/foo')],
+          ['push', normalize('/bar')],
+          ['push', normalize('/baz')]
+        ])
 
-        next.after(tolerance, () => {
-          expect(events).toEqual([
-            ['push', normalize('/foo')],
-            ['push', normalize('/bar')],
-            ['push', normalize('/baz')],
-            ['pop', normalize('/bar')]
-          ])
+        history.back()
+        await wait(tolerance)
 
-          history.back()
-        })
+        expect(events).toEqual([
+          ['push', normalize('/foo')],
+          ['push', normalize('/bar')],
+          ['push', normalize('/baz')],
+          ['pop', normalize('/bar')]
+        ])
 
-        next.after(150, () => {
-          expect(events).toEqual([
-            ['push', normalize('/foo')],
-            ['push', normalize('/bar')],
-            ['push', normalize('/baz')],
-            ['pop', normalize('/bar')],
-            ['pop', normalize('/foo')]
-          ])
+        history.back()
+        await wait(150)
 
-          history.forward()
-        })
+        expect(events).toEqual([
+          ['push', normalize('/foo')],
+          ['push', normalize('/bar')],
+          ['push', normalize('/baz')],
+          ['pop', normalize('/bar')],
+          ['pop', normalize('/foo')]
+        ])
 
-        next.after(150, () => {
-          expect(events).toEqual([
-            ['push', normalize('/foo')],
-            ['push', normalize('/bar')],
-            ['push', normalize('/baz')],
-            ['pop', normalize('/bar')],
-            ['pop', normalize('/foo')],
-            ['pop', normalize('/bar')]
-          ])
+        history.forward()
+        await wait(150)
 
-          history.forward()
-        })
+        expect(events).toEqual([
+          ['push', normalize('/foo')],
+          ['push', normalize('/bar')],
+          ['push', normalize('/baz')],
+          ['pop', normalize('/bar')],
+          ['pop', normalize('/foo')],
+          ['pop', normalize('/bar')]
+        ])
 
-        next.after(150, () => {
-          expect(events).toEqual([
-            ['push', normalize('/foo')],
-            ['push', normalize('/bar')],
-            ['push', normalize('/baz')],
-            ['pop', normalize('/bar')],
-            ['pop', normalize('/foo')],
-            ['pop', normalize('/bar')],
-            ['pop', normalize('/baz')]
-          ])
-        })
+        history.forward()
+        await wait(150)
+
+        expect(events).toEqual([
+          ['push', normalize('/foo')],
+          ['push', normalize('/bar')],
+          ['push', normalize('/baz')],
+          ['pop', normalize('/bar')],
+          ['pop', normalize('/foo')],
+          ['pop', normalize('/bar')],
+          ['pop', normalize('/baz')]
+        ])
       })
-      )
 
       it('emits an up:location:changed event with a string { location } property (issue #490)', async function() {
         const waitForBrowser = 100
@@ -350,7 +340,7 @@ describe('up.history', function() {
         expect(listener.calls.mostRecent().args[0].location).toMatchURL('/page1')
       })
 
-      it('calls destructor functions when destroying compiled elements (bugfix)', asyncSpec(function(next) {
+      it('calls destructor functions when destroying compiled elements (bugfix)', async function() {
         const waitForBrowser = 100
 
         // By default, up.history will replace the <body> tag when
@@ -376,21 +366,19 @@ describe('up.history', function() {
         expect(constructorSpy).toHaveBeenCalled()
 
         history.back()
+        await wait(waitForBrowser)
 
-        next.after(waitForBrowser, () => {
-          expect(location.pathname).toEqual('/one')
-          this.respondWith("<div class='container'>restored container text</div>")
-        })
+        expect(location.pathname).toEqual('/one')
+        this.respondWith("<div class='container'>restored container text</div>")
 
-        next(() => {
-          expect(destructorSpy).toHaveBeenCalled()
-        })
+        await wait()
+
+        expect(destructorSpy).toHaveBeenCalled()
       })
-      )
 
       describe('up:location:restore event', function() {
 
-        it('emits an up:location:restore event that users can prevent and substitute their own restoration logic', asyncSpec(function(next) {
+        it('emits an up:location:restore event that users can prevent and substitute their own restoration logic', async function() {
           const waitForBrowser = 100
           const main = fixture('main#main', {text: 'original content'})
           up.history.config.restoreTargets = [':main']
@@ -401,24 +389,22 @@ describe('up.history', function() {
           up.on('up:location:restore', restoreListener)
 
           up.history.push("/page1")
+          await wait()
 
-          next(() => up.history.push("/page2"))
+          up.history.push("/page2")
+          await wait()
 
-          next(function() {
-            expect(up.history.location).toMatchURL('/page2')
-            expect(restoreListener).not.toHaveBeenCalled()
+          expect(up.history.location).toMatchURL('/page2')
+          expect(restoreListener).not.toHaveBeenCalled()
 
-            history.back()
-          })
+          history.back()
+          await wait(waitForBrowser)
 
-          next.after(waitForBrowser, function() {
-            expect(up.history.location).toMatchURL('/page1')
-            expect(restoreListener).toHaveBeenCalled()
+          expect(up.history.location).toMatchURL('/page1')
+          expect(restoreListener).toHaveBeenCalled()
 
-            expect(main).toHaveText('manually restored content')
-          })
+          expect(main).toHaveText('manually restored content')
         })
-        )
 
         it('lets users mutate event.renderOptions to customize the restoration pass', async function() {
           const waitForBrowser = 100
@@ -544,41 +530,40 @@ describe('up.history', function() {
 
 
       describe('focus restoration', () => {
-        it('restores element focus when the user hits the back button', asyncSpec(function(next) {
-            const waitForBrowser = 100
-            up.fragment.config.mainTargets = ['main']
-            up.history.config.restoreTargets = [':main']
-            const main = fixture('main')
-            const link = e.affix(main, 'a[href="/focus-path2"][up-follow]', {text: 'link label'})
+        it('restores element focus when the user hits the back button', async function() {
+          const waitForBrowser = 100
+          up.fragment.config.mainTargets = ['main']
+          up.history.config.restoreTargets = [':main']
+          const main = fixture('main')
+          const link = e.affix(main, 'a[href="/focus-path2"][up-follow]', {text: 'link label'})
 
-            up.history.replace('/focus-path1')
+          up.history.replace('/focus-path1')
+          await wait()
 
-            next(() => Trigger.clickSequence(link))
+          Trigger.clickSequence(link)
+          await wait()
 
-            next(function() {
-              expect(link).toBeFocused()
-              expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(link).toBeFocused()
+          expect(jasmine.Ajax.requests.count()).toBe(1)
 
-              jasmine.respondWithSelector('main', {text: 'new text'})
-            })
+          jasmine.respondWithSelector('main', {text: 'new text'})
+          await wait()
 
-            next(function() {
-              expect('main').toHaveText('new text')
-              expect('main').toBeFocused()
+          expect('main').toHaveText('new text')
+          expect('main').toBeFocused()
 
-              history.back()
-            })
+          history.back()
+          await wait(waitForBrowser)
 
-            next.after(waitForBrowser, () => expect(jasmine.Ajax.requests.count()).toBe(2))
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+          await wait()
 
-            next(() => jasmine.respondWithSelector('main a[href="/focus-path2"]'))
+          jasmine.respondWithSelector('main a[href="/focus-path2"]')
+          await wait()
 
-            next(function() {
-              expect(document).toHaveSelector('main a[href="/focus-path2"]')
-              expect('a[href="/focus-path2"]').toBeFocused()
-            })
-          })
-        )
+          expect(document).toHaveSelector('main a[href="/focus-path2"]')
+          expect('a[href="/focus-path2"]').toBeFocused()
+        })
       })
 
       describe('scroll restoration', function() {
@@ -587,11 +572,11 @@ describe('up.history', function() {
           $('.viewport').remove()
         })
 
-        it('restores the scroll position of viewports when the user hits the back button', asyncSpec(function(next) {
+        it('restores the scroll position of viewports when the user hits the back button', async function() {
           const longContentHTML = `
             <div class="viewport" style="width: 100px; height: 100px; overflow-y: scroll">
               <div class="content" style="height: 1000px"></div>
-            </div>\
+            </div>
           `
 
           const respond = () => this.respondWith(longContentHTML)
@@ -606,63 +591,52 @@ describe('up.history', function() {
           up.history.replace('/scroll-restauration-spec')
 
           up.navigate('.content', {url: '/test-one', history: true})
+          await wait(waitForBrowser)
 
-          next.after(waitForBrowser, () => {
-            respond()
-          })
+          respond()
+          await wait(waitForBrowser)
 
-          next.after(waitForBrowser, () => {
-            expect(location.href).toMatchURL('/test-one')
-            $viewport.scrollTop(50)
-            up.navigate('.content', {url: '/test-two', history: true})
-          })
+          expect(location.href).toMatchURL('/test-one')
+          $viewport.scrollTop(50)
+          up.navigate('.content', {url: '/test-two', history: true})
+          await wait(waitForBrowser)
 
-          next.after(waitForBrowser, () => {
-            respond()
-          })
+          respond()
+          await wait(waitForBrowser)
 
-          next.after(waitForBrowser, () => {
-            expect(location.href).toMatchURL('/test-two')
-            $('.viewport').scrollTop(150)
-            up.navigate('.content', {url: '/test-three', history: true})
-          })
+          expect(location.href).toMatchURL('/test-two')
+          $('.viewport').scrollTop(150)
+          up.navigate('.content', {url: '/test-three', history: true})
+          await wait(waitForBrowser)
 
-          next.after(waitForBrowser, () => {
-            respond()
-          })
+          respond()
+          await wait(waitForBrowser)
 
-          next.after(waitForBrowser, () => {
-            expect(location.href).toMatchURL('/test-three')
-            $('.viewport').scrollTop(250)
-            history.back()
-          })
+          expect(location.href).toMatchURL('/test-three')
+          $('.viewport').scrollTop(250)
+          history.back()
+          await wait(waitForBrowser)
 
-          next.after(waitForBrowser, () => {
-            expect(location.href).toMatchURL('/test-two')
-            expect($('.viewport').scrollTop()).toBe(150)
-            history.back()
-          })
+          expect(location.href).toMatchURL('/test-two')
+          expect($('.viewport').scrollTop()).toBe(150)
+          history.back()
+          await wait(waitForBrowser)
 
-          next.after(waitForBrowser, () => {
-            expect(location.href).toMatchURL('/test-one') // cannot delay the browser from restoring the URL on pop
-            expect($('.viewport').scrollTop()).toBe(50)
-            history.forward()
-          })
+          expect(location.href).toMatchURL('/test-one')
+          expect($('.viewport').scrollTop()).toBe(50)
+          history.forward()
+          await wait(waitForBrowser)
 
-          next.after(waitForBrowser, () => {
-            expect(location.href).toMatchURL('/test-two')
-            expect($('.viewport').scrollTop()).toBe(150)
-            history.forward()
-          })
+          expect(location.href).toMatchURL('/test-two')
+          expect($('.viewport').scrollTop()).toBe(150)
+          history.forward()
+          await wait(waitForBrowser)
 
-          next.after(waitForBrowser, () => {
-            expect(location.href).toMatchURL('/test-three') // cannot delay the browser from restoring the URL on pop
-            expect($('.viewport').scrollTop()).toBe(250)
-          })
+          expect(location.href).toMatchURL('/test-three')
+          expect($('.viewport').scrollTop()).toBe(250)
         })
-        )
 
-        it('resets the scroll position of no earlier scroll position is known', asyncSpec(function(next) {
+        it('resets the scroll position of no earlier scroll position is known', async function() {
           const longContentHTML = `
             <div class="viewport" style="width: 100px; height: 100px; overflow-y: scroll">
               <div class="content" style="height: 1000px">text</div>
@@ -681,31 +655,28 @@ describe('up.history', function() {
           up.history.replace('/restore-path1')
 
           up.navigate('.content', {url: '/restore-path2', history: true})
+          await wait()
 
-          next(() => {
-            respond()
-          })
+          respond()
+          await wait()
 
-          next(function() {
-            expect(location.href).toMatchURL('/restore-path2')
-            $('.viewport').scrollTop(50)
+          expect(location.href).toMatchURL('/restore-path2')
+          $('.viewport').scrollTop(50)
 
-            // Emulate a cache miss
-            up.layer.root.lastScrollTops.clear()
+          // Emulate a cache miss
+          up.layer.root.lastScrollTops.clear()
 
-            history.back()
-          })
+          history.back()
+          await wait(waitForBrowser)
 
-          next.after(waitForBrowser, () => respond())
+          respond()
+          await wait()
 
-          next(function() {
-            expect(location.href).toMatchURL('/restore-path1')
-            expect($('.viewport').scrollTop()).toBe(0)
-          })
+          expect(location.href).toMatchURL('/restore-path1')
+          expect($('.viewport').scrollTop()).toBe(0)
         })
-        )
 
-        it('restores the scroll position of two viewports marked with [up-viewport], but not configured in up.viewport.config (bugfix)', asyncSpec(function(next) {
+        it('restores the scroll position of two viewports marked with [up-viewport], but not configured in up.viewport.config (bugfix)', async function() {
           up.history.config.restoreTargets = ['.container']
 
           const html = `
@@ -725,35 +696,29 @@ describe('up.history', function() {
           $screen.html(html)
 
           up.navigate('.content1, .content2', {url: '/one', reveal: false, history: true})
+          await wait()
 
-          next(() => {
-            respond()
-          })
+          respond()
+          await wait()
 
-          next(() => {
-            $('.viewport1').scrollTop(3000)
-            $('.viewport2').scrollTop(3050)
-            expect('.viewport1').toBeScrolledTo(3000)
-            expect('.viewport2').toBeScrolledTo(3050)
+          $('.viewport1').scrollTop(3000)
+          $('.viewport2').scrollTop(3050)
+          expect('.viewport1').toBeScrolledTo(3000)
+          expect('.viewport2').toBeScrolledTo(3050)
 
-            up.navigate('.content1, .content2', {url: '/two', reveal: false, history: true})
-          })
+          up.navigate('.content1, .content2', {url: '/two', reveal: false, history: true})
+          await wait()
 
-          next(() => {
-            respond()
-          })
+          respond()
+          await wait()
 
-          next.after(50, () => {
-            expect(location.href).toMatchURL('/two')
-            history.back()
-          })
+          expect(location.href).toMatchURL('/two')
+          history.back()
+          await wait(50)
 
-          next.after(50, () => {
-            expect('.viewport1').toBeScrolledTo(3000)
-            expect('.viewport2').toBeScrolledTo(3050)
-          })
+          expect('.viewport1').toBeScrolledTo(3000)
+          expect('.viewport2').toBeScrolledTo(3050)
         })
-        )
       })
     })
 
