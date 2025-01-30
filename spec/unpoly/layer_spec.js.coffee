@@ -1062,17 +1062,17 @@ describe 'up.layer', ->
 
             describe 'for an overlay with tether', ->
 
-              it 'dismisses the overlay when the user clicks anywhere on the parent layer', asyncSpec (next) ->
+              it 'dismisses the overlay when the user clicks anywhere on the parent layer', ->
                 opener = fixture('a', text: 'label')
                 up.layer.open(dismissable: 'outside', mode: 'popup', origin: opener)
+                await wait()
 
-                next ->
-                  expect(up.layer.isOverlay()).toBe(true)
+                expect(up.layer.isOverlay()).toBe(true)
 
-                  Trigger.clickSequence(document.body)
+                Trigger.clickSequence(document.body)
+                await wait()
 
-                next ->
-                  expect(up.layer.isOverlay()).toBe(false)
+                expect(up.layer.isOverlay()).toBe(false)
 
               it 'does not dismiss the overlay when the user clicks on the parent layer, but within a foreign overlay', asyncSpec (next) ->
                 up.layer.config.foreignOverlaySelectors = ['.foreign-overlay']
@@ -1100,6 +1100,55 @@ describe 'up.layer', ->
 
                 next ->
                   expect(up.layer.isOverlay()).toBe(false)
+
+              describe 'focus', ->
+
+                it 'focuses the link that opened the overlay', ->
+                  opener = fixture('a[href="#"][up-content="overlay content"][up-dismissable="outside"][up-layer="new popup"]', text: 'label')
+                  Trigger.clickSequence(opener)
+                  await wait()
+
+                  expect(up.layer.isOverlay()).toBe(true)
+
+                  Trigger.clickSequence(document.body)
+                  await wait(50)
+
+                  expect(up.layer.isOverlay()).toBe(false)
+                  expect(opener).toBeFocused()
+
+                it 'focuses the link that opened the overlay when nested overlays are dismissed', ->
+                  rootOpener = fixture('a[href="#"][up-content="overlay content"][up-dismissable="outside"][up-layer="new popup"]', text: 'label')
+                  Trigger.clickSequence(rootOpener)
+                  await wait()
+
+                  expect(up.layer.current.index).toBe(1)
+
+                  overlay1Opener = up.layer.affix('a[href="#"][up-content="overlay content"][up-dismissable="outside"][up-layer="new popup"]', text: 'label')
+                  Trigger.clickSequence(overlay1Opener)
+                  await wait()
+
+                  expect(up.layer.current.index).toBe(2)
+
+                  Trigger.clickSequence(document.body)
+                  await wait(50)
+
+                  expect(up.layer.isOverlay()).toBe(false)
+                  expect(rootOpener).toBeFocused()
+
+                it 'preserves focus when the overlay was dismissed by clicking a focusable element on the parent layer', ->
+                  opener = fixture('a[href="#"][up-content="overlay content"][up-dismissable="outside"][up-layer="new popup"]', text: 'label')
+                  input = fixture('input[type=text]')
+
+                  Trigger.clickSequence(opener)
+                  await wait()
+
+                  expect(up.layer.isOverlay()).toBe(true)
+
+                  Trigger.clickSequence(input)
+                  await wait(50)
+
+                  expect(up.layer.isOverlay()).toBe(false)
+                  expect(input).toBeFocused()
 
           describe 'without { dismissable: "outside" }', ->
 

@@ -107,14 +107,19 @@ up.Change.CloseLayer = class CloseLayer extends up.Change {
   }
 
   _handleFocus(formerParent) {
+    let hadFocus = this._layer.hasFocus()
+
     // A11Y: Stop trapping focus in the layer that's about to close
     this._layer.overlayFocus.teardown()
     // A11Y: Start trapping focus in the parent layer that is being promoted to front.
 
     formerParent.overlayFocus?.moveToFront()
-    // A11Y: Focus the element that originally opened this layer.
-    let newFocusElement = this._layer.origin || formerParent.element
 
-    up.focus(newFocusElement, { preventScroll: true })
+    if (hadFocus) {
+      // A11Y: Focus the element that originally opened this layer.
+      let newFocusElement = this._layer.origin || formerParent.element
+
+      up.focus(newFocusElement, { preventScroll: true })
+    }
   }
 }
