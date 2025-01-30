@@ -833,7 +833,7 @@ describe('up.element', function() {
       expect(element.textContent).toEqual('alternative content')
     })
 
-    it('can create non-inert <script> tags', asyncSpec(function(next) {
+    it('can create non-inert <script> tags', async function() {
       window.scriptTagExecuted = jasmine.createSpy('scriptTagExecuted')
 
       const html = `
@@ -847,13 +847,13 @@ describe('up.element', function() {
 
       document.body.appendChild(element)
 
-      next.after(100, function() {
-        expect(window.scriptTagExecuted).toHaveBeenCalled()
+      await wait(100)
 
-        element.remove()
-        delete window.scriptTagExecuted
-      })
-    }))
+      expect(window.scriptTagExecuted).toHaveBeenCalled()
+
+      element.remove()
+      delete window.scriptTagExecuted
+    })
 
     it('create an element when there is leading whitespace in the given string (bugfix)', function() {
       const html = "    <h1>Full story</h1>"
