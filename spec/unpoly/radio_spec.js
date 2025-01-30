@@ -8,109 +8,96 @@ describe('up.radio', function() {
 
     describe('up.radio.startPolling()', function() {
 
-      it('starts polling the given element', asyncSpec(function(next) {
+      it("starts polling the given element", async function() {
         let interval
-        up.radio.config.pollInterval = (interval = 150)
+        up.radio.config.pollInterval = interval = 150
         const timingTolerance = interval / 3
 
-        const element = fixture('.element', {text: 'old text'})
+        const element = fixture(".element", { text: "old text" })
         up.radio.startPolling(element)
 
-        next.after(timingTolerance, function() {
-          expect('.element').toHaveText('old text')
-          expect(jasmine.Ajax.requests.count()).toBe(0)
-        })
+        await wait(timingTolerance)
 
-        next.after(interval, function() {
-          expect(jasmine.Ajax.requests.count()).toBe(1)
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.element')
-          jasmine.respondWithSelector('.element', {text: 'new text'})
-        })
+        expect(".element").toHaveText("old text")
+        expect(jasmine.Ajax.requests.count()).toBe(0)
 
-        
-        next(function() {
-          expect('.element').toHaveText('new text')
-          expect(jasmine.Ajax.requests.count()).toBe(1)
-        })
+        await wait(interval)
 
-        next.after((timingTolerance + interval), function() {
-          expect(jasmine.Ajax.requests.count()).toBe(2)
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(jasmine.lastRequest().requestHeaders["X-Up-Target"]).toBe(".element")
+        jasmine.respondWithSelector(".element", { text: "new text" })
 
-          jasmine.respondWithSelector('.element', {text: 'newer text'})
-        })
+        await wait()
 
-        next(function() {
-          expect('.element').toHaveText('newer text')
-          expect(jasmine.Ajax.requests.count()).toBe(2)
-        })
+        expect(".element").toHaveText("new text")
+        expect(jasmine.Ajax.requests.count()).toBe(1)
 
-        next.after((timingTolerance + interval), () => expect(jasmine.Ajax.requests.count()).toBe(3))
+        await wait(timingTolerance + interval)
+
+        expect(jasmine.Ajax.requests.count()).toBe(2)
+        jasmine.respondWithSelector(".element", { text: "newer text" })
+
+        await wait()
+
+        expect(".element").toHaveText("newer text")
+        expect(jasmine.Ajax.requests.count()).toBe(2)
+
+        await wait(timingTolerance + interval)
+        expect(jasmine.Ajax.requests.count()).toBe(3)
       })
-      )
 
-      it('does not cause duplicate requests when the server responds with an [up-poll] fragment (bugfix)', asyncSpec(function(next) {
+      it("does not cause duplicate requests when the server responds with an [up-poll] fragment (bugfix)", async function() {
         let interval
-        up.radio.config.pollInterval = (interval = 150)
+        up.radio.config.pollInterval = interval = 150
         const timingTolerance = interval / 3
 
-        const element = fixture('.element', {text: 'old text'})
+        const element = fixture(".element", { text: "old text" })
         up.radio.startPolling(element)
 
-        next.after(timingTolerance, function() {
-          expect('.element').toHaveText('old text')
-          expect(jasmine.Ajax.requests.count()).toBe(0)
-        })
+        await wait(timingTolerance)
 
-        next.after(interval, function() {
-          expect(jasmine.Ajax.requests.count()).toBe(1)
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.element')
-          jasmine.respondWithSelector('.element[up-poll]', {text: 'new text'})
-        })
+        expect(".element").toHaveText("old text")
+        expect(jasmine.Ajax.requests.count()).toBe(0)
 
-        next(function() {
-          expect('.element').toHaveText('new text')
-          expect(jasmine.Ajax.requests.count()).toBe(1)
-        })
+        await wait(interval)
 
-        next.after((timingTolerance + interval), function() {
-          expect(jasmine.Ajax.requests.count()).toBe(2)
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(jasmine.lastRequest().requestHeaders["X-Up-Target"]).toBe(".element")
+        jasmine.respondWithSelector(".element[up-poll]", { text: "new text" })
 
-          jasmine.respondWithSelector('.element[up-poll]', {text: 'newer text'})
-        })
+        await wait()
 
-        next(function() {
-          expect('.element').toHaveText('newer text')
-          expect(jasmine.Ajax.requests.count()).toBe(2)
-        })
-
-        next.after((timingTolerance + interval), () => expect(jasmine.Ajax.requests.count()).toBe(3))
+        expect(".element").toHaveText("new text")
       })
-      )
 
-      it('does not stop polling when the server responds without an [up-poll] attribute', asyncSpec(function(next) {
+      it("does not stop polling when the server responds without an [up-poll] attribute", async function() {
         let interval
-        up.radio.config.pollInterval = (interval = 150)
+        up.radio.config.pollInterval = interval = 150
         const timingTolerance = interval / 3
 
-        const element = fixture('.element', {text: 'old text'})
+        const element = fixture(".element", { text: "old text" })
         up.radio.startPolling(element)
 
-        next.after(timingTolerance, () => expect(jasmine.Ajax.requests.count()).toBe(0))
+        await wait(timingTolerance)
 
-        next.after(interval, function() {
-          expect(jasmine.Ajax.requests.count()).toBe(1)
-          jasmine.respondWithSelector('.element', {text: 'new text'})
-        })
+        expect(jasmine.Ajax.requests.count()).toBe(0)
 
-        next(() => expect('.element').toHaveText('new text'))
+        await wait(interval)
 
-        next.after((timingTolerance + interval), () => expect(jasmine.Ajax.requests.count()).toBe(2))
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        jasmine.respondWithSelector(".element", { text: "new text" })
+
+        await wait()
+
+        expect(".element").toHaveText("new text")
+
+        await wait(timingTolerance + interval)
+        expect(jasmine.Ajax.requests.count()).toBe(2)
       })
-      )
 
-      it('stops polling when the element is removed from the DOM', asyncSpec(function(next) {
-        let interval
-        up.radio.config.pollInterval = (interval = 150)
+      it('stops polling when the element is removed from the DOM', async function() {
+        const interval = 150
+        up.radio.config.pollInterval = interval
         const timingTolerance = interval / 3
 
         const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
@@ -118,18 +105,18 @@ describe('up.radio', function() {
         const element = fixture('.element')
         up.radio.startPolling(element)
 
-        next.after(timingTolerance, function() {
-          expect(reloadSpy).not.toHaveBeenCalled()
-          up.destroy(element)
-        })
+        await wait(timingTolerance)
+        expect(reloadSpy).not.toHaveBeenCalled()
 
-        next.after(interval, () => expect(reloadSpy).not.toHaveBeenCalled())
+        up.destroy(element)
+
+        await wait(interval)
+        expect(reloadSpy).not.toHaveBeenCalled()
       })
-      )
 
-      it('stops polling when the polling fragment is aborted', asyncSpec(function(next) {
-        let interval
-        up.radio.config.pollInterval = (interval = 150)
+      it('stops polling when the polling fragment is aborted', async function() {
+        const interval = 150
+        up.radio.config.pollInterval = interval
         const timingTolerance = interval / 3
 
         const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
@@ -138,55 +125,53 @@ describe('up.radio', function() {
         const element = e.affix(container, '.element')
         up.radio.startPolling(element)
 
-        next.after(timingTolerance, function() {
-          expect(reloadSpy).not.toHaveBeenCalled()
-          up.fragment.abort(container)
-        })
+        await wait(timingTolerance)
+        expect(reloadSpy).not.toHaveBeenCalled()
 
-        next.after(interval, () => expect(reloadSpy).not.toHaveBeenCalled())
+        up.fragment.abort(container)
+
+        await wait(interval)
+        expect(reloadSpy).not.toHaveBeenCalled()
       })
-      )
 
-      it('keeps polling when the polling fragment is aborted through its own reloading', asyncSpec(function(next) {
-        let interval
+      it('keeps polling when the polling fragment is aborted through its own reloading', async function() {
         up.radio.config.pollAbortable = false
-        up.radio.config.pollInterval = (interval = 150)
+        const interval = 150
+        up.radio.config.pollInterval = interval
         const timingTolerance = interval / 3
 
-        const element = fixture('.element', {text: 'old text'})
+        const element = fixture('.element', { text: 'old text' })
         up.radio.startPolling(element)
 
-        next.after(timingTolerance + interval, function() {
-          expect('.element').toHaveText('old text')
+        await wait(timingTolerance + interval)
+        expect('.element').toHaveText('old text')
+        expect(jasmine.Ajax.requests.count()).toBe(1)
 
-          expect(jasmine.Ajax.requests.count()).toBe(1)
+        jasmine.respondWithSelector('.element', { text: 'new text' })
 
-          jasmine.respondWithSelector('.element', {text: 'new text'})
-        })
+        await wait()
+        expect('.element').toHaveText('new text')
 
-        next(() => expect('.element').toHaveText('new text'))
-
-        next.after(timingTolerance + interval, () => expect(jasmine.Ajax.requests.count()).toBe(2))
+        await wait(timingTolerance + interval)
+        expect(jasmine.Ajax.requests.count()).toBe(2)
       })
-      )
 
-      it('does not cause duplicate requests when called on an [up-poll] element that is already polling', asyncSpec(function(next) {
-        let interval
-        up.radio.config.pollInterval = (interval = 150)
+      it('does not cause duplicate requests when called on an [up-poll] element that is already polling', async function() {
+        const interval = 150
+        up.radio.config.pollInterval = interval
         const timingTolerance = interval / 3
 
-        const element = up.hello(fixture('.element[up-poll]', {text: 'old text'}))
+        const element = up.hello(fixture('.element[up-poll]', { text: 'old text' }))
 
-        next(() => up.radio.startPolling(element))
+        up.radio.startPolling(element)
 
-        next.after(timingTolerance, function() {
-          expect('.element').toHaveText('old text')
-          expect(jasmine.Ajax.requests.count()).toBe(0)
-        })
+        await wait(timingTolerance)
+        expect('.element').toHaveText('old text')
+        expect(jasmine.Ajax.requests.count()).toBe(0)
 
-        next.after(interval, () => expect(jasmine.Ajax.requests.count()).toBe(1))
+        await wait(interval)
+        expect(jasmine.Ajax.requests.count()).toBe(1)
       })
-      )
 
       it('can override an [up-source] attribute with a { url } option', async function() {
         let interval
@@ -246,24 +231,26 @@ describe('up.radio', function() {
         expect(jasmine.lastRequest().url).toMatchURL('/two')
       })
 
-      it('polls with the given { interval }', asyncSpec(function(next) {
+      it('polls with the given { interval }', async function() {
         const defaultInterval = 100
         up.radio.config.pollInterval = defaultInterval
         const timingTolerance = defaultInterval / 3
 
         const element = up.hello(fixture('.element'))
 
-        next(() => up.radio.startPolling(element, { interval: defaultInterval * 2 }))
+        up.radio.startPolling(element, { interval: defaultInterval * 2 })
 
-        next.after(timingTolerance, () => expect(jasmine.Ajax.requests.count()).toBe(0))
+        await wait(timingTolerance)
+        expect(jasmine.Ajax.requests.count()).toBe(0)
 
-        next.after(defaultInterval, () => expect(jasmine.Ajax.requests.count()).toBe(0))
+        await wait(defaultInterval)
+        expect(jasmine.Ajax.requests.count()).toBe(0)
 
-        next.after(defaultInterval, () => expect(jasmine.Ajax.requests.count()).toBe(1))
+        await wait(defaultInterval)
+        expect(jasmine.Ajax.requests.count()).toBe(1)
       })
-      )
 
-      it('does not emit up:network:late if the server is slow to respond', asyncSpec(function(next) {
+      it('does not emit up:network:late if the server is slow to respond', async function() {
         const element = up.hello(fixture('.element'))
         up.network.config.lateDelay = 20
         const lateListener = jasmine.createSpy('up:network:late listener')
@@ -271,32 +258,36 @@ describe('up.radio', function() {
 
         up.radio.startPolling(element, { interval: 5 })
 
-        next.after(60, function() {
-          expect(jasmine.Ajax.requests.count()).toBe(1)
-          expect(lateListener).not.toHaveBeenCalled()
-        })
+        await wait(60)
+
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(lateListener).not.toHaveBeenCalled()
       })
-      )
+
     })
 
     describe('up.radio.stopPolling()', function() {
-      it('stops polling the given, polling element', asyncSpec(function (next) {
-          const interval = 150
-          const timingTolerance = interval / 3
 
-          const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+      it("stops polling the given, polling element", async function() {
+        const interval = 150
+        const timingTolerance = interval / 3
 
-          const element = fixture('.element')
-          up.radio.startPolling(element, { interval })
+        const reloadSpy = spyOn(up, "reload").and.callFake(() => Promise.resolve(new up.RenderResult()))
 
-          next.after((timingTolerance + interval), function () {
-            expect(reloadSpy.calls.count()).toBe(1)
-            up.radio.stopPolling(element)
-          })
+        const element = fixture(".element")
+        up.radio.startPolling(element, { interval })
 
-          next.after((timingTolerance + interval), () => expect(reloadSpy.calls.count()).toBe(1))
-        })
-      )
+        await wait(timingTolerance + interval)
+
+        expect(reloadSpy.calls.count()).toBe(1)
+        up.radio.stopPolling(element)
+
+        await wait(timingTolerance + interval)
+
+        expect(reloadSpy.calls.count()).toBe(1)
+      })
+
+
     })
   })
 
@@ -313,17 +304,16 @@ describe('up.radio', function() {
         await wait()
 
         jasmine.respondWith(`\
-<div class="target">
-  new target
-</div>
-<div class="between">
-  new between
-</div>
-<div class="hungry">
-  new hungry
-</div>\
-`
-        )
+          <div class="target">
+            new target
+          </div>
+          <div class="between">
+            new between
+          </div>
+          <div class="hungry">
+            new hungry
+          </div>\
+        `)
 
         await wait()
 
@@ -340,14 +330,13 @@ describe('up.radio', function() {
         await wait()
 
         jasmine.respondWith(`\
-<div class="target">
-  new target
-</div>
-<div class="hungry">
-  new hungry
-</div>\
-`
-        )
+          <div class="target">
+            new target
+          </div>
+          <div class="hungry">
+            new hungry
+          </div>\
+        `)
 
         await wait()
 
@@ -364,14 +353,13 @@ describe('up.radio', function() {
         await wait()
 
         jasmine.respondWith(`\
-<div class="target">
-  new target
-</div>
-<div class="hungry">
-  new hungry
-</div>\
-`
-        )
+          <div class="target">
+            new target
+          </div>
+          <div class="hungry">
+            new hungry
+          </div>\
+        `)
 
         await wait()
 
@@ -388,11 +376,10 @@ describe('up.radio', function() {
         await wait()
 
         jasmine.respondWith(`\
-<div class="target">
-  new target
-</div>\
-`
-        )
+          <div class="target">
+            new target
+          </div>\
+        `)
 
         await wait()
 
@@ -410,15 +397,13 @@ describe('up.radio', function() {
         const keepListener = jasmine.createSpy('up:fragment:keep listener')
         up.on('up:fragment:keep', keepListener)
 
-        up.render('#target', { document: `\
-<div id="target">new target</div>
-
-<div id="hungry" up-hungry>
-  <div id="child" up-keep>new child</div>
-</div>\
-`
-      }
-        )
+        up.render('#target', { document: `
+          <div id="target">new target</div>
+          
+          <div id="hungry" up-hungry>
+            <div id="child" up-keep>new child</div>
+          </div>
+        `})
 
         expect('#target').toHaveText('new target')
         expect('#child').toHaveText('old child')
@@ -431,15 +416,14 @@ describe('up.radio', function() {
         const keepListener = jasmine.createSpy('up:fragment:keep listener')
         up.on('up:fragment:keep', keepListener)
 
-        up.render('#target', { document: `\
-<div id="target">new target</div>
-
-<div id="hungry" up-hungry up-keep>
-  new hungry
-</div>\
-`
-      }
-        )
+        up.render('#target', { document: `
+          <div id="target">new target</div>
+          
+          <div id="hungry" up-hungry up-keep>
+            new hungry
+          </div>\
+          `
+        })
 
         expect('#target').toHaveText('new target')
         expect('#hungry').toHaveText('old hungry')
@@ -447,76 +431,60 @@ describe('up.radio', function() {
         expect(keepListener).toHaveBeenCalled()
       })
 
-      it("does not reload an hungry element if it has a weak selector", asyncSpec(function(next) {
-        $fixture('div[up-hungry]').text('old hungry')
-        $fixture('.target').text('old target')
-        const warnSpy = spyOn(up, 'warn')
 
-        up.render('.target', {url: '/path'})
+      it("does not reload a hungry element if it has a weak selector", async function() {
+        $fixture("div[up-hungry]").text("old hungry")
+        $fixture(".target").text("old target")
+        const warnSpy = spyOn(up, "warn")
 
-        next(() => {
-          this.respondWith(`
-            <div class="target">
-              new target
-            </div>
-            <div class="between">
-              new between
-            </div>
-            <div up-hungry>
-              new hungry
-            </div>
-          `
-          )
-        })
+        const renderJob = up.render(".target", { url: "/path" })
 
-        next(() => {
-          expect('.target').toHaveText('new target')
-          expect('div[up-hungry]').toHaveText('old hungry')
-          expect(warnSpy).toHaveBeenCalled()
-          expect(warnSpy.calls.argsFor(0)[1]).toMatch(/ignoring untargetable fragment/i)
-        })
+        await wait()
+        jasmine.respondWith(`
+          <div class="target">new target</div>
+          <div class="between">new between</div>
+          <div up-hungry>new hungry</div>
+        `)
+
+        await renderJob
+
+        expect(".target").toHaveText("new target")
+        expect("div[up-hungry]").toHaveText("old hungry")
+        expect(warnSpy).toHaveBeenCalled()
+        expect(warnSpy.calls.argsFor(0)[1]).toMatch(/ignoring untargetable fragment/i)
       })
-      )
 
-      it('still reveals the element that was originally targeted', asyncSpec(function(next) {
-        $fixture('.hungry[up-hungry]').text('old hungry')
-        $fixture('.target').text('old target')
+      it("still reveals the element that was originally targeted", async function() {
+        $fixture(".hungry[up-hungry]").text("old hungry")
+        $fixture(".target").text("old target")
 
         const revealStub = up.reveal.mock().and.returnValue(Promise.resolve())
 
-        up.navigate('.target', {url: '/path', scroll: 'target'})
+        const navigateJob = up.navigate(".target", { url: "/path", scroll: "target" })
 
-        next(() => {
-          this.respondWith(`\
-<div class="target">
-  new target
-</div>\
-`
-          )
-        })
+        await wait()
+        jasmine.respondWith(`<div class="target">new target</div>`)
 
-        next(() => {
-          expect(revealStub).toHaveBeenCalled()
-          const revealArg = revealStub.calls.mostRecent().args[0]
-          expect(revealArg).not.toMatchSelector('.hungry')
-          expect(revealArg).toMatchSelector('.target')
-        })
+        await navigateJob
+
+        expect(revealStub).toHaveBeenCalled()
+        const revealArg = revealStub.calls.mostRecent().args[0]
+        expect(revealArg).not.toMatchSelector(".hungry")
+        expect(revealArg).toMatchSelector(".target")
       })
-      )
 
-      it('does not change the X-Up-Target header for the request', asyncSpec(function(next) {
-        $fixture('.hungry[up-hungry]').text('old hungry')
-        $fixture('.target').text('old target')
-        $fixture('.fail-target').text('old fail target')
+      it("does not change the X-Up-Target header for the request", async function() {
+        $fixture(".hungry[up-hungry]").text("old hungry")
+        $fixture(".target").text("old target")
+        $fixture(".fail-target").text("old fail target")
 
-        up.navigate('.target', {url: '/path', failTarget: '.fail-target'})
+        const navigateJob = up.navigate(".target", { url: "/path", failTarget: ".fail-target" })
 
-        next(() => {
-          expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.target')
-          expect(this.lastRequest().requestHeaders['X-Up-Fail-Target']).toEqual('.fail-target')
-        })
+        await wait()
+
+        expect(this.lastRequest().requestHeaders["X-Up-Target"]).toEqual(".target")
+        expect(this.lastRequest().requestHeaders["X-Up-Fail-Target"]).toEqual(".fail-target")
       })
-      )
 
       it('does replace the element when the server responds with an error (e.g. for error flashes)', async function() {
         $fixture('.hungry[up-hungry]').text('old hungry')
@@ -529,20 +497,20 @@ describe('up.radio', function() {
 
         jasmine.respondWith({
           status: 500,
-          responseText: `\
-<div class="target">
-  new target
-</div>
-<div class="fail-target">
-  new fail target
-</div>
-<div class="between">
-  new between
-</div>
-<div class="hungry">
-  new hungry
-</div>\
-`
+          responseText: `
+            <div class="target">
+              new target
+            </div>
+            <div class="fail-target">
+              new fail target
+            </div>
+            <div class="between">
+              new between
+            </div>
+            <div class="hungry">
+              new hungry
+            </div>
+          `
         })
 
         await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
@@ -552,55 +520,47 @@ describe('up.radio', function() {
         expect('.hungry').toHaveText('new hungry')
       })
 
-      it('does not update [up-hungry] elements with { hungry: false } option', asyncSpec(function(next) {
-        $fixture('.hungry[up-hungry]').text('old hungry')
-        $fixture('.target').text('old target')
+      it("does not update [up-hungry] elements with { hungry: false } option", async function() {
+        $fixture(".hungry[up-hungry]").text("old hungry")
+        $fixture(".target").text("old target")
 
-        up.render('.target', {url: '/path', hungry: false})
+        const renderJob = up.render(".target", { url: "/path", hungry: false })
 
-        next(() => {
-          this.respondWith({
-            responseText: `\
-<div class="target">
-  new target
-</div>
-<div class="hungry">
-  new hungry
-</div>\
-`
-          })
+        await wait()
+        jasmine.respondWith({
+          responseText: `
+            <div class="target">new target</div>
+            <div class="hungry">new hungry</div>
+          `
         })
 
-        next(() => {
-          expect('.target').toHaveText('new target')
-          expect('.hungry').toHaveText('old hungry')
-        })
+        await renderJob
+
+        expect(".target").toHaveText("new target")
+        expect(".hungry").toHaveText("old hungry")
       })
-      )
 
-      it('does not update an [up-hungry] element that is contained by the explicit target', asyncSpec(function(next) {
-        const container = fixture('.container')
-        e.affix(container, '.child[up-hungry]')
+      it("does not update an [up-hungry] element that is contained by the explicit target", async function() {
+        const container = fixture(".container")
+        e.affix(container, ".child[up-hungry]")
 
-        const insertedSpy = jasmine.createSpy('up:fragment:inserted listener')
-        up.on('up:fragment:inserted', insertedSpy)
+        const insertedSpy = jasmine.createSpy("up:fragment:inserted listener")
+        up.on("up:fragment:inserted", insertedSpy)
 
-        up.render({
-          target: '.container',
-          document: `\
-<div class="container">
-  <div class="child" up-hungry>
-  </div>
-</div>\
-`
-        })
+        await up.render({
+          target: ".container",
+          document: `
+            <div class="container">
+              <div class="child" up-hungry>
+              </div>
+            </div>
+        `})
 
-        next(function() {
-          expect(insertedSpy.calls.count()).toBe(1)
-          expect(insertedSpy.calls.argsFor(0)[0].target).toBe(document.querySelector('.container'))
-        })
+        expect(insertedSpy.calls.count()).toBe(1)
+        expect(insertedSpy.calls.argsFor(0)[0].target).toBe(
+          document.querySelector(".container")
+        )
       })
-      )
 
       it("replaces the element when the explicit target is :none", async function() {
         $fixture('.hungry[up-hungry]').text('old hungry')
@@ -611,17 +571,16 @@ describe('up.radio', function() {
         await wait()
 
         jasmine.respondWith(`\
-<div class="target">
-  new target
-</div>
-<div class="between">
-  new between
-</div>
-<div class="hungry">
-  new hungry
-</div>\
-`
-        )
+          <div class="target">
+            new target
+          </div>
+          <div class="between">
+            new between
+          </div>
+          <div class="hungry">
+            new hungry
+          </div>\
+        `)
 
         await wait()
 
@@ -638,21 +597,20 @@ describe('up.radio', function() {
 
         await wait()
 
-        jasmine.respondWith({status: 500, responseText: `\
-<div class="success-target">
-  new success target
-</div>
-<div class="failure-target">
-  new failure target
-</div>
-<div class="between">
-  new between
-</div>
-<div class="hungry">
-  new hungry
-</div>\
-`
-        })
+        jasmine.respondWith({status: 500, responseText: `
+          <div class="success-target">
+            new success target
+          </div>
+          <div class="failure-target">
+            new failure target
+          </div>
+          <div class="between">
+            new between
+          </div>
+          <div class="hungry">
+            new hungry
+          </div>
+        `})
 
         await expectAsync(promise).toBeRejectedWith(jasmine.any(up.RenderResult))
         await expectAsync(promise).toBeRejectedWith(jasmine.objectContaining({
@@ -669,25 +627,25 @@ describe('up.radio', function() {
         const insertedSpy = jasmine.createSpy('up:fragment:inserted listener for hungry elements')
         up.on('up:fragment:inserted', '[up-hungry]', insertedSpy)
 
-        htmlFixture(`\
-<div id='root'>
-  <div id="container" class='old' up-hungry>
-    <div id='child' class='old' up-hungry></div>
-  </div>
-  <div id="target" class='old'></div>
-</div>\
-`
+        htmlFixture(`
+          <div id='root'>
+            <div id="container" class='old' up-hungry>
+              <div id='child' class='old' up-hungry></div>
+            </div>
+            <div id="target" class='old'></div>
+          </div>
+          `
         )
 
-        up.render('#target', { document: `\
-<div id='root'>
-  <div id="container" class='new' up-hungry>
-    <div id='child' class='new' up-hungry></div>
-  </div>
-  <div id="target" class='new'></div>
-</div>\
-`
-      })
+        up.render('#target', { document: `
+          <div id='root'>
+            <div id="container" class='new' up-hungry>
+              <div id='child' class='new' up-hungry></div>
+            </div>
+            <div id="target" class='new'></div>
+          </div>\
+          `
+        })
 
         expect('#container').toHaveClass('new')
         expect('#child').toHaveClass('new')
@@ -703,11 +661,10 @@ describe('up.radio', function() {
           fixture('.target.old', {text: 'old target'})
           fixture('.hungry.new', {text: 'old hungry', 'up-hungry': ''})
 
-          up.render('.target', { transition: 'cross-fade', duration: 300, document: `\
-<div class="target new">new target</div>
-<div class="hungry new">new hungry</div>\
-`
-        })
+          up.render('.target', { transition: 'cross-fade', duration: 300, document: `
+            <div class="target new">new target</div>
+            <div class="hungry new">new hungry</div>
+            `})
 
           await wait(150)
 
@@ -727,11 +684,10 @@ describe('up.radio', function() {
             fixture('#target.old', {text: 'old target'})
             fixture('#hungry.old', {text: 'old hungry', 'up-hungry': '', 'up-transition': 'cross-fade', 'up-duration': '300'})
 
-            up.render('#target', { document: `\
-<div id="target" class="new">new target</div>
-<div id="hungry" class="new">new hungry</div>\
-`
-          })
+            up.render('#target', { document: `
+              <div id="target" class="new">new target</div>
+              <div id="hungry" class="new">new hungry</div>
+            `})
 
             await wait(150)
 
@@ -749,11 +705,10 @@ describe('up.radio', function() {
             fixture('#target.old', {text: 'old target'})
             fixture('#hungry.new', {text: 'old hungry', 'up-hungry': '', 'up-transition': 'cross-fade', 'up-duration': '200'})
 
-            const job = up.render('#target', { transition: 'cross-fade', document: `\
-<div id="target" class="new">new target</div>
-<div id="hungry" class="new">new hungry</div>\
-`
-          })
+            const job = up.render('#target', { transition: 'cross-fade', document: `
+              <div id="target" class="new">new target</div>
+              <div id="hungry" class="new">new hungry</div>
+            `})
 
             await wait(100)
 
@@ -784,11 +739,10 @@ describe('up.radio', function() {
 
             await wait()
 
-            jasmine.respondWith({status: 500, responseText: `\
-<div id="target" class="new">new target</div>
-<div id="hungry" class="new">new hungry</div>\
-`
-            })
+            jasmine.respondWith({status: 500, responseText: `
+              <div id="target" class="new">new target</div>
+              <div id="hungry" class="new">new hungry</div>
+            `})
 
             await wait(100)
 
@@ -818,25 +772,24 @@ describe('up.radio', function() {
           const closeEventHandler = jasmine.createSpy('close event handler')
           up.on('up:layer:dismiss up:layer:accept', closeEventHandler)
 
-          up.layer.open({fragment: `\
-<div class='inside'>
-  old inside
-</div>\
-`
-          })
+          up.layer.open({fragment: `
+            <div class='inside'>
+              old inside
+            </div>\
+          `})
 
           expect(up.layer.isOverlay()).toBe(true)
 
           up.render({
             target: '.inside',
-            document: `\
-<div class="outside">
-  new outside
-</div>
-<div class='inside'>
-  new inside
-</div>\
-`,
+            document: `
+              <div class="outside">
+                new outside
+              </div>
+              <div class='inside'>
+                new inside
+              </div>
+            `,
             layer: 'front'
           })
 
@@ -860,25 +813,24 @@ describe('up.radio', function() {
               const closeEventHandler = jasmine.createSpy('close event handler')
               up.on('up:layer:dismiss up:layer:accept', closeEventHandler)
 
-              up.layer.open({fragment: `\
-<div class='inside'>
-  old inside
-</div>\
-`
-              })
+              up.layer.open({fragment: `
+                <div class='inside'>
+                  old inside
+                </div>
+              `})
 
               expect(up.layer.isOverlay()).toBe(true)
 
               up.render({
                 target: '.inside',
-                document: `\
-<div class="outside">
-  new outside
-</div>
-<div class='inside'>
-  new inside
-</div>\
-`,
+                document: `
+                  <div class="outside">
+                    new outside
+                  </div>
+                  <div class='inside'>
+                    new inside
+                  </div>\
+                `,
                 layer: 'front'
               })
 
@@ -902,25 +854,24 @@ describe('up.radio', function() {
               expect(currentLayerSpy.calls.argsFor(0)[0]).toBe(up.layer.root)
               expect(metaLayerSpy.calls.argsFor(0)[0]).toBe(up.layer.root)
 
-              up.layer.open({fragment: `\
-<div class='inside'>
-  old inside
-</div>\
-`
-              })
+              up.layer.open({fragment: `
+                <div class='inside'>
+                  old inside
+                </div>
+              `})
 
               expect(up.layer.isOverlay()).toBe(true)
 
               up.render({
                 target: '.inside',
-                document: `\
-<div class="outside">
-  new outside
-</div>
-<div class='inside'>
-  new inside
-</div>\
-`,
+                document: `
+                  <div class="outside">
+                    new outside
+                  </div>
+                  <div class='inside'>
+                    new inside
+                  </div>
+                `,
                 layer: 'front'
               })
 
@@ -934,24 +885,22 @@ describe('up.radio', function() {
             it('does not update the element if it is contained by the explicit target', function() {
               fixture('.foo', {text: 'old foo', 'up-hungry': true, 'up-if-layer': 'any'})
 
-              up.layer.open({fragment: `\
-<div class='overlay'>
-  <div class='foo'>old foo</div>
-  <div class='content'>old content</div>
-</div>\
-`
-              })
+              up.layer.open({fragment: `
+                <div class='overlay'>
+                  <div class='foo'>old foo</div>
+                  <div class='content'>old content</div>
+                </div>
+              `})
 
               const insertedSpy = jasmine.createSpy('up:fragment:inserted listener')
               up.on('up:fragment:inserted', insertedSpy)
 
-              up.render({fragment: `\
-<div class='overlay'>
-  <div class='foo'>new foo</div>
-  <div class='content'>new content</div>
-</div>\
-`
-              })
+              up.render({fragment: `
+                <div class='overlay'>
+                  <div class='foo'>new foo</div>
+                  <div class='content'>new content</div>
+                </div>
+              `})
 
               expect(up.fragment.get('.content', {layer: 'overlay'})).toHaveText('new content')
               expect(up.fragment.get('.foo', {layer: 'overlay'})).toHaveText('new foo')
@@ -961,29 +910,27 @@ describe('up.radio', function() {
             })
 
             it('only updates a single element if two hungry elements on another layer are nested', function() {
-              htmlFixture(`\
-<div id='root'>
-  <div id="container" class='old' up-hungry up-if-layer='any'>
-    <div id='child' class='old' up-hungry up-if-layer='any'></div>
-  </div>
-</div>\
-`
-              )
+              htmlFixture(`
+                <div id='root'>
+                  <div id="container" class='old' up-hungry up-if-layer='any'>
+                    <div id='child' class='old' up-hungry up-if-layer='any'></div>
+                  </div>
+                </div>
+              `)
 
               up.layer.open({fragment: "<div id='target' class='old'</div>"})
 
               const insertedSpy = jasmine.createSpy('up:fragment:inserted listener for hungry elements')
               up.on('up:fragment:inserted', '[up-hungry]', insertedSpy)
 
-              up.render('#target', { document: `\
-<div id='root'>
-  <div id="container" class='new' up-hungry up-if-layer='any'>
-    <div id='child' class='new' up-hungry up-if-layer='any'></div>
-  </div>
-  <div id='target' class='new'></div>
-</div>\
-`
-            })
+              up.render('#target', { document: `
+                <div id='root'>
+                  <div id="container" class='new' up-hungry up-if-layer='any'>
+                    <div id='child' class='new' up-hungry up-if-layer='any'></div>
+                  </div>
+                  <div id='target' class='new'></div>
+                </div>\
+              `})
 
               expect('#container').toHaveClass('new')
               expect('#child').toHaveClass('new')
@@ -994,19 +941,18 @@ describe('up.radio', function() {
             })
 
             it('updates a hungry element on a descendant layer', function() {
-              htmlFixture(`\
-<div id="target">old target</div>\
-`
-              )
+              htmlFixture(`
+                <div id="target">old target</div>
+              `)
 
-              up.layer.open({fragment: `\
-<div id="hungry" up-hungry up-if-layer='any'>old hungry</div>\
-`})
+              up.layer.open({fragment: `
+                <div id="hungry" up-hungry up-if-layer='any'>old hungry</div>
+              `})
 
-              up.render({target: '#target', layer: 'root', document: `\
-<div id="hungry" up-hungry up-if-layer='any'>new hungry</div>
-<div id="target">new target</div>\
-`})
+              up.render({target: '#target', layer: 'root', document: `
+                <div id="hungry" up-hungry up-if-layer='any'>new hungry</div>
+                <div id="target">new target</div>\
+              `})
 
               expect(up.fragment.get('#target', {layer: 'root'})).toHaveText('new target')
               expect(up.fragment.get('#hungry', {layer: 'overlay'})).toHaveText('new hungry')
@@ -1019,10 +965,10 @@ describe('up.radio', function() {
                 { fragment: '<main><div id="hungry" up-hungry up-if-layer="any">old hungry</div></main>' },
               ])
 
-              up.render({target: '#target', layer: 'root', document: `\
-<div id="hungry" up-hungry up-if-layer='any'>new hungry</div>
-<div id="target">new target</div>\
-`})
+              up.render({target: '#target', layer: 'root', document: `
+                <div id="hungry" up-hungry up-if-layer='any'>new hungry</div>
+                <div id="target">new target</div>
+              `})
 
               expect(up.fragment.get('#target', {layer: 0})).toHaveText('new target')
               expect(up.fragment.get('#hungry', {layer: 1})).toHaveText('new hungry')
@@ -1036,10 +982,10 @@ describe('up.radio', function() {
                 { fragment: '<main><div id="target">old target</div></main>' },
               ])
 
-              up.render({target: '#target', layer: 2, document: `\
-<div id="hungry" up-hungry up-if-layer='any'>new hungry</div>
-<div id="target">new target</div>\
-`})
+              up.render({target: '#target', layer: 2, document: `
+                <div id="hungry" up-hungry up-if-layer='any'>new hungry</div>
+                <div id="target">new target</div>
+              `})
 
               expect(up.fragment.get('#hungry', {layer: 0})).toHaveText('old hungry')
               expect(up.fragment.get('#hungry', {layer: 1})).toHaveText('new hungry')
@@ -1055,10 +1001,10 @@ describe('up.radio', function() {
                 { fragment: '<main><div id="hungry" up-hungry up-if-layer="any">old hungry</div></main>' },
               ])
 
-              up.render({target: '#target', layer: 3, document: `\
-<div id="hungry" up-hungry up-if-layer='any'>new hungry</div>
-<div id="target">new target</div>\
-`})
+              up.render({target: '#target', layer: 3, document: `
+                <div id="hungry" up-hungry up-if-layer='any'>new hungry</div>
+                <div id="target">new target</div>\
+              `})
 
               expect(up.fragment.get('#hungry', {layer: 0})).toHaveText('old hungry')
               expect(up.fragment.get('#hungry', {layer: 1})).toHaveText('new hungry')
@@ -1075,12 +1021,11 @@ describe('up.radio', function() {
                 const closeEventHandler = jasmine.createSpy('close event handler')
                 up.on('up:layer:accept', closeEventHandler)
 
-                up.layer.open({fragment: `\
-<div class='inside'>
-  old inside
-</div>\
-`
-                })
+                up.layer.open({fragment: `
+                  <div class='inside'>
+                    old inside
+                  </div>
+                `})
 
                 expect(up.layer.count).toBe(2)
 
@@ -1089,14 +1034,14 @@ describe('up.radio', function() {
                 await wait()
 
                 jasmine.respondWith({
-                  responseText: `\
-<div class="outside">
-  new outside
-</div>
-<div class='inside'>
-  new inside
-</div>\
-`,
+                  responseText: `
+                    <div class="outside">
+                      new outside
+                    </div>
+                    <div class='inside'>
+                      new inside
+                    </div>
+                  `,
                   responseHeaders: { 'X-Up-Accept-Layer': 'null' }
                 })
 
@@ -1110,13 +1055,12 @@ describe('up.radio', function() {
               it('updates the [up-hungry] element with the discarded overlay content even if it would have been contained by the explicit target', async function() {
                 fixture('.foo', {text: 'old foo in root', 'up-hungry': '', 'up-if-layer': 'any'})
 
-                up.layer.open({fragment: `\
-<div class='overlay'>
-  <div class='foo'>old foo in overlay</div>
-  <div class='content'>old content in overlay</div>
-</div>\
-`
-                })
+                up.layer.open({ fragment: `
+                  <div class='overlay'>
+                    <div class='foo'>old foo in overlay</div>
+                    <div class='content'>old content in overlay</div>
+                  </div>
+                `})
 
                 await wait()
 
@@ -1126,12 +1070,12 @@ describe('up.radio', function() {
 
                 jasmine.respondWith({
                   responseHeaders: { 'X-Up-Accept-Layer': 'null' },
-                  responseText: `\
-<div class='overlay'>
-  <div class='foo'>new foo</div>
-  <div class='content'>new content</div>
-</div>\
-`
+                  responseText: `
+                    <div class='overlay'>
+                      <div class='foo'>new foo</div>
+                      <div class='content'>new content</div>
+                    </div>
+                  `
                 })
 
                 await expectAsync(updatePromise).toBeRejectedWith(jasmine.any(up.Aborted))
@@ -1149,12 +1093,11 @@ describe('up.radio', function() {
                 const outsideSpy = jasmine.createSpy('outside spy')
                 const onAccepted = () => outsideSpy(document.querySelector('.outside').innerText.trim())
 
-                up.layer.open({onAccepted, fragment: `\
-<div class='inside'>
-  old inside
-</div>\
-`
-                })
+                up.layer.open({onAccepted, fragment: `
+                  <div class='inside'>
+                    old inside
+                  </div>
+                `})
 
                 expect(up.layer.count).toBe(2)
 
@@ -1163,14 +1106,14 @@ describe('up.radio', function() {
                 await wait()
 
                 jasmine.respondWith({
-                  responseText: `\
-<div class="outside">
-  new outside
-</div>
-<div class='inside'>
-  new inside
-</div>\
-`,
+                  responseText: `
+                    <div class="outside">
+                      new outside
+                    </div>
+                    <div class='inside'>
+                      new inside
+                    </div>
+                  `,
                   responseHeaders: { 'X-Up-Accept-Layer': 'null' }
                 })
 
@@ -1189,11 +1132,13 @@ describe('up.radio', function() {
                 const closeEventHandler = jasmine.createSpy('close event handler')
                 up.on('up:layer:accept', closeEventHandler)
 
-                up.layer.open({acceptEvent: 'goal:reached', fragment: `\
-<div class='inside'>
-  old inside
-</div>\
-`
+                up.layer.open({
+                  acceptEvent: 'goal:reached',
+                  fragment: `
+                    <div class='inside'>
+                      old inside
+                    </div>\
+                  `
                 })
 
                 expect(up.layer.count).toBe(2)
@@ -1203,14 +1148,14 @@ describe('up.radio', function() {
                 await wait()
 
                 jasmine.respondWith({
-                  responseText: `\
-<div class="outside">
-  new outside
-</div>
-<div class='inside'>
-  new inside
-</div>\
-`,
+                  responseText: `
+                    <div class="outside">
+                      new outside
+                    </div>
+                    <div class='inside'>
+                      new inside
+                    </div>\
+                  `,
                   responseHeaders: { 'X-Up-Events': JSON.stringify([{ type: 'goal:reached', layer: 'current' }]) }
                 })
 
@@ -1227,12 +1172,11 @@ describe('up.radio', function() {
                 const outsideSpy = jasmine.createSpy('outside spy')
                 const onAccepted = () => outsideSpy(document.querySelector('.outside').innerText.trim())
 
-                up.layer.open({acceptEvent: 'goal:reached', onAccepted, fragment: `\
-<div class='inside'>
-  old inside
-</div>\
-`
-                })
+                up.layer.open({acceptEvent: 'goal:reached', onAccepted, fragment: `
+                  <div class='inside'>
+                    old inside
+                  </div>\
+                `})
 
                 expect(up.layer.count).toBe(2)
 
@@ -1241,14 +1185,14 @@ describe('up.radio', function() {
                 await wait()
 
                 jasmine.respondWith({
-                  responseText: `\
-<div class="outside">
-  new outside
-</div>
-<div class='inside'>
-  new inside
-</div>\
-`,
+                  responseText: `
+                    <div class="outside">
+                      new outside
+                    </div>
+                    <div class='inside'>
+                      new inside
+                    </div>
+                  `,
                   responseHeaders: { 'X-Up-Events': JSON.stringify([{ type: 'goal:reached', layer: 'current' }]) }
                 })
 
@@ -1265,15 +1209,14 @@ describe('up.radio', function() {
             it('does update the [up-hungry] element in the parent layer', function() {
               fixture('.outside', {text: 'old outside', 'up-hungry': true,  'up-if-layer': 'any'})
 
-              up.layer.open({target: '.inside', document: `\
-<div class="outside">
-  new outside
-</div>
-<div class='inside'>
-  new inside
-</div>\
-`
-              })
+              up.layer.open({target: '.inside', document: `
+                <div class="outside">
+                  new outside
+                </div>
+                <div class='inside'>
+                  new inside
+                </div>
+              `})
 
               expect(up.layer.isOverlay()).toBe(true)
 
@@ -1282,26 +1225,25 @@ describe('up.radio', function() {
             })
 
             it('only updates a single element if two hungry elements on another layer are nested', function() {
-              htmlFixture(`\
-<div id='root'>
-  <div id="container" class='old' up-hungry up-if-layer='any'>
-    <div id='child' class='old' up-hungry up-if-layer='any'></div>
-  </div>
-</div>\
-`
-              )
+              htmlFixture(`
+                <div id='root'>
+                  <div id="container" class='old' up-hungry up-if-layer='any'>
+                    <div id='child' class='old' up-hungry up-if-layer='any'></div>
+                  </div>
+                </div>\
+              `)
 
               const insertedSpy = jasmine.createSpy('up:fragment:inserted listener for hungry elements')
               up.on('up:fragment:inserted', '[up-hungry]', insertedSpy)
 
-              up.layer.open({target: '#target', document: `\
-<div id='root'>
-  <div id="container" class='new' up-hungry up-if-layer='any'>
-    <div id='child' class='new' up-hungry up-if-layer='any'></div>
-  </div>
-  <div id='target' class='new'></div>
-</div>\
-`})
+              up.layer.open({target: '#target', document: `
+                <div id='root'>
+                  <div id="container" class='new' up-hungry up-if-layer='any'>
+                    <div id='child' class='new' up-hungry up-if-layer='any'></div>
+                  </div>
+                  <div id='target' class='new'></div>
+                </div>\
+              `})
 
               expect('#container').toHaveClass('new')
               expect('#child').toHaveClass('new')
@@ -1321,15 +1263,16 @@ describe('up.radio', function() {
                 await wait()
 
                 jasmine.respondWith({
-                  responseText: `\
-<div class="outside">
-  new outside
-</div>
-<div class='inside'>
-  new inside
-</div>\
-`,
-                  responseHeaders: { 'X-Up-Accept-Layer': 'null'}})
+                  responseText: `
+                    <div class="outside">
+                      new outside
+                    </div>
+                    <div class='inside'>
+                      new inside
+                    </div>\
+                  `,
+                  responseHeaders: { 'X-Up-Accept-Layer': 'null'}
+                })
 
                 await expectAsync(openPromise).toBeRejectedWith(jasmine.any(up.Aborted))
 
@@ -1347,12 +1290,12 @@ describe('up.radio', function() {
 
                 jasmine.respondWith({
                   responseHeaders: { 'X-Up-Accept-Layer': 'null' },
-                  responseText: `\
-<div class='overlay'>
-  <div class='foo'>new foo</div>
-  <div class='content'>new content</div>
-</div>\
-`
+                  responseText: `
+                    <div class='overlay'>
+                      <div class='foo'>new foo</div>
+                      <div class='content'>new content</div>
+                    </div>\
+                  `
                 })
 
                 await expectAsync(openPromise).toBeRejectedWith(jasmine.any(up.Aborted))
@@ -1375,15 +1318,16 @@ describe('up.radio', function() {
                 await wait()
 
                 jasmine.respondWith({
-                  responseText: `\
-<div class="outside">
-  new outside
-</div>
-<div class='inside'>
-  new inside
-</div>\
-`,
-                  responseHeaders: { 'X-Up-Accept-Layer': 'null'}})
+                  responseText: `
+                    <div class="outside">
+                      new outside
+                    </div>
+                    <div class='inside'>
+                      new inside
+                    </div>\
+                    `,
+                  responseHeaders: { 'X-Up-Accept-Layer': 'null'}
+                })
 
                 await expectAsync(openPromise).toBeRejectedWith(jasmine.any(up.Aborted))
 
@@ -1402,15 +1346,16 @@ describe('up.radio', function() {
                 await wait()
 
                 jasmine.respondWith({
-                  responseText: `\
-<div class="outside">
-  new outside
-</div>
-<div class='inside'>
-  new inside
-</div>\
-`,
-                  responseHeaders: { 'X-Up-Events': JSON.stringify([{ type: 'goal:reached', layer: 'current' }])}})
+                  responseText: `
+                    <div class="outside">
+                      new outside
+                    </div>
+                    <div class='inside'>
+                      new inside
+                    </div>\
+                  `,
+                  responseHeaders: { 'X-Up-Events': JSON.stringify([{ type: 'goal:reached', layer: 'current' }])}
+                })
 
                 await expectAsync(openPromise).toBeRejectedWith(jasmine.any(up.Aborted))
 
@@ -1430,15 +1375,16 @@ describe('up.radio', function() {
                 await wait()
 
                 jasmine.respondWith({
-                  responseText: `\
-<div class="outside">
-  new outside
-</div>
-<div class='inside'>
-  new inside
-</div>\
-`,
-                  responseHeaders: { 'X-Up-Events': JSON.stringify([{ type: 'goal:reached', layer: 'current' }])}})
+                  responseText: `
+                    <div class="outside">
+                      new outside
+                    </div>
+                    <div class='inside'>
+                      new inside
+                    </div>
+                  `,
+                  responseHeaders: { 'X-Up-Events': JSON.stringify([{ type: 'goal:reached', layer: 'current' }])}
+                })
 
                 await expectAsync(openPromise).toBeRejectedWith(jasmine.any(up.Aborted))
 
@@ -1451,7 +1397,7 @@ describe('up.radio', function() {
         })
 
         describe('with [up-if-layer] set to a layer option matching multiple layers', () => {
-          it('only grabs updates from matching layers', async function () {
+          it('only grabs updates from matching layers', async function() {
             makeLayers([
               { content: '<div id="target">target1</div><div id="hungry" up-hungry up-if-layer="0, 1">hungry1</div>' },
               { content: '<div id="target">target1</div>' },
@@ -1494,7 +1440,7 @@ describe('up.radio', function() {
         })
 
         describe('with [up-if-layer] set to a relative layer option', () => {
-          it('resolves the option from the perspective of the hungry layer, not of the updating layer', async function () {
+          it('resolves the option from the perspective of the hungry layer, not of the updating layer', async function() {
             makeLayers([
               { content: '<div id="target">target1</div><div id="hungry" up-hungry up-if-layer="child">hungry1</div>' },
               { content: '<div id="target">target1</div><div id="hungry" up-hungry up-if-layer="child">hungry1</div>' },
@@ -1544,46 +1490,46 @@ describe('up.radio', function() {
       })
 
       if (up.migrate.loaded) {
+
         describe('with [up-if-history]', function() {
-          it('only updates a hungry fragment when updating history', asyncSpec(function (next) {
-              up.hello($fixture('.hungry[up-hungry]').text('old hungry').attr('up-if-history', ''))
-              $fixture('.target').text('target version 1')
+          it("only updates a hungry fragment when updating history", async function() {
+            up.hello(
+              $fixture(".hungry[up-hungry]")
+                .text("old hungry")
+                .attr("up-if-history", "")
+            )
+            $fixture(".target").text("target version 1")
 
-              up.render('.target', { url: '/other', history: false })
+            const firstRenderJob = up.render(".target", { url: "/other", history: false })
 
-              next(() => jasmine.respondWith(`\
-  <div class="target">
-  target version 2
-  </div>
-  <div class="hungry">
-  new hungry
-  </div>\
-  `
-              ))
+            await wait()
 
-              next(function () {
-                expect('.target').toHaveText('target version 2')
-                expect('.hungry').toHaveText('old hungry')
+            jasmine.respondWith(`
+              <div class="target">target version 2</div>
+              <div class="hungry">new hungry</div>
+            `)
 
-                up.render('.target', { url: '/target', history: true })
-              })
+            await firstRenderJob
 
-              next(() => jasmine.respondWith(`\
-  <div class="target">
-  target version 3
-  </div>
-  <div class="hungry">
-  new hungry
-  </div>\
-  `
-              ))
+            expect(".target").toHaveText("target version 2")
+            expect(".hungry").toHaveText("old hungry")
 
-              next(function () {
-                expect('.target').toHaveText('target version 3')
-                expect('.hungry').toHaveText('new hungry')
-              })
-            })
-          )
+            const secondRenderJob = up.render(".target", { url: "/target", history: true })
+
+            await wait()
+
+            jasmine.respondWith(`
+              <div class="target">target version 3</div>
+              <div class="hungry">new hungry</div>
+            `)
+
+            await secondRenderJob
+
+            expect(".target").toHaveText("target version 3")
+            expect(".hungry").toHaveText("new hungry")
+          })
+
+
         })
       }
 
@@ -1600,10 +1546,10 @@ describe('up.radio', function() {
             target: '#target',
             scroll: '#target',
             abort: 'all',
-            document: `\
-<div id="hungry" up-hungry>new hungry</div>
-<div id="target">new target</div>\
-`
+            document: `
+              <div id="hungry" up-hungry>new hungry</div>
+              <div id="target">new target</div>\
+            `
           })
 
           await wait()
@@ -1634,11 +1580,10 @@ describe('up.radio', function() {
 
           up.render({
             target: '#target',
-            document: `\
-<div id="hungry" up-hungry>new hungry</div>
-<div id="target">new target</div>\
-`
-          })
+            document: `
+              <div id="hungry" up-hungry>new hungry</div>
+              <div id="target">new target</div>
+          `})
 
           await wait()
 
@@ -1656,10 +1601,10 @@ describe('up.radio', function() {
 
           up.render({
             target: '#target',
-            document: `\
-<div id="hungry" up-hungry>new hungry</div>
-<div id="target">new target</div>\
-`
+            document: `
+              <div id="hungry" up-hungry>new hungry</div>
+              <div id="target">new target</div>\
+            `
           })
 
           await wait()
@@ -1680,10 +1625,10 @@ describe('up.radio', function() {
 
           up.render({
             target: '#target',
-            document: `\
-<div id="hungry" up-hungry>new hungry</div>
-<div id="target">new target</div>\
-`
+            document: `
+              <div id="hungry" up-hungry>new hungry</div>
+              <div id="target">new target</div>\
+            `
           })
 
           await wait()
@@ -1697,91 +1642,76 @@ describe('up.radio', function() {
     describe('[up-flashes]', function() {
 
       it('updates flashes within an explicit target', function() {
-        up.hello(htmlFixture(`\
-<div id='container'>
-  <div id='flashes' up-flashes></div>
-  <div id='target'>old target</div>
-</div>\
-`
-        )
-        )
+        up.hello(htmlFixture(`
+          <div id='container'>
+            <div id='flashes' up-flashes></div>
+            <div id='target'>old target</div>
+          </div>\
+        `))
 
-        up.render({fragment: `\
-<div id='container'>
-  <div id='flashes' up-flashes>new flashes</div>
-  <div id='target'>new target</div>
-</div>\
-`
-        })
+        up.render({fragment: `
+          <div id='container'>
+            <div id='flashes' up-flashes>new flashes</div>
+            <div id='target'>new target</div>
+          </div>
+        `})
 
         expect('#target').toHaveText('new target')
         expect('#flashes').toHaveText('new flashes')
       })
 
       it('updates flashes when not targeted explicitly', function() {
-        up.hello(htmlFixture(`\
-<div id='container'>
-  <div id='flashes' up-flashes></div>
-  <div id='target'>old target</div>
-</div>\
-`
-        )
-        )
+        up.hello(htmlFixture(`
+          <div id='container'>
+            <div id='flashes' up-flashes></div>
+            <div id='target'>old target</div>
+          </div>
+        `))
 
-        up.render('#target', { document: `\
-<div id='container'>
-  <div id='flashes' up-flashes>new flashes</div>
-  <div id='target'>new target</div>
-</div>\
-`
-      }
-        )
+        up.render('#target', { document: `
+          <div id='container'>
+            <div id='flashes' up-flashes>new flashes</div>
+            <div id='target'>new target</div>
+          </div>
+        `})
 
         expect('#target').toHaveText('new target')
         expect('#flashes').toHaveText('new flashes')
       })
 
       it('does not overwrite existing flashes with empty flashes', function() {
-        up.hello(htmlFixture(`\
-<div id='container'>
-  <div id='flashes' up-flashes>existing flashes</div>
-  <div id='target'>old target</div>
-</div>\
-`
-        )
-        )
+        up.hello(htmlFixture(`
+          <div id='container'>
+            <div id='flashes' up-flashes>existing flashes</div>
+            <div id='target'>old target</div>
+          </div>
+        `))
 
-        up.render('#target', { document: `\
-<div id='container'>
-  <div id='flashes' up-flashes></div>
-  <div id='target'>new target</div>
-</div>\
-`
-      }
-        )
+        up.render('#target', { document: `
+          <div id='container'>
+            <div id='flashes' up-flashes></div>
+            <div id='target'>new target</div>
+          </div>
+        `})
 
         expect('#target').toHaveText('new target')
         expect('#flashes').toHaveText('existing flashes')
       })
 
       it('overwrites existing flashes with newer, non-empty flashes', function() {
-        up.hello(htmlFixture(`\
-<div id='container'>
-  <div id='flashes' up-flashes>existing flashes</div>
-  <div id='target'>old target</div>
-</div>\
-`
-        )
-        )
+        up.hello(htmlFixture(`
+          <div id='container'>
+            <div id='flashes' up-flashes>existing flashes</div>
+            <div id='target'>old target</div>
+          </div>
+        `))
 
-        up.render('#target', { document: `\
-<div id='container'>
-  <div id='flashes' up-flashes>new flashes</div>
-  <div id='target'>new target</div>
-</div>\
-`
-      }
-        )
+        up.render('#target', { document: `
+          <div id='container'>
+            <div id='flashes' up-flashes>new flashes</div>
+            <div id='target'>new target</div>
+          </div>
+        `})
 
         expect('#target').toHaveText('new target')
         expect('#flashes').toHaveText('new flashes')
@@ -1790,25 +1720,21 @@ describe('up.radio', function() {
       describe('when flashes are rendered into an overlay', function() {
 
         it('updates flashes on root from an overlay if the flashes are not used for the overlay', function() {
-          up.hello(htmlFixture(`\
-<div id='container'>
-  <div id='flashes' up-flashes>old flashes</div>
-  <div id='target'>old target</div>
-</div>\
-`
-          )
-          )
+          up.hello(htmlFixture(`
+            <div id='container'>
+              <div id='flashes' up-flashes>old flashes</div>
+              <div id='target'>old target</div>
+            </div>
+          `))
 
           up.layer.open({ target: '#target' })
 
-          up.render('#target', { layer: 'overlay', document: `\
-<div id='container'>
-  <div id='flashes' up-flashes>new flashes</div>
-  <div id='target'>new target</div>
-</div>\
-`
-        }
-          )
+          up.render('#target', { layer: 'overlay', document: `
+            <div id='container'>
+              <div id='flashes' up-flashes>new flashes</div>
+              <div id='target'>new target</div>
+            </div>\
+          `})
 
           expect(up.fragment.get('#target', { layer: 'root' })).toHaveText('old target')
           expect(up.fragment.get('#flashes', { layer: 'root' })).toHaveText('new flashes')
@@ -1816,25 +1742,21 @@ describe('up.radio', function() {
         })
 
         it('does not update flashes on root if the flashes were already rendered into the overlay', function() {
-          up.hello(htmlFixture(`\
-<div id='container'>
-  <div id='flashes' up-flashes>old flashes</div>
-  <div id='target'>old target</div>
-</div>\
-`
-          )
-          )
+          up.hello(htmlFixture(`
+            <div id='container'>
+              <div id='flashes' up-flashes>old flashes</div>
+              <div id='target'>old target</div>
+            </div>\
+          `))
 
           up.layer.open({ target: '#container' })
 
-          up.render('#container', { layer: 'overlay', document: `\
-<div id='container'>
-  <div id='flashes' up-flashes>new flashes</div>
-  <div id='target'>new target</div>
-</div>\
-`
-        }
-          )
+          up.render('#container', { layer: 'overlay', document: `
+            <div id='container'>
+              <div id='flashes' up-flashes>new flashes</div>
+              <div id='target'>new target</div>
+            </div>
+          `})
 
           expect(up.fragment.get('#target', { layer: 'root' })).toHaveText('old target')
           expect(up.fragment.get('#flashes', { layer: 'root' })).toHaveText('old flashes')
@@ -1843,27 +1765,23 @@ describe('up.radio', function() {
         })
 
         it('updates flashes on root from a grand-child overlay if the flashes are not used for the overlay', function() {
-          up.hello(htmlFixture(`\
-<div id='container'>
-  <div id='flashes' up-flashes>old flashes</div>
-  <div id='target'>old target</div>
-</div>\
-`
-          )
-          )
+          up.hello(htmlFixture(`
+            <div id='container'>
+              <div id='flashes' up-flashes>old flashes</div>
+              <div id='target'>old target</div>
+            </div>\
+          `))
 
           up.layer.open({ target: '#target', content: 'old target' })
 
           up.layer.open({ target: '#target', content: 'old target' })
 
-          up.render('#target', { layer: 'overlay', document: `\
-<div id='container'>
-  <div id='flashes' up-flashes>new flashes</div>
-  <div id='target'>new target</div>
-</div>\
-`
-        }
-          )
+          up.render('#target', { layer: 'overlay', document: `
+            <div id='container'>
+              <div id='flashes' up-flashes>new flashes</div>
+              <div id='target'>new target</div>
+            </div>
+          `})
 
           expect(up.fragment.get('#target', { layer: 0 })).toHaveText('old target')
           expect(up.fragment.get('#target', { layer: 1 })).toHaveText('old target')
@@ -1875,14 +1793,12 @@ describe('up.radio', function() {
       describe('when flashes in a closing overlay are discarded', function() {
 
         it('shows the discarded flashes in the parent layer', async function() {
-          up.hello(htmlFixture(`\
-<div id='container'>
-  <div id='flashes' up-flashes>old flashes</div>
-  <div id='target'>old target</div>
-</div>\
-`
-          )
-          )
+          up.hello(htmlFixture(`
+            <div id='container'>
+              <div id='flashes' up-flashes>old flashes</div>
+              <div id='target'>old target</div>
+            </div>\
+          `))
 
           up.layer.open({ target: '#container' })
 
@@ -1894,13 +1810,12 @@ describe('up.radio', function() {
 
           jasmine.respondWith({
             responseHeaders: { 'X-Up-Accept-Layer': 'null' },
-            responseText: `\
-<div id='container'>
-  <div id='flashes' up-flashes>new flashes</div>
-  <div id='target'>new target</div>
-</div>\
-`
-          })
+            responseText: `
+              <div id='container'>
+                <div id='flashes' up-flashes>new flashes</div>
+                <div id='target'>new target</div>
+              </div>\
+          `})
 
           await expectAsync(renderPromise).toBeRejectedWith(jasmine.any(up.Aborted))
           expect(up.layer.isOverlay()).toBe(false)
@@ -1910,12 +1825,12 @@ describe('up.radio', function() {
         })
 
         it('shows the discarded flashes in the parent overlay (not root) when multiple overlays are nested', async function() {
-          const html = `\
-<div id='container'>
-  <div id='flashes' up-flashes>old flashes</div>
-  <div id='target'>old target</div>
-</div>\
-`
+          const html = `
+            <div id='container'>
+              <div id='flashes' up-flashes>old flashes</div>
+              <div id='target'>old target</div>
+            </div>
+          `
 
           up.hello(htmlFixture(html))    // 0
           up.layer.open({fragment: html}) // 1
@@ -1931,12 +1846,11 @@ describe('up.radio', function() {
           jasmine.respondWith({
             responseHeaders: { 'X-Up-Accept-Layer': 'null' },
             responseText: `\
-<div id='container'>
-  <div id='flashes' up-flashes>new flashes</div>
-  <div id='target'>new target</div>
-</div>\
-`
-          })
+              <div id='container'>
+                <div id='flashes' up-flashes>new flashes</div>
+                <div id='target'>new target</div>
+              </div>\
+          `})
 
           await expectAsync(renderPromise).toBeRejectedWith(jasmine.any(up.Aborted))
 
@@ -2011,11 +1925,11 @@ describe('up.radio', function() {
         expect(jasmine.Ajax.requests.count()).toBe(0)
       })
 
-      it('does not make additional requests while a previous requests is still in flight', asyncSpec(function(next) {
+      it('does not make additional requests while a previous request is still in flight', async function() {
         const deferreds = []
-
         up.radio.config.pollInterval = 100
-        const reloadSpy = spyOn(up, 'reload').and.callFake(function() {
+
+        const reloadSpy = spyOn(up, 'reload').and.callFake(() => {
           const deferred = u.newDeferred()
           deferreds.push(deferred)
           return deferred
@@ -2023,52 +1937,52 @@ describe('up.radio', function() {
 
         up.hello(fixture('.element[up-poll]'))
 
-        next.after(200, () => expect(reloadSpy.calls.count()).toBe(1))
+        await wait(200)
+        expect(reloadSpy.calls.count()).toBe(1)
 
-        next.after(200, function() {
-          expect(reloadSpy.calls.count()).toBe(1)
-          u.last(deferreds).resolve(new up.RenderResult())
-        })
+        await wait(200)
+        expect(reloadSpy.calls.count()).toBe(1)
+        u.last(deferreds).resolve(new up.RenderResult())
 
-        next.after(150, () => expect(reloadSpy.calls.count()).toBe(2))
+        await wait(150)
+        expect(reloadSpy.calls.count()).toBe(2)
       })
-      )
 
-      it('keeps the polling rhythm when the server responds with `X-Up-Target: :none` (bugfix)', asyncSpec(function(next) {
+      it('keeps the polling rhythm when the server responds with `X-Up-Target: :none` (bugfix)', async function() {
         up.radio.config.pollInterval = 250
-
         up.hello(fixture('.element[up-poll][up-source="/source"]'))
 
-        next.after(50, () => expect(jasmine.Ajax.requests.count()).toBe(0))
+        await wait(50)
+        expect(jasmine.Ajax.requests.count()).toBe(0)
 
-        next.after(250, function() {
-          expect(jasmine.Ajax.requests.count()).toBe(1)
-          jasmine.respondWith({status: 200, responseHeaders: { 'X-Up-Target': ':none' }})
-        })
+        await wait(250)
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        jasmine.respondWith({ status: 200, responseHeaders: { 'X-Up-Target': ':none' } })
 
-        next.after(50, () => expect(jasmine.Ajax.requests.count()).toBe(1))
+        await wait(50)
+        expect(jasmine.Ajax.requests.count()).toBe(1)
 
-        next.after(250, () => expect(jasmine.Ajax.requests.count()).toBe(2))
+        await wait(250)
+        expect(jasmine.Ajax.requests.count()).toBe(2)
       })
-      )
 
-      it('keeps polling if the server responds with a 304 Not Modified status', asyncSpec(function(next) {
+      it('keeps polling if the server responds with a 304 Not Modified status', async function() {
         up.radio.config.pollInterval = 250
-
         up.hello(fixture('.element[up-poll][up-source="/source"]'))
 
-        next.after(50, () => expect(jasmine.Ajax.requests.count()).toBe(0))
+        await wait(50)
+        expect(jasmine.Ajax.requests.count()).toBe(0)
 
-        next.after(250, function() {
-          expect(jasmine.Ajax.requests.count()).toBe(1)
-          jasmine.respondWith({status: 304, responseText: ''})
-        })
+        await wait(250)
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        jasmine.respondWith({ status: 304, responseText: '' })
 
-        next.after(50, () => expect(jasmine.Ajax.requests.count()).toBe(1))
+        await wait(50)
+        expect(jasmine.Ajax.requests.count()).toBe(1)
 
-        next.after(250, () => expect(jasmine.Ajax.requests.count()).toBe(2))
+        await wait(250)
+        expect(jasmine.Ajax.requests.count()).toBe(2)
       })
-      )
 
       it('keeps polling if a request failed with a network issue', async function() {
         up.radio.config.pollInterval = 100
@@ -2114,7 +2028,7 @@ describe('up.radio', function() {
         expect(jasmine.Ajax.requests.count()).toBe(2)
       })
 
-      it('does not reload if the tab is hidden', asyncSpec(function(next) {
+      it('does not reload if the tab is hidden', async function() {
         up.radio.config.pollInterval = 50
         spyOnProperty(document, 'hidden', 'get').and.returnValue(true)
         spyOnProperty(document, 'visibilityState', 'get').and.returnValue('hidden')
@@ -2122,9 +2036,9 @@ describe('up.radio', function() {
 
         up.hello(fixture('.element[up-poll]'))
 
-        next.after(100, () => expect(reloadSpy).not.toHaveBeenCalled())
+        await wait(100)
+        expect(reloadSpy).not.toHaveBeenCalled()
       })
-      )
 
       it("pauses polling while the browser tab is hidden", async function() {
         const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
@@ -2159,20 +2073,19 @@ describe('up.radio', function() {
         expect(reloadSpy.calls.count()).toBe(2)
       })
 
-      it('stops polling when the element is destroyed', asyncSpec(function(next) {
+      it('stops polling when the element is destroyed', async function() {
         up.radio.config.pollInterval = 75
         const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
 
         const element = up.hello(fixture('.element[up-poll]'))
 
-        next.after(125, function() {
-          expect(reloadSpy.calls.count()).toBe(1)
-          up.destroy(element)
-        })
+        await wait(125)
+        expect(reloadSpy.calls.count()).toBe(1)
+        up.destroy(element)
 
-        next.after(75, () => expect(reloadSpy.calls.count()).toBe(1))
+        await wait(75)
+        expect(reloadSpy.calls.count()).toBe(1)
       })
-      )
 
       it('stops polling when the server responds without an [up-poll] attribute', async function() {
         let interval
@@ -2226,30 +2139,40 @@ describe('up.radio', function() {
         expect(jasmine.Ajax.requests.count()).toBe(1)
       })
 
-      it('lets the server change the [up-interval] (bugfix)', asyncSpec(function(next) {
+      it("lets the server change the [up-interval] (bugfix)", async function() {
         let initialInterval
-        up.radio.config.pollInterval = (initialInterval = 150)
+        up.radio.config.pollInterval = initialInterval = 150
         const timingTolerance = initialInterval / 3
 
-        up.hello(fixture(`.element[up-poll][up-interval='${initialInterval}']`, {text: 'old text'}))
+        up.hello(
+          fixture(`.element[up-poll][up-interval='${initialInterval}']`, {
+            text: "old text",
+          })
+        )
 
-        next.after(timingTolerance, function() {
-          expect('.element').toHaveText('old text')
-          expect(jasmine.Ajax.requests.count()).toBe(0)
-        })
+        await wait(timingTolerance)
 
-        next.after(initialInterval, function() {
-          expect(jasmine.Ajax.requests.count()).toBe(1)
-          jasmine.respondWithSelector(`.element[up-poll][up-interval='${initialInterval * 2}']`, {text: 'new text'})
-        })
+        expect(".element").toHaveText("old text")
+        expect(jasmine.Ajax.requests.count()).toBe(0)
 
-        next(() => expect('.element').toHaveText('new text'))
+        await wait(initialInterval)
 
-        next.after((timingTolerance + initialInterval), () => expect(jasmine.Ajax.requests.count()).toBe(1))
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        jasmine.respondWithSelector(
+          `.element[up-poll][up-interval='${initialInterval * 2}']`,
+          { text: "new text" }
+        )
 
-        next.after(initialInterval, () => expect(jasmine.Ajax.requests.count()).toBe(2))
+        await wait()
+
+        expect(".element").toHaveText("new text")
+
+        await wait(timingTolerance + initialInterval)
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+
+        await wait(initialInterval)
+        expect(jasmine.Ajax.requests.count()).toBe(2)
       })
-      )
 
       it('stops polling when the element is destroyed while waiting for a previous request (bugfix)', async function() {
         up.radio.config.pollInterval = 75
@@ -2270,20 +2193,21 @@ describe('up.radio', function() {
         expect(jasmine.Ajax.requests.count()).toBe(1)
       })
 
-      it('allows to pass a polling interval per [up-interval] attribute', asyncSpec(function(next) {
+      it('allows to pass a polling interval per [up-interval] attribute', async function() {
         const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
 
         up.radio.config.pollInterval = 5
 
         up.hello(fixture('.element[up-poll][up-interval=80]'))
 
-        next.after(30, () => expect(reloadSpy).not.toHaveBeenCalled())
+        await wait(30)
+        expect(reloadSpy).not.toHaveBeenCalled()
 
-        next.after(90, () => expect(reloadSpy).toHaveBeenCalled())
+        await wait(90)
+        expect(reloadSpy).toHaveBeenCalled()
       })
-      )
 
-      it('pauses polling when an up:fragment:poll event is prevented', asyncSpec(function(next) {
+      it('pauses polling when an up:fragment:poll event is prevented', async function() {
         let interval
         up.radio.config.pollInterval = (interval = 70)
         const timingTolerance = 20
@@ -2299,23 +2223,18 @@ describe('up.radio', function() {
           }
         })
 
+        await wait(timingTolerance)
+        expect(eventCount).toBe(0)
+        expect(jasmine.Ajax.requests.count()).toBe(0)
 
-        next.after(timingTolerance, function() {
-          expect(eventCount).toBe(0)
-          expect(jasmine.Ajax.requests.count()).toBe(0)
-        })
+        await wait(interval)
+        expect(eventCount).toBe(1)
+        expect(jasmine.Ajax.requests.count()).toBe(0)
 
-        next.after(interval, function() {
-          expect(eventCount).toBe(1)
-          expect(jasmine.Ajax.requests.count()).toBe(0)
-        })
-
-        next.after((interval + timingTolerance), function() {
-          expect(eventCount).toBe(2)
-          expect(jasmine.Ajax.requests.count()).toBe(1)
-        })
+        await wait(interval + timingTolerance)
+        expect(eventCount).toBe(2)
+        expect(jasmine.Ajax.requests.count()).toBe(1)
       })
-      )
 
       it('lets up:fragment:poll listeners mutate render options for the reload pass', async function() {
         let interval
@@ -2402,29 +2321,27 @@ describe('up.radio', function() {
         expect(jasmine.lastRequest().url).toMatchURL('/page2')
       })
 
-      it('does not poll a fragment with a weak selector', asyncSpec(function(next) {
+      it('does not poll a fragment with a weak selector', async function() {
         const warnSpy = spyOn(up, 'warn')
 
         up.hello(fixture('div[up-poll][up-interval=30]', {text: 'old text'}))
 
-        next.after(80, function() {
-          expect(jasmine.Ajax.requests.count()).toBe(0)
-          expect(warnSpy).toHaveBeenCalled()
-          expect(warnSpy.calls.argsFor(0)[1]).toMatch(/untargetable fragment/i)
-        })
+        await wait(80)
+
+        expect(jasmine.Ajax.requests.count()).toBe(0)
+        expect(warnSpy).toHaveBeenCalled()
+        expect(warnSpy.calls.argsFor(0)[1]).toMatch(/untargetable fragment/i)
       })
-      )
 
       it('adds params from an [up-params] attribute', async function() {
         const interval = 50
         const timingTolerance = 20
         up.radio.config.pollInterval = interval
 
-        const element = htmlFixture(`\
-<div id='element' up-poll up-source='/path' up-params='{ "foo": "bar" }'>
-</div>\
-`
-        )
+        const element = htmlFixture(`
+          <div id='element' up-poll up-source='/path' up-params='{ "foo": "bar" }'>
+          </div>
+        `)
         up.hello(element)
 
         await wait(interval + timingTolerance)
@@ -2438,11 +2355,10 @@ describe('up.radio', function() {
         const timingTolerance = 20
         up.radio.config.pollInterval = interval
 
-        const element = htmlFixture(`\
-<div id='element' up-poll up-source='/path' up-headers='{ "App-Header": "header-value" }'>
-</div>\
-`
-        )
+        const element = htmlFixture(`
+          <div id='element' up-poll up-source='/path' up-headers='{ "App-Header": "header-value" }'>
+          </div>
+        `)
         up.hello(element)
 
         await wait(interval + timingTolerance)
@@ -2462,16 +2378,15 @@ describe('up.radio', function() {
         })
 
         it('uses a URL from an [up-source] attribute an an ancestor element', async function() {
-          const [grandMother, mother, element] = htmlFixtureList(`\
-<div id="grand-mother" up-source='/grand-mother-path'>
-  <div id="mother">
-    <div id="element" up-poll up-interval='2'>
-      Content
-    </div>
-  </div>
-</div>\
-`
-          )
+          const [grandMother, mother, element] = htmlFixtureList(`
+            <div id="grand-mother" up-source='/grand-mother-path'>
+              <div id="mother">
+                <div id="element" up-poll up-interval='2'>
+                  Content
+                </div>
+              </div>
+            </div>
+          `)
 
           up.hello(grandMother)
 
@@ -2518,42 +2433,40 @@ describe('up.radio', function() {
       })
 
       describe('with [up-keep-data]', function() {
-        it("persists the polling element's data through reloading", asyncSpec(function (next) {
-            var counterSpy = jasmine.createSpy(counterSpy)
+        it("persists the polling element's data through reloading", async function() {
+          const counterSpy = jasmine.createSpy('counterSpy')
 
-            up.compiler('.element', function (element, data) {
-              counterSpy(data.counter)
-              data.counter++
-            })
-
-            const element = fixture('.element', {
-                'up-poll': '',
-                'up-data': '{ counter: 5 }',
-                'up-keep-data': '',
-                'up-interval': '30'
-              }
-            )
-            up.hello(element)
-
-            expect(counterSpy.calls.count()).toBe(1)
-            expect(counterSpy.calls.argsFor(0)[0]).toBe(5)
-
-            next.after(80, function () {
-              expect(jasmine.Ajax.requests.count()).toBe(1)
-
-              jasmine.respondWithSelector('.element', { 'up-data': '{ counter: 99 }' })
-            })
-
-            next(function () {
-              expect(counterSpy.calls.count()).toBe(2)
-              expect(counterSpy.calls.argsFor(1)[0]).toBe(6)
-            })
+          up.compiler('.element', function(element, data) {
+            counterSpy(data.counter)
+            data.counter++
           })
-        )
+
+          const element = fixture('.element', {
+            'up-poll': '',
+            'up-data': '{ counter: 5 }',
+            'up-keep-data': '',
+            'up-interval': '30'
+          })
+
+          up.hello(element)
+
+          expect(counterSpy.calls.count()).toBe(1)
+          expect(counterSpy.calls.argsFor(0)[0]).toBe(5)
+
+          await wait(80)
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          jasmine.respondWithSelector('.element', { 'up-data': '{ counter: 99 }' })
+          await wait()
+
+          expect(counterSpy.calls.count()).toBe(2)
+          expect(counterSpy.calls.argsFor(1)[0]).toBe(6)
+        })
       })
 
+
       describe('with [up-preview]', function() {
-        it('shows a preview while the fragment is reloading', async function () {
+        it('shows a preview while the fragment is reloading', async function() {
           const interval = 5
           const timingTolerance = 30
           up.radio.config.pollInterval = interval
@@ -2594,7 +2507,7 @@ describe('up.radio', function() {
       })
 
       describe('with [up-placeholder]', function() {
-        it('shows a UI placeholder while the fragment is loading', async function () {
+        it('shows a UI placeholder while the fragment is loading', async function() {
           const interval = 5
           const timingTolerance = 30
           up.radio.config.pollInterval = interval
