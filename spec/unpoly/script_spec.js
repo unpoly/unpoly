@@ -545,40 +545,40 @@ describe('up.script', function() {
         expect(listener).toHaveBeenCalledWith(expectedEvent)
       })
 
-      it("sets up.layer.current to the given element's layer while compilers are running", asyncSpec(function(next) {
+      it("sets up.layer.current to the given element's layer while compilers are running", async function() {
         const layerSpy = jasmine.createSpy('layer spy')
         up.compiler('.foo', () => layerSpy(up.layer.current))
         makeLayers(2)
 
-        next(function() {
-          const rootElement = fixture('.foo.in-root')
-          const overlayElement = up.layer.get(1).affix('.foo.in-overlay')
+        await wait()
 
-          up.hello(rootElement)
-          up.hello(overlayElement)
+        const rootElement = fixture('.foo.in-root')
+        const overlayElement = up.layer.get(1).affix('.foo.in-overlay')
 
-          expect(layerSpy.calls.count()).toBe(2)
+        up.hello(rootElement)
+        up.hello(overlayElement)
 
-          expect(layerSpy.calls.argsFor(0)[0]).toBe(up.layer.get(0))
-          expect(layerSpy.calls.argsFor(1)[0]).toBe(up.layer.get(1))
-        })
-      }))
+        expect(layerSpy.calls.count()).toBe(2)
 
-      it('keeps up.layer.current and does not crash when compiling a detached element (bugfix)', asyncSpec(function(next) {
+        expect(layerSpy.calls.argsFor(0)[0]).toBe(up.layer.get(0))
+        expect(layerSpy.calls.argsFor(1)[0]).toBe(up.layer.get(1))
+      })
+
+      it('keeps up.layer.current and does not crash when compiling a detached element (bugfix)', async function() {
         const layerSpy = jasmine.createSpy('layer spy')
         up.compiler('.foo', () => layerSpy(up.layer.current))
         makeLayers(2)
 
-        next(function() {
-          expect(up.layer.current.isOverlay()).toBe(true)
+        await wait()
 
-          const element = up.element.createFromSelector('.foo')
-          const compileFn = () => up.hello(element)
+        expect(up.layer.current.isOverlay()).toBe(true)
 
-          expect(compileFn).not.toThrowError()
-          expect(layerSpy.calls.argsFor(0)[0]).toBe(up.layer.current)
-        })
-      }))
+        const element = up.element.createFromSelector('.foo')
+        const compileFn = () => up.hello(element)
+
+        expect(compileFn).not.toThrowError()
+        expect(layerSpy.calls.argsFor(0)[0]).toBe(up.layer.current)
+      })
 
       it('does not re-compile elements when called multiple times', function() {
         const compiler = jasmine.createSpy('compiler')
