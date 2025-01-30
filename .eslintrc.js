@@ -58,6 +58,7 @@ module.exports = {
         "fixture": "readonly",
         "fixtureStyle": "readonly",
         "fixtureStyleSheet": "readonly",
+        "htmlFixture": "readonly",
         "htmlFixtureList": "readonly",
         "$fixture": "readonly",
         "wait": "readonly",
