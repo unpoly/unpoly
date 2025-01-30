@@ -197,105 +197,93 @@ describe('up.viewport', function() {
 
         const $documentViewport = () => $(up.viewport.root)
 
-        it('reveals the given element', asyncSpec(function(next) {
+        it('reveals the given element', async function() {
           up.reveal(this.$elements[0])
+          await wait()
 
-          next(() => {
-            // ---------------------
-            // [0] 0 .......... ch-1
-            // ---------------------
-            // [1] ch+0 ...... ch+49
-            // [2] ch+50 ... ch+5049
-            expect($documentViewport().scrollTop()).toBe(0)
+          // ---------------------
+          // [0] 0 .......... ch-1
+          // ---------------------
+          // [1] ch+0 ...... ch+49
+          // [2] ch+50 ... ch+5049
+          expect($documentViewport().scrollTop()).toBe(0)
 
-            up.reveal(this.$elements[1])
-          })
+          up.reveal(this.$elements[1])
+          await wait()
 
-          next(() => {
-            // ---------------------
-            // [0] 0 .......... ch-1
-            // [1] ch+0 ...... ch+49
-            // ---------------------
-            // [2] ch+50 ... ch+5049
-            expect($documentViewport().scrollTop()).toBe(50)
+          // ---------------------
+          // [0] 0 .......... ch-1
+          // [1] ch+0 ...... ch+49
+          // ---------------------
+          // [2] ch+50 ... ch+5049
+          expect($documentViewport().scrollTop()).toBe(50)
 
-            up.reveal(this.$elements[2])
-          })
+          up.reveal(this.$elements[2])
+          await wait()
 
-          next(() => {
-            // [0] 0 .......... ch-1
-            // [1] ch+0 ...... ch+49
-            // ---------------------
-            // [2] ch+50 ... ch+5049
-            // ---------------------
-            expect($documentViewport().scrollTop()).toBe(this.clientHeight + 50)
-          })
+          // [0] 0 .......... ch-1
+          // [1] ch+0 ...... ch+49
+          // ---------------------
+          // [2] ch+50 ... ch+5049
+          // ---------------------
+          expect($documentViewport().scrollTop()).toBe(this.clientHeight + 50)
         })
-        )
 
-        it("includes the element's top margin in the revealed area", asyncSpec(function(next) {
+        it("includes the element's top margin in the revealed area", async function() {
           this.$elements[1].css({'margin-top': '20px'})
           up.reveal(this.$elements[1])
-          next(() => expect($(document).scrollTop()).toBe(50 + 20))
-        })
-        )
+          await wait()
 
-        it("includes the element's bottom margin in the revealed area", asyncSpec(function(next) {
+          expect($(document).scrollTop()).toBe(50 + 20)
+        })
+
+        it("includes the element's bottom margin in the revealed area", async function() {
           this.$elements[1].css({'margin-bottom': '20px'})
           up.reveal(this.$elements[2])
-          next(() => expect($(document).scrollTop()).toBe(this.clientHeight + 50 + 20))
+          await wait()
+
+          expect($(document).scrollTop()).toBe(this.clientHeight + 50 + 20)
         })
-        )
 
-        it('snaps to the top if the space above the future-visible area is smaller than the value of config.revealSnap', asyncSpec(function(next) {
+        it('snaps to the top if the space above the future-visible area is smaller than the value of config.revealSnap', async function() {
           up.viewport.config.revealSnap = 30
-
           this.$elements[0].css({height: '20px'})
 
           up.reveal(this.$elements[2])
+          await wait()
 
-          next(() => {
-            // [0] 0 ............ 19
-            // [1] 20 ........... 69
-            // ---------------------
-            // [2] 70 ......... 5069
-            // ---------------------
-            expect($(document).scrollTop()).toBe(70)
-
-            // Even though we're revealing the second element, the viewport
-            // snaps to the top edge.
-            up.reveal(this.$elements[1])
-          })
-
-          next(() => {
-            // ---------------------
-            // [0] 0 ............ 19
-            // [1] 20 ........... 69
-            // ---------------------
-            // [2] 70 ......... 5069
-            expect($(document).scrollTop()).toBe(0)
-          })
-        })
-        )
-
-        it('does not snap to the top if it would un-reveal an element at the bottom edge of the screen (bugfix)', asyncSpec(function(next) {
-          up.viewport.config.revealSnap = 100
+          // [0] 0 ............ 19
+          // [1] 20 ........... 69
+          // ---------------------
+          // [2] 70 ......... 5069
+          // ---------------------
+          expect($(document).scrollTop()).toBe(70)
 
           up.reveal(this.$elements[1])
+          await wait()
 
-          next(() => {
-            // ---------------------
-            // [0] 0 .......... ch-1
-            // [1] ch+0 ...... ch+49
-            // ---------------------
-            // [2] ch+50 ... ch+5049
-            expect($(document).scrollTop()).toBe(50)
-          })
+          // ---------------------
+          // [0] 0 ............ 19
+          // [1] 20 ........... 69
+          // ---------------------
+          // [2] 70 ......... 5069
+          expect($(document).scrollTop()).toBe(0)
         })
-        )
 
+        it('does not snap to the top if it would un-reveal an element at the bottom edge of the screen (bugfix)', async function() {
+          up.viewport.config.revealSnap = 100
+          up.reveal(this.$elements[1])
+          await wait()
 
-        it('scrolls far enough so the element is not obstructed by an element fixed to the top', asyncSpec(function(next) {
+          // ---------------------
+          // [0] 0 .......... ch-1
+          // [1] ch+0 ...... ch+49
+          // ---------------------
+          // [2] ch+50 ... ch+5049
+          expect($(document).scrollTop()).toBe(50)
+        })
+
+        it('scrolls far enough so the element is not obstructed by an element fixed to the top', async function() {
           const $topNav = $fixture('[up-fixed=top]').css({
             position: 'fixed',
             top: '0',
@@ -305,56 +293,51 @@ describe('up.viewport', function() {
           })
 
           up.reveal(this.$elements[0])
+          await wait()
 
-          next(() => {
-            // ---------------------
-            // [F] 0 ............ 99
-            // [0] 0 .......... ch-1
-            // ---------------------
-            // [1] ch+0 ...... ch+49
-            // [2] ch+50 ... ch+5049
-            expect($(document).scrollTop()).toBe(0) // would need to be -100
+          // ---------------------
+          // [F] 0 ............ 99
+          // [0] 0 .......... ch-1
+          // ---------------------
+          // [1] ch+0 ...... ch+49
+          // [2] ch+50 ... ch+5049
+          expect($(document).scrollTop()).toBe(0) // would need to be -100
 
-            up.reveal(this.$elements[1])
-          })
+          up.reveal(this.$elements[1])
+          await wait()
 
-          next(() => {
-            // ---------------------
-            // [F] 0 ............ 99
-            // [0] 00000 ...... ch-1
-            // [1] ch+0 ...... ch+49
-            // ---------------------
-            // [2] ch+50 ... ch+5049
-            expect($(document).scrollTop()).toBe(50)
+          // ---------------------
+          // [F] 0 ............ 99
+          // [0] 00000 ...... ch-1
+          // [1] ch+0 ...... ch+49
+          // ---------------------
+          // [2] ch+50 ... ch+5049
+          expect($(document).scrollTop()).toBe(50)
 
-            up.reveal(this.$elements[2])
-          })
+          up.reveal(this.$elements[2])
+          await wait()
 
-          next(() => {
-            // [0] 00000 ...... ch-1
-            // [1] ch+0 ...... ch+49
-            // ---------------------
-            // [F] 0 ............ 99
-            // [2] ch+50 ... ch+5049
-            // ----------------
-            expect($(document).scrollTop()).toBe((this.clientHeight + 50) - 100)
+          // [0] 00000 ...... ch-1
+          // [1] ch+0 ...... ch+49
+          // ---------------------
+          // [F] 0 ............ 99
+          // [2] ch+50 ... ch+5049
+          // ----------------
+          expect($(document).scrollTop()).toBe((this.clientHeight + 50) - 100)
 
-            up.reveal(this.$elements[1])
-          })
+          up.reveal(this.$elements[1])
+          await wait()
 
-          next(() => {
-            // [0] 00000 ...... ch-1
-            // ---------------------
-            // [F] 0 ............ 99
-            // [1] ch+0 ...... ch+49
-            // [2] ch+50 ... ch+5049
-            // ----------------
-            expect($(document).scrollTop()).toBe((this.clientHeight + 50) - 100 - 50)
-          })
+          // [0] 00000 ...... ch-1
+          // ---------------------
+          // [F] 0 ............ 99
+          // [1] ch+0 ...... ch+49
+          // [2] ch+50 ... ch+5049
+          // ----------------
+          expect($(document).scrollTop()).toBe((this.clientHeight + 50) - 100 - 50)
         })
-        )
 
-        it('scrolls far enough so the element is not obstructed by an element fixed to the top with margin, padding, border and non-zero top properties', asyncSpec(function(next) {
+        it('scrolls far enough so the element is not obstructed by an element fixed to the top with margin, padding, border and non-zero top properties', async function() {
           const $topNav = $fixture('[up-fixed=top]').css({
             position: 'fixed',
             top: '29px',
@@ -366,29 +349,21 @@ describe('up.viewport', function() {
             height: '100px'
           })
 
-          up.reveal(this.$elements[2], {viewport: this.viewport})
+          up.reveal(this.$elements[2], { viewport: this.viewport })
+          await wait()
 
-          next(() => {
-            // [0] 00000 ...... ch-1  [F] 0 ...... 99+props
-            // [1] ch+0 ...... ch+49
-            // ---------------------  ---------------------
-            // [2] ch+50 ... ch+5049
-            // ---------------------
-
-            expect($(document).scrollTop()).toBe(
-              (this.clientHeight +  // scroll past @$elements[0]
-              50)            -  // scroll past @$elements[1]
-              100           -  // obstruction height
-              29            -  // obstruction's top property
-              (1 * 16)      -  // top margin (bottom margin is not a visual obstruction)
-              (2 * 7)       -  // obstruction top and bottom borders
-              (2 * 5)          // obstruction top and bottom paddings
-            )
-          })
+          expect($(document).scrollTop()).toBe(
+            (this.clientHeight + // scroll past @$elements[0]
+              50) - // scroll past @$elements[1]
+            100 - // obstruction height
+            29 - // obstruction's top property
+            (1 * 16) - // top margin (bottom margin is not a visual obstruction)
+            (2 * 7) - // obstruction top and bottom borders
+            (2 * 5) // obstruction top and bottom paddings
+          )
         })
-        )
 
-        it('scrolls far enough so the element is not obstructed by an element fixed to the bottom', asyncSpec(function(next) {
+        it('scrolls far enough so the element is not obstructed by an element fixed to the bottom', async function() {
           const $bottomNav = $fixture('[up-fixed=bottom]').css({
             position: 'fixed',
             bottom: '0',
@@ -398,44 +373,22 @@ describe('up.viewport', function() {
           })
 
           up.reveal(this.$elements[0])
+          await wait()
 
-          next(() => {
-            // ---------------------
-            // [0] 0 .......... ch-1
-            // [F] 0 ............ 99
-            // ---------------------
-            // [1] ch+0 ...... ch+49
-            // [2] ch+50 ... ch+5049
-            expect($(document).scrollTop()).toBe(0)
+          expect($(document).scrollTop()).toBe(0)
 
-            up.reveal(this.$elements[1])
-          })
+          up.reveal(this.$elements[1])
+          await wait()
 
-          next(() => {
-            // ---------------------
-            // [0] 0 .......... ch-1
-            // [1] ch+0 ...... ch+49
-            // [F] 0 ............ 99
-            // ---------------------
-            // [2] ch+50 ... ch+5049
-            expect($(document).scrollTop()).toBe(150)
+          expect($(document).scrollTop()).toBe(150)
 
-            up.reveal(this.$elements[2])
-          })
+          up.reveal(this.$elements[2])
+          await wait()
 
-          next(() => {
-            // ---------------------
-            // [0] 0 .......... ch-1
-            // [1] ch+0 ...... ch+49
-            // ---------------------
-            // [2] ch+50 ... ch+5049
-            // [F] 0 ............ 99
-            expect($(document).scrollTop()).toBe(this.clientHeight + 50)
-          })
+          expect($(document).scrollTop()).toBe(this.clientHeight + 50)
         })
-        )
 
-        it('scrolls far enough so the element is not obstructed by an element fixed to the bottom with margin, padding, border and non-zero bottom properties', asyncSpec(function(next) {
+        it('scrolls far enough so the element is not obstructed by an element fixed to the bottom with margin, padding, border and non-zero bottom properties', async function() {
           const $bottomNav = $fixture('[up-fixed=bottom]').css({
             position: 'fixed',
             bottom: '29px',
@@ -448,63 +401,52 @@ describe('up.viewport', function() {
           })
 
           up.reveal(this.$elements[1])
+          await wait()
 
-          next(() => {
-            // ---------------------
-            // [0] 0 .......... ch-1
-            // [1] ch+0 ...... ch+49
-            // ---------------------
-            // [2] ch+50 ... ch+5049
-            // [F] 0 ...... 99+props
-            expect($(document).scrollTop()).toBe(
-              50        +  // height of elements[1]
-              100       +  // obstruction height
-              29        +  // obstruction's bottom property
-              (1 * 16)  +  // bottom margin (top margin is not a visual obstruction)
-              (2 * 7)   +  // obstruction top and bottom borders
-              (2 * 5)      // obstruction top and bottom paddings
-            )
-          })
+          expect($(document).scrollTop()).toBe(
+            50 + // height of elements[1]
+            100 + // obstruction height
+            29 + // obstruction's bottom property
+            (1 * 16) + // bottom margin (top margin is not a visual obstruction)
+            (2 * 7) + // obstruction top and bottom borders
+            (2 * 5) // obstruction top and bottom paddings
+          )
         })
-        )
 
-        it('ignores a bottom-fixed obstruction that is not visible (bugfix)', asyncSpec(function(next) {
+        it('ignores a bottom-fixed obstruction that is not visible (bugfix)', async function() {
           const bottomNav = fixture('[up-fixed=bottom]', { style: {
-            position: 'fixed',
-            bottom: '0px',
-            left: '0px',
-            right: '0px',
-            height: '100px',
-            display: 'none'
-          }
-        })
+              position: 'fixed',
+              bottom: '0px',
+              left: '0px',
+              right: '0px',
+              height: '100px',
+              display: 'none'
+            }})
 
           up.reveal(this.$elements[1])
+          await wait()
 
           expect(document.scrollingElement.scrollTop).toBe(50)
         })
-        )
 
         it('does not crash when called with a CSS selector (bugfix)', function() {
           up.reveal('.container', { behavior: 'instant' })
           expect(true).toBe(true)
         })
 
-        it('scrolls the viewport to the first row if the element if the element is higher than the viewport', asyncSpec(function(next) {
+        it('scrolls the viewport to the first row if the element is higher than the viewport', async function() {
           this.$elements[0].css({height: '1000px'})
           this.$elements[1].css({height: '3000px'})
 
           up.reveal(this.$elements[1])
+          await wait()
 
-          next(() => {
-            // [0] 0 ............ 999
-            // [1] 1000 ........ 4999
-            expect($(document).scrollTop()).toBe(1000)
-          })
+          // [0] 0 ............ 999
+          // [1] 1000 ........ 4999
+          expect($(document).scrollTop()).toBe(1000)
         })
-        )
 
-        it('only reveals the top number of pixels defined in config.revealMax', asyncSpec(function(next) {
+        it('only reveals the top number of pixels defined in config.revealMax', async function() {
           up.viewport.config.revealMax = 20
 
           const $viewport = $fixture('div').css({
@@ -522,158 +464,131 @@ describe('up.viewport', function() {
             $elements.push($element)
           })
 
-          // [0] 000..049
-          // [1] 050..099
-          // [2] 100..149
-          // [3] 150..199
-          // [4] 200..249
-          // [5] 250..299
-
-          // Viewing 0 .. 99
           expect($viewport.scrollTop()).toBe(0)
 
-          // See that the view only scrolls down as little as possible
-          // in order to reveal the first 20 rows of the element
           up.reveal($elements[3], {viewport: $viewport})
+          await wait()
 
-          next(() => {
-            // Viewing 70 to 169
-            expect($viewport.scrollTop()).toBe(50 + 20)
+          expect($viewport.scrollTop()).toBe(50 + 20)
 
-            // See that the view doesn't move if the element
-            // is already revealed
-            up.reveal($elements[2], {viewport: $viewport})
-          })
+          up.reveal($elements[2], {viewport: $viewport})
+          await wait()
 
-          next(() => {
-            expect($viewport.scrollTop()).toBe(50 + 20)
+          expect($viewport.scrollTop()).toBe(50 + 20)
 
-            // See that the view scrolls as far down as it cans
-            // to show the first 20 rows of the bottom element
-            up.reveal($elements[5], {viewport: $viewport})
-          })
+          up.reveal($elements[5], {viewport: $viewport})
+          await wait()
 
-          next(() => {
-            // Viewing 170 to 269
-            expect($viewport.scrollTop()).toBe(150 + 20)
+          expect($viewport.scrollTop()).toBe(150 + 20)
 
-            // See that the view only scrolls up as little as possible
-            // in order to reveal the first 20 rows element
-            up.reveal($elements[2], {viewport: $viewport})
-          })
+          up.reveal($elements[2], {viewport: $viewport})
+          await wait()
 
-          next(() => {
-            // Viewing 100 to 199
-            expect($viewport.scrollTop()).toBe(100)
-          })
+          expect($viewport.scrollTop()).toBe(100)
         })
-        )
-
 
         describe('with { top: true } option', function() {
-          it('scrolls the viewport to the first row of the element, even if that element is already fully revealed', asyncSpec(function(next) {
-              this.$elements[0].css({ height: '20px' })
+          it('scrolls the viewport to the first row of the element, even if that element is already fully revealed', async function() {
+            this.$elements[0].css({ height: '20px' })
 
-              up.reveal(this.$elements[1], { top: true, snap: false })
+            up.reveal(this.$elements[1], { top: true, snap: false })
 
-              next(() => {
-                // [0] 0 ............ 19
-                // [1] 20 ........... 69
-                // ---------------------
-                // [2] 70 ......... 5069
-                // ---------------------
-                expect($(document).scrollTop()).toBe(20)
-              })
-            })
-          )
+            await wait()
+            // [0] 0 ............ 19
+            // [1] 20 ........... 69
+            // ---------------------
+            // [2] 70 ......... 5069
+            // ---------------------
+            expect($(document).scrollTop()).toBe(20)
+          })
         })
       })
 
 
       describe('when the viewport is a container with overflow-y: scroll', function() {
-        it('reveals the given element', asyncSpec(function(next) {
-            const $viewport = $fixture('div').css({
-              'position': 'absolute',
-              'top': '50px',
-              'left': '50px',
-              'width': '100px',
-              'height': '100px',
-              'overflow-y': 'scroll'
-            })
-            const $elements = []
-            u.each([0, 1, 2, 3, 4, 5], function() {
-              const $element = $('<div>').css({ height: '50px' })
-              $element.appendTo($viewport)
-              $elements.push($element)
-            })
 
-            // ------------
-            // [0] 000..049
-            // [1] 050..099
-            // ------------
-            // [2] 100..149
-            // [3] 150..199
-            // [4] 200..249
-            // [5] 250..399
-            expect($viewport.scrollTop()).toBe(0)
-
-            // See that the view only scrolls down as little as possible
-            // in order to reveal the element
-            up.reveal($elements[3], { viewport: $viewport[0] })
-
-            next(() => {
-              // [0] 000..049
-              // [1] 050..099
-              // ------------
-              // [2] 100..149
-              // [3] 150..199
-              // ------------
-              // [4] 200..249
-              // [5] 250..299
-              expect($viewport.scrollTop()).toBe(100)
-
-              // See that the view doesn't move if the element
-              // is already revealed
-              up.reveal($elements[2], { viewport: $viewport[0] })
-            })
-
-            next(() => {
-              expect($viewport.scrollTop()).toBe(100)
-
-              // See that the view scrolls as far down as it cans
-              // to show the bottom element
-              up.reveal($elements[5], { viewport: $viewport[0] })
-            })
-
-            next(() => {
-              // [0] 000..049
-              // [1] 050..099
-              // [2] 100..149
-              // [3] 150..199
-              // ------------
-              // [4] 200..249
-              // [5] 250..299
-              // ------------
-              expect($viewport.scrollTop()).toBe(200)
-
-              up.reveal($elements[1], { viewport: $viewport[0] })
-            })
-
-            next(() => {
-              // See that the view only scrolls up as little as possible
-              // in order to reveal the element
-              // [0] 000..049
-              // ------------
-              // [1] 050..099
-              // [2] 100..149
-              // ------------
-              // [3] 150..199
-              // [4] 200..249
-              // [5] 250..299
-              expect($viewport.scrollTop()).toBe(50)
-            })
+        it('reveals the given element', async function() {
+          const $viewport = $fixture('div').css({
+            'position': 'absolute',
+            'top': '50px',
+            'left': '50px',
+            'width': '100px',
+            'height': '100px',
+            'overflow-y': 'scroll'
           })
-        )
+          const $elements = []
+          u.each([0, 1, 2, 3, 4, 5], function() {
+            const $element = $('<div>').css({ height: '50px' })
+            $element.appendTo($viewport)
+            $elements.push($element)
+          })
+
+          // ------------
+          // [0] 000..049
+          // [1] 050..099
+          // ------------
+          // [2] 100..149
+          // [3] 150..199
+          // [4] 200..249
+          // [5] 250..399
+          expect($viewport.scrollTop()).toBe(0)
+
+          // See that the view only scrolls down as little as possible
+          // in order to reveal the element
+          up.reveal($elements[3], { viewport: $viewport[0] })
+
+          await wait()
+
+          // [0] 000..049
+          // [1] 050..099
+          // ------------
+          // [2] 100..149
+          // [3] 150..199
+          // ------------
+          // [4] 200..249
+          // [5] 250..299
+          expect($viewport.scrollTop()).toBe(100)
+
+          // See that the view doesn't move if the element
+          // is already revealed
+          up.reveal($elements[2], { viewport: $viewport[0] })
+
+          await wait()
+
+          expect($viewport.scrollTop()).toBe(100)
+
+          // See that the view scrolls as far down as it cans
+          // to show the bottom element
+          up.reveal($elements[5], { viewport: $viewport[0] })
+
+          await wait()
+
+          // [0] 000..049
+          // [1] 050..099
+          // [2] 100..149
+          // [3] 150..199
+          // ------------
+          // [4] 200..249
+          // [5] 250..299
+          // ------------
+          expect($viewport.scrollTop()).toBe(200)
+
+          up.reveal($elements[1], { viewport: $viewport[0] })
+
+          await wait()
+
+          // See that the view only scrolls up as little as possible
+          // in order to reveal the element
+          // [0] 000..049
+          // ------------
+          // [1] 050..099
+          // [2] 100..149
+          // ------------
+          // [3] 150..199
+          // [4] 200..249
+          // [5] 250..299
+          expect($viewport.scrollTop()).toBe(50)
+        })
       })
 
       describe('with { behavior: "smooth" }', function() {
@@ -731,21 +646,25 @@ describe('up.viewport', function() {
 
     describe('up.viewport.revealHash()', function() {
 
-      it('reveals an element with an ID matching the given #hash', asyncSpec(function(next) {
+      it('reveals an element with an ID matching the given #hash', async function() {
         const revealSpy = up.reveal.mock().and.returnValue(Promise.resolve())
         const $match = $fixture('div#hash')
-        up.viewport.revealHash('#hash')
-        next(() => expect(revealSpy).toHaveBeenCalledWith($match[0], jasmine.anything()))
-      })
-      )
 
-      it('reveals a named anchor matching the given #hash', asyncSpec(function(next) {
+        up.viewport.revealHash('#hash')
+        await wait()
+
+        expect(revealSpy).toHaveBeenCalledWith($match[0], jasmine.anything())
+      })
+
+      it('reveals a named anchor matching the given #hash', async function() {
         const revealSpy = up.reveal.mock().and.returnValue(Promise.resolve())
         const $match = $fixture('a[name="hash"]')
+
         up.viewport.revealHash('#hash')
-        next(() => expect(revealSpy).toHaveBeenCalledWith($match[0], jasmine.anything()))
+        await wait()
+
+        expect(revealSpy).toHaveBeenCalledWith($match[0], jasmine.anything())
       })
-      )
 
       it('returns a truthy value so up.FragmentScrolling knows that scrolling succeeded', function() {
         fixture('#hash')
@@ -755,21 +674,21 @@ describe('up.viewport', function() {
 
       describe('if no element or anchor matches the given #hash', function() {
 
-        it('does not change the scroll position', asyncSpec(function(next) {
-          fixture('.high', {style: { height: '10000px' }}) // Ensure we have a vertical scroll bar
+        it('does not change the scroll position', async function() {
+          fixture('.high', { style: { height: '10000px' } }) // Ensure we have a vertical scroll bar
           const revealSpy = up.reveal.mock()
+
           up.viewport.root.scrollTop = 50
           up.viewport.revealHash('#hash')
-          next(function() {
-            expect(revealSpy).not.toHaveBeenCalled()
-            // Assert that we did not change the scroll position
-            expect(up.viewport.root.scrollTop).toBe(50)
-          })
+          await wait()
+
+          expect(revealSpy).not.toHaveBeenCalled()
+          // Assert that we did not change the scroll position
+          expect(up.viewport.root.scrollTop).toBe(50)
         })
-        )
 
         it('returns a falsy value so up.FragmentScrolling knows it needs to try the next option', function() {
-          fixture('.high', {style: { height: '10000px' }}) // Ensure we have a vertical scroll bar
+          fixture('.high', { style: { height: '10000px' } }) // Ensure we have a vertical scroll bar
           const result = up.viewport.revealHash('#hash')
           expect(result).toBeFalsy()
         })
@@ -871,40 +790,39 @@ describe('up.viewport', function() {
         expect($viewport.scrollTop()).toEqual(50)
       })
 
-      it('does not restore scroll positions that were saved for another layer', asyncSpec(function(next) {
-        const viewportHTML = `\
-<div class="viewport" up-viewport style="height: 100px; overflow-y: scroll">
-  <div style="height: 1000px">
-  </div>
-</div>\
-`
+      it('does not restore scroll positions that were saved for another layer', async function() {
+        const viewportHTML = `
+          <div class="viewport" up-viewport style="height: 100px; overflow-y: scroll">
+            <div style="height: 1000px">
+            </div>
+          </div>
+        `
 
         makeLayers([
           { content: viewportHTML },
           { content: viewportHTML }
         ])
 
-        next(() => {
-          this.rootViewport = up.fragment.get('.viewport', {layer: 'root'})
-          this.overlayViewport = up.fragment.get('.viewport', {layer: 'overlay'})
+        await wait()
 
-          this.rootViewport.scrollTop = 10
-          this.overlayViewport.scrollTop = 20
+        this.rootViewport = up.fragment.get('.viewport', {layer: 'root'})
+        this.overlayViewport = up.fragment.get('.viewport', {layer: 'overlay'})
 
-          up.viewport.saveScroll({layer: 'root'})
+        this.rootViewport.scrollTop = 10
+        this.overlayViewport.scrollTop = 20
 
-          this.rootViewport.scrollTop = 0
-          this.overlayViewport.scrollTop = 0
+        up.viewport.saveScroll({layer: 'root'})
 
-          up.viewport.restoreScroll({layer: 'root'})
-        })
+        this.rootViewport.scrollTop = 0
+        this.overlayViewport.scrollTop = 0
 
-        next(() => {
-          expect(this.rootViewport.scrollTop).toBe(10)
-          expect(this.overlayViewport.scrollTop).toBe(0)
-        })
+        up.viewport.restoreScroll({layer: 'root'})
+
+        await wait()
+
+        expect(this.rootViewport.scrollTop).toBe(10)
+        expect(this.overlayViewport.scrollTop).toBe(0)
       })
-      )
 
       it("returns true if a previous scroll position is known and could be restored", function() {
         const $viewport = $fixture('#viewport[up-viewport]').css({height: '100px', overflowY: 'scroll'})
