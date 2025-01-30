@@ -17,9 +17,7 @@ up.Change.CloseLayer = class CloseLayer extends up.Change {
   execute() {
     // Closing a layer is a sync function.
 
-    if (!this._layer.isOpen()) {
-      return Promise.resolve()
-    }
+    if (!this._layer.isOpen()) return
 
     up.browser.assertConfirmed(this.options)
 
