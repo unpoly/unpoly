@@ -8,40 +8,36 @@ describe('up.event', function() {
 
     describe('up.on()', function() {
 
-      it('registers a delagating event listener to the document, which passes the element as a second argument to the listener', asyncSpec(function(next) {
+      it('registers a delagating event listener to the document, which passes the element as a second argument to the listener', async function() {
         fixture('.container .child')
         const observeClass = jasmine.createSpy()
         up.on('click', '.child', (event, element) => observeClass(element.className))
 
         Trigger.click($('.container'))
         Trigger.click($('.child'))
+        await wait()
 
-        next(() => {
-          expect(observeClass).not.toHaveBeenCalledWith('container')
-          expect(observeClass).toHaveBeenCalledWith('child')
-        })
+        expect(observeClass).not.toHaveBeenCalledWith('container')
+        expect(observeClass).toHaveBeenCalledWith('child')
       })
-      )
 
-      it('calls the event listener if the event was triggered on a child of the requested selector', asyncSpec(function(next) {
+      it('calls the event listener if the event was triggered on a child of the requested selector', async function() {
         const $container = $fixture('.container')
         const $child = $container.affix('.child')
         const listener = jasmine.createSpy()
         up.on('click', '.container', listener)
 
         Trigger.click($('.child'))
+        await wait()
 
-        next(() => {
-          expect(listener).toHaveBeenCalledWith(
-            jasmine.any(MouseEvent),
-            $container[0],
-            jasmine.any(Object)
-          )
-        })
+        expect(listener).toHaveBeenCalledWith(
+          jasmine.any(MouseEvent),
+          $container[0],
+          jasmine.any(Object)
+        )
       })
-      )
 
-      it('does not call the event listener if the event was triggered on a child and the selector has a [disabled] attribute', asyncSpec(function(next) {
+      it('does not call the event listener if the event was triggered on a child and the selector has a [disabled] attribute', async function() {
         const listener = jasmine.createSpy()
         up.on('click', '.parent', listener)
 
@@ -49,47 +45,42 @@ describe('up.event', function() {
         const $child = $button.affix('span.child')
 
         Trigger.click($child)
-        next(() => {
-          expect(listener.calls.count()).toBe(0)
-        })
-      })
-      )
+        await wait()
 
-      it('passes the event target as the second argument if no selector was passed to up.on()', asyncSpec(function(next) {
+        expect(listener.calls.count()).toBe(0)
+      })
+
+      it('passes the event target as the second argument if no selector was passed to up.on()', async function() {
         const $element = $fixture('.element')
         const listener = jasmine.createSpy()
         up.on('click', listener)
         Trigger.click($element)
+        await wait()
 
-        next(() => {
-          expect(listener).toHaveBeenCalledWith(
-            jasmine.any(MouseEvent),
-            $element[0],
-            jasmine.any(Object)
-          )
-        })
+        expect(listener).toHaveBeenCalledWith(
+          jasmine.any(MouseEvent),
+          $element[0],
+          jasmine.any(Object)
+        )
       })
-      )
 
-      it('allows to bind the listener to a given element', asyncSpec(function(next) {
+      it('allows to bind the listener to a given element', async function() {
         const element1 = fixture('.element')
         const element2 = fixture('.element')
         const listener = jasmine.createSpy()
         up.on(element1, 'click', listener)
         Trigger.click(element1)
+        await wait()
 
-        next(function() {
-          expect(listener).toHaveBeenCalledWith(
-            jasmine.any(MouseEvent),
-            element1,
-            jasmine.any(Object)
-          )
-          expect(listener.calls.count()).toBe(1)
-        })
+        expect(listener).toHaveBeenCalledWith(
+          jasmine.any(MouseEvent),
+          element1,
+          jasmine.any(Object)
+        )
+        expect(listener.calls.count()).toBe(1)
       })
-      )
 
-      it('allows to pass a function that returns a selector', asyncSpec(function(next) {
+      it('allows to pass a function that returns a selector', async function() {
         const foo = fixture('.foo')
         const bar = fixture('.bar')
 
@@ -100,30 +91,25 @@ describe('up.event', function() {
         up.on('click', selectorFn, listener)
 
         Trigger.click(foo)
+        await wait()
 
-        next(() => {
-          expect(listener.calls.count()).toBe(1)
+        expect(listener.calls.count()).toBe(1)
 
-          this.selector = '.bar'
+        this.selector = '.bar'
+        Trigger.click(foo)
+        await wait()
 
-          Trigger.click(foo)
-        })
+        // Selector no longer matches event target, so the listener is not called
+        expect(listener.calls.count()).toBe(1)
 
-        next(() => {
-          // Selector no longer matches event target, so the listener is not called
-          expect(listener.calls.count()).toBe(1)
+        Trigger.click(bar)
+        await wait()
 
-          Trigger.click(bar)
-        })
-
-        next(() => {
-          // Selector again matches event target
-          expect(listener.calls.count()).toBe(2)
-        })
+        // Selector again matches event target
+        expect(listener.calls.count()).toBe(2)
       })
-      )
 
-      it('allows to bind the listener to a given element while also passing a selector', asyncSpec(function(next) {
+      it('allows to bind the listener to a given element while also passing a selector', async function() {
         const element1 = fixture('.element.one')
         const element2 = fixture('.element.two')
         const element2Child1 = e.affix(element2, '.child.one')
@@ -132,20 +118,17 @@ describe('up.event', function() {
         up.on(element2, 'click', '.one', listener)
 
         Trigger.click(element2Child1)
+        await wait()
 
-        next(function() {
-          expect(listener).toHaveBeenCalledWith(
-            jasmine.any(MouseEvent),
-            element2Child1,
-            jasmine.any(Object)
-          )
-          expect(listener.calls.count()).toBe(1)
-        })
+        expect(listener).toHaveBeenCalledWith(
+          jasmine.any(MouseEvent),
+          element2Child1,
+          jasmine.any(Object)
+        )
+        expect(listener.calls.count()).toBe(1)
       })
-      )
 
-
-      it('allows to bind the listener to an array of elements at once', asyncSpec(function(next) {
+      it('allows to bind the listener to an array of elements at once', async function() {
         const element1 = fixture('.element')
         const element2 = fixture('.element')
         const listener = jasmine.createSpy()
@@ -153,61 +136,53 @@ describe('up.event', function() {
         const unbindAll = up.on([element1, element2], 'click', listener)
 
         Trigger.click(element1)
+        await wait()
 
-        next(() => {
-          expect(listener.calls.count()).toBe(1)
-          expect(listener.calls.argsFor(0)[1]).toBe(element1)
+        expect(listener.calls.count()).toBe(1)
+        expect(listener.calls.argsFor(0)[1]).toBe(element1)
 
-          Trigger.click(element2)
-        })
+        Trigger.click(element2)
+        await wait()
 
-        next(() => {
-          expect(listener.calls.count()).toBe(2)
-          expect(listener.calls.argsFor(1)[1]).toBe(element2)
+        expect(listener.calls.count()).toBe(2)
+        expect(listener.calls.argsFor(1)[1]).toBe(element2)
 
-          unbindAll()
+        unbindAll()
 
-          Trigger.click(element1)
-          Trigger.click(element2)
-        })
+        Trigger.click(element1)
+        Trigger.click(element2)
+        await wait()
 
-        next(() => {
-          expect(listener.calls.count()).toBe(2)
-        })
+        expect(listener.calls.count()).toBe(2)
       })
-      )
 
-      it('allows to explicitly bind a listener to the document', asyncSpec(function(next) {
+      it('allows to explicitly bind a listener to the document', async function() {
         const listener = jasmine.createSpy()
         up.on(document, 'foo', listener)
         up.emit(document, 'foo')
+        await wait()
 
-        next(function() {
-          expect(listener).toHaveBeenCalledWith(
-            jasmine.any(Event),
-            document,
-            {}
-          )
-          expect(listener.calls.count()).toBe(1)
-        })
+        expect(listener).toHaveBeenCalledWith(
+          jasmine.any(Event),
+          document,
+          {}
+        )
+        expect(listener.calls.count()).toBe(1)
       })
-      )
 
-      it('allows to bind a listener to the window', asyncSpec(function(next) {
+      it('allows to bind a listener to the window', async function() {
         const listener = jasmine.createSpy()
         up.on(window, 'foo', listener)
         up.emit(window, 'foo')
+        await wait()
 
-        next(function() {
-          expect(listener).toHaveBeenCalledWith(
-            jasmine.any(Event),
-            window,
-            {}
-          )
-          expect(listener.calls.count()).toBe(1)
-        })
+        expect(listener).toHaveBeenCalledWith(
+          jasmine.any(Event),
+          window,
+          {}
+        )
+        expect(listener.calls.count()).toBe(1)
       })
-      )
 
       it('registers the listener to multiple space-separated event types', function() {
         const listener = jasmine.createSpy()
@@ -245,24 +220,21 @@ describe('up.event', function() {
         expect(listener.calls.count()).toEqual(2)
       })
 
-      it('returns a method that unregisters the event listener when called', asyncSpec(function(next) {
+      it('returns a method that unregisters the event listener when called', async function() {
         const $child = $fixture('.child')
         const clickSpy = jasmine.createSpy()
         const unsubscribe = up.on('click', '.child', clickSpy)
 
         Trigger.click($('.child'))
+        await wait()
 
-        next(() => {
-          expect(clickSpy.calls.count()).toEqual(1)
-          unsubscribe()
-          return Trigger.click($('.child'))
-        })
+        expect(clickSpy.calls.count()).toEqual(1)
+        unsubscribe()
+        Trigger.click($('.child'))
+        await wait()
 
-        next(() => {
-          expect(clickSpy.calls.count()).toEqual(1)
-        })
+        expect(clickSpy.calls.count()).toEqual(1)
       })
-      )
 
       it('throws an error when trying to register the same callback multiple times', function() {
         const callback = function() {}
@@ -434,7 +406,7 @@ describe('up.event', function() {
 
       describe('passing of [up-data]', function() {
 
-        it('parses an [up-data] attribute as JSON and passes the parsed object as a third argument to the listener', asyncSpec(function(next) {
+        it('parses an [up-data] attribute as JSON and passes the parsed object as a third argument to the listener', async function() {
           const observeArgs = jasmine.createSpy()
           up.on('click', '.child', (event, element, data) => observeArgs(element.className, data))
 
@@ -443,53 +415,45 @@ describe('up.event', function() {
           $child.attr('up-data', JSON.stringify(data))
 
           Trigger.click($child)
+          await wait()
 
-          next(() => {
-            expect(observeArgs).toHaveBeenCalledWith('child', jasmine.objectContaining(data))
-          })
+          expect(observeArgs).toHaveBeenCalledWith('child', jasmine.objectContaining(data))
         })
-        )
 
-        it('passes an empty object as a second argument to the listener if there is no [up-data] attribute', asyncSpec(function(next) {
+        it('passes an empty object as a second argument to the listener if there is no [up-data] attribute', async function() {
           const $child = $fixture('.child')
           const observeArgs = jasmine.createSpy()
           up.on('click', '.child', (event, element, data) => observeArgs(element.className, data))
 
           Trigger.click($('.child'))
+          await wait()
 
-          next(() => {
-            expect(observeArgs).toHaveBeenCalledWith('child', jasmine.objectContaining({}))
-          })
+          expect(observeArgs).toHaveBeenCalledWith('child', jasmine.objectContaining({}))
         })
-        )
 
-        it('does not parse an [up-data] attribute if the listener function only takes one argument', asyncSpec(function(next) {
+        it('does not parse an [up-data] attribute if the listener function only takes one argument', async function() {
           const parseDataSpy = spyOn(up.script, 'data').and.returnValue({})
 
           const $child = $fixture('.child')
           up.on('click', '.child', function(event) {}) // no-op
 
           Trigger.click($child)
+          await wait()
 
-          next(() => {
-            expect(parseDataSpy).not.toHaveBeenCalled()
-          })
+          expect(parseDataSpy).not.toHaveBeenCalled()
         })
-        )
 
-        it('does not parse an [up-data] attribute if the listener function only takes two arguments', asyncSpec(function(next) {
+        it('does not parse an [up-data] attribute if the listener function only takes two arguments', async function() {
           const parseDataSpy = spyOn(up.script, 'data').and.returnValue({})
 
           const $child = $fixture('.child')
           up.on('click', '.child', function(event, $element) {}) // no-op
 
           Trigger.click($child)
+          await wait()
 
-          next(() => {
-            expect(parseDataSpy).not.toHaveBeenCalled()
-          })
+          expect(parseDataSpy).not.toHaveBeenCalled()
         })
-        )
       })
 
       if (up.migrate.loaded) {
@@ -520,22 +484,20 @@ describe('up.event', function() {
     if (up.migrate.loaded) {
       describe('up.$on()', function() {
 
-        it('registers a delagating event listener to the document body, which passes a jQuery-wrapped element as a second argument to the listener', asyncSpec(function(next) {
+        it('registers a delagating event listener to the document body, which passes a jQuery-wrapped element as a second argument to the listener', async function() {
           fixture('.container[data-mark=container] .child[data-mark=child]')
           const observeClass = jasmine.createSpy()
           up.$on('click', '.child', (event, $element) => observeClass($element.attr('data-mark')))
 
           Trigger.click($('.container'))
           Trigger.click($('.child'))
+          await wait()
 
-          next(() => {
-            expect(observeClass).not.toHaveBeenCalledWith('container')
-            expect(observeClass).toHaveBeenCalledWith('child')
-          })
+          expect(observeClass).not.toHaveBeenCalledWith('container')
+          expect(observeClass).toHaveBeenCalledWith('child')
         })
-        )
 
-        it('returns a function that unbinds the listener when called', asyncSpec(function(next) {
+        it('returns a function that unbinds the listener when called', async function() {
           const $child = $fixture('.child')
           const clickSpy = jasmine.createSpy()
           const unbind = up.$on('click', '.child', clickSpy)
@@ -543,59 +505,51 @@ describe('up.event', function() {
           unbind()
           Trigger.click($('.child'))
 
-          next(() => {
-            expect(clickSpy.calls.count()).toEqual(1)
-          })
+          await next()
+
+          expect(clickSpy.calls.count()).toEqual(1)
         })
-        )
       })
     }
 
     describe('up.off()', function() {
 
-      it('unregisters an event listener previously registered through up.on', asyncSpec(function(next) {
+      it('unregisters an event listener previously registered through up.on', async function() {
         const $child = $fixture('.child')
         const clickSpy = jasmine.createSpy()
         up.on('click', '.child', clickSpy)
         Trigger.click($('.child'))
         up.off('click', '.child', clickSpy)
         Trigger.click($('.child'))
+        await wait()
 
-        next(() => {
-          expect(clickSpy.calls.count()).toEqual(1)
-        })
+        expect(clickSpy.calls.count()).toEqual(1)
       })
-      )
 
-      it('allows to unregister a single event from a group of events that were registered in a single up.on call', asyncSpec(function(next) {
+      it('allows to unregister a single event from a group of events that were registered in a single up.on call', async function() {
         const listener = jasmine.createSpy()
         const element = fixture('.element')
         up.on(element, 'mouseover mouseout', listener)
 
         up.off(element, 'mouseover', listener)
         Trigger.mouseover(element)
+        await wait()
 
-        next(function() {
-          expect(listener.calls.count()).toBe(0)
+        expect(listener.calls.count()).toBe(0)
 
-          Trigger.mouseout(element)
-        })
+        Trigger.mouseout(element)
+        await wait()
 
-        next(function() {
-          expect(listener.calls.count()).toBe(1)
+        expect(listener.calls.count()).toBe(1)
 
-          up.off(element, 'mouseout', listener)
+        up.off(element, 'mouseout', listener)
+        Trigger.mouseout(element)
+        await wait()
 
-          Trigger.mouseout(element)
-        })
-
-        next(() => {
-          expect(listener.calls.count()).toBe(1)
-        })
+        expect(listener.calls.count()).toBe(1)
       })
-      )
 
-      it('allows to unregister a single element from a group of elements that were registered in a single up.on call', asyncSpec(function(next) {
+      it('allows to unregister a single element from a group of elements that were registered in a single up.on call', async function() {
         const listener = jasmine.createSpy()
         const element1 = fixture('.element1')
         const element2 = fixture('.element2')
@@ -604,42 +558,39 @@ describe('up.event', function() {
 
         up.off(element1, 'mouseover', listener)
         Trigger.mouseover(element1)
+        await wait()
 
-        next(function() {
-          expect(listener.calls.count()).toBe(0)
+        expect(listener.calls.count()).toBe(0)
 
-          Trigger.mouseover(element2)
-        })
+        Trigger.mouseover(element2)
+        await wait()
 
-        next(function() {
-          expect(listener.calls.count()).toBe(1)
+        expect(listener.calls.count()).toBe(1)
 
-          up.off(element2, 'mouseover', listener)
+        up.off(element2, 'mouseover', listener)
+        Trigger.mouseover(element2)
+        await wait()
 
-          Trigger.mouseover(element2)
-        })
-
-        next(() => {
-          expect(listener.calls.count()).toBe(1)
-        })
+        expect(listener.calls.count()).toBe(1)
       })
-      )
     })
 
     if (up.migrate.loaded) {
-      describe('up.$off()', () => it('unregisters an event listener previously registered through up.$on', asyncSpec(function(next) {
-        const $child = $fixture('.child')
-        const clickSpy = jasmine.createSpy()
-        up.$on('click', '.child', clickSpy)
-        Trigger.click($('.child'))
-        up.$off('click', '.child', clickSpy)
-        Trigger.click($('.child'))
+      describe('up.$off()', function() {
 
-        next(() => {
+        it('unregisters an event listener previously registered through up.$on', async function() {
+          const $child = $fixture('.child')
+          const clickSpy = jasmine.createSpy()
+          up.$on('click', '.child', clickSpy)
+          Trigger.click($('.child'))
+          up.$off('click', '.child', clickSpy)
+          Trigger.click($('.child'))
+          await wait()
+
           expect(clickSpy.calls.count()).toEqual(1)
         })
+
       })
-      ))
     }
 
 
@@ -812,25 +763,25 @@ describe('up.event', function() {
 
     describe('up.event.onEscape()', function() {
 
-      it('runs the given callback when the user presses the Escape key', asyncSpec(function(next) {
+      it('runs the given callback when the user presses the Escape key', async function() {
         const callback = jasmine.createSpy()
         up.event.onEscape(callback)
         const element = fixture('.element')
         Trigger.keySequence(element, 'Escape')
+        await wait()
 
-        next(() => expect(callback).toHaveBeenCalled())
+        expect(callback).toHaveBeenCalled()
       })
-      )
 
-      it('does not run the given callback when the user presses another key', asyncSpec(function(next) {
+      it('does not run the given callback when the user presses another key', async function() {
         const callback = jasmine.createSpy()
         up.event.onEscape(callback)
         const element = fixture('.element')
         Trigger.keySequence(element, 'A')
+        await wait()
 
-        next(() => expect(callback).not.toHaveBeenCalled())
+        expect(callback).not.toHaveBeenCalled()
       })
-      )
     })
 
     describe('up.event.isUnmodified()', function() {
@@ -1017,42 +968,44 @@ describe('up.event', function() {
         expect(fooListener.calls.mostRecent().args[0]).toBeEvent('foo', {key: 'value'})
       })
 
-      it('does not emit the event if the right mouse button is used', asyncSpec(function(next) {
-          const link = up.hello(fixture("a[up-emit='foo']", {text: 'label'}))
-          const fooListener = jasmine.createSpy('fooListener')
-          link.addEventListener('foo', fooListener)
+      it('does not emit the event if the right mouse button is used', async function() {
+        const link = up.hello(fixture("a[up-emit='foo']", {text: 'label'}))
+        const fooListener = jasmine.createSpy('fooListener')
+        link.addEventListener('foo', fooListener)
 
-          Trigger.clickSequence(link, {button: 2})
+        Trigger.clickSequence(link, {button: 2})
+        await wait()
 
-          next(() => expect(fooListener).not.toHaveBeenCalled())
-        })
-      )
+        expect(fooListener).not.toHaveBeenCalled()
+      })
 
-      it('does not emit the event if ctrl is pressed during the click', asyncSpec(function(next) {
-          const link = up.hello(fixture("a[up-emit='foo']", {text: 'label'}))
-          const fooListener = jasmine.createSpy('fooListener')
-          link.addEventListener('foo', fooListener)
+      it('does not emit the event if ctrl is pressed during the click', async function() {
+        const link = up.hello(fixture("a[up-emit='foo']", {text: 'label'}))
+        const fooListener = jasmine.createSpy('fooListener')
+        link.addEventListener('foo', fooListener)
 
-          Trigger.clickSequence(link, {ctrlKey: true})
+        Trigger.clickSequence(link, {ctrlKey: true})
+        await wait()
 
-          next(() => expect(fooListener).not.toHaveBeenCalled())
-        })
-      )
+        expect(fooListener).not.toHaveBeenCalled()
+      })
 
-      it('emits the event on mousedown when the link is [up-instant]', asyncSpec(function(next) {
-          const link = up.hello(fixture("a[href='#'][up-emit='foo'][up-instant]", { text: 'label' }))
-          const fooListener = jasmine.createSpy('fooListener')
-          link.addEventListener('foo', fooListener)
+      it('emits the event on mousedown when the link is [up-instant]', async function() {
+        const link = up.hello(fixture("a[up-emit='foo'][up-instant]", { text: 'label' }))
 
-          Trigger.mousedown(link)
+        const fooListener = jasmine.createSpy('fooListener')
+        link.addEventListener('foo', fooListener)
 
-          next(() => expect(fooListener.calls.count()).toBe(1))
+        Trigger.mousedown(link)
+        await wait()
 
-          Trigger.click(link)
+        expect(fooListener.calls.count()).toBe(1)
 
-          next(() => expect(fooListener.calls.count()).toBe(1))
-        })
-      )
+        Trigger.click(link)
+        await wait()
+
+        expect(fooListener.calls.count()).toBe(1)
+      })
 
       it('emits the event on Enter for keyboard users', function() {
         const link = up.hello(fixture("a[up-emit='foo']", {text: 'label'}))
@@ -1122,32 +1075,34 @@ describe('up.event', function() {
 
       describe('when the emitted event is prevented', function() {
 
-        it("prevents the click event's default", asyncSpec(function(next) {
+        it('prevents the click event\'s default', async function() {
           const link = up.hello(fixture("a[up-emit='foo']", {text: 'label'}))
           let clickEvent = null
           link.addEventListener('click', event => clickEvent = event)
           link.addEventListener('foo', event => event.preventDefault())
 
           Trigger.clickSequence(link)
+          await wait()
 
-          next(() => expect(clickEvent.defaultPrevented).toBe(true))
+          expect(clickEvent.defaultPrevented).toBe(true)
         })
-        )
 
       })
 
       describe('when the emitted event is stopped from propagation', function() {
-        it('prevents an Unpoly link from being followed', asyncSpec(function(next) {
+
+        it('prevents an Unpoly link from being followed', async function() {
           const link = up.hello(fixture("a[up-emit='foo'][href='/path'][up-follow]", {text: 'label'}))
           const followListener = jasmine.createSpy('follow listener')
           link.addEventListener('up:link:follow', followListener)
           link.addEventListener('foo', event => up.event.halt(event))
 
           Trigger.clickSequence(link)
+          await wait()
 
-          next(() => expect(followListener).not.toHaveBeenCalled())
+          expect(followListener).not.toHaveBeenCalled()
         })
-        )
+
       })
     })
   })
