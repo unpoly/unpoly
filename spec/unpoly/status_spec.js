@@ -1103,95 +1103,97 @@ describe('up.status', function() {
           expect(link2).toHaveClass('up-current')
         })
 
-        it('marks a link as .up-current if it links to the current URL, but is missing a trailing slash', asyncSpec(function(next) {
+        it('marks a link as .up-current if it links to the current URL, but is missing a trailing slash', async function() {
           const $nav = $fixture('div[up-nav]')
           const $link = $nav.affix('a[href="/fork"][up-target=".main"][up-history]')
           fixture('.main')
           up.hello($nav)
 
-          next(() => {
-            Trigger.clickSequence($link)
+          await wait()
+
+          Trigger.clickSequence($link)
+
+          await wait()
+
+          this.respondWith({
+            responseHeaders: { 'X-Up-Location': '/fork/' },
+            responseText: '<div class="main">new-text</div>'
           })
 
-          next(() => {
-            this.respondWith({
-              responseHeaders: { 'X-Up-Location': '/fork/' },
-              responseText: '<div class="main">new-text</div>'
-            })
-          })
+          await wait()
 
-          next(() => {
-            expect($link).toHaveClass('up-current')
-          })
+          expect($link).toHaveClass('up-current')
         })
-        )
 
-        it('marks a link as .up-current if it links to the current URL, but is missing a trailing slash, and has a matching query string', asyncSpec(function(next) {
+        it('marks a link as .up-current if it links to the current URL, but is missing a trailing slash', async function() {
           const $nav = $fixture('div[up-nav]')
-          const $link = $nav.affix('a[href="/fork?foo=1"][up-target=".main"][up-history]')
+          const $link = $nav.affix('a[href="/fork"][up-target=".main"][up-history]')
           fixture('.main')
           up.hello($nav)
 
-          next(() => {
-            Trigger.clickSequence($link)
+          await wait()
+
+          Trigger.clickSequence($link)
+
+          await wait()
+
+          this.respondWith({
+            responseHeaders: { 'X-Up-Location': '/fork/' },
+            responseText: '<div class="main">new-text</div>'
           })
 
-          next(() => {
-            this.respondWith({
-              responseHeaders: { 'X-Up-Location': '/fork/?foo=1' },
-              responseText: '<div class="main">new-text</div>'
-            })
-          })
+          await wait()
 
-          next(() => {
-            expect($link).toHaveClass('up-current')
-          })
+          expect($link).toHaveClass('up-current')
         })
-        )
 
-        it('marks a link as .up-current if it links to the current URL, but has an extra trailing slash', asyncSpec(function(next) {
+        it('marks a link as .up-current if it links to the current URL, but has an extra trailing slash', async function() {
           const $nav = $fixture('div[up-nav]')
           const $link = $nav.affix('a[href="/foo/"][up-target=".main"][up-history]')
           up.hello($nav)
 
           fixture('.main')
+
+          await wait()
+
           Trigger.clickSequence($link)
 
-          next(() => {
-            this.respondWith({
-              responseHeaders: { 'X-Up-Location': '/foo' },
-              responseText: '<div class="main">new-text</div>'
-            })
+          await wait()
+
+          this.respondWith({
+            responseHeaders: { 'X-Up-Location': '/foo' },
+            responseText: '<div class="main">new-text</div>'
           })
 
-          next(() => {
-            expect($link).toHaveClass('up-current')
-          })
+          await wait()
+
+          expect($link).toHaveClass('up-current')
         })
-        )
 
-        it('marks a link as .up-current if it links to the current URL, but has an extra trailing slash, and has a matching query string', asyncSpec(function(next) {
+        it('marks a link as .up-current if it links to the current URL, but has an extra trailing slash, and has a matching query string', async function() {
           const $nav = $fixture('div[up-nav]')
           const $link = $nav.affix('a[href="/foo/?foo=1"][up-target=".main"][up-history]')
           up.hello($nav)
 
           fixture('.main')
+
+          await wait()
+
           Trigger.clickSequence($link)
 
-          next(() => {
-            this.respondWith({
-              responseHeaders: { 'X-Up-Location': '/foo?foo=1' },
-              responseText: '<div class="main">new-text</div>'
-            })
+          await wait()
+
+          this.respondWith({
+            responseHeaders: { 'X-Up-Location': '/foo?foo=1' },
+            responseText: '<div class="main">new-text</div>'
           })
 
-          next(() => {
-            expect($link).toHaveClass('up-current')
-          })
+          await wait()
+
+          expect($link).toHaveClass('up-current')
         })
-        )
 
-        it("marks a link as .up-current if it links to its own layer's URL, but not when it links to another layer's URL", asyncSpec(function(next) {
+        it("marks a link as .up-current if it links to its own layer's URL, but not when it links to another layer's URL", async function() {
           replaceURL('/background-url')
 
           const nav = fixture('div[up-nav]')
@@ -1200,43 +1202,43 @@ describe('up.status', function() {
           this.backgroundLinkToOtherURL = e.affix(nav, 'a[href="/other-url"]')
           up.hello(nav)
 
-          next(() => {
-            up.layer.open({url: '/layer-url', target: '.layer-content'})
-          })
+          await wait()
 
-          next(() => {
-            this.respondWith(`
-              <div class="layer-content" up-nav>
-                <a href="/background-url">text</a>
-                <a href="/layer-url">text</a>
-                <a href="/other-url">text</a>
-              </div>
-            `)
-          })
+          up.layer.open({url: '/layer-url', target: '.layer-content'})
 
-          next(() => {
-            this.layerLinkToBackgroundURL = e.get('.layer-content a[href="/background-url"]')
-            this.layerLinkToLayerURL = e.get('.layer-content a[href="/layer-url"]')
-            this.layerLinkToOtherURL = e.get('.layer-content a[href="/other-url"]')
+          await wait()
 
-            expect(this.backgroundLinkToBackgroundURL).toHaveClass('up-current')
-            expect(this.backgroundLinkToLayerURL).not.toHaveClass('up-current')
-            expect(this.backgroundLinkToOtherURL).not.toHaveClass('up-current')
+          this.respondWith(`
+            <div class="layer-content" up-nav>
+              <a href="/background-url">text</a>
+              <a href="/layer-url">text</a>
+              <a href="/other-url">text</a>
+            </div>
+          `)
 
-            expect(this.layerLinkToBackgroundURL).not.toHaveClass('up-current')
-            expect(this.layerLinkToLayerURL).toHaveClass('up-current')
-            expect(this.layerLinkToOtherURL).not.toHaveClass('up-current')
+          await wait()
 
-            up.layer.dismiss()
+          this.layerLinkToBackgroundURL = e.get('.layer-content a[href="/background-url"]')
+          this.layerLinkToLayerURL = e.get('.layer-content a[href="/layer-url"]')
+          this.layerLinkToOtherURL = e.get('.layer-content a[href="/other-url"]')
 
-            expect(this.backgroundLinkToBackgroundURL).toHaveClass('up-current')
-            expect(this.backgroundLinkToLayerURL).not.toHaveClass('up-current')
-            expect(this.backgroundLinkToOtherURL).not.toHaveClass('up-current')
-          })
+          expect(this.backgroundLinkToBackgroundURL).toHaveClass('up-current')
+          expect(this.backgroundLinkToLayerURL).not.toHaveClass('up-current')
+          expect(this.backgroundLinkToOtherURL).not.toHaveClass('up-current')
+
+          expect(this.layerLinkToBackgroundURL).not.toHaveClass('up-current')
+          expect(this.layerLinkToLayerURL).toHaveClass('up-current')
+          expect(this.layerLinkToOtherURL).not.toHaveClass('up-current')
+
+          up.layer.dismiss()
+
+          expect(this.backgroundLinkToBackgroundURL).toHaveClass('up-current')
+          expect(this.backgroundLinkToLayerURL).not.toHaveClass('up-current')
+          expect(this.backgroundLinkToOtherURL).not.toHaveClass('up-current')
         })
-        )
 
-        it("marks a link as .up-current if it links to its current layer's URL, even if that layer does not render location", asyncSpec(function(next) {
+
+        it("marks a link as .up-current if it links to its current layer's URL, even if that layer does not render location", async function() {
           replaceURL('/background-url')
 
           const fragment = `
@@ -1253,40 +1255,39 @@ describe('up.status', function() {
             this.layerLinkToOtherURL = e.get('.layer-content a[href="/other-url"]')
           }
 
-          next(() => {
-            up.layer.open({target: '.layer-content', url: '/layer-url', history: false})
-          })
+          await wait()
 
-          next(() => {
-            this.respondWith(fragment)
-          })
+          up.layer.open({target: '.layer-content', url: '/layer-url', history: false})
 
-          next(() => {
-            expect(up.layer.location).toMatchURL('/layer-url')
-            expect(location.href).toMatchURL('/background-url')
+          await wait()
 
-            findLinks()
-            expect(this.layerLinkToBackgroundURL).not.toHaveClass('up-current')
-            expect(this.layerLinkToLayerURL).toHaveClass('up-current')
-            expect(this.layerLinkToOtherURL).not.toHaveClass('up-current')
+          this.respondWith(fragment)
 
-            up.navigate({target: '.layer-content', url: '/other-url'})
-          })
+          await wait()
 
-          next(() => {
-            this.respondWith(fragment)
-          })
+          expect(up.layer.location).toMatchURL('/layer-url')
+          expect(location.href).toMatchURL('/background-url')
 
-          next(() => {
-            findLinks()
-            expect(this.layerLinkToBackgroundURL).not.toHaveClass('up-current')
-            expect(this.layerLinkToLayerURL).not.toHaveClass('up-current')
-            expect(this.layerLinkToOtherURL).toHaveClass('up-current')
-          })
+          findLinks()
+          expect(this.layerLinkToBackgroundURL).not.toHaveClass('up-current')
+          expect(this.layerLinkToLayerURL).toHaveClass('up-current')
+          expect(this.layerLinkToOtherURL).not.toHaveClass('up-current')
+
+          up.navigate({target: '.layer-content', url: '/other-url'})
+
+          await wait()
+
+          this.respondWith(fragment)
+
+          await wait()
+
+          findLinks()
+          expect(this.layerLinkToBackgroundURL).not.toHaveClass('up-current')
+          expect(this.layerLinkToLayerURL).not.toHaveClass('up-current')
+          expect(this.layerLinkToOtherURL).toHaveClass('up-current')
         })
-        )
 
-        it("respects links that are added to an existing [up-nav] by a fragment update", asyncSpec(function(next) {
+        it("respects links that are added to an existing [up-nav] by a fragment update", async function() {
           const $nav = $fixture('.nav[up-nav]')
           const $link = $nav.affix('a[href="/foo"][up-target=".main"]')
           const $more = $nav.affix('.more')
@@ -1294,13 +1295,13 @@ describe('up.status', function() {
 
           up.render({fragment: '<div class="more"><a href="/bar"></div>', history: true, location: '/bar'})
 
-          next(() => {
-            const $moreLink = $('.more').find('a')
-            expect($moreLink).toBeAttached()
-            expect($moreLink).toHaveClass('up-current')
-          })
+          await wait()
+
+          const $moreLink = $('.more').find('a')
+          expect($moreLink).toBeAttached()
+          expect($moreLink).toHaveClass('up-current')
         })
-        )
+
       })
     })
 
@@ -1453,49 +1454,56 @@ describe('up.status', function() {
           expect(link).not.toHaveClass('up-active')
         })
 
-        it('does not mark a link as .up-active with [up-feedback=false] attribute', asyncSpec(function(next) {
+        it('does not mark a link as .up-active with [up-feedback=false] attribute', async function() {
           const $link = $fixture('a[href="/foo"][up-target=".main"][up-feedback=false]')
           fixture('.main')
 
           Trigger.clickSequence($link)
 
-          next(() => {
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
-            expect($link).not.toHaveClass('up-active')
-          })
-        })
-        )
+          await wait()
 
-        it('marks links with [up-instant] on mousedown as .up-active until the request finishes', asyncSpec(function(next) {
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect($link).not.toHaveClass('up-active')
+        })
+
+        it('marks links with [up-instant] on mousedown as .up-active until the request finishes', async function() {
           const $link = $fixture('a[href="/foo"][up-instant][up-target=".main"]')
           fixture('.main')
           Trigger.mousedown($link)
 
-          next(() => expect($link).toHaveClass('up-active'))
-          next(() => this.respondWith('<div class="main">new-text</div>'))
-          next(() => expect($link).not.toHaveClass('up-active'))
-        })
-        )
+          await wait()
 
-        it('prefers to mark an enclosing [up-expand] click area', asyncSpec(function(next) {
+          expect($link).toHaveClass('up-active')
+
+          await wait()
+
+          this.respondWith('<div class="main">new-text</div>')
+
+          await wait()
+
+          expect($link).not.toHaveClass('up-active')
+        })
+
+        it('prefers to mark an enclosing [up-expand] click area', async function() {
           const $area = $fixture('div[up-expand] a[href="/foo"][up-target=".main"]')
           up.hello($area)
           const $link = $area.find('a')
           fixture('.main')
           Trigger.clickSequence($link)
 
-          next(() => {
-            expect($link).not.toHaveClass('up-active')
-            expect($area).toHaveClass('up-active')
-          })
-          next(() => {
-            this.respondWith('<div class="main">new-text</div>')
-          })
-          next(() => {
-            expect($area).not.toHaveClass('up-active')
-          })
+          await wait()
+
+          expect($link).not.toHaveClass('up-active')
+          expect($area).toHaveClass('up-active')
+
+          await wait()
+
+          this.respondWith('<div class="main">new-text</div>')
+
+          await wait()
+
+          expect($area).not.toHaveClass('up-active')
         })
-        )
 
         it('allows to set additional active classes via up.status.config.activeClasses', async function() {
           up.status.config.activeClasses.push('working')
@@ -1503,72 +1511,86 @@ describe('up.status', function() {
           fixture('.main')
 
           Trigger.clickSequence(link)
+
           await wait()
 
           expect(link).toHaveClass('up-active')
           expect(link).toHaveClass('working')
 
           jasmine.respondWithSelector('.main')
+
           await wait()
 
           expect(link).not.toHaveClass('up-active')
           expect(link).not.toHaveClass('working')
         })
 
-        it('removes .up-active when a link with [up-confirm] was not confirmed', asyncSpec(function(next) {
+        it('removes .up-active when a link with [up-confirm] was not confirmed', async function() {
           const $link = $fixture('a[href="/foo"][up-target=".main"][up-confirm="Really follow?"]')
           spyOn(up.browser, 'assertConfirmed').and.throwError(new up.Aborted('User aborted'))
 
           Trigger.clickSequence($link)
 
-          next(() => {
-            expect($link).not.toHaveClass('up-active')
-          })
-        })
-        )
+          await wait()
 
-        it('marks clicked modal openers as .up-active while the modal is loading', asyncSpec(function(next) {
+          expect($link).not.toHaveClass('up-active')
+        })
+
+        it('marks clicked modal openers as .up-active while the modal is loading', async function() {
           const $link = $fixture('a[href="/foo"][up-target=".main"]')
           fixture('.main')
           Trigger.clickSequence($link)
 
-          next(() => expect($link).toHaveClass('up-active'))
-          next(() => this.respondWith('<div class="main">new-text</div>'))
-          next(() => expect($link).not.toHaveClass('up-active'))
-        })
-        )
+          await wait()
 
-        it('removes .up-active from a clicked modal opener if the target is already preloaded (bugfix)', asyncSpec(function(next) {
+          expect($link).toHaveClass('up-active')
+
+          await wait()
+
+          this.respondWith('<div class="main">new-text</div>')
+
+          await wait()
+
+          expect($link).not.toHaveClass('up-active')
+        })
+
+        it('removes .up-active from a clicked modal opener if the target is already preloaded (bugfix)', async function() {
           const $link = $fixture('a[href="/foo"][up-target=".main"][up-layer="new modal"]')
           up.hello($link)
           up.link.preload($link)
 
-          next(() => {
-            this.respondWith('<div class="main">new-text</div>')
-          })
-          next(() => {
-            Trigger.clickSequence($link)
-          })
-          next(() => {
-            expect('up-modal .main').toHaveText('new-text')
-            expect($link).not.toHaveClass('up-active')
-          })
-        })
-        )
+          await wait()
 
-        it('removes .up-active from a clicked link if the target is already preloaded (bugfix)', asyncSpec(function(next) {
+          this.respondWith('<div class="main">new-text</div>')
+
+          await wait()
+
+          Trigger.clickSequence($link)
+
+          await wait()
+
+          expect('up-modal .main').toHaveText('new-text')
+          expect($link).not.toHaveClass('up-active')
+        })
+
+        it('removes .up-active from a clicked link if the target is already preloaded (bugfix)', async function() {
           const $link = $fixture('a[href="/foo"][up-target=".main"]')
           fixture('.main')
           up.link.preload($link)
 
-          next(() => this.respondWith('<div class="main">new-text</div>'))
-          next(() => Trigger.clickSequence($link))
-          next(() => {
-            expect('.main').toHaveText('new-text')
-            expect($link).not.toHaveClass('up-active')
-          })
+          await wait()
+
+          this.respondWith('<div class="main">new-text</div>')
+
+          await wait()
+
+          Trigger.clickSequence($link)
+
+          await wait()
+
+          expect('.main').toHaveText('new-text')
+          expect($link).not.toHaveClass('up-active')
         })
-        )
 
         it('removes .up-active when the server responds with an error code', async function() {
           const link = fixture('a[href="/foo"][up-target="#main"][up-fail-target="#main"]')
