@@ -8866,7 +8866,7 @@ describe('up.fragment', function() {
 
       describe('with { guardEvent } option', function() {
 
-        it('emits the given event before rendering', asyncSpec(function(next) {
+        it('emits the given event before rendering', async function() {
           fixture('.target', {text: 'old content'})
           const guardEvent = up.event.build('my:guard')
           const listener = jasmine.createSpy('listener').and.callFake(event => expect('.target').toHaveText('old content'))
@@ -8874,14 +8874,13 @@ describe('up.fragment', function() {
 
           up.render({target: '.target', content: 'new content', guardEvent})
 
-          return next(function() {
-            expect(listener).toHaveBeenCalledWith(guardEvent, jasmine.anything(), jasmine.anything())
-            return expect('.target').toHaveText('new content')
-          })
-        })
-        )
+          await wait()
 
-        it('prefers to emit the given event on the given { origin } instead of the document', asyncSpec(function(next) {
+          expect(listener).toHaveBeenCalledWith(guardEvent, jasmine.anything(), jasmine.anything())
+          expect('.target').toHaveText('new content')
+        })
+
+        it('prefers to emit the given event on the given { origin } instead of the document', async function() {
           fixture('.target', {text: 'old content'})
           const origin = fixture('.origin')
           const guardEvent = up.event.build('my:guard')
@@ -8890,9 +8889,10 @@ describe('up.fragment', function() {
 
           up.render({target: '.target', content: 'new content', guardEvent, origin})
 
-          return next(() => expect(listener).toHaveBeenCalledWith(guardEvent))
+          await wait()
+
+          expect(listener).toHaveBeenCalledWith(guardEvent)
         })
-        )
 
         it('lets listeners prevent the event, aborting the fragment update', async function() {
           fixture('.target', {text: 'old content'})
@@ -8900,7 +8900,7 @@ describe('up.fragment', function() {
           up.on('my:guard', event => event.preventDefault())
 
           const promise = up.render({target: '.target', content: 'new content', guardEvent})
-          return await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/(Aborted|Prevented)/i))
+          await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/(Aborted|Prevented)/i))
         })
 
         it('sets { renderOptions } on the emitted event', async function() {
@@ -8914,10 +8914,10 @@ describe('up.fragment', function() {
           await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.Aborted))
 
           expect(listener).toHaveBeenCalledWith(guardEvent, jasmine.anything(), jasmine.anything())
-          return expect(listener.calls.argsFor(0)[0].renderOptions.target).toEqual('.target')
+          expect(listener.calls.argsFor(0)[0].renderOptions.target).toEqual('.target')
         })
 
-        return it('omits the { guardEvent } key from the { renderOptions }, so event handlers can pass this to render() without causing an infinite loop', async function() {
+        it('omits the { guardEvent } key from the { renderOptions }, so event handlers can pass this to render() without causing an infinite loop', async function() {
           fixture('.target', {text: 'old content'})
           const listener = jasmine.createSpy('listener').and.callFake(event => event.preventDefault())
           const guardEvent = up.event.build('my:guard')
@@ -8929,7 +8929,7 @@ describe('up.fragment', function() {
 
           expect(listener).toHaveBeenCalledWith(guardEvent, jasmine.anything(), jasmine.anything())
           expect(listener.calls.argsFor(0)[0].renderOptions.target).toEqual('.target')
-          return expect(listener.calls.argsFor(0)[0].renderOptions.guardEvent).toBeMissing()
+          expect(listener.calls.argsFor(0)[0].renderOptions.guardEvent).toBeMissing()
         })
       })
 
@@ -8937,7 +8937,7 @@ describe('up.fragment', function() {
 
         describe('with { abort: true }', function() {
 
-          it('aborts the request of an existing change', asyncSpec(function(next) {
+          it('aborts the request of an existing change', async function() {
             fixture('.element')
 
             let change1Error  = undefined
@@ -8946,21 +8946,20 @@ describe('up.fragment', function() {
             change1Promise = up.render('.element', {url: '/path1', abort: true})
             change1Promise.catch(e => change1Error = e)
 
-            next(function() {
-              expect(up.network.queue.allRequests.length).toEqual(1)
-              expect(change1Error).toBeUndefined()
+            await wait()
 
-              return up.render('.element', {url: '/path2', abort: true})
-            })
+            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(change1Error).toBeUndefined()
 
-            return next(function() {
-              expect(change1Error).toBeAbortError()
-              return expect(up.network.queue.allRequests.length).toEqual(1)
-            })
+            up.render('.element', {url: '/path2', abort: true})
+
+            await wait()
+
+            expect(change1Error).toBeAbortError()
+            expect(up.network.queue.allRequests.length).toEqual(1)
           })
-          )
 
-          it('does not abort an earlier request that was made with { abortable: false }', asyncSpec(function(next) {
+          it('does not abort an earlier request that was made with { abortable: false }', async function() {
             fixture('.element')
 
             let change1Error  = undefined
@@ -8969,21 +8968,20 @@ describe('up.fragment', function() {
             change1Promise = up.render('.element', {url: '/path1', abortable: false})
             change1Promise.catch(e => change1Error = e)
 
-            next(function() {
-              expect(up.network.queue.allRequests.length).toEqual(1)
-              expect(change1Error).toBeUndefined()
+            await wait()
 
-              return up.render('.element', {url: '/path2', abort: true})
-            })
+            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(change1Error).toBeUndefined()
 
-            return next(function() {
-              expect(change1Error).toBeUndefined()
-              return expect(up.network.queue.allRequests.length).toEqual(2)
-            })
+            up.render('.element', {url: '/path2', abort: true})
+
+            await wait()
+
+            expect(change1Error).toBeUndefined()
+            expect(up.network.queue.allRequests.length).toEqual(2)
           })
-          )
 
-          it('aborts the request of an existing change if the new change is made from local content', asyncSpec(function(next) {
+          it('aborts the request of an existing change if the new change is made from local content', async function() {
             fixture('.element1')
             fixture('.element2')
 
@@ -8993,19 +8991,18 @@ describe('up.fragment', function() {
             change1Promise = up.render('.element1', {url: '/path1', abort: true})
             change1Promise.catch(e => change1Error = e)
 
-            next(function() {
-              expect(up.network.queue.allRequests.length).toEqual(1)
-              expect(change1Error).toBeUndefined()
+            await wait()
 
-              return up.render('.element2', {content: 'local content', abort: true})
-            })
+            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(change1Error).toBeUndefined()
 
-            return next(function() {
-              expect(change1Error).toBeAbortError()
-              return expect(up.network.queue.allRequests.length).toEqual(0)
-            })
+            up.render('.element2', {content: 'local content', abort: true})
+
+            await wait()
+
+            expect(change1Error).toBeAbortError()
+            expect(up.network.queue.allRequests.length).toEqual(0)
           })
-          )
 
           it('aborts an existing request when a preload request gets promoted to the foreground', async function() {
             fixture('.element')
@@ -9018,26 +9015,23 @@ describe('up.fragment', function() {
 
             const change2Link = fixture('a[href="/path2"][up-target=".element"][up-abort="true"]')
 
-            // Give the initial up.render() time to dispatch a request
             await wait()
 
             expect(up.network.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
-            // Preloading a conflicting link will not abort change1
             up.link.preload(change2Link)
             await wait()
             expect(change1Error).toBeUndefined()
             expect(up.network.queue.allRequests.length).toEqual(2)
 
-            // Following a conflicting link *will* abort change1
             up.link.follow(change2Link)
             await wait()
             expect(change1Error).toBeAbortError()
-            return expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(up.network.queue.allRequests.length).toEqual(1)
           })
 
-          it('does not cancel its own pending preload request (bugfix)',  async function() {
+          it('does not cancel its own pending preload request (bugfix)', async function() {
             fixture('.element')
 
             let change1Error  = undefined
@@ -9061,10 +9055,10 @@ describe('up.fragment', function() {
 
             expect(change1Error).toBeUndefined()
             expect(change2Error).toBeUndefined()
-            return expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(up.network.queue.allRequests.length).toEqual(1)
           })
 
-          return it("aborts an existing change's request that was queued with { abort: false }", asyncSpec(function(next) {
+          it("aborts an existing change's request that was queued with { abort: false }", async function() {
             fixture('.element')
 
             let change1Error  = undefined
@@ -9073,79 +9067,86 @@ describe('up.fragment', function() {
             change1Promise = up.render('.element', {url: '/path1', abort: false})
             change1Promise.catch(e => change1Error = e)
 
-            next(() => {
-              expect(up.network.queue.allRequests.length).toEqual(1)
-              expect(change1Error).toBeUndefined()
+            await wait()
 
-              return up.render('.element', {url: '/path2', abort: true})
-            })
+            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(change1Error).toBeUndefined()
 
-            return next(() => {
-              expect(change1Error).toBeAbortError()
-              return expect(up.network.queue.allRequests.length).toEqual(1)
-            })
+            up.render('.element', {url: '/path2', abort: true})
+
+            await wait()
+
+            expect(change1Error).toBeAbortError()
+            expect(up.network.queue.allRequests.length).toEqual(1)
           })
-          )
         })
 
-        describe('with { abort: "all" }', () => it('is an alias for { abort: true }', asyncSpec(function(next) {
-          fixture('.element')
-          // We must have some earlier requests or up.fragment.abort() will not be called.
-          const previousRequest = up.request('/baz')
+        describe('with { abort: "all" }', function() {
+          it('is an alias for { abort: true }', async function() {
+            fixture('.element')
+            const previousRequest = up.request('/baz')
 
-          const abortSpy = spyOn(up.fragment, 'abort')
+            const abortSpy = spyOn(up.fragment, 'abort')
 
-          up.render('.element', {url: '/path1', abort: 'all'})
+            up.render('.element', {url: '/path1', abort: 'all'})
 
-          return next(() => expect(abortSpy).toHaveBeenCalledWith(jasmine.objectContaining({layer: 'any'})))
+            await wait()
+
+            expect(abortSpy).toHaveBeenCalledWith(jasmine.objectContaining({layer: 'any'}))
+          })
         })
-        ))
 
-        describe('with { abort: "layer" }', () => it("aborts all requests on the targeted fragment's layer", asyncSpec(function(next) {
-          const layers = makeLayers(3)
+        describe('with { abort: "layer" }', function() {
+          it("aborts all requests on the targeted fragment's layer", async function() {
+            const layers = makeLayers(3)
 
-          layers[1].affix('.element')
+            layers[1].affix('.element')
 
-          // We must have some earlier requests or up.fragment.abort() will not be called.
-          const previousRequest = up.request('/baz')
+            const previousRequest = up.request('/baz')
 
-          const abortSpy = spyOn(up.fragment, 'abort')
+            const abortSpy = spyOn(up.fragment, 'abort')
 
-          up.render('.element', {url: '/path1', abort: 'layer', layer: 1})
+            up.render('.element', {url: '/path1', abort: 'layer', layer: 1})
 
-          return next(() => expect(abortSpy).toHaveBeenCalledWith(jasmine.objectContaining({layer: up.layer.get(1)})))
+            await wait()
+
+            expect(abortSpy).toHaveBeenCalledWith(jasmine.objectContaining({layer: up.layer.get(1)}))
+          })
         })
-        ))
 
-        describe('with { abort } option set to a CSS selector', () => it("aborts all requests in the subtree of a matching element in the targeted layer", asyncSpec(function(next) {
-          const layers = makeLayers(3)
+        describe('with { abort } option set to a CSS selector', function() {
+          it("aborts all requests in the subtree of a matching element in the targeted layer", async function() {
+            const layers = makeLayers(3)
 
-          layers[1].affix('.element')
+            layers[1].affix('.element')
 
-          // We must have some earlier requests or up.fragment.abort() will not be called.
-          const previousRequest = up.request('/baz')
+            const previousRequest = up.request('/baz')
 
-          const abortSpy = spyOn(up.fragment, 'abort')
+            const abortSpy = spyOn(up.fragment, 'abort')
 
-          up.render('.element', {url: '/path1', abort: '.element', layer: 1})
+            up.render('.element', {url: '/path1', abort: '.element', layer: 1})
 
-          return next(() => expect(abortSpy).toHaveBeenCalledWith('.element', jasmine.objectContaining({layer: up.layer.get(1)})))
+            await wait()
+
+            expect(abortSpy).toHaveBeenCalledWith('.element', jasmine.objectContaining({layer: up.layer.get(1)}))
+          })
         })
-        ))
 
-        describe('with { abort } option set to an Element', () => it("aborts all requests in the subtree of that Element", asyncSpec(function(next) {
-          const element = fixture('.element')
+        describe('with { abort } option set to an Element', function() {
+          it("aborts all requests in the subtree of that Element", async function() {
+            const element = fixture('.element')
 
-          // We must have some earlier requests or up.fragment.abort() will not be called.
-          const previousRequest = up.request('/baz')
+            const previousRequest = up.request('/baz')
 
-          const abortSpy = spyOn(up.fragment, 'abort')
+            const abortSpy = spyOn(up.fragment, 'abort')
 
-          up.render('.element', {url: '/path1', abort: element})
+            up.render('.element', {url: '/path1', abort: element})
 
-          return next(() => expect(abortSpy).toHaveBeenCalledWith(element, jasmine.anything()))
+            await wait()
+
+            expect(abortSpy).toHaveBeenCalledWith(element, jasmine.anything())
+          })
         })
-        ))
 
         describe('with { abort: "target" }', function() {
 
@@ -9157,7 +9158,7 @@ describe('up.fragment', function() {
 
             up.render('.element', {url: '/path2', abort: 'target'})
 
-            return await expectAsync(change1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
+            await expectAsync(change1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
           })
 
           it('aborts an existing requests targeting the same URL and element IFF not caching (bugfix)', async function() {
@@ -9168,7 +9169,7 @@ describe('up.fragment', function() {
 
             up.render('.element', {url: '/path1', abort: 'target'})
 
-            return await expectAsync(change1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
+            await expectAsync(change1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
           })
 
           it('aborts existing requests targeting the same element when updating from local content', async function() {
@@ -9183,10 +9184,9 @@ describe('up.fragment', function() {
             up.render('.element', {content: 'new content', abort: 'target'})
 
             await expectAsync(change1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
-            await expectAsync(change2Promise).toBePending() // does not conflict
-            return expect('.element').toHaveText('new content')
+            await expectAsync(change2Promise).toBePending()
+            expect('.element').toHaveText('new content')
           })
-
 
           it('aborts existing requests targeting a descendant of the targeted element', async function() {
             fixture('.parent .child')
@@ -9196,7 +9196,7 @@ describe('up.fragment', function() {
 
             up.render('.parent', {url: '/path2', abort: 'target'})
 
-            return await expectAsync(change1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
+            await expectAsync(change1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
           })
 
           it('does not abort existing requests targeting an ascendant of the targeted element', async function() {
@@ -9207,10 +9207,10 @@ describe('up.fragment', function() {
 
             up.render('.child', {url: '/path2', abort: 'target'})
 
-            return await expectAsync(parentChangePromise).toBePending()
+            await expectAsync(parentChangePromise).toBePending()
           })
 
-          return it('does not abort its own preloading request', async function() {
+          it('does not abort its own preloading request', async function() {
             fixture('.element')
             const link = fixture('a[href="/path"][up-target=".element"]')
 
@@ -9224,13 +9224,13 @@ describe('up.fragment', function() {
 
             await expectAsync(preloadPromise).toBePending()
             await expectAsync(followPromise).toBePending()
-            return expect(up.network.queue.allRequests.length).toBe(1)
+            expect(up.network.queue.allRequests.length).toBe(1)
           })
         })
 
-        return describe('with { abort: false }', function() {
+        describe('with { abort: false }', function() {
 
-          it("does not abort an existing change's request", asyncSpec(function(next) {
+          it("does not abort an existing change's request", async function() {
             fixture('.element')
 
             let change1Error = undefined
@@ -9239,47 +9239,45 @@ describe('up.fragment', function() {
             change1Promise = up.render('.element', {url: '/path1'})
             change1Promise.catch(e => change1Error = e)
 
-            next(() => {
-              expect(up.network.queue.allRequests.length).toEqual(1)
-              expect(change1Error).toBeUndefined()
+            await wait()
 
-              return up.render('.element', {url: '/path2', abort: false})
-            })
+            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(change1Error).toBeUndefined()
 
-            return next(() => {
-              expect(change1Error).toBeUndefined()
-              return expect(up.network.queue.allRequests.length).toEqual(2)
-            })
+            up.render('.element', {url: '/path2', abort: false})
+
+            await wait()
+
+            expect(change1Error).toBeUndefined()
+            expect(up.network.queue.allRequests.length).toEqual(2)
           })
-          )
 
-          return it('does not abort requests targeting the same subtree once our response is received and swapped in', asyncSpec(function(next) {
+          it('does not abort requests targeting the same subtree once our response is received and swapped in', async function() {
             fixture('.element', {text: 'old text'})
 
             const change1Promise = up.render('.element', {url: '/path1', abort: false})
             let change1Error = undefined
             change1Promise.catch(e => change1Error = e)
 
-            next(() => {
-              expect(up.network.queue.allRequests.length).toEqual(1)
+            await wait()
 
-              return up.render('.element', {url: '/path2', abort: false})
-            })
+            expect(up.network.queue.allRequests.length).toEqual(1)
 
-            next(() => {
-              expect(up.network.queue.allRequests.length).toEqual(2)
-              expect(change1Error).toBeUndefined()
+            up.render('.element', {url: '/path2', abort: false})
 
-              return jasmine.respondWithSelector('.element', {text: 'text from /path2'})
-            })
+            await wait()
 
-            return next(() => {
-              expect('.element').toHaveText('text from /path2')
-              expect(change1Error).toBeUndefined()
-              return expect(up.network.queue.allRequests.length).toEqual(1)
-            })
+            expect(up.network.queue.allRequests.length).toEqual(2)
+            expect(change1Error).toBeUndefined()
+
+            jasmine.respondWithSelector('.element', {text: 'text from /path2'})
+
+            await wait()
+
+            expect('.element').toHaveText('text from /path2')
+            expect(change1Error).toBeUndefined()
+            expect(up.network.queue.allRequests.length).toEqual(1)
           })
-          )
         })
       })
 
