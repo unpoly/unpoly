@@ -21,13 +21,13 @@ describe('up.fragment', function() {
 
         const result = up.fragment.get('.match')
 
-        return expect(result).toEqual(match)
+        expect(result).toEqual(match)
       })
 
       it('returns an Element argument unchanged', function() {
         const element = fixture('.element')
         const result = up.fragment.get(element)
-        return expect(result).toBe(element)
+        expect(result).toBe(element)
       })
 
       describe('when a root element is given as the optional first argument', function() {
@@ -40,7 +40,7 @@ describe('up.fragment', function() {
 
           const result = up.fragment.get(container, '.element')
 
-          return expect(result).toEqual(elementWithinContainer)
+          expect(result).toEqual(elementWithinContainer)
         })
 
         it('returns a second Element argument unchanged, even if its not a descendant of the given root', function() {
@@ -49,7 +49,7 @@ describe('up.fragment', function() {
 
           const result = up.fragment.get(root, element)
 
-          return expect(result).toBe(element)
+          expect(result).toBe(element)
         })
 
         it('finds an element in a detached tree', function() {
@@ -58,17 +58,17 @@ describe('up.fragment', function() {
 
           const result = up.fragment.get(detachedTree, '.element')
 
-          return expect(result).toEqual(element)
+          expect(result).toEqual(element)
         })
 
-        return it('finds an element in a detached tree if the current layer is an overlay (bugfix)', function() {
+        it('finds an element in a detached tree if the current layer is an overlay (bugfix)', function() {
           makeLayers(2)
           const detachedTree = e.createFromSelector('.detached-tree')
           const element = e.affix(detachedTree, '.element')
 
           const result = up.fragment.get(detachedTree, '.element')
 
-          return expect(result).toEqual(element)
+          expect(result).toEqual(element)
         })
       })
 
@@ -81,9 +81,11 @@ describe('up.fragment', function() {
             { '.element': '.element', content: 'element in layer 2' }
           ])
 
-          const result = up.layer.get(1).asCurrent(() => up.fragment.get(window.document, '.element'))
+          const result = up.layer.get(1).asCurrent(function() {
+            return up.fragment.get(window.document, '.element')
+          })
 
-          return expect(result).toHaveText('element in layer 1')
+          expect(result).toHaveText('element in layer 1')
         })
 
         it('matches in the given { layer }', function() {
@@ -95,18 +97,20 @@ describe('up.fragment', function() {
 
           const result = up.fragment.get(window.document, '.element', {layer: 1})
 
-          return expect(result).toHaveText('element in layer 1')
+          expect(result).toHaveText('element in layer 1')
         })
 
-        return it('does not filter layers if given an external document', function() {
-          const html = '<div class="element">external element</div>'
+        it('does not filter layers if given an external document', function() {
+          const html = `
+            <div class="element">external element</div>
+          `
           const parser = new DOMParser()
           const externalDocument = parser.parseFromString(html, "text/html")
           expect(externalDocument).toEqual(jasmine.any(Document))
 
           const result = up.fragment.get(externalDocument, '.element')
 
-          return expect(result).toHaveText('external element')
+          expect(result).toHaveText('external element')
         })
       })
 
@@ -118,7 +122,7 @@ describe('up.fragment', function() {
           expect(up.layer.count).toBe(2)
           const result = up.fragment.get('.element', {layer: 'root'})
 
-          return expect(up.layer.get(result)).toBe(up.layer.get(0))
+          expect(up.layer.get(result)).toBe(up.layer.get(0))
         })
 
         it('matches elements in the current layer if no { layer } option is given', function() {
@@ -128,7 +132,7 @@ describe('up.fragment', function() {
 
           const result = up.fragment.get('.element')
 
-          return expect(up.layer.get(result)).toBe(up.layer.get(1))
+          expect(up.layer.get(result)).toBe(up.layer.get(1))
         })
 
         it('matches elements on the root layer with { layer: 0 } (bugfix)', function() {
@@ -136,13 +140,15 @@ describe('up.fragment', function() {
 
           const result = up.fragment.get('.element', {layer: 0})
 
-          return expect(up.layer.get(result)).toBe(up.layer.root)
+          expect(up.layer.get(result)).toBe(up.layer.root)
         })
 
         it('throws an exception if the { layer } option did not resolve to any layer', function() {
           makeLayers(2)
-          const doGet = () => up.fragment.get('.element', {layer: 3})
-          return expect(doGet).toThrowError(/unknown layer: 3/i)
+          const doGet = function() {
+            return up.fragment.get('.element', {layer: 3})
+          }
+          expect(doGet).toThrowError(/unknown layer: 3/i)
         })
 
         it('matches in earlier layers first if multiple layers are given', function() {
@@ -155,10 +161,10 @@ describe('up.fragment', function() {
           ])
 
           const result = up.fragment.get('.element', {layer: '1 3'})
-          return expect(result.id).toBe('b')
+          expect(result.id).toBe('b')
         })
 
-        return it('matches in earlier layers first if multiple layers are given and the layer priority is the reverse DOM order', function() {
+        it('matches in earlier layers first if multiple layers are given and the layer priority is the reverse DOM order', function() {
           makeLayers([
             { target: '.element#a' }, // 0
             { target: '.element#b' }, // 1
@@ -168,7 +174,7 @@ describe('up.fragment', function() {
           ])
 
           const result = up.fragment.get('.element', {layer: '3 1'})
-          return expect(result.id).toBe('d')
+          expect(result.id).toBe('d')
         })
       })
 
@@ -183,7 +189,7 @@ describe('up.fragment', function() {
 
           const result = up.fragment.get('.element', {origin: childOfTwo})
 
-          return expect(result).toBe(two)
+          expect(result).toBe(two)
         })
 
         it('prefers to match an element closest to origin with { match: "region" }', function() {
@@ -195,7 +201,7 @@ describe('up.fragment', function() {
 
           const result = up.fragment.get('.element', {origin: childOfTwo, match: 'region'})
 
-          return expect(result).toBe(two)
+          expect(result).toBe(two)
         })
 
         it('does not throw an error when we cannot parse a selector with spaces and commas as attribute values (bugfix)', function() {
@@ -203,36 +209,38 @@ describe('up.fragment', function() {
           parent.setAttribute('foo', 'a b, c d')
           const child = e.affix(parent, '.child')
           const origin = e.affix(parent, '.origin')
-          const doGet = () => up.fragment.get('.parent[foo="a b, c d"] .child', {origin, match: 'region'})
-          return expect(doGet).not.toThrowError()
+          const doGet = function() {
+            return up.fragment.get('.parent[foo="a b, c d"] .child', {origin, match: 'region'})
+          }
+          expect(doGet).not.toThrowError()
         })
 
         it('prefers to match a descendant selector in the region of the origin', function() {
           const element1 = fixture('.element')
-          const element1Child1 = e.affix(element1, '.child',         {text: 'old element1Child1'})
+          const element1Child1 = e.affix(element1, '.child', {text: 'old element1Child1'})
           const element1Child2 = e.affix(element1, '.child.sibling', {text: 'old element1Child2'})
 
           const element2 = fixture('.element')
-          const element2Child1 = e.affix(element2, '.child',         {text: 'old element2Child1'})
+          const element2Child1 = e.affix(element2, '.child', {text: 'old element2Child1'})
           const element2Child2 = e.affix(element2, '.child.sibling', {text: 'old element2Child2'})
 
           const result = up.fragment.get('.element .sibling', {origin: element2Child1})
 
-          return expect(result).toBe(element2Child2)
+          expect(result).toBe(element2Child2)
         })
 
         it('prefers to match a union of descendant selectors in the region of the origin', function() {
           const element1 = fixture('.element')
-          const element1Child1 = e.affix(element1, '.child',         {text: 'old element1Child1'})
+          const element1Child1 = e.affix(element1, '.child', {text: 'old element1Child1'})
           const element1Child2 = e.affix(element1, '.child.sibling', {text: 'old element1Child2'})
 
           const element2 = fixture('.element')
-          const element2Child1 = e.affix(element2, '.child',         {text: 'old element2Child1'})
+          const element2Child1 = e.affix(element2, '.child', {text: 'old element2Child1'})
           const element2Child2 = e.affix(element2, '.child.sibling', {text: 'old element2Child2'})
 
           const result = up.fragment.get('.foo, .element .sibling, .baz', {origin: element2Child1})
 
-          return expect(result.innerText).toBe('old element2Child2')
+          expect(result.innerText).toBe('old element2Child2')
         })
 
         it('ignores the origin with { match: "first" }', function() {
@@ -244,10 +252,10 @@ describe('up.fragment', function() {
 
           const result = up.fragment.get('.element', {origin: childOfTwo, match: 'first'})
 
-          return expect(result).toBe(root)
+          expect(result).toBe(root)
         })
 
-        return it('ignores the origin with up.fragment.config.match = "first"', function() {
+        it('ignores the origin with up.fragment.config.match = "first"', function() {
           const root = fixture('.element#root')
           const one = e.affix(root, '.element', {text: 'old one'})
           const two = e.affix(root, '.element', {text: 'old two'})
@@ -257,11 +265,11 @@ describe('up.fragment', function() {
           up.fragment.config.match = 'first'
           const result = up.fragment.get('.element', {origin: childOfTwo})
 
-          return expect(result).toBe(root)
+          expect(result).toBe(root)
         })
       })
 
-      return describe('expansion of :main', function() {
+      describe('expansion of :main', function() {
 
         it('returns an element matching the configured main target selectors', function() {
           const one = fixture('.one')
@@ -271,14 +279,14 @@ describe('up.fragment', function() {
           up.fragment.config.mainTargets = ['.two']
 
           const result = up.fragment.get(':main')
-          return expect(result).toBe(two)
+          expect(result).toBe(two)
         })
 
         it('returns a missing value if the user has configured no main targets', function() {
           up.fragment.config.mainTargets = []
 
           const result = up.fragment.get(':main')
-          return expect(result).toBeMissing()
+          expect(result).toBeMissing()
         })
 
         it('prioritizes earlier main targets', function() {
@@ -290,7 +298,7 @@ describe('up.fragment', function() {
           up.fragment.config.mainTargets = ['.three', '.one', '.four']
 
           const result = up.fragment.get(':main')
-          return expect(result).toBe(three)
+          expect(result).toBe(three)
         })
 
         it('matches a secondary main target if a primary main target does not exist', function() {
@@ -299,7 +307,7 @@ describe('up.fragment', function() {
           up.fragment.config.mainTargets = ['#primary', '#secondary']
 
           const result = up.fragment.get(':main')
-          return expect(result).toBe(secondary)
+          expect(result).toBe(secondary)
         })
 
         it('ignores an origin when matching :main', function() {
@@ -313,10 +321,10 @@ describe('up.fragment', function() {
           up.fragment.config.mainTargets = ['#main', '#container']
 
           const result = up.fragment.get(':main', {origin: navItem})
-          return expect(result).toBe(main)
+          expect(result).toBe(main)
         })
 
-        return it('ignores an origin when matching a descendant of :main', function() {
+        it('ignores an origin when matching a descendant of :main', function() {
           const container = fixture('#container')
           const containerTarget = e.affix(container, '.target')
           const nav = e.affix(container, '#nav')
@@ -329,7 +337,7 @@ describe('up.fragment', function() {
           up.fragment.config.mainTargets = ['#main', '#container']
 
           const result = up.fragment.get(':main .target', {origin: navItem})
-          return expect(result).toBe(mainTarget)
+          expect(result).toBe(mainTarget)
         })
       })
     })
@@ -341,48 +349,48 @@ describe('up.fragment', function() {
         const otherMatch = fixture('.match.other')
         const noMatch = fixture('.no-match')
         const results = up.fragment.all('.match')
-        return expect(results).toEqual([match, otherMatch])
-    })
+        expect(results).toEqual([match, otherMatch])
+      })
 
       it('returns an array of the first argument if the first argument is already an element', function() {
         const match = fixture('.match')
         const results = up.fragment.all(match)
-        return expect(results).toEqual([match])
-    })
+        expect(results).toEqual([match])
+      })
 
       it('returns a given Array unchanged', function() {
         const match = fixture('.match')
         const results = up.fragment.all([match])
-        return expect(results).toEqual([match])
-    })
+        expect(results).toEqual([match])
+      })
 
       it('returns a given NodeList unchanged', function() {
         const match = fixture('.match')
         const nodeList = document.querySelectorAll('.match')
         const results = up.fragment.all(nodeList)
-        return expect(results).toEqual(nodeList)
+        expect(results).toEqual(nodeList)
       })
 
       it('returns an empty array if there are no matches', function() {
         const results = up.fragment.all('.match')
-        return expect(results).toEqual([])
-    })
+        expect(results).toEqual([])
+      })
 
       it('does not return an element that is currently destroying', function() {
         const match = fixture('.match.up-destroying')
         const results = up.fragment.all('.match')
-        return expect(results).toEqual([])
-    })
+        expect(results).toEqual([])
+      })
 
       it('finds the <body> element (bugfix)', function() {
         const results = up.fragment.all('body')
-        return expect(results).toEqual([document.body])
-    })
+        expect(results).toEqual([document.body])
+      })
 
       it('finds the <html> element (bugfix)', function() {
         const results = up.fragment.all('html')
-        return expect(results).toEqual([document.documentElement])
-    })
+        expect(results).toEqual([document.documentElement])
+      })
 
       describe('expansion of :main', function() {
 
@@ -394,27 +402,16 @@ describe('up.fragment', function() {
           up.fragment.config.mainTargets = ['.two']
 
           const results = up.fragment.all(':main')
-          return expect(results).toEqual([two])
-      })
+          expect(results).toEqual([two])
+        })
 
-        return it('matches nothing if the user has configured no main targets', function() {
+        it('matches nothing if the user has configured no main targets', function() {
           up.fragment.config.mainTargets = []
 
           const results = up.fragment.all(':main')
-          return expect(results).toEqual([])
+          expect(results).toEqual([])
+        })
       })
-    })
-
-//        it 'matches earlier main targets first', ->
-//          one = fixture('.one')
-//          two = fixture('.two')
-//          three = fixture('.three')
-//          four = fixture('.four')
-//
-//          up.fragment.config.mainTargets = ['.three', '.one', '.four']
-//
-//          results = up.fragment.all(':main')
-//          expect(results).toEqual [three, one, four]
 
       describe('when given a root element for the search', function() {
 
@@ -426,17 +423,17 @@ describe('up.fragment', function() {
           const parent2Match = e.affix(parent2, '.match')
 
           expect(up.fragment.all(parent1, '.match')).toEqual([parent1Match])
-          return expect(up.fragment.all(parent2, '.match')).toEqual([parent2Match])
-      })
+          expect(up.fragment.all(parent2, '.match')).toEqual([parent2Match])
+        })
 
         it('does not match the root element itself', function() {
           const parent = fixture('.element')
           const child = e.affix(parent, '.element')
 
-          return expect(up.fragment.all(parent, '.element')).toEqual([child])
-      })
+          expect(up.fragment.all(parent, '.element')).toEqual([child])
+        })
 
-        return it("only matches descendants in that root's layer", function() {
+        it("only matches descendants in that root's layer", function() {
           makeLayers([
             { '.element': '.element', content: 'element in root layer' },
             { '.element': '.element', content: 'element in modal layer' }
@@ -444,7 +441,7 @@ describe('up.fragment', function() {
 
           const results = up.fragment.all(document.body, '.element')
           expect(results.length).toBe(1)
-          return expect(up.layer.get(results[0])).toBe(up.layer.root)
+          expect(up.layer.get(results[0])).toBe(up.layer.root)
         })
       })
 
@@ -457,11 +454,10 @@ describe('up.fragment', function() {
             { '.element': '.element', content: 'element in layer 2' }
           ])
 
-
           const results = up.layer.get(1).asCurrent(() => up.fragment.all(window.document, '.element'))
 
           expect(results.length).toBe(1)
-          return expect(results[0]).toHaveText('element in layer 1')
+          expect(results[0]).toHaveText('element in layer 1')
         })
 
         it('matches in the given { layer }', function() {
@@ -474,11 +470,13 @@ describe('up.fragment', function() {
           const results = up.fragment.all(window.document, '.element', {layer: 1})
 
           expect(results.length).toBe(1)
-          return expect(results[0]).toHaveText('element in layer 1')
+          expect(results[0]).toHaveText('element in layer 1')
         })
 
-        return it('does not filter layers if given an external document', function() {
-          const html = '<div class="element">external element</div>'
+        it('does not filter layers if given an external document', function() {
+          const html = `
+            <div class="element">external element</div>
+          `
           const parser = new DOMParser()
           const externalDocument = parser.parseFromString(html, "text/html")
           expect(document).toEqual(jasmine.any(Document))
@@ -486,45 +484,45 @@ describe('up.fragment', function() {
           const results = up.fragment.all(externalDocument, '.element')
 
           expect(results.length).toBe(1)
-          return expect(results[0]).toHaveText('external element')
+          expect(results[0]).toHaveText('external element')
         })
       })
 
-      return describe('layer matching', function() {
+      describe('layer matching', function() {
 
         beforeEach(function(done) {
           this.rootElement = fixture('.element.in-root')
           fixtureInOverlay('.element.in-overlay').then(element => {
             this.overlayElement = element
-            return done()
+            done()
           })
         })
 
         it('matches elements in the current layer only', function() {
           const results = up.fragment.all('.element')
-          return expect(results).toEqual([this.overlayElement])
-      })
+          expect(results).toEqual([this.overlayElement])
+        })
 
         it("only matches elements in the layer of the given { origin }", function() {
           const otherRootElement = fixture('.element.other.in-root')
           const results = up.fragment.all('.element', {origin: otherRootElement})
-          return expect(results).toEqual([this.rootElement, otherRootElement])
-      })
+          expect(results).toEqual([this.rootElement, otherRootElement])
+        })
 
         it('only matches elements in the given { layer }', function() {
           const results = up.fragment.all('.element', {layer: 'root'})
-          return expect(results).toEqual([this.rootElement])
-      })
+          expect(results).toEqual([this.rootElement])
+        })
 
         it('returns an empty array if no element matches', function() {
           const results = up.fragment.all('.other')
-          return expect(results).toEqual([])
-      })
+          expect(results).toEqual([])
+        })
 
-        return it('returns the first argument if that is already an element, even if { layer } is given', function() {
+        it('returns the first argument if that is already an element, even if { layer } is given', function() {
           const match = fixture('.match')
           const result = up.fragment.get(match, {layer: 'root'})
-          return expect(result).toBe(match)
+          expect(result).toBe(match)
         })
       })
     })
@@ -534,16 +532,16 @@ describe('up.fragment', function() {
       it('returns whether the fragment matches the selector', function() {
         const fragment = fixture('.foo')
         expect(up.fragment.matches(fragment, '.foo')).toBe(true)
-        return expect(up.fragment.matches(fragment, '.bar')).toBe(false)
+        expect(up.fragment.matches(fragment, '.bar')).toBe(false)
       })
 
-      return it('supports non-standard pseudos like :main', function() {
+      it('supports non-standard pseudos like :main', function() {
         const foo = fixture('.foo')
         const bar = fixture('.bar')
         up.fragment.config.mainTargets = ['.foo']
 
         expect(up.fragment.matches(foo, ':main')).toBe(true)
-        return expect(up.fragment.matches(bar, ':main')).toBe(false)
+        expect(up.fragment.matches(bar, ':main')).toBe(false)
       })
     })
 
