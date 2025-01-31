@@ -10395,7 +10395,6 @@ describe('up.fragment', function() {
       })
 
       describe('handling of [up-keep] elements', function() {
-
         let container
         const squish = function(string) {
           if (u.isString(string)) {
@@ -10406,34 +10405,34 @@ describe('up.fragment', function() {
           return string
         }
 
-        beforeEach(() => // Need to refactor this spec file so examples don't all share one example
-        $('.before, .middle, .after').remove())
+        beforeEach(function() {
+          // Need to refactor this spec file so examples don't all share one example
+          $('.before, .middle, .after').remove()
+        })
 
-        it('keeps an [up-keep] element, but does replace other elements around it', asyncSpec(function(next) {
+        it('keeps an [up-keep] element, but does replace other elements around it', async function() {
           const $container = $fixture('.container')
           $container.affix('.before').text('old-before')
           $container.affix('.middle[up-keep]').text('old-middle')
           $container.affix('.after').text('old-after')
 
-          up.render('.container', { document: `\
-<div class='container'>
-  <div class='before'>new-before</div>
-  <div class='middle' up-keep>new-middle</div>
-  <div class='after'>new-after</div>
-</div>\
-`
-        }
-          )
-
-          return next(() => {
-            expect('.before').toHaveText('new-before')
-            expect('.middle').toHaveText('old-middle')
-            return expect('.after').toHaveText('new-after')
+          up.render('.container', { document: `
+            <div class='container'>
+              <div class='before'>new-before</div>
+              <div class='middle' up-keep>new-middle</div>
+              <div class='after'>new-after</div>
+            </div>
+          `
           })
-        })
-        )
 
-        it('does not run destructors within kept elements', asyncSpec(function(next) {
+          await wait()
+
+          expect('.before').toHaveText('new-before')
+          expect('.middle').toHaveText('old-middle')
+          expect('.after').toHaveText('new-after')
+        })
+
+        it('does not run destructors within kept elements', async function() {
           const destructor = jasmine.createSpy('destructor spy')
 
           up.compiler('.keepable', element => destructor)
@@ -10443,23 +10442,21 @@ describe('up.fragment', function() {
 
           up.hello(keepable)
 
-          up.render('.container', { document: `\
-<div class='container'>
-  <div class='keepable' up-keep>new text</div>
-</div>\
-`
-        }
-          )
-
-          next(function() {
-            expect(destructor).not.toHaveBeenCalled()
-
-            return up.destroy('.container')
+          up.render('.container', { document: `
+            <div class='container'>
+              <div class='keepable' up-keep>new text</div>
+            </div>
+          `
           })
 
-          return next(() => expect(destructor).toHaveBeenCalled())
+          await wait()
+          expect(destructor).not.toHaveBeenCalled()
+
+          up.destroy('.container')
+          await wait()
+
+          expect(destructor).toHaveBeenCalled()
         })
-        )
 
         it('does not run destructors within kept elements when the <body> is targeted (bugfix)', async function() {
           const destructor = jasmine.createSpy('destructor spy')
@@ -10470,20 +10467,19 @@ describe('up.fragment', function() {
 
           up.hello(keepable)
 
-          up.render('body', { document: `\
-<body>
-  <div class='keepable' up-keep>new content</div>
-</body>\
-`
-        }
-          )
+          up.render('body', { document: `
+            <body>
+              <div class='keepable' up-keep>new content</div>
+            </body>
+          `
+          })
 
           await wait()
 
-          return expect(destructor).not.toHaveBeenCalled()
+          expect(destructor).not.toHaveBeenCalled()
         })
 
-        it('keeps an [up-keep] element when updating a singleton element like <body>', asyncSpec(function(next) {
+        it('keeps an [up-keep] element when updating a singleton element like <body>', async function() {
           up.fragment.config.targetDerivers.unshift('middle-element')
 
           // shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
