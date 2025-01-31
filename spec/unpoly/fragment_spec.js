@@ -4141,23 +4141,30 @@ describe('up.fragment', function() {
 
         describe('when selectors are missing on the page before the request was made', function() {
 
-          beforeEach(() => // In helpers/protect_jasmine_runner wie have configured <default-fallback>
-          // as a default target for all layers.
-          up.layer.config.any.mainTargets = [])
+          beforeEach(function() {
+            // In helpers/protect_jasmine_runner we have configured <default-fallback>
+            // as a default target for all layers.
+            up.layer.config.any.mainTargets = []
+          })
 
-          it('tries selectors from options.fallback before making a request', asyncSpec(function(next) {
+          it('tries selectors from options.fallback before making a request', async function() {
             $fixture('.box').text('old box')
             up.render('.unknown', {url: '/path', fallback: '.box'})
 
-            next(() => this.respondWith('<div class="box">new box</div>'))
-            return next(() => expect('.box').toHaveText('new box'))
+            await wait()
+
+            this.respondWith(`
+              <div class="box">new box</div>
+            `)
+            await wait()
+
+            expect('.box').toHaveText('new box')
           })
-          )
 
           it('rejects the promise with up.CannotMatch if all alternatives are exhausted', async function() {
             const promise = up.render('.unknown', {url: '/path', fallback: '.more-unknown'})
 
-            return await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotMatch', /Could not find target in current page/i))
+            await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotMatch', /Could not find target in current page/i))
           })
 
           it('allows the request and does not reject if the { target } can be matched, but { failTarget } cannot', async function() {
@@ -4174,42 +4181,45 @@ describe('up.fragment', function() {
 
             // When the server does end up responding with a failure, we cannot process it and must throw up.CannotMatch.
             jasmine.respondWithSelector('.failure', {status: 500})
-            return await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotMatch', /Could not find( common)? target/i))
+            await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotMatch', /Could not find( common)? target/i))
           })
 
-          it('considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec(function(next) {
+          it('considers a union selector to be missing if one of its selector-atoms are missing', async function() {
             $fixture('.target').text('old target')
             $fixture('.fallback').text('old fallback')
             up.render('.target, .unknown', {url: '/path', fallback: '.fallback'})
 
-            next(() => {
-              return this.respondWith(`\
-<div class="target">new target</div>
-<div class="fallback">new fallback</div>\
-`
-              )
-            })
+            await wait()
 
-            return next(() => {
-              expect('.target').toHaveText('old target')
-              return expect('.fallback').toHaveText('new fallback')
-            })
+            this.respondWith(`
+              <div class="target">new target</div>
+              <div class="fallback">new fallback</div>
+            `)
+            await wait()
+
+            expect('.target').toHaveText('old target')
+            expect('.fallback').toHaveText('new fallback')
           })
-          )
 
-          it("tries the layer's main target with { fallback: true }", asyncSpec(function(next) {
+          it("tries the layer's main target with { fallback: true }", async function() {
             up.layer.config.any.mainTargets = ['.existing']
             $fixture('.existing').text('old existing')
             up.render('.unknown', {url: '/path', fallback: true})
-            next(() => this.respondWith('<div class="existing">new existing</div>'))
-            return next(() => expect('.existing').toHaveText('new existing'))
-          })
-          )
 
-          return it("does not try the layer's default targets and rejects the promise with { fallback: false }", async function() {
+            await wait()
+
+            this.respondWith(`
+              <div class="existing">new existing</div>
+            `)
+            await wait()
+
+            expect('.existing').toHaveText('new existing')
+          })
+
+          it("does not try the layer's default targets and rejects the promise with { fallback: false }", async function() {
             up.layer.config.any.mainTargets = ['.existing']
             $fixture('.existing').text('old existing')
-            return await expectAsync(
+            await expectAsync(
               up.render('.unknown', {url: '/path', fallback: false})
             ).toBeRejectedWith(
               jasmine.anyError(/Could not find target in current page/i)
