@@ -4447,7 +4447,7 @@ describe('up.fragment', function() {
             up.render('.element', {content: 'new text', layer: 'root', peel: false})
 
             expect(up.fragment.get('.element', {layer: 0})).toHaveText(/new text/)
-            return expect(up.fragment.get('.element', {layer: 1})).toHaveText(/old text in modal/)
+            expect(up.fragment.get('.element', {layer: 1})).toHaveText(/old text in modal/)
           })
 
           it('updates the layer of the given { origin }', function() {
@@ -4461,7 +4461,7 @@ describe('up.fragment', function() {
             up.render('.element', {content: 'new text', origin, peel: false})
 
             expect(up.fragment.get('.element', {layer: 0})).toHaveText(/new text/)
-            return expect(up.fragment.get('.element', {layer: 1})).toHaveText(/old text in modal/)
+            expect(up.fragment.get('.element', {layer: 1})).toHaveText(/old text in modal/)
           })
 
           it('rejects when a detached { origin } is given, but no { layer } option', async function() {
@@ -4478,7 +4478,7 @@ describe('up.fragment', function() {
             await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/Could not find.*layer.*detached/i))
 
             expect(up.fragment.get('.element', {layer: 0})).toHaveText(/old text in root/)
-            return expect(up.fragment.get('.element', {layer: 1})).toHaveText(/old text in modal/)
+            expect(up.fragment.get('.element', {layer: 1})).toHaveText(/old text in modal/)
           })
 
           it('ignores a detached { origin } for layer selection when there is also a { layer } option given', function() {
@@ -4493,7 +4493,7 @@ describe('up.fragment', function() {
             up.render('.element', {content: 'new text', origin, layer: 1, peel: false})
 
             expect(up.fragment.get('.element', {layer: 0})).toHaveText(/old text in root/)
-            return expect(up.fragment.get('.element', {layer: 1})).toHaveText(/new text/)
+            expect(up.fragment.get('.element', {layer: 1})).toHaveText(/new text/)
           })
 
           it('updates the given { layer } even if the given { origin } is in another layer', function() {
@@ -4507,7 +4507,7 @@ describe('up.fragment', function() {
             up.render('.element', {content: 'new text', origin, layer: 'root', peel: false})
 
             expect(up.fragment.get('.element', {layer: 0})).toHaveText(/new text/)
-            return expect(up.fragment.get('.element', {layer: 1})).toHaveText(/old text in modal/)
+            expect(up.fragment.get('.element', {layer: 1})).toHaveText(/old text in modal/)
           })
 
           it('updates the layer of the given { origin } if the origin was detached after the request was sent', async function() {
@@ -4530,7 +4530,7 @@ describe('up.fragment', function() {
             await wait()
 
             expect(up.fragment.get('.element', {layer: 0})).toHaveText(/new text/)
-            return expect(up.fragment.get('.element', {layer: 1})).toHaveText(/old text in modal/)
+            expect(up.fragment.get('.element', {layer: 1})).toHaveText(/old text in modal/)
           })
 
           it('updates the layer of the given target, if the target is given as an element (and not a selector)', function() {
@@ -4544,10 +4544,10 @@ describe('up.fragment', function() {
 
             expect(up.layer.get(0)).toHaveText(/old text in root/)
             expect(up.layer.get(1)).toHaveText('new text in overlay 1')
-            return expect(up.layer.get(2)).toHaveText('old text in overlay 2')
+            expect(up.layer.get(2)).toHaveText('old text in overlay 2')
           })
 
-          return describe('with { peel: true }', function() {
+          describe('with { peel: true }', function() {
 
             it('closes all overlays over the target with { peel: true }', function() {
               makeLayers([
@@ -4560,7 +4560,7 @@ describe('up.fragment', function() {
 
               expect(up.layer.count).toBe(1)
               expect(up.layer.current.mode).toBe('root')
-              return expect(up.layer.current).toHaveText(/new text/)
+              expect(up.layer.current).toHaveText(/new text/)
             })
 
             it('does not create a history entry for the peeled layer', async function() {
@@ -4582,8 +4582,8 @@ describe('up.fragment', function() {
 
               expect('.content').toHaveText('root 2')
               expect(up.layer.count).toBe(1)
-              return expect(locations).toEqual(['/overlay1', '/root2'])
-          })
+              expect(locations).toEqual(['/overlay1', '/root2'])
+            })
 
             it('does create a history entry for the peeled layer if the fragment update does not update history', async function() {
               up.history.config.enabled = true
@@ -4604,10 +4604,10 @@ describe('up.fragment', function() {
 
               expect('.content').toHaveText('root 2')
               expect(up.layer.count).toBe(1)
-              return expect(locations).toEqual(['/overlay1', '/root1'])
-          })
+              expect(locations).toEqual(['/overlay1', '/root1'])
+            })
 
-            return it('still renders content if a destructor for the peeled layer crashes', async function() {
+            it('still renders content if a destructor for the peeled layer crashes', async function() {
               const destroyError = new Error('error from crashing destructor')
 
               up.compiler('.overlay-element', () => (function() { throw destroyError }))
@@ -4624,7 +4624,7 @@ describe('up.fragment', function() {
               }))
 
               expect('.root-element').toHaveText('new root')
-              return expect(up.layer.isOverlay()).toBe(false)
+              expect(up.layer.isOverlay()).toBe(false)
             })
           })
         })
@@ -4635,7 +4635,7 @@ describe('up.fragment', function() {
             up.render('.element', {content: 'new text', layer: 'new'})
 
             expect(up.layer.count).toBe(2)
-            return expect(up.layer.current).toHaveText('new text')
+            expect(up.layer.current).toHaveText('new text')
           })
 
           it('returns a promise with an up.RenderResult that contains information about the updated fragments and layer', function(done) {
@@ -4645,15 +4645,14 @@ describe('up.fragment', function() {
               expect(up.layer.count).toBe(2)
               expect(result.fragments).toEqual([up.fragment.get('.overlay-element')])
               expect(result.layer).toBe(up.layer.current)
-              return done()
+              done()
             })
-
           })
 
-          return it('allows to pass the mode for the new layer as { layer: "new $MODE" } (as a shortcut)', function() {
+          it('allows to pass the mode for the new layer as { layer: "new $MODE" } (as a shortcut)', function() {
             up.render('.element', {content: 'new text', layer: 'new drawer'})
 
-            return expect(up.layer.current.mode).toEqual('drawer')
+            expect(up.layer.current.mode).toEqual('drawer')
           })
         })
 
@@ -4669,7 +4668,7 @@ describe('up.fragment', function() {
 
             expect(up.layer.count).toBe(2)
             expect(up.layer.current.mode).toEqual('drawer')
-            return expect(up.layer.current).toHaveText('new text')
+            expect(up.layer.current).toHaveText('new text')
           })
 
           it('opens a new overlay if no overlay is open', function() {
@@ -4679,7 +4678,7 @@ describe('up.fragment', function() {
 
             expect(up.layer.count).toBe(2)
             expect(up.layer.current.mode).toEqual('drawer')
-            return expect(up.layer.current).toHaveText('new text')
+            expect(up.layer.current).toHaveText('new text')
           })
 
           it('does not push a history entry between that of the old and new overlays', async function() {
@@ -4697,10 +4696,10 @@ describe('up.fragment', function() {
             await wait()
 
             expect(up.layer.count).toBe(2)
-            return expect(locations).toEqual(['/overlay1', '/overlay2'])
-        })
+            expect(locations).toEqual(['/overlay1', '/overlay2'])
+          })
 
-          return it("does restore the base layer's history entry if the new overlay has no history", async function() {
+          it("does restore the base layer's history entry if the new overlay has no history", async function() {
             up.history.config.enabled = true
             up.history.replace('/base-layer')
             const locations = []
@@ -4716,9 +4715,9 @@ describe('up.fragment', function() {
             await wait()
 
             expect(up.layer.count).toBe(2)
-            return expect(locations).toEqual(['/overlay1', '/base-layer'])
+            expect(locations).toEqual(['/overlay1', '/base-layer'])
+          })
         })
-      })
 
         describe('with { layer: "shatter" }', function() {
 
@@ -4732,17 +4731,17 @@ describe('up.fragment', function() {
 
             expect(up.layer.count).toBe(2)
             expect(up.layer.current.mode).toEqual('drawer')
-            return expect(up.layer.current).toHaveText('new text')
+            expect(up.layer.current).toHaveText('new text')
           })
 
-          return it('opens a new overlay if no overlay is open', function() {
+          it('opens a new overlay if no overlay is open', function() {
             expect(up.layer.count).toBe(1)
 
             up.render('.element', {content: 'new text', layer: 'shatter', mode: 'drawer'})
 
             expect(up.layer.count).toBe(2)
             expect(up.layer.current.mode).toEqual('drawer')
-            return expect(up.layer.current).toHaveText('new text')
+            expect(up.layer.current).toHaveText('new text')
           })
         })
 
@@ -4757,10 +4756,10 @@ describe('up.fragment', function() {
             up.render('.element', {content: 'new text', peel: false})
 
             expect(up.layer.get(0)).toHaveText(/old text in root/)
-            return expect(up.layer.get(1)).toHaveText(/new text/)
+            expect(up.layer.get(1)).toHaveText(/new text/)
           })
 
-          return it('rejects if the current layer does not match', async function() {
+          it('rejects if the current layer does not match', async function() {
             makeLayers([
               { target: '.element', content: 'old text in root' },
               { target: '.other', content: 'old text in modal1' }
@@ -4768,18 +4767,18 @@ describe('up.fragment', function() {
 
             const promise = up.render('.element', {content: 'new text'})
 
-            return await expectAsync(promise).toBeRejected()
+            await expectAsync(promise).toBeRejected()
           })
         })
 
-        return describe('if the given layer does not exist', function() {
+        describe('if the given layer does not exist', function() {
 
           it('rejects the change', async function() {
             fixture('.element', {text: 'old text'})
             const promise = up.render('.element', {layer: 'parent', content: 'new text'})
 
             await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotMatch', /could not find (a )?layer/i))
-            return expect('.element').toHaveText(/old text/)
+            expect('.element').toHaveText(/old text/)
           })
 
           it('allows the request and does not reject if the { layer } can be resolved, but { failLayer } cannot', async function() {
@@ -4797,17 +4796,17 @@ describe('up.fragment', function() {
 
             // When the server does end up responding with a failure, we cannot process it and must throw up.CannotMatch.
             jasmine.respondWithSelector('.failure', {status: 500})
-            return await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotMatch', /could not find (a )?layer/i))
+            await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotMatch', /could not find (a )?layer/i))
           })
 
           it('updates the next layer in a space-separated list of alternative layer names', function(done) {
             fixture('.element', {text: 'old text'})
             const promise = up.render('.element', {layer: 'parent root', content: 'new text'})
 
-            return u.task(() => promiseState(promise).then(function(result) {
+            u.task(() => promiseState(promise).then(function(result) {
               expect(result.state).toEqual('fulfilled')
               expect('.element').toHaveText(/new text/)
-              return done()
+              done()
             }))
           })
 
@@ -4815,22 +4814,22 @@ describe('up.fragment', function() {
             fixture('.element', {text: 'old text'})
             const promise = up.render('.element', {layer: 'parent, root', content: 'new text'})
 
-            return u.task(() => promiseState(promise).then(function(result) {
+            u.task(() => promiseState(promise).then(function(result) {
               expect(result.state).toEqual('fulfilled')
               expect('.element').toHaveText(/new text/)
-              return done()
+              done()
             }))
           })
 
           if (up.migrate.loaded) {
-            return it('updates the next layer in an "or"-separated list of alternative layer names', function(done) {
+            it('updates the next layer in an "or"-separated list of alternative layer names', function(done) {
               fixture('.element', {text: 'old text'})
               const promise = up.render('.element', {layer: 'parent or root', content: 'new text'})
 
-              return u.task(() => promiseState(promise).then(function(result) {
+              u.task(() => promiseState(promise).then(function(result) {
                 expect(result.state).toEqual('fulfilled')
                 expect('.element').toHaveText(/new text/)
-                return done()
+                done()
               }))
             })
           }
