@@ -10603,11 +10603,11 @@ describe('up.fragment', function() {
         describe('media elements', function() {
 
           it('keeps a <video> element when rendering with DOMparser (bugfix)', async function() {
-            const html = `\
-<div id="container">
-  <video id="video" up-keep></video>
-</div>\
-`
+            const html = `
+              <div id="container">
+                <video id="video" up-keep></video>
+              </div>
+            `
 
             htmlFixture(html)
             const videoBeforeRender = document.querySelector('#video')
@@ -10617,15 +10617,15 @@ describe('up.fragment', function() {
 
             await wait()
 
-            return expect(document.querySelector('#video')).toBe(videoBeforeRender)
+            expect(document.querySelector('#video')).toBe(videoBeforeRender)
           })
 
           it('keeps the position of a <video> element within the DOM hierarchy when rendering with DOMparser (bugfix)', async function() {
-            const html = `\
-<div id="container">
-  <video id="video" up-keep></video>
-</div>\
-`
+            const html = `
+              <div id="container">
+                <video id="video" up-keep></video>
+              </div>
+            `
 
             container = htmlFixture(html)
             document.querySelector('#video')
@@ -10636,15 +10636,15 @@ describe('up.fragment', function() {
             await wait()
 
             const video = document.querySelector('#video')
-            return expect(video).toMatchSelector('#fixtures > #container > #video')
+            expect(video).toMatchSelector('#fixtures > #container > #video')
           })
 
           it('keeps a <audio> element when rendering with DOMparser (bugfix)', async function() {
-            const html = `\
-<div id="container">
-  <audio id="audio" up-keep></audio>
-</div>\
-`
+            const html = `
+              <div id="container">
+                <audio id="audio" up-keep></audio>
+              </div>
+            `
 
             htmlFixture(html)
             const audioBeforeRender = document.querySelector('#audio')
@@ -10654,18 +10654,18 @@ describe('up.fragment', function() {
 
             await wait()
 
-            return expect(document.querySelector('#audio')).toBe(audioBeforeRender)
+            expect(document.querySelector('#audio')).toBe(audioBeforeRender)
           })
 
-          return it('preserves the playback state of a kept media element', function(done) {
+          it('preserves the playback state of a kept media element', function(done) {
             container = fixture('.container')
-            const playerHTML = `\
-<div id="player">
-  <video width="400" controls loop muted up-keep id="video">
-    <source src="/spec/files/video.mp4" type="video/mp4">
-  </video>
-</div>\
-`
+            const playerHTML = `
+              <div id="player">
+                <video width="400" controls loop muted up-keep id="video">
+                  <source src="/spec/files/video.mp4" type="video/mp4">
+                </video>
+              </div>
+            `
 
             const onPlaying = async function() {
               expect(video.paused).toBe(false)
@@ -10695,7 +10695,7 @@ describe('up.fragment', function() {
               const onUpdate = () => done()
 
               // Check that we video is still playing
-              return video.addEventListener('timeupdate', onUpdate, { once: true })
+              video.addEventListener('timeupdate', onUpdate, { once: true })
             }
 
             container.innerHTML = playerHTML
@@ -10706,7 +10706,6 @@ describe('up.fragment', function() {
             // since an unpaused video may not actually be playing.
             video.addEventListener('timeupdate', onPlaying, { once: true })
             video.play()
-
           })
         })
 
