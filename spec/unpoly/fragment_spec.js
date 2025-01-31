@@ -6956,7 +6956,7 @@ describe('up.fragment', function() {
           this.revealedText = []
           this.revealOptions = {}
 
-          return this.revealMock = up.reveal.mock().and.callFake((element, options) => {
+          this.revealMock = up.reveal.mock().and.callFake((element, options) => {
             this.revealedHTML.push(element.outerHTML)
             this.revealedText.push(element.textContent.trim())
             this.revealOptions = options
@@ -6964,52 +6964,52 @@ describe('up.fragment', function() {
           })
         }
 
-        const mockRevealBeforeEach = () => beforeEach(function() {
-          return mockReveal.apply(this)
-        })
+        const mockRevealBeforeEach = function() {
+          beforeEach(function() {
+            mockReveal.apply(this)
+          })
+        }
 
         describe('with { scroll: false }', function() {
 
           mockRevealBeforeEach()
 
-          it('does not scroll', asyncSpec(function(next) {
+          it('does not scroll', async function() {
             fixture('.target')
             up.render('.target', {url: '/path#hash', scroll: false})
 
-            next(() => {
-              return this.respondWith(`\
-<div class="target">
-  <div id="hash"></div>
-</div>\
-`
-              )
-            })
+            await wait()
 
-            return next(() => {
-              return expect(this.revealMock).not.toHaveBeenCalled()
-            })
+            this.respondWith(`
+              <div class="target">
+                <div id="hash"></div>
+              </div>
+            `)
+
+            await wait()
+
+            expect(this.revealMock).not.toHaveBeenCalled()
           })
-          )
 
           if (up.migrate.loaded) {
-            return describe('with { reveal: false }', () => it('does not scroll', asyncSpec(function(next) {
-              fixture('.target')
-              up.render('.target', {url: '/path#hash', reveal: false})
+            describe('with { reveal: false }', function() {
+              it('does not scroll', async function() {
+                fixture('.target')
+                up.render('.target', {url: '/path#hash', reveal: false})
 
-              next(() => {
-                return this.respondWith(`\
-<div class="target">
-<div id="hash"></div>
-</div>\
-`
-                )
-              })
+                await wait()
 
-              return next(() => {
-                return expect(this.revealMock).not.toHaveBeenCalled()
+                this.respondWith(`
+                  <div class="target">
+                    <div id="hash"></div>
+                  </div>
+                `)
+
+                await wait()
+
+                expect(this.revealMock).not.toHaveBeenCalled()
               })
             })
-            ))
           }
         })
 
@@ -7017,234 +7017,234 @@ describe('up.fragment', function() {
 
           mockRevealBeforeEach()
 
-          it('scrolls to the new element that is inserted into the DOM', asyncSpec(function(next) {
+          it('scrolls to the new element that is inserted into the DOM', async function() {
             fixture('.target')
             up.render('.target', {url: '/path', scroll: 'target'})
 
-            next(() => {
-              return this.respondWithSelector('.target', {text: 'new text'})
-            })
+            await wait()
 
-            return next(() => {
-              return expect(this.revealedText).toEqual(['new text'])
-          })}))
+            this.respondWithSelector('.target', {text: 'new text'})
 
-          it('allows to pass another selector to reveal', asyncSpec(function(next){
+            await wait()
+
+            expect(this.revealedText).toEqual(['new text'])
+          })
+
+          it('allows to pass another selector to reveal', async function() {
             fixture('.target', {text: 'target text'})
             fixture('.other', {text: 'other text'})
 
             up.render('.target', {url: '/path', scroll: '.other'})
 
-            next(() => {
-              return this.respondWithSelector('.target')
-            })
+            await wait()
 
-            return next(() => {
-              return expect(this.revealedText).toEqual(['other text'])
-          })}))
+            this.respondWithSelector('.target')
 
-          it('allows to refer to the replacement { origin } as ":origin" in the { scroll } selector', asyncSpec(function(next) {
+            await wait()
+
+            expect(this.revealedText).toEqual(['other text'])
+          })
+
+          it('allows to refer to the replacement { origin } as ":origin" in the { scroll } selector', async function() {
             const target = fixture('.target', {text: 'target text'})
             const origin = fixture('.origin', {text: 'origin text'})
 
             up.render('.target', {url: '/path', scroll: ':origin', origin})
 
-            next(() => {
-              return this.respondWithSelector('.target')
-            })
+            await wait()
 
-            return next(() => {
-              return expect(this.revealedText).toEqual(['origin text'])
-          })}))
+            this.respondWithSelector('.target')
+
+            await wait()
+
+            expect(this.revealedText).toEqual(['origin text'])
+          })
 
           if (up.migrate.loaded) {
+            describe('with { reveal: true }', function() {
+              it('scrolls to the new element that is inserted into the DOM', async function() {
+                fixture('.target')
+                up.render('.target', {url: '/path', reveal: true})
 
-            describe('with { reveal: true }', () => it('scrolls to the new element that is inserted into the DOM', asyncSpec(function(next) {
-              fixture('.target')
-              up.render('.target', {url: '/path', reveal: true})
+                await wait()
 
-              next(() => {
-                return this.respondWithSelector('.target', {text: 'new text'})
+                this.respondWithSelector('.target', {text: 'new text'})
+
+                await wait()
+
+                expect(this.revealedText).toEqual(['new text'])
               })
-
-              return next(() => {
-                return expect(this.revealedText).toEqual(['new text'])
-            })})))
+            })
           }
 
-          describe('when more than one fragment is replaced', () => it('only reveals the first fragment', asyncSpec(function(next) {
-            fixture('.one', {text: 'old one text'})
-            fixture('.two', {text: 'old two text'})
-            up.render('.one, .two', {url: '/path', scroll: 'target'})
+          describe('when more than one fragment is replaced', function() {
+            it('only reveals the first fragment', async function() {
+              fixture('.one', {text: 'old one text'})
+              fixture('.two', {text: 'old two text'})
+              up.render('.one, .two', {url: '/path', scroll: 'target'})
 
-            next(() => {
-              return this.respondWith(`\
-<div class="one">new one text</div>
-<div class="two">new two text</div>\
-`
-              )
+              await wait()
+
+              this.respondWith(`
+                <div class="one">new one text</div>
+                <div class="two">new two text</div>
+              `)
+
+              await wait()
+
+              expect(this.revealedText).toEqual(['new one text'])
             })
+          })
 
-            return next(() => {
-              return expect(this.revealedText).toEqual(['new one text'])
-          })})))
-
-          it('reveals a new element that is being appended', asyncSpec(function(next) {
+          it('reveals a new element that is being appended', async function() {
             fixture('.target')
             up.render('.target:after', {url: '/path', scroll: 'target'})
 
-            next(() => {
-              return this.respondWithSelector('.target', {text: 'new target text'})
-            })
+            await wait()
 
-            return next(() => {
-              // Text nodes are wrapped in a up-wrapper container so we can
-              // animate them and measure their position/size for scrolling.
-              // This is not possible for container-less text nodes.
-              expect(this.revealedHTML).toEqual(['<up-wrapper>new target text</up-wrapper>'])
-              // Show that the wrapper is done after the insertion.
-              return expect('up-wrapper').not.toBeAttached()
-            })
+            this.respondWithSelector('.target', {text: 'new target text'})
+
+            await wait()
+
+            // Text nodes are wrapped in a up-wrapper container so we can
+            // animate them and measure their position/size for scrolling.
+            // This is not possible for container-less text nodes.
+            expect(this.revealedHTML).toEqual(['<up-wrapper>new target text</up-wrapper>'])
+            // Show that the wrapper is done after the insertion.
+            expect('up-wrapper').not.toBeAttached()
           })
-          )
 
-          return it('reveals a new element that is being prepended', asyncSpec(function(next) {
+          it('reveals a new element that is being prepended', async function() {
             fixture('.target')
             up.render('.target:before', {url: '/path', scroll: 'target'})
 
-            next(() => {
-              return this.respondWithSelector('.target', {text: 'new target text'})
-            })
+            await wait()
 
-            return next(() => {
-              // Text nodes are wrapped in a up-wrapper container so we can
-              // animate them and measure their position/size for scrolling.
-              // This is not possible for container-less text nodes.
-              expect(this.revealedHTML).toEqual(['<up-wrapper>new target text</up-wrapper>'])
-              // Show that the wrapper is done after the insertion.
-              return expect('up-wrapper').not.toBeAttached()
-            })
+            this.respondWithSelector('.target', {text: 'new target text'})
+
+            await wait()
+
+            // Text nodes are wrapped in a up-wrapper container so we can
+            // animate them and measure their position/size for scrolling.
+            // This is not possible for container-less text nodes.
+            expect(this.revealedHTML).toEqual(['<up-wrapper>new target text</up-wrapper>'])
+            // Show that the wrapper is done after the insertion.
+            expect('up-wrapper').not.toBeAttached()
           })
-          )
         })
 
         describe('with { scroll: "hash" }', function() {
 
           mockRevealBeforeEach()
 
-          it("scrolls to the top of an element with the ID the location's #hash", asyncSpec(function(next) {
+          it("scrolls to the top of an element with the ID the location's #hash", async function() {
             fixture('.target')
             up.render('.target', {url: '/path#hash', scroll: 'hash'})
 
-            next(() => {
-              return this.respondWith(`\
-<div class="target">
-  <div id="hash"></div>
-</div>\
-`
-              )
-            })
+            await wait()
 
-            return next(() => {
-              expect(this.revealedHTML).toEqual(['<div id="hash"></div>'])
-              return expect(this.revealOptions).toEqual(jasmine.objectContaining({top: true}))
-            })
+            this.respondWith(`
+              <div class="target">
+                <div id="hash"></div>
+              </div>
+            `)
+
+            await wait()
+
+            expect(this.revealedHTML).toEqual(['<div id="hash"></div>'])
+            expect(this.revealOptions).toEqual(jasmine.objectContaining({top: true}))
           })
-          )
 
-          it("scrolls to the top of an <a> element with the name of that hash", asyncSpec(function(next) {
+          it("scrolls to the top of an <a> element with the name of that hash", async function() {
             fixture('.target')
             up.render('.target', {url: '/path#three', scroll: 'hash'})
 
-            next(() => {
-              return this.respondWith(`\
-<div class="target">
-  <a name="three"></a>
-</div>\
-`
-              )
-            })
+            await wait()
 
-            return next(() => {
-              expect(this.revealedHTML).toEqual(['<a name="three"></a>'])
-              return expect(this.revealOptions).toEqual(jasmine.objectContaining({top: true}))
-            })
+            this.respondWith(`
+              <div class="target">
+                <a name="three"></a>
+              </div>
+            `)
+
+            await wait()
+
+            expect(this.revealedHTML).toEqual(['<a name="three"></a>'])
+            expect(this.revealOptions).toEqual(jasmine.objectContaining({top: true}))
           })
-          )
 
-          it("scrolls to a hash that includes a dot character ('.') (bugfix)", asyncSpec(function(next) {
+          it("scrolls to a hash that includes a dot character ('.') (bugfix)", async function() {
             fixture('.target')
             up.render('.target', {url: '/path#foo.bar', scroll: 'hash'})
 
-            next(() => {
-              return this.respondWith(`\
-<div class="target">
-  <a name="foo.bar"></a>
-</div>\
-`
-              )
-            })
+            await wait()
 
-            return next(() => {
-              expect(this.revealedHTML).toEqual(['<a name="foo.bar"></a>'])
-              return expect(this.revealOptions).toEqual(jasmine.objectContaining({top: true}))
-            })
+            this.respondWith(`
+              <div class="target">
+                <a name="foo.bar"></a>
+              </div>
+            `)
+
+            await wait()
+
+            expect(this.revealedHTML).toEqual(['<a name="foo.bar"></a>'])
+            expect(this.revealOptions).toEqual(jasmine.objectContaining({top: true}))
           })
-          )
 
-          it('reveals multiple consecutive #hash targets with the same URL (bugfix)', asyncSpec(function(next) {
+          it('reveals multiple consecutive #hash targets with the same URL (bugfix)', async function() {
             fixture('.target')
             up.render('.target', {url: '/path#two', scroll: 'hash', cache: true})
 
-            const html = `\
-<div class="target">
-  <div id="one">one</div>
-  <div id="two">two</div>
-  <div id="three">three</div>
-</div>\
-`
+            const html = `
+              <div class="target">
+                <div id="one">one</div>
+                <div id="two">two</div>
+                <div id="three">three</div>
+              </div>
+            `
 
-            next(() => {
-              return this.respondWith(html)
-            })
+            await wait()
 
-            next(() => {
-              expect(this.revealedText).toEqual(['two'])
+            this.respondWith(html)
 
-              return up.render('.target', {url: '/path#three', scroll: 'hash', cache: true})
-            })
+            await wait()
 
-            return next(() => {
-              return expect(this.revealedText).toEqual(['two', 'three'])
-          })}))
+            expect(this.revealedText).toEqual(['two'])
 
-          return it("does not scroll if there is no element with the ID of that #hash", asyncSpec(function(next) {
+            up.render('.target', {url: '/path#three', scroll: 'hash', cache: true})
+
+            await wait()
+
+            expect(this.revealedText).toEqual(['two', 'three'])
+          })
+
+          it("does not scroll if there is no element with the ID of that #hash", async function() {
             fixture('.target')
             up.render('.target', {url: '/path#hash', scroll: 'hash'})
 
-            next(() => {
-              return this.respondWithSelector('.target')
-            })
+            await wait()
 
-            return next(() => {
-              return expect(this.revealMock).not.toHaveBeenCalled()
-            })
+            this.respondWithSelector('.target')
+
+            await wait()
+
+            expect(this.revealMock).not.toHaveBeenCalled()
           })
-          )
         })
 
         describe('with an array of { scroll } options', function() {
 
           mockRevealBeforeEach()
 
-          return it('tries each option until one succeeds', asyncSpec(function(next) {
+          it('tries each option until one succeeds', async function() {
             fixture('.container')
             up.render('.container', {scroll: ['hash', '.element', '.container'], content: "<div class='element'>element text</div>"})
 
-            return next(() => {
-              return expect(this.revealedText).toEqual(['element text'])
-          })}))
-      })
+            await wait()
+
+            expect(this.revealedText).toEqual(['element text'])
+          })
+        })
 
         describe('with a string of comma-separated { scroll } options', function() {
 
@@ -7253,33 +7253,36 @@ describe('up.fragment', function() {
           it('tries each option until one succeeds', async function() {
             fixture('.container')
             up.render('.container', {scroll: 'hash, .element, .container', content: "<div class='element'>element text</div>"})
+
             await wait()
 
-            return expect(this.revealedText).toEqual(['element text'])
-        })
+            expect(this.revealedText).toEqual(['element text'])
+          })
 
-          return it('ignores commas in parentheses', async function() {
+          it('ignores commas in parentheses', async function() {
             fixture('.container')
             up.render('.container', {scroll: 'hash, .other:not(input, select), .element:not(input, select), .container', content: "<div class='element'>element text</div>"})
+
             await wait()
 
-            return expect(this.revealedText).toEqual(['element text'])
+            expect(this.revealedText).toEqual(['element text'])
+          })
         })
-      })
 
         if (up.migrate.load) {
           describe('with a string of "or"-separated { scroll } options', function() {
 
             mockRevealBeforeEach()
 
-            return it('tries each option until one succeeds', async function() {
+            it('tries each option until one succeeds', async function() {
               fixture('.container')
               up.render('.container', {scroll: 'hash or .element or .container', content: "<div class='element'>element text</div>"})
+
               await wait()
 
-              return expect(this.revealedText).toEqual(['element text'])
+              expect(this.revealedText).toEqual(['element text'])
+            })
           })
-        })
         }
 
         describe('when the server responds with an error code', function() {
@@ -7299,7 +7302,7 @@ describe('up.fragment', function() {
 
             await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
 
-            return expect(this.revealMock).not.toHaveBeenCalled()
+            expect(this.revealMock).not.toHaveBeenCalled()
           })
 
           it('accepts a { failScroll } option for error responses', async function() {
@@ -7312,19 +7315,19 @@ describe('up.fragment', function() {
 
             jasmine.respondWith({
               status: 500,
-              responseText: `\
-<div class="fail-target">
-  new fail-target text
-</div>\
-`
+              responseText: `
+                <div class="fail-target">
+                  new fail-target text
+                </div>
+              `
             })
 
             await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
 
-            return expect(this.revealedText).toEqual(['other text'])
-        })
+            expect(this.revealedText).toEqual(['other text'])
+          })
 
-          return it('allows to refer to the replacement { origin } as ":origin" in the { failScroll } selector', async function() {
+          it('allows to refer to the replacement { origin } as ":origin" in the { failScroll } selector', async function() {
             const $origin = $fixture('.origin').text('origin text')
             $fixture('.target').text('old target text')
             $fixture('.fail-target').text('old fail-target text')
@@ -7334,18 +7337,18 @@ describe('up.fragment', function() {
 
             jasmine.respondWith({
               status: 500,
-              responseText: `\
-<div class="fail-target">
-  new fail-target text
-</div>\
-`
+              responseText: `
+                <div class="fail-target">
+                  new fail-target text
+                </div>
+              `
             })
 
             await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
 
-            return expect(this.revealedText).toEqual(['origin text'])
+            expect(this.revealedText).toEqual(['origin text'])
+          })
         })
-      })
 
         describe('with { scrollBehavior } option', function() {
 
@@ -7357,12 +7360,11 @@ describe('up.fragment', function() {
               document: '<div class="element">version 2</div>',
               scroll: 'target',
               scrollBehavior: 'smooth'
-            }
-            )
+            })
 
             await wait()
 
-            return expect(this.revealOptions.scrollBehavior).toEqual('smooth')
+            expect(this.revealOptions.scrollBehavior).toEqual('smooth')
           })
 
           it('animates the revealing when appending an element', async function() {
@@ -7373,15 +7375,14 @@ describe('up.fragment', function() {
               document: '<div class="element">version 2</div>',
               scroll: 'target',
               scrollBehavior: 'smooth'
-            }
-            )
+            })
 
             await wait()
 
-            return expect(this.revealOptions.scrollBehavior).toEqual('smooth')
+            expect(this.revealOptions.scrollBehavior).toEqual('smooth')
           })
 
-          return it('animates the revealing when swapping out an element', async function() {
+          it('animates the revealing when swapping out an element', async function() {
             fixture('.before', {text: 'before', style: { height: '20000px' }})
 
             fixture('.element', {text: 'version 1'})
@@ -7389,22 +7390,22 @@ describe('up.fragment', function() {
               document: '<div class="element">version 2</div>',
               scroll: 'target',
               scrollBehavior: 'smooth'
-            }
-            )
+            })
 
             await wait(80)
 
             expect(document.scrollingElement.scrollTop).toBeGreaterThan(10)
-            return expect(document.scrollingElement.scrollTop).toBeLessThan(19000)
+            expect(document.scrollingElement.scrollTop).toBeLessThan(19000)
           })
         })
 
         describe('with { scroll: "restore" } option', function() {
 
-          beforeEach(() => up.history.config.enabled = true)
+          beforeEach(function() {
+            up.history.config.enabled = true
+          })
 
-          return it("restores the scroll positions of the target's viewport", asyncSpec(function(next) {
-
+          it("restores the scroll positions of the target's viewport", async function() {
             const $viewport = $fixture('.viewport[up-viewport] .element').css({
               'height': '100px',
               'width': '100px',
@@ -7412,7 +7413,7 @@ describe('up.fragment', function() {
             })
 
             const respond = () => {
-              return this.respondWith({
+              this.respondWith({
                 status: 200,
                 contentType: 'text/html',
                 responseText: '<div class="element" style="height: 300px"></div>'
@@ -7421,16 +7422,23 @@ describe('up.fragment', function() {
 
             up.render('.element', {url: '/foo', history: true})
 
-            next(() => respond())
-            next(() => $viewport.scrollTop(65))
-            next(() => up.render('.element', {url: '/bar', history: true}))
-            next(() => respond())
-            next(() => $viewport.scrollTop(10))
-            next(() => up.render('.element', {url: '/foo', scroll: 'restore', history: true}))
-            next(() => respond())
-            return next(() => expect($viewport.scrollTop()).toBeAround(65, 1))
+            await wait()
+
+            respond()
+            $viewport.scrollTop(65)
+            up.render('.element', {url: '/bar', history: true})
+
+            await wait()
+
+            respond()
+            $viewport.scrollTop(10)
+            up.render('.element', {url: '/foo', scroll: 'restore', history: true})
+
+            await wait()
+
+            respond()
+            expect($viewport.scrollTop()).toBeAround(65, 1)
           })
-          )
         })
 
         describe('when rendering nothing', function() {
@@ -7445,20 +7453,20 @@ describe('up.fragment', function() {
 
             up.render(':none', {scroll: 'main', document: '<div></div>'})
 
-            return expect(this.revealedText).toEqual(['main'])
-        })
+            expect(this.revealedText).toEqual(['main'])
+          })
 
-          return it('does not crash with { scroll: "target" }', function(done) {
+          it('does not crash with { scroll: "target" }', function(done) {
             const promise = up.render(':none', {scroll: 'target', document: '<div></div>'})
 
-            return u.task(() => promiseState(promise).then(function(result) {
+            u.task(() => promiseState(promise).then(function(result) {
               expect(result.state).toBe('fulfilled')
-              return done()
+              done()
             }))
           })
         })
 
-        return describe('with a function passed as { scroll } option', function() {
+        describe('with a function passed as { scroll } option', function() {
 
           it('calls the function', function() {
             const scrollHandler = jasmine.createSpy('scroll handler')
@@ -7467,20 +7475,20 @@ describe('up.fragment', function() {
             up.render('.element', {content: 'new text', scroll: scrollHandler})
 
             expect('.element').toHaveText('new text')
-            return expect(scrollHandler).toHaveBeenCalled()
+            expect(scrollHandler).toHaveBeenCalled()
           })
 
-          return it('does not crash the render pass and emits an error event if the function throws', async function() {
+          it('does not crash the render pass and emits an error event if the function throws', async function() {
             const scrollError = new Error('error in scroll handler')
             const scrollHandler = jasmine.createSpy('scroll handler').and.throwError(scrollError)
             fixture('.element', {content: 'old text'})
 
-            return await jasmine.expectGlobalError(scrollError, async function() {
+            await jasmine.expectGlobalError(scrollError, async function() {
               const job = up.render('.element', {content: 'new text', scroll: scrollHandler})
 
               await expectAsync(job).toBeResolvedTo(jasmine.any(up.RenderResult))
               expect('.element').toHaveText('new text')
-              return expect(scrollHandler).toHaveBeenCalled()
+              expect(scrollHandler).toHaveBeenCalled()
             })
           })
         })
