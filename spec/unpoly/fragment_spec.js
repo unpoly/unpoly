@@ -2312,22 +2312,19 @@ describe('up.fragment', function() {
 
         describe('when the server sends an X-Up-Target header', function() {
 
-          it('renders the server-provided target', asyncSpec(function(next) {
+          it('renders the server-provided target', async function() {
             fixture('.one', {text: 'old content'})
             fixture('.two', {text: 'old content'})
 
             up.render({target: '.one', url: '/path'})
+            await wait()
 
-            next(() => {
-              return this.respondWithSelector('.two', {text: 'new content', responseHeaders: { 'X-Up-Target': '.two' }})
-            })
+            this.respondWithSelector('.two', {text: 'new content', responseHeaders: { 'X-Up-Target': '.two' }})
+            await wait()
 
-            return next(function() {
-              expect('.one').toHaveText('old content')
-              return expect('.two').toHaveText('new content')
-            })
+            expect('.one').toHaveText('old content')
+            expect('.two').toHaveText('new content')
           })
-          )
 
           it('renders the server-provided target for a failed update', async function() {
             fixture('.one', {text: 'old content'})
@@ -2344,84 +2341,76 @@ describe('up.fragment', function() {
 
             expect('.one').toHaveText('old content')
             expect('.two').toHaveText('old content')
-            return expect('.three').toHaveText('new content')
+            expect('.three').toHaveText('new content')
           })
 
           describe('when the server sends X-Up-Target: :none', function() {
 
-            it('does not require a response body and succeeds', asyncSpec(function(next) {
+            it('does not require a response body and succeeds', async function() {
               fixture('.one', {text: 'old one'})
               fixture('.two', {text: 'old two'})
 
               const promise = up.render({target: '.one', url: '/path'})
+              await wait()
 
-              next(() => {
-                return this.respondWith({responseHeaders: { 'X-Up-Target': ':none' }, responseText: '', contentType: 'text/plain'})
-              })
+              this.respondWith({responseHeaders: { 'X-Up-Target': ':none' }, responseText: '', contentType: 'text/plain'})
+              await wait()
 
-              next(function() {
-                expect('.one').toHaveText('old one')
-                expect('.two').toHaveText('old two')
+              expect('.one').toHaveText('old one')
+              expect('.two').toHaveText('old two')
 
-                return next.await(promiseState(promise))
-              })
+              let result = await promiseState(promise)
+              expect(result.state).toBe('fulfilled')
+              expect(result.value).toEqual(jasmine.any(up.RenderResult))
+              expect(result.value.fragments).toEqual([])
+            })
 
-              return next(function(result) {
-                expect(result.state).toBe('fulfilled')
-                expect(result.value).toEqual(jasmine.any(up.RenderResult))
-                return expect(result.value.fragments).toEqual([])})}))
-
-            return it('does not call an { onRendered } callback', asyncSpec(function(next) {
+            it('does not call an { onRendered } callback', async function() {
               fixture('.one', {text: 'old one'})
 
               const onRendered = jasmine.createSpy('onRendered callback')
               up.render({ target: '.one', url: '/path', onRendered })
+              await wait()
 
-              next(() => jasmine.respondWith({responseHeaders: { 'X-Up-Target': ':none' }, responseText: '', contentType: 'text/plain'}))
+              jasmine.respondWith({responseHeaders: { 'X-Up-Target': ':none' }, responseText: '', contentType: 'text/plain'})
+              await wait()
 
-              return next(function() {
-                expect('.one').toHaveText('old one')
-                return expect(onRendered).not.toHaveBeenCalled()
-              })
+              expect('.one').toHaveText('old one')
+              expect(onRendered).not.toHaveBeenCalled()
             })
-            )
           })
 
-          return it('lets the server sends an abstract target like :main', asyncSpec(function(next) {
+          it('lets the server sends an abstract target like :main', async function() {
             fixture('.one', {text: 'old content'})
             fixture('.two', {text: 'old content'})
             up.fragment.config.mainTargets = ['.two']
 
             up.render({target: '.one', url: '/path'})
+            await wait()
 
-            next(() => {
-              return this.respondWithSelector('.two', {text: 'new content', responseHeaders: { 'X-Up-Target': ':main' }})
-            })
+            this.respondWithSelector('.two', {text: 'new content', responseHeaders: { 'X-Up-Target': ':main' }})
+            await wait()
 
-            return next(function() {
-              expect('.one').toHaveText('old content')
-              return expect('.two').toHaveText('new content')
-            })
+            expect('.one').toHaveText('old content')
+            expect('.two').toHaveText('new content')
           })
-          )
         })
 
         describe('for a cross-origin URL', function() {
 
-          it('loads the content in a new page', asyncSpec(function(next) {
+          it('loads the content in a new page', async function() {
             const loadPage = spyOn(up.network, 'loadPage')
 
             fixture('.one')
             up.render({target: '.one', url: 'http://other-domain.com/path/to'})
 
-            return next(function() {
-              expect(loadPage).toHaveBeenCalledWith(jasmine.objectContaining({url: 'http://other-domain.com/path/to'}))
-              return expect(jasmine.Ajax.requests.count()).toBe(0)
-            })
-          })
-          )
+            await wait()
 
-          return it("returns an pending promise (since we do not want any callbacks to run as we're tearing down this page context)", function(done) {
+            expect(loadPage).toHaveBeenCalledWith(jasmine.objectContaining({url: 'http://other-domain.com/path/to'}))
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+          })
+
+          it("returns an pending promise (since we do not want any callbacks to run as we're tearing down this page context)", function(done) {
             const loadPage = spyOn(up.network, 'loadPage')
 
             fixture('.one')
@@ -2429,13 +2418,12 @@ describe('up.fragment', function() {
 
             promiseState(promise).then(function(result) {
               expect(result.state).toBe('pending')
-              return done()
+              done()
             })
-
           })
         })
 
-        return describeFallback('canPushState', function() {
+        describeFallback('canPushState', function() {
 
           describe('when options.history is truthy', function() {
 
@@ -2448,31 +2436,33 @@ describe('up.fragment', function() {
               await wait()
 
               expect(loadPage).toHaveBeenCalledWith(jasmine.objectContaining({url: '/path'}))
-              return expect(jasmine.Ajax.requests.count()).toBe(0)
+              expect(jasmine.Ajax.requests.count()).toBe(0)
             })
 
-            return it("returns an pending promise (since we do not want any callbacks to run as we're tearing down this page context)", async function() {
+            it("returns an pending promise (since we do not want any callbacks to run as we're tearing down this page context)", async function() {
               const loadPage = spyOn(up.network, 'loadPage')
 
               fixture('.one')
               const promise = up.render({target: '.one', url: '/path', history: true})
 
               const result = await promiseState(promise)
-              return expect(result.state).toBe('pending')
+              expect(result.state).toBe('pending')
             })
           })
 
-          return describe('when options.history is falsy', () => it("does not load the content in a new page", async function() {
-            const loadPage = spyOn(up.network, 'loadPage')
+          describe('when options.history is falsy', function() {
+            it("does not load the content in a new page", async function() {
+              const loadPage = spyOn(up.network, 'loadPage')
 
-            fixture('.one')
-            up.render({target: '.one', url: '/path'})
+              fixture('.one')
+              up.render({target: '.one', url: '/path'})
 
-            await wait()
+              await wait()
 
-            expect(loadPage).not.toHaveBeenCalled()
-            return expect(jasmine.Ajax.requests.count()).toBe(1)
-          }))
+              expect(loadPage).not.toHaveBeenCalled()
+              expect(jasmine.Ajax.requests.count()).toBe(1)
+            })
+          })
         })
       })
 
