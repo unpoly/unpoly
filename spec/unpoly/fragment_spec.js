@@ -6480,6 +6480,7 @@ describe('up.fragment', function() {
             duration: 200,
             easing: 'linear'
           })
+          await wait()
 
           let oldElement = undefined
           let newElement = undefined
@@ -6489,7 +6490,7 @@ describe('up.fragment', function() {
 
           expect(oldElement).toHaveOpacity(1.0, 0.15)
           expect(newElement).toHaveOpacity(0.0, 0.15)
-          await wait()
+          await wait(100)
 
           expect(oldElement).toHaveOpacity(0.5, 0.3)
           expect(newElement).toHaveOpacity(0.5, 0.3)
@@ -7421,22 +7422,26 @@ describe('up.fragment', function() {
             }
 
             up.render('.element', {url: '/foo', history: true})
-
             await wait()
 
             respond()
+            await wait()
+
             $viewport.scrollTop(65)
             up.render('.element', {url: '/bar', history: true})
-
             await wait()
 
             respond()
+            await wait()
+
             $viewport.scrollTop(10)
             up.render('.element', {url: '/foo', scroll: 'restore', history: true})
 
             await wait()
 
             respond()
+            await wait()
+
             expect($viewport.scrollTop()).toBeAround(65, 1)
           })
         })
@@ -8098,22 +8103,21 @@ describe('up.fragment', function() {
 
           await up.render('.element', {document: '<div class="element v2">v2</div>'})
 
-          return expect(spy).toHaveBeenCalledWith($parent[0], $element[0], true)
+          expect(spy).toHaveBeenCalledWith($parent[0], $element[0], true)
         })
 
-        it('calls destructors on the old element', asyncSpec(function(next) {
+        it('calls destructors on the old element', async function() {
           const destructor = jasmine.createSpy('destructor')
           up.compiler('.container', element => () => destructor(element.innerText))
           const $container = $fixture('.container').text('old text')
           up.hello($container)
           up.render('.container', {document: '<div class="container">new text</div>'})
 
-          return next(() => {
-            expect('.container').toHaveText('new text')
-            return expect(destructor).toHaveBeenCalledWith('old text')
-          })
+          await wait()
+
+          expect('.container').toHaveText('new text')
+          expect(destructor).toHaveBeenCalledWith('old text')
         })
-        )
 
         it('calls destructors on the old element after a { transition }', function(done) {
           up.motion.config.enabled = true
@@ -8126,17 +8130,17 @@ describe('up.fragment', function() {
           up.render({fragment: '<div class="container">new text</div>', transition: 'cross-fade', duration: 100})
 
           u.timer(50, () => {
-            return expect(destructor).not.toHaveBeenCalled()
+            expect(destructor).not.toHaveBeenCalled()
           })
 
-          return u.timer(220, () => {
+          u.timer(220, () => {
             expect('.container').toHaveText('new text')
             expect(destructor).toHaveBeenCalledWith('old text')
-            return done()
+            done()
           })
         })
 
-        it('calls destructors when the replaced element is a singleton element like <body> (bugfix)', asyncSpec(function(next) {
+        it('calls destructors when the replaced element is a singleton element like <body> (bugfix)', async function() {
           // shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
           up.element.isSingleton.mock().and.callFake(element => element.matches('.container'))
           const destructor = jasmine.createSpy('destructor')
@@ -8148,18 +8152,17 @@ describe('up.fragment', function() {
           // classes and only returns the tag name for singleton elements.
           up.render('.container', {document: '<div class="container">new text</div>'})
 
-          return next(() => {
-            expect('.container').toHaveText('new text')
-            return expect(destructor).toHaveBeenCalled()
-          })
+          await wait()
+
+          expect('.container').toHaveText('new text')
+          expect(destructor).toHaveBeenCalled()
         })
-        )
 
         it('marks the old element as .up-destroying before destructors', function(done) {
           const testElementState = u.memoize(function(element) {
             expect(element).toHaveText('old text')
             expect(element).toMatchSelector('.up-destroying')
-            return done()
+            done()
           })
 
           up.compiler('.container', element => () => testElementState(element))
@@ -8183,10 +8186,10 @@ describe('up.fragment', function() {
           })
 
           expect('.container').toHaveText('new text')
-          return expect(destructor).toHaveBeenCalledWith('old text', true)
+          expect(destructor).toHaveBeenCalledWith('old text', true)
         })
 
-        it('calls destructors while the element is still attached to the DOM, so destructors see ancestry and events bubble up', asyncSpec(function(next) {
+        it('calls destructors while the element is still attached to the DOM, so destructors see ancestry and events bubble up', async function() {
           const spy = jasmine.createSpy('parent spy')
           up.compiler('.element', element => () => spy(element.innerText, element.parentElement))
 
@@ -8196,13 +8199,12 @@ describe('up.fragment', function() {
 
           up.render({fragment: '<div class="element">new text</div>'})
 
-          return next(() => {
-            return expect(spy).toHaveBeenCalledWith('old text', $parent.get(0))
-          })
-        })
-        )
+          await wait()
 
-        return it('calls destructors while the element is still attached to the DOM when also using a { transition }', async function() {
+          expect(spy).toHaveBeenCalledWith('old text', $parent.get(0))
+        })
+
+        it('calls destructors while the element is still attached to the DOM when also using a { transition }', async function() {
           const spy = jasmine.createSpy('parent spy')
           up.compiler('.element', element => () => // We must seek .parent in our ancestry, because our direct parent() is an .up-bounds container
           spy(element.innerText, element.closest('.parent')))
@@ -8217,138 +8219,151 @@ describe('up.fragment', function() {
             duration: 30
           })
 
-          return expect(spy).toHaveBeenCalledWith('old text', $parent.get(0))
+          expect(spy).toHaveBeenCalledWith('old text', $parent.get(0))
         })
       })
 
       describe('focus', function() {
 
-        describe('with { focus: "autofocus" }', () => it('focuses an [autofocus] element in the new fragment', asyncSpec(function(next) {
-          fixture('form.foo-bar')
-          up.render({focus: 'autofocus', fragment: `\
-<form class='foo-bar'>
-<input class="autofocused-input" autofocus>
-</form>\
-`
-          })
+        describe('with { focus: "autofocus" }', function() {
+          it('focuses an [autofocus] element in the new fragment', async function() {
+            fixture('form.foo-bar')
+            up.render({
+              focus: 'autofocus',
+              fragment: `
+                <form class='foo-bar'>
+                  <input class="autofocused-input" autofocus>
+                </form>
+              `
+            })
 
-          return next(() => {
-            return expect('.autofocused-input').toBeFocused()
+            await wait()
+
+            expect('.autofocused-input').toBeFocused()
           })
         })
-        ))
 
         describe('with { focus: "target" }', function() {
 
-          it('focuses the new fragment', asyncSpec(function(next) {
+          it('focuses the new fragment', async function() {
             fixture('form.foo-bar')
-            up.render({focus: 'target', fragment: `\
-<form class='foo-bar'>
-  <input>
-</form>\
-`
+            up.render({
+              focus: 'target',
+              fragment: `
+                <form class='foo-bar'>
+                  <input>
+                </form>
+              `
             })
 
-            return next(() => {
-              return expect('.foo-bar').toBeFocused()
-            })
+            await wait()
+
+            expect('.foo-bar').toBeFocused()
           })
-          )
 
-          return it('focuses the fragment even if its element type is not focusable by default', asyncSpec(function(next) {
+          it('focuses the fragment even if its element type is not focusable by default', async function() {
             fixture('.foo-bar')
-            up.render({focus: 'target', fragment: `\
-<span class='foo-bar'></span>\
-`
+            up.render({
+              focus: 'target',
+              fragment: `
+                <span class='foo-bar'></span>
+              `
             })
 
-            return next(() => {
-              return expect('.foo-bar').toBeFocused()
+            await wait()
+
+            expect('.foo-bar').toBeFocused()
+          })
+        })
+
+        describe('with { focus: "main" }', function() {
+          it('focuses the main element', async function() {
+            const main = fixture('main')
+            e.affix(main, 'form.foo-bar')
+            up.render({
+              focus: 'main',
+              fragment: `
+                <form class='foo-bar'>
+                  <input>
+                </form>
+              `
             })
-          })
-          )
-        })
 
-        describe('with { focus: "main" }', () => it('focuses the main element', asyncSpec(function(next) {
-          const main = fixture('main')
-          e.affix(main, 'form.foo-bar')
-          up.render({focus: 'main', fragment: `\
-<form class='foo-bar'>
-<input>
-</form>\
-`
-          })
+            await wait()
 
-          return next(() => {
-            return expect('main').toBeFocused()
+            expect('main').toBeFocused()
           })
         })
-        ))
 
-        describe('with { focus: "hash" }', () => it('focuses the target of a URL #hash', asyncSpec(function(next) {
-          fixture('.target')
-          up.render('.target', {url: '/path#hash', focus: 'hash'})
+        describe('with { focus: "hash" }', function() {
+          it('focuses the target of a URL #hash', async function() {
+            fixture('.target')
+            up.render('.target', {url: '/path#hash', focus: 'hash'})
 
-          next(() => {
-            return this.respondWith(`\
-<div class="target">
-<div id="hash"></div>
-</div>\
-`
-            )
-          })
+            await wait()
 
-          return next(() => {
-            return expect('#hash').toBeFocused()
+            this.respondWith(`
+              <div class="target">
+                <div id="hash"></div>
+              </div>
+            `)
+
+            await wait()
+
+            expect('#hash').toBeFocused()
           })
         })
-        ))
 
         describe('with a CSS selector as { focus } option', function() {
 
-          it('focuses a matching element within the new fragment', asyncSpec(function(next) {
+          it('focuses a matching element within the new fragment', async function() {
             fixture('form.foo-bar')
-            up.render({focus: '.input', fragment: `\
-<form class='foo-bar'>
-  <input class='input'>
-</form>\
-`
+            up.render({
+              focus: '.input',
+              fragment: `
+                <form class='foo-bar'>
+                  <input class='input'>
+                </form>
+              `
             })
 
-            return next(() => {
-              return expect('.input').toBeFocused()
-            })
+            await wait()
+
+            expect('.input').toBeFocused()
           })
-          )
 
-          it('focuses a matching element in the same layer', asyncSpec(function(next) {
+          it('focuses a matching element in the same layer', async function() {
             fixture('form.foo-bar')
 
             fixture('.element')
 
-            up.render({focus: '.element', fragment: `\
-<form class='foo-bar'>
-</form>\
-`
+            up.render({
+              focus: '.element',
+              fragment: `
+                <form class='foo-bar'>
+                </form>
+              `
             })
 
-            return next(() => {
-              return expect('.element').toBeFocused()
-            })
+            await wait()
+
+            expect('.element').toBeFocused()
           })
-          )
 
-          return it('does not focus a matching element in another layer', asyncSpec(function(next) {
+          it('does not focus a matching element in another layer', async function() {
             makeLayers([
               { target: '.root-element' },
               { target: '.overlay-element' }
             ])
 
-            next(() => up.render('.overlay-element', {focus: '.root-element', content: 'new content'}))
+            await wait()
 
-            return next(() => expect('.rootElement').not.toBeFocused())
+            up.render('.overlay-element', {focus: '.root-element', content: 'new content'})
+
+            await wait()
+
+            expect('.rootElement').not.toBeFocused()
           })
-          )
         })
 
         describe('with { focus: "keep" }', function() {
@@ -8359,16 +8374,18 @@ describe('up.fragment', function() {
             oldFocused.focus()
             expect(oldFocused).toBeFocused()
 
-            up.render('.container', { focus: 'keep', document: `\
-<div class="container">
-  <div class="focused" tabindex="0">new focused</div>
-</div>\
-`
-          })
+            up.render('.container', {
+              focus: 'keep',
+              document: `
+                <div class="container">
+                  <div class="focused" tabindex="0">new focused</div>
+                </div>
+              `
+            })
             await wait()
 
             expect('.focused').toHaveText('new focused')
-            return expect('.focused').toBeFocused()
+            expect('.focused').toBeFocused()
           })
 
           it('does not re-focus an unrelated element that never lost focus during the render pass', async function() {
@@ -8379,40 +8396,43 @@ describe('up.fragment', function() {
 
             const focusSpy = spyOn(up, 'focus').and.callThrough()
 
-            up.render({focus: 'keep', fragment: `\
-<div class="target">
-  new target
-</div>\
-`})
+            up.render({
+              focus: 'keep',
+              fragment: `
+                <div class="target">
+                  new target
+                </div>
+              `
+            })
             await wait()
 
             expect('.target').toHaveText('new target')
             expect(focusSpy).not.toHaveBeenCalled()
-            return expect('.focused').toBeFocused()
+            expect('.focused').toBeFocused()
           })
 
-          it('does not crash if the focused element is not targetable (bugfix)', asyncSpec(function(next) {
+          it('does not crash if the focused element is not targetable (bugfix)', async function() {
             const container = fixture('.container')
             const oldFocused = e.affix(container, 'div[tabindex=0]', {text: 'old focused'})
             oldFocused.focus()
             expect(oldFocused).toBeFocused()
 
-            up.render('.container', { focus: 'keep', document: `\
-<div class="container">
-  <div tabindex="0">new focused</div>
-</div>\
-`
-          })
-
-            return next(function() {
-              expect('div[tabindex]').toHaveText('new focused')
-              return expect('div[tabindex]').not.toBeFocused()
+            up.render('.container', {
+              focus: 'keep',
+              document: `
+                <div class="container">
+                  <div tabindex="0">new focused</div>
+                </div>
+              `
             })
-          })
-          )
-              // Jasmine will fail if there are unhandled promise rejections
 
-          it('preserves focus of an element within the changed fragment when updating inner HTML with { content } (bugfix)', asyncSpec(function(next) {
+            await wait()
+
+            expect('div[tabindex]').toHaveText('new focused')
+            expect('div[tabindex]').not.toBeFocused()
+          })
+
+          it('preserves focus of an element within the changed fragment when updating inner HTML with { content } (bugfix)', async function() {
             const container = fixture('.container')
             const oldFocused = e.affix(container, '.focused[tabindex=0]', {text: 'old focused'})
             oldFocused.focus()
@@ -8420,24 +8440,25 @@ describe('up.fragment', function() {
 
             up.render('.container', {focus: 'keep', content: '<div class="focused" tabindex="0">new focused</div>'})
 
-            return next(() => expect('.focused').toBeFocused())
-          })
-          )
+            await wait()
 
-          it('preserves scroll position and selection range of an element within the changed fragment', asyncSpec(function(next) {
+            expect('.focused').toBeFocused()
+          })
+
+          it('preserves scroll position and selection range of an element within the changed fragment', async function() {
             const container = fixture('.container')
-            const longText = `\
-foooooooooooo
-baaaaaaaaaaar
-baaaaaaaaaaaz
-baaaaaaaaaaam
-quuuuuuuuuuux
-foooooooooooo
-baaaaaaaaaaar
-baaaaaaaaaaaz
-baaaaaaaaaaam
-quuuuuuuuuuux\
-`
+            const longText = `
+              foooooooooooo
+              baaaaaaaaaaar
+              baaaaaaaaaaaz
+              baaaaaaaaaaam
+              quuuuuuuuuuux
+              foooooooooooo
+              baaaaaaaaaaar
+              baaaaaaaaaaaz
+              baaaaaaaaaaam
+              quuuuuuuuuuux
+            `
             const oldFocused = e.affix(container, 'textarea[name=prose][wrap=off][rows=3][cols=6]', {text: longText})
 
             oldFocused.selectionStart = 10
@@ -8454,18 +8475,17 @@ quuuuuuuuuuux\
 
             up.render('.container', {focus: 'keep', content: `<textarea name='prose' wrap='off' rows='3' cols='6'>${longText}</textarea>`})
 
-            return next(function() {
-              const textarea = document.querySelector('.container textarea')
-              expect(textarea.selectionStart).toBeAround(10, 2)
-              expect(textarea.selectionEnd).toBeAround(11, 2)
-              expect(textarea.scrollTop).toBeAround(12, 2)
-              expect(textarea.scrollLeft).toBeAround(13, 2)
-              return expect(textarea).toBeFocused()
-            })
-          })
-          )
+            await wait()
 
-          it('does not lose focus of an element outside the changed fragment', asyncSpec(function(next) {
+            const textarea = document.querySelector('.container textarea')
+            expect(textarea.selectionStart).toBeAround(10, 2)
+            expect(textarea.selectionEnd).toBeAround(11, 2)
+            expect(textarea.scrollTop).toBeAround(12, 2)
+            expect(textarea.scrollLeft).toBeAround(13, 2)
+            expect(textarea).toBeFocused()
+          })
+
+          it('does not lose focus of an element outside the changed fragment', async function() {
             const oldFocused = fixture('textarea')
             oldFocused.focus()
 
@@ -8474,11 +8494,12 @@ quuuuuuuuuuux\
 
             up.render('.container', {focus: 'keep', content: "<textarea></textarea>"})
 
-            return next(() => expect(oldFocused).toBeFocused())
-          })
-          )
+            await wait()
 
-          return it('does not rediscover an element with the same selector outside the changed fragment (bugfix)', asyncSpec(function(next) {
+            expect(oldFocused).toBeFocused()
+          })
+
+          it('does not rediscover an element with the same selector outside the changed fragment (bugfix)', async function() {
             const outside = fixture('textarea')
 
             const container = fixture('.container')
@@ -8486,285 +8507,313 @@ quuuuuuuuuuux\
 
             up.render('.container', {focus: 'keep', content: "<textarea></textarea>"})
 
-            return next(() => expect(outside).not.toBeFocused())
+            await wait()
+
+            expect(outside).not.toBeFocused()
           })
-          )
         })
 
-        describe('with { focus: "layer" }', () => it("focuses the fragment's layer", asyncSpec(function(next) {
-          // Focus another element since the front layer will automatically
-          // get focus after opening.
-          const textarea = fixture('textarea')
-          textarea.focus()
+        describe('with { focus: "layer" }', function() {
+          it("focuses the fragment's layer", async function() {
+            // Focus another element since the front layer will automatically
+            // get focus after opening.
+            const textarea = fixture('textarea')
+            textarea.focus()
 
-          makeLayers([
-            { target: '.root' },
-            { target: '.overlay' }
-          ])
+            makeLayers([
+              { target: '.root' },
+              { target: '.overlay' }
+            ])
 
-          next(() => up.render('.overlay', {focus: 'layer', content: 'new overlay text'}))
+            await wait()
 
-          return next(() => expect(up.layer.front).toBeFocused())
+            up.render('.overlay', {focus: 'layer', content: 'new overlay text'})
+
+            await wait()
+
+            expect(up.layer.front).toBeFocused()
+          })
         })
-        ))
-
 
         describe('with { focus: "target-if-main" }', function() {
 
-          it('focuses a main target', asyncSpec(function(next) {
+          it('focuses a main target', async function() {
             fixture('form.foo-bar')
 
             up.fragment.config.mainTargets.push('.foo-bar')
 
-            up.render({focus: 'target-if-main', fragment: `\
-<form class='foo-bar'>
-  <input>
-</form>\
-`
+            up.render({
+              focus: 'target-if-main',
+              fragment: `
+                <form class='foo-bar'>
+                  <input>
+                </form>
+              `
             })
 
-            return next(() => {
-              return expect('.foo-bar').toBeFocused()
-            })
+            await wait()
+
+            expect('.foo-bar').toBeFocused()
           })
-          )
 
-          return it('does not focus a non-main target', asyncSpec(function(next) {
+          it('does not focus a non-main target', async function() {
             fixture('form.foo-bar')
 
-            up.render({focus: 'target-if-main', fragment: `\
-<form class='foo-bar'>
-  <input>
-</form>\
-`
+            up.render({
+              focus: 'target-if-main',
+              fragment: `
+                <form class='foo-bar'>
+                  <input>
+                </form>
+              `
             })
 
-            return next(() => {
-              return expect('.foo-bar').not.toBeFocused()
-            })
+            await wait()
+
+            expect('.foo-bar').not.toBeFocused()
           })
-          )
         })
 
         describe('with { focus: "target-if-lost" }', function() {
 
-          it('focuses the target if the focus was lost with the old fragment', asyncSpec(function(next) {
+          it('focuses the target if the focus was lost with the old fragment', async function() {
             const container = fixture('.container')
             const child = e.affix(container, '.child[tabindex=0]')
             child.focus()
 
             expect(child).toBeFocused()
 
-            up.render({focus: 'target-if-lost', fragment: `\
-<div class='container'>
-  <div class='child' tabindex='0'></div>
-</div>\
-`
+            up.render({
+              focus: 'target-if-lost',
+              fragment: `
+                <div class='container'>
+                  <div class='child' tabindex='0'></div>
+                </div>
+              `
             })
 
-            return next(() => expect('.container').toBeFocused())
-          })
-          )
+            await wait()
 
-          it('focuses the target if the focus was lost within a secondary fragment in a multi-fragment update', asyncSpec(function(next) {
+            expect('.container').toBeFocused()
+          })
+
+          it('focuses the target if the focus was lost within a secondary fragment in a multi-fragment update', async function() {
             const element1 = fixture('#element1[tabindex=0]')
             const element2 = fixture('#element2[tabindex=0]')
             element2.focus()
 
             expect(element2).toBeFocused()
 
-            up.render('#element1, #element2', { focus: 'target-if-lost', document: `\
-<div>
-  <div id="element1" tabindex='0'>new element1</div>
-  <div id="element2" tabindex='0'>new element2</div>
-</div>\
-`
-          }
-            )
+            up.render('#element1, #element2', {
+              focus: 'target-if-lost',
+              document: `
+                <div>
+                  <div id="element1" tabindex='0'>new element1</div>
+                  <div id="element2" tabindex='0'>new element2</div>
+                </div>
+              `
+            })
 
-            return next(() => expect('#element1').toBeFocused())
+            await wait()
+
+            expect('#element1').toBeFocused()
           })
-          )
 
-          return it('does not focus the target if an element outside the updating fragment was focused', asyncSpec(function(next) {
+          it('does not focus the target if an element outside the updating fragment was focused', async function() {
             const container = fixture('.container')
             const child = e.affix(container, '.child')
 
             const outside = fixture('.outside[tabindex=0]')
             outside.focus()
 
-            up.render({focus: 'target-if-lost', fragment: `\
-<div class='container'>
-  <div class='child' tabindex='0'></div>
-</div>\
-`
+            up.render({
+              focus: 'target-if-lost',
+              fragment: `
+                <div class='container'>
+                  <div class='child' tabindex='0'></div>
+                </div>
+              `
             })
 
-            return next(() => expect('.outside').toBeFocused())
-          })
-          )
-        })
-
-        describe('with an array of { focus } options', () => it('tries each option until one succeeds', asyncSpec(function(next) {
-          fixture('.container')
-          up.render('.container', {focus: ['autofocus', '.element', '.container'], content: "<div class='element'>element</div>"})
-
-          return next(() => expect('.container .element').toBeFocused())
-        })
-        ))
-
-        describe('with a string with comma-separated { focus } options', () => it('tries each option until one succeeds', async function() {
-          fixture('.container')
-          up.render('.container', {focus: 'autofocus, .element, .container', content: "<div class='element'>element</div>"})
-          await wait()
-
-          return expect('.container .element').toBeFocused()
-        }))
-
-        if (up.migrate.loaded) {
-          describe('with a string with "or"-separated { focus } options', () => it('tries each option until one succeeds', asyncSpec(async function(next) {
-            fixture('.container')
-            up.render('.container', {focus: 'autofocus or .element or .container', content: "<div class='element'>element</div>"})
             await wait()
 
-            return expect('.container .element').toBeFocused()
+            expect('.outside').toBeFocused()
           })
-          ))
+        })
+
+        describe('with an array of { focus } options', function() {
+          it('tries each option until one succeeds', async function() {
+            fixture('.container')
+            up.render('.container', {focus: ['autofocus', '.element', '.container'], content: "<div class='element'>element</div>"})
+
+            await wait()
+
+            expect('.container .element').toBeFocused()
+          })
+        })
+
+        describe('with a string with comma-separated { focus } options', function() {
+          it('tries each option until one succeeds', async function() {
+            fixture('.container')
+            up.render('.container', {focus: 'autofocus, .element, .container', content: "<div class='element'>element</div>"})
+            await wait()
+
+            expect('.container .element').toBeFocused()
+          })
+        })
+
+        if (up.migrate.loaded) {
+          describe('with a string with "or"-separated { focus } options', function() {
+            it('tries each option until one succeeds', async function() {
+              fixture('.container')
+              up.render('.container', {focus: 'autofocus or .element or .container', content: "<div class='element'>element</div>"})
+              await wait()
+
+              expect('.container .element').toBeFocused()
+            })
+          })
         }
 
-        describe('with { focus: "restore" }', () => it('restores earlier focus-related state at this location'))
+        describe('with { focus: "restore" }', function() {
+          it('restores earlier focus-related state at this location')
+        })
 
         describe('with { focus: "auto" }', function() {
 
-          it('focuses a main target', asyncSpec(function(next) {
+          it('focuses a main target', async function() {
             fixture('form.foo-bar')
 
             up.fragment.config.mainTargets.unshift('.foo-bar')
 
-            up.render({focus: 'auto', fragment: `\
-<form class='foo-bar'>
-  <input>
-</form>\
-`
+            up.render({
+              focus: 'auto',
+              fragment: `
+                <form class='foo-bar'>
+                  <input>
+                </form>
+              `
             })
 
-            return next(() => {
-              return expect('.foo-bar').toBeFocused()
-            })
+            await wait()
+
+            expect('.foo-bar').toBeFocused()
           })
-          )
 
-          it('focuses a main target within the updated container', asyncSpec(function(next) {
+          it('focuses a main target within the updated container', async function() {
             const container = fixture('.container')
             e.affix(container, 'form.foo-bar')
 
             up.fragment.config.mainTargets.push('.foo-bar')
 
-            up.render({focus: 'auto', fragment: `\
-<div class='container'>
-  <form class='foo-bar'>
-    <input>
-  </form>
-</div>\
-`
+            up.render({
+              focus: 'auto',
+              fragment: `
+                <div class='container'>
+                  <form class='foo-bar'>
+                    <input>
+                  </form>
+                </div>
+              `
             })
 
-            return next(() => {
-              return expect('.foo-bar').toBeFocused()
-            })
+            await wait()
+
+            expect('.foo-bar').toBeFocused()
           })
-          )
 
-          it('does not focus a non-main target', asyncSpec(function(next) {
+          it('does not focus a non-main target', async function() {
             fixture('.foo-bar')
 
-            up.render({focus: 'auto', fragment: `\
-<form class='foo-bar'>
-  <input>
-</form>\
-`
+            up.render({
+              focus: 'auto',
+              fragment: `
+                <form class='foo-bar'>
+                  <input>
+                </form>
+              `
             })
 
-            return next(() => {
-              return expect('.foo-bar').not.toBeFocused()
-            })
+            await wait()
+
+            expect('.foo-bar').not.toBeFocused()
           })
-          )
 
-          it('focuses an child element with [autofocus] attribute (even when not replacing a main target)', asyncSpec(function(next) {
+          it('focuses an child element with [autofocus] attribute (even when not replacing a main target)', async function() {
             fixture('form.foo-bar')
-            up.render({focus: 'auto', fragment: `\
-<form class='foo-bar'>
-  <input class="autofocused-input" autofocus>
-</form>\
-`
+            up.render({
+              focus: 'auto',
+              fragment: `
+                <form class='foo-bar'>
+                  <input class="autofocused-input" autofocus>
+                </form>
+              `
             })
 
-            return next(() => {
-              return expect('.autofocused-input').toBeFocused()
-            })
+            await wait()
+
+            expect('.autofocused-input').toBeFocused()
           })
-          )
 
-          it('focuses the target of a URL #hash', asyncSpec(function(next) {
+          it('focuses the target of a URL #hash', async function() {
             fixture('.target')
             up.render('.target', {url: '/path#hash', focus: 'auto'})
 
-            next(() => {
-              return this.respondWith(`\
-<div class="target">
-  <div id="hash"></div>
-</div>\
-`
-              )
-            })
+            await wait()
 
-            return next(() => {
-              return expect('#hash').toBeFocused()
-            })
+            this.respondWith(`
+              <div class="target">
+                <div id="hash"></div>
+              </div>
+            `)
+
+            await wait()
+
+            expect('#hash').toBeFocused()
           })
-          )
 
-          return it('preserves focus within a non-main fragment', asyncSpec(function(next) {
+          it('preserves focus within a non-main fragment', async function() {
             const container = fixture('.container')
             const oldFocused = e.affix(container, '.focused[tabindex=0]', {text: 'old focused'})
             oldFocused.focus()
             expect(oldFocused).toBeFocused()
 
-            up.render('.container', { focus: 'auto', document: `\
-<div class="container">
-  <div class="focused" tabindex="0">new focused</div>
-</div>\
-`
-          })
-
-            return next(function() {
-              expect('.focused').toHaveText('new focused')
-              return expect('.focused').toBeFocused()
+            up.render('.container', {
+              focus: 'auto',
+              document: `
+                <div class="container">
+                  <div class="focused" tabindex="0">new focused</div>
+                </div>
+              `
             })
-          })
-          )
-        })
 
-        describe('without a { focus } option', () => it('preserves focus of an element within the changed fragment', asyncSpec(function(next) {
-          const container = fixture('.container')
-          const oldFocused = e.affix(container, '.focused[tabindex=0]', {text: 'old focused'})
-          oldFocused.focus()
-          expect(oldFocused).toBeFocused()
+            await wait()
 
-          up.render('.container', { document: `\
-<div class="container">
-<div class="focused" tabindex="0">new focused</div>
-</div>\
-`
-        })
-
-          return next(function() {
             expect('.focused').toHaveText('new focused')
-            return expect('.focused').toBeFocused()
+            expect('.focused').toBeFocused()
           })
         })
-        ))
+
+        describe('without a { focus } option', function() {
+          it('preserves focus of an element within the changed fragment', async function() {
+            const container = fixture('.container')
+            const oldFocused = e.affix(container, '.focused[tabindex=0]', {text: 'old focused'})
+            oldFocused.focus()
+            expect(oldFocused).toBeFocused()
+
+            up.render('.container', {
+              document: `
+                <div class="container">
+                  <div class="focused" tabindex="0">new focused</div>
+                </div>
+              `
+            })
+
+            await wait()
+
+            expect('.focused').toHaveText('new focused')
+            expect('.focused').toBeFocused()
+          })
+        })
 
         describe('with a function passed as { focus } option', function() {
 
@@ -8775,25 +8824,25 @@ quuuuuuuuuuux\
             await up.render('.element', {content: 'new text', focus: focusHandler})
 
             expect('.element').toHaveText('new text')
-            return expect(focusHandler).toHaveBeenCalled()
+            expect(focusHandler).toHaveBeenCalled()
           })
 
-          return it('does not crash the render pass and emits an error event if the function throws', async function() {
+          it('does not crash the render pass and emits an error event if the function throws', async function() {
             const focusError = new Error('error in focus handler')
             const focusHandler = jasmine.createSpy('focus handler').and.throwError(focusError)
             fixture('.element', {content: 'old text'})
 
-            return await jasmine.expectGlobalError(focusError, async function() {
+            await jasmine.expectGlobalError(focusError, async function() {
               const job = up.render('.element', {content: 'new text', focus: focusHandler})
 
               await expectAsync(job).toBeResolvedTo(jasmine.any(up.RenderResult))
               expect('.element').toHaveText('new text')
-              return expect(focusHandler).toHaveBeenCalled()
+              expect(focusHandler).toHaveBeenCalled()
             })
           })
         })
 
-        return describe('when rendering nothing', function() {
+        describe('when rendering nothing', function() {
 
           it('still processes a { focus } option', function() {
             fixture('main')
@@ -8801,15 +8850,15 @@ quuuuuuuuuuux\
 
             up.render(':none', {focus: 'main', document: '<div></div>'})
 
-            return expect('main').toBeFocused()
+            expect('main').toBeFocused()
           })
 
-          return it('does not crash with { focus: "target" }', function(done) {
+          it('does not crash with { focus: "target" }', function(done) {
             const promise = up.render(':none', {focus: 'target', document: '<div></div>'})
 
-            return u.task(() => promiseState(promise).then(function(result) {
+            u.task(() => promiseState(promise).then(function(result) {
               expect(result.state).toBe('fulfilled')
-              return done()
+              done()
             }))
           })
         })
