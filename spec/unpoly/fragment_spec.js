@@ -10266,11 +10266,11 @@ describe('up.fragment', function() {
                 // Browsers wait a bit before emitting an unhandledrejection event.
                 await wait(100)
 
-                return expect(globalErrorSpy).toHaveBeenCalledWith(jasmine.any(up.Offline))
+                expect(globalErrorSpy).toHaveBeenCalledWith(jasmine.any(up.Offline))
               })
             })
 
-            return it('keeps the expired response in the cache so users can keep navigating within the last known content', async function() {
+            it('keeps the expired response in the cache so users can keep navigating within the last known content', async function() {
               const job1 = up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
 
               await job1
@@ -10309,36 +10309,38 @@ describe('up.fragment', function() {
 
               await expectAsync(job2.finished).toBeRejectedWith(jasmine.any(up.Offline))
               expect(up.network.isBusy()).toBe(false)
-              return expect('.target').toHaveText('cached text')
+              expect('.target').toHaveText('cached text')
             })
           })
 
 
-          return describe('prevention', function() {
+          describe('prevention', function() {
 
-            it('emits a second up:fragment:loaded event with { revalidating: true }', asyncSpec(function(next) {
+            it('emits a second up:fragment:loaded event with { revalidating: true }', async function() {
               const flags = []
-              up.on('up:fragment:loaded', event => flags.push(event.revalidating))
-
-              up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
-
-              next(function() {
-                expect('.target').toHaveText('cached text')
-                expect(up.network.isBusy()).toBe(true)
-                expect(flags).toEqual([false])
-
-                return jasmine.respondWithSelector('.target', {text: 'verified text'})
+              up.on('up:fragment:loaded', event => {
+                flags.push(event.revalidating)
               })
 
-              return next(function() {
-                expect(up.network.isBusy()).toBe(false)
-                expect('.target').toHaveText('verified text')
-                return expect(flags).toEqual([false, true])})}))
+              up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
+              await wait()
+
+              expect('.target').toHaveText('cached text')
+              expect(up.network.isBusy()).toBe(true)
+              expect(flags).toEqual([false])
+
+              jasmine.respondWithSelector('.target', {text: 'verified text'})
+              await wait()
+
+              expect(up.network.isBusy()).toBe(false)
+              expect('.target').toHaveText('verified text')
+              expect(flags).toEqual([false, true])
+            })
 
             it('lets listeners prevent insertion of revalidated content by *preventing* the second up:fragment:loaded event, aborting the { finished } promise yy', async function() {
               up.on('up:fragment:loaded', function(event) {
                 if (event.revalidating) {
-                  return event.preventDefault()
+                  event.preventDefault()
                 }
               })
 
@@ -10359,13 +10361,13 @@ describe('up.fragment', function() {
               expect(up.network.isBusy()).toBe(false)
               expect('.target').toHaveText('cached text')
 
-              return await expectAsync(job.finished).toBeRejectedWith(jasmine.any(up.Aborted))
+              await expectAsync(job.finished).toBeRejectedWith(jasmine.any(up.Aborted))
             })
 
-            return it('lets listeners prevent insertion of revalidated content by *skipping* the second up:fragment:loaded event, fulfilling the { finished } promise', async function() {
+            it('lets listeners prevent insertion of revalidated content by *skipping* the second up:fragment:loaded event, fulfilling the { finished } promise', async function() {
               up.on('up:fragment:loaded', function(event) {
                 if (event.revalidating) {
-                  return event.skip()
+                  event.skip()
                 }
               })
 
@@ -10386,7 +10388,7 @@ describe('up.fragment', function() {
               expect(up.network.isBusy()).toBe(false)
               expect('.target').toHaveText('cached text')
 
-              return await expectAsync(job.finished).toBeResolvedTo(jasmine.any(up.RenderResult))
+              await expectAsync(job.finished).toBeResolvedTo(jasmine.any(up.RenderResult))
             })
           })
         })
