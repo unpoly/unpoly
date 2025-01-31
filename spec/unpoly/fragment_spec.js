@@ -704,7 +704,7 @@ describe('up.fragment', function() {
           fixture('.two', {text: 'old two'})
           fixture('.three', {text: 'old three'})
 
-          const promise = up.render('.one, .three', { 
+          const promise = up.render('.one, .three', {
             document: `
               <div class="one">new one</div>
               <div class="two">new two</div>
@@ -3264,7 +3264,7 @@ describe('up.fragment', function() {
             fixture('.foo', {text: 'old foo'})
             fixture('.bar', {text: 'old bar'})
 
-            up.render('.foo:maybe, .bar', { 
+            up.render('.foo:maybe, .bar', {
               document: `
                 <div class="foo">new foo</div>
                 <div class="bar">new bar</div>
@@ -3281,7 +3281,7 @@ describe('up.fragment', function() {
             fixture('.foo', {text: 'old foo'})
             fixture('.bar', {text: 'old bar'})
 
-            const promise = up.render('.foo:maybe, .bar', { 
+            const promise = up.render('.foo:maybe, .bar', {
               document: `
                 <div class="bar">new bar</div>
               `
@@ -3298,7 +3298,7 @@ describe('up.fragment', function() {
           it('does not impede the render pass if the :maybe target is missing from the current page', async function() {
             fixture('.bar', {text: 'old bar'})
 
-            const promise = up.render('.foo:maybe, .bar', { 
+            const promise = up.render('.foo:maybe, .bar', {
               document: `
                 <div class="foo">new foo</div>
                 <div class="bar">new bar</div>
@@ -4850,7 +4850,9 @@ describe('up.fragment', function() {
 
       describe('with { history } option', function() {
 
-        beforeEach(function() { up.history.config.enabled = true })
+        beforeEach(function() {
+          up.history.config.enabled = true
+        })
 
         describe('browser location', function() {
 
@@ -4871,6 +4873,8 @@ describe('up.fragment', function() {
             await wait()
 
             this.respondWithSelector('.target')
+            await wait()
+
             expect(location.href).toMatchURL(jasmine.locationBeforeExample)
           })
 
@@ -4880,6 +4884,8 @@ describe('up.fragment', function() {
             await wait()
 
             this.respondWithSelector('.target', {responseHeaders: { 'X-Up-Location': '/other-path' }})
+            await wait()
+
             expect(location.href).toMatchURL('/other-path')
           })
 
@@ -4889,6 +4895,8 @@ describe('up.fragment', function() {
             await wait()
 
             jasmine.respondWithSelector('.target', {responseHeaders: { 'X-Up-Location': '/redirect-path' }})
+            await wait()
+
             expect(location.href).toMatchURL('/redirect-path')
           })
 
@@ -4898,6 +4906,8 @@ describe('up.fragment', function() {
             await wait()
 
             jasmine.respondWithSelector('.target', {responseHeaders: { 'X-Up-Location': '/endpoint' }})
+            await wait()
+
             expect(location.href).toMatchURL(jasmine.locationBeforeExample)
           })
 
@@ -4907,6 +4917,8 @@ describe('up.fragment', function() {
             await wait()
 
             jasmine.respondWithSelector('.target', {responseHeaders: { 'X-Up-Location': '/redirect-path', 'X-Up-Method': 'post' }})
+            await wait()
+
             expect(location.href).toMatchURL(jasmine.locationBeforeExample)
           })
 
@@ -4916,6 +4928,8 @@ describe('up.fragment', function() {
             await wait()
 
             this.respondWithSelector('.target', {responseHeaders: { 'X-Up-Location': '/other-path' }})
+            await wait()
+
             expect(location.href).toMatchURL('/other-path#hash')
           })
 
@@ -4930,6 +4944,8 @@ describe('up.fragment', function() {
                 'X-Up-Location': '/signaled-path'
               }
             })
+            await wait()
+
             expect(location.href).toMatchURL('/signaled-path')
           })
 
@@ -4952,6 +4968,8 @@ describe('up.fragment', function() {
             await wait()
 
             this.respondWithSelector('.target')
+            await wait()
+
             expect(location.href).toMatchURL(jasmine.locationBeforeExample)
           })
 
@@ -4961,6 +4979,8 @@ describe('up.fragment', function() {
             await wait()
 
             this.respondWithSelector('.target')
+            await wait()
+
             expect(location.href).toMatchURL(jasmine.locationBeforeExample)
           })
 
@@ -4970,6 +4990,8 @@ describe('up.fragment', function() {
             await wait()
 
             this.respondWithSelector('.target')
+            await wait()
+
             expect(location.href).toMatchURL('/path?foo-key=foo%20value&bar-key=bar%20value')
           })
 
@@ -4979,6 +5001,8 @@ describe('up.fragment', function() {
             await wait()
 
             this.respondWithSelector('.target')
+            await wait()
+
             expect(location.href).toMatchURL(jasmine.locationBeforeExample)
           })
 
@@ -4988,6 +5012,8 @@ describe('up.fragment', function() {
             await wait()
 
             this.respondWithSelector('.target')
+            await wait()
+
             expect(location.href).toMatchURL(jasmine.locationBeforeExample)
           })
 
@@ -5071,6 +5097,8 @@ describe('up.fragment', function() {
               await wait()
 
               this.respondWithSelector('.target')
+              await wait()
+
               expect(location.href).toMatchURL('/path2')
             })
 
@@ -5080,6 +5108,8 @@ describe('up.fragment', function() {
               await wait()
 
               this.respondWithSelector('.target')
+              await wait()
+
               expect(location.href).toMatchURL('/path3')
             })
 
@@ -5244,6 +5274,7 @@ describe('up.fragment', function() {
                 </div>
               `
             })
+            await wait()
 
             expect('.container').toHaveText('new container text')
             expect(document.title).toBe('Title from header')
@@ -5272,6 +5303,7 @@ describe('up.fragment', function() {
                 </html>
               `
             })
+            await wait()
 
             expect('.container').toHaveText('new container text')
             expect(document.title).toBe('Title from header')
@@ -5294,6 +5326,7 @@ describe('up.fragment', function() {
                   </div>
                 `
               })
+              await wait()
 
               expect('.container').toHaveText('new container text')
               expect(document.title).toBe('Title from header')
@@ -5318,7 +5351,6 @@ describe('up.fragment', function() {
                 </body>
               </html>
             `)
-
             await wait()
 
             expect('.container').toHaveText('new container text')
@@ -5344,7 +5376,6 @@ describe('up.fragment', function() {
                 new container text
               </div>
             `)
-
             await wait()
 
             expect('.container').toHaveText('new container text')
@@ -5355,7 +5386,6 @@ describe('up.fragment', function() {
             fixture('.container', {text: 'old container text'})
             const oldTitle = document.title
             up.render('.container', {url: '/path', history: true, title: false})
-
             await wait()
 
             jasmine.respondWith({
@@ -5375,7 +5405,6 @@ describe('up.fragment', function() {
                 </html>
               `
             })
-
             await wait()
 
             expect(document.title).toEqual(oldTitle)
@@ -5385,7 +5414,6 @@ describe('up.fragment', function() {
             fixture('.container', {text: 'old container text'})
             const oldTitle = document.title
             up.render('.container', {url: '/path', history: false})
-
             await wait()
 
             jasmine.respondWith({
@@ -5405,7 +5433,6 @@ describe('up.fragment', function() {
                 </html>
               `
             })
-
             await wait()
 
             expect(document.title).toEqual(oldTitle)
@@ -5414,7 +5441,6 @@ describe('up.fragment', function() {
           it('allows to pass an explicit title as { title } option', async function() {
             $fixture('.container').text('old container text')
             up.render('.container', {url: '/path', history: true, title: 'Title from options'})
-
             await wait()
 
             this.respondWith(`
@@ -5429,7 +5455,6 @@ describe('up.fragment', function() {
                 </body>
               </html>
             `)
-
             await wait()
 
             expect('.container').toHaveText('new container text')
@@ -5475,7 +5500,6 @@ describe('up.fragment', function() {
                 </body>
               </html>
             `)
-
             await wait()
 
             expect('.container').toHaveText('new container text')
@@ -5488,16 +5512,15 @@ describe('up.fragment', function() {
         describe('meta tags', function() {
 
           beforeEach(function() { up.history.config.enabled = true })
-  
+
           it("updates meta tags from the response", async function() {
             fixture(document.head, 'link[rel="canonical"][href="/old-canonical"]')
             fixture(document.head, 'meta[name="description"][content="old description"]')
-  
+
             fixture('.container', {text: 'old container text'})
             up.render('.container', {url: '/path', history: true})
-  
             await wait()
-  
+
             jasmine.respondWith(`
               <html>
                 <head>
@@ -5511,24 +5534,22 @@ describe('up.fragment', function() {
                 </body>
               </html>
             `)
-  
             await wait()
-  
+
             expect(document.head).not.toHaveSelector('link[rel="canonical"][href="/old-canonical"]')
             expect(document.head).toHaveSelector('link[rel="canonical"][href="/new-canonical"]')
             expect(document.head).not.toHaveSelector('meta[name="description"][content="old description"]')
             expect(document.head).toHaveSelector('meta[name="description"][content="new description"]')
           })
-  
+
           it("does not update meta tags with [up-meta=false]", async function() {
             fixture(document.head, 'link[rel="canonical"][href="/old-canonical"][up-meta="false"]')
             fixture(document.head, 'meta[name="description"][content="old description"]')
-  
+
             fixture('.container', {text: 'old container text'})
             up.render('.container', {url: '/path', history: true})
-  
             await wait()
-  
+
             jasmine.respondWith(`
               <html>
                 <head>
@@ -5542,24 +5563,22 @@ describe('up.fragment', function() {
                 </body>
               </html>
             `)
-  
             await wait()
-  
+
             expect(document.head).toHaveSelector('link[rel="canonical"][href="/old-canonical"]')
             expect(document.head).not.toHaveSelector('link[rel="canonical"][href="/new-canonical"]')
             expect(document.head).not.toHaveSelector('meta[name="description"][content="old description"]')
             expect(document.head).toHaveSelector('meta[name="description"][content="new description"]')
           })
-  
+
           it('does not update meta tags with { history: false }', async function() {
             fixture(document.head, 'link[rel="canonical"][href="/old-canonical"]')
             fixture(document.head, 'meta[name="description"][content="old description"]')
-  
+
             fixture('.container', {text: 'old container text'})
             up.render('.container', {url: '/path', history: false})
-  
             await wait()
-  
+
             jasmine.respondWith(`
               <html>
                 <head>
@@ -5573,24 +5592,22 @@ describe('up.fragment', function() {
                 </body>
               </html>
             `)
-  
             await wait()
-  
+
             expect(document.head).toHaveSelector('link[rel="canonical"][href="/old-canonical"]')
             expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
           })
-  
+
           it('does not update meta tags with up.history.config.updateMetaTags = false', async function() {
             up.history.config.updateMetaTags = false
-  
+
             fixture(document.head, 'link[rel="canonical"][href="/old-canonical"]')
             fixture(document.head, 'meta[name="description"][content="old description"]')
-  
+
             fixture('.container', {text: 'old container text'})
             up.render('.container', {url: '/path', history: true})
-  
             await wait()
-  
+
             jasmine.respondWith(`
               <html>
                 <head>
@@ -5604,22 +5621,20 @@ describe('up.fragment', function() {
                 </body>
               </html>
             `)
-  
             await wait()
-  
+
             expect(document.head).toHaveSelector('link[rel="canonical"][href="/old-canonical"]')
             expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
           })
-  
+
           it('does not update meta tags with { metaTags: false } option', async function() {
             fixture(document.head, 'link[rel="canonical"][href="/old-canonical"]')
             fixture(document.head, 'meta[name="description"][content="old description"]')
-  
+
             fixture('.container', {text: 'old container text'})
             up.render('.container', {url: '/path', history: true, metaTags: false})
-  
             await wait()
-  
+
             jasmine.respondWith(`
               <html>
                 <head>
@@ -5633,19 +5648,18 @@ describe('up.fragment', function() {
                 </body>
               </html>
             `)
-  
             await wait()
-  
+
             expect(document.head).toHaveSelector('link[rel="canonical"][href="/old-canonical"]')
             expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
           })
-  
+
           it('does not render meta tags for a background layer, but saves them for later restoration', async function() {
             fixture(document.head, 'meta[name="description"][content="old root description"]')
             document.title = 'old root title'
-  
+
             fixture('.container', {text: 'old root container text'})
-  
+
             up.layer.open({
               target: '.container',
               history: true,
@@ -5664,13 +5678,13 @@ describe('up.fragment', function() {
                 </html>
               `
             })
-  
+
             await wait()
-  
+
             expect(document.title).toBe('overlay title')
             expect(document.head).toHaveSelector('meta[name="description"][content="overlay description"]')
             expect(document.head).not.toHaveSelector('meta[name="description"][content="old root description"]')
-  
+
             up.render({
               target: '.container',
               layer: 'root',
@@ -5690,49 +5704,49 @@ describe('up.fragment', function() {
                 </html>
               `
             })
-  
+
             await wait()
-  
+
             // Since we updated a background layer, the rendered meta tags are still those from the overlay.
             expect(document.title).toBe('overlay title')
             expect(document.head).toHaveSelector('meta[name="description"][content="overlay description"]')
             expect(document.head).not.toHaveSelector('meta[name="description"][content="old root description"]')
-  
+
             up.layer.dismiss()
-  
+
             await wait()
-  
+
             // Now that the root layer is revealed again, we see the meta tags saved from the last render pass.
             expect(document.title).toBe('new root title')
             expect(document.head).not.toHaveSelector('meta[name="description"][content="overlay description"]')
             expect(document.head).not.toHaveSelector('meta[name="description"][content="old root description"]')
             expect(document.head).toHaveSelector('meta[name="description"][content="new root description"]')
           })
-  
+
           it('does not remove current meta tags if the response has no <head>', async function() {
             fixture(document.head, 'link[rel="canonical"][href="/old-canonical"]')
             fixture(document.head, 'meta[name="description"][content="old description"]')
-  
+
             fixture('.container', {text: 'old container text'})
             up.render('.container', {url: '/path', history: true})
-  
+
             await wait()
-  
+
             jasmine.respondWith(`
               <div class='container'>
                 new container text
               </div>
             `)
-  
+
             await wait()
-  
+
             expect(document.head).toHaveSelector('link[rel="canonical"][href="/old-canonical"]')
             expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
           })
-  
+
           it('updates a script[type="application/ld+json"] from the response with up.fragment.config.runScripts = false (bugfix)', async function() {
             up.fragment.config.runScripts = false
-  
+
             const json = `
               {
                 "@context": "https://schema.org/",
@@ -5747,12 +5761,12 @@ describe('up.fragment', function() {
                 "prepTime": "PT20M"
               }
             `
-  
+
             fixture('.container', {text: 'old container text'})
             up.render('.container', {url: '/path', history: true})
-  
+
             await wait()
-  
+
             jasmine.respondWith(`
               <html>
                 <head>
@@ -5765,24 +5779,24 @@ describe('up.fragment', function() {
                 </body>
               </html>
             `)
-  
+
             await wait()
-  
+
             expect('.container').toHaveText('new container text')
             expect(document.head).toHaveSelector('script[type="application/ld+json"]')
             expect(document.head.querySelector('script[type="application/ld+json"]')).toHaveText(json)
           })
-  
+
           if (up.migrate.loaded) {
             it("warns if an auto-update meta tags is also [up-hungry]", async function() {
               fixture(document.head, 'link[rel="canonical"][href="/old-canonical"][up-hungry]')
               const warnSpy = up.migrate.warn.mock()
-  
+
               fixture('.container', {text: 'old container text'})
               up.render('.container', {url: '/path', history: true})
-  
+
               await wait()
-  
+
               jasmine.respondWith(`
                 <html>
                   <head>
@@ -5795,25 +5809,25 @@ describe('up.fragment', function() {
                   </body>
                 </html>
               `)
-  
+
               await wait()
-  
+
               expect(document.head).not.toHaveSelector('link[rel="canonical"][href="/old-canonical"]')
               expect(document.head).toHaveSelector('link[rel="canonical"][href="/new-canonical"]')
               expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('Remove the [up-hungry] attribute'), jasmine.anything())
             })
           }
         })
-  
+
         describe('html[lang]', function() {
-  
+
           it('updates the html[lang] attribute with the language from the response', async function() {
             document.documentElement.setAttribute('lang', 'it')
             fixture('.container', {text: 'old container text'})
             up.render('.container', {url: '/path', history: true})
-  
+
             await wait()
-  
+
             jasmine.respondWith(`
               <html lang='fr'>
                 <body>
@@ -5823,20 +5837,20 @@ describe('up.fragment', function() {
                 </body>
               </html>
             `)
-  
+
             await wait()
-  
+
             expect('.container').toHaveText('new container text')
             expect(document.documentElement).toHaveAttribute('lang', 'fr')
           })
-  
+
           it('removes the html[lang] attribute if the response has a <html> element without a [lang] attribute', async function() {
             document.documentElement.setAttribute('lang', 'it')
             fixture('.container', {text: 'old container text'})
             up.render('.container', {url: '/path', history: true})
-  
+
             await wait()
-  
+
             jasmine.respondWith(`
               <html>
                 <body>
@@ -5846,39 +5860,39 @@ describe('up.fragment', function() {
                 </body>
               </html>
             `)
-  
+
             await wait()
-  
+
             expect('.container').toHaveText('new container text')
             expect(document.documentElement).not.toHaveAttribute('lang')
           })
-  
+
           it('does not remove the html[lang] attribute if the response has no <html> element', async function() {
             document.documentElement.setAttribute('lang', 'it')
             fixture('.container', {text: 'old container text'})
             up.render('.container', {url: '/path', history: true})
-  
+
             await wait()
-  
+
             jasmine.respondWith(`
               <div class='container'>
                 new container text
               </div>
             `)
-  
+
             await wait()
-  
+
             expect('.container').toHaveText('new container text')
             expect(document.documentElement).toHaveAttribute('lang', 'it')
           })
-  
+
           it('does not update the html[lang] attribute with { lang: false }', async function() {
             document.documentElement.setAttribute('lang', 'it')
             fixture('.container', {text: 'old container text'})
             up.render('.container', {url: '/path', history: true, lang: false})
-  
+
             await wait()
-  
+
             jasmine.respondWith(`
               <html lang='fr'>
                 <body>
@@ -5888,20 +5902,20 @@ describe('up.fragment', function() {
                 </body>
               </html>
             `)
-  
+
             await wait()
-  
+
             expect('.container').toHaveText('new container text')
             expect(document.documentElement).toHaveAttribute('lang', 'it')
           })
-  
+
           it('does not update the html[lang] attribute when not updating history', async function() {
             document.documentElement.setAttribute('lang', 'it')
             fixture('.container', {text: 'old container text'})
             up.render('.container', {url: '/path', history: false})
-  
+
             await wait()
-  
+
             jasmine.respondWith(`
               <html lang='fr'>
                 <body>
@@ -5911,21 +5925,21 @@ describe('up.fragment', function() {
                 </body>
               </html>
             `)
-  
+
             await wait()
-  
+
             expect('.container').toHaveText('new container text')
             expect(document.documentElement).toHaveAttribute('lang', 'it')
           })
         })
-  
+
         describe('assets in the head', function() {
-  
+
           it('does not update linked stylesheets in the <head>', async function() {
             const style = e.createFromSelector('link[rel="stylesheet"][href="styles-1.css"]')
             registerFixture(style)
             document.head.append(style)
-  
+
             fixture('.container', {text: 'old container text'})
             up.render('.container', {
               location: '/path',
@@ -5943,18 +5957,18 @@ describe('up.fragment', function() {
                 </html>
               `
             })
-  
+
             await wait()
-  
+
             expect('.container').toHaveText('new container text')
             expect(document.head).toHaveSelector('link[rel="stylesheet"][href="styles-1.css"]')
           })
-  
+
           it('does not update linked scripts in the <head>', async function() {
             const style = e.createFromSelector('script[src="scripts-1.js"]')
             registerFixture(style)
             document.head.append(style)
-  
+
             fixture('.container', {text: 'old container text'})
             up.render('.container', {
               location: '/path',
@@ -5972,21 +5986,21 @@ describe('up.fragment', function() {
                 </html>
               `
             })
-  
+
             await wait()
-  
+
             expect('.container').toHaveText('new container text')
             expect(document.head).toHaveSelector('script[src="scripts-1.js"]')
           })
-  
+
           it('emits an up:assets:changed event if linked assets differ between <head> and <response>', async function() {
             const listener = jasmine.createSpy('up:assets:changed listener')
             up.on('up:assets:changed', listener)
-  
+
             const style = e.createFromSelector('script[src="scripts-1.js"]')
             registerFixture(style)
             document.head.append(style)
-  
+
             fixture('.container', {text: 'old container text'})
             up.render('.container', {
               location: '/path',
@@ -6004,11 +6018,11 @@ describe('up.fragment', function() {
                 </html>
               `
             })
-  
+
             await wait()
-  
+
             expect('.container').toHaveText('new container text')
-  
+
             expect(listener).toHaveBeenCalled()
             const event = listener.calls.mostRecent().args[0]
             expect(event.type).toBe('up:assets:changed')
@@ -6017,17 +6031,17 @@ describe('up.fragment', function() {
             expect(u.map(event.oldAssets, 'outerHTML')).toEqual(['<script src="scripts-1.js"></script>'])
             expect(u.map(event.newAssets, 'outerHTML')).toEqual(['<script src="scripts-2.js"></script>'])
           })
-  
+
           it('does not emit up:assets:changed if the only changed asset has [up-asset=false]', async function() {
             const listener = jasmine.createSpy('up:assets:changed listener')
             up.on('up:assets:changed', listener)
-  
+
             const style = e.createFromSelector('script[src="scripts-1.js"][up-asset="false"]')
             registerFixture(style)
             document.head.append(style)
-  
+
             fixture('.container', {text: 'old container text'})
-  
+
             up.render('.container', {
               location: '/path',
               history: true,
@@ -6044,23 +6058,23 @@ describe('up.fragment', function() {
                 </html>
               `
             })
-  
+
             await wait()
-  
+
             expect('.container').toHaveText('new container text')
             expect(listener).not.toHaveBeenCalled()
           })
-  
+
           it('does not emit up:assets:changed if the <link> and <meta> elements did not change', async function() {
             const listener = jasmine.createSpy('up:assets:changed listener')
             up.on('up:assets:changed', listener)
-  
+
             const style = e.createFromSelector('script[src="scripts.js"]')
             registerFixture(style)
             document.head.append(style)
-  
+
             fixture('.container', {text: 'old container text'})
-  
+
             up.render('.container', {
               location: '/path',
               history: true,
@@ -6077,24 +6091,24 @@ describe('up.fragment', function() {
                 </html>
               `
             })
-  
+
             await wait()
-  
+
             expect('.container').toHaveText('new container text')
             expect(listener).not.toHaveBeenCalled()
           })
-  
+
           it('does not emit up:assets:changed after a script in the <body> was disabled through up.fragmentconfig.runScripts = false (bugfix)', async function() {
             up.fragment.config.runScripts = false
             const listener = jasmine.createSpy('up:assets:changed listener')
             up.on('up:assets:changed', listener)
-  
+
             const style = e.createFromSelector('script[src="scripts.js"]')
             registerFixture(style)
             document.head.append(style)
-  
+
             fixture('.container', {text: 'old container text'})
-  
+
             up.render('.container', {
               location: '/path',
               history: true,
@@ -6111,31 +6125,31 @@ describe('up.fragment', function() {
                 </html>
               `
             })
-  
+
             await wait()
-  
+
             expect('.container').toHaveText('new container text')
             expect(listener).not.toHaveBeenCalled()
           })
-  
+
           it('does not emit up:assets:changed if the updated <link> and <meta> elements are not asset-related', async function() {
             const listener = jasmine.createSpy('up:assets:changed listener')
             up.on('up:assets:changed', listener)
-  
+
             const style = e.createFromSelector('script[src="scripts.js"]')
             registerFixture(style)
             document.head.append(style)
-  
+
             const description = e.createFromSelector('meta[name="description"][content="old description"]')
             registerFixture(description)
             document.head.append(description)
-  
+
             const nextLink = e.createFromSelector('link[rel="next"][href="/old-next"]')
             registerFixture(nextLink)
             document.head.append(nextLink)
-  
+
             fixture('.container', {text: 'old container text'})
-  
+
             up.render('.container', {
               location: '/path',
               history: true,
@@ -6154,21 +6168,21 @@ describe('up.fragment', function() {
                 </html>
               `
             })
-  
+
             await wait()
-  
+
             expect('.container').toHaveText('new container text')
             expect(listener).not.toHaveBeenCalled()
           })
-  
+
           it('does not emit up:assets:changed if the response has no <head>', async function() {
             const listener = jasmine.createSpy('up:assets:changed listener')
             up.on('up:assets:changed', listener)
-  
+
             const script = e.createFromSelector('script[src="scripts-1.js"]')
             registerFixture(script)
             document.head.append(script)
-  
+
             fixture('.container', {text: 'old container text'})
             up.render('.container', {
               location: '/path',
@@ -6179,21 +6193,21 @@ describe('up.fragment', function() {
                 </div>
               `
             })
-  
+
             await wait()
-  
+
             expect('.container').toHaveText('new container text')
             expect(listener).not.toHaveBeenCalled()
           })
-  
+
           it('does not emit up:assets:changed if inline scripts in the <head> changed', async function() {
             const listener = jasmine.createSpy('up:assets:changed listener')
             up.on('up:assets:changed', listener)
-  
+
             const script = e.createFromSelector('script', {text: 'console.log("hello from old inline scripts")'})
             registerFixture(script)
             document.head.append(script)
-  
+
             fixture('.container', {text: 'old container text'})
             up.render('.container', {
               location: '/path',
@@ -6211,21 +6225,21 @@ describe('up.fragment', function() {
                 </html>
               `
             })
-  
+
             await wait()
-  
+
             expect('.container').toHaveText('new container text')
             expect(listener).not.toHaveBeenCalled()
           })
-  
+
           it('aborts the render pass if the up:assets:changed event is prevented', async function() {
             const listener = jasmine.createSpy('up:assets:changed listener').and.callFake(event => event.preventDefault())
             up.on('up:assets:changed', listener)
-  
+
             const style = e.createFromSelector('script[src="scripts-1.js"]')
             registerFixture(style)
             document.head.append(style)
-  
+
             fixture('.container', {text: 'old container text'})
             const renderPromise = up.render('.container', {
               location: '/path',
@@ -6243,9 +6257,9 @@ describe('up.fragment', function() {
                 </html>
               `
             })
-  
+
             await expectAsync(renderPromise).toBeRejectedWith(jasmine.any(up.Aborted))
-  
+
             expect(listener).toHaveBeenCalled()
             expect('.container').toHaveText('old container text')
           })
@@ -6756,10 +6770,10 @@ describe('up.fragment', function() {
           $container.scrollTop(300)
           expect($container.scrollTop()).toEqual(300)
 
-          up.render($element.get(0), { 
-            transition: 'cross-fade', 
-            duration: 60000, 
-            scroll: 'target', 
+          up.render($element.get(0), {
+            transition: 'cross-fade',
+            duration: 60000,
+            scroll: 'target',
             document: `
               <div class="element" style="height: 600px"></div>
             `
@@ -6895,7 +6909,7 @@ describe('up.fragment', function() {
 
             await jasmine.expectGlobalError(transitionError, async function() {
               const job = up.render({
-                transition: crashingTransition, 
+                transition: crashingTransition,
                 fragment: `
                   <div class="target">new target</div>
                 `
@@ -6917,8 +6931,8 @@ describe('up.fragment', function() {
             fixture('.tertiary', {text: 'old tertiary'})
 
             await jasmine.spyOnGlobalErrorsAsync(async function() {
-              up.render('.primary, .secondary, .tertiary', { 
-                transition: 'crashing', 
+              up.render('.primary, .secondary, .tertiary', {
+                transition: 'crashing',
                 document: `
                   <div class="primary">new primary</div>
                   <div class="secondary">new secondary</div>
