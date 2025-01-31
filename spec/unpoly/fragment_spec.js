@@ -1854,7 +1854,7 @@ describe('up.fragment', function() {
             await wait()
 
             expect('.one').toHaveText('old one')
-            return expect('.two').toHaveText('new two')
+            expect('.two').toHaveText('new two')
           })
 
           it('allows listeners to mutate up.render() options to target another fragment with a failed response', async function() {
@@ -1874,7 +1874,7 @@ describe('up.fragment', function() {
             await wait()
 
             expect('.one').toHaveText('old one')
-            return expect('.two').toHaveText('new two')
+            expect('.two').toHaveText('new two')
           })
 
           it('allows listeners to mutate up.render() options and render into a new layer', async function() {
@@ -1892,7 +1892,7 @@ describe('up.fragment', function() {
             await wait()
 
             expect(up.layer.isOverlay()).toBe(true)
-            return expect(up.fragment.get('.one', { layer: 'overlay' })).toHaveText('new one')
+            expect(up.fragment.get('.one', { layer: 'overlay' })).toHaveText('new one')
           })
 
           it('allows listeners to mutate up.render() options and render into a new layer with a failed response', async function() {
@@ -1910,7 +1910,7 @@ describe('up.fragment', function() {
             await wait()
 
             expect(up.layer.isOverlay()).toBe(true)
-            return expect(up.fragment.get('.one', { layer: 'overlay' })).toHaveText('new one')
+            expect(up.fragment.get('.one', { layer: 'overlay' })).toHaveText('new one')
           })
 
           it('allows listeners to mutate up.render() options before the fragment is updated when the server responds with an error code (bugfix)', async function() {
@@ -1937,26 +1937,25 @@ describe('up.fragment', function() {
 
             expect('.one').toHaveText('old one')
             expect('.two').toHaveText('old two')
-            return expect('.three').toHaveText('new three')
+            expect('.three').toHaveText('new three')
           })
 
-          it('allows to pass a listener for just one render pass using { onLoaded } option', asyncSpec(function(next) {
+          it('allows to pass a listener for just one render pass using { onLoaded } option', async function() {
             const origin = fixture('.origin')
             fixture('.target')
             let event = undefined
             const onLoaded = e => event = e
 
             up.render({ target: '.target', url: '/url', location: '/location-from-option', peel: false, origin, onLoaded })
+            await wait()
 
-            next(() => jasmine.respondWithSelector('.target', {text: 'text from server'}))
+            jasmine.respondWithSelector('.target', {text: 'text from server'})
+            await wait()
 
-            return next(function() {
-              expect(event).toBeGiven()
-              expect(event.request).toEqual(jasmine.any(up.Request))
-              return expect(event.request.url).toMatchURL('/url')
-            })
+            expect(event).toBeGiven()
+            expect(event.request).toEqual(jasmine.any(up.Request))
+            expect(event.request.url).toMatchURL('/url')
           })
-          )
 
           it('runs an { onLoaded } listener for failed responses (there is no { onFailLoaded })', async function() {
             const origin = fixture('.origin')
@@ -1975,10 +1974,10 @@ describe('up.fragment', function() {
 
             expect(event).toBeGiven()
             expect(event.request).toEqual(jasmine.any(up.Request))
-            return expect(event.request.url).toMatchURL('/url')
+            expect(event.request.url).toMatchURL('/url')
           })
 
-          return describe('emission target', function() {
+          describe('emission target', function() {
 
             it('is emitted on the element of the updating layer', async function() {
               makeLayers(2)
@@ -1995,10 +1994,10 @@ describe('up.fragment', function() {
               jasmine.respondWithSelector('#one')
               await wait()
 
-              return expect(spy).toHaveBeenCalledWith(up.layer.current.element)
+              expect(spy).toHaveBeenCalledWith(up.layer.current.element)
             })
 
-            return it('is emitted on the element of the base layer when opening a new overlay', async function() {
+            it('is emitted on the element of the base layer when opening a new overlay', async function() {
               makeLayers(2)
               const baseLayer = up.layer.current
               expect(baseLayer.isOverlay()).toBe(true)
@@ -2012,7 +2011,7 @@ describe('up.fragment', function() {
               jasmine.respondWithSelector('#one')
               await wait()
 
-              return expect(spy).toHaveBeenCalledWith(baseLayer.element)
+              expect(spy).toHaveBeenCalledWith(baseLayer.element)
             })
           })
         })
