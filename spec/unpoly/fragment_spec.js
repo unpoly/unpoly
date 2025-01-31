@@ -10712,11 +10712,11 @@ describe('up.fragment', function() {
         describe('scripts', function() {
 
           it('keeps a <script> element (bugfix)', async function() {
-            const html = `\
-<div id="container">
-  <script id="script" up-keep></script>
-</div>\
-`
+            const html = `
+              <div id="container">
+                <script id="script" up-keep></script>
+              </div>
+            `
 
             htmlFixture(html)
             const scriptBeforeRender = document.querySelector('#script')
@@ -10726,17 +10726,17 @@ describe('up.fragment', function() {
 
             await wait()
 
-            return expect(document.querySelector('#script')).toBe(scriptBeforeRender)
+            expect(document.querySelector('#script')).toBe(scriptBeforeRender)
           })
 
           it('keeps a <script> element, but allows to replace it in a non-keeping render pass later (bugfix)', async function() {
             window.keepSpy = jasmine.createSpy('spy called from keepable script')
 
-            const html = `\
-<div id="container">
-  <script id="script" up-keep>window.keepSpy()</script>
-</div>\
-`
+            const html = `
+              <div id="container">
+                <script id="script" up-keep>window.keepSpy()</script>
+              </div>
+            `
 
             htmlFixture(html)
             const scriptBeforeRender = document.querySelector('#script')
@@ -10759,18 +10759,18 @@ describe('up.fragment', function() {
             expect(document.querySelector('#script')).not.toBe(scriptBeforeRender)
             expect(window.keepSpy.calls.count()).toBe(2)
 
-            return delete window.keepSpy
+            delete window.keepSpy
           })
 
           it('does not re-run a kept <script> element when rendering with DOMParser (bugfix)', async function() {
             window.specSpy = jasmine.createSpy('specSpy() function')
             expect(window.specSpy.calls.count()).toBe(0)
 
-            const html = `\
-<div id="container">
-  <script id="script" up-keep>window.specSpy()</script>
-</div>\
-`
+            const html = `
+              <div id="container">
+                <script id="script" up-keep>window.specSpy()</script>
+              </div>
+            `
 
             htmlFixture(html)
             expect(window.specSpy.calls.count()).toBe(1)
@@ -10782,18 +10782,18 @@ describe('up.fragment', function() {
 
             expect(window.specSpy.calls.count()).toBe(1)
 
-            return delete window.specSpy
+            delete window.specSpy
           })
 
           it('does not re-run a kept <script> element when rendering without DOMParser (bugfix)', async function() {
             window.specSpy = jasmine.createSpy('specSpy() function')
             expect(window.specSpy.calls.count()).toBe(0)
 
-            const html = `\
-<div id="container">
-  <script id="script" up-keep>window.specSpy()</script>
-</div>\
-`
+            const html = `
+              <div id="container">
+                <script id="script" up-keep>window.specSpy()</script>
+              </div>
+            `
 
             htmlFixture(html)
             expect(window.specSpy.calls.count()).toBe(1)
@@ -10807,15 +10807,15 @@ describe('up.fragment', function() {
 
             expect(window.specSpy.calls.count()).toBe(1)
 
-            return delete window.specSpy
+            delete window.specSpy
           })
 
-          return it('keeps a <noscript> element (bugfix)', async function() {
-            const html = `\
-<div id="container">
-  <noscript id="noscript" up-keep></noscript>
-</div>\
-`
+          it('keeps a <noscript> element (bugfix)', async function() {
+            const html = `
+              <div id="container">
+                <noscript id="noscript" up-keep></noscript>
+              </div>
+            `
 
             htmlFixture(html)
             const noscriptBeforeRender = document.querySelector('#noscript')
@@ -10825,7 +10825,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            return expect(document.querySelector('#noscript')).toBe(noscriptBeforeRender)
+            expect(document.querySelector('#noscript')).toBe(noscriptBeforeRender)
           })
         })
 
