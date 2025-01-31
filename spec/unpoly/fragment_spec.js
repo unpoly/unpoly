@@ -676,7 +676,9 @@ describe('up.fragment', function() {
 
     describe('up.render()', function() {
 
-      beforeEach(() => up.motion.config.enabled = false)
+      beforeEach(function() {
+        up.motion.config.enabled = false
+      })
 
       it('preserves a verbatim "<script>" string in an element attribute (bugfix)', function() {
         fixture('#target')
@@ -684,7 +686,7 @@ describe('up.fragment', function() {
 
         up.render({fragment: `<div id='target' foo='${attrValue}'></div>`})
 
-        return expect(document.querySelector('#target').getAttribute('foo')).toBe(attrValue)
+        expect(document.querySelector('#target').getAttribute('foo')).toBe(attrValue)
       })
 
       describe('return value', function() {
@@ -694,23 +696,24 @@ describe('up.fragment', function() {
 
           const job = up.render('.target', {content: 'new text'})
           expect(job.options.target).toBe('.target')
-          return expect(job.options.content).toBe('new text')
+          expect(job.options.content).toBe('new text')
         })
 
-        return it('returns a promise for an up.RenderResult describing the updated fragments and layer', async function() {
+        it('returns a promise for an up.RenderResult describing the updated fragments and layer', async function() {
           fixture('.one', {text: 'old one'})
           fixture('.two', {text: 'old two'})
           fixture('.three', {text: 'old three'})
 
-          const promise = up.render('.one, .three', { document: `\
-<div class="one">new one</div>
-<div class="two">new two</div>
-<div class="three">new three</div>\
-`
-        })
+          const promise = up.render('.one, .three', { 
+            document: `
+              <div class="one">new one</div>
+              <div class="two">new two</div>
+              <div class="three">new three</div>
+            `
+          })
 
           await expectAsync(promise).toBeResolvedTo(jasmine.any(up.RenderResult))
-          return await expectAsync(promise).toBeResolvedTo(jasmine.objectContaining({
+          await expectAsync(promise).toBeResolvedTo(jasmine.objectContaining({
             fragments: [document.querySelector('.one'), document.querySelector('.three')],
             layer: up.layer.root
           }))
