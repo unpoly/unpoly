@@ -67,6 +67,7 @@ module.exports = {
         "Trigger": "readonly",
         "promiseState": "readonly",
         "raceThenables": "readonly",
+        "allowGlobalErrors": "readonly",
       },
       "rules": {
         "@typescript-eslint/no-unused-vars": "off"
