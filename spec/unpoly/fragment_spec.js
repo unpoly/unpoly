@@ -9284,7 +9284,7 @@ describe('up.fragment', function() {
       if (up.migrate.loaded) {
         describe('with { solo } option', function() {
 
-          it('aborts the request of an existing change', asyncSpec(function(next) {
+          it('aborts the request of an existing change', async function() {
             fixture('.element')
 
             let change1Error  = undefined
@@ -9293,21 +9293,20 @@ describe('up.fragment', function() {
 
             change1Promise = up.render('.element', {url: '/path1', solo: true}).catch(e => change1Error = e)
 
-            next(() => {
-              expect(up.network.queue.allRequests.length).toEqual(1)
-              expect(change1Error).toBeUndefined()
+            await wait()
 
-              return change2Promise = up.render('.element', {url: '/path2', solo: true})
-            })
+            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(change1Error).toBeUndefined()
 
-            return next(() => {
-              expect(change1Error).toBeAbortError()
-              return expect(up.network.queue.allRequests.length).toEqual(1)
-            })
+            change2Promise = up.render('.element', {url: '/path2', solo: true})
+
+            await wait()
+
+            expect(change1Error).toBeAbortError()
+            expect(up.network.queue.allRequests.length).toEqual(1)
           })
-          )
 
-          it('aborts the request of an existing change if the new change is made from local content', asyncSpec(function(next) {
+          it('aborts the request of an existing change if the new change is made from local content', async function() {
             fixture('.element')
 
             let change1Error  = undefined
@@ -9316,19 +9315,18 @@ describe('up.fragment', function() {
 
             change1Promise = up.render('.element', {url: '/path1', solo: true}).catch(e => change1Error = e)
 
-            next(() => {
-              expect(up.network.queue.allRequests.length).toEqual(1)
-              expect(change1Error).toBeUndefined()
+            await wait()
 
-              return change2Promise = up.render('.element', {content: 'local content', solo: true})
-            })
+            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(change1Error).toBeUndefined()
 
-            return next(() => {
-              expect(change1Error).toBeAbortError()
-              return expect(up.network.queue.allRequests.length).toEqual(0)
-            })
+            change2Promise = up.render('.element', {content: 'local content', solo: true})
+
+            await wait()
+
+            expect(change1Error).toBeAbortError()
+            expect(up.network.queue.allRequests.length).toEqual(0)
           })
-          )
 
           it('does not cancel its own pending preload request (bugfix)', async function() {
             fixture('.element')
@@ -9352,10 +9350,10 @@ describe('up.fragment', function() {
 
             expect(change1Error).toBeUndefined()
             expect(change2Error).toBeUndefined()
-            return expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(up.network.queue.allRequests.length).toEqual(1)
           })
 
-          it("aborts an existing change's request that was queued with { solo: false }", asyncSpec(function(next) {
+          it("aborts an existing change's request that was queued with { solo: false }", async function() {
             fixture('.element')
 
             let change1Error  = undefined
@@ -9364,21 +9362,20 @@ describe('up.fragment', function() {
 
             change1Promise = up.render('.element', {url: '/path1', solo: false}).catch(e => change1Error = e)
 
-            next(() => {
-              expect(up.network.queue.allRequests.length).toEqual(1)
-              expect(change1Error).toBeUndefined()
+            await wait()
 
-              return change2Promise = up.render('.element', {url: '/path2', solo: true})
-            })
+            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(change1Error).toBeUndefined()
 
-            return next(() => {
-              expect(change1Error).toBeAbortError()
-              return expect(up.network.queue.allRequests.length).toEqual(1)
-            })
+            change2Promise = up.render('.element', {url: '/path2', solo: true})
+
+            await wait()
+
+            expect(change1Error).toBeAbortError()
+            expect(up.network.queue.allRequests.length).toEqual(1)
           })
-          )
 
-          it("does not abort an existing change's request when called with { solo: false }", asyncSpec(function(next) {
+          it("does not abort an existing change's request when called with { solo: false }", async function() {
             fixture('.element')
 
             let change1Error = undefined
@@ -9388,21 +9385,20 @@ describe('up.fragment', function() {
 
             change1Promise = up.render('.element', {url: '/path1'}).catch(e => change1Error = e)
 
-            next(() => {
-              expect(up.network.queue.allRequests.length).toEqual(1)
-              expect(change1Error).toBeUndefined()
+            await wait()
 
-              return change2Promise = up.render('.element', {url: '/path2', solo: false})
-            })
+            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(change1Error).toBeUndefined()
 
-            return next(() => {
-              expect(change1Error).toBeUndefined()
-              return expect(up.network.queue.allRequests.length).toEqual(2)
-            })
+            change2Promise = up.render('.element', {url: '/path2', solo: false})
+
+            await wait()
+
+            expect(change1Error).toBeUndefined()
+            expect(up.network.queue.allRequests.length).toEqual(2)
           })
-          )
 
-          it('may be passed as a function that decides which existing requests are aborted', asyncSpec(function(next) {
+          it('may be passed as a function that decides which existing requests are aborted', async function() {
             fixture('.element1')
             fixture('.element2')
             fixture('.element3')
@@ -9419,27 +9415,26 @@ describe('up.fragment', function() {
             change1Promise = up.render('.element1', {url: '/path1', abort: false}).catch(e => change1Error = e)
             change2Promise = up.render('.element2', {url: '/path2', abort: false}).catch(e => change2Error = e)
 
-            next(() => {
-              expect(up.network.queue.allRequests.length).toEqual(2)
-              expect(change1Error).toBeUndefined()
-              expect(change2Error).toBeUndefined()
+            await wait()
 
-              const soloFn = request => u.matchURLs(request.url, '/path1')
+            expect(up.network.queue.allRequests.length).toEqual(2)
+            expect(change1Error).toBeUndefined()
+            expect(change2Error).toBeUndefined()
 
-              return change3Promise = up.render('.element3', {url: '/path3', solo: soloFn}).catch(e => change3Error = e)
-            })
+            const soloFn = request => u.matchURLs(request.url, '/path1')
 
-            return next(() => {
-              expect(change1Error).toBeAbortError()
-              expect(change2Error).toBeUndefined()
-              expect(change3Error).toBeUndefined()
+            change3Promise = up.render('.element3', {url: '/path3', solo: soloFn}).catch(e => change3Error = e)
 
-              return expect(up.network.queue.allRequests.length).toEqual(2)
-            })
+            await wait()
+
+            expect(change1Error).toBeAbortError()
+            expect(change2Error).toBeUndefined()
+            expect(change3Error).toBeUndefined()
+
+            expect(up.network.queue.allRequests.length).toEqual(2)
           })
-          )
 
-          return it('may be passed as a function that decides which existing requests are aborted when updating from local content', asyncSpec(function(next) {
+          it('may be passed as a function that decides which existing requests are aborted when updating from local content', async function() {
             fixture('.element1')
             fixture('.element2')
             fixture('.element3')
@@ -9456,25 +9451,24 @@ describe('up.fragment', function() {
             change1Promise = up.render('.element1', {url: '/path1', abort: false}).catch(e => change1Error = e)
             change2Promise = up.render('.element2', {url: '/path2', abort: false}).catch(e => change2Error = e)
 
-            next(() => {
-              expect(up.network.queue.allRequests.length).toEqual(2)
-              expect(change1Error).toBeUndefined()
-              expect(change2Error).toBeUndefined()
+            await wait()
 
-              const soloFn = request => u.matchURLs(request.url, '/path1')
+            expect(up.network.queue.allRequests.length).toEqual(2)
+            expect(change1Error).toBeUndefined()
+            expect(change2Error).toBeUndefined()
 
-              return change3Promise = up.render('.element3', {content: 'new content', solo: soloFn}).catch(e => change3Error = e)
-            })
+            const soloFn = request => u.matchURLs(request.url, '/path1')
 
-            return next(() => {
-              expect(change1Error).toBeAbortError()
-              expect(change2Error).toBeUndefined()
-              expect(change3Error).toBeUndefined()
+            change3Promise = up.render('.element3', {content: 'new content', solo: soloFn}).catch(e => change3Error = e)
 
-              return expect(up.network.queue.allRequests.length).toEqual(1)
-            })
+            await wait()
+
+            expect(change1Error).toBeAbortError()
+            expect(change2Error).toBeUndefined()
+            expect(change3Error).toBeUndefined()
+
+            expect(up.network.queue.allRequests.length).toEqual(1)
           })
-          )
         })
       }
 
