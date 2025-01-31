@@ -2716,61 +2716,54 @@ describe('up.fragment', function() {
 
       describe('with { document } option', function() {
 
-        it('replaces the given selector with a matching element that has the outer HTML from the given { document } string', asyncSpec(function(next) {
+        it('replaces the given selector with a matching element that has the outer HTML from the given { document } string', async function() {
           $fixture('.before').text('old-before')
           $fixture('.middle').text('old-middle')
           $fixture('.after').text('old-after')
 
-          const document =
-            `\
-<div class="before">new-before</div>
-<div class="middle">new-middle</div>
-<div class="after">new-after</div>\
-`
+          const document = `
+            <div class="before">new-before</div>
+            <div class="middle">new-middle</div>
+            <div class="after">new-after</div>
+          `
 
           up.render('.middle', { document })
+          await wait()
 
-          return next(function() {
-            expect('.before').toHaveText('old-before')
-            expect('.middle').toHaveText('new-middle')
-            return expect('.after').toHaveText('old-after')
-          })
+          expect('.before').toHaveText('old-before')
+          expect('.middle').toHaveText('new-middle')
+          expect('.after').toHaveText('old-after')
         })
-        )
 
-        it('derives a selector from an element given as { target } option', asyncSpec(function(next) {
+        it('derives a selector from an element given as { target } option', async function() {
           const target = fixture('.target', {text: 'old-text'})
           const document = '<div class="target">new-text</div>'
           up.render({ target, document })
+          await wait()
 
-          return next(() => {
-            return expect('.target').toHaveText('new-text')
-          })
+          expect('.target').toHaveText('new-text')
         })
-        )
 
-        it('replaces the given selector with a matching element that has the outer HTML from the given { document } element', asyncSpec(function(next) {
+        it('replaces the given selector with a matching element that has the outer HTML from the given { document } element', async function() {
           fixture('.target', {text: 'old text'})
           const element = e.createFromHTML('<div class="target">new text</div>')
           up.render('.target', { document: element })
+          await wait()
 
-          return next(() => {
-            return expect('.target').toHaveText('new text')
-          })
+          expect('.target').toHaveText('new text')
         })
-        )
 
         it("rejects if the selector can't be found in the given { document } string", async function() {
           $fixture('.foo-bar')
           const promise = up.render('.foo-bar', {document: 'html without match'})
 
-          return await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/Could not find common target/i))
+          await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/Could not find common target/i))
         })
 
         it('has a sync effect', function() {
           fixture('.target', {text: 'old text'})
           up.render('.target', {document: '<div class="target">new text</div>'})
-          return expect('.target').toHaveText('new text')
+          expect('.target').toHaveText('new text')
         })
 
         it('does not set an [up-source] attribute', function() {
@@ -2778,7 +2771,7 @@ describe('up.fragment', function() {
           up.render('.target', {document: '<div class="target">new text</div>'})
 
           expect('.target').toHaveText('new text')
-          return expect('.target').not.toHaveAttribute('up-source')
+          expect('.target').not.toHaveAttribute('up-source')
         })
 
         it('sets an [up-time=false] attribute to prevent an If-None-Match request header when reloading this fragment.', function() {
@@ -2786,7 +2779,7 @@ describe('up.fragment', function() {
           up.render('.target', {document: '<div class="target">new text</div>'})
 
           expect('.target').toHaveText('new text')
-          return expect('.target').toHaveAttribute('up-time', 'false')
+          expect('.target').toHaveAttribute('up-time', 'false')
         })
 
         it('sets an [up-etag=false] attribute to prevent an If-Modified-Since request header when reloading this fragment.', function() {
@@ -2794,17 +2787,17 @@ describe('up.fragment', function() {
           up.render('.target', {document: '<div class="target">new text</div>'})
 
           expect('.target').toHaveText('new text')
-          return expect('.target').toHaveAttribute('up-etag', 'false')
+          expect('.target').toHaveAttribute('up-etag', 'false')
         })
 
-        return it('compiles a document cloned from a <template>', async function() {
-          const template = htmlFixture(`\
-<template id="document-template">
-  <div id="foo">new foo</div>
-  <div id="bar">new bar</div>
-  <div id="baz">new baz</div>
-</template>\
-`)
+        it('compiles a document cloned from a <template>', async function() {
+          const template = htmlFixture(`
+            <template id="document-template">
+              <div id="foo">new foo</div>
+              <div id="bar">new bar</div>
+              <div id="baz">new baz</div>
+            </template>
+          `)
 
           htmlFixture('<div id="foo">old foo</div>')
           htmlFixture('<div id="bar">old bar</div>')
@@ -2815,14 +2808,14 @@ describe('up.fragment', function() {
 
           expect('#foo').toHaveText('new foo')
           expect('#bar').toHaveText('old bar')
-          return expect('#baz').toHaveText('new baz')
+          expect('#baz').toHaveText('new baz')
         })
       })
 
 
       describe('with { fragment } option', function() {
 
-        it('derives target and outer HTML from the given { fragment } string', asyncSpec(function(next) {
+        it('derives target and outer HTML from the given { fragment } string', async function() {
           $fixture('.before').text('old-before')
           $fixture('.middle').text('old-middle')
           $fixture('.after').text('old-after')
@@ -2830,131 +2823,123 @@ describe('up.fragment', function() {
           const fragment = '<div class="middle">new-middle</div>'
 
           up.render({ fragment })
+          await wait()
 
-          return next(function() {
-            expect('.before').toHaveText('old-before')
-            expect('.middle').toHaveText('new-middle')
-            return expect('.after').toHaveText('old-after')
-          })
+          expect('.before').toHaveText('old-before')
+          expect('.middle').toHaveText('new-middle')
+          expect('.after').toHaveText('old-after')
         })
-        )
 
-        it('derives target and outer HTML from the given { fragment } element', asyncSpec(function(next) {
+        it('derives target and outer HTML from the given { fragment } element', async function() {
           fixture('.target', {text: 'old text'})
           const fragment = e.createFromHTML('<div class="target">new text</div>')
           up.render('.target', { fragment })
+          await wait()
 
-          return next(() => {
-            return expect('.target').toHaveText('new text')
-          })
+          expect('.target').toHaveText('new text')
         })
-        )
 
         it("rejects if the given { fragment } does not match an element on the current page", async function() {
           $fixture('.foo-bar')
           const fragment = e.createFromHTML('<div class="target">new text</div>')
           const promise = up.render({ fragment })
 
-          return await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/Could not find common target/i))
+          await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/Could not find common target/i))
         })
 
         it('has a sync effect', function() {
           fixture('.target', {text: 'old text'})
           up.render('.target', {fragment: '<div class="target">new text</div>'})
-          return expect('.target').toHaveText('new text')
+          expect('.target').toHaveText('new text')
         })
 
-        it('can append content with an :after selector', asyncSpec(function(next) {
+        it('can append content with an :after selector', async function() {
           const container = fixture('.target')
           e.affix(container, '.old-child')
 
           up.render('.target:after', {fragment: '<div class="target"><div class="new-child"></div></div>'})
+          await wait()
 
-          return next(function() {
-            const newTarget = document.querySelector('.target')
-            return expect(newTarget.innerHTML).toEqual('<div class="old-child"></div><div class="new-child"></div>')
-          })
+          const newTarget = document.querySelector('.target')
+          expect(newTarget.innerHTML).toEqual('<div class="old-child"></div><div class="new-child"></div>')
         })
-        )
 
-        it('can prepend content with an :before selector', asyncSpec(function(next) {
+        it('can prepend content with an :before selector', async function() {
           const container = fixture('.target')
           e.affix(container, '.old-child')
 
           up.render('.target:before', {fragment: '<div class="target"><div class="new-child"></div></div>'})
+          await wait()
 
-          return next(function() {
-            const newTarget = document.querySelector('.target')
-            return expect(newTarget.innerHTML).toEqual('<div class="new-child"></div><div class="old-child"></div>')
-          })
+          const newTarget = document.querySelector('.target')
+          expect(newTarget.innerHTML).toEqual('<div class="new-child"></div><div class="old-child"></div>')
         })
-        )
 
-        return describe('cloning a <template>', function() {
+        describe('cloning a <template>', function() {
 
           it('it accepts a CSS selector for a <template> to clone', async function() {
-            const template = htmlFixture(`\
-<template id="target-template">
-  <div id="target">
-    target from template
-  </div>
-</template>\
-`)
+            const template = htmlFixture(`
+              <template id="target-template">
+                <div id="target">
+                  target from template
+                </div>
+              </template>
+            `)
 
-            const target = htmlFixture(`\
-<div id="target">
-  old target
-</div>\
-`)
+            const target = htmlFixture(`
+              <div id="target">
+                old target
+              </div>
+            `)
 
             up.render({ fragment: '#target-template' })
             await wait()
 
             expect('#target').toHaveText('target from template')
             // Make sure the element was cloned, not moved
-            return expect(document.querySelector('#target').children[0]).not.toBe(template.content.children[0])
+            expect(document.querySelector('#target').children[0]).not.toBe(template.content.children[0])
           })
 
           it('it accepts the <template> as an Element option', async function() {
-            const template = htmlFixture(`\
-<template id="target-template">
-  <div id="target">
-    target from template
-  </div>
-</template>\
-`)
+            const template = htmlFixture(`
+              <template id="target-template">
+                <div id="target">
+                  target from template
+                </div>
+              </template>
+            `)
 
-            const target = htmlFixture(`\
-<div id="target">
-  old target
-</div>\
-`)
+            const target = htmlFixture(`
+              <div id="target">
+                old target
+              </div>
+            `)
 
             up.render({ fragment: template })
             await wait()
 
             expect('#target').toHaveText('target from template')
             // Make sure the element was cloned, not moved
-            return expect(document.querySelector('#target').children[0]).not.toBe(template.content.children[0])
+            expect(document.querySelector('#target').children[0]).not.toBe(template.content.children[0])
           })
 
           it('compiles an element cloned from a <template>', async function() {
             const compilerFn = jasmine.createSpy('compiler fn')
             up.compiler('#target', compilerFn)
 
-            const template = htmlFixture(`\
-<template id="target-template">
-  <div id="target">
-    target from template
-  </div>
-</template>\
-`)
+            const template = htmlFixture(`
+              <template id="target-template">
+                <div id="target">
+                  target from template
+                </div>
+              </template>
+            `)
 
-            const target = htmlFixture(`\
-<div id="target">
-  old target
-</div>\
-`)
+            const target = htmlFixture(`
+              <div id="target">
+                old target
+              </div>
+            `)
 
             expect(compilerFn).not.toHaveBeenCalled()
 
@@ -2963,26 +2948,26 @@ describe('up.fragment', function() {
 
             expect('#target').toHaveText('target from template')
             expect(compilerFn).toHaveBeenCalled()
-            return expect(compilerFn.calls.mostRecent().args[0]).toMatchSelector('#target')
+            expect(compilerFn.calls.mostRecent().args[0]).toMatchSelector('#target')
           })
 
           it('compiles an element cloned from a <template> with a custom data object embedded into the { fragment } option', async function() {
             const compilerFn = jasmine.createSpy('compiler fn')
             up.compiler('#target', compilerFn)
 
-            const template = htmlFixture(`\
-<template id="target-template">
-  <div id="target">
-    target from template
-  </div>
-</template>\
-`)
+            const template = htmlFixture(`
+              <template id="target-template">
+                <div id="target">
+                  target from template
+                </div>
+              </template>
+            `)
 
-            const target = htmlFixture(`\
-<div id="target">
-  old target
-</div>\
-`)
+            const target = htmlFixture(`
+              <div id="target">
+                old target
+              </div>
+            `)
 
             expect(compilerFn).not.toHaveBeenCalled()
 
@@ -2992,26 +2977,26 @@ describe('up.fragment', function() {
             expect('#target').toHaveText('target from template')
             expect(compilerFn).toHaveBeenCalled()
             expect(compilerFn.calls.mostRecent().args[0]).toMatchSelector('#target')
-            return expect(compilerFn.calls.mostRecent().args[1]).toEqual({ foo: 1, bar: 2 })
+            expect(compilerFn.calls.mostRecent().args[1]).toEqual({ foo: 1, bar: 2 })
           })
 
           it('compiles an element cloned from a <template> with a custom data object in the { data } option', async function() {
             const compilerFn = jasmine.createSpy('compiler fn')
             up.compiler('#target', compilerFn)
 
-            const template = htmlFixture(`\
-<template id="target-template">
-  <div id="target">
-    target from template
-  </div>
-</template>\
-`)
+            const template = htmlFixture(`
+              <template id="target-template">
+                <div id="target">
+                  target from template
+                </div>
+              </template>
+            `)
 
-            const target = htmlFixture(`\
-<div id="target">
-  old target
-</div>\
-`)
+            const target = htmlFixture(`
+              <div id="target">
+                old target
+              </div>
+            `)
 
             expect(compilerFn).not.toHaveBeenCalled()
 
@@ -3021,23 +3006,23 @@ describe('up.fragment', function() {
             expect('#target').toHaveText('target from template')
             expect(compilerFn).toHaveBeenCalled()
             expect(compilerFn.calls.mostRecent().args[0]).toMatchSelector('#target')
-            return expect(compilerFn.calls.mostRecent().args[1]).toEqual({ foo: 1, bar: 2 })
+            expect(compilerFn.calls.mostRecent().args[1]).toEqual({ foo: 1, bar: 2 })
           })
 
           it('passes a { data } option to a custom up:template:clone handler', async function() {
-            const template = htmlFixture(`\
-<template id="target-template" type='text/minimustache'>
-  <div id="target">
-    Hello, <b>{{name}}</b>!
-  </div>
-</template>\
-`)
+            const template = htmlFixture(`
+              <template id="target-template" type='text/minimustache'>
+                <div id="target">
+                  Hello, <b>{{name}}</b>!
+                </div>
+              </template>
+            `)
 
-            const target = htmlFixture(`\
-<div id="target">
-  old target
-</div>\
-`)
+            const target = htmlFixture(`
+              <div id="target">
+                old target
+              </div>
+            `)
 
             const templateHandler = jasmine.createSpy('up:template:clone').and.callFake(function(event) {
               let html = event.target.innerHTML
@@ -3051,29 +3036,29 @@ describe('up.fragment', function() {
             await wait()
 
             expect(templateHandler).toHaveBeenCalledWith(jasmine.objectContaining({target: template, data: { name: "Alice" }}), template, jasmine.anything())
-            return expect('#target').toHaveText('Hello, Alice!')
+            expect('#target').toHaveText('Hello, Alice!')
           })
 
-          return it('compiles an element cloned from a <template> that can be manipulated with { onRendered }', async function() {
-            const template = htmlFixture(`\
-<template id="target-template">
-  <div id="target">
-    target from template
-  </div>
-</template>\
-`)
+          it('compiles an element cloned from a <template> that can be manipulated with { onRendered }', async function() {
+            const template = htmlFixture(`
+              <template id="target-template">
+                <div id="target">
+                  target from template
+                </div>
+              </template>
+            `)
 
-            const target = htmlFixture(`\
-<div id="target">
-  old target
-</div>\
-`)
+            const target = htmlFixture(`
+              <div id="target">
+                old target
+              </div>
+            `)
 
-            up.render({ fragment: '#target-template', onRendered({ fragment }) { return fragment.classList.add('class-from-callback') } })
+            up.render({ fragment: '#target-template', onRendered({ fragment }) { fragment.classList.add('class-from-callback') } })
             await wait()
 
             expect('#target').toHaveText('target from template')
-            return expect('#target').toHaveClass('class-from-callback')
+            expect('#target').toHaveClass('class-from-callback')
           })
         })
       })
