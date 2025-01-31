@@ -745,7 +745,7 @@ describe('up.fragment', function() {
           fixture('.fragment')
           up.render({fragment: '<div class="fragment"><span class="child"></span></div>'})
 
-          return expect(childCompiler).toHaveBeenCalledWith('SPAN', 'child')
+          expect(childCompiler).toHaveBeenCalledWith('SPAN', 'child')
         })
 
         it('calls compilers with a third "meta" argument containing information about the render pass', async function() {
@@ -760,7 +760,7 @@ describe('up.fragment', function() {
           await wait()
 
           expect('.element').toHaveText('new content')
-          return expect(compiler).toHaveBeenCalledWith(
+          expect(compiler).toHaveBeenCalledWith(
             jasmine.any(Element),
             jasmine.any(Object),
             jasmine.objectContaining({
@@ -770,27 +770,27 @@ describe('up.fragment', function() {
         })
 
         if (up.migrate.loaded) {
-          it('calls compilers with a third argument containing the { response } for the current render pass', asyncSpec(function(next) {
+          it('calls compilers with a third argument containing the { response } for the current render pass', async function() {
             const compiler = jasmine.createSpy('compiler')
             up.compiler('.element', compiler)
 
             fixture('.element', {text: 'old content'})
             up.render('.element', {url: '/path'})
 
-            next(() => jasmine.respondWithSelector('.element', {text: 'new content'}))
+            await wait()
 
-            return next(function() {
-              expect('.element').toHaveText('new content')
-              return expect(compiler).toHaveBeenCalledWith(
-                jasmine.any(Element),
-                jasmine.any(Object),
-                jasmine.objectContaining({
-                  response: jasmine.any(up.Response)
-                })
-              )
-            })
+            jasmine.respondWithSelector('.element', {text: 'new content'})
+            await wait()
+
+            expect('.element').toHaveText('new content')
+            expect(compiler).toHaveBeenCalledWith(
+              jasmine.any(Element),
+              jasmine.any(Object),
+              jasmine.objectContaining({
+                response: jasmine.any(up.Response)
+              })
+            )
           })
-          )
         }
 
         describe('when a compiler throws an error', function() {
@@ -804,11 +804,11 @@ describe('up.fragment', function() {
             await jasmine.expectGlobalError(compileError, async function() {
               const promise = up.render({ fragment: '<div class="element">new text</div>' })
 
-              return await expectAsync(promise).toBeResolvedTo(jasmine.any(up.RenderResult))
+              await expectAsync(promise).toBeResolvedTo(jasmine.any(up.RenderResult))
             })
 
             expect('.element').toHaveText('new text')
-            return expect(crashingCompiler).toHaveBeenCalled()
+            expect(crashingCompiler).toHaveBeenCalled()
           })
 
           it('emits an error event, but does not reject the up.render().finished promise', async function() {
@@ -820,11 +820,11 @@ describe('up.fragment', function() {
             await jasmine.expectGlobalError(compileError, async function() {
               const promise = up.render({ fragment: '<div class="element">new text</div>' })
 
-              return await expectAsync(promise.finished).toBeResolvedTo(jasmine.any(up.RenderResult))
+              await expectAsync(promise.finished).toBeResolvedTo(jasmine.any(up.RenderResult))
             })
 
             expect('.element').toHaveText('new text')
-            return expect(crashingCompiler).toHaveBeenCalled()
+            expect(crashingCompiler).toHaveBeenCalled()
           })
 
           it('does not call an { onError } callback', async function() {
@@ -838,7 +838,7 @@ describe('up.fragment', function() {
 
             expect('.element').toHaveText('new text')
             expect(crashingCompiler).toHaveBeenCalled()
-            return expect(errorCallback).not.toHaveBeenCalled()
+            expect(errorCallback).not.toHaveBeenCalled()
           })
 
           it('does not prevent other compilers on the same element', async function() {
@@ -857,7 +857,7 @@ describe('up.fragment', function() {
 
             expect(compilerBefore).toHaveBeenCalled()
             expect(crashingCompiler).toHaveBeenCalled()
-            return expect(compilerAfter).toHaveBeenCalled()
+            expect(compilerAfter).toHaveBeenCalled()
           })
 
           it('still updates subsequent elements for a multi-step target', async function() {
@@ -868,18 +868,18 @@ describe('up.fragment', function() {
             fixture('.secondary', {text: 'old secondary'})
             fixture('.tertiary', {text: 'old tertiary'})
 
-            await jasmine.expectGlobalError(compileError, () => up.render('.primary, .secondary, .tertiary', { document: `\
-<div class="primary">new primary</div>
-<div class="secondary">new secondary</div>
-<div class="tertiary">new tertiary</div>\
-`
-          }))
+            await jasmine.expectGlobalError(compileError, () => up.render('.primary, .secondary, .tertiary', { document: `
+              <div class="primary">new primary</div>
+              <div class="secondary">new secondary</div>
+              <div class="tertiary">new tertiary</div>
+            `
+            }))
 
             expect('.primary').toHaveText('new primary')
             expect('.secondary').toHaveText('new secondary')
             expect('.tertiary').toHaveText('new tertiary')
 
-            return expect(crashingCompiler).toHaveBeenCalled()
+            expect(crashingCompiler).toHaveBeenCalled()
           })
 
           it('still updates the target when failing to compile a hungry element on another layer', async function() {
@@ -890,16 +890,16 @@ describe('up.fragment', function() {
 
             up.layer.open({fragment: '<div class="overlay">old secondary</div>'})
 
-            await jasmine.expectGlobalError(compileError, () => up.render('.overlay', { document: `\
-<div class="root">new root</div>
-<div class="overlay">new overlay</div>\
-`
-          }))
+            await jasmine.expectGlobalError(compileError, () => up.render('.overlay', { document: `
+              <div class="root">new root</div>
+              <div class="overlay">new overlay</div>
+            `
+            }))
 
             expect('.root').toHaveText('new root')
             expect('.overlay').toHaveText('new overlay')
 
-            return expect(crashingCompiler).toHaveBeenCalled()
+            expect(crashingCompiler).toHaveBeenCalled()
           })
 
           it('still opens an overlay when failing to compile a hungry element on another layer', async function() {
@@ -908,15 +908,15 @@ describe('up.fragment', function() {
             up.compiler('.root', crashingCompiler)
             fixture('.root', {text: 'root', 'up-hungry': '', 'up-if-layer': 'any'})
 
-            await jasmine.expectGlobalError(compileError, () => up.layer.open({target: '.overlay', document: `\
-<div class="root">new root</div>
-<div class="overlay">new overlay</div>\
-`}))
+            await jasmine.expectGlobalError(compileError, () => up.layer.open({target: '.overlay', document: `
+              <div class="root">new root</div>
+              <div class="overlay">new overlay</div>
+            `}))
 
             expect(up.layer.isOverlay()).toBe(true)
             expect('.root').toHaveText('new root')
             expect('.overlay').toHaveText('new overlay')
-            return expect(crashingCompiler).toHaveBeenCalled()
+            expect(crashingCompiler).toHaveBeenCalled()
           })
 
           it('does not prevent destructors', async function() {
@@ -931,10 +931,10 @@ describe('up.fragment', function() {
 
             expect('.element').toHaveText('new text')
 
-            return expect(crashingCompiler).toHaveBeenCalled()
+            expect(crashingCompiler).toHaveBeenCalled()
           })
 
-          return it('still processes a { scroll } option', async function() {
+          it('still processes a { scroll } option', async function() {
             const compileError = new Error("error from crashing compiler")
             const crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(compileError)
             up.compiler('.element', crashingCompiler)
@@ -946,11 +946,11 @@ describe('up.fragment', function() {
 
             expect('.element').toHaveText('new text')
             expect(revealSpy).toHaveBeenCalled()
-            return expect(crashingCompiler).toHaveBeenCalled()
+            expect(crashingCompiler).toHaveBeenCalled()
           })
         })
 
-        return describe('when a destructor throws an error', function() {
+        describe('when a destructor throws an error', function() {
 
           it('still updates subsequent elements for a multi-step target', async function() {
             const destroyError = new Error("error from crashing destructor")
@@ -961,31 +961,33 @@ describe('up.fragment', function() {
 
             up.destructor(secondary, crashingDestructor)
 
-            await jasmine.expectGlobalError(destroyError, () => up.render('.primary, .secondary, .tertiary', { document: `\
-<div class="primary">new primary</div>
-<div class="secondary">new secondary</div>
-<div class="tertiary">new tertiary</div>\
-`
-          }))
+            await jasmine.expectGlobalError(destroyError, () => up.render('.primary, .secondary, .tertiary', { document: `
+              <div class="primary">new primary</div>
+              <div class="secondary">new secondary</div>
+              <div class="tertiary">new tertiary</div>
+            `
+            }))
 
             expect('.primary').toHaveText('new primary')
             expect('.secondary').toHaveText('new secondary')
             expect('.tertiary').toHaveText('new tertiary')
-            return expect(crashingDestructor).toHaveBeenCalled()
+            expect(crashingDestructor).toHaveBeenCalled()
           })
 
-          return it('removes the old element', async function() {
+          it('removes the old element', async function() {
             const destroyError = new Error("error from crashing destructor")
             const crashingDestructor = jasmine.createSpy('crashing destructor').and.throwError(destroyError)
             const oldElement = fixture('#element.old')
 
             up.destructor(oldElement, crashingDestructor)
 
-            await jasmine.expectGlobalError(destroyError, () => up.render('#element', {document: '<div id="element" class="new"></div>'}))
+            await jasmine.expectGlobalError(destroyError, () => up.render('#element', {document: `
+              <div id="element" class="new"></div>
+            `}))
 
             expect(oldElement).toBeDetached()
             expect('#element').toHaveClass('new')
-            return expect(crashingDestructor).toHaveBeenCalled()
+            expect(crashingDestructor).toHaveBeenCalled()
           })
         })
       })
