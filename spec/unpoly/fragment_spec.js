@@ -2038,7 +2038,7 @@ describe('up.fragment', function() {
             await wait()
 
             expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining(event1Plan))
-            return expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining(event2Plan))
+            expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining(event2Plan))
           })
 
           it('accepts unquoted property names in the header value', async function() {
@@ -2057,10 +2057,10 @@ describe('up.fragment', function() {
 
             await wait()
 
-            return expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining({ type: "foo", prop: "bar" }))
+            expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining({ type: "foo", prop: "bar" }))
           })
 
-          return it('emits these events for a failure response', async function() {
+          it('emits these events for a failure response', async function() {
             fixture('.element')
 
             const renderPromise = up.render({target: '.element', failTarget: '.element', url: '/path'})
@@ -2079,7 +2079,7 @@ describe('up.fragment', function() {
 
             await expectAsync(renderPromise).toBeRejectedWith(jasmine.any(up.RenderResult))
 
-            return expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining(eventPlan))
+            expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining(eventPlan))
           })
         })
 
@@ -2104,7 +2104,7 @@ describe('up.fragment', function() {
               await expectAsync(promise).toBeRejectedWith(jasmine.any(up.Aborted))
 
               expect(up.layer.mode).toBe('root')
-              return expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({value: 123}))
+              expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({value: 123}))
             })
 
             it('does not require the server to render content when the overlay will close anyway (when updating a layer)', async function() {
@@ -2124,10 +2124,10 @@ describe('up.fragment', function() {
 
               await expectAsync(promise).toBeRejectedWith(jasmine.any(up.Aborted))
 
-              return expect(callback).toHaveBeenCalled()
+              expect(callback).toHaveBeenCalled()
             })
 
-            return it('makes the discarded response available to up:layer:accepted listeners as a { response } property 1', async function() {
+            it('makes the discarded response available to up:layer:accepted listeners as a { response } property 1', async function() {
               const callback = jasmine.createSpy('onAccepted callback')
               up.layer.open({ onAccepted: callback, content: 'initial content', target: '.target' })
 
@@ -2145,29 +2145,30 @@ describe('up.fragment', function() {
               await expectAsync(promise).toBeRejectedWith(jasmine.any(up.Aborted))
 
               expect(callback.calls.mostRecent().args[0].response).toEqual(jasmine.any(up.Response))
-              return expect(callback.calls.mostRecent().args[0].response.text).toBe('<div class="target">new content</div>')
+              expect(callback.calls.mostRecent().args[0].response.text).toBe('<div class="target">new content</div>')
             })
           })
 
-          describe('when updating the root layer', () => it('ignores the header and updates the root layer with the response body', asyncSpec(function(next) {
-            const element = fixture('.element', {text: 'old content'})
-            const acceptedListener = jasmine.createSpy('up:layer:accepted listener')
-            up.on('up:layer:accepted', acceptedListener)
+          describe('when updating the root layer', function() {
+            it('ignores the header and updates the root layer with the response body', async function() {
+              const element = fixture('.element', {text: 'old content'})
+              const acceptedListener = jasmine.createSpy('up:layer:accepted listener')
+              up.on('up:layer:accepted', acceptedListener)
 
-            up.render({ url: '/path', target: '.element'})
+              up.render({ url: '/path', target: '.element'})
 
-            next(() => {
-              return this.respondWithSelector('.element', {text: 'new content', responseHeaders: { 'X-Up-Accept-Layer': "null" }})
-            })
+              await wait()
 
-            return next(() => {
+              this.respondWithSelector('.element', {text: 'new content', responseHeaders: { 'X-Up-Accept-Layer': "null" }})
+
+              await wait()
+
               expect('.element').toHaveText('new content')
-              return expect(acceptedListener).not.toHaveBeenCalled()
+              expect(acceptedListener).not.toHaveBeenCalled()
             })
           })
-          ))
 
-          return describe('when opening a layer', function() {
+          describe('when opening a layer', function() {
 
             it('accepts the layer that is about to open', async function() {
               const callback = jasmine.createSpy('onAccepted callback')
@@ -2182,10 +2183,10 @@ describe('up.fragment', function() {
 
               await expectAsync(layerPromise).toBeRejectedWith(jasmine.any(up.Aborted))
 
-              return expect(callback).toHaveBeenCalled()
+              expect(callback).toHaveBeenCalled()
             })
 
-            return it('does not require the server to render content when the overlay will close anyway', async function() {
+            it('does not require the server to render content when the overlay will close anyway', async function() {
               const callback = jasmine.createSpy('onAccepted callback')
               const layerPromise = up.layer.open({ onAccepted: callback, url: '/path', target: '.target' })
 
@@ -2197,7 +2198,7 @@ describe('up.fragment', function() {
 
               await expectAsync(layerPromise).toBeRejectedWith(jasmine.any(up.Aborted))
 
-              return expect(callback).toHaveBeenCalled()
+              expect(callback).toHaveBeenCalled()
             })
           })
         })
@@ -2227,10 +2228,10 @@ describe('up.fragment', function() {
             await expectAsync(renderPromise).toBeRejectedWith(jasmine.any(up.Aborted))
 
             expect(up.layer.mode).toBe('root')
-            return expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({value: 123}))
+            expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({value: 123}))
           })
 
-          return it('makes the discarded response available to up:layer:accepted listeners as a { response } property 2', async function() {
+          it('makes the discarded response available to up:layer:accepted listeners as a { response } property 2', async function() {
             const callback = jasmine.createSpy('onAccepted callback')
             up.layer.open({ onDismissed: callback, target: '.target', content: 'Initial content' })
 
@@ -2247,65 +2248,66 @@ describe('up.fragment', function() {
             await expectAsync(promise).toBeRejectedWith(jasmine.any(up.Aborted))
 
             expect(callback.calls.mostRecent().args[0].response).toEqual(jasmine.any(up.Response))
-            return expect(callback.calls.mostRecent().args[0].response.text).toBe('<div class="target">new content</div>')
+            expect(callback.calls.mostRecent().args[0].response.text).toBe('<div class="target">new content</div>')
           })
         })
 
         describe('when the server sends no content', function() {
 
-          it('succeeds when the server sends an empty body with HTTP status 304 (not modified)', asyncSpec(function(next) {
+          it('succeeds when the server sends an empty body with HTTP status 304 (not modified)', async function() {
             fixture('.one', {text: 'old one'})
             fixture('.two', {text: 'old two'})
 
             const promise = up.render({target: '.one', url: '/path'})
 
-            next(() => jasmine.respondWith({status: 304, responseText: ''}))
+            await wait()
 
-            next(function() {
-              expect('.one').toHaveText('old one')
-              expect('.two').toHaveText('old two')
+            jasmine.respondWith({status: 304, responseText: ''})
 
-              return next.await(promiseState(promise))
-            })
+            await wait()
 
-            return next(result => expect(result.state).toBe('fulfilled'))
+            expect('.one').toHaveText('old one')
+            expect('.two').toHaveText('old two')
+
+            let result = await promiseState(promise)
+            expect(result.state).toBe('fulfilled')
           })
-          )
 
-          it('succeeds when the server sends an empty body with HTTP status 204 (no content)', asyncSpec(function(next) {
+          it('succeeds when the server sends an empty body with HTTP status 204 (no content)', async function() {
             fixture('.one', {text: 'old one'})
             fixture('.two', {text: 'old two'})
 
             const promise = up.render({target: '.one', url: '/path'})
 
-            next(() => jasmine.respondWith({status: 204, responseText: ''}))
+            await wait()
 
-            next(function() {
-              expect('.one').toHaveText('old one')
-              expect('.two').toHaveText('old two')
+            jasmine.respondWith({status: 204, responseText: ''})
 
-              return next.await(promiseState(promise))
-            })
+            await wait()
 
-            return next(result => expect(result.state).toBe('fulfilled'))
+            expect('.one').toHaveText('old one')
+            expect('.two').toHaveText('old two')
+
+            let result = await promiseState(promise)
+            expect(result.state).toBe('fulfilled')
           })
-          )
 
-          return it('does not call on { onRendered } callback', asyncSpec(function(next) {
+          it('does not call on { onRendered } callback', async function() {
             fixture('.one', {text: 'old one'})
             fixture('.two', {text: 'old two'})
 
             const onRendered = jasmine.createSpy('onRendered callback')
             up.render({ target: '.one', url: '/path', onRendered })
 
-            next(() => jasmine.respondWith({status: 304, responseText: ''}))
+            await wait()
 
-            return next(function() {
-              expect('.one').toHaveText('old one')
-              return expect(onRendered).not.toHaveBeenCalled()
-            })
+            jasmine.respondWith({status: 304, responseText: ''})
+
+            await wait()
+
+            expect('.one').toHaveText('old one')
+            expect(onRendered).not.toHaveBeenCalled()
           })
-          )
         })
 
         describe('when the server sends an X-Up-Target header', function() {
