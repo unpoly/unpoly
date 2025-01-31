@@ -3822,6 +3822,7 @@ describe('up.fragment', function() {
             const $inner = $outer.affix('.inner').text('old inner text')
 
             const replacePromise = up.render('.outer, .inner', {url: '/path'})
+            await wait()
 
             expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
 
@@ -3850,6 +3851,7 @@ describe('up.fragment', function() {
             const $inner = $outer.affix('.inner').text('old inner text')
 
             const replacePromise = up.render('.inner, .outer', {url: '/path'})
+            await wait()
 
             expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
 
@@ -3878,6 +3880,7 @@ describe('up.fragment', function() {
             const $inner = $outer.affix('.inner').text('old inner text')
 
             const replacePromise = up.render('.outer:before, .inner', {url: '/path'})
+            await wait()
 
             // Placement pseudo-selectors are removed from X-Up-Target
             expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer, .inner')
@@ -3908,6 +3911,7 @@ describe('up.fragment', function() {
             const $inner = $outer.affix('.inner').text('old inner text')
 
             const replacePromise = up.render('.outer:after, .inner', {url: '/path'})
+            await wait()
 
             expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer, .inner')
 
@@ -3937,6 +3941,7 @@ describe('up.fragment', function() {
             const $inner = $outer.affix('.inner').text('old inner text')
 
             const replacePromise = up.render('.outer, .inner', {url: '/path'})
+            await wait()
 
             expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
 
@@ -3967,6 +3972,7 @@ describe('up.fragment', function() {
             const $inner = $outer.affix('.inner').text('old inner text')
 
             up.render('.inner, .outer', {url: '/path', scroll: '.revealee'})
+            await wait()
 
             expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
 
@@ -3998,6 +4004,7 @@ describe('up.fragment', function() {
             const $inner = $outer.affix('.inner').text('old inner text')
 
             const replacePromise = up.render('.outer, .inner', {url: '/path'})
+            await wait()
 
             this.respondWith(`
               <div class="inner">
@@ -4023,6 +4030,7 @@ describe('up.fragment', function() {
             const $inner = $fixture('.two').text('old two text')
 
             const replacePromise = up.render('.one, .two', {url: '/path'})
+            await wait()
 
             this.respondWith(`
               <div class="one">
@@ -4049,6 +4057,7 @@ describe('up.fragment', function() {
             const $inner = $fixture('.two').text('old two text')
 
             const replacePromise = up.render('.one, .two', {url: '/path'})
+            await wait()
 
             this.respondWith(`
               <div class="two">
@@ -4074,6 +4083,7 @@ describe('up.fragment', function() {
             const $one = $fixture('.one.alias').text('old one text')
 
             const replacePromise = up.render('.one, .alias', {url: '/path'})
+            await wait()
 
             expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.one')
 
@@ -4096,6 +4106,7 @@ describe('up.fragment', function() {
             const $one = $fixture('.one').text('old one text')
 
             const replacePromise = up.render('.one:before, .one:after', {url: '/path'})
+            await wait()
 
             // Placement pseudo-selectors are removed from X-Up-Target
             expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.one')
@@ -4119,6 +4130,7 @@ describe('up.fragment', function() {
             const $elem = $fixture('.elem.alias1.alias2').text("old text")
 
             const replacePromise = up.render('.elem:before, .alias1, .alias2:after', {url: '/path'})
+            await wait()
 
             // Placement pseudo-selectors are removed from X-Up-Target
             expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.elem')
