@@ -3072,7 +3072,7 @@ describe('up.fragment', function() {
           up.render({ target: '.two', content: 'new two' })
 
           expect('.one').toHaveText('old one')
-          return expect('.two').toHaveText('new two')
+          expect('.two').toHaveText('new two')
         })
 
         it('accepts an array of selector alternatives as { target } option', function() {
@@ -3082,7 +3082,7 @@ describe('up.fragment', function() {
           up.render({ target: ['.four', '.three', '.two', '.one'], document: '<div class="two">new two</div>' })
 
           expect('.one').toHaveText('old one')
-          return expect('.two').toHaveText('new two')
+          expect('.two').toHaveText('new two')
         })
 
         it('uses a selector given as first argument')
@@ -3095,7 +3095,7 @@ describe('up.fragment', function() {
           await wait()
 
           expect(jasmine.lastRequest().url).toMatchURL('/path')
-          return expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#element')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#element')
         })
 
         it('uses a default target for the layer that is being updated if no other option suggests a target')
@@ -3105,7 +3105,7 @@ describe('up.fragment', function() {
           $fixture('.foo-bar.up-destroying')
           const promise = up.render('.foo-bar', { document })
 
-          return await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/Could not find common target/i))
+          await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/Could not find common target/i))
         })
 
         it("ignores an element that matches the selector but also has a parent matching .up-destroying", async function() {
@@ -3114,22 +3114,21 @@ describe('up.fragment', function() {
           const $child = $fixture('.foo-bar').appendTo($parent)
           const promise = up.render('.foo-bar', { document })
 
-          return await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/Could not find common target/i))
+          await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/Could not find common target/i))
         })
 
-        it('only replaces the first element matching the selector', asyncSpec(function(next) {
+        it('only replaces the first element matching the selector', async function() {
           const document = '<div class="foo-bar">text</div>'
           $fixture('.foo-bar')
           $fixture('.foo-bar')
           up.render('.foo-bar', { document })
 
-          return next(() => {
-            const $elements = $('.foo-bar')
-            expect($($elements.get(0)).text()).toEqual('text')
-            return expect($($elements.get(1)).text()).toEqual('')
-          })
+          await wait()
+
+          const $elements = $('.foo-bar')
+          expect($($elements.get(0)).text()).toEqual('text')
+          expect($($elements.get(1)).text()).toEqual('')
         })
-        )
 
         it('replaces the body if asked to replace the "html" selector')
 
@@ -3138,135 +3137,125 @@ describe('up.fragment', function() {
           it('replaces the children with :content, but keeps the element itself', function() {
             const oldTarget = fixture('#target', {'old-attr': ''})
             e.affix(oldTarget, '.child', {text: 'old child'})
-            up.render('#target:content', { document: `\
-<div id='target' new-attr>
-  <div class='child'>new child</div>
-</div>"\
-`
-          }
-            )
+            up.render('#target:content', { document: `
+              <div id='target' new-attr>
+                <div class='child'>new child</div>
+              </div>
+            `
+            })
 
             const newTarget = document.querySelector('#target')
             expect(newTarget).toBe(oldTarget)
             expect(newTarget).toHaveAttribute('old-attr')
 
             expect(newTarget).not.toHaveText('old child')
-            return expect(newTarget).toHaveText('new child')
+            expect(newTarget).toHaveText('new child')
           })
 
-          return it('returns an up.RenderResult with only the new children', async function() {
+          it('returns an up.RenderResult with only the new children', async function() {
             let target = fixture('#target', {'old-attr': ''})
             e.affix(target, '.child', {text: 'old child'})
-            const result = await up.render('#target:content', { document: `\
-<div id='target' new-attr>
-  <div class='child'>new child</div>
-</div>"\
-`
-          }
-            )
+            const result = await up.render('#target:content', { document: `
+              <div id='target' new-attr>
+                <div class='child'>new child</div>
+              </div>
+            `
+            })
 
             expect('#target').toHaveText('new child')
             expect(result.fragments.length).toBe(1)
-            return expect(result.fragments[0]).toMatchSelector('.child')
+            expect(result.fragments[0]).toMatchSelector('.child')
           })
         })
 
         describe('appending and prepending', function() {
 
-          it('prepends instead of replacing when the target has a :before pseudo-selector', asyncSpec(function(next) {
+          it('prepends instead of replacing when the target has a :before pseudo-selector', async function() {
             const target = fixture('.target')
             e.affix(target, '.child', {text: 'old'})
-            up.render('.target:before', { document: `\
-<div class='target'>
-  <div class='child'>new</div>
-</div>"\
-`
-          }
-            )
-
-            return next(function() {
-              const children = target.querySelectorAll('.child')
-              expect(children.length).toBe(2)
-              expect(children[0]).toHaveText('new')
-              return expect(children[1]).toHaveText('old')
+            up.render('.target:before', { document: `
+              <div class='target'>
+                <div class='child'>new</div>
+              </div>
+            `
             })
-          })
-          )
 
-          it('appends instead of replacing when the target has a :after pseudo-selector', asyncSpec(function(next) {
+            await wait()
+
+            const children = target.querySelectorAll('.child')
+            expect(children.length).toBe(2)
+            expect(children[0]).toHaveText('new')
+            expect(children[1]).toHaveText('old')
+          })
+
+          it('appends instead of replacing when the target has a :after pseudo-selector', async function() {
             const target = fixture('.target')
             e.affix(target, '.child', {text: 'old'})
-            up.render('.target:after', { document: `\
-<div class='target'>
-  <div class='child'>new</div>
-</div>\
-`
-          }
-            )
-
-            return next(function() {
-              const children = target.querySelectorAll('.child')
-              expect(children.length).toBe(2)
-              expect(children[0]).toHaveText('old')
-              return expect(children[1]).toHaveText('new')
+            up.render('.target:after', { document: `
+              <div class='target'>
+                <div class='child'>new</div>
+              </div>
+            `
             })
+
+            await wait()
+
+            const children = target.querySelectorAll('.child')
+            expect(children.length).toBe(2)
+            expect(children[0]).toHaveText('old')
+            expect(children[1]).toHaveText('new')
           })
-          )
 
           it('returns an up.RenderResult with only the appended elements', async function() {
             const target = fixture('.target')
             e.affix(target, '.child', {text: 'old'})
-            const result = await up.render('.target:after', { document: `\
-<div class='target'>
-  <div class='child'>new</div>
-</div>\
-`
-          }
-            )
+            const result = await up.render('.target:after', { document: `
+              <div class='target'>
+                <div class='child'>new</div>
+              </div>
+            `
+            })
 
             expect(result.fragments.length).toBe(1)
-            return expect(result.fragments[0]).toMatchSelector('.child')
+            expect(result.fragments[0]).toMatchSelector('.child')
           })
 
-          it("lets the developer choose between replacing/prepending/appending for each selector", asyncSpec(function(next) {
+          it("lets the developer choose between replacing/prepending/appending for each selector", async function() {
             fixture('.before', {text: 'old-before'})
             fixture('.middle', {text: 'old-middle'})
             fixture('.after', {text: 'old-after'})
-            up.render('.before:before, .middle, .after:after', { document: `\
-<div class="before">new-before</div>
-<div class="middle">new-middle</div>
-<div class="after">new-after</div>\
-`
-          }
-            )
-            return next(function() {
-              expect('.before').toHaveText('new-beforeold-before')
-              expect('.middle').toHaveText('new-middle')
-              return expect('.after').toHaveText('old-afternew-after')
+            up.render('.before:before, .middle, .after:after', { document: `
+              <div class="before">new-before</div>
+              <div class="middle">new-middle</div>
+              <div class="after">new-after</div>
+            `
             })
-          })
-          )
 
-          return it('replaces multiple selectors separated with a comma', asyncSpec(function(next) {
+            await wait()
+
+            expect('.before').toHaveText('new-beforeold-before')
+            expect('.middle').toHaveText('new-middle')
+            expect('.after').toHaveText('old-afternew-after')
+          })
+
+          it('replaces multiple selectors separated with a comma', async function() {
             fixture('.before', {text: 'old-before'})
             fixture('.middle', {text: 'old-middle'})
             fixture('.after', {text: 'old-after'})
 
-            up.render('.middle, .after', { document: `\
-<div class="before">new-before</div>
-<div class="middle">new-middle</div>
-<div class="after">new-after</div>\
-`
-          }
-            )
-
-            return next(function() {
-              expect('.before').toHaveText('old-before')
-              expect('.middle').toHaveText('new-middle')
-              return expect('.after').toHaveText('new-after')
+            up.render('.middle, .after', { document: `
+              <div class="before">new-before</div>
+              <div class="middle">new-middle</div>
+              <div class="after">new-after</div>
+            `
             })
+
+            await wait()
+
+            expect('.before').toHaveText('old-before')
+            expect('.middle').toHaveText('new-middle')
+            expect('.after').toHaveText('new-after')
           })
-          )
         })
 
         describe('optional targets', function() {
