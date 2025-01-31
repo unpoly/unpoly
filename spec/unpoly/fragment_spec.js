@@ -11369,9 +11369,7 @@ describe('up.fragment', function() {
       })
 
       if (window.customElements) {
-
-        return describe('custom elements', function() {
-
+        describe('custom elements', function() {
           beforeAll(function() {
             var TestComponent = function() {
               const instance = Reflect.construct(HTMLElement, [], TestComponent)
@@ -11382,88 +11380,81 @@ describe('up.fragment', function() {
             Object.setPrototypeOf(TestComponent.prototype, HTMLElement.prototype)
             Object.setPrototypeOf(TestComponent, HTMLElement)
 
-            return window.customElements.define('test-component-activation', TestComponent)
+            window.customElements.define('test-component-activation', TestComponent)
           })
 
-          it('activates custom elements in inserted fragments', asyncSpec(function(next) {
+          it('activates custom elements in inserted fragments', async function() {
             fixture('.target')
 
-            up.render('.target', { content: `\
-<test-component-activation></test-component-activation>\
-`
-          }
-            )
+            up.render('.target', { content: `
+              <test-component-activation></test-component-activation>
+            `})
 
-            return next(() => {
-              return expect('.target test-component-activation').toHaveText('component activated')
-            })
+            await wait()
+            expect('.target test-component-activation').toHaveText('component activated')
           })
-          )
 
-          return it('does not activate custom elements outside of inserted fragments (for performance reasons)', asyncSpec(function(next) {
+          it('does not activate custom elements outside of inserted fragments (for performance reasons)', async function() {
             fixture('.target')
             const constructorSpy = jasmine.createSpy('constructor called')
             up.on('test-component:new', constructorSpy)
 
-            up.render('.target', { document: `\
-<div class="target">
-  <test-component-activation></test-component-activation>
-</div>
-<div class="other">
-  <test-component-activation></test-component-activation>
-</div>\
-`
-          }
-            )
+            up.render('.target', { document: `
+              <div class="target">
+                <test-component-activation></test-component-activation>
+              </div>
+              <div class="other">
+                <test-component-activation></test-component-activation>
+              </div>
+            `})
 
-            return next(() => {
-              return expect(constructorSpy.calls.count()).toBe(1)
-            })
+            await wait()
+            expect(constructorSpy.calls.count()).toBe(1)
           })
-          )
         })
       }
     })
 
     if (up.migrate.loaded) {
-      describe('up.replace()', () => it('delegates to up.navigate({ target, url }) (deprecated)', function() {
-        const navigateSpy = up.fragment.navigate.mock()
-        const deprecatedSpy = spyOn(up.migrate, 'deprecated')
-        up.replace('target', 'url')
-        expect(navigateSpy).toHaveBeenCalledWith({ target: 'target', url: 'url' })
-        return expect(deprecatedSpy).toHaveBeenCalled()
-      }))
+      describe('up.replace()', function() {
+        it('delegates to up.navigate({ target, url }) (deprecated)', function() {
+          const navigateSpy = up.fragment.navigate.mock()
+          const deprecatedSpy = spyOn(up.migrate, 'deprecated')
+          up.replace('target', 'url')
+          expect(navigateSpy).toHaveBeenCalledWith({ target: 'target', url: 'url' })
+          expect(deprecatedSpy).toHaveBeenCalled()
+        })
+      })
     }
 
     if (up.migrate.loaded) {
-      describe('up.extract()', () => it('delegates to up.navigate({ target, document }) (deprecated)', function() {
-        const navigateSpy = up.fragment.navigate.mock()
-        const deprecatedSpy = spyOn(up.migrate, 'deprecated')
-        up.extract('target', 'document')
-        expect(navigateSpy).toHaveBeenCalledWith({ target: 'target', document: 'document' })
-        return expect(deprecatedSpy).toHaveBeenCalled()
-      }))
+      describe('up.extract()', function() {
+        it('delegates to up.navigate({ target, document }) (deprecated)', function() {
+          const navigateSpy = up.fragment.navigate.mock()
+          const deprecatedSpy = spyOn(up.migrate, 'deprecated')
+          up.extract('target', 'document')
+          expect(navigateSpy).toHaveBeenCalledWith({ target: 'target', document: 'document' })
+          expect(deprecatedSpy).toHaveBeenCalled()
+        })
+      })
     }
 
     describe('up.navigate()', function() {
-
       it('delegates to up.render({ ...options, navigate: true })', function() {
         const renderSpy = up.fragment.render.mock()
         up.navigate({ url: 'url' })
-        return expect(renderSpy).toHaveBeenCalledWith({ url: 'url', navigate: true })
+        expect(renderSpy).toHaveBeenCalledWith({ url: 'url', navigate: true })
       })
 
-      return it("updates the layer's main target by default (since navigation sets { fallback: true })", asyncSpec(function(next) {
+      it("updates the layer's main target by default (since navigation sets { fallback: true })", async function() {
         up.fragment.config.mainTargets.unshift('.main-target')
         fixture('.main-target')
 
         up.navigate({ url: '/path2' })
 
-        return next(() => {
-          return expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.main-target')
-        })
+        await wait()
+        expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.main-target')
       })
-      )
     })
 
     describe('up.destroy()', function() {
