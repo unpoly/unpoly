@@ -555,7 +555,7 @@ describe('up.fragment', function() {
         const $element = $mother.affix('.element')
 
         const result = up.fragment.closest($element[0], '.match')
-        return expect(result).toBe($grandMother[0])
+        expect(result).toBe($grandMother[0])
       })
 
       it('returns the given root if it matches', function() {
@@ -563,7 +563,7 @@ describe('up.fragment', function() {
         const $element = $mother.affix('.match')
 
         const result = up.fragment.closest($element[0], '.match')
-        return expect(result).toBe($element[0])
+        expect(result).toBe($element[0])
       })
 
       it('does not return descendants of the root, even if they match', function() {
@@ -571,7 +571,7 @@ describe('up.fragment', function() {
         const $child = $element.affix('.match')
 
         const result = up.fragment.closest($element[0], '.match')
-        return expect(result).toBeMissing()
+        expect(result).toBeMissing()
       })
 
       it('returns missing if neither root nor ancestor matches', function() {
@@ -579,7 +579,7 @@ describe('up.fragment', function() {
         const $element = $mother.affix('.no-match')
 
         const result = up.fragment.closest($element[0], '.match')
-        return expect(result).toBeMissing()
+        expect(result).toBeMissing()
       })
 
       it('returns missing if an ancestor matches, but is in another layer', function() {
@@ -587,10 +587,10 @@ describe('up.fragment', function() {
 
         const start = up.layer.element
         const result = up.fragment.closest(start, 'body')
-        return expect(result).toBeMissing()
+        expect(result).toBeMissing()
       })
 
-      return it('returns the closest ancestor in a detached tree', function() {
+      it('returns the closest ancestor in a detached tree', function() {
         const $grandGrandMother = $fixture('.match')
         const $grandMother = $grandGrandMother.affix('.match')
         const $mother = $grandMother.affix('.no-match')
@@ -599,7 +599,7 @@ describe('up.fragment', function() {
         $grandGrandMother.detach()
 
         const result = up.fragment.closest($element[0], '.match')
-        return expect(result).toBe($grandMother[0])
+        expect(result).toBe($grandMother[0])
       })
     })
 
@@ -612,8 +612,8 @@ describe('up.fragment', function() {
         const $otherChild = $element.affix('.child')
         const $otherGrandChild = $otherChild.affix('.grand-child')
         const results = up.fragment.subtree($element[0], '.match')
-        return expect(results).toEqual([$matchingChild[0], $matchingGrandChild[0]])
-    })
+        expect(results).toEqual([$matchingChild[0], $matchingGrandChild[0]])
+      })
 
       it('includes the given root if it matches the selector', function() {
         const $element = $fixture('.element.match')
@@ -622,22 +622,22 @@ describe('up.fragment', function() {
         const $otherChild = $element.affix('.child')
         const $otherGrandChild = $otherChild.affix('.grand-child')
         const results = up.fragment.subtree($element[0], '.match')
-        return expect(results).toEqual([$element[0], $matchingChild[0], $matchingGrandChild[0]])
-    })
+        expect(results).toEqual([$element[0], $matchingChild[0], $matchingGrandChild[0]])
+      })
 
       it('does not return ancestors of the root, even if they match', function() {
         const $parent = $fixture('.parent.match')
         const $element = $parent.affix('.element')
         const results = up.fragment.subtree($element[0], '.match')
-        return expect(results).toEqual([])
-    })
+        expect(results).toEqual([])
+      })
 
       it('returns an empty list if neither root nor any descendant matches', function() {
         const $element = $fixture('.element')
         const $child = $element.affix('.child')
         const results = up.fragment.subtree($element[0], '.match')
-        return expect(results).toEqual([])
-    })
+        expect(results).toEqual([])
+      })
 
       it('ignores descendants that are being destroyed', function() {
         const element = fixture('.element')
@@ -646,8 +646,8 @@ describe('up.fragment', function() {
 
         const results = up.fragment.subtree(element, '.child')
 
-        return expect(results).toEqual([activeChild])
-    })
+        expect(results).toEqual([activeChild])
+      })
 
       it('supports non-standard selector extensions')
 
@@ -658,10 +658,10 @@ describe('up.fragment', function() {
 
         const results = up.fragment.subtree(detachedTree, '.child')
 
-        return expect(results).toEqual([matchingChild])
-    })
+        expect(results).toEqual([matchingChild])
+      })
 
-      return it('matches descendants in a detached tree when the current layer is an overlay (bugfix)', function() {
+      it('matches descendants in a detached tree when the current layer is an overlay (bugfix)', function() {
         makeLayers(2)
 
         const detachedTree = fixture('.element')
@@ -670,9 +670,9 @@ describe('up.fragment', function() {
 
         const results = up.fragment.subtree(detachedTree, '.child')
 
-        return expect(results).toEqual([matchingChild])
+        expect(results).toEqual([matchingChild])
+      })
     })
-  })
 
     describe('up.render()', function() {
 
