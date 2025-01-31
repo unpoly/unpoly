@@ -1,7 +1,7 @@
 Relaxed JSON
 ============
 
-*Relaxed JSON* is a JSON superset that that aims to be easier to write by humans.
+*Relaxed JSON* is a JSON superset that aims to be easier to write by humans.
 
 
 Example
