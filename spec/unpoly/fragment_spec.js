@@ -10492,48 +10492,41 @@ describe('up.fragment', function() {
           $container.affix('middle-element[up-keep]').text('old-middle')
           $container.affix('after-element').text('old-after')
 
-          up.render('.container', { document: `\
-<div class='container'>
-  <before-element>new-before</before-element>
-  <middle-element class='middle' up-keep>new-middle</middle-element>
-  <after-element class='after'>new-after</after-element>
-</div>\
-`
-        }
-          )
+          up.render('.container', { document: `
+            <div class='container'>
+              <before-element>new-before</before-element>
+              <middle-element class='middle' up-keep>new-middle</middle-element>
+              <after-element class='after'>new-after</after-element>
+            </div>
+          `})
 
-          return next(() => {
-            expect('before-element').toHaveText('new-before')
-            expect('middle-element').toHaveText('old-middle')
-            return expect('after-element').toHaveText('new-after')
-          })
+          await wait()
+
+          expect('before-element').toHaveText('new-before')
+          expect('middle-element').toHaveText('old-middle')
+          expect('after-element').toHaveText('new-after')
         })
-        )
 
-        it('keeps an [up-keep] element, but does replace text nodes around it', asyncSpec(function(next) {
+        it('keeps an [up-keep] element, but does replace text nodes around it', async function() {
           const $container = $fixture('.container')
-          $container.html(`\
-old-before
-<div class='element' up-keep>old-inside</div>
-old-after\
-`
-          )
+          $container.html(`
+            old-before
+            <div class='element' up-keep>old-inside</div>
+            old-after
+          `)
 
-          up.render('.container', { document: `\
-<div class='container'>
-  new-before
-  <div class='element' up-keep>new-inside</div>
-  new-after
-</div>\
-`
-        }
-          )
+          up.render('.container', { document: `
+            <div class='container'>
+              new-before
+              <div class='element' up-keep>new-inside</div>
+              new-after
+            </div>
+          `})
 
-          return next(() => {
-            return expect(squish($('.container').text())).toEqual('new-before old-inside new-after')
-          })
+          await wait()
+
+          expect(squish($('.container').text())).toEqual('new-before old-inside new-after')
         })
-        )
 
         it('omits a kept element from the returned up.RenderResult', async function() {
           const $container = $fixture('.container')
@@ -10541,49 +10534,45 @@ old-after\
           $container.affix('.middle[up-keep]').text('old-middle')
           $container.affix('.after').text('old-after')
 
-          const result = await up.render('.before, .middle', { document: `\
-<div class='container'>
-  <div class='before'>new-before</div>
-  <div class='middle' up-keep>new-middle</div>
-  <div class='after'>new-after</div>
-</div>\
-`
-        })
+          const result = await up.render('.before, .middle', { document: `
+            <div class='container'>
+              <div class='before'>new-before</div>
+              <div class='middle' up-keep>new-middle</div>
+              <div class='after'>new-after</div>
+            </div>
+          `})
 
           expect('.before').toHaveText('new-before')
           expect('.middle').toHaveText('old-middle') // was kept
           expect('.after').toHaveText('old-after')
 
           expect(result.fragments.length).toBe(1)
-          return expect(result.fragments[0]).toMatchSelector('.before')
+          expect(result.fragments[0]).toMatchSelector('.before')
         })
 
-        it('updates an [up-keep] element with { keep: false } option', asyncSpec(function(next) {
+        it('updates an [up-keep] element with { keep: false } option', async function() {
           const $container = $fixture('.container')
-          $container.html(`\
-old-before
-<div class='element' up-keep>old-inside</div>
-old-after\
-`
-          )
+          $container.html(`
+            old-before
+            <div class='element' up-keep>old-inside</div>
+            old-after
+          `)
 
           up.render('.container', {
             keep: false,
-            document: `\
-<div class='container'>
-  new-before
-  <div class='element' up-keep>new-inside</div>
-  new-after
-</div>\
-`
-          }
-          )
-
-          return next(() => {
-            return expect(squish($('.container').text())).toEqual('new-before new-inside new-after')
+            document: `
+              <div class='container'>
+                new-before
+                <div class='element' up-keep>new-inside</div>
+                new-after
+              </div>
+            `
           })
+
+          await wait()
+
+          expect(squish($('.container').text())).toEqual('new-before new-inside new-after')
         })
-        )
 
         it('keeps the scroll position of an [up-viewport] within a kept element', function() {
           container = fixture('.container')
@@ -10597,20 +10586,18 @@ old-after\
           expect(viewport).toBeAttached()
           expect(viewport.scrollTop).toBe(100)
 
-          up.render({fragment: `\
-
-<div class="container">
-  <div class="keepable" up-keep>
-    <div class="viewport" up-viewport></div>
-  </div>
-  <div class="other">new other text</div>
-</div>\
-`
-          })
+          up.render({fragment: `
+            <div class="container">
+              <div class="keepable" up-keep>
+                <div class="viewport" up-viewport></div>
+              </div>
+              <div class="other">new other text</div>
+            </div>
+          `})
 
           expect('.other').toHaveText('new other text')
           expect(viewport).toBeAttached()
-          return expect(viewport.scrollTop).toBe(100)
+          expect(viewport.scrollTop).toBe(100)
         })
 
         describe('media elements', function() {
