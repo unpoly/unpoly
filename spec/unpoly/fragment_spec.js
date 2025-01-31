@@ -6255,67 +6255,62 @@ describe('up.fragment', function() {
 
       describe('fragment source', function() {
 
-        it('remembers the source the fragment was retrieved from', asyncSpec(function(next) {
+        it('remembers the source the fragment was retrieved from', async function() {
           fixture('.target')
           up.render('.target', {url: '/path'})
-          next(() => {
-            return this.respondWithSelector('.target')
-          })
-          return next(() => {
-            return expect(up.fragment.source(e.get('.target'))).toMatchURL('/path')
-          })
-        })
-        )
+          await wait()
 
-        it('returns the source location without a #hash', asyncSpec(function(next) {
+          this.respondWithSelector('.target')
+          await wait()
+
+          expect(up.fragment.source(e.get('.target'))).toMatchURL('/path')
+        })
+
+        it('returns the source location without a #hash', async function() {
           fixture('.target')
           up.render('.target', {url: '/path#hash'})
-          next(() => {
-            return this.respondWithSelector('.target')
-          })
-          return next(() => {
-            return expect(up.fragment.source(e.get('.target'))).toMatchURL('/path')
-          })
-        })
-        )
+          await wait()
 
-        it('keeps the previous source for a non-GET request (since only that is reloadable)', asyncSpec(function(next) {
+          this.respondWithSelector('.target')
+          await wait()
+
+          expect(up.fragment.source(e.get('.target'))).toMatchURL('/path')
+        })
+
+        it('keeps the previous source for a non-GET request (since only that is reloadable)', async function() {
           const target = fixture('.target[up-source="/previous-source"]')
           up.render('.target', {url: '/path', method: 'post'})
-          next(() => {
-            return this.respondWithSelector('.target')
-          })
-          return next(() => {
-            return expect(up.fragment.source(e.get('.target'))).toMatchURL('/previous-source')
-          })
-        })
-        )
+          await wait()
 
-        it('does not overwrite an [up-source] attribute from the element HTML', asyncSpec(function(next) {
+          this.respondWithSelector('.target')
+          await wait()
+
+          expect(up.fragment.source(e.get('.target'))).toMatchURL('/previous-source')
+        })
+
+        it('does not overwrite an [up-source] attribute from the element HTML', async function() {
           fixture('.target')
           up.render('.target', {url: '/path'})
-          next(() => {
-            return this.respondWithSelector('.target[up-source="/other"]')
-          })
-          return next(() => {
-            return expect(up.fragment.source(e.get('.target'))).toMatchURL('/other')
-          })
+          await wait()
+
+          this.respondWithSelector('.target[up-source="/other"]')
+          await wait()
+
+          expect(up.fragment.source(e.get('.target'))).toMatchURL('/other')
         })
-        )
 
-        return describe('with { source } option', function() {
+        describe('with { source } option', function() {
 
-          it('uses that URL as the source for a GET request', asyncSpec(function(next) {
+          it('uses that URL as the source for a GET request', async function() {
             fixture('.target[up-source="/previous-source"]')
             up.render('.target', {url: '/path', source: '/given-path'})
-            next(() => {
-              return this.respondWithSelector('.target')
-            })
-            return next(() => {
-              return expect(up.fragment.source(e.get('.target'))).toMatchURL('/given-path')
-            })
+            await wait()
+
+            this.respondWithSelector('.target')
+            await wait()
+
+            expect(up.fragment.source(e.get('.target'))).toMatchURL('/given-path')
           })
-          )
 
           it('uses that URL as the source for a failed GET request', async function() {
             fixture('.target[up-source="/previous-source"]')
@@ -6326,22 +6321,21 @@ describe('up.fragment', function() {
             jasmine.respondWithSelector('.target', {status: 500})
 
             await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
-            return expect(up.fragment.source(e.get('.target'))).toMatchURL('/given-path')
+            expect(up.fragment.source(e.get('.target'))).toMatchURL('/given-path')
           })
 
-          it('uses that URL as the source after a non-GET request', asyncSpec(function(next) {
+          it('uses that URL as the source after a non-GET request', async function() {
             fixture('.target[up-source="/previous-source"]')
             up.render('.target', {url: '/path', method: 'post', source: '/given-path'})
-            next(() => {
-              return this.respondWithSelector('.target')
-            })
-            return next(() => {
-              return expect(up.fragment.source(e.get('.target'))).toMatchURL('/given-path')
-            })
-          })
-          )
+            await wait()
 
-          return it('uses that URL as the source after a failed non-GET request\'', async function() {
+            this.respondWithSelector('.target')
+            await wait()
+
+            expect(up.fragment.source(e.get('.target'))).toMatchURL('/given-path')
+          })
+
+          it('uses that URL as the source after a failed non-GET request\'', async function() {
             const target = fixture('.target[up-source="/previous-source"]')
             const renderJob = up.navigate('.target', {failTarget: '.target', url: '/path', method: 'post', source: '/given-path'})
 
@@ -6351,14 +6345,14 @@ describe('up.fragment', function() {
 
             await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
 
-            return expect(up.fragment.source(e.get('.target'))).toMatchURL('/given-path')
+            expect(up.fragment.source(e.get('.target'))).toMatchURL('/given-path')
           })
         })
       })
 
       describe('context', function() {
 
-        it("sends the layer's context along with requests pertaining to this layer as an X-Up-Context request header", asyncSpec(function(next) {
+        it("sends the layer's context along with requests pertaining to this layer as an X-Up-Context request header", async function() {
           makeLayers([
             { target: '.target', context: { rootKey: 'rootValue' }},
             { target: '.target', context: { overlayKey: 'overlayValue' }}
@@ -6367,50 +6361,45 @@ describe('up.fragment', function() {
           expect(up.layer.get(0).context).toEqual({ rootKey: 'rootValue' })
           expect(up.layer.get(1).context).toEqual({ overlayKey: 'overlayValue' })
 
-          next(() => up.render('.target', {layer: up.layer.get(0), url: '/path1'}))
+          await wait()
 
-          next(function() {
-            expect(jasmine.Ajax.requests.count()).toBe(1)
-            expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Context']).toEqual(JSON.stringify({ rootKey: 'rootValue'}))
+          up.render('.target', {layer: up.layer.get(0), url: '/path1'})
+          await wait()
 
-            return up.render('.target', {layer: up.layer.get(1), url: '/path2'})
-          })
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Context']).toEqual(JSON.stringify({ rootKey: 'rootValue'}))
 
-          return next(function() {
-            expect(jasmine.Ajax.requests.count()).toBe(2)
-            return expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Context']).toEqual(JSON.stringify({ overlayKey: 'overlayValue'}))
-          })
+          up.render('.target', {layer: up.layer.get(1), url: '/path2'})
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+          expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Context']).toEqual(JSON.stringify({ overlayKey: 'overlayValue'}))
         })
-        )
 
-        it('escapes high ASCII characters in the X-Up-Context request header so Unicode values can be transported', asyncSpec(function(next) {
+        it('escapes high ASCII characters in the X-Up-Context request header so Unicode values can be transported', async function() {
           up.layer.context = { foo: 'xäy' }
           fixture('.target')
 
           up.render('.target', {url: '/path3'})
+          await wait()
 
-          return next(function() {
-            expect(jasmine.Ajax.requests.count()).toBe(1)
-            return expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Context']).toBe('{"foo":"x\\u00e4y"}')
-          })
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Context']).toBe('{"foo":"x\\u00e4y"}')
         })
-        )
 
-        it("sends the fail layer's context as an X-Up-Fail-Context request header", asyncSpec(function(next) {
+        it("sends the fail layer's context as an X-Up-Fail-Context request header", async function() {
           makeLayers([
             { target: '.target', context: { rootKey: 'rootValue' }},
             { target: '.target', context: { overlayKey: 'overlayValue' }}
           ])
 
           up.render({target: '.target', failTarget: '.target', layer: up.layer.get(0), failLayer: up.layer.get(1), url: '/path1'})
+          await wait()
 
-          return next(function() {
-            expect(jasmine.Ajax.requests.count()).toBe(1)
-            expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Context']).toEqual(JSON.stringify({ rootKey: 'rootValue'}))
-            return expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Fail-Context']).toEqual(JSON.stringify({ overlayKey: 'overlayValue'}))
-          })
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Context']).toEqual(JSON.stringify({ rootKey: 'rootValue'}))
+          expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Fail-Context']).toEqual(JSON.stringify({ overlayKey: 'overlayValue'}))
         })
-        )
 
         it('lets the server update the context by responding with an X-Up-Context response header', async function() {
           makeLayers([
@@ -6425,7 +6414,7 @@ describe('up.fragment', function() {
           await wait()
 
           expect(up.layer.get(0).context).toEqual({ rootKey: 'rootValue' })
-          return expect(up.layer.get(1).context).toEqual({ overlayKey: 'overlayValue', newKey: 'newValue' })
+          expect(up.layer.get(1).context).toEqual({ overlayKey: 'overlayValue', newKey: 'newValue' })
         })
 
         it('allows unquoted property names in the X-Up-Context response header', async function() {
@@ -6441,10 +6430,10 @@ describe('up.fragment', function() {
           await wait()
 
           expect(up.layer.get(0).context).toEqual({ rootKey: 'rootValue' })
-          return expect(up.layer.get(1).context).toEqual({ overlayKey: 'overlayValue', newKey: 'newValue' })
+          expect(up.layer.get(1).context).toEqual({ overlayKey: 'overlayValue', newKey: 'newValue' })
         })
 
-        return it('uses updates from an X-Up-Context header for failed responses', async function() {
+        it('uses updates from an X-Up-Context header for failed responses', async function() {
           fixture('.success-target', {text: 'success target'})
           fixture('.failure-target', {text: 'failure target'})
 
@@ -6456,55 +6445,47 @@ describe('up.fragment', function() {
             text: 'new text',
             status: 500,
             responseHeaders: { 'X-Up-Context': JSON.stringify({ newKey: 'newValue'})}
-          }
-          )
+          })
 
           await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
 
           expect('.failure-target').toHaveText('new text')
-          return expect(up.layer.get(0).context).toEqual({ newKey: 'newValue' })
+          expect(up.layer.get(0).context).toEqual({ newKey: 'newValue' })
         })
       })
 
       describe('with { transition } option', function() {
 
-        beforeEach(() => up.motion.config.enabled = true)
+        beforeEach(function() { up.motion.config.enabled = true })
 
-        it('morphs between the old and new element', asyncSpec(function(next) {
+        it('morphs between the old and new element', async function() {
           fixture('.element.v1', {text: 'version 1'})
           up.render('.element', {
             document: '<div class="element v2">version 2</div>',
             transition: 'cross-fade',
             duration: 200,
             easing: 'linear'
-          }
-          )
+          })
 
           let oldElement = undefined
           let newElement = undefined
 
-          next(function() {
-            oldElement = document.querySelector('.element.v1')
-            newElement = document.querySelector('.element.v2')
+          oldElement = document.querySelector('.element.v1')
+          newElement = document.querySelector('.element.v2')
 
-            expect(oldElement).toHaveOpacity(1.0, 0.15)
-            return expect(newElement).toHaveOpacity(0.0, 0.15)
-          })
+          expect(oldElement).toHaveOpacity(1.0, 0.15)
+          expect(newElement).toHaveOpacity(0.0, 0.15)
+          await wait()
 
-          next.after(100, function() {
-            expect(oldElement).toHaveOpacity(0.5, 0.3)
-            return expect(newElement).toHaveOpacity(0.5, 0.3)
-          })
+          expect(oldElement).toHaveOpacity(0.5, 0.3)
+          expect(newElement).toHaveOpacity(0.5, 0.3)
+          await wait(170)
 
-          return next.after((100 + 70), function() {
-            expect(newElement).toHaveOpacity(1.0, 0.1)
-            return expect(oldElement).toBeDetached()
-          })
+          expect(newElement).toHaveOpacity(1.0, 0.1)
+          expect(oldElement).toBeDetached()
         })
-        )
 
-
-        it('ignores a { transition } option when replacing a singleton element like <body>', asyncSpec(function(next) {
+        it('ignores a { transition } option when replacing a singleton element like <body>', async function() {
           // shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
           spyOn(up.element, 'isSingleton').and.callFake(element => element.matches('fake-body'))
 
@@ -6513,22 +6494,21 @@ describe('up.fragment', function() {
 
           const renderDone = jasmine.createSpy('render() done')
           const promise = up.render({
-            fragment: '<fake-body>new text</fake-bofy>',
+            fragment: '<fake-body>new text</fake-body>',
             transition: 'cross-fade',
             duration: 200
           })
           promise.then(renderDone)
 
-          return next(() => {
-            // See that we've already immediately swapped the element and ignored the duration of 200ms
-            expect(renderDone).toHaveBeenCalled()
-            expect($('fake-body').length).toEqual(1)
-            return expect('fake-body').toHaveOpacity(1.0)
-          })
-        })
-        )
+          await wait()
 
-        it('marks the old fragment as .up-destroying during the transition', asyncSpec(function(next) {
+          // See that we've already immediately swapped the element and ignored the duration of 200ms
+          expect(renderDone).toHaveBeenCalled()
+          expect($('fake-body').length).toEqual(1)
+          expect('fake-body').toHaveOpacity(1.0)
+        })
+
+        it('marks the old fragment as .up-destroying during the transition', async function() {
           fixture('.element', {text: 'version 1'})
           up.render({
             fragment: '<div class="element">version 2</div>',
@@ -6536,24 +6516,22 @@ describe('up.fragment', function() {
             duration: 200
           })
 
-          return next(() => {
-            const version1 = up.specUtil.findElementContainingText('.element', "version 1")
-            expect(version1).toHaveClass('up-destroying')
+          await wait()
 
-            const version2 = up.specUtil.findElementContainingText('.element', "version 2")
-            return expect(version2).not.toHaveClass('up-destroying')
-          })
+          const version1 = up.specUtil.findElementContainingText('.element', "version 1")
+          expect(version1).toHaveClass('up-destroying')
+
+          const version2 = up.specUtil.findElementContainingText('.element', "version 2")
+          expect(version2).not.toHaveClass('up-destroying')
         })
-        )
 
-        // render with { transition } option
         it('runs an { onFinished } callback after the element has been removed from the DOM', function(done) {
           const $parent = $fixture('.parent')
           const $element = $parent.affix('.element.v1').text('v1')
 
           const testElementAttachment = function() {
             expect($element).toBeDetached()
-            return done()
+            done()
           }
 
           up.render('.element', {
@@ -6561,10 +6539,9 @@ describe('up.fragment', function() {
             transition: 'cross-fade',
             duration: 50,
             onFinished: testElementAttachment
-          }
-          )
+          })
 
-          return expect($element).toBeAttached()
+          expect($element).toBeAttached()
         })
 
         it('fulfills the render().finished promise after the element has been removed from the DOM', function(done) {
@@ -6573,19 +6550,18 @@ describe('up.fragment', function() {
 
           const testElementAttachment = function() {
             expect($element).toBeDetached()
-            return done()
+            done()
           }
 
           const job = up.render('.element', {
             document: '<div class="element v2">v2</div>',
             transition: 'cross-fade',
             duration: 50,
-          }
-          )
+          })
 
           job.finished.then(testElementAttachment)
 
-          return expect($element).toBeAttached()
+          expect($element).toBeAttached()
         })
 
         it('rejects the render().finished promise after the element has been removed from the DOM when updating from a failed response', async function() {
@@ -6605,9 +6581,11 @@ describe('up.fragment', function() {
 
           await wait()
 
-          jasmine.respondWith({status: 500, responseText: `\
-<div class="target">new target</div>\
-`
+          jasmine.respondWith({
+            status: 500,
+            responseText: `
+              <div class="target">new target</div>
+            `
           })
 
           await wait(100)
@@ -6618,14 +6596,14 @@ describe('up.fragment', function() {
           await wait(200)
 
           await expectAsync(finished).toBeRejectedWith(jasmine.any(up.RenderResult))
-          return await expectAsync(finished).toBeRejectedWith(jasmine.objectContaining({
+          await expectAsync(finished).toBeRejectedWith(jasmine.objectContaining({
             target: '.target',
             fragments: [document.querySelector('.target')],
             layer: up.layer.root,
           }))
         })
 
-        it('runs an { onFinished } callback once when updating multiple elements', asyncSpec(function(next) {
+        it('runs an { onFinished } callback once when updating multiple elements', async function() {
           fixture('.foo')
           fixture('.bar')
 
@@ -6636,56 +6614,48 @@ describe('up.fragment', function() {
             transition: 'cross-fade',
             duration: 10,
             onFinished: onFinishedSpy
-          }
-          )
+          })
 
-          return next.after(200, () => expect(onFinishedSpy.calls.count()).toBe(1))
+          await wait(200)
+          expect(onFinishedSpy.calls.count()).toBe(1)
         })
-        )
 
-        it('cancels an existing transition by instantly jumping to the last frame', asyncSpec(function(next) {
+        it('cancels an existing transition by instantly jumping to the last frame', async function() {
           $fixture('.element.v1').text('version 1')
 
           up.render('.element', {
             document: '<div class="element v2">version 2</div>',
             transition: 'cross-fade',
             duration: 200
-          }
-          )
-
-          next(() => {
-            const $ghost1 = $('.element:contains("version 1")')
-            expect($ghost1).toHaveLength(1)
-            expect($ghost1.css('opacity')).toBeAround(1.0, 0.1)
-
-            const $ghost2 = $('.element:contains("version 2")')
-            expect($ghost2).toHaveLength(1)
-            return expect($ghost2.css('opacity')).toBeAround(0.0, 0.1)
           })
 
-          next(() => {
-            return up.render('.element', {
-              document: '<div class="element v3">version 3</div>',
-              transition: 'cross-fade',
-              duration: 200
-            }
-            )
+          await wait()
+
+          const $ghost1 = $('.element:contains("version 1")')
+          expect($ghost1).toHaveLength(1)
+          expect($ghost1.css('opacity')).toBeAround(1.0, 0.1)
+
+          const $ghost2 = $('.element:contains("version 2")')
+          expect($ghost2).toHaveLength(1)
+          expect($ghost2.css('opacity')).toBeAround(0.0, 0.1)
+
+          await up.render('.element', {
+            document: '<div class="element v3">version 3</div>',
+            transition: 'cross-fade',
+            duration: 200
           })
 
-          return next(() => {
-            const $ghost1 = $('.element:contains("version 1")')
-            expect($ghost1).toHaveLength(0)
+          const $ghost1After = $('.element:contains("version 1")')
+          expect($ghost1After).toHaveLength(0)
 
-            const $ghost2 = $('.element:contains("version 2")')
-            expect($ghost2).toHaveLength(1)
-            expect($ghost2.css('opacity')).toBeAround(1.0, 0.1)
+          const $ghost2After = $('.element:contains("version 2")')
+          expect($ghost2After).toHaveLength(1)
+          expect($ghost2After.css('opacity')).toBeAround(1.0, 0.1)
 
-            const $ghost3 = $('.element:contains("version 3")')
-            expect($ghost3).toHaveLength(1)
-            return expect($ghost3.css('opacity')).toBeAround(0.0, 0.1)
-          })
+          const $ghost3 = $('.element:contains("version 3")')
+          expect($ghost3).toHaveLength(1)
+          expect($ghost3.css('opacity')).toBeAround(0.0, 0.1)
         })
-        )
 
         it('resolves the returned promise as soon as both elements are in the DOM and the transition has started', function(done) {
           fixture('.swapping-element', {text: 'version 1'})
@@ -6706,12 +6676,11 @@ describe('up.fragment', function() {
             expect(elements[1]).toHaveText('version 1')
             expect(elements[1]).toMatchSelector('.up-destroying')
 
-            return done()
+            done()
           })
-
         })
 
-        it('runs an { onFinished } callback when the transition has finished', asyncSpec(function(next) {
+        it('runs an { onFinished } callback when the transition has finished', async function() {
           fixture('.element', {text: 'version 1'})
           const onFinished = jasmine.createSpy('onFinished callback')
 
@@ -6723,14 +6692,15 @@ describe('up.fragment', function() {
           })
 
           expect(onFinished).not.toHaveBeenCalled()
+          await wait(20)
 
-          next.after(20, () => expect(onFinished).not.toHaveBeenCalled())
+          expect(onFinished).not.toHaveBeenCalled()
+          await wait(200)
 
-          return next.after(200, () => expect(onFinished).toHaveBeenCalled())
+          expect(onFinished).toHaveBeenCalled()
         })
-        )
 
-        it('runs an { onFinished } callback once when appending an element', asyncSpec(function(next) {
+        it('runs an { onFinished } callback once when appending an element', async function() {
           fixture('.foo')
 
           const onFinishedSpy = jasmine.createSpy('onFinished spy')
@@ -6740,26 +6710,24 @@ describe('up.fragment', function() {
             transition: 'fade-in',
             duration: 10,
             onFinished: onFinishedSpy
-          }
-          )
+          })
 
-          return next.after(200, () => expect(onFinishedSpy.calls.count()).toBe(1))
+          await wait(200)
+          expect(onFinishedSpy.calls.count()).toBe(1)
         })
-        )
 
-        it('marks the old element as .up-destroying before compilers are called', asyncSpec(function(next) {
+        it('marks the old element as .up-destroying before compilers are called', async function() {
           const element = fixture('.element', {id: 'old', text: 'old text'})
           const isMarkedSpy = jasmine.createSpy()
           up.compiler('.element', element => isMarkedSpy(document.querySelector('.element#old').matches('.up-destroying')))
           up.render({target: '.element', document: '<div class="element" id="new">new text</div>', transition: 'cross-fade', duration: 70})
-          return next.after(35, function() {
-            expect('.element').toHaveText('new text')
-            return expect(isMarkedSpy).toHaveBeenCalledWith(true)
-          })
-        })
-        )
+          await wait(35)
 
-        it('attaches the new element to the DOM before compilers are called, so they can see their parents and trigger bubbling events', asyncSpec(function(next) {
+          expect('.element').toHaveText('new text')
+          expect(isMarkedSpy).toHaveBeenCalledWith(true)
+        })
+
+        it('attaches the new element to the DOM before compilers are called, so they can see their parents and trigger bubbling events', async function() {
           const $parent = $fixture('.parent')
           const $element = $parent.affix('.element').text('old text')
           const spy = jasmine.createSpy('parent spy')
@@ -6770,13 +6738,11 @@ describe('up.fragment', function() {
             duration: 50
           })
 
-          return next(() => {
-            return expect(spy).toHaveBeenCalledWith('new text', $parent.get(0))
-          })
+          await wait()
+          expect(spy).toHaveBeenCalledWith('new text', $parent.get(0))
         })
-        )
 
-        it('reveals the new element while making the old element within the same viewport appear as if it would keep its scroll position', asyncSpec(function(next) {
+        it('reveals the new element while making the old element within the same viewport appear as if it would keep its scroll position', async function() {
           const $container = $fixture('.container[up-viewport]').css({
             'width': '200px',
             'height': '200px',
@@ -6790,31 +6756,33 @@ describe('up.fragment', function() {
           $container.scrollTop(300)
           expect($container.scrollTop()).toEqual(300)
 
-          up.render($element.get(0), { transition: 'cross-fade', duration: 60000, scroll: 'target', document: `\
-<div class="element" style="height: 600px"></div>\
-`
-        }
-          )
-
-          return next(() => {
-            const $old = $('.element.up-destroying')
-            const $new = $('.element:not(.up-destroying)')
-
-            // Container is scrolled up due to { scroll: 'target' } option.
-            // Since $old and $new are sitting in the same viewport with a
-            // single shared scrollbar, this will make the ghost for $old jump.
-            expect($container.scrollTop()).toBeAround(0, 5)
-
-            // See that the ghost for $new is aligned with the top edge
-            // of the viewport.
-            expect($new.offset().top).toBeAround(0, 5)
-
-            // The absolutized $old is shifted upwards to make it looks like it
-            // was at the scroll position before we revealed $new.
-            return expect($old.offset().top).toBeAround(-300, 5)
+          up.render($element.get(0), { 
+            transition: 'cross-fade', 
+            duration: 60000, 
+            scroll: 'target', 
+            document: `
+              <div class="element" style="height: 600px"></div>
+            `
           })
+
+          await wait()
+
+          const $old = $('.element.up-destroying')
+          const $new = $('.element:not(.up-destroying)')
+
+          // Container is scrolled up due to { scroll: 'target' } option.
+          // Since $old and $new are sitting in the same viewport with a
+          // single shared scrollbar, this will make the ghost for $old jump.
+          expect($container.scrollTop()).toBeAround(0, 5)
+
+          // See that the ghost for $new is aligned with the top edge
+          // of the viewport.
+          expect($new.offset().top).toBeAround(0, 5)
+
+          // The absolutized $old is shifted upwards to make it looks like it
+          // was at the scroll position before we revealed $new.
+          expect($old.offset().top).toBeAround(-300, 5)
         })
-        )
 
         describe('when up.morph() is called from a transition function', function() {
 
@@ -6831,7 +6799,7 @@ describe('up.fragment', function() {
             const testListenerCalls = function() {
               expect(destroyedListener.calls.count()).toBe(1)
               expect(insertedListener.calls.count()).toBe(1)
-              return done()
+              done()
             }
 
             up.render({
@@ -6841,7 +6809,6 @@ describe('up.fragment', function() {
               easing: 'linear',
               onFinished: testListenerCalls
             })
-
           })
 
           it("does not compile the element multiple times (bugfix)", function(done) {
@@ -6863,12 +6830,11 @@ describe('up.fragment', function() {
 
             extractDone.then(function() {
               expect(compiler.calls.count()).toBe(2)
-              return done()
+              done()
             })
-
           })
 
-          return it("does not call destructors multiple times (bugfix)", async function() {
+          it("does not call destructors multiple times (bugfix)", async function() {
             const destructor = jasmine.createSpy('destructor')
             up.compiler('.element', element => destructor)
 
@@ -6884,29 +6850,28 @@ describe('up.fragment', function() {
               easing: 'linear',
             }).finished
 
-            return expect(destructor.calls.count()).toBe(1)
+            expect(destructor.calls.count()).toBe(1)
           })
         })
 
         describe('when animation is disabled', function() {
 
-          beforeEach(() => up.motion.config.enabled = false)
+          beforeEach(function() { up.motion.config.enabled = false })
 
-          it('immediately swaps the old and new elements without creating unnecessary ghosts', asyncSpec(function(next) {
+          it('immediately swaps the old and new elements without creating unnecessary ghosts', async function() {
             $fixture('.element').text('version 1')
             up.render({
               fragment: '<div class="element">version 2</div>',
               transition: 'cross-fade',
               duration: 200
             })
-            return next(() => {
-              expect('.element').toHaveText('version 2')
-              return expect(document.querySelectorAll('.up-ghost')).toHaveLength(0)
-            })
-          })
-          )
+            await wait()
 
-          return it("replaces the elements directly, since first inserting and then removing would shift scroll positions", asyncSpec(function(next) {
+            expect('.element').toHaveText('version 2')
+            expect(document.querySelectorAll('.up-ghost')).toHaveLength(0)
+          })
+
+          it("replaces the elements directly, since first inserting and then removing would shift scroll positions", async function() {
             const swapDirectlySpy = up.motion.swapElementsDirectly.mock()
             $fixture('.element').text('version 1')
             up.render({
@@ -6914,14 +6879,12 @@ describe('up.fragment', function() {
               transition: false
             })
 
-            return next(() => {
-              return expect(swapDirectlySpy).toHaveBeenCalled()
-            })
+            await wait()
+            expect(swapDirectlySpy).toHaveBeenCalled()
           })
-          )
         })
 
-        return describe('when the transition function throws an error', function() {
+        describe('when the transition function throws an error', function() {
 
           it('emits an error event on window, but does not reject the render job', async function() {
             const transitionError = new Error("error from crashing transition")
@@ -6930,20 +6893,21 @@ describe('up.fragment', function() {
 
             fixture('.target', {text: 'old target'})
 
-            return await jasmine.expectGlobalError(transitionError, async function() {
-              const job = up.render({transition: crashingTransition, fragment: `\
-<div class="target">new target</div>\
-`})
+            await jasmine.expectGlobalError(transitionError, async function() {
+              const job = up.render({
+                transition: crashingTransition, 
+                fragment: `
+                  <div class="target">new target</div>
+                `
+              })
 
               expect('.target').toHaveText('new target')
-
               expect(crashingTransition).toHaveBeenCalled()
-
-              return await expectAsync(job).toBeResolvedTo(jasmine.any(up.RenderResult))
+              await expectAsync(job).toBeResolvedTo(jasmine.any(up.RenderResult))
             })
           })
 
-          return it('still updates subsequent elements for a multi-step target', async function() {
+          it('still updates subsequent elements for a multi-step target', async function() {
             const transitionError = new Error("error from crashing transition")
             const crashingTransition = jasmine.createSpy('crashing transition').and.throwError(transitionError)
             up.transition('crashing', crashingTransition)
@@ -6952,21 +6916,20 @@ describe('up.fragment', function() {
             fixture('.secondary', {text: 'old secondary'})
             fixture('.tertiary', {text: 'old tertiary'})
 
-            return await jasmine.spyOnGlobalErrorsAsync(async function() {
-              up.render('.primary, .secondary, .tertiary', { transition: 'crashing', document: `\
-<div class="primary">new primary</div>
-<div class="secondary">new secondary</div>
-<div class="tertiary">new tertiary</div>\
-`
-            })
+            await jasmine.spyOnGlobalErrorsAsync(async function() {
+              up.render('.primary, .secondary, .tertiary', { 
+                transition: 'crashing', 
+                document: `
+                  <div class="primary">new primary</div>
+                  <div class="secondary">new secondary</div>
+                  <div class="tertiary">new tertiary</div>
+                `
+              })
 
               expect(crashingTransition).toHaveBeenCalled()
-
               expect('.primary').toHaveText('new primary')
               expect('.secondary').toHaveText('new secondary')
               expect('.tertiary').toHaveText('new tertiary')
-
-              return await Promise.resolve()
             })
           })
         })
