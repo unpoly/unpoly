@@ -2466,159 +2466,142 @@ describe('up.fragment', function() {
         })
       })
 
-      describe('with { response } option', () => it('renders the given up.Response', asyncSpec(function(next) {
-        up.history.config.enabled = true
-        const target = fixture('.target', {text: 'old text'})
+      describe('with { response } option', function() {
+        it('renders the given up.Response', async function() {
+          up.history.config.enabled = true
+          const target = fixture('.target', {text: 'old text'})
 
-        const request = up.request('/response-url')
+          const request = up.request('/response-url')
+          await wait()
 
-        next(function() {
           jasmine.respondWith('<div class="target">new text</div>')
+          const response = await request
 
-          return next.await(request)
-        })
-
-        next(function(response) {
           expect('.target').toHaveText('old text')
-          return up.render({ target: '.target', response, history: true })
-        })
+          await up.render({ target: '.target', response, history: true })
+          await wait()
 
-        return next(function() {
           expect('.target').toHaveText('new text')
-          return expect(location.href).toMatchURL('/response-url')
+          expect(location.href).toMatchURL('/response-url')
         })
       })
-      ))
 
       describe('with { content } option', function() {
 
-        it('replaces the given selector with a matching element that has the inner HTML from the given { content } string', asyncSpec(function(next) {
+        it('replaces the given selector with a matching element that has the inner HTML from the given { content } string', async function() {
           fixture('.target', {text: 'old text'})
 
           up.render('.target', {content: 'new text'})
+          await wait()
 
-          return next(() => {
-            return expect('.target').toHaveText('new text')
-          })
+          expect('.target').toHaveText('new text')
         })
-        )
 
         it('returns an up.RenderResult with the new children', async function() {
           fixture('.target', {text: 'old text'})
 
-          const result = await up.render('.target', { content: `\
-<div class="child1">child1</div>
-<div class="child2">child2</div>\
-`
-        })
+          const result = await up.render('.target', { content: `
+            <div class="child1">child1</div>
+            <div class="child2">child2</div>
+          ` })
 
           expect(result.fragments.length).toBe(2)
           expect(result.fragments[0]).toMatchSelector('.child1')
-          return expect(result.fragments[1]).toMatchSelector('.child2')
+          expect(result.fragments[1]).toMatchSelector('.child2')
         })
 
-        it('replaces the given selector with a matching element that has the inner HTML from the given { content } element', asyncSpec(function(next) {
+        it('replaces the given selector with a matching element that has the inner HTML from the given { content } element', async function() {
           fixture('.target', {text: 'old text'})
           const content = e.createFromSelector('div', {text: 'new text'})
 
           up.render('.target', { content })
+          await wait()
 
-          return next(() => {
-            return expect('.target').toHaveText('new text')
-          })
+          expect('.target').toHaveText('new text')
         })
-        )
 
-        it('allows to target :main', asyncSpec(function(next) {
+        it('allows to target :main', async function() {
           up.layer.config.root.mainTargets.unshift('.main-element')
           fixture('.main-element', {text: 'old text'})
 
           up.render({target: ':main', content: 'new text'})
+          await wait()
 
-          return next(() => {
-            return expect('.main-element').toHaveText('new text')
-          })
+          expect('.main-element').toHaveText('new text')
         })
-        )
 
-        it("removes the target's inner HTML with { content: '' }", asyncSpec(function(next) {
+        it("removes the target's inner HTML with { content: '' }", async function() {
           fixture('.target', {text: 'old text'})
 
           up.render('.target', {content: ''})
+          await wait()
 
-          return next(() => {
-            return expect(document.querySelector('.target').innerHTML).toBe('')
-          })
+          expect(document.querySelector('.target').innerHTML).toBe('')
         })
-        )
 
-        it('keeps the target element and only updates its children', asyncSpec(function(next) {
+        it('keeps the target element and only updates its children', async function() {
           const originalTarget = fixture('.target.klass', {text: 'old text'})
 
           up.render('.target', {content: 'new text'})
+          await wait()
 
-          return next(() => {
-            const rediscoveredTarget = document.querySelector('.target')
-            expect(rediscoveredTarget).toBe(originalTarget)
-            return expect(rediscoveredTarget).toHaveClass('klass')
-          })
+          const rediscoveredTarget = document.querySelector('.target')
+          expect(rediscoveredTarget).toBe(originalTarget)
+          expect(rediscoveredTarget).toHaveClass('klass')
         })
-        )
 
-        it('does not leave <up-wrapper> elements in the DOM', asyncSpec(function(next) {
+        it('does not leave <up-wrapper> elements in the DOM', async function() {
           fixture('.target', {text: 'old text'})
 
           up.render('.target', {content: 'new text'})
+          await wait()
 
-          return next(() => {
-            expect('.target').toHaveText('new text')
-            return expect(document.querySelectorAll('up-wrapper').length).toBe(0)
-          })
+          expect('.target').toHaveText('new text')
+          expect(document.querySelectorAll('up-wrapper').length).toBe(0)
         })
-        )
 
         it('has a sync effect', function() {
           fixture('.target', {text: 'old text'})
           up.render('.target', {content: 'new text'})
-          return expect('.target').toHaveText('new text')
+          expect('.target').toHaveText('new text')
         })
 
-        it('can append content with an :after selector', asyncSpec(function(next) {
+        it('can append content with an :after selector', async function() {
           const container = fixture('.target')
           e.affix(container, '.old-child')
 
           up.render('.target:after', {content: '<div class="new-child"></div>'})
+          await wait()
 
-          return next(() => expect(container.innerHTML).toEqual('<div class="old-child"></div><div class="new-child"></div>'))
+          expect(container.innerHTML).toEqual('<div class="old-child"></div><div class="new-child"></div>')
         })
-        )
 
-        it('can prepend content with an :before selector', asyncSpec(function(next) {
+        it('can prepend content with an :before selector', async function() {
           const container = fixture('.target')
           e.affix(container, '.old-child')
 
           up.render('.target:before', {content: '<div class="new-child"></div>'})
+          await wait()
 
-          return next(() => expect(container.innerHTML).toEqual('<div class="new-child"></div><div class="old-child"></div>'))
+          expect(container.innerHTML).toEqual('<div class="new-child"></div><div class="old-child"></div>')
         })
-        )
 
         it('accepts a CSS selector for a <template> to clone', async function() {
-          const template = htmlFixture(`\
-<template id="target-template">
-  <div id="child">
-    child from template
-  </div>
-</template>\
-`)
+          const template = htmlFixture(`
+            <template id="target-template">
+              <div id="child">
+                child from template
+              </div>
+            </template>
+          `)
 
-          const target = htmlFixture(`\
-<div id="target">
-  <div id="child">
-    old child
-  </div>
-</div>\
-`)
+          const target = htmlFixture(`
+            <div id="target">
+              <div id="child">
+                old child
+              </div>
+            </div>
+          `)
 
           up.render({ target: '#target', content: '#target-template' })
           await wait()
@@ -2626,110 +2609,108 @@ describe('up.fragment', function() {
           expect('#target').toHaveSelector('#child')
           expect('#target').toHaveText('child from template')
           // Make sure the element was cloned, not moved
-          return expect(document.querySelector('#target').children[0]).not.toBe(template.content.children[0])
+          expect(document.querySelector('#target').children[0]).not.toBe(template.content.children[0])
         })
 
         it('can clone a template with multiple child nodes without a root element', async function() {
-          const template = htmlFixture(`\
-<template id="target-template">
-  one
-  <div>two</div>
-  three
-</template>\
-`)
+          const template = htmlFixture(`
+            <template id="target-template">
+              one
+              <div>two</div>
+              three
+            </template>
+          `)
 
-          const target = htmlFixture(`\
-<div id="target">
-  old text
-</div>\
-`)
+          const target = htmlFixture(`
+            <div id="target">
+              old text
+            </div>
+          `)
 
           up.render({ target: '#target', content: '#target-template' })
           await wait()
 
-          return expect('#target').toHaveVisibleText('one two three')
+          expect('#target').toHaveVisibleText('one two three')
         })
 
         it('can render a string containing a text node without an enclosing element', async function() {
-          const target = htmlFixture(`\
-<div id="target">
-  old text
-</div>\
-`)
+          const target = htmlFixture(`
+            <div id="target">
+              old text
+            </div>
+          `)
 
           up.render({ target: '#target', content: 'new text' })
           await wait()
 
-          return expect('#target').toHaveVisibleText('new text')
+          expect('#target').toHaveVisibleText('new text')
         })
 
         it('can render a string containing multiple child nodes without an root element', async function() {
-          const target = htmlFixture(`\
-<div id="target">
-  old text
-</div>\
-`)
+          const target = htmlFixture(`
+            <div id="target">
+              old text
+            </div>
+          `)
 
-          up.render({ target: '#target', content: `\
-one
-<div>two</div>
-three\
-` })
+          up.render({ target: '#target', content: `
+            one
+            <div>two</div>
+            three
+          ` })
           await wait()
 
-          return expect('#target').toHaveVisibleText('one two three')
+          expect('#target').toHaveVisibleText('one two three')
         })
 
         it('can render an Element value', async function() {
           const givenElement = up.element.createFromHTML('<div>foo bar baz</div>')
 
-          const target = htmlFixture(`\
-<div id="target">
-  old text
-</div>\
-`)
+          const target = htmlFixture(`
+            <div id="target">
+              old text
+            </div>
+          `)
 
           up.render({ target: '#target', content: givenElement })
-
           await wait()
 
           expect(document.querySelector('#target')).toHaveVisibleText('foo bar baz')
-          return expect(document.querySelector('#target').children[0]).toBe(givenElement)
+          expect(document.querySelector('#target').children[0]).toBe(givenElement)
         })
 
         it('can render an Text node value', async function() {
           const givenTextNode = new Text('foo bar baz')
 
-          const target = htmlFixture(`\
-<div id="target">
-  old text
-</div>\
-`)
+          const target = htmlFixture(`
+            <div id="target">
+              old text
+            </div>
+          `)
 
           up.render({ target: '#target', content: givenTextNode })
           await wait()
 
           expect(document.querySelector('#target')).toHaveVisibleText('foo bar baz')
-          return expect(document.querySelector('#target').childNodes[0]).toBe(givenTextNode)
+          expect(document.querySelector('#target').childNodes[0]).toBe(givenTextNode)
         })
 
-
-        return it('can render an NodeList with mixed Element and Text nodes', async function() {
+        it('can render an NodeList with mixed Element and Text nodes', async function() {
           // Make a copy as it is a live list that we're going to mutate, then compare
           const givenNodes = [...up.element.createNodesFromHTML('foo <b>bar</b> baz')]
           expect(givenNodes).toHaveLength(3)
 
-          const target = htmlFixture(`\
-<div id="target">
-  old text
-</div>\
-`)
+          const target = htmlFixture(`
+            <div id="target">
+              old text
+            </div>
+          `)
 
           up.render({ target: '#target', content: givenNodes })
           await wait()
 
           expect(document.querySelector('#target')).toHaveText('foo bar baz')
-          return expect(document.querySelector('#target').childNodes).toEqual(givenNodes)
+          expect(document.querySelector('#target').childNodes).toEqual(givenNodes)
         })
       })
 
