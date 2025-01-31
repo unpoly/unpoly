@@ -5815,21 +5815,20 @@ describe('up.fragment', function() {
 
           await wait()
 
-          jasmine.respondWith(`\
-<html lang='fr'>
-  <body>
-    <div class='container'>
-      new container text
-    </div>
-  </body>
-</html>\
-`
-          )
+          jasmine.respondWith(`
+            <html lang='fr'>
+              <body>
+                <div class='container'>
+                  new container text
+                </div>
+              </body>
+            </html>
+          `)
 
           await wait()
 
           expect('.container').toHaveText('new container text')
-          return expect(document.documentElement).toHaveAttribute('lang', 'fr')
+          expect(document.documentElement).toHaveAttribute('lang', 'fr')
         })
 
         it('removes the html[lang] attribute if the response has a <html> element without a [lang] attribute', async function() {
@@ -5839,21 +5838,20 @@ describe('up.fragment', function() {
 
           await wait()
 
-          jasmine.respondWith(`\
-<html>
-  <body>
-    <div class='container'>
-      new container text
-    </div>
-  </body>
-</html>\
-`
-          )
+          jasmine.respondWith(`
+            <html>
+              <body>
+                <div class='container'>
+                  new container text
+                </div>
+              </body>
+            </html>
+          `)
 
           await wait()
 
           expect('.container').toHaveText('new container text')
-          return expect(document.documentElement).not.toHaveAttribute('lang')
+          expect(document.documentElement).not.toHaveAttribute('lang')
         })
 
         it('does not remove the html[lang] attribute if the response has no <html> element', async function() {
@@ -5863,17 +5861,16 @@ describe('up.fragment', function() {
 
           await wait()
 
-          jasmine.respondWith(`\
-<div class='container'>
-  new container text
-</div>\
-`
-          )
+          jasmine.respondWith(`
+            <div class='container'>
+              new container text
+            </div>
+          `)
 
           await wait()
 
           expect('.container').toHaveText('new container text')
-          return expect(document.documentElement).toHaveAttribute('lang', 'it')
+          expect(document.documentElement).toHaveAttribute('lang', 'it')
         })
 
         it('does not update the html[lang] attribute with { lang: false }', async function() {
@@ -5883,45 +5880,43 @@ describe('up.fragment', function() {
 
           await wait()
 
-          jasmine.respondWith(`\
-<html lang='fr'>
-  <body>
-    <div class='container'>
-      new container text
-    </div>
-  </body>
-</html>\
-`
-          )
+          jasmine.respondWith(`
+            <html lang='fr'>
+              <body>
+                <div class='container'>
+                  new container text
+                </div>
+              </body>
+            </html>
+          `)
 
           await wait()
 
           expect('.container').toHaveText('new container text')
-          return expect(document.documentElement).toHaveAttribute('lang', 'it')
+          expect(document.documentElement).toHaveAttribute('lang', 'it')
         })
 
-        return it('does not update the html[lang] attribute when not updating history', async function() {
+        it('does not update the html[lang] attribute when not updating history', async function() {
           document.documentElement.setAttribute('lang', 'it')
           fixture('.container', {text: 'old container text'})
           up.render('.container', {url: '/path', history: false})
 
           await wait()
 
-          jasmine.respondWith(`\
-<html lang='fr'>
-  <body>
-    <div class='container'>
-      new container text
-    </div>
-  </body>
-</html>\
-`
-          )
+          jasmine.respondWith(`
+            <html lang='fr'>
+              <body>
+                <div class='container'>
+                  new container text
+                </div>
+              </body>
+            </html>
+          `)
 
           await wait()
 
           expect('.container').toHaveText('new container text')
-          return expect(document.documentElement).toHaveAttribute('lang', 'it')
+          expect(document.documentElement).toHaveAttribute('lang', 'it')
         })
       })
 
@@ -5933,24 +5928,27 @@ describe('up.fragment', function() {
           document.head.append(style)
 
           fixture('.container', {text: 'old container text'})
-          up.render('.container', { location: '/path', history: true, document: `\
-<html>
-  <head>
-    <link rel='stylesheet' href='styles-2.css'>
-  </head>
-  <body>
-    <div class='container'>
-      new container text
-    </div>
-  </body>
-</html>\
-`
-        })
+          up.render('.container', {
+            location: '/path',
+            history: true,
+            document: `
+              <html>
+                <head>
+                  <link rel='stylesheet' href='styles-2.css'>
+                </head>
+                <body>
+                  <div class='container'>
+                    new container text
+                  </div>
+                </body>
+              </html>
+            `
+          })
 
           await wait()
 
           expect('.container').toHaveText('new container text')
-          return expect(document.head).toHaveSelector('link[rel="stylesheet"][href="styles-1.css"]')
+          expect(document.head).toHaveSelector('link[rel="stylesheet"][href="styles-1.css"]')
         })
 
         it('does not update linked scripts in the <head>', async function() {
@@ -5959,24 +5957,27 @@ describe('up.fragment', function() {
           document.head.append(style)
 
           fixture('.container', {text: 'old container text'})
-          up.render('.container', { location: '/path', history: true, document: `\
-<html>
-  <head>
-    <script src='scripts-2.js'></script>
-  </head>
-  <body>
-    <div class='container'>
-      new container text
-    </div>
-  </body>
-</html>\
-`
-        })
+          up.render('.container', {
+            location: '/path',
+            history: true,
+            document: `
+              <html>
+                <head>
+                  <script src='scripts-2.js'></script>
+                </head>
+                <body>
+                  <div class='container'>
+                    new container text
+                  </div>
+                </body>
+              </html>
+            `
+          })
 
           await wait()
 
           expect('.container').toHaveText('new container text')
-          return expect(document.head).toHaveSelector('script[src="scripts-1.js"]')
+          expect(document.head).toHaveSelector('script[src="scripts-1.js"]')
         })
 
         it('emits an up:assets:changed event if linked assets differ between <head> and <response>', async function() {
@@ -5988,19 +5989,22 @@ describe('up.fragment', function() {
           document.head.append(style)
 
           fixture('.container', {text: 'old container text'})
-          up.render('.container', { location: '/path', history: true, document: `\
-<html>
-  <head>
-    <script src='scripts-2.js'></script>
-  </head>
-  <body>
-    <div class='container'>
-      new container text
-    </div>
-  </body>
-</html>\
-`
-        })
+          up.render('.container', {
+            location: '/path',
+            history: true,
+            document: `
+              <html>
+                <head>
+                  <script src='scripts-2.js'></script>
+                </head>
+                <body>
+                  <div class='container'>
+                    new container text
+                  </div>
+                </body>
+              </html>
+            `
+          })
 
           await wait()
 
@@ -6012,7 +6016,7 @@ describe('up.fragment', function() {
           expect(event.renderOptions).toEqual(jasmine.any(Object))
           expect(event.renderOptions.location).toBe('/path')
           expect(u.map(event.oldAssets, 'outerHTML')).toEqual(['<script src="scripts-1.js"></script>'])
-          return expect(u.map(event.newAssets, 'outerHTML')).toEqual(['<script src="scripts-2.js"></script>'])
+          expect(u.map(event.newAssets, 'outerHTML')).toEqual(['<script src="scripts-2.js"></script>'])
         })
 
         it('does not emit up:assets:changed if the only changed asset has [up-asset=false]', async function() {
@@ -6025,25 +6029,27 @@ describe('up.fragment', function() {
 
           fixture('.container', {text: 'old container text'})
 
-          up.render('.container', { location: '/path', history: true, document: `\
-<html>
-  <head>
-    <script src='scripts-2.js' up-asset='false'></script>
-  </head>
-  <body>
-    <div class='container'>
-      new container text
-    </div>
-  </body>
-</html>\
-`
-        })
+          up.render('.container', {
+            location: '/path',
+            history: true,
+            document: `
+              <html>
+                <head>
+                  <script src='scripts-2.js' up-asset='false'></script>
+                </head>
+                <body>
+                  <div class='container'>
+                    new container text
+                  </div>
+                </body>
+              </html>
+            `
+          })
 
           await wait()
 
           expect('.container').toHaveText('new container text')
-
-          return expect(listener).not.toHaveBeenCalled()
+          expect(listener).not.toHaveBeenCalled()
         })
 
         it('does not emit up:assets:changed if the <link> and <meta> elements did not change', async function() {
@@ -6056,25 +6062,27 @@ describe('up.fragment', function() {
 
           fixture('.container', {text: 'old container text'})
 
-          up.render('.container', { location: '/path', history: true, document: `\
-<html>
-  <head>
-    <script src='scripts.js'></script>
-  </head>
-  <body>
-    <div class='container'>
-      new container text
-    </div>
-  </body>
-</html>\
-`
-        })
+          up.render('.container', {
+            location: '/path',
+            history: true,
+            document: `
+              <html>
+                <head>
+                  <script src='scripts.js'></script>
+                </head>
+                <body>
+                  <div class='container'>
+                    new container text
+                  </div>
+                </body>
+              </html>
+            `
+          })
 
           await wait()
 
           expect('.container').toHaveText('new container text')
-
-          return expect(listener).not.toHaveBeenCalled()
+          expect(listener).not.toHaveBeenCalled()
         })
 
         it('does not emit up:assets:changed after a script in the <body> was disabled through up.fragmentconfig.runScripts = false (bugfix)', async function() {
@@ -6088,25 +6096,27 @@ describe('up.fragment', function() {
 
           fixture('.container', {text: 'old container text'})
 
-          up.render('.container', { location: '/path', history: true, document: `\
-<html>
-  <head>
-    <script src='scripts.js'></script>
-  </head>
-  <body>
-    <div class='container'>
-      new container text
-    </div>
-  </body>
-</html>\
-`
-        })
+          up.render('.container', {
+            location: '/path',
+            history: true,
+            document: `
+              <html>
+                <head>
+                  <script src='scripts.js'></script>
+                </head>
+                <body>
+                  <div class='container'>
+                    new container text
+                  </div>
+                </body>
+              </html>
+            `
+          })
 
           await wait()
 
           expect('.container').toHaveText('new container text')
-
-          return expect(listener).not.toHaveBeenCalled()
+          expect(listener).not.toHaveBeenCalled()
         })
 
         it('does not emit up:assets:changed if the updated <link> and <meta> elements are not asset-related', async function() {
@@ -6127,27 +6137,29 @@ describe('up.fragment', function() {
 
           fixture('.container', {text: 'old container text'})
 
-          up.render('.container', { location: '/path', history: true, document: `\
-<html>
-  <head>
-    <script src='scripts.js'></script>
-    <meta name='description' content='new description'>
-    <link rel='next' href='/new-next'>
-  </head>
-  <body>
-    <div class='container'>
-      new container text
-    </div>
-  </body>
-</html>\
-`
-        })
+          up.render('.container', {
+            location: '/path',
+            history: true,
+            document: `
+              <html>
+                <head>
+                  <script src='scripts.js'></script>
+                  <meta name='description' content='new description'>
+                  <link rel='next' href='/new-next'>
+                </head>
+                <body>
+                  <div class='container'>
+                    new container text
+                  </div>
+                </body>
+              </html>
+            `
+          })
 
           await wait()
 
           expect('.container').toHaveText('new container text')
-
-          return expect(listener).not.toHaveBeenCalled()
+          expect(listener).not.toHaveBeenCalled()
         })
 
         it('does not emit up:assets:changed if the response has no <head>', async function() {
@@ -6159,18 +6171,20 @@ describe('up.fragment', function() {
           document.head.append(script)
 
           fixture('.container', {text: 'old container text'})
-          up.render('.container', { location: '/path', history: true, document: `\
-<div class='container'>
-  new container text
-</div>\
-`
-        })
+          up.render('.container', {
+            location: '/path',
+            history: true,
+            document: `
+              <div class='container'>
+                new container text
+              </div>
+            `
+          })
 
           await wait()
 
           expect('.container').toHaveText('new container text')
-
-          return expect(listener).not.toHaveBeenCalled()
+          expect(listener).not.toHaveBeenCalled()
         })
 
         it('does not emit up:assets:changed if inline scripts in the <head> changed', async function() {
@@ -6182,28 +6196,30 @@ describe('up.fragment', function() {
           document.head.append(script)
 
           fixture('.container', {text: 'old container text'})
-          up.render('.container', { location: '/path', history: true, document: `\
-<html>
-  <head>
-    <script>console.log("hello from new inline script")</script>
-  </head>
-  <body>
-    <div class='container'>
-      new container text
-    </div>
-  </body>
-</html>\
-`
-        })
+          up.render('.container', {
+            location: '/path',
+            history: true,
+            document: `
+              <html>
+                <head>
+                  <script>console.log("hello from new inline script")</script>
+                </head>
+                <body>
+                  <div class='container'>
+                    new container text
+                  </div>
+                </body>
+              </html>
+            `
+          })
 
           await wait()
 
           expect('.container').toHaveText('new container text')
-
-          return expect(listener).not.toHaveBeenCalled()
+          expect(listener).not.toHaveBeenCalled()
         })
 
-        return it('aborts the render pass if the up:assets:changed event is prevented', async function() {
+        it('aborts the render pass if the up:assets:changed event is prevented', async function() {
           const listener = jasmine.createSpy('up:assets:changed listener').and.callFake(event => event.preventDefault())
           up.on('up:assets:changed', listener)
 
@@ -6212,25 +6228,27 @@ describe('up.fragment', function() {
           document.head.append(style)
 
           fixture('.container', {text: 'old container text'})
-          const renderPromise = up.render('.container', { location: '/path', history: true, document: `\
-<html>
-  <head>
-    <script src='scripts-2.js'></script>
-  </head>
-  <body>
-    <div class='container'>
-      new container text
-    </div>
-  </body>
-</html>\
-`
-        })
+          const renderPromise = up.render('.container', {
+            location: '/path',
+            history: true,
+            document: `
+              <html>
+                <head>
+                  <script src='scripts-2.js'></script>
+                </head>
+                <body>
+                  <div class='container'>
+                    new container text
+                  </div>
+                </body>
+              </html>
+            `
+          })
 
           await expectAsync(renderPromise).toBeRejectedWith(jasmine.any(up.Aborted))
 
           expect(listener).toHaveBeenCalled()
-
-          return expect('.container').toHaveText('old container text')
+          expect('.container').toHaveText('old container text')
         })
       })
 
