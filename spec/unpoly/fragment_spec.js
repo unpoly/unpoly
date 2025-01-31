@@ -4838,86 +4838,88 @@ describe('up.fragment', function() {
 
       describe('with { history } option', function() {
 
-        beforeEach(() => up.history.config.enabled = true)
+        beforeEach(function() { up.history.config.enabled = true })
 
         describe('browser location', function() {
 
-          it('sets the browser location to the requested URL', asyncSpec(function(next) {
+          it('sets the browser location to the requested URL', async function() {
             fixture('.target')
             const promise = up.render('.target', {url: '/path', history: true})
-            next(() => {
-              this.respondWithSelector('.target')
-              return next.await(promise)
-            })
-            return next(() => {
-              return expect(location.href).toMatchURL('/path')
-            })
-          })
-          )
+            await wait()
 
-          it('does not add a history entry after non-GET requests', asyncSpec(function(next) {
+            this.respondWithSelector('.target')
+            await promise
+
+            expect(location.href).toMatchURL('/path')
+          })
+
+          it('does not add a history entry after non-GET requests', async function() {
             fixture('.target')
             up.render('.target', {url: '/path', method: 'post', history: true})
-            next(() => this.respondWithSelector('.target'))
-            return next(() => expect(location.href).toMatchURL(jasmine.locationBeforeExample))
-          })
-          )
+            await wait()
 
-          it("detects a redirect's new URL when the server sets an X-Up-Location header", asyncSpec(function(next) {
+            this.respondWithSelector('.target')
+            expect(location.href).toMatchURL(jasmine.locationBeforeExample)
+          })
+
+          it("detects a redirect's new URL when the server sets an X-Up-Location header", async function() {
             fixture('.target')
             up.render('.target', {url: '/path', history: true})
-            next(() => this.respondWithSelector('.target', {responseHeaders: { 'X-Up-Location': '/other-path' }}))
-            return next(() => expect(location.href).toMatchURL('/other-path'))
-          })
-          )
+            await wait()
 
-          it('assumes a redirect to GET when the response URL does not match the request URL', asyncSpec(function(next) {
+            this.respondWithSelector('.target', {responseHeaders: { 'X-Up-Location': '/other-path' }})
+            expect(location.href).toMatchURL('/other-path')
+          })
+
+          it('assumes a redirect to GET when the response URL does not match the request URL', async function() {
             fixture('.target')
             up.render('.target', {url: '/endpoint', history: true, method: 'post'})
-            next(() => jasmine.respondWithSelector('.target', {responseHeaders: { 'X-Up-Location': '/redirect-path' }}))
-            return next(() => expect(location.href).toMatchURL('/redirect-path'))
-          })
-          )
+            await wait()
 
-          it('does not assume a redirect to GET when the response URL matches the request URL', asyncSpec(function(next) {
+            jasmine.respondWithSelector('.target', {responseHeaders: { 'X-Up-Location': '/redirect-path' }})
+            expect(location.href).toMatchURL('/redirect-path')
+          })
+
+          it('does not assume a redirect to GET when the response URL matches the request URL', async function() {
             fixture('.target')
             up.render('.target', {url: '/endpoint', history: true, method: 'post'})
-            next(() => jasmine.respondWithSelector('.target', {responseHeaders: { 'X-Up-Location': '/endpoint' }}))
-            return next(() => expect(location.href).toMatchURL(jasmine.locationBeforeExample))
-          })
-          )
+            await wait()
 
-          it('does not assume a redirect to GET when the server sends an X-Up-Method header', asyncSpec(function(next) {
+            jasmine.respondWithSelector('.target', {responseHeaders: { 'X-Up-Location': '/endpoint' }})
+            expect(location.href).toMatchURL(jasmine.locationBeforeExample)
+          })
+
+          it('does not assume a redirect to GET when the server sends an X-Up-Method header', async function() {
             fixture('.target')
             up.render('.target', {url: '/endpoint', history: true, method: 'post'})
-            next(() => jasmine.respondWithSelector('.target', {responseHeaders: { 'X-Up-Location': '/redirect-path', 'X-Up-Method': 'post' }}))
-            return next(() => expect(location.href).toMatchURL(jasmine.locationBeforeExample))
-          })
-          )
+            await wait()
 
-          it("preserves the #hash when the server sets an X-Up-Location header (like a vanilla form submission would do in the browser)", asyncSpec(function(next) {
+            jasmine.respondWithSelector('.target', {responseHeaders: { 'X-Up-Location': '/redirect-path', 'X-Up-Method': 'post' }})
+            expect(location.href).toMatchURL(jasmine.locationBeforeExample)
+          })
+
+          it("preserves the #hash when the server sets an X-Up-Location header (like a vanilla form submission would do in the browser)", async function() {
             fixture('.target')
             up.render('.target', {url: '/path#hash', history: true})
-            next(() => this.respondWithSelector('.target', {responseHeaders: { 'X-Up-Location': '/other-path' }}))
-            return next(() => expect(location.href).toMatchURL('/other-path#hash'))
-          })
-          )
+            await wait()
 
-          it('adds a history entry after non-GET requests if the response includes a `X-Up-Method: GET` header (will happen after a redirect)', asyncSpec(function(next) {
+            this.respondWithSelector('.target', {responseHeaders: { 'X-Up-Location': '/other-path' }})
+            expect(location.href).toMatchURL('/other-path#hash')
+          })
+
+          it('adds a history entry after non-GET requests if the response includes a `X-Up-Method: GET` header (will happen after a redirect)', async function() {
             fixture('.target')
             up.render('.target', {url: '/requested-path', method: 'post', history: true})
-            next(() => {
-              return this.respondWithSelector('.target', {
-                responseHeaders: {
-                  'X-Up-Method': 'GET',
-                  'X-Up-Location': '/signaled-path'
-                }})
+            await wait()
+
+            this.respondWithSelector('.target', {
+              responseHeaders: {
+                'X-Up-Method': 'GET',
+                'X-Up-Location': '/signaled-path'
+              }
             })
-            return next(() => {
-              return expect(location.href).toMatchURL('/signaled-path')
-            })
+            expect(location.href).toMatchURL('/signaled-path')
           })
-          )
 
           it('does add a history entry after a failed GET-request (since that is reloadable)', async function() {
             fixture('.target')
@@ -4929,156 +4931,145 @@ describe('up.fragment', function() {
 
             await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
 
-            return expect(location.href).toMatchURL(jasmine.locationBeforeExample)
+            expect(location.href).toMatchURL(jasmine.locationBeforeExample)
           })
 
-          it('does not add a history entry with { history: false } option', asyncSpec(function(next) {
+          it('does not add a history entry with { history: false } option', async function() {
             fixture('.target')
             up.render('.target', {url: '/path', history: false})
-            next(() => this.respondWithSelector('.target'))
-            return next(() => expect(location.href).toMatchURL(jasmine.locationBeforeExample))
-          })
-          )
+            await wait()
 
-          it('does not add a history entry without a { history } option', asyncSpec(function(next) {
+            this.respondWithSelector('.target')
+            expect(location.href).toMatchURL(jasmine.locationBeforeExample)
+          })
+
+          it('does not add a history entry without a { history } option', async function() {
             fixture('.target')
             up.render('.target', {url: '/path'})
-            next(() => this.respondWithSelector('.target'))
-            return next(() => expect(location.href).toMatchURL(jasmine.locationBeforeExample))
-          })
-          )
+            await wait()
 
-          it('adds params from a { params } option to the URL of a GET request', asyncSpec(function(next) {
+            this.respondWithSelector('.target')
+            expect(location.href).toMatchURL(jasmine.locationBeforeExample)
+          })
+
+          it('adds params from a { params } option to the URL of a GET request', async function() {
             fixture('.target')
             up.render('.target', {url: '/path', params: { 'foo-key': 'foo value', 'bar-key': 'bar value' }, history: true})
-            next(() => this.respondWithSelector('.target'))
-            return next(() => expect(location.href).toMatchURL('/path?foo-key=foo%20value&bar-key=bar%20value'))
-          })
-          )
+            await wait()
 
-          it('does not add a history entry with { history: false } option (which also prevents updating of window title)', asyncSpec(function(next) {
+            this.respondWithSelector('.target')
+            expect(location.href).toMatchURL('/path?foo-key=foo%20value&bar-key=bar%20value')
+          })
+
+          it('does not add a history entry with { history: false } option (which also prevents updating of window title)', async function() {
             fixture('.target')
             up.render('.target', {url: '/path', history: false})
-            next(() => this.respondWithSelector('.target'))
-            return next(() => expect(location.href).toMatchURL(jasmine.locationBeforeExample))
-          })
-          )
+            await wait()
 
-          it('does not add a history entry with { location: false } option', asyncSpec(function(next) {
+            this.respondWithSelector('.target')
+            expect(location.href).toMatchURL(jasmine.locationBeforeExample)
+          })
+
+          it('does not add a history entry with { location: false } option', async function() {
             fixture('.target')
             up.render('.target', {url: '/path', location: false})
-            next(() => this.respondWithSelector('.target'))
-            return next(() => expect(location.href).toMatchURL(jasmine.locationBeforeExample))
+            await wait()
+
+            this.respondWithSelector('.target')
+            expect(location.href).toMatchURL(jasmine.locationBeforeExample)
           })
-          )
 
           describe('with { history: "auto" }', function() {
 
-            it('adds an history entry when updating a main target', asyncSpec(function(next) {
+            it('adds an history entry when updating a main target', async function() {
               up.fragment.config.mainTargets = ['.target']
               fixture('.target')
               const promise = up.render('.target', {url: '/path3', history: 'auto'})
+              await wait()
 
-              next(() => {
-                this.respondWithSelector('.target')
-                return next.await(promise)
-              })
-              return next(() => {
-                return expect(location.href).toMatchURL('/path3')
-              })
+              this.respondWithSelector('.target')
+              await promise
+
+              expect(location.href).toMatchURL('/path3')
             })
-            )
 
-            it('allows to configure auto-history targets that are not a main target', asyncSpec(function(next) {
+            it('allows to configure auto-history targets that are not a main target', async function() {
               up.fragment.config.autoHistoryTargets = ['.target']
               expect(up.fragment.config.mainTargets).not.toContain('.target')
 
               fixture('.target')
               const promise = up.render('.target', {url: '/path3-2', history: 'auto'})
+              await wait()
 
-              next(() => {
-                this.respondWithSelector('.target')
-                return next.await(promise)
-              })
-              return next(() => {
-                return expect(location.href).toMatchURL('/path3-2')
-              })
+              this.respondWithSelector('.target')
+              await promise
+
+              expect(location.href).toMatchURL('/path3-2')
             })
-            )
 
-            it('adds an history entry when updating a fragment that contains a main target', asyncSpec(function(next) {
+            it('adds an history entry when updating a fragment that contains a main target', async function() {
               up.fragment.config.mainTargets = ['.target']
               const container = fixture('.container')
               e.affix(container, '.target')
               const promise = up.render('.container', {url: '/path3-1', history: 'auto'})
+              await wait()
 
-              next(() => {
-                this.respondWithSelector('.container .target')
-                return next.await(promise)
-              })
-              return next(() => {
-                return expect(location.href).toMatchURL('/path3-1')
-              })
+              this.respondWithSelector('.container .target')
+              await promise
+
+              expect(location.href).toMatchURL('/path3-1')
             })
-            )
 
-            it('does not add an history entry when updating a non-main targets', asyncSpec(function(next) {
+            it('does not add an history entry when updating a non-main targets', async function() {
               up.fragment.config.mainTargets = ['.other']
               fixture('.target')
               const promise = up.render('.target', {url: '/path4', history: 'auto'})
+              await wait()
 
-              next(() => {
-                this.respondWithSelector('.target')
-                return next.await(promise)
-              })
-              return next(() => {
-                return expect(location.href).toMatchURL(jasmine.locationBeforeExample)
-              })
+              this.respondWithSelector('.target')
+              await promise
+
+              expect(location.href).toMatchURL(jasmine.locationBeforeExample)
             })
-            )
 
-            return it('adds a history when at least fragment of a multi-fragment update is a main target', asyncSpec(function(next) {
+            it('adds a history when at least fragment of a multi-fragment update is a main target', async function() {
               up.fragment.config.mainTargets = ['.bar']
               fixture('.foo')
               fixture('.bar')
               fixture('.baz')
               const promise = up.render('.foo, .bar, .baz', {url: '/path4', history: 'auto'})
+              await wait()
 
-              next(() => {
-                this.respondWith(`\
-<div class='foo'></div>
-<div class='bar'></div>
-<div class='baz'></div>\
-`
-                )
-                return next.await(promise)
-              })
-              return next(() => {
-                return expect(location.href).toMatchURL('/path4')
-              })
+              this.respondWith(`
+                <div class='foo'></div>
+                <div class='bar'></div>
+                <div class='baz'></div>
+              `)
+              await promise
+
+              expect(location.href).toMatchURL('/path4')
             })
-            )
           })
 
           describe('when a string is passed as { location } option', function() {
 
-            it('uses that URL as the new location after a GET request', asyncSpec(function(next) {
+            it('uses that URL as the new location after a GET request', async function() {
               fixture('.target')
               up.render('.target', {url: '/path', history: true, location: '/path2'})
-              next(() => this.respondWithSelector('.target'))
-              return next(() => {
-                return expect(location.href).toMatchURL('/path2')
-              })
-            })
-            )
+              await wait()
 
-            it('adds a history entry after a non-GET request', asyncSpec(function(next) {
+              this.respondWithSelector('.target')
+              expect(location.href).toMatchURL('/path2')
+            })
+
+            it('adds a history entry after a non-GET request', async function() {
               fixture('.target')
               up.render('.target', {url: '/path', method: 'post', history: true, location: '/path3'})
-              next(() => this.respondWithSelector('.target'))
-              return next(() => expect(location.href).toMatchURL('/path3'))
+              await wait()
+
+              this.respondWithSelector('.target')
+              expect(location.href).toMatchURL('/path3')
             })
-            )
 
             it('does not override the response URL after a failed request', async function() {
               fixture('.success-target')
@@ -5091,10 +5082,10 @@ describe('up.fragment', function() {
 
               await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
 
-              return expect(location.href).toMatchURL('/path')
+              expect(location.href).toMatchURL('/path')
             })
 
-            return it('overrides the response URL after a failed request when passed as { failLocation }', async function() {
+            it('overrides the response URL after a failed request when passed as { failLocation }', async function() {
               fixture('.success-target')
               fixture('.failure-target')
               const renderJob = up.render('.success-target', {url: '/path', history: true, location: '/path5', failLocation: '/path6', failTarget: '.failure-target'})
@@ -5105,115 +5096,100 @@ describe('up.fragment', function() {
 
               await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
 
-              return expect(location.href).toMatchURL('/path6')
+              expect(location.href).toMatchURL('/path6')
             })
           })
 
-          return describe('up:layer:location:changed event', function() {
+          describe('up:layer:location:changed event', function() {
 
-            it('is emitted when the location changed in the root layer', asyncSpec(function(next) {
+            it('is emitted when the location changed in the root layer', async function() {
               history.replaceState?.({}, 'original title', '/original-url')
               fixture('.target')
 
               const listener = jasmine.createSpy('event listener')
               up.on('up:layer:location:changed', listener)
 
-              next(() => up.render({target: '.target', location: '/new-url', content: 'new content', history: true}))
+              await up.render({target: '.target', location: '/new-url', content: 'new content', history: true})
 
-              return next(() => expect(listener.calls.argsFor(0)[0]).toBeEvent('up:layer:location:changed', { location: '/new-url', layer: up.layer.current }))
+              expect(listener.calls.argsFor(0)[0]).toBeEvent('up:layer:location:changed', { location: '/new-url', layer: up.layer.current })
             })
-            )
 
-            it("is emitted when the location changed in an overlay", asyncSpec(function(next) {
+            it("is emitted when the location changed in an overlay", async function() {
               const listener = jasmine.createSpy('event listener')
               up.on('up:layer:location:changed', listener)
 
               up.layer.open({target: '.target', location: '/original-layer-url', history: false, content: 'old overlay text'})
+              await wait()
 
-              next(() => {
-                expect(up.layer.isOverlay()).toBe(true)
-                // Browser location is unchanged, but the overlay still needs its internal location
-                expect(location.href).toMatchURL(jasmine.locationBeforeExample)
-                expect(up.layer.location).toMatchURL('/original-layer-url')
+              expect(up.layer.isOverlay()).toBe(true)
+              // Browser location is unchanged, but the overlay still needs its internal location
+              expect(location.href).toMatchURL(jasmine.locationBeforeExample)
+              expect(up.layer.location).toMatchURL('/original-layer-url')
 
-                expect(listener.calls.count()).toBe(0)
+              expect(listener.calls.count()).toBe(0)
 
-                return up.render({target: '.target', location: '/next-layer-url', content: 'new overlay text', history: true})
-              })
+              await up.render({target: '.target', location: '/next-layer-url', content: 'new overlay text', history: true})
 
-              return next(function() {
-                expect(up.layer.current).toHaveText('new overlay text')
-                return expect(listener.calls.count()).toBe(1)
-              })
+              expect(up.layer.current).toHaveText('new overlay text')
+              expect(listener.calls.count()).toBe(1)
             })
-            )
 
-            it('is not emitted when a layer is initially opened', asyncSpec(function(next) {
+            it('is not emitted when a layer is initially opened', async function() {
               const listener = jasmine.createSpy('event listener')
               up.on('up:layer:location:changed', listener)
 
               up.layer.open({target: '.target', location: '/original-layer-url', content: 'old overlay text'})
+              await wait()
 
-              return next(() => {
-                expect(up.layer.isOverlay()).toBe(true)
-                expect(up.layer.location).toMatchURL('/original-layer-url')
-                return expect(listener.calls.count()).toBe(0)
-              })
+              expect(up.layer.isOverlay()).toBe(true)
+              expect(up.layer.location).toMatchURL('/original-layer-url')
+              expect(listener.calls.count()).toBe(0)
             })
-            )
 
-            it('is not emitted when the location did not change', asyncSpec(function(next) {
+            it('is not emitted when the location did not change', async function() {
               const listener = jasmine.createSpy('event listener')
               up.on('up:layer:location:changed', listener)
 
               up.layer.open({target: '.target', location: '/original-layer-url', content: 'old overlay text'})
+              await wait()
 
-              next(() => {
-                expect(up.layer.isOverlay()).toBe(true)
-                expect(up.layer.location).toMatchURL('/original-layer-url')
-                return expect(listener.calls.count()).toBe(0)
-              })
+              expect(up.layer.isOverlay()).toBe(true)
+              expect(up.layer.location).toMatchURL('/original-layer-url')
+              expect(listener.calls.count()).toBe(0)
 
-              next(() => up.render({target: '.target', location: '/original-layer-url', content: 'new overlay text', history: true}))
+              await up.render({target: '.target', location: '/original-layer-url', content: 'new overlay text', history: true})
 
-              return next(function() {
-                expect(up.layer.current).toHaveText('new overlay text')
-                return expect(listener.calls.count()).toBe(0)
-              })
+              expect(up.layer.current).toHaveText('new overlay text')
+              expect(listener.calls.count()).toBe(0)
             })
-            )
 
-            return it("is emitted in overlays that don't render history", asyncSpec(function(next) {
+            it("is emitted in overlays that don't render history", async function() {
               const listener = jasmine.createSpy('event listener')
               up.on('up:layer:location:changed', listener)
 
               up.layer.open({target: '.target', location: '/original-layer-url', history: false, content: 'old overlay text'})
+              await wait()
 
-              next(() => {
-                expect(up.layer.isOverlay()).toBe(true)
-                // Browser location is unchanged, but the overlay still needs its internal location
-                expect(location.href).toMatchURL(jasmine.locationBeforeExample)
-                expect(up.layer.location).toMatchURL('/original-layer-url')
+              expect(up.layer.isOverlay()).toBe(true)
+              // Browser location is unchanged, but the overlay still needs its internal location
+              expect(location.href).toMatchURL(jasmine.locationBeforeExample)
+              expect(up.layer.location).toMatchURL('/original-layer-url')
 
-                expect(listener.calls.count()).toBe(0)
+              expect(listener.calls.count()).toBe(0)
 
-                return up.render({target: '.target', location: '/next-layer-url', content: 'new overlay text', history: true})
-              })
+              await up.render({target: '.target', location: '/next-layer-url', content: 'new overlay text', history: true})
 
-              return next(() => {
-                // Browser location is unchanged, but the overlay still needs its internal location
-                expect(location.href).toMatchURL(jasmine.locationBeforeExample)
-                expect(up.layer.location).toMatchURL('/next-layer-url')
+              // Browser location is unchanged, but the overlay still needs its internal location
+              expect(location.href).toMatchURL(jasmine.locationBeforeExample)
+              expect(up.layer.location).toMatchURL('/next-layer-url')
 
-                // Listener was called again, as we're tracking changes to the layer's { location } prop
-                return expect(listener.calls.count()).toBe(1)
-              })
+              // Listener was called again, as we're tracking changes to the layer's { location } prop
+              expect(listener.calls.count()).toBe(1)
             })
-            )
           })
         })
 
-        return describe('window title', function() {
+        describe('window title', function() {
 
           it("sets the document title to the response <title>", async function() {
             fixture('.container', {text: 'old container text'})
@@ -5221,155 +5197,147 @@ describe('up.fragment', function() {
 
             await wait()
 
-            jasmine.respondWith(`\
-<html>
-  <head>
-    <title>Title from HTML</title>
-  </head>
-  <body>
-    <div class='container'>
-      new container text
-    </div>
-  </body>
-</html>\
-`
-            )
+            jasmine.respondWith(`
+              <html>
+                <head>
+                  <title>Title from HTML</title>
+                </head>
+                <body>
+                  <div class='container'>
+                    new container text
+                  </div>
+                </body>
+              </html>
+            `)
 
             await wait()
 
             expect('.container').toHaveText('new container text')
-            return expect(document.title).toBe('Title from HTML')
+            expect(document.title).toBe('Title from HTML')
           })
 
-          it("sets the document title to a JSON-encoded X-Up-Title header in the response", asyncSpec(function(next) {
+          it("sets the document title to a JSON-encoded X-Up-Title header in the response", async function() {
             fixture('.container', {text: 'old container text'})
             up.render('.container', {url: '/path', history: true})
 
-            next(() => jasmine.respondWith({
+            await wait()
+
+            jasmine.respondWith({
               responseHeaders: {
                 'X-Up-Title': '"Title from header"'
               },
-              responseText: `\
-<div class='container'>
-new container text
-</div>\
-`
-            }))
-
-            return next(function() {
-              expect('.container').toHaveText('new container text')
-              return expect(document.title).toBe('Title from header')
+              responseText: `
+                <div class='container'>
+                  new container text
+                </div>
+              `
             })
-          })
-          )
 
-          it("prefers the X-Up-Title header to the response <title>", asyncSpec(function(next) {
+            expect('.container').toHaveText('new container text')
+            expect(document.title).toBe('Title from header')
+          })
+
+          it("prefers the X-Up-Title header to the response <title>", async function() {
             fixture('.container', {text: 'old container text'})
             up.render('.container', {url: '/path', history: true})
 
-            next(() => jasmine.respondWith({
+            await wait()
+
+            jasmine.respondWith({
               responseHeaders: {
                 'X-Up-Title': '"Title from header"'
               },
-              responseText: `\
-<html>
-<head>
-  <title>Title from HTML</title>
-</head>
-<body>
-  <div class='container'>
-    new container text
-  </div>
-</body>
-</html>\
-`
-            }))
-
-            return next(function() {
-              expect('.container').toHaveText('new container text')
-              return expect(document.title).toBe('Title from header')
+              responseText: `
+                <html>
+                  <head>
+                    <title>Title from HTML</title>
+                  </head>
+                  <body>
+                    <div class='container'>
+                      new container text
+                    </div>
+                  </body>
+                </html>
+              `
             })
+
+            expect('.container').toHaveText('new container text')
+            expect(document.title).toBe('Title from header')
           })
-          )
 
           if (up.migrate.loaded) {
-            it("sets the document title to an unquoted X-Up-Title header in the response", asyncSpec(function(next) {
+            it("sets the document title to an unquoted X-Up-Title header in the response", async function() {
               fixture('.container', {text: 'old container text'})
               up.render('.container', {url: '/path', history: true})
 
-              next(() => jasmine.respondWith({
+              await wait()
+
+              jasmine.respondWith({
                 responseHeaders: {
                   'X-Up-Title': '"Title from header"'
                 },
-                responseText: `\
-<div class='container'>
-new container text
-</div>\
-`
-              }))
-
-              return next(function() {
-                expect('.container').toHaveText('new container text')
-                return expect(document.title).toBe('Title from header')
+                responseText: `
+                  <div class='container'>
+                    new container text
+                  </div>
+                `
               })
+
+              expect('.container').toHaveText('new container text')
+              expect(document.title).toBe('Title from header')
             })
-            )
           }
 
-          it("sets the document title to the response <title> with { location: false, title: true } options (bugfix)", asyncSpec(function(next) {
+          it("sets the document title to the response <title> with { location: false, title: true } options (bugfix)", async function() {
             $fixture('.container').text('old container text')
             up.render('.container', {url: '/path', history: true, location: false, title: true})
 
-            next(() => {
-              return this.respondWith(`\
-<html>
-  <head>
-    <title>Title from HTML</title>
-  </head>
-  <body>
-    <div class='container'>
-      new container text
-    </div>
-  </body>
-</html>\
-`
-              )
-            })
+            await wait()
 
-            return next(() => {
-              expect('.container').toHaveText('new container text')
-              return expect(document.title).toBe('Title from HTML')
-            })
+            this.respondWith(`
+              <html>
+                <head>
+                  <title>Title from HTML</title>
+                </head>
+                <body>
+                  <div class='container'>
+                    new container text
+                  </div>
+                </body>
+              </html>
+            `)
+
+            await wait()
+
+            expect('.container').toHaveText('new container text')
+            expect(document.title).toBe('Title from HTML')
           })
-          )
 
-          it('does not update the document title if the response has a <title> tag inside an inline SVG image (bugfix)', asyncSpec(function(next) {
+          it('does not update the document title if the response has a <title> tag inside an inline SVG image (bugfix)', async function() {
             $fixture('.container').text('old container text')
             const oldTitle = document.title
             up.render('.container', {url: '/path', history: true})
 
-            next(() => {
-              return this.respondWith(`\
-<svg width="500" height="300" xmlns="http://www.w3.org/2000/svg">
-  <g>
-    <title>SVG Title Demo example</title>
-    <rect x="10" y="10" width="200" height="50" style="fill:none; stroke:blue; stroke-width:1px"/>
-  </g>
-</svg>
+            await wait()
 
-<div class='container'>
-  new container text
-</div>\
-`
-              )
-            })
+            this.respondWith(`
+              <svg width="500" height="300" xmlns="http://www.w3.org/2000/svg">
+                <g>
+                  <title>SVG Title Demo example</title>
+                  <rect x="10" y="10" width="200" height="50" style="fill:none; stroke:blue; stroke-width:1px"/>
+                </g>
+              </svg>
 
-            return next(() => {
-              expect('.container').toHaveText('new container text')
-              return expect(document.title).toBe(oldTitle)
-            })
+              <div class='container'>
+                new container text
+              </div>
+            `)
+
+            await wait()
+
+            expect('.container').toHaveText('new container text')
+            expect(document.title).toBe(oldTitle)
           })
-          )
 
           it("does not extract the title from the response or HTTP header with { title: false }", async function() {
             fixture('.container', {text: 'old container text'})
@@ -5382,23 +5350,23 @@ new container text
               responseHeaders: {
                 'X-Up-Title': '"Title from header"'
               },
-              responseText: `\
-<html>
-  <head>
-    <title>Title from HTML</title>
-  </head>
-  <body>
-    <div class='container'>
-      new container text
-    </div>
-  </body>
-</html>\
-`
+              responseText: `
+                <html>
+                  <head>
+                    <title>Title from HTML</title>
+                  </head>
+                  <body>
+                    <div class='container'>
+                      new container text
+                    </div>
+                  </body>
+                </html>
+              `
             })
 
             await wait()
 
-            return expect(document.title).toEqual(oldTitle)
+            expect(document.title).toEqual(oldTitle)
           })
 
           it("does not extract the title from the response or HTTP header with { history: false }", async function() {
@@ -5412,53 +5380,51 @@ new container text
               responseHeaders: {
                 'X-Up-Title': '"Title from header"'
               },
-              responseText: `\
-<html>
-  <head>
-    <title>Title from HTML</title>
-  </head>
-  <body>
-    <div class='container'>
-      new container text
-    </div>
-  </body>
-</html>\
-`
+              responseText: `
+                <html>
+                  <head>
+                    <title>Title from HTML</title>
+                  </head>
+                  <body>
+                    <div class='container'>
+                      new container text
+                    </div>
+                  </body>
+                </html>
+              `
             })
 
             await wait()
 
-            return expect(document.title).toEqual(oldTitle)
+            expect(document.title).toEqual(oldTitle)
           })
 
-          it('allows to pass an explicit title as { title } option', asyncSpec(function(next) {
+          it('allows to pass an explicit title as { title } option', async function() {
             $fixture('.container').text('old container text')
             up.render('.container', {url: '/path', history: true, title: 'Title from options'})
 
-            next(() => {
-              return this.respondWith(`\
-<html>
-  <head>
-    <title>Title from HTML</title>
-  </head>
-  <body>
-    <div class='container'>
-      new container text
-    </div>
-  </body>
-</html>\
-`
-              )
-            })
+            await wait()
 
-            return next(() => {
-              expect('.container').toHaveText('new container text')
-              return expect(document.title).toBe('Title from options')
-            })
+            this.respondWith(`
+              <html>
+                <head>
+                  <title>Title from HTML</title>
+                </head>
+                <body>
+                  <div class='container'>
+                    new container text
+                  </div>
+                </body>
+              </html>
+            `)
+
+            await wait()
+
+            expect('.container').toHaveText('new container text')
+            expect(document.title).toBe('Title from options')
           })
-          )
 
-          return it("sets document.title after calling history.pushState() to prevent mutating the old history state", async function() {
+          it("sets document.title after calling history.pushState() to prevent mutating the old history state", async function() {
             const calls = []
             spyOnProperty(up.layer.root, 'location', 'set').and.callFake(() => calls.push('set location'))
             spyOnProperty(up.layer.root, 'title', 'set').and.callFake(() => calls.push('set title'))
@@ -5485,26 +5451,25 @@ new container text
 
             await wait()
 
-            jasmine.respondWith(`\
-<html>
-  <head>
-    <title>Title from HTML</title>
-  </head>
-  <body>
-    <div class='container'>
-      new container text
-    </div>
-  </body>
-</html>\
-`
-            )
+            jasmine.respondWith(`
+              <html>
+                <head>
+                  <title>Title from HTML</title>
+                </head>
+                <body>
+                  <div class='container'>
+                    new container text
+                  </div>
+                </body>
+              </html>
+            `)
 
             await wait()
 
             expect('.container').toHaveText('new container text')
             expect(calls).toEqual(['set location', 'set title'])
 
-            return observer.disconnect()
+            observer.disconnect()
           })
         })
       })
