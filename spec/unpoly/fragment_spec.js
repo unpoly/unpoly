@@ -11458,42 +11458,43 @@ describe('up.fragment', function() {
     })
 
     describe('up.destroy()', function() {
-
-      it('removes the element with the given selector', asyncSpec(function(next) {
+      it('removes the element with the given selector', async function() {
         $fixture('.element')
         up.destroy('.element')
+        await wait()
 
-        return next(() => expect('.element').not.toBeAttached())
+        expect('.element').not.toBeAttached()
       })
-      )
 
       it('has a sync effect', function() {
         fixture('.element')
         up.destroy('.element')
-        return expect('.element').not.toBeAttached()
+        expect('.element').not.toBeAttached()
       })
 
-      it('runs an animation before removal with { animate } option', asyncSpec(function(next) {
+      it('runs an animation before removal with { animate } option', async function() {
         const $element = $fixture('.element')
         up.destroy($element, {animation: 'fade-out', duration: 200, easing: 'linear'})
+        await wait()
 
-        next(() => expect($element).toHaveOpacity(1.0, 0.15))
+        expect($element).toHaveOpacity(1.0, 0.15)
+        await wait(100)
 
-        next.after(100, () => expect($element).toHaveOpacity(0.5, 0.3))
+        expect($element).toHaveOpacity(0.5, 0.3)
+        await wait(75)
 
-        return next.after((100 + 75), () => expect($element).toBeDetached())
+        expect($element).toBeDetached()
       })
-      )
 
       it('calls destructors for custom elements', function() {
         const destructor = jasmine.createSpy('destructor')
         up.compiler('.element', element => destructor)
         up.hello(fixture('.element'))
         up.destroy('.element')
-        return expect(destructor).toHaveBeenCalled()
+        expect(destructor).toHaveBeenCalled()
       })
 
-      it('does not call destructors twice if up.destroy() is called twice on the same fragment', asyncSpec(function(next) {
+      it('does not call destructors twice if up.destroy() is called twice on the same fragment', async function() {
         const destructor = jasmine.createSpy('destructor')
         up.compiler('.element', element => destructor)
 
@@ -11502,10 +11503,10 @@ describe('up.fragment', function() {
 
         up.destroy(element, {animation: 'fade-out', duration: 10})
         up.destroy(element, {animation: 'fade-out', duration: 10})
+        await wait(150)
 
-        return next.after(150, () => expect(destructor.calls.count()).toBe(1))
+        expect(destructor.calls.count()).toBe(1)
       })
-      )
 
       it('calls destructors while the element is still attached', function() {
         const attachmentSpy = jasmine.createSpy('attachment spy')
@@ -11516,14 +11517,14 @@ describe('up.fragment', function() {
         up.hello(element)
         up.destroy(element)
 
-        return expect(attachmentSpy).toHaveBeenCalledWith(true)
+        expect(attachmentSpy).toHaveBeenCalledWith(true)
       })
 
       it('marks the old element as [aria-hidden=true] before destructors', function(done) {
         const testElement = function(element) {
           expect(element).toHaveText('old text')
           expect(element).toMatchSelector('[aria-hidden=true]')
-          return done()
+          done()
         }
 
         up.compiler('.container', element => () => testElement(element))
@@ -11531,7 +11532,6 @@ describe('up.fragment', function() {
         up.hello(fixture('.container', {text: 'old text'}))
 
         up.destroy('.container')
-
       })
 
       it('immediately marks the old element as .up-destroying', function() {
@@ -11539,33 +11539,33 @@ describe('up.fragment', function() {
 
         up.destroy('.container', {animation: 'fade-out', duration: 100})
 
-        return expect(container).toMatchSelector('.up-destroying')
+        expect(container).toMatchSelector('.up-destroying')
       })
 
-      it('waits until an { animation } is done before calling destructors', asyncSpec(function(next) {
+      it('waits until an { animation } is done before calling destructors', async function() {
         const destructor = jasmine.createSpy('destructor')
         up.compiler('.container', element => () => destructor(element.innerText))
         const $container = $fixture('.container').text('old text')
         up.hello($container)
 
         up.destroy('.container', {animation: 'fade-out', duration: 100})
+        await wait(50)
 
-        next.after(50, () => expect(destructor).not.toHaveBeenCalled())
+        expect(destructor).not.toHaveBeenCalled()
+        await wait(200)
 
-        return next.after(200, () => expect(destructor).toHaveBeenCalledWith('old text'))
+        expect(destructor).toHaveBeenCalledWith('old text')
       })
-      )
 
-      it('marks the element as .up-destroying while it is animating', asyncSpec(function(next) {
+      it('marks the element as .up-destroying while it is animating', async function() {
         const $element = $fixture('.element')
         up.destroy($element, {animation: 'fade-out', duration: 80, easing: 'linear'})
+        await wait()
 
-        return next(() => expect($element).toHaveClass('up-destroying'))
+        expect($element).toHaveClass('up-destroying')
       })
-      )
 
-      // up.destroy
-      it('runs an { onFinished } callback after the element has been removed from the DOM', asyncSpec(function(next) {
+      it('runs an { onFinished } callback after the element has been removed from the DOM', async function() {
         const $parent = $fixture('.parent')
         const $element = $parent.affix('.element')
         expect($element).toBeAttached()
@@ -11573,21 +11573,17 @@ describe('up.fragment', function() {
         const onFinished = jasmine.createSpy('onFinished callback')
 
         up.destroy($element, { animation: 'fade-out', duration: 30, onFinished })
+        await wait()
 
-        next(function() {
-          expect($element).toBeAttached()
-          return expect(onFinished).not.toHaveBeenCalled()
-        })
+        expect($element).toBeAttached()
+        expect(onFinished).not.toHaveBeenCalled()
+        await wait(200)
 
-        return next.after(200, function() {
-          expect($element).toBeDetached()
-          return expect(onFinished).toHaveBeenCalled()
-        })
+        expect($element).toBeDetached()
+        expect(onFinished).toHaveBeenCalled()
       })
-      )
 
-      // up.destroy
-      it('emits an up:fragment:destroyed event on the former parent element after the element was marked as .up-destroying and started its close animation', asyncSpec(function(next) {
+      it('emits an up:fragment:destroyed event on the former parent element after the element was marked as .up-destroying and started its close animation', async function() {
         const $parent = $fixture('.parent')
         const $element = $parent.affix('.element')
         expect($element).toBeAttached()
@@ -11597,43 +11593,38 @@ describe('up.fragment', function() {
         $parent[0].addEventListener('up:fragment:destroyed', listener)
 
         up.destroy($element, {animation: 'fade-out', duration: 30})
+        await wait()
 
-        return next(function() {
-          expect(listener).toHaveBeenCalled()
-          expect($element).toMatchSelector('.up-destroying')
-          return expect($element).toBeAttached()
-        })
+        expect(listener).toHaveBeenCalled()
+        expect($element).toMatchSelector('.up-destroying')
+        expect($element).toBeAttached()
       })
-      )
 
-      it('removes element-related data from the global jQuery cache (bugfix)', asyncSpec(function(next) {
+      it('removes element-related data from the global jQuery cache (bugfix)', async function() {
         const $element = $fixture('.element')
         $element.data('foo', { foo: '1' })
         expect($element.data('foo')).toEqual({ foo: '1'})
         up.destroy($element)
+        await wait()
 
-        return next(() => expect($element.data('foo')).toBeMissing())
+        expect($element.data('foo')).toBeMissing()
       })
-      )
 
-      it('calls #sync() on all layers in the stack', asyncSpec(function(next) {
+      it('calls #sync() on all layers in the stack', async function() {
         makeLayers(2)
+        await wait()
 
-        next(function() {
-          spyOn(up.layer.stack[0], 'sync')
-          spyOn(up.layer.stack[1], 'sync')
+        spyOn(up.layer.stack[0], 'sync')
+        spyOn(up.layer.stack[1], 'sync')
 
-          const element = up.layer.stack[1].affix('.element')
+        const element = up.layer.stack[1].affix('.element')
 
-          return up.destroy(element)
-        })
+        up.destroy(element)
+        await wait()
 
-        return next(function() {
-          expect(up.layer.stack[0].sync).toHaveBeenCalled()
-          return expect(up.layer.stack[1].sync).toHaveBeenCalled()
-        })
+        expect(up.layer.stack[0].sync).toHaveBeenCalled()
+        expect(up.layer.stack[1].sync).toHaveBeenCalled()
       })
-      )
 
       it('does not crash and runs destructors when destroying a detached element (bugfix)', function() {
         const destructor = jasmine.createSpy('destructor')
@@ -11641,19 +11632,18 @@ describe('up.fragment', function() {
         const detachedElement = up.element.createFromSelector('.element')
         up.hello(detachedElement)
         up.destroy(detachedElement)
-        return expect(destructor).toHaveBeenCalled()
+        expect(destructor).toHaveBeenCalled()
       })
 
       describe('when a destructor crashes', function() {
-
         it('emits an error event but does not throw an exception', async function() {
           const destroyError = new Error('destructor error')
           const element = fixture('.element')
           up.destructor(element, function() { throw destroyError })
 
-          return await jasmine.expectGlobalError(destroyError, function() {
+          await jasmine.expectGlobalError(destroyError, function() {
             const doDestroy = () => up.destroy(element)
-            return expect(doDestroy).not.toThrowError()
+            expect(doDestroy).not.toThrowError()
           })
         })
 
@@ -11664,10 +11654,10 @@ describe('up.fragment', function() {
 
           await jasmine.expectGlobalError(destroyError, () => up.destroy(element))
 
-          return expect(element).toBeDetached()
+          expect(element).toBeDetached()
         })
 
-        return it('removes the element after animation', async function() {
+        it('removes the element after animation', async function() {
           const destroyError = new Error('destructor error')
           const element = fixture('.element')
           up.destructor(element, function() { throw destroyError })
@@ -11676,19 +11666,17 @@ describe('up.fragment', function() {
 
           expect(element).not.toBeDetached()
 
-          return await jasmine.spyOnGlobalErrorsAsync(async function(globalErrorSpy) {
+          await jasmine.spyOnGlobalErrorsAsync(async function(globalErrorSpy) {
             expect(globalErrorSpy).not.toHaveBeenCalled()
-
             await wait(150)
 
             expect(element).toBeDetached()
-            return expect(globalErrorSpy).toHaveBeenCalledWith(destroyError)
+            expect(globalErrorSpy).toHaveBeenCalledWith(destroyError)
           })
         })
       })
 
-      return describe('pending requests', function() {
-
+      describe('pending requests', function() {
         it('aborts pending requests targeting the given element', async function() {
           const target = fixture('.target')
           const promise = up.render(target, { url: '/path' })
@@ -11697,7 +11685,7 @@ describe('up.fragment', function() {
 
           up.destroy(target)
 
-          return await expectAsync(promise).toBeRejectedWith(jasmine.any(up.Aborted))
+          await expectAsync(promise).toBeRejectedWith(jasmine.any(up.Aborted))
         })
 
         it('aborts pending requests targeting a descendant of the given element', async function() {
@@ -11709,10 +11697,10 @@ describe('up.fragment', function() {
 
           up.destroy(parent)
 
-          return await expectAsync(promise).toBeRejectedWith(jasmine.any(up.Aborted))
+          await expectAsync(promise).toBeRejectedWith(jasmine.any(up.Aborted))
         })
 
-        return it('does not abort pending requests targeting an ascendant of the given element', async function() {
+        it('does not abort pending requests targeting an ascendant of the given element', async function() {
           const parent = fixture('.parent')
           const child = e.affix(parent, '.child')
           const promise = up.render(parent, { url: '/path' })
@@ -11721,103 +11709,94 @@ describe('up.fragment', function() {
 
           up.destroy(child)
 
-          return await expectAsync(promise).toBePending()
+          await expectAsync(promise).toBePending()
         })
       })
     })
 
     describe('up.reload()', function() {
 
-      it('reloads the given selector from the closest known source URL', asyncSpec(function(next) {
+      it('reloads the given selector from the closest known source URL', async function() {
         const container = fixture('.container[up-source="/source"]')
         const element = e.affix(container, '.element', {text: 'old text'})
 
         up.reload('.element')
+        await wait()
 
-        next(function() {
-          expect(jasmine.lastRequest().url).toMatchURL('/source')
-          return jasmine.respondWith(`\
-<div class="container">
-  <div class="element">new text</div>
-</div>\
-`
-          )
-        })
+        expect(jasmine.lastRequest().url).toMatchURL('/source')
+        jasmine.respondWith(`
+          <div class="container">
+            <div class="element">new text</div>
+          </div>
+        `)
+        await wait()
 
-        return next(() => expect('.element').toHaveText('new text'))
+        expect('.element').toHaveText('new text')
       })
-      )
 
-      it('reloads the given element', asyncSpec(function(next) {
+      it('reloads the given element', async function() {
         const element = fixture('.element', {'up-source': '/source', text: 'old text'})
 
         up.reload(element)
+        await wait()
 
-        next(function() {
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.element')
-          expect(jasmine.lastRequest().url).toMatchURL('/source')
-          return jasmine.respondWithSelector('.element', {text: 'new text'})
-        })
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.element')
+        expect(jasmine.lastRequest().url).toMatchURL('/source')
+        jasmine.respondWithSelector('.element', {text: 'new text'})
+        await wait()
 
-        return next(() => expect('.element').toHaveText('new text'))
+        expect('.element').toHaveText('new text')
       })
-      )
 
       it('reloads a fragment from the URL from which it was received', async function() {
         fixture('.container')
 
         up.render('.container', {url: '/container-source'})
-
         await wait()
 
-        jasmine.respondWith(`\
-<div class='container'>
-  <div class='target'>target text</div>
-</div>\
-`
-        )
-
+        jasmine.respondWith(`
+          <div class='container'>
+            <div class='target'>target text</div>
+          </div>
+        `)
         await wait()
 
         expect('.container').toHaveSelector('.target')
         expect('.target').toHaveText('target text')
 
         up.reload('.target')
-
         await wait()
 
         expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.target')
         expect(jasmine.lastRequest().url).toMatchURL('/container-source')
 
         jasmine.respondWithSelector('.target', {text: 'reloaded target text'})
-
         await wait()
 
-        return expect('.target').toHaveText('reloaded target text')
+        expect('.target').toHaveText('reloaded target text')
       })
 
       it('throws a readable error when attempting to reloading a detached element', async function() {
         const element = fixture('.element', {'up-source': '/source', text: 'old text'})
         element.remove() // detach from document
 
-        return await expectAsync(up.reload(element)).toBeRejectedWith(jasmine.anyError(/detached/))
+        await expectAsync(up.reload(element)).toBeRejectedWith(jasmine.anyError(/detached/))
       })
 
       if (up.migrate.loaded) {
-        it('reloads the given jQuery collection', asyncSpec(function(next) {
+        it('reloads the given jQuery collection', async function() {
           const element = fixture('.element', {'up-source': '/source', text: 'old text'})
 
           up.reload($(element))
+          await wait()
 
-          next(function() {
-            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.element')
-            expect(jasmine.lastRequest().url).toMatchURL('/source')
-            return jasmine.respondWithSelector('.element', {text: 'new text'})
-          })
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.element')
+          expect(jasmine.lastRequest().url).toMatchURL('/source')
+          jasmine.respondWithSelector('.element', {text: 'new text'})
+          await wait()
 
-          return next(() => expect('.element').toHaveText('new text'))
+          expect('.element').toHaveText('new text')
         })
-        )
       }
 
       it('does not use a cached response', function() {
@@ -11825,220 +11804,194 @@ describe('up.fragment', function() {
         const element = fixture('.element[up-source="/source"]')
 
         up.reload(element)
-        return expect(renderSpy).not.toHaveBeenCalledWith(jasmine.objectContaining({cache: true}))
+        expect(renderSpy).not.toHaveBeenCalledWith(jasmine.objectContaining({cache: true}))
       })
 
-      it('does not reveal by default', asyncSpec(function(next) {
+      it('does not reveal by default', async function() {
         const element = fixture('.element[up-source="/source"]', {text: 'old text'})
 
         const revealSpy = up.reveal.mock().and.returnValue(Promise.resolve())
 
-        next(() => up.reload('.element'))
+        up.reload('.element')
+        await wait()
 
-        next(() => {
-          return this.respondWithSelector('.element', {text: 'new text'})
-        })
+        this.respondWithSelector('.element', {text: 'new text'})
+        await wait()
 
-        return next(function() {
-          expect('.element').toHaveText('new text')
-          return expect(revealSpy).not.toHaveBeenCalled()
-        })
+        expect('.element').toHaveText('new text')
+        expect(revealSpy).not.toHaveBeenCalled()
       })
-      )
 
       describe('last modification time', function() {
 
-        let next, element
-        it("sends an If-Modified-Since header with the fragment's timestamp so the server can render nothing if no fresher content exists", asyncSpec(function(next) {
-          element = fixture('.element[up-source="/source"][up-time="1445412480"]')
+        it("sends an If-Modified-Since header with the fragment's timestamp so the server can render nothing if no fresher content exists", async function() {
+          const element = fixture('.element[up-source="/source"][up-time="1445412480"]')
 
           up.reload(element)
+          await wait()
 
-          return next(() => {
-            expect(this.lastRequest().url).toMatchURL('/source')
-            return expect(this.lastRequest().requestHeaders['If-Modified-Since']).toEqual('Wed, 21 Oct 2015 07:28:00 GMT')
-          })
+          expect(this.lastRequest().url).toMatchURL('/source')
+          expect(this.lastRequest().requestHeaders['If-Modified-Since']).toEqual('Wed, 21 Oct 2015 07:28:00 GMT')
         })
-        )
 
-        it("sends no If-Modified-Since header if no timestamp is known for the fragment", asyncSpec(function(next) {
-          element = fixture('.element[up-source="/source"]')
-
-          up.reload(element)
-
-          return next(() => {
-            expect(this.lastRequest().url).toMatchURL('/source')
-            return expect(this.lastRequest().requestHeaders['If-Modified-Since']).toBeUndefined()
-          })
-        })
-        )
-
-        return - (() => {
-          if (up.migrate.loaded) {
-          it("sends an X-Up-Reload-From-Time header with the fragment's timestamp so the server can render nothing if no fresher content exists", asyncSpec(function(next) {
-            element = fixture('.element[up-source="/source"][up-time="1608712106"]')
-
-            up.reload(element)
-
-            return next(() => {
-              expect(this.lastRequest().url).toMatchURL('/source')
-              return expect(this.lastRequest().requestHeaders['X-Up-Reload-From-Time']).toEqual('1608712106')
-            })
-          })
-          )
-
-          return it("sends an X-Up-Reload-From-Time: 0 header if no timestamp is known for the fragment", asyncSpec(function(next) {
-            element = fixture('.element[up-source="/source"]')
-
-            up.reload(element)
-
-            return next(() => {
-              expect(this.lastRequest().url).toMatchURL('/source')
-              return expect(this.lastRequest().requestHeaders['X-Up-Reload-From-Time']).toEqual('0')
-            })
-          })
-          )
-        }
-        })()
-      })
-
-
-      describe('ETags', function() {
-
-        it("sends an If-None-Match header with the fragment's timestamp so the server can render nothing if no fresher content exists", asyncSpec(function(next) {
-          const element = fixture(".element[up-source='/source'][up-etag='\"abc\"']")
-
-          up.reload(element)
-
-          return next(() => {
-            expect(this.lastRequest().url).toMatchURL('/source')
-            return expect(this.lastRequest().requestHeaders['If-None-Match']).toEqual('"abc"')
-          })
-        })
-        ) // double quotes are part of the ETag
-
-        return it("sends no If-None-Match header if no timestamp is known for the fragment", asyncSpec(function(next) {
+        it("sends no If-Modified-Since header if no timestamp is known for the fragment", async function() {
           const element = fixture('.element[up-source="/source"]')
 
           up.reload(element)
+          await wait()
 
-          return next(() => {
-            expect(this.lastRequest().url).toMatchURL('/source')
-            return expect(this.lastRequest().requestHeaders['If-None-Match']).toBeUndefined()
-          })
+          expect(this.lastRequest().url).toMatchURL('/source')
+          expect(this.lastRequest().requestHeaders['If-Modified-Since']).toBeUndefined()
         })
-        )
+
+        if (up.migrate.loaded) {
+          it("sends an X-Up-Reload-From-Time header with the fragment's timestamp so the server can render nothing if no fresher content exists", async function() {
+            const element = fixture('.element[up-source="/source"][up-time="1608712106"]')
+
+            up.reload(element)
+            await wait()
+
+            expect(this.lastRequest().url).toMatchURL('/source')
+            expect(this.lastRequest().requestHeaders['X-Up-Reload-From-Time']).toEqual('1608712106')
+          })
+
+          it("sends an X-Up-Reload-From-Time: 0 header if no timestamp is known for the fragment", async function() {
+            const element = fixture('.element[up-source="/source"]')
+
+            up.reload(element)
+            await wait()
+
+            expect(this.lastRequest().url).toMatchURL('/source')
+            expect(this.lastRequest().requestHeaders['X-Up-Reload-From-Time']).toEqual('0')
+          })
+        }
       })
 
-      describe('with { data } option', () => it('lets the user forward data to compilers of the new element', asyncSpec(function(next) {
-        const dataSpy = jasmine.createSpy('data spy')
+      describe('ETags', function() {
 
-        up.compiler('.element', function(element, data) {
-          dataSpy(data)
-          return element.addEventListener('click', () => up.reload(element, { data }))
+        it("sends an If-None-Match header with the fragment's timestamp so the server can render nothing if no fresher content exists", async function() {
+          const element = fixture(".element[up-source='/source'][up-etag='\"abc\"']")
+
+          up.reload(element)
+          await wait()
+
+          expect(this.lastRequest().url).toMatchURL('/source')
+          expect(this.lastRequest().requestHeaders['If-None-Match']).toEqual('"abc"')
         })
 
-        const element = fixture('.element', {'data-foo': 'a', 'up-source': '/source'})
-        up.hello(element)
+        it("sends no If-None-Match header if no timestamp is known for the fragment", async function() {
+          const element = fixture('.element[up-source="/source"]')
 
-        expect(dataSpy.calls.count()).toBe(1)
-        expect(dataSpy.calls.argsFor(0)[0].foo).toBe('a')
+          up.reload(element)
+          await wait()
 
-        Trigger.click(element)
+          expect(this.lastRequest().url).toMatchURL('/source')
+          expect(this.lastRequest().requestHeaders['If-None-Match']).toBeUndefined()
+        })
+      })
 
-        next(() => jasmine.respondWithSelector('.element', {'data-foo': 'b', 'data-bar': 'c'}))
+      describe('with { data } option', function() {
+        it('lets the user forward data to compilers of the new element', async function() {
+          const dataSpy = jasmine.createSpy('data spy')
 
-        return next(function() {
+          up.compiler('.element', function(element, data) {
+            dataSpy(data)
+            return element.addEventListener('click', () => up.reload(element, { data }))
+          })
+
+          const element = fixture('.element', {'data-foo': 'a', 'up-source': '/source'})
+          up.hello(element)
+
+          expect(dataSpy.calls.count()).toBe(1)
+          expect(dataSpy.calls.argsFor(0)[0].foo).toBe('a')
+
+          Trigger.click(element)
+          await wait()
+
+          jasmine.respondWithSelector('.element', {'data-foo': 'b', 'data-bar': 'c'})
+          await wait()
+
           expect(dataSpy.calls.count()).toBe(2)
           expect(dataSpy.calls.argsFor(1)[0].foo).toBe('a')
 
           // Non-overridden props are still visible
-          return expect(dataSpy.calls.argsFor(1)[0].bar).toBe('c')
+          expect(dataSpy.calls.argsFor(1)[0].bar).toBe('c')
         })
       })
-      ))
 
-      describe('with { keepData: true } option', () => it("compiles the new element with the old element's data", asyncSpec(function(next) {
-        const dataSpy = jasmine.createSpy('data spy')
+      describe('with { keepData: true } option', function() {
+        it("compiles the new element with the old element's data", async function() {
+          const dataSpy = jasmine.createSpy('data spy')
 
-        up.compiler('.element', function(element, data) {
-          dataSpy(data)
-          return element.addEventListener('click', () => up.reload(element, { keepData: true }))
-        })
+          up.compiler('.element', function(element, data) {
+            dataSpy(data)
+            return element.addEventListener('click', () => up.reload(element, { keepData: true }))
+          })
 
-        const element = fixture('.element', {'data-foo': 'a', 'up-source': '/source'})
-        up.hello(element)
+          const element = fixture('.element', {'data-foo': 'a', 'up-source': '/source'})
+          up.hello(element)
 
-        expect(dataSpy.calls.count()).toBe(1)
-        expect(dataSpy.calls.argsFor(0)[0].foo).toBe('a')
+          expect(dataSpy.calls.count()).toBe(1)
+          expect(dataSpy.calls.argsFor(0)[0].foo).toBe('a')
 
-        Trigger.click(element)
+          Trigger.click(element)
+          await wait()
 
-        next(() => jasmine.respondWithSelector('.element', {'data-foo': 'b'}))
+          jasmine.respondWithSelector('.element', {'data-foo': 'b'})
+          await wait()
 
-        return next(function() {
           expect(dataSpy.calls.count()).toBe(2)
-          return expect(dataSpy.calls.argsFor(1)[0].foo).toBe('a')
+          expect(dataSpy.calls.argsFor(1)[0].foo).toBe('a')
         })
       })
-      ))
 
-      it("reloads the layer's main element if no selector is given", asyncSpec(function(next) {
+      it("reloads the layer's main element if no selector is given", async function() {
         up.fragment.config.mainTargets = ['.element']
 
         fixture('.element[up-source="/source"]', {text: 'old text'})
 
-        next(() => {
-          return up.reload()
-        })
+        up.reload()
+        await wait()
 
-        next(() => {
-          expect(this.lastRequest().url).toMatch(/\/source$/)
-          expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
-          return this.respondWithSelector('.element', {content: 'new text'})
-        })
+        expect(this.lastRequest().url).toMatch(/\/source$/)
+        expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
+        this.respondWithSelector('.element', {content: 'new text'})
+        await wait()
 
-        return next(() => {
-          return expect('.element').toHaveText('new text')
-        })
+        expect('.element').toHaveText('new text')
       })
-      )
 
-      return describe('reloading multiple fragments', function() {
+      describe('reloading multiple fragments', function() {
 
         it('reloads multiple fragments', async function() {
           const foo = fixture('#foo[up-source="/path"]', {text: 'old foo'})
           const bar = fixture('#bar[up-source="/path"]', {text: 'old bar'})
 
           up.reload('#foo, #bar')
-
           await wait()
 
           expect(jasmine.lastRequest().url).toMatchURL('/path')
 
-          jasmine.respondWith(`\
-<div id="foo">new foo</div>
-<div id="bar">new bar</div>\
-`
-          )
-
+          jasmine.respondWith(`
+            <div id="foo">new foo</div>
+            <div id="bar">new bar</div>
+          `)
           await wait()
 
           expect('#foo').toHaveText('new foo')
-          return expect('#bar').toHaveText('new bar')
+          expect('#bar').toHaveText('new bar')
         })
 
-        return it('uses source URL, ETag and last modifiction time from the first matching fragment', async function() {
+        it('uses source URL, ETag and last modifiction time from the first matching fragment', async function() {
           const foo = fixture('#foo[up-source="/foo-source"][up-etag="foo-etag"][up-time="1704067200"]', {text: 'old foo'})
           const bar = fixture('#bar[up-source="/bar-source"][up-etag="bar-etag"][up-time="1735689600"]', {text: 'old bar'})
 
           up.reload('#foo, #bar')
-
           await wait()
 
           expect(jasmine.lastRequest().url).toMatchURL('/foo-source')
           expect(jasmine.lastRequest().requestHeaders['If-None-Match']).toMatchURL('foo-etag')
-          return expect(jasmine.lastRequest().requestHeaders['If-Modified-Since']).toMatchURL(new Date(1704067200 * 1000).toUTCString())
+          expect(jasmine.lastRequest().requestHeaders['If-Modified-Since']).toMatchURL(new Date(1704067200 * 1000).toUTCString())
         })
       })
     })
