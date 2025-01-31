@@ -5488,7 +5488,7 @@ describe('up.fragment', function() {
 
       describe('meta tags', function() {
 
-        beforeEach(() => up.history.config.enabled = true)
+        beforeEach(function() { up.history.config.enabled = true })
 
         it("updates meta tags from the response", async function() {
           fixture(document.head, 'link[rel="canonical"][href="/old-canonical"]')
@@ -5499,27 +5499,26 @@ describe('up.fragment', function() {
 
           await wait()
 
-          jasmine.respondWith(`\
-<html>
-  <head>
-    <link rel='canonical' href='/new-canonical'>
-    <meta name='description' content='new description'>
-  </head>
-  <body>
-    <div class='container'>
-      new container text
-    </div>
-  </body>
-</html>\
-`
-          )
+          jasmine.respondWith(`
+            <html>
+              <head>
+                <link rel='canonical' href='/new-canonical'>
+                <meta name='description' content='new description'>
+              </head>
+              <body>
+                <div class='container'>
+                  new container text
+                </div>
+              </body>
+            </html>
+          `)
 
           await wait()
 
           expect(document.head).not.toHaveSelector('link[rel="canonical"][href="/old-canonical"]')
           expect(document.head).toHaveSelector('link[rel="canonical"][href="/new-canonical"]')
           expect(document.head).not.toHaveSelector('meta[name="description"][content="old description"]')
-          return expect(document.head).toHaveSelector('meta[name="description"][content="new description"]')
+          expect(document.head).toHaveSelector('meta[name="description"][content="new description"]')
         })
 
         it("does not update meta tags with [up-meta=false]", async function() {
@@ -5531,27 +5530,26 @@ describe('up.fragment', function() {
 
           await wait()
 
-          jasmine.respondWith(`\
-<html>
-  <head>
-    <link rel='canonical' href='/new-canonical' up-meta='false'>
-    <meta name='description' content='new description'>
-  </head>
-  <body>
-    <div class='container'>
-      new container text
-    </div>
-  </body>
-</html>\
-`
-          )
+          jasmine.respondWith(`
+            <html>
+              <head>
+                <link rel='canonical' href='/new-canonical' up-meta='false'>
+                <meta name='description' content='new description'>
+              </head>
+              <body>
+                <div class='container'>
+                  new container text
+                </div>
+              </body>
+            </html>
+          `)
 
           await wait()
 
           expect(document.head).toHaveSelector('link[rel="canonical"][href="/old-canonical"]')
           expect(document.head).not.toHaveSelector('link[rel="canonical"][href="/new-canonical"]')
           expect(document.head).not.toHaveSelector('meta[name="description"][content="old description"]')
-          return expect(document.head).toHaveSelector('meta[name="description"][content="new description"]')
+          expect(document.head).toHaveSelector('meta[name="description"][content="new description"]')
         })
 
         it('does not update meta tags with { history: false }', async function() {
@@ -5563,25 +5561,24 @@ describe('up.fragment', function() {
 
           await wait()
 
-          jasmine.respondWith(`\
-<html>
-  <head>
-    <link rel='canonical' href='/new-canonical'>
-    <meta name='description' content='old description'>
-  </head>
-  <body>
-    <div class='container'>
-      new container text
-    </div>
-  </body>
-</html>\
-`
-          )
+          jasmine.respondWith(`
+            <html>
+              <head>
+                <link rel='canonical' href='/new-canonical'>
+                <meta name='description' content='old description'>
+              </head>
+              <body>
+                <div class='container'>
+                  new container text
+                </div>
+              </body>
+            </html>
+          `)
 
           await wait()
 
           expect(document.head).toHaveSelector('link[rel="canonical"][href="/old-canonical"]')
-          return expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
+          expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
         })
 
         it('does not update meta tags with up.history.config.updateMetaTags = false', async function() {
@@ -5595,25 +5592,24 @@ describe('up.fragment', function() {
 
           await wait()
 
-          jasmine.respondWith(`\
-<html>
-  <head>
-    <link rel='canonical' href='/new-canonical'>
-    <meta name='description' content='old description'>
-  </head>
-  <body>
-    <div class='container'>
-      new container text
-    </div>
-  </body>
-</html>\
-`
-          )
+          jasmine.respondWith(`
+            <html>
+              <head>
+                <link rel='canonical' href='/new-canonical'>
+                <meta name='description' content='old description'>
+              </head>
+              <body>
+                <div class='container'>
+                  new container text
+                </div>
+              </body>
+            </html>
+          `)
 
           await wait()
 
           expect(document.head).toHaveSelector('link[rel="canonical"][href="/old-canonical"]')
-          return expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
+          expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
         })
 
         it('does not update meta tags with { metaTags: false } option', async function() {
@@ -5625,25 +5621,24 @@ describe('up.fragment', function() {
 
           await wait()
 
-          jasmine.respondWith(`\
-<html>
-  <head>
-    <link rel='canonical' href='/new-canonical'>
-    <meta name='description' content='old description'>
-  </head>
-  <body>
-    <div class='container'>
-      new container text
-    </div>
-  </body>
-</html>\
-`
-          )
+          jasmine.respondWith(`
+            <html>
+              <head>
+                <link rel='canonical' href='/new-canonical'>
+                <meta name='description' content='old description'>
+              </head>
+              <body>
+                <div class='container'>
+                  new container text
+                </div>
+              </body>
+            </html>
+          `)
 
           await wait()
 
           expect(document.head).toHaveSelector('link[rel="canonical"][href="/old-canonical"]')
-          return expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
+          expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
         })
 
         it('does not render meta tags for a background layer, but saves them for later restoration', async function() {
@@ -5656,19 +5651,19 @@ describe('up.fragment', function() {
             target: '.container',
             history: true,
             location: "/overlay",
-            document: `\
-<html>
-  <head>
-    <title>overlay title</title>
-    <meta name='description' content='overlay description'>
-  </head>
-  <body>
-    <div class='container'>
-      container text
-    </div>
-  </body>
-</html>\
-`
+            document: `
+              <html>
+                <head>
+                  <title>overlay title</title>
+                  <meta name='description' content='overlay description'>
+                </head>
+                <body>
+                  <div class='container'>
+                    container text
+                  </div>
+                </body>
+              </html>
+            `
           })
 
           await wait()
@@ -5682,19 +5677,19 @@ describe('up.fragment', function() {
             layer: 'root',
             history: true,
             location: '/root2',
-            document: `\
-<html>
-  <head>
-    <title>new root title</title>
-    <meta name='description' content='new root description'>
-  </head>
-  <body>
-    <div class='container'>
-      container text
-    </div>
-  </body>
-</html>\
-`
+            document: `
+              <html>
+                <head>
+                  <title>new root title</title>
+                  <meta name='description' content='new root description'>
+                </head>
+                <body>
+                  <div class='container'>
+                    container text
+                  </div>
+                </body>
+              </html>
+            `
           })
 
           await wait()
@@ -5712,9 +5707,8 @@ describe('up.fragment', function() {
           expect(document.title).toBe('new root title')
           expect(document.head).not.toHaveSelector('meta[name="description"][content="overlay description"]')
           expect(document.head).not.toHaveSelector('meta[name="description"][content="old root description"]')
-          return expect(document.head).toHaveSelector('meta[name="description"][content="new root description"]')
+          expect(document.head).toHaveSelector('meta[name="description"][content="new root description"]')
         })
-
 
         it('does not remove current meta tags if the response has no <head>', async function() {
           fixture(document.head, 'link[rel="canonical"][href="/old-canonical"]')
@@ -5725,67 +5719,63 @@ describe('up.fragment', function() {
 
           await wait()
 
-          jasmine.respondWith(`\
-<div class='container'>
-  new container text
-</div>\
-`
-          )
+          jasmine.respondWith(`
+            <div class='container'>
+              new container text
+            </div>
+          `)
 
           await wait()
 
           expect(document.head).toHaveSelector('link[rel="canonical"][href="/old-canonical"]')
-          return expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
+          expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
         })
-
 
         it('updates a script[type="application/ld+json"] from the response with up.fragment.config.runScripts = false (bugfix)', async function() {
           up.fragment.config.runScripts = false
 
-          const json = `\
-{
-  "@context": "https://schema.org/",
-  "@type": "Recipe",
-  "name": "Party Coffee Cake",
-  "author": {
-    "@type": "Person",
-    "name": "Mary Stone"
-  },
-  "datePublished": "2018-03-10",
-  "description": "This coffee cake is awesome and perfect for parties.",
-  "prepTime": "PT20M"
-}\
-`
+          const json = `
+            {
+              "@context": "https://schema.org/",
+              "@type": "Recipe",
+              "name": "Party Coffee Cake",
+              "author": {
+                "@type": "Person",
+                "name": "Mary Stone"
+              },
+              "datePublished": "2018-03-10",
+              "description": "This coffee cake is awesome and perfect for parties.",
+              "prepTime": "PT20M"
+            }
+          `
 
           fixture('.container', {text: 'old container text'})
           up.render('.container', {url: '/path', history: true})
 
           await wait()
 
-          jasmine.respondWith(`\
-<html>
-  <head>
-    <script type="application/ld+json">${json}</script>
-  </head>
-  <body>
-    <div class='container'>
-      new container text
-    </div>
-  </body>
-</html>\
-`
-          )
+          jasmine.respondWith(`
+            <html>
+              <head>
+                <script type="application/ld+json">${json}</script>
+              </head>
+              <body>
+                <div class='container'>
+                  new container text
+                </div>
+              </body>
+            </html>
+          `)
 
           await wait()
 
           expect('.container').toHaveText('new container text')
           expect(document.head).toHaveSelector('script[type="application/ld+json"]')
-          return expect(document.head.querySelector('script[type="application/ld+json"]')).toHaveText(json)
+          expect(document.head.querySelector('script[type="application/ld+json"]')).toHaveText(json)
         })
 
-
         if (up.migrate.loaded) {
-          return it("warns if an auto-update meta tags is also [up-hungry]", async function() {
+          it("warns if an auto-update meta tags is also [up-hungry]", async function() {
             fixture(document.head, 'link[rel="canonical"][href="/old-canonical"][up-hungry]')
             const warnSpy = up.migrate.warn.mock()
 
@@ -5794,26 +5784,24 @@ describe('up.fragment', function() {
 
             await wait()
 
-            jasmine.respondWith(`\
-<html>
-  <head>
-    <link rel='canonical' href='/new-canonical' up-hungry>
-  </head>
-  <body>
-    <div class='container'>
-      new container text
-    </div>
-  </body>
-</html>\
-`
-            )
+            jasmine.respondWith(`
+              <html>
+                <head>
+                  <link rel='canonical' href='/new-canonical' up-hungry>
+                </head>
+                <body>
+                  <div class='container'>
+                    new container text
+                  </div>
+                </body>
+              </html>
+            `)
 
             await wait()
 
             expect(document.head).not.toHaveSelector('link[rel="canonical"][href="/old-canonical"]')
             expect(document.head).toHaveSelector('link[rel="canonical"][href="/new-canonical"]')
-
-            return expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('Remove the [up-hungry] attribute'), jasmine.anything())
+            expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('Remove the [up-hungry] attribute'), jasmine.anything())
           })
         }
       })
