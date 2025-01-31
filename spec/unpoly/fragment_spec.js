@@ -9475,60 +9475,52 @@ describe('up.fragment', function() {
 
       describe('with { cache } option', function() {
 
-        it('reuses a cached request with { cache: true }', asyncSpec(function(next) {
+        it('reuses a cached request with { cache: true }', async function() {
           fixture('.element')
 
           up.render('.element', {url: '/path', cache: true})
+          await wait()
 
-          next(function() {
-            expect(jasmine.Ajax.requests.count()).toBe(1)
-            expect({target: '.element', url: '/path'}).toBeCached()
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect({target: '.element', url: '/path'}).toBeCached()
 
-            return up.render('.element', {url: '/path', cache: true, abort: false})
-          })
+          up.render('.element', {url: '/path', cache: true, abort: false})
+          await wait()
 
-          return next(() => // See that the cached request is used.
-          expect(jasmine.Ajax.requests.count()).toBe(1))
+          expect(jasmine.Ajax.requests.count()).toBe(1)
         })
-        )
 
-        it('does not reuse a cached request with { cache: false }', asyncSpec(function(next) {
+        it('does not reuse a cached request with { cache: false }', async function() {
           fixture('.element')
 
           up.render('.element', {url: '/path', cache: false})
+          await wait()
 
-          next(function() {
-            expect(jasmine.Ajax.requests.count()).toBe(1)
-            expect({target: '.element', url: '/path'}).not.toBeCached()
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect({target: '.element', url: '/path'}).not.toBeCached()
 
-            return up.render('.element', {url: '/path', cache: false, abort: false})
-          })
+          up.render('.element', {url: '/path', cache: false, abort: false})
+          await wait()
 
-          return next(() => // See that the cached request is used.
-          expect(jasmine.Ajax.requests.count()).toBe(2))
+          expect(jasmine.Ajax.requests.count()).toBe(2)
         })
-        )
 
-        it('does not reuse a cached request when no { cache } option is given', asyncSpec(function(next) {
+        it('does not reuse a cached request when no { cache } option is given', async function() {
           fixture('.element')
 
           up.render('.element', {url: '/path'})
+          await wait()
 
-          next(function() {
-            expect(jasmine.Ajax.requests.count()).toBe(1)
-            expect({target: '.element', url: '/path'}).not.toBeCached()
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect({target: '.element', url: '/path'}).not.toBeCached()
 
-            return up.render('.element', {url: '/path', abort: false})
-          })
+          up.render('.element', {url: '/path', abort: false})
+          await wait()
 
-          return next(() => // See that the cached request is used.
-          expect(jasmine.Ajax.requests.count()).toBe(2))
+          expect(jasmine.Ajax.requests.count()).toBe(2)
         })
-        )
 
-
-
-        return describe('cache revalidation with { revalidate }', function() {
+        describe('cache revalidation with { revalidate }', function() {
 
           beforeEach(async function() {
             fixture('.target', {text: 'initial text'})
@@ -9542,14 +9534,13 @@ describe('up.fragment', function() {
                 'Etag': 'W/"0123456789"',
                 'Last-Modified': 'Wed, 21 Oct 2015 18:14:00 GMT'
               }
-            }
-            )
+            })
 
             await wait()
 
             expect({url: '/cached-path'}).toBeCached()
-            return expect('.target').toHaveText('initial text')
-          }) // We only made the request. We did not render.
+            expect('.target').toHaveText('initial text')
+          })
 
           it('reloads a fragment that was rendered from an expired cached response', async function() {
             up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
@@ -9566,7 +9557,7 @@ describe('up.fragment', function() {
             await wait()
 
             expect(up.network.isBusy()).toBe(false)
-            return expect('.target').toHaveText('verified text')
+            expect('.target').toHaveText('verified text')
           })
 
           it('reloads expired content that was rendered into a new overlay', async function() {
@@ -9586,7 +9577,7 @@ describe('up.fragment', function() {
 
             expect(up.network.isBusy()).toBe(false)
             expect(up.layer.current).toBeOverlay()
-            return expect('up-modal .target').toHaveText('verified text')
+            expect('up-modal .target').toHaveText('verified text')
           })
 
           it('reloads multiple targets', async function() {
@@ -9597,10 +9588,10 @@ describe('up.fragment', function() {
 
             await wait()
 
-            jasmine.respondWith(`\
-<div id="foo">cached foo</div>
-<div id="bar">cached bar</div>\
-`)
+            jasmine.respondWith(`
+              <div id="foo">cached foo</div>
+              <div id="bar">cached bar</div>
+            `)
 
             await wait()
 
@@ -9616,16 +9607,16 @@ describe('up.fragment', function() {
             expect(up.network.isBusy()).toBe(true)
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#foo, #bar')
 
-            jasmine.respondWith(`\
-<div id="foo">verified foo</div>
-<div id="bar">verified bar</div>\
-`)
+            jasmine.respondWith(`
+              <div id="foo">verified foo</div>
+              <div id="bar">verified bar</div>
+            `)
 
             await wait()
 
             expect(up.network.isBusy()).toBe(false)
             expect('#foo').toHaveText('verified foo')
-            return expect('#bar').toHaveText('verified bar')
+            expect('#bar').toHaveText('verified bar')
           })
 
           it('reloads multiple targets when an { origin } is given (bugfix)', async function() {
@@ -9637,10 +9628,10 @@ describe('up.fragment', function() {
 
             await wait()
 
-            jasmine.respondWith(`\
-<div id="foo">cached foo</div>
-<div id="bar">cached bar</div>\
-`)
+            jasmine.respondWith(`
+              <div id="foo">cached foo</div>
+              <div id="bar">cached bar</div>
+            `)
 
             await wait()
 
@@ -9656,16 +9647,16 @@ describe('up.fragment', function() {
             expect(up.network.isBusy()).toBe(true)
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#foo, #bar')
 
-            jasmine.respondWith(`\
-<div id="foo">verified foo</div>
-<div id="bar">verified bar</div>\
-`)
+            jasmine.respondWith(`
+              <div id="foo">verified foo</div>
+              <div id="bar">verified bar</div>
+            `)
 
             await wait()
 
             expect(up.network.isBusy()).toBe(false)
             expect('#foo').toHaveText('verified foo')
-            return expect('#bar').toHaveText('verified bar')
+            expect('#bar').toHaveText('verified bar')
           })
 
           it('reloads hungry targets that piggy-backed on the initial request when an { origin } is given (bugfix)', async function() {
@@ -9677,10 +9668,10 @@ describe('up.fragment', function() {
 
             await wait()
 
-            jasmine.respondWith(`\
-<div id="foo">cached foo</div>
-<div id="bar">cached bar</div>\
-`)
+            jasmine.respondWith(`
+              <div id="foo">cached foo</div>
+              <div id="bar">cached bar</div>
+            `)
 
             await wait()
 
@@ -9696,101 +9687,87 @@ describe('up.fragment', function() {
             expect(up.network.isBusy()).toBe(true)
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#foo, #bar')
 
-            jasmine.respondWith(`\
-<div id="foo">verified foo</div>
-<div id="bar">verified bar</div>\
-`)
+            jasmine.respondWith(`
+              <div id="foo">verified foo</div>
+              <div id="bar">verified bar</div>
+            `)
 
             await wait()
 
             expect(up.network.isBusy()).toBe(false)
             expect('#foo').toHaveText('verified foo')
-            return expect('#bar').toHaveText('verified bar')
+            expect('#bar').toHaveText('verified bar')
           })
 
-          it('does not verify a fragment rendered from a recent cached response with { revalidate: "auto" }', asyncSpec(function(next) {
+          it('does not verify a fragment rendered from a recent cached response with { revalidate: "auto" }', async function() {
             up.fragment.config.autoRevalidate = response => response.age >= (10 * 1000)
 
             up.render('.target', { url: '/cached-path', cache: true, revalidate: 'auto' })
+            await wait()
 
-            return next(function() {
-              expect('.target').toHaveText('cached text')
-              return expect(up.network.isBusy()).toBe(false)
-            })
+            expect('.target').toHaveText('cached text')
+            expect(up.network.isBusy()).toBe(false)
           })
-          )
 
-          it("does not verify a fragment that wasn't rendered from a cached response", asyncSpec(function(next) {
+          it("does not verify a fragment that wasn't rendered from a cached response", async function() {
             up.render('.target', { url: '/uncached-path', cache: true, revalidate: true })
+            await wait()
 
-            return next(function() {
-              expect(up.network.isBusy()).toBe(true)
+            expect(up.network.isBusy()).toBe(true)
 
-              return jasmine.respondWithSelector('.target', {text: 'server text'})
-            })
+            jasmine.respondWithSelector('.target', {text: 'server text'})
           })
-          )
 
-          it('does not verify a fragment when prepending content with :before', asyncSpec(function(next) {
+          it('does not verify a fragment when prepending content with :before', async function() {
             up.render('.target:before', { url: '/cached-path', cache: true, revalidate: true })
+            await wait()
 
-            return next(function() {
-              expect('.target').toHaveText("cached textinitial text")
-              return expect(up.network.isBusy()).toBe(false)
-            })
+            expect('.target').toHaveText("cached textinitial text")
+            expect(up.network.isBusy()).toBe(false)
           })
-          )
 
-          it('does not verify a fragment when appending content with :after', asyncSpec(function(next) {
+          it('does not verify a fragment when appending content with :after', async function() {
             up.render('.target:after', { url: '/cached-path', cache: true, revalidate: true })
+            await wait()
 
-            return next(function() {
-              expect('.target').toHaveText("initial textcached text")
-              return expect(up.network.isBusy()).toBe(false)
-            })
+            expect('.target').toHaveText("initial textcached text")
+            expect(up.network.isBusy()).toBe(false)
           })
-          )
 
-          it('does not render a second time if the revalidation response is a 304 Not Modified', asyncSpec(function(next) {
+          it('does not render a second time if the revalidation response is a 304 Not Modified', async function() {
             up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
+            await wait()
 
-            next(function() {
-              expect('.target').toHaveText('cached text')
-              expect(up.network.isBusy()).toBe(true)
+            expect('.target').toHaveText('cached text')
+            expect(up.network.isBusy()).toBe(true)
 
-              return jasmine.respondWith({status: 304})
-            })
+            jasmine.respondWith({status: 304})
+            await wait()
 
-            return next(function() {
-              expect(up.network.isBusy()).toBe(false)
-              return expect('.target').toHaveText('cached text')
-            })
+            expect(up.network.isBusy()).toBe(false)
+            expect('.target').toHaveText('cached text')
           })
-          )
 
-          it('does not render a second time if the revalidation response has the same text as the expired response', asyncSpec(function(next) {
+          it('does not render a second time if the revalidation response has the same text as the expired response', async function() {
             const insertedSpy = jasmine.createSpy('up:fragment:inserted listener')
             up.on('up:fragment:inserted', insertedSpy)
             up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
+            await wait()
 
-            next(function() {
-              expect(insertedSpy.calls.count()).toBe(1)
-              const target = document.querySelector('.target')
-              expect(target).toHaveText('cached text')
-              target.innerText = 'text changed on client'
+            expect(insertedSpy.calls.count()).toBe(1)
+            const target = document.querySelector('.target')
+            expect(target).toHaveText('cached text')
+            target.innerText = 'text changed on client'
 
-              expect(up.network.isBusy()).toBe(true)
+            expect(up.network.isBusy()).toBe(true)
 
-              return jasmine.respondWithSelector('.target', {text: 'cached text'})
-            })
+            jasmine.respondWithSelector('.target', {text: 'cached text'})
+            await wait()
 
-            return next(function() {
-              expect(up.network.isBusy()).toBe(false)
-              expect(insertedSpy.calls.count()).toBe(1)
-              return expect('.target').toHaveText('text changed on client')
-            })
+            expect(up.network.isBusy()).toBe(false)
+            expect(insertedSpy.calls.count()).toBe(1)
+            expect('.target').toHaveText('text changed on client')
           })
-          )
 
           it('allows to define which responses to verify in up.fragment.config.autoRevalidate')
 
@@ -9827,52 +9804,47 @@ describe('up.fragment', function() {
             await wait()
 
             expect('#target').toHaveText('revalidated text')
-            return expect(sequence).toEqual(['renderedCallback', 'renderedPromise', 'revalidateOption', 'requestLoad', 'requestLoaded', 'renderedCallback'])
-        })
+            expect(sequence).toEqual(['renderedCallback', 'renderedPromise', 'revalidateOption', 'requestLoad', 'requestLoaded', 'renderedCallback'])
+          })
 
-          it('does not use options like { confirm } or { feedback } when verifying', asyncSpec(function(next) {
+          it('does not use options like { confirm } or { feedback } when verifying', async function() {
             const confirmSpy = spyOn(window, 'confirm').and.returnValue(true)
 
             up.render('.target', { url: '/cached-path', cache: true, revalidate: true, confirm: true, feedback: true })
             expect(confirmSpy.calls.count()).toBe(1)
+            await wait()
 
-            return next(function() {
-              expect('.target').toHaveText('cached text')
-              expect('.target').not.toHaveClass('up-loading')
-              expect(up.network.isBusy()).toBe(true)
-
-              return expect(confirmSpy.calls.count()).toBe(1)
-            })
+            expect('.target').toHaveText('cached text')
+            expect('.target').not.toHaveClass('up-loading')
+            expect(up.network.isBusy()).toBe(true)
+            expect(confirmSpy.calls.count()).toBe(1)
           })
-          )
 
-          it("delays revalidation until the original transition completed, so an element isn't changed in-flight", asyncSpec(function(next) {
+          it("delays revalidation until the original transition completed, so an element isn't changed in-flight", async function() {
             up.motion.config.enabled = true
             up.render('.target', { url: '/cached-path', cache: true, revalidate: true, transition: 'cross-fade', easing: 'linear', duration: 200 })
+            await wait()
 
-            next(function() {
-              expect('.target').toHaveText('cached text')
-              expect('.target:not(.up-destroying)').toHaveOpacity(0, 0.15)
-              return expect(up.network.isBusy()).toBe(false)
-            })
+            expect('.target').toHaveText('cached text')
+            expect('.target:not(.up-destroying)').toHaveOpacity(0, 0.15)
+            expect(up.network.isBusy()).toBe(false)
 
-            next.after(300, function() {
-              expect('.target:not(.up-destroying)').toHaveOpacity(1)
-              expect(up.network.isBusy()).toBe(true)
+            await wait(300)
 
-              return jasmine.respondWithSelector('.target', {text: 'verified text'})
-            })
+            expect('.target:not(.up-destroying)').toHaveOpacity(1)
+            expect(up.network.isBusy()).toBe(true)
 
-            return next(() => expect('.target').toHaveText('verified text'))
+            jasmine.respondWithSelector('.target', {text: 'verified text'})
+            await wait()
+
+            expect('.target').toHaveText('verified text')
           })
-          )
 
           it('delays up.render().finished promise until the fragment was verified', async function() {
             const finishedCallback = jasmine.createSpy('finished callback')
 
             const job = up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
             job.finished.then(finishedCallback)
-
             await wait()
 
             expect('.target').toHaveText('cached text')
@@ -9881,19 +9853,17 @@ describe('up.fragment', function() {
             expect(up.network.isBusy()).toBe(true)
 
             jasmine.respondWithSelector('.target', {text: 'verified text'})
-
             await wait()
 
             expect(up.network.isBusy()).toBe(false)
             expect('.target').toHaveText('verified text')
-            return expect(finishedCallback).toHaveBeenCalledWith(jasmine.any(up.RenderResult))
+            expect(finishedCallback).toHaveBeenCalledWith(jasmine.any(up.RenderResult))
           })
 
           it('delays an { onFinished } callback until the fragment was verified', async function() {
             const finishedCallback = jasmine.createSpy('finished callback')
 
             const job = up.render('.target', { url: '/cached-path', cache: true, revalidate: true, onFinished: finishedCallback })
-
             await wait()
 
             expect('.target').toHaveText('cached text')
@@ -9902,106 +9872,89 @@ describe('up.fragment', function() {
             expect(up.network.isBusy()).toBe(true)
 
             jasmine.respondWithSelector('.target', {text: 'verified text'})
-
             await wait()
 
             expect(up.network.isBusy()).toBe(false)
             expect('.target').toHaveText('verified text')
-            return expect(finishedCallback).toHaveBeenCalledWith(jasmine.any(up.RenderResult))
+            expect(finishedCallback).toHaveBeenCalledWith(jasmine.any(up.RenderResult))
           })
 
-          it('runs the { onRendered } a second time for the second render pass', asyncSpec(function(next) {
+          it('runs the { onRendered } a second time for the second render pass', async function() {
             const onRendered = jasmine.createSpy('onRendered callback')
 
             up.render('.target', { url: '/cached-path', cache: true, revalidate: true, onRendered })
+            await wait()
 
-            next(function() {
-              expect('.target').toHaveText('cached text')
+            expect('.target').toHaveText('cached text')
+            expect(onRendered.calls.count()).toBe(1)
 
-              expect(onRendered.calls.count()).toBe(1)
+            expect(up.network.isBusy()).toBe(true)
+            jasmine.respondWithSelector('.target', {text: 'verified text'})
+            await wait()
 
-              expect(up.network.isBusy()).toBe(true)
-              return jasmine.respondWithSelector('.target', {text: 'verified text'})
-            })
-
-            return next(function() {
-              expect(onRendered.calls.count()).toBe(2)
-
-              expect(up.network.isBusy()).toBe(false)
-              return expect('.target').toHaveText('verified text')
-            })
+            expect(onRendered.calls.count()).toBe(2)
+            expect(up.network.isBusy()).toBe(false)
+            expect('.target').toHaveText('verified text')
           })
-          )
 
-          it('does not re-emit a { guardEvent } for the second render pass', asyncSpec(function(next) {
+          it('does not re-emit a { guardEvent } for the second render pass', async function() {
             const guardEventListener = jasmine.createSpy('guard event listener')
             const guardEvent = up.event.build('my:guard')
             up.on('my:guard', guardEventListener)
 
             up.render('.target', { url: '/cached-path', cache: true, revalidate: true, guardEvent })
+            await wait()
 
-            next(function() {
-              expect('.target').toHaveText('cached text')
-              expect(guardEventListener.calls.count()).toBe(1)
+            expect('.target').toHaveText('cached text')
+            expect(guardEventListener.calls.count()).toBe(1)
 
-              expect(up.network.isBusy()).toBe(true)
-              return jasmine.respondWithSelector('.target', {text: 'verified text'})
-            })
+            expect(up.network.isBusy()).toBe(true)
+            jasmine.respondWithSelector('.target', {text: 'verified text'})
+            await wait()
 
-            return next(function() {
-              expect('.target').toHaveText('verified text')
-              return expect(guardEventListener.calls.count()).toBe(1)
-            })
+            expect('.target').toHaveText('verified text')
+            expect(guardEventListener.calls.count()).toBe(1)
           })
-          )
 
-          it("preserves user's changes in scroll position between the first and second render pass", asyncSpec(function(next) {
+          it("preserves user's changes in scroll position between the first and second render pass", async function() {
             fixture('style', {content: '.target { height: 50000px; background-color: red }'})
 
             up.viewport.root.scrollTop = 0
 
             up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
+            await wait()
 
-            next(function() {
-              expect('.target').toHaveText('cached text')
+            expect('.target').toHaveText('cached text')
+            expect(up.network.isBusy()).toBe(true)
 
-              expect(up.network.isBusy()).toBe(true)
+            up.viewport.root.scrollTop = 500
 
-              up.viewport.root.scrollTop = 500
+            jasmine.respondWithSelector('.target', {text: 'verified text'})
+            await wait()
 
-              return jasmine.respondWithSelector('.target', {text: 'verified text'})
-            })
-
-            return next(function() {
-              expect('.target').toHaveText('verified text')
-
-              return expect(up.viewport.root.scrollTop).toBe(500)
-            })
+            expect('.target').toHaveText('verified text')
+            expect(up.viewport.root.scrollTop).toBe(500)
           })
-          )
 
-          it("preserves user's changes in focus between the first and second render pass", asyncSpec(function(next) {
+          it("preserves user's changes in focus between the first and second render pass", async function() {
             up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
+            await wait()
 
-            next(function() {
-              expect('.target').toHaveText('cached text')
+            expect('.target').toHaveText('cached text')
+            expect(up.network.isBusy()).toBe(true)
 
-              expect(up.network.isBusy()).toBe(true)
+            const input = e.affix(document.querySelector('.target'), 'input[name=foo]')
+            input.focus()
 
-              const input = e.affix(document.querySelector('.target'), 'input[name=foo]')
-              input.focus()
+            jasmine.respondWithSelector('.target input[name=foo]')
+            await wait()
 
-              return jasmine.respondWithSelector('.target input[name=foo]')
-            })
-
-            return next(() => expect('input[name=foo]').toBeFocused())
+            expect('input[name=foo]').toBeFocused()
           })
-          )
 
           it('revalidates a fallback target', async function() {
             up.fragment.config.mainTargets = ['.target']
             up.render({ url: '/cached-path', cache: true, revalidate: true, fallback: true })
-
             await wait()
 
             expect('.target').toHaveText('cached text')
@@ -10010,18 +9963,16 @@ describe('up.fragment', function() {
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.target')
 
             jasmine.respondWithSelector('.target', {text: 'verified text'})
-
             await wait()
 
             expect(up.network.isBusy()).toBe(false)
-            return expect('.target').toHaveText('verified text')
+            expect('.target').toHaveText('verified text')
           })
 
           it('updates the original { failTarget } if the revalidation response has an error code', async function() {
             fixture('.fail-target', {text: 'old failure text'})
 
             up.render({ target: '.target', failTarget: '.fail-target', url: '/cached-path', cache: true, revalidate: true })
-
             await wait()
 
             expect('.target').toHaveText('cached text')
@@ -10030,24 +9981,23 @@ describe('up.fragment', function() {
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.target')
 
             jasmine.respondWithSelector('.fail-target', {text: 'new failure text', status: 500})
-
             await wait()
 
             expect(up.network.isBusy()).toBe(false)
             expect('.target').toHaveText('cached text')
-            return expect('.fail-target').toHaveText('new failure text')
+            expect('.fail-target').toHaveText('new failure text')
           })
 
           it('revalidates when a link in an overlay is loading cached content into a parent layer (bugfix)', async function() {
             expect('.target').toHaveText('initial text')
 
-            up.layer.open({ content: '<a href="/cached-path" up-target=".target" up-layer="root" up-revalidate="true" id="overlay-link">label</a>'})
-
+            up.layer.open({ content: `
+              <a href="/cached-path" up-target=".target" up-layer="root" up-revalidate="true" id="overlay-link">label</a>
+            `})
             await wait()
 
             const overlayLink = document.querySelector('#overlay-link')
             Trigger.clickSequence(overlayLink)
-
             await wait()
 
             expect('.target').toHaveText('cached text')
@@ -10056,11 +10006,10 @@ describe('up.fragment', function() {
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.target')
 
             jasmine.respondWithSelector('.target', {text: 'verified text'})
-
             await wait()
 
             expect(up.network.isBusy()).toBe(false)
-            return expect('.target').toHaveText('verified text')
+            expect('.target').toHaveText('verified text')
           })
 
           it('reloads the correct path when when rendering a relative URL, and does not use its own location as a new base', async function() {
@@ -10072,7 +10021,6 @@ describe('up.fragment', function() {
             up.history.replace('/sub1/')
 
             up.render('.target', { url: 'sub2/index.html', cache: true, revalidate: true, history: true })
-
             await wait()
 
             expect('.target').toHaveText('cached text')
@@ -10082,48 +10030,44 @@ describe('up.fragment', function() {
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.target')
             expect(jasmine.lastRequest().url).toMatchURL('/sub1/sub2/index.html')
             jasmine.respondWithSelector('.target', {text: 'verified text'})
-
             await wait()
 
             expect(up.network.isBusy()).toBe(false)
             expect('.target').toHaveText('verified text')
             expect(jasmine.lastRequest().url).toMatchURL('/sub1/sub2/index.html')
-
-            return expect(up.history.location).toMatchURL('/sub1/sub2/index.html')
+            expect(up.history.location).toMatchURL('/sub1/sub2/index.html')
           })
 
-          it('calls compilers with a third argument containing a { revalidating } property', asyncSpec(function(next) {
+          it('calls compilers with a third argument containing a { revalidating } property', async function() {
             const compiler = jasmine.createSpy('compiler')
             up.compiler('.target', compiler)
 
             expect(compiler.calls.count()).toBe(1)
 
             up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
+            await wait()
 
-            next(function() {
-              expect('.target').toHaveText('cached text')
-              expect(compiler.calls.count()).toBe(2)
+            expect('.target').toHaveText('cached text')
+            expect(compiler.calls.count()).toBe(2)
 
-              expect(up.network.isBusy()).toBe(true)
+            expect(up.network.isBusy()).toBe(true)
 
-              return jasmine.respondWithSelector('.target', {text: 'validated content'})
-            })
+            jasmine.respondWithSelector('.target', {text: 'validated content'})
+            await wait()
 
-            return next(function() {
-              expect('.target').toHaveText('validated content')
-
-              expect(compiler.calls.count()).toBe(3)
-              return expect(compiler.calls.mostRecent().args).toEqual([
-                jasmine.any(Element),
-                jasmine.any(Object),
-                jasmine.objectContaining({
-                  revalidating: true
-                })
-              ])})}))
+            expect('.target').toHaveText('validated content')
+            expect(compiler.calls.count()).toBe(3)
+            expect(compiler.calls.mostRecent().args).toEqual([
+              jasmine.any(Element),
+              jasmine.any(Object),
+              jasmine.objectContaining({
+                revalidating: true
+              })
+            ])
+          })
 
           it('resends ETag and Last-Modified since headers from the cached response', async function() {
             up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
-
             await wait()
 
             expect('.target').toHaveText('cached text')
@@ -10134,68 +10078,61 @@ describe('up.fragment', function() {
             expect(jasmine.lastRequest().requestHeaders['If-Modified-Since']).toBe('Wed, 21 Oct 2015 18:14:00 GMT')
 
             jasmine.respondWithSelector('.target', {text: 'verified text'})
-
             await wait()
 
             expect(up.network.isBusy()).toBe(false)
-            return expect('.target').toHaveText('verified text')
+            expect('.target').toHaveText('verified text')
           })
 
           describe('if revalidation responded with 304 Not Modified', function() {
 
-            it('does not call { onRendered } a second time', asyncSpec(function(next) {
+            it('does not call { onRendered } a second time', async function() {
               const onRendered = jasmine.createSpy('onRendered handler')
               up.render('.target', { url: '/cached-path', cache: true, revalidate: true, onRendered })
+              await wait()
 
-              next(function() {
-                expect(onRendered.calls.count()).toBe(1)
-                expect('.target').toHaveText('cached text')
+              expect(onRendered.calls.count()).toBe(1)
+              expect('.target').toHaveText('cached text')
 
-                expect(up.network.isBusy()).toBe(true)
-                return jasmine.respondWith({status: 304})
-              })
+              expect(up.network.isBusy()).toBe(true)
+              jasmine.respondWith({status: 304})
+              await wait()
 
-              return next(function() {
-                expect(up.network.isBusy()).toBe(false)
-                expect(onRendered.calls.count()).toBe(1)
-                return expect('.target').toHaveText('cached text')
-              })
+              expect(up.network.isBusy()).toBe(false)
+              expect(onRendered.calls.count()).toBe(1)
+              expect('.target').toHaveText('cached text')
             })
-            )
 
             it('fulfills up.render().finished promise with the cached up.RenderResult from the first render pass')
 
-            it('calls { onFinished } with the cached up.RenderResult from the first render pass', asyncSpec(function(next) {
+            it('calls { onFinished } with the cached up.RenderResult from the first render pass', async function() {
               const onFinished = jasmine.createSpy('onFinished handler')
               const onRendered = jasmine.createSpy('onRendered handler')
               up.render('.target', { url: '/cached-path', cache: true, revalidate: true, onRendered, onFinished })
+              await wait()
 
-              next(function() {
-                expect('.target').toHaveText('cached text')
-                expect(onRendered).toHaveBeenCalled()
+              expect('.target').toHaveText('cached text')
+              expect(onRendered).toHaveBeenCalled()
 
-                const renderedResult = onRendered.calls.argsFor(0)[0]
-                expect(renderedResult).toEqual(jasmine.any(up.RenderResult))
-                expect(renderedResult.none).toBe(false)
-                expect(renderedResult.fragment).toMatchSelector('.target')
+              const renderedResult = onRendered.calls.argsFor(0)[0]
+              expect(renderedResult).toEqual(jasmine.any(up.RenderResult))
+              expect(renderedResult.none).toBe(false)
+              expect(renderedResult.fragment).toMatchSelector('.target')
 
-                expect(up.network.isBusy()).toBe(true)
-                return jasmine.respondWith({status: 304})
-              })
+              expect(up.network.isBusy()).toBe(true)
+              jasmine.respondWith({status: 304})
+              await wait()
 
-              return next(function() {
-                expect('.target').toHaveText('cached text')
-                expect(onFinished).toHaveBeenCalled()
+              expect('.target').toHaveText('cached text')
+              expect(onFinished).toHaveBeenCalled()
 
-                const finishedResult = onFinished.calls.argsFor(0)[0]
-                expect(finishedResult).toEqual(jasmine.any(up.RenderResult))
-                expect(finishedResult.none).toBe(false)
-                return expect(finishedResult.fragment).toMatchSelector('.target')
-              })
+              const finishedResult = onFinished.calls.argsFor(0)[0]
+              expect(finishedResult).toEqual(jasmine.any(up.RenderResult))
+              expect(finishedResult.none).toBe(false)
+              expect(finishedResult.fragment).toMatchSelector('.target')
             })
-            )
 
-            return it('keeps the older cache entry that did have content', async function() {
+            it('keeps the older cache entry that did have content', async function() {
               const job1 = up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
 
               await job1
@@ -10234,10 +10171,9 @@ describe('up.fragment', function() {
 
               await expectAsync(job1.finished).toBeResolvedTo(jasmine.any(up.RenderResult))
               expect(up.network.isBusy()).toBe(false)
-              return expect('.target').toHaveText('cached text')
+              expect('.target').toHaveText('cached text')
             })
           })
-
 
           describe('if revalidation failed due to a network error', function() {
 
@@ -10257,7 +10193,7 @@ describe('up.fragment', function() {
 
               await expectAsync(job.finished).toBeRejectedWith(jasmine.any(up.Offline))
               expect(up.network.isBusy()).toBe(false)
-              return expect('.target').toHaveText('cached text')
+              expect('.target').toHaveText('cached text')
             })
 
             it('rejects up.render().finished promise if there also is an { onFinished } callback (bugfix)', async function() {
@@ -10279,7 +10215,7 @@ describe('up.fragment', function() {
               expect(up.network.isBusy()).toBe(false)
               expect('.target').toHaveText('cached text')
 
-              return expect(onFinished).not.toHaveBeenCalled()
+              expect(onFinished).not.toHaveBeenCalled()
             })
 
             it('logs to the error console and there also is an { onFinished } callback (bugfix)', async function() {
@@ -10302,7 +10238,7 @@ describe('up.fragment', function() {
               expect(up.network.isBusy()).toBe(false)
               expect('.target').toHaveText('cached text')
 
-              return expect(logErrorSpy.calls.mostRecent().args[1]).toMatch(/Cannot load request/i)
+              expect(logErrorSpy.calls.mostRecent().args[1]).toMatch(/Cannot load request/i)
             })
 
             // Cannot get this spec to work in both Chrome and Safari. See comment in up.RenderJob.
@@ -10318,7 +10254,7 @@ describe('up.fragment', function() {
               // Still revalidating
               expect(up.network.isBusy()).toBe(true)
 
-              return await jasmine.spyOnGlobalErrorsAsync(async function(globalErrorSpy) {
+              await jasmine.spyOnGlobalErrorsAsync(async function(globalErrorSpy) {
 
                 jasmine.lastRequest().responseError()
 
