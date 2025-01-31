@@ -7498,26 +7498,31 @@ describe('up.fragment', function() {
 
         beforeEach(function() {
           window.scriptTagExecuted = jasmine.createSpy('scriptTagExecuted')
-          return this.linkedScriptPath = `/spec/files/linked_script.js?cache-buster=${Math.random().toString()}`
+          this.linkedScriptPath = `/spec/files/linked_script.js?cache-buster=${Math.random().toString()}`
         })
 
-        afterEach(() => delete window.scriptTagExecuted)
+        afterEach(function() {
+          delete window.scriptTagExecuted
+        })
 
         describe('with up.fragment.config.runScripts = false', function() {
 
-          beforeEach(() => up.fragment.config.runScripts = false)
+          beforeEach(function() {
+            up.fragment.config.runScripts = false
+          })
 
           it('does not execute inline script tags from a fragment response', async function() {
             fixture('.target', {text: 'old text'})
 
-            up.render({fragment: `\
-<div class="target">
-  new text
-  <script type="text/javascript">
-    window.scriptTagExecuted()
-  </script>
-</div>\
-`
+            up.render({
+              fragment: `
+                <div class="target">
+                  new text
+                  <script type="text/javascript">
+                    window.scriptTagExecuted()
+                  </script>
+                </div>
+              `
             })
 
             await wait(200)
@@ -7525,20 +7530,21 @@ describe('up.fragment', function() {
             expect(window.scriptTagExecuted).not.toHaveBeenCalled()
             expect(document).toHaveSelector('.target')
             expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
-            return expect('.target').toHaveVisibleText('new text')
+            expect('.target').toHaveVisibleText('new text')
           })
 
           it('does not execute a script[type=module]', async function() {
             fixture('.target', {text: 'old text'})
 
-            up.render({fragment: `\
-<div class="target">
-  new text
-  <script type="module">
-    window.scriptTagExecuted()
-  </script>
-</div>\
-`
+            up.render({
+              fragment: `
+                <div class="target">
+                  new text
+                  <script type="module">
+                    window.scriptTagExecuted()
+                  </script>
+                </div>
+              `
             })
 
             await wait(200)
@@ -7546,64 +7552,66 @@ describe('up.fragment', function() {
             expect(window.scriptTagExecuted).not.toHaveBeenCalled()
             expect(document).toHaveSelector('.target')
             expect(document).not.toHaveSelector('.target script[type="module"]')
-            return expect('.target').toHaveVisibleText('new text')
+            expect('.target').toHaveVisibleText('new text')
           })
 
           it('does not execute inline script tags from a document response', async function() {
             fixture('.target', {text: 'old text'})
 
-            up.render('.target', { document: `\
-<html>
-  <body>
-    <div class="target">
-      new text
-      <script type="text/javascript">
-        window.scriptTagExecuted()
-      </script>
-    </div>
-  </body>
-</html>\
-`
-          }
-            )
+            up.render('.target', {
+              document: `
+                <html>
+                  <body>
+                    <div class="target">
+                      new text
+                      <script type="text/javascript">
+                        window.scriptTagExecuted()
+                      </script>
+                    </div>
+                  </body>
+                </html>
+              `
+            })
 
             await wait(200)
 
             expect(window.scriptTagExecuted).not.toHaveBeenCalled()
             expect(document).toHaveSelector('.target')
             expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
-            return expect('.target').toHaveVisibleText('new text')
+            expect('.target').toHaveVisibleText('new text')
           })
 
           it('does not execute inline script tags when opening a new overlay', async function() {
-            up.layer.open({fragment: `\
-<div class="target">
-  new text
-  <script type="text/javascript">
-    window.scriptTagExecuted()
-  </script>
-</div>\
-`
+            up.layer.open({
+              fragment: `
+                <div class="target">
+                  new text
+                  <script type="text/javascript">
+                    window.scriptTagExecuted()
+                  </script>
+                </div>
+              `
             })
 
             await wait(200)
 
             expect(window.scriptTagExecuted).not.toHaveBeenCalled()
             expect(up.layer.count).toBe(2)
-            return expect(up.layer.current).toHaveVisibleText('new text')
+            expect(up.layer.current).toHaveVisibleText('new text')
           })
 
           it('does not crash when the new fragment contains inline script tag that is followed by another sibling (bugfix)', async function() {
             fixture('.target')
-            up.render({fragment: `\
-<div class="target">
-  <div>before</div>
-  <script type="text/javascript">
-    window.scriptTagExecuted()
-  </script>
-  <div>after</div>
-</div>\
-`
+            up.render({
+              fragment: `
+                <div class="target">
+                  <div>before</div>
+                  <script type="text/javascript">
+                    window.scriptTagExecuted()
+                  </script>
+                  <div>after</div>
+                </div>
+              `
             })
 
             await wait(200)
@@ -7611,73 +7619,77 @@ describe('up.fragment', function() {
             expect(window.scriptTagExecuted).not.toHaveBeenCalled()
             expect(document).toHaveSelector('.target')
             expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
-            return expect('.target').toHaveVisibleText('before after')
+            expect('.target').toHaveVisibleText('before after')
           })
 
           it('does not execute linked scripts to prevent re-inclusion of javascript inserted before the closing body tag', async function() {
             fixture('.target')
-            up.render({fragment: `\
-<div class="target">
-  <script type="text/javascript" src="${this.linkedScriptPath}"></script>
-</div>\
-`
+            up.render({
+              fragment: `
+                <div class="target">
+                  <script type="text/javascript" src="${this.linkedScriptPath}"></script>
+                </div>
+              `
             })
 
-            await wait((1000))
+            await wait(1000)
 
             expect(window.scriptTagExecuted).not.toHaveBeenCalled()
             expect(document).toHaveSelector('.target')
-            return expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
+            expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
           })
 
-          return it('keeps script[type="application/ld+json"]', function() {
-            const json = `\
-{
-  "@context": "https://schema.org/",
-  "@type": "Recipe",
-  "name": "Party Coffee Cake",
-  "author": {
-    "@type": "Person",
-    "name": "Mary Stone"
-  },
-  "datePublished": "2018-03-10",
-  "description": "This coffee cake is awesome and perfect for parties.",
-  "prepTime": "PT20M"
-}\
-`
+          it('keeps script[type="application/ld+json"]', function() {
+            const json = `
+              {
+                "@context": "https://schema.org/",
+                "@type": "Recipe",
+                "name": "Party Coffee Cake",
+                "author": {
+                  "@type": "Person",
+                  "name": "Mary Stone"
+                },
+                "datePublished": "2018-03-10",
+                "description": "This coffee cake is awesome and perfect for parties.",
+                "prepTime": "PT20M"
+              }
+            `
 
             fixture('#target')
 
-            up.render({fragment: `\
-<div id="target">
-  <script type="application/ld+json">
-    ${json}
-  </script>
-</div>\
-`
+            up.render({
+              fragment: `
+                <div id="target">
+                  <script type="application/ld+json">
+                    ${json}
+                  </script>
+                </div>
+              `
             })
 
             expect(document.querySelector('#target')).toHaveSelector('script[type="application/ld+json"]')
-            return expect(document.querySelector('#target script[type="application/ld+json"]')).toHaveText(json)
+            expect(document.querySelector('#target script[type="application/ld+json"]')).toHaveText(json)
           })
         })
 
-
         describe('with up.fragment.config.runScripts = true (default)', function() {
 
-          beforeEach(() => up.fragment.config.runScripts = true)
+          beforeEach(function() {
+            up.fragment.config.runScripts = true
+          })
 
           it('executes inline script tags inside the updated fragment', async function() {
             fixture('.target', {text: 'old text'})
 
-            up.render({fragment: `\
-<div class="target">
-  new text
-  <script type="text/javascript">
-    window.scriptTagExecuted()
-  </script>
-</div>\
-`
+            up.render({
+              fragment: `
+                <div class="target">
+                  new text
+                  <script type="text/javascript">
+                    window.scriptTagExecuted()
+                  </script>
+                </div>
+              `
             })
 
             await wait(200)
@@ -7685,59 +7697,62 @@ describe('up.fragment', function() {
             expect(window.scriptTagExecuted).toHaveBeenCalled()
             expect(document).toHaveSelector('.target')
             expect(document).toHaveSelector('.target script[type="text/javascript"]')
-            return expect('.target').toHaveVisibleText(/new text/)
+            expect('.target').toHaveVisibleText(/new text/)
           })
 
           it('executes a script[type=module] inside the updated fragment', async function() {
             fixture('.target', {text: 'old text'})
 
-            up.render({fragment: `\
-<div class="target">
-  new text
-  <script type="module">
-    window.scriptTagExecuted()
-  </script>
-</div>\
-`
+            up.render({
+              fragment: `
+                <div class="target">
+                  new text
+                  <script type="module">
+                    window.scriptTagExecuted()
+                  </script>
+                </div>
+              `
             })
 
-            // Timing is delayed
             await wait(200)
 
             expect(window.scriptTagExecuted).toHaveBeenCalled()
             expect(document).toHaveSelector('.target')
             expect(document).toHaveSelector('.target script[type="module"]')
-            return expect('.target').toHaveVisibleText(/new text/)
+            expect('.target').toHaveVisibleText(/new text/)
           })
 
           it('executes inline script tags that are itself the target', async function() {
             fixture('script#target', {text: 'true'})
 
-            up.render({fragment: `\
-<script id="target">
-  window.scriptTagExecuted()
-</script>\
-`
+            up.render({
+              fragment: `
+                <script id="target">
+                  window.scriptTagExecuted()
+                </script>
+              `
             })
 
             await wait(200)
 
-            return expect(window.scriptTagExecuted).toHaveBeenCalled()
+            expect(window.scriptTagExecuted).toHaveBeenCalled()
           })
 
           it('does not execute inline script tags outside the updated fragment', async function() {
             fixture('.target', {text: 'old text'})
 
-            up.render({target: '.target', document: `\
-<div class="before">
-  <script type="text/javascript">
-    window.scriptTagExecuted()
-  </script>
-</div>
-<div class="target">
-  new text
-</div>\
-`
+            up.render({
+              target: '.target',
+              document: `
+                <div class="before">
+                  <script type="text/javascript">
+                    window.scriptTagExecuted()
+                  </script>
+                </div>
+                <div class="target">
+                  new text
+                </div>
+              `
             })
 
             await wait(200)
@@ -7745,124 +7760,117 @@ describe('up.fragment', function() {
             expect(window.scriptTagExecuted).not.toHaveBeenCalled()
             expect(document).toHaveSelector('.target')
             expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
-            return expect('.target').toHaveVisibleText('new text')
+            expect('.target').toHaveVisibleText('new text')
           })
 
-          return it('executes linked scripts', async function() {
+          it('executes linked scripts', async function() {
             fixture('.target')
-            up.render({fragment: `\
-<div class="target">
-  <script type="text/javascript" src="${this.linkedScriptPath}"></script>
-</div>\
-`
+            up.render({
+              fragment: `
+                <div class="target">
+                  <script type="text/javascript" src="${this.linkedScriptPath}"></script>
+                </div>
+              `
             })
 
             await wait(1000)
 
             expect(window.scriptTagExecuted).toHaveBeenCalled()
             expect(document).toHaveSelector('.target')
-            return expect(document).toHaveSelector('.target script')
+            expect(document).toHaveSelector('.target script')
           })
         })
 
-        return describe('<noscript> tags', function() {
+        describe('<noscript> tags', function() {
 
-          it('parses <noscript> contents as text, not DOM nodes (since it will be placed in a scripting-capable browser)', asyncSpec(async function(next) {
+          it('parses <noscript> contents as text, not DOM nodes (since it will be placed in a scripting-capable browser)', async function() {
             fixture('.target')
             up.render('.target', {url: '/path'})
 
             await wait()
 
-            jasmine.respondWith(`\
-<div class="target">
-  <noscript>
-    <img src="foo.png">
-  </noscript>
-</div>\
-`
-            )
+            jasmine.respondWith(`
+              <div class="target">
+                <noscript>
+                  <img src="foo.png">
+                </noscript>
+              </div>
+            `)
 
             await wait()
 
             const noscript = document.querySelector('.target noscript')
-            return expect(noscript).toHaveText('<img src="foo.png">')
+            expect(noscript).toHaveText('<img src="foo.png">')
           })
-          )
 
-          it('parses <noscript> contents as text, not DOM nodes when the <noscript> itself is the target', asyncSpec(async function(next) {
+          it('parses <noscript> contents as text, not DOM nodes when the <noscript> itself is the target', async function() {
             fixture('noscript#target')
             up.render('#target', {url: '/path'})
 
             await wait()
 
-            jasmine.respondWith(`\
-<div>
-  <noscript id='target'>
-    <img src="foo.png">
-  </noscript>
-</div>\
-`
-            )
+            jasmine.respondWith(`
+              <div>
+                <noscript id='target'>
+                  <img src="foo.png">
+                </noscript>
+              </div>
+            `)
 
             await wait()
 
             const noscript = document.querySelector('#target')
-            return expect(noscript).toHaveText('<img src="foo.png">')
+            expect(noscript).toHaveText('<img src="foo.png">')
           })
-          )
 
-          it('parses <noscript> contents with multiple lines as text, not DOM nodes', asyncSpec(function(next) {
+          it('parses <noscript> contents with multiple lines as text, not DOM nodes', async function() {
             fixture('.target')
             up.render('.target', {url: '/path'})
 
-            next(() => {
-              return this.respondWith(`\
-<div class="target">
-  <noscript>
-    <img src="foo.png">
-    <img src="bar.png">
-  </noscript>
-</div>\
-`
-              )
-            })
+            await wait()
 
-            return next(() => {
-              const $noscript = $('.target noscript')
-              const text = $noscript.text().trim()
-              return expect(text).toMatch(/<img src="foo\.png">\s+<img src="bar\.png">/)
-            })
+            jasmine.respondWith(`
+              <div class="target">
+                <noscript>
+                  <img src="foo.png">
+                  <img src="bar.png">
+                </noscript>
+              </div>
+            `)
+
+            await wait()
+
+            const $noscript = $('.target noscript')
+            const text = $noscript.text().trim()
+            expect(text).toMatch(/<img src="foo\.png">\s+<img src="bar\.png">/)
           })
-          )
 
-          return it('parses multiple <noscript> tags in the same fragment as text, not DOM nodes', asyncSpec(function(next) {
+          it('parses multiple <noscript> tags in the same fragment as text, not DOM nodes', async function() {
             fixture('.target')
             up.render('.target', {url: '/path'})
 
-            next(() => {
-              return this.respondWith(`\
-<div class="target">
-  <noscript>
-    <img src="foo.png">
-  </noscript>
-  <noscript>
-    <img src="bar.png">
-  </noscript>
-</div>\
-`
-              )
-            })
+            await wait()
 
-            return next(() => {
-              const $noscripts = $('.target noscript')
-              expect($noscripts.length).toBe(2)
-              const text0 = $noscripts[0].textContent.trim()
-              const text1 = $noscripts[1].textContent.trim()
-              expect(text0).toEqual('<img src="foo.png">')
-              return expect(text1).toEqual('<img src="bar.png">')
-            })
+            jasmine.respondWith(`
+              <div class="target">
+                <noscript>
+                  <img src="foo.png">
+                </noscript>
+                <noscript>
+                  <img src="bar.png">
+                </noscript>
+              </div>
+            `)
+
+            await wait()
+
+            const $noscripts = $('.target noscript')
+            expect($noscripts.length).toBe(2)
+            const text0 = $noscripts[0].textContent.trim()
+            const text1 = $noscripts[1].textContent.trim()
+            expect(text0).toEqual('<img src="foo.png">')
+            expect(text1).toEqual('<img src="bar.png">')
           })
-          )
         })
       })
 
