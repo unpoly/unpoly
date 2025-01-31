@@ -46,7 +46,9 @@ module.exports = {
       "globals": {
         "jasmine": "writable",
         "describe": "readonly",
+        "xdescribe": "readonly",
         "it": "readonly",
+        "xit": "readonly",
         "expect": "readonly",
         "expectAsync": "readonly",
         "beforeEach": "readonly",
@@ -68,6 +70,8 @@ module.exports = {
         "promiseState": "readonly",
         "raceThenables": "readonly",
         "allowGlobalErrors": "readonly",
+        "fixtureInOverlay": "readonly",
+        "describeFallback": "readonly",
       },
       "rules": {
         "@typescript-eslint/no-unused-vars": "off"
