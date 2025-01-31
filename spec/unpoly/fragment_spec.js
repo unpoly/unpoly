@@ -3541,7 +3541,7 @@ describe('up.fragment', function() {
             await wait()
 
             elements = document.querySelectorAll('.element')
-            expect(elements.length).toBe 4
+            expect(elements.length).toBe(4)
 
             // While #root is an ancestor, two was closer
             expect(elements[0]).toMatchSelector('#root')
@@ -7874,24 +7874,22 @@ describe('up.fragment', function() {
         })
       })
 
-      describe('media elements', () => // https://github.com/unpoly/unpoly/issues/432
-      it(
-        'inserts an auto-playing <video> element (bugfix for Safari)',
-        function(done) {
+      describe('media elements', function() {
+        // https://github.com/unpoly/unpoly/issues/432
+        it('inserts an auto-playing <video> element (bugfix for Safari)', function(done) {
           fixture('#target')
 
           // Must render from a { url } or { document } so DOMParser is involved.
           up.render('#target', {url: '/video'})
 
           return u.task(function() {
-            jasmine.respondWith(`\
-<div id='target'>
-  <video width="400" controls loop muted autoplay>
-    <source src="/spec/files/video.mp4" type="video/mp4">
-  </video>
-</div>\
-`
-            )
+            jasmine.respondWith(`
+                <div id='target'>
+                  <video width="400" controls loop muted autoplay>
+                    <source src="/spec/files/video.mp4" type="video/mp4">
+                  </video>
+                </div>
+            `)
 
             return u.task(function() {
               const video = document.querySelector('#target video')
@@ -7900,12 +7898,15 @@ describe('up.fragment', function() {
               return video.addEventListener('timeupdate', specDone, { once: true })
             })
           })
-        }
-      ))
+        })
+      })
+
 
       describe('CSP nonces', function() {
 
-        beforeEach(() => up.script.config.nonceableAttributes.push('callback'))
+        beforeEach(function() {
+          up.script.config.nonceableAttributes.push('callback')
+        })
 
         it("rewrites nonceable callbacks to use the current page's nonce", async function() {
           spyOn(up.protocol, 'cspNonce').and.returnValue('secret1')
@@ -7915,14 +7916,16 @@ describe('up.fragment', function() {
           await wait()
 
           jasmine.respondWith({
-            responseText: '<div class="target" callback="nonce-secret2 alert()">new text</div>',
+            responseText: `
+              <div class="target" callback="nonce-secret2 alert()">new text</div>
+            `,
             responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'"}
           })
 
           await wait()
 
           expect('.target').toHaveText('new text')
-          return expect('.target').toHaveAttribute('callback', "nonce-secret1 alert()")
+          expect('.target').toHaveAttribute('callback', "nonce-secret1 alert()")
         })
 
         it("rewrites nonceable callbacks to use the current page's nonce with Content-Security-Policy-Report-Only header", async function() {
@@ -7933,14 +7936,16 @@ describe('up.fragment', function() {
           await wait()
 
           jasmine.respondWith({
-            responseText: '<div class="target" callback="nonce-secret2 alert()">new text</div>',
+            responseText: `
+              <div class="target" callback="nonce-secret2 alert()">new text</div>
+            `,
             responseHeaders: { 'Content-Security-Policy-Report-Only': "script-src: 'nonce-secret2'"}
           })
 
           await wait()
 
           expect('.target').toHaveText('new text')
-          return expect('.target').toHaveAttribute('callback', "nonce-secret1 alert()")
+          expect('.target').toHaveAttribute('callback', "nonce-secret1 alert()")
         })
 
         it("rewrites nonceable callbacks to use the current page's nonce when opening a new overlay (bugfix)", async function() {
@@ -7950,7 +7955,9 @@ describe('up.fragment', function() {
           await wait()
 
           jasmine.respondWith({
-            responseText: '<div class="target" callback="nonce-secret2 alert()">new text</div>',
+            responseText: `
+              <div class="target" callback="nonce-secret2 alert()">new text</div>
+            `,
             responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'"}
           })
 
@@ -7959,7 +7966,7 @@ describe('up.fragment', function() {
           expect(up.layer.isOverlay()).toBe(true)
 
           expect('.target').toHaveText('new text')
-          return expect('.target').toHaveAttribute('callback', "nonce-secret1 alert()")
+          expect('.target').toHaveAttribute('callback', "nonce-secret1 alert()")
         })
 
         it("ensures nonced callbacks still match the current page's nonce after a render pass that updates history (meta tags are part of history state) (bugfix)", async function() {
@@ -7975,18 +7982,18 @@ describe('up.fragment', function() {
 
           jasmine.respondWith({
             responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'"},
-            responseText: `\
-<html>
-  <head>
-    <meta id="test-nonce" name="csp-nonce" content="nonce-secret2">
-  </head>
-  <body>
-    <div class="target">
-      new text
-    </div>
-  </body>
-</html>\
-`
+            responseText: `
+              <html>
+                <head>
+                  <meta id="test-nonce" name="csp-nonce" content="nonce-secret2">
+                </head>
+                <body>
+                  <div class="target">
+                    new text
+                  </div>
+                </body>
+              </html>
+            `
           })
 
           await wait()
@@ -7995,76 +8002,88 @@ describe('up.fragment', function() {
           expect(element.getAttribute('callback')).toBe(`${currentPageNonce} alert()`)
 
           // clean up
-          return document.querySelector('meta#test-nonce').remove()
+          document.querySelector('meta#test-nonce').remove()
         })
 
-        it("rewrites a callback's nonce it the nonce matches one of multiple script-src nonces in its own response", asyncSpec(function(next) {
+        it("rewrites a callback's nonce it the nonce matches one of multiple script-src nonces in its own response", async function() {
           spyOn(up.protocol, 'cspNonce').and.returnValue('secret1')
           fixture('.target')
           up.render('.target', {url: '/path'})
 
-          next(() => jasmine.respondWith({
-            responseText: '<div class="target" callback="nonce-secret3 alert()">new text</div>',
+          await wait()
+
+          jasmine.respondWith({
+            responseText: `
+              <div class="target" callback="nonce-secret3 alert()">new text</div>
+            `,
             responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2' 'self' 'nonce-secret3'"}
-          }))
-
-          return next(function() {
-            expect('.target').toHaveText('new text')
-            return expect('.target').toHaveAttribute('callback', "nonce-secret1 alert()")
           })
-        })
-        )
 
-        it("does not rewrite a callback's nonce it the nonce does not match a script-src nonce in its own response", asyncSpec(function(next) {
+          await wait()
+
+          expect('.target').toHaveText('new text')
+          expect('.target').toHaveAttribute('callback', "nonce-secret1 alert()")
+        })
+
+        it("does not rewrite a callback's nonce it the nonce does not match a script-src nonce in its own response", async function() {
           spyOn(up.protocol, 'cspNonce').and.returnValue('secret1')
           fixture('.target')
           up.render('.target', {url: '/path'})
 
-          next(() => jasmine.respondWith({
-            responseText: '<div class="target" callback="nonce-wrong alert()">new text</div>',
+          await wait()
+
+          jasmine.respondWith({
+            responseText: `
+              <div class="target" callback="nonce-wrong alert()">new text</div>
+            `,
             responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'"}
-          }))
-
-          return next(function() {
-            expect('.target').toHaveText('new text')
-            return expect('.target').toHaveAttribute('callback', "nonce-wrong alert()")
           })
-        })
-        )
 
-        it("does not rewrite a callback's nonce it the nonce only matches a style-src nonce in its own response", asyncSpec(function(next) {
+          await wait()
+
+          expect('.target').toHaveText('new text')
+          expect('.target').toHaveAttribute('callback', "nonce-wrong alert()")
+        })
+
+        it("does not rewrite a callback's nonce it the nonce only matches a style-src nonce in its own response", async function() {
           spyOn(up.protocol, 'cspNonce').and.returnValue('secret1')
           fixture('.target')
           up.render('.target', {url: '/path'})
 
-          next(() => jasmine.respondWith({
-            responseText: '<div class="target" callback="nonce-secret2 alert()">new text</div>',
+          await wait()
+
+          jasmine.respondWith({
+            responseText: `
+              <div class="target" callback="nonce-secret2 alert()">new text</div>
+            `,
             responseHeaders: { 'Content-Security-Policy': "style-src: 'nonce-secret2'"}
-          }))
-
-          return next(function() {
-            expect('.target').toHaveText('new text')
-            return expect('.target').toHaveAttribute('callback', "nonce-secret2 alert()")
           })
-        })
-        )
 
-        return it("does not rewrite a callback's nonce it the curent page's nonce is unknown", asyncSpec(function(next) {
+          await wait()
+
+          expect('.target').toHaveText('new text')
+          expect('.target').toHaveAttribute('callback', "nonce-secret2 alert()")
+        })
+
+        it("does not rewrite a callback's nonce it the curent page's nonce is unknown", async function() {
           spyOn(up.protocol, 'cspNonce').and.returnValue(null)
           fixture('.target')
           up.render('.target', {url: '/path'})
 
-          next(() => jasmine.respondWith({
-            responseText: '<div class="target" callback="nonce-secret2 alert()">new text</div>',
-            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'"}
-          }))
+          await wait()
 
-          return next(function() {
-            expect('.target').toHaveText('new text')
-            return expect('.target').toHaveAttribute('callback', "nonce-secret2 alert()")
+          jasmine.respondWith({
+            responseText: `
+              <div class="target" callback="nonce-secret2 alert()">new text</div>
+            `,
+            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'"}
           })
+
+          await wait()
+
+          expect('.target').toHaveText('new text')
+          expect('.target').toHaveAttribute('callback', "nonce-secret2 alert()")
         })
-        )
       })
 
       describe('destruction of old element', function() {
