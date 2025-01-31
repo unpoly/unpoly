@@ -3743,260 +3743,224 @@ describe('up.fragment', function() {
 
         describe('non-standard selector extensions', function() {
 
-          describe(':has()', () => it('matches elements with a given descendant', async function() {
-            const $first = $fixture('.boxx#first')
-            const $firstChild = $('<span class="first-child">old first</span>').appendTo($first)
-            const $second = $fixture('.boxx#second')
-            const $secondChild = $('<span class="second-child">old second</span>').appendTo($second)
+          describe(':has()', function() {
+            it('matches elements with a given descendant', async function() {
+              const $first = $fixture('.boxx#first')
+              const $firstChild = $('<span class="first-child">old first</span>').appendTo($first)
+              const $second = $fixture('.boxx#second')
+              const $secondChild = $('<span class="second-child">old second</span>').appendTo($second)
 
-            up.navigate('.boxx:has(.second-child)', {url: '/path'})
+              up.navigate('.boxx:has(.second-child)', {url: '/path'})
 
-            await wait()
+              await wait()
 
-            jasmine.respondWith(`\
-<div class="boxx" id="first">
-<span class="first-child">new first</span>
-</div>
-<div class="boxx" id="second">
-<span class="second-child">new second</span>
-</div>\
-`
-            )
+              jasmine.respondWith(`
+                <div class="boxx" id="first">
+                  <span class="first-child">new first</span>
+                </div>
+                <div class="boxx" id="second">
+                  <span class="second-child">new second</span>
+                </div>
+              `)
 
-            await wait()
+              await wait()
 
-            expect('#first span').toHaveText('old first')
-            return expect('#second span').toHaveText('new second')
-          }))
-
-          describe(':layer', () => it('matches the first swappable element in a layer', asyncSpec(function(next) {
-            up.render(':layer', {url: '/path'})
-
-            return next(() => {
-              return expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('body')
+              expect('#first span').toHaveText('old first')
+              expect('#second span').toHaveText('new second')
             })
           })
-          ))
 
-          describe(':main', () => it('matches a main selector in a layer', asyncSpec(function(next) {
-            const main = fixture('.main-element')
-            up.layer.config.root.mainTargets = ['.main-element']
-            up.render(':main', {url: '/path'})
+          describe(':layer', function() {
+            it('matches the first swappable element in a layer', async function() {
+              up.render(':layer', {url: '/path'})
 
-            return next(() => {
-              return expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.main-element')
+              await wait()
+
+              expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('body')
             })
           })
-          ))
 
-          return describe(':none', () => it('contacts the server but does not update any fragment', asyncSpec(function(next) {
-            fixture('.one', {text: 'old one'})
-            fixture('.two', {text: 'old two'})
+          describe(':main', function() {
+            it('matches a main selector in a layer', async function() {
+              const main = fixture('.main-element')
+              up.layer.config.root.mainTargets = ['.main-element']
+              up.render(':main', {url: '/path'})
 
-            const promise = up.render({target: ':none', url: '/path'})
+              await wait()
 
-            next(() => {
+              expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.main-element')
+            })
+          })
+
+          describe(':none', function() {
+            it('contacts the server but does not update any fragment', async function() {
+              fixture('.one', {text: 'old one'})
+              fixture('.two', {text: 'old two'})
+
+              const promise = up.render({target: ':none', url: '/path'})
+
+              await wait()
+
               expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual(':none')
-              return this.respondWith({responseText: '', contentType: 'text/plain'})
-            })
+              this.respondWith({responseText: '', contentType: 'text/plain'})
 
-            next(function() {
+              await wait()
+
               expect('.one').toHaveText('old one')
               expect('.two').toHaveText('old two')
 
-              return next.await(promiseState(promise))
+              const result = await promiseState(promise)
+              expect(result.state).toBe('fulfilled')
             })
-
-            return next(result => expect(result.state).toBe('fulfilled'))
           })
-          ))
         })
 
         describe('merging of nested selectors', function() {
 
-          it('replaces a single fragment if a selector contains a subsequent selector in the current page', asyncSpec(function(next) {
+          it('replaces a single fragment if a selector contains a subsequent selector in the current page', async function() {
             const $outer = $fixture('.outer').text('old outer text')
             const $inner = $outer.affix('.inner').text('old inner text')
 
             const replacePromise = up.render('.outer, .inner', {url: '/path'})
 
-            next(() => {
-              expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
+            expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
 
-              return this.respondWith(`\
-<div class="outer">
-  new outer text
-  <div class="inner">
-    new inner text
-  </div>
-</div>\
-`
-              )
-            })
+            this.respondWith(`
+              <div class="outer">
+                new outer text
+                <div class="inner">
+                  new inner text
+                </div>
+              </div>
+            `)
+            await wait()
 
-            next(() => {
-              expect('.outer').toBeAttached()
-              expect($('.outer').text()).toContain('new outer text')
-              expect('.inner').toBeAttached()
-              return expect($('.inner').text()).toContain('new inner text')
-            })
+            expect('.outer').toBeAttached()
+            expect($('.outer').text()).toContain('new outer text')
+            expect('.inner').toBeAttached()
+            expect($('.inner').text()).toContain('new inner text')
 
-            return next.await(() => {
-              const promise = promiseState(replacePromise)
-              return promise.then(result => expect(result.state).toEqual('fulfilled'))
-            })
+            const promise = promiseState(replacePromise)
+            const result = await promise
+            expect(result.state).toEqual('fulfilled')
           })
-          )
 
-          it('replaces a single fragment if a selector is contained by a subsequent selector in the current page', asyncSpec(function(next) {
+          it('replaces a single fragment if a selector is contained by a subsequent selector in the current page', async function() {
             const $outer = $fixture('.outer').text('old outer text')
             const $inner = $outer.affix('.inner').text('old inner text')
 
             const replacePromise = up.render('.inner, .outer', {url: '/path'})
 
-            next(() => {
-              expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
+            expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
 
-              return this.respondWith(`\
-<div class="outer">
-  new outer text
-  <div class="inner">
-    new inner text
-  </div>
-</div>\
-`
-              )
-            })
+            this.respondWith(`
+              <div class="outer">
+                new outer text
+                <div class="inner">
+                  new inner text
+                </div>
+              </div>
+            `)
+            await wait()
 
-            next(() => {
-              expect('.outer').toBeAttached()
-              expect($('.outer').text()).toContain('new outer text')
-              expect('.inner').toBeAttached()
-              return expect($('.inner').text()).toContain('new inner text')
-            })
+            expect('.outer').toBeAttached()
+            expect($('.outer').text()).toContain('new outer text')
+            expect('.inner').toBeAttached()
+            expect($('.inner').text()).toContain('new inner text')
 
-            return next.await(() => {
-              const promise = promiseState(replacePromise)
-              return promise.then(result => expect(result.state).toEqual('fulfilled'))
-            })
+            const promise = promiseState(replacePromise)
+            const result = await promise
+            expect(result.state).toEqual('fulfilled')
           })
-          )
 
-          it('does not merge selectors if a selector contains a subsequent selector, but prepends instead of replacing', asyncSpec(function(next) {
+          it('does not merge selectors if a selector contains a subsequent selector, but prepends instead of replacing', async function() {
             const $outer = $fixture('.outer').text('old outer text')
             const $inner = $outer.affix('.inner').text('old inner text')
 
             const replacePromise = up.render('.outer:before, .inner', {url: '/path'})
 
-            next(() => {
-              // Placement pseudo-selectors are removed from X-Up-Target
-              expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer, .inner')
+            // Placement pseudo-selectors are removed from X-Up-Target
+            expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer, .inner')
 
-              return this.respondWith(`\
-<div class="outer">
-  new outer text
-  <div class="inner">
-    new inner text
-  </div>
-</div>\
-`
-              )
-            })
+            this.respondWith(`
+              <div class="outer">
+                new outer text
+                <div class="inner">
+                  new inner text
+                </div>
+              </div>
+            `)
+            await wait()
 
-            next(() => {
-              expect('.outer').toBeAttached()
-              expect($('.outer').text()).toContain('new outer text')
-              expect($('.outer').text()).toContain('old outer text')
-              expect('.inner').toBeAttached()
-              return expect($('.inner').text()).toContain('new inner text')
-            })
+            expect('.outer').toBeAttached()
+            expect($('.outer').text()).toContain('new outer text')
+            expect($('.outer').text()).toContain('old outer text')
+            expect('.inner').toBeAttached()
+            expect($('.inner').text()).toContain('new inner text')
 
-            return next.await(() => {
-              const promise = promiseState(replacePromise)
-              return promise.then(result => expect(result.state).toEqual('fulfilled'))
-            })
+            const promise = promiseState(replacePromise)
+            const result = await promise
+            expect(result.state).toEqual('fulfilled')
           })
-          )
 
-          it('does not merge selectors if a selector contains a subsequent selector, but appends instead of replacing', asyncSpec(function(next) {
+          it('does not merge selectors if a selector contains a subsequent selector, but appends instead of replacing', async function() {
             const $outer = $fixture('.outer').text('old outer text')
             const $inner = $outer.affix('.inner').text('old inner text')
 
             const replacePromise = up.render('.outer:after, .inner', {url: '/path'})
 
-            next(() => {
-              expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer, .inner')
+            expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer, .inner')
 
-              return this.respondWith(`\
-<div class="outer">
-  new outer text
-  <div class="inner">
-    new inner text
-  </div>
-</div>\
-`
-              )
-            })
+            this.respondWith(`
+              <div class="outer">
+                new outer text
+                <div class="inner">
+                  new inner text
+                </div>
+              </div>
+            `)
+            await wait()
 
-            next(() => {
-              expect('.outer').toBeAttached()
-              expect($('.outer').text()).toContain('old outer text')
-              expect($('.outer').text()).toContain('new outer text')
-              expect('.inner').toBeAttached()
-              return expect($('.inner').text()).toContain('new inner text')
-            })
+            expect('.outer').toBeAttached()
+            expect($('.outer').text()).toContain('old outer text')
+            expect($('.outer').text()).toContain('new outer text')
+            expect('.inner').toBeAttached()
+            expect($('.inner').text()).toContain('new inner text')
 
-            return next.await(() => {
-              const promise = promiseState(replacePromise)
-              return promise.then(result => expect(result.state).toEqual('fulfilled'))
-            })
+            const promise = promiseState(replacePromise)
+            const result = await promise
+            expect(result.state).toEqual('fulfilled')
           })
-          )
 
-  //          it 'does not lose selector pseudo-classes when merging selectors (bugfix)', asyncSpec (next) ->
-  //            $outer = $fixture('.outer').text('old outer text')
-  //            $inner = $outer.affix('.inner').text('old inner text')
-  //
-  //            replacePromise = up.render('.outer:after, .inner', url: '/path')
-  //
-  //            next =>
-  //              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer:after, .inner')
-
-          it('replaces a single fragment if a selector contains a previous selector in the current page', asyncSpec(function(next) {
+          it('replaces a single fragment if a selector contains a previous selector in the current page', async function() {
             const $outer = $fixture('.outer').text('old outer text')
             const $inner = $outer.affix('.inner').text('old inner text')
 
             const replacePromise = up.render('.outer, .inner', {url: '/path'})
 
-            next(() => {
-              expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
+            expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
 
-              return this.respondWith(`\
-<div class="outer">
-  new outer text
-  <div class="inner">
-    new inner text
-  </div>
-</div>\
-`
-              )
-            })
+            this.respondWith(`
+              <div class="outer">
+                new outer text
+                <div class="inner">
+                  new inner text
+                </div>
+              </div>
+            `)
+            await wait()
 
-            next(() => {
-              expect('.outer').toBeAttached()
-              expect($('.outer').text()).toContain('new outer text')
-              expect('.inner').toBeAttached()
-              return expect($('.inner').text()).toContain('new inner text')
-            })
+            expect('.outer').toBeAttached()
+            expect($('.outer').text()).toContain('new outer text')
+            expect('.inner').toBeAttached()
+            expect($('.inner').text()).toContain('new inner text')
 
-            return next.await(() => {
-              const promise = promiseState(replacePromise)
-              return promise.then(result => expect(result.state).toEqual('fulfilled'))
-            })
+            const promise = promiseState(replacePromise)
+            const result = await promise
+            expect(result.state).toEqual('fulfilled')
           })
-          )
 
-          it('does not lose a { scroll } option if the first selector was merged into a subsequent selector', asyncSpec(function(next) {
+          it('does not lose a { scroll } option if the first selector was merged into a subsequent selector', async function() {
             const revealStub = up.reveal.mock().and.returnValue(Promise.resolve())
 
             const $outer = $fixture('.outer').text('old outer text')
@@ -4004,216 +3968,175 @@ describe('up.fragment', function() {
 
             up.render('.inner, .outer', {url: '/path', scroll: '.revealee'})
 
-            next(() => {
-              expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
+            expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
 
-              return this.respondWith(`\
-<div class="outer">
-  new outer text
-  <div class="inner">
-    new inner text
-    <div class="revealee">
-      revealee text
-    </div>
-  </div>
-</div>\
-`
-              )
-            })
+            this.respondWith(`
+              <div class="outer">
+                new outer text
+                <div class="inner">
+                  new inner text
+                  <div class="revealee">
+                    revealee text
+                  </div>
+                </div>
+              </div>
+            `)
+            await wait()
 
-            return next(() => {
-              expect('.outer').toBeAttached()
-              expect($('.outer').text()).toContain('new outer text')
-              expect('.inner').toBeAttached()
-              expect($('.inner').text()).toContain('new inner text')
+            expect('.outer').toBeAttached()
+            expect($('.outer').text()).toContain('new outer text')
+            expect('.inner').toBeAttached()
+            expect($('.inner').text()).toContain('new inner text')
 
-              expect(revealStub).toHaveBeenCalled()
-              const revealArg = revealStub.calls.mostRecent().args[0]
-              return expect(revealArg).toMatchSelector('.revealee')
-            })
+            expect(revealStub).toHaveBeenCalled()
+            const revealArg = revealStub.calls.mostRecent().args[0]
+            expect(revealArg).toMatchSelector('.revealee')
           })
-          )
 
-          it('replaces a single fragment if the nesting differs in current page and response', asyncSpec(function(next) {
+          it('replaces a single fragment if the nesting differs in current page and response', async function() {
             const $outer = $fixture('.outer').text('old outer text')
             const $inner = $outer.affix('.inner').text('old inner text')
 
             const replacePromise = up.render('.outer, .inner', {url: '/path'})
 
-            next(() => {
-              return this.respondWith(`\
-<div class="inner">
-  new inner text
-  <div class="outer">
-    new outer text
-  </div>
-</div>\
-`
-              )
-            })
+            this.respondWith(`
+              <div class="inner">
+                new inner text
+                <div class="outer">
+                  new outer text
+                </div>
+              </div>
+            `)
+            await wait()
 
-            next(() => {
-              expect('.outer').toBeAttached()
-              expect($('.outer').text()).toContain('new outer text')
-              return expect('.inner').not.toBeAttached()
-            })
+            expect('.outer').toBeAttached()
+            expect($('.outer').text()).toContain('new outer text')
+            expect('.inner').not.toBeAttached()
 
-            return next.await(() => {
-              const promise = promiseState(replacePromise)
-              return promise.then(result => expect(result.state).toEqual('fulfilled'))
-            })
+            const promise = promiseState(replacePromise)
+            const result = await promise
+            expect(result.state).toEqual('fulfilled')
           })
-          )
 
-          it('does not crash if two selectors that are siblings in the current page are nested in the response', asyncSpec(function(next) {
+          it('does not crash if two selectors that are siblings in the current page are nested in the response', async function() {
             const $outer = $fixture('.one').text('old one text')
             const $inner = $fixture('.two').text('old two text')
 
             const replacePromise = up.render('.one, .two', {url: '/path'})
 
-            next(() => {
-              return this.respondWith(`\
-<div class="one">
-  new one text
-  <div class="two">
-    new two text
-  </div>
-</div>\
-`
-              )
-            })
+            this.respondWith(`
+              <div class="one">
+                new one text
+                <div class="two">
+                  new two text
+                </div>
+              </div>
+            `)
+            await wait()
 
-            next(() => {
-              expect('.one').toBeAttached()
-              expect($('.one').text()).toContain('new one text')
-              expect('.two').toBeAttached()
-              return expect($('.two').text()).toContain('new two text')
-            })
+            expect('.one').toBeAttached()
+            expect($('.one').text()).toContain('new one text')
+            expect('.two').toBeAttached()
+            expect($('.two').text()).toContain('new two text')
 
-            return next.await(() => {
-              const promise = promiseState(replacePromise)
-              return promise.then(result => expect(result.state).toEqual('fulfilled'))
-            })
+            const promise = promiseState(replacePromise)
+            const result = await promise
+            expect(result.state).toEqual('fulfilled')
           })
-          )
 
-          it('does not crash if selectors that siblings in the current page are inversely nested in the response', asyncSpec(function(next) {
+          it('does not crash if selectors that siblings in the current page are inversely nested in the response', async function() {
             const $outer = $fixture('.one').text('old one text')
             const $inner = $fixture('.two').text('old two text')
 
             const replacePromise = up.render('.one, .two', {url: '/path'})
 
-            next(() => {
-              return this.respondWith(`\
-<div class="two">
-  new two text
-  <div class="one">
-    new one text
-  </div>
-</div>\
-`
-              )
-            })
+            this.respondWith(`
+              <div class="two">
+                new two text
+                <div class="one">
+                  new one text
+                </div>
+              </div>
+            `)
+            await wait()
 
-            next(() => {
-              expect('.one').toBeAttached()
-              expect($('.one').text()).toContain('new one text')
-              expect('.two').toBeAttached()
-              return expect($('.two').text()).toContain('new two text')
-            })
+            expect('.one').toBeAttached()
+            expect($('.one').text()).toContain('new one text')
+            expect('.two').toBeAttached()
+            expect($('.two').text()).toContain('new two text')
 
-            return next.await(() => {
-              const promise = promiseState(replacePromise)
-              return promise.then(result => expect(result.state).toEqual('fulfilled'))
-            })
+            const promise = promiseState(replacePromise)
+            const result = await promise
+            expect(result.state).toEqual('fulfilled')
           })
-          )
 
-          it('updates the first selector if the same element is targeted twice in a single replacement', asyncSpec(function(next) {
+          it('updates the first selector if the same element is targeted twice in a single replacement', async function() {
             const $one = $fixture('.one.alias').text('old one text')
 
             const replacePromise = up.render('.one, .alias', {url: '/path'})
 
-            next(() => {
-              expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.one')
+            expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.one')
 
-              return this.respondWith(`\
-<div class="one">
-  new one text
-</div>\
-`
-              )
-            })
+            this.respondWith(`
+              <div class="one">
+                new one text
+              </div>
+            `)
+            await wait()
 
-            next(() => {
-              expect('.one').toBeAttached()
-              return expect($('.one').text()).toContain('new one text')
-            })
+            expect('.one').toBeAttached()
+            expect($('.one').text()).toContain('new one text')
 
-            return next.await(() => {
-              const promise = promiseState(replacePromise)
-              return promise.then(result => expect(result.state).toEqual('fulfilled'))
-            })
+            const promise = promiseState(replacePromise)
+            const result = await promise
+            expect(result.state).toEqual('fulfilled')
           })
-          )
 
-          it('updates the first selector if the same element is prepended or appended twice in a single replacement', asyncSpec(function(next) {
+          it('updates the first selector if the same element is prepended or appended twice in a single replacement', async function() {
             const $one = $fixture('.one').text('old one text')
 
             const replacePromise = up.render('.one:before, .one:after', {url: '/path'})
 
-            next(() => {
-              // Placement pseudo-selectors are removed from X-Up-Target
-              expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.one')
+            // Placement pseudo-selectors are removed from X-Up-Target
+            expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.one')
 
-              return this.respondWith(`\
-<div class="one">
-  new one text
-</div>\
-`
-              )
-            })
+            this.respondWith(`
+              <div class="one">
+                new one text
+              </div>
+            `)
+            await wait()
 
-            next(() => {
-              expect('.one').toBeAttached()
-              return expect($('.one').text()).toMatchText('new one text old one text')
-            })
+            expect('.one').toBeAttached()
+            expect($('.one').text()).toMatchText('new one text old one text')
 
-            return next.await(() => {
-              const promise = promiseState(replacePromise)
-              return promise.then(result => expect(result.state).toEqual('fulfilled'))
-            })
+            const promise = promiseState(replacePromise)
+            const result = await promise
+            expect(result.state).toEqual('fulfilled')
           })
-          )
 
-          return it("updates the first selector if the same element is prepended, replaced and appended in a single replacement", asyncSpec(function(next) {
+          it("updates the first selector if the same element is prepended, replaced and appended in a single replacement", async function() {
             const $elem = $fixture('.elem.alias1.alias2').text("old text")
 
             const replacePromise = up.render('.elem:before, .alias1, .alias2:after', {url: '/path'})
 
-            next(() => {
-              // Placement pseudo-selectors are removed from X-Up-Target
-              expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.elem')
+            // Placement pseudo-selectors are removed from X-Up-Target
+            expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.elem')
 
-              return this.respondWith(`\
-<div class="elem alias1 alias2">
-  new text
-</div>\
-`
-              )
-            })
+            this.respondWith(`
+              <div class="elem alias1 alias2">
+                new text
+              </div>
+            `)
+            await wait()
 
-            next(() => {
-              expect('.elem').toBeAttached()
-              return expect($('.elem').text()).toMatchText('new text old text')
-            })
+            expect('.elem').toBeAttached()
+            expect($('.elem').text()).toMatchText('new text old text')
 
-            return next.await(() => {
-              const promise = promiseState(replacePromise)
-              return promise.then(result => expect(result.state).toEqual('fulfilled'))
-            })
+            const promise = promiseState(replacePromise)
+            const result = await promise
+            expect(result.state).toEqual('fulfilled')
           })
-          )
         })
 
         describe('when selectors are missing on the page before the request was made', function() {
