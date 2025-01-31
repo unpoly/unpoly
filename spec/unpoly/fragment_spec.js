@@ -4229,27 +4229,25 @@ describe('up.fragment', function() {
 
         describe('when selectors are missing on the page after the request was made', function() {
 
-          beforeEach(() => up.layer.config.any.mainTargets = [])
+          beforeEach(function() { up.layer.config.any.mainTargets = [] })
 
-          it('tries the selector in options.fallback before swapping elements', asyncSpec(function(next) {
+          it('tries the selector in options.fallback before swapping elements', async function() {
             const $target = $fixture('.target').text('old target')
             const $fallback = $fixture('.fallback').text('old fallback')
             up.render('.target', {url: '/path', fallback: '.fallback'})
             $target.remove()
 
-            next(() => {
-              return this.respondWith(`\
-<div class="target">new target</div>
-<div class="fallback">new fallback</div>\
-`
-              )
-            })
+            await wait()
 
-            return next(() => {
-              return expect('.fallback').toHaveText('new fallback')
-            })
+            this.respondWith(`
+              <div class="target">new target</div>
+              <div class="fallback">new fallback</div>
+            `)
+
+            await wait()
+
+            expect('.fallback').toHaveText('new fallback')
           })
-          )
 
           it('rejects the promise if all alternatives are exhausted', async function() {
             const $target = $fixture('.target').text('old target')
@@ -4261,103 +4259,98 @@ describe('up.fragment', function() {
             $target.remove()
             $fallback.remove()
 
-            jasmine.respondWith(`\
-<div class="target">new target</div>
-<div class="fallback">new fallback</div>\
-`
-            )
+            jasmine.respondWith(`
+              <div class="target">new target</div>
+              <div class="fallback">new fallback</div>
+            `)
 
-            return await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/Could not find common target/i))
+            await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/Could not find common target/i))
           })
 
-          it('considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec(function(next) {
+          it('considers a union selector to be missing if one of its selector-atoms are missing', async function() {
             const $target = $fixture('.target').text('old target')
             const $target2 = $fixture('.target2').text('old target2')
             const $fallback = $fixture('.fallback').text('old fallback')
             up.render('.target, .target2', {url: '/path', fallback: '.fallback'})
             $target2.remove()
 
-            next(() => {
-              return this.respondWith(`\
-<div class="target">new target</div>
-<div class="target2">new target2</div>
-<div class="fallback">new fallback</div>\
-`
-              )
-            })
-            return next(() => {
-              expect('.target').toHaveText('old target')
-              return expect('.fallback').toHaveText('new fallback')
-            })
-          })
-          )
+            await wait()
 
-          it("tries the layer's default targets with { fallback: true }", asyncSpec(function(next) {
+            this.respondWith(`
+              <div class="target">new target</div>
+              <div class="target2">new target2</div>
+              <div class="fallback">new fallback</div>
+            `)
+
+            await wait()
+
+            expect('.target').toHaveText('old target')
+            expect('.fallback').toHaveText('new fallback')
+          })
+
+          it("tries the layer's default targets with { fallback: true }", async function() {
             up.layer.config.any.mainTargets = ['.fallback']
             const $target = $fixture('.target').text('old target')
             const $fallback = $fixture('.fallback').text('old fallback')
             up.render('.target', {url: '/path', fallback: true})
             $target.remove()
 
-            next(() => {
-              return this.respondWith(`\
-<div class="target">new target</div>
-<div class="fallback">new fallback</div>\
-`
-              )
-            })
+            await wait()
 
-            return next(() => {
-              return expect('.fallback').toHaveText('new fallback')
-            })
+            this.respondWith(`
+              <div class="target">new target</div>
+              <div class="fallback">new fallback</div>
+            `)
+
+            await wait()
+
+            expect('.fallback').toHaveText('new fallback')
           })
-          )
 
-          return it("does not try the layer's default targets and rejects the promise if options.fallback is false", function(done) {
+          it("does not try the layer's default targets and rejects the promise if options.fallback is false", function(done) {
             up.layer.config.any.fallbacks = ['.fallback']
             const $target = $fixture('.target').text('old target')
             const $fallback = $fixture('.fallback').text('old fallback')
             const promise = up.render('.target', {url: '/path', fallback: false})
 
-            return u.task(() => {
+            u.task(() => {
               $target.remove()
 
-              this.respondWith(`\
-<div class="target">new target</div>
-<div class="fallback">new fallback</div>\
-`
-              )
+              this.respondWith(`
+                <div class="target">new target</div>
+                <div class="fallback">new fallback</div>
+              `)
 
-              return promise.catch(function(e) {
+              promise.catch(function(e) {
                 expect(e).toBeError(/Could not find common target/i)
-                return done()
+                done()
               })
             })
           })
         })
 
-        return describe('when selectors are missing in the response', function() {
+        describe('when selectors are missing in the response', function() {
 
-          beforeEach(() => up.layer.config.any.mainTargets = [])
+          beforeEach(function() {
+            up.layer.config.any.mainTargets = []
+          })
 
-          it("tries the selector in options.fallback before swapping elements", asyncSpec(function(next) {
+          it("tries the selector in options.fallback before swapping elements", async function() {
             const $target = $fixture('.target').text('old target')
             const $fallback = $fixture('.fallback').text('old fallback')
             up.render('.target', {url: '/path', fallback: '.fallback'})
 
-            next(() => {
-              return this.respondWith(`\
-<div class="fallback">new fallback</div>\
-`
-              )
-            })
+            await wait()
 
-            return next(() => {
-              expect('.target').toHaveText('old target')
-              return expect('.fallback').toHaveText('new fallback')
-            })
+            this.respondWith(`
+              <div class="fallback">new fallback</div>
+            `)
+
+            await wait()
+
+            expect('.target').toHaveText('old target')
+            expect('.fallback').toHaveText('new fallback')
           })
-          )
 
           it("replaces the layer's main target with { fallback: true }", async function() {
             up.layer.config.root.mainTargets = ['.default']
@@ -4373,61 +4366,60 @@ describe('up.fragment', function() {
             await wait()
 
             expect('.target').toHaveText('old target text')
-            return expect('.default').toHaveText('new fallback text')
+            expect('.default').toHaveText('new fallback text')
           })
 
-          describe('if all alternatives are exhausted', () => it('rejects the promise', async function() {
-            const $target = $fixture('.target').text('old target')
-            const $fallback = $fixture('.fallback').text('old fallback')
-            const promise = up.render('.target', {url: '/path', fallback: '.fallback'})
+          describe('if all alternatives are exhausted', function() {
+            it('rejects the promise', async function() {
+              const $target = $fixture('.target').text('old target')
+              const $fallback = $fixture('.fallback').text('old fallback')
+              const promise = up.render('.target', {url: '/path', fallback: '.fallback'})
 
-            await wait()
+              await wait()
 
-            jasmine.respondWith('<div class="unexpected">new unexpected</div>')
+              jasmine.respondWith('<div class="unexpected">new unexpected</div>')
 
-            return await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/Could not find common target/i))
-          }))
+              await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/Could not find common target/i))
+            })
+          })
 
-          it('considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec(function(next) {
+          it('considers a union selector to be missing if one of its selector-atoms are missing', async function() {
             const $target = $fixture('.target').text('old target')
             const $target2 = $fixture('.target2').text('old target2')
             const $fallback = $fixture('.fallback').text('old fallback')
             up.render('.target, .target2', {url: '/path', fallback: '.fallback'})
 
-            next(() => {
-              return this.respondWith(`\
-<div class="target">new target</div>
-<div class="fallback">new fallback</div>\
-`
-              )
-            })
+            await wait()
 
-            return next(() => {
-              expect('.target').toHaveText('old target')
-              expect('.target2').toHaveText('old target2')
-              return expect('.fallback').toHaveText('new fallback')
-            })
+            this.respondWith(`
+              <div class="target">new target</div>
+              <div class="fallback">new fallback</div>
+            `)
+
+            await wait()
+
+            expect('.target').toHaveText('old target')
+            expect('.target2').toHaveText('old target2')
+            expect('.fallback').toHaveText('new fallback')
           })
-          )
 
-          it("tries the layer's default targets with { fallback: true }", asyncSpec(function(next) {
+          it("tries the layer's default targets with { fallback: true }", async function() {
             up.layer.config.any.mainTargets = ['.fallback']
             const $target = $fixture('.target').text('old target')
             const $fallback = $fixture('.fallback').text('old fallback')
             up.render('.target', {url: '/path', fallback: true})
 
-            next(() => {
-              return this.respondWith('<div class="fallback">new fallback</div>')
-            })
+            await wait()
 
-            return next(() => {
-              expect('.target').toHaveText('old target')
-              return expect('.fallback').toHaveText('new fallback')
-            })
+            this.respondWith('<div class="fallback">new fallback</div>')
+
+            await wait()
+
+            expect('.target').toHaveText('old target')
+            expect('.fallback').toHaveText('new fallback')
           })
-          )
 
-          return it("does not try the layer's default targets and rejects the promise with { fallback: false }", async function() {
+          it("does not try the layer's default targets and rejects the promise with { fallback: false }", async function() {
             up.layer.config.any.mainTargets = ['.fallback']
             const $target = $fixture('.target').text('old target')
             const $fallback = $fixture('.fallback').text('old fallback')
@@ -4437,7 +4429,7 @@ describe('up.fragment', function() {
 
             jasmine.respondWith('<div class="fallback">new fallback</div>')
 
-            return await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/Could not find common target/i))
+            await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/Could not find common target/i))
           })
         })
       })
