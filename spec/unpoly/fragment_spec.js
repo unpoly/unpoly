@@ -3334,25 +3334,22 @@ describe('up.fragment', function() {
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.bar')
           })
 
-          it('allows to combine :maybe and :after pseudo-selectors', function() {
-            // Test implementation goes here
-          })
+          it('allows to combine :maybe and :after pseudo-selectors')
         })
 
         describe('matching old fragments around the origin', function() {
 
           it('prefers to match an element closest to origin', async function() {
-            htmlFixture(`\
-<div class="element" id="root">
-  <div class="element">old one</div>
-  <div class="element">
-    old two
-    <span class="origin"></span>
-  </div>
-  <div class="element">old three</div>
-</div>\
-`
-            )
+            htmlFixture(`
+              <div class="element" id="root">
+                <div class="element">old one</div>
+                <div class="element">
+                  old two
+                  <span class="origin"></span>
+                </div>
+                <div class="element">old three</div>
+              </div>
+            `)
 
             const origin = document.querySelector('.origin')
             up.render('.element', {origin, content: 'new text'})
@@ -3373,21 +3370,20 @@ describe('up.fragment', function() {
             expect(elements[2]).toHaveText('new text')
 
             // Three is a sibling of three
-            return expect(elements[3]).toHaveText('old three')
+            expect(elements[3]).toHaveText('old three')
           })
 
           it('updates the first matching element with { match: "first" }', async function() {
-            htmlFixture(`\
-<div id="root">
-  <div class="element">old one</div>
-  <div class="element">
-    old two
-    <span class="origin"></span>
-  </div>
-  <div class="element">old three</div>
-</div>\
-`
-            )
+            htmlFixture(`
+              <div id="root">
+                <div class="element">old one</div>
+                <div class="element">
+                  old two
+                  <span class="origin"></span>
+                </div>
+                <div class="element">old three</div>
+              </div>
+            `)
 
             const origin = document.querySelector('.origin')
             up.render('.element', {origin, content: 'new text', match: 'first'})
@@ -3399,7 +3395,7 @@ describe('up.fragment', function() {
 
             expect(elements[0]).toHaveText('new text')
             expect(elements[1]).toHaveText('old two')
-            return expect(elements[2]).toHaveText('old three')
+            expect(elements[2]).toHaveText('old three')
           })
 
           it('prefers to match an element closest to origin when the origin was swapped and then revalidating (bugfix)', async function() {
@@ -3408,29 +3404,27 @@ describe('up.fragment', function() {
             await wait()
 
             expect(jasmine.Ajax.requests.count()).toBe(1)
-            jasmine.respondWith(`\
-<div class="element">
-  new text from cache
-  <span class="origin"></span>
-</div>\
-`
-            )
+            jasmine.respondWith(`
+              <div class="element">
+                new text from cache
+                <span class="origin"></span>
+              </div>
+            `)
 
             await wait()
 
             expect({url: '/home', target: '.element'}).toBeCached()
 
-            htmlFixture(`\
-<div class="element" id="root">
-  <div class="element">old one</div>
-  <div class="element">
-    old two
-    <span class="origin"></span>
-  </div>
-  <div class="element">old three</div>
-</div>\
-`
-            )
+            htmlFixture(`
+              <div class="element" id="root">
+                <div class="element">old one</div>
+                <div class="element">
+                  old two
+                  <span class="origin"></span>
+                </div>
+                <div class="element">old three</div>
+              </div>
+            `)
 
             const origin = document.querySelector('.origin')
             up.render('.element', {origin, url: '/home', cache: true, revalidate: true})
@@ -3459,10 +3453,9 @@ describe('up.fragment', function() {
             await wait()
 
             expect(jasmine.Ajax.requests.count()).toBe(2)
-            jasmine.respondWith(`\
-<div class="element">revalidated new text</div>\
-`
-            )
+            jasmine.respondWith(`
+              <div class="element">revalidated new text</div>
+            `)
 
             await wait()
 
@@ -3480,7 +3473,7 @@ describe('up.fragment', function() {
             expect(elements[2]).toHaveText('revalidated new text')
 
             // Three is a sibling of three
-            return expect(elements[3]).toHaveText('old three')
+            expect(elements[3]).toHaveText('old three')
           })
 
           it('prefers to match an element closest to origin when the origin was swapped and then revalidating when the origin has no derivable target (bugfix)', async function() {
@@ -3489,29 +3482,27 @@ describe('up.fragment', function() {
             await wait()
 
             expect(jasmine.Ajax.requests.count()).toBe(1)
-            jasmine.respondWith(`\
-<div class="element">
-  new text from cache
-  <span>origin</span>
-</div>\
-`
-            )
+            jasmine.respondWith(`
+              <div class="element">
+                new text from cache
+                <span>origin</span>
+              </div>
+            `)
 
             await wait()
 
             expect({url: '/home', target: '.element'}).toBeCached()
 
-            htmlFixture(`\
-<div class="element" id="root">
-  <div class="element">old one</div>
-  <div class="element">
-    old two
-    <span>origin</span>
-  </div>
-  <div class="element">old three</div>
-</div>\
-`
-            )
+            htmlFixture(`
+              <div class="element" id="root">
+                <div class="element">old one</div>
+                <div class="element">
+                  old two
+                  <span>origin</span>
+                </div>
+                <div class="element">old three</div>
+              </div>
+            `)
 
             const origin = document.querySelector('.element .element span')
             expect(origin).not.toBeTargetable()
@@ -3540,18 +3531,17 @@ describe('up.fragment', function() {
             expect(elements[3]).toHaveText('old three')
 
             expect(jasmine.Ajax.requests.count()).toBe(2)
-            jasmine.respondWith(`\
-<div class="element">
-  revalidated new text
-  <span>origin</span>
-</div>\
-`
-            )
+            jasmine.respondWith(`
+              <div class="element">
+                revalidated new text
+                <span>origin</span>
+              </div>
+            `)
 
             await wait()
 
             elements = document.querySelectorAll('.element')
-            expect(elements.length).toBe(4)
+            expect(elements.length).toBe 4
 
             // While #root is an ancestor, two was closer
             expect(elements[0]).toMatchSelector('#root')
@@ -3564,24 +3554,23 @@ describe('up.fragment', function() {
             expect(elements[2]).toHaveText('revalidated new text origin')
 
             // Three is a sibling of three
-            return expect(elements[3]).toHaveText('old three')
+            expect(elements[3]).toHaveText('old three')
           })
 
           it('prefers to match a descendant selector in the region of the origin', async function() {
             const element1 = fixture('.element')
-            const element1Child1 = e.affix(element1, '.child',         {text: 'old element1Child1'})
+            const element1Child1 = e.affix(element1, '.child', {text: 'old element1Child1'})
             const element1Child2 = e.affix(element1, '.child.sibling', {text: 'old element1Child2'})
 
             const element2 = fixture('.element')
-            const element2Child1 = e.affix(element2, '.child',         {text: 'old element2Child1'})
+            const element2Child1 = e.affix(element2, '.child', {text: 'old element2Child1'})
             const element2Child2 = e.affix(element2, '.child.sibling', {text: 'old element2Child2'})
 
-            up.render('.element .sibling', { origin: element2Child1, document: `\
-<div class="element">
-  <div class="child sibling">new text</div>
-</div>\
-`
-          })
+            up.render('.element .sibling', { origin: element2Child1, document: `
+              <div class="element">
+                <div class="child sibling">new text</div>
+              </div>
+            `})
 
             await wait()
 
@@ -3593,7 +3582,7 @@ describe('up.fragment', function() {
             expect(children[1]).toHaveText('old element1Child2')
 
             expect(children[2]).toHaveText('old element2Child1')
-            return expect(children[3]).toHaveText('new text')
+            expect(children[3]).toHaveText('new text')
           })
 
           it('prefers to match a descendant selector in the region of the origin when revalidating (bugfix)', async function() {
@@ -3603,23 +3592,22 @@ describe('up.fragment', function() {
 
             expect(jasmine.Ajax.requests.count()).toBe(1)
 
-            jasmine.respondWith(`\
-<div class="element">
-  <div class="child sibling">new text from cache</div>
-</div>\
-`
-            )
+            jasmine.respondWith(`
+              <div class="element">
+                <div class="child sibling">new text from cache</div>
+              </div>
+            `)
 
             await wait()
 
             expect({url: '/page', target: '.element .sibling'}).toBeCached()
 
             const element1 = fixture('.element')
-            const element1Child1 = e.affix(element1, '.child',         {text: 'old element1Child1'})
+            const element1Child1 = e.affix(element1, '.child', {text: 'old element1Child1'})
             const element1Child2 = e.affix(element1, '.child.sibling', {text: 'old element1Child2'})
 
             const element2 = fixture('.element')
-            const element2Child1 = e.affix(element2, '.child',         {text: 'old element2Child1'})
+            const element2Child1 = e.affix(element2, '.child', {text: 'old element2Child1'})
             const element2Child2 = e.affix(element2, '.child.sibling', {text: 'old element2Child2'})
 
             up.render('.element .sibling', {url: 'page', origin: element2Child1, cache: true, revalidate: true})
@@ -3635,12 +3623,11 @@ describe('up.fragment', function() {
 
             expect(jasmine.Ajax.requests.count()).toBe(2)
 
-            jasmine.respondWith(`\
-<div class="element">
-  <div class="child sibling">revalidated text</div>
-</div>\
-`
-            )
+            jasmine.respondWith(`
+              <div class="element">
+                <div class="child sibling">revalidated text</div>
+              </div>
+            `)
 
             await wait()
 
@@ -3649,10 +3636,10 @@ describe('up.fragment', function() {
             expect(children[0]).toHaveText('old element1Child1')
             expect(children[1]).toHaveText('old element1Child2')
             expect(children[2]).toHaveText('old element2Child1')
-            return expect(children[3]).toHaveText('revalidated text')
+            expect(children[3]).toHaveText('revalidated text')
           })
 
-          it('allows ambiguous target derivation if it becomes clear given an origin', asyncSpec(function(next) {
+          it('allows ambiguous target derivation if it becomes clear given an origin', async function() {
             const root = fixture('.element#root')
             const one = e.affix(root, '.element', {text: 'old one'})
             const two = e.affix(root, '.element', {text: 'old two'})
@@ -3661,24 +3648,23 @@ describe('up.fragment', function() {
 
             up.render(two, {origin: childOfTwo, content: 'new text'})
 
-            return next(() => {
-              const elements = document.querySelectorAll('.element')
-              expect(elements.length).toBe(4)
+            await wait()
 
-              // While #root is an ancestor, two was closer
-              expect(elements[0]).toMatchSelector('#root')
+            const elements = document.querySelectorAll('.element')
+            expect(elements.length).toBe(4)
 
-              // One is a sibling of two
-              expect(elements[1]).toHaveText('old one')
+            // While #root is an ancestor, two was closer
+            expect(elements[0]).toMatchSelector('#root')
 
-              // Two is the closest match around the origin (childOfTwo)
-              expect(elements[2]).toHaveText('new text')
+            // One is a sibling of two
+            expect(elements[1]).toHaveText('old one')
 
-              // Three is a sibling of three
-              return expect(elements[3]).toHaveText('old three')
-            })
+            // Two is the closest match around the origin (childOfTwo)
+            expect(elements[2]).toHaveText('new text')
+
+            // Three is a sibling of three
+            expect(elements[3]).toHaveText('old three')
           })
-          )
 
           it('rediscovers the { origin } in the new content and prefers matching an element closest to the rediscovered origin', function() {
             const root = fixture('.element#root')
@@ -3704,10 +3690,10 @@ describe('up.fragment', function() {
             expect(elements[2]).toHaveText('new two')
 
             // Three is a sibling of three
-            return expect(elements[3]).toHaveText('old three')
+            expect(elements[3]).toHaveText('old three')
           })
 
-          return it('uses the first match in the new content if the { origin } cannot be rediscovered in the new content', function() {
+          it('uses the first match in the new content if the { origin } cannot be rediscovered in the new content', function() {
             const root = fixture('#root')
             const one = e.affix(root, '.element', {text: 'old one'})
             const two = e.affix(root, '.element', {text: 'old two'})
@@ -3726,7 +3712,7 @@ describe('up.fragment', function() {
             // We could not rediscover the origin in the new content, so the first match ("one") is used.
             expect(elements[0]).toHaveText('old one')
             expect(elements[1]).toHaveText('new one')
-            return expect(elements[2]).toHaveText('old three')
+            expect(elements[2]).toHaveText('old three')
           })
         })
 
