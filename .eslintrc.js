@@ -32,7 +32,8 @@ module.exports = {
       "anonymous": "never",
       "named": "never",
       "asyncArrow": "always"
-    }]
+    }],
+    "@typescript-eslint/no-var-requires": "off",
   },
   "globals": {
     "up": "writable",
@@ -76,6 +77,12 @@ module.exports = {
       "rules": {
         "@typescript-eslint/no-unused-vars": "off"
       },
+    },
+    {
+      "files": ["bin/**/*.js"],
+      "globals": {
+        "process": "readonly",
+      }
     }
   ]
 

@@ -117,17 +117,10 @@ In addition to the unit tests, there is an optional support repo [`unpoly-manual
 
 ### Making a new release
 
-You can use this repository to publish a new version of the `unpoly` npm package.
-
-The release process currently requires Ruby. To install these dependencies:
-
-- Install the Ruby version from `.ruby-version`
-- Run `bundle install`
-
 There is a guided CLI interface to lead you through the release process. To start the process run:
 
 ```
-bundle exec rake release:process
+npm run release
 ```
 
 
