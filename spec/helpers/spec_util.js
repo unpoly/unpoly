@@ -30,7 +30,7 @@ up.specUtil = (function() {
 
   function findElementContainingText(selector, text) {
     const elements = document.querySelectorAll(selector)
-    return u.find(elements, element => element.innerText.includes(text))
+    return u.find(elements, (element) => element.innerText.includes(text))
   }
 
   function promiseTimer(ms) {

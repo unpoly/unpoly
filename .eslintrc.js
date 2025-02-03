@@ -22,6 +22,8 @@ module.exports = {
     "no-control-regex": "off",
     "getter-return": "off",
     "no-useless-escape": "warn",
+    "arrow-parens": ["error", "always"],
+    "object-curly-spacing": ["error", "always"],
     "@typescript-eslint/no-unused-vars": ["warn", {
       "argsIgnorePattern": "^_",
       "varsIgnorePattern": "^_"
@@ -73,6 +75,8 @@ module.exports = {
         "allowGlobalErrors": "readonly",
         "fixtureInOverlay": "readonly",
         "describeFallback": "readonly",
+        "AgentDetector": "readonly",
+        "safeHistory": "readonly",
       },
       "rules": {
         "@typescript-eslint/no-unused-vars": "off"

@@ -1,2 +1,0 @@
-afterEach ->
-  jasmine.clock().uninstall()
