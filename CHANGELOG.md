@@ -8,6 +8,14 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+3.10.2
+------
+
+- Fix a bug where Unpoly would sometimes reset the cursor position of inputs outside the rendering fragment
+- When a popup is dismissed by clicking on a focusable element in the background, focus that element instead of the popup opener (issue #706).
+- Fix an inconsistency where `up.layer.accept()` and `up.layer.dismiss()` would return a fulfilled promise, despite both being sync functions.
+
+
 3.10.1
 ------
 
