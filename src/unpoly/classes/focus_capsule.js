@@ -1,21 +1,42 @@
 up.FocusCapsule = class FocusCapsule {
 
-  constructor(element, target, cursorProps) {
+  constructor(element, target) {
     this._element = element
     this._target = target
-    this._cursorProps = cursorProps
+    this._cursorProps = up.viewport.copyCursorProps(this._element)
   }
 
   wasLost() {
-    return document.activeElement !== this._element
+    return document.activeElement !== this._element && !this._voided
   }
 
-  // This function restores focus, but does not test if the user focuses something else
-  // during the render pass (which would invalidate this capsule). This is handled elsewhere:
-  //
-  // (1) up.FragmentFocus will check #wasLost() before calling restore()
-  // (2) runPreviews() will listen to focusin and void this capsule manually.
+  /*-
+  Invalidates this capsule when an explicit focus change by the user was detected.
+
+  Call it *after* your own focus-losing DOM mutation:
+
+  ```js
+  let capsule = up.FocusCapsule.preserve(layer)
+  domChangeThatMayLoseFocus() // e.g. disabling
+  capsule.autoVoid()
+  await timeInWhichUserMayChangeFocusExplictly()
+  capsule.restore()
+  ```
+
+  @function up.FocusCapsule.prototype.autoVoid
+  */
+  autoVoid() {
+    up.on('focusin', { once: true }, () => this._voided = true)
+  }
+
   restore(layer, focusOptions) {
+    if (!this.wasLost()) {
+      // Signal callers that we could not restore.
+      // This matters to up.FragmentFocus to know that a { focus: ['restore', '.other'] }
+      // option could not restore focus, and should focus the next option (".other".).
+      return false
+    }
+
     let rediscoveredElement = up.fragment.get(this._target, { layer })
     if (rediscoveredElement) {
       // Firefox needs focus-related props to be set *before* we focus the element
@@ -23,7 +44,6 @@ up.FocusCapsule = class FocusCapsule {
       up.focus(rediscoveredElement, focusOptions)
 
       // Signals callers that we could restore.
-      //
       // This matters to up.FragmentFocus to know that a { focus: ['restore', '.other'] }
       // option could restore focus, and should not focus the next option (".other".).
       return true
@@ -37,8 +57,7 @@ up.FocusCapsule = class FocusCapsule {
     let target = up.fragment.tryToTarget(focusedElement)
     if (!target) return
 
-    const cursorProps = up.viewport.copyCursorProps(focusedElement)
-    return new this(focusedElement, target, cursorProps)
+    return new this(focusedElement, target)
   }
 
 }

@@ -4797,6 +4797,47 @@ describe('up.form', function() {
 
           expect(jasmine.Ajax.requests.count()).toBe(1)
         })
+
+        it('does not reset cursor positions that were changed while the revalidation request is underway (bugfix)', async function() {
+          fixture('#target', { text: 'old target' })
+          const form = fixture('form[up-submit][action="/path"]')
+          const textField = e.affix(form, 'input[type=text][name=email][up-validate="#target"][up-watch-event="input"]')
+          up.hello(form)
+
+          expect('#target').toHaveText('old target')
+
+          textField.focus()
+          textField.value = 'abcdefghijklmnopqurstuvwxyz'
+          textField.selectionStart = 3
+          textField.selectionEnd = 5
+
+          Trigger.input(textField)
+
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          expect(textField).toBeFocused()
+          expect(textField.selectionStart).toBe(3)
+          expect(textField.selectionEnd).toBe(5)
+
+          textField.selectionStart = 8
+          textField.selectionEnd = 10
+          await wait()
+
+          expect(textField).toBeFocused()
+          expect(textField.selectionStart).toBe(8)
+          expect(textField.selectionEnd).toBe(10)
+
+          jasmine.respondWithSelector('#target', { text: 'validated target' })
+          await wait()
+
+          expect('#target').toHaveText('validated target')
+
+          expect(textField).toBeFocused()
+          expect(textField.selectionStart).toBe(8)
+          expect(textField.selectionEnd).toBe(10)
+        })
       })
 
       describe('with [up-watch-delay]', function() {

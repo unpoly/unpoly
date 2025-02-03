@@ -158,7 +158,7 @@ up.status = (function() {
     let focusCapsule = up.FocusCapsule.preserve(bindLayer)
     let applyPreviews = () => doRunPreviews(request, renderOptions)
     let revertPreviews = bindLayer.asCurrent(applyPreviews)
-    up.on('focusin', { once: true }, () => focusCapsule = null)
+    focusCapsule?.autoVoid()
     return () => {
       bindLayer.asCurrent(revertPreviews)
       focusCapsule?.restore(bindLayer, { preventScroll: true })

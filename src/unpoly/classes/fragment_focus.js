@@ -57,9 +57,7 @@ up.FragmentFocus = class FragmentFocus extends up.FragmentProcessor {
   }
 
   _restoreLostFocus() {
-    if (this._wasFocusLost()) {
-      return this.focusCapsule?.restore(this.layer, PREVENT_SCROLL_OPTIONS)
-    }
+    return this.focusCapsule?.restore(this.layer, PREVENT_SCROLL_OPTIONS)
   }
 
   _restorePreviousFocusForLocation() {

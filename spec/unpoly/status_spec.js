@@ -711,6 +711,47 @@ describe('up.status', function() {
             expect(outsideFocusable).toBeFocused()
           })
 
+          it('does not reset cursor positions that were changed while the request is underway (bugfix)', async function() {
+            let outsideTextField = fixture('input[type="text"][name="foo"]')
+            let target = fixture('form#target')
+            // Have some field to disable in order to provoke the issue
+            let insideTextField = e.affix(target, 'input[type="text"][name="bar"]')
+
+            outsideTextField.focus()
+            outsideTextField.value = 'abcdefghijklmnopqurstuvwxyz'
+            outsideTextField.selectionStart = 3
+            outsideTextField.selectionEnd = 5
+
+            let previewFn = function(preview) {
+              preview.disable(preview.fragment)
+            }
+
+            up.render({ target: '#target', focus: 'keep', url: '/path', preview: previewFn })
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(insideTextField).toBeDisabled()
+            expect(outsideTextField).toBeFocused()
+            expect(outsideTextField.selectionStart).toBe(3)
+            expect(outsideTextField.selectionEnd).toBe(5)
+
+            outsideTextField.selectionStart = 8
+            outsideTextField.selectionEnd = 10
+            await wait()
+
+            expect(outsideTextField).toBeFocused()
+            expect(outsideTextField.selectionStart).toBe(8)
+            expect(outsideTextField.selectionEnd).toBe(10)
+
+            jasmine.respondWithSelector('#target', { text: 'New target' })
+            await wait()
+
+            expect('#target').toHaveText('New target')
+            expect(outsideTextField).toBeFocused()
+            expect(outsideTextField.selectionStart).toBe(8)
+            expect(outsideTextField.selectionEnd).toBe(10)
+          })
+
         })
 
       })

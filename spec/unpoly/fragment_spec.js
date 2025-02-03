@@ -8493,6 +8493,66 @@ describe('up.fragment', function() {
             expect(oldFocused).toBeFocused()
           })
 
+          it('does not override a focus change made after the request was sent', async function() {
+            let outsideTextField = fixture('input[type="text"][name="foo"]')
+            let target = fixture('form#target')
+            let insideTextField = e.affix(target, 'input[type="text"][name="bar"]')
+            insideTextField.focus()
+            expect(insideTextField).toBeFocused()
+
+            up.render({ target: '#target', focus: 'keep', url: '/path' })
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(insideTextField).toBeFocused()
+
+            outsideTextField.focus()
+            await wait()
+
+            expect(outsideTextField).toBeFocused()
+
+            jasmine.respondWithSelector('#target', { text: 'New target' })
+            await wait()
+
+            expect('#target').toHaveText('New target')
+            expect(outsideTextField).toBeFocused()
+          })
+
+          it('does not override selection changes made after the request was sent', async function() {
+            let outsideTextField = fixture('input[type="text"][name="foo"]')
+            let target = fixture('form#target')
+            let insideTextField = e.affix(target, 'input[type="text"][name="bar"]')
+
+            outsideTextField.focus()
+            outsideTextField.value = 'abcdefghijklmnopqurstuvwxyz'
+            outsideTextField.selectionStart = 3
+            outsideTextField.selectionEnd = 5
+
+            up.render({ target: '#target', focus: 'keep', url: '/path' })
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(outsideTextField).toBeFocused()
+            expect(outsideTextField.selectionStart).toBe(3)
+            expect(outsideTextField.selectionEnd).toBe(5)
+
+            outsideTextField.selectionStart = 8
+            outsideTextField.selectionEnd = 10
+            await wait()
+
+            expect(outsideTextField).toBeFocused()
+            expect(outsideTextField.selectionStart).toBe(8)
+            expect(outsideTextField.selectionEnd).toBe(10)
+
+            jasmine.respondWithSelector('#target', { text: 'New target' })
+            await wait()
+
+            expect('#target').toHaveText('New target')
+            expect(outsideTextField).toBeFocused()
+            expect(outsideTextField.selectionStart).toBe(8)
+            expect(outsideTextField.selectionEnd).toBe(10)
+          })
+
           it('does not rediscover an element with the same selector outside the changed fragment (bugfix)', async function() {
             const outside = fixture('textarea')
 
@@ -11236,7 +11296,7 @@ describe('up.fragment', function() {
           up.render('.keeper', {document: `
             <div class='keeper new' up-keep up-data='{ "key": "new-value" }'>new-inside</div>
           `})
-          
+
           await wait()
 
           expect(keeper.onKeepSpy).toHaveBeenCalledWith(
@@ -11252,9 +11312,9 @@ describe('up.fragment', function() {
           up.render({fragment: `
             <div class='keeper' up-keep>new-inside</div>
           `})
-          
+
           await wait()
-          
+
           expect('.keeper').toHaveText('new-inside')
         })
 
@@ -11268,14 +11328,14 @@ describe('up.fragment', function() {
             <div class='keeper' up-keep>version 2</div>
           `})
           await wait()
-          
+
           expect('.keeper').toHaveText('version 1')
-          
+
           up.render({fragment: `
             <div class='keeper' up-keep>version 3</div>
           `})
           await wait()
-          
+
           expect('.keeper').toHaveText('version 3')
         })
 
@@ -12983,27 +13043,27 @@ describe('up.fragment', function() {
         const selectors = up.fragment.splitTarget('.one')
         expect(selectors).toEqual(['.one'])
       })
-  
+
       it('splits multiple targets at commas', function() {
         const selectors = up.fragment.splitTarget('.one, .two')
         expect(selectors).toEqual(['.one', '.two'])
       })
-  
+
       it('does not split at commas within parentheses', function() {
         const selectors = up.fragment.splitTarget('.one:has(.three, .four), .two')
         expect(selectors).toEqual(['.one:has(.three, .four)', '.two'])
       })
     })
-  
+
     describe('up.fragment.parseTargetSteps()', function() {
-  
+
       it('parses a single target', function() {
         const steps = up.fragment.parseTargetSteps('.one')
         expect(steps).toEqual([
           jasmine.objectContaining({selector: '.one'})
         ])
       })
-  
+
       it('parses multiple targets', function() {
         const steps = up.fragment.parseTargetSteps('.one, .two')
         expect(steps).toEqual([
@@ -13011,7 +13071,7 @@ describe('up.fragment', function() {
           jasmine.objectContaining({selector: '.two'}),
         ])
       })
-  
+
       it('parses multiple targets with commas within parentheses', function() {
         const steps = up.fragment.parseTargetSteps('.one:has(.three, .four), .two')
         expect(steps).toEqual([
@@ -13019,12 +13079,12 @@ describe('up.fragment', function() {
           jasmine.objectContaining({selector: '.two'}),
         ])
       })
-  
+
       it('does not parse any steps from a :none target', function() {
         const steps = up.fragment.parseTargetSteps(':none')
         expect(steps).toEqual([])
       })
-  
+
       it('ignores a :none target in a union of other targets', function() {
         const steps = up.fragment.parseTargetSteps('.one, :none, .two')
         expect(steps).toEqual([
@@ -13032,14 +13092,14 @@ describe('up.fragment', function() {
           jasmine.objectContaining({selector: '.two'}),
         ])
       })
-  
+
       it('sets a default placement of "swap"', function() {
         const steps = up.fragment.parseTargetSteps('.one')
         expect(steps).toEqual([
           jasmine.objectContaining({selector: '.one', placement: 'swap'})
         ])
       })
-  
+
       it('parses a prepending placement from :before (single colon)', function() {
         const steps = up.fragment.parseTargetSteps('.one:before, .two')
         expect(steps).toEqual([
@@ -13047,7 +13107,7 @@ describe('up.fragment', function() {
           jasmine.objectContaining({selector: '.two', placement: 'swap'}),
         ])
       })
-  
+
       it('parses a prepending placement from ::before (double colon)', function() {
         const steps = up.fragment.parseTargetSteps('.one::before, .two')
         expect(steps).toEqual([
@@ -13055,7 +13115,7 @@ describe('up.fragment', function() {
           jasmine.objectContaining({selector: '.two', placement: 'swap'}),
         ])
       })
-  
+
       it('parses an append placement from :after (single colon)', function() {
         const steps = up.fragment.parseTargetSteps('.one, .two:after')
         expect(steps).toEqual([
@@ -13063,7 +13123,7 @@ describe('up.fragment', function() {
           jasmine.objectContaining({selector: '.two', placement: 'after'}),
         ])
       })
-  
+
       it('parses an append placement from ::after (double colon)', function() {
         const steps = up.fragment.parseTargetSteps('.one, .two::after')
         expect(steps).toEqual([
@@ -13071,7 +13131,7 @@ describe('up.fragment', function() {
           jasmine.objectContaining({selector: '.two', placement: 'after'}),
         ])
       })
-  
+
       it('parses an optional target from :maybe', function() {
         const steps = up.fragment.parseTargetSteps('.one, .two:maybe')
         expect(steps).toEqual([
@@ -13079,7 +13139,7 @@ describe('up.fragment', function() {
           jasmine.objectContaining({selector: '.two', maybe: true}),
         ])
       })
-  
+
       it('parses multiple pseudo elements in the same target', function() {
         const steps = up.fragment.parseTargetSteps('.one:maybe:before')
         expect(steps).toEqual([
@@ -13087,56 +13147,56 @@ describe('up.fragment', function() {
         ])
       })
     })
-  
+
     describe('up.fragment.provideNodes()', function() {
-  
+
       describe('with a string of HTML', function() {
-  
+
         it('parses a HTML fragment and returns a list containing its root Element', function() {
           const nodes = up.fragment.provideNodes('<div>root</div>')
-  
+
           expect(nodes).toHaveLength(1)
           expect(nodes[0]).toBeElement()
           expect(nodes[0].outerHTML).toBe('<div>root</div>')
         })
-  
+
         it('parses a Text node without a containing Element', function() {
           const nodes = up.fragment.provideNodes('foo')
-  
+
           expect(nodes).toHaveLength(1)
           expect(nodes[0]).toBeTextNode('foo')
         })
-  
+
         it('parses multiple HTML elements without a containing root element', function() {
           const nodes = up.fragment.provideNodes("<div>sibling1</div><div>sibling2</div>")
-  
+
           expect(nodes).toHaveLength(2)
           expect(nodes[0].outerHTML).toBe('<div>sibling1</div>')
           expect(nodes[1].outerHTML).toBe('<div>sibling2</div>')
         })
-  
+
         it('parses a mix of Element nodes and Text nodes without a containing root element', function() {
           const nodes = up.fragment.provideNodes("foo<b>bar</b>baz")
           expect(nodes).toHaveLength(3)
-  
+
           expect(nodes[0]).toBeTextNode('foo')
           expect(nodes[1].outerHTML).toBe('<b>bar</b>')
           expect(nodes[2]).toBeTextNode('baz')
         })
       })
-  
+
       describe('with a non-template element', function() {
         it('returns an list of the given element without making a copy, so users can temporarily move an element into an overlay', function() {
           const element = document.createElement('div')
           const nodes = up.fragment.provideNodes(element)
-  
+
           expect(nodes).toHaveLength(1)
           expect(nodes[0]).toBe(element)
         })
       })
-  
+
       describe('with a template element', function() {
-  
+
         it('returns a copy of the template content', function() {
           const template = up.element.createFromHTML(`
             <template id="my-template">
@@ -13144,100 +13204,100 @@ describe('up.fragment', function() {
             </template>
           `)
           const nodes = up.fragment.provideNodes(template)
-  
+
           expect(nodes[0]).toBeTextNode('foo')
           expect(nodes[1].outerHTML).toBe('<b>bar</b>')
           expect(nodes[2]).toBeTextNode('baz')
-  
+
           // Make sure we made a copy and did not re-attach existing nodes
           expect(nodes[0]).not.toBe(template.content.childNodes[0])
           expect(nodes[1]).not.toBe(template.content.childNodes[1])
           expect(nodes[2]).not.toBe(template.content.childNodes[2])
         })
-  
+
         it('allows to register a template engine with up:template:clone', function() {
           const template = htmlFixture(`
             <template id="my-template" type='text/minimustache'>
               Hello, <b>{{name}}</b>!
             </template>
           `)
-  
+
           const templateHandler = jasmine.createSpy('up:template:clone').and.callFake(function(event) {
             let html = event.target.innerHTML
             html = html.replace(/{{(\w+)}}/g, (_match, variable) => event.data[variable])
             event.nodes = up.element.createNodesFromHTML(html)
           })
-  
+
           up.on('up:template:clone', 'template[type="text/minimustache"]', templateHandler)
-  
+
           const nodes = up.template.clone('#my-template', { name: "Alice" })
           expect(templateHandler).toHaveBeenCalledWith(jasmine.objectContaining({target: template, data: { name: "Alice" }}), template, jasmine.anything())
-  
+
           expect(nodes[0]).toBeTextNode('Hello, ')
           expect(nodes[1].outerHTML).toBe('<b>Alice</b>')
           expect(nodes[2]).toBeTextNode('!')
         })
       })
-  
+
       describe('with a script element', function() {
-  
+
         it('returns an list of the given element without making a copy', function() {
           const element = up.element.createFromSelector('script[type="text/javascript"]')
           const nodes = up.fragment.provideNodes(element)
-  
+
           expect(nodes).toHaveLength(1)
           expect(nodes[0]).toBe(element)
         })
-  
+
         it('clones a script that does not contain JavaScript, considerung it a custom template', function() {
           const template = htmlFixture(`
             <script id="my-template" type='text/minimustache'>
               Hello, <b>{{name}}</b>!
             </script>
           `)
-  
+
           const templateHandler = jasmine.createSpy('up:template:clone').and.callFake(function(event) {
             let html = event.target.innerHTML
             html = html.replace(/{{(\w+)}}/g, (_match, variable) => event.data[variable])
             event.nodes = up.element.createNodesFromHTML(html)
           })
-  
+
           up.on('up:template:clone', 'script[type="text/minimustache"]', templateHandler)
-  
+
           const nodes = up.fragment.provideNodes('#my-template { name: "Alice" }')
-  
+
           expect(templateHandler).toHaveBeenCalledWith(jasmine.objectContaining({target: template, data: { name: "Alice" }}), jasmine.anything(), jasmine.anything())
           expect(nodes[0]).toBeTextNode('Hello, ')
           expect(nodes[1].outerHTML).toBe('<b>Alice</b>')
           expect(nodes[2]).toBeTextNode('!')
         })
       })
-  
+
       describe('with a selector string', function() {
-  
+
         it('returns a list containing the first matching element', function() {
           const element1 = fixture('.my-element')
           const element2 = fixture('.my-element')
           const nodes = up.fragment.provideNodes('.my-element')
-  
+
           expect(nodes).toEqual([element1])
         })
-  
+
         it('looks up a selector in the given { origin } before looking at other layers', function() {
           const [layer0, layer1, layer2] = makeLayers(3)
           const layer0Match = layer0.affix('.match#layer0-element')
           const layer1Match = layer1.affix('.match#layer1-element')
-  
+
           expect(up.fragment.provideNodes('.match', { origin: layer0.element })).toEqual([layer0Match])
           expect(up.fragment.provideNodes('.match', { origin: layer1.element })).toEqual([layer1Match])
           expect(up.fragment.provideNodes('.match', { origin: layer2.element })).toEqual([layer1Match])
         })
-  
+
         it('throws an error if the selector cannot be matched', function() {
           const provide = () => up.fragment.provideNodes('#my-element')
           expect(provide).toThrowError('Cannot find template "#my-element"')
         })
-  
+
         it('clones a matching <template>', function() {
           const template = htmlFixture(`
             <template id="my-template">
@@ -13245,12 +13305,12 @@ describe('up.fragment', function() {
             </template>
           `)
           const nodes = up.fragment.provideNodes('#my-template')
-  
+
           expect(nodes[0]).toBeTextNode('foo')
           expect(nodes[1].outerHTML).toBe('<b>bar</b>')
         })
       })
-  
+
       describe('with a list of elements', function() {
         it('returns that list', function() {
           const list = [document.head, document.body]
@@ -13258,7 +13318,7 @@ describe('up.fragment', function() {
           expect(nodes).toEqual([document.head, document.body])
         })
       })
-  
+
       describe('with a Document', function() {
         it('returns that Document', function() {
           const nodes = up.fragment.provideNodes(document)
@@ -13266,120 +13326,120 @@ describe('up.fragment', function() {
         })
       })
     })
-  
+
     describe('up.fragment.contains()', function() {
-  
+
       it('returns whether the given element is an ancestor of an element matching the given selector', function() {
         const root = fixture('#root')
         const child = e.affix(root, '#child')
         const grandChild = e.affix(root, '#grand-child')
         const sibling = fixture('#sibling')
-  
+
         expect(up.fragment.contains(root, '#child')).toBe(true)
         expect(up.fragment.contains(root, '#grand-child')).toBe(true)
         expect(up.fragment.contains(root, '#sibling')).toBe(false)
         expect(up.fragment.contains(child, '#root')).toBe(false)
       })
-  
+
       it('returns whether the given element itself matches the given selector', function() {
         const root = fixture('#root')
         expect(up.fragment.contains(root, '#root')).toBe(true)
         expect(up.fragment.contains(root, '#other')).toBe(false)
       })
-  
+
       it('ignores matches on other layers', function() {
         up.layer.open({ target: '.child', content: 'child content' })
-  
+
         expect(up.fragment.contains(document.body, '.child')).toBe(false)
       })
-  
+
       it('returns whether the given element is an ancestor of the other given element', function() {
         const root = fixture('#root')
         const child = e.affix(root, '#child')
         const grandChild = e.affix(root, '#grand-child')
         const sibling = fixture('#sibling')
-  
+
         expect(up.fragment.contains(root, child)).toBe(true)
         expect(up.fragment.contains(root, grandChild)).toBe(true)
         expect(up.fragment.contains(root, sibling)).toBe(false)
         expect(up.fragment.contains(child, root)).toBe(false)
       })
-  
+
       it('returns whether the given element is the other given element', function() {
         const root = fixture('#root')
         const sibling = fixture('#sibling')
         expect(up.fragment.contains(root, root)).toBe(true)
         expect(up.fragment.contains(root, sibling)).toBe(false)
       })
-  
+
       it('supports a Document for the root', function() {
         fixture('.internal-match')
-  
+
         const parser = new DOMParser()
         const externalHTML = '<div class="external-match"></div>'
         const externalDocument = parser.parseFromString(externalHTML, "text/html")
-  
+
         expect(up.fragment.contains(document, '.internal-match')).toBe(true)
         expect(up.fragment.contains(document, '.external-match')).toBe(false)
-  
+
         expect(up.fragment.contains(externalDocument, '.internal-match')).toBe(false)
         expect(up.fragment.contains(externalDocument, '.external-match')).toBe(true)
       })
     })
-  
+
     describe('up.fragment.compressNestedSteps()', function() {
-  
+
       it("removes a step whose { oldElement } is contained by a later step's { oldElement }", function() {
         const container = fixture('.container')
         const child = e.affix(container, '.child')
-  
+
         const containerStep = { placement: 'swap', oldElement: container, selector: '.container' }
         const childStep = { placement: 'swap', oldElement: child, selector: '.child' }
-  
+
         expect(up.fragment.compressNestedSteps([childStep, containerStep])).toEqual([containerStep])
       })
-  
+
       it("removes a step whose { oldElement } is contained by an earlier step's { oldElement }", function() {
         const container = fixture('.container')
         const child = e.affix(container, '.child')
-  
+
         const containerStep = { placement: 'swap', oldElement: container, selector: '.container' }
         const childStep = { placement: 'swap', oldElement: child, selector: '.child' }
-  
+
         expect(up.fragment.compressNestedSteps([containerStep, childStep])).toEqual([containerStep])
       })
-  
+
       it("keeps a step whose { oldElement } is not contained by another step's { oldElement }", function() {
         const sibling1 = fixture('.sibling1')
         const sibling2 = fixture('.sibling2')
-  
+
         const sibling1Step = { placement: 'swap', oldElement: sibling1, selector: '.sibling1' }
         const sibling2Step = { placement: 'swap', oldElement: sibling2, selector: '.sibling2' }
-  
+
         expect(up.fragment.compressNestedSteps([sibling1Step, sibling2Step])).toEqual([sibling1Step, sibling2Step])
       })
-  
+
       it('keeps the earlier step if two steps have the same { oldElement }', function() {
         const element = fixture('.element')
-  
+
         const step1 = { placement: 'swap', oldElement: element, selector: '.element', scroll: 'auto' }
         const step2 = { placement: 'swap', oldElement: element, selector: '.element', scroll: false }
-  
+
         expect(up.fragment.compressNestedSteps([step1, step2])).toEqual([step1])
       })
-  
+
       it('keeps the earlier step if two steps have the same { oldElement } but a different { selector }', function() {
         const element = fixture('.element')
-  
+
         const step1 = { placement: 'swap', oldElement: element, selector: 'div', scroll: 'auto' }
         const step2 = { placement: 'swap', oldElement: element, selector: '.element', scroll: false }
-  
+
         expect(up.fragment.compressNestedSteps([step1, step2])).toEqual([step1])
       })
     })
-  
+
     describe('up.template.clone()', function() {
-  
+
       it('clones the given <template> Element', function() {
         const template = htmlFixture(`
           <template id="my-template">
@@ -13387,17 +13447,17 @@ describe('up.fragment', function() {
           </template>
         `)
         const nodes = up.template.clone(template)
-  
+
         expect(nodes[0]).toBeTextNode('foo')
         expect(nodes[1].outerHTML).toBe('<b>bar</b>')
         expect(nodes[2]).toBeTextNode('baz')
-  
+
         // Make sure we made a copy and did not re-attach existing nodes
         expect(nodes[0]).not.toBe(template.content.childNodes[0])
         expect(nodes[1]).not.toBe(template.content.childNodes[1])
         expect(nodes[2]).not.toBe(template.content.childNodes[2])
       })
-  
+
       it('looks up a template by selector', function() {
         const template = htmlFixture(`
           <template id="my-template">
@@ -13405,44 +13465,44 @@ describe('up.fragment', function() {
           </template>
         `)
         const nodes = up.template.clone('#my-template')
-  
+
         expect(nodes[0]).toBeTextNode('foo')
         expect(nodes[1].outerHTML).toBe('<b>bar</b>')
         expect(nodes[2]).toBeTextNode('baz')
       })
-  
+
       it('throws an error if the a template selector cannot be matched', function() {
         const doUse = () => up.template.clone('#my-template')
         expect(doUse).toThrowError(/Template not found/i)
       })
-  
+
       it('allows to register a template engine with up:template:clone', function() {
         const template = htmlFixture(`
           <template id="my-template" type='text/minimustache'>
             Hello, <b>{{name}}</b>!
           </template>
         `)
-  
+
         const templateHandler = jasmine.createSpy('up:template:clone').and.callFake(function(event) {
           let html = event.target.innerHTML
           html = html.replace(/{{(\w+)}}/g, (_match, variable) => event.data[variable])
           event.nodes = up.element.createNodesFromHTML(html)
         })
-  
+
         up.on('up:template:clone', 'template[type="text/minimustache"]', templateHandler)
-  
+
         const nodes = up.template.clone('#my-template', { name: "Alice" })
         expect(templateHandler).toHaveBeenCalledWith(jasmine.objectContaining({target: template, data: { name: "Alice" }}), template, jasmine.anything())
-  
+
         expect(nodes[0]).toBeTextNode('Hello, ')
         expect(nodes[1].outerHTML).toBe('<b>Alice</b>')
         expect(nodes[2]).toBeTextNode('!')
       })
-  
+
       it('compiles an element cloned from a <template> with the second data argument', async function() {
         const compilerFn = jasmine.createSpy('compiler fn')
         up.compiler('#target', compilerFn)
-  
+
         const template = htmlFixture(`
           <template id="target-template">
             <div id="target">
@@ -13450,20 +13510,20 @@ describe('up.fragment', function() {
             </div>
           </template>
         `)
-  
+
         const target = htmlFixture(`
           <div id="target">
             old target
           </div>
         `)
-  
+
         expect(compilerFn).not.toHaveBeenCalled()
-  
+
         const nodes = up.template.clone('#target-template', { foo: 1, bar: 2 })
         up.render({ fragment: nodes })
-  
+
         await wait()
-  
+
         expect('#target').toHaveText('target from template')
         expect(compilerFn).toHaveBeenCalled()
         expect(compilerFn.calls.mostRecent().args[0]).toMatchSelector('#target')
