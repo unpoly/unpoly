@@ -36,7 +36,7 @@ describe('up.error', function() {
       await expectAsync(mutedPromise).toBeResolved()
     })
 
-    return it('does not mute a rejected promise with another rejection value', async function() {
+    it('does not mute a rejected promise with another rejection value', async function() {
       const error = new Error('other error')
       const promise = Promise.reject(error)
       const mutedPromise = up.error.muteUncriticalRejection(promise)

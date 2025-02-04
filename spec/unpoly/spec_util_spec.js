@@ -35,7 +35,7 @@ describe('up.specUtil', function() {
       expect(up.specUtil.documentOverflowElement()).toBe(this.body)
     })
 
-    return it('returns the scrolling element if the developer set { overflow-y: visible } on both <html> and <body>', function() {
+    it('returns the scrolling element if the developer set { overflow-y: visible } on both <html> and <body>', function() {
       this.html.style.overflowY = 'visible'
       this.body.style.overflowY = 'visible'
       expect(up.specUtil.documentOverflowElement()).toBe(up.viewport.root)
