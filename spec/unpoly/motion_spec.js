@@ -9,8 +9,8 @@ describe('up.motion', function() {
     describe('up.animate()', function() {
 
       it('animates the given element with a predefined animation', async function() {
-        const element = fixture('.element', {text: 'content'})
-        up.animate(element, 'fade-in', {duration: 200, easing: 'linear'})
+        const element = fixture('.element', { text: 'content' })
+        up.animate(element, 'fade-in', { duration: 200, easing: 'linear' })
 
         await wait(1)
 
@@ -26,8 +26,8 @@ describe('up.motion', function() {
       })
 
       it('animates the given element to a frame of kebab-case CSS properties', async function() {
-        const element = fixture('.element', {text: 'content', style: { opacity: 0 }})
-        up.animate(element, { opacity: 1 }, {duration: 200, easing: 'linear'})
+        const element = fixture('.element', { text: 'content', style: { opacity: 0 } })
+        up.animate(element, { opacity: 1 }, { duration: 200, easing: 'linear' })
 
         await wait(1)
 
@@ -45,8 +45,8 @@ describe('up.motion', function() {
       if (up.migrate.loaded) {
         it('animates the given element to a frame of camelCase CSS properties', async function() {
           const warnSpy = up.migrate.warn.mock()
-          const element = fixture('.element', {text: 'content', style: { 'font-size': '0px' }})
-          up.animate(element, { fontSize: '100px' }, {duration: 200, easing: 'linear'})
+          const element = fixture('.element', { text: 'content', style: { 'font-size': '0px' } })
+          up.animate(element, { fontSize: '100px' }, { duration: 200, easing: 'linear' })
 
           await wait(1)
 
@@ -67,7 +67,7 @@ describe('up.motion', function() {
         const $element = $fixture('.element').text('content')
         const resolveSpy = jasmine.createSpy('resolve')
 
-        const promise = up.animate($element, 'fade-in', {duration: 100, easing: 'linear'})
+        const promise = up.animate($element, 'fade-in', { duration: 100, easing: 'linear' })
         promise.then(resolveSpy)
 
         u.timer(50, function() {
@@ -82,11 +82,11 @@ describe('up.motion', function() {
 
       it('cancels an existing animation on the element by instantly jumping to the last frame (async)', async function() {
         const $element = $fixture('.element').text('content')
-        up.animate($element, { 'font-size': '40px' }, {duration: 10000, easing: 'linear'})
+        up.animate($element, { 'font-size': '40px' }, { duration: 10000, easing: 'linear' })
 
         await wait()
 
-        up.animate($element, 'fade-in', {duration: 200, easing: 'linear'})
+        up.animate($element, 'fade-in', { duration: 200, easing: 'linear' })
 
         await wait()
 
@@ -101,8 +101,8 @@ describe('up.motion', function() {
       it('cancels an existing animation on the element by instantly jumping to the last frame (sync)', async function() {
         const $element = $fixture('.element').text('content')
 
-        up.animate($element, { 'font-size': '40px' }, {duration: 10000, easing: 'linear'})
-        up.animate($element, 'fade-in', {duration: 200, easing: 'linear'})
+        up.animate($element, { 'font-size': '40px' }, { duration: 10000, easing: 'linear' })
+        up.animate($element, 'fade-in', { duration: 200, easing: 'linear' })
 
         expect($element.css('font-size')).toEqual('40px')
         expect($element).toHaveOpacity(0.0, 0.15)
@@ -140,7 +140,7 @@ describe('up.motion', function() {
         expect(this.fontSizeBeforeAnimate).toBeAround(0.5 * (100 - 10), 20)
         expect(this.heightBeforeAnimate).toBeAround(0.5 * (200 - 20), 40)
 
-        up.animate($element, 'fade-in', {duration: 1000, easing: 'linear'})
+        up.animate($element, 'fade-in', { duration: 1000, easing: 'linear' })
 
         await wait(500)
 
@@ -169,8 +169,8 @@ describe('up.motion', function() {
           // Use a vastly different default so we see that the given { duration } is used instead
           up.motion.config.duration = 5000
 
-          const element = fixture('.element', {text: 'content'})
-          up.animate(element, 'fade-in', {duration: 200, easing: 'linear'})
+          const element = fixture('.element', { text: 'content' })
+          up.animate(element, 'fade-in', { duration: 200, easing: 'linear' })
 
           await wait(100)
 
@@ -180,8 +180,8 @@ describe('up.motion', function() {
         it('defaults to up.motion.config.duration if no { duration } is given', async function() {
           up.motion.config.duration = 200
 
-          const element = fixture('.element', {text: 'content'})
-          up.animate(element, 'fade-in', {easing: 'linear'})
+          const element = fixture('.element', { text: 'content' })
+          up.animate(element, 'fade-in', { easing: 'linear' })
 
           await wait(100)
 
@@ -191,8 +191,8 @@ describe('up.motion', function() {
         it('animates instantly with { duration: 0 }', async function() {
           up.motion.config.duration = 200
 
-          const element = fixture('.element', {text: 'content'})
-          up.animate(element, 'fade-in', {easing: 'linear', duration: 0})
+          const element = fixture('.element', { text: 'content' })
+          up.animate(element, 'fade-in', { easing: 'linear', duration: 0 })
 
           await wait()
 
@@ -217,11 +217,11 @@ describe('up.motion', function() {
           const $element = $fixture('.element').text('content')
 
           const animation = function($element, options) {
-            e.setStyle($element, {opacity: 0})
+            e.setStyle($element, { opacity: 0 })
             return up.animate($element, { opacity: 1 }, options)
           }
 
-          up.animate($element, animation, {duration: 2000, easing: 'linear'})
+          up.animate($element, animation, { duration: 2000, easing: 'linear' })
 
           await wait(5)
 
@@ -240,11 +240,11 @@ describe('up.motion', function() {
           const $element = $fixture('.element').text('content')
 
           const animation = function($element, options) {
-            e.setStyle($element, {opacity: 0})
+            e.setStyle($element, { opacity: 0 })
             return up.animate($element, { opacity: 1 }, options)
           }
 
-          up.animate($element, animation, {duration: 200, easing: 'linear'})
+          up.animate($element, animation, { duration: 200, easing: 'linear' })
 
           u.task(() => {
             expect(up.motion.finishCount()).toEqual(1)
@@ -263,7 +263,7 @@ describe('up.motion', function() {
         it("doesn't animate and directly sets the last frame instead", function(done) {
           const $element = $fixture('.element').text('content')
           const callback = jasmine.createSpy('animation done callback')
-          const animateDone = up.animate($element, { 'font-size': '40px' }, {duration: 10000, easing: 'linear'})
+          const animateDone = up.animate($element, { 'font-size': '40px' }, { duration: 10000, easing: 'linear' })
           animateDone.then(callback)
 
           u.timer(5, () => {
@@ -280,7 +280,7 @@ describe('up.motion', function() {
           it("doesn't animate and resolves instantly", async function() {
             const $element = $fixture('.element').text('content')
             const callback = jasmine.createSpy('animation done callback')
-            const animateDone = up.animate($element, noneAnimation, {duration: 10000, easing: 'linear'})
+            const animateDone = up.animate($element, noneAnimation, { duration: 10000, easing: 'linear' })
             animateDone.then(callback)
             await wait()
             expect(callback).toHaveBeenCalled()
@@ -297,7 +297,7 @@ describe('up.motion', function() {
 
         it('cancels an existing animation on the given element by instantly jumping to the last frame', async function() {
           const $element = $fixture('.element').text('content')
-          up.animate($element, { 'font-size': '40px', 'opacity': '0.5' }, {duration: 30000})
+          up.animate($element, { 'font-size': '40px', 'opacity': '0.5' }, { duration: 30000 })
 
           await wait()
 
@@ -312,7 +312,7 @@ describe('up.motion', function() {
         it('cancels animations on children of the given element', async function() {
           const $parent = $fixture('.element')
           const $child = $parent.affix('.child')
-          up.animate($child, { 'font-size': '40px' }, {duration: 10000})
+          up.animate($child, { 'font-size': '40px' }, { duration: 10000 })
 
           await wait()
 
@@ -326,8 +326,8 @@ describe('up.motion', function() {
         it('does not cancel animations on other elements', async function() {
           const $element1 = $fixture('.element1').text('content1')
           const $element2 = $fixture('.element2').text('content2')
-          up.animate($element1, 'fade-in', {duration: 10000})
-          up.animate($element2, 'fade-in', {duration: 10000})
+          up.animate($element1, 'fade-in', { duration: 10000 })
+          up.animate($element2, 'fade-in', { duration: 10000 })
 
           await wait()
 
@@ -341,11 +341,11 @@ describe('up.motion', function() {
 
         it('restores CSS transitions from before the Unpoly animation', async function() {
           const $element = $fixture('.element').text('content')
-          $element.css({'transition': 'font-size 3s ease'})
+          $element.css({ 'transition': 'font-size 3s ease' })
           const oldTransitionProperty = $element.css('transition-property')
           expect(oldTransitionProperty).toBeDefined()
           expect(oldTransitionProperty).toContain('font-size') // be paranoid
-          up.animate($element, 'fade-in', {duration: 10000})
+          up.animate($element, 'fade-in', { duration: 10000 })
 
           await wait()
 
@@ -364,7 +364,7 @@ describe('up.motion', function() {
           const $v1 = $fixture('.element').text('v1')
           const $v2 = $fixture('.element').text('v2')
 
-          up.morph($v1, $v2, 'cross-fade', {duration: 200})
+          up.morph($v1, $v2, 'cross-fade', { duration: 200 })
 
           await wait()
 
@@ -384,7 +384,7 @@ describe('up.motion', function() {
           const $v1 = $fixture('.element').text('v1')
           const $v2 = $fixture('.element').text('v2')
 
-          up.morph($v1, $v2, 'cross-fade', {duration: 200})
+          up.morph($v1, $v2, 'cross-fade', { duration: 200 })
 
           await wait()
 
@@ -404,7 +404,7 @@ describe('up.motion', function() {
           const $old = $parent.affix('.old').text('old content')
           const $new = $parent.affix('.new').text('new content')
 
-          up.morph($old, $new, 'cross-fade', {duration: 2000})
+          up.morph($old, $new, 'cross-fade', { duration: 2000 })
 
           await wait()
 
@@ -423,7 +423,7 @@ describe('up.motion', function() {
           const $old = $fixture('.old').text('old content')
           const $new = $fixture('.new').text('new content')
 
-          up.morph($old, $new, 'cross-fade', {duration: 2000})
+          up.morph($old, $new, 'cross-fade', { duration: 2000 })
 
           await wait()
 
@@ -470,8 +470,8 @@ describe('up.motion', function() {
           let $element1 = $fixture('.element1').text('content1')
           let $element2 = $fixture('.element2').text('content2')
 
-          up.animate($element1, 'fade-in', {duration: 3000})
-          up.animate($element2, 'fade-in', {duration: 3000})
+          up.animate($element1, 'fade-in', { duration: 3000 })
+          up.animate($element2, 'fade-in', { duration: 3000 })
 
           await wait()
 
@@ -495,12 +495,12 @@ describe('up.motion', function() {
 
       it('transitions between two element by absolutely positioning one element above the other', async function() {
         let tolerance
-        const $old = $fixture('.old').text('old content').css({width: '200px', height: '200px'})
-        const $new = $fixture('.new').text('new content').css({width: '200px', height: '200px'}).detach()
+        const $old = $fixture('.old').text('old content').css({ width: '200px', height: '200px' })
+        const $new = $fixture('.new').text('new content').css({ width: '200px', height: '200px' }).detach()
 
         const oldDims = $old[0].getBoundingClientRect()
 
-        up.morph($old, $new, 'cross-fade', {duration: 200, easing: 'linear'})
+        up.morph($old, $new, 'cross-fade', { duration: 200, easing: 'linear' })
 
         await wait()
 
@@ -524,15 +524,15 @@ describe('up.motion', function() {
       it('does not change the position of sibling elements (as long as the old and new elements are of equal size)', async function() {
         const $container = $fixture('.container')
 
-        const $before = $container.affix('.before').css({margin: '20px'})
-        const $old = $container.affix('.old').text('old content').css({width: '200px', height: '200px', margin: '20px'})
-        const $new = $container.affix('.new').text('new content').css({width: '200px', height: '200px', margin: '20px'}).detach()
-        const $after = $container.affix('.before').css({margin: '20px'})
+        const $before = $container.affix('.before').css({ margin: '20px' })
+        const $old = $container.affix('.old').text('old content').css({ width: '200px', height: '200px', margin: '20px' })
+        const $new = $container.affix('.new').text('new content').css({ width: '200px', height: '200px', margin: '20px' }).detach()
+        const $after = $container.affix('.before').css({ margin: '20px' })
 
         const beforeDims = $before[0].getBoundingClientRect()
         const afterDims = $after[0].getBoundingClientRect()
 
-        up.morph($old, $new, 'cross-fade', {duration: 30, easing: 'linear'})
+        up.morph($old, $new, 'cross-fade', { duration: 30, easing: 'linear' })
 
         await wait()
 
@@ -559,7 +559,7 @@ describe('up.motion', function() {
 
         const oldDims = $old[0].getBoundingClientRect()
 
-        up.morph($old, $new, 'cross-fade', {duration: 100, easing: 'linear'})
+        up.morph($old, $new, 'cross-fade', { duration: 100, easing: 'linear' })
 
         await wait()
 
@@ -577,14 +577,14 @@ describe('up.motion', function() {
         const $v2 = $fixture('.element').text('v2')
         const $v3 = $fixture('.element').text('v3')
 
-        up.morph($v1, $v2, 'cross-fade', {duration: 200})
+        up.morph($v1, $v2, 'cross-fade', { duration: 200 })
 
         await wait()
 
         expect($v1).toHaveOpacity(1.0, 0.2)
         expect($v2).toHaveOpacity(0.0, 0.2)
 
-        up.morph($v2, $v3, 'cross-fade', {duration: 200})
+        up.morph($v2, $v3, 'cross-fade', { duration: 200 })
 
         await wait()
 
@@ -597,7 +597,7 @@ describe('up.motion', function() {
         const $v1 = $fixture('.element').text('v1')
         const $v2 = $fixture('.element').text('v2')
 
-        await up.morph($v1, $v2, 'cross-fade', {duration: 5})
+        await up.morph($v1, $v2, 'cross-fade', { duration: 5 })
 
         expect($v1).toBeDetached()
         expect($v2).toBeAttached()
@@ -607,15 +607,15 @@ describe('up.motion', function() {
         const $v1 = $fixture('.element').text('v1')
         const $v2 = $fixture('.element').text('v2')
 
-        await up.morph($v1, $v2, 'cross-fade', {duration: 5})
+        await up.morph($v1, $v2, 'cross-fade', { duration: 5 })
 
         expect($('up-bounds').length).toBe(0)
       })
 
       // https://github.com/unpoly/unpoly/issues/439
       it('does not leave a `transition` CSS property once the transition finishes, as to not affect the positioning of child elements', async function() {
-        const v1 = fixture('.element', {text: 'v1'})
-        const v2 = fixture('.element', {text: 'v2'})
+        const v1 = fixture('.element', { text: 'v1' })
+        const v2 = fixture('.element', { text: 'v2' })
 
         await up.morph(v1, v2, 'move-left', { duration: 10 })
 
@@ -638,7 +638,7 @@ describe('up.motion', function() {
             ])
           }
 
-          up.morph($old, $new, transition, {duration: 200, easing: 'linear'})
+          up.morph($old, $new, transition, { duration: 200, easing: 'linear' })
 
           await wait()
 
@@ -669,7 +669,7 @@ describe('up.motion', function() {
             up.animate(newElement, 'fade-in', options)
           }
 
-          up.morph($old, $new, transition, {duration: 200, easing: 'linear'})
+          up.morph($old, $new, transition, { duration: 200, easing: 'linear' })
 
           await wait()
 
@@ -689,7 +689,7 @@ describe('up.motion', function() {
 
           const transition = (oldElement, newElement, options) => up.morph(oldElement, newElement, 'cross-fade', options)
 
-          up.morph($old, $new, transition, {duration: 400, easing: 'linear'})
+          up.morph($old, $new, transition, { duration: 400, easing: 'linear' })
 
           await wait()
 
@@ -718,7 +718,7 @@ describe('up.motion', function() {
 
           const transition = (oldElement, newElement, options) => up.morph(oldElement, newElement, 'cross-fade', options)
 
-          up.morph($old, $new, transition, {duration: 50, easing: 'linear'})
+          up.morph($old, $new, transition, { duration: 50, easing: 'linear' })
 
           await wait()
 
@@ -737,7 +737,7 @@ describe('up.motion', function() {
         it("doesn't animate and detaches the old element instead", async function() {
           const $old = $fixture('.old').text('old content')
           const $new = $fixture('.new').text('new content')
-          up.morph($old, $new, 'cross-fade', {duration: 1000})
+          up.morph($old, $new, 'cross-fade', { duration: 1000 })
 
           await wait()
 
@@ -753,7 +753,7 @@ describe('up.motion', function() {
           it("doesn't animate and detaches the old element instead", async function() {
             const $old = $fixture('.old').text('old content')
             const $new = $fixture('.new').text('new content')
-            up.morph($old, $new, noneTransition, {duration: 1000})
+            up.morph($old, $new, noneTransition, { duration: 1000 })
 
             await wait()
 
@@ -765,7 +765,7 @@ describe('up.motion', function() {
           it('returns a fulfilled promise', async function() {
             const $old = $fixture('.old').text('old content')
             const $new = $fixture('.new').text('new content')
-            const promise = up.morph($old, $new, noneTransition, {duration: 1000})
+            const promise = up.morph($old, $new, noneTransition, { duration: 1000 })
 
             return await expectAsync(promise).toBeResolved()
           })

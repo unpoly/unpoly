@@ -112,7 +112,7 @@ describe('up.form', function() {
       it('accepts additional options for the render pass', async function() {
         const form = fixture('form')
         const field = e.affix(form, 'input[name="input-name"][value="old-value"]')
-        up.autosubmit(field, { headers: { 'Custom-Header': 'Custom-Value' }, params: { 'custom-param': 'custom-value' }})
+        up.autosubmit(field, { headers: { 'Custom-Header': 'Custom-Value' }, params: { 'custom-param': 'custom-value' } })
         const submitSpy = up.form.submit.mock().and.returnValue(Promise.resolve(new up.RenderResult()))
         await wait()
 
@@ -124,7 +124,7 @@ describe('up.form', function() {
 
         expect(submitSpy).toHaveBeenCalledWith(
           field,
-          jasmine.objectContaining({ headers: { 'Custom-Header': 'Custom-Value' }, params: { 'custom-param': 'custom-value' }})
+          jasmine.objectContaining({ headers: { 'Custom-Header': 'Custom-Value' }, params: { 'custom-param': 'custom-value' } })
         )
       })
     })
@@ -674,7 +674,7 @@ describe('up.form', function() {
 
                 await wait()
 
-                expect(callback).toHaveBeenCalledWith('other', 'email', jasmine.objectContaining({disable: '#disable-from-function-call'}))
+                expect(callback).toHaveBeenCalledWith('other', 'email', jasmine.objectContaining({ disable: '#disable-from-function-call' }))
               })
             })
 
@@ -1084,9 +1084,9 @@ describe('up.form', function() {
         const form = fixture('form[up-watch-disable=false]')
         const field = e.affix(form, 'input[type="text"][name="foo"]')
 
-        const options = up.form.watchOptions(field, {}, { defaults: { disable: true, feedback: true }})
+        const options = up.form.watchOptions(field, {}, { defaults: { disable: true, feedback: true } })
 
-        expect(options).toEqual(jasmine.objectContaining({disable: false, feedback: true}))
+        expect(options).toEqual(jasmine.objectContaining({ disable: false, feedback: true }))
       })
 
       it('parses status effect options with an [up-watch-] prefix', function() {
@@ -1113,7 +1113,7 @@ describe('up.form', function() {
 
         const options = up.form.watchOptions(field)
 
-        expect(options).toEqual(jasmine.objectContaining({delay: 500}))
+        expect(options).toEqual(jasmine.objectContaining({ delay: 500 }))
       })
 
       it('overrides all attributes with the given options hash', function() {
@@ -1122,7 +1122,7 @@ describe('up.form', function() {
 
         const options = up.form.watchOptions(field, { delay: 300 })
 
-        expect(options).toEqual(jasmine.objectContaining({delay: 300}))
+        expect(options).toEqual(jasmine.objectContaining({ delay: 300 }))
       })
     })
 
@@ -1131,7 +1131,7 @@ describe('up.form', function() {
       it('emits a preventable up:form:submit event', async function() {
         const $form = $fixture('form[action="/form-target"][up-target=".response"]')
 
-        const listener = jasmine.createSpy('submit listener').and.callFake(event => event.preventDefault())
+        const listener = jasmine.createSpy('submit listener').and.callFake((event) => event.preventDefault())
 
         $form.on('up:form:submit', listener)
 
@@ -1172,14 +1172,14 @@ describe('up.form', function() {
         expect(loadPage).toHaveBeenCalledWith(jasmine.objectContaining({
           method: 'POST',
           url: 'https://external-domain.com/path',
-          params: new up.Params({'field-name': 'field-value'})
+          params: new up.Params({ 'field-name': 'field-value' })
         }))
       })
 
       it('returns a promise with an up.RenderResult that contains information about the updated fragments and layer', async function() {
-        fixture('.one', {text: 'old one'})
-        fixture('.two', {text: 'old two'})
-        fixture('.three', {text: 'old three'})
+        fixture('.one', { text: 'old one' })
+        fixture('.two', { text: 'old two' })
+        fixture('.three', { text: 'old three' })
 
         const form = fixture('form[up-target=".one, .three"][action="/path"]')
 
@@ -1218,8 +1218,8 @@ describe('up.form', function() {
         it('adds the [name] and [value] from the first submit button to the params', async function() {
           const form = fixture('form[action="/action"][method="post"]')
           const fooInput = e.affix(form, 'input[type="text"][name="foo"][value="foo-value"]')
-          const submit1 = e.affix(form, 'button[type="submit"][name="submit1"][value="submit1-value"]', {text: 'Submit1'})
-          const submit2 = e.affix(form, 'button[type="submit"][name="submit2"][value="submit1-value"]', {text: 'Submit2'})
+          const submit1 = e.affix(form, 'button[type="submit"][name="submit1"][value="submit1-value"]', { text: 'Submit1' })
+          const submit2 = e.affix(form, 'button[type="submit"][name="submit2"][value="submit1-value"]', { text: 'Submit2' })
 
           up.submit(form)
           await wait()
@@ -1231,9 +1231,9 @@ describe('up.form', function() {
         it('does not include the submit button in the params with { submitButton: false }', async function() {
           const form = fixture('form[action="/action"][method="post"]')
           const fooInput = e.affix(form, 'input[type="text"][name="foo"][value="foo-value"]')
-          const submit = e.affix(form, 'button[type="submit"][name="submit"][value="submit-value"]', {text: 'Submit'})
+          const submit = e.affix(form, 'button[type="submit"][name="submit"][value="submit-value"]', { text: 'Submit' })
 
-          up.submit(form, {submitButton: false})
+          up.submit(form, { submitButton: false })
           await wait()
 
           expect(jasmine.lastRequest().url).toMatchURL('/action')
@@ -1257,7 +1257,7 @@ describe('up.form', function() {
 
           await wait()
 
-          jasmine.respondWithSelector(formSelector, {text: 'failure text', status: 422})
+          jasmine.respondWithSelector(formSelector, { text: 'failure text', status: 422 })
 
           await wait()
 
@@ -1283,7 +1283,7 @@ describe('up.form', function() {
 
           await wait()
 
-          jasmine.respondWithSelector(formSelector, {text: 'failure text', status: 422})
+          jasmine.respondWithSelector(formSelector, { text: 'failure text', status: 422 })
 
           await wait()
 
@@ -1311,7 +1311,7 @@ describe('up.form', function() {
 
           await wait()
 
-          jasmine.respondWithSelector(formSelector, {text: 'failure text', status: 422})
+          jasmine.respondWithSelector(formSelector, { text: 'failure text', status: 422 })
 
           await wait()
 
@@ -1478,7 +1478,7 @@ describe('up.form', function() {
 
           expect(input).toBeDisabled()
 
-          jasmine.respondWithSelector('.fail-target', {status: 500})
+          jasmine.respondWithSelector('.fail-target', { status: 500 })
 
           await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
 
@@ -1644,7 +1644,7 @@ describe('up.form', function() {
 
             unrelatedInput.focus()
 
-            jasmine.respondWithSelector('#target', {text: 'new target'})
+            jasmine.respondWithSelector('#target', { text: 'new target' })
             await wait()
 
             expect(input).not.toBeFocused()
@@ -1670,7 +1670,7 @@ describe('up.form', function() {
 
           // Since this test cannot programmatically append an <input type="file"> with
           // a value, we pass a binary param with the { params } option.
-          const params = { 'file-input': new Blob(['data'])}
+          const params = { 'file-input': new Blob(['data']) }
           up.submit(form, { params })
 
           await wait()
@@ -1705,7 +1705,7 @@ describe('up.form', function() {
         })
 
         it('submits the given form and replaces the target with the response', async function() {
-          up.submit(this.$form, {history: true})
+          up.submit(this.$form, { history: true })
 
           await wait()
 
@@ -1778,7 +1778,7 @@ describe('up.form', function() {
         })
 
         it('respects X-Up-Method and X-Up-Location response headers so the server can show that it redirected to a GET URL', async function() {
-          up.submit(this.$form, {history: true})
+          up.submit(this.$form, { history: true })
 
           await wait()
 
@@ -1849,7 +1849,7 @@ describe('up.form', function() {
         describe('with { location } option', function() {
 
           it('uses the given URL as the new browser location if the request succeeded', async function() {
-            up.submit(this.$form, {location: '/given-path'})
+            up.submit(this.$form, { location: '/given-path' })
             await wait()
             this.respondWith('<div class="response">new-text</div>')
             await wait()
@@ -1857,11 +1857,11 @@ describe('up.form', function() {
           })
 
           it('keeps the current browser location if the request failed', async function() {
-            const renderJob = up.submit(this.$form, {location: '/given-path', failTarget: '.response'})
+            const renderJob = up.submit(this.$form, { location: '/given-path', failTarget: '.response' })
 
             await wait()
 
-            jasmine.respondWith('<div class="response">new-text</div>', {status: 500})
+            jasmine.respondWith('<div class="response">new-text</div>', { status: 500 })
 
             await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
 
@@ -1871,7 +1871,7 @@ describe('up.form', function() {
 
         describe('with { history: false } option', function() {
           it('keeps the current browser location', async function() {
-            up.submit(this.$form, {history: false})
+            up.submit(this.$form, { history: false })
             await wait()
             this.respondWith('<div class="response">new-text</div>')
             await wait()
@@ -1888,7 +1888,7 @@ describe('up.form', function() {
 
             const revealStub = up.reveal.mock().and.returnValue(Promise.resolve())
 
-            up.submit($form, {scroll: '.other'})
+            up.submit($form, { scroll: '.other' })
 
             await wait()
 
@@ -1912,7 +1912,7 @@ describe('up.form', function() {
 
             const revealStub = up.reveal.mock().and.returnValue(Promise.resolve())
 
-            up.submit($form, {scroll: ':origin .form-child'})
+            up.submit($form, { scroll: ':origin .form-child' })
 
             await wait()
 
@@ -1942,7 +1942,7 @@ describe('up.form', function() {
 
             const revealStub = up.reveal.mock().and.returnValue(Promise.resolve())
 
-            const renderJob = up.submit($form, {reveal: '.other', failScroll: '.error'})
+            const renderJob = up.submit($form, { reveal: '.other', failScroll: '.error' })
 
             await wait()
 
@@ -1967,7 +1967,7 @@ describe('up.form', function() {
 
             const revealStub = up.reveal.mock().and.returnValue(Promise.resolve())
 
-            const renderJob = up.submit($form, {failScroll: ':origin .form-child'})
+            const renderJob = up.submit($form, { failScroll: ':origin .form-child' })
 
             await wait()
 
@@ -2064,7 +2064,7 @@ describe('up.form', function() {
           expect(validateEvent.form).toBe(form)
           // Cannot emit on the origin because we're batching validations from multiple origins
           expect(validateEvent.target).toBe(form)
-          expect(validateEvent.params).toMatchParams({foo: 'foo-value'})
+          expect(validateEvent.params).toMatchParams({ foo: 'foo-value' })
         })
 
         it('lets listeners mutate params before submission', async function() {
@@ -2088,17 +2088,17 @@ describe('up.form', function() {
 
       it('allows to override the { data } for the new element', async function() {
         const form = fixture('form[action="/path"]')
-        e.affix(form, '.element', {'up-data': JSON.stringify({key: 'one'}), text: 'old text'})
+        e.affix(form, '.element', { 'up-data': JSON.stringify({ key: 'one' }), text: 'old text' })
 
-        expect(up.data('.element')).toEqual({key: 'one'})
+        expect(up.data('.element')).toEqual({ key: 'one' })
 
-        up.validate('.element', {data: { key: 'two' }})
+        up.validate('.element', { data: { key: 'two' } })
 
         await wait()
 
         expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
 
-        jasmine.respondWithSelector('.element', {text: 'new text'})
+        jasmine.respondWithSelector('.element', { text: 'new text' })
 
         await wait()
 
@@ -2108,17 +2108,17 @@ describe('up.form', function() {
 
       it('allows to transfer data with { keepData }', async function() {
         const form = fixture('form[action="/path"]')
-        e.affix(form, '.element', {'up-data': JSON.stringify({key: 'one'}), text: 'old text'})
+        e.affix(form, '.element', { 'up-data': JSON.stringify({ key: 'one' }), text: 'old text' })
 
-        expect(up.data('.element')).toEqual({key: 'one'})
+        expect(up.data('.element')).toEqual({ key: 'one' })
 
-        up.validate('.element', {keepData: true})
+        up.validate('.element', { keepData: true })
 
         await wait()
 
         expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
 
-        jasmine.respondWithSelector('.element', {text: 'new text'})
+        jasmine.respondWithSelector('.element', { text: 'new text' })
 
         await wait()
 
@@ -2146,7 +2146,7 @@ describe('up.form', function() {
           const element = e.affix(form, '.element')
           const field = e.affix(form, 'input[name=email]')
 
-          up.validate('.element', {origin: field})
+          up.validate('.element', { origin: field })
 
           await wait()
 
@@ -2250,7 +2250,7 @@ describe('up.form', function() {
           const element = e.affix(form, '.element')
           const field = e.affix(form, 'input[name=email]')
 
-          up.validate(element, {origin: field})
+          up.validate(element, { origin: field })
 
           await wait()
 
@@ -2381,7 +2381,7 @@ describe('up.form', function() {
 
           expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('form')
 
-          jasmine.respondWithSelector('form.form', {text: 'new text'})
+          jasmine.respondWithSelector('form.form', { text: 'new text' })
 
           await wait()
 
@@ -2412,7 +2412,7 @@ describe('up.form', function() {
 
         it('returns a Promise that fulfills when the server responds to validation with an 200 OK status code', async function() {
           const form = fixture('form[action=/form]')
-          const element = e.affix(form, '.element', {text: 'old text'})
+          const element = e.affix(form, '.element', { text: 'old text' })
 
           const promise = up.validate(element)
 
@@ -2423,7 +2423,7 @@ describe('up.form', function() {
 
           await wait()
 
-          jasmine.respondWithSelector('.element', {text: 'new text'})
+          jasmine.respondWithSelector('.element', { text: 'new text' })
 
           await wait()
 
@@ -2436,7 +2436,7 @@ describe('up.form', function() {
 
         it('returns a Promise that rejects with an up.RenderResult when the server responds to validation with an error code', async function() {
           const form = fixture('form[action=/form]')
-          const element = e.affix(form, '.element', {text: 'old text'})
+          const element = e.affix(form, '.element', { text: 'old text' })
 
           const promise = up.validate(element)
 
@@ -2447,7 +2447,7 @@ describe('up.form', function() {
 
           await expectAsync(promise).toBePending()
 
-          jasmine.respondWithSelector('.element', {text: 'new text', status: 422})
+          jasmine.respondWithSelector('.element', { text: 'new text', status: 422 })
 
           await wait()
 
@@ -2458,7 +2458,7 @@ describe('up.form', function() {
 
         it('returns a Promise that rejects with up.Aborted when the validation request is aborted', async function() {
           const form = fixture('form[action=/form]')
-          const element = e.affix(form, '.element', {text: 'old text'})
+          const element = e.affix(form, '.element', { text: 'old text' })
 
           const promise = up.validate(element)
 
@@ -2477,7 +2477,7 @@ describe('up.form', function() {
 
         it('returns a Promise that rejects with up.Aborted when the form is aborted before a debounce { delay } has elapsed', async function() {
           const form = fixture('form[action=/form]')
-          const element = e.affix(form, '.element', {text: 'old text'})
+          const element = e.affix(form, '.element', { text: 'old text' })
 
           const promise = up.validate(element, { delay: 1000 })
 
@@ -2787,11 +2787,11 @@ describe('up.form', function() {
           await wait()
 
           expect(preview1Fn.calls.count()).toBe(1)
-          expect(preview1Fn).toHaveBeenCalledWith(jasmine.objectContaining({fragment: fooGroup}), {})
+          expect(preview1Fn).toHaveBeenCalledWith(jasmine.objectContaining({ fragment: fooGroup }), {})
           expect(undo1Fn.calls.count()).toBe(0)
 
           expect(preview2Fn.calls.count()).toBe(1)
-          expect(preview2Fn).toHaveBeenCalledWith(jasmine.objectContaining({fragment: bazGroup}), {})
+          expect(preview2Fn).toHaveBeenCalledWith(jasmine.objectContaining({ fragment: bazGroup }), {})
           expect(undo2Fn.calls.count()).toBe(0)
 
           jasmine.respondWith(`
@@ -2881,7 +2881,7 @@ describe('up.form', function() {
           const fooField = e.affix(form, 'input[name=foo]')
           const barField = e.affix(form, 'input[name=bar]')
           const bazField = e.affix(form, 'input[name=baz]')
-          const validateTarget = e.affix(form, '.validate-target', {text: 'old content'})
+          const validateTarget = e.affix(form, '.validate-target', { text: 'old content' })
           const fooFocus = e.affix(form, '.foo-focus')
           const barFocus = e.affix(form, '.bar-focus')
 
@@ -2895,7 +2895,7 @@ describe('up.form', function() {
 
           expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.validate-target')
 
-          jasmine.respondWithSelector('.validate-target', {text: 'new content'})
+          jasmine.respondWithSelector('.validate-target', { text: 'new content' })
 
           await wait()
 
@@ -2908,8 +2908,8 @@ describe('up.form', function() {
           const fooField = e.affix(form, 'input[name=foo][value="foo-value"]')
           const barField = e.affix(form, 'input[name=bar][value="bar-value"]')
 
-          up.validate(fooField, {params: { baz: 'baz-value' }, formGroup: false})
-          up.validate(barField, {params: { bam: 'bam-value' }, formGroup: false})
+          up.validate(fooField, { params: { baz: 'baz-value' }, formGroup: false })
+          up.validate(barField, { params: { bam: 'bam-value' }, formGroup: false })
 
           await wait()
 
@@ -2926,8 +2926,8 @@ describe('up.form', function() {
           const fooField = e.affix(form, 'input[name=foo]')
           const barField = e.affix(form, 'input[name=bar]')
 
-          up.validate(fooField, {headers: { Baz: 'baz-value' }, formGroup: false})
-          up.validate(barField, {headers: { Bam: 'bam-value' }, formGroup: false})
+          up.validate(fooField, { headers: { Baz: 'baz-value' }, formGroup: false })
+          up.validate(barField, { headers: { Bam: 'bam-value' }, formGroup: false })
           await wait()
 
           expect(jasmine.lastRequest().requestHeaders['Baz']).toBe('baz-value')
@@ -2953,8 +2953,8 @@ describe('up.form', function() {
           expect(fooDataSpy.calls.argsFor(0)[0]).toEqual({})
           expect(barDataSpy.calls.argsFor(0)[0]).toEqual({})
 
-          up.validate(fooField, {data: { key: 1 }, formGroup: false})
-          up.validate(barField, {data: { key: 2 }, formGroup: false})
+          up.validate(fooField, { data: { key: 1 }, formGroup: false })
+          up.validate(barField, { data: { key: 2 }, formGroup: false })
 
           await wait()
 
@@ -2969,10 +2969,10 @@ describe('up.form', function() {
           await wait()
 
           expect(fooDataSpy.calls.count()).toBe(2)
-          expect(fooDataSpy.calls.argsFor(1)[0]).toEqual({key: 1})
+          expect(fooDataSpy.calls.argsFor(1)[0]).toEqual({ key: 1 })
 
           expect(barDataSpy.calls.count()).toBe(2)
-          expect(barDataSpy.calls.argsFor(1)[0]).toEqual({key: 2})
+          expect(barDataSpy.calls.argsFor(1)[0]).toEqual({ key: 2 })
         })
 
         describe('concurrency', function() {
@@ -3035,9 +3035,9 @@ describe('up.form', function() {
           it('does not crash if an target for a pending batch is destroyed while the validation request is loading', async function() {
             const form = fixture('form[action=/path]')
             const fooField = e.affix(form, 'input[name=foo][up-validate="#foo-target"]')
-            const fooTarget = e.affix(form, '#foo-target', {text: 'old foo target'})
+            const fooTarget = e.affix(form, '#foo-target', { text: 'old foo target' })
             const barField = e.affix(form, 'input[name=bar][up-validate="#bar-target"]')
-            const barTarget = e.affix(form, '#bar-target', {text: 'new bar target'})
+            const barTarget = e.affix(form, '#bar-target', { text: 'new bar target' })
 
             up.validate(fooField)
             up.validate(barField)
@@ -3233,7 +3233,7 @@ describe('up.form', function() {
 
         it('disables a button[type=button]', function() {
           const form = fixture('form')
-          const button = e.affix(form, 'button[type=button]', {text: 'label'})
+          const button = e.affix(form, 'button[type=button]', { text: 'label' })
           expect(button).not.toBeDisabled()
 
           up.form.disable(form)
@@ -3243,7 +3243,7 @@ describe('up.form', function() {
 
         it('disables an input[type=button]', function() {
           const form = fixture('form')
-          const button = e.affix(form, 'input[type=button]', {value: 'label'})
+          const button = e.affix(form, 'input[type=button]', { value: 'label' })
           expect(button).not.toBeDisabled()
 
           up.form.disable(form)
@@ -3340,7 +3340,7 @@ describe('up.form', function() {
       })
 
       it('submits a form with [up-submit=true]', async function() {
-        fixture('main', {text: 'old text'})
+        fixture('main', { text: 'old text' })
 
         const $form = $fixture('form[action="/form-target"][method="put"][up-submit="true"]')
         $form.append('<input name="field" value="value">')
@@ -3358,7 +3358,7 @@ describe('up.form', function() {
       it('does not focus the submit button when pressing Enter within an input (discussion #658)', async function() {
         const form = fixture('form[up-submit][action="/action"]')
         const input = e.affix(form, 'input[type=text][name="foo"]')
-        const submitButton = e.affix(form, 'button[type=submit]', {text: 'Submit'})
+        const submitButton = e.affix(form, 'button[type=submit]', { text: 'Submit' })
 
         Trigger.submitFormWithEnter(input)
 
@@ -3369,7 +3369,7 @@ describe('up.form', function() {
       })
 
       it('does not submit a form when a HTML5 validation constraint is violated', async function() {
-        fixture('main', {text: 'old text'})
+        fixture('main', { text: 'old text' })
 
         const [form, input, submitButton] = htmlFixtureList(`
           <form action="/form-target" method="post" up-submit>
@@ -3405,7 +3405,7 @@ describe('up.form', function() {
           up.hello(form)
 
           let submitEvent = null
-          form.addEventListener('up:form:submit', event => { submitEvent = event })
+          form.addEventListener('up:form:submit', (event) => { submitEvent = event })
 
           Trigger.clickSequence(submitButton)
 
@@ -3442,7 +3442,7 @@ describe('up.form', function() {
           up.hello(form)
 
           let submitEvent = null
-          form.addEventListener('up:form:submit', event => { submitEvent = event })
+          form.addEventListener('up:form:submit', (event) => { submitEvent = event })
 
           Trigger.clickSequence(submitButton)
           await wait()
@@ -3475,12 +3475,12 @@ describe('up.form', function() {
       })
 
       it('does not submit the form if a listener has prevented the submit event', async function() {
-        fixture('.response', {text: 'old text'})
+        fixture('.response', { text: 'old text' })
         const form = fixture('form[action="/form-target"][method="put"][up-target=".response"]')
         const submitButton = e.affix(form, 'input[type="submit"]')
         up.hello(form)
 
-        form.addEventListener('submit', event => event.preventDefault())
+        form.addEventListener('submit', (event) => event.preventDefault())
 
         Trigger.clickSequence(submitButton)
 
@@ -3490,7 +3490,7 @@ describe('up.form', function() {
       })
 
       it('does not handle a form with a [target] attribute', async function() {
-        fixture('.response', {text: 'old text'})
+        fixture('.response', { text: 'old text' })
         const form = fixture('form[action="/form-target"][method="put"][up-submit][target="_blank"]')
         const submitButton = e.affix(form, 'input[type="submit"]')
         up.hello(form)
@@ -3634,7 +3634,7 @@ describe('up.form', function() {
 
           await wait()
 
-          jasmine.respondWithSelector(formSelector, {text: 'failure text', status: 422})
+          jasmine.respondWithSelector(formSelector, { text: 'failure text', status: 422 })
 
           await wait()
 
@@ -3836,13 +3836,13 @@ describe('up.form', function() {
 
       describe('with [up-preview] modifier', function() {
         it('shows a preview effect while the form is loading', async function() {
-          const target = fixture('#target', {text: 'old target'})
+          const target = fixture('#target', { text: 'old target' })
           const spinnerContainer = fixture('#other')
 
-          up.preview('my:preview', preview => preview.insert(spinnerContainer, '<div id="spinner"></div>'))
+          up.preview('my:preview', (preview) => preview.insert(spinnerContainer, '<div id="spinner"></div>'))
 
-          const form = fixture('form[action="/foo"][up-submit][up-target="#target"][up-preview="my:preview"]', {text: 'label'})
-          const submitButton = e.affix(form, 'input[type=submit]', {text: 'label'})
+          const form = fixture('form[action="/foo"][up-submit][up-target="#target"][up-preview="my:preview"]', { text: 'label' })
+          const submitButton = e.affix(form, 'input[type=submit]', { text: 'label' })
 
           expect(spinnerContainer).not.toHaveSelector('#spinner')
 
@@ -3851,7 +3851,7 @@ describe('up.form', function() {
 
           expect(spinnerContainer).toHaveSelector('#spinner')
 
-          jasmine.respondWithSelector('#target', {text: 'new target'})
+          jasmine.respondWithSelector('#target', { text: 'new target' })
           await wait()
 
           expect(spinnerContainer).not.toHaveSelector('#spinner')
@@ -3860,9 +3860,9 @@ describe('up.form', function() {
 
       describe('with [up-placeholder] modifier', function() {
         it('shows a UI placeholder while the form is loading', async function() {
-          fixture('#target', {content: '<p>old target</p>'})
-          const form = fixture('form[action="/foo"][up-submit][up-target="#target"][up-placeholder="<p>placeholder</p>"]', {text: 'label'})
-          const submitButton = e.affix(form, 'input[type=submit]', {text: 'label'})
+          fixture('#target', { content: '<p>old target</p>' })
+          const form = fixture('form[action="/foo"][up-submit][up-target="#target"][up-placeholder="<p>placeholder</p>"]', { text: 'label' })
+          const submitButton = e.affix(form, 'input[type=submit]', { text: 'label' })
 
           expect('#target').toHaveVisibleText('old target')
 
@@ -3871,7 +3871,7 @@ describe('up.form', function() {
 
           expect('#target').toHaveVisibleText('placeholder')
 
-          jasmine.respondWithSelector('#target', {content: '<p>new target</p>'})
+          jasmine.respondWithSelector('#target', { content: '<p>new target</p>' })
           await wait()
 
           expect('#target').toHaveVisibleText('new target')
@@ -3926,7 +3926,7 @@ describe('up.form', function() {
       it('queues changes while a prior form autosubmission is still loading (bugfix)', async function() {
         const form = fixture('form[method="post"][action="/endpoint"][up-target="#target"]')
         const field = e.affix(form, 'input[up-autosubmit][name="input-name"][value="value1"]')
-        const target = fixture('#target', {text: 'initial text'})
+        const target = fixture('#target', { text: 'initial text' })
         up.hello(form)
 
         field.value = 'value2'
@@ -3947,7 +3947,7 @@ describe('up.form', function() {
         // Still waiting for the previous request
         expect(jasmine.Ajax.requests.count()).toBe(1)
 
-        jasmine.respondWithSelector('#target', {text: 'response for value2'})
+        jasmine.respondWithSelector('#target', { text: 'response for value2' })
 
         await wait()
 
@@ -3957,7 +3957,7 @@ describe('up.form', function() {
         expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#target')
         expect(jasmine.lastRequest().data()['input-name']).toEqual(['value3'])
 
-        jasmine.respondWithSelector('#target', {text: 'response for value3'})
+        jasmine.respondWithSelector('#target', { text: 'response for value3' })
 
         await wait()
 
@@ -4122,17 +4122,17 @@ describe('up.form', function() {
             </form>
           `)
           up.hello(form)
-          const target = fixture('#target', {text: 'old target'})
+          const target = fixture('#target', { text: 'old target' })
 
           input.value = 'changed-value'
           Trigger.change(input)
 
           await wait(40)
 
-          expect(previewFn).toHaveBeenCalledWith(jasmine.objectContaining({fragment: target}), {})
+          expect(previewFn).toHaveBeenCalledWith(jasmine.objectContaining({ fragment: target }), {})
           expect(undoFn).not.toHaveBeenCalled()
 
-          jasmine.respondWithSelector('#target', {text: 'new target'})
+          jasmine.respondWithSelector('#target', { text: 'new target' })
 
           await wait()
 
@@ -4152,7 +4152,7 @@ describe('up.form', function() {
             </form>
           `)
           up.hello(form)
-          fixture('#target', {text: 'old target'})
+          fixture('#target', { text: 'old target' })
 
           input.value = 'changed-value'
           Trigger.change(input)
@@ -4710,7 +4710,7 @@ describe('up.form', function() {
         const form = fixture('form[method="post"][action="/endpoint"]')
         const field1 = e.affix(form, 'input[up-validate][name="field1"][value="value1"][up-validate="#preview"]')
         const field2 = e.affix(form, 'input[up-validate][name="field2"][value="value1"][up-validate="#preview"]')
-        const preview = e.affix(form, '#preview', {text: 'version 1'})
+        const preview = e.affix(form, '#preview', { text: 'version 1' })
         up.hello(form)
 
         field1.value = 'value2'
@@ -4732,7 +4732,7 @@ describe('up.form', function() {
         // Still waiting for the previous request
         expect(jasmine.Ajax.requests.count()).toBe(1)
 
-        jasmine.respondWithSelector('#preview', {text: 'version 2'})
+        jasmine.respondWithSelector('#preview', { text: 'version 2' })
 
         await wait()
 
@@ -4743,7 +4743,7 @@ describe('up.form', function() {
         expect(jasmine.lastRequest().data()['field1']).toEqual(['value2'])
         expect(jasmine.lastRequest().data()['field2']).toEqual(['value2'])
 
-        jasmine.respondWithSelector('#preview', {text: 'version 3'})
+        jasmine.respondWithSelector('#preview', { text: 'version 3' })
 
         await wait()
 
@@ -5468,9 +5468,9 @@ describe('up.form', function() {
       it("works on inputs outside the form (associated with [form=form-id] attribute)", async function() {
         const form = fixture('form#form-id')
         const select = e.affix(form, 'select[name="select-name"][up-switch=".target"][form="#form-id"]')
-        const fooOption = e.affix(select, 'option[value="foo"]', {text: 'Foo'})
-        const barOption = e.affix(select, 'option[value="bar"]', {text: 'Bar'})
-        const bazOption = e.affix(select, 'option[value="baz"]', {text: 'Baz'})
+        const fooOption = e.affix(select, 'option[value="foo"]', { text: 'Foo' })
+        const barOption = e.affix(select, 'option[value="bar"]', { text: 'Bar' })
+        const bazOption = e.affix(select, 'option[value="baz"]', { text: 'Baz' })
         const target = e.affix(form, '.target[up-show-for="bar"]')
         up.hello(select)
         await wait()

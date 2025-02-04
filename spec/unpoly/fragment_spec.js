@@ -89,7 +89,7 @@ describe('up.fragment', function() {
             { '.element': '.element', content: 'element in layer 2' }
           ])
 
-          const result = up.fragment.get(window.document, '.element', {layer: 1})
+          const result = up.fragment.get(window.document, '.element', { layer: 1 })
 
           expect(result).toHaveText('element in layer 1')
         })
@@ -114,7 +114,7 @@ describe('up.fragment', function() {
           makeLayers([{ target: '.element' }, { target: '.element' }])
 
           expect(up.layer.count).toBe(2)
-          const result = up.fragment.get('.element', {layer: 'root'})
+          const result = up.fragment.get('.element', { layer: 'root' })
 
           expect(up.layer.get(result)).toBe(up.layer.get(0))
         })
@@ -132,7 +132,7 @@ describe('up.fragment', function() {
         it('matches elements on the root layer with { layer: 0 } (bugfix)', function() {
           makeLayers([{ target: '.element' }, { target: '.element' }])
 
-          const result = up.fragment.get('.element', {layer: 0})
+          const result = up.fragment.get('.element', { layer: 0 })
 
           expect(up.layer.get(result)).toBe(up.layer.root)
         })
@@ -140,7 +140,7 @@ describe('up.fragment', function() {
         it('throws an exception if the { layer } option did not resolve to any layer', function() {
           makeLayers(2)
           const doGet = function() {
-            return up.fragment.get('.element', {layer: 3})
+            return up.fragment.get('.element', { layer: 3 })
           }
           expect(doGet).toThrowError(/unknown layer: 3/i)
         })
@@ -154,7 +154,7 @@ describe('up.fragment', function() {
             { target: '.element#e' }, // 4
           ])
 
-          const result = up.fragment.get('.element', {layer: '1 3'})
+          const result = up.fragment.get('.element', { layer: '1 3' })
           expect(result.id).toBe('b')
         })
 
@@ -167,7 +167,7 @@ describe('up.fragment', function() {
             { target: '.element#e' }, // 4
           ])
 
-          const result = up.fragment.get('.element', {layer: '3 1'})
+          const result = up.fragment.get('.element', { layer: '3 1' })
           expect(result.id).toBe('d')
         })
       })
@@ -176,24 +176,24 @@ describe('up.fragment', function() {
 
         it('prefers to match an element closest to origin when no { match } option is given', function() {
           const root = fixture('.element#root')
-          const one = e.affix(root, '.element', {text: 'old one'})
-          const two = e.affix(root, '.element', {text: 'old two'})
+          const one = e.affix(root, '.element', { text: 'old one' })
+          const two = e.affix(root, '.element', { text: 'old two' })
           const childOfTwo = e.affix(two, '.origin')
-          const three = e.affix(root, '.element', {text: 'old three'})
+          const three = e.affix(root, '.element', { text: 'old three' })
 
-          const result = up.fragment.get('.element', {origin: childOfTwo})
+          const result = up.fragment.get('.element', { origin: childOfTwo })
 
           expect(result).toBe(two)
         })
 
         it('prefers to match an element closest to origin with { match: "region" }', function() {
           const root = fixture('.element#root')
-          const one = e.affix(root, '.element', {text: 'old one'})
-          const two = e.affix(root, '.element', {text: 'old two'})
+          const one = e.affix(root, '.element', { text: 'old one' })
+          const two = e.affix(root, '.element', { text: 'old two' })
           const childOfTwo = e.affix(two, '.origin')
-          const three = e.affix(root, '.element', {text: 'old three'})
+          const three = e.affix(root, '.element', { text: 'old three' })
 
-          const result = up.fragment.get('.element', {origin: childOfTwo, match: 'region'})
+          const result = up.fragment.get('.element', { origin: childOfTwo, match: 'region' })
 
           expect(result).toBe(two)
         })
@@ -204,60 +204,60 @@ describe('up.fragment', function() {
           const child = e.affix(parent, '.child')
           const origin = e.affix(parent, '.origin')
           const doGet = function() {
-            return up.fragment.get('.parent[foo="a b, c d"] .child', {origin, match: 'region'})
+            return up.fragment.get('.parent[foo="a b, c d"] .child', { origin, match: 'region' })
           }
           expect(doGet).not.toThrowError()
         })
 
         it('prefers to match a descendant selector in the region of the origin', function() {
           const element1 = fixture('.element')
-          const element1Child1 = e.affix(element1, '.child', {text: 'old element1Child1'})
-          const element1Child2 = e.affix(element1, '.child.sibling', {text: 'old element1Child2'})
+          const element1Child1 = e.affix(element1, '.child', { text: 'old element1Child1' })
+          const element1Child2 = e.affix(element1, '.child.sibling', { text: 'old element1Child2' })
 
           const element2 = fixture('.element')
-          const element2Child1 = e.affix(element2, '.child', {text: 'old element2Child1'})
-          const element2Child2 = e.affix(element2, '.child.sibling', {text: 'old element2Child2'})
+          const element2Child1 = e.affix(element2, '.child', { text: 'old element2Child1' })
+          const element2Child2 = e.affix(element2, '.child.sibling', { text: 'old element2Child2' })
 
-          const result = up.fragment.get('.element .sibling', {origin: element2Child1})
+          const result = up.fragment.get('.element .sibling', { origin: element2Child1 })
 
           expect(result).toBe(element2Child2)
         })
 
         it('prefers to match a union of descendant selectors in the region of the origin', function() {
           const element1 = fixture('.element')
-          const element1Child1 = e.affix(element1, '.child', {text: 'old element1Child1'})
-          const element1Child2 = e.affix(element1, '.child.sibling', {text: 'old element1Child2'})
+          const element1Child1 = e.affix(element1, '.child', { text: 'old element1Child1' })
+          const element1Child2 = e.affix(element1, '.child.sibling', { text: 'old element1Child2' })
 
           const element2 = fixture('.element')
-          const element2Child1 = e.affix(element2, '.child', {text: 'old element2Child1'})
-          const element2Child2 = e.affix(element2, '.child.sibling', {text: 'old element2Child2'})
+          const element2Child1 = e.affix(element2, '.child', { text: 'old element2Child1' })
+          const element2Child2 = e.affix(element2, '.child.sibling', { text: 'old element2Child2' })
 
-          const result = up.fragment.get('.foo, .element .sibling, .baz', {origin: element2Child1})
+          const result = up.fragment.get('.foo, .element .sibling, .baz', { origin: element2Child1 })
 
           expect(result.innerText).toBe('old element2Child2')
         })
 
         it('ignores the origin with { match: "first" }', function() {
           const root = fixture('.element#root')
-          const one = e.affix(root, '.element', {text: 'old one'})
-          const two = e.affix(root, '.element', {text: 'old two'})
+          const one = e.affix(root, '.element', { text: 'old one' })
+          const two = e.affix(root, '.element', { text: 'old two' })
           const childOfTwo = e.affix(two, '.origin')
-          const three = e.affix(root, '.element', {text: 'old three'})
+          const three = e.affix(root, '.element', { text: 'old three' })
 
-          const result = up.fragment.get('.element', {origin: childOfTwo, match: 'first'})
+          const result = up.fragment.get('.element', { origin: childOfTwo, match: 'first' })
 
           expect(result).toBe(root)
         })
 
         it('ignores the origin with up.fragment.config.match = "first"', function() {
           const root = fixture('.element#root')
-          const one = e.affix(root, '.element', {text: 'old one'})
-          const two = e.affix(root, '.element', {text: 'old two'})
+          const one = e.affix(root, '.element', { text: 'old one' })
+          const two = e.affix(root, '.element', { text: 'old two' })
           const childOfTwo = e.affix(two, '.origin')
-          const three = e.affix(root, '.element', {text: 'old three'})
+          const three = e.affix(root, '.element', { text: 'old three' })
 
           up.fragment.config.match = 'first'
-          const result = up.fragment.get('.element', {origin: childOfTwo})
+          const result = up.fragment.get('.element', { origin: childOfTwo })
 
           expect(result).toBe(root)
         })
@@ -314,7 +314,7 @@ describe('up.fragment', function() {
           // We always want to match an earlier main target, even if the user clicks outside it.
           up.fragment.config.mainTargets = ['#main', '#container']
 
-          const result = up.fragment.get(':main', {origin: navItem})
+          const result = up.fragment.get(':main', { origin: navItem })
           expect(result).toBe(main)
         })
 
@@ -330,7 +330,7 @@ describe('up.fragment', function() {
           // We always want to match an earlier main target, even if the user clicks outside it.
           up.fragment.config.mainTargets = ['#main', '#container']
 
-          const result = up.fragment.get(':main .target', {origin: navItem})
+          const result = up.fragment.get(':main .target', { origin: navItem })
           expect(result).toBe(mainTarget)
         })
       })
@@ -461,7 +461,7 @@ describe('up.fragment', function() {
             { '.element': '.element', content: 'element in layer 2' }
           ])
 
-          const results = up.fragment.all(window.document, '.element', {layer: 1})
+          const results = up.fragment.all(window.document, '.element', { layer: 1 })
 
           expect(results.length).toBe(1)
           expect(results[0]).toHaveText('element in layer 1')
@@ -486,7 +486,7 @@ describe('up.fragment', function() {
 
         beforeEach(function(done) {
           this.rootElement = fixture('.element.in-root')
-          fixtureInOverlay('.element.in-overlay').then(element => {
+          fixtureInOverlay('.element.in-overlay').then((element) => {
             this.overlayElement = element
             done()
           })
@@ -499,12 +499,12 @@ describe('up.fragment', function() {
 
         it("only matches elements in the layer of the given { origin }", function() {
           const otherRootElement = fixture('.element.other.in-root')
-          const results = up.fragment.all('.element', {origin: otherRootElement})
+          const results = up.fragment.all('.element', { origin: otherRootElement })
           expect(results).toEqual([this.rootElement, otherRootElement])
         })
 
         it('only matches elements in the given { layer }', function() {
-          const results = up.fragment.all('.element', {layer: 'root'})
+          const results = up.fragment.all('.element', { layer: 'root' })
           expect(results).toEqual([this.rootElement])
         })
 
@@ -515,7 +515,7 @@ describe('up.fragment', function() {
 
         it('returns the first argument if that is already an element, even if { layer } is given', function() {
           const match = fixture('.match')
-          const result = up.fragment.get(match, {layer: 'root'})
+          const result = up.fragment.get(match, { layer: 'root' })
           expect(result).toBe(match)
         })
       })
@@ -678,7 +678,7 @@ describe('up.fragment', function() {
         fixture('#target')
         const attrValue = '<script>alert("I am valid unescaped HTML/JS")<script>'
 
-        up.render({fragment: `<div id='target' foo='${attrValue}'></div>`})
+        up.render({ fragment: `<div id='target' foo='${attrValue}'></div>` })
 
         expect(document.querySelector('#target').getAttribute('foo')).toBe(attrValue)
       })
@@ -688,15 +688,15 @@ describe('up.fragment', function() {
         it('returns an up.RenderJob that describes the render options', function() {
           fixture('.target')
 
-          const job = up.render('.target', {content: 'new text'})
+          const job = up.render('.target', { content: 'new text' })
           expect(job.options.target).toBe('.target')
           expect(job.options.content).toBe('new text')
         })
 
         it('returns a promise for an up.RenderResult describing the updated fragments and layer', async function() {
-          fixture('.one', {text: 'old one'})
-          fixture('.two', {text: 'old two'})
-          fixture('.three', {text: 'old three'})
+          fixture('.one', { text: 'old one' })
+          fixture('.two', { text: 'old two' })
+          fixture('.three', { text: 'old three' })
 
           const promise = up.render('.one, .three', {
             document: `
@@ -719,10 +719,10 @@ describe('up.fragment', function() {
 
         it('runs compilers for matching elements in the new content', function() {
           const childCompiler = jasmine.createSpy('compiler')
-          up.compiler('.child', element => childCompiler(element.tagName, element.className))
+          up.compiler('.child', (element) => childCompiler(element.tagName, element.className))
 
           fixture('.fragment')
-          up.render({fragment: '<div class="fragment"><span class="child"></span></div>'})
+          up.render({ fragment: '<div class="fragment"><span class="child"></span></div>' })
 
           expect(childCompiler).toHaveBeenCalledWith('SPAN', 'child')
         })
@@ -730,12 +730,12 @@ describe('up.fragment', function() {
         it('calls compilers with a third "meta" argument containing information about the render pass', async function() {
           const compiler = jasmine.createSpy('compiler')
           up.compiler('.element', compiler)
-          fixture('.element', {text: 'old content'})
+          fixture('.element', { text: 'old content' })
 
-          up.render('.element', {url: '/path'})
+          up.render('.element', { url: '/path' })
           await wait()
 
-          jasmine.respondWithSelector('.element', {text: 'new content'})
+          jasmine.respondWithSelector('.element', { text: 'new content' })
           await wait()
 
           expect('.element').toHaveText('new content')
@@ -753,12 +753,12 @@ describe('up.fragment', function() {
             const compiler = jasmine.createSpy('compiler')
             up.compiler('.element', compiler)
 
-            fixture('.element', {text: 'old content'})
-            up.render('.element', {url: '/path'})
+            fixture('.element', { text: 'old content' })
+            up.render('.element', { url: '/path' })
 
             await wait()
 
-            jasmine.respondWithSelector('.element', {text: 'new content'})
+            jasmine.respondWithSelector('.element', { text: 'new content' })
             await wait()
 
             expect('.element').toHaveText('new content')
@@ -778,7 +778,7 @@ describe('up.fragment', function() {
             const compileError = new Error("error from crashing compiler")
             const crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(compileError)
             up.compiler('.element', crashingCompiler)
-            fixture('.element', {text: 'old text'})
+            fixture('.element', { text: 'old text' })
 
             await jasmine.expectGlobalError(compileError, async function() {
               const promise = up.render({ fragment: '<div class="element">new text</div>' })
@@ -794,7 +794,7 @@ describe('up.fragment', function() {
             const compileError = new Error('error from crashing compiler')
             const crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(compileError)
             up.compiler('.element', crashingCompiler)
-            const element = fixture('.element', {text: 'old text'})
+            const element = fixture('.element', { text: 'old text' })
 
             await jasmine.expectGlobalError(compileError, async function() {
               const promise = up.render({ fragment: '<div class="element">new text</div>' })
@@ -811,7 +811,7 @@ describe('up.fragment', function() {
             const crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(compileError)
             const errorCallback = jasmine.createSpy('onError callback')
             up.compiler('.element', crashingCompiler)
-            const element = fixture('.element', {text: 'old text'})
+            const element = fixture('.element', { text: 'old text' })
 
             await jasmine.expectGlobalError(compileError, () => up.render({ fragment: '<div class="element">new text</div>', onError: errorCallback }))
 
@@ -828,7 +828,7 @@ describe('up.fragment', function() {
             up.compiler('.element', compilerBefore)
             up.compiler('.element', crashingCompiler)
             up.compiler('.element', compilerAfter)
-            fixture('.element', {text: 'old text'})
+            fixture('.element', { text: 'old text' })
 
             await jasmine.expectGlobalError(compileError, () => up.render({ fragment: '<div class="element">new text</div>' }))
 
@@ -843,9 +843,9 @@ describe('up.fragment', function() {
             const compileError = new Error("error from crashing compiler")
             const crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(compileError)
             up.compiler('.secondary', crashingCompiler)
-            fixture('.primary', {text: 'old primary'})
-            fixture('.secondary', {text: 'old secondary'})
-            fixture('.tertiary', {text: 'old tertiary'})
+            fixture('.primary', { text: 'old primary' })
+            fixture('.secondary', { text: 'old secondary' })
+            fixture('.tertiary', { text: 'old tertiary' })
 
             await jasmine.expectGlobalError(compileError, () => up.render('.primary, .secondary, .tertiary', { document: `
               <div class="primary">new primary</div>
@@ -865,9 +865,9 @@ describe('up.fragment', function() {
             const compileError = new Error("error from crashing compiler")
             const crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(compileError)
             up.compiler('.root', crashingCompiler)
-            fixture('.root', {text: 'root', 'up-hungry': '', 'up-if-layer': 'any'})
+            fixture('.root', { text: 'root', 'up-hungry': '', 'up-if-layer': 'any' })
 
-            up.layer.open({fragment: '<div class="overlay">old secondary</div>'})
+            up.layer.open({ fragment: '<div class="overlay">old secondary</div>' })
 
             await jasmine.expectGlobalError(compileError, () => up.render('.overlay', { document: `
               <div class="root">new root</div>
@@ -885,12 +885,12 @@ describe('up.fragment', function() {
             const compileError = new Error("error from crashing compiler")
             const crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(compileError)
             up.compiler('.root', crashingCompiler)
-            fixture('.root', {text: 'root', 'up-hungry': '', 'up-if-layer': 'any'})
+            fixture('.root', { text: 'root', 'up-hungry': '', 'up-if-layer': 'any' })
 
-            await jasmine.expectGlobalError(compileError, () => up.layer.open({target: '.overlay', document: `
+            await jasmine.expectGlobalError(compileError, () => up.layer.open({ target: '.overlay', document: `
               <div class="root">new root</div>
               <div class="overlay">new overlay</div>
-            `}))
+            ` }))
 
             expect(up.layer.isOverlay()).toBe(true)
             expect('.root').toHaveText('new root')
@@ -903,7 +903,7 @@ describe('up.fragment', function() {
             const destructor = jasmine.createSpy('destructor')
             const crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(compileError)
             up.compiler('.element', crashingCompiler)
-            const element = fixture('.element', {text: 'old text'})
+            const element = fixture('.element', { text: 'old text' })
             up.destructor(element, destructor)
 
             await jasmine.expectGlobalError(compileError, () => up.render({ fragment: '<div class="element">new text</div>' }))
@@ -917,7 +917,7 @@ describe('up.fragment', function() {
             const compileError = new Error("error from crashing compiler")
             const crashingCompiler = jasmine.createSpy('crashing compiler').and.throwError(compileError)
             up.compiler('.element', crashingCompiler)
-            fixture('.element', {text: 'old text'})
+            fixture('.element', { text: 'old text' })
 
             const revealSpy = up.reveal.mock()
 
@@ -934,9 +934,9 @@ describe('up.fragment', function() {
           it('still updates subsequent elements for a multi-step target', async function() {
             const destroyError = new Error("error from crashing destructor")
             const crashingDestructor = jasmine.createSpy('crashing destructor').and.throwError(destroyError)
-            const primary = fixture('.primary', {text: 'old primary'})
-            const secondary = fixture('.secondary', {text: 'old secondary'})
-            const tertiary = fixture('.tertiary', {text: 'old tertiary'})
+            const primary = fixture('.primary', { text: 'old primary' })
+            const secondary = fixture('.secondary', { text: 'old secondary' })
+            const tertiary = fixture('.tertiary', { text: 'old tertiary' })
 
             up.destructor(secondary, crashingDestructor)
 
@@ -960,9 +960,9 @@ describe('up.fragment', function() {
 
             up.destructor(oldElement, crashingDestructor)
 
-            await jasmine.expectGlobalError(destroyError, () => up.render('#element', {document: `
+            await jasmine.expectGlobalError(destroyError, () => up.render('#element', { document: `
               <div id="element" class="new"></div>
-            `}))
+            ` }))
 
             expect(oldElement).toBeDetached()
             expect('#element').toHaveClass('new')
@@ -974,11 +974,11 @@ describe('up.fragment', function() {
       describe('with { url } option', function() {
 
         it('replaces the given selector with the same selector from a freshly fetched page', async function() {
-          fixture('.before', {text: 'old-before'})
-          fixture('.middle', {text: 'old-middle'})
-          fixture('.after', {text: 'old-after'})
+          fixture('.before', { text: 'old-before' })
+          fixture('.middle', { text: 'old-middle' })
+          fixture('.after', { text: 'old-after' })
 
-          up.render('.middle', {url: '/path'})
+          up.render('.middle', { url: '/path' })
 
           await wait()
 
@@ -996,11 +996,11 @@ describe('up.fragment', function() {
         })
 
         it('parses a full HTML page', async function() {
-          fixture('.before', {text: 'old-before'})
-          fixture('.middle', {text: 'old-middle'})
-          fixture('.after', {text: 'old-after'})
+          fixture('.before', { text: 'old-before' })
+          fixture('.middle', { text: 'old-middle' })
+          fixture('.after', { text: 'old-after' })
 
-          up.render('.middle', {url: '/path'})
+          up.render('.middle', { url: '/path' })
 
           await wait()
 
@@ -1026,11 +1026,11 @@ describe('up.fragment', function() {
         })
 
         it('parses a full HTML page with uppercase tag names', async function() {
-          fixture('.before', {text: 'old-before'})
-          fixture('.middle', {text: 'old-middle'})
-          fixture('.after', {text: 'old-after'})
+          fixture('.before', { text: 'old-before' })
+          fixture('.middle', { text: 'old-middle' })
+          fixture('.after', { text: 'old-after' })
 
-          up.render('.middle', {url: '/path'})
+          up.render('.middle', { url: '/path' })
 
           await wait()
 
@@ -1059,14 +1059,14 @@ describe('up.fragment', function() {
           fixture('.target')
 
           const resolution = jasmine.createSpy()
-          const promise = up.render('.target', {url: '/path'})
+          const promise = up.render('.target', { url: '/path' })
 
           promise.then(resolution)
 
           await wait()
 
           expect(resolution).not.toHaveBeenCalled()
-          this.respondWithSelector('.target', {text: 'new-text'})
+          this.respondWithSelector('.target', { text: 'new-text' })
 
           await wait()
 
@@ -1078,12 +1078,12 @@ describe('up.fragment', function() {
           fixture('.target')
 
           const callback = jasmine.createSpy('onRendered callback')
-          up.render('.target', {url: '/path', onRendered: callback})
+          up.render('.target', { url: '/path', onRendered: callback })
 
           await wait()
 
           expect(callback).not.toHaveBeenCalled()
-          this.respondWithSelector('.target', {text: 'new-text'})
+          this.respondWithSelector('.target', { text: 'new-text' })
 
           await wait()
 
@@ -1093,14 +1093,14 @@ describe('up.fragment', function() {
 
         it('uses a HTTP method given as { method } option', async function() {
           fixture('.target')
-          up.render('.target', {url: '/path', method: 'put'})
+          up.render('.target', { url: '/path', method: 'put' })
           await wait()
           expect(this.lastRequest()).toHaveRequestMethod('PUT')
         })
 
         it('rejects with an AbortError if the request is aborted', async function() {
           fixture('.target')
-          const promise = up.render('.target', {url: '/path'})
+          const promise = up.render('.target', { url: '/path' })
 
           expect(up.network.isBusy()).toBe(true)
 
@@ -1112,8 +1112,8 @@ describe('up.fragment', function() {
         describe('last modification time', function() {
 
           it('sets an Last-Modified response header as an [up-time] attribute', async function() {
-            fixture('.target', {text: 'old content'})
-            up.render('.target', {url: '/path'})
+            fixture('.target', { text: 'old content' })
+            up.render('.target', { url: '/path' })
 
             await wait()
 
@@ -1129,8 +1129,8 @@ describe('up.fragment', function() {
           })
 
           it('does not change an existing [up-time] attribute on the new fragment with information from the Last-Modified header', async function() {
-            fixture('.target', {text: 'old content'})
-            up.render('.target', {url: '/path'})
+            fixture('.target', { text: 'old content' })
+            up.render('.target', { url: '/path' })
 
             await wait()
 
@@ -1146,12 +1146,12 @@ describe('up.fragment', function() {
           })
 
           it("sets an [up-time=false] attribute if the server did not send an Last-Modified header, so we won't fall back to a parent's Last-Modified header later", async function() {
-            fixture('.target', {text: 'old content'})
-            up.render('.target', {url: '/path'})
+            fixture('.target', { text: 'old content' })
+            up.render('.target', { url: '/path' })
 
             await wait()
 
-            jasmine.respondWithSelector('.target', {text: 'new content'})
+            jasmine.respondWithSelector('.target', { text: 'new content' })
 
             await wait()
 
@@ -1163,8 +1163,8 @@ describe('up.fragment', function() {
         describe('ETags', function() {
 
           it('sets a weak ETag header as an [up-etag] attribute', async function() {
-            fixture('.target', {text: 'old content'})
-            up.render('.target', {url: '/path'})
+            fixture('.target', { text: 'old content' })
+            up.render('.target', { url: '/path' })
 
             await wait()
 
@@ -1180,8 +1180,8 @@ describe('up.fragment', function() {
           })
 
           it('sets a strong ETag header as an [up-etag] attribute', async function() {
-            fixture('.target', {text: 'old content'})
-            up.render('.target', {url: '/path'})
+            fixture('.target', { text: 'old content' })
+            up.render('.target', { url: '/path' })
 
             await wait()
 
@@ -1197,8 +1197,8 @@ describe('up.fragment', function() {
           })
 
           it('does not change an existing [up-etag] attribute on the new fragment with information from the ETag header', async function() {
-            fixture('.target', {text: 'old content'})
-            up.render('.target', {url: '/path'})
+            fixture('.target', { text: 'old content' })
+            up.render('.target', { url: '/path' })
 
             await wait()
 
@@ -1214,12 +1214,12 @@ describe('up.fragment', function() {
           })
 
           it("sets an [up-etag=false] attribute if the server did not send an ETag header, so we won't fall back to a parent's ETag header later", async function() {
-            fixture('.target', {text: 'old content'})
-            up.render('.target', {url: '/path'})
+            fixture('.target', { text: 'old content' })
+            up.render('.target', { url: '/path' })
 
             await wait()
 
-            jasmine.respondWithSelector('.target', {text: 'new content'})
+            jasmine.respondWithSelector('.target', { text: 'new content' })
 
             await wait()
 
@@ -1233,7 +1233,7 @@ describe('up.fragment', function() {
           it("uses the given params as a non-GET request's payload", async function() {
             const givenParams = { 'foo-key': 'foo-value', 'bar-key': 'bar-value' }
             fixture('.target')
-            up.render('.target', {url: '/path', method: 'put', params: givenParams})
+            up.render('.target', { url: '/path', method: 'put', params: givenParams })
 
             await wait()
 
@@ -1244,7 +1244,7 @@ describe('up.fragment', function() {
           it("encodes the given params into the URL of a GET request", async function() {
             fixture('.target')
             const givenParams = { 'foo-key': 'foo-value', 'bar-key': 'bar-value' }
-            up.render('.target', {url: '/path', method: 'get', params: givenParams})
+            up.render('.target', { url: '/path', method: 'get', params: givenParams })
 
             await wait()
 
@@ -1255,10 +1255,10 @@ describe('up.fragment', function() {
         describe('when the server responds with an error or unexpected content', function() {
 
           it('uses a target selector given as { failTarget } option', async function() {
-            fixture('.success-target', {text: 'old success text'})
-            fixture('.failure-target', {text: 'old failure text'})
+            fixture('.success-target', { text: 'old success text' })
+            fixture('.failure-target', { text: 'old failure text' })
 
-            const renderJob = up.render('.success-target', {url: '/path', failTarget: '.failure-target'})
+            const renderJob = up.render('.success-target', { url: '/path', failTarget: '.failure-target' })
 
             await wait()
 
@@ -1277,11 +1277,11 @@ describe('up.fragment', function() {
           })
 
           it('updates a fallback target if the { failTarget } cannot be matched', async function() {
-            fixture('.fallback', {text: 'old fallback text'})
-            fixture('.success-target', {text: 'old success text'})
-            fixture('.failure-target', {text: 'old failure text'})
+            fixture('.fallback', { text: 'old fallback text' })
+            fixture('.success-target', { text: 'old success text' })
+            fixture('.failure-target', { text: 'old failure text' })
 
-            const renderJob = up.render('.success-target', {url: '/path', failTarget: '.failure-target', fallback: '.fallback'})
+            const renderJob = up.render('.success-target', { url: '/path', failTarget: '.failure-target', fallback: '.fallback' })
 
             await wait()
 
@@ -1300,9 +1300,9 @@ describe('up.fragment', function() {
           })
 
           it('does update a fragment if the server sends an XHTML content-type instead of text/html', async function() {
-            fixture('.target', {text: 'old text'})
+            fixture('.target', { text: 'old text' })
 
-            up.render('.target', {url: '/path', failTarget: '.failure'})
+            up.render('.target', { url: '/path', failTarget: '.failure' })
 
             await wait()
 
@@ -1319,11 +1319,11 @@ describe('up.fragment', function() {
           it('rejects the returned promise', async function() {
             fixture('.success-target')
             fixture('.failure-target')
-            const renderJob = up.render('.success-target', {url: '/path', failTarget: '.failure-target'})
+            const renderJob = up.render('.success-target', { url: '/path', failTarget: '.failure-target' })
 
             await wait()
 
-            jasmine.respondWithSelector('.failure-target', {status: 500})
+            jasmine.respondWithSelector('.failure-target', { status: 500 })
 
             await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
           })
@@ -1331,7 +1331,7 @@ describe('up.fragment', function() {
           it('rejects the up.render().finished promise', async function() {
             fixture('.success-target')
             fixture('.failure-target')
-            const renderJob = up.render('.success-target', {url: '/path', failTarget: '.failure-target'})
+            const renderJob = up.render('.success-target', { url: '/path', failTarget: '.failure-target' })
             const {
               finished
             } = renderJob
@@ -1339,7 +1339,7 @@ describe('up.fragment', function() {
             await wait()
             await expectAsync(finished).toBePending()
 
-            jasmine.respondWithSelector('.failure-target', {status: 500})
+            jasmine.respondWithSelector('.failure-target', { status: 500 })
 
             await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
             await expectAsync(finished).toBeRejectedWith(jasmine.any(up.RenderResult))
@@ -1347,18 +1347,18 @@ describe('up.fragment', function() {
 
           it('rejects with an error that explains why success targets were not used', async function() {
             fixture('.target')
-            const promise = up.render('.target', {url: '/qux'})
+            const promise = up.render('.target', { url: '/qux' })
 
             await wait()
 
-            jasmine.respondWithSelector('.unexpected', {status: 500})
+            jasmine.respondWithSelector('.unexpected', { status: 500 })
 
             await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/No target selector given for failed responses/i))
           })
 
           it('runs an onFailRendered callback', async function() {
-            fixture('.success-target', {text: 'old text'})
-            fixture('.failure-target', {text: 'old text'})
+            fixture('.success-target', { text: 'old text' })
+            fixture('.failure-target', { text: 'old text' })
             const onRendered = jasmine.createSpy('onRendered callback')
             const onFailRendered = jasmine.createSpy('onFailRendered callback')
 
@@ -1369,7 +1369,7 @@ describe('up.fragment', function() {
             expect(onRendered).not.toHaveBeenCalled()
             expect(onFailRendered).not.toHaveBeenCalled()
 
-            jasmine.respondWithSelector('.failure-target', {status: 500, text: 'new text'})
+            jasmine.respondWithSelector('.failure-target', { status: 500, text: 'new text' })
 
             await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
 
@@ -1383,8 +1383,8 @@ describe('up.fragment', function() {
           describe('with { fail } option', function() {
 
             it('always uses success options with { fail: false }', async function() {
-              fixture('.success-target', {text: 'old success text'})
-              fixture('.failure-target', {text: 'old failure text'})
+              fixture('.success-target', { text: 'old success text' })
+              fixture('.failure-target', { text: 'old failure text' })
 
               const renderJob = up.render({
                 target: '.success-target',
@@ -1408,8 +1408,8 @@ describe('up.fragment', function() {
             })
 
             it('always uses failure options with { fail: true }', async function() {
-              fixture('.success-target', {text: 'old success text'})
-              fixture('.failure-target', {text: 'old failure text'})
+              fixture('.success-target', { text: 'old success text' })
+              fixture('.failure-target', { text: 'old failure text' })
 
               const renderJob = up.render({
                 target: '.success-target',
@@ -1435,8 +1435,8 @@ describe('up.fragment', function() {
             it('accepts a function as { fail } option', async function() {
               const failFn = jasmine.createSpy('fail function').and.returnValue(false)
 
-              fixture('.success-target', {text: 'old success text'})
-              fixture('.failure-target', {text: 'old failure text'})
+              fixture('.success-target', { text: 'old success text' })
+              fixture('.failure-target', { text: 'old failure text' })
 
               up.render({
                 target: '.success-target',
@@ -1462,12 +1462,12 @@ describe('up.fragment', function() {
             })
 
             it('lets up:fragment:loaded listeners force a failure response by setting event.renderOptions.fail = true', async function() {
-              fixture('.success-target', {text: 'old success text'})
-              fixture('.failure-target', {text: 'old failure text'})
+              fixture('.success-target', { text: 'old success text' })
+              fixture('.failure-target', { text: 'old failure text' })
 
-              up.on('up:fragment:loaded', e => e.renderOptions.fail = true)
+              up.on('up:fragment:loaded', (e) => e.renderOptions.fail = true)
 
-              const renderJob = up.render({target: '.success-target', failTarget: '.failure-target', url: '/path'})
+              const renderJob = up.render({ target: '.success-target', failTarget: '.failure-target', url: '/path' })
 
               await wait()
 
@@ -1488,7 +1488,7 @@ describe('up.fragment', function() {
           it("doesn't crash and rejects the returned promise with an up.Offline error xx", async function() {
             jasmine.clock().install() // required by responseTimeout()
             fixture('.target')
-            const renderJob = up.render('.target', {url: '/path', timeout: 500})
+            const renderJob = up.render('.target', { url: '/path', timeout: 500 })
 
             await wait()
 
@@ -1507,7 +1507,7 @@ describe('up.fragment', function() {
 
           it("doesn't crash and rejects the returned promise with an up.Offline error", async function() {
             fixture('.target')
-            const renderJob = up.render('.target', {url: '/path', timeout: 50})
+            const renderJob = up.render('.target', { url: '/path', timeout: 50 })
 
             await wait()
 
@@ -1526,7 +1526,7 @@ describe('up.fragment', function() {
             up.on('up:fragment:offline', listener)
 
             fixture('.target')
-            const renderJob = up.render('.target', {url: '/other-path'})
+            const renderJob = up.render('.target', { url: '/other-path' })
 
             await wait()
 
@@ -1549,7 +1549,7 @@ describe('up.fragment', function() {
             const listener = jasmine.createSpy('onOffline callback')
 
             fixture('.target')
-            const renderJob = up.render('.target', {url: '/other-path', onOffline: listener})
+            const renderJob = up.render('.target', { url: '/other-path', onOffline: listener })
 
             await wait()
 
@@ -1568,8 +1568,8 @@ describe('up.fragment', function() {
           it('allows up:fragment:offline listeners to retry the rendering by calling event.retry()', async function() {
             const listener = jasmine.createSpy('onOffline callback')
 
-            fixture('.target', {text: 'old text'})
-            const promise = up.render('.target', {url: '/other-path', onOffline: listener})
+            fixture('.target', { text: 'old text' })
+            const promise = up.render('.target', { url: '/other-path', onOffline: listener })
 
             await wait()
 
@@ -1589,7 +1589,7 @@ describe('up.fragment', function() {
 
             expect(jasmine.Ajax.requests.count()).toBe(2)
 
-            jasmine.respondWithSelector('.target', {text: 'new text'})
+            jasmine.respondWithSelector('.target', { text: 'new text' })
 
             await wait()
 
@@ -1603,8 +1603,8 @@ describe('up.fragment', function() {
             up.history.replace('/base1/')
             const listener = jasmine.createSpy('onOffline callback')
 
-            fixture('.target', {text: 'old text'})
-            const promise = up.render('.target', {url: 'relative', onOffline: listener})
+            fixture('.target', { text: 'old text' })
+            const promise = up.render('.target', { url: 'relative', onOffline: listener })
 
             await wait()
 
@@ -1628,7 +1628,7 @@ describe('up.fragment', function() {
             expect(jasmine.Ajax.requests.count()).toBe(2)
             expect(jasmine.lastRequest().url).toMatchURL('/base1/relative')
 
-            jasmine.respondWithSelector('.target', {text: 'new text'})
+            jasmine.respondWithSelector('.target', { text: 'new text' })
 
             await wait()
 
@@ -1640,10 +1640,10 @@ describe('up.fragment', function() {
           it('allows up:fragment:offline listeners to override render options when retrying', async function() {
             const listener = jasmine.createSpy('onOffline callback')
 
-            fixture('.target', {text: 'old text'})
-            fixture('.override-target', {text: 'old text'})
+            fixture('.target', { text: 'old text' })
+            fixture('.override-target', { text: 'old text' })
 
-            const promise = up.render('.target', {url: '/other-path', onOffline: listener})
+            const promise = up.render('.target', { url: '/other-path', onOffline: listener })
 
             await wait()
 
@@ -1657,7 +1657,7 @@ describe('up.fragment', function() {
             expect(listener.calls.count()).toBe(1)
 
             const event = listener.calls.argsFor(0)[0]
-            event.retry({target: '.override-target'})
+            event.retry({ target: '.override-target' })
 
             await wait()
 
@@ -1669,7 +1669,7 @@ describe('up.fragment', function() {
             const listener = jasmine.createSpy('onFinished callback')
 
             fixture('.target')
-            const renderJob = up.render('.target', {url: '/other-path', onFinished: listener})
+            const renderJob = up.render('.target', { url: '/other-path', onFinished: listener })
 
             await wait()
 
@@ -1686,11 +1686,11 @@ describe('up.fragment', function() {
           describe('when there is an expired cache entry', function() {
 
             beforeEach(function(done) {
-              fixture('.target', {text: 'old text'})
+              fixture('.target', { text: 'old text' })
 
-              const request = up.request('/path', {target: '.target', cache: true})
+              const request = up.request('/path', { target: '.target', cache: true })
 
-              u.task(() => jasmine.respondWithSelector('.target', {text: 'expired text'}))
+              u.task(() => jasmine.respondWithSelector('.target', { text: 'expired text' }))
 
               u.task(function() {
                 expect(request).toBeCached()
@@ -1705,7 +1705,7 @@ describe('up.fragment', function() {
             })
 
             it('renders the expired content', async function() {
-              up.render('.target', {url: '/path', cache: true})
+              up.render('.target', { url: '/path', cache: true })
 
               await wait()
 
@@ -1744,13 +1744,13 @@ describe('up.fragment', function() {
             const origin = fixture('.origin')
             fixture('.target')
             let event = undefined
-            up.on('up:fragment:loaded', e => event = e)
+            up.on('up:fragment:loaded', (e) => event = e)
 
-            up.render({target: '.target', url: '/url', location: '/location-from-option', peel: false, origin})
+            up.render({ target: '.target', url: '/url', location: '/location-from-option', peel: false, origin })
 
             await wait()
 
-            jasmine.respondWithSelector('.target', {text: 'text from server'})
+            jasmine.respondWithSelector('.target', { text: 'text from server' })
 
             await wait()
 
@@ -1766,10 +1766,10 @@ describe('up.fragment', function() {
 
           it('allows listeners to prevent an up:fragment:loaded event to prevent changes to the DOM and browser history', async function() {
             up.history.config.enabled = true
-            up.on('up:fragment:loaded', e => e.preventDefault())
-            fixture('.target', {text: 'old text'})
+            up.on('up:fragment:loaded', (e) => e.preventDefault())
+            fixture('.target', { text: 'old text' })
 
-            const renderJob = up.render({target: '.target', url: '/url'})
+            const renderJob = up.render({ target: '.target', url: '/url' })
 
             await wait()
 
@@ -1782,10 +1782,10 @@ describe('up.fragment', function() {
           })
 
           it('rejects programmatic callers with an up.AbortError when the event is prevented', async function() {
-            up.on('up:fragment:loaded', e => e.preventDefault())
-            fixture('.target', {text: 'old text'})
+            up.on('up:fragment:loaded', (e) => e.preventDefault())
+            fixture('.target', { text: 'old text' })
 
-            const changePromise = up.render({target: '.target', url: '/url'})
+            const changePromise = up.render({ target: '.target', url: '/url' })
 
             await wait()
 
@@ -1798,10 +1798,10 @@ describe('up.fragment', function() {
           })
 
           it('fulfills programmatic callers with an empty up.RenderResult when the event is skipped (instead of prevented)', async function() {
-            up.on('up:fragment:loaded', e => e.skip())
-            fixture('.target', {text: 'old text'})
+            up.on('up:fragment:loaded', (e) => e.skip())
+            fixture('.target', { text: 'old text' })
 
-            const changePromise = up.render({target: '.target', url: '/url'})
+            const changePromise = up.render({ target: '.target', url: '/url' })
             await wait()
 
             jasmine.respondWith('new text')
@@ -1817,12 +1817,12 @@ describe('up.fragment', function() {
           })
 
           it('allows listeners to mutate up.render() options to target another fragment', async function() {
-            fixture('.one', {text: 'old one'})
-            fixture('.two', {text: 'old two'})
+            fixture('.one', { text: 'old one' })
+            fixture('.two', { text: 'old two' })
 
-            up.on('up:fragment:loaded', e => e.renderOptions.target = '.two')
+            up.on('up:fragment:loaded', (e) => e.renderOptions.target = '.two')
 
-            up.render({target: '.one', url: '/url'})
+            up.render({ target: '.one', url: '/url' })
             await wait()
 
             jasmine.respondWith(`\
@@ -1837,15 +1837,15 @@ describe('up.fragment', function() {
           })
 
           it('allows listeners to mutate up.render() options to target another fragment with a failed response', async function() {
-            fixture('.one', {text: 'old one'})
-            fixture('.two', {text: 'old two'})
+            fixture('.one', { text: 'old one' })
+            fixture('.two', { text: 'old two' })
 
-            up.on('up:fragment:loaded', e => e.renderOptions.failTarget = '.two')
+            up.on('up:fragment:loaded', (e) => e.renderOptions.failTarget = '.two')
 
-            up.render({target: '.one', url: '/url'})
+            up.render({ target: '.one', url: '/url' })
             await wait()
 
-            jasmine.respondWith({status: 500, responseText: `\
+            jasmine.respondWith({ status: 500, responseText: `\
 <div class="one">new one</div>
 <div class="two">new two</div>\
 `
@@ -1857,11 +1857,11 @@ describe('up.fragment', function() {
           })
 
           it('allows listeners to mutate up.render() options and render into a new layer', async function() {
-            fixture('.one', {text: 'old one'})
+            fixture('.one', { text: 'old one' })
 
-            up.on('up:fragment:loaded', event => event.renderOptions.layer = 'new')
+            up.on('up:fragment:loaded', (event) => event.renderOptions.layer = 'new')
 
-            up.render({target: '.one', url: '/url'})
+            up.render({ target: '.one', url: '/url' })
             await wait()
 
             jasmine.respondWith(`\
@@ -1875,14 +1875,14 @@ describe('up.fragment', function() {
           })
 
           it('allows listeners to mutate up.render() options and render into a new layer with a failed response', async function() {
-            fixture('.one', {text: 'old one'})
+            fixture('.one', { text: 'old one' })
 
-            up.on('up:fragment:loaded', event => event.renderOptions.failLayer = 'new')
+            up.on('up:fragment:loaded', (event) => event.renderOptions.failLayer = 'new')
 
-            up.render({target: '.one', failTarget: '.one', url: '/url'})
+            up.render({ target: '.one', failTarget: '.one', url: '/url' })
             await wait()
 
-            jasmine.respondWith({status: 500, responseText: `\
+            jasmine.respondWith({ status: 500, responseText: `\
 <div class="one">new one</div>\
 `
             })
@@ -1893,13 +1893,13 @@ describe('up.fragment', function() {
           })
 
           it('allows listeners to mutate up.render() options before the fragment is updated when the server responds with an error code (bugfix)', async function() {
-            fixture('.one', {text: 'old one'})
-            fixture('.two', {text: 'old two'})
-            fixture('.three', {text: 'old three'})
+            fixture('.one', { text: 'old one' })
+            fixture('.two', { text: 'old two' })
+            fixture('.three', { text: 'old three' })
 
-            up.on('up:fragment:loaded', e => e.renderOptions.failTarget = '.three')
+            up.on('up:fragment:loaded', (e) => e.renderOptions.failTarget = '.three')
 
-            const renderJob = up.render({target: '.one', failTarget: '.two', url: '/url'})
+            const renderJob = up.render({ target: '.one', failTarget: '.two', url: '/url' })
 
             await wait()
 
@@ -1923,12 +1923,12 @@ describe('up.fragment', function() {
             const origin = fixture('.origin')
             fixture('.target')
             let event = undefined
-            const onLoaded = e => event = e
+            const onLoaded = (e) => event = e
 
             up.render({ target: '.target', url: '/url', location: '/location-from-option', peel: false, origin, onLoaded })
             await wait()
 
-            jasmine.respondWithSelector('.target', {text: 'text from server'})
+            jasmine.respondWithSelector('.target', { text: 'text from server' })
             await wait()
 
             expect(event).toBeGiven()
@@ -1941,13 +1941,13 @@ describe('up.fragment', function() {
             fixture('.target')
             fixture('.fail-target')
             let event = undefined
-            const onLoaded = e => event = e
+            const onLoaded = (e) => event = e
 
             const renderJob = up.render({ target: '.target', failTarget: '.fail-target', url: '/url', location: '/location-from-option', peel: false, origin, onLoaded })
 
             await wait()
 
-            jasmine.respondWithSelector('.fail-target', {text: 'error from server', status: 500})
+            jasmine.respondWithSelector('.fail-target', { text: 'error from server', status: 500 })
 
             await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
 
@@ -1965,9 +1965,9 @@ describe('up.fragment', function() {
               const one = up.layer.current.affix('#one')
 
               const spy = jasmine.createSpy('event.target spy')
-              up.on('up:fragment:loaded', event => spy(event.target))
+              up.on('up:fragment:loaded', (event) => spy(event.target))
 
-              up.render({target: '#one', url: '/url'})
+              up.render({ target: '#one', url: '/url' })
               await wait()
 
               jasmine.respondWithSelector('#one')
@@ -1982,9 +1982,9 @@ describe('up.fragment', function() {
               expect(baseLayer.isOverlay()).toBe(true)
 
               const spy = jasmine.createSpy('event.target spy')
-              up.on('up:fragment:loaded', event => spy(event.target))
+              up.on('up:fragment:loaded', (event) => spy(event.target))
 
-              up.render({target: '#one', url: '/url', layer: 'new modal'})
+              up.render({ target: '#one', url: '/url', layer: 'new modal' })
               await wait()
 
               jasmine.respondWithSelector('#one')
@@ -2000,10 +2000,10 @@ describe('up.fragment', function() {
           it('emits these events', async function() {
             fixture('.element')
 
-            up.render({target: '.element', url: '/path'})
+            up.render({ target: '.element', url: '/path' })
 
-            const event1Plan = { type: 'foo', prop: 'bar '}
-            const event2Plan = { type: 'baz', prop: 'bam '}
+            const event1Plan = { type: 'foo', prop: 'bar ' }
+            const event2Plan = { type: 'baz', prop: 'bam ' }
 
             spyOn(up, 'emit').and.callThrough()
 
@@ -2023,7 +2023,7 @@ describe('up.fragment', function() {
           it('accepts unquoted property names in the header value', async function() {
             fixture('.element')
 
-            up.render({target: '.element', url: '/path'})
+            up.render({ target: '.element', url: '/path' })
 
             spyOn(up, 'emit').and.callThrough()
 
@@ -2042,9 +2042,9 @@ describe('up.fragment', function() {
           it('emits these events for a failure response', async function() {
             fixture('.element')
 
-            const renderPromise = up.render({target: '.element', failTarget: '.element', url: '/path'})
+            const renderPromise = up.render({ target: '.element', failTarget: '.element', url: '/path' })
 
-            const eventPlan = { type: 'foo', prop: 'bar '}
+            const eventPlan = { type: 'foo', prop: 'bar ' }
 
             spyOn(up, 'emit').and.callThrough()
 
@@ -2073,17 +2073,17 @@ describe('up.fragment', function() {
               await wait()
 
               expect(up.layer.mode).toBe('modal')
-              const promise = up.render({ url: '/path2', target: '.target'})
+              const promise = up.render({ url: '/path2', target: '.target' })
 
               await wait()
 
               expect(callback).not.toHaveBeenCalled()
-              jasmine.respondWithSelector('.target', {responseHeaders: { 'X-Up-Accept-Layer': "123" }})
+              jasmine.respondWithSelector('.target', { responseHeaders: { 'X-Up-Accept-Layer': "123" } })
 
               await expectAsync(promise).toBeRejectedWith(jasmine.any(up.Aborted))
 
               expect(up.layer.mode).toBe('root')
-              expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({value: 123}))
+              expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value: 123 }))
             })
 
             it('does not require the server to render content when the overlay will close anyway (when updating a layer)', async function() {
@@ -2099,7 +2099,7 @@ describe('up.fragment', function() {
 
               await wait()
 
-              jasmine.respondWith('', {responseHeaders: { 'X-Up-Accept-Layer': "null" }})
+              jasmine.respondWith('', { responseHeaders: { 'X-Up-Accept-Layer': "null" } })
 
               await expectAsync(promise).toBeRejectedWith(jasmine.any(up.Aborted))
 
@@ -2113,13 +2113,13 @@ describe('up.fragment', function() {
               await wait()
 
               expect(up.layer.mode).toBe('modal')
-              const promise = up.render({ url: '/path2', target: '.target'})
+              const promise = up.render({ url: '/path2', target: '.target' })
 
               await wait()
 
               expect(callback).not.toHaveBeenCalled()
 
-              jasmine.respondWith('<div class="target">new content</div>', {responseHeaders: { 'X-Up-Accept-Layer': "123" }})
+              jasmine.respondWith('<div class="target">new content</div>', { responseHeaders: { 'X-Up-Accept-Layer': "123" } })
 
               await expectAsync(promise).toBeRejectedWith(jasmine.any(up.Aborted))
 
@@ -2130,15 +2130,15 @@ describe('up.fragment', function() {
 
           describe('when updating the root layer', function() {
             it('ignores the header and updates the root layer with the response body', async function() {
-              const element = fixture('.element', {text: 'old content'})
+              const element = fixture('.element', { text: 'old content' })
               const acceptedListener = jasmine.createSpy('up:layer:accepted listener')
               up.on('up:layer:accepted', acceptedListener)
 
-              up.render({ url: '/path', target: '.element'})
+              up.render({ url: '/path', target: '.element' })
 
               await wait()
 
-              this.respondWithSelector('.element', {text: 'new content', responseHeaders: { 'X-Up-Accept-Layer': "null" }})
+              this.respondWithSelector('.element', { text: 'new content', responseHeaders: { 'X-Up-Accept-Layer': "null" } })
 
               await wait()
 
@@ -2158,7 +2158,7 @@ describe('up.fragment', function() {
 
               expect(callback).not.toHaveBeenCalled()
 
-              jasmine.respondWithSelector('.target', {responseHeaders: { 'X-Up-Accept-Layer': "null" }})
+              jasmine.respondWithSelector('.target', { responseHeaders: { 'X-Up-Accept-Layer': "null" } })
 
               await expectAsync(layerPromise).toBeRejectedWith(jasmine.any(up.Aborted))
 
@@ -2173,7 +2173,7 @@ describe('up.fragment', function() {
 
               expect(callback).not.toHaveBeenCalled()
 
-              jasmine.respondWith('', {responseHeaders: { 'X-Up-Accept-Layer': "null" }})
+              jasmine.respondWith('', { responseHeaders: { 'X-Up-Accept-Layer': "null" } })
 
               await expectAsync(layerPromise).toBeRejectedWith(jasmine.any(up.Aborted))
 
@@ -2197,17 +2197,17 @@ describe('up.fragment', function() {
             await wait()
 
             expect(up.layer.mode).toBe('modal')
-            const renderPromise = up.render({ url: '/path2', target: '.target'})
+            const renderPromise = up.render({ url: '/path2', target: '.target' })
 
             await wait()
 
             expect(callback).not.toHaveBeenCalled()
-            jasmine.respondWithSelector('.target', {responseHeaders: { 'X-Up-Dismiss-Layer': "123" }})
+            jasmine.respondWithSelector('.target', { responseHeaders: { 'X-Up-Dismiss-Layer': "123" } })
 
             await expectAsync(renderPromise).toBeRejectedWith(jasmine.any(up.Aborted))
 
             expect(up.layer.mode).toBe('root')
-            expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({value: 123}))
+            expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value: 123 }))
           })
 
           it('makes the discarded response available to up:layer:accepted listeners as a { response } property 2', async function() {
@@ -2217,12 +2217,12 @@ describe('up.fragment', function() {
             await wait()
 
             expect(up.layer.mode).toBe('modal')
-            const promise = up.render({ url: '/path2', target: '.target'})
+            const promise = up.render({ url: '/path2', target: '.target' })
 
             await wait()
 
             expect(callback).not.toHaveBeenCalled()
-            jasmine.respondWith('<div class="target">new content</div>', {responseHeaders: { 'X-Up-Dismiss-Layer': "123" }})
+            jasmine.respondWith('<div class="target">new content</div>', { responseHeaders: { 'X-Up-Dismiss-Layer': "123" } })
 
             await expectAsync(promise).toBeRejectedWith(jasmine.any(up.Aborted))
 
@@ -2234,14 +2234,14 @@ describe('up.fragment', function() {
         describe('when the server sends no content', function() {
 
           it('succeeds when the server sends an empty body with HTTP status 304 (not modified)', async function() {
-            fixture('.one', {text: 'old one'})
-            fixture('.two', {text: 'old two'})
+            fixture('.one', { text: 'old one' })
+            fixture('.two', { text: 'old two' })
 
-            const promise = up.render({target: '.one', url: '/path'})
+            const promise = up.render({ target: '.one', url: '/path' })
 
             await wait()
 
-            jasmine.respondWith({status: 304, responseText: ''})
+            jasmine.respondWith({ status: 304, responseText: '' })
 
             await wait()
 
@@ -2253,14 +2253,14 @@ describe('up.fragment', function() {
           })
 
           it('succeeds when the server sends an empty body with HTTP status 204 (no content)', async function() {
-            fixture('.one', {text: 'old one'})
-            fixture('.two', {text: 'old two'})
+            fixture('.one', { text: 'old one' })
+            fixture('.two', { text: 'old two' })
 
-            const promise = up.render({target: '.one', url: '/path'})
+            const promise = up.render({ target: '.one', url: '/path' })
 
             await wait()
 
-            jasmine.respondWith({status: 204, responseText: ''})
+            jasmine.respondWith({ status: 204, responseText: '' })
 
             await wait()
 
@@ -2272,15 +2272,15 @@ describe('up.fragment', function() {
           })
 
           it('does not call on { onRendered } callback', async function() {
-            fixture('.one', {text: 'old one'})
-            fixture('.two', {text: 'old two'})
+            fixture('.one', { text: 'old one' })
+            fixture('.two', { text: 'old two' })
 
             const onRendered = jasmine.createSpy('onRendered callback')
             up.render({ target: '.one', url: '/path', onRendered })
 
             await wait()
 
-            jasmine.respondWith({status: 304, responseText: ''})
+            jasmine.respondWith({ status: 304, responseText: '' })
 
             await wait()
 
@@ -2292,13 +2292,13 @@ describe('up.fragment', function() {
         describe('when the server sends an X-Up-Target header', function() {
 
           it('renders the server-provided target', async function() {
-            fixture('.one', {text: 'old content'})
-            fixture('.two', {text: 'old content'})
+            fixture('.one', { text: 'old content' })
+            fixture('.two', { text: 'old content' })
 
-            up.render({target: '.one', url: '/path'})
+            up.render({ target: '.one', url: '/path' })
             await wait()
 
-            this.respondWithSelector('.two', {text: 'new content', responseHeaders: { 'X-Up-Target': '.two' }})
+            this.respondWithSelector('.two', { text: 'new content', responseHeaders: { 'X-Up-Target': '.two' } })
             await wait()
 
             expect('.one').toHaveText('old content')
@@ -2306,15 +2306,15 @@ describe('up.fragment', function() {
           })
 
           it('renders the server-provided target for a failed update', async function() {
-            fixture('.one', {text: 'old content'})
-            fixture('.two', {text: 'old content'})
-            fixture('.three', {text: 'old content'})
+            fixture('.one', { text: 'old content' })
+            fixture('.two', { text: 'old content' })
+            fixture('.three', { text: 'old content' })
 
-            const renderJob = up.render({target: '.one', failTarget: '.two', url: '/path'})
+            const renderJob = up.render({ target: '.one', failTarget: '.two', url: '/path' })
 
             await wait()
 
-            jasmine.respondWithSelector('.three', {text: 'new content', responseHeaders: { 'X-Up-Target': '.three' }, status: 500})
+            jasmine.respondWithSelector('.three', { text: 'new content', responseHeaders: { 'X-Up-Target': '.three' }, status: 500 })
 
             await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
 
@@ -2326,13 +2326,13 @@ describe('up.fragment', function() {
           describe('when the server sends X-Up-Target: :none', function() {
 
             it('does not require a response body and succeeds', async function() {
-              fixture('.one', {text: 'old one'})
-              fixture('.two', {text: 'old two'})
+              fixture('.one', { text: 'old one' })
+              fixture('.two', { text: 'old two' })
 
-              const promise = up.render({target: '.one', url: '/path'})
+              const promise = up.render({ target: '.one', url: '/path' })
               await wait()
 
-              this.respondWith({responseHeaders: { 'X-Up-Target': ':none' }, responseText: '', contentType: 'text/plain'})
+              this.respondWith({ responseHeaders: { 'X-Up-Target': ':none' }, responseText: '', contentType: 'text/plain' })
               await wait()
 
               expect('.one').toHaveText('old one')
@@ -2345,13 +2345,13 @@ describe('up.fragment', function() {
             })
 
             it('does not call an { onRendered } callback', async function() {
-              fixture('.one', {text: 'old one'})
+              fixture('.one', { text: 'old one' })
 
               const onRendered = jasmine.createSpy('onRendered callback')
               up.render({ target: '.one', url: '/path', onRendered })
               await wait()
 
-              jasmine.respondWith({responseHeaders: { 'X-Up-Target': ':none' }, responseText: '', contentType: 'text/plain'})
+              jasmine.respondWith({ responseHeaders: { 'X-Up-Target': ':none' }, responseText: '', contentType: 'text/plain' })
               await wait()
 
               expect('.one').toHaveText('old one')
@@ -2360,14 +2360,14 @@ describe('up.fragment', function() {
           })
 
           it('lets the server sends an abstract target like :main', async function() {
-            fixture('.one', {text: 'old content'})
-            fixture('.two', {text: 'old content'})
+            fixture('.one', { text: 'old content' })
+            fixture('.two', { text: 'old content' })
             up.fragment.config.mainTargets = ['.two']
 
-            up.render({target: '.one', url: '/path'})
+            up.render({ target: '.one', url: '/path' })
             await wait()
 
-            this.respondWithSelector('.two', {text: 'new content', responseHeaders: { 'X-Up-Target': ':main' }})
+            this.respondWithSelector('.two', { text: 'new content', responseHeaders: { 'X-Up-Target': ':main' } })
             await wait()
 
             expect('.one').toHaveText('old content')
@@ -2381,11 +2381,11 @@ describe('up.fragment', function() {
             const loadPage = spyOn(up.network, 'loadPage')
 
             fixture('.one')
-            up.render({target: '.one', url: 'http://other-domain.com/path/to'})
+            up.render({ target: '.one', url: 'http://other-domain.com/path/to' })
 
             await wait()
 
-            expect(loadPage).toHaveBeenCalledWith(jasmine.objectContaining({url: 'http://other-domain.com/path/to'}))
+            expect(loadPage).toHaveBeenCalledWith(jasmine.objectContaining({ url: 'http://other-domain.com/path/to' }))
             expect(jasmine.Ajax.requests.count()).toBe(0)
           })
 
@@ -2393,7 +2393,7 @@ describe('up.fragment', function() {
             const loadPage = spyOn(up.network, 'loadPage')
 
             fixture('.one')
-            const promise = up.render({target: '.one', url: 'http://other-domain.com/path/to'})
+            const promise = up.render({ target: '.one', url: 'http://other-domain.com/path/to' })
 
             promiseState(promise).then(function(result) {
               expect(result.state).toBe('pending')
@@ -2410,11 +2410,11 @@ describe('up.fragment', function() {
               const loadPage = spyOn(up.network, 'loadPage')
 
               fixture('.one')
-              up.render({target: '.one', url: '/path', history: true})
+              up.render({ target: '.one', url: '/path', history: true })
 
               await wait()
 
-              expect(loadPage).toHaveBeenCalledWith(jasmine.objectContaining({url: '/path'}))
+              expect(loadPage).toHaveBeenCalledWith(jasmine.objectContaining({ url: '/path' }))
               expect(jasmine.Ajax.requests.count()).toBe(0)
             })
 
@@ -2422,7 +2422,7 @@ describe('up.fragment', function() {
               const loadPage = spyOn(up.network, 'loadPage')
 
               fixture('.one')
-              const promise = up.render({target: '.one', url: '/path', history: true})
+              const promise = up.render({ target: '.one', url: '/path', history: true })
 
               const result = await promiseState(promise)
               expect(result.state).toBe('pending')
@@ -2434,7 +2434,7 @@ describe('up.fragment', function() {
               const loadPage = spyOn(up.network, 'loadPage')
 
               fixture('.one')
-              up.render({target: '.one', url: '/path'})
+              up.render({ target: '.one', url: '/path' })
 
               await wait()
 
@@ -2448,7 +2448,7 @@ describe('up.fragment', function() {
       describe('with { response } option', function() {
         it('renders the given up.Response', async function() {
           up.history.config.enabled = true
-          const target = fixture('.target', {text: 'old text'})
+          const target = fixture('.target', { text: 'old text' })
 
           const request = up.request('/response-url')
           await wait()
@@ -2468,16 +2468,16 @@ describe('up.fragment', function() {
       describe('with { content } option', function() {
 
         it('replaces the given selector with a matching element that has the inner HTML from the given { content } string', async function() {
-          fixture('.target', {text: 'old text'})
+          fixture('.target', { text: 'old text' })
 
-          up.render('.target', {content: 'new text'})
+          up.render('.target', { content: 'new text' })
           await wait()
 
           expect('.target').toHaveText('new text')
         })
 
         it('returns an up.RenderResult with the new children', async function() {
-          fixture('.target', {text: 'old text'})
+          fixture('.target', { text: 'old text' })
 
           const result = await up.render('.target', { content: `
             <div class="child1">child1</div>
@@ -2490,8 +2490,8 @@ describe('up.fragment', function() {
         })
 
         it('replaces the given selector with a matching element that has the inner HTML from the given { content } element', async function() {
-          fixture('.target', {text: 'old text'})
-          const content = e.createFromSelector('div', {text: 'new text'})
+          fixture('.target', { text: 'old text' })
+          const content = e.createFromSelector('div', { text: 'new text' })
 
           up.render('.target', { content })
           await wait()
@@ -2501,27 +2501,27 @@ describe('up.fragment', function() {
 
         it('allows to target :main', async function() {
           up.layer.config.root.mainTargets.unshift('.main-element')
-          fixture('.main-element', {text: 'old text'})
+          fixture('.main-element', { text: 'old text' })
 
-          up.render({target: ':main', content: 'new text'})
+          up.render({ target: ':main', content: 'new text' })
           await wait()
 
           expect('.main-element').toHaveText('new text')
         })
 
         it("removes the target's inner HTML with { content: '' }", async function() {
-          fixture('.target', {text: 'old text'})
+          fixture('.target', { text: 'old text' })
 
-          up.render('.target', {content: ''})
+          up.render('.target', { content: '' })
           await wait()
 
           expect(document.querySelector('.target').innerHTML).toBe('')
         })
 
         it('keeps the target element and only updates its children', async function() {
-          const originalTarget = fixture('.target.klass', {text: 'old text'})
+          const originalTarget = fixture('.target.klass', { text: 'old text' })
 
-          up.render('.target', {content: 'new text'})
+          up.render('.target', { content: 'new text' })
           await wait()
 
           const rediscoveredTarget = document.querySelector('.target')
@@ -2530,9 +2530,9 @@ describe('up.fragment', function() {
         })
 
         it('does not leave <up-wrapper> elements in the DOM', async function() {
-          fixture('.target', {text: 'old text'})
+          fixture('.target', { text: 'old text' })
 
-          up.render('.target', {content: 'new text'})
+          up.render('.target', { content: 'new text' })
           await wait()
 
           expect('.target').toHaveText('new text')
@@ -2540,8 +2540,8 @@ describe('up.fragment', function() {
         })
 
         it('has a sync effect', function() {
-          fixture('.target', {text: 'old text'})
-          up.render('.target', {content: 'new text'})
+          fixture('.target', { text: 'old text' })
+          up.render('.target', { content: 'new text' })
           expect('.target').toHaveText('new text')
         })
 
@@ -2549,7 +2549,7 @@ describe('up.fragment', function() {
           const container = fixture('.target')
           e.affix(container, '.old-child')
 
-          up.render('.target:after', {content: '<div class="new-child"></div>'})
+          up.render('.target:after', { content: '<div class="new-child"></div>' })
           await wait()
 
           expect(container.innerHTML).toEqual('<div class="old-child"></div><div class="new-child"></div>')
@@ -2559,7 +2559,7 @@ describe('up.fragment', function() {
           const container = fixture('.target')
           e.affix(container, '.old-child')
 
-          up.render('.target:before', {content: '<div class="new-child"></div>'})
+          up.render('.target:before', { content: '<div class="new-child"></div>' })
           await wait()
 
           expect(container.innerHTML).toEqual('<div class="new-child"></div><div class="old-child"></div>')
@@ -2715,7 +2715,7 @@ describe('up.fragment', function() {
         })
 
         it('derives a selector from an element given as { target } option', async function() {
-          const target = fixture('.target', {text: 'old-text'})
+          const target = fixture('.target', { text: 'old-text' })
           const document = '<div class="target">new-text</div>'
           up.render({ target, document })
           await wait()
@@ -2724,7 +2724,7 @@ describe('up.fragment', function() {
         })
 
         it('replaces the given selector with a matching element that has the outer HTML from the given { document } element', async function() {
-          fixture('.target', {text: 'old text'})
+          fixture('.target', { text: 'old text' })
           const element = e.createFromHTML('<div class="target">new text</div>')
           up.render('.target', { document: element })
           await wait()
@@ -2734,36 +2734,36 @@ describe('up.fragment', function() {
 
         it("rejects if the selector can't be found in the given { document } string", async function() {
           $fixture('.foo-bar')
-          const promise = up.render('.foo-bar', {document: 'html without match'})
+          const promise = up.render('.foo-bar', { document: 'html without match' })
 
           await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/Could not find common target/i))
         })
 
         it('has a sync effect', function() {
-          fixture('.target', {text: 'old text'})
-          up.render('.target', {document: '<div class="target">new text</div>'})
+          fixture('.target', { text: 'old text' })
+          up.render('.target', { document: '<div class="target">new text</div>' })
           expect('.target').toHaveText('new text')
         })
 
         it('does not set an [up-source] attribute', function() {
-          fixture('.target', {text: 'old text'})
-          up.render('.target', {document: '<div class="target">new text</div>'})
+          fixture('.target', { text: 'old text' })
+          up.render('.target', { document: '<div class="target">new text</div>' })
 
           expect('.target').toHaveText('new text')
           expect('.target').not.toHaveAttribute('up-source')
         })
 
         it('sets an [up-time=false] attribute to prevent an If-None-Match request header when reloading this fragment.', function() {
-          fixture('.target', {text: 'old text'})
-          up.render('.target', {document: '<div class="target">new text</div>'})
+          fixture('.target', { text: 'old text' })
+          up.render('.target', { document: '<div class="target">new text</div>' })
 
           expect('.target').toHaveText('new text')
           expect('.target').toHaveAttribute('up-time', 'false')
         })
 
         it('sets an [up-etag=false] attribute to prevent an If-Modified-Since request header when reloading this fragment.', function() {
-          fixture('.target', {text: 'old text'})
-          up.render('.target', {document: '<div class="target">new text</div>'})
+          fixture('.target', { text: 'old text' })
+          up.render('.target', { document: '<div class="target">new text</div>' })
 
           expect('.target').toHaveText('new text')
           expect('.target').toHaveAttribute('up-etag', 'false')
@@ -2810,7 +2810,7 @@ describe('up.fragment', function() {
         })
 
         it('derives target and outer HTML from the given { fragment } element', async function() {
-          fixture('.target', {text: 'old text'})
+          fixture('.target', { text: 'old text' })
           const fragment = e.createFromHTML('<div class="target">new text</div>')
           up.render('.target', { fragment })
           await wait()
@@ -2827,8 +2827,8 @@ describe('up.fragment', function() {
         })
 
         it('has a sync effect', function() {
-          fixture('.target', {text: 'old text'})
-          up.render('.target', {fragment: '<div class="target">new text</div>'})
+          fixture('.target', { text: 'old text' })
+          up.render('.target', { fragment: '<div class="target">new text</div>' })
           expect('.target').toHaveText('new text')
         })
 
@@ -2836,7 +2836,7 @@ describe('up.fragment', function() {
           const container = fixture('.target')
           e.affix(container, '.old-child')
 
-          up.render('.target:after', {fragment: '<div class="target"><div class="new-child"></div></div>'})
+          up.render('.target:after', { fragment: '<div class="target"><div class="new-child"></div></div>' })
           await wait()
 
           const newTarget = document.querySelector('.target')
@@ -2847,7 +2847,7 @@ describe('up.fragment', function() {
           const container = fixture('.target')
           e.affix(container, '.old-child')
 
-          up.render('.target:before', {fragment: '<div class="target"><div class="new-child"></div></div>'})
+          up.render('.target:before', { fragment: '<div class="target"><div class="new-child"></div></div>' })
           await wait()
 
           const newTarget = document.querySelector('.target')
@@ -3014,7 +3014,7 @@ describe('up.fragment', function() {
             up.render({ fragment: '#target-template', data: { name: "Alice" } })
             await wait()
 
-            expect(templateHandler).toHaveBeenCalledWith(jasmine.objectContaining({target: template, data: { name: "Alice" }}), template, jasmine.anything())
+            expect(templateHandler).toHaveBeenCalledWith(jasmine.objectContaining({ target: template, data: { name: "Alice" } }), template, jasmine.anything())
             expect('#target').toHaveText('Hello, Alice!')
           })
 
@@ -3045,8 +3045,8 @@ describe('up.fragment', function() {
       describe('choice of target', function() {
 
         it('uses a selector given as { target } option', function() {
-          const one = fixture('.one', {text: 'old one'})
-          const two = fixture('.two', {text: 'old two'})
+          const one = fixture('.one', { text: 'old one' })
+          const two = fixture('.two', { text: 'old two' })
 
           up.render({ target: '.two', content: 'new two' })
 
@@ -3055,8 +3055,8 @@ describe('up.fragment', function() {
         })
 
         it('accepts an array of selector alternatives as { target } option', function() {
-          const one = fixture('.one', {text: 'old one'})
-          const two = fixture('.two', {text: 'old two'})
+          const one = fixture('.one', { text: 'old one' })
+          const two = fixture('.two', { text: 'old two' })
 
           up.render({ target: ['.four', '.three', '.two', '.one'], document: '<div class="two">new two</div>' })
 
@@ -3069,7 +3069,7 @@ describe('up.fragment', function() {
         it('derives a selector from an element given as first argument', async function() {
           const element = fixture('#element')
 
-          up.render(element, {url: '/path'})
+          up.render(element, { url: '/path' })
 
           await wait()
 
@@ -3114,8 +3114,8 @@ describe('up.fragment', function() {
         describe('updating children', function() {
 
           it('replaces the children with :content, but keeps the element itself', function() {
-            const oldTarget = fixture('#target', {'old-attr': ''})
-            e.affix(oldTarget, '.child', {text: 'old child'})
+            const oldTarget = fixture('#target', { 'old-attr': '' })
+            e.affix(oldTarget, '.child', { text: 'old child' })
             up.render('#target:content', { document: `
               <div id='target' new-attr>
                 <div class='child'>new child</div>
@@ -3132,8 +3132,8 @@ describe('up.fragment', function() {
           })
 
           it('returns an up.RenderResult with only the new children', async function() {
-            let target = fixture('#target', {'old-attr': ''})
-            e.affix(target, '.child', {text: 'old child'})
+            let target = fixture('#target', { 'old-attr': '' })
+            e.affix(target, '.child', { text: 'old child' })
             const result = await up.render('#target:content', { document: `
               <div id='target' new-attr>
                 <div class='child'>new child</div>
@@ -3151,7 +3151,7 @@ describe('up.fragment', function() {
 
           it('prepends instead of replacing when the target has a :before pseudo-selector', async function() {
             const target = fixture('.target')
-            e.affix(target, '.child', {text: 'old'})
+            e.affix(target, '.child', { text: 'old' })
             up.render('.target:before', { document: `
               <div class='target'>
                 <div class='child'>new</div>
@@ -3169,7 +3169,7 @@ describe('up.fragment', function() {
 
           it('appends instead of replacing when the target has a :after pseudo-selector', async function() {
             const target = fixture('.target')
-            e.affix(target, '.child', {text: 'old'})
+            e.affix(target, '.child', { text: 'old' })
             up.render('.target:after', { document: `
               <div class='target'>
                 <div class='child'>new</div>
@@ -3187,7 +3187,7 @@ describe('up.fragment', function() {
 
           it('returns an up.RenderResult with only the appended elements', async function() {
             const target = fixture('.target')
-            e.affix(target, '.child', {text: 'old'})
+            e.affix(target, '.child', { text: 'old' })
             const result = await up.render('.target:after', { document: `
               <div class='target'>
                 <div class='child'>new</div>
@@ -3200,9 +3200,9 @@ describe('up.fragment', function() {
           })
 
           it("lets the developer choose between replacing/prepending/appending for each selector", async function() {
-            fixture('.before', {text: 'old-before'})
-            fixture('.middle', {text: 'old-middle'})
-            fixture('.after', {text: 'old-after'})
+            fixture('.before', { text: 'old-before' })
+            fixture('.middle', { text: 'old-middle' })
+            fixture('.after', { text: 'old-after' })
             up.render('.before:before, .middle, .after:after', { document: `
               <div class="before">new-before</div>
               <div class="middle">new-middle</div>
@@ -3218,9 +3218,9 @@ describe('up.fragment', function() {
           })
 
           it('replaces multiple selectors separated with a comma', async function() {
-            fixture('.before', {text: 'old-before'})
-            fixture('.middle', {text: 'old-middle'})
-            fixture('.after', {text: 'old-after'})
+            fixture('.before', { text: 'old-before' })
+            fixture('.middle', { text: 'old-middle' })
+            fixture('.after', { text: 'old-after' })
 
             up.render('.middle, .after', { document: `
               <div class="before">new-before</div>
@@ -3240,8 +3240,8 @@ describe('up.fragment', function() {
         describe('optional targets', function() {
 
           it('uses a target with a :maybe pseudo-selector if it is found in the response', async function() {
-            fixture('.foo', {text: 'old foo'})
-            fixture('.bar', {text: 'old bar'})
+            fixture('.foo', { text: 'old foo' })
+            fixture('.bar', { text: 'old bar' })
 
             up.render('.foo:maybe, .bar', {
               document: `
@@ -3257,8 +3257,8 @@ describe('up.fragment', function() {
           })
 
           it('does not impede the render pass if the :maybe target is missing from the response', async function() {
-            fixture('.foo', {text: 'old foo'})
-            fixture('.bar', {text: 'old bar'})
+            fixture('.foo', { text: 'old foo' })
+            fixture('.bar', { text: 'old bar' })
 
             const promise = up.render('.foo:maybe, .bar', {
               document: `
@@ -3275,7 +3275,7 @@ describe('up.fragment', function() {
           })
 
           it('does not impede the render pass if the :maybe target is missing from the current page', async function() {
-            fixture('.bar', {text: 'old bar'})
+            fixture('.bar', { text: 'old bar' })
 
             const promise = up.render('.foo:maybe, .bar', {
               document: `
@@ -3291,10 +3291,10 @@ describe('up.fragment', function() {
           })
 
           it('includes a :maybe target in the X-Up-Target header if it can be matched in the current page', async function() {
-            fixture('.foo', {text: 'old foo'})
-            fixture('.bar', {text: 'old bar'})
+            fixture('.foo', { text: 'old foo' })
+            fixture('.bar', { text: 'old bar' })
 
-            const promise = up.render('.foo:maybe, .bar', {url: '/my-page'})
+            const promise = up.render('.foo:maybe, .bar', { url: '/my-page' })
 
             await wait()
 
@@ -3303,9 +3303,9 @@ describe('up.fragment', function() {
           })
 
           it('omits a :maybe target from the X-Up-Target header if it cannot be matched in the current page', async function() {
-            fixture('.bar', {text: 'old bar'})
+            fixture('.bar', { text: 'old bar' })
 
-            const promise = up.render('.foo:maybe, .bar', {url: '/some-page'})
+            const promise = up.render('.foo:maybe, .bar', { url: '/some-page' })
 
             await wait()
 
@@ -3331,7 +3331,7 @@ describe('up.fragment', function() {
             `)
 
             const origin = document.querySelector('.origin')
-            up.render('.element', {origin, content: 'new text'})
+            up.render('.element', { origin, content: 'new text' })
 
             await wait()
 
@@ -3365,7 +3365,7 @@ describe('up.fragment', function() {
             `)
 
             const origin = document.querySelector('.origin')
-            up.render('.element', {origin, content: 'new text', match: 'first'})
+            up.render('.element', { origin, content: 'new text', match: 'first' })
 
             await wait()
 
@@ -3378,7 +3378,7 @@ describe('up.fragment', function() {
           })
 
           it('prefers to match an element closest to origin when the origin was swapped and then revalidating (bugfix)', async function() {
-            up.request('/home', {target: '.element', cache: true})
+            up.request('/home', { target: '.element', cache: true })
 
             await wait()
 
@@ -3392,7 +3392,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            expect({url: '/home', target: '.element'}).toBeCached()
+            expect({ url: '/home', target: '.element' }).toBeCached()
 
             htmlFixture(`
               <div class="element" id="root">
@@ -3406,7 +3406,7 @@ describe('up.fragment', function() {
             `)
 
             const origin = document.querySelector('.origin')
-            up.render('.element', {origin, url: '/home', cache: true, revalidate: true})
+            up.render('.element', { origin, url: '/home', cache: true, revalidate: true })
 
             await wait()
 
@@ -3456,7 +3456,7 @@ describe('up.fragment', function() {
           })
 
           it('prefers to match an element closest to origin when the origin was swapped and then revalidating when the origin has no derivable target (bugfix)', async function() {
-            up.request('/home', {target: '.element', cache: true})
+            up.request('/home', { target: '.element', cache: true })
 
             await wait()
 
@@ -3470,7 +3470,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            expect({url: '/home', target: '.element'}).toBeCached()
+            expect({ url: '/home', target: '.element' }).toBeCached()
 
             htmlFixture(`
               <div class="element" id="root">
@@ -3486,7 +3486,7 @@ describe('up.fragment', function() {
             const origin = document.querySelector('.element .element span')
             expect(origin).not.toBeTargetable()
 
-            up.render('.element', {origin, url: '/home', cache: true, revalidate: true})
+            up.render('.element', { origin, url: '/home', cache: true, revalidate: true })
 
             await wait()
 
@@ -3538,18 +3538,18 @@ describe('up.fragment', function() {
 
           it('prefers to match a descendant selector in the region of the origin', async function() {
             const element1 = fixture('.element')
-            const element1Child1 = e.affix(element1, '.child', {text: 'old element1Child1'})
-            const element1Child2 = e.affix(element1, '.child.sibling', {text: 'old element1Child2'})
+            const element1Child1 = e.affix(element1, '.child', { text: 'old element1Child1' })
+            const element1Child2 = e.affix(element1, '.child.sibling', { text: 'old element1Child2' })
 
             const element2 = fixture('.element')
-            const element2Child1 = e.affix(element2, '.child', {text: 'old element2Child1'})
-            const element2Child2 = e.affix(element2, '.child.sibling', {text: 'old element2Child2'})
+            const element2Child1 = e.affix(element2, '.child', { text: 'old element2Child1' })
+            const element2Child2 = e.affix(element2, '.child.sibling', { text: 'old element2Child2' })
 
             up.render('.element .sibling', { origin: element2Child1, document: `
               <div class="element">
                 <div class="child sibling">new text</div>
               </div>
-            `})
+            ` })
 
             await wait()
 
@@ -3565,7 +3565,7 @@ describe('up.fragment', function() {
           })
 
           it('prefers to match a descendant selector in the region of the origin when revalidating (bugfix)', async function() {
-            up.request({url: '/page', target: '.element .sibling', cache: true})
+            up.request({ url: '/page', target: '.element .sibling', cache: true })
 
             await wait()
 
@@ -3579,17 +3579,17 @@ describe('up.fragment', function() {
 
             await wait()
 
-            expect({url: '/page', target: '.element .sibling'}).toBeCached()
+            expect({ url: '/page', target: '.element .sibling' }).toBeCached()
 
             const element1 = fixture('.element')
-            const element1Child1 = e.affix(element1, '.child', {text: 'old element1Child1'})
-            const element1Child2 = e.affix(element1, '.child.sibling', {text: 'old element1Child2'})
+            const element1Child1 = e.affix(element1, '.child', { text: 'old element1Child1' })
+            const element1Child2 = e.affix(element1, '.child.sibling', { text: 'old element1Child2' })
 
             const element2 = fixture('.element')
-            const element2Child1 = e.affix(element2, '.child', {text: 'old element2Child1'})
-            const element2Child2 = e.affix(element2, '.child.sibling', {text: 'old element2Child2'})
+            const element2Child1 = e.affix(element2, '.child', { text: 'old element2Child1' })
+            const element2Child2 = e.affix(element2, '.child.sibling', { text: 'old element2Child2' })
 
-            up.render('.element .sibling', {url: 'page', origin: element2Child1, cache: true, revalidate: true})
+            up.render('.element .sibling', { url: 'page', origin: element2Child1, cache: true, revalidate: true })
 
             await wait()
 
@@ -3620,12 +3620,12 @@ describe('up.fragment', function() {
 
           it('allows ambiguous target derivation if it becomes clear given an origin', async function() {
             const root = fixture('.element#root')
-            const one = e.affix(root, '.element', {text: 'old one'})
-            const two = e.affix(root, '.element', {text: 'old two'})
+            const one = e.affix(root, '.element', { text: 'old one' })
+            const two = e.affix(root, '.element', { text: 'old two' })
             const childOfTwo = e.affix(two, '.origin')
-            const three = e.affix(root, '.element', {text: 'old three'})
+            const three = e.affix(root, '.element', { text: 'old three' })
 
-            up.render(two, {origin: childOfTwo, content: 'new text'})
+            up.render(two, { origin: childOfTwo, content: 'new text' })
 
             await wait()
 
@@ -3647,14 +3647,14 @@ describe('up.fragment', function() {
 
           it('rediscovers the { origin } in the new content and prefers matching an element closest to the rediscovered origin', function() {
             const root = fixture('.element#root')
-            const one = e.affix(root, '.element', {text: 'old one'})
-            const two = e.affix(root, '.element', {text: 'old two'})
+            const one = e.affix(root, '.element', { text: 'old one' })
+            const two = e.affix(root, '.element', { text: 'old two' })
             const childOfTwo = e.affix(two, '.origin')
-            const three = e.affix(root, '.element', {text: 'old three'})
+            const three = e.affix(root, '.element', { text: 'old three' })
 
             const newHTML = root.outerHTML.replace(/old/g, 'new')
 
-            up.render('.element', {origin: childOfTwo, document: newHTML})
+            up.render('.element', { origin: childOfTwo, document: newHTML })
 
             const elements = document.querySelectorAll('.element')
             expect(elements.length).toBe(4)
@@ -3674,14 +3674,14 @@ describe('up.fragment', function() {
 
           it('uses the first match in the new content if the { origin } cannot be rediscovered in the new content', function() {
             const root = fixture('#root')
-            const one = e.affix(root, '.element', {text: 'old one'})
-            const two = e.affix(root, '.element', {text: 'old two'})
+            const one = e.affix(root, '.element', { text: 'old one' })
+            const two = e.affix(root, '.element', { text: 'old two' })
             const childOfTwo = e.affix(two, '.origin')
-            const three = e.affix(root, '.element', {text: 'old three'})
+            const three = e.affix(root, '.element', { text: 'old three' })
 
             const newHTML = root.outerHTML.replace(/old/g, 'new').replace('origin', 'not-origin')
 
-            up.render('.element', {origin: childOfTwo, document: newHTML})
+            up.render('.element', { origin: childOfTwo, document: newHTML })
 
             const elements = document.querySelectorAll('.element')
 
@@ -3705,7 +3705,7 @@ describe('up.fragment', function() {
               const $second = $fixture('.boxx#second')
               const $secondChild = $('<span class="second-child">old second</span>').appendTo($second)
 
-              up.navigate('.boxx:has(.second-child)', {url: '/path'})
+              up.navigate('.boxx:has(.second-child)', { url: '/path' })
 
               await wait()
 
@@ -3727,7 +3727,7 @@ describe('up.fragment', function() {
 
           describe(':layer', function() {
             it('matches the first swappable element in a layer', async function() {
-              up.render(':layer', {url: '/path'})
+              up.render(':layer', { url: '/path' })
 
               await wait()
 
@@ -3739,7 +3739,7 @@ describe('up.fragment', function() {
             it('matches a main selector in a layer', async function() {
               const main = fixture('.main-element')
               up.layer.config.root.mainTargets = ['.main-element']
-              up.render(':main', {url: '/path'})
+              up.render(':main', { url: '/path' })
 
               await wait()
 
@@ -3749,15 +3749,15 @@ describe('up.fragment', function() {
 
           describe(':none', function() {
             it('contacts the server but does not update any fragment', async function() {
-              fixture('.one', {text: 'old one'})
-              fixture('.two', {text: 'old two'})
+              fixture('.one', { text: 'old one' })
+              fixture('.two', { text: 'old two' })
 
-              const promise = up.render({target: ':none', url: '/path'})
+              const promise = up.render({ target: ':none', url: '/path' })
 
               await wait()
 
               expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual(':none')
-              this.respondWith({responseText: '', contentType: 'text/plain'})
+              this.respondWith({ responseText: '', contentType: 'text/plain' })
 
               await wait()
 
@@ -3776,7 +3776,7 @@ describe('up.fragment', function() {
             const $outer = $fixture('.outer').text('old outer text')
             const $inner = $outer.affix('.inner').text('old inner text')
 
-            const replacePromise = up.render('.outer, .inner', {url: '/path'})
+            const replacePromise = up.render('.outer, .inner', { url: '/path' })
             await wait()
 
             expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
@@ -3805,7 +3805,7 @@ describe('up.fragment', function() {
             const $outer = $fixture('.outer').text('old outer text')
             const $inner = $outer.affix('.inner').text('old inner text')
 
-            const replacePromise = up.render('.inner, .outer', {url: '/path'})
+            const replacePromise = up.render('.inner, .outer', { url: '/path' })
             await wait()
 
             expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
@@ -3834,7 +3834,7 @@ describe('up.fragment', function() {
             const $outer = $fixture('.outer').text('old outer text')
             const $inner = $outer.affix('.inner').text('old inner text')
 
-            const replacePromise = up.render('.outer:before, .inner', {url: '/path'})
+            const replacePromise = up.render('.outer:before, .inner', { url: '/path' })
             await wait()
 
             // Placement pseudo-selectors are removed from X-Up-Target
@@ -3865,7 +3865,7 @@ describe('up.fragment', function() {
             const $outer = $fixture('.outer').text('old outer text')
             const $inner = $outer.affix('.inner').text('old inner text')
 
-            const replacePromise = up.render('.outer:after, .inner', {url: '/path'})
+            const replacePromise = up.render('.outer:after, .inner', { url: '/path' })
             await wait()
 
             expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer, .inner')
@@ -3895,7 +3895,7 @@ describe('up.fragment', function() {
             const $outer = $fixture('.outer').text('old outer text')
             const $inner = $outer.affix('.inner').text('old inner text')
 
-            const replacePromise = up.render('.outer, .inner', {url: '/path'})
+            const replacePromise = up.render('.outer, .inner', { url: '/path' })
             await wait()
 
             expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
@@ -3926,7 +3926,7 @@ describe('up.fragment', function() {
             const $outer = $fixture('.outer').text('old outer text')
             const $inner = $outer.affix('.inner').text('old inner text')
 
-            up.render('.inner, .outer', {url: '/path', scroll: '.revealee'})
+            up.render('.inner, .outer', { url: '/path', scroll: '.revealee' })
             await wait()
 
             expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
@@ -3958,7 +3958,7 @@ describe('up.fragment', function() {
             const $outer = $fixture('.outer').text('old outer text')
             const $inner = $outer.affix('.inner').text('old inner text')
 
-            const replacePromise = up.render('.outer, .inner', {url: '/path'})
+            const replacePromise = up.render('.outer, .inner', { url: '/path' })
             await wait()
 
             this.respondWith(`
@@ -3984,7 +3984,7 @@ describe('up.fragment', function() {
             const $outer = $fixture('.one').text('old one text')
             const $inner = $fixture('.two').text('old two text')
 
-            const replacePromise = up.render('.one, .two', {url: '/path'})
+            const replacePromise = up.render('.one, .two', { url: '/path' })
             await wait()
 
             this.respondWith(`
@@ -4011,7 +4011,7 @@ describe('up.fragment', function() {
             const $outer = $fixture('.one').text('old one text')
             const $inner = $fixture('.two').text('old two text')
 
-            const replacePromise = up.render('.one, .two', {url: '/path'})
+            const replacePromise = up.render('.one, .two', { url: '/path' })
             await wait()
 
             this.respondWith(`
@@ -4037,7 +4037,7 @@ describe('up.fragment', function() {
           it('updates the first selector if the same element is targeted twice in a single replacement', async function() {
             const $one = $fixture('.one.alias').text('old one text')
 
-            const replacePromise = up.render('.one, .alias', {url: '/path'})
+            const replacePromise = up.render('.one, .alias', { url: '/path' })
             await wait()
 
             expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.one')
@@ -4060,7 +4060,7 @@ describe('up.fragment', function() {
           it('updates the first selector if the same element is prepended or appended twice in a single replacement', async function() {
             const $one = $fixture('.one').text('old one text')
 
-            const replacePromise = up.render('.one:before, .one:after', {url: '/path'})
+            const replacePromise = up.render('.one:before, .one:after', { url: '/path' })
             await wait()
 
             // Placement pseudo-selectors are removed from X-Up-Target
@@ -4084,7 +4084,7 @@ describe('up.fragment', function() {
           it("updates the first selector if the same element is prepended, replaced and appended in a single replacement", async function() {
             const $elem = $fixture('.elem.alias1.alias2').text("old text")
 
-            const replacePromise = up.render('.elem:before, .alias1, .alias2:after', {url: '/path'})
+            const replacePromise = up.render('.elem:before, .alias1, .alias2:after', { url: '/path' })
             await wait()
 
             // Placement pseudo-selectors are removed from X-Up-Target
@@ -4116,7 +4116,7 @@ describe('up.fragment', function() {
 
           it('tries selectors from options.fallback before making a request', async function() {
             $fixture('.box').text('old box')
-            up.render('.unknown', {url: '/path', fallback: '.box'})
+            up.render('.unknown', { url: '/path', fallback: '.box' })
 
             await wait()
 
@@ -4129,7 +4129,7 @@ describe('up.fragment', function() {
           })
 
           it('rejects the promise with up.CannotMatch if all alternatives are exhausted', async function() {
-            const promise = up.render('.unknown', {url: '/path', fallback: '.more-unknown'})
+            const promise = up.render('.unknown', { url: '/path', fallback: '.more-unknown' })
 
             await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotMatch', /Could not find target in current page/i))
           })
@@ -4137,7 +4137,7 @@ describe('up.fragment', function() {
           it('allows the request and does not reject if the { target } can be matched, but { failTarget } cannot', async function() {
             fixture('.success')
 
-            const promise = up.render('.success', {url: '/path', failTarget: '.failure'})
+            const promise = up.render('.success', { url: '/path', failTarget: '.failure' })
 
             await wait()
 
@@ -4147,14 +4147,14 @@ describe('up.fragment', function() {
             expect(jasmine.Ajax.requests.count()).toBe(1)
 
             // When the server does end up responding with a failure, we cannot process it and must throw up.CannotMatch.
-            jasmine.respondWithSelector('.failure', {status: 500})
+            jasmine.respondWithSelector('.failure', { status: 500 })
             await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotMatch', /Could not find( common)? target/i))
           })
 
           it('considers a union selector to be missing if one of its selector-atoms are missing', async function() {
             $fixture('.target').text('old target')
             $fixture('.fallback').text('old fallback')
-            up.render('.target, .unknown', {url: '/path', fallback: '.fallback'})
+            up.render('.target, .unknown', { url: '/path', fallback: '.fallback' })
 
             await wait()
 
@@ -4171,7 +4171,7 @@ describe('up.fragment', function() {
           it("tries the layer's main target with { fallback: true }", async function() {
             up.layer.config.any.mainTargets = ['.existing']
             $fixture('.existing').text('old existing')
-            up.render('.unknown', {url: '/path', fallback: true})
+            up.render('.unknown', { url: '/path', fallback: true })
 
             await wait()
 
@@ -4187,7 +4187,7 @@ describe('up.fragment', function() {
             up.layer.config.any.mainTargets = ['.existing']
             $fixture('.existing').text('old existing')
             await expectAsync(
-              up.render('.unknown', {url: '/path', fallback: false})
+              up.render('.unknown', { url: '/path', fallback: false })
             ).toBeRejectedWith(
               jasmine.anyError(/Could not find target in current page/i)
             )
@@ -4201,7 +4201,7 @@ describe('up.fragment', function() {
           it('tries the selector in options.fallback before swapping elements', async function() {
             const $target = $fixture('.target').text('old target')
             const $fallback = $fixture('.fallback').text('old fallback')
-            up.render('.target', {url: '/path', fallback: '.fallback'})
+            up.render('.target', { url: '/path', fallback: '.fallback' })
             $target.remove()
 
             await wait()
@@ -4219,7 +4219,7 @@ describe('up.fragment', function() {
           it('rejects the promise if all alternatives are exhausted', async function() {
             const $target = $fixture('.target').text('old target')
             const $fallback = $fixture('.fallback').text('old fallback')
-            const promise = up.render('.target', {url: '/path', fallback: '.fallback'})
+            const promise = up.render('.target', { url: '/path', fallback: '.fallback' })
 
             await wait()
 
@@ -4238,7 +4238,7 @@ describe('up.fragment', function() {
             const $target = $fixture('.target').text('old target')
             const $target2 = $fixture('.target2').text('old target2')
             const $fallback = $fixture('.fallback').text('old fallback')
-            up.render('.target, .target2', {url: '/path', fallback: '.fallback'})
+            up.render('.target, .target2', { url: '/path', fallback: '.fallback' })
             $target2.remove()
 
             await wait()
@@ -4259,7 +4259,7 @@ describe('up.fragment', function() {
             up.layer.config.any.mainTargets = ['.fallback']
             const $target = $fixture('.target').text('old target')
             const $fallback = $fixture('.fallback').text('old fallback')
-            up.render('.target', {url: '/path', fallback: true})
+            up.render('.target', { url: '/path', fallback: true })
             $target.remove()
 
             await wait()
@@ -4278,7 +4278,7 @@ describe('up.fragment', function() {
             up.layer.config.any.fallbacks = ['.fallback']
             const $target = $fixture('.target').text('old target')
             const $fallback = $fixture('.fallback').text('old fallback')
-            const promise = up.render('.target', {url: '/path', fallback: false})
+            const promise = up.render('.target', { url: '/path', fallback: false })
 
             u.task(() => {
               $target.remove()
@@ -4305,7 +4305,7 @@ describe('up.fragment', function() {
           it("tries the selector in options.fallback before swapping elements", async function() {
             const $target = $fixture('.target').text('old target')
             const $fallback = $fixture('.fallback').text('old fallback')
-            up.render('.target', {url: '/path', fallback: '.fallback'})
+            up.render('.target', { url: '/path', fallback: '.fallback' })
 
             await wait()
 
@@ -4321,14 +4321,14 @@ describe('up.fragment', function() {
 
           it("replaces the layer's main target with { fallback: true }", async function() {
             up.layer.config.root.mainTargets = ['.default']
-            fixture('.target', {text: 'old target text'})
-            fixture('.default', {text: 'old fallback text'})
+            fixture('.target', { text: 'old target text' })
+            fixture('.default', { text: 'old fallback text' })
 
-            up.render('.target', {url: '/path', fallback: true})
+            up.render('.target', { url: '/path', fallback: true })
 
             await wait()
 
-            jasmine.respondWithSelector('.default', {text: 'new fallback text'})
+            jasmine.respondWithSelector('.default', { text: 'new fallback text' })
 
             await wait()
 
@@ -4340,7 +4340,7 @@ describe('up.fragment', function() {
             it('rejects the promise', async function() {
               const $target = $fixture('.target').text('old target')
               const $fallback = $fixture('.fallback').text('old fallback')
-              const promise = up.render('.target', {url: '/path', fallback: '.fallback'})
+              const promise = up.render('.target', { url: '/path', fallback: '.fallback' })
 
               await wait()
 
@@ -4354,7 +4354,7 @@ describe('up.fragment', function() {
             const $target = $fixture('.target').text('old target')
             const $target2 = $fixture('.target2').text('old target2')
             const $fallback = $fixture('.fallback').text('old fallback')
-            up.render('.target, .target2', {url: '/path', fallback: '.fallback'})
+            up.render('.target, .target2', { url: '/path', fallback: '.fallback' })
 
             await wait()
 
@@ -4374,7 +4374,7 @@ describe('up.fragment', function() {
             up.layer.config.any.mainTargets = ['.fallback']
             const $target = $fixture('.target').text('old target')
             const $fallback = $fixture('.fallback').text('old fallback')
-            up.render('.target', {url: '/path', fallback: true})
+            up.render('.target', { url: '/path', fallback: true })
 
             await wait()
 
@@ -4390,7 +4390,7 @@ describe('up.fragment', function() {
             up.layer.config.any.mainTargets = ['.fallback']
             const $target = $fixture('.target').text('old target')
             const $fallback = $fixture('.fallback').text('old fallback')
-            const promise = up.render('.target', {url: '/path', fallback: false})
+            const promise = up.render('.target', { url: '/path', fallback: false })
 
             await wait()
 
@@ -4411,10 +4411,10 @@ describe('up.fragment', function() {
               { target: '.element', content: 'old text in modal' }
             ])
 
-            up.render('.element', {content: 'new text', layer: 'root', peel: false})
+            up.render('.element', { content: 'new text', layer: 'root', peel: false })
 
-            expect(up.fragment.get('.element', {layer: 0})).toHaveText(/new text/)
-            expect(up.fragment.get('.element', {layer: 1})).toHaveText(/old text in modal/)
+            expect(up.fragment.get('.element', { layer: 0 })).toHaveText(/new text/)
+            expect(up.fragment.get('.element', { layer: 1 })).toHaveText(/old text in modal/)
           })
 
           it('updates the layer of the given { origin }', function() {
@@ -4425,10 +4425,10 @@ describe('up.fragment', function() {
 
             const origin = fixture('.origin')
 
-            up.render('.element', {content: 'new text', origin, peel: false})
+            up.render('.element', { content: 'new text', origin, peel: false })
 
-            expect(up.fragment.get('.element', {layer: 0})).toHaveText(/new text/)
-            expect(up.fragment.get('.element', {layer: 1})).toHaveText(/old text in modal/)
+            expect(up.fragment.get('.element', { layer: 0 })).toHaveText(/new text/)
+            expect(up.fragment.get('.element', { layer: 1 })).toHaveText(/old text in modal/)
           })
 
           it('rejects when a detached { origin } is given, but no { layer } option', async function() {
@@ -4440,12 +4440,12 @@ describe('up.fragment', function() {
             const origin = fixture('.origin')
             origin.remove()
 
-            const promise = up.render('.element', {content: 'new text', origin, peel: false})
+            const promise = up.render('.element', { content: 'new text', origin, peel: false })
 
             await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/Could not find.*layer.*detached/i))
 
-            expect(up.fragment.get('.element', {layer: 0})).toHaveText(/old text in root/)
-            expect(up.fragment.get('.element', {layer: 1})).toHaveText(/old text in modal/)
+            expect(up.fragment.get('.element', { layer: 0 })).toHaveText(/old text in root/)
+            expect(up.fragment.get('.element', { layer: 1 })).toHaveText(/old text in modal/)
           })
 
           it('ignores a detached { origin } for layer selection when there is also a { layer } option given', function() {
@@ -4457,10 +4457,10 @@ describe('up.fragment', function() {
             const origin = fixture('.origin')
             origin.remove()
 
-            up.render('.element', {content: 'new text', origin, layer: 1, peel: false})
+            up.render('.element', { content: 'new text', origin, layer: 1, peel: false })
 
-            expect(up.fragment.get('.element', {layer: 0})).toHaveText(/old text in root/)
-            expect(up.fragment.get('.element', {layer: 1})).toHaveText(/new text/)
+            expect(up.fragment.get('.element', { layer: 0 })).toHaveText(/old text in root/)
+            expect(up.fragment.get('.element', { layer: 1 })).toHaveText(/new text/)
           })
 
           it('updates the given { layer } even if the given { origin } is in another layer', function() {
@@ -4469,12 +4469,12 @@ describe('up.fragment', function() {
               { target: '.element', content: 'old text in modal' }
             ])
 
-            const origin = up.fragment.get('.element', {layer: 1})
+            const origin = up.fragment.get('.element', { layer: 1 })
 
-            up.render('.element', {content: 'new text', origin, layer: 'root', peel: false})
+            up.render('.element', { content: 'new text', origin, layer: 'root', peel: false })
 
-            expect(up.fragment.get('.element', {layer: 0})).toHaveText(/new text/)
-            expect(up.fragment.get('.element', {layer: 1})).toHaveText(/old text in modal/)
+            expect(up.fragment.get('.element', { layer: 0 })).toHaveText(/new text/)
+            expect(up.fragment.get('.element', { layer: 1 })).toHaveText(/old text in modal/)
           })
 
           it('updates the layer of the given { origin } if the origin was detached after the request was sent', async function() {
@@ -4485,7 +4485,7 @@ describe('up.fragment', function() {
 
             const origin = fixture('.origin')
 
-            up.render('.element', {url: '/path', origin, peel: false})
+            up.render('.element', { url: '/path', origin, peel: false })
             await wait()
 
             expect(jasmine.Ajax.requests.count()).toBe(1)
@@ -4493,11 +4493,11 @@ describe('up.fragment', function() {
             // Detach the origin
             origin.remove()
 
-            jasmine.respondWithSelector('.element', {text: 'new text'})
+            jasmine.respondWithSelector('.element', { text: 'new text' })
             await wait()
 
-            expect(up.fragment.get('.element', {layer: 0})).toHaveText(/new text/)
-            expect(up.fragment.get('.element', {layer: 1})).toHaveText(/old text in modal/)
+            expect(up.fragment.get('.element', { layer: 0 })).toHaveText(/new text/)
+            expect(up.fragment.get('.element', { layer: 1 })).toHaveText(/old text in modal/)
           })
 
           it('updates the layer of the given target, if the target is given as an element (and not a selector)', function() {
@@ -4507,7 +4507,7 @@ describe('up.fragment', function() {
               { target: '.element', content: 'old text in overlay 2' }
             ])
 
-            up.render(up.layer.get(1).getFirstSwappableElement(), {content: 'new text in overlay 1', peel: false})
+            up.render(up.layer.get(1).getFirstSwappableElement(), { content: 'new text in overlay 1', peel: false })
 
             expect(up.layer.get(0)).toHaveText(/old text in root/)
             expect(up.layer.get(1)).toHaveText('new text in overlay 1')
@@ -4523,7 +4523,7 @@ describe('up.fragment', function() {
                 { target: '.element', content: 'old text in overlay 2' }
               ])
 
-              up.render('.element', {content: 'new text', layer: 'root', peel: true})
+              up.render('.element', { content: 'new text', layer: 'root', peel: true })
 
               expect(up.layer.count).toBe(1)
               expect(up.layer.current.mode).toBe('root')
@@ -4536,15 +4536,15 @@ describe('up.fragment', function() {
               const locations = []
               up.on('up:location:changed', ({ location }) => locations.push(up.util.normalizeURL(location)))
 
-              fixture('.content', {text: 'root 1'})
+              fixture('.content', { text: 'root 1' })
 
-              up.layer.open({location: '/overlay1', history: true})
+              up.layer.open({ location: '/overlay1', history: true })
               await wait()
 
               expect(up.layer.count).toBe(2)
               expect(locations).toEqual(['/overlay1'])
 
-              up.render({content: 'root 2', target: '.content', history: true, location: '/root2', layer: 'root', peel: true})
+              up.render({ content: 'root 2', target: '.content', history: true, location: '/root2', layer: 'root', peel: true })
               await wait()
 
               expect('.content').toHaveText('root 2')
@@ -4558,15 +4558,15 @@ describe('up.fragment', function() {
               const locations = []
               up.on('up:location:changed', ({ location }) => locations.push(up.util.normalizeURL(location)))
 
-              fixture('.content', {text: 'root 1'})
+              fixture('.content', { text: 'root 1' })
 
-              up.layer.open({location: '/overlay1', history: true})
+              up.layer.open({ location: '/overlay1', history: true })
               await wait()
 
               expect(up.layer.count).toBe(2)
               expect(locations).toEqual(['/overlay1'])
 
-              up.render({content: 'root 2', target: '.content', history: false, layer: 'root', peel: true})
+              up.render({ content: 'root 2', target: '.content', history: false, layer: 'root', peel: true })
               await wait()
 
               expect('.content').toHaveText('root 2')
@@ -4580,7 +4580,7 @@ describe('up.fragment', function() {
               up.compiler('.overlay-element', () => (function() { throw destroyError }))
 
               htmlFixture('<div class="root-element">new root</div>')
-              up.layer.open({fragment: '<div class="overlay-element"></div>'})
+              up.layer.open({ fragment: '<div class="overlay-element"></div>' })
 
               expect(up.layer.isOverlay()).toBe(true)
 
@@ -4599,14 +4599,14 @@ describe('up.fragment', function() {
         describe('stacking a new overlay', function() {
 
           it('opens a new layer when given { layer: "new" }', function() {
-            up.render('.element', {content: 'new text', layer: 'new'})
+            up.render('.element', { content: 'new text', layer: 'new' })
 
             expect(up.layer.count).toBe(2)
             expect(up.layer.current).toHaveText('new text')
           })
 
           it('returns a promise with an up.RenderResult that contains information about the updated fragments and layer', function(done) {
-            const promise = up.render('.overlay-element', {content: 'new text', layer: 'new'})
+            const promise = up.render('.overlay-element', { content: 'new text', layer: 'new' })
 
             promise.then(function(result) {
               expect(up.layer.count).toBe(2)
@@ -4617,7 +4617,7 @@ describe('up.fragment', function() {
           })
 
           it('allows to pass the mode for the new layer as { layer: "new $MODE" } (as a shortcut)', function() {
-            up.render('.element', {content: 'new text', layer: 'new drawer'})
+            up.render('.element', { content: 'new text', layer: 'new drawer' })
 
             expect(up.layer.current.mode).toEqual('drawer')
           })
@@ -4631,7 +4631,7 @@ describe('up.fragment', function() {
             expect(up.layer.count).toBe(2)
             expect(up.layer.current.mode).toEqual('modal')
 
-            up.render('.element', {content: 'new text', layer: 'swap', mode: 'drawer'})
+            up.render('.element', { content: 'new text', layer: 'swap', mode: 'drawer' })
 
             expect(up.layer.count).toBe(2)
             expect(up.layer.current.mode).toEqual('drawer')
@@ -4641,7 +4641,7 @@ describe('up.fragment', function() {
           it('opens a new overlay if no overlay is open', function() {
             expect(up.layer.count).toBe(1)
 
-            up.render('.element', {content: 'new text', layer: 'swap', mode: 'drawer'})
+            up.render('.element', { content: 'new text', layer: 'swap', mode: 'drawer' })
 
             expect(up.layer.count).toBe(2)
             expect(up.layer.current.mode).toEqual('drawer')
@@ -4653,13 +4653,13 @@ describe('up.fragment', function() {
             const locations = []
             up.on('up:location:changed', ({ location }) => locations.push(up.util.normalizeURL(location)))
 
-            up.layer.open({location: '/overlay1', history: true})
+            up.layer.open({ location: '/overlay1', history: true })
             await wait()
 
             expect(up.layer.count).toBe(2)
             expect(locations).toEqual(['/overlay1'])
 
-            up.render({content: 'overlay 2', target: '.content', history: true, location: '/overlay2', layer: 'swap'})
+            up.render({ content: 'overlay 2', target: '.content', history: true, location: '/overlay2', layer: 'swap' })
             await wait()
 
             expect(up.layer.count).toBe(2)
@@ -4672,13 +4672,13 @@ describe('up.fragment', function() {
             const locations = []
             up.on('up:location:changed', ({ location }) => locations.push(up.util.normalizeURL(location)))
 
-            up.layer.open({location: '/overlay1', history: true})
+            up.layer.open({ location: '/overlay1', history: true })
             await wait()
 
             expect(up.layer.count).toBe(2)
             expect(locations).toEqual(['/overlay1'])
 
-            up.render({content: 'overlay 2', target: '.content', history: false, layer: 'swap'})
+            up.render({ content: 'overlay 2', target: '.content', history: false, layer: 'swap' })
             await wait()
 
             expect(up.layer.count).toBe(2)
@@ -4694,7 +4694,7 @@ describe('up.fragment', function() {
             expect(up.layer.count).toBe(3)
             expect(up.layer.current.mode).toEqual('modal')
 
-            up.render('.element', {content: 'new text', layer: 'shatter', mode: 'drawer'})
+            up.render('.element', { content: 'new text', layer: 'shatter', mode: 'drawer' })
 
             expect(up.layer.count).toBe(2)
             expect(up.layer.current.mode).toEqual('drawer')
@@ -4704,7 +4704,7 @@ describe('up.fragment', function() {
           it('opens a new overlay if no overlay is open', function() {
             expect(up.layer.count).toBe(1)
 
-            up.render('.element', {content: 'new text', layer: 'shatter', mode: 'drawer'})
+            up.render('.element', { content: 'new text', layer: 'shatter', mode: 'drawer' })
 
             expect(up.layer.count).toBe(2)
             expect(up.layer.current.mode).toEqual('drawer')
@@ -4720,7 +4720,7 @@ describe('up.fragment', function() {
               { target: '.element', content: 'old text in modal' }
             ])
 
-            up.render('.element', {content: 'new text', peel: false})
+            up.render('.element', { content: 'new text', peel: false })
 
             expect(up.layer.get(0)).toHaveText(/old text in root/)
             expect(up.layer.get(1)).toHaveText(/new text/)
@@ -4732,7 +4732,7 @@ describe('up.fragment', function() {
               { target: '.other', content: 'old text in modal1' }
             ])
 
-            const promise = up.render('.element', {content: 'new text'})
+            const promise = up.render('.element', { content: 'new text' })
 
             await expectAsync(promise).toBeRejected()
           })
@@ -4741,8 +4741,8 @@ describe('up.fragment', function() {
         describe('if the given layer does not exist', function() {
 
           it('rejects the change', async function() {
-            fixture('.element', {text: 'old text'})
-            const promise = up.render('.element', {layer: 'parent', content: 'new text'})
+            fixture('.element', { text: 'old text' })
+            const promise = up.render('.element', { layer: 'parent', content: 'new text' })
 
             await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotMatch', /could not find (a )?layer/i))
             expect('.element').toHaveText(/old text/)
@@ -4752,7 +4752,7 @@ describe('up.fragment', function() {
             fixture('.success')
             fixture('.failure')
 
-            const promise = up.render('.success', {url: '/path', failTarget: '.failure', layer: 'current', failLayer: 'parent'})
+            const promise = up.render('.success', { url: '/path', failTarget: '.failure', layer: 'current', failLayer: 'parent' })
 
             await wait()
 
@@ -4762,13 +4762,13 @@ describe('up.fragment', function() {
             expect(jasmine.Ajax.requests.count()).toBe(1)
 
             // When the server does end up responding with a failure, we cannot process it and must throw up.CannotMatch.
-            jasmine.respondWithSelector('.failure', {status: 500})
+            jasmine.respondWithSelector('.failure', { status: 500 })
             await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotMatch', /could not find (a )?layer/i))
           })
 
           it('updates the next layer in a space-separated list of alternative layer names', function(done) {
-            fixture('.element', {text: 'old text'})
-            const promise = up.render('.element', {layer: 'parent root', content: 'new text'})
+            fixture('.element', { text: 'old text' })
+            const promise = up.render('.element', { layer: 'parent root', content: 'new text' })
 
             u.task(() => promiseState(promise).then(function(result) {
               expect(result.state).toEqual('fulfilled')
@@ -4778,8 +4778,8 @@ describe('up.fragment', function() {
           })
 
           it('updates the next layer in a comma-separated list of alternative layer names', function(done) {
-            fixture('.element', {text: 'old text'})
-            const promise = up.render('.element', {layer: 'parent, root', content: 'new text'})
+            fixture('.element', { text: 'old text' })
+            const promise = up.render('.element', { layer: 'parent, root', content: 'new text' })
 
             u.task(() => promiseState(promise).then(function(result) {
               expect(result.state).toEqual('fulfilled')
@@ -4790,8 +4790,8 @@ describe('up.fragment', function() {
 
           if (up.migrate.loaded) {
             it('updates the next layer in an "or"-separated list of alternative layer names', function(done) {
-              fixture('.element', {text: 'old text'})
-              const promise = up.render('.element', {layer: 'parent or root', content: 'new text'})
+              fixture('.element', { text: 'old text' })
+              const promise = up.render('.element', { layer: 'parent or root', content: 'new text' })
 
               u.task(() => promiseState(promise).then(function(result) {
                 expect(result.state).toEqual('fulfilled')
@@ -4813,7 +4813,7 @@ describe('up.fragment', function() {
 
           it('sets the browser location to the requested URL', async function() {
             fixture('.target')
-            const promise = up.render('.target', {url: '/path', history: true})
+            const promise = up.render('.target', { url: '/path', history: true })
             await wait()
 
             this.respondWithSelector('.target')
@@ -4824,7 +4824,7 @@ describe('up.fragment', function() {
 
           it('does not add a history entry after non-GET requests', async function() {
             fixture('.target')
-            up.render('.target', {url: '/path', method: 'post', history: true})
+            up.render('.target', { url: '/path', method: 'post', history: true })
             await wait()
 
             this.respondWithSelector('.target')
@@ -4835,10 +4835,10 @@ describe('up.fragment', function() {
 
           it("detects a redirect's new URL when the server sets an X-Up-Location header", async function() {
             fixture('.target')
-            up.render('.target', {url: '/path', history: true})
+            up.render('.target', { url: '/path', history: true })
             await wait()
 
-            this.respondWithSelector('.target', {responseHeaders: { 'X-Up-Location': '/other-path' }})
+            this.respondWithSelector('.target', { responseHeaders: { 'X-Up-Location': '/other-path' } })
             await wait()
 
             expect(location.href).toMatchURL('/other-path')
@@ -4846,10 +4846,10 @@ describe('up.fragment', function() {
 
           it('assumes a redirect to GET when the response URL does not match the request URL', async function() {
             fixture('.target')
-            up.render('.target', {url: '/endpoint', history: true, method: 'post'})
+            up.render('.target', { url: '/endpoint', history: true, method: 'post' })
             await wait()
 
-            jasmine.respondWithSelector('.target', {responseHeaders: { 'X-Up-Location': '/redirect-path' }})
+            jasmine.respondWithSelector('.target', { responseHeaders: { 'X-Up-Location': '/redirect-path' } })
             await wait()
 
             expect(location.href).toMatchURL('/redirect-path')
@@ -4857,10 +4857,10 @@ describe('up.fragment', function() {
 
           it('does not assume a redirect to GET when the response URL matches the request URL', async function() {
             fixture('.target')
-            up.render('.target', {url: '/endpoint', history: true, method: 'post'})
+            up.render('.target', { url: '/endpoint', history: true, method: 'post' })
             await wait()
 
-            jasmine.respondWithSelector('.target', {responseHeaders: { 'X-Up-Location': '/endpoint' }})
+            jasmine.respondWithSelector('.target', { responseHeaders: { 'X-Up-Location': '/endpoint' } })
             await wait()
 
             expect(location.href).toMatchURL(jasmine.locationBeforeExample)
@@ -4868,10 +4868,10 @@ describe('up.fragment', function() {
 
           it('does not assume a redirect to GET when the server sends an X-Up-Method header', async function() {
             fixture('.target')
-            up.render('.target', {url: '/endpoint', history: true, method: 'post'})
+            up.render('.target', { url: '/endpoint', history: true, method: 'post' })
             await wait()
 
-            jasmine.respondWithSelector('.target', {responseHeaders: { 'X-Up-Location': '/redirect-path', 'X-Up-Method': 'post' }})
+            jasmine.respondWithSelector('.target', { responseHeaders: { 'X-Up-Location': '/redirect-path', 'X-Up-Method': 'post' } })
             await wait()
 
             expect(location.href).toMatchURL(jasmine.locationBeforeExample)
@@ -4879,10 +4879,10 @@ describe('up.fragment', function() {
 
           it("preserves the #hash when the server sets an X-Up-Location header (like a vanilla form submission would do in the browser)", async function() {
             fixture('.target')
-            up.render('.target', {url: '/path#hash', history: true})
+            up.render('.target', { url: '/path#hash', history: true })
             await wait()
 
-            this.respondWithSelector('.target', {responseHeaders: { 'X-Up-Location': '/other-path' }})
+            this.respondWithSelector('.target', { responseHeaders: { 'X-Up-Location': '/other-path' } })
             await wait()
 
             expect(location.href).toMatchURL('/other-path#hash')
@@ -4890,7 +4890,7 @@ describe('up.fragment', function() {
 
           it('adds a history entry after non-GET requests if the response includes a `X-Up-Method: GET` header (will happen after a redirect)', async function() {
             fixture('.target')
-            up.render('.target', {url: '/requested-path', method: 'post', history: true})
+            up.render('.target', { url: '/requested-path', method: 'post', history: true })
             await wait()
 
             this.respondWithSelector('.target', {
@@ -4906,11 +4906,11 @@ describe('up.fragment', function() {
 
           it('does add a history entry after a failed GET-request (since that is reloadable)', async function() {
             fixture('.target')
-            const renderJob = up.render('.target', {url: '/path', method: 'post', failTarget: '.target', history: true})
+            const renderJob = up.render('.target', { url: '/path', method: 'post', failTarget: '.target', history: true })
 
             await wait()
 
-            jasmine.respondWithSelector('.target', {status: 500})
+            jasmine.respondWithSelector('.target', { status: 500 })
 
             await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
 
@@ -4919,7 +4919,7 @@ describe('up.fragment', function() {
 
           it('does not add a history entry with { history: false } option', async function() {
             fixture('.target')
-            up.render('.target', {url: '/path', history: false})
+            up.render('.target', { url: '/path', history: false })
             await wait()
 
             this.respondWithSelector('.target')
@@ -4930,7 +4930,7 @@ describe('up.fragment', function() {
 
           it('does not add a history entry without a { history } option', async function() {
             fixture('.target')
-            up.render('.target', {url: '/path'})
+            up.render('.target', { url: '/path' })
             await wait()
 
             this.respondWithSelector('.target')
@@ -4941,7 +4941,7 @@ describe('up.fragment', function() {
 
           it('adds params from a { params } option to the URL of a GET request', async function() {
             fixture('.target')
-            up.render('.target', {url: '/path', params: { 'foo-key': 'foo value', 'bar-key': 'bar value' }, history: true})
+            up.render('.target', { url: '/path', params: { 'foo-key': 'foo value', 'bar-key': 'bar value' }, history: true })
             await wait()
 
             this.respondWithSelector('.target')
@@ -4952,7 +4952,7 @@ describe('up.fragment', function() {
 
           it('does not add a history entry with { history: false } option (which also prevents updating of window title)', async function() {
             fixture('.target')
-            up.render('.target', {url: '/path', history: false})
+            up.render('.target', { url: '/path', history: false })
             await wait()
 
             this.respondWithSelector('.target')
@@ -4963,7 +4963,7 @@ describe('up.fragment', function() {
 
           it('does not add a history entry with { location: false } option', async function() {
             fixture('.target')
-            up.render('.target', {url: '/path', location: false})
+            up.render('.target', { url: '/path', location: false })
             await wait()
 
             this.respondWithSelector('.target')
@@ -4977,7 +4977,7 @@ describe('up.fragment', function() {
             it('adds an history entry when updating a main target', async function() {
               up.fragment.config.mainTargets = ['.target']
               fixture('.target')
-              const promise = up.render('.target', {url: '/path3', history: 'auto'})
+              const promise = up.render('.target', { url: '/path3', history: 'auto' })
               await wait()
 
               this.respondWithSelector('.target')
@@ -4991,7 +4991,7 @@ describe('up.fragment', function() {
               expect(up.fragment.config.mainTargets).not.toContain('.target')
 
               fixture('.target')
-              const promise = up.render('.target', {url: '/path3-2', history: 'auto'})
+              const promise = up.render('.target', { url: '/path3-2', history: 'auto' })
               await wait()
 
               this.respondWithSelector('.target')
@@ -5004,7 +5004,7 @@ describe('up.fragment', function() {
               up.fragment.config.mainTargets = ['.target']
               const container = fixture('.container')
               e.affix(container, '.target')
-              const promise = up.render('.container', {url: '/path3-1', history: 'auto'})
+              const promise = up.render('.container', { url: '/path3-1', history: 'auto' })
               await wait()
 
               this.respondWithSelector('.container .target')
@@ -5016,7 +5016,7 @@ describe('up.fragment', function() {
             it('does not add an history entry when updating a non-main targets', async function() {
               up.fragment.config.mainTargets = ['.other']
               fixture('.target')
-              const promise = up.render('.target', {url: '/path4', history: 'auto'})
+              const promise = up.render('.target', { url: '/path4', history: 'auto' })
               await wait()
 
               this.respondWithSelector('.target')
@@ -5030,7 +5030,7 @@ describe('up.fragment', function() {
               fixture('.foo')
               fixture('.bar')
               fixture('.baz')
-              const promise = up.render('.foo, .bar, .baz', {url: '/path4', history: 'auto'})
+              const promise = up.render('.foo, .bar, .baz', { url: '/path4', history: 'auto' })
               await wait()
 
               this.respondWith(`
@@ -5048,7 +5048,7 @@ describe('up.fragment', function() {
 
             it('uses that URL as the new location after a GET request', async function() {
               fixture('.target')
-              up.render('.target', {url: '/path', history: true, location: '/path2'})
+              up.render('.target', { url: '/path', history: true, location: '/path2' })
               await wait()
 
               this.respondWithSelector('.target')
@@ -5059,7 +5059,7 @@ describe('up.fragment', function() {
 
             it('adds a history entry after a non-GET request', async function() {
               fixture('.target')
-              up.render('.target', {url: '/path', method: 'post', history: true, location: '/path3'})
+              up.render('.target', { url: '/path', method: 'post', history: true, location: '/path3' })
               await wait()
 
               this.respondWithSelector('.target')
@@ -5071,11 +5071,11 @@ describe('up.fragment', function() {
             it('does not override the response URL after a failed request', async function() {
               fixture('.success-target')
               fixture('.failure-target')
-              const renderJob = up.render('.success-target', {url: '/path', history: true, location: '/path4', failLocation: true, failTarget: '.failure-target'})
+              const renderJob = up.render('.success-target', { url: '/path', history: true, location: '/path4', failLocation: true, failTarget: '.failure-target' })
 
               await wait()
 
-              jasmine.respondWithSelector('.failure-target', {status: 500})
+              jasmine.respondWithSelector('.failure-target', { status: 500 })
 
               await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
 
@@ -5085,11 +5085,11 @@ describe('up.fragment', function() {
             it('overrides the response URL after a failed request when passed as { failLocation }', async function() {
               fixture('.success-target')
               fixture('.failure-target')
-              const renderJob = up.render('.success-target', {url: '/path', history: true, location: '/path5', failLocation: '/path6', failTarget: '.failure-target'})
+              const renderJob = up.render('.success-target', { url: '/path', history: true, location: '/path5', failLocation: '/path6', failTarget: '.failure-target' })
 
               await wait()
 
-              jasmine.respondWithSelector('.failure-target', {status: 500})
+              jasmine.respondWithSelector('.failure-target', { status: 500 })
 
               await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
 
@@ -5106,7 +5106,7 @@ describe('up.fragment', function() {
               const listener = jasmine.createSpy('event listener')
               up.on('up:layer:location:changed', listener)
 
-              await up.render({target: '.target', location: '/new-url', content: 'new content', history: true})
+              await up.render({ target: '.target', location: '/new-url', content: 'new content', history: true })
 
               expect(listener.calls.argsFor(0)[0]).toBeEvent('up:layer:location:changed', { location: '/new-url', layer: up.layer.current })
             })
@@ -5115,7 +5115,7 @@ describe('up.fragment', function() {
               const listener = jasmine.createSpy('event listener')
               up.on('up:layer:location:changed', listener)
 
-              up.layer.open({target: '.target', location: '/original-layer-url', history: false, content: 'old overlay text'})
+              up.layer.open({ target: '.target', location: '/original-layer-url', history: false, content: 'old overlay text' })
               await wait()
 
               expect(up.layer.isOverlay()).toBe(true)
@@ -5125,7 +5125,7 @@ describe('up.fragment', function() {
 
               expect(listener.calls.count()).toBe(0)
 
-              await up.render({target: '.target', location: '/next-layer-url', content: 'new overlay text', history: true})
+              await up.render({ target: '.target', location: '/next-layer-url', content: 'new overlay text', history: true })
 
               expect(up.layer.current).toHaveText('new overlay text')
               expect(listener.calls.count()).toBe(1)
@@ -5135,7 +5135,7 @@ describe('up.fragment', function() {
               const listener = jasmine.createSpy('event listener')
               up.on('up:layer:location:changed', listener)
 
-              up.layer.open({target: '.target', location: '/original-layer-url', content: 'old overlay text'})
+              up.layer.open({ target: '.target', location: '/original-layer-url', content: 'old overlay text' })
               await wait()
 
               expect(up.layer.isOverlay()).toBe(true)
@@ -5147,14 +5147,14 @@ describe('up.fragment', function() {
               const listener = jasmine.createSpy('event listener')
               up.on('up:layer:location:changed', listener)
 
-              up.layer.open({target: '.target', location: '/original-layer-url', content: 'old overlay text'})
+              up.layer.open({ target: '.target', location: '/original-layer-url', content: 'old overlay text' })
               await wait()
 
               expect(up.layer.isOverlay()).toBe(true)
               expect(up.layer.location).toMatchURL('/original-layer-url')
               expect(listener.calls.count()).toBe(0)
 
-              await up.render({target: '.target', location: '/original-layer-url', content: 'new overlay text', history: true})
+              await up.render({ target: '.target', location: '/original-layer-url', content: 'new overlay text', history: true })
 
               expect(up.layer.current).toHaveText('new overlay text')
               expect(listener.calls.count()).toBe(0)
@@ -5164,7 +5164,7 @@ describe('up.fragment', function() {
               const listener = jasmine.createSpy('event listener')
               up.on('up:layer:location:changed', listener)
 
-              up.layer.open({target: '.target', location: '/original-layer-url', history: false, content: 'old overlay text'})
+              up.layer.open({ target: '.target', location: '/original-layer-url', history: false, content: 'old overlay text' })
               await wait()
 
               expect(up.layer.isOverlay()).toBe(true)
@@ -5174,7 +5174,7 @@ describe('up.fragment', function() {
 
               expect(listener.calls.count()).toBe(0)
 
-              await up.render({target: '.target', location: '/next-layer-url', content: 'new overlay text', history: true})
+              await up.render({ target: '.target', location: '/next-layer-url', content: 'new overlay text', history: true })
 
               // Browser location is unchanged, but the overlay still needs its internal location
               expect(location.href).toMatchURL(jasmine.locationBeforeExample)
@@ -5189,8 +5189,8 @@ describe('up.fragment', function() {
         describe('window title', function() {
 
           it("sets the document title to the response <title>", async function() {
-            fixture('.container', {text: 'old container text'})
-            up.render('.container', {url: '/path', history: true})
+            fixture('.container', { text: 'old container text' })
+            up.render('.container', { url: '/path', history: true })
 
             await wait()
 
@@ -5214,8 +5214,8 @@ describe('up.fragment', function() {
           })
 
           it("sets the document title to a JSON-encoded X-Up-Title header in the response", async function() {
-            fixture('.container', {text: 'old container text'})
-            up.render('.container', {url: '/path', history: true})
+            fixture('.container', { text: 'old container text' })
+            up.render('.container', { url: '/path', history: true })
 
             await wait()
 
@@ -5236,8 +5236,8 @@ describe('up.fragment', function() {
           })
 
           it("prefers the X-Up-Title header to the response <title>", async function() {
-            fixture('.container', {text: 'old container text'})
-            up.render('.container', {url: '/path', history: true})
+            fixture('.container', { text: 'old container text' })
+            up.render('.container', { url: '/path', history: true })
 
             await wait()
 
@@ -5266,8 +5266,8 @@ describe('up.fragment', function() {
 
           if (up.migrate.loaded) {
             it("sets the document title to an unquoted X-Up-Title header in the response", async function() {
-              fixture('.container', {text: 'old container text'})
-              up.render('.container', {url: '/path', history: true})
+              fixture('.container', { text: 'old container text' })
+              up.render('.container', { url: '/path', history: true })
 
               await wait()
 
@@ -5290,7 +5290,7 @@ describe('up.fragment', function() {
 
           it("sets the document title to the response <title> with { location: false, title: true } options (bugfix)", async function() {
             $fixture('.container').text('old container text')
-            up.render('.container', {url: '/path', history: true, location: false, title: true})
+            up.render('.container', { url: '/path', history: true, location: false, title: true })
 
             await wait()
 
@@ -5315,7 +5315,7 @@ describe('up.fragment', function() {
           it('does not update the document title if the response has a <title> tag inside an inline SVG image (bugfix)', async function() {
             $fixture('.container').text('old container text')
             const oldTitle = document.title
-            up.render('.container', {url: '/path', history: true})
+            up.render('.container', { url: '/path', history: true })
 
             await wait()
 
@@ -5338,9 +5338,9 @@ describe('up.fragment', function() {
           })
 
           it("does not extract the title from the response or HTTP header with { title: false }", async function() {
-            fixture('.container', {text: 'old container text'})
+            fixture('.container', { text: 'old container text' })
             const oldTitle = document.title
-            up.render('.container', {url: '/path', history: true, title: false})
+            up.render('.container', { url: '/path', history: true, title: false })
             await wait()
 
             jasmine.respondWith({
@@ -5366,9 +5366,9 @@ describe('up.fragment', function() {
           })
 
           it("does not extract the title from the response or HTTP header with { history: false }", async function() {
-            fixture('.container', {text: 'old container text'})
+            fixture('.container', { text: 'old container text' })
             const oldTitle = document.title
-            up.render('.container', {url: '/path', history: false})
+            up.render('.container', { url: '/path', history: false })
             await wait()
 
             jasmine.respondWith({
@@ -5395,7 +5395,7 @@ describe('up.fragment', function() {
 
           it('allows to pass an explicit title as { title } option', async function() {
             $fixture('.container').text('old container text')
-            up.render('.container', {url: '/path', history: true, title: 'Title from options'})
+            up.render('.container', { url: '/path', history: true, title: 'Title from options' })
             await wait()
 
             this.respondWith(`
@@ -5423,7 +5423,7 @@ describe('up.fragment', function() {
 
             // Instead of setting Layer#title or document#title, an alternative implementation is to insert
             // a new <title> element.
-            const onHeadChanges = mutations => mutations.map((mutation) =>
+            const onHeadChanges = (mutations) => mutations.map((mutation) =>
               (() => {
                 const result = []
                 for (var node of mutation.addedNodes) {
@@ -5436,10 +5436,10 @@ describe('up.fragment', function() {
                 return result
               })())
             const observer = new MutationObserver(onHeadChanges)
-            observer.observe(document.head, {childList: true, subtree: true})
+            observer.observe(document.head, { childList: true, subtree: true })
 
             $fixture('.container').text('old container text')
-            up.render('.container', {url: '/path', history: true})
+            up.render('.container', { url: '/path', history: true })
 
             await wait()
 
@@ -5472,8 +5472,8 @@ describe('up.fragment', function() {
             fixture(document.head, 'link[rel="canonical"][href="/old-canonical"]')
             fixture(document.head, 'meta[name="description"][content="old description"]')
 
-            fixture('.container', {text: 'old container text'})
-            up.render('.container', {url: '/path', history: true})
+            fixture('.container', { text: 'old container text' })
+            up.render('.container', { url: '/path', history: true })
             await wait()
 
             jasmine.respondWith(`
@@ -5501,8 +5501,8 @@ describe('up.fragment', function() {
             fixture(document.head, 'link[rel="canonical"][href="/old-canonical"][up-meta="false"]')
             fixture(document.head, 'meta[name="description"][content="old description"]')
 
-            fixture('.container', {text: 'old container text'})
-            up.render('.container', {url: '/path', history: true})
+            fixture('.container', { text: 'old container text' })
+            up.render('.container', { url: '/path', history: true })
             await wait()
 
             jasmine.respondWith(`
@@ -5530,8 +5530,8 @@ describe('up.fragment', function() {
             fixture(document.head, 'link[rel="canonical"][href="/old-canonical"]')
             fixture(document.head, 'meta[name="description"][content="old description"]')
 
-            fixture('.container', {text: 'old container text'})
-            up.render('.container', {url: '/path', history: false})
+            fixture('.container', { text: 'old container text' })
+            up.render('.container', { url: '/path', history: false })
             await wait()
 
             jasmine.respondWith(`
@@ -5559,8 +5559,8 @@ describe('up.fragment', function() {
             fixture(document.head, 'link[rel="canonical"][href="/old-canonical"]')
             fixture(document.head, 'meta[name="description"][content="old description"]')
 
-            fixture('.container', {text: 'old container text'})
-            up.render('.container', {url: '/path', history: true})
+            fixture('.container', { text: 'old container text' })
+            up.render('.container', { url: '/path', history: true })
             await wait()
 
             jasmine.respondWith(`
@@ -5586,8 +5586,8 @@ describe('up.fragment', function() {
             fixture(document.head, 'link[rel="canonical"][href="/old-canonical"]')
             fixture(document.head, 'meta[name="description"][content="old description"]')
 
-            fixture('.container', {text: 'old container text'})
-            up.render('.container', {url: '/path', history: true, metaTags: false})
+            fixture('.container', { text: 'old container text' })
+            up.render('.container', { url: '/path', history: true, metaTags: false })
             await wait()
 
             jasmine.respondWith(`
@@ -5613,7 +5613,7 @@ describe('up.fragment', function() {
             fixture(document.head, 'meta[name="description"][content="old root description"]')
             document.title = 'old root title'
 
-            fixture('.container', {text: 'old root container text'})
+            fixture('.container', { text: 'old root container text' })
 
             up.layer.open({
               target: '.container',
@@ -5682,8 +5682,8 @@ describe('up.fragment', function() {
             fixture(document.head, 'link[rel="canonical"][href="/old-canonical"]')
             fixture(document.head, 'meta[name="description"][content="old description"]')
 
-            fixture('.container', {text: 'old container text'})
-            up.render('.container', {url: '/path', history: true})
+            fixture('.container', { text: 'old container text' })
+            up.render('.container', { url: '/path', history: true })
 
             await wait()
 
@@ -5717,8 +5717,8 @@ describe('up.fragment', function() {
               }
             `
 
-            fixture('.container', {text: 'old container text'})
-            up.render('.container', {url: '/path', history: true})
+            fixture('.container', { text: 'old container text' })
+            up.render('.container', { url: '/path', history: true })
 
             await wait()
 
@@ -5747,8 +5747,8 @@ describe('up.fragment', function() {
               fixture(document.head, 'link[rel="canonical"][href="/old-canonical"][up-hungry]')
               const warnSpy = up.migrate.warn.mock()
 
-              fixture('.container', {text: 'old container text'})
-              up.render('.container', {url: '/path', history: true})
+              fixture('.container', { text: 'old container text' })
+              up.render('.container', { url: '/path', history: true })
 
               await wait()
 
@@ -5778,8 +5778,8 @@ describe('up.fragment', function() {
 
           it('updates the html[lang] attribute with the language from the response', async function() {
             document.documentElement.setAttribute('lang', 'it')
-            fixture('.container', {text: 'old container text'})
-            up.render('.container', {url: '/path', history: true})
+            fixture('.container', { text: 'old container text' })
+            up.render('.container', { url: '/path', history: true })
 
             await wait()
 
@@ -5801,8 +5801,8 @@ describe('up.fragment', function() {
 
           it('removes the html[lang] attribute if the response has a <html> element without a [lang] attribute', async function() {
             document.documentElement.setAttribute('lang', 'it')
-            fixture('.container', {text: 'old container text'})
-            up.render('.container', {url: '/path', history: true})
+            fixture('.container', { text: 'old container text' })
+            up.render('.container', { url: '/path', history: true })
 
             await wait()
 
@@ -5824,8 +5824,8 @@ describe('up.fragment', function() {
 
           it('does not remove the html[lang] attribute if the response has no <html> element', async function() {
             document.documentElement.setAttribute('lang', 'it')
-            fixture('.container', {text: 'old container text'})
-            up.render('.container', {url: '/path', history: true})
+            fixture('.container', { text: 'old container text' })
+            up.render('.container', { url: '/path', history: true })
 
             await wait()
 
@@ -5843,8 +5843,8 @@ describe('up.fragment', function() {
 
           it('does not update the html[lang] attribute with { lang: false }', async function() {
             document.documentElement.setAttribute('lang', 'it')
-            fixture('.container', {text: 'old container text'})
-            up.render('.container', {url: '/path', history: true, lang: false})
+            fixture('.container', { text: 'old container text' })
+            up.render('.container', { url: '/path', history: true, lang: false })
 
             await wait()
 
@@ -5866,8 +5866,8 @@ describe('up.fragment', function() {
 
           it('does not update the html[lang] attribute when not updating history', async function() {
             document.documentElement.setAttribute('lang', 'it')
-            fixture('.container', {text: 'old container text'})
-            up.render('.container', {url: '/path', history: false})
+            fixture('.container', { text: 'old container text' })
+            up.render('.container', { url: '/path', history: false })
 
             await wait()
 
@@ -5895,7 +5895,7 @@ describe('up.fragment', function() {
             registerFixture(style)
             document.head.append(style)
 
-            fixture('.container', {text: 'old container text'})
+            fixture('.container', { text: 'old container text' })
             up.render('.container', {
               location: '/path',
               history: true,
@@ -5924,7 +5924,7 @@ describe('up.fragment', function() {
             registerFixture(style)
             document.head.append(style)
 
-            fixture('.container', {text: 'old container text'})
+            fixture('.container', { text: 'old container text' })
             up.render('.container', {
               location: '/path',
               history: true,
@@ -5956,7 +5956,7 @@ describe('up.fragment', function() {
             registerFixture(style)
             document.head.append(style)
 
-            fixture('.container', {text: 'old container text'})
+            fixture('.container', { text: 'old container text' })
             up.render('.container', {
               location: '/path',
               history: true,
@@ -5995,7 +5995,7 @@ describe('up.fragment', function() {
             registerFixture(style)
             document.head.append(style)
 
-            fixture('.container', {text: 'old container text'})
+            fixture('.container', { text: 'old container text' })
 
             up.render('.container', {
               location: '/path',
@@ -6028,7 +6028,7 @@ describe('up.fragment', function() {
             registerFixture(style)
             document.head.append(style)
 
-            fixture('.container', {text: 'old container text'})
+            fixture('.container', { text: 'old container text' })
 
             up.render('.container', {
               location: '/path',
@@ -6062,7 +6062,7 @@ describe('up.fragment', function() {
             registerFixture(style)
             document.head.append(style)
 
-            fixture('.container', {text: 'old container text'})
+            fixture('.container', { text: 'old container text' })
 
             up.render('.container', {
               location: '/path',
@@ -6103,7 +6103,7 @@ describe('up.fragment', function() {
             registerFixture(nextLink)
             document.head.append(nextLink)
 
-            fixture('.container', {text: 'old container text'})
+            fixture('.container', { text: 'old container text' })
 
             up.render('.container', {
               location: '/path',
@@ -6138,7 +6138,7 @@ describe('up.fragment', function() {
             registerFixture(script)
             document.head.append(script)
 
-            fixture('.container', {text: 'old container text'})
+            fixture('.container', { text: 'old container text' })
             up.render('.container', {
               location: '/path',
               history: true,
@@ -6159,11 +6159,11 @@ describe('up.fragment', function() {
             const listener = jasmine.createSpy('up:assets:changed listener')
             up.on('up:assets:changed', listener)
 
-            const script = e.createFromSelector('script', {text: 'console.log("hello from old inline scripts")'})
+            const script = e.createFromSelector('script', { text: 'console.log("hello from old inline scripts")' })
             registerFixture(script)
             document.head.append(script)
 
-            fixture('.container', {text: 'old container text'})
+            fixture('.container', { text: 'old container text' })
             up.render('.container', {
               location: '/path',
               history: true,
@@ -6188,14 +6188,14 @@ describe('up.fragment', function() {
           })
 
           it('aborts the render pass if the up:assets:changed event is prevented', async function() {
-            const listener = jasmine.createSpy('up:assets:changed listener').and.callFake(event => event.preventDefault())
+            const listener = jasmine.createSpy('up:assets:changed listener').and.callFake((event) => event.preventDefault())
             up.on('up:assets:changed', listener)
 
             const style = e.createFromSelector('script[src="scripts-1.js"]')
             registerFixture(style)
             document.head.append(style)
 
-            fixture('.container', {text: 'old container text'})
+            fixture('.container', { text: 'old container text' })
             const renderPromise = up.render('.container', {
               location: '/path',
               history: true,
@@ -6226,7 +6226,7 @@ describe('up.fragment', function() {
 
         it('remembers the source the fragment was retrieved from', async function() {
           fixture('.target')
-          up.render('.target', {url: '/path'})
+          up.render('.target', { url: '/path' })
           await wait()
 
           this.respondWithSelector('.target')
@@ -6237,7 +6237,7 @@ describe('up.fragment', function() {
 
         it('returns the source location without a #hash', async function() {
           fixture('.target')
-          up.render('.target', {url: '/path#hash'})
+          up.render('.target', { url: '/path#hash' })
           await wait()
 
           this.respondWithSelector('.target')
@@ -6248,7 +6248,7 @@ describe('up.fragment', function() {
 
         it('keeps the previous source for a non-GET request (since only that is reloadable)', async function() {
           const target = fixture('.target[up-source="/previous-source"]')
-          up.render('.target', {url: '/path', method: 'post'})
+          up.render('.target', { url: '/path', method: 'post' })
           await wait()
 
           this.respondWithSelector('.target')
@@ -6259,7 +6259,7 @@ describe('up.fragment', function() {
 
         it('does not overwrite an [up-source] attribute from the element HTML', async function() {
           fixture('.target')
-          up.render('.target', {url: '/path'})
+          up.render('.target', { url: '/path' })
           await wait()
 
           this.respondWithSelector('.target[up-source="/other"]')
@@ -6272,7 +6272,7 @@ describe('up.fragment', function() {
 
           it('uses that URL as the source for a GET request', async function() {
             fixture('.target[up-source="/previous-source"]')
-            up.render('.target', {url: '/path', source: '/given-path'})
+            up.render('.target', { url: '/path', source: '/given-path' })
             await wait()
 
             this.respondWithSelector('.target')
@@ -6283,11 +6283,11 @@ describe('up.fragment', function() {
 
           it('uses that URL as the source for a failed GET request', async function() {
             fixture('.target[up-source="/previous-source"]')
-            const renderJob = up.render('.target', {failTarget: '.target', url: '/path', source: '/given-path'})
+            const renderJob = up.render('.target', { failTarget: '.target', url: '/path', source: '/given-path' })
 
             await wait()
 
-            jasmine.respondWithSelector('.target', {status: 500})
+            jasmine.respondWithSelector('.target', { status: 500 })
 
             await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
             expect(up.fragment.source(e.get('.target'))).toMatchURL('/given-path')
@@ -6295,7 +6295,7 @@ describe('up.fragment', function() {
 
           it('uses that URL as the source after a non-GET request', async function() {
             fixture('.target[up-source="/previous-source"]')
-            up.render('.target', {url: '/path', method: 'post', source: '/given-path'})
+            up.render('.target', { url: '/path', method: 'post', source: '/given-path' })
             await wait()
 
             this.respondWithSelector('.target')
@@ -6306,11 +6306,11 @@ describe('up.fragment', function() {
 
           it('uses that URL as the source after a failed non-GET request\'', async function() {
             const target = fixture('.target[up-source="/previous-source"]')
-            const renderJob = up.navigate('.target', {failTarget: '.target', url: '/path', method: 'post', source: '/given-path'})
+            const renderJob = up.navigate('.target', { failTarget: '.target', url: '/path', method: 'post', source: '/given-path' })
 
             await wait()
 
-            jasmine.respondWithSelector('.target', {status: 500})
+            jasmine.respondWithSelector('.target', { status: 500 })
 
             await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
 
@@ -6323,8 +6323,8 @@ describe('up.fragment', function() {
 
         it("sends the layer's context along with requests pertaining to this layer as an X-Up-Context request header", async function() {
           makeLayers([
-            { target: '.target', context: { rootKey: 'rootValue' }},
-            { target: '.target', context: { overlayKey: 'overlayValue' }}
+            { target: '.target', context: { rootKey: 'rootValue' } },
+            { target: '.target', context: { overlayKey: 'overlayValue' } }
           ])
 
           expect(up.layer.get(0).context).toEqual({ rootKey: 'rootValue' })
@@ -6332,24 +6332,24 @@ describe('up.fragment', function() {
 
           await wait()
 
-          up.render('.target', {layer: up.layer.get(0), url: '/path1'})
+          up.render('.target', { layer: up.layer.get(0), url: '/path1' })
           await wait()
 
           expect(jasmine.Ajax.requests.count()).toBe(1)
-          expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Context']).toEqual(JSON.stringify({ rootKey: 'rootValue'}))
+          expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Context']).toEqual(JSON.stringify({ rootKey: 'rootValue' }))
 
-          up.render('.target', {layer: up.layer.get(1), url: '/path2'})
+          up.render('.target', { layer: up.layer.get(1), url: '/path2' })
           await wait()
 
           expect(jasmine.Ajax.requests.count()).toBe(2)
-          expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Context']).toEqual(JSON.stringify({ overlayKey: 'overlayValue'}))
+          expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Context']).toEqual(JSON.stringify({ overlayKey: 'overlayValue' }))
         })
 
         it('escapes high ASCII characters in the X-Up-Context request header so Unicode values can be transported', async function() {
           up.layer.context = { foo: 'xäy' }
           fixture('.target')
 
-          up.render('.target', {url: '/path3'})
+          up.render('.target', { url: '/path3' })
           await wait()
 
           expect(jasmine.Ajax.requests.count()).toBe(1)
@@ -6358,28 +6358,28 @@ describe('up.fragment', function() {
 
         it("sends the fail layer's context as an X-Up-Fail-Context request header", async function() {
           makeLayers([
-            { target: '.target', context: { rootKey: 'rootValue' }},
-            { target: '.target', context: { overlayKey: 'overlayValue' }}
+            { target: '.target', context: { rootKey: 'rootValue' } },
+            { target: '.target', context: { overlayKey: 'overlayValue' } }
           ])
 
-          up.render({target: '.target', failTarget: '.target', layer: up.layer.get(0), failLayer: up.layer.get(1), url: '/path1'})
+          up.render({ target: '.target', failTarget: '.target', layer: up.layer.get(0), failLayer: up.layer.get(1), url: '/path1' })
           await wait()
 
           expect(jasmine.Ajax.requests.count()).toBe(1)
-          expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Context']).toEqual(JSON.stringify({ rootKey: 'rootValue'}))
-          expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Fail-Context']).toEqual(JSON.stringify({ overlayKey: 'overlayValue'}))
+          expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Context']).toEqual(JSON.stringify({ rootKey: 'rootValue' }))
+          expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Fail-Context']).toEqual(JSON.stringify({ overlayKey: 'overlayValue' }))
         })
 
         it('lets the server update the context by responding with an X-Up-Context response header', async function() {
           makeLayers([
-            { target: '.target', context: { rootKey: 'rootValue' }},
-            { target: '.target', context: { overlayKey: 'overlayValue' }}
+            { target: '.target', context: { rootKey: 'rootValue' } },
+            { target: '.target', context: { overlayKey: 'overlayValue' } }
           ])
 
-          up.render('.target', {layer: up.layer.get(1), url: '/path1'})
+          up.render('.target', { layer: up.layer.get(1), url: '/path1' })
           await wait()
 
-          jasmine.respondWithSelector('.target', {responseHeaders: { 'X-Up-Context': JSON.stringify({ newKey: 'newValue'})}})
+          jasmine.respondWithSelector('.target', { responseHeaders: { 'X-Up-Context': JSON.stringify({ newKey: 'newValue' }) } })
           await wait()
 
           expect(up.layer.get(0).context).toEqual({ rootKey: 'rootValue' })
@@ -6388,14 +6388,14 @@ describe('up.fragment', function() {
 
         it('allows unquoted property names in the X-Up-Context response header', async function() {
           makeLayers([
-            { target: '.target', context: { rootKey: 'rootValue' }},
-            { target: '.target', context: { overlayKey: 'overlayValue' }}
+            { target: '.target', context: { rootKey: 'rootValue' } },
+            { target: '.target', context: { overlayKey: 'overlayValue' } }
           ])
 
-          up.render('.target', {layer: up.layer.get(1), url: '/path1'})
+          up.render('.target', { layer: up.layer.get(1), url: '/path1' })
           await wait()
 
-          jasmine.respondWithSelector('.target', {responseHeaders: { 'X-Up-Context': '{ newKey: "newValue" }' }})
+          jasmine.respondWithSelector('.target', { responseHeaders: { 'X-Up-Context': '{ newKey: "newValue" }' } })
           await wait()
 
           expect(up.layer.get(0).context).toEqual({ rootKey: 'rootValue' })
@@ -6403,17 +6403,17 @@ describe('up.fragment', function() {
         })
 
         it('uses updates from an X-Up-Context header for failed responses', async function() {
-          fixture('.success-target', {text: 'success target'})
-          fixture('.failure-target', {text: 'failure target'})
+          fixture('.success-target', { text: 'success target' })
+          fixture('.failure-target', { text: 'failure target' })
 
-          const renderJob = up.render({target: '.success-target', failTarget: '.failure-target', url: '/path1'})
+          const renderJob = up.render({ target: '.success-target', failTarget: '.failure-target', url: '/path1' })
 
           await wait()
 
           jasmine.respondWithSelector('.failure-target', {
             text: 'new text',
             status: 500,
-            responseHeaders: { 'X-Up-Context': JSON.stringify({ newKey: 'newValue'})}
+            responseHeaders: { 'X-Up-Context': JSON.stringify({ newKey: 'newValue' }) }
           })
 
           await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
@@ -6428,7 +6428,7 @@ describe('up.fragment', function() {
         beforeEach(function() { up.motion.config.enabled = true })
 
         it('morphs between the old and new element', async function() {
-          fixture('.element.v1', {text: 'version 1'})
+          fixture('.element.v1', { text: 'version 1' })
           up.render('.element', {
             document: '<div class="element v2">version 2</div>',
             transition: 'cross-fade',
@@ -6457,7 +6457,7 @@ describe('up.fragment', function() {
 
         it('ignores a { transition } option when replacing a singleton element like <body>', async function() {
           // shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
-          spyOn(up.element, 'isSingleton').and.callFake(element => element.matches('fake-body'))
+          spyOn(up.element, 'isSingleton').and.callFake((element) => element.matches('fake-body'))
 
           up.fragment.config.targetDerivers.unshift('fake-body')
           $fixture('fake-body').text('old text')
@@ -6479,7 +6479,7 @@ describe('up.fragment', function() {
         })
 
         it('marks the old fragment as .up-destroying during the transition', async function() {
-          fixture('.element', {text: 'version 1'})
+          fixture('.element', { text: 'version 1' })
           up.render({
             fragment: '<div class="element">version 2</div>',
             transition: 'cross-fade',
@@ -6535,7 +6535,7 @@ describe('up.fragment', function() {
         })
 
         it('rejects the render().finished promise after the element has been removed from the DOM when updating from a failed response', async function() {
-          fixture('.target', {text: 'old target'})
+          fixture('.target', { text: 'old target' })
 
           const job = up.render({
             target: '.target',
@@ -6628,7 +6628,7 @@ describe('up.fragment', function() {
         })
 
         it('resolves the returned promise as soon as both elements are in the DOM and the transition has started', function(done) {
-          fixture('.swapping-element', {text: 'version 1'})
+          fixture('.swapping-element', { text: 'version 1' })
 
           const renderDone = up.render({
             fragment: '<div class="swapping-element">version 2</div>',
@@ -6651,7 +6651,7 @@ describe('up.fragment', function() {
         })
 
         it('runs an { onFinished } callback when the transition has finished', async function() {
-          fixture('.element', {text: 'version 1'})
+          fixture('.element', { text: 'version 1' })
           const onFinished = jasmine.createSpy('onFinished callback')
 
           up.render({
@@ -6687,10 +6687,10 @@ describe('up.fragment', function() {
         })
 
         it('marks the old element as .up-destroying before compilers are called', async function() {
-          const element = fixture('.element', {id: 'old', text: 'old text'})
+          const element = fixture('.element', { id: 'old', text: 'old text' })
           const isMarkedSpy = jasmine.createSpy()
-          up.compiler('.element', element => isMarkedSpy(document.querySelector('.element#old').matches('.up-destroying')))
-          up.render({target: '.element', document: '<div class="element" id="new">new text</div>', transition: 'cross-fade', duration: 70})
+          up.compiler('.element', (element) => isMarkedSpy(document.querySelector('.element#old').matches('.up-destroying')))
+          up.render({ target: '.element', document: '<div class="element" id="new">new text</div>', transition: 'cross-fade', duration: 70 })
           await wait(35)
 
           expect('.element').toHaveText('new text')
@@ -6701,7 +6701,7 @@ describe('up.fragment', function() {
           const $parent = $fixture('.parent')
           const $element = $parent.affix('.element').text('old text')
           const spy = jasmine.createSpy('parent spy')
-          up.compiler('.element', element => spy(element.innerText, element.parentElement))
+          up.compiler('.element', (element) => spy(element.innerText, element.parentElement))
           up.render({
             fragment: '<div class="element">new text</div>',
             transition: 'cross-fade',
@@ -6721,7 +6721,7 @@ describe('up.fragment', function() {
             'left': '0px',
             'top': '0px',
           })
-          const $element = $fixture('.element').appendTo($container).css({height: '600px'})
+          const $element = $fixture('.element').appendTo($container).css({ height: '600px' })
 
           $container.scrollTop(300)
           expect($container.scrollTop()).toEqual(300)
@@ -6806,7 +6806,7 @@ describe('up.fragment', function() {
 
           it("does not call destructors multiple times (bugfix)", async function() {
             const destructor = jasmine.createSpy('destructor')
-            up.compiler('.element', element => destructor)
+            up.compiler('.element', (element) => destructor)
 
             const $element = $fixture('.element').text('old content')
             up.hello($element)
@@ -6861,7 +6861,7 @@ describe('up.fragment', function() {
             const crashingTransition = jasmine.createSpy('crashing transition').and.throwError(transitionError)
             up.transition('crashing', crashingTransition)
 
-            fixture('.target', {text: 'old target'})
+            fixture('.target', { text: 'old target' })
 
             await jasmine.expectGlobalError(transitionError, async function() {
               const job = up.render({
@@ -6882,9 +6882,9 @@ describe('up.fragment', function() {
             const crashingTransition = jasmine.createSpy('crashing transition').and.throwError(transitionError)
             up.transition('crashing', crashingTransition)
 
-            fixture('.primary', {text: 'old primary'})
-            fixture('.secondary', {text: 'old secondary'})
-            fixture('.tertiary', {text: 'old tertiary'})
+            fixture('.primary', { text: 'old primary' })
+            fixture('.secondary', { text: 'old secondary' })
+            fixture('.tertiary', { text: 'old tertiary' })
 
             await jasmine.spyOnGlobalErrorsAsync(async function() {
               up.render('.primary, .secondary, .tertiary', {
@@ -6932,7 +6932,7 @@ describe('up.fragment', function() {
 
           it('does not scroll', async function() {
             fixture('.target')
-            up.render('.target', {url: '/path#hash', scroll: false})
+            up.render('.target', { url: '/path#hash', scroll: false })
 
             await wait()
 
@@ -6951,7 +6951,7 @@ describe('up.fragment', function() {
             describe('with { reveal: false }', function() {
               it('does not scroll', async function() {
                 fixture('.target')
-                up.render('.target', {url: '/path#hash', reveal: false})
+                up.render('.target', { url: '/path#hash', reveal: false })
 
                 await wait()
 
@@ -6975,11 +6975,11 @@ describe('up.fragment', function() {
 
           it('scrolls to the new element that is inserted into the DOM', async function() {
             fixture('.target')
-            up.render('.target', {url: '/path', scroll: 'target'})
+            up.render('.target', { url: '/path', scroll: 'target' })
 
             await wait()
 
-            this.respondWithSelector('.target', {text: 'new text'})
+            this.respondWithSelector('.target', { text: 'new text' })
 
             await wait()
 
@@ -6987,10 +6987,10 @@ describe('up.fragment', function() {
           })
 
           it('allows to pass another selector to reveal', async function() {
-            fixture('.target', {text: 'target text'})
-            fixture('.other', {text: 'other text'})
+            fixture('.target', { text: 'target text' })
+            fixture('.other', { text: 'other text' })
 
-            up.render('.target', {url: '/path', scroll: '.other'})
+            up.render('.target', { url: '/path', scroll: '.other' })
 
             await wait()
 
@@ -7002,10 +7002,10 @@ describe('up.fragment', function() {
           })
 
           it('allows to refer to the replacement { origin } as ":origin" in the { scroll } selector', async function() {
-            const target = fixture('.target', {text: 'target text'})
-            const origin = fixture('.origin', {text: 'origin text'})
+            const target = fixture('.target', { text: 'target text' })
+            const origin = fixture('.origin', { text: 'origin text' })
 
-            up.render('.target', {url: '/path', scroll: ':origin', origin})
+            up.render('.target', { url: '/path', scroll: ':origin', origin })
 
             await wait()
 
@@ -7020,11 +7020,11 @@ describe('up.fragment', function() {
             describe('with { reveal: true }', function() {
               it('scrolls to the new element that is inserted into the DOM', async function() {
                 fixture('.target')
-                up.render('.target', {url: '/path', reveal: true})
+                up.render('.target', { url: '/path', reveal: true })
 
                 await wait()
 
-                this.respondWithSelector('.target', {text: 'new text'})
+                this.respondWithSelector('.target', { text: 'new text' })
 
                 await wait()
 
@@ -7035,9 +7035,9 @@ describe('up.fragment', function() {
 
           describe('when more than one fragment is replaced', function() {
             it('only reveals the first fragment', async function() {
-              fixture('.one', {text: 'old one text'})
-              fixture('.two', {text: 'old two text'})
-              up.render('.one, .two', {url: '/path', scroll: 'target'})
+              fixture('.one', { text: 'old one text' })
+              fixture('.two', { text: 'old two text' })
+              up.render('.one, .two', { url: '/path', scroll: 'target' })
 
               await wait()
 
@@ -7054,11 +7054,11 @@ describe('up.fragment', function() {
 
           it('reveals a new element that is being appended', async function() {
             fixture('.target')
-            up.render('.target:after', {url: '/path', scroll: 'target'})
+            up.render('.target:after', { url: '/path', scroll: 'target' })
 
             await wait()
 
-            this.respondWithSelector('.target', {text: 'new target text'})
+            this.respondWithSelector('.target', { text: 'new target text' })
 
             await wait()
 
@@ -7072,11 +7072,11 @@ describe('up.fragment', function() {
 
           it('reveals a new element that is being prepended', async function() {
             fixture('.target')
-            up.render('.target:before', {url: '/path', scroll: 'target'})
+            up.render('.target:before', { url: '/path', scroll: 'target' })
 
             await wait()
 
-            this.respondWithSelector('.target', {text: 'new target text'})
+            this.respondWithSelector('.target', { text: 'new target text' })
 
             await wait()
 
@@ -7095,7 +7095,7 @@ describe('up.fragment', function() {
 
           it("scrolls to the top of an element with the ID the location's #hash", async function() {
             fixture('.target')
-            up.render('.target', {url: '/path#hash', scroll: 'hash'})
+            up.render('.target', { url: '/path#hash', scroll: 'hash' })
 
             await wait()
 
@@ -7108,12 +7108,12 @@ describe('up.fragment', function() {
             await wait()
 
             expect(this.revealedHTML).toEqual(['<div id="hash"></div>'])
-            expect(this.revealOptions).toEqual(jasmine.objectContaining({top: true}))
+            expect(this.revealOptions).toEqual(jasmine.objectContaining({ top: true }))
           })
 
           it("scrolls to the top of an <a> element with the name of that hash", async function() {
             fixture('.target')
-            up.render('.target', {url: '/path#three', scroll: 'hash'})
+            up.render('.target', { url: '/path#three', scroll: 'hash' })
 
             await wait()
 
@@ -7126,12 +7126,12 @@ describe('up.fragment', function() {
             await wait()
 
             expect(this.revealedHTML).toEqual(['<a name="three"></a>'])
-            expect(this.revealOptions).toEqual(jasmine.objectContaining({top: true}))
+            expect(this.revealOptions).toEqual(jasmine.objectContaining({ top: true }))
           })
 
           it("scrolls to a hash that includes a dot character ('.') (bugfix)", async function() {
             fixture('.target')
-            up.render('.target', {url: '/path#foo.bar', scroll: 'hash'})
+            up.render('.target', { url: '/path#foo.bar', scroll: 'hash' })
 
             await wait()
 
@@ -7144,12 +7144,12 @@ describe('up.fragment', function() {
             await wait()
 
             expect(this.revealedHTML).toEqual(['<a name="foo.bar"></a>'])
-            expect(this.revealOptions).toEqual(jasmine.objectContaining({top: true}))
+            expect(this.revealOptions).toEqual(jasmine.objectContaining({ top: true }))
           })
 
           it('reveals multiple consecutive #hash targets with the same URL (bugfix)', async function() {
             fixture('.target')
-            up.render('.target', {url: '/path#two', scroll: 'hash', cache: true})
+            up.render('.target', { url: '/path#two', scroll: 'hash', cache: true })
 
             const html = `
               <div class="target">
@@ -7167,7 +7167,7 @@ describe('up.fragment', function() {
 
             expect(this.revealedText).toEqual(['two'])
 
-            up.render('.target', {url: '/path#three', scroll: 'hash', cache: true})
+            up.render('.target', { url: '/path#three', scroll: 'hash', cache: true })
 
             await wait()
 
@@ -7176,7 +7176,7 @@ describe('up.fragment', function() {
 
           it("does not scroll if there is no element with the ID of that #hash", async function() {
             fixture('.target')
-            up.render('.target', {url: '/path#hash', scroll: 'hash'})
+            up.render('.target', { url: '/path#hash', scroll: 'hash' })
 
             await wait()
 
@@ -7194,7 +7194,7 @@ describe('up.fragment', function() {
 
           it('tries each option until one succeeds', async function() {
             fixture('.container')
-            up.render('.container', {scroll: ['hash', '.element', '.container'], content: "<div class='element'>element text</div>"})
+            up.render('.container', { scroll: ['hash', '.element', '.container'], content: "<div class='element'>element text</div>" })
 
             await wait()
 
@@ -7208,7 +7208,7 @@ describe('up.fragment', function() {
 
           it('tries each option until one succeeds', async function() {
             fixture('.container')
-            up.render('.container', {scroll: 'hash, .element, .container', content: "<div class='element'>element text</div>"})
+            up.render('.container', { scroll: 'hash, .element, .container', content: "<div class='element'>element text</div>" })
 
             await wait()
 
@@ -7217,7 +7217,7 @@ describe('up.fragment', function() {
 
           it('ignores commas in parentheses', async function() {
             fixture('.container')
-            up.render('.container', {scroll: 'hash, .other:not(input, select), .element:not(input, select), .container', content: "<div class='element'>element text</div>"})
+            up.render('.container', { scroll: 'hash, .other:not(input, select), .element:not(input, select), .container', content: "<div class='element'>element text</div>" })
 
             await wait()
 
@@ -7232,7 +7232,7 @@ describe('up.fragment', function() {
 
             it('tries each option until one succeeds', async function() {
               fixture('.container')
-              up.render('.container', {scroll: 'hash or .element or .container', content: "<div class='element'>element text</div>"})
+              up.render('.container', { scroll: 'hash or .element or .container', content: "<div class='element'>element text</div>" })
 
               await wait()
 
@@ -7246,15 +7246,15 @@ describe('up.fragment', function() {
           mockRevealBeforeEach()
 
           it('ignores the { scroll } option', async function() {
-            fixture('.target', {text: 'target text'})
-            fixture('.other', {text: 'other text'})
-            fixture('.fail-target', {text: 'fail-target text'})
+            fixture('.target', { text: 'target text' })
+            fixture('.other', { text: 'other text' })
+            fixture('.fail-target', { text: 'fail-target text' })
 
-            const renderJob = up.render('.target', {url: '/path', failTarget: '.fail-target', scroll: '.other'})
+            const renderJob = up.render('.target', { url: '/path', failTarget: '.fail-target', scroll: '.other' })
 
             await wait()
 
-            jasmine.respondWithSelector('.fail-target', {status: 500, text: 'new fail-target text'})
+            jasmine.respondWithSelector('.fail-target', { status: 500, text: 'new fail-target text' })
 
             await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
 
@@ -7262,10 +7262,10 @@ describe('up.fragment', function() {
           })
 
           it('accepts a { failScroll } option for error responses', async function() {
-            fixture('.target', {text: 'old target text'})
-            fixture('.other', {text: 'other text'})
-            fixture('.fail-target', {text: 'old fail-target text'})
-            const renderJob = up.render('.target', {url: '/path', failTarget: '.fail-target', scroll: false, failScroll: '.other'})
+            fixture('.target', { text: 'old target text' })
+            fixture('.other', { text: 'other text' })
+            fixture('.fail-target', { text: 'old fail-target text' })
+            const renderJob = up.render('.target', { url: '/path', failTarget: '.fail-target', scroll: false, failScroll: '.other' })
 
             await wait()
 
@@ -7287,7 +7287,7 @@ describe('up.fragment', function() {
             const $origin = $fixture('.origin').text('origin text')
             $fixture('.target').text('old target text')
             $fixture('.fail-target').text('old fail-target text')
-            const renderJob = up.render('.target', {url: '/path', failTarget: '.fail-target', scroll: false, failScroll: ':origin', origin: $origin[0]})
+            const renderJob = up.render('.target', { url: '/path', failTarget: '.fail-target', scroll: false, failScroll: ':origin', origin: $origin[0] })
 
             await wait()
 
@@ -7311,7 +7311,7 @@ describe('up.fragment', function() {
           it('animates the revealing when prepending an element', async function() {
             mockReveal.apply(this)
 
-            fixture('.element', {text: 'version 1'})
+            fixture('.element', { text: 'version 1' })
             up.render('.element:before', {
               document: '<div class="element">version 2</div>',
               scroll: 'target',
@@ -7326,7 +7326,7 @@ describe('up.fragment', function() {
           it('animates the revealing when appending an element', async function() {
             mockReveal.apply(this)
 
-            fixture('.element', {text: 'version 1'})
+            fixture('.element', { text: 'version 1' })
             up.render('.element:after', {
               document: '<div class="element">version 2</div>',
               scroll: 'target',
@@ -7339,9 +7339,9 @@ describe('up.fragment', function() {
           })
 
           it('animates the revealing when swapping out an element', async function() {
-            fixture('.before', {text: 'before', style: { height: '20000px' }})
+            fixture('.before', { text: 'before', style: { height: '20000px' } })
 
-            fixture('.element', {text: 'version 1'})
+            fixture('.element', { text: 'version 1' })
             up.render('.element', {
               document: '<div class="element">version 2</div>',
               scroll: 'target',
@@ -7376,21 +7376,21 @@ describe('up.fragment', function() {
               })
             }
 
-            up.render('.element', {url: '/foo', history: true})
+            up.render('.element', { url: '/foo', history: true })
             await wait()
 
             respond()
             await wait()
 
             $viewport.scrollTop(65)
-            up.render('.element', {url: '/bar', history: true})
+            up.render('.element', { url: '/bar', history: true })
             await wait()
 
             respond()
             await wait()
 
             $viewport.scrollTop(10)
-            up.render('.element', {url: '/foo', scroll: 'restore', history: true})
+            up.render('.element', { url: '/foo', scroll: 'restore', history: true })
 
             await wait()
 
@@ -7406,18 +7406,18 @@ describe('up.fragment', function() {
           mockRevealBeforeEach()
 
           it('still processes a { scroll } option', function() {
-            fixture('.other', {text: 'other'})
+            fixture('.other', { text: 'other' })
 
-            fixture('main', {text: 'main'})
+            fixture('main', { text: 'main' })
             expect('main').not.toBeFocused()
 
-            up.render(':none', {scroll: 'main', document: '<div></div>'})
+            up.render(':none', { scroll: 'main', document: '<div></div>' })
 
             expect(this.revealedText).toEqual(['main'])
           })
 
           it('does not crash with { scroll: "target" }', function(done) {
-            const promise = up.render(':none', {scroll: 'target', document: '<div></div>'})
+            const promise = up.render(':none', { scroll: 'target', document: '<div></div>' })
 
             u.task(() => promiseState(promise).then(function(result) {
               expect(result.state).toBe('fulfilled')
@@ -7430,9 +7430,9 @@ describe('up.fragment', function() {
 
           it('calls the function', function() {
             const scrollHandler = jasmine.createSpy('scroll handler')
-            fixture('.element', {content: 'old text'})
+            fixture('.element', { content: 'old text' })
 
-            up.render('.element', {content: 'new text', scroll: scrollHandler})
+            up.render('.element', { content: 'new text', scroll: scrollHandler })
 
             expect('.element').toHaveText('new text')
             expect(scrollHandler).toHaveBeenCalled()
@@ -7441,10 +7441,10 @@ describe('up.fragment', function() {
           it('does not crash the render pass and emits an error event if the function throws', async function() {
             const scrollError = new Error('error in scroll handler')
             const scrollHandler = jasmine.createSpy('scroll handler').and.throwError(scrollError)
-            fixture('.element', {content: 'old text'})
+            fixture('.element', { content: 'old text' })
 
             await jasmine.expectGlobalError(scrollError, async function() {
-              const job = up.render('.element', {content: 'new text', scroll: scrollHandler})
+              const job = up.render('.element', { content: 'new text', scroll: scrollHandler })
 
               await expectAsync(job).toBeResolvedTo(jasmine.any(up.RenderResult))
               expect('.element').toHaveText('new text')
@@ -7472,7 +7472,7 @@ describe('up.fragment', function() {
           })
 
           it('does not execute inline script tags from a fragment response', async function() {
-            fixture('.target', {text: 'old text'})
+            fixture('.target', { text: 'old text' })
 
             up.render({
               fragment: `
@@ -7494,7 +7494,7 @@ describe('up.fragment', function() {
           })
 
           it('does not execute a script[type=module]', async function() {
-            fixture('.target', {text: 'old text'})
+            fixture('.target', { text: 'old text' })
 
             up.render({
               fragment: `
@@ -7516,7 +7516,7 @@ describe('up.fragment', function() {
           })
 
           it('does not execute inline script tags from a document response', async function() {
-            fixture('.target', {text: 'old text'})
+            fixture('.target', { text: 'old text' })
 
             up.render('.target', {
               document: `
@@ -7639,7 +7639,7 @@ describe('up.fragment', function() {
           })
 
           it('executes inline script tags inside the updated fragment', async function() {
-            fixture('.target', {text: 'old text'})
+            fixture('.target', { text: 'old text' })
 
             up.render({
               fragment: `
@@ -7661,7 +7661,7 @@ describe('up.fragment', function() {
           })
 
           it('executes a script[type=module] inside the updated fragment', async function() {
-            fixture('.target', {text: 'old text'})
+            fixture('.target', { text: 'old text' })
 
             up.render({
               fragment: `
@@ -7683,7 +7683,7 @@ describe('up.fragment', function() {
           })
 
           it('executes inline script tags that are itself the target', async function() {
-            fixture('script#target', {text: 'true'})
+            fixture('script#target', { text: 'true' })
 
             up.render({
               fragment: `
@@ -7699,7 +7699,7 @@ describe('up.fragment', function() {
           })
 
           it('does not execute inline script tags outside the updated fragment', async function() {
-            fixture('.target', {text: 'old text'})
+            fixture('.target', { text: 'old text' })
 
             up.render({
               target: '.target',
@@ -7745,7 +7745,7 @@ describe('up.fragment', function() {
 
           it('parses <noscript> contents as text, not DOM nodes (since it will be placed in a scripting-capable browser)', async function() {
             fixture('.target')
-            up.render('.target', {url: '/path'})
+            up.render('.target', { url: '/path' })
 
             await wait()
 
@@ -7765,7 +7765,7 @@ describe('up.fragment', function() {
 
           it('parses <noscript> contents as text, not DOM nodes when the <noscript> itself is the target', async function() {
             fixture('noscript#target')
-            up.render('#target', {url: '/path'})
+            up.render('#target', { url: '/path' })
 
             await wait()
 
@@ -7785,7 +7785,7 @@ describe('up.fragment', function() {
 
           it('parses <noscript> contents with multiple lines as text, not DOM nodes', async function() {
             fixture('.target')
-            up.render('.target', {url: '/path'})
+            up.render('.target', { url: '/path' })
 
             await wait()
 
@@ -7807,7 +7807,7 @@ describe('up.fragment', function() {
 
           it('parses multiple <noscript> tags in the same fragment as text, not DOM nodes', async function() {
             fixture('.target')
-            up.render('.target', {url: '/path'})
+            up.render('.target', { url: '/path' })
 
             await wait()
 
@@ -7840,7 +7840,7 @@ describe('up.fragment', function() {
           fixture('#target')
 
           // Must render from a { url } or { document } so DOMParser is involved.
-          up.render('#target', {url: '/video'})
+          up.render('#target', { url: '/video' })
 
           return u.task(function() {
             jasmine.respondWith(`
@@ -7871,7 +7871,7 @@ describe('up.fragment', function() {
         it("rewrites nonceable callbacks to use the current page's nonce", async function() {
           spyOn(up.protocol, 'cspNonce').and.returnValue('secret1')
           fixture('.target')
-          up.render('.target', {url: '/path'})
+          up.render('.target', { url: '/path' })
 
           await wait()
 
@@ -7879,7 +7879,7 @@ describe('up.fragment', function() {
             responseText: `
               <div class="target" callback="nonce-secret2 alert()">new text</div>
             `,
-            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'"}
+            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'" }
           })
 
           await wait()
@@ -7891,7 +7891,7 @@ describe('up.fragment', function() {
         it("rewrites nonceable callbacks to use the current page's nonce with Content-Security-Policy-Report-Only header", async function() {
           spyOn(up.protocol, 'cspNonce').and.returnValue('secret1')
           fixture('.target')
-          up.render('.target', {url: '/path'})
+          up.render('.target', { url: '/path' })
 
           await wait()
 
@@ -7899,7 +7899,7 @@ describe('up.fragment', function() {
             responseText: `
               <div class="target" callback="nonce-secret2 alert()">new text</div>
             `,
-            responseHeaders: { 'Content-Security-Policy-Report-Only': "script-src: 'nonce-secret2'"}
+            responseHeaders: { 'Content-Security-Policy-Report-Only': "script-src: 'nonce-secret2'" }
           })
 
           await wait()
@@ -7910,7 +7910,7 @@ describe('up.fragment', function() {
 
         it("rewrites nonceable callbacks to use the current page's nonce when opening a new overlay (bugfix)", async function() {
           spyOn(up.protocol, 'cspNonce').and.returnValue('secret1')
-          up.render('.target', {url: '/path', layer: 'new'})
+          up.render('.target', { url: '/path', layer: 'new' })
 
           await wait()
 
@@ -7918,7 +7918,7 @@ describe('up.fragment', function() {
             responseText: `
               <div class="target" callback="nonce-secret2 alert()">new text</div>
             `,
-            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'"}
+            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'" }
           })
 
           await wait()
@@ -7933,15 +7933,15 @@ describe('up.fragment', function() {
           up.element.affix(document.head, 'meta#test-nonce[name="csp-nonce"][content="nonce-secret1"]')
           expect(up.protocol.cspNonce()).toBe('nonce-secret1')
 
-          const element = fixture('.element', {callback: 'nonce-secret1 alert()'})
-          fixture('.target', {text: 'old text'})
+          const element = fixture('.element', { callback: 'nonce-secret1 alert()' })
+          fixture('.target', { text: 'old text' })
 
-          up.render('.target', {url: '/path', history: true})
+          up.render('.target', { url: '/path', history: true })
 
           await wait()
 
           jasmine.respondWith({
-            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'"},
+            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'" },
             responseText: `
               <html>
                 <head>
@@ -7968,7 +7968,7 @@ describe('up.fragment', function() {
         it("rewrites a callback's nonce it the nonce matches one of multiple script-src nonces in its own response", async function() {
           spyOn(up.protocol, 'cspNonce').and.returnValue('secret1')
           fixture('.target')
-          up.render('.target', {url: '/path'})
+          up.render('.target', { url: '/path' })
 
           await wait()
 
@@ -7976,7 +7976,7 @@ describe('up.fragment', function() {
             responseText: `
               <div class="target" callback="nonce-secret3 alert()">new text</div>
             `,
-            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2' 'self' 'nonce-secret3'"}
+            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2' 'self' 'nonce-secret3'" }
           })
 
           await wait()
@@ -7988,7 +7988,7 @@ describe('up.fragment', function() {
         it("does not rewrite a callback's nonce it the nonce does not match a script-src nonce in its own response", async function() {
           spyOn(up.protocol, 'cspNonce').and.returnValue('secret1')
           fixture('.target')
-          up.render('.target', {url: '/path'})
+          up.render('.target', { url: '/path' })
 
           await wait()
 
@@ -7996,7 +7996,7 @@ describe('up.fragment', function() {
             responseText: `
               <div class="target" callback="nonce-wrong alert()">new text</div>
             `,
-            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'"}
+            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'" }
           })
 
           await wait()
@@ -8008,7 +8008,7 @@ describe('up.fragment', function() {
         it("does not rewrite a callback's nonce it the nonce only matches a style-src nonce in its own response", async function() {
           spyOn(up.protocol, 'cspNonce').and.returnValue('secret1')
           fixture('.target')
-          up.render('.target', {url: '/path'})
+          up.render('.target', { url: '/path' })
 
           await wait()
 
@@ -8016,7 +8016,7 @@ describe('up.fragment', function() {
             responseText: `
               <div class="target" callback="nonce-secret2 alert()">new text</div>
             `,
-            responseHeaders: { 'Content-Security-Policy': "style-src: 'nonce-secret2'"}
+            responseHeaders: { 'Content-Security-Policy': "style-src: 'nonce-secret2'" }
           })
 
           await wait()
@@ -8028,7 +8028,7 @@ describe('up.fragment', function() {
         it("does not rewrite a callback's nonce it the curent page's nonce is unknown", async function() {
           spyOn(up.protocol, 'cspNonce').and.returnValue(null)
           fixture('.target')
-          up.render('.target', {url: '/path'})
+          up.render('.target', { url: '/path' })
 
           await wait()
 
@@ -8036,7 +8036,7 @@ describe('up.fragment', function() {
             responseText: `
               <div class="target" callback="nonce-secret2 alert()">new text</div>
             `,
-            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'"}
+            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'" }
           })
 
           await wait()
@@ -8054,19 +8054,19 @@ describe('up.fragment', function() {
           expect($element).toBeAttached()
 
           const spy = jasmine.createSpy('event listener')
-          $parent[0].addEventListener('up:fragment:destroyed', event => spy(event.target, event.fragment, up.specUtil.isDetached($element)))
+          $parent[0].addEventListener('up:fragment:destroyed', (event) => spy(event.target, event.fragment, up.specUtil.isDetached($element)))
 
-          await up.render('.element', {document: '<div class="element v2">v2</div>'})
+          await up.render('.element', { document: '<div class="element v2">v2</div>' })
 
           expect(spy).toHaveBeenCalledWith($parent[0], $element[0], true)
         })
 
         it('calls destructors on the old element', async function() {
           const destructor = jasmine.createSpy('destructor')
-          up.compiler('.container', element => () => destructor(element.innerText))
+          up.compiler('.container', (element) => () => destructor(element.innerText))
           const $container = $fixture('.container').text('old text')
           up.hello($container)
-          up.render('.container', {document: '<div class="container">new text</div>'})
+          up.render('.container', { document: '<div class="container">new text</div>' })
 
           await wait()
 
@@ -8078,11 +8078,11 @@ describe('up.fragment', function() {
           up.motion.config.enabled = true
 
           const destructor = jasmine.createSpy('destructor')
-          up.compiler('.container', element => () => destructor(element.innerText))
+          up.compiler('.container', (element) => () => destructor(element.innerText))
           const $container = $fixture('.container').text('old text')
           up.hello($container)
 
-          up.render({fragment: '<div class="container">new text</div>', transition: 'cross-fade', duration: 100})
+          up.render({ fragment: '<div class="container">new text</div>', transition: 'cross-fade', duration: 100 })
 
           u.timer(50, () => {
             expect(destructor).not.toHaveBeenCalled()
@@ -8097,7 +8097,7 @@ describe('up.fragment', function() {
 
         it('calls destructors when the replaced element is a singleton element like <body> (bugfix)', async function() {
           // shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
-          up.element.isSingleton.mock().and.callFake(element => element.matches('.container'))
+          up.element.isSingleton.mock().and.callFake((element) => element.matches('.container'))
           const destructor = jasmine.createSpy('destructor')
           up.compiler('.container', () => destructor)
           const $container = $fixture('.container')
@@ -8105,7 +8105,7 @@ describe('up.fragment', function() {
 
           // Need to pass a { target } and not use { fragment }, since up.fragment.toTarget() ignores
           // classes and only returns the tag name for singleton elements.
-          up.render('.container', {document: '<div class="container">new text</div>'})
+          up.render('.container', { document: '<div class="container">new text</div>' })
 
           await wait()
 
@@ -8120,17 +8120,17 @@ describe('up.fragment', function() {
             done()
           })
 
-          up.compiler('.container', element => () => testElementState(element))
+          up.compiler('.container', (element) => () => testElementState(element))
 
-          up.hello(fixture('.container', {text: 'old text'}))
+          up.hello(fixture('.container', { text: 'old text' }))
 
-          up.render({fragment: '<div class="container">new text</div>'})
+          up.render({ fragment: '<div class="container">new text</div>' })
 
         })
 
         it('marks the old element as .up-destroying before destructors after a { transition }', async function() {
           const destructor = jasmine.createSpy('destructor')
-          up.compiler('.container', element => () => destructor(element.innerText, element.matches('.up-destroying')))
+          up.compiler('.container', (element) => () => destructor(element.innerText, element.matches('.up-destroying')))
           const $container = $fixture('.container').text('old text')
           up.hello($container)
 
@@ -8146,13 +8146,13 @@ describe('up.fragment', function() {
 
         it('calls destructors while the element is still attached to the DOM, so destructors see ancestry and events bubble up', async function() {
           const spy = jasmine.createSpy('parent spy')
-          up.compiler('.element', element => () => spy(element.innerText, element.parentElement))
+          up.compiler('.element', (element) => () => spy(element.innerText, element.parentElement))
 
           const $parent = $fixture('.parent')
           const $element = $parent.affix('.element').text('old text')
           up.hello($element)
 
-          up.render({fragment: '<div class="element">new text</div>'})
+          up.render({ fragment: '<div class="element">new text</div>' })
 
           await wait()
 
@@ -8161,7 +8161,7 @@ describe('up.fragment', function() {
 
         it('calls destructors while the element is still attached to the DOM when also using a { transition }', async function() {
           const spy = jasmine.createSpy('parent spy')
-          up.compiler('.element', element => () => // We must seek .parent in our ancestry, because our direct parent() is an .up-bounds container
+          up.compiler('.element', (element) => () => // We must seek .parent in our ancestry, because our direct parent() is an .up-bounds container
           spy(element.innerText, element.closest('.parent')))
 
           const $parent = $fixture('.parent')
@@ -8253,7 +8253,7 @@ describe('up.fragment', function() {
         describe('with { focus: "hash" }', function() {
           it('focuses the target of a URL #hash', async function() {
             fixture('.target')
-            up.render('.target', {url: '/path#hash', focus: 'hash'})
+            up.render('.target', { url: '/path#hash', focus: 'hash' })
 
             await wait()
 
@@ -8313,7 +8313,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            up.render('.overlay-element', {focus: '.root-element', content: 'new content'})
+            up.render('.overlay-element', { focus: '.root-element', content: 'new content' })
 
             await wait()
 
@@ -8325,7 +8325,7 @@ describe('up.fragment', function() {
 
           it('preserves focus of an element within the changed fragment', async function() {
             const container = fixture('.container')
-            const oldFocused = e.affix(container, '.focused[tabindex=0]', {text: 'old focused'})
+            const oldFocused = e.affix(container, '.focused[tabindex=0]', { text: 'old focused' })
             oldFocused.focus()
             expect(oldFocused).toBeFocused()
 
@@ -8344,8 +8344,8 @@ describe('up.fragment', function() {
           })
 
           it('does not re-focus an unrelated element that never lost focus during the render pass', async function() {
-            fixture('.target', {text: 'old target'})
-            const outside = fixture('.focused[tabindex=0]', {text: 'old focused'})
+            fixture('.target', { text: 'old target' })
+            const outside = fixture('.focused[tabindex=0]', { text: 'old focused' })
             outside.focus()
             expect(outside).toBeFocused()
 
@@ -8368,7 +8368,7 @@ describe('up.fragment', function() {
 
           it('does not crash if the focused element is not targetable (bugfix)', async function() {
             const container = fixture('.container')
-            const oldFocused = e.affix(container, 'div[tabindex=0]', {text: 'old focused'})
+            const oldFocused = e.affix(container, 'div[tabindex=0]', { text: 'old focused' })
             oldFocused.focus()
             expect(oldFocused).toBeFocused()
 
@@ -8389,11 +8389,11 @@ describe('up.fragment', function() {
 
           it('preserves focus of an element within the changed fragment when updating inner HTML with { content } (bugfix)', async function() {
             const container = fixture('.container')
-            const oldFocused = e.affix(container, '.focused[tabindex=0]', {text: 'old focused'})
+            const oldFocused = e.affix(container, '.focused[tabindex=0]', { text: 'old focused' })
             oldFocused.focus()
             expect(oldFocused).toBeFocused()
 
-            up.render('.container', {focus: 'keep', content: '<div class="focused" tabindex="0">new focused</div>'})
+            up.render('.container', { focus: 'keep', content: '<div class="focused" tabindex="0">new focused</div>' })
 
             await wait()
 
@@ -8414,7 +8414,7 @@ describe('up.fragment', function() {
               baaaaaaaaaaam
               quuuuuuuuuuux
             `
-            const oldFocused = e.affix(container, 'textarea[name=prose][wrap=off][rows=3][cols=6]', {text: longText})
+            const oldFocused = e.affix(container, 'textarea[name=prose][wrap=off][rows=3][cols=6]', { text: longText })
 
             oldFocused.selectionStart = 10
             oldFocused.selectionEnd = 11
@@ -8428,7 +8428,7 @@ describe('up.fragment', function() {
             expect(oldFocused.scrollTop).toBeAround(12, 2)
             expect(oldFocused.scrollLeft).toBeAround(13, 2)
 
-            up.render('.container', {focus: 'keep', content: `<textarea name='prose' wrap='off' rows='3' cols='6'>${longText}</textarea>`})
+            up.render('.container', { focus: 'keep', content: `<textarea name='prose' wrap='off' rows='3' cols='6'>${longText}</textarea>` })
 
             await wait()
 
@@ -8447,7 +8447,7 @@ describe('up.fragment', function() {
             const container = fixture('.container')
             e.affix(container, 'textarea')
 
-            up.render('.container', {focus: 'keep', content: "<textarea></textarea>"})
+            up.render('.container', { focus: 'keep', content: "<textarea></textarea>" })
 
             await wait()
 
@@ -8520,7 +8520,7 @@ describe('up.fragment', function() {
             const container = fixture('.container')
             e.affix(container, 'textarea')
 
-            up.render('.container', {focus: 'keep', content: "<textarea></textarea>"})
+            up.render('.container', { focus: 'keep', content: "<textarea></textarea>" })
 
             await wait()
 
@@ -8542,7 +8542,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            up.render('.overlay', {focus: 'layer', content: 'new overlay text'})
+            up.render('.overlay', { focus: 'layer', content: 'new overlay text' })
 
             await wait()
 
@@ -8659,7 +8659,7 @@ describe('up.fragment', function() {
         describe('with an array of { focus } options', function() {
           it('tries each option until one succeeds', async function() {
             fixture('.container')
-            up.render('.container', {focus: ['autofocus', '.element', '.container'], content: "<div class='element'>element</div>"})
+            up.render('.container', { focus: ['autofocus', '.element', '.container'], content: "<div class='element'>element</div>" })
 
             await wait()
 
@@ -8670,7 +8670,7 @@ describe('up.fragment', function() {
         describe('with a string with comma-separated { focus } options', function() {
           it('tries each option until one succeeds', async function() {
             fixture('.container')
-            up.render('.container', {focus: 'autofocus, .element, .container', content: "<div class='element'>element</div>"})
+            up.render('.container', { focus: 'autofocus, .element, .container', content: "<div class='element'>element</div>" })
             await wait()
 
             expect('.container .element').toBeFocused()
@@ -8681,7 +8681,7 @@ describe('up.fragment', function() {
           describe('with a string with "or"-separated { focus } options', function() {
             it('tries each option until one succeeds', async function() {
               fixture('.container')
-              up.render('.container', {focus: 'autofocus or .element or .container', content: "<div class='element'>element</div>"})
+              up.render('.container', { focus: 'autofocus or .element or .container', content: "<div class='element'>element</div>" })
               await wait()
 
               expect('.container .element').toBeFocused()
@@ -8771,7 +8771,7 @@ describe('up.fragment', function() {
 
           it('focuses the target of a URL #hash', async function() {
             fixture('.target')
-            up.render('.target', {url: '/path#hash', focus: 'auto'})
+            up.render('.target', { url: '/path#hash', focus: 'auto' })
 
             await wait()
 
@@ -8788,7 +8788,7 @@ describe('up.fragment', function() {
 
           it('preserves focus within a non-main fragment', async function() {
             const container = fixture('.container')
-            const oldFocused = e.affix(container, '.focused[tabindex=0]', {text: 'old focused'})
+            const oldFocused = e.affix(container, '.focused[tabindex=0]', { text: 'old focused' })
             oldFocused.focus()
             expect(oldFocused).toBeFocused()
 
@@ -8811,7 +8811,7 @@ describe('up.fragment', function() {
         describe('without a { focus } option', function() {
           it('preserves focus of an element within the changed fragment', async function() {
             const container = fixture('.container')
-            const oldFocused = e.affix(container, '.focused[tabindex=0]', {text: 'old focused'})
+            const oldFocused = e.affix(container, '.focused[tabindex=0]', { text: 'old focused' })
             oldFocused.focus()
             expect(oldFocused).toBeFocused()
 
@@ -8834,9 +8834,9 @@ describe('up.fragment', function() {
 
           it('calls the function', async function() {
             const focusHandler = jasmine.createSpy('focus handler')
-            fixture('.element', {content: 'old text'})
+            fixture('.element', { content: 'old text' })
 
-            await up.render('.element', {content: 'new text', focus: focusHandler})
+            await up.render('.element', { content: 'new text', focus: focusHandler })
 
             expect('.element').toHaveText('new text')
             expect(focusHandler).toHaveBeenCalled()
@@ -8845,10 +8845,10 @@ describe('up.fragment', function() {
           it('does not crash the render pass and emits an error event if the function throws', async function() {
             const focusError = new Error('error in focus handler')
             const focusHandler = jasmine.createSpy('focus handler').and.throwError(focusError)
-            fixture('.element', {content: 'old text'})
+            fixture('.element', { content: 'old text' })
 
             await jasmine.expectGlobalError(focusError, async function() {
-              const job = up.render('.element', {content: 'new text', focus: focusHandler})
+              const job = up.render('.element', { content: 'new text', focus: focusHandler })
 
               await expectAsync(job).toBeResolvedTo(jasmine.any(up.RenderResult))
               expect('.element').toHaveText('new text')
@@ -8863,13 +8863,13 @@ describe('up.fragment', function() {
             fixture('main')
             expect('main').not.toBeFocused()
 
-            up.render(':none', {focus: 'main', document: '<div></div>'})
+            up.render(':none', { focus: 'main', document: '<div></div>' })
 
             expect('main').toBeFocused()
           })
 
           it('does not crash with { focus: "target" }', function(done) {
-            const promise = up.render(':none', {focus: 'target', document: '<div></div>'})
+            const promise = up.render(':none', { focus: 'target', document: '<div></div>' })
 
             u.task(() => promiseState(promise).then(function(result) {
               expect(result.state).toBe('fulfilled')
@@ -8882,12 +8882,12 @@ describe('up.fragment', function() {
       describe('with { guardEvent } option', function() {
 
         it('emits the given event before rendering', async function() {
-          fixture('.target', {text: 'old content'})
+          fixture('.target', { text: 'old content' })
           const guardEvent = up.event.build('my:guard')
-          const listener = jasmine.createSpy('listener').and.callFake(event => expect('.target').toHaveText('old content'))
+          const listener = jasmine.createSpy('listener').and.callFake((event) => expect('.target').toHaveText('old content'))
           up.on('my:guard', listener)
 
-          up.render({target: '.target', content: 'new content', guardEvent})
+          up.render({ target: '.target', content: 'new content', guardEvent })
 
           await wait()
 
@@ -8896,13 +8896,13 @@ describe('up.fragment', function() {
         })
 
         it('prefers to emit the given event on the given { origin } instead of the document', async function() {
-          fixture('.target', {text: 'old content'})
+          fixture('.target', { text: 'old content' })
           const origin = fixture('.origin')
           const guardEvent = up.event.build('my:guard')
           const listener = jasmine.createSpy('listener')
           origin.addEventListener('my:guard', listener)
 
-          up.render({target: '.target', content: 'new content', guardEvent, origin})
+          up.render({ target: '.target', content: 'new content', guardEvent, origin })
 
           await wait()
 
@@ -8910,21 +8910,21 @@ describe('up.fragment', function() {
         })
 
         it('lets listeners prevent the event, aborting the fragment update', async function() {
-          fixture('.target', {text: 'old content'})
+          fixture('.target', { text: 'old content' })
           const guardEvent = up.event.build('my:guard')
-          up.on('my:guard', event => event.preventDefault())
+          up.on('my:guard', (event) => event.preventDefault())
 
-          const promise = up.render({target: '.target', content: 'new content', guardEvent})
+          const promise = up.render({ target: '.target', content: 'new content', guardEvent })
           await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/(Aborted|Prevented)/i))
         })
 
         it('sets { renderOptions } on the emitted event', async function() {
-          fixture('.target', {text: 'old content'})
-          const listener = jasmine.createSpy('listener').and.callFake(event => event.preventDefault())
+          fixture('.target', { text: 'old content' })
+          const listener = jasmine.createSpy('listener').and.callFake((event) => event.preventDefault())
           const guardEvent = up.event.build('my:guard')
           up.on('my:guard', listener)
 
-          const renderJob = up.render({target: '.target', content: 'new content', guardEvent})
+          const renderJob = up.render({ target: '.target', content: 'new content', guardEvent })
 
           await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.Aborted))
 
@@ -8933,12 +8933,12 @@ describe('up.fragment', function() {
         })
 
         it('omits the { guardEvent } key from the { renderOptions }, so event handlers can pass this to render() without causing an infinite loop', async function() {
-          fixture('.target', {text: 'old content'})
-          const listener = jasmine.createSpy('listener').and.callFake(event => event.preventDefault())
+          fixture('.target', { text: 'old content' })
+          const listener = jasmine.createSpy('listener').and.callFake((event) => event.preventDefault())
           const guardEvent = up.event.build('my:guard')
           up.on('my:guard', listener)
 
-          const renderJob = up.render({target: '.target', content: 'new content', guardEvent})
+          const renderJob = up.render({ target: '.target', content: 'new content', guardEvent })
 
           await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.Aborted))
 
@@ -8958,15 +8958,15 @@ describe('up.fragment', function() {
             let change1Error  = undefined
             let change1Promise = undefined
 
-            change1Promise = up.render('.element', {url: '/path1', abort: true})
-            change1Promise.catch(e => change1Error = e)
+            change1Promise = up.render('.element', { url: '/path1', abort: true })
+            change1Promise.catch((e) => change1Error = e)
 
             await wait()
 
             expect(up.network.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
-            up.render('.element', {url: '/path2', abort: true})
+            up.render('.element', { url: '/path2', abort: true })
 
             await wait()
 
@@ -8980,15 +8980,15 @@ describe('up.fragment', function() {
             let change1Error  = undefined
             let change1Promise = undefined
 
-            change1Promise = up.render('.element', {url: '/path1', abortable: false})
-            change1Promise.catch(e => change1Error = e)
+            change1Promise = up.render('.element', { url: '/path1', abortable: false })
+            change1Promise.catch((e) => change1Error = e)
 
             await wait()
 
             expect(up.network.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
-            up.render('.element', {url: '/path2', abort: true})
+            up.render('.element', { url: '/path2', abort: true })
 
             await wait()
 
@@ -9003,15 +9003,15 @@ describe('up.fragment', function() {
             let change1Error  = undefined
             let change1Promise = undefined
 
-            change1Promise = up.render('.element1', {url: '/path1', abort: true})
-            change1Promise.catch(e => change1Error = e)
+            change1Promise = up.render('.element1', { url: '/path1', abort: true })
+            change1Promise.catch((e) => change1Error = e)
 
             await wait()
 
             expect(up.network.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
-            up.render('.element2', {content: 'local content', abort: true})
+            up.render('.element2', { content: 'local content', abort: true })
 
             await wait()
 
@@ -9025,8 +9025,8 @@ describe('up.fragment', function() {
             let change1Error  = undefined
             let change1Promise = undefined
 
-            change1Promise = up.render('.element', {url: '/path1', abort: true})
-            change1Promise.catch(e => change1Error = e)
+            change1Promise = up.render('.element', { url: '/path1', abort: true })
+            change1Promise.catch((e) => change1Error = e)
 
             const change2Link = fixture('a[href="/path2"][up-target=".element"][up-abort="true"]')
 
@@ -9057,7 +9057,7 @@ describe('up.fragment', function() {
             const changeLink = fixture('a[href="/path"][up-target=".element"]')
 
             change1Promise = up.link.preload(changeLink)
-            change1Promise.catch(e => change1Error = e)
+            change1Promise.catch((e) => change1Error = e)
 
             await wait()
 
@@ -9065,7 +9065,7 @@ describe('up.fragment', function() {
             expect(change1Error).toBeUndefined()
 
             change2Promise = up.follow(changeLink)
-            change2Promise.catch(e => change2Error = e)
+            change2Promise.catch((e) => change2Error = e)
             await wait()
 
             expect(change1Error).toBeUndefined()
@@ -9079,15 +9079,15 @@ describe('up.fragment', function() {
             let change1Error  = undefined
             let change1Promise = undefined
 
-            change1Promise = up.render('.element', {url: '/path1', abort: false})
-            change1Promise.catch(e => change1Error = e)
+            change1Promise = up.render('.element', { url: '/path1', abort: false })
+            change1Promise.catch((e) => change1Error = e)
 
             await wait()
 
             expect(up.network.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
-            up.render('.element', {url: '/path2', abort: true})
+            up.render('.element', { url: '/path2', abort: true })
 
             await wait()
 
@@ -9103,11 +9103,11 @@ describe('up.fragment', function() {
 
             const abortSpy = spyOn(up.fragment, 'abort')
 
-            up.render('.element', {url: '/path1', abort: 'all'})
+            up.render('.element', { url: '/path1', abort: 'all' })
 
             await wait()
 
-            expect(abortSpy).toHaveBeenCalledWith(jasmine.objectContaining({layer: 'any'}))
+            expect(abortSpy).toHaveBeenCalledWith(jasmine.objectContaining({ layer: 'any' }))
           })
         })
 
@@ -9121,11 +9121,11 @@ describe('up.fragment', function() {
 
             const abortSpy = spyOn(up.fragment, 'abort')
 
-            up.render('.element', {url: '/path1', abort: 'layer', layer: 1})
+            up.render('.element', { url: '/path1', abort: 'layer', layer: 1 })
 
             await wait()
 
-            expect(abortSpy).toHaveBeenCalledWith(jasmine.objectContaining({layer: up.layer.get(1)}))
+            expect(abortSpy).toHaveBeenCalledWith(jasmine.objectContaining({ layer: up.layer.get(1) }))
           })
         })
 
@@ -9139,11 +9139,11 @@ describe('up.fragment', function() {
 
             const abortSpy = spyOn(up.fragment, 'abort')
 
-            up.render('.element', {url: '/path1', abort: '.element', layer: 1})
+            up.render('.element', { url: '/path1', abort: '.element', layer: 1 })
 
             await wait()
 
-            expect(abortSpy).toHaveBeenCalledWith('.element', jasmine.objectContaining({layer: up.layer.get(1)}))
+            expect(abortSpy).toHaveBeenCalledWith('.element', jasmine.objectContaining({ layer: up.layer.get(1) }))
           })
         })
 
@@ -9155,7 +9155,7 @@ describe('up.fragment', function() {
 
             const abortSpy = spyOn(up.fragment, 'abort')
 
-            up.render('.element', {url: '/path1', abort: element})
+            up.render('.element', { url: '/path1', abort: element })
 
             await wait()
 
@@ -9167,36 +9167,36 @@ describe('up.fragment', function() {
 
           it('aborts existing requests targeting the same element', async function() {
             fixture('.element')
-            const change1Promise = up.render('.element', {url: '/path1'})
+            const change1Promise = up.render('.element', { url: '/path1' })
 
             expect(up.network.queue.allRequests.length).toBe(1)
 
-            up.render('.element', {url: '/path2', abort: 'target'})
+            up.render('.element', { url: '/path2', abort: 'target' })
 
             await expectAsync(change1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
           })
 
           it('aborts an existing requests targeting the same URL and element IFF not caching (bugfix)', async function() {
             fixture('.element')
-            const change1Promise = up.render('.element', {url: '/path1'})
+            const change1Promise = up.render('.element', { url: '/path1' })
 
             expect(up.network.queue.allRequests.length).toBe(1)
 
-            up.render('.element', {url: '/path1', abort: 'target'})
+            up.render('.element', { url: '/path1', abort: 'target' })
 
             await expectAsync(change1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
           })
 
           it('aborts existing requests targeting the same element when updating from local content', async function() {
             fixture('.element')
-            const change1Promise = up.render('.element', {url: '/path1'})
+            const change1Promise = up.render('.element', { url: '/path1' })
 
             fixture('.sibling')
-            const change2Promise = up.render('.sibling', {url: '/path2'})
+            const change2Promise = up.render('.sibling', { url: '/path2' })
 
             expect(up.network.queue.allRequests.length).toBe(2)
 
-            up.render('.element', {content: 'new content', abort: 'target'})
+            up.render('.element', { content: 'new content', abort: 'target' })
 
             await expectAsync(change1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
             await expectAsync(change2Promise).toBePending()
@@ -9205,22 +9205,22 @@ describe('up.fragment', function() {
 
           it('aborts existing requests targeting a descendant of the targeted element', async function() {
             fixture('.parent .child')
-            const change1Promise = up.render('.child', {url: '/path1'})
+            const change1Promise = up.render('.child', { url: '/path1' })
 
             expect(up.network.queue.allRequests.length).toBe(1)
 
-            up.render('.parent', {url: '/path2', abort: 'target'})
+            up.render('.parent', { url: '/path2', abort: 'target' })
 
             await expectAsync(change1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
           })
 
           it('does not abort existing requests targeting an ascendant of the targeted element', async function() {
             fixture('.parent .child')
-            const parentChangePromise = up.render('.parent', {url: '/path1'})
+            const parentChangePromise = up.render('.parent', { url: '/path1' })
 
             expect(up.network.queue.allRequests.length).toBe(1)
 
-            up.render('.child', {url: '/path2', abort: 'target'})
+            up.render('.child', { url: '/path2', abort: 'target' })
 
             await expectAsync(parentChangePromise).toBePending()
           })
@@ -9251,15 +9251,15 @@ describe('up.fragment', function() {
             let change1Error = undefined
             let change1Promise = undefined
 
-            change1Promise = up.render('.element', {url: '/path1'})
-            change1Promise.catch(e => change1Error = e)
+            change1Promise = up.render('.element', { url: '/path1' })
+            change1Promise.catch((e) => change1Error = e)
 
             await wait()
 
             expect(up.network.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
-            up.render('.element', {url: '/path2', abort: false})
+            up.render('.element', { url: '/path2', abort: false })
 
             await wait()
 
@@ -9268,24 +9268,24 @@ describe('up.fragment', function() {
           })
 
           it('does not abort requests targeting the same subtree once our response is received and swapped in', async function() {
-            fixture('.element', {text: 'old text'})
+            fixture('.element', { text: 'old text' })
 
-            const change1Promise = up.render('.element', {url: '/path1', abort: false})
+            const change1Promise = up.render('.element', { url: '/path1', abort: false })
             let change1Error = undefined
-            change1Promise.catch(e => change1Error = e)
+            change1Promise.catch((e) => change1Error = e)
 
             await wait()
 
             expect(up.network.queue.allRequests.length).toEqual(1)
 
-            up.render('.element', {url: '/path2', abort: false})
+            up.render('.element', { url: '/path2', abort: false })
 
             await wait()
 
             expect(up.network.queue.allRequests.length).toEqual(2)
             expect(change1Error).toBeUndefined()
 
-            jasmine.respondWithSelector('.element', {text: 'text from /path2'})
+            jasmine.respondWithSelector('.element', { text: 'text from /path2' })
 
             await wait()
 
@@ -9306,14 +9306,14 @@ describe('up.fragment', function() {
             let change1Promise = undefined
             let change2Promise = undefined
 
-            change1Promise = up.render('.element', {url: '/path1', solo: true}).catch(e => change1Error = e)
+            change1Promise = up.render('.element', { url: '/path1', solo: true }).catch((e) => change1Error = e)
 
             await wait()
 
             expect(up.network.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
-            change2Promise = up.render('.element', {url: '/path2', solo: true})
+            change2Promise = up.render('.element', { url: '/path2', solo: true })
 
             await wait()
 
@@ -9328,14 +9328,14 @@ describe('up.fragment', function() {
             let change1Promise = undefined
             let change2Promise = undefined
 
-            change1Promise = up.render('.element', {url: '/path1', solo: true}).catch(e => change1Error = e)
+            change1Promise = up.render('.element', { url: '/path1', solo: true }).catch((e) => change1Error = e)
 
             await wait()
 
             expect(up.network.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
-            change2Promise = up.render('.element', {content: 'local content', solo: true})
+            change2Promise = up.render('.element', { content: 'local content', solo: true })
 
             await wait()
 
@@ -9353,14 +9353,14 @@ describe('up.fragment', function() {
             let change2Promise = undefined
 
             change1Promise = up.link.preload(changeLink)
-            change1Promise.catch(e => change1Error = e)
+            change1Promise.catch((e) => change1Error = e)
             await wait()
 
             expect(up.network.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
             change2Promise = up.follow(changeLink, { solo: true })
-            change2Promise.catch(e => change2Error = e)
+            change2Promise.catch((e) => change2Error = e)
             await wait()
 
             expect(change1Error).toBeUndefined()
@@ -9375,14 +9375,14 @@ describe('up.fragment', function() {
             let change1Promise = undefined
             let change2Promise = undefined
 
-            change1Promise = up.render('.element', {url: '/path1', solo: false}).catch(e => change1Error = e)
+            change1Promise = up.render('.element', { url: '/path1', solo: false }).catch((e) => change1Error = e)
 
             await wait()
 
             expect(up.network.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
-            change2Promise = up.render('.element', {url: '/path2', solo: true})
+            change2Promise = up.render('.element', { url: '/path2', solo: true })
 
             await wait()
 
@@ -9398,14 +9398,14 @@ describe('up.fragment', function() {
 
             let change2Promise = undefined
 
-            change1Promise = up.render('.element', {url: '/path1'}).catch(e => change1Error = e)
+            change1Promise = up.render('.element', { url: '/path1' }).catch((e) => change1Error = e)
 
             await wait()
 
             expect(up.network.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
-            change2Promise = up.render('.element', {url: '/path2', solo: false})
+            change2Promise = up.render('.element', { url: '/path2', solo: false })
 
             await wait()
 
@@ -9427,8 +9427,8 @@ describe('up.fragment', function() {
             let change3Promise = undefined
             let change3Error = undefined
 
-            change1Promise = up.render('.element1', {url: '/path1', abort: false}).catch(e => change1Error = e)
-            change2Promise = up.render('.element2', {url: '/path2', abort: false}).catch(e => change2Error = e)
+            change1Promise = up.render('.element1', { url: '/path1', abort: false }).catch((e) => change1Error = e)
+            change2Promise = up.render('.element2', { url: '/path2', abort: false }).catch((e) => change2Error = e)
 
             await wait()
 
@@ -9436,9 +9436,9 @@ describe('up.fragment', function() {
             expect(change1Error).toBeUndefined()
             expect(change2Error).toBeUndefined()
 
-            const soloFn = request => u.matchURLs(request.url, '/path1')
+            const soloFn = (request) => u.matchURLs(request.url, '/path1')
 
-            change3Promise = up.render('.element3', {url: '/path3', solo: soloFn}).catch(e => change3Error = e)
+            change3Promise = up.render('.element3', { url: '/path3', solo: soloFn }).catch((e) => change3Error = e)
 
             await wait()
 
@@ -9463,8 +9463,8 @@ describe('up.fragment', function() {
             let change3Promise = undefined
             let change3Error = undefined
 
-            change1Promise = up.render('.element1', {url: '/path1', abort: false}).catch(e => change1Error = e)
-            change2Promise = up.render('.element2', {url: '/path2', abort: false}).catch(e => change2Error = e)
+            change1Promise = up.render('.element1', { url: '/path1', abort: false }).catch((e) => change1Error = e)
+            change2Promise = up.render('.element2', { url: '/path2', abort: false }).catch((e) => change2Error = e)
 
             await wait()
 
@@ -9472,9 +9472,9 @@ describe('up.fragment', function() {
             expect(change1Error).toBeUndefined()
             expect(change2Error).toBeUndefined()
 
-            const soloFn = request => u.matchURLs(request.url, '/path1')
+            const soloFn = (request) => u.matchURLs(request.url, '/path1')
 
-            change3Promise = up.render('.element3', {content: 'new content', solo: soloFn}).catch(e => change3Error = e)
+            change3Promise = up.render('.element3', { content: 'new content', solo: soloFn }).catch((e) => change3Error = e)
 
             await wait()
 
@@ -9493,13 +9493,13 @@ describe('up.fragment', function() {
         it('reuses a cached request with { cache: true }', async function() {
           fixture('.element')
 
-          up.render('.element', {url: '/path', cache: true})
+          up.render('.element', { url: '/path', cache: true })
           await wait()
 
           expect(jasmine.Ajax.requests.count()).toBe(1)
-          expect({target: '.element', url: '/path'}).toBeCached()
+          expect({ target: '.element', url: '/path' }).toBeCached()
 
-          up.render('.element', {url: '/path', cache: true, abort: false})
+          up.render('.element', { url: '/path', cache: true, abort: false })
           await wait()
 
           expect(jasmine.Ajax.requests.count()).toBe(1)
@@ -9508,13 +9508,13 @@ describe('up.fragment', function() {
         it('does not reuse a cached request with { cache: false }', async function() {
           fixture('.element')
 
-          up.render('.element', {url: '/path', cache: false})
+          up.render('.element', { url: '/path', cache: false })
           await wait()
 
           expect(jasmine.Ajax.requests.count()).toBe(1)
-          expect({target: '.element', url: '/path'}).not.toBeCached()
+          expect({ target: '.element', url: '/path' }).not.toBeCached()
 
-          up.render('.element', {url: '/path', cache: false, abort: false})
+          up.render('.element', { url: '/path', cache: false, abort: false })
           await wait()
 
           expect(jasmine.Ajax.requests.count()).toBe(2)
@@ -9523,13 +9523,13 @@ describe('up.fragment', function() {
         it('does not reuse a cached request when no { cache } option is given', async function() {
           fixture('.element')
 
-          up.render('.element', {url: '/path'})
+          up.render('.element', { url: '/path' })
           await wait()
 
           expect(jasmine.Ajax.requests.count()).toBe(1)
-          expect({target: '.element', url: '/path'}).not.toBeCached()
+          expect({ target: '.element', url: '/path' }).not.toBeCached()
 
-          up.render('.element', {url: '/path', abort: false})
+          up.render('.element', { url: '/path', abort: false })
           await wait()
 
           expect(jasmine.Ajax.requests.count()).toBe(2)
@@ -9538,7 +9538,7 @@ describe('up.fragment', function() {
         describe('cache revalidation with { revalidate }', function() {
 
           beforeEach(async function() {
-            fixture('.target', {text: 'initial text'})
+            fixture('.target', { text: 'initial text' })
             up.request('/cached-path', { cache: true })
 
             await wait()
@@ -9553,7 +9553,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            expect({url: '/cached-path'}).toBeCached()
+            expect({ url: '/cached-path' }).toBeCached()
             expect('.target').toHaveText('initial text')
           })
 
@@ -9567,7 +9567,7 @@ describe('up.fragment', function() {
             expect(up.network.isBusy()).toBe(true)
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.target')
 
-            jasmine.respondWithSelector('.target', {text: 'verified text'})
+            jasmine.respondWithSelector('.target', { text: 'verified text' })
 
             await wait()
 
@@ -9586,7 +9586,7 @@ describe('up.fragment', function() {
             expect(up.network.isBusy()).toBe(true)
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.target')
 
-            jasmine.respondWithSelector('.target', {text: 'verified text'})
+            jasmine.respondWithSelector('.target', { text: 'verified text' })
 
             await wait()
 
@@ -9596,8 +9596,8 @@ describe('up.fragment', function() {
           })
 
           it('reloads multiple targets', async function() {
-            fixture('#foo', {text: 'initial foo'})
-            fixture('#bar', {text: 'initial bar'})
+            fixture('#foo', { text: 'initial foo' })
+            fixture('#bar', { text: 'initial bar' })
 
             up.request('/multi-cached-path', { cache: true })
 
@@ -9610,7 +9610,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            expect({url: '/multi-cached-path'}).toBeCached()
+            expect({ url: '/multi-cached-path' }).toBeCached()
 
             up.render('#foo, #bar', { url: '/multi-cached-path', cache: true, revalidate: true })
 
@@ -9635,9 +9635,9 @@ describe('up.fragment', function() {
           })
 
           it('reloads multiple targets when an { origin } is given (bugfix)', async function() {
-            fixture('#foo', {text: 'initial foo'})
-            fixture('#bar', {text: 'initial bar'})
-            const origin = fixture('#origin', {text: 'origin'})
+            fixture('#foo', { text: 'initial foo' })
+            fixture('#bar', { text: 'initial bar' })
+            const origin = fixture('#origin', { text: 'origin' })
 
             up.request('/multi-cached-path', { cache: true })
 
@@ -9650,7 +9650,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            expect({url: '/multi-cached-path'}).toBeCached()
+            expect({ url: '/multi-cached-path' }).toBeCached()
 
             up.render('#foo, #bar', { url: '/multi-cached-path', cache: true, revalidate: true, origin }).finished
 
@@ -9675,9 +9675,9 @@ describe('up.fragment', function() {
           })
 
           it('reloads hungry targets that piggy-backed on the initial request when an { origin } is given (bugfix)', async function() {
-            fixture('#foo', {text: 'initial foo'})
-            fixture('#bar[up-hungry]', {text: 'initial bar'})
-            const origin = fixture('#origin', {text: 'origin'})
+            fixture('#foo', { text: 'initial foo' })
+            fixture('#bar[up-hungry]', { text: 'initial bar' })
+            const origin = fixture('#origin', { text: 'origin' })
 
             up.request('/multi-cached-path', { cache: true })
 
@@ -9690,7 +9690,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            expect({url: '/multi-cached-path'}).toBeCached()
+            expect({ url: '/multi-cached-path' }).toBeCached()
 
             up.render('#foo', { url: '/multi-cached-path', cache: true, revalidate: true, origin })
 
@@ -9715,7 +9715,7 @@ describe('up.fragment', function() {
           })
 
           it('does not verify a fragment rendered from a recent cached response with { revalidate: "auto" }', async function() {
-            up.fragment.config.autoRevalidate = response => response.age >= (10 * 1000)
+            up.fragment.config.autoRevalidate = (response) => response.age >= (10 * 1000)
 
             up.render('.target', { url: '/cached-path', cache: true, revalidate: 'auto' })
             await wait()
@@ -9730,7 +9730,7 @@ describe('up.fragment', function() {
 
             expect(up.network.isBusy()).toBe(true)
 
-            jasmine.respondWithSelector('.target', {text: 'server text'})
+            jasmine.respondWithSelector('.target', { text: 'server text' })
           })
 
           it('does not verify a fragment when prepending content with :before', async function() {
@@ -9756,7 +9756,7 @@ describe('up.fragment', function() {
             expect('.target').toHaveText('cached text')
             expect(up.network.isBusy()).toBe(true)
 
-            jasmine.respondWith({status: 304})
+            jasmine.respondWith({ status: 304 })
             await wait()
 
             expect(up.network.isBusy()).toBe(false)
@@ -9776,7 +9776,7 @@ describe('up.fragment', function() {
 
             expect(up.network.isBusy()).toBe(true)
 
-            jasmine.respondWithSelector('.target', {text: 'cached text'})
+            jasmine.respondWithSelector('.target', { text: 'cached text' })
             await wait()
 
             expect(up.network.isBusy()).toBe(false)
@@ -9787,7 +9787,7 @@ describe('up.fragment', function() {
           it('allows to define which responses to verify in up.fragment.config.autoRevalidate')
 
           it('revalidates after the initial round of render callbacks', async function() {
-            fixture('#target', {text: 'initial text'})
+            fixture('#target', { text: 'initial text' })
             await jasmine.populateCache('/foo', '<div id="target">expired text</div>')
             up.cache.expire()
 
@@ -9815,7 +9815,7 @@ describe('up.fragment', function() {
             expect('#target').toHaveText('expired text')
             expect(sequence).toEqual(['renderedCallback', 'renderedPromise', 'revalidateOption', 'requestLoad'])
 
-            jasmine.respondWithSelector('#target', {text: 'revalidated text'})
+            jasmine.respondWithSelector('#target', { text: 'revalidated text' })
             await wait()
 
             expect('#target').toHaveText('revalidated text')
@@ -9849,7 +9849,7 @@ describe('up.fragment', function() {
             expect('.target:not(.up-destroying)').toHaveOpacity(1)
             expect(up.network.isBusy()).toBe(true)
 
-            jasmine.respondWithSelector('.target', {text: 'verified text'})
+            jasmine.respondWithSelector('.target', { text: 'verified text' })
             await wait()
 
             expect('.target').toHaveText('verified text')
@@ -9867,7 +9867,7 @@ describe('up.fragment', function() {
 
             expect(up.network.isBusy()).toBe(true)
 
-            jasmine.respondWithSelector('.target', {text: 'verified text'})
+            jasmine.respondWithSelector('.target', { text: 'verified text' })
             await wait()
 
             expect(up.network.isBusy()).toBe(false)
@@ -9886,7 +9886,7 @@ describe('up.fragment', function() {
 
             expect(up.network.isBusy()).toBe(true)
 
-            jasmine.respondWithSelector('.target', {text: 'verified text'})
+            jasmine.respondWithSelector('.target', { text: 'verified text' })
             await wait()
 
             expect(up.network.isBusy()).toBe(false)
@@ -9904,7 +9904,7 @@ describe('up.fragment', function() {
             expect(onRendered.calls.count()).toBe(1)
 
             expect(up.network.isBusy()).toBe(true)
-            jasmine.respondWithSelector('.target', {text: 'verified text'})
+            jasmine.respondWithSelector('.target', { text: 'verified text' })
             await wait()
 
             expect(onRendered.calls.count()).toBe(2)
@@ -9924,7 +9924,7 @@ describe('up.fragment', function() {
             expect(guardEventListener.calls.count()).toBe(1)
 
             expect(up.network.isBusy()).toBe(true)
-            jasmine.respondWithSelector('.target', {text: 'verified text'})
+            jasmine.respondWithSelector('.target', { text: 'verified text' })
             await wait()
 
             expect('.target').toHaveText('verified text')
@@ -9932,7 +9932,7 @@ describe('up.fragment', function() {
           })
 
           it("preserves user's changes in scroll position between the first and second render pass", async function() {
-            fixture('style', {content: '.target { height: 50000px; background-color: red }'})
+            fixture('style', { content: '.target { height: 50000px; background-color: red }' })
 
             up.viewport.root.scrollTop = 0
 
@@ -9944,7 +9944,7 @@ describe('up.fragment', function() {
 
             up.viewport.root.scrollTop = 500
 
-            jasmine.respondWithSelector('.target', {text: 'verified text'})
+            jasmine.respondWithSelector('.target', { text: 'verified text' })
             await wait()
 
             expect('.target').toHaveText('verified text')
@@ -9977,7 +9977,7 @@ describe('up.fragment', function() {
             expect(up.network.isBusy()).toBe(true)
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.target')
 
-            jasmine.respondWithSelector('.target', {text: 'verified text'})
+            jasmine.respondWithSelector('.target', { text: 'verified text' })
             await wait()
 
             expect(up.network.isBusy()).toBe(false)
@@ -9985,7 +9985,7 @@ describe('up.fragment', function() {
           })
 
           it('updates the original { failTarget } if the revalidation response has an error code', async function() {
-            fixture('.fail-target', {text: 'old failure text'})
+            fixture('.fail-target', { text: 'old failure text' })
 
             up.render({ target: '.target', failTarget: '.fail-target', url: '/cached-path', cache: true, revalidate: true })
             await wait()
@@ -9995,7 +9995,7 @@ describe('up.fragment', function() {
             expect(up.network.isBusy()).toBe(true)
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.target')
 
-            jasmine.respondWithSelector('.fail-target', {text: 'new failure text', status: 500})
+            jasmine.respondWithSelector('.fail-target', { text: 'new failure text', status: 500 })
             await wait()
 
             expect(up.network.isBusy()).toBe(false)
@@ -10008,7 +10008,7 @@ describe('up.fragment', function() {
 
             up.layer.open({ content: `
               <a href="/cached-path" up-target=".target" up-layer="root" up-revalidate="true" id="overlay-link">label</a>
-            `})
+            ` })
             await wait()
 
             const overlayLink = document.querySelector('#overlay-link')
@@ -10020,7 +10020,7 @@ describe('up.fragment', function() {
             expect(up.network.isBusy()).toBe(true)
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.target')
 
-            jasmine.respondWithSelector('.target', {text: 'verified text'})
+            jasmine.respondWithSelector('.target', { text: 'verified text' })
             await wait()
 
             expect(up.network.isBusy()).toBe(false)
@@ -10044,7 +10044,7 @@ describe('up.fragment', function() {
             expect(up.network.isBusy()).toBe(true)
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.target')
             expect(jasmine.lastRequest().url).toMatchURL('/sub1/sub2/index.html')
-            jasmine.respondWithSelector('.target', {text: 'verified text'})
+            jasmine.respondWithSelector('.target', { text: 'verified text' })
             await wait()
 
             expect(up.network.isBusy()).toBe(false)
@@ -10067,7 +10067,7 @@ describe('up.fragment', function() {
 
             expect(up.network.isBusy()).toBe(true)
 
-            jasmine.respondWithSelector('.target', {text: 'validated content'})
+            jasmine.respondWithSelector('.target', { text: 'validated content' })
             await wait()
 
             expect('.target').toHaveText('validated content')
@@ -10092,7 +10092,7 @@ describe('up.fragment', function() {
             expect(jasmine.lastRequest().requestHeaders['If-None-Match']).toBe('W/"0123456789"')
             expect(jasmine.lastRequest().requestHeaders['If-Modified-Since']).toBe('Wed, 21 Oct 2015 18:14:00 GMT')
 
-            jasmine.respondWithSelector('.target', {text: 'verified text'})
+            jasmine.respondWithSelector('.target', { text: 'verified text' })
             await wait()
 
             expect(up.network.isBusy()).toBe(false)
@@ -10110,7 +10110,7 @@ describe('up.fragment', function() {
               expect('.target').toHaveText('cached text')
 
               expect(up.network.isBusy()).toBe(true)
-              jasmine.respondWith({status: 304})
+              jasmine.respondWith({ status: 304 })
               await wait()
 
               expect(up.network.isBusy()).toBe(false)
@@ -10135,7 +10135,7 @@ describe('up.fragment', function() {
               expect(renderedResult.fragment).toMatchSelector('.target')
 
               expect(up.network.isBusy()).toBe(true)
-              jasmine.respondWith({status: 304})
+              jasmine.respondWith({ status: 304 })
               await wait()
 
               expect('.target').toHaveText('cached text')
@@ -10159,14 +10159,14 @@ describe('up.fragment', function() {
 
               expect(up.network.isBusy()).toBe(true)
 
-              jasmine.respondWith({status: 304})
+              jasmine.respondWith({ status: 304 })
 
               await expectAsync(job1.finished).toBeResolvedTo(jasmine.any(up.RenderResult))
               expect(up.network.isBusy()).toBe(false)
               expect('.target').toHaveText('cached text')
 
               // Simulate navigating to another page
-              up.render('.target', {content: 'other text'})
+              up.render('.target', { content: 'other text' })
               expect('.target').toHaveText('other text')
 
               // Re-render the cached content that we could not revalidate earlier.
@@ -10182,7 +10182,7 @@ describe('up.fragment', function() {
 
               expect(up.network.isBusy()).toBe(true)
 
-              jasmine.respondWith({status: 304})
+              jasmine.respondWith({ status: 304 })
 
               await expectAsync(job1.finished).toBeResolvedTo(jasmine.any(up.RenderResult))
               expect(up.network.isBusy()).toBe(false)
@@ -10304,7 +10304,7 @@ describe('up.fragment', function() {
               expect('.target').toHaveText('cached text')
 
               // Simulate navigating to another page
-              up.render('.target', {content: 'other text'})
+              up.render('.target', { content: 'other text' })
               expect('.target').toHaveText('other text')
 
               // Re-render the cached content that we could not revalidate earlier.
@@ -10333,7 +10333,7 @@ describe('up.fragment', function() {
 
             it('emits a second up:fragment:loaded event with { revalidating: true }', async function() {
               const flags = []
-              up.on('up:fragment:loaded', event => {
+              up.on('up:fragment:loaded', (event) => {
                 flags.push(event.revalidating)
               })
 
@@ -10344,7 +10344,7 @@ describe('up.fragment', function() {
               expect(up.network.isBusy()).toBe(true)
               expect(flags).toEqual([false])
 
-              jasmine.respondWithSelector('.target', {text: 'verified text'})
+              jasmine.respondWithSelector('.target', { text: 'verified text' })
               await wait()
 
               expect(up.network.isBusy()).toBe(false)
@@ -10369,7 +10369,7 @@ describe('up.fragment', function() {
 
               expect(up.network.isBusy()).toBe(true)
 
-              jasmine.respondWithSelector('.target', {text: 'verified text'})
+              jasmine.respondWithSelector('.target', { text: 'verified text' })
 
               await wait()
 
@@ -10396,7 +10396,7 @@ describe('up.fragment', function() {
 
               expect(up.network.isBusy()).toBe(true)
 
-              jasmine.respondWithSelector('.target', {text: 'verified text'})
+              jasmine.respondWithSelector('.target', { text: 'verified text' })
 
               await wait()
 
@@ -10450,10 +10450,10 @@ describe('up.fragment', function() {
         it('does not run destructors within kept elements', async function() {
           const destructor = jasmine.createSpy('destructor spy')
 
-          up.compiler('.keepable', element => destructor)
+          up.compiler('.keepable', (element) => destructor)
 
           container = fixture('.container')
-          const keepable = e.affix(container, '.keepable[up-keep]', {text: 'old text'})
+          const keepable = e.affix(container, '.keepable[up-keep]', { text: 'old text' })
 
           up.hello(keepable)
 
@@ -10476,9 +10476,9 @@ describe('up.fragment', function() {
         it('does not run destructors within kept elements when the <body> is targeted (bugfix)', async function() {
           const destructor = jasmine.createSpy('destructor spy')
 
-          up.compiler('.keepable', element => destructor)
+          up.compiler('.keepable', (element) => destructor)
 
-          const keepable = fixture('.keepable[up-keep]', {text: 'old content'})
+          const keepable = fixture('.keepable[up-keep]', { text: 'old content' })
 
           up.hello(keepable)
 
@@ -10498,7 +10498,7 @@ describe('up.fragment', function() {
           up.fragment.config.targetDerivers.unshift('middle-element')
 
           // shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
-          up.element.isSingleton.mock().and.callFake(element => element.matches('middle-element'))
+          up.element.isSingleton.mock().and.callFake((element) => element.matches('middle-element'))
 
           const $container = $fixture('.container')
           $container.affix('before-element').text('old-before')
@@ -10513,7 +10513,7 @@ describe('up.fragment', function() {
               <middle-element class='middle' up-keep>new-middle</middle-element>
               <after-element class='after'>new-after</after-element>
             </div>
-          `})
+          ` })
 
           await wait()
 
@@ -10536,7 +10536,7 @@ describe('up.fragment', function() {
               <div class='element' up-keep>new-inside</div>
               new-after
             </div>
-          `})
+          ` })
 
           await wait()
 
@@ -10555,7 +10555,7 @@ describe('up.fragment', function() {
               <div class='middle' up-keep>new-middle</div>
               <div class='after'>new-after</div>
             </div>
-          `})
+          ` })
 
           expect('.before').toHaveText('new-before')
           expect('.middle').toHaveText('old-middle') // was kept
@@ -10592,23 +10592,23 @@ describe('up.fragment', function() {
         it('keeps the scroll position of an [up-viewport] within a kept element', function() {
           container = fixture('.container')
           const keepable = e.affix(container, '.keepable[up-keep]')
-          const viewport = e.affix(keepable, '.viewport[up-viewport]', {style: { 'height': '100px', 'overflow-y': 'scroll' }})
-          const viewportContent = e.affix(viewport, '.viewport-content', {style: { 'height': '500px' }})
-          const unkeeptSibling = e.affix(container, '.other', {text: 'old other text'})
+          const viewport = e.affix(keepable, '.viewport[up-viewport]', { style: { 'height': '100px', 'overflow-y': 'scroll' } })
+          const viewportContent = e.affix(viewport, '.viewport-content', { style: { 'height': '500px' } })
+          const unkeeptSibling = e.affix(container, '.other', { text: 'old other text' })
 
           viewport.scrollTop = 100
 
           expect(viewport).toBeAttached()
           expect(viewport.scrollTop).toBe(100)
 
-          up.render({fragment: `
+          up.render({ fragment: `
             <div class="container">
               <div class="keepable" up-keep>
                 <div class="viewport" up-viewport></div>
               </div>
               <div class="other">new other text</div>
             </div>
-          `})
+          ` })
 
           expect('.other').toHaveText('new other text')
           expect(viewport).toBeAttached()
@@ -10628,7 +10628,7 @@ describe('up.fragment', function() {
             const videoBeforeRender = document.querySelector('#video')
 
             // Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
-            up.render('#container', {document: html})
+            up.render('#container', { document: html })
 
             await wait()
 
@@ -10646,7 +10646,7 @@ describe('up.fragment', function() {
             document.querySelector('#video')
 
             // Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
-            up.render('#container', {document: html})
+            up.render('#container', { document: html })
 
             await wait()
 
@@ -10665,7 +10665,7 @@ describe('up.fragment', function() {
             const audioBeforeRender = document.querySelector('#audio')
 
             // Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
-            up.render('#container', {document: html})
+            up.render('#container', { document: html })
 
             await wait()
 
@@ -10693,7 +10693,7 @@ describe('up.fragment', function() {
               // 1. Rendering from a URL is async, rendering a local string is sync
               // 2. Rendering from a URL uses DOMParser and fixParserDamage(), rendering from a local string
               //    creates elements within the current browsing context.
-              const promise = up.render({target: '#player', url: '/video2'})
+              const promise = up.render({ target: '#player', url: '/video2' })
 
               await wait()
 
@@ -10737,7 +10737,7 @@ describe('up.fragment', function() {
             const scriptBeforeRender = document.querySelector('#script')
 
             // Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
-            up.render('#container', {document: html})
+            up.render('#container', { document: html })
 
             await wait()
 
@@ -10759,7 +10759,7 @@ describe('up.fragment', function() {
             expect(window.keepSpy.calls.count()).toBe(1)
 
             // Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
-            up.render('#container', {document: html})
+            up.render('#container', { document: html })
 
             await wait()
 
@@ -10767,7 +10767,7 @@ describe('up.fragment', function() {
             expect(window.keepSpy.calls.count()).toBe(1)
 
             // Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
-            up.render('#container', {document: html, keep: false})
+            up.render('#container', { document: html, keep: false })
 
             await wait()
 
@@ -10791,7 +10791,7 @@ describe('up.fragment', function() {
             expect(window.specSpy.calls.count()).toBe(1)
 
             // Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
-            up.render('#container', {document: html})
+            up.render('#container', { document: html })
 
             await wait()
 
@@ -10816,7 +10816,7 @@ describe('up.fragment', function() {
             document.querySelector('#container #script').classList.add('the-original-one')
 
             // Rendering from { fragment } does *not* use DOMParser to parse HTML
-            up.render({fragment: html})
+            up.render({ fragment: html })
 
             await wait()
 
@@ -10836,7 +10836,7 @@ describe('up.fragment', function() {
             const noscriptBeforeRender = document.querySelector('#noscript')
 
             // Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
-            up.render('#container', {document: html})
+            up.render('#container', { document: html })
 
             await wait()
 
@@ -10848,9 +10848,9 @@ describe('up.fragment', function() {
 
           it("keeps that element", async function() {
             $fixture('.keeper[up-keep]').text('old-inside')
-            up.render({fragment: `
+            up.render({ fragment: `
               <div class='keeper' up-keep>new-inside</div>
-            `})
+            ` })
 
             await wait()
             expect('.keeper').toHaveText('old-inside')
@@ -10859,9 +10859,9 @@ describe('up.fragment', function() {
           it("does not run the element's destructors", async function() {
             const destructor = jasmine.createSpy('destructor spy')
 
-            up.compiler('.keepable', element => destructor)
+            up.compiler('.keepable', (element) => destructor)
 
-            const keepable = fixture('.keepable[up-keep]', {text: 'old text'})
+            const keepable = fixture('.keepable[up-keep]', { text: 'old text' })
 
             up.hello(keepable)
 
@@ -10869,7 +10869,7 @@ describe('up.fragment', function() {
               <div class='keepable' up-keep>
                 new text
               </div>
-            `})
+            ` })
 
             await wait()
             expect(destructor).not.toHaveBeenCalled()
@@ -10885,14 +10885,14 @@ describe('up.fragment', function() {
             up.on('up:fragment:keep', keepListener)
             up.on('up:fragment:inserted', insertedListener)
             const $keeper = $fixture('.keeper[up-keep]').text('old-inside')
-            up.render('.keeper', {document: `
+            up.render('.keeper', { document: `
               <div class='keeper new' up-keep>new-inside</div>
-            `})
+            ` })
 
             await wait()
             expect(insertedListener).not.toHaveBeenCalled()
             expect(keepListener).toHaveBeenCalledWith(
-              jasmine.objectContaining({newFragment: jasmine.objectContaining({className: 'keeper new'})}),
+              jasmine.objectContaining({ newFragment: jasmine.objectContaining({ className: 'keeper new' }) }),
               $keeper[0],
               jasmine.anything()
             )
@@ -10918,11 +10918,11 @@ describe('up.fragment', function() {
           expect(barCompiler.calls.allArgs()).toEqual([['old-bar']])
           expect(barDestructor.calls.allArgs()).toEqual([])
 
-          up.render({fragment: `
+          up.render({ fragment: `
             <div class='container'>
               <div class='foo'>new-ffrooo</div>
             </div>
-          `})
+          ` })
 
           await wait()
           expect('.container .foo').toBeAttached()
@@ -10941,12 +10941,12 @@ describe('up.fragment', function() {
           `)
           up.hello(container)
 
-          up.render({fragment: `
+          up.render({ fragment: `
             <div class='container'>
               <div class='foo'>new-foo</div>
               <div class='bar'>new-bar</div>
             </div>
-          `})
+          ` })
 
           expect('.container .foo').toHaveText('new-foo')
           expect('.container .bar').toHaveText('old-bar')
@@ -10971,12 +10971,12 @@ describe('up.fragment', function() {
           expect(barCompiler.calls.allArgs()).toEqual([['old-bar']])
           expect(barDestructor.calls.allArgs()).toEqual([])
 
-          up.render({fragment: `
+          up.render({ fragment: `
             <div class='container'>
               <div class='foo'>new-foo</div>
               <div class='bar' up-keep='false'>new-bar</div>
             </div>
-          `})
+          ` })
 
           await wait()
           expect('.container .foo').toHaveText('new-foo')
@@ -10995,12 +10995,12 @@ describe('up.fragment', function() {
           `)
           up.hello(container)
 
-          up.render({fragment: `
+          up.render({ fragment: `
             <div class='container'>
               <div class='foo'>new-foo</div>
               <div class='bar' up-keep='true'>new-bar</div>
             </div>
-          `})
+          ` })
 
           expect('.container .foo').toHaveText('new-foo')
           expect('.container .bar').toHaveText('old-bar')
@@ -11015,12 +11015,12 @@ describe('up.fragment', function() {
           `)
           up.hello(container)
 
-          up.render({fragment: `
+          up.render({ fragment: `
             <div class='container'>
               <div class='foo'>new-foo</div>
               <div class='bar' up-keep>new-bar</div>
             </div>
-          `})
+          ` })
 
           expect('.container .foo').toHaveText('new-foo')
           expect('.container .bar').toHaveText('new-bar')
@@ -11035,7 +11035,7 @@ describe('up.fragment', function() {
             <div class="parent2">
             </div>
           `)
-          up.render({fragment: `
+          up.render({ fragment: `
             <div class='container'>
               <div class="parent1">
               </div>
@@ -11043,7 +11043,7 @@ describe('up.fragment', function() {
                 <div class="keeper" up-keep>old-inside</div>
               </div>
             </div>
-          `})
+          ` })
 
           await wait()
           expect('.keeper').toHaveText('old-inside')
@@ -11063,20 +11063,20 @@ describe('up.fragment', function() {
             expect(document.querySelector('#player').src).toMatchURL('foo.mp3')
             expect(document.querySelector('#player').dataset.tag).toBe('1')
 
-            up.render({fragment: `
+            up.render({ fragment: `
               <div class='container'>
                 <audio id='player' src='bar.mp3' up-keep='[src="bar.mp3"]' data-tag='2'></audio>
               </div>
-            `})
+            ` })
 
             expect(document.querySelector('#player').src).toMatchURL('bar.mp3')
             expect(document.querySelector('#player').dataset.tag).toBe('2')
 
-            up.render({fragment: `
+            up.render({ fragment: `
               <div class='container'>
                 <audio id='player' src='bar.mp3' up-keep='[src="bar.mp3"]' data-tag='3'></audio>
               </div>
-            `})
+            ` })
 
             expect(document.querySelector('#player').src).toMatchURL('bar.mp3')
             expect(document.querySelector('#player').dataset.tag).toBe('2')
@@ -11109,11 +11109,11 @@ describe('up.fragment', function() {
           up.hello($container)
           expect(compiler.calls.count()).toEqual(1)
 
-          up.render({fragment: `
+          up.render({ fragment: `
             <div class='container'>
               <div class="keeper" up-keep>new-text</div>
             </div>
-          `})
+          ` })
 
           await wait()
 
@@ -11124,7 +11124,7 @@ describe('up.fragment', function() {
 
         it('does not lose jQuery event handlers on a kept element (bugfix)', async function() {
           const handler = jasmine.createSpy('event handler')
-          up.compiler('.keeper', keeper => keeper.addEventListener('click', handler))
+          up.compiler('.keeper', (keeper) => keeper.addEventListener('click', handler))
 
           const $container = $fixture('.container')
           $container.html(`
@@ -11132,11 +11132,11 @@ describe('up.fragment', function() {
           `)
           up.hello($container)
 
-          up.render({fragment: `
+          up.render({ fragment: `
             <div class='container'>
               <div class="keeper" up-keep>new-text</div>
             </div>
-          `})
+          ` })
 
           await wait()
 
@@ -11151,7 +11151,7 @@ describe('up.fragment', function() {
 
         it('does not call destructors on a kept alement', async function() {
           const destructor = jasmine.createSpy('destructor')
-          up.compiler('.keeper', keeper => destructor)
+          up.compiler('.keeper', (keeper) => destructor)
 
           const $container = $fixture('.container')
           $container.html(`
@@ -11159,11 +11159,11 @@ describe('up.fragment', function() {
           `)
           up.hello($container)
 
-          up.render({fragment: `
+          up.render({ fragment: `
             <div class='container'>
               <div class="keeper" up-keep>new-text</div>
             </div>
-          `})
+          ` })
 
           await wait()
 
@@ -11175,7 +11175,7 @@ describe('up.fragment', function() {
         it('calls destructors when a kept element is eventually removed from the DOM', async function() {
           const handler = jasmine.createSpy('event handler')
           const destructor = jasmine.createSpy('destructor')
-          up.compiler('.keeper', keeper => destructor)
+          up.compiler('.keeper', (keeper) => destructor)
 
           const $container = $fixture('.container')
           $container.html(`
@@ -11183,11 +11183,11 @@ describe('up.fragment', function() {
           `)
           up.hello($container)
 
-          up.render({fragment: `
+          up.render({ fragment: `
             <div class='container'>
               <div class="keeper" up-keep="false">new-text</div>
             </div>
-          `})
+          ` })
 
           await wait()
 
@@ -11200,15 +11200,15 @@ describe('up.fragment', function() {
           const $keeper = $fixture('.keeper[up-keep]').text('old-inside')
           const listener = jasmine.createSpy('event listener')
           $keeper[0].addEventListener('up:fragment:keep', listener)
-          up.render('.keeper', {document: `
+          up.render('.keeper', { document: `
             <div class='keeper new' up-keep up-data='{ "key": "new-value" }'>new-inside</div>
-          `})
+          ` })
 
           await wait()
 
           expect(listener).toHaveBeenCalledWith(
             jasmine.objectContaining({
-              newFragment: jasmine.objectContaining({className: 'keeper new'}),
+              newFragment: jasmine.objectContaining({ className: 'keeper new' }),
               newData: jasmine.objectContaining({ key: 'new-value' }),
               target: $keeper[0]
             })
@@ -11216,18 +11216,18 @@ describe('up.fragment', function() {
         })
 
         it('emits an up:fragment:keep event with information about the render pass', async function() {
-          const keeper = fixture('.keeper[up-keep]', {text: 'old inside'})
+          const keeper = fixture('.keeper[up-keep]', { text: 'old inside' })
           const listener = jasmine.createSpy('event listener')
           keeper.addEventListener('up:fragment:keep', listener)
-          up.render('.keeper', {document: `
+          up.render('.keeper', { document: `
             <div class='keeper new' up-keep>new-inside</div>
-          `, abort: 'all', scroll: 'reset'})
+          `, abort: 'all', scroll: 'reset' })
 
           await wait()
 
           expect(listener).toHaveBeenCalledWith(
             jasmine.objectContaining({
-              renderOptions: jasmine.objectContaining({abort: 'all', scroll: 'reset'})
+              renderOptions: jasmine.objectContaining({ abort: 'all', scroll: 'reset' })
             })
           )
         })
@@ -11241,7 +11241,7 @@ describe('up.fragment', function() {
             <div class='container'>
               <div class='keeper' up-keep>new-inside</div>
             </div>
-          `})
+          ` })
 
           await wait()
 
@@ -11250,29 +11250,29 @@ describe('up.fragment', function() {
         })
 
         it('allows to define a listener in an [up-on-keep] attribute', async function() {
-          const keeper = fixture('.keeper[up-keep][up-on-keep="this.onKeepSpy(this, newFragment, newData)"]', {text: 'old-inside'})
+          const keeper = fixture('.keeper[up-keep][up-on-keep="this.onKeepSpy(this, newFragment, newData)"]', { text: 'old-inside' })
 
           keeper.onKeepSpy = jasmine.createSpy('onKeep spy')
 
-          up.render('.keeper', {document: `
+          up.render('.keeper', { document: `
             <div class='keeper new' up-keep up-data='{ "key": "new-value" }'>new-inside</div>
-          `})
+          ` })
 
           await wait()
 
           expect(keeper.onKeepSpy).toHaveBeenCalledWith(
             keeper,
-            jasmine.objectContaining({className: 'keeper new'}),
+            jasmine.objectContaining({ className: 'keeper new' }),
             jasmine.objectContaining({ key: 'new-value' })
           )
         })
 
         it('lets listeners cancel the keeping by preventing default on an up:fragment:keep event', async function() {
           const $keeper = $fixture('.keeper[up-keep]').text('old-inside')
-          $keeper.on('up:fragment:keep', event => event.preventDefault())
-          up.render({fragment: `
+          $keeper.on('up:fragment:keep', (event) => event.preventDefault())
+          up.render({ fragment: `
             <div class='keeper' up-keep>new-inside</div>
-          `})
+          ` })
 
           await wait()
 
@@ -11285,16 +11285,16 @@ describe('up.fragment', function() {
             if (event.newFragment.textContent.trim() === 'version 3') { event.preventDefault() }
           })
 
-          up.render({fragment: `
+          up.render({ fragment: `
             <div class='keeper' up-keep>version 2</div>
-          `})
+          ` })
           await wait()
 
           expect('.keeper').toHaveText('version 1')
 
-          up.render({fragment: `
+          up.render({ fragment: `
             <div class='keeper' up-keep>version 3</div>
-          `})
+          ` })
           await wait()
 
           expect('.keeper').toHaveText('version 3')
@@ -11311,11 +11311,11 @@ describe('up.fragment', function() {
             <div class="keeper" up-keep></div>
           `)
 
-          up.render({fragment: `
+          up.render({ fragment: `
             <div class='container'>
               <div class="keeper" up-keep></div>
             </div>
-          `})
+          ` })
 
           await wait()
 
@@ -11325,7 +11325,7 @@ describe('up.fragment', function() {
 
         it('reuses the same element and emits up:fragment:keep during multiple extractions', async function() {
           const keepListener = jasmine.createSpy()
-          up.on('up:fragment:keep', event => keepListener(event.target, event.newData))
+          up.on('up:fragment:keep', (event) => keepListener(event.target, event.newData))
           const $container = $fixture('.container')
           let $keeper = $container.affix('.keeper[up-keep]').text('old-inside')
 
@@ -11333,14 +11333,14 @@ describe('up.fragment', function() {
             <div class='container'>
               <div class='keeper' up-keep up-data='{ "key": "value1" }'>new-inside</div>
             </div>
-          `})
+          ` })
           await wait()
 
           up.render('.keeper', { document: `
             <div class='container'>
               <div class='keeper' up-keep up-data='{ "key": "value2" }'>new-inside</div>
             </div>
-          `})
+          ` })
           await wait()
 
           $keeper = $('.keeper')
@@ -11403,7 +11403,7 @@ describe('up.fragment', function() {
 
             up.render('.target', { content: `
               <test-component-activation></test-component-activation>
-            `})
+            ` })
 
             await wait()
             expect('.target test-component-activation').toHaveText('component activated')
@@ -11421,7 +11421,7 @@ describe('up.fragment', function() {
               <div class="other">
                 <test-component-activation></test-component-activation>
               </div>
-            `})
+            ` })
 
             await wait()
             expect(constructorSpy.calls.count()).toBe(1)
@@ -11489,7 +11489,7 @@ describe('up.fragment', function() {
 
       it('runs an animation before removal with { animate } option', async function() {
         const $element = $fixture('.element')
-        up.destroy($element, {animation: 'fade-out', duration: 200, easing: 'linear'})
+        up.destroy($element, { animation: 'fade-out', duration: 200, easing: 'linear' })
         await wait()
 
         expect($element).toHaveOpacity(1.0, 0.15)
@@ -11503,7 +11503,7 @@ describe('up.fragment', function() {
 
       it('calls destructors for custom elements', function() {
         const destructor = jasmine.createSpy('destructor')
-        up.compiler('.element', element => destructor)
+        up.compiler('.element', (element) => destructor)
         up.hello(fixture('.element'))
         up.destroy('.element')
         expect(destructor).toHaveBeenCalled()
@@ -11511,13 +11511,13 @@ describe('up.fragment', function() {
 
       it('does not call destructors twice if up.destroy() is called twice on the same fragment', async function() {
         const destructor = jasmine.createSpy('destructor')
-        up.compiler('.element', element => destructor)
+        up.compiler('.element', (element) => destructor)
 
         const element = fixture('.element')
         up.hello(element)
 
-        up.destroy(element, {animation: 'fade-out', duration: 10})
-        up.destroy(element, {animation: 'fade-out', duration: 10})
+        up.destroy(element, { animation: 'fade-out', duration: 10 })
+        up.destroy(element, { animation: 'fade-out', duration: 10 })
         await wait(150)
 
         expect(destructor.calls.count()).toBe(1)
@@ -11525,7 +11525,7 @@ describe('up.fragment', function() {
 
       it('calls destructors while the element is still attached', function() {
         const attachmentSpy = jasmine.createSpy('attachment spy')
-        const compiler = element => () => attachmentSpy(element.isConnected)
+        const compiler = (element) => () => attachmentSpy(element.isConnected)
         up.compiler('.element', compiler)
 
         const element = fixture('.element')
@@ -11542,9 +11542,9 @@ describe('up.fragment', function() {
           done()
         }
 
-        up.compiler('.container', element => () => testElement(element))
+        up.compiler('.container', (element) => () => testElement(element))
 
-        up.hello(fixture('.container', {text: 'old text'}))
+        up.hello(fixture('.container', { text: 'old text' }))
 
         up.destroy('.container')
       })
@@ -11552,18 +11552,18 @@ describe('up.fragment', function() {
       it('immediately marks the old element as .up-destroying', function() {
         const container = fixture('.container')
 
-        up.destroy('.container', {animation: 'fade-out', duration: 100})
+        up.destroy('.container', { animation: 'fade-out', duration: 100 })
 
         expect(container).toMatchSelector('.up-destroying')
       })
 
       it('waits until an { animation } is done before calling destructors', async function() {
         const destructor = jasmine.createSpy('destructor')
-        up.compiler('.container', element => () => destructor(element.innerText))
+        up.compiler('.container', (element) => () => destructor(element.innerText))
         const $container = $fixture('.container').text('old text')
         up.hello($container)
 
-        up.destroy('.container', {animation: 'fade-out', duration: 100})
+        up.destroy('.container', { animation: 'fade-out', duration: 100 })
         await wait(50)
 
         expect(destructor).not.toHaveBeenCalled()
@@ -11574,7 +11574,7 @@ describe('up.fragment', function() {
 
       it('marks the element as .up-destroying while it is animating', async function() {
         const $element = $fixture('.element')
-        up.destroy($element, {animation: 'fade-out', duration: 80, easing: 'linear'})
+        up.destroy($element, { animation: 'fade-out', duration: 80, easing: 'linear' })
         await wait()
 
         expect($element).toHaveClass('up-destroying')
@@ -11607,7 +11607,7 @@ describe('up.fragment', function() {
 
         $parent[0].addEventListener('up:fragment:destroyed', listener)
 
-        up.destroy($element, {animation: 'fade-out', duration: 30})
+        up.destroy($element, { animation: 'fade-out', duration: 30 })
         await wait()
 
         expect(listener).toHaveBeenCalled()
@@ -11618,7 +11618,7 @@ describe('up.fragment', function() {
       it('removes element-related data from the global jQuery cache (bugfix)', async function() {
         const $element = $fixture('.element')
         $element.data('foo', { foo: '1' })
-        expect($element.data('foo')).toEqual({ foo: '1'})
+        expect($element.data('foo')).toEqual({ foo: '1' })
         up.destroy($element)
         await wait()
 
@@ -11643,7 +11643,7 @@ describe('up.fragment', function() {
 
       it('does not crash and runs destructors when destroying a detached element (bugfix)', function() {
         const destructor = jasmine.createSpy('destructor')
-        up.compiler('.element', element => destructor)
+        up.compiler('.element', (element) => destructor)
         const detachedElement = up.element.createFromSelector('.element')
         up.hello(detachedElement)
         up.destroy(detachedElement)
@@ -11733,7 +11733,7 @@ describe('up.fragment', function() {
 
       it('reloads the given selector from the closest known source URL', async function() {
         const container = fixture('.container[up-source="/source"]')
-        const element = e.affix(container, '.element', {text: 'old text'})
+        const element = e.affix(container, '.element', { text: 'old text' })
 
         up.reload('.element')
         await wait()
@@ -11750,14 +11750,14 @@ describe('up.fragment', function() {
       })
 
       it('reloads the given element', async function() {
-        const element = fixture('.element', {'up-source': '/source', text: 'old text'})
+        const element = fixture('.element', { 'up-source': '/source', text: 'old text' })
 
         up.reload(element)
         await wait()
 
         expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.element')
         expect(jasmine.lastRequest().url).toMatchURL('/source')
-        jasmine.respondWithSelector('.element', {text: 'new text'})
+        jasmine.respondWithSelector('.element', { text: 'new text' })
         await wait()
 
         expect('.element').toHaveText('new text')
@@ -11766,7 +11766,7 @@ describe('up.fragment', function() {
       it('reloads a fragment from the URL from which it was received', async function() {
         fixture('.container')
 
-        up.render('.container', {url: '/container-source'})
+        up.render('.container', { url: '/container-source' })
         await wait()
 
         jasmine.respondWith(`
@@ -11785,14 +11785,14 @@ describe('up.fragment', function() {
         expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.target')
         expect(jasmine.lastRequest().url).toMatchURL('/container-source')
 
-        jasmine.respondWithSelector('.target', {text: 'reloaded target text'})
+        jasmine.respondWithSelector('.target', { text: 'reloaded target text' })
         await wait()
 
         expect('.target').toHaveText('reloaded target text')
       })
 
       it('throws a readable error when attempting to reloading a detached element', async function() {
-        const element = fixture('.element', {'up-source': '/source', text: 'old text'})
+        const element = fixture('.element', { 'up-source': '/source', text: 'old text' })
         element.remove() // detach from document
 
         await expectAsync(up.reload(element)).toBeRejectedWith(jasmine.anyError(/detached/))
@@ -11800,14 +11800,14 @@ describe('up.fragment', function() {
 
       if (up.migrate.loaded) {
         it('reloads the given jQuery collection', async function() {
-          const element = fixture('.element', {'up-source': '/source', text: 'old text'})
+          const element = fixture('.element', { 'up-source': '/source', text: 'old text' })
 
           up.reload($(element))
           await wait()
 
           expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.element')
           expect(jasmine.lastRequest().url).toMatchURL('/source')
-          jasmine.respondWithSelector('.element', {text: 'new text'})
+          jasmine.respondWithSelector('.element', { text: 'new text' })
           await wait()
 
           expect('.element').toHaveText('new text')
@@ -11819,18 +11819,18 @@ describe('up.fragment', function() {
         const element = fixture('.element[up-source="/source"]')
 
         up.reload(element)
-        expect(renderSpy).not.toHaveBeenCalledWith(jasmine.objectContaining({cache: true}))
+        expect(renderSpy).not.toHaveBeenCalledWith(jasmine.objectContaining({ cache: true }))
       })
 
       it('does not reveal by default', async function() {
-        const element = fixture('.element[up-source="/source"]', {text: 'old text'})
+        const element = fixture('.element[up-source="/source"]', { text: 'old text' })
 
         const revealSpy = up.reveal.mock().and.returnValue(Promise.resolve())
 
         up.reload('.element')
         await wait()
 
-        this.respondWithSelector('.element', {text: 'new text'})
+        this.respondWithSelector('.element', { text: 'new text' })
         await wait()
 
         expect('.element').toHaveText('new text')
@@ -11914,7 +11914,7 @@ describe('up.fragment', function() {
             return element.addEventListener('click', () => up.reload(element, { data }))
           })
 
-          const element = fixture('.element', {'data-foo': 'a', 'up-source': '/source'})
+          const element = fixture('.element', { 'data-foo': 'a', 'up-source': '/source' })
           up.hello(element)
 
           expect(dataSpy.calls.count()).toBe(1)
@@ -11923,7 +11923,7 @@ describe('up.fragment', function() {
           Trigger.click(element)
           await wait()
 
-          jasmine.respondWithSelector('.element', {'data-foo': 'b', 'data-bar': 'c'})
+          jasmine.respondWithSelector('.element', { 'data-foo': 'b', 'data-bar': 'c' })
           await wait()
 
           expect(dataSpy.calls.count()).toBe(2)
@@ -11943,7 +11943,7 @@ describe('up.fragment', function() {
             return element.addEventListener('click', () => up.reload(element, { keepData: true }))
           })
 
-          const element = fixture('.element', {'data-foo': 'a', 'up-source': '/source'})
+          const element = fixture('.element', { 'data-foo': 'a', 'up-source': '/source' })
           up.hello(element)
 
           expect(dataSpy.calls.count()).toBe(1)
@@ -11952,7 +11952,7 @@ describe('up.fragment', function() {
           Trigger.click(element)
           await wait()
 
-          jasmine.respondWithSelector('.element', {'data-foo': 'b'})
+          jasmine.respondWithSelector('.element', { 'data-foo': 'b' })
           await wait()
 
           expect(dataSpy.calls.count()).toBe(2)
@@ -11963,14 +11963,14 @@ describe('up.fragment', function() {
       it("reloads the layer's main element if no selector is given", async function() {
         up.fragment.config.mainTargets = ['.element']
 
-        fixture('.element[up-source="/source"]', {text: 'old text'})
+        fixture('.element[up-source="/source"]', { text: 'old text' })
 
         up.reload()
         await wait()
 
         expect(this.lastRequest().url).toMatch(/\/source$/)
         expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
-        this.respondWithSelector('.element', {content: 'new text'})
+        this.respondWithSelector('.element', { content: 'new text' })
         await wait()
 
         expect('.element').toHaveText('new text')
@@ -11979,8 +11979,8 @@ describe('up.fragment', function() {
       describe('reloading multiple fragments', function() {
 
         it('reloads multiple fragments', async function() {
-          const foo = fixture('#foo[up-source="/path"]', {text: 'old foo'})
-          const bar = fixture('#bar[up-source="/path"]', {text: 'old bar'})
+          const foo = fixture('#foo[up-source="/path"]', { text: 'old foo' })
+          const bar = fixture('#bar[up-source="/path"]', { text: 'old bar' })
 
           up.reload('#foo, #bar')
           await wait()
@@ -11998,8 +11998,8 @@ describe('up.fragment', function() {
         })
 
         it('uses source URL, ETag and last modifiction time from the first matching fragment', async function() {
-          const foo = fixture('#foo[up-source="/foo-source"][up-etag="foo-etag"][up-time="1704067200"]', {text: 'old foo'})
-          const bar = fixture('#bar[up-source="/bar-source"][up-etag="bar-etag"][up-time="1735689600"]', {text: 'old bar'})
+          const foo = fixture('#foo[up-source="/foo-source"][up-etag="foo-etag"][up-time="1704067200"]', { text: 'old foo' })
+          const bar = fixture('#bar[up-source="/bar-source"][up-etag="bar-etag"][up-time="1735689600"]', { text: 'old bar' })
 
           up.reload('#foo, #bar')
           await wait()
@@ -12015,7 +12015,7 @@ describe('up.fragment', function() {
 
       it('returns the source the fragment was retrieved from', async function() {
         fixture('.target')
-        up.render('.target', {url: '/path'})
+        up.render('.target', { url: '/path' })
         await wait()
 
         this.respondWithSelector('.target')
@@ -12026,7 +12026,7 @@ describe('up.fragment', function() {
 
       it('returns the source of a parent fragment if the given fragment has no reloadable source', async function() {
         fixture('.target')
-        up.render('.target', {url: '/outer'})
+        up.render('.target', { url: '/outer' })
         await wait()
 
         this.respondWith(`
@@ -12038,7 +12038,7 @@ describe('up.fragment', function() {
         `)
         await wait()
 
-        up.render('.inner', {url: '/inner', method: 'post'})
+        up.render('.inner', { url: '/inner', method: 'post' })
         await wait()
 
         this.respondWithSelector('.inner')
@@ -12049,7 +12049,7 @@ describe('up.fragment', function() {
 
       it('allows users to provide an alternate reloading URL with an [up-source] attribute', async function() {
         fixture('.outer')
-        up.render('.outer', {url: '/outer'})
+        up.render('.outer', { url: '/outer' })
         await wait()
 
         this.respondWithSelector('.outer .between[up-source="/between"] .inner')
@@ -12251,7 +12251,7 @@ describe('up.fragment', function() {
         const element = fixture('div.foo[custom-attr=value]')
         expect(up.fragment.toTarget(element)).toBe('.foo')
 
-        up.fragment.config.targetDerivers.unshift(element => e.attrSelector('custom-attr', element.getAttribute('custom-attr')))
+        up.fragment.config.targetDerivers.unshift((element) => e.attrSelector('custom-attr', element.getAttribute('custom-attr')))
 
         expect(up.fragment.toTarget(element)).toBe('[custom-attr="value"]')
       })
@@ -12340,7 +12340,7 @@ describe('up.fragment', function() {
           up.motion.config.enabled = true
 
           const rivalElement = fixture('div#foo.foo')
-          const overlay = await up.layer.open({target: '#foo', fragment: '<div id="foo" class="bar"></div'})
+          const overlay = await up.layer.open({ target: '#foo', fragment: '<div id="foo" class="bar"></div' })
           expect(up.layer.isOverlay()).toBe(true)
           const elementInClosingOverlay = overlay.getFirstSwappableElement()
 
@@ -12407,54 +12407,54 @@ describe('up.fragment', function() {
 
       it('returns a list of simple selectors without changes', function() {
         const targets = ['.foo', '.bar']
-        const expanded = up.fragment.expandTargets(targets, {layer: up.layer.root})
+        const expanded = up.fragment.expandTargets(targets, { layer: up.layer.root })
         expect(expanded).toEqual(['.foo', '.bar'])
       })
 
       it("expands ':main' to the given layer mode's main targets", function() {
         const targets = ['.before', ':main', '.after']
         up.layer.config.root.mainTargets = ['.main1', '.main2']
-        const expanded = up.fragment.expandTargets(targets, {layer: up.layer.root})
+        const expanded = up.fragment.expandTargets(targets, { layer: up.layer.root })
         expect(expanded).toEqual(['.before', '.main1', '.main2', '.after'])
       })
 
       it("expands a descendant selector rooted at ':main'", function() {
         const targets = ['.before .child', ':main .child', '.after .child']
         up.layer.config.root.mainTargets = ['.main1', '.main2']
-        const expanded = up.fragment.expandTargets(targets, {layer: up.layer.root})
+        const expanded = up.fragment.expandTargets(targets, { layer: up.layer.root })
         expect(expanded).toEqual(['.before .child', '.main1 .child', '.main2 .child', '.after .child'])
       })
 
       it("expands true to the given layer mode's main targets (useful because { fallback } is often passed as a target)", function() {
         const targets = ['.before', true, '.after']
         up.layer.config.root.mainTargets = ['.main1', '.main2']
-        const expanded = up.fragment.expandTargets(targets, {layer: up.layer.root})
+        const expanded = up.fragment.expandTargets(targets, { layer: up.layer.root })
         expect(expanded).toEqual(['.before', '.main1', '.main2', '.after'])
       })
 
       it("expands ':layer' to a selector for the given layer's first swappable element", function() {
         const targets = ['.before', ':layer', '.after']
-        const expanded = up.fragment.expandTargets(targets, {layer: up.layer.root})
+        const expanded = up.fragment.expandTargets(targets, { layer: up.layer.root })
         expect(expanded).toEqual(['.before', 'body', '.after'])
       })
 
       it("expands a descendant selector rooted at ':layer'", function() {
         const targets = ['.before .child', ':layer .child', '.after .child']
-        const expanded = up.fragment.expandTargets(targets, {layer: up.layer.root})
+        const expanded = up.fragment.expandTargets(targets, { layer: up.layer.root })
         expect(expanded).toEqual(['.before .child', 'body .child', '.after .child'])
       })
 
       it("expands ':main' to the given layer mode's main targets if a main target is itself ':layer'", function() {
         const targets = ['.before', ':main', '.after']
         up.layer.config.root.mainTargets = [':layer']
-        const expanded = up.fragment.expandTargets(targets, {layer: up.layer.root})
+        const expanded = up.fragment.expandTargets(targets, { layer: up.layer.root })
         expect(expanded).toEqual(['.before', 'body', '.after'])
       })
 
       it('expands an element to a matching selector', function() {
         const element = fixture('#foo')
         const targets = ['.before', element, '.after']
-        const expanded = up.fragment.expandTargets(targets, {layer: up.layer.root})
+        const expanded = up.fragment.expandTargets(targets, { layer: up.layer.root })
         expect(expanded).toEqual(['.before', '#foo', '.after'])
       })
 
@@ -12462,7 +12462,7 @@ describe('up.fragment', function() {
         const targets = ['.before', ':origin .child', '.after']
         const origin = fixture('#foo')
         up.layer.config.root.mainTargets = [':layer']
-        const expanded = up.fragment.expandTargets(targets, {layer: up.layer.root, origin})
+        const expanded = up.fragment.expandTargets(targets, { layer: up.layer.root, origin })
         expect(expanded).toEqual(['.before', '#foo .child', '.after'])
       })
 
@@ -12470,7 +12470,7 @@ describe('up.fragment', function() {
         const targets = ['#before', ':layer :main :origin .child', '#after']
         const origin = fixture('#origin')
         up.layer.config.root.mainTargets = ['#main']
-        const expanded = up.fragment.expandTargets(targets, {layer: up.layer.root, origin})
+        const expanded = up.fragment.expandTargets(targets, { layer: up.layer.root, origin })
         expect(expanded).toEqual(['#before', 'body #main #origin .child', '#after'])
       })
 
@@ -12479,7 +12479,7 @@ describe('up.fragment', function() {
           const targets = ['.before', '& .child', '.after']
           const origin = fixture('#foo')
           up.layer.config.root.mainTargets = [':layer']
-          const expanded = up.fragment.expandTargets(targets, {layer: up.layer.root, origin})
+          const expanded = up.fragment.expandTargets(targets, { layer: up.layer.root, origin })
           expect(expanded).toEqual(['.before', '#foo .child', '.after'])
         })
       }
@@ -12487,7 +12487,7 @@ describe('up.fragment', function() {
       it('removes duplicate selectors', function() {
         const targets = ['.foo', ':main']
         up.layer.config.root.mainTargets = ['.foo']
-        const expanded = up.fragment.expandTargets(targets, {layer: up.layer.root})
+        const expanded = up.fragment.expandTargets(targets, { layer: up.layer.root })
         expect(expanded).toEqual(['.foo'])
       })
     })
@@ -12496,14 +12496,14 @@ describe('up.fragment', function() {
 
       it("it expands ':origin' to a selector for { origin }", function() {
         const origin = fixture('#foo')
-        const resolved = up.fragment.resolveOrigin('.before :origin .after', {origin})
+        const resolved = up.fragment.resolveOrigin('.before :origin .after', { origin })
         expect(resolved).toEqual('.before #foo .after')
       })
 
       if (up.migrate.loaded) {
         it("expands the ampersand character '&' to a selector for { origin }", function() {
           const origin = fixture('#foo')
-          const resolved = up.fragment.resolveOrigin('.before & .after', {origin})
+          const resolved = up.fragment.resolveOrigin('.before & .after', { origin })
           expect(resolved).toEqual('.before #foo .after')
         })
 
@@ -12520,7 +12520,7 @@ describe('up.fragment', function() {
 
       it("it expands ':origin' to a selector for { origin } if the origin's target is an attribute selector (bugfix)'", function() {
         const origin = fixture('a[href="/foo"]')
-        const resolved = up.fragment.resolveOrigin('.before :origin .after', {origin})
+        const resolved = up.fragment.resolveOrigin('.before :origin .after', { origin })
         expect(resolved).toEqual('.before a[href="/foo"] .after')
       })
     })
@@ -12708,7 +12708,7 @@ describe('up.fragment', function() {
         it('calls destructors on the element', function() {
           const reference = fixture('#reference')
           const destructorFunction = jasmine.createSpy('destructor function')
-          up.compiler('my-element', element => destructorFunction)
+          up.compiler('my-element', (element) => destructorFunction)
           const newElement = document.createElement('my-element')
           const undo = up.fragment.insertTemp(reference, newElement)
 
@@ -12825,10 +12825,10 @@ describe('up.fragment', function() {
           { content: layerHTML },
         ])
 
-        this.layer0Parent0ChildRequest = up.request('/path/a', {layer: this.layers[0], target: '#parent0-child'})
-        this.layer0Parent1ChildRequest = up.request('/path/b', {layer: this.layers[0], target: '#parent1-child'})
-        this.layer1Parent0ChildRequest = up.request('/path/c', {layer: this.layers[1], target: '#parent0-child'})
-        this.layer1Parent1ChildRequest = up.request('/path/d', {layer: this.layers[1], target: '#parent1-child'})
+        this.layer0Parent0ChildRequest = up.request('/path/a', { layer: this.layers[0], target: '#parent0-child' })
+        this.layer0Parent1ChildRequest = up.request('/path/b', { layer: this.layers[0], target: '#parent1-child' })
+        this.layer1Parent0ChildRequest = up.request('/path/c', { layer: this.layers[1], target: '#parent0-child' })
+        this.layer1Parent1ChildRequest = up.request('/path/d', { layer: this.layers[1], target: '#parent1-child' })
 
         u.task(done)
       })
@@ -12846,7 +12846,7 @@ describe('up.fragment', function() {
 
         it("also aborts requests outside the layer's main element", async function() {
           e.affix(up.layer.element, '#outside-main')
-          const outsideRequest = up.request('/path/e', {layer: up.layer.element, target: '#outside-main'})
+          const outsideRequest = up.request('/path/e', { layer: up.layer.element, target: '#outside-main' })
 
           await wait()
 
@@ -12857,7 +12857,7 @@ describe('up.fragment', function() {
 
         describe('with { layer } option', function() {
           it('aborts requests on the given layer', function() {
-            up.fragment.abort({layer: 'root'})
+            up.fragment.abort({ layer: 'root' })
 
             expect(this.layer0Parent0ChildRequest.state).toBe('aborted')
             expect(this.layer0Parent1ChildRequest.state).toBe('aborted')
@@ -12868,7 +12868,7 @@ describe('up.fragment', function() {
 
         describe('with { layer: "any" }', function() {
           it('aborts requests on all layers', function() {
-            up.fragment.abort({layer: 'any'})
+            up.fragment.abort({ layer: 'any' })
 
             expect(this.layer0Parent0ChildRequest.state).toBe('aborted')
             expect(this.layer0Parent1ChildRequest.state).toBe('aborted')
@@ -12880,7 +12880,7 @@ describe('up.fragment', function() {
 
       describe('with an element', function() {
         it("aborts requests targeting given element's subtree", function() {
-          const layer0Parent0 = up.fragment.get('#parent0', {layer: 0})
+          const layer0Parent0 = up.fragment.get('#parent0', { layer: 0 })
 
           up.fragment.abort(layer0Parent0)
 
@@ -12893,8 +12893,8 @@ describe('up.fragment', function() {
 
       describe('with a list of elements', function() {
         it("aborts requests targeting any of the given elements' subtrees", function() {
-          const layer0Parent0 = up.fragment.get('#parent0', {layer: 0})
-          const layer0Parent1 = up.fragment.get('#parent1', {layer: 0})
+          const layer0Parent0 = up.fragment.get('#parent0', { layer: 0 })
+          const layer0Parent1 = up.fragment.get('#parent1', { layer: 0 })
 
           up.fragment.abort([layer0Parent0, layer0Parent1])
 
@@ -12918,7 +12918,7 @@ describe('up.fragment', function() {
 
         describe('with { layer } option', function() {
           it('resolves the selector on another layer', function() {
-            up.fragment.abort('.parent', {layer: 'root'})
+            up.fragment.abort('.parent', { layer: 'root' })
 
             expect(this.layer0Parent0ChildRequest.state).toBe('aborted')
             expect(this.layer0Parent1ChildRequest.state).toBe('aborted')
@@ -12930,7 +12930,7 @@ describe('up.fragment', function() {
 
       describe('with { reason } option', function() {
         it('aborts the request with the given reason', async function() {
-          up.fragment.abort('#parent0', {reason: 'Given reason'})
+          up.fragment.abort('#parent0', { reason: 'Given reason' })
 
           await expectAsync(this.layer1Parent0ChildRequest).toBeRejectedWith(jasmine.anyError(/Given reason/))
         })
@@ -13021,23 +13021,23 @@ describe('up.fragment', function() {
       it('parses a single target', function() {
         const steps = up.fragment.parseTargetSteps('.one')
         expect(steps).toEqual([
-          jasmine.objectContaining({selector: '.one'})
+          jasmine.objectContaining({ selector: '.one' })
         ])
       })
 
       it('parses multiple targets', function() {
         const steps = up.fragment.parseTargetSteps('.one, .two')
         expect(steps).toEqual([
-          jasmine.objectContaining({selector: '.one'}),
-          jasmine.objectContaining({selector: '.two'}),
+          jasmine.objectContaining({ selector: '.one' }),
+          jasmine.objectContaining({ selector: '.two' }),
         ])
       })
 
       it('parses multiple targets with commas within parentheses', function() {
         const steps = up.fragment.parseTargetSteps('.one:has(.three, .four), .two')
         expect(steps).toEqual([
-          jasmine.objectContaining({selector: '.one:has(.three, .four)'}),
-          jasmine.objectContaining({selector: '.two'}),
+          jasmine.objectContaining({ selector: '.one:has(.three, .four)' }),
+          jasmine.objectContaining({ selector: '.two' }),
         ])
       })
 
@@ -13049,62 +13049,62 @@ describe('up.fragment', function() {
       it('ignores a :none target in a union of other targets', function() {
         const steps = up.fragment.parseTargetSteps('.one, :none, .two')
         expect(steps).toEqual([
-          jasmine.objectContaining({selector: '.one'}),
-          jasmine.objectContaining({selector: '.two'}),
+          jasmine.objectContaining({ selector: '.one' }),
+          jasmine.objectContaining({ selector: '.two' }),
         ])
       })
 
       it('sets a default placement of "swap"', function() {
         const steps = up.fragment.parseTargetSteps('.one')
         expect(steps).toEqual([
-          jasmine.objectContaining({selector: '.one', placement: 'swap'})
+          jasmine.objectContaining({ selector: '.one', placement: 'swap' })
         ])
       })
 
       it('parses a prepending placement from :before (single colon)', function() {
         const steps = up.fragment.parseTargetSteps('.one:before, .two')
         expect(steps).toEqual([
-          jasmine.objectContaining({selector: '.one', placement: 'before'}),
-          jasmine.objectContaining({selector: '.two', placement: 'swap'}),
+          jasmine.objectContaining({ selector: '.one', placement: 'before' }),
+          jasmine.objectContaining({ selector: '.two', placement: 'swap' }),
         ])
       })
 
       it('parses a prepending placement from ::before (double colon)', function() {
         const steps = up.fragment.parseTargetSteps('.one::before, .two')
         expect(steps).toEqual([
-          jasmine.objectContaining({selector: '.one', placement: 'before'}),
-          jasmine.objectContaining({selector: '.two', placement: 'swap'}),
+          jasmine.objectContaining({ selector: '.one', placement: 'before' }),
+          jasmine.objectContaining({ selector: '.two', placement: 'swap' }),
         ])
       })
 
       it('parses an append placement from :after (single colon)', function() {
         const steps = up.fragment.parseTargetSteps('.one, .two:after')
         expect(steps).toEqual([
-          jasmine.objectContaining({selector: '.one', placement: 'swap'}),
-          jasmine.objectContaining({selector: '.two', placement: 'after'}),
+          jasmine.objectContaining({ selector: '.one', placement: 'swap' }),
+          jasmine.objectContaining({ selector: '.two', placement: 'after' }),
         ])
       })
 
       it('parses an append placement from ::after (double colon)', function() {
         const steps = up.fragment.parseTargetSteps('.one, .two::after')
         expect(steps).toEqual([
-          jasmine.objectContaining({selector: '.one', placement: 'swap'}),
-          jasmine.objectContaining({selector: '.two', placement: 'after'}),
+          jasmine.objectContaining({ selector: '.one', placement: 'swap' }),
+          jasmine.objectContaining({ selector: '.two', placement: 'after' }),
         ])
       })
 
       it('parses an optional target from :maybe', function() {
         const steps = up.fragment.parseTargetSteps('.one, .two:maybe')
         expect(steps).toEqual([
-          jasmine.objectContaining({selector: '.one', maybe: false}),
-          jasmine.objectContaining({selector: '.two', maybe: true}),
+          jasmine.objectContaining({ selector: '.one', maybe: false }),
+          jasmine.objectContaining({ selector: '.two', maybe: true }),
         ])
       })
 
       it('parses multiple pseudo elements in the same target', function() {
         const steps = up.fragment.parseTargetSteps('.one:maybe:before')
         expect(steps).toEqual([
-          jasmine.objectContaining({selector: '.one', maybe: true, placement: 'before'}),
+          jasmine.objectContaining({ selector: '.one', maybe: true, placement: 'before' }),
         ])
       })
     })
@@ -13192,7 +13192,7 @@ describe('up.fragment', function() {
           up.on('up:template:clone', 'template[type="text/minimustache"]', templateHandler)
 
           const nodes = up.template.clone('#my-template', { name: "Alice" })
-          expect(templateHandler).toHaveBeenCalledWith(jasmine.objectContaining({target: template, data: { name: "Alice" }}), template, jasmine.anything())
+          expect(templateHandler).toHaveBeenCalledWith(jasmine.objectContaining({ target: template, data: { name: "Alice" } }), template, jasmine.anything())
 
           expect(nodes[0]).toBeTextNode('Hello, ')
           expect(nodes[1].outerHTML).toBe('<b>Alice</b>')
@@ -13227,7 +13227,7 @@ describe('up.fragment', function() {
 
           const nodes = up.fragment.provideNodes('#my-template { name: "Alice" }')
 
-          expect(templateHandler).toHaveBeenCalledWith(jasmine.objectContaining({target: template, data: { name: "Alice" }}), jasmine.anything(), jasmine.anything())
+          expect(templateHandler).toHaveBeenCalledWith(jasmine.objectContaining({ target: template, data: { name: "Alice" } }), jasmine.anything(), jasmine.anything())
           expect(nodes[0]).toBeTextNode('Hello, ')
           expect(nodes[1].outerHTML).toBe('<b>Alice</b>')
           expect(nodes[2]).toBeTextNode('!')
@@ -13453,7 +13453,7 @@ describe('up.fragment', function() {
         up.on('up:template:clone', 'template[type="text/minimustache"]', templateHandler)
 
         const nodes = up.template.clone('#my-template', { name: "Alice" })
-        expect(templateHandler).toHaveBeenCalledWith(jasmine.objectContaining({target: template, data: { name: "Alice" }}), template, jasmine.anything())
+        expect(templateHandler).toHaveBeenCalledWith(jasmine.objectContaining({ target: template, data: { name: "Alice" } }), template, jasmine.anything())
 
         expect(nodes[0]).toBeTextNode('Hello, ')
         expect(nodes[1].outerHTML).toBe('<b>Alice</b>')

@@ -174,7 +174,7 @@ describe('up.viewport', function() {
 
           this.$elements = []
           this.$container = $('<div class="container">').prependTo($body)
-          this.$container.css({opacity: 0.2}) // reduce flashing during test runs
+          this.$container.css({ opacity: 0.2 }) // reduce flashing during test runs
 
           this.clientHeight = up.viewport.rootHeight()
 
@@ -230,7 +230,7 @@ describe('up.viewport', function() {
         })
 
         it("includes the element's top margin in the revealed area", async function() {
-          this.$elements[1].css({'margin-top': '20px'})
+          this.$elements[1].css({ 'margin-top': '20px' })
           up.reveal(this.$elements[1])
           await wait()
 
@@ -238,7 +238,7 @@ describe('up.viewport', function() {
         })
 
         it("includes the element's bottom margin in the revealed area", async function() {
-          this.$elements[1].css({'margin-bottom': '20px'})
+          this.$elements[1].css({ 'margin-bottom': '20px' })
           up.reveal(this.$elements[2])
           await wait()
 
@@ -247,7 +247,7 @@ describe('up.viewport', function() {
 
         it('snaps to the top if the space above the future-visible area is smaller than the value of config.revealSnap', async function() {
           up.viewport.config.revealSnap = 30
-          this.$elements[0].css({height: '20px'})
+          this.$elements[0].css({ height: '20px' })
 
           up.reveal(this.$elements[2])
           await wait()
@@ -421,7 +421,7 @@ describe('up.viewport', function() {
               right: '0px',
               height: '100px',
               display: 'none'
-            }})
+            } })
 
           up.reveal(this.$elements[1])
           await wait()
@@ -435,8 +435,8 @@ describe('up.viewport', function() {
         })
 
         it('scrolls the viewport to the first row if the element is higher than the viewport', async function() {
-          this.$elements[0].css({height: '1000px'})
-          this.$elements[1].css({height: '3000px'})
+          this.$elements[0].css({ height: '1000px' })
+          this.$elements[1].css({ height: '3000px' })
 
           up.reveal(this.$elements[1])
           await wait()
@@ -459,29 +459,29 @@ describe('up.viewport', function() {
           })
           const $elements = []
           u.each([0, 1, 2, 3, 4, 5], function() {
-            const $element = $('<div>').css({height: '50px'})
+            const $element = $('<div>').css({ height: '50px' })
             $element.appendTo($viewport)
             $elements.push($element)
           })
 
           expect($viewport.scrollTop()).toBe(0)
 
-          up.reveal($elements[3], {viewport: $viewport})
+          up.reveal($elements[3], { viewport: $viewport })
           await wait()
 
           expect($viewport.scrollTop()).toBe(50 + 20)
 
-          up.reveal($elements[2], {viewport: $viewport})
+          up.reveal($elements[2], { viewport: $viewport })
           await wait()
 
           expect($viewport.scrollTop()).toBe(50 + 20)
 
-          up.reveal($elements[5], {viewport: $viewport})
+          up.reveal($elements[5], { viewport: $viewport })
           await wait()
 
           expect($viewport.scrollTop()).toBe(150 + 20)
 
-          up.reveal($elements[2], {viewport: $viewport})
+          up.reveal($elements[2], { viewport: $viewport })
           await wait()
 
           expect($viewport.scrollTop()).toBe(100)
@@ -626,8 +626,8 @@ describe('up.viewport', function() {
       describe('up.scroll()', function() {
 
         it('scrolls the given viewport to the given Y position', function() {
-          const viewport = fixture('.viewport[up-viewport]', {style: { height: '100px', 'overflow-y': 'scroll' }})
-          const content = e.affix(viewport, '.content', {style: { height: '1000px' }})
+          const viewport = fixture('.viewport[up-viewport]', { style: { height: '100px', 'overflow-y': 'scroll' } })
+          const content = e.affix(viewport, '.content', { style: { height: '1000px' } })
 
           expect(viewport.scrollTop).toBe(0)
 
@@ -752,23 +752,23 @@ describe('up.viewport', function() {
         })
 
         it('falls back to the scrolling element', function() {
-          const element = fixture('.element', {style: { height: '3000px' }})
+          const element = fixture('.element', { style: { height: '3000px' } })
           const result = up.viewport.get(element)
           expect(result).toBe(document.scrollingElement)
         })
 
         it('falls back to the scrolling element if <body> is configured to scroll (fix for Edge)', function() {
-          const element = fixture('.element', {style: { height: '3000px' }})
-          this.resetHTMLCSS = e.setStyleTemp(document.documentElement, {'overflow-y': 'hidden'})
-          this.resetBodyCSS = e.setStyleTemp(document.body, {'overflow-y': 'scroll'})
+          const element = fixture('.element', { style: { height: '3000px' } })
+          this.resetHTMLCSS = e.setStyleTemp(document.documentElement, { 'overflow-y': 'hidden' })
+          this.resetBodyCSS = e.setStyleTemp(document.body, { 'overflow-y': 'scroll' })
           const result = up.viewport.get(element)
           expect(result).toBe(document.scrollingElement)
         })
 
         it('falls back to the scrolling element if <html> is configured to scroll (fix for Edge)', function() {
-          const element = fixture('.element', {style: { height: '3000px' }})
-          this.resetHTMLCSS = e.setStyleTemp(document.documentElement, {'overflow-y': 'scroll'})
-          this.resetBodyCSS = e.setStyleTemp(document.body, {'overflow-y': 'hidden'})
+          const element = fixture('.element', { style: { height: '3000px' } })
+          this.resetHTMLCSS = e.setStyleTemp(document.documentElement, { 'overflow-y': 'scroll' })
+          this.resetBodyCSS = e.setStyleTemp(document.body, { 'overflow-y': 'hidden' })
           const result = up.viewport.get(element)
           expect(result).toBe(document.scrollingElement)
         })
@@ -778,8 +778,8 @@ describe('up.viewport', function() {
     describe('up.viewport.restoreScroll()', function() {
 
       it("restores a viewport's previously saved scroll position", function() {
-        const $viewport = $fixture('#viewport[up-viewport]').css({height: '100px', overflowY: 'scroll'})
-        const $content = $viewport.affix('.content').css({height: '1000px'})
+        const $viewport = $fixture('#viewport[up-viewport]').css({ height: '100px', overflowY: 'scroll' })
+        const $content = $viewport.affix('.content').css({ height: '1000px' })
         up.hello($viewport)
         $viewport.scrollTop(50)
         up.viewport.saveScroll()
@@ -805,18 +805,18 @@ describe('up.viewport', function() {
 
         await wait()
 
-        this.rootViewport = up.fragment.get('.viewport', {layer: 'root'})
-        this.overlayViewport = up.fragment.get('.viewport', {layer: 'overlay'})
+        this.rootViewport = up.fragment.get('.viewport', { layer: 'root' })
+        this.overlayViewport = up.fragment.get('.viewport', { layer: 'overlay' })
 
         this.rootViewport.scrollTop = 10
         this.overlayViewport.scrollTop = 20
 
-        up.viewport.saveScroll({layer: 'root'})
+        up.viewport.saveScroll({ layer: 'root' })
 
         this.rootViewport.scrollTop = 0
         this.overlayViewport.scrollTop = 0
 
-        up.viewport.restoreScroll({layer: 'root'})
+        up.viewport.restoreScroll({ layer: 'root' })
 
         await wait()
 
@@ -825,16 +825,16 @@ describe('up.viewport', function() {
       })
 
       it("returns true if a previous scroll position is known and could be restored", function() {
-        const $viewport = $fixture('#viewport[up-viewport]').css({height: '100px', overflowY: 'scroll'})
-        const $content = $viewport.affix('.content').css({height: '1000px'})
+        const $viewport = $fixture('#viewport[up-viewport]').css({ height: '100px', overflowY: 'scroll' })
+        const $content = $viewport.affix('.content').css({ height: '1000px' })
         up.hello($viewport)
         up.viewport.saveScroll()
         expect(up.viewport.restoreScroll()).toBe(true)
       })
 
       it("does not scroll and returns a falsey value if no previous scroll position is known", function() {
-        const $viewport = $fixture('#viewport[up-viewport]').css({height: '100px', overflowY: 'scroll'})
-        const $content = $viewport.affix('.content').css({height: '1000px'})
+        const $viewport = $fixture('#viewport[up-viewport]').css({ height: '100px', overflowY: 'scroll' })
+        const $content = $viewport.affix('.content').css({ height: '1000px' })
         $viewport.scrollTop(70)
 
         expect(up.viewport.restoreScroll()).toBeFalsy()
@@ -849,7 +849,7 @@ describe('up.viewport', function() {
       })
 
       it('absolutely positions the element, preserving visual position and size', function() {
-        const $element = $fixture('.element').text('element text').css({paddingTop: '20px', paddingLeft: '20px'})
+        const $element = $fixture('.element').text('element text').css({ paddingTop: '20px', paddingLeft: '20px' })
 
         expect($element.css('position')).toEqual('static')
         const previousDims = $element[0].getBoundingClientRect()
@@ -863,7 +863,7 @@ describe('up.viewport', function() {
       })
 
       it('accurately positions the ghost over an element with margins', function() {
-        const $element = $fixture('.element').css({margin: '40px'})
+        const $element = $fixture('.element').css({ margin: '40px' })
         const previousDims = $element[0].getBoundingClientRect()
 
         up.viewport.absolutize($element[0])
@@ -874,7 +874,7 @@ describe('up.viewport', function() {
 
       it("doesn't change the position of a child whose margins no longer collapse", function() {
         const $element = $fixture('.element')
-        const $child = $('<div class="child">child text</div>').css({margin: '40px'}).appendTo($element)
+        const $child = $('<div class="child">child text</div>').css({ margin: '40px' }).appendTo($element)
         const previousChildDims = $child[0].getBoundingClientRect()
 
         up.viewport.absolutize($element[0])
@@ -885,8 +885,8 @@ describe('up.viewport', function() {
 
       it('correctly positions an element within a scrolled body', function() {
         const $body = $('body')
-        const $element1 = $('<div class="fixture"></div>').css({height: '75px'}).prependTo($body)
-        const $element2 = $('<div class="fixture"></div>').css({height: '100px'}).insertAfter($element1)
+        const $element1 = $('<div class="fixture"></div>').css({ height: '75px' }).prependTo($body)
+        const $element2 = $('<div class="fixture"></div>').css({ height: '100px' }).insertAfter($element1)
         $body.scrollTop(33)
 
         const previousDims = $element2[0].getBoundingClientRect()
@@ -903,8 +903,8 @@ describe('up.viewport', function() {
           height: '50px'
         })
 
-        const $element1 = $('<div class="fixture"></div>').css({height: '75px'}).prependTo($viewport)
-        const $element2 = $('<div class="fixture"></div>').css({height: '100px'}).insertAfter($element1)
+        const $element1 = $('<div class="fixture"></div>').css({ height: '75px' }).prependTo($viewport)
+        const $element2 = $('<div class="fixture"></div>').css({ height: '100px' }).insertAfter($element1)
         $viewport.scrollTop(33)
 
         const previousDims = $element2[0].getBoundingClientRect()
@@ -937,10 +937,10 @@ describe('up.viewport', function() {
       })
 
       it("does not convert fixed elements outside the element's subtree (bugfix)", function() {
-        const $element = $fixture('.element').css({position: 'absolute'})
-        const $fixedChild = $('<div class="fixed-child" up-fixed></div>').css({position: 'fixed'})
+        const $element = $fixture('.element').css({ position: 'absolute' })
+        const $fixedChild = $('<div class="fixed-child" up-fixed></div>').css({ position: 'fixed' })
         $fixedChild.appendTo($element)
-        const $fixedSibling = $fixture('[up-fixed]').css({position: 'fixed'})
+        const $fixedSibling = $fixture('[up-fixed]').css({ position: 'fixed' })
 
         up.viewport.absolutize($element[0])
 
@@ -969,9 +969,9 @@ describe('up.viewport', function() {
           location.hash = ''
           await wait()
 
-          const highElement = fixture('.high', {style: { height: '10000px' }}) // ensure we can scroll
-          const element = fixture('#element', {text: 'content', style: { position: 'absolute', top: '5000px' }})
-          const obstruction = fixture('.obstruction[up-fixed=top]', {text: 'obstructions', style: { 'position': 'fixed', 'top': '0px', 'height': '30px', 'background-color': 'blue' }})
+          const highElement = fixture('.high', { style: { height: '10000px' } }) // ensure we can scroll
+          const element = fixture('#element', { text: 'content', style: { position: 'absolute', top: '5000px' } })
+          const obstruction = fixture('.obstruction[up-fixed=top]', { text: 'obstructions', style: { 'position': 'fixed', 'top': '0px', 'height': '30px', 'background-color': 'blue' } })
 
           location.hash = "#element"
           await wait()
@@ -1000,10 +1000,10 @@ describe('up.viewport', function() {
           location.hash = ''
           await wait()
 
-          const highElement = fixture('.high', {style: { height: '10000px' }}) // ensure we can scroll
-          const element = fixture('#element', {text: 'content', style: { position: 'absolute', top: '5000px', 'background-color': 'yellow' }})
-          const obstruction = fixture('.obstruction[up-fixed=top]', {text: 'obstructions', style: { 'position': 'fixed', 'top': '0px', 'height': '30px', 'background-color': 'blue' }})
-          const link = fixture('a', {href: '#element'})
+          const highElement = fixture('.high', { style: { height: '10000px' } }) // ensure we can scroll
+          const element = fixture('#element', { text: 'content', style: { position: 'absolute', top: '5000px', 'background-color': 'yellow' } })
+          const obstruction = fixture('.obstruction[up-fixed=top]', { text: 'obstructions', style: { 'position': 'fixed', 'top': '0px', 'height': '30px', 'background-color': 'blue' } })
+          const link = fixture('a', { href: '#element' })
 
           // Firefox will only do native #anchor processing when we use link.click(),
           // but not when we emit a synthetic 'click' event.
@@ -1018,10 +1018,10 @@ describe('up.viewport', function() {
           location.hash = '#element'
           await wait()
 
-          const highElement = fixture('.high', {style: { height: '10000px' }}) // ensure we can scroll
-          const element = fixture('#element', {text: 'content', style: { position: 'absolute', top: '5000px' }})
-          const obstruction = fixture('.obstruction[up-fixed=top]', {text: 'obstructions', style: { 'position': 'fixed', 'top': '0px', 'height': '30px', 'background-color': 'blue' }})
-          const link = fixture('a', {href: '#element'})
+          const highElement = fixture('.high', { style: { height: '10000px' } }) // ensure we can scroll
+          const element = fixture('#element', { text: 'content', style: { position: 'absolute', top: '5000px' } })
+          const obstruction = fixture('.obstruction[up-fixed=top]', { text: 'obstructions', style: { 'position': 'fixed', 'top': '0px', 'height': '30px', 'background-color': 'blue' } })
+          const link = fixture('a', { href: '#element' })
 
           // Firefox will only do native #anchor processing when we use link.click(),
           // but not when we emit a synthetic 'click' event.
@@ -1036,7 +1036,7 @@ describe('up.viewport', function() {
           location.hash = ''
           await wait()
 
-          const link = fixture('a', {href: '#element'})
+          const link = fixture('a', { href: '#element' })
           const revealSpy = up.reveal.mock()
 
           // Firefox will only do native #anchor processing when we use link.click(),
@@ -1052,11 +1052,11 @@ describe('up.viewport', function() {
           location.hash = ''
           await wait()
 
-          const highElement = fixture('.high', {style: { height: '10000px' }}) // ensure we can scroll
+          const highElement = fixture('.high', { style: { height: '10000px' } }) // ensure we can scroll
           up.viewport.root.scrollTop = 3000
           expect(up.viewport.root.scrollTop).toBe(3000)
 
-          const link = fixture('a', {href: '#'})
+          const link = fixture('a', { href: '#' })
 
           // Firefox will only do native #anchor processing when we use link.click(),
           // but not when we emit a synthetic 'click' event.

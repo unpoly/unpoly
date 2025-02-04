@@ -116,7 +116,7 @@ describe('up.layer', function() {
 
           const rootRenderJob = up.navigate('.root-element', { url: '/path1' })
           const abortedURLs = []
-          up.on('up:request:aborted', event => abortedURLs.push(event.request.url))
+          up.on('up:request:aborted', (event) => abortedURLs.push(event.request.url))
 
           await wait()
 
@@ -134,7 +134,7 @@ describe('up.layer', function() {
 
           up.navigate('.root-element', { url: '/path1' })
           const abortedURLs = []
-          up.on('up:request:aborted', event => abortedURLs.push(event.request.url))
+          up.on('up:request:aborted', (event) => abortedURLs.push(event.request.url))
 
           await wait()
 
@@ -150,7 +150,7 @@ describe('up.layer', function() {
         it('aborts a previous pending request that would result in opening a new overlay', async function() {
           const openJob1 = up.layer.open({ url: '/path1' })
           const abortedURLs = []
-          up.on('up:request:aborted', event => abortedURLs.push(event.request.url))
+          up.on('up:request:aborted', (event) => abortedURLs.push(event.request.url))
 
           await wait()
 
@@ -991,7 +991,7 @@ describe('up.layer', function() {
 
             it('does not emit a global error if the button is clicked and up:layer:dismiss is prevented', async function() {
               up.layer.open({ dismissable: 'button', mode: 'modal' })
-              up.on('up:layer:dismiss', event => event.preventDefault())
+              up.on('up:layer:dismiss', (event) => event.preventDefault())
 
               await wait()
 
@@ -1072,7 +1072,7 @@ describe('up.layer', function() {
 
             it('does not emit a global error when Escape is pressed and up:layer:dismiss is prevented', async function() {
               up.layer.open({ dismissable: "key" })
-              up.on('up:layer:dismiss', event => event.preventDefault())
+              up.on('up:layer:dismiss', (event) => event.preventDefault())
 
               await wait()
 
@@ -1190,7 +1190,7 @@ describe('up.layer', function() {
 
               it('does not emit a global error when the viewport is clicked and up:layer:dismiss is prevented', async function() {
                 up.layer.open({ dismissable: "outside", mode: 'modal' })
-                up.on('up:layer:dismiss', event => event.preventDefault())
+                up.on('up:layer:dismiss', (event) => event.preventDefault())
 
                 await wait()
 
@@ -1684,7 +1684,7 @@ describe('up.layer', function() {
           })
 
           it('does emit a global error when an event of the given type was emitted on the layer and up:layer:dismiss is prevented', async function() {
-            up.on('up:layer:dismiss', event => event.preventDefault())
+            up.on('up:layer:dismiss', (event) => event.preventDefault())
 
             up.layer.open({ dismissEvent: 'foo' })
             await wait()
@@ -2046,7 +2046,7 @@ describe('up.layer', function() {
       it('stops dismissing overlays when any overlay prevents its dismissal', function() {
         makeLayers(5)
         // The third layer will prevent its dismissal
-        up.layer.get(2).on('up:layer:dismiss', event => event.preventDefault())
+        up.layer.get(2).on('up:layer:dismiss', (event) => event.preventDefault())
 
         const dismissOverlays = () => up.layer.dismissOverlays()
         expect(dismissOverlays).toAbort()
@@ -2881,7 +2881,7 @@ describe('up.layer', function() {
       })
 
       it('does not emit a global error when clicked and up:layer:accept is prevented', async function() {
-        up.on('up:layer:accept', event => event.preventDefault())
+        up.on('up:layer:accept', (event) => event.preventDefault())
 
         makeLayers(2)
 

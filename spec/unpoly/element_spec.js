@@ -354,7 +354,7 @@ describe('up.element', function() {
     })
 
     it('shows the given element if it is hidden', function() {
-      const element = fixture('.element', {style: { display: 'none' }})
+      const element = fixture('.element', { style: { display: 'none' } })
       up.element.toggle(element)
       expect(element).toBeVisible()
     })
@@ -578,13 +578,13 @@ describe('up.element', function() {
     })
 
     it('sets attributes from a second argument', function() {
-      const element = up.element.createFromSelector('div', {foo: 'one', bar: 'two'})
+      const element = up.element.createFromSelector('div', { foo: 'one', bar: 'two' })
       expect(element.getAttribute('foo')).toEqual('one')
       expect(element.getAttribute('bar')).toEqual('two')
     })
 
     it('adds an addition class from a { class } option', function() {
-      const element = up.element.createFromSelector('.foo', {class: 'bar'})
+      const element = up.element.createFromSelector('.foo', { class: 'bar' })
       expect(element).toHaveClass('foo')
       expect(element).toHaveClass('bar')
     })
@@ -592,13 +592,13 @@ describe('up.element', function() {
     describe('with { style } option', function() {
 
       it('sets inline styles from a { style } object with kebab-case keys', function() {
-        const element = up.element.createFromSelector('div', {style: { 'font-size': '100px', 'margin-top': '200px' }})
+        const element = up.element.createFromSelector('div', { style: { 'font-size': '100px', 'margin-top': '200px' } })
         expect(element.style.fontSize).toEqual('100px')
         expect(element.style.marginTop).toEqual('200px')
       })
 
       it('sets inline styles from a { style } string with semicolon-separated styles', function() {
-        const element = up.element.createFromSelector('div', {style: 'font-size: 100px; margin-top: 200px'})
+        const element = up.element.createFromSelector('div', { style: 'font-size: 100px; margin-top: 200px' })
         expect(element.style.fontSize).toEqual('100px')
         expect(element.style.marginTop).toEqual('200px')
       })
@@ -606,7 +606,7 @@ describe('up.element', function() {
       if (up.migrate.loaded) {
         it('sets inline styles from a { style } object with camelCase keys', function() {
           const warnSpy = up.migrate.warn.mock()
-          const element = up.element.createFromSelector('div', {style: { fontSize: '100px', marginTop: '200px' }})
+          const element = up.element.createFromSelector('div', { style: { fontSize: '100px', marginTop: '200px' } })
 
           expect(element.style.fontSize).toEqual('100px')
           expect(element.style.marginTop).toEqual('200px')
@@ -632,7 +632,7 @@ describe('up.element', function() {
       })
 
       it('escapes HTML from the given text', function() {
-        const element = up.element.createFromSelector('.foo', {text: '<script>alert("foo")</script>'})
+        const element = up.element.createFromSelector('.foo', { text: '<script>alert("foo")</script>' })
         expect(element).toHaveText('<script>alert("foo")</script>')
       })
     })
@@ -961,7 +961,7 @@ describe('up.element', function() {
         overflowY: 'scroll'
       })
 
-      const $staticContainerContent = $container.affix('.content').css({height: '3000px'}).scrollTop(100)
+      const $staticContainerContent = $container.affix('.content').css({ height: '3000px' }).scrollTop(100)
 
       const $element = $container.affix('.element').text('element').css({
         position: 'fixed',
@@ -1130,12 +1130,12 @@ describe('up.element', function() {
 
     it("returns the given attribute's value parsed as JSON", function() {
       const element = up.element.createFromHTML('<div foo=\'{ "key": "value" }\'></div>')
-      expect(up.element.jsonAttr(element, 'foo')).toEqual({ 'key': 'value'})
+      expect(up.element.jsonAttr(element, 'foo')).toEqual({ 'key': 'value' })
     })
 
     it("parses unquoted property names", function() {
       const element = up.element.createFromHTML('<div foo=\'{ key: "value" }\'></div>')
-      expect(up.element.jsonAttr(element, 'foo')).toEqual({ key: 'value'})
+      expect(up.element.jsonAttr(element, 'foo')).toEqual({ key: 'value' })
     })
 
     it("returns undefined if the given attribute's value is blank", function() {
@@ -1370,7 +1370,7 @@ describe('up.element', function() {
     })
 
     it('an inherited style, parsed as a number', function() {
-      const container = fixture('div', {style: { 'font-size': '40px' }})
+      const container = fixture('div', { style: { 'font-size': '40px' } })
       const element = up.element.affix(container, 'div')
 
       expect(up.element.styleNumber(element, 'font-size')).toBe(40.0)
@@ -1590,7 +1590,7 @@ describe('up.element', function() {
   describe('up.element.isVisible', function() {
 
     it('returns true for an attached element', function() {
-      const element = fixture('.element', {text: 'content'})
+      const element = fixture('.element', { text: 'content' })
       expect(up.element.isVisible(element)).toBe(true)
     })
 
@@ -1611,7 +1611,7 @@ describe('up.element', function() {
     })
 
     it('returns false for an attached element with { display: none }', function() {
-      const element = fixture('.element', {text: 'content', style: { display: 'none' }})
+      const element = fixture('.element', { text: 'content', style: { display: 'none' } })
       expect(up.element.isVisible(element)).toBe(false)
     })
   })
@@ -1684,7 +1684,7 @@ describe('up.element', function() {
     })
 
     it('restores the { display } property the element had before hiding', function() {
-      const element = fixture('div', {style: { display: 'flex'}})
+      const element = fixture('div', { style: { display: 'flex' } })
       expect(getComputedStyle(element).display).toBe('flex')
       up.element.hide(element)
       expect(element).not.toBeVisible()

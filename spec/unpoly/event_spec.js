@@ -505,7 +505,7 @@ describe('up.event', function() {
           unbind()
           Trigger.click($('.child'))
 
-          await next()
+          await wait()
 
           expect(clickSpy.calls.count()).toEqual(1)
         })
@@ -629,14 +629,14 @@ describe('up.event', function() {
         const $element = $parent.affix('.element')
         const callback = jasmine.createSpy('event handler')
         $parent[0].addEventListener('custom:name', callback)
-        $element[0].addEventListener('custom:name', event => event.stopPropagation())
+        $element[0].addEventListener('custom:name', (event) => event.stopPropagation())
         up.emit($element[0], 'custom:name')
         expect(callback).not.toHaveBeenCalled()
       })
 
       it('triggers an event that can have its default prevented (IE11 bugfix)', function() {
         const element = fixture('.element')
-        element.addEventListener('custom:name', event => event.preventDefault())
+        element.addEventListener('custom:name', (event) => event.preventDefault())
         const event = up.emit(element, 'custom:name')
         expect(event.defaultPrevented).toBe(true)
       })
@@ -644,7 +644,7 @@ describe('up.event', function() {
       describe('custom event properties', function() {
         it('accepts custom event properties that can be accessed from an up.on() handler', function() {
           let emittedEvent = undefined
-          up.on('foo', event => emittedEvent = event)
+          up.on('foo', (event) => emittedEvent = event)
 
           up.emit('foo', { customField: 'custom-value' })
 
@@ -654,7 +654,7 @@ describe('up.event', function() {
 
       it('accepts custom event properties that can be accessed from an jQuery.on() handler', function() {
         let emittedEvent = undefined
-        $(document).on('foo', event => emittedEvent = event.originalEvent)
+        $(document).on('foo', (event) => emittedEvent = event.originalEvent)
 
         up.emit('foo', { customField: 'custom-value' })
 
@@ -663,7 +663,7 @@ describe('up.event', function() {
 
       it('accepts custom event properties that can be accessed from an addEventListener() handler', function() {
         let emittedEvent = undefined
-        document.addEventListener('foo', event => emittedEvent = event)
+        document.addEventListener('foo', (event) => emittedEvent = event)
 
         up.emit('foo', { customField: 'custom-value' })
 
@@ -712,14 +712,14 @@ describe('up.event', function() {
       it('emits the event', function() {
         const eventListener = jasmine.createSpy('event listener')
         up.on('my:event', eventListener)
-        up.event.assertEmitted('my:event', {key: 'value'})
-        expect(eventListener).toHaveBeenCalledWith(jasmine.objectContaining({key: 'value'}), jasmine.anything(), jasmine.anything())
+        up.event.assertEmitted('my:event', { key: 'value' })
+        expect(eventListener).toHaveBeenCalledWith(jasmine.objectContaining({ key: 'value' }), jasmine.anything(), jasmine.anything())
       })
 
       it('throws an AbortError if any listener calls event.preventDefault()', function() {
-        const eventListener = event => event.preventDefault()
+        const eventListener = (event) => event.preventDefault()
         up.on('my:event', eventListener)
-        const fn = () => up.event.assertEmitted('my:event', {key: 'value'})
+        const fn = () => up.event.assertEmitted('my:event', { key: 'value' })
         expect(fn).toAbort()
       })
     })
@@ -787,27 +787,27 @@ describe('up.event', function() {
     describe('up.event.isUnmodified()', function() {
 
       it('returns true for a click event with the left mouse button', function() {
-        const event = Trigger.createMouseEvent('mousedown', {button: 0})
+        const event = Trigger.createMouseEvent('mousedown', { button: 0 })
         expect(up.event.isUnmodified(event)).toBe(true)
       })
 
       it('returns false if the right mouse button is used', function() {
-        const event = Trigger.createMouseEvent('mousedown', {button: 2})
+        const event = Trigger.createMouseEvent('mousedown', { button: 2 })
         expect(up.event.isUnmodified(event)).toBe(false)
       })
 
       it('returns false if shift is pressed during the click', function() {
-        const event = Trigger.createMouseEvent('mousedown', {shiftKey: 2})
+        const event = Trigger.createMouseEvent('mousedown', { shiftKey: 2 })
         expect(up.event.isUnmodified(event)).toBe(false)
       })
 
       it('returns false if ctrl is pressed during the click', function() {
-        const event = Trigger.createMouseEvent('mousedown', {ctrlKey: 2})
+        const event = Trigger.createMouseEvent('mousedown', { ctrlKey: 2 })
         expect(up.event.isUnmodified(event)).toBe(false)
       })
 
       it('returns false if meta is pressed during the click', function() {
-        const event = Trigger.createMouseEvent('mousedown', {metaKey: 2})
+        const event = Trigger.createMouseEvent('mousedown', { metaKey: 2 })
         expect(up.event.isUnmodified(event)).toBe(false)
       })
     })
@@ -858,7 +858,7 @@ describe('up.event', function() {
         })
 
         it('is "key" while a link is clicked with the keyboard', function() {
-          const link = fixture('a[href="#"]', {text: 'label'})
+          const link = fixture('a[href="#"]', { text: 'label' })
           const inputDeviceSpy = jasmine.createSpy('inputDevice spy')
           link.addEventListener('click', function(event) {
             inputDeviceSpy(up.event.inputDevice)
@@ -874,7 +874,7 @@ describe('up.event', function() {
       describe('after a mouse event was registered', function() {
 
         it('is "pointer" while clicking an element', function() {
-          const link = fixture('a[href="#"]', {text: 'label'})
+          const link = fixture('a[href="#"]', { text: 'label' })
           const inputDeviceSpy = jasmine.createSpy('inputDevice spy')
           link.addEventListener('click', function(event) {
             inputDeviceSpy(up.event.inputDevice)
@@ -887,7 +887,7 @@ describe('up.event', function() {
         })
 
         it('reverts to "unknown" one task afterwards', async function() {
-          const link = fixture('a[href="#"]', {text: 'label'})
+          const link = fixture('a[href="#"]', { text: 'label' })
 
           Trigger.clickSequence(link)
 
@@ -899,9 +899,9 @@ describe('up.event', function() {
         })
 
         it('is "pointer" during a pointerdown sequence on an element', function() {
-          const link = fixture('a[href="#"]', {text: 'label'})
+          const link = fixture('a[href="#"]', { text: 'label' })
           const inputDeviceSpy = jasmine.createSpy('inputDevice spy')
-          link.addEventListener('mousedown', _event => inputDeviceSpy(up.event.inputDevice))
+          link.addEventListener('mousedown', (_event) => inputDeviceSpy(up.event.inputDevice))
 
           Trigger.pointerdownSequence(link)
 
@@ -918,7 +918,7 @@ describe('up.event', function() {
     describe('[up-emit]', function() {
 
       it('emits an event of the given type when its link is clicked', function() {
-        const link = up.hello(fixture("a[up-emit='foo']", {text: 'label'}))
+        const link = up.hello(fixture("a[up-emit='foo']", { text: 'label' }))
         const fooListener = jasmine.createSpy('fooListener')
         link.addEventListener('foo', fooListener)
 
@@ -928,7 +928,7 @@ describe('up.event', function() {
       })
 
       it('emits an event of the given type when its button is clicked', function() {
-        const button = up.hello(fixture("button[up-emit='foo']", {text: 'label'}))
+        const button = up.hello(fixture("button[up-emit='foo']", { text: 'label' }))
         const fooListener = jasmine.createSpy('fooListener')
         button.addEventListener('foo', fooListener)
 
@@ -938,7 +938,7 @@ describe('up.event', function() {
       })
 
       it('emits an event of the given type when its input[type=button] is clicked', function() {
-        const input = up.hello(fixture("input[type=button][up-emit='foo']", {text: 'label'}))
+        const input = up.hello(fixture("input[type=button][up-emit='foo']", { text: 'label' }))
         const fooListener = jasmine.createSpy('fooListener')
         input.addEventListener('foo', fooListener)
 
@@ -948,7 +948,7 @@ describe('up.event', function() {
       })
 
       it('emits an event of the given type when its [up-clickable] is clicked', function() {
-        const clickable = up.hello(fixture("span[up-clickable][up-emit='foo']", {text: 'label'}))
+        const clickable = up.hello(fixture("span[up-clickable][up-emit='foo']", { text: 'label' }))
         const fooListener = jasmine.createSpy('fooListener')
         clickable.addEventListener('foo', fooListener)
 
@@ -958,33 +958,33 @@ describe('up.event', function() {
       })
 
       it('allows to pass event props as [up-emit-props]', function() {
-        const link = up.hello(fixture(`a[up-emit='foo'][up-emit-props='${JSON.stringify({key: 'value'})}']`, {text: 'label'}))
+        const link = up.hello(fixture(`a[up-emit='foo'][up-emit-props='${JSON.stringify({ key: 'value' })}']`, { text: 'label' }))
         const fooListener = jasmine.createSpy('fooListener')
         link.addEventListener('foo', fooListener)
 
         Trigger.clickSequence(link)
 
         expect(fooListener).toHaveBeenCalled()
-        expect(fooListener.calls.mostRecent().args[0]).toBeEvent('foo', {key: 'value'})
+        expect(fooListener.calls.mostRecent().args[0]).toBeEvent('foo', { key: 'value' })
       })
 
       it('does not emit the event if the right mouse button is used', async function() {
-        const link = up.hello(fixture("a[up-emit='foo']", {text: 'label'}))
+        const link = up.hello(fixture("a[up-emit='foo']", { text: 'label' }))
         const fooListener = jasmine.createSpy('fooListener')
         link.addEventListener('foo', fooListener)
 
-        Trigger.clickSequence(link, {button: 2})
+        Trigger.clickSequence(link, { button: 2 })
         await wait()
 
         expect(fooListener).not.toHaveBeenCalled()
       })
 
       it('does not emit the event if ctrl is pressed during the click', async function() {
-        const link = up.hello(fixture("a[up-emit='foo']", {text: 'label'}))
+        const link = up.hello(fixture("a[up-emit='foo']", { text: 'label' }))
         const fooListener = jasmine.createSpy('fooListener')
         link.addEventListener('foo', fooListener)
 
-        Trigger.clickSequence(link, {ctrlKey: true})
+        Trigger.clickSequence(link, { ctrlKey: true })
         await wait()
 
         expect(fooListener).not.toHaveBeenCalled()
@@ -1008,7 +1008,7 @@ describe('up.event', function() {
       })
 
       it('emits the event on Enter for keyboard users', function() {
-        const link = up.hello(fixture("a[up-emit='foo']", {text: 'label'}))
+        const link = up.hello(fixture("a[up-emit='foo']", { text: 'label' }))
         const fooListener = jasmine.createSpy('fooListener')
         link.addEventListener('foo', fooListener)
 
@@ -1018,24 +1018,24 @@ describe('up.event', function() {
       })
 
       it('has a pointer cursor on an <a> element', function() {
-        const link = up.hello(fixture("a[up-emit='foo']", {text: 'label'}))
+        const link = up.hello(fixture("a[up-emit='foo']", { text: 'label' }))
         expect(link).toHaveCursorStyle('pointer')
       })
 
       describe('on a non-interactive element', function() {
 
         it('is focusable for keyboard users', function() {
-          const fauxButton = up.hello(fixture("span[up-emit='foo']", {text: 'label'}))
+          const fauxButton = up.hello(fixture("span[up-emit='foo']", { text: 'label' }))
           expect(fauxButton).toBeKeyboardFocusable()
         })
 
         it('gets a [role] attribute', function() {
-          const fauxButton = up.hello(fixture("span[up-emit='foo']", {text: 'label'}))
+          const fauxButton = up.hello(fixture("span[up-emit='foo']", { text: 'label' }))
           expect(fauxButton).toHaveAttribute('role', 'button')
         })
 
         it('emits an event on Enter for keyboard users', function() {
-          const fauxButton = up.hello(fixture("span[up-emit='foo']", {text: 'label'}))
+          const fauxButton = up.hello(fixture("span[up-emit='foo']", { text: 'label' }))
           const fooListener = jasmine.createSpy('fooListener')
           fauxButton.addEventListener('foo', fooListener)
 
@@ -1045,7 +1045,7 @@ describe('up.event', function() {
         })
 
         it('emits an event on Space for keyboard users', function() {
-          const fauxButton = up.hello(fixture("span[up-emit='foo']", {text: 'label'}))
+          const fauxButton = up.hello(fixture("span[up-emit='foo']", { text: 'label' }))
           const fooListener = jasmine.createSpy('fooListener')
           fauxButton.addEventListener('foo', fooListener)
 
@@ -1055,18 +1055,18 @@ describe('up.event', function() {
         })
 
         it('has a pointer cursor as an a:not([href]) element', function() {
-          const fauxButton = up.hello(fixture("a[up-emit='foo']", {text: 'label'}))
+          const fauxButton = up.hello(fixture("a[up-emit='foo']", { text: 'label' }))
           expect(fauxButton).toHaveCursorStyle('pointer')
         })
 
         describe('with [up-clickable=false]', function() {
           it('has no pointer cursor as an a:not([href]) element', function() {
-            const fauxButton = up.hello(fixture("a[up-emit='foo'][up-clickable='false']", {text: 'label'}))
+            const fauxButton = up.hello(fixture("a[up-emit='foo'][up-clickable='false']", { text: 'label' }))
             expect(fauxButton).toHaveCursorStyle('auto')
           })
 
           it('is not focusable for keyboard users', function() {
-            const fauxButton = up.hello(fixture("a[up-emit='foo'][up-clickable='false']", {text: 'label'}))
+            const fauxButton = up.hello(fixture("a[up-emit='foo'][up-clickable='false']", { text: 'label' }))
             expect(fauxButton).not.toBeKeyboardFocusable()
           })
         })
@@ -1076,10 +1076,10 @@ describe('up.event', function() {
       describe('when the emitted event is prevented', function() {
 
         it('prevents the click event\'s default', async function() {
-          const link = up.hello(fixture("a[up-emit='foo']", {text: 'label'}))
+          const link = up.hello(fixture("a[up-emit='foo']", { text: 'label' }))
           let clickEvent = null
-          link.addEventListener('click', event => clickEvent = event)
-          link.addEventListener('foo', event => event.preventDefault())
+          link.addEventListener('click', (event) => clickEvent = event)
+          link.addEventListener('foo', (event) => event.preventDefault())
 
           Trigger.clickSequence(link)
           await wait()
@@ -1092,10 +1092,10 @@ describe('up.event', function() {
       describe('when the emitted event is stopped from propagation', function() {
 
         it('prevents an Unpoly link from being followed', async function() {
-          const link = up.hello(fixture("a[up-emit='foo'][href='/path'][up-follow]", {text: 'label'}))
+          const link = up.hello(fixture("a[up-emit='foo'][href='/path'][up-follow]", { text: 'label' }))
           const followListener = jasmine.createSpy('follow listener')
           link.addEventListener('up:link:follow', followListener)
-          link.addEventListener('foo', event => up.event.halt(event))
+          link.addEventListener('foo', (event) => up.event.halt(event))
 
           Trigger.clickSequence(link)
           await wait()

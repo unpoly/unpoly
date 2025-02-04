@@ -53,7 +53,7 @@ describe('up.rails', function() {
           })
 
           it('transforms an element that becomes followable through a user macro like [content-link]', function() {
-            up.macro('[user-make-followable]', element => element.setAttribute('up-follow', ''))
+            up.macro('[user-make-followable]', (element) => element.setAttribute('up-follow', ''))
             const $element = $fixture('a[href=/foo][user-make-followable][data-method="put"]')
             up.hello($element)
             expect($element.attr('data-method')).toBeUndefined()
@@ -114,7 +114,7 @@ describe('up.rails', function() {
         $.rails = {}
       })
 
-      u.each(upAttributes, upAttribute => describe(`on an [${upAttribute}] element`, function() {
+      u.each(upAttributes, (upAttribute) => describe(`on an [${upAttribute}] element`, function() {
 
         it("is transformed to an up-confirm attribute so the element isn't handled a second time by Rails UJS", function() {
           const $element = $fixture(`a[href="/foo"][${upAttribute}][data-confirm="Really?"]`)

@@ -10,7 +10,7 @@ describe('up.script', function() {
 
       it('applies an event initializer whenever a matching fragment is inserted', function() {
         const observeElement = jasmine.createSpy()
-        up.compiler('.child', element => observeElement(element))
+        up.compiler('.child', (element) => observeElement(element))
 
         const $container = $fixture('.container')
         const $child = $container.affix('.child')
@@ -36,7 +36,7 @@ describe('up.script', function() {
 
         it('compiles all matching elements at once', function() {
           const compiler = jasmine.createSpy('compiler')
-          up.compiler('.foo', { batch: true }, elements => compiler(elements))
+          up.compiler('.foo', { batch: true }, (elements) => compiler(elements))
           const $container = $fixture('.container')
           const first = $container.affix('.foo.first')[0]
           const second = $container.affix('.foo.second')[0]
@@ -47,7 +47,7 @@ describe('up.script', function() {
 
         it('throws an error if the batch compiler returns a destructor', function() {
           const destructor = function() {}
-          up.compiler('.element', { batch: true }, element => destructor)
+          up.compiler('.element', { batch: true }, (element) => destructor)
           const $container = $fixture('.element')
           const compile = () => up.hello($container)
           expect(compile).toThrowError(/cannot return destructor/i)
@@ -119,7 +119,7 @@ describe('up.script', function() {
           it('runs the compiler for future fragments, but not for current fragments (even if they match)', function() {
             const spy = jasmine.createSpy('compiler')
             const element1 = up.hello(fixture('.element'))
-            up.compiler('.element', { priority: 10 }, element => spy(element))
+            up.compiler('.element', { priority: 10 }, (element) => spy(element))
 
             expect(spy).not.toHaveBeenCalled()
 
@@ -140,7 +140,7 @@ describe('up.script', function() {
           it('compiles current fragments', function() {
             const spy = jasmine.createSpy('compiler')
             const element1 = up.hello(fixture('.element'))
-            up.compiler('.element', element => spy(element))
+            up.compiler('.element', (element) => spy(element))
 
             expect(spy).toHaveBeenCalledWith(element1)
           })
@@ -153,7 +153,7 @@ describe('up.script', function() {
             expect(document.querySelectorAll('.foo').length).toBe(2)
 
             const spy = jasmine.createSpy('compiler')
-            up.compiler('.foo', element => spy(element))
+            up.compiler('.foo', (element) => spy(element))
 
             expect(spy.calls.count()).toBe(2)
             expect(spy.calls.argsFor(0)[0]).toBe(rootElement)
@@ -162,18 +162,18 @@ describe('up.script', function() {
 
           it('does not compile elements twice if the new fragment contains a <script> that defines a new compiler', function() {
             const container = fixture('.container')
-            const element = e.affix(container, '.element', {text: 'old text'})
+            const element = e.affix(container, '.element', { text: 'old text' })
 
             window.compileSpy = jasmine.createSpy('compile spy')
 
-            up.render({fragment: `
+            up.render({ fragment: `
             <div class="container">
               <div class="element">new text</div>
               <script>
                 up.compiler('.element', (element) => window.compileSpy(element))
               </script>
             </div>
-          `})
+          ` })
 
             expect(window.compileSpy.calls.count()).toBe(1)
 
@@ -187,7 +187,7 @@ describe('up.script', function() {
       describe('up.$compiler()', function() {
         it('registers a compiler that receives the element as a jQuery collection', function() {
           const observeElement = jasmine.createSpy()
-          up.$compiler('.element', $element => observeElement($element))
+          up.$compiler('.element', ($element) => observeElement($element))
 
           const $element = $fixture('.element')
           up.hello($element)
@@ -232,7 +232,7 @@ describe('up.script', function() {
       })
 
       it('allows users to use the built-in [up-expand] from their own macros', function() {
-        up.macro('.element', element => element.setAttribute('up-expand', ''))
+        up.macro('.element', (element) => element.setAttribute('up-expand', ''))
         const $element = $fixture('.element a[href="/foo"][up-target=".target"]')
         up.hello($element)
         expect($element.attr('up-target')).toEqual('.target')
@@ -241,7 +241,7 @@ describe('up.script', function() {
 
       if (up.migrate.loaded) {
         it('allows users to use the built-in [up-dash] from their own macros', function() {
-          up.macro('.element', element => element.setAttribute('up-dash', '.target'))
+          up.macro('.element', (element) => element.setAttribute('up-dash', '.target'))
           const $element = $fixture('a.element[href="/foo"]')
           up.hello($element)
           expect($element.attr('up-target')).toEqual('.target')
@@ -255,8 +255,8 @@ describe('up.script', function() {
       describe('up.$macro()', function() {
         it('registers a macro that receives the element as a jQuery collection', function() {
           const observeElement = jasmine.createSpy()
-          up.$macro('.element', $element => observeElement('macro', $element))
-          up.$compiler('.element', $element => observeElement('compiler', $element))
+          up.$macro('.element', ($element) => observeElement('macro', $element))
+          up.$compiler('.element', ($element) => observeElement('compiler', $element))
 
           const $element = $fixture('.element')
           up.hello($element)
@@ -334,7 +334,7 @@ describe('up.script', function() {
       describe('when the element has an [up-data] attribute', function() {
 
         it('parses an object value serialized as JSON', function() {
-          const element = fixture('.element', {'up-data': '{ "foo": 1, "bar": 2 }'})
+          const element = fixture('.element', { 'up-data': '{ "foo": 1, "bar": 2 }' })
           const data = up.data(element)
 
           expect(data).toEqual(jasmine.any(Object))
@@ -344,7 +344,7 @@ describe('up.script', function() {
         })
 
         it('allows unquoted property names', function() {
-          const element = fixture('.element', {'up-data': '{ foo: 1, bar: 2 }'})
+          const element = fixture('.element', { 'up-data': '{ foo: 1, bar: 2 }' })
           const data = up.data(element)
 
           expect(data).toEqual(jasmine.any(Object))
@@ -354,14 +354,14 @@ describe('up.script', function() {
         })
 
         it('parses an array value serialized as JSON', function() {
-          const element = fixture('.element', {'up-data': '["foo", "bar"]'})
+          const element = fixture('.element', { 'up-data': '["foo", "bar"]' })
           const data = up.data(element)
 
           expect(data).toEqual(['foo', 'bar'])
         })
 
         it('parses a string value serialized as JSON', function() {
-          const element = fixture('.element', {'up-data': '"foo"'})
+          const element = fixture('.element', { 'up-data': '"foo"' })
           const data = up.data(element)
 
           expect(data).toBe('foo')
@@ -379,7 +379,7 @@ describe('up.script', function() {
         })
 
         it("returns access to the element's vanilla [data-] attributes", function() {
-          const element = fixture('.element', {'data-foo': 'foo value', 'data-bar': 'bar value'})
+          const element = fixture('.element', { 'data-foo': 'foo value', 'data-bar': 'bar value' })
           const data = up.data(element)
 
           expect(data.foo).toBe('foo value')
@@ -387,7 +387,7 @@ describe('up.script', function() {
         })
 
         it('allows to access [data-] attribute with camelCase keys', function() {
-          const element = fixture('.element', {'data-foo-bar': 'value'})
+          const element = fixture('.element', { 'data-foo-bar': 'value' })
           const data = up.data(element)
 
           expect(data.fooBar).toBe('value')
@@ -397,7 +397,7 @@ describe('up.script', function() {
       describe('when the element has both an [up-data] and vanilla [data-] attributes', function() {
 
         it('returns an object with properties from both', function() {
-          const element = fixture('.element', {'data-foo': 'foo value', 'up-data': JSON.stringify({bar: 'bar value'})})
+          const element = fixture('.element', { 'data-foo': 'foo value', 'up-data': JSON.stringify({ bar: 'bar value' }) })
           const data = up.data(element)
 
           expect(data.foo).toBe('foo value')
@@ -405,14 +405,14 @@ describe('up.script', function() {
         })
 
         it('allows to access [data-] attribute with camelCase keys', function() {
-          const element = fixture('.element', {'data-foo-bar': 'value1', 'up-data': JSON.stringify({baz: 'value2'})})
+          const element = fixture('.element', { 'data-foo-bar': 'value1', 'up-data': JSON.stringify({ baz: 'value2' }) })
           const data = up.data(element)
 
           expect(data.fooBar).toBe('value1')
         })
 
         it('supports the `in` operator', function() {
-          const element = fixture('.element', {'data-foo': 'foo value', 'up-data': JSON.stringify({bar: 'bar value'})})
+          const element = fixture('.element', { 'data-foo': 'foo value', 'up-data': JSON.stringify({ bar: 'bar value' }) })
           const data = up.data(element)
 
           expect('foo' in data).toBe(true)
@@ -421,21 +421,21 @@ describe('up.script', function() {
         })
 
         it('supports Object.keys()', function() {
-          const element = fixture('.element', {'data-foo': 'foo value', 'up-data': JSON.stringify({bar: 'bar value'})})
+          const element = fixture('.element', { 'data-foo': 'foo value', 'up-data': JSON.stringify({ bar: 'bar value' }) })
           const data = up.data(element)
 
           expect(Object.keys(data)).toEqual(jasmine.arrayWithExactContents(['foo', 'bar']))
         })
 
         it('prefers properties from [up-data]', function() {
-          const element = fixture('.element', {'data-foo': 'a', 'up-data': JSON.stringify({foo: 'b'})})
+          const element = fixture('.element', { 'data-foo': 'a', 'up-data': JSON.stringify({ foo: 'b' }) })
           const data = up.data(element)
 
           expect(data.foo).toBe('b')
         })
 
         it('allows to override a property from a [data-] attribute', function() {
-          const element = fixture('.element', {'data-foo': 'a', 'up-data': JSON.stringify({foo: 'b'})})
+          const element = fixture('.element', { 'data-foo': 'a', 'up-data': JSON.stringify({ foo: 'b' }) })
           const data = up.data(element)
 
           data.foo = 'new a'
@@ -444,7 +444,7 @@ describe('up.script', function() {
         })
 
         it('allows to override a property from [up-data]', function() {
-          const element = fixture('.element', {'data-foo': 'a', 'up-data': JSON.stringify({foo: 'b'})})
+          const element = fixture('.element', { 'data-foo': 'a', 'up-data': JSON.stringify({ foo: 'b' }) })
           const data = up.data(element)
 
           data.foo = 'overridden'
@@ -453,7 +453,7 @@ describe('up.script', function() {
         })
 
         it('allows to delete a property from a [data-] attribute', function() {
-          const element = fixture('.element', {'data-foo': 'a', 'up-data': JSON.stringify({bar: 'b'})})
+          const element = fixture('.element', { 'data-foo': 'a', 'up-data': JSON.stringify({ bar: 'b' }) })
           const data = up.data(element)
 
           data.foo = 'overridden'
@@ -462,7 +462,7 @@ describe('up.script', function() {
         })
 
         it('allows to delete a property from [up-data]', function() {
-          const element = fixture('.element', {'data-foo': 'a', 'up-data': JSON.stringify({foo: 'b'})})
+          const element = fixture('.element', { 'data-foo': 'a', 'up-data': JSON.stringify({ foo: 'b' }) })
           const data = up.data(element)
 
           delete data.foo
@@ -472,7 +472,7 @@ describe('up.script', function() {
         })
 
         it('allows to delete a property from a [data-] attribute', function() {
-          const element = fixture('.element', {'data-foo': 'a', 'up-data': JSON.stringify({bar: 'b'})})
+          const element = fixture('.element', { 'data-foo': 'a', 'up-data': JSON.stringify({ bar: 'b' }) })
           const data = up.data(element)
 
           delete data.foo
@@ -485,21 +485,21 @@ describe('up.script', function() {
       describe('when the element was compiled with a { data } option', function() {
 
         it('overrides properties from a [data-] attribute', function() {
-          const element = fixture('.element', {'data-foo': 'a', 'data-bar': 'b'})
-          up.hello(element, {data: { bar: 'c' }})
+          const element = fixture('.element', { 'data-foo': 'a', 'data-bar': 'b' })
+          up.hello(element, { data: { bar: 'c' } })
 
           const data = up.data(element)
 
-          expect(data).toEqual({foo: 'a', bar: 'c'})
+          expect(data).toEqual({ foo: 'a', bar: 'c' })
         })
 
         it('overrides properties from an [up-data] attribute', function() {
-          const element = fixture('.element', {'up-data': JSON.stringify({foo: 'a', bar: 'b'})})
-          up.hello(element, {data: { bar: 'c' }})
+          const element = fixture('.element', { 'up-data': JSON.stringify({ foo: 'a', bar: 'b' }) })
+          up.hello(element, { data: { bar: 'c' } })
 
           const data = up.data(element)
 
-          expect(data).toEqual({foo: 'a', bar: 'c'})
+          expect(data).toEqual({ foo: 'a', bar: 'c' })
         })
       })
 
@@ -677,7 +677,7 @@ describe('up.script', function() {
 
             const $tag = $fixture(".child").attr('up-data', JSON.stringify(data))
 
-            up.hello($tag[0], {data: { key2: 'override-value2' }})
+            up.hello($tag[0], { data: { key2: 'override-value2' } })
 
             expect(observeArgs).toHaveBeenCalledWith('child', { key1: 'value1', key2: 'override-value2' })
           })
@@ -689,8 +689,8 @@ describe('up.script', function() {
             up.compiler('.child', (element, data) => observeArgs(element.id, data))
 
             const fragment = fixture('.fragment')
-            const child1 = e.affix(fragment, '.child#child1', {'up-data': JSON.stringify({foo: 'default foo'})})
-            const child2 = e.affix(fragment, '.child#child2', {'up-data': JSON.stringify({foo: 'default foo'})})
+            const child1 = e.affix(fragment, '.child#child1', { 'up-data': JSON.stringify({ foo: 'default foo' }) })
+            const child2 = e.affix(fragment, '.child#child2', { 'up-data': JSON.stringify({ foo: 'default foo' }) })
 
             up.hello(fragment, { dataMap: {
                 '#child1': { foo: 'foo for child1' },
@@ -698,8 +698,8 @@ describe('up.script', function() {
               }
             })
 
-            expect(observeArgs.calls.argsFor(0)).toEqual(['child1', {foo: 'foo for child1'}])
-            expect(observeArgs.calls.argsFor(1)).toEqual(['child2', {foo: 'foo for child2'}])
+            expect(observeArgs.calls.argsFor(0)).toEqual(['child1', { foo: 'foo for child1' }])
+            expect(observeArgs.calls.argsFor(1)).toEqual(['child2', { foo: 'foo for child2' }])
           })
         })
 
@@ -707,7 +707,7 @@ describe('up.script', function() {
 
       it('compiles multiple matching elements one-by-one', function() {
         const compiler = jasmine.createSpy('compiler')
-        up.compiler('.foo', element => compiler(element))
+        up.compiler('.foo', (element) => compiler(element))
         const $container = $fixture('.container')
         const $first = $container.affix('.foo.first')
         const $second = $container.affix('.foo.second')
@@ -722,7 +722,7 @@ describe('up.script', function() {
 
       it('allows compilers to return a function to call when the compiled element is cleaned', function() {
         const destructor = jasmine.createSpy('destructor')
-        up.compiler('.child', element => destructor)
+        up.compiler('.child', (element) => destructor)
 
         const container = fixture('.container .child')
         up.hello(container)
@@ -735,7 +735,7 @@ describe('up.script', function() {
       it('allows compilers to return an array of functions to call when the compiled element is cleaned', function() {
         const destructor1 = jasmine.createSpy('destructor1')
         const destructor2 = jasmine.createSpy('destructor2')
-        up.compiler('.child', element => [ destructor1, destructor2 ])
+        up.compiler('.child', (element) => [ destructor1, destructor2 ])
 
         const container = fixture('.container .child')
         up.hello(container)
@@ -749,7 +749,7 @@ describe('up.script', function() {
       it('ignores return values that are not functions', function() {
         const destructor1 = jasmine.createSpy('destructor1')
         const destructor2 = jasmine.createSpy('destructor2')
-        up.compiler('.child', element => [ destructor1, 'nothing', destructor2 ])
+        up.compiler('.child', (element) => [ destructor1, 'nothing', destructor2 ])
 
         const container = fixture('.container .child')
         up.hello(container)
@@ -762,9 +762,9 @@ describe('up.script', function() {
 
       it('runs all destructors if multiple compilers are applied to the same element', function() {
         const destructor1 = jasmine.createSpy('destructor1')
-        up.compiler('.one', element => destructor1)
+        up.compiler('.one', (element) => destructor1)
         const destructor2 = jasmine.createSpy('destructor2')
-        up.compiler('.two', element => destructor2)
+        up.compiler('.two', (element) => destructor2)
 
         const element = fixture('.one.two')
         up.hello(element)
@@ -776,9 +776,9 @@ describe('up.script', function() {
       })
 
       it('does not throw an error if both container and child have a destructor, and the container gets destroyed', function() {
-        up.compiler('.container', element => (function() {}))
+        up.compiler('.container', (element) => (function() {}))
 
-        up.compiler('.child', element => (function() {}))
+        up.compiler('.child', (element) => (function() {}))
 
         const container = fixture('.container .child')
 
@@ -850,7 +850,7 @@ describe('up.script', function() {
       })
 
       it('does not find an inline script in the head', function() {
-        const script = fixture(document.head, 'script', {text: 'console.log("hello from inline script")'})
+        const script = fixture(document.head, 'script', { text: 'console.log("hello from inline script")' })
         expect(up.script.findAssets()).not.toContain(script)
       })
 

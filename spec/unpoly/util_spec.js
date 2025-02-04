@@ -94,7 +94,7 @@ describe('up.util', () => {
       describe('options slots', function() {
 
         it('parses a trailing options object', function() {
-          let args = [0, 1, { foo: 'bar'} ]
+          let args = [0, 1, { foo: 'bar' } ]
           let results = up.util.args(args, 'val', 'val', 'options')
           expect(results).toEqual([0, 1, { foo: 'bar' }])
         })
@@ -646,7 +646,7 @@ describe('up.util', () => {
     describe('up.util.flatMap', function() {
 
       it('collects the Array results of the given map function, then concatenates the result arrays into one flat array', function() {
-        const fun = x => [x, x]
+        const fun = (x) => [x, x]
         const result = up.util.flatMap([1, 2, 3], fun)
         expect(result).toEqual([1, 1, 2, 2, 3, 3])
       })
@@ -666,7 +666,7 @@ describe('up.util', () => {
 
 
       it('flattens return values that are NodeLists', function() {
-        const fun = selector => document.querySelectorAll(selector)
+        const fun = (selector) => document.querySelectorAll(selector)
 
         const foo1 = fixture('.foo-element')
         const foo2 = fixture('.foo-element')
@@ -815,7 +815,7 @@ describe('up.util', () => {
 
       it('creates a new array of values by calling the given function on each item of the given array', function() {
         const array = ["apple", "orange", "cucumber"]
-        const mapped = up.util.map(array, element => element.length)
+        const mapped = up.util.map(array, (element) => element.length)
         expect(mapped).toEqual([5, 6, 8])
       })
 
@@ -836,7 +836,7 @@ describe('up.util', () => {
         const two = fixture('.qwertz[data-value=two]')
         const collection = document.querySelectorAll('.qwertz')
 
-        const result = up.util.map(collection, elem => elem.dataset.value)
+        const result = up.util.map(collection, (elem) => elem.dataset.value)
         expect(result).toEqual(['one', 'two'])
       })
 
@@ -851,14 +851,14 @@ describe('up.util', () => {
 
       it('maps over a Set', function() {
         const set = new Set(["foo", "orange", "cucumber"])
-        const results = up.util.map(set, item => item.length)
+        const results = up.util.map(set, (item) => item.length)
         expect(results).toEqual([3, 6, 8])
       })
 
       it('maps over an iterator', function() {
         const set = new Set(["foo", "orange", "cucumber"])
         const iterator = set.values()
-        const results = up.util.map(iterator, item => item.length)
+        const results = up.util.map(iterator, (item) => item.length)
         expect(results).toEqual([3, 6, 8])
       })
     })
@@ -866,7 +866,7 @@ describe('up.util', () => {
 
     describe('up.util.mapObject', () => it('creates an object from the given array and pairer', function() {
       const array = ['foo', 'bar', 'baz']
-      const object = up.util.mapObject(array, str => [`${str}Key`, `${str}Value`])
+      const object = up.util.mapObject(array, (str) => [`${str}Key`, `${str}Value`])
       expect(object).toEqual({
         fooKey: 'fooValue',
         barKey: 'barValue',
@@ -879,7 +879,7 @@ describe('up.util', () => {
       it('calls the given function once for each item of the given array', function() {
         const args = []
         const array = ["apple", "orange", "cucumber"]
-        up.util.each(array, item => args.push(item))
+        up.util.each(array, (item) => args.push(item))
         expect(args).toEqual(["apple", "orange", "cucumber"])
       })
 
@@ -936,7 +936,7 @@ describe('up.util', () => {
 
       it('returns an array of those elements in the given array for which the given function returns true', function() {
         const array = ["foo", "orange", "cucumber"]
-        const results = up.util.filter(array, item => item.length > 3)
+        const results = up.util.filter(array, (item) => item.length > 3)
         expect(results).toEqual(['orange', 'cucumber'])
       })
 
@@ -965,14 +965,14 @@ describe('up.util', () => {
 
       it('iterates over a Set', function() {
         const set = new Set(["foo", "orange", "cucumber"])
-        const results = up.util.filter(set, item => item.length > 3)
+        const results = up.util.filter(set, (item) => item.length > 3)
         expect(results).toEqual(['orange', 'cucumber'])
       })
 
       it('iterates over an iterator', function() {
         const set = new Set(["foo", "orange", "cucumber"])
         const iterator = set.values()
-        const results = up.util.filter(iterator, item => item.length > 3)
+        const results = up.util.filter(iterator, (item) => item.length > 3)
         expect(results).toEqual(['orange', 'cucumber'])
       })
     })
@@ -981,7 +981,7 @@ describe('up.util', () => {
 
       it('returns an array of those elements in the given array for which the given function returns false', function() {
         const array = ["foo", "orange", "cucumber"]
-        const results = up.util.reject(array, item => item.length < 4)
+        const results = up.util.reject(array, (item) => item.length < 4)
         expect(results).toEqual(['orange', 'cucumber'])
       })
 
@@ -1110,7 +1110,7 @@ describe('up.util', () => {
 
       it('does not add empty keys to the returned object if the given object does not have that key', function() {
         const original =
-          {foo: 'foo-value'}
+          { foo: 'foo-value' }
         const whitelisted = up.util.pick(original, ['foo', 'bar'])
         expect(whitelisted).toHaveOwnProperty('foo')
         expect(whitelisted).not.toHaveOwnProperty('bar')
@@ -1121,7 +1121,7 @@ describe('up.util', () => {
           foo: 'foo-value',
           bar: 'bar-value'
         }
-        Object.defineProperty(original, 'baz', {get() { return 'baz-value' }})
+        Object.defineProperty(original, 'baz', { get() { return 'baz-value' } })
         const whitelisted = up.util.pick(original, ['foo', 'baz'])
         expect(whitelisted).toEqual({
           foo: 'foo-value',
@@ -1131,7 +1131,7 @@ describe('up.util', () => {
 
       it('copies inherited properties', function() {
         const parent =
-          {foo: 'foo-value'}
+          { foo: 'foo-value' }
         const child = Object.create(parent)
         child.bar = 'bar-value'
         child.baz = 'baz-value'
@@ -1325,7 +1325,7 @@ describe('up.util', () => {
           d: 'DEH',
           e: 'EH'
         }
-        const fn = el => map[el]
+        const fn = (el) => map[el]
 
         const result = up.util.findResult(['a', 'b', 'c', 'd', 'e'], fn)
         expect(result).toEqual('DEH')
@@ -1333,7 +1333,7 @@ describe('up.util', () => {
 
       it('returns undefined if the function does not return a truthy value for any element in the array', function() {
         const map = {}
-        const fn = el => map[el]
+        const fn = (el) => map[el]
 
         const result = up.util.findResult(['a', 'b', 'c'], fn)
         expect(result).toBeUndefined()
@@ -1420,7 +1420,7 @@ describe('up.util', () => {
       })
 
       it('returns true for an object with at least one key', () => {
-        expect(up.util.isBlank({key: 'value'})).toBe(false)
+        expect(up.util.isBlank({ key: 'value' })).toBe(false)
       })
 
       it('returns true for an object with an [up.util.isBlank.key] method that returns true', function() {
@@ -1478,7 +1478,7 @@ describe('up.util', () => {
       })
 
       it('strips a query string with { search: false } option', () => {
-        expect(up.util.normalizeURL('/foo/bar?key=value', {search: false})).toBe('/foo/bar')
+        expect(up.util.normalizeURL('/foo/bar?key=value', { search: false })).toBe('/foo/bar')
       })
 
       it('normalizes a result from up.util.parseURL()', function() {
@@ -1498,11 +1498,11 @@ describe('up.util', () => {
         })
 
         it('strips a trailing slash with { trailingSlash: false }', () => {
-          expect(up.util.normalizeURL('/foo/', {trailingSlash: false})).toEqual("/foo")
+          expect(up.util.normalizeURL('/foo/', { trailingSlash: false })).toEqual("/foo")
         })
 
         it('does not strip a trailing slash when passed the "/" URL', () => {
-          expect(up.util.normalizeURL('/', {trailingSlash: false})).toEqual("/")
+          expect(up.util.normalizeURL('/', { trailingSlash: false })).toEqual("/")
         })
       })
 
@@ -1513,7 +1513,7 @@ describe('up.util', () => {
       describe('hash fragments', function() {
 
         it('strips a #hash with { hash: false }', () => {
-          expect(up.util.normalizeURL('/foo/bar#fragment', {hash: false})).toBe('/foo/bar')
+          expect(up.util.normalizeURL('/foo/bar#fragment', { hash: false })).toBe('/foo/bar')
         })
 
         it('preserves a #hash by default', () => {
@@ -1530,13 +1530,13 @@ describe('up.util', () => {
 
       it('finds the first element in the given array that matches the given tester', function() {
         const array = ['foo', 'bar', 'baz']
-        const tester = element => element[0] === 'b'
+        const tester = (element) => element[0] === 'b'
         expect(up.util.find(array, tester)).toEqual('bar')
       })
 
       it("returns undefined if the given array doesn't contain a matching element", function() {
         const array = ['foo', 'bar', 'baz']
-        const tester = element => element[0] === 'z'
+        const tester = (element) => element[0] === 'z'
         expect(up.util.find(array, tester)).toBeUndefined()
       })
     })
@@ -1629,14 +1629,14 @@ describe('up.util', () => {
     describe('up.util.renameKey', function() {
 
       it('renames a key in the given property', function() {
-        const object = { a: 'a value', b: 'b value'}
+        const object = { a: 'a value', b: 'b value' }
         u.renameKey(object, 'a', 'c')
         expect(object.b).toBe('b value')
         expect(object.c).toBe('a value')
       })
 
       it('deletes a renamed key from the object', function() {
-        const object = { a: 'a value'}
+        const object = { a: 'a value' }
         u.renameKey(object, 'a', 'c')
         expect(object.c).toBe('a value')
         expect(object).not.toHaveKey('a')
@@ -1684,7 +1684,7 @@ describe('up.util', () => {
       })
 
       it('returns true for an object literal', () => {
-        expect(up.util.isOptions({ foo: 'bar'})).toBe(true)
+        expect(up.util.isOptions({ foo: 'bar' })).toBe(true)
       })
 
       it('returns true for a prototype-less object', () => {
@@ -1737,7 +1737,7 @@ describe('up.util', () => {
       })
 
       it('returns true for an object literal', () => {
-        expect(up.util.isObject({ foo: 'bar'})).toBe(true)
+        expect(up.util.isObject({ foo: 'bar' })).toBe(true)
       })
 
       it('returns false for undefined', () => {
@@ -1802,7 +1802,7 @@ describe('up.util', () => {
 
       it('overrides (not merges) keys with object value', function() {
         let obj = { a: '1', b: { c: '2', d: '3' } }
-        const other = { e: '4', b: { f: '5', g: '6' }}
+        const other = { e: '4', b: { f: '5', g: '6' } }
         obj = up.util.merge(obj, other)
         expect(obj).toEqual({ a: '1', e: '4', b: { f: '5', g: '6' } })
       })
@@ -1975,7 +1975,7 @@ describe('up.util', () => {
       })
 
       it('returns a shallow copy of the given plain object', function() {
-        const original = {a: 'b', c: [1, 2], d: 'e'}
+        const original = { a: 'b', c: [1, 2], d: 'e' }
 
         const copy = up.util.copy(original)
         expect(copy).toEqual(original)
@@ -2190,7 +2190,7 @@ describe('up.util', () => {
       })
 
       it('returns true for an up.Request', function() {
-        const value = new up.Request({url: '/path'})
+        const value = new up.Request({ url: '/path' })
         expect(up.util.isPromise(value)).toBe(true)
       })
 
@@ -2348,7 +2348,7 @@ describe('up.util', () => {
 
         it("skips a key if a getter crashes", function() {
           const object = {}
-          Object.defineProperty(object, 'foo', {get() { throw "error" }})
+          Object.defineProperty(object, 'foo', { get() { throw "error" } })
           let formatted = up.util.sprintf('before %o after', object)
           expect(formatted).toEqual('before {} after')
 
@@ -2374,21 +2374,21 @@ describe('up.util', () => {
 
       it('returns a copy of the given object, but with keys transformed by the given function', function() {
         const source = { foo: 1, bar: 2 }
-        const upcase = str => str.toUpperCase()
+        const upcase = (str) => str.toUpperCase()
         const copy = up.util.withRenamedKeys(source, upcase)
         expect(copy).toEqual({ FOO: 1, BAR: 2 })
       })
 
       it('does not change the given object', function() {
         const source = { foo: 1 }
-        const upcase = str => str.toUpperCase()
+        const upcase = (str) => str.toUpperCase()
         up.util.withRenamedKeys(source, upcase)
         expect(source).toEqual({ foo: 1  })
       })
 
       it('omits keys for which the function returns undefined', function() {
         const source = { foo: 1, bar: 2 }
-        const transformKey = str => {
+        const transformKey = (str) => {
           if (str === 'bar') return str.toUpperCase()
         }
         expect(transformKey('foo')).toBe(undefined)
@@ -3197,7 +3197,7 @@ describe('up.util', () => {
         })
 
         it('parses a property value with single quotes', function() {
-          expect(up.util.parseRelaxedJSON("{ 'foo': 1, 'bar': 2 }")).toEqual({ foo: 1, bar: 2})
+          expect(up.util.parseRelaxedJSON("{ 'foo': 1, 'bar': 2 }")).toEqual({ foo: 1, bar: 2 })
         })
 
         it('does not change single quotes inside a double-quoted string', function() {
@@ -3209,11 +3209,11 @@ describe('up.util', () => {
         })
 
         it('allows unquoted property names', function() {
-          expect(up.util.parseRelaxedJSON("{ foo: 1, bar: 2 }")).toEqual({ foo: 1, bar: 2})
+          expect(up.util.parseRelaxedJSON("{ foo: 1, bar: 2 }")).toEqual({ foo: 1, bar: 2 })
         })
 
         it('allows unquoted property names starting with "true" or "null"', function() {
-          expect(up.util.parseRelaxedJSON("{ trueFoo: 1, nullBar: 2 }")).toEqual({ trueFoo: 1, nullBar: 2})
+          expect(up.util.parseRelaxedJSON("{ trueFoo: 1, nullBar: 2 }")).toEqual({ trueFoo: 1, nullBar: 2 })
         })
 
         it('does not change unquoted property names inside a string', function() {
@@ -3221,7 +3221,7 @@ describe('up.util', () => {
         })
 
         it('allows trailing commas in object literals', function() {
-          expect(up.util.parseRelaxedJSON("{ foo: 1, bar: 2, }")).toEqual({ foo: 1, bar: 2})
+          expect(up.util.parseRelaxedJSON("{ foo: 1, bar: 2, }")).toEqual({ foo: 1, bar: 2 })
         })
 
         it('allows trailing commas in array literals', function() {
@@ -3257,7 +3257,7 @@ describe('up.util', () => {
         it('parses nested objects', function() {
           let str = 'foo bar { baz: { qux: 3 } }'
           let result = up.util.parseScalarJSONPairs(str)
-          expect(result).toEqual([['foo bar', { baz: {qux: 3 } }]])
+          expect(result).toEqual([['foo bar', { baz: { qux: 3 } }]])
         })
 
         it('parses multiple pairs separated by comma', function() {

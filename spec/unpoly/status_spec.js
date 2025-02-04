@@ -89,11 +89,11 @@ describe('up.status', function() {
       })
 
       it('removes .up-current classes from all nav links in overlays without history', async function() {
-        const overlay = await up.layer.open({history: false, content: `
+        const overlay = await up.layer.open({ history: false, content: `
           <nav>
             <a id="overlay-link" href='/bar'></a>
           </nav>
-        `})
+        ` })
 
         const link = overlay.element.querySelector('#overlay-link')
 
@@ -865,7 +865,7 @@ describe('up.status', function() {
           done()
         })
 
-        up.render('#container', {content: '<a href="/bar">label</a>', history: true, location: '/bar'})
+        up.render('#container', { content: '<a href="/bar">label</a>', history: true, location: '/bar' })
       })
 
       it('marks the element as .up-current if itself is a link to the current URL', function() {
@@ -1100,7 +1100,7 @@ describe('up.status', function() {
 
         it('marks an existing link as .up-current as it becomes current', async function() {
           replaceURL('/page1')
-          fixture('#content', {text: 'content1'})
+          fixture('#content', { text: 'content1' })
           const nav = fixture('[up-nav]')
           const link1 = e.affix(nav, 'a[href="/page1"]')
           const link2 = e.affix(nav, 'a[href="/page2"]')
@@ -1109,7 +1109,7 @@ describe('up.status', function() {
           expect(link1).toHaveClass('up-current')
           expect(link2).not.toHaveClass('up-current')
 
-          up.render('#content', {content: 'content2', history: true, location: '/page2'})
+          up.render('#content', { content: 'content2', history: true, location: '/page2' })
 
           await wait()
 
@@ -1120,7 +1120,7 @@ describe('up.status', function() {
 
         it('marks an existing expanded link as .up-current as it becomes current', async function() {
           replaceURL('/page1')
-          fixture('#content', {text: 'content1'})
+          fixture('#content', { text: 'content1' })
           const nav = fixture('[up-nav]')
           const wrapper1 = e.affix(nav, 'span[up-expand]')
           const link1 = e.affix(wrapper1, 'a[href="/page1"]')
@@ -1133,7 +1133,7 @@ describe('up.status', function() {
           expect(wrapper2).not.toHaveClass('up-current')
           expect(link2).not.toHaveClass('up-current')
 
-          up.render('#content', {content: 'content2', history: true, location: '/page2'})
+          up.render('#content', { content: 'content2', history: true, location: '/page2' })
 
           await wait()
 
@@ -1245,7 +1245,7 @@ describe('up.status', function() {
 
           await wait()
 
-          up.layer.open({url: '/layer-url', target: '.layer-content'})
+          up.layer.open({ url: '/layer-url', target: '.layer-content' })
 
           await wait()
 
@@ -1298,7 +1298,7 @@ describe('up.status', function() {
 
           await wait()
 
-          up.layer.open({target: '.layer-content', url: '/layer-url', history: false})
+          up.layer.open({ target: '.layer-content', url: '/layer-url', history: false })
 
           await wait()
 
@@ -1314,7 +1314,7 @@ describe('up.status', function() {
           expect(this.layerLinkToLayerURL).toHaveClass('up-current')
           expect(this.layerLinkToOtherURL).not.toHaveClass('up-current')
 
-          up.navigate({target: '.layer-content', url: '/other-url'})
+          up.navigate({ target: '.layer-content', url: '/other-url' })
 
           await wait()
 
@@ -1334,7 +1334,7 @@ describe('up.status', function() {
           const $more = $nav.affix('.more')
           up.hello($nav)
 
-          up.render({fragment: '<div class="more"><a href="/bar"></div>', history: true, location: '/bar'})
+          up.render({ fragment: '<div class="more"><a href="/bar"></div>', history: true, location: '/bar' })
 
           await wait()
 
@@ -1351,7 +1351,7 @@ describe('up.status', function() {
       it('gives the loading element an .up-loading class', async function() {
         fixture('.target')
 
-        up.render('.target', {url: '/path', feedback: true})
+        up.render('.target', { url: '/path', feedback: true })
 
         await wait()
 
@@ -1382,13 +1382,13 @@ describe('up.status', function() {
       it('removes the .up-loading class when the fragment was updated', async function() {
         fixture('.target')
 
-        up.render('.target', {url: '/path', feedback: true})
+        up.render('.target', { url: '/path', feedback: true })
 
         await wait()
 
         expect('.target').toHaveClass('up-loading')
 
-        jasmine.respondWithSelector('.target', {text: 'new text'})
+        jasmine.respondWithSelector('.target', { text: 'new text' })
 
         await wait()
 
@@ -1400,12 +1400,12 @@ describe('up.status', function() {
         fixture('.target')
         fixture('.fail-target')
 
-        const renderJob = up.render('.target', {url: '/path', failTarget: '.fail-target', feedback: true})
+        const renderJob = up.render('.target', { url: '/path', failTarget: '.fail-target', feedback: true })
 
         await wait()
 
         expect('.target').toHaveClass('up-loading')
-        jasmine.respondWithSelector('.fail-target', {text: 'new text', status: 422})
+        jasmine.respondWithSelector('.fail-target', { text: 'new text', status: 422 })
 
         await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
 
@@ -1415,12 +1415,12 @@ describe('up.status', function() {
       })
 
       it('assigns .load-loading on the correct element if a guard event listeners changes target', async function() {
-        fixture('#foo', {text: 'old foo'})
-        fixture('#bar', {text: 'old bar'})
+        fixture('#foo', { text: 'old foo' })
+        fixture('#bar', { text: 'old bar' })
 
         const link = fixture('a[href="/path"][up-target="#foo"]')
 
-        const listener = jasmine.createSpy('follow listener').and.callFake(event => event.renderOptions.target = '#bar')
+        const listener = jasmine.createSpy('follow listener').and.callFake((event) => event.renderOptions.target = '#bar')
 
         link.addEventListener('up:link:follow', listener)
 
@@ -1439,7 +1439,7 @@ describe('up.status', function() {
         up.status.config.loadingClasses.push('custom-loading')
         fixture('.target')
 
-        up.render('.target', {url: '/path', feedback: true})
+        up.render('.target', { url: '/path', feedback: true })
 
         await wait()
 

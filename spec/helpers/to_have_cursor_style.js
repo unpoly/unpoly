@@ -12,9 +12,9 @@ beforeEach(function() {
           const pass = (actualStyle === expectedStyle)
 
           if (pass) {
-            message = `Expected element to not have cursor style \"${expectedStyle}\"`
+            message = `Expected element to not have cursor style "${expectedStyle}"`
           } else {
-            message = `Expected element to have cursor style \"${expectedStyle}\", but its cursor style was \"${actualStyle}\"`
+            message = `Expected element to have cursor style "${expectedStyle}", but its cursor style was "${actualStyle}"`
           }
 
           return { pass, message }

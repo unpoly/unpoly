@@ -80,12 +80,12 @@ describe('up.history', function() {
 
           it('returns true if the given path is the current URL with a #hash', function() {
             history.replaceState?.({}, 'title', '/host/path/')
-            expect(up.history.isLocation('/host/path/#hash', {hash: false})).toBe(true)
+            expect(up.history.isLocation('/host/path/#hash', { hash: false })).toBe(true)
           })
 
           it('returns true if the given path is the current URL without a #hash', function() {
             history.replaceState?.({}, 'title', '/host/path/#hash')
-            expect(up.history.isLocation('/host/path/', {hash: false})).toBe(true)
+            expect(up.history.isLocation('/host/path/', { hash: false })).toBe(true)
           })
         })
       })
@@ -235,9 +235,9 @@ describe('up.history', function() {
         const normalize = up.util.normalizeURL
 
         const events = []
-        up.on('up:location:changed', event => events.push([event.reason, normalize(event.location)]))
+        up.on('up:location:changed', (event) => events.push([event.reason, normalize(event.location)]))
 
-        up.navigate('.content', {url: '/foo', history: true})
+        up.navigate('.content', { url: '/foo', history: true })
 
         const tolerance = 150
 
@@ -250,7 +250,7 @@ describe('up.history', function() {
           ['push', normalize('/foo')]
         ])
 
-        up.navigate('.content', {url: '/bar', history: true})
+        up.navigate('.content', { url: '/bar', history: true })
         await wait()
 
         respond()
@@ -261,7 +261,7 @@ describe('up.history', function() {
           ['push', normalize('/bar')]
         ])
 
-        up.navigate('.content', {url: '/baz', history: true})
+        up.navigate('.content', { url: '/baz', history: true })
         await wait()
 
         respond()
@@ -380,7 +380,7 @@ describe('up.history', function() {
 
         it('emits an up:location:restore event that users can prevent and substitute their own restoration logic', async function() {
           const waitForBrowser = 100
-          const main = fixture('main#main', {text: 'original content'})
+          const main = fixture('main#main', { text: 'original content' })
           up.history.config.restoreTargets = [':main']
           const restoreListener = jasmine.createSpy('up:location:restore listener').and.callFake((event) => {
             event.preventDefault()
@@ -408,10 +408,10 @@ describe('up.history', function() {
 
         it('lets users mutate event.renderOptions to customize the restoration pass', async function() {
           const waitForBrowser = 100
-          fixture('#main', {text: 'original main'})
-          fixture('#other', {text: 'original other'})
+          fixture('#main', { text: 'original main' })
+          fixture('#other', { text: 'original other' })
           up.history.config.restoreTargets = ['#main']
-          const restoreListener = jasmine.createSpy('up:location:restore listener').and.callFake(event => event.renderOptions.target = '#other')
+          const restoreListener = jasmine.createSpy('up:location:restore listener').and.callFake((event) => event.renderOptions.target = '#other')
 
           up.on('up:location:restore', restoreListener)
 
@@ -453,12 +453,12 @@ describe('up.history', function() {
 
         it('restores a page from cache', async function() {
           const waitForBrowser = 100
-          fixture('main', {text: 'original content'})
+          fixture('main', { text: 'original content' })
           up.history.config.restoreTargets = [':main']
 
           up.navigate({ target: 'main', url: '/path1' })
           await wait()
-          jasmine.respondWithSelector('main', {text: 'path1 content'})
+          jasmine.respondWithSelector('main', { text: 'path1 content' })
           await wait()
 
           expect(up.history.location).toMatchURL('/path1')
@@ -466,7 +466,7 @@ describe('up.history', function() {
 
           up.navigate({ target: 'main', url: '/path2' })
           await wait()
-          jasmine.respondWithSelector('main', {text: 'path2 content'})
+          jasmine.respondWithSelector('main', { text: 'path2 content' })
           await wait()
 
           expect(up.history.location).toMatchURL('/path2')
@@ -485,14 +485,14 @@ describe('up.history', function() {
         it('revalidates expired cache entries after restoration', async function() {
           const waitForBrowser = 100
           up.network.config.cacheExpireAge = 1
-          fixture('main', {text: 'original content'})
+          fixture('main', { text: 'original content' })
           up.history.config.restoreTargets = [':main']
 
           up.navigate({ target: 'main', url: '/path1' })
           await wait()
           expect(jasmine.Ajax.requests.count()).toBe(1)
 
-          jasmine.respondWithSelector('main', {text: 'path1 content'})
+          jasmine.respondWithSelector('main', { text: 'path1 content' })
           await wait()
 
           expect(up.history.location).toMatchURL('/path1')
@@ -503,7 +503,7 @@ describe('up.history', function() {
 
           expect(jasmine.Ajax.requests.count()).toBe(2)
 
-          jasmine.respondWithSelector('main', {text: 'path2 content'})
+          jasmine.respondWithSelector('main', { text: 'path2 content' })
           await wait()
 
           expect(up.history.location).toMatchURL('/path2')
@@ -518,7 +518,7 @@ describe('up.history', function() {
           // No additional request was made
           expect(jasmine.Ajax.requests.count()).toBe(3)
 
-          jasmine.respondWithSelector('main', {text: 'revalidated path1 content'})
+          jasmine.respondWithSelector('main', { text: 'revalidated path1 content' })
           await wait()
 
           expect(up.history.location).toMatchURL('/path1')
@@ -535,7 +535,7 @@ describe('up.history', function() {
           up.fragment.config.mainTargets = ['main']
           up.history.config.restoreTargets = [':main']
           const main = fixture('main')
-          const link = e.affix(main, 'a[href="/focus-path2"][up-follow]', {text: 'link label'})
+          const link = e.affix(main, 'a[href="/focus-path2"][up-follow]', { text: 'link label' })
 
           up.history.replace('/focus-path1')
           await wait()
@@ -546,7 +546,7 @@ describe('up.history', function() {
           expect(link).toBeFocused()
           expect(jasmine.Ajax.requests.count()).toBe(1)
 
-          jasmine.respondWithSelector('main', {text: 'new text'})
+          jasmine.respondWithSelector('main', { text: 'new text' })
           await wait()
 
           expect('main').toHaveText('new text')
@@ -590,7 +590,7 @@ describe('up.history', function() {
 
           up.history.replace('/scroll-restauration-spec')
 
-          up.navigate('.content', {url: '/test-one', history: true})
+          up.navigate('.content', { url: '/test-one', history: true })
           await wait(waitForBrowser)
 
           respond()
@@ -598,7 +598,7 @@ describe('up.history', function() {
 
           expect(location.href).toMatchURL('/test-one')
           $viewport.scrollTop(50)
-          up.navigate('.content', {url: '/test-two', history: true})
+          up.navigate('.content', { url: '/test-two', history: true })
           await wait(waitForBrowser)
 
           respond()
@@ -606,7 +606,7 @@ describe('up.history', function() {
 
           expect(location.href).toMatchURL('/test-two')
           $('.viewport').scrollTop(150)
-          up.navigate('.content', {url: '/test-three', history: true})
+          up.navigate('.content', { url: '/test-three', history: true })
           await wait(waitForBrowser)
 
           respond()
@@ -654,7 +654,7 @@ describe('up.history', function() {
 
           up.history.replace('/restore-path1')
 
-          up.navigate('.content', {url: '/restore-path2', history: true})
+          up.navigate('.content', { url: '/restore-path2', history: true })
           await wait()
 
           respond()
@@ -695,7 +695,7 @@ describe('up.history', function() {
           const $screen = $fixture('.screen')
           $screen.html(html)
 
-          up.navigate('.content1, .content2', {url: '/one', reveal: false, history: true})
+          up.navigate('.content1, .content2', { url: '/one', reveal: false, history: true })
           await wait()
 
           respond()
@@ -706,7 +706,7 @@ describe('up.history', function() {
           expect('.viewport1').toBeScrolledTo(3000)
           expect('.viewport2').toBeScrolledTo(3050)
 
-          up.navigate('.content1, .content2', {url: '/two', reveal: false, history: true})
+          up.navigate('.content1, .content2', { url: '/two', reveal: false, history: true })
           await wait()
 
           respond()
@@ -728,7 +728,7 @@ describe('up.history', function() {
       it('sets an [up-href] attribute to the previous URL and sets the up-scroll attribute to "restore"', function() {
         up.history.push('/path1')
         up.history.push('/path2')
-        const element = up.hello(fixture('a[href="/path3"][up-back]', {text: 'text'}))
+        const element = up.hello(fixture('a[href="/path3"][up-back]', { text: 'text' }))
         expect(element.getAttribute('href')).toMatchURL('/path3')
         expect(element.getAttribute('up-href')).toMatchURL('/path1')
         expect(element.getAttribute('up-scroll')).toBe('restore')

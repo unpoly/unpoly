@@ -9,13 +9,13 @@ describe('up.browser', function() {
 
       it('shows a confirmation dialog with the given message', function() {
         spyOn(window, 'confirm').and.returnValue(true)
-        up.browser.assertConfirmed({confirm: 'Do action?'})
+        up.browser.assertConfirmed({ confirm: 'Do action?' })
         expect(window.confirm).toHaveBeenCalledWith('Do action?')
       })
 
       it('throws an AbortError when any listener calls event.preventDefault()', function() {
         spyOn(window, 'confirm').and.returnValue(false)
-        const call = () => up.browser.assertConfirmed({confirm: 'Do action?'})
+        const call = () => up.browser.assertConfirmed({ confirm: 'Do action?' })
         expect(call).toAbort()
       })
 
