@@ -60,7 +60,6 @@ module.exports = {
         "spyOn": "readonly",
         "spyOnProperty": "readonly",
         "pending": "readonly",
-        "asyncSpec": "readonly",
         "fixture": "readonly",
         "fixtureStyle": "readonly",
         "fixtureStyleSheet": "readonly",
