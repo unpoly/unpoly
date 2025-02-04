@@ -32,16 +32,16 @@ describe 'up.Layer.Popup', ->
 
       return { origin, popup, popupRect, originRect }
 
-    it 'repositions when the window is resized', asyncSpec (next) ->
+    it 'repositions when the window is resized', ->
       { origin, popup } = openPopup()
 
       origin.style.left = '85px'
       expect(popup.element.style.left).not.toBe(origin.style.left)
 
       up.emit(window, 'resize')
+      await wait()
 
-      next ->
-        expect(popup.element.style.left).toBe(origin.style.left)
+      expect(popup.element.style.left).toBe(origin.style.left)
 
     describe 'with { position: "bottom", align: "left" }', ->
 

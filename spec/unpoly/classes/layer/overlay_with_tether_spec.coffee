@@ -5,7 +5,7 @@ describe 'up.Layer.OverlayWithTether', ->
 
   describe 'preservation of overlays during fragment changes', ->
 
-    it 'dismisses the overlay when its viewport has been removed', asyncSpec (next) ->
+    it 'dismisses the overlay when its viewport has been removed', ->
       viewport = fixture('.viewport', style: {
         'width': '300px',
         'height': '200px',
@@ -16,33 +16,30 @@ describe 'up.Layer.OverlayWithTether', ->
 
       onDismissed = jasmine.createSpy('onDismissed spy')
       up.on('up:layer:dismissed', onDismissed)
+      await wait()
 
-      next ->
-        expect(up.layer.count).toBe(2)
+      expect(up.layer.count).toBe(2)
 
-      next ->
-        up.destroy(viewport)
+      up.destroy(viewport)
+      await wait()
 
-      next ->
-        expect(up.layer.count).toBe(1)
-        expect(onDismissed).toHaveBeenCalled()
+      expect(up.layer.count).toBe(1)
+      expect(onDismissed).toHaveBeenCalled()
 
-    it 'dismisses the overlay when its anchor has been removed', asyncSpec (next) ->
+    it 'dismisses the overlay when its anchor has been removed', ->
       opener = fixture('.opener')
       up.layer.open(origin: opener, mode: 'popup', animation: false)
 
       onDismissed = jasmine.createSpy('onDismissed spy')
       up.on('up:layer:dismissed', onDismissed)
 
-      next ->
-        expect(up.layer.count).toBe(2)
+      expect(up.layer.count).toBe(2)
 
-      next ->
-        up.destroy(opener)
+      up.destroy(opener)
+      await wait()
 
-      next ->
-        expect(up.layer.count).toBe(1)
-        expect(onDismissed).toHaveBeenCalled()
+      expect(up.layer.count).toBe(1)
+      expect(onDismissed).toHaveBeenCalled()
 
 #    it 're-attaches the overlay when it has been manually removed from the DOM', asyncSpec (next) ->
 #      opener = fixture('.opener')

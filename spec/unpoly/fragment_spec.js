@@ -714,21 +714,6 @@ describe('up.fragment', function() {
         })
       })
 
-//        it 'returns a promise for an up.RenderResult describing the request and response', asyncSpec (next) ->
-//          fixture('.target', text: 'old text')
-//          responseText = '<div class="target">new text</div>'
-//
-//          promise = up.render('.target', url: '/path')
-//
-//          next ->
-//            jasmine.respondWith(responseText)
-//            next.await(promise)
-//
-//          next (result) ->
-//            expect(result.request).toEqual(jasmine.any(up.Request))
-//            expect(result.request.url).toMatchURL('/path')
-//            expect(result.response).toEqual(jasmine.any(up.Respinse))
-//            expect(result.response.text).toBe(responseText)
 
       describe('compilation', function() {
 
@@ -3709,30 +3694,6 @@ describe('up.fragment', function() {
             expect(elements[2]).toHaveText('old three')
           })
         })
-
-//          it 'considers an Element argument to be the origin if no { origin } is given', asyncSpec (next) ->
-//            root = fixture('.element#root')
-//            one = e.affix(root, '.element', text: 'old one')
-//            two = e.affix(root, '.element', text: 'old two')
-//            three = e.affix(root, '.element', text: 'old three')
-//
-//            up.render(two, content: 'new text')
-//
-//            next =>
-//              elements = document.querySelectorAll('.element')
-//              expect(elements.length).toBe(4)
-//
-//              # While #root is an ancestor, two was closer
-//              expect(elements[0]).toMatchSelector('#root')
-//
-//              # One is a sibling of two
-//              expect(elements[1]).toHaveText('old one')
-//
-//              # Two is the closest match around the origin (childOfTwo)
-//              expect(elements[2]).toHaveText('new text')
-//
-//              # Three is a sibling of three
-//              expect(elements[3]).toHaveText('old three')
 
 
         describe('non-standard selector extensions', function() {

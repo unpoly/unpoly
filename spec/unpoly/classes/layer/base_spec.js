@@ -60,23 +60,22 @@ describe('up.Layer', function() {
       expect(listener).not.toHaveBeenCalled()
     })
 
-    it('allows to pass a selector for event delegation as second argument', asyncSpec(function(next) {
+    it('allows to pass a selector for event delegation as second argument', async function() {
       const listener = jasmine.createSpy('event listener')
 
       makeLayers(2)
+      await wait()
 
-      next(function() {
-        up.layer.on('foo', '.two', listener)
-        const one = up.layer.affix('.one')
-        const two = up.layer.affix('.two')
+      up.layer.on('foo', '.two', listener)
+      const one = up.layer.affix('.one')
+      const two = up.layer.affix('.two')
 
-        up.emit(one, 'foo')
-        expect(listener).not.toHaveBeenCalled()
+      up.emit(one, 'foo')
+      expect(listener).not.toHaveBeenCalled()
 
-        up.emit(two, 'foo')
-        expect(listener).toHaveBeenCalled()
-      })
-    }))
+      up.emit(two, 'foo')
+      expect(listener).toHaveBeenCalled()
+    })
 
     it('sets up.layer.current to this layer while the listener is running', function() {
       const currentSpy = jasmine.createSpy()
