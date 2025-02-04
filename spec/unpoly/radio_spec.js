@@ -482,8 +482,8 @@ describe('up.radio', function() {
 
         await wait()
 
-        expect(this.lastRequest().requestHeaders["X-Up-Target"]).toEqual(".target")
-        expect(this.lastRequest().requestHeaders["X-Up-Fail-Target"]).toEqual(".fail-target")
+        expect(jasmine.lastRequest().requestHeaders["X-Up-Target"]).toEqual(".target")
+        expect(jasmine.lastRequest().requestHeaders["X-Up-Fail-Target"]).toEqual(".fail-target")
       })
 
       it('does replace the element when the server responds with an error (e.g. for error flashes)', async function() {

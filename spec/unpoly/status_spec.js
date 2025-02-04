@@ -1156,7 +1156,7 @@ describe('up.status', function() {
 
           await wait()
 
-          this.respondWith({
+          jasmine.respondWith({
             responseHeaders: { 'X-Up-Location': '/fork/' },
             responseText: '<div class="main">new-text</div>'
           })
@@ -1178,7 +1178,7 @@ describe('up.status', function() {
 
           await wait()
 
-          this.respondWith({
+          jasmine.respondWith({
             responseHeaders: { 'X-Up-Location': '/fork/' },
             responseText: '<div class="main">new-text</div>'
           })
@@ -1201,7 +1201,7 @@ describe('up.status', function() {
 
           await wait()
 
-          this.respondWith({
+          jasmine.respondWith({
             responseHeaders: { 'X-Up-Location': '/foo' },
             responseText: '<div class="main">new-text</div>'
           })
@@ -1224,7 +1224,7 @@ describe('up.status', function() {
 
           await wait()
 
-          this.respondWith({
+          jasmine.respondWith({
             responseHeaders: { 'X-Up-Location': '/foo?foo=1' },
             responseText: '<div class="main">new-text</div>'
           })
@@ -1249,7 +1249,7 @@ describe('up.status', function() {
 
           await wait()
 
-          this.respondWith(`
+          jasmine.respondWith(`
             <div class="layer-content" up-nav>
               <a href="/background-url">text</a>
               <a href="/layer-url">text</a>
@@ -1302,7 +1302,7 @@ describe('up.status', function() {
 
           await wait()
 
-          this.respondWith(fragment)
+          jasmine.respondWith(fragment)
 
           await wait()
 
@@ -1318,7 +1318,7 @@ describe('up.status', function() {
 
           await wait()
 
-          this.respondWith(fragment)
+          jasmine.respondWith(fragment)
 
           await wait()
 
@@ -1518,7 +1518,7 @@ describe('up.status', function() {
 
           await wait()
 
-          this.respondWith('<div class="main">new-text</div>')
+          jasmine.respondWith('<div class="main">new-text</div>')
 
           await wait()
 
@@ -1539,7 +1539,7 @@ describe('up.status', function() {
 
           await wait()
 
-          this.respondWith('<div class="main">new-text</div>')
+          jasmine.respondWith('<div class="main">new-text</div>')
 
           await wait()
 
@@ -1588,7 +1588,7 @@ describe('up.status', function() {
 
           await wait()
 
-          this.respondWith('<div class="main">new-text</div>')
+          jasmine.respondWith('<div class="main">new-text</div>')
 
           await wait()
 
@@ -1602,7 +1602,7 @@ describe('up.status', function() {
 
           await wait()
 
-          this.respondWith('<div class="main">new-text</div>')
+          jasmine.respondWith('<div class="main">new-text</div>')
 
           await wait()
 
@@ -1621,7 +1621,7 @@ describe('up.status', function() {
 
           await wait()
 
-          this.respondWith('<div class="main">new-text</div>')
+          jasmine.respondWith('<div class="main">new-text</div>')
 
           await wait()
 

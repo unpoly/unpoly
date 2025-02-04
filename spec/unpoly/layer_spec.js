@@ -98,9 +98,9 @@ describe('up.layer', function() {
           await wait()
 
           expect(up.layer.count).toBe(1)
-          expect(this.lastRequest().url).toMatchURL('/path')
+          expect(jasmine.lastRequest().url).toMatchURL('/path')
 
-          this.respondWith('<div class="element other-class">element text</div>')
+          jasmine.respondWith('<div class="element other-class">element text</div>')
 
           await wait()
 
@@ -192,7 +192,7 @@ describe('up.layer', function() {
 
             await wait()
 
-            this.respondWith({
+            jasmine.respondWith({
               responseHeaders: { 'X-Up-Events': JSON.stringify([event1Plan, event2Plan]) },
               responseText: '<div class="element"></div>'
             })
@@ -794,7 +794,7 @@ describe('up.layer', function() {
 
           await wait()
 
-          this.respondWithSelector('.target', { responseHeaders: { 'X-Up-Context': JSON.stringify({ serverKey: 'serverValue' }) } })
+          jasmine.respondWithSelector('.target', { responseHeaders: { 'X-Up-Context': JSON.stringify({ serverKey: 'serverValue' }) } })
 
           await wait()
 

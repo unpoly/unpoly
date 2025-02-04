@@ -8,7 +8,9 @@ beforeEach(function() {
   this.respondWithSelector = jasmine.respondWithSelector
 })
 
-jasmine.lastRequest = () => jasmine.Ajax.requests.mostRecent() || up.fail('There is no last request')
+jasmine.lastRequest = function() {
+  return jasmine.Ajax.requests.mostRecent() || up.fail('There is no last request')
+}
 
 jasmine.respondWith = function(...args) {
   const firstArg = args.shift()

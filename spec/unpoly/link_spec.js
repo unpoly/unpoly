@@ -66,7 +66,7 @@ describe('up.link', function() {
         const promise = up.follow(link)
         await wait()
 
-        this.respondWith(`
+        jasmine.respondWith(`
           <div class="one">new one</div>
           <div class="two">new two</div>
           <div class="three">new three</div>
@@ -249,7 +249,7 @@ describe('up.link', function() {
           up.history.config.restoreTargets = ['.container']
 
           const respondWith = (html, title) => {
-            this.respondWith({
+            jasmine.respondWith({
               status: 200,
               contentType: 'text/html',
               responseText: `
@@ -378,7 +378,7 @@ describe('up.link', function() {
           const waitForBrowser = 150
 
           const respondWith = (text) => {
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="container">
                 <div class='target'>${text}</div>
               </div>
@@ -451,7 +451,7 @@ describe('up.link', function() {
           const waitForBrowser = 150
 
           const respondWith = (text) => {
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="container">
                 <div class='target'>${text}</div>
               </div>
@@ -553,7 +553,7 @@ describe('up.link', function() {
             up.follow($link.get(0), { scroll: 'target' })
             await wait()
 
-            this.respondWith('<div class="target">new text</div>')
+            jasmine.respondWith('<div class="target">new text</div>')
             await wait()
 
             expect(revealStub).toHaveBeenCalled()
@@ -685,7 +685,7 @@ describe('up.link', function() {
             }
 
             const respond = (linkDestination) => {
-              this.respondWith(`
+              jasmine.respondWith(`
                 <div class="element" style="height: 300px">
                   <a class="link" href="${linkDestination}" up-target=".element">Link</a>
                 </div>
@@ -1250,7 +1250,7 @@ describe('up.link', function() {
     describe('up.link.preload()', function() {
 
       beforeEach(function() {
-        this.requestTarget = () => this.lastRequest().requestHeaders['X-Up-Target']
+        this.requestTarget = () => jasmine.lastRequest().requestHeaders['X-Up-Target']
       })
 
       it("loads and caches the given link's destination", async function() {
@@ -1562,7 +1562,7 @@ describe('up.link', function() {
 
         await wait()
 
-        this.respondWith(`
+        jasmine.respondWith(`
           <div class="target">new text</div>
         `)
 
@@ -1581,7 +1581,7 @@ describe('up.link', function() {
 
         await wait()
 
-        this.respondWith(`
+        jasmine.respondWith(`
           <div class="target">new text</div>
         `)
 
@@ -1600,7 +1600,7 @@ describe('up.link', function() {
 
         await wait()
 
-        this.respondWith({
+        jasmine.respondWith({
           responseText: `
             <div class="target">new text</div>
           `,
@@ -1730,7 +1730,7 @@ describe('up.link', function() {
 
           await wait()
 
-          this.respondWith(`
+          jasmine.respondWith(`
             <div class="target">new text from modal link</div>
           `)
 
@@ -1760,7 +1760,7 @@ describe('up.link', function() {
 
             await wait()
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="target">new text from modal link</div>
             `)
 
@@ -1784,7 +1784,7 @@ describe('up.link', function() {
 
             await wait()
 
-            this.respondWith({
+            jasmine.respondWith({
               responseText: `
                 <div class="target">new failure text from modal link</div>
               `,
@@ -1811,7 +1811,7 @@ describe('up.link', function() {
 
             await wait()
 
-            this.respondWith({
+            jasmine.respondWith({
               responseText: `
                 <div class="target">new failure text from modal link</div>
               `,
@@ -2014,7 +2014,7 @@ describe('up.link', function() {
           Trigger.clickSequence(this.$link)
           await wait()
 
-          this.respondWith(`
+          jasmine.respondWith(`
             <div class="failure-target">new failure text</div>
           `, { status: 500 })
           await wait()
@@ -2031,7 +2031,7 @@ describe('up.link', function() {
           Trigger.clickSequence(this.$link)
           await wait()
 
-          this.respondWith(`
+          jasmine.respondWith(`
             <div class="success-target">new success text</div>
           `, { status: 200 })
           await wait()
@@ -2146,7 +2146,7 @@ describe('up.link', function() {
 
           await wait()
 
-          this.respondWith(`
+          jasmine.respondWith(`
             <div class="target">new target</div>
             <div class="fallback">new fallback</div>
           `)
@@ -2164,7 +2164,7 @@ describe('up.link', function() {
 
           await wait()
 
-          this.respondWith(`
+          jasmine.respondWith(`
             <div class="target">new target</div>
             <div class="fallback">new fallback</div>
           `)
@@ -2239,7 +2239,7 @@ describe('up.link', function() {
 
         await wait()
 
-        this.respondWith({
+        jasmine.respondWith({
           responseText: '<div class="target">new text</div>',
           responseHeaders: { 'X-Up-Location': '/other/path' }
         })
@@ -3413,11 +3413,11 @@ describe('up.link', function() {
         await wait()
 
         expect(jasmine.Ajax.requests.count()).toEqual(1)
-        expect(this.lastRequest().url).toMatchURL('/foo')
-        expect(this.lastRequest()).toHaveRequestMethod('GET')
-        expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.target')
+        expect(jasmine.lastRequest().url).toMatchURL('/foo')
+        expect(jasmine.lastRequest()).toHaveRequestMethod('GET')
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.target')
 
-        this.respondWith(`
+        jasmine.respondWith(`
           <div class="target">
             new text
           </div>
@@ -3463,11 +3463,11 @@ describe('up.link', function() {
         await wait()
 
         expect(jasmine.Ajax.requests.count()).toEqual(1)
-        expect(this.lastRequest().url).toMatchURL('/foo')
-        expect(this.lastRequest()).toHaveRequestMethod('GET')
-        expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.target')
+        expect(jasmine.lastRequest().url).toMatchURL('/foo')
+        expect(jasmine.lastRequest()).toHaveRequestMethod('GET')
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.target')
 
-        this.respondWith(`
+        jasmine.respondWith(`
           <div class="target">
             new text
           </div>

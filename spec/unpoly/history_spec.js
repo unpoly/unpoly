@@ -225,7 +225,7 @@ describe('up.history', function() {
 
         fixture('.viewport .content')
         const respond = () => {
-          this.respondWith(`
+          jasmine.respondWith(`
             <div class="viewport">
               <div class="content">content</div>
             </div>
@@ -369,7 +369,7 @@ describe('up.history', function() {
         await wait(waitForBrowser)
 
         expect(location.pathname).toEqual('/one')
-        this.respondWith("<div class='container'>restored container text</div>")
+        jasmine.respondWith("<div class='container'>restored container text</div>")
 
         await wait()
 
@@ -579,7 +579,7 @@ describe('up.history', function() {
             </div>
           `
 
-          const respond = () => this.respondWith(longContentHTML)
+          const respond = () => jasmine.respondWith(longContentHTML)
 
           const $viewport = $(longContentHTML).appendTo(document.body)
 
@@ -690,7 +690,7 @@ describe('up.history', function() {
             </div>
           `
 
-          const respond = () => this.respondWith(html)
+          const respond = () => jasmine.respondWith(html)
 
           const $screen = $fixture('.screen')
           $screen.html(html)

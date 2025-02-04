@@ -1066,7 +1066,7 @@ describe('up.fragment', function() {
           await wait()
 
           expect(resolution).not.toHaveBeenCalled()
-          this.respondWithSelector('.target', { text: 'new-text' })
+          jasmine.respondWithSelector('.target', { text: 'new-text' })
 
           await wait()
 
@@ -1083,7 +1083,7 @@ describe('up.fragment', function() {
           await wait()
 
           expect(callback).not.toHaveBeenCalled()
-          this.respondWithSelector('.target', { text: 'new-text' })
+          jasmine.respondWithSelector('.target', { text: 'new-text' })
 
           await wait()
 
@@ -1095,7 +1095,7 @@ describe('up.fragment', function() {
           fixture('.target')
           up.render('.target', { url: '/path', method: 'put' })
           await wait()
-          expect(this.lastRequest()).toHaveRequestMethod('PUT')
+          expect(jasmine.lastRequest()).toHaveRequestMethod('PUT')
         })
 
         it('rejects with an AbortError if the request is aborted', async function() {
@@ -1237,8 +1237,8 @@ describe('up.fragment', function() {
 
             await wait()
 
-            expect(this.lastRequest().data()['foo-key']).toEqual(['foo-value'])
-            expect(this.lastRequest().data()['bar-key']).toEqual(['bar-value'])
+            expect(jasmine.lastRequest().data()['foo-key']).toEqual(['foo-value'])
+            expect(jasmine.lastRequest().data()['bar-key']).toEqual(['bar-value'])
           })
 
           it("encodes the given params into the URL of a GET request", async function() {
@@ -1248,7 +1248,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            expect(this.lastRequest().url).toMatchURL('/path?foo-key=foo-value&bar-key=bar-value')
+            expect(jasmine.lastRequest().url).toMatchURL('/path?foo-key=foo-value&bar-key=bar-value')
           })
         })
 
@@ -1306,7 +1306,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            this.respondWith({
+            jasmine.respondWith({
               contentType: 'application/xhtml+xml',
               responseText: '<div class="target">new text</div>'
             })
@@ -2138,7 +2138,7 @@ describe('up.fragment', function() {
 
               await wait()
 
-              this.respondWithSelector('.element', { text: 'new content', responseHeaders: { 'X-Up-Accept-Layer': "null" } })
+              jasmine.respondWithSelector('.element', { text: 'new content', responseHeaders: { 'X-Up-Accept-Layer': "null" } })
 
               await wait()
 
@@ -2298,7 +2298,7 @@ describe('up.fragment', function() {
             up.render({ target: '.one', url: '/path' })
             await wait()
 
-            this.respondWithSelector('.two', { text: 'new content', responseHeaders: { 'X-Up-Target': '.two' } })
+            jasmine.respondWithSelector('.two', { text: 'new content', responseHeaders: { 'X-Up-Target': '.two' } })
             await wait()
 
             expect('.one').toHaveText('old content')
@@ -2332,7 +2332,7 @@ describe('up.fragment', function() {
               const promise = up.render({ target: '.one', url: '/path' })
               await wait()
 
-              this.respondWith({ responseHeaders: { 'X-Up-Target': ':none' }, responseText: '', contentType: 'text/plain' })
+              jasmine.respondWith({ responseHeaders: { 'X-Up-Target': ':none' }, responseText: '', contentType: 'text/plain' })
               await wait()
 
               expect('.one').toHaveText('old one')
@@ -2367,7 +2367,7 @@ describe('up.fragment', function() {
             up.render({ target: '.one', url: '/path' })
             await wait()
 
-            this.respondWithSelector('.two', { text: 'new content', responseHeaders: { 'X-Up-Target': ':main' } })
+            jasmine.respondWithSelector('.two', { text: 'new content', responseHeaders: { 'X-Up-Target': ':main' } })
             await wait()
 
             expect('.one').toHaveText('old content')
@@ -3731,7 +3731,7 @@ describe('up.fragment', function() {
 
               await wait()
 
-              expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('body')
+              expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('body')
             })
           })
 
@@ -3743,7 +3743,7 @@ describe('up.fragment', function() {
 
               await wait()
 
-              expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.main-element')
+              expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.main-element')
             })
           })
 
@@ -3756,8 +3756,8 @@ describe('up.fragment', function() {
 
               await wait()
 
-              expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual(':none')
-              this.respondWith({ responseText: '', contentType: 'text/plain' })
+              expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual(':none')
+              jasmine.respondWith({ responseText: '', contentType: 'text/plain' })
 
               await wait()
 
@@ -3779,9 +3779,9 @@ describe('up.fragment', function() {
             const replacePromise = up.render('.outer, .inner', { url: '/path' })
             await wait()
 
-            expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="outer">
                 new outer text
                 <div class="inner">
@@ -3808,9 +3808,9 @@ describe('up.fragment', function() {
             const replacePromise = up.render('.inner, .outer', { url: '/path' })
             await wait()
 
-            expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="outer">
                 new outer text
                 <div class="inner">
@@ -3838,9 +3838,9 @@ describe('up.fragment', function() {
             await wait()
 
             // Placement pseudo-selectors are removed from X-Up-Target
-            expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer, .inner')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer, .inner')
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="outer">
                 new outer text
                 <div class="inner">
@@ -3868,9 +3868,9 @@ describe('up.fragment', function() {
             const replacePromise = up.render('.outer:after, .inner', { url: '/path' })
             await wait()
 
-            expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer, .inner')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer, .inner')
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="outer">
                 new outer text
                 <div class="inner">
@@ -3898,9 +3898,9 @@ describe('up.fragment', function() {
             const replacePromise = up.render('.outer, .inner', { url: '/path' })
             await wait()
 
-            expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="outer">
                 new outer text
                 <div class="inner">
@@ -3929,9 +3929,9 @@ describe('up.fragment', function() {
             up.render('.inner, .outer', { url: '/path', scroll: '.revealee' })
             await wait()
 
-            expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="outer">
                 new outer text
                 <div class="inner">
@@ -3961,7 +3961,7 @@ describe('up.fragment', function() {
             const replacePromise = up.render('.outer, .inner', { url: '/path' })
             await wait()
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="inner">
                 new inner text
                 <div class="outer">
@@ -3987,7 +3987,7 @@ describe('up.fragment', function() {
             const replacePromise = up.render('.one, .two', { url: '/path' })
             await wait()
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="one">
                 new one text
                 <div class="two">
@@ -4014,7 +4014,7 @@ describe('up.fragment', function() {
             const replacePromise = up.render('.one, .two', { url: '/path' })
             await wait()
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="two">
                 new two text
                 <div class="one">
@@ -4040,9 +4040,9 @@ describe('up.fragment', function() {
             const replacePromise = up.render('.one, .alias', { url: '/path' })
             await wait()
 
-            expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.one')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.one')
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="one">
                 new one text
               </div>
@@ -4064,9 +4064,9 @@ describe('up.fragment', function() {
             await wait()
 
             // Placement pseudo-selectors are removed from X-Up-Target
-            expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.one')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.one')
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="one">
                 new one text
               </div>
@@ -4088,9 +4088,9 @@ describe('up.fragment', function() {
             await wait()
 
             // Placement pseudo-selectors are removed from X-Up-Target
-            expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.elem')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.elem')
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="elem alias1 alias2">
                 new text
               </div>
@@ -4120,7 +4120,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="box">new box</div>
             `)
             await wait()
@@ -4158,7 +4158,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="target">new target</div>
               <div class="fallback">new fallback</div>
             `)
@@ -4175,7 +4175,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="existing">new existing</div>
             `)
             await wait()
@@ -4206,7 +4206,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="target">new target</div>
               <div class="fallback">new fallback</div>
             `)
@@ -4243,7 +4243,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="target">new target</div>
               <div class="target2">new target2</div>
               <div class="fallback">new fallback</div>
@@ -4264,7 +4264,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="target">new target</div>
               <div class="fallback">new fallback</div>
             `)
@@ -4283,7 +4283,7 @@ describe('up.fragment', function() {
             u.task(() => {
               $target.remove()
 
-              this.respondWith(`
+              jasmine.respondWith(`
                 <div class="target">new target</div>
                 <div class="fallback">new fallback</div>
               `)
@@ -4309,7 +4309,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="fallback">new fallback</div>
             `)
 
@@ -4358,7 +4358,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="target">new target</div>
               <div class="fallback">new fallback</div>
             `)
@@ -4378,7 +4378,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            this.respondWith('<div class="fallback">new fallback</div>')
+            jasmine.respondWith('<div class="fallback">new fallback</div>')
 
             await wait()
 
@@ -4816,7 +4816,7 @@ describe('up.fragment', function() {
             const promise = up.render('.target', { url: '/path', history: true })
             await wait()
 
-            this.respondWithSelector('.target')
+            jasmine.respondWithSelector('.target')
             await promise
 
             expect(location.href).toMatchURL('/path')
@@ -4827,7 +4827,7 @@ describe('up.fragment', function() {
             up.render('.target', { url: '/path', method: 'post', history: true })
             await wait()
 
-            this.respondWithSelector('.target')
+            jasmine.respondWithSelector('.target')
             await wait()
 
             expect(location.href).toMatchURL(jasmine.locationBeforeExample)
@@ -4838,7 +4838,7 @@ describe('up.fragment', function() {
             up.render('.target', { url: '/path', history: true })
             await wait()
 
-            this.respondWithSelector('.target', { responseHeaders: { 'X-Up-Location': '/other-path' } })
+            jasmine.respondWithSelector('.target', { responseHeaders: { 'X-Up-Location': '/other-path' } })
             await wait()
 
             expect(location.href).toMatchURL('/other-path')
@@ -4882,7 +4882,7 @@ describe('up.fragment', function() {
             up.render('.target', { url: '/path#hash', history: true })
             await wait()
 
-            this.respondWithSelector('.target', { responseHeaders: { 'X-Up-Location': '/other-path' } })
+            jasmine.respondWithSelector('.target', { responseHeaders: { 'X-Up-Location': '/other-path' } })
             await wait()
 
             expect(location.href).toMatchURL('/other-path#hash')
@@ -4893,7 +4893,7 @@ describe('up.fragment', function() {
             up.render('.target', { url: '/requested-path', method: 'post', history: true })
             await wait()
 
-            this.respondWithSelector('.target', {
+            jasmine.respondWithSelector('.target', {
               responseHeaders: {
                 'X-Up-Method': 'GET',
                 'X-Up-Location': '/signaled-path'
@@ -4922,7 +4922,7 @@ describe('up.fragment', function() {
             up.render('.target', { url: '/path', history: false })
             await wait()
 
-            this.respondWithSelector('.target')
+            jasmine.respondWithSelector('.target')
             await wait()
 
             expect(location.href).toMatchURL(jasmine.locationBeforeExample)
@@ -4933,7 +4933,7 @@ describe('up.fragment', function() {
             up.render('.target', { url: '/path' })
             await wait()
 
-            this.respondWithSelector('.target')
+            jasmine.respondWithSelector('.target')
             await wait()
 
             expect(location.href).toMatchURL(jasmine.locationBeforeExample)
@@ -4944,7 +4944,7 @@ describe('up.fragment', function() {
             up.render('.target', { url: '/path', params: { 'foo-key': 'foo value', 'bar-key': 'bar value' }, history: true })
             await wait()
 
-            this.respondWithSelector('.target')
+            jasmine.respondWithSelector('.target')
             await wait()
 
             expect(location.href).toMatchURL('/path?foo-key=foo%20value&bar-key=bar%20value')
@@ -4955,7 +4955,7 @@ describe('up.fragment', function() {
             up.render('.target', { url: '/path', history: false })
             await wait()
 
-            this.respondWithSelector('.target')
+            jasmine.respondWithSelector('.target')
             await wait()
 
             expect(location.href).toMatchURL(jasmine.locationBeforeExample)
@@ -4966,7 +4966,7 @@ describe('up.fragment', function() {
             up.render('.target', { url: '/path', location: false })
             await wait()
 
-            this.respondWithSelector('.target')
+            jasmine.respondWithSelector('.target')
             await wait()
 
             expect(location.href).toMatchURL(jasmine.locationBeforeExample)
@@ -4980,7 +4980,7 @@ describe('up.fragment', function() {
               const promise = up.render('.target', { url: '/path3', history: 'auto' })
               await wait()
 
-              this.respondWithSelector('.target')
+              jasmine.respondWithSelector('.target')
               await promise
 
               expect(location.href).toMatchURL('/path3')
@@ -4994,7 +4994,7 @@ describe('up.fragment', function() {
               const promise = up.render('.target', { url: '/path3-2', history: 'auto' })
               await wait()
 
-              this.respondWithSelector('.target')
+              jasmine.respondWithSelector('.target')
               await promise
 
               expect(location.href).toMatchURL('/path3-2')
@@ -5007,7 +5007,7 @@ describe('up.fragment', function() {
               const promise = up.render('.container', { url: '/path3-1', history: 'auto' })
               await wait()
 
-              this.respondWithSelector('.container .target')
+              jasmine.respondWithSelector('.container .target')
               await promise
 
               expect(location.href).toMatchURL('/path3-1')
@@ -5019,7 +5019,7 @@ describe('up.fragment', function() {
               const promise = up.render('.target', { url: '/path4', history: 'auto' })
               await wait()
 
-              this.respondWithSelector('.target')
+              jasmine.respondWithSelector('.target')
               await promise
 
               expect(location.href).toMatchURL(jasmine.locationBeforeExample)
@@ -5033,7 +5033,7 @@ describe('up.fragment', function() {
               const promise = up.render('.foo, .bar, .baz', { url: '/path4', history: 'auto' })
               await wait()
 
-              this.respondWith(`
+              jasmine.respondWith(`
                 <div class='foo'></div>
                 <div class='bar'></div>
                 <div class='baz'></div>
@@ -5051,7 +5051,7 @@ describe('up.fragment', function() {
               up.render('.target', { url: '/path', history: true, location: '/path2' })
               await wait()
 
-              this.respondWithSelector('.target')
+              jasmine.respondWithSelector('.target')
               await wait()
 
               expect(location.href).toMatchURL('/path2')
@@ -5062,7 +5062,7 @@ describe('up.fragment', function() {
               up.render('.target', { url: '/path', method: 'post', history: true, location: '/path3' })
               await wait()
 
-              this.respondWithSelector('.target')
+              jasmine.respondWithSelector('.target')
               await wait()
 
               expect(location.href).toMatchURL('/path3')
@@ -5294,7 +5294,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <html>
                 <head>
                   <title>Title from HTML</title>
@@ -5319,7 +5319,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <svg width="500" height="300" xmlns="http://www.w3.org/2000/svg">
                 <g>
                   <title>SVG Title Demo example</title>
@@ -5398,7 +5398,7 @@ describe('up.fragment', function() {
             up.render('.container', { url: '/path', history: true, title: 'Title from options' })
             await wait()
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <html>
                 <head>
                   <title>Title from HTML</title>
@@ -6229,7 +6229,7 @@ describe('up.fragment', function() {
           up.render('.target', { url: '/path' })
           await wait()
 
-          this.respondWithSelector('.target')
+          jasmine.respondWithSelector('.target')
           await wait()
 
           expect(up.fragment.source(e.get('.target'))).toMatchURL('/path')
@@ -6240,7 +6240,7 @@ describe('up.fragment', function() {
           up.render('.target', { url: '/path#hash' })
           await wait()
 
-          this.respondWithSelector('.target')
+          jasmine.respondWithSelector('.target')
           await wait()
 
           expect(up.fragment.source(e.get('.target'))).toMatchURL('/path')
@@ -6251,7 +6251,7 @@ describe('up.fragment', function() {
           up.render('.target', { url: '/path', method: 'post' })
           await wait()
 
-          this.respondWithSelector('.target')
+          jasmine.respondWithSelector('.target')
           await wait()
 
           expect(up.fragment.source(e.get('.target'))).toMatchURL('/previous-source')
@@ -6262,7 +6262,7 @@ describe('up.fragment', function() {
           up.render('.target', { url: '/path' })
           await wait()
 
-          this.respondWithSelector('.target[up-source="/other"]')
+          jasmine.respondWithSelector('.target[up-source="/other"]')
           await wait()
 
           expect(up.fragment.source(e.get('.target'))).toMatchURL('/other')
@@ -6275,7 +6275,7 @@ describe('up.fragment', function() {
             up.render('.target', { url: '/path', source: '/given-path' })
             await wait()
 
-            this.respondWithSelector('.target')
+            jasmine.respondWithSelector('.target')
             await wait()
 
             expect(up.fragment.source(e.get('.target'))).toMatchURL('/given-path')
@@ -6298,7 +6298,7 @@ describe('up.fragment', function() {
             up.render('.target', { url: '/path', method: 'post', source: '/given-path' })
             await wait()
 
-            this.respondWithSelector('.target')
+            jasmine.respondWithSelector('.target')
             await wait()
 
             expect(up.fragment.source(e.get('.target'))).toMatchURL('/given-path')
@@ -6936,7 +6936,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="target">
                 <div id="hash"></div>
               </div>
@@ -6955,7 +6955,7 @@ describe('up.fragment', function() {
 
                 await wait()
 
-                this.respondWith(`
+                jasmine.respondWith(`
                   <div class="target">
                     <div id="hash"></div>
                   </div>
@@ -6979,7 +6979,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            this.respondWithSelector('.target', { text: 'new text' })
+            jasmine.respondWithSelector('.target', { text: 'new text' })
 
             await wait()
 
@@ -6994,7 +6994,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            this.respondWithSelector('.target')
+            jasmine.respondWithSelector('.target')
 
             await wait()
 
@@ -7009,7 +7009,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            this.respondWithSelector('.target')
+            jasmine.respondWithSelector('.target')
 
             await wait()
 
@@ -7024,7 +7024,7 @@ describe('up.fragment', function() {
 
                 await wait()
 
-                this.respondWithSelector('.target', { text: 'new text' })
+                jasmine.respondWithSelector('.target', { text: 'new text' })
 
                 await wait()
 
@@ -7041,7 +7041,7 @@ describe('up.fragment', function() {
 
               await wait()
 
-              this.respondWith(`
+              jasmine.respondWith(`
                 <div class="one">new one text</div>
                 <div class="two">new two text</div>
               `)
@@ -7058,7 +7058,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            this.respondWithSelector('.target', { text: 'new target text' })
+            jasmine.respondWithSelector('.target', { text: 'new target text' })
 
             await wait()
 
@@ -7076,7 +7076,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            this.respondWithSelector('.target', { text: 'new target text' })
+            jasmine.respondWithSelector('.target', { text: 'new target text' })
 
             await wait()
 
@@ -7099,7 +7099,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="target">
                 <div id="hash"></div>
               </div>
@@ -7117,7 +7117,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="target">
                 <a name="three"></a>
               </div>
@@ -7135,7 +7135,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="target">
                 <a name="foo.bar"></a>
               </div>
@@ -7161,7 +7161,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            this.respondWith(html)
+            jasmine.respondWith(html)
 
             await wait()
 
@@ -7180,7 +7180,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            this.respondWithSelector('.target')
+            jasmine.respondWithSelector('.target')
 
             await wait()
 
@@ -7369,7 +7369,7 @@ describe('up.fragment', function() {
             })
 
             const respond = () => {
-              this.respondWith({
+              jasmine.respondWith({
                 status: 200,
                 contentType: 'text/html',
                 responseText: '<div class="element" style="height: 300px"></div>'
@@ -8257,7 +8257,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="target">
                 <div id="hash"></div>
               </div>
@@ -8775,7 +8775,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="target">
                 <div id="hash"></div>
               </div>
@@ -11468,7 +11468,7 @@ describe('up.fragment', function() {
         up.navigate({ url: '/path2' })
 
         await wait()
-        expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.main-target')
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.main-target')
       })
     })
 
@@ -11830,7 +11830,7 @@ describe('up.fragment', function() {
         up.reload('.element')
         await wait()
 
-        this.respondWithSelector('.element', { text: 'new text' })
+        jasmine.respondWithSelector('.element', { text: 'new text' })
         await wait()
 
         expect('.element').toHaveText('new text')
@@ -11845,8 +11845,8 @@ describe('up.fragment', function() {
           up.reload(element)
           await wait()
 
-          expect(this.lastRequest().url).toMatchURL('/source')
-          expect(this.lastRequest().requestHeaders['If-Modified-Since']).toEqual('Wed, 21 Oct 2015 07:28:00 GMT')
+          expect(jasmine.lastRequest().url).toMatchURL('/source')
+          expect(jasmine.lastRequest().requestHeaders['If-Modified-Since']).toEqual('Wed, 21 Oct 2015 07:28:00 GMT')
         })
 
         it("sends no If-Modified-Since header if no timestamp is known for the fragment", async function() {
@@ -11855,8 +11855,8 @@ describe('up.fragment', function() {
           up.reload(element)
           await wait()
 
-          expect(this.lastRequest().url).toMatchURL('/source')
-          expect(this.lastRequest().requestHeaders['If-Modified-Since']).toBeUndefined()
+          expect(jasmine.lastRequest().url).toMatchURL('/source')
+          expect(jasmine.lastRequest().requestHeaders['If-Modified-Since']).toBeUndefined()
         })
 
         if (up.migrate.loaded) {
@@ -11866,8 +11866,8 @@ describe('up.fragment', function() {
             up.reload(element)
             await wait()
 
-            expect(this.lastRequest().url).toMatchURL('/source')
-            expect(this.lastRequest().requestHeaders['X-Up-Reload-From-Time']).toEqual('1608712106')
+            expect(jasmine.lastRequest().url).toMatchURL('/source')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Reload-From-Time']).toEqual('1608712106')
           })
 
           it("sends an X-Up-Reload-From-Time: 0 header if no timestamp is known for the fragment", async function() {
@@ -11876,8 +11876,8 @@ describe('up.fragment', function() {
             up.reload(element)
             await wait()
 
-            expect(this.lastRequest().url).toMatchURL('/source')
-            expect(this.lastRequest().requestHeaders['X-Up-Reload-From-Time']).toEqual('0')
+            expect(jasmine.lastRequest().url).toMatchURL('/source')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Reload-From-Time']).toEqual('0')
           })
         }
       })
@@ -11890,8 +11890,8 @@ describe('up.fragment', function() {
           up.reload(element)
           await wait()
 
-          expect(this.lastRequest().url).toMatchURL('/source')
-          expect(this.lastRequest().requestHeaders['If-None-Match']).toEqual('"abc"')
+          expect(jasmine.lastRequest().url).toMatchURL('/source')
+          expect(jasmine.lastRequest().requestHeaders['If-None-Match']).toEqual('"abc"')
         })
 
         it("sends no If-None-Match header if no timestamp is known for the fragment", async function() {
@@ -11900,8 +11900,8 @@ describe('up.fragment', function() {
           up.reload(element)
           await wait()
 
-          expect(this.lastRequest().url).toMatchURL('/source')
-          expect(this.lastRequest().requestHeaders['If-None-Match']).toBeUndefined()
+          expect(jasmine.lastRequest().url).toMatchURL('/source')
+          expect(jasmine.lastRequest().requestHeaders['If-None-Match']).toBeUndefined()
         })
       })
 
@@ -11968,9 +11968,9 @@ describe('up.fragment', function() {
         up.reload()
         await wait()
 
-        expect(this.lastRequest().url).toMatch(/\/source$/)
-        expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
-        this.respondWithSelector('.element', { content: 'new text' })
+        expect(jasmine.lastRequest().url).toMatch(/\/source$/)
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
+        jasmine.respondWithSelector('.element', { content: 'new text' })
         await wait()
 
         expect('.element').toHaveText('new text')
@@ -12018,7 +12018,7 @@ describe('up.fragment', function() {
         up.render('.target', { url: '/path' })
         await wait()
 
-        this.respondWithSelector('.target')
+        jasmine.respondWithSelector('.target')
         await wait()
 
         expect(up.fragment.source(e.get('.target'))).toMatchURL('/path')
@@ -12029,7 +12029,7 @@ describe('up.fragment', function() {
         up.render('.target', { url: '/outer' })
         await wait()
 
-        this.respondWith(`
+        jasmine.respondWith(`
           <div class="target">
             <div class="inner">
               inner
@@ -12041,7 +12041,7 @@ describe('up.fragment', function() {
         up.render('.inner', { url: '/inner', method: 'post' })
         await wait()
 
-        this.respondWithSelector('.inner')
+        jasmine.respondWithSelector('.inner')
         await wait()
 
         expect(up.fragment.source(e.get('.inner'))).toMatchURL('/outer')
@@ -12052,7 +12052,7 @@ describe('up.fragment', function() {
         up.render('.outer', { url: '/outer' })
         await wait()
 
-        this.respondWithSelector('.outer .between[up-source="/between"] .inner')
+        jasmine.respondWithSelector('.outer .between[up-source="/between"] .inner')
         await wait()
 
         expect(up.fragment.source(e.get('.outer'))).toMatchURL('/outer')

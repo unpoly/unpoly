@@ -38,7 +38,7 @@ describe('up.network', function() {
         })
 
         u.task(() => {
-          this.respondWith({
+          jasmine.respondWith({
             status: 201,
             responseText: 'response-text'
           })
@@ -65,7 +65,7 @@ describe('up.network', function() {
         const promise = up.request({ url: '/url' })
 
         u.task(() => {
-          this.respondWith({
+          jasmine.respondWith({
             responseHeaders: { 'foo': 'bar', 'baz': 'bam' },
             responseText: 'hello'
           })
@@ -85,10 +85,10 @@ describe('up.network', function() {
         const promise = up.request('/url#hash')
 
         u.task(() => {
-          const request = this.lastRequest()
+          const request = jasmine.lastRequest()
           expect(request.url).toMatchURL('/url')
 
-          this.respondWith('response-text')
+          jasmine.respondWith('response-text')
 
           promise.then(function(response) {
             expect(response.request.url).toMatchURL('/url')
@@ -103,7 +103,7 @@ describe('up.network', function() {
         up.request('/url')
 
         u.task(() => {
-          const headers = this.lastRequest().requestHeaders
+          const headers = jasmine.lastRequest().requestHeaders
           expect(headers['X-Requested-With']).toBeMissing()
           done()
         })
@@ -124,7 +124,7 @@ describe('up.network', function() {
 
           await wait()
 
-          const versionHeader = this.lastRequest().requestHeaders['X-Up-Version']
+          const versionHeader = jasmine.lastRequest().requestHeaders['X-Up-Version']
           expect(versionHeader).toBePresent()
           expect(versionHeader).toEqual(up.version)
         })
@@ -142,7 +142,7 @@ describe('up.network', function() {
 
           await wait()
 
-          const request = this.lastRequest()
+          const request = jasmine.lastRequest()
           expect(request.requestHeaders['X-Up-Target']).toEqual('.target')
           expect(request.requestHeaders['X-Up-Fail-Target']).toEqual('.fail-target')
           expect(request.requestHeaders['X-Up-Mode']).toEqual('modal')
@@ -252,7 +252,7 @@ describe('up.network', function() {
             await wait()
 
             jasmine.clock().install() // required by responseTimeout()
-            this.lastRequest().responseTimeout()
+            jasmine.lastRequest().responseTimeout()
 
             await expectAsync(request).toBeRejectedWith(jasmine.anyError('up.Offline', /time ?out/i))
           })
@@ -278,7 +278,7 @@ describe('up.network', function() {
           })
 
           u.task(() => {
-            this.respondWith({
+            jasmine.respondWith({
               responseHeaders: {
                 'X-Up-Location': '/redirect',
                 'X-Up-Method': 'GET'
@@ -303,7 +303,7 @@ describe('up.network', function() {
           const promise = up.request('/request-url#request-hash')
 
           u.task(() => {
-            this.respondWith({
+            jasmine.respondWith({
               responseHeaders: {
                 'X-Up-Location': '/response-url'
               }
@@ -375,7 +375,7 @@ describe('up.network', function() {
             await wait()
 
             expect(jasmine.Ajax.requests.count()).toEqual(1)
-            this.respondWith({
+            jasmine.respondWith({
               responseHeaders: {
                 'X-Up-Location': '/bar',
                 'X-Up-Method': 'GET'
@@ -398,7 +398,7 @@ describe('up.network', function() {
             await wait()
 
             expect(jasmine.Ajax.requests.count()).toEqual(1)
-            this.respondWith({
+            jasmine.respondWith({
               responseHeaders: {
                 'X-Up-Location': '/bar',
                 'X-Up-Method': 'GET'
@@ -424,7 +424,7 @@ describe('up.network', function() {
               await wait()
 
               expect(jasmine.Ajax.requests.count()).toEqual(1)
-              this.respondWith({
+              jasmine.respondWith({
                 responseHeaders: {
                   'X-Up-Location': '/bar',
                   'X-Up-Method': 'GET'
@@ -452,7 +452,7 @@ describe('up.network', function() {
           const promise = up.request('/request-url#request-hash')
 
           u.task(() => {
-            this.respondWith({
+            jasmine.respondWith({
               responseURL: '/response-url'
             })
 
@@ -469,7 +469,7 @@ describe('up.network', function() {
           const promise = up.request('/request-url', { method: 'post' })
 
           u.task(() => {
-            this.respondWith({
+            jasmine.respondWith({
               responseURL: '/response-url'
             })
 
@@ -485,7 +485,7 @@ describe('up.network', function() {
           const promise = up.request('/request-url', { method: 'post' })
 
           u.task(() => {
-            this.respondWith({
+            jasmine.respondWith({
               responseURL: '/request-url'
             })
 
@@ -501,7 +501,7 @@ describe('up.network', function() {
           const promise = up.request('/request-url', { method: 'post' })
 
           u.task(() => {
-            this.respondWith({
+            jasmine.respondWith({
               responseURL: '/request-url',
               responseHeaders: { 'X-Up-Method': 'GET' }
             })
@@ -522,7 +522,7 @@ describe('up.network', function() {
             await wait()
 
             expect(jasmine.Ajax.requests.count()).toEqual(1)
-            this.respondWith({ responseURL: '/bar' })
+            jasmine.respondWith({ responseURL: '/bar' })
 
             await wait()
 
@@ -540,7 +540,7 @@ describe('up.network', function() {
             await wait()
 
             expect(jasmine.Ajax.requests.count()).toEqual(1)
-            this.respondWith({
+            jasmine.respondWith({
               responseURL: '/bar'
             })
 
@@ -560,7 +560,7 @@ describe('up.network', function() {
             await wait()
 
             expect(jasmine.Ajax.requests.count()).toEqual(1)
-            this.respondWith({
+            jasmine.respondWith({
               responseURL: '/bar',
               status: 500
             })
@@ -626,7 +626,7 @@ describe('up.network', function() {
 
           await wait()
 
-          const headers = this.lastRequest().requestHeaders
+          const headers = jasmine.lastRequest().requestHeaders
           expect(headers['csrf-header']).toEqual('csrf-token')
         })
 
@@ -636,7 +636,7 @@ describe('up.network', function() {
 
           await wait()
 
-          const headers = this.lastRequest().requestHeaders
+          const headers = jasmine.lastRequest().requestHeaders
           expect(headers['csrf-header']).toBeMissing()
         })
 
@@ -645,7 +645,7 @@ describe('up.network', function() {
 
           await wait()
 
-          const headers = this.lastRequest().requestHeaders
+          const headers = jasmine.lastRequest().requestHeaders
           expect(headers['csrf-header']).toBeMissing()
         })
 
@@ -654,7 +654,7 @@ describe('up.network', function() {
 
           await wait()
 
-          const headers = this.lastRequest().requestHeaders
+          const headers = jasmine.lastRequest().requestHeaders
           expect(headers['csrf-header']).toBeMissing()
         })
 
@@ -668,8 +668,8 @@ describe('up.network', function() {
 
           await wait()
 
-          expect(this.lastRequest().data()['foo-key']).toEqual(['foo-value'])
-          expect(this.lastRequest().data()['bar-key']).toEqual(['bar-value'])
+          expect(jasmine.lastRequest().data()['foo-key']).toEqual(['foo-value'])
+          expect(jasmine.lastRequest().data()['bar-key']).toEqual(['bar-value'])
         })
 
         it("encodes the given params into the URL of a GET request", function(done) {
@@ -677,10 +677,10 @@ describe('up.network', function() {
           const promise = up.request({ url: '/path', method: 'get', params: givenParams })
 
           u.task(() => {
-            expect(this.lastRequest().url).toMatchURL('/path?foo-key=foo-value&bar-key=bar-value')
-            expect(this.lastRequest().data()).toBeBlank()
+            expect(jasmine.lastRequest().url).toMatchURL('/path?foo-key=foo-value&bar-key=bar-value')
+            expect(jasmine.lastRequest().data()).toBeBlank()
 
-            this.respondWith('response-text')
+            jasmine.respondWith('response-text')
 
             promise.then(function(response) {
               // See that the response object has been updated by moving the data options
@@ -720,7 +720,7 @@ describe('up.network', function() {
           expect(jasmine.Ajax.requests.count()).toEqual(1)
           expect(responses).toEqual([])
 
-          this.respondWith('foo')
+          jasmine.respondWith('foo')
 
           await wait()
 
@@ -740,7 +740,7 @@ describe('up.network', function() {
           // })
           //
           // next(() => {
-          //   this.respondWith('bar')
+          //   jasmine.respondWith('bar')
           // })
           //
           // next(() => {
@@ -1426,7 +1426,7 @@ describe('up.network', function() {
           up.request({ url: '/bar', evictCache: true })
           await wait()
 
-          this.respondWith('foo')
+          jasmine.respondWith('foo')
           await wait()
 
           expect({ url: '/foo' }).not.toBeCached()
@@ -1440,7 +1440,7 @@ describe('up.network', function() {
           up.request({ url: '/bar', cache: true, evictCache: true })
           await wait()
 
-          this.respondWith('foo')
+          jasmine.respondWith('foo')
           await wait()
 
           expect({ url: '/foo' }).not.toBeCached()
@@ -1461,7 +1461,7 @@ describe('up.network', function() {
 
           expect(jasmine.Ajax.requests.count()).toEqual(4)
 
-          this.respondWith({
+          jasmine.respondWith({
             status: 200,
             contentType: 'text/html',
             responseText: 'foo'
@@ -1488,7 +1488,7 @@ describe('up.network', function() {
 
           expect(jasmine.Ajax.requests.count()).toEqual(4)
 
-          this.respondWith({
+          jasmine.respondWith({
             status: 200,
             contentType: 'text/html',
             responseText: 'foo'
@@ -1514,7 +1514,7 @@ describe('up.network', function() {
 
           expect(jasmine.Ajax.requests.count()).toEqual(4)
 
-          this.respondWith({
+          jasmine.respondWith({
             status: 200,
             contentType: 'text/html',
             responseText: 'foo',
@@ -1538,7 +1538,7 @@ describe('up.network', function() {
 
           expect(jasmine.Ajax.requests.count()).toEqual(3)
 
-          this.respondWith({
+          jasmine.respondWith({
             status: 200,
             contentType: 'text/html',
             responseText: 'foo',
@@ -1603,7 +1603,7 @@ describe('up.network', function() {
           up.request({ url: '/bar', expireCache: true })
           await wait()
 
-          this.respondWith('foo')
+          jasmine.respondWith('foo')
           await wait()
 
           expect({ url: '/foo' }).toBeExpired()
@@ -1616,7 +1616,7 @@ describe('up.network', function() {
           up.request({ url: '/bar', cache: true, expireCache: true })
           await wait()
 
-          this.respondWith('bar')
+          jasmine.respondWith('bar')
           await wait()
 
           expect({ url: '/foo' }).toBeExpired()
@@ -1638,7 +1638,7 @@ describe('up.network', function() {
 
           expect(jasmine.Ajax.requests.count()).toEqual(4)
 
-          this.respondWith({
+          jasmine.respondWith({
             status: 200,
             contentType: 'text/html',
             responseText: 'foo'
@@ -1665,7 +1665,7 @@ describe('up.network', function() {
 
           expect(jasmine.Ajax.requests.count()).toEqual(4)
 
-          this.respondWith({
+          jasmine.respondWith({
             status: 200,
             contentType: 'text/html',
             responseText: 'foo'
@@ -1691,7 +1691,7 @@ describe('up.network', function() {
 
           expect(jasmine.Ajax.requests.count()).toEqual(4)
 
-          this.respondWith({
+          jasmine.respondWith({
             status: 200,
             contentType: 'text/html',
             responseText: 'foo',
@@ -1715,7 +1715,7 @@ describe('up.network', function() {
 
           expect(jasmine.Ajax.requests.count()).toEqual(3)
 
-          this.respondWith({
+          jasmine.respondWith({
             status: 200,
             contentType: 'text/html',
             responseText: 'foo',
@@ -1777,7 +1777,7 @@ describe('up.network', function() {
             up.request(safeRequestAttrs)
             await wait()
 
-            this.respondWith('foo')
+            jasmine.respondWith('foo')
             await wait()
 
             expect(safeRequestAttrs).toBeCached()
@@ -1785,7 +1785,7 @@ describe('up.network', function() {
             up.request(unsafeRequestAttrs)
             await wait()
 
-            this.respondWith('foo')
+            jasmine.respondWith('foo')
             await wait()
 
             expect(safeRequestAttrs).toBeExpired()
@@ -1798,7 +1798,7 @@ describe('up.network', function() {
             up.request(safeRequestAttrs)
             await wait()
 
-            this.respondWith('false')
+            jasmine.respondWith('false')
             await wait()
 
             expect(safeRequestAttrs).toBeCached()
@@ -1806,7 +1806,7 @@ describe('up.network', function() {
             up.request(unsafeRequestAttrs)
             await wait()
 
-            this.respondWith('foo')
+            jasmine.respondWith('foo')
             await wait()
 
             expect(safeRequestAttrs).not.toBeExpired()
@@ -1819,7 +1819,7 @@ describe('up.network', function() {
             up.request(safeRequestAttrs)
             await wait()
 
-            this.respondWith('foo')
+            jasmine.respondWith('foo')
             await wait()
 
             expect(safeRequestAttrs).toBeCached()
@@ -1827,7 +1827,7 @@ describe('up.network', function() {
             up.request(unsafeRequestAttrs)
             await wait()
 
-            this.respondWith('foo', { responseHeaders: { 'X-Up-Expire-Cache': 'false' } })
+            jasmine.respondWith('foo', { responseHeaders: { 'X-Up-Expire-Cache': 'false' } })
             await wait()
 
             expect(safeRequestAttrs).not.toBeExpired()
@@ -1844,7 +1844,7 @@ describe('up.network', function() {
             up.request({ url: '/foo', method })
             await wait()
 
-            const request = this.lastRequest()
+            const request = jasmine.lastRequest()
             expect(request.method).toEqual(method)
             expect(request.data()['_method']).toBeUndefined()
           })
@@ -1855,7 +1855,7 @@ describe('up.network', function() {
             up.request({ url: '/foo', method })
             await wait()
 
-            const request = this.lastRequest()
+            const request = jasmine.lastRequest()
             expect(request.method).toEqual('POST')
             expect(request.data()['_method']).toEqual([method])
           })
@@ -1867,7 +1867,7 @@ describe('up.network', function() {
               up.request({ url: '/foo', method, wrapMethod: false })
               await wait()
 
-              const request = this.lastRequest()
+              const request = jasmine.lastRequest()
               expect(request.method).toEqual(method)
               expect(request.data()['_method']).toBeUndefined()
             })
@@ -1892,14 +1892,14 @@ describe('up.network', function() {
           expect(jasmine.Ajax.requests.count()).toEqual(1)
           await wait()
 
-          this.respondWith('first response', { request: jasmine.Ajax.requests.at(0) })
+          jasmine.respondWith('first response', { request: jasmine.Ajax.requests.at(0) })
           await wait()
 
           expect(responses).toEqual(['first response'])
           expect(jasmine.Ajax.requests.count()).toEqual(2)
           await wait()
 
-          this.respondWith('second response', { request: jasmine.Ajax.requests.at(1) })
+          jasmine.respondWith('second response', { request: jasmine.Ajax.requests.at(1) })
           await wait()
 
           expect(responses).toEqual(['first response', 'second response'])
@@ -1961,7 +1961,7 @@ describe('up.network', function() {
         u.task(() => {
           expect(listener.calls.count()).toBe(2)
           expect(jasmine.Ajax.requests.count()).toEqual(1)
-          expect(this.lastRequest().url).toMatchURL('/path2')
+          expect(jasmine.lastRequest().url).toMatchURL('/path2')
           done()
         })
       })
@@ -1974,7 +1974,7 @@ describe('up.network', function() {
         up.request('/path1')
 
         u.task(() => {
-          expect(this.lastRequest().requestHeaders['X-From-Listener']).toEqual('foo')
+          expect(jasmine.lastRequest().requestHeaders['X-From-Listener']).toEqual('foo')
           done()
         })
       })
@@ -1987,7 +1987,7 @@ describe('up.network', function() {
         up.request('/path1', { method: 'post' })
 
         u.task(() => {
-          expect(this.lastRequest().params).toMatchParams({ key: 'value' })
+          expect(jasmine.lastRequest().params).toMatchParams({ key: 'value' })
           done()
         })
       })
@@ -2001,8 +2001,8 @@ describe('up.network', function() {
 
         u.task(() => {
 
-          expect(this.lastRequest().url).toMatchURL('/path1?key1=value1&key2=value2&key3=value3')
-          expect(this.lastRequest().params).toMatchParams({})
+          expect(jasmine.lastRequest().url).toMatchURL('/path1?key1=value1&key2=value2&key3=value3')
+          expect(jasmine.lastRequest().params).toMatchParams({})
           done()
         })
       })
@@ -2166,7 +2166,7 @@ describe('up.network', function() {
           'up:network:late'
         ])
 
-        this.respondWith('foo')
+        jasmine.respondWith('foo')
         await wait(10)
 
         expect(this.events).toEqual([
@@ -2236,7 +2236,7 @@ describe('up.network', function() {
         ])
 
         jasmine.clock().install() // required by responseTimeout()
-        this.lastRequest().responseTimeout()
+        jasmine.lastRequest().responseTimeout()
         await wait(10)
 
         jasmine.clock().tick(10)
@@ -2281,7 +2281,7 @@ describe('up.network', function() {
           'up:network:late'
         ])
 
-        this.lastRequest().responseError()
+        jasmine.lastRequest().responseError()
         await wait(10)
 
         expect(this.events).toEqual([
@@ -2345,7 +2345,7 @@ describe('up.network', function() {
 
           u.task(() => {
             expect(jasmine.Ajax.requests.count()).toEqual(1)
-            this.respondWith('response-text')
+            jasmine.respondWith('response-text')
 
             promise.then(function(text) {
               expect(text).toEqual('response-text')
@@ -2446,7 +2446,7 @@ describe('up.network', function() {
         // side effects than the real one: Check that xhr.abort() is never called.
         spyOn(request.xhr, 'abort').and.callThrough()
 
-        this.respondWith('response text')
+        jasmine.respondWith('response text')
         await wait()
 
         expect(response.xhr.readyState).toBe(XMLHttpRequest.DONE)
@@ -2473,7 +2473,7 @@ describe('up.network', function() {
         await wait()
 
         expect(jasmine.Ajax.requests.count()).toEqual(1)
-        this.respondWith('response from server')
+        jasmine.respondWith('response from server')
         await wait()
 
         let result = await promiseState(request)

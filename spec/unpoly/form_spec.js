@@ -1155,7 +1155,7 @@ describe('up.form', function() {
 
         await wait()
 
-        const params = this.lastRequest().data()
+        const params = jasmine.lastRequest().data()
         expect(params['id']).toEqual(['value'])
       })
 
@@ -1662,7 +1662,7 @@ describe('up.form', function() {
 
           await wait()
 
-          expect(this.lastRequest().requestHeaders['Content-Type']).toEqual('application/x-www-form-urlencoded')
+          expect(jasmine.lastRequest().requestHeaders['Content-Type']).toEqual('application/x-www-form-urlencoded')
         })
 
         it('defaults to multipart/form-data in a form with file inputs', async function() {
@@ -1677,10 +1677,10 @@ describe('up.form', function() {
 
           // Unpoly will set an empty content type so the browser will automatically append
           // a MIME boundary like multipart/form-data; boundary=----WebKitFormBoundaryHkiKAbOweEFUtny8
-          expect(this.lastRequest().requestHeaders['Content-Type']).toBeMissing()
+          expect(jasmine.lastRequest().requestHeaders['Content-Type']).toBeMissing()
 
           // Jasmine's fake request contains the original payload in { params }
-          expect(this.lastRequest().params).toEqual(jasmine.any(FormData))
+          expect(jasmine.lastRequest().params).toEqual(jasmine.any(FormData))
         })
 
         it("uses the form's [enctype] attribute", async function() {
@@ -1690,7 +1690,7 @@ describe('up.form', function() {
 
           await wait()
 
-          expect(this.lastRequest().requestHeaders['Content-Type']).toEqual('my-type')
+          expect(jasmine.lastRequest().requestHeaders['Content-Type']).toEqual('my-type')
         })
       })
 
@@ -1709,13 +1709,13 @@ describe('up.form', function() {
 
           await wait()
 
-          expect(this.lastRequest().url).toMatchURL('/form-target')
-          expect(this.lastRequest()).toHaveRequestMethod('PUT')
-          expect(this.lastRequest().data()['field1']).toEqual(['value1'])
-          expect(this.lastRequest().data()['field2']).toEqual(['value2'])
-          expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.response')
+          expect(jasmine.lastRequest().url).toMatchURL('/form-target')
+          expect(jasmine.lastRequest()).toHaveRequestMethod('PUT')
+          expect(jasmine.lastRequest().data()['field1']).toEqual(['value1'])
+          expect(jasmine.lastRequest().data()['field2']).toEqual(['value2'])
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.response')
 
-          this.respondWith({
+          jasmine.respondWith({
             responseHeaders: {
               'X-Up-Location': '/redirect-target',
               'X-Up-Method': 'GET'
@@ -1782,7 +1782,7 @@ describe('up.form', function() {
 
           await wait()
 
-          this.respondWith({
+          jasmine.respondWith({
             status: 200,
             contentType: 'text/html',
             responseHeaders: {
@@ -1808,7 +1808,7 @@ describe('up.form', function() {
 
           await wait()
 
-          expect(this.lastRequest().url).toMatchURL('/form-source')
+          expect(jasmine.lastRequest().url).toMatchURL('/form-source')
         })
 
         describe('handling of query params in the [action] URL', function() {
@@ -1826,7 +1826,7 @@ describe('up.form', function() {
 
               await wait()
 
-              expect(this.lastRequest().url).toMatchURL('/action?foo=value-from-input&foo=other-value-from-input')
+              expect(jasmine.lastRequest().url).toMatchURL('/action?foo=value-from-input&foo=other-value-from-input')
             })
           })
 
@@ -1840,8 +1840,8 @@ describe('up.form', function() {
 
               await wait()
 
-              expect(this.lastRequest().url).toMatchURL('/action?foo=value-from-action')
-              expect(this.lastRequest().data()['foo']).toEqual(['value-from-input', 'other-value-from-input'])
+              expect(jasmine.lastRequest().url).toMatchURL('/action?foo=value-from-action')
+              expect(jasmine.lastRequest().data()['foo']).toEqual(['value-from-input', 'other-value-from-input'])
             })
           })
         })
@@ -1851,7 +1851,7 @@ describe('up.form', function() {
           it('uses the given URL as the new browser location if the request succeeded', async function() {
             up.submit(this.$form, { location: '/given-path' })
             await wait()
-            this.respondWith('<div class="response">new-text</div>')
+            jasmine.respondWith('<div class="response">new-text</div>')
             await wait()
             expect(up.history.location).toMatchURL('/given-path')
           })
@@ -1873,7 +1873,7 @@ describe('up.form', function() {
           it('keeps the current browser location', async function() {
             up.submit(this.$form, { history: false })
             await wait()
-            this.respondWith('<div class="response">new-text</div>')
+            jasmine.respondWith('<div class="response">new-text</div>')
             await wait()
             expect(up.history.location).toMatchURL(jasmine.locationBeforeExample)
           })
@@ -1892,7 +1892,7 @@ describe('up.form', function() {
 
             await wait()
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="target">
                 new text
               </div>
@@ -1916,7 +1916,7 @@ describe('up.form', function() {
 
             await wait()
 
-            this.respondWith(`
+            jasmine.respondWith(`
               <div class="target">
                 new text
               </div>
@@ -3460,7 +3460,7 @@ describe('up.form', function() {
 
         await wait()
 
-        expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('form:has(.submit)')
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('form:has(.submit)')
 
         jasmine.respondWith(`
           <form class="my-form">
@@ -3543,7 +3543,7 @@ describe('up.form', function() {
 
           await wait()
 
-          const params = this.lastRequest().data()
+          const params = jasmine.lastRequest().data()
           expect(params['field1']).toEqual(['value1'])
           expect(params['field2']).toEqual(['value2'])
 
@@ -3574,7 +3574,7 @@ describe('up.form', function() {
 
           await wait()
 
-          this.respondWith({
+          jasmine.respondWith({
             status: 500,
             responseText: `
               <form class="my-form">
@@ -3605,9 +3605,9 @@ describe('up.form', function() {
 
           await wait()
 
-          expect(this.lastRequest().requestHeaders['X-Up-Fail-Target']).toEqual('form:has(.submit)')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Fail-Target']).toEqual('form:has(.submit)')
 
-          this.respondWith({
+          jasmine.respondWith({
             status: 500,
             responseText: `
               <form class="my-form">
@@ -3653,7 +3653,7 @@ describe('up.form', function() {
 
           await wait()
 
-          const params = this.lastRequest().data()
+          const params = jasmine.lastRequest().data()
           expect(params['text-field']).toEqual(['text-field-value'])
           expect(params['submit-button']).toEqual(['submit-button-value'])
         })
@@ -3667,7 +3667,7 @@ describe('up.form', function() {
 
           await wait()
 
-          const params = this.lastRequest().data()
+          const params = jasmine.lastRequest().data()
           expect(params['text-field']).toEqual(['text-field-value'])
           expect(params['submit-button']).toEqual(['submit-button-value'])
         })
@@ -3682,7 +3682,7 @@ describe('up.form', function() {
 
           await wait()
 
-          const params = this.lastRequest().data()
+          const params = jasmine.lastRequest().data()
           expect(params['text-field']).toEqual(['text-field-value'])
           expect(params['submit-button-1']).toBeUndefined()
           expect(params['submit-button-2']).toEqual(['submit-button-2-value'])
@@ -3699,7 +3699,7 @@ describe('up.form', function() {
 
           await wait()
 
-          const params = this.lastRequest().data()
+          const params = jasmine.lastRequest().data()
           expect(params['text-field']).toEqual(['text-field-value'])
           expect(params['submit-button-1']).toEqual(['submit-button-1-value'])
           expect(params['submit-button-2']).toBeUndefined()
@@ -3714,7 +3714,7 @@ describe('up.form', function() {
 
           await wait()
 
-          const params = this.lastRequest().data()
+          const params = jasmine.lastRequest().data()
           const keys = Object.keys(params)
           expect(keys).toEqual(['text-field'])
         })
@@ -3728,7 +3728,7 @@ describe('up.form', function() {
 
           await wait()
 
-          const request = this.lastRequest()
+          const request = jasmine.lastRequest()
           expect(request.url).toMatchURL('/button-path')
           expect(request.method).toBe('POST')
         })
@@ -4369,12 +4369,12 @@ describe('up.form', function() {
 
           await wait()
 
-          const request = this.lastRequest()
+          const request = jasmine.lastRequest()
           expect(request.requestHeaders['X-Up-Validate']).toEqual('user')
           expect(request.data()).toMatchParams({ user: 'carl' })
           expect(request.requestHeaders['X-Up-Target']).toEqual('.field-group')
 
-          this.respondWith({
+          jasmine.respondWith({
             status: 500,
             responseText: `
               <div class="field-group has-error">
@@ -4453,7 +4453,7 @@ describe('up.form', function() {
 
           await wait()
 
-          this.respondWith(`
+          jasmine.respondWith(`
             <div class="field-group has-error">
               <div class='error'>Username has already been taken</div>
               <input name="user" value="judy" up-validate=".field-group:has(:origin)">
@@ -4484,7 +4484,7 @@ describe('up.form', function() {
 
           await wait()
 
-          this.respondWith(`
+          jasmine.respondWith(`
             <div class="field-group has-error">
               <div class='error'>Username has already been taken</div>
               <input name="user" value="judy" up-validate=".field-group:has(:origin)">
@@ -4910,10 +4910,10 @@ describe('up.form', function() {
         await wait()
 
         expect(jasmine.Ajax.requests.count()).toEqual(1)
-        expect(this.lastRequest().requestHeaders['X-Up-Validate']).toEqual('password')
-        expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-form-group]:has(input[name="password"])')
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('password')
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-form-group]:has(input[name="password"])')
 
-        this.respondWith(`
+        jasmine.respondWith(`
           <form action="/users" id="registration" up-validate>
             <div up-form-group>
               Validation message
@@ -4975,8 +4975,8 @@ describe('up.form', function() {
         await wait()
 
         expect(jasmine.Ajax.requests.count()).toEqual(1)
-        expect(this.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
-        expect(this.lastRequest().requestHeaders['X-Up-Target']).toEqual('.result')
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.result')
       })
 
       it('picks up new inputs after the form was compiled', async function() {
