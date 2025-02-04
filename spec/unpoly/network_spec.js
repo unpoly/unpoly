@@ -29,15 +29,6 @@ describe('up.network', function() {
         })
       })
 
-//      it 'allows to pass in an up.Request instance instead of an options object', ->
-//        requestArg = new up.Request(url: '/foo', params: { key: 'value' }, method: 'post')
-//        up.request(requestArg)
-//
-//        jasmineRequest = @lastRequest()
-//        expect(jasmineRequest.url).toMatchURL('/foo')
-//        expect(jasmineRequest.data()).toEqual(key: ['value'])
-//        expect(jasmineRequest.method).toEqual('POST')
-
       it('resolves to a Response object that contains information about the response and request', function(done) {
         const promise = up.request({
           url: '/url',
@@ -128,17 +119,17 @@ describe('up.network', function() {
 
       describe('transfer of meta attributes', function() {
 
-        it("sends Unpoly's version as an X-Up-Version request header", asyncSpec(function(next) {
+        it("sends Unpoly's version as an X-Up-Version request header", async function() {
           up.request({url: '/foo'})
 
-          next(() => {
-            const versionHeader = this.lastRequest().requestHeaders['X-Up-Version']
-            expect(versionHeader).toBePresent()
-            expect(versionHeader).toEqual(up.version)
-          })
-        }))
+          await wait()
 
-        it('submits information about the fragment update as HTTP headers, so the server may choose to optimize its responses', asyncSpec(function(next) {
+          const versionHeader = this.lastRequest().requestHeaders['X-Up-Version']
+          expect(versionHeader).toBePresent()
+          expect(versionHeader).toEqual(up.version)
+        })
+
+        it('submits information about the fragment update as HTTP headers, so the server may choose to optimize its responses', async function() {
           makeLayers(2)
 
           up.request({
@@ -149,14 +140,14 @@ describe('up.network', function() {
             failLayer: 'root'
           })
 
-          next(() => {
-            const request = this.lastRequest()
-            expect(request.requestHeaders['X-Up-Target']).toEqual('.target')
-            expect(request.requestHeaders['X-Up-Fail-Target']).toEqual('.fail-target')
-            expect(request.requestHeaders['X-Up-Mode']).toEqual('modal')
-            expect(request.requestHeaders['X-Up-Fail-Mode']).toEqual('root')
-          })
-        }))
+          await wait()
+
+          const request = this.lastRequest()
+          expect(request.requestHeaders['X-Up-Target']).toEqual('.target')
+          expect(request.requestHeaders['X-Up-Fail-Target']).toEqual('.fail-target')
+          expect(request.requestHeaders['X-Up-Mode']).toEqual('modal')
+          expect(request.requestHeaders['X-Up-Fail-Mode']).toEqual('root')
+        })
 
         it ('does not transmit missing meta attributes as X-Up-prefixed headers', function(done) {
           const request = up.request('/foo')
@@ -378,60 +369,60 @@ describe('up.network', function() {
             expect(up.cache.currentSize).toBe(1)
           })
 
-          it('does not considers a redirection URL an alias for the requested URL if the original request was never cached', asyncSpec(function(next) {
+          it('does not considers a redirection URL an alias for the requested URL if the original request was never cached', async function() {
             up.request('/foo', {cache: false}) // POST requests are not cached
 
-            next(() => {
-              expect(jasmine.Ajax.requests.count()).toEqual(1)
-              this.respondWith({
-                responseHeaders: {
-                  'X-Up-Location': '/bar',
-                  'X-Up-Method': 'GET'
-                }
-              })
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            this.respondWith({
+              responseHeaders: {
+                'X-Up-Location': '/bar',
+                'X-Up-Method': 'GET'
+              }
             })
 
-            next(() => {
-              up.request('/bar', {cache: true})
-            })
+            await wait()
 
-            next(() => {
-              // See that an additional request was made
-              expect(jasmine.Ajax.requests.count()).toEqual(2)
-            })
-          }))
+            up.request('/bar', {cache: true})
 
-          it('does not considers a redirection URL an alias for the requested URL if the response returned a non-200 status code', asyncSpec(function(next) {
+            await wait()
+
+            // See that an additional request was made
+            expect(jasmine.Ajax.requests.count()).toEqual(2)
+          })
+
+          it('does not considers a redirection URL an alias for the requested URL if the response returned a non-200 status code', async function() {
             up.request('/foo', {cache: true})
 
-            next(() => {
-              expect(jasmine.Ajax.requests.count()).toEqual(1)
-              this.respondWith({
-                responseHeaders: {
-                  'X-Up-Location': '/bar',
-                  'X-Up-Method': 'GET'
-                },
-                status: 500
-              })
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            this.respondWith({
+              responseHeaders: {
+                'X-Up-Location': '/bar',
+                'X-Up-Method': 'GET'
+              },
+              status: 500
             })
 
-            next(() => {
-              up.request('/bar', {cache: true})
-            })
+            await wait()
 
-            next(() => {
-              // See that an additional request was made
-              expect(jasmine.Ajax.requests.count()).toEqual(2)
-            })
-          }))
-        })
+            up.request('/bar', {cache: true})
 
-        if (FormData.prototype.entries) {
+            await wait()
 
-          it("does not explode if the original request's { params } is a FormData object", asyncSpec(function(next) {
-            up.request('/foo', {method: 'post', params: new FormData()}) // POST requests are not cached
+            // See that an additional request was made
+            expect(jasmine.Ajax.requests.count()).toEqual(2)
+          })
 
-            next(() => {
+          if (FormData.prototype.entries) {
+
+            it("does not explode if the original request's { params } is a FormData object", async function() {
+              up.request('/foo', {method: 'post', params: new FormData()}) // POST requests are not cached
+
+              await wait()
+
               expect(jasmine.Ajax.requests.count()).toEqual(1)
               this.respondWith({
                 responseHeaders: {
@@ -439,18 +430,18 @@ describe('up.network', function() {
                   'X-Up-Method': 'GET'
                 }
               })
-            })
 
-            next(() => {
+              await wait()
+
               this.secondAjaxPromise = up.request('/bar')
-            })
 
-            next.await(() => {
-              return promiseState(this.secondAjaxPromise).then(result => // See that the promise was not rejected due to an internal error.
-                expect(result.state).toEqual('pending'))
+              let result = await promiseState(this.secondAjaxPromise)
+              // See that the promise was not rejected due to an internal error.
+              expect(result.state).toEqual('pending')
             })
-          }))
-        }
+          }
+
+        })
 
       })
 
@@ -525,88 +516,97 @@ describe('up.network', function() {
 
         describe('when caching', function() {
 
-          it('considers a redirection URL an alias for the requested URL', asyncSpec(function(next) {
+          it('considers a redirection URL an alias for the requested URL', async function() {
             up.request('/foo', {cache: true})
 
-            next(() => {
-              expect(jasmine.Ajax.requests.count()).toEqual(1)
-              this.respondWith({responseURL: '/bar'})
-            })
+            await wait()
 
-            next(() => {
-              up.request('/bar', {cache: true})
-            })
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            this.respondWith({responseURL: '/bar'})
 
-            next(() => {
-              // See that the cached alias is used and no additional requests are made
-              expect(jasmine.Ajax.requests.count()).toEqual(1)
-            })
-          }))
+            await wait()
 
-          it('does not consider a redirection URL an alias for the requested URL if the original request was never cached', asyncSpec(function(next) {
+            up.request('/bar', {cache: true})
+
+            await wait()
+
+            // See that the cached alias is used and no additional requests are made
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+          })
+
+          it('does not consider a redirection URL an alias for the requested URL if the original request was never cached', async function() {
             up.request('/foo', {cache: false})
 
-            next(() => {
-              expect(jasmine.Ajax.requests.count()).toEqual(1)
-              this.respondWith({
-                responseURL: '/bar'
-              })
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            this.respondWith({
+              responseURL: '/bar'
             })
 
-            next(() => {
-              up.request('/bar', {cache: true})
-            })
+            await wait()
 
-            next(() => {
-              // See that an additional request was made
-              expect(jasmine.Ajax.requests.count()).toEqual(2)
-            })
-          }))
+            up.request('/bar', {cache: true})
 
-          it('does not consider a redirection URL an alias for the requested URL if the response returned a non-200 status code', asyncSpec(function(next) {
+            await wait()
+
+            // See that an additional request was made
+            expect(jasmine.Ajax.requests.count()).toEqual(2)
+          })
+
+          it('does not consider a redirection URL an alias for the requested URL if the response returned a non-200 status code', async function() {
             up.request('/foo', {cache: true})
 
-            next(() => {
-              expect(jasmine.Ajax.requests.count()).toEqual(1)
-              this.respondWith({
-                responseURL: '/bar',
-                status: 500
-              })
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            this.respondWith({
+              responseURL: '/bar',
+              status: 500
             })
 
-            next(() => {
-              up.request('/bar', {cache: true})
-            })
-          }))
+            await wait()
+
+            up.request('/bar', {cache: true})
+
+            await wait()
+
+            // See that an additional request was made
+            expect(jasmine.Ajax.requests.count()).toEqual(2)
+          })
 
           describe('eviction of expensive properties to prevent memory leaks when caching', function() {
 
-            it('does not keep element references in the up.Request object', asyncSpec(function(next) {
+            it('does not keep element references in the up.Request object', async function() {
               let request = up.request('/foo', { cache: true, layer: 'current', target: 'body', origin: document.body })
 
-              next(() => { jasmine.respondWith('response text') })
+              await wait()
 
-              next(() => {
-                // Eviction is delayed by 1 task so event listeners can still observe the properties we're about to evict
-              })
+              jasmine.respondWith('response text')
 
-              next(() => { expect(request).not.toHaveRecursiveValue(u.isElement) })
-            }))
+              await wait()
 
-            it('does not keep element references in the up.Response object', asyncSpec(function(next) {
+              // Eviction is delayed by 1 task so event listeners can still observe the properties we're about to evict
+
+              await wait()
+
+              expect(request).not.toHaveRecursiveValue(u.isElement)
+            })
+
+            it('does not keep element references in the up.Response object', async function() {
               let request = up.request('/foo', { cache: true, layer: 'current', target: 'body', origin: document.body })
 
-              next(() => {
-                jasmine.respondWith('response text')
-                next.await(request)
-              })
+              await wait()
 
-              next(() => {
-                // Eviction is delayed by 1 task so event listeners can still observe the properties we're about to evict
-              })
+              jasmine.respondWith('response text')
+              let response = await request
 
-              next((response) => { expect(request).not.toHaveRecursiveValue(u.isElement) })
-            }))
+              await wait()
+
+              // Eviction is delayed by 1 task so event listeners can still observe the properties we're about to evict
+
+              expect(request).not.toHaveRecursiveValue(u.isElement)
+            })
 
           })
 
@@ -621,52 +621,56 @@ describe('up.network', function() {
           up.protocol.config.csrfToken = 'csrf-token'
         })
 
-        it('sets a CSRF token in the header', asyncSpec(function(next) {
+        it('sets a CSRF token in the header', async function() {
           up.request('/path', {method: 'post'})
-          next(() => {
-            const headers = this.lastRequest().requestHeaders
-            expect(headers['csrf-header']).toEqual('csrf-token')
-          })
-        }))
 
-        it('does not add a CSRF token if there is none', asyncSpec(function(next) {
+          await wait()
+
+          const headers = this.lastRequest().requestHeaders
+          expect(headers['csrf-header']).toEqual('csrf-token')
+        })
+
+        it('does not add a CSRF token if there is none', async function() {
           up.protocol.config.csrfToken = ''
           up.request('/path', {method: 'post'})
-          next(() => {
-            const headers = this.lastRequest().requestHeaders
-            expect(headers['csrf-header']).toBeMissing()
-          })
-        }))
 
-        it('does not add a CSRF token for GET requests', asyncSpec(function(next) {
+          await wait()
+
+          const headers = this.lastRequest().requestHeaders
+          expect(headers['csrf-header']).toBeMissing()
+        })
+
+        it('does not add a CSRF token for GET requests', async function() {
           up.request('/path', {method: 'get'})
-          next(() => {
-            const headers = this.lastRequest().requestHeaders
-            expect(headers['csrf-header']).toBeMissing()
-          })
-        }))
 
-        it('does not add a CSRF token when loading content from another domain', asyncSpec(function(next) {
+          await wait()
+
+          const headers = this.lastRequest().requestHeaders
+          expect(headers['csrf-header']).toBeMissing()
+        })
+
+        it('does not add a CSRF token when loading content from another domain', async function() {
           up.request('http://other-domain.tld/path', {method: 'post'})
-          next(() => {
-            const headers = this.lastRequest().requestHeaders
-            expect(headers['csrf-header']).toBeMissing()
-          })
-        }))
+
+          await wait()
+
+          const headers = this.lastRequest().requestHeaders
+          expect(headers['csrf-header']).toBeMissing()
+        })
 
       })
 
       describe('with { params } option', function() {
 
-        it("uses the given params as a non-GET request's payload", asyncSpec(function(next) {
+        it("uses the given params as a non-GET request's payload", async function() {
           const givenParams = {'foo-key': 'foo-value', 'bar-key': 'bar-value'}
           up.request({url: '/path', method: 'put', params: givenParams})
 
-          next(() => {
-            expect(this.lastRequest().data()['foo-key']).toEqual(['foo-value'])
-            expect(this.lastRequest().data()['bar-key']).toEqual(['bar-value'])
-          })
-        }))
+          await wait()
+
+          expect(this.lastRequest().data()['foo-key']).toEqual(['foo-value'])
+          expect(this.lastRequest().data()['bar-key']).toEqual(['bar-value'])
+        })
 
         it("encodes the given params into the URL of a GET request", function(done) {
           const givenParams = {'foo-key': 'foo-value', 'bar-key': 'bar-value'}
@@ -691,7 +695,7 @@ describe('up.network', function() {
 
       describe('with { cache } option', function() {
 
-        it('caches server responses for the configured duration', asyncSpec(function(next) {
+        it('caches server responses for the configured duration', async function() {
           up.network.config.cacheEvictAge = 200 // 1 second for test
 
           const responses = []
@@ -699,34 +703,29 @@ describe('up.network', function() {
             responses.push(response.text)
           }
 
-          next(() => {
-            up.request({url: '/foo', cache: true}).then(trackResponse)
-          })
+          up.request({url: '/foo', cache: true}).then(trackResponse)
 
-          next(() => {
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
-          })
+          await wait()
 
-          next.after((10), () => {
-            // Send the same request for the same path
-            up.request({url: '/foo', cache: true}).then(trackResponse)
-          })
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
 
-          next(() => {
-            // See that only a single network request was triggered
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
-            expect(responses).toEqual([])
-          })
+          await wait(10)
 
-          next(() => {
-            // Server responds once.
-            this.respondWith('foo')
-          })
+          // Send the same request for the same path
+          up.request({url: '/foo', cache: true}).then(trackResponse)
 
-          next(() => {
-            // See that both requests have been fulfilled
-            expect(responses).toEqual(['foo', 'foo'])
-          })
+          await wait()
+
+          // See that only a single network request was triggered
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(responses).toEqual([])
+
+          this.respondWith('foo')
+
+          await wait()
+
+          // See that both requests have been fulfilled
+          expect(responses).toEqual(['foo', 'foo'])
 
           // next.after((200), () => {
           //   // Send another request after another 3 minutes
@@ -747,7 +746,7 @@ describe('up.network', function() {
           // next(() => {
           //   expect(responses).toEqual(['foo', 'foo', 'bar'])
           // })
-        }))
+        })
 
         it('tracks an existing request that is still pending', async function() {
           let request0 = up.request({ url: '/path', cache: true })
@@ -910,23 +909,23 @@ describe('up.network', function() {
           expect({url: '/url#bar'}).toBeCached()
         })
 
-        it('caches requests that change their URL in up:request:load', asyncSpec(function(next) {
+        it('caches requests that change their URL in up:request:load', async function() {
           up.on('up:request:load', ({ request }) => request.url = '/changed-path')
           up.request({url: '/original-path', cache: true})
 
-          next(() => {
-            expect({url: '/changed-path'}).toBeCached()
-          })
-        }))
+          await wait()
 
-        it('caches GET requests that change their query params in up:request:load', asyncSpec(function(next) {
+          expect({url: '/changed-path'}).toBeCached()
+        })
+
+        it('caches GET requests that change their query params in up:request:load', async function() {
           up.on('up:request:load', ({ request }) => request.params.add('bar', 'two'))
           up.request({url: '/path?foo=one', cache: true})
 
-          next(() => {
-            expect({url: '/path?foo=one&bar=two'}).toBeCached()
-          })
-        }))
+          await wait()
+
+          expect({url: '/path?foo=one&bar=two'}).toBeCached()
+        })
 
         it('respects a config.cacheSize setting', async function() {
           up.network.config.cacheSize = 2
