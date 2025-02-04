@@ -1,15 +1,13 @@
-describe 'up.Request.Cache', ->
+describe('up.Request.Cache', function() {
+  describe('#track', function() {
+    it('resolves the given new request when the given cached request is resolved')
 
-  describe '#track', ->
+    it('rejects the given new request when the given cached request is rejected')
 
-    it 'resolves the given new request when the given cached request is resolved'
+    it('aborts the given new request when the given cached request is aborted', async function() {
+      let sourceRequest = new up.Request({ url: '/foo' })
 
-    it 'rejects the given new request when the given cached request is rejected'
-
-    it 'aborts the given new request when the given cached request is aborted', ->
-      sourceRequest = new up.Request(url: '/foo')
-
-      followingRequest = new up.Request(url: '/foo')
+      let followingRequest = new up.Request({ url: '/foo' })
       up.cache.track(sourceRequest, followingRequest)
 
       expect(sourceRequest.state).toEqual('new')
@@ -24,3 +22,7 @@ describe 'up.Request.Cache', ->
 
       await expectAsync(followingRequest).toBeRejectedWith(jasmine.any(up.Aborted))
       expect(followingRequest.state).toEqual('aborted')
+    })
+  })
+})
+
