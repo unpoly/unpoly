@@ -59,6 +59,7 @@ module.exports = {
         "afterEach": "readonly",
         "spyOn": "readonly",
         "spyOnProperty": "readonly",
+        "pending": "readonly",
         "asyncSpec": "readonly",
         "fixture": "readonly",
         "fixtureStyle": "readonly",

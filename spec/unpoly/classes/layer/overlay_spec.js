@@ -13,7 +13,7 @@ describe('up.Layer.Overlay', function() {
       makeLayers(2)
       expect(modes()).toEqual(['root', 'modal'])
 
-      up.layer.accept(null, {animation: false})
+      up.layer.accept(null, { animation: false })
 
       expect(modes()).toEqual(['root'])
     })
@@ -28,18 +28,18 @@ describe('up.Layer.Overlay', function() {
       up.layer.get(1).accept()
 
       expect(listener.calls.count()).toBe(3)
-      expect(listener.calls.argsFor(0)[0]).toBeEvent('up:layer:dismissed', {layer: this.layers[3]})
-      expect(listener.calls.argsFor(1)[0]).toBeEvent('up:layer:dismissed', {layer: this.layers[2]})
-      expect(listener.calls.argsFor(2)[0]).toBeEvent('up:layer:accepted', {layer: this.layers[1]})
+      expect(listener.calls.argsFor(0)[0]).toBeEvent('up:layer:dismissed', { layer: this.layers[3] })
+      expect(listener.calls.argsFor(1)[0]).toBeEvent('up:layer:dismissed', { layer: this.layers[2] })
+      expect(listener.calls.argsFor(2)[0]).toBeEvent('up:layer:accepted', { layer: this.layers[1] })
     })
 
     it('aborts pending requests for this layer', async function() {
       const abortedURLs = []
-      up.on('up:request:aborted', event => abortedURLs.push(event.request.url))
+      up.on('up:request:aborted', (event) => abortedURLs.push(event.request.url))
 
       makeLayers(2)
 
-      const promise = up.render('.element', {url: '/layer-url', layer: 'current'})
+      const promise = up.render('.element', { url: '/layer-url', layer: 'current' })
 
       await wait()
 
@@ -53,11 +53,11 @@ describe('up.Layer.Overlay', function() {
 
     it('does not abort a pending request for another layer', async function() {
       const abortedURLs = []
-      up.on('up:request:aborted', event => abortedURLs.push(event.request.url))
+      up.on('up:request:aborted', (event) => abortedURLs.push(event.request.url))
 
       makeLayers(2)
 
-      up.render('.element', {url: '/root-url', layer: 'root', peel: false})
+      up.render('.element', { url: '/root-url', layer: 'root', peel: false })
 
       await wait()
 
@@ -77,11 +77,11 @@ describe('up.Layer.Overlay', function() {
 
       up.layer.current.accept('acceptance value')
 
-      expect(onAccept).toHaveBeenCalledWith(jasmine.objectContaining({value: 'acceptance value'}))
+      expect(onAccept).toHaveBeenCalledWith(jasmine.objectContaining({ value: 'acceptance value' }))
     })
 
     it('does not close the overlay if an onAccept handler prevents the event', function() {
-      const onAccept = jasmine.createSpy('onAccept handler').and.callFake(event => event.preventDefault())
+      const onAccept = jasmine.createSpy('onAccept handler').and.callFake((event) => event.preventDefault())
       const onAccepted = jasmine.createSpy('onAccepted handler')
 
       makeLayers([
@@ -93,7 +93,7 @@ describe('up.Layer.Overlay', function() {
       const doAccept = () => up.layer.current.accept('acceptance value')
       expect(doAccept).toThrowError(/prevented/i)
 
-      expect(onAccept).toHaveBeenCalledWith(jasmine.objectContaining({value: 'acceptance value'}))
+      expect(onAccept).toHaveBeenCalledWith(jasmine.objectContaining({ value: 'acceptance value' }))
       expect(onAccepted).not.toHaveBeenCalled()
       expect(up.layer.isOverlay()).toBe(true)
     })
@@ -129,7 +129,7 @@ describe('up.Layer.Overlay', function() {
 
       up.layer.current.accept('acceptance value')
 
-      expect(onAccepted).toHaveBeenCalledWith(jasmine.objectContaining({value: 'acceptance value'}))
+      expect(onAccepted).toHaveBeenCalledWith(jasmine.objectContaining({ value: 'acceptance value' }))
     })
 
     it('focuses the link that originally opened the overlay', async function() {
@@ -139,7 +139,7 @@ describe('up.Layer.Overlay', function() {
 
       await wait()
 
-      jasmine.respondWithSelector('.element', {text: 'text'})
+      jasmine.respondWithSelector('.element', { text: 'text' })
 
       await wait()
 
@@ -414,7 +414,7 @@ describe('up.Layer.Overlay', function() {
         const destroyError = new Error('error from destructor')
         up.compiler('.overlay-element', () => (function() { throw destroyError }))
 
-        up.layer.open({fragment: '<div class="overlay-element"></div>', mode: 'modal'})
+        up.layer.open({ fragment: '<div class="overlay-element"></div>', mode: 'modal' })
 
         expect(up.layer.isOverlay()).toBe(true)
 
@@ -432,7 +432,7 @@ describe('up.Layer.Overlay', function() {
         const destroyError = new Error('error from destructor')
         up.compiler('.overlay-element', () => (function() { throw destroyError }))
 
-        up.layer.open({fragment: '<div class="overlay-element"></div>', mode: 'modal'})
+        up.layer.open({ fragment: '<div class="overlay-element"></div>', mode: 'modal' })
 
         await jasmine.expectGlobalError(destroyError, () => up.layer.accept())
 
@@ -447,7 +447,7 @@ describe('up.Layer.Overlay', function() {
           const destroyError = new Error('error from destructor')
           up.compiler('.overlay-element', () => (function() { throw destroyError }))
 
-          await up.layer.open({fragment: '<div class="overlay-element"></div>', mode: 'modal'})
+          await up.layer.open({ fragment: '<div class="overlay-element"></div>', mode: 'modal' })
 
           await wait()
 
@@ -517,7 +517,7 @@ describe('up.Layer.Overlay', function() {
         makeLayers(2)
         expect(up.layer.count).toBe(2)
 
-        const acceptListener = event => event.value = 'replaced'
+        const acceptListener = (event) => event.value = 'replaced'
         const acceptedListener = jasmine.createSpy('up:layer:accepted listener')
 
         up.layer.current.on('up:layer:accept', acceptListener)
@@ -533,7 +533,7 @@ describe('up.Layer.Overlay', function() {
         makeLayers(2)
         expect(up.layer.count).toBe(2)
 
-        up.layer.current.on('up:layer:accept', event => event.preventDefault())
+        up.layer.current.on('up:layer:accept', (event) => event.preventDefault())
 
         const accept = () => up.layer.current.accept()
 
@@ -568,7 +568,7 @@ describe('up.Layer.Overlay', function() {
 
       up.layer.current.dismiss('dismissal value')
 
-      expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({value: 'dismissal value'}))
+      expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value: 'dismissal value' }))
     })
   })
 
@@ -579,7 +579,7 @@ describe('up.Layer.Overlay', function() {
     describe('if the layer is the frontmost layer', function() {
 
       it('returns the current browser location', function() {
-        up.layer.open({location: '/foo/bar', history: true})
+        up.layer.open({ location: '/foo/bar', history: true })
         expect(up.layer.isOverlay()).toBe(true)
         expect(up.layer.location).toEqual('/foo/bar')
 
@@ -588,7 +588,7 @@ describe('up.Layer.Overlay', function() {
       })
 
       it('returns the current browser location with a #hash', function() {
-        up.layer.open({location: '/foo/bar', history: true})
+        up.layer.open({ location: '/foo/bar', history: true })
         expect(up.layer.isOverlay()).toBe(true)
         expect(up.layer.location).toEqual('/foo/bar')
 
@@ -599,10 +599,10 @@ describe('up.Layer.Overlay', function() {
 
     describe('for an overlay that does not render history', function() {
       it('returns the location of the last fragment update that rendered history', function() {
-        up.layer.open({content: 'step1', history: false})
+        up.layer.open({ content: 'step1', history: false })
         expect(up.layer.isOverlay()).toBe(true)
 
-        up.render({content: 'step2', history: true, location: '/step2', target: ':layer'})
+        up.render({ content: 'step2', history: true, location: '/step2', target: ':layer' })
 
         expect(up.layer.location).toEqual('/step2')
       })
@@ -625,7 +625,7 @@ describe('up.Layer.Overlay', function() {
 
         await wait()
 
-        jasmine.respondWithSelector('.target', {text: 'overlay 1'})
+        jasmine.respondWithSelector('.target', { text: 'overlay 1' })
 
         await wait()
 
@@ -633,7 +633,7 @@ describe('up.Layer.Overlay', function() {
 
         await wait()
 
-        jasmine.respondWithSelector('.target', {text: 'overlay 2'})
+        jasmine.respondWithSelector('.target', { text: 'overlay 2' })
 
         await wait()
 
@@ -652,8 +652,8 @@ describe('up.Layer.Overlay', function() {
     it('cycles focus within the overlay', async function() {
       makeLayers(2)
 
-      this.link1 = up.layer.affix('a[href="/one"]', {text: 'link1'})
-      this.link2 = up.layer.affix('a[href="/one"]', {text: 'link2'})
+      this.link1 = up.layer.affix('a[href="/one"]', { text: 'link1' })
+      this.link2 = up.layer.affix('a[href="/one"]', { text: 'link2' })
 
       this.dismisser = up.fragment.get('up-modal-dismiss')
 
@@ -815,10 +815,10 @@ describe('up.Layer.Overlay', function() {
           { content: form }
         ])
 
-        const rootLabel = up.fragment.get('label', {layer: 'root'})
-        const rootInput = up.fragment.get('#foo', {layer: 'root'})
-        const overlayLabel = up.fragment.get('label', {layer: 'overlay'})
-        const overlayInput = up.fragment.get('#foo', {layer: 'overlay'})
+        const rootLabel = up.fragment.get('label', { layer: 'root' })
+        const rootInput = up.fragment.get('#foo', { layer: 'root' })
+        const overlayLabel = up.fragment.get('label', { layer: 'overlay' })
+        const overlayInput = up.fragment.get('#foo', { layer: 'overlay' })
 
         await wait()
 
@@ -855,10 +855,10 @@ describe('up.Layer.Overlay', function() {
           { content: form }
         ])
 
-        const rootLabel = up.fragment.get('label', {layer: 'root'})
-        const rootInput = up.fragment.get('#foo', {layer: 'root'})
-        const overlayLabel = up.fragment.get('label', {layer: 'overlay'})
-        const overlayInput = up.fragment.get('#foo', {layer: 'overlay'})
+        const rootLabel = up.fragment.get('label', { layer: 'root' })
+        const rootInput = up.fragment.get('#foo', { layer: 'root' })
+        const overlayLabel = up.fragment.get('label', { layer: 'overlay' })
+        const overlayInput = up.fragment.get('#foo', { layer: 'overlay' })
 
         expect(up.layer.isOverlay()).toBe(true)
 
@@ -902,14 +902,14 @@ describe('up.Layer.Overlay', function() {
           { content: form }
         ])
 
-        const rootLabelPDF = up.fragment.get('label[for=format_pdf]', {layer: 'root'})
-        const rootLabelXLS = up.fragment.get('label[for=format_xls]', {layer: 'root'})
-        const rootInputPDF = up.fragment.get('#format_pdf', {layer: 'root'})
-        const rootInputXLS = up.fragment.get('#format_xls', {layer: 'root'})
-        const overlayLabelPDF = up.fragment.get('label[for=format_pdf]', {layer: 'overlay'})
-        const overlayLabelXLS = up.fragment.get('label[for=format_xls]', {layer: 'overlay'})
-        const overlayInputPDF = up.fragment.get('#format_pdf', {layer: 'overlay'})
-        const overlayInputXLS = up.fragment.get('#format_xls', {layer: 'overlay'})
+        const rootLabelPDF = up.fragment.get('label[for=format_pdf]', { layer: 'root' })
+        const rootLabelXLS = up.fragment.get('label[for=format_xls]', { layer: 'root' })
+        const rootInputPDF = up.fragment.get('#format_pdf', { layer: 'root' })
+        const rootInputXLS = up.fragment.get('#format_xls', { layer: 'root' })
+        const overlayLabelPDF = up.fragment.get('label[for=format_pdf]', { layer: 'overlay' })
+        const overlayLabelXLS = up.fragment.get('label[for=format_xls]', { layer: 'overlay' })
+        const overlayInputPDF = up.fragment.get('#format_pdf', { layer: 'overlay' })
+        const overlayInputXLS = up.fragment.get('#format_xls', { layer: 'overlay' })
 
         expect(up.layer.isOverlay()).toBe(true)
 

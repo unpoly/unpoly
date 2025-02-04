@@ -9,11 +9,11 @@ describe('up.Layer', function() {
     it('stores a per-layer context object', async function() {
       up.layer.root.context.rootKey = 'rootValue'
 
-      const overlay = await up.layer.open({context: { overlayKey: 'overlayValue' }})
+      const overlay = await up.layer.open({ context: { overlayKey: 'overlayValue' } })
 
-      expect(overlay.context).toEqual({overlayKey: 'overlayValue'})
+      expect(overlay.context).toEqual({ overlayKey: 'overlayValue' })
       // Show that the root layer's context wasn't changed.
-      expect(up.layer.root.context).toEqual({rootKey: 'rootValue'})
+      expect(up.layer.root.context).toEqual({ rootKey: 'rootValue' })
     })
 
     it('may be mutated by the user', function() {
@@ -152,7 +152,7 @@ describe('up.Layer', function() {
 
       up.layer.root.peel()
 
-      expect(listener.calls.argsFor(0)[0]).toEqual(jasmine.objectContaining({value: ':peel'}))
+      expect(listener.calls.argsFor(0)[0]).toEqual(jasmine.objectContaining({ value: ':peel' }))
     })
 
     describe('when a destructor throws an error', function() {
@@ -163,8 +163,8 @@ describe('up.Layer', function() {
           return () => { throw destroyError }
         })
 
-        up.layer.open({fragment: '<div class="overlay-element"></div>'})
-        up.layer.open({fragment: '<div class="overlay-element"></div>'})
+        up.layer.open({ fragment: '<div class="overlay-element"></div>' })
+        up.layer.open({ fragment: '<div class="overlay-element"></div>' })
 
         expect(up.layer.count).toBe(3)
 
