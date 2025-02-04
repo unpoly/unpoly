@@ -8,22 +8,22 @@ describe('up.network', function() {
     describe('up.request()', function() {
 
       it('makes a request with the given URL and params', function(done) {
-        up.request('/foo', {params: {key: 'value'}, method: 'post'})
+        up.request('/foo', { params: { key: 'value' }, method: 'post' })
         queueMicrotask(function() {
           const request = jasmine.lastRequest()
           expect(request.url).toMatchURL('/foo')
-          expect(request.data()).toEqual({key: ['value']})
+          expect(request.data()).toEqual({ key: ['value'] })
           expect(request.method).toEqual('POST')
           done()
         })
       })
 
       it('also allows to pass the URL as a { url } option instead', function(done) {
-        up.request({url: '/foo', params: {key: 'value'}, method: 'post'})
+        up.request({ url: '/foo', params: { key: 'value' }, method: 'post' })
         queueMicrotask(function() {
           const request = jasmine.lastRequest()
           expect(request.url).toMatchURL('/foo')
-          expect(request.data()).toEqual({key: ['value']})
+          expect(request.data()).toEqual({ key: ['value'] })
           expect(request.method).toEqual('POST')
           done()
         })
@@ -32,7 +32,7 @@ describe('up.network', function() {
       it('resolves to a Response object that contains information about the response and request', function(done) {
         const promise = up.request({
           url: '/url',
-          params: {key: 'value'},
+          params: { key: 'value' },
           method: 'post',
           target: '.target'
         })
@@ -45,7 +45,7 @@ describe('up.network', function() {
 
           promise.then(function(response) {
             expect(response.request.url).toMatchURL('/url')
-            expect(response.request.params).toEqual(new up.Params({key: 'value'}))
+            expect(response.request.params).toEqual(new up.Params({ key: 'value' }))
             expect(response.request.method).toEqual('POST')
             expect(response.request.target).toEqual('.target')
             expect(response.request.hash).toBeBlank()
@@ -62,11 +62,11 @@ describe('up.network', function() {
       })
 
       it('resolves to a Response that contains the response headers', function(done) {
-        const promise = up.request({url: '/url'})
+        const promise = up.request({ url: '/url' })
 
         u.task(() => {
           this.respondWith({
-            responseHeaders: {'foo': 'bar', 'baz': 'bam'},
+            responseHeaders: { 'foo': 'bar', 'baz': 'bam' },
             responseText: 'hello'
           })
         })
@@ -120,7 +120,7 @@ describe('up.network', function() {
       describe('transfer of meta attributes', function() {
 
         it("sends Unpoly's version as an X-Up-Version request header", async function() {
-          up.request({url: '/foo'})
+          up.request({ url: '/foo' })
 
           await wait()
 
@@ -149,7 +149,7 @@ describe('up.network', function() {
           expect(request.requestHeaders['X-Up-Fail-Mode']).toEqual('root')
         })
 
-        it ('does not transmit missing meta attributes as X-Up-prefixed headers', function(done) {
+        it('does not transmit missing meta attributes as X-Up-prefixed headers', function(done) {
           const request = up.request('/foo')
           u.task(() => {
             expect('X-Up-Target' in jasmine.lastRequest().requestHeaders).toBe(false)
@@ -164,19 +164,19 @@ describe('up.network', function() {
 
         it('allows to quickly construct a cacheable up.Request by passing { layer, failLayer } options', function() {
           makeLayers([
-            {mode: 'root', context: {rootKey: 'rootValue'}},
-            {mode: 'drawer', context: {drawerKey: 'drawerValue'}}
+            { mode: 'root', context: { rootKey: 'rootValue' } },
+            { mode: 'drawer', context: { drawerKey: 'drawerValue' } }
           ])
 
-          const request = up.request({url: '/foo', layer: 'root', failLayer: 'front'})
+          const request = up.request({ url: '/foo', layer: 'root', failLayer: 'front' })
           expect(request.mode).toEqual('root')
           expect(request.failMode).toEqual('drawer')
-          expect(request.context).toEqual({rootKey: 'rootValue'})
-          expect(request.failContext).toEqual({drawerKey: 'drawerValue'})
+          expect(request.context).toEqual({ rootKey: 'rootValue' })
+          expect(request.failContext).toEqual({ drawerKey: 'drawerValue' })
         })
 
         it('does not associate the request with the current layer if no { target, origin, layer } options are given', function() {
-          const request = up.request({url: '/foo'})
+          const request = up.request({ url: '/foo' })
           expect(request.layer).toBeUndefined()
           expect(request.mode).toBeUndefined()
           expect(request.context).toBeUndefined()
@@ -184,24 +184,24 @@ describe('up.network', function() {
 
         it('allows to quickly construct a cacheable up.Request by passing an { origin } option', function() {
           makeLayers([
-            {mode: 'root', context: {rootKey: 'rootValue'}},
-            {mode: 'drawer', context: {drawerKey: 'drawerValue'}}
+            { mode: 'root', context: { rootKey: 'rootValue' } },
+            { mode: 'drawer', context: { drawerKey: 'drawerValue' } }
           ])
 
-          const request = up.request({url: '/foo', origin: up.layer.front.element})
+          const request = up.request({ url: '/foo', origin: up.layer.front.element })
           expect(request.mode).toEqual('drawer')
           expect(request.failMode).toEqual('drawer')
-          expect(request.context).toEqual({drawerKey: 'drawerValue'})
-          expect(request.failContext).toEqual({drawerKey: 'drawerValue'})
+          expect(request.context).toEqual({ drawerKey: 'drawerValue' })
+          expect(request.failContext).toEqual({ drawerKey: 'drawerValue' })
         })
 
         it('assumes no layer if neither { layer, failLayer, origin } are given', function() {
           makeLayers([
-            {mode: 'root', context: {rootKey: 'rootValue'}},
-            {mode: 'drawer', context: {drawerKey: 'drawerValue'}}
+            { mode: 'root', context: { rootKey: 'rootValue' } },
+            { mode: 'drawer', context: { drawerKey: 'drawerValue' } }
           ])
 
-          const request = up.request({url: '/foo'})
+          const request = up.request({ url: '/foo' })
           expect(request.mode).toBeUndefined()
           expect(request.failMode).toBeUndefined()
           expect(request.context).toBeUndefined()
@@ -238,7 +238,7 @@ describe('up.network', function() {
 
           await wait()
 
-          jasmine.respondWith('text', {status: 500})
+          jasmine.respondWith('text', { status: 500 })
 
           await expectAsync(request).toBeRejectedWith(jasmine.any(up.Response))
           await expectAsync(request).toBeRejectedWith(jasmine.objectContaining({ status: 500, ok: false }))
@@ -370,7 +370,7 @@ describe('up.network', function() {
           })
 
           it('does not considers a redirection URL an alias for the requested URL if the original request was never cached', async function() {
-            up.request('/foo', {cache: false}) // POST requests are not cached
+            up.request('/foo', { cache: false }) // POST requests are not cached
 
             await wait()
 
@@ -384,7 +384,7 @@ describe('up.network', function() {
 
             await wait()
 
-            up.request('/bar', {cache: true})
+            up.request('/bar', { cache: true })
 
             await wait()
 
@@ -393,7 +393,7 @@ describe('up.network', function() {
           })
 
           it('does not considers a redirection URL an alias for the requested URL if the response returned a non-200 status code', async function() {
-            up.request('/foo', {cache: true})
+            up.request('/foo', { cache: true })
 
             await wait()
 
@@ -408,7 +408,7 @@ describe('up.network', function() {
 
             await wait()
 
-            up.request('/bar', {cache: true})
+            up.request('/bar', { cache: true })
 
             await wait()
 
@@ -419,7 +419,7 @@ describe('up.network', function() {
           if (FormData.prototype.entries) {
 
             it("does not explode if the original request's { params } is a FormData object", async function() {
-              up.request('/foo', {method: 'post', params: new FormData()}) // POST requests are not cached
+              up.request('/foo', { method: 'post', params: new FormData() }) // POST requests are not cached
 
               await wait()
 
@@ -466,7 +466,7 @@ describe('up.network', function() {
         })
 
         it("assumes a response method of GET if the { reponseURL } is not the request URL", function(done) {
-          const promise = up.request('/request-url', {method: 'post'})
+          const promise = up.request('/request-url', { method: 'post' })
 
           u.task(() => {
             this.respondWith({
@@ -482,7 +482,7 @@ describe('up.network', function() {
         })
 
         it("assumes the method did not change if if the { reponseURL } equals the request's URL", function(done) {
-          const promise = up.request('/request-url', {method: 'post'})
+          const promise = up.request('/request-url', { method: 'post' })
 
           u.task(() => {
             this.respondWith({
@@ -498,12 +498,12 @@ describe('up.network', function() {
         })
 
         it("sets the { method } to an X-Up-Method header, even if if the { reponseURL } equals the request's URL", function(done) {
-          const promise = up.request('/request-url', {method: 'post'})
+          const promise = up.request('/request-url', { method: 'post' })
 
           u.task(() => {
             this.respondWith({
               responseURL: '/request-url',
-              responseHeaders: {'X-Up-Method': 'GET'}
+              responseHeaders: { 'X-Up-Method': 'GET' }
             })
 
             promise.then(function(response) {
@@ -517,16 +517,16 @@ describe('up.network', function() {
         describe('when caching', function() {
 
           it('considers a redirection URL an alias for the requested URL', async function() {
-            up.request('/foo', {cache: true})
+            up.request('/foo', { cache: true })
 
             await wait()
 
             expect(jasmine.Ajax.requests.count()).toEqual(1)
-            this.respondWith({responseURL: '/bar'})
+            this.respondWith({ responseURL: '/bar' })
 
             await wait()
 
-            up.request('/bar', {cache: true})
+            up.request('/bar', { cache: true })
 
             await wait()
 
@@ -535,7 +535,7 @@ describe('up.network', function() {
           })
 
           it('does not consider a redirection URL an alias for the requested URL if the original request was never cached', async function() {
-            up.request('/foo', {cache: false})
+            up.request('/foo', { cache: false })
 
             await wait()
 
@@ -546,7 +546,7 @@ describe('up.network', function() {
 
             await wait()
 
-            up.request('/bar', {cache: true})
+            up.request('/bar', { cache: true })
 
             await wait()
 
@@ -555,7 +555,7 @@ describe('up.network', function() {
           })
 
           it('does not consider a redirection URL an alias for the requested URL if the response returned a non-200 status code', async function() {
-            up.request('/foo', {cache: true})
+            up.request('/foo', { cache: true })
 
             await wait()
 
@@ -567,7 +567,7 @@ describe('up.network', function() {
 
             await wait()
 
-            up.request('/bar', {cache: true})
+            up.request('/bar', { cache: true })
 
             await wait()
 
@@ -622,7 +622,7 @@ describe('up.network', function() {
         })
 
         it('sets a CSRF token in the header', async function() {
-          up.request('/path', {method: 'post'})
+          up.request('/path', { method: 'post' })
 
           await wait()
 
@@ -632,7 +632,7 @@ describe('up.network', function() {
 
         it('does not add a CSRF token if there is none', async function() {
           up.protocol.config.csrfToken = ''
-          up.request('/path', {method: 'post'})
+          up.request('/path', { method: 'post' })
 
           await wait()
 
@@ -641,7 +641,7 @@ describe('up.network', function() {
         })
 
         it('does not add a CSRF token for GET requests', async function() {
-          up.request('/path', {method: 'get'})
+          up.request('/path', { method: 'get' })
 
           await wait()
 
@@ -650,7 +650,7 @@ describe('up.network', function() {
         })
 
         it('does not add a CSRF token when loading content from another domain', async function() {
-          up.request('http://other-domain.tld/path', {method: 'post'})
+          up.request('http://other-domain.tld/path', { method: 'post' })
 
           await wait()
 
@@ -663,8 +663,8 @@ describe('up.network', function() {
       describe('with { params } option', function() {
 
         it("uses the given params as a non-GET request's payload", async function() {
-          const givenParams = {'foo-key': 'foo-value', 'bar-key': 'bar-value'}
-          up.request({url: '/path', method: 'put', params: givenParams})
+          const givenParams = { 'foo-key': 'foo-value', 'bar-key': 'bar-value' }
+          up.request({ url: '/path', method: 'put', params: givenParams })
 
           await wait()
 
@@ -673,8 +673,8 @@ describe('up.network', function() {
         })
 
         it("encodes the given params into the URL of a GET request", function(done) {
-          const givenParams = {'foo-key': 'foo-value', 'bar-key': 'bar-value'}
-          const promise = up.request({url: '/path', method: 'get', params: givenParams})
+          const givenParams = { 'foo-key': 'foo-value', 'bar-key': 'bar-value' }
+          const promise = up.request({ url: '/path', method: 'get', params: givenParams })
 
           u.task(() => {
             expect(this.lastRequest().url).toMatchURL('/path?foo-key=foo-value&bar-key=bar-value')
@@ -703,7 +703,7 @@ describe('up.network', function() {
             responses.push(response.text)
           }
 
-          up.request({url: '/foo', cache: true}).then(trackResponse)
+          up.request({ url: '/foo', cache: true }).then(trackResponse)
 
           await wait()
 
@@ -712,7 +712,7 @@ describe('up.network', function() {
           await wait(10)
 
           // Send the same request for the same path
-          up.request({url: '/foo', cache: true}).then(trackResponse)
+          up.request({ url: '/foo', cache: true }).then(trackResponse)
 
           await wait()
 
@@ -756,7 +756,7 @@ describe('up.network', function() {
           await wait()
 
           expect(jasmine.Ajax.requests.count()).toBe(1)
-          jasmine.respondWith({status: 200, responseText: 'ok'})
+          jasmine.respondWith({ status: 200, responseText: 'ok' })
 
           await expectAsync(request0).toBeResolvedTo(jasmine.any(up.Response))
           await expectAsync(request1).toBeResolvedTo(jasmine.any(up.Response))
@@ -765,15 +765,15 @@ describe('up.network', function() {
         describe('when the server responds with an error status code', function() {
 
           it('does not cache the response', async function() {
-            up.request({url: '/foo', cache: true})
+            up.request({ url: '/foo', cache: true })
 
             await wait()
 
-            jasmine.respondWith({status: 500, responseText: 'foo'})
+            jasmine.respondWith({ status: 500, responseText: 'foo' })
 
             await wait()
 
-            expect({url: '/foo'}).not.toBeCached()
+            expect({ url: '/foo' }).not.toBeCached()
           })
 
           it('evicts an earlier cache entry with a successful response (as we now know a better state, even if that state is an error page, and the next request should retry)', async function() {
@@ -800,7 +800,7 @@ describe('up.network', function() {
             let request1 = up.request({ url: '/path', cache: true })
             await wait()
 
-            jasmine.Ajax.requests.at(0).respondWith({status: 403, responseText: 'error'})
+            jasmine.Ajax.requests.at(0).respondWith({ status: 403, responseText: 'error' })
 
             await expectAsync(request0).toBeRejectedWith(jasmine.any(up.Response))
             await expectAsync(request1).toBeRejectedWith(jasmine.any(up.Response))
@@ -836,7 +836,7 @@ describe('up.network', function() {
 
             await wait()
 
-            expect({ url: '/path' }).toBeCachedWithResponse({ text: 'success text'})
+            expect({ url: '/path' }).toBeCachedWithResponse({ text: 'success text' })
           })
 
         })
@@ -844,7 +844,7 @@ describe('up.network', function() {
         describe('when the server responds without content', function() {
 
           it('does not cache responses with a status of 304 (Not Modified)', async function() {
-            up.request({url: '/foo', cache: true})
+            up.request({ url: '/foo', cache: true })
 
             await wait()
 
@@ -856,7 +856,7 @@ describe('up.network', function() {
           })
 
           it('does not cache responses with a status of 204 (No Content)', async function() {
-            up.request({url: '/foo', cache: true})
+            up.request({ url: '/foo', cache: true })
 
             await wait()
 
@@ -868,7 +868,7 @@ describe('up.network', function() {
           })
 
           it('does not cache responses with an empty body', async function() {
-            up.request({url: '/foo', cache: true})
+            up.request({ url: '/foo', cache: true })
 
             await wait()
 
@@ -893,56 +893,56 @@ describe('up.network', function() {
 
             await wait()
 
-            expect({ url: '/path' }).toBeCachedWithResponse({ text: 'success text'})
+            expect({ url: '/path' }).toBeCachedWithResponse({ text: 'success text' })
           })
 
         })
 
         it("does not lose a request's #hash when re-using a cached request without a #hash (bugfix)", function() {
-          const request1 = up.request({url: '/url#foo', cache: true})
+          const request1 = up.request({ url: '/url#foo', cache: true })
           expect(request1.hash).toEqual('#foo')
-          expect({url: '/url#foo'}).toBeCached()
+          expect({ url: '/url#foo' }).toBeCached()
 
-          const request2 = up.request({url: '/url#bar', cache: true})
+          const request2 = up.request({ url: '/url#bar', cache: true })
           expect(request2.hash).toEqual('#bar')
           expect(request1.hash).toEqual('#foo') // also make sure that the first request was not mutated
-          expect({url: '/url#bar'}).toBeCached()
+          expect({ url: '/url#bar' }).toBeCached()
         })
 
         it('caches requests that change their URL in up:request:load', async function() {
           up.on('up:request:load', ({ request }) => request.url = '/changed-path')
-          up.request({url: '/original-path', cache: true})
+          up.request({ url: '/original-path', cache: true })
 
           await wait()
 
-          expect({url: '/changed-path'}).toBeCached()
+          expect({ url: '/changed-path' }).toBeCached()
         })
 
         it('caches GET requests that change their query params in up:request:load', async function() {
           up.on('up:request:load', ({ request }) => request.params.add('bar', 'two'))
-          up.request({url: '/path?foo=one', cache: true})
+          up.request({ url: '/path?foo=one', cache: true })
 
           await wait()
 
-          expect({url: '/path?foo=one&bar=two'}).toBeCached()
+          expect({ url: '/path?foo=one&bar=two' }).toBeCached()
         })
 
         it('respects a config.cacheSize setting', async function() {
           up.network.config.cacheSize = 2
 
-          up.request({url: '/foo', cache: true})
+          up.request({ url: '/foo', cache: true })
 
           await wait(2)
 
-          up.request({url: '/bar', cache: true})
+          up.request({ url: '/bar', cache: true })
 
           await wait(2)
 
-          up.request({url: '/baz', cache: true})
+          up.request({ url: '/baz', cache: true })
 
           await wait(2)
 
-          up.request({url: '/foo', cache: true})
+          up.request({ url: '/foo', cache: true })
 
           await wait()
 
@@ -1115,7 +1115,7 @@ describe('up.network', function() {
             it('partitions the cache separately for varying X-Up-Target and X-Up-Fail-Target headers', async function() {
               await jasmine.populateCache(
                 { url: '/path', target: '.a, .b', failTarget: '.c, .d' },
-                { responseHeaders: { Vary: 'X-Up-Target, X-Up-Fail-Target'} }
+                { responseHeaders: { Vary: 'X-Up-Target, X-Up-Fail-Target' } }
               )
 
               expect({ url: '/path', target: '.a', failTarget: '.c' }).toBeCached()
@@ -1125,7 +1125,7 @@ describe('up.network', function() {
             it('reuses a multi-target response for a new request targeting only some of the cached selectors', async function() {
               await jasmine.populateCache(
                 { url: '/path', target: '.a, .b, .c' },
-                { responseHeaders: { Vary: 'X-Up-Target'} }
+                { responseHeaders: { Vary: 'X-Up-Target' } }
               )
 
               expect({ url: '/path', target: '.a, .b, .c' }).toBeCached()
@@ -1151,7 +1151,7 @@ describe('up.network', function() {
             it('does not reuse a multi-target response for a new request targeting additional selectors', async function() {
               await jasmine.populateCache(
                 { url: '/path', target: '.a, .b, .c' },
-                { responseHeaders: { Vary: 'X-Up-Target'} }
+                { responseHeaders: { Vary: 'X-Up-Target' } }
               )
 
               expect({ url: '/path', target: '.a, .b, .c' }).toBeCached()
@@ -1163,7 +1163,7 @@ describe('up.network', function() {
             it('reuses a response without a target for a new request with a target', async function() {
               await jasmine.populateCache(
                 { url: '/path' },
-                { responseHeaders: { Vary: 'X-Up-Target'} }
+                { responseHeaders: { Vary: 'X-Up-Target' } }
               )
 
               expect({ url: '/path', target: '.a' }).toBeCached()
@@ -1173,7 +1173,7 @@ describe('up.network', function() {
             it('does not reuse a response tailored to a target for a new request without a target', async function() {
               await jasmine.populateCache(
                 { url: '/path', target: '.a' },
-                { responseHeaders: { Vary: 'X-Up-Target'} }
+                { responseHeaders: { Vary: 'X-Up-Target' } }
               )
 
               expect({ url: '/path', target: '.a' }).toBeCached()
@@ -1315,138 +1315,139 @@ describe('up.network', function() {
 
             u.each(['GET', 'HEAD', 'OPTIONS'], function(safeMethod) {
 
-              it(`caches ${safeMethod} requests`, asyncSpec(function(next) {
-                next(() => up.request({url: '/foo', method: safeMethod, cache: 'auto'}))
-                next(() => up.request({url: '/foo', method: safeMethod, cache: 'auto'}))
-                next(() => expect(jasmine.Ajax.requests.count()).toEqual(1))
-              }))
+              it(`caches ${safeMethod} requests`, async function() {
+                up.request({ url: '/foo', method: safeMethod, cache: 'auto' })
+                await wait()
 
-              it(`does not cache ${safeMethod} requests with { cache: false }`, asyncSpec(function(next) {
-                next(() => up.request({url: '/foo', method: safeMethod, cache: false}))
-                next(() => up.request({url: '/foo', method: safeMethod, cache: false}))
-                next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
-              }))
+                up.request({ url: '/foo', method: safeMethod, cache: 'auto' })
+                await wait()
+
+                expect(jasmine.Ajax.requests.count()).toEqual(1)
+              })
+
+              it(`does not cache ${safeMethod} requests with { cache: false }`, async function() {
+                up.request({ url: '/foo', method: safeMethod, cache: false })
+                await wait()
+
+                up.request({ url: '/foo', method: safeMethod, cache: false })
+                await wait()
+
+                expect(jasmine.Ajax.requests.count()).toEqual(2)
+              })
             })
 
             u.each(['POST', 'PUT', 'DELETE'], function(unsafeMethod) {
-              it(`does not cache ${unsafeMethod} requests`, asyncSpec(function(next) {
-                next(() => up.request({url: '/foo', method: unsafeMethod, cache: 'auto'}))
-                next(() => up.request({url: '/foo', method: unsafeMethod, cache: 'auto'}))
-                next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
-              }))
+              it(`does not cache ${unsafeMethod} requests`, async function() {
+                up.request({ url: '/foo', method: unsafeMethod, cache: 'auto' })
+                await wait()
+
+                up.request({ url: '/foo', method: unsafeMethod, cache: 'auto' })
+                await wait()
+
+                expect(jasmine.Ajax.requests.count()).toEqual(2)
+              })
             })
           })
 
           it('caches the request if up.network.config.autoCache(request) returns true', function() {
-            up.network.config.autoCache = request => request.url === '/yes'
+            up.network.config.autoCache = (request) => request.url === '/yes'
 
-            up.request({url: '/yes', cache: 'auto'})
+            up.request({ url: '/yes', cache: 'auto' })
 
-            expect({url: '/yes'}).toBeCached()
+            expect({ url: '/yes' }).toBeCached()
           })
 
           it('does not cache the request if up.network.config.autoCache(request) returns false', function() {
-            up.network.config.autoCache = request => request.url === '/yes'
+            up.network.config.autoCache = (request) => request.url === '/yes'
 
-            up.request({url: '/no', cache: 'auto'})
+            up.request({ url: '/no', cache: 'auto' })
 
-            expect({url: '/no'}).not.toBeCached()
+            expect({ url: '/no' }).not.toBeCached()
           })
         })
       })
 
       describe('when there is an existing cache entry and a new request has { cache: false }', function() {
 
-        it('keeps the existing response in the cache while the new request is loading', asyncSpec(function(next) {
+        it('keeps the existing response in the cache while the new request is loading', async function() {
           let response = null
 
-          next(() => up.request({url: '/cache-me', cache: true}))
+          up.request({ url: '/cache-me', cache: true })
+          await wait()
 
-          next(function() {
-            expect(up.network.queue.allRequests.length).toBe(1)
-            jasmine.respondWith('response text')
-          })
+          expect(up.network.queue.allRequests.length).toBe(1)
+          jasmine.respondWith('response text')
+          await wait()
 
-          next(function() {
-            expect(up.network.queue.allRequests.length).toBe(0)
-            up.request({url: '/cache-me', cache: false})
-          })
+          expect(up.network.queue.allRequests.length).toBe(0)
+          up.request({ url: '/cache-me', cache: false })
+          await wait()
 
-          next(function() {
-            expect(up.network.queue.allRequests.length).toBe(1)
-            up.request({url: '/cache-me', cache: true}).then(cachedResponse => response = cachedResponse)
-          })
+          expect(up.network.queue.allRequests.length).toBe(1)
+          up.request({ url: '/cache-me', cache: true }).then((cachedResponse) => response = cachedResponse)
+          await wait()
 
-          next(function() {
-            expect(response).toBeGiven()
-            expect(response.text).toEqual('response text')
-          })
-        }))
+          expect(response).toBeGiven()
+          expect(response.text).toEqual('response text')
+        })
 
-        it("updates an existing cache entry with the newer response", asyncSpec(function(next) {
+        it("updates an existing cache entry with the newer response", async function() {
           let response = null
 
-          next(() => up.request({url: '/cache-me', cache: true}))
+          up.request({ url: '/cache-me', cache: true })
+          await wait()
 
-          next(function() {
-            expect(up.network.queue.allRequests.length).toBe(1)
-            jasmine.respondWith('old response text')
-          })
+          expect(up.network.queue.allRequests.length).toBe(1)
+          jasmine.respondWith('old response text')
+          await wait()
 
-          next(function() {
-            expect(up.network.queue.allRequests.length).toBe(0)
-            up.request({url: '/cache-me', cache: false})
-          })
+          expect(up.network.queue.allRequests.length).toBe(0)
+          up.request({ url: '/cache-me', cache: false })
+          await wait()
 
-          next(function() {
-            expect(up.network.queue.allRequests.length).toBe(1)
-            jasmine.respondWith('new response text')
-          })
+          expect(up.network.queue.allRequests.length).toBe(1)
+          jasmine.respondWith('new response text')
+          await wait()
 
-          next(() => up.request({url: '/cache-me', cache: true}).then(cachedResponse => response = cachedResponse))
+          up.request({ url: '/cache-me', cache: true }).then((cachedResponse) => response = cachedResponse)
+          await wait()
 
-          next(function() {
-            expect(response).toBeGiven()
-            expect(response.text).toEqual('new response text')
-          })
-        }))
+          expect(response).toBeGiven()
+          expect(response.text).toEqual('new response text')
+        })
       })
 
       describe('cache eviction', function() {
 
-        it('evicts all cache entries with { evictCache: true }', asyncSpec(function(next) {
+        it('evicts all cache entries with { evictCache: true }', async function() {
           up.request({ url: '/foo', cache: true })
           expect({ url: '/foo' }).toBeCached()
 
           up.request({ url: '/bar', evictCache: true })
+          await wait()
 
-          next(() => {
-            this.respondWith('foo')
-          })
+          this.respondWith('foo')
+          await wait()
 
-          next(() => {
-            expect({ url: '/foo' }).not.toBeCached()
-            expect({ url: '/bar' }).not.toBeCached()
-          })
-        }))
+          expect({ url: '/foo' }).not.toBeCached()
+          expect({ url: '/bar' }).not.toBeCached()
+        })
 
-        it('keeps this new request in the cache with { cache: true, evictCache: true }', asyncSpec(function(next) {
+        it('keeps this new request in the cache with { cache: true, evictCache: true }', async function() {
           up.request({ url: '/foo', cache: true })
           expect({ url: '/foo' }).toBeCached()
 
           up.request({ url: '/bar', cache: true, evictCache: true })
+          await wait()
 
-          next(() => {
-            this.respondWith('foo')
-          })
+          this.respondWith('foo')
+          await wait()
 
-          next(() => {
-            expect({ url: '/foo' }).not.toBeCached()
-            expect({ url: '/bar' }).toBeCached()
-          })
-        }))
+          expect({ url: '/foo' }).not.toBeCached()
+          expect({ url: '/bar' }).toBeCached()
+        })
 
-        it('accepts an URL pattern as { evictCache } option', asyncSpec(function(next) {
+        it('accepts an URL pattern as { evictCache } option', async function() {
           up.request({ url: '/foo/1', cache: true })
           up.request({ url: '/foo/2', cache: true })
           up.request({ url: '/bar/1', cache: true })
@@ -1456,25 +1457,23 @@ describe('up.network', function() {
           expect({ url: '/bar/1' }).toBeCached()
 
           up.request({ url: '/other', evictCache: '/foo/*' })
+          await wait()
 
-          next(() => {
-            expect(jasmine.Ajax.requests.count()).toEqual(4)
+          expect(jasmine.Ajax.requests.count()).toEqual(4)
 
-            this.respondWith({
-              status: 200,
-              contentType: 'text/html',
-              responseText: 'foo'
-            })
+          this.respondWith({
+            status: 200,
+            contentType: 'text/html',
+            responseText: 'foo'
           })
+          await wait()
 
-          next(function() {
-            expect({ url: '/foo/1' }).not.toBeCached()
-            expect({ url: '/foo/2' }).not.toBeCached()
-            expect({ url: '/bar/1' }).toBeCached()
-          })
-        }))
+          expect({ url: '/foo/1' }).not.toBeCached()
+          expect({ url: '/foo/2' }).not.toBeCached()
+          expect({ url: '/bar/1' }).toBeCached()
+        })
 
-        it('accepts an function as { evictCache } option', asyncSpec(function(next) {
+        it('accepts an function as { evictCache } option', async function() {
           up.request({ url: '/foo/1', cache: true })
           up.request({ url: '/foo/2', cache: true })
           up.request({ url: '/bar/1', cache: true })
@@ -1485,25 +1484,23 @@ describe('up.network', function() {
 
           let evictCache = (request) => request.url.indexOf('/foo/') === 0
           up.request({ url: '/other', evictCache })
+          await wait()
 
-          next(() => {
-            expect(jasmine.Ajax.requests.count()).toEqual(4)
+          expect(jasmine.Ajax.requests.count()).toEqual(4)
 
-            this.respondWith({
-              status: 200,
-              contentType: 'text/html',
-              responseText: 'foo'
-            })
+          this.respondWith({
+            status: 200,
+            contentType: 'text/html',
+            responseText: 'foo'
           })
+          await wait()
 
-          next(function() {
-            expect({ url: '/foo/1' }).not.toBeCached()
-            expect({ url: '/foo/2' }).not.toBeCached()
-            expect({ url: '/bar/1' }).toBeCached()
-          })
-        }))
+          expect({ url: '/foo/1' }).not.toBeCached()
+          expect({ url: '/foo/2' }).not.toBeCached()
+          expect({ url: '/bar/1' }).toBeCached()
+        })
 
-        it('lets the server send an URL pattern as X-Up-Evict-Cache response header', asyncSpec(function(next) {
+        it('lets the server send an URL pattern as X-Up-Evict-Cache response header', async function() {
           up.request({ url: '/foo/1', cache: true })
           up.request({ url: '/foo/2', cache: true })
           up.request({ url: '/bar/1', cache: true })
@@ -1513,52 +1510,47 @@ describe('up.network', function() {
           expect({ url: '/bar/1' }).toBeCached()
 
           up.request({ url: '/other' })
+          await wait()
 
-          next(() => {
-            expect(jasmine.Ajax.requests.count()).toEqual(4)
+          expect(jasmine.Ajax.requests.count()).toEqual(4)
 
-            this.respondWith({
-              status: 200,
-              contentType: 'text/html',
-              responseText: 'foo',
-              responseHeaders: { 'X-Up-Evict-Cache': '/foo/*' }
-            })
+          this.respondWith({
+            status: 200,
+            contentType: 'text/html',
+            responseText: 'foo',
+            responseHeaders: { 'X-Up-Evict-Cache': '/foo/*' }
           })
+          await wait()
 
-          next(function() {
-            expect({ url: '/foo/1' }).not.toBeCached()
-            expect({ url: '/foo/2' }).not.toBeCached()
-            expect({ url: '/bar/1' }).toBeCached()
+          expect({ url: '/foo/1' }).not.toBeCached()
+          expect({ url: '/foo/2' }).not.toBeCached()
+          expect({ url: '/bar/1' }).toBeCached()
+        })
+
+        it('evicts the entire cache if the server responds with an X-Up-Evict-Cache: * header', async function() {
+          up.request({ url: '/foo', cache: true })
+          up.request({ url: '/bar', cache: true })
+          expect({ url: '/foo' }).toBeCached()
+          expect({ url: '/bar' }).toBeCached()
+
+          up.request({ url: '/baz' })
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toEqual(3)
+
+          this.respondWith({
+            status: 200,
+            contentType: 'text/html',
+            responseText: 'foo',
+            responseHeaders: { 'X-Up-Evict-Cache': '*' }
           })
-        }))
+          await wait()
 
-        it('evicts the entire cache if the server responds with an X-Up-Evict-Cache: * header', asyncSpec(function(next) {
-          up.request({url: '/foo', cache: true})
-          up.request({url: '/bar', cache: true})
-          expect({url: '/foo'}).toBeCached()
-          expect({url: '/bar'}).toBeCached()
+          expect({ url: '/foo' }).not.toBeCached()
+          expect({ url: '/bar' }).not.toBeCached()
+        })
 
-          up.request({url: '/baz'})
-
-          next(() => {
-            expect(jasmine.Ajax.requests.count()).toEqual(3)
-
-            this.respondWith({
-              status: 200,
-              contentType: 'text/html',
-              responseText: 'foo',
-              responseHeaders: {'X-Up-Evict-Cache': '*'}
-            })
-          })
-
-          next(function() {
-            expect({url: '/foo'}).not.toBeCached()
-            expect({url: '/bar'}).not.toBeCached()
-          })
-        }))
-
-
-        it('defaults to a rule in up.network.config.evictCache() if neither request nor server set a { evictCache } option', asyncSpec(function(next) {
+        it('defaults to a rule in up.network.config.evictCache() if neither request nor server set a { evictCache } option', async function() {
           up.network.config.evictCache = function(request, response) {
             expect(request).toEqual(jasmine.any(up.Request))
             expect(response).toEqual(jasmine.any(up.Response))
@@ -1571,74 +1563,68 @@ describe('up.network', function() {
           up.request({ url: '/foo', cache: true })
           up.request({ url: '/bar', cache: true })
           up.request({ url: '/baz', cache: true })
+          await wait()
 
           expect({ url: '/foo' }).toBeCached()
           expect({ url: '/bar' }).toBeCached()
           expect({ url: '/baz' }).toBeCached()
 
-          next(() => jasmine.Ajax.requests.at(0).respondWith({ status: 200, responseText: 'foo response' }))
+          jasmine.Ajax.requests.at(0).respondWith({ status: 200, responseText: 'foo response' })
+          await wait()
 
-          next(function() {
-            expect({ url: '/foo' }).toBeCached()
-            expect({ url: '/bar' }).toBeCached()
-            expect({ url: '/baz' }).toBeCached()
+          expect({ url: '/foo' }).toBeCached()
+          expect({ url: '/bar' }).toBeCached()
+          expect({ url: '/baz' }).toBeCached()
 
-            jasmine.Ajax.requests.at(1).respondWith({ status: 200, responseText: 'bar response' })
-          })
+          jasmine.Ajax.requests.at(1).respondWith({ status: 200, responseText: 'bar response' })
+          await wait()
 
-          next(function() {
-            expect({ url: '/foo' }).toBeCached()
-            expect({ url: '/bar' }).toBeCached()
-            expect({ url: '/baz' }).toBeCached()
+          expect({ url: '/foo' }).toBeCached()
+          expect({ url: '/bar' }).toBeCached()
+          expect({ url: '/baz' }).toBeCached()
 
-            jasmine.Ajax.requests.at(2).respondWith({ status: 200, responseText: 'baz response' })
-          })
+          jasmine.Ajax.requests.at(2).respondWith({ status: 200, responseText: 'baz response' })
+          await wait()
 
-          next(function() {
-            // Only the URL pattern returned by config.evictCache() is evicted
-            expect({ url: '/foo' }).not.toBeCached()
-            expect({ url: '/bar' }).toBeCached()
-            expect({ url: '/baz' }).toBeCached()
-          })
-        }))
+          // Only the URL pattern returned by config.evictCache() is evicted
+          expect({ url: '/foo' }).not.toBeCached()
+          expect({ url: '/bar' }).toBeCached()
+          expect({ url: '/baz' }).toBeCached()
+        })
 
       })
 
       describe('cache expiration', function() {
 
-        it('expires all cache entries with { expireCache: true }', asyncSpec(function(next) {
+        it('expires all cache entries with { expireCache: true }', async function() {
           up.request({ url: '/foo', cache: true })
           expect({ url: '/foo' }).toBeCached()
 
           up.request({ url: '/bar', expireCache: true })
+          await wait()
 
-          next(() => {
-            this.respondWith('foo')
-          })
+          this.respondWith('foo')
+          await wait()
 
-          next(() => {
-            expect({ url: '/foo' }).toBeExpired()
-          })
-        }))
+          expect({ url: '/foo' }).toBeExpired()
+        })
 
-        it('keeps a fresh cache entry for this new request with { cache: true, expireCache: true }', asyncSpec(function(next) {
+        it('keeps a fresh cache entry for this new request with { cache: true, expireCache: true }', async function() {
           up.request({ url: '/foo', cache: true })
           expect({ url: '/foo' }).toBeCached()
 
           up.request({ url: '/bar', cache: true, expireCache: true })
+          await wait()
 
-          next(() => {
-            this.respondWith('bar')
-          })
+          this.respondWith('bar')
+          await wait()
 
-          next(() => {
-            expect({ url: '/foo' }).toBeExpired()
-            expect({ url: '/bar' }).toBeCached()
-            expect({ url: '/bar' }).not.toBeExpired()
-          })
-        }))
+          expect({ url: '/foo' }).toBeExpired()
+          expect({ url: '/bar' }).toBeCached()
+          expect({ url: '/bar' }).not.toBeExpired()
+        })
 
-        it('accepts an URL pattern as { expireCache } option', asyncSpec(function(next) {
+        it('accepts an URL pattern as { expireCache } option', async function() {
           up.request({ url: '/foo/1', cache: true })
           up.request({ url: '/foo/2', cache: true })
           up.request({ url: '/bar/1', cache: true })
@@ -1648,25 +1634,23 @@ describe('up.network', function() {
           expect({ url: '/bar/1' }).toBeCached()
 
           up.request({ url: '/other', expireCache: '/foo/*' })
+          await wait()
 
-          next(() => {
-            expect(jasmine.Ajax.requests.count()).toEqual(4)
+          expect(jasmine.Ajax.requests.count()).toEqual(4)
 
-            this.respondWith({
-              status: 200,
-              contentType: 'text/html',
-              responseText: 'foo'
-            })
+          this.respondWith({
+            status: 200,
+            contentType: 'text/html',
+            responseText: 'foo'
           })
+          await wait()
 
-          next(function() {
-            expect({ url: '/foo/1' }).toBeExpired()
-            expect({ url: '/foo/2' }).toBeExpired()
-            expect({ url: '/bar/1' }).not.toBeExpired()
-          })
-        }))
+          expect({ url: '/foo/1' }).toBeExpired()
+          expect({ url: '/foo/2' }).toBeExpired()
+          expect({ url: '/bar/1' }).not.toBeExpired()
+        })
 
-        it('accepts an function as { expireCache } option', asyncSpec(function(next) {
+        it('accepts an function as { expireCache } option', async function() {
           up.request({ url: '/foo/1', cache: true })
           up.request({ url: '/foo/2', cache: true })
           up.request({ url: '/bar/1', cache: true })
@@ -1677,25 +1661,23 @@ describe('up.network', function() {
 
           let expireCache = (request) => request.url.indexOf('/foo/') === 0
           up.request({ url: '/other', expireCache })
+          await wait()
 
-          next(() => {
-            expect(jasmine.Ajax.requests.count()).toEqual(4)
+          expect(jasmine.Ajax.requests.count()).toEqual(4)
 
-            this.respondWith({
-              status: 200,
-              contentType: 'text/html',
-              responseText: 'foo'
-            })
+          this.respondWith({
+            status: 200,
+            contentType: 'text/html',
+            responseText: 'foo'
           })
+          await wait()
 
-          next(function() {
-            expect({ url: '/foo/1' }).toBeExpired()
-            expect({ url: '/foo/2' }).toBeExpired()
-            expect({ url: '/bar/1' }).not.toBeExpired()
-          })
-        }))
+          expect({ url: '/foo/1' }).toBeExpired()
+          expect({ url: '/foo/2' }).toBeExpired()
+          expect({ url: '/bar/1' }).not.toBeExpired()
+        })
 
-        it('lets the server send an URL pattern as X-Up-Expire-Cache response header', asyncSpec(function(next) {
+        it('lets the server send an URL pattern as X-Up-Expire-Cache response header', async function() {
           up.request({ url: '/foo/1', cache: true })
           up.request({ url: '/foo/2', cache: true })
           up.request({ url: '/bar/1', cache: true })
@@ -1705,52 +1687,47 @@ describe('up.network', function() {
           expect({ url: '/bar/1' }).toBeCached()
 
           up.request({ url: '/other' })
+          await wait()
 
-          next(() => {
-            expect(jasmine.Ajax.requests.count()).toEqual(4)
+          expect(jasmine.Ajax.requests.count()).toEqual(4)
 
-            this.respondWith({
-              status: 200,
-              contentType: 'text/html',
-              responseText: 'foo',
-              responseHeaders: { 'X-Up-Expire-Cache': '/foo/*' }
-            })
+          this.respondWith({
+            status: 200,
+            contentType: 'text/html',
+            responseText: 'foo',
+            responseHeaders: { 'X-Up-Expire-Cache': '/foo/*' }
           })
+          await wait()
 
-          next(function() {
-            expect({ url: '/foo/1' }).toBeExpired()
-            expect({ url: '/foo/2' }).toBeExpired()
-            expect({ url: '/bar/1' }).not.toBeExpired()
+          expect({ url: '/foo/1' }).toBeExpired()
+          expect({ url: '/foo/2' }).toBeExpired()
+          expect({ url: '/bar/1' }).not.toBeExpired()
+        })
+
+        it('expires the entire cache if the server responds with an X-Up-Expire-Cache: * header', async function() {
+          up.request({ url: '/foo', cache: true })
+          up.request({ url: '/bar', cache: true })
+          expect({ url: '/foo' }).toBeCached()
+          expect({ url: '/bar' }).toBeCached()
+
+          up.request({ url: '/baz' })
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toEqual(3)
+
+          this.respondWith({
+            status: 200,
+            contentType: 'text/html',
+            responseText: 'foo',
+            responseHeaders: { 'X-Up-Expire-Cache': '*' }
           })
-        }))
+          await wait()
 
-        it('expires the entire cache if the server responds with an X-Up-Expire-Cache: * header', asyncSpec(function(next) {
-          up.request({url: '/foo', cache: true})
-          up.request({url: '/bar', cache: true})
-          expect({url: '/foo'}).toBeCached()
-          expect({url: '/bar'}).toBeCached()
+          expect({ url: '/foo' }).toBeExpired()
+          expect({ url: '/bar' }).toBeExpired()
+        })
 
-          up.request({url: '/baz'})
-
-          next(() => {
-            expect(jasmine.Ajax.requests.count()).toEqual(3)
-
-            this.respondWith({
-              status: 200,
-              contentType: 'text/html',
-              responseText: 'foo',
-              responseHeaders: {'X-Up-Expire-Cache': '*'}
-            })
-          })
-
-          next(function() {
-            expect({url: '/foo'}).toBeExpired()
-            expect({url: '/bar'}).toBeExpired()
-          })
-        }))
-
-
-        it('defaults to a rule in up.network.config.expireCache() if neither request nor server set a { expireCache } option', asyncSpec(function(next) {
+        it('defaults to a rule in up.network.config.expireCache() if neither request nor server set a { expireCache } option', async function() {
           up.network.config.expireCache = function(request, response) {
             expect(request).toEqual(jasmine.any(up.Request))
             expect(response).toEqual(jasmine.any(up.Response))
@@ -1767,152 +1744,133 @@ describe('up.network', function() {
           expect({ url: '/foo' }).toBeCached()
           expect({ url: '/bar' }).toBeCached()
           expect({ url: '/baz' }).toBeCached()
+          await wait()
 
-          next(() => jasmine.Ajax.requests.at(0).respondWith({ status: 200, responseText: 'foo response' }))
+          jasmine.Ajax.requests.at(0).respondWith({ status: 200, responseText: 'foo response' })
+          await wait()
 
-          next(function() {
-            expect({ url: '/foo' }).not.toBeExpired()
-            expect({ url: '/bar' }).not.toBeExpired()
-            expect({ url: '/baz' }).not.toBeExpired()
+          expect({ url: '/foo' }).not.toBeExpired()
+          expect({ url: '/bar' }).not.toBeExpired()
+          expect({ url: '/baz' }).not.toBeExpired()
 
-            jasmine.Ajax.requests.at(1).respondWith({ status: 200, responseText: 'bar response' })
-          })
+          jasmine.Ajax.requests.at(1).respondWith({ status: 200, responseText: 'bar response' })
+          await wait()
 
-          next(function() {
-            expect({ url: '/foo' }).not.toBeExpired()
-            expect({ url: '/bar' }).not.toBeExpired()
-            expect({ url: '/baz' }).not.toBeExpired()
+          expect({ url: '/foo' }).not.toBeExpired()
+          expect({ url: '/bar' }).not.toBeExpired()
+          expect({ url: '/baz' }).not.toBeExpired()
 
-            jasmine.Ajax.requests.at(2).respondWith({ status: 200, responseText: 'baz response' })
-          })
+          jasmine.Ajax.requests.at(2).respondWith({ status: 200, responseText: 'baz response' })
+          await wait()
 
-          next(function() {
-            // Only the URL pattern returned by config.expireCache() is exppired
-            expect({ url: '/foo' }).toBeExpired()
-            expect({ url: '/bar' }).not.toBeExpired()
-            expect({ url: '/baz' }).not.toBeExpired()
-          })
-        }))
+          expect({ url: '/foo' }).toBeExpired()
+          expect({ url: '/bar' }).not.toBeExpired()
+          expect({ url: '/baz' }).not.toBeExpired()
+        })
 
         u.each(['POST', 'PUT', 'DELETE'], function(unsafeMethod) {
 
-          it(`expires the entire cache if a ${unsafeMethod} request is made`, asyncSpec(function(next) {
+          it(`expires the entire cache if a ${unsafeMethod} request is made`, async function() {
             const safeRequestAttrs = { method: 'GET', url: '/foo', cache: true }
             const unsafeRequestAttrs = { method: unsafeMethod, url: '/foo' }
 
             up.request(safeRequestAttrs)
+            await wait()
 
-            next(() => {
-              this.respondWith('foo')
-            })
+            this.respondWith('foo')
+            await wait()
 
-            next(() => {
-              expect(safeRequestAttrs).toBeCached()
+            expect(safeRequestAttrs).toBeCached()
 
-              up.request(unsafeRequestAttrs)
-            })
+            up.request(unsafeRequestAttrs)
+            await wait()
 
-            next(() => {
-              this.respondWith('foo')
-            })
+            this.respondWith('foo')
+            await wait()
 
-            next(() => {
-              expect(safeRequestAttrs).toBeExpired()
-            })
-          }))
+            expect(safeRequestAttrs).toBeExpired()
+          })
 
-          it(`does notexpireclear the cache if a ${unsafeMethod} request is made with { expireCache: false }`, asyncSpec(function(next) {
-            const safeRequestAttrs = {method: 'GET', url: '/foo', cache: true}
-            const unsafeRequestAttrs = {method: unsafeMethod, url: '/foo', expireCache: false}
+          it(`does not expire the cache if a ${unsafeMethod} request is made with { expireCache: false }`, async function() {
+            const safeRequestAttrs = { method: 'GET', url: '/foo', cache: true }
+            const unsafeRequestAttrs = { method: unsafeMethod, url: '/foo', expireCache: false }
 
             up.request(safeRequestAttrs)
+            await wait()
 
-            next(() => {
-              this.respondWith('false')
-            })
+            this.respondWith('false')
+            await wait()
 
-            next(() => {
-              expect(safeRequestAttrs).toBeCached()
+            expect(safeRequestAttrs).toBeCached()
 
-              up.request(unsafeRequestAttrs)
-            })
+            up.request(unsafeRequestAttrs)
+            await wait()
 
-            next(() => {
-              this.respondWith('foo')
-            })
+            this.respondWith('foo')
+            await wait()
 
-            next(() => {
-              expect(safeRequestAttrs).not.toBeExpired()
-            })
-          }))
+            expect(safeRequestAttrs).not.toBeExpired()
+          })
 
-          it(`does not expire the cache the server responds to an ${unsafeMethod} request with X-Up-Expire-Cache: false`, asyncSpec(function(next) {
-            const safeRequestAttrs = {method: 'GET', url: '/foo', cache: true}
-            const unsafeRequestAttrs = {method: unsafeMethod, url: '/foo', cache: true}
+          it(`does not expire the cache if the server responds to an ${unsafeMethod} request with X-Up-Expire-Cache: false`, async function() {
+            const safeRequestAttrs = { method: 'GET', url: '/foo', cache: true }
+            const unsafeRequestAttrs = { method: unsafeMethod, url: '/foo', cache: true }
 
             up.request(safeRequestAttrs)
+            await wait()
 
-            next(() => {
-              this.respondWith('foo')
-            })
+            this.respondWith('foo')
+            await wait()
 
-            next(() => {
-              expect(safeRequestAttrs).toBeCached()
+            expect(safeRequestAttrs).toBeCached()
 
-              up.request(unsafeRequestAttrs)
-            })
+            up.request(unsafeRequestAttrs)
+            await wait()
 
-            next(() => {
-              this.respondWith('foo', {responseHeaders: {'X-Up-Expire-Cache': 'false'}})
-            })
+            this.respondWith('foo', { responseHeaders: { 'X-Up-Expire-Cache': 'false' } })
+            await wait()
 
-            next(() => {
-              expect(safeRequestAttrs).not.toBeExpired()
-            })
-          }))
+            expect(safeRequestAttrs).not.toBeExpired()
+          })
         })
 
       })
 
 
-
       describe('method wrapping', function() {
 
         u.each(['GET', 'POST', 'HEAD', 'OPTIONS'], function(method) {
-          it(`does not change the method of a ${method} request`, asyncSpec(function(next) {
-            up.request({url: '/foo', method})
+          it(`does not change the method of a ${method} request`, async function() {
+            up.request({ url: '/foo', method })
+            await wait()
 
-            next(() => {
-              const request = this.lastRequest()
-              expect(request.method).toEqual(method)
-              expect(request.data()['_method']).toBeUndefined()
-            })
-          }))
+            const request = this.lastRequest()
+            expect(request.method).toEqual(method)
+            expect(request.data()['_method']).toBeUndefined()
+          })
         })
 
         u.each(['PUT', 'PATCH', 'DELETE'], function(method) {
-          it(`turns a ${method} request into a POST request and sends the actual method as a { _method } param to prevent unexpected redirect behavior (https://makandracards.com/makandra/38347)`, asyncSpec(function(next) {
-            up.request({url: '/foo', method})
+          it(`turns a ${method} request into a POST request and sends the actual method as a { _method } param to prevent unexpected redirect behavior (https://makandracards.com/makandra/38347)`, async function() {
+            up.request({ url: '/foo', method })
+            await wait()
 
-            next(() => {
-              const request = this.lastRequest()
-              expect(request.method).toEqual('POST')
-              expect(request.data()['_method']).toEqual([method])
-            })
-          }))
+            const request = this.lastRequest()
+            expect(request.method).toEqual('POST')
+            expect(request.data()['_method']).toEqual([method])
+          })
         })
 
         describe('with { wrapMethod: false }', function() {
           u.each(['GET', 'POST', 'HEAD', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'], function(method) {
-            it(`does not wrap the method of a ${method} request`, asyncSpec(function(next) {
-              up.request({url: '/foo', method, wrapMethod: false})
+            it(`does not wrap the method of a ${method} request`, async function() {
+              up.request({ url: '/foo', method, wrapMethod: false })
+              await wait()
 
-              next(() => {
-                const request = this.lastRequest()
-                expect(request.method).toEqual(method)
-                expect(request.data()['_method']).toBeUndefined()
-              })
-            }))
+              const request = this.lastRequest()
+              expect(request.method).toEqual(method)
+              expect(request.data()['_method']).toBeUndefined()
+            })
           })
         })
       })
@@ -1923,506 +1881,458 @@ describe('up.network', function() {
           up.network.config.concurrency = 1
         })
 
-        it('limits the number of concurrent requests', asyncSpec(function(next) {
+        it('limits the number of concurrent requests', async function() {
           const responses = []
-          const trackResponse = response => responses.push(response.text)
+          const trackResponse = (response) => responses.push(response.text)
 
-          up.request({url: '/foo'}).then(trackResponse)
-          up.request({url: '/bar'}).then(trackResponse)
+          up.request({ url: '/foo' }).then(trackResponse)
+          up.request({ url: '/bar' }).then(trackResponse)
+          await wait()
 
-          next(() => {
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
-          }) // only one request was made
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          await wait()
 
-          next(() => {
-            this.respondWith('first response', {request: jasmine.Ajax.requests.at(0)})
-          })
+          this.respondWith('first response', { request: jasmine.Ajax.requests.at(0) })
+          await wait()
 
-          next(() => {
-            expect(responses).toEqual(['first response'])
-            expect(jasmine.Ajax.requests.count()).toEqual(2)
-          }) // a second request was made
+          expect(responses).toEqual(['first response'])
+          expect(jasmine.Ajax.requests.count()).toEqual(2)
+          await wait()
 
-          next(() => {
-            this.respondWith('second response', {request: jasmine.Ajax.requests.at(1)})
-          })
+          this.respondWith('second response', { request: jasmine.Ajax.requests.at(1) })
+          await wait()
 
-          next(() => {
-            expect(responses).toEqual(['first response', 'second response'])
-          })
-        }))
+          expect(responses).toEqual(['first response', 'second response'])
+        })
       })
 
       describe('up:request:load event', function() {
 
-        it('emits an up:request:load event before the request touches the network', asyncSpec(function(next) {
+        it('emits an up:request:load event before the request touches the network', async function() {
           let origin = fixture('.origin')
           const listener = jasmine.createSpy('listener')
           up.on('up:request:load', listener)
           up.request('/bar', { origin })
+          await wait()
 
-          next(() => {
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
 
-            const partialRequest = jasmine.objectContaining({
-              method: 'GET',
-              url: jasmine.stringMatching('/bar'),
-              origin: origin
-            })
-            const partialEvent = jasmine.objectContaining({ request: partialRequest })
-
-            expect(listener).toHaveBeenCalledWith(partialEvent, jasmine.anything(), jasmine.anything())
+          const partialRequest = jasmine.objectContaining({
+            method: 'GET',
+            url: jasmine.stringMatching('/bar'),
+            origin: origin
           })
-        }))
+          const partialEvent = jasmine.objectContaining({ request: partialRequest })
 
-        it('allows up:request:load listeners to prevent the request (useful to cancel all requests when stopping a test scenario)', async function() {
-          const listener = jasmine.createSpy('listener').and.callFake(function(event) {
-            expect(jasmine.Ajax.requests.count()).toEqual(0)
-            event.preventDefault()
-          })
-
-          up.on('up:request:load', listener)
-
-          const promise = up.request('/bar')
-
-          await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/prevented|aborted/i))
-          expect(listener).toHaveBeenCalled()
-          expect(jasmine.Ajax.requests.count()).toEqual(0)
-        })
-
-        it('does not block the queue when an up:request:load event was prevented', function(done) {
-          up.network.config.concurrency = 1
-
-          const listener = jasmine.createSpy('listener').and.callFake(function(event) {
-            // only prevent the first request
-            if (event.request.url.indexOf('/path1') >= 0) {
-              event.preventDefault()
-            }
-          })
-
-          up.on('up:request:load', listener)
-
-          const promise1 = up.request('/path1')
-          const promise2 = up.request('/path2')
-
-          u.task(() => {
-            expect(listener.calls.count()).toBe(2)
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
-            expect(this.lastRequest().url).toMatchURL('/path2')
-            done()
-          })
-        })
-
-        it('allows up:request:load listeners to manipulate the request headers', function(done) {
-          const listener = event => event.request.headers['X-From-Listener'] = 'foo'
-
-          up.on('up:request:load', listener)
-
-          up.request('/path1')
-
-          u.task(() => {
-            expect(this.lastRequest().requestHeaders['X-From-Listener']).toEqual('foo')
-            done()
-          })
-        })
-
-        it('allows up:request:load listeners to add request params for a POST request', function(done) {
-          const listener = event => event.request.params.set('key', 'value')
-
-          up.on('up:request:load', listener)
-
-          up.request('/path1', {method: 'post'})
-
-          u.task(() => {
-            expect(this.lastRequest().params).toMatchParams({key: 'value'})
-            done()
-          })
-        })
-
-        it('allows up:request:load listeners to add request params for a GET request, which are moved to the URL before connecting', function(done) {
-          const listener = event => event.request.params.set('key3', 'value3')
-
-          up.on('up:request:load', listener)
-
-          up.request('/path1?key1=value1', {params: {key2: 'value2'}, method: 'get'})
-
-          u.task(() => {
-
-            expect(this.lastRequest().url).toMatchURL('/path1?key1=value1&key2=value2&key3=value3')
-            expect(this.lastRequest().params).toMatchParams({})
-            done()
-          })
-        })
-
-        it('allows up:request:load listeners to access the xhr request object', function(done) {
-          const listener = jasmine.createSpy('listener').and.callFake(function(event) {
-            expect(jasmine.Ajax.requests.count()).toEqual(0)
-            expect(event.request.xhr).toBeDefined()
-          })
-
-          up.on('up:request:load', listener)
-
-          up.request('/path1', {method: 'post'})
-
-          u.task(() => {
-            expect(listener.calls.count()).toBe(1)
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
-            done()
-          })
-        })
-
-        describe('event target', function() {
-          it('is emitted on the layer that triggered the event', asyncSpec(function(next) {
-            makeLayers(3)
-
-            const listener = jasmine.createSpy('event listener')
-            up.on('up:request:load', listener)
-
-            next(() => up.request('/path', {layer: 1}))
-
-            next(function() {
-              expect(listener.calls.count()).toBe(1)
-              expect(listener.calls.argsFor(0)[0].target).toBe(up.layer.get(1).element)
-            })
-          }))
+          expect(listener).toHaveBeenCalledWith(partialEvent, jasmine.anything(), jasmine.anything())
         })
       })
 
-      describe('up:network:late and up:network:recover events', function() {
-
-        beforeEach(function() {
-          up.network.config.lateDelay = 0
-          this.events = []
-          u.each(['up:request:load', 'up:request:loaded', 'up:network:late', 'up:network:recover', 'up:request:offline', 'up:request:aborted'], (eventType) => {
-            up.on(eventType, () => {
-              this.events.push(eventType)
-            })
-          })
+      it('allows up:request:load listeners to prevent the request (useful to cancel all requests when stopping a test scenario)', async function() {
+        const listener = jasmine.createSpy('listener').and.callFake(function(event) {
+          expect(jasmine.Ajax.requests.count()).toEqual(0)
+          event.preventDefault()
         })
 
-        it('emits an up:network:late event if the server takes too long to respond', asyncSpec(function(next) {
-          let lateListener = jasmine.createSpy('up:network:late listener')
-          up.on('up:network:late', lateListener)
+        up.on('up:request:load', listener)
 
-          up.network.config.lateDelay = 70
+        const promise = up.request('/bar')
 
-          up.request({ url: '/foo' })
+        await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/prevented|aborted/i))
+        expect(listener).toHaveBeenCalled()
+        expect(jasmine.Ajax.requests.count()).toEqual(0)
+      })
 
-          next.after(40, function() {
-            expect(lateListener).not.toHaveBeenCalled()
-          })
+      it('does not block the queue when an up:request:load event was prevented', function(done) {
+        up.network.config.concurrency = 1
 
-          next.after(60, function() {
-            expect(lateListener).toHaveBeenCalled()
-          })
-        }))
-
-        it('allows to configure request-specific response times as a function in up.network.config.lateDelay', asyncSpec(function(next) {
-          let lateListener = jasmine.createSpy('up:network:late listener')
-          up.on('up:network:late', lateListener)
-
-          let badResponseTimeFn = jasmine.createSpy('lateDelay').and.callFake((request) => request.url === '/foo' ? 70 : 0)
-          up.network.config.lateDelay = badResponseTimeFn
-
-          up.request({ url: '/foo' })
-
-          next.after(40, function() {
-            expect(badResponseTimeFn).toHaveBeenCalled()
-            expect(lateListener).not.toHaveBeenCalled()
-          })
-
-          next.after(60, function() {
-            expect(lateListener).toHaveBeenCalled()
-          })
-        }))
-
-        it('honors an up.request({ lateDelay }) option', async function() {
-          up.network.config.lateDelay = 5
-          let lateListener = jasmine.createSpy('up:network:late listener')
-          up.on('up:network:late', lateListener)
-
-          up.request({ url: '/foo', lateDelay: 70 })
-          await wait(40)
-
-          expect(lateListener).not.toHaveBeenCalled()
-          await wait(60)
-
-          expect(lateListener).toHaveBeenCalled()
+        const listener = jasmine.createSpy('listener').and.callFake(function(event) {
+          // only prevent the first request
+          if (event.request.url.indexOf('/path1') >= 0) {
+            event.preventDefault()
+          }
         })
 
-        it('never emits an up:network:late event for requests with { lateDelay: false }', async function() {
-          up.network.config.lateDelay = 5
-          let lateListener = jasmine.createSpy('up:network:late listener')
-          up.on('up:network:late', lateListener)
+        up.on('up:request:load', listener)
 
-          up.request({ url: '/foo', lateDelay: false })
-          await wait(70)
+        const promise1 = up.request('/path1')
+        const promise2 = up.request('/path2')
 
-          expect(lateListener).not.toHaveBeenCalled()
+        u.task(() => {
+          expect(listener.calls.count()).toBe(2)
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(this.lastRequest().url).toMatchURL('/path2')
+          done()
+        })
+      })
+
+      it('allows up:request:load listeners to manipulate the request headers', function(done) {
+        const listener = (event) => event.request.headers['X-From-Listener'] = 'foo'
+
+        up.on('up:request:load', listener)
+
+        up.request('/path1')
+
+        u.task(() => {
+          expect(this.lastRequest().requestHeaders['X-From-Listener']).toEqual('foo')
+          done()
+        })
+      })
+
+      it('allows up:request:load listeners to add request params for a POST request', function(done) {
+        const listener = (event) => event.request.params.set('key', 'value')
+
+        up.on('up:request:load', listener)
+
+        up.request('/path1', { method: 'post' })
+
+        u.task(() => {
+          expect(this.lastRequest().params).toMatchParams({ key: 'value' })
+          done()
+        })
+      })
+
+      it('allows up:request:load listeners to add request params for a GET request, which are moved to the URL before connecting', function(done) {
+        const listener = (event) => event.request.params.set('key3', 'value3')
+
+        up.on('up:request:load', listener)
+
+        up.request('/path1?key1=value1', { params: { key2: 'value2' }, method: 'get' })
+
+        u.task(() => {
+
+          expect(this.lastRequest().url).toMatchURL('/path1?key1=value1&key2=value2&key3=value3')
+          expect(this.lastRequest().params).toMatchParams({})
+          done()
+        })
+      })
+
+      it('allows up:request:load listeners to access the xhr request object', function(done) {
+        const listener = jasmine.createSpy('listener').and.callFake(function(event) {
+          expect(jasmine.Ajax.requests.count()).toEqual(0)
+          expect(event.request.xhr).toBeDefined()
         })
 
-        it('never emits an up:network:late event for background requests', async function() {
-          // A background request doesn't make us busy.
-          up.request({url: '/foo', cache: true, background: true})
+        up.on('up:request:load', listener)
+
+        up.request('/path1', { method: 'post' })
+
+        u.task(() => {
+          expect(listener.calls.count()).toBe(1)
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          done()
+        })
+      })
+
+      describe('event target', function() {
+        it('is emitted on the layer that triggered the event', async function() {
+          makeLayers(3)
+
+          const listener = jasmine.createSpy('event listener')
+          up.on('up:request:load', listener)
           await wait()
 
-          expect(this.events).toEqual([
-            'up:request:load'
-          ])
+          up.request('/path', { layer: 1 })
+          await wait()
 
-          // The same request in the foreground does trigger up:network:late.
-          up.request({url: '/foo', cache: true})
+          expect(listener.calls.count()).toBe(1)
+          expect(listener.calls.argsFor(0)[0].target).toBe(up.layer.get(1).element)
+        })
+      })
+    })
 
-          await wait(20)
+    describe('up:network:late and up:network:recover events', function() {
 
-          expect(this.events).toEqual([
-            'up:request:load',
-            'up:network:late'
-          ])
-
-          // The response resolves both promises and emits up:network:recover.
-          jasmine.Ajax.requests.at(0).respondWith({
-            status: 200,
-            contentType: 'text/html',
-            responseText: 'foo'
+      beforeEach(function() {
+        up.network.config.lateDelay = 0
+        this.events = []
+        u.each(['up:request:load', 'up:request:loaded', 'up:network:late', 'up:network:recover', 'up:request:offline', 'up:request:aborted'], (eventType) => {
+          up.on(eventType, () => {
+            this.events.push(eventType)
           })
+        })
+      })
 
-          await wait(10)
+      it('emits an up:network:late event if the server takes too long to respond', async function() {
+        let lateListener = jasmine.createSpy('up:network:late listener')
+        up.on('up:network:late', lateListener)
 
-          expect(this.events).toEqual([
-            'up:request:load',
-            'up:network:late',
-            'up:request:loaded',
-            'up:network:recover'
-          ])
+        up.network.config.lateDelay = 70
+
+        up.request({ url: '/foo' })
+        await wait(40)
+
+        expect(lateListener).not.toHaveBeenCalled()
+
+        await wait(60)
+        expect(lateListener).toHaveBeenCalled()
+      })
+
+      it('allows to configure request-specific response times as a function in up.network.config.lateDelay', async function() {
+        let lateListener = jasmine.createSpy('up:network:late listener')
+        up.on('up:network:late', lateListener)
+
+        let badResponseTimeFn = jasmine.createSpy('lateDelay').and.callFake((request) => request.url === '/foo' ? 70 : 0)
+        up.network.config.lateDelay = badResponseTimeFn
+
+        up.request({ url: '/foo' })
+        await wait(40)
+
+        expect(badResponseTimeFn).toHaveBeenCalled()
+        expect(lateListener).not.toHaveBeenCalled()
+
+        await wait(60)
+        expect(lateListener).toHaveBeenCalled()
+      })
+
+      it('honors an up.request({ lateDelay }) option', async function() {
+        up.network.config.lateDelay = 5
+        let lateListener = jasmine.createSpy('up:network:late listener')
+        up.on('up:network:late', lateListener)
+
+        up.request({ url: '/foo', lateDelay: 70 })
+        await wait(40)
+
+        expect(lateListener).not.toHaveBeenCalled()
+        await wait(60)
+
+        expect(lateListener).toHaveBeenCalled()
+      })
+
+      it('never emits an up:network:late event for requests with { lateDelay: false }', async function() {
+        up.network.config.lateDelay = 5
+        let lateListener = jasmine.createSpy('up:network:late listener')
+        up.on('up:network:late', lateListener)
+
+        up.request({ url: '/foo', lateDelay: false })
+        await wait(70)
+
+        expect(lateListener).not.toHaveBeenCalled()
+      })
+
+      it('never emits an up:network:late event for background requests', async function() {
+        // A background request doesn't make us busy.
+        up.request({ url: '/foo', cache: true, background: true })
+        await wait()
+
+        expect(this.events).toEqual([
+          'up:request:load'
+        ])
+
+        // The same request in the foreground does trigger up:network:late.
+        up.request({ url: '/foo', cache: true })
+
+        await wait(20)
+
+        expect(this.events).toEqual([
+          'up:request:load',
+          'up:network:late'
+        ])
+
+        // The response resolves both promises and emits up:network:recover.
+        jasmine.Ajax.requests.at(0).respondWith({
+          status: 200,
+          contentType: 'text/html',
+          responseText: 'foo'
         })
 
-        it('can delay the up:network:late event to prevent flickering of spinners', asyncSpec(function(next) {
-          next(() => {
-            up.network.config.lateDelay = 50
-            up.request({url: '/foo'})
-          })
+        await wait(10)
 
-          next(() => {
-            expect(this.events).toEqual([
-              'up:request:load'
-            ])
-          })
+        expect(this.events).toEqual([
+          'up:request:load',
+          'up:network:late',
+          'up:request:loaded',
+          'up:network:recover'
+        ])
+      })
 
-          next.after(25, () => {
-            expect(this.events).toEqual([
-              'up:request:load'
-            ])
-          })
+      it('can delay the up:network:late event to prevent flickering of spinners', async function() {
+        up.network.config.lateDelay = 50
+        up.request({ url: '/foo' })
+        await wait()
 
-          next.after(200, () => {
-            expect(this.events).toEqual([
-              'up:request:load',
-              'up:network:late'
-            ])
-          })
+        expect(this.events).toEqual([
+          'up:request:load'
+        ])
+        await wait(25)
 
-          next(() => {
-            this.respondWith('foo')
-          })
+        expect(this.events).toEqual([
+          'up:request:load'
+        ])
+        await wait(200)
 
-          next.after(10, () => {
-            expect(this.events).toEqual([
-              'up:request:load',
-              'up:network:late',
-              'up:request:loaded',
-              'up:network:recover'
-            ])
-          })
-        }))
+        expect(this.events).toEqual([
+          'up:request:load',
+          'up:network:late'
+        ])
 
-        it('does not emit up:network:recover if a delayed up:network:late was never emitted due to a fast response', asyncSpec(function(next) {
-          next(() => {
-            up.network.config.lateDelay = 200
-            up.request({url: '/foo'})
-          })
+        this.respondWith('foo')
+        await wait(10)
 
-          next(() => {
-            expect(this.events).toEqual([
-              'up:request:load'
-            ])
-          })
+        expect(this.events).toEqual([
+          'up:request:load',
+          'up:network:late',
+          'up:request:loaded',
+          'up:network:recover'
+        ])
+      })
 
-          next.after(100, () => {
-            jasmine.Ajax.requests.at(0).respondWith({
-              status: 200,
-              contentType: 'text/html',
-              responseText: 'foo'
-            })
-          })
+      it('does not emit up:network:recover if a delayed up:network:late was never emitted due to a fast response', async function() {
+        up.network.config.lateDelay = 200
+        up.request({ url: '/foo' })
+        await wait()
 
-          next.after(250, () => {
-            expect(this.events).toEqual([
-              'up:request:load',
-              'up:request:loaded'
-            ])
-          })
-        }))
+        expect(this.events).toEqual([
+          'up:request:load'
+        ])
+        await wait(100)
 
-        it('emits up:network:recover if a request returned but failed with an error code', asyncSpec(function(next) {
-          next(() => {
-            up.request({url: '/foo'})
-          })
-
-          next(() => {
-            expect(this.events).toEqual([
-              'up:request:load',
-              'up:network:late'
-            ])
-          })
-
-          next(() => {
-            jasmine.Ajax.requests.at(0).respondWith({
-              status: 500,
-              contentType: 'text/html',
-              responseText: 'something went wrong'
-            })
-          })
-
-          next.after(10, () => {
-            expect(this.events).toEqual([
-              'up:request:load',
-              'up:network:late',
-              'up:request:loaded',
-              'up:network:recover'
-            ])
-          })
-        }))
-
-        it('emits up:network:recover if a request timed out', asyncSpec(function(next) {
-          up.network.config.lateDelay = 10
-
-          next(() => {
-            up.request({url: '/foo'})
-          })
-
-          next.after(50, () => {
-            expect(this.events).toEqual([
-              'up:request:load',
-              'up:network:late'
-            ])
-          })
-
-          next(() => {
-            jasmine.clock().install() // required by responseTimeout()
-            this.lastRequest().responseTimeout()
-          })
-
-          next.after(10, () => {
-            jasmine.clock().tick(10)
-            expect(this.events).toEqual([
-              'up:request:load',
-              'up:network:late',
-              'up:request:offline',
-              'up:network:recover'
-            ])
-          })
-        }))
-
-        it('emits up:network:recover if a request was aborted', asyncSpec(function(next) {
-          up.network.config.lateDelay = 10
-
-          next(() => {
-            this.request = up.request({url: '/foo'})
-          })
-
-          next.after(100, () => {
-            expect(this.events).toEqual([
-              'up:request:load',
-              'up:network:late'
-            ])
-          })
-
-          next(() => {
-            up.network.abort(this.request)
-          })
-
-          next.after(10, () => {
-            expect(this.events).toEqual([
-              'up:request:load',
-              'up:network:late',
-              'up:request:aborted',
-              'up:network:recover'
-            ])
-          })
-        }))
-
-        it('emits up:network:recover if a request failed fatally', asyncSpec(function(next) {
-          up.network.config.lateDelay = 10
-
-          next(() => {
-            this.request = up.request({url: '/foo'})
-          })
-
-          next.after(100, () => {
-            expect(this.events).toEqual([
-              'up:request:load',
-              'up:network:late'
-            ])
-          })
-
-          next(() => {
-            this.lastRequest().responseError()
-          })
-
-          next.after(10, () => {
-            expect(this.events).toEqual([
-              'up:request:load',
-              'up:network:late',
-              'up:request:offline',
-              'up:network:recover'
-            ])
-          })
-        }))
-
-        it('delays up:network:recover until the foreground queue is completely empty', async function() {
-          up.network.config.lateDelay = 50
-
-          // Make a chain of requests, like a queued watcher diff.
-          let request1, request2
-          request1 = up.request('/path1')
-          request1.then(() => request2 = up.request('/path2'))
-
-          await wait()
-
-          expect(this.events).toEqual([
-            'up:request:load'
-          ])
-
-          await wait(100)
-          expect(this.events).toEqual([
-            'up:request:load',
-            'up:network:late',
-          ])
-
-          jasmine.respondWith('response 1')
-          await wait()
-
-          expect(this.events).toEqual([
-            'up:request:load',
-            'up:network:late',
-            'up:request:loaded',
-            'up:request:load',
-          ])
-
-          jasmine.respondWith('response 2')
-          await wait()
-
-          expect(this.events).toEqual([
-            'up:request:load',
-            'up:network:late',
-            'up:request:loaded',
-            'up:request:load',
-            'up:request:loaded',
-            'up:network:recover',
-          ])
-
+        jasmine.Ajax.requests.at(0).respondWith({
+          status: 200,
+          contentType: 'text/html',
+          responseText: 'foo'
         })
+        await wait(250)
+
+        expect(this.events).toEqual([
+          'up:request:load',
+          'up:request:loaded'
+        ])
+      })
+
+      it('emits up:network:recover if a request returned but failed with an error code', async function() {
+        up.request({ url: '/foo' })
+        await wait()
+
+        expect(this.events).toEqual([
+          'up:request:load',
+          'up:network:late'
+        ])
+
+        jasmine.Ajax.requests.at(0).respondWith({
+          status: 500,
+          contentType: 'text/html',
+          responseText: 'something went wrong'
+        })
+        await wait(10)
+
+        expect(this.events).toEqual([
+          'up:request:load',
+          'up:network:late',
+          'up:request:loaded',
+          'up:network:recover'
+        ])
+      })
+
+      it('emits up:network:recover if a request timed out', async function() {
+        up.network.config.lateDelay = 10
+
+        up.request({ url: '/foo' })
+        await wait(50)
+
+        expect(this.events).toEqual([
+          'up:request:load',
+          'up:network:late'
+        ])
+
+        jasmine.clock().install() // required by responseTimeout()
+        this.lastRequest().responseTimeout()
+        await wait(10)
+
+        jasmine.clock().tick(10)
+        expect(this.events).toEqual([
+          'up:request:load',
+          'up:network:late',
+          'up:request:offline',
+          'up:network:recover'
+        ])
+      })
+
+      it('emits up:network:recover if a request was aborted', async function() {
+        up.network.config.lateDelay = 10
+
+        this.request = up.request({ url: '/foo' })
+        await wait(100)
+
+        expect(this.events).toEqual([
+          'up:request:load',
+          'up:network:late'
+        ])
+
+        up.network.abort(this.request)
+        await wait(10)
+
+        expect(this.events).toEqual([
+          'up:request:load',
+          'up:network:late',
+          'up:request:aborted',
+          'up:network:recover'
+        ])
+      })
+
+      it('emits up:network:recover if a request failed fatally', async function() {
+        up.network.config.lateDelay = 10
+
+        this.request = up.request({ url: '/foo' })
+        await wait(100)
+
+        expect(this.events).toEqual([
+          'up:request:load',
+          'up:network:late'
+        ])
+
+        this.lastRequest().responseError()
+        await wait(10)
+
+        expect(this.events).toEqual([
+          'up:request:load',
+          'up:network:late',
+          'up:request:offline',
+          'up:network:recover'
+        ])
+      })
+
+      it('delays up:network:recover until the foreground queue is completely empty', async function() {
+        up.network.config.lateDelay = 50
+
+        // Make a chain of requests, like a queued watcher diff.
+        let request1, request2
+        request1 = up.request('/path1')
+        request1.then(() => request2 = up.request('/path2'))
+
+        await wait()
+
+        expect(this.events).toEqual([
+          'up:request:load'
+        ])
+
+        await wait(100)
+        expect(this.events).toEqual([
+          'up:request:load',
+          'up:network:late',
+        ])
+
+        jasmine.respondWith('response 1')
+        await wait()
+
+        expect(this.events).toEqual([
+          'up:request:load',
+          'up:network:late',
+          'up:request:loaded',
+          'up:request:load',
+        ])
+
+        jasmine.respondWith('response 2')
+        await wait()
+
+        expect(this.events).toEqual([
+          'up:request:load',
+          'up:network:late',
+          'up:request:loaded',
+          'up:request:load',
+          'up:request:loaded',
+          'up:network:recover',
+        ])
 
       })
 
@@ -2443,7 +2353,7 @@ describe('up.network', function() {
               done()
             })
 
-            promise.catch(reason => done.fail(reason))
+            promise.catch((reason) => done.fail(reason))
           })
         })
       })
@@ -2496,103 +2406,98 @@ describe('up.network', function() {
         await expectAsync(request1).toBePending()
       })
 
-      it('emits an up:request:aborted event', asyncSpec(function(next) {
+      it('emits an up:request:aborted event', async function() {
+        const listener = jasmine.createSpy('event listener')
+        up.on('up:request:aborted', listener)
+
+        const request = up.request('/url')
+        await wait()
+
+        request.abort()
+        await wait()
+
+        expect(listener).toHaveBeenCalled()
+        expect(listener.calls.argsFor(0)[0]).toBeEvent('up:request:aborted')
+      })
+
+      it('does not send multiple up:request:aborted events if the request is aborted multiple times', async function() {
         const listener = jasmine.createSpy('event listener')
         up.on('up:request:aborted', listener)
 
         const request = up.request('/url')
 
-        next(() => request.abort())
+        up.network.abort(request)
+        up.network.abort(request)
+        await wait()
 
-        next(function() {
-          expect(listener).toHaveBeenCalled()
-          expect(listener.calls.argsFor(0)[0]).toBeEvent('up:request:aborted')
-        })
-      }))
+        expect(listener.calls.count()).toBe(1)
+      })
 
-      it('does not send multiple up:request:aborted events if the request is aborted multiple times', asyncSpec(function(next) {
-        const listener = jasmine.createSpy('event listener')
-        up.on('up:request:aborted', listener)
-
-        const request = up.request('/url')
-
-        next(function() {
-          up.network.abort(request)
-          up.network.abort(request)
-        })
-
-        next(() => expect(listener.calls.count()).toBe(1))
-      }))
-
-      it('does not reset the XHR object by calling xhr.abort() on a loaded XHR object (bugfix)', asyncSpec(function(next) {
+      it('does not reset the XHR object by calling xhr.abort() on a loaded XHR object (bugfix)', async function() {
         const request = up.request('/url')
         let response = null
-        request.then(r => response = r)
+        request.then((r) => response = r)
 
-        next(() => {
-          expect(request.xhr).toBeGiven()
+        await wait()
 
-          // Just to make sure that the fake XHR object we have in specs has different
-          // side effects than the real one: Check that xhr.abort() is never called.
-          spyOn(request.xhr, 'abort').and.callThrough()
+        expect(request.xhr).toBeGiven()
 
-          this.respondWith('response text')
-        })
+        // Just to make sure that the fake XHR object we have in specs has different
+        // side effects than the real one: Check that xhr.abort() is never called.
+        spyOn(request.xhr, 'abort').and.callThrough()
 
-        next(() => {
-          expect(response.xhr.readyState).toBe(XMLHttpRequest.DONE)
-          expect(response.contentType).toEqual('text/html')
+        this.respondWith('response text')
+        await wait()
 
-          request.abort()
-        })
+        expect(response.xhr.readyState).toBe(XMLHttpRequest.DONE)
+        expect(response.contentType).toEqual('text/html')
 
-        next(() => {
-          // Calling xhr.abort() on a loaded XHR will reset the readyState to 0
-          expect(response.xhr.readyState).toBe(XMLHttpRequest.DONE)
+        request.abort()
+        await wait()
 
-          // Calling xhr.abort() on a loaded XHR will lose all response headers
-          expect(response.contentType).toEqual('text/html')
+        // Calling xhr.abort() on a loaded XHR will reset the readyState to 0
+        expect(response.xhr.readyState).toBe(XMLHttpRequest.DONE)
 
-          expect(request.xhr.abort).not.toHaveBeenCalled()
-        })
-      }))
+        // Calling xhr.abort() on a loaded XHR will lose all response headers
+        expect(response.contentType).toEqual('text/html')
 
-      it('does not abort a request that was already fulfilled with a response', asyncSpec(function(next) {
+        expect(request.xhr.abort).not.toHaveBeenCalled()
+      })
+
+      it('does not abort a request that was already fulfilled with a response', async function() {
         const listener = jasmine.createSpy('event listener')
         up.on('up:request:aborted', listener)
 
         const request = up.request('/url')
 
-        next(() => {
-          expect(jasmine.Ajax.requests.count()).toEqual(1)
-          this.respondWith('response from server')
-        })
+        await wait()
 
-        next.await(() => promiseState(request))
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
+        this.respondWith('response from server')
+        await wait()
 
-        next(function(result) {
-          expect(result.state).toBe('fulfilled')
-          expect(result.value).toEqual(jasmine.any(up.Response))
-          expect(listener).not.toHaveBeenCalled()
-        })
+        let result = await promiseState(request)
 
-        next(() => request.abort())
+        expect(result.state).toBe('fulfilled')
+        expect(result.value).toEqual(jasmine.any(up.Response))
+        expect(listener).not.toHaveBeenCalled()
 
-        next.await(() => promiseState(request))
+        request.abort()
+        await wait()
 
-        next(function(result) {
-          expect(result.state).toBe('fulfilled')
-          expect(result.value).toEqual(jasmine.any(up.Response))
-          expect(listener).not.toHaveBeenCalled()
-        })
-      }))
+        result = await promiseState(request)
+
+        expect(result.state).toBe('fulfilled')
+        expect(result.value).toEqual(jasmine.any(up.Response))
+        expect(listener).not.toHaveBeenCalled()
+      })
 
       describe('with { reason } option', function() {
 
         it("sets the given reason as the AbortError's message", async function() {
           let request = up.request('/url')
 
-          up.network.abort(request, { reason: 'Given reason'})
+          up.network.abort(request, { reason: 'Given reason' })
 
           await expectAsync(request).toBeRejectedWith(jasmine.anyError('AbortError', /Given reason/i))
         })
@@ -2604,43 +2509,44 @@ describe('up.network', function() {
     describe('up.cache.get()', function() {
 
       it('returns an existing cache entry for the given request', function() {
-        const requestAttrs = {url: '/foo', params: {key: 'value'}, cache: true}
+        const requestAttrs = { url: '/foo', params: { key: 'value' }, cache: true }
         up.request(requestAttrs)
         expect(requestAttrs).toBeCached()
       })
 
-      it('returns undefined if the given request is not cached', () => expect({url: '/foo'}).not.toBeCached())
+      it('returns undefined if the given request is not cached', function() {
+        expect({ url: '/foo' }).not.toBeCached()
+      })
     })
 
-    describe('up.cache.set()', () => it('should have tests'))
+    describe('up.cache.set()', function() {
+      it('should have tests')
+    })
 
-    describe('up.cache.alias()', () =>
-      it('uses an existing cache entry for another request (used in case of redirects)', asyncSpec(function(next) {
-        let originalRequest = up.request({url: '/foo', cache: true})
+    describe('up.cache.alias()', function() {
+      it('uses an existing cache entry for another request (used in case of redirects)', async function() {
+        let originalRequest = up.request({ url: '/foo', cache: true })
         let aliasRequest
 
-        next(() => {
-          expect({url: '/foo'}).toBeCached()
-          expect({url: '/bar'}).not.toBeCached()
+        await wait()
 
-          aliasRequest = up.cache.alias({url: '/foo'}, {url: '/bar'})
-        })
+        expect({ url: '/foo' }).toBeCached()
+        expect({ url: '/bar' }).not.toBeCached()
 
-        next(() => {
-          expect({url: '/foo'}).toBeCached()
-          expect({url: '/bar'}).toBeCached()
-          expect(jasmine.Ajax.requests.count()).toEqual(1)
+        aliasRequest = up.cache.alias({ url: '/foo' }, { url: '/bar' })
+        await wait()
 
-          jasmine.respondWith("original request response")
-        })
+        expect({ url: '/foo' }).toBeCached()
+        expect({ url: '/bar' }).toBeCached()
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
 
-        next(() => {
-          expect(originalRequest.response.text).toBe('original request response')
-          expect(aliasRequest.response.text).toBe('original request response')
-        })
+        jasmine.respondWith('original request response')
+        await wait()
 
-      }))
-    )
+        expect(originalRequest.response.text).toBe('original request response')
+        expect(aliasRequest.response.text).toBe('original request response')
+      })
+    })
 
     describe('up.cache.remove()', function() {
 
@@ -2652,14 +2558,14 @@ describe('up.network', function() {
     describe('up.cache.evict()', function() {
 
       it('removes all cache entries', async function() {
-        up.request({url: '/foo', cache: true})
-        expect({url: '/foo'}).toBeCached()
+        up.request({ url: '/foo', cache: true })
+        expect({ url: '/foo' }).toBeCached()
         up.cache.evict()
-        expect({url: '/foo'}).not.toBeCached()
+        expect({ url: '/foo' }).not.toBeCached()
       })
 
       it('it does not crash if the cache is evicted before a caching request starts loading (bugfix)', async function() {
-        up.request({url: '/foo', cache: true})
+        up.request({ url: '/foo', cache: true })
         up.cache.evict()
 
         await wait()
@@ -2668,22 +2574,22 @@ describe('up.network', function() {
 
         await wait()
 
-        expect({url: '/foo'}).toBeCached()
+        expect({ url: '/foo' }).toBeCached()
       })
 
       it('accepts an URL pattern that determines which entries are purged', function() {
-        up.request({url: '/foo/1', cache: true})
-        up.request({url: '/foo/2', cache: true})
-        up.request({url: '/bar/1', cache: true})
-        expect({url: '/foo/1'}).toBeCached()
-        expect({url: '/foo/2'}).toBeCached()
-        expect({url: '/bar/1'}).toBeCached()
+        up.request({ url: '/foo/1', cache: true })
+        up.request({ url: '/foo/2', cache: true })
+        up.request({ url: '/bar/1', cache: true })
+        expect({ url: '/foo/1' }).toBeCached()
+        expect({ url: '/foo/2' }).toBeCached()
+        expect({ url: '/bar/1' }).toBeCached()
 
         up.cache.evict('/foo/*')
 
-        expect({url: '/foo/1'}).not.toBeCached()
-        expect({url: '/foo/2'}).not.toBeCached()
-        expect({url: '/bar/1'}).toBeCached()
+        expect({ url: '/foo/1' }).not.toBeCached()
+        expect({ url: '/foo/2' }).not.toBeCached()
+        expect({ url: '/bar/1' }).toBeCached()
       })
     })
 
@@ -2699,7 +2605,11 @@ describe('up.network', function() {
 
         it("creates a GET form, adds all { params } as hidden fields and submits the form", function() {
           const submitForm = spyOn(up.browser, 'submitForm')
-          up.network.loadPage({url: '/foo', method: 'GET', params: { param1: 'param1 value', param2: 'param2 value' }})
+          up.network.loadPage({
+            url: '/foo',
+            method: 'GET',
+            params: { param1: 'param1 value', param2: 'param2 value' }
+          })
           expect(submitForm).toHaveBeenCalled()
 
           const $form = $('form.up-request-loader')
@@ -2715,7 +2625,7 @@ describe('up.network', function() {
 
         it('merges params from the given URL and the { params } option', function() {
           const submitForm = spyOn(up.browser, 'submitForm')
-          up.network.loadPage({url: '/foo?param1=param1%20value', method: 'GET', params: { param2: 'param2 value' }})
+          up.network.loadPage({ url: '/foo?param1=param1%20value', method: 'GET', params: { param2: 'param2 value' } })
           expect(submitForm).toHaveBeenCalled()
           const $form = $('form.up-request-loader')
           expect($form).toBeAttached()
@@ -2731,7 +2641,11 @@ describe('up.network', function() {
 
         it("creates a POST form, adds all { params } params as hidden fields and submits the form", function() {
           const submitForm = spyOn(up.browser, 'submitForm')
-          up.network.loadPage({url: '/foo', method: 'POST', params: { param1: 'param1 value', param2: 'param2 value' }})
+          up.network.loadPage({
+            url: '/foo',
+            method: 'POST',
+            params: { param1: 'param1 value', param2: 'param2 value' }
+          })
           expect(submitForm).toHaveBeenCalled()
           const $form = $('form.up-request-loader')
           expect($form).toBeAttached()
@@ -2743,7 +2657,7 @@ describe('up.network', function() {
 
         it('merges params from the given URL and the { params } option', function() {
           const submitForm = spyOn(up.browser, 'submitForm')
-          up.network.loadPage({url: '/foo?param1=param1%20value', method: 'POST', params: { param2: 'param2 value' }})
+          up.network.loadPage({ url: '/foo?param1=param1%20value', method: 'POST', params: { param2: 'param2 value' } })
           expect(submitForm).toHaveBeenCalled()
           const $form = $('form.up-request-loader')
           expect($form).toBeAttached()
@@ -2755,7 +2669,12 @@ describe('up.network', function() {
 
         it('uses the given { contentType }', function() {
           const submitForm = spyOn(up.browser, 'submitForm')
-          up.network.loadPage({url: '/foo', method: 'POST', params: { foo: 'bar' }, contentType: 'multipart/form-data'})
+          up.network.loadPage({
+            url: '/foo',
+            method: 'POST',
+            params: { foo: 'bar' },
+            contentType: 'multipart/form-data'
+          })
           expect(submitForm).toHaveBeenCalled()
           const $form = $('form.up-request-loader')
           expect($form).toBeAttached()
@@ -2763,15 +2682,19 @@ describe('up.network', function() {
         })
       })
 
-      u.each(['PUT', 'PATCH', 'DELETE'], method => describe(`for ${method} requests`, () => it("uses a POST form and sends the actual method as a { _method } param", function() {
-        const submitForm = spyOn(up.browser, 'submitForm')
-        up.network.loadPage({url: '/foo', method})
-        expect(submitForm).toHaveBeenCalled()
-        const $form = $('form.up-request-loader')
-        expect($form).toBeAttached()
-        expect($form.attr('method')).toEqual('POST')
-        expect($form.find('input[name="_method"]').val()).toEqual(method)
-      })))
+      u.each(['PUT', 'PATCH', 'DELETE'], function(method) {
+        describe(`for ${method} requests`, function() {
+          it("uses a POST form and sends the actual method as a { _method } param", function() {
+            const submitForm = spyOn(up.browser, 'submitForm')
+            up.network.loadPage({ url: '/foo', method })
+            expect(submitForm).toHaveBeenCalled()
+            const $form = $('form.up-request-loader')
+            expect($form).toBeAttached()
+            expect($form.attr('method')).toEqual('POST')
+            expect($form.find('input[name="_method"]').val()).toEqual(method)
+          })
+        })
+      })
 
       describe('CSRF', function() {
 
@@ -2782,7 +2705,7 @@ describe('up.network', function() {
         })
 
         it('submits an CSRF token as another hidden field', function() {
-          up.network.loadPage({url: '/foo', method: 'post'})
+          up.network.loadPage({ url: '/foo', method: 'post' })
           expect(this.submitForm).toHaveBeenCalled()
           const $form = $('form.up-request-loader')
           const $tokenInput = $form.find('input[name="csrf-param"]')
@@ -2792,7 +2715,7 @@ describe('up.network', function() {
 
         it('does not add a CSRF token if there is none', function() {
           up.protocol.config.csrfToken = () => ''
-          up.network.loadPage({url: '/foo', method: 'post'})
+          up.network.loadPage({ url: '/foo', method: 'post' })
           expect(this.submitForm).toHaveBeenCalled()
           const $form = $('form.up-request-loader')
           const $tokenInput = $form.find('input[name="csrf-param"]')
@@ -2800,7 +2723,7 @@ describe('up.network', function() {
         })
 
         it('does not add a CSRF token for GET requests', function() {
-          up.network.loadPage({url: '/foo', method: 'get'})
+          up.network.loadPage({ url: '/foo', method: 'get' })
           expect(this.submitForm).toHaveBeenCalled()
           const $form = $('form.up-request-loader')
           const $tokenInput = $form.find('input[name="csrf-param"]')
@@ -2808,7 +2731,7 @@ describe('up.network', function() {
         })
 
         it('does not add a CSRF token when loading content from another domain', function() {
-          up.network.loadPage({url: 'http://other-domain.tld/foo', method: 'get'})
+          up.network.loadPage({ url: 'http://other-domain.tld/foo', method: 'get' })
           expect(this.submitForm).toHaveBeenCalled()
           const $form = $('form.up-request-loader')
           const $tokenInput = $form.find('input[name="csrf-param"]')
@@ -2837,82 +2760,86 @@ describe('up.network', function() {
 
     describe('progress bar', function() {
 
-      it('shows an animated progress when requests are late', asyncSpec(function(next) {
+      it('shows an animated progress when requests are late', async function() {
         up.network.config.lateDelay = 200
         let lastWidth = null
 
         up.request('/slow')
+        await wait(100)
 
-        next.after(100, () => expect(document).not.toHaveSelector('up-progress-bar'))
+        expect(document).not.toHaveSelector('up-progress-bar')
 
-        next.after(200, function() {
-          expect(document).toHaveSelector('up-progress-bar')
-          const bar = document.querySelector('up-progress-bar')
-          lastWidth = parseFloat(getComputedStyle(bar).width)
-        })
+        await wait(200)
+        expect(document).toHaveSelector('up-progress-bar')
+        const bar = document.querySelector('up-progress-bar')
+        lastWidth = parseFloat(getComputedStyle(bar).width)
 
-        next.after(500, function() {
-          expect(document).toHaveSelector('up-progress-bar')
-          const bar = document.querySelector('up-progress-bar')
-          const newWidth = parseFloat(getComputedStyle(bar).width)
-          expect(newWidth).toBeGreaterThan(lastWidth)
+        await wait(500)
+        expect(document).toHaveSelector('up-progress-bar')
+        const newBar = document.querySelector('up-progress-bar')
+        const newWidth = parseFloat(getComputedStyle(newBar).width)
+        expect(newWidth).toBeGreaterThan(lastWidth)
 
-          jasmine.respondWith('response')
-        })
+        jasmine.respondWith('response')
 
-        next.after(500, () => expect(document).not.toHaveSelector('up-progress-bar'))
-      }))
+        await wait(500)
+        expect(document).not.toHaveSelector('up-progress-bar')
+      })
 
-      it('shows no progress bar when requests finish fast enough', asyncSpec(function(next) {
+      it('shows no progress bar when requests finish fast enough', async function() {
         up.network.config.lateDelay = 300
 
         up.request('/slow')
+        await wait(100)
 
-        next.after(100, function() {
-          expect(document).not.toHaveSelector('up-progress-bar')
-          jasmine.respondWith('response')
-        })
+        expect(document).not.toHaveSelector('up-progress-bar')
+        jasmine.respondWith('response')
 
-        next.after(300, () => expect(document).not.toHaveSelector('up-progress-bar'))
-      }))
+        await wait(300)
+        expect(document).not.toHaveSelector('up-progress-bar')
+      })
 
       it('delays removal of the progress bar as more pending requests become late')
 
-      it('does not show a progress bar with up.network.config.progressBar = false', asyncSpec(function(next) {
+      it('does not show a progress bar with up.network.config.progressBar = false', async function() {
         up.network.config.lateDelay = 10
         up.network.config.progressBar = false
         up.request('/slow')
+        await wait(100)
 
-        next.after(100, () => expect(document).not.toHaveSelector('up-progress-bar'))
-      }))
+        expect(document).not.toHaveSelector('up-progress-bar')
+      })
 
       if (up.migrate.loaded) {
 
-        it('does not show a progress bar when an up:network:late listener is registered', asyncSpec(function(next) {
+        it('does not show a progress bar when an up:network:late listener is registered', async function() {
           up.network.config.lateDelay = 30
           up.on('up:network:late', () => console.log("custom loading indicator"))
           up.request('/slow')
+          await wait(100)
 
-          next.after(100, () => expect(document).not.toHaveSelector('up-progress-bar'))
-        }))
+          expect(document).not.toHaveSelector('up-progress-bar')
+        })
 
-        it('shows a progress bar when no up:network:late listener is registered', asyncSpec(function(next) {
+        it('shows a progress bar when no up:network:late listener is registered', async function() {
           up.network.config.lateDelay = 10
           up.request('/slow')
+          await wait(100)
 
-          next.after(100, () => expect(document).toHaveSelector('up-progress-bar'))
-        }))
+          expect(document).toHaveSelector('up-progress-bar')
+        })
 
       } else {
 
-        it('shows a progress bar even when an up:network:late listener is registered', asyncSpec(function(next) {
+        it('shows a progress bar even when an up:network:late listener is registered', async function() {
           up.network.config.lateDelay = 10
           up.request('/slow')
 
           up.on('up:network:late', () => console.log("custom loading indicator"))
+          await wait(100)
 
-          next.after(100, () => expect(document).toHaveSelector('up-progress-bar'))
-        }))
+          expect(document).toHaveSelector('up-progress-bar')
+        })
       }
 
     })
@@ -2920,5 +2847,4 @@ describe('up.network', function() {
   })
 
 })
-
 
