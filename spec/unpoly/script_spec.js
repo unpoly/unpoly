@@ -415,8 +415,6 @@ describe('up.script', function() {
           const element = fixture('.element', {'data-foo': 'foo value', 'up-data': JSON.stringify({bar: 'bar value'})})
           const data = up.data(element)
 
-          // The `in` operator is `of` in CoffeeScript
-          // See https://makandracards.com/makandra/52454
           expect('foo' in data).toBe(true)
           expect('bar' in data).toBe(true)
           expect('baz' in data).toBe(false)

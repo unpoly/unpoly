@@ -40,8 +40,6 @@
   "homepage": "https://unpoly.com",
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "*",
-    "coffee-loader": "*",
-    "coffeescript": "*",
     "css-loader": "*",
     "eslint": "*",
     "eslint-webpack-plugin": "*",

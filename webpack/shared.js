@@ -86,10 +86,6 @@ function scriptPipeline({ es, lint = true }) {
     }
   }
 
-  let coffeeLoader = {
-    loader: 'coffee-loader'
-  }
-
   let plugins = []
   if (lint) {
     plugins.push(
@@ -109,24 +105,14 @@ function scriptPipeline({ es, lint = true }) {
           use: [tsLoader]
         },
         {
-          test: /\.coffee$/,
-          exclude: /node_modules/,
-          use: [tsLoader, coffeeLoader]
-        },
-        {
           test: /\.js\.erb$/,
           exclude: /node_modules/,
           use: [tsLoader, erbLoader]
         },
-        {
-          test: /\.coffee\.erb$/,
-          exclude: /node_modules/,
-          use: [tsLoader, coffeeLoader, erbLoader]
-        }
       ]
     },
     resolve: {
-      extensions: ['.js', '.coffee', '.js.erb', '.coffee.erb']
+      extensions: ['.js', '.js.erb']
     },
     target: ['web', es]
   }
