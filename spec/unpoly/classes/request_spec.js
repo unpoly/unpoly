@@ -62,7 +62,7 @@ describe('up.Request', function() {
 
       expect(request.ended).toBe(false)
 
-      jasmine.respondWith({responseText: 'error', status: 500})
+      jasmine.respondWith({ responseText: 'error', status: 500 })
       // don't wait()
 
       expect(request.ended).toBe(true)
@@ -94,7 +94,7 @@ describe('up.Request', function() {
 
   describe('#xhr', function() {
     it('returns an XMLHttpRequest instance', function() {
-      const request = new up.Request({url: '/foo'})
+      const request = new up.Request({ url: '/foo' })
       expect(request.xhr).toEqual(jasmine.any(XMLHttpRequest))
     })
   })
@@ -102,28 +102,28 @@ describe('up.Request', function() {
   describe('#url', function() {
 
     it('returns the given URL', function() {
-      const request = new up.Request({url: 'http://host.com/foo'})
+      const request = new up.Request({ url: 'http://host.com/foo' })
       expect(request.url).toEqual('http://host.com/foo')
     })
 
     it('does not include a hash anchor of the constructed URL', function() {
-      const request = new up.Request({url: 'http://host.com/foo#hash'})
+      const request = new up.Request({ url: 'http://host.com/foo#hash' })
       expect(request.url).toEqual('http://host.com/foo')
     })
 
     it("merges { params } for HTTP methods that don't allow a payload", function() {
-      const request = new up.Request({url: 'http://host.com/foo?urlKey=urlValue', params: { paramsKey: 'paramsValue' }, method: 'get'})
+      const request = new up.Request({ url: 'http://host.com/foo?urlKey=urlValue', params: { paramsKey: 'paramsValue' }, method: 'get' })
       expect(request.url).toEqual('http://host.com/foo?urlKey=urlValue&paramsKey=paramsValue')
     })
 
     it('keeps query params in the URL for HTTP methods that allow a payload', function() {
-      const request = new up.Request({url: 'http://host.com/foo?key=value', method: 'post'})
+      const request = new up.Request({ url: 'http://host.com/foo?key=value', method: 'post' })
       expect(request.url).toEqual('http://host.com/foo?key=value')
       expect(request.params).toBeBlank()
     })
 
     it('is not normalized as to not clutter logs', function() {
-      const request = new up.Request({url: '/path'})
+      const request = new up.Request({ url: '/path' })
       expect(request.url).not.toContain('://')
       expect(request.url).toEqual('/path')
     })
@@ -131,7 +131,7 @@ describe('up.Request', function() {
 
   describe('#method', function() {
     it('defaults to "GET"', function() {
-      const request = new up.Request({url: 'http://host.com/foo'})
+      const request = new up.Request({ url: 'http://host.com/foo' })
       expect(request.method).toEqual('GET')
     })
   })
@@ -139,12 +139,12 @@ describe('up.Request', function() {
   describe('#hash', function() {
 
     it('returns the hash anchor from the constructed URL', function() {
-      const request = new up.Request({url: 'http://host.com/foo#hash'})
+      const request = new up.Request({ url: 'http://host.com/foo#hash' })
       expect(request.hash).toEqual('#hash')
     })
 
     it('returns undefined if the constructed URL had no hash anchor', function() {
-      const request = new up.Request({url: 'http://host.com/foo'})
+      const request = new up.Request({ url: 'http://host.com/foo' })
       expect(request.hash).toBeUndefined()
     })
   })
@@ -153,12 +153,12 @@ describe('up.Request', function() {
 
     it('returns the constructed params for HTTP methods that allow a payload', function() {
       const params = { key: 'value' }
-      const request = new up.Request({url: 'http://host.com/foo', params, method: 'post'})
+      const request = new up.Request({ url: 'http://host.com/foo', params, method: 'post' })
       expect(request.params).toEqual(new up.Params(params))
     })
 
     it("returns a blank up.Params object for HTTP methods that don't allow a payload", function() {
-      const request = new up.Request({url: 'http://host.com/foo', params: { key: 'value' }, method: 'get'})
+      const request = new up.Request({ url: 'http://host.com/foo', params: { key: 'value' }, method: 'get' })
       expect(request.params).toBeBlank()
     })
   })
@@ -166,7 +166,7 @@ describe('up.Request', function() {
   describe('#fragments', function() {
 
     it('returns the { fragments } passed to constructor', function() {
-      const request = new up.Request({url: '/path', fragments: [document.body]})
+      const request = new up.Request({ url: '/path', fragments: [document.body] })
       expect(request.fragments).toEqual([document.body])
     })
 
@@ -175,7 +175,7 @@ describe('up.Request', function() {
       it('looks up the { target } selector', function() {
         const element = fixture('.element')
         const otherElement = fixture('.other-element')
-        const request = new up.Request({url: '/path', target: '.element, .other-element'})
+        const request = new up.Request({ url: '/path', target: '.element, .other-element' })
         expect(request.fragments).toEqual([element, otherElement])
       })
 
@@ -185,13 +185,13 @@ describe('up.Request', function() {
 
         makeLayers(2)
 
-        const request = new up.Request({url: '/path', target: '.element, .other-element', layer: 'root'})
+        const request = new up.Request({ url: '/path', target: '.element, .other-element', layer: 'root' })
         expect(request.fragments).toEqual([element, otherElement])
       })
     })
 
     it('returns an empty array if neither { target, fragments } were passed to the constructor', function() {
-      const request = new up.Request({url: '/path'})
+      const request = new up.Request({ url: '/path' })
       expect(request.fragments).toEqual([])
     })
   })
@@ -211,7 +211,7 @@ describe('up.Request', function() {
   describe('#header()', function() {
 
     it('returns the value of a header set via { headers } option', async function() {
-      const request = up.request('/url', {headers: { 'X-Foo': 'foo-value' }})
+      const request = up.request('/url', { headers: { 'X-Foo': 'foo-value' } })
 
       await wait()
 
@@ -219,7 +219,7 @@ describe('up.Request', function() {
     })
 
     it('returns the value of a header that was automatically set by Unpoly', async function() {
-      const request = up.request('/url', {target: '.target', layer: 'root'})
+      const request = up.request('/url', { target: '.target', layer: 'root' })
 
       await wait()
 

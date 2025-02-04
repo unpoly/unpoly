@@ -395,7 +395,7 @@ describe('up.Preview', function() {
 
     it('temporarily sets inline styles on an element', async function() {
       fixture('#target')
-      let element = fixture('#element', { style: { 'font-size': '10px' }})
+      let element = fixture('#element', { style: { 'font-size': '10px' } })
       let previewFn = (preview) => preview.setStyle(element, { 'font-size': '15px', 'margin-top': '20px' })
 
       up.render({ preview: previewFn, url: '/url', target: '#target' })
@@ -412,7 +412,7 @@ describe('up.Preview', function() {
 
     it('accepts an selector for the element', async function() {
       fixture('#target')
-      let element = fixture('#element', { style: { 'font-size': '10px' }})
+      let element = fixture('#element', { style: { 'font-size': '10px' } })
       let previewFn = (preview) => preview.setStyle('#element', { 'font-size': '15px', 'margin-top': '20px' })
 
       up.render({ preview: previewFn, url: '/url', target: '#target' })
@@ -422,7 +422,7 @@ describe('up.Preview', function() {
     })
 
     it('assumes the targeted fragment if no element is given', async function() {
-      let target = fixture('#target', { style: { 'font-size': '10px' }})
+      let target = fixture('#target', { style: { 'font-size': '10px' } })
       let previewFn = (preview) => preview.setStyle({ 'font-size': '15px', 'margin-top': '20px' })
 
       up.render({ preview: previewFn, url: '/url', target: '#target' })
@@ -1360,7 +1360,7 @@ describe('up.Preview', function() {
         expect('#parent').toHaveSelector('#placeholder')
         expect('#parent').not.toHaveSelector('#placeholder-template')
         expect('#child').toBeHidden()
-        const expectedData = { keyFromTemplate: 'foo', keyFromMethod: 'bar'}
+        const expectedData = { keyFromTemplate: 'foo', keyFromMethod: 'bar' }
         expect(placeholderCompiler).toHaveBeenCalledWith(jasmine.elementMatchingSelector('#placeholder'), expectedData, jasmine.anything())
 
         jasmine.respondWithSelector('#target')
@@ -1623,7 +1623,7 @@ describe('up.Preview', function() {
 
   describe('#swapContent()', function() {
 
-    it('temporarily swaps the child elements of the given parent element', async function () {
+    it('temporarily swaps the child elements of the given parent element', async function() {
       fixture('#target')
       let parent = htmlFixture(`
         <div id="parent">
@@ -1646,7 +1646,7 @@ describe('up.Preview', function() {
       expect('#parent').toHaveVisibleText('original text')
     })
 
-    it('swaps children of the targeted fragment if no explicit parent is given', async function () {
+    it('swaps children of the targeted fragment if no explicit parent is given', async function() {
       let parent = htmlFixture(`
         <div id="parent">
           original text
