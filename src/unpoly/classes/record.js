@@ -11,7 +11,7 @@ up.Record = class Record {
   }
 
   constructor(options) {
-    Object.assign(this, this.defaults(options), this.attributes(options))
+    Object.assign(this, u.mergeDefined(this.defaults(options), this.attributes(options)))
   }
 
   attributes(source = this) {

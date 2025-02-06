@@ -134,7 +134,8 @@ up.Response = class Response extends up.Record {
   defaults() {
     return {
       headers: {},
-      loadedAt: new Date()
+      loadedAt: new Date(),
+      fail: 'auto',
     }
   }
 
@@ -146,7 +147,7 @@ up.Response = class Response extends up.Record {
   @stable
   */
   get ok() {
-    return !u.evalOption(this.fail ?? up.network.config.fail, this)
+    return !u.evalAutoOption(this.fail, up.network.config.autoFail, this)
   }
 
   /*-

@@ -84,7 +84,7 @@ up.network = (function() {
 
     Set `undefined` to not use a timeout.
 
-  @param {boolean|Function(up.Response): boolean} [config.fail]
+  @param {boolean|Function(up.Response): boolean} [config.autoFail]
     Whether Unpoly will consider a response to constitute a [failed response](/failed-responses).
 
     By default Unpoly will consider any status code other than HTTP 2xx or [304](/skipping-rendering#rendering-nothing) to represent a failed response.
@@ -93,8 +93,8 @@ up.network = (function() {
     The following configuration will fail all responses with an `X-Unauthorized` header:
 
     ```js
-    let badStatus = up.network.config.fail
-    up.network.config.fail = (response) => badStatus(response) || response.header('X-Unauthorized')
+    let badStatus = up.network.config.autoFail
+    up.network.config.autoFail = (response) => badStatus(response) || response.header('X-Unauthorized')
     ```
 
     Also see [Customizing failure detection](/failed-responses#customizing-failure-detection).
@@ -160,7 +160,7 @@ up.network = (function() {
     cacheExpireAge: 15 * 1000,
     cacheEvictAge: 90 * 60 * 1000,
     lateDelay: 400,
-    fail(response) { return (response.status < 200 || response.status > 299) && response.status !== 304 },
+    autoFail(response) { return (response.status < 200 || response.status > 299) && response.status !== 304 },
     autoCache(request) { return request.isSafe() },
     expireCache(request, _response) { return !request.isSafe() },
     evictCache: false,
@@ -404,10 +404,16 @@ up.network = (function() {
     If the request is queued due to [many concurrent requests](/up.network.config#config.concurrency),
     the timeout will not include the time spent waiting in the queue.
 
+  @param {boolean|Function(up.Response): boolean} [options.fail='auto']
+    Whether the response to this request should be considered [failed](/failed-responses).
+
+    By [default](/up.network.config#config.autoFail) any HTTP status code other than 2xx or 304 is considered an error code.
+    Pass `{ fail: false }` to handle *any* response as successful, even with a 4xx or 5xx status code.
+
   @param {string} [options.target='body']
     The CSS selector that will be sent as an `X-Up-Target` header.
 
-    The targets of concurrent requests to to same URL [may be merged](/X-Up-Target#merging).
+    The targets of concurrent requests to the same URL [may be merged](/X-Up-Target#merging).
 
   @param {string} [options.failTarget='body']
     The CSS selector that will be sent as an `X-Up-Fail-Target` header.
