@@ -2034,7 +2034,7 @@ up.form = (function() {
 
   The programmatic variant of this is the [`up.autosubmit()`](/up.autosubmit) function.
 
-  ### Example
+  ## Example
 
   The following would automatically submit the form when the `query` field is changed:
 
@@ -2045,7 +2045,7 @@ up.form = (function() {
   </form>
   ```
 
-  ### Auto-submitting multiple fields
+  ## Auto-submitting multiple fields
 
   You can set `[up-autosubmit]` on any element to submit the form when a contained field changes.
 
@@ -2058,7 +2058,7 @@ up.form = (function() {
   </form>
   ```
 
-  #### Auto-submitting radio buttons
+  ## Auto-submitting radio buttons
 
   Multiple radio buttons with the same `[name]` (a radio button group)
   produce a single value for the form.
