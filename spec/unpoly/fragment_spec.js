@@ -1109,6 +1109,46 @@ describe('up.fragment', function() {
           await expectAsync(promise).toBeRejectedWith(jasmine.any(up.Aborted))
         })
 
+        describe('source URL', function() {
+
+          it('sets an [up-source] attribute to remember to URL from which the fragment was loaded', async function() {
+            fixture('.target', { text: 'old text' })
+            up.render('.target', { url: '/source-path' })
+            await wait()
+            jasmine.respondWithSelector('.target', { text: 'new text' })
+            await wait()
+
+            expect('.target').toHaveText('new text')
+            expect('.target').toHaveAttribute('up-source', '/source-path')
+            expect(up.fragment.source('.target')).toMatchURL('/source-path')
+          })
+
+          it('sets an [up-source] attribute for failed responses', async function() {
+            fixture('.target', { text: 'old text' })
+            up.render({ target: '.target', failTarget: '.target', url: '/source-path' })
+            await wait()
+            jasmine.respondWithSelector('.target', { text: 'new text', status: 500 })
+            await wait()
+
+            expect('.target').toHaveText('new text')
+            expect('.target').toHaveAttribute('up-source', '/source-path')
+            expect(up.fragment.source('.target')).toMatchURL('/source-path')
+          })
+
+          it('keeps an existing [up-source] attribute for responses to non-GET requests', async function() {
+            fixture('.target', { text: 'old text', 'up-source': '/previous-source' })
+            up.render('.target', { url: '/source-path', method: 'post' })
+            await wait()
+            jasmine.respondWithSelector('.target', { text: 'new text' })
+            await wait()
+
+            expect('.target').toHaveText('new text')
+            expect('.target').toHaveAttribute('up-source', '/previous-source')
+            expect(up.fragment.source('.target')).toMatchURL('/previous-source')
+          })
+
+        })
+
         describe('last modification time', function() {
 
           it('sets an Last-Modified response header as an [up-time] attribute', async function() {
