@@ -194,7 +194,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // this would otherwise cause auto-history for *every* overlay regardless of initial target.
     const buildOptions = { ...this.options, opening: true }
 
-    const beforeNew = optionsWithLayerDefaults => {
+    const beforeNew = (optionsWithLayerDefaults) => {
       return this.options = up.RenderOptions.finalize(optionsWithLayerDefaults)
     }
 

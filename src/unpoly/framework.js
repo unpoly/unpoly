@@ -46,7 +46,7 @@ up.framework = (function() {
   @internal
   */
   function emitReset() {
-    up.emit('up:framework:reset', {log: false})
+    up.emit('up:framework:reset', { log: false })
   }
 
   /*-

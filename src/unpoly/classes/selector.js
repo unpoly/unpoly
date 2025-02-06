@@ -29,7 +29,7 @@ up.Selector = class Selector {
       this._layers = up.layer.getAll(options)
       if (!this._layers.length) throw new up.CannotMatch(["Unknown layer: %o", options.layer])
 
-      this._filters.push(match => u.some(this._layers, layer => layer.contains(match)))
+      this._filters.push((match) => u.some(this._layers, (layer) => layer.contains(match)))
 
       // Use the first layer to expand layer-specific selectors like `:main` or `:layer`
       expandTargetLayer = this._layers[0]
@@ -85,7 +85,7 @@ up.Selector = class Selector {
   }
 
   _passesFilter(element) {
-    return element && u.every(this._filters, filter => filter(element))
+    return element && u.every(this._filters, (filter) => filter(element))
   }
 
   _filterOne(element) {

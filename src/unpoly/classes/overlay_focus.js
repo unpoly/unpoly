@@ -27,7 +27,7 @@ up.OverlayFocus = class OverlayFocus {
     })
 
     if (this._trapFocus) {
-      this._untrapFocus = up.on('focusin', event => this._onFocus(event))
+      this._untrapFocus = up.on('focusin', (event) => this._onFocus(event))
       this._focusTrapBefore = e.affix(this._focusElement, 'beforebegin', 'up-focus-trap[tabindex=0]')
       this._focusTrapAfter = e.affix(this._focusElement, 'afterend', 'up-focus-trap[tabindex=0]')
     }

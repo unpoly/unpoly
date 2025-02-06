@@ -133,7 +133,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   createViewportElement(parentElement) {
     // Give the viewport element an [up-viewport] attribute so it will be found
     // by up.viewport.get().
-    this.viewportElement = this.affixPart(parentElement, 'viewport', {'up-viewport': ''})
+    this.viewportElement = this.affixPart(parentElement, 'viewport', { 'up-viewport': '' })
   }
 
   createBoxElement(parentElement) {
@@ -193,7 +193,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
       // If this overlay has its own viewport, a click outside the frame will hit
       // the viewport and not the parent element.
       if (this.viewportElement) {
-        up.on(this.viewportElement, 'up:click', event => {
+        up.on(this.viewportElement, 'up:click', (event) => {
           // Don't react when a click into the overlay frame bubbles to the viewportElement
           if (event.target === this.viewportElement) {
             this._onOutsideClicked(event, true)
@@ -216,7 +216,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     }
 
     if (this._supportsDismissMethod('key')) {
-      this.unbindEscapePressed = up.event.onEscape(event => this.onEscapePressed(event))
+      this.unbindEscapePressed = up.event.onEscape((event) => this.onEscapePressed(event))
     }
 
     // <a up-accept="value">OK</a>
@@ -317,7 +317,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
 
   _registerEventCloser(eventTypes, closeFn) {
     if (!eventTypes) { return }
-    return this.on(eventTypes, event => {
+    return this.on(eventTypes, (event) => {
       event.preventDefault()
       up.error.muteUncriticalSync(() =>
         closeFn.call(this, event, { response: event.response })

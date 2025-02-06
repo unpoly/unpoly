@@ -37,7 +37,7 @@ up.protocol = (function() {
   const e = up.element
 
   const headerize = function(camel) {
-    const header = camel.replace(/(^.|[A-Z])/g, char => '-' + char.toUpperCase())
+    const header = camel.replace(/(^.|[A-Z])/g, (char) => '-' + char.toUpperCase())
     return 'X-Up' + header
   }
 

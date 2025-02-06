@@ -737,7 +737,7 @@ up.layer = (function() {
   }
 
   function anySelector() {
-    return u.map(LAYER_CLASSES, Class => Class.selector()).join()
+    return u.map(LAYER_CLASSES, (Class) => Class.selector()).join()
   }
 
   function optionToString(option) {

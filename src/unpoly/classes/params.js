@@ -356,7 +356,7 @@ up.Params = class Params {
   }
 
   _matchEntryFn(name) {
-    return entry => entry.name === name
+    return (entry) => entry.name === name
   }
 
   /*-

@@ -19,7 +19,7 @@ up.LayerLookup = class LayerLookup {
   }
 
   all() {
-    let results = u.flatMap(this._values, value => this._resolveValue(value))
+    let results = u.flatMap(this._values, (value) => this._resolveValue(value))
     results = u.compact(results)
     results = u.uniq(results)
     return results
@@ -43,7 +43,7 @@ up.LayerLookup = class LayerLookup {
 
   _forElement(element) {
     element = e.get(element) // unwrap jQuery
-    return u.find(this._stack.reversed(), layer => layer.contains(element))
+    return u.find(this._stack.reversed(), (layer) => layer.contains(element))
   }
 
   _forIndex(value) {

@@ -18,7 +18,7 @@ up.Request.Queue = class Queue {
 
   asap(request) {
     request.runQueuedCallbacks()
-    u.always(request, responseOrError => this._onRequestSettled(request, responseOrError))
+    u.always(request, (responseOrError) => this._onRequestSettled(request, responseOrError))
 
     // When considering whether a request is "slow", we're measuring the duration between request.queuedAt
     // and the moment when the request gets settled. Note that when setSlowTimer() occurs, it will
@@ -79,7 +79,7 @@ up.Request.Queue = class Queue {
     // Only when there is no foreground request left in the queue we will send a background request.
     // Note that if a queued preload request is requested without { preload: true } we will
     // promote it to the foreground (see @promoteToForeground()).
-    let request = u.find(this._queuedRequests, request => !request.background)
+    let request = u.find(this._queuedRequests, (request) => !request.background)
     request ||= this._queuedRequests[0]
     return u.remove(this._queuedRequests, request)
   }

@@ -243,18 +243,18 @@ up.FormValidator = class FormValidator {
 
     // Each up.validate({ data }) call should only apply to the targeted element,
     options.data = undefined
-    options.dataMap = u.mapObject(dirtySolutions, ({ target, element, renderOptions: { data, keepData }}) => [
+    options.dataMap = u.mapObject(dirtySolutions, ({ target, element, renderOptions: { data, keepData } }) => [
       target,
       keepData ? up.data(element) : data
     ])
 
     // Each up.validate({ preview }) call should only apply to the targeted element,
     options.preview = undefined
-    options.previewMap = u.mapObject(dirtySolutions, ({ target, renderOptions: { preview }}) => [target, preview])
+    options.previewMap = u.mapObject(dirtySolutions, ({ target, renderOptions: { preview } }) => [target, preview])
 
     // Each up.validate({ placeholder }) call should only apply to the targeted element,
     options.placeholder = undefined
-    options.placeholderMap = u.mapObject(dirtySolutions, ({ target, renderOptions: { placeholder }}) => [target, placeholder])
+    options.placeholderMap = u.mapObject(dirtySolutions, ({ target, renderOptions: { placeholder } }) => [target, placeholder])
 
     // We may render multiple solutions with { disable } options, and most disable options
     // are specific to an { origin }, e.g. `{ disable: '.form-group:has(:origin)'}

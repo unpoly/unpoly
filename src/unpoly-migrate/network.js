@@ -83,7 +83,7 @@ up.ajax('/search', { params: { query: 'sunshine' } }).then(function(text) {
 */
 up.ajax = function(...args) {
   up.migrate.deprecated('up.ajax()', 'up.request()')
-  const pickResponseText = response => response.text
+  const pickResponseText = (response) => response.text
   return up.request(...args).then(pickResponseText)
 }
 
@@ -248,7 +248,7 @@ up.Response.prototype.isError = function() {
 
 function mayHaveCustomIndicator() {
   const listeners = up.EventListener.allNonDefault(document)
-  return u.find(listeners, listener => listener.eventType === 'up:network:late')
+  return u.find(listeners, (listener) => listener.eventType === 'up:network:late')
 }
 
 const progressBarDefault = up.network.config.progressBar

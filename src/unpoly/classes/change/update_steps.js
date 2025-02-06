@@ -36,7 +36,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     //     the viewport height through element insertions.
     this._steps.reverse()
 
-    const motionEndPromises = this._steps.map(step => this._executeStep(step))
+    const motionEndPromises = this._steps.map((step) => this._executeStep(step))
     this.renderResult.finished = this._finish(motionEndPromises)
 
     return this.renderResult

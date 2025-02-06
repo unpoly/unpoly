@@ -31,7 +31,7 @@ up.LayerStack = class LayerStack {
   }
 
   reset() {
-    this.peel(this.root, {animation: false})
+    this.peel(this.root, { animation: false })
     this._currentOverrides = []
     this.root.reset()
   }

@@ -179,7 +179,7 @@ up.RenderOptions = (function() {
   }
 
   function assertContentGiven(options) {
-    if (!u.some(CONTENT_KEYS, contentKey => u.isGiven(options[contentKey]))) {
+    if (!u.some(CONTENT_KEYS, (contentKey) => u.isGiven(options[contentKey]))) {
       // up.layer.open() should open an empty layer without a content key.
       if (options.defaultToEmptyContent) {
         options.content = ''

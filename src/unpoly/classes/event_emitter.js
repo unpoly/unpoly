@@ -108,7 +108,7 @@ up.EventEmitter = class EventEmitter extends up.Record {
     }
 
     if (u.isString(options.target)) {
-      options.target = up.fragment.get(options.target, {layer: options.layer})
+      options.target = up.fragment.get(options.target, { layer: options.layer })
     } else if (!options.target) {
       // If no element is given, we emit the event on the document.
       options.target = document

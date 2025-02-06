@@ -84,7 +84,7 @@ up.MotionController = class MotionController {
 
   _expandFinishRequest(elements) {
     if (elements) {
-      return u.flatMap(elements, el => e.list(el.closest(this._selector), el.querySelectorAll(this._selector)))
+      return u.flatMap(elements, (el) => e.list(el.closest(this._selector), el.querySelectorAll(this._selector)))
     } else {
       // If no reference elements were given, we finish every matching
       // element on the screen.

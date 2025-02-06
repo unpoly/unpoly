@@ -150,7 +150,7 @@ up.Change.FromContent = class FromContent extends up.Change {
   // Returns information about the change that is most likely before the request was dispatched.
   // This might change postflight if the response does not contain the desired target.
   getPreflightProps(opts = {}) {
-    const getPlanProps = plan => plan.getPreflightProps()
+    const getPlanProps = (plan) => plan.getPreflightProps()
     return this._seekPlan(getPlanProps) || opts.optional || this._cannotMatchPreflightTarget()
   }
 

@@ -242,7 +242,7 @@ up.util = (function() {
 
   function iteratee(block) {
     if (isString(block)) {
-      return item => item[block]
+      return (item) => item[block]
     } else {
       return block
     }
@@ -1109,7 +1109,7 @@ up.util = (function() {
   @internal
   */
   function intersect(array1, array2) {
-    return filterList(array1, element => contains(array2, element))
+    return filterList(array1, (element) => contains(array2, element))
   }
 
   /*-
@@ -1355,7 +1355,7 @@ up.util = (function() {
   @stable
   */
   function escapeHTML(string) {
-    return string.replace(/[&<>"']/g, char => ESCAPE_HTML_ENTITY_MAP[char])
+    return string.replace(/[&<>"']/g, (char) => ESCAPE_HTML_ENTITY_MAP[char])
   }
 
   /*-
@@ -1489,7 +1489,7 @@ up.util = (function() {
   */
   function sequence(functions) {
     functions = compact(functions)
-    return (...args) => map(functions, fn => fn(...args))
+    return (...args) => map(functions, (fn) => fn(...args))
   }
 
 //  ###**
@@ -1667,7 +1667,7 @@ up.util = (function() {
       const aKeys = Object.keys(a)
       const bKeys = Object.keys(b)
       if (isEqualList(aKeys, bKeys)) {
-        return every(aKeys, aKey => isEqual(a[aKey], b[aKey]))
+        return every(aKeys, (aKey) => isEqual(a[aKey], b[aKey]))
       } else {
         return false
       }
@@ -1806,7 +1806,7 @@ up.util = (function() {
   }
 
   function camelToKebabCase(str) {
-    return str.replace(/[A-Z]/g, char => '-' + char.toLowerCase())
+    return str.replace(/[A-Z]/g, (char) => '-' + char.toLowerCase())
   }
 
   // function prefixCamelCase(str, prefix) {

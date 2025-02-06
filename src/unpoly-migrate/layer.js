@@ -63,16 +63,16 @@ a fallback destination on the root layer:
 @deprecated
   Use `[up-dismiss]` instead.
 */
-up.migrate.registerLayerCloser = layer => // <a up-close>Close</a> (legacy close attribute)
+up.migrate.registerLayerCloser = (layer) => // <a up-close>Close</a> (legacy close attribute)
 layer.registerClickCloser('up-close', (value, closeOptions) => {
   up.migrate.deprecated('[up-close]', '[up-dismiss]')
   layer.dismiss(value, closeOptions)
 })
 
-up.migrate.handleLayerConfig = config => up.migrate.fixKey(config, 'historyVisible', 'history')
+up.migrate.handleLayerConfig = (config) => up.migrate.fixKey(config, 'historyVisible', 'history')
 
 Object.defineProperty(up.Layer.prototype, 'historyVisible', { get: function() {
   up.migrate.deprecated('up.Layer#historyVisible', 'up.Layer#history')
   return this.history
-}})
+} })
 

@@ -382,7 +382,7 @@ up.history = (function() {
     // Unpoly will wrongly assume that it can restore the state by reloading with GET.
     if (up.protocol.initialRequestMethod() === 'GET') {
       // Replace the vanilla state of the initial page load with an Unpoly-enabled state
-      replace(currentLocation(), {event: false})
+      replace(currentLocation(), { event: false })
     }
   }
 

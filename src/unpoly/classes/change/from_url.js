@@ -22,7 +22,7 @@ up.Change.FromURL = class FromURL extends up.Change {
 
     // Use always() since _onRequestSettled() will decide whether the promise
     // will be fulfilled or rejected.
-    return await u.always(request, responseOrError => this._onRequestSettled(responseOrError))
+    return await u.always(request, (responseOrError) => this._onRequestSettled(responseOrError))
   }
 
   _newPageReason() {

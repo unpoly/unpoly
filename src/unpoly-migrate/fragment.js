@@ -11,7 +11,7 @@ up.fragment.config.patch(function(config) {
   up.migrate.renamedProperty(config, 'fallbacks', 'mainTargets')
 })
 
-up.migrate.handleResponseDocOptions = docOptions => up.migrate.fixKey(docOptions, 'html', 'document')
+up.migrate.handleResponseDocOptions = (docOptions) => up.migrate.fixKey(docOptions, 'html', 'document')
 
 up.fragment.config.patch(function(config) {
   let matchAroundOriginDeprecated = () => up.migrate.deprecated('up.fragment.config.matchAroundOrigin', 'up.fragment.config.match')

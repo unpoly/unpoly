@@ -50,7 +50,7 @@ up.FragmentProcessor = class FragmentProcessor extends up.Record {
   }
 
   processArray(array) {
-    return u.find(array, opt => this.tryProcess(opt))
+    return u.find(array, (opt) => this.tryProcess(opt))
   }
 
   resolveCondition(condition) {

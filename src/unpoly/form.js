@@ -139,7 +139,7 @@ up.form = (function() {
   @internal
   */
   function fieldSelector(suffix = '') {
-    return config.fieldSelectors.map(field => field + suffix).join()
+    return config.fieldSelectors.map((field) => field + suffix).join()
   }
 
   /*-

@@ -423,7 +423,7 @@ up.event = (function() {
   */
   function isUnmodified(event) {
     return (u.isUndefined(event.button) || (event.button === 0)) &&
-      !u.some(keyModifiers, modifier => event[modifier])
+      !u.some(keyModifiers, (modifier) => event[modifier])
   }
 
   /*-

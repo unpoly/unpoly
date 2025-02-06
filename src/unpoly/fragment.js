@@ -1386,7 +1386,7 @@ up.fragment = (function() {
   function emitFragmentDestroyed(fragment, options) {
     const log = options.log ?? ['Destroyed fragment %o', fragment]
     const parent = options.parent || document
-    return up.emit(parent, 'up:fragment:destroyed', {fragment, parent, log})
+    return up.emit(parent, 'up:fragment:destroyed', { fragment, parent, log })
   }
 
   function isNotDestroying(element) {
@@ -2004,7 +2004,7 @@ up.fragment = (function() {
   @stable
   */
   function visit(url, options) {
-    return navigate({...options, url})
+    return navigate({ ...options, url })
   }
 
   const KEY_PATTERN = /^(onFail|on|fail)?(.+)$/
@@ -2731,7 +2731,7 @@ up.fragment = (function() {
   function compressNestedSteps(steps) {
     if (steps.length < 2) return steps
     let compressed = u.uniqBy(steps, 'oldElement')
-    compressed = u.reject(compressed, step => isContainedByRivalStep(compressed, step))
+    compressed = u.reject(compressed, (step) => isContainedByRivalStep(compressed, step))
     return compressed
   }
 
