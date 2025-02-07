@@ -365,7 +365,7 @@ up.link = (function() {
 
     // Fragment options
     options.origin ||= link
-    parser.boolean('fail')
+    parser.booleanOrString('fail')
     parser.boolean('navigate', { default: true })
     parser.string('confirm', { attr: ['up-confirm', 'data-confirm'] })
     parser.string('target')

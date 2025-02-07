@@ -990,6 +990,22 @@ describe('up.link', function() {
         expect(options.disable).toBe(true)
       })
 
+      it('parses an [up-fail] attribute as a boolean', function() {
+        const link = fixture('a[href="/foo"][up-fail="false"]')
+        up.hello(link)
+
+        const options = up.link.followOptions(link)
+        expect(options.fail).toBe(false)
+      })
+
+      it('parses an [up-fail="auto"] attribute as a string', function() {
+        const link = fixture('a[href="/foo"][up-fail="auto"]')
+        up.hello(link)
+
+        const options = up.link.followOptions(link)
+        expect(options.fail).toBe('auto')
+      })
+
       if (up.migrate.loaded) {
         it('parses an [up-reset-scroll] attribute', function() {
           const link = fixture('a[href="/foo"][up-reset-scroll]')
