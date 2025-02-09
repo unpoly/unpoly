@@ -466,7 +466,7 @@ up.fragment = (function() {
   /*-
   Replaces elements on the current page with matching elements from a server response or HTML string.
 
-  ### Choosing which fragment to update
+  ## Choosing which fragment to update
 
   The current and new elements must both match the same [target selector](/targeting-fragments).
   The selector is either given as `{ target }` option,
@@ -505,7 +505,7 @@ up.fragment = (function() {
 
   See [targeting fragments](/targeting-fragments) for many examples for how you can target content.
 
-  ### Passing the new fragment
+  ## Passing the new fragment
 
   The new fragment content can be passed as one of the following options:
 
@@ -513,7 +513,7 @@ up.fragment = (function() {
 
   See [providing HTML to render](/providing-html) for more details and examples.
 
-  ### Enabling side effects
+  ## Enabling side effects
 
   This function has many options to enable scrolling, focus, request cancelation and other side
   effects. These options are all disabled by default and must be opted into one-by-one.
@@ -521,18 +521,18 @@ up.fragment = (function() {
   To enable defaults that a user would expects for navigation (like clicking a link),
   pass [`{ navigate: true }`](#options.navigate) or use `up.navigate()` instead.
 
-  ### Hooking into the render process
+  ## Hooking into the render process
 
   Your code may hook into specific stages of the rendering process. This allows you to modify the rendered result or handle error cases.
 
   See [render hooks](/render-lifecycle) for details.
 
-  ### Concurrency
+  ## Concurrency
 
   Unfinished requests [targeting](/targeting-fragments) the updated fragment or its descendants are [aborted](/aborting-requests).
   You may control this behavior using the [`{ abort }`](#options.abort) option.
 
-  ### Events
+  ## Events
 
   Unpoly will emit events at various stages of the rendering process:
 
