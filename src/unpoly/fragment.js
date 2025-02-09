@@ -436,8 +436,10 @@ up.fragment = (function() {
   When Unpoly inserts a fragment, the `[up-source]` attribute is automatically set
   to the URL from which the fragment's HTML was loaded.
 
-  When an element is [reloaded](/up.reload) or [polled](/up-poll), Unpoly will request the URL from the closest
-  `[up-source]` attribute.
+  When an element is [reloaded](/up.reload) or [polled](/up-poll),
+  Unpoly will request the URL from the closest `[up-source]` attribute.
+
+  The `[up-source]` attribute is only set for `GET` requests.
 
   ## Using an explicit source URL
 
