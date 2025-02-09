@@ -320,6 +320,7 @@ up.link = (function() {
     parser.string('contentType')
     parser.booleanOrNumber('lateDelay')
     parser.number('timeout')
+    parser.booleanOrString('fail')
 
     return options
   }
@@ -365,7 +366,6 @@ up.link = (function() {
 
     // Fragment options
     options.origin ||= link
-    parser.booleanOrString('fail')
     parser.boolean('navigate', { default: true })
     parser.string('confirm', { attr: ['up-confirm', 'data-confirm'] })
     parser.string('target')
@@ -1227,7 +1227,7 @@ up.link = (function() {
     from the new fragment's [data](/data).
 
   @param [up-fail='auto']
-    Whether the server response should be considered failed.
+    How to handle [failed server responses](/failed-responses).
 
     For failed responses Unpoly will use attributes prefixed with `up-fail`, e.g. [`[up-fail-target]`](#up-fail-target).
     See [handling server errors](/failed-responses) for details.

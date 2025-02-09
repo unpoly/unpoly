@@ -343,7 +343,7 @@ up.radio = (function() {
   /*-
   Elements with an `[up-poll]` attribute are [reloaded](/up.reload) from the server periodically.
 
-  ### Example
+  ## Example {#example}
 
   Assume an application layout with an unread message counter.
   You can use `[up-poll]` to refresh the counter every 30 seconds:
@@ -354,12 +354,12 @@ up.radio = (function() {
   </div>
   ```
 
-  ### Controlling the reload interval
+  ## Controlling the reload interval {#interval}
 
   You may set an optional `[up-interval]` attribute to set the reload interval in milliseconds:
 
   ```html
-  <div class="unread-count" up-poll up-interval="10000">
+  <div class="unread-count" up-poll up-interval="10000"> <!-- mark-phrase "up-interval" -->
     2 new messages
   </div>
   ```
@@ -370,23 +370,54 @@ up.radio = (function() {
   up.radio.config.pollInterval = 10000
   ```
 
-  ### Controlling the source URL
+  ## Controlling the source URL {#source}
 
   The element will be reloaded from the URL from which it was originally loaded.
 
   To reload from another URL, set an `[up-source]` attribute on the polling element:
 
   ```html
-  <div class="unread-count" up-poll up-source="/unread-count">
+  <div class="unread-count" up-poll up-source="/unread-count"> <!-- mark-phrase "up-source" -->
     2 new messages
   </div>
   ```
 
-  ### Controlling the target selector
+  ## The target selector is derived {#target}
 
   A target selector will be [derived](/target-derivation) from the polling element.
 
-  ### Polling is paused in the background
+  For example, the following element would be polled with the selector `#score`:
+
+  ```html
+  <div id="score" up-poll> <!-- mark-phrase "score" -->
+    Score: 1400
+  </div>
+  ```
+
+  When you see an error `Cannot poll untargetable fragment`, Unpoly cannot derive a good
+  selector that identifies the element. In that case, set a unique `[id]` or `[up-id]` attribute.
+
+
+  ## Handling failed responses {#failed-responses}
+
+  By default polling will *not* render server responses with an error code,
+  even when the response contains a matching fragment. After the configured
+  interval, the server will be polled again.
+
+  In order to *any* response that contains a matching fragment,
+  set an `[up-fail=false]` attribute:
+
+  ```html
+  <div class="download-status" up-poll up-fail="false"> <!-- mark-phrase "up-fail" -->
+    Download not ready yet.
+  </div>
+  ```
+
+  This will update the fragment with any response that contains
+  a `.download-status` element, even when that response has a 4xx or 5xx status code.
+
+
+  ## Polling is paused in the background {#pausing}
 
   By default polling will pause while the fragment's [layer](/up.layer) is covered by an overlay.
   When the layer is uncovered, polling will resume.
@@ -406,23 +437,67 @@ up.radio = (function() {
   </main>
    ```
 
-  ### Skipping updates on the client
+  ## Skipping updates on the client {#preventing-request}
 
-  Client-side code may skip an update by preventing an `up:fragment:poll` event
-  on the polling fragment.
+  Client-side code may prevent a polling request by preventing an `up:fragment:poll` event
+  on the polling fragment:
 
+  ```js
+  up.on('up:fragment:poll', function(event) {
+    // Don't reload a fragment that contains a playing video
+    let video = event.target.querySelector('video')
+    if (video && !video.paused) {
+      event.preventDefault()
+    }
+  })
+  ```
 
-  ### Skipping updates on the server
+  The server will be polled again after the configured interval, emitting another `up:fragment:poll` event.
+
+  To not use a polling response that has already been received, use the `up:fragment:loaded` event or `[up-keep]` attribute.
+
+  ## Saving bandwidth when nothing changed {#detecting-unchanged-content}
 
   When polling a fragment periodically we want to avoid rendering unchanged content.
   This saves <b>CPU time</b> and reduces the <b>bandwidth cost</b> for a
   request/response exchange to about 1 KB (1 packet).
 
-  See [Skipping rendering](/skipping-rendering) for more details and examples.
+  A good way to detect unchanged content is to deliver the initial fragment
+  with an `ETag` header. An ETag is a hash of the data that was used to produce the HTML:
+
+  ```http
+  HTTP/1.1 200 OK
+  ETag: "x234dff"
+
+  <html>
+    ...
+    <div class='messages'>
+      ...
+    </div>
+    ...
+  </html>
+  ```
+
+  When Unpoly polls the fragment, it echoes the ETag in an `If-None-Match` header:
+
+  ```http
+  GET /messages HTTP/1.1
+  If-None-Match: "x234dff"
+  ```
+
+  The server can compare the ETag from the request with the ETag of the underlying data.
+  If no more recent data is available, the server can skip rendering and
+  respond with `304 Not Modified`. No response body is required.
+
+  ```http
+  HTTP/1.1 304 Not Modified
+  ```
+
+  See [Conditional requests](/conditional-requests) for more details and examples.
 
   When an update is skipped, Unpoly will try to poll again after the configured interval.
 
-  ### Stopping polling
+  ## Stopping polling {#stopping}
 
   There are multiple ways to stop the polling interval:
 
@@ -431,31 +506,48 @@ up.radio = (function() {
   - Client-side code has called `up.radio.stopPolling()` with the polling element.
 
   @selector [up-poll]
+
   @param [up-interval]
     The reload interval in milliseconds.
 
     Defaults to `up.radio.config.pollInterval`, which defaults to 30 seconds.
+
   @param [up-href]
     The URL from which to reload the fragment.
 
     Defaults to the URL this fragment was [originally loaded from](/up-source).
+
   @param [up-method='get']
     The HTTP method used to reload the fragment.
 
     @experimental
+
   @param [up-headers]
     A [relaxed JSON](/relaxed-json) object with additional request headers.
+
   @param [up-params]
     A [relaxed JSON](/relaxed-json) object with additional [parameters](/up.Params) that should be sent as the request's
     [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
 
     When making a `GET` request to a URL with a query string, the given `{ params }` will be added
     to the query parameters.
+
+  @param [up-fail='auto']
+    How to handle [failed server responses](/failed-responses).
+
+    By default polling will skip server responses with an error code,
+    even when the response contains a matching fragment. After the configured
+    interval, the server will be polled again.
+
+    Set `[up-fail=false]` to render *any* response that contains a matching fragment,
+    even with a 4xx or 5xx status code.
+
   @param [up-keep-data]
     Whether to [preserve](/data#preserving) the polling fragment's
     [data object](/data) through reloads.
 
     @experimental
+
   @param [up-if-layer='front']
     Controls polling while the fragment's [layer](/up.layer) is covered by an overlay.
 
@@ -465,6 +557,7 @@ up.radio = (function() {
     When set to `'any'`, polling will continue on background layers.
 
     @experimental
+
   @param [up-placeholder]
     A [placeholder](/placeholders) to show while the fragment is reloading.
 
@@ -484,7 +577,19 @@ up.radio = (function() {
   This event is emitted before a [polling](/up-poll) fragment is reloaded from the server.
 
   Listener may prevent the `up:fragment:poll` event to prevent the fragment from being reloaded.
-  Preventing the event will only skip a single update. It will *not* stop future polling.
+  Preventing the event will only skip a single update:
+
+  ```js
+  up.on('up:fragment:poll', function(event) {
+    // Don't reload a fragment that contains a playing video
+    let video = event.target.querySelector('video')
+    if (video && !video.paused) {
+      event.preventDefault()
+    }
+  })
+  ```
+
+  The server will be polled again after the configured interval, emitting another `up:fragment:poll` event.
 
   @event up:fragment:poll
   @param {Element} event.target

@@ -2003,29 +2003,80 @@ describe('up.radio', function() {
         })
       })
 
-      it('keeps polling if the server responds with a 404 Not Found error', async function() {
-        up.radio.config.pollInterval = 250
+      describe('when the server responds with an error status', function() {
 
-        up.hello(fixture('.element[up-poll][up-source="/source"]'))
+        it('tries again after the next interval', async function() {
+          up.radio.config.pollInterval = 250
 
-        await wait(50)
-        expect(jasmine.Ajax.requests.count()).toBe(0)
-
-        await wait(250)
-        expect(jasmine.Ajax.requests.count()).toBe(1)
-
-        await jasmine.spyOnGlobalErrorsAsync(async function(globalErrorSpy) {
-          jasmine.respondWith({ status: 404, responseText: 'Not found' })
+          up.hello(fixture('.element[up-poll][up-source="/source"]'))
 
           await wait(50)
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+          await wait(250)
           expect(jasmine.Ajax.requests.count()).toBe(1)
 
-          // up.FragmentPolling#onReloadFailure() will throw critical errors
-          expect(globalErrorSpy).toHaveBeenCalledWith(jasmine.any(up.CannotMatch))
+          await jasmine.spyOnGlobalErrorsAsync(async function(globalErrorSpy) {
+            jasmine.respondWith({ status: 404, responseText: 'Not found' })
+
+            await wait(50)
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+
+            // up.FragmentPolling#onReloadFailure() will throw critical errors
+            expect(globalErrorSpy).toHaveBeenCalledWith(jasmine.any(up.CannotMatch))
+          })
+
+          await wait(250)
+          expect(jasmine.Ajax.requests.count()).toBe(2)
         })
 
-        await wait(250)
-        expect(jasmine.Ajax.requests.count()).toBe(2)
+        it('does not update a matching fragment from the response', async function() {
+          up.radio.config.pollInterval = 250
+
+          up.hello(fixture('.element[up-poll][up-source="/source"]', { text: 'original text' }))
+
+          await wait(50)
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+          await wait(250)
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          await jasmine.spyOnGlobalErrorsAsync(async function(globalErrorSpy) {
+            jasmine.respondWithSelector('.element', { status: 404, text: 'response text' })
+
+            await wait(50)
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+
+            // up.FragmentPolling#onReloadFailure() will throw critical errors
+            expect(globalErrorSpy).toHaveBeenCalledWith(jasmine.any(up.CannotMatch))
+
+            expect('.element').not.toHaveText('response text')
+          })
+        })
+
+        it('updates a matching fragment from the response with [up-fail="false"]', async function() {
+          up.radio.config.pollInterval = 250
+
+          up.hello(fixture('.element[up-poll][up-source="/source"][up-fail="false"]', { text: 'original text' }))
+
+          await wait(50)
+
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+          await wait(250)
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          jasmine.respondWithSelector('.element[up-poll]', { status: 404, text: 'response text' })
+          await wait(50)
+
+          expect('.element').toHaveText('response text')
+
+          await wait(250 + 50)
+
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+        })
+
       })
 
       it('does not reload if the tab is hidden', async function() {

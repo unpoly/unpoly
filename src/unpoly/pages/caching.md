@@ -106,7 +106,9 @@ This gives you a chance to inspect the response or DOM state right before a frag
 up.on('up:fragment:loaded', function(event) {
   // Don't insert fresh content if the user has started a video
   // after the expired content was rendered.
-  if (event.revalidating && !event.request.fragment.querySelector('video')?.paused) {
+  let video = event.request.fragment.querySelector('video')
+  
+  if (event.revalidating && video && !video.paused) {
     // Finish the render pass with no changes.
     event.skip()
   }

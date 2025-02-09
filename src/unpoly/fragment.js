@@ -286,7 +286,7 @@ up.fragment = (function() {
   If the given element was never directly updated, but part of a larger fragment update,
   the [closest](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest) known source of an ancestor element is returned.
 
-  ### Example
+  ## Example
 
   In the HTML below, the element `#one` was loaded from the URL `/foo`:
 
@@ -436,11 +436,26 @@ up.fragment = (function() {
   When Unpoly inserts a fragment, the `[up-source]` attribute is automatically set
   to the URL from which the fragment's HTML was loaded.
 
-  When an element is [reloaded](/up.reload), Unpoly will request the URL from the closest
-  `[up-source]` attribute. You may manually set `[up-source]` attribute to indicate a different
-  source URL for a fragment or a fragment's descendant.
+  When an element is [reloaded](/up.reload) or [polled](/up-poll), Unpoly will request the URL from the closest
+  `[up-source]` attribute.
 
-  To access the source URL from JavaScript, use `up.fragment.source()`.
+  ## Using an explicit source URL
+
+  To indicate a different source URL for a fragment (and its descendants),
+  manually set `[up-source]` attribute:
+
+  ```html
+  <div class="unread-count" up-poll up-source="/unread-count"> <!-- mark-phrase "up-source" -->
+    2 new messages
+  </div>
+  ```
+
+  When such an `[up-source]` attribute is explicitly set in the HTML, Unpoly will not overwrite
+  it on insertion.
+
+  ## Accessing the source URL from JavaScript
+
+  To retrieve the source URL from JavaScript, use `up.fragment.source()`.
 
   @selector [up-source]
   @param {string} up-source
@@ -1904,7 +1919,7 @@ up.fragment = (function() {
 
   ### Controlling the URL that is reloaded
 
-  Unpoly remembers [the URL from which a fragment was loaded](/up.fragment.source),
+  Unpoly remembers [the URL from which a fragment was loaded](/up-source),
   so you don't usually need to pass a URL when reloading.
 
   To reload from another URL, pass a `{ url }` option or set an `[up-source]` attribute
