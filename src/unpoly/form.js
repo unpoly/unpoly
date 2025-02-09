@@ -1253,7 +1253,7 @@ up.form = (function() {
       show = u.intersect(fieldValues, hideValues).length === 0
     } else {
       let showValues = target.getAttribute('up-show-for')
-      // If the target has neither [up-show-for] or [up-hide-for] attributes,
+      // If the target has neither [up-show-for] or [up-hide-for] attribute
       // assume the user wants the target to be visible whenever anything
       // is checked or entered.
       showValues = showValues ? parseSwitchTokens(showValues) : [':present', ':checked']

@@ -404,7 +404,7 @@ up.network = (function() {
     If the request is queued due to [many concurrent requests](/up.network.config#config.concurrency),
     the timeout will not include the time spent waiting in the queue.
 
-  @param {boolean|Function(up.Response): boolean} [options.fail='auto']
+  @param {string|boolean|Function(up.Response): boolean} [options.fail='auto']
     Whether the response to this request should be considered [failed](/failed-responses).
 
     By [default](/up.network.config#config.autoFail) any HTTP status code other than 2xx or 304 is considered an error code.

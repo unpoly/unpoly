@@ -298,7 +298,7 @@ up.radio = (function() {
 
     When making a `GET` request to a URL with a query string, the given `{ params }` will be added
     to the query parameters.
-  @param [options.keepData=false]
+  @param {boolean} [options.keepData=false]
     Whether to [preserve](/data#preserving) the polling fragment's
     [data object](/data) through reloads.
 
@@ -535,7 +535,7 @@ up.radio = (function() {
   @param [up-fail='auto']
     How to handle [failed server responses](/failed-responses).
 
-    By default polling will skip server responses with an error code,
+    By default, polling will skip server responses with an error code,
     even when the response contains a matching fragment. After the configured
     interval, the server will be polled again.
 

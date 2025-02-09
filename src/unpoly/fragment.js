@@ -643,7 +643,7 @@ up.fragment = (function() {
 
     See [Rendering an up.Response object](/providing-html#response).
 
-  @param {boolean|Function(up.Response): boolean} [options.fail='auto']
+  @param {string|boolean|Function(up.Response): boolean} [options.fail='auto']
     Whether the server response should be considered failed.
 
     For failed responses Unpoly will use options prefixed with `fail`, e.g. `{ failTarget }`.
@@ -1910,14 +1910,14 @@ up.fragment = (function() {
   By default, reloading is not considered a [user navigation](/navigation) and e.g. will not update
   the browser location. You may change this with `{ navigate: true }`.
 
-  ### Example
+  ## Example
 
   ```js
   let { fragment } = await up.reload('.inbox')
   console.log("New .inbox element: ", fragment)
   ```
 
-  ### Controlling the URL that is reloaded
+  ## Controlling the URL that is reloaded
 
   Unpoly remembers [the URL from which a fragment was loaded](/up-source),
   so you don't usually need to pass a URL when reloading.
@@ -1925,7 +1925,7 @@ up.fragment = (function() {
   To reload from another URL, pass a `{ url }` option or set an `[up-source]` attribute
   on the element being reloaded or its ancestors.
 
-  ### Skipping updates when nothing changed
+  ## Skipping updates when nothing changed
 
   Your server-side app is not required to re-render a request if there are no changes to the cached content.
 
@@ -1946,6 +1946,12 @@ up.fragment = (function() {
   @param {string} [options.url]
     The URL from which to reload the fragment.
     This defaults to the URL from which the fragment was originally loaded.
+
+  @param {string|boolean|Function(up.Response): boolean} [options.fail='auto']
+    How to handle [failed server responses](/failed-responses).
+
+    By default, a failed response will not be used unless a
+    [`{ failTarget }`](/up.render#options.failTarget) or `{ fail: false }` option is also passed.
 
   @param {Object} [options.data]
     Overrides properties from the new fragment's `[up-data]`
