@@ -1244,23 +1244,21 @@ up.form = (function() {
   }
 
   const switchTarget = up.mockable(function(target, fieldValues) {
-    let show
     fieldValues ||= switcherValues(findSwitcherForTarget(target))
 
     let hideValues = target.getAttribute('up-hide-for')
+    let showValues = target.getAttribute('up-show-for')
+
     if (hideValues) {
       hideValues = parseSwitchTokens(hideValues)
-      show = u.intersect(fieldValues, hideValues).length === 0
-    } else {
-      let showValues = target.getAttribute('up-show-for')
-      // If the target has neither [up-show-for] or [up-hide-for] attribute
-      // assume the user wants the target to be visible whenever anything
-      // is checked or entered.
-      showValues = showValues ? parseSwitchTokens(showValues) : [':present', ':checked']
-      show = u.intersect(fieldValues, showValues).length > 0
+      let shouldHide = u.intersect(fieldValues, hideValues).length > 0
+      e.toggle(target, !shouldHide)
+    } else if (showValues) {
+      showValues = parseSwitchTokens(showValues)
+      let shouldShow = u.intersect(fieldValues, showValues).length > 0
+      e.toggle(target, shouldShow)
     }
 
-    e.toggle(target, show)
     target.classList.add('up-switched')
   })
 
