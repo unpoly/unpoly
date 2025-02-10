@@ -60,9 +60,6 @@ up.motion = (function() {
   const u = up.util
   const e = up.element
 
-  let namedAnimations = {}
-  let namedTransitions = {}
-
   const motionController = new up.MotionController('motion')
 
   /*-
@@ -79,7 +76,7 @@ up.motion = (function() {
   @param {boolean} [config.enabled]
     Whether animation is enabled.
 
-    By default animations are enabled, unless the user has configured their
+    By default, animations are enabled, unless the user has configured their
     system to [minimize non-essential motion](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion).
 
     Set this to `false` to disable animation globally.
@@ -92,14 +89,92 @@ up.motion = (function() {
     enabled: !matchMedia('(prefers-reduced-motion: reduce)').matches
   }))
 
-  function pickDefault(registry) {
-    return u.pickBy(registry, 'isDefault')
-  }
+  let namedAnimations = new up.Registry('animation', findAnimationFn)
+
+  /*-
+  Defines a named animation.
+
+  ### Example
+
+  Here is the definition of the pre-defined `fade-in` animation:
+
+  ```js
+  up.animation('fade-in', function(element, options) {
+    element.style.opacity = 0
+    return up.animate(element, { opacity: 1 }, options)
+  })
+  ```
+
+  ### Callback contract
+
+  For animations that can be expressed through [CSS transitions](https://www.w3schools.com/css/css3_transitions.asp),
+  we recommend that your definitions end by calling calling [`up.animate()`](/up.animate) with an object argument,
+  passing along your `options` and returning the result.
+
+  If you choose to *not* use `up.animate()` and roll your own
+  animation code instead, your code must honor the following contract:
+
+  1. It must honor the options `{ duration, easing }`, if given.
+  2. It must *not* remove any of the given elements from the DOM.
+  3. It returns a promise that is fulfilled when the transition has ended
+  4. If during the animation an event `up:motion:finish` is emitted on
+     the given element, the transition instantly jumps to the last frame
+     and resolves the returned promise.
+
+  Calling [`up.animate()`](/up.animate) with an object argument
+  will take care of all these points.
+
+  @function up.animation
+  @param {string} name
+  @param {Function(element, options): Promise} animation
+  @stable
+  */
+
+  let namedTransitions = new up.Registry('transition', findTransitionFn)
+
+  /*-
+  Defines a named transition that [morphs](/up.morph) from one element to another.
+
+  ### Example
+
+  Here is the definition of the pre-defined `cross-fade` animation:
+
+  ```js
+  up.transition('cross-fade', function(oldElement, newElement, options) {
+    return Promise.all([
+      up.animate(oldElement, 'fade-out', options),
+      up.animate(newElement, 'fade-in', options)
+    ])
+  })
+  ```
+
+  ### Callback contract
+
+  For animations that can be expressed through [CSS transitions](https://www.w3schools.com/css/css3_transitions.asp),
+  we recomend that your definitions end by calling [`up.animate()`](/up.animate) with an object argument,
+  passing along your `options` and returning the result.
+
+  If you choose to *not* use `up.animate()` and roll your own
+  logic instead, your code must honor the following contract:
+
+  1. It must honor the options `{ duration, easing }` if given.
+  2. It must *not* remove any of the given elements from the DOM.
+  3. It returns a promise that is fulfilled when the transition has ended.
+  4. If during the animation an event `up:motion:finish` is emitted on
+     either element, the transition instantly jumps to the last frame
+     and resolves the returned promise.
+
+  Calling [`up.animate()`](/up.animate) with an object argument
+  will take care of all these points.
+
+  @function up.transition
+  @param {string} name
+  @param {Function(oldElement, newElement, options): Promise} transition
+  @stable
+  */
 
   function reset() {
     motionController.reset()
-    namedAnimations = pickDefault(namedAnimations)
-    namedTransitions = pickDefault(namedTransitions)
   }
 
   /*-
@@ -246,10 +321,6 @@ up.motion = (function() {
   function applyConfig(options) {
     options.easing ??= config.easing
     options.duration ??= config.duration
-  }
-
-  function findNamedAnimation(name) {
-    return namedAnimations[name] || up.fail("Unknown animation %o", name)
   }
 
   /*-
@@ -443,22 +514,17 @@ up.motion = (function() {
     }
   }
 
-  function findTransitionFn(object) {
-    if (isNone(object)) {
+  function findTransitionFn(value) {
+    if (isNone(value)) {
       return undefined
-    } else if (u.isFunction(object)) {
-      return object
-    } else if (u.isArray(object)) {
-      return composeTransitionFn(...object)
-    } else if (u.isString(object)) {
-      let namedTransition
-      if (object.indexOf('/') >= 0) { // Compose a transition from two animation names
-        return composeTransitionFn(...object.split('/'))
-      } else if (namedTransition = namedTransitions[object]) {
-        return findTransitionFn(namedTransition)
-      }
+    } else if (u.isFunction(value)) {
+      return value
+    } else if (u.isArray(value)) {
+      return composeTransitionFn(...value)
+    } else if (u.isString(value) && value.includes('/')) {
+      return composeTransitionFn(...value.split('/'))
     } else {
-      up.fail("Unknown transition %o", object)
+      return namedTransitions.get(value)
     }
   }
 
@@ -475,17 +541,15 @@ up.motion = (function() {
     }
   }
 
-  function findAnimationFn(object) {
-    if (isNone(object)) {
+  function findAnimationFn(value) {
+    if (isNone(value)) {
       return undefined
-    } else if (u.isFunction(object)) {
-      return object
-    } else if (u.isString(object)) {
-      return findNamedAnimation(object)
-    } else if (u.isOptions(object)) {
-      return (element, options) => animateNow(element, object, options)
+    } else if (u.isFunction(value)) {
+      return value
+    } else if (u.isOptions(value)) {
+      return (element, options) => animateNow(element, value, options)
     } else {
-      up.fail('Unknown animation %o', object)
+      return namedAnimations.get(value)
     }
   }
 
@@ -504,96 +568,6 @@ up.motion = (function() {
     parser.number('duration')
 
     return options
-  }
-
-  /*-
-  Defines a named transition that [morphs](/up.morph) from one element to another.
-
-  ### Example
-
-  Here is the definition of the pre-defined `cross-fade` animation:
-
-  ```js
-  up.transition('cross-fade', function(oldElement, newElement, options) {
-    return Promise.all([
-      up.animate(oldElement, 'fade-out', options),
-      up.animate(newElement, 'fade-in', options)
-    ])
-  })
-  ```
-
-  ### Callback contract
-
-  For animations that can be expressed through [CSS transitions](https://www.w3schools.com/css/css3_transitions.asp),
-  we recomend that your definitions end by calling [`up.animate()`](/up.animate) with an object argument,
-  passing along your `options` and returning the result.
-
-  If you choose to *not* use `up.animate()` and roll your own
-  logic instead, your code must honor the following contract:
-
-  1. It must honor the options `{ duration, easing }` if given.
-  2. It must *not* remove any of the given elements from the DOM.
-  3. It returns a promise that is fulfilled when the transition has ended.
-  4. If during the animation an event `up:motion:finish` is emitted on
-     either element, the transition instantly jumps to the last frame
-     and resolves the returned promise.
-
-  Calling [`up.animate()`](/up.animate) with an object argument
-  will take care of all these points.
-
-  @function up.transition
-  @param {string} name
-  @param {Function(oldElement, newElement, options): Promise} transition
-  @stable
-  */
-  function registerTransition(name, transition) {
-    const fn = findTransitionFn(transition)
-    fn.isDefault = up.framework.evaling
-    namedTransitions[name] = fn
-  }
-
-  /*-
-  Defines a named animation.
-
-  ### Example
-
-  Here is the definition of the pre-defined `fade-in` animation:
-
-  ```js
-  up.animation('fade-in', function(element, options) {
-    element.style.opacity = 0
-    return up.animate(element, { opacity: 1 }, options)
-  })
-  ```
-
-  ### Callback contract
-
-  For animations that can be expressed through [CSS transitions](https://www.w3schools.com/css/css3_transitions.asp),
-  we recomend that your definitions end by calling calling [`up.animate()`](/up.animate) with an object argument,
-  passing along your `options` and returning the result.
-
-  If you choose to *not* use `up.animate()` and roll your own
-  animation code instead, your code must honor the following contract:
-
-  1. It must honor the options `{ duration, easing }`, if given.
-  2. It must *not* remove any of the given elements from the DOM.
-  3. It returns a promise that is fulfilled when the transition has ended
-  4. If during the animation an event `up:motion:finish` is emitted on
-     the given element, the transition instantly jumps to the last frame
-     and resolves the returned promise.
-
-  Calling [`up.animate()`](/up.animate) with an object argument
-  will take care of all these points.
-
-  @function up.animation
-  @param {string} name
-  @param {Function(element, options): Promise} animation
-  @stable
-  */
-  function registerAnimation(name, animation) {
-    const fn = findAnimationFn(animation)
-    fn.isDefault = up.framework.evaling
-    namedAnimations[name] = fn
   }
 
   up.on('up:framework:boot', function() {
@@ -617,7 +591,7 @@ up.motion = (function() {
   }
 
   function registerOpacityAnimation(name, from, to) {
-    registerAnimation(name, function(element, options) {
+    namedAnimations.put(name, function(element, options) {
       element.style.opacity = 0
       e.setStyle(element, { opacity: from })
       return animateNow(element, { opacity: to }, options)
@@ -644,13 +618,13 @@ up.motion = (function() {
     const animationToName = `move-to-${direction}`
     const animationFromName = `move-from-${direction}`
 
-    registerAnimation(animationToName, function(element, options) {
+    namedAnimations.put(animationToName, function(element, options) {
       const box = untranslatedBox(element)
       const transform = boxToTransform(box)
       return animateNow(element, transform, options)
     })
 
-    registerAnimation(animationFromName, function(element, options) {
+    namedAnimations.put(animationFromName, function(element, options) {
       const box = untranslatedBox(element)
       const transform = boxToTransform(box)
       e.setStyle(element, transform)
@@ -678,11 +652,11 @@ up.motion = (function() {
     return translateCSS(travelDistance, 0)
   })
 
-  registerTransition('cross-fade', ['fade-out', 'fade-in'])
-  registerTransition('move-left', ['move-to-left', 'move-from-right'])
-  registerTransition('move-right', ['move-to-right', 'move-from-left'])
-  registerTransition('move-up', ['move-to-top', 'move-from-bottom'])
-  registerTransition('move-down', ['move-to-bottom', 'move-from-top'])
+  namedTransitions.put('cross-fade', ['fade-out', 'fade-in'])
+  namedTransitions.put('move-left', ['move-to-left', 'move-from-right'])
+  namedTransitions.put('move-right', ['move-to-right', 'move-from-left'])
+  namedTransitions.put('move-up', ['move-to-top', 'move-from-bottom'])
+  namedTransitions.put('move-down', ['move-to-bottom', 'move-from-top'])
 
   /*-
   Swaps a fragment with an animated transition.
@@ -740,8 +714,8 @@ up.motion = (function() {
     animate,
     finish,
     finishCount() { return motionController.finishCount },
-    transition: registerTransition,
-    animation: registerAnimation,
+    transition: namedTransitions.put,
+    animation: namedAnimations.put,
     config,
     isEnabled,
     isNone,
