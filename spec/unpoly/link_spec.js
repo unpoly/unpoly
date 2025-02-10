@@ -4401,7 +4401,7 @@ describe('up.link', function() {
         })
 
         it('immediately loads a partial that is already visible within the document viewport', async function() {
-          const partial = fixture('a#slow[up-defer="reveal"][href="/slow-path"]')
+          const partial = fixture('a#slow[up-defer="reveal"][href="/slow-path"]', { text: 'deferred', style: { 'background-color': 'yellow' } })
           up.hello(partial)
 
           // MutationObserver has a delay even for the initial intersection check.

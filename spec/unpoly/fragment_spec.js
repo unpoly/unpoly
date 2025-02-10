@@ -8357,7 +8357,7 @@ describe('up.fragment', function() {
 
             await wait()
 
-            expect('.rootElement').not.toBeFocused()
+            expect('.root-element').not.toBeFocused()
           })
         })
 

@@ -9,32 +9,24 @@ function describeElement(element) {
 function matcher(util, customEqualityTesters) {
   return {
     compare(element) {
-      let message, pass
       if (element instanceof up.Layer) {
         element = element.getFocusElement()
       } else {
         element = up.element.get(element)
       }
 
+      if (!element) throw new Error('Cannot check focus on a null element')
+
       const focusedElement = document.activeElement
 
-      if (!element) {
-        pass = false
-        message = 'cannot check focus on a null element'
-      } else if (focusedElement === element) {
-        pass = true
-        message = 'Expected ' + describeElement(element) + ' not to be focused'
-      } else {
-        pass = false
-        message = 'Expected ' + describeElement(element) + ' to be focused'
-        if (focusedElement) {
-          message += ', but ' + describeElement(focusedElement) + ' was focused'
-        } else {
-          message += ', but nothing was focused'
-        }
-      }
+      const result = { pass: (element === focusedElement) }
 
-      return { pass, message }
+      if (result.pass) {
+        result.message = 'Expected ' + describeElement(element) + ' not to be focused, but it was'
+      } else {
+        result.message = 'Expected ' + describeElement(element) + ' to be focused, but ' + describeElement(focusedElement) + ' was focused'
+      }
+      return result
     }
   }
 }
