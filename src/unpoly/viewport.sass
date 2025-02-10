@@ -14,6 +14,7 @@ up-bounds
 body.up-scrollbar-away
   &, html:has(>&)
     overflow-y: hidden !important
+    overflow-y: clip !important
 
   padding-right: calc(var(--up-scrollbar-width) + var(--up-original-padding-right)) !important
 
