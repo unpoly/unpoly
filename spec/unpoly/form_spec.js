@@ -5042,6 +5042,24 @@ describe('up.form', function() {
         expect(form2Target).toBeVisible()
       })
 
+      it("works on inputs outside the form (associated with [form=form-id] attribute)", async function() {
+        const form = fixture('form#form-id')
+        const select = e.affix(form, 'select[name="select-name"][up-switch=".target"][form="#form-id"]')
+        const fooOption = e.affix(select, 'option[value="foo"]', { text: 'Foo' })
+        const barOption = e.affix(select, 'option[value="bar"]', { text: 'Bar' })
+        const bazOption = e.affix(select, 'option[value="baz"]', { text: 'Baz' })
+        const target = e.affix(form, '.target[up-show-for="bar"]')
+        up.hello(select)
+        await wait()
+
+        expect(target).toBeHidden()
+        select.value = 'bar'
+        Trigger.change(select)
+        await wait()
+
+        expect(target).toBeVisible()
+      })
+
       describe('on a select', function() {
 
         beforeEach(function() {
@@ -5442,23 +5460,6 @@ describe('up.form', function() {
         })
       })
 
-      it("works on inputs outside the form (associated with [form=form-id] attribute)", async function() {
-        const form = fixture('form#form-id')
-        const select = e.affix(form, 'select[name="select-name"][up-switch=".target"][form="#form-id"]')
-        const fooOption = e.affix(select, 'option[value="foo"]', { text: 'Foo' })
-        const barOption = e.affix(select, 'option[value="bar"]', { text: 'Bar' })
-        const bazOption = e.affix(select, 'option[value="baz"]', { text: 'Baz' })
-        const target = e.affix(form, '.target[up-show-for="bar"]')
-        up.hello(select)
-        await wait()
-
-        expect(target).toBeHidden()
-        select.value = 'bar'
-        Trigger.change(select)
-        await wait()
-
-        expect(target).toBeVisible()
-      })
     })
   })
 })
