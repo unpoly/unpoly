@@ -271,6 +271,7 @@ afterEach(function() {
     // or up.fragment will ignore everything within the body from now on.
     document.body.classList.remove('up-destroying')
     document.body.removeAttribute('aria-hidden')
+    document.body.removeAttribute('inert')
 
     // When the body was swapped while an overlay was open, it has this class.
     document.body.classList.remove('up-scrollbar-away')

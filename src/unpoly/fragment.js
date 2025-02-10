@@ -1810,8 +1810,8 @@ up.fragment = (function() {
 
   If the element's removal is animated, the element will remain in the DOM until after the animation
   has completed. While the animation is running the element will be given the `.up-destroying` class.
-  The element will also be given the `[aria-hidden]` attribute to remove it from
-  the accessibility tree.
+  The element will also be given the [`[inert]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/inert)
+  attribute to prevent interaction and to hide its content from assistive technologies.
 
   Elements that are about to be destroyed (but still animating) are ignored by all
   functions that lookup fragments, like `up.fragment.all()`, `up.fragment.get()` or `up.fragment.closest()`.
@@ -1877,8 +1877,9 @@ up.fragment = (function() {
   ### Accessibility
 
   While an element's destruction is animating, the element is also assigned an
-  [`[aria-hidden]`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden) attribute.
-  This hides the element from the browser's accessibility API.
+  [`[inertt]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/inert) attribute.
+
+  This prevents interaction with the element and hides it from assistive technologies.
 
   @selector .up-destroying
   @stable
@@ -1886,7 +1887,7 @@ up.fragment = (function() {
 
   function markFragmentAsDestroying(element) {
     element.classList.add('up-destroying')
-    element.setAttribute('aria-hidden', 'true')
+    element.setAttribute('inert', '')
   }
 
   /*-

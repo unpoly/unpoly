@@ -6667,6 +6667,39 @@ describe('up.fragment', function() {
           expect($ghost3.css('opacity')).toBeAround(0.0, 0.1)
         })
 
+        it('prevents the user from focusing the destroying element', async function() {
+          up.motion.config.enabled = true
+
+          const oldFocused = fixture('.focused[tabindex=0][data-version="old"]', { text: 'old focused' })
+
+          up.render('.focused', {
+            focus: false,
+            document: `
+                <div class="focused" data-version="new" tabindex="0">new focused</div>
+              `,
+            transition: 'cross-fade',
+            duration: 1200,
+          })
+
+          await wait(600)
+
+          const newFocused = document.querySelector('.focused[data-version="new"]')
+
+          expect(oldFocused).toBeAttached()
+          expect(oldFocused).toHaveOpacity(0.5, 0.4)
+          expect(newFocused).toBeAttached()
+          expect(newFocused).toHaveOpacity(0.5, 0.4)
+
+          oldFocused.focus()
+          expect(oldFocused).not.toBeFocused()
+
+          await wait(800)
+
+          expect(oldFocused).toBeDetached()
+          expect(newFocused).toBeAttached()
+          expect(newFocused).toHaveOpacity(1.0, 0.2)
+        })
+
         it('resolves the returned promise as soon as both elements are in the DOM and the transition has started', function(done) {
           fixture('.swapping-element', { text: 'version 1' })
 
@@ -8381,6 +8414,40 @@ describe('up.fragment', function() {
 
             expect('.focused').toHaveText('new focused')
             expect('.focused').toBeFocused()
+          })
+
+          it('preserves focus when morphing with a { transition }', async function() {
+            up.motion.config.enabled = true
+
+            const oldFocused = fixture('.focused[tabindex=0][data-version="old"]', { text: 'old focused' })
+            oldFocused.focus()
+            expect(oldFocused).toBeFocused()
+
+            up.render('.focused', {
+              focus: 'keep',
+              document: `
+                <div class="focused" data-version="new" tabindex="0">new focused</div>
+              `,
+              transition: 'cross-fade',
+              duration: 1200,
+            })
+
+            await wait(600)
+
+            const newFocused = document.querySelector('.focused[data-version="new"]')
+
+            expect(oldFocused).toBeAttached()
+            expect(oldFocused).toHaveOpacity(0.5, 0.4)
+            expect(newFocused).toBeAttached()
+            expect(newFocused).toHaveOpacity(0.5, 0.4)
+            expect(newFocused).toBeFocused()
+
+            await wait(800)
+
+            expect(oldFocused).toBeDetached()
+            expect(newFocused).toBeAttached()
+            expect(newFocused).toHaveOpacity(1.0, 0.2)
+            expect(newFocused).toBeFocused()
           })
 
           it('does not re-focus an unrelated element that never lost focus during the render pass', async function() {
@@ -11575,10 +11642,10 @@ describe('up.fragment', function() {
         expect(attachmentSpy).toHaveBeenCalledWith(true)
       })
 
-      it('marks the old element as [aria-hidden=true] before destructors', function(done) {
+      it('marks the old element as [inert] before destructors', function(done) {
         const testElement = function(element) {
           expect(element).toHaveText('old text')
-          expect(element).toMatchSelector('[aria-hidden=true]')
+          expect(element).toMatchSelector('[inert]')
           done()
         }
 
