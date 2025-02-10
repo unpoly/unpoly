@@ -8,12 +8,13 @@ beforeEach(function() {
           let overflowElement = viewport === document ? up.specUtil.documentOverflowElement() : viewport
           let overflow = getComputedStyle(overflowElement).overflowY
 
-          let heightElement = [document, document.documentElement, document.body].includes(viewport) ? document.scrollingElement : viewport
-
-          // debugger
+          let isMainViewport = [document, document.documentElement, document.body].includes(viewport)
+          let heightElement = isMainViewport ? document.scrollingElement : viewport
+          let canShowScrollbars = (overflow === 'scroll' || overflow === 'auto' || (isMainViewport && overflow === 'visible'))
+          let hasOverflow = (heightElement.scrollHeight > heightElement.clientHeight)
 
           return {
-            pass: (overflow === 'scroll' || overflow === 'auto') && (heightElement.scrollHeight > heightElement.clientHeight)
+            pass: canShowScrollbars && hasOverflow
           }
         }
       }

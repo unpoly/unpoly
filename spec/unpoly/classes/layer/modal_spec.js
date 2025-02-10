@@ -303,6 +303,64 @@ describe('up.Layer.Modal', function() {
         expect(anchored).toHaveComputedStyle({ right: '70px' })
       })
 
+      it('keeps the scroll position of the background layer', async function() {
+        fixture('#high-element', { style: { 'background-color': 'yellow', 'height': '30000px' } })
+        up.viewport.root.scrollTop = 4567
+
+        expect(up.viewport.root).toHaveVerticalScrollbar()
+        expect(up.viewport.root.scrollTop).toBe(4567)
+
+        up.layer.open({ mode: 'modal', content: 'overlay content' })
+        await wait()
+
+        expect(up.viewport.root).not.toHaveVerticalScrollbar()
+        expect(up.viewport.root.scrollTop).toBe(4567)
+      })
+
+      it('allows sticky elements in the background to keep their "stuck" positions', async function() {
+        fixture('#high-element', {
+          style: {
+            'background-color': 'yellow',
+            'height': '30000px'
+          }
+        })
+        const sticky = up.element.createFromSelector('#sticky-element', {
+          style: {
+            'background-color': 'green',
+            'height': '100px',
+            'width': '200px',
+            'position': 'sticky',
+            'top': '0',
+            'left': '0'
+          }
+        })
+        document.body.prepend(sticky)
+        registerFixture(sticky)
+
+        up.viewport.root.scrollTop = 4567
+
+        expect(up.viewport.root).toHaveVerticalScrollbar()
+        expect(up.viewport.root.scrollTop).toBe(4567)
+        expect(sticky.getBoundingClientRect()).toEqual(jasmine.objectContaining({
+          left: 0,
+          top: 0,
+          width: 200,
+          height: 100,
+        }))
+
+        up.layer.open({ mode: 'modal', content: 'overlay content' })
+        await wait()
+
+        expect(up.viewport.root).not.toHaveVerticalScrollbar()
+        expect(up.viewport.root.scrollTop).toBe(4567)
+        expect(sticky.getBoundingClientRect()).toEqual(jasmine.objectContaining({
+          left: 0,
+          top: 0,
+          width: 200,
+          height: 100,
+        }))
+      })
+
       it('does not leave inline custom properties after the overlay was closed', async function() {
         spyOn(up.viewport, 'rootScrollbarWidth').and.returnValue(25)
         const anchored = fixture('div[up-anchored=right]', { style: { position: 'fixed', top: '0px', right: '70px' } })
