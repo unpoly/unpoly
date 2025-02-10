@@ -261,7 +261,7 @@ up.FormValidator = class FormValidator {
     // Since up.render() can only take a single { origin },
     // we resolve it here.
     //
-    // Disabling the same elements multiple time is not an issue since up.form.disable()
+    // Disabling the same elements multiple time is not an issue since up.form.disableTemp()
     // only sees enabled elements.
     options.disable = dirtySolutions.map((solution) => up.fragment.resolveOrigin(solution.renderOptions.disable, solution))
 

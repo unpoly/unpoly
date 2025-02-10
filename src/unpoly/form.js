@@ -192,6 +192,14 @@ up.form = (function() {
     return fields
   }
 
+  function findFieldsAndButtons(container) {
+    return [
+      ...findFields(container),
+      ...findSubmitButtons(container),
+      ...findGenericButtons(container),
+    ]
+  }
+
   /*-
   Returns a list of submit buttons within the given element.
 
@@ -454,7 +462,7 @@ up.form = (function() {
 
   In that case Unpoly will focus the [closest form group](/up.form.group) around the disabled control.
 
-  @function up.form.disable
+  @function up.form.disableTemp
   @param {Element} element
     The element within which fields and buttons should be disabled.
   @return {Function}
@@ -462,17 +470,12 @@ up.form = (function() {
   @internal
   */
 
-  function disableContainer(container) {
-    let controls = [
-      ...findFields(container),
-      ...findSubmitButtons(container),
-      ...findGenericButtons(container),
-    ]
-
-    return u.sequence(u.map(controls, disableControl))
+  function disableContainerTemp(container) {
+    let controls = findFieldsAndButtons(container)
+    return u.sequence(u.map(controls, disableControlTemp))
   }
 
-  function disableControl(control) {
+  function disableControlTemp(control) {
     // Ignore controls that were already disabled before us.
     // This way we don't accidentally re-enable a control that we didn't change.
     if (control.disabled) return
@@ -489,7 +492,7 @@ up.form = (function() {
     // (1) This function is only returned if we didn't early-return above
     //     for a control that is already disabled.
     // (2) In case our disabling caused focus loss: We don't care about restoring focus,
-    //     selection or scroll position here. The up.form.disable() function is *only*
+    //     selection or scroll position here. The up.form.disableTemp() function is *only*
     //     used via up.Preview#disable(), and previews already use a FocusCapsule
     //     to preserve and restore focus-related state.
     return () => { control.disabled = false }
@@ -517,6 +520,14 @@ up.form = (function() {
       for (let container of containers) {
         preview.disable(container)
       }
+    }
+  }
+
+  function setContainerDisabled(container, disabled) {
+    // This function is much simpler than disableContainerTemp(), as we only require
+    // it for [up-enable-for] / [up-disable-for].
+    for (let control of findFieldsAndButtons(container)) {
+      control.disabled = disabled
     }
   }
 
@@ -1239,24 +1250,32 @@ up.form = (function() {
     const fieldValues = switcherValues(switcher)
 
     for (let target of up.fragment.all(form, targetSelector)) {
-      switchTarget(target, fieldValues)
+      switchTarget(target, fieldValues, switcher)
     }
   }
 
-  const switchTarget = up.mockable(function(target, fieldValues) {
-    fieldValues ||= switcherValues(findSwitcherForTarget(target))
+  const SWITCH_EFFECTS = [
+    { attr: 'up-hide-for', toggle(target, active) { e.toggle(target, !active) } },
+    { attr: 'up-show-for', toggle(target, active) { e.toggle(target, active) } },
+    { attr: 'up-disable-for', toggle(target, active) { up.form.setDisabled(target, active) } },
+    { attr: 'up-enable-for', toggle(target, active) { up.form.setDisabled(target, !active) } },
+  ]
 
-    let hideValues = target.getAttribute('up-hide-for')
-    let showValues = target.getAttribute('up-show-for')
+  function unswitchedSwitchTargetSelector() {
+    return e.unionSelector(u.map(SWITCH_EFFECTS, (effect) => `[${effect.attr}]`), ['.up-switched'])
+  }
 
-    if (hideValues) {
-      hideValues = parseSwitchTokens(hideValues)
-      let shouldHide = u.intersect(fieldValues, hideValues).length > 0
-      e.toggle(target, !shouldHide)
-    } else if (showValues) {
-      showValues = parseSwitchTokens(showValues)
-      let shouldShow = u.intersect(fieldValues, showValues).length > 0
-      e.toggle(target, shouldShow)
+  const switchTarget = up.mockable(function(target, fieldValues, switcher) {
+    switcher ||= findSwitcherForTarget(target)
+    fieldValues ||= switcherValues(switcher)
+
+    for (let { attr, toggle } of SWITCH_EFFECTS) {
+      let attrValue = target.getAttribute(attr)
+      if (attrValue) {
+        let activeValues = parseSwitchTokens(attrValue)
+        let isActive = u.intersect(fieldValues, activeValues).length > 0
+        toggle(target, isActive)
+      }
     }
 
     target.classList.add('up-switched')
@@ -1929,7 +1948,7 @@ up.form = (function() {
     switchTargets(switcher)
   })
 
-  up.compiler('[up-show-for]:not(.up-switched), [up-hide-for]:not(.up-switched)', (element) => {
+  up.compiler(unswitchedSwitchTargetSelector, (element) => {
     switchTarget(element)
   })
 
@@ -2131,7 +2150,8 @@ up.form = (function() {
     focusedField,
     switchTarget,
     // disableWhile,
-    disable: disableContainer,
+    disableTemp: disableContainerTemp,
+    setDisabled: setContainerDisabled,
     getDisablePreviewFn,
     // handleDisableOption,
     group: findGroup,
