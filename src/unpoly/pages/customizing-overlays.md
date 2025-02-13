@@ -164,8 +164,13 @@ Popup position
 
 By default popups will open below the link that opened it (the `{ origin }`).
 You may control the position of the popup relative to the origin by assigning
-`[up-position]` and `[up-align]` attributes to the opening link. When opening
-an overlay with JavaScript, use `{ position, align }` options.
+`[up-position]` and `[up-align]` attributes to the opening link:
+
+```html
+<a href="/help" up-layer="new popup" up-position="top" up-align="right">Show help</a>
+```
+
+When opening an overlay with JavaScript, use `{ position, align }` options.
 
 The following combinations are supported:
 
@@ -183,5 +188,20 @@ The following combinations are supported:
 | `right`        | `top`       | Popup sits right to the origin. Top edges align.        |
 | `right`        | `bottom`    | Popup sits right to the origin. Bottom edges align.     |
 | `right`        | `center`    | Popup sits right to the origin. Vertical centers align. |
+
+
+Drawer position
+---------------
+
+By default, drawers will slide in on the left edge of the screen.
+
+You can open a drawer on the edge by setting an `[up-position="right"]` attribute:
+
+```html
+<a href="/settings" up-layer="new drawer" up-position="right">Settings</a>
+```
+
+From JavaScript, pass a `{ position: 'right' }` option.
+
 
 @page customizing-overlays

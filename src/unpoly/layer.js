@@ -776,12 +776,14 @@ up.layer = (function() {
 
     See [replacing existing overlays](/opening-overlays#replacing-existing-overlays).
 
-  @param [up-mode]
+  @param [up-mode='modal']
     The kind of overlay to open.
+
+    Defaults to `up.layer.config.mode`, which defaults to `'modal'`.
 
     See [available layer modes](/layer-terminology#available-modes).
 
-  @param [up-size]
+  @param [up-size='medium']
     The size of the overlay.
 
     See [overlay sizes](/customizing-overlays#overlay-sizes) for details.
@@ -899,18 +901,18 @@ up.layer = (function() {
     @experimental
 
   @param [up-position]
-    The position of the popup relative to the `{ origin }` element that opened
-    the overlay.
+    The position of the overlay.
 
-    Supported values are `top`,  `right`,  `bottom` and  `left`.
+    For drawer overlays, supported values `left` and `right`.\
+    See [drawer position](/customizing-overlays#drawer-position).
 
+    For popup overlays, supported values are `top`,  `right`,  `bottom` and  `left`.\
     See [popup position](/customizing-overlays#popup-position).
 
   @param [up-align]
-    The alignment of the popup within its `{ position }`.
+    The alignment of a popup overlay within its `{ position }`.
 
-    Supported values are `top`,  `right`, `center`, `bottom` and  `left`.
-
+    Supported values are `top`,  `right`, `center`, `bottom` and  `left`.\
     See [popup position](/customizing-overlays#popup-position).
 
   @stable
