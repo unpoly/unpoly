@@ -74,16 +74,5 @@ Neither to you need to update the `<meta>` tag with the latest nonce.
 > using the [`up.safe_callback()`](https://github.com/unpoly/unpoly-rails#allowing-callbacks-with-a-strict-csp) helper.
 
 
-## <em class="heading-prefix">Option 3</em> Relax your CSP
-
-Depending on your requirements, you may decide to prioritize developer convenience over a strict CSP.
-
-You can use all `[up-on-]` attributes without restriction by passing the `'unsafe-eval'` directive:
-
-```http
-Content-Security-Policy: script-src 'self' 'unsafe-eval'
-```
-
-Note that this allows the use of `eval()` from all allowed scripts on your page, not just from Unpoly. However, it does not allow the creation of inline `<script>` tags.
 
 @page csp
