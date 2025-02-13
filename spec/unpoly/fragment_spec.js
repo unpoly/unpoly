@@ -2271,6 +2271,122 @@ describe('up.fragment', function() {
           })
         })
 
+        describe('when the server sends an X-Up-Open-Layer header', function() {
+
+          describe('when updating an overlay', function() {
+
+            it('opens a new layer, ignoring the original { layer } option', async function() {
+              fixture('#target', { text: 'old target' })
+              up.render('#target', { url: '/path', layer: 'current' })
+              await wait()
+
+              jasmine.respondWith({ responseText: '<div id="overlay">overlay</div>', responseHeaders: { 'X-Up-Open-Layer': '{}', 'X-Up-Target': '#overlay' } })
+              await wait()
+
+              expect(up.layer.current).toBeOverlay()
+              expect(up.layer.current).toHaveSelector('#overlay')
+              expect('#overlay').toHaveText('overlay')
+              expect('#target').toHaveText('old target')
+            })
+
+            it('opens a new layer with render options parsed from the header value', async function() {
+              fixture('#target', { text: 'old target' })
+              up.render('#target', { url: '/path' })
+              await wait()
+
+              jasmine.respondWith({ responseText: '<div id="overlay">overlay</div>', responseHeaders: { 'X-Up-Open-Layer': JSON.stringify({ target: '#overlay', mode: 'drawer', size: 'small' }) } })
+              await wait()
+
+              expect(up.layer.current).toBeOverlay()
+              expect(up.layer.current).toHaveSelector('#overlay')
+              expect(up.layer.current.mode).toBe('drawer')
+              expect(up.layer.current.size).toBe('small')
+              expect('#overlay').toHaveText('overlay')
+            })
+
+            it("resolves a :main target using the new overlay mode", async function() {
+              up.layer.config.root.mainTargets = ['#root-target']
+              up.layer.config.modal.mainTargets = ['#overlay-target']
+
+              fixture('#root-target', { text: 'old root target' })
+              up.render(':main', { url: '/path' })
+              await wait()
+
+              jasmine.respondWith({ responseText: '<div id="overlay-target">overlay</div>', responseHeaders: { 'X-Up-Open-Layer': '{}' } })
+              await wait()
+
+              expect(up.layer.current).toBeOverlay()
+              expect(up.layer.current).toHaveSelector('#overlay-target')
+              expect('#overlay-target').toHaveText('overlay')
+              expect('#root-target').toHaveText('old root target')
+            })
+
+            it('replaces the initial target with ":main" if no explicit target is given in either X-Up-Open-Layer nor X-Up-Target header', async function() {
+              up.layer.config.root.mainTargets = ['#root-target']
+              up.layer.config.modal.mainTargets = ['#overlay-target']
+
+              fixture('#root-target', { text: 'old root target' })
+              up.render('#root-target', { url: '/path' })
+              await wait()
+
+              jasmine.respondWith({ responseText: '<div id="overlay-target">overlay</div>', responseHeaders: { 'X-Up-Open-Layer': '{}' } })
+              await wait()
+
+              expect(up.layer.current).toBeOverlay()
+              expect(up.layer.current).toHaveSelector('#overlay-target')
+              expect('#overlay-target').toHaveText('overlay')
+              expect('#root-target').toHaveText('old root target')
+            })
+
+          })
+
+          describe('when already opening an overlay', function() {
+
+            it('still opens an overlay', async function() {
+              up.render({ target: '#overlay', url: '/path', layer: 'new' })
+              await wait()
+
+              jasmine.respondWith({ responseText: '<div id="overlay">overlay</div>', responseHeaders: { 'X-Up-Open-Layer': '{}', 'X-Up-Target': '#overlay' } })
+              await wait()
+
+              expect(up.layer.current).toBeOverlay()
+              expect(up.layer.current).toHaveSelector('#overlay')
+              expect('#overlay').toHaveText('overlay')
+            })
+
+            it('opens a new layer with render options parsed from the header value', async function() {
+              up.render({ target: '#initial-target', url: '/path', layer: 'new' })
+              await wait()
+
+              jasmine.respondWith({ responseText: '<div id="overlay">overlay</div>', responseHeaders: { 'X-Up-Open-Layer': JSON.stringify({ target: '#overlay', mode: 'drawer', size: 'small' }) } })
+              await wait()
+
+              expect(up.layer.current).toBeOverlay()
+              expect(up.layer.current).toHaveSelector('#overlay')
+              expect(up.layer.current.mode).toBe('drawer')
+              expect(up.layer.current.size).toBe('small')
+              expect('#overlay').toHaveText('overlay')
+            })
+
+            it('uses default overlay options when no explicit options are given in the header value', async function() {
+              up.render({ target: '#initial-target', url: '/path', layer: 'new', mode: 'drawer', size: 'small' })
+              await wait()
+
+              jasmine.respondWith({ responseText: '<div id="overlay">overlay</div>', responseHeaders: { 'X-Up-Open-Layer': JSON.stringify({ target: '#overlay' }) } })
+              await wait()
+
+              expect(up.layer.current).toBeOverlay()
+              expect(up.layer.current).toHaveSelector('#overlay')
+              expect(up.layer.current.mode).toBe('modal')
+              expect(up.layer.current.size).toBe('medium')
+              expect('#overlay').toHaveText('overlay')
+
+            })
+
+          })
+
+        })
+
         describe('when the server sends no content', function() {
 
           it('succeeds when the server sends an empty body with HTTP status 304 (not modified)', async function() {

@@ -6,7 +6,11 @@ beforeEach(function() {
     toHaveSelector(util, customEqualityTesters) {
       return {
         compare(root, selector) {
-          root = up.element.get(root)
+          if (root instanceof up.Layer) {
+            root = root.getContentElement()
+          } else {
+            root = up.element.get(root)
+          }
           const match = root.querySelector(selector)
           return { pass: !!match }
         }

@@ -162,8 +162,9 @@ up.protocol = (function() {
   </div>
   ```
 
-  The frontend will use the server-provided target for both successful (HTTP status `200 OK`)
-  and failed (status `4xx` or `5xx`) responses.
+  The frontend will use the `X-Up-Target` selector for both successful (HTTP status `200 OK`)
+  and failed (status `4xx` or `5xx`) responses. There is no <code autolink="false">X-Up-Fail-Target</code>
+  header in the response.
 
 
   ### Rendering nothing
@@ -718,6 +719,18 @@ up.protocol = (function() {
   @stable
   */
 
+  function openLayerFromXHR(xhr) {
+    // When no specific options are given, the server will send X-Up-Open-Layer: {}
+    return extractHeader(xhr, 'openLayer', u.parseRelaxedJSON)
+  }
+
+  /*-
+  TODO: Docs
+
+  @header X-Up-Open-Layer
+  @experimental
+  */
+
   function acceptLayerFromXHR(xhr) {
     // Even if acceptance has no value, the server will send
     // X-Up-Accept-Layer: null
@@ -1075,6 +1088,7 @@ up.protocol = (function() {
     titleFromXHR,
     targetFromXHR,
     methodFromXHR,
+    openLayerFromXHR,
     acceptLayerFromXHR,
     contextFromXHR,
     dismissLayerFromXHR,

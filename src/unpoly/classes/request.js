@@ -770,6 +770,7 @@ up.Request = class Request extends up.Record {
       status: this.xhr.status,
       title: up.protocol.titleFromXHR(this.xhr),
       target: up.protocol.targetFromXHR(this.xhr),
+      openLayer: up.protocol.openLayerFromXHR(this.xhr),
       acceptLayer: up.protocol.acceptLayerFromXHR(this.xhr),
       dismissLayer: up.protocol.dismissLayerFromXHR(this.xhr),
       eventPlans: up.protocol.eventPlansFromXHR(this.xhr),

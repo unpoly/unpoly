@@ -863,16 +863,41 @@ describe('up.util', () => {
       })
     })
 
-
-    describe('up.util.mapObject', () => it('creates an object from the given array and pairer', function() {
-      const array = ['foo', 'bar', 'baz']
-      const object = up.util.mapObject(array, (str) => [`${str}Key`, `${str}Value`])
-      expect(object).toEqual({
-        fooKey: 'fooValue',
-        barKey: 'barValue',
-        bazKey: 'bazValue'
+    describe('up.util.mapObject()', function() {
+      it('creates an object from the given array and pairer', function() {
+        const array = ['foo', 'bar', 'baz']
+        const object = up.util.mapObject(array, (str) => [`${str}Key`, `${str}Value`])
+        expect(object).toEqual({
+          fooKey: 'fooValue',
+          barKey: 'barValue',
+          bazKey: 'bazValue'
+        })
       })
-    }))
+    })
+
+    describe('up.util.spanObject()', function() {
+
+      it('creates an object with the given property names, assigning all properties the given value', function() {
+        const array = ['foo', 'bar', 'baz']
+        const object = up.util.spanObject(array, 123)
+        expect(object).toEqual({
+          foo: 123,
+          bar: 123,
+          baz: 123,
+        })
+      })
+
+      it('sets all properties to undefined if no value is given', function() {
+        const array = ['foo', 'bar', 'baz']
+        const object = up.util.spanObject(array)
+        expect(object).toEqual({
+          foo: undefined,
+          bar: undefined,
+          baz: undefined,
+        })
+      })
+
+    })
 
     describe('up.util.each', function() {
 

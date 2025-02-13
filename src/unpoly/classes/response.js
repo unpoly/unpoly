@@ -119,6 +119,7 @@ up.Response = class Response extends up.Record {
       'xhr', // optional
       'target',
       'title',
+      'openLayer',
       'acceptLayer',
       'dismissLayer',
       'eventPlans',

@@ -828,7 +828,7 @@ up.fragment = (function() {
   @param {Object} [options.context]
     An object that will be merged into the [context](/context) of the current layer once the fragment is rendered.
 
-  @param {boolean|string|Element|Function} [options.scroll]
+  @param {boolean|string|Element|Function} [options.scroll=false]
     How to scroll after the new fragment was rendered.
 
     See [scrolling](/scrolling) for a list of allowed values.
@@ -857,7 +857,7 @@ up.fragment = (function() {
 
     Saved scroll positions can later be restored with [`{ scroll: 'restore' }`](/scrolling#restoring-scroll-positions).
 
-  @param {boolean|string|Element|Function} [options.focus]
+  @param {boolean|string|Element|Function} [options.focus='keep']
     What to focus after the new fragment was rendered.
 
     See [Controlling focus](/focus) for a list of allowed values.

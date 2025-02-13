@@ -278,11 +278,7 @@ up.util = (function() {
   @internal
   */
   function mapObject(array, pairer) {
-    const merger = function(object, pair) {
-      object[pair[0]] = pair[1]
-      return object
-    }
-    return map(array, pairer).reduce(merger, {})
+    return Object.fromEntries(array.map(pairer))
   }
 
   /*-
@@ -2246,6 +2242,10 @@ up.util = (function() {
     })
   }
 
+  function spanObject(keys, value) {
+    return mapObject(keys, (key) => [key, value])
+  }
+
   return {
     parseURL,
     normalizeURL,
@@ -2263,6 +2263,7 @@ up.util = (function() {
     map,
     flatMap,
     mapObject,
+    spanObject,
     findResult,
     some,
     every,

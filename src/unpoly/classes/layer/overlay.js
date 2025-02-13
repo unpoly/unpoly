@@ -64,6 +64,8 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     'trapFocus',
   ]
 
+  static UNSET_VISUALS = u.spanObject(this.VISUAL_KEYS, undefined)
+
   keys() {
     return [
       ...super.keys(),
