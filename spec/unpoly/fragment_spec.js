@@ -2321,21 +2321,48 @@ describe('up.fragment', function() {
               expect('#root-target').toHaveText('old root target')
             })
 
-            it('replaces the initial target with ":main" if no explicit target is given in either X-Up-Open-Layer nor X-Up-Target header', async function() {
-              up.layer.config.root.mainTargets = ['#root-target']
-              up.layer.config.modal.mainTargets = ['#overlay-target']
+            describe('if no explicit target is given in either X-Up-Open-Layer or X-Up-Target header', function() {
 
-              fixture('#root-target', { text: 'old root target' })
-              up.render('#root-target', { url: '/path' })
-              await wait()
+              it('replaces the initial target with ":main"', async function() {
+                up.layer.config.root.mainTargets = ['#root-target']
+                up.layer.config.modal.mainTargets = ['#overlay-target']
 
-              jasmine.respondWith({ responseText: '<div id="overlay-target">overlay</div>', responseHeaders: { 'X-Up-Open-Layer': '{}' } })
-              await wait()
+                fixture('#root-target', { text: 'old root target' })
+                up.render('#root-target', { url: '/path' })
+                await wait()
 
-              expect(up.layer.current).toBeOverlay()
-              expect(up.layer.current).toHaveSelector('#overlay-target')
-              expect('#overlay-target').toHaveText('overlay')
-              expect('#root-target').toHaveText('old root target')
+                jasmine.respondWith({ responseText: '<div id="overlay-target">overlay</div>', responseHeaders: { 'X-Up-Open-Layer': '{}' } })
+                await wait()
+
+                expect(up.layer.current).toBeOverlay()
+                expect(up.layer.current).toHaveSelector('#overlay-target')
+                expect('#overlay-target').toHaveText('overlay')
+                expect('#root-target').toHaveText('old root target')
+              })
+
+              it('ignores the initial target, even it exists in the response', async function() {
+                up.layer.config.root.mainTargets = ['#root-target']
+                up.layer.config.modal.mainTargets = ['#overlay-target']
+
+                fixture('#root-target', { text: 'old root target' })
+                up.render('#root-target', { url: '/path' })
+                await wait()
+
+                jasmine.respondWith({
+                  responseText: `
+                    <div id="root-target">new root target</div>
+                    <div id="overlay-target">new overlay target</div>
+                  `,
+                  responseHeaders: { 'X-Up-Open-Layer': '{}' }
+                })
+                await wait()
+
+                expect(up.layer.current).toBeOverlay()
+                expect(up.layer.current).not.toHaveSelector('#root-target')
+                expect(up.layer.current).toHaveSelector('#overlay-target')
+                expect('#root-target').toHaveText('old root target')
+              })
+
             })
 
           })

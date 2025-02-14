@@ -178,6 +178,7 @@ up.Change.FromResponse = class FromResponse extends up.Change {
     if (openLayerOptions) {
       Object.assign(renderOptions, {
         ...up.Layer.Overlay.UNSET_VISUALS,     // When we're already opening an overlay, don't adopt its visuals.
+        target: undefined,                     // The original target may no longer be appropriate, even if it exists in the response.
         ...up.fragment.config.navigateOptions, // Options like `{ history, focus, scroll }` might no longer work. Also enable a fallback target.
         ...openLayerOptions,                   // Anything explicitly passed as the value of `X-Up-Open-Layer`.
         layer: 'new',                          // Don't accept `X-Up-Open-Layer: { layer: 'parent' }`.
