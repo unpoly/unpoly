@@ -164,9 +164,10 @@ up.migrate = (function() {
 
   const warn = up.mockable((message, ...args) => {
     const formattedMessage = u.sprintf(message, ...args)
-    if (!warnedMessages[formattedMessage]) {
+    const logLevel = config.logLevel
+    if (logLevel !== 'none' && !warnedMessages[formattedMessage]) {
       warnedMessages[formattedMessage] = true
-      up.log[config.logLevel]('unpoly-migrate', message, ...args)
+      up.log[logLevel]('unpoly-migrate', message, ...args)
     }
   })
 
