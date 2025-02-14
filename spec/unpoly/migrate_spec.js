@@ -126,6 +126,27 @@ if (up.migrate.loaded) {
       })
 
       it('allows substitution')
+
+      describe('log level', function() {
+        it('uses the log level from up.migrate.config.logLevel', function() {
+          up.migrate.config.logLevel = 'error'
+          const warnSpy = spyOn(up.log, 'warn')
+          const errorSpy = spyOn(up.log, 'error')
+          up.migrate.warn("a legacy warning")
+          expect(errorSpy).toHaveBeenCalledWith('unpoly-migrate', 'a legacy warning')
+          expect(warnSpy).not.toHaveBeenCalled()
+        })
+
+        it('does not log anything with up.migrate.config.logLevel = "none"', function() {
+          up.migrate.config.logLevel = 'none'
+          const warnSpy = spyOn(up.log, 'warn')
+          const errorSpy = spyOn(up.log, 'error')
+          up.migrate.warn("a legacy warning")
+          expect(errorSpy).not.toHaveBeenCalled()
+          expect(warnSpy).not.toHaveBeenCalled()
+        })
+
+      })
     })
 
 

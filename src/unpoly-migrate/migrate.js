@@ -156,7 +156,11 @@ up.migrate = (function() {
     })
   }
 
-  const warnedMessages = {}
+  let warnedMessages = {}
+
+  function reset() {
+    warnedMessages = {}
+  }
 
   const warn = up.mockable((message, ...args) => {
     const formattedMessage = u.sprintf(message, ...args)
@@ -228,6 +232,8 @@ up.migrate = (function() {
 
     return transformed
   }
+
+  up.on('up:framework:reset', reset)
 
   return {
     deprecated,
