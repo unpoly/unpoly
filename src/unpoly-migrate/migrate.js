@@ -9,25 +9,6 @@ up.migrate = (function() {
     logLevel: 'warn'
   }))
 
-  // function getPath(object, path) {
-  //   for (let leg in path.split('.')) {
-  //     object = object[leg]
-  //   }
-  //   return object
-  // }
-  //
-  // function setPath(object, path, newValue) {
-  //   let legs = path.split('.')
-  //   u.each(legs, function(leg, i) {
-  //     if (i === legs.length - 1) {
-  //       object[leg] = newValue
-  //     } else {
-  //       object = object[leg]
-  //     }
-  //   })
-  //   return newValue
-  // }
-
   function renamedProperty(object, oldKey, newKey, warning) {
     // We memoize the warning to prevent infinite recursion. The `found in %o` will access the getter
     // to print the object, which will call the warning, which will access the getter, etc.
