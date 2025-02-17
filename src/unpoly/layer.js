@@ -1209,7 +1209,9 @@ up.layer = (function() {
 
   @function up.layer.accept
   @param {any} [value]
+    @like up.Layer#accept
   @param {Object} [options]
+    See [options for `up.Layer#accept()`](/up.Layer.prototype.accept#parameters).
   @stable
   */
 
@@ -1376,18 +1378,16 @@ up.layer = (function() {
   See `up.Layer#on()` for more documentation.
 
   @function up.layer.on
-  @param {string|Array<string>} types
-    The event types to bind to.
-
-    Multiple event types may be passed as either a space-separated string (`'foo bar'`), a comma-separated string (`'foo, bar'`)
-    or as an array of types (`['foo', 'bar']`).
-  @param {string|Function(): string} [selector]
-    The selector of an element on which the event must be triggered.
+  @param types
+    @like up.on
+  @param selector
+    @like up.on
   @param {Object} [options]
-  @param {Function(event, [element], [data])} listener
-    The listener function that should be called.
-  @return {Function()}
-    A function that unbinds the event listeners when called.
+    See [options for `up.on()`](/up.on).
+  @param listener
+    @like up.on
+  @return
+    @like up.on
   @stable
   */
 
@@ -1398,10 +1398,10 @@ up.layer = (function() {
   See `up.Layer#off()` for more documentation.
 
   @function up.layer.off
-  @param {string} events
-  @param {string|Function(): string} [selector]
-  @param {Function(event, [element], [data])} listener
-    The listener function to unbind.
+  @param types
+    @like up.off
+  @param listener
+    @like up.off
   @stable
   */
 

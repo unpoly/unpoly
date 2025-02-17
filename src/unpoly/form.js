@@ -262,13 +262,13 @@ up.form = (function() {
     Unpoly will search its ancestors for the [closest](/up.fragment.closest) form.
 
   @param {Object} [options]
-    [Render options](/up.render#parameters) that should be used for submitting the form.
+    [Render options](/up.render#parameters) to apply when submitting the form.
+    All [options for `up.render()`](/up.render#parameters) can be used.
 
     Unpoly will parse render options from the given form's attributes
     like `[up-target]` or `[up-transition]`. See `[up-submit]` for a list
-    of supported attributes.
-
-    You may pass this additional `options` object to [supplement or override](/attributes-and-options#options)
+    of supported attributes. You may pass this additional `options` object
+    to [supplement or override](/attributes-and-options#options)
     options parsed from the form attributes.
 
   @param {boolean} [options.navigate=true]
@@ -276,17 +276,21 @@ up.form = (function() {
 
     Setting this to `false` will disable most defaults.
 
+  @param options.layer
+    @like up.render
+
+  @param options.fail
+    @like up.render
+
   @param {string|Element} [options.failTarget]
     The [target selector](/targeting-fragments) to update when the server responds with an error code.
 
-    Defaults to the form element itself.
+    Defaults to a selector [derived](/target-derivation) from the submitting `<form>` element.
 
     @see failed-responses
 
-  @param {boolean|string|Element|Array} [options.disable]
-    [Disables form controls](/disabling-forms) while the form is submitting.
-
-    The values of disabled fields will still be included in the submitted form params.
+  @param [options.history='auto']
+    @like up.render
 
   @param {Element} [options.origin]
     The element that triggered the form submission.
@@ -298,17 +302,58 @@ up.form = (function() {
     - The first submit button
     - The `<form>` element
 
-  @param {Object|up.Params|FormData|string|Array} [options.params]
-    Additional [Form parameters](/up.Params) that should be sent as the request's
-    [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
+  @param options.params
+    Additional [Form parameters](/up.Params) that should be sent as the request payload.
 
-    The given value will be added to params parsed from the form's input field.
+    The given value will be added to params parsed from the form's input fields.
+
+    @like up.render
+
+  @param options.headers
+    @like up.render
 
   @param {Element|false} [options.submitButton]
     The submit button used to submit the form.
 
-    By default the form's first submit button will be assumed.
+    If the button has a `[name]` and `[value]` attribute, it will be added to the [submitted params](#optioms.params).
+
+    By default, the form's first submit button will be assumed.
     Pass `{ submitButton: false }` to not assume any submit button.
+
+  @param [options.cache='auto']
+    @like up.render
+
+  @param options.expireCache
+     Whether existing [cache](/caching) entries will be [expired](/caching#expiration) with this request.
+
+     By [default](/up.network.config#config.expireCache) submitting a `POST` form
+     will expire (but not evict) the entire cache.
+
+     @like up.render
+
+  @param [options.abort='target']
+    @like up.render
+
+  @param options.timeout
+    @like up.render
+
+  @param options.transition
+    @like up.render
+
+  @param [options.scroll='auto']
+    @like up.render
+
+  @param [options.focus='auto']
+    @like up.render
+
+  @param options.disable
+    @like up.render
+
+  @param options.placeholder
+    @like up.render
+
+  @param options.preview
+    @like up.render
 
   @return {up.RenderJob}
     A promise that fulfills with an `up.RenderResult`
@@ -807,36 +852,29 @@ up.form = (function() {
   @param {string|Element|jQuery} target
     The field or form to watch.
 
-  @param {string|Array<string>} [options.event='change']
-    The event types to observe.
+  @param options.event
+    @like up.watch
 
-    See [which events to watch](/watch-options#events).
+  @param options.delay
+    @like up.watch
 
-  @param {number} [options.delay]
-    The number of milliseconds to wait between an observed event and validating.
+  @param options.disable
+    @like up.render
 
-    See [debouncing callbacks](/watch-options#debouncing).
+  @param options.placeholder
+    @like up.render
 
-  @param {boolean|string|Element|Array} [options.disable]
-    Disables fields while waiting for the server response.
+  @param options.preview
+    @like up.render
 
-    See [disabling fields while working](/watch-options#disabling).
+  @param options.feedback
+    @like up.render
 
-  @param {string|Element|List<Node>} [options.placeholder]
-    A [placeholder](/placeholders) to show within the targeted fragment while it is loading.
+  @param options.params
+    @like up.submit
 
-    See [showing loading state while working](/watch-options#loading-state).
-
-    @experimental
-
-  @param {string|Function(up.Preview)|Array} [options.preview]
-    One or more [previews](/previews) that temporarily change the page
-    while the targeted fragment is loading.
-
-    See [showing loading state while working](/watch-options#loading-state).
-
-  @param {boolean} [options.feedback=true]
-    Whether to show [feedback classes](/feedback-classes) while waiting for the server response.
+  @param options.headers
+    @like up.render
 
   @param {Object} [options]
     Additional [render options](/up.render#parameters) to use when the form is submitted.
@@ -984,7 +1022,7 @@ up.form = (function() {
   You may combine `[up-validate]` and `up.validate()` within the same form. Their updates
   will be [batched together](#batching) to prevent race conditions.
 
-  ### Controlling what is updated
+  ## Controlling what is updated
 
   `up.validate()` always submits the entire form with its current field values to the form's
   `[action]` path. Typically only a fragment of the form is updated with the response.
@@ -1014,7 +1052,7 @@ up.form = (function() {
   up.validate('form', { disable: true })
   ```
 
-  ### Multiple validations are batched together {#batching}
+  ## Multiple validations are batched together {#batching}
 
   In order to prevent race conditions, multiple calls of `up.validate()` within the same
   [task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/) are consolidated into a single request.
@@ -1066,62 +1104,40 @@ up.form = (function() {
     The names of all fields contained within the origin will be passed as an `X-Up-Validate` request header.
 
   @param {string|Array<string>} [options.event='change']
-    The event types to observe.
+    @like up.watch
 
-    See [which events to watch](/watch-options#events).
+  @param options.delay
+    @like up.watch
 
-  @param {number} [options.delay]
-    The number of milliseconds to wait between an observed event and validating.
+  @param options.data
+    @like up.render
 
-    See [debouncing callbacks](/watch-options#debouncing).
+  @param options.keepData
+    @like up.reload
 
-  @param {Object} [options.data]
-    Overrides properties from the new fragment's `[up-data]`
-    with the given [data object](/data).
+  @param options.disable
+    @like up.render
 
-    To assign data the validating element must have a [derivable target selector](/target-derivation).
+  @param options.placeholder
+    @like up.render
 
-  @param {boolean} [options.keepData]
-    [Preserve](/data#preserving) the reloaded fragment's [data object](/data).
+  @param options.preview
+    @like up.render
 
-    Properties from the new fragment's `[up-data]` are overridden with the old fragment's `[up-data]`.
+  @param options.params
+    @like up.render
 
-  @param {boolean|string|Element|Array} [options.disable]
-    Disables fields while waiting for the server response.
+  @param options.headers
+    @like up.render
 
-    See [disabling fields while working](/watch-options#disabling).
+  @param options.scroll
+    @like up.render
 
-  @param {string|Element|List<Node>} [options.placeholder]
-    A [placeholder](/placeholders) to show within the targeted fragment while it is loading.
+  @param options.focus
+    @like up.render
 
-    @experimental
-
-  @param {string|Function(up.Preview)|Array} [options.preview]
-    One or more [previews](/previews) that temporarily change the page
-    while the targeted fragment is loading.
-
-  @param {boolean} [options.feedback=true]
-    Whether to show [feedback classes](/feedback-classes) while waiting for the server response.
-
-  @param {Object} [options]
-    Additional [render options](/up.render#parameters) to use when re-rendering the targeted
-    fragment.
-
-    Note that validation requests may be [batched together](/up.validate#batching).
-    In this case Unpoly will try to merge render options where possible (e.g. `{ headers }`).
-    When a render option cannot be merged (e.g. `{ scroll }`),
-    the option from the last validation in the batch will be used.
-
-  @return {up.RenderJob}
-    A promise that fulfills when the server-side validation is received
-    and the form was updated.
-
-    The promise rejects when one of the following conditions occur:
-
-    - the form element was [aborted](/aborting-requests)
-    - the server sends an error status
-    - there is a [network issue](/network-issues)
-    - [targets](/targeting-fragments) could not be matched
+  @return
+    @like up.render
 
   @stable
   */

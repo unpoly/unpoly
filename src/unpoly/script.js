@@ -327,14 +327,15 @@ up.script = (function() {
   ```
 
   @function up.macro
-  @param {string} selector
-    The selector to match.
+
+  @param selector
+    @like up.compiler
+
   @param {Object} options
     See options for [`up.compiler()`](/up.compiler).
-  @param {Function(element, data)} macro
-    The function to call when a matching element is inserted.
 
-    See [`up.compiler()`](/up.compiler#parameters) for details.
+  @param {Function(element, data)} macro
+    @like up.compiler/compiler
   @stable
   */
   function registerMacro(...args) {

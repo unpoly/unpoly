@@ -236,12 +236,16 @@ up.event = (function() {
 
   @function up.off
   @param {Element|jQuery} [element=document]
-  @param {string|Function(): string} events
-  @param {string} [selector]
+    The element from which to unbind the listener.
+  @param {string|Function(): string} types
+    The event types to unbind.
+
+    Multiple event types may be passed as either a space-separated string (`'foo bar'`), a comma-separated string (`'foo, bar'`)
+    or as an array of types (`['foo', 'bar']`).
   @param {Function(event, [element], [data])} listener
     The listener function to unbind.
 
-    Note that you must pass a reference to the same function reference
+    You must pass a reference to the same function reference
     that was passed to `up.on()` earlier.
   @stable
   */

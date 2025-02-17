@@ -49,7 +49,7 @@ In this layout rendering with `{ abort: 'target' }` has the following effect:
 - Rendering `#main` will abort an earlier request targeting `#box`.
 - Rendering `#box` will *not* abort an earlier request targeting `#main`.
 
-## Preventing requests from being aborted
+## Preventing requests from being aborted {#preventing}
 
 In some cases you may want protect a request from being aborted through `{ abort }`.\
 You may do so by passing an `{ abortable: false }` option.

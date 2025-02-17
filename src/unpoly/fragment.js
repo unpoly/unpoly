@@ -611,9 +611,7 @@ up.fragment = (function() {
   @param {Object} [options.headers={}]
     An object with additional request headers.
 
-    Unpoly will by default send a number of custom request headers.
-    E.g. the `X-Up-Target` header includes the [targeted](/targeting-fragments) CSS selector.
-    See `up.protocol` for details.
+    Unpoly will always add some custom headers by default. See `up.protocol`.
 
   @param {string|Element|List<Node>} [options.content]
     The new [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML)
@@ -662,8 +660,7 @@ up.fragment = (function() {
   @param {boolean|string} [options.history]
     Whether the browser URL, window title and meta tags will be [updated](/updating-history).
 
-    If set to `true`, the history will always be updated, using history
-    the server response, or from given `{ title }` and `{ location }` options.
+    If set to `true`, the history will always be updated.
 
     If set to `'auto'` history will be updated if the `{ target }` matches
     a selector in `up.fragment.config.autoHistoryTargets`. By default this contains all
@@ -774,13 +771,13 @@ up.fragment = (function() {
   @param {boolean|string|Function(request): boolean} [options.abort='target']
     Whether to abort existing requests before rendering.
 
-    See [aborting requests](/aborting-requests) for details and a list of options.
+    See [aborting requests](/aborting-requests) for a list of allowed values.
 
   @param {boolean} [options.abortable=true]
-    Whether this request may be aborted by other requests [targeting](/targeting-fragments)
+    Whether the request may be aborted by other requests [targeting](/targeting-fragments)
     the same fragments or layer.
 
-    See [aborting requests](/aborting-requests) for details.
+    See [Preventing a request from being aborted](/aborting-requests#preventing).
 
   @param {boolean} [options.background=false]
     Whether this request will load in the background.
@@ -831,7 +828,7 @@ up.fragment = (function() {
   @param {boolean|string|Element|Function} [options.scroll=false]
     How to scroll after the new fragment was rendered.
 
-    See [scrolling](/scrolling) for a list of allowed values.
+    See [Scrolling](/scrolling) for a list of allowed values.
 
   @param {string} [options.scrollBehavior='instant']
     Whether to [animate the scroll motion](/scroll-tuning#animating-the-scroll-motion)
@@ -875,20 +872,13 @@ up.fragment = (function() {
     If the user does not confirm the render promise will reject and no fragments will be updated.
 
   @param {boolean|string|Element|Array} [options.disable]
-    [Disables form controls](/disabling-forms) while the form is submitting.
+    [Disables form controls](/disabling-forms) while waiting for the server response.
 
   @param {string|Element|List<Node>} [options.placeholder]
     A [placeholder](/placeholders) to show within the targeted fragment while new content is loading.
 
     Existing children of the targeted fragment [will be hidden](/placeholders#basic-example) during the request.
     When the request ends for any reason, all changes will be reverted.
-
-    The placeholder content can be provided in various forms:
-
-    - A string of HTML.
-    - A [template selector](/placeholders#from-template), optionally with [variables](/placeholders#dynamic-templates).
-    - An `Element` object.
-    - A mixed array of `Text` or `Element` objects.
 
     @experimental
 
@@ -907,7 +897,7 @@ up.fragment = (function() {
 
   @param {boolean} [options.feedback=true]
     Whether to set [feedback classes](/feedback-classes)
-    while loading content.
+    while waiting for the server response.
 
   @param {Function(Event)} [options.onLoaded]
     A callback that will be run when the server responds with new HTML,
@@ -917,9 +907,8 @@ up.fragment = (function() {
 
     This callback will also run for [failed responses](/failed-responses).
 
-  @param {Object} [options.data]
-    Overrides properties from the new fragment's `[up-data]`
-    with the given [data object](/data).
+  @param options.data
+    @like up.hello
 
   @param {Function(up.RenderResult)} [options.onRendered]
     A function to call when Unpoly has updated fragments.
@@ -975,10 +964,15 @@ up.fragment = (function() {
   @return {up.RenderJob}
     A promise that fulfills with an `up.RenderResult` once the page has been updated.
 
-    If the update is animated, the promise will be resolved *before* the existing element was
-    removed from the DOM tree. The old element will be marked with the `.up-destroying` class
-    and removed once the animation finishes. To run code after the old element was removed,
-    pass an `{ onFinished }` callback.
+    The promise rejects when one of the following conditions occur:
+
+    - the form element was [aborted](/aborting-requests)
+    - the server sends an error status
+    - there is a [network issue](/network-issues)
+    - [targets](/targeting-fragments) could not be matched
+
+    See [Render lifecycle hooks](/render-lifecycle) for more information about handling
+    errors, or running code after rendering.
 
   @stable
   */
@@ -1961,7 +1955,7 @@ up.fragment = (function() {
     with the given [data object](/data).
 
   @param {boolean} [options.keepData]
-    [Preserve](/data#preserving) the reloaded fragment's [data object](/data).
+    Whether to [preserve](/data#preserving) the fragment's [data object](/data) throughout the update.
 
     Properties from the new fragment's `[up-data]`  are overridden with the old fragment's `[up-data]`.
 

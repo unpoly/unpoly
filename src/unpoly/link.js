@@ -276,25 +276,78 @@ up.link = (function() {
     The link to follow.
 
   @param {Object} [options]
-    [Render options](/up.render#parameters) that should be used for following the link.
+    [Render options](/up.render#parameters) to apply when following this link.
+    All [options for `up.render()`](/up.render#parameters) can be used.
 
     Unpoly will parse render options from the given link's attributes,
     like `[up-target]` or `[up-transition]`. See `[up-follow]` for a list
-    of supported attributes.
-
-    You may pass this additional `options` object to [supplement or override](/attributes-and-options#options)
+    of supported attributes. You may pass this additional `options` object to
+    [supplement or override](/attributes-and-options#options)
     options parsed from the link attributes.
 
-  @param {boolean} [options.navigate=true]
-    Whether this fragment update is considered [navigation](/navigation).
+  @param [options.navigate=true]
+    @like up.render
 
-    Setting this to `false` will disable most defaults, causing
-    Unpoly to render a fragment without side-effects like [updating history](/updating-history)
-    or [scrolling](/scrolling).
+  @param options.layer
+    @like up.render
 
-  @return {up.RenderJob}
-    A promise that fulfills with an `up.RenderResult` once the link destination
-    has been loaded and rendered.
+  @param options.fail
+    @like up.render
+
+  @param options.failTarget
+    @like up.render
+
+  @param [options.history='auto']
+    @like up.render
+
+  @param {Element} [options.origin=link]
+    The element that triggered the link activation.
+
+    Defaults to the link element.
+
+  @param options.params
+    Additional [Form parameters](/up.Params) that should be sent as the request's
+    [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
+
+    The given value will be appended to a query string found in the link's `[href]` attribute.
+
+    @like up.render
+
+  @param [options.cache='auto']
+    @like up.render
+
+  @param [options.revalidate='auto']
+    @like up.render
+
+  @param options.headers
+    @like up.render
+
+  @param [options.abort='target']
+    @like up.render
+
+  @param options.timeout
+    @like up.render
+
+  @param options.transition
+    @like up.render
+
+  @param [options.scroll='auto']
+    @like up.render
+
+  @param [options.focus='auto']
+    @like up.render
+
+  @param options.disable
+    @like up.render
+
+  @param options.placeholder
+    @like up.render
+
+  @param options.preview
+    @like up.render
+
+  @return
+    @like up.render
 
   @stable
   */
@@ -351,8 +404,9 @@ up.link = (function() {
   @param {Object} [options]
     Additional options for following the link.
 
-    Values from these options will override any attributes set on the given link element.
+    Values from this object will override any attributes set on the link element.
   @return {Object}
+    An object of [render options](/up.render#parameters).
   @stable
   */
   function followOptions(link, options, parserOptions) {
@@ -488,7 +542,7 @@ up.link = (function() {
   */
 
   /*-
-  [Preloads](/preloading) the given link.
+  [Preloads](/preloading) a `GET` link.
 
   When the link is clicked later, the response will already be [cached](/caching),
   making the interaction feel instant.
@@ -498,19 +552,23 @@ up.link = (function() {
   [accessible while offline](/network-issues#offline-cache).
 
   @function up.link.preload
+
   @param {string|Element|jQuery} link
     The element or selector whose destination should be preloaded.
-  @param {Object} options
-    See options for `up.follow()`.
-  @param {boolean} [options.abortable=false]
-    Whether the preload request may be aborted when the user [navigates](/navigation)
-    or when `up.fragment.abort()` is called.
 
-    @experimental
+  @param {Object} [options]
+    [Render options](/up.render#parameters) to apply when preloading this link.
+
+    Most [options for `up.follow()`](/up.follow#parameters) can be used,
+    but no elements will be changed while preloading.
+
+  @param {boolean} [options.abortable=false]
+    @like up.render
+
   @return {Promise}
     A promise that will be fulfilled when the request was loaded and cached.
 
-    When the link cannot be preloaded, the promise rejects with an `up.AbortError`.
+    When the link cannot be preloaded, the promise rejects with an error.
   @stable
   */
   function preload(link, options) {
@@ -529,9 +587,9 @@ up.link = (function() {
       abortable: false,
       background: true,
       cache: true,
+      ...options,
       ...up.RenderOptions.NO_INPUT_INTERFERENCE,
       ...up.RenderOptions.NO_PREVIEWS,
-      ...options,
       guardEvent,
       preload: true, // hint to up.Change.FromURL to stop execution after sending the request
     })
@@ -627,6 +685,8 @@ up.link = (function() {
   @function up.link.isFollowable
   @param {Element|jQuery|string} link
     The link to check.
+  @return {boolean}
+    Whether Unpoly will handle the given link.
   @stable
   */
   function isFollowable(link) {
