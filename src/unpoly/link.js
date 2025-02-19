@@ -288,13 +288,28 @@ up.link = (function() {
   @param [options.navigate=true]
     @like up.render
 
-  @param options.layer
-    @like up.render
+  @param {string|Element|jQuery} [options.target]
+    The [target selector](/targeting-fragments) to update.
+
+    Defaults to the `[up-target]` attribute on the link.
+    If neither `{ target }` option nor `[up-target]` is given, a [main target](/main) will be rendered.
+
+    You may also pass an `Element` value, in which case a selector
+    will be [derived](/target-derivation). A passed element will also be used as [`{ origin }`](#options.origin) for the fragment update.
+
+  @param [options.fallback=':main']
+    The selector to use if no `{ target }` is given.
+
+    The fallback is also used when the given target cannot be matched
+    in either page or response.
 
   @param options.fail
     @like up.render
 
   @param options.failTarget
+    @like up.render
+
+  @param options.layer
     @like up.render
 
   @param [options.history='auto']
@@ -344,6 +359,27 @@ up.link = (function() {
     @like up.render
 
   @param options.preview
+    @like up.render
+
+  @param options.onLoaded
+    @like up.render
+
+  @param options.onRendered
+    @like up.render
+
+  @param options.onFinished
+    @like up.render
+
+  @param options.onOffline
+    @like up.render
+
+  @param options.onError
+    @like up.render
+
+  @param options.keep
+    @like up.render
+
+  @param options.hungry
     @like up.render
 
   @return

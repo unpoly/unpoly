@@ -45,7 +45,6 @@ The following default options will be used when navigating:
 | `{ fallback: ':main' }`  | Render a [main target](/up-main) if response doesn't contain the given target             |
 | `{ cache: 'auto' }`      | [Cache responses](/caching)                                                               |
 | `{ revalidate: 'auto' }` | [Cache responses](/caching)                                                               |
-| `{ feedback: true }`     | Set `.up-active` and [`.up-loading`](/up-loading) classes while waiting for the server    |
 | `{ focus: 'auto' }`      | [Focus](/focus) the new fragment ([read more](/up.fragment.config#config.autoFocus))      |
 | `{ peel: true }`         | Close overlays when targeting a layer below                                               |
 

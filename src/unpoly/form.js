@@ -276,8 +276,17 @@ up.form = (function() {
 
     Setting this to `false` will disable most defaults.
 
-  @param options.layer
-    @like up.render
+  @param {string|Element|jQuery} [options.target]
+    The [target selector](/targeting-fragments) to update.
+
+    Defaults to the `[up-target]` attribute on the form element.
+    If neither `{ target }` option nor `[up-target]` is given, a [main target](/main) will be rendered.
+
+    You may also pass an `Element` value, in which case a selector
+    will be [derived](/target-derivation). A passed element will also be used as [`{ origin }`](#options.origin) for the fragment update.
+
+  @param options.fallback
+    @like up.follow
 
   @param options.fail
     @like up.render
@@ -288,6 +297,9 @@ up.form = (function() {
     Defaults to a selector [derived](/target-derivation) from the submitting `<form>` element.
 
     @see failed-responses
+
+  @param options.layer
+    @like up.render
 
   @param [options.history='auto']
     @like up.render
@@ -353,6 +365,27 @@ up.form = (function() {
     @like up.render
 
   @param options.preview
+    @like up.render
+
+  @param options.onLoaded
+    @like up.render
+
+  @param options.onRendered
+    @like up.render
+
+  @param options.onFinished
+    @like up.render
+
+  @param options.onOffline
+    @like up.render
+
+  @param options.onError
+    @like up.render
+
+  @param options.keep
+    @like up.render
+
+  @param options.hungry
     @like up.render
 
   @return {up.RenderJob}

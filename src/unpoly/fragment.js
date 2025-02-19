@@ -547,17 +547,14 @@ up.fragment = (function() {
   @param {string|Element|jQuery|Array<string>} [target]
     The [target selector](/targeting-fragments) to update.
 
-    If omitted a [main target](/up-main) will be rendered.
-
-    You may also pass a DOM element or jQuery element here, in which case a selector
-    will be [derived](/target-derivation).
-    The given element will also be used as [`{ origin }`](#options.origin) for the fragment update.
+    You may also pass an `Element` value, in which case a selector
+    will be [derived](/target-derivation). A passed element will also be used as [`{ origin }`](#options.origin) for the fragment update.
 
     You may also pass an array of selector alternatives. The first selector
     matching in both old and new content will be used.
 
     Instead of passing the target as the first argument, you may also pass it as
-    a [`{ target }`](#options.target) option..
+    a [`{ target }`](#options.target) option.
 
   @param {string|Element|jQuery|Array<string>} [options.target]
     The [target selector](/targeting-fragments) to update after a successful response.
