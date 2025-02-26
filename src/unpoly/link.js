@@ -272,115 +272,64 @@ up.link = (function() {
 
   @function up.follow
 
-  @param {Element|jQuery|string} link
-    The link to follow.
+  @section General
 
-  @param {Object} [options]
-    [Render options](/up.render#parameters) to apply when following this link.
-    All [options for `up.render()`](/up.render#parameters) can be used.
+    @param {Element|jQuery|string} link
+      The link to follow.
 
-    Unpoly will parse render options from the given link's attributes,
-    like `[up-target]` or `[up-transition]`. See `[up-follow]` for a list
-    of supported attributes. You may pass this additional `options` object to
-    [supplement or override](/attributes-and-options#options)
-    options parsed from the link attributes.
+    @param {Object} [options]
+      [Render options](/up.render#parameters) that should be used for following the link.
 
-  @param [options.navigate=true]
-    @like up.render
+      Unpoly will parse render options from the given link's attributes.
+      E.g. the `[up-target]` attribute will be parsed into a `{ target }` option.
+      See `[up-follow]` for a list of supported attributes.
 
-  @param {string|Element|jQuery} [options.target]
-    The [target selector](/targeting-fragments) to update.
+      You may pass this additional `options` object to
+      [supplement or override](/attributes-and-options#options)
+      options parsed from the link attributes.
 
-    Defaults to the `[up-target]` attribute on the link.
-    If neither `{ target }` option nor `[up-target]` is given, a [main target](/main) will be rendered.
+  @section Targeting
+    @include render-options/targeting
 
-    You may also pass an `Element` value, in which case a selector
-    will be [derived](/target-derivation). A passed element will also be used as [`{ origin }`](#options.origin) for the fragment update.
+  @section Navigation
+    @param {boolean} [options.navigate=true]
+      @like up.render
 
-  @param [options.fallback=':main']
-    The selector to use if no `{ target }` is given.
+  @section Request
+    @include render-options/request
 
-    The fallback is also used when the given target cannot be matched
-    in either page or response.
+  @section Local content
+    @include render-options/local-content
 
-  @param options.fail
-    @like up.render
+  @section Layer
+    @include render-options/layer
 
-  @param options.failTarget
-    @like up.render
+  @section History
+    @include render-options/history
 
-  @param options.layer
-    @like up.render
+  @section Animation
+    @include render-options/motion
 
-  @param [options.history='auto']
-    @like up.render
+  @section Caching
+    @include render-options/caching
 
-  @param {Element} [options.origin=link]
-    The element that triggered the link activation.
+  @section Scrolling
+    @include render-options/scrolling
 
-    Defaults to the link element.
+  @section Focus
+    @include render-options/focus
 
-  @param options.params
-    Additional [Form parameters](/up.Params) that should be sent as the request's
-    [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
+  @section Loading state
+    @include render-options/loading-state
 
-    The given value will be appended to a query string found in the link's `[href]` attribute.
+  @section Failed responses
+    @include render-options/failed-responses
 
-    @like up.render
+  @section Client state
+    @include render-options/client-state
 
-  @param [options.cache='auto']
-    @like up.render
-
-  @param [options.revalidate='auto']
-    @like up.render
-
-  @param options.headers
-    @like up.render
-
-  @param [options.abort='target']
-    @like up.render
-
-  @param options.timeout
-    @like up.render
-
-  @param options.transition
-    @like up.render
-
-  @param [options.scroll='auto']
-    @like up.render
-
-  @param [options.focus='auto']
-    @like up.render
-
-  @param options.disable
-    @like up.render
-
-  @param options.placeholder
-    @like up.render
-
-  @param options.preview
-    @like up.render
-
-  @param options.onLoaded
-    @like up.render
-
-  @param options.onRendered
-    @like up.render
-
-  @param options.onFinished
-    @like up.render
-
-  @param options.onOffline
-    @like up.render
-
-  @param options.onError
-    @like up.render
-
-  @param options.keep
-    @like up.render
-
-  @param options.hungry
-    @like up.render
+  @section Lifecycle hooks
+    @include render-options/lifecycle-hooks
 
   @return
     @like up.render
@@ -1251,9 +1200,9 @@ up.link = (function() {
 
     If set to a CSS selector, Unpoly will attempt to replace that selector instead.
 
-    If set to `true` Unpoly will attempt to replace a [main target](/up-main) instead.
+    If set to `true`, Unpoly will attempt to replace a [main target](/up-main) instead.
 
-    If set to `false` Unpoly will immediately reject the render promise.
+    If set to `false`, Unpoly will immediately reject the render promise.
 
   @param [up-match='region']
     Controls which fragment to update when the [`[up-target]`](#up-target) selector yields multiple results.

@@ -58,7 +58,7 @@ up.network = (function() {
 
     Your browser may impose additional concurrency limits  regardless of what you configure here.
 
-  @param {boolean} [config.wrapMethod]
+  @param {boolean} [config.wrapMethod=true]
     Whether to wrap non-standard HTTP methods in a POST request.
 
     If this is set, methods other than GET and POST will be converted to a `POST` request

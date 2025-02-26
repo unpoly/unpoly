@@ -520,7 +520,7 @@ up.fragment = (function() {
   This function has many options to enable scrolling, focus, request cancelation and other side
   effects. These options are all disabled by default and must be opted into one-by-one.
 
-  To enable defaults that a user would expects for navigation (like clicking a link),
+  To enable defaults that a user would expect for navigation (like clicking a link),
   pass [`{ navigate: true }`](#options.navigate) or use `up.navigate()` instead.
 
   ## Hooking into the render process
@@ -534,429 +534,62 @@ up.fragment = (function() {
   Unfinished requests [targeting](/targeting-fragments) the updated fragment or its descendants are [aborted](/aborting-requests).
   You may control this behavior using the [`{ abort }`](#options.abort) option.
 
-  ## Events
-
-  Unpoly will emit events at various stages of the rendering process:
-
-  - `up:fragment:destroyed`
-  - `up:fragment:loaded`
-  - `up:fragment:inserted`
-
   @function up.render
 
-  @param {string|Element|jQuery|Array<string>} [target]
-    The [target selector](/targeting-fragments) to update.
+  @section Targeting
+    @param {string|Element|jQuery|Array<string>} [target]
+      The [target selector](/targeting-fragments) to update.
 
-    You may also pass an `Element` value, in which case a selector
-    will be [derived](/target-derivation). A passed element will also be used as [`{ origin }`](#options.origin) for the fragment update.
+      Instead of passing the target as the first argument, you may also pass it as
+      a `{ target }` option. See [`{ target }`](#options.target) for details.
 
-    You may also pass an array of selector alternatives. The first selector
-    matching in both old and new content will be used.
+    @include render-options/targeting
 
-    Instead of passing the target as the first argument, you may also pass it as
-    a [`{ target }`](#options.target) option.
+  @section Navigation
+    @param {boolean} [options.navigate=false]
+      Whether this fragment update is considered [navigation](/navigation).
 
-  @param {string|Element|jQuery|Array<string>} [options.target]
-    The [target selector](/targeting-fragments) to update after a successful response.
+      Setting this to `true` will enable many side effects, like
+      like [updating history](/updating-history) or [scrolling](/scrolling).
 
-    See documentation for the [`target`](#target) parameter.
+      Setting this to `false` will disable most defaults, allowing you to
+      opt into individual side effects using the options below.
 
-  @param {string|boolean} [options.fallback=false]
-    Specifies behavior if the [target selector](/targeting-fragments) is missing from the current page or the server response.
+  @section Request
+    @include render-options/request
 
-    If set to a CSS selector string, Unpoly will attempt to replace that selector instead.
+  @section Local content
+    @include render-options/local-content
 
-    If set to `true` Unpoly will attempt to replace a [main target](/up-main) instead.
+  @section Layer
+    @include render-options/layer
 
-    If set to `false` Unpoly will immediately reject the render promise.
+  @section History
+    @include render-options/history
 
-    Also see [Dealing with missing targets](/targeting-fragments#missing-targets).
+  @section Animation
+    @include render-options/motion
 
-  @param {string} [options.match='region']
-    Controls which fragment to update when the [`{ target }`](#options.target) selector yields multiple results.
+  @section Caching
+    @include render-options/caching
 
-    When set to `'region'` Unpoly will prefer to update fragments in the
-    [region](/targeting-fragments#ambiguous-selectors) of the [origin element](/up.render#options.origin).
+  @section Scrolling
+    @include render-options/scrolling
 
-    If set to `'first'` Unpoly will always update the first matching fragment.
+  @section Focus
+    @include render-options/focus
 
-    Defaults to `up.fragment.config.match`, which defaults to `'region'`.
+  @section Loading state
+    @include render-options/loading-state
 
-  @param {boolean} [options.navigate=false]
-    Whether this fragment update is considered [navigation](/navigation).
+  @section Failed responses
+    @include render-options/failed-responses
 
-  @param {string} [options.url]
-    The URL to fetch from the server.
+  @section Client state
+    @include render-options/client-state
 
-    See [loading content from a URL](/providing-html#url).
-
-    Instead of making a server request, you may also render an [existing string of HTML](/providing-html#string).
-
-  @param {string} [options.method='get']
-    The HTTP method to use for the request.
-
-    Common values are `'get'`, `'post'`, `'put'`, `'patch'` and `'delete`'.
-    The value is case insensitive.
-
-  @param {Object|up.Params|FormData|string|Array} [options.params]
-    Additional [parameters](/up.Params) that should be sent as the request's
-    [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
-
-    When making a `GET` request to a URL with a query string, the given `{ params }` will be added
-    to the query parameters.
-
-  @param {Object} [options.headers={}]
-    An object with additional request headers.
-
-    Unpoly will always add some custom headers by default. See `up.protocol`.
-
-  @param {string|Element|List<Node>} [options.content]
-    The new [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML)
-    for the targeted fragment.
-
-    See [Updating an element's inner HTML from a string](/providing-html#content).
-
-    Instead of passing an HTML string you can also [refer to a template](/templates).
-
-  @param {string|Element} [options.fragment]
-    A string of HTML comprising only the new fragment's [outer HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/outerHTML).
-
-    When passing `{ fragment }` you can omit the `{ target }` option.
-    The target will be [derived](/target-derivation) from the root element in the given HTML.
-
-    See [Rendering a string that only contains the fragment](/providing-html#fragment).
-
-    Instead of passing an HTML string you can also [refer to a template](/templates).
-
-  @param {string|Element|Document} [options.document]
-    A string of HTML containing the targeted fragment.
-
-    See [Extracting an element's outer HTML from a larger HTML string](/providing-html#document).
-
-    Instead of passing an HTML string you can also [refer to a template](/templates).
-
-  @param {up.Response} [options.response]
-    An `up.Response` object that contains the targeted fragments in its [text](/up.Response.prototype.text).
-
-    See [Rendering an up.Response object](/providing-html#response).
-
-  @param {string|boolean|Function(up.Response): boolean} [options.fail='auto']
-    Whether the server response should be considered failed.
-
-    For failed responses Unpoly will use options prefixed with `fail`, e.g. `{ failTarget }`.
-    See [handling server errors](/failed-responses) for details.
-
-    By [default](/up.network.config#config.autoFail) any HTTP status code other than 2xx or 304 is considered an error code.
-    Pass `{ fail: false }` to handle *any* response as successful, even with a 4xx or 5xx status code.
-
-  @param {string|Element|jQuery|Array<string>} [options.failTarget]
-    The [target selector](/targeting-fragments) to update after a [failed response](/failed-responses).
-
-    See [Rendering failed responses differently](/failed-responses#rendering-failed-responses-differently) for details.
-
-  @param {boolean|string} [options.history]
-    Whether the browser URL, window title and meta tags will be [updated](/updating-history).
-
-    If set to `true`, the history will always be updated.
-
-    If set to `'auto'` history will be updated if the `{ target }` matches
-    a selector in `up.fragment.config.autoHistoryTargets`. By default this contains all
-    [main targets](/main).
-
-    If set to `false`, the history will remain unchanged.
-
-    @see updating-history
-
-  @param {boolean|string} [options.title]
-    An explicit document title to set before rendering.
-
-    By default the title is extracted from the response's `<title>` tag.
-    To prevent the title from being updated, pass `{ title: false }`
-
-    This option is only used when [updating history](#options.history).
-
-  @param {boolean|string} [options.location]
-    An explicit browser location URL to set before rendering.
-
-    By default Unpoly will use the `{ url }` or the final URL after the server redirected.
-    To prevent the URL from being updated, pass `{ location: false }`.
-
-    This option is only used when [updating history](#options.history).
-
-  @param {boolean|Array<Element>} [options.metaTags]
-    Whether to update [meta tags](/up-meta) in the `<head>`.
-
-    By default Unpoly will extract meta tags from the response's `<head>`.
-    To prevent meta tags from being updated, pass `{ metaTags: false }`.
-
-    This option is only used when [updating history](#options.history).
-
-  @param {boolean|Array<Element>} [options.lang]
-    An explicit language code to set as the [`html[lang]`](https://www.tpgi.com/using-the-html-lang-attribute/) attribute.
-
-    By default Unpoly will extract the language from the response and update the `html[lang]`
-    attribute in the current page.
-    To prevent the attrribute from being changed, pass `{ lang: false }`.
-
-    This option is only used when [updating history](#options.history).
-
-  @param {string} [options.transition]
-    The name of an [transition](/up.motion) to morph between the old and few fragment.
-
-    If you are [prepending or appending content](/targeting-fragments#appending-or-prepending),
-    use the `{ animation }` option instead.
-
-  @param {string} [options.animation]
-    The name of an [animation](/up.motion) to reveal a new fragment when
-    [prepending or appending content](/targeting-fragments#appending-or-prepending).
-
-    If you are replacing content (the default), use the `{ transition }` option instead.
-
-  @param {number} [options.duration]
-    The duration of the transition or animation (in millisconds).
-
-  @param {string} [options.easing]
-    The timing function that accelerates the transition or animation.
-
-    See [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
-    for a list of available timing functions.
-
-  @param {boolean} [options.cache]
-    Whether to read from and write to the [cache](/caching).
-
-    With `{ cache: true }` Unpoly will try to re-use a cached response before connecting
-    to the network. To prevent display of stale content, cached responses are
-    [reloaded once rendered](#options.revalidate).
-    If no cached response exists, Unpoly will make a request and cache
-    the server response.
-
-    With `{ cache: 'auto' }` Unpoly will use the cache only if `up.network.config.autoCache`
-    returns `true` for the request.
-
-    With `{ cache: false }` Unpoly will always make a network request.
-
-  @param {boolean} [options.revalidate]
-    Whether to reload the targeted fragment after it was rendered from a cached response.
-
-    With `{ revalidate: 'auto' }` Unpoly will revalidate if the `up.fragment.config.autoRevalidate(response)`
-    returns `true`. By default this configuration will return true for
-    [expired](/up.fragment.config#config.autoRevalidate) responses.
-
-    With `{ revalidate: true }` Unpoly will always revalidate cached content, regardless
-    of its age.
-
-    With `{ revalidate: false }` Unpoly will never revalidate cached content.
-
-  @param {boolean|string} [options.expireCache]
-    Whether existing [cache](/caching) entries will be [expired](/caching#expiration) with this request.
-
-    Defaults to the result of `up.network.config.expireCache`, which
-    defaults to `true` for [unsafe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) requests.
-
-    To only expire some requests, pass an [URL pattern](/url-patterns) that matches requests to uncache.
-    You may also pass a function that accepts an existing `up.Request` and returns a boolean value.
-
-  @param {boolean|string} [options.evictCache]
-    Whether existing [cache](/caching) entries will be [evicted](/caching#eviction) with this request.
-
-    Defaults to the result of `up.network.config.evictCache`, which
-    defaults to `false`.
-
-    To only evict some requests, pass an [URL pattern](/url-patterns) that matches requests to uncache.
-    You may also pass a function that accepts an existing `up.Request` and returns a boolean value.
-
-  @param {boolean|string|Function(request): boolean} [options.abort='target']
-    Whether to abort existing requests before rendering.
-
-    See [aborting requests](/aborting-requests) for a list of allowed values.
-
-  @param {boolean} [options.abortable=true]
-    Whether the request may be aborted by other requests [targeting](/targeting-fragments)
-    the same fragments or layer.
-
-    See [Preventing a request from being aborted](/aborting-requests#preventing).
-
-  @param {boolean} [options.background=false]
-    Whether this request will load in the background.
-
-    Background requests deprioritized over foreground requests.
-    Background requests also won't emit `up:network:late` events and won't trigger
-    the [progress bar](/progress-bar).
-
-  @param {number|boolean} [options.lateDelay]
-    The number of milliseconds after which this request can cause
-    an `up:network:late` event and show the [progress bar](/progress-bar).
-
-    To prevent the event and progress bar, pass `{ lateDelay: false }`.
-
-    Defaults to `up.network.config.lateDelay`.
-
-    @experimental
-
-  @param {number} [options.timeout]
-    The number of milliseconds after which this request fails with a timeout.
-
-    Defaults to `up.network.config.timeout`.
-
-  @param {Element|jQuery} [options.origin]
-    The element that triggered the change.
-
-    When multiple elements in the current page match the `{ target }`,
-    Unpoly will replace an element in the [origin's proximity](/targeting-fragments#ambiguous-selectors).
-
-    The origin's selector will be substituted for `:origin` in a [target selector](/targeting-fragments).
-
-  @param {string|up.Layer|Element} [options.layer='origin current']
-    The [layer](/up.layer) in which to match and render the fragment.
-
-    See [layer option](/layer-option) for a list of allowed values.
-
-    To [open the fragment in a new overlay](/opening-overlays), pass `{ layer: 'new' }`.
-    In this case options for `up.layer.open()` may also be used.
-
-  @param {boolean} [options.peel]
-    Whether to close overlays obstructing the updated layer when the fragment is updated.
-
-    This is only relevant when updating a layer that is not the [frontmost layer](/up.layer.front).
-
-  @param {Object} [options.context]
-    An object that will be merged into the [context](/context) of the current layer once the fragment is rendered.
-
-  @param {boolean|string|Element|Function} [options.scroll=false]
-    How to scroll after the new fragment was rendered.
-
-    See [Scrolling](/scrolling) for a list of allowed values.
-
-  @param {string} [options.scrollBehavior='instant']
-    Whether to [animate the scroll motion](/scroll-tuning#animating-the-scroll-motion)
-    when [prepending or appending](/targeting-fragments#appending-or-prepending) content.
-
-  @param {number} [options.revealSnap]
-    When to [snap to the top](/scroll-tuning#snapping-to-the-screen-edge)
-    when scrolling to an element near the top edge of the viewport's scroll buffer.
-
-  @param {number} [options.revealTop]
-    When to [move a revealed element to the top](/scroll-tuning#moving-revealed-elements-to-the-top)
-    when scrolling to an element.
-
-  @param {string} [options.revealPadding]
-    How much [space to leave to the closest viewport edge](/scroll-tuning#revealing-with-padding)
-    when scrolling to an element.
-
-  @param {string} [options.revealMax]
-    How many pixel lines of [high element to reveal](/scroll-tuning#revealing-with-padding) when scrolling to an element.
-
-  @param {boolean} [options.saveScroll=true]
-    Whether to [save scroll positions](/up.viewport.saveScroll) before updating the fragment.
-
-    Saved scroll positions can later be restored with [`{ scroll: 'restore' }`](/scrolling#restoring-scroll-positions).
-
-  @param {boolean|string|Element|Function} [options.focus='keep']
-    What to focus after the new fragment was rendered.
-
-    See [Controlling focus](/focus) for a list of allowed values.
-
-  @param {boolean} [options.saveFocus=true]
-    Whether to [save focus-related state](/up.viewport.saveFocus) before updating the fragment.
-
-    Saved focus state can later be restored with [`{ focus: 'restore' }`](/focus#restoring-focus).
-
-  @param {string} [options.confirm]
-    A message the user needs to confirm before fragments are updated.
-
-    The message will be shown as a [native browser prompt](https://developer.mozilla.org/en-US/docs/Web/API/Window/prompt).
-
-    If the user does not confirm the render promise will reject and no fragments will be updated.
-
-  @param {boolean|string|Element|Array} [options.disable]
-    [Disables form controls](/disabling-forms) while waiting for the server response.
-
-  @param {string|Element|List<Node>} [options.placeholder]
-    A [placeholder](/placeholders) to show within the targeted fragment while new content is loading.
-
-    Existing children of the targeted fragment [will be hidden](/placeholders#basic-example) during the request.
-    When the request ends for any reason, all changes will be reverted.
-
-    @experimental
-
-  @param {string|Function(up.Preview)|Array} [options.preview]
-    One or more [previews](/previews) that temporarily change the page
-    while new content is loading.
-
-    The preview changes will be reverted automatically
-    when the request ends for [any reason](/previews#ending).
-
-  @param {string|Function(up.Preview)} [options.revalidatePreview]
-    A [preview](/previews) that that runs
-    while [revalidating cached content](/caching#revalidation).
-
-    @experimental
-
-  @param {boolean} [options.feedback=true]
-    Whether to set [feedback classes](/feedback-classes)
-    while waiting for the server response.
-
-  @param {Function(Event)} [options.onLoaded]
-    A callback that will be run when the server responds with new HTML,
-    but before the HTML is rendered.
-
-    The callback argument is a preventable `up:fragment:loaded` event.
-
-    This callback will also run for [failed responses](/failed-responses).
-
-  @param options.data
-    @like up.hello
-
-  @param {Function(up.RenderResult)} [options.onRendered]
-    A function to call when Unpoly has updated fragments.
-
-    This callback may be called zero, one or two times:
-
-    - When the server rendered an [empty response](/skipping-rendering#rendering-nothing), no fragments are updated. `{ onRendered }` is not called.
-    - When the server rendered a matching fragment, it will be updated on the page. `{ onRendered }` is called with the [result](/up.RenderResult).
-    - When [revalidation](/caching#revalidation) renders a second time, `{ onRendered }` is called again with the final result.
-
-    Also see [Running code after rendering](/render-lifecycle#running-code-after-rendering).
-
-  @param {Function(up.RenderResult)} [options.onFinished]
-    A function to call when no further DOM changes will be caused by this render pass.
-
-    In particular:
-
-    - [Animations](/up.motion) have concluded and [transitioned](/up-transition) elements were removed from the DOM tree.
-    - A [cached response](#options.cache) was [revalidated with the server](/caching#revalidation).
-      If the server has responded with new content, this content has also been rendered.
-
-    The callback argument is the last `up.RenderResult` that updated a fragment.
-    If [revalidation](/caching#revalidation) re-rendered the fragment, it is the result from the
-    second render pass. If no revalidation was performed, or if revalidation yielded an [empty response](/caching#when-nothing-changed),
-    it is the result from the initial render pass.
-
-    Also see [Awaiting postprocessing](/render-lifecycle#awaiting-postprocessing).
-
-  @param {Function(Event)} [options.onOffline]
-    A callback that will be run when the fragment could not be loaded
-    due to a [disconnect or timeout](/network-issues).
-
-    The callback argument is a preventable `up:fragment:offline` event.
-
-  @param {Function(Error)} [options.onError]
-    A callback that will be run when any error is thrown during the rendering process.
-
-    The callback is also called when the render pass fails due to [network issues](/network-issues),
-    or [aborts](/aborting-requests).
-
-    Also see [Handling errors](/render-lifecycle#handling-errors).
-
-  @param {boolean} [options.keep=true]
-    Whether [`[up-keep]`](/up-keep) elements will be preserved in the updated fragment.
-
-    @experimental
-
-  @param {boolean} [options.hungry=true]
-    Whether [`[up-hungry]`](/up-hungry) elements outside the updated fragment will also be updated.
-
-    @experimental
+  @section Lifecycle hooks
+    @include render-options/lifecycle-hooks
 
   @return {up.RenderJob}
     A promise that fulfills with an `up.RenderResult` once the page has been updated.
