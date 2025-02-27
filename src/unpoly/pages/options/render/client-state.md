@@ -5,6 +5,6 @@
   with the given [data object](/data).
 
 @param {boolean} [options.keep=true]
-  Whether [`[up-keep]`](/up-keep) elements will be preserved in the updated fragment.
+  Whether [`[up-keep]`](/up-keep) elements will be preserved in the updated fragments.
 
   @experimental

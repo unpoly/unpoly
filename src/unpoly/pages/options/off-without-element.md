@@ -1,3 +1,5 @@
+@partial options/off-without-element
+
 @param {string|Function(): string} types
   The event types to unbind.
 

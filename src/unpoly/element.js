@@ -1349,7 +1349,7 @@ up.element = (function() {
   @function up.element.setStyle
   @param {Element} element
     The element on which to change inline styles.
-  @param {Object} props
+  @param {Object} styles
     One or more CSS properties with kebab-case keys.
   @stable
   */
@@ -1389,7 +1389,7 @@ up.element = (function() {
   @function up.element.setStyleTemp
   @param element
     @like up.element.setStyle
-  @param {Object} styles
+  @param styles
     @like up.element.setStyle
   @return {Function()}
     A function that restores the original inline styles when called.

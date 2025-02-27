@@ -9,13 +9,6 @@
   Existing children of the targeted fragment [will be hidden](/placeholders#basic-example) during the request.
   When the request ends for any reason, all changes will be reverted.
 
-  The placeholder content can be provided in various forms:
-
-  - A string of HTML.
-  - A [template selector](/placeholders#from-template), optionally with [variables](/placeholders#dynamic-templates).
-  - An `Element` object.
-  - A mixed array of `Text` or `Element` objects.
-
   @experimental
 
 @param {string|Function(up.Preview)|Array} [options.preview]

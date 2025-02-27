@@ -172,7 +172,7 @@ up.form = (function() {
 
     If the element is itself a form field, a list of that element is returned.
   @return {List<Element>}
-
+    The field elements within the given element.
   @experimental
   */
   function findFields(root) {
@@ -264,14 +264,11 @@ up.form = (function() {
       Unpoly will search its ancestors for the [closest](/up.fragment.closest) form.
 
     @param {Object} [options]
-      [Render options](/up.render#parameters) that should be used for submitting the form.
+      Additional [render options](/up.render#parameters) that should be used for submitting the form.
 
-      Unpoly will parse render options from the given form's attributes.
-      E.g. the `[up-target]` attribute will be parsed into a `{ target }` option.
-      See `[up-submit]` for a list of supported attributes.
-
+      Unpoly will parse render options from the watched form's attributes.
       You may pass this additional `options` object to [supplement or override](/attributes-and-options#options)
-      options parsed from the form attributes.
+      options parsed from attributes.  See `[up-submit]` for a list of supported attributes.
 
   @section Targeting
     @mix options/render/targeting
@@ -290,37 +287,7 @@ up.form = (function() {
       @param [options.navigate=true]
 
   @section Request
-    @mix options/render/request
-      @param options.url
-        Where to send the form data when the form is submitted.
-
-        Defaults to the form's `[action]` attribute.
-
-      @param options.method
-        The HTTP method to use for the request.
-
-        Defaults to the form's `[method]` attribute.
-
-        The value is case-insensitive.
-
-        You can also use methods that would not be allowed on a `<form>` element,
-        such as `'patch`' or `'delete'`. These will be [wrapped in a POST request](/up.network.config#config.wrapMethod).
-
-      @param options.params
-        Additional [Form parameters](/up.Params) that should be sent as the request's
-        [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
-
-        The given value will be added to params [parsed](/up.Params.fromForm)
-        from the form's input fields.
-
-    @param {Element|false} [options.submitButton]
-      The submit button used to submit the form.
-
-      If the submit button has a `[name]` and `[value]` attribute, it will
-      be included in the request params.
-
-      By default, the form's first submit button will be assumed.
-      Pass `{ submitButton: false }` to not assume any submit button.
+    @mix options/submit/request
 
   @section Layer
     @mix options/render/layer
@@ -341,11 +308,7 @@ up.form = (function() {
     @mix options/render/focus
 
   @section Loading state
-    @mix options/render/loading-state
-      @param options.disable
-        [Disables form controls](/disabling-forms) while the request is loading.
-
-        The values of disabled fields will still be included in the submitted form params.
+    @mix options/submit/loading-state
 
   @section Failed responses
     @mix options/render/failed-responses
@@ -375,7 +338,7 @@ up.form = (function() {
   Parses the [render](/up.render) options that would be used to
   [submit](/up.submit) the given form, but does not render.
 
-  ### Example
+  ## Example
 
   Given a form element:
 
@@ -401,6 +364,7 @@ up.form = (function() {
     Values from these options will override any attributes set on the given form element.
   @function up.form.submitOptions
   @return {Object}
+    The parsed submit options.
   @stable
   */
   function submitOptions(form, options, parserOptions) {
@@ -787,39 +751,41 @@ up.form = (function() {
 
   @function up.watch
 
-  @param {Element|jQuery} element
-    The form field that will be watched.
+  @section Event source
+    @param {Element|jQuery} element
+      The form field that will be watched.
 
-    You can pass a field, a `<form>` or any container that contains form fields.
-    The callback will be run if any of the contained fields change.
+      You can pass a field, a `<form>` or any container that contains form fields.
+      The callback will be run if any of the contained fields change.
 
-  @param {boolean} [options.batch=false]
-    If set to `true`, the `onChange` callback will receive multiple
-    detected changes in a [single diff object as its argument](#batching-changes).
+    @param {string|Array<string>} [options.event='input']
+      The types of event to observe.
 
-    The object's keys are the names of the changed fields.
-    The object's values are the values of the changed fields.
+      See [which events to watch](/watch-options#events).
 
-    @experimental
+    @param {number} [options.delay=0]
+      The number of milliseconds to wait between an observed event and running the callback.
 
-  @param {string|Array<string>} [options.event='input']
-    The types of event to observe.
+      See [debouncing callbacks](/watch-options#debouncing).
 
-    See [which events to watch](/watch-options#events).
+  @section Callback
+    @param {boolean} [options.batch=false]
+      If set to `true`, the callback will receive multiple
+      detected changes in a [single diff object as its argument](#batching-changes).
 
-  @param {number} [options.delay=0]
-    The number of milliseconds to wait between an observed event and running the callback.
+      The object's keys are the names of the changed fields.
+      The object's values are the values of the changed fields.
 
-    See [debouncing callbacks](/watch-options#debouncing).
+      @experimental
 
-  @param {Function(value, name, options): Promise|undefined} callback
-    The callback to run when the field's value changes.
+    @param {Function(value, name, options): Promise} callback
+      The callback to run when the field's value changes.
 
-    The callback is called with [arguments](#callback-arguments) that
-    describe the change.
+      The callback is called with [arguments](#callback-arguments) that
+      describe the change.
 
-    An [async callback function must return a promise](#async-callbacks) that settles when
-    the callback completes.
+      An [async callback function must return a promise](#async-callbacks) that settles when
+      the callback completes.
 
   @return {Function()}
     A destructor function that unsubscribes the watcher when called.
@@ -853,39 +819,51 @@ up.form = (function() {
 
   The unobtrusive variant of this is the `[up-autosubmit]` attribute.
 
+  ## Example
+
+  We have a search form like this:
+
+  ```html
+  <form method="GET" action="/search">
+    <input type="search" name="query">
+    <input type="checkbox" name="archive"> Include archived
+  </form>
+  ```
+
+  To cause the form to automatically submit when either field is changed,
+  call `up.autosubmit()`:
+
+  ```js
+  up.autosubmit(form)
+  ```
+
   @function up.autosubmit
 
-  @param {string|Element|jQuery} target
-    The field or form to watch.
+  @section Event source
+    @param {string|Element|jQuery} element
+      The field or form to watch.
 
-  @param options.event
-    @like up.watch
+    @param options.event
+      @like up.watch
 
-  @param options.delay
-    @like up.watch
+    @param options.delay
+      @like up.watch
 
-  @param options.disable
-    @like up.render
+  @section Render options
+    @param {Object} [options]
+      Additional [render options](/up.render#parameters) to use when the form is submitted.
 
-  @param options.placeholder
-    @like up.render
+      Unpoly will parse render options from the watched form's attributes.
+      You may pass this additional `options` object to [supplement or override](/attributes-and-options#options)
+      options parsed from attributes.  See `[up-submit]` for a list of supported attributes.
 
-  @param options.preview
-    @like up.render
+      Common options are documented below, but all [options for `up.submit()`](/up.submit#parameters) may be used.
 
-  @param options.feedback
-    @like up.render
+  @section Request
+    @include options/submit/request
 
-  @param options.params
-    @like up.submit
-
-  @param options.headers
-    @like up.render
-
-  @param {Object} [options]
-    Additional [render options](/up.render#parameters) to use when the form is submitted.
-
-    See [options for `up.submit()`](/up.submit#parameters).
+  @section Loading state
+    @include options/render/loading-state
 
   @return {Function()}
     A destructor function that stops auto-submitting when called.
@@ -906,7 +884,7 @@ up.form = (function() {
   /*-
   Returns the [form group](/up-form-group) for the given element.
 
-  By default a form group is a `<fieldset>` element or any container with an `[up-form-group]` attribute.
+  By default, a form group is a `<fieldset>` element or any container with an `[up-form-group]` attribute.
   This can be configured in `up.form.config.groupSelectors`.
 
   Form groups may be nested. This function returns the [closest](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest) group around the given element.
@@ -942,7 +920,9 @@ up.form = (function() {
   @return {Element|undefined}
     The closest form group around the given element.
 
-    If no better group can be found, the `form` element is returned.
+    If no better group can be found, the `<form>` element is returned.
+
+    If the element is not within a `<form>`, returns `undefined`.
   @experimental
   */
   function findGroup(field) {
@@ -1089,61 +1069,62 @@ up.form = (function() {
 
   @function up.validate
 
-  @param {string|Element|jQuery} element
-    The field or fragment that should be re-rendered on the server.
+  @section Targeting
+    @param {string|Element|jQuery} element
+      The field or fragment that should be re-rendered on the server.
 
-    See [controlling what is updated](#controlling-what-is-updated).
+      See [controlling what is updated](#controlling-what-is-updated).
 
-  @param {string} [options.target=element]
-    The [target selector](/targeting-fragments) to re-render.
+    @param {string} [options.target=element]
+      The [target selector](/targeting-fragments) to re-render.
 
-    By default the given `element` will be rendered.
-    If `element` is a field, its form group or `[up-validate]` target will be rendered.
+      By default the given `element` will be rendered.
+      If `element` is a field, its form group or `[up-validate]` target will be rendered.
 
-  @param {boolean} [options.formGroup = true]
-    Whether, when a field is given as `element`,
-    the field's closest [form group](/up-form-group) should be targeted.
+    @param {boolean} [options.formGroup = true]
+      Whether, when a field is given as `element`,
+      the field's closest [form group](/up-form-group) should be targeted.
 
-  @param {Element} [options.origin=element]
-    The element or field that caused this validation pass.
+    @param {Element} [options.origin=element]
+      The element or field that caused this validation pass.
 
-    The names of all fields contained within the origin will be passed as an `X-Up-Validate` request header.
+      The names of all fields contained within the origin will be passed as an `X-Up-Validate` request header.
 
-  @param {string|Array<string>} [options.event='change']
-    @like up.watch
+  @section Render options
+    @param {Object} [options]
+      Additional [render options](/up.render#parameters) to use when re-rendering the targeted
+      fragment.
 
-  @param options.delay
-    @like up.watch
+      Common options are documented below, but most [options for `up.submit()`](/up.submit#parameters) may be used.
 
-  @param options.data
-    @like up.render
+      Note that validation requests may be [batched together](/up.validate#batching).
+      In this case Unpoly will try to merge render options where possible (e.g. `{ headers }`).
+      When a render option cannot be merged (e.g. `{ scroll }`),
+      the option from the last validation in the batch will be used.
 
-  @param options.keepData
-    @like up.reload
+  @section Client state
 
-  @param options.disable
-    @like up.render
+    @param options.data
+      @like up.render
 
-  @param options.placeholder
-    @like up.render
+    @param options.keepData
+      @like up.reload
 
-  @param options.preview
-    @like up.render
+    @param options.keep
+      @like up.render
 
-  @param options.params
-    @like up.render
+  @section Request
+    @param options.params
+      @like up.render
 
-  @param options.headers
-    @like up.render
+    @param options.headers
+      @like up.render
 
-  @param options.scroll
-    @like up.render
+  @section Loading state
+    @mix options/submit/loading-state
 
-  @param options.focus
-    @like up.render
-
-  @return
-    @like up.render
+  @return {Promise<up.RenderResult}}
+    A promise that fulfills when the server-side validation is received and the form was updated.
 
   @stable
   */
@@ -1344,10 +1325,10 @@ up.form = (function() {
   }
 
   /*-
-  Returns whether the given form will be [submitted](/up.follow) through Unpoly
+  Returns whether the given form will be [submitted](/up-submit) through Unpoly
   instead of making a full page load.
 
-  By default Unpoly will follow forms if the element has
+  By default, Unpoly will follow forms if the element has
   one of the following attributes:
 
   - [`[up-submit]`](/up-submit)
@@ -1360,6 +1341,8 @@ up.form = (function() {
   @function up.form.isSubmittable
   @param {Element|jQuery|string} form
     The form to check.
+  @return {boolean}
+    Whether the form will be submitted through Unpoly.
   @stable
   */
   function isSubmittable(form) {
@@ -1802,43 +1785,18 @@ up.form = (function() {
 
   @selector [up-validate]
 
-  @param [up-validate]
-    The [target selector](/targeting-fragments) to update with the server response.
+  @section Targeting
+    @param [up-validate]
+      The [target selector](/targeting-fragments) to update with the server response.
 
-    Defaults the closest [form group](/up-form-group) around the validating field.
+      Defaults the closest [form group](/up-form-group) around the validating field.
 
-  @param [up-watch-event='change']
-    The event types to observe.
+  @section Event source
+    @mix attrs/watch/event-source
+      @param [up-watch-event='change']
 
-    See [which events to watch](/watch-options#events).
-
-  @param [up-watch-delay="0"]
-    The number of milliseconds to wait between an observed event and validating.
-
-    See [debouncing callbacks](/watch-options#debouncing).
-
-  @param [up-watch-disable]
-    Whether to [disable fields](/disabling-forms) while validation is running.
-
-    See [disabling fields while working](/watch-options#disabling).
-
-  @param [up-watch-placeholder]
-    A [placeholder](/placeholders) to show within the targeted fragment while it is loading.
-
-    See [showing loading state while working](/watch-options#loading-state).
-
-    @experimental
-
-  @param [up-watch-preview]
-    One or more [previews](/previews) that temporarily change the page
-    while the targeted fragment is loading.
-
-    See [showing loading state while working](/watch-options#loading-state).
-
-    @experimental
-
-  @param [up-watch-feedback='true']
-    Whether to set [feedback classes](/feedback-classes) while validating.
+  @section Loading state
+    @mix attrs/watch/loading-state
 
   @stable
   */
@@ -2101,18 +2059,16 @@ up.form = (function() {
   until the callback concludes and then run it again with the latest field values.
 
   @selector [up-watch]
-  @param up-watch
-    The code to run when any field's value changes.
 
-    See [callback context](#callback-context).
-  @param [up-watch-event='input']
-    The type of event to watch.
+  @section Callback
+    @param up-watch
+      The code to run when any field's value changes.
 
-    See [which events to watch](/watch-options#events).
-  @param [up-watch-delay='0']
-    The number of milliseconds to wait after a change before the code is run.
+      See [callback context](#callback-context).
 
-    See [debouncing callbacks](/watch-options#debouncing).
+  @section Event source
+    @mix attrs/watch/event-source
+
   @stable
   */
 
@@ -2129,7 +2085,7 @@ up.form = (function() {
 
   ```html
   <form method="GET" action="/search">
-    <input type="search" name="query" up-autosubmit>
+    <input type="search" name="query" up-autosubmit> <!-- mark-phrase "up-autosubmit" -->
     <input type="checkbox" name="archive"> Include archived
   </form>
   ```
@@ -2165,41 +2121,11 @@ up.form = (function() {
 
   @selector [up-autosubmit]
 
-  @param [up-watch-event='input']
-    The type of event to watch.
+  @section Event source
+    @mix attrs/watch/event-source
 
-    See [which events to watch](/watch-options#events).
-
-  @param [up-watch-delay=0]
-    The number of milliseconds to wait after a change before submitting the form.
-
-    If the form element is [aborted](/aborting-requests) or
-    destroyed during the delay, the submission is canceled.
-
-    See [debouncing callbacks](/watch-options#debouncing).
-
-  @param [up-watch-disable]
-    Whether to [disable fields](/disabling-forms) while submitting
-
-    See [disabling fields while working](/watch-options#disabling).
-
-  @param [up-watch-placeholder]
-    A [placeholder](/placeholders) to show within the targeted fragment during submission.
-
-    See [showing loading state while working](/watch-options#loading-state).
-
-    @experimental
-
-  @param [up-watch-preview]
-    One or more [previews](/previews) that temporarily change the page
-    during submission.
-
-    See [showing loading state while working](/watch-options#loading-state).
-
-    @experimental
-
-  @param [up-watch-feedback='true']
-    Whether to set [feedback classes](/feedback-classes) during submission.
+  @section Loading state
+    @mix attrs/watch/loading-state
 
   @stable
   */
