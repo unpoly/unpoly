@@ -1,4 +1,4 @@
-@partial render-options/client-state
+@partial options/render/client-state
 
 @param {Object} [options.data]
   Overrides properties from the new fragment's `[up-data]`

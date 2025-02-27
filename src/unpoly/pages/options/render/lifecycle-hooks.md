@@ -1,4 +1,4 @@
-@partial render-options/lifecycle-hooks
+@partial options/render/lifecycle-hooks
 
 @param {string} [options.confirm]
   A message the user needs to confirm before a request is made.

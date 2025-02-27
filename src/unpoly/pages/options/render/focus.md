@@ -1,4 +1,4 @@
-@partial render-options/focus
+@partial options/render/focus
 
 @param {boolean|string|Element|Function} [options.focus]
   What to focus after the new fragment was rendered.

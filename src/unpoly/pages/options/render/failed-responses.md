@@ -1,4 +1,4 @@
-@partial render-options/failed-responses
+@partial options/render/failed-responses
 
 @param {boolean|Function(up.Response): boolean} [options.fail]
   Whether a received server response should be considered failed.

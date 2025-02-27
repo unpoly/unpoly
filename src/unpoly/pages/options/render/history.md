@@ -1,4 +1,4 @@
-@partial render-options/history
+@partial options/render/history
 
 @param {boolean|string} [options.history]
   Whether the browser URL, window title and meta tags will be [updated](/updating-history).

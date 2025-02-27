@@ -1,4 +1,4 @@
-@partial render-options/motion
+@partial options/render/motion
 
 @param {string} [options.transition]
   The name of an [transition](/up.motion) to morph between the old and few fragment.

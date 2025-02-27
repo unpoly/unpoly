@@ -1,4 +1,4 @@
-@partial render-options/caching
+@partial options/render/caching
 
 @param {boolean} [options.cache]
   Whether to read from and write to the [cache](/caching).

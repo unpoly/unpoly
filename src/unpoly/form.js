@@ -274,60 +274,44 @@ up.form = (function() {
       options parsed from the form attributes.
 
   @section Targeting
-    @param options.target
-      @like up.render
+    @mix options/render/targeting
+      @param options.origin
+        The element that triggered the form submission.
 
-    @param options.fallback
-      @like up.render
+        This defaults to the first applicable:
 
-    @param options.match
-      @like up.render
-
-    @param options.origin
-      @like up.render
-
-      The element that triggered the form submission.
-
-      This defaults to the first applicable:
-
-      - An element within the form that was focused when the form was submitted (e.g. when the user presses `Enter` inside a text field)
-      - The [button clicked to submit the form](/up:form:submit#event.submitButton).
-      - The first submit button
-      - The `<form>` element
-
-    @param options.hungry
-      @like up.render
+        - An element within the form that was focused when the form was submitted (e.g. when the user presses `Enter` inside a text field)
+        - The [button clicked to submit the form](/up:form:submit#event.submitButton).
+        - The first submit button
+        - The `<form>` element
 
   @section Navigation
-    @param {boolean} [options.navigate=true]
-      @like up.render
+    @mix options/render/navigation
+      @param [options.navigate=true]
 
   @section Request
-    @param options.url
-      @like up.render
+    @mix options/render/request
+      @param options.url
+        Where to send the form data when the form is submitted.
 
-      The URL to request from the server.
+        Defaults to the form's `[action]` attribute.
 
-      Defaults to the form's `[action]` attribute.
+      @param options.method
+        The HTTP method to use for the request.
 
-    @param options.method
-      @like up.render
+        Defaults to the form's `[method]` attribute.
 
-      The HTTP method to use for the request.
+        The value is case-insensitive.
 
-      Defaults to the form's `[method]` attribute.
+        You can also use methods that would not be allowed on a `<form>` element,
+        such as `'patch`' or `'delete'`. These will be [wrapped in a POST request](/up.network.config#config.wrapMethod).
 
-      The value is case-insensitive.
+      @param options.params
+        Additional [Form parameters](/up.Params) that should be sent as the request's
+        [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
 
-      You can also use methods that would not be allowed on a `<form>` element,
-      such as `'patch`' or `'delete'`. These will be [wrapped in a POST request](/up.network.config#config.wrapMethod).
-
-    @param {Object|up.Params|FormData|string|Array} [options.params]
-      Additional [Form parameters](/up.Params) that should be sent as the request's
-      [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
-
-      The given value will be added to params [parsed](/up.Params.fromForm)
-      from the form's input fields.
+        The given value will be added to params [parsed](/up.Params.fromForm)
+        from the form's input fields.
 
     @param {Element|false} [options.submitButton]
       The submit button used to submit the form.
@@ -338,46 +322,45 @@ up.form = (function() {
       By default, the form's first submit button will be assumed.
       Pass `{ submitButton: false }` to not assume any submit button.
 
-    @include render-options/request-tuning
-
   @section Layer
-    @include render-options/layer
+    @mix options/render/layer
 
   @section History
-    @include render-options/history
+    @mix options/render/history
 
   @section Animation
-    @include render-options/motion
+    @mix options/render/motion
 
   @section Caching
-    @include render-options/caching
+    @mix options/render/caching
 
   @section Scrolling
-    @include render-options/scrolling
+    @mix options/render/scrolling
 
   @section Focus
-    @include render-options/focus
+    @mix options/render/focus
 
   @section Loading state
-    @include render-options/loading-state
+    @mix options/render/loading-state
+      @param options.disable
+        [Disables form controls](/disabling-forms) while the request is loading.
+
+        The values of disabled fields will still be included in the submitted form params.
 
   @section Failed responses
+    @mix options/render/failed-responses
+      @param options.failTarget
+        The [target selector](/targeting-fragments) to update when the server responds with an error code.
 
-    @param options.fail
-      @like up.render
+        By default, failed responses will update the `<form>` element itself.
 
-    @param {string|Element} [options.failTarget]
-      The [target selector](/targeting-fragments) to update when the server responds with an error code.
-
-      By default, failed responses will update the `<form>` element itself.
-
-      @see failed-responses
+        @see failed-responses
 
   @section Client state
-    @include render-options/client-state
+    @mix options/render/client-state
 
   @section Lifecycle hooks
-    @include render-options/lifecycle-hooks
+    @mix options/render/lifecycle-hooks
 
   @return
     @like up.render
@@ -2076,7 +2059,7 @@ up.form = (function() {
     The type of event to watch.
 
     See [which events to watch](/watch-options#events).
-  @param [up-watch-delay=0]
+  @param [up-watch-delay='0']
     The number of milliseconds to wait after a change before the code is run.
 
     See [debouncing callbacks](/watch-options#debouncing).

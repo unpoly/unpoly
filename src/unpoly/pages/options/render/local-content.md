@@ -1,4 +1,4 @@
-@partial render-options/local-content
+@partial options/render/local-content
 
 @param {string|Element|List<Node>} [options.content]
   The new [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML)

@@ -543,53 +543,46 @@ up.fragment = (function() {
       Instead of passing the target as the first argument, you may also pass it as
       a `{ target }` option. See [`{ target }`](#options.target) for details.
 
-    @include render-options/targeting
+    @mix options/render/targeting
 
   @section Navigation
-    @param {boolean} [options.navigate=false]
-      Whether this fragment update is considered [navigation](/navigation).
-
-      Setting this to `true` will enable many side effects, like
-      like [updating history](/updating-history) or [scrolling](/scrolling).
-
-      Setting this to `false` will disable most defaults, allowing you to
-      opt into individual side effects using the options below.
+    @mix options/render/navigation
 
   @section Request
-    @include render-options/request
+    @mix options/render/request
 
   @section Local content
-    @include render-options/local-content
+    @mix options/render/local-content
 
   @section Layer
-    @include render-options/layer
+    @mix options/render/layer
 
   @section History
-    @include render-options/history
+    @mix options/render/history
 
   @section Animation
-    @include render-options/motion
+    @mix options/render/motion
 
   @section Caching
-    @include render-options/caching
+    @mix options/render/caching
 
   @section Scrolling
-    @include render-options/scrolling
+    @mix options/render/scrolling
 
   @section Focus
-    @include render-options/focus
+    @mix options/render/focus
 
   @section Loading state
-    @include render-options/loading-state
+    @mix options/render/loading-state
 
   @section Failed responses
-    @include render-options/failed-responses
+    @mix options/render/failed-responses
 
   @section Client state
-    @include render-options/client-state
+    @mix options/render/client-state
 
   @section Lifecycle hooks
-    @include render-options/lifecycle-hooks
+    @mix options/render/lifecycle-hooks
 
   @return {up.RenderJob}
     A promise that fulfills with an `up.RenderResult` once the page has been updated.

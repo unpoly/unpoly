@@ -1,4 +1,4 @@
-@partial render-options/scrolling
+@partial options/render/scrolling
 
 @param {boolean|string|Element|Function} [options.scroll]
   How to scroll after the new fragment was rendered.

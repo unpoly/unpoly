@@ -1,4 +1,4 @@
-@partial render-options/layer
+@partial options/render/layer
 
 @param {string|up.Layer|Element} [options.layer='origin current']
   The [layer](/up.layer) in which to match and render the fragment.

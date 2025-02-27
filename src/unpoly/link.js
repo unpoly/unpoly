@@ -289,47 +289,47 @@ up.link = (function() {
       options parsed from the link attributes.
 
   @section Targeting
-    @include render-options/targeting
+    @mix options/render/targeting
 
   @section Navigation
-    @param {boolean} [options.navigate=true]
-      @like up.render
+    @mix options/render/navigation
+      @param [options.navigate=true]
 
   @section Request
-    @include render-options/request
+    @mix options/render/request
 
   @section Local content
-    @include render-options/local-content
+    @mix options/render/local-content
 
   @section Layer
-    @include render-options/layer
+    @mix options/render/layer
 
   @section History
-    @include render-options/history
+    @mix options/render/history
 
   @section Animation
-    @include render-options/motion
+    @mix options/render/motion
 
   @section Caching
-    @include render-options/caching
+    @mix options/render/caching
 
   @section Scrolling
-    @include render-options/scrolling
+    @mix options/render/scrolling
 
   @section Focus
-    @include render-options/focus
+    @mix options/render/focus
 
   @section Loading state
-    @include render-options/loading-state
+    @mix options/render/loading-state
 
   @section Failed responses
-    @include render-options/failed-responses
+    @mix options/render/failed-responses
 
   @section Client state
-    @include render-options/client-state
+    @mix options/render/client-state
 
   @section Lifecycle hooks
-    @include render-options/lifecycle-hooks
+    @mix options/render/lifecycle-hooks
 
   @return
     @like up.render

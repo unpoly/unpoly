@@ -1,4 +1,4 @@
-@partial render-options/loading-state
+@partial options/render/loading-state
 
 @param {boolean|string|Element|Array} [options.disable]
   [Disables form controls](/disabling-forms) while the request is loading.

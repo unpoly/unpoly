@@ -1,4 +1,4 @@
-@partial render-options/targeting
+@partial options/render/targeting
 
 @param {string|Element|jQuery|Array<string>} [options.target]
   The [target selector](/targeting-fragments) to update after a successful response.
