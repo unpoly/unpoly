@@ -1173,442 +1173,47 @@ up.link = (function() {
 
   @selector [up-follow]
 
-  @param [up-navigate='true']
-    Whether this fragment update is considered [navigation](/navigation).
+  @section Targeting
+    @mix attrs/follow/targeting
 
-    Setting this to `false` will disable most defaults documented below,
-    causing Unpoly to render a fragment without side-effects like updating history
-    or scrolling.
+  @section Navigation
+    @mix attrs/follow/navigation
 
-  @param [href]
-    The URL to fetch from the server.
+  @section Request
+    @mix attrs/follow/request
 
-    See [loading content from a URL](/providing-html#url).
+  @section Local content
+    @mix attrs/follow/local-content
 
-    To use a different URL when a link is followed through Unpoly (as opposed to a browser's full page load),
-    set an `[up-href]` attribute.
+  @section Layer
+    @mix attrs/follow/layer
 
-    Instead of making a server request, you may also render an [existing string of HTML](/providing-html#string).
+  @section History
+    @mix attrs/follow/history
 
-  @param [up-target=':main']
-    The [target selector](/targeting-fragments) to update after a successful response.
+  @section Animation
+    @mix attrs/follow/motion
 
-    If omitted a [main target](/up-main) will be rendered.
+  @section Caching
+    @mix attrs/follow/caching
 
-  @param [up-fallback='true']
-    Specifies behavior if the [target selector](/up.render#options.target) is missing from the current page or the server response.
+  @section Scrolling
+    @mix attrs/follow/scrolling
 
-    If set to a CSS selector, Unpoly will attempt to replace that selector instead.
+  @section Focus
+    @mix attrs/follow/focus
 
-    If set to `true`, Unpoly will attempt to replace a [main target](/up-main) instead.
+  @section Loading state
+    @mix attrs/follow/loading-state
 
-    If set to `false`, Unpoly will immediately reject the render promise.
+  @section Failed responses
+    @mix attrs/follow/failed-responses
 
-  @param [up-match='region']
-    Controls which fragment to update when the [`[up-target]`](#up-target) selector yields multiple results.
+  @section Client state
+    @mix attrs/follow/client-state
 
-    When set to `'region'` Unpoly will prefer to update fragments in the
-    [region](/targeting-fragments#ambiguous-selectors) of the [origin element](/up.render#options.origin).
-
-    If set to `'first'` Unpoly will always update the first matching fragment.
-
-    Defaults to `up.fragment.config.match`, which defaults to `'region'`.
-
-  @param [up-method='get']
-    The HTTP method to use for the request.
-
-    Common values are `get`, `post`, `put`, `patch` and `delete`. The value is case insensitive.
-
-    The HTTP method may also be passed as an `[data-method]` attribute.
-
-    By default, methods other than `get` or `post` will be converted into a `post` request, and carry
-    their original method as a configurable [`_method` parameter](/up.protocol.config#config.methodParam).
-
-  @param [up-params]
-    A [relaxed JSON](/relaxed-json) object with additional [parameters](/up.Params) that should be sent as the request's
-    [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
-
-    When making a `GET` request to a URL with a query string, the given `{ params }` will be added
-    to the query parameters.
-
-  @param [up-headers]
-    A [relaxed JSON](/relaxed-json) object with additional request headers.
-
-    Unpoly will by default send a number of custom request headers.
-    E.g. the `X-Up-Target` header includes the [target selector](/targeting-fragments).
-    See `up.protocol` for details.
-
-  @param [up-content]
-    The new [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML)
-    for the targeted fragment.
-
-    See [Updating an element's inner HTML from a string](/providing-html#content).
-
-    Instead of passing an HTML string you can also [pass a template selector](/templates),
-    optionally with [variables](/placeholders#dynamic-templates).
-
-  @param [up-fragment]
-    A string of HTML comprising *only* the new fragment's
-    [outer HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/outerHTML).
-
-    With an `[up-fragment]` attribute you can omit the `[up-target]` attribute.
-    The target will be [derived](/target-derivation) from the root element in the given HTML.
-
-    See [Rendering a string that only contains the fragment](/providing-html#fragment).
-
-    Instead of passing an HTML string you can also [pass a template selector](/templates),
-    optionally with [variables](/placeholders#dynamic-templates).
-
-  @param [up-document]
-    A string of HTML containing the targeted fragment.
-
-    See [Extracting an element's outer HTML from a larger HTML string](/providing-html#document).
-
-    Instead of passing an HTML string you can also [pass a template selector](/templates),
-    optionally with [variables](/placeholders#dynamic-templates).
-
-  @param [up-use-data]
-    A [relaxed JSON](/relaxed-json) object that [overrides properties](/data#overriding)
-    from the new fragment's [data](/data).
-
-  @param [up-fail='auto']
-    How to handle [failed server responses](/failed-responses).
-
-    For failed responses Unpoly will use attributes prefixed with `up-fail`, e.g. [`[up-fail-target]`](#up-fail-target).
-    See [handling server errors](/failed-responses) for details.
-
-    By [default](/up.network.config#config.autoFail) any HTTP status code other than 2xx or [304](/skipping-rendering#rendering-nothing) is considered an error code.
-    Set `[up-fail=false]` to handle *any* response as successful, even with a 4xx or 5xx status code.
-
-  @param [up-fail-target=':main']
-    The [target selector](/targeting-fragments) to update after a [failed response](/failed-responses).
-
-    See [Rendering failed responses differently](/failed-responses#rendering-failed-responses-differently) for details.
-
-    If omitted, a failed response will *not* update the [`[up-target]`](#up-target),
-    but update the [main target](/up-main) instead.
-
-  @param [up-history='auto']
-    Whether the browser URL, window title and meta tags will be [updated](/updating-history).
-
-    If set to `true`, the history will always be updated, using the title and URL from
-    the server response, or from given `[up-title]` and `[up-location]` attributes.
-
-    If set to `auto` history will be updated if the `[up-target]` matches
-    a selector in `up.fragment.config.autoHistoryTargets`. By default this contains all
-    [main targets](/up-main).
-
-    If set to `false`, the history will remain unchanged.
-
-    @see updating-history
-
-  @param [up-title]
-    An explicit document title to set before rendering.
-
-    By default the title is extracted from the response's `<title>` tag.
-    To prevent the title from being updated, set `[up-title=false]` to explicitly
-
-    This attribute is only used when [updating history](#up-history).
-
-  @param [up-location]
-    An explicit URL to set before rendering.
-
-    By default Unpoly will use the link's `[href]` or the final URL after the server redirected.
-    To prevent the URL from being updated, set `[up-location=false]`.
-
-    This attribute is only used when [updating history](#up-history).
-
-  @param [up-meta-tags]
-    Whether to update [meta tags](/up-meta) in the `<head>`.
-
-    By default Unpoly will extract meta tags from the response's `<head>`.
-    To prevent meta tags from being updated, set `[up-meta-tags=false]`.
-
-    This attribute is only used when [updating history](#up-history).
-
-  @param [up-lang]
-    An explicit language code to set as the [`html[lang]`](https://www.tpgi.com/using-the-html-lang-attribute/) attribute.
-
-    By default Unpoly will extract the language from the response and update the `html[lang]`
-    attribute in the current page.
-    To prevent the attrribute from being changed, set `[up-lang=false]`.
-
-    This attribute is only used when [updating history](#up-history).
-
-  @param [up-transition]
-    The name of an [transition](/up.motion) to morph between the old and few fragment.
-
-    If you are [prepending or appending content](/targeting-fragments#appending-or-prepending),
-    use the `[up-animation]` attribute instead.
-
-  @param [up-animation]
-    The name of an [animation](/up.motion) to reveal a new fragment when
-    [prepending or appending content](/targeting-fragments#appending-or-prepending).
-
-    If you are replacing content (the default), use the `[up-transition]` attribute instead.
-
-  @param [up-duration]
-    The duration of the transition or animation (in millisconds).
-
-  @param [up-easing]
-    The timing function that accelerates the transition or animation.
-
-    See [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
-    for a list of available timing functions.
-
-  @param [up-cache='auto']
-    Whether to read from and write to the [cache](/caching).
-
-    With `[up-cache=true]` Unpoly will try to re-use a cached response before connecting
-    to the network. To prevent display of stale content, cached responses are
-    [reloaded once rendered](#up-revalidate). If no cached response exists,
-    Unpoly will make a request and cache the server response.
-
-    With `[up-cache=auto]` Unpoly will use the cache only if `up.network.config.autoCache`
-    returns `true` for the request. By default this only caches `GET` requests.
-
-    With `[up-cache=false]` Unpoly will always make a network request.
-
-  @param [up-revalidate='auto']
-    Whether to [reload the targeted fragment](/caching#revalidation)
-    after it was rendered from a cached response.
-
-    With `[up-revalidate='auto']` Unpoly will revalidate if the `up.fragment.config.autoRevalidate(response)`
-    returns `true`. By default this configuration will return true for
-    [expired](/up.fragment.config#config.autoRevalidate) responses.
-
-    With `[up-revalidate='true']` Unpoly will always revalidate cached content, regardless
-    of its age.
-
-    With `[up-revalidate='false']` Unpoly will never revalidate cached content.
-
-  @param [up-expire-cache]
-    Whether existing [cache](/caching) entries will be [expired](/caching#expiration) with this request.
-
-    By default a non-GET request will expire the entire cache.
-    You may also pass a [URL pattern](/url-patterns) to only expire matching requests.
-
-    Also see [`up.request({ expireCache })`](/up.request#options.expireCache) and `up.network.config.expireCache`.
-
-  @param [up-evict-cache]
-    Whether existing [cache](/caching) entries will be [evicted](/caching#eviction) with this request.
-
-    You may also pass a [URL pattern](/url-patterns) to only evict matching requests.
-
-    Also see [`up.request({ evictCache })`](/up.request#options.evictCache) and `up.network.config.evictCache`.
-
-  @param [up-abort='target']
-    Whether to [abort existing requests](/aborting-requests) before rendering.
-
-  @param [up-abortable='true']
-    Whether this request may be aborted by other requests targeting the same fragments or layer.
-
-    See [aborting requests](/aborting-requests) for details.
-
-    @experimental
-
-  @param [up-background='false']
-    Whether this request will load in the background.
-
-    Background requests deprioritized over foreground requests.
-    Background requests also won't emit `up:network:late` events and won't trigger
-    the [progress bar](/progress-bar).
-
-  @param [up-late-delay]
-    The number of milliseconds after which this request can cause
-    an `up:network:late` event.
-
-    Defaults to `up.network.config.lateDelay`.
-
-    @experimental
-
-  @param [up-timeout]
-    The number of milliseconds after which this request fails with a timeout.
-
-    Defaults to `up.network.config.timeout`.
-
-  @param [up-layer='origin current']
-    The [layer](/up.layer) in which to match and render the fragment.
-
-    See [layer option](/layer-option) for a list of allowed values.
-
-    To [open the fragment in a new overlay](/opening-overlays), pass `[up-layer=new]`.
-    In this case attributes for `[up-layer=new]` may also be used.
-
-  @param [up-peel='true']
-    Whether to close overlays obstructing the updated layer when the fragment is updated.
-
-    This is only relevant when updating a layer that is not the [frontmost layer](/up.layer.front).
-
-  @param [up-context]
-    A [relaxed JSON](/relaxed-json) object that will be merged into the [context](/context)
-    of the current layer once the fragment is rendered.
-
-    @experimental
-
-  @param [up-scroll='auto']
-    How to scroll after the new fragment was rendered.
-
-    See [Scrolling](/scrolling) for a list of allowed values.
-
-  @param [up-scroll-behavior='instant']
-    Whether to [animate the scroll motion](/scroll-tuning#animating-the-scroll-motion)
-    when [prepending or appending](/targeting-fragments#appending-or-prepending) content.
-
-  @param [up-reveal-snap]
-    When to [snap to the top](/scroll-tuning#snapping-to-the-screen-edge)
-    when scrolling to an element near the top edge of the viewport's scroll buffer.
-
-  @param [up-reveal-top]
-    When to [move a revealed element to the top](/scroll-tuning#moving-revealed-elements-to-the-top)
-    when scrolling to an element.
-
-  @param [up-reveal-padding]
-    How much [space to leave to the closest viewport edge](/scroll-tuning#revealing-with-padding)
-    when scrolling to an element.
-
-  @param [up-reveal-max]
-    How many pixel lines of [high element to reveal](/scroll-tuning#revealing-with-padding) when scrolling to an element.
-
-  @param [up-save-scroll]
-    Whether to [save scroll positions](/up.viewport.saveScroll) before updating the fragment.
-
-    Saved scroll positions can later be restored with [`[up-scroll=restore]`](/scrolling#restoring-scroll-positions).
-
-  @param [up-focus='auto']
-    What to focus after the new fragment was rendered.
-
-    See [Controlling focus](/focus) for a list of allowed values.
-
-  @param [up-save-focus]
-    Whether to [save focus-related state](/up.viewport.saveFocus) before updating the fragment.
-
-    Saved scroll positions can later be restored with [`[up-focus=restore]`](/focus#restoring-focus).
-
-  @param [up-confirm]
-    A message the user needs to confirm before fragments are updated.
-
-    The message will be shown as a [native browser prompt](https://developer.mozilla.org/en-US/docs/Web/API/Window/prompt).
-
-    If the user does not confirm the render promise will reject and no fragments will be updated.
-
-  @param [up-placeholder]
-    A [placeholder](/placeholders) to show in the targeted fragment while new content is loading.
-
-    Existing children of the targeted fragment [will be hidden](/placeholders#basic-example) during the request.
-    When the request ends for any reason, all changes will be reverted.
-
-    You can either [pass a HTML string](/placeholders#basic-example)
-    or [refer to a template](/placeholders#from-template), optionally with
-    [variables](/placeholders#dynamic-templates).
-
-    If this link [opens a new overlay](/opening-overlays), the placeholder
-    will be shown temporary overlay with the same [visual style](/customizing-overlays) and open animation.
-
-    @experimental
-
-  @param [up-preview]
-    The name of a [preview](/previews) that temporarily changes the page
-    while new content is loading.
-
-    The preview changes will be reverted automatically
-    when the request ends for [any reason](/previews#ending).
-
-  @param [up-revalidate-preview]
-    The name of a [preview](/previews) that runs
-    while [revalidating cached content](/caching#revalidation).
-
-    @experimental
-
-  @param [up-disable]
-    [Disables form controls](/disabling-forms#from-link) while the link is loading.
-
-  @param [up-feedback='true']
-    Whether to set [feedback classes](/feedback-classes)
-    while loading content.
-
-  @param [up-on-loaded]
-    A JavaScript snippet that is executed when the server responds with new HTML,
-    but before the HTML is rendered.
-
-    The snippet runs in the following scope:
-
-    | Expression | Value                                         |
-    |------------|-----------------------------------------------|
-    | `this`     | The link being followed                       |
-    | `event`    | A preventable `up:fragment:loaded` event      |
-
-    The snippet will also run for [failed responses](/failed-responses).
-
-  @param [up-on-rendered]
-    A JavaScript snippet that is executed when Unpoly has updated fragments.
-
-    The snippet runs in the following scope:
-
-    | Expression | Value                                                |
-    |------------|------------------------------------------------------|
-    | `this`     | The link being followed                              |
-    | `result`   | The `up.RenderResult` for the respective render pass |
-
-    The snippet will be called zero, one or two times:
-
-    - When the server rendered an [empty response](/skipping-rendering#rendering-nothing), no fragments are updated. `[up-on-rendered]` is not called.
-    - When the server rendered a matching fragment, it will be updated on the page. `[up-on-rendered]` is called with the [result](/up.RenderResult).
-    - When [revalidation](/caching#revalidation) renders a second time, `[up-on-rendered]` is called again with the final result.
-
-    Also see [Running code after rendering](/render-lifecycle#running-code-after-rendering).
-
-  @param [up-on-finished]
-    A JavaScript snippet that is execvuted when no further DOM changes will be caused by this render pass.
-
-    In particular:
-
-    - [Animations](/up.motion) have concluded and [transitioned](/up-transition) elements were removed from the DOM tree.
-    - A [cached response](#up-cache) was [revalidated with the server](/caching#revalidation).
-      If the server has responded with new content, this content has also been rendered.
-
-    | Expression | Value                                                                  |
-    |------------|------------------------------------------------------------------------|
-    | `this`     | The link being followed                                                |
-    | `result`   | The `up.RenderResult` for the last render pass that updated a fragment |
-
-    If [revalidation](/caching#revalidation) re-rendered the fragment, `result` describes updates from the
-    second render pass. If no revalidation was performed, or if revalidation yielded an [empty response](/caching#when-nothing-changed),
-    it is the result from the initial render pass.
-
-    Also see [Awaiting postprocessing](/render-lifecycle#awaiting-postprocessing).
-
-  @param [up-on-offline]
-    A JavaScript snippet that is executed when the fragment could not be loaded
-    due to a [disconnect or timeout](/network-issues).
-
-    | Expression | Value                                         |
-    |------------|-----------------------------------------------|
-    | `this`     | The link being followed                       |
-    | `error`    | An `up.Offline` error                         |
-
-  @param [up-on-error]
-    A JavaScript snippet that is run when any error is thrown during the rendering process.
-
-    | Expression | Value                                         |
-    |------------|-----------------------------------------------|
-    | `this`     | The link being followed                       |
-    | `error`    | An `Error` object                             |
-
-    The callback is also called when the render pass fails due to [network issues](/network-issues),
-    or [aborts](/aborting-requests).
-
-    Also see [Handling errors](/render-lifecycle#handling-errors).
-
-  @param [up-use-keep='true']
-    Whether [`[up-keep]`](/up-keep) elements will be preserved in the updated fragment.
-
-    @experimental
-
-  @param [up-use-hungry='true']
-    Whether [`[up-hungry]`](/up-hungry) elements outside the updated fragment will also be updated.
-
-    @experimental
+  @section Lifecycle hooks
+    @mix attrs/follow/lifecycle-hooks
 
   @stable
   */
