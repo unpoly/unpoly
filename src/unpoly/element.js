@@ -38,12 +38,13 @@ up.element = (function() {
   }
 
   /*-
-  Returns a list of the given parent's descendants matching the given selector.
-  The list will also include the parent element if it matches the selector itself.
+  Returns a list of a `root` element's descendants matching the given selector.
+
+  If the `root` element itself matches the selector, it is also included in the returned list.
 
   @function up.element.subtree
-  @param {Element} parent
-    The parent element for the search.
+  @param {Element} root
+    The root element for the search.
   @param {string} selector
     The CSS selector to match.
   @return {NodeList<Element>|Array<Element>}

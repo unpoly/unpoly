@@ -666,6 +666,14 @@ describe('up.fragment', function() {
 
         expect(results).toEqual([matchingChild])
       })
+
+      it('only matches elements in the layer of the root element', function() {
+        makeLayers([{ target: '.element' }, { target: '.element' }])
+
+        const results = up.fragment.subtree(document.body, '.element')
+
+        expect(results).toEqual([up.fragment.get('.element', { layer: 'root' })])
+      })
     })
 
     describe('up.render()', function() {

@@ -281,7 +281,7 @@ up.fragment = (function() {
   }
 
   /*-
-  Returns the URL the given element was retrieved from.
+  Returns the URL from which the given element was loaded.
 
   If the given element was never directly updated, but part of a larger fragment update,
   the [closest](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest) known source of an ancestor element is returned.
@@ -306,6 +306,7 @@ up.fragment = (function() {
   @param {Element|string} element
     The element or CSS selector for which to look up the source URL.
   @return {string|undefined}
+    The URL from which the element was loaded.
   @stable
   */
   function sourceOf(element, options = {}) {
@@ -629,10 +630,8 @@ up.fragment = (function() {
     The URL to navigate to.
   @param {Object} [options]
     See options for `up.render()`.
-  @return {up.RenderJob}
-    A promise that fulfills with an `up.RenderResult` once the page has been updated.
-
-    For details, see return value for `up.render()`.
+  @return
+    @like up.render
   @stable
   */
   const navigate = up.mockable((...args) => {
@@ -1157,38 +1156,40 @@ up.fragment = (function() {
   without filtering by layer or destruction state.
 
   @function up.fragment.get
-  @param {Element|jQuery|Document} [root=document]
-    The root element for the search. Only the root's children will be matched.
+  @section Search scope
+    @param {Element|jQuery|Document} [root=document]
+      The root element for the search. Only the root's children will be matched.
 
-    May be omitted to search through all elements in the current `document`.
-  @param {string|Element} selector
-    The selector to match.
+      May be omitted to search through all elements in the current `document`.
+    @param {string|Element} selector
+      The selector to match.
 
-    If passed an `Element` instead of a string, that element is returned without further lookups.
-  @param {string} [options.layer='current']
-    The layer in which to select elements.
+      If passed an `Element` instead of a string, that element is returned without further lookups.
+    @param {string} [options.layer='current']
+      The layer in which to select elements.
 
-    See `up.layer.get()` for a list of supported layer values.
+      See `up.layer.get()` for a list of supported layer values.
 
-    If a root element was passed as first argument, this option is ignored and the
-    root element's layer is searched.
-  @param {string} [options.match='region']
-    Controls which fragment to return when the [`{ target }`](#options.target) selector yields multiple results.
+      If a root element was passed as first argument, this option is ignored and the
+      root element's layer is searched.
+  @section Region awareness
+    @param {string} [options.match='region']
+      Controls which fragment to return when the [`{ target }`](#options.target) selector yields multiple results.
 
-    When set to `'region'` Unpoly will prefer to match fragments in the
-    [region](/targeting-fragments#ambiguous-selectors) of the [origin element](#options.origin).
+      When set to `'region'` Unpoly will prefer to match fragments in the
+      [region](/targeting-fragments#ambiguous-selectors) of the [origin element](#options.origin).
 
-    If set to `'first'` Unpoly will always return the first matching fragment.
+      If set to `'first'` Unpoly will always return the first matching fragment.
 
-    Defaults to `up.fragment.config.match`, which defaults to `'region'`.
+      Defaults to `up.fragment.config.match`, which defaults to `'region'`.
 
-  @param {Element|jQuery} [options.origin]
-    The origin element that triggered this fragment lookup, e.g. a button that was clicked.
+    @param {Element|jQuery} [options.origin]
+      The origin element that triggered this fragment lookup, e.g. a button that was clicked.
 
-    Unpoly will prefer to match fragments in the [region](/targeting-fragments#ambiguous-selectors)
-    of the origin element.
+      Unpoly will prefer to match fragments in the [region](/targeting-fragments#ambiguous-selectors)
+      of the origin element.
 
-    The `selector` argument may refer to the origin as `:origin`.
+      The `selector` argument may refer to the origin as `:origin`.
   @return {Element|undefined}
     The first matching element, or `undefined` if no such element matched.
   @stable
@@ -1271,29 +1272,28 @@ up.fragment = (function() {
 
   @function up.fragment.all
 
-  @param {Element|jQuery|Document} [root=document]
-    The root element for the search. Only the root's children will be matched.
+  @section Search scope
+    @param {Element|jQuery|Document} [root=document]
+      The root element for the search. Only the root's children will be matched.
 
-    May be omitted to search through all elements in the given [layer](#options.layer).
+      May be omitted to search through all elements in the given [layer](#options.layer).
 
-  @param {string} selector
-    The selector to match.
+    @param {string} selector
+      The selector to match.
 
-  @param {string} [options.layer='current']
-    The layer in which to select elements.
+    @param {string} [options.layer='current']
+      The layer in which to select elements.
 
-    See `up.layer.get()` for a list of supported layer values.
+      See `up.layer.get()` for a list of supported layer values.
 
-    If a root element was passed as first argument, this option is ignored and the
-    root element's layer is searched.
+      If a `root` element was passed as first argument, this option is ignored and the
+      root element's layer is searched.
 
-  @param {string|Element|jQuery} [options.origin]
-    The origin element that triggered this fragment lookup, e.g. a button that was clicked.
+  @section Origin
+    @param {string|Element|jQuery} [options.origin]
+      The origin element that triggered this fragment lookup, e.g. a button that was clicked.
 
-    Unpoly will prefer to match fragments in the [region](/targeting-fragments#ambiguous-selectors)
-    of the origin element.
-
-    The `selector` argument may refer to the origin as `:origin`.
+      The `selector` argument may refer to the origin as `:origin`.
 
   @return {Element|undefined}
     The first matching element, or `undefined` if no such element matched.
@@ -1349,16 +1349,25 @@ up.fragment = (function() {
   */
 
   /*-
-  Returns a list of the given parent's descendants matching the given selector.
-  The list will also include the parent element if it matches the selector itself.
+  Returns a list of a `root` element's descendants matching the given selector.
+
+  If the `root` element itself matches the selector, it is also included in the returned list.
+
+  ## Ignored elements
+
+  The following elements are ignored, even if they match the selector:
+
+  - Elements in a different [layer](/up.layer) than `root`.
+  - Elements that are being [destroyed](/up.destroy) with an animation.
+  - Elements that are being removed by a [transition](/up-transition).
+
+  To include all elements matching the selector, use `up.element.subtree()`.
 
   @function up.fragment.subtree
-  @param {Element} parent
-    The parent element for the search.
+  @param {Element} root
+    The root element for the search.
   @param {string} selector
     The CSS selector to match.
-  @param {up.Layer|string|Element} [options.layer = 'current]
-    The layer in whicht to match.
   @return {NodeList<Element>|Array<Element>}
     A list of all matching elements.
   @experimental
@@ -1377,6 +1386,7 @@ up.fragment = (function() {
     The selector or element to look for.
   @return {boolean}
   @function up.fragment.contains
+    Whether the root contains the given element or selector.
   @experimental
   */
   function contains(root, selectorOrElement) {
@@ -1417,9 +1427,9 @@ up.fragment = (function() {
 
   Unfinished requests targeting the destroyed fragment or its descendants are [aborted](/aborting-requests).
 
-  Emits events [`up:fragment:destroyed`](/up:fragment:destroyed).
+  Emits the event [`up:fragment:destroyed`](/up:fragment:destroyed).
 
-  ### Animating the removal
+  ## Animating the removal
 
   You may animate the element's removal by passing an option like `{ animate: 'fade-out' }`.
   Unpoly ships with a number of [predefined animations](/up.animate#named-animations) and
@@ -1433,7 +1443,36 @@ up.fragment = (function() {
   Elements that are about to be destroyed (but still animating) are ignored by all
   functions that lookup fragments, like `up.fragment.all()`, `up.fragment.get()` or `up.fragment.closest()`.
 
-  ### Detecting destructor errors
+  ## Running code after removal
+
+  Destroying an element without animation works synchronously:
+
+  ```js
+  console.log(element.isConnected) // logs "true"
+
+  up.destroy(element) // no need to await
+
+  console.log(element.isConnected) // logs "false"
+  ```
+
+  When the removal is animated, it remains attached while the exit animation
+  plays. To run code after the element was detached from the DOM, pass an `{ onFinished }` callback:
+
+  ```js
+  console.log(element.isConnected) // logs "true"
+
+  up.destroy(element, {
+    animation: 'fade-out',
+    duration: 500,
+    onFinished() { console.log(element.isConnected) }
+  })
+
+  console.log(element.isConnected) // logs "true"
+
+  // After 500 ms the { onFinished } callback logs "false"
+  ```
+
+  ## Detecting destructor errors
 
   If a [destructor](/up.compiler#destructor) throws an error, `up.destroy()` will still remove the element and *not* throw an error.
 
@@ -1443,16 +1482,18 @@ up.fragment = (function() {
   See [errors in user code](/render-lifecycle#errors-in-user-code) for details.
 
   @function up.destroy
-  @param {string|Element|jQuery} target
-  @param {string|Function(element, options): Promise} [options.animation='none']
-    The animation to use before the element is removed from the DOM.
-  @param {number} [options.duration]
-    The duration of the animation. See [`up.animate()`](/up.animate).
-  @param {string} [options.easing]
-    The timing function that controls the animation's acceleration. See [`up.animate()`](/up.animate).
-  @param {Function} [options.onFinished]
-    A callback that is run when any animations are finished and the element was removed from the DOM.
-  @return undefined
+  @section Scope
+    @param {string|Element|jQuery} element
+      The element to remove.
+  @section Animation
+    @param {string|Function(element, options): Promise} [options.animation='none']
+      An animation to play before the element is removed from the DOM.
+    @param options.duration
+      @like up.animate
+    @param options.easing
+      @like up.animate
+    @param {Function} [options.onFinished]
+      A callback that is run when any animations are finished and the element was removed from the DOM.
   @stable
   */
   function destroy(...args) {
@@ -1553,41 +1594,44 @@ up.fragment = (function() {
 
   @function up.reload
 
-  @param {string|Element|Array<Element>|jQuery} [target]
-    The element that should be reloaded.
+  @section Targeting
+    @param {string|Element|Array<Element>|jQuery} [element]
+      The element or selector that should be reloaded.
 
-    If omitted, an element matching a selector in `up.fragment.config.mainTargets` will be reloaded.
+      If omitted, an element matching a selector in `up.fragment.config.mainTargets` will be reloaded.
 
-    When an `Element` object is passed, a target selector will be [derived](/target-derivation).
+      When an `Element` object is passed, a target selector will be [derived](/target-derivation).
 
-  @param {Object} [options]
-    See options for `up.render()`.
+  @section Render options
+    @param {Object} [options]
+      Additional [render options](/up.render#parameters) to use when reloading the fragment.
 
-  @param {string} [options.url]
-    The URL from which to reload the fragment.
-    This defaults to the URL from which the fragment was originally loaded.
+      Common options are documented below, but most [options for `up.render()`](/up.render#parameters) may be used.
 
-  @param {string|boolean|Function(up.Response): boolean} [options.fail='auto']
-    How to handle [failed server responses](/failed-responses).
+    @param {boolean} [options.navigate=false]
+      Whether the reloading constitutes a [user navigation](/navigation).
 
-    By default, a failed response will not be used unless a
-    [`{ failTarget }`](/up.render#options.failTarget) or `{ fail: false }` option is also passed.
+  @section Request
+    @mix options/render/request
+      @param options.url
+        The URL from which to reload the fragment.
 
-  @param {Object} [options.data]
-    Overrides properties from the new fragment's `[up-data]`
-    with the given [data object](/data).
+        Defaults to the [URL from which the fragment was originally loaded](/up.fragment.source).
 
-  @param {boolean} [options.keepData]
-    Whether to [preserve](/data#preserving) the fragment's [data object](/data) throughout the update.
+  @section Loading state
+    @mix options/render/loading-state
 
-    Properties from the new fragment's `[up-data]`  are overridden with the old fragment's `[up-data]`.
+  @section Failed responses
+    @mix options/render/failed-responses
 
-  @param {string} [options.navigate=false]
-    Whether the reloading constitutes a [user navigation](/navigation).
+  @section Client state
+    @mix options/reload/client-state
 
-  @return {up.RenderJob}
-    A promise that fulfills with an `up.RenderResult` once the fragment
-    has been reloaded and rendered.
+  @section Lifecycle hooks
+    @mix options/render/lifecycle-hooks
+
+  @return
+    @like up.render
 
   @stable
   */
@@ -1632,15 +1676,21 @@ up.fragment = (function() {
 
   @function up.visit
 
-  @param {string} url
-    The URL to visit.
+  @section Destination
+    @param {string} url
+      The URL to visit.
 
-  @param {Object} [options]
-    See options for `up.render()`.
+  @section Render options
+    @param {Object} [options]
+      Additional [render options](/up.render#parameters) to use for rendering the destination URL.
 
-  @return {up.RenderJob}
-    A promise that fulfills with an `up.RenderResult`
-    once the destination was loaded and rendered.
+      Most [options for `up.render()`](/up.render#parameters) may be used.
+
+    @param {boolean} [options.navigate=true]
+      Whether to apply [navigation defaults](/navigation), such as scrolling and updating history.
+
+  @return
+    @like up.render
 
   @stable
   */
@@ -1725,25 +1775,29 @@ up.fragment = (function() {
   ```
 
   @function up.fragment.toTarget
-  @param {Element|string} element
-    The element for which to create a selector.
+  @section Element
+    @param {Element|string} element
+      The element for which to create a selector.
 
-    When a string is given, it is returned unchanged.
-  @param {Element} [options.verify]
-    Whether to verify that the derived selector matches the given element.
+      When a string is given, it is returned unchanged.
+    @param {Element} [options.strong=false]
+      Whether to provide a more unique selector by only considering the element's `[id]` and `[up-id]` attributes.
 
-    Defaults to `up.fragment.config.verifyDerivedTarget`.
+      Weaker target derivers, like the element's class, are not considered in strong mode.
+      The element's tag name is only considered for singleton elements like `<html>` or `<body>`.
 
-  @param {Element} [options.strong=false]
-    Whether to provide a more unique selector by only considering the element's `[id]` and `[up-id]` attributes.
+      @experimental
+  @section Verification
+    @param {Element} [options.verify]
+      Whether to verify that the derived selector matches the given element.
 
-    Weaker target derivers, like the element's class, are not considered in strong mode.
-    The element's tag name is only considered for singleton elements like `<html>` or `<body>`.
+      Defaults to `up.fragment.config.verifyDerivedTarget`.
 
-    @experimental
-  @param {Element} [options.origin]
-    The origin used to [resolve an ambiguous selector](/targeting-fragments#ambiguous-selectors)
-    during [target verification](/target-derivation#verification).
+    @param {Element} [options.origin]
+      The origin used to [resolve an ambiguous selector](/targeting-fragments#ambiguous-selectors)
+      during [target verification](/target-derivation#verification).
+  @return {string}
+    The derived selector string.
   @stable
   */
   function toTarget(element, options) {
@@ -1755,11 +1809,17 @@ up.fragment = (function() {
 
   @function up.fragment.isTargetable
   @param {Element} element
+    The element to test.
+  @param {Object} options
+    Options for target derivation and [verification](/target-derivation#verification).
+
+    See [options for `up.fragment.toTarget()`](/up.fragment.toTarget).
   @return {boolean}
+    Whether a selector can be derived for the given element.
   @experimental
   */
-  function isTargetable(element) {
-    return !!tryToTarget(element)
+  function isTargetable(element, options) {
+    return !!tryToTarget(element, options)
   }
 
   function untargetableMessage(element) {
@@ -2174,11 +2234,11 @@ up.fragment = (function() {
 
   @selector [up-main]
   @param [up-main]
-  A space-separated list of [layer modes](/layer-terminology) for which to use this main target.
+    A space-separated list of [layer modes](/layer-terminology) for which to use this main target.
 
-  Omit the attribute value to define a main target for *all* layer modes.
+    Omit the attribute value to define a main target for *all* layer modes.
 
-  To use a different main target for all overlays (but not the root layer), set `[up-main=overlay]`.
+    To use a different main target for all overlays (but not the root layer), set `[up-main=overlay]`.
   @stable
   */
 
@@ -2325,20 +2385,29 @@ up.fragment = (function() {
   ```
 
   @function up.fragment.matches
-  @param {Element} fragment
-  @param {string|Element} selector
-    The selector or element to match.
 
-    When an element is passed, returns whether `element` matches
-    the [target derived](/target-derivation) from `selector`.
-  @param {string|up.Layer} [options.layer]
-    The layer for which to match.
+  @section Comparison
+    @param {Element} fragment
+      The element to test.
+    @param {string|Element} selector
+      The selector that the `fragment` should match.
 
-    Pseudo-selectors like `:main` may expand to different selectors
-    in different layers.
-  @param {string|up.Layer} [options.mode]
-    Required if `{ layer: 'new' }` is passed.
+      When an `Element` is passed as this `selector` argument, this functions tests whether `fragment` matches
+      a [target derived](/target-derivation) from `selector`.
+
+  @section Layer
+    @param {string|up.Layer} [options.layer]
+      The layer for which to match.
+
+      Pseudo-selectors like `:main` may expand to different selectors in different layers.
+
+      Defaults to the layer of `fragment`.
+    @param {string|up.Layer} [options.mode]
+      Required if `{ layer: 'new' }` is passed.
+
   @return {boolean}
+    Whether `fragment` matches the given `selector`.
+
   @experimental
   */
   function matches(element, selector, options = {}) {
@@ -2415,29 +2484,32 @@ up.fragment = (function() {
   ```
 
   @function up.fragment.abort
-  @param {string|Element|List<Element>} [element]
-    The element for which requests should be aborted.
+  @section Matching requests
+    @param {string|Element|List<Element>} [element]
+      The element (or selector) for which requests should be aborted.
 
-    May be omitted with `{ layer }` option.
-  @param {string|up.Layer} [options.layer]
-    The [layer](/layer-option) for which requests should be aborted.
+      May be omitted with `{ layer }` option.
+    @param {string|up.Layer} [options.layer]
+      The [layer](/layer-option) for which requests should be aborted.
 
-    May be omitted with `element` argument.
-  @param {Element} [options.origin]
-    The element causing requests to be aborted.
+      May be omitted with `element` argument.
+    @param {Element} [options.origin]
+      The element causing requests to be aborted.
 
-    This is used to look up an `element` selector or `{ layer }` name.
-  @param {string} [options.reason]
-    The reason for aborting requests.
+      This is used to look up an `element` selector or `{ layer }` name.
+    @param {up.Request} [options.except]
+      A request that should not be aborted, even if it matches
+      the conditions above.
 
-    The promise by an aborted `up.request()` will reject with this reason.
+      @experimental
+  @section Debugging
+    @param {string} [options.reason]
+      The reason for aborting requests.
 
-    If omitted a default message will describe the abort conditions.
-  @param {up.Request} [options.except]
-    A request that should not be aborted, even if it matches
-    the conditions above.
+      The promise by an aborted `up.request()` will reject with this reason
+      to help debugging an unexpected aborting.
 
-    @experimental
+      If omitted, a default message will describe the abort conditions.
   @experimental
   */
   function abort(...args) {

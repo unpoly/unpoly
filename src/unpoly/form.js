@@ -857,7 +857,7 @@ up.form = (function() {
       You may pass this additional `options` object to [supplement or override](/attributes-and-options#options)
       options parsed from attributes.  See `[up-submit]` for a list of supported attributes.
 
-      Common options are documented below, but all [options for `up.submit()`](/up.submit#parameters) may be used.
+      Common options are documented below, but most [options for `up.submit()`](/up.submit#parameters) may be used.
 
   @section Request
     @include options/submit/request
@@ -1103,15 +1103,7 @@ up.form = (function() {
       the option from the last validation in the batch will be used.
 
   @section Client state
-
-    @param options.data
-      @like up.render
-
-    @param options.keepData
-      @like up.reload
-
-    @param options.keep
-      @like up.render
+    @mix options/reload/client-state
 
   @section Request
     @param options.params
