@@ -1415,23 +1415,73 @@ up.form = (function() {
 
   @selector [up-submit]
 
-  @params-note
-    All attributes for `[up-follow]` may be used.
+  @section Targeting
+    @mix attrs/follow/targeting
+      @param [up-target]
+        The [target selector](/targeting-fragments) to update for a successful form submission.
 
-  @param [up-target]
-    The [target selector](/targeting-fragments) to update for a successful form submission.
+  @section Navigation
+    @mix attrs/follow/navigation
 
-  @param [up-fail-target]
-    The [target selector](/targeting-fragments) to update when the server responds with an error code.
+  @section Request
+    @param action
+      Where to send the form data when the form is submitted.
 
-    Defaults to the form element itself.
+    @param method
+      The HTTP method to use for the request.
 
-    @see failed-responses
+      The value is case-insensitive.
 
-  @param [up-disable]
-    [Disables form controls](/disabling-forms) while the form is submitting.
+      You can also use methods that would not be allowed on a `<form>` element,
+      such as `'patch`' or `'delete'`. These will be [wrapped in a POST request](/up.network.config#config.wrapMethod).
 
-    The values of disabled fields will still be included in the submitted form params.
+    @mix attrs/follow/request-extras
+      @param up-params
+        Additional [Form parameters](/up.Params) that should be sent as the request's
+        [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
+
+        The given value will be added to params [parsed](/up.Params.fromForm)
+        from the form's input fields.
+
+  @section Layer
+    @mix attrs/follow/layer
+
+  @section History
+    @mix attrs/follow/history
+
+  @section Animation
+    @mix attrs/follow/motion
+
+  @section Caching
+    @mix attrs/follow/caching
+
+  @section Scrolling
+    @mix attrs/follow/scrolling
+
+  @section Focus
+    @mix attrs/follow/focus
+
+  @section Loading state
+    @mix attrs/follow/loading-state
+      @param up-disable
+        [Disables form controls](/disabling-forms) while the request is loading.
+
+        The values of disabled fields will still be included in the submitted form params.
+
+  @section Failed responses
+    @mix attrs/follow/failed-responses
+      @param up-fail-target
+        The [target selector](/targeting-fragments) to update when the server responds with an error code.
+
+        By default, failed responses will update the `<form>` element itself.
+
+        @see failed-responses
+
+  @section Client state
+    @mix attrs/follow/client-state
+
+  @section Lifecycle hooks
+    @mix attrs/follow/lifecycle-hooks
 
   @stable
   */
