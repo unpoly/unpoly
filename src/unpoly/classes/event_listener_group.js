@@ -59,7 +59,7 @@ up.EventListenerGroup = class EventListenerGroup extends up.Record {
   @function up.EventListenerGroup.fromBindArgs
   @internal
   */
-  static fromBindArgs(args, defaults) {
+  static fromBindArgs(args, overrides) {
     args = u.copy(args)
 
     // A callback function is given in all arg variants.
@@ -89,7 +89,7 @@ up.EventListenerGroup = class EventListenerGroup extends up.Record {
     // It might be undefined.
     const selector = args[0]
 
-    const attributes = { elements, eventTypes, selector, callback, ...options, ...defaults }
+    const attributes = { elements, eventTypes, selector, callback, ...options, ...overrides }
     return new (this)(attributes)
   }
 }

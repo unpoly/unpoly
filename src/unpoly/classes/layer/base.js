@@ -473,16 +473,7 @@ up.Layer = class Layer extends up.Record {
   ```
 
   @function up.Layer#on
-  @param types
-    @like up.on
-  @param selector
-    @like up.on
-  @param {Object} [options]
-    See [options for `up.on()`](/up.on).
-  @param listener
-    @like up.on
-  @return
-    @like up.on
+  @include options/on-without-element
   @stable
   */
   on(...args) {
@@ -493,13 +484,7 @@ up.Layer = class Layer extends up.Record {
   Unbinds an event listener previously bound with `up.Layer#on()`.
 
   @function up.Layer#off
-  @param {string} events
-  @param {string|Function(): string} [selector]
-  @param {Function(event, [element], [data])} listener
-    The listener function to unbind.
-
-    Note that you must pass a reference to the same function reference
-    that was passed to `up.Layer#on()` earlier.
+  @include options/off-without-element
   @stable
   */
   off(...args) {
@@ -536,33 +521,20 @@ up.Layer = class Layer extends up.Record {
   The value of [up.layer.current](/up.layer.current) will be set to the this layer
   while event listeners are running.
 
-  ### Example
+  ## Example
 
-      let rootLayer = up.layer.root
-      let overlay = await up.layer.open()
+  ```js
+  let rootLayer = up.layer.root
+  let overlay = await up.layer.open()
 
-      rootLayer.on('foo', (event) => console.log('Listener called'))
+  rootLayer.on('foo', (event) => console.log('Listener called'))
 
-      rootLayer.emit('foo') // logs "Listener called"
-      overlay.emit('foo')   // listener is not called
+  rootLayer.emit('foo') // logs "Listener called"
+  overlay.emit('foo')   // listener is not called
+  ```
 
   @function up.Layer#emit
-  @param {Element|jQuery} [target=this.element]
-    The element on which the event is triggered.
-
-    If omitted, the event will be emitted on the [this layer's element](/up.Layer.prototype.element).
-  @param {string} eventType
-    The event type, e.g. `my:event`.
-  @param {Object} [props={}]
-    A list of properties to become part of the event object that will be passed to listeners.
-  @param {string|Array} [props.log]
-    A message to print to the [log](/up.log) when the event is emitted.
-
-    Pass `false` to not log this event emission.
-  @param {Element|jQuery} [props.target=this.element]
-    The element on which the event is triggered.
-
-    Alternatively the target element may be passed as the first argument.
+  @include options/emit-without-element
   @stable
   */
   emit(...args) {
@@ -790,17 +762,7 @@ up.Layer = class Layer extends up.Record {
   ```
 
   @function up.Layer#affix
-  @param {string} selector
-    The CSS selector from which to create an element.
-  @param {Object} attrs
-    An object of attributes to set on the created element.
-  @param {Object} attrs.text
-    The [text content](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent) of the created element.
-  @param {Object} attrs.style
-    An object of CSS properties that will be set as the inline style
-    of the created element.
-
-    The given object must use kebab-case keys.
+  @include options/create-element-from-selector
   @experimental
   */
   affix(...args) {

@@ -166,49 +166,7 @@ up.event = (function() {
 
     If no element is given, the listener is registered on the `document`.
 
-  @param {string|Array<string>} types
-    The event types to bind to.
-
-    Multiple event types may be passed as either a space-separated string (`'foo bar'`), a comma-separated string (`'foo, bar'`)
-    or as an array of types (`['foo', 'bar']`).
-
-  @param {string|Function():string} [selector]
-    The selector of an element on which the event must be triggered.
-
-    Omit the selector to listen to all events of the given type, regardless
-    of the event target.
-
-    If the selector is not known in advance you may also pass a function
-    that returns the selector. The function is evaluated every time
-    an event with the given type is observed.
-
-  @param {boolean} [options.passive=false]
-    Whether to register a [passive event listener](https://developers.google.com/web/updates/2016/06/passive-event-listeners).
-
-    A passive event listener may not call `event.preventDefault()`.
-    This in particular may improve the frame rate when registering
-    `touchstart` and `touchmove` events.
-
-  @param {boolean} [options.once=true]
-    Whether the listener should run at most once.
-
-    If `true` the listener will automatically be unbound
-    after the first invocation.
-
-  @param {boolean} [options.capture=false]
-    Whether the listener should run before the event is emitted on the element.
-
-    See [event capturing](https://javascript.info/bubbling-and-capturing#capturing) for more information
-    about DOM event processing phases.
-
-  @param {Function(event, [element], [data])} listener
-    The listener function that should be called.
-
-    The function takes the observed element as a second argument.
-    The element's [attached data](/data) is passed as a third argument.
-
-  @return {Function()}
-    A function that unbinds the event listeners when called.
+  @include options/on-without-element
 
   @stable
   */
@@ -237,16 +195,7 @@ up.event = (function() {
   @function up.off
   @param {Element|jQuery} [element=document]
     The element from which to unbind the listener.
-  @param {string|Function(): string} types
-    The event types to unbind.
-
-    Multiple event types may be passed as either a space-separated string (`'foo bar'`), a comma-separated string (`'foo, bar'`)
-    or as an array of types (`['foo', 'bar']`).
-  @param {Function(event, [element], [data])} listener
-    The listener function to unbind.
-
-    You must pass a reference to the same function reference
-    that was passed to `up.on()` earlier.
+  @include options/off-without-element
   @stable
   */
   function off(...args) {
@@ -286,28 +235,7 @@ up.event = (function() {
     The element on which the event is triggered.
 
     If omitted, the event will be emitted on the `document`.
-  @param {string} eventType
-    The event type, e.g. `my:event`.
-  @param {Object} [props={}]
-    A list of properties to become part of the event object that will be passed to listeners.
-  @param {up.Layer|string|number} [props.layer]
-    The [layer](/up.layer) on which to emit this event.
-
-    If this property is set, the event will be emitted on the [layer's outmost element](/up.Layer.prototype.element).
-    Also [up.layer.current](/up.layer.current) will be set to the given layer while event listeners
-    are running.
-  @param {string|Array} [props.log]
-    A message to print to the [log](/up.log) when the event is emitted.
-
-    Pass `false` to not log this event emission.
-
-    @experimental
-  @param {Element|jQuery} [props.target=document]
-    The element on which the event is triggered.
-
-    Alternatively the target element may be passed as the first argument.
-  @return {Event}
-    The emitted event object.
+  @include options/emit-without-element
   @stable
   */
   function emit(...args) {
@@ -319,7 +247,7 @@ up.event = (function() {
 
   The returned event is not [emitted](/up.emit).
 
-  ### Example
+  ## Example
 
   ```js
   let event = up.event.build('my:event', { foo: 'bar' })
@@ -341,6 +269,7 @@ up.event = (function() {
 
     May also be passed as a first string argument.
   @return {Event}
+    The unemitted event object.
   @experimental
   */
   function build(...args) {
@@ -381,7 +310,6 @@ up.event = (function() {
   @function up.event.onEscape
   @param {Function(Event)} listener
     The listener function that will be called when `Escape` is pressed.
-  @function
   @experimental
   */
   function onEscape(listener) {
@@ -411,6 +339,7 @@ up.event = (function() {
 
   @function up.event.halt
   @param {Event} event
+    The event to stop processing for.
   @stable
   */
   function halt(event, options = {}) {

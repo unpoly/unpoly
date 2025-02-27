@@ -29,7 +29,7 @@ up.element = (function() {
   @return {Element|undefined|null}
     The first element matching the selector.
 
-    Returns `null` or `undefined` if no element macthes.
+    Returns `null` or `undefined` if no element matches.
   @internal
   */
   function first(...args) {
@@ -261,6 +261,7 @@ up.element = (function() {
 
   @function up.element.show
   @param {Element} element
+    The element to show.
   @stable
   */
   function show(element) {
@@ -304,6 +305,7 @@ up.element = (function() {
 
   @function up.element.toggle
   @param {Element} element
+    The element to toggle.
   @param {boolean} [newVisible]
     Pass `true` to show the element or `false` to hide it.
 
@@ -375,14 +377,10 @@ up.element = (function() {
   ```
 
   @function up.element.setAttrsTemp
-  @param {Element} element
-    The element on which to set attributes.
-  @param {Object} attributes
-    An object of attribute names and values to set.
-
-    To set an empty attribute, pass an empty string value.
-
-    To remove an attribute, use a value of `null` or `undefined`.
+  @param element
+    @like up.element.setAttrs
+  @param attributes
+    @like up.element.setAttrs
   @return {Function}
     A function that restores the attributes to their value before the change.
   @internal
@@ -494,22 +492,7 @@ up.element = (function() {
   ```
 
   @function up.element.createFromSelector
-  @param {string} selector
-    The CSS selector from which to create an element.
-  @param {Object} [attrs]
-    An object of attributes to set on the created element.
-  @param {Object} [attrs.text]
-    The [text content](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent) of the created element.
-  @param {Object} [attrs.content]
-    The [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML) of the created element.
-  @param {Object|string} [attrs.style]
-    An object of CSS properties that will be set as the inline style
-    of the created element. The given object must use kebab-case keys.
-
-    You may also pass a string with semicolon-separated styles.
-
-  @return {Element}
-    The created element.
+  @include options/create-element-from-selector
   @stable
   */
   function createFromSelector(selector, attrs = {}) {
@@ -685,21 +668,7 @@ up.element = (function() {
     The position of the new element in relation to `parent`.
 
     @include adjacent-positions
-  @param {string} selector
-    The CSS selector from which to create an element.
-  @param {Object} [attrs]
-    An object of attributes to set on the created element.
-  @param {Object} [attrs.text]
-    The [text content](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent) of the created element.
-  @param {Object} [attrs.content]
-    The [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML) of the created element.
-  @param {Object|string} [attrs.style]
-    An object of CSS properties that will be set as the inline style
-    of the created element.
-
-    The given object must use kebab-case keys.
-  @return {Element}
-    The created element.
+  @include options/create-element-from-selector
   @stable
   */
   function affix(...args) {
@@ -813,6 +782,8 @@ up.element = (function() {
     A string of HTML from which to create the element.
 
     The given HTML must have a single tag at its root or an error is thrown.
+  @return {Element}
+    The root element of the parsed DOM tree.
   @stable
   */
   function createFromHTML(html) {
@@ -1046,6 +1017,14 @@ up.element = (function() {
   If the element has the attribute but without value (e.g. `<input readonly>`), it returns an empty string.
 
   @function up.element.attr
+  @param {Element}
+    The element from which to read an attribute.
+  @param {string}
+    The name of the attribute to read.
+  @return {string|undefined}
+    The attribute value.
+
+    Returns `undefined` if the attribute is not set on the given element.
   @stable
   */
   function stringAttr(element, attribute) {
@@ -1117,6 +1096,8 @@ up.element = (function() {
     The element from which to retrieve the attribute value.
   @param {string} attribute
     The attribute name.
+  @return {boolean|string|undefined}
+    The cast attribute value.
   @internal
   */
   function booleanOrStringAttr(element, attribute) {
@@ -1135,6 +1116,8 @@ up.element = (function() {
     The element from which to retrieve the attribute value.
   @param {string} attribute
     The attribute name.
+  @return {boolean|number|undefined}
+    The cast attribute value.
   @internal
   */
   function booleanOrNumberAttr(element, attribute) {
@@ -1244,6 +1227,8 @@ up.element = (function() {
   ```
 
   @function up.element.addClassTemp
+  @param {Element} element
+  @param {string} klass
   @return {Function}
     A function that restores the original class list when called.
   @internal
@@ -1289,6 +1274,7 @@ up.element = (function() {
   @param {string|Array} propOrProps
     One or more CSS property names in kebab-case.
   @return {string|Object}
+    The requested style value or values.
   @stable
   */
   function computedStyle(element, props) {
@@ -1320,6 +1306,7 @@ up.element = (function() {
   @param {string} prop
     A single property name in kebab-case.
   @return {number|undefined|NaN}
+    The cast attribute value.
   @stable
   */
   function computedStyleNumber(element, prop) {
@@ -1361,6 +1348,7 @@ up.element = (function() {
 
   @function up.element.setStyle
   @param {Element} element
+    The element on which to change inline styles.
   @param {Object} props
     One or more CSS properties with kebab-case keys.
   @stable
@@ -1399,10 +1387,10 @@ up.element = (function() {
   ```
 
   @function up.element.setStyleTemp
-  @param {Element} element
-    The element to style.
+  @param element
+    @like up.element.setStyle
   @param {Object} styles
-    One or more CSS properties with kebab-case keys.
+    @like up.element.setStyle
   @return {Function()}
     A function that restores the original inline styles when called.
   @internal
@@ -1425,6 +1413,7 @@ up.element = (function() {
   @param {Element} element
     The element to check.
   @return {boolean}
+    Whether the given element is visible.
   @stable
   */
   function isVisible(element) {

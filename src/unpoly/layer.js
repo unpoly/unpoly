@@ -1378,16 +1378,7 @@ up.layer = (function() {
   See `up.Layer#on()` for more documentation.
 
   @function up.layer.on
-  @param types
-    @like up.on
-  @param selector
-    @like up.on
-  @param {Object} [options]
-    See [options for `up.on()`](/up.on).
-  @param listener
-    @like up.on
-  @return
-    @like up.on
+  @include options/on-without-element
   @stable
   */
 
@@ -1398,10 +1389,7 @@ up.layer = (function() {
   See `up.Layer#off()` for more documentation.
 
   @function up.layer.off
-  @param types
-    @like up.off
-  @param listener
-    @like up.off
+  @include options/off-without-element
   @stable
   */
 
@@ -1412,8 +1400,7 @@ up.layer = (function() {
   See `up.Layer#emit()` for more documentation.
 
   @function up.layer.emit
-  @param {string} eventType
-  @param {Object} [props={}]
+  @include options/emit-without-element
   @stable
   */
 
@@ -1526,9 +1513,7 @@ up.layer = (function() {
   See `up.Layer#affix` for more documentation.
 
   @function up.layer.affix
-  @param {Element} element
-  @param {string} selector
-  @param {Object} attrs
+  @include options/create-element-from-selector
   @experimental
   */
 
