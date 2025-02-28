@@ -68,18 +68,21 @@ the events `up:fragment:aborted` and `up:request:aborted` are emitted.
 
 To simplify the registration of code when a fragment or its ancestor is aborted, use `up.fragment.onAborted()`.
 
+## Aborting rules in layers {#layers}
 
-## Other aborting rules
+The following rules apply when opening or closing [overlays](/up.layer):
 
-Unpoly handles the following edge cases, which sometimes require requests to be aborted:
+- A request to open a new overlay will abort existing requests targeting the base layer's [main element](/main) or its descendants.
+- When two requests attempt to [open a new overlay](/up-layer-new) over the same base layer, the first request will be aborted by the second request.
+- A request to open a new overlay is aborted when the base layer's [main element](/main) is targeted by a second request.
+- When a layer is closed, all pending requests targeting that layer are aborted. This is regardless of the `{ abort }` option used.
 
-- When a fragment is removed from the DOM (by [rendering](/up.render) or explicit [destroying](/up.destroy)),
-  any request targeting this fragment is aborted. This is regardless of the `{ abort }` option used.
-- When a layer is closed, all pending requests targeting that layer are aborted.
-  This is regardless of the `{ abort }` option used.
-- The mere act of [preloading a link](/preloading) does not abort pending requests. Only when actually rendering
-  from a preloaded response, requests targeting the same fragment are aborted.
-- When two requests attempt to [open a new layer](/up-layer-new), the first request will be aborted by the second request.
-- A request to open a new layer is also aborted when the base layer's [main element](/main) is targeted by a second request.
+
+## Destroyed fragments are aborted
+
+When a fragment is removed from the DOM (by [rendering](/up.render) or explicit [destroying](/up.destroy)),
+any request targeting this fragment (or its descendants) is aborted.
+
+This is regardless of the `{ abort }` option used for the render pass.
 
 @page aborting-requests

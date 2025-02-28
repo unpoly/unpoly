@@ -12,6 +12,3 @@
   Whether to close overlays obstructing the updated layer when the fragment is updated.
 
   This is only relevant when updating a layer that is not the [frontmost layer](/up.layer.front).
-
-@param {Object} [options.context]
-  An object that will be merged into the [context](/context) of the current layer once the fragment is rendered.

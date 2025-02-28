@@ -446,6 +446,20 @@ describe('up.layer', function() {
 
           expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), 'move-from-top', jasmine.anything())
         })
+
+        it('accepts a { closeAnimation } option for closing', async function() {
+          up.motion.config.enabled = true
+          spyOn(up, 'animate').and.callThrough()
+
+          await up.layer.open({ openAnimation: false, closeAnimation: 'move-to-bottom' })
+
+          expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), false, jasmine.anything())
+
+          await up.layer.dismiss()
+
+          expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), 'move-to-bottom', jasmine.anything())
+
+        })
       })
 
       describe('events', function() {

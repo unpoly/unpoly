@@ -43,11 +43,7 @@ By default the new overlay will be stacked on top of the current layer. There is
 
 You can pass an option `[up-layer="swap"]` or `[up-layer="shatter"]` to replace existing overlays:
 
-| Option     | Description                                                            |
-| ---------- | ---------------------------------------------------------------------- |
-| `new`      | Stacks a new overlay over the current layer.                           |
-| `swap`     | Replaces the current overlay. If no overlay is open, opens an overlay. |
-| `shatter`  | Closes all overlays and opens a new overlay.                           |
+@include new-overlay-placement-table
 
 
 Opening overlays from local content {#string}

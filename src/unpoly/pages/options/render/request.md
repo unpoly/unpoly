@@ -34,7 +34,7 @@
   Whether the request may be aborted by other requests [targeting](/targeting-fragments)
   the same fragments or layer.
 
-  See [Preventing a request from being aborted](/aborting-requests#preventing).
+  See [Aborting rules in layers](/aborting-requests#layers).
 
 @param {boolean} [options.background=false]
   Whether this request will load in the background.

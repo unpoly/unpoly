@@ -189,6 +189,7 @@ up.history = (function() {
 
     When set to `false` this function will consider the URLs `/foo#one` and `/foo#two` to be equal.
   @return {boolean}
+    Whether the browser is currently at the given location.
   @experimental
   */
   function isLocation(url, options) {
