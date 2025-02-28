@@ -17,7 +17,7 @@ the background layer during compilation.
 up.Layer = class Layer extends up.Record {
 
   /*-
-  This layer's outmost element.
+  This layer's outmost container element.
 
   ### Example
 
@@ -31,6 +31,7 @@ up.Layer = class Layer extends up.Record {
 
   @property up.Layer#element
   @param {Element} element
+    The layer's container element.
   @stable
   */
 
@@ -41,6 +42,7 @@ up.Layer = class Layer extends up.Record {
 
   @property up.Layer#history
   @param {boolean} history
+    Whether this layer renders history.
   @stable
   */
 
@@ -51,6 +53,7 @@ up.Layer = class Layer extends up.Record {
 
   @property up.Layer#mode
   @param {string} mode
+    The layer mode.
   @stable
   */
 

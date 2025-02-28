@@ -1382,7 +1382,9 @@ up.layer = (function() {
 
   @function up.layer.dismiss
   @param {any} [value]
+    @like up.Layer#dismiss
   @param {Object} [options]
+    See [options for `up.Layer#dismiss()`](/up.Layer.prototype.dismiss#parameters).
   @stable
   */
 
@@ -1445,10 +1447,11 @@ up.layer = (function() {
   Returns whether the [current layer](/up.layer.current) is the [root layer](/up.layer.root).
 
   This is a shortcut for `up.layer.current.isRoot()`.
-  See `up.Layer#isRoot()` for more documentation..
+  See `up.Layer#isRoot()` for more documentation.
 
   @function up.layer.isRoot
-  @return {boolean}
+  @return
+    @like up.Layer#isRoot
   @stable
   */
 
@@ -1459,7 +1462,8 @@ up.layer = (function() {
   See `up.Layer#isOverlay()` for more documentation.
 
   @function up.layer.isOverlay
-  @return {boolean}
+  @return
+    @like up.Layer#isOverlay
   @stable
   */
 
@@ -1470,7 +1474,8 @@ up.layer = (function() {
   See `up.Layer#isFront()` for more documentation.
 
   @function up.layer.isFront
-  @return {boolean}
+  @return
+    @like up.Layer#isOverlay
   @stable
   */
 
@@ -1522,7 +1527,8 @@ up.layer = (function() {
   See `up.Layer#parent` for more documentation.
 
   @property up.layer.parent
-  @param {up.Layer} parent
+  @param parent
+    @like up.Layer#parent
   @stable
   */
 
@@ -1534,7 +1540,8 @@ up.layer = (function() {
   See `up.Layer#history` for more documentation.
 
   @property up.layer.history
-  @param {boolean} history
+  @param history
+    @like up.Layer#history
   @stable
   */
 
@@ -1545,7 +1552,8 @@ up.layer = (function() {
   See `up.Layer#location` for more documentation.
 
   @property up.layer.location
-  @param {string} location
+  @param location
+    @like up.Layer#location
   @stable
   */
 
@@ -1553,21 +1561,26 @@ up.layer = (function() {
   The [current layer](/up.layer.current)'s [mode](/up.layer.mode)
   which governs its appearance and behavior.
 
+  This is a shortcut for `up.layer.current.mode`.
+  See `up.Layer#mode` for more documentation.
+
   @property up.layer.mode
-  @param {string} mode
+  @param mode
+    @like up.Layer#mode
   @stable
   */
 
   /*-
   The [context](/context) of the [current layer](/up.layer.current).
 
-  This is aliased as `up.context`.
+  This is a shortcut for `up.layer.current.context`.
+  See `up.Layer#context` for more documentation.
+
+  Aliased as `up.context`.
 
   @property up.layer.context
-  @param {string} context
-    The context object.
-
-    If no context has been set an empty object is returned.
+  @param context
+    @like up.Layer#context
   @experimental
   */
 
@@ -1578,7 +1591,8 @@ up.layer = (function() {
   See `up.Layer#element` for more documentation.
 
   @property up.layer.element
-  @param {Element} element
+  @param element
+    @like up.Layer#element
   @stable
   */
 
@@ -1589,7 +1603,10 @@ up.layer = (function() {
   See `up.Layer#contains` for more documentation.
 
   @function up.layer.contains
-  @param {Element} element
+  @param element
+    @like up.Layer#contains
+  @return
+    @like up.Layer#contains
   @stable
   */
 
@@ -1601,7 +1618,8 @@ up.layer = (function() {
   See `up.Layer#size` for more documentation.
 
   @property up.layer.size
-  @param {string} size
+  @param size
+    @like up.Layer#size
   @stable
   */
 
