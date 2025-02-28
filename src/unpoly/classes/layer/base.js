@@ -479,7 +479,7 @@ up.Layer = class Layer extends up.Record {
   ```
 
   @function up.Layer#on
-  @include options/on-without-element
+  @include up.on/after-element
   @stable
   */
   on(...args) {
@@ -490,7 +490,7 @@ up.Layer = class Layer extends up.Record {
   Unbinds an event listener previously bound with `up.Layer#on()`.
 
   @function up.Layer#off
-  @include options/off-without-element
+  @include up.off/after-element
   @stable
   */
   off(...args) {
@@ -545,6 +545,8 @@ up.Layer = class Layer extends up.Record {
   @param props
     @like up.emit
   @param props.log
+    @like up.emit
+  @return
     @like up.emit
   @stable
   */
@@ -773,7 +775,7 @@ up.Layer = class Layer extends up.Record {
   ```
 
   @function up.Layer#affix
-  @include options/create-element-from-selector
+  @include up.element.createFromSelector/all
   @experimental
   */
   affix(...args) {

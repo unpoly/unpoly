@@ -289,47 +289,47 @@ up.link = (function() {
       options parsed from the link attributes.
 
   @section Targeting
-    @mix options/render/targeting
+    @mix up.render/targeting
 
   @section Navigation
-    @mix options/render/navigation
+    @mix up.render/navigation
       @param [options.navigate=true]
 
   @section Request
-    @mix options/render/request
+    @mix up.render/request
 
   @section Local content
-    @mix options/render/local-content
+    @mix up.render/local-content
 
   @section Layer
-    @mix options/render/layer
+    @mix up.render/layer
 
   @section History
-    @mix options/render/history
+    @mix up.render/history
 
   @section Animation
-    @mix options/render/motion
+    @mix up.render/motion
 
   @section Caching
-    @mix options/render/caching
+    @mix up.render/caching
 
   @section Scrolling
-    @mix options/render/scrolling
+    @mix up.render/scrolling
 
   @section Focus
-    @mix options/render/focus
+    @mix up.render/focus
 
   @section Loading state
-    @mix options/render/loading-state
+    @mix up.render/loading-state
 
   @section Failed responses
-    @mix options/render/failed-responses
+    @mix up.render/failed-responses
 
   @section Client state
-    @mix options/render/client-state
+    @mix up.render/client-state
 
   @section Lifecycle hooks
-    @mix options/render/lifecycle-hooks
+    @mix up.render/lifecycle-hooks
 
   @return
     @like up.render
@@ -1176,46 +1176,46 @@ up.link = (function() {
   @selector [up-follow]
 
   @section Targeting
-    @mix attrs/follow/targeting
+    @mix up-follow/targeting
 
   @section Navigation
-    @mix attrs/follow/navigation
+    @mix up-follow/navigation
 
   @section Request
-    @mix attrs/follow/request
+    @mix up-follow/request
 
   @section Local content
-    @mix attrs/follow/local-content
+    @mix up-follow/local-content
 
   @section Layer
-    @mix attrs/follow/layer
+    @mix up-follow/layer
 
   @section History
-    @mix attrs/follow/history
+    @mix up-follow/history
 
   @section Animation
-    @mix attrs/follow/motion
+    @mix up-follow/motion
 
   @section Caching
-    @mix attrs/follow/caching
+    @mix up-follow/caching
 
   @section Scrolling
-    @mix attrs/follow/scrolling
+    @mix up-follow/scrolling
 
   @section Focus
-    @mix attrs/follow/focus
+    @mix up-follow/focus
 
   @section Loading state
-    @mix attrs/follow/loading-state
+    @mix up-follow/loading-state
 
   @section Failed responses
-    @mix attrs/follow/failed-responses
+    @mix up-follow/failed-responses
 
   @section Client state
-    @mix attrs/follow/client-state
+    @mix up-follow/client-state
 
   @section Lifecycle hooks
-    @mix attrs/follow/lifecycle-hooks
+    @mix up-follow/lifecycle-hooks
 
   @stable
   */

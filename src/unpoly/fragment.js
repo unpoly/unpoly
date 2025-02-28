@@ -544,46 +544,46 @@ up.fragment = (function() {
       Instead of passing the target as the first argument, you may also pass it as
       a `{ target }` option. See [`{ target }`](#options.target) for details.
 
-    @mix options/render/targeting
+    @mix up.render/targeting
 
   @section Navigation
-    @mix options/render/navigation
+    @mix up.render/navigation
 
   @section Request
-    @mix options/render/request
+    @mix up.render/request
 
   @section Local content
-    @mix options/render/local-content
+    @mix up.render/local-content
 
   @section Layer
-    @mix options/render/layer
+    @mix up.render/layer
 
   @section History
-    @mix options/render/history
+    @mix up.render/history
 
   @section Animation
-    @mix options/render/motion
+    @mix up.render/motion
 
   @section Caching
-    @mix options/render/caching
+    @mix up.render/caching
 
   @section Scrolling
-    @mix options/render/scrolling
+    @mix up.render/scrolling
 
   @section Focus
-    @mix options/render/focus
+    @mix up.render/focus
 
   @section Loading state
-    @mix options/render/loading-state
+    @mix up.render/loading-state
 
   @section Failed responses
-    @mix options/render/failed-responses
+    @mix up.render/failed-responses
 
   @section Client state
-    @mix options/render/client-state
+    @mix up.render/client-state
 
   @section Lifecycle hooks
-    @mix options/render/lifecycle-hooks
+    @mix up.render/lifecycle-hooks
 
   @return {up.RenderJob}
     A promise that fulfills with an `up.RenderResult` once the page has been updated.
@@ -1612,23 +1612,23 @@ up.fragment = (function() {
       Whether the reloading constitutes a [user navigation](/navigation).
 
   @section Request
-    @mix options/render/request
+    @mix up.render/request
       @param options.url
         The URL from which to reload the fragment.
 
         Defaults to the [URL from which the fragment was originally loaded](/up.fragment.source).
 
   @section Loading state
-    @mix options/render/loading-state
+    @mix up.render/loading-state
 
   @section Failed responses
-    @mix options/render/failed-responses
+    @mix up.render/failed-responses
 
   @section Client state
-    @mix options/reload/client-state
+    @mix up.reload/client-state
 
   @section Lifecycle hooks
-    @mix options/render/lifecycle-hooks
+    @mix up.render/lifecycle-hooks
 
   @return
     @like up.render

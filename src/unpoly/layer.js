@@ -459,7 +459,7 @@ up.layer = (function() {
       See [popup position](/customizing-overlays#popup-position).
 
   @section Request
-    @mix options/render/request
+    @mix up.render/request
       @param options.abort
         Whether to abort existing requests before rendering.
 
@@ -479,7 +479,7 @@ up.layer = (function() {
         See [Preventing a request from being aborted](/aborting-requests#preventing).
 
   @section Local content
-    @mix options/render/local-content
+    @mix up.render/local-content
 
   @section Customization
 
@@ -535,7 +535,7 @@ up.layer = (function() {
       @experimental
 
   @section History
-    @mix options/render/history
+    @mix up.render/history
       @param {boolean|string} [options.history]
         Whether the overlay has [visible history](/history-in-overlays).
 
@@ -631,7 +631,7 @@ up.layer = (function() {
 
       The function argument is an `up:layer:dismissed` event.
 
-    @include attrs/follow/lifecycle-hooks
+    @include up-follow/lifecycle-hooks
 
   @return {Promise<up.Layer>}
     A promise for the `up.Layer` object that describes the new overlay.
@@ -830,7 +830,7 @@ up.layer = (function() {
       @like up.layer.open/options.align
 
   @section Request
-    @mix attrs/follow/request
+    @mix up-follow/request
       @param [up-abort]
         Whether to abort existing requests before rendering.
 
@@ -850,7 +850,7 @@ up.layer = (function() {
         See [Preventing a request from being aborted](/aborting-requests#preventing).
 
   @section Local content
-    @mix attrs/follow/local-content
+    @mix up-follow/local-content
 
   @section Customization
     @param [up-mode='modal']
@@ -894,7 +894,7 @@ up.layer = (function() {
       @experimental
 
   @section History
-    @mix attrs/follow/history
+    @mix up-follow/history
       @param [up-history]
         Whether the overlay has [visible history](/history-in-overlays).
 
@@ -1007,7 +1007,7 @@ up.layer = (function() {
       | `response` | The server response that caused the overlay to close |
       | `event`    | An `up:layer:dismissed` event                  |
 
-    @mix attrs/follow/lifecycle-hooks
+    @mix up-follow/lifecycle-hooks
 
   @stable
   */
@@ -1482,7 +1482,7 @@ up.layer = (function() {
   See `up.Layer#on()` for more documentation.
 
   @function up.layer.on
-  @include options/on-without-element
+  @include up.on/after-element
   @stable
   */
 
@@ -1493,7 +1493,7 @@ up.layer = (function() {
   See `up.Layer#off()` for more documentation.
 
   @function up.layer.off
-  @include options/off-without-element
+  @include up.off/after-element
   @stable
   */
 
@@ -1509,6 +1509,8 @@ up.layer = (function() {
   @param props
     @like up.Layer#emit
   @param props.log
+    @like up.Layer#emit
+  @return
     @like up.Layer#emit
   @stable
   */
@@ -1611,7 +1613,7 @@ up.layer = (function() {
   See `up.Layer#affix` for more documentation.
 
   @function up.layer.affix
-  @include options/create-element-from-selector
+  @include up.element.createFromSelector/all
   @experimental
   */
 

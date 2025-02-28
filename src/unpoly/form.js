@@ -271,7 +271,7 @@ up.form = (function() {
       options parsed from attributes.  See `[up-submit]` for a list of supported attributes.
 
   @section Targeting
-    @mix options/render/targeting
+    @mix up.render/targeting
       @param options.origin
         The element that triggered the form submission.
 
@@ -283,35 +283,35 @@ up.form = (function() {
         - The `<form>` element
 
   @section Navigation
-    @mix options/render/navigation
+    @mix up.render/navigation
       @param [options.navigate=true]
 
   @section Request
-    @mix options/submit/request
+    @mix up.submit/request
 
   @section Layer
-    @mix options/render/layer
+    @mix up.render/layer
 
   @section History
-    @mix options/render/history
+    @mix up.render/history
 
   @section Animation
-    @mix options/render/motion
+    @mix up.render/motion
 
   @section Caching
-    @mix options/render/caching
+    @mix up.render/caching
 
   @section Scrolling
-    @mix options/render/scrolling
+    @mix up.render/scrolling
 
   @section Focus
-    @mix options/render/focus
+    @mix up.render/focus
 
   @section Loading state
-    @mix options/submit/loading-state
+    @mix up.submit/loading-state
 
   @section Failed responses
-    @mix options/render/failed-responses
+    @mix up.render/failed-responses
       @param options.failTarget
         The [target selector](/targeting-fragments) to update when the server responds with an error code.
 
@@ -320,10 +320,10 @@ up.form = (function() {
         @see failed-responses
 
   @section Client state
-    @mix options/render/client-state
+    @mix up.render/client-state
 
   @section Lifecycle hooks
-    @mix options/render/lifecycle-hooks
+    @mix up.render/lifecycle-hooks
 
   @return
     @like up.render
@@ -860,10 +860,10 @@ up.form = (function() {
       Common options are documented below, but most [options for `up.submit()`](/up.submit#parameters) may be used.
 
   @section Request
-    @include options/submit/request
+    @include up.submit/request
 
   @section Loading state
-    @include options/render/loading-state
+    @include up.render/loading-state
 
   @return {Function()}
     A destructor function that stops auto-submitting when called.
@@ -1103,7 +1103,7 @@ up.form = (function() {
       the option from the last validation in the batch will be used.
 
   @section Client state
-    @mix options/reload/client-state
+    @mix up.reload/client-state
 
   @section Request
     @param options.params
@@ -1113,7 +1113,7 @@ up.form = (function() {
       @like up.render
 
   @section Loading state
-    @mix options/submit/loading-state
+    @mix up.submit/loading-state
 
   @return {Promise<up.RenderResult}}
     A promise that fulfills when the server-side validation is received and the form was updated.
@@ -1391,12 +1391,12 @@ up.form = (function() {
   @selector [up-submit]
 
   @section Targeting
-    @mix attrs/follow/targeting
+    @mix up-follow/targeting
       @param [up-target]
         The [target selector](/targeting-fragments) to update for a successful form submission.
 
   @section Navigation
-    @mix attrs/follow/navigation
+    @mix up-follow/navigation
 
   @section Request
     @param action
@@ -1410,7 +1410,7 @@ up.form = (function() {
       You can also use methods that would not be allowed on a `<form>` element,
       such as `'patch`' or `'delete'`. These will be [wrapped in a POST request](/up.network.config#config.wrapMethod).
 
-    @mix attrs/follow/request-extras
+    @mix up-follow/request-extras
       @param up-params
         Additional [Form parameters](/up.Params) that should be sent as the request's
         [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
@@ -1419,32 +1419,32 @@ up.form = (function() {
         from the form's input fields.
 
   @section Layer
-    @mix attrs/follow/layer
+    @mix up-follow/layer
 
   @section History
-    @mix attrs/follow/history
+    @mix up-follow/history
 
   @section Animation
-    @mix attrs/follow/motion
+    @mix up-follow/motion
 
   @section Caching
-    @mix attrs/follow/caching
+    @mix up-follow/caching
 
   @section Scrolling
-    @mix attrs/follow/scrolling
+    @mix up-follow/scrolling
 
   @section Focus
-    @mix attrs/follow/focus
+    @mix up-follow/focus
 
   @section Loading state
-    @mix attrs/follow/loading-state
+    @mix up-follow/loading-state
       @param up-disable
         [Disables form controls](/disabling-forms) while the request is loading.
 
         The values of disabled fields will still be included in the submitted form params.
 
   @section Failed responses
-    @mix attrs/follow/failed-responses
+    @mix up-follow/failed-responses
       @param up-fail-target
         The [target selector](/targeting-fragments) to update when the server responds with an error code.
 
@@ -1453,10 +1453,10 @@ up.form = (function() {
         @see failed-responses
 
   @section Client state
-    @mix attrs/follow/client-state
+    @mix up-follow/client-state
 
   @section Lifecycle hooks
-    @mix attrs/follow/lifecycle-hooks
+    @mix up-follow/lifecycle-hooks
 
   @stable
   */
@@ -1784,11 +1784,11 @@ up.form = (function() {
       Defaults the closest [form group](/up-form-group) around the validating field.
 
   @section Event source
-    @mix attrs/watch/event-source
+    @mix up-watch/event-source
       @param [up-watch-event='change']
 
   @section Loading state
-    @mix attrs/watch/loading-state
+    @mix up-watch/loading-state
 
   @stable
   */
@@ -2059,7 +2059,7 @@ up.form = (function() {
       See [callback context](#callback-context).
 
   @section Event source
-    @mix attrs/watch/event-source
+    @mix up-watch/event-source
 
   @stable
   */
@@ -2114,10 +2114,10 @@ up.form = (function() {
   @selector [up-autosubmit]
 
   @section Event source
-    @mix attrs/watch/event-source
+    @mix up-watch/event-source
 
   @section Loading state
-    @mix attrs/watch/loading-state
+    @mix up-watch/loading-state
 
   @stable
   */

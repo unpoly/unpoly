@@ -493,7 +493,7 @@ up.element = (function() {
   ```
 
   @function up.element.createFromSelector
-  @include options/create-element-from-selector
+  @include up.element.createFromSelector/all
   @stable
   */
   function createFromSelector(selector, attrs = {}) {
@@ -669,7 +669,7 @@ up.element = (function() {
     The position of the new element in relation to `parent`.
 
     @include adjacent-positions
-  @include options/create-element-from-selector
+  @include up.element.createFromSelector/all
   @stable
   */
   function affix(...args) {
