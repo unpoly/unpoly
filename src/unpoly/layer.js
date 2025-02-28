@@ -448,7 +448,7 @@ up.layer = (function() {
       When opening a popup, the overlay will be anchored relative to the origin element.
 
     @param {string} [options.position]
-      For **popups**, the position of the popup relative to the `{ origin }` element that opened
+      For **popups**, the position of the popup relative to the link or button that opened
       the overlay. See [popup position](/customizing-overlays#popup-position).
 
       For **drawers**, the screen edge on which to position the drawer (`left` or `right`).
@@ -526,7 +526,7 @@ up.layer = (function() {
     @param {Object} [options.data]
       The [data object](/data) object for the overlay's root content element (`{ target }`).
 
-      If the content element already has an `[up-data]` object, this option will override
+      If the content element already has an `[up-data]` attribute, this option will override
       individual properties from that attribute.
 
     @param {Object} [options.context={}]
@@ -551,14 +551,14 @@ up.layer = (function() {
         See [History in overlays](/history-in-overlays).
 
   @section Animation
-    @param {string|Function|boolean} [options.openAnimation='fade-in']
+    @param {string|Function|boolean} [options.animation='fade-in']
       The opening animation.
 
-    @param {string} [options.openEasing='ease']
+    @param {string} [options.easing='ease']
       The [timing function](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
       that controls the opening animation's acceleration.
 
-    @param {number} [options.openDuration=175]
+    @param {number} [options.duration=175]
       The duration of the opening animation in milliseconds.
 
     @param {string|Function|boolean} [options.closeAnimation='fade-out']
@@ -631,8 +631,10 @@ up.layer = (function() {
 
       The function argument is an `up:layer:dismissed` event.
 
+    @include attrs/follow/lifecycle-hooks
+
   @return {Promise<up.Layer>}
-    A promise for the `up.Layer` object that models the new overlay.
+    A promise for the `up.Layer` object that describes the new overlay.
 
     The promise is fulfilled once the overlay was placed into the DOM.
     At this time an overlay's opening animation will still be playing.
@@ -759,11 +761,11 @@ up.layer = (function() {
     See options for `up.layer.open()`.
 
   @return {Promise}
-    A promise that will settle when the overlay closes.
+    A promise that settles when the overlay closes.
 
-    When the overlay was accepted, the promise will fulfill with the overlay's acceptance value.
+    When the overlay was accepted, the promise will fulfill with the overlay's [acceptance value](/closing-overlays#acceptance-values).
 
-    When the overlay was dismissed, the promise will reject with the overlay's dismissal value.
+    When the overlay was dismissed, the promise will reject with the overlay's [dismissal reason](/closing-overlays#dismissal-reasons).
 
   @stable
   */
@@ -807,151 +809,205 @@ up.layer = (function() {
   @selector [up-layer=new]
 
   @params-note
-    All attributes for `[up-follow]` may also be used.
+    All attributes for `[up-follow]` can also be used.\
+    Default layer attributes can be configured in `up.layer.config`.
 
-    You may configure default layer attributes in `up.layer.config`.
+  @section Placement
+    @param [up-target]
+      The selector of root content element to place inside the overlay container.
 
-  @param [up-layer="new"]
-    Whether to stack the new overlay onto the current layer or replace existing overlays.
+      The target must be matchable within the HTML provided by either `[href]`, `[up-content]`, `[up-fragment]` or `[up-document]` option.
 
-    See [replacing existing overlays](/opening-overlays#replacing-existing-overlays).
+      If the attribute is emitted, Unpoly will use the first matching [main target](/up-main) configured for the overlay mode. E.g. the default selectors for modals are configured in `up.layer.config.modal.mainTargets`. See [main targets in overlays](/up-main#overlays).
 
-  @param [up-mode='modal']
-    The kind of overlay to open.
+    @param [up-layer="new"]
+      @like up.layer.open/options.layer
 
-    Defaults to `up.layer.config.mode`, which defaults to `'modal'`.
+    @param [up-position]
+      @like up.layer.open/options.position
 
-    See [available layer modes](/layer-terminology#available-modes).
+    @param [up-align]
+      @like up.layer.open/options.align
 
-  @param [up-size='medium']
-    The size of the overlay.
+  @section Request
+    @mix attrs/follow/request
+      @param [up-abort]
+        Whether to abort existing requests before rendering.
 
-    See [overlay sizes](/customizing-overlays#overlay-sizes) for details.
+        By default, opening a new overlay will abort all requests within the [main](/main) element
+        of its base layer.
 
-  @param [up-class]
-    An optional HTML class for the overlay's container element.
+        See [aborting requests](/aborting-requests) for details and a list of options.
 
-    See [overlay classes](/customizing-overlays#overlay-classes).
+      @param [up-abortable]
+        Whether the request may be aborted by other requests.
 
-  @param [up-history]
-    Whether the overlay has [visible history](/history-in-overlays).
+        By default, the request will be aborted:
 
-    If set to `'true'` the overlay location, title and meta tags will be shown
-    while the overlay is open. When the overlay is closed, the parent layer's history is restored.
+        - By another request opening another overlay from the same base layer
+        - By another request targeting the base layer's [main](/main) element
 
-    If set to `'auto'` history will be visible if the initial overlay
-    content matches a [main target](/up-main).
+        See [Preventing a request from being aborted](/aborting-requests#preventing).
 
-    If set to `'false'`, fragments changes within the overlay will *never* update the address bar.
-    You can still access the overlay's current location using `up.layer.location`.
+  @section Local content
+    @mix attrs/follow/local-content
 
-    See [History in overlays](/history-in-overlays).
+  @section Customization
+    @param [up-mode='modal']
+      The kind of overlay to open.
 
-  @param [up-dismissable]
-    How the overlay may be [dismissed](/closing-overlays) by the user.
+      Defaults to `up.layer.config.mode`, which defaults to `'modal'`.
 
-    See [customizing dismiss controls](/closing-overlays#customizing-dismiss-controls)
-    for details.
+      See [available layer modes](/layer-terminology#available-modes).
 
-    You may enable multiple dismiss controls by separating values with a space or comma character.
+    @param [up-size='medium']
+      The size of the overlay.
 
-    Passing `true` or `false` will enable or disable all dismiss controls.
+      See [overlay sizes](/customizing-overlays#overlay-sizes) for details.
 
-  @param [up-animation]
-    The [name](/predefined-animations) of the opening animation.
+    @param [up-class]
+      An optional HTML class for the overlay's container element.
 
-  @param [up-on-opened]
-    A JavaScript snippet that is called when the overlay was inserted into the DOM.
+      See [overlay classes](/customizing-overlays#overlay-classes).
 
-    The snippet runs in the following scope:
+    @param [up-dismissable]
+      How the overlay may be [dismissed](/closing-overlays) by the user.
 
-    | Expression | Value                                    |
-    |------------|------------------------------------------|
-    | `this`     | The link that opened the overlay         |
-    | `layer`    | An `up.Layer` object for the new overlay |
-    | `event`    | An `up:layer:opened` event               |
+      See [customizing dismiss controls](/closing-overlays#customizing-dismiss-controls)
+      for details.
 
-  @param [up-on-accepted]
-    A JavaScript snippet that is called when the overlay was [accepted](/closing-overlays).
+      You may enable multiple dismiss controls by separating values with a space or comma character.
 
-    The snippet runs in the following scope:
+      Passing `true` or `false` will enable or disable all dismiss controls.
 
-    | Expression | Value                                         |
-    |------------|-----------------------------------------------|
-    | `this`     | The link that originally opened the overlay   |
-    | `layer`    | An `up.Layer` object for the accepted overlay |
-    | `value`    | The overlay's [acceptance value](/closing-overlays#overlay-result-values) |
-    | `response` | The server response that caused the overlay to close |
-    | `event`    | An `up:layer:accepted` event                  |
+  @section Client state
+    @param [up-use-data]
+      The [data object](/data) object for the overlay's root content element (`[up-target]`),
+      encoded as [relaxed JSON](/relaxed-json).
 
-  @param [up-on-dismissed]
-    A JavaScript snippet that is called when the overlay was [dismissed](/closing-overlays).
+      If the content element already has an `[up-data]` attribute, this option will override
+      individual properties from that attribute.
 
-    The snippet runs in the following scope:
+    @param [up-context]
+      The new overlay's [context](/up.layer.context) object, encoded as [relaxed JSON](/relaxed-json).
 
-    | Expression | Value                                          |
-    |------------|------------------------------------------------|
-    | `this`     | The link that originally opened the overlay    |
-    | `layer`    | An `up.Layer` object for the dismissed overlay |
-    | `value`    | The overlay's [dismissal value](/closing-overlays#overlay-result-values) |
-    | `response` | The server response that caused the overlay to close |
-    | `event`    | An `up:layer:dismissed` event                  |
+      @experimental
 
-  @param [up-accept-event]
-    One or more space-separated event types that will cause this overlay to automatically be
-    [accepted](/closing-overlays) when a matching event occurs within the overlay.
+  @section History
+    @mix attrs/follow/history
+      @param [up-history]
+        Whether the overlay has [visible history](/history-in-overlays).
 
-    The [overlay result value](/closing-overlays#overlay-result-values)
-    is the event object that caused the overlay to close.
+        If set to `'true'` the overlay location, title and meta tags will be shown
+        while the overlay is open. When the overlay is closed, the parent layer's history is restored.
 
-    See [Closing when an event is emitted](/closing-overlays#event-condition).
+        If set to `'auto'` history will be visible if the initial overlay
+        content matches a [main target](/up-main).
 
-  @param [up-dismiss-event]
-    One or more space-separated event types that will cause this overlay to automatically be
-    [dismissed](/closing-overlays) when a matching event occurs within the overlay.
+        If set to `'false'`, fragments changes within the overlay will *never* update the address bar.
+        You can still access the overlay's current location using `up.layer.location`.
 
-    The [overlay result value](/closing-overlays#overlay-result-values)
-    is the event object that caused the overlay to close.
+        See [History in overlays](/history-in-overlays).
 
-    See [Closing when an event is emitted](/closing-overlays#event-condition).
+  @section Animation
+    @param [up-animation='fade-in']
+      The [name](/predefined-animations) of the opening animation.
 
-  @param [up-accept-location]
-    One or more space-separated [URL patterns](/url-patterns) that will cause this overlay to automatically be
-    [accepted](/closing-overlays) when the overlay reaches a matching [location](/up.layer.location).
+    @param [up-easing='ease']
+      The [timing function](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
+      that controls the opening animation's acceleration.
 
-    The [overlay result value](/closing-overlays#overlay-result-values)
-    is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
-    by the URL pattern.
+    @param [up-duration='175']
+      The duration of the opening animation in milliseconds.
 
-    See [Closing when a location is reached](/closing-overlays#location-condition).
+    @param [up-close-animation='fade-out']
+      The [name](/predefined-animations) of the closing animation.
 
-  @param [up-dismiss-location]
-    One or more space-separated [URL patterns](/url-patterns) that will cause this overlay to automatically be
-    [dismissed](/closing-overlays) when the overlay reaches a matching [location](/up.layer.location).
+    @param [up-close-easing='ease']
+      The [timing function](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
+      that controls the closing animation's acceleration.
 
-    The [overlay result value](/closing-overlays#overlay-result-values)
-    is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
-    by the URL pattern.
+    @param [up-close-duration=175]
+      The duration of the closing animation in milliseconds.
 
-    See [Closing when a location is reached](/closing-overlays#location-condition).
+  @section Close conditions
+    @param [up-accept-event]
+      One or more space-separated event types that will cause this overlay to automatically be
+      [accepted](/closing-overlays) when a matching event occurs within the overlay.
 
-  @param [up-context]
-    The new overlay's [context](/up.layer.context) object, encoded as [relaxed JSON](/relaxed-json).
+      The [overlay result value](/closing-overlays#overlay-result-values)
+      is the event object that caused the overlay to close.
 
-    @experimental
+      See [Closing when an event is emitted](/closing-overlays#event-condition).
 
-  @param [up-position]
-    The position of the overlay.
+    @param [up-dismiss-event]
+      One or more space-separated event types that will cause this overlay to automatically be
+      [dismissed](/closing-overlays) when a matching event occurs within the overlay.
 
-    For **popups**, the position of the popup relative to the origin element that opened
-    the overlay. See [popup position](/customizing-overlays#popup-position).
+      The [overlay result value](/closing-overlays#overlay-result-values)
+      is the event object that caused the overlay to close.
 
-    For **drawers**, the screen edge on which to position the drawer (`left` or `right`).
-    See [drawer position](/customizing-overlays#drawer-position).
+      See [Closing when an event is emitted](/closing-overlays#event-condition).
 
-  @param [up-align]
-    For **popups**, the alignment of the popup within its position.
-    See [popup position](/customizing-overlays#popup-position).
+    @param [up-accept-location]
+      One or more space-separated [URL patterns](/url-patterns) that will cause this overlay to automatically be
+      [accepted](/closing-overlays) when the overlay reaches a matching [location](/up.layer.location).
+
+      The [overlay result value](/closing-overlays#overlay-result-values)
+      is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
+      by the URL pattern.
+
+      See [Closing when a location is reached](/closing-overlays#location-condition).
+
+    @param [up-dismiss-location]
+      One or more space-separated [URL patterns](/url-patterns) that will cause this overlay to automatically be
+      [dismissed](/closing-overlays) when the overlay reaches a matching [location](/up.layer.location).
+
+      The [overlay result value](/closing-overlays#overlay-result-values)
+      is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
+      by the URL pattern.
+
+      See [Closing when a location is reached](/closing-overlays#location-condition).
+
+  @section Callbacks
+    @param [up-on-opened]
+      A JavaScript snippet that is called when the overlay was inserted into the DOM.
+
+      The snippet runs in the following scope:
+
+      | Expression | Value                                    |
+      |------------|------------------------------------------|
+      | `this`     | The link that opened the overlay         |
+      | `layer`    | An `up.Layer` object for the new overlay |
+      | `event`    | An `up:layer:opened` event               |
+
+    @param [up-on-accepted]
+      A JavaScript snippet that is called when the overlay was [accepted](/closing-overlays).
+
+      The snippet runs in the following scope:
+
+      | Expression | Value                                         |
+      |------------|-----------------------------------------------|
+      | `this`     | The link that originally opened the overlay   |
+      | `layer`    | An `up.Layer` object for the accepted overlay |
+      | `value`    | The overlay's [acceptance value](/closing-overlays#overlay-result-values) |
+      | `response` | The server response that caused the overlay to close |
+      | `event`    | An `up:layer:accepted` event                  |
+
+    @param [up-on-dismissed]
+      A JavaScript snippet that is called when the overlay was [dismissed](/closing-overlays).
+
+      The snippet runs in the following scope:
+
+      | Expression | Value                                          |
+      |------------|------------------------------------------------|
+      | `this`     | The link that originally opened the overlay    |
+      | `layer`    | An `up.Layer` object for the dismissed overlay |
+      | `value`    | The overlay's [dismissal value](/closing-overlays#overlay-result-values) |
+      | `response` | The server response that caused the overlay to close |
+      | `event`    | An `up:layer:dismissed` event                  |
+
+    @mix attrs/follow/lifecycle-hooks
 
   @stable
   */
@@ -976,18 +1032,20 @@ up.layer = (function() {
   You can also [omit the `[href]` attribute](/providing-html#omitting-href) to make a link that only works in overlays.
 
   @selector [up-dismiss]
-  @param [up-dismiss]
-    The overlay's [dismissal value](/closing-overlays#overlay-result-values) as a [relaxed JSON](/relaxed-json) value.
-  @param [up-confirm]
-    A message the user needs to confirm before the layer is closed.
-  @param [up-animation]
-    The [name](/predefined-animations) of the overlay's close animation.
 
-    Defaults to overlay's [preconfigured close animation](/up.layer.config).
-  @param [up-duration]
-    The close animation's duration in milliseconds.
-  @param [up-easing]
-    The close animation's easing function.
+  @section Dismissal
+    @param [up-dismiss]
+      The overlay's [dismissal value](/closing-overlays#overlay-result-values) as a [relaxed JSON](/relaxed-json) value.
+    @param [up-confirm]
+      A message the user needs to confirm before the layer is closed.
+
+  @section Animation
+    @param [up-animation]
+      @like [up-accept]
+    @param [up-duration]
+      @like [up-accept]
+    @param [up-easing]
+      @like [up-accept]
   @stable
   */
 
@@ -1011,14 +1069,21 @@ up.layer = (function() {
   You can also omit the `[href]` attribute to make a link that only works in overlays.
 
   @selector [up-accept]
-  @param [up-accept]
-    The overlay's [acceptance value](/closing-overlays#overlay-result-values) as a [relaxed JSON](/relaxed-json) value.
-  @param [up-confirm]
-    A message the user needs to confirm before the layer is closed.
-  @param [up-duration]
-    The close animation's duration in milliseconds.
-  @param [up-easing]
-    The close animation's easing function.
+
+  @section Acceptance
+    @param [up-accept]
+      The overlay's [acceptance value](/closing-overlays#overlay-result-values) as a [relaxed JSON](/relaxed-json) value.
+    @param [up-confirm]
+      A message the user needs to confirm before the layer is closed.
+
+  @section Animation
+    @param [up-animation]
+      @like [up-layer=new]/up-close-animation
+    @param [up-duration]
+      @like [up-layer=new]/up-close-duration
+    @param [up-easing]
+      @like [up-layer=new]/up-close-easing
+
   @stable
   */
 
@@ -1174,6 +1239,7 @@ up.layer = (function() {
   @param {string|up.Layer|number} [layer='current']
     The [layer option](/layer-option) to look up.
   @return {Array<up.Layer>}
+    An array of matching layers.
   @experimental
   */
 
@@ -1438,7 +1504,12 @@ up.layer = (function() {
   See `up.Layer#emit()` for more documentation.
 
   @function up.layer.emit
-  @include options/emit-without-element
+  @param eventType
+    @like up.Layer#emit
+  @param props
+    @like up.Layer#emit
+  @param props.log
+    @like up.Layer#emit
   @stable
   */
 
@@ -1496,17 +1567,6 @@ up.layer = (function() {
 
     If no context has been set an empty object is returned.
   @experimental
-  */
-
-  /*-
-  The outmost element of the [current layer](/up.layer.current).
-
-  This is a shortcut for `up.layer.current.element`.
-  See `up.Layer#element` for more documentation.
-
-  @property up.layer.element
-  @param {Element} element
-  @stable
   */
 
   /*-

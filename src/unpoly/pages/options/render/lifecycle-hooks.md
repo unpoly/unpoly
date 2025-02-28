@@ -1,11 +1,12 @@
 @partial options/render/lifecycle-hooks
 
 @param {string} [options.confirm]
-  A message the user needs to confirm before a request is made.
+  A message the user needs to confirm before any request or changes are made.
 
   The message will be shown as a [native browser prompt](https://developer.mozilla.org/en-US/docs/Web/API/Window/prompt).
 
-  If the user does not confirm the render promise will reject and no fragments will be updated.
+  If the user does not confirm, no request is sent and no fragments are updated.
+  In that case the render promise rejects with an `up.AbortError`.
 
 @param {Function(Event)} [options.onLoaded]
   A callback that will be run when the server responds with new HTML,

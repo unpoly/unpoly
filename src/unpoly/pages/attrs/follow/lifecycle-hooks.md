@@ -1,11 +1,11 @@
 @partial attrs/follow/lifecycle-hooks
 
 @param [up-confirm]
-  A message the user needs to confirm before fragments are updated.
+  A message the user needs to confirm before any request or changes are made.
 
   The message will be shown as a [native browser prompt](https://developer.mozilla.org/en-US/docs/Web/API/Window/prompt).
 
-  If the user does not confirm the render promise will reject and no fragments will be updated.
+  If the user does not confirm, no request is sent and no fragments are updated.
 
 @param [up-on-loaded]
   A JavaScript snippet that is executed when the server responds with new HTML,
@@ -48,7 +48,7 @@
   Also see [Running code after rendering](/render-lifecycle#running-code-after-rendering).
 
 @param [up-on-finished]
-  A JavaScript snippet that is execvuted when no further DOM changes will be caused by this render pass.
+  A JavaScript snippet that is executed when no further DOM changes will be caused by this render pass.
 
   In particular:
 

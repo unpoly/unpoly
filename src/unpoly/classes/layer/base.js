@@ -136,46 +136,52 @@ up.Layer = class Layer extends up.Record {
   To dismiss a layer *without* an accepting intent, use `up.Layer#dismiss()` instead.
 
   @function up.Layer#accept
-  @param {any} [value]
-    The acceptance value that will be passed to `{ onAccepted }` callbacks.
+  @section Acceptance
+    @param {any} [value]
+      The [acceptance value](/closing-overlays#acceptance-values) that will be passed to `{ onAccepted }` callbacks.
 
-    If there isn't an acceptance value, omit this argument.
-    If you need to pass options without an acceptance value, pass `null`:
+      If there isn't an acceptance value, omit this argument.
+      If you need to pass options without an acceptance value, pass `null`:
 
-    ```js
-    up.layer.accept(null, { animation: 'move-to-bottom' })
-    ```
-  @param {string} [options.confirm]
-    A message the user needs to confirm before the overlay is closed.
-  @param {up.Response} [options.response]
-    The server response that caused this overlay to close.
+      ```js
+      up.layer.accept(null, { animation: 'move-to-bottom' })
+      ```
+    @param {string} [options.confirm]
+      A message the user needs to confirm before the overlay is closed.
 
-    May be left blank if the overlay was not closed in reaction to a server response.
+    @param {boolean} [options.preventable=true]
+      Whether the closing can be prevented by an event listener.
 
-    @experimental
-  @param {string|Function(Element, Object)} [options.animation]
-    The [animation](/up.animate) to use for closing this layer.
+      @internal
 
-    Defaults to the close animation configured for this layer mode.
-  @param {number} [options.duration]
-    The duration for the close animation in milliseconds.
-  @param {number} [options.easing]
-    The [timing function](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
-    that controls the acceleration of the close animation.
-  @param {Function} [options.onFinished]
-    A callback that will run when the elements have been removed from the DOM.
+    @param {up.Response} [options.response]
+      The server response that caused this overlay to close.
 
-    If the layer has a close animation, the callback will run after the animation has finished.
-  @param {number} [options.history=true]
-    Whether to restore the the parent layer's [history state](/updating-history#history-state)
-    in the browser's address bar.
+      May be left blank if the overlay was not closed in reaction to a server response.
 
-    @experimental
-  @param {boolean} [options.preventable=true]
-    Whether the closing can be prevented by an event listener.
+      @experimental
 
-    @internal
-  @return
+  @section Animation
+    @param {string|Function(Element, Object)} [options.animation]
+      The [animation](/up.animate) to use for closing this layer.
+
+      Defaults to the close animation configured for this layer mode.
+    @param {number} [options.duration]
+      The duration for the close animation in milliseconds.
+    @param {number} [options.easing]
+      The [timing function](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
+      that controls the acceleration of the close animation.
+    @param {Function} [options.onFinished]
+      A callback that will run when the elements have been removed from the DOM.
+
+      If the layer has a close animation, the callback will run after the animation has finished.
+
+  @section History
+    @param {number} [options.history=true]
+      Whether to restore the the parent layer's [history state](/updating-history#history-state)
+      in the browser's address bar.
+
+      @experimental
   @stable
   */
   accept() {
@@ -534,7 +540,12 @@ up.Layer = class Layer extends up.Record {
   ```
 
   @function up.Layer#emit
-  @include options/emit-without-element
+  @param eventType
+    @like up.emit
+  @param props
+    @like up.emit
+  @param props.log
+    @like up.emit
   @stable
   */
   emit(...args) {

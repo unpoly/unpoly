@@ -442,7 +442,9 @@ up.link = (function() {
     parser.string('dismissEvent')
     parser.string('acceptLocation')
     parser.string('dismissLocation')
-    parser.booleanOrString('history')
+    parser.booleanOrString('closeAnimation')
+    parser.string('closeEasing')
+    parser.number('closeDuration')
 
     // Status effects
     parser.include(up.status.statusOptions)
