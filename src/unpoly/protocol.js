@@ -173,8 +173,6 @@ up.protocol = (function() {
 
   Also see [skipping unnecessary rendering](/skipping-rendering).
 
-
-
   @header X-Up-Target
   @stable
   */

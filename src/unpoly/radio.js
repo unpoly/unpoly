@@ -120,7 +120,7 @@ up.radio = (function() {
   /*-
   Before an `[up-hungry]` is added to a render pass, a event `up:fragment:hungry` is emitted on the element.
 
-  ### Preventing hungry elements from being updated
+  ## Preventing hungry elements from being updated
 
   You may prevent the `up:fragment:hungry` event to exclude an hungry element from the render pass.
   Use this to define arbitrary conditions for when an hungry element should be updated.
@@ -164,7 +164,7 @@ up.radio = (function() {
   When an `[up-hungry]` element does not match in the server response, the element will not be updated,
   but no error is thrown.
 
-  ### Use cases
+  ## Use cases
 
   Common use cases for `[up-hungry]` are elements that live in the application layout,
   outside of the fragment that is typically being targeted. Examples include:
@@ -184,16 +184,21 @@ up.radio = (function() {
 
   An selector for the hungry element (`.unread-messages`) will be added to target selectors automatically.
 
-  ### Derivable target required {#derivable-target-required}
+  ## Derivable target required {#derivable-target-required}
 
   When an `[up-hungry]` fragment piggy-backs on another fragment update, Unpoly
   will [derive a target selector](/target-derivation) for the hungry element.
 
   For this to work the hungry element must have an [identifying attribute](/target-derivation#derivation-patterns),
   like an `[id]` or a unique `[class]` attribute.
-  When no good target can be derived, the hungry element is excluded from the update.
+  When no good target can be derived, the hungry element is excluded from the update and a
+  message like this will be [logged](/up.log):
 
-  ### Behavior with multiple layers
+  ```text
+  [up-hungry] Ignoring untargetable fragment <div>
+  ```
+
+  ## Behavior with multiple layers
 
   By default only hungry elements on the targeted [layer](/up.layer) are updated.
 
@@ -201,7 +206,7 @@ up.radio = (function() {
   For example, a hungry element with `[up-if-layer="subtree"]` will piggy-back on render passes for both
   its own layer and any overlay covering it.
 
-  ### Conflict resolution
+  ## Conflict resolution
 
   When Unpoly renders new content, each element in that content can only be inserted once.
   When multiple hungry elements conflict with each other or with the the [primary render target](/targeting-fragments),
@@ -212,7 +217,7 @@ up.radio = (function() {
   3. When hungry elements on different layers target the same fragment in the response,
      the layer closest to the rendering layer will be chosen.
 
-  ### Disabling
+  ## Disabling
 
   By default hungry fragments are processed for all updates of the current layer.
   You can disable the processing of hungry fragments using one of the following methods:
@@ -225,44 +230,50 @@ up.radio = (function() {
     from being updated.
 
   @selector [up-hungry]
-  @param [up-if-layer='current']
-    Only piggy-back on updates on [layers](/up.layer) that match the given [layer reference](/layer-option).
 
-    Relative references like `'parent'` or `'child'` will be resolved in relation to the hungry element's layer.
+  @section Layer
+    @param [up-if-layer='current']
+      Only piggy-back on updates on [layers](/up.layer) that match the given [layer reference](/layer-option).
 
-    To match a hungry element when updating one of multiple layers, separate the references using and `or` delimiter.
-    For example, `'current or child'` will match for updates on either the hungry element's layer, or
-    its direct child.
+      Relative references like `'parent'` or `'child'` will be resolved in relation to the hungry element's layer.
 
-    To match a hungry element when updating *any* layer, set this attribute to `'any'`.
-  @param [up-on-hungry]
-    Code to run before this element is included in a fragment update.
+      To match a hungry element when updating one of multiple layers, separate the references using and `or` delimiter.
+      For example, `'current or child'` will match for updates on either the hungry element's layer, or
+      its direct child.
 
-    Calling `event.preventDefault()` will prevent the hungry fragment
-    from being updated.
+      To match a hungry element when updating *any* layer, set this attribute to `'any'`.
 
-    For instance, you want to auto-update an hungry navigation bar,
-    but only if we're changing history entries:
+  @section Animation
+    @param [up-transition]
+      The [animated transition](/up-transition) to apply when this element is updated.
+    @param [up-duration]
+      The duration of the transition or animation (in millisconds).
 
-    ```html
-    <nav id="side-nav" up-hungry up-on-hungry="if (!renderOptions.history) event.preventDefault()">
-     ...
-    </nav>
-    ```
+    @param [up-easing]
+      The timing function that accelerates the transition or animation.
 
-    The code may use the variables `event` (of type `up:fragment:hungry`),
-    `this` (the hungry element), `newFragment` and `renderOptions`.
+      See [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
+      for a list of available timing functions.
 
-  @param [up-transition]
-    The [animated transition](/up-transition) to apply when this element is updated.
-  @param [up-duration]
-    The duration of the transition or animation (in millisconds).
+  @section Callbacks
+    @param [up-on-hungry]
+      Code to run before this element is included in a fragment update.
 
-  @param [up-easing]
-    The timing function that accelerates the transition or animation.
+      Calling `event.preventDefault()` will prevent the hungry fragment
+      from being updated.
 
-    See [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
-    for a list of available timing functions.
+      For instance, you want to auto-update an hungry navigation bar,
+      but only if we're changing history entries:
+
+      ```html
+      <nav id="side-nav" up-hungry up-on-hungry="if (!renderOptions.history) event.preventDefault()">
+       ...
+      </nav>
+      ```
+
+      The code may use the variables `event` (of type `up:fragment:hungry`),
+      `this` (the hungry element), `newFragment` and `renderOptions`.
+
   @stable
   */
 
@@ -358,65 +369,63 @@ up.radio = (function() {
 
   @selector [up-poll]
 
-  @param [up-interval]
-    The reload interval in milliseconds.
+  @section Timing
+    @param [up-interval]
+      The reload interval in milliseconds.
 
-    Defaults to `up.radio.config.pollInterval`, which defaults to 30 seconds.
+      Defaults to `up.radio.config.pollInterval`, which defaults to 30 seconds.
 
-  @param [up-href]
-    The URL from which to reload the fragment.
+    @param [up-if-layer='front']
+      Controls polling while the fragment's [layer](/up.layer) is covered by an overlay.
 
-    Defaults to the URL this fragment was [originally loaded from](/up-source).
+      When set to `'front'`, polling will pause while the fragment's layer is covered by an overlay.
+      When the fragment's layer is uncovered, polling will resume.
 
-  @param [up-method='get']
-    The HTTP method used to reload the fragment.
+      When set to `'any'`, polling will continue on background layers.
 
-    @experimental
+      @experimental
 
-  @param [up-headers]
-    A [relaxed JSON](/relaxed-json) object with additional request headers.
+  @section Request
+    @param [up-href]
+      The URL from which to reload the fragment.
 
-  @param [up-params]
-    A [relaxed JSON](/relaxed-json) object with additional [parameters](/up.Params) that should be sent as the request's
-    [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
+      Defaults to the URL this fragment was [originally loaded from](/up-source).
 
-    When making a `GET` request to a URL with a query string, the given `{ params }` will be added
-    to the query parameters.
+    @param [up-method='get']
+      The HTTP method used to reload the fragment.
 
-  @param [up-fail='auto']
-    How to handle [failed server responses](/failed-responses).
+      @experimental
 
-    By default, polling will skip server responses with an error code,
-    even when the response contains a matching fragment. After the configured
-    interval, the server will be polled again.
+    @param [up-headers]
+      A [relaxed JSON](/relaxed-json) object with additional request headers.
 
-    Set `[up-fail=false]` to render *any* response that contains a matching fragment,
-    even with a 4xx or 5xx status code.
+    @param [up-params]
+      A [relaxed JSON](/relaxed-json) object with additional [parameters](/up.Params) that should be sent as the request's
+      [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
 
-  @param [up-keep-data]
-    Whether to [preserve](/data#preserving) the polling fragment's
-    [data object](/data) through reloads.
+      When making a `GET` request to a URL with a query string, the given `{ params }` will be added
+      to the query parameters.
 
-    @experimental
+  @section Failed responses
+    @param [up-fail='auto']
+      How to handle [failed server responses](/failed-responses).
 
-  @param [up-if-layer='front']
-    Controls polling while the fragment's [layer](/up.layer) is covered by an overlay.
+      By default, polling will skip server responses with an error code,
+      even when the response contains a matching fragment. After the configured
+      interval, the server will be polled again.
 
-    When set to `'front'`, polling will pause while the fragment's layer is covered by an overlay.
-    When the fragment's layer is uncovered, polling will resume.
+      Set `[up-fail=false]` to render *any* response that contains a matching fragment,
+      even with a 4xx or 5xx status code.
 
-    When set to `'any'`, polling will continue on background layers.
+  @section Client state
+    @param [up-keep-data]
+      Whether to [preserve](/data#preserving) the polling fragment's
+      [data object](/data) through reloads.
 
-    @experimental
+      @experimental
 
-  @param [up-placeholder]
-    A [placeholder](/placeholders) to show while the fragment is reloading.
-
-    @experimental
-
-  @param [up-preview]
-    The name of a [preview](/previews) that temporarily changes the page
-    while the fragment is reloading.
+  @section Loading state
+    @mix up-follow/loading-state
 
   @stable
   */
