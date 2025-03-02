@@ -4859,12 +4859,25 @@ describe('up.link', function() {
           expect(clickListener.calls.argsFor(0)[0].defaultPrevented).toBe(true)
         })
 
-        it('does not emit multiple up:click events in a click sequence', function() {
+        it('does not emit multiple up:click events in a single click sequence', function() {
           const link = fixture('a[href="/path"][up-instant]')
           const listener = jasmine.createSpy('up:click listener')
           link.addEventListener('up:click', listener)
+
           Trigger.clickSequence(link)
           expect(listener.calls.count()).toBe(1)
+        })
+
+        it('emits multiple up:click events on multiple click sequences on the same link', function() {
+          const link = fixture('a[href="/path"][up-instant]')
+          const listener = jasmine.createSpy('up:click listener')
+          link.addEventListener('up:click', listener)
+
+          Trigger.clickSequence(link)
+          expect(listener.calls.count()).toBe(1)
+
+          Trigger.clickSequence(link)
+          expect(listener.calls.count()).toBe(2)
         })
 
         it('does emit an up:click event on click if there was an earlier mousedown event that was not default-prevented (happens when the user CTRL+clicks and Unpoly won\'t follow)', function() {
@@ -4892,6 +4905,32 @@ describe('up.link', function() {
           Trigger.mousedown(link)
           expect(mousedownEvent.defaultPrevented).toBe(true)
         })
+
+        describe('on a touch device', function() {
+
+          it('emits up:click on click (not mousedown) as the user may be long-pressing to open the context menu', async function() {
+            const link = fixture('a[href="/path"][up-instant]')
+            const listener = jasmine.createSpy('up:click listener').and.callFake((event) => event.preventDefault())
+            link.addEventListener('up:click', listener)
+
+            Trigger.pointerdown(link)
+            Trigger.touchstart(link)
+
+            await wait(100)
+
+            expect(listener.calls.count()).toBe(0)
+
+            Trigger.mousedown(link)
+            await wait()
+            expect(listener.calls.count()).toBe(0)
+
+            Trigger.click(link)
+            await wait()
+            expect(listener.calls.count()).toBe(1)
+          })
+
+        })
+
       })
 
       describe('on a non-interactive element that is not [up-instant]', function() {
@@ -4926,6 +4965,7 @@ describe('up.link', function() {
       })
 
       describe('on a non-interactive element that is [up-instant]', function() {
+
         it('emits an up:click event on mousedown', function() {
           const div = fixture('div[up-instant]')
           const listener = jasmine.createSpy('up:click listener')
@@ -4933,6 +4973,32 @@ describe('up.link', function() {
           Trigger.mousedown(div)
           expect(listener).toHaveBeenCalled()
         })
+
+        describe('on a touch device', function() {
+
+          it("emits up:click on mousedown (not click) as the user can't long-press to open a context menu", async function() {
+            const link = fixture('div[up-instant]')
+            const listener = jasmine.createSpy('up:click listener')
+            link.addEventListener('up:click', listener)
+
+            Trigger.pointerdown(link)
+            Trigger.touchstart(link)
+
+            await wait(100)
+
+            expect(listener.calls.count()).toBe(0)
+
+            Trigger.mousedown(link)
+            await wait()
+            expect(listener.calls.count()).toBe(1)
+
+            Trigger.click(link)
+            await wait()
+            expect(listener.calls.count()).toBe(1)
+          })
+
+        })
+
       })
 
       describe('on a button[type=submit]', function() {

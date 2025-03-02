@@ -92,7 +92,9 @@ up.link = (function() {
   const u = up.util
   const e = up.element
 
+  let lastTouchstartTarget = null
   let lastMousedownTarget = null
+  let lastInstantTarget = null
 
   const ATTRS_WITH_LOCAL_HTML = '[up-content], [up-fragment], [up-document]'
   const ATTRS_SUGGESTING_FOLLOW = `${ATTRS_WITH_LOCAL_HTML}, [up-target], [up-layer], [up-transition], [up-preload]`
@@ -240,7 +242,9 @@ up.link = (function() {
   }
 
   function reset() {
+    lastTouchstartTarget = null
     lastMousedownTarget = null
+    lastInstantTarget = null
   }
 
   /*-
@@ -850,7 +854,7 @@ up.link = (function() {
       //     This would trigger the browsers default follow-behavior and possibly activate JS libs.
       // (2) A11Y: We also need to check whether the [up-instant] behavior did trigger on mousedown.
       //     Keyboard navigation will not necessarily trigger a mousedown event.
-      if (isInstant(element) && lastMousedownTarget) {
+      if (isInstant(element) && lastInstantTarget === element) {
         up.event.halt(event)
 
       // In case mousedown has created a layer over the click coordinates,
@@ -864,7 +868,13 @@ up.link = (function() {
       }
 
       // In case the user switches input modes.
-      return lastMousedownTarget = null
+      lastMousedownTarget = null
+      lastInstantTarget = null
+    })
+
+    layer.on('touchstart', function(event, element) {
+      // Remember for isLongPressPossible() on mousedown
+      lastTouchstartTarget = element
     })
 
     layer.on('mousedown', function(event, element) {
@@ -874,15 +884,30 @@ up.link = (function() {
         return
       }
 
-      lastMousedownTarget = event.target
+      // Remember for the didUserDragAway() test on click
+      lastMousedownTarget = element
 
-      if (isInstant(element)) {
+      // (1) Instant links emit up:click on mousedown
+      // (2) On touch devices we never act on mousedown as the user may be long-pressing to open the context menu
+      if (isInstant(element) && !isLongPressPossible(event)) {
+        // Remember that we already emitted an event so we don't do it again on click
+        lastInstantTarget = element
+
         // A11Y: Keyboard navigation will not necessarily trigger a mousedown event.
         // We also don't want to listen to the enter key, since some screen readers
         // use the enter key for something else.
         forkEventAsUpClick(event)
       }
+
+      // (1) Now that we tested isLongPressPossible() we can reset the last touchstart target for the next press
+      // (2) Do it here rather than on click because, when long pressing opens the menu, there won't be a click
+      lastTouchstartTarget = null
     })
+  }
+
+  function isLongPressPossible(mousedownEvent) {
+    let mousedownTarget = mousedownEvent.target
+    return (lastTouchstartTarget === mousedownTarget) && mousedownTarget.closest('[href]')
   }
 
   function didUserDragAway(clickEvent) {

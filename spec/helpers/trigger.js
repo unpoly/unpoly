@@ -408,6 +408,8 @@ window.Trigger = (function() {
     mouseleave,
     click,
     clickSequence,
+    pointerdown,
+    pointerup,
     pointerdownSequence,
     touchstart,
     hoverSequence,
