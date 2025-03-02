@@ -240,6 +240,7 @@ up.Layer = class Layer extends up.Record {
 
   @function up.Layer#isCurrent
   @return {boolean}
+    Whether this layer is the current layer.
   @stable
   */
   isCurrent() {
@@ -250,6 +251,7 @@ up.Layer = class Layer extends up.Record {
   Returns whether this layer is the [frontmost layer](/up.layer.front).
 
   @function up.Layer#isFront
+    Whether this layer is the front layer.
   @return {boolean}
   @stable
   */
@@ -262,6 +264,7 @@ up.Layer = class Layer extends up.Record {
 
   @function up.Layer#isRoot
   @return {boolean}
+    Whether this layer is the root layer.
   @stable
   */
   isRoot() {
@@ -288,6 +291,7 @@ up.Layer = class Layer extends up.Record {
 
   @function up.Layer#isOpen
   @return {boolean}
+    Whether this layer is still open.
   @stable
   */
   isOpen() {
@@ -303,6 +307,7 @@ up.Layer = class Layer extends up.Record {
 
   @function up.Layer#isClosed
   @return {boolean}
+    Whether this layer has been closed..
   @stable
   */
   isClosed() {
@@ -316,8 +321,17 @@ up.Layer = class Layer extends up.Record {
 
   Returns `undefined` for the [root layer](/up.layer.root).
 
+  ## Example
+
+  ```js
+  up.layer.open()
+
+  up.layer.parent // returns up.Layer.Root
+  ```
+
   @property up.Layer#parent
   @param {up.Layer} parent
+    This layer's parent layer.
   @stable
   */
   get parent() {
@@ -336,6 +350,7 @@ up.Layer = class Layer extends up.Record {
 
   @property up.Layer#child
   @return {up.Layer} child
+    This layer's direct child overlay.
   @stable
   */
   get child() {
@@ -349,8 +364,19 @@ up.Layer = class Layer extends up.Record {
   The first element is this layer's direct parent. The last element
   is the [root layer](/up.layer.root).
 
+  ## Example
+
+  ```js
+  // Open two overlays
+  up.layer.open({ mode: 'drawer' })
+  up.layer.open({ mode: 'modal' })
+
+  up.layer.parent // returns [up.Layer.Drawer, up.Layer.Root]
+  ```
+
   @property up.Layer#ancestors
   @return {Array<up.Layer>} ancestors
+    This layer's ancestors.
   @stable
   */
   get ancestors() {
@@ -366,8 +392,19 @@ up.Layer = class Layer extends up.Record {
   The first element is this layer's direct child. The last element
   is the [frontmost layer](/up.layer.front).
 
+  ## Example
+
+  ```js
+  up.layer.open()
+  up.layer.current              // returns up.Layer.Modal
+  up.layer.current.descendants  // returns []
+  up.layer.root.descendants     // returns [up.Layer.Modal]
+  ```
+
+
   @property up.Layer#descendants
   @return {Array<up.Layer>} descendants
+    This layer's descendants.
   @stable
   */
   get descendants() {
@@ -386,6 +423,7 @@ up.Layer = class Layer extends up.Record {
 
   @property up.Layer#subtree
   @return {Array<up.Layer>} subtree
+    An array of this layer and its descendants.
   @experimental
   */
   get subtree() {
@@ -401,6 +439,7 @@ up.Layer = class Layer extends up.Record {
 
   @property up.Layer#index
   @return {number} index
+    The position of this layer in the stack.
   @stable
   */
   get index() {
@@ -431,7 +470,9 @@ up.Layer = class Layer extends up.Record {
 
   @function up.Layer#contains
   @param {Element} element
+    The element to test.
   @return {boolean}
+    Whether the layer contains the element.
   @stable
   */
   contains(element) {
@@ -602,6 +643,21 @@ up.Layer = class Layer extends up.Record {
   Calls the given function and restores the original current layer when the function
   terminates.
 
+  ## Example
+
+  ```js
+  up.layer.current // returns up.Layer.Root
+
+  up.layer.open() // open an overlay
+  up.layer.current // returns up.Layer.Modal
+
+  up.layer.parent.asCurrent(function() {
+    up.layer.current // returns up.layer.Root
+  })
+
+  up.layer.current // returns up.Layer.Modal
+  ```
+
   @param {Function()} fn
     The synchronous function to call.
 
@@ -655,6 +711,7 @@ up.Layer = class Layer extends up.Record {
 
   @property up.Layer#title
   @param {string} title
+    This layer's title.
   @experimental
   */
   get title() {
@@ -719,6 +776,7 @@ up.Layer = class Layer extends up.Record {
 
   @property up.Layer#location
   @param {string} location
+    The layer's current location.
   @experimental
   */
   get location() {

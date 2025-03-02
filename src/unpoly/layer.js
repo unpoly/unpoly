@@ -631,7 +631,7 @@ up.layer = (function() {
 
       The function argument is an `up:layer:dismissed` event.
 
-    @include up-follow/lifecycle-hooks
+    @include up.render/lifecycle-hooks
 
   @return {Promise<up.Layer>}
     A promise for the `up.Layer` object that describes the new overlay.

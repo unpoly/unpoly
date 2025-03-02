@@ -273,7 +273,6 @@ up.link = (function() {
   @function up.follow
 
   @section General
-
     @param {Element|jQuery|string} link
       The link to follow.
 
@@ -552,6 +551,9 @@ up.link = (function() {
   @param {boolean} [options.abortable=false]
     @like up.render
 
+  @param {boolean} [options.background=false]
+    @like up.render
+
   @return {Promise}
     A promise that will be fulfilled when the request was loaded and cached.
 
@@ -632,7 +634,11 @@ up.link = (function() {
 
   @function up.link.followMethod
   @param link
+    The link from which to evaluate the method.
   @param options.method {string}
+    @internal
+  @return {string}
+    The HTTP method.
   @internal
   */
   function followMethod(link, options = {}) {
@@ -671,7 +677,7 @@ up.link = (function() {
 
   @function up.link.isFollowable
   @param {Element|jQuery|string} link
-    The link to check.
+    The link to test.
   @return {boolean}
     Whether Unpoly will handle the given link.
   @stable
@@ -1054,53 +1060,56 @@ up.link = (function() {
   @params-note
     All attributes for `[up-follow]` may also be used.
 
-  @param [up-defer='insert']
-    When to load and render the deferred content.
+  @section Timing
+    @param [up-defer='insert']
+      When to load and render the deferred content.
 
-    When set to `'insert'` (the default), the deferred content will load immediatedly when
-    the `[up-defer]` element is inserted into the DOM.
+      When set to `'insert'` (the default), the deferred content will load immediatedly when
+      the `[up-defer]` element is inserted into the DOM.
 
-    When set to `'reveal'`, the deferred content will load when the `[up-defer]` placeholder is scrolled
-    into the [viewport](/up-viewport). If the element is already visible when
-    inserted, loading will start immediately.  Also see [loading as the placeholder becomes visible](/lazy-loading#on-reveal).
+      When set to `'reveal'`, the deferred content will load when the `[up-defer]` placeholder is scrolled
+      into the [viewport](/up-viewport). If the element is already visible when
+      inserted, loading will start immediately.  Also see [loading as the placeholder becomes visible](/lazy-loading#on-reveal).
 
-    When set to `'manual'` the deferred content will not load on its own.
-    You can control the load timing by calling `up.deferred.load()` from your own JavaScripts.
+      When set to `'manual'` the deferred content will not load on its own.
+      You can control the load timing by calling `up.deferred.load()` from your own JavaScripts.
 
-  @param [up-intersect-margin='0']
-    With `[up-defer=reveal]`, this enlarges the viewport by the given number of pixels before
-    computing the intersection.
+    @param [up-intersect-margin='0']
+      With `[up-defer=reveal]`, this enlarges the viewport by the given number of pixels before
+      computing the intersection.
 
-    A positive number will load the deferred content some pixels before it becomes visible.
+      A positive number will load the deferred content some pixels before it becomes visible.
 
-    A negative number will require the user to scroll some pixels into the element before it is loaded.
+      A negative number will require the user to scroll some pixels into the element before it is loaded.
 
-    @experimental
+      @experimental
 
-  @param [up-href]
-    The URL from which to load the deferred content.
+  @section Targeting
+    @param [up-target=':origin']
+      A selector for the fragment to render the content in.
 
-    If your `[up-defer]` placeholder is a [standard hyperlink](/lazy-loading#seo), you can use an `[href]` attribute instead.
+      By default the `[up-defer]` element itself will be replaced with the loaded content.
+      For this the element must have a [derivable target selector](/target-derivation).
 
-  @param [up-headers]
-    A [relaxed JSON](/relaxed-json) object with additional request headers.
+      You may target one or [multiple](/targeting-fragments#multiple) fragments.
+      To target the placeholder itself, you can use `:origin` target instead of spelling out a selector.
 
-  @param [up-cache='auto']
-    Whether to cache the deferred content.
+  @section Request
+    @param [up-href]
+      The URL from which to load the deferred content.
 
-  @param [up-target=':origin']
-    A selector for the fragment to render the content in.
+      If your `[up-defer]` placeholder is a [standard hyperlink](/lazy-loading#seo), you can use an `[href]` attribute instead.
 
-    By default the `[up-defer]` element itself will be replaced with the loaded content.
-    For this the element must have a [derivable target selector](/target-derivation).
+    @param [up-headers]
+      A [relaxed JSON](/relaxed-json) object with additional request headers.
 
-    You may target one or [multiple](/targeting-fragments#multiple) fragments.
-    To target the placeholder itself, you can use `:origin` target instead of spelling out a selector.
+    @param [up-background='false']
+      Whether to load the deferred content [in the background](/up.render#options.background).
 
-  @param [up-background='false']
-    Whether to load the deferred content [in the background](/up.render#options.background).
+      Background requests will not show the [global progress bar](/progress-bar).
 
-    Background requests will not show the [global progress bar](/progress-bar).
+  @section Caching
+    @mix up-follow/caching
 
   @experimental
   */

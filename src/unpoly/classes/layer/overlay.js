@@ -7,10 +7,11 @@ const u = up.util
 up.Layer.Overlay = class Overlay extends up.Layer {
 
   /*-
-  The link or form element that opened this overlay.
+  The button or link that opened this overlay.
 
   @property up.Layer#origin
   @param {Element} origin
+    The element that opened this overlay.
   @stable
   */
 
@@ -21,16 +22,18 @@ up.Layer.Overlay = class Overlay extends up.Layer {
 
   @property up.Layer#size
   @param {Element} size
+    This layer's size setting.
   @stable
   */
 
   /*-
-  The [position](/customizing-overlays#popup-position) of this popup overlay.
+  The [position](/customizing-overlays#popup-position) of this popup or drawer overlay.
 
-  Returns a string like `'top'` or `'left'`.
+  Returns a string like `'top'`, '`right`', `'bottom'` or `'left'`.
 
   @property up.Layer#position
-  @param {Element} position
+  @param {Element} [position]
+    This layer's position setting.
   @stable
   */
 
@@ -39,8 +42,11 @@ up.Layer.Overlay = class Overlay extends up.Layer {
 
   Returns a string like `'left'` or `'right'`.
 
+  Returns `undefined` for an overlay that isn't a popup.
+
   @property up.Layer#align
   @param {Element} align
+    This layer's alignment setting.
   @stable
   */
 
