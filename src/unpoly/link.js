@@ -384,11 +384,12 @@ up.link = (function() {
 
   @function up.link.followOptions
   @param {Element|jQuery|string} link
-    The link to follow.
+    The link from which to parse options.
   @param {Object} [options]
     Additional options for following the link.
 
     Values from this object will override any attributes set on the link element.
+    @internal
   @return {Object}
     An object of [render options](/up.render#parameters).
   @stable
@@ -539,20 +540,30 @@ up.link = (function() {
 
   @function up.link.preload
 
-  @param {string|Element|jQuery} link
-    The element or selector whose destination should be preloaded.
+  @section General
+    @param {string|Element|jQuery} link
+      The element or selector whose destination should be preloaded.
 
-  @param {Object} [options]
-    [Render options](/up.render#parameters) to apply when preloading this link.
+    @param {Object} [options]
+      [Render options](/up.render#parameters) to apply when preloading this link.
 
-    Most [options for `up.follow()`](/up.follow#parameters) can be used,
-    but no elements will be changed while preloading.
+      Most [options for `up.follow()`](/up.follow#parameters) can be used,
+      but no elements will be changed while preloading.
 
-  @param {boolean} [options.abortable=false]
-    @like up.render
+  @section Request
+    @params {string} [options.url]
+      The URL to preload.
 
-  @param {boolean} [options.background=false]
-    @like up.render
+      Defaults to the link's `[href]` attribute.
+
+    @param {Object} [options.headers]
+      @like up.follow
+
+    @param {boolean} [options.abortable=false]
+      @like up.follow
+
+    @param {boolean} [options.background=true]
+      @like up.follow
 
   @return {Promise}
     A promise that will be fulfilled when the request was loaded and cached.
@@ -627,10 +638,9 @@ up.link = (function() {
   */
 
   /*-
-  Returns the HTTP method that should be used when following the given link.
+  Returns the HTTP method that Unpoly will be use when [following](/up-follow) the given link.
 
-  Looks at the link's `up-method` or `data-method` attribute.
-  Defaults to `"get"`.
+  Looks at the link's `[up-method]` or `[data-method]` attributes. Defaults to `"get"`.
 
   @function up.link.followMethod
   @param link
@@ -667,8 +677,8 @@ up.link = (function() {
   - `[up-follow]`
   - `[up-target]`
   - `[up-layer]`
-  - `[up-mode]`
   - `[up-transition]`
+  - `[up-preload]`
   - `[up-content]`
   - `[up-fragment]`
   - `[up-document]`
@@ -985,18 +995,37 @@ up.link = (function() {
 
   @function up.deferred.load
 
-  @param {Element} placeholder
-    The `[up-defer]` placeholder to load.
+  @section General
+    @param {Element} placeholder
+      The `[up-defer]` placeholder to load.
 
-  @param {Object} [options]
-    [Render options](/up.render#parameters) that should be used for loading the partial.
+    @param {Object} [options]
+      [Render options](/up.render#parameters) that should be used for loading the placeholder.
 
-    Unpoly will parse render options from the given placeholder's attributes,
-    like `[up-target]` or `[up-cache]`. See `[up-defer]` and `[up-follow]` for a list
-    of supported attributes.
+      Unpoly will parse render options from the given placeholder's attributes.
+      You may pass this additional `options` object to [supplement or override](/attributes-and-options#options)
+      options parsed from the placeholder attributes. See `[up-follow]` for a list of supported attributes.
 
-    You may pass this additional `options` object to [supplement or override](/attributes-and-options#options)
-    options parsed from the placeholder attributes.
+      Common options are documented below, but most [options for `up.follow()`](/up.follow#parameters) may be used.
+
+  @section Targeting
+    @param [optons.target=':origin']
+      @like [up-defer]/up-target
+
+  @section Request
+    @param [options.url]
+      The URL from which to load the deferred content.
+
+      Defaults to the placeholder's [`[up-href]`](/up-defer#up-href) or `[href]` attribute.
+
+    @param [options.headers]
+      @like up.follow
+
+    @param [up.background=false]
+      @like [up-defer]/up-background
+
+  @section Caching
+    @mix up.render/caching
 
   @return {up.RenderJob}
     A promise that fulfills with an `up.RenderResult` once the deferred content
@@ -1058,7 +1087,7 @@ up.link = (function() {
   @selector [up-defer]
 
   @params-note
-    All attributes for `[up-follow]` may also be used.
+    All modifying attributes for `[up-follow]` may also be used.
 
   @section Timing
     @param [up-defer='insert']
@@ -1259,7 +1288,7 @@ up.link = (function() {
   /*-
   Follows this link on `mousedown` instead of `click` ("Act on press").
 
-  This will save precious milliseconds that otherwise spent
+  This will save precious milliseconds that would otherwise be spent
   on waiting for the user to release the mouse button. Since an
   AJAX request will be triggered right way, the interaction will
   appear faster.
@@ -1283,6 +1312,8 @@ up.link = (function() {
   instead of `click`.
 
   @selector [up-instant]
+  @params-note
+    May be combined with all modifying attributes for `[up-follow]`.
   @stable
   */
 
@@ -1329,6 +1360,8 @@ up.link = (function() {
   [It's OK to put block elements inside an anchor tag](https://makandracards.com/makandra/43549-it-s-ok-to-put-block-elements-inside-an-a-tag).
 
   @selector [up-expand]
+  @params-note
+    May be combined with all modifying attributes for `[up-follow]`.
   @param [up-expand]
     A CSS selector that defines which containing link should be expanded.
 
@@ -1374,36 +1407,46 @@ up.link = (function() {
 
   @selector [up-preload]
   @params-note
-    All attributes for `[up-follow]` may also be used.
-  @param [up-preload='hover']
-    When to preload this link.
+    All modifying attributes for `[up-follow]` may also be used.
+  @section Timing
+    @param [up-preload='hover']
+      When to preload this link.
 
-    When set to `'hover'` (the default), preloading will start when the user hovers
-    over this link [for a while](#up-preload-delay). On touch devices preloading will
-    begin when the user places her finger on the link. Also see [preloading on hover](/preloading#on-hover).
+      When set to `'hover'` (the default), preloading will start when the user hovers
+      over this link [for a while](#up-preload-delay). On touch devices preloading will
+      begin when the user places her finger on the link. Also see [preloading on hover](/preloading#on-hover).
 
-    When set to `'insert'`, preloading will start immediatedly when this
-    link is inserted into the DOM. Also see [eagerly preloading on insertion](/preloading#on-insert).
+      When set to `'insert'`, preloading will start immediatedly when this
+      link is inserted into the DOM. Also see [eagerly preloading on insertion](/preloading#on-insert).
 
-    When set to `'reveal'`, preloading will start when the link is scrolled
-    into the [viewport](/up-viewport). If the link is already visible when
-    inserted, preloading will start immediately.  Also see [preloading when a link becomes visible](/preloading#on-reveal).
+      When set to `'reveal'`, preloading will start when the link is scrolled
+      into the [viewport](/up-viewport). If the link is already visible when
+      inserted, preloading will start immediately.  Also see [preloading when a link becomes visible](/preloading#on-reveal).
 
-  @param [up-preload-delay]
-    [`[up-preload="hover"]`](#up-preload), this requires the user to hover
-    for the given number of milliseconds before the link is preloaded.
+    @param [up-preload-delay]
+      [`[up-preload="hover"]`](#up-preload), this requires the user to hover
+      for the given number of milliseconds before the link is preloaded.
 
-    Defaults to `up.link.config.preloadDelay`.
+      Defaults to `up.link.config.preloadDelay`.
 
-  @param [up-intersect-margin='0']
-    With `[up-preload=reveal]`, this enlarges the viewport by the given number of pixels before
-    computing the intersection.
+    @param [up-intersect-margin='0']
+      With `[up-preload=reveal]`, this enlarges the viewport by the given number of pixels before
+      computing the intersection.
 
-    A positive number will load the deferred content some pixels before it becomes visible.
+      A positive number will load the deferred content some pixels before it becomes visible.
 
-    A negative number will require the user to scroll some pixels into the element before it is loaded.
+      A negative number will require the user to scroll some pixels into the element before it is loaded.
 
-    @experimental
+      @experimental
+  @section Request
+    @param href
+      The URL to preload.
+    @param [up-headers]
+      @like [up-follow]
+    @param [up-background='true']
+      @like [up-follow]
+    @param [up-abortable='false']
+      @like [up-follow]
   @stable
   */
   up.compiler(config.selectorFn('preloadSelectors'), function(link) {

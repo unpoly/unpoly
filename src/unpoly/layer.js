@@ -743,14 +743,26 @@ up.layer = (function() {
   It's useful to think of overlays as [promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
   which may either be **fulfilled (accepted)** or **rejected (dismissed)**.
 
-  ### Example
+  ## Example
 
   Instead of using `up.layer.open()` and passing callbacks, you may use `up.layer.ask()`.
-  `up.layer.ask()` returns a promise for the acceptance value, which you can `await`:
+  `up.layer.ask()` returns a promise for the [acceptance value](/closing-overlays#acceptance-values), which you can `await`:
 
   ```js
   let user = await up.layer.ask({ url: '/users/new' })
   console.log("New user is " + user)
+  ```
+
+  To handle the case that the overlay wasn't completed successful, you
+  can `catch` the rejected promise [reason](/closing-overlays#dismissal-reasons):
+
+  ```js
+  try {
+    let user = await up.layer.ask({ url: '/users/new' })
+    console.log("New user is",  user)
+  } catch (reason) {
+    console.error("Could not register:", reason)
+  }
   ```
 
   @see closing-overlays
@@ -809,7 +821,7 @@ up.layer = (function() {
   @selector [up-layer=new]
 
   @params-note
-    All attributes for `[up-follow]` can also be used.\
+    All modifying attributes for `[up-follow]` can also be used.\
     Default layer attributes can be configured in `up.layer.config`.
 
   @section Placement

@@ -145,7 +145,7 @@ The following `<span>` element will [navigate](/up-follow) to `/details` when cl
 @param [up-href]
   The URL to load when activated.
 @params-note
-  All attributes for `[up-follow]` may be used.
+  All modifying attributes for `[up-follow]` may also be used.
 @deprecated
   You must also set an `[up-follow]` attribute on the same link.
 */

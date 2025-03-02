@@ -120,7 +120,7 @@ the given selector in a popup overlay.
 
 @selector [up-popup]
 @params-note
-  All attributes for `[up-layer=new]` may also be used.
+  All modifying attributes for `[up-layer=new]` may also be used.
 @param {string} up-popup
   The CSS selector that will be extracted from the response and displayed in a popup overlay.
 @deprecated

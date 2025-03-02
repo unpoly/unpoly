@@ -697,7 +697,7 @@ up.motion = (function() {
 
   @selector [up-transition]
   @params-note
-    All attributes for `[up-follow]` (links) or `[up-submit]` forms may also be used.
+    All modifying attributes for `[up-follow]` (links) or `[up-submit]` forms may also be used.
   @param [up-transition]
     The [name of a transition](/predefined-transitions).
   @param [up-fail-transition]

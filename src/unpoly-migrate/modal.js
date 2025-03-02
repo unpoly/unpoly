@@ -163,7 +163,7 @@ the given selector in a modal overlay.
 
 @selector [up-modal]
 @params-note
-  All attributes for `[up-layer=new]` may also be used.
+  All modifying attributes for `[up-layer=new]` may also be used.
 @param {string} up-modal
   The CSS selector that will be extracted from the response and displayed in a modal dialog.
 @deprecated
@@ -177,7 +177,7 @@ the given selector in a modal drawer that slides in from the edge of the screen.
 
 @selector [up-drawer]
 @params-note
-  All attributes for `[up-layer=new]` may also be used.
+  All modifying attributes for `[up-layer=new]` may also be used.
 @param {string} up-drawer
   The CSS selector that will be extracted from the response and displayed in a modal dialog.
 @deprecated
