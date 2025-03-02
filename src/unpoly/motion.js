@@ -94,7 +94,7 @@ up.motion = (function() {
   /*-
   Defines a named animation.
 
-  ### Example
+  ## Example
 
   Here is the definition of the pre-defined `fade-in` animation:
 
@@ -105,7 +105,7 @@ up.motion = (function() {
   })
   ```
 
-  ### Callback contract
+  ## Callback contract
 
   For animations that can be expressed through [CSS transitions](https://www.w3schools.com/css/css3_transitions.asp),
   we recommend that your definitions end by calling calling [`up.animate()`](/up.animate) with an object argument,
@@ -126,7 +126,9 @@ up.motion = (function() {
 
   @function up.animation
   @param {string} name
+    The name of the new animation.
   @param {Function(element, options): Promise} animation
+    The callback function that executes the animation.
   @stable
   */
 
@@ -135,7 +137,7 @@ up.motion = (function() {
   /*-
   Defines a named transition that [morphs](/up.morph) from one element to another.
 
-  ### Example
+  ## Example
 
   Here is the definition of the pre-defined `cross-fade` animation:
 
@@ -148,7 +150,7 @@ up.motion = (function() {
   })
   ```
 
-  ### Callback contract
+  ## Callback contract
 
   For animations that can be expressed through [CSS transitions](https://www.w3schools.com/css/css3_transitions.asp),
   we recomend that your definitions end by calling [`up.animate()`](/up.animate) with an object argument,
@@ -169,7 +171,9 @@ up.motion = (function() {
 
   @function up.transition
   @param {string} name
+    The name of the new transition.
   @param {Function(oldElement, newElement, options): Promise} transition
+    The callback function that executes the transition.
   @stable
   */
 
@@ -178,12 +182,13 @@ up.motion = (function() {
   }
 
   /*-
-  Returns whether Unpoly will perform animations.
+  Returns whether Unpoly will perform animations and transitions.
 
   Set [`up.motion.config.enabled = false`](/up.motion.config#config.enabled) in order to disable animations globally.
 
   @function up.motion.isEnabled
   @return {boolean}
+    Whether animation is enabled.
   @stable
   */
   function isEnabled() {
@@ -193,7 +198,7 @@ up.motion = (function() {
   /*-
   Applies the given animation to the given element.
 
-  ### Example
+  ## Example
 
   ```js
   up.animate('.warning', 'fade-in')
@@ -208,13 +213,13 @@ up.motion = (function() {
   })
   ```
 
-  ### Named animations
+  ## Named animations
 
   Unpoly ships with a number of [predefined animations](/predefined-animations)
 
   You can define additional named animations using [`up.animation()`](/up.animation).
 
-  ### Animating CSS properties directly
+  ## Animating CSS properties directly
 
   By passing an object instead of an animation name, you can animate
   the CSS properties of the given element:
@@ -227,7 +232,7 @@ up.motion = (function() {
 
   CSS properties must be given using `kebab-case` keys.
 
-  ### Multiple animations on the same element
+  ## Multiple animations on the same element
 
   Unpoly doesn't allow more than one concurrent animation on the same element.
 
@@ -236,21 +241,23 @@ up.motion = (function() {
   the new animation begins.
 
   @function up.animate
-  @param {Element|jQuery|string} element
-    The element to animate.
-  @param {string|Function(element, options): Promise|Object} animation
-    Can either be:
+  @section Element
+    @param {Element|jQuery|string} element
+      The element to animate.
+  @section Animation
+    @param {string|Function(element, options): Promise|Object} animation
+      Can either be:
 
-    - The name of a [registered](/up.animation) animation
-    - A function performing the animation (same contract as a function passed to `up.animation()`)
-    - An object of CSS attributes describing the last frame of the animation (using kebeb-case property names)
-  @param {number} [options.duration=300]
-    The duration of the animation, in milliseconds.
-  @param {string} [options.easing='ease']
-    The timing function that controls the animation's acceleration.
+      - The name of a [registered](/up.animation) animation
+      - A function performing the animation (same contract as a function passed to `up.animation()`)
+      - An object of CSS attributes describing the last frame of the animation (using kebeb-case property names)
+    @param {number} [options.duration=300]
+      The duration of the animation, in milliseconds.
+    @param {string} [options.easing='ease']
+      The timing function that controls the animation's acceleration.
 
-    See [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
-    for a list of pre-defined timing functions.
+      See [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
+      for a list of pre-defined timing functions.
   @return {Promise}
     A promise for the animation's end.
   @stable
@@ -367,25 +374,25 @@ up.motion = (function() {
   */
 
   /*-
-  Performs an animated transition between the `source` and `target` elements.
+  Performs an animated transition between two elements.
 
   Transitions are implement by performing two animations in parallel,
-  causing `source` to disappear and the `target` to appear.
+  causing `oldElement` to disappear and the `newElement` to appear.
 
-  - `target` is [inserted before](https://developer.mozilla.org/en-US/docs/Web/API/Node/insertBefore) `source`
-  - `source` is removed from the [document flow](https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout/Positioning) with `position: absolute`.
-     It will be positioned over its original place in the flow that is now occupied by `target`.
-  - Both `source` and `target` are animated in parallel
-  - `source` is removed from the DOM
+  - `newElement` is [inserted before](https://developer.mozilla.org/en-US/docs/Web/API/Node/insertBefore) `oldElement`
+  - `oldElement` is removed from the [document flow](https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout/Positioning) with `position: absolute`.
+     It will be positioned over its original place in the flow that is now occupied by `newElement`.
+  - Both `oldElement` and `newElement` are animated in parallel
+  - `oldElement` is removed from the DOM
 
-  ### Named transitions
+  ## Named transitions
 
   Unpoly ships with a number of [predefined transitions](/predefined-transitions).
 
   You can define additional named transitions using [`up.transition()`](/up.transition).
 
 
-  ### Implementation details
+  ## Implementation details
 
   During a transition both the old and new element occupy
   the same position on the screen.
@@ -404,25 +411,29 @@ up.motion = (function() {
     The old element remains hidden in the DOM.
 
   @function up.morph
-  @param {Element|jQuery|string} source
-  @param {Element|jQuery|string} target
-    The target element that will remain in the DOM once the transition finished.
+  @section Elements
+    @param {Element|jQuery|string} oldElement
+      The old element to transition away from.
 
-    It should be detached before calling `up.morph()`.
-  @param {Function(oldElement, newElement, options)|string} transition
-    Can either be:
+      It will remain attached when the transition finished, but may be hidden our
+      be located outside the visible viewport.
+    @param {Element|jQuery|string} newElement
+      The new element that will remain in the DOM once the transition finished.
 
-    - The name of a [registered](/up.transition) transition
-    - A function performing the transition (same contract as a function passed to `up.transition()`)
-  @param {number} [options.duration=300]
-    The duration of the animation, in milliseconds.
-  @param {string} [options.easing='ease']
-    The timing function that controls the transition's acceleration.
+      It should be detached before calling `up.morph()`.
+  @section Transition
+    @param {Function(oldElement, newElement, options)|string} transition
+      Can either be:
 
-    See [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
-    for a list of pre-defined timing functions.
-  @param {boolean} [options.reveal=false]
-    Whether to reveal the new element by scrolling its parent viewport.
+      - The name of a [registered](/up.transition) transition
+      - A function performing the transition (same contract as a function passed to `up.transition()`)
+    @param {number} [options.duration=300]
+      The duration of the animation, in milliseconds.
+    @param {string} [options.easing='ease']
+      The timing function that controls the transition's acceleration.
+
+      See [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
+      for a list of pre-defined timing functions.
   @return {Promise}
     A promise that fulfills when the transition ends.
   @stable
