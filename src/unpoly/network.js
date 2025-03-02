@@ -177,12 +177,15 @@ up.network = (function() {
   /*-
   Returns a [cached](/caching) request matching the given request options.
 
+  The request may still be in flight.
+
   Returns `undefined` if the given request is not currently cached.
 
   > [IMPORTANT]
-  > `up.request()` and `up.render()` will only write to the cache when a [`{ cache }`](/up.request#options.cache) option is set.
+  > `up.request()` and `up.render()` will only write to the cache when a [`{ cache }`](/up.request#options.cache)
+  > option is set.
 
-  ### Example
+  ## Example
 
   ```
   let request = up.cache.get({ url: '/foo' })
@@ -208,13 +211,21 @@ up.network = (function() {
   /*-
   [Evicts](/caching#eviction) responses in the [cache](/caching).
 
+  The server may also evict cache entries by sending an [`X-Up-Evict-Cache`](/X-Up-Evict-Cache) header.
+
+  ## Example
+
+  Calling without argument will clear the entire cache:
+
+  ```js
+  up.cache.evict()
+  ```
+
   To only remove some cache entries, pass a [URL pattern](/url-patterns):
 
   ```js
   up.cache.evict('/users/*')
   ```
-
-  The server may also evict cache entries by sending an [`X-Up-Evict-Cache`](/X-Up-Evict-Cache) header.
 
   @function up.cache.evict
   @param {string} [pattern]
@@ -227,20 +238,31 @@ up.network = (function() {
   /*-
   [Expires](/caching#expiration) entries in the [cache](/caching).
 
+  Expired entries remain in the cache, but will be [revalidated](/caching#revalidation)
+  after rendering.
+
+  By default, Unpoly automatically expires the entire cache whenever it processes
+  a request with an non-GET HTTP method. To customize this rule, use `up.network.config.expireCache`.
+
+  The server may also expire cache entries by sending an [`X-Up-Expire-Cache`](/X-Up-Expire-Cache) header.
+
+  ## Example
+
+  Calling without argument will mark the entire cache as expired:
+
+  ```js
+  up.cache.expire()
+  ```
+
   To only expire some cache entries, pass a [URL pattern](/url-patterns):
 
   ```js
   up.cache.expire('/users/*')
   ```
 
-  The server may also expire cache entries by sending an [`X-Up-Expire-Cache`](/X-Up-Expire-Cache) header.
-
-  By default Unpoly automatically expires the entire cache whenever it processes
-  a request with an non-GET HTTP method. To customize this rule, use `up.network.config.expireCache`.
-
   @function up.cache.expire
   @param {string} [pattern]
-    A [URL pattern](/url-patterns) matching cache entries that should be expire.
+    A [URL pattern](/url-patterns) matching cache entries that should be expired.
 
     If omitted, the entire cache is expired.
   @stable
@@ -258,6 +280,8 @@ up.network = (function() {
     The earlier request or [request options](/up.request).
   @param {Object|up.Request|undefined} newRequest
     The new request or [request options](/up.request).
+  @return {up.Request|undefined]
+    If an alias could be registered, `newRequest` is returned.
 
     If `oldRequest` wasn't found in the cache, `undefined` is returned.
   @experimental
@@ -270,9 +294,6 @@ up.network = (function() {
   making a new request.
 
   @function up.cache.set
-  @param {string} request.url
-  @param {string} [request.method='GET']
-  @param {string} [request.target='body']
   @param {up.Request} request
     The request to cache. The cache is also a promise for the response.
   @internal
@@ -339,133 +360,140 @@ up.network = (function() {
 
   @function up.request
 
-  @param {string} [url]
-    The requested URL.
+  @section Request
+    @param {string} [url]
+      The requested URL.
 
-    Instead of passing the URL as a string argument, you can also pass it as an `{ url }` option.
+      Instead of passing the URL as a string argument, you can also pass it as an `{ url }` option.
 
-  @param {string} [options.url]
-    The requested URL.
+    @param {string} [options.url]
+      The requested URL.
 
-  @param {string} [options.method='GET']
-    The HTTP method for the request.
+    @param {string} [options.method='GET']
+      The HTTP method for the request.
 
-  @param {Object|up.Params|FormData|string|Array} [options.params={}]
-    [Parameters](/up.Params) that should be sent as the request's
-    [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
+    @param {Object|up.Params|FormData|string|Array} [options.params={}]
+      [Parameters](/up.Params) that should be sent as the request's
+      [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
 
-    When making a `GET` request to a URL with a query string, the given `{ params }` will be added
-    to the query parameters.
+      When making a `GET` request to a URL with a query string, the given `{ params }` will be added
+      to the query parameters.
 
-  @param {boolean} [options.cache=false]
-    Whether to read from and write to the [cache](/caching).
+    @param {Object} [options.headers={}]
+      An object of additional HTTP headers.
 
-    With `{ cache: true }` Unpoly will try to re-use a cached response before connecting
-    to the network. If no cached response exists, Unpoly will make a request and cache
-    the server response.
+      Unpoly will by default send a number of custom request headers.
+      See `up.protocol` for details.
 
-    With `{ cache: 'auto' }` Unpoly will use the cache only if `up.network.config.autoCache`
-    returns `true` for this request.
+    @param {boolean} [options.wrapMethod]
+      Whether to wrap non-standard HTTP methods in a POST request.
 
-    With `{ cache: false }` (the default) Unpoly will always make a network request.
+      If this is set, methods other than GET and POST will be converted to a `POST` request
+      and carry their original method as a `_method` parameter. This is to [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
 
-  @param {boolean|string} [options.expireCache]
-    Whether to [expire](/caching#expiration) the [cache](/caching) after this request.
+      Defaults to [`up.network.config`](/up.network.config#config.wrapMethod).
 
-    Defaults to the result of `up.network.config.expireCache`, which
-    defaults to expiring the entire cache after a non-GET request.
+    @param {string} [options.timeout]
+      A timeout in milliseconds.
 
-    You may also pass a [URL pattern](/url-patterns) to only expire matching responses.
+      If the request is queued due to [many concurrent requests](/up.network.config#config.concurrency),
+      the timeout will not include the time spent waiting in the queue.
 
-  @param {boolean|string} [options.evictCache]
-    Whether to [evict](/caching#eviction) the [cache](/caching) after this request.
+    @param {Element} [options.contentType]
+      The format in which to encode the request params.
 
-    Defaults to the result of `up.network.config.evictCache`, which defaults to `false`.
+      Allowed values are `application/x-www-form-urlencoded` and `multipart/form-data`.
+      Only `multipart/form-data` can transport binary data.
 
-    You may also pass a [URL pattern](/url-patterns) to only evict matching responses.
+      If this option is omitted Unpoly will prefer `application/x-www-form-urlencoded`,
+      unless request params contains binary data.
 
-  @param {Object} [options.headers={}]
-    An object of additional HTTP headers.
+    @param {string} [options.payload]
+      A custom payload for this request.
 
-    Unpoly will by default send a number of custom request headers.
-    See `up.protocol` for details.
+      By default Unpoly will build a payload from the given `{ params }` option.
+      Therefore this option is not required when making a standard link or form request to a server
+      that renders HTML.
 
-  @param {boolean} [options.wrapMethod]
-    Whether to wrap non-standard HTTP methods in a POST request.
+      A use case for this option is talking to a JSON API that expects requests with a `application/json` payload.
 
-    If this is set, methods other than GET and POST will be converted to a `POST` request
-    and carry their original method as a `_method` parameter. This is to [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
+      If a `{ payload }` option is given you must also pass a `{ contentType }`.
 
-    Defaults to [`up.network.config`](/up.network.config#config.wrapMethod).
+    @param {boolean} [options.background=false]
+      Whether this request will load in the background.
 
-  @param {string} [options.timeout]
-    A timeout in milliseconds.
+      Background requests deprioritized over foreground requests.
+      Background requests also won't emit `up:network:late` events and won't trigger
+      the [progress bar](/progress-bar).
 
-    If the request is queued due to [many concurrent requests](/up.network.config#config.concurrency),
-    the timeout will not include the time spent waiting in the queue.
+    @param {number} [options.lateDelay]
+      The number of milliseconds after which this request can cause
+      an `up:network:late` event.
 
-  @param {string|boolean|Function(up.Response): boolean} [options.fail='auto']
-    Whether the response to this request should be considered [failed](/failed-responses).
+      Defaults to `up.network.config.lateDelay`.
 
-    By [default](/up.network.config#config.autoFail) any HTTP status code other than 2xx or 304 is considered an error code.
-    Pass `{ fail: false }` to handle *any* response as successful, even with a 4xx or 5xx status code.
+      @experimental
 
-  @param {string} [options.target='body']
-    The CSS selector that will be sent as an `X-Up-Target` header.
+  @section Failed responses
+    @param {string|boolean|Function(up.Response): boolean} [options.fail='auto']
+      Whether the response to this request should be considered [failed](/failed-responses).
 
-    The targets of concurrent requests to the same URL [may be merged](/X-Up-Target#merging).
+      By [default](/up.network.config#config.autoFail) any HTTP status code other than 2xx or 304 is considered an error code.
+      Pass `{ fail: false }` to handle *any* response as successful, even with a 4xx or 5xx status code.
 
-  @param {string} [options.failTarget='body']
-    The CSS selector that will be sent as an `X-Up-Fail-Target` header.
+      A failed response will cause the [returned promise](#return-value) to reject.
 
-  @param {string} [options.layer='current']
-    The [layer](/up.layer) this request is associated with.
+  @section Caching
+    @param {boolean} [options.cache=false]
+      Whether to read from and write to the [cache](/caching).
 
-    If this request is intended to update an existing fragment, this is that fragment's layer.
+      With `{ cache: true }` Unpoly will try to re-use a cached response before connecting
+      to the network. If no cached response exists, Unpoly will make a request and cache
+      the server response.
 
-    If this request is intended to [open an overlay](/opening-overlays),
-    the associated layer is the future overlay's parent layer.
+      With `{ cache: 'auto' }` Unpoly will use the cache only if `up.network.config.autoCache`
+      returns `true` for this request.
 
-  @param {string} [options.failLayer='current']
-    The [layer](/up.layer) this request is associated with if the server [sends a HTTP status code](/failed-responses).
+      With `{ cache: false }` (the default) Unpoly will always make a network request.
 
-  @param {Element} [options.origin]
-    The DOM element that caused this request to be sent, e.g. a hyperlink or form element.
+    @param {boolean|string} [options.expireCache]
+      Whether to [expire](/caching#expiration) the [cache](/caching) after this request.
 
-  @param {Element} [options.contentType]
-    The format in which to encode the request params.
+      Defaults to the result of `up.network.config.expireCache`, which
+      defaults to expiring the entire cache after a non-GET request.
 
-    Allowed values are `application/x-www-form-urlencoded` and `multipart/form-data`.
-    Only `multipart/form-data` can transport binary data.
+      You may also pass a [URL pattern](/url-patterns) to only expire matching responses.
 
-    If this option is omitted Unpoly will prefer `application/x-www-form-urlencoded`,
-    unless request params contains binary data.
+    @param {boolean|string} [options.evictCache]
+      Whether to [evict](/caching#eviction) the [cache](/caching) after this request.
 
-  @param {string} [options.payload]
-    A custom payload for this request.
+      Defaults to the result of `up.network.config.evictCache`, which defaults to `false`.
 
-    By default Unpoly will build a payload from the given `{ params }` option.
-    Therefore this option is not required when making a standard link or form request to a server
-    that renders HTML.
+      You may also pass a [URL pattern](/url-patterns) to only evict matching responses.
 
-    A use case for this option is talking to a JSON API that expects requests with a `application/json` payload.
 
-    If a `{ payload }` option is given you must also pass a `{ contentType }`.
+  @section Render info
+    @param {string} [options.target='body']
+      The CSS selector that will be sent as an `X-Up-Target` header.
 
-  @param {boolean} [options.background=false]
-    Whether this request will load in the background.
+      The targets of concurrent requests to the same URL [may be merged](/X-Up-Target#merging).
 
-    Background requests deprioritized over foreground requests.
-    Background requests also won't emit `up:network:late` events and won't trigger
-    the [progress bar](/progress-bar).
+    @param {string} [options.failTarget='body']
+      The CSS selector that will be sent as an `X-Up-Fail-Target` header.
 
-  @param {number} [options.lateDelay]
-    The number of milliseconds after which this request can cause
-    an `up:network:late` event.
+    @param {string} [options.layer='current']
+      The [layer](/up.layer) this request is associated with.
 
-    Defaults to `up.network.config.lateDelay`.
+      If this request is intended to update an existing fragment, this is that fragment's layer.
 
-    @experimental
+      If this request is intended to [open an overlay](/opening-overlays),
+      the associated layer is the future overlay's parent layer.
+
+    @param {string} [options.failLayer='current']
+      The [layer](/up.layer) this request is associated with if the server [sends a HTTP status code](/failed-responses).
+
+    @param {Element} [options.origin]
+      The DOM element that caused this request to be sent, e.g. a hyperlink or form element.
 
   @return {up.Request}
     An object with information about the request.
@@ -620,6 +648,7 @@ up.network = (function() {
 
   @function up.network.isBusy
   @return {boolean}
+    Whether a request is loading.
   @stable
   */
   function isBusy() {
@@ -634,18 +663,12 @@ up.network = (function() {
   Also see `up.Request#loadPage()`.
 
   @function up.network.loadPage
-  @param {string} options.url
-    The URL to load.
-  @param {string} [options.method='get']
-    The method for the request.
-
-    Methods other than GET or POST will be [wrapped](/up.protocol.config#config.methodParam) in a POST request.
-  @param {Object|up.Params|FormData|string|Array} [options.params]
-    [Parameters](/up.Params) that should be sent as the request's
-    [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
-
-    When making a `GET` request to a URL with a query string, the given `{ params }` will be added
-    to the query parameters.
+  @param options.url
+    The URL to load as a full page.
+  @param options.method
+    @like up.render
+  @param options.params
+    @like up.render
   @experimental
   */
   function loadPage(requestsAttrs) {
@@ -660,7 +683,7 @@ up.network = (function() {
   > which matches requests by screen region. Only when requests are aborted by screen region, components
   > can [react to being aborted](/up:fragment:aborted).
 
-  ### Effects of aborting
+  ## Effects of aborting
 
   When an `up.request()` is aborted, its returned promise rejects with an `up.AbortError`:
 
@@ -677,7 +700,7 @@ up.network = (function() {
 
   Also the event `up:request:aborted` will be emitted.
 
-  ### Aborting all requests
+  ## Aborting all requests
 
   Without arguments, this will abort all pending requests:
 
@@ -685,7 +708,7 @@ up.network = (function() {
   up.network.abort()
   ```
 
-  ### Aborting a single request
+  ## Aborting a single request
 
   To abort a given `up.Request` object, pass it as the first argument:
 
@@ -694,7 +717,7 @@ up.network = (function() {
   up.network.abort(request)
   ```
 
-  ### Aborting requests matching a pattern
+  ## Aborting requests matching a pattern
 
   To abort all requests matching an [URL pattern](/url-patterns), pass it as the first argument:
 
@@ -702,7 +725,7 @@ up.network = (function() {
   up.network.abort('/path/*')
   ```
 
-  ### Aborting requests matching an arbitrary condition
+  ## Aborting requests matching an arbitrary condition
 
   To abort all requests matching an arbitrary condition, pass a function that takes a request
   and returns a boolean value. Unpoly will abort all request for which the given
@@ -712,7 +735,7 @@ up.network = (function() {
   up.network.abort((request) => request.method == 'GET')
   ```
 
-  ### Aborting requests targeting a fragment or layer
+  ## Aborting requests targeting a fragment or layer
 
   Use `up.fragment.abort()`.
 
