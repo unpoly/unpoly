@@ -198,7 +198,8 @@ up.Preview = class Preview {
   When not revalidating, this property is `undefined`.
 
   @property up.Preview#expiredResponse
-  @return {up.Response|undefined)
+  @return {up.Response|undefined}
+    The expired response object.
   @experimental
   */
   get expiredResponse() {
@@ -218,6 +219,7 @@ up.Preview = class Preview {
 
   @property up.Preview#revalidating
   @return {boolean}
+    Whether the preview is shown while revalidating.
   @experimental
   */
   get revalidating() {

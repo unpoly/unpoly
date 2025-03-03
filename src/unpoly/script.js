@@ -28,7 +28,7 @@ up.script = (function() {
   /*-
   Configures defaults for script handling.
 
-  @param [config.assetSelectors]
+  @param {Array<string} [config.assetSelectors]
     An array of CSS selectors matching default [assets](/up-asset).
 
     By default all remote scripts and stylesheets in the `<head>` are considered assets.
@@ -41,13 +41,13 @@ up.script = (function() {
 
     See [Tracking assets](/handling-asset-changes#tracking-assets) for examples.
 
-  @param [config.noAssetSelectors]
+  @param {Array<string} [config.noAssetSelectors]
     Exceptions to `up.script.config.assetSelectors`.
 
     Matching elements will *not* be considered [assets](/up-asset)
     even if they match `up.script.config.assetSelectors`.
 
-  @param [config.scriptSelectors]
+  @param {Array<string} [config.scriptSelectors]
     An array of CSS selectors matching elements that run JavaScript.
 
     By default this matches all `<script>` tags.
@@ -58,7 +58,7 @@ up.script = (function() {
     For this configure `up.script.config.assetSelectors`.
 
     @experimental
-  @param [config.noScriptSelectors]
+  @param {Array<string} [config.noScriptSelectors]
     Exceptions to `up.script.config.scriptSelectors`.
 
     @experimental

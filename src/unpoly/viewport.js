@@ -394,7 +394,7 @@ up.viewport = (function() {
   @function up.viewport.subtree
   @param {string|Element|jQuery} target
   @param {Object} options
-  @return List<Element>
+  @return {List<Element>}
   @internal
   */
   function getSubtree(element, options = {}) {
@@ -412,7 +412,7 @@ up.viewport = (function() {
   @function up.viewport.around
   @param {string|Element|jQuery} element
   @param {Object} options
-  @return List<Element>
+  @return {List<Element>}
   @internal
   */
   function getAround(element, options = {}) {
@@ -521,7 +521,7 @@ up.viewport = (function() {
       => { '.main': 0, '.sidebar': 73 }
 
   @function getScrollTopsForSave
-  @return Object<string, number>
+  @return {Object<string, number>}
   @internal
   */
   function getScrollTopsForSave(viewports) {

@@ -408,7 +408,8 @@ up.Request = class Request extends up.Record {
   @see up.RenderResult.prototype.fragments
 
   @property up.Request#fragments
-  @param List<Element> fragments
+  @param {List<Element>} fragments
+    A list of targeted fragments.
   @experimental
   */
   get fragments() { // eslint-disable-line getter-return
@@ -447,7 +448,8 @@ up.Request = class Request extends up.Record {
   @see up.RenderResult.prototype.fragment
 
   @property up.Request#fragment
-  @param Element fragment
+  @param {Element} fragment
+    The first targeted fragment.
   @experimental
   */
   get fragment() {

@@ -280,7 +280,7 @@ up.network = (function() {
     The earlier request or [request options](/up.request).
   @param {Object|up.Request|undefined} newRequest
     The new request or [request options](/up.request).
-  @return {up.Request|undefined]
+  @return {up.Request|undefined}
     If an alias could be registered, `newRequest` is returned.
 
     If `oldRequest` wasn't found in the cache, `undefined` is returned.
@@ -663,7 +663,7 @@ up.network = (function() {
   Also see `up.Request#loadPage()`.
 
   @function up.network.loadPage
-  @param options.url
+  @param {string} options.url
     The URL to load as a full page.
   @param options.method
     @like up.render

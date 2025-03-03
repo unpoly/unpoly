@@ -798,7 +798,7 @@ up.element = (function() {
   Throws an error if the given list only contains a `Text` node.
 
   @function up.element.extractSingular
-  @param {List<Node>}
+  @param {List<Node>} nodes
   @return {Element}
   @internal
   */
@@ -1018,9 +1018,9 @@ up.element = (function() {
   If the element has the attribute but without value (e.g. `<input readonly>`), it returns an empty string.
 
   @function up.element.attr
-  @param {Element}
+  @param {Element} element
     The element from which to read an attribute.
-  @param {string}
+  @param {string} attribute
     The name of the attribute to read.
   @return {string|undefined}
     The attribute value.
@@ -1039,7 +1039,7 @@ up.element = (function() {
 
   If the attribute value cannot be cast to `true` or `false`, `undefined` is returned.
 
-  ### Casting rules
+  ## Casting rules
 
   This function deviates from the
   [HTML Standard for boolean attributes](https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#boolean-attributes)

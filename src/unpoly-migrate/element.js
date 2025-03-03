@@ -162,7 +162,7 @@ Returns a CSS selector that matches the given element as good as possible.
 Alias for `up.fragment.toTarget()`.
 
 @function up.element.toSelector
-@param {string|Element|jQuery}
+@param {string|Element|jQuery} element
   The element for which to create a selector.
 @deprecated
   Use `up.fragment.toTarget()` instead.

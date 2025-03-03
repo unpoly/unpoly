@@ -77,7 +77,8 @@ up.RenderResult = class RenderResult extends up.Record {
   console.log(result.fragments)
 
   @property up.RenderResult#finished
-  @param {Promise<up.RenderResult>}
+  @param {Promise<up.RenderResult>} finished
+    A promise that settles after all DOM changes.
   ```
   */
 

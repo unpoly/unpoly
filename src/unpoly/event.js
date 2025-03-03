@@ -522,7 +522,7 @@ up.event = (function() {
   | `'unknown'`  | The input device is unknown or this event was not caused by user input. |
 
   @property up.event.inputDevice
-  @param inputDevice
+  @param {string} inputDevice
     A string describing the current input device class.
   @experimental
   */

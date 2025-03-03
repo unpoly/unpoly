@@ -647,10 +647,10 @@ up.link = (function() {
   Looks at the link's `[up-method]` or `[data-method]` attributes. Defaults to `"get"`.
 
   @function up.link.followMethod
-  @param link
+  @param {Element} link
     The link from which to evaluate the method.
-  @param options.method {string}
-    @internal
+  @param {string} options.method
+    A value to override the value parsed from the attribute.
   @return {string}
     The HTTP method.
   @internal
@@ -1034,7 +1034,7 @@ up.link = (function() {
       Common options are documented below, but most [options for `up.follow()`](/up.follow#parameters) may be used.
 
   @section Targeting
-    @param [optons.target=':origin']
+    @param {string} [options.target=':origin']
       @like [up-defer]/up-target
 
   @section Request
@@ -1043,10 +1043,12 @@ up.link = (function() {
 
       Defaults to the placeholder's [`[up-href]`](/up-defer#up-href) or `[href]` attribute.
 
+      @like up.follow
+
     @param [options.headers]
       @like up.follow
 
-    @param [up.background=false]
+    @param {boolean} [options.background=false]
       @like [up-defer]/up-background
 
   @section Caching

@@ -303,24 +303,24 @@ up.util = (function() {
   Returns whether the given argument is `null`.
 
   @function up.util.isNull
-  @param object
+  @param {any} object
   @return {boolean}
   @stable
   */
-  function isNull(object) {
-    return object === null
+  function isNull(value) {
+    return value === null
   }
 
   /*-
   Returns whether the given argument is `undefined`.
 
   @function up.util.isUndefined
-  @param object
+  @param {any} value
   @return {boolean}
   @stable
   */
-  function isUndefined(object) {
-    return object === undefined
+  function isUndefined(value) {
+    return value === undefined
   }
 
 
@@ -328,7 +328,7 @@ up.util = (function() {
   Returns whether the given argument is not `undefined`.
 
   @function up.util.isDefined
-  @param object
+  @param {any} value
   @return {boolean}
   @stable
   */
@@ -342,12 +342,12 @@ up.util = (function() {
   For the opposite of `up.util.isMissing()` see [`up.util.isGiven()`](/up.util.isGiven).
 
   @function up.util.isMissing
-  @param object
+  @param {any} value
   @return {boolean}
   @stable
   */
-  function isMissing(object) {
-    return isUndefined(object) || isNull(object)
+  function isMissing(value) {
+    return isUndefined(value) || isNull(value)
   }
 
   /*-
@@ -360,7 +360,7 @@ up.util = (function() {
   > Empty strings or the number zero are not truthy, but *are* considered to be "given".
 
   @function up.util.isGiven
-  @param object
+  @param {any} value
   @return {boolean}
   @stable
   */
@@ -386,7 +386,7 @@ up.util = (function() {
   see `up.util.isBlank.key`.
 
   @function up.util.isBlank
-  @param value
+  @param {any} value
     The value is to check.
   @return {boolean}
     Whether the value is blank.
@@ -455,7 +455,7 @@ up.util = (function() {
   otherwise returns `undefined`.
 
   @function up.util.presence
-  @param value
+  @param {any} value
   @param {Function(value): boolean} [tester=up.util.isPresent]
     The function that will be used to test whether the argument is present.
   @return {any|undefined}
@@ -471,7 +471,7 @@ up.util = (function() {
   Returns whether the given argument is not [blank](/up.util.isBlank).
 
   @function up.util.isPresent
-  @param object
+  @param {any} value
   @return {boolean}
   @stable
   */
@@ -481,36 +481,36 @@ up.util = (function() {
   Returns whether the given argument is a function.
 
   @function up.util.isFunction
-  @param object
+  @param {any} value
   @return {boolean}
   @stable
   */
-  function isFunction(object) {
-    return typeof(object) === 'function'
+  function isFunction(value) {
+    return typeof(value) === 'function'
   }
 
   /*-
   Returns whether the given argument is a string.
 
   @function up.util.isString
-  @param object
+  @param {any} value
   @return {boolean}
   @stable
   */
-  function isString(object) {
-    return (typeof(object) === 'string') || object instanceof String
+  function isString(value) {
+    return (typeof(value) === 'string') || value instanceof String
   }
 
   /*-
   Returns whether the given argument is a boolean value.
 
   @function up.util.isBoolean
-  @param object
+  @param {any} value
   @return {boolean}
   @stable
   */
-  function isBoolean(object) {
-    return (typeof(object) === 'boolean') || object instanceof Boolean
+  function isBoolean(value) {
+    return (typeof(value) === 'boolean') || value instanceof Boolean
   }
 
   /*-
@@ -520,12 +520,12 @@ up.util = (function() {
   It will return `false` for a string like `"123"`.
 
   @function up.util.isNumber
-  @param object
+  @param {any} value
   @return {boolean}
   @stable
   */
-  function isNumber(object) {
-    return (typeof(object) === 'number') || object instanceof Number
+  function isNumber(value) {
+    return (typeof(value) === 'number') || value instanceof Number
   }
 
   /*-
@@ -535,12 +535,12 @@ up.util = (function() {
   functions, jQuery collections, promises, `FormData` instances and arrays.
 
   @function up.util.isOptions
-  @param object
+  @param {any} value
   @return {boolean}
   @internal
   */
-  function isOptions(object) {
-    return (typeof(object) === 'object') && !isNull(object) && (isUndefined(object.constructor) || (object.constructor === Object))
+  function isOptions(value) {
+    return (typeof(value) === 'object') && !isNull(value) && (isUndefined(value.constructor) || (value.constructor === Object))
   }
 
   /*-
@@ -549,102 +549,102 @@ up.util = (function() {
   This also returns `true` for functions, which may behave like objects in JavaScript.
 
   @function up.util.isObject
-  @param object
+  @param {any} value
   @return {boolean}
   @stable
   */
-  function isObject(object) {
-    const typeOfResult = typeof(object)
-    return ((typeOfResult === 'object') && !isNull(object)) || (typeOfResult === 'function')
+  function isObject(value) {
+    const typeOfResult = typeof(value)
+    return ((typeOfResult === 'object') && !isNull(value)) || (typeOfResult === 'function')
   }
 
   /*-
   Returns whether the given argument is a [DOM element](https://developer.mozilla.org/de/docs/Web/API/Element).
 
   @function up.util.isElement
-  @param object
+  @param {any} value
   @return {boolean}
   @stable
   */
-  function isElement(object) {
-    return object instanceof Element
+  function isElement(value) {
+    return value instanceof Element
   }
 
   /*-
   Returns whether the given argument is a [text node](https://developer.mozilla.org/en-US/docs/Web/API/Text).
 
   @function up.util.isTextNode
-  @param object
+  @param {any} value
   @return {boolean}
   @internal
   */
-  function isTextNode(object) {
-    return object instanceof Text
+  function isTextNode(value) {
+    return value instanceof Text
   }
 
   /*-
   Returns whether the given argument is a [regular expression](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp).
 
   @function up.util.isRegExp
-  @param object
+  @param {any} value
   @return {boolean}
   @internal
   */
-  function isRegExp(object) {
-    return object instanceof RegExp
+  function isRegExp(value) {
+    return value instanceof RegExp
   }
 
   /*-
   Returns whether the given argument is an error instance.
 
   @function up.util.isError
-  @param object
+  @param {any} object
   @return {boolean}
   @internal
   */
-  function isError(object) {
-    return object instanceof Error
+  function isError(value) {
+    return value instanceof Error
   }
 
   /*-
   Returns whether the given argument is a [jQuery collection](https://learn.jquery.com/using-jquery-core/jquery-object/).
 
   @function up.util.isJQuery
-  @param object
+  @param {any} value
   @return {boolean}
   @stable
   */
-  function isJQuery(object) {
-    return up.browser.canJQuery() && object instanceof jQuery
+  function isJQuery(value) {
+    return up.browser.canJQuery() && value instanceof jQuery
   }
 
   /*-
   @function up.util.isElementLike
-  @param object
+  @param {any} value
   @return {boolean}
   @internal
   */
-  function isElementLike(object) {
-    return !!(object && (object.addEventListener || (isJQuery(object) && object[0]?.addEventListener)))
+  function isElementLike(value) {
+    return !!(value && (value.addEventListener || (isJQuery(value) && value[0]?.addEventListener)))
   }
 
   /*-
   Returns whether the given argument is an object with a `then` method.
 
   @function up.util.isPromise
-  @param object
+  @param {any} value
   @return {boolean}
   @stable
   */
-  function isPromise(object) {
-    return isObject(object) && isFunction(object.then)
+  function isPromise(value) {
+    return isObject(value) && isFunction(value.then)
   }
 
   /*-
   Returns whether the given argument is an array.
 
   @function up.util.isArray
-  @param object
+  @param {any} value
   @return {boolean}
   @stable
   */
@@ -657,12 +657,12 @@ up.util = (function() {
   Always returns `false` in browsers that don't support `FormData`.
 
   @function up.util.isFormData
-  @param object
+  @param {any} value
   @return {boolean}
   @internal
   */
-  function isFormData(object) {
-    return object instanceof FormData
+  function isFormData(value) {
+    return value instanceof FormData
   }
 
   /*-
@@ -671,7 +671,7 @@ up.util = (function() {
   If the given value is already an array, it is returned unchanged.
 
   @function up.util.toArray
-  @param object
+  @param {any} value
   @return {Array}
   @stable
   */
@@ -685,7 +685,7 @@ up.util = (function() {
   To test whether a value is an actual `Array`, use [`up.util.isArray()`](/up.util.isArray).
 
   @function up.util.isList
-  @param value
+  @param {any} value
   @return {boolean}
   @stable
   */
@@ -703,7 +703,7 @@ up.util = (function() {
   `NodeLists` are array-like objects returned by [`document.querySelectorAll()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/querySelectorAll).
 
   @function up.util.isNodeList
-  @param value
+  @param {any} value
   @return {boolean}
   @internal
   */
@@ -719,7 +719,7 @@ up.util = (function() {
   Returns whether the given value is an [arguments object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/arguments).
 
   @function up.util.isArguments
-  @param value
+  @param {any} value
   @return {boolean}
   @internal
   */
@@ -855,7 +855,8 @@ up.util = (function() {
 
   @function up.util.merge
   @param {Array<Object>} sources...
-  @return Object
+  @return {Object}
+    A new object with all merged properties.
   @stable
   */
   function merge(...sources) {
@@ -865,7 +866,7 @@ up.util = (function() {
   /*-
   @function up.util.mergeDefined
   @param {Array<Object>} sources...
-  @return Object
+  @return {Object}
   @internal
   */
   function mergeDefined(...sources) {
@@ -1787,7 +1788,7 @@ up.util = (function() {
 
   @function up.util.withRenamedKeys
   @param {Object} object
-  @param {Function(string): string|undefined) renameKeyFn
+  @param {Function(string): string|undefined} renameKeyFn
   @internal
   */
   function withRenamedKeys(object, renameKeyFn) {

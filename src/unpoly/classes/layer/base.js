@@ -209,7 +209,6 @@ up.Layer = class Layer extends up.Record {
     ```
   @param {Object} [options]
     See options for `up.Layer#accept()`.
-  @return
   @stable
   */
   dismiss() {
