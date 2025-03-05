@@ -81,6 +81,11 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
         let keepPlan = this._findKeepPlan(step)
         if (keepPlan) {
           // Since we're keeping the element that was requested to be swapped,
+          // there is nothing left to do here, except notify event listeners.
+          up.fragment.emitKept(keepPlan)
+
+
+          // Since we're keeping the element that was requested to be swapped,
           // we won't be making changes to the DOM.
 
           this._handleFocus(step.oldElement, step)
@@ -93,7 +98,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
         } else {
           // This needs to happen before up.script.clean() below.
           // Otherwise we would run destructors for elements we want to keep.
-          this._preserveKeepables(step)
+          this._preserveDescendantKeepables(step)
 
           // TODO: Don't suppport [up-keep] for direct children of <body>
 
@@ -108,13 +113,13 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
               // Restore keepable before finalizing. Finalizing will rewrite elements that DOMParser broke,
               // causing a keepPlans's newElement to point to a rewritten element that is now detached.
               // Hence we lose the original position of the keepable.
-              this._restoreKeepables(step)
+              this._restoreDescendantKeepables(step)
 
               // Adopt CSP nonces and fix broken script tags
               this.responseDoc.finalizeElement(step.newElement)
 
-              // Remove the .up-keeping classes.
-              this._unmarkKeepables(step)
+              // Remove the .up-keeping classes and emit up:fragment:kept.
+              this._finalizeDescendantKeepables(step)
 
               // up.hello() tracks which compilers have been called for which elements.
               // Because of this we do not need to worry about [up-keep] elements being compiled twice.
@@ -205,7 +210,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     }
   }
 
-  // Returns a object detailling a keep operation iff the given element is [up-keep] and
+  // Returns a object detailing a keep operation iff the given element is [up-keep] and
   // we can find a matching partner in newElement. Otherwise returns undefined.
   //
   // @param {Element} options.oldElement
@@ -253,8 +258,8 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
   // This will find all [up-keep] descendants in oldElement, overwrite their partner
   // element in newElement and leave a visually identical clone in oldElement for a later transition.
   // Returns an array of keepPlans.
-  _preserveKeepables(step) {
-    const keepPlans = []
+  _preserveDescendantKeepables(step) {
+    const descendantKeepPlans = []
 
     if (step.keep) {
       for (let keepable of step.oldElement.querySelectorAll('[up-keep]')) {
@@ -296,16 +301,16 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
           // // Since we're going to swap the entire oldElement and newElement containers afterwards,
           // // replace the matching element with keepable so it will eventually return to the DOM.
           // keepPlan.newElement.replaceWith(keepable)
-          keepPlans.push(keepPlan)
+          descendantKeepPlans.push(keepPlan)
         }
       }
     }
 
-    step.keepPlans = keepPlans
+    step.descendantKeepPlans = descendantKeepPlans
   }
 
-  _restoreKeepables(step) {
-    for (let keepPlan of step.keepPlans) {
+  _restoreDescendantKeepables(step) {
+    for (let keepPlan of step.descendantKeepPlans) {
       // Now that we know the final destination of { newElement }, we can replace it with the keepable.
       keepPlan.newElement.replaceWith(keepPlan.oldElement)
 
@@ -315,9 +320,10 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     }
   }
 
-  _unmarkKeepables(step) {
-    for (let keepPlan of step.keepPlans) {
+  _finalizeDescendantKeepables(step) {
+    for (let keepPlan of step.descendantKeepPlans) {
       keepPlan.oldElement.classList.remove('up-keeping')
+      up.fragment.emitKept(keepPlan)
     }
   }
 

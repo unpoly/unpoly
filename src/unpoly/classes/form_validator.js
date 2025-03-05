@@ -12,6 +12,23 @@ up.FormValidator = class FormValidator {
     this._honorAbort()
   }
 
+  start() {
+    let guard = (field) => this._isValidatingField(field)
+    let callback = (field) => this._onFieldAdded(field)
+    return up.form.trackFields(this._form, { guard }, callback)
+  }
+
+  _isValidatingField(field) {
+    return field.closest('[up-validate]:not([up-validate=false])')
+  }
+
+  _onFieldAdded(field) {
+    let { event } = this._originOptions(field)
+    // let guard = () => up.fragment.isAlive(field)
+    let callback = () => up.error.muteUncriticalRejection(this.validate({ origin: field }))
+    return up.on(field, event, callback)
+  }
+
   _honorAbort() {
     up.fragment.onAborted(this._form, (event) => this._onAborted(event))
   }
@@ -26,13 +43,6 @@ up.FormValidator = class FormValidator {
 
   _resetNextRenderPromise() {
     this._nextRenderPromise = u.newDeferred()
-  }
-
-  watchContainer(fieldOrForm) {
-    let { event } = this._originOptions(fieldOrForm)
-    let guard = () => up.fragment.isAlive(fieldOrForm)
-    let callback = () => up.error.muteUncriticalRejection(this.validate({ origin: fieldOrForm }))
-    up.on(fieldOrForm, event, { guard }, callback)
   }
 
   validate(options = {}) {
@@ -136,6 +146,9 @@ up.FormValidator = class FormValidator {
   }
 
   async _doRenderDirtySolutions() {
+    // We do *not* remove solutions for which the origin no longer exists,
+    // as a delayed solution's { target } may still require an update.
+
     // When aborted we clear out _dirtySolutions to cancel a scheduled callback.
     if (!this._dirtySolutions.length) return
 
@@ -265,7 +278,7 @@ up.FormValidator = class FormValidator {
     // only sees enabled elements.
     options.disable = dirtySolutions.map((solution) => up.fragment.resolveOrigin(solution.renderOptions.disable, solution))
 
-    // The guardEvent will be be emitted on the render pass' { origin }, so the form in this case.
+    // The guardEvent will be emitted on the render pass' { origin }, so the form in this case.
     // The guardEvent will also be assigned a { renderOptions } attribute in up.render()
     options.guardEvent = up.event.build('up:form:validate', {
       fields: dirtyFields,
@@ -282,11 +295,6 @@ up.FormValidator = class FormValidator {
     let value = names.join(' ')
     if (!value || value.length > up.protocol.config.maxHeaderSize) value = ':unknown'
     headers[key] = value
-  }
-
-  static forElement(element) {
-    let form = up.form.get(element)
-    return form.upFormValidator ||= new this(form)
   }
 
 }

@@ -5,7 +5,7 @@ up.FieldWatcher = class FieldWatcher {
   constructor(root, options, callback) {
     this._options = options
     this._root = root
-    this._scope = up.form.getScope(root)
+    this._form = up.form.get(root)
     this._callback = callback
     this._batch = options.batch
   }
@@ -15,26 +15,13 @@ up.FieldWatcher = class FieldWatcher {
     this._processedValues = this._readFieldValues()
     this._currentTimer = null
     this._callbackRunning = false
-    this._cleaner = u.cleaner()
 
-    this._watchFieldsWithin(this._root)
-
-    this._root.addEventListener('up:fragment:inserted', ({ target }) => {
-      if (target !== this._root) this._watchFieldsWithin(target)
-    })
-
-    this._cleaner(
-      up.fragment.onAborted(this._scope, () => this._abort())
-    )
-
-    this._cleaner(
-      up.on(this._scope, 'reset', () => this._onFormReset())
-    )
-  }
-
-  stop() {
-    this._abort()
-    this._cleaner.clean()
+    return u.sequence([
+      up.form.trackFields(this._root, (field) => this._watchField(field)),
+      up.fragment.onAborted(this._form, () => this._abort()),
+      up.on(this._form, 'reset', () => this._onFormReset()),
+      () => this._abort(),
+    ])
   }
 
   _fieldOptions(field) {
@@ -42,17 +29,11 @@ up.FieldWatcher = class FieldWatcher {
     return up.form.watchOptions(field, rootOptions, { defaults: { event: 'input' } })
   }
 
-  _watchFieldsWithin(container) {
-    for (let field of up.form.fields(container)) {
-      this._watchField(field)
-    }
-  }
-
   _watchField(field) {
     let fieldOptions = this._fieldOptions(field)
-    this._cleaner(
-      up.on(field, fieldOptions.event, () => this._check(fieldOptions))
-    )
+    // Return a function that unbinds all events when the field is removed from _root.
+    // Note that an [up-keep] field may be moved to another root.
+    return up.on(field, fieldOptions.event, () => this._check(fieldOptions))
   }
 
   _abort() {
@@ -89,7 +70,8 @@ up.FieldWatcher = class FieldWatcher {
     if (this._currentTimer) return
 
     // If the form was destroyed while a callback was scheduled, we don't run the callback.
-    if (!this._scope.isConnected) return
+    // TODO: Do we need this? Since we already clear scheduledValues in stop()?
+    if (!up.fragment.isAlive(this._form)) return
 
     // Don't forward { event, delay } because
     // (1) we have already processed them here and

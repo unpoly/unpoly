@@ -28,7 +28,7 @@ an `{ event }` option:
 </form>
 ```
 
-Multiple events can be passed as a space-separated string or as an array.
+Multiple events can be passed as a comma-separated string or as an array.
 It's OK to name multiple events that may result in the same field (e.g. `keydown keyup change`).
 Unpoly guarantees the callback is run only once per unique changed value.
 

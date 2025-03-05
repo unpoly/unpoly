@@ -132,6 +132,7 @@ up.form = (function() {
     watchInputEvents: ['input', 'change'],
     watchInputDelay: 0,
     watchChangeEvents: ['change'],
+    watchableEvents: ['input', 'change'],
   }))
 
   /*-
@@ -802,9 +803,7 @@ up.form = (function() {
 
     const watcher = new up.FieldWatcher(root, options, callback)
 
-    watcher.start()
-
-    return () => watcher.stop()
+    return watcher.start()
   }
 
   function watchCallbackFromElement(element) {
@@ -1122,7 +1121,8 @@ up.form = (function() {
   */
   function validate(...args) {
     let options = parseValidateArgs(...args)
-    let validator = up.FormValidator.forElement(options.origin)
+    let form = getForm(options.origin)
+    let validator = getFormValidator(form)
     return validator.validate(options)
   }
 
@@ -1293,8 +1293,20 @@ up.form = (function() {
   function getForm(elementOrSelector, options = {}) {
     const element = up.fragment.get(elementOrSelector, options)
 
-    // Element#form will also work if the element is outside the form with an [form=form-id] attribute
+    // (1) Element#form will also work if the element is outside the form with an [form=form-id] attribute
+    // (2) We still need the closest('form') in case we're called with a non-field element
     return element.form || element.closest('form')
+  }
+
+  function getFormValidator(form) {
+    return form.upFormValidator ||= setupFormValidator(form)
+  }
+
+  function setupFormValidator(form) {
+    const validator = new up.FormValidator(form)
+    const stop = validator.start()
+    up.destructor(form, stop)
+    return validator
   }
 
   // Alternative to getForm() which always returns a likely scope:
@@ -1310,6 +1322,12 @@ up.form = (function() {
     } else {
       return up.layer.current.element
     }
+  }
+
+  function trackFields(...args) {
+    let [root, options, callback] = u.args(args, 'val', 'options', 'callback')
+    let tracker = new up.FieldTracker(root, options, callback)
+    return tracker.start()
   }
 
   function focusedField() {
@@ -1792,16 +1810,12 @@ up.form = (function() {
 
   @stable
   */
-  up.compiler(validatingFieldSelector, function(fieldOrForm) {
-    let validator = up.FormValidator.forElement(fieldOrForm)
-    validator.watchContainer(fieldOrForm)
+  up.compiler('form', function(form) {
+    // We pre-emptively initialize a FormValidator for *every* form, so it can start tracking fields.
+    // There are non-intuitive ways that an [up-validate] field can find its way into a <form>,
+    // e.g. when the field is also [up-keep] and is transplanted into a new <form> later.
+    getFormValidator(form)
   })
-
-  function validatingFieldSelector() {
-    let includes = config.fieldSelectors.map((selector) => `${selector}[up-validate], [up-validate] ${selector}`)
-    let excludes = ['[up-validate=false]']
-    return e.unionSelector(includes, excludes)
-  }
 
   /*-
   Show or hide elements when a form field is set to a given value.
@@ -2135,6 +2149,7 @@ up.form = (function() {
     autosubmit,
     fieldSelector,
     fields: findFields,
+    trackFields,
     isField,
     submitButtons: findSubmitButtons,
     focusedField,

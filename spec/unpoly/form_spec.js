@@ -53,6 +53,379 @@ describe('up.form', function() {
       })
     })
 
+    describe('up.form.trackFields()', function() {
+
+      it('runs the callback for an existing field that is a descendant of the form', function() {
+        let detachCallback = jasmine.createSpy('detach callback')
+        let attachCallback = jasmine.createSpy('attach callback').and.returnValue(detachCallback)
+
+        const [form, field1, field2] = htmlFixtureList(`
+          <form>
+            <input type="text" name="field1">
+            <input type="text" name="field2">
+          </form>
+        `)
+
+        up.form.trackFields(form, attachCallback)
+
+        expect(attachCallback.calls.allArgs()).toEqual([[field1], [field2]])
+      })
+
+      it('does not run the callback for an existing field of another form', function() {
+        let detachCallback = jasmine.createSpy('detach callback')
+        let attachCallback = jasmine.createSpy('attach callback').and.returnValue(detachCallback)
+
+        const [_main, form1, field1, form2, field2] = htmlFixtureList(`
+          <main>
+            <form name="form1">
+              <input type="text" name="field1">
+            </form>
+            <form name="form2">
+              <input type="text" name="field2">
+            </form>
+          </main>
+        `)
+
+        up.form.trackFields(form1, attachCallback)
+
+        expect(attachCallback.calls.allArgs()).toEqual([[field1]])
+      })
+
+      it('runs the callback for fields that are appended to the form later', async function() {
+        let attachSpy = jasmine.createSpy('attach callback')
+        let detachSpy = jasmine.createSpy('detach callback')
+
+        const [form, field1, field2] = htmlFixtureList(`
+          <form>
+            <input type="text" name="field1">
+            <div id="target"></div>
+          </form>
+        `)
+
+        up.form.trackFields(form, (field) => {
+          attachSpy(field.name)
+          return () => detachSpy(field.name)
+        })
+
+        expect(attachSpy.calls.allArgs()).toEqual([['field1']])
+
+        up.render({ fragment: `
+          <div id="target">
+            <input type="text" name="field2">
+          </div>
+        `})
+        await wait()
+
+        expect(attachSpy.calls.allArgs()).toEqual([['field1'], ['field2']])
+      })
+
+      it('does not run the callback for fields that are appended to another form later', async function() {
+        let attachSpy = jasmine.createSpy('attach callback')
+        let detachSpy = jasmine.createSpy('detach callback')
+
+        const [_main, form1, field1, form2, field2] = htmlFixtureList(`
+          <main>
+            <form name="form1">
+              <input type="text" name="field1">
+            </form>
+            <form name="form2">
+              <div id="target"></div>
+            </form>
+          </main>
+        `)
+
+        up.form.trackFields(form1, (field) => {
+          attachSpy(field.name)
+          return () => detachSpy(field.name)
+        })
+
+        expect(attachSpy.calls.allArgs()).toEqual([['field1']])
+
+        up.render({ fragment: `
+          <div id="target">
+            <input type="text" name="field2">
+          </div>
+        `})
+        await wait()
+
+        expect(attachSpy.calls.allArgs()).toEqual([['field1']])
+      })
+
+      it('runs an undo callback when the field is destroyed', async function() {
+        let detachCallback = jasmine.createSpy('detach callback')
+        let attachCallback = jasmine.createSpy('attach callback').and.returnValue(detachCallback)
+
+        const [form, field1, destroyZone, field2, field3, field4] = htmlFixtureList(`
+          <form>
+            <input type="text" name="field1">
+            <div id="destroy-zone">
+              <input type="text" name="field2">
+              <input type="text" name="field3">
+            </div>
+            <input type="text" name="field4">
+          </form>
+        `)
+
+        up.form.trackFields(form, attachCallback)
+
+        expect(attachCallback.calls.allArgs()).toEqual([[field1], [field2], [field3], [field4]])
+
+        up.destroy(destroyZone)
+        await wait()
+
+        expect(detachCallback.calls.allArgs()).toEqual([[field2], [field3]])
+      })
+
+      it('returns a function that stops tracking', async function() {
+        let attachSpy = jasmine.createSpy('attach callback')
+        let detachSpy = jasmine.createSpy('detach callback')
+
+        const [form, field1, field2] = htmlFixtureList(`
+          <form>
+            <input type="text" name="field1">
+            <div id="target"></div>
+          </form>
+        `)
+
+        let stopTracking = up.form.trackFields(form, (field) => {
+          attachSpy(field.name)
+          return () => detachSpy(field.name)
+        })
+
+        expect(attachSpy.calls.allArgs()).toEqual([['field1']])
+
+        stopTracking()
+
+        up.render({ fragment: `
+          <div id="target">
+            <input type="text" name="field2">
+          </div>
+        `})
+        await wait()
+
+        expect(attachSpy.calls.allArgs()).toEqual([['field1']])
+        up.destroy(form)
+        await wait()
+
+        expect(attachSpy.calls.allArgs()).toEqual([['field1']])
+      })
+
+      describe('with [up-keep] fields', function() {
+
+        it('runs attach and undo callbacks when an [up-keep] field is transported into another form', async function() {
+          let changeSpy = jasmine.createSpy('change spy')
+
+          const [form, field] = htmlFixtureList(`
+            <form id="form" name="form1">
+              <input type="text" name="field" up-keep>
+            </form>
+          `)
+
+          up.compiler('form', function(form) {
+            up.form.trackFields(form, (field) => {
+              changeSpy('attach', form.name, field.name)
+              return () => changeSpy('detach', form.name, field.name)
+            })
+          })
+
+          expect(changeSpy.calls.allArgs()).toEqual([['attach', 'form1', 'field']])
+
+          up.render({ fragment: `
+            <form id="form" name="form2">
+              <input type="text" name="field" up-keep>
+            </form>
+          ` })
+          await wait()
+
+          expect(changeSpy.calls.allArgs()).toEqual([
+            ['attach', 'form1', 'field'],
+            ['detach', 'form1', 'field'],
+            ['attach', 'form2', 'field'],
+          ])
+        })
+
+        it('does not run additional callbacks when an [up-keep] field remains in the tracked form', async function() {
+          let changeSpy = jasmine.createSpy('change spy')
+
+          const [form, target, field] = htmlFixtureList(`
+            <form id="form" name="form1">
+              <div id="target">
+                <input type="text" name="field" up-keep>
+                <p>old text</p>
+              </div>
+            </form>
+          `)
+
+          up.compiler('form', function(form) {
+            up.form.trackFields(form, (field) => {
+              changeSpy('attach', form.name, field.name)
+              return () => changeSpy('detach', form.name, field.name)
+            })
+          })
+
+          expect(changeSpy.calls.allArgs()).toEqual([['attach', 'form1', 'field']])
+
+          up.render({ fragment: `
+            <div id="target">
+              <input type="text" name="field" up-keep>
+              <p>new text</p>
+            </div>
+          ` })
+          await wait()
+
+          expect(form).toHaveText('new text')
+
+          // Because the field didn't change forms, no additional callbacks are run
+          expect(changeSpy.calls.allArgs()).toEqual([['attach', 'form1', 'field']])
+        })
+
+      })
+
+      describe('with a root that is not a form', function() {
+
+        it('only runs the callback for subtree matches of that root', async function() {
+          let changeSpy = jasmine.createSpy('change spy')
+
+          const [form, root, field1, outside, field2] = htmlFixtureList(`
+            <form id="form" name="form1">
+              <div id="root">
+                <input type="text" name="field1">
+              </div>
+              <div id="outside">
+                <input type="text" name="field2">
+              </div>
+            </form>
+          `)
+
+          up.form.trackFields(root, (field) => {
+            changeSpy('attach', form.name, field.name)
+            return () => changeSpy('detach', form.name, field.name)
+          })
+
+          expect(changeSpy.calls.allArgs()).toEqual([['attach', 'form1', 'field1']])
+        })
+
+        it('only runs the callback for subtree matches that are inserted later', async function() {
+          let changeSpy = jasmine.createSpy('change spy')
+
+          const [form, root, field1, rootExtension, outside, field2, outsideExtension] = htmlFixtureList(`
+            <form id="form" name="form1">
+              <div id="root">
+                <input type="text" name="field1">
+                <div id="root-extension"></div>
+              </div>
+              <div id="outside">
+                <input type="text" name="field2">
+                <div id="outside-extension"></div>
+              </div>
+            </form>
+          `)
+
+          up.form.trackFields(root, (field) => {
+            changeSpy('attach', form.name, field.name)
+            return () => changeSpy('detach', form.name, field.name)
+          })
+
+          expect(changeSpy.calls.allArgs()).toEqual([
+            ['attach', 'form1', 'field1']
+          ])
+
+          up.render({
+            target: '#root-extension, #outside-extension',
+            document: `
+              <div id="root-extension">
+                <input type="text" name="field3">
+              </div>
+              <div id="outside-extension">
+                <input type="text" name="field4">
+              </div>
+          ` })
+          await wait()
+
+          // Because the field didn't change forms, no additional callbacks are run
+          expect(changeSpy.calls.allArgs()).toEqual([
+            ['attach', 'form1', 'field1'],
+            ['attach', 'form1', 'field3'],
+          ])
+        })
+
+      })
+
+      describe('form-external fields with [form] attribute', function() {
+
+        it('runs the callback for an existing form-external field', async function() {
+          let changeSpy = jasmine.createSpy('change spy')
+
+          htmlFixtureList(`
+            <form id="form1" name="form1">
+              <input type="text" name="field1">
+            </form>
+
+            <form id="form2" name="form2">
+            </form>
+            
+            <input type="text" name="field2" form="form1">
+            <input type="text" name="field3" form="form2">
+          `)
+
+          up.compiler('form', function(form) {
+            up.form.trackFields(form, (field) => {
+              changeSpy('attach', form.name, field.name)
+              return () => changeSpy('detach', form.name, field.name)
+            })
+          })
+
+          expect(changeSpy.calls.allArgs()).toEqual([
+            ['attach', 'form1', 'field1'],
+            ['attach', 'form1', 'field2'],
+            ['attach', 'form2', 'field3'],
+          ])
+        })
+
+        it('runs the callback for a form-external field that is inserted later', async function() {
+          let changeSpy = jasmine.createSpy('change spy')
+
+          htmlFixtureList(`
+            <form id="form1" name="form1">
+              <input type="text" name="field1">
+            </form>
+
+            <form id="form2" name="form2">
+            </form>
+            
+            <div id="target"></div>
+          `)
+
+          up.compiler('form', function(form) {
+            up.form.trackFields(form, (field) => {
+              changeSpy('attach', form.name, field.name)
+              return () => changeSpy('detach', form.name, field.name)
+            })
+          })
+
+          expect(changeSpy.calls.allArgs()).toEqual([
+            ['attach', 'form1', 'field1'],
+          ])
+
+          up.render({ fragment: `
+            <div id="target">
+              <input type="text" name="field2" form="form1">
+              <input type="text" name="field3" form="form2">
+            </div>
+          ` })
+
+          expect(changeSpy.calls.allArgs()).toEqual([
+            ['attach', 'form1', 'field1'],
+            ['attach', 'form1', 'field2'],
+            ['attach', 'form2', 'field3'],
+          ])
+
+        })
+
+      })
+
+    })
+
     describe('up.autosubmit()', function() {
 
       beforeEach(function() { up.form.config.watchInputDelay = 0 })
@@ -331,18 +704,6 @@ describe('up.form', function() {
                   placeholder: '#placeholder',
                 })
               )
-            })
-
-            it('allows the observe a field without a containing <form>', async function() {
-              const input = fixture('input[name="input-name"][value="old-value"]')
-              const callback = jasmine.createSpy('change callback')
-              up.watch(input, callback)
-              input.value = 'new-value'
-              Trigger[eventType](input)
-
-              await wait()
-
-              expect(callback).toHaveBeenCalledWith('new-value', 'input-name', jasmine.anything())
             })
 
             describe('with { delay } option', function() {
@@ -901,7 +1262,7 @@ describe('up.form', function() {
               expect(callback).toHaveBeenCalled()
             })
 
-            it('detects a change in a field that was added dynamically later and that also has a custom [up-watch-event]', async function() {
+            it('detects a change in a field that was added later and that also has a custom [up-watch-event]', async function() {
               const callback = jasmine.createSpy('change callback')
               const form = fixture('form')
               const target = fixture('#target')
@@ -919,6 +1280,46 @@ describe('up.form', function() {
 
               expect(callback).toHaveBeenCalled()
             })
+          })
+
+          describe('form-external fields with [form] attribute', function() {
+
+            it('detects a change in a form-external field', async function() {
+              const form = fixture('form[id="my-form"]')
+              const input = fixture('input[name="input-name"][value="old-value"][form="my-form"]')
+              const callback = jasmine.createSpy('change callback')
+              up.watch(form, callback)
+              input.value = 'new-value'
+              Trigger[eventType](input)
+              await wait()
+
+              expect(callback).toHaveBeenCalledWith('new-value', 'input-name', jasmine.anything())
+              expect(callback.calls.count()).toEqual(1)
+            })
+
+            it('detects a change in a form-external field that was added later', async function() {
+              const form = fixture('form[id="my-form"]')
+              const target = fixture('#target')
+              const callback = jasmine.createSpy('change callback')
+              up.watch(form, callback)
+              await wait()
+
+              up.render({ fragment: `
+                <div id="target">
+                  <input name="input-name" value="old-value" form="my-form">
+                </div>
+              `})
+              await wait()
+
+              const input = document.querySelector('[name="input-name"]')
+              input.value = 'new-value'
+              Trigger[eventType](input)
+              await wait()
+
+              expect(callback).toHaveBeenCalledWith('new-value', 'input-name', jasmine.anything())
+              expect(callback.calls.count()).toEqual(1)
+            })
+
           })
         })
       })
@@ -4584,6 +4985,53 @@ describe('up.form', function() {
           expect(groups[0]).not.toHaveText('Validation message')
           expect(groups[1]).toHaveText('Validation message')
         })
+
+        // https://glitch.com/edit/#!/jet-slow-splash?path=src%2Fpages%2Findex.hbs%3A26%3A0
+        it('updates a form with an [up-keep] input multiple times (bugfix)', async function() {
+           const form = htmlFixture(`
+            <form action="/users" method="post">
+              <input type="text" name="email" up-keep up-validate />
+            </form>
+          `)
+          up.hello(form)
+
+          form.querySelector('input[name=email]').value = 'foo'
+          Trigger.change('input[name=email]')
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          jasmine.respondWith(`
+            <form action="/users" method="post">
+
+              <div class="error">Error 1</div>
+              <input type="text" name="email" up-keep up-validate />
+
+            </form>
+          `)
+          await wait()
+
+          expect('.error').toHaveText('Error 1')
+
+          form.querySelector('input[name=email]').value = 'bar'
+          Trigger.change('input[name=email]')
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+
+          jasmine.respondWith(`
+            <form action="/users" method="post">
+
+              <div class="error">Error 2</div>
+              <input type="text" name="email" up-keep up-validate />
+
+            </form>
+          `)
+          await wait()
+
+          expect('.error').toHaveText('Error 2')
+        })
+
       })
 
       describe('with [up-validate=true]', function() {
