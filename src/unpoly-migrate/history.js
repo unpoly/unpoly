@@ -25,8 +25,6 @@ up.migrate.renamedEvent('up:history:restored', 'up:location:changed')
 // There was never an up:history:replace (present tense) event
 up.migrate.renamedEvent('up:history:replaced', 'up:location:changed')
 
-up.migrate.removedEvent('up:fragment:kept', 'up:fragment:keep')
-
 up.history.config.patch(function() {
   this.updateMetaTagsValue = this.updateMetaTags
   this.updateMetaTagsSet = false

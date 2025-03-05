@@ -46,8 +46,14 @@ function collectElements(element) {
 }
 
 function createFixtureListFromHTML(html) {
-  const root = createFixtureFromHTML(html)
-  return collectElements(root)
+  let nodes = e.createNodesFromHTML(html)
+  let elements = u.filter(nodes, u.isElement)
+  let fixtureContainer = getCreatedFixtureContainer()
+
+  return u.flatMap(elements, (element) => {
+    fixtureContainer.append(element)
+    return collectElements(element)
+  })
 }
 
 function registerExternalFixture(element) {

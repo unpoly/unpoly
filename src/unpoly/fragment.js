@@ -943,6 +943,41 @@ up.fragment = (function() {
   @stable
   */
 
+
+  function emitFragmentInserted(element) {
+    return up.emit(element, 'up:fragment:inserted', {
+      log: ['Inserted fragment %o', element],
+    })
+  }
+
+  /*-
+  When any page fragment has been [inserted or updated](/up.replace),
+  this event is [emitted](/up.emit) on the fragment.
+
+  If you're looking to run code when a new fragment matches
+  a selector, use `up.compiler()` instead.
+
+  ### Example
+
+  ```js
+  up.on('up:fragment:inserted', function(event, fragment) {
+    console.log("Looks like we have a new %o!", fragment)
+  })
+  ```
+
+  @event up:fragment:inserted
+  @param {Element} event.target
+    The fragment that has been inserted or updated.
+  @stable
+  */
+
+  function emitFragmentKeep(keepPlan) {
+    let { oldElement } = keepPlan
+    const log = ['Keeping fragment %o', oldElement]
+    const callback = e.callbackAttr(keepPlan.oldElement, 'up-on-keep', { exposedKeys: ['newFragment', 'newData'] })
+    return emitFromKeepPlan(keepPlan, 'up:fragment:keep', { log, callback })
+  }
+
   /*-
   This event is [emitted](/up.emit) before an existing element is [kept](/up-keep) during
   a page update.
@@ -983,44 +1018,43 @@ up.fragment = (function() {
   @stable
   */
 
+  function emitFragmentKept(keepPlan) {
+    return emitFromKeepPlan(keepPlan, 'up:fragment:kept', { log: false })
+  }
+
+  function emitFromKeepPlan(keepPlan, eventType, emitDetails) {
+    let { oldElement: keepable, newElement: newFragment, newData, renderOptions } = keepPlan
+    const event = up.event.build(eventType, { newFragment, newData, renderOptions })
+    return up.emit(keepable, event, emitDetails)
+  }
+
   /*-
-  When any page fragment has been [inserted or updated](/up.replace),
-  this event is [emitted](/up.emit) on the fragment.
-
-  If you're looking to run code when a new fragment matches
-  a selector, use `up.compiler()` instead.
-
-  ### Example
-
-  ```js
-  up.on('up:fragment:inserted', function(event, fragment) {
-    console.log("Looks like we have a new %o!", fragment)
-  })
-  ```
-
-  @event up:fragment:inserted
-  @param {Element} event.target
-    The fragment that has been inserted or updated.
-  @stable
+  @event up:fragment:kept
+  @internal
   */
-  function emitFragmentInserted(element) {
-    return up.emit(element, 'up:fragment:inserted', {
-      log: ['Inserted fragment %o', element],
-    })
-  }
-
-  function emitFragmentKeep(keepPlan) {
-    let { oldElement, newElement: newFragment, newData, renderOptions } = keepPlan
-    const log = ['Keeping fragment %o', oldElement]
-    const callback = e.callbackAttr(oldElement, 'up-on-keep', { exposedKeys: ['newFragment', 'newData'] })
-    return up.emit(oldElement, 'up:fragment:keep', { newFragment, newData, renderOptions, log, callback })
-  }
 
   function emitFragmentDestroyed(fragment, options) {
     const log = options.log ?? ['Destroyed fragment %o', fragment]
     const parent = options.parent || document
     return up.emit(parent, 'up:fragment:destroyed', { fragment, parent, log })
   }
+
+  /*-
+  This event is [emitted](/up.emit) after a page fragment was [destroyed](/up.destroy) and removed from the DOM.
+
+  If the destruction is animated, this event is emitted after the animation has ended.
+
+  The event is emitted on the parent element of the fragment that was removed.
+
+  @event up:fragment:destroyed
+  @param {Element} event.fragment
+    The detached element that has been removed from the DOM.
+  @param {Element} event.parent
+    The former parent element of the fragment that has now been detached from the DOM.
+  @param {Element} event.target
+    The former parent element of the fragment that has now been detached from the DOM.
+  @stable
+  */
 
   function isNotDestroying(element) {
     return !element.closest('.up-destroying')
@@ -1547,23 +1581,6 @@ up.fragment = (function() {
     element.classList.add('up-destroying')
     element.setAttribute('inert', '')
   }
-
-  /*-
-  This event is [emitted](/up.emit) after a page fragment was [destroyed](/up.destroy) and removed from the DOM.
-
-  If the destruction is animated, this event is emitted after the animation has ended.
-
-  The event is emitted on the parent element of the fragment that was removed.
-
-  @event up:fragment:destroyed
-  @param {Element} event.fragment
-    The detached element that has been removed from the DOM.
-  @param {Element} event.parent
-    The former parent element of the fragment that has now been detached from the DOM.
-  @param {Element} event.target
-    The former parent element of the fragment that has now been detached from the DOM.
-  @stable
-  */
 
   /*-
   Replaces the given element with a fresh copy fetched from the server.
@@ -2917,6 +2934,7 @@ up.fragment = (function() {
     emitInserted: emitFragmentInserted,
     emitDestroyed: emitFragmentDestroyed,
     emitKeep: emitFragmentKeep,
+    emitKept: emitFragmentKept,
     successKey,
     failKey,
     expandTargets,
