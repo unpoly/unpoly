@@ -113,7 +113,7 @@ describe('up.form', function() {
           <div id="target">
             <input type="text" name="field2">
           </div>
-        `})
+        ` })
         await wait()
 
         expect(attachSpy.calls.allArgs()).toEqual([['field1'], ['field2']])
@@ -145,7 +145,7 @@ describe('up.form', function() {
           <div id="target">
             <input type="text" name="field2">
           </div>
-        `})
+        ` })
         await wait()
 
         expect(attachSpy.calls.allArgs()).toEqual([['field1']])
@@ -200,7 +200,7 @@ describe('up.form', function() {
           <div id="target">
             <input type="text" name="field2">
           </div>
-        `})
+        ` })
         await wait()
 
         expect(attachSpy.calls.allArgs()).toEqual([['field1']])
@@ -1308,7 +1308,7 @@ describe('up.form', function() {
                 <div id="target">
                   <input name="input-name" value="old-value" form="my-form">
                 </div>
-              `})
+              ` })
               await wait()
 
               const input = document.querySelector('[name="input-name"]')
