@@ -65,10 +65,8 @@ up.FieldTracker = class FieldTracker {
 
   _considerRemovedFields(fields, force = false) {
     for (let field of fields) {
-      console.debug("Testing for removal: %o (isKnown: %o, shouldKnow: %o)", field, this._knownFields.has(field), this._shouldKnowField(field))
       if (force || (this._knownFields.has(field) && !this._shouldKnowField(field))) {
         let undo = this._knownFields.get(field)
-        console.debug("REMOVING %o with undo fn %o", field, undo)
         this._knownFields.delete(field)
         undo?.(field)
       }

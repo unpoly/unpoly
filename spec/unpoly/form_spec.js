@@ -1262,7 +1262,7 @@ describe('up.form', function() {
               expect(callback).toHaveBeenCalled()
             })
 
-            it('detects a change in a field that was added dynamically later and that also has a custom [up-watch-event]', async function() {
+            it('detects a change in a field that was added later and that also has a custom [up-watch-event]', async function() {
               const callback = jasmine.createSpy('change callback')
               const form = fixture('form')
               const target = fixture('#target')
@@ -1280,6 +1280,46 @@ describe('up.form', function() {
 
               expect(callback).toHaveBeenCalled()
             })
+          })
+
+          describe('form-external fields with [form] attribute', function() {
+
+            it('detects a change in a form-external field', async function() {
+              const form = fixture('form[id="my-form"]')
+              const input = fixture('input[name="input-name"][value="old-value"][form="my-form"]')
+              const callback = jasmine.createSpy('change callback')
+              up.watch(form, callback)
+              input.value = 'new-value'
+              Trigger[eventType](input)
+              await wait()
+
+              expect(callback).toHaveBeenCalledWith('new-value', 'input-name', jasmine.anything())
+              expect(callback.calls.count()).toEqual(1)
+            })
+
+            it('detects a change in a form-external field that was added later', async function() {
+              const form = fixture('form[id="my-form"]')
+              const target = fixture('#target')
+              const callback = jasmine.createSpy('change callback')
+              up.watch(form, callback)
+              await wait()
+
+              up.render({ fragment: `
+                <div id="target">
+                  <input name="input-name" value="old-value" form="my-form">
+                </div>
+              `})
+              await wait()
+
+              const input = document.querySelector('[name="input-name"]')
+              input.value = 'new-value'
+              Trigger[eventType](input)
+              await wait()
+
+              expect(callback).toHaveBeenCalledWith('new-value', 'input-name', jasmine.anything())
+              expect(callback.calls.count()).toEqual(1)
+            })
+
           })
         })
       })

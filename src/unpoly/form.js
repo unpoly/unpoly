@@ -464,11 +464,6 @@ up.form = (function() {
     return options
   }
 
-  function parseWatchEvents(attrValue) {
-    let watchEvents = u.getSimpleTokens(attrValue)
-
-  }
-
   /*-
   Disables all fields and buttons within the given element.
 
