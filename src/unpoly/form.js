@@ -1817,50 +1817,6 @@ up.form = (function() {
     getFormValidator(form)
   })
 
-  // function validatingFieldSelector() {
-  //   let includes = config.fieldSelectors.map((selector) => `${selector}[up-validate], [up-validate] ${selector}`)
-  //   let excludes = ['[up-validate=false]']
-  //   return e.unionSelector(includes, excludes)
-  // }
-
-  // up.compiler(fieldSelector, function(field) {
-  //
-  // })
-
-  // function onFieldEvent(eventType, callback) {
-  //   up.on(eventType, function({ target }) {
-  //     let fields = findFields(target)
-  //     fields.forEach(callback)
-  //   })
-  // }
-  //
-  // function fieldAdded(field) {
-  //   let form = getForm(field)
-  //   field.upForm = form
-  //   up.emit(form, 'up:field:added', { field })
-  // }
-  //
-  // function fieldRemoved(field) {
-  //   let notifiedForm = field.upForm
-  //   if (notifiedForm) {
-  //     delete field.upForm
-  //     up.emit(notifiedForm, 'up:field:removed', { field })
-  //   }
-  // }
-  //
-  // onFieldEvent('up:fragment:inserted', fieldAdded)
-  //
-  // onFieldEvent('up:fragment:destroyed', fieldRemoved)
-  //
-  // onFieldEvent('up:fragment:kept', function(field) {
-  //   let oldNotifiedForm = field.upForm
-  //   let newForm = getForm(field)
-  //   if (oldNotifiedForm !== newForm) {
-  //     fieldRemoved(field)
-  //     fieldAdded(field)
-  //   }
-  // })
-
   /*-
   Show or hide elements when a form field is set to a given value.
 
