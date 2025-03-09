@@ -245,15 +245,13 @@ up.radio = (function() {
 
   @section Animation
     @param [up-transition]
-      The [animated transition](/up-transition) to apply when this element is updated.
+      @like [up-transition]
+
     @param [up-duration]
-      The duration of the transition or animation (in millisconds).
+      @like [up-transition]
 
     @param [up-easing]
-      The timing function that accelerates the transition or animation.
-
-      See [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
-      for a list of available timing functions.
+      @like [up-transition]
 
   @section Callbacks
     @param [up-on-hungry]
@@ -283,47 +281,59 @@ up.radio = (function() {
   The given element does not need an `[up-poll]` attribute.
 
   @function up.radio.startPolling
-  @param {Element} fragment
-    The fragment to reload periodically.
-  @param {Object} [options]
-    Options for reloading the fragment.
+  @section General
+    @param {Element} fragment
+      The fragment to reload periodically.
+    @param {Object} [options]
+      Options for reloading the fragment.
 
-    By default Unpoly will parse options from the fragment's attributes like ([`[up-interval]`](/up-poll#up-interval)).
-    You may pass this additional options object to [supplement or override](/attributes-and-options#options) options parsed from the fragment's attributes.
-  @param {number} [options.interval]
-    The reload interval in milliseconds.
+      By default Unpoly will parse options from the fragment's attributes (see `[up-poll]`).
+      You may pass this additional `options` object to [supplement or override](/attributes-and-options#options) options parsed from the fragment's attributes.
+  @section Timing
+    @param {number} [options.interval]
+      The reload interval in milliseconds.
 
-    Defaults to `up.radio.config.pollInterval`.
-  @param {string} [options.url]
-    The URL from which to reload the fragment.
+      Defaults to `up.radio.config.pollInterval`.
 
-    Defaults to the URL this fragment was [originally loaded from](/up-source).
-  @param {string} [options.method='get']
-    The HTTP method used to reload the fragment.
+    @param {string} [options.ifLayer='front']
+      Controls polling while the fragment's [layer](/up.layer) is covered by an overlay.
 
-    @experimental
-  @param {string} [options.headers={}]
-    A JSON object with additional request headers.
-  @param {string} [options.params={}]
-    A JSON object with additional [parameters](/up.Params) that should be sent as the request's
-    [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
+      When set to `'front'`, polling will pause while the fragment's layer is covered by an overlay.
+      When the fragment's layer is uncovered, polling will resume.
 
-    When making a `GET` request to a URL with a query string, the given `{ params }` will be added
-    to the query parameters.
-  @param {boolean} [options.keepData=false]
-    Whether to [preserve](/data#preserving) the polling fragment's
-    [data object](/data) through reloads.
+      When set to `'any'`, polling will continue on background layers.
 
-    @experimental
-  @param {string} [options.ifLayer='front']
-    Controls polling while the fragment's [layer](/up.layer) is covered by an overlay.
+      @experimental
+  @section Request
+    @param {string} [options.url]
+      The URL from which to reload the fragment.
 
-    When set to `'front'`, polling will pause while the fragment's layer is covered by an overlay.
-    When the fragment's layer is uncovered, polling will resume.
+      Defaults to the URL this fragment was [originally loaded from](/up-source).
 
-    When set to `'any'`, polling will continue on background layers.
+    @param {string} [options.method='get']
+      The HTTP method used to reload the fragment.
 
-    @experimental
+      @experimental
+
+    @param {string} [options.headers={}]
+      A JSON object with additional request headers.
+
+    @param {string} [options.params={}]
+      A JSON object with additional [parameters](/up.Params) that should be sent as the request's
+      [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
+
+      When making a `GET` request to a URL with a query string, the given `{ params }` will be added
+      to the query parameters.
+
+  @section Client state
+    @param {boolean} [options.keepData=false]
+      Whether to [preserve](/data#preserving) the polling fragment's
+      [data object](/data) through reloads.
+
+      @experimental
+
+  @section Loading state
+    @mix up.render/loading-state
   @stable
   */
   function startPolling(fragment, options = {}) {
@@ -497,16 +507,14 @@ should be inserted:
   See [notification flashes](/flashes) for more details and examples.
 
   @selector [up-flashes]
-  @param [up-transition]
-    The name of a [transition](/up.motion) to morph between the old and new notification flashes.
-  @param [up-duration]
-    The duration of the transition (in millisconds).
+  @section Animation
+    @param [up-transition]
+      The name of a [transition](/up.motion) to morph between the old and new notification flashes.
+    @param [up-duration]
+      @like [up-transition]
 
-  @param [up-easing]
-    The timing function that accelerates the transition.
-
-    See [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
-    for a list of available timing functions.
+    @param [up-easing]
+      @like [up-transition]
   @stable
   */
   up.macro('[up-flashes]', function(fragment) {

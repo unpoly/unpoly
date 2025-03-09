@@ -711,6 +711,11 @@ up.motion = (function() {
     All modifying attributes for `[up-follow]` (links) or `[up-submit]` forms may also be used.
   @param [up-transition]
     The [name of a transition](/predefined-transitions).
+  @param [up-duration]
+      The duration of the transition in milliseconds.
+  @param [up-easing]
+      The [timing function](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
+      that controls the acceleration of the transition.
   @param [up-fail-transition]
     The transition to use when the server responds with an error code.
 
