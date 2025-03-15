@@ -42,8 +42,6 @@ up.network.config.patch(function(config) {
   // Provide a default for the removed property, in case someone pushes into that.
   up.network.config.requestMetaKeys = []
   up.migrate.removedProperty(config, 'requestMetaKeys', 'The configuration up.network.config.requestMetaKeys has been removed. Servers that optimize responses based on request headers should instead set a Vary response header.')
-
-  up.migrate.renamedProperty(config, 'fail', 'autoFail')
 })
 
 up.migrate.handleRequestOptions = function(options) {

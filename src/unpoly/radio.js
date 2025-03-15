@@ -417,7 +417,7 @@ up.radio = (function() {
       to the query parameters.
 
   @section Failed responses
-    @param [up-fail='auto']
+    @param [up-fail]
       How to handle [failed server responses](/failed-responses).
 
       By default, polling will skip server responses with an error code,

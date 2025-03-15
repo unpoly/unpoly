@@ -84,7 +84,7 @@ up.network = (function() {
 
     Set `undefined` to not use a timeout.
 
-  @param {boolean|Function(up.Response): boolean} [config.autoFail]
+  @param {boolean|Function(up.Response): boolean} [config.fail]
     Whether Unpoly will consider a response to constitute a [failed response](/failed-responses).
 
     By default Unpoly will consider any status code other than HTTP 2xx or [304](/skipping-rendering#rendering-nothing) to represent a failed response.
@@ -93,8 +93,8 @@ up.network = (function() {
     The following configuration will fail all responses with an `X-Unauthorized` header:
 
     ```js
-    let badStatus = up.network.config.autoFail
-    up.network.config.autoFail = (response) => badStatus(response) || response.header('X-Unauthorized')
+    let badStatus = up.network.config.fail
+    up.network.config.fail = (response) => badStatus(response) || response.header('X-Unauthorized')
     ```
 
     Also see [Customizing failure detection](/failed-responses#customizing-failure-detection).
@@ -160,7 +160,7 @@ up.network = (function() {
     cacheExpireAge: 15 * 1000,
     cacheEvictAge: 90 * 60 * 1000,
     lateDelay: 400,
-    autoFail(response) { return (response.status < 200 || response.status > 299) && response.status !== 304 },
+    fail(response) { return (response.status < 200 || response.status > 299) && response.status !== 304 },
     autoCache(request) { return request.isSafe() },
     expireCache(request, _response) { return !request.isSafe() },
     evictCache: false,
@@ -435,7 +435,7 @@ up.network = (function() {
       @experimental
 
   @section Failed responses
-    @param {string|boolean|Function(up.Response): boolean} [options.fail='auto']
+    @param {string|boolean|Function(up.Response): boolean} [options.fail]
       Whether the response to this request should be considered [failed](/failed-responses).
 
       By [default](/up.network.config#config.autoFail) any HTTP status code other than 2xx or 304 is considered an error code.

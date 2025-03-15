@@ -75,8 +75,8 @@ By default any HTTP 2xx or [304](/skipping-rendering#rendering-nothing)) status 
 The following configuration will fail all responses with an `X-Unauthorized` header:
 
 ```js
-let badStatus = up.network.config.autoFail
-up.network.config.autoFail = (response) => badStatus(response) || response.header('X-Unauthorized')
+let badStatus = up.network.config.fail
+up.network.config.fail = (response) => badStatus(response) || response.header('X-Unauthorized')
 ```
 
 You can also decide to fail a response in an `up:fragment:loaded` listener:

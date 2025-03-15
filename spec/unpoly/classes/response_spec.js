@@ -22,9 +22,9 @@ describe('up.Response', function() {
 
   describe('#fail', function() {
 
-    it('defaults to "auto"', function() {
+    it('defaults to undefined', function() {
       const response = new up.Response({ text: 'hello from server' })
-      expect(response.fail).toBe('auto')
+      expect(response.fail).toBeUndefined()
     })
 
   })
@@ -71,18 +71,14 @@ describe('up.Response', function() {
       expect(response.ok).toBe(false)
     })
 
-    it("allows to configure what's considered a failed response with up.network.config.autoFail", function() {
-      up.network.config.autoFail = (response) => response.url === '/foo'
+    it("allows to configure what's considered a failed response with up.network.config.fail", function() {
+      up.network.config.fail = (response) => response.url === '/foo'
 
-      const fooResponseWithDefaultAuto  = new up.Response({ url: '/foo', status: 200 })
-      const fooResponseWithExplicitAuto = new up.Response({ url: '/foo', status: 200, fail: 'auto' })
-      const barResponseWithDefaultAuto  = new up.Response({ url: '/bar', status: 200 })
-      const barResponseWithExplicitAuto = new up.Response({ url: '/bar', status: 200, fail: 'auto' })
+      const fooResponse = new up.Response({ url: '/foo', status: 200 })
+      const barResponse = new up.Response({ url: '/bar', status: 200 })
 
-      expect(fooResponseWithDefaultAuto.ok).toBe(false)
-      expect(fooResponseWithExplicitAuto.ok).toBe(false)
-      expect(barResponseWithDefaultAuto.ok).toBe(true)
-      expect(barResponseWithExplicitAuto.ok).toBe(true)
+      expect(fooResponse.ok).toBe(false)
+      expect(barResponse.ok).toBe(true)
     })
   })
 
