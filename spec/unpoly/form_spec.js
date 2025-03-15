@@ -176,6 +176,54 @@ describe('up.form', function() {
         expect(detachCallback.calls.allArgs()).toEqual([[field2], [field3]])
       })
 
+      it('runs undo callbacks for all fields when the form is destroyed', async function() {
+        let detachCallback = jasmine.createSpy('detach callback')
+        let attachCallback = jasmine.createSpy('attach callback').and.returnValue(detachCallback)
+
+        const [form, field1, field2] = htmlFixtureList(`
+          <form>
+            <input type="text" name="field1">
+            <input type="text" name="field2">
+          </form>
+        `)
+
+        up.form.trackFields(form, attachCallback)
+
+        expect(attachCallback.calls.allArgs()).toEqual([[field1], [field2]])
+
+        up.destroy(form)
+        await wait()
+
+        expect(detachCallback.calls.allArgs()).toEqual([[field1], [field2]])
+      })
+
+      it("runs undo callbacks for all fields when the form's layer is destroyed", async function() {
+        let detachSpy = jasmine.createSpy('detach callback')
+        let attachSpy = jasmine.createSpy('attach callback').and.returnValue(detachSpy)
+
+        up.layer.open({ fragment: `
+          <form id="form">
+            <input type="text" name="field1">
+            <input type="text" name="field2">
+          </form>
+        ` })
+        await wait()
+
+        let form = up.fragment.get('#form')
+
+        up.form.trackFields(form, (field) => {
+          attachSpy(field.name)
+          return () => detachSpy(field.name)
+        })
+
+        expect(attachSpy.calls.allArgs()).toEqual([['field1'], ['field2']])
+
+        up.layer.dismiss()
+        await wait()
+
+        expect(detachSpy.calls.allArgs()).toEqual([['field1'], ['field2']])
+      })
+
       it('returns a function that stops tracking', async function() {
         let attachSpy = jasmine.createSpy('attach callback')
         let detachSpy = jasmine.createSpy('detach callback')
@@ -421,6 +469,59 @@ describe('up.form', function() {
           ])
 
         })
+
+        it('runs undo callbacks for all form-external fields when the form is destroyed', async function() {
+          let detachCallback = jasmine.createSpy('detach callback')
+          let attachCallback = jasmine.createSpy('attach callback').and.returnValue(detachCallback)
+
+          const [form, field1, field2] = htmlFixtureList(`
+            <form id="form">
+            </form>
+            
+            <input type="text" name="field1" form="form">
+            <input type="text" name="field2" form="form">
+          `)
+
+          up.form.trackFields(form, attachCallback)
+
+          expect(attachCallback.calls.allArgs()).toEqual([[field1], [field2]])
+
+          up.destroy(form)
+          await wait()
+
+          expect(detachCallback.calls.allArgs()).toEqual([[field1], [field2]])
+        })
+
+        it("runs undo callbacks for all form-external fields when the form's layer is destroyed", async function() {
+          let detachSpy = jasmine.createSpy('detach callback')
+          let attachSpy = jasmine.createSpy('attach callback').and.returnValue(detachSpy)
+
+          up.layer.open({ fragment: `
+            <main>
+              <form id="form">
+              </form>
+
+              <input type="text" name="field1" form="form">
+              <input type="text" name="field2" form="form">
+            </main>
+          ` })
+          await wait()
+
+          let form = up.fragment.get('#form')
+
+          up.form.trackFields(form, (field) => {
+            attachSpy(field.name)
+            return () => detachSpy(field.name)
+          })
+
+          expect(attachSpy.calls.allArgs()).toEqual([['field1'], ['field2']])
+
+          up.layer.dismiss()
+          await wait()
+
+          expect(detachSpy.calls.allArgs()).toEqual([['field1'], ['field2']])
+        })
+
 
       })
 

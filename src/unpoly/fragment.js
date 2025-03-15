@@ -1039,6 +1039,10 @@ up.fragment = (function() {
     return up.emit(parent, 'up:fragment:destroyed', { fragment, parent, log })
   }
 
+  function emitFragmentDestroying(fragment) {
+    return up.emit(fragment, 'up:fragment:destroying', { log: false })
+  }
+
   /*-
   This event is [emitted](/up.emit) after a page fragment was [destroyed](/up.destroy) and removed from the DOM.
 
@@ -1578,6 +1582,10 @@ up.fragment = (function() {
   */
 
   function markFragmentAsDestroying(element) {
+    // Emit an event before .up-destroying will cause the element to become invisible
+    // to up.fragment.get(), and before it is detached. This allows up.form.trackFields()
+    // to clean up elements before their context is lost.
+    emitFragmentDestroying(element)
     element.classList.add('up-destroying')
     element.setAttribute('inert', '')
   }

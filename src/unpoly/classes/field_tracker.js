@@ -23,7 +23,7 @@ up.FieldTracker = class FieldTracker {
     )
 
     cleaner(
-      this._listen('up:fragment:destroyed', (fields) => {
+      this._listen('up:fragment:destroying', (fields) => {
         this._considerRemovedFields(fields, true)
       })
     )
@@ -45,10 +45,8 @@ up.FieldTracker = class FieldTracker {
   _listen(eventType, handler) {
     // We cannot just listen on this._root or this._form because we might have
     // fields outside the form (using [form] attribute).
-    return this._layer.on(eventType, ({ target, fragment }) => {
-      // up:fragment:destroyed is emitted on the former parent,
-      // but has the actual destroyed element as a { fragment } prop.
-      let fields = up.form.fields(fragment || target)
+    return this._layer.on(eventType, ({ target }) => {
+      let fields = up.form.fields(target)
       handler(fields)
     })
   }

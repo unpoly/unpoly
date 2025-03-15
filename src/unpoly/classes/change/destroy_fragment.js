@@ -39,13 +39,13 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change {
   async _destroyAfterAnimation() {
     this._emitDestroyed()
     await this._animate()
-    this._wipe()
+    this._erase()
     this._onFinished?.()
   }
 
   _destroyNow() {
     // If we're not animating, we can remove the element before emitting up:fragment:destroyed.
-    this._wipe()
+    this._erase()
     this._emitDestroyed()
     this._onFinished?.()
   }
@@ -54,7 +54,7 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change {
     return up.motion.animate(this._element, this._animation, this.options)
   }
 
-  _wipe() {
+  _erase() {
     this._layer.asCurrent(() => {
       up.fragment.abort(this._element)
       up.script.clean(this._element, { layer: this._layer })
@@ -64,7 +64,6 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change {
   }
 
   _emitDestroyed() {
-    // Emits up:fragment:destroyed.
     up.fragment.emitDestroyed(this._element, { parent: this._parent, log: this._log })
   }
 
