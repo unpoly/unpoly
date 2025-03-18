@@ -1,9 +1,6 @@
 function showVersions() {
-  document.querySelector('.jasmine-version').innerText = `
-    Jasmine ${jasmine.version}
-    /
-    Unpoly ${up.version}
-  `
+  const versionString = `Jasmine ${jasmine.version} / Unpoly ${up.version}`
+  document.querySelector('.jasmine-version').innerText = versionString
 }
 
 beforeAll(showVersions)
