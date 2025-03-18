@@ -1233,13 +1233,10 @@ up.form = (function() {
 
   @function up.form.switchTargets
   @param {Element} switcher
-  @param {string} [options.target]
-    The target selectors to switch.
-    Defaults to an `[up-switch]` attribute on the given field.
   @internal
   */
-  function switchTargets(switcher, options = {}) {
-    const targetSelector = options.target || options.target || switcher.getAttribute('up-switch')
+  function switchTargets(switcher) {
+    const targetSelector = switcher.getAttribute('up-switch')
     const form = getScope(switcher)
     targetSelector || up.fail("No switch target given for %o", switcher)
     const fieldValues = switcherValues(switcher)
