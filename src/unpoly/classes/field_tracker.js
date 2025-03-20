@@ -3,8 +3,8 @@ const u = up.util
 up.FieldTracker = class FieldTracker {
 
   constructor(root, options, callback) {
-    this._root = root ?? this._form
-    this._form = up.form.get(root)
+    this._root = root ?? this._scope
+    this._scope = up.form.getScope(root)
     this._layer = up.layer.get(root)
     this._callback = callback
     this._guard = options.guard ?? (() => true)
@@ -12,7 +12,7 @@ up.FieldTracker = class FieldTracker {
   }
 
   start() {
-    this._considerAddedFields(up.form.fields(this._form))
+    this._considerAddedFields(up.form.fields(this._scope))
 
     let cleaner = u.cleaner()
 
@@ -43,7 +43,7 @@ up.FieldTracker = class FieldTracker {
   }
 
   _listen(eventType, handler) {
-    // We cannot just listen on this._root or this._form because we might have
+    // We cannot just listen on this._root or this._scope because we might have
     // fields outside the form (using [form] attribute).
     return this._layer.on(eventType, ({ target }) => {
       let fields = up.form.fields(target)
@@ -72,8 +72,8 @@ up.FieldTracker = class FieldTracker {
   }
 
   _shouldKnowField(field) {
-    return (up.form.get(field) === this._form)
-      && (this._root === this._form || this._root.contains(field))
+    return (up.form.get(field) === this._scope)
+      && (this._root === this._scope || this._root.contains(field))
       && this._guard(field)
   }
 

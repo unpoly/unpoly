@@ -5,7 +5,7 @@ up.FieldWatcher = class FieldWatcher {
   constructor(root, options, callback) {
     this._options = options
     this._root = root
-    this._form = up.form.get(root)
+    this._scope = up.form.getScope(root)
     this._callback = callback
     this._batch = options.batch
   }
@@ -18,8 +18,8 @@ up.FieldWatcher = class FieldWatcher {
 
     return u.sequence([
       up.form.trackFields(this._root, (field) => this._watchField(field)),
-      up.fragment.onAborted(this._form, () => this._abort()),
-      up.on(this._form, 'reset', () => this._onFormReset()),
+      up.fragment.onAborted(this._scope, () => this._abort()),
+      up.on(this._scope, 'reset', () => this._onFormReset()),
       () => this._abort(),
     ])
   }
@@ -71,7 +71,7 @@ up.FieldWatcher = class FieldWatcher {
 
     // If the form was destroyed while a callback was scheduled, we don't run the callback.
     // TODO: Do we need this? Since we already clear scheduledValues in stop()?
-    if (!up.fragment.isAlive(this._form)) return
+    if (!up.fragment.isAlive(this._scope)) return
 
     // Don't forward { event, delay } because
     // (1) we have already processed them here and
