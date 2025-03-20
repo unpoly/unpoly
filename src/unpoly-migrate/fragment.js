@@ -238,6 +238,8 @@ up.migrate.resolveOrigin = function(target, { origin } = {}) {
   })
 }
 
+up.migrate.removedEvent('up:fragment:kept', 'up:fragment:keep')
+
 up.fragment.config.patch(function() {
   this.runScriptsValue = this.runScripts
   this.runScriptsSet = false

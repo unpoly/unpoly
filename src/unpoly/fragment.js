@@ -972,10 +972,11 @@ up.fragment = (function() {
   */
 
   function emitFragmentKeep(keepPlan) {
-    let { oldElement } = keepPlan
+    let { oldElement, newElement: newFragment, newData, renderOptions } = keepPlan
     const log = ['Keeping fragment %o', oldElement]
     const callback = e.callbackAttr(keepPlan.oldElement, 'up-on-keep', { exposedKeys: ['newFragment', 'newData'] })
-    return emitFromKeepPlan(keepPlan, 'up:fragment:keep', { log, callback })
+    const event = up.event.build('up:fragment:keep', { newFragment, newData, renderOptions })
+    return up.emit(oldElement, event, { log, callback })
   }
 
   /*-
@@ -1018,29 +1019,10 @@ up.fragment = (function() {
   @stable
   */
 
-  function emitFragmentKept(keepPlan) {
-    return emitFromKeepPlan(keepPlan, 'up:fragment:kept', { log: false })
-  }
-
-  function emitFromKeepPlan(keepPlan, eventType, emitDetails) {
-    let { oldElement: keepable, newElement: newFragment, newData, renderOptions } = keepPlan
-    const event = up.event.build(eventType, { newFragment, newData, renderOptions })
-    return up.emit(keepable, event, emitDetails)
-  }
-
-  /*-
-  @event up:fragment:kept
-  @internal
-  */
-
   function emitFragmentDestroyed(fragment, options) {
     const log = options.log ?? ['Destroyed fragment %o', fragment]
     const parent = options.parent || document
     return up.emit(parent, 'up:fragment:destroyed', { fragment, parent, log })
-  }
-
-  function emitFragmentDestroying(fragment) {
-    return up.emit(fragment, 'up:fragment:destroying', { log: false })
   }
 
   /*-
@@ -1582,10 +1564,6 @@ up.fragment = (function() {
   */
 
   function markFragmentAsDestroying(element) {
-    // Emit an event before .up-destroying will cause the element to become invisible
-    // to up.fragment.get(), and before it is detached. This allows up.form.trackFields()
-    // to clean up elements before their context is lost.
-    emitFragmentDestroying(element)
     element.classList.add('up-destroying')
     element.setAttribute('inert', '')
   }
@@ -2682,7 +2660,7 @@ up.fragment = (function() {
     let guard = (event) => event.target.contains(fragment)
     let unsubscribe = up.on('up:fragment:aborted', { guard }, callback)
     // Since we're binding to an element that is an ancestor of the fragment,
-    // we need to unregister the event listener when the form is removed.
+    // we need to unregister the event listener when the fragment is removed.
     up.destructor(fragment, unsubscribe)
     return unsubscribe
   }
@@ -2913,6 +2891,22 @@ up.fragment = (function() {
     }
   }
 
+  /*-
+  @function up.fragment.trackSelector
+  @param {string|Function} selector
+    The selector to track
+  @param {Function(List<Element>): List<Element>} options.filter
+    Filters a list of potential matches.
+  @param {Function(Element): Function(Element)
+    A callback that is called when we discover a new match.
+    The callback can return another function that is called when that element no longer matches.
+  */
+  function trackSelector(...args) {
+    let parsedArgs = u.args(args, 'val', 'options', 'callback')
+    let tracker = new up.SelectorTracker(...parsedArgs)
+    return tracker.start()
+  }
+
   up.on('up:framework:boot', function() {
     const { documentElement } = document
     documentElement.setAttribute('up-source', normalizeSource(location.href))
@@ -2942,7 +2936,6 @@ up.fragment = (function() {
     emitInserted: emitFragmentInserted,
     emitDestroyed: emitFragmentDestroyed,
     emitKeep: emitFragmentKeep,
-    emitKept: emitFragmentKept,
     successKey,
     failKey,
     expandTargets,
@@ -2968,6 +2961,7 @@ up.fragment = (function() {
     insertTemp,
     provideNodes,
     cloneTemplate,
+    trackSelector,
     // swapTemp,
     // timer: scheduleTimer
   }

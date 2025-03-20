@@ -260,7 +260,7 @@ describe('up.form', function() {
 
       describe('with [up-keep] fields', function() {
 
-        it('runs attach and undo callbacks when an [up-keep] field is transported into another form', async function() {
+        it('runs undo and re-attach callbacks when an [up-keep] field is transported into another form', async function() {
           let changeSpy = jasmine.createSpy('change spy')
 
           const [form, field] = htmlFixtureList(`
@@ -287,8 +287,8 @@ describe('up.form', function() {
 
           expect(changeSpy.calls.allArgs()).toEqual([
             ['attach', 'form1', 'field'],
-            ['detach', 'form1', 'field'],
             ['attach', 'form2', 'field'],
+            ['detach', 'form1', 'field'],
           ])
         })
 
@@ -327,6 +327,42 @@ describe('up.form', function() {
           expect(changeSpy.calls.allArgs()).toEqual([['attach', 'form1', 'field']])
         })
 
+        it('does not run callbacks when watching a single field that is transported to another form', async function() {
+          let changeSpy = jasmine.createSpy('change spy')
+
+          const [oldForm, keepField, otherField] = htmlFixtureList(`
+            <form id="form" name="form1">
+              <input type="text" name="field" up-keep data-version="old">
+              <input type="text" name="other">
+            </form>
+          `)
+
+          up.hello(oldForm)
+
+          up.form.trackFields(keepField, (field) => {
+            changeSpy('insert', oldForm.name, field.name)
+            return () => changeSpy('destroy', oldForm.name, field.name)
+          })
+
+          expect(changeSpy.calls.count()).toBe(1)
+          expect(changeSpy.calls.allArgs()).toEqual([['insert', 'form1', 'field']])
+
+          const { fragment: newForm } = await up.render({ fragment: `
+            <form id="form" name="form2">
+              <input type="text" name="field" up-keep data-version="new">
+            </form>
+          ` })
+          await wait()
+
+          // Check that we kept the old field and attached it to the new form
+          expect(keepField).toBeAttached()
+          expect(keepField.dataset.version).toBe('old')
+          expect(keepField.parentElement).toBe(newForm)
+
+          expect(changeSpy.calls.count()).toBe(1)
+          expect(changeSpy.calls.allArgs()).toEqual([['insert', 'form1', 'field']])
+        })
+
       })
 
       describe('with a root that is not a form', function() {
@@ -343,6 +379,27 @@ describe('up.form', function() {
                 <input type="text" name="field2">
               </div>
             </form>
+          `)
+
+          up.form.trackFields(root, (field) => {
+            changeSpy('attach', form.name, field.name)
+            return () => changeSpy('detach', form.name, field.name)
+          })
+
+          expect(changeSpy.calls.allArgs()).toEqual([['attach', 'form1', 'field1']])
+        })
+
+        it('does not run the callback for form-external fields with [form] attribute', async function() {
+          let changeSpy = jasmine.createSpy('change spy')
+
+          const [form, root, field1, field2] = htmlFixtureList(`
+            <form id="form" name="form1">
+              <div id="root">
+                <input type="text" name="field1">
+              </div>
+            </form>
+            
+            <input type="text" name="field2" form="form1">
           `)
 
           up.form.trackFields(root, (field) => {
@@ -729,28 +786,69 @@ describe('up.form', function() {
 
       describe('with a field element', function() {
 
-        it("runs the callback with the field's default value when the form is reset", async function() {
-          const form = fixture('form')
-          const input = e.affix(form, 'input[name=foo][value=default]')
-          const reset = e.affix(form, 'input[type=reset]')
+        describe('when the form is reset', function() {
 
-          const callback = jasmine.createSpy('watch callback')
+          it("runs the callback with the field's default value when the form is reset", async function() {
+            const [form, input, reset] = htmlFixtureList(`
+              <form id="form">
+                <input name="foo" value="default" up-keep>
+                <input type="reset">
+              </form>
+            `)
 
-          up.watch(input, callback)
+            const callback = jasmine.createSpy('watch callback')
 
-          input.value = 'changed'
-          Trigger.change(input)
-          await wait()
+            up.watch(input, callback)
 
-          expect(callback.calls.count()).toBe(1)
-          expect(callback.calls.argsFor(0)[0]).toBe('changed')
+            input.value = 'changed'
+            Trigger.change(input)
+            await wait()
 
-          reset.click()
-          await wait()
-          await wait() // We need to wait 1 task for the reset button to affect field values, then another task for a 0ms debounce delay.
+            expect(callback.calls.count()).toBe(1)
+            expect(callback.calls.argsFor(0)[0]).toBe('changed')
 
-          expect(callback.calls.count()).toBe(2)
-          expect(callback.calls.argsFor(1)[0]).toBe('default')
+            reset.click()
+            await wait()
+            await wait() // We need to wait 1 task for the reset button to affect field values, then another task for a 0ms debounce delay.
+
+            expect(callback.calls.count()).toBe(2)
+            expect(callback.calls.argsFor(1)[0]).toBe('default')
+          })
+
+          it('keeps honoring the reset event after an [up-keep] field is transported to new form', async function() {
+            const [form, input, reset] = htmlFixtureList(`
+              <form id="form">
+                <input name="foo" value="default" up-keep>
+                <input type="reset">
+              </form>
+            `)
+
+            const callback = jasmine.createSpy('watch callback')
+
+            up.watch(input, callback)
+
+            input.value = 'changed'
+            Trigger.change(input)
+            await wait()
+
+            expect(callback.calls.count()).toBe(1)
+            expect(callback.calls.argsFor(0)[0]).toBe('changed')
+
+            up.render({ fragment: `
+              <form id="form">
+                <input name="foo" value="default" up-keep>
+                <input type="reset">
+              </form>
+            ` })
+
+            document.querySelector('input[type=reset]').click()
+            await wait()
+            await wait() // We need to wait 1 task for the reset button to affect field values, then another task for a 0ms debounce delay.
+
+            expect(callback.calls.count()).toBe(2)
+            expect(callback.calls.argsFor(1)[0]).toBe('default')
+          })
+
         })
 
         u.each(defaultInputEvents, function(eventType) {
@@ -768,6 +866,41 @@ describe('up.form', function() {
 
               expect(callback).toHaveBeenCalledWith('new-value', 'input-name', jasmine.anything())
               expect(callback.calls.count()).toEqual(1)
+            })
+
+            it('keeps running callbacks after a field with [up-keep] is transported to a new form', async function() {
+              const [oldForm, input] = htmlFixtureList(`
+                <form id="form">
+                  <input name="name" up-keep>
+                </form>
+              `)
+
+              up.hello(oldForm)
+              await wait()
+
+              const callback = jasmine.createSpy('change callback')
+              up.watch(input, callback)
+
+              input.value = 'foo'
+              Trigger[eventType](input)
+              await wait()
+
+              expect(callback.calls.count()).toBe(1)
+
+              const { fragment: newForm } = await up.render({ fragment: `
+                <form id="form">
+                  <input name="name" up-keep>
+                </form>
+              ` })
+
+              expect(input).toBeAttached()
+              expect(input.parentElement).toBe(newForm)
+
+              input.value = 'bar'
+              Trigger[eventType](input)
+              await wait()
+
+              expect(callback.calls.count()).toBe(2)
             })
 
             it("does not run the callback if the value didn't change", async function() {
@@ -846,7 +979,7 @@ describe('up.form', function() {
                 expect(callback.calls.mostRecent().args[0]).toEqual('new-value-3')
               })
 
-              it('does not run the callback if the form was detached during the delay', async function() {
+              it('does not run the callback if the form was destroyed during the delay', async function() {
                 const form = fixture('form')
                 const input = e.affix(form, 'input[name="input-name"][value="old-value"]')
                 const callback = jasmine.createSpy('watcher callback')
@@ -1004,7 +1137,7 @@ describe('up.form', function() {
               expect(callbackCount).toEqual(1)
             })
 
-            it('does not run a callback if the form was detached while a previous callback was still running', async function() {
+            it('does not run a callback if the form was destroyed while a previous callback was still running', async function() {
               const form = fixture('form')
               const input = e.affix(form, 'input[name="input-name"][value="old-value"]')
               let callbackCount = 0
@@ -1030,7 +1163,7 @@ describe('up.form', function() {
 
               await wait(10)
 
-              form.remove()
+              up.destroy(form)
 
               await wait(80)
 
@@ -5570,50 +5703,148 @@ describe('up.form', function() {
 
     describe('[up-switch]', function() {
 
-      // const FOO = {
-      //   positiveAttr: 'up-show-for',
-      //   expectPositive(element) { expect(element).toBeVisible() },
-      //   positiveAttr: 'up-show-for',
-      //   expectPositive(element) { expect(element).toBeVisible() },
-      // }
+      describe('custom switching effects', function() {
 
-      it('only switches a target in the same form', async function() {
-        const form1 = fixture('form')
-        const form1Input = e.affix(form1, 'input[name="foo"][up-switch=".target"]')
-        const form1Target = e.affix(form1, '.target[up-show-for="active"]')
-        up.hello(form1)
+        it('emits up:form:switch on switchees with { field, values }')
 
-        const form2 = fixture('form')
-        const form2Input = e.affix(form2, 'input[name="foo"][up-switch=".target"]')
-        const form2Target = e.affix(form2, '.target[up-show-for="active"]')
-        up.hello(form2)
+        it('only emits up:form:switch once per distinct { values }')
 
-        expect(form1Target).toBeHidden()
-        expect(form2Target).toBeHidden()
-
-        form2Input.value = 'active'
-        Trigger.change(form2Input)
-
-        expect(form1Target).toBeHidden()
-        expect(form2Target).toBeVisible()
       })
 
-      it("works on inputs outside the form (associated with [form=form-id] attribute)", async function() {
-        const form = fixture('form#form-id')
-        const select = e.affix(form, 'select[name="select-name"][up-switch=".target"][form="#form-id"]')
-        const fooOption = e.affix(select, 'option[value="foo"]', { text: 'Foo' })
-        const barOption = e.affix(select, 'option[value="bar"]', { text: 'Bar' })
-        const bazOption = e.affix(select, 'option[value="baz"]', { text: 'Baz' })
-        const target = e.affix(form, '.target[up-show-for="bar"]')
-        up.hello(select)
-        await wait()
+      describe('with [up-keep]', function() {
 
-        expect(target).toBeHidden()
-        select.value = 'bar'
-        Trigger.change(select)
-        await wait()
+        it('supports moving an [up-switch][up-keep] element to a new form', async function() {
+          const [oldForm, select] = htmlFixtureList(`
+            <form id="form">
+              <select name="name" up-keep up-switch="#target">
+                <option value="foo" selected>foo</option>              
+                <option value="bar">bar</option>              
+              </select>
+              <div id="target" up-show-for="bar">old target</div>
+            </form>
+          `)
 
-        expect(target).toBeVisible()
+          up.hello(oldForm)
+          await wait()
+
+          expect('#target').toHaveText('old target')
+          expect('#target').toBeHidden()
+
+          const { fragment: newForm } = await up.render({ fragment: `
+            <form id="form">
+              <select name="name" up-keep up-switch="#target">
+                <option value="foo" selected>foo</option>              
+                <option value="bar">bar</option>              
+              </select>
+              <div id="target" up-show-for="bar">new target</div>
+            </form>
+          ` })
+
+          // The switcher was preserved, but attached to the new form
+          expect(select).toBeAttached()
+          expect(select.parentElement).toBe(newForm)
+          expect(select.value).toBe('foo')
+
+          // Other elements in the new form were updated from the server response
+          expect('#target').toHaveText('new target')
+          expect('#target').toBeHidden()
+
+          // Show that the kept switcher is switching elements in its new form
+          select.value = 'bar'
+          Trigger.change(select)
+          await wait()
+
+          expect('#target').toBeVisible()
+
+
+          // Show that the kept switcher is still watching for new fragments on the new form
+          up.render({ fragment: `
+            <div id="target" up-show-for="foo">newer target</div>
+          `})
+          await wait()
+
+          expect('#target').toHaveText('newer target')
+          expect('#target').toBeHidden()
+
+          select.value = 'foo'
+          Trigger.change(select)
+          await wait()
+
+          expect('#target').toBeVisible()
+        })
+
+      })
+
+      describe('scope of switchee matching', function() {
+
+        it('only switches a target in the same form', async function() {
+          const form1 = fixture('form')
+          const form1Input = e.affix(form1, 'input[name="foo"][up-switch=".target"]')
+          const form1Target = e.affix(form1, '.target[up-show-for="active"]')
+          up.hello(form1)
+
+          const form2 = fixture('form')
+          const form2Input = e.affix(form2, 'input[name="foo"][up-switch=".target"]')
+          const form2Target = e.affix(form2, '.target[up-show-for="active"]')
+          up.hello(form2)
+          await wait()
+
+          expect(form1Target).toBeHidden()
+          expect(form2Target).toBeHidden()
+
+          form2Input.value = 'active'
+          Trigger.change(form2Input)
+          await wait()
+
+          expect(form1Target).toBeHidden()
+          expect(form2Target).toBeVisible()
+        })
+
+        it("can watch a form-external field", async function() {
+          const container = fixture('#container')
+          const form = e.affix(container, 'form#form-id')
+          const externalSelect = e.affix(container, 'select[name="select-name"][up-switch=".target"][form="form-id"]')
+          const fooOption = e.affix(externalSelect, 'option[value="foo"]', { text: 'Foo' })
+          const barOption = e.affix(externalSelect, 'option[value="bar"]', { text: 'Bar' })
+          const target = e.affix(form, '.target[up-show-for="bar"]')
+          up.hello(container)
+          await wait()
+
+          expect(target).toBeHidden()
+
+          externalSelect.value = 'bar'
+          Trigger.change(externalSelect)
+          await wait()
+
+          expect(target).toBeVisible()
+        })
+
+        it('can watch a form-external field that is inserted after the form', async function() {
+          const form = fixture('form#form-id')
+          const target = e.affix(form, '.target[up-show-for="bar"]')
+          up.hello(form)
+          await wait()
+
+          expect(target).toBeVisible()
+
+          const externalSelect = fixture('select[name="select-name"][up-switch=".target"][form="form-id"]')
+          const fooOption = e.affix(externalSelect, 'option[value="foo"]', { text: 'Foo' })
+          const barOption = e.affix(externalSelect, 'option[value="bar"]', { text: 'Bar' })
+          up.hello(externalSelect)
+          await wait()
+
+          expect(target).toBeHidden()
+
+          externalSelect.value = 'bar'
+          Trigger.change(externalSelect)
+          await wait()
+
+          expect(target).toBeVisible()
+        })
+
+        it('switches matching element outside the form with [up-switch-scope="layer"]')
+
+        it('switches matching element outside the form with [up-switch-scope="#selector"]')
       })
 
       describe('switching visibility', function() {
@@ -5621,7 +5852,8 @@ describe('up.form', function() {
         describe('on a select', function() {
 
           beforeEach(function() {
-            this.$select = $fixture('select[name="select-name"][up-switch=".target"]')
+            this.$form = $fixture('form')
+            this.$select = this.$form.affix('select[name="select-name"][up-switch=".target"]')
             this.$blankOption = this.$select.affix('option').text('<Please select something>').val('')
             this.$fooOption = this.$select.affix('option[value="foo"]').text('Foo')
             this.$barOption = this.$select.affix('option[value="bar"]').text('Bar')
@@ -5630,8 +5862,8 @@ describe('up.form', function() {
           })
 
           it("shows the target element if a space-separated [up-show-for] token contains the select value", async function() {
-            const $target = $fixture('.target[up-show-for="something bar other"]')
-            up.hello(this.$select)
+            const $target = this.$form.affix('.target[up-show-for="something bar other"]')
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeHidden()
@@ -5643,8 +5875,8 @@ describe('up.form', function() {
           })
 
           it("shows the target element if a comma-separated [up-show-for] token contains the select value", async function() {
-            const $target = $fixture('.target[up-show-for="something, bar, other"]')
-            up.hello(this.$select)
+            const $target = this.$form.affix('.target[up-show-for="something, bar, other"]')
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeHidden()
@@ -5656,8 +5888,8 @@ describe('up.form', function() {
           })
 
           it("shows the target element if a space-separated [up-hide-for] attribute doesn't contain the select value", async function() {
-            const $target = $fixture('.target[up-hide-for="something bar other"]')
-            up.hello(this.$select)
+            const $target = this.$form.affix('.target[up-hide-for="something bar other"]')
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeVisible()
@@ -5669,8 +5901,8 @@ describe('up.form', function() {
           })
 
           it("shows the target element if a comma-separated [up-hide-for] attribute doesn't contain the select value", async function() {
-            const $target = $fixture('.target[up-hide-for="something, bar, other"]')
-            up.hello(this.$select)
+            const $target = this.$form.affix('.target[up-hide-for="something, bar, other"]')
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeVisible()
@@ -5682,8 +5914,8 @@ describe('up.form', function() {
           })
 
           it("shows the target element if its up-show-for attribute contains a value ':present' and the select value is present", async function() {
-            const $target = $fixture('.target[up-show-for=":present"]')
-            up.hello(this.$select)
+            const $target = this.$form.affix('.target[up-show-for=":present"]')
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeHidden()
@@ -5695,8 +5927,8 @@ describe('up.form', function() {
           })
 
           it("shows the target element if its up-show-for attribute contains a value ':blank' and the select value is blank", async function() {
-            const $target = $fixture('.target[up-show-for=":blank"]')
-            up.hello(this.$select)
+            const $target = this.$form.affix('.target[up-show-for=":blank"]')
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeVisible()
@@ -5708,9 +5940,9 @@ describe('up.form', function() {
           })
 
           it("shows the target element if its up-show-for attribute contains the select value encoded as a JSON array", async function() {
-            const $target = $fixture('.target')
+            const $target = this.$form.affix('.target')
             $target.attr('up-show-for', '["Some phrase"]')
-            up.hello(this.$select)
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeHidden()
@@ -5722,8 +5954,8 @@ describe('up.form', function() {
           })
 
           it('does not show a default-hidden target without [up-show-for] and [up-hide-for] attributes', async function() {
-            const $target = $fixture('.target[hidden]')
-            up.hello(this.$select)
+            const $target = this.$form.affix('.target[hidden]')
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeHidden()
@@ -5735,8 +5967,8 @@ describe('up.form', function() {
           })
 
           it('does not hide a default-visible target without [up-show-for] and [up-hide-for] attributes', async function() {
-            const $target = $fixture('.target')
-            up.hello(this.$select)
+            const $target = this.$form.affix('.target')
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeVisible()
@@ -5752,12 +5984,13 @@ describe('up.form', function() {
         describe('on a checkbox', function() {
 
           beforeEach(function() {
-            this.$checkbox = $fixture('input[name="input-name"][type="checkbox"][value="1"][up-switch=".target"]')
+            this.$form = $fixture('form')
+            this.$checkbox = this.$form.affix('input[name="input-name"][type="checkbox"][value="1"][up-switch=".target"]')
           })
 
           it("shows the target element if its up-show-for attribute is :checked and the checkbox is checked", async function() {
-            const $target = $fixture('.target[up-show-for=":checked"]')
-            up.hello(this.$checkbox)
+            const $target = this.$form.affix('.target[up-show-for=":checked"]')
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeHidden()
@@ -5769,8 +6002,8 @@ describe('up.form', function() {
           })
 
           it("shows the target element if its up-show-for attribute is :unchecked and the checkbox is unchecked", async function() {
-            const $target = $fixture('.target[up-show-for=":unchecked"]')
-            up.hello(this.$checkbox)
+            const $target = this.$form.affix('.target[up-show-for=":unchecked"]')
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeVisible()
@@ -5782,8 +6015,8 @@ describe('up.form', function() {
           })
 
           it("shows the target element if its up-hide-for attribute is :checked and the checkbox is unchecked", async function() {
-            const $target = $fixture('.target[up-hide-for=":checked"]')
-            up.hello(this.$checkbox)
+            const $target = this.$form.affix('.target[up-hide-for=":checked"]')
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeVisible()
@@ -5795,8 +6028,8 @@ describe('up.form', function() {
           })
 
           it("shows the target element if its up-hide-for attribute is :unchecked and the checkbox is checked", async function() {
-            const $target = $fixture('.target[up-hide-for=":unchecked"]')
-            up.hello(this.$checkbox)
+            const $target = this.$form.affix('.target[up-hide-for=":unchecked"]')
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeHidden()
@@ -5812,7 +6045,8 @@ describe('up.form', function() {
         describe('on a group of radio buttons', function() {
 
           beforeEach(function() {
-            this.$buttons = $fixture('.radio-buttons')
+            this.$form = $fixture('form')
+            this.$buttons = this.$form.affix('.radio-buttons')
             this.$blankButton = this.$buttons.affix('input[type="radio"][name="group"][up-switch=".target"]').val('')
             this.$fooButton = this.$buttons.affix('input[type="radio"][name="group"][up-switch=".target"]').val('foo')
             this.$barButton = this.$buttons.affix('input[type="radio"][name="group"][up-switch=".target"]').val('bar')
@@ -5820,8 +6054,8 @@ describe('up.form', function() {
           })
 
           it("shows the target element if its up-show-for attribute contains the selected button value", async function() {
-            const $target = $fixture('.target[up-show-for="something bar other"]')
-            up.hello(this.$buttons)
+            const $target = this.$form.affix('.target[up-show-for="something bar other"]')
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeHidden()
@@ -5833,8 +6067,8 @@ describe('up.form', function() {
           })
 
           it("shows the target element if its up-hide-for attribute doesn't contain the selected button value", async function() {
-            const $target = $fixture('.target[up-hide-for="something bar other"]')
-            up.hello(this.$buttons)
+            const $target = this.$form.affix('.target[up-hide-for="something bar other"]')
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeVisible()
@@ -5846,8 +6080,8 @@ describe('up.form', function() {
           })
 
           it("shows the target element if its up-show-for attribute contains a value ':present' and the selected button value is present", async function() {
-            const $target = $fixture('.target[up-show-for=":present"]')
-            up.hello(this.$buttons)
+            const $target = this.$form.affix('.target[up-show-for=":present"]')
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeHidden()
@@ -5864,8 +6098,8 @@ describe('up.form', function() {
           })
 
           it("shows the target element if its up-show-for attribute contains a value ':blank' and the selected button value is blank", async function() {
-            const $target = $fixture('.target[up-show-for=":blank"]')
-            up.hello(this.$buttons)
+            const $target = this.$form.affix('.target[up-show-for=":blank"]')
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeVisible()
@@ -5882,8 +6116,8 @@ describe('up.form', function() {
           })
 
           it("shows the target element if its up-show-for attribute contains a value ':checked' and any button is checked", async function() {
-            const $target = $fixture('.target[up-show-for=":checked"]')
-            up.hello(this.$buttons)
+            const $target = this.$form.affix('.target[up-show-for=":checked"]')
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeHidden()
@@ -5895,8 +6129,8 @@ describe('up.form', function() {
           })
 
           it("shows the target element if its up-show-for attribute contains a value ':unchecked' and no button is checked", async function() {
-            const $target = $fixture('.target[up-show-for=":unchecked"]')
-            up.hello(this.$buttons)
+            const $target = this.$form.affix('.target[up-show-for=":unchecked"]')
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeVisible()
@@ -5906,17 +6140,20 @@ describe('up.form', function() {
 
             expect($target).toBeHidden()
           })
+
+          it('allows to set [up-switch] on a container of radio buttons, as with [up-watch]')
         })
 
         describe('on a text input', function() {
 
           beforeEach(function() {
-            this.$textInput = $fixture('input[name="input-name"][type="text"][up-switch=".target"]')
+            this.$form = $fixture('form')
+            this.$textInput = this.$form.affix('input[name="input-name"][type="text"][up-switch=".target"]')
           })
 
           it("shows the target element if its up-show-for attribute contains the input value", async function() {
-            const $target = $fixture('.target[up-show-for="something bar other"]')
-            up.hello(this.$textInput)
+            const $target = this.$form.affix('.target[up-show-for="something bar other"]')
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeHidden()
@@ -5928,8 +6165,8 @@ describe('up.form', function() {
           })
 
           it("shows the target element if its up-hide-for attribute doesn't contain the input value", async function() {
-            const $target = $fixture('.target[up-hide-for="something bar other"]')
-            up.hello(this.$textInput)
+            const $target = this.$form.affix('.target[up-hide-for="something bar other"]')
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeVisible()
@@ -5942,8 +6179,8 @@ describe('up.form', function() {
 
 
           it("shows the target element if its up-show-for attribute contains a value ':present' and the input value is present", async function() {
-            const $target = $fixture('.target[up-show-for=":present"]')
-            up.hello(this.$textInput)
+            const $target = this.$form.affix('.target[up-show-for=":present"]')
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeHidden()
@@ -5955,8 +6192,8 @@ describe('up.form', function() {
           })
 
           it("shows the target element if its up-show-for attribute contains a value ':blank' and the input value is blank", async function() {
-            const $target = $fixture('.target[up-show-for=":blank"]')
-            up.hello(this.$textInput)
+            const $target = this.$form.affix('.target[up-show-for=":blank"]')
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeVisible()
@@ -5971,7 +6208,8 @@ describe('up.form', function() {
         describe('when an [up-show-for] element is dynamically inserted later', function() {
 
           it("shows the element if it matches the [up-switch] control's value", async function() {
-            const $select = $fixture('select[name="select-name"][up-switch=".target"]')
+            const $form = $fixture('form')
+            const $select = $form.affix('select[name="select-name"][up-switch=".target"]')
             $select.affix('option[value="foo"]').text('Foo')
             $select.affix('option[value="bar"]').text('Bar')
             $select.val('foo')
@@ -5979,7 +6217,7 @@ describe('up.form', function() {
             await wait()
 
             // New target enters the DOM after [up-switch] has been compiled
-            this.$target = $fixture('.target[up-show-for="bar"]')
+            this.$target = $form.affix('.target[up-show-for="bar"]')
             up.hello(this.$target)
             await wait()
 
@@ -5994,21 +6232,21 @@ describe('up.form', function() {
           })
 
           it("doesn't re-switch targets that were part of the original compile run", async function() {
-            const $container = $fixture('.container')
+            const $form = $fixture('form')
 
-            const $select = $container.affix('select[name="select-name"][up-switch=".target"]')
+            const $select = $form.affix('select[name="select-name"][up-switch=".target"]')
             $select.affix('option[value="foo"]').text('Foo')
             $select.affix('option[value="bar"]').text('Bar')
             $select.val('foo')
-            const $existingTarget = $container.affix('.target.existing[up-show-for="bar"]')
+            const $existingTarget = $form.affix('.target.existing[up-show-for="bar"]')
 
-            const switchTargetSpy = up.form.switchTarget.mock().and.callThrough()
+            const switchTargetSpy = spyOn(up.Switcher.prototype, '_switchSwitcheeNow').and.callThrough()
 
-            up.hello($container)
+            up.hello($form)
             await wait()
 
             // New target enters the DOM after [up-switch] has been compiled
-            this.$lateTarget = $container.affix('.target.late[up-show-for="bar"]')
+            this.$lateTarget = $form.affix('.target.late[up-show-for="bar"]')
             up.hello(this.$lateTarget)
             await wait()
 
@@ -6036,7 +6274,7 @@ describe('up.form', function() {
 
           it("enables the target element if a space-separated [up-enable-for] token contains the select value", async function() {
             const $target = this.$form.affix('input.target[up-enable-for="something bar other"]')
-            up.hello(this.$select)
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeDisabled()
@@ -6049,7 +6287,7 @@ describe('up.form', function() {
 
           it("enables the target element if a comma-separated [up-enable-for] token contains the select value", async function() {
             const $target = this.$form.affix('input.target[up-enable-for="something, bar, other"]')
-            up.hello(this.$select)
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeDisabled()
@@ -6062,7 +6300,7 @@ describe('up.form', function() {
 
           it("enables the target element if a space-separated [up-disable-for] attribute doesn't contain the select value", async function() {
             const $target = this.$form.affix('input.target[up-disable-for="something bar other"]')
-            up.hello(this.$select)
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeEnabled()
@@ -6075,7 +6313,7 @@ describe('up.form', function() {
 
           it("enables the target element if a comma-separated [up-disable-for] attribute doesn't contain the select value", async function() {
             const $target = this.$form.affix('input.target[up-disable-for="something, bar, other"]')
-            up.hello(this.$select)
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeEnabled()
@@ -6088,7 +6326,7 @@ describe('up.form', function() {
 
           it("enables the target element if its up-enable-for attribute contains a value ':present' and the select value is present", async function() {
             const $target = this.$form.affix('input.target[up-enable-for=":present"]')
-            up.hello(this.$select)
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeDisabled()
@@ -6101,7 +6339,7 @@ describe('up.form', function() {
 
           it("enables the target element if its up-enable-for attribute contains a value ':blank' and the select value is blank", async function() {
             const $target = this.$form.affix('input.target[up-enable-for=":blank"]')
-            up.hello(this.$select)
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeEnabled()
@@ -6115,7 +6353,7 @@ describe('up.form', function() {
           it("enables the target element if its up-enable-for attribute contains the select value encoded as a JSON array", async function() {
             const $target = this.$form.affix('input.target')
             $target.attr('up-enable-for', '["Some phrase"]')
-            up.hello(this.$select)
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeDisabled()
@@ -6128,7 +6366,7 @@ describe('up.form', function() {
 
           it('does not enable a default-disabled target without [up-enable-for] and [up-disable-for] attributes', async function() {
             const $target = this.$form.affix('input.target[disabled]')
-            up.hello(this.$select)
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeDisabled()
@@ -6141,7 +6379,7 @@ describe('up.form', function() {
 
           it('does not disable a default-enabled target without [up-enable-for] and [up-disable-for] attributes', async function() {
             const $target = this.$form.affix('input.target')
-            up.hello(this.$select)
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeEnabled()
@@ -6163,7 +6401,7 @@ describe('up.form', function() {
 
           it("enables the target element if its up-enable-for attribute is :checked and the checkbox is checked", async function() {
             const $target = this.$form.affix('input.target[up-enable-for=":checked"]')
-            up.hello(this.$checkbox)
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeDisabled()
@@ -6176,7 +6414,7 @@ describe('up.form', function() {
 
           it("enables the target element if its up-enable-for attribute is :unchecked and the checkbox is unchecked", async function() {
             const $target = this.$form.affix('input.target[up-enable-for=":unchecked"]')
-            up.hello(this.$checkbox)
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeEnabled()
@@ -6189,7 +6427,7 @@ describe('up.form', function() {
 
           it("enables the target element if its up-disable-for attribute is :checked and the checkbox is unchecked", async function() {
             const $target = this.$form.affix('input.target[up-disable-for=":checked"]')
-            up.hello(this.$checkbox)
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeEnabled()
@@ -6202,7 +6440,7 @@ describe('up.form', function() {
 
           it("enables the target element if its up-disable-for attribute is :unchecked and the checkbox is checked", async function() {
             const $target = this.$form.affix('input.target[up-disable-for=":unchecked"]')
-            up.hello(this.$checkbox)
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeDisabled()
@@ -6228,7 +6466,7 @@ describe('up.form', function() {
 
           it("enables the target element if its up-enable-for attribute contains the selected button value", async function() {
             const $target = this.$form.affix('input.target[up-enable-for="something bar other"]')
-            up.hello(this.$buttons)
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeDisabled()
@@ -6241,7 +6479,7 @@ describe('up.form', function() {
 
           it("enables the target element if its up-disable-for attribute doesn't contain the selected button value", async function() {
             const $target = this.$form.affix('input.target[up-disable-for="something bar other"]')
-            up.hello(this.$buttons)
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeEnabled()
@@ -6254,7 +6492,7 @@ describe('up.form', function() {
 
           it("enables the target element if its up-enable-for attribute contains a value ':present' and the selected button value is present", async function() {
             const $target = this.$form.affix('input.target[up-enable-for=":present"]')
-            up.hello(this.$buttons)
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeDisabled()
@@ -6272,7 +6510,7 @@ describe('up.form', function() {
 
           it("enables the target element if its up-enable-for attribute contains a value ':blank' and the selected button value is blank", async function() {
             const $target = this.$form.affix('input.target[up-enable-for=":blank"]')
-            up.hello(this.$buttons)
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeEnabled()
@@ -6290,7 +6528,7 @@ describe('up.form', function() {
 
           it("enables the target element if its up-enable-for attribute contains a value ':checked' and any button is checked", async function() {
             const $target = this.$form.affix('input.target[up-enable-for=":checked"]')
-            up.hello(this.$buttons)
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeDisabled()
@@ -6303,7 +6541,7 @@ describe('up.form', function() {
 
           it("enables the target element if its up-enable-for attribute contains a value ':unchecked' and no button is checked", async function() {
             const $target = this.$form.affix('input.target[up-enable-for=":unchecked"]')
-            up.hello(this.$buttons)
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeEnabled()
@@ -6324,7 +6562,7 @@ describe('up.form', function() {
 
           it("enables the target element if its up-enable-for attribute contains the input value", async function() {
             const $target = this.$form.affix('input.target[up-enable-for="something bar other"]')
-            up.hello(this.$textInput)
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeDisabled()
@@ -6337,7 +6575,7 @@ describe('up.form', function() {
 
           it("enables the target element if its up-disable-for attribute doesn't contain the input value", async function() {
             const $target = this.$form.affix('input.target[up-disable-for="something bar other"]')
-            up.hello(this.$textInput)
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeEnabled()
@@ -6351,7 +6589,7 @@ describe('up.form', function() {
 
           it("enables the target element if its up-enable-for attribute contains a value ':present' and the input value is present", async function() {
             const $target = this.$form.affix('input.target[up-enable-for=":present"]')
-            up.hello(this.$textInput)
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeDisabled()
@@ -6364,7 +6602,7 @@ describe('up.form', function() {
 
           it("enables the target element if its up-enable-for attribute contains a value ':blank' and the input value is blank", async function() {
             const $target = this.$form.affix('input.target[up-enable-for=":blank"]')
-            up.hello(this.$textInput)
+            up.hello(this.$form)
             await wait()
 
             expect($target).toBeEnabled()
@@ -6384,7 +6622,7 @@ describe('up.form', function() {
             $select.affix('option[value="foo"]').text('Foo')
             $select.affix('option[value="bar"]').text('Bar')
             $select.val('foo')
-            up.hello($select)
+            up.hello($form)
             await wait()
 
             // New target enters the DOM after [up-switch] has been compiled
@@ -6411,7 +6649,7 @@ describe('up.form', function() {
             $select.val('foo')
             const $existingTarget = $form.affix('.target.existing[up-enable-for="bar"]')
 
-            const switchTargetSpy = up.form.switchTarget.mock().and.callThrough()
+            const switchTargetSpy = spyOn(up.Switcher.prototype, '_switchSwitcheeNow').and.callThrough()
 
             up.hello($form)
             await wait()
