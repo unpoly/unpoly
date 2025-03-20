@@ -1,7 +1,8 @@
 const u = up.util
 const e = up.element
 
-const FULL_DOCUMENT_PATTERN = /^\s*<(html|!DOCTYPE)\b/i
+// HTML allows comments before a <!DOCTYPE> or <html> tag (issue #726)
+const FULL_DOCUMENT_PATTERN = /^\s*(<!--[^-]*.*?-->\s*)*<(html|!DOCTYPE)\b/i
 
 up.ResponseDoc = class ResponseDoc {
 

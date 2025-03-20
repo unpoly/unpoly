@@ -97,8 +97,56 @@ describe('up.ResponseDoc', function() {
 
     describe('#title', function() {
 
-      it("returns the document's <title> text", function() {
+      it("returns the <title> text of a document that starts with <html>", function() {
         let doc = new up.ResponseDoc({ document: `
+          <html>
+            <head>
+              <title>Document title</title>
+            </head>
+            <body>
+            </body>
+          </html>  
+        ` })
+
+        expect(doc.title).toBe('Document title')
+      })
+
+      it("returns the <title> text of a document that starts with a <!DOCTYPE>", function() {
+        let doc = new up.ResponseDoc({ document: `
+          <!DOCTYPE>
+          <html>
+            <head>
+              <title>Document title</title>
+            </head>
+            <body>
+            </body>
+          </html>  
+        ` })
+
+        expect(doc.title).toBe('Document title')
+      })
+
+      it("returns the <title> text of a document that starts with a comment before <!DOCTYPE>", function() {
+        let doc = new up.ResponseDoc({ document: `
+          <!-- Comment -->
+          <!DOCTYPE>
+          <html>
+            <head>
+              <title>Document title</title>
+            </head>
+            <body>
+            </body>
+          </html>  
+        ` })
+
+        expect(doc.title).toBe('Document title')
+      })
+
+      it("returns the <title> text of a document that starts with multiple comments before <!DOCTYPE>", function() {
+        let doc = new up.ResponseDoc({ document: `
+          <!-- Comment1 -->
+          <!-- Comment2 -->
+          <!DOCTYPE>
           <html>
             <head>
               <title>Document title</title>
@@ -117,6 +165,14 @@ describe('up.ResponseDoc', function() {
             <body>
             </body>
           </html>  
+        ` })
+
+        expect(doc.title).toBeMissing()
+      })
+
+      it('returns a missing value if the document is only a fragment', function() {
+        let doc = new up.ResponseDoc({ document: `
+          <div id="target">target</div>  
         ` })
 
         expect(doc.title).toBeMissing()
