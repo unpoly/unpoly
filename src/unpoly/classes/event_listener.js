@@ -73,14 +73,6 @@ up.EventListener = class EventListener extends up.Record {
     let element = event.target
     if (this.selector) {
       let selector = u.evalOption(this.selector)
-
-      // // TODO: If we only need this in FieldWatcher#_trackReset(), we should implement it with { guard } instead
-      // if (u.isElement(selector)) {
-      //   element = selector.contains(element) && selector
-      // } else {
-      //   element = element.closest(selector)
-      // }
-
       element = element.closest(selector)
     }
 
