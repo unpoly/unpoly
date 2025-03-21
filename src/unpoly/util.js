@@ -1485,8 +1485,8 @@ up.util = (function() {
     A function that will call all `functions` if called.
   @internal
   */
-  function sequence(functions) {
-    functions = compact(functions)
+  function sequence(...args) {
+    let functions = scanFunctions(...args)
     return (...args) => map(functions, (fn) => fn(...args))
   }
 

@@ -1308,10 +1308,39 @@ up.form = (function() {
     }
   }
 
+  // function trackFields(...args) {
+  //   let [root, options, callback] = u.args(args, 'val', 'options', 'callback')
+  //   let tracker = new up.FieldTracker(root, options, callback)
+  //   return tracker.start()
+  // }
+
+  /*-
+  @function up.form.trackFields
+  @param {Element} root
+    A form or a container element within a form.
+  @param {Function(Element): boolean} options.guard
+    Optional, additional condition whether a field matches.
+  @param {Function(Element): Function(Element)
+    A callback that is called when we discover a new match.
+    The callback can return another function that is called when that field no longer matches.
+  */
   function trackFields(...args) {
-    let [root, options, callback] = u.args(args, 'val', 'options', 'callback')
-    let tracker = new up.FieldTracker(root, options, callback)
-    return tracker.start()
+    let [root, { guard }, callback] = u.args(args, 'val', 'options', 'callback')
+
+    let filter = function(fields) {
+      let scope = getScope(root)
+      return u.filter(fields, function(field) {
+        return (root === scope || root.contains(field))
+          && (getForm(field) === scope) // will also match external fields with [form]
+          && (!guard || guard(field)) // user-provided condition
+      })
+    }
+
+    // If root is already a field, it cannot contain other fields.
+    // We do not need to listed to up:fragment:inserted etc.
+    const live = true // !isField(root)
+
+    return up.fragment.trackSelector(fieldSelector(), { filter, live }, callback)
   }
 
   function focusedField() {

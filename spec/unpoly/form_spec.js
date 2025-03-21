@@ -260,7 +260,7 @@ describe('up.form', function() {
 
       describe('with [up-keep] fields', function() {
 
-        it('runs attach and undo callbacks when an [up-keep] field is transported into another form', async function() {
+        it('runs undo and re-attach callbacks when an [up-keep] field is transported into another form', async function() {
           let changeSpy = jasmine.createSpy('change spy')
 
           const [form, field] = htmlFixtureList(`
@@ -287,8 +287,8 @@ describe('up.form', function() {
 
           expect(changeSpy.calls.allArgs()).toEqual([
             ['attach', 'form1', 'field'],
-            ['detach', 'form1', 'field'],
             ['attach', 'form2', 'field'],
+            ['detach', 'form1', 'field'],
           ])
         })
 
@@ -325,6 +325,43 @@ describe('up.form', function() {
 
           // Because the field didn't change forms, no additional callbacks are run
           expect(changeSpy.calls.allArgs()).toEqual([['attach', 'form1', 'field']])
+        })
+
+        it('does not run callbacks when watching a single field that is transported to another form', async function() {
+          let changeSpy = jasmine.createSpy('change spy')
+
+          const [oldForm, keepField, otherField] = htmlFixtureList(`
+            <form id="form" name="form1">
+              <input type="text" name="field" up-keep data-version="old">
+              <input type="text" name="other">
+            </form>
+          `)
+
+          up.hello(oldForm)
+
+          up.form.trackFields(keepField, (field) => {
+            changeSpy('insert', oldForm.name, field.name)
+            return () => changeSpy('destroy', oldForm.name, field.name)
+          })
+
+          expect(changeSpy.calls.count()).toBe(1)
+          expect(changeSpy.calls.allArgs()).toEqual([['insert', 'form1', 'field']])
+
+          const { fragment: newForm } = await up.render({ fragment: `
+            <form id="form" name="form2">
+              <input type="text" name="field" up-keep data-version="new">
+            </form>
+          ` })
+          await wait()
+
+          // Check that we kept the old field and attached it to the new form
+          expect(keepField).toBeAttached()
+          expect(keepField.dataset.version).toBe('old')
+          expect(keepField.parentElement).toBe(newForm)
+
+          expect(changeSpy.calls.count()).toBe(1)
+          console.debug("[spec] allArgs are %o", changeSpy.calls.allArgs())
+          expect(changeSpy.calls.allArgs()).toEqual([['insert', 'form1', 'field']])
         })
 
       })
@@ -750,28 +787,69 @@ describe('up.form', function() {
 
       describe('with a field element', function() {
 
-        it("runs the callback with the field's default value when the form is reset", async function() {
-          const form = fixture('form')
-          const input = e.affix(form, 'input[name=foo][value=default]')
-          const reset = e.affix(form, 'input[type=reset]')
+        describe('when the form is reset', function() {
 
-          const callback = jasmine.createSpy('watch callback')
+          it("runs the callback with the field's default value when the form is reset", async function() {
+            const [form, input, reset] = htmlFixtureList(`
+              <form id="form">
+                <input name="foo" value="default" up-keep>
+                <input type="reset">
+              </form>
+            `)
 
-          up.watch(input, callback)
+            const callback = jasmine.createSpy('watch callback')
 
-          input.value = 'changed'
-          Trigger.change(input)
-          await wait()
+            up.watch(input, callback)
 
-          expect(callback.calls.count()).toBe(1)
-          expect(callback.calls.argsFor(0)[0]).toBe('changed')
+            input.value = 'changed'
+            Trigger.change(input)
+            await wait()
 
-          reset.click()
-          await wait()
-          await wait() // We need to wait 1 task for the reset button to affect field values, then another task for a 0ms debounce delay.
+            expect(callback.calls.count()).toBe(1)
+            expect(callback.calls.argsFor(0)[0]).toBe('changed')
 
-          expect(callback.calls.count()).toBe(2)
-          expect(callback.calls.argsFor(1)[0]).toBe('default')
+            reset.click()
+            await wait()
+            await wait() // We need to wait 1 task for the reset button to affect field values, then another task for a 0ms debounce delay.
+
+            expect(callback.calls.count()).toBe(2)
+            expect(callback.calls.argsFor(1)[0]).toBe('default')
+          })
+
+          it('keeps honoring the reset event after an [up-keep] field is transported to new form', async function() {
+            const [form, input, reset] = htmlFixtureList(`
+              <form id="form">
+                <input name="foo" value="default" up-keep>
+                <input type="reset">
+              </form>
+            `)
+
+            const callback = jasmine.createSpy('watch callback')
+
+            up.watch(input, callback)
+
+            input.value = 'changed'
+            Trigger.change(input)
+            await wait()
+
+            expect(callback.calls.count()).toBe(1)
+            expect(callback.calls.argsFor(0)[0]).toBe('changed')
+
+            up.render({ fragment: `
+              <form id="form">
+                <input name="foo" value="default" up-keep>
+                <input type="reset">
+              </form>
+            ` })
+
+            document.querySelector('input[type=reset]').click()
+            await wait()
+            await wait() // We need to wait 1 task for the reset button to affect field values, then another task for a 0ms debounce delay.
+
+            expect(callback.calls.count()).toBe(2)
+            expect(callback.calls.argsFor(1)[0]).toBe('default')
+          })
+
         })
 
         u.each(defaultInputEvents, function(eventType) {
@@ -789,6 +867,45 @@ describe('up.form', function() {
 
               expect(callback).toHaveBeenCalledWith('new-value', 'input-name', jasmine.anything())
               expect(callback.calls.count()).toEqual(1)
+            })
+
+            it('keeps running callbacks after a field with [up-keep] is transported to a new form', async function() {
+              const [oldForm, input] = htmlFixtureList(`
+                <form id="form">
+                  <input name="name" up-keep>
+                </form>
+              `)
+
+              up.hello(oldForm)
+              await wait()
+
+              const callback = jasmine.createSpy('change callback')
+              up.watch(input, callback)
+
+              console.debug("[spec] Changing input to 'foo'")
+
+              input.value = 'foo'
+              Trigger[eventType](input)
+              await wait()
+
+              expect(callback.calls.count()).toBe(1)
+
+              const { fragment: newForm } = await up.render({ fragment: `
+                <form id="form">
+                  <input name="name" up-keep>
+                </form>
+              ` })
+
+              expect(input).toBeAttached()
+              expect(input.parentElement).toBe(newForm)
+
+              console.debug("[spec] Changing input to 'bar'")
+
+              input.value = 'bar'
+              Trigger[eventType](input)
+              await wait()
+
+              expect(callback.calls.count()).toBe(2)
             })
 
             it("does not run the callback if the value didn't change", async function() {
@@ -867,7 +984,7 @@ describe('up.form', function() {
                 expect(callback.calls.mostRecent().args[0]).toEqual('new-value-3')
               })
 
-              it('does not run the callback if the form was detached during the delay', async function() {
+              it('does not run the callback if the form was destroyed during the delay', async function() {
                 const form = fixture('form')
                 const input = e.affix(form, 'input[name="input-name"][value="old-value"]')
                 const callback = jasmine.createSpy('watcher callback')
@@ -1025,7 +1142,7 @@ describe('up.form', function() {
               expect(callbackCount).toEqual(1)
             })
 
-            it('does not run a callback if the form was detached while a previous callback was still running', async function() {
+            it('does not run a callback if the form was destroyed while a previous callback was still running', async function() {
               const form = fixture('form')
               const input = e.affix(form, 'input[name="input-name"][value="old-value"]')
               let callbackCount = 0
@@ -1051,7 +1168,7 @@ describe('up.form', function() {
 
               await wait(10)
 
-              form.remove()
+              up.destroy(form)
 
               await wait(80)
 
@@ -5601,7 +5718,68 @@ describe('up.form', function() {
 
       describe('with [up-keep]', function() {
 
-        it('supports moving an [up-switch][up-keep] element to a new form')
+        it('supports moving an [up-switch][up-keep] element to a new form', async function() {
+          const [oldForm, select] = htmlFixtureList(`
+            <form id="form">
+              <select name="name" up-keep up-switch="#target">
+                <option value="foo" selected>foo</option>              
+                <option value="bar">bar</option>              
+              </select>
+              <div id="target" up-show-for="bar">old target</div>
+            </form>
+          `)
+
+          up.hello(oldForm)
+          await wait()
+
+          expect('#target').toHaveText('old target')
+          expect('#target').toBeHidden()
+
+          console.debug("[spec] Updating form, but keeping the switcher")
+          const { fragment: newForm } = await up.render({ fragment: `
+            <form id="form">
+              <select name="name" up-keep up-switch="#target">
+                <option value="foo" selected>foo</option>              
+                <option value="bar">bar</option>              
+              </select>
+              <div id="target" up-show-for="bar">new target</div>
+            </form>
+          ` })
+
+          console.debug("[spec] Asserting update results")
+          // The switcher was preserved, but attached to the new form
+          expect(select).toBeAttached()
+          expect(select.parentElement).toBe(newForm)
+          expect(select.value).toBe('foo')
+
+          // Other elements in the new form were updated from the server response
+          expect('#target').toHaveText('new target')
+          expect('#target').toBeHidden()
+
+          // Show that the kept switcher is switching elements in its new form
+          console.debug("[spec] Changing select in new form")
+          select.value = 'bar'
+          Trigger.change(select)
+          await wait()
+
+          expect('#target').toBeVisible()
+
+          //
+          // // Show that the kept switcher is still watching for new fragments on the new form
+          // up.render({ fragment: `
+          //   <div id="target" up-show-for="foo">newer target</div>
+          // `})
+          // await wait()
+          //
+          // expect('#target').toHaveText('newer target')
+          // expect('#target').toBeHidden()
+          //
+          // select.value = 'foo'
+          // Trigger.change(select)
+          // await wait()
+          //
+          // expect('#target').toBeVisible()
+        })
 
       })
 
@@ -6070,7 +6248,7 @@ describe('up.form', function() {
             $select.val('foo')
             const $existingTarget = $form.affix('.target.existing[up-show-for="bar"]')
 
-            const switchTargetSpy = spyOn(up.Switcher.prototype, '_switchSwitchee').and.callThrough()
+            const switchTargetSpy = spyOn(up.Switcher.prototype, '_switchSwitcheeNow').and.callThrough()
 
             up.hello($form)
             await wait()
@@ -6479,7 +6657,7 @@ describe('up.form', function() {
             $select.val('foo')
             const $existingTarget = $form.affix('.target.existing[up-enable-for="bar"]')
 
-            const switchTargetSpy = spyOn(up.Switcher.prototype, '_switchSwitchee').and.callThrough()
+            const switchTargetSpy = spyOn(up.Switcher.prototype, '_switchSwitcheeNow').and.callThrough()
 
             up.hello($form)
             await wait()

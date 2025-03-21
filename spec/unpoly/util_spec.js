@@ -1069,16 +1069,42 @@ describe('up.util', () => {
 //            expect(callback).toHaveBeenCalledWith('return value')
 //            done()
 
-    describe('up.util.sequence', () => it('combines the given functions into a single function', function() {
-      const values = []
-      const one = () => values.push('one')
-      const two = () => values.push('two')
-      const three = () => values.push('three')
-      const sequence = up.util.sequence([one, two, three])
-      expect(values).toEqual([])
-      sequence()
-      expect(values).toEqual(['one', 'two', 'three'])
-    }))
+    describe('up.util.sequence', function() {
+
+      it('combines an array of function into a single function', function() {
+        const values = []
+        const one = () => values.push('one')
+        const two = () => values.push('two')
+        const three = () => values.push('three')
+        const sequence = up.util.sequence([one, two, three])
+        expect(values).toEqual([])
+        sequence()
+        expect(values).toEqual(['one', 'two', 'three'])
+      })
+
+      it('combines multiple function args into a single function', function() {
+        const values = []
+        const one = () => values.push('one')
+        const two = () => values.push('two')
+        const three = () => values.push('three')
+        const sequence = up.util.sequence(one, two, three)
+        expect(values).toEqual([])
+        sequence()
+        expect(values).toEqual(['one', 'two', 'three'])
+      })
+
+      it('ignores non-function values', function() {
+        const values = []
+        const one = () => values.push('one')
+        const two = () => values.push('two')
+        const three = () => values.push('three')
+        const sequence = up.util.sequence(one, false, two, undefined, three)
+        expect(values).toEqual([])
+        sequence()
+        expect(values).toEqual(['one', 'two', 'three'])
+      })
+
+    })
 
     describe('up.util.timer', function() {
 

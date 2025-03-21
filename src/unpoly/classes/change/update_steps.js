@@ -268,6 +268,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
           // Replace keepable with its clone so it looks good in a transition
           // between oldElement and newElement.
           const keepableClone = keepable.cloneNode(true)
+          keepableClone.classList.add('up-clone')
           keepable.insertAdjacentElement('beforebegin', keepableClone)
 
           // Mark the original keepable to up.ResponseDoc#finalizeElement() knows to skip it.

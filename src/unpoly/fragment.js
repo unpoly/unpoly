@@ -1018,6 +1018,7 @@ up.fragment = (function() {
   @stable
   */
 
+  // TODO: Check if we can get rid of that event
   function emitFragmentKept(keepPlan) {
     return emitFromKeepPlan(keepPlan, 'up:fragment:kept', { log: false })
   }
@@ -1025,6 +1026,7 @@ up.fragment = (function() {
   function emitFromKeepPlan(keepPlan, eventType, emitDetails) {
     let { oldElement: keepable, newElement: newFragment, newData, renderOptions } = keepPlan
     const event = up.event.build(eventType, { newFragment, newData, renderOptions })
+    console.debug("[emit] emitting %o for oldElement %o and newElement %o", eventType, keepable, newFragment)
     return up.emit(keepable, event, emitDetails)
   }
 
@@ -1039,6 +1041,7 @@ up.fragment = (function() {
     return up.emit(parent, 'up:fragment:destroyed', { fragment, parent, log })
   }
 
+  // TODO: Check if we can get rid of that event
   function emitFragmentDestroying(fragment) {
     return up.emit(fragment, 'up:fragment:destroying', { log: false })
   }
@@ -2593,6 +2596,7 @@ up.fragment = (function() {
       //     a message "Change with { abort } option will abort other requests' before
       //     we abort the first request. This is done via an { logOnce } option that
       //     this function passes on to up.network.abort().
+      console.debug("[abort] Emitting up:fragment:aborted on %o", element)
       up.emit(element, 'up:fragment:aborted', { reason, newLayer, log: false })
     }
   }
@@ -2682,7 +2686,7 @@ up.fragment = (function() {
     let guard = (event) => event.target.contains(fragment)
     let unsubscribe = up.on('up:fragment:aborted', { guard }, callback)
     // Since we're binding to an element that is an ancestor of the fragment,
-    // we need to unregister the event listener when the form is removed.
+    // we need to unregister the event listener when the fragment is removed.
     up.destructor(fragment, unsubscribe)
     return unsubscribe
   }
@@ -2913,6 +2917,22 @@ up.fragment = (function() {
     }
   }
 
+  /*-
+  @function up.fragment.trackSelector
+  @param {string|Function} selector
+    The selector to track
+  @param {Function(List<Element>): List<Element>} options.filter
+    Filters a list of potential matches.
+  @param {Function(Element): Function(Element)
+    A callback that is called when we discover a new match.
+    The callback can return another function that is called when that element no longer matches.
+  */
+  function trackSelector(...args) {
+    let parsedArgs = u.args(args, 'val', 'options', 'callback')
+    let tracker = new up.SelectorTracker(...parsedArgs)
+    return tracker.start()
+  }
+
   up.on('up:framework:boot', function() {
     const { documentElement } = document
     documentElement.setAttribute('up-source', normalizeSource(location.href))
@@ -2968,6 +2988,7 @@ up.fragment = (function() {
     insertTemp,
     provideNodes,
     cloneTemplate,
+    trackSelector,
     // swapTemp,
     // timer: scheduleTimer
   }

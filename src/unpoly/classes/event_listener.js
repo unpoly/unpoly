@@ -72,7 +72,16 @@ up.EventListener = class EventListener extends up.Record {
     // 3. There is only a single event bubbling up the DOM, so we are only called once.
     let element = event.target
     if (this.selector) {
-      element = element.closest(u.evalOption(this.selector))
+      let selector = u.evalOption(this.selector)
+
+      // // TODO: If we only need this in FieldWatcher#_trackReset(), we should implement it with { guard } instead
+      // if (u.isElement(selector)) {
+      //   element = selector.contains(element) && selector
+      // } else {
+      //   element = element.closest(selector)
+      // }
+
+      element = element.closest(selector)
     }
 
     if (this.guard && !this.guard(event)) {
