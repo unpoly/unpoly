@@ -140,7 +140,7 @@ This will reload an empty fragment `#version-detector` from a URL `/version` eve
 
 ## Detecting changes in backend code
 
-You can configure Unpoly to also emit the `up:asset:changed` event after a new version of your backend code was deployed.
+You can configure Unpoly to also emit the `up:assets:changed` event after a new version of your backend code was deployed.
 
 See [Tracking the backend version](/up-asset#tracking-backend-versions) for details.
 
