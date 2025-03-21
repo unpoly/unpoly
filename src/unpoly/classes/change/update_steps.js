@@ -81,11 +81,6 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
         let keepPlan = this._findKeepPlan(step)
         if (keepPlan) {
           // Since we're keeping the element that was requested to be swapped,
-          // there is nothing left to do here, except notify event listeners.
-          up.fragment.emitKept(keepPlan)
-
-
-          // Since we're keeping the element that was requested to be swapped,
           // we won't be making changes to the DOM.
 
           this._handleFocus(step.oldElement, step)
@@ -324,7 +319,6 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
   _finalizeDescendantKeepables(step) {
     for (let keepPlan of step.descendantKeepPlans) {
       keepPlan.oldElement.classList.remove('up-keeping')
-      up.fragment.emitKept(keepPlan)
     }
   }
 

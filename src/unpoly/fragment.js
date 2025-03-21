@@ -972,10 +972,11 @@ up.fragment = (function() {
   */
 
   function emitFragmentKeep(keepPlan) {
-    let { oldElement } = keepPlan
+    let { oldElement, newElement: newFragment, newData, renderOptions } = keepPlan
     const log = ['Keeping fragment %o', oldElement]
     const callback = e.callbackAttr(keepPlan.oldElement, 'up-on-keep', { exposedKeys: ['newFragment', 'newData'] })
-    return emitFromKeepPlan(keepPlan, 'up:fragment:keep', { log, callback })
+    const event = up.event.build('up:fragment:keep', { newFragment, newData, renderOptions })
+    return up.emit(oldElement, event, { log, callback })
   }
 
   /*-
@@ -1018,31 +1019,10 @@ up.fragment = (function() {
   @stable
   */
 
-  // TODO: Check if we can get rid of that event
-  function emitFragmentKept(keepPlan) {
-    return emitFromKeepPlan(keepPlan, 'up:fragment:kept', { log: false })
-  }
-
-  function emitFromKeepPlan(keepPlan, eventType, emitDetails) {
-    let { oldElement: keepable, newElement: newFragment, newData, renderOptions } = keepPlan
-    const event = up.event.build(eventType, { newFragment, newData, renderOptions })
-    return up.emit(keepable, event, emitDetails)
-  }
-
-  /*-
-  @event up:fragment:kept
-  @internal
-  */
-
   function emitFragmentDestroyed(fragment, options) {
     const log = options.log ?? ['Destroyed fragment %o', fragment]
     const parent = options.parent || document
     return up.emit(parent, 'up:fragment:destroyed', { fragment, parent, log })
-  }
-
-  // TODO: Check if we can get rid of that event
-  function emitFragmentDestroying(fragment) {
-    return up.emit(fragment, 'up:fragment:destroying', { log: false })
   }
 
   /*-
@@ -1584,10 +1564,6 @@ up.fragment = (function() {
   */
 
   function markFragmentAsDestroying(element) {
-    // Emit an event before .up-destroying will cause the element to become invisible
-    // to up.fragment.get(), and before it is detached. This allows up.form.trackFields()
-    // to clean up elements before their context is lost.
-    emitFragmentDestroying(element)
     element.classList.add('up-destroying')
     element.setAttribute('inert', '')
   }
@@ -2960,7 +2936,6 @@ up.fragment = (function() {
     emitInserted: emitFragmentInserted,
     emitDestroyed: emitFragmentDestroyed,
     emitKeep: emitFragmentKeep,
-    emitKept: emitFragmentKept,
     successKey,
     failKey,
     expandTargets,
