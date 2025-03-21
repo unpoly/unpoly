@@ -1184,96 +1184,6 @@ up.form = (function() {
   @stable
   */
 
-  // function switcherValues(field) {
-  //   let value
-  //   let meta
-  //
-  //   if (field.matches('input[type=checkbox]')) {
-  //     if (field.checked) {
-  //       value = field.value
-  //       meta = ':checked'
-  //     } else {
-  //       meta = ':unchecked'
-  //     }
-  //   } else if (field.matches('input[type=radio]')) {
-  //     const form = getScope(field)
-  //     const groupName = field.getAttribute('name')
-  //     const checkedButton = form.querySelector(`input[type=radio]${e.attrSelector('name', groupName)}:checked`)
-  //     if (checkedButton) {
-  //       meta = ':checked'
-  //       value = checkedButton.value
-  //     } else {
-  //       meta = ':unchecked'
-  //     }
-  //   } else {
-  //     value = field.value
-  //   }
-  //
-  //   const values = []
-  //   if (u.isPresent(value)) {
-  //     values.push(value)
-  //     values.push(':present')
-  //   } else {
-  //     values.push(':blank')
-  //   }
-  //   if (u.isPresent(meta)) {
-  //     values.push(meta)
-  //   }
-  //   return values
-  // }
-
-  // function switchTargets(switcher) {
-  //   const targetSelector = switcher.getAttribute('up-switch')
-  //   const form = getScope(switcher)
-  //   targetSelector || up.fail("No switch target given for %o", switcher)
-  //   const fieldValues = switcherValues(switcher)
-  //
-  //   for (let target of up.fragment.all(form, targetSelector)) {
-  //     switchTarget(target, fieldValues, switcher)
-  //   }
-  // }
-  //
-  // const SWITCH_EFFECTS = [
-  //   { attr: 'up-hide-for', toggle(target, active) { e.toggle(target, !active) } },
-  //   { attr: 'up-show-for', toggle(target, active) { e.toggle(target, active) } },
-  //   { attr: 'up-disable-for', toggle(target, active) { up.form.setDisabled(target, active) } },
-  //   { attr: 'up-enable-for', toggle(target, active) { up.form.setDisabled(target, !active) } },
-  // ]
-  //
-  // function unswitchedSwitchTargetSelector() {
-  //   return e.unionSelector(u.map(SWITCH_EFFECTS, (effect) => `[${effect.attr}]`), ['.up-switched'])
-  // }
-  //
-  // const switchTarget = up.mockable(function(target, fieldValues, switcher) {
-  //   switcher ||= findSwitcherForTarget(target)
-  //   fieldValues ||= switcherValues(switcher)
-  //
-  //   for (let { attr, toggle } of SWITCH_EFFECTS) {
-  //     let attrValue = target.getAttribute(attr)
-  //     if (attrValue) {
-  //       let activeValues = parseSwitchTokens(attrValue)
-  //       let isActive = u.intersect(fieldValues, activeValues).length > 0
-  //       toggle(target, isActive)
-  //     }
-  //   }
-  //
-  //   target.classList.add('up-switched')
-  // })
-  //
-  // function parseSwitchTokens(str) {
-  //   return u.getSimpleTokens(str, { json: true })
-  // }
-  //
-  // function findSwitcherForTarget(target) {
-  //   const form = getScope(target)
-  //   const switchers = form.querySelectorAll('[up-switch]')
-  //   const switcher = u.find(switchers, function(switcher) {
-  //     const targetSelector = switcher.getAttribute('up-switch')
-  //     return target.matches(targetSelector)
-  //   })
-  //   return switcher || up.fail('Could not find [up-switch] field for %o', target)
-  // }
-
   function getForm(elementOrSelector, options = {}) {
     const element = up.fragment.get(elementOrSelector, options)
 
@@ -1307,12 +1217,6 @@ up.form = (function() {
       return up.layer.current.element
     }
   }
-
-  // function trackFields(...args) {
-  //   let [root, options, callback] = u.args(args, 'val', 'options', 'callback')
-  //   let tracker = new up.FieldTracker(root, options, callback)
-  //   return tracker.start()
-  // }
 
   /*-
   @function up.form.trackFields
@@ -1993,14 +1897,6 @@ up.form = (function() {
     return new up.Switcher(switcher).start()
   })
 
-  // up.on('change', '[up-switch]', (_event, switcher) => {
-  //   switchTargets(switcher)
-  // })
-  //
-  // up.compiler(unswitchedSwitchTargetSelector, (element) => {
-  //   switchTarget(element)
-  // })
-
   /*-
   Watches form fields and runs a callback when a value changes.
 
@@ -2166,7 +2062,6 @@ up.form = (function() {
     isField,
     submitButtons: findSubmitButtons,
     focusedField,
-    // switchTarget,
     // disableWhile,
     disableTemp: disableContainerTemp,
     setDisabled: setContainerDisabled,
