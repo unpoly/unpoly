@@ -64,15 +64,6 @@ up.FieldWatcher = class FieldWatcher {
       this._currentTimer = null
       this._requestCallback()
     })
-    // // TODO: Do we need this?
-    // if (delay === 0) {
-    //   this._requestCallback()
-    // } else {
-    //   this._currentTimer = u.timer(delay, () => {
-    //     this._currentTimer = null
-    //     this._requestCallback()
-    //   })
-    // }
   }
 
   _isNewValues(values) {
