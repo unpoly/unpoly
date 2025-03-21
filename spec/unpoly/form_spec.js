@@ -5617,30 +5617,56 @@ describe('up.form', function() {
           const form2Input = e.affix(form2, 'input[name="foo"][up-switch=".target"]')
           const form2Target = e.affix(form2, '.target[up-show-for="active"]')
           up.hello(form2)
+          await wait()
 
           expect(form1Target).toBeHidden()
           expect(form2Target).toBeHidden()
 
           form2Input.value = 'active'
           Trigger.change(form2Input)
+          await wait()
 
           expect(form1Target).toBeHidden()
           expect(form2Target).toBeVisible()
         })
 
-        it("works on inputs outside the form (associated with [form=form-id] attribute)", async function() {
-          const form = fixture('form#form-id')
-          const select = e.affix(form, 'select[name="select-name"][up-switch=".target"][form="#form-id"]')
-          const fooOption = e.affix(select, 'option[value="foo"]', { text: 'Foo' })
-          const barOption = e.affix(select, 'option[value="bar"]', { text: 'Bar' })
-          const bazOption = e.affix(select, 'option[value="baz"]', { text: 'Baz' })
+        it("can watch a form-external field", async function() {
+          const container = fixture('#container')
+          const form = e.affix(container, 'form#form-id')
+          const externalSelect = e.affix(container, 'select[name="select-name"][up-switch=".target"][form="form-id"]')
+          const fooOption = e.affix(externalSelect, 'option[value="foo"]', { text: 'Foo' })
+          const barOption = e.affix(externalSelect, 'option[value="bar"]', { text: 'Bar' })
           const target = e.affix(form, '.target[up-show-for="bar"]')
-          up.hello(select)
+          up.hello(container)
           await wait()
 
           expect(target).toBeHidden()
-          select.value = 'bar'
-          Trigger.change(select)
+
+          externalSelect.value = 'bar'
+          Trigger.change(externalSelect)
+          await wait()
+
+          expect(target).toBeVisible()
+        })
+
+        it('can watch a form-external field that is inserted after the form', async function() {
+          const form = fixture('form#form-id')
+          const target = e.affix(form, '.target[up-show-for="bar"]')
+          up.hello(form)
+          await wait()
+
+          expect(target).toBeVisible()
+
+          const externalSelect = fixture('select[name="select-name"][up-switch=".target"][form="form-id"]')
+          const fooOption = e.affix(externalSelect, 'option[value="foo"]', { text: 'Foo' })
+          const barOption = e.affix(externalSelect, 'option[value="bar"]', { text: 'Bar' })
+          up.hello(externalSelect)
+          await wait()
+
+          expect(target).toBeHidden()
+
+          externalSelect.value = 'bar'
+          Trigger.change(externalSelect)
           await wait()
 
           expect(target).toBeVisible()

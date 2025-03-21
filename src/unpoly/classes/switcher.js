@@ -18,7 +18,9 @@ up.Switcher = class Switcher {
   start() {
     let cleaner = u.cleaner()
 
-    console.debug("Switcher: watching %o", this._switcher)
+    console.debug("[Switcher] Started (watching field %o)", this._switcher)
+
+    this._switchScope()
 
     cleaner(
       up.watch(this._switcher, () => this._switchScope())
@@ -33,14 +35,14 @@ up.Switcher = class Switcher {
 
   _switchScope(scope = this._scope) {
     const fieldValues = this._switcherValues()
-    console.debug("switchNow(%o) with values: %o", scope, fieldValues)
+    console.debug("[Switcher] switchNow(scope: %o) for values %o", scope, fieldValues)
     for (let switchee of this._findSwitchees(scope)) {
       this._switchSwitchee(switchee, fieldValues)
     }
   }
 
   _switchSwitchee(switchee, fieldValues) {
-    console.debug("Found switchee: %o", switchee)
+    console.debug("[Switcher] Processing switchee: %o", switchee)
     // TODO: Emit up:form:switch here and possibly migrate our own effects to it
     for (let { attr, toggle } of BUILTIN_SWITCH_EFFECTS) {
       let attrValue = switchee.getAttribute(attr)

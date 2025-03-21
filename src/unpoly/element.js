@@ -855,7 +855,7 @@ up.element = (function() {
     //     root within that.
     // (2) We cannot use innerHTML on an anonymous element here, since up.ResponseDoc
     //     needs to create executable <script> elements and setting innerHTML will
-    //     create intert <script> elements.
+    //     create inert <script> elements.
     // (3) Using Range#createContextualFragment() is significantly faster than setting
     //     innerHTML on Chrome. See https://jsben.ch/QQngJ
     const range = document.createRange()
