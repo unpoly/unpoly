@@ -22,7 +22,6 @@ up.SelectorTracker = class SelectorTracker {
 
   _trackFragments() {
     if (this._live) {
-      console.debug("[SelectorTracker] listening to events")
       return up.on('up:fragment:inserted up:fragment:destroyed', () => this._sync())
     }
   }

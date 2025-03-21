@@ -1026,7 +1026,6 @@ up.fragment = (function() {
   function emitFromKeepPlan(keepPlan, eventType, emitDetails) {
     let { oldElement: keepable, newElement: newFragment, newData, renderOptions } = keepPlan
     const event = up.event.build(eventType, { newFragment, newData, renderOptions })
-    console.debug("[emit] emitting %o for oldElement %o and newElement %o", eventType, keepable, newFragment)
     return up.emit(keepable, event, emitDetails)
   }
 
@@ -2596,7 +2595,6 @@ up.fragment = (function() {
       //     a message "Change with { abort } option will abort other requests' before
       //     we abort the first request. This is done via an { logOnce } option that
       //     this function passes on to up.network.abort().
-      console.debug("[abort] Emitting up:fragment:aborted on %o", element)
       up.emit(element, 'up:fragment:aborted', { reason, newLayer, log: false })
     }
   }

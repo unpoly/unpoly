@@ -46,7 +46,6 @@ up.FieldWatcher = class FieldWatcher {
     let fieldOptions = this._fieldOptions(field)
     // Return a function that unbinds all events when the field is removed from _root.
     // Note that an [up-keep] field may be moved to another root.
-    console.debug("[FieldWatcher] Added field %o", field)
     return up.on(field, fieldOptions.event, () => this._check(fieldOptions))
   }
 
@@ -59,7 +58,6 @@ up.FieldWatcher = class FieldWatcher {
     this._scheduledValues = values
     this._scheduledFieldOptions = fieldOptions
     let delay = fieldOptions.delay || 0
-    console.debug("[Watcher] _scheduleValues(%o)", u.copy(values))
     clearTimeout(this._currentTimer) // debounce a previously set timer
 
     this._currentTimer = u.timer(delay, () => {
@@ -82,8 +80,6 @@ up.FieldWatcher = class FieldWatcher {
   }
 
   async _requestCallback() {
-    console.debug("[Watcher] _requestCallback")
-
     // When aborted we nullify _scheduledValues to cancel a scheduled callback.
     if (!this._scheduledValues) return
 
@@ -155,13 +151,7 @@ up.FieldWatcher = class FieldWatcher {
   }
 
   _check(fieldOptions = {}) {
-    console.debug("[Watcher] checking after event")
     const values = this._readFieldValues()
-
-    console.debug("[Watcher] current values: %o", u.copy(values))
-    console.debug("[Watcher] processed values: %o", u.copy(this._processedValues))
-    console.debug("[Watcher] scheduled values: %o", u.copy(this._scheduledValues))
-    console.debug("[Watcher] isNew: %o", this._isNewValues(values))
 
     if (this._isNewValues(values)) {
       this._scheduleValues(values, fieldOptions)

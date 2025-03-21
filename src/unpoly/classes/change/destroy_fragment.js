@@ -56,7 +56,6 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change {
 
   _erase() {
     this._layer.asCurrent(() => {
-      console.debug("[destroy] Calling up.fragment.abort(%o)", this._element)
       up.fragment.abort(this._element)
       up.script.clean(this._element, { layer: this._layer })
       up.element.cleanJQuery(this._element)

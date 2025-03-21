@@ -360,7 +360,6 @@ describe('up.form', function() {
           expect(keepField.parentElement).toBe(newForm)
 
           expect(changeSpy.calls.count()).toBe(1)
-          console.debug("[spec] allArgs are %o", changeSpy.calls.allArgs())
           expect(changeSpy.calls.allArgs()).toEqual([['insert', 'form1', 'field']])
         })
 
@@ -882,8 +881,6 @@ describe('up.form', function() {
               const callback = jasmine.createSpy('change callback')
               up.watch(input, callback)
 
-              console.debug("[spec] Changing input to 'foo'")
-
               input.value = 'foo'
               Trigger[eventType](input)
               await wait()
@@ -898,8 +895,6 @@ describe('up.form', function() {
 
               expect(input).toBeAttached()
               expect(input.parentElement).toBe(newForm)
-
-              console.debug("[spec] Changing input to 'bar'")
 
               input.value = 'bar'
               Trigger[eventType](input)
@@ -5735,7 +5730,6 @@ describe('up.form', function() {
           expect('#target').toHaveText('old target')
           expect('#target').toBeHidden()
 
-          console.debug("[spec] Updating form, but keeping the switcher")
           const { fragment: newForm } = await up.render({ fragment: `
             <form id="form">
               <select name="name" up-keep up-switch="#target">
@@ -5746,7 +5740,6 @@ describe('up.form', function() {
             </form>
           ` })
 
-          console.debug("[spec] Asserting update results")
           // The switcher was preserved, but attached to the new form
           expect(select).toBeAttached()
           expect(select.parentElement).toBe(newForm)
@@ -5757,7 +5750,6 @@ describe('up.form', function() {
           expect('#target').toBeHidden()
 
           // Show that the kept switcher is switching elements in its new form
-          console.debug("[spec] Changing select in new form")
           select.value = 'bar'
           Trigger.change(select)
           await wait()

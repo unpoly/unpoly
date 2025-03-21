@@ -40,13 +40,11 @@ up.Switcher = class Switcher {
   }
 
   _onSwitcherChanged() {
-    console.debug("[Switcher] Field changed")
     this._switchScope()
   }
 
   _switchScope() {
     const fieldValues = this._switcherValues()
-    console.debug("[Switcher] switchNow(scope: %o) for values %o", this._scope, fieldValues)
     for (let switchee of this._findSwitchees(this._scope)) {
       this._switchSwitchee(switchee, fieldValues)
     }
@@ -61,7 +59,6 @@ up.Switcher = class Switcher {
   }
 
   _switchSwitcheeNow(switchee, fieldValues) {
-    console.debug("[Switcher] Toggling switchee: %o", switchee)
     // TODO: Emit up:form:switch here and possibly migrate our own effects to it
     for (let { attr, toggle } of BUILTIN_SWITCH_EFFECTS) {
       let attrValue = switchee.getAttribute(attr)
