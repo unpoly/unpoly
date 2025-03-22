@@ -80,7 +80,7 @@ up.FieldWatcher = class FieldWatcher {
 
     // When we re-called _requestCallback() after waiting for a prior callback, another
     // debounce delay may have started while waiting for the prior callback.
-    // We must not shorted that debounce delay.
+    // We must not shorten that debounce delay.
     if (this._currentTimer) return
 
     // If the form was destroyed while a callback was scheduled, we don't run the callback.
