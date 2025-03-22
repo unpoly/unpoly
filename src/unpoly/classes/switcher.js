@@ -10,9 +10,10 @@ const BUILTIN_SWITCH_EFFECTS = [
 
 up.Switcher = class Switcher {
 
-  constructor(switcherElement) {
-    this._switcher = switcherElement
-    this._switcheeSelector = switcherElement.getAttribute('up-switch') || up.fail("No switch target given for %o", switcherElement)
+  constructor(field) {
+    this._switcher = field
+    this._switcheeSelector = field.getAttribute('up-switch') || up.fail("No switch target given for %o", field)
+    this._scopeSelector = field.getAttribute('up-switch-scope')
   }
 
   start() {
@@ -31,7 +32,7 @@ up.Switcher = class Switcher {
   _trackNewSwitchees() {
     let filter = (matches) => {
       let scope = this._scope
-      return u.filter(matches, (match) => scope === up.form.getScope(match))
+      return u.filter(matches, (match) => scope.contains(match))
     }
 
     let onSwitcheeAdded = (switchee) => this._switchSwitchee(switchee)
@@ -45,7 +46,7 @@ up.Switcher = class Switcher {
 
   _switchScope() {
     const fieldValues = this._switcherValues()
-    for (let switchee of this._findSwitchees(this._scope)) {
+    for (let switchee of this._findSwitchees()) {
       this._switchSwitchee(switchee, fieldValues)
     }
   }
@@ -70,12 +71,16 @@ up.Switcher = class Switcher {
     }
   }
 
-  _findSwitchees(scope) {
-    return up.fragment.all(scope, this._switcheeSelector)
+  _findSwitchees() {
+    return up.fragment.subtree(this._scope, this._switcheeSelector)
   }
 
   get _scope() {
-    return up.form.getScope(this._switcher)
+    if (this._scopeSelector) {
+      return up.fragment.get(this._scopeSelector, { origin: this._switcher })
+    } else {
+      return up.form.getScope(this._switcher)
+    }
   }
 
   _parseSwitcheeTokens(str) {
