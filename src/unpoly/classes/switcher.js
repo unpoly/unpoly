@@ -45,30 +45,31 @@ up.Switcher = class Switcher {
   }
 
   _switchScope() {
-    const fieldValues = this._switcherValues()
+    const fieldTokens = this._readSwitcherTokens()
     for (let switchee of this._findSwitchees()) {
-      this._switchSwitchee(switchee, fieldValues)
+      this._switchSwitchee(switchee, fieldTokens)
     }
   }
 
-  _switchSwitchee(switchee, fieldValues = this._switcherValues()) {
+  _switchSwitchee(switchee, fieldTokens = this._readSwitcherTokens()) {
     let previousValues = switchee.upSwitchValues
-    if (!u.isEqual(previousValues, fieldValues)) {
-      switchee.upSwitchValues = fieldValues
-      this._switchSwitcheeNow(switchee, fieldValues)
+    if (!u.isEqual(previousValues, fieldTokens)) {
+      switchee.upSwitchValues = fieldTokens
+      this._switchSwitcheeNow(switchee, fieldTokens)
     }
   }
 
-  _switchSwitcheeNow(switchee, fieldValues) {
-    // TODO: Emit up:form:switch here and possibly migrate our own effects to it
+  _switchSwitcheeNow(switchee, fieldTokens) {
     for (let { attr, toggle } of BUILTIN_SWITCH_EFFECTS) {
       let attrValue = switchee.getAttribute(attr)
       if (attrValue) {
-        let activeValues = this._parseSwitcheeTokens(attrValue)
-        let isActive = u.intersect(fieldValues, activeValues).length > 0
+        let activeTokens = this._parseSwitcheeTokens(attrValue)
+        let isActive = u.intersect(fieldTokens, activeTokens).length > 0
         toggle(switchee, isActive)
       }
     }
+    let log = ['Switching %o', switchee]
+    up.emit(switchee, 'up:form:switch', { field: this._switcher, tokens: fieldTokens, log })
   }
 
   _findSwitchees() {
@@ -87,7 +88,7 @@ up.Switcher = class Switcher {
     return u.getSimpleTokens(str, { json: true })
   }
 
-  _switcherValues() {
+  _readSwitcherTokens() {
     let field = this._switcher
     let value
     let meta

@@ -5705,9 +5705,113 @@ describe('up.form', function() {
 
       describe('custom switching effects', function() {
 
-        it('emits up:form:switch on switchees with { field, values }')
+        it('emits up:form:switch on switchees with { field, tokens }', async function() {
+          const listener = jasmine.createSpy('up:form:switch listener')
+          up.on('up:form:switch', (event) => listener(event))
 
-        it('only emits up:form:switch once per distinct { values }')
+          let [form, field, target1, target2, nonTarget] = htmlFixtureList(`
+            <form>
+              <input name="foo" up-switch=".target" value="default">
+              <div class="target" up-show-for="active">target1</div>
+              <div class="target" up-show-for="active">target2</div>
+              <div class="non-target" up-show-for="active">non-target</div>
+            </form>
+          `)
+          up.hello(form)
+          await wait()
+
+          expect(listener.calls.count()).toBe(2)
+          expect(listener.calls.argsFor(0)[0].target).toBe(target1)
+          expect(listener.calls.argsFor(0)[0].field).toBe(field)
+          expect(listener.calls.argsFor(0)[0].tokens).toEqual(['default', ':present'])
+          expect(listener.calls.argsFor(1)[0].target).toBe(target2)
+          expect(listener.calls.argsFor(1)[0].field).toBe(field)
+          expect(listener.calls.argsFor(1)[0].tokens).toEqual(['default', ':present'])
+
+          field.value = 'changed'
+          Trigger.change(field)
+          await wait()
+
+          expect(listener.calls.count()).toBe(4)
+          expect(listener.calls.argsFor(2)[0].target).toBe(target1)
+          expect(listener.calls.argsFor(2)[0].field).toBe(field)
+          expect(listener.calls.argsFor(2)[0].tokens).toEqual(['changed', ':present'])
+          expect(listener.calls.argsFor(3)[0].target).toBe(target2)
+          expect(listener.calls.argsFor(3)[0].field).toBe(field)
+          expect(listener.calls.argsFor(3)[0].tokens).toEqual(['changed', ':present'])
+
+          field.value = ''
+          Trigger.change(field)
+          await wait()
+
+          expect(listener.calls.count()).toBe(6)
+          expect(listener.calls.argsFor(4)[0].target).toBe(target1)
+          expect(listener.calls.argsFor(4)[0].field).toBe(field)
+          expect(listener.calls.argsFor(4)[0].tokens).toEqual([':blank'])
+          expect(listener.calls.argsFor(5)[0].target).toBe(target2)
+          expect(listener.calls.argsFor(5)[0].field).toBe(field)
+          expect(listener.calls.argsFor(5)[0].tokens).toEqual([':blank'])
+        })
+
+        it('only emits up:form:switch once per distinct { tokens }', async function() {
+          const listener = jasmine.createSpy('up:form:switch listener')
+          up.on('up:form:switch', (event) => listener(event))
+
+          let [form, field, target] = htmlFixtureList(`
+            <form>
+              <input name="foo" up-switch=".target" value="default">
+              <div class="target" up-show-for="active">target1</div>
+            </form>
+          `)
+          up.hello(form)
+          await wait()
+
+          expect(listener.calls.count()).toBe(1)
+
+          field.value = 'changed'
+          Trigger.change(field)
+          await wait()
+
+          expect(listener.calls.count()).toBe(2)
+
+          field.value = 'changed'
+          Trigger.change(field)
+          await wait()
+
+          expect(listener.calls.count()).toBe(2)
+
+          field.value = 'changed again'
+          Trigger.change(field)
+          await wait()
+
+          expect(listener.calls.count()).toBe(3)
+        })
+
+        it('emits up:form:switch for matching elements that were inserted later', async function() {
+          const listener = jasmine.createSpy('up:form:switch listener')
+          up.on('up:form:switch', (event) => listener(event))
+
+          let [form, field, target1] = htmlFixtureList(`
+            <form>
+              <input name="foo" up-switch=".target" value="default">
+              <div class="target" up-show-for="active">target1</div>
+              <div id="extension"></div>
+            </form>
+          `)
+          up.hello(form)
+          await wait()
+
+          expect(listener.calls.count()).toBe(1)
+
+          up.render({ fragment: `
+            <div id="extension">
+              <div class="target" up-show-for="active">target2</div>
+            </div>
+          `})
+          await wait()
+
+          expect(listener.calls.count()).toBe(2)
+        })
 
       })
 
