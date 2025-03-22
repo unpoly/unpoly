@@ -5705,9 +5705,9 @@ describe('up.form', function() {
 
       describe('custom switching effects', function() {
 
-        it('emits up:form:switch on switchees with { fieldValues }')
+        it('emits up:form:switch on switchees with { field, values }')
 
-        it('only emits up:form:switch once per distinct { fieldValues }')
+        it('only emits up:form:switch once per distinct { values }')
 
       })
 
