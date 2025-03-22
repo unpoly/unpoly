@@ -5756,21 +5756,21 @@ describe('up.form', function() {
 
           expect('#target').toBeVisible()
 
-          //
-          // // Show that the kept switcher is still watching for new fragments on the new form
-          // up.render({ fragment: `
-          //   <div id="target" up-show-for="foo">newer target</div>
-          // `})
-          // await wait()
-          //
-          // expect('#target').toHaveText('newer target')
-          // expect('#target').toBeHidden()
-          //
-          // select.value = 'foo'
-          // Trigger.change(select)
-          // await wait()
-          //
-          // expect('#target').toBeVisible()
+
+          // Show that the kept switcher is still watching for new fragments on the new form
+          up.render({ fragment: `
+            <div id="target" up-show-for="foo">newer target</div>
+          `})
+          await wait()
+
+          expect('#target').toHaveText('newer target')
+          expect('#target').toBeHidden()
+
+          select.value = 'foo'
+          Trigger.change(select)
+          await wait()
+
+          expect('#target').toBeVisible()
         })
 
       })
