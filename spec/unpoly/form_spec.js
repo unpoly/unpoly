@@ -5842,9 +5842,96 @@ describe('up.form', function() {
           expect(target).toBeVisible()
         })
 
-        it('switches matching element outside the form with [up-switch-scope="layer"]')
+        it('switches matching element outside the form with [up-switch-scope=":layer"]', async function() {
+          const form = fixture('form')
+          const field = e.affix(form, 'input[name="foo"][up-switch=".target"][up-switch-scope=":layer"]')
+          const targetInsideForm = e.affix(form, '.target[up-show-for="active"]')
+          up.hello(form)
 
-        it('switches matching element outside the form with [up-switch-scope="#selector"]')
+          const targetOutsideForm = fixture('.target[up-show-for="active"]')
+          up.hello(targetOutsideForm)
+          await wait()
+
+          expect(targetInsideForm).toBeHidden()
+          expect(targetOutsideForm).toBeHidden()
+
+          field.value = 'active'
+          Trigger.change(field)
+          await wait()
+
+          expect(targetInsideForm).toBeVisible()
+          expect(targetOutsideForm).toBeVisible()
+        })
+
+        it('switches matching element within a field ancestor with [up-switch-scope="#selector"]', async function() {
+          let [form, fieldContainer, field, target1, target2, otherContainer, target3] = htmlFixtureList(`
+            <form>
+              <div class="container">
+                <input name="foo" up-switch=".target" up-switch-scope=".container">
+                <div class="target" up-show-for="active">target1</div>
+                <div class="target" up-show-for="active">target2</div>
+              </div>
+              <div class="container">
+                <div class="target" up-show-for="active">target3</div>
+              </div>
+            </form>
+          `)
+          up.hello(form)
+
+          expect(target1).toBeHidden()
+          expect(target2).toBeHidden()
+          expect(target3).toBeVisible()
+
+          field.value = 'active'
+          Trigger.change(field)
+          await wait()
+
+          expect(target1).toBeVisible()
+          expect(target2).toBeVisible()
+          expect(target3).toBeVisible()
+
+          field.value = 'inactive'
+          Trigger.change(field)
+          await wait()
+
+          expect(target1).toBeHidden()
+          expect(target2).toBeHidden()
+          expect(target3).toBeVisible()
+        })
+
+        it('switches matching element within a non-ancestor container with [up-switch-scope="#selector"]', async function() {
+          let [form, field, container, target1, target2, target3] = htmlFixtureList(`
+            <form>
+              <input name="foo" up-switch=".target" up-switch-scope=".container">
+              <div class="container">
+                <div class="target" up-show-for="active">target1</div>
+                <div class="target" up-show-for="active">target2</div>
+              </div>
+              <div class="target" up-show-for="active">target3</div>
+            </form>
+          `)
+          up.hello(form)
+
+          expect(target1).toBeHidden()
+          expect(target2).toBeHidden()
+          expect(target3).toBeVisible()
+
+          field.value = 'active'
+          Trigger.change(field)
+          await wait()
+
+          expect(target1).toBeVisible()
+          expect(target2).toBeVisible()
+          expect(target3).toBeVisible()
+
+          field.value = 'inactive'
+          Trigger.change(field)
+          await wait()
+
+          expect(target1).toBeHidden()
+          expect(target2).toBeHidden()
+          expect(target3).toBeVisible()
+        })
       })
 
       describe('switching visibility', function() {
