@@ -11,7 +11,7 @@ const BUILTIN_SWITCH_EFFECTS = [
 up.Switcher = class Switcher {
 
   constructor(field) {
-    this._switcher = field
+    this._field = field
     this._switcheeSelector = field.getAttribute('up-switch') || up.fail("No switch target given for %o", field)
     this._scopeSelector = field.getAttribute('up-switch-scope')
   }
@@ -20,13 +20,13 @@ up.Switcher = class Switcher {
     this._switchScope()
 
     return u.sequence(
-      this._trackSwitcherChanges(),
+      this._trackFieldChanges(),
       this._trackNewSwitchees(),
     )
   }
 
-  _trackSwitcherChanges() {
-    return up.watch(this._switcher, () => this._onSwitcherChanged())
+  _trackFieldChanges() {
+    return up.watch(this._field, () => this._onFieldChanged())
   }
 
   _trackNewSwitchees() {
@@ -40,18 +40,18 @@ up.Switcher = class Switcher {
     return up.fragment.trackSelector(this._switcheeSelector, { filter }, onSwitcheeAdded)
   }
 
-  _onSwitcherChanged() {
+  _onFieldChanged() {
     this._switchScope()
   }
 
   _switchScope() {
-    const fieldTokens = this._readSwitcherTokens()
+    const fieldTokens = this._buildFieldTokens()
     for (let switchee of this._findSwitchees()) {
       this._switchSwitchee(switchee, fieldTokens)
     }
   }
 
-  _switchSwitchee(switchee, fieldTokens = this._readSwitcherTokens()) {
+  _switchSwitchee(switchee, fieldTokens = this._buildFieldTokens()) {
     let previousValues = switchee.upSwitchValues
     if (!u.isEqual(previousValues, fieldTokens)) {
       switchee.upSwitchValues = fieldTokens
@@ -69,7 +69,7 @@ up.Switcher = class Switcher {
       }
     }
     let log = ['Switching %o', switchee]
-    up.emit(switchee, 'up:form:switch', { field: this._switcher, tokens: fieldTokens, log })
+    up.emit(switchee, 'up:form:switch', { field: this._field, tokens: fieldTokens, log })
   }
 
   _findSwitchees() {
@@ -78,9 +78,9 @@ up.Switcher = class Switcher {
 
   get _scope() {
     if (this._scopeSelector) {
-      return up.fragment.get(this._scopeSelector, { origin: this._switcher })
+      return up.fragment.get(this._scopeSelector, { origin: this._field })
     } else {
-      return up.form.getScope(this._switcher)
+      return up.form.getScope(this._field)
     }
   }
 
@@ -88,8 +88,8 @@ up.Switcher = class Switcher {
     return u.getSimpleTokens(str, { json: true })
   }
 
-  _readSwitcherTokens() {
-    let field = this._switcher
+  _buildFieldTokens() {
+    let field = this._field
     let value
     let meta
 
