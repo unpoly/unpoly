@@ -5887,6 +5887,22 @@ describe('up.form', function() {
             expect($target).toBeVisible()
           })
 
+          it('toggles multiple target elements', async function() {
+            const $target1 = this.$form.affix('.target[up-show-for="something, bar, other"]')
+            const $target2 = this.$form.affix('.target[up-show-for="something, bar, other"]')
+            up.hello(this.$form)
+            await wait()
+
+            expect($target1).toBeHidden()
+            expect($target2).toBeHidden()
+            this.$select.val('bar')
+            Trigger.change(this.$select)
+            await wait()
+
+            expect($target1).toBeVisible()
+            expect($target2).toBeVisible()
+          })
+
           it("shows the target element if a space-separated [up-hide-for] attribute doesn't contain the select value", async function() {
             const $target = this.$form.affix('.target[up-hide-for="something bar other"]')
             up.hello(this.$form)
