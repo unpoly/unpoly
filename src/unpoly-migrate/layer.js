@@ -64,7 +64,7 @@ a fallback destination on the root layer:
   Use `[up-dismiss]` instead.
 */
 up.migrate.registerLayerCloser = (layer) => // <a up-close>Close</a> (legacy close attribute)
-layer.registerClickCloser('up-close', (value, closeOptions) => {
+layer.registerAttrCloser('up-close', (value, closeOptions) => {
   up.migrate.deprecated('[up-close]', '[up-dismiss]')
   layer.dismiss(value, closeOptions)
 })

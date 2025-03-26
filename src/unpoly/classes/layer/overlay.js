@@ -228,21 +228,21 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     }
 
     // <a up-accept="value">OK</a>
-    this.registerClickCloser('up-accept', (value, closeOptions) => {
+    this.registerAttrCloser('up-accept', (value, closeOptions) => {
       this.accept(value, closeOptions)
     })
 
     // <a up-dismiss="value">Cancel</a>
-    this.registerClickCloser('up-dismiss', (value, closeOptions) => {
+    this.registerAttrCloser('up-dismiss', (value, closeOptions) => {
       this.dismiss(value, closeOptions)
     })
 
     up.migrate.registerLayerCloser?.(this)
 
     // let { userId } = await up.layer.open({ acceptEvent: 'user:show' })
-    // _registerEventCloser() will fill in this and arguments.
-    this._registerEventCloser(this.acceptEvent, this.accept)
-    this._registerEventCloser(this.dismissEvent, this.dismiss)
+    // _registerExternalEventCloser() will fill in this and arguments.
+    this._registerExternalEventCloser(this.acceptEvent, this.accept)
+    this._registerExternalEventCloser(this.dismissEvent, this.dismiss)
 
     this.on('up:click', 'label[for]', (event, label) => this._onLabelClicked(event, label))
   }
@@ -302,28 +302,47 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     }
   }
 
-  registerClickCloser(attribute, closeFn) {
-    let selector = `[${attribute}]`
-    // Allow the fallbacks to be both vanilla links and Unpoly [up-target] links
-    this.on('up:click', selector, function(event) {
+  registerAttrCloser(attribute, closeFn) {
+    this._registerClickCloser(attribute, closeFn)
+    this._registerSubmitCloser(attribute, closeFn)
+  }
+
+  _registerClickCloser(attribute, closeFn) {
+    // Allow the fallbacks to be both vanilla links and Unpoly [up-follow] links
+    this.on('up:click', `[${attribute}]:not(form)`, (event, link) => {
       // Since we're defining this handler on up.Overlay, we will not prevent
       // a link from being followed on the root layer.
       up.event.halt(event, { log: true })
 
-      const origin = event.target.closest(selector)
-      const value = e.jsonAttr(origin, attribute)
-      const closeOptions = { origin }
-      const parser = new up.OptionsParser(origin, closeOptions)
-      parser.booleanOrString('animation')
-      parser.string('easing')
-      parser.number('duration')
-      parser.string('confirm')
-
-      up.error.muteUncriticalSync(() => closeFn(value, closeOptions))
+      const value = e.jsonAttr(link, attribute)
+      this._onAttrCloserActivated(link, value, closeFn)
     })
   }
 
-  _registerEventCloser(eventTypes, closeFn) {
+  _registerSubmitCloser(attribute, closeFn) {
+    // Allow the fallbacks to be both vanilla forms and Unpoly [up-submit] forms
+    this.on('submit', `[${attribute}]`, (event, form) => {
+      // Since we're defining this handler on up.Overlay, we will not prevent
+      // a form from being submitted on the root layer.
+      up.event.halt(event, { log: true })
+
+      const value = up.Params.fromForm(form)
+      this._onAttrCloserActivated(form, value, closeFn)
+    })
+  }
+
+  _onAttrCloserActivated(origin, value, closeFn) {
+    const closeOptions = { origin }
+    const parser = new up.OptionsParser(origin, closeOptions)
+    parser.booleanOrString('animation')
+    parser.string('easing')
+    parser.number('duration')
+    parser.string('confirm')
+
+    up.error.muteUncriticalSync(() => closeFn(value, closeOptions))
+  }
+
+  _registerExternalEventCloser(eventTypes, closeFn) {
     if (!eventTypes) { return }
     return this.on(eventTypes, (event) => {
       event.preventDefault()

@@ -2775,171 +2775,348 @@ describe('up.layer', function() {
         up.motion.config.enabled = false
       })
 
-      it('accepts an overlay', function() {
-        const acceptListener = jasmine.createSpy('accept listener')
-        up.on('up:layer:accept', acceptListener)
+      describe('on a link', function() {
 
-        makeLayers(2)
+        it('accepts an overlay when the link is clicked', function() {
+          const acceptListener = jasmine.createSpy('accept listener')
+          up.on('up:layer:accept', acceptListener)
 
-        expect(up.layer.isOverlay()).toBe(true)
-        const link = up.layer.affix('a[href="#"]')
-        link.setAttribute('up-accept', '')
-        Trigger.clickSequence(link)
+          makeLayers(2)
 
-        expect(up.layer.isRoot()).toBe(true)
-        expect(acceptListener).toHaveBeenCalled()
-      })
-
-      it('accepts an overlay with the attribute value as JSON', function() {
-        const acceptListener = jasmine.createSpy('accept listener')
-        up.on('up:layer:accept', acceptListener)
-
-        makeLayers(2)
-
-        expect(up.layer.isOverlay()).toBe(true)
-        const link = up.layer.affix('a[href="#"]')
-        link.setAttribute('up-accept', JSON.stringify({ foo: 'bar' }))
-        Trigger.clickSequence(link)
-
-        expect(up.layer.isRoot()).toBe(true)
-        expect(acceptListener.calls.mostRecent().args[0]).toBeEvent('up:layer:accept', { value: { foo: 'bar' } })
-      })
-
-      it('allows unquoted property names and single-quotes in the acceptance value JSON', function() {
-        const acceptListener = jasmine.createSpy('accept listener')
-        up.on('up:layer:accept', acceptListener)
-
-        makeLayers(2)
-
-        expect(up.layer.isOverlay()).toBe(true)
-        const link = up.layer.affix('a[href="#"]')
-        link.setAttribute('up-accept', "{ foo: 'bar' }")
-        Trigger.clickSequence(link)
-
-        expect(up.layer.isRoot()).toBe(true)
-        expect(acceptListener.calls.mostRecent().args[0]).toBeEvent('up:layer:accept', { value: { foo: 'bar' } })
-      })
-
-      it('parses the acceptance value if the user clicks on a descendant of the [up-accept] element (bugfix)', function() {
-        const acceptListener = jasmine.createSpy('accept listener')
-        up.on('up:layer:accept', acceptListener)
-
-        makeLayers(2)
-
-        expect(up.layer.isOverlay()).toBe(true)
-        const link = up.layer.affix('a[href="#"]')
-        link.setAttribute('up-accept', JSON.stringify({ foo: 'bar' }))
-        const child = e.affix(link, 'span.child', { text: 'label' })
-        Trigger.clickSequence(child)
-
-        expect(up.layer.isRoot()).toBe(true)
-        expect(acceptListener.calls.mostRecent().args[0]).toBeEvent('up:layer:accept', { value: { foo: 'bar' } })
-      })
-
-      it('prevents a link from being followed on an overlay', function() {
-        const followListener = jasmine.createSpy('follow listener')
-        up.on('up:link:follow', followListener)
-
-        makeLayers(2)
-
-        expect(up.layer.isOverlay()).toBe(true)
-        const link = up.layer.affix('a[href="/foo"][up-follow]')
-        link.setAttribute('up-accept', '')
-        Trigger.clickSequence(link)
-
-        expect(followListener).not.toHaveBeenCalled()
-      })
-
-      it('follows a link on the root layer', function() {
-        const followListener = jasmine.createSpy('follow listener')
-        up.on('up:link:follow', followListener)
-
-        const link = up.layer.affix('a[href="/foo"][up-follow]')
-        link.setAttribute('up-accept', '')
-        Trigger.clickSequence(link)
-
-        expect(followListener).toHaveBeenCalled()
-      })
-
-      it('may be used on elements that are no links', function() {
-        const acceptListener = jasmine.createSpy('accept listener')
-        up.on('up:layer:accept', acceptListener)
-
-        makeLayers(2)
-
-        expect(up.layer.isOverlay()).toBe(true)
-        const link = up.layer.affix('span')
-        link.setAttribute('up-accept', JSON.stringify({ foo: 'bar' }))
-        Trigger.clickSequence(link)
-
-        expect(up.layer.isRoot()).toBe(true)
-        expect(acceptListener.calls.mostRecent().args[0]).toBeEvent('up:layer:accept', { value: { foo: 'bar' } })
-      })
-
-      it('allows to set attributes that control the closing animation', function() {
-        makeLayers(2)
-        const overlay = up.layer.current
-
-        expect(up.layer.isOverlay()).toBe(true)
-        spyOn(overlay, 'accept')
-        const link = up.layer.affix('a[href="#"]')
-        link.setAttribute('up-accept', '')
-        link.setAttribute('up-animation', 'move-to-right')
-        link.setAttribute('up-duration', '654')
-        Trigger.clickSequence(link)
-
-        expect(overlay.accept).toHaveBeenCalledWith(undefined, jasmine.objectContaining({
-          animation: 'move-to-right',
-          duration: 654
-        }))
-      })
-
-      it('does not emit a global error when clicked and up:layer:accept is prevented', async function() {
-        up.on('up:layer:accept', (event) => event.preventDefault())
-
-        makeLayers(2)
-
-        expect(up.layer.isOverlay()).toBe(true)
-        const link = up.layer.affix('a[href="#"][up-accept]')
-        Trigger.clickSequence(link)
-
-        await jasmine.spyOnGlobalErrorsAsync(async function(globalErrorSpy) {
-          await wait()
           expect(up.layer.isOverlay()).toBe(true)
-          expect(globalErrorSpy).not.toHaveBeenCalled()
-        })
-      })
-
-      describe('with [up-confirm]', function() {
-
-        allowGlobalErrors()
-
-        it('shows a confirm message before accepting the overlay', function() {
-          const [root, overlay] = makeLayers(2)
-          const link = overlay.affix('a[up-accept][up-confirm="Are you sure?"]')
-          const confirmSpy = spyOn(up.browser, 'assertConfirmed')
-
+          const link = up.layer.affix('a[href="#"]')
+          link.setAttribute('up-accept', '')
           Trigger.clickSequence(link)
 
-          expect(confirmSpy).toHaveBeenCalledWith(jasmine.objectContaining({ confirm: 'Are you sure?' }))
-          expect(overlay).toBeClosed()
+          expect(up.layer.isRoot()).toBe(true)
+          expect(acceptListener).toHaveBeenCalled()
         })
 
-        it('does not accept the overlay if the message is not confirmed', function() {
+        it('accepts an overlay with the attribute value as JSON', function() {
+          const acceptListener = jasmine.createSpy('accept listener')
+          up.on('up:layer:accept', acceptListener)
+
+          makeLayers(2)
+
+          expect(up.layer.isOverlay()).toBe(true)
+          const link = up.layer.affix('a[href="#"]')
+          link.setAttribute('up-accept', JSON.stringify({ foo: 'bar' }))
+          Trigger.clickSequence(link)
+
+          expect(up.layer.isRoot()).toBe(true)
+          expect(acceptListener.calls.mostRecent().args[0]).toBeEvent('up:layer:accept', { value: { foo: 'bar' } })
+        })
+
+        it('allows unquoted property names and single-quotes in the acceptance value JSON', function() {
+          const acceptListener = jasmine.createSpy('accept listener')
+          up.on('up:layer:accept', acceptListener)
+
+          makeLayers(2)
+
+          expect(up.layer.isOverlay()).toBe(true)
+          const link = up.layer.affix('a[href="#"]')
+          link.setAttribute('up-accept', "{ foo: 'bar' }")
+          Trigger.clickSequence(link)
+
+          expect(up.layer.isRoot()).toBe(true)
+          expect(acceptListener.calls.mostRecent().args[0]).toBeEvent('up:layer:accept', { value: { foo: 'bar' } })
+        })
+
+        it('parses the acceptance value if the user clicks on a descendant of the [up-accept] element (bugfix)', function() {
+          const acceptListener = jasmine.createSpy('accept listener')
+          up.on('up:layer:accept', acceptListener)
+
+          makeLayers(2)
+
+          expect(up.layer.isOverlay()).toBe(true)
+          const link = up.layer.affix('a[href="#"]')
+          link.setAttribute('up-accept', JSON.stringify({ foo: 'bar' }))
+          const child = e.affix(link, 'span.child', { text: 'label' })
+          Trigger.clickSequence(child)
+
+          expect(up.layer.isRoot()).toBe(true)
+          expect(acceptListener.calls.mostRecent().args[0]).toBeEvent('up:layer:accept', { value: { foo: 'bar' } })
+        })
+
+        it('prevents a link from being followed on an overlay', function() {
+          const followListener = jasmine.createSpy('follow listener')
+          up.on('up:link:follow', followListener)
+
+          makeLayers(2)
+
+          expect(up.layer.isOverlay()).toBe(true)
+          const link = up.layer.affix('a[href="/foo"][up-follow]')
+          link.setAttribute('up-accept', '')
+          Trigger.clickSequence(link)
+
+          expect(followListener).not.toHaveBeenCalled()
+          expect(link).not.toHaveBeenDefaultFollowed()
+        })
+
+        it('follows a link on the root layer', function() {
+          const followListener = jasmine.createSpy('follow listener')
+          up.on('up:link:follow', followListener)
+
+          const link = up.layer.affix('a[href="/foo"][up-follow]')
+          link.setAttribute('up-accept', '')
+          Trigger.clickSequence(link)
+
+          expect(followListener).toHaveBeenCalled()
+        })
+
+        it('may be used on elements that are no links', function() {
+          const acceptListener = jasmine.createSpy('accept listener')
+          up.on('up:layer:accept', acceptListener)
+
+          makeLayers(2)
+
+          expect(up.layer.isOverlay()).toBe(true)
+          const link = up.layer.affix('span')
+          link.setAttribute('up-accept', JSON.stringify({ foo: 'bar' }))
+          Trigger.clickSequence(link)
+
+          expect(up.layer.isRoot()).toBe(true)
+          expect(acceptListener.calls.mostRecent().args[0]).toBeEvent('up:layer:accept', { value: { foo: 'bar' } })
+        })
+
+        it('allows to set attributes that control the closing animation', function() {
           const [root, overlay] = makeLayers(2)
-          const confirmSpy = spyOn(up.browser, 'assertConfirmed').and.callFake(function(options) {
-            if (options.confirm) {
-              throw new up.Aborted('User aborted')
-            }
+
+          spyOn(overlay, 'accept')
+          const link = up.layer.affix('a[href="#"]')
+          link.setAttribute('up-accept', '')
+          link.setAttribute('up-animation', 'move-to-right')
+          link.setAttribute('up-duration', '654')
+          Trigger.clickSequence(link)
+
+          expect(overlay.accept).toHaveBeenCalledWith(undefined, jasmine.objectContaining({
+            animation: 'move-to-right',
+            duration: 654
+          }))
+        })
+
+        it('does not emit a global error when clicked and up:layer:accept is prevented', async function() {
+          up.on('up:layer:accept', (event) => event.preventDefault())
+
+          makeLayers(2)
+
+          expect(up.layer.isOverlay()).toBe(true)
+          const link = up.layer.affix('a[href="#"][up-accept]')
+          Trigger.clickSequence(link)
+
+          await jasmine.spyOnGlobalErrorsAsync(async function(globalErrorSpy) {
+            await wait()
+            expect(up.layer.isOverlay()).toBe(true)
+            expect(globalErrorSpy).not.toHaveBeenCalled()
           })
-          const link = overlay.affix('a[up-accept][up-confirm="Are you sure?"]')
+        })
 
-          Trigger.clickSequence(link)
+        describe('with [up-confirm]', function() {
 
-          expect(confirmSpy).toHaveBeenCalled()
-          expect(overlay).not.toBeClosed()
+          allowGlobalErrors()
+
+          it('shows a confirm message before accepting the overlay', function() {
+            const [root, overlay] = makeLayers(2)
+            const link = overlay.affix('a[up-accept][up-confirm="Are you sure?"]')
+            const confirmSpy = spyOn(up.browser, 'assertConfirmed')
+
+            Trigger.clickSequence(link)
+
+            expect(confirmSpy).toHaveBeenCalledWith(jasmine.objectContaining({ confirm: 'Are you sure?' }))
+            expect(overlay).toBeClosed()
+          })
+
+          it('does not accept the overlay or follow the link if the message is not confirmed', function() {
+            const [root, overlay] = makeLayers(2)
+            const confirmSpy = spyOn(up.browser, 'assertConfirmed').and.callFake(function(options) {
+              if (options.confirm) {
+                throw new up.Aborted('User aborted')
+              }
+            })
+
+            const followListener = jasmine.createSpy('follow listener')
+            up.on('up:link:follow', followListener)
+
+            const link = overlay.affix('a[up-accept][up-follow][up-confirm="Are you sure?"]')
+
+            Trigger.clickSequence(link)
+
+            expect(confirmSpy).toHaveBeenCalled()
+            expect(overlay).not.toBeClosed()
+            expect(followListener).not.toHaveBeenCalled()
+            expect(link).not.toHaveBeenDefaultFollowed()
+          })
         })
       })
+
+      describe('on a form', function() {
+
+        it('accepts the layer when the form is submitted', function() {
+          const acceptListener = jasmine.createSpy('accept listener')
+          up.on('up:layer:accept', acceptListener)
+
+          const [root, overlay] = makeLayers(2)
+
+          expect(up.layer.isOverlay()).toBe(true)
+          const form = overlay.affix('form[up-accept]')
+          const submitButton = e.affix(form, 'input[type=submit]')
+          Trigger.clickSequence(submitButton)
+
+          expect(up.layer.isRoot()).toBe(true)
+          expect(acceptListener).toHaveBeenCalled()
+        })
+
+        it('does not accept the layer when the form element is clicked', function() {
+          const acceptListener = jasmine.createSpy('accept listener')
+          up.on('up:layer:accept', acceptListener)
+
+          const [root, overlay] = makeLayers(2)
+
+          expect(up.layer.isOverlay()).toBe(true)
+          const form = overlay.affix('form[up-accept]', { text: 'form content' })
+          Trigger.clickSequence(form)
+
+          expect(up.layer.isOverlay()).toBe(true)
+          expect(acceptListener).not.toHaveBeenCalled()
+        })
+
+        it('does not accept the layer when a form child is clicked', function() {
+          const acceptListener = jasmine.createSpy('accept listener')
+          up.on('up:layer:accept', acceptListener)
+
+          const [root, overlay] = makeLayers(2)
+
+          expect(up.layer.isOverlay()).toBe(true)
+          const form = overlay.affix('form[up-accept]')
+          const formChild = e.affix(form, 'div', { text: 'form content' })
+          Trigger.clickSequence(formChild)
+
+          expect(up.layer.isOverlay()).toBe(true)
+          expect(acceptListener).not.toHaveBeenCalled()
+        })
+
+        it('uses the form params as the acceptance value', function() {
+          const acceptListener = jasmine.createSpy('accept listener')
+          up.on('up:layer:accept', acceptListener)
+
+          const [root, overlay] = makeLayers(2)
+
+          expect(up.layer.isOverlay()).toBe(true)
+          const form = overlay.affix('form[up-accept]')
+          const fooInput = e.affix(form, 'input[name=foo][value="foo-value"]')
+          const barInput = e.affix(form, 'input[name=bar][value="bar-value"]')
+          const submitButton = e.affix(form, 'input[type=submit]')
+          Trigger.clickSequence(submitButton)
+
+          expect(up.layer.isRoot()).toBe(true)
+          expect(acceptListener).toHaveBeenCalled()
+        })
+
+        it('prevents the form from being submitted', function() {
+          const submitListener = jasmine.createSpy('submit listener')
+          up.on('up:form:submit', submitListener)
+
+          const [root, overlay] = makeLayers(2)
+
+          expect(up.layer.isOverlay()).toBe(true)
+          const form = overlay.affix('form[up-accept]')
+          const submitButton = e.affix(form, 'input[type=submit]')
+          Trigger.clickSequence(submitButton)
+
+          expect(submitListener).not.toHaveBeenCalled()
+          expect(form).not.toHaveBeenDefaultSubmitted()
+        })
+
+        it('submits a form on the root layer', function() {
+          const submitListener = jasmine.createSpy('submit listener')
+          up.on('up:form:submit', submitListener)
+
+          const form = fixture('form[up-submit][up-accept]')
+          const submitButton = e.affix(form, 'input[type=submit]')
+          Trigger.clickSequence(submitButton)
+
+
+          expect(submitListener).toHaveBeenCalled()
+        })
+
+        it('allows to set attributes that control the closing animation', function() {
+          const [root, overlay] = makeLayers(2)
+
+          spyOn(overlay, 'accept')
+
+          const form = overlay.affix('form[up-accept]')
+          form.setAttribute('up-accept', '')
+          form.setAttribute('up-animation', 'move-to-right')
+          form.setAttribute('up-duration', '654')
+          const submitButton = e.affix(form, 'input[type=submit]')
+          Trigger.clickSequence(submitButton)
+
+          expect(overlay.accept).toHaveBeenCalledWith(
+            jasmine.any(up.Params),
+            jasmine.objectContaining({
+              animation: 'move-to-right',
+              duration: 654
+            })
+          )
+        })
+
+        it('does not emit a global error when submitted and up:layer:accept is prevented', async function() {
+          up.on('up:layer:accept', (event) => event.preventDefault())
+
+          makeLayers(2)
+
+          expect(up.layer.isOverlay()).toBe(true)
+          const form = up.layer.affix('form[up-accept]')
+          const submitButton = e.affix(form, 'input[type=submit]')
+          Trigger.clickSequence(submitButton)
+
+          await jasmine.spyOnGlobalErrorsAsync(async function(globalErrorSpy) {
+            await wait()
+            expect(up.layer.isOverlay()).toBe(true)
+            expect(globalErrorSpy).not.toHaveBeenCalled()
+          })
+        })
+
+        describe('with [up-confirm]', function() {
+
+          allowGlobalErrors()
+
+          it('shows a confirm message before accepting the overlay', function() {
+            const [root, overlay] = makeLayers(2)
+            const form = overlay.affix('form[up-accept][up-confirm="Are you sure?"]')
+            const submitButton = e.affix(form, 'input[type=submit]')
+            const confirmSpy = spyOn(up.browser, 'assertConfirmed')
+
+            Trigger.clickSequence(submitButton)
+
+            expect(confirmSpy).toHaveBeenCalledWith(jasmine.objectContaining({ confirm: 'Are you sure?' }))
+            expect(overlay).toBeClosed()
+          })
+
+          it('does not accept the overlay or submit the form if the message is not confirmed', function() {
+            const [root, overlay] = makeLayers(2)
+            const confirmSpy = spyOn(up.browser, 'assertConfirmed').and.callFake(function(options) {
+              if (options.confirm) {
+                throw new up.Aborted('User aborted')
+              }
+            })
+
+            const submitListener = jasmine.createSpy('submit listener')
+            up.on('up:form:submit', submitListener)
+
+            const form = overlay.affix('form[up-accept][up-confirm="Are you sure?"]')
+            const submitButton = e.affix(form, 'input[type=submit]')
+
+            Trigger.clickSequence(submitButton)
+
+            expect(confirmSpy).toHaveBeenCalled()
+            expect(overlay).not.toBeClosed()
+            expect(submitListener).not.toHaveBeenCalled()
+          })
+        })
+
+      })
+
     })
 
     describe('[up-dismiss]', function() {
@@ -2948,19 +3125,29 @@ describe('up.layer', function() {
         up.motion.config.enabled = false
       })
 
-      it('dismisses an overlay with the attribute value as JSON', function() {
-        const dismissListener = jasmine.createSpy('dismiss listener')
-        up.on('up:layer:dismiss', dismissListener)
+      describe('on a link', function() {
 
-        makeLayers(2)
+        it('dismisses an overlay with the attribute value as JSON', function() {
+          const dismissListener = jasmine.createSpy('dismiss listener')
+          up.on('up:layer:dismiss', dismissListener)
 
-        expect(up.layer.isOverlay()).toBe(true)
-        const link = up.layer.affix('a[href="#"]')
-        link.setAttribute('up-dismiss', JSON.stringify({ foo: 'bar' }))
-        Trigger.clickSequence(link)
+          makeLayers(2)
 
-        expect(up.layer.isRoot()).toBe(true)
-        expect(dismissListener.calls.mostRecent().args[0]).toBeEvent('up:layer:dismiss', { value: { foo: 'bar' } })
+          expect(up.layer.isOverlay()).toBe(true)
+          const link = up.layer.affix('a[href="#"]')
+          link.setAttribute('up-dismiss', JSON.stringify({ foo: 'bar' }))
+          Trigger.clickSequence(link)
+
+          expect(up.layer.isRoot()).toBe(true)
+          expect(dismissListener.calls.mostRecent().args[0]).toBeEvent('up:layer:dismiss', { value: { foo: 'bar' } })
+        })
+
+      })
+
+      describe('on a form', function() {
+
+        it('dismisses the overlay, using the form params as the dismissal reason')
+
       })
     })
   })
