@@ -1224,9 +1224,10 @@ up.form = (function() {
     A form or a container element within a form.
   @param {Function(Element): boolean} options.guard
     Optional, additional condition whether a field matches.
-  @param {Function(Element): Function(Element)
+  @param {Function(Element): Function(Element)} callback
     A callback that is called when we discover a new match.
     The callback can return another function that is called when that field no longer matches.
+  @internal
   */
   function trackFields(...args) {
     let [root, { guard }, callback] = u.args(args, 'val', 'options', 'callback')

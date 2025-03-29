@@ -2897,7 +2897,7 @@ up.fragment = (function() {
     The selector to track
   @param {Function(List<Element>): List<Element>} options.filter
     Filters a list of potential matches.
-  @param {Function(Element): Function(Element)
+  @param {Function(Element): Function(Element)} callback
     A callback that is called when we discover a new match.
     The callback can return another function that is called when that element no longer matches.
   */
