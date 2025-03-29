@@ -3069,6 +3069,41 @@ describe('up.form', function() {
           expect(value).toEqual(jasmine.any(up.RenderResult))
         })
 
+        it('delays the Promise when a new validation was queued due to a prior request still loading', async function() {
+          const form = fixture('form[action=/form]')
+          const element = e.affix(form, '.element', { text: 'version 1' })
+
+          const promise1 = up.validate(element)
+
+          await wait()
+
+          expect('.element').toHaveText('version 1')
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          const promise2 = up.validate(element)
+
+          await wait()
+
+          expect((await promiseState(promise1)).state).toBe('pending')
+          expect((await promiseState(promise2)).state).toBe('pending')
+
+          jasmine.respondWithSelector('.element', { text: 'version 2' })
+
+          await wait()
+
+          expect('.element').toHaveText('version 2')
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+
+          expect((await promiseState(promise1)).state).toBe('fulfilled')
+          expect((await promiseState(promise2)).state).toBe('pending')
+
+          jasmine.respondWithSelector('.element', { text: 'version 3' })
+          await wait()
+
+          expect((await promiseState(promise1)).state).toBe('fulfilled')
+          expect((await promiseState(promise2)).state).toBe('fulfilled')
+        })
+
         it('returns a Promise that rejects with an up.RenderResult when the server responds to validation with an error code', async function() {
           const form = fixture('form[action=/form]')
           const element = e.affix(form, '.element', { text: 'old text' })
