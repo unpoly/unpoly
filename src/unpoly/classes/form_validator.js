@@ -8,7 +8,6 @@ up.FormValidator = class FormValidator {
     this._dirtySolutions = []
     this._nextRenderTimer = null
     this._rendering = false
-    this._resetNextRenderPromise()
     this._honorAbort()
   }
 
@@ -23,8 +22,7 @@ up.FormValidator = class FormValidator {
   }
 
   _onFieldAdded(field) {
-    let { event } = this._originOptions(field)
-    // let guard = () => up.fragment.isAlive(field)
+    let { event } = up.form.validateOptions(field)
     let callback = () => up.error.muteUncriticalRejection(this.validate({ origin: field }))
     return up.on(field, event, callback)
   }
@@ -34,22 +32,18 @@ up.FormValidator = class FormValidator {
   }
 
   _onAborted(event) {
-    if (this._dirtySolutions.length) {
-      this._dirtySolutions = []
-      this._nextRenderPromise.reject(new up.Aborted(event.reason))
-      this._resetNextRenderPromise()
+    let abortedError = new up.Aborted(event.reason)
+    let solution
+    while (solution = this._dirtySolutions.shift()) {
+      solution.deferred.reject(abortedError)
     }
   }
 
-  _resetNextRenderPromise() {
-    this._nextRenderPromise = u.newDeferred()
-  }
-
   validate(options = {}) {
-    let solutions = this._getSolutions(options)
-    this._dirtySolutions.push(...solutions)
+    let newSolutions = this._getSolutions(options)
+    this._dirtySolutions.push(...newSolutions)
     this._scheduleNextRender()
-    return this._nextRenderPromise
+    return newSolutions[0]?.deferred
   }
 
   _getSolutions(options) {
@@ -57,15 +51,25 @@ up.FormValidator = class FormValidator {
       || this._getFieldSolutions(options)
       || this._getElementSolutions(options.origin)
 
+    // Although a single validate() call may update multiple fragments,
+    // they will all share the same render pass.
+    let deferred = u.newDeferred()
+
     for (let solution of solutions) {
       // Remember solution-specific render options from
       // (1) the given options object
       // (2) any [up-watch-] prefixed attributes parsed from the origin
-      solution.renderOptions = this._originOptions(solution.origin, options)
+      // (3) any [up-validate-] prefixed attributes parsed from the origin
+      let renderOptions = up.form.validateOptions(solution.origin, options)
+      solution.renderOptions = renderOptions
 
-      // Resolve :origin pseudo here, as a batched validation will only
+      solution.destination = `${renderOptions.method} ${renderOptions.url}`
+
+        // Resolve :origin pseudo here, as a batched validation will only
       // have a single { origin } (set to the form).
       solution.target = up.fragment.resolveOrigin(solution.target, solution)
+
+      solution.deferred = deferred
     }
 
     return solutions
@@ -126,10 +130,6 @@ up.FormValidator = class FormValidator {
     }
   }
 
-  _originOptions(element, overrideOptions) {
-    return up.form.watchOptions(element, overrideOptions, { defaults: { event: 'change' } })
-  }
-
   _scheduleNextRender() {
     let solutionDelays = this._dirtySolutions.map((solution) => solution.renderOptions.delay)
     let shortestDelay = Math.min(...solutionDelays) || 0
@@ -161,28 +161,42 @@ up.FormValidator = class FormValidator {
     // We must not shorted that debounce delay.
     if (this._nextRenderTimer) return
 
-    let options = this._mergeRenderOptions(this._dirtySolutions)
-    this._dirtySolutions = []
+    let solutionsBatch = this._selectDirtySolutionsBatch()
+
+    let renderOptions = this._mergeRenderOptions(solutionsBatch)
 
     // We don't render concurrently. If additional fields want to validate
     // while our request is in flight, they add to a new @dirtySolutions array.
     this._rendering = true
 
-    // Just like we're gathering new dirty solutions for our next render pass,
-    // we now pass out a new validate() promise for that next pass.
-    let renderingPromise = this._nextRenderPromise
-    this._resetNextRenderPromise()
-
     try {
       // Resolve all promises we have handed out for the now-rendered solutions.
-      renderingPromise.resolve(up.render(options))
-      await renderingPromise
+      let renderPromise = up.render(renderOptions)
+      for (let solution of solutionsBatch) {
+        solution.deferred.resolve(renderPromise)
+      }
+      await renderPromise
     } finally {
       this._rendering = false
       // Additional solutions may have become dirty while we were _rendering so we check again.
       // If no pending solutions are found, the method will return immediately.
       this._renderDirtySolutions()
     }
+  }
+
+  _selectDirtySolutionsBatch() {
+    let batch = []
+    let i = 0
+    while (i < this._dirtySolutions.length) {
+      let solution = this._dirtySolutions[i]
+      if (batch.length === 0 || batch[0].destination === solution.destination) {
+        batch.push(solution)
+        this._dirtySolutions.splice(i, 1)
+      } else {
+        i++
+      }
+    }
+    return batch
   }
 
   _mergeRenderOptions(dirtySolutions) {
@@ -200,11 +214,14 @@ up.FormValidator = class FormValidator {
     let dirtyNames = u.uniq(u.map(dirtyFields, 'name'))
     let dirtyRenderOptionsList = u.map(dirtySolutions, 'renderOptions')
 
-    // Merge together all render options for all origins.
-    let options = u.mergeDefined(
-      ...dirtyRenderOptionsList,
-      up.form.destinationOptions(this._form),
-    )
+    let formDestinationOptions = up.form.destinationOptions(this._form)
+
+    // (1) Merge together all render options for all origins.
+    // (2) Adopt some formDestinationOptions that cannot be overridden by solutions,
+    //     like { contentType } or { submitButton }.
+    // (3) u.mergeDefined() does not skip undefined objects, it skips entries in objects
+    //     that have an undefined value.
+    let options = u.mergeDefined(formDestinationOptions, ...dirtyRenderOptionsList)
 
     // Update the collected targets of all solutions.
     options.target = u.map(dirtySolutions, 'target').join(', ')
@@ -235,7 +252,7 @@ up.FormValidator = class FormValidator {
     // (1) A <form up-params="..."> JSON attribute, obtained by up.form.destinationOptions() above
     // (2) one or more up.validate({ params }) calls
     options.params = up.Params.merge(
-      options.params,
+      formDestinationOptions.params,
       ...u.map(dirtyRenderOptionsList, 'params')
     )
 
@@ -243,7 +260,7 @@ up.FormValidator = class FormValidator {
     // (1) A <form up-headers="..."> JSON attribute, obtained by up.form.destinationOptions() above
     // (2) one or more up.validate({ headers }) calls
     options.headers = u.merge(
-      options.headers,
+      formDestinationOptions.headers,
       ...u.map(dirtyRenderOptionsList, 'headers')
     )
 

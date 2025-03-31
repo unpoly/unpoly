@@ -199,15 +199,34 @@ describe('up.OptionsParser', function() {
       const element = fixture('.element', { 'up-attr': 'up-attr-value' })
 
       const options = {}
-      const parserOptions = { fail: true }
-      const parser = new up.OptionsParser(element, options, parserOptions)
+      const parser = new up.OptionsParser(element, options)
 
       parser.string('attr')
       parser.include(parsingFn)
 
-      expect(parsingFn).toHaveBeenCalledWith(element, options, parserOptions)
+      expect(parsingFn).toHaveBeenCalledWith(element, options, jasmine.any(Object))
       expect(options).toEqual({ attr: 'up-attr-value', other: 'other-value' })
     })
+
+    it('forwards { defaults } as the only parser option', function() {
+      const parsingFn = jasmine.createSpy('option parsing function').and.callFake((_element, _options, _parserOptions) => ({
+        other: 'other-value'
+      }))
+
+      const element = fixture('.element', { 'my-prefix-attr': 'attr-value' })
+
+      const options = {}
+      const parserOptions = { fail: true, attrPrefix: 'my-prefix-', defaults: { fromDefault: 'defaultValue' } }
+      const parser = new up.OptionsParser(element, options, parserOptions)
+
+      parser.string('attr')
+      parser.include(parsingFn)
+      parser.string('fromDefault')
+
+      expect(parsingFn).toHaveBeenCalledWith(element, options, { defaults: { fromDefault: 'defaultValue' } })
+      expect(options).toEqual({ attr: 'attr-value', other: 'other-value', fromDefault: 'defaultValue' })
+    })
+
   })
 })
 

@@ -1761,6 +1761,47 @@ describe('up.form', function() {
       })
     })
 
+    describe('up.form.validateOptions()', function() {
+
+      it('parses the closest [up-validate-url] attribute into a { url } option', function() {
+        const form = fixture('form[action="/path1"]')
+        const container = e.affix(form, 'div[up-validate-url="/path2"]')
+        const field = e.affix(container, 'input[type="text"][name="foo"]')
+
+        const options = up.form.validateOptions(field)
+
+        expect(options.url).toBe('/path2')
+      })
+
+      it('parses the closest [up-watch-event] attribute into an { event } option', function() {
+        const form = fixture('form')
+        const container = e.affix(form, 'div[up-watch-event="my:event"]')
+        const field = e.affix(container, 'input[type="text"][name="foo"]')
+
+        const options = up.form.validateOptions(field)
+
+        expect(options.event).toBe('my:event')
+      })
+
+      it('parses status effect options with an [up-watch-] prefix', function() {
+        const form = fixture('form')
+        const container = e.affix(form, 'div[up-watch-disable="#disable"][up-watch-feedback="false"][up-watch-preview="my-preview"][up-watch-placeholder="#placeholder"]')
+        const field = e.affix(container, 'input[type="text"][name="foo"]')
+
+        const options = up.form.validateOptions(field)
+
+        expect(options).toEqual(
+          jasmine.objectContaining({
+            disable: '#disable',
+            feedback: false,
+            preview: 'my-preview',
+            placeholder: '#placeholder'
+          })
+        )
+      })
+
+    })
+
     describe('up.submit()', function() {
 
       it('emits a preventable up:form:submit event', async function() {
@@ -2174,7 +2215,7 @@ describe('up.form', function() {
           const container = fixture('.container')
           const form = e.affix(container, 'form[method="post"][action="/endpoint"][up-target=".container"][up-disable][up-watch-disable]')
           const input = e.affix(form, 'input[name=email]')
-          up.validate(input)
+          const validatePromise = up.validate(input)
 
           await wait()
 
@@ -2182,6 +2223,8 @@ describe('up.form', function() {
           expect(input).toBeDisabled()
 
           up.submit(form)
+
+          await expectAsync(validatePromise).toBeRejectedWith(jasmine.any(up.Aborted))
 
           await wait()
 
@@ -3242,7 +3285,7 @@ describe('up.form', function() {
           const group2 = e.affix(form, '[up-form-group]')
           const input2 = e.affix(group2, 'input[name=password]')
 
-          up.validate(input1)
+          const validateInput1Promise = up.validate(input1)
 
           await wait()
 
@@ -3259,6 +3302,7 @@ describe('up.form', function() {
 
           up.fragment.abort(form)
 
+          await expectAsync(validateInput1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
           await expectAsync(validateInput2Promise).toBeRejectedWith(jasmine.any(up.Aborted))
 
           await wait()
@@ -3396,6 +3440,59 @@ describe('up.form', function() {
           expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo baz')
           expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-form-group]:has(input[name="foo"]), [up-form-group]:has(input[name="baz"])')
         })
+
+        it('does not batch requests with a different { url }', async function() {
+          const formHTML = `
+            <form action="/path1" method="post">
+              <fieldset><input name="foo"></fieldset>
+              <fieldset><input name="bar" up-validate-url="/path2"></fieldset>
+              <fieldset><input name="baz"></fieldset>
+              <fieldset><input name="qux" up-validate-url="/path2"></fieldset>
+            </form>
+          `
+
+          const [form, fooGroup, fooField, barGroup, barField, bazGroup, bazField, quxGroup, quxField] = htmlFixtureList(formHTML)
+
+          let promise1 = up.validate(fooField)
+          let promise2 = up.validate(barField)
+          let promise3 = up.validate(bazField)
+          let promise4 = up.validate(quxField)
+
+          await wait()
+
+          expect((await promiseState(promise1)).state).toBe('pending')
+          expect((await promiseState(promise2)).state).toBe('pending')
+          expect((await promiseState(promise3)).state).toBe('pending')
+          expect((await promiseState(promise4)).state).toBe('pending')
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(jasmine.lastRequest().url).toMatchURL('/path1')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo baz')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('fieldset:has(input[name="foo"]), fieldset:has(input[name="baz"])')
+
+          jasmine.respondWith(formHTML)
+          await wait()
+
+          expect((await promiseState(promise1)).state).toBe('fulfilled')
+          expect((await promiseState(promise2)).state).toBe('pending')
+          expect((await promiseState(promise3)).state).toBe('fulfilled')
+          expect((await promiseState(promise4)).state).toBe('pending')
+
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+          expect(jasmine.lastRequest().url).toMatchURL('/path2')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('bar qux')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('fieldset:has(input[name="bar"]), fieldset:has(input[name="qux"])')
+
+          jasmine.respondWith(formHTML)
+          await wait()
+
+          expect((await promiseState(promise1)).state).toBe('fulfilled')
+          expect((await promiseState(promise2)).state).toBe('fulfilled')
+          expect((await promiseState(promise3)).state).toBe('fulfilled')
+          expect((await promiseState(promise4)).state).toBe('fulfilled')
+        })
+
+        it('does not batch requests with a different { method }')
 
         it('honors the { disable } option of each batched validation, resolving the :origin for each field', async function() {
           const form = fixture('form[action=/path][up-watch-disable=":origin"]')
@@ -3584,10 +3681,10 @@ describe('up.form', function() {
           await wait()
 
           expect(jasmine.lastRequest().data()).toMatchParams({
-            foo: 'foo-value',
-            bar: 'bar-value',
-            baz: 'baz-value',
-            bam: 'bam-value',
+            foo: 'foo-value', // from form
+            bar: 'bar-value', // from form
+            baz: 'baz-value', // from validate() arg
+            bam: 'bam-value', // from validate() arg
           })
         })
 
@@ -3702,22 +3799,22 @@ describe('up.form', function() {
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('#bar-target')
           })
 
-          it('does not crash if an target for a pending batch is destroyed while the validation request is loading', async function() {
-            const form = fixture('form[action=/path]')
+          it('does not crash if an target for a pending batch is detached while the validation request is loading', async function() {
+            const form = fixture('form[action=/path][method=post]')
             const fooField = e.affix(form, 'input[name=foo][up-validate="#foo-target"]')
             const fooTarget = e.affix(form, '#foo-target', { text: 'old foo target' })
             const barField = e.affix(form, 'input[name=bar][up-validate="#bar-target"]')
             const barTarget = e.affix(form, '#bar-target', { text: 'new bar target' })
 
-            up.validate(fooField)
-            up.validate(barField)
+            const validateFooPromise = up.validate(fooField)
+            const validateBarPromise = up.validate(barField)
 
             await wait()
 
             expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo bar')
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('#foo-target, #bar-target')
 
-            up.destroy(fooTarget)
+            fooTarget.remove()
 
             jasmine.respondWith(`
               <div id="foo-target">new foo target</div>
@@ -3762,12 +3859,10 @@ describe('up.form', function() {
             const validateFooPromise = up.validate(fooField)
             const validateBarPromise = up.validate(bazField)
 
-            // Two validations in the same batch return the same Promise reference
-            expect(validateFooPromise).toBe(validateBarPromise)
-
             up.destroy(form)
 
             await expectAsync(validateFooPromise).toBeRejectedWith(jasmine.any(up.Aborted))
+            await expectAsync(validateBarPromise).toBeRejectedWith(jasmine.any(up.Aborted))
 
             await wait()
 
@@ -5648,6 +5743,35 @@ describe('up.form', function() {
         const $labels = $('#registration [up-form-group]')
         expect($labels[0]).not.toHaveText('Validation message')
         expect($labels[1]).toHaveText('Validation message')
+      })
+
+      it('allows to validate against a different endpoint using [up-validate-url] and [up-validate-method] attributes', async function() {
+        up.network.config.wrapMethod = false
+
+        const [form] = htmlFixtureList(`
+          <form action="/users" method="post" id="registration" up-validate up-validate-url="/users/validate" up-validate-method="put" enctype="my-custom-type">
+            <div up-form-group>
+              <input type="text" name="email">
+            </div>
+            <div up-form-group>
+              <input type="password" name="password">
+            </div>
+          </form>
+        `)
+        up.hello(form)
+
+        const $passwordInput = $('#registration input[name=password]')
+        $passwordInput.val('secret5435')
+        Trigger.change($passwordInput)
+
+        await wait()
+
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
+        expect(jasmine.lastRequest().url).toMatchURL('/users/validate')
+        expect(jasmine.lastRequest().method).toBe('PUT')
+        // Other options are inherited
+        expect(jasmine.lastRequest().requestHeaders['Content-Type']).toEqual('my-custom-type')
+
       })
 
       it('only sends a single request when a radio button group changes', async function() {

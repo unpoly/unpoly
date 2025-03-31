@@ -22,7 +22,6 @@ up.OptionsParser = class OptionsParser {
   constructor(element, options, parserOptions = {}) {
     this._options = options
     this._element = element
-    this._parserOptions = parserOptions // for pass-through in include()
     this._fail = parserOptions.fail
     this._closest = parserOptions.closest
     this._attrPrefix = parserOptions.attrPrefix || 'up-'
@@ -70,12 +69,12 @@ up.OptionsParser = class OptionsParser {
 
     value ??= keyOptions.default ?? this._defaults[key]
 
-    let normalizeFn = keyOptions.normalize
-    if (normalizeFn) {
-      value = normalizeFn(value)
-    }
-
     if (u.isDefined(value)) {
+      let normalizeFn = keyOptions.normalize
+      if (normalizeFn) {
+        value = normalizeFn(value)
+      }
+
       this._options[key] = value
     }
 
@@ -86,8 +85,9 @@ up.OptionsParser = class OptionsParser {
     }
   }
 
-  include(optionsFn) {
-    let fnResult = optionsFn(this._element, this._options, this._parserOptions)
+  include(optionsFn, parserOptions) {
+    // let fnResult = optionsFn(this._element, this._options, this._parserOptions)
+    let fnResult = optionsFn(this._element, this._options, { defaults: this._defaults, ...parserOptions })
     Object.assign(this._options, fnResult)
   }
 

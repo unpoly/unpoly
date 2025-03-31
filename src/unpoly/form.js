@@ -440,9 +440,12 @@ up.form = (function() {
     //
     //    up.validate(field, { disable: true })
 
-    let parser = new up.OptionsParser(field, options, { ...parserOptions, closest: true, attrPrefix: 'up-watch-' })
+    parserOptions.closest ??= true
+    parserOptions.attrPrefix ??= 'up-watch-'
 
-    parser.include(up.status.statusOptions)
+    let parser = new up.OptionsParser(field, options, parserOptions)
+
+    parser.include(up.status.statusOptions, parserOptions)
     parser.string('event')
     parser.number('delay')
 
@@ -461,6 +464,16 @@ up.form = (function() {
     // The callback to [up-watch] is not parsed here.
     // It is parsed in watch(), which calls watchCallbackFromElement().
 
+    return options
+  }
+
+  function validateOptions(field, options, parserOptions = {}) {
+    options = u.options(options)
+    let parser = new up.OptionsParser(field, options, { ...parserOptions, closest: true, attrPrefix: 'up-validate-' })
+    parser.string('url')
+    parser.string('method', { normalize: u.normalizeMethod })
+    // parser.include(destinationOptions)
+    parser.include(watchOptions, { defaults: { event: 'change' } })
     return options
   }
 
@@ -2053,6 +2066,7 @@ up.form = (function() {
     submitOptions,
     destinationOptions,
     watchOptions,
+    validateOptions,
     isSubmittable,
     watch,
     validate,
