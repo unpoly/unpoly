@@ -600,7 +600,6 @@ describe('up.script', function() {
       describe('up:fragment:inserted event', function() {
 
         it('emits an up:fragment:inserted event', function() {
-          const compiler = jasmine.createSpy('compiler')
           const target = fixture('.element')
           const listener = jasmine.createSpy('up:fragment:inserted listener')
           target.addEventListener('up:fragment:inserted', listener)
@@ -611,8 +610,18 @@ describe('up.script', function() {
           expect(listener).toHaveBeenCalledWith(expectedEvent)
         })
 
+        it('emits up:fragment:inserted after compilation', function() {
+          const callOrder = []
+          up.compiler('.element', () => callOrder.push('compiler'))
+          const target = fixture('.element')
+          target.addEventListener('up:fragment:inserted', () => callOrder.push('event'))
+
+          up.hello(target)
+
+          expect(callOrder).toEqual(['compiler', 'event'])
+        })
+
         it('only calls up:fragment:inserted once when the same element is passed to up.hello() multiple times', async function() {
-          const compiler = jasmine.createSpy('compiler')
           const target = fixture('.element')
           const listener = jasmine.createSpy('up:fragment:inserted listener')
           target.addEventListener('up:fragment:inserted', listener)

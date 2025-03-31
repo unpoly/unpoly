@@ -960,6 +960,8 @@ up.fragment = (function() {
   If you're looking to run code when a new fragment matches
   a selector, use `up.compiler()` instead.
 
+  The event is emitted after compilation.
+
   ### Example
 
   ```js
@@ -970,7 +972,7 @@ up.fragment = (function() {
 
   @event up:fragment:inserted
   @param {Element} event.target
-    The fragment that has been inserted or updated.
+    The fragment that has been inserted or swapped with a new version.
   @stable
   */
 
