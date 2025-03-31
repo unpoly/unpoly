@@ -537,7 +537,7 @@ describe('up.script', function() {
         const listener = jasmine.createSpy('up:fragment:inserted listener')
         target.addEventListener('up:fragment:inserted', listener)
 
-        up.hello(target, { origin })
+        up.hello(target)
 
         const expectedEvent = jasmine.objectContaining({ target })
         expect(listener).toHaveBeenCalledWith(expectedEvent)
