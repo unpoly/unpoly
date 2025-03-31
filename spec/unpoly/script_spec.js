@@ -531,88 +531,99 @@ describe('up.script', function() {
         expect(compiler).toHaveBeenCalledWith(element, jasmine.anything(), jasmine.anything())
       })
 
-      it('emits an up:fragment:inserted event', function() {
-        const compiler = jasmine.createSpy('compiler')
-        const target = fixture('.element')
-        const listener = jasmine.createSpy('up:fragment:inserted listener')
-        target.addEventListener('up:fragment:inserted', listener)
+      describe('idempotent compilation', function() {
 
-        up.hello(target)
+        it('does not re-compile elements when called multiple times', function() {
+          const compiler = jasmine.createSpy('compiler')
+          up.compiler('.element', compiler)
+          const element = fixture('.element')
 
-        const expectedEvent = jasmine.objectContaining({ target })
-        expect(listener).toHaveBeenCalledWith(expectedEvent)
+          up.hello(element)
+          up.hello(element)
+          expect(compiler.calls.count()).toBe(1)
+        })
+
+        it('does not re-compile elements when their container is compiled afterwards', function() {
+          const compiler = jasmine.createSpy('compiler')
+          up.compiler('.element', compiler)
+          const container = fixture('.container')
+          const element = e.affix(container, '.element')
+
+          up.hello(element)
+          up.hello(container)
+          expect(compiler.calls.count()).toBe(1)
+        })
+
       })
 
-      it('only calls up:fragment:inserted once when the same element is passed to up.hello() multiple times', async function() {
-        const compiler = jasmine.createSpy('compiler')
-        const target = fixture('.element')
-        const listener = jasmine.createSpy('up:fragment:inserted listener')
-        target.addEventListener('up:fragment:inserted', listener)
+      describe('current layer', function() {
 
-        up.hello(target)
-        up.hello(target)
+        it("sets up.layer.current to the given element's layer while compilers are running", async function() {
+          const layerSpy = jasmine.createSpy('layer spy')
+          up.compiler('.foo', () => layerSpy(up.layer.current))
+          makeLayers(2)
 
-        expect(listener.calls.count()).toBe(1)
+          await wait()
 
-      })
+          const rootElement = fixture('.foo.in-root')
+          const overlayElement = up.layer.get(1).affix('.foo.in-overlay')
 
-      it("sets up.layer.current to the given element's layer while compilers are running", async function() {
-        const layerSpy = jasmine.createSpy('layer spy')
-        up.compiler('.foo', () => layerSpy(up.layer.current))
-        makeLayers(2)
+          up.hello(rootElement)
+          up.hello(overlayElement)
 
-        await wait()
+          expect(layerSpy.calls.count()).toBe(2)
 
-        const rootElement = fixture('.foo.in-root')
-        const overlayElement = up.layer.get(1).affix('.foo.in-overlay')
+          expect(layerSpy.calls.argsFor(0)[0]).toBe(up.layer.get(0))
+          expect(layerSpy.calls.argsFor(1)[0]).toBe(up.layer.get(1))
+        })
 
-        up.hello(rootElement)
-        up.hello(overlayElement)
+        it('keeps up.layer.current and does not crash when compiling a detached element (bugfix)', async function() {
+          const layerSpy = jasmine.createSpy('layer spy')
+          up.compiler('.foo', () => layerSpy(up.layer.current))
+          makeLayers(2)
 
-        expect(layerSpy.calls.count()).toBe(2)
+          await wait()
 
-        expect(layerSpy.calls.argsFor(0)[0]).toBe(up.layer.get(0))
-        expect(layerSpy.calls.argsFor(1)[0]).toBe(up.layer.get(1))
-      })
+          expect(up.layer.current.isOverlay()).toBe(true)
 
-      it('keeps up.layer.current and does not crash when compiling a detached element (bugfix)', async function() {
-        const layerSpy = jasmine.createSpy('layer spy')
-        up.compiler('.foo', () => layerSpy(up.layer.current))
-        makeLayers(2)
+          const element = up.element.createFromSelector('.foo')
+          const compileFn = () => up.hello(element)
 
-        await wait()
+          expect(compileFn).not.toThrowError()
+          expect(layerSpy.calls.argsFor(0)[0]).toBe(up.layer.current)
+        })
 
-        expect(up.layer.current.isOverlay()).toBe(true)
-
-        const element = up.element.createFromSelector('.foo')
-        const compileFn = () => up.hello(element)
-
-        expect(compileFn).not.toThrowError()
-        expect(layerSpy.calls.argsFor(0)[0]).toBe(up.layer.current)
-      })
-
-      it('does not re-compile elements when called multiple times', function() {
-        const compiler = jasmine.createSpy('compiler')
-        up.compiler('.element', compiler)
-        const element = fixture('.element')
-
-        up.hello(element)
-        up.hello(element)
-        expect(compiler.calls.count()).toBe(1)
-      })
-
-      it('does not re-compile elements when their compiler is compiled afterwards', function() {
-        const compiler = jasmine.createSpy('compiler')
-        up.compiler('.element', compiler)
-        const container = fixture('.container')
-        const element = e.affix(container, '.element')
-
-        up.hello(element)
-        up.hello(container)
-        expect(compiler.calls.count()).toBe(1)
       })
 
       it("sets the compiled fragment's layer as layer.current, even if the fragment is not in the front layer")
+
+      describe('up:fragment:inserted event', function() {
+
+        it('emits an up:fragment:inserted event', function() {
+          const compiler = jasmine.createSpy('compiler')
+          const target = fixture('.element')
+          const listener = jasmine.createSpy('up:fragment:inserted listener')
+          target.addEventListener('up:fragment:inserted', listener)
+
+          up.hello(target)
+
+          const expectedEvent = jasmine.objectContaining({ target })
+          expect(listener).toHaveBeenCalledWith(expectedEvent)
+        })
+
+        it('only calls up:fragment:inserted once when the same element is passed to up.hello() multiple times', async function() {
+          const compiler = jasmine.createSpy('compiler')
+          const target = fixture('.element')
+          const listener = jasmine.createSpy('up:fragment:inserted listener')
+          target.addEventListener('up:fragment:inserted', listener)
+
+          up.hello(target)
+          up.hello(target)
+
+          expect(listener.calls.count()).toBe(1)
+        })
+
+      })
 
       describe('when a compiler throws an error', function() {
 
