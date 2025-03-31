@@ -15,9 +15,7 @@ up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
 
   processPrimitive(opt) {
     switch (opt) {
-      case 'reset':
-        // If the user has passed { scroll: 'top' } we scroll to the top all
-        // viewports that are either containing or are contained by element.
+      case 'top':
         return this._reset()
       case 'layer':
         return this._revealLayer()

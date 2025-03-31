@@ -56,12 +56,12 @@ up.migrate.transformAttribute('up-reveal', function(link, reveal) {
 up.migrate.transformAttribute('up-reset-scroll', function(link, resetScroll) {
   switch (resetScroll) {
     case '':
-      up.migrate.warn('Attribute [up-reset-scroll] has been replaced with [up-scroll="reset"]')
-      link.setAttribute('up-scroll', 'reset')
+      up.migrate.warn('Attribute [up-reset-scroll] has been replaced with [up-scroll="top"]')
+      link.setAttribute('up-scroll', 'top')
       break
     case 'true':
-      up.migrate.warn('Attribute [up-reset-scroll="true"] has been replaced with [up-scroll="reset"]')
-      link.setAttribute('up-scroll', 'reset')
+      up.migrate.warn('Attribute [up-reset-scroll="true"] has been replaced with [up-scroll="top"]')
+      link.setAttribute('up-scroll', 'top')
       break
     case 'false':
       up.migrate.warn('Attribute [up-reset-scroll="false"] has been replaced with [up-scroll="false"]')

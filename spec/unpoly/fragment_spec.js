@@ -7412,6 +7412,33 @@ describe('up.fragment', function() {
           })
         })
 
+        describe('with { scroll: "top" }', function() {
+
+          it("scrolls the updated fragment's viewport to the top", async function() {
+            // viewport = fixture('[up-viewport]', { style: { 'width': '200px', 'height': '200px' }})
+            // content = e.affix
+            const [viewport] = htmlFixtureList(`
+              <div up-viewport id="viewport" style="height: 200px; overflow-y: scroll">
+                <div style="height: 1000px">
+                  <div id="child">old child</div>
+                </div>
+              </div>
+            `)
+
+            viewport.scrollTop = 333
+            await wait()
+
+            expect(viewport.scrollTop).toBe(333)
+
+            up.render({ fragment: '<div id="child">new child</div>', scroll: 'top' })
+            await wait()
+
+            expect('#child').toHaveText('new child')
+            expect(viewport.scrollTop).toBe(0)
+          })
+
+        })
+
         describe('with an array of { scroll } options', function() {
 
           mockRevealBeforeEach()
@@ -11479,13 +11506,13 @@ describe('up.fragment', function() {
           keeper.addEventListener('up:fragment:keep', listener)
           up.render('.keeper', { document: `
             <div class='keeper new' up-keep>new-inside</div>
-          `, abort: 'all', scroll: 'reset' })
+          `, abort: 'all', scroll: 'top' })
 
           await wait()
 
           expect(listener).toHaveBeenCalledWith(
             jasmine.objectContaining({
-              renderOptions: jasmine.objectContaining({ abort: 'all', scroll: 'reset' })
+              renderOptions: jasmine.objectContaining({ abort: 'all', scroll: 'top' })
             })
           )
         })

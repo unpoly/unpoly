@@ -35,7 +35,7 @@ Pass `{ scroll: false }` to keep all scroll positions.
 
 ### Resetting scroll positions
 
-Pass `{ scroll: 'reset' }` to reset the scroll position of the updated fragment's viewport.
+Pass `{ scroll: 'top' }` to reset the scroll position of the updated fragment's viewport.
 
 ### Restoring scroll positions
 
@@ -53,7 +53,7 @@ Pass `{ scroll: 'hash' }` to focus the element matching the `#hash` in the URL.
 To only scroll when a [main target](/up-main) is updated,
 you may append `-if-main` to any of the string options in this list.
 
-E.g. `{ scroll: 'reset-if-main' }` will reset scroll positions, but only if a main target is updated.
+E.g. `{ scroll: 'top-if-main' }` will reset scroll positions, but only if a main target is updated.
 
 To implement other conditions, [pass a function](#custom-scrolling-logic) instead.
 
@@ -67,7 +67,7 @@ If the URL has no `#hash`, scroll positions will be reset.
 In an `[up-scroll]` attribute you may separate scroll options with a comma:
 
 ```html
-<a href="/path#section" up-follow up-scroll="hash, reset">Link label</a>
+<a href="/path#section" up-follow up-scroll="hash, top">Link label</a>
 ```
 
 ### Automatic scrolling logic

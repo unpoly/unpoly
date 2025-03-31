@@ -875,9 +875,9 @@ describe('up.link', function() {
       })
 
       it('parses an [up-scroll] attribute', function() {
-        const link = fixture('a[href="/foo"][up-scroll="reset"]')
+        const link = fixture('a[href="/foo"][up-scroll="top"]')
         const options = up.link.followOptions(link)
-        expect(options.scroll).toBe('reset')
+        expect(options.scroll).toBe('top')
       })
 
       it('parses an [up-scroll-behavior] attribute', function() {
