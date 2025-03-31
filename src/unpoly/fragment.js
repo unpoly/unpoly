@@ -945,6 +945,9 @@ up.fragment = (function() {
 
 
   function emitFragmentInserted(element) {
+    if (element.upInserted) return
+    element.upInserted = true
+
     return up.emit(element, 'up:fragment:inserted', {
       log: ['Inserted fragment %o', element],
     })

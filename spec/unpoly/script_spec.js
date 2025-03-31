@@ -543,6 +543,19 @@ describe('up.script', function() {
         expect(listener).toHaveBeenCalledWith(expectedEvent)
       })
 
+      it('only calls up:fragment:inserted once when the same element is passed to up.hello() multiple times', async function() {
+        const compiler = jasmine.createSpy('compiler')
+        const target = fixture('.element')
+        const listener = jasmine.createSpy('up:fragment:inserted listener')
+        target.addEventListener('up:fragment:inserted', listener)
+
+        up.hello(target)
+        up.hello(target)
+
+        expect(listener.calls.count()).toBe(1)
+
+      })
+
       it("sets up.layer.current to the given element's layer while compilers are running", async function() {
         const layerSpy = jasmine.createSpy('layer spy')
         up.compiler('.foo', () => layerSpy(up.layer.current))
