@@ -35,8 +35,7 @@ Pass `{ scroll: false }` to keep all scroll positions.
 
 ### Resetting scroll positions
 
-Pass `{ scroll: 'reset' }` to reset the scroll positions of all
-[viewports](/up.viewport) that are ancestors or descendants of the updated fragment.
+Pass `{ scroll: 'reset' }` to reset the scroll position of the updated fragment's viewport.
 
 ### Restoring scroll positions
 

@@ -63,13 +63,13 @@ up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
   }
 
   _reset() {
-    // With { around: undefined }, resetScroll() resets all viewports in { layer }
-    up.viewport.resetScroll({ ...this.attributes(), around: this.fragment })
+    // With an undefined fragment reference, resetScroll() resets all viewports in { layer }
+    up.viewport.resetScroll(this.fragment, this.attributes())
     return true
   }
 
   _restore() {
-    // With { around: undefined }, restoreScroll() restores all viewports in { layer }
-    return up.viewport.restoreScroll({ ...this.attributes(), around: this.fragment })
+    // With an undefined fragment reference, restoreScroll() restores all viewports in { layer }
+    return up.viewport.restoreScroll(this.fragment, this.attributes())
   }
 }
