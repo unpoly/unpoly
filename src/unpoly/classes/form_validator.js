@@ -61,14 +61,13 @@ up.FormValidator = class FormValidator {
       // (2) any [up-watch-] prefixed attributes parsed from the origin
       // (3) any [up-validate-] prefixed attributes parsed from the origin
       let renderOptions = up.form.validateOptions(solution.origin, options)
+      solution.batch = u.pluckKey(renderOptions, 'batch')
       solution.renderOptions = renderOptions
 
       solution.destination = `${renderOptions.method} ${renderOptions.url}`
-
-        // Resolve :origin pseudo here, as a batched validation will only
+      // Resolve :origin pseudo here, as a batched validation will only
       // have a single { origin } (set to the form).
       solution.target = up.fragment.resolveOrigin(solution.target, solution)
-
       solution.deferred = deferred
     }
 
@@ -189,7 +188,7 @@ up.FormValidator = class FormValidator {
     let i = 0
     while (i < this._dirtySolutions.length) {
       let solution = this._dirtySolutions[i]
-      if (batch.length === 0 || batch[0].destination === solution.destination) {
+      if (batch.length === 0 || this._canBatchSolutions(batch[0], solution)) {
         batch.push(solution)
         this._dirtySolutions.splice(i, 1)
       } else {
@@ -197,6 +196,10 @@ up.FormValidator = class FormValidator {
       }
     }
     return batch
+  }
+
+  _canBatchSolutions(s1, s2) {
+    return s1.destination === s2.destination && s1.batch && s2.batch
   }
 
   _mergeRenderOptions(dirtySolutions) {

@@ -1773,6 +1773,16 @@ describe('up.form', function() {
         expect(options.url).toBe('/path2')
       })
 
+      it('parses the closest [up-validate-batch] attribute into a { batch } option', function() {
+        const form = fixture('form[action="/path1"]')
+        const container = e.affix(form, 'div[up-validate-batch="false"]')
+        const field = e.affix(container, 'input[type="text"][name="foo"]')
+        const fieldOutsideContainer = e.affix(form, 'input[type="text"][name="foo"]')
+
+        expect(up.form.validateOptions(field).batch).toBe(false)
+        expect(up.form.validateOptions(fieldOutsideContainer).batch).toBe(true)
+      })
+
       it('parses the closest [up-watch-event] attribute into an { event } option', function() {
         const form = fixture('form')
         const container = e.affix(form, 'div[up-watch-event="my:event"]')
@@ -3869,6 +3879,178 @@ describe('up.form', function() {
             expect(jasmine.Ajax.requests.count()).toBe(0)
           })
         })
+
+        describe('disabling', function() {
+
+          it('does not batch with up.form.config.validateBatch = false', async function() {
+            up.form.config.validateBatch = false
+
+            const form = fixture('form[action=/path]')
+            const fooField = e.affix(form, 'input[name=foo][up-validate="#foo-target"]')
+            const fooTarget = e.affix(form, '#foo-target', { text: 'old foo target' })
+            const barField = e.affix(form, 'input[name=bar][up-validate="#bar-target"]')
+            const barTarget = e.affix(form, '#bar-target', { text: 'old bar target' })
+
+            up.validate(fooField)
+            up.validate(barField)
+            await wait()
+
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('#foo-target')
+
+            jasmine.respondWithSelector('#foo-target', { text: 'new foo target' })
+            await wait()
+
+            expect('#foo-target').toHaveText('new foo target')
+            expect('#bar-target').toHaveText('old bar target')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('bar')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('#bar-target')
+
+            jasmine.respondWithSelector('#bar-target', { text: 'new bar target' })
+            await wait()
+
+            expect('#foo-target').toHaveText('new foo target')
+            expect('#bar-target').toHaveText('new bar target')
+          })
+
+          it('does not batch with form[up-validate-batch=false]', async function() {
+            const form = fixture('form[action=/path][up-validate-batch=false]')
+            const fooField = e.affix(form, 'input[name=foo][up-validate="#foo-target"]')
+            const fooTarget = e.affix(form, '#foo-target', { text: 'old foo target' })
+            const barField = e.affix(form, 'input[name=bar][up-validate="#bar-target"]')
+            const barTarget = e.affix(form, '#bar-target', { text: 'old bar target' })
+
+            up.validate(fooField)
+            up.validate(barField)
+            await wait()
+
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('#foo-target')
+
+            jasmine.respondWithSelector('#foo-target', { text: 'new foo target' })
+            await wait()
+
+            expect('#foo-target').toHaveText('new foo target')
+            expect('#bar-target').toHaveText('old bar target')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('bar')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('#bar-target')
+
+            jasmine.respondWithSelector('#bar-target', { text: 'new bar target' })
+            await wait()
+
+            expect('#foo-target').toHaveText('new foo target')
+            expect('#bar-target').toHaveText('new bar target')
+          })
+
+          it('allows individual elements to opt out of batching with [up-validate-batch=false]', async function() {
+            const form = fixture('form[action=/path]')
+            const fooField = e.affix(form, 'input[name=foo][up-validate="#foo-target"]')
+            const fooTarget = e.affix(form, '#foo-target', { text: 'old foo target' })
+            const barField = e.affix(form, 'input[name=bar][up-validate="#bar-target"][up-validate-batch="false"]')
+            const barTarget = e.affix(form, '#bar-target', { text: 'old bar target' })
+            const bazField = e.affix(form, 'input[name=baz][up-validate="#baz-target"][up-validate-batch="false"]')
+            const bazTarget = e.affix(form, '#baz-target', { text: 'old baz target' })
+            const quxField = e.affix(form, 'input[name=qux][up-validate="#qux-target"]')
+            const quxTarget = e.affix(form, '#qux-target', { text: 'old qux target' })
+
+            up.validate(fooField)
+            up.validate(barField)
+            up.validate(bazField)
+            up.validate(quxField)
+            await wait()
+
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo qux')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('#foo-target, #qux-target')
+
+            jasmine.respondWith(`
+              <div id="foo-target">new foo target</div> 
+              <div id="qux-target">new qux target</div> 
+            `)
+            await wait()
+
+            expect('#foo-target').toHaveText('new foo target')
+            expect('#bar-target').toHaveText('old bar target')
+            expect('#baz-target').toHaveText('old baz target')
+            expect('#qux-target').toHaveText('new qux target')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('bar')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('#bar-target')
+
+            jasmine.respondWithSelector('#bar-target', { text: 'new bar target' })
+            await wait()
+
+            expect('#foo-target').toHaveText('new foo target')
+            expect('#bar-target').toHaveText('new bar target')
+            expect('#baz-target').toHaveText('old baz target')
+            expect('#qux-target').toHaveText('new qux target')
+
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('baz')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('#baz-target')
+
+            jasmine.respondWithSelector('#baz-target', { text: 'new baz target' })
+            await wait()
+
+            expect('#foo-target').toHaveText('new foo target')
+            expect('#bar-target').toHaveText('new bar target')
+            expect('#baz-target').toHaveText('new baz target')
+            expect('#qux-target').toHaveText('new qux target')
+          })
+
+          it('allows individual elements to opt out of batching with up.validate({ batch: false })', async function() {
+            const form = fixture('form[action=/path]')
+            const fooField = e.affix(form, 'input[name=foo][up-validate="#foo-target"]')
+            const fooTarget = e.affix(form, '#foo-target', { text: 'old foo target' })
+            const barField = e.affix(form, 'input[name=bar][up-validate="#bar-target"]')
+            const barTarget = e.affix(form, '#bar-target', { text: 'old bar target' })
+            const bazField = e.affix(form, 'input[name=baz][up-validate="#baz-target"]')
+            const bazTarget = e.affix(form, '#baz-target', { text: 'old baz target' })
+            const quxField = e.affix(form, 'input[name=qux][up-validate="#qux-target"]')
+            const quxTarget = e.affix(form, '#qux-target', { text: 'old qux target' })
+
+            up.validate(fooField)
+            up.validate(barField, { batch: false })
+            up.validate(bazField, { batch: false })
+            up.validate(quxField)
+            await wait()
+
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo qux')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('#foo-target, #qux-target')
+
+            jasmine.respondWith(`
+              <div id="foo-target">new foo target</div> 
+              <div id="qux-target">new qux target</div> 
+            `)
+            await wait()
+
+            expect('#foo-target').toHaveText('new foo target')
+            expect('#bar-target').toHaveText('old bar target')
+            expect('#baz-target').toHaveText('old baz target')
+            expect('#qux-target').toHaveText('new qux target')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('bar')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('#bar-target')
+
+            jasmine.respondWithSelector('#bar-target', { text: 'new bar target' })
+            await wait()
+
+            expect('#foo-target').toHaveText('new foo target')
+            expect('#bar-target').toHaveText('new bar target')
+            expect('#baz-target').toHaveText('old baz target')
+            expect('#qux-target').toHaveText('new qux target')
+
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('baz')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('#baz-target')
+
+            jasmine.respondWithSelector('#baz-target', { text: 'new baz target' })
+            await wait()
+
+            expect('#foo-target').toHaveText('new foo target')
+            expect('#bar-target').toHaveText('new bar target')
+            expect('#baz-target').toHaveText('new baz target')
+            expect('#qux-target').toHaveText('new qux target')
+
+          })
+
+        })
+
       })
     })
 

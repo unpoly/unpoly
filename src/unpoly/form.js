@@ -86,6 +86,9 @@ up.form = (function() {
 
     @experimental
 
+  @param {boolean} [config.validateBatch=true]
+    TODO: Params
+
   @param {number} [config.watchInputDelay=0]
     The number of milliseconds to [wait before running a watcher callback](/watch-options#debouncing).
 
@@ -129,6 +132,7 @@ up.form = (function() {
     genericButtonSelectors: ['input[type=button]', 'button[type=button]'],
     // Although we only need to bind to `input`, we always also bind to `change`
     // in case another script manually triggers it.
+    validateBatch: true,
     watchInputEvents: ['input', 'change'],
     watchInputDelay: 0,
     watchChangeEvents: ['change'],
@@ -472,6 +476,7 @@ up.form = (function() {
     let parser = new up.OptionsParser(field, options, { ...parserOptions, closest: true, attrPrefix: 'up-validate-' })
     parser.string('url')
     parser.string('method', { normalize: u.normalizeMethod })
+    parser.boolean('batch', { default: config.validateBatch })
     // parser.include(destinationOptions)
     parser.include(watchOptions, { defaults: { event: 'change' } })
     return options
@@ -1118,6 +1123,15 @@ up.form = (function() {
     @mix up.reload/client-state
 
   @section Request
+    @param {string} options.url
+      TODO: Docs
+
+    @param {string} options.method
+      TODO: Docs
+
+    @param {boolean} options.batch
+      TODO: Docs
+
     @param options.params
       @like up.render
 
@@ -1736,8 +1750,22 @@ up.form = (function() {
     @mix up-watch/event-source
       @param [up-watch-event='change']
 
+  @section Request
+    @param [up-validate-url]
+      TODO: Docs
+      @experimental
+
+    @param [up-validate-method]
+      TODO: Docs
+      @experimental
+
+    @param [up-validate-batch]
+      TODO: Docs
+      @experimental
+
   @section Loading state
     @mix up-watch/loading-state
+
 
   @stable
   */
