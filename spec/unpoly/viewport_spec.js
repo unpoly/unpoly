@@ -715,6 +715,19 @@ describe('up.viewport', function() {
       })
     })
 
+    describe('up.viewport.around()', function() {
+      it('returns viewports that  are either ancestors, descendants, or the given element itself', function() {
+        const $motherViewport = $fixture('.mother[up-viewport]')
+        const $element = $motherViewport.affix('.element')
+        const $childViewport = $element.affix('.child[up-viewport]')
+        const $grandChildViewport = $childViewport.affix('.grand-child[up-viewport]')
+        const actual = up.viewport.around($element[0])
+        const expected = $motherViewport.add($childViewport).add($grandChildViewport)
+
+        expect(actual).toMatchList(expected)
+      })
+    })
+
     describe('up.viewport.get()', function() {
 
       it('seeks upwards from the given element', function() {

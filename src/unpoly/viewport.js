@@ -403,6 +403,24 @@ up.viewport = (function() {
   }
 
   /*-
+  Returns a list of all viewports that are either contained within
+  the given element or that are ancestors of the given element.
+
+  This is relevant when updating a fragment with `{ scroll: 'restore' | 'reset' }`.
+  In tht case we restore / reset the scroll tops of all viewports around the fragment.
+
+  @function up.viewport.around
+  @param {string|Element|jQuery} element
+  @param {Object} options
+  @return {List<Element>}
+  @internal
+  */
+  function getAround(element, options = {}) {
+    element = f.get(element, options)
+    return e.around(element, allSelector())
+  }
+
+  /*-
   Returns a list of all the viewports on the current layer.
 
   @function up.viewport.all
@@ -642,6 +660,10 @@ up.viewport = (function() {
     let viewports
     if (reference) {
       viewports = [closest(reference, options)]
+    } else if (options.around) {
+      // This is relevant when updating a fragment with { scroll: 'restore' | 'reset' }.
+      // In tht case we restore / reset the scroll tops of all viewports around the fragment.
+      viewports = getAround(options.around, options)
     } else {
       viewports = getAll(options)
     }
@@ -998,6 +1020,7 @@ up.viewport = (function() {
     config,
     get: closest,
     subtree: getSubtree,
+    around: getAround,
     get root() { return getRoot() },
     rootWidth,
     rootHeight,
