@@ -1116,7 +1116,7 @@ describe('up.form', function() {
 
               await wait(30)
 
-              // Callback has been called and takes 100 ms to complete
+              // Callback has been called and takes 100 ms to complete. 30ms have past, 70ms are left.
               expect(callbackCount).toEqual(1)
               input.value = 'new-value-2'
               Trigger[eventType](input)
