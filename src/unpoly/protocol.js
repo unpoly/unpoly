@@ -279,6 +279,13 @@ up.protocol = (function() {
   */
 
   /*-
+  TODO: Docs
+
+  @header X-Up-Origin-Mode
+  @experimental
+  */
+
+  /*-
   This response header contains a hash identifying the content in the response body.
 
   Typically, the ETag value is a hash of the underlying data that was rendered,

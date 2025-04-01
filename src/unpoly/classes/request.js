@@ -292,6 +292,8 @@ up.Request = class Request extends up.Record {
       'failMode',    // we would love to delegate @failMode to @failLayer.mode, but @failLayer might be the string "new"
       'failContext', // we would love to delegate @failContext to @failLayer.mode, but @failLayer might be the string "new"
       'origin',
+      'originLayer',
+      'originMode',
       'builtAt',
       'wrapMethod',
       'contentType',
@@ -352,11 +354,15 @@ up.Request = class Request extends up.Record {
       // if any code actually calls up.request({ ..., layer: 'new' }).
       // In up.Change.OpenLayer we connect requests to the base layer we're stacking upon.
       this.layer = up.layer.get(this.layer, layerLookupOptions)
-      this.failLayer = up.layer.get(this.failLayer, layerLookupOptions)
       this.context ||= this.layer.context || {} // @layer might be "new", so we default to {}
-      this.failContext ||= this.failLayer?.context || {} // @failLayer might be "new", so we default to {}
       this.mode ||= this.layer.mode
+
+      this.failLayer = up.layer.get(this.failLayer, layerLookupOptions)
+      this.failContext ||= this.failLayer?.context || {} // @failLayer might be "new", so we default to {}
       this.failMode ||= this.failLayer?.mode
+
+      this.originLayer ||= up.layer.get(this.origin) || up.layer.current
+      this.originMode ||= this.originLayer?.mode
     }
 
     this.bindLayer = options.bindLayer || this.layer
@@ -486,6 +492,7 @@ up.Request = class Request extends up.Record {
       // response.request.origin will prevent its (now maybe detached) DOM tree
       // from garbage collection while the response is cached by up.network.
       this.origin = undefined
+      this.originLayer = undefined
 
       this._fragments = undefined
       this._bindFragments = undefined // there is also a bindLayer() getter
@@ -854,7 +861,7 @@ up.Request = class Request extends up.Record {
   _setAutoHeaders() {
     // Add information about the response's intended use, so the server may
     // customize or shorten its response.
-    for (let key of ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']) {
+    for (let key of ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext', 'originMode']) {
       this._setPropertyHeader(key)
     }
 

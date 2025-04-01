@@ -130,23 +130,29 @@ describe('up.network', function() {
         })
 
         it('submits information about the fragment update as HTTP headers, so the server may choose to optimize its responses', async function() {
-          makeLayers(2)
+          makeLayers([
+            { mode: 'root', context: { rootKey: 'rootValue' } },
+            { mode: 'modal', context: { modalKey: 'modalValue' } },
+            { mode: 'drawer', context: { drawerKey: 'drawerValue' } }
+          ])
 
           up.request({
             url: '/foo',
             target: '.target',
-            layer: 'overlay',
+            layer: 0,
             failTarget: '.fail-target',
-            failLayer: 'root'
+            failLayer: 1,
+            origin: up.layer.front.element,
           })
 
           await wait()
 
           const request = jasmine.lastRequest()
           expect(request.requestHeaders['X-Up-Target']).toEqual('.target')
+          expect(request.requestHeaders['X-Up-Mode']).toEqual('root')
           expect(request.requestHeaders['X-Up-Fail-Target']).toEqual('.fail-target')
-          expect(request.requestHeaders['X-Up-Mode']).toEqual('modal')
-          expect(request.requestHeaders['X-Up-Fail-Mode']).toEqual('root')
+          expect(request.requestHeaders['X-Up-Fail-Mode']).toEqual('modal')
+          expect(request.requestHeaders['X-Up-Origin-Mode']).toEqual('drawer')
         })
 
         it('does not transmit missing meta attributes as X-Up-prefixed headers', function(done) {
@@ -193,10 +199,31 @@ describe('up.network', function() {
           const request = up.request({ url: '/foo', origin: up.layer.front.element, failLayer: 'root' })
           expect(request.layer).toEqual(up.layer.current)
           expect(request.mode).toEqual('drawer')
+          expect(request.context).toEqual({ drawerKey: 'drawerValue' })
           expect(request.failLayer).toEqual(up.layer.root)
           expect(request.failMode).toEqual('root')
-          expect(request.context).toEqual({ drawerKey: 'drawerValue' })
           expect(request.failContext).toEqual({ rootKey: 'rootValue' })
+        })
+
+        it('remembers the { originLayer } when targeting another layer', function() {
+          makeLayers([
+            { mode: 'root', context: { rootKey: 'rootValue' } },
+            { mode: 'modal', context: { modalKey: 'modalValue' } },
+            { mode: 'drawer', context: { drawerKey: 'drawerValue' } }
+          ])
+
+          const request = up.request({ url: '/foo', origin: up.layer.front.element, layer: 0, failLayer: 1 })
+
+          expect(request.layer).toEqual(up.layer.root)
+          expect(request.mode).toEqual('root')
+          expect(request.context).toEqual({ rootKey: 'rootValue' })
+
+          expect(request.failLayer).toEqual(up.layer.get(1))
+          expect(request.failMode).toEqual('modal')
+          expect(request.failContext).toEqual({ modalKey: 'modalValue' })
+
+          expect(request.originLayer).toEqual(up.layer.current)
+          expect(request.originMode).toEqual('drawer')
         })
 
         it('assumes no layer if neither { layer, failLayer, origin } are given', function() {
