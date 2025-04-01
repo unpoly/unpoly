@@ -7439,6 +7439,28 @@ describe('up.fragment', function() {
 
         })
 
+        describe('with { scroll: "bottom" }', function() {
+
+          it("scrolls the updated fragment's viewport to the bottom", async function() {
+            // viewport = fixture('[up-viewport]', { style: { 'width': '200px', 'height': '200px' }})
+            // content = e.affix
+            const [viewport] = htmlFixtureList(`
+              <div up-viewport id="viewport" style="height: 200px; overflow-y: scroll">
+                <div style="height: 1000px">
+                  <div id="child">old child</div>
+                </div>
+              </div>
+            `)
+
+            up.render({ fragment: '<div id="child">new child</div>', scroll: 'bottom' })
+            await wait()
+
+            expect('#child').toHaveText('new child')
+            expect(viewport.scrollTop).toBe(800)
+          })
+
+        })
+
         describe('with an array of { scroll } options', function() {
 
           mockRevealBeforeEach()

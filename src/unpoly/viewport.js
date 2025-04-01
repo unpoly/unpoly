@@ -565,7 +565,7 @@ up.viewport = (function() {
     const { location } = options.layer
     const locationScrollTops = options.layer.lastScrollTops.get(location)
     if (locationScrollTops) {
-      setScrollTops(viewports, locationScrollTops)
+      setScrollPositions(viewports, locationScrollTops, 0)
       up.puts('up.viewport.restoreScroll()', 'Restored scroll positions to %o', locationScrollTops)
       return true
     } else {
@@ -670,15 +670,16 @@ up.viewport = (function() {
     return [viewports, options]
   }
 
-  function resetScroll(...args) {
+  function scrollTo(position, ...args) {
     const [viewports, _options] = parseOptions(args)
-    setScrollTops(viewports, {})
+    setScrollPositions(viewports, {}, position)
+    return true
   }
 
-  function setScrollTops(viewports, tops) {
+  function setScrollPositions(viewports, tops, defaultTop) {
     for (let viewport of viewports) {
       const key = scrollTopKey(viewport)
-      viewport.scrollTop = tops[key] || 0
+      viewport.scrollTop = tops[key] || defaultTop
     }
   }
 
@@ -1028,7 +1029,7 @@ up.viewport = (function() {
     rootScrollbarWidth,
     saveScroll,
     restoreScroll,
-    resetScroll,
+    scrollTo,
     saveFocus,
     restoreFocus,
     absolutize,

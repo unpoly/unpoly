@@ -16,7 +16,9 @@ up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
   processPrimitive(opt) {
     switch (opt) {
       case 'top':
-        return this._reset()
+        return this._scrollTo(0)
+      case 'bottom':
+        return this._scrollTo(Number.MAX_SAFE_INTEGER)
       case 'layer':
         return this._revealLayer()
       case 'main':
@@ -60,10 +62,9 @@ up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
     return this._revealElement(this.layer.getBoxElement())
   }
 
-  _reset() {
-    // With { around: undefined }, resetScroll() resets all viewports in { layer }
-    up.viewport.resetScroll({ ...this.attributes(), around: this.fragment })
-    return true
+  _scrollTo(position) {
+    // With { around: undefined }, scrollToTop() resets all viewports in { layer }
+    return up.viewport.scrollTo(position, { ...this.attributes(), around: this.fragment })
   }
 
   _restore() {
