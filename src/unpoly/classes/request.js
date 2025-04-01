@@ -479,7 +479,7 @@ up.Request = class Request extends up.Record {
       // we have already copied all layer-relevant properties, e.g. this.mode, this.context.
       this.layer = undefined
       this.failLayer = undefined
-      this._bindLayer = undefined
+      this.bindLayer = undefined
 
       // We want to provide the triggering element as { origin } to the function
       // providing the CSRF function. We now evict this property, since
@@ -488,7 +488,7 @@ up.Request = class Request extends up.Record {
       this.origin = undefined
 
       this._fragments = undefined
-      this._bindFragments = undefined
+      this._bindFragments = undefined // there is also a bindLayer() getter
     })
   }
 
