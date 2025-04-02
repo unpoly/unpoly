@@ -3526,16 +3526,16 @@ describe('up.link', function() {
           expect(cacheEntry).toBeCachedWithResponse({ text: '<div class="target">new text</div>' })
         })
 
-        it('does not cache a failed response', async function() {
+        fit('does not cache a failed response', async function() {
           up.link.config.preloadDelay = 0
 
-          fixture('.target', { text: 'old text' })
+          fixture('.success', { text: 'old text' })
+          fixture('.failure', { text: 'old error' })
 
-          const link = fixture('a[href="/foo"][up-target=".target"][up-preload]')
+          const link = fixture('a[href="/foo"][up-target=".success"][up-fail-target=".failure"][up-preload]')
           up.hello(link)
 
           Trigger.hoverSequence(link)
-
           await wait(30)
 
           expect(jasmine.Ajax.requests.count()).toEqual(1)
@@ -3543,23 +3543,38 @@ describe('up.link', function() {
           jasmine.respondWith({
             status: 500,
             responseText: `
-              <div class="target">
-                new text
+              <div class="failure">
+                new error
               </div>
             `
           })
-
           await wait()
 
           // We only preloaded, so the target isn't replaced yet.
-          expect('.target').toHaveText('old text')
+          expect('.success').toHaveText('old text')
+          expect('.failure').toHaveText('old error')
 
-          Trigger.click(link)
+          expect({ url: '/foo' }).not.toBeCached()
 
+          Trigger.clickSequence(link)
           await wait()
 
           // Since the preloading failed, we send another request
           expect(jasmine.Ajax.requests.count()).toEqual(2)
+
+          jasmine.respondWith({
+            status: 500,
+            responseText: `
+              <div class="failure">
+                new error
+              </div>
+            `
+          })
+          await wait()
+
+          expect('.success').toHaveText('old text')
+          expect('.failure').toHaveText('new error')
+
         })
 
         describe('when the link destination is already cached', function() {
