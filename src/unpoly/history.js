@@ -364,6 +364,8 @@ up.history = (function() {
   */
 
   function onPop(event) {
+    up.log.putsEvent(event)
+
     // The earlier URL has now been restored by the browser. This cannot be prevented.
     trackCurrentLocation()
     let location = currentLocation()
