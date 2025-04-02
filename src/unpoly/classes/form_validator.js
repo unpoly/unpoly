@@ -22,9 +22,11 @@ up.FormValidator = class FormValidator {
   }
 
   _onFieldAdded(field) {
-    let { event } = up.form.validateOptions(field)
-    let callback = () => up.error.muteUncriticalRejection(this.validate({ origin: field }))
-    return up.on(field, event, callback)
+    let eventType = up.form.validateOptions(field).event
+    return up.on(field, eventType, (event) => {
+      up.log.putsEvent(event)
+      up.error.muteUncriticalRejection(this.validate({ origin: field }))
+    })
   }
 
   _honorAbort() {

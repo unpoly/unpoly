@@ -87,11 +87,15 @@ up.log = (function() {
     }
   }
 
+  // With multiple watchers on the same field we only want to print once.
+  let lastPrintedUserEvent
+
   function printUserEvent(event) {
-    if (config.enabled) {
-      event = event.originalEvent || event
+    if (config.enabled && lastPrintedUserEvent !== event) {
+      lastPrintedUserEvent = event
+      let originalEvent = event.originalEvent || event
       let color = '#5566cc'
-      printToStreamStyled('log', event.type, `color: white; border-color: ${color}; background-color: ${color}`, 'Interaction on %o', event.target)
+      printToStreamStyled('log', originalEvent.type, `color: white; border-color: ${color}; background-color: ${color}`, 'Interaction on %o', originalEvent.target)
     }
   }
 

@@ -30,7 +30,7 @@ up.FieldWatcher = class FieldWatcher {
 
   _trackReset() {
     let guard = ({ target }) => target === this._region
-    return up.on('reset', { guard }, () => this._onFormReset())
+    return up.on('reset', { guard }, (event) => this._onFormReset(event))
   }
 
   get _region() {
@@ -44,9 +44,11 @@ up.FieldWatcher = class FieldWatcher {
 
   _watchField(field) {
     let fieldOptions = this._fieldOptions(field)
+    let eventType = fieldOptions.event
+
     // Return a function that unbinds all events when the field is removed from _root.
     // Note that an [up-keep] field may be moved to another root.
-    return up.on(field, fieldOptions.event, () => this._check(fieldOptions))
+    return up.on(field, eventType, (event) => this._check(event, fieldOptions))
   }
 
   _abort() {
@@ -141,7 +143,9 @@ up.FieldWatcher = class FieldWatcher {
     return up.Params.fromContainer(this._root).toObject()
   }
 
-  _check(fieldOptions = {}) {
+  _check(event, fieldOptions = {}) {
+    up.log.putsEvent(event)
+
     const values = this._readFieldValues()
 
     if (this._isNewValues(values)) {
@@ -149,8 +153,8 @@ up.FieldWatcher = class FieldWatcher {
     }
   }
 
-  _onFormReset() {
+  _onFormReset(event) {
     // We need to wait 1 task for the reset button to affect field values
-    u.task(() => this._check())
+    u.task(() => this._check(event))
   }
 }
