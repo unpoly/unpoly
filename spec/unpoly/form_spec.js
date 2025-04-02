@@ -6287,9 +6287,9 @@ describe('up.form', function() {
           expect(target).toBeVisible()
         })
 
-        it('switches matching element outside the form with [up-switch-scope=":layer"]', async function() {
+        it('switches matching element outside the form with [up-switch-region=":layer"]', async function() {
           const form = fixture('form')
-          const field = e.affix(form, 'input[name="foo"][up-switch=".target"][up-switch-scope=":layer"]')
+          const field = e.affix(form, 'input[name="foo"][up-switch=".target"][up-switch-region=":layer"]')
           const targetInsideForm = e.affix(form, '.target[up-show-for="active"]')
           up.hello(form)
 
@@ -6308,11 +6308,11 @@ describe('up.form', function() {
           expect(targetOutsideForm).toBeVisible()
         })
 
-        it('switches matching element within a field ancestor with [up-switch-scope="#selector"]', async function() {
+        it('switches matching element within a field ancestor with [up-switch-region="#selector"]', async function() {
           let [form, fieldContainer, field, target1, target2, otherContainer, target3] = htmlFixtureList(`
             <form>
               <div class="container">
-                <input name="foo" up-switch=".target" up-switch-scope=".container">
+                <input name="foo" up-switch=".target" up-switch-region=".container">
                 <div class="target" up-show-for="active">target1</div>
                 <div class="target" up-show-for="active">target2</div>
               </div>
@@ -6344,10 +6344,10 @@ describe('up.form', function() {
           expect(target3).toBeVisible()
         })
 
-        it('switches matching element within a non-ancestor container with [up-switch-scope="#selector"]', async function() {
+        it('switches matching element within a non-ancestor container with [up-switch-region="#selector"]', async function() {
           let [form, field, container, target1, target2, target3] = htmlFixtureList(`
             <form>
-              <input name="foo" up-switch=".target" up-switch-scope=".container">
+              <input name="foo" up-switch=".target" up-switch-region=".container">
               <div class="container">
                 <div class="target" up-show-for="active">target1</div>
                 <div class="target" up-show-for="active">target2</div>

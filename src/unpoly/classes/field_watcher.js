@@ -24,17 +24,17 @@ up.FieldWatcher = class FieldWatcher {
   }
 
   _trackAbort() {
-    let guard = ({ target }) => target.contains(this._scope)
+    let guard = ({ target }) => target.contains(this._region)
     return up.on('up:fragment:aborted', { guard }, () => this._abort())
   }
 
   _trackReset() {
-    let guard = ({ target }) => target === this._scope
+    let guard = ({ target }) => target === this._region
     return up.on('reset', { guard }, () => this._onFormReset())
   }
 
-  get _scope() {
-    return up.form.getScope(this._root)
+  get _region() {
+    return up.form.getRegion(this._root)
   }
 
   _fieldOptions(field) {
@@ -85,7 +85,7 @@ up.FieldWatcher = class FieldWatcher {
 
     // If the form was destroyed while a callback was scheduled, we don't run the callback.
     // TODO: Do we need this? Since we already clear scheduledValues in stop()?
-    if (!up.fragment.isAlive(this._scope)) return
+    if (!up.fragment.isAlive(this._region)) return
 
     // Don't forward { event, delay } because
     // (1) we have already processed them here and

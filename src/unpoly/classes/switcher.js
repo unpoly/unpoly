@@ -13,11 +13,11 @@ up.Switcher = class Switcher {
   constructor(field) {
     this._field = field
     this._switcheeSelector = field.getAttribute('up-switch') || up.fail("No switch target given for %o", field)
-    this._scopeSelector = field.getAttribute('up-switch-scope')
+    this._regionSelector = field.getAttribute('up-switch-region')
   }
 
   start() {
-    this._switchScope()
+    this._switchRegion()
 
     return u.sequence(
       this._trackFieldChanges(),
@@ -41,10 +41,10 @@ up.Switcher = class Switcher {
   }
 
   _onFieldChanged() {
-    this._switchScope()
+    this._switchRegion()
   }
 
-  _switchScope() {
+  _switchRegion() {
     const fieldTokens = this._buildFieldTokens()
     for (let switchee of this._findSwitchees()) {
       this._switchSwitchee(switchee, fieldTokens)
@@ -77,10 +77,10 @@ up.Switcher = class Switcher {
   }
 
   get _scope() {
-    if (this._scopeSelector) {
-      return up.fragment.get(this._scopeSelector, { origin: this._field })
+    if (this._regionSelector) {
+      return up.fragment.get(this._regionSelector, { origin: this._field })
     } else {
-      return up.form.getScope(this._field)
+      return up.form.getRegion(this._field)
     }
   }
 

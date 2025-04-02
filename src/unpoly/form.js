@@ -533,7 +533,7 @@ up.form = (function() {
   }
 
   function getDisableContainers(disable, origin) {
-    let originScope = () => getScope(origin)
+    let originScope = () => getRegion(origin)
 
     if (disable === true) {
       return [originScope()]
@@ -1237,7 +1237,7 @@ up.form = (function() {
   // (3) Called without an origin element => Returns the current layer element
   //
   // Does not support a selector string as a first argument. Only works with Element arguments.
-  function getScope(origin, options) {
+  function getRegion(origin, options) {
     if (origin) {
       return getForm(origin, options) || up.layer.get(origin).element
     } else {
@@ -1260,7 +1260,7 @@ up.form = (function() {
     let [root, { guard }, callback] = u.args(args, 'val', 'options', 'callback')
 
     let filter = function(fields) {
-      let scope = getScope(root)
+      let scope = getRegion(root)
       return u.filter(fields, function(field) {
         return (root === scope || root.contains(field))
           && (getForm(field) === scope) // will also match external fields with [form]
@@ -2114,7 +2114,7 @@ up.form = (function() {
     groupSolution: findGroupSolution,
     groupSelectors: getGroupSelectors,
     get: getForm,
-    getScope,
+    getRegion,
   }
 })()
 
