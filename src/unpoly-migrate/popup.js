@@ -16,7 +16,7 @@ up.popup = {
     Use `up.layer.open({ origin, layer: 'popup' })` instead.
   */
   attach(origin, options = {}) {
-    let origin = up.fragment.get(origin)
+    origin = up.fragment.get(origin)
     up.migrate.deprecated('up.popup.attach(origin)', "up.layer.open({ origin, layer: 'popup' })")
     return up.layer.open({ ...options, origin, layer: 'popup' })
   },
