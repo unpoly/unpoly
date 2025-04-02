@@ -3526,7 +3526,7 @@ describe('up.link', function() {
           expect(cacheEntry).toBeCachedWithResponse({ text: '<div class="target">new text</div>' })
         })
 
-        fit('does not cache a failed response', async function() {
+        it('does not cache a failed response', async function() {
           up.link.config.preloadDelay = 0
 
           fixture('.success', { text: 'old text' })
