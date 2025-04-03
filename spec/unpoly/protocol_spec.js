@@ -54,16 +54,31 @@ describe('up.protocol', function() {
     })
   })
 
-  describe('up.protocol.cspNoncesFromHeader', function() {
+  describe('up.protocol.cspNoncesFromHeader()', function() {
 
     it('returns the CSP nonces for script-src', function() {
       const nonces = up.protocol.cspNoncesFromHeader("script-src: 'nonce-secret2' 'self' 'nonce-secret3'")
       expect(nonces).toEqual(['secret2', 'secret3'])
     })
 
-    it('returns the CSP nonces for script-src-elem', function() {
-      const nonces = up.protocol.cspNoncesFromHeader("script-src-elem: 'nonce-secret2' 'self' 'nonce-secret3'")
+    it('returns the CSP nonces for default-src if no script-src is set', function() {
+      const nonces = up.protocol.cspNoncesFromHeader("default-src: 'nonce-secret2' 'self' 'nonce-secret3'")
       expect(nonces).toEqual(['secret2', 'secret3'])
+    })
+
+    it('ignores CSP nonces for default-src if script-src is set', function() {
+      const nonces = up.protocol.cspNoncesFromHeader("default-src: 'nonce-secret1'; script-src: 'nonce-secret2' 'self' 'nonce-secret3'")
+      expect(nonces).toEqual(['secret2', 'secret3'])
+    })
+
+    it('returns an empty array if the header has neither default-src nor script-src directive', function() {
+      const nonces = up.protocol.cspNoncesFromHeader("image-src: 'nonce-secret2'")
+      expect(nonces).toEqual([])
+    })
+
+    it('does not return the CSP nonces for script-src-elem, because we also validate attribute callbacks', function() {
+      const nonces = up.protocol.cspNoncesFromHeader("script-src-elem: 'nonce-secret2' 'self' 'nonce-secret3'")
+      expect(nonces).toEqual([])
     })
 
     it('does not return the CSP nonces for style-src', function() {
@@ -75,5 +90,6 @@ describe('up.protocol', function() {
       const nonces = up.protocol.cspNoncesFromHeader(null)
       expect(nonces).toEqual([])
     })
+
   })
 })

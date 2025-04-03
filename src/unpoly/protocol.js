@@ -1065,21 +1065,26 @@ up.protocol = (function() {
     return u.evalOption(config.cspNonce)
   }
 
+  const NONCE_PATTERN = /'nonce-([^']+)'/g
+
+  function findNonces(cspPart) {
+    let matches = cspPart.matchAll(NONCE_PATTERN)
+    return u.map(matches, '1')
+  }
+
   function cspNoncesFromHeader(cspHeader) {
-    let nonces = []
+    let results = {}
+
     if (cspHeader) {
-      let parts = cspHeader.split(/\s*;\s*/)
+      let parts = cspHeader.split(/;/)
       for (let part of parts) {
-        if (part.indexOf('script-src') === 0) {
-          let noncePattern = /'nonce-([^']+)'/g
-          let match
-          while (match = noncePattern.exec(part)) {
-            nonces.push(match[1])
-          }
+        let directive = part.match(/^\s*(script|default)-src:/)?.[1]
+        if (directive) {
+          results[directive] = findNonces(part)
         }
       }
     }
-    return nonces
+    return results.script || results.default || []
   }
 
   function wrapMethod(method, params) {
