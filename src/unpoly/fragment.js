@@ -246,6 +246,7 @@ up.fragment = (function() {
       saveScroll: true,
       saveFocus: true,
       focus: 'keep',
+      focusVisible: 'auto',
       abort: 'target',
       failOptions: true,
       feedback: true,

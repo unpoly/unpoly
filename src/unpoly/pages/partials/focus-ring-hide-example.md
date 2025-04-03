@@ -8,7 +8,7 @@ a CSS framework like Bootstrap. You can remove these outlines for most mouse and
 }
 ```
 
-By default Unpoly removes an `outline` CSS property from elements with an `.up-focus-hidden` class.
+[By default](https://github.com/unpoly/unpoly/blob/master/src/unpoly/viewport.sass) Unpoly removes an `outline` CSS property from elements with an `.up-focus-hidden` class.
 
 > [tip]
 > CSS frameworks might render focus rings using properties other than `outline`. For example,

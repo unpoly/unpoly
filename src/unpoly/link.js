@@ -455,6 +455,7 @@ up.link = (function() {
 
     // Viewport options
     parser.booleanOrString('focus')
+    parser.booleanOrString('focusVisible')
     parser.boolean('saveScroll')
     parser.boolean('saveFocus')
     parser.booleanOrString('scroll')

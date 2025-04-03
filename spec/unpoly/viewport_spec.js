@@ -7,7 +7,7 @@ describe('up.viewport', function() {
   describe('JavaScript functions', function() {
 
     describe('up.focus()', function() {
-      describe('focus ring', function() {
+      describe('focus ring visibility', function() {
 
         const useMouse = function() {
           Trigger.clickSequence(document.body)

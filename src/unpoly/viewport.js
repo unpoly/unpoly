@@ -226,8 +226,8 @@ up.viewport = (function() {
     If set to `'auto'` (the default), focus will be visible if `up.viewport.config.autoFocusVisible()`
     returns `true` for the given element and [current input device](/up.event.inputDevice).
 
-    The [`:focus-visible`](https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible) pseudo-class will also be set or removed accordingly
-    on [browsers that support it](https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter).
+    The [`:focus-visible`](https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible) pseudo-class will
+    also be set or removed accordingly on [supporting browsers](https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter).
 
     @experimental
 
@@ -289,14 +289,14 @@ up.viewport = (function() {
 
   You can use this class to [remove an unwanted focus outline](#example).
 
-  ### Relation to `:focus-visible`
+  ## Relation to `:focus-visible`
 
   Unpoly will try to unset `:focus-visible` whenever it sets `.up-focus-visible`, but can only do so
   in [some browsers](https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter).
   Because of this the `.up-focus-hidden` class may be set on elements that the browser considers to be
   [`:focus-visible`](https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible).
 
-  ### Example
+  ## Example
 
   @include focus-ring-hide-example
 
@@ -311,14 +311,14 @@ up.viewport = (function() {
   You can use this class to [give a new component a focus ring](#example) for keyboard users,
   while not rendering a focus ring for mouse or touch users.
 
-  ### Relation to `:focus-visible`
+  ## Relation to `:focus-visible`
 
   Unpoly will try to force `:focus-visible` whenever it sets `.up-focus-visible`, but can only do so
   in [some browsers](https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter).
   Because of this the `.up-focus-visible` class may be set on elements that the browser considers to *not* be
   [`:focus-visible`](https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible).
 
-  ### Example
+  ## Example
 
   @include focus-ring-show-example
 

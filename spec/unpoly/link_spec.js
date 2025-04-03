@@ -928,6 +928,18 @@ describe('up.link', function() {
         expect(options.lang).toBe('fr')
       })
 
+      it('parses an [up-focus-visible=false] attribute as boolean', function() {
+        const link = fixture('a[href="/foo"][up-focus-visible="false"]')
+        const options = up.link.followOptions(link)
+        expect(options.focusVisible).toBe(false)
+      })
+
+      it('parses an [up-focus-visible="auto"] attribute as string', function() {
+        const link = fixture('a[href="/foo"][up-focus-visible="auto"]')
+        const options = up.link.followOptions(link)
+        expect(options.focusVisible).toBe('auto')
+      })
+
       it('parses an [up-match] attribute', function() {
         const link = fixture('a[href="/foo"][up-match="first"]')
         const options = up.link.followOptions(link)
@@ -1960,54 +1972,91 @@ describe('up.link', function() {
           expect('#focus').toHaveFocus()
         })
 
-        it('hides the focus ring when the link is activated with the mouse', async function() {
-          fixture('div#focus')
-          fixture('#target', { text: 'old content' })
-          const link = fixture('a[href="/path"][up-target="#target"][up-focus="#focus"]')
-          Trigger.clickSequence(link)
+        describe('focus ring visibility', function() {
 
-          await wait()
+          it('hides the focus ring when the link is activated with the mouse', async function() {
+            fixture('div#focus')
+            fixture('#target', { text: 'old content' })
+            const link = fixture('a[href="/path"][up-target="#target"][up-focus="#focus"]')
+            Trigger.clickSequence(link)
 
-          jasmine.respondWithSelector('#target', { text:' new content' })
+            await wait()
 
-          await wait()
+            jasmine.respondWithSelector('#target', { text:' new content' })
 
-          expect('#focus').toHaveFocus()
-          expect('#focus').not.toHaveOutline()
+            await wait()
+
+            expect('#focus').toHaveFocus()
+            expect('#focus').not.toHaveOutline()
+          })
+
+          it('shows the focus ring when the link is activated with the mouse but the link has [up-focus-visible=true]', async function() {
+            fixture('div#focus')
+            fixture('#target', { text: 'old content' })
+            const link = fixture('a[href="/path"][up-target="#target"][up-focus="#focus"][up-focus-visible=true]')
+            Trigger.clickSequence(link)
+
+            await wait()
+
+            jasmine.respondWithSelector('#target', { text:' new content' })
+
+            await wait()
+
+            expect('#focus').toHaveFocus()
+            expect('#focus').toHaveOutline()
+          })
+
+          it('shows the focus ring when the link is activated with the keyboard', async function() {
+            fixture('div#focus', { text: 'focus' })
+            fixture('#target', { text: 'old content' })
+            const link = fixture('a[href="/path"][up-target="#target"][up-focus="#focus"]')
+            Trigger.clickLinkWithKeyboard(link)
+
+            await wait()
+
+            jasmine.respondWithSelector('#target', { text:' new content' })
+
+            await wait(1000)
+
+            expect('#focus').toHaveFocus()
+            expect('#focus').toHaveOutline()
+          })
+
+          it('hides the focus ring when the link is activated with the keyboard but the link has [up-focus-visible=false]', async function() {
+            fixture('div#focus', { text: 'focus' })
+            fixture('#target', { text: 'old content' })
+            const link = fixture('a[href="/path"][up-target="#target"][up-focus="#focus"][up-focus-visible=false]')
+            Trigger.clickLinkWithKeyboard(link)
+
+            await wait()
+
+            jasmine.respondWithSelector('#target', { text:' new content' })
+
+            await wait(1000)
+
+            expect('#focus').toHaveFocus()
+            expect('#focus').not.toHaveOutline()
+          })
+
+          it('shows the focus ring when the link is activated with the mouse and the focused element is an input', async function() {
+            const form = fixture('form')
+            e.affix(form, 'input#focus[name="email"]')
+            fixture('#target', { text: 'old content' })
+            const link = fixture('a[href="/path"][up-target="#target"][up-focus="#focus"]')
+            Trigger.clickSequence(link)
+
+            await wait()
+
+            jasmine.respondWithSelector('#target', { text:' new content' })
+
+            await wait()
+
+            expect('#focus').toHaveFocus()
+            expect('#focus').toHaveOutline()
+          })
+
         })
 
-        it('shows the focus ring when the link is activated with the keyboard', async function() {
-          fixture('div#focus', { text: 'focus' })
-          fixture('#target', { text: 'old content' })
-          const link = fixture('a[href="/path"][up-target="#target"][up-focus="#focus"]')
-          Trigger.clickLinkWithKeyboard(link)
-
-          await wait()
-
-          jasmine.respondWithSelector('#target', { text:' new content' })
-
-          await wait(1000)
-
-          expect('#focus').toHaveFocus()
-          expect('#focus').toHaveOutline()
-        })
-
-        it('shows the focus ring when the link is activated with the mouse and the focused element is an input', async function() {
-          const form = fixture('form')
-          e.affix(form, 'input#focus[name="email"]')
-          fixture('#target', { text: 'old content' })
-          const link = fixture('a[href="/path"][up-target="#target"][up-focus="#focus"]')
-          Trigger.clickSequence(link)
-
-          await wait()
-
-          jasmine.respondWithSelector('#target', { text:' new content' })
-
-          await wait()
-
-          expect('#focus').toHaveFocus()
-          expect('#focus').toHaveOutline()
-        })
       })
 
       describe('with [up-fail-target] modifier', function() {
