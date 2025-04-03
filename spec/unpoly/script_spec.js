@@ -169,7 +169,7 @@ describe('up.script', function() {
             up.render({ fragment: `
             <div class="container">
               <div class="element">new text</div>
-              <script>
+              <script nonce="spec-runner-nonce">
                 up.compiler('.element', (element) => window.compileSpy(element))
               </script>
             </div>
@@ -873,17 +873,17 @@ describe('up.script', function() {
       })
 
       it('finds a script[src] in the head', function() {
-        const script = fixture(document.head, 'script[src="/foo.js"]')
+        const script = fixture(document.head, 'script[src="/foo.js"][nonce="spec-runner-nonce"]')
         expect(up.script.findAssets()).toContain(script)
       })
 
       it('does not find a script[src] in the body', function() {
-        const script = fixture(document.body, 'script[src="/foo.js"]')
+        const script = fixture(document.body, 'script[src="/foo.js"][nonce="spec-runner-nonce"]')
         expect(up.script.findAssets()).not.toContain(script)
       })
 
       it('does not find an inline script in the head', function() {
-        const script = fixture(document.head, 'script', { text: 'console.log("hello from inline script")' })
+        const script = fixture(document.head, 'script', { text: 'console.log("hello from inline script")', nonce: 'spec-runner-nonce' })
         expect(up.script.findAssets()).not.toContain(script)
       })
 

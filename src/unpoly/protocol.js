@@ -1073,6 +1073,7 @@ up.protocol = (function() {
   }
 
   function cspNoncesFromHeader(cspHeader) {
+    console.debug("[cspNoncesFromHeader] got header value %o", cspHeader)
     let results = {}
 
     if (cspHeader) {
@@ -1084,6 +1085,8 @@ up.protocol = (function() {
         }
       }
     }
+    console.debug("[cspNoncesFromHeader] parsed results: %o", results)
+
     return results.script || results.default || []
   }
 

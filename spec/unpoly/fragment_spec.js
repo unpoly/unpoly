@@ -6361,7 +6361,9 @@ describe('up.fragment', function() {
               document: `
                 <html>
                   <head>
-                    <script>console.log("hello from new inline script")</script>
+                    <script nonce="spec-runner-nonce">
+                      console.log("hello from new inline script")
+                    </script>
                   </head>
                   <body>
                     <div class='container'>
@@ -7739,7 +7741,7 @@ describe('up.fragment', function() {
             fragment: `
               <div id="target">
                 new target text
-                <style>
+                <style nonce="spec-runner-nonce">
                   p {
                     font-size: 60px;
                   }
@@ -7757,7 +7759,7 @@ describe('up.fragment', function() {
         })
       })
 
-      describe('execution of scripts', function() {
+      fdescribe('execution of scripts', function() {
 
         beforeEach(function() {
           window.scriptTagExecuted = jasmine.createSpy('scriptTagExecuted')
@@ -7781,7 +7783,7 @@ describe('up.fragment', function() {
               fragment: `
                 <div class="target">
                   new text
-                  <script type="text/javascript">
+                  <script type="text/javascript" nonce="spec-runner-nonce">
                     window.scriptTagExecuted()
                   </script>
                 </div>
@@ -7803,7 +7805,7 @@ describe('up.fragment', function() {
               fragment: `
                 <div class="target">
                   new text
-                  <script type="module">
+                  <script type="module" nonce="spec-runner-nonce">
                     window.scriptTagExecuted()
                   </script>
                 </div>
@@ -7827,7 +7829,7 @@ describe('up.fragment', function() {
                   <body>
                     <div class="target">
                       new text
-                      <script type="text/javascript">
+                      <script type="text/javascript" nonce="spec-runner-nonce">
                         window.scriptTagExecuted()
                       </script>
                     </div>
@@ -7849,7 +7851,7 @@ describe('up.fragment', function() {
               fragment: `
                 <div class="target">
                   new text
-                  <script type="text/javascript">
+                  <script type="text/javascript" nonce="spec-runner-nonce">
                     window.scriptTagExecuted()
                   </script>
                 </div>
@@ -7869,7 +7871,7 @@ describe('up.fragment', function() {
               fragment: `
                 <div class="target">
                   <div>before</div>
-                  <script type="text/javascript">
+                  <script type="text/javascript" nonce="spec-runner-nonce">
                     window.scriptTagExecuted()
                   </script>
                   <div>after</div>
@@ -7890,7 +7892,7 @@ describe('up.fragment', function() {
             up.render({
               fragment: `
                 <div class="target">
-                  <script type="text/javascript" src="${this.linkedScriptPath}"></script>
+                  <script type="text/javascript" src="${this.linkedScriptPath}" nonce="spec-runner-nonce"></script>
                 </div>
               `
             })
@@ -7941,14 +7943,14 @@ describe('up.fragment', function() {
             up.fragment.config.runScripts = true
           })
 
-          it('executes inline script tags inside the updated fragment', async function() {
+          it('executes inline script elements inside the updated fragment', async function() {
             fixture('.target', { text: 'old text' })
 
             up.render({
               fragment: `
                 <div class="target">
                   new text
-                  <script type="text/javascript">
+                  <script type="text/javascript" nonce="spec-runner-nonce">
                     window.scriptTagExecuted()
                   </script>
                 </div>
@@ -7963,6 +7965,72 @@ describe('up.fragment', function() {
             expect('.target').toHaveVisibleText(/new text/)
           })
 
+          it('preserves the [nonce] attribute of an inline script (bugfix)', async function() {
+            fixture('.target', { text: 'old text' })
+
+            up.render({
+              fragment: `
+                <div class="target">
+                  new text
+                  <script type="text/javascript" nonce="secret">
+                    window.scriptTagExecuted()
+                  </script>
+                </div>
+              `
+            })
+
+            await wait(200)
+
+            // Cannot use toHaveAttribute() here, because on pages with a CSP that value is masked by the browser.
+            expect('.target script[type="text/javascript"]').toHaveProperty('nonce', 'secret')
+          })
+
+          it('executes scripts with a correct [nonce]', async function() {
+            fixture('.target', { text: 'old text' })
+
+            up.render({
+              fragment: `
+                <div class="target">
+                  new text
+                  <script type="text/javascript" nonce="spec-runner-nonce">
+                    window.scriptTagExecuted()
+                  </script>
+                </div>
+              `
+            })
+
+            await wait(200)
+
+            expect(window.scriptTagExecuted).toHaveBeenCalled()
+            expect(document).toHaveSelector('.target')
+            expect(document).toHaveSelector('.target script[type="text/javascript"]')
+            // Cannot use toHaveAttribute() here, because on pages with a CSP that value is masked by the browser.
+            expect('.target script[type="text/javascript"]').toHaveProperty('nonce', 'spec-runner-nonce')
+            expect('.target').toHaveVisibleText(/new text/)
+          })
+
+          it('does not execute scripts with an incorrect [nonce]', async function() {
+            fixture('.target', { text: 'old text' })
+
+            up.render({
+              fragment: `
+                <div class="target">
+                  new text
+                  <script type="text/javascript" nonce="incorrect-nonce">
+                    console.log("execute!")
+                    window.scriptTagExecuted()
+                  </script>
+                </div>
+              `
+            })
+
+            await wait(200)
+
+            expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+            // Cannot use toHaveAttribute() here, because on pages with a CSP that value is masked by the browser.
+            expect('.target script[type="text/javascript"]').toHaveProperty('nonce', 'incorrect-nonce')
+          })
+
           it('executes a script[type=module] inside the updated fragment', async function() {
             fixture('.target', { text: 'old text' })
 
@@ -7970,7 +8038,7 @@ describe('up.fragment', function() {
               fragment: `
                 <div class="target">
                   new text
-                  <script type="module">
+                  <script type="module" nonce="spec-runner-nonce">
                     window.scriptTagExecuted()
                   </script>
                 </div>
@@ -7990,7 +8058,7 @@ describe('up.fragment', function() {
 
             up.render({
               fragment: `
-                <script id="target">
+                <script id="target" nonce="spec-runner-nonce">
                   window.scriptTagExecuted()
                 </script>
               `
@@ -8008,7 +8076,7 @@ describe('up.fragment', function() {
               target: '.target',
               document: `
                 <div class="before">
-                  <script type="text/javascript">
+                  <script type="text/javascript" nonce="spec-runner-nonce">
                     window.scriptTagExecuted()
                   </script>
                 </div>
@@ -8031,7 +8099,7 @@ describe('up.fragment', function() {
             up.render({
               fragment: `
                 <div class="target">
-                  <script type="text/javascript" src="${this.linkedScriptPath}"></script>
+                  <script type="text/javascript" src="${this.linkedScriptPath}" nonce="spec-runner-nonce"></script>
                 </div>
               `
             })
@@ -8165,7 +8233,253 @@ describe('up.fragment', function() {
       })
 
 
-      describe('CSP nonces', function() {
+      fdescribe('CSP nonces in body scripts', function() {
+
+        beforeEach(function() {
+          up.fragment.config.runScripts = true
+        })
+
+        it("rewrites the [nonce] of a body script to use the current page's nonce when it matches the response nonce", async function() {
+          spyOn(up.protocol, 'cspNonce').and.returnValue('page-secret')
+
+          let [target] = htmlFixtureList(`
+            <div id="target">
+              old target text
+            </div>
+          `)
+
+          up.render('#target', { url: '/path' })
+          await wait()
+
+          jasmine.respondWith({
+            responseText: `
+              <div id="target">
+                new target text
+                <script nonce="response-secret"></script>
+              </div>
+            `,
+            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-response-secret'" }
+          })
+          await wait()
+
+          expect('#target').toHaveVisibleText('new target text')
+          expect('#target script').toHaveProperty('nonce', 'page-secret')
+        })
+
+        it("rewrites the [nonce] of a body script to use the current page's nonce when it matches one of multiple response's nonces", async function() {
+          spyOn(up.protocol, 'cspNonce').and.returnValue('page-secret')
+
+          let [target] = htmlFixtureList(`
+            <div id="target">
+              old target text
+            </div>
+          `)
+
+          up.render('#target', { url: '/path' })
+          await wait()
+
+          jasmine.respondWith({
+            responseText: `
+              <div id="target">
+                new target text
+                <script nonce="response-secret-2"></script>
+              </div>
+            `,
+            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-response-secret-1' 'nonce-response-secret-2' 'nonce-response-secret-3'" }
+          })
+          await wait()
+
+          expect('#target').toHaveVisibleText('new target text')
+          expect('#target script').toHaveProperty('nonce', 'page-secret')
+        })
+
+        it('rewrites the [nonce] of a body script with Content-Security-Policy-Report-Only response header', async function() {
+          spyOn(up.protocol, 'cspNonce').and.returnValue('page-secret')
+
+          let [target] = htmlFixtureList(`
+            <div id="target">
+              old target text
+            </div>
+          `)
+
+          up.render('#target', { url: '/path' })
+          await wait()
+
+          jasmine.respondWith({
+            responseText: `
+              <div id="target">
+                new target text
+                <script nonce="response-secret"></script>
+              </div>
+            `,
+            responseHeaders: { 'Content-Security-Policy-Report-Only': "script-src: 'nonce-response-secret'" }
+          })
+          await wait()
+
+          expect('#target').toHaveVisibleText('new target text')
+          expect('#target script').toHaveProperty('nonce', 'page-secret')
+        })
+
+        it('does not change a body script when the current page nonce is unknown', async function() {
+          spyOn(up.protocol, 'cspNonce').and.returnValue(null)
+
+          let [target] = htmlFixtureList(`
+            <div id="target">
+              old target text
+            </div>
+          `)
+
+          up.render('#target', { url: '/path' })
+          await wait()
+
+          jasmine.respondWith({
+            responseText: `
+              <div id="target">
+                new target text
+                <script nonce="response-secret"></script>
+              </div>
+            `,
+            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-response-secret'" }
+          })
+          await wait()
+
+          expect('#target').toHaveVisibleText('new target text')
+          expect('#target script').toHaveProperty('nonce', 'response-secret')
+        })
+
+        it("does not change a body script that doesn't match the response's script-src policy", async function() {
+          spyOn(up.protocol, 'cspNonce').and.returnValue('page-secret')
+
+          let [target] = htmlFixtureList(`
+            <div id="target">
+              old target text
+            </div>
+          `)
+
+          up.render('#target', { url: '/path' })
+          await wait()
+
+          jasmine.respondWith({
+            responseText: `
+              <div id="target">
+                new target text
+                <script nonce="html-secret"></script>
+              </div>
+            `,
+            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-response-secret'" }
+          })
+          await wait()
+
+          expect('#target').toHaveVisibleText('new target text')
+          expect('#target script').toHaveProperty('nonce', 'html-secret')
+
+        })
+
+        it("does not change a body script that only matches the response's style-src policy", async function() {
+          spyOn(up.protocol, 'cspNonce').and.returnValue('page-secret')
+
+          let [target] = htmlFixtureList(`
+            <div id="target">
+              old target text
+            </div>
+          `)
+
+          up.render('#target', { url: '/path' })
+          await wait()
+
+          jasmine.respondWith({
+            responseText: `
+              <div id="target">
+                new target text
+                <script nonce="style-secret"></script>
+              </div>
+            `,
+            responseHeaders: { 'Content-Security-Policy': "style-src: 'nonce-style-secret'" }
+          })
+          await wait()
+
+          expect('#target').toHaveVisibleText('new target text')
+          expect('#target script').toHaveProperty('nonce', 'style-secret')
+        })
+
+        it("does not change body scripts that never had [nonce] attribute", async function() {
+          spyOn(up.protocol, 'cspNonce').and.returnValue('page-secret')
+
+          let [target] = htmlFixtureList(`
+            <div id="target">
+              old target text
+            </div>
+          `)
+
+          up.render('#target', { url: '/path' })
+          await wait()
+
+          jasmine.respondWith({
+            responseText: `
+              <div id="target">
+                new target text
+                <script></script>
+              </div>
+            `,
+            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-response-secret'" }
+          })
+          await wait()
+
+          expect('#target').toHaveVisibleText('new target text')
+          expect(document.querySelector('#target script').nonce).toBeBlank()
+        })
+
+      })
+
+      fdescribe('CSP nonces in head scripts', function() {
+
+        it('rewrites a matching [nonce] of a head script before it is passed to up:assets:changed', async function() {
+          spyOn(up.protocol, 'cspNonce').and.returnValue('page-secret')
+          const listener = jasmine.createSpy('up:assets:changed listener')
+          up.on('up:assets:changed', listener)
+
+          let [target] = htmlFixtureList(`
+            <div id="target">
+              old target text
+            </div>
+          `)
+
+          up.render('#target', { url: '/path', history: true })
+          await wait()
+
+          jasmine.respondWith({
+            responseText: `
+              <html>
+                <head>
+                  <script src='head-script.js' nonce="response-secret"></script>
+                </head>
+                <body>
+                  <div id="target">
+                    new target text
+                    <script nonce="response-secret"></script>
+                  </div>
+                </body>
+              </html>
+            `,
+            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-response-secret'" }
+          })
+          await wait()
+
+          expect('#target').toHaveVisibleText('new target text')
+          expect(listener).toHaveBeenCalled()
+          const event = listener.calls.mostRecent().args[0]
+          expect(event.newAssets.length).toBe(1)
+          expect(event.newAssets[0]).toMatchSelector('script[src="head-script.js"]')
+          expect(event.newAssets[0]).toHaveProperty('nonce', 'page-secret')
+        })
+
+        it('does not rewrite a non-matching [nonce] of a head script before it is passed to up:assets:changed')
+
+        it('does not trigger up:assets:changed if a script elements is identical after the [nonce] was rewritten')
+
+      })
+
+      fdescribe('CSP nonces in callback attributes', function() {
 
         beforeEach(function() {
           up.script.config.nonceableAttributes.push('callback')
@@ -8191,7 +8505,7 @@ describe('up.fragment', function() {
           expect('.target').toHaveAttribute('callback', "nonce-secret1 alert()")
         })
 
-        it("rewrites nonceable callbacks to use the current page's nonce with Content-Security-Policy-Report-Only header", async function() {
+        it("rewrites nonceable callbacks to use the current page's nonce with Content-Security-Policy-Report-Only response header", async function() {
           spyOn(up.protocol, 'cspNonce').and.returnValue('secret1')
           fixture('.target')
           up.render('.target', { url: '/path' })
@@ -11066,14 +11380,14 @@ describe('up.fragment', function() {
           it('keeps a <script> element (bugfix)', async function() {
             const html = `
               <div id="container">
-                <script id="script" up-keep></script>
+                <script id="script" up-keep nonce="spec-runner-nonce"></script>
               </div>
             `
 
             htmlFixture(html)
             const scriptBeforeRender = document.querySelector('#script')
 
-            // Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
+            // Must render from { url } or { document } so DOMParser and fixParserDamage() is involved.
             up.render('#container', { document: html })
 
             await wait()
@@ -11086,7 +11400,7 @@ describe('up.fragment', function() {
 
             const html = `
               <div id="container">
-                <script id="script" up-keep>window.keepSpy()</script>
+                <script id="script" up-keep nonce="spec-runner-nonce">window.keepSpy()</script>
               </div>
             `
 
@@ -11120,7 +11434,7 @@ describe('up.fragment', function() {
 
             const html = `
               <div id="container">
-                <script id="script" up-keep>window.specSpy()</script>
+                <script id="script" up-keep nonce="spec-runner-nonce">window.specSpy()</script>
               </div>
             `
 
@@ -11143,7 +11457,7 @@ describe('up.fragment', function() {
 
             const html = `
               <div id="container">
-                <script id="script" up-keep>window.specSpy()</script>
+                <script id="script" up-keep nonce="spec-runner-nonce">window.specSpy()</script>
               </div>
             `
 

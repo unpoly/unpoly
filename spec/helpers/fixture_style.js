@@ -1,5 +1,6 @@
 beforeAll(function() {
   let fixtureStyleElement = document.createElement('style')
+  fixtureStyleElement.nonce = 'spec-runner-nonce'
   document.head.appendChild(fixtureStyleElement)
   window.fixtureStyleSheet = fixtureStyleElement.sheet
 })

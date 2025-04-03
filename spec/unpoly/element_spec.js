@@ -837,12 +837,13 @@ describe('up.element', function() {
       window.scriptTagExecuted = jasmine.createSpy('scriptTagExecuted')
 
       const html = `
-        <script>window.scriptTagExecuted()</script>\
+        <script nonce="spec-runner-nonce">window.scriptTagExecuted()</script>\
       `
 
       const element = up.element.createFromHTML(html)
 
       expect(element.tagName).toBe('SCRIPT')
+      expect(element.nonce).toBe('spec-runner-nonce')
       expect(window.scriptTagExecuted).not.toHaveBeenCalled()
 
       document.body.appendChild(element)

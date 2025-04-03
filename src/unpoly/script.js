@@ -896,19 +896,47 @@ up.script = (function() {
   @stable
   */
 
-  function disableScript(scriptElement) {
-    scriptElement.type = 'up-disabled-script'
+  function disableScriptsInSubtree(root) {
+    for (let script of findScripts(root)) {
+      script.type = 'up-disabled-script'
+    }
   }
 
-  function disableScriptsInSubtree(root) {
-    let selector = config.selector('scriptSelectors')
-    u.each(e.subtree(root, selector), disableScript)
+  function findScripts(root, selectorSuffix = '') {
+    let selector = config.selector('scriptSelectors') + selectorSuffix
+    return e.subtree(root, selector)
   }
 
   function isScript(value) {
     return config.matches(value, 'scriptSelectors')
   }
 
+  function adoptNoncesInSubtree(root, responseNonces) {
+    let pageNonce = up.protocol.cspNonce()
+
+    console.debug("[adoptNonces]", { pageNonce, responseNonces })
+
+    if (!responseNonces?.length || !pageNonce) return
+
+    for (let script of findScripts(root, '[nonce]')) {
+      console.debug("!!! found script %o, comparing responseNonces %o with pageNonce %o", script, responseNonces, pageNonce)
+      if (responseNonces.includes(script.nonce)) {
+        script.nonce = pageNonce
+      }
+    }
+
+    for (let attribute of config.nonceableAttributes) {
+      let matches = e.subtree(root, `[${attribute}^="nonce-"]`)
+      for (let match of matches) {
+        let attributeValue = match.getAttribute(attribute)
+        let callback = up.NonceableCallback.fromString(attributeValue)
+        if (responseNonces.includes(callback.nonce)) {
+          callback.nonce = pageNonce
+          match.setAttribute(attribute, callback.toString())
+        }
+      }
+    }
+  }
   /*
   Resets the list of registered compiler directives to the
   moment when the framework was booted.
@@ -932,6 +960,7 @@ up.script = (function() {
     findAssets,
     assertAssetsOK,
     disableSubtree: disableScriptsInSubtree,
+    adoptNoncesInSubtree,
     isScript,
   }
 })()

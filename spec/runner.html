@@ -8,9 +8,9 @@
     <link rel="stylesheet" href="/dist/specs.css">
     <link rel="stylesheet" href="/dist/unpoly.css">
 
-    <script>
+    <script nonce="spec-runner-nonce">
       function insertScript(src) {
-        document.write('<script src="' + src + '"><' + '/script>')
+        document.write('<script src="' + src + '" nonce="spec-runner-nonce"><' + '/script>')
       }
 
       insertScript('/dist/jasmine.js')
@@ -33,6 +33,7 @@
 
       insertScript(`/dist/specs${esSuffix}.js`)
     </script>
+
 
 <!--    <script>-->
 <!--      if (/(\?|&)jquery=1($|\?|&)/.test(location.search)) {-->

@@ -191,7 +191,7 @@ describe('up.history', function() {
 
       it('does not find a script[src]', function() {
         const head = document.createElement('head')
-        const meta = e.affix(head, 'script[src="/foo.js"]')
+        const meta = e.affix(head, 'script[src="/foo.js"][nonce="spec-runner-nonce"]')
         expect(up.history.findMetaTags(head)).toEqual([])
       })
 

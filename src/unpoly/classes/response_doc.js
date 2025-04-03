@@ -17,6 +17,7 @@ up.ResponseDoc = class ResponseDoc {
       this._parseContent(content || '', origin, target, data)
     }
 
+    // These are script-src nonces from the response
     this._cspNonces = cspNonces
 
     if (origin) {
@@ -206,9 +207,11 @@ up.ResponseDoc = class ResponseDoc {
 
   commitElement(element) {
     if (this._document.contains(element)) {
-      // If the user doesn't want to run scripts in the new fragment, we disable all <script> elements.
-      // While <script> elements parsed by `DOMParser` are inert anyway, we also parse HTML through
-      // other methods, which do create non-inert <script> elements.
+      // (1) If the user doesn't want to run scripts in the new fragment, we disable all <script> elements.
+      // (2) We cannot wait until finalizeElement, because then the script has already
+      //     been inserted and has executed.
+      // (3) While <script> elements parsed by `DOMParser` are inert anyway, we also parse HTML through
+      //     other methods, which do create non-inert <script> elements.
       if (!up.fragment.config.runScripts) {
         up.script.disableSubtree(element)
       }
@@ -220,8 +223,10 @@ up.ResponseDoc = class ResponseDoc {
   }
 
   finalizeElement(element) {
+    console.debug("[finalizeElement] response nonces are %o", this._cspNonces)
+
     // Rewrite per-request CSP nonces to match that of the current page.
-    up.NonceableCallback.adoptNonces(element, this._cspNonces)
+    up.script.adoptNoncesInSubtree(element, this._cspNonces)
 
     // If we plucked elements from a Document we assume that document was created by DOMParser,
     // which operates in a different context and creates inert elements.

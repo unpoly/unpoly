@@ -399,7 +399,7 @@ up.element = (function() {
   */
   function metaContent(name) {
     const selector = "meta" + attrSelector('name', name)
-    return first(selector)?.getAttribute('content')
+    return document.head.querySelector(selector)?.getAttribute('content')
   }
 
   /*-
@@ -760,10 +760,12 @@ up.element = (function() {
     A `<script>` or `<noscript>` element.
   @internal
   */
-  function fixParserDamage(scriptish) {
+  function fixParserDamage(element) {
     // We cannot use `scriptish.cloneNode(true)` as this does not fix broken <noscript> elements
-    let clone = createFromHTML(scriptish.outerHTML)
-    scriptish.replaceWith(clone)
+    let clone = createFromHTML(element.outerHTML)
+    // When a CSP is set, the browser masks the nonce from .getAttribute() and .outerHTML
+    if ('nonce' in element) clone.nonce = element.nonce
+    element.replaceWith(clone)
   }
 
   /*-
