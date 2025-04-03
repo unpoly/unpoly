@@ -746,12 +746,14 @@ up.element = (function() {
   /*-
   Fixes `<script>` and `<noscript>` elements in documents parsed by `up.element.createBrokenDocumentFromHTML()`.
 
-  This addresses two [quirks in the `DOMParser` spec](http://w3c.github.io/DOM-Parsing/#dom-domparser-parsefromstring):
+  This addresses some quirks [in the `DOMParser` spec](http://w3c.github.io/DOM-Parsing/#dom-domparser-parsefromstring)
+  and in some browsers:
 
   1. Children of a <nonscript> tag are expected to be a verbatim text node in a scripting-capable browser.
      However, `DOMParser` parses children into actual DOM nodes.
      This confuses libraries that work with <noscript> tags, such as lazysizes.
   2. <script> elements are inert and will not run code when inserted into the main `document`.
+  3. Safari cannot parse auto-playing media elements.
 
   @function up.element.fixParserDamage
   @param {Element} scriptish
