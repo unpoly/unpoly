@@ -521,6 +521,38 @@ up.event = (function() {
   | `'pointer'`  | The event was caused by an interaction via mouse, touch or stylus.      |
   | `'unknown'`  | The input device is unknown or this event was not caused by user input. |
 
+  ## Example
+
+  In event listeners, `up.event.inputDevice` returns the type of input device that caused the event:
+
+  ```js
+  document.addEventListener('mousedown', function() {
+    console.log(up.event.inputDevice) // will print "pointer"
+  })
+
+  document.addEventListener('keydown', function() {
+    console.log(up.event.inputDevice) // will print "key"
+  })
+
+  document.addEventListener('click', function() {
+    // will print either "pointer" or "key", depending on
+    // whether the link was activated with mouse or keyboard
+    console.log(up.event.inputDevice)
+  })
+  ```
+
+  ## Limitations
+
+  Unpoly can only detect the input device when the user interacts with the document area.
+  Interactions with browser-drawn UI elements (like the back button or scroll bar) can not be detected:
+
+  ```js
+  window.addEventListener('scroll', function() {
+    console.log(up.event.inputDevice) // will print "unknown"
+  })
+  ```
+
+
   @property up.event.inputDevice
   @param {string} inputDevice
     A string describing the current input device class.
