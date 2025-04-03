@@ -813,7 +813,7 @@ describe('up.element', function() {
 
   })
 
-  describe('up.element.createFromHTML', function() {
+  describe('up.element.createFromHTML()', function() {
 
     it('creates an element from the given HTML fragment', function() {
       const html = `
@@ -837,12 +837,13 @@ describe('up.element', function() {
       window.scriptTagExecuted = jasmine.createSpy('scriptTagExecuted')
 
       const html = `
-        <script>window.scriptTagExecuted()</script>\
+        <script nonce="spec-runner-nonce">window.scriptTagExecuted()</script>\
       `
 
       const element = up.element.createFromHTML(html)
 
       expect(element.tagName).toBe('SCRIPT')
+      expect(element.nonce).toBe('spec-runner-nonce')
       expect(window.scriptTagExecuted).not.toHaveBeenCalled()
 
       document.body.appendChild(element)
@@ -873,6 +874,7 @@ describe('up.element', function() {
       const parse = () => up.element.createFromHTML(html)
       expect(parse).toThrowError(/Expected a single element, but got 0 elements/)
     })
+
   })
 
   describe('up.element.fixedToAbsolute', function() {

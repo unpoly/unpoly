@@ -95,6 +95,49 @@ describe('up.ResponseDoc', function() {
 
     })
 
+    describe('#_getHead()', function() {
+
+      it('returns the head element', function() {
+        let doc = new up.ResponseDoc({ document: `
+          <html>
+            <head>
+            </head>
+            <body>
+            </body>
+          </html>  
+        ` })
+
+        expect(doc._getHead()).toEqual(jasmine.any(HTMLHeadElement))
+      })
+
+      it('returns a missing value if the document is only a fragment', function() {
+        let doc = new up.ResponseDoc({ document: `
+          <div id="target">target</div>  
+        ` })
+
+        expect(doc._getHead()).toBeMissing()
+      })
+
+      // it('adopts nonces only once when called multiple times', function() {
+      //   let adoptNoncesSpy = spyOn(up.script, 'adoptNoncesInSubtree')
+      //
+      //   let doc = new up.ResponseDoc({ document: `
+      //     <html>
+      //       <head>
+      //       </head>
+      //       <body>
+      //       </body>
+      //     </html>
+      //   ` })
+      //
+      //   doc._getHead()
+      //   doc._getHead()
+      //
+      //   expect(adoptNoncesSpy.calls.count()).toBe(1)
+      // })
+
+    })
+
     describe('#title', function() {
 
       it("returns the <title> text of a document that starts with <html>", function() {
@@ -233,6 +276,18 @@ describe('up.ResponseDoc', function() {
 
     })
 
+    describe('#_getHead()', function() {
+
+      it('returns a missing value', function() {
+        let doc = new up.ResponseDoc({ fragment: `
+          <div class="foo">foo text</div>
+        ` })
+
+        expect(doc._getHead()).toBeMissing()
+      })
+
+    })
+
     describe('#title', function() {
 
       it('returns a missing value', function() {
@@ -292,6 +347,16 @@ describe('up.ResponseDoc', function() {
 
     })
 
+    describe('#_getHead()', function() {
+
+      it('returns a missing value', function() {
+        let doc = new up.ResponseDoc({ target: '.foo', content: 'foo text' })
+
+        expect(doc._getHead()).toBeMissing()
+      })
+
+    })
+
     describe('#title', function() {
 
       it('returns a missing value', function() {
@@ -301,7 +366,6 @@ describe('up.ResponseDoc', function() {
       })
 
     })
-
 
   })
 

@@ -276,7 +276,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
           // Attaching a viewport to another element will cause it to loose
           // its scroll position, even if both parents are in the same document.
           let viewports = up.viewport.subtree(keepPlan.oldElement)
-          keepPlan.revivers = viewports.map(function(viewport) {
+          keepPlan.revivers = u.map(viewports, function(viewport) {
             let cursorProps = up.viewport.copyCursorProps(viewport)
             return () => up.viewport.copyCursorProps(cursorProps, viewport)
           })

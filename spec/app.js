@@ -23,5 +23,14 @@ app.get('/', function(req, res){
 })
 
 app.get('/specs', function(req, res){
-  res.sendFile(cwd + '/spec/runner.html')
+  res.sendFile(cwd + '/spec/runner.html', {
+    headers: {
+      'Content-Security-Policy': [
+        "default-src 'self' 'nonce-spec-runner-nonce'",
+        "style-src 'self' 'nonce-spec-runner-nonce' 'unsafe-inline'",
+        "img-src 'self' 'nonce-spec-runner-nonce' data:",
+      ].join('; ')
+    }
+  })
+  // res.sendFile(cwd + '/spec/runner.html', { headers: { 'Content-Security-Policy': "default-src 'self'; script-src 'strict-dynamic' 'nonce-spec-runner-nonce'" } })
 })

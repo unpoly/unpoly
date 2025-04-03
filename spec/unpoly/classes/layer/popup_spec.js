@@ -6,7 +6,7 @@ describe('up.Layer.Popup', function() {
   describe('positioning', function() {
 
     const setPopupMargin = function(margins) {
-      const styleElement = fixture('style')
+      const styleElement = fixture('style[nonce="spec-runner-nonce"]')
       const { sheet } = styleElement
       for (let key in margins) {
         let value = margins[key]

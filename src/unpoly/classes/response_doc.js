@@ -17,6 +17,7 @@ up.ResponseDoc = class ResponseDoc {
       this._parseContent(content || '', origin, target, data)
     }
 
+    // These are script-src nonces from the response
     this._cspNonces = cspNonces
 
     if (origin) {
@@ -107,7 +108,6 @@ up.ResponseDoc = class ResponseDoc {
   Returns `undefined` if the root has no contentful `<head>`, e.g. if the root was
   parsed from a fragment, or from a document without a `<head>` element.
   */
-  // eslint-disable-next-line getter-return
   _getHead() {
     // The root may be a `Document` (which always has a `#head`, even if it wasn't present in the HTML)
     // or an `Element` (which never has a `#head`).
@@ -126,7 +126,14 @@ up.ResponseDoc = class ResponseDoc {
   }
 
   get assets() {
-    return this._fromHead(up.script.findAssets)
+    return this._fromHead((head) => {
+      let assets = up.script.findAssets(head)
+      return u.map(assets, (asset) => {
+        this._adoptNoncesInSubtree(asset)
+        let clone = this._reviveElementAsClone(asset)
+        return clone
+      })
+    })
   }
 
   get lang() {
@@ -171,6 +178,7 @@ up.ResponseDoc = class ResponseDoc {
   }
 
   _trySelectStep(step) {
+    // TODO: Why do we need this check?
     if (step.newElement) {
       return true
     }
@@ -204,33 +212,61 @@ up.ResponseDoc = class ResponseDoc {
     }
   }
 
-  commitElement(element) {
-    if (this._document.contains(element)) {
-      // If the user doesn't want to run scripts in the new fragment, we disable all <script> elements.
-      // While <script> elements parsed by `DOMParser` are inert anyway, we also parse HTML through
-      // other methods, which do create non-inert <script> elements.
-      if (!up.fragment.config.runScripts) {
-        up.script.disableSubtree(element)
+  _disableScriptsInSubtree(element) {
+    // While <script> elements parsed by `DOMParser` are inert anyway, we also parse HTML through
+    // other methods, which do create non-inert <script> elements.
+    if (!up.fragment.config.runScripts) {
+      up.script.disableSubtree(element)
+    }
+  }
+
+  _reviveElementAsClone(element) {
+    return e.revivedClone(element)
+  }
+
+  _reviveSubtreeInPlace(element) {
+    // If we plucked elements from a Document we assume that document was created by DOMParser,
+    // which operates in a different context and creates inert elements:
+    //
+    // (1) Children of a <nonscript> tag are expected to be a verbatim text node in a scripting-capable browser.
+    //     However, `DOMParser` parses children into actual DOM nodes.
+    //     This confuses libraries that work with <noscript> tags, such as lazysizes.
+    // (2) <script> elements are inert and will not run code when inserted into the main `document`.
+    // (3) Safari cannot parse (or move?) auto-playing media elements.
+    if (this._document instanceof Document) {
+      for (let brokenElement of e.subtree(element, ':is(noscript, script, audio, video):not(.up-keeping, .up-keeping *)')) {
+        let clone = this._reviveElementAsClone(brokenElement)
+        brokenElement.replaceWith(clone)
       }
+    }
+  }
+
+  _adoptNoncesInSubtree(element) {
+    // Rewrite per-request CSP nonces to match that of the current page.
+    up.script.adoptNoncesInSubtree(element, this._cspNonces)
+  }
+
+  commitElement(element) {
+    // If multiple steps want to match the name new element, only he first will succeed.
+    // This will happen when multiple layers have the same hungry element with [up-if-layer=any].
+    if (this._document.contains(element)) {
+      // (1) If the user doesn't want to run scripts in the new fragment, we disable all <script> elements.
+      // (2) We cannot wait until finalizeElement(), because then the script has already been inserted and has executed.
+      this._disableScriptsInSubtree(element)
+
+      this._adoptNoncesInSubtree(element)
 
       // Ensure that the element cannot be matched for subsequent selects().
       element.remove()
+
       return true
     }
   }
 
   finalizeElement(element) {
-    // Rewrite per-request CSP nonces to match that of the current page.
-    up.NonceableCallback.adoptNonces(element, this._cspNonces)
-
-    // If we plucked elements from a Document we assume that document was created by DOMParser,
-    // which operates in a different context and creates inert elements.
-    if (this._document instanceof Document) {
-      // Now that these elements is attached to the current document, we can re-create them
-      // in the correct browsing context.
-      let brokenElements = e.subtree(element, ':is(noscript,script,audio,video):not(.up-keeping, .up-keeping *)')
-      u.each(brokenElements, e.fixParserDamage)
-    }
+    // Now that these elements is attached to the current document, we can re-create them
+    // in the correct browsing context.
+    this._reviveSubtreeInPlace(element)
   }
 
   static {

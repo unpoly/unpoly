@@ -403,7 +403,7 @@ up.element = (function() {
   */
   function metaContent(name) {
     const selector = "meta" + attrSelector('name', name)
-    return first(selector)?.getAttribute('content')
+    return document.head.querySelector(selector)?.getAttribute('content')
   }
 
   /*-
@@ -735,8 +735,9 @@ up.element = (function() {
   even if the given `html` string only contains a fragment.
 
   Due to quirks in the `DOMParser` spec, `<script>` and `<noscript>`
-  elements in the returned document will be inert. To make them active,
-  use `up.element.fixParserDamage()`.
+  elements in the returned document will be inert. Also media elements may
+  not work fully on Safari. To make them active, clone them after insertion
+  into the destination document, using `up.element.revivedClone()`.
 
   @function up.element.createBrokenDocumentFromHTML
   @param {string} html
@@ -747,27 +748,34 @@ up.element = (function() {
     return new DOMParser().parseFromString(html, 'text/html')
   }
 
-  /*-
-  Fixes `<script>` and `<noscript>` elements in documents parsed by `up.element.createBrokenDocumentFromHTML()`.
+  // /*-
+  // Fixes `<script>` and `<noscript>` elements in documents parsed by `up.element.createBrokenDocumentFromHTML()`.
+  //
+  // This addresses some quirks [in the `DOMParser` spec](http://w3c.github.io/DOM-Parsing/#dom-domparser-parsefromstring)
+  // and in some browsers:
+  //
+  // 1. Children of a <nonscript> tag are expected to be a verbatim text node in a scripting-capable browser.
+  //    However, `DOMParser` parses children into actual DOM nodes.
+  //    This confuses libraries that work with <noscript> tags, such as lazysizes.
+  // 2. <script> elements are inert and will not run code when inserted into the main `document`.
+  // 3. Safari cannot parse auto-playing media elements.
+  //
+  // @function up.element.fixParserDamage
+  // @param {Element} scriptish
+  //   A `<script>` or `<noscript>` element.
+  // @internal
+  // */
+  // function fixParserDamage(element) {
+  //   let clone = revivedClone(element)
+  //   element.replaceWith(clone)
+  // }
 
-  This addresses some quirks [in the `DOMParser` spec](http://w3c.github.io/DOM-Parsing/#dom-domparser-parsefromstring)
-  and in some browsers:
-
-  1. Children of a <nonscript> tag are expected to be a verbatim text node in a scripting-capable browser.
-     However, `DOMParser` parses children into actual DOM nodes.
-     This confuses libraries that work with <noscript> tags, such as lazysizes.
-  2. <script> elements are inert and will not run code when inserted into the main `document`.
-  3. Safari cannot parse auto-playing media elements.
-
-  @function up.element.fixParserDamage
-  @param {Element} scriptish
-    A `<script>` or `<noscript>` element.
-  @internal
-  */
-  function fixParserDamage(scriptish) {
+  function revivedClone(element) {
     // We cannot use `scriptish.cloneNode(true)` as this does not fix broken <noscript> elements
-    let clone = createFromHTML(scriptish.outerHTML)
-    scriptish.replaceWith(clone)
+    let clone = createFromHTML(element.outerHTML)
+    // When a CSP is set, the browser masks the nonce from .getAttribute() and .outerHTML
+    if ('nonce' in element) clone.nonce = element.nonce
+    return clone
   }
 
   /*-
@@ -1574,7 +1582,7 @@ up.element = (function() {
     attrSelector,
     tagName: elementTagName,
     createBrokenDocumentFromHTML,
-    fixParserDamage,
+    revivedClone,
     createNodesFromHTML,
     createFromHTML,
     extractSingular,

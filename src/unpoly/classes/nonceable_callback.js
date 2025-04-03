@@ -1,4 +1,3 @@
-const u = up.util
 const e = up.element
 
 up.NonceableCallback = class NonceableCallback {
@@ -70,44 +69,6 @@ up.NonceableCallback = class NonceableCallback {
         scriptElement.remove()
       }
     }
-  }
-
-  _allowedBy(allowedNonces) {
-    return this.nonce && u.contains(allowedNonces, this.nonce)
-  }
-
-  static adoptNonces(element, allowedNonces) {
-    if (!allowedNonces?.length) {
-      return
-    }
-
-    // Looking up a nonce requires a DOM query.
-    // For performance reasons we only do this when we're actually rewriting
-    // a nonce, and only once per response.
-    const getPageNonce = u.memoize(up.protocol.cspNonce)
-
-    u.each(up.script.config.nonceableAttributes, (attribute) => {
-      let matches = e.subtree(element, `[${attribute}^="nonce-"]`)
-      u.each(matches, (match) => {
-        let attributeValue = match.getAttribute(attribute)
-        let callback = this.fromString(attributeValue)
-        let warn = (message, ...args) => up.log.warn('up.render()', `Cannot use callback [${attribute}="${attributeValue}"]: ${message}`, ...args)
-
-        if (!callback._allowedBy(allowedNonces)) {
-          // Don't rewrite a nonce that the browser would have rejected.
-          return warn("Callback's CSP nonce (%o) does not match response header (%o)", callback.nonce, allowedNonces)
-        }
-
-        // Replace the nonce with that of the current page.
-        // This will allow the handler to run via #toFunction().
-        let pageNonce = getPageNonce()
-        if (!pageNonce) {
-          return warn("Current page's CSP nonce is unknown")
-        }
-        callback.nonce = pageNonce
-        match.setAttribute(attribute, callback.toString())
-      })
-    })
   }
 
 }
