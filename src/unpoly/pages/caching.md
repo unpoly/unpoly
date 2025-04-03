@@ -15,7 +15,9 @@ You can enable caching with `{ cache: 'auto' }`, which caches all responses to G
 You can configure this default:
 
 ```js
-up.network.config.autoCache = (request) => request.method === 'GET'
+up.network.config.autoCache = function(request) {
+  return request.method === 'GET'
+}
 ```
 
 When [navigating](/navigation) the `{ cache: 'auto' }` option is already set by [default](/up.fragment.config#config.navigateOptions).
@@ -45,7 +47,7 @@ If you want to keep the navigation default, but disable auto-caching for some UR
 ```js
 let defaultAutoCache = up.network.config.autoCache
 up.network.config.autoCache = function(request) {
-  defaultAutoCache(request) && !request.url.endsWith('/edit')
+  return defaultAutoCache(request) && !request.url.endsWith('/edit')
 }
 ```
 

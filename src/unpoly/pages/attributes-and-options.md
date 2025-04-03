@@ -108,7 +108,7 @@ of requests to URLs ending with `/edit`:
 ```js
 let defaultAutoCache = up.network.config.autoCache
 up.network.config.autoCache = function(request) {
-  defaultAutoCache(request) && !request.url.endsWith('/edit')
+  return defaultAutoCache(request) && !request.url.endsWith('/edit')
 }
 ```
 
