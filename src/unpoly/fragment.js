@@ -172,7 +172,7 @@ up.fragment = (function() {
     Scripts will load asynchronously, with no guarantee of execution order.
 
     Note that the `<body>` element is a default
-    [main target](/main. If you are including your global application scripts
+    [main target](/main). If you are including your global application scripts
     at the end of your `<body>` for performance reasons, swapping the `<body>` will re-execute
     these scripts. In that case you can [configure a different main target](/up.fragment.config#config.mainTargets)
     or [move your scripts to the `<head>` with a `[defer]` attribute](https://makandracards.com/makandra/504104-you-should-probably-load-your-javascript-with-script-defer),
