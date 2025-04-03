@@ -57,11 +57,6 @@ up.ResponseDoc = class ResponseDoc {
     }
   }
 
-  _parseDocumentFromHTML(html) {
-    // This function will always return a Document, even if `html` is multiple sibling nodes.
-    return e.createBrokenDocumentFromHTML(html)
-  }
-
   _parseFragment(value, origin, data) {
     let element = e.extractSingular(up.fragment.provideNodes(value, { origin, data }))
     this._document = this._buildFauxDocument(element)
