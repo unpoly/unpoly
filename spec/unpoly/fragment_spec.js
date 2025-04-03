@@ -7727,6 +7727,36 @@ describe('up.fragment', function() {
         })
       })
 
+      describe('style elements', function() {
+
+        it('applies internal <style> elements that were inserted by a render pass', async function() {
+          let [paragraph, target] = htmlFixtureList(`
+            <p>paragraph text</p>
+            <div id="target">old target text</div>
+          `)
+
+          up.render({
+            fragment: `
+              <div id="target">
+                new target text
+                <style>
+                  p {
+                    font-size: 60px;
+                  }
+                </style>
+              </div>
+            `
+          })
+
+          await wait(200)
+
+          expect('#target').toHaveVisibleText('new target text')
+          expect('#target').toHaveSelector('style')
+          expect(paragraph).toHaveComputedStyle({ 'font-size': '60px' })
+
+        })
+      })
+
       describe('execution of scripts', function() {
 
         beforeEach(function() {
