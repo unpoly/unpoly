@@ -914,12 +914,9 @@ up.script = (function() {
   function adoptNoncesInSubtree(root, responseNonces) {
     let pageNonce = up.protocol.cspNonce()
 
-    console.debug("[adoptNonces]", { pageNonce, responseNonces })
-
     if (!responseNonces?.length || !pageNonce) return
 
     for (let script of findScripts(root, '[nonce]')) {
-      console.debug("!!! found script %o, comparing responseNonces %o with pageNonce %o", script, responseNonces, pageNonce)
       if (responseNonces.includes(script.nonce)) {
         script.nonce = pageNonce
       }

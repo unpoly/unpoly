@@ -6139,6 +6139,41 @@ describe('up.fragment', function() {
             expect(document.head).toHaveSelector('script[src="scripts-1.js"]')
           })
 
+          fit('does not execute new inline scripts in the <head>, even when they are marked as [up-asset]', async function() {
+            const listener = jasmine.createSpy('up:assets:changed listener')
+            up.on('up:assets:changed', listener)
+            window.scriptTagExecuted = jasmine.createSpy('scriptTagExecuted')
+            fixture('.container', { text: 'old container text' })
+
+            fixture('.container', { text: 'old container text' })
+            up.render('.container', {
+              location: '/path',
+              history: true,
+              document: `
+                <html>
+                  <head>
+                    <script id="new-script" up-asset nonce="spec-runner-nonce">window.scriptTagExecuted()</script>
+                  </head>
+                  <body>
+                    <div class='container'>
+                      new container text
+                    </div>
+                  </body>
+                </html>
+              `
+            })
+            await wait()
+
+            expect('.container').toHaveText('new container text')
+
+            expect(listener).toHaveBeenCalled()
+            expect(listener.calls.mostRecent().args[0].newAssets[0].id).toBe('new-script')
+            expect(document.head).not.toHaveSelector('script#new-script')
+            expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+
+            delete window.scriptTagExecuted
+          })
+
           it('emits an up:assets:changed event if linked assets differ between <head> and <response>', async function() {
             const listener = jasmine.createSpy('up:assets:changed listener')
             up.on('up:assets:changed', listener)
@@ -6164,7 +6199,6 @@ describe('up.fragment', function() {
                 </html>
               `
             })
-
             await wait()
 
             expect('.container').toHaveText('new container text')
@@ -6176,6 +6210,46 @@ describe('up.fragment', function() {
             expect(event.renderOptions.location).toBe('/path')
             expect(u.map(event.oldAssets, 'outerHTML')).toEqual(['<script src="scripts-1.js"></script>'])
             expect(u.map(event.newAssets, 'outerHTML')).toEqual(['<script src="scripts-2.js"></script>'])
+          })
+
+          fit('allows the user to insert an executable script from event.newAssets (bugfix)', async function() {
+            const listener = jasmine.createSpy('up:assets:changed listener').and.callFake((event) => {
+              for (let newAsset of event.newAssets) {
+                document.head.append(newAsset)
+              }
+            })
+            up.on('up:assets:changed', listener)
+            window.scriptTagExecuted = jasmine.createSpy('scriptTagExecuted')
+            fixture('.container', { text: 'old container text' })
+
+            fixture('.container', { text: 'old container text' })
+            up.render('.container', {
+              location: '/path',
+              history: true,
+              document: `
+                <html>
+                  <head>
+                    <script id="new-script" up-asset nonce="spec-runner-nonce">window.scriptTagExecuted()</script>
+                  </head>
+                  <body>
+                    <div class='container'>
+                      new container text
+                    </div>
+                  </body>
+                </html>
+              `
+            })
+            await wait()
+
+            expect('.container').toHaveText('new container text')
+
+            expect(listener).toHaveBeenCalled()
+            expect(document.head).toHaveSelector('script#new-script')
+            expect(window.scriptTagExecuted).toHaveBeenCalled()
+            // Check that we didn't re-execute the script when we repaired the inert element
+            expect(window.scriptTagExecuted.calls.count()).toBe(1)
+
+            delete window.scriptTagExecuted
           })
 
           it('does not emit up:assets:changed if the only changed asset has [up-asset=false]', async function() {
@@ -8205,7 +8279,7 @@ describe('up.fragment', function() {
         })
       })
 
-      describe('media elements', function() {
+      fdescribe('media elements', function() {
         // https://github.com/unpoly/unpoly/issues/432
         it('inserts an auto-playing <video> element (bugfix for Safari)', function(done) {
           fixture('#target')
@@ -11060,7 +11134,7 @@ describe('up.fragment', function() {
         })
       })
 
-      describe('handling of [up-keep] elements', function() {
+      fdescribe('handling of [up-keep] elements', function() {
         let container
         const squish = function(string) {
           if (u.isString(string)) {
@@ -11266,7 +11340,7 @@ describe('up.fragment', function() {
           expect(viewport.scrollTop).toBe(100)
         })
 
-        describe('media elements', function() {
+        fdescribe('media elements', function() {
 
           it('keeps a <video> element when rendering with DOMparser (bugfix)', async function() {
             const html = `
@@ -11901,7 +11975,7 @@ describe('up.fragment', function() {
         })
 
         it('allows to define a listener in an [up-on-keep] attribute', async function() {
-          const keeper = fixture('.keeper[up-keep][up-on-keep="this.onKeepSpy(this, newFragment, newData)"]', { text: 'old-inside' })
+          const keeper = fixture('.keeper[up-keep][up-on-keep="nonce-spec-runner-nonce this.onKeepSpy(this, newFragment, newData)"]', { text: 'old-inside' })
 
           keeper.onKeepSpy = jasmine.createSpy('onKeep spy')
 

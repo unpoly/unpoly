@@ -207,7 +207,7 @@ describe('up.element', function() {
     })
   }
 
-  describe('up.element.subtree()', function() {
+  fdescribe('up.element.subtree()', function() {
 
     it('returns all descendants of the given root matching the given selector', function() {
       const $element = $fixture('.element')
@@ -813,7 +813,7 @@ describe('up.element', function() {
 
   })
 
-  describe('up.element.createFromHTML', function() {
+  describe('up.element.createFromHTML()', function() {
 
     it('creates an element from the given HTML fragment', function() {
       const html = `
@@ -874,6 +874,7 @@ describe('up.element', function() {
       const parse = () => up.element.createFromHTML(html)
       expect(parse).toThrowError(/Expected a single element, but got 0 elements/)
     })
+
   })
 
   describe('up.element.fixedToAbsolute', function() {

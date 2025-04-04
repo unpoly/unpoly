@@ -821,7 +821,7 @@ describe('up.link', function() {
 
       it('parses an [up-on-finished] attribute', function() {
         window.onFinishedCallback = jasmine.createSpy('onFinished callback')
-        const link = fixture('a[href="/path"][up-on-finished="window.onFinishedCallback(this)"]')
+        const link = fixture('a[href="/path"][up-on-finished="nonce-spec-runner-nonce window.onFinishedCallback(this)"]')
         const options = up.link.followOptions(link)
 
         expect(u.isFunction(options.onFinished)).toBe(true)

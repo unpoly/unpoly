@@ -28,7 +28,7 @@ app.get('/specs', function(req, res){
       'Content-Security-Policy': [
         "default-src 'self' 'nonce-spec-runner-nonce'",
         "style-src 'self' 'nonce-spec-runner-nonce' 'unsafe-inline'",
-        "image-src 'self' 'nonce-spec-runner-nonce' data:",
+        "img-src 'self' 'nonce-spec-runner-nonce' data:",
       ].join('; ')
     }
   })
