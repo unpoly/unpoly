@@ -52,21 +52,25 @@ up.element = (function() {
   @stable
   */
   function subtree(root, selector) {
-    const results = []
+    const descendantMatches = root.querySelectorAll(selector)
 
     if (elementLikeMatches(root, selector)) {
-      results.push(root)
+      return [root, ...descendantMatches]
+    } else {
+      return descendantMatches
     }
-
-    results.push(...root.querySelectorAll(selector))
-
-    return results
   }
 
   function subtreeFirst(root, selector) {
     return elementLikeMatches(root, selector) ? root : root.querySelector(selector)
   }
 
+  /*-
+  Like `Element#matches()`, but returns `false` for a `Document` or `Window argument.
+
+  @function elementLikeMatches
+  @internal
+  */
   function elementLikeMatches(elementLike, selector) {
     return u.isElement(elementLike) && elementLike.matches(selector)
   }
