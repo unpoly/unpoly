@@ -1,4 +1,4 @@
-builddev: npm run watch-dev
+build-dev: npm run watch-dev
 test: PORT=4000 npm run test
 docs: test -d ../unpoly-site && cd ../unpoly-site && PORT=4567 bundle exec middleman server
 manual-test: test -d ../unpoly-manual-tests && cd ../unpoly-manual-tests && PORT=4001 bundle exec rails server
