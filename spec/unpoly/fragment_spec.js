@@ -6139,7 +6139,7 @@ describe('up.fragment', function() {
             expect(document.head).toHaveSelector('script[src="scripts-1.js"]')
           })
 
-          fit('does not execute new inline scripts in the <head>, even when they are marked as [up-asset]', async function() {
+          it('does not execute new inline scripts in the <head>, even when they are marked as [up-asset]', async function() {
             const listener = jasmine.createSpy('up:assets:changed listener')
             up.on('up:assets:changed', listener)
             window.scriptTagExecuted = jasmine.createSpy('scriptTagExecuted')
@@ -6212,7 +6212,7 @@ describe('up.fragment', function() {
             expect(u.map(event.newAssets, 'outerHTML')).toEqual(['<script src="scripts-2.js"></script>'])
           })
 
-          fit('allows the user to insert an executable script from event.newAssets (bugfix)', async function() {
+          it('allows the user to insert an executable script from event.newAssets (bugfix)', async function() {
             const listener = jasmine.createSpy('up:assets:changed listener').and.callFake((event) => {
               for (let newAsset of event.newAssets) {
                 document.head.append(newAsset)
@@ -6250,6 +6250,7 @@ describe('up.fragment', function() {
             expect(window.scriptTagExecuted.calls.count()).toBe(1)
 
             delete window.scriptTagExecuted
+            document.head.querySelector('script#new-script').remove()
           })
 
           it('does not emit up:assets:changed if the only changed asset has [up-asset=false]', async function() {
@@ -7833,7 +7834,7 @@ describe('up.fragment', function() {
         })
       })
 
-      fdescribe('execution of scripts', function() {
+      describe('execution of scripts', function() {
 
         beforeEach(function() {
           window.scriptTagExecuted = jasmine.createSpy('scriptTagExecuted')
@@ -8279,7 +8280,7 @@ describe('up.fragment', function() {
         })
       })
 
-      fdescribe('media elements', function() {
+      describe('media elements', function() {
         // https://github.com/unpoly/unpoly/issues/432
         it('inserts an auto-playing <video> element (bugfix for Safari)', function(done) {
           fixture('#target')
@@ -8307,7 +8308,7 @@ describe('up.fragment', function() {
       })
 
 
-      fdescribe('CSP nonces in body scripts', function() {
+      describe('CSP nonces in body scripts', function() {
 
         beforeEach(function() {
           up.fragment.config.runScripts = true
@@ -8505,7 +8506,7 @@ describe('up.fragment', function() {
 
       })
 
-      fdescribe('CSP nonces in head scripts', function() {
+      describe('CSP nonces in head scripts', function() {
 
         it('rewrites a matching [nonce] of a head script before it is passed to up:assets:changed', async function() {
           spyOn(up.protocol, 'cspNonce').and.returnValue('page-secret')
@@ -8553,7 +8554,7 @@ describe('up.fragment', function() {
 
       })
 
-      fdescribe('CSP nonces in callback attributes', function() {
+      describe('CSP nonces in callback attributes', function() {
 
         beforeEach(function() {
           up.script.config.nonceableAttributes.push('callback')
@@ -10657,7 +10658,9 @@ describe('up.fragment', function() {
           })
 
           it("preserves user's changes in scroll position between the first and second render pass", async function() {
-            fixture('style', { content: '.target { height: 50000px; background-color: red }' })
+            fixtureStyle(`
+              .target { height: 50000px; background-color: red }
+            `)
 
             up.viewport.root.scrollTop = 0
 
@@ -11134,7 +11137,7 @@ describe('up.fragment', function() {
         })
       })
 
-      fdescribe('handling of [up-keep] elements', function() {
+      describe('handling of [up-keep] elements', function() {
         let container
         const squish = function(string) {
           if (u.isString(string)) {
@@ -11340,7 +11343,7 @@ describe('up.fragment', function() {
           expect(viewport.scrollTop).toBe(100)
         })
 
-        fdescribe('media elements', function() {
+        describe('media elements', function() {
 
           it('keeps a <video> element when rendering with DOMparser (bugfix)', async function() {
             const html = `

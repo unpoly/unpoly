@@ -293,7 +293,7 @@ describe('up.radio', function() {
 
   describe('unobtrusive behavior', function() {
 
-    fdescribe('[up-hungry]', function() {
+    describe('[up-hungry]', function() {
 
       it("replaces the element when it is found in a response, even when the element wasn't targeted", async function() {
         fixture('.hungry[up-hungry]', { text: 'old hungry' })

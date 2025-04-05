@@ -207,7 +207,7 @@ describe('up.element', function() {
     })
   }
 
-  fdescribe('up.element.subtree()', function() {
+  describe('up.element.subtree()', function() {
 
     it('returns all descendants of the given root matching the given selector', function() {
       const $element = $fixture('.element')

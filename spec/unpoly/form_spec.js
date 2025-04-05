@@ -5119,7 +5119,7 @@ describe('up.form', function() {
 
       it('calls the JavaScript code in the attribute value when a change is observed in the field', async function() {
         const form = fixture('form')
-        const field = e.affix(form, 'input[name="input-name"][value="old-value"][up-watch="window.watchCallbackSpy(this, value, name)"]')
+        const field = e.affix(form, 'input[name="input-name"][value="old-value"][up-watch="nonce-spec-runner-nonce window.watchCallbackSpy(this, value, name)"]')
         up.hello(form)
         field.value = 'new-value'
         Trigger.change(field)
@@ -5143,7 +5143,7 @@ describe('up.form', function() {
 
       it('runs the callback only once for multiple changes in the same task', async function() {
         const $form = $fixture('form')
-        const $field = $form.affix('input[name="input-name"][value="old-value"][up-watch="window.watchCallbackSpy(value, name)"]')
+        const $field = $form.affix('input[name="input-name"][value="old-value"][up-watch="nonce-spec-runner-nonce window.watchCallbackSpy(value, name)"]')
         up.hello($form)
         $field.val('a')
         Trigger.input($field)
@@ -5157,7 +5157,7 @@ describe('up.form', function() {
       it('does not run the callback when the form is submitted immediately after a change, e.g. in a test', async function() {
         const container = fixture('.container[up-main]')
         const form = e.affix(container, 'form[action="/path"]')
-        const field = e.affix(form, 'input[name="input-name"][value="old-value"][up-watch="window.watchCallbackSpy(value, name)"]')
+        const field = e.affix(form, 'input[name="input-name"][value="old-value"][up-watch="nonce-spec-runner-nonce window.watchCallbackSpy(value, name)"]')
         up.hello(form)
         field.value = 'new-value'
         Trigger.change(field)
@@ -5169,7 +5169,7 @@ describe('up.form', function() {
 
       it('passes any options parsed from [up-watch] attributes as `options`', async function() {
         const form = fixture('form')
-        const field = e.affix(form, 'input[name=email][up-watch="window.watchCallbackSpy(options)"][up-watch-disable="#disable"][up-watch-feedback="false"][up-watch-preview="my-preview"][up-watch-placeholder="#placeholder"]')
+        const field = e.affix(form, 'input[name=email][up-watch="nonce-spec-runner-nonce window.watchCallbackSpy(options)"][up-watch-disable="#disable"][up-watch-feedback="false"][up-watch-preview="my-preview"][up-watch-placeholder="#placeholder"]')
         up.hello(form)
         field.value = 'new-value'
         Trigger.change(field)
@@ -5189,7 +5189,7 @@ describe('up.form', function() {
         it('debounces the callback', async function() {
           const $form = $fixture('form')
           window.watchCallbackSpy = jasmine.createSpy('watch callback')
-          const $field = $form.affix('input[name="input-name"][value="old-value"][up-watch="window.watchCallbackSpy()"][up-watch-delay="40"]')
+          const $field = $form.affix('input[name="input-name"][value="old-value"][up-watch="nonce-spec-runner-nonce window.watchCallbackSpy()"][up-watch-delay="40"]')
           up.hello($form)
           $field.val('new-value')
           Trigger.change($field)
@@ -5205,7 +5205,7 @@ describe('up.form', function() {
           const container = fixture('.container[up-main]')
           const form = e.affix(container, 'form[action="/path"]')
           window.watchCallbackSpy = jasmine.createSpy('watch callback')
-          const field = e.affix(form, 'input[name="input-name"][value="old-value"][up-watch="window.watchCallbackSpy()"][up-watch-delay="40"]')
+          const field = e.affix(form, 'input[name="input-name"][value="old-value"][up-watch="nonce-spec-runner-nonce window.watchCallbackSpy()"][up-watch-delay="40"]')
           up.hello(form)
           field.value = 'new-value'
           Trigger.change(field)
@@ -5226,7 +5226,7 @@ describe('up.form', function() {
 
       it('runs the JavaScript code in the attribute value when a change is observed in any contained field', async function() {
         window.watchCallbackSpy = jasmine.createSpy('watch callback')
-        const form = fixture('form[up-watch="window.watchCallbackSpy(this, value, name)"]')
+        const form = fixture('form[up-watch="nonce-spec-runner-nonce window.watchCallbackSpy(this, value, name)"]')
         const field1 = e.affix(form, 'input[name="field1"][value="field1-old-value"]')
         const field2 = e.affix(form, 'input[name="field2"][value="field2-old-value"]')
         up.hello(form)
@@ -5254,7 +5254,7 @@ describe('up.form', function() {
 
         it('allows to set a different event to watch', async function() {
           window.watchCallbackSpy = jasmine.createSpy('watch callback')
-          const form = fixture('form[up-watch="window.watchCallbackSpy(value, name)"][up-watch-event="foo"]')
+          const form = fixture('form[up-watch="nonce-spec-runner-nonce window.watchCallbackSpy(value, name)"][up-watch-event="foo"]')
           const field1 = e.affix(form, 'input[name="field1"][value="field1-old-value"]')
           up.hello(form)
           field1.value = 'field1-new-value'
@@ -5275,7 +5275,7 @@ describe('up.form', function() {
 
         it('allows to override the custom event at individual inputs', async function() {
           window.watchCallbackSpy = jasmine.createSpy('watch callback')
-          const form = fixture('form[up-watch="window.watchCallbackSpy(value, name)"][up-watch-event="foo"]')
+          const form = fixture('form[up-watch="nonce-spec-runner-nonce window.watchCallbackSpy(value, name)"][up-watch-event="foo"]')
           const field1 = e.affix(form, 'input[name="field1"][value="field1-old-value"][up-watch-event="bar"]')
           up.hello(form)
           field1.value = 'field1-new-value'

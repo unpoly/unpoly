@@ -840,6 +840,8 @@ up.script = (function() {
     let newHTML = u.map(newAssets, 'outerHTML').join()
 
     if (oldHTML !== newHTML) {
+      console.debug("[asset compare] oldHTML is %o", oldHTML)
+      console.debug("[asset compare] newHTML is %o", newHTML)
       up.event.assertEmitted('up:assets:changed', { oldAssets, newAssets, renderOptions })
     }
   }

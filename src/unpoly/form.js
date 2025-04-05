@@ -190,8 +190,7 @@ up.form = (function() {
     if (root.matches('form[id]')) {
       const outsideFieldSelector = fieldSelector(e.attrSelector('form', root.getAttribute('id')))
       const outsideFields = up.fragment.all(outsideFieldSelector, { layer: root })
-      fields.push(...outsideFields)
-      fields = u.uniq(fields)
+      fields = u.uniq([...fields, ...outsideFields])
     }
 
     return fields

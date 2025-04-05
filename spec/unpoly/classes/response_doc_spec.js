@@ -1,7 +1,7 @@
 const e = up.element
 const u = up.util
 
-fdescribe('up.ResponseDoc', function() {
+describe('up.ResponseDoc', function() {
 
   describe('from { document }', function() {
 
