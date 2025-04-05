@@ -17,18 +17,19 @@
       <button type="submit" autofocus>Run specs</button>
     </p>
     <p>
-      <label><input type="checkbox" name="jquery" value="1" checked> Load jQuery</label>
+      <label><input type="checkbox" name="migrate" value="true"> Load unpoly-migrate.js</label>
     </p>
     <p>
-      <label><input type="checkbox" name="migrate" value="1"> Load unpoly-migrate.js</label>
+      <label><input type="radio" name="es6" value="false" checked> Modern ES</label>
+      <label><input type="radio" name="es6" value="true"> ES6</label>
     </p>
     <p>
-      <label><input type="radio" name="es" value="modern" checked> Modern ES</label>
-      <label><input type="radio" name="es" value="es6"> ES6</label>
+      <label><input type="radio" name="csp" value="false" checked> No CSP</label>
+      <label><input type="radio" name="csp" value="true"> Strict CSP</label>
     </p>
     <p>
-      <label><input type="radio" name="minify" value="0" checked> Full source</label>
-      <label><input type="radio" name="minify" value="1"> Minified (requires manual build)</label>
+      <label><input type="radio" name="minify" value="false" checked> Full source</label>
+      <label><input type="radio" name="minify" value="true"> Minified (requires manual build)</label>
     </p>
     <p>
       <label><input type="checkbox" name="random" value="true"> Random test order</label>

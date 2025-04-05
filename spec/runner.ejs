@@ -10,47 +10,25 @@
 
     <script nonce="spec-runner-nonce">
       window.specs = {}
-      window.specs.config = <%- JSON.stringify(config) %>)
+      window.specs.config = <%- JSON.stringify(config) %>;
     </script>
 
-    <script nonce="spec-runner-nonce">
-      function insertScript(src) {
-        document.write('<script src="' + src + '" nonce="spec-runner-nonce"><' + '/script>')
-      }
+    <script nonce="spec-runner-nonce" src="/dist/jasmine.js"></script>
 
-      insertScript('/dist/jasmine.js')
+    <%
+      var esSuffix = config.es6 ? '.es6' : ''
+      var minifySuffix = config.minify  ? '.min' : ''
+    %>
 
-      let es6 = /(\?|&)es=es6($|\?|&)/.test(location.search)
-      let minify = /(\?|&)minify=true($|\?|&)/.test(location.search)
+    <script nonce="spec-runner-nonce" src="/dist/unpoly<%- esSuffix + minifySuffix %>.js"></script>
 
-      let esSuffix = es6 ? '.es6' : ''
-      let minifySuffix = minify  ? '.min' : ''
+    <script nonce="spec-runner-nonce" src="https://code.jquery.com/jquery-3.6.0.js"></script>
 
-      insertScript(`/dist/unpoly${esSuffix}${minifySuffix}.js`)
+    <% if (config.migrate) { %>
+      <script nonce="spec-runner-nonce" src="/dist/unpoly-migrate<%- minifySuffix %>.js"></script>
+    <% } %>
 
-      if (/(\?|&)jquery=true($|\?|&)/.test(location.search)) {
-        insertScript('https://code.jquery.com/jquery-3.6.0.js')
-      }
-
-      if (/(\?|&)migrate=true($|\?|&)/.test(location.search)) {
-        insertScript(`/dist/unpoly-migrate${minifySuffix}.js`)
-      }
-
-      insertScript(`/dist/specs${esSuffix}.js`)
-    </script>
-
-
-<!--    <script>-->
-<!--      if (/(\?|&)jquery=1($|\?|&)/.test(location.search)) {-->
-<!--        document.write('<script src="https://code.jquery.com/jquery-3.6.0.js">\u003C/script\u003E')-->
-<!--      }-->
-<!--      if (/(\?|&)migrate=1($|\?|&)/.test(location.search)) {-->
-<!--        document.write('<script src="/unpoly-migrate.js">\u003C/script\u003E')-->
-<!--      }-->
-<!--    </script>-->
-
-    <!-- <script src="/specs.js"></script> -->
-
+    <script nonce="spec-runner-nonce" src="/dist/specs<%- esSuffix %>.js"></script>
   </head>
   <body>
   </body>

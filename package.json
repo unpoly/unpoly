@@ -63,5 +63,8 @@
     "webpack-cli": "*",
     "webpack-dev-server": "*",
     "yoctocolors-cjs": "*"
+  },
+  "dependencies": {
+    "ejs": "^3.1.10"
   }
 }
