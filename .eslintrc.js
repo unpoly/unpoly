@@ -77,6 +77,7 @@ module.exports = {
         "describeFallback": "readonly",
         "AgentDetector": "readonly",
         "safeHistory": "readonly",
+        "specs": "writable",
       },
       "rules": {
         "@typescript-eslint/no-unused-vars": "off"
