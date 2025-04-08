@@ -62,9 +62,9 @@
     "webpack": "*",
     "webpack-cli": "*",
     "webpack-dev-server": "*",
-    "yoctocolors-cjs": "*"
+    "yoctocolors-cjs": "*",
+    "ejs": "^3.1.10"
   },
   "dependencies": {
-    "ejs": "^3.1.10"
   }
 }
