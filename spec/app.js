@@ -44,10 +44,10 @@ app.get('/specs', function(req, res){
   if (config.csp) {
     headers['Content-Security-Policy'] = [
       "default-src 'self'",
-      "script-src 'self' 'nonce-spec-runner-nonce'",
-      "style-src-elem 'self' 'nonce-spec-runner-nonce'",
+      "script-src 'self' 'nonce-specs-nonce'",
+      "style-src-elem 'self' 'nonce-specs-nonce'",
       "style-src-attr 'unsafe-inline'",
-      "img-src 'self' 'nonce-spec-runner-nonce' data:",
+      "img-src 'self' 'nonce-specs-nonce' data:",
     ].join('; ')
   }
 

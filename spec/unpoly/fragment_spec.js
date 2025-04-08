@@ -6152,7 +6152,7 @@ describe('up.fragment', function() {
               document: `
                 <html>
                   <head>
-                    <script id="new-script" up-asset nonce="spec-runner-nonce">window.scriptTagExecuted()</script>
+                    <script id="new-script" up-asset nonce="specs-nonce">window.scriptTagExecuted()</script>
                   </head>
                   <body>
                     <div class='container'>
@@ -6229,7 +6229,7 @@ describe('up.fragment', function() {
               document: `
                 <html>
                   <head>
-                    <script id="new-script" up-asset nonce="spec-runner-nonce">window.scriptTagExecuted()</script>
+                    <script id="new-script" up-asset nonce="specs-nonce">window.scriptTagExecuted()</script>
                   </head>
                   <body>
                     <div class='container'>
@@ -6436,7 +6436,7 @@ describe('up.fragment', function() {
               document: `
                 <html>
                   <head>
-                    <script nonce="spec-runner-nonce">
+                    <script nonce="specs-nonce">
                       console.log("hello from new inline script")
                     </script>
                   </head>
@@ -7816,7 +7816,7 @@ describe('up.fragment', function() {
             fragment: `
               <div id="target">
                 new target text
-                <style nonce="spec-runner-nonce">
+                <style nonce="specs-nonce">
                   p {
                     font-size: 60px;
                   }
@@ -7858,7 +7858,7 @@ describe('up.fragment', function() {
               fragment: `
                 <div class="target">
                   new text
-                  <script type="text/javascript" nonce="spec-runner-nonce">
+                  <script type="text/javascript" nonce="specs-nonce">
                     window.scriptTagExecuted()
                   </script>
                 </div>
@@ -7880,7 +7880,7 @@ describe('up.fragment', function() {
               fragment: `
                 <div class="target">
                   new text
-                  <script type="module" nonce="spec-runner-nonce">
+                  <script type="module" nonce="specs-nonce">
                     window.scriptTagExecuted()
                   </script>
                 </div>
@@ -7904,7 +7904,7 @@ describe('up.fragment', function() {
                   <body>
                     <div class="target">
                       new text
-                      <script type="text/javascript" nonce="spec-runner-nonce">
+                      <script type="text/javascript" nonce="specs-nonce">
                         window.scriptTagExecuted()
                       </script>
                     </div>
@@ -7926,7 +7926,7 @@ describe('up.fragment', function() {
               fragment: `
                 <div class="target">
                   new text
-                  <script type="text/javascript" nonce="spec-runner-nonce">
+                  <script type="text/javascript" nonce="specs-nonce">
                     window.scriptTagExecuted()
                   </script>
                 </div>
@@ -7946,7 +7946,7 @@ describe('up.fragment', function() {
               fragment: `
                 <div class="target">
                   <div>before</div>
-                  <script type="text/javascript" nonce="spec-runner-nonce">
+                  <script type="text/javascript" nonce="specs-nonce">
                     window.scriptTagExecuted()
                   </script>
                   <div>after</div>
@@ -7967,7 +7967,7 @@ describe('up.fragment', function() {
             up.render({
               fragment: `
                 <div class="target">
-                  <script type="text/javascript" src="${this.linkedScriptPath}" nonce="spec-runner-nonce"></script>
+                  <script type="text/javascript" src="${this.linkedScriptPath}" nonce="specs-nonce"></script>
                 </div>
               `
             })
@@ -8025,7 +8025,7 @@ describe('up.fragment', function() {
               fragment: `
                 <div class="target">
                   new text
-                  <script type="text/javascript" nonce="spec-runner-nonce">
+                  <script type="text/javascript" nonce="specs-nonce">
                     window.scriptTagExecuted()
                   </script>
                 </div>
@@ -8067,7 +8067,7 @@ describe('up.fragment', function() {
               fragment: `
                 <div class="target">
                   new text
-                  <script type="text/javascript" nonce="spec-runner-nonce">
+                  <script type="text/javascript" nonce="specs-nonce">
                     window.scriptTagExecuted()
                   </script>
                 </div>
@@ -8080,7 +8080,7 @@ describe('up.fragment', function() {
             expect(document).toHaveSelector('.target')
             expect(document).toHaveSelector('.target script[type="text/javascript"]')
             // Cannot use toHaveAttribute() here, because on pages with a CSP that value is masked by the browser.
-            expect('.target script[type="text/javascript"]').toHaveProperty('nonce', 'spec-runner-nonce')
+            expect('.target script[type="text/javascript"]').toHaveProperty('nonce', 'specs-nonce')
             expect('.target').toHaveVisibleText(/new text/)
           })
 
@@ -8115,7 +8115,7 @@ describe('up.fragment', function() {
               fragment: `
                 <div class="target">
                   new text
-                  <script type="module" nonce="spec-runner-nonce">
+                  <script type="module" nonce="specs-nonce">
                     window.scriptTagExecuted()
                   </script>
                 </div>
@@ -8135,7 +8135,7 @@ describe('up.fragment', function() {
 
             up.render({
               fragment: `
-                <script id="target" nonce="spec-runner-nonce">
+                <script id="target" nonce="specs-nonce">
                   window.scriptTagExecuted()
                 </script>
               `
@@ -8153,7 +8153,7 @@ describe('up.fragment', function() {
               target: '.target',
               document: `
                 <div class="before">
-                  <script type="text/javascript" nonce="spec-runner-nonce">
+                  <script type="text/javascript" nonce="specs-nonce">
                     window.scriptTagExecuted()
                   </script>
                 </div>
@@ -8176,7 +8176,7 @@ describe('up.fragment', function() {
             up.render({
               fragment: `
                 <div class="target">
-                  <script type="text/javascript" src="${this.linkedScriptPath}" nonce="spec-runner-nonce"></script>
+                  <script type="text/javascript" src="${this.linkedScriptPath}" nonce="specs-nonce"></script>
                 </div>
               `
             })
@@ -11459,7 +11459,7 @@ describe('up.fragment', function() {
           it('keeps a <script> element (bugfix)', async function() {
             const html = `
               <div id="container">
-                <script id="script" up-keep nonce="spec-runner-nonce"></script>
+                <script id="script" up-keep nonce="specs-nonce"></script>
               </div>
             `
 
@@ -11479,7 +11479,7 @@ describe('up.fragment', function() {
 
             const html = `
               <div id="container">
-                <script id="script" up-keep nonce="spec-runner-nonce">window.keepSpy()</script>
+                <script id="script" up-keep nonce="specs-nonce">window.keepSpy()</script>
               </div>
             `
 
@@ -11513,7 +11513,7 @@ describe('up.fragment', function() {
 
             const html = `
               <div id="container">
-                <script id="script" up-keep nonce="spec-runner-nonce">window.specSpy()</script>
+                <script id="script" up-keep nonce="specs-nonce">window.specSpy()</script>
               </div>
             `
 
@@ -11536,7 +11536,7 @@ describe('up.fragment', function() {
 
             const html = `
               <div id="container">
-                <script id="script" up-keep nonce="spec-runner-nonce">window.specSpy()</script>
+                <script id="script" up-keep nonce="specs-nonce">window.specSpy()</script>
               </div>
             `
 
@@ -11980,7 +11980,7 @@ describe('up.fragment', function() {
         })
 
         it('allows to define a listener in an [up-on-keep] attribute', async function() {
-          const keeper = fixture('.keeper[up-keep][up-on-keep="nonce-spec-runner-nonce this.onKeepSpy(this, newFragment, newData)"]', { text: 'old-inside' })
+          const keeper = fixture('.keeper[up-keep][up-on-keep="nonce-specs-nonce this.onKeepSpy(this, newFragment, newData)"]', { text: 'old-inside' })
 
           keeper.onKeepSpy = jasmine.createSpy('onKeep spy')
 

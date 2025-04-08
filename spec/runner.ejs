@@ -8,27 +8,27 @@
     <link rel="stylesheet" href="/dist/specs.css">
     <link rel="stylesheet" href="/dist/unpoly.css">
 
-    <script nonce="spec-runner-nonce">
+    <script nonce="specs-nonce">
       window.specs = {}
       window.specs.config = <%- JSON.stringify(config) %>;
     </script>
 
-    <script nonce="spec-runner-nonce" src="/dist/jasmine.js"></script>
+    <script nonce="specs-nonce" src="/dist/jasmine.js"></script>
 
     <%
       var esSuffix = config.es6 ? '.es6' : ''
       var minifySuffix = config.minify  ? '.min' : ''
     %>
 
-    <script nonce="spec-runner-nonce" src="/dist/unpoly<%- esSuffix + minifySuffix %>.js"></script>
+    <script nonce="specs-nonce" src="/dist/unpoly<%- esSuffix + minifySuffix %>.js"></script>
 
-    <script nonce="spec-runner-nonce" src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script nonce="specs-nonce" src="https://code.jquery.com/jquery-3.6.0.js"></script>
 
     <% if (config.migrate) { %>
-      <script nonce="spec-runner-nonce" src="/dist/unpoly-migrate<%- minifySuffix %>.js"></script>
+      <script nonce="specs-nonce" src="/dist/unpoly-migrate<%- minifySuffix %>.js"></script>
     <% } %>
 
-    <script nonce="spec-runner-nonce" src="/dist/specs<%- esSuffix %>.js"></script>
+    <script nonce="specs-nonce" src="/dist/specs<%- esSuffix %>.js"></script>
   </head>
   <body>
   </body>

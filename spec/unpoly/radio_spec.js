@@ -1595,7 +1595,7 @@ describe('up.radio', function() {
 
         it("parses an up:fragment:hungry listener from the hungry element's [up-on-hungry] attribute", async function() {
           window.attributeListener = jasmine.createSpy('attribute listener')
-          const oldHungry = fixture('#hungry[up-hungry]', { text: 'old hungry', 'up-on-hungry': 'nonce-spec-runner-nonce window.attributeListener(event, newFragment)' })
+          const oldHungry = fixture('#hungry[up-hungry]', { text: 'old hungry', 'up-on-hungry': 'nonce-specs-nonce window.attributeListener(event, newFragment)' })
           fixture('#target', { text: 'old target' })
 
 
@@ -1620,7 +1620,7 @@ describe('up.radio', function() {
         })
 
         it('does not update the element if an [up-on-hungry] attribute prevents the event', async function() {
-          fixture('#hungry[up-hungry]', { text: 'old hungry', 'up-on-hungry': 'nonce-spec-runner-nonce event.preventDefault()' })
+          fixture('#hungry[up-hungry]', { text: 'old hungry', 'up-on-hungry': 'nonce-specs-nonce event.preventDefault()' })
           fixture('#target', { text: 'old target' })
 
           up.render({

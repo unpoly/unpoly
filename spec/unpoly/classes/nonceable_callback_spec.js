@@ -40,27 +40,27 @@ describe('up.NonceableCallback', function() {
     })
 
     it('evals a function with an embedded nonce', function() {
-      let callback = up.NonceableCallback.fromString('nonce-spec-runner-nonce return a + b')
+      let callback = up.NonceableCallback.fromString('nonce-specs-nonce return a + b')
       let fn = callback.toFunction('a', 'b')
       expect(fn(2, 3)).toBe(5)
     })
 
     it('evals a function using a <script nonce> element', function() {
       spyOn(up.element, 'affix').and.callThrough()
-      let callback = up.NonceableCallback.fromString('nonce-spec-runner-nonce return a + b')
+      let callback = up.NonceableCallback.fromString('nonce-specs-nonce return a + b')
       let fn = callback.toFunction('a', 'b')
       fn()
-      expect(up.element.affix).toHaveBeenCalledWith(document.body, 'script', jasmine.objectContaining({ nonce: 'spec-runner-nonce' }))
+      expect(up.element.affix).toHaveBeenCalledWith(document.body, 'script', jasmine.objectContaining({ nonce: 'specs-nonce' }))
     })
 
     it('re-throws errors thrown by the callback script', function() {
-      let callback = up.NonceableCallback.fromString('nonce-spec-runner-nonce throw "error message"')
+      let callback = up.NonceableCallback.fromString('nonce-specs-nonce throw "error message"')
       let fn = callback.toFunction()
       expect(fn).toThrow('error message')
     })
 
     it('returns a function that can be re-bound to another `this`', function() {
-      let callback = up.NonceableCallback.fromString('nonce-spec-runner-nonce return this')
+      let callback = up.NonceableCallback.fromString('nonce-specs-nonce return this')
       let fn = callback.toFunction()
       let newThis = new String('hi world')
       let value = fn.apply(newThis)
