@@ -1011,7 +1011,7 @@ describe('up.link', function() {
       })
 
       if (up.migrate.loaded) {
-        it('parses an [up-reset-scroll] attribute', function() {
+        it('parses an [up-reset-scroll] attribute as { scroll: "reset" }', function() {
           const link = fixture('a[href="/foo"][up-reset-scroll]')
           up.hello(link)
 
@@ -1019,7 +1019,7 @@ describe('up.link', function() {
           expect(options.scroll).toBe('reset')
         })
 
-        it('parses an [up-restore-scroll] attribute', function() {
+        it('parses an [up-restore-scroll] attribute as { scroll: "restore" }', function() {
           const link = fixture('a[href="/foo"][up-restore-scroll]')
           up.hello(link)
 
@@ -1027,7 +1027,7 @@ describe('up.link', function() {
           expect(options.scroll).toBe('restore')
         })
 
-        it('parses an [up-reveal] attribute', function() {
+        it('parses an [up-reveal=false] attribute as { scroll: false }', function() {
           const link = fixture('a[href="/foo"][up-reveal=false]')
           up.hello(link)
 
@@ -1035,12 +1035,12 @@ describe('up.link', function() {
           expect(options.scroll).toBe(false)
         })
 
-        it('parses an [up-bad-response-time=Number] attribute as a number', function() {
+        it('parses an [up-bad-response-time=Number] attribute as { lateDelay: Number }', function() {
           const link = fixture('a[href="/foo"][up-bad-response-time=123]')
           up.hello(link)
 
           const options = up.link.followOptions(link)
-          expect(options.badResponseTime).toBe(123)
+          expect(options.lateDelay).toBe(123)
         })
       }
     })
