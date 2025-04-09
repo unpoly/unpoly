@@ -6,7 +6,7 @@ jasmine.getEnv().addReporter({
 beforeEach(function() {
   const specName = jasmine.currentSpec.fullName
 
-  if (!specs.config.console) {
+  if (!specs.config.terminal) {
     console.debug(`%c${specName}`, 'color: white; background-color: #4477aa; padding: 3px 4px; border-radius: 2px; display: inline-block')
   }
 })

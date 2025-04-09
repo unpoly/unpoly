@@ -84,7 +84,7 @@ module.exports = {
       },
     },
     {
-      "files": ["bin/**/*.js", "spec/app.js"],
+      "files": ["bin/**/*.{js,mjs}", "spec/runner/**/*.{js,mjs}"],
       "globals": {
         "process": "readonly",
       }

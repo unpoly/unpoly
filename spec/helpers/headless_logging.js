@@ -121,7 +121,7 @@ const headlessReporter = {
 }
 
 // Attach reporter to Jasmine
-if (specs.config.console) {
+if (specs.config.terminal) {
   jasmine.getEnv().addReporter(headlessReporter)
 }
 

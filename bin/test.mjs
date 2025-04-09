@@ -10,11 +10,14 @@ if (!(await isServerRunning())) {
   halt(3)
 }
 
+const config = Config.fromProcessEnv(process.env, { terminal: true })
+
 const windowWidth = 1200
 const windowHeight = 800
 
 browser = await puppeteer.launch({
-  // headless: false,
+  browser: config.browser,
+  headless: config.headless,
   args: [`--window-size=${windowWidth},${windowHeight}`],
   defaultViewport: {
     width:  windowWidth,
@@ -23,10 +26,10 @@ browser = await puppeteer.launch({
 })
 
 const page = await browser.newPage()
-const config = Config.fromProcessEnv(process.env, { console: true })
 
 const runnerURL = serverURL + '/specs?' + config.toQueryString()
-console.log(pc.blue("Running specs from " + runnerURL))
+const humanBrowser = config.browser.charAt(0).toUpperCase() + config.browser.slice(1)
+console.log(pc.blue("Running specs with %s from %s"), humanBrowser, runnerURL)
 await page.goto(runnerURL)
 
 let lastRunnerPing = new Date()
