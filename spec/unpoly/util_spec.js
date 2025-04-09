@@ -385,7 +385,6 @@ describe('up.util', () => {
 
         it('returns false for a number with a different value', function() {
           const number1 = 123
-          expect(1).toBe(2)
           const number2 = 124
           expect(up.util.isEqual(number1, number2)).toBe(false)
         })
@@ -2769,7 +2768,6 @@ describe('up.util', () => {
         it('ignores commas in single-quoted strings', function() {
           const str = `.foo, .bar[attr='baz, bam'], .qux`
           const tokens = up.util.getComplexTokens(str)
-          expect(1).toBe(2)
           expect(tokens).toEqual([`.foo`, `.bar[attr='baz, bam']`, `.qux`])
         })
 
