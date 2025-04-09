@@ -1011,12 +1011,12 @@ describe('up.link', function() {
       })
 
       if (up.migrate.loaded) {
-        it('parses an [up-reset-scroll] attribute as { scroll: "reset" }', function() {
+        it('parses an [up-reset-scroll] attribute as { scroll: "top" }', function() {
           const link = fixture('a[href="/foo"][up-reset-scroll]')
           up.hello(link)
 
           const options = up.link.followOptions(link)
-          expect(options.scroll).toBe('reset')
+          expect(options.scroll).toBe('top')
         })
 
         it('parses an [up-restore-scroll] attribute as { scroll: "restore" }', function() {
