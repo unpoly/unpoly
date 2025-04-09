@@ -8294,7 +8294,7 @@ describe('up.fragment', function() {
             jasmine.respondWith(`
                 <div id='target'>
                   <video width="400" controls loop muted autoplay>
-                    <source src="/spec/files/video.mp4" type="video/mp4">
+                    <source src="/spec/files/video.webm" type="video/webm">
                   </video>
                 </div>
             `)
@@ -11407,7 +11407,7 @@ describe('up.fragment', function() {
             const playerHTML = `
               <div id="player">
                 <video width="400" controls loop muted up-keep id="video">
-                  <source src="/spec/files/video.mp4" type="video/mp4">
+                  <source src="/spec/files/video.webm" type="video/webm">
                 </video>
               </div>
             `
