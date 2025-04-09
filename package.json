@@ -12,7 +12,8 @@
     "unpoly*.css"
   ],
   "scripts": {
-    "test": "node spec/app.js",
+    "test-server": "node bin/test-server.mjs",
+    "test": "node bin/test.mjs",
     "build": "webpack --config ./webpack/production.js && gzip --keep --force dist/unpoly.es6.min.js dist/unpoly.min.js",
     "dev": "npx nf start --procfile Procfile.dev",
     "watch-dev": "webpack --watch --config ./webpack/development.js",
@@ -41,6 +42,7 @@
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "*",
     "css-loader": "*",
+    "ejs": "^3.1.10",
     "eslint": "*",
     "eslint-webpack-plugin": "*",
     "express": "*",
@@ -53,6 +55,8 @@
     "nf": "*",
     "null-loader": "*",
     "opn": "*",
+    "picocolors": "^1.1.1",
+    "puppeteer": "^24.6.0",
     "rails-erb-loader": "*",
     "sass": "*",
     "sass-loader": "*",
@@ -62,9 +66,6 @@
     "webpack": "*",
     "webpack-cli": "*",
     "webpack-dev-server": "*",
-    "yoctocolors-cjs": "*",
-    "ejs": "^3.1.10"
-  },
-  "dependencies": {
+    "yoctocolors-cjs": "*"
   }
 }

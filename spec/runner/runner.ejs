@@ -10,7 +10,7 @@
 
     <script nonce="specs-nonce">
       window.specs = {}
-      window.specs.config = <%- JSON.stringify(config) %>;
+      window.specs.config = <%- config.toJSON() %>;
     </script>
 
     <script nonce="specs-nonce" src="/dist/jasmine.js"></script>

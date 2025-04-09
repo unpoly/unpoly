@@ -53,7 +53,7 @@ To build Unpoly you require Node.js, Webpack and other npm packages.
 
 Install the Node version from `.nvmrc`.
 
-To install Webpack and other required npm packages, run:
+To install required npm packages, run:
 
 ```
 npm install
@@ -61,19 +61,27 @@ npm install
 
 ### Quick start
 
-The following will build the library and open a web browser with the test suite:
+The following will build the library and start a server to run tests:
 
 ```
 npm run dev
 ```
 
-To run individual tasks instead, see below.
+Allow a moment for Unpoly and tests to build in `dist/`. Changing a file will re-build automatically.
+
+You can now run tests using one of the following methods:
+
+- From your console, using `npm run test`
+- In a browser, by accessing `http://localhost:4000` 
+
+If you don't want to use `npm run dev` and prefer to run individual tasks instead, see below.
+
 
 ### Building the library
 
 Tests don't consume the sources directly, but from a transpiled build in `dist/`.
 
-To make fresh build, run:
+To make fresh build for development, run:
 
 ```
 npm run build-dev
@@ -99,19 +107,22 @@ During development it is impractical to make a full build after every change. In
 npm run watch-dev
 ```
 
-This will make a fresh build and then watch the project for changes to the source files. When a source changes, affected build files are automatically recompiled. The incremental recompilation is much faster than a full build.
+This will make a fresh build and then watch the project for changes to the source files. 
+
+hen a source changes, affected build files are automatically recompiled. The incremental recompilation is much faster than a full build.
 
 ### Running tests
 
-Tests run using a browser-based [Jasmine](https://jasmine.github.io/) runner.
-
-To start a web server serving the Jasmine runner:
+Tests need a small background server to run:
 
 ```
-npm run test
+npm run test-server &
 ```
 
-This will open a server on <http://localhost:4000> and opens that URL with your default browser.
+You can now run tests using one of the following methods:
+
+- From your console, using `npm run test`
+- In a browser, by accessing `http://localhost:4000`
 
 In addition to the unit tests, there is an optional support repo [`unpoly-manual-tests`](https://github.com/unpoly/unpoly-manual-tests). It contains a Rails app to play with Unpoly features that are hard to test well with a unit test. E.g. the visual look of overlays, or edge cases when booting Unpoly.
 
