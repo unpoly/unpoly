@@ -2761,7 +2761,6 @@ describe('up.util', () => {
         it('trims whitespace', function() {
           const str = '\n foo   , \t bar  , \n baz  '
           const tokens = up.util.getComplexTokens(str)
-          pending("no time")
           expect(tokens).toEqual(['foo', 'bar', 'baz'])
         })
 
