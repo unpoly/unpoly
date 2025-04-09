@@ -77,10 +77,13 @@ page.on('console', async (msg) => {
   }
 })
 
-setInterval(() => {
+setInterval(async () => {
   // Jasmine default timeout is 30 seconds
   if (new Date() -  lastRunnerPing > 35_000) {
     console.error('Timeout from Jasmine runner')
+    let response = await fetch(runnerURL)
+    let text = await response.text()
+    console.error(text)
     halt(2)
   }
 }, 1000)

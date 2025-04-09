@@ -1,0 +1,74 @@
+---
+name: Tests
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+    branches:
+      - master
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Chrome without CSP
+            browser: chrome
+            csp: false
+          - name: Chrome with strict CSP
+            browser: chrome
+            csp: true
+          - name: Chrome with unpoly-migrate
+            browser: chrome
+            migrate: true
+          - name: Chrome with ES6 build
+            browser: chrome
+            es6: true
+          - name: Chrome with minified build
+            browser: chrome
+            min: true
+          - name: Firefox
+            browser: firefox
+    name: ${{ matrix.name }}
+    env:
+      BROWSER: "${{ matrix.browser }}"
+      CSP: "${{ matrix.csp }}"
+      MIGRATE: "${{ matrix.migrate }}"
+      ES6: "${{ matrix.es6 }}"
+      MIN: "${{ matrix.min }}"
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Read .nvmrc
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvm
+
+      - name: Install Node.js vom .nvmrc
+        uses: actions/setup-node@v4
+        with:
+          node-version: "${{ steps.nvm.outputs.NVMRC }}"
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Install Firefox for Puppeteer
+        if: matrix.browser == 'firefox'
+        run: npx puppeteer browsers install firefox
+
+      - name: Build Unpoly and tests
+        run: npm run build-ci
+
+      - name: Start test server
+        run: npm run test-server &
+
+      - name: Wait for test server
+        run: npx wait-on http://localhost:4000
+
+      - name: Run tests
+        run: npm run test
