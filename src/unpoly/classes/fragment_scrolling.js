@@ -18,7 +18,7 @@ up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
       case 'top':
         return this._scrollTo(0)
       case 'bottom':
-        return this._scrollTo(Number.MAX_SAFE_INTEGER)
+        return this._scrollTo(99999999)
       case 'layer':
         return this._revealLayer()
       case 'main':
