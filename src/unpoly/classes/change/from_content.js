@@ -100,7 +100,7 @@ up.Change.FromContent = class FromContent extends up.Change {
       'fragment',
       'document',
       'html',
-      'cspNonces',
+      'cspInfo',
       'origin',
       'data',
     ])

@@ -203,12 +203,13 @@ up.Response = class Response extends up.Record {
   }
 
   /*-
-  @property up.Response#cspNonces
-  @param {Array<string>} cspNonces
+  @property up.Response#cspInfo
+  @param {Object} cspInfo
   @internal
   */
-  get cspNonces() {
-    return up.protocol.cspNoncesFromHeader(this.header('Content-Security-Policy') || this.header('Content-Security-Policy-Report-Only'))
+  get cspInfo() {
+    let policy = this.header('Content-Security-Policy') || this.header('Content-Security-Policy-Report-Only')
+    return up.protocol.cspInfoFromHeader(policy)
   }
 
   /*-

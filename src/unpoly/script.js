@@ -898,9 +898,11 @@ up.script = (function() {
   @stable
   */
 
-  function disableScriptsInSubtree(root) {
+  function disableScriptsInSubtree(root, guard = () => true) {
     for (let script of findScripts(root)) {
-      script.type = 'up-disabled-script'
+      if (guard(script)) {
+        script.type = 'up-disabled-script'
+      }
     }
   }
 

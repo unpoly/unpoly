@@ -6,7 +6,7 @@ const FULL_DOCUMENT_PATTERN = /^\s*(<!--[^-]*.*?-->\s*)*<(html|!DOCTYPE)\b/i
 
 up.ResponseDoc = class ResponseDoc {
 
-  constructor({ document, fragment, content, target, origin, data, cspNonces, match }) {
+  constructor({ document, fragment, content, target, origin, data, cspInfo, match }) {
     if (document) {
       this._parseDocument(document, origin, data)
     } else if (fragment) {
@@ -17,8 +17,8 @@ up.ResponseDoc = class ResponseDoc {
       this._parseContent(content || '', origin, target, data)
     }
 
-    // These are script-src nonces from the response
-    this._cspNonces = cspNonces
+    // This is the parsed script-src declaration from the response
+    this._cspInfo = cspInfo || {}
 
     if (origin) {
       let originSelector = up.fragment.tryToTarget(origin)
@@ -213,10 +213,20 @@ up.ResponseDoc = class ResponseDoc {
   }
 
   _disableScriptsInSubtree(element) {
+    // Retrieve the page nonce once for multiple checks.
+    let pageNonce = up.protocol.cspNonce()
+
     // While <script> elements parsed by `DOMParser` are inert anyway, we also parse HTML through
     // other methods, which do create non-inert <script> elements.
-    if (!up.fragment.config.runScripts) {
-      up.script.disableSubtree(element)
+    up.script.disableSubtree(element, (script) => !this._isScriptAllowed(script, pageNonce))
+  }
+
+  _isScriptAllowed(scriptElement, pageNonce) {
+    let strategy = up.fragment.config.runScripts
+    if (strategy === true && this._cspInfo.declaration?.includes("'strict-dynamic'")) {
+      return pageNonce === scriptElement.nonce
+    } else {
+      return u.evalOption(strategy, scriptElement)
     }
   }
 
@@ -235,6 +245,7 @@ up.ResponseDoc = class ResponseDoc {
     // (3) Safari cannot parse (or move?) auto-playing media elements.
     if (this._document instanceof Document) {
       for (let brokenElement of e.subtree(element, ':is(noscript, script, audio, video):not(.up-keeping, .up-keeping *)')) {
+        // throw "why does this not re-execute a <script> tag? wouldn't it be safer to disable all scripts, then revive some of them?"
         let clone = this._reviveElementAsClone(brokenElement)
         brokenElement.replaceWith(clone)
       }
@@ -243,18 +254,18 @@ up.ResponseDoc = class ResponseDoc {
 
   _adoptNoncesInSubtree(element) {
     // Rewrite per-request CSP nonces to match that of the current page.
-    up.script.adoptNoncesInSubtree(element, this._cspNonces)
+    up.script.adoptNoncesInSubtree(element, this._cspInfo.nonces)
   }
 
   commitElement(element) {
     // If multiple steps want to match the name new element, only he first will succeed.
     // This will happen when multiple layers have the same hungry element with [up-if-layer=any].
     if (this._document.contains(element)) {
+      this._adoptNoncesInSubtree(element)
+
       // (1) If the user doesn't want to run scripts in the new fragment, we disable all <script> elements.
       // (2) We cannot wait until finalizeElement(), because then the script has already been inserted and has executed.
       this._disableScriptsInSubtree(element)
-
-      this._adoptNoncesInSubtree(element)
 
       // Ensure that the element cannot be matched for subsequent selects().
       element.remove()

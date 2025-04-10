@@ -208,7 +208,7 @@ up.Change.FromResponse = class FromResponse extends up.Change {
     // response header, merge it into our existing { context } option.
     renderOptions.context = u.merge(renderOptions.context, this._response.context)
 
-    renderOptions.cspNonces = this._response.cspNonces
+    renderOptions.cspInfo = this._response.cspInfo
     renderOptions.time ??= this._response.lastModified
     renderOptions.etag ??= this._response.etag
   }

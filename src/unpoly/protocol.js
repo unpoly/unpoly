@@ -1072,19 +1072,22 @@ up.protocol = (function() {
     return u.map(matches, '1')
   }
 
-  function cspNoncesFromHeader(cspHeader) {
+  function cspInfoFromHeader(cspHeader) {
     let results = {}
 
     if (cspHeader) {
-      let parts = cspHeader.split(/;/)
-      for (let part of parts) {
-        let directive = part.match(/^\s*(script|default)-src:/)?.[1]
+      let declarations = cspHeader.split(/\s*;\s*/)
+      for (let declaration of declarations) {
+        let directive = declaration.match(/^(script|default)-src:/)?.[1]
         if (directive) {
-          results[directive] = findNonces(part)
+          results[directive] = {
+            declaration: declaration,
+            nonces: findNonces(declaration)
+          }
         }
       }
     }
-    return results.script || results.default || []
+    return results.script || results.default || {}
   }
 
   function wrapMethod(method, params) {
@@ -1112,6 +1115,6 @@ up.protocol = (function() {
     initialRequestMethod,
     headerize,
     wrapMethod,
-    cspNoncesFromHeader,
+    cspInfoFromHeader,
   }
 })()
