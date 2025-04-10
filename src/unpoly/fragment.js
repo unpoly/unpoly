@@ -166,7 +166,7 @@ up.fragment = (function() {
     - If focus was lost with the old fragment, re-focus a [similar](/target-derivation) element.
     - If focus was lost with the old fragment, focus the new fragment.
 
-  @param {boolean} [config.runScripts=true]
+  @param {boolean} [config.runScripts=false]
     Whether to execute `<script>` tags in updated fragments.
 
     Scripts will load asynchronously, with no guarantee of execution order.
@@ -265,7 +265,7 @@ up.fragment = (function() {
     },
 
     match: 'region',
-    runScripts: true,
+    runScripts: false,
     autoHistoryTargets: [':main'],
     autoFocus: ['hash', 'autofocus', 'main-if-main', 'keep', 'target-if-lost'],
     autoScroll: ['hash', 'layer-if-main'],

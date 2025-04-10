@@ -161,6 +161,8 @@ describe('up.script', function() {
           })
 
           it('does not compile elements twice if the new fragment contains a <script> that defines a new compiler', function() {
+            up.fragment.config.runScripts = true
+
             const container = fixture('.container')
             const element = e.affix(container, '.element', { text: 'old text' })
 

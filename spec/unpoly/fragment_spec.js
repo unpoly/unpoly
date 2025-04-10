@@ -11456,6 +11456,10 @@ describe('up.fragment', function() {
 
         describe('scripts', function() {
 
+          beforeEach(function() {
+            up.fragment.config.runScripts = true
+          })
+
           it('keeps a <script> element (bugfix)', async function() {
             const html = `
               <div id="container">
