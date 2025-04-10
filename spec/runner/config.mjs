@@ -21,15 +21,26 @@ function parseEnumString(str, knownValues, defaultValue = undefined) {
 }
 
 const PARSERS = {
-  'csp':      (value) => parseBoolean(value, false),
-  'minify':   (value) => parseBoolean(value, false),
-  'es6':      (value) => parseBoolean(value, false),
-  'random':   (value) => parseBoolean(value, false),
-  'migrate':  (value) => parseBoolean(value, false),
+  // The title of an example or example group to focus on
+  'spec': (value) => parseString(value, ''),
+  // Whether to deliver the test runner with a strict script-src CSP.
+  'csp': (value) => parseBoolean(value, false),
+  // Whether we use minified sources.
+  'minify': (value) => parseBoolean(value, false),
+  // Whether we use the ES6 build for legacy browsers.
+  'es6': (value) => parseBoolean(value, false),
+  // Whether scripts run in random order.
+  'random': (value) => parseBoolean(value, false),
+  // Whether we load unpoly-migrate.js.
+  'migrate': (value) => parseBoolean(value, false),
+  // Whether the runner is called from a terminal. This activates extra logging to communicate with Puppeteer.
   'terminal': (value) => parseBoolean(value, false),
+  // (Terminal only) Whether the remote-controlled browser is hidden (true) or visible (false)
   'headless': (value) => parseBoolean(value, true),
+  // (Terminal only) Which type of browser to remote-control
   'browser' : (value) => parseEnumString(value, ['chrome', 'firefox'], 'chrome'),
-  'spec':     (value) => parseString(value, ''),
+  // (Terminal only) Whether the test runner should print out example names as they are running.
+  'verbose' : (value) => parseBoolean(value, false),
 }
 
 export class Config {
@@ -44,17 +55,27 @@ export class Config {
   }
 
   toQueryString() {
-    return new URLSearchParams(this._object).toString()
+    let defaults = this.constructor.fromObject({})
+
+    let objectWithoutDefaults = Object.fromEntries(
+      Object.entries(this._object).filter(([key, val]) => val !== defaults[key])
+    )
+
+    return new URLSearchParams(objectWithoutDefaults).toString()
   }
 
-  static fromExpressQuery(query, overrides = {}) {
+  static fromObject(object, overrides = {}) {
     let obj = {}
     for (let key in PARSERS) {
       let parse = PARSERS[key]
-      let value = query[key]
+      let value = object[key]
       obj[key] = parse(value)
     }
     return new this({ ...obj, ...overrides })
+  }
+
+  static fromExpressQuery(query, overrides = {}) {
+    return this.fromObject(query, overrides)
   }
 
   static fromProcessEnv(env, overrides = {}) {

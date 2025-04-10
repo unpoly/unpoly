@@ -4,16 +4,21 @@ import { Config } from '../spec/runner/config.mjs'
 import pc from "picocolors"
 
 let browser
+const config = Config.fromProcessEnv(process.env, { terminal: true })
+const windowWidth = 1200
+const windowHeight = 800
+
+async function halt(errorCode) {
+  if (browser) {
+    await browser.close()
+  }
+  process.exit(errorCode)
+}
 
 if (!(await isServerRunning())) {
   console.error(pc.red('First start a test server with `npm run test-server &`'))
   halt(3)
 }
-
-const config = Config.fromProcessEnv(process.env, { terminal: true })
-
-const windowWidth = 1200
-const windowHeight = 800
 
 browser = await puppeteer.launch({
   browser: config.browser,
@@ -30,20 +35,16 @@ const page = await browser.newPage()
 const runnerURL = serverURL + '/specs?' + config.toQueryString()
 const humanBrowser = config.browser.charAt(0).toUpperCase() + config.browser.slice(1)
 console.log(pc.blue("Running specs with %s from %s"), humanBrowser, runnerURL)
+console.log()
+
 await page.goto(runnerURL)
 
 let lastRunnerPing = new Date()
 
-async function halt(errorCode) {
-  if (browser) {
-    await browser.close()
-  }
-  process.exit(errorCode)
-}
-
-page.on('console', async (msg) => {
+page.on('console', (msg) => {
   let text = msg.text()
 
+  // Parse the messages from spec/helpers/terminal_logging.js
   if (!text.startsWith('[SPECS]')) return
 
   text = text.replace(/^\[SPECS\] /, '')
@@ -54,32 +55,49 @@ page.on('console', async (msg) => {
   let examplePassed = text.startsWith('Example passed')
   let exampleFailed = text.startsWith('Example failed')
   let examplePending = text.startsWith('Example pending')
+  let afterAllFailed = text.startsWith('Failure in afterAll') || text.startsWith('Failure in top-level afterAll')
 
-  let coloredText
-  if (examplePassed || jasminePassed) {
-    coloredText = pc.green(text)
-  } else if (exampleFailed || jasmineFailed) {
-    coloredText = pc.red(text)
-  } else if (examplePending || jasmineIncomplete) {
-    coloredText = pc.yellow(text)
-  } else {
-    coloredText = pc.reset(text)
-  }
-
-  console.log(coloredText)
-  lastRunnerPing = new Date()
-
-  if (jasminePassed || jasmineIncomplete) {
+  if (jasminePassed) {
+    console.log()
+    console.log()
+    console.log(pc.green(text))
+    halt(0)
+  } else if (jasmineIncomplete) {
+    console.log()
+    console.log()
+    console.log(pc.yellow(text))
     halt(0)
   } else if (jasmineFailed) {
-    await browser.close()
+    console.log()
+    console.log()
+    console.log(pc.red(text))
     halt(1)
+  } else if (examplePassed) {
+    if (config.verbose) {
+      console.log(pc.green(text))
+    } else {
+      process.stdout.write(pc.green('.'))
+    }
+  } else if (examplePending) {
+    if (config.verbose) {
+      console.log(pc.yellow(text))
+    } else {
+      process.stdout.write(pc.yellow('.'))
+    }
+  } else if (exampleFailed || afterAllFailed) {
+    if (!config.verbose) console.log()
+    console.log(pc.red(text))
+  } else {
+    if (!config.verbose) console.log()
+    console.log(pc.reset(text))
   }
+
+  lastRunnerPing = new Date()
 })
 
 setInterval(async () => {
   // Jasmine default timeout is 30 seconds
-  if (new Date() -  lastRunnerPing > 35_000) {
+  if (new Date() -  lastRunnerPing > 30_000) {
     console.error('Timeout from Jasmine runner')
     let response = await fetch(runnerURL)
     let text = await response.text()

@@ -23,11 +23,12 @@ function log(data) {
 function debugInBrowserURL(exampleName) {
   let url = new URL(jasmine.locationBeforeSuite)
   url.searchParams.set('spec', exampleName)
+  url.searchParams.delete('terminal')
   return url.toString().replaceAll('+', '%20')
 }
 
 // Compare with console_reporter.js in jasmine
-const headlessReporter = {
+const terminalReporter = {
   jasmineStarted(suiteInfo) {
     log('Jasmine started')
   },
@@ -81,7 +82,7 @@ const headlessReporter = {
   suiteDone: function(result) {
     if (result.failedExpectations.length > 0) {
       log((part) => {
-        part(0, `Failures in afterAll(): ${result.fullName}`)
+        part(0, `Failure in afterAll(): ${result.fullName}`)
         result.failedExpectations.forEach((failure, i) => {
           part(4, failure.message)
           if (failure.stack) {
@@ -93,10 +94,10 @@ const headlessReporter = {
   },
 
   jasmineDone: function(result) {
-    const totalTimeHuman = `${Math.round(0.001 * result.totalTime)}s`
+    // const totalTimeHuman = `${Math.round(0.001 * result.totalTime)}s`
 
     log((part) => {
-      part(0, `Jasmine ${result.overallStatus} (${totalTimeHuman})`) // 'passed' | 'failed' | 'incomplete'
+      part(0, `Jasmine ${result.overallStatus}`) // 'passed' | 'failed' | 'incomplete'
 
       // Only focusing specs with fit/fdescribe will cause an incomplete status.
       // Pending specs are not considered incomplete.
@@ -122,6 +123,6 @@ const headlessReporter = {
 
 // Attach reporter to Jasmine
 if (specs.config.terminal) {
-  jasmine.getEnv().addReporter(headlessReporter)
+  jasmine.getEnv().addReporter(terminalReporter)
 }
 
