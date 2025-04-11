@@ -224,7 +224,7 @@ up.ResponseDoc = class ResponseDoc {
   _isScriptAllowed(scriptElement, pageNonce) {
     let strategy = up.fragment.config.runScripts
     if (strategy === true && this._cspInfo.declaration?.includes("'strict-dynamic'")) {
-      return pageNonce === scriptElement.nonce
+      return pageNonce && (pageNonce === scriptElement.nonce)
     } else {
       return u.evalOption(strategy, scriptElement)
     }
