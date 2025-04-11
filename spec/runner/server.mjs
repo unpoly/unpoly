@@ -28,14 +28,9 @@ export function startServer() {
 
     const config = Config.fromExpressQuery(req.query)
 
-    if (config.csp) {
-      headers['Content-Security-Policy'] = [
-        "default-src 'self'",
-        "script-src 'self' 'nonce-specs-nonce'",
-        "style-src-elem 'self' 'nonce-specs-nonce'",
-        "style-src-attr 'unsafe-inline'",
-        "img-src 'self' 'nonce-specs-nonce' data:",
-      ].join('; ')
+    let cspHeader = config.toCSPHeader()
+    if (cspHeader) {
+      headers['Content-Security-Policy'] = cspHeader
     }
 
     res.set(headers).render('spec/runner/runner', { config })

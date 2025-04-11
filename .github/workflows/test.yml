@@ -20,10 +20,13 @@ jobs:
         include:
           - name: Chrome without CSP
             browser: chrome
-            csp: false
-          - name: Chrome with strict CSP
+            csp: none
+          - name: Chrome with nonce-only CSP
             browser: chrome
-            csp: true
+            csp: nonce-only
+          - name: Chrome with strict-dynamic CSP
+            browser: chrome
+            csp: strict-dynamic
           - name: Chrome with unpoly-migrate
             browser: chrome
             migrate: true

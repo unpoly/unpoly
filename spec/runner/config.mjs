@@ -24,7 +24,7 @@ const PARSERS = {
   // The title of an example or example group to focus on
   'spec': (value) => parseString(value, ''),
   // Whether to deliver the test runner with a strict script-src CSP.
-  'csp': (value) => parseBoolean(value, false),
+  'csp': (value) => parseEnumString(value, ['none', 'nonce', 'strict-dynamic'], 'none'),
   // Whether we use minified sources.
   'minify': (value) => parseBoolean(value, false),
   // Whether we use the ES6 build for legacy browsers.
@@ -62,6 +62,35 @@ export class Config {
     )
 
     return new URLSearchParams(objectWithoutDefaults).toString()
+  }
+
+  toCSPHeader() {
+    switch (this.csp) {
+      case 'none': {
+        return undefined
+      }
+      case 'nonce-only': {
+        return [
+          "default-src 'self'",
+          "script-src 'nonce-specs-nonce'",
+          "style-src-elem 'self' 'nonce-specs-nonce'",
+          "style-src-attr 'unsafe-inline'",
+          "img-src 'self' 'nonce-specs-nonce' data:",
+        ].join('; ')
+      }
+      case 'strict-dynamic': {
+        return [
+          "default-src 'self'",
+          "script-src 'nonce-specs-nonce' 'strict-dynamic'",
+          "style-src-elem 'self' 'nonce-specs-nonce'",
+          "style-src-attr 'unsafe-inline'",
+          "img-src 'self' 'nonce-specs-nonce' data:",
+        ].join('; ')
+      }
+      default: {
+        throw new Error('Unknown csp config: ' + this.csp)
+      }
+    }
   }
 
   static fromObject(object, overrides = {}) {

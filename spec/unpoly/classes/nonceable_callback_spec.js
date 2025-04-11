@@ -20,10 +20,6 @@ describe('up.NonceableCallback', function() {
 
   describe('#toFunction()', function() {
 
-    beforeEach(function() {
-      spyOn(up.protocol, 'cspNonce').and.returnValue('secret')
-    })
-
     it('builds a callable function', function() {
       let callback = up.NonceableCallback.fromString('return a + b')
 
@@ -32,10 +28,10 @@ describe('up.NonceableCallback', function() {
         return fn(2, 3)
       }
 
-      if (specs.config.csp) {
-        expect(callFnWithArgs).toThrowError(EvalError)
-      } else {
+      if (specs.config.csp === 'none') {
         expect(callFnWithArgs()).toBe(5)
+      } else {
+        expect(callFnWithArgs).toThrowError(EvalError)
       }
     })
 
