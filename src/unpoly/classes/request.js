@@ -307,13 +307,15 @@ up.Request = class Request extends up.Record {
   }
 
   defaults() {
+    let config = up.network.config
     return {
       state: 'new',
       abortable: true,
       headers: {},
-      timeout: up.network.config.timeout,
+      timeout: config.timeout,
       builtAt: new Date(),
       previews: [],
+      wrapMethod: config.wrapMethod,
     }
   }
 
@@ -336,8 +338,6 @@ up.Request = class Request extends up.Record {
     super(options)
 
     this.params = new up.Params(this.params) // copies, which we want
-
-    if (this.wrapMethod == null) { this.wrapMethod = up.network.config.wrapMethod }
 
     // Normalize a first time to get a normalized cache key.
     this._normalize()

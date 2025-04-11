@@ -128,25 +128,28 @@ up.network = (function() {
     }
     ```
 
-  @param {Function(up.Request, up.Response | up.Offline): boolean|string} [config.expireCache]
-    Whether to [expire](/caching#expiration) the [cache](/caching) after the given request and response.
+  @param {(Function(up.Request): boolean|string)|boolean} [config.expireCache]
+    A function that controls [cache expiration](/caching#expiration) before the given request loads.
 
-    By default Unpoly will expire the entire cache after a request with an [unsafe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP method.
+    Returning `true` will expire the entire cache.\
+    Returning `false` will not expire any cache entries.\
+    Returning a [URL pattern](/url-pattern) will expire matching cache entries only:
 
-    The configured function can either return a boolean or an [URL pattern](/url-patterns) matching responses that should be expired.
-
-  @param {Function(up.Request, up.Response | up.Offline): boolean|string} [config.evictCache=false]
-    Whether to [evict](/caching#eviction) the [cache](/caching) after the given request and response.
-
-    The configured function can either return a boolean or an [URL pattern](/url-patterns) matching responses that should be evicted.
-
-    By default Unpoly will *not* evict any cache entries when a request is made.
-
-    For example, to evict the entire cache after a request with an [unsafe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP method:
+    By default Unpoly will expire the entire cache after a request with an [unsafe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP method:
 
     ```js
-    up.network.config.evictCache = (request) => !request.isSafe()
+    up.request({ url: '/path', method: 'get' })  // no cache entries expired
+    up.request({ url: '/path', method: 'post' }) // entire cache expired
     ```
+
+  @param {(Function(up.Request): boolean|string)|boolean} [config.evictCache=false]
+    A function that controls [cache eviction](/caching#eviction) before the given request loads.
+
+    Returning `true` will expire the entire cache.\
+    Returning `false` will not expire any cache entries.\
+    Returning a [URL pattern](/url-pattern) will expire matching cache entries only.
+
+    By default Unpoly will *not* evict any cache entries when a request is made.
 
   @param {boolean|Function(): boolean} [config.progressBar]
     Whether to show a [progress bar](/progress-bar) for [late requests](#config.lateDelay).
@@ -162,7 +165,7 @@ up.network = (function() {
     lateDelay: 400,
     fail(response) { return (response.status < 200 || response.status > 299) && response.status !== 304 },
     autoCache(request) { return request.isSafe() },
-    expireCache(request, _response) { return !request.isSafe() },
+    expireCache(request) { return !request.isSafe() },
     evictCache: false,
     progressBar: true,
     timeout: 90_000,
@@ -516,6 +519,8 @@ up.network = (function() {
   }
 
   function processRequest(request) {
+    cache.expire(request.expireCache ?? u.evalOption(config.expireCache, request) ?? false)
+    cache.evict(request.evictCache ?? u.evalOption(config.evictCache, request) ?? false)
     useCachedRequest(request) || queueRequest(request)
   }
 
@@ -592,25 +597,8 @@ up.network = (function() {
     // Once we receive a response we honor options/headers for eviction/expiration,
     // even if the request was not cachable.
     u.always(request, function(responseOrError) {
-      // Three places can request the cache to be expired or kept fresh:
-      //
-      // (1) The server via X-Up-Expire-Cache header, found in response.expireCache
-      // (2) The interaction via { expireCache } option, found in request.expireCache
-      // (3) The default in up.network.config.expireCache({ request, response })
-      let expireCache = responseOrError.expireCache ?? request.expireCache ?? u.evalOption(config.expireCache, request, responseOrError)
-      if (expireCache) {
-        cache.expire(expireCache, { except: request })
-      }
-
-      // Three places can request the cache to be evicted:
-      //
-      // (1) The server via X-Up-Evict-Cache header, found in response.evictCache
-      // (2) The interaction via { evictCache } option, found in request.evictCache
-      // (3) The default in up.network.config.evictCache({ request, response })
-      let evictCache = responseOrError.evictCache ?? request.evictCache ?? u.evalOption(config.evictCache, request, responseOrError)
-      if (evictCache) {
-        cache.evict(evictCache, { except: request })
-      }
+      cache.expire(responseOrError.expireCache ?? false, { except: request })
+      cache.evict(responseOrError.evictCache ?? false, { except: request })
 
       let hasCacheEntry = cache.get(request)
       let isResponse = responseOrError instanceof up.Response

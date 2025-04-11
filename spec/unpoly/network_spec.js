@@ -1454,10 +1454,14 @@ describe('up.network', function() {
 
         it('evicts all cache entries with { evictCache: true }', async function() {
           up.request({ url: '/foo', cache: true })
+          await wait()
           expect({ url: '/foo' }).toBeCached()
 
           up.request({ url: '/bar', evictCache: true })
           await wait()
+
+          expect({ url: '/foo' }).not.toBeCached()
+          expect({ url: '/bar' }).not.toBeCached()
 
           jasmine.respondWith('foo')
           await wait()
@@ -1466,12 +1470,16 @@ describe('up.network', function() {
           expect({ url: '/bar' }).not.toBeCached()
         })
 
-        it('keeps this new request in the cache with { cache: true, evictCache: true }', async function() {
+        it('keeps this new request in the cache after a cache miss with { cache: true, evictCache: true }', async function() {
           up.request({ url: '/foo', cache: true })
+          await wait()
           expect({ url: '/foo' }).toBeCached()
 
           up.request({ url: '/bar', cache: true, evictCache: true })
           await wait()
+
+          expect({ url: '/foo' }).not.toBeCached()
+          expect({ url: '/bar' }).toBeCached()
 
           jasmine.respondWith('foo')
           await wait()
@@ -1480,10 +1488,32 @@ describe('up.network', function() {
           expect({ url: '/bar' }).toBeCached()
         })
 
+        it('evicts the cache before making a new request after a cache hit with { cache: true, evictCache: true }', async function() {
+          await jasmine.populateCache('/path', 'old content')
+          expect({ url: '/path' }).toBeCached()
+          await expectAsync(up.cache.get({ url: '/path' })).toBeResolvedTo(jasmine.any(up.Response))
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          up.request({ url: '/path', cache: true, evictCache: true })
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+          expect({ url: '/path' }).toBeCached() // Cache has been expired and immediately replaced with the new request
+          await expectAsync(up.cache.get({ url: '/path' })).toBePending()
+
+          jasmine.respondWith('fresh content')
+          await wait()
+
+          expect({ url: '/path' }).toBeCached()
+          await expectAsync(up.cache.get({ url: '/path' })).toBeResolvedTo(jasmine.any(up.Response))
+        })
+
         it('accepts an URL pattern as { evictCache } option', async function() {
           up.request({ url: '/foo/1', cache: true })
           up.request({ url: '/foo/2', cache: true })
           up.request({ url: '/bar/1', cache: true })
+          await wait()
 
           expect({ url: '/foo/1' }).toBeCached()
           expect({ url: '/foo/2' }).toBeCached()
@@ -1491,6 +1521,10 @@ describe('up.network', function() {
 
           up.request({ url: '/other', evictCache: '/foo/*' })
           await wait()
+
+          expect({ url: '/foo/1' }).not.toBeCached()
+          expect({ url: '/foo/2' }).not.toBeCached()
+          expect({ url: '/bar/1' }).toBeCached()
 
           expect(jasmine.Ajax.requests.count()).toEqual(4)
 
@@ -1510,6 +1544,7 @@ describe('up.network', function() {
           up.request({ url: '/foo/1', cache: true })
           up.request({ url: '/foo/2', cache: true })
           up.request({ url: '/bar/1', cache: true })
+          await wait()
 
           expect({ url: '/foo/1' }).toBeCached()
           expect({ url: '/foo/2' }).toBeCached()
@@ -1518,6 +1553,10 @@ describe('up.network', function() {
           let evictCache = (request) => request.url.indexOf('/foo/') === 0
           up.request({ url: '/other', evictCache })
           await wait()
+
+          expect({ url: '/foo/1' }).not.toBeCached()
+          expect({ url: '/foo/2' }).not.toBeCached()
+          expect({ url: '/bar/1' }).toBeCached()
 
           expect(jasmine.Ajax.requests.count()).toEqual(4)
 
@@ -1537,6 +1576,7 @@ describe('up.network', function() {
           up.request({ url: '/foo/1', cache: true })
           up.request({ url: '/foo/2', cache: true })
           up.request({ url: '/bar/1', cache: true })
+          await wait()
 
           expect({ url: '/foo/1' }).toBeCached()
           expect({ url: '/foo/2' }).toBeCached()
@@ -1563,12 +1603,16 @@ describe('up.network', function() {
         it('evicts the entire cache if the server responds with an X-Up-Evict-Cache: * header', async function() {
           up.request({ url: '/foo', cache: true })
           up.request({ url: '/bar', cache: true })
+          await wait()
+
           expect({ url: '/foo' }).toBeCached()
           expect({ url: '/bar' }).toBeCached()
 
           up.request({ url: '/baz' })
           await wait()
 
+          expect({ url: '/foo' }).toBeCached()
+          expect({ url: '/bar' }).toBeCached()
           expect(jasmine.Ajax.requests.count()).toEqual(3)
 
           jasmine.respondWith({
@@ -1584,9 +1628,8 @@ describe('up.network', function() {
         })
 
         it('defaults to a rule in up.network.config.evictCache() if neither request nor server set a { evictCache } option', async function() {
-          up.network.config.evictCache = function(request, response) {
+          up.network.config.evictCache = function(request) {
             expect(request).toEqual(jasmine.any(up.Request))
-            expect(response).toEqual(jasmine.any(up.Response))
 
             if (request.url === '/baz') {
               return '/foo'
@@ -1595,28 +1638,12 @@ describe('up.network', function() {
 
           up.request({ url: '/foo', cache: true })
           up.request({ url: '/bar', cache: true })
+          await wait()
+
+          expect({ url: '/foo' }).toBeCached()
+          expect({ url: '/bar' }).toBeCached()
+
           up.request({ url: '/baz', cache: true })
-          await wait()
-
-          expect({ url: '/foo' }).toBeCached()
-          expect({ url: '/bar' }).toBeCached()
-          expect({ url: '/baz' }).toBeCached()
-
-          jasmine.Ajax.requests.at(0).respondWith({ status: 200, responseText: 'foo response' })
-          await wait()
-
-          expect({ url: '/foo' }).toBeCached()
-          expect({ url: '/bar' }).toBeCached()
-          expect({ url: '/baz' }).toBeCached()
-
-          jasmine.Ajax.requests.at(1).respondWith({ status: 200, responseText: 'bar response' })
-          await wait()
-
-          expect({ url: '/foo' }).toBeCached()
-          expect({ url: '/bar' }).toBeCached()
-          expect({ url: '/baz' }).toBeCached()
-
-          jasmine.Ajax.requests.at(2).respondWith({ status: 200, responseText: 'baz response' })
           await wait()
 
           // Only the URL pattern returned by config.evictCache() is evicted
@@ -1631,10 +1658,14 @@ describe('up.network', function() {
 
         it('expires all cache entries with { expireCache: true }', async function() {
           up.request({ url: '/foo', cache: true })
+          await wait()
+
           expect({ url: '/foo' }).toBeCached()
 
           up.request({ url: '/bar', expireCache: true })
           await wait()
+
+          expect({ url: '/foo' }).toBeExpired()
 
           jasmine.respondWith('foo')
           await wait()
@@ -1642,25 +1673,50 @@ describe('up.network', function() {
           expect({ url: '/foo' }).toBeExpired()
         })
 
-        it('keeps a fresh cache entry for this new request with { cache: true, expireCache: true }', async function() {
+        it('keeps a fresh cache entry for this new request after a cache miss with { cache: true, expireCache: true }', async function() {
           up.request({ url: '/foo', cache: true })
+          await wait()
           expect({ url: '/foo' }).toBeCached()
 
           up.request({ url: '/bar', cache: true, expireCache: true })
           await wait()
 
+          expect({ url: '/foo' }).toBeCached()
+          expect({ url: '/foo' }).toBeExpired()
+          expect({ url: '/bar' }).toBeCached()
+
           jasmine.respondWith('bar')
           await wait()
 
+          expect({ url: '/foo' }).toBeCached()
           expect({ url: '/foo' }).toBeExpired()
           expect({ url: '/bar' }).toBeCached()
           expect({ url: '/bar' }).not.toBeExpired()
+        })
+
+        it('processes an { expireCache } option after a cache hit with', async function() {
+          await jasmine.populateCache('/foo', 'cached foo')
+          await jasmine.populateCache('/bar', 'cached bar')
+          expect({ url: '/foo' }).toBeCached()
+          expect({ url: '/foo' }).not.toBeExpired()
+          expect({ url: '/bar' }).toBeCached()
+          expect({ url: '/bar' }).not.toBeExpired()
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+
+          console.debug("------------------")
+          up.request({ url: '/foo', cache: true, expireCache: '/bar' })
+          await wait()
+
+          expect({ url: '/foo' }).not.toBeExpired()
+          expect({ url: '/bar' }).toBeExpired()
+          expect(jasmine.Ajax.requests.count()).toBe(2)
         })
 
         it('accepts an URL pattern as { expireCache } option', async function() {
           up.request({ url: '/foo/1', cache: true })
           up.request({ url: '/foo/2', cache: true })
           up.request({ url: '/bar/1', cache: true })
+          await wait()
 
           expect({ url: '/foo/1' }).toBeCached()
           expect({ url: '/foo/2' }).toBeCached()
@@ -1668,6 +1724,10 @@ describe('up.network', function() {
 
           up.request({ url: '/other', expireCache: '/foo/*' })
           await wait()
+
+          expect({ url: '/foo/1' }).toBeExpired()
+          expect({ url: '/foo/2' }).toBeExpired()
+          expect({ url: '/bar/1' }).not.toBeExpired()
 
           expect(jasmine.Ajax.requests.count()).toEqual(4)
 
@@ -1687,14 +1747,19 @@ describe('up.network', function() {
           up.request({ url: '/foo/1', cache: true })
           up.request({ url: '/foo/2', cache: true })
           up.request({ url: '/bar/1', cache: true })
+          await wait()
 
           expect({ url: '/foo/1' }).toBeCached()
           expect({ url: '/foo/2' }).toBeCached()
           expect({ url: '/bar/1' }).toBeCached()
 
-          let expireCache = (request) => request.url.indexOf('/foo/') === 0
+          let expireCache = (request) => request.url.startsWith('/foo/')
           up.request({ url: '/other', expireCache })
           await wait()
+
+          expect({ url: '/foo/1' }).toBeExpired()
+          expect({ url: '/foo/2' }).toBeExpired()
+          expect({ url: '/bar/1' }).not.toBeExpired()
 
           expect(jasmine.Ajax.requests.count()).toEqual(4)
 
@@ -1716,8 +1781,11 @@ describe('up.network', function() {
           up.request({ url: '/bar/1', cache: true })
 
           expect({ url: '/foo/1' }).toBeCached()
+          expect({ url: '/foo/1' }).not.toBeExpired()
           expect({ url: '/foo/2' }).toBeCached()
+          expect({ url: '/foo/2' }).not.toBeExpired()
           expect({ url: '/bar/1' }).toBeCached()
+          expect({ url: '/bar/1' }).not.toBeExpired()
 
           up.request({ url: '/other' })
           await wait()
@@ -1740,8 +1808,12 @@ describe('up.network', function() {
         it('expires the entire cache if the server responds with an X-Up-Expire-Cache: * header', async function() {
           up.request({ url: '/foo', cache: true })
           up.request({ url: '/bar', cache: true })
+          await wait()
+
           expect({ url: '/foo' }).toBeCached()
+          expect({ url: '/foo' }).not.toBeExpired()
           expect({ url: '/bar' }).toBeCached()
+          expect({ url: '/bar' }).not.toBeExpired()
 
           up.request({ url: '/baz' })
           await wait()
@@ -1761,9 +1833,8 @@ describe('up.network', function() {
         })
 
         it('defaults to a rule in up.network.config.expireCache() if neither request nor server set a { expireCache } option', async function() {
-          up.network.config.expireCache = function(request, response) {
+          up.network.config.expireCache = function(request) {
             expect(request).toEqual(jasmine.any(up.Request))
-            expect(response).toEqual(jasmine.any(up.Response))
 
             if (request.url === '/baz') {
               return '/foo'
@@ -1771,33 +1842,26 @@ describe('up.network', function() {
           }
 
           up.request({ url: '/foo', cache: true })
+          await wait()
+
           up.request({ url: '/bar', cache: true })
-          up.request({ url: '/baz', cache: true })
+          await wait()
 
           expect({ url: '/foo' }).toBeCached()
+          expect({ url: '/foo' }).not.toBeExpired()
           expect({ url: '/bar' }).toBeCached()
-          expect({ url: '/baz' }).toBeCached()
-          await wait()
-
-          jasmine.Ajax.requests.at(0).respondWith({ status: 200, responseText: 'foo response' })
-          await wait()
-
-          expect({ url: '/foo' }).not.toBeExpired()
           expect({ url: '/bar' }).not.toBeExpired()
-          expect({ url: '/baz' }).not.toBeExpired()
-
-          jasmine.Ajax.requests.at(1).respondWith({ status: 200, responseText: 'bar response' })
+          expect({ url: '/baz' }).not.toBeCached()
           await wait()
 
-          expect({ url: '/foo' }).not.toBeExpired()
-          expect({ url: '/bar' }).not.toBeExpired()
-          expect({ url: '/baz' }).not.toBeExpired()
-
-          jasmine.Ajax.requests.at(2).respondWith({ status: 200, responseText: 'baz response' })
+          up.request({ url: '/baz', cache: true })
           await wait()
 
+          expect({ url: '/foo' }).toBeCached()
           expect({ url: '/foo' }).toBeExpired()
+          expect({ url: '/bar' }).toBeCached()
           expect({ url: '/bar' }).not.toBeExpired()
+          expect({ url: '/baz' }).toBeCached()
           expect({ url: '/baz' }).not.toBeExpired()
         })
 
@@ -1845,26 +1909,6 @@ describe('up.network', function() {
             expect(safeRequestAttrs).not.toBeExpired()
           })
 
-          it(`does not expire the cache if the server responds to an ${unsafeMethod} request with X-Up-Expire-Cache: false`, async function() {
-            const safeRequestAttrs = { method: 'GET', url: '/foo', cache: true }
-            const unsafeRequestAttrs = { method: unsafeMethod, url: '/foo', cache: true }
-
-            up.request(safeRequestAttrs)
-            await wait()
-
-            jasmine.respondWith('foo')
-            await wait()
-
-            expect(safeRequestAttrs).toBeCached()
-
-            up.request(unsafeRequestAttrs)
-            await wait()
-
-            jasmine.respondWith('foo', { responseHeaders: { 'X-Up-Expire-Cache': 'false' } })
-            await wait()
-
-            expect(safeRequestAttrs).not.toBeExpired()
-          })
         })
 
       })
