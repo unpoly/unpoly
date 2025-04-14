@@ -265,7 +265,7 @@ up.fragment.config.patch(function() {
 
 up.on('up:framework:boot', function() {
   if (!up.fragment.config.runScriptsSet) {
-    up.migrate.warn('Scripts within fragments are now executed. Configure up.fragment.config.runScripts to remove this warning.')
+    up.migrate.warn('Scripts within fragments are no longer executed. Configure up.fragment.config.runScripts to remove this warning.')
   }
 })
 
