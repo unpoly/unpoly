@@ -3283,12 +3283,10 @@ describe('up.link', function() {
         up.hello(link)
 
         Trigger.hoverSequence(link)
-
         await wait(50)
 
         // It's still too early
         expect(jasmine.Ajax.requests.count()).toEqual(0)
-
         await wait(75)
 
         expect(jasmine.Ajax.requests.count()).toEqual(1)
@@ -3301,14 +3299,13 @@ describe('up.link', function() {
             new text
           </div>
         `)
-
         await wait()
-        // We only preloaded, so the target isn't replaced yet.
 
+        // We only preloaded, so the target isn't replaced yet.
         expect('.target').toHaveText('old text')
+        expect({ url: '/foo' }).toBeCachedWithResponse()
 
         Trigger.clickSequence(link)
-
         await wait()
 
         // No additional request has been sent since we already preloaded
@@ -3360,6 +3357,148 @@ describe('up.link', function() {
         await wait(90)
 
         expect(jasmine.Ajax.requests.count()).toEqual(0)
+      })
+
+      it('does not send a request if the link was targeted by another request before the delay is over', async function() {
+        up.link.config.preloadDelay = 100
+
+        fixture('.target', { text: 'old text' })
+
+        const link = fixture('a.link[href="/foo"][up-target=".target"][up-preload]')
+        up.hello(link)
+
+        Trigger.hoverSequence(link)
+
+        await wait(40)
+
+        // It's still too early
+        expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+        up.render({ target: '.link', url: '/bar' })
+
+        await wait(90)
+
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
+        expect(jasmine.lastRequest().url).toMatchURL('/bar')
+      })
+
+      it('does not crash or send a request if the preloading link is [up-hungry] and gets replaced before the delay is over', async function() {
+        up.link.config.preloadDelay = 100
+
+        let [hungryNav, link, target] = htmlFixtureList(`
+          <div class="nav" up-hungry>
+            <a class="link" href="/foo" up-target=".target" up-preload>link label</a>
+          </div>
+
+          <div class="target">
+            old target
+          </div>
+        `)
+
+        fixture('.target', { text: 'old target' })
+
+        up.hello(hungryNav)
+
+        Trigger.hoverSequence(link)
+        await wait(40)
+
+        // It's still too early
+        expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+        up.render({ target: '.target', url: '/bar' })
+        await wait()
+
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
+        expect(jasmine.lastRequest().url).toMatchURL('/bar')
+
+        jasmine.respondWith(`
+          <div class="nav" up-hungry>
+            new nav
+          </div>
+
+          <div class="target">
+            new target
+          </div>
+        `)
+        await wait(100)
+
+        expect('.nav').toHaveText('new nav')
+        expect('.target').toHaveText('new target')
+      })
+
+      it('does not crash if the preloading link is [up-hungry] and the preloaded request is revalidated (bugfix)', async function() {
+        up.link.config.preloadDelay = 100
+
+        let [hungryNav, link, target] = htmlFixtureList(`
+          <div class="nav" up-hungry>
+            <a class="link" href="/foo" up-target=".target" up-preload>old label</a>
+          </div>
+
+          <div class="target">
+            old target
+          </div>
+        `)
+        up.hello(hungryNav)
+
+        Trigger.hoverSequence(link)
+        await wait(50)
+
+        // It's still too early
+        expect(jasmine.Ajax.requests.count()).toEqual(0)
+        await wait(75)
+
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
+        expect(jasmine.lastRequest().url).toMatchURL('/foo')
+        expect(jasmine.lastRequest()).toHaveRequestMethod('GET')
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.target')
+
+        jasmine.respondWith(`
+          <div class="nav" up-hungry>
+            <a class="link" href="/foo" up-target=".target" up-preload>new label</a>
+          </div>
+
+          <div class="target">
+            new target
+          </div>
+        `)
+        await wait()
+
+        // We only preloaded, so the target isn't replaced yet.
+        expect('.link').toHaveText('old label')
+        expect('.target').toHaveText('old target')
+        expect({ url: '/foo' }).toBeCachedWithResponse()
+
+        up.cache.expire()
+        await wait()
+
+        Trigger.hoverSequence(link)
+        await wait()
+
+        Trigger.clickSequence(link)
+        await wait()
+
+        // The target is replaced instantly
+        expect('.target').toHaveText('new target')
+        expect('.link').toHaveText('new label')
+
+        // Because the cursor sits at the same position, we immediately cause another mouseenter event.
+        Trigger.hoverSequence(link)
+
+        expect(jasmine.Ajax.requests.count()).toEqual(2)
+
+        jasmine.respondWith(`
+          <div class="nav" up-hungry>
+            <a class="link" href="/foo" up-target=".target" up-preload>revalidated label</a>
+          </div>
+
+          <div class="target">
+            revalidated target
+          </div>
+        `)
+        await wait()
+
+        expect('.target').toHaveText('revalidated target')
+        expect('.link').toHaveText('revalidated label')
       })
 
       it('aborts a preload request if the user stops hovering before the response was received', async function() {

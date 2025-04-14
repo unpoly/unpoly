@@ -52,6 +52,19 @@ up.LinkFollowIntent = class LinkFollowIntent {
   _runCallback(event) {
     up.log.putsEvent(event)
 
+    // We unschedule the delayed callback then the link is aborted.
+    // However, there are edge cases when the link can still be detached while
+    // waiting for the delay:
+    //
+    // - The link (or its container) is [up-hungry] so it won't be eagerly
+    //   aborted when it is targeted.
+    // - We render an [up-preload] link from an expired cache entry
+    // - We schedule another callback
+    // - The expired content is revalidated (which does not abort eagerly).
+    // - The link is replaced with the revalidated content.
+    // - The callback delay finishes and tries to follow a detached link.
+    if (!up.fragment.isAlive(this._link)) return
+
     // (1) Remember the request when sent
     // (2) All callbacks from up.link already mute uncritical rejections.
     //     We cannot do it here, as the callbacks are also passed to other places,

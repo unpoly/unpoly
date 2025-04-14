@@ -1703,7 +1703,6 @@ describe('up.network', function() {
           expect({ url: '/bar' }).not.toBeExpired()
           expect(jasmine.Ajax.requests.count()).toBe(2)
 
-          console.debug("------------------")
           up.request({ url: '/foo', cache: true, expireCache: '/bar' })
           await wait()
 
