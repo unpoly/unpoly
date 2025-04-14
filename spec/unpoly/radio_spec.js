@@ -329,13 +329,15 @@ describe('up.radio', function() {
 
         await wait()
 
-        jasmine.respondWith(`\
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.target')
+
+        jasmine.respondWith(`
           <div class="target">
             new target
           </div>
           <div class="hungry">
             new hungry
-          </div>\
+          </div>
         `)
 
         await wait()
@@ -352,13 +354,13 @@ describe('up.radio', function() {
 
         await wait()
 
-        jasmine.respondWith(`\
+        jasmine.respondWith(`
           <div class="target">
             new target
           </div>
           <div class="hungry">
             new hungry
-          </div>\
+          </div>
         `)
 
         await wait()
@@ -375,10 +377,10 @@ describe('up.radio', function() {
 
         await wait()
 
-        jasmine.respondWith(`\
+        jasmine.respondWith(`
           <div class="target">
             new target
-          </div>\
+          </div>
         `)
 
         await wait()
@@ -653,6 +655,42 @@ describe('up.radio', function() {
 
         expect(insertedSpy.calls.count()).toBe(1)
         expect(insertedSpy.calls.mostRecent().args[0]).toBeEvent('up:fragment:inserted', { target: document.querySelector('#container') })
+      })
+
+      it("aborts pending requests for a hungry element when it is updated", async function() {
+        fixture('.hungry[up-hungry]', { text: 'old hungry' })
+        fixture('.target', { text: 'old target' })
+
+
+        let renderHungryPromise = up.render('.target', { url: '/hungry' })
+        let renderTargetPromise = up.render('.target', { url: '/target' })
+
+        await wait()
+
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.target')
+
+        await expectAsync(renderHungryPromise).toBePending()
+        await expectAsync(renderTargetPromise).toBePending()
+
+        jasmine.respondWith(`
+          <div class="target">
+            new target
+          </div>
+          <div class="between">
+            new between
+          </div>
+          <div class="hungry">
+            new hungry
+          </div>up-hungry
+        `)
+
+        await wait()
+
+        expect('.target').toHaveText('new target')
+        expect('.hungry').toHaveText('new hungry')
+
+        await expectAsync(renderTargetPromise).toBeResolvedTo(jasmine.any(up.RenderResult))
+        await expectAsync(renderHungryPromise).toBeRejectedWith(jasmine.any(up.Aborted))
       })
 
       describe('transition', function() {
