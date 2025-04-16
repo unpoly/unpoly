@@ -68,21 +68,21 @@ up.log = (function() {
   */
   const printToError = (...args) => printToStream('error', ...args)
 
-  function printToStream(stream, trace, message, ...args) {
-    printToStreamStyled(stream, trace, '', message, ...args)
+  function printToStream(stream, prefix, message, ...args) {
+    printToStreamStyled(stream, prefix, '', message, ...args)
   }
 
-  function printToStreamStyled(stream, trace, customStyles, message, ...args) {
+  function printToStreamStyled(stream, prefix, customStyles, message, ...args) {
     if (message) {
       if (config.format) {
         console[stream](
-          `%c${trace}%c ${message}`,
+          `%c${prefix}%c ${message}`,
           'color: #666666; padding: 1px 3px; border: 1px solid #bbbbbb; border-radius: 2px; font-size: 90%; display: inline-block;' + customStyles,
           '', // reset for message after trace
           ...args
         )
       } else {
-        console[stream](`[${trace}] ${u.sprintf(message, ...args)}`)
+        console[stream](`[${prefix}] ${u.sprintf(message, ...args)}`)
       }
     }
   }

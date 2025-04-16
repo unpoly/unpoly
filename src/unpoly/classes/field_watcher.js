@@ -7,6 +7,9 @@ up.FieldWatcher = class FieldWatcher {
     this._root = root
     this._callback = callback
     this._batch = options.batch
+    this._logPrefix = options.logPrefix ?? 'up.watch()'
+
+    this._ensureWatchable()
   }
 
   start() {
@@ -21,6 +24,18 @@ up.FieldWatcher = class FieldWatcher {
       this._trackReset(),
       () => this._abort(),
     )
+  }
+
+  _ensureWatchable() {
+    const fail = (message) => up.fail(message, this._logPrefix, this._root)
+
+    if (!this._callback) {
+      fail('No callback provided for %s (%o)')
+    }
+
+    if (this._root.matches('input[type=radio]')) {
+      fail('Use %s with the container of a radio group, not with an individual radio button (%o)')
+    }
   }
 
   _trackAbort() {

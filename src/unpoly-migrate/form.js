@@ -19,6 +19,32 @@ up.migrate.migratedFormGroupSelectors = function() {
   })
 }
 
+
+// An old implementation allowed [up-switch] to be set on individual radio buttons
+// instead of on a container for the radio group. Each button got its own up.Switcher.
+// The old implementation also listened to `change`, which has a weird caveat for radio
+// buttons that happens to make individual Switchers work: It only fires when the radio
+// button gets checked, not when it gets unchecked.
+// The new implementation uses up.watch(), which only works for a group of radio buttons.
+up.migrate.watchForSwitch = function(root, callback) {
+  if (root.matches('input[type=radio]')) {
+    up.migrate.warn('Using [up-switch] on an individual radio button is deprecated (%o). Use [up-switch] on the container of a radio group instead.', root)
+    return up.on(root, 'change', callback)
+  }
+}
+
+// An old implementation allowed [up-switch] to be set on individual radio buttons
+// instead of on a container for the radio group. Each button got its own up.Switcher.
+// Because such an up.Switcher cannot always find the checked button within its root.
+// Instead it needs to check which of its sibling buttons is the checked one.
+up.migrate.checkedRadioButtonForSwitch = function(siblingButton) {
+  // Warning is already printed by up.migrate.watchForSwitch()
+  const region = up.form.getRegion(siblingButton)
+  const groupName = siblingButton.getAttribute('name')
+  const groupButtonsSelector = 'input[type=radio]' + up.element.attrSelector('name', groupName)
+  return region.querySelector(groupButtonsSelector + ':checked')
+}
+
 /*-
 Watches form fields and runs a callback when a value changes.
 

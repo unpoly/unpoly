@@ -1463,6 +1463,21 @@ describe('up.form', function() {
         })
       })
 
+      describe('with an individual radio button', function() {
+
+        it('throws an error', function() {
+          let [form, radioButton] = htmlFixtureList(`
+            <form>
+              <input type="radio">Name</input>
+            </form>  
+          `)
+
+          let doWatch = () => up.watch(radioButton, u.noop)
+          expect(doWatch).toThrowError(/Use up\.watch\(\) with the container of a radio group/i)
+        })
+
+      })
+
       describe('with a form element', function() {
         u.each(defaultInputEvents, function(eventType) {
           describe(`when any of the form's fields receives a ${eventType} event`, function() {
@@ -4950,6 +4965,19 @@ describe('up.form', function() {
         expect(submitSpy.calls.count()).toBe(3)
       })
 
+      it('throws an error when used with an individual radio button', async function() {
+        let [form, radioButton] = htmlFixtureList(`
+          <form>
+            <input type="radio" up-autosubmit name="foo">
+          </form>
+        `)
+
+        await jasmine.expectGlobalError(/Use \[up-autosubmit\] with the container of a radio group/i, async function() {
+          up.hello(form)
+          await wait()
+        })
+      })
+
       it('calls up.submit() with render options parsed from the watched element', async function() {
         const submitSpy = up.submit.mock()
 
@@ -6208,7 +6236,71 @@ describe('up.form', function() {
           expect(switchee).toBeVisible()
         })
 
-        it('logs a warning if an input[type=radio] has an [up-switch] attribute')
+        describe('when [up-switch] is set on an input[type=radio] instead of a group container', function() {
+
+          if (up.migrate.loaded) {
+            it('logs a warning and keeps working', async function() {
+              spyOn(console, 'warn')
+
+              const [form, radio1, radio2, switchee] = htmlFixtureList(`
+              <form>
+                <input type="radio" name="group" value="1" up-switch="#switchee">
+                <input type="radio" name="group" value="2" up-switch="#switchee">
+  
+                <div id="switchee" up-show-for="1">
+                  Switchee
+                </div>
+              </form>
+            `)
+
+              up.hello(form)
+              await wait()
+
+              expect(console.warn).toHaveBeenCalled()
+              expect(console.warn.calls.mostRecent().args[0]).toMatch(/Use \[up-switch\] on the container of a radio buttons group/i)
+
+              // This still works for backwards compatibility
+              expect(switchee).not.toBeVisible()
+              radio1.checked = true
+              Trigger.change(radio1)
+              await wait()
+
+              expect(switchee).toBeVisible()
+              radio2.checked = true
+              Trigger.change(radio2)
+              await wait()
+
+              expect(switchee).not.toBeVisible()
+              radio1.checked = true
+              Trigger.change(radio1)
+              await wait()
+
+              expect(switchee).toBeVisible()
+            })
+          } else {
+
+            it('throws an error', async function() {
+              const [form, radio1, radio2, switchee] = htmlFixtureList(`
+                <form>
+                  <input type="radio" name="group" value="1" up-switch="#switchee">
+                  <input type="radio" name="group" value="2" up-switch="#switchee">
+    
+                  <div id="switchee" up-show-for="1">
+                    Switchee
+                  </div>
+                </form>
+              `)
+
+              await jasmine.expectGlobalError(/Use \[up-switch\] with the container of a radio group/i, async function() {
+                up.hello(form)
+                await wait()
+              })
+
+            })
+          }
+
+
+        })
 
       })
 
@@ -6650,11 +6742,11 @@ describe('up.form', function() {
 
           beforeEach(function() {
             this.$form = $fixture('form')
-            this.$buttons = this.$form.affix('.radio-buttons')
-            this.$blankButton = this.$buttons.affix('input[type="radio"][name="group"][up-switch=".target"]').val('')
-            this.$fooButton = this.$buttons.affix('input[type="radio"][name="group"][up-switch=".target"]').val('foo')
-            this.$barButton = this.$buttons.affix('input[type="radio"][name="group"][up-switch=".target"]').val('bar')
-            this.$bazkButton = this.$buttons.affix('input[type="radio"][name="group"][up-switch=".target"]').val('baz')
+            this.$buttons = this.$form.affix('.radio-buttons[up-switch=".target"]')
+            this.$blankButton = this.$buttons.affix('input[type="radio"][name="group"]').val('')
+            this.$fooButton = this.$buttons.affix('input[type="radio"][name="group"]').val('foo')
+            this.$barButton = this.$buttons.affix('input[type="radio"][name="group"]').val('bar')
+            this.$bazkButton = this.$buttons.affix('input[type="radio"][name="group"]').val('baz')
           })
 
           it("shows the target element if its up-show-for attribute contains the selected button value", async function() {
@@ -7061,11 +7153,11 @@ describe('up.form', function() {
 
           beforeEach(function() {
             this.$form = $fixture('form')
-            this.$buttons = this.$form.affix('.radio-buttons')
-            this.$blankButton = this.$buttons.affix('input[type="radio"][name="group"][up-switch=".target"]').val('')
-            this.$fooButton = this.$buttons.affix('input[type="radio"][name="group"][up-switch=".target"]').val('foo')
-            this.$barButton = this.$buttons.affix('input[type="radio"][name="group"][up-switch=".target"]').val('bar')
-            this.$bazkButton = this.$buttons.affix('input[type="radio"][name="group"][up-switch=".target"]').val('baz')
+            this.$buttons = this.$form.affix('.radio-buttons[up-switch=".target"]')
+            this.$blankButton = this.$buttons.affix('input[type="radio"][name="group"]').val('')
+            this.$fooButton = this.$buttons.affix('input[type="radio"][name="group"]').val('foo')
+            this.$barButton = this.$buttons.affix('input[type="radio"][name="group"]').val('bar')
+            this.$bazkButton = this.$buttons.affix('input[type="radio"][name="group"]').val('baz')
           })
 
           it("enables the target element if its up-enable-for attribute contains the selected button value", async function() {

@@ -890,7 +890,7 @@ up.form = (function() {
   */
   function autosubmit(target, options = {}) {
     const onChange = (_diff, renderOptions) => submit(target, renderOptions)
-    return watch(target, { ...options, batch: true }, onChange)
+    return watch(target, { logPrefix: 'up.autosubmit()', ...options, batch: true }, onChange)
   }
 
   function getGroupSelectors() {
@@ -2085,7 +2085,7 @@ up.form = (function() {
 
   @stable
   */
-  up.attribute('up-autosubmit', (formOrField) => autosubmit(formOrField))
+  up.attribute('up-autosubmit', (formOrField) => autosubmit(formOrField, { logPrefix: '[up-autosubmit]' }))
 
   return {
     config,

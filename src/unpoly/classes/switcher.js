@@ -27,7 +27,9 @@ up.Switcher = class Switcher {
   }
 
   _trackFieldChanges() {
-    return up.watch(this._root, () => this._onFieldChanged())
+    let callback = () => this._onFieldChanged()
+    return up.migrate.watchForSwitch?.(this._root, callback)
+      || up.watch(this._root, { logPrefix: '[up-switch]' }, callback)
   }
 
   _trackNewSwitchees() {
@@ -90,6 +92,7 @@ up.Switcher = class Switcher {
   }
 
   _buildFieldTokens() {
+    // root is either an individual input, or a container of radio buttons.
     let fields = up.form.fields(this._root)
     let field = fields[0]
 
@@ -104,7 +107,7 @@ up.Switcher = class Switcher {
         meta = ':unchecked'
       }
     } else if (field.matches('input[type=radio]')) {
-      let checkedButton = u.find(fields, 'checked')
+      let checkedButton = up.migrate.checkedRadioButtonForSwitch?.(field) || u.find(fields, 'checked')
 
       if (checkedButton) {
         meta = ':checked'
