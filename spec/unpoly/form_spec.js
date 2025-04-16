@@ -6257,7 +6257,7 @@ describe('up.form', function() {
               await wait()
 
               expect(console.warn).toHaveBeenCalled()
-              expect(console.warn.calls.mostRecent().args[0]).toMatch(/Use \[up-switch\] on the container of a radio buttons group/i)
+              expect(console.warn.calls.mostRecent().args[0]).toMatch(/Use \[up-switch\] on the container of a radio group/i)
 
               // This still works for backwards compatibility
               expect(switchee).not.toBeVisible()
