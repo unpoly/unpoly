@@ -89,6 +89,7 @@ async function confirmRelease() {
   console.log("- Run `npm install` to update version in package-lock.json")
   console.log("- Update CHANGELOG.md")
   console.log("- Commit and push changes")
+  console.log("- Check that CI is green (https://github.com/unpoly/unpoly/actions)")
   console.log("- Make sure you're logged into npm")
   console.log()
   console.log("Continuing will make a fresh build and publish a new version to npm.")
