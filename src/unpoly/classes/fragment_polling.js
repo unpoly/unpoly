@@ -112,6 +112,12 @@ up.FragmentPolling = class FragmentPolling {
       return
     }
 
+    if (!up.fragment.isAlive(this._fragment)) {
+      this._stop()
+      up.puts('[up-poll]', 'Stopped polling a detached fragment')
+      return
+    }
+
     if (!this._isFragmentVisible()) {
       up.puts('[up-poll]', 'Will not poll hidden fragment')
       // (1) We don't need to re-schedule a timer here. _onVisibilityChange() will do that for us.

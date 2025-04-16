@@ -95,7 +95,7 @@ describe('up.radio', function() {
         expect(jasmine.Ajax.requests.count()).toBe(2)
       })
 
-      it('stops polling when the element is removed from the DOM', async function() {
+      it('stops polling when the element is destroyed', async function() {
         const interval = 150
         up.radio.config.pollInterval = interval
         const timingTolerance = interval / 3
@@ -109,6 +109,27 @@ describe('up.radio', function() {
         expect(reloadSpy).not.toHaveBeenCalled()
 
         up.destroy(element)
+
+        await wait(interval)
+        expect(reloadSpy).not.toHaveBeenCalled()
+      })
+
+      it('stops polling when the element is detached by a foreign script', async function() {
+        const interval = 150
+        up.radio.config.pollInterval = interval
+        const timingTolerance = interval / 3
+
+        const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+
+        const element = fixture('.element')
+        up.radio.startPolling(element)
+
+        await wait(timingTolerance)
+        expect(reloadSpy).not.toHaveBeenCalled()
+
+
+        // Detach without going through up.destroy()
+        element.remove()
 
         await wait(interval)
         expect(reloadSpy).not.toHaveBeenCalled()
@@ -2171,6 +2192,22 @@ describe('up.radio', function() {
         await wait(125)
         expect(reloadSpy.calls.count()).toBe(1)
         up.destroy(element)
+
+        await wait(75)
+        expect(reloadSpy.calls.count()).toBe(1)
+      })
+
+      it('stops polling when the element is detached by an external script', async function() {
+        up.radio.config.pollInterval = 75
+        const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+
+        const element = up.hello(fixture('.element[up-poll]'))
+
+        await wait(125)
+        expect(reloadSpy.calls.count()).toBe(1)
+
+        // Detach without going through up.destroy()
+        element.remove()
 
         await wait(75)
         expect(reloadSpy.calls.count()).toBe(1)
