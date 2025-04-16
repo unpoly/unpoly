@@ -994,6 +994,21 @@ describe('up.form', function() {
                 expect(callback).not.toHaveBeenCalled()
               })
 
+              it('does not run the callback if the form was detached by foreign scripts during the delay', async function() {
+                const form = fixture('form')
+                const input = e.affix(form, 'input[name="input-name"][value="old-value"]')
+                const callback = jasmine.createSpy('watcher callback')
+                up.watch(input, { delay: 150 }, callback)
+                input.value = 'new-value'
+                Trigger[eventType](input)
+
+                await wait(50)
+                form.remove()
+
+                await wait(150)
+                expect(callback).not.toHaveBeenCalled()
+              })
+
               it('does not run the callback if the form was aborted during the delay', async function() {
                 const form = fixture('form')
                 const input = e.affix(form, 'input[name="input-name"][value="old-value"]')
