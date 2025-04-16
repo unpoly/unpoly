@@ -2599,9 +2599,9 @@ describe('up.radio', function() {
 
           const previewUndo = jasmine.createSpy('preview undo')
           const previewApply = jasmine.createSpy('preview apply').and.returnValue(previewUndo)
-          up.preview('my:preview', previewApply)
+          up.preview('my:polling:preview', previewApply)
 
-          const element = up.hello(fixture('.element[up-poll][up-preview="my:preview"]', { text: 'old text' }))
+          const element = up.hello(fixture('.element[up-poll][up-preview="my:polling:preview"]', { text: 'old text' }))
 
           await wait(interval + timingTolerance)
 
@@ -2610,7 +2610,7 @@ describe('up.radio', function() {
           expect(previewApply).toHaveBeenCalledWith(jasmine.objectContaining({ fragment: element }), {})
           expect(previewUndo.calls.count()).toBe(0)
 
-          jasmine.respondWithSelector('.element[up-poll][up-preview="my:preview"]', { text: 'new text' })
+          jasmine.respondWithSelector('.element[up-poll][up-preview="my:polling:preview"]', { text: 'new text' })
           await wait()
 
           expect('.element').toHaveText('new text')
@@ -2621,7 +2621,7 @@ describe('up.radio', function() {
           expect(previewApply.calls.count()).toBe(2)
           expect(previewUndo.calls.count()).toBe(1)
 
-          jasmine.respondWithSelector('.element[up-poll][up-preview="my:preview"]', { text: 'newer text' })
+          jasmine.respondWithSelector('.element[up-poll][up-preview="my:polling:preview"]', { text: 'newer text' })
 
           await wait()
 
