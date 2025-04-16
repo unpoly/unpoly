@@ -6059,7 +6059,7 @@ describe('up.form', function() {
 
     describe('[up-switch]', function() {
 
-      describe('custom switching effects', function() {
+      describe('emitting up:form:switch on changes', function() {
 
         it('emits up:form:switch on switchees with { field, tokens }', async function() {
           const listener = jasmine.createSpy('up:form:switch listener')
@@ -6168,6 +6168,47 @@ describe('up.form', function() {
 
           expect(listener.calls.count()).toBe(2)
         })
+
+      })
+
+      describe('radio buttons', function() {
+
+        it('allows to switch a container of radio buttons', async function() {
+          const [form, container, radio1, radio2, switchee] = htmlFixtureList(`
+            <form>
+              <div up-switch="#switchee">
+                <input type="radio" name="group" value="1">
+                <input type="radio" name="group" value="2">
+              </div>
+
+              <div id="switchee" up-show-for="1">
+                Switchee
+              </div>
+            </form>
+          `)
+
+          up.hello(form)
+          await wait()
+
+          expect(switchee).not.toBeVisible()
+          radio1.checked = true
+          Trigger.change(radio1)
+          await wait()
+
+          expect(switchee).toBeVisible()
+          radio2.checked = true
+          Trigger.change(radio2)
+          await wait()
+
+          expect(switchee).not.toBeVisible()
+          radio1.checked = true
+          Trigger.change(radio1)
+          await wait()
+
+          expect(switchee).toBeVisible()
+        })
+
+        it('logs a warning if an input[type=radio] has an [up-switch] attribute')
 
       })
 

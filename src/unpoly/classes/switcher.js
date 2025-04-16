@@ -10,10 +10,11 @@ const BUILTIN_SWITCH_EFFECTS = [
 
 up.Switcher = class Switcher {
 
-  constructor(field) {
-    this._field = field
-    this._switcheeSelector = field.getAttribute('up-switch') || up.fail("No switch target given for %o", field)
-    this._regionSelector = field.getAttribute('up-switch-region')
+  constructor(root) {
+    // The root should either be an individual input, or a container of radio buttons.
+    this._root = root
+    this._switcheeSelector = root.getAttribute('up-switch') || up.fail("No switch target given for %o", root)
+    this._regionSelector = root.getAttribute('up-switch-region')
   }
 
   start() {
@@ -26,7 +27,7 @@ up.Switcher = class Switcher {
   }
 
   _trackFieldChanges() {
-    return up.watch(this._field, () => this._onFieldChanged())
+    return up.watch(this._root, () => this._onFieldChanged())
   }
 
   _trackNewSwitchees() {
@@ -69,7 +70,7 @@ up.Switcher = class Switcher {
       }
     }
     let log = ['Switching %o', switchee]
-    up.emit(switchee, 'up:form:switch', { field: this._field, tokens: fieldTokens, log })
+    up.emit(switchee, 'up:form:switch', { field: this._root, tokens: fieldTokens, log })
   }
 
   _findSwitchees() {
@@ -78,9 +79,9 @@ up.Switcher = class Switcher {
 
   get _scope() {
     if (this._regionSelector) {
-      return up.fragment.get(this._regionSelector, { origin: this._field })
+      return up.fragment.get(this._regionSelector, { origin: this._root })
     } else {
-      return up.form.getRegion(this._field)
+      return up.form.getRegion(this._root)
     }
   }
 
@@ -89,7 +90,9 @@ up.Switcher = class Switcher {
   }
 
   _buildFieldTokens() {
-    let field = this._field
+    let fields = up.form.fields(this._root)
+    let field = fields[0]
+
     let value
     let meta
 
@@ -101,9 +104,8 @@ up.Switcher = class Switcher {
         meta = ':unchecked'
       }
     } else if (field.matches('input[type=radio]')) {
-      // TODO: Allow [up-switch] on a container of radio buttons
-      const groupName = field.getAttribute('name')
-      const checkedButton = this._scope.querySelector(`input[type=radio]${e.attrSelector('name', groupName)}:checked`)
+      let checkedButton = u.find(fields, 'checked')
+
       if (checkedButton) {
         meta = ':checked'
         value = checkedButton.value
