@@ -379,12 +379,11 @@ up.event = (function() {
   const keyModifiers = ['metaKey', 'shiftKey', 'ctrlKey', 'altKey']
 
   /*-
-  @function up.event.isUnmodified
+  @function up.event.isModified
   @internal
   */
-  function isUnmodified(event) {
-    return (u.isUndefined(event.button) || (event.button === 0)) &&
-      !u.some(keyModifiers, (modifier) => event[modifier])
+  function isModified(event) {
+    return (event.button > 0) || u.some(keyModifiers, (modifier) => event[modifier])
   }
 
   /*-
@@ -498,7 +497,7 @@ up.event = (function() {
   @stable
   */
   function executeEmitAttr(event, element) {
-    if (!isUnmodified(event)) { return }
+    if (isModified(event)) { return }
     const eventType = e.attr(element, 'up-emit')
     const eventProps = e.jsonAttr(element, 'up-emit-props')
     const forkedEvent = fork(event, eventType)
@@ -580,7 +579,7 @@ up.event = (function() {
     assertEmitted,
     onEscape,
     halt,
-    isUnmodified,
+    isModified,
     isSyntheticClick,
     fork,
     keyModifiers,

@@ -131,15 +131,10 @@ window.safeHistory = new (class {
   }
 })
 
-//  reset: ->
-//    @log("safeHistory: reset()")
-//    @cursor = 0
-//    @stateIndexes = [0]
-
-var oldPushState = history.pushState
-var oldReplaceState = history.replaceState
-var oldBack = history.back
-var oldForward = history.forward
+let oldPushState = history.pushState
+let oldReplaceState = history.replaceState
+let oldBack = history.back
+let oldForward = history.forward
 
 history.pushState = (...args) => safeHistory.pushState(...args)
 history.replaceState = (...args) => safeHistory.replaceState(...args)

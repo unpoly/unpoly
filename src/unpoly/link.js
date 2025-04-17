@@ -847,7 +847,7 @@ up.link = (function() {
     layer.on('click', function(event, element) {
       // We never handle events for the right mouse button,
       // or when Shift/CTRL/Meta/ALT is pressed
-      if (!up.event.isUnmodified(event)) {
+      if (up.event.isModified(event)) {
         return
       }
 
@@ -881,7 +881,7 @@ up.link = (function() {
     layer.on('mousedown', function(event, element) {
       // We never handle events for the right mouse button,
       // or when Shift/CTRL/Meta/ALT is pressed
-      if (!up.event.isUnmodified(event)) {
+      if (up.event.isModified(event)) {
         return
       }
 

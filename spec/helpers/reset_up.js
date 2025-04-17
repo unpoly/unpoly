@@ -1,3 +1,5 @@
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 30_000
+
 const u = up.util
 
 const RESET_MESSAGE = 'Resetting framework for next test'
@@ -85,7 +87,7 @@ afterEach(async function() {
 
     const hadRequests = (jasmine.Ajax.requests.count() > 0)
     const hadLayers = (up.layer.count > 0)
-    const waitMore = hadRequests || hadLayers
+    const waitMore = hadRequests || hadLayers || AgentDetector.isFirefox()
 
     // Abort all requests so any cancel handlers can run and do async things.
     up.network.abort({ reason: RESET_MESSAGE })

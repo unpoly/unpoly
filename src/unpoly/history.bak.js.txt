@@ -90,11 +90,6 @@ up.history = (function() {
       // New nonced callbacks from the response will validates and then rewritten to match the existing nonce.
       'meta[name=csp-nonce]',
     ],
-    handleChange({ location }) {
-      // We handle bases (path + query string) that were pushed or replaced via up.history methods.
-      // All other bases we assume are pushed by external JS that wants to handle restoration itself.
-      return ownedBases.get(location)
-    },
   }))
 
   /*-
@@ -109,12 +104,9 @@ up.history = (function() {
   let previousLocation
   let nextPreviousLocation
 
-  let ownedBases = new up.FIFOCache({ capacity: 100, normalizeKey: getBase })
-
   function reset() {
     previousLocation = undefined
     nextPreviousLocation = undefined
-    ownedBases.clear()
     trackCurrentLocation()
   }
 
@@ -143,59 +135,16 @@ up.history = (function() {
   @function trackCurrentLocation
   @internal
   */
-  function trackCurrentLocation(originEvent) {
-    // currentLocation() normalizes
-    let location = currentLocation()
+  function trackCurrentLocation() {
+    const url = currentLocation()
 
-    if (nextPreviousLocation !== location) {
+    if (nextPreviousLocation !== url) {
       previousLocation = nextPreviousLocation
-      nextPreviousLocation = location
-
-      let [base, hash] = splitLocation(currentLocation())
-      let [previousBase, previousHash] = splitLocation(previousLocation)
-      let state = history.state
-      // TODO: Document new up:location:changed properties
-      let change = { location, state, base, hash, previousLocation, previousBase, previousHash }
-      if (up.framework.booted) {
-        let locationChangedEvent = up.event.build('up:location:changed', { ...change, log: `New location is ${location}` })
-        up.migrate.prepareLocationChangedEvent?.(locationChangedEvent)
-        up.emit(locationChangedEvent)
-      }
-
-      return change
+      nextPreviousLocation = url
     }
   }
 
-  /*-
-  This event is [emitted](/up.emit) after the browser's address bar was updated with a new URL.
-
-  There may be several reasons why the browser location was changed:
-
-  - A fragment update changes history through [navigation](/navigation) or rendering with `{ history: true }`.
-  - The user uses the back or forward buttons in their browser UI.
-  - Programmatic calls to `up.history.push()`.
-  - The user navigates to a different `#hash` within the page.
-
-  When a [layer](/up.layer) has no [visible history](/up.Layer.prototype.history), following a link
-  will not cause the browser's address bar to be updated. In this case no `up:location:changed` event will be emitted.
-  However, an `up:layer:location:changed` will be emitted even if the address bar did not change.
-
-  The `up:location:changed` event is *not* emitted when the page is loaded initially.
-  For this observe `up:framework:booted`.
-
-  @event up:location:changed
-  @param {string} event.location
-    The URL for the history entry after the change.
-  @stable
-  */
-
-  function splitLocation(location) {
-    return location?.split(/(?=#)/) || []
-  }
-
-  function getBase(location) {
-    return splitLocation(location)[0]
-  }
+  trackCurrentLocation()
 
   /*-
   Returns whether the given URL matches the [current browser location](/up.history.location).
@@ -260,14 +209,15 @@ up.history = (function() {
   > will automatically update the browser's location bar for you. This can be disabled with
   > an [`{ history: false }`](/up.render#options.history) option.
 
-  TODO: Document that the new state will be owned and restored by Unpoly. For custom state, use window.history.pushState().
-
   @function up.history.replace
   @param {string} url
   @internal
   */
-  function replace(location) {
-    placeOwnedHistoryEntry('replaceState', location)
+  function replace(location, options = {}) {
+    location = u.normalizeURL(location)
+    if (manipulate('replaceState', location) && (options.event !== false)) {
+      emitLocationChanged({ location, reason: 'replace', log: `Replaced state for ${location}` })
+    }
   }
 
   /*-
@@ -284,27 +234,73 @@ up.history = (function() {
 
   Emits event `up:location:changed`.
 
-  TODO: Document that the new state will be owned and restored by Unpoly. For custom state, use window.history.pushState().
-
   @function up.history.push
   @param {string} url
     The URL for the history entry to be added.
   @experimental
   */
   function push(location) {
-    placeOwnedHistoryEntry('pushState', location)
-  }
-
-  function placeOwnedHistoryEntry(method, location) {
     location = u.normalizeURL(location)
-    ownedBases.set(location, true)
-
-    if (config.enabled) {
-      history[method](null, '', location)
+    if (!isLocation(location) && manipulate('pushState', location)) {
+      emitLocationChanged({ location, reason: 'push', log: `Advanced to location ${location}` })
     }
   }
 
-  function restoreLocation(location) {
+  function emitLocationChanged(props) {
+    let event = up.event.build('up:location:changed', props)
+    up.migrate?.renamedProperty?.(event, 'url', 'location')
+    up.emit(event)
+  }
+
+  /*-
+  This event is [emitted](/up.emit) after the browser's address bar was updated with a new URL.
+
+  There may be several reasons why the browser location was changed:
+
+  - A fragment update changes history through [navigation](/navigation) or rendering with `{ history: true }`.
+  - The user uses the back or forward buttons in their browser UI.
+  - Programmatic calls to `up.history.push()`.
+
+  When a [layer](/up.layer) has no [visible history](/up.Layer.prototype.history), following a link
+  will not cause the browser's address bar to be updated. In this case no `up:location:changed` event will be emitted.
+  However, a `up:layer:location:changed` will be emitted even if the address bar did not change.
+
+  The `up:location:changed` event is *not* emitted when the page is loaded initially.
+  For this observe `up:framework:booted`.
+
+  @event up:location:changed
+  @param {string} event.location
+    The URL for the history entry after the change.
+  @param {string} event.reason
+    The action that caused this change in [history state](https://developer.mozilla.org/en-US/docs/Web/API/History/state).
+
+    The value of this property is either `'push'`, `'pop'` or `'replace'`.
+
+    @experimental
+  @stable
+  */
+
+  function manipulate(method, url) {
+    if (config.enabled) {
+      const state = buildState()
+      window.history[method](state, '', url)
+      trackCurrentLocation()
+      // Signal that manipulation was successful
+      return true
+    }
+  }
+
+  function buildState() {
+    return { up: {} }
+  }
+
+  function restoreStateOnPop(state) {
+    if (!state?.up) {
+      up.puts('popstate', 'Ignoring a history state not owned by Unpoly')
+      return
+    }
+
+    let location = currentLocation()
 
     up.error.muteUncriticalRejection(up.render({
       guardEvent: up.event.build('up:location:restore', { location, log: `Restoring location ${location}` }),
@@ -344,25 +340,6 @@ up.history = (function() {
     }))
   }
 
-  function handleExternalChange() {
-    let change = trackCurrentLocation()
-    if (!change) return
-    if (!config.handleChange(change)) {
-      up.puts('up.history', 'Ignoring history state owned by foreign script')
-      return
-    }
-
-    if (change.base !== change.previousBase) {
-      up.viewport.saveFocus({ location: change.previousLocation })
-      up.viewport.saveScroll({ location: change.previousLocation })
-      restoreLocation(change.location)
-    } else {
-      // We handle every hashchange, since only we know reveal obstructions.
-      up.viewport.revealHash(change.hash)
-    }
-  }
-
-
   /*-
   This event is emitted when the user is [restoring a previous history entry](/restoring-history),
   usually by pressing the back button.
@@ -385,6 +362,44 @@ up.history = (function() {
     Preventing the event will *not* stop the browser from restoring the URL in the address bar.
   @stable
   */
+
+  function onPop(event) {
+    up.log.putsEvent(event)
+
+    // The earlier URL has now been restored by the browser. This cannot be prevented.
+    trackCurrentLocation()
+    let location = currentLocation()
+    emitLocationChanged({ location, reason: 'pop', log: `Navigated to history entry ${location}` })
+
+    up.viewport.saveFocus({ location: previousLocation })
+    up.viewport.saveScroll({ location: previousLocation })
+
+    restoreStateOnPop(event.state)
+  }
+
+  function register() {
+    window.addEventListener('popstate', onPop)
+
+    // Unpoly replaces the initial page state so it can later restore it when the user
+    // goes back to that initial URL. However, if the initial request was a POST,
+    // Unpoly will wrongly assume that it can restore the state by reloading with GET.
+    if (up.protocol.initialRequestMethod() === 'GET') {
+      // Replace the vanilla state of the initial page load with an Unpoly-enabled state
+      replace(currentLocation(), { event: false })
+    }
+  }
+
+  up.on('up:framework:boot', function() {
+    if ('jasmine' in window) {
+      // Can't delay this in tests.
+      register()
+    } else {
+      // Defeat an unnecessary popstate that some browsers trigger
+      // on pageload (Safari, Chrome < 34).
+      // We should check in 2023 if we can remove this.
+      setTimeout(register, 100)
+    }
+  })
 
   function findMetaTags(head = document.head) {
     return head.querySelectorAll(config.selector('metaTagSelectors'))
@@ -458,89 +473,6 @@ up.history = (function() {
   function updateLang(newLang) {
     e.setAttrPresence(e.root, 'lang', newLang, !!newLang)
   }
-
-  function patchHistoryAPI() {
-    const originalPushState = history.pushState
-    history.pushState = function(...args) {
-      originalPushState.apply(this, args)
-      trackCurrentLocation()
-    }
-
-    const originalReplaceState = history.replaceState
-    history.replaceState = function(...args) {
-      originalReplaceState.apply(this, args)
-      trackCurrentLocation()
-    }
-  }
-
-  function adoptInitialHistoryEntry() {
-    // Unpoly replaces the initial page state so it can later restore it when the user
-    // goes back to that initial URL. However, if the initial request was a POST,
-    // Unpoly will wrongly assume that it can restore the state by reloading with GET.
-    if (up.protocol.initialRequestMethod() === 'GET') {
-      // Replace the vanilla state of the initial page load with an Unpoly-enabled state
-      replace(currentLocation())
-    }
-  }
-
-  // Wait until the framework is booted before we (1) patch window.history
-  // and (2) replace the current history state.
-  up.on('up:framework:boot', function() {
-    trackCurrentLocation()
-    patchHistoryAPI()
-    adoptInitialHistoryEntry()
-  })
-
-  // (A) Honor obstructions when the initial URL contains a #hash.
-  up.on('DOMContentLoaded', function() {
-    // When reloading, Chrome's default scrolling behavior
-    // happens *before* DOMContentLoaded. We fix that as soon as possible.
-    up.viewport.revealHash()
-
-    // When following a link to another URL with a #hash URL, Chrome's default
-    // scrolling behavior happens *after* DOMContentLoaded. We wait one more task to
-    // fix the scroll position after the browser did its thing.
-    u.task(up.viewport.revealHash)
-  })
-
-  up.on(window, 'hashchange, popstate', handleExternalChange)
-
-  function onHashLinkClicked(event, link) {
-    // If other JavaScript wants to handle this click, do nothing.
-    if (event.defaultPrevented) return
-
-    // Don't handle clicks that would open a new tab.
-    if (up.event.isModified(event)) return
-
-    let [currentBase] = splitLocation(up.layer.current.location)
-    let [linkBase, linkHash] = splitLocation(u.normalizeURL(link.href))
-
-    // If the base changes, we must allow new content to be loaded
-    // by either the browser or Unpoly.
-    if (currentBase !== linkBase) return
-
-    up.log.putsEvent(event)
-
-    let onBeforeScroll = () => {
-      // Because we prevented the event, it is up to us to change the hash.
-      // This will trigger browser scrolling, which we immediately override with our
-      // own reveal motion.
-      location.hash = linkHash
-    }
-
-    if (up.viewport.revealHash(linkHash, { onBeforeScroll })) {
-      // Prevent default on this event so neither browser nor Unpoly will handle it.
-      up.event.halt(event)
-    } else {
-      // (1) When it did not reveal, we let the browser handle the event.
-      //     The browser will scroll to the top for an a[href="#"] or a[href="#top"] link.
-      // (2) We do not handle the edge case where a followable link points to the current base,
-      //     but has a #hash that matched no [id] or anchor. In that case Unpoly will follow the link.
-    }
-  }
-
-  // TODO: Support [up-scroll-behavior]
-  up.on('up:click', 'a[href*="#"]', onHashLinkClicked)
 
   /*-
   Changes the link's destination so it points to the previous URL.
