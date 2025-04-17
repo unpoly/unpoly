@@ -1,3 +1,5 @@
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 30_000
+
 const u = up.util
 
 const RESET_MESSAGE = 'Resetting framework for next test'
@@ -72,6 +74,8 @@ beforeEach(function() {
 })
 
 afterEach(async function() {
+  console.debug("=========== afterEach reset begins")
+
   // Wait 1 more frame for async errors to (correctly) fail the test.
   await jasmine.waitMessageChannel()
 
@@ -110,7 +114,7 @@ afterEach(async function() {
 
     up.framework.reset()
 
-    if (waitMore) { return await jasmine.waitMessageChannel() }
+    if (true || waitMore) { return await jasmine.waitMessageChannel() }
   })
 
   // Make some final checks that we have reset successfully

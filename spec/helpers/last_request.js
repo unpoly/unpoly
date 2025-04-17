@@ -43,7 +43,17 @@ jasmine.respondWith = function(...args) {
   }
 
   const request = options.request || jasmine.lastRequest()
-  request.respondWith(requestAttrs)
+
+  console.debug("[jasmine.respondWith] calling request.respondWith()")
+
+  try {
+    request.respondWith(requestAttrs)
+  } catch (error) {
+    console.debug("[jasmine.respondWith] got error %o", error)
+    throw error
+  }
+
+  console.debug("[jasmine.respondWith] after request.respondWith()")
 }
 
 jasmine.respondWithSelector = function(selector, options = {}) {

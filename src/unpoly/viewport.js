@@ -353,9 +353,10 @@ up.viewport = (function() {
   @param {string} hash
   @internal
   */
-  function revealHash(hash = location.hash, options) {
+  function revealHash(hash = location.hash, options = {}) {
     let match = firstHashTarget(hash, options)
     if (match) {
+      options.beforeScroll?.()
       return reveal(match, { top: true })
     }
   }
@@ -996,23 +997,41 @@ up.viewport = (function() {
   })
 
   // (B) Honor obstructions when the user manually changes the location #hash.
-  up.on(window, 'hashchange', () => revealHash())
+  up.on(window, 'hashchange', () => {
+    revealHash()
+  })
+
+  function splitLocation(location) {
+    return location.split('#')
+  }
 
   // (C) Honor obstructions when the user clicks a link with a local #hash.
-  up.on('up:click', 'a[href^="#"]', function(event, link) {
-    // When the location is not already on the link hash, the browser will
-    // emit hashchange, which we already handle above.
-    if (link.hash !== location.hash) return
+  up.on('up:click', 'a[href*="#"]', function(event, link) {
+    // If other JavaScript wants to handle
+    if (event.defaultPrevented) return
+
+    let [currentBase, currentHash] = splitLocation(up.history.location)
+    let [linkBase, linkHash] = splitLocation(u.normalizeURL(link.href))
+
+    if (currentBase !== linkBase) return
+
+    // // When the location is not already on the link hash, the browser will
+    // // (1) change location.hash and (2) emit hashchange, which we already (3) handle and track above.
+    // if (linkHash !== currentHash) return
 
     // Some links may already be handled by Unpoly, but have an [href="#"] attribute to be valid HTML.
     // E.g. an <a href="#" up-fragment="...">
-    if (up.link.isFollowable(link)) return
+    if (linkHash === '#') return
 
     // When we know revealHash() has found and revealed a fragment, we handle this event.
     // When it did not reveal, we let the browser handle the event. The browser will scroll to
     // the top for an a[href="#"] or a[href="#top"] link.
-    if (revealHash(link.hash)) up.event.halt(event)
+    if (revealHash(linkHash, { beforeScroll: () => location.hash = linkHash })) {
+      up.event.halt(event)
+      location.hash = linkHash
+    }
   })
+
 
   return {
     reveal,

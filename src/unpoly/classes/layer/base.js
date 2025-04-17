@@ -802,7 +802,7 @@ up.Layer = class Layer extends up.Record {
 
       // When opening we never emit up:layer:location:changed.
       if (!this.opening) {
-        this.emit('up:layer:location:changed', { location })
+        this.emit('up:layer:location:changed', { location, log: false })
       }
     }
   }

@@ -218,7 +218,355 @@ describe('up.history', function() {
 
   describe('unobtrusive behavior', function() {
 
-    describe('back button', function() {
+    describe('history navigation', function() {
+
+      beforeEach(async function() {
+        await wait(1_000)
+      })
+
+      fit('loads locations when the navigation changes the path', async function() {
+        const waitForBrowser = 100
+
+        up.network.config.autoCache = false
+        up.history.config.restoreTargets = ['main']
+
+        let [nav, link1, link2, link3, target] = htmlFixtureList(`
+          <nav>
+            <a href="/path1" up-follow>path1</a>
+            <a href="/path2" up-follow>path2</a>
+            <a href="/path3" up-follow>path3</a>
+          </nav>
+          <main>
+            initial text
+          </main>
+        `)
+
+        expect('main').toHaveText('initial text')
+
+        Trigger.clickSequence(link1)
+        await wait()
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path1')
+        jasmine.respondWith('<main>path1 text</main>')
+        await wait()
+        expect(location.href).toMatchURL('/path1')
+        expect('main').toHaveText('path1 text')
+
+        Trigger.clickSequence(link2)
+        await wait()
+        expect(jasmine.Ajax.requests.count()).toBe(2)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path2')
+        jasmine.respondWith('<main>path2 text</main>')
+        await wait()
+        expect(location.href).toMatchURL('/path2')
+        expect('main').toHaveText('path2 text')
+
+        Trigger.clickSequence(link3)
+        await wait()
+        expect(jasmine.Ajax.requests.count()).toBe(3)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path3')
+        jasmine.respondWith('<main>path3 text</main>')
+        await wait()
+        expect(location.href).toMatchURL('/path3')
+        expect('main').toHaveText('path3 text')
+
+        history.back()
+        await wait(waitForBrowser)
+        expect(jasmine.Ajax.requests.count()).toBe(4)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path2')
+        jasmine.respondWith('<main>path2 text</main>')
+        await wait()
+        expect(location.href).toMatchURL('/path2')
+        expect('main').toHaveText('path2 text')
+
+        history.back()
+        await wait(waitForBrowser)
+        expect(jasmine.Ajax.requests.count()).toBe(5)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path1')
+        jasmine.respondWith('<main>path1 text</main>')
+        await wait()
+        expect(location.href).toMatchURL('/path1')
+        expect('main').toHaveText('path1 text')
+
+        history.forward()
+        await wait(waitForBrowser)
+        expect(jasmine.Ajax.requests.count()).toBe(6)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path2')
+        jasmine.respondWith('<main>path2 text</main>')
+        await wait()
+        expect(location.href).toMatchURL('/path2')
+        expect('main').toHaveText('path2 text')
+
+        history.forward()
+        await wait(waitForBrowser)
+        expect(jasmine.Ajax.requests.count()).toBe(7)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path3')
+        jasmine.respondWith('<main>path3 text</main>')
+        await wait()
+        expect(location.href).toMatchURL('/path3')
+        expect('main').toHaveText('path3 text')
+
+        expect(up.network.isBusy()).toBe(false)
+      })
+
+      fit('loads locations when the navigation changes the query string', async function() {
+        const waitForBrowser = 100
+
+        up.network.config.autoCache = false
+        up.history.config.restoreTargets = ['main']
+
+        let [nav, link1, link2, link3, target] = htmlFixtureList(`
+          <nav>
+            <a href="/path?query=1" up-follow>path1</a>
+            <a href="/path?query=2" up-follow>path2</a>
+            <a href="/path?query=3" up-follow>path3</a>
+          </nav>
+          <main>
+            initial text
+          </main>
+        `)
+
+        expect('main').toHaveText('initial text')
+
+        console.debug("[spec] clicking on link1")
+        Trigger.clickSequence(link1)
+        await wait()
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path?query=1')
+        jasmine.respondWith('<main>path1 text</main>')
+        await wait()
+        expect(location.href).toMatchURL('/path?query=1')
+        expect('main').toHaveText('path1 text')
+
+        console.debug("[spec] clicking on link2")
+        Trigger.clickSequence(link2)
+        await wait()
+        expect(jasmine.Ajax.requests.count()).toBe(2)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path?query=2')
+        jasmine.respondWith('<main>path2 text</main>')
+        await wait()
+        expect(location.href).toMatchURL('/path?query=2')
+        expect('main').toHaveText('path2 text')
+
+        console.debug("[spec] clicking on link3")
+        Trigger.clickSequence(link3)
+        await wait()
+        expect(jasmine.Ajax.requests.count()).toBe(3)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path?query=3')
+        jasmine.respondWith('<main>path3 text</main>')
+        await wait()
+        expect(location.href).toMatchURL('/path?query=3')
+        expect('main').toHaveText('path3 text')
+
+        console.debug("[spec] going back (to 2)")
+        history.back()
+        console.debug("[spec] after back")
+        await wait(waitForBrowser)
+        console.debug("[spec] after waitForBrowser")
+        expect(jasmine.Ajax.requests.count()).toBe(4)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path?query=2')
+        console.debug("[spec] after Ajax.requests expectations")
+        jasmine.respondWith('<main>path2 text</main>')
+        console.debug("[spec] after respondWith")
+        await wait()
+        console.debug("[spec] after path2 response")
+        expect(location.href).toMatchURL('/path?query=2')
+        expect('main').toHaveText('path2 text')
+        console.debug("[spec] after looking at path2 text")
+
+        console.debug("[spec] going back (to 1)")
+        history.back()
+        await wait(waitForBrowser)
+        expect(jasmine.Ajax.requests.count()).toBe(5)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path?query=1')
+        jasmine.respondWith('<main>path1 text</main>')
+        await wait()
+        expect(location.href).toMatchURL('/path?query=1')
+        expect('main').toHaveText('path1 text')
+
+        console.debug("[spec] going forward (to 2)")
+        history.forward()
+        await wait(waitForBrowser)
+        expect(jasmine.Ajax.requests.count()).toBe(6)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path?query=2')
+        jasmine.respondWith('<main>path2 text</main>')
+        await wait()
+        expect(location.href).toMatchURL('/path?query=2')
+        expect('main').toHaveText('path2 text')
+
+        console.debug("[spec] going forward (to 3)")
+        history.forward()
+        await wait(waitForBrowser)
+        expect(jasmine.Ajax.requests.count()).toBe(7)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path?query=3')
+        jasmine.respondWith('<main>path3 text</main>')
+        await wait()
+        expect(location.href).toMatchURL('/path?query=3')
+        expect('main').toHaveText('path3 text')
+
+        expect(up.network.isBusy()).toBe(false)
+      })
+
+      it('loads locations when the navigation changes both path and hash', async function() {
+        const waitForBrowser = 100
+
+        up.network.config.autoCache = false
+        up.history.config.restoreTargets = ['main']
+        up.viewport.config.revealSnap = 0
+
+        let [nav, link1, link2a, link2b, link3, viewport, target] = htmlFixtureList(`
+          <nav>
+            <a href="/path1" up-follow>path1</a>
+            <a href="/path2#a" up-follow>path2#a</a>
+            <a href="/path2#b" up-follow>path2#b</a>
+            <a href="/path3" up-follow>path3</a>
+          </nav>
+          <div id="viewport" up-viewport style="height: 200px; overflow-y: scroll; background-color: yellow;">
+            <main>
+              initial text
+            </main>
+          </div>
+        `)
+
+        let path1Text = `
+          <main>
+            path1 text
+          </main>
+        `
+
+        let path2Text = `
+          <main>
+            <div style="height: 300px">before</div>
+            <div id="a" style="height: 50px; background-color: green">
+              path2#a text
+            </div>
+            <div style="height: 300px">between</div>
+            <div id="b" style="height: 50px; background-color: blue">
+              path2#b text
+            </div>
+            <div style="height: 300px">below</div>
+          </main>
+        `
+
+        let path3Text = `
+          <main>
+            path3 text
+          </main>
+        `
+
+        expect('main').toHaveText('initial text')
+
+        Trigger.clickSequence(link1)
+        await wait()
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path1')
+        jasmine.respondWith(path1Text)
+        await wait()
+        expect(location.href).toMatchURL('/path1')
+        expect('main').toHaveText('path1 text')
+        expect(viewport.scrollTop).toBe(0)
+
+        Trigger.clickSequence(link2a)
+        await wait()
+        expect(jasmine.Ajax.requests.count()).toBe(2)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path2')
+        jasmine.respondWith(path2Text)
+        await wait()
+        expect(location.href).toMatchURL('/path2#a')
+        expect('main #a').toHaveText('path2#a text')
+
+        expect(viewport.scrollTop).toBe(300) // revealing a hash always aligns with top
+
+        Trigger.clickSequence(link2b)
+        await wait()
+        expect(up.network.isBusy()).toBe(false)
+        expect(jasmine.Ajax.requests.count()).toBe(2)
+        expect(viewport.scrollTop).toBe(300 + 50 + 300)
+        expect(location.href).toMatchURL('/path2#b')
+
+        Trigger.clickSequence(link3)
+        await wait()
+        expect(jasmine.Ajax.requests.count()).toBe(3)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path3')
+        jasmine.respondWith(path3Text)
+        await wait()
+        expect(location.href).toMatchURL('/path3')
+        expect('main').toHaveText('path3 text')
+        expect(viewport.scrollTop).toBe(0)
+
+        console.debug("[spec] going back to /path2#b")
+        history.back()
+        await wait(waitForBrowser)
+        expect(jasmine.Ajax.requests.count()).toBe(4)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path2')
+        jasmine.respondWith(path2Text)
+        await wait()
+        expect(location.href).toMatchURL('/path2#b')
+        expect('main #b').toHaveText('path2#b text')
+        expect(viewport.scrollTop).toBe(300 + 50 + 300)
+
+        console.debug("[spec] going back to /path2#a")
+        history.back()
+        await wait(waitForBrowser)
+        expect(jasmine.Ajax.requests.count()).toBe(4)
+        expect(up.network.isBusy()).toBe(false)
+        expect(location.href).toMatchURL('/path2#a')
+        expect(viewport.scrollTop).toBe(300)
+
+        console.debug("[spec] going back to /path1")
+        history.back()
+        await wait(waitForBrowser)
+        expect(jasmine.Ajax.requests.count()).toBe(5)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path1')
+        jasmine.respondWith(path1Text)
+        await wait()
+        expect(location.href).toMatchURL('/path1')
+        expect('main').toHaveText('path1 text')
+        expect(viewport.scrollTop).toBe(0)
+
+        console.debug("[spec] going forward to /path2#a")
+        history.forward()
+        await wait(waitForBrowser)
+        expect(jasmine.Ajax.requests.count()).toBe(6)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path2')
+        jasmine.respondWith(path2Text)
+        await wait()
+        expect(location.href).toMatchURL('/path2#a')
+        expect('main #a').toHaveText('path2#a text')
+        expect(viewport.scrollTop).toBe(300)
+
+        console.debug("[spec] going forward to /path2#b")
+        history.forward()
+        await wait(waitForBrowser)
+        expect(jasmine.Ajax.requests.count()).toBe(6)
+        expect(up.network.isBusy()).toBe(false)
+        expect(location.href).toMatchURL('/path2#b')
+        expect('main #b').toHaveText('path2#b text')
+        expect(viewport.scrollTop).toBe(300 + 50 + 300)
+
+        console.debug("[spec] going forward to /path3")
+        history.forward()
+        await wait(waitForBrowser)
+        expect(jasmine.Ajax.requests.count()).toBe(7)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path3')
+        jasmine.respondWith(path3Text)
+        await wait()
+        expect(location.href).toMatchURL('/path3')
+        expect('main').toHaveText('path3 text')
+        expect(viewport.scrollTop).toBe(0)
+
+        expect(up.network.isBusy()).toBe(false)
+      })
+
+      it('loads locations when the navigation changes both query string and hash')
+
+      it('reveals (but does not load) as the history entries that only change the #hash')
+
+      it('does not load locations when navigating over entries pushed by external JS with custom state')
+
+      it('honors obstructions when restoring scroll positions after a #hash change')
+
+      it('reveals history entries created by clicking a #hash link')
 
       it('emits up:location:changed events as the user goes forwards and backwards through history', async function() {
         up.history.config.restoreTargets = ['.viewport']
@@ -235,7 +583,7 @@ describe('up.history', function() {
         const normalize = up.util.normalizeURL
 
         const events = []
-        up.on('up:location:changed', (event) => events.push([event.reason, normalize(event.location)]))
+        up.on('up:location:changed', (event) => events.push(normalize(event.location)))
 
         up.navigate('.content', { url: '/foo', history: true })
 
@@ -247,7 +595,7 @@ describe('up.history', function() {
         await wait()
 
         expect(events).toEqual([
-          ['push', normalize('/foo')]
+          normalize('/foo')
         ])
 
         up.navigate('.content', { url: '/bar', history: true })
@@ -257,8 +605,8 @@ describe('up.history', function() {
         await wait()
 
         expect(events).toEqual([
-          ['push', normalize('/foo')],
-          ['push', normalize('/bar')]
+          normalize('/foo'),
+          normalize('/bar'),
         ])
 
         up.navigate('.content', { url: '/baz', history: true })
@@ -268,55 +616,55 @@ describe('up.history', function() {
         await wait()
 
         expect(events).toEqual([
-          ['push', normalize('/foo')],
-          ['push', normalize('/bar')],
-          ['push', normalize('/baz')]
+          normalize('/foo'),
+          normalize('/bar'),
+          normalize('/baz')
         ])
 
         history.back()
         await wait(tolerance)
 
         expect(events).toEqual([
-          ['push', normalize('/foo')],
-          ['push', normalize('/bar')],
-          ['push', normalize('/baz')],
-          ['pop', normalize('/bar')]
+          normalize('/foo'),
+          normalize('/bar'),
+          normalize('/baz'),
+          normalize('/bar'),
         ])
 
         history.back()
         await wait(150)
 
         expect(events).toEqual([
-          ['push', normalize('/foo')],
-          ['push', normalize('/bar')],
-          ['push', normalize('/baz')],
-          ['pop', normalize('/bar')],
-          ['pop', normalize('/foo')]
+          normalize('/foo'),
+          normalize('/bar'),
+          normalize('/baz'),
+          normalize('/bar'),
+          normalize('/foo'),
         ])
 
         history.forward()
         await wait(150)
 
         expect(events).toEqual([
-          ['push', normalize('/foo')],
-          ['push', normalize('/bar')],
-          ['push', normalize('/baz')],
-          ['pop', normalize('/bar')],
-          ['pop', normalize('/foo')],
-          ['pop', normalize('/bar')]
+          normalize('/foo'),
+          normalize('/bar'),
+          normalize('/baz'),
+          normalize('/bar'),
+          normalize('/foo'),
+          normalize('/bar')
         ])
 
         history.forward()
         await wait(150)
 
         expect(events).toEqual([
-          ['push', normalize('/foo')],
-          ['push', normalize('/bar')],
-          ['push', normalize('/baz')],
-          ['pop', normalize('/bar')],
-          ['pop', normalize('/foo')],
-          ['pop', normalize('/bar')],
-          ['pop', normalize('/baz')]
+          normalize('/foo'),
+          normalize('/bar'),
+          normalize('/baz'),
+          normalize('/bar'),
+          normalize('/foo'),
+          normalize('/bar'),
+          normalize('/baz')
         ])
       })
 

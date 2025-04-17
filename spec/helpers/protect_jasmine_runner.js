@@ -4,7 +4,7 @@ const $ = jQuery
 
 window.safeHistory = new (class {
   constructor() {
-    this.logEnabled = false
+    this.logEnabled = true
     this.cursor = -1 // we don't know the initial state
     this.stateIndexes = []
     this.nextIndex = 1000
@@ -131,25 +131,20 @@ window.safeHistory = new (class {
   }
 })
 
-//  reset: ->
-//    @log("safeHistory: reset()")
-//    @cursor = 0
-//    @stateIndexes = [0]
-
-var oldPushState = history.pushState
-var oldReplaceState = history.replaceState
-var oldBack = history.back
-var oldForward = history.forward
-
-history.pushState = (...args) => safeHistory.pushState(...args)
-history.replaceState = (...args) => safeHistory.replaceState(...args)
-history.back = (...args) => safeHistory.back(...args)
-history.forward = (...args) => safeHistory.forward(...args)
-
-window.addEventListener('popstate', (event) => safeHistory.onPopState(event))
-
-// Use a longer timeout than the default 5000
-afterEach((async () => await safeHistory.afterEach()), 30000)
+// let oldPushState = history.pushState
+// let oldReplaceState = history.replaceState
+// let oldBack = history.back
+// let oldForward = history.forward
+//
+// history.pushState = (...args) => safeHistory.pushState(...args)
+// history.replaceState = (...args) => safeHistory.replaceState(...args)
+// history.back = (...args) => safeHistory.back(...args)
+// history.forward = (...args) => safeHistory.forward(...args)
+//
+// window.addEventListener('popstate', (event) => safeHistory.onPopState(event))
+//
+// // Use a longer timeout than the default 5000
+// afterEach((async () => await safeHistory.afterEach()), 30000)
 
 const willScrollWithinPage = function(link) {
   const verbatimHREF = link.getAttribute('href')

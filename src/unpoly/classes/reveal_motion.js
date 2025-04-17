@@ -65,6 +65,7 @@ up.RevealMotion = class RevealMotion {
     }
 
     if (newScrollTop !== originalScrollTop) {
+      console.debug("[RevealMotion] scrolling to %o (top: %o)", newScrollTop, this._top)
       this._viewport.scrollTo({ top: newScrollTop, behavior: this._behavior })
     }
   }
