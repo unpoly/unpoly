@@ -801,31 +801,31 @@ describe('up.event', function() {
       })
     })
 
-    describe('up.event.isUnmodified()', function() {
+    describe('up.event.isModified()', function() {
 
-      it('returns true for a click event with the left mouse button', function() {
+      it('returns false for a click event with the left mouse button', function() {
         const event = Trigger.createMouseEvent('mousedown', { button: 0 })
-        expect(up.event.isUnmodified(event)).toBe(true)
+        expect(up.event.isModified(event)).toBe(false)
       })
 
-      it('returns false if the right mouse button is used', function() {
+      it('returns true if the right mouse button is used', function() {
         const event = Trigger.createMouseEvent('mousedown', { button: 2 })
-        expect(up.event.isUnmodified(event)).toBe(false)
+        expect(up.event.isModified(event)).toBe(true)
       })
 
-      it('returns false if shift is pressed during the click', function() {
+      it('returns true if shift is pressed during the click', function() {
         const event = Trigger.createMouseEvent('mousedown', { shiftKey: 2 })
-        expect(up.event.isUnmodified(event)).toBe(false)
+        expect(up.event.isModified(event)).toBe(true)
       })
 
-      it('returns false if ctrl is pressed during the click', function() {
+      it('returns true if ctrl is pressed during the click', function() {
         const event = Trigger.createMouseEvent('mousedown', { ctrlKey: 2 })
-        expect(up.event.isUnmodified(event)).toBe(false)
+        expect(up.event.isModified(event)).toBe(true)
       })
 
-      it('returns false if meta is pressed during the click', function() {
+      it('returns true if meta is pressed during the click', function() {
         const event = Trigger.createMouseEvent('mousedown', { metaKey: 2 })
-        expect(up.event.isUnmodified(event)).toBe(false)
+        expect(up.event.isModified(event)).toBe(true)
       })
     })
 

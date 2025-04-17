@@ -100,8 +100,8 @@ up.FieldWatcher = class FieldWatcher {
     // We must not shorten that debounce delay.
     if (this._currentTimer) return
 
-    // If the form was destroyed while a callback was scheduled, we don't run the callback.
-    // TODO: Do we need this? Since we already clear scheduledValues in stop()?
+    // If the form was manually detached (not destroyed) while a callback was scheduled,
+    // we don't run the callback.
     if (!up.fragment.isAlive(this._region)) return
 
     // Don't forward { event, delay } because

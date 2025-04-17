@@ -25,6 +25,12 @@ up.migrate.renamedEvent('up:history:restored', 'up:location:changed')
 // There was never an up:history:replace (present tense) event
 up.migrate.renamedEvent('up:history:replaced', 'up:location:changed')
 
+up.migrate.prepareLocationChangedEvent = function(event) {
+  up.migrate.renamedProperty(event, 'url', 'location')
+  up.migrate.removedProperty(event, 'reason')
+}
+
+
 up.history.config.patch(function() {
   this.updateMetaTagsValue = this.updateMetaTags
   this.updateMetaTagsSet = false

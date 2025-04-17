@@ -43,6 +43,7 @@ jasmine.respondWith = function(...args) {
   }
 
   const request = options.request || jasmine.lastRequest()
+
   request.respondWith(requestAttrs)
 }
 

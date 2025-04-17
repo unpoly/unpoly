@@ -99,7 +99,7 @@ const terminalReporter = {
     log((part) => {
       part(0, `Jasmine ${result.overallStatus}`) // 'passed' | 'failed' | 'incomplete'
 
-      // Only focusing specs with fit/fdescribe will cause an incomplete status.
+      // Only focusing specs with fit/describe will cause an incomplete status.
       // Pending specs are not considered incomplete.
       if (result.incompleteReason) {
         part(4, `Incomplete reason: ${result.incompleteReason}`)

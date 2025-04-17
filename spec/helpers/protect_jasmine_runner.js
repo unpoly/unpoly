@@ -2,6 +2,24 @@ const u = up.util
 const e = up.element
 const $ = jQuery
 
+function fail(...args) {
+  if (!jasmine.resetting) {
+    up.fail(...args)
+  }
+}
+
+// (1) Chrome allows 200 history changes per 10 seconds
+//     Exceeding this limit will fail silently, but sometimes log a warning.
+//     https://chromium.googlesource.com/chromium/src.git/+/443bd0ef7014ab4e414d0d3e7d8e5bdbb7473d5b/third_party/blink/renderer/core/frame/navigation_rate_limiter.cc#31
+//
+// (2) Safari allows 100 history changes per 30 seconds
+//     Exceeding this limit will throw `SecurityError: Attempt to use history.replaceState() more than 100 times per 30 second.`
+//     https://bugs.webkit.org/show_bug.cgi?id=156115#:~:text=http%20for%20security%20restrictions%20An,updates%20per%20second%20is%20not
+const THROTTLE_WINDOW_DURATION = AgentDetector.isSafari() ? 30_000 : 10_000
+const THROTTLE_MAX_WINDOW_ACTIONS = AgentDetector.isSafari() ? 100 : 200
+const THROTTLE_MAX_SPEC_ACTIONS = 20 // the maximum number of history changes we expect in a spec
+const THROTTLE_CLOCK_INACCURACY = 1100
+
 window.safeHistory = new (class {
   constructor() {
     this.logEnabled = false
@@ -19,7 +37,7 @@ window.safeHistory = new (class {
       // This will trigger popstate, which we will handle and update @cursor
       oldBack.call(history)
     } else {
-      up.fail('safeHistory: Tried to go too far back in history (prevented)')
+      fail('safeHistory: Tried to go too far back in history (prevented)')
     }
   }
 
@@ -31,7 +49,7 @@ window.safeHistory = new (class {
       // This will trigger popstate, which we will handle and update @cursor
       oldForward.call(history)
     } else {
-      up.fail('safeHistory: Tried to go too far forward in history (prevented)')
+      fail('safeHistory: Tried to go too far forward in history (prevented)')
     }
   }
 
@@ -44,7 +62,7 @@ window.safeHistory = new (class {
     oldPushState.call(history, state, title, url)
 
     if (url && (u.normalizeURL(url) !== u.normalizeURL(location.href))) {
-      up.fail('safeHistory: Browser did now allow history.pushState() to URL %s (Chrome throttling history changes?)', url)
+      fail('safeHistory: Browser did now allow history.pushState() to URL %s (Chrome throttling history changes?)', url)
     }
 
     this.stateIndexes.splice(this.cursor + 1, this.stateIndexes.length, state._index)
@@ -61,7 +79,7 @@ window.safeHistory = new (class {
     oldReplaceState.call(history, state, title, url)
 
     if (url && (u.normalizeURL(url) !== u.normalizeURL(location.href))) {
-      up.fail('safeHistory: Browser did now allow history.replaceState() to URL %s (Chrome throttling history changes?)', url)
+      fail('safeHistory: Browser did now allow history.replaceState() to URL %s (Chrome throttling history changes?)', url)
     }
 
     // In case an example uses replaceState to set a known initial URL
@@ -77,11 +95,11 @@ window.safeHistory = new (class {
 
     if (!state) { return }
 
-    this.log("safeHistory: restored(%o)", state._index)
+    this.log("safeHistory: popped(%o)", state._index)
     this.cursor = this.stateIndexes.indexOf(state._index)
 
     if (this.cursor === -1) {
-      up.fail('safeHistory: Could not find position of state %o', state)
+      fail('safeHistory: Could not find position of state %o', state)
     }
 
     this.log("safeHistory: @stateIndexes are now %o, cursor is %o, path is %o", u.copy(this.stateIndexes), this.cursor, location.pathname)
@@ -93,20 +111,15 @@ window.safeHistory = new (class {
   }
 
   async throttle() {
-    // Using the pushState API too often will crash in Safari with the following error:
-    // SecurityError: Attempt to use history.replaceState() more than 100 times per 30 second.
-    const maxActions = AgentDetector.isSafari() ? 100 : 1000
-    const spaceForNextSpec = 10
-
-    while (this.truncateActionTimes().length > (maxActions - spaceForNextSpec)) {
-      this.forceLog("safeHistory: Too many uses of the pushState API (%o). Waiting for throttle window to pass.", this.actionTimes.length)
-      await wait(100)
+    while (this.truncateActionTimes().length > (THROTTLE_MAX_WINDOW_ACTIONS - THROTTLE_MAX_SPEC_ACTIONS)) {
+      this.forceLog("safeHistory: Too many uses of the history API. Waiting for throttle window to clear (%o actions left).", this.actionTimes.length)
+      await wait(1000)
     }
   }
 
   truncateActionTimes() {
     const windowEnd = new Date()
-    const windowStart = new Date(windowEnd - ((30 + 1) * 1000))
+    const windowStart = new Date(windowEnd - THROTTLE_WINDOW_DURATION + THROTTLE_CLOCK_INACCURACY)
 
     this.actionTimes = this.actionTimes.filter((time) => time >= windowStart)
 
@@ -131,15 +144,10 @@ window.safeHistory = new (class {
   }
 })
 
-//  reset: ->
-//    @log("safeHistory: reset()")
-//    @cursor = 0
-//    @stateIndexes = [0]
-
-var oldPushState = history.pushState
-var oldReplaceState = history.replaceState
-var oldBack = history.back
-var oldForward = history.forward
+let oldPushState = history.pushState
+let oldReplaceState = history.replaceState
+let oldBack = history.back
+let oldForward = history.forward
 
 history.pushState = (...args) => safeHistory.pushState(...args)
 history.replaceState = (...args) => safeHistory.replaceState(...args)
@@ -155,7 +163,7 @@ const willScrollWithinPage = function(link) {
   const verbatimHREF = link.getAttribute('href')
 
   const linkURL = u.normalizeURL(verbatimHREF, { hash: false })
-  const currentURL = u.normalizeURL(up.history.location, { hash: false })
+  const currentURL = u.normalizeURL(location.href, { hash: false })
   return linkURL === currentURL
 }
 
@@ -194,7 +202,7 @@ beforeEach(function() {
 afterEach(function() {
   let links = u.presence(window.defaultFollowedLinks)
   if (links) {
-    return up.fail('Unhandled default click behavior for links %o', links)
+    return fail('Unhandled default click behavior for links %o', links)
   }
 })
 
@@ -229,9 +237,9 @@ beforeEach(function() {
 })
 
 afterEach(function() {
-  let forms
-  if (forms = u.presence(window.defaultSubmittedForms)) {
-    up.fail('Unhandled default click behavior for forms %o', forms)
+  let forms = u.presence(window.defaultSubmittedForms)
+  if (forms) {
+    fail('Unhandled default click behavior for forms %o', forms)
   }
 })
 

@@ -1189,8 +1189,8 @@ up.form = (function() {
     Listeners may inspect and modify params before they are sent.
     Note that the request may be a [batch of multiple validations](/up.validate#batching).
 
-  @param {Element} event.fields
-    The form fields that triggered this validation pass.
+  @param {List<Element>} event.fields
+    The [form fields](/up.form.fields) that triggered this validation pass.
 
     When multiple fields are validating within the same [task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/),
     Unpoly will make a [single validation request with multiple targets](/up.validate#batching).
