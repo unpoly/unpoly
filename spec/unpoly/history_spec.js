@@ -220,9 +220,11 @@ describe('up.history', function() {
 
     describe('history navigation', function() {
 
-      beforeEach(async function() {
-        await wait(1_000)
-      })
+      // beforeEach(async function() {
+      //   await wait(1_000)
+      // })
+
+      // afterEach((async () => await wait(30000)), 31000)
 
       fit('loads locations when the navigation changes the path', async function() {
         const waitForBrowser = 100
@@ -357,8 +359,9 @@ describe('up.history', function() {
         await wait()
         expect(location.href).toMatchURL('/path?query=3')
         expect('main').toHaveText('path3 text')
+        expect(up.network.isBusy()).toBe(false)
 
-        console.debug("[spec] going back (to 2)")
+        console.debug("[spec] going back (to 2b)")
         history.back()
         console.debug("[spec] after back")
         await wait(waitForBrowser)
@@ -407,7 +410,7 @@ describe('up.history', function() {
         expect(up.network.isBusy()).toBe(false)
       })
 
-      it('loads locations when the navigation changes both path and hash', async function() {
+      fit('loads locations when the navigation changes both path and hash', async function() {
         const waitForBrowser = 100
 
         up.network.config.autoCache = false

@@ -347,9 +347,14 @@ up.history = (function() {
   }
 
   function handleExternalChange(event) {
+    console.debug("handleExternalChange(%o)", event)
     let change = trackCurrentLocation(event)
 
+    console.debug("[handleExternalChange] change is %o", change)
+
     if (!change) return
+
+    console.debug("[handleExternalChange] handleChange is %o", config.handleChange(change))
 
     if (!config.handleChange(change)) return
 
@@ -474,36 +479,7 @@ up.history = (function() {
     }
   }
 
-  function register() {
-    trackCurrentLocation()
-
-    patchHistoryAPI()
-
-    // TODO: Test that we reveal a link with a #hash when the base is the current base
-    up.on('up:click', 'a[href*="#"]', function(event, link) {
-      // If other JavaScript wants to handle
-      if (event.defaultPrevented) return
-
-      let [currentBase] = splitLocation(currentLocation())
-      let [linkBase, linkHash] = splitLocation(u.normalizeURL(link.href))
-
-      if (currentBase !== linkBase) return
-
-      // Some links may already be handled by Unpoly, but have an [href="#"] attribute to be valid HTML.
-      // E.g. an <a href="#" up-fragment="...">
-      if (linkHash === '#') return
-
-      // When we know revealHash() has found and revealed a fragment, we handle this event.
-      // When it did not reveal, we let the browser handle the event. The browser will scroll to
-      // the top for an a[href="#"] or a[href="#top"] link.
-      let beforeScroll = () => location.hash = linkHash // because we prevented the event, it is up to us to change the hash
-      if (up.viewport.revealHash(link.hash, { beforeScroll })) {
-        up.event.halt(event)
-      }
-    })
-
-    up.on(window, 'hashchange, popstate', handleExternalChange)
-
+  function adoptInitialHistoryEntry() {
     // Unpoly replaces the initial page state so it can later restore it when the user
     // goes back to that initial URL. However, if the initial request was a POST,
     // Unpoly will wrongly assume that it can restore the state by reloading with GET.
@@ -512,6 +488,55 @@ up.history = (function() {
       replace(currentLocation())
     }
   }
+
+  // Wait until the framework is booted before we (1) patch window.history
+  // and (2) replace the current history state.
+  up.on('up:framework:boot', function() {
+    trackCurrentLocation()
+    patchHistoryAPI()
+    adoptInitialHistoryEntry()
+  })
+
+  // (A) Honor obstructions when the initial URL contains a #hash.
+  up.on('DOMContentLoaded', function() {
+    // When reloading, Chrome's default scrolling behavior
+    // happens *before* DOMContentLoaded. We fix that as soon as possible.
+    up.viewport.revealHash()
+
+    // When following a link to another URL with a #hash URL, Chrome's default
+    // scrolling behavior happens *after* DOMContentLoaded. We wait one more task to
+    // fix the scroll position after the browser did its thing.
+    u.task(up.viewport.revealHash)
+  })
+
+  up.on(window, 'hashchange, popstate', handleExternalChange)
+
+  // TODO: Test that we reveal a link with a #hash when the base is the current base
+  function onHashLinkClicked(event, link) {
+    // If other JavaScript wants to handle
+    if (event.defaultPrevented) return
+
+    let [currentBase] = splitLocation(currentLocation())
+    let [linkBase, linkHash] = splitLocation(u.normalizeURL(link.href))
+
+    if (currentBase !== linkBase) return
+
+    // Some links may already be handled by Unpoly, but have an [href="#"] attribute to be valid HTML.
+    // E.g. an <a href="#" up-fragment="...">
+    if (linkHash === '#') return
+
+    // When we know revealHash() has found and revealed a fragment, we handle this event.
+    // When it did not reveal, we let the browser handle the event. The browser will scroll to
+    // the top for an a[href="#"] or a[href="#top"] link.
+    let beforeScroll = () => location.hash = linkHash // because we prevented the event, it is up to us to change the hash
+    if (up.viewport.revealHash(link.hash, { beforeScroll })) {
+      up.event.halt(event)
+    }
+  }
+
+// TODO: Support [up-scroll-behavior]
+  up.on('up:click', 'a[href*="#"]', onHashLinkClicked)
+
 
   /*-
   Changes the link's destination so it points to the previous URL.
@@ -553,10 +578,6 @@ up.history = (function() {
       up.link.makeFollowable(link)
     }
   })
-
-  // Wait until the framework is booted before we (1) patch window.history
-  // and (2) replace the current history state.
-  up.on('up:framework:boot', register)
 
   up.on('up:framework:reset', reset)
 
