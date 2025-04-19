@@ -90,12 +90,10 @@ up.history = (function() {
       // New nonced callbacks from the response will validates and then rewritten to match the existing nonce.
       'meta[name=csp-nonce]',
     ],
-    handleChange({ state }) {
-      // We handle (1) entries with a null state (e.g. hash changes) or (2) states owned by Unpoly.
-      // If the state is anything else, we assume it is from another JS lib that wants to handle its own popstate.
-      return u.isNull(state) || state.up
-
-      // TODO: The safeHistory helper sets a not-null state
+    handleChange({ location }) {
+      // We handle bases (path + query string) that were pushed or replaced via up.history methods.
+      // All other bases we assume are pushed by external JS that wants to handle restoration itself.
+      return ownedBases.get(location)
     },
   }))
 
@@ -111,9 +109,12 @@ up.history = (function() {
   let previousLocation
   let nextPreviousLocation
 
+  let ownedBases = new up.FIFOCache({ capacity: 100, normalizeKey: getBase })
+
   function reset() {
     previousLocation = undefined
     nextPreviousLocation = undefined
+    ownedBases.clear()
     trackCurrentLocation()
   }
 
@@ -199,6 +200,10 @@ up.history = (function() {
 
   function splitLocation(location) {
     return location?.split('#') || []
+  }
+
+  function getBase(location) {
+    return splitLocation(location)[0]
   }
 
   /*-
@@ -297,12 +302,10 @@ up.history = (function() {
 
   function placeOwnedHistoryEntry(method, location) {
     location = u.normalizeURL(location)
-    // let [base] = splitLocation(location)
-    // ownedBases.add(base]
+    ownedBases.set(location, true)
 
     if (config.enabled) {
-      let ownedState = { up: {} }
-      history[method](ownedState, '', location)
+      history[method](null, '', location)
     }
   }
 
