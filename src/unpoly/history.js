@@ -143,7 +143,7 @@ up.history = (function() {
   @function trackCurrentLocation
   @internal
   */
-  function trackCurrentLocation(originEvent) {
+  function trackCurrentLocation() {
     // currentLocation() normalizes
     let location = currentLocation()
 
@@ -347,6 +347,9 @@ up.history = (function() {
   function handleExternalChange() {
     let change = trackCurrentLocation()
     if (!change) return
+
+    console.debug("[handleExternalChange] sees change %o", change)
+
     if (!config.handleChange(change)) {
       up.puts('up.history', 'Ignoring history state owned by foreign script')
       return
@@ -357,8 +360,9 @@ up.history = (function() {
       up.viewport.saveScroll({ location: change.previousLocation })
       restoreLocation(change.location)
     } else {
+      console.debug("[handleExternalChange] revealing hash %o", change.hash)
       // We handle every hashchange, since only we know reveal obstructions.
-      up.viewport.revealHash(change.hash)
+      up.viewport.revealHash(change.hash, { strong: true })
     }
   }
 
@@ -491,19 +495,22 @@ up.history = (function() {
     adoptInitialHistoryEntry()
   })
 
-  // (A) Honor obstructions when the initial URL contains a #hash.
+  // Honor obstructions when the initial URL contains a #hash.
   up.on('DOMContentLoaded', function() {
-    // When reloading, Chrome's default scrolling behavior
-    // happens *before* DOMContentLoaded. We fix that as soon as possible.
-    up.viewport.revealHash()
+    // (1) When reloading, Chrome's default scrolling behavior
+    //     happens *before* DOMContentLoaded. We fix that as soon as possible.
+    // (2) When following a link to another URL with a #hash URL, Chrome's default
+    //     scrolling behavior happens *after* DOMContentLoaded. We wait one more task to
+    //     fix the scroll position after the browser did its thing.
+    up.viewport.revealHash({ strong: true })
 
-    // When following a link to another URL with a #hash URL, Chrome's default
-    // scrolling behavior happens *after* DOMContentLoaded. We wait one more task to
-    // fix the scroll position after the browser did its thing.
     u.task(up.viewport.revealHash)
   })
 
-  up.on(window, 'hashchange, popstate', handleExternalChange)
+  up.on(window, 'hashchange, popstate', (event) => {
+    console.debug("[history] got event %o", event)
+    handleExternalChange()
+  })
 
   function onHashLinkClicked(event, link) {
     // If other JavaScript wants to handle this click, do nothing.
@@ -521,14 +528,10 @@ up.history = (function() {
 
     up.log.putsEvent(event)
 
-    let onBeforeScroll = () => {
-      // Because we prevented the event, it is up to us to change the hash.
-      // This will trigger browser scrolling, which we immediately override with our
-      // own reveal motion.
-      location.hash = linkHash
-    }
-
-    if (up.viewport.revealHash(linkHash, { onBeforeScroll })) {
+    // Because we prevented the event, it is up to us to change the hash.
+    // This will trigger browser scrolling, which we immediately override with our
+    // own reveal motion.
+    if (up.viewport.revealHash(linkHash, { setLocation: true })) {
       // Prevent default on this event so neither browser nor Unpoly will handle it.
       up.event.halt(event)
     } else {

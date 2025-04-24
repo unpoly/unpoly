@@ -356,8 +356,10 @@ up.viewport = (function() {
   function revealHash(hash = location.hash, options = {}) {
     let match = firstHashTarget(hash, options)
     if (match) {
-      options.onBeforeScroll?.()
-      return reveal(match, { top: true })
+      if (options.setLocation) location.hash = hash
+      let doReveal = () => reveal(match, { top: true })
+      if (options.strong) u.fastTask(doReveal)
+      return doReveal()
     }
   }
 
@@ -942,7 +944,8 @@ up.viewport = (function() {
   @internal
   */
   function firstHashTarget(hash, options = {}) {
-    if (hash = pureHash(hash)) {
+    hash = pureHash(hash)
+    if (hash) {
       const selector = [
         // Match an <* id="hash">
         e.idSelector(hash),

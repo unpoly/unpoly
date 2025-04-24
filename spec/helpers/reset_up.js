@@ -72,6 +72,8 @@ beforeEach(function() {
 })
 
 afterEach(async function() {
+  jasmine.resetting = true
+
   // Wait 1 more frame for async errors to (correctly) fail the test.
   await jasmine.waitMessageChannel()
 
@@ -129,6 +131,8 @@ afterEach(async function() {
 
   // Scroll to the top
   document.scrollingElement.scrollTop = 0
+
+  jasmine.resetting = false
 
   up.puts('specs', 'Framework was reset')
 })

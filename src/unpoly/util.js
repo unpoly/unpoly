@@ -1150,7 +1150,13 @@ up.util = (function() {
   @stable
   */
   function queueTask(task) {
-    return setTimeout(task)
+    setTimeout(task)
+  }
+
+  function queueFastTask(task) {
+    const channel = new MessageChannel()
+    channel.port1.onmessage = task
+    channel.port2.postMessage(0)
   }
 
   /*-
@@ -2333,6 +2339,7 @@ up.util = (function() {
     isBasicObjectProperty,
     isCrossOrigin,
     task: queueTask,
+    fastTask: queueFastTask,
     isEqual,
     getSimpleTokens,
     getComplexTokens,

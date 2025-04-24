@@ -683,7 +683,7 @@ describe('up.history', function() {
       })
 
       it('does not load locations when navigating over entries pushed by foreign JS with custom state', async function() {
-        const waitForBrowser = 100
+        const waitForBrowser = 150
 
         up.network.config.autoCache = false
         up.history.config.restoreTargets = ['main']
@@ -1144,6 +1144,8 @@ describe('up.history', function() {
       describe('when the #hash is changed manually', function() {
 
         it('reveals a matching fragment, honoring obstructions', async function() {
+          // up.history.scrollRestoration = 'manual'
+
           // The browser will only fire a hashchange event if the hash actually did change.
           // In case someone re-runs this spec, reset the hash before we setup our test below.
           location.hash = ''
@@ -1153,8 +1155,17 @@ describe('up.history', function() {
           const element = fixture('#element', { text: 'content', style: { position: 'absolute', top: '5000px' } })
           const obstruction = fixture('.obstruction[up-fixed=top]', { text: 'obstructions', style: { 'position': 'fixed', 'top': '0px', 'height': '30px', 'background-color': 'blue' } })
 
+          console.debug("[spec] setting location.hash")
+
+          Promise.resolve().then(() => { console.debug("[spec] scrolltop after 1 microtask is %o", up.viewport.root.scrollTop) })
+
           location.hash = "#element"
+
+          console.debug("[spec] scrolltop after setting is %o", up.viewport.root.scrollTop)
+
           await wait()
+
+          console.debug("[spec] scrolltop after 1 task is %o", up.viewport.root.scrollTop)
 
           expect(up.viewport.root.scrollTop).toBe(5000 - 30)
         })
@@ -1305,7 +1316,7 @@ describe('up.history', function() {
         describe("when the link's base matches the current location", function() {
 
           it('reveals a matching fragment, honoring obstructions', async function() {
-            let base = location.pathname + location.query
+            let base = location.pathname + location.search
 
             location.hash = ''
             await wait()
@@ -1325,7 +1336,7 @@ describe('up.history', function() {
           })
 
           it("reveals a matching fragment when we are already on the link's #hash", async function() {
-            let base = location.pathname + location.query
+            let base = location.pathname + location.search
 
             location.hash = '#element'
             await wait()
@@ -1345,7 +1356,7 @@ describe('up.history', function() {
           })
 
           it("scrolls to the top if the link's hash is '#top', even if there is no matching fragment", async function() {
-            let base = location.pathname + location.query
+            let base = location.pathname + location.search
             location.hash = '#top'
             await wait()
 

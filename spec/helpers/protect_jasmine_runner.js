@@ -2,6 +2,12 @@ const u = up.util
 const e = up.element
 const $ = jQuery
 
+function fail(...args) {
+  if (!jasmine.resetting) {
+    up.fail(...args)
+  }
+}
+
 window.safeHistory = new (class {
   constructor() {
     this.logEnabled = false
@@ -19,7 +25,7 @@ window.safeHistory = new (class {
       // This will trigger popstate, which we will handle and update @cursor
       oldBack.call(history)
     } else {
-      up.fail('safeHistory: Tried to go too far back in history (prevented)')
+      fail('safeHistory: Tried to go too far back in history (prevented)')
     }
   }
 
@@ -31,7 +37,7 @@ window.safeHistory = new (class {
       // This will trigger popstate, which we will handle and update @cursor
       oldForward.call(history)
     } else {
-      up.fail('safeHistory: Tried to go too far forward in history (prevented)')
+      fail('safeHistory: Tried to go too far forward in history (prevented)')
     }
   }
 
@@ -44,7 +50,7 @@ window.safeHistory = new (class {
     oldPushState.call(history, state, title, url)
 
     if (url && (u.normalizeURL(url) !== u.normalizeURL(location.href))) {
-      up.fail('safeHistory: Browser did now allow history.pushState() to URL %s (Chrome throttling history changes?)', url)
+      fail('safeHistory: Browser did now allow history.pushState() to URL %s (Chrome throttling history changes?)', url)
     }
 
     this.stateIndexes.splice(this.cursor + 1, this.stateIndexes.length, state._index)
@@ -61,7 +67,7 @@ window.safeHistory = new (class {
     oldReplaceState.call(history, state, title, url)
 
     if (url && (u.normalizeURL(url) !== u.normalizeURL(location.href))) {
-      up.fail('safeHistory: Browser did now allow history.replaceState() to URL %s (Chrome throttling history changes?)', url)
+      fail('safeHistory: Browser did now allow history.replaceState() to URL %s (Chrome throttling history changes?)', url)
     }
 
     // In case an example uses replaceState to set a known initial URL
@@ -81,7 +87,7 @@ window.safeHistory = new (class {
     this.cursor = this.stateIndexes.indexOf(state._index)
 
     if (this.cursor === -1) {
-      up.fail('safeHistory: Could not find position of state %o', state)
+      fail('safeHistory: Could not find position of state %o', state)
     }
 
     this.log("safeHistory: @stateIndexes are now %o, cursor is %o, path is %o", u.copy(this.stateIndexes), this.cursor, location.pathname)
@@ -95,7 +101,7 @@ window.safeHistory = new (class {
   async throttle() {
     // Using the pushState API too often will crash in Safari with the following error:
     // SecurityError: Attempt to use history.replaceState() more than 100 times per 30 second.
-    const maxActions = AgentDetector.isSafari() ? 100 : 1000
+    const maxActions = AgentDetector.isSafari() ? 100 : 500
     const spaceForNextSpec = 10
 
     while (this.truncateActionTimes().length > (maxActions - spaceForNextSpec)) {
@@ -150,7 +156,7 @@ const willScrollWithinPage = function(link) {
   const verbatimHREF = link.getAttribute('href')
 
   const linkURL = u.normalizeURL(verbatimHREF, { hash: false })
-  const currentURL = u.normalizeURL(up.history.location, { hash: false })
+  const currentURL = u.normalizeURL(location.href, { hash: false })
   return linkURL === currentURL
 }
 
@@ -189,7 +195,7 @@ beforeEach(function() {
 afterEach(function() {
   let links = u.presence(window.defaultFollowedLinks)
   if (links) {
-    return up.fail('Unhandled default click behavior for links %o', links)
+    return fail('Unhandled default click behavior for links %o', links)
   }
 })
 
@@ -224,9 +230,9 @@ beforeEach(function() {
 })
 
 afterEach(function() {
-  let forms
-  if (forms = u.presence(window.defaultSubmittedForms)) {
-    up.fail('Unhandled default click behavior for forms %o', forms)
+  let forms = u.presence(window.defaultSubmittedForms)
+  if (forms) {
+    fail('Unhandled default click behavior for forms %o', forms)
   }
 })
 
