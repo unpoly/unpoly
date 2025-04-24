@@ -1,5 +1,3 @@
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 30_000
-
 const u = up.util
 
 const RESET_MESSAGE = 'Resetting framework for next test'

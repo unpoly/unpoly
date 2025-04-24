@@ -90,7 +90,7 @@ up.history = (function() {
       // New nonced callbacks from the response will validates and then rewritten to match the existing nonce.
       'meta[name=csp-nonce]',
     ],
-    handleChange({ location }) {
+    handleChange({ location }) { // TODO: Experimental docs
       // We handle bases (path + query string) that were pushed or replaced via up.history methods.
       // All other bases we assume are pushed by external JS that wants to handle restoration itself.
       return ownedBases.get(location)

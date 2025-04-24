@@ -216,11 +216,11 @@ describe('up.history', function() {
     })
   })
 
-  fdescribe('unobtrusive behavior', function() {
+  describe('unobtrusive behavior', function() {
 
     describe('navigating history with back and forward buttons', function() {
 
-      fit('loads locations when the navigation changes the path', async function() {
+      it('loads locations when the navigation changes the path', async function() {
         const waitForBrowser = 100
 
         up.network.config.autoCache = false
@@ -305,7 +305,7 @@ describe('up.history', function() {
         expect(up.network.isBusy()).toBe(false)
       })
 
-      fit('loads locations when the navigation changes the query string', async function() {
+      it('loads locations when the navigation changes the query string', async function() {
         const waitForBrowser = 100
 
         up.network.config.autoCache = false
@@ -391,7 +391,7 @@ describe('up.history', function() {
         expect(up.network.isBusy()).toBe(false)
       })
 
-      fit('loads locations when the navigation changes both path and hash', async function() {
+      it('loads locations when the navigation changes both path and hash', async function() {
         const waitForBrowser = 100
 
         up.network.config.autoCache = false
@@ -536,7 +536,7 @@ describe('up.history', function() {
         expect(up.network.isBusy()).toBe(false)
       })
 
-      fit('loads locations when the navigation changes both query string and hash', async function() {
+      it('loads locations when the navigation changes both query string and hash', async function() {
         const waitForBrowser = 100
 
         up.network.config.autoCache = false
@@ -682,7 +682,7 @@ describe('up.history', function() {
 
       })
 
-      fit('does not load locations when navigating over entries pushed by foreign JS with custom state', async function() {
+      it('does not load locations when navigating over entries pushed by foreign JS with custom state', async function() {
         const waitForBrowser = 100
 
         up.network.config.autoCache = false
@@ -1174,7 +1174,7 @@ describe('up.history', function() {
         })
       })
 
-      fdescribe('clicking link containing only a #hash in its [href]', function() {
+      describe('clicking link containing only a #hash in its [href]', function() {
 
         it("reveals a fragment matching the link's hash, honoring obstructions", async function() {
           location.hash = ''
@@ -1300,7 +1300,7 @@ describe('up.history', function() {
 
       })
 
-      fdescribe('clicking link containing with both a path and a #hash in its [href]', function() {
+      describe('clicking link containing with both a path and a #hash in its [href]', function() {
 
         describe("when the link's base matches the current location", function() {
 
@@ -1370,7 +1370,7 @@ describe('up.history', function() {
 
         })
 
-        fdescribe("when the link's base matches another location", function() {
+        describe("when the link's base matches another location", function() {
 
           it('renders the new location and reveals a matching fragment in the new content', async function() {
             location.hash = ''
@@ -1441,7 +1441,7 @@ describe('up.history', function() {
 
     }) // changing the location #hash
 
-    fdescribe('up:location:changed event', function() {
+    describe('up:location:changed event', function() {
 
       it('emits up:location:changed when foreign JavaScript uses window.history.pushState()', async function() {
         history.replaceState({}, '', '/path1')
