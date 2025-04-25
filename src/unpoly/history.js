@@ -536,30 +536,25 @@ up.history = (function() {
     // currentBase may be undefined if we're on a layer that was opened from a string
     let isHashLink = (currentBase === linkBase) || verbatimHREF.startsWith('#')
 
-    // (1) If the base changes, we must allow new content to be loaded by either the browser or Unpoly.
-    // (2) The base is undefined if we opened a layer from a string
+    // If we're not scrolling the page, we must leave the event unprevented
+    // and allow the link to be followed.
     if (!isHashLink) return
-
-    // throw "how do we follow a link in history-less overlays?"
-    // throw "we can only assume current-ness if the link begins with #"
-    // TODO: Possibly move this to viewport or link
 
     up.log.putsEvent(event)
 
+    // (1) Because we prevented the event, it is up to us to change the hash.
+    //     This will trigger browser scrolling, which we immediately override with our
+    //     own reveal motion.
+    // (2) We should not set the location if the layer shows no live history.
     let layer = up.layer.get(link)
+    let setLocation = layer.showsLiveHistory()
 
-    // Because we prevented the event, it is up to us to change the hash.
-    // This will trigger browser scrolling, which we immediately override with our
-    // own reveal motion.
-    if (up.viewport.revealHash(linkHash, { setLocation: layer.showsLiveHistory(), layer })) {
-      // Prevent default on this event so neither browser nor Unpoly will handle it.
+    if (up.viewport.revealHash(linkHash, { setLocation, layer })) {
+      // Prevent default on this event so it won't be followed.
       up.event.halt(event)
     } else {
-      // TODO: Do we want to override this so we hande revealing #top within the current layer only?
-
-
-      // (1) When it did not reveal, we let the browser handle the event.
-      //     The browser will scroll to the top for an a[href="#"] or a[href="#top"] link.
+      // (1) At this point revealHash() could not find a matching fragment.
+      //     The hash also isn't '#' or '#top', which would also have been handled by revealHash().
       // (2) We do not handle the edge case where a followable link points to the current base,
       //     but has a #hash that matched no [id] or anchor. In that case Unpoly will follow the link.
     }
