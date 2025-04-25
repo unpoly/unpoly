@@ -116,6 +116,7 @@ up.history = (function() {
     nextPreviousLocation = undefined
     ownedBases.clear()
     trackCurrentLocation()
+    adopt() // make sure we will process the current history entry
   }
 
   /*-
@@ -296,12 +297,20 @@ up.history = (function() {
   }
 
   function placeOwnedHistoryEntry(method, location) {
-    location = u.normalizeURL(location)
-    ownedBases.set(location, true)
+    adopt(location)
 
     if (config.enabled) {
       history[method](null, '', location)
     }
+  }
+
+  /*-
+  @function up.history.adopt
+  @internal
+  */
+  function adopt(location = currentLocation()) {
+    location = u.normalizeURL(location)
+    ownedBases.set(location, true)
   }
 
   function restoreLocation(location) {
@@ -350,7 +359,7 @@ up.history = (function() {
 
     console.debug("[handleExternalChange] sees change %o", change)
 
-    if (!config.handleChange(change)) {
+    if (!u.evalOption(config.handleChange, change)) {
       up.puts('up.history', 'Ignoring history state owned by foreign script')
       return
     }
@@ -483,7 +492,7 @@ up.history = (function() {
     // Unpoly will wrongly assume that it can restore the state by reloading with GET.
     if (up.protocol.initialRequestMethod() === 'GET') {
       // Replace the vanilla state of the initial page load with an Unpoly-enabled state
-      replace(currentLocation())
+      adopt()
     }
   }
 
@@ -592,6 +601,7 @@ up.history = (function() {
     config,
     push,
     replace,
+    adopt,
     get location() { return currentLocation() },
     get previousLocation() { return previousLocation },
     isLocation,

@@ -1372,7 +1372,7 @@ describe('up.history', function() {
             await wait(100)
 
             expect(up.viewport.root.scrollTop).toBe(0)
-            expect(location.hash).toBe('')
+            expect(location.hash).toBe('#top')
           })
 
           it('uses smooth scrolling with [up-scroll-behavior=smooth] (issue #737)', async function() {

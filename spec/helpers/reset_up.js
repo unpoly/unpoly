@@ -11,10 +11,10 @@ function resetLocation() {
     location.hash = ''
   }
 
-  // Webkit ignores replaceState() calls after 100 calls / 30 sec.
+  // Webkit throttles replaceState() calls (see protect_jasmine_runner.js).
   // Hence we only call it when the history was actually changed.
   if (!up.util.matchURLs(location.href, jasmine.locationBeforeSuite)) {
-    history.replaceState?.({ fromResetPathHelper: true }, '', jasmine.locationBeforeSuite)
+    up.history.replace(jasmine.locationBeforeSuite)
   }
 }
 

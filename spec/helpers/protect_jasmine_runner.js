@@ -8,6 +8,18 @@ function fail(...args) {
   }
 }
 
+// (1) Chrome allows 200 history changes per 10 seconds
+//     Exceeding this limit will fail silently, but sometimes log a warning.
+//     https://bugs.webkit.org/show_bug.cgi?id=156115#:~:text=http%20for%20security%20restrictions%20An,updates%20per%20second%20is%20not
+//
+// (2) Safari allows 100 history changes per 30 seconds
+//     Exceeding this limit will throw `SecurityError: Attempt to use history.replaceState() more than 100 times per 30 second.`
+//     https://chromium.googlesource.com/chromium/src.git/+/443bd0ef7014ab4e414d0d3e7d8e5bdbb7473d5b/third_party/blink/renderer/core/frame/navigation_rate_limiter.cc#31
+const THROTTLE_WINDOW_DURATION = AgentDetector.isSafari() ? 30_000 : 10_000
+const THROTTLE_MAX_WINDOW_ACTIONS = AgentDetector.isSafari() ? 100 : 200
+const THROTTLE_MAX_SPEC_ACTIONS = 20 // the maximum number of history changes we expect in a spec
+const THROTTLE_CLOCK_INACCURACY = 100
+
 window.safeHistory = new (class {
   constructor() {
     this.logEnabled = false
@@ -83,7 +95,7 @@ window.safeHistory = new (class {
 
     if (!state) { return }
 
-    this.log("safeHistory: restored(%o)", state._index)
+    this.log("safeHistory: popped(%o)", state._index)
     this.cursor = this.stateIndexes.indexOf(state._index)
 
     if (this.cursor === -1) {
@@ -99,20 +111,15 @@ window.safeHistory = new (class {
   }
 
   async throttle() {
-    // Using the pushState API too often will crash in Safari with the following error:
-    // SecurityError: Attempt to use history.replaceState() more than 100 times per 30 second.
-    const maxActions = AgentDetector.isSafari() ? 100 : 500
-    const spaceForNextSpec = 10
-
-    while (this.truncateActionTimes().length > (maxActions - spaceForNextSpec)) {
-      this.forceLog("safeHistory: Too many uses of the pushState API (%o). Waiting for throttle window to pass.", this.actionTimes.length)
-      await wait(100)
+    while (this.truncateActionTimes().length > (THROTTLE_MAX_WINDOW_ACTIONS - THROTTLE_MAX_SPEC_ACTIONS)) {
+      this.forceLog("safeHistory: Too many uses of the history API. Waiting for throttle window to clear (%o actions left).", this.actionTimes.length)
+      await wait(1000)
     }
   }
 
   truncateActionTimes() {
     const windowEnd = new Date()
-    const windowStart = new Date(windowEnd - ((30 + 1) * 1000))
+    const windowStart = new Date(windowEnd - THROTTLE_WINDOW_DURATION + THROTTLE_CLOCK_INACCURACY)
 
     this.actionTimes = this.actionTimes.filter((time) => time >= windowStart)
 
