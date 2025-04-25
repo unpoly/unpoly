@@ -1224,7 +1224,7 @@ describe('up.history', function() {
           expect(location.hash).toBe('#element')
         })
 
-        it("reveals a fragment when the location of a history-less layer is already on the link's #hash", async function() {
+        it("reveals a fragment within a history-less layer", async function() {
           up.history.replace('/root-location')
 
           up.layer.open({ mode: 'cover', url: '/overlay-location', target: '#content', history: false })
@@ -1309,6 +1309,78 @@ describe('up.history', function() {
           expect(location.hash).toBe('#top')
         })
 
+        it("only reveals a fragment in the link's layer", async function() {
+          let html = `
+            <div id="content">
+              <div style="height: 10000px"></div>
+              <a id="link" href="#element" style="display: block; height: 50px">click me</a>
+              <div style="height: 10000px"></div>
+              <div id="element" style="height: 50px; background-color: yellow">element</div>
+              <div style="height: 10000px"></div>
+            </div>
+          `
+
+          makeLayers([
+            { fragment: html },
+            { fragment: html },
+          ])
+          await wait()
+
+          let rootViewport = up.viewport.root
+          let overlayViewport = up.layer.get(1).viewportElement
+
+          let overlayLink = up.fragment.get('#link', { layer: 'current' })
+
+          console.debug("[spec] clicking link --------------------------------------")
+          overlayLink.click()
+          await wait()
+
+          let overlayTopMargin = 25
+          let overlayTopPadding = 20
+
+          expect(rootViewport.scrollTop).toBe(0)
+          expect(overlayViewport.scrollTop).toBe(overlayTopMargin + overlayTopPadding + 10000 + 50 + 10000)
+        })
+
+        it('only scrolls the current layer to the #top', async function() {
+          let html = `
+              <div id="content">
+                <div style="height: 10000px"></div>
+                <a id="link" href="#top" style="display: block; height: 50px">click me</a>
+              </div>
+            `
+
+          makeLayers([
+            { fragment: html },
+            { fragment: html },
+          ])
+          await wait()
+
+          let rootViewport = up.viewport.root
+          let overlayViewport = up.layer.get(1).viewportElement
+          rootViewport.scrollTop = 500
+          overlayViewport.scrollTop = 500
+
+          expect(rootViewport.scrollTop).toBe(500)
+          expect(overlayViewport.scrollTop).toBe(500)
+
+          let overlayLink = up.fragment.get('#link', { layer: 'current' })
+
+          overlayLink.click()
+          await wait()
+
+          expect(rootViewport.scrollTop).toBe(500)
+          expect(overlayViewport.scrollTop).toBe(0)
+        })
+
+        it('uses smooth scrolling with [up-scroll-behavior=smooth] (issue #737)', async function() {
+          throw "implement smooth scrolling"
+        })
+
+        it('uses smooth scrolling if the viewport has a `{ scroll-behavior: smooth }` style (issue #737)', async function() {
+          throw "implement smooth scrolling"
+        })
+
       })
 
       describe('clicking link containing with both a path and a #hash in its [href]', function() {
@@ -1375,10 +1447,6 @@ describe('up.history', function() {
             expect(location.hash).toBe('#top')
           })
 
-          it('uses smooth scrolling with [up-scroll-behavior=smooth] (issue #737)', async function() {
-            throw "implement smooth scrolling"
-          })
-
         })
 
         describe("when the link's base matches another location", function() {
@@ -1409,7 +1477,7 @@ describe('up.history', function() {
 
           })
 
-          it("renders the new location is the link's base matches the browser location, but not the location of a history-less layer", async function() {
+          it("renders the new location if the link's base matches the browser location, but not the location of a history-less layer", async function() {
             up.history.replace('/root-location')
 
             up.layer.open({ mode: 'cover', url: '/overlay-location', target: '#content', history: false })
@@ -1434,6 +1502,40 @@ describe('up.history', function() {
             await wait()
 
             expect(jasmine.Ajax.requests.count()).toBe(2)
+            jasmine.respondWith(`
+              <div id="content">
+                new content
+              </div>
+            `)
+
+            await wait()
+
+            expect(up.layer.isOverlay()).toBe(true)
+            expect(up.layer.current).toHaveSelector('#content')
+            expect('#content').toHaveText('new content')
+          })
+
+          it("renders the new location if the overlay was opened from a string of HTML", async function() {
+            up.history.replace('/root-location')
+
+            up.layer.open({ mode: 'cover', fragment: `
+              <div id="content">
+                <a id="link" href="/root-location#hash" up-target="#content">label</a>
+                <div id="hash">fake hash</div> <!-- up.history.onHashLinkClicked should see a matching fragment, but not reveal it -->
+              </div>
+            ` })
+            await wait()
+
+            expect(up.layer.isOverlay()).toBe(true)
+            expect(up.layer.current).toHaveSelector('#content')
+
+            expect(location.href).toMatchURL('/root-location')
+            expect(up.layer.location).toBeMissing()
+
+            document.querySelector('#link').click()
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
             jasmine.respondWith(`
               <div id="content">
                 new content

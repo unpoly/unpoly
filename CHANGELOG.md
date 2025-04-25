@@ -23,6 +23,7 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 - Fixed history navigation when #hash changes are involved
 - In-page #hash navigation works reliably, even when the link contains a hash
 - New properties `{ base, previousBase, previousLocation, state, hash, previousHash }`
+- Following #hash links in overlays only scrolls the overlay
 
 
 3.10.2

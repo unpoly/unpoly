@@ -10,15 +10,15 @@ function fail(...args) {
 
 // (1) Chrome allows 200 history changes per 10 seconds
 //     Exceeding this limit will fail silently, but sometimes log a warning.
-//     https://bugs.webkit.org/show_bug.cgi?id=156115#:~:text=http%20for%20security%20restrictions%20An,updates%20per%20second%20is%20not
+//     https://chromium.googlesource.com/chromium/src.git/+/443bd0ef7014ab4e414d0d3e7d8e5bdbb7473d5b/third_party/blink/renderer/core/frame/navigation_rate_limiter.cc#31
 //
 // (2) Safari allows 100 history changes per 30 seconds
 //     Exceeding this limit will throw `SecurityError: Attempt to use history.replaceState() more than 100 times per 30 second.`
-//     https://chromium.googlesource.com/chromium/src.git/+/443bd0ef7014ab4e414d0d3e7d8e5bdbb7473d5b/third_party/blink/renderer/core/frame/navigation_rate_limiter.cc#31
+//     https://bugs.webkit.org/show_bug.cgi?id=156115#:~:text=http%20for%20security%20restrictions%20An,updates%20per%20second%20is%20not
 const THROTTLE_WINDOW_DURATION = AgentDetector.isSafari() ? 30_000 : 10_000
 const THROTTLE_MAX_WINDOW_ACTIONS = AgentDetector.isSafari() ? 100 : 200
 const THROTTLE_MAX_SPEC_ACTIONS = 20 // the maximum number of history changes we expect in a spec
-const THROTTLE_CLOCK_INACCURACY = 100
+const THROTTLE_CLOCK_INACCURACY = 1100
 
 window.safeHistory = new (class {
   constructor() {

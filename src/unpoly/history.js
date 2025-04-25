@@ -357,7 +357,7 @@ up.history = (function() {
     let change = trackCurrentLocation()
     if (!change) return
 
-    console.debug("[handleExternalChange] sees change %o", change)
+    console.debug("[handleExternalChange] sees change (base changed: %o, hash changed: %o)", change.base !== change.previousBase, change.hash, change.previousHash)
 
     if (!u.evalOption(config.handleChange, change)) {
       up.puts('up.history', 'Ignoring history state owned by foreign script')
@@ -522,6 +522,7 @@ up.history = (function() {
   })
 
   function onHashLinkClicked(event, link) {
+    console.debug("[onHashLinkClicked] got event %o", event)
     // If other JavaScript wants to handle this click, do nothing.
     if (event.defaultPrevented) return
 
@@ -529,21 +530,34 @@ up.history = (function() {
     if (up.event.isModified(event)) return
 
     let [currentBase] = splitLocation(up.layer.current.location)
-    let [linkBase, linkHash] = splitLocation(u.normalizeURL(link.href))
+    let [linkBase, linkHash] = splitLocation(u.normalizeURL(link))
+    let verbatimHREF = link.getAttribute('href')
 
-    // If the base changes, we must allow new content to be loaded
-    // by either the browser or Unpoly.
-    if (currentBase !== linkBase) return
+    // currentBase may be undefined if we're on a layer that was opened from a string
+    let isHashLink = (currentBase === linkBase) || verbatimHREF.startsWith('#')
+
+    // (1) If the base changes, we must allow new content to be loaded by either the browser or Unpoly.
+    // (2) The base is undefined if we opened a layer from a string
+    if (!isHashLink) return
+
+    // throw "how do we follow a link in history-less overlays?"
+    // throw "we can only assume current-ness if the link begins with #"
+    // TODO: Possibly move this to viewport or link
 
     up.log.putsEvent(event)
+
+    let layer = up.layer.get(link)
 
     // Because we prevented the event, it is up to us to change the hash.
     // This will trigger browser scrolling, which we immediately override with our
     // own reveal motion.
-    if (up.viewport.revealHash(linkHash, { setLocation: true })) {
+    if (up.viewport.revealHash(linkHash, { setLocation: layer.showsLiveHistory(), layer })) {
       // Prevent default on this event so neither browser nor Unpoly will handle it.
       up.event.halt(event)
     } else {
+      // TODO: Do we want to override this so we hande revealing #top within the current layer only?
+
+
       // (1) When it did not reveal, we let the browser handle the event.
       //     The browser will scroll to the top for an a[href="#"] or a[href="#top"] link.
       // (2) We do not handle the edge case where a followable link points to the current base,

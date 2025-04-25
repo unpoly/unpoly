@@ -354,12 +354,20 @@ up.viewport = (function() {
   @internal
   */
   function revealHash(hash = location.hash, options = {}) {
+    if (!hash) return
+
     let match = firstHashTarget(hash, options)
+    let setLocation = () => { if (options.setLocation) location.hash = hash }
+
+    console.debug("[revealHash] hash %o yielded match %o in layer %o", hash, match, up.layer.get(match))
     if (match) {
-      if (options.setLocation) location.hash = hash
+      setLocation()
       let doReveal = () => reveal(match, { top: true })
       if (options.strong) u.fastTask(doReveal)
       return doReveal()
+    } else if (hash === '#top' || hash === '#') {
+      setLocation()
+      return scrollTo(0, options)
     }
   }
 
@@ -675,6 +683,7 @@ up.viewport = (function() {
 
   function scrollTo(position, ...args) {
     const [viewports, _options] = parseOptions(args)
+    console.debug("[scrollTo] works on viewports", viewports)
     setScrollPositions(viewports, {}, position)
     return true
   }

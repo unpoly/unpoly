@@ -7,15 +7,21 @@ function logResetting() {
 }
 
 function resetLocation() {
+  let didChange = false
+
   if (location.hash) {
     location.hash = ''
+    didChange = true
   }
 
   // Webkit throttles replaceState() calls (see protect_jasmine_runner.js).
   // Hence we only call it when the history was actually changed.
   if (!up.util.matchURLs(location.href, jasmine.locationBeforeSuite)) {
     up.history.replace(jasmine.locationBeforeSuite)
+    didChange = true
   }
+
+  return didChange
 }
 
 function resetTitle() {
@@ -100,19 +106,17 @@ afterEach(async function() {
     // Wait one more frame so pending callbacks have a chance to run.
     // Pending callbacks might change the URL or cause errors that bleed into
     // the next example.
-    if (waitMore) { await jasmine.waitMessageChannel() }
+    if (resetLocation() || waitMore) { await jasmine.waitMessageChannel() }
 
-    // Reset browser location and meta/link elements to those from before the suite.
-    // Some resetting modules (like up.history) need to be called after the URL was been reset.
-    resetLocation()
+    up.framework.reset()
+
+    // Resetting the framework may change the location, title, etc. again.
+    if (resetLocation() || waitMore) { await jasmine.waitMessageChannel() }
+
     resetTitle()
     resetMetaTags()
     resetLang()
     resetAttributes()
-
-    up.framework.reset()
-
-    if (waitMore) { return await jasmine.waitMessageChannel() }
   })
 
   // Make some final checks that we have reset successfully
@@ -136,3 +140,4 @@ afterEach(async function() {
 
   up.puts('specs', 'Framework was reset')
 })
+
