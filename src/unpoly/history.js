@@ -377,11 +377,11 @@ up.history = (function() {
       return
     }
 
-    if (change.base !== change.previousBase) {
+    if (change.reason === 'pop') {
       up.viewport.saveFocus({ location: change.previousLocation })
       up.viewport.saveScroll({ location: change.previousLocation })
       restoreLocation(change.location)
-    } else {
+    } else { // reason must be 'hashchange
       console.debug("[handleExternalChange] revealing hash %o", change.hash)
       // We handle every hashchange, since only we know reveal obstructions.
       up.viewport.revealHash(change.hash, { strong: true })
