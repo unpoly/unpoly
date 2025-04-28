@@ -11,16 +11,7 @@ describe('up.history', function() {
   describe('JavaScript functions', function() {
 
     describe('up.history.push()', () => {
-      it('emits an up:location:changed event with a string { location } property (issue #490)', function() {
-        const listener = jasmine.createSpy('event listener')
-        up.on('up:location:changed', listener)
-
-        up.history.push('/new-location')
-
-        expect(listener).toHaveBeenCalled()
-        expect(listener.calls.mostRecent().args[0].location).toEqual(jasmine.any(String))
-        expect(listener.calls.mostRecent().args[0].location).toMatchURL('/new-location')
-      })
+      it('should have tests')
     })
 
     describe('up.history.replace', () => {
@@ -1568,6 +1559,7 @@ describe('up.history', function() {
         expect(location.href).toMatchURL('/path2')
         expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
           type: 'up:location:changed',
+          reason: 'push',
           location: '/path2',
           base: '/path2',
           hash: undefined,
@@ -1589,6 +1581,7 @@ describe('up.history', function() {
         expect(location.href).toMatchURL('/path?query=two')
         expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
           type: 'up:location:changed',
+          reason: 'push',
           previousLocation: '/path?query=one',
           location: '/path?query=two',
         }))
@@ -1606,6 +1599,7 @@ describe('up.history', function() {
         expect(location.href).toMatchURL('/path#hash2')
         expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
           type: 'up:location:changed',
+          reason: 'push',
           location: '/path#hash2',
           base: '/path',
           hash: '#hash2',
@@ -1627,6 +1621,7 @@ describe('up.history', function() {
         expect(location.href).toMatchURL('/path2')
         expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
           type: 'up:location:changed',
+          reason: 'push',
           previousLocation: '/path1',
           location: '/path2',
         }))
@@ -1657,6 +1652,7 @@ describe('up.history', function() {
         expect(location.href).toMatchURL('/path2')
         expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
           type: 'up:location:changed',
+          reason: 'replace',
           previousLocation: '/path1',
           location: '/path2',
         }))
@@ -1674,6 +1670,7 @@ describe('up.history', function() {
         expect(location.href).toMatchURL('/path2')
         expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
           type: 'up:location:changed',
+          reason: 'replace',
           previousLocation: '/path1',
           location: '/path2',
         }))
@@ -1707,6 +1704,7 @@ describe('up.history', function() {
 
         expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
           type: 'up:location:changed',
+          reason: 'hashchange',
           location: '/path?query=value#hash2',
           base: '/path?query=value',
           hash: '#hash2',
@@ -1717,123 +1715,225 @@ describe('up.history', function() {
       })
 
       it('emits up:location:changed events as the user goes forwards and backwards through history', async function() {
-        up.history.config.restoreTargets = ['.viewport']
+        const waitForBrowser = 100
 
-        fixture('.viewport .content')
-        const respond = () => {
-          jasmine.respondWith(`
-            <div class="viewport">
-              <div class="content">content</div>
-            </div>
-          `)
-        }
-
-        const normalize = up.util.normalizeURL
+        up.network.config.autoCache = false
+        up.history.config.restoreTargets = ['main']
+        up.viewport.config.revealSnap = 0
 
         const events = []
-        up.on('up:location:changed', (event) => events.push(normalize(event.location)))
+        up.on('up:location:changed', (event) => events.push([event.reason, event.location]))
 
-        up.navigate('.content', { url: '/foo', history: true })
+        let [nav, link1, link2a, link2b, link3, viewport, target] = htmlFixtureList(`
+          <nav>
+            <a href="/path1" up-follow>path1</a>
+            <a href="/path2#a" up-follow>path2#a</a>
+            <a href="/path2#b" up-follow>path2#b</a>
+            <a href="/path3" up-follow>path3</a>
+          </nav>
+          <div id="viewport" up-viewport style="height: 200px; overflow-y: scroll; background-color: yellow;">
+            <main>
+              initial text
+            </main>
+          </div>
+        `)
 
-        const tolerance = 150
+        let path1Text = `
+          <main>
+            path1 text
+          </main>
+        `
 
+        let path2Text = `
+          <main>
+            <div style="height: 300px">before</div>
+            <div id="a" style="height: 50px; background-color: green">
+              path2#a text
+            </div>
+            <div style="height: 300px">between</div>
+            <div id="b" style="height: 50px; background-color: blue">
+              path2#b text
+            </div>
+            <div style="height: 300px">below</div>
+          </main>
+        `
+
+        let path3Text = `
+          <main>
+            path3 text
+          </main>
+        `
+
+        expect('main').toHaveText('initial text')
+
+        Trigger.clickSequence(link1)
         await wait()
-
-        respond()
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path1')
+        jasmine.respondWith(path1Text)
         await wait()
-
+        expect(location.href).toMatchURL('/path1')
+        expect('main').toHaveText('path1 text')
+        expect(viewport.scrollTop).toBe(0)
         expect(events).toEqual([
-          normalize('/foo')
+          ['push', '/path1'],
         ])
 
-        up.navigate('.content', { url: '/bar', history: true })
+        Trigger.clickSequence(link2a)
         await wait()
-
-        respond()
+        expect(jasmine.Ajax.requests.count()).toBe(2)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path2')
+        jasmine.respondWith(path2Text)
         await wait()
-
+        expect(location.href).toMatchURL('/path2#a')
+        expect('main #a').toHaveText('path2#a text')
+        expect(viewport.scrollTop).toBe(300) // revealing a hash always aligns with top
         expect(events).toEqual([
-          normalize('/foo'),
-          normalize('/bar'),
+          ['push', '/path1'],
+          ['push', '/path2#a'],
         ])
 
-        up.navigate('.content', { url: '/baz', history: true })
+        Trigger.clickSequence(link2b)
         await wait()
-
-        respond()
-        await wait()
-
+        expect(up.network.isBusy()).toBe(false)
+        expect(jasmine.Ajax.requests.count()).toBe(2)
+        expect(viewport.scrollTop).toBe(300 + 50 + 300)
+        expect(location.href).toMatchURL('/path2#b')
         expect(events).toEqual([
-          normalize('/foo'),
-          normalize('/bar'),
-          normalize('/baz')
+          ['push', '/path1'],
+          ['push', '/path2#a'],
+          ['hashchange', '/path2#b'],
+        ])
+
+        Trigger.clickSequence(link3)
+        await wait()
+        expect(jasmine.Ajax.requests.count()).toBe(3)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path3')
+        jasmine.respondWith(path3Text)
+        await wait()
+        expect(location.href).toMatchURL('/path3')
+        expect('main').toHaveText('path3 text')
+        expect(viewport.scrollTop).toBe(0)
+        expect(events).toEqual([
+          ['push', '/path1'],
+          ['push', '/path2#a'],
+          ['hashchange', '/path2#b'],
+          ['push', '/path3'],
         ])
 
         history.back()
-        await wait(tolerance)
-
+        await wait(waitForBrowser)
+        expect(jasmine.Ajax.requests.count()).toBe(4)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path2')
+        jasmine.respondWith(path2Text)
+        await wait()
+        expect(location.href).toMatchURL('/path2#b')
+        expect('main #b').toHaveText('path2#b text')
+        expect(viewport.scrollTop).toBe(300 + 50 + 300)
         expect(events).toEqual([
-          normalize('/foo'),
-          normalize('/bar'),
-          normalize('/baz'),
-          normalize('/bar'),
+          ['push', '/path1'],
+          ['push', '/path2#a'],
+          ['hashchange', '/path2#b'],
+          ['push', '/path3'],
+          ['pop', '/path2#b'],
         ])
 
         history.back()
-        await wait(150)
-
+        await wait(waitForBrowser)
+        expect(jasmine.Ajax.requests.count()).toBe(4)
+        expect(up.network.isBusy()).toBe(false)
+        expect(location.href).toMatchURL('/path2#a')
+        expect(viewport.scrollTop).toBe(300)
         expect(events).toEqual([
-          normalize('/foo'),
-          normalize('/bar'),
-          normalize('/baz'),
-          normalize('/bar'),
-          normalize('/foo'),
+          ['push', '/path1'],
+          ['push', '/path2#a'],
+          ['hashchange', '/path2#b'],
+          ['push', '/path3'],
+          ['pop', '/path2#b'],
+          ['hashchange', '/path2#a'],
+        ])
+
+        history.back()
+        await wait(waitForBrowser)
+        expect(jasmine.Ajax.requests.count()).toBe(5)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path1')
+        jasmine.respondWith(path1Text)
+        await wait()
+        expect(location.href).toMatchURL('/path1')
+        expect('main').toHaveText('path1 text')
+        expect(viewport.scrollTop).toBe(0)
+        expect(events).toEqual([
+          ['push', '/path1'],
+          ['push', '/path2#a'],
+          ['hashchange', '/path2#b'],
+          ['push', '/path3'],
+          ['pop', '/path2#b'],
+          ['hashchange', '/path2#a'],
+          ['pop', '/path1'],
         ])
 
         history.forward()
-        await wait(150)
-
+        await wait(waitForBrowser)
+        expect(jasmine.Ajax.requests.count()).toBe(6)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path2')
+        jasmine.respondWith(path2Text)
+        await wait()
+        expect(location.href).toMatchURL('/path2#a')
+        expect('main #a').toHaveText('path2#a text')
+        expect(viewport.scrollTop).toBe(300)
         expect(events).toEqual([
-          normalize('/foo'),
-          normalize('/bar'),
-          normalize('/baz'),
-          normalize('/bar'),
-          normalize('/foo'),
-          normalize('/bar')
+          ['push', '/path1'],
+          ['push', '/path2#a'],
+          ['hashchange', '/path2#b'],
+          ['push', '/path3'],
+          ['pop', '/path2#b'],
+          ['hashchange', '/path2#a'],
+          ['pop', '/path1'],
+          ['pop', '/path2#a'],
         ])
 
         history.forward()
-        await wait(150)
-
+        await wait(waitForBrowser)
+        expect(jasmine.Ajax.requests.count()).toBe(6)
+        expect(up.network.isBusy()).toBe(false)
+        expect(location.href).toMatchURL('/path2#b')
+        expect('main #b').toHaveText('path2#b text')
+        expect(viewport.scrollTop).toBe(300 + 50 + 300)
         expect(events).toEqual([
-          normalize('/foo'),
-          normalize('/bar'),
-          normalize('/baz'),
-          normalize('/bar'),
-          normalize('/foo'),
-          normalize('/bar'),
-          normalize('/baz')
+          ['push', '/path1'],
+          ['push', '/path2#a'],
+          ['hashchange', '/path2#b'],
+          ['push', '/path3'],
+          ['pop', '/path2#b'],
+          ['hashchange', '/path2#a'],
+          ['pop', '/path1'],
+          ['pop', '/path2#a'],
+          ['hashchange', '/path2#b'],
         ])
-      })
 
-      it('has a string { location } property (issue #490)', async function() {
-        const waitForBrowser = 100
-        // fixture('.content')
-        // up.history.config.restoreTargets = ['.content']
-        up.history.push('/page1')
+        history.forward()
         await wait(waitForBrowser)
-        up.history.push('/page2')
-        await wait(waitForBrowser)
+        expect(jasmine.Ajax.requests.count()).toBe(7)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path3')
+        jasmine.respondWith(path3Text)
+        await wait()
+        expect(location.href).toMatchURL('/path3')
+        expect('main').toHaveText('path3 text')
+        expect(viewport.scrollTop).toBe(0)
+        expect(events).toEqual([
+          ['push', '/path1'],
+          ['push', '/path2#a'],
+          ['hashchange', '/path2#b'],
+          ['push', '/path3'],
+          ['pop', '/path2#b'],
+          ['hashchange', '/path2#a'],
+          ['pop', '/path1'],
+          ['pop', '/path2#a'],
+          ['hashchange', '/path2#b'],
+          ['pop', '/path3'],
+        ])
 
-        const listener = jasmine.createSpy('event listener')
-        up.on('up:location:changed', listener)
-
-        history.back()
-        await wait(waitForBrowser)
-
-        expect(listener).toHaveBeenCalled()
-        expect(listener.calls.mostRecent().args[0].location).toEqual(jasmine.any(String))
-        expect(listener.calls.mostRecent().args[0].location).toMatchURL('/page1')
+        expect(up.network.isBusy()).toBe(false)
       })
 
     })

@@ -115,7 +115,7 @@ up.history = (function() {
     previousLocation = undefined
     nextPreviousLocation = undefined
     ownedBases.clear()
-    trackCurrentLocation()
+    trackCurrentLocation(null)
     adopt() // make sure we will process the current history entry
   }
 
@@ -139,12 +139,12 @@ up.history = (function() {
   }
 
   /*-
-  Remembers the current URL so we can use previousURL on pop.
+  Remembers the current URL so we can use previousLocation on pop.
 
   @function trackCurrentLocation
   @internal
   */
-  function trackCurrentLocation() {
+  function trackCurrentLocation(reason) {
     // currentLocation() normalizes
     let location = currentLocation()
 
@@ -154,10 +154,19 @@ up.history = (function() {
 
       let [base, hash] = splitLocation(currentLocation())
       let [previousBase, previousHash] = splitLocation(previousLocation)
+
+      if (reason === 'detect') {
+        if (base === previousBase) {
+          reason = 'hashchange'
+        } else {
+          reason = 'pop'
+        }
+      }
+
       let state = history.state
       // TODO: Document new up:location:changed properties
-      let change = { location, state, base, hash, previousLocation, previousBase, previousHash }
-      if (up.framework.booted) {
+      let change = { reason, location, state, base, hash, previousLocation, previousBase, previousHash }
+      if (reason) {
         let locationChangedEvent = up.event.build('up:location:changed', { ...change, log: `New location is ${location}` })
         up.migrate.prepareLocationChangedEvent?.(locationChangedEvent)
         up.emit(locationChangedEvent)
@@ -187,6 +196,10 @@ up.history = (function() {
   @event up:location:changed
   @param {string} event.location
     The URL for the history entry after the change.
+  @param {string} event.reason
+    The action that caused this change in history state.
+
+    The value of this property is either `'push'`, `'pop'`, `'hashchange'` or `'replace'`.
   @stable
   */
 
@@ -353,8 +366,8 @@ up.history = (function() {
     }))
   }
 
-  function handleExternalChange() {
-    let change = trackCurrentLocation()
+  function handleExternalChange(reason) {
+    let change = trackCurrentLocation(reason)
     if (!change) return
 
     console.debug("[handleExternalChange] sees change (base changed: %o, hash changed: %o)", change.base !== change.previousBase, change.hash, change.previousHash)
@@ -476,13 +489,13 @@ up.history = (function() {
     const originalPushState = history.pushState
     history.pushState = function(...args) {
       originalPushState.apply(this, args)
-      trackCurrentLocation()
+      trackCurrentLocation('push')
     }
 
     const originalReplaceState = history.replaceState
     history.replaceState = function(...args) {
       originalReplaceState.apply(this, args)
-      trackCurrentLocation()
+      trackCurrentLocation('replace')
     }
   }
 
@@ -499,7 +512,7 @@ up.history = (function() {
   // Wait until the framework is booted before we (1) patch window.history
   // and (2) replace the current history state.
   up.on('up:framework:boot', function() {
-    trackCurrentLocation()
+    trackCurrentLocation(null) // no event is emitted while booting
     patchHistoryAPI()
     adoptInitialHistoryEntry()
   })
@@ -518,7 +531,7 @@ up.history = (function() {
 
   up.on(window, 'hashchange, popstate', (event) => {
     console.debug("[history] got event %o", event)
-    handleExternalChange()
+    handleExternalChange('detect')
   })
 
   function onHashLinkClicked(event, link) {
