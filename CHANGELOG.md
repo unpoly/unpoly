@@ -32,7 +32,7 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
   - previousLocation
   - previousBase
   - previousHash
-  - manual
+  - manual (This is redundant when we have { reason }. Maybe not expose this)
   - adopted
   - willHandle
 

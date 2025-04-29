@@ -156,7 +156,8 @@ up.history = (function() {
       let [base, hash] = splitLocation(currentLocation())
       let [previousBase, previousHash] = splitLocation(previousLocation)
 
-      if (reason === 'detect') {
+      if (manual) {
+        // Detect the reason
         if (base === previousBase) {
           reason = 'hash'
         } else {
@@ -176,7 +177,7 @@ up.history = (function() {
         previousLocation,
         previousBase,
         previousHash,
-        manual,
+        manual, // TODO: This is redundant when we have { reason }. Maybe not expose this.
         adopted,
         willHandle,
         log: `New location is ${location}`
@@ -546,7 +547,7 @@ up.history = (function() {
   })
 
   up.on(window, 'hashchange, popstate', () => {
-    trackCurrentLocation({ reason: 'detect', manual: true })
+    trackCurrentLocation({ manual: true })
   })
 
   function onHashLinkClicked(event, link) {
