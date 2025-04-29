@@ -24,6 +24,17 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 - In-page #hash navigation works reliably, even when the link contains a hash
 - New properties `{ base, previousBase, previousLocation, state, hash, previousHash }`
 - Following #hash links in overlays only scrolls the overlay
+- New up:location:changed props
+  - reason (new "hash" value)
+  - location
+  - base
+  - hash
+  - previousLocation
+  - previousBase
+  - previousHash
+  - manual
+  - adopted
+  - react
 
 
 3.10.2

@@ -359,7 +359,6 @@ up.viewport = (function() {
     let match = firstHashTarget(hash, options)
     let setLocation = () => { if (options.setLocation) location.hash = hash }
 
-    console.debug("[revealHash] hash %o yielded match %o in layer %o", hash, match, up.layer.get(match))
     if (match) {
       setLocation()
       let doReveal = () => reveal(match, { top: true })
@@ -683,7 +682,6 @@ up.viewport = (function() {
 
   function scrollTo(position, ...args) {
     const [viewports, _options] = parseOptions(args)
-    console.debug("[scrollTo] works on viewports", viewports)
     setScrollPositions(viewports, {}, position)
     return true
   }
