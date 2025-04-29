@@ -1579,7 +1579,7 @@ describe('up.history', function() {
           previousHash: undefined,
           manual: false,
           adopted: false,
-          react: false,
+          willHandle: false,
         }))
       })
 
@@ -1600,7 +1600,7 @@ describe('up.history', function() {
           location: '/path?query=two',
           manual: false,
           adopted: false,
-          react: false,
+          willHandle: false,
         }))
       })
 
@@ -1625,7 +1625,7 @@ describe('up.history', function() {
           previousHash: '#hash1',
           manual: false,
           adopted: false,
-          react: false,
+          willHandle: false,
         }))
       })
 
@@ -1646,7 +1646,7 @@ describe('up.history', function() {
           location: '/path2',
           manual: false,
           adopted: true,
-          react: false,
+          willHandle: false,
         }))
       })
 
@@ -1680,7 +1680,7 @@ describe('up.history', function() {
           location: '/path2',
           manual: false,
           adopted: false,
-          react: false,
+          willHandle: false,
         }))
       })
 
@@ -1701,7 +1701,7 @@ describe('up.history', function() {
           location: '/path2',
           manual: false,
           adopted: true,
-          react: false,
+          willHandle: false,
         }))
       })
 
@@ -1742,7 +1742,7 @@ describe('up.history', function() {
           previousHash: '#hash1',
           manual: true,
           adopted: false,
-          react: false,
+          willHandle: false,
         }))
       })
 

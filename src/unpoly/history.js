@@ -165,7 +165,7 @@ up.history = (function() {
       }
 
       let adopted = isAdopted(location)
-      let react = manual && adopted
+      let willHandle = manual && adopted
 
       // TODO: Document new up:location:changed properties
       let locationChangedEvent = up.event.build('up:location:changed', {
@@ -178,7 +178,7 @@ up.history = (function() {
         previousHash,
         manual,
         adopted,
-        react,
+        willHandle,
         log: `New location is ${location}`
       })
 
@@ -207,6 +207,9 @@ up.history = (function() {
 
   The `up:location:changed` event is *not* emitted when the page is loaded initially.
   For this observe `up:framework:booted`.
+
+  This event cannot be prevented, but you can mutate the `event.willHandle` property to decide whether
+  Unpoly should handle the change by restoring a location or revealing a fragment matching the location `#hash`.
 
   @event up:location:changed
   @param {string} event.location
@@ -386,7 +389,7 @@ up.history = (function() {
       return
     }
 
-    if (!event.react) {
+    if (!event.willHandle) {
       up.puts('up.history', 'Ignoring history entry owned by foreign script')
       return
     }

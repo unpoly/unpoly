@@ -34,7 +34,7 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
   - previousHash
   - manual
   - adopted
-  - react
+  - willHandle
 
 
 3.10.2
