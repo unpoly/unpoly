@@ -90,11 +90,6 @@ up.history = (function() {
       // New nonced callbacks from the response will validates and then rewritten to match the existing nonce.
       'meta[name=csp-nonce]',
     ],
-    handleChange({ location }) { // TODO: Experimental docs
-      // We handle bases (path + query string) that were pushed or replaced via up.history methods.
-      // All other bases we assume are pushed by external JS that wants to handle restoration itself.
-      return ownedBases.get(location)
-    },
   }))
 
   /*-
@@ -109,13 +104,19 @@ up.history = (function() {
   let previousLocation
   let nextPreviousLocation
 
-  let ownedBases = new up.FIFOCache({ capacity: 100, normalizeKey: getBase })
+  let adoptedBases = new up.FIFOCache({ capacity: 100, normalizeKey: getBase })
+
+  function isAdopted(location) {
+    // We handle bases (path + query string) that were pushed or replaced via up.history methods.
+    // All other bases we assume are pushed by external JS that wants to handle restoration itself.
+    return !!adoptedBases.get(location)
+  }
 
   function reset() {
     previousLocation = undefined
     nextPreviousLocation = undefined
-    ownedBases.clear()
-    trackCurrentLocation(null)
+    adoptedBases.clear()
+    trackCurrentLocation()
     adopt() // make sure we will process the current history entry
   }
 
@@ -144,7 +145,7 @@ up.history = (function() {
   @function trackCurrentLocation
   @internal
   */
-  function trackCurrentLocation(reason) {
+  function trackCurrentLocation({ reason = null, manual = false } = {}) {
     // currentLocation() normalizes
     let location = currentLocation()
 
@@ -155,7 +156,8 @@ up.history = (function() {
       let [base, hash] = splitLocation(currentLocation())
       let [previousBase, previousHash] = splitLocation(previousLocation)
 
-      if (reason === 'detect') {
+      if (manual) {
+        // Detect the reason
         if (base === previousBase) {
           reason = 'hash'
         } else {
@@ -163,16 +165,30 @@ up.history = (function() {
         }
       }
 
-      let state = history.state
-      // TODO: Document new up:location:changed properties
-      let change = { reason, location, state, base, hash, previousLocation, previousBase, previousHash }
-      if (reason) {
-        let locationChangedEvent = up.event.build('up:location:changed', { ...change, log: `New location is ${location}` })
-        up.migrate.prepareLocationChangedEvent?.(locationChangedEvent)
-        up.emit(locationChangedEvent)
-      }
+      let adopted = isAdopted(location)
+      let willHandle = manual && adopted
 
-      return change
+      // TODO: Document new up:location:changed properties
+      let locationChangedEvent = up.event.build('up:location:changed', {
+        reason,
+        location,
+        base,
+        hash,
+        previousLocation,
+        previousBase,
+        previousHash,
+        manual, // TODO: This is redundant when we have { reason }. Maybe not expose this.
+        adopted,
+        willHandle,
+        log: `New location is ${location}`
+      })
+
+      up.migrate.prepareLocationChangedEvent?.(locationChangedEvent)
+
+      if (reason) {
+        up.emit(locationChangedEvent)
+        reactToChange(locationChangedEvent)
+      }
     }
   }
 
@@ -192,6 +208,9 @@ up.history = (function() {
 
   The `up:location:changed` event is *not* emitted when the page is loaded initially.
   For this observe `up:framework:booted`.
+
+  This event cannot be prevented, but you can mutate the `event.willHandle` property to decide whether
+  Unpoly should handle the change by restoring a location or revealing a fragment matching the location `#hash`.
 
   @event up:location:changed
   @param {string} event.location
@@ -281,7 +300,7 @@ up.history = (function() {
   @internal
   */
   function replace(location) {
-    placeOwnedHistoryEntry('replaceState', location)
+    placeAdoptedHistoryEntry('replaceState', location)
   }
 
   /*-
@@ -306,10 +325,10 @@ up.history = (function() {
   @experimental
   */
   function push(location) {
-    placeOwnedHistoryEntry('pushState', location)
+    placeAdoptedHistoryEntry('pushState', location)
   }
 
-  function placeOwnedHistoryEntry(method, location) {
+  function placeAdoptedHistoryEntry(method, location) {
     adopt(location)
 
     if (config.enabled) {
@@ -323,7 +342,7 @@ up.history = (function() {
   */
   function adopt(location = currentLocation()) {
     location = u.normalizeURL(location)
-    ownedBases.set(location, true)
+    adoptedBases.set(location, true)
   }
 
   function restoreLocation(location) {
@@ -366,25 +385,23 @@ up.history = (function() {
     }))
   }
 
-  function handleExternalChange(reason) {
-    let change = trackCurrentLocation(reason)
-    if (!change) return
-
-    console.debug("[handleExternalChange] sees change (base changed: %o, hash changed: %o)", change.base !== change.previousBase, change.hash, change.previousHash)
-
-    if (!u.evalOption(config.handleChange, change)) {
-      up.puts('up.history', 'Ignoring history state owned by foreign script')
+  function reactToChange(event) {
+    if (!event.manual) {
       return
     }
 
-    if (change.reason === 'pop') {
-      up.viewport.saveFocus({ location: change.previousLocation })
-      up.viewport.saveScroll({ location: change.previousLocation })
-      restoreLocation(change.location)
-    } else if (change.reason === 'hash') {
-      console.debug("[handleExternalChange] revealing hash %o", change.hash)
+    if (!event.willHandle) {
+      up.puts('up.history', 'Ignoring history entry owned by foreign script')
+      return
+    }
+
+    if (event.reason === 'pop') {
+      up.viewport.saveFocus({ location: event.previousLocation })
+      up.viewport.saveScroll({ location: event.previousLocation })
+      restoreLocation(event.location)
+    } else if (event.reason === 'hash') {
       // We handle every hashchange, since only we know reveal obstructions.
-      up.viewport.revealHash(change.hash, { strong: true })
+      up.viewport.revealHash(event.hash, { strong: true })
     }
   }
 
@@ -489,13 +506,13 @@ up.history = (function() {
     const originalPushState = history.pushState
     history.pushState = function(...args) {
       originalPushState.apply(this, args)
-      trackCurrentLocation('push')
+      trackCurrentLocation({ reason: 'push' })
     }
 
     const originalReplaceState = history.replaceState
     history.replaceState = function(...args) {
       originalReplaceState.apply(this, args)
-      trackCurrentLocation('replace')
+      trackCurrentLocation({ reason: 'replace' })
     }
   }
 
@@ -512,7 +529,7 @@ up.history = (function() {
   // Wait until the framework is booted before we (1) patch window.history
   // and (2) replace the current history state.
   up.on('up:framework:boot', function() {
-    trackCurrentLocation(null) // no event is emitted while booting
+    trackCurrentLocation() // no event is emitted while booting
     patchHistoryAPI()
     adoptInitialHistoryEntry()
   })
@@ -529,13 +546,11 @@ up.history = (function() {
     u.task(up.viewport.revealHash)
   })
 
-  up.on(window, 'hashchange, popstate', (event) => {
-    console.debug("[history] got event %o", event)
-    handleExternalChange('detect')
+  up.on(window, 'hashchange, popstate', () => {
+    trackCurrentLocation({ manual: true })
   })
 
   function onHashLinkClicked(event, link) {
-    console.debug("[onHashLinkClicked] got event %o", event)
     // If other JavaScript wants to handle this click, do nothing.
     if (event.defaultPrevented) return
 
@@ -562,6 +577,7 @@ up.history = (function() {
     let layer = up.layer.get(link)
     let setLocation = layer.showsLiveHistory()
 
+    // If we set a new hash this will also trigger a hashchange event.
     if (up.viewport.revealHash(linkHash, { setLocation, layer })) {
       // Prevent default on this event so it won't be followed.
       up.event.halt(event)
@@ -624,6 +640,7 @@ up.history = (function() {
     push,
     replace,
     adopt,
+    isAdopted,
     get location() { return currentLocation() },
     get previousLocation() { return previousLocation },
     isLocation,

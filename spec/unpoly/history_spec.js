@@ -1146,17 +1146,8 @@ describe('up.history', function() {
           const element = fixture('#element', { text: 'content', style: { position: 'absolute', top: '5000px' } })
           const obstruction = fixture('.obstruction[up-fixed=top]', { text: 'obstructions', style: { 'position': 'fixed', 'top': '0px', 'height': '30px', 'background-color': 'blue' } })
 
-          console.debug("[spec] setting location.hash")
-
-          Promise.resolve().then(() => { console.debug("[spec] scrolltop after 1 microtask is %o", up.viewport.root.scrollTop) })
-
           location.hash = "#element"
-
-          console.debug("[spec] scrolltop after setting is %o", up.viewport.root.scrollTop)
-
           await wait()
-
-          console.debug("[spec] scrolltop after 1 task is %o", up.viewport.root.scrollTop)
 
           expect(up.viewport.root.scrollTop).toBe(5000 - 30)
         })
@@ -1343,7 +1334,6 @@ describe('up.history', function() {
 
           let overlayLink = up.fragment.get('#link', { layer: 'current' })
 
-          console.debug("[spec] clicking link --------------------------------------")
           overlayLink.click()
           await wait()
 
@@ -1587,6 +1577,9 @@ describe('up.history', function() {
           previousLocation: '/path1',
           previousBase: '/path1',
           previousHash: undefined,
+          manual: false,
+          adopted: false,
+          willHandle: false,
         }))
       })
 
@@ -1605,6 +1598,9 @@ describe('up.history', function() {
           reason: 'push',
           previousLocation: '/path?query=one',
           location: '/path?query=two',
+          manual: false,
+          adopted: false,
+          willHandle: false,
         }))
       })
 
@@ -1627,6 +1623,9 @@ describe('up.history', function() {
           previousLocation: '/path#hash1',
           previousBase: '/path',
           previousHash: '#hash1',
+          manual: false,
+          adopted: false,
+          willHandle: false,
         }))
       })
 
@@ -1645,6 +1644,9 @@ describe('up.history', function() {
           reason: 'push',
           previousLocation: '/path1',
           location: '/path2',
+          manual: false,
+          adopted: true,
+          willHandle: false,
         }))
       })
 
@@ -1676,6 +1678,9 @@ describe('up.history', function() {
           reason: 'replace',
           previousLocation: '/path1',
           location: '/path2',
+          manual: false,
+          adopted: false,
+          willHandle: false,
         }))
       })
 
@@ -1694,6 +1699,9 @@ describe('up.history', function() {
           reason: 'replace',
           previousLocation: '/path1',
           location: '/path2',
+          manual: false,
+          adopted: true,
+          willHandle: false,
         }))
       })
 
@@ -1732,6 +1740,9 @@ describe('up.history', function() {
           previousLocation: '/path?query=value#hash1',
           previousBase: '/path?query=value',
           previousHash: '#hash1',
+          manual: true,
+          adopted: false,
+          willHandle: false,
         }))
       })
 
