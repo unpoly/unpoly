@@ -157,7 +157,7 @@ up.history = (function() {
 
       if (reason === 'detect') {
         if (base === previousBase) {
-          reason = 'hashchange'
+          reason = 'hash'
         } else {
           reason = 'pop'
         }
@@ -199,7 +199,7 @@ up.history = (function() {
   @param {string} event.reason
     The action that caused this change in history state.
 
-    The value of this property is either `'push'`, `'pop'`, `'hashchange'` or `'replace'`.
+    The value of this property is either `'push'`, `'pop'`, `'hash'` or `'replace'`.
   @stable
   */
 
@@ -381,7 +381,7 @@ up.history = (function() {
       up.viewport.saveFocus({ location: change.previousLocation })
       up.viewport.saveScroll({ location: change.previousLocation })
       restoreLocation(change.location)
-    } else { // reason must be 'hashchange
+    } else if (change.reason === 'hash') {
       console.debug("[handleExternalChange] revealing hash %o", change.hash)
       // We handle every hashchange, since only we know reveal obstructions.
       up.viewport.revealHash(change.hash, { strong: true })

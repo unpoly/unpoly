@@ -1704,7 +1704,7 @@ describe('up.history', function() {
 
         expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
           type: 'up:location:changed',
-          reason: 'hashchange',
+          reason: 'hash',
           location: '/path?query=value#hash2',
           base: '/path?query=value',
           hash: '#hash2',
@@ -1802,7 +1802,7 @@ describe('up.history', function() {
         expect(events).toEqual([
           ['push', '/path1'],
           ['push', '/path2#a'],
-          ['hashchange', '/path2#b'],
+          ['hash', '/path2#b'],
         ])
 
         Trigger.clickSequence(link3)
@@ -1817,7 +1817,7 @@ describe('up.history', function() {
         expect(events).toEqual([
           ['push', '/path1'],
           ['push', '/path2#a'],
-          ['hashchange', '/path2#b'],
+          ['hash', '/path2#b'],
           ['push', '/path3'],
         ])
 
@@ -1833,7 +1833,7 @@ describe('up.history', function() {
         expect(events).toEqual([
           ['push', '/path1'],
           ['push', '/path2#a'],
-          ['hashchange', '/path2#b'],
+          ['hash', '/path2#b'],
           ['push', '/path3'],
           ['pop', '/path2#b'],
         ])
@@ -1847,10 +1847,10 @@ describe('up.history', function() {
         expect(events).toEqual([
           ['push', '/path1'],
           ['push', '/path2#a'],
-          ['hashchange', '/path2#b'],
+          ['hash', '/path2#b'],
           ['push', '/path3'],
           ['pop', '/path2#b'],
-          ['hashchange', '/path2#a'],
+          ['hash', '/path2#a'],
         ])
 
         history.back()
@@ -1865,10 +1865,10 @@ describe('up.history', function() {
         expect(events).toEqual([
           ['push', '/path1'],
           ['push', '/path2#a'],
-          ['hashchange', '/path2#b'],
+          ['hash', '/path2#b'],
           ['push', '/path3'],
           ['pop', '/path2#b'],
-          ['hashchange', '/path2#a'],
+          ['hash', '/path2#a'],
           ['pop', '/path1'],
         ])
 
@@ -1884,10 +1884,10 @@ describe('up.history', function() {
         expect(events).toEqual([
           ['push', '/path1'],
           ['push', '/path2#a'],
-          ['hashchange', '/path2#b'],
+          ['hash', '/path2#b'],
           ['push', '/path3'],
           ['pop', '/path2#b'],
-          ['hashchange', '/path2#a'],
+          ['hash', '/path2#a'],
           ['pop', '/path1'],
           ['pop', '/path2#a'],
         ])
@@ -1902,13 +1902,13 @@ describe('up.history', function() {
         expect(events).toEqual([
           ['push', '/path1'],
           ['push', '/path2#a'],
-          ['hashchange', '/path2#b'],
+          ['hash', '/path2#b'],
           ['push', '/path3'],
           ['pop', '/path2#b'],
-          ['hashchange', '/path2#a'],
+          ['hash', '/path2#a'],
           ['pop', '/path1'],
           ['pop', '/path2#a'],
-          ['hashchange', '/path2#b'],
+          ['hash', '/path2#b'],
         ])
 
         history.forward()
@@ -1923,13 +1923,13 @@ describe('up.history', function() {
         expect(events).toEqual([
           ['push', '/path1'],
           ['push', '/path2#a'],
-          ['hashchange', '/path2#b'],
+          ['hash', '/path2#b'],
           ['push', '/path3'],
           ['pop', '/path2#b'],
-          ['hashchange', '/path2#a'],
+          ['hash', '/path2#a'],
           ['pop', '/path1'],
           ['pop', '/path2#a'],
-          ['hashchange', '/path2#b'],
+          ['hash', '/path2#b'],
           ['pop', '/path3'],
         ])
 
