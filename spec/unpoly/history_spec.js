@@ -1262,6 +1262,27 @@ describe('up.history', function() {
           expect(location.hash).toBe('#element')
         })
 
+
+        it("does not reveal when an event listener prevents the click event", async function() {
+          location.hash = ''
+          await wait()
+
+          fixture('#element')
+
+          const link = fixture('a', { href: '#element' })
+          link.addEventListener('click', (event) => event.preventDefault())
+
+          const revealSpy = up.reveal.mock()
+
+          // Firefox will only do native #anchor processing when we use link.click(),
+          // but not when we emit a synthetic 'click' event.
+          link.click()
+          await wait(100)
+
+          expect(revealSpy).not.toHaveBeenCalled()
+          expect(location.hash).toBe('')
+        })
+
         it("scrolls to the top if the link's hash is just the '#' symbol", async function() {
           location.hash = ''
           await wait()
