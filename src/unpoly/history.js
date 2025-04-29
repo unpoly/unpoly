@@ -562,6 +562,7 @@ up.history = (function() {
     let layer = up.layer.get(link)
     let setLocation = layer.showsLiveHistory()
 
+    // If we set a new hash this will also trigger a hashchange event.
     if (up.viewport.revealHash(linkHash, { setLocation, layer })) {
       // Prevent default on this event so it won't be followed.
       up.event.halt(event)

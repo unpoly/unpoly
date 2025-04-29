@@ -334,19 +334,19 @@ up.viewport = (function() {
   /*-
   [Reveals](/up.reveal) an element matching the given `#hash` anchor.
 
-  Other than the default behavior found in browsers, `up.revealHash()` works with
+  Other than the default behavior found in browsers, `up.viewport.revealHash()` works with
   [multiple viewports](/up-viewport) and honors [fixed elements](/up-fixed-top) obstructing the user's
   view of the viewport.
 
   When the page loads initially, this function is automatically called with the hash from
   the current URL.
 
-  If no element matches the given `#hash` anchor, a resolved promise is returned.
+  If no element matches the given `#hash` anchor, a falsy value is returned.
 
   ### Example
 
   ```js
-  up.revealHash('#chapter2')
+  up.viewport.revealHash('#chapter2')
   ```
 
   @function up.viewport.revealHash
