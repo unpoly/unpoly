@@ -133,8 +133,15 @@ afterEach(async function() {
     throw new Error('Shifted elements survived reset!')
   }
 
-  // Scroll to the top
-  document.scrollingElement.scrollTop = 0
+  // Interrupt active smooth scrolling animnations.
+  // Then scroll to the top.
+  if (document.scrollingElement.scrollTop !== 0) {
+    document.scrollingElement.style.setProperty('overflow-y', 'hidden')
+    up.element.paint(document.scrollingElement)
+    document.scrollingElement.style.removeProperty('overflow-y')
+    up.element.paint(document.scrollingElement)
+    document.scrollingElement.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  }
 
   jasmine.resetting = false
 

@@ -795,6 +795,11 @@ up.link = (function() {
   */
   up.macro(config.selectorFn('clickableSelectors'), makeClickable)
 
+  // function willJump(link) {
+  //   let [linkBase, linkHash] = splitLocation(u.normalizeURL(link))
+  //   let verbatimHREF = link.getAttribute('href')
+  // }
+
   function shouldFollowEvent(event, link) {
     // Users may configure up.link.config.followSelectors.push('a')
     // and then opt out individual links with [up-follow=false].

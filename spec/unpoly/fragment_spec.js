@@ -7689,19 +7689,24 @@ describe('up.fragment', function() {
           })
 
           it('animates the revealing when swapping out an element', async function() {
-            fixture('.before', { text: 'before', style: { height: '20000px' } })
+            const highElement = fixture('.high', { style: { height: '30000px' } }) // ensure we can scroll
 
             fixture('.element', { text: 'version 1' })
             up.render('.element', {
-              document: '<div class="element">version 2</div>',
+              document: '<div class="element" style="position: absolute; top: 20000px; height: 100px; background-color: yellow">version 2</div>',
               scroll: 'target',
               scrollBehavior: 'smooth'
             })
 
             await wait(80)
 
+            const finalScrollTop = 20000 - document.scrollingElement.clientHeight + 100
             expect(document.scrollingElement.scrollTop).toBeGreaterThan(10)
-            expect(document.scrollingElement.scrollTop).toBeLessThan(19000)
+            expect(document.scrollingElement.scrollTop).toBeLessThan(finalScrollTop - 10)
+
+            await wait(1500)
+
+            expect(document.scrollingElement.scrollTop).toBe(finalScrollTop)
           })
         })
 

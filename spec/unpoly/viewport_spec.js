@@ -593,8 +593,8 @@ describe('up.viewport', function() {
 
       describe('with { behavior: "smooth" }', function() {
         it('animates the scroll motion', async function() {
-          fixture('.between', { text: 'between', style: { height: '20000px' } })
-          const destination = fixture('.destination', { text: 'destination' })
+          const highElement = fixture('.high', { style: { height: '10000px' } }) // ensure we can scroll
+          const destination = fixture('.destination', { text: 'destination', style: { position: 'absolute', top: '20000px',height: '100px', background: 'red' } })
 
           expect(document.scrollingElement.scrollTop).toBe(0)
 
@@ -602,8 +602,61 @@ describe('up.viewport', function() {
 
           await wait(80)
 
+          const finalScrollTop = 20000 - document.scrollingElement.clientHeight + 100
           expect(document.scrollingElement.scrollTop).toBeGreaterThan(10)
-          expect(document.scrollingElement.scrollTop).toBeLessThan(19000)
+          expect(document.scrollingElement.scrollTop).toBeLessThan(finalScrollTop - 10)
+
+          await wait(1500)
+          expect(document.scrollingElement.scrollTop).toBe(finalScrollTop)
+        })
+      })
+
+      describe('with { behavior: "auto" }', function() {
+        it('uses smooth scrolling if the viewport has a `{ scroll-behavior: smooth }` style', async function() {
+          const viewport = fixture('[up-viewport]', { style: {
+            'position': 'absolute',
+            'top': '50px',
+            'left': '50px',
+            'width': '100px',
+            'height': '100px',
+            'overflow-y': 'scroll',
+            'scroll-behavior': 'smooth',
+          } } )
+
+          const before = e.affix(viewport, '#before', { style: { 'height': '20000px', 'background-color': 'yellow' } })
+          const target = e.affix(viewport, '#target', { style: { 'height': '10px', 'background-color': 'red' } })
+          const after = e.affix(viewport, '#after', { style: { 'height': '20000px', 'background-color': 'yellow' } })
+
+          // spyOn(viewport, 'scrollTo').and.callThrough()
+
+          up.reveal(target, { behavior: 'auto', top: true })
+          await wait(80)
+
+          expect(viewport.scrollTop).toBeGreaterThan(10)
+          expect(viewport.scrollTop).toBeLessThan(19000)
+        })
+
+        it('does not use smooth scrolling if the viewport has no `{ scroll-behavior }` style', async function() {
+          const viewport = fixture('[up-viewport]', { style: {
+            'position': 'absolute',
+            'top': '50px',
+            'left': '50px',
+            'width': '100px',
+            'height': '100px',
+            'overflow-y': 'scroll',
+            // 'scroll-behavior': 'auto',
+          } } )
+
+          const before = e.affix(viewport, '#before', { style: { 'height': '20000px', 'background-color': 'yellow' } })
+          const target = e.affix(viewport, '#target', { style: { 'height': '10px', 'background-color': 'red' } })
+          const after = e.affix(viewport, '#after', { style: { 'height': '20000px', 'background-color': 'yellow' } })
+
+          // spyOn(viewport, 'scrollTo').and.callThrough()
+
+          up.reveal(target, { behavior: 'auto', top: true })
+          await wait(80)
+
+          expect(viewport.scrollTop).toBe(20000)
         })
       })
 

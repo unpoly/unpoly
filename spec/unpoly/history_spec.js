@@ -8,6 +8,14 @@ describe('up.history', function() {
     up.history.config.enabled = true
   })
 
+  afterEach(async function() {
+    // This suite makes heavy use of pushState API, which sometimes causes the browser to stop
+    // accepting new history entries.
+    //
+    // Wait a little after each spec, in addition to the throttling in protect_jasmine_runner.js.
+    await wait(50)
+  })
+
   describe('JavaScript functions', function() {
 
     describe('up.history.push()', () => {
@@ -1274,43 +1282,6 @@ describe('up.history', function() {
           expect(location.hash).toBe('')
         })
 
-        it("scrolls to the top if the link's hash is just the '#' symbol", async function() {
-          location.hash = ''
-          await wait()
-
-          const highElement = fixture('.high', { style: { height: '10000px' } }) // ensure we can scroll
-          up.viewport.root.scrollTop = 3000
-          expect(up.viewport.root.scrollTop).toBe(3000)
-
-          const link = fixture('a', { href: '#' })
-
-          // Firefox will only do native #anchor processing when we use link.click(),
-          // but not when we emit a synthetic 'click' event.
-          link.click()
-          await wait(100)
-
-          expect(up.viewport.root.scrollTop).toBe(0)
-          expect(location.hash).toBe('')
-        })
-
-        it("scrolls to the top if the link's hash '#top', even if there is no matching fragment", async function() {
-          location.hash = ''
-          await wait()
-
-          const highElement = fixture('.high', { style: { height: '10000px' } }) // ensure we can scroll
-          up.viewport.root.scrollTop = 3000
-          expect(up.viewport.root.scrollTop).toBe(3000)
-
-          const link = fixture('a', { href: '#top' })
-
-          // Firefox will only do native #anchor processing when we use link.click(),
-          // but not when we emit a synthetic 'click' event.
-          link.click()
-          await wait(100)
-
-          expect(up.viewport.root.scrollTop).toBe(0)
-          expect(location.hash).toBe('#top')
-        })
 
         it("only reveals a fragment in the link's layer", async function() {
           let html = `
@@ -1346,11 +1317,11 @@ describe('up.history', function() {
 
         it('only scrolls the current layer to the #top', async function() {
           let html = `
-              <div id="content">
-                <div style="height: 10000px"></div>
-                <a id="link" href="#top" style="display: block; height: 50px">click me</a>
-              </div>
-            `
+            <div id="content">
+              <div style="height: 10000px"></div>
+              <a id="link" href="#top" style="display: block; height: 50px">click me</a>
+            </div>
+          `
 
           makeLayers([
             { fragment: html },
@@ -1360,8 +1331,8 @@ describe('up.history', function() {
 
           let rootViewport = up.viewport.root
           let overlayViewport = up.layer.get(1).viewportElement
-          rootViewport.scrollTop = 500
-          overlayViewport.scrollTop = 500
+          rootViewport.scrollTo({ top: 500, behavior: 'instant' })
+          overlayViewport.scrollTo({ top: 500, behavior: 'instant' })
 
           expect(rootViewport.scrollTop).toBe(500)
           expect(overlayViewport.scrollTop).toBe(500)
@@ -1375,12 +1346,219 @@ describe('up.history', function() {
           expect(overlayViewport.scrollTop).toBe(0)
         })
 
-        it('uses smooth scrolling with [up-scroll-behavior=smooth] (issue #737)', async function() {
-          throw "implement smooth scrolling"
+        it('uses smooth scrolling if the viewport has a `{ scroll-behavior: smooth }` style', async function() {
+          location.hash = ''
+          await wait()
+
+          fixtureStyle(`
+            #viewport {
+              width: 200px;
+              height: 200px;
+              overflow-y: scroll;
+              scroll-behavior: smooth;
+              background-color: yellow;
+            }
+          `)
+
+          const viewport = fixture('#viewport[up-viewport]')
+          const highElement = e.affix(viewport, '#high', { style: { height: '20000px' } }) // ensure we can scroll
+          const element = e.affix(viewport, '#element', { text: 'content', style: { height: '100px', 'background-color': 'red' } })
+          const link = fixture('a', { href: '#element' })
+
+          // Firefox will only do native #anchor processing when we use link.click(),
+          // but not when we emit a synthetic 'click' event.
+          link.click()
+          await wait(80)
+
+          const finalScrollTop = 20000 - 100
+          expect(viewport.scrollTop).toBeGreaterThan(10)
+          expect(viewport.scrollTop).toBeLessThan(finalScrollTop - 10)
+
+          expect(location.hash).toBe('#element')
+
+          await wait(1500)
+          expect(viewport.scrollTop).toBe(finalScrollTop)
         })
 
-        it('uses smooth scrolling if the viewport has a `{ scroll-behavior: smooth }` style (issue #737)', async function() {
-          throw "implement smooth scrolling"
+        it('does not use smooth scrolling if the viewport has no `{ scroll-behavior } style', async function() {
+          location.hash = ''
+          await wait()
+
+          fixtureStyle(`
+            #viewport {
+              width: 200px;
+              height: 200px;
+              overflow-y: scroll;
+              scroll-behavior: auto;
+              background-color: yellow;
+            }
+          `)
+
+          const viewport = fixture('#viewport[up-viewport]')
+          const highElement = e.affix(viewport, '#high', { style: { height: '20000px' } }) // ensure we can scroll
+          const element = e.affix(viewport, '#element', { text: 'content', style: { height: '100px', 'background-color': 'red' } })
+          const link = fixture('a', { href: '#element' })
+
+          // Firefox will only do native #anchor processing when we use link.click(),
+          // but not when we emit a synthetic 'click' event.
+          link.click()
+          await wait(80)
+
+          expect(location.hash).toBe('#element')
+          expect(viewport.scrollTop).toBe(20000 - 100)
+        })
+
+        it('uses smooth scrolling if the root viewport has a `{ scroll-behavior: smooth }` style', async function() {
+          location.hash = ''
+          await wait()
+
+          fixtureStyle(`
+            ${document.scrollingElement.tagName} { scroll-behavior: smooth; }
+          `)
+          const highElement = fixture('.high', { style: { height: '30000px' } }) // ensure we can scroll
+          const element = fixture('#element', { text: 'content', style: { position: 'absolute', top: '20000px', 'background-color': 'yellow' } })
+          const link = fixture('a', { href: '#element' })
+
+          expect(document.scrollingElement.scrollTop).toBe(0)
+
+          // Firefox will only do native #anchor processing when we use link.click(),
+          // but not when we emit a synthetic 'click' event.
+          link.click()
+          await wait(80)
+
+          const finalScrollTop = 20000
+          expect(document.scrollingElement.scrollTop).toBeLessThan(finalScrollTop - 10)
+          expect(document.scrollingElement.scrollTop).toBeGreaterThan(10)
+
+          expect(location.hash).toBe('#element')
+
+          await wait(1500)
+          expect(document.scrollingElement.scrollTop).toBe(finalScrollTop)
+        })
+
+        describe('scrolling to #top', function() {
+          it("scrolls to the top if the link's hash '#top', even if there is no matching fragment", async function() {
+            location.hash = ''
+            await wait()
+
+            const highElement = fixture('.high', { style: { height: '10000px' } }) // ensure we can scroll
+            up.viewport.root.scrollTo({ top: 3000, behavior: 'instant' })
+            expect(up.viewport.root.scrollTop).toBe(3000)
+
+            const link = fixture('a', { href: '#top' })
+
+            // Firefox will only do native #anchor processing when we use link.click(),
+            // but not when we emit a synthetic 'click' event.
+            link.click()
+            await wait(100)
+
+            expect(up.viewport.root.scrollTop).toBe(0)
+            expect(location.hash).toBe('#top')
+          })
+
+          it("uses smooth scrolling if the root viewport has a `{ scroll-behavior: smooth }` style", async function() {
+            location.hash = ''
+            await wait()
+
+            fixtureStyle(`
+              ${document.scrollingElement.tagName} { scroll-behavior: smooth; }
+            `)
+            const highElement = fixture('.high', { style: { height: '30000px' } }) // ensure we can scroll
+            const link = fixture('a', { href: '#top' })
+
+            up.viewport.root.scrollTo({ top: 20000, behavior: 'instant' })
+            expect(up.viewport.root.scrollTop).toBe(20_000)
+
+            // Firefox will only do native #anchor processing when we use link.click(),
+            // but not when we emit a synthetic 'click' event.
+            link.click()
+            await wait(80)
+
+            expect(document.scrollingElement.scrollTop).toBeLessThan(20_000 - 10)
+            expect(document.scrollingElement.scrollTop).toBeGreaterThan(10)
+            expect(location.hash).toBe('#top')
+
+            await wait(1500)
+
+            expect(up.viewport.root.scrollTop).toBe(0)
+          })
+
+          it("uses smooth scrolling if the link has an [up-scroll-behavior='smooth'] attribute (#737)", async function() {
+            location.hash = ''
+            await wait()
+
+            fixtureStyle(`
+              ${document.scrollingElement.tagName} { scroll-behavior: instant; }
+            `)
+            const highElement = fixture('.high', { style: { height: '30000px' } }) // ensure we can scroll
+            const link = fixture('a', { href: '#top', 'up-scroll-behavior': 'smooth' })
+
+            up.viewport.root.scrollTo({ top: 20000, behavior: 'instant' })
+            expect(up.viewport.root.scrollTop).toBe(20_000)
+
+            // Firefox will only do native #anchor processing when we use link.click(),
+            // but not when we emit a synthetic 'click' event.
+            link.click()
+            await wait(80)
+
+            expect(document.scrollingElement.scrollTop).toBeLessThan(20_000 - 10)
+            expect(document.scrollingElement.scrollTop).toBeGreaterThan(10)
+            expect(location.hash).toBe('#top')
+
+            await wait(1500)
+
+            expect(up.viewport.root.scrollTop).toBe(0)
+          })
+        })
+
+        describe('JavaScript links with an a[href="#"]', function() {
+
+          it('allows foreign scripts to handle clicks with a listener bound to the link', async function() {
+            location.hash = ''
+            await wait()
+
+            const highElement = fixture('.high', { style: { height: '10000px' } }) // ensure we can scroll
+            up.viewport.root.scrollTo({ top: 3000, behavior: 'instant' })
+            expect(up.viewport.root.scrollTop).toBe(3000)
+
+            const link = fixture('a', { href: '#' })
+            const foreignListener = jasmine.createSpy('foreign listener').and.callFake((event) => {
+              event.preventDefault()
+            })
+            link.addEventListener('click', foreignListener)
+
+            // Firefox will only do native #anchor processing when we use link.click(),
+            // but not when we emit a synthetic 'click' event.
+            link.click()
+            await wait(100)
+
+            expect(foreignListener).toHaveBeenCalled()
+            expect(up.viewport.root.scrollTop).toBe(3000)
+          })
+
+          it('allows foreign scripts to handle clicks with a listener bound to the document', async function() {
+            location.hash = ''
+            await wait()
+
+            const highElement = fixture('.high', { style: { height: '10000px' } }) // ensure we can scroll
+            up.viewport.root.scrollTo({ top: 3000, behavior: 'instant' })
+            expect(up.viewport.root.scrollTop).toBe(3000)
+
+            const link = fixture('a#link', { href: '#' })
+            const foreignListener = jasmine.createSpy('foreign listener').and.callFake((event) => {
+              event.preventDefault()
+            })
+            up.on('click', 'a#link', foreignListener)
+
+            // Firefox will only do native #anchor processing when we use link.click(),
+            // but not when we emit a synthetic 'click' event.
+            link.click()
+            await wait(100)
+
+            expect(foreignListener).toHaveBeenCalled()
+            expect(up.viewport.root.scrollTop).toBe(3000)
+          })
+
         })
 
       })
@@ -1435,7 +1613,7 @@ describe('up.history', function() {
             await wait()
 
             const highElement = fixture('.high', { style: { height: '10000px' } }) // ensure we can scroll
-            up.viewport.root.scrollTop = 3000
+            up.viewport.root.scrollTo({ top: 3000, behavior: 'instant' })
             expect(up.viewport.root.scrollTop).toBe(3000)
 
             const link = fixture('a', { href: base + '#top' })
@@ -1443,7 +1621,7 @@ describe('up.history', function() {
             // Firefox will only do native #anchor processing when we use link.click(),
             // but not when we emit a synthetic 'click' event.
             link.click()
-            await wait(100)
+            await wait(200)
 
             expect(up.viewport.root.scrollTop).toBe(0)
             expect(location.hash).toBe('#top')
@@ -1558,414 +1736,457 @@ describe('up.history', function() {
 
     describe('up:location:changed event', function() {
 
-      it('emits up:location:changed when foreign JavaScript uses window.history.pushState()', async function() {
-        history.replaceState({}, '', '/path1')
+      describe('when scripts call window.history.pushState()', function() {
 
-        let spy = jasmine.createSpy('up:location:changed listener')
-        document.addEventListener('up:location:changed', spy)
+        it('emits the event, considering it already handled by the foreign script', async function() {
+          history.replaceState({}, '', '/path1')
 
-        history.pushState({}, '', '/path2')
-        await wait()
+          let spy = jasmine.createSpy('up:location:changed listener')
+          document.addEventListener('up:location:changed', spy)
 
-        expect(location.href).toMatchURL('/path2')
-        expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
-          type: 'up:location:changed',
-          reason: 'push',
-          location: '/path2',
-          base: '/path2',
-          hash: undefined,
-          previousLocation: '/path1',
-          previousBase: '/path1',
-          previousHash: undefined,
-          manual: false,
-          adopted: false,
-          willHandle: false,
-        }))
+          history.pushState({}, '', '/path2')
+          await wait()
+
+          expect(location.href).toMatchURL('/path2')
+          expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
+            type: 'up:location:changed',
+            reason: 'push',
+            location: '/path2',
+            previousLocation: '/path1',
+            alreadyHandled: true,
+            willHandle: false,
+          }))
+        })
+
+        it('emits the event when only the  query string changes', async function() {
+          history.replaceState({}, '', '/path?query=one')
+
+          let spy = jasmine.createSpy('up:location:changed listener')
+          document.addEventListener('up:location:changed', spy)
+
+          history.pushState({}, '', '/path?query=two')
+          await wait()
+
+          expect(location.href).toMatchURL('/path?query=two')
+          expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
+            type: 'up:location:changed',
+            reason: 'push',
+            previousLocation: '/path?query=one',
+            location: '/path?query=two',
+            alreadyHandled: true,
+            willHandle: false,
+          }))
+        })
+
+        it('emits the event when only the #hash changes', async function() {
+          history.replaceState({}, '', '/path#hash1')
+
+          let spy = jasmine.createSpy('up:location:changed listener')
+          document.addEventListener('up:location:changed', spy)
+
+          history.pushState({}, '', '/path#hash2')
+          await wait()
+
+          expect(location.href).toMatchURL('/path#hash2')
+          expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
+            type: 'up:location:changed',
+            reason: 'push',
+            location: '/path#hash2',
+            previousLocation: '/path#hash1',
+            alreadyHandled: true,
+            willHandle: false,
+          }))
+        })
+
+        it("does not emit the event if the location didn't change", async function() {
+          history.replaceState({}, '', '/path1')
+
+          let spy = jasmine.createSpy('up:location:changed listener')
+          document.addEventListener('up:location:changed', spy)
+
+          history.pushState({}, '', '/path1')
+          await wait()
+
+          expect(location.href).toMatchURL('/path1')
+          expect(spy).not.toHaveBeenCalled()
+        })
+
       })
 
-      it('emits up:location:changed when only the query string changes', async function() {
-        history.replaceState({}, '', '/path?query=one')
+      describe('when scripts call up.history.push()', function() {
 
-        let spy = jasmine.createSpy('up:location:changed listener')
-        document.addEventListener('up:location:changed', spy)
+        it('emits the event, considering it already handled', async function() {
+          history.replaceState({}, '', '/path1')
 
-        history.pushState({}, '', '/path?query=two')
-        await wait()
+          let spy = jasmine.createSpy('up:location:changed listener')
+          document.addEventListener('up:location:changed', spy)
 
-        expect(location.href).toMatchURL('/path?query=two')
-        expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
-          type: 'up:location:changed',
-          reason: 'push',
-          previousLocation: '/path?query=one',
-          location: '/path?query=two',
-          manual: false,
-          adopted: false,
-          willHandle: false,
-        }))
+          up.history.push('/path2')
+          await wait()
+
+          expect(location.href).toMatchURL('/path2')
+          expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
+            type: 'up:location:changed',
+            reason: 'push',
+            previousLocation: '/path1',
+            location: '/path2',
+            alreadyHandled: true,
+            willHandle: false,
+          }))
+        })
+
+        it('does not emit the event when the location did not change', async function() {
+          history.replaceState({}, '', '/path')
+
+          let spy = jasmine.createSpy('up:location:changed listener')
+          document.addEventListener('up:location:changed', spy)
+
+          up.history.push('/path')
+          await wait()
+
+          expect(location.href).toMatchURL('/path')
+          expect(spy).not.toHaveBeenCalled()
+        })
+
       })
 
-      it('emits up:location:changed when only the #hash changes', async function() {
-        history.replaceState({}, '', '/path#hash1')
+      describe('when scripts call window.history.replaceState()', function() {
 
-        let spy = jasmine.createSpy('up:location:changed listener')
-        document.addEventListener('up:location:changed', spy)
+        it('emits the event, considering it already handled', async function() {
+          history.replaceState({}, '', '/path1')
 
-        history.pushState({}, '', '/path#hash2')
-        await wait()
+          let spy = jasmine.createSpy('up:location:changed listener')
+          document.addEventListener('up:location:changed', spy)
 
-        expect(location.href).toMatchURL('/path#hash2')
-        expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
-          type: 'up:location:changed',
-          reason: 'push',
-          location: '/path#hash2',
-          base: '/path',
-          hash: '#hash2',
-          previousLocation: '/path#hash1',
-          previousBase: '/path',
-          previousHash: '#hash1',
-          manual: false,
-          adopted: false,
-          willHandle: false,
-        }))
+          history.replaceState({}, '', '/path2')
+          await wait()
+
+          expect(location.href).toMatchURL('/path2')
+          expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
+            type: 'up:location:changed',
+            reason: 'replace',
+            previousLocation: '/path1',
+            location: '/path2',
+            alreadyHandled: true,
+            willHandle: false,
+          }))
+        })
+
       })
 
-      it('emits up:location:changed when foreign JavaScript uses up.history.push()', async function() {
-        history.replaceState({}, '', '/path1')
+      describe('when scripts call up.history.replace()', function() {
 
-        let spy = jasmine.createSpy('up:location:changed listener')
-        document.addEventListener('up:location:changed', spy)
+        it('emits the event, considering it already handled', async function() {
+          history.replaceState({}, '', '/path1')
 
-        up.history.push('/path2')
-        await wait()
+          let spy = jasmine.createSpy('up:location:changed listener')
+          document.addEventListener('up:location:changed', spy)
 
-        expect(location.href).toMatchURL('/path2')
-        expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
-          type: 'up:location:changed',
-          reason: 'push',
-          previousLocation: '/path1',
-          location: '/path2',
-          manual: false,
-          adopted: true,
-          willHandle: false,
-        }))
+          up.history.replace('/path2')
+          await wait()
+
+          expect(location.href).toMatchURL('/path2')
+          expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
+            type: 'up:location:changed',
+            reason: 'replace',
+            previousLocation: '/path1',
+            location: '/path2',
+            alreadyHandled: true,
+            willHandle: false,
+          }))
+        })
+
+        it('does not emit up:location:changed when foreign JavaScript uses up.history.replace() to re-set (or adopt) the current location', async function() {
+          history.replaceState({}, '', '/path')
+
+          let spy = jasmine.createSpy('up:location:changed listener')
+          document.addEventListener('up:location:changed', spy)
+
+          up.history.replace('/path')
+          await wait()
+
+          expect(location.href).toMatchURL('/path')
+          expect(spy).not.toHaveBeenCalled()
+        })
+
       })
 
-      it('does not emit up:location:changed when foreign JavaScript uses up.history.push() to re-push the current location', async function() {
-        history.replaceState({}, '', '/path')
+      describe('when scripts set location.hash', function() {
 
-        let spy = jasmine.createSpy('up:location:changed listener')
-        document.addEventListener('up:location:changed', spy)
+        it("emits the event, suggesting to handle if we're on an adopted base", async function() {
+          window.history.replaceState({}, '', '/path?query=value')
+          up.history.adopt()
+          location.hash = '#hash1'
 
-        up.history.push('/path')
-        await wait()
+          let spy = jasmine.createSpy('up:location:changed listener')
+          document.addEventListener('up:location:changed', spy)
 
-        expect(location.href).toMatchURL('/path')
-        expect(spy).not.toHaveBeenCalled()
+          location.hash = '#hash2'
+          await wait()
+
+          expect(location.href).toMatchURL('/path?query=value#hash2')
+          expect(up.history.location).toMatchURL('/path?query=value#hash2')
+
+          expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
+            type: 'up:location:changed',
+            reason: 'hash',
+            location: '/path?query=value#hash2',
+            previousLocation: '/path?query=value#hash1',
+            alreadyHandled: false,
+            willHandle: true,
+          }))
+        })
+
+        it("emits the event, suggesting to not handle if we're not on an adopted base", async function() {
+          // Be on a non-adopted base
+          window.history.replaceState({}, '', '/path?query=value')
+          location.hash = '#hash1'
+
+          let spy = jasmine.createSpy('up:location:changed listener')
+          document.addEventListener('up:location:changed', spy)
+
+          location.hash = '#hash2'
+          await wait()
+
+          expect(location.href).toMatchURL('/path?query=value#hash2')
+          expect(up.history.location).toMatchURL('/path?query=value#hash2')
+
+          expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
+            type: 'up:location:changed',
+            reason: 'hash',
+            location: '/path?query=value#hash2',
+            previousLocation: '/path?query=value#hash1',
+            alreadyHandled: false,
+            willHandle: false,
+          }))
+        })
+
       })
 
-      it('emits up:location:changed when foreign JavaScript uses window.history.replaceState()', async function() {
-        history.replaceState({}, '', '/path1')
+      describe('history navigation', function() {
 
-        let spy = jasmine.createSpy('up:location:changed listener')
-        document.addEventListener('up:location:changed', spy)
+        it('emits an event for every navigation step', async function() {
+          const waitForBrowser = 100
 
-        history.replaceState({}, '', '/path2')
-        await wait()
+          up.network.config.autoCache = false
+          up.history.config.restoreTargets = ['main']
+          up.viewport.config.revealSnap = 0
 
-        expect(location.href).toMatchURL('/path2')
-        expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
-          type: 'up:location:changed',
-          reason: 'replace',
-          previousLocation: '/path1',
-          location: '/path2',
-          manual: false,
-          adopted: false,
-          willHandle: false,
-        }))
-      })
+          const events = []
+          up.on('up:location:changed', (event) => events.push(event))
 
-      it('emits up:location:changed when foreign JavaScript uses up.history.replace()', async function() {
-        history.replaceState({}, '', '/path1')
+          let [nav, link1, link2a, link2b, link3, viewport, target] = htmlFixtureList(`
+            <nav>
+              <a href="/path1" up-follow>path1</a>
+              <a href="/path2#a" up-follow>path2#a</a>
+              <a href="/path2#b" up-follow>path2#b</a>
+              <a href="/path3" up-follow>path3</a>
+            </nav>
+            <div id="viewport" up-viewport style="height: 200px; overflow-y: scroll; background-color: yellow;">
+              <main>
+                initial text
+              </main>
+            </div>
+          `)
 
-        let spy = jasmine.createSpy('up:location:changed listener')
-        document.addEventListener('up:location:changed', spy)
-
-        up.history.replace('/path2')
-        await wait()
-
-        expect(location.href).toMatchURL('/path2')
-        expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
-          type: 'up:location:changed',
-          reason: 'replace',
-          previousLocation: '/path1',
-          location: '/path2',
-          manual: false,
-          adopted: true,
-          willHandle: false,
-        }))
-      })
-
-      it('does not emit up:location:changed when foreign JavaScript uses up.history.replace() to re-set (or adopt) the current location', async function() {
-        history.replaceState({}, '', '/path')
-
-        let spy = jasmine.createSpy('up:location:changed listener')
-        document.addEventListener('up:location:changed', spy)
-
-        up.history.replace('/path')
-        await wait()
-
-        expect(location.href).toMatchURL('/path')
-        expect(spy).not.toHaveBeenCalled()
-      })
-
-      it('emits up:location:changed when foreign JavaScript sets location.hash, providing additional { base, previousBase, hash, previousHash } properties', async function() {
-        history.replaceState({}, '', '/path?query=value')
-        location.hash = '#hash1'
-
-        let spy = jasmine.createSpy('up:location:changed listener')
-        document.addEventListener('up:location:changed', spy)
-
-        location.hash = '#hash2'
-        await wait()
-
-        expect(location.href).toMatchURL('/path?query=value#hash2')
-        expect(up.history.location).toMatchURL('/path?query=value#hash2')
-
-        expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
-          type: 'up:location:changed',
-          reason: 'hash',
-          location: '/path?query=value#hash2',
-          base: '/path?query=value',
-          hash: '#hash2',
-          previousLocation: '/path?query=value#hash1',
-          previousBase: '/path?query=value',
-          previousHash: '#hash1',
-          manual: true,
-          adopted: false,
-          willHandle: false,
-        }))
-      })
-
-      it('emits up:location:changed events as the user goes forwards and backwards through history', async function() {
-        const waitForBrowser = 100
-
-        up.network.config.autoCache = false
-        up.history.config.restoreTargets = ['main']
-        up.viewport.config.revealSnap = 0
-
-        const events = []
-        up.on('up:location:changed', (event) => events.push([event.reason, event.location]))
-
-        let [nav, link1, link2a, link2b, link3, viewport, target] = htmlFixtureList(`
-          <nav>
-            <a href="/path1" up-follow>path1</a>
-            <a href="/path2#a" up-follow>path2#a</a>
-            <a href="/path2#b" up-follow>path2#b</a>
-            <a href="/path3" up-follow>path3</a>
-          </nav>
-          <div id="viewport" up-viewport style="height: 200px; overflow-y: scroll; background-color: yellow;">
+          let path1Text = `
             <main>
-              initial text
+              path1 text
             </main>
-          </div>
-        `)
+          `
 
-        let path1Text = `
-          <main>
-            path1 text
-          </main>
-        `
+          let path2Text = `
+            <main>
+              <div style="height: 300px">before</div>
+              <div id="a" style="height: 50px; background-color: green">
+                path2#a text
+              </div>
+              <div style="height: 300px">between</div>
+              <div id="b" style="height: 50px; background-color: blue">
+                path2#b text
+              </div>
+              <div style="height: 300px">below</div>
+            </main>
+          `
 
-        let path2Text = `
-          <main>
-            <div style="height: 300px">before</div>
-            <div id="a" style="height: 50px; background-color: green">
-              path2#a text
-            </div>
-            <div style="height: 300px">between</div>
-            <div id="b" style="height: 50px; background-color: blue">
-              path2#b text
-            </div>
-            <div style="height: 300px">below</div>
-          </main>
-        `
+          let path3Text = `
+            <main>
+              path3 text
+            </main>
+          `
 
-        let path3Text = `
-          <main>
-            path3 text
-          </main>
-        `
+          expect('main').toHaveText('initial text')
 
-        expect('main').toHaveText('initial text')
+          Trigger.clickSequence(link1)
+          await wait()
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path1')
+          jasmine.respondWith(path1Text)
+          await wait()
+          expect(location.href).toMatchURL('/path1')
+          expect('main').toHaveText('path1 text')
+          expect(viewport.scrollTop).toBe(0)
+          expect(events).toEqual([
+            jasmine.objectContaining({ reason: 'push', location: '/path1', alreadyHandled: true, willHandle: false }),
+          ])
 
-        Trigger.clickSequence(link1)
-        await wait()
-        expect(jasmine.Ajax.requests.count()).toBe(1)
-        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path1')
-        jasmine.respondWith(path1Text)
-        await wait()
-        expect(location.href).toMatchURL('/path1')
-        expect('main').toHaveText('path1 text')
-        expect(viewport.scrollTop).toBe(0)
-        expect(events).toEqual([
-          ['push', '/path1'],
-        ])
+          Trigger.clickSequence(link2a)
+          await wait()
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+          expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path2')
+          jasmine.respondWith(path2Text)
+          await wait()
+          expect(location.href).toMatchURL('/path2#a')
+          expect('main #a').toHaveText('path2#a text')
+          expect(viewport.scrollTop).toBe(300) // revealing a hash always aligns with top
+          expect(events).toEqual([
+            jasmine.objectContaining({ reason: 'push', location: '/path1', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'push', location: '/path2#a', alreadyHandled: true, willHandle: false }),
+          ])
 
-        Trigger.clickSequence(link2a)
-        await wait()
-        expect(jasmine.Ajax.requests.count()).toBe(2)
-        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path2')
-        jasmine.respondWith(path2Text)
-        await wait()
-        expect(location.href).toMatchURL('/path2#a')
-        expect('main #a').toHaveText('path2#a text')
-        expect(viewport.scrollTop).toBe(300) // revealing a hash always aligns with top
-        expect(events).toEqual([
-          ['push', '/path1'],
-          ['push', '/path2#a'],
-        ])
+          Trigger.clickSequence(link2b)
+          await wait()
+          expect(up.network.isBusy()).toBe(false)
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+          expect(viewport.scrollTop).toBe(300 + 50 + 300)
+          expect(location.href).toMatchURL('/path2#b')
+          expect(events).toEqual([
+            jasmine.objectContaining({ reason: 'push', location: '/path1', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'push', location: '/path2#a', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'hash', location: '/path2#b', alreadyHandled: true, willHandle: false }),
+          ])
 
-        Trigger.clickSequence(link2b)
-        await wait()
-        expect(up.network.isBusy()).toBe(false)
-        expect(jasmine.Ajax.requests.count()).toBe(2)
-        expect(viewport.scrollTop).toBe(300 + 50 + 300)
-        expect(location.href).toMatchURL('/path2#b')
-        expect(events).toEqual([
-          ['push', '/path1'],
-          ['push', '/path2#a'],
-          ['hash', '/path2#b'],
-        ])
+          Trigger.clickSequence(link3)
+          await wait()
+          expect(jasmine.Ajax.requests.count()).toBe(3)
+          expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path3')
+          jasmine.respondWith(path3Text)
+          await wait()
+          expect(location.href).toMatchURL('/path3')
+          expect('main').toHaveText('path3 text')
+          expect(viewport.scrollTop).toBe(0)
+          expect(events).toEqual([
+            jasmine.objectContaining({ reason: 'push', location: '/path1', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'push', location: '/path2#a', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'hash', location: '/path2#b', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'push', location: '/path3', alreadyHandled: true, willHandle: false }),
+          ])
 
-        Trigger.clickSequence(link3)
-        await wait()
-        expect(jasmine.Ajax.requests.count()).toBe(3)
-        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path3')
-        jasmine.respondWith(path3Text)
-        await wait()
-        expect(location.href).toMatchURL('/path3')
-        expect('main').toHaveText('path3 text')
-        expect(viewport.scrollTop).toBe(0)
-        expect(events).toEqual([
-          ['push', '/path1'],
-          ['push', '/path2#a'],
-          ['hash', '/path2#b'],
-          ['push', '/path3'],
-        ])
+          history.back()
+          await wait(waitForBrowser)
+          expect(jasmine.Ajax.requests.count()).toBe(4)
+          expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path2')
+          jasmine.respondWith(path2Text)
+          await wait()
+          expect(location.href).toMatchURL('/path2#b')
+          expect('main #b').toHaveText('path2#b text')
+          expect(viewport.scrollTop).toBe(300 + 50 + 300)
+          expect(events).toEqual([
+            jasmine.objectContaining({ reason: 'push', location: '/path1', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'push', location: '/path2#a', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'hash', location: '/path2#b', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'push', location: '/path3', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'pop', location: '/path2#b', alreadyHandled: false, willHandle: true }),
+          ])
 
-        history.back()
-        await wait(waitForBrowser)
-        expect(jasmine.Ajax.requests.count()).toBe(4)
-        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path2')
-        jasmine.respondWith(path2Text)
-        await wait()
-        expect(location.href).toMatchURL('/path2#b')
-        expect('main #b').toHaveText('path2#b text')
-        expect(viewport.scrollTop).toBe(300 + 50 + 300)
-        expect(events).toEqual([
-          ['push', '/path1'],
-          ['push', '/path2#a'],
-          ['hash', '/path2#b'],
-          ['push', '/path3'],
-          ['pop', '/path2#b'],
-        ])
+          history.back()
+          await wait(waitForBrowser)
+          expect(jasmine.Ajax.requests.count()).toBe(4)
+          expect(up.network.isBusy()).toBe(false)
+          expect(location.href).toMatchURL('/path2#a')
+          expect(viewport.scrollTop).toBe(300)
+          expect(events).toEqual([
+            jasmine.objectContaining({ reason: 'push', location: '/path1', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'push', location: '/path2#a', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'hash', location: '/path2#b', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'push', location: '/path3', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'pop', location: '/path2#b', alreadyHandled: false, willHandle: true }),
+            jasmine.objectContaining({ reason: 'hash', location: '/path2#a', alreadyHandled: false, willHandle: true }),
+          ])
 
-        history.back()
-        await wait(waitForBrowser)
-        expect(jasmine.Ajax.requests.count()).toBe(4)
-        expect(up.network.isBusy()).toBe(false)
-        expect(location.href).toMatchURL('/path2#a')
-        expect(viewport.scrollTop).toBe(300)
-        expect(events).toEqual([
-          ['push', '/path1'],
-          ['push', '/path2#a'],
-          ['hash', '/path2#b'],
-          ['push', '/path3'],
-          ['pop', '/path2#b'],
-          ['hash', '/path2#a'],
-        ])
+          history.back()
+          await wait(waitForBrowser)
+          expect(jasmine.Ajax.requests.count()).toBe(5)
+          expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path1')
+          jasmine.respondWith(path1Text)
+          await wait()
+          expect(location.href).toMatchURL('/path1')
+          expect('main').toHaveText('path1 text')
+          expect(viewport.scrollTop).toBe(0)
+          expect(events).toEqual([
+            jasmine.objectContaining({ reason: 'push', location: '/path1', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'push', location: '/path2#a', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'hash', location: '/path2#b', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'push', location: '/path3', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'pop', location: '/path2#b', alreadyHandled: false, willHandle: true }),
+            jasmine.objectContaining({ reason: 'hash', location: '/path2#a', alreadyHandled: false, willHandle: true }),
+            jasmine.objectContaining({ reason: 'pop', location: '/path1', alreadyHandled: false, willHandle: true }),
+          ])
 
-        history.back()
-        await wait(waitForBrowser)
-        expect(jasmine.Ajax.requests.count()).toBe(5)
-        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path1')
-        jasmine.respondWith(path1Text)
-        await wait()
-        expect(location.href).toMatchURL('/path1')
-        expect('main').toHaveText('path1 text')
-        expect(viewport.scrollTop).toBe(0)
-        expect(events).toEqual([
-          ['push', '/path1'],
-          ['push', '/path2#a'],
-          ['hash', '/path2#b'],
-          ['push', '/path3'],
-          ['pop', '/path2#b'],
-          ['hash', '/path2#a'],
-          ['pop', '/path1'],
-        ])
+          history.forward()
+          await wait(waitForBrowser)
+          expect(jasmine.Ajax.requests.count()).toBe(6)
+          expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path2')
+          jasmine.respondWith(path2Text)
+          await wait()
+          expect(location.href).toMatchURL('/path2#a')
+          expect('main #a').toHaveText('path2#a text')
+          expect(viewport.scrollTop).toBe(300)
+          expect(events).toEqual([
+            jasmine.objectContaining({ reason: 'push', location: '/path1', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'push', location: '/path2#a', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'hash', location: '/path2#b', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'push', location: '/path3', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'pop', location: '/path2#b', alreadyHandled: false, willHandle: true }),
+            jasmine.objectContaining({ reason: 'hash', location: '/path2#a', alreadyHandled: false, willHandle: true }),
+            jasmine.objectContaining({ reason: 'pop', location: '/path1', alreadyHandled: false, willHandle: true }),
+            jasmine.objectContaining({ reason: 'pop', location: '/path2#a', alreadyHandled: false, willHandle: true }),
+          ])
 
-        history.forward()
-        await wait(waitForBrowser)
-        expect(jasmine.Ajax.requests.count()).toBe(6)
-        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path2')
-        jasmine.respondWith(path2Text)
-        await wait()
-        expect(location.href).toMatchURL('/path2#a')
-        expect('main #a').toHaveText('path2#a text')
-        expect(viewport.scrollTop).toBe(300)
-        expect(events).toEqual([
-          ['push', '/path1'],
-          ['push', '/path2#a'],
-          ['hash', '/path2#b'],
-          ['push', '/path3'],
-          ['pop', '/path2#b'],
-          ['hash', '/path2#a'],
-          ['pop', '/path1'],
-          ['pop', '/path2#a'],
-        ])
+          history.forward()
+          await wait(waitForBrowser)
+          expect(jasmine.Ajax.requests.count()).toBe(6)
+          expect(up.network.isBusy()).toBe(false)
+          expect(location.href).toMatchURL('/path2#b')
+          expect('main #b').toHaveText('path2#b text')
+          expect(viewport.scrollTop).toBe(300 + 50 + 300)
+          expect(events).toEqual([
+            jasmine.objectContaining({ reason: 'push', location: '/path1', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'push', location: '/path2#a', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'hash', location: '/path2#b', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'push', location: '/path3', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'pop', location: '/path2#b', alreadyHandled: false, willHandle: true }),
+            jasmine.objectContaining({ reason: 'hash', location: '/path2#a', alreadyHandled: false, willHandle: true }),
+            jasmine.objectContaining({ reason: 'pop', location: '/path1', alreadyHandled: false, willHandle: true }),
+            jasmine.objectContaining({ reason: 'pop', location: '/path2#a', alreadyHandled: false, willHandle: true }),
+            jasmine.objectContaining({ reason: 'hash', location: '/path2#b', alreadyHandled: false, willHandle: true }),
+          ])
 
-        history.forward()
-        await wait(waitForBrowser)
-        expect(jasmine.Ajax.requests.count()).toBe(6)
-        expect(up.network.isBusy()).toBe(false)
-        expect(location.href).toMatchURL('/path2#b')
-        expect('main #b').toHaveText('path2#b text')
-        expect(viewport.scrollTop).toBe(300 + 50 + 300)
-        expect(events).toEqual([
-          ['push', '/path1'],
-          ['push', '/path2#a'],
-          ['hash', '/path2#b'],
-          ['push', '/path3'],
-          ['pop', '/path2#b'],
-          ['hash', '/path2#a'],
-          ['pop', '/path1'],
-          ['pop', '/path2#a'],
-          ['hash', '/path2#b'],
-        ])
+          history.forward()
+          await wait(waitForBrowser)
+          expect(jasmine.Ajax.requests.count()).toBe(7)
+          expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path3')
+          jasmine.respondWith(path3Text)
+          await wait()
+          expect(location.href).toMatchURL('/path3')
+          expect('main').toHaveText('path3 text')
+          expect(viewport.scrollTop).toBe(0)
+          expect(events).toEqual([
+            jasmine.objectContaining({ reason: 'push', location: '/path1', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'push', location: '/path2#a', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'hash', location: '/path2#b', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'push', location: '/path3', alreadyHandled: true, willHandle: false }),
+            jasmine.objectContaining({ reason: 'pop', location: '/path2#b', alreadyHandled: false, willHandle: true }),
+            jasmine.objectContaining({ reason: 'hash', location: '/path2#a', alreadyHandled: false, willHandle: true }),
+            jasmine.objectContaining({ reason: 'pop', location: '/path1', alreadyHandled: false, willHandle: true }),
+            jasmine.objectContaining({ reason: 'pop', location: '/path2#a', alreadyHandled: false, willHandle: true }),
+            jasmine.objectContaining({ reason: 'hash', location: '/path2#b', alreadyHandled: false, willHandle: true }),
+            jasmine.objectContaining({ reason: 'pop', location: '/path3', alreadyHandled: false, willHandle: true }),
+          ])
 
-        history.forward()
-        await wait(waitForBrowser)
-        expect(jasmine.Ajax.requests.count()).toBe(7)
-        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path3')
-        jasmine.respondWith(path3Text)
-        await wait()
-        expect(location.href).toMatchURL('/path3')
-        expect('main').toHaveText('path3 text')
-        expect(viewport.scrollTop).toBe(0)
-        expect(events).toEqual([
-          ['push', '/path1'],
-          ['push', '/path2#a'],
-          ['hash', '/path2#b'],
-          ['push', '/path3'],
-          ['pop', '/path2#b'],
-          ['hash', '/path2#a'],
-          ['pop', '/path1'],
-          ['pop', '/path2#a'],
-          ['hash', '/path2#b'],
-          ['pop', '/path3'],
-        ])
+          expect(up.network.isBusy()).toBe(false)
+        })
 
-        expect(up.network.isBusy()).toBe(false)
       })
 
     })
