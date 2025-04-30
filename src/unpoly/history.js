@@ -117,7 +117,7 @@ up.history = (function() {
     nextPreviousLocation = undefined
     nextTrackOptions = undefined
     adoptedBases.clear()
-    trackCurrentLocation()
+    trackCurrentLocation({ reason: null, alreadyHandled: true })
     adopt() // make sure we will process the current history entry
   }
 
@@ -147,7 +147,7 @@ up.history = (function() {
   @internal
   */
   function trackCurrentLocation(trackOptions) {
-    let { reason = null, manual = false } = nextTrackOptions || trackOptions || {}
+    let { reason, alreadyHandled } = nextTrackOptions || trackOptions
 
     // currentLocation() normalizes
     let location = currentLocation()
@@ -156,32 +156,18 @@ up.history = (function() {
       previousLocation = nextPreviousLocation
       nextPreviousLocation = location
 
-      let [base, hash] = splitLocation(currentLocation())
-      let [previousBase, previousHash] = splitLocation(previousLocation)
-
-      if (manual) { // TODO: Maybe rename to { !handled } and { reason: 'detect' }
-        // Detect the reason
-        if (base === previousBase) {
-          reason = 'hash'
-        } else {
-          reason = 'pop'
-        }
+      if (reason === 'detect') {
+        reason = (getBase(location) === getBase(previousLocation)) ? 'hash' : 'pop'
       }
 
-      let adopted = isAdopted(location)
-      let willHandle = manual && adopted
+      let willHandle = !alreadyHandled && isAdopted(location)
 
       // TODO: Document new up:location:changed properties
       let locationChangedEvent = up.event.build('up:location:changed', {
         reason,
         location,
-        base,
-        hash,
         previousLocation,
-        previousBase,
-        previousHash,
-        manual, // TODO: This is redundant when we have { reason }. Maybe not expose this.
-        adopted,
+        alreadyHandled,
         willHandle,
         log: `New location is ${location}`
       })
@@ -392,7 +378,7 @@ up.history = (function() {
   }
 
   function reactToChange(event) {
-    if (!event.manual) {
+    if (event.alreadyHandled) {
       return
     }
 
@@ -512,13 +498,13 @@ up.history = (function() {
     const originalPushState = history.pushState
     history.pushState = function(...args) {
       originalPushState.apply(this, args)
-      trackCurrentLocation({ reason: 'push' })
+      trackCurrentLocation({ reason: 'push', alreadyHandled: true })
     }
 
     const originalReplaceState = history.replaceState
     history.replaceState = function(...args) {
       originalReplaceState.apply(this, args)
-      trackCurrentLocation({ reason: 'replace' })
+      trackCurrentLocation({ reason: 'replace', alreadyHandled: true })
     }
   }
 
@@ -535,7 +521,7 @@ up.history = (function() {
   // Wait until the framework is booted before we (1) patch window.history
   // and (2) replace the current history state.
   up.on('up:framework:boot', function() {
-    trackCurrentLocation() // no event is emitted while booting
+    trackCurrentLocation({ reason: null, alreadyHandled: true }) // no event is emitted while booting
     patchHistoryAPI()
     adoptInitialHistoryEntry()
   })
@@ -553,7 +539,9 @@ up.history = (function() {
   })
 
   up.on(window, 'hashchange, popstate', () => {
-    trackCurrentLocation({ manual: true })
+    // We do not detect the reason here because we're in  a state where
+    // location and previousLocation are the same. This will be fixed by trackCurrentLocation().
+    trackCurrentLocation({ reason: 'detect', alreadyHandled: false })
   })
 
   function onJumpLinkClicked(event, link) {
@@ -593,7 +581,7 @@ up.history = (function() {
         // We use pushState() instead of setting location.hash so we don't trigger
         // a hashchange event or cause browser scrolling.
         let newHREF = currentBase + linkHash
-        push(newHREF, { reason: 'hash', manual: false })
+        push(newHREF, { reason: 'hash', alreadyHandled: true })
       }
 
       revealFn()
@@ -659,8 +647,6 @@ up.history = (function() {
     isAdopted,
     get location() { return currentLocation() },
     get previousLocation() { return previousLocation },
-    get base() { return getBase(currentLocation()) },
-    getBase,
     isLocation,
     findMetaTags,
     updateMetaTags,
