@@ -122,8 +122,9 @@ describe('up.Layer.Modal', function() {
         return unsetBodyStyle()
       })
 
-      it('does not change elements if viewport root never had a scrollbar', async function() {
-        const unsetBodyStyle = e.setStyleTemp(document.body, { 'overflow-y': 'hidden', 'padding-right': '30px' })
+      it('does not change the body if the viewport root never had a scrollbar', async function() {
+        const unsetScrollingElementStyle = e.setStyleTemp(document.scrollingElement, { 'overflow-y': 'hidden' })
+        const unsetBodyStyle = e.setStyleTemp(document.body, { 'padding-right': '30px' })
         expect(document).not.toHaveVerticalScrollbar()
 
         up.layer.open({ modal: 'modal', content: '<div style="height: 10000px"></div>' })
@@ -136,6 +137,7 @@ describe('up.Layer.Modal', function() {
         expect('up-modal-viewport').toHaveVerticalScrollbar()
 
         unsetBodyStyle()
+        unsetScrollingElementStyle()
 
         expect(document.querySelector('up-modal-viewport')).toHaveVerticalScrollbar()
       })

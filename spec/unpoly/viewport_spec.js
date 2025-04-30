@@ -593,8 +593,8 @@ describe('up.viewport', function() {
 
       describe('with { behavior: "smooth" }', function() {
         it('animates the scroll motion', async function() {
-          fixture('.between', { text: 'between', style: { height: '20000px' } })
-          const destination = fixture('.destination', { text: 'destination' })
+          const highElement = fixture('.high', { style: { height: '10000px' } }) // ensure we can scroll
+          const destination = fixture('.destination', { text: 'destination', style: { position: 'absolute', top: '20000px',height: '100px', background: 'red' } })
 
           expect(document.scrollingElement.scrollTop).toBe(0)
 
@@ -604,6 +604,9 @@ describe('up.viewport', function() {
 
           expect(document.scrollingElement.scrollTop).toBeGreaterThan(10)
           expect(document.scrollingElement.scrollTop).toBeLessThan(19000)
+
+          await wait(2000)
+          expect(document.scrollingElement.scrollTop).toBe(20000 - document.scrollingElement.clientHeight + 100)
         })
       })
 

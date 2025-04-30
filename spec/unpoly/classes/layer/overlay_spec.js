@@ -451,11 +451,11 @@ describe('up.Layer.Overlay', function() {
 
           await wait()
 
-          expect(getOverflowY()).toBe('hidden')
+          expect(['clip', 'hidden'].includes(getOverflowY())).toBe(true)
 
           await jasmine.expectGlobalError(destroyError, () => up.layer.accept())
 
-          expect(getOverflowY()).not.toBe('hidden')
+          expect(['clip', 'hidden'].includes(getOverflowY())).toBe(false)
         })
       }
     })

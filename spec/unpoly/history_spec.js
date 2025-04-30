@@ -8,6 +8,14 @@ describe('up.history', function() {
     up.history.config.enabled = true
   })
 
+  afterEach(async function() {
+    // This suite makes heavy use of pushState API, which sometimes causes the browser to stop
+    // accepting new history entries.
+    //
+    // Wait a little after each spec, in addition to the throttling in protect_jasmine_runner.js.
+    await wait(50)
+  })
+
   describe('JavaScript functions', function() {
 
     describe('up.history.push()', () => {
@@ -1370,6 +1378,9 @@ describe('up.history', function() {
           expect(document.scrollingElement.scrollTop).toBeLessThan(19000)
 
           expect(location.hash).toBe('#element')
+
+          await wait(2000)
+          expect(document.scrollingElement.scrollTop).toBe(20000)
         })
 
         describe('scrolling to the top', function() {
@@ -1504,7 +1515,7 @@ describe('up.history', function() {
             // Firefox will only do native #anchor processing when we use link.click(),
             // but not when we emit a synthetic 'click' event.
             link.click()
-            await wait(100)
+            await wait(200)
 
             expect(up.viewport.root.scrollTop).toBe(0)
             expect(location.hash).toBe('#top')
@@ -1621,7 +1632,7 @@ describe('up.history', function() {
 
       describe('when scripts call window.history.pushState()', function() {
 
-        it('emits the event, considering it already handled by the foriegn script', async function() {
+        it('emits the event, considering it already handled by the foreign script', async function() {
           history.replaceState({}, '', '/path1')
 
           let spy = jasmine.createSpy('up:location:changed listener')
