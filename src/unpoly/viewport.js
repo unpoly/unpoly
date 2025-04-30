@@ -353,22 +353,62 @@ up.viewport = (function() {
   @param {string} hash
   @internal
   */
-  function revealHash(hash = location.hash, options = {}) {
+  function revealHash(...args) {
+    return revealHashFn(...args)?.()
+  }
+
+  /*-
+  Returns a function that [reveals](/up.reveal) an element matching the given `#hash` anchor.
+  Returns a function that scrolls to the top if the hash is `#top` or `#`.
+  Returns `undefined` if we cannot scroll.
+
+  @function up.viewport.revealHashFn
+  @internal
+  */
+  function revealHashFn(hash = location.hash, { strong, layer, origin, behavior = 'instant' } = {}) {
     if (!hash) return
 
-    let match = firstHashTarget(hash, options)
-    let setLocation = () => { if (options.setLocation) location.hash = hash }
+    let match = firstHashTarget(hash, { layer, origin })
 
     if (match) {
-      setLocation()
-      let doReveal = () => reveal(match, { top: true })
-      if (options.strong) u.fastTask(doReveal)
-      return doReveal()
-    } else if (hash === '#top' || hash === '#') {
-      setLocation()
-      return scrollTo(0, options)
+      return () => {
+        let doReveal = () => reveal(match, { top: true, behavior })
+        if (strong) u.fastTask(doReveal)
+        return doReveal()
+      }
+    } else if (hash === '#top') {
+      return () => {
+        return scrollTo(0, { behavior })
+      }
     }
   }
+
+  // function oldRevealHash(hash = location.hash, options = {}) {
+  //   if (!hash) return
+  //
+  //   let match = firstHashTarget(hash, options)
+  //   let setLocation = () => { if (options.setLocation) location.hash = hash }
+  //
+  //   let ensureLocation () => {
+  //     if (options.ensureLocation && hash !== location.hash) {
+  //
+  //     }
+  //   }
+  //
+  //   if (match) {
+  //     setLocation()
+  //     let doReveal = () => {
+  //       debugger
+  //       reveal(match, { top: true, ...options })
+  //     }
+  //     if (options.strong) u.fastTask(doReveal)
+  //     return doReveal()
+  //   } else if (hash === '#top' || hash === '#') {
+  //     debugger
+  //     setLocation()
+  //     return scrollTo(0, options)
+  //   }
+  // }
 
   function allSelector() {
     // On Edge the document viewport can be changed from CSS
@@ -681,15 +721,16 @@ up.viewport = (function() {
   }
 
   function scrollTo(position, ...args) {
-    const [viewports, _options] = parseOptions(args)
-    setScrollPositions(viewports, {}, position)
+    const [viewports, options] = parseOptions(args)
+    setScrollPositions(viewports, {}, position, options.behavior)
     return true
   }
 
-  function setScrollPositions(viewports, tops, defaultTop) {
+  function setScrollPositions(viewports, tops, defaultTop, behavior = 'instant') {
     for (let viewport of viewports) {
       const key = scrollTopKey(viewport)
-      viewport.scrollTop = tops[key] || defaultTop
+      const top = tops[key] || defaultTop
+      viewport.scrollTo({ top, behavior })
     }
   }
 
@@ -997,6 +1038,7 @@ up.viewport = (function() {
   return {
     reveal,
     revealHash,
+    revealHashFn,
     firstHashTarget,
     config,
     get: closest,

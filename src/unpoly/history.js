@@ -103,7 +103,7 @@ up.history = (function() {
   */
   let previousLocation
   let nextPreviousLocation
-
+  let nextTrackOptions
   let adoptedBases = new up.FIFOCache({ capacity: 100, normalizeKey: getBase })
 
   function isAdopted(location) {
@@ -115,6 +115,7 @@ up.history = (function() {
   function reset() {
     previousLocation = undefined
     nextPreviousLocation = undefined
+    nextTrackOptions = undefined
     adoptedBases.clear()
     trackCurrentLocation()
     adopt() // make sure we will process the current history entry
@@ -145,7 +146,9 @@ up.history = (function() {
   @function trackCurrentLocation
   @internal
   */
-  function trackCurrentLocation({ reason = null, manual = false } = {}) {
+  function trackCurrentLocation(trackOptions) {
+    let { reason = null, manual = false } = nextTrackOptions || trackOptions || {}
+
     // currentLocation() normalizes
     let location = currentLocation()
 
@@ -156,7 +159,7 @@ up.history = (function() {
       let [base, hash] = splitLocation(currentLocation())
       let [previousBase, previousHash] = splitLocation(previousLocation)
 
-      if (manual) {
+      if (manual) { // TODO: Maybe rename to { !handled } and { reason: 'detect' }
         // Detect the reason
         if (base === previousBase) {
           reason = 'hash'
@@ -299,8 +302,8 @@ up.history = (function() {
   @param {string} url
   @internal
   */
-  function replace(location) {
-    placeAdoptedHistoryEntry('replaceState', location)
+  function replace(location, trackOptions) {
+    placeAdoptedHistoryEntry('replaceState', location, trackOptions)
   }
 
   /*-
@@ -324,15 +327,18 @@ up.history = (function() {
     The URL for the history entry to be added.
   @experimental
   */
-  function push(location) {
-    placeAdoptedHistoryEntry('pushState', location)
+  function push(location, trackOptions) {
+    placeAdoptedHistoryEntry('pushState', location, trackOptions)
   }
 
-  function placeAdoptedHistoryEntry(method, location) {
+  function placeAdoptedHistoryEntry(method, location, trackOptions) {
     adopt(location)
 
     if (config.enabled) {
+      nextTrackOptions = trackOptions
+      // Call this instead of originalPushState in case someone else has patched history.pushState()
       history[method](null, '', location)
+      nextTrackOptions = undefined
     }
   }
 
@@ -550,47 +556,57 @@ up.history = (function() {
     trackCurrentLocation({ manual: true })
   })
 
-  function onHashLinkClicked(event, link) {
-    // If other JavaScript wants to handle this click, do nothing.
+  function onJumpLinkClicked(event, link) {
+    // If other JavaScript already handled this click, do nothing.
     if (event.defaultPrevented) return
 
     // Don't handle clicks that would open a new tab.
     if (up.event.isModified(event)) return
 
-    let [currentBase] = splitLocation(up.layer.current.location)
+    let [currentBase, currentHash] = splitLocation(up.layer.current.location)
     let [linkBase, linkHash] = splitLocation(u.normalizeURL(link))
     let verbatimHREF = link.getAttribute('href')
 
-    // currentBase may be undefined if we're on a layer that was opened from a string
-    let isHashLink = (currentBase === linkBase) || verbatimHREF.startsWith('#')
+    // (1) If we're not scrolling the page, we must leave the event unprevented
+    //     and allow the link to be followed, or handled by other JavaScript.
+    // (2) currentBase may be undefined if we're on a layer that was opened from a string.
+    let isJumpLink = (currentBase === linkBase) || verbatimHREF.startsWith('#')
+    if (!isJumpLink) return
 
-    // If we're not scrolling the page, we must leave the event unprevented
-    // and allow the link to be followed.
-    if (!isHashLink) return
-
-    up.log.putsEvent(event)
-
-    // (1) Because we prevented the event, it is up to us to change the hash.
-    //     This will trigger browser scrolling, which we immediately override with our
-    //     own reveal motion.
-    // (2) We should not set the location if the layer shows no live history.
+    // (1) Check if we recognize the link hash, because it matches a fragment or
+    //     a well-known anchor like "#top".
+    // (2) Scroll with { behavior: 'auto' } (instead of thew default { behavior: 'instant' }
+    //     so it picks up any scroll-behavior CSS rule on the viewport element.
     let layer = up.layer.get(link)
-    let setLocation = layer.showsLiveHistory()
+    let revealFn = up.viewport.revealHashFn(linkHash, { layer, behavior: 'auto' })
 
-    // If we set a new hash this will also trigger a hashchange event.
-    if (up.viewport.revealHash(linkHash, { setLocation, layer })) {
-      // Prevent default on this event so it won't be followed.
+    if (revealFn) {
+      // (1) Prevent the browser, Unpoly or other JavaScript from following the link.
+      // (2) This means we will be responsible to change the hash in the address bar.
       up.event.halt(event)
+
+      up.log.putsEvent(event)
+
+      // (1) Because we prevented the event, it is up to us to change the hash.
+      // (2) We should not set the location if the layer shows no live history.
+      if (linkHash !== currentHash && layer.showsLiveHistory()) {
+        // We use pushState() instead of setting location.hash so we don't trigger
+        // a hashchange event or cause browser scrolling.
+        let newHREF = currentBase + linkHash
+        push(newHREF, { reason: 'hash', manual: false })
+      }
+
+      revealFn()
     } else {
       // (1) At this point revealHash() could not find a matching fragment.
-      //     The hash also isn't '#' or '#top', which would also have been handled by revealHash().
-      // (2) We do not handle the edge case where a followable link points to the current base,
-      //     but has a #hash that matched no [id] or anchor. In that case Unpoly will follow the link.
+      //     The hash also isn't '#top', which would also have been handled by revealHash().
+      // (2) We might be looking at a <a href="#"> that wants to be handled be a script
+      //     that is called after this click listener.
     }
   }
 
   // TODO: Support [up-scroll-behavior]
-  up.on('up:click', 'a[href*="#"]', onHashLinkClicked)
+  up.on('up:click', 'a[href*="#"]', onJumpLinkClicked)
 
   /*-
   Changes the link's destination so it points to the previous URL.
@@ -643,6 +659,8 @@ up.history = (function() {
     isAdopted,
     get location() { return currentLocation() },
     get previousLocation() { return previousLocation },
+    get base() { return getBase(currentLocation()) },
+    getBase,
     isLocation,
     findMetaTags,
     updateMetaTags,

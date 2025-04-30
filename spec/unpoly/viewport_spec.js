@@ -607,6 +607,55 @@ describe('up.viewport', function() {
         })
       })
 
+      describe('with { behavior: "auto" }', function() {
+        it('uses smooth scrolling if the viewport has a `{ scroll-behavior: smooth }` style', async function() {
+          const viewport = fixture('[up-viewport]', { style: {
+            'position': 'absolute',
+            'top': '50px',
+            'left': '50px',
+            'width': '100px',
+            'height': '100px',
+            'overflow-y': 'scroll',
+            'scroll-behavior': 'smooth',
+          } } )
+
+          const before = e.affix(viewport, '#before', { style: { 'height': '20000px', 'background-color': 'yellow' } })
+          const target = e.affix(viewport, '#target', { style: { 'height': '10px', 'background-color': 'red' } })
+          const after = e.affix(viewport, '#after', { style: { 'height': '20000px', 'background-color': 'yellow' } })
+
+          // spyOn(viewport, 'scrollTo').and.callThrough()
+
+          up.reveal(target, { behavior: 'auto', top: true })
+          await wait(80)
+
+          expect(viewport.scrollTop).toBeGreaterThan(10)
+          expect(viewport.scrollTop).toBeLessThan(19000)
+        })
+
+        it('does not use smooth scrolling if the viewport has no `{ scroll-behavior }` style', async function() {
+          const viewport = fixture('[up-viewport]', { style: {
+            'position': 'absolute',
+            'top': '50px',
+            'left': '50px',
+            'width': '100px',
+            'height': '100px',
+            'overflow-y': 'scroll',
+            // 'scroll-behavior': 'auto',
+          } } )
+
+          const before = e.affix(viewport, '#before', { style: { 'height': '20000px', 'background-color': 'yellow' } })
+          const target = e.affix(viewport, '#target', { style: { 'height': '10px', 'background-color': 'red' } })
+          const after = e.affix(viewport, '#after', { style: { 'height': '20000px', 'background-color': 'yellow' } })
+
+          // spyOn(viewport, 'scrollTo').and.callThrough()
+
+          up.reveal(target, { behavior: 'auto', top: true })
+          await wait(80)
+
+          expect(viewport.scrollTop).toBe(20000)
+        })
+      })
+
       describe('without a { behavior } option', function() {
         it('defaults to { behavior: "instant" } to ignore a scroll-behavior set in CSS', function() {
           const viewport = fixture('#viewport[up-viewport]', { style: { 'height': '100px', 'overflow-y': 'scroll' } })

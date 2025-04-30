@@ -1274,43 +1274,6 @@ describe('up.history', function() {
           expect(location.hash).toBe('')
         })
 
-        it("scrolls to the top if the link's hash is just the '#' symbol", async function() {
-          location.hash = ''
-          await wait()
-
-          const highElement = fixture('.high', { style: { height: '10000px' } }) // ensure we can scroll
-          up.viewport.root.scrollTop = 3000
-          expect(up.viewport.root.scrollTop).toBe(3000)
-
-          const link = fixture('a', { href: '#' })
-
-          // Firefox will only do native #anchor processing when we use link.click(),
-          // but not when we emit a synthetic 'click' event.
-          link.click()
-          await wait(100)
-
-          expect(up.viewport.root.scrollTop).toBe(0)
-          expect(location.hash).toBe('')
-        })
-
-        it("scrolls to the top if the link's hash '#top', even if there is no matching fragment", async function() {
-          location.hash = ''
-          await wait()
-
-          const highElement = fixture('.high', { style: { height: '10000px' } }) // ensure we can scroll
-          up.viewport.root.scrollTop = 3000
-          expect(up.viewport.root.scrollTop).toBe(3000)
-
-          const link = fixture('a', { href: '#top' })
-
-          // Firefox will only do native #anchor processing when we use link.click(),
-          // but not when we emit a synthetic 'click' event.
-          link.click()
-          await wait(100)
-
-          expect(up.viewport.root.scrollTop).toBe(0)
-          expect(location.hash).toBe('#top')
-        })
 
         it("only reveals a fragment in the link's layer", async function() {
           let html = `
@@ -1346,11 +1309,11 @@ describe('up.history', function() {
 
         it('only scrolls the current layer to the #top', async function() {
           let html = `
-              <div id="content">
-                <div style="height: 10000px"></div>
-                <a id="link" href="#top" style="display: block; height: 50px">click me</a>
-              </div>
-            `
+            <div id="content">
+              <div style="height: 10000px"></div>
+              <a id="link" href="#top" style="display: block; height: 50px">click me</a>
+            </div>
+          `
 
           makeLayers([
             { fragment: html },
@@ -1379,8 +1342,86 @@ describe('up.history', function() {
           throw "implement smooth scrolling"
         })
 
-        it('uses smooth scrolling if the viewport has a `{ scroll-behavior: smooth }` style (issue #737)', async function() {
+        it('uses smooth scrolling if the viewport has a `{ scroll-behavior: smooth }` style', async function() {
           throw "implement smooth scrolling"
+        })
+
+        it('does not use smooth scrolling if the viewport has no `{ scroll-behavior } style', async function() {
+          throw "implement smooth scrolling"
+        })
+
+        it('uses smooth scrolling if the root viewport has a `{ scroll-behavior: smooth }` style', async function() {
+          location.hash = ''
+          await wait()
+
+          fixtureStyle(`
+            ${document.scrollingElement.tagName} { scroll-behavior: smooth; }
+          `)
+          const highElement = fixture('.high', { style: { height: '30000px' } }) // ensure we can scroll
+          const element = fixture('#element', { text: 'content', style: { position: 'absolute', top: '20000px', 'background-color': 'yellow' } })
+          const link = fixture('a', { href: '#element' })
+
+          // Firefox will only do native #anchor processing when we use link.click(),
+          // but not when we emit a synthetic 'click' event.
+          link.click()
+          await wait(80)
+
+          expect(document.scrollingElement.scrollTop).toBeGreaterThan(10)
+          expect(document.scrollingElement.scrollTop).toBeLessThan(19000)
+
+          expect(location.hash).toBe('#element')
+        })
+
+        describe('scrolling to the top', function() {
+          it("scrolls to the top if the link's hash is just the '#' symbol", async function() {
+            location.hash = ''
+            await wait()
+
+            const highElement = fixture('.high', { style: { height: '10000px' } }) // ensure we can scroll
+            up.viewport.root.scrollTop = 3000
+            expect(up.viewport.root.scrollTop).toBe(3000)
+
+            const link = fixture('a', { href: '#' })
+
+            // Firefox will only do native #anchor processing when we use link.click(),
+            // but not when we emit a synthetic 'click' event.
+            link.click()
+            await wait(100)
+
+            expect(up.viewport.root.scrollTop).toBe(0)
+            expect(location.hash).toBe('')
+          })
+
+          it('allows foreign scripts to handle an a[href="#"] with a listener bound to the link', async function() {
+            throw "implement me"
+          })
+
+          it('allows foreign scripts to handle an a[href="#"] with a listener bound to the document', async function() {
+            throw "implement me"
+          })
+
+          it("scrolls to the top if the link's hash '#top', even if there is no matching fragment", async function() {
+            location.hash = ''
+            await wait()
+
+            const highElement = fixture('.high', { style: { height: '10000px' } }) // ensure we can scroll
+            up.viewport.root.scrollTop = 3000
+            expect(up.viewport.root.scrollTop).toBe(3000)
+
+            const link = fixture('a', { href: '#top' })
+
+            // Firefox will only do native #anchor processing when we use link.click(),
+            // but not when we emit a synthetic 'click' event.
+            link.click()
+            await wait(100)
+
+            expect(up.viewport.root.scrollTop).toBe(0)
+            expect(location.hash).toBe('#top')
+          })
+
+          it("uses smooth scrolling if the root viewport has a `{ scroll-behavior: smooth }` style", async function() {
+            throw "implement smooth scrolling"
+          })
         })
 
       })
