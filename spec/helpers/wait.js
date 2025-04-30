@@ -7,8 +7,6 @@ function waitTime(ms) {
   })
 }
 
-window.wait = waitTime
-
 jasmine.waitTime = waitTime
 
 async function waitMicrotasks(count = 1) {
@@ -46,3 +44,16 @@ async function waitAnimationFrame() {
 }
 
 jasmine.waitAnimationFrame = waitAnimationFrame
+
+function waitFlex(ms) {
+  if (typeof ms === 'undefined') {
+    return waitMessageChannel()
+  } else {
+    return waitTime(ms)
+  }
+}
+
+jasmine.waitFlex = waitFlex
+
+window.wait = waitFlex
+

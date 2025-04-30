@@ -1143,19 +1143,13 @@ up.util = (function() {
   /*-
   Pushes the given function to the [JavaScript task queue](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/) (also "macrotask queue").
 
-  Equivalent to calling `setTimeout(fn, 0)`.
-
   @function up.util.task
   @param {Function()} block
   @stable
   */
   function queueTask(task) {
-    setTimeout(task)
-  }
-
-  function queueFastTask(task) {
     const channel = new MessageChannel()
-    channel.port1.onmessage = task
+    channel.port1.onmessage = () => task()
     channel.port2.postMessage(0)
   }
 
@@ -2339,7 +2333,6 @@ up.util = (function() {
     isBasicObjectProperty,
     isCrossOrigin,
     task: queueTask,
-    fastTask: queueFastTask,
     isEqual,
     getSimpleTokens,
     getComplexTokens,
