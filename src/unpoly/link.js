@@ -878,7 +878,7 @@ up.link = (function() {
       lastInstantTarget = null
     })
 
-    layer.on('touchstart', function(event, element) {
+    layer.on('touchstart', { passive: true }, function(event, element) {
       // Remember for isLongPressPossible() on mousedown
       lastTouchstartTarget = element
     })
