@@ -383,33 +383,6 @@ up.viewport = (function() {
     }
   }
 
-  // function oldRevealHash(hash = location.hash, options = {}) {
-  //   if (!hash) return
-  //
-  //   let match = firstHashTarget(hash, options)
-  //   let setLocation = () => { if (options.setLocation) location.hash = hash }
-  //
-  //   let ensureLocation () => {
-  //     if (options.ensureLocation && hash !== location.hash) {
-  //
-  //     }
-  //   }
-  //
-  //   if (match) {
-  //     setLocation()
-  //     let doReveal = () => {
-  //       debugger
-  //       reveal(match, { top: true, ...options })
-  //     }
-  //     if (options.strong) u.fastTask(doReveal)
-  //     return doReveal()
-  //   } else if (hash === '#top' || hash === '#') {
-  //     debugger
-  //     setLocation()
-  //     return scrollTo(0, options)
-  //   }
-  // }
-
   function allSelector() {
     // On Edge the document viewport can be changed from CSS
     return [rootSelector(), ...config.viewportSelectors].join()

@@ -1373,33 +1373,6 @@ describe('up.history', function() {
         })
 
         describe('scrolling to the top', function() {
-          it("scrolls to the top if the link's hash is just the '#' symbol", async function() {
-            location.hash = ''
-            await wait()
-
-            const highElement = fixture('.high', { style: { height: '10000px' } }) // ensure we can scroll
-            up.viewport.root.scrollTop = 3000
-            expect(up.viewport.root.scrollTop).toBe(3000)
-
-            const link = fixture('a', { href: '#' })
-
-            // Firefox will only do native #anchor processing when we use link.click(),
-            // but not when we emit a synthetic 'click' event.
-            link.click()
-            await wait(100)
-
-            expect(up.viewport.root.scrollTop).toBe(0)
-            expect(location.hash).toBe('')
-          })
-
-          it('allows foreign scripts to handle an a[href="#"] with a listener bound to the link', async function() {
-            throw "implement me"
-          })
-
-          it('allows foreign scripts to handle an a[href="#"] with a listener bound to the document', async function() {
-            throw "implement me"
-          })
-
           it("scrolls to the top if the link's hash '#top', even if there is no matching fragment", async function() {
             location.hash = ''
             await wait()
@@ -1422,6 +1395,53 @@ describe('up.history', function() {
           it("uses smooth scrolling if the root viewport has a `{ scroll-behavior: smooth }` style", async function() {
             throw "implement smooth scrolling"
           })
+
+          it('allows foreign scripts to handle an a[href="#"] with a listener bound to the link', async function() {
+            location.hash = ''
+            await wait()
+
+            const highElement = fixture('.high', { style: { height: '10000px' } }) // ensure we can scroll
+            up.viewport.root.scrollTop = 3000
+            expect(up.viewport.root.scrollTop).toBe(3000)
+
+            const link = fixture('a', { href: '#' })
+            const foreignListener = jasmine.createSpy('foreign listener').and.callFake((event) => {
+              event.preventDefault()
+            })
+            link.addEventListener('click', foreignListener)
+
+            // Firefox will only do native #anchor processing when we use link.click(),
+            // but not when we emit a synthetic 'click' event.
+            link.click()
+            await wait(100)
+
+            expect(foreignListener).toHaveBeenCalled()
+            expect(up.viewport.root.scrollTop).toBe(3000)
+          })
+
+          it('allows foreign scripts to handle an a[href="#"] with a listener bound to the document', async function() {
+            location.hash = ''
+            await wait()
+
+            const highElement = fixture('.high', { style: { height: '10000px' } }) // ensure we can scroll
+            up.viewport.root.scrollTop = 3000
+            expect(up.viewport.root.scrollTop).toBe(3000)
+
+            const link = fixture('a#link', { href: '#' })
+            const foreignListener = jasmine.createSpy('foreign listener').and.callFake((event) => {
+              event.preventDefault()
+            })
+            up.on('click', 'a#link', foreignListener)
+
+            // Firefox will only do native #anchor processing when we use link.click(),
+            // but not when we emit a synthetic 'click' event.
+            link.click()
+            await wait(100)
+
+            expect(foreignListener).toHaveBeenCalled()
+            expect(up.viewport.root.scrollTop).toBe(3000)
+          })
+
         })
 
       })

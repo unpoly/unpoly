@@ -134,7 +134,7 @@ afterEach(async function() {
   }
 
   // Scroll to the top
-  document.scrollingElement.scrollTop = 0
+  document.scrollingElement.scrollTo({ top: 0, left: 0, behavior: 'instant' })
 
   jasmine.resetting = false
 
