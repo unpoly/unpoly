@@ -1900,6 +1900,70 @@ describe('up.element', function() {
 
   })
 
+  describe('up.element.preservingAppend()', function() {
+
+    it('appends an element to the given parent', function() {
+      let parent = fixture('#parent')
+      let oldChild = up.element.affix(parent, '#old-child')
+      let newChild = fixture('#new-child')
+      expect(parent.children).toEqual([oldChild])
+
+      up.element.preservingAppend(parent, newChild)
+
+      expect(parent.children).toEqual([oldChild, newChild])
+    })
+
+    if (up.specUtil.canMoveBefore()) {
+
+      it('preserves focus of the appended element', function() {
+        let parent = fixture('div')
+        let oldChild = up.element.affix(parent, 'div')
+        let newChild = fixture('input[type=text]')
+        newChild.focus()
+        expect(newChild).toBeFocused()
+
+        up.element.preservingAppend(parent, newChild)
+
+        expect(newChild.parentElement).toBe(parent)
+        expect(newChild).toBeFocused()
+      })
+
+    }
+
+  })
+
+  describe('up.element.preservingReplace()', function() {
+
+    it('replaces one child with another', function() {
+      let parent = fixture('#parent')
+      let oldChild = up.element.affix(parent, '#old-child')
+      let newChild = fixture('#new-child')
+      expect(parent.children).toEqual([oldChild])
+
+      up.element.preservingReplace(oldChild, newChild)
+
+      expect(parent.children).toEqual([newChild])
+    })
+
+    if (up.specUtil.canMoveBefore()) {
+
+      it('preserves focus of the appended element', function() {
+        let parent = fixture('div')
+        let oldChild = up.element.affix(parent, 'div')
+        let newChild = fixture('input[type=text]')
+        newChild.focus()
+        expect(newChild).toBeFocused()
+
+        up.element.preservingReplace(oldChild, newChild)
+
+        expect(newChild.parentElement).toBe(parent)
+        expect(newChild).toBeFocused()
+      })
+
+    }
+
+  })
+
   if (up.migrate.loaded) {
     describe('up.element.isAttached()', function() {
 

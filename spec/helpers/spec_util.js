@@ -81,6 +81,10 @@ up.specUtil = (function() {
     }
   }
 
+  function canMoveBefore() {
+    return ('moveBefore' in document.createElement('div'))
+  }
+
   return {
     isDetached,
     isAttached,
@@ -91,5 +95,6 @@ up.specUtil = (function() {
     rootHasReducedWidthFromScrollbar,
     documentOverflowElement,
     assertTabFocused,
+    canMoveBefore,
   }
 })()

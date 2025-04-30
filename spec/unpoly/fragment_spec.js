@@ -11638,6 +11638,43 @@ describe('up.fragment', function() {
           expect('.after').toHaveText('new-after')
         })
 
+
+        if (up.specUtil.canMoveBefore()) {
+          it('preserves focus in an [up-keep] without re-focusing the element (which may e.g. open custom menus)', async function() {
+            let focusinSpy = jasmine.createSpy('focusin listener')
+            up.on('focusin', focusinSpy)
+
+            let [container, oldBefore, middle, oldAfter] = htmlFixtureList(`
+              <div class='container'>
+                <div class='before'>old-before</div>
+                <input type="text" class='middle' up-keep></input>
+                <div class='after'>old-after</div>
+              </div>
+            `)
+
+            middle.focus()
+            expect(middle).toBeFocused()
+            expect(focusinSpy.calls.count()).toBe(1)
+
+            up.render({ fragment: `
+              <div class='container'>
+                <div class='before'>new-before</div>
+                <input type="text" class='middle' up-keep></input>
+                <div class='after'>new-after</div>
+              </div>
+            `})
+
+            await wait()
+
+            expect('.before').toHaveText('new-before')
+            expect(document.querySelector('.middle')).toBe(middle)
+            expect('.after').toHaveText('new-after')
+
+            expect(middle).toBeFocused()
+            expect(focusinSpy.calls.count()).toBe(1)
+          })
+        }
+
         it('does not run destructors within kept elements', async function() {
           const destructor = jasmine.createSpy('destructor spy')
 

@@ -36,6 +36,13 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
   - adopted
   - willHandle
 
+### Persistent keeping
+
+- `[up-keep]` elements are preserved with `moveBefore()` (currently Chrome and Edge only).
+  - This preserves client-side state. 
+  - This allows to keep focus without re-focusing, which may e.g. cause custom menus to open again.
+
+
 
 3.10.2
 ------

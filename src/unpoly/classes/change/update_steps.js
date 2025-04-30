@@ -281,7 +281,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
             return () => up.viewport.copyCursorProps(cursorProps, viewport)
           })
 
-          if (this._willChangeElement(document.body)) {
+          if (this._willChangeBody()) {
             // Since we're going to swap the entire oldElement and newElement containers afterwards,
             // replace the matching element with keepable so it will eventually return to the DOM.
             keepPlan.newElement.replaceWith(keepable)
@@ -290,7 +290,8 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
             // to lose playback state. To avoid this we temporarily move the keepable (keepPlan.oldElement)
             // so it can remain attached while we swap fragment versions. We will move it to its place within
             // the new fragment version once the swap is complete.
-            document.body.append(keepable)
+            console.debug("preservingAppend(%o, %o)", document.body, keepable)
+            e.preservingAppend(document.body, keepable)
           }
 
           // // Since we're going to swap the entire oldElement and newElement containers afterwards,
@@ -307,7 +308,11 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
   _restoreDescendantKeepables(step) {
     for (let keepPlan of step.descendantKeepPlans) {
       // Now that we know the final destination of { newElement }, we can replace it with the keepable.
-      keepPlan.newElement.replaceWith(keepPlan.oldElement)
+      if (this._willChangeBody()) {
+        keepPlan.newElement.replaceWith(keepPlan.oldElement)
+      } else {
+        e.preservingReplace(keepPlan.newElement, keepPlan.oldElement)
+      }
 
       for (let reviver of keepPlan.revivers) {
         reviver()
@@ -321,8 +326,11 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     }
   }
 
-  _willChangeElement(element) {
-    return u.some(this._steps, (step) => step.oldElement.contains(element))
+  // Legacy apps might e.g. replace the <body> and an element in the <head>.
+  // In that case we cannot use the body as "safe harbor" to remporarily move
+  // [up-keep] elements.
+  _willChangeBody() {
+    return u.some(this._steps, (step) => step.oldElement.matches('body'))
   }
 
   _handleFocus(fragment, options) {
