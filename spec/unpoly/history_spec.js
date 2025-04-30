@@ -1914,8 +1914,8 @@ describe('up.history', function() {
       describe('when scripts set location.hash', function() {
 
         it("emits the event, suggesting to handle if we're on an adopted base", async function() {
-          window.history.replaceState({}, '', '/path?query=value')
-          up.history.adopt()
+          // Be on an adopted base
+          up.history.replace('/path?query=value')
           location.hash = '#hash1'
 
           let spy = jasmine.createSpy('up:location:changed listener')

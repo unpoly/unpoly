@@ -647,8 +647,6 @@ up.history = (function() {
     config,
     push,
     replace,
-    adopt,
-    isAdopted,
     get location() { return currentLocation() },
     get previousLocation() { return previousLocation },
     isLocation,
