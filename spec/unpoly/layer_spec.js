@@ -654,7 +654,7 @@ describe('up.layer', function() {
             expect(changedListener).not.toHaveBeenCalled()
           })
 
-          it('does not update the brower location if the layer is not the front layer', async function() {
+          it('does not update the browser location if the layer is not the front layer', async function() {
             makeLayers([
               { target: '.root-element' },
               { target: '.overlay-element', location: '/modal-location', history: true }
