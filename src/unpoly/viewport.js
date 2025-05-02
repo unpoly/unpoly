@@ -808,7 +808,7 @@ up.viewport = (function() {
   This would be the HTML (notice the `up-viewport` attribute):
 
   ```html
-  <div class=".side" up-viewport>
+  <div class="side" up-viewport>
     <a href="/emails/5001" up-target=".main">Re: Your invoice</a>
     <a href="/emails/2023" up-target=".main">Quote for services</a>
     <a href="/emails/9002" up-target=".main">Fwd: Room reservation</a>
