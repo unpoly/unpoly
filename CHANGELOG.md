@@ -35,6 +35,7 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
   - manual (This is redundant when we have { reason }. Maybe not expose this)
   - adopted
   - willHandle
+- up.history.push() will add a entry for the same location
 
 ### Persistent keeping
 
