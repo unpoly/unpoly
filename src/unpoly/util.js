@@ -1766,7 +1766,11 @@ up.util = (function() {
   let nextUid = 0
 
   function uid() {
-    return nextUid++
+    return `uid${nextUid++}`
+  }
+
+  function isUID(value) {
+    return /^uid:/.test(value)
   }
 
   /*-
@@ -2339,6 +2343,7 @@ up.util = (function() {
     wrapList,
     wrapValue,
     uid,
+    isUID,
     upperCaseFirst,
     lowerCaseFirst,
     delegate: defineDelegates,

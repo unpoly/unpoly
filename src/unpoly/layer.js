@@ -207,6 +207,13 @@ up.layer = (function() {
           "[up-main='']",
           'main',
           ':layer' // this is <body> for the root layer
+        ],
+        restoreTargets: [
+          // (1) On the root layer, prefer restoring the body instead of :main, in case the last
+          //     fragment update changed the page layout. See https://github.com/unpoly/unpoly/issues/237.
+          // (2) An overlay might not be opened from a main element. In that case, restore the
+          //     topmost swappable element.
+          ':layer'
         ]
       },
       root: {

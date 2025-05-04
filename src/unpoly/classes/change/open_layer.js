@@ -88,8 +88,8 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     //     This cannot be prevented with { peel: false }, as the layer stack must be a sequence,
     //     not a tree.
     //
-    // (2) Only restore the base layer's history if the new overlay does not add one of its own.
-    //     Otherwise we would add an intermediate history entries when swapping overlays
+    // (2) Only restore the base layer's history if the new overlay does not push its own entry.
+    //     Otherwise we would add an intermediate history entry when swapping overlays
     //     with { layer: 'swap' } (issue #397).
     this._baseLayer.peel({ history: !this.layer.history })
 

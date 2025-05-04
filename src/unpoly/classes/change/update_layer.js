@@ -94,8 +94,8 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       //
       // (2) Closing a layer will also abort requests targeting that layer.
       //
-      // (3) Only restore the base layer's history if the fragment update adds a
-      //     history entry (issue #397).
+      // (3) Only restore the base layer's history if the fragment update does not push
+      //     its own entry (issue #397).
       this.layer.peel({ history: !this._hasHistory() })
     }
 

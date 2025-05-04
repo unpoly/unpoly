@@ -87,6 +87,7 @@ up.Layer = class Layer extends up.Record {
       'context',
       'lastScrollTops',
       'lastFocusCapsules',
+      'uid',
     ]
   }
 
@@ -100,6 +101,8 @@ up.Layer = class Layer extends up.Record {
 
   constructor(options = {}) {
     super(options)
+
+    this.uid = u.uid()
 
     if (!this.mode) {
       throw "missing { mode } option"

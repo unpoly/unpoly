@@ -50,13 +50,17 @@ up.LayerLookup = class LayerLookup {
     return this._stack.at(value)
   }
 
-  _resolveValue(value) {
-    if (value instanceof up.Layer) {
-      return value
-    }
+  _forUID(value) {
+    return this._stack.layers.find((layer) => layer.uid === value)
+  }
 
+  _resolveValue(value) {
     if (u.isNumber(value)) {
       return this._forIndex(value)
+    }
+
+    if (u.isUID(value)) {
+      return this._forUID(value)
     }
 
     if (/^\d+$/.test(value)) {

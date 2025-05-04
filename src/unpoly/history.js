@@ -72,9 +72,7 @@ up.history = (function() {
   const config = new up.Config(() => ({
     enabled: true,
     updateMetaTags: true,
-    // Prefer restoring the body instead of :main, in case the last fragment update
-    // changed the page layout. See https://github.com/unpoly/unpoly/issues/237.
-    restoreTargets: ['body'],
+    preserveLayers: true,
     metaTagSelectors: [
       'meta',
       'link[rel=alternate]',
@@ -92,6 +90,10 @@ up.history = (function() {
     ],
   }))
 
+  // Users who are not using layers will prefer settings restore targets
+  // as up.history.config.restoreTargets instead of up.layer.config.any.restoreTargets.
+  u.delegate(config, ['restoreTargets'], () => up.layer.config.any)
+
   /*-
   Returns a normalized URL for the previous history entry.
 
@@ -104,6 +106,7 @@ up.history = (function() {
   let previousLocation
   let nextPreviousLocation
   let nextTrackOptions
+
   let adoptedBases = new up.FIFOCache({ capacity: 100, normalizeKey: getBase })
 
   function isAdopted(location) {
@@ -140,6 +143,12 @@ up.history = (function() {
     return u.normalizeURL(location.href)
   }
 
+  function currentLayerProfiles() {
+    // history.state can only store JSON-serializable values.
+    let serializableKeys = ['uid', 'location', ...up.Layer.Overlay.VISUAL_KEYS]
+    return up.layer.stack.map((layer) => u.pick(layer, (layer) => u.pick(layer, serializableKeys)))
+  }
+
   /*-
   Remembers the current URL so we can use previousLocation on pop.
 
@@ -158,6 +167,13 @@ up.history = (function() {
 
       if (reason === 'detect') {
         reason = (getBase(location) === getBase(previousLocation)) ? 'hash' : 'pop'
+      }
+
+      // When a user jumps from an adopted entry to a #hash,
+      // this will push a new entry that is missing the { up } state
+      // we need for restoration.
+      if (reason === 'hash') {
+        ensureAdoptedEntryHasState()
       }
 
       let willHandle = !alreadyHandled && isAdopted(location)
@@ -288,8 +304,8 @@ up.history = (function() {
   @param {string} url
   @internal
   */
-  function replace(location, trackOptions) {
-    placeAdoptedHistoryEntry('replaceState', location, trackOptions)
+  function replaceWithAdoptedEntry(location, trackOptions) {
+    placeAdoptedEntry('replaceState', location, trackOptions)
   }
 
   /*-
@@ -313,18 +329,27 @@ up.history = (function() {
     The URL for the history entry to be added.
   @experimental
   */
-  function push(location, trackOptions) {
-    placeAdoptedHistoryEntry('pushState', location, trackOptions)
+  function pushAdoptedEntry(location, trackOptions) {
+    placeAdoptedEntry('pushState', location, trackOptions)
   }
 
-  function placeAdoptedHistoryEntry(method, location, trackOptions) {
+  function placeAdoptedEntry(method, location, trackOptions) {
     adopt(location)
 
     if (config.enabled) {
       nextTrackOptions = trackOptions
+      let state = { up: { layerUIDs: currentLayerProfiles() } }
       // Call this instead of originalPushState in case someone else has patched history.pushState()
-      history[method](null, '', location)
+      history[method](state, '', location)
       nextTrackOptions = undefined
+    }
+  }
+
+  function ensureAdoptedEntryHasState() {
+    let location = currentLocation()
+
+    if (isAdopted(location) && !history.state.up) {
+      replaceWithAdoptedEntry(currentLocation(), { reason: null, alreadyHandled: true })
     }
   }
 
@@ -337,66 +362,80 @@ up.history = (function() {
     adoptedBases.set(location, true)
   }
 
-  function restoreLocation(location) {
+  function restoreCurrentHistoryEntry() {
+    // Nothing was changed yet
 
-    up.error.muteUncriticalRejection(up.render({
-      guardEvent: up.event.build('up:location:restore', { location, log: `Restoring location ${location}` }),
+    let location = currentLocation()
 
-      // The browser has already restored the URL, but hasn't changed content
-      // four our synthetic history state. We're now fetching the content for the restored URL.
-      url: location,
-      target: config.restoreTargets,
-
-      // The browser won't let us prevent the state restoration, so we're
-      // rendering whatever the server sends us.
-      fail: false,
-
-      history: true,
-      // (1) While the browser has already restored the earlier URL, we must still
-      //     pass it to render() so the current layer can track the new URL.
-      // (2) Since we're passing the current URL, up.history.push() will not add another state.
-      // (2) Pass the current URL to ensure that this exact URL is being rendered
-      //     and not something derived from the up.Response.
-      location,
-
-      // Don't replace elements in a modal that might still be open
-      // We will close all overlays and update the root layer.
-      peel: true,
-      layer: 'root',
-
-      // We won't usually have a cache hit for config.restoreTargets ('body')
-      // since most earlier cache entries are for a main target. But it doesn't hurt to try.
-      cache: 'auto',
-      revalidate: 'auto',
-
-      // We already saved view state in onPop()
-      saveScroll: false,
-      scroll: ['restore', 'auto'],
-      saveFocus: false,
-      focus: ['restore', 'auto'],
-    }))
-  }
-
-  function reactToChange(event) {
-    if (event.alreadyHandled) {
+    // This cannot be a guardEvent, as in one branch we only peel() and don't render().
+    if (up.emit('up:location:restore', { location, log: `Restoring location ${location}` }).defaultPrevented) {
       return
     }
 
-    if (!event.willHandle) {
-      up.puts('up.history', 'Ignoring history entry owned by foreign script')
-      return
+    let targetLayerProfiles = history.state.up?.layerProfiles
+    let unrestoredLayerProfiles = currentLayerProfiles()
+
+    if (!targetLayerProfiles || !config.preserveLayers) {
+      // Someone messed with our state for an adopted location.
+      return resetLocation(location)
     }
 
-    if (event.reason === 'pop') {
-      up.viewport.saveFocus({ location: event.previousLocation })
-      up.viewport.saveScroll({ location: event.previousLocation })
-      restoreLocation(event.location)
-    } else if (event.reason === 'hash') {
-      // We handle every hashchange, since only we know reveal obstructions.
-      up.viewport.revealHash(event.hash, { strong: true })
+    // Compare { uid } as the { location } may have changed since the entry was pushed
+    let unrestoredLayerUIDs = u.map(unrestoredLayerProfiles, 'uid')
+    let targetLayerUIDs = u.map(targetLayerProfiles, 'uid')
+    let samePrefix = u.isEqual(targetLayerUIDs, unrestoredLayerUIDs.slice(0, targetLayerUIDs.length))
+
+    if (samePrefix) {
+      let frontTargetLayerUID = u.last(targetLayerUIDs)
+      let targetLayer = up.layer.get(frontTargetLayerUID)
+
+      if (targetLayer.location === location) {
+        targetLayer.peel({ history: false })
+      } else {
+        resetLocation(location, targetLayer)
+      }
+    } else {
+      // The target layer is no longer in the stack. We would need to re-open a layer.
+      return resetLocation(location)
     }
   }
 
+  function resetLocation(location, layer = up.layer.root) {
+    up.error.muteUncriticalRejection(
+      up.render({
+        // The browser has already restored the URL, but hasn't changed content
+        // four our synthetic history state. We're now fetching the content for the restored URL.
+        url: location,
+        target: config.restoreTargets,
+
+        // The browser won't let us prevent the state restoration, so we're
+        // rendering whatever the server sends us.
+        fail: false,
+
+        // Restore title and meta tags.
+        history: true,
+        // The browser has already restored the earlier location.
+        // We don't want to push another history entry.
+        location: false,
+
+        // Don't replace elements in a modal that might still be open
+        // We will close all overlays and update the root layer.
+        peel: true,
+        layer,
+
+        // We won't usually have a cache hit for config.restoreTargets ('body')
+        // since most earlier cache entries are for a main target. But it doesn't hurt to try.
+        cache: 'auto',
+        revalidate: 'auto',
+
+        // We already saved view state in reactToChange()
+        saveScroll: false,
+        scroll: ['restore', 'auto'],
+        saveFocus: false,
+        focus: ['restore', 'auto'],
+      })
+    )
+  }
 
   /*-
   This event is emitted when the user is [restoring a previous history entry](/restoring-history),
@@ -420,6 +459,27 @@ up.history = (function() {
     Preventing the event will *not* stop the browser from restoring the URL in the address bar.
   @stable
   */
+
+  function reactToChange(event) {
+    if (event.alreadyHandled) {
+      return
+    }
+
+    if (!event.willHandle) {
+      up.puts('up.history', 'Ignoring history entry owned by foreign script')
+      return
+    }
+
+    up.viewport.saveFocus({ location: event.previousLocation })
+    up.viewport.saveScroll({ location: event.previousLocation })
+
+    if (event.reason === 'pop') {
+      restoreCurrentHistoryEntry()
+    } else if (event.reason === 'hash') {
+      // We handle every hashchange, since only we know reveal obstructions.
+      up.viewport.revealHash(event.hash, { strong: true })
+    }
+  }
 
   function findMetaTags(head = document.head) {
     return head.querySelectorAll(config.selector('metaTagSelectors'))
@@ -539,7 +599,7 @@ up.history = (function() {
   })
 
   up.on(window, 'hashchange, popstate', () => {
-    // We do not detect the reason here because we're in  a state where
+    // We do not detect the reason here because we're in a state where
     // location and previousLocation are the same. This will be fixed by trackCurrentLocation().
     trackCurrentLocation({ reason: 'detect', alreadyHandled: false })
   })
@@ -585,7 +645,7 @@ up.history = (function() {
         // We use pushState() instead of setting location.hash so we don't trigger
         // a hashchange event or cause browser scrolling.
         let newHREF = currentBase + linkHash
-        push(newHREF, { reason: 'hash', alreadyHandled: true })
+        pushAdoptedEntry(newHREF, { reason: 'hash', alreadyHandled: true })
       }
 
       revealFn()
@@ -645,8 +705,8 @@ up.history = (function() {
 
   return {
     config,
-    push,
-    replace,
+    push: pushAdoptedEntry,
+    replace: replaceWithAdoptedEntry,
     get location() { return currentLocation() },
     get previousLocation() { return previousLocation },
     isLocation,

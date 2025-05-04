@@ -34,10 +34,11 @@ up.Change.CloseLayer = class CloseLayer extends up.Change {
     // remove @layer from the @stack.
     const { parent } = this._layer
 
-    // Close any child-layers we might have.
-    // We don't wait for peeling to finish, since changes that affect the
-    // layer stack should happen sync:
-    this._layer.peel()
+    // (1) Close any child-layers we might have. We cannot have "holes" in the stack.
+    // (2) We don't wait for peeling to finish, since changes that affect the
+    //     layer stack should happen sync.
+    // (3) Don't add history entries.
+    this._layer.peel({ history: false })
 
     // Remove ourselves from the layer stack.
     this._layer.stack.remove(this._layer)
