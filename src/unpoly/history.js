@@ -143,10 +143,15 @@ up.history = (function() {
     return u.normalizeURL(location.href)
   }
 
-  function currentLayerProfiles() {
-    // history.state can only store JSON-serializable values.
+  function getLayerShape(layer) {
     let serializableKeys = ['uid', 'location', ...up.Layer.Overlay.VISUAL_KEYS]
-    return up.layer.stack.map((layer) => u.pick(layer, (layer) => u.pick(layer, serializableKeys)))
+    return u.pick(layer, serializableKeys)
+  }
+
+  function currentLayerShapes() {
+    // history.state can only store JSON-serializable values.
+    let historyLayers = u.select(up.layer.stack, 'history')
+    return historyLayers.map(getLayerShape)
   }
 
   /*-
@@ -338,7 +343,7 @@ up.history = (function() {
 
     if (config.enabled) {
       nextTrackOptions = trackOptions
-      let state = { up: { layerUIDs: currentLayerProfiles() } }
+      let state = { up: { layerUIDs: currentLayerShapes() } }
       // Call this instead of originalPushState in case someone else has patched history.pushState()
       history[method](state, '', location)
       nextTrackOptions = undefined
@@ -362,45 +367,45 @@ up.history = (function() {
     adoptedBases.set(location, true)
   }
 
-  function restoreCurrentHistoryEntry() {
-    // Nothing was changed yet
+  function restoreCurrentEntry() {
+    // At this point the browser has changed the address bar, but the page still shows the previous state.
 
     let location = currentLocation()
 
+    let entryLayerShapes = history.state.up?.layerShapes
+    let pageLayerShapes = currentLayerShapes()
+
     // This cannot be a guardEvent, as in one branch we only peel() and don't render().
-    if (up.emit('up:location:restore', { location, log: `Restoring location ${location}` }).defaultPrevented) {
+    if (up.emit('up:location:restore', { location, layerShapes: entryLayerShapes, log: `Restoring location ${location}` }).defaultPrevented) {
       return
     }
 
-    let targetLayerProfiles = history.state.up?.layerProfiles
-    let unrestoredLayerProfiles = currentLayerProfiles()
-
-    if (!targetLayerProfiles || !config.preserveLayers) {
+    if (!entryLayerShapes || !config.preserveLayers) {
       // Someone messed with our state for an adopted location.
-      return resetLocation(location)
+      return resetToLocation(location)
     }
 
-    // Compare { uid } as the { location } may have changed since the entry was pushed
-    let unrestoredLayerUIDs = u.map(unrestoredLayerProfiles, 'uid')
-    let targetLayerUIDs = u.map(targetLayerProfiles, 'uid')
-    let samePrefix = u.isEqual(targetLayerUIDs, unrestoredLayerUIDs.slice(0, targetLayerUIDs.length))
+    // Compare { uid } as the { location } of a background layer may have changed since the entry was pushed.
+    let pageLayerUIDs = u.map(pageLayerShapes, 'uid')
+    let entryLayerUIDs = u.map(entryLayerShapes, 'uid')
+    let samePrefix = u.isEqual(entryLayerUIDs, pageLayerUIDs.slice(0, entryLayerUIDs.length))
 
     if (samePrefix) {
-      let frontTargetLayerUID = u.last(targetLayerUIDs)
-      let targetLayer = up.layer.get(frontTargetLayerUID)
+      let frontEntryLayerUID = u.last(entryLayerUIDs)
+      let frontEntryLayer = up.layer.get(frontEntryLayerUID)
 
-      if (targetLayer.location === location) {
-        targetLayer.peel({ history: false })
+      if (frontEntryLayer.location === location) {
+        frontEntryLayer.peel({ history: false })
       } else {
-        resetLocation(location, targetLayer)
+        resetToLocation(location, frontEntryLayer)
       }
     } else {
       // The target layer is no longer in the stack. We would need to re-open a layer.
-      return resetLocation(location)
+      return resetToLocation(location)
     }
   }
 
-  function resetLocation(location, layer = up.layer.root) {
+  function resetToLocation(location, layer = up.layer.root) {
     up.error.muteUncriticalRejection(
       up.render({
         // The browser has already restored the URL, but hasn't changed content
@@ -474,7 +479,7 @@ up.history = (function() {
     up.viewport.saveScroll({ location: event.previousLocation })
 
     if (event.reason === 'pop') {
-      restoreCurrentHistoryEntry()
+      restoreCurrentEntry()
     } else if (event.reason === 'hash') {
       // We handle every hashchange, since only we know reveal obstructions.
       up.viewport.revealHash(event.hash, { strong: true })
