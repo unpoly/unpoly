@@ -144,14 +144,14 @@ up.history = (function() {
   }
 
   function getLayerShape(layer) {
-    let serializableKeys = ['uid', 'location', ...up.Layer.Overlay.VISUAL_KEYS]
+    // history.state can only store JSON-serializable values.
+    let serializableKeys = ['uid', 'history', 'location', ...up.Layer.Overlay.VISUAL_KEYS]
+    u.remove(serializableKeys, 'origin')
     return u.pick(layer, serializableKeys)
   }
 
   function currentLayerShapes() {
-    // history.state can only store JSON-serializable values.
-    let historyLayers = u.select(up.layer.stack, 'history')
-    return historyLayers.map(getLayerShape)
+    return up.layer.stack.map(getLayerShape)
   }
 
   /*-
@@ -162,6 +162,9 @@ up.history = (function() {
   */
   function trackCurrentLocation(trackOptions) {
     let { reason, alreadyHandled } = nextTrackOptions || trackOptions
+
+    throw "(1) up.history.push() no longer pushes entries for identical locations, but clicking a vanilla link does not. Should we compare locations in UpdateSteps? Or do we already in set location?"
+    throw "(2) our pop handle logic only fires on changed locations, but when we push identical locations on open, it does not change: Maybe also compare { layerShapes }?"
 
     // currentLocation() normalizes
     let location = currentLocation()
@@ -174,9 +177,8 @@ up.history = (function() {
         reason = (getBase(location) === getBase(previousLocation)) ? 'hash' : 'pop'
       }
 
-      // When a user jumps from an adopted entry to a #hash,
-      // this will push a new entry that is missing the { up } state
-      // we need for restoration.
+      // When a user jumps from an adopted entry to a #hash, the browser will push a new entry
+      // without the { up } state that we need for restoration.
       if (reason === 'hash') {
         ensureAdoptedEntryHasState()
       }
@@ -367,9 +369,9 @@ up.history = (function() {
     adoptedBases.set(location, true)
   }
 
+  // Restore the current history entry from window.location.href and window.history.state.
+  // At this point the browser has changed the address bar, but the page still shows the previous state.
   function restoreCurrentEntry() {
-    // At this point the browser has changed the address bar, but the page still shows the previous state.
-
     let location = currentLocation()
 
     let entryLayerShapes = history.state.up?.layerShapes
@@ -394,10 +396,10 @@ up.history = (function() {
       let frontEntryLayerUID = u.last(entryLayerUIDs)
       let frontEntryLayer = up.layer.get(frontEntryLayerUID)
 
-      if (frontEntryLayer.location === location) {
+      if (!frontEntryLayer.history || (frontEntryLayer.location === location)) {
         frontEntryLayer.peel({ history: false })
       } else {
-        resetToLocation(location, frontEntryLayer)
+        return resetToLocation(location, frontEntryLayer)
       }
     } else {
       // The target layer is no longer in the stack. We would need to re-open a layer.
@@ -406,8 +408,11 @@ up.history = (function() {
   }
 
   function resetToLocation(location, layer = up.layer.root) {
-    up.error.muteUncriticalRejection(
+    return up.error.muteUncriticalRejection(
       up.render({
+        layer,
+        peel: true,
+
         // The browser has already restored the URL, but hasn't changed content
         // four our synthetic history state. We're now fetching the content for the restored URL.
         url: location,
@@ -422,11 +427,6 @@ up.history = (function() {
         // The browser has already restored the earlier location.
         // We don't want to push another history entry.
         location: false,
-
-        // Don't replace elements in a modal that might still be open
-        // We will close all overlays and update the root layer.
-        peel: true,
-        layer,
 
         // We won't usually have a cache hit for config.restoreTargets ('body')
         // since most earlier cache entries are for a main target. But it doesn't hurt to try.

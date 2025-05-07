@@ -801,6 +801,10 @@ up.Layer = class Layer extends up.Record {
 
       if (this.showsLiveHistory()) {
         up.history.push(location)
+      } else if (this.opening) {
+        // Push another entry so going back will detect the layer closing.
+        // The entry will have the same URL, but different { layerShapes }.
+        up.history.push(up.history.location)
       }
 
       // When opening we never emit up:layer:location:changed.
