@@ -290,7 +290,6 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
             // to lose playback state. To avoid this we temporarily move the keepable (keepPlan.oldElement)
             // so it can remain attached while we swap fragment versions. We will move it to its place within
             // the new fragment version once the swap is complete.
-            console.debug("preservingAppend(%o, %o)", document.body, keepable)
             e.preservingAppend(document.body, keepable)
           }
 
