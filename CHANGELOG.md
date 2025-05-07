@@ -11,37 +11,111 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 3.11.0 (unreleased)
 -------------------
 
+Full changes: https://github.com/unpoly/unpoly/compare/v3.10.2...master
+
+
+## Layers
+
+- The server can now force its response to open an overlay using an `X-Up-Open-Layer: { ...options }` response header.
+- Forms can now have `[up-dismiss]` and `[up-accept]` to close their overlay when submitted. The form's field values become the closing value.
+- The server can now detect if the request was triggered from an overlay using the `X-Up-Origin-Mode` request header.
+- Make up.Request clear out { bindLayer } after loading (to release memory)
+
+
+## Scrolling
+
+- Change { scroll: 'reset' } to { scroll: 'top' }
+- Support { scroll: 'bottom' }
+- When clicking a #hash link, honor the viewports `scroll-behavior` styles
+- Support [up-scroll-behavior] for #hash links (fixes #737)
+- Overflays better prevent scrolling of the background. Use "overflow-y: clip" when scrollbar is hidden.
+
+
+## Forms
+
+- Watchers and validatorss correctly track (1) form-external fields with [form] attr (2) [up-keep] elements that are transported into a new form (fixes #725)
+- When a watched field runs a callback, print a purple event badg
+- Allow to disable validation batching
+- Allow to validate against a different server endpoint (closes #486)
+  - For full form
+  - For individual fields
+  - Consistency is still guaranteed
+- Rework [up-switch] and fix many edge cases with [up-keep] or form-external fields
+- Support [up-switch-region] to expand or contract the scope of switchees
+- Introduce up:form:switch event for custom switching effects
+- Introduce [up-disable-for] and [up-enable-for]
+- [up-switch] works on a container of radio buttons
+- Watching features now fail if used on an individual radio button (instead of on the butto group): [up-autosubmit], [up-watch], [up-switch]
+- Don't un-hide [up-switch] targets without [up-show-for] or [up-hide-for] attributes
+
+
+### CSP
+
+- Using up.fragment.config.runScripts = true with a 'strict-dynamic' CSP will only run scripts with a [nonce] matching the response CSP
+- Default to up.fragment.config.runScripts = false 
+- Use default-src nonces if no script-src is given; Don't use script-src-elem directive (since we're using it to allow attr callbacks)
+- Rewrite `<script nonce>` in new fragment; Ensure head assets have the new nonce before up:assets:changed check
+
+
+### Docs
+
+- Options documented in groups (show screenshot)
+- Many options now explicitly documented instead of referring to `up.render()`
+- New options:
+  - ...
+  - 
+
+
 ### History
 
-- up:location:changed is emitted whenever the URL changes, even when not rendering
-  - up.history.push()
-  - up.history.replace()
-  - history.pushState()
-  - history.replaceState()
-  - forward / backward buttons, even on non-owned state
-  - Property `{ reason }` has been removed without replacement
 - Fixed history navigation when #hash changes are involved
-- In-page #hash navigation works reliably, even when the link contains a hash
-- New properties `{ base, previousBase, previousLocation, state, hash, previousHash }`
+- `up:location:changed` is now emitted when the URL change for any reason, not just when rendering:
+  - Calls to `history.pushState()` or `up.history.push()`
+  - Calls to `history.replaceState()` or `up.history.replace()`
+  - Use of back and forward buttons
+  - When the user changes the `#hash` in the browser's address bar
+  - When the user clicks on a `#hash` link
+- Changes to the properties of the `up:location:changed` event:
+  - The `{ reason }` property can now be `hash` if the only the location `#hash` was changed, without changes to the path or search query.
+  - New property `{ willHandle }` shows if Unpoly thinks it is responsible for restoring state.
+  - New properties `{ willHandle, alreadyHandled }`
+- The log now shows purple event badge when the user navigates within history using any of the above methods.
+- Following a link with a #hash now only scrolls the page without re-rerendering
 - Following #hash links in overlays only scrolls the overlay
-- New up:location:changed props
-  - reason (new "hash" value)
-  - location
-  - base
-  - hash
-  - previousLocation
-  - previousBase
-  - previousHash
-  - manual (This is redundant when we have { reason }. Maybe not expose this)
-  - adopted
-  - willHandle
 - up.history.push() will add a entry for the same location
+
 
 ### Persistent keeping
 
-- `[up-keep]` elements are preserved with `moveBefore()` (currently Chrome and Edge only).
-  - This preserves client-side state. 
-  - This allows to keep focus without re-focusing, which may e.g. cause custom menus to open again.
+- `[up-keep]` fragment are now preserved without detaching and re-attaching the element.  This allows to keep focus without re-focusing, which may cause custom dropdown implementation to re-open options. Only on [supporting browsers](https://caniuse.com/mdn-api_element_movebefore).
+
+
+### Smaller changes and bugfixes
+
+- iOS: Long-pressing a link to open the context menu will no longer follow an `[up-instant]` link (#271)
+- iOS: Long-pressing a link will no longer emit an `up:click` event (#721)
+- Fix a bug where history wasn't updated when a response contains comments before the `<!DOCTYPE>` or `<html>` tag (fixes #726)
+- When `up.hello()` is called on a script that is already compiled, `up:fragment:inserted` is only emitted once.
+- Allow to override [focus ring visibility](/focus-visibility) by passing a `{ focusVisible }` render option, or by setting an `[up-focus-visible]` attribute.
+- Process { expireCache, evictCache } before the request is sent
+- No longer throw an error when preloading an `[up-hungry]` link that gets replaced its own a revalidation response while waiting for its debounce delay.
+- `[up-poll]` now stops if an external script detaches the polling fragment.
+- The `up.util.task()` implementation now uses `postMessage()` instead of `setTimeout()`. This causes the new task to be scheduled earlier, ideally before the browser renders the next frame.
+- Unpoly now prevents interactions with elements that are being destroyed (and playing out their exit animation).
+- `unpoly-migrate` now allows to disable all deprecation warnings with `up.migrate.config.logLevel = 'none'`.
+- It is now guaranteed that `up:fragment:inserted` is emitted after compilation.
+- `up.element.subtree()` now prevents redundant array allocation.
+
+
+### DX
+
+- Headless tests
+- CI for all Pull Requests
+- CoffeeScript removed from tests
+- All tests use `async` / `await` instead of the verbose `asyncSpec` helper.
+- Release without Ruby.
+
+
 
 
 
