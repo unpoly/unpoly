@@ -2322,7 +2322,7 @@ describe('up.radio', function() {
       it('allows to pass a polling interval per [up-interval] attribute', async function() {
         const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
 
-        up.radio.config.pollInterval = 5
+        up.radio.config.pollInterval = 30
 
         up.hello(fixture('.element[up-poll][up-interval=80]'))
 
@@ -2593,7 +2593,7 @@ describe('up.radio', function() {
 
       describe('with [up-preview]', function() {
         it('shows a preview while the fragment is reloading', async function() {
-          const interval = 5
+          const interval = 30
           const timingTolerance = 30
           up.radio.config.pollInterval = interval
 
@@ -2634,7 +2634,7 @@ describe('up.radio', function() {
 
       describe('with [up-placeholder]', function() {
         it('shows a UI placeholder while the fragment is loading', async function() {
-          const interval = 5
+          const interval = 30
           const timingTolerance = 30
           up.radio.config.pollInterval = interval
 
