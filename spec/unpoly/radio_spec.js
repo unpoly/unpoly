@@ -682,8 +682,7 @@ describe('up.radio', function() {
         fixture('.hungry[up-hungry]', { text: 'old hungry' })
         fixture('.target', { text: 'old target' })
 
-
-        let renderHungryPromise = up.render('.target', { url: '/hungry' })
+        let renderHungryPromise = up.render('.hungry', { url: '/hungry' })
         let renderTargetPromise = up.render('.target', { url: '/target' })
 
         await wait()
@@ -702,16 +701,14 @@ describe('up.radio', function() {
           </div>
           <div class="hungry">
             new hungry
-          </div>up-hungry
+          </div>
         `)
 
-        await wait()
+        await expectAsync(renderHungryPromise).toBeRejectedWith(jasmine.any(up.Aborted))
+        await expectAsync(renderTargetPromise).toBeResolvedTo(jasmine.any(up.RenderResult))
 
         expect('.target').toHaveText('new target')
         expect('.hungry').toHaveText('new hungry')
-
-        await expectAsync(renderTargetPromise).toBeResolvedTo(jasmine.any(up.RenderResult))
-        await expectAsync(renderHungryPromise).toBeRejectedWith(jasmine.any(up.Aborted))
       })
 
       describe('transition', function() {
@@ -2634,8 +2631,8 @@ describe('up.radio', function() {
 
       describe('with [up-placeholder]', function() {
         it('shows a UI placeholder while the fragment is loading', async function() {
-          const interval = 30
-          const timingTolerance = 30
+          const interval = 80
+          const timingTolerance = 50
           up.radio.config.pollInterval = interval
 
           const element = up.hello(fixture('.element[up-poll][up-placeholder="<span>placeholder text</span>"]', { text: 'old text' }))
