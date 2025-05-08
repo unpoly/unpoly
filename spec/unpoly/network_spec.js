@@ -2590,12 +2590,17 @@ describe('up.network', function() {
         expect(requestAttrs).toBeCached()
       })
 
+      it('returns an existing cache entry for a known location, but with an added #hash', function() {
+        up.request({ url: '/foo', cache: true })
+        expect({ url: '/foo#hash', cache: true }).toBeCached()
+      })
+
       it('returns undefined if the given request is not cached', function() {
         expect({ url: '/foo' }).not.toBeCached()
       })
     })
 
-    describe('up.cache.set()', function() {
+    describe('up.cache.put()', function() {
       it('should have tests')
     })
 

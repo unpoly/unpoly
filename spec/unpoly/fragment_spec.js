@@ -10694,6 +10694,21 @@ describe('up.fragment', function() {
           expect(jasmine.Ajax.requests.count()).toBe(1)
         })
 
+        it('reuses a cached request when rendering the same location, but with a #hash', async function() {
+          fixture('.element')
+
+          up.render('.element', { url: '/path', cache: true })
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect({ target: '.element', url: '/path' }).toBeCached()
+
+          up.render('.element', { url: '/path#other', cache: true, abort: false })
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+        })
+
         it('does not reuse a cached request with { cache: false }', async function() {
           fixture('.element')
 
