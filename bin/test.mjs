@@ -15,6 +15,22 @@ async function halt(errorCode) {
   process.exit(errorCode)
 }
 
+let charsWritten = 0
+
+function writeLine(...args) {
+  console.log(...args)
+  charsWritten = 0
+}
+
+function writeChar(char) {
+  process.stdout.write(char)
+  charsWritten++
+  if (charsWritten > 20) {
+    process.stdout.write('\n')
+    charsWritten = 0
+  }
+}
+
 if (!(await isServerRunning())) {
   console.error(pc.red('First start a test server with `npm run test-server &`'))
   halt(3)
@@ -34,8 +50,8 @@ const page = await browser.newPage()
 
 const runnerURL = serverURL + '/specs?' + config.toQueryString()
 const humanBrowser = config.browser.charAt(0).toUpperCase() + config.browser.slice(1)
-console.log(pc.blue("Running specs with %s from %s"), humanBrowser, runnerURL)
-console.log()
+writeLine(pc.blue("Running specs with %s from %s"), humanBrowser, runnerURL)
+writeLine()
 
 await page.goto(runnerURL)
 
@@ -58,38 +74,38 @@ page.on('console', (msg) => {
   let afterAllFailed = text.startsWith('Failure in afterAll') || text.startsWith('Failure in top-level afterAll')
 
   if (jasminePassed) {
-    console.log()
-    console.log()
-    console.log(pc.green(text))
+    writeLine()
+    writeLine()
+    writeLine(pc.green(text))
     halt(0)
   } else if (jasmineIncomplete) {
-    console.log()
-    console.log()
-    console.log(pc.yellow(text))
+    writeLine()
+    writeLine()
+    writeLine(pc.yellow(text))
     halt(0)
   } else if (jasmineFailed) {
-    console.log()
-    console.log()
-    console.log(pc.red(text))
+    writeLine()
+    writeLine()
+    writeLine(pc.red(text))
     halt(1)
   } else if (examplePassed) {
     if (config.verbose) {
-      console.log(pc.green(text))
+      writeLine(pc.green(text))
     } else {
-      process.stdout.write(pc.green('.'))
+      writeChar(pc.green('.'))
     }
   } else if (examplePending) {
     if (config.verbose) {
-      console.log(pc.yellow(text))
+      writeLine(pc.yellow(text))
     } else {
-      process.stdout.write(pc.yellow('.'))
+      writeChar(pc.yellow('.'))
     }
   } else if (exampleFailed || afterAllFailed) {
-    if (!config.verbose) console.log()
-    console.log(pc.red(text))
+    if (!config.verbose) writeLine()
+    writeLine(pc.red(text))
   } else {
-    if (!config.verbose) console.log()
-    console.log(pc.reset(text))
+    if (!config.verbose) writeLine()
+    writeLine(pc.reset(text))
   }
 
   lastRunnerPing = new Date()
