@@ -97,7 +97,7 @@ const terminalReporter = {
     const totalTimeHuman = `${Math.round(0.001 * result.totalTime)}s`
 
     log((part) => {
-      part(0, `Jasmine ${result.overallStatus} (${totalTimeHuman}s)`) // 'passed' | 'failed' | 'incomplete'
+      part(0, `Jasmine ${result.overallStatus} (${totalTimeHuman})`) // 'passed' | 'failed' | 'incomplete'
 
       // Only focusing specs with fit/describe will cause an incomplete status.
       // Pending specs are not considered incomplete.
