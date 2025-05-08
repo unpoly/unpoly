@@ -17,7 +17,7 @@ This release contains some breaking changes, which are marked with the ⚠️ em
 
 
 
-## History navigation
+### History navigation
 
 - Unpoly can now restore history entries created by a changed location `#hash`.
 - Unpoly will now restore history entries that were later replaced by external scripts.
@@ -35,7 +35,7 @@ This release contains some breaking changes, which are marked with the ⚠️ em
 - ⚠️ `up.history.push()` will now add another history entry if the given location matches the current location.
 
 
-## Clicking on `#hash` links
+### Clicking on `#hash` links
 
 - Clicking a hash link will now, honor the viewport's [`scroll-behavior: smooth`](https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-behavior) style.
 - Hash links can now override their scroll behavior using an `[up-scroll-behavior]` attribute. Valid values are `instant`, `smooth` and `auto` (uses CSS behavior).
@@ -44,13 +44,13 @@ This release contains some breaking changes, which are marked with the ⚠️ em
 - Clicking a hash link will now scroll the page without re-rendering.
 
 
-## Scrolling
+### Scrolling
 
 - New [scroll option](/scrolling) `[up-scroll='bottom']`. This scrolls viewports around the targeted fragment to the bottom.
 - ⚠️ The option `[up-scroll='reset']` was changed to `[up-scroll='top']`.
 
 
-## Watching fields for changes
+### Watching fields for changes
 
 When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-validate]`, the following cases are now addressed:
 
@@ -61,7 +61,7 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 - ⚠️ Watching an individual radio button will now throw an error. Watch a container for the entire radio group instead.
 
 
-## Reworked `[up-switch]`
+### Reworked `[up-switch]`
 
 - You can now disable dependent fields using `[up-disable-for]` and `[up-enable-for]`.
 - You can now implement custom switching effect by listening to the `up:form:switch` event on any element targeted by `[up-switch]`.
@@ -70,13 +70,13 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 - ⚠️ Unpoly will no longer un-hide elements targeted by `[up-switch]` when that element has neither `[up-show-for]` nor `[up-hide-for]` attributes. This was an undocumented side effect of the old implementation.
 
 
-## Validations with `[up-validate]`
+### Validations with `[up-validate]`
 
 - You can now disable validation batching with `up.form.config.batchValidate = false`.
 - You can now send validation requests to a different server route (issue #486). You can use the new `[up-validate-url]` and `[up-validate-method]` attributes on indivudal fields or on entire forms. Unpoly still guarantees eventual consistency in a form with many concurrent validations.
   
 
-## Layers
+### Layers
 
 - The server can now force its response to open an overlay using an `X-Up-Open-Layer: { ...options }` response header.
 - Forms can now have `[up-dismiss]` and `[up-accept]` to close their overlay when submitted. The form's field values become the closing value.
@@ -84,7 +84,7 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 - Overflays better prevent scrolling of the background. Use "overflow-y: clip" when scrollbar is hidden.
 
 
-## CSP and script security
+### CSP and script security
 
 - ⚠️ Unpoly no longer executes scripts in new fragments by default. The `up.fragment.config.runScripts` configuration now defaults to `false`.
 - Using `up.fragment.config.runScripts = true` with a `'strict-dynamic'` CSP will now only run scripts with a `[nonce]` attribute matching a nonce from the response that inserted the fragment.
@@ -94,25 +94,25 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 - When `up:assets:changed` listeners inspect the `event.newAssets`, any asset nonces are now already rewritten to the current page's nonce *if* they a nonce from the response that caused the event.
 
 
-## Documentation
+### Documentation
 
 - Features with many attributes (or options) are now shown in groups like "Request" or "Animation".
   - TODO: Screenshot
 - Many attributes and options now explicitly documented instead of referring to `up.render()`.
 
 
-## Caching
+### Caching
 
 - ⚠️ Any `[up-expire-cache]` and `[up-evict-cache]` attributes are now executed *before* the request is sent. In previous version, the cache was only changed after a response was loaded. This change allows the combined use of `[up-evict-cache]` and `[up-cache]` to clear and re-populate the cache with a single render pass.
 - ⚠️ The server can no longer prevent expiration with an `X-Up-Expire-Cache: false` response header.
 
 
-## Persistent keeping
+### Persistent keeping
 
 - `[up-keep]` fragment are now preserved without detaching and re-attaching the element. This allows to keep focus without re-focusing, which may e.g. cause custom dropdown implementation to re-open options. Only on [supporting browsers](https://caniuse.com/mdn-api_element_movebefore).
 
 
-## Smaller changes and bugfixes
+### Smaller changes and bugfixes
 
 - iOS: Long-pressing a link to open the context menu will no longer follow an `[up-instant]` link (#271)
 - iOS: Long-pressing a link will no longer emit an `up:click` event (#721)
@@ -129,7 +129,7 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 - Requests now clear out their `{ bindLayer }` property after loading, allowing layer objects to be garbage-collected.
 
 
-## Developer experience
+### Developer experience
 
 - You can now run headless tests (without a browser window) by running `npm run test`.
 - CI: Tests now [run automatically](https://github.com/unpoly/unpoly/actions) for every pull request.
