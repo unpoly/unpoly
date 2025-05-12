@@ -139,8 +139,8 @@ When new fragments are loaded and inserted, their HTML may contain new, random n
 match the document. Nonces that don't match the document cannot be used to allowlist active content.
 
 To ensure that new fragments contain valid nonces, Unpoly will rewrite the new fragment's HTML
-so all nonces match those from the initial document. This is *only* done when the fragment's nonces match the CSP from
-its own response. 
+so all nonces match those from the initial document. This is *only* done when the fragment's nonces match the
+`script-src` directive from its own response.
 
 This can be convenient to you as a developer.
 Nonces in your HTML only need to match the response you're currently rendering.
@@ -162,6 +162,16 @@ Because Unpoly [rewrites new fragments](#nonce-rewriting) so their nonces matche
 you never need to update the `<meta>` tag with the latest nonce.
 
 To provide the nonce through another method, configure `up.protocol.config.cspNonce`.
+
+### Only `style-src` directives are supported
+
+When verifying responses, only the `style-src` directive is parsed.
+A `default-src` directive is parsed if no `script-src` directive is set.
+
+The `script-src-elem` and `script-src-attr` directives are not currently supported.
+
+Unpoly does not rewrite CSP nonces for non-script elements, such as stylesheets or images.
+
 
 
 @page csp
