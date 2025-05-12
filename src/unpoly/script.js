@@ -26,42 +26,44 @@ up.script = (function() {
   const e = up.element
 
   /*-
-  Configures defaults for script handling.
+  Configures defaults for script handling and asset tracking.
 
-  @param {Array<string} [config.assetSelectors]
-    An array of CSS selectors matching default [assets](/up-asset).
+  @section Assets
+    @param {Array<string} [config.assetSelectors]
+      An array of CSS selectors matching default [assets](/up-asset).
 
-    By default all remote scripts and stylesheets in the `<head>` are considered assets.
-    [Inline scripts](https://simpledev.io/lesson/inline-script-javascript-1/) and
-    [internal styles](https://www.tutorialspoint.com/How-to-use-internal-CSS-Style-Sheet-in-HTML)
-    are not tracked by default, but you can include them with an `[up-asset]` attribute.
+      By default all remote scripts and stylesheets in the `<head>` are considered assets.
+      [Inline scripts](https://simpledev.io/lesson/inline-script-javascript-1/) and
+      [internal styles](https://www.tutorialspoint.com/How-to-use-internal-CSS-Style-Sheet-in-HTML)
+      are not tracked by default, but you can include them with an `[up-asset]` attribute.
 
-    Unpoly only tracks assets in the `<head>`. Elements in the `<body>` are never tracked,
-    even if they match one of the configured selectors.
+      Unpoly only tracks assets in the `<head>`. Elements in the `<body>` are never tracked,
+      even if they match one of the configured selectors.
 
-    See [Tracking assets](/handling-asset-changes#tracking-assets) for examples.
+      See [Tracking assets](/handling-asset-changes#tracking-assets) for examples.
 
-  @param {Array<string} [config.noAssetSelectors]
-    Exceptions to `up.script.config.assetSelectors`.
+    @param {Array<string} [config.noAssetSelectors]
+      Exceptions to `up.script.config.assetSelectors`.
 
-    Matching elements will *not* be considered [assets](/up-asset)
-    even if they match `up.script.config.assetSelectors`.
+      Matching elements will *not* be considered [assets](/up-asset)
+      even if they match `up.script.config.assetSelectors`.
 
-  @param {Array<string} [config.scriptSelectors]
-    An array of CSS selectors matching elements that run JavaScript.
+  @section Scripts
+    @param {Array<string} [config.scriptSelectors]
+      An array of CSS selectors matching elements that run JavaScript.
 
-    By default this matches all `<script>` tags.
+      By default this matches all `<script>` tags.
 
-    Matching elements will be removed from new page fragments with `up.fragment.config.runScripts = false`.
+      Matching elements will be removed from new page fragments with `up.fragment.config.runScripts = false`.
 
-    This configuration does not affect what Unpoly considers an [assets](/up-asset).
-    For this configure `up.script.config.assetSelectors`.
+      This configuration does not affect what Unpoly considers an [assets](/up-asset).
+      For this configure `up.script.config.assetSelectors`.
 
-    @experimental
-  @param {Array<string} [config.noScriptSelectors]
-    Exceptions to `up.script.config.scriptSelectors`.
+      @experimental
+    @param {Array<string} [config.noScriptSelectors]
+      Exceptions to `up.script.config.scriptSelectors`.
 
-    @experimental
+      @experimental
   @property up.script.config
   @stable
   */
@@ -128,7 +130,7 @@ up.script = (function() {
   when a new fragment is inserted later.
   See [Migrating legacy JavaScripts](/legacy-scripts) for advice on migrating legacy applications.
 
-  ### Example
+  ## Example
 
   This compiler will insert the current time into a
   `<div class='current-time'></div>`:
@@ -143,7 +145,7 @@ up.script = (function() {
   The compiler function will be called once for each matching element when
   the page loads, or when a matching fragment is rendered later.
 
-  ### Integrating JavaScript libraries
+  ## Integrating JavaScript libraries {#integrating-libraries}
 
   `up.compiler()` is a great way to integrate JavaScript libraries.
   Let's say your JavaScript plugin wants you to call `lightboxify()`
@@ -163,7 +165,7 @@ up.script = (function() {
   })
   ```
 
-  ### Cleaning up after yourself {#destructor}
+  ## Cleaning up after yourself {#destructor}
 
   If your compiler returns a function, Unpoly will use this as a *destructor* to
   clean up if the element leaves the DOM. Note that in Unpoly the same DOM and JavaScript environment
@@ -195,7 +197,7 @@ up.script = (function() {
   > [important]
   > The destructor function is *not* expected to remove the element from the DOM.
 
-  ### Passing parameters to a compiler
+  ## Passing parameters to a compiler {#data}
 
   You may attach data to an element using HTML5 data attributes
   or encoded as [relaxed JSON](/relaxed-json) in an `[up-data]` attribute:
@@ -216,8 +218,7 @@ up.script = (function() {
 
   See [attaching data to elements](/data) for more details and examples.
 
-
-  ### Throwing exceptions from compilers
+  ## Throwing exceptions from compilers {#errors}
 
   It is safe to throw exceptions from a compiler or its [destructor](#destructor).
   A crashing compiler will *not* interrupt a render pass, or prevent other compilers on the same element.
@@ -227,8 +228,7 @@ up.script = (function() {
 
   See [errors in user code](/render-lifecycle#errors-in-user-code) for details.
 
-
-  ### Accessing information about the render pass
+  ## Accessing information about the render pass {#meta}
 
   Compilers may accept a third argument with information about the current [render pass](/up.render):
 
@@ -246,7 +246,7 @@ up.script = (function() {
   | `meta.layer`           | `up.Layer`    |                                                 | The [layer](/up.layer) of the fragment being compiled.<br>This has the same value as `up.layer.current`. |
   | `meta.revalidating`    | `boolean`     | <span class="tag is_light_gray">optional</span> | Whether the element was reloaded for the purpose of [cache revalidation](/caching#revalidation). |
 
-  ### Registering compilers after booting
+  ## Registering compilers after booting
 
   When you [deliver your JavaScript in multiple files](https://makandracards.com/makandra/498036-webpacker-loading-code-on-demand),
   you may register compilers after Unpoly was booted.
@@ -296,7 +296,7 @@ up.script = (function() {
   If you want default attributes for *every* link and form, consider customizing your
   [navigation options](/navigation).
 
-  ### Example
+  ## Example
 
   You will sometimes find yourself setting the same combination of UJS attributes again and again:
 
@@ -460,9 +460,9 @@ up.script = (function() {
   closes, or when `up.destroy()` is called on the element or its container.
 
   An alternative way to register a destructor function is to
-  [`return` it from your compiler function](/up.compiler#destructor).
+  [return it from your compiler function](/up.compiler#destructor).
 
-  ### Example
+  ## Example
 
   The code below will log a message when `element` exits the DOM:
 
@@ -471,7 +471,7 @@ up.script = (function() {
   up.destructor(element, () => console.log('Element was destroyed!'))
   ```
 
-  ### Reusing destructor functions
+  ## Reusing destructor functions
 
   You may reuse the same destructor function for multiple element.
   The destructor function is called with the element being destroyed:
@@ -514,7 +514,7 @@ up.script = (function() {
 
   The [`up:fragment:inserted`](/up:fragment:inserted) event is emitted on the compiled element.
 
-  ### Unpoly automatically calls `up.hello()`
+  ## Unpoly automatically calls `up.hello()`
 
   When the page is manipulated using Unpoly functions or HTML selectors,
   Unpoly will automatically call `up.hello()` on new fragments:
@@ -542,7 +542,7 @@ up.script = (function() {
   up.hello(element)
   ```
 
-  ### Recompiling elements
+  ## Recompiling elements
 
   It is safe to call `up.hello()` multiple times with the same elements.
   In particular every compiler function is guaranteed to only run once for each matching element.
@@ -550,7 +550,7 @@ up.script = (function() {
   If a new compiler is registered after initial compilation,
   that new compiler is [run automatically on current elements](/up.compiler#registering-compilers-after-booting).
 
-  ### Detecting compiler errors
+  ## Detecting compiler errors
 
   If a compiler function throws an error, `up.hello()` will still finish the compilation and *not* throw an error.
 
@@ -581,9 +581,9 @@ up.script = (function() {
     An object mapping selectors to `options.data`.
     @internal
   @param {Object} [options.meta={}]
-    An object containing information about this compiler pass.
+    An object containing [information about this compiler pass](/up.compiler#meta).
 
-    This typically contains `{ request, response, revalidating }` properties.
+    This typically contains `{ layer, revalidating }` properties.
 
     It will be passed as a third [compiler](/up.compiler) argument.
     @experimental
@@ -624,7 +624,7 @@ up.script = (function() {
 
   Multiple `up.data()` calls for the same object always return the same object reference.
 
-  ### Use with `[up-data]`
+  ## Use with `[up-data]`
 
   You have an element with JSON data serialized into an `[up-data]` attribute:
 
@@ -638,7 +638,7 @@ up.script = (function() {
   up.data('.person') // returns { age: 18, name: 'Bob' }
   ```
 
-  ### Use with data attributes
+  ## Use with data attributes
 
   You may also use standard [`[data-*]` attributes](https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes)
   to attach data to an element.
@@ -677,7 +677,7 @@ up.script = (function() {
 
   To programmatically parse an `[up-data]` attribute into an object, use `up.data(element)`.
 
-  ### Example
+  ## Example
 
   A container for a [Google Map](https://developers.google.com/maps/documentation/javascript/tutorial)
   might attach the location and names of its marker pins:
@@ -689,7 +689,8 @@ up.script = (function() {
   ]"></div>
   ```
 
-  The JSON will be parsed and handed to your compiler as a second argument:
+  The attribute value will be parsed as [relaxed JSON](/relaxed-json).
+  The parsed object is handed to your compiler as a second argument:
 
   ```js
   up.compiler('.google-map', function(element, pins) {
@@ -720,13 +721,13 @@ up.script = (function() {
   data[0].title // => 'Friedberg'
   ```
 
-  ### Alternatives
+  ## Alternatives
 
   See [attaching data to elements](/data).
 
   @selector [up-data]
   @param up-data
-    A serialized JSON string
+    A data object serialized as [relaxed JSON](/relaxed-json).
   @stable
   */
   function readData(element) {
@@ -767,7 +768,7 @@ up.script = (function() {
   from the server response. If the assets don't match, an `up:assets:changed` event is emitted.
 
 
-  ### Default assets
+  ## Default assets
 
   By default all remote scripts and stylesheets in the `<head>` are considered assets:
 
@@ -790,7 +791,7 @@ up.script = (function() {
   are not tracked by default, but you can [include them explicitly](#including-assets).
 
 
-  ### Excluding assets from tracking {#excluding-assets}
+  ## Excluding assets from tracking {#excluding-assets}
 
   To *exclude* an element in the `<head>` from tracking, mark it with an `[up-asset="false"]` attribute:
 
@@ -801,7 +802,7 @@ up.script = (function() {
   To exclude assets by default, configure `up.script.config.noAssetSelectors`.
 
 
-  ### Tracking additional assets {#including-assets}
+  ## Tracking additional assets {#including-assets}
 
   To track additional assets in the `<head>`, mark them with an `[up-asset]` attribute.
 
@@ -818,7 +819,7 @@ up.script = (function() {
 
   To track additional assets by default, configure `up.script.config.assetSelectors`.
 
-  ### Tracking the backend version {#tracking-backend-versions}
+  ## Tracking the backend version {#tracking-backend-versions}
 
   To detect a new deployment of your *backend* code, consider including the deployed commit hash in a `<meta>` tag.
 
@@ -827,7 +828,6 @@ up.script = (function() {
   ```html
   <meta name="backend-version" value="d50c6dd629e9bbc80304e14a6ba99a18c32ba738" up-asset>
   ```
-
 
   @selector [up-asset]
   @stable
@@ -856,8 +856,7 @@ up.script = (function() {
 
   The event is emitted on the `document`.
 
-
-  ### Example
+  ## Example
 
   The code below inserts a clickable `<div id="new-version">` banner when assets change.
   The user can then choose to reload at their convenience, by clicking on the notification.
@@ -866,8 +865,7 @@ up.script = (function() {
 
   For more examples see [Handling asset changes](/handling-asset-changes).
 
-
-  ### Emission time
+  ## Emission time
 
   The event is emitted at a particular time in the [render lifecycle](/render-lifecycle):
 

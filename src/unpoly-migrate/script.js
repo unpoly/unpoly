@@ -44,7 +44,7 @@ with each matching element as a
 If you're not using jQuery, use `up.compiler()` instead, which calls
 the compiler function with a native element.
 
-### Example
+## Example
 
 This jQuery compiler will insert the current time into a
 `<div class='current-time'></div>`:
@@ -62,9 +62,7 @@ up.$compiler('.current-time', function($element) {
 @param {Object} [options]
   See [`options` argument for `up.compiler()`](/up.compiler#parameters).
 @param {Function($element, data)} compiler
-  The function to call when a matching element is inserted.
-
-  See [`compiler` argument for `up.compiler()`](/up.compiler#parameters).
+  @like up.compiler
 @deprecated
   Use `up.compiler()` with a callback that wraps the given native element in a jQuery collection.
 */
@@ -88,7 +86,7 @@ The compiler function is called with each matching element as a
 If you're not using jQuery, use `up.macro()` instead, which calls
 the macro function with a native element.
 
-### Example
+## Example
 
 ```js
 up.$macro('[content-link]', function($link) {
@@ -105,10 +103,8 @@ up.$macro('[content-link]', function($link) {
   The selector to match.
 @param {Object} options
   See [`options` argument for `up.compiler()`](/up.compiler#parameters).
-@param {Function(element, data)} macro
-  The function to call when a matching element is inserted.
-
-  See [`compiler` argument for `up.compiler()`](/up.compiler#parameters).
+@param {Function($element, data)} macro
+  @like up.macro
 @deprecated
   Use `up.macro()` with a callback that wraps the given native element in a jQuery collection.
 */
