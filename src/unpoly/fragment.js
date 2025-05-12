@@ -2730,8 +2730,8 @@ up.fragment = (function() {
   ### Example
 
   ```js
-  let { nodes } = up.template.clone('#table-placeholder')
-  up.render({ fragment: nodes })
+  let nodes = up.template.clone('#table-placeholder')
+  up.render({ fragment: nodes[0] })
   ```
 
   ### Passing variables
@@ -2739,7 +2739,7 @@ up.fragment = (function() {
   Any [template variables](/templates#dynamic) can be passed as a second argument:
 
   ```js
-  let { nodes } = up.template.clone('#table-placeholder', { rows: 10 })
+  let nodes = up.template.clone('#table-placeholder', { rows: 10 })
   ```
 
   @function up.template.clone
