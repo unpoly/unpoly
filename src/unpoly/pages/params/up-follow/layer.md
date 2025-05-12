@@ -1,6 +1,6 @@
 @partial up-follow/layer
 
-@param [up-layer='origin current']
+@param [up-layer='origin, current']
   The [layer](/up.layer) in which to match and render the fragment.
 
   See [layer option](/layer-option) for a list of allowed values.

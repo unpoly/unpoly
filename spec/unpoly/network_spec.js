@@ -1984,7 +1984,7 @@ describe('up.network', function() {
 
       describe('up:request:load event', function() {
 
-        it('emits an up:request:load event before the request touches the network', async function() {
+        it('emits the event before the request touches the network', async function() {
           let origin = fixture('.origin')
           const listener = jasmine.createSpy('listener')
           up.on('up:request:load', listener)
@@ -2002,105 +2002,7 @@ describe('up.network', function() {
 
           expect(listener).toHaveBeenCalledWith(partialEvent, jasmine.anything(), jasmine.anything())
         })
-      })
 
-      it('allows up:request:load listeners to prevent the request (useful to cancel all requests when stopping a test scenario)', async function() {
-        const listener = jasmine.createSpy('listener').and.callFake(function(event) {
-          expect(jasmine.Ajax.requests.count()).toEqual(0)
-          event.preventDefault()
-        })
-
-        up.on('up:request:load', listener)
-
-        const promise = up.request('/bar')
-
-        await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/prevented|aborted/i))
-        expect(listener).toHaveBeenCalled()
-        expect(jasmine.Ajax.requests.count()).toEqual(0)
-      })
-
-      it('does not block the queue when an up:request:load event was prevented', function(done) {
-        up.network.config.concurrency = 1
-
-        const listener = jasmine.createSpy('listener').and.callFake(function(event) {
-          // only prevent the first request
-          if (event.request.url.indexOf('/path1') >= 0) {
-            event.preventDefault()
-          }
-        })
-
-        up.on('up:request:load', listener)
-
-        const promise1 = up.request('/path1')
-        const promise2 = up.request('/path2')
-
-        u.task(() => {
-          expect(listener.calls.count()).toBe(2)
-          expect(jasmine.Ajax.requests.count()).toEqual(1)
-          expect(jasmine.lastRequest().url).toMatchURL('/path2')
-          done()
-        })
-      })
-
-      it('allows up:request:load listeners to manipulate the request headers', function(done) {
-        const listener = (event) => event.request.headers['X-From-Listener'] = 'foo'
-
-        up.on('up:request:load', listener)
-
-        up.request('/path1')
-
-        u.task(() => {
-          expect(jasmine.lastRequest().requestHeaders['X-From-Listener']).toEqual('foo')
-          done()
-        })
-      })
-
-      it('allows up:request:load listeners to add request params for a POST request', function(done) {
-        const listener = (event) => event.request.params.set('key', 'value')
-
-        up.on('up:request:load', listener)
-
-        up.request('/path1', { method: 'post' })
-
-        u.task(() => {
-          expect(jasmine.lastRequest().params).toMatchParams({ key: 'value' })
-          done()
-        })
-      })
-
-      it('allows up:request:load listeners to add request params for a GET request, which are moved to the URL before connecting', function(done) {
-        const listener = (event) => event.request.params.set('key3', 'value3')
-
-        up.on('up:request:load', listener)
-
-        up.request('/path1?key1=value1', { params: { key2: 'value2' }, method: 'get' })
-
-        u.task(() => {
-
-          expect(jasmine.lastRequest().url).toMatchURL('/path1?key1=value1&key2=value2&key3=value3')
-          expect(jasmine.lastRequest().params).toMatchParams({})
-          done()
-        })
-      })
-
-      it('allows up:request:load listeners to access the xhr request object', function(done) {
-        const listener = jasmine.createSpy('listener').and.callFake(function(event) {
-          expect(jasmine.Ajax.requests.count()).toEqual(0)
-          expect(event.request.xhr).toBeDefined()
-        })
-
-        up.on('up:request:load', listener)
-
-        up.request('/path1', { method: 'post' })
-
-        u.task(() => {
-          expect(listener.calls.count()).toBe(1)
-          expect(jasmine.Ajax.requests.count()).toEqual(1)
-          done()
-        })
-      })
-
-      describe('event target', function() {
         it('is emitted on the layer that triggered the event', async function() {
           makeLayers(3)
 
@@ -2113,6 +2015,107 @@ describe('up.network', function() {
 
           expect(listener.calls.count()).toBe(1)
           expect(listener.calls.argsFor(0)[0].target).toBe(up.layer.get(1).element)
+        })
+
+        it('allows listeners to prevent the request from loading', async function() {
+          const listener = jasmine.createSpy('listener').and.callFake(function(event) {
+            expect(jasmine.Ajax.requests.count()).toEqual(0)
+            event.preventDefault()
+          })
+
+          up.on('up:request:load', listener)
+
+          const promise = up.request('/bar')
+
+          await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/prevented|aborted/i))
+          expect(listener).toHaveBeenCalled()
+          expect(jasmine.Ajax.requests.count()).toEqual(0)
+        })
+
+        it('does not block the queue when the event was prevented', async function() {
+          up.network.config.concurrency = 1
+
+          const listener = jasmine.createSpy('listener').and.callFake(function(event) {
+            // only prevent the first request
+            if (event.request.url.indexOf('/path1') >= 0) {
+              event.preventDefault()
+            }
+          })
+
+          up.on('up:request:load', listener)
+
+          const promise1 = up.request('/path1')
+          const promise2 = up.request('/path2')
+
+          await wait()
+
+          expect(listener.calls.count()).toBe(2)
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(jasmine.lastRequest().url).toMatchURL('/path2')
+        })
+
+        it('allows listeners to add a request header', async function() {
+          const listener = (event) => event.request.headers['X-From-Listener'] = 'foo'
+
+          up.on('up:request:load', listener)
+
+          up.request('/path1')
+          await wait()
+
+          expect(jasmine.lastRequest().requestHeaders['X-From-Listener']).toEqual('foo')
+        })
+
+        it('allows listeners to add request params for a POST request', async function() {
+          const listener = (event) => event.request.params.set('key', 'value')
+
+          up.on('up:request:load', listener)
+
+          up.request('/path1', { method: 'post' })
+          await wait()
+
+          expect(jasmine.lastRequest().params).toMatchParams({ key: 'value' })
+        })
+
+        it('allows listeners to add request params for a GET request, which are moved to the URL before connecting', async function() {
+          const listener = (event) => event.request.params.set('key3', 'value3')
+
+          up.on('up:request:load', listener)
+
+          up.request('/path1?key1=value1', { params: { key2: 'value2' }, method: 'get' })
+          await wait()
+
+          expect(jasmine.lastRequest().url).toMatchURL('/path1?key1=value1&key2=value2&key3=value3')
+          expect(jasmine.lastRequest().params).toMatchParams({})
+        })
+
+        // Specs for up.network ensure that changing params will re-index a cached requests
+
+        it('allows listeners to change the request URL', async function() {
+          const listener = (event) => event.request.url = '/other'
+
+          up.on('up:request:load', listener)
+
+          up.request('/original')
+          await wait()
+
+          expect(jasmine.lastRequest().url).toMatchURL('/other')
+        })
+
+        // Specs for up.network ensure that changing the URL will re-index a cached requests
+
+        it('allows listeners to access the xhr request object', async function() {
+          const listener = jasmine.createSpy('listener').and.callFake(function(event) {
+            expect(jasmine.Ajax.requests.count()).toEqual(0)
+            expect(event.request.xhr).toBeDefined()
+          })
+
+          up.on('up:request:load', listener)
+
+          up.request('/path1', { method: 'post' })
+          await wait()
+
+          expect(listener.calls.count()).toBe(1)
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
         })
       })
     })

@@ -826,11 +826,35 @@ up.network = (function() {
   This event is [emitted](/up.emit) before an [AJAX request](/up.request)
   is sent over the network.
 
+  Only requests that are sent via Unpoly features
+  (like `[up-follow]` or `up.request()`) will trigger this event.
+  When making a requests using `fetch()` or `XMLHttpRequest`, no event is emitted.
+
   The event is emitted on the layer that caused the request.
+
+  ## Changing requests before loading {#changing-requests}
+
+  Listeners to `up:request:load` can inspect or
+  mutate the [request options](/up.request#parameters-request)
+  before it is loaded.
+
+  For example, this listeners changes requests to `/stocks`
+  to include a custom header and have a timeout of 10 seconds:
+
+  ```js
+  up.on('up:request:load', (event) => {
+    if (event.request.url === '/stocks') {
+      event.request.headers['X-Client-Time'] = Date.now().toString()
+      event.request.timeout = 10_000
+    }
+  })
+  ```
 
   @event up:request:load
   @param {up.Request} event.request
-    The request to be sent.
+    The request that will be sent.
+
+    Listeners can [inspect or mutate request options](#changing-requests) before it is sent.
   @param {up.Layer} [event.layer]
     The [layer](/up.layer) this request is associated with.
 

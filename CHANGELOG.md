@@ -114,6 +114,10 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 
 ### Smaller changes and bugfixes
 
+(possibly organize this into sub-sections)
+
+- Listeners to `up:request:loaded` can now [inspect or mutate request options](/up:request:loaded#changing-requests)
+  before it is sent. This has been possible before, but was never documented.
 - iOS: Long-pressing a link to open the context menu will no longer follow an `[up-instant]` link (#271)
 - iOS: Long-pressing a link will no longer emit an `up:click` event (#721)
 - Fix a bug where history wasn't updated when a response contains comments before the `<!DOCTYPE>` or `<html>` tag (fixes #726)
