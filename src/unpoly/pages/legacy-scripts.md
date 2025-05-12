@@ -24,7 +24,8 @@ This may cause some of the following issues:
 The cleanest solution to these issues is to call all your JavaScript
 from an [Unpoly compiler](/up.compiler).
 
-## Migrating legacy scripts to a compiler
+
+## Migrating legacy scripts to a compiler {#migrate-to-compiler}
 
 The legacy code below waits for the page to load, then selects all links with a
 `.lightbox` class and calls `lightboxify()` for each of these links:
@@ -38,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
 ```
 
 Since the code only runs after the initial page load, links contained in
-a fragment update will not be lightboxified.
+a fragment update will not be "lightboxified".
 
 You can fix this by moving your code to a [compiler](/up.compiler):
 
@@ -57,13 +58,63 @@ for new matches within the new fragment.
 > It should not use `document.querySelectorAll()` to process elements
 > elsewhere on the page, since these may already have been compiled.
 
+
+### Migrating screen-specific scripts
+
+You may sometimes have a script that enhances the HTML on the current screen:
+
+```html
+<form action="/orders/new">
+   ...
+</form>
+
+<script>
+   trackView({ screen: 'order-form', step: 1 })
+</script>
+```
+
+To migrate this script, think of an attribute or class that should activate the behavior,
+and add it to the relevant element:  
+
+```html
+<form action="/orders/new" track-view"> <!-- mark-phrase "track-view" -->
+   ...
+</form>
+```
+
+Any parameters can be [attached to the element](/data):
+
+```html
+<form action="/orders/new" track-view up-data="{ screen: 'order-form', step: 1 }"> <!-- mark-phrase "{ screen: 'order-form', step: 1 }" -->
+   ...
+</form>
+```
+
+You can now react to an element in a compiler:
+
+
+```js
+up.compiler('[track-view]', function(element, data) { // mark-phrase "[track-view]"
+  trackView(data)
+})
+```
+
+
 ## Running inline `<script>` tags
 
-`<script>` tags will run if they are part of the updated fragment.
+By default `<script>` tags will only run during the initial page load.
+Scripts in updated fragments will *not* be loaded or executed.
+If possible, [migrate these scripts to a compiler](#migrate-to-compiler).
 
-Mind that the `<body>` element is a default [main target](/main).
-If you are including your global application scripts
-at the end of your `<body>` for performance reasons, swapping the `<body>` will re-execute these scripts:
+If you absolutely want to run scripts in new fragments, you can change the default:
+
+
+```js
+up.fragment.config.runScripts = true // default is false
+```
+
+When changing this setting, mind that the `<body>` element is a default [main target](/main).
+If you include your global scripts at the end of your `<body>`, swapping the `<body>` will re-execute these scripts:
 
 ```html
 <html>
