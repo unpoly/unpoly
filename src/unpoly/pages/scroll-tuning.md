@@ -1,7 +1,7 @@
 Tuning the scroll behavior
 ==========================
 
-This page details various options to tune Unpoly's scrolling behavior.
+This guide details various options to tune Unpoly's scrolling behavior.
 
 All features are available both as JavaScript options (like `{ revealSnap }`) and
 HTML attributes (like `[up-reveal-snap]`).

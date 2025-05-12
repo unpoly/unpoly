@@ -87,7 +87,7 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 ### CSP and script security
 
 - ⚠️ Unpoly no longer executes scripts in new fragments by default. The `up.fragment.config.runScripts` configuration now defaults to `false`.
-- Using `up.fragment.config.runScripts = true` with a `'strict-dynamic'` CSP will now only run scripts with a `[nonce]` attribute matching a nonce from the response that inserted the fragment.
+- Using `up.fragment.config.runScripts = true` with a `'strict-dynamic'` CSP will now only run scripts with a `[nonce]` attribute matching a nonce from the response that inserted the fragment. As an alternative you can set `up.fragment.config.runScripts` to a function that returns `true` for scripts that you allow.
 - Unpoly now uses CSP nonces from a `default-src` directive if no `script-src` directive is found in the policy.
 - Unpoly now ignores CSP nonces from the `script-src-elem` directive.
 - Fix a bug where `<script>` elements in new fragments would lose their `[nonce]` attribute. That attribute is now rewritten to the current page's nonce *if* it matches a nonce from the response that inserted the fragment.

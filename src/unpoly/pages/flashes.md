@@ -1,7 +1,7 @@
 Notification flashes
 ====================
 
-This page explains how to implement notification flashes for confirmations, errors or warnings.
+This guide explains how to implement notification flashes for confirmations, errors or warnings.
 
 ![A confirmation flash, an error flash and a warning flash](images/flashes.png){:width='480'}
 

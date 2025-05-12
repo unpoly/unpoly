@@ -6,7 +6,7 @@ You can configure Unpoly to handle all links and forms on the page.
 This avoids full page loads where possible, resulting in a smoother navigation experience.
 For developers this means having to use fewer `[up-...]` attributes.
 
-This page shows how to make handle Unpoly all interactive elements.
+This guide shows how to make handle Unpoly all interactive elements.
 It also explains how to configure smart defaults that work for most of your links and forms.
 
 

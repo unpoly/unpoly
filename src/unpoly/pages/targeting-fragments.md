@@ -1,7 +1,7 @@
 Targeting fragments
 ===================
 
-This page outlines ways to target and update fragments on your page.
+This guide outlines ways to target and update fragments on your page.
 
 
 ## Swapping a fragment {#swapping}

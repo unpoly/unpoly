@@ -1,7 +1,13 @@
-Working with strict Content Security Policies
-=============================================
+Working with Content Security Policies
+======================================
 
-When your [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) disallows `eval()`, Unpoly cannot directly run JavaScript code in HTML attributes. This affects `[up-on-...]` attributes like [`[up-on-loaded]`](/up-follow#up-on-loaded) or [`[up-on-accepted]`](/up-layer-new#up-on-accepted).
+This guide shows how address issues with a strict [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) (or  CSP). 
+
+
+Attribute callbacks {#attribute-callbacks}
+------------------------------------------
+
+When your CSP disallows `eval()`, Unpoly cannot directly run JavaScript code in HTML attributes. This affects `[up-on-...]` attributes like [`[up-on-loaded]`](/up-follow#up-on-loaded) or [`[up-on-accepted]`](/up-layer-new#up-on-accepted).
 
 For example, the following callback would crash the fragment update with an error like `Uncaught EvalError: call to Function() blocked by CSP`:
 
@@ -9,10 +15,10 @@ For example, the following callback would crash the fragment update with an erro
 <a href="/path" up-follow up-on-loaded="alert()">Click me</a>
 ```
 
-This page outlines several solutions for this.
+There are several solutions to this.
 
 
-## <em class="heading-prefix">Option 1</em> Move the callback into your JavaScript
+### <em class="heading-prefix">Option 1</em> Move the callback into your JavaScript {#attribute-to-compiler}
 
 One solution is to move the handler from the HTML to the JavaScript file that we loaded via an allowed `<script src>`.
 
@@ -31,7 +37,7 @@ up.on('up:link:follow', '.alert-on-loaded', (event) => {
 ```
 
 
-## <em class="heading-prefix">Option 2</em> Prefix a CSP nonce {#nonceable-attributes}
+### <em class="heading-prefix">Option 2</em> Prefix a CSP nonce {#nonceable-attributes}
 
 Unpoly lets you work around this by prefixing your callback with a [CSP nonce](https://content-security-policy.com/nonce/):
 
@@ -54,25 +60,109 @@ Content-Security-Policy: script-src 'self' 'nonce-kO52Iphm8B'
 <a href="/path" up-follow up-on-loaded="nonce-kO52Iphm8B alert()">Click me</a>
 ```
 
-For this to work you must also include the `<meta name="csp-nonce">` tag in the `<head>` of the initial page that [booted](/up.boot) Unpoly:
+When the nonces from the HTML and the response header match, Unpoly will [rewrite the HTML to the document's nonce](#nonce-rewriting).
+
+
+
+Inline scripts {#scripts}
+-------------------------
+
+By default `<script>` tags will only run during the initial page load.
+Scripts in updated fragments will *not* be loaded or executed.
+If possible, [migrate these scripts to a compiler](#migrate-to-compiler). That compiler can then be moved into a
+global script that satisfies your CSP:
+
+```js
+<html>
+  <head>
+    <script src="/compilers.js" defer></script> <!-- mark-phrase "/compilers.js" -->
+  </head>
+  <body>
+    ...
+  </body>
+</html>
+```
+
+If you absolutely want to run scripts in new fragments, you can change the default:
+
+```js
+up.fragment.config.runScripts = true // default is false
+```
+
+This will work as long as a script satisfies your CSP, e.g. by matching an allowed nonce or hostname.
+
+
+### Nonce-based CSPs {#scripts-nonce}
+
+With a [nonce-based CSP](https://content-security-policy.com/nonce/) make sure that any `<script nonce>` attribute
+matches the `script-src` of the response you're currently rendering:
+
+```http
+Content-Type: text/html
+Content-Security-Policy: script-src 'self' 'nonce-kO52Iphm8B'
+...
+
+<script nonce="kO52Iphm8B">
+  console.log("Hello from inline script")
+</script>
+```
+
+When the nonces from the HTML and the response header match, Unpoly will Unpoly will [rewrite the HTML to the document's nonce](#nonce-rewriting).
+
+
+### CSPs with `strict-dynamic` {#scripts-strict-dynamic}
+
+A CSP with [`strict-dynamic`](https://content-security-policy.com/strict-dynamic/) allows any allowed script
+to load additional scripts. Because Unpoly is already an allowed script,
+this would allow *any* Unpoly-rendered script to execute.
+
+To prevent this, Unpoly requires [matching CSP nonces](#scripts-nonce) in any response with a `strict-dynamic` CSP.
+
+If you cannot use nonces for some reasons, you can configure `up.fragment.config.runScripts` to a function
+that returns `true` for allowed scripts only:
+
+```js
+up.fragment.config.runScripts = (script) => {
+  return script.src.startsWith('https://myhost.com/')
+}
+```
+
+This would allow any script from a `myhost.com` host, even without a matching nonce.
+
+
+
+Fragment nonces are rewritten {#nonce-rewriting}
+------------------------------------------------
+
+When the initial document is rendered, its CSP header contains the only valid nonce for the lifetime of that document. 
+When new fragments are loaded and inserted, their HTML may contain new, random nonces that won't
+match the document. Nonces that don't match the document cannot be used to allowlist active content.
+
+To ensure that new fragments contain valid nonces, Unpoly will rewrite the new fragment's HTML
+so all nonces match those from the initial document. This is *only* done when the fragment's nonces match the CSP from
+its own response. 
+
+This can be convenient to you as a developer.
+Nonces in your HTML only need to match the response you're currently rendering.
+You do *not* need to track and re-use the nonce of the initial document.
+
+### Providing the document nonce to Unpoly {#providing-document-nonce}
+
+For Unpoly to able to rewrite response nonces, you must include a `<meta name="csp-nonce">` tag
+in the `<head>` of the initial page that [booted](/up.boot) Unpoly:
 
 ```html
 <head>
-  <meta name="csp-nonce" content="nonce-kO52Iphm8B">
+  <meta name="csp-nonce" content="nonce-kO52Iphm8B"> <!-- mark-phrase "nonce-kO52Iphm8B" -->
   ...
 </head>
 ```
 
+Because Unpoly [rewrites new fragments](#nonce-rewriting) so their nonces matches the document,
+you never need to update the `<meta>` tag with the latest nonce.
+
 To provide the nonce through another method, configure `up.protocol.config.cspNonce`.
-
-When responding to a fragment update, you may use a CSP nonce unique to that latest response.
-You do *not* need to reuse the nonce of the initial page that booted Unpoly.
-Neither to you need to update the `<meta>` tag with the latest nonce.
-
-> [TIP]
-> If you're using the [unpoly-rails](https://github.com/unpoly/unpoly-rails) gem you can prefix a nonce
-> using the [`up.safe_callback()`](https://github.com/unpoly/unpoly-rails#allowing-callbacks-with-a-strict-csp) helper.
-
 
 
 @page csp
+@menu-title Content Security Policy

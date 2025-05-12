@@ -1,7 +1,7 @@
 Tracking page views
 ===================
 
-This page shows how to track page views using web analytics tools like
+This guide shows how to track page views using web analytics tools like
 [Matomo](https://matomo.org/) or [Google Analytics](https://analytics.google.com/).
 
 Web analytics tools usually track a page visit during the initial page load.

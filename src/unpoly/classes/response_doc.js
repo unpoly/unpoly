@@ -223,9 +223,14 @@ up.ResponseDoc = class ResponseDoc {
 
   _isScriptAllowed(scriptElement, pageNonce) {
     let strategy = up.fragment.config.runScripts
+    // When the strategy is a constant `true` and also using strict-dynamic,
+    // we enforce a correct nonce. Otherwise we would allow all scripts (as strict-dynamic is viral,
+    // and Unpoly is already an allowed script).
     if (strategy === true && this._cspInfo.declaration?.includes("'strict-dynamic'")) {
       return pageNonce && (pageNonce === scriptElement.nonce)
     } else {
+      // If the strategy is a function or not using strict-dynamic, we allow anything
+      // for which runScripts evals to true. Will be subject to the browser's CSP afterwards.
       return u.evalOption(strategy, scriptElement)
     }
   }

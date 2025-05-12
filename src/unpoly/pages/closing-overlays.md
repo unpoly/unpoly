@@ -1,7 +1,7 @@
 Closing overlays
 ================
 
-This page explains the many different ways to close an [overlay](/up.layer) in Unpoly.
+This guide explains the many different ways to close an [overlay](/up.layer) in Unpoly.
 
 In addition to making the overlay disappear, you may also communicate a result value back
 to the parent layer. This is useful to branch off a complex user interaction into an overlay,
