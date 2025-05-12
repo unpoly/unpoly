@@ -167,9 +167,7 @@ up.fragment = (function() {
     - If focus was lost with the old fragment, focus the new fragment.
 
   @param {boolean} [config.runScripts=false]
-    Whether to execute `<script>` tags in updated fragments.
-
-    Scripts will load asynchronously, with no guarantee of execution order.
+    Whether to load or execute `<script>` tags in updated fragments.
 
     Note that the `<body>` element is a default
     [main target](/main). If you are including your global application scripts
@@ -177,6 +175,9 @@ up.fragment = (function() {
     these scripts. In that case you can [configure a different main target](/up.fragment.config#config.mainTargets)
     or [move your scripts to the `<head>` with a `[defer]` attribute](https://makandracards.com/makandra/504104-you-should-probably-load-your-javascript-with-script-defer),
     which is even better for performance.
+
+    Scripts in the `<head>` are never load or executed, even with `up.fragment.config.runScripts = true`.
+    See [Handling new asset versions](/handling-asset-changes#handling-changed-assets).
 
   @param {boolean|Function(up.Response): boolean} [config.autoRevalidate]
     Whether to reload a fragment after it was rendered from a cached response with `{ revalidate: 'auto' }`.
