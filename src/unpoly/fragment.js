@@ -744,7 +744,7 @@ up.fragment = (function() {
     Programmatic callers will fulfill with an [empty](/up.RenderResult.prototype.none) `up.RenderResult`.
 
     To configure global rules for responses that should be skipped, you may
-    also use `up.fragment.config.skipResponse` instead of registering an `up:fragment:oaded` listener.
+    also use `up.fragment.config.skipResponse` instead of registering an `up:fragment:loaded` listener.
 
     @experimental
 
