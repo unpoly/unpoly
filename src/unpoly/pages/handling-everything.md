@@ -82,7 +82,7 @@ Legacy code often contains JavaScript that expects a full page load whenever the
 user interacts with the page. When you configure Unpoly to handle all interaction,
 there will not be additional page loads as the user clicks a link or submits a form.
 
-See [Making JavaScripts work with fragment updates](/legacy-scripts).
+See [Migrating legacy JavaScripts](/legacy-scripts).
 
 
 ## Customizing navigation defaults
