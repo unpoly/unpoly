@@ -27,99 +27,107 @@ up.form = (function() {
 
   @property up.form.config
 
-  @param {Array<string>} [config.submitSelectors]
-    An array of CSS selectors matching forms that will be [submitted through Unpoly](/up-submit).
+  @section Submittable forms
 
-    You can configure Unpoly to handle *all* forms on a page without requiring an `[up-submit]` attribute:
+    @param {Array<string>} [config.submitSelectors]
+      An array of CSS selectors matching forms that will be [submitted through Unpoly](/up-submit).
 
-    ```js
-    up.form.config.submitSelectors.push('form')
-    ```
+      You can configure Unpoly to handle *all* forms on a page without requiring an `[up-submit]` attribute:
 
-    Individual forms may opt out with an `[up-submit=false]` attribute.
-    You may configure additional exceptions in `config.noSubmitSelectors`.
+      ```js
+      up.form.config.submitSelectors.push('form')
+      ```
 
-  @param {Array<string>} [config.noSubmitSelectors]
-    Exceptions to `up.form.config.submitSelectors`.
+      Individual forms may opt out with an `[up-submit=false]` attribute.
+      You may configure additional exceptions in `config.noSubmitSelectors`.
 
-    Matching forms will *not* be [submitted through Unpoly](/up-submit),
-    even if they match `up.form.config.submitSelectors`.
+    @param {Array<string>} [config.noSubmitSelectors]
+      Exceptions to `up.form.config.submitSelectors`.
 
-  @param {Array<string>} [config.groupSelectors=['[up-form-group]', 'fieldset', 'label', 'form']]
-    An array of CSS selectors matching a [form group](/up-form-group).
+      Matching forms will *not* be [submitted through Unpoly](/up-submit),
+      even if they match `up.form.config.submitSelectors`.
 
-    When [validating](/validation#validating-after-changing-a-field) a field,
-    Unpoly will re-render the [closest](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest)
-    form group around that field.
+  @section Form elements
 
-    When a group is matched, Unpoly will [derive a target selector](/target-derivation) for the element.
-    In the example below, changing the *City* field would validate the target `#city_group`:
+    @param {Array<string>} [config.groupSelectors=['[up-form-group]', 'fieldset', 'label', 'form']]
+      An array of CSS selectors matching a [form group](/up-form-group).
 
-    ```html
-    <fieldset id="city_group">
-      <label for="city">City</label>
-      <input type="text" name="city" id="city" up-validate>
-    </fieldset>
-    ```
+      When [validating](/validation#validating-after-changing-a-field) a field,
+      Unpoly will re-render the [closest](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest)
+      form group around that field.
 
-    If no good selector cannot be derived from the group element, the resulting target will
-    use a `:has()` suffix that matches the changed field. In the example below the target
-    would be `fieldset:has(#city)`:
+      When a group is matched, Unpoly will [derive a target selector](/target-derivation) for the element.
+      In the example below, changing the *City* field would validate the target `#city_group`:
 
-    ```html
-    <fieldset> <!-- no [id] attribute to derive a selector from -->
-      <label for="city">City</label>
-      <input type="text" name="city" id="city" up-validate>
-    </fieldset>
-    ```
+      ```html
+      <fieldset id="city_group">
+        <label for="city">City</label>
+        <input type="text" name="city" id="city" up-validate>
+      </fieldset>
+      ```
 
-  @param {string} [config.fieldSelectors]
-    An array of CSS selectors that represent form fields, such as `input` or `select`.
+      If no good selector cannot be derived from the group element, the resulting target will
+      use a `:has()` suffix that matches the changed field. In the example below the target
+      would be `fieldset:has(#city)`:
 
-    When you add custom JavaScript controls to this list, matching elements should respond to the properties `{ name, value, disabled }`.
+      ```html
+      <fieldset> <!-- no [id] attribute to derive a selector from -->
+        <label for="city">City</label>
+        <input type="text" name="city" id="city" up-validate>
+      </fieldset>
+      ```
 
-  @param {string} [config.submitButtonSelectors]
-    An array of CSS selectors that represent submit buttons, such as `input[type=submit]` or `button[type=submit]`.
+    @param {string} [config.fieldSelectors]
+      An array of CSS selectors that represent form fields, such as `input` or `select`.
 
-  @param {string} [config.genericButtonSelectors]
-    An array of CSS selectors that represent push buttons with no default behavior, such as `input[type=button]` or `button[type=button]`.
+      When you add custom JavaScript controls to this list, matching elements should respond to the properties `{ name, value, disabled }`.
 
-    @experimental
+    @param {string} [config.submitButtonSelectors]
+      An array of CSS selectors that represent submit buttons, such as `input[type=submit]` or `button[type=submit]`.
 
-  @param {boolean} [config.validateBatch=true]
-    TODO: Params
+    @param {string} [config.genericButtonSelectors]
+      An array of CSS selectors that represent push buttons with no default behavior, such as `input[type=button]` or `button[type=button]`.
 
-  @param {number} [config.watchInputDelay=0]
-    The number of milliseconds to [wait before running a watcher callback](/watch-options#debouncing).
+      @experimental
 
-    This default delay is only applied when [watching the `input` event](/watch-options#events).
-    There is no default delay when watching other types of events.
+  @section Watching fields
 
-  @param {Array<string>|Function(Element): Array<string>} [config.watchInputEvents=['input', 'change']]
-    An array of events to substitute if [watching the `input` event](/watch-options#events).
+    @param {number} [config.watchInputDelay=0]
+      The number of milliseconds to [wait before running a watcher callback](/watch-options#debouncing).
 
-    This can be used to watch [misbehaving fields](/watch-options#normalizing-non-standard-events)
-    that don't emit the [standard `input` event](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/input_event)
-    as its value is being edited.
+      This default delay is only applied when [watching the `input` event](/watch-options#events).
+      There is no default delay when watching other types of events.
 
-    It's OK to name multiple events that may result in the same change (e.g. `['keydown', 'keyup']`).
-    Unpoly guarantees the callback is only run once per changed value.
+    @param {Array<string>|Function(Element): Array<string>} [config.watchInputEvents=['input', 'change']]
+      An array of events to substitute if [watching the `input` event](/watch-options#events).
 
-    Instead of configuring an array of event types, you may also set a function that accepts
-    a form field and returns an array of event types to watch for that field.
+      This can be used to watch [misbehaving fields](/watch-options#normalizing-non-standard-events)
+      that don't emit the [standard `input` event](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/input_event)
+      as its value is being edited.
 
-  @param {Array<string>|Function(Element): Array<string>} [config.watchChangeEvents=['change']]
-    An array of events to substitute if [watching the `change` event](/watch-options#events).
+      It's OK to name multiple events that may result in the same change (e.g. `['keydown', 'keyup']`).
+      Unpoly guarantees the callback is only run once per changed value.
 
-    This can be used to watch [misbehaving fields](/watch-options#normalizing-non-standard-events)
-    that don't emit the [standard `change` event](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/change_event)
-    after its value was changed.
+      Instead of configuring an array of event types, you may also set a function that accepts
+      a form field and returns an array of event types to watch for that field.
 
-    It's OK to name multiple events that may result in the same change (e.g. `['change', 'blur']`).
-    Unpoly guarantees the callback is only run once per changed value.
+    @param {Array<string>|Function(Element): Array<string>} [config.watchChangeEvents=['change']]
+      An array of events to substitute if [watching the `change` event](/watch-options#events).
 
-    Instead of configuring an array of event types, you may also set a function that accepts
-    a form field and returns an array of event types to watch for that field.
+      This can be used to watch [misbehaving fields](/watch-options#normalizing-non-standard-events)
+      that don't emit the [standard `change` event](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/change_event)
+      after its value was changed.
+
+      It's OK to name multiple events that may result in the same change (e.g. `['change', 'blur']`).
+      Unpoly guarantees the callback is only run once per changed value.
+
+      Instead of configuring an array of event types, you may also set a function that accepts
+      a form field and returns an array of event types to watch for that field.
+
+  @section Validation
+
+    @param {boolean} [config.validateBatch=true]
+      TODO: Params
 
   @stable
    */
@@ -361,11 +369,13 @@ up.form = (function() {
   ```
 
   @param {Element|jQuery|string} form
-    The form for which to parse render option.
+    The form for which to parse render options.
   @param {Object} [options]
     Additional options for the form submission.
 
     Values from these options will override any attributes set on the given form element.
+
+    @internal
   @function up.form.submitOptions
   @return {Object}
     The parsed submit options.
@@ -623,7 +633,7 @@ up.form = (function() {
   When the form is being [validated](/up-validate), this event is not emitted.
   Instead an `up:form:validate` event is emitted.
 
-  ### Changing render options
+  ## Changing render options
 
   Listeners may inspect and manipulate [render options](/up.render#parameters) for the coming fragment update.
 
@@ -638,33 +648,39 @@ up.form = (function() {
 
   @event up:form:submit
 
-  @param {Element} event.target
-    The element that caused the form submission.
+  @section Submission
 
-    This is usually a submit button or a focused field. If the element is not known, the event is emitted
-    on the `<form>` element.
+    @param {Element} event.form
+      The form that is being submitted.
 
-  @param {Element} event.form
-    The form that is being submitted.
+    @param {up.Params} event.params
+      The [form parameters](/up.Params) that will be send as the form's request payload.
 
-  @param {up.Params} event.params
-    The [form parameters](/up.Params) that will be send as the form's request payload.
+      Listeners may inspect and modify params before they are sent.
 
-    Listeners may inspect and modify params before they are sent.
+    @param {Element} [event.submitButton]
+      The button used to submit the form.
 
-  @param {Element} [event.submitButton]
-    The button used to submit the form.
+      If no button was pressed directly (e.g. the user pressed `Enter` inside a focused text field),
+      this returns the first submit button.
 
-    If no button was pressed directly (e.g. the user pressed `Enter` inside a focused text field),
-    this returns the first submit button.
+      If the form has no submit buttons, this property is `undefined`.
 
-  @param {Object} event.renderOptions
-    An object with [render options](/up.render#parameters) for the fragment update.
+    @param {Element} event.target
+      The element that caused the form submission.
 
-    Listeners may inspect and modify these options.
+      This is usually a submit button or a focused field from which the user pressed `Enter`.
+      If the element is not known, the event is emitted on the `<form>` element.
 
-  @param event.preventDefault()
-    Prevents the form from being submitted.
+  @section Render pass
+
+    @param {Object} event.renderOptions
+      An object with [render options](/up.render#parameters) for the fragment update.
+
+      Listeners may inspect and modify these options.
+
+    @param event.preventDefault()
+      Prevents the form from being submitted.
 
   @stable
   */
@@ -906,7 +922,7 @@ up.form = (function() {
   Form groups may be nested. This function returns the [closest](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest) group around the given element.
   If no closer group is found, the `<form>` element is returned.
 
-  ### Example
+  ## Example
 
   This is a form with two groups:
 
@@ -957,7 +973,7 @@ up.form = (function() {
   By default Unpoly will also consider a `<fieldset>` or `<label>` around a field to be a form group.
   You can configure this in `up.form.config.groupSelectors`.
 
-  ### Example
+  ## Example
 
   Many apps use form groups to wrap a label, input field, error message and help text:
 
@@ -1177,35 +1193,42 @@ up.form = (function() {
 
   @event up:form:validate
 
-  @param {Element} event.target
-    The form that is being validated.
+  @section Validation
 
-  @param {Element} event.form
-    The form that is being validated.
+    @param {Element} event.target
+      The form that is being validated.
 
-  @param {up.Params} event.params
-    The [form parameters](/up.Params) that will be sent as the form's request payload.
+    @param {Element} event.form
+      The form that is being validated.
 
-    Listeners may inspect and modify params before they are sent.
-    Note that the request may be a [batch of multiple validations](/up.validate#batching).
+    @param {up.Params} event.params
+      The [form parameters](/up.Params) that will be sent as the form's request payload.
 
-  @param {List<Element>} event.fields
-    The [form fields](/up.form.fields) that triggered this validation pass.
+      Listeners may inspect and modify params before they are sent.
+      Note that the request may be a [batch of multiple validations](/up.validate#batching).
 
-    When multiple fields are validating within the same [task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/),
-    Unpoly will make a [single validation request with multiple targets](/up.validate#batching).
+    @param {List<Element>} event.fields
+      The [form fields](/up.form.fields) that triggered this validation pass.
 
-    @experimental
+      When multiple fields are validating within the same [task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/),
+      Unpoly will make a [single validation request with multiple targets](/up.validate#batching).
 
-  @param {Object} event.renderOptions
-    An object with [render options](/up.render#parameters) for the fragment update
-    that will show the validation results.
+      The names of the validating fields are also sent
+      as an `X-Up-Validate` request header.
 
-    Listeners may inspect and modify these options.
-    Note that the request may be a [batch of multiple validations](/up.validate#batching).
+      @experimental
 
-  @param event.preventDefault()
-    Prevents the validation request from being sent to the server.
+  @section Render pass
+
+    @param {Object} event.renderOptions
+      An object with [render options](/up.render#parameters) for the fragment update
+      that will show the validation results.
+
+      Listeners may inspect and modify these options.
+      Note that the request may be a [batch of multiple validations](/up.validate#batching).
+
+    @param event.preventDefault()
+      Prevents the validation request from being sent to the server.
 
   @stable
   */
@@ -1313,7 +1336,7 @@ up.form = (function() {
 
   The programmatic variant of this is the [`up.submit()`](/up.submit) function.
 
-  ### Example
+  ## Example
 
   ```html
   <form method="post" action="/users" up-submit up-target=".content">
@@ -1321,7 +1344,7 @@ up.form = (function() {
   </form>
   ```
 
-  ### Handling validation errors
+  ## Handling validation errors
 
   When the form could not be submitted due to invalid user input,
   Unpoly can re-render the form with validation errors.
@@ -1329,12 +1352,12 @@ up.form = (function() {
   See [validating forms](/validation) for details and examples.
 
 
-  ### Showing that the form is processing
+  ## Showing that the form is processing
 
   See [Loading state](/loading-state) and [Disabling form controls while working](/disabling-forms).
 
 
-  ### Short notation
+  ## Short notation
 
   You may omit the `[up-submit]` attribute if the form has one of the following attributes:
 
@@ -1344,7 +1367,7 @@ up.form = (function() {
 
   Such a form will still be submitted through Unpoly.
 
-  ### Handling all forms automatically
+  ## Handling all forms automatically
 
   You can configure Unpoly to handle *all* forms on a page without requiring an `[up-submit]` attribute.
 
@@ -1783,7 +1806,7 @@ up.form = (function() {
 
   The `[up-switch]` element and its observed elements must be inside the same `<form>`.
 
-  ### Example: Select options
+  ## Example: Select options
 
   The controlling form field gets an `[up-switch]` attribute with a selector for the elements to show or hide:
 
@@ -1812,7 +1835,7 @@ up.form = (function() {
   </div>
   ```
 
-  ### Example: Text field
+  ## Example: Text field
 
   The controlling `<input>` gets an `[up-switch]` attribute with a selector for the elements to show or hide:
 
@@ -1835,7 +1858,7 @@ up.form = (function() {
   </div>
   ```
 
-  ### Example: Checkbox
+  ## Example: Checkboxs
 
   For checkboxes you may match against the pseudo-values `:checked` or `:unchecked`:
 
@@ -1861,12 +1884,16 @@ up.form = (function() {
   </div>
   ```
 
-  ### Example: Radio button
+  ## Example: Radio buttons
+
+  Use `[up-switch]` on a container for a radio button group:
 
   ```html
-  <input type="radio" name="advancedness" value="basic" up-switch=".target">
-  <input type="radio" name="advancedness" value="advanced" up-switch=".target">
-  <input type="radio" name="advancedness" value="very-advanced" up-switch=".target">
+  <div up-switch=".target">
+    <input type="radio" name="advancedness" value="basic">
+    <input type="radio" name="advancedness" value="advanced">
+    <input type="radio" name="advancedness" value="very-advanced">
+  </div>
 
   <div class="target" up-show-for="basic">
     only shown for advancedness = basic
@@ -1881,7 +1908,7 @@ up.form = (function() {
   </div>
   ```
 
-  ### Example: Values containing spaces
+  ## Example: Values containing spaces
 
   If your values might contain spaces, you may also serialize them as a [relaxed JSON](/relaxed-json) array:
 
@@ -1904,6 +1931,10 @@ up.form = (function() {
   @selector [up-switch]
   @param up-switch
     A CSS selector for elements whose visibility depends on this field's value.
+  @param [up-switch-region='form']
+    A selector for the region in which elements are switched.
+
+    By default all matching elements within the form are switched.
   @stable
   */
 
@@ -1986,7 +2017,7 @@ up.form = (function() {
   </form>
   ```
 
-  ### Watching radio buttons
+  ## Watching radio buttons
 
   Multiple radio buttons with the same `[name]` produce a single value for the form.
 
