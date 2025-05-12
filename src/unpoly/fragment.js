@@ -512,7 +512,7 @@ up.fragment = (function() {
 
   ## Enabling side effects
 
-  This function has many options to enable scrolling, focus, request cancelation and other side
+  This function has many options to enable scrolling, focus, request cancellation and other side
   effects. These options are all disabled by default and must be opted into one-by-one.
 
   To enable defaults that a user would expect for navigation (like clicking a link),
@@ -603,7 +603,7 @@ up.fragment = (function() {
   [Navigates](/navigation) to the given URL by updating a major fragment in the current page.
 
   `up.navigate()` will mimic a click on a vanilla `<a href>` link to satisfy user expectations
-  regarding scrolling, focus, request cancelation and [many other side effects](/navigation).
+  regarding scrolling, focus, request cancellation and [many other side effects](/navigation).
   To update a fragment without side effects, use `up.render()`.
 
   Instead of calling `up.navigate()` you may also call `up.render({ navigate: true })`.

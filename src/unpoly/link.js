@@ -108,83 +108,91 @@ up.link = (function() {
 
   @property up.link.config
 
-  @param {Array<string>} config.followSelectors
-    An array of CSS selectors matching links that will be [followed through Unpoly](/up-follow).
+  @section Followable links
 
-    You can customize this property to automatically follow *all* links on a page without requiring an `[up-follow]` attribute.
-    See [Handling all links and forms](/handling-everything).
+    @param {Array<string>} config.followSelectors
+      An array of CSS selectors matching links that will be [followed through Unpoly](/up-follow).
 
-  @param {Array<string>} config.noFollowSelectors
-    Exceptions to `up.link.config.followSelectors`.
+      You can customize this property to automatically follow *all* links on a page without requiring an `[up-follow]` attribute.
+      See [Handling all links and forms](/handling-everything).
 
-    Matching links will *not* be [followed through Unpoly](/up-follow), even if they match `up.link.config.followSelectors`.
+    @param {Array<string>} config.noFollowSelectors
+      Exceptions to `up.link.config.followSelectors`.
 
-    By default Unpoly excludes:
+      Matching links will *not* be [followed through Unpoly](/up-follow), even if they match `up.link.config.followSelectors`.
 
-    - Links with an `[up-follow=false]` attribute.
-    - Links with a cross-origin `[href]`.
-    - Links with a [`[target]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#attr-target) attribute
-      (to target an iframe or open new browser tab).
-    - Links with a [`[download]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#attr-download) attribute.
-    - Links with an `[href]` attribute starting with `javascript:`.
-    - Links with an `[href="#"]` attribute that don't also have local HTML
-      in an `[up-document]`, `[up-fragment]` or `[up-content]` attribute.
+      By default Unpoly excludes:
 
-  @param {Array<string>} config.instantSelectors
-    An array of CSS selectors matching links that are [followed on `mousedown`](/up-instant)
-    instead of on `click`.
+      - Links with an `[up-follow=false]` attribute.
+      - Links with a cross-origin `[href]`.
+      - Links with a [`[target]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#attr-target) attribute
+        (to target an iframe or open new browser tab).
+      - Links with a [`[download]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#attr-download) attribute.
+      - Links with an `[href]` attribute starting with `javascript:`.
+      - Links with an `[href="#"]` attribute that don't also have local HTML
+        in an `[up-document]`, `[up-fragment]` or `[up-content]` attribute.
 
-    You can customize this property to follow *all* links on `mousedown` without requiring an `[up-instant]` attribute.
-    See [Handling all links and forms](/handling-everything).
+  @section Instant click
 
-    Note that an instant link must also by [followable](/up.link.isFollowable), usually by giving it an
-    [`[up-follow]`](/up-follow) attribute or by configuring `up.link.config.followSelectors`.
+    @param {Array<string>} config.instantSelectors
+      An array of CSS selectors matching elements that are [activated on `mousedown`](/up-instant)
+      instead of on `click`.
 
-  @param {Array<string>} config.noInstantSelectors
-    Exceptions to `up.link.config.instantSelectors`.
+      You can customize this property to follow *all* links on `mousedown` without requiring an `[up-instant]` attribute.
+      See [Handling all links and forms](/handling-everything).
 
-    Matching links will *not* be [followed on `mousedown`](/up-instant), even if they match `up.link.config.instantSelectors`.
+      Note that an instant link must also be [followable](/up.link.isFollowable), usually by giving it an
+      [`[up-follow]`](/up-follow) attribute or by configuring `up.link.config.followSelectors`.
 
-    By default Unpoly excludes:
+    @param {Array<string>} config.noInstantSelectors
+      Exceptions to `up.link.config.instantSelectors`.
 
-    - Links with an `[up-instant=false]` attribute.
-    - Links that are [not followable](#config.noFollowSelectors).
+      Matching links will *not* be [followed on `mousedown`](/up-instant), even if they match `up.link.config.instantSelectors`.
 
-  @param {Array<string>} config.preloadSelectors
-    An array of CSS selectors matching links that are [preloaded on hover](/preloading#on-hover).
+      By default Unpoly excludes:
 
-    You can customize this property to preload *all* links on `mousedown` without requiring an `[up-preload]` attribute.
-    See [Handling all links and forms](/handling-everything).
+      - Elements with an `[up-instant=false]` attribute.
+      - Links that are [not followable](#config.noFollowSelectors).
 
-  @param {Array<string>} config.noPreloadSelectors
-    Exceptions to `up.link.config.preloadSelectors`.
+  @section Preloading
 
-    Matching links will *not* be [preloaded on hover](/preloading#on-hover), even if they match `up.link.config.preloadSelectors`.
+    @param {Array<string>} config.preloadSelectors
+      An array of CSS selectors matching links that are [preloaded on hover](/preloading#on-hover).
 
-    By default Unpoly excludes:
+      You can customize this property to preload *all* links on `mousedown` without requiring an `[up-preload]` attribute.
+      See [Handling all links and forms](/handling-everything).
 
-    - Links with an `[up-preload=false]` attribute.
-    - Links that are [not followable](#config.noFollowSelectors).
-    - Links with an [unsafe method](/up.link.isSafe).
-    - When the link destination [cannot be cached](/up.network.config#config.autoCache).
+    @param {Array<string>} config.noPreloadSelectors
+      Exceptions to `up.link.config.preloadSelectors`.
 
-  @param {number} [config.preloadDelay=90]
-    The number of milliseconds to wait before [preloading on hover](/preloading#on-hover).
+      Matching links will *not* be [preloaded on hover](/preloading#on-hover), even if they match `up.link.config.preloadSelectors`.
 
-  @param {Array<string>} [config.clickableSelectors]
-    A list of CSS selectors matching elements that should behave like links or buttons.
+      By default Unpoly excludes:
 
-    See [Clicking on non-interactive elements](/faux-interactive-elements).
+      - Links with an `[up-preload=false]` attribute.
+      - Links that are [not followable](#config.noFollowSelectors).
+      - Links with an [unsafe method](/up.link.isSafe).
+      - When the link destination [cannot be cached](/up.network.config#config.autoCache).
 
-    @experimental
+    @param {number} [config.preloadDelay=90]
+      The number of milliseconds to wait before [preloading on hover](/preloading#on-hover).
 
-  @param {Array<string>} [config.noClickableSelectors]
-    Exceptions to `up.link.config.clickableSelectors`.
+  @section Interactive elements
 
-    Matching elements will *not* be receive [interactive behavior](/up-follow),
-    even if they match `up.link.config.clickableSelectors`.
+    @param {Array<string>} [config.clickableSelectors]
+      A list of CSS selectors matching elements that should behave like links or buttons.
 
-    @experimental
+      See [Clicking on non-interactive elements](/faux-interactive-elements).
+
+      @experimental
+
+    @param {Array<string>} [config.noClickableSelectors]
+      Exceptions to `up.link.config.clickableSelectors`.
+
+      Matching elements will *not* be receive [interactive behavior](/up-follow),
+      even if they match `up.link.config.clickableSelectors`.
+
+      @experimental
 
   @stable
   */
@@ -258,7 +266,7 @@ up.link = (function() {
 
   Emits the event `up:link:follow`.
 
-  ### Examples
+  ## Examples
 
   Assume we have a link with an [`[up-target]`](/up-follow#up-target) attribute:
 
@@ -370,7 +378,7 @@ up.link = (function() {
   Parses the [render](/up.render) options that would be used to
   [follow](/up.follow) the given link, but does not render.
 
-  ### Example
+  ## Example
 
   Given a link with some `[up-...]` attributes:
 
@@ -490,7 +498,7 @@ up.link = (function() {
 
   The event is emitted on the `<a>` element that is being followed.
 
-  ### Changing render options
+  ## Changing render options
 
   Listeners may inspect and manipulate [render options](/up.render#parameters) for the coming fragment update.
 
@@ -518,7 +526,6 @@ up.link = (function() {
     }
   })
   ```
-
 
   @event up:link:follow
   @param {Element} event.target
@@ -612,7 +619,7 @@ up.link = (function() {
   Listeners may prevent this event to stop the link from being preloaded,
   or [change render options](/up:link:follow#changing-render-options) for the preload request.
 
-  ### Example
+  ## Example
 
   The following would disable preloading on slow 2G connections:
 
@@ -621,7 +628,6 @@ up.link = (function() {
     // https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation
     return navigator.connection && navigator.connection.effectiveType.include('2g')
   }
-
 
   up.on('up:link:preload', function(event) {
     if (isSlowConnection()) {
@@ -750,7 +756,7 @@ up.link = (function() {
 
   See [Clicking on non-interactive elements](/faux-interactive-elements) for an overview of similiar techniques.
 
-  ### Example
+  ## Example
 
   Add the `[up-clickable]` attribute to a non-interactive element, like a `<span>`:
 
@@ -768,7 +774,7 @@ up.link = (function() {
   })
   ```
 
-  ### Act on press
+  ## Act on press
 
   To activate the element on `mousedown` instead of `click`, also set an `[up-instant]` attribute:
 
@@ -776,7 +782,7 @@ up.link = (function() {
   <span id="faux-button" up-clickable up-instant>Click me</span> <!-- mark-phrase "up-instant" -->
   ```
 
-  ### Unobtrusive use
+  ## Unobtrusive use
 
   To make elements clickable without an explicit `[up-clickable]` attribute, configure `up.link.config.clickableSelectors`:
 
@@ -791,6 +797,8 @@ up.link = (function() {
   ```
 
   @selector [up-clickable]
+  @param [up-instant]
+    Whether this element is activated on `mousedown` instead of waiting for `click`.
   @experimental
   */
   up.macro(config.selectorFn('clickableSelectors'), makeClickable)
@@ -935,7 +943,7 @@ up.link = (function() {
   This is useful to listen to links being activated, without needing to know whether
   a link is `[up-instant]`.
 
-  ### Example
+  ## Example
 
   Assume we have two links, one of which is `[up-instant]`:
 
@@ -952,7 +960,7 @@ up.link = (function() {
   })
   ```
 
-  ### Cancelation
+  ## Cancellation
 
   You may cancel an `up:click` event using `event.preventDefault()`.
 
@@ -960,12 +968,12 @@ up.link = (function() {
 
   The underlying `click` or `mousedown` event will also be canceled.
 
-  ### Accessibility
+  ## Accessibility
 
   If the user activates an element using their keyboard, the `up:click` event will be emitted
   when the key is pressed even if the element has an `[up-instant]` attribute.
 
-  ### Only unmodified clicks are considered
+  ## Only unmodified clicks are considered
 
   To prevent overriding native browser behavior, the `up:click` is only emitted for unmodified clicks.
 
@@ -1319,45 +1327,43 @@ up.link = (function() {
   })
 
   /*-
-  Follows this link on `mousedown` instead of `click` ("Act on press").
+  Activates this link-like element on `mousedown` instead of `click` ("Act on press").
 
-  This will save precious milliseconds that would otherwise be spent
-  on waiting for the user to release the mouse button. Since an
-  AJAX request will be triggered right way, the interaction will
-  appear faster.
+  For links with `[up-follow]` this will save some time that would otherwise be spent
+  on waiting for the user to release the mouse button. Since an AJAX request will be triggered right way,
+  the interaction will appear faster.
 
-  Links with the `[up-instant]` attribute are always [followed by Unpoly](/up-follow) and will not make a full page load.
+  For [faux-interactive elements](/faux-interactive-elements) setting `[up-instant]` will cause
+  the `up:click` event to be emitted on `mousedown` instead of `click`.
 
-  To [follow all links on `mousedown`](/handling-everything#following-all-links-on-mousedown), configure `up.link.config.instantSelectors`.
+  To apply the instant effect without changing your HTML, configure `up.link.config.instantSelectors`.
 
-  ### Example
+  ## Example
 
   ```html
   <a href="/users" up-follow up-instant>User list</a> <!-- mark-phrase "up-instant" -->
   ```
 
-  ### Accessibility
+  ## Accessibility
 
-  Links with `[up-instant]` can still be activated with the keyboard.
+  Links or [faux-interactive elements](/faux-interactive-elements) with `[up-instant]`
+  can still be activated with the keyboard.
 
-  With `[up-instant]` users can no longer cancel a click by dragging the pressed mouse away from the link.
+  With `[up-instant]` users can no longer cancel a click by dragging the pressed mouse away from the elements.
   However, for navigation actions this isn't required. E.g. many operation systems switch tabs on `mousedown`
   instead of `click`.
 
   @selector [up-instant]
-  @params-note
-    May be combined with all modifying attributes for `[up-follow]`.
   @stable
   */
 
   /*-
-  Add an `[up-expand]` attribute to any element to enlarge the click area of a
-  descendant link.
+  Enlarges the click area of a descendant link.
 
   `[up-expand]` honors all the Unppoly attributes in expanded links, like
   [`[up-target]`](/up-follow#up-target), `[up-instant]` or `[up-preload]`.
 
-  ### Example
+  ## Example
 
   ```html
   <div class="notification" up-expand>
@@ -1369,7 +1375,7 @@ up.link = (function() {
   In the example above, clicking anywhere within `.notification` element
   would [follow](/up.follow) the *Close* link.
 
-  ### Elements with multiple contained links
+  ## Elements with multiple contained links
 
   If a container contains more than one link, you can set the value of the
   `[up-expand]` attribute to a CSS selector to define which link should be expanded:
@@ -1382,7 +1388,7 @@ up.link = (function() {
   </div>
   ```
 
-  ### Limitations
+  ## Limitations
 
   `[up-expand]` has some limitations for advanced browser users:
 
@@ -1394,7 +1400,8 @@ up.link = (function() {
 
   @selector [up-expand]
   @params-note
-    May be combined with all modifying attributes for `[up-follow]`.
+    All attributes of the descendant link will also be applied to the enlarged
+    click area.
   @param [up-expand]
     A CSS selector that defines which containing link should be expanded.
 
@@ -1449,12 +1456,15 @@ up.link = (function() {
       over this link [for a while](#up-preload-delay). On touch devices preloading will
       begin when the user places her finger on the link. Also see [preloading on hover](/preloading#on-hover).
 
-      When set to `'insert'`, preloading will start immediatedly when this
+      When set to `'insert'`, preloading will start immediately when this
       link is inserted into the DOM. Also see [eagerly preloading on insertion](/preloading#on-insert).
 
       When set to `'reveal'`, preloading will start when the link is scrolled
       into the [viewport](/up-viewport). If the link is already visible when
       inserted, preloading will start immediately.  Also see [preloading when a link becomes visible](/preloading#on-reveal).
+
+      When set to `'false'`, the link will not be preloaded.
+      You can still preload this link programmatically using `up.link.preload()`.
 
     @param [up-preload-delay]
       [`[up-preload="hover"]`](#up-preload), this requires the user to hover

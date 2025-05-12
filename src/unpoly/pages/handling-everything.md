@@ -91,7 +91,7 @@ See [Migrating legacy JavaScripts](/legacy-scripts).
 [navigation](/navigation) by default.
 
 When navigating Unpoly will use defaults to satisfy the user's expectation regarding
-scrolling, history, focus, request cancelation, etc.
+scrolling, history, focus, request cancellation, etc.
 
 See [navigation](/navigation) for a detailed breakdown of navigation defaults
 and how to customize them.

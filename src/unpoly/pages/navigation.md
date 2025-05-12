@@ -3,7 +3,7 @@ Navigation
 
 When a browser user interacts with a standard hyperlink or form,
 they have certain expectations regarding scrolling, history, focus,
-request cancelation, etc. When an Unpoly feature
+request cancellation, etc. When an Unpoly feature
 *navigates* it will mimic the behavior of standard hyperlinks and forms.
 
 When an Unpoly feature does *not* navigate, it only renders a new fragment,

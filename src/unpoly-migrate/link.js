@@ -96,7 +96,7 @@ This is done by:
 - [Preloading the link's destination URL](/preloading)
 - [Triggering the link on `mousedown`](/up-instant) instead of on `click`
 
-### Example
+## Example
 
 Use `[up-dash]` like this:
 
@@ -133,7 +133,7 @@ up.on('up:link:preload', function(event) {
 /*-
 Makes any element [behave like a hyperlink](/faux-interactive-elements).
 
-### Example
+## Example
 
 The following `<span>` element will [navigate](/up-follow) to `/details` when clicked:
 
