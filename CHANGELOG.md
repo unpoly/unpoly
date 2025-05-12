@@ -68,6 +68,8 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 - A new `[up-switch-region]` attribute allows to expand or narrow the region where elements are switched.
 - `[up-switch]` now works on a container for a radio group.
 - ⚠️ Unpoly will no longer un-hide elements targeted by `[up-switch]` when that element has neither `[up-show-for]` nor `[up-hide-for]` attributes. This was an undocumented side effect of the old implementation.
+- ⚠️ Fields with `[up-switch]` now require a `[name]` attribute.
+- Using `[up-switch]` on a text field will now switch while the user is typing (as opposed to when the field is blurred).
 
 
 ### Validations with `[up-validate]`
