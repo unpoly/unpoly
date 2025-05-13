@@ -39,7 +39,11 @@ up.Request.XHRRenderer = class XHRRenderer {
 
     Object.assign(xhr, handlers)
 
-    Promise.resolve(this._getPayload()).then(xhr.send)
+    Promise.resolve(this._getPayload()).then(
+      (payload) => {
+        if (this.state !== 'loading') return
+        xhr.send(payload)
+      })
   }
 
   _getMethod() {
