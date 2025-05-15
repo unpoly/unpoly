@@ -1026,7 +1026,7 @@ up.form = (function() {
 
   /*-
   Render a new form state from its current field values, to show validation errors or
-  update [dependent fields](/dependent-fields).
+  update [dependent elements](/reactive-server-forms).
 
   Typical use cases are to [show validation errors](/validation#validating-after-changing-a-field)
   after a field was changed or to update forms where one field depends on the value of another.
@@ -1097,7 +1097,7 @@ up.form = (function() {
   up.validate('form')
   ```
 
-  Also see [preventing race conditions](/dependent-fields#preventing-race-conditions).
+  Also see [preventing race conditions](/reactive-server-forms#preventing-race-conditions).
 
   @function up.validate
 
@@ -1459,7 +1459,7 @@ up.form = (function() {
 
   /*-
   Renders a new form state when a field changes, to show validation errors or
-  update [dependent fields](/dependent-fields).
+  update [dependent elements](/reactive-server-forms).
 
   When a form field with an `[up-validate]` attribute is changed, the form is submitted to the server
   which is expected to render a new form state from its current field values.
@@ -1638,7 +1638,7 @@ up.form = (function() {
   server responds with a non-200 status code.
 
   Upon seeing an `X-Up-Validate` header, the server now renders a new state form from request parameters,
-  showing eventual validation errors and updating [dependent fields](/dependent-fields):
+  showing eventual validation errors and updating [dependent elements](/reactive-server-forms):
 
   ```html
   <form action="/users">
@@ -1690,12 +1690,12 @@ up.form = (function() {
   <input type="text" name="email" up-validate=".email-errors, .base-errors"> <!-- mark-phrase ".email-errors, .base-errors" -->
   ```
 
-  ## Updating dependent fields
+  ## Updating dependent elements
 
   The `[up-validate]` attribute is a useful tool to partially update a form
-  when one fields depends on the value of another field.
+  when an element depends on the value of another field.
 
-  See [dependent fields](/dependent-fields) for more details and examples.
+  See [Reactive server forms](/reactive-server-forms) for more details and examples.
 
 
   ## Validating while typing
@@ -1710,7 +1710,7 @@ up.form = (function() {
   Such issues are solved with `[up-validate]`. The form will eventually show a consistent state,
   regardless of how fast the user clicks or how slow the network is.
 
-  See [preventing race conditions](/dependent-fields#preventing-race-conditions) for more details.
+  See [preventing race conditions](/reactive-server-forms#preventing-race-conditions) for more details.
 
   ## Validating multiple fields
 
@@ -1757,7 +1757,7 @@ up.form = (function() {
   To update form fragments from your JavaScript, use the [`up.validate()`](/up.validate) function.
   You may combine `[up-validate]` and `up.validate()` within the same form. Their updates
   will be [batched together](/up.validate#batching) in order to
-  [prevent race conditions](/dependent-fields#preventing-race-conditions).
+  [prevent race conditions](/reactive-server-forms#preventing-race-conditions).
 
 
   @selector [up-validate]
@@ -1892,7 +1892,7 @@ up.form = (function() {
   or when a new match for `.role-dependent` is inserted into the form.
 
   You can use the `up:form:switch` event to implement arbitrary client-side effects.
-  To implement asynchronous effects that are rendered on the server, [use `[up-validate]`](/dependent-fields).
+  To implement asynchronous effects that are rendered on the server, [use `[up-validate]`](/reactive-server-forms).
 
   ## Switching for multiple values {#multiple-values}
 

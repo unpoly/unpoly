@@ -249,7 +249,7 @@ up.FormValidator = class FormValidator {
     // { fail: false }.
     options.failOptions = false
 
-    // Re-rendering forms may cause dependent fields to disappear.
+    // Re-rendering forms may cause dependent elements to disappear.
     // Let's not blow up the render pass in that case.
     options.defaultMaybe = true
 

@@ -1,7 +1,7 @@
-Dependent fields
-================
+Reactive server forms
+=====================
 
-Using the `[up-validate]` attribute you can implement forms where the state of some fields
+Using the `[up-validate]` attribute you can implement forms where the state of some elements
 depend on the value of other fields.
 
 Declaring dependencies
@@ -9,7 +9,7 @@ Declaring dependencies
 
 This is a form to purchase postage for international parcels: 
 
-![A form with many dependent fields](images/form-with-dependent-fields.svg){:width='625'}
+![A form with many dependent elements](images/form-with-dependent-fields.svg){:width='625'}
 
 The fields in this form have many dependencies between them:
 
@@ -73,7 +73,7 @@ in addition to the country select:
 Preventing race conditions
 --------------------------
 
-Custom implementations of dependent fields will often exhibit race conditions, e.g. when the user
+Custom implementations of dependent elements will often exhibit race conditions, e.g. when the user
 is quickly changing fields while requests are still in flight.
 
 Such issues are solved with `[up-validate]`. The form will eventually show a consistent state,
@@ -113,4 +113,4 @@ You may also assign `[up-watch-disable]` to individual fields, or any element th
 
 Also see [disabling fields while working](/watch-options#disabling).
 
-@page dependent-fields
+@page reactive-server-forms

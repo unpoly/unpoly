@@ -161,7 +161,7 @@ For a full example see the [documentation for `[up-validate]`](/up-validate).
 
 > [tip]
 > The `[up-validate]` attribute is a useful tool to partially update a form when one fields depends on the value of another field.
-> See [dependent fields](/dependent-fields) for more details and examples.
+> See [Reactive server forms](/reactive-server-forms) for more details and examples.
 
 
 Validating while typing

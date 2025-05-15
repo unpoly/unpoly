@@ -129,3 +129,8 @@ RedirectPermanent /up.feedback /up.status
 
 RedirectPermanent /navigate /navigation
 RedirectPermanent /navigating /navigation
+
+RedirectPermanent /dependent-fields /reactive-server-forms
+RedirectPermanent /dependent-elements /reactive-server-forms
+RedirectPermanent /dependent-forms /reactive-server-forms
+

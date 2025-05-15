@@ -992,7 +992,7 @@ This release addresses many edge cases with features that watch form fields for 
 
 - Watchers now detect changes in fields that were inserted dynamically later. This regression was introduced by Unpoly 3.0.
 - Watchers now detect changes when the form is [reset](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/reset).
-- Fix an issue where `[up-autosubmit]` would not work on forms that also have [dependent fields](/dependent-fields) using `[up-validate]`.
+- Fix an issue where `[up-autosubmit]` would not work on forms that also have [dependent fields](/reactive-server-forms) using `[up-validate]`.
 - Watchers no longer run callbacks if the form was [aborted](/aborting-requests) or detached while [waiting for a previous async callback](/up-watch#async-callbacks).
 - Watchers now abort their [debounce delay](/watch-options#debouncing) if the entire form is aborted. Previously it would abort the delay if any watched field was aborted.
 - `[up-autosubmit]` now aborts a debounce delay if either the form element or the [form's target](/up-submit#up-target) are aborted. It no longer aborts the delay if any watched field is aborted.
@@ -1996,7 +1996,7 @@ Unpoly 3 has a <b>second</b> solution for forms with many `[up-validate]` depend
 - Validation will only have a single concurrent request at a time. Additional validation passes while the request is in flight will be queued. 
 - Form will eventually show a consistent state, regardless how fast the user clicks or how slow the network is.
 
-See [Dependent fields](/dependent-fields) for a full example.
+See [Reactive server forms](/reactive-server-forms) for a full example.
 
 
 #### Watching fields for changes
@@ -2294,7 +2294,7 @@ In our ongoing efforts to evolve Unpoly's documentation from an API reference to
 - [Controlling focus](/focus)
 - [Validating forms](/validation)
 - [Disabling forms while working](/disabling-forms)
-- [Dependent fields](/dependent-fields)
+- [Reactive server forms](/reactive-server-forms)
 - [Watch options](/watch-options)
 - [Caching](/caching)
 - [Handling network issues](/network-issues)
