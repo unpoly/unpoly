@@ -6393,6 +6393,31 @@ describe('up.form', function() {
           expect(form2Target).toBeVisible()
         })
 
+        it('switches all matching targets', async function() {
+          const form = fixture('form')
+          const formInput = e.affix(form, 'input[name="foo"][up-switch=".target"]')
+          const formTarget1 = e.affix(form, '.target[up-show-for="active"]')
+          const formTarget2 = e.affix(form, '.target[up-show-for="active"]')
+          up.hello(form)
+
+          expect(formTarget1).toBeHidden()
+          expect(formTarget2).toBeHidden()
+
+          formInput.value = 'active'
+          Trigger.change(formInput)
+          await wait()
+
+          expect(formTarget1).toBeVisible()
+          expect(formTarget2).toBeVisible()
+
+          formInput.value = 'inactive'
+          Trigger.change(formInput)
+          await wait()
+
+          expect(formTarget1).toBeHidden()
+          expect(formTarget2).toBeHidden()
+        })
+
         it("can watch a form-external field", async function() {
           const container = fixture('#container')
           const form = e.affix(container, 'form#form-id')
@@ -7020,7 +7045,37 @@ describe('up.form', function() {
             expect($target).toBeDisabled()
           })
 
-          it("enables the target element if its up-enable-for attribute contains a value ':present' and the select value is present", async function() {
+          it('disables all fields within a targeted container', async function() {
+            const form = fixture('form')
+            const controllingField = e.affix(form, 'input[name="foo"][up-switch=".target"]')
+            const targetContainer = e.affix(form, '.target[up-enable-for="active"]')
+            const targetedField1 = e.affix(targetContainer, 'input[name=field1]')
+            const targetedField2 = e.affix(targetContainer, 'input[name=field2]')
+            const untargetedField = e.affix(form, 'input[name=field3][up-enable-for="active"]')
+            up.hello(form)
+
+            expect(targetedField1).toBeDisabled()
+            expect(targetedField2).toBeDisabled()
+            expect(untargetedField).toBeEnabled()
+
+            controllingField.value = 'active'
+            Trigger.change(controllingField)
+            await wait()
+
+            expect(targetedField1).toBeEnabled()
+            expect(targetedField2).toBeEnabled()
+            expect(untargetedField).toBeEnabled()
+
+            controllingField.value = 'inactive'
+            Trigger.change(controllingField)
+            await wait()
+
+            expect(targetedField1).toBeDisabled()
+            expect(targetedField2).toBeDisabled()
+            expect(untargetedField).toBeEnabled()
+          })
+
+          it("enables the target element if its [up-enable-for] attribute contains a value ':present' and the select value is present", async function() {
             const $target = this.$form.affix('input.target[up-enable-for=":present"]')
             up.hello(this.$form)
             await wait()
@@ -7033,7 +7088,7 @@ describe('up.form', function() {
             expect($target).toBeEnabled()
           })
 
-          it("enables the target element if its up-enable-for attribute contains a value ':blank' and the select value is blank", async function() {
+          it("enables the target element if its [up-enable-for] attribute contains a value ':blank' and the select value is blank", async function() {
             const $target = this.$form.affix('input.target[up-enable-for=":blank"]')
             up.hello(this.$form)
             await wait()
@@ -7046,7 +7101,7 @@ describe('up.form', function() {
             expect($target).toBeDisabled()
           })
 
-          it("enables the target element if its up-enable-for attribute contains the select value encoded as a JSON array", async function() {
+          it("enables the target element if its [up-enable-for] attribute contains the select value encoded as a JSON array", async function() {
             const $target = this.$form.affix('input.target')
             $target.attr('up-enable-for', '["Some phrase"]')
             up.hello(this.$form)
