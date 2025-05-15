@@ -117,10 +117,15 @@ up.fragment = (function() {
     Also see [Derived target verification](/target-derivation#verification).
 
   @param {Object} [config.renderOptions]
-    An object of default render options to always apply.
+    An object of low-level render options to apply to *any* render pass.
 
-    When [navigating](/navigation), the defaults from `up.fragment.config.navigateOptions` will
-    also be applied.
+    When [navigating](/navigation), the defaults from `up.fragment.config.navigateOptions` will also be applied.
+
+    > [!important]
+    > By design only a minimal set of options is configured. This is to spare callers from excessive unsetting
+    > of defaults when rendering a fragment without navigation.
+    > Any opinionated settings (in particular `{ cache, history, scroll }`)
+    > should be configured in `up.fragment.config.navigateOptions`.
 
     @experimental
 
