@@ -59,6 +59,7 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 - Fix all cases where a watched field outside its form (with `[form]` attribute) is added or removed.
 - When a watched field does run a callback, a purple event badge is logged to better understand cause and effect.
 - ⚠️ Watching an individual radio button will now throw an error. Watch a container for the entire radio group instead.
+- Directly watching a field without a `[name]` will now throw an error explaining that this attribute is required. In earlier versions callbacks were simply never called.
 
 
 ### Reworked `[up-switch]`

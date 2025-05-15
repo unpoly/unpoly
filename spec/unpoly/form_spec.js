@@ -1468,12 +1468,27 @@ describe('up.form', function() {
         it('throws an error', function() {
           let [form, radioButton] = htmlFixtureList(`
             <form>
-              <input type="radio">Name</input>
+              <input name="foo" type="radio">
             </form>  
           `)
 
           let doWatch = () => up.watch(radioButton, u.noop)
           expect(doWatch).toThrowError(/Use up\.watch\(\) with the container of a radio group/i)
+        })
+
+      })
+
+      describe('with a field that has no [name]', function() {
+
+        it('throws an error', function() {
+          let [form, namelessInput] = htmlFixtureList(`
+            <form>
+              <input type="text">
+            </form>  
+          `)
+
+          let doWatch = () => up.watch(namelessInput, u.noop)
+          expect(doWatch).toThrowError(/up\.watch\(\) can only watch fields with a \[name\] attribute/i)
         })
 
       })

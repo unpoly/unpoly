@@ -36,6 +36,10 @@ up.FieldWatcher = class FieldWatcher {
     if (this._root.matches('input[type=radio]')) {
       fail('Use %s with the container of a radio group, not with an individual radio button (%o)')
     }
+
+    if (up.form.isField(this._root) && !this._root.name) {
+      fail('%s can only watch fields with a [name] attribute (%o)')
+    }
   }
 
   _trackAbort() {
