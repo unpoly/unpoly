@@ -72,7 +72,7 @@ up.Switcher = class Switcher {
       }
     }
     let log = ['Switching %o', switchee]
-    up.emit(switchee, 'up:form:switch', { field: this._root, tokens: fieldTokens, log })
+    up.emit(switchee, 'up:form:switch', { field: this._root, fieldTokens, log })
   }
 
   _findSwitchees() {

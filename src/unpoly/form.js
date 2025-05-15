@@ -5,7 +5,8 @@ Forms
 The `up.form` module helps you work with non-trivial forms.
 
 @see validation
-@see dependent-fields
+@see switching-form-state
+@see reactive-server-forms
 @see disabling-forms
 @see watch-options
 
@@ -1801,12 +1802,11 @@ up.form = (function() {
   /*-
   Controls the state of another element when this field changes.
 
-  Common effects are showing, hiding or disabling another element.
+  See [Switching form state](/switching-form-state) for comprehensive examples.
 
-  ## Showing or hiding other elements {#toggle}
+  ## Example
 
-  The controlling form field gets an `[up-switch]` attribute with a selector
-  for the elements to show or hide:
+  The controlling form field gets an `[up-switch]` attribute with a selector for the elements to show or hide:
 
   ```html
   <select name="level" up-switch=".level-dependent">
@@ -1816,218 +1816,21 @@ up.form = (function() {
   </select>
   ```
 
-  The target elements can use [`[up-show-for]`](/up-show-for) and [`[up-hide-for]`](/up-hide-for)
-  attributes to indicate for which values they should be shown or hidden:
+  The target elements can choose how to alter their state after the controlling field changes.
+  For example, the `[up-show-for]` will show an element while the field has one of the given values:
 
   ```html
   <div class="level-dependent" up-show-for="beginner"> <!-- mark-phrase "up-show-for" -->
     shown for beginner level, hidden for other levels
   </div>
-
-  <div class="level-dependent" up-hide-for="beginner"> <!-- mark-phrase "up-hide-for" -->
-    hidden for beginner level, shown for other levels
-  </div>
   ```
 
-  By default the entire form will be searched for matches. This can be [configured](#region).
-
-  To toggle an element [for multiple values](#multiple-values), separate with a comma:
-
-  ```
-  <div class="level-dependent" up-show-for="intermediate, expert"> <!-- mark-phrase "up-show-for" -->
-    only shown for intermediate and expert levels
-  </div>
-  ```
-
-  ## Disabling or hiding fields {#disable}
-
-  The controlling field gets an `[up-switch]` attribute with a selector
-  for the fields to disable for enable:
-
-  ```html
-  <select name="role" up-switch=".role-dependent">
-    <option value="trainee">Trainee</option>
-    <option value="manager">Manager</option>
-  </select>
-  ```
-
-  The target elements can use [`[up-enable-for]`](/up-enable-for) and [`[up-disable-for]`](/up-disable-for)
-  attributes to indicate for which values they should be shown or hidden:
-
-  ```html
-  <!-- The department field is only shown for managers -->
-  <input class="role-dependent" name="department" up-enable-for="manager"> <!-- mark-phrase "up-enable-for" -->
-
-  <!-- The mentor field is only shown for trainees -->
-  <input class="role-dependent" name="mentor" up-disable-for="manager"> <!-- mark-phrase "up-disable-for" -->
-  ```
-
-  ## Custom switching effects
-
-  `[up-switch]` allows you to implement your own switching effects.
-  For example, we want a custom `[highlight-for]` attribute. It draws a bright
-  outline around the department field when the manager role is selected:
-
-  ```html
-  <select name="role" up-switch=".role-dependent">
-    <option value="trainee">Trainee</option>
-    <option value="manager">Manager</option>
-  </select>
-
-  <input class="role-dependent" name="department" highlight-for="manager"> <!-- mark-phrase "highlight-for" -->
-  ```
-
-  When the role select changes, an `up:form:switch` event is emitted on all elements matching `.role-dependent`.
-  We can use this event to implement our custom `[highlight-for]` effect:
-
-  ```js
-  up.on('up:form:switch', '[highlight-for]', (event) => {
-    let highlightedValue = event.target.getAttribute('highlight-for')
-    let isHighlighted = (event.field.value === readonlyValue)
-    event.target.style.highlight = isHighlighted ? '2px solid orange' : ''
-  })
-  ```
-
-  To ensure a consistent form state, the `up:form:switch` event is also emitted when the role select is initially rendered,
-  or when a new match for `.role-dependent` is inserted into the form.
-
-  You can use the `up:form:switch` event to implement arbitrary client-side effects.
-  To implement asynchronous effects that are rendered on the server, [use `[up-validate]`](/reactive-server-forms).
-
-  ## Switching for multiple values {#multiple-values}
-
-  To switch for multiple values, separate them with a comma:
-
-  ```html
-  <div class="level-dependent" up-show-for="intermediate, expert"> <!-- mark-phrase "intermediate, expert" -->
-    only shown for intermediate and expert levels
-  </div>
-  ```
-
-  If your values might contain spaces, you may also serialize them as a [relaxed JSON](/relaxed-json) array:
-
-  ```html
-  <div class='level-dependent' up-show-for='["John Doe", "Jane Doe"]'> <!-- mark-phrase '["John Doe", "Jane Doe"]' -->
-    You selected John or Jane Doe
-  </div>
-  ```
-
-
-  ## Changing the switched region {#region}
-
-  By default the entire form will be searched for matches.
-  You can narrow or expand the search scope by setting an [`[up-switch-region]`](/up-switch#up-switch-region)
-  attribute on the controlling field.
-
-  To match all elements within the current [layer](/up.layer), set the region to `:layer`:
-
-  ```
-  <form method="post" action="/order">
-    <select name="payment" up-switch="#info" up-switch-region=":layer"> <!-- mark-phrase "up-switch-region" -->
-      <option value="paypal">PayPal</option>
-      <option value="manual">Manual wire transfer</option>
-    </select>
-  </form>
-
-  <div id="info" up-show-for="paypal">
-    You will be redirected to PayPal to complete your order.
-  </div>
-
-  <div id="info" up-show-for="manual">
-    We will ship your package once we receive your transfer.
-  </div>
-  ```
-
-  ## Switching on different events
-
-  By default switch effects are applied for every [`input`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input) event.
-  For example, text fields will switch other elements as the user is typing:
-
-  ```html
-  <input type="text" name="user" up-switch=".user-dependent">
-
-  <div class="user-dependent" up-show-for="alice">
-    only shown for user alice
-  </div>
-  ```
-
-  You can watch for other events by setting an [`[up-watch-event]`](/up-switch#up-watch-event) attribute.
-  For example, listening to `change` will wait until the text field is blurred
-  before applying any switching effects:
-
-  ```html
-  <input type="text" name="user" up-switch=".user-dependent" up-watch-event="change"> <!-- mark-phrase "up-watch-event" -->
-  ```
-
-  ## Switching on blank or present values
-
-  Instead of switching on specific string values, you can use `:blank` to match an empty input value:
-
-  ```html
-  <input type="text" name="user" up-switch=".target"> <!-- mark-phrase ":blank" -->
-
-  <div class="target" up-show-for=":blank">
-    please enter a username
-  </div>
-  ```
-
-  Inversely, `:present` will match any non-empty input value:
-
-  ```html
-  <div class="target" up-hide-for=":present"> <!-- mark-phrase ":present" -->
-    please enter a username
-  </div>
-  ```
-
-  ## Usage with checkboxes
-
-  For checkboxes you may match against the pseudo-values `:checked` or `:unchecked`:
-
-  ```html
-  <input type="checkbox" name="flag" up-switch=".flag-dependent">
-
-  <div class="flag-dependent" up-show-for=":checked">
-    only shown when checkbox is checked
-  </div>
-
-  <div class="flag-dependent" up-show-for=":unchecked">
-    only shown when checkbox is unchecked
-  </div>
-  ```
-
-  You may also match against the `[value]` attribute of the checkbox element:
-
-  ```html
-  <input type="checkbox" name="flag" value="active" up-switch=".flag-dependent">
-
-  <div class="flag-dependent" up-show-for="active">
-    only shown when checkbox is checked
-  </div>
-  ```
-
-  ## Usage with radio buttons
-
-  Use `[up-switch]` on a container for a radio button group:
-
-  ```html
-  <div up-switch=".level-dependent"> <!-- mark-phrase "div" -->
-    <input type="radio" name="level" value="beginner">
-    <input type="radio" name="level" value="intermediate">
-    <input type="radio" name="level" value="expert">
-  </div> <!-- mark-phrase "div" -->
-
-  <div class="level-dependent" up-show-for="beginner">
-    shown for beginner level, hidden for other levels
-  </div>
-
-  <div class="level-dependent" up-hide-for="beginner">
-    hidden for beginner level, shown for other levels
-  </div>
-  ```
+  There are other attributes like `[up-hide-for]`, `[up-disable-for]` or `[up-enable-for]`.
+  You can also [implement custom switching effects](/switching-form-state#custom-effects).
 
   @selector [up-switch]
   @param up-switch
-    A CSS selector for elements whose visibility depends on this field's value.
+    A CSS selector for elements whose state depends on this field's value.
   @param [up-switch-region='form']
     A selector for the region in which elements are switched.
 
@@ -2036,64 +1839,125 @@ up.form = (function() {
 
   @stable
   */
+  up.compiler('[up-switch]', (switcher) => {
+    return new up.Switcher(switcher).start()
+  })
 
-  /*
-  TODO: Docs
+  /*-
+  When an `[up-switch]` field changes, this event is emitted on all dependent elements.
 
-  @selector [up-disable-for]
-  @stable
-  */
+  You can listen to `up:form:switch` to implement [custom switching effects](/switching-form-state#custom-effects).
 
-  /*
-  TODO: Docs
+  ## Event targets
 
-  @selector [up-enable-for]
-  @stable
-  */
+  This event is *not* emitted on the switching field. Instead each element matching the switch selector will receive an `up:form:switch` event:
 
-  /*
-  TODO: Docs
+  ```html
+  <!-- Switching field won't receive an event on change -->
+  <select name="role" up-switch=".role-dependent">
+    <option value="trainee">Trainee</option>
+    <option value="manager">Manager</option>
+  </select>
 
-  Is *not* emitted on the switching field. It is emitted on all elements matching the switch selector.
+  <!-- Dependent field will receive up:form:switch -->
+  <input class="role-dependent" name="department">
 
-  Emitted when the switching field is initially rendered.
+  <!-- Dependent field will receive up:form:switch -->
+  <input class="role-dependent" name="budget">
+  ```
 
-  Emitted when a new match enters the form.
+  ## Timing
+
+  The `up:form:switch` is emitted at the following times:
+
+  - when the switching field is initially rendered.
+  - after a switching field has changed its effective form value.
+  - after a switching checkbox was checked or unchecked.
+  - when a new selector match enters the form.
+  - when a [kept](/up-keep) `[up-switch]` field is transported to a new form.
 
   @event up:form:switch
+
+  @param {Element} event.target
+    The dependent element matching the `[up-switch]` selector.
+
+    If multiple elements match the selector, this event is emitted once for
+    each match.
+
+  @param {Element} event.field
+    The controlling `[up-switch]` field.
+
+  @param {Array<string>} event.fieldTokens
+    An array describing the state of the controlling `[up-switch]` field.
+
+    The array contains:
+
+    - The field's value, unless the value is [blank](/up.util.isBlank).
+    - A pseudo-value [`:blank` or `:present`](/switching-form-state#presence), depending on the effective form value.
+    - For [checkboxes](/switching-form-state#checkboxes), a pseudo-value `:checked` or `:unchecked`.
+
   @stable
   */
 
   /*-
   Only shows this element if an input field with `[up-switch]` has one of the given values.
 
-  See `[up-switch]` for more documentation and examples.
+  The element will be hidden for all other values.
+
+  See [Switching visibility](/switching-form-state) for details and examples.
 
   @selector [up-show-for]
   @param [up-show-for]
     A list of input values for which this element should be shown.
 
-    Multiple values can be separated by either a space (`foo bar`) or a comma (`foo, bar`).
-    If your values might contain spaces, you may also serialize them as a JSON array (`["foo", "bar"]`).
+    @include switch-token-serialization
   @stable
   */
 
   /*-
-  Hides this element if an input field with `[up-switch]` has one of the given values.
+  Hides this element while an input field with `[up-switch]` has one of the given values.
 
-  See `[up-switch]` for more documentation and examples.
+  The element will be shown for all other values.
+
+  See [Switching visibility](/switching-form-state#toggle) for details and examples.
 
   @selector [up-hide-for]
   @param [up-hide-for]
     A list of input values for which this element should be hidden.
 
-    Multiple values can be separated by either a space (`foo bar`) or a comma (`foo, bar`).
-    If your values might contain spaces, you may also serialize them as a JSON array (`["foo", "bar"]`).
+    @include switch-token-serialization
   @stable
   */
-  up.compiler('[up-switch]', (switcher) => {
-    return new up.Switcher(switcher).start()
-  })
+
+  /*-
+  Disables this element while an input field with `[up-switch]` has one of the given values.
+
+  The element will be enabled for all other values.
+
+  See [Switching disabled state](/switching-form-state#disable) for details and examples.
+
+  @selector [up-disable-for]
+  @param [up-disable-for]
+    A list of input values for which this element should be disabled.
+
+    @include switch-token-serialization
+  @stable
+  */
+
+  /*-
+  Enables this element while an input field with `[up-switch]` has one of the given values.
+
+  The element will be disabled for all other values.
+
+  See [Switching disabled state](/switching-form-state#disable) for details and examples.
+
+  @selector [up-enable-for]
+  @param [up-enable-for]
+    A list of input values for which this element should be enabled.
+
+    @include switch-token-serialization
+  @stable
+  */
 
   /*-
   Watches form fields and runs a callback when a value changes.

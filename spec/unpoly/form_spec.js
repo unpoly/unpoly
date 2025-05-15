@@ -6089,7 +6089,7 @@ describe('up.form', function() {
 
       describe('emitting up:form:switch on changes', function() {
 
-        it('emits up:form:switch on switchees with { field, tokens }', async function() {
+        it('emits up:form:switch on switchees with { field, fieldTokens }', async function() {
           const listener = jasmine.createSpy('up:form:switch listener')
           up.on('up:form:switch', (event) => listener(event))
 
@@ -6107,10 +6107,10 @@ describe('up.form', function() {
           expect(listener.calls.count()).toBe(2)
           expect(listener.calls.argsFor(0)[0].target).toBe(target1)
           expect(listener.calls.argsFor(0)[0].field).toBe(field)
-          expect(listener.calls.argsFor(0)[0].tokens).toEqual(['default', ':present'])
+          expect(listener.calls.argsFor(0)[0].fieldTokens).toEqual(['default', ':present'])
           expect(listener.calls.argsFor(1)[0].target).toBe(target2)
           expect(listener.calls.argsFor(1)[0].field).toBe(field)
-          expect(listener.calls.argsFor(1)[0].tokens).toEqual(['default', ':present'])
+          expect(listener.calls.argsFor(1)[0].fieldTokens).toEqual(['default', ':present'])
 
           field.value = 'changed'
           Trigger.change(field)
@@ -6119,10 +6119,10 @@ describe('up.form', function() {
           expect(listener.calls.count()).toBe(4)
           expect(listener.calls.argsFor(2)[0].target).toBe(target1)
           expect(listener.calls.argsFor(2)[0].field).toBe(field)
-          expect(listener.calls.argsFor(2)[0].tokens).toEqual(['changed', ':present'])
+          expect(listener.calls.argsFor(2)[0].fieldTokens).toEqual(['changed', ':present'])
           expect(listener.calls.argsFor(3)[0].target).toBe(target2)
           expect(listener.calls.argsFor(3)[0].field).toBe(field)
-          expect(listener.calls.argsFor(3)[0].tokens).toEqual(['changed', ':present'])
+          expect(listener.calls.argsFor(3)[0].fieldTokens).toEqual(['changed', ':present'])
 
           field.value = ''
           Trigger.change(field)
@@ -6131,13 +6131,13 @@ describe('up.form', function() {
           expect(listener.calls.count()).toBe(6)
           expect(listener.calls.argsFor(4)[0].target).toBe(target1)
           expect(listener.calls.argsFor(4)[0].field).toBe(field)
-          expect(listener.calls.argsFor(4)[0].tokens).toEqual([':blank'])
+          expect(listener.calls.argsFor(4)[0].fieldTokens).toEqual([':blank'])
           expect(listener.calls.argsFor(5)[0].target).toBe(target2)
           expect(listener.calls.argsFor(5)[0].field).toBe(field)
-          expect(listener.calls.argsFor(5)[0].tokens).toEqual([':blank'])
+          expect(listener.calls.argsFor(5)[0].fieldTokens).toEqual([':blank'])
         })
 
-        it('only emits up:form:switch once per distinct { tokens }', async function() {
+        it('only emits up:form:switch once per distinct { fieldTokens }', async function() {
           const listener = jasmine.createSpy('up:form:switch listener')
           up.on('up:form:switch', (event) => listener(event))
 

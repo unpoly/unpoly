@@ -1,8 +1,22 @@
 Reactive server forms
 =====================
 
-Using the `[up-validate]` attribute you can implement forms where the state of some elements
-depend on the value of other fields.
+Unpoly makes it easy to implement server-rendered forms where sections depend on the value of other fields.
+
+Common use cases for dynamic forms include:
+
+- Picking a `<select>` value fetches options for another `<select>`.
+- Changing a field can make dependent form sections appear or disappear.
+- Typing into a field can preview the effects of a form submission, e.g. show an order total.
+- Picking a value can show related data, like existing booking for a selected customer.
+
+By using the `[up-validate]` attribute we can implement logic like this on the server, using regular HTML templates
+and no additional JavaScript.
+
+> [tip]
+> For trivial effects (like toggling visibility) no server request is required.
+> See [Switching form state](/switching-form-state).
+
 
 Declaring dependencies
 ----------------------
