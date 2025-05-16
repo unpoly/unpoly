@@ -188,26 +188,64 @@ up.history = (function() {
 
   - A fragment update changes history through [navigation](/navigation) or rendering with `{ history: true }`.
   - The user uses the back or forward buttons in their browser UI.
-  - Programmatic calls to `up.history.push()`.
+  - Programmatic calls to functions like `up.history.push()` or `history.pushState()`.
   - The user navigates to a different `#hash` within the page.
-
-  When a [layer](/up.layer) has no [visible history](/up.Layer.prototype.history), following a link
-  will not cause the browser's address bar to be updated. In this case no `up:location:changed` event will be emitted.
-  However, an `up:layer:location:changed` will be emitted even if the address bar did not change.
 
   The `up:location:changed` event is *not* emitted when the page is loaded initially.
   For this observe `up:framework:booted`.
 
+  ## Handling the change {#handling}
+
   This event cannot be prevented, but you can mutate the `event.willHandle` property to decide whether
   Unpoly should handle the change by restoring a location or revealing a fragment matching the location `#hash`.
 
-  @event up:location:changed
-  @param {string} event.location
-    The URL for the history entry after the change.
-  @param {string} event.reason
-    The action that caused this change in history state.
+  ## Location changes in overlays {#overlays}
 
-    The value of this property is either `'push'`, `'pop'`, `'hash'` or `'replace'`.
+  Overlays can configure whether their history state is reflected the browser's address bar.
+
+  When a [layer](/up.layer) has no [visible history](/up.Layer.prototype.history), no `up:location:changed` event will be emitted.
+  However, an `up:layer:location:changed` will be emitted even if the address bar did not change.
+
+  Also see [History in overlays](/history-in-overlays).
+
+  @event up:location:changed
+  @section Change
+    @param {string} event.location
+      The new URL after the change.
+
+      When this event is emitted, the [browser location](/up.history.location) has already been updated.
+    @param {string} event.reason
+      The action that caused this change in history state.
+
+      The value of this property is one of the following:
+
+      | Value | Reason |
+      |-------|--------|
+      | `'hash'`    | The location was changed, but only the `#hash` changed from the [previous location](/up.history.previousLocation). |
+      | `'push'`    | A new history entry was added via `up.history.push()` or `history.pushState()`.                |
+      | `'replace'` | The current history update was changed via `up.history.replace()` or `history.replaceState()`. |
+      | `'pop'`     | The user navigated back to the current location. |
+  @section Handling
+    @param {boolean} event.alreadyHandled
+      Whether Unpoly thinks this change has already been handled and requires no additional processing.
+
+      For example, updating history by [navigating](/navigating) or calling `history.pushState()` is
+      considered to be already handled.
+
+      @experimental
+    @param {boolean} event.willHandle
+      Whether Unpoly thinks it is responsible for handling this change.
+
+      By default Unpoly feels responsible for [owned locations](/restoring-history#handled-entries)
+      when the change has not [already been handled](#event.alreadyHandled).
+
+      Listeners can tell Unpoly to *not* handle a change by setting `event.willHandle = false`.
+      You can then handle the change with your own code.
+
+      Listeners can tell Unpoly to handle a change it does not own by setting `event.willHandle = true`.
+      Regardless of this Unpoly will never handle a change that [already been handled](#event.alreadyHandled).
+
+      @experimental
   @stable
   */
 
@@ -297,14 +335,19 @@ up.history = (function() {
   Does not add a history entry if the given URL is already the current browser location.
   If the URL did change, an event `up:location:changed` is emitted.
 
-  Note that [fragment navigation](/navigation) will automatically update the
-  browser's location bar for you.
+  When [navigating](/navigation) (or rendering with [`{ history: true }`](/up.render#options.history))
+  Unpoly will update the browser location for you. You only need to call `up.history.push()` to push
+  a new entry without rendering.
 
-  Does not add a history entry if the the given URL is already the current browser location.
+  ## Restoration
 
-  Emits event `up:location:changed`.
+  The new history entry will be owned by Unpoly.
+  When the user navigates back to this history entry,
+  Unpoly will [restore the content](/restoring-history) at that URL.
 
-  TODO: Document that the new state will be owned and restored by Unpoly. For custom state, use window.history.pushState().
+  To push a history entry that you want to restore yourself, use the browser's
+  [`history.pushState()`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState) function,
+  or handle the `up:location:changed` event.
 
   @function up.history.push
   @param {string} url
@@ -363,8 +406,6 @@ up.history = (function() {
       peel: true,
       layer: 'root',
 
-      // We won't usually have a cache hit for config.restoreTargets ('body')
-      // since most earlier cache entries are for a main target. But it doesn't hurt to try.
       cache: 'auto',
       revalidate: 'auto',
 
@@ -403,6 +444,8 @@ up.history = (function() {
 
   Listeners may prevent `up:location:restore` or mutate `event.renderOptions`
   to [customize the restoration behavior](/restoring-history#custom-restoration-behavior).
+
+  When this event is emitted, the [browser location](/up.history.location) has already been updated.
 
   @event up:location:restore
   @param {string} event.location
