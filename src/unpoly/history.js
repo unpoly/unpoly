@@ -270,23 +270,21 @@ up.history = (function() {
   }
 
   /*-
-  Replaces the current history entry and updates the browser's location bar with the given URL.
+  Replaces the current history entry and updates the browser's location bar.
 
-  When the user navigates to the replaced history entry at a later time,
-  Unpoly will update the `<body>` element with the `<body>` fetched from the restored URL.
+  ## Restoration
 
-  To update a fragment other than body, configure `up.history.config.restoreTargets`.
+  The replaced history entry will be owned by Unpoly.
+  When the user navigates back to this history entry,
+  Unpoly will [restore the content](/restoring-history) at that URL.
 
-  > [TIP]
-  > [Navigating](/navigation) functions like `up.follow()` or `up.submit()`
-  > will automatically update the browser's location bar for you. This can be disabled with
-  > an [`{ history: false }`](/up.render#options.history) option.
-
-  TODO: Document that the new state will be owned and restored by Unpoly. For custom state, use window.history.pushState().
+  To replace a history entry that you want to restore yourself, use the browser's
+  [`history.replaceState()`](https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState) function,
+  or handle the `up:location:changed` event.
 
   @function up.history.replace
   @param {string} url
-  @internal
+  @experimental
   */
   function replace(location, trackOptions) {
     placeAdoptedHistoryEntry('replaceState', location, trackOptions)
