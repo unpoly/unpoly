@@ -77,138 +77,145 @@ up.fragment = (function() {
 
   @property up.fragment.config
 
-  @param {Array<string>} [config.mainTargets=['[up-main]', 'main', ':layer']]
-    An array of CSS selectors matching default [render targets](/targeting-fragments).
+  @section Targeting
+    @param {Array<string>} [config.mainTargets=['[up-main]', 'main', ':layer']]
+      An array of CSS selectors matching default [render targets](/targeting-fragments).
 
-    When no explicit target is given, Unpoly will update the first selector matching both
-    the current page and the server response.
+      When no explicit target is given, Unpoly will update the first selector matching both
+      the current page and the server response.
 
-    When [navigating](/navigation) to a main target, Unpoly will automatically
-    [reset scroll positions](/scrolling#automatic-scrolling-logic) and
-    [update the browser history](/updating-history).
+      When [navigating](/navigation) to a main target, Unpoly will automatically
+      [reset scroll positions](/scrolling#automatic-scrolling-logic) and
+      [update the browser history](/updating-history).
 
-    This property is aliased as [`up.layer.config.any.mainTargets`](/up.layer.config#config.any.mainTargets).
+      This property is aliased as [`up.layer.config.any.mainTargets`](/up.layer.config#config.any.mainTargets).
 
-    Also see [targeting the main element](/targeting-fragments#targeting-the-main-element).
+      Also see [targeting the main element](/targeting-fragments#targeting-the-main-element).
 
-  @param {Array<string|Function<Element>: string|undefined>} [config.targetDerivers]
-    An array of [target derivation patterns](/target-derivation#derivation-patterns)
-    used to [guess a target selector](/target-derivation) for an element.
+    @param {Array<string|Function<Element>: string|undefined>} [config.targetDerivers]
+      An array of [target derivation patterns](/target-derivation#derivation-patterns)
+      used to [guess a target selector](/target-derivation) for an element.
 
-    For instance, a pattern pattern `'a[href]'` is applicable to all `<a href="...">` elements.
-    It produces a target like `a[href="/users"]`.
+      For instance, a pattern pattern `'a[href]'` is applicable to all `<a href="...">` elements.
+      It produces a target like `a[href="/users"]`.
 
-    If your deriver can't be expressed in a pattern string, you may also add a function that
-    accepts an `Element` and returns a target selector, if applicable. If the function
-    is not applicable it may return `undefined`. In that case the next pattern will be tried.
+      If your deriver can't be expressed in a pattern string, you may also add a function that
+      accepts an `Element` and returns a target selector, if applicable. If the function
+      is not applicable it may return `undefined`. In that case the next pattern will be tried.
 
-  @param {Array<string|RegExp>} [config.badTargetClasses]
-    An array of class names that should be ignored when
-    [deriving a target selector from a fragment](/target-derivation).
+    @param {Array<string|RegExp>} [config.badTargetClasses]
+      An array of class names that should be ignored when
+      [deriving a target selector from a fragment](/target-derivation).
 
-    The class names may also be passed as a regular expression.
+      The class names may also be passed as a regular expression.
 
-  @param {boolean} [config.verifyDerivedTarget=true]
-    Whether [derived targets](/target-derivation) must match the element to be applicable.
+    @param {boolean} [config.verifyDerivedTarget=true]
+      Whether [derived targets](/target-derivation) must match the element to be applicable.
 
-    When verification is disabled, the first applicable [derivation pattern](/target-derivation#derivation-patterns)
-    will be used, even if the produced target would match another element on the page.
+      When verification is disabled, the first applicable [derivation pattern](/target-derivation#derivation-patterns)
+      will be used, even if the produced target would match another element on the page.
 
-    Also see [Derived target verification](/target-derivation#verification).
+      Also see [Derived target verification](/target-derivation#verification).
 
-  @param {Object} [config.renderOptions]
-    An object of low-level render options to apply to *any* render pass.
+    @param {string} [config.match='region']
+      How to match fragments when a [target selector](/targeting-fragments) yields multiple results.
 
-    When [navigating](/navigation), the defaults from `up.fragment.config.navigateOptions` will also be applied.
+      When set to `'region'` Unpoly will prefer to match fragments in the
+      [region](/targeting-fragments#ambiguous-selectors) of the [origin element](/up.render#options.origin).
 
-    > [!important]
-    > By design only a minimal set of options is configured. This is to spare callers from excessive unsetting
-    > of defaults when rendering a fragment without navigation.
-    > Any opinionated settings (in particular `{ cache, history, scroll }`)
-    > should be configured in `up.fragment.config.navigateOptions`.
+      If set to `'first'` Unpoly will always use the first matching fragment.
 
-    @experimental
+  @section Render options
 
-  @param {Object} [config.navigateOptions]
-    An object of default render options to apply when [navigating](/navigation).
+    @param {Object} [config.navigateOptions]
+      An object of default render options to apply when [navigating](/navigation).
 
-    To set defaults for *all* render passes (when navigating or not), use `up.fragment.config.renderOptions`.
+      To set defaults for *all* render passes (when navigating or not), use `up.fragment.config.renderOptions`.
 
-  @param {string} [config.match='region']
-    How to match fragments when a [target selector](/targeting-fragments) yields multiple results.
+    @param {Object} [config.renderOptions]
+      An object of low-level render options to apply to *any* render pass.
 
-    When set to `'region'` Unpoly will prefer to match fragments in the
-    [region](/targeting-fragments#ambiguous-selectors) of the [origin element](/up.render#options.origin).
+      When [navigating](/navigation), the defaults from `up.fragment.config.navigateOptions` will also be applied.
 
-    If set to `'first'` Unpoly will always use the first matching fragment.
+      > [!important]
+      > By design only a minimal set of options is configured. This is to spare callers from excessive unsetting
+      > of defaults when rendering a fragment without navigation.
+      > Any opinionated settings (in particular `{ cache, history, scroll }`)
+      > should be configured in `up.fragment.config.navigateOptions`.
 
-  @param {Array<string>} [config.autoHistoryTargets]
-    When an updated fragments contain an element matching one of the given [target selectors](/targeting-fragments),
-    history will be updated with `{ history: 'auto' }`.
+      @experimental
 
-    By default Unpoly will auto-update history when updating a [main target](#config.mainTargets).
+    @param {Array<string>} [config.autoHistoryTargets]
+      When an updated fragments contain an element matching one of the given [target selectors](/targeting-fragments),
+      history will be updated with `{ history: 'auto' }`.
 
-  @param {boolean|string|Function(Element)} [config.autoScroll]
-    How to scroll after updating a fragment with `{ scroll: 'auto' }`.
+      By default Unpoly will auto-update history when updating a [main target](#config.mainTargets).
 
-    See [Scrolling](/scrolling) for a list of allowed values.
+    @param {Array<boolean|string|Function(Element)>} [config.autoScroll]
+      An array of scroll strategies to try after updating a fragment with `{ scroll: 'auto' }`.
 
-    The default configuration tries, in this order:
+      See [Scrolling](/scrolling) for available strategies.
 
-    - If the URL has a `#hash`, scroll to the hash.
-    - If updating a [main target](/up-main), reset scroll positions.
+      The default configuration tries, in this order:
 
-  @param {boolean|string|Function(Element)} [config.autoFocus]
-    How to focus when updating a fragment with `{ focus: 'auto' }`.
+      - If the URL has a `#hash`, scroll to the hash.
+      - If updating a [main target](/up-main), reset scroll positions.
 
-    See [Controlling focus](/focus) for a list of allowed values.
+    @param {Array<boolean|string|Function(Element)>} [config.autoFocus]
+      An array of focus strategies when updating a fragment with `{ focus: 'auto' }`.
 
-    The default configuration tries the following strategies, in this order:
+      See [Controlling focus](/focus) for available strategies.
 
-    - Focus a `#hash` in the URL.
-    - Focus an `[autofocus]` element in the new fragment.
-    - If updating a [main target](/up-main), focus the new fragment.
-    - If focus was lost with the old fragment, re-focus a [similar](/target-derivation) element.
-    - If focus was lost with the old fragment, focus the new fragment.
+      The default configuration tries the following strategies, in this order:
 
-  @param {boolean|Function(ScriptElement): boolean} [config.runScripts=false]
-    Whether to load or execute `<script>` tags in updated fragments.
+      - Focus a `#hash` in the URL.
+      - Focus an `[autofocus]` element in the new fragment.
+      - If updating a [main target](/up-main), focus the new fragment.
+      - If focus was lost with the old fragment, re-focus a [similar](/target-derivation) element.
+      - If focus was lost with the old fragment, focus the new fragment.
 
-    See [Running inline `<script>` tags](/legacy-scripts#running-inline-script-tags) for details.
+  @section Scripts
 
-  @param {boolean|Function(up.Response): boolean} [config.autoRevalidate]
-    Whether to reload a fragment after it was rendered from a cached response with `{ revalidate: 'auto' }`.
+    @param {boolean|Function(ScriptElement): boolean} [config.runScripts=false]
+      Whether to load or execute `<script>` tags in updated fragments.
 
-    By default Unpoly verifies cached responses that are older than `up.fragment.config.expireAge`:
+      See [Running inline `<script>` tags](/legacy-scripts#running-inline-script-tags) for details.
 
-    ```js
-    up.fragment.config.autoRevalidate = (response) => response.expired
-    ```
+  @section Responses
 
-    You can exempt server paths from being auto-revalidated like this:
+    @param {boolean|Function(up.Response): boolean} [config.autoRevalidate]
+      Whether to reload a fragment after it was rendered from a cached response with `{ revalidate: 'auto' }`.
 
-    ```js
-    up.fragment.config.autoRevalidate = (response) => response.expired && response.url != '/dashboard'
-    ```
+      By default Unpoly verifies cached responses that are older than `up.fragment.config.expireAge`:
 
-  @param {Function(Object): boolean} [config.skipResponse]
-    When to finishes a render pass without changes,
-    usually to [not re-insert identical content](/skipping-rendering).
+      ```js
+      up.fragment.config.autoRevalidate = (response) => response.expired
+      ```
 
-    The configured function accepts an object with the same properties
-    as an `up:fragment:loaded` event.
+      You can exempt server paths from being auto-revalidated like this:
 
-    By default Unpoly skips the following responses:
+      ```js
+      up.fragment.config.autoRevalidate = (response) => response.expired && response.url != '/dashboard'
+      ```
 
-    - Responses without text in their body.
-      Such responses occur when a [conditional request](/conditional-requests)
-      in answered with HTTP status `304 Not Modified` or `204 No Content`.
-    - When [revalidating](/caching#revalidation), if the expired response and fresh response
-      have the exact same text.
+    @param {Function(Object): boolean} [config.skipResponse]
+      When to finishes a render pass without changes,
+      usually to [not re-insert identical content](/skipping-rendering).
 
-    You may also skip responses by calling `event.skip()` on an `up:fragment:loaded` event.
+      The configured function accepts an object with the same properties
+      as an `up:fragment:loaded` event.
 
-    @experimental
+      By default Unpoly skips the following responses:
+
+      - Responses without text in their body.
+        Such responses occur when a [conditional request](/conditional-requests)
+        in answered with HTTP status `304 Not Modified` or `204 No Content`.
+      - When [revalidating](/caching#revalidation), if the expired response and fresh response
+        have the exact same text.
+
+      You may also skip responses by calling `event.skip()` on an `up:fragment:loaded` event.
+
+      @experimental
 
   @stable
   */
