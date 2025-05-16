@@ -725,6 +725,37 @@ describe('up.layer', function() {
 
             expect(location.href).toMatchURL(originalLocation)
           })
+
+          it('does not insert an identical history entry after the overlay is closed', async function() {
+            up.history.replace('/path1')
+            await wait()
+
+            up.history.push('/path2')
+            await wait()
+
+            up.layer.open({
+              target: '.element',
+              history: false,
+              location: '/modal-url'
+            })
+
+            await wait()
+
+            expect(up.layer.isOverlay()).toBe(true)
+            expect(location.href).toMatchURL('/path2')
+
+            up.layer.dismiss()
+            await wait()
+
+            expect(up.layer.isOverlay()).toBe(false)
+            expect(location.href).toMatchURL('/path2')
+
+            history.back()
+            await wait(100)
+
+            expect(location.href).toMatchURL('/path1')
+          })
+
         })
 
         describe('with { history: "auto" }', function() {

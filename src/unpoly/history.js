@@ -294,10 +294,10 @@ up.history = (function() {
 
   /*-
   Adds a new history entry and updates the browser's
-  address bar with the given URL.
+  address bar.
 
-  When the user restores the new history entry later,
-  Unpoly will replace a selector from `up.history.config.restoreTargets` with the body from that URL.
+  Does not add a history entry if the given URL is already the current browser location.
+  If the URL did change, an event `up:location:changed` is emitted.
 
   Note that [fragment navigation](/navigation) will automatically update the
   browser's location bar for you.
@@ -314,6 +314,7 @@ up.history = (function() {
   @experimental
   */
   function push(location, trackOptions) {
+    if (isLocation(location)) return
     placeAdoptedHistoryEntry('pushState', location, trackOptions)
   }
 
