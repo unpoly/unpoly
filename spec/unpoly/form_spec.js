@@ -6146,10 +6146,10 @@ describe('up.form', function() {
           expect(listener.calls.count()).toBe(6)
           expect(listener.calls.argsFor(4)[0].target).toBe(target1)
           expect(listener.calls.argsFor(4)[0].field).toBe(field)
-          expect(listener.calls.argsFor(4)[0].fieldTokens).toEqual([':blank'])
+          expect(listener.calls.argsFor(4)[0].fieldTokens).toEqual(['', ':blank'])
           expect(listener.calls.argsFor(5)[0].target).toBe(target2)
           expect(listener.calls.argsFor(5)[0].field).toBe(field)
-          expect(listener.calls.argsFor(5)[0].fieldTokens).toEqual([':blank'])
+          expect(listener.calls.argsFor(5)[0].fieldTokens).toEqual(['', ':blank'])
         })
 
         it('only emits up:form:switch once per distinct { fieldTokens }', async function() {
@@ -6851,33 +6851,31 @@ describe('up.form', function() {
             expect($target).toBeHidden()
           })
 
-          it("shows the target element if its up-show-for attribute contains a value ':checked' and any button is checked", async function() {
-            const $target = this.$form.affix('.target[up-show-for=":checked"]')
+          it("shows the target element if its up-show-for attribute contains a value ':present' and any button with a value is checked", async function() {
+            const $target = this.$form.affix('.target[up-show-for=":present"]')
             up.hello(this.$form)
             await wait()
 
             expect($target).toBeHidden()
-            this.$blankButton.prop('checked', true)
+            this.$fooButton.prop('checked', true)
             Trigger.change(this.$blankButton)
             await wait()
 
             expect($target).toBeVisible()
           })
 
-          it("shows the target element if its up-show-for attribute contains a value ':unchecked' and no button is checked", async function() {
-            const $target = this.$form.affix('.target[up-show-for=":unchecked"]')
+          it("shows the target element if its up-show-for attribute contains a value ':blank' and no button with a value is checked", async function() {
+            const $target = this.$form.affix('.target[up-show-for=":blank"]')
             up.hello(this.$form)
             await wait()
 
             expect($target).toBeVisible()
-            this.$blankButton.prop('checked', true)
+            this.$fooButton.prop('checked', true)
             Trigger.change(this.$blankButton)
             await wait()
 
             expect($target).toBeHidden()
           })
-
-          it('allows to set [up-switch] on a container of radio buttons, as with [up-watch]')
         })
 
         describe('on a text input', function() {

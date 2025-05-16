@@ -95,41 +95,23 @@ up.Switcher = class Switcher {
     // root is either an individual input, or a container of radio buttons.
     let fields = up.form.fields(this._root)
     let field = fields[0]
-
-    let value
     let meta
 
     if (field.matches('input[type=checkbox]')) {
-      if (field.checked) {
-        value = field.value
-        meta = ':checked'
-      } else {
-        meta = ':unchecked'
-      }
-    } else if (field.matches('input[type=radio]')) {
-      let checkedButton = up.migrate.checkedRadioButtonForSwitch?.(field) || u.find(fields, 'checked')
-
-      if (checkedButton) {
-        meta = ':checked'
-        value = checkedButton.value
-      } else {
-        meta = ':unchecked'
-      }
-    } else {
-      value = field.value
+      meta = field.checked ? ':checked' : ':unchecked'
     }
 
-    const values = []
-    if (u.isPresent(value)) {
-      values.push(value)
-      values.push(':present')
-    } else {
-      values.push(':blank')
+    if (field.matches('input[type=radio]')) {
+      field = u.find(fields, 'checked')
     }
-    if (u.isPresent(meta)) {
-      values.push(meta)
-    }
-    return values
+
+    let value = field?.value
+
+    return u.compact([
+      value,
+      meta,
+      u.isPresent(value) ? ':present' : ':blank'
+    ])
   }
 
 }

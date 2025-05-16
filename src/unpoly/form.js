@@ -1871,7 +1871,7 @@ up.form = (function() {
   The `up:form:switch` is emitted at the following times:
 
   - when the switching field is initially rendered.
-  - after a switching field has changed its effective form value.
+  - after a switching field has changed its value.
   - after a switching checkbox was checked or unchecked.
   - when a new selector match enters the form.
   - when a [kept](/up-keep) `[up-switch]` field is transported to a new form.
@@ -1892,9 +1892,11 @@ up.form = (function() {
 
     The array contains:
 
-    - The field's value, unless the value is [blank](/up.util.isBlank).
-    - A pseudo-value [`:blank` or `:present`](/switching-form-state#presence), depending on the effective form value.
+    - The field's value.
+    - A pseudo-value [`:blank` or `:present`](/switching-form-state#presence), depending on the field's value.
     - For [checkboxes](/switching-form-state#checkboxes), a pseudo-value `:checked` or `:unchecked`.
+
+    @experimental
 
   @stable
   */

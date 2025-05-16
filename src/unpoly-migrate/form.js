@@ -33,18 +33,6 @@ up.migrate.watchForSwitch = function(root, callback) {
   }
 }
 
-// An old implementation allowed [up-switch] to be set on individual radio buttons
-// instead of on a container for the radio group. Each button got its own up.Switcher.
-// Because such an up.Switcher cannot always find the checked button within its root.
-// Instead it needs to check which of its sibling buttons is the checked one.
-up.migrate.checkedRadioButtonForSwitch = function(siblingButton) {
-  // Warning is already printed by up.migrate.watchForSwitch()
-  const region = up.form.getRegion(siblingButton)
-  const groupName = siblingButton.getAttribute('name')
-  const groupButtonsSelector = 'input[type=radio]' + up.element.attrSelector('name', groupName)
-  return region.querySelector(groupButtonsSelector + ':checked')
-}
-
 /*-
 Watches form fields and runs a callback when a value changes.
 
