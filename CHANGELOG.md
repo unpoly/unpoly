@@ -67,6 +67,8 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 - You can now disable dependent fields using `[up-disable-for]` and `[up-enable-for]`.
 - You can now implement custom switching effect by listening to the `up:form:switch` event on any element targeted by `[up-switch]`.
 - A new `[up-switch-region]` attribute allows to expand or narrow the region where elements are switched.
+- `[up-switch]` can now react to other events with an `[up-watch-event]` attribute.
+- `[up-switch]` can now debounce their switching effects with an `[up-watch-delay]` attribute.
 - `[up-switch]` now works on a container for a radio group.
 - ⚠️ Unpoly will no longer un-hide elements targeted by `[up-switch]` when that element has neither `[up-show-for]` nor `[up-hide-for]` attributes. This was an undocumented side effect of the old implementation.
 - ⚠️ Fields with `[up-switch]` now require a `[name]` attribute.

@@ -6383,6 +6383,67 @@ describe('up.form', function() {
 
       })
 
+      describe('event source', function() {
+
+        it('switches on another event with [up-watch-event]', async function() {
+          let [form, textField, target] = htmlFixtureList(`
+            <form>
+              <input name="field" up-switch=".target" up-watch-event="custom:event">
+              <div class="target" up-show-for="foo">target text</div>
+            </form>
+          `)
+          up.hello(form)
+          await wait()
+
+          expect(target).toBeHidden()
+
+          textField.value = 'foo'
+          Trigger.change(textField)
+          await wait()
+
+          expect(target).toBeHidden()
+
+          up.emit(textField, 'custom:event')
+          await wait()
+
+          expect(target).toBeVisible()
+
+          textField.value = 'bar'
+          Trigger.change(textField)
+          await wait()
+
+          expect(target).toBeVisible()
+
+          up.emit(textField, 'custom:event')
+          await wait()
+
+          expect(target).toBeHidden()
+        })
+
+        it('delays the switching with [up-watch-delay]', async function() {
+          let [form, textField, target] = htmlFixtureList(`
+            <form>
+              <input name="field" up-switch=".target" up-watch-delay="50">
+              <div class="target" up-show-for="foo">target text</div>
+            </form>
+          `)
+          up.hello(form)
+          await wait()
+
+          expect(target).toBeHidden()
+
+          textField.value = 'foo'
+          Trigger.change(textField)
+          await wait()
+
+          expect(target).toBeHidden()
+          await wait(100)
+
+          expect(target).toBeVisible()
+        })
+
+      })
+
       describe('scope of switchee matching', function() {
 
         it('only switches a target in the same form', async function() {

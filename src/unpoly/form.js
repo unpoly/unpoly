@@ -1829,13 +1829,19 @@ up.form = (function() {
   You can also [implement custom switching effects](/switching-form-state#custom-effects).
 
   @selector [up-switch]
-  @param up-switch
-    A CSS selector for elements whose state depends on this field's value.
-  @param [up-switch-region='form']
-    A selector for the region in which elements are switched.
 
-    By default all matching elements within the form are switched.
-    You can expand or narrow the search scope by configuring a different selector.
+  @section Dependencies
+    @param up-switch
+      A CSS selector for elements whose state depends on this field's value.
+
+    @param [up-switch-region='form']
+      A selector for the region in which elements are switched.
+
+      By default all matching elements within the form are switched.
+      You can expand or narrow the search scope by configuring a different selector.
+
+  @section Event source
+    @mix up-watch/event-source
 
   @stable
   */

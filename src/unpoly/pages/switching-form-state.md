@@ -224,6 +224,13 @@ before applying any switching effects:
 <input type="text" name="user" up-switch=".user-dependent" up-watch-event="change"> <!-- mark-phrase "up-watch-event" -->
 ```
 
+When watching a fast-firing event like `input`,
+you can debounce the switching effect
+with an [`[up-watch-delay]`](/up-switch#up-watch-delay) attribute:
+
+```html
+<input type="text" name="user" up-switch=".user-dependent" up-watch-event="input" up-watch-delay="150"> <!-- mark-phrase "up-watch-delay" -->
+```
 
 
 @page switching-form-state
