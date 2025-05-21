@@ -79,6 +79,7 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 
 - You can now disable validation batching with `up.form.config.batchValidate = false`.
 - You can now send validation requests to a different server route (issue #486). You can use the new `[up-validate-url]` and `[up-validate-method]` attributes on indivudal fields or on entire forms. Unpoly still guarantees eventual consistency in a form with many concurrent validations.
+- Validation targets can now refer to the changed field with `:origin`. This has been possible before, but was never documented.
   
 
 ### Layers

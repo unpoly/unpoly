@@ -5539,6 +5539,69 @@ describe('up.form', function() {
           expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.position, .employee')
           expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('department')
         })
+
+        describe('handling of :origin', function() {
+
+          it('allows to refer to the changed field as :origin', async function() {
+            const [form, fieldset1, field1, fieldset2, field2, fieldset3, field3, preview] = htmlFixtureList(`
+              <form method="post" action="/process">
+                <fieldset>
+                  <input name="field1" up-validate="fieldset:has(:origin), #preview">
+                </fieldset>
+                <fieldset>
+                  <input name="field2" up-validate="fieldset:has(:origin), #preview">
+                </fieldset>
+                <fieldset>
+                  <input name="field3" up-validate="fieldset:has(:origin), #preview">
+                </fieldset>
+                <output id="preview">
+                </output>
+              </form>
+            `)
+
+            up.hello(form)
+
+            field2.value = 'changed'
+            Trigger.change(field2)
+            await wait()
+
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('fieldset:has(input[name="field2"]), #preview')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('field2')
+          })
+
+          it('allows to refer to the changed field as :origin when multiple validations are batched', async function() {
+            const [form, fieldset1, field1, fieldset2, field2, fieldset3, field3, preview] = htmlFixtureList(`
+              <form method="post" action="/process">
+                <fieldset>
+                  <input name="field1" up-validate="fieldset:has(:origin), #preview">
+                </fieldset>
+                <fieldset>
+                  <input name="field2" up-validate="fieldset:has(:origin), #preview">
+                </fieldset>
+                <fieldset>
+                  <input name="field3" up-validate="fieldset:has(:origin), #preview">
+                </fieldset>
+                <output id="preview">
+                </output>
+              </form>
+            `)
+
+            up.hello(form)
+
+            field2.value = 'changed'
+            Trigger.change(field2)
+
+            field3.value = 'changed'
+            Trigger.change(field3)
+            await wait()
+
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('fieldset:has(input[name="field2"]), #preview, fieldset:has(input[name="field3"])')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('field2 field3')
+
+          })
+
+        })
+
       })
 
       describe('when no selector is given', function() {
