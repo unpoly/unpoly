@@ -110,6 +110,7 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 
 - ⚠️ Any `[up-expire-cache]` and `[up-evict-cache]` attributes are now executed *before* the request is sent. In previous version, the cache was only changed after a response was loaded. This change allows the combined use of `[up-evict-cache]` and `[up-cache]` to clear and re-populate the cache with a single render pass.
 - ⚠️ The server can no longer prevent expiration with an `X-Up-Expire-Cache: false` response header.
+- When a POST request redirects to a GET route, that final GET request is now cached.
 
 
 ### Persistent keeping

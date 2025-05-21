@@ -1370,6 +1370,7 @@ describe('up.network', function() {
             })
 
             u.each(['POST', 'PUT', 'DELETE'], function(unsafeMethod) {
+
               it(`does not cache ${unsafeMethod} requests`, async function() {
                 up.request({ url: '/foo', method: unsafeMethod, cache: 'auto' })
                 await wait()
@@ -1379,6 +1380,20 @@ describe('up.network', function() {
 
                 expect(jasmine.Ajax.requests.count()).toEqual(2)
               })
+
+              it(`does not cache an ${unsafeMethod} request, but does cache a redirect to a GET route`, async function() {
+                up.request({ url: '/post-path', method: unsafeMethod, cache: 'auto' })
+                await wait()
+
+                expect({ url: '/post-path', method: unsafeMethod }).not.toBeCached()
+
+                jasmine.respondWith('redirect body', { responseURL: '/redirect-path' })
+                await wait()
+
+                expect({ url: '/post-path', method: unsafeMethod }).not.toBeCached()
+                expect({ url: '/redirect-path', method: 'GET' }).toBeCached()
+              })
+
             })
           })
 
@@ -1398,55 +1413,93 @@ describe('up.network', function() {
             expect({ url: '/no' }).not.toBeCached()
           })
         })
-      })
 
-      describe('when there is an existing cache entry and a new request has { cache: false }', function() {
+        describe('with { cache: false }', function() {
 
-        it('keeps the existing response in the cache while the new request is loading', async function() {
-          let response = null
+          it(`does not cache a redirect to a GET route`, async function() {
+            up.request({ url: '/path1', method: 'GET', cache: false })
+            await wait()
 
-          up.request({ url: '/cache-me', cache: true })
-          await wait()
+            expect({ url: '/path1', method: 'GET' }).not.toBeCached()
 
-          expect(up.network.queue.allRequests.length).toBe(1)
-          jasmine.respondWith('response text')
-          await wait()
+            jasmine.respondWith('redirect body', { responseURL: '/path2' })
+            await wait()
 
-          expect(up.network.queue.allRequests.length).toBe(0)
-          up.request({ url: '/cache-me', cache: false })
-          await wait()
+            expect({ url: '/path1', method: 'GET' }).not.toBeCached()
+            expect({ url: '/path2', method: 'GET' }).not.toBeCached()
+          })
 
-          expect(up.network.queue.allRequests.length).toBe(1)
-          up.request({ url: '/cache-me', cache: true }).then((cachedResponse) => response = cachedResponse)
-          await wait()
+          it(`updates an already-cached redirect to a GET route`, async function() {
+            await jasmine.populateCache('/path2', 'old path2 text')
 
-          expect(response).toBeGiven()
-          expect(response.text).toEqual('response text')
-        })
+            up.request({ url: '/path1', method: 'GET', cache: false })
+            await wait()
 
-        it("updates an existing cache entry with the newer response", async function() {
-          let response = null
+            expect({ url: '/path1', method: 'GET' }).not.toBeCached()
+            expect({ url: '/path2', method: 'GET' }).toBeCached()
 
-          up.request({ url: '/cache-me', cache: true })
-          await wait()
+            jasmine.respondWith('new path2 text', { responseURL: '/path2' })
+            await wait()
 
-          expect(up.network.queue.allRequests.length).toBe(1)
-          jasmine.respondWith('old response text')
-          await wait()
+            expect({ url: '/path1', method: 'GET' }).not.toBeCached()
+            expect({ url: '/path2', method: 'GET' }).toBeCached()
+            expect({ url: '/path2', method: 'GET' }).toBeCachedWithResponse({ text: 'new path2 text' })
+          })
 
-          expect(up.network.queue.allRequests.length).toBe(0)
-          up.request({ url: '/cache-me', cache: false })
-          await wait()
+          describe('when there is an existing cache entry', function() {
 
-          expect(up.network.queue.allRequests.length).toBe(1)
-          jasmine.respondWith('new response text')
-          await wait()
+            it('keeps the existing response in the cache while the new request is loading', async function() {
+              let response = null
 
-          up.request({ url: '/cache-me', cache: true }).then((cachedResponse) => response = cachedResponse)
-          await wait()
+              up.request({ url: '/cache-me', cache: true })
+              await wait()
 
-          expect(response).toBeGiven()
-          expect(response.text).toEqual('new response text')
+              expect(up.network.queue.allRequests.length).toBe(1)
+              jasmine.respondWith('response text')
+              await wait()
+
+              expect(up.network.queue.allRequests.length).toBe(0)
+              up.request({ url: '/cache-me', cache: false })
+              await wait()
+
+              expect(up.network.queue.allRequests.length).toBe(1)
+              up.request({ url: '/cache-me', cache: true }).then((cachedResponse) => response = cachedResponse)
+              await wait()
+
+              expect(response).toBeGiven()
+              expect(response.text).toEqual('response text')
+            })
+
+            it("updates an existing cache entry with the newer response", async function() {
+              let response = null
+
+              up.request({ url: '/cache-me', cache: true })
+              await wait()
+
+              expect(up.network.queue.allRequests.length).toBe(1)
+              jasmine.respondWith('old response text')
+              await wait()
+
+              expect(up.network.queue.allRequests.length).toBe(0)
+              up.request({ url: '/cache-me', cache: false })
+              await wait()
+
+              expect(up.network.queue.allRequests.length).toBe(1)
+              jasmine.respondWith('new response text')
+              await wait()
+
+              up.request({ url: '/cache-me', cache: true }).then((cachedResponse) => response = cachedResponse)
+              await wait()
+
+              expect(response).toBeGiven()
+              expect(response.text).toEqual('new response text')
+            })
+
+            it('evicts an existing cache entry after a network error')
+
+            it('evicts an existing cache entry after an error response')
+
+          })
         })
       })
 
@@ -2605,31 +2658,6 @@ describe('up.network', function() {
 
     describe('up.cache.put()', function() {
       it('should have tests')
-    })
-
-    describe('up.cache.alias()', function() {
-      it('uses an existing cache entry for another request (used in case of redirects)', async function() {
-        let originalRequest = up.request({ url: '/foo', cache: true })
-        let aliasRequest
-
-        await wait()
-
-        expect({ url: '/foo' }).toBeCached()
-        expect({ url: '/bar' }).not.toBeCached()
-
-        aliasRequest = up.cache.alias({ url: '/foo' }, { url: '/bar' })
-        await wait()
-
-        expect({ url: '/foo' }).toBeCached()
-        expect({ url: '/bar' }).toBeCached()
-        expect(jasmine.Ajax.requests.count()).toEqual(1)
-
-        jasmine.respondWith('original request response')
-        await wait()
-
-        expect(originalRequest.response.text).toBe('original request response')
-        expect(aliasRequest.response.text).toBe('original request response')
-      })
     })
 
     describe('up.cache.remove()', function() {

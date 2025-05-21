@@ -600,31 +600,38 @@ up.network = (function() {
       cache.expire(responseOrError.expireCache ?? false, { except: request })
       cache.evict(responseOrError.evictCache ?? false, { except: request })
 
-      let hasCacheEntry = cache.get(request)
       let isResponse = responseOrError instanceof up.Response
       let isNetworkError = !isResponse
       let isSuccessResponse = isResponse && responseOrError.ok
       let isErrorResponse = isResponse && !responseOrError.ok
       let isEmptyResponse = isResponse && responseOrError.none
+      let redirectRequest = isResponse && responseOrError.redirectRequest
 
       if (isErrorResponse) {
         // Evict an earlier cache entry with a successful response (as we now know a better state, even if that state is an error page).
         cache.evict(request.url)
       } else if (isNetworkError || isEmptyResponse) {
         // Only evict this one request instance in case we put it into the cache at the start of this function.
-        // We want to keep other cache entries for the same URL because:
-        //
-        // (1) If the request failed due to a
+        // We keep other requests for the same URL but with a different { cacheRoute } (due to Vary).
         cache.evict(request)
-      } else if (isSuccessResponse && hasCacheEntry) {
-        // We now re-put the request into the cache, regardless of its { cache } setting, for multiple reasons:
-        //
-        // (1) In case we evicted the entire cache above, we must re-cache a cacheable request.
-        // (2) An un-cacheable request should still update an existing cache entry
-        //     (written by a earlier, cacheable request with the same cache key)
-        //     since the later response will be fresher.
-        // (3) Now that we have a response the cache needs to be updated with Vary info.
-        cache.put(request)
+      } else if (isSuccessResponse) {
+        if (cache.get(request)) {
+          // We now re-put the request into the cache, regardless of its { cache } setting, for multiple reasons:
+          //
+          // (1) In case we evicted the entire cache above, we must re-cache a cacheable request.
+          // (2) An un-cacheable request should still update an existing cache entry
+          //     (written by a earlier, cacheable request with the same cache key)
+          //     since the later response will be fresher.
+          // (3) Now that we have a response the cache needs to be updated with Vary info.
+          cache.put(request)
+        }
+
+        if (redirectRequest && (redirectRequest.willCache() || cache.get(redirectRequest))) {
+          // (1) If GET /foo redirected to GET /bar, both /foo and /bar should yield the cached response.
+          // (2) If POST /foo redirected to GET /bar, we should now cache GET /bar (although we didn't cache POST /foo)
+          // (3) If POST /foo redirected to GET /bar without caching, but /bar was already cached, update cache for /bar
+          cache.put(redirectRequest)
+        }
       }
     })
   }
@@ -869,18 +876,6 @@ up.network = (function() {
   @stable
   */
 
-  function registerAliasForRedirect(request, response) {
-    if (request.cache && response.url && request.url !== response.url) {
-      const newRequest = u.variant(request, {
-        method: response.method,
-        url: response.url,
-        // TODO: Consider dropping the cacheRoute prop
-        cacheRoute: null,
-      })
-      cache.alias(request, newRequest)
-    }
-  }
-
   /*-
   This event is [emitted](/up.emit) when the response to an [AJAX request](/up.request)
   has been received.
@@ -977,7 +972,6 @@ up.network = (function() {
     isSafeMethod,
     config,
     abort: abortRequests,
-    registerAliasForRedirect,
     queue, // for testing
     loadPage,
   }

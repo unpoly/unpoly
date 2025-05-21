@@ -297,4 +297,24 @@ up.Response = class Response extends up.Record {
     return `HTTP ${this.status} response to ${this.request.description}`
   }
 
+  get redirect() {
+    return (this.url !== this.request.url) || (this.method !== this.request.method)
+  }
+
+  get redirectRequest() {
+    if (!this.redirect) return
+
+    let finalRequest = u.variant(this.request, {
+      method: this.method,
+      url: this.url,
+      // The { cacheRoute } prop may no longer be correctly cached
+      // TODO: Maybe we can find a way to get rid of this prop?
+      cacheRoute: null,
+    })
+
+    up.cache.track(this.request, finalRequest, { force: true })
+
+    return finalRequest
+  }
+
 }

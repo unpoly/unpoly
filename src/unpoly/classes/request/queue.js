@@ -94,10 +94,6 @@ up.Request.Queue = class Queue {
     // If the request was aborted before it was sent, it still sits in @queuedRequests.
     u.remove(this._currentRequests, request) || u.remove(this._queuedRequests, request)
 
-    if ((responseOrError instanceof up.Response) && responseOrError.ok) {
-      up.network.registerAliasForRedirect(request, responseOrError)
-    }
-
     queueMicrotask(() => this._poke())
 
     // Check if we can emit up:network:recover after a previous up:network:late event.

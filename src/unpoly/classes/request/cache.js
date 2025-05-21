@@ -111,27 +111,7 @@ up.Request.Cache = class Cache {
     this._limitSize()
   }
 
-  alias(existingCachedRequest, newRequest) {
-    // Check if we have a cached copy of the given up.Request or request options.
-    // Only the cached copy will have the correct promise that will resolve to a response,
-    // even if all other properties match.
-    //
-    // Calling up.get() will also wrap an options object into an up.Request.
-    existingCachedRequest = this.get(existingCachedRequest)
-
-    // If the existing request is no longer in the cache, we have nothing to register an alias against.
-    if (!existingCachedRequest) return
-
-    newRequest = this._wrap(newRequest)
-
-    this.track(existingCachedRequest, newRequest, { force: true })
-    this.put(newRequest)
-
-    // If the user has passed us request options for `newRequest`, we have constructed
-    // the up.Request instance. Return it to the user, who has no other means of accessing it.
-    return newRequest
-  }
-
+  // TODO: Move this to up.Request
   async track(existingRequest, newRequest, options = {}) {
     newRequest.trackedRequest = existingRequest
     newRequest.state = 'tracking'
