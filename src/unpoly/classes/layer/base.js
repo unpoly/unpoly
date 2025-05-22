@@ -602,38 +602,38 @@ up.Layer = class Layer extends up.Record {
 
   saveHistory() {
     // (1) showsLiveHistory() would always return false unless we're the front layer
-    // (2) Getters like this.title would always return this.savedTitle unless we're the front layer
+    // (2) Getters like this.title would always return this._savedTitle unless we're the front layer
     u.assert(this.isFront())
 
     // If we're not rendering history, don't save history state of a background layer.
     if (!this.showsLiveHistory()) return
 
-    this.savedTitle = this.title
-    this.savedMetaTags = this.metaTags
-    this.savedLocation = this.location // synced except on the root layer before the initial location change
-    this.savedLang = this.lang
+    this._savedTitle = this.title
+    this._savedMetaTags = this.metaTags
+    this._savedLocation = this.location // synced except on the root layer before the initial location change
+    this._savedLang = this.lang
   }
 
   restoreHistory() {
     if (!this.showsLiveHistory()) return
 
     // We may not have a #savedLocation when we were opened from an HTML string instead of a URL.
-    if (this.savedLocation) {
+    if (this._savedLocation) {
       // We cannot use the `this.title` setter as that does not
-      // push a state if `newLocation === this.savedLocation`.
-      up.history.push(this.savedLocation)
+      // push a state if `newLocation === this._savedLocation`.
+      up.history.push(this._savedLocation)
     }
 
-    if (this.savedTitle) {
-      document.title = this.savedTitle
+    if (this._savedTitle) {
+      document.title = this._savedTitle
     }
 
-    if (this.savedMetaTags) {
-      up.history.updateMetaTags(this.savedMetaTags)
+    if (this._savedMetaTags) {
+      up.history.updateMetaTags(this._savedMetaTags)
     }
 
-    if (u.isString(this.savedLang)) {
-      up.history.updateLang(this.savedLang)
+    if (u.isString(this._savedLang)) {
+      up.history.updateLang(this._savedLang)
     }
   }
 
@@ -727,12 +727,12 @@ up.Layer = class Layer extends up.Record {
       // This will implicitey change the front layer's title.
       return document.title
     } else {
-      return this.savedTitle
+      return this._savedTitle
     }
   }
 
   _updateTitle(title) {
-    this.savedTitle = title
+    this._savedTitle = title
 
     if (this.showsLiveHistory()) {
       document.title = title
@@ -743,12 +743,12 @@ up.Layer = class Layer extends up.Record {
     if (this.showsLiveHistory()) {
       return up.history.findMetaTags()
     } else {
-      return this.savedMetaTags
+      return this._savedMetaTags
     }
   }
 
   _updateMetaTags(metaTags) {
-    this.savedMetaTags = metaTags
+    this._savedMetaTags = metaTags
 
     if (this.showsLiveHistory()) {
       up.history.updateMetaTags(metaTags)
@@ -759,12 +759,12 @@ up.Layer = class Layer extends up.Record {
     if (this.showsLiveHistory()) {
       return up.history.getLang()
     } else {
-      return this.savedLang
+      return this._savedLang
     }
   }
 
   _updateLang(lang) {
-    this.savedLang = lang
+    this._savedLang = lang
 
     if (this.showsLiveHistory()) {
       up.history.updateLang(lang)
@@ -793,16 +793,16 @@ up.Layer = class Layer extends up.Record {
       // This will implicitly change the front layer's location.
       return up.history.location
     } else {
-      return this.savedLocation
+      return this._savedLocation
     }
   }
 
   _updateLocation(location, { push }) {
     location = u.normalizeURL(location)
-    let previousLocation = this.savedLocation
+    let previousLocation = this._savedLocation
 
     if (location !== previousLocation) {
-      this.savedLocation = location
+      this._savedLocation = location
 
       if (this.showsLiveHistory() && push) {
         up.history.push(location)

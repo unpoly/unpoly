@@ -18,7 +18,7 @@ up.Request.Queue = class Queue {
 
   asap(request) {
     request.runQueuedCallbacks()
-    u.always(request, (responseOrError) => this._onRequestSettled(request, responseOrError))
+    u.always(request, () => this._onRequestSettled(request))
 
     // When considering whether a request is "slow", we're measuring the duration between request.queuedAt
     // and the moment when the request gets settled. Note that when setSlowTimer() occurs, it will
@@ -90,7 +90,7 @@ up.Request.Queue = class Queue {
     }
   }
 
-  _onRequestSettled(request, responseOrError) {
+  _onRequestSettled(request) {
     // If the request was aborted before it was sent, it still sits in @queuedRequests.
     u.remove(this._currentRequests, request) || u.remove(this._queuedRequests, request)
 
