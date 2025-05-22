@@ -1758,7 +1758,7 @@ describe('up.history', function() {
           }))
         })
 
-        it('emits the event when only the  query string changes', async function() {
+        it('emits the event when only the query string changes', async function() {
           history.replaceState({}, '', '/path?query=one')
 
           let spy = jasmine.createSpy('up:location:changed listener')

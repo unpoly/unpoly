@@ -33,6 +33,8 @@ This release contains some breaking changes, which are marked with the ⚠️ em
   - A new experimental property `{ willHandle }` shows if Unpoly thinks it is responsible for restoring the new location state.
   - A new experimental property `{ alreadyHandled }` shows if Unpoly thinks the change has already been handled (e.g. when a script calls `pushState()`).
 - ⚠️ `up.history.push()` will now add another history entry if the given location matches the current location.
+- For overlays with history, the `up:layer:location:changed' event is now emitted when the URL changes for *any* reason, not just after rendering.
+- The `up:location:location:changed` event now has a `{ previousLocation }` property.
 
 
 ### Clicking on `#hash` links

@@ -93,6 +93,11 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     //     with { layer: 'swap' } (issue #397).
     this._baseLayer.peel({ history: !this.layer.history })
 
+    // (1) The parent's saved history will be restored when this new overlay is closed.
+    // (2) Save the parent's history as long as it is the topmost layer in the stack,
+    //     otherwise parent.showsLiveHistory() becomes false.
+    this._baseLayer.saveHistory()
+
     // Don't wait for peeling to finish. Change the stack sync so there is no state
     // when the new overlay is scheduled to be pushed, but not yet in the stack.
     up.layer.stack.push(this.layer)
@@ -208,14 +213,9 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
       this.layer.history = up.fragment.hasAutoHistory([this._content], this.layer)
     }
 
-    let { parent } = this.layer
-
     // If an ancestor layer was opened with the wish to not affect history, this
     // child layer must not affect it either, regardless of its @history setting.
-    this.layer.history &&= parent.history
-
-    // The parent's saved history will be restored when this new overlay is closed.
-    parent.saveHistory()
+    this.layer.history &&= this._baseLayer.history
 
     // For the initial fragment insertion we always update its location, even if the layer
     // does not have visible history ({ history } attribute). This ensures that a

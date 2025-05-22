@@ -730,7 +730,11 @@ up.layer = (function() {
   This event is *not* emitted when an overlay is opened. For this observe `up:layer:opened` instead.
 
   @param {string} event.location
-    The new location URL.
+    The current layer location.
+  @param {string|undefined} event.previousLocation
+    The previous layer location.
+
+    May be `undefined` if the layer was opened without a known location.
   @param {up.Layer} event.layer
     The [layer object](/up.Layer) that had its location changed.
   @event up:layer:location:changed

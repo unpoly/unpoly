@@ -463,43 +463,12 @@ up.status = (function() {
   @stable
   */
 
-  function updateLayerIfLocationChanged(layer) {
-    const processedLocation = layer.feedbackLocation
-
-    const layerLocation = getMatchableLayerLocation(layer.location)
-
-    // A history change might call this function multiple times,
-    // since we listen to both up:location:changed and up:layer:location:changed.
-    // We also don't want to unnecessarily reprocess nav links, which is expensive.
-    // For this reason we check whether the current location differs from
-    // the last processed location.
-    if (!processedLocation || (processedLocation !== layerLocation)) {
-      layer.feedbackLocation = layerLocation
-      updateFragment(layer.element, { layer })
-    }
-  }
-
-  function onBrowserLocationChanged() {
-    const frontLayer = up.layer.front
-
-    // We allow Unpoly-unaware code to use the pushState API and change the
-    // front layer in the process. See up.Layer.Base#location setter.
-    if (frontLayer.showsLiveHistory()) {
-      updateLayerIfLocationChanged(frontLayer)
-    }
-  }
-
-  // Even when the modal or popup does not change history, we consider the URLs of the content it displays.
-  up.on('up:location:changed', (_event) => { // take 1 arg to prevent data parsing
-    onBrowserLocationChanged()
-  })
-
   up.on('up:fragment:compile', (_event, newFragment) => {
     updateFragment(newFragment)
   })
 
-  up.on('up:layer:location:changed', (event) => {
-    updateLayerIfLocationChanged(event.layer)
+  up.on('up:layer:location:changed', ({ layer }) => {
+    updateFragment(layer.element, { layer })
   })
 
   // The framework is reset between tests

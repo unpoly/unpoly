@@ -100,18 +100,17 @@ up.Layer = class Layer extends up.Record {
 
   constructor(options = {}) {
     super(options)
-
-    if (!this.mode) {
-      throw "missing { mode } option"
-    }
+    u.assert(this.mode)
   }
 
   setupHandlers() {
     up.link.convertClicks(this)
+    this._unbindLocationChanged = up.on('up:location:changed', (event) => this._onBrowserLocationChanged(event))
   }
 
-  teardownHandlers() {}
-    // no-op for overriding
+  teardownHandlers() {
+    this._unbindLocationChanged?.()
+  }
 
   mainTargets() {
     return up.layer.mainTargets(this.mode)
@@ -602,18 +601,21 @@ up.Layer = class Layer extends up.Record {
   }
 
   saveHistory() {
-    if (this.history) {
-      this.savedTitle = document.title
-      this.savedMetaTags = up.history.findMetaTags()
-      this.savedLocation = up.history.location
-      this.savedLang = up.history.getLang()
-    }
+    // (1) showsLiveHistory() would always return false unless we're the front layer
+    // (2) Getters like this.title would always return this.savedTitle unless we're the front layer
+    u.assert(this.isFront())
+
+    // If we're not rendering history, don't save history state of a background layer.
+    if (!this.showsLiveHistory()) return
+
+    this.savedTitle = this.title
+    this.savedMetaTags = this.metaTags
+    this.savedLocation = this.location // synced except on the root layer before the initial location change
+    this.savedLang = this.lang
   }
 
   restoreHistory() {
-    if (!this.showsLiveHistory()) {
-      return
-    }
+    if (!this.showsLiveHistory()) return
 
     // We may not have a #savedLocation when we were opened from an HTML string instead of a URL.
     if (this.savedLocation) {
@@ -671,28 +673,34 @@ up.Layer = class Layer extends up.Record {
   updateHistory(options) {
     // Set unless { location: false }
     if (u.isString(options.location)) {
-      this.location = options.location
+      this._updateLocation(options.location, { push: true })
     }
 
     // Set unless { metaTags: false }
     if (up.history.config.updateMetaTags && u.isList(options.metaTags)) {
       up.migrate?.warnOfHungryMetaTags?.(options.metaTags)
-      this.metaTags = options.metaTags
+      this._updateMetaTags(options.metaTags)
     }
 
     // Set unless { title: false }
     if (u.isString(options.title)) {
-      this.title = options.title
+      this._updateTitle(options.title)
     }
 
     // Set unless { lang: false }
     if (u.isString(options.lang)) {
-      this.lang = options.lang
+      this._updateLang(options.lang)
     }
   }
 
   showsLiveHistory() {
     return this.history && this.isFront() // && (up.history.config.enabled || this.isRoot())
+  }
+
+  _onBrowserLocationChanged({ location }) {
+    if (this.showsLiveHistory()) {
+      this._updateLocation(location, { push: false })
+    }
   }
 
   /*-
@@ -723,7 +731,7 @@ up.Layer = class Layer extends up.Record {
     }
   }
 
-  set title(title) {
+  _updateTitle(title) {
     this.savedTitle = title
 
     if (this.showsLiveHistory()) {
@@ -739,7 +747,7 @@ up.Layer = class Layer extends up.Record {
     }
   }
 
-  set metaTags(metaTags) {
+  _updateMetaTags(metaTags) {
     this.savedMetaTags = metaTags
 
     if (this.showsLiveHistory()) {
@@ -755,7 +763,7 @@ up.Layer = class Layer extends up.Record {
     }
   }
 
-  set lang(lang) {
+  _updateLang(lang) {
     this.savedLang = lang
 
     if (this.showsLiveHistory()) {
@@ -779,6 +787,7 @@ up.Layer = class Layer extends up.Record {
   @experimental
   */
   get location() {
+    // TODO: Maybe we can always return savedLocation now
     if (this.showsLiveHistory()) {
       // Allow Unpoly-unaware code to use the pushState API directly.
       // This will implicitly change the front layer's location.
@@ -788,21 +797,21 @@ up.Layer = class Layer extends up.Record {
     }
   }
 
-  set location(location) {
-    const previousLocation = this.location
+  _updateLocation(location, { push }) {
     location = u.normalizeURL(location)
+    let previousLocation = this.savedLocation
 
-    // When opening, we always need to store the location to have an initial value.
-    if (previousLocation !== location || this.opening) {
+    if (location !== previousLocation) {
       this.savedLocation = location
 
-      if (this.showsLiveHistory()) {
+      if (this.showsLiveHistory() && push) {
         up.history.push(location)
       }
 
-      // When opening we never emit up:layer:location:changed.
+      // (1) The up:layer:location:changed event signals a location change for history-less overlays.
+      // (2) When opening we never emit up:layer:location:changed.
       if (!this.opening) {
-        this.emit('up:layer:location:changed', { location, log: false })
+        this.emit('up:layer:location:changed', { location, previousLocation, log: false })
       }
     }
   }

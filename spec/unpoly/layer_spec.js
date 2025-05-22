@@ -2670,6 +2670,328 @@ describe('up.layer', function() {
 
   describe('unobtrusive behavior', function() {
 
+    describe('up:layer:location:changed event', function() {
+
+      beforeEach(function() {
+        up.history.config.enabled = true
+      })
+
+      afterEach(async function() {
+        // This suite makes heavy use of pushState API, which sometimes causes the browser to stop
+        // accepting new history entries.
+        //
+        // Wait a little after each spec, in addition to the throttling in protect_jasmine_runner.js.
+        await wait(50)
+      })
+
+      describe('when rendering', function() {
+
+        // See specs for 'up.render() with { history option }'
+        it('is tested elsewhere')
+
+      })
+
+      describe('when scripts call window.history.pushState()', function() {
+
+        it('emits the event on the root layer', async function() {
+          history.replaceState({}, '', '/path1')
+          await wait()
+          expect(location.href).toMatchURL('/path1')
+          expect(up.layer.current.location).toMatchURL('/path1')
+
+          const listener = jasmine.createSpy('event listener')
+          up.on('up:layer:location:changed', listener)
+
+          history.pushState({}, '', '/path2')
+          await wait()
+
+          expect(location.href).toMatchURL('/path2')
+          expect(up.layer.current.location).toMatchURL('/path2')
+
+          expect(listener.calls.count()).toBe(1)
+          expect(listener.calls.argsFor(0)[0]).toBeEvent('up:layer:location:changed', {
+            previousLocation: '/path1',
+            location: '/path2',
+            layer: up.layer.root,
+          })
+        })
+
+        it('emits the event on an overlay with history', async function() {
+          await up.layer.open({ content: 'overlay text', history: true, location: '/path1' })
+          expect(up.layer.current).toBeOverlay()
+          expect(up.layer.current.history).toBe(true)
+          expect(location.href).toMatchURL('/path1')
+          expect(up.layer.current.location).toMatchURL('/path1')
+
+          const listener = jasmine.createSpy('event listener')
+          up.on('up:layer:location:changed', listener)
+
+          history.pushState({}, '', '/path2')
+          await wait()
+
+          expect(location.href).toMatchURL('/path2')
+          expect(up.layer.current.location).toMatchURL('/path2')
+          expect(listener.calls.count()).toBe(1)
+          expect(listener.calls.argsFor(0)[0]).toBeEvent('up:layer:location:changed', {
+            previousLocation: '/path1',
+            location: '/path2',
+            layer: up.layer.get(1),
+          })
+        })
+
+        it('does not emit the event if the URL did not change', async function() {
+          await up.layer.open({ content: 'overlay text', history: true, location: '/path1' })
+          expect(up.layer.current).toBeOverlay()
+          expect(up.layer.current.history).toBe(true)
+          expect(location.href).toMatchURL('/path1')
+          expect(up.layer.current.location).toMatchURL('/path1')
+
+          const listener = jasmine.createSpy('event listener')
+          up.on('up:layer:location:changed', listener)
+
+          history.pushState({}, '', '/path1')
+          await wait()
+
+          expect(listener).not.toHaveBeenCalled()
+          expect(up.layer.current.location).toMatchURL('/path1')
+        })
+
+        it('does not emit the event on an overlay without history', async function() {
+          history.replaceState({}, '', '/root-path')
+          await wait()
+          expect(location.href).toMatchURL('/root-path')
+
+          await up.layer.open({ content: 'overlay text', history: false, location: '/hidden-overlay-location' })
+          expect(up.layer.current).toBeOverlay()
+          expect(up.layer.current.history).toBe(false)
+          expect(location.href).toMatchURL('/root-path')
+          expect(up.layer.current.location).toMatchURL('/hidden-overlay-location')
+
+          const listener = jasmine.createSpy('event listener')
+          up.on('up:layer:location:changed', listener)
+
+          history.pushState({}, '', '/path1')
+          await wait()
+
+          expect(listener).not.toHaveBeenCalled()
+          expect(location.href).toMatchURL('/path1')
+          expect(up.layer.current.location).toMatchURL('/hidden-overlay-location')
+        })
+
+      })
+
+      describe('when scripts call window.history.replaceState()', function() {
+
+        it('emits the event on the root layer', async function() {
+          history.replaceState({}, '', '/path1')
+          await wait()
+          expect(location.href).toMatchURL('/path1')
+          expect(up.layer.current.location).toMatchURL('/path1')
+
+          const listener = jasmine.createSpy('event listener')
+          up.on('up:layer:location:changed', listener)
+
+          history.replaceState({}, '', '/path2')
+          await wait()
+
+          expect(location.href).toMatchURL('/path2')
+          expect(up.layer.current.location).toMatchURL('/path2')
+
+          expect(listener.calls.count()).toBe(1)
+          expect(listener.calls.argsFor(0)[0]).toBeEvent('up:layer:location:changed', {
+            previousLocation: '/path1',
+            location: '/path2',
+            layer: up.layer.root,
+          })
+        })
+
+        it('emits the event on an overlay with history', async function() {
+          await up.layer.open({ content: 'overlay text', history: true, location: '/path1' })
+          expect(up.layer.current).toBeOverlay()
+          expect(up.layer.current.history).toBe(true)
+          expect(location.href).toMatchURL('/path1')
+          expect(up.layer.current.location).toMatchURL('/path1')
+
+          const listener = jasmine.createSpy('event listener')
+          up.on('up:layer:location:changed', listener)
+
+          history.replaceState({}, '', '/path2')
+          await wait()
+
+          expect(location.href).toMatchURL('/path2')
+          expect(up.layer.current.location).toMatchURL('/path2')
+          expect(listener.calls.count()).toBe(1)
+          expect(listener.calls.argsFor(0)[0]).toBeEvent('up:layer:location:changed', {
+            previousLocation: '/path1',
+            location: '/path2',
+            layer: up.layer.get(1),
+          })
+        })
+
+        it('does not emit the event if the URL did not change', async function() {
+          await up.layer.open({ content: 'overlay text', history: true, location: '/path1' })
+          expect(up.layer.current).toBeOverlay()
+          expect(up.layer.current.history).toBe(true)
+          expect(location.href).toMatchURL('/path1')
+          expect(up.layer.current.location).toMatchURL('/path1')
+
+          const listener = jasmine.createSpy('event listener')
+          up.on('up:layer:location:changed', listener)
+
+          history.replaceState({}, '', '/path1')
+          await wait()
+
+          expect(listener).not.toHaveBeenCalled()
+          expect(up.layer.current.location).toMatchURL('/path1')
+        })
+
+        it('does not emit the event on an overlay without history', async function() {
+          history.replaceState({}, '', '/root-path')
+          await wait()
+          expect(location.href).toMatchURL('/root-path')
+
+          await up.layer.open({ content: 'overlay text', history: false, location: '/hidden-overlay-location' })
+          expect(up.layer.current).toBeOverlay()
+          expect(up.layer.current.history).toBe(false)
+          expect(location.href).toMatchURL('/root-path')
+          expect(up.layer.current.location).toMatchURL('/hidden-overlay-location')
+
+          const listener = jasmine.createSpy('event listener')
+          up.on('up:layer:location:changed', listener)
+
+          history.replaceState({}, '', '/path1')
+          await wait()
+
+          expect(listener).not.toHaveBeenCalled()
+          expect(location.href).toMatchURL('/path1')
+          expect(up.layer.current.location).toMatchURL('/hidden-overlay-location')
+        })
+
+      })
+
+      describe('when scripts set location.hash', function() {
+
+        it('emits the event on the root layer', async function() {
+          history.replaceState({}, '', '/path#hash1')
+          await wait()
+          expect(location.href).toMatchURL('/path#hash1')
+          expect(up.layer.current.location).toMatchURL('/path#hash1')
+
+          const listener = jasmine.createSpy('event listener')
+          up.on('up:layer:location:changed', listener)
+
+          location.hash = '#hash2'
+          await wait()
+
+          expect(location.href).toMatchURL('/path#hash2')
+          expect(up.layer.current.location).toMatchURL('/path#hash2')
+
+          expect(listener.calls.count()).toBe(1)
+          expect(listener.calls.argsFor(0)[0]).toBeEvent('up:layer:location:changed', {
+            previousLocation: '/path#hash1',
+            location: '/path#hash2',
+            layer: up.layer.root,
+          })
+        })
+
+        it('emits the event on an overlay with history', async function() {
+          await up.layer.open({ content: 'overlay text', history: true, location: '/path#hash1' })
+          expect(up.layer.current).toBeOverlay()
+          expect(up.layer.current.history).toBe(true)
+          expect(location.href).toMatchURL('/path#hash1')
+          expect(up.layer.current.location).toMatchURL('/path#hash1')
+
+          const listener = jasmine.createSpy('event listener')
+          up.on('up:layer:location:changed', listener)
+
+          location.hash = '#hash2'
+          await wait()
+
+          expect(location.href).toMatchURL('/path#hash2')
+          expect(up.layer.current.location).toMatchURL('/path#hash2')
+          expect(listener.calls.count()).toBe(1)
+          expect(listener.calls.argsFor(0)[0]).toBeEvent('up:layer:location:changed', {
+            previousLocation: '/path#hash1',
+            location: '/path#hash2',
+            layer: up.layer.get(1),
+          })
+        })
+
+        it('does not emit the event if the URL did not change', async function() {
+          await up.layer.open({ content: 'overlay text', history: true, location: '/path#hash1' })
+          expect(up.layer.current).toBeOverlay()
+          expect(up.layer.current.history).toBe(true)
+          expect(location.href).toMatchURL('/path#hash1')
+          expect(up.layer.current.location).toMatchURL('/path#hash1')
+
+          const listener = jasmine.createSpy('event listener')
+          up.on('up:layer:location:changed', listener)
+
+          location.hash = '#hash1'
+          await wait()
+
+          expect(listener).not.toHaveBeenCalled()
+          expect(up.layer.current.location).toMatchURL('/path#hash1')
+        })
+
+        it('does not emit the event on an overlay without history', async function() {
+          history.replaceState({}, '', '/path#hash1')
+          await wait()
+          expect(location.href).toMatchURL('/path#hash1')
+
+          await up.layer.open({ content: 'overlay text', history: false, location: '/hidden-overlay-location' })
+          expect(up.layer.current).toBeOverlay()
+          expect(up.layer.current.history).toBe(false)
+          expect(location.href).toMatchURL('/path#hash1')
+          expect(up.layer.current.location).toMatchURL('/hidden-overlay-location')
+
+          const listener = jasmine.createSpy('event listener')
+          up.on('up:layer:location:changed', listener)
+
+          location.hash = '#hash2'
+          await wait()
+
+          expect(listener).not.toHaveBeenCalled()
+          expect(location.href).toMatchURL('/path#hash2')
+          expect(up.layer.current.location).toMatchURL('/hidden-overlay-location')
+        })
+
+      })
+
+      describe('when the user goes back in history', function() {
+
+        it('emits the event on the root layer', async function() {
+          history.replaceState({}, '', '/path1')
+          await wait()
+
+          history.pushState({}, '', '/path2')
+          await wait()
+
+          expect(location.href).toMatchURL('/path2')
+          expect(up.layer.current.location).toMatchURL('/path2')
+
+          const listener = jasmine.createSpy('event listener')
+          up.on('up:layer:location:changed', listener)
+
+          history.back()
+          await wait(100)
+
+          expect(location.href).toMatchURL('/path1')
+          expect(up.layer.current.location).toMatchURL('/path1')
+
+          expect(listener.calls.count()).toBe(1)
+          expect(listener.calls.argsFor(0)[0]).toBeEvent('up:layer:location:changed', {
+            previousLocation: '/path2',
+            location: '/path1',
+            layer: up.layer.root,
+          })
+        })
+
+      })
+
+    })
+
+
     describe('link with [up-layer=new]', function() {
 
       it('opens a new overlay loaded from the given [href]', async function() {
