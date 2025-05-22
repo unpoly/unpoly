@@ -2248,6 +2248,10 @@ up.util = (function() {
     return mapObject(keys, (key) => [key, value])
   }
 
+  function assert(condition) {
+    if (!condition) throw "assert failed"
+  }
+
   return {
     parseURL,
     normalizeURL,
@@ -2362,6 +2366,7 @@ up.util = (function() {
     maskPattern,
     expressionOutline,
     parseString,
+    assert,
     // partialRight,
   }
 })()

@@ -173,6 +173,7 @@ describe('up.Layer.Overlay', function() {
 
       expect(up.layer.isOverlay()).toBe(true)
       expect(location.href).toMatchURL('/path/to/modal')
+      expect(up.layer.current.location).toMatchURL('/path/to/modal')
 
       up.layer.current.accept()
 
