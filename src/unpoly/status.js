@@ -115,10 +115,6 @@ up.status = (function() {
   @stable
   */
 
-  function reset() {
-    up.layer.root.feedbackLocation = null
-  }
-
   const SELECTOR_LINK = 'a, [up-href]'
 
   function linkCurrentURLs(link) {
@@ -161,9 +157,7 @@ up.status = (function() {
   }
 
   function getMatchableLayerLocation(layer) {
-    // Don't re-use layer.feedbackLocation since the current layer returns
-    // location.href in case someone changed the history using the pushState API.
-    return layer.feedbackLocation || u.matchableURL(layer.location)
+    return u.matchableURL(layer.location)
   }
 
   /*-
@@ -470,9 +464,6 @@ up.status = (function() {
   up.on('up:layer:location:changed', ({ layer }) => {
     updateFragment(layer.element, { layer })
   })
-
-  // The framework is reset between tests
-  up.on('up:framework:reset', reset)
 
   return {
     config,
