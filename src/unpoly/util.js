@@ -1653,25 +1653,42 @@ up.util = (function() {
   @experimental
   */
   function isEqual(a, b) {
+    // When two values have trivial equality, return immediately instead of going
+    // through the extensive normalization and comparison below.
+    if (a === b) {
+      return true
+    }
+
     if (a?.valueOf) { a = a.valueOf() } // Date, String objects, Number objects
     if (b?.valueOf) { b = b.valueOf() } // Date, String objects, Number objects
+
+    if (a === b) {
+      return true
+    }
+
     if (typeof(a) !== typeof(b)) {
       return false
-    } else if (isList(a) && isList(b)) {
-      return isEqualList(a, b)
-    } else if (isObject(a) && a[isEqual.key]) {
-      return a[isEqual.key](b)
-    } else if (isOptions(a) && isOptions(b)) {
-      const aKeys = Object.keys(a)
-      const bKeys = Object.keys(b)
-      if (isEqualList(aKeys, bKeys)) {
-        return every(aKeys, (aKey) => isEqual(a[aKey], b[aKey]))
-      } else {
-        return false
-      }
-    } else {
-      return a === b
     }
+
+    if (isList(a) && isList(b)) {
+      return isEqualList(a, b)
+    }
+
+    if (isObject(a) && a[isEqual.key]) {
+      return a[isEqual.key](b)
+    }
+
+    if (isOptions(a) && isOptions(b)) {
+      return isEqualOptions(a, b)
+    }
+
+    return false
+  }
+
+  function isEqualOptions(a, b) {
+    const aKeys = Object.keys(a)
+    const bKeys = Object.keys(b)
+    return isEqualList(aKeys, bKeys) && every(aKeys, (key) => isEqual(a[key], b[key]))
   }
 
   /*-
