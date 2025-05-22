@@ -212,7 +212,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
         // This prevents issues with other overlay libs appending elements to document.body,
         // but overlaying this overlay with a huge z-index. Clicking such a foreign overlay
         // would close this layer, as Unpoly considers it to be on the root layer (our parent).2
-        this.unbindParentClicked = this.parent.on('up:click', (event, element) => {
+        this._unbindParentClicked = this.parent.on('up:click', (event, element) => {
           if (!up.layer.isWithinForeignOverlay(element)) {
             // When our origin is clicked again, halt the click event
             // We achieve this by halting the click event.
@@ -224,7 +224,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     }
 
     if (this._supportsDismissMethod('key')) {
-      this.unbindEscapePressed = up.event.onEscape((event) => this.onEscapePressed(event))
+      this._unbindEscapePressed = up.event.onEscape((event) => this.onEscapePressed(event))
     }
 
     // <a up-accept="value">OK</a>
@@ -375,8 +375,8 @@ up.Layer.Overlay = class Overlay extends up.Layer {
 
   teardownHandlers() {
     super.teardownHandlers()
-    this.unbindParentClicked?.()
-    this.unbindEscapePressed?.()
+    this._unbindParentClicked?.()
+    this._unbindEscapePressed?.()
     this.overlayFocus.teardown()
   }
 

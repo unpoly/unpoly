@@ -48,7 +48,7 @@ up.FragmentPolling = class FragmentPolling {
     if (this._state === 'started') {
       this._clearReloadTimer()
       this._state = 'stopped'
-      this.unbindEvents?.()
+      this._unbindEvents?.()
     }
   }
 
@@ -64,8 +64,8 @@ up.FragmentPolling = class FragmentPolling {
   }
 
   _ensureEventsBound() {
-    if (!this.unbindEvents) {
-      this.unbindEvents = up.on('visibilitychange up:layer:opened up:layer:dismissed up:layer:accepted', this._onVisibilityChange.bind(this))
+    if (!this._unbindEvents) {
+      this._unbindEvents = up.on('visibilitychange up:layer:opened up:layer:dismissed up:layer:accepted', this._onVisibilityChange.bind(this))
     }
   }
 
