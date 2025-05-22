@@ -79,12 +79,26 @@ For instance, when the user changes the continent, the following would update th
 in addition to the country select:
 
 ```html
-<select name="continent" up-validate="#country, #price">
+<select name="continent" up-validate="#country, #price"> <!-- mark-phrase "#country, #price" -->
   ...
 </select>
 ```
 
-Preventing race conditions
+To update another fragment *in addition* to the field's [form group](/up-form-group), include
+the group in the target list.\
+You can refer to the changed field as `:origin`:
+
+
+```html
+<fieldset>
+  <select name="continent" up-validate="fieldset:has(:origin), #country, #price"> <!-- mark-phrase "fieldset:has(:origin)" -->
+    ...
+  </select>
+</fieldset>
+```
+
+
+Preventing race conditions {#race-conditions}
 --------------------------
 
 Custom implementations of dependent elements will often exhibit race conditions, e.g. when the user
@@ -126,5 +140,27 @@ If you prefer to completely prevent user input during validation, give the form 
 You may also assign `[up-watch-disable]` to individual fields, or any element that contains fields.
 
 Also see [disabling fields while working](/watch-options#disabling).
+
+
+Rendering from other URLs {#urls}
+--------------------------------
+
+By default, validation requests will use `[method]` and `[action]` attributes from the form element.
+
+You can render content from another server endpoint by setting an
+[`[up-validate-url]`](/up-validate#up-validate#url) attribute on a form or field:
+
+```html
+<form method="post" action="/order">
+  <input name="quantity" up-validate="#preview" up-validate-url="/preview-order"> <!-- mark-phrase "/preview-order" -->
+  
+  <div id="preview">
+    Order total: €190
+  </div>
+</form>
+```
+
+Multiple validations to the same URL will be [batched together](/up.validate#batching).
+
 
 @page reactive-server-forms

@@ -128,7 +128,7 @@ up.form = (function() {
   @section Validation
 
     @param {boolean} [config.validateBatch=true]
-      TODO: Params
+      Whether to [batch validations](/up.validate#batching).
 
   @stable
    */
@@ -1038,8 +1038,8 @@ up.form = (function() {
   for control flow on the server.
 
   To automatically update a form after a field was changed, use the the `[up-validate]` attribute.
-  You may combine `[up-validate]` and `up.validate()` within the same form. Their updates
-  will be [batched together](#batching) to prevent race conditions.
+  You may combine `[up-validate]` and `up.validate()` within the same form. In order to reduce
+  requests, their updates will be [batched together](#batching).
 
   ## Controlling what is updated
 
@@ -1073,7 +1073,7 @@ up.form = (function() {
 
   ## Multiple validations are batched together {#batching}
 
-  In order to prevent race conditions, multiple calls of `up.validate()` within the same
+  In order to reduce requests, multiple calls of `up.validate()` within the same
   [task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/) are consolidated into a single request.
   For instance, the following will send a single request [targeting](/targeting-fragments) `.foo, .bar`:
 
@@ -1098,7 +1098,48 @@ up.form = (function() {
   up.validate('form')
   ```
 
-  Also see [preventing race conditions](/reactive-server-forms#preventing-race-conditions).
+  When a validation request is already in flight,
+  additional validations are [queued](/reactive-server-forms#face-conditions).
+  When the current request has loaded, queued validations are batched using
+  the same rules as outlined above.
+
+  ### Batching with multiple URLs {#batching-multiple-urls}
+
+  Even with multiple URLs, only a single validation request per form will be in flight at the same time.
+  Additional validations are queued until the current validation request has loaded.
+
+  For instance, let's assume the following four validations:
+
+  ```js
+  up.validate('.foo', { url: '/path1' })
+  up.validate('.bar', { url: '/path2' })
+  up.validate('.baz', { url: '/path1' })
+  up.validate('.qux', { url: '/path2' })
+  ```
+
+  This will send a sequence of two requests:
+
+  1. A request to `/path` targeting `.foo, .baz`. The other validations are queued.
+  2. Once that request finishes, a second request to `/path2` targeting `.bar, .qux`.
+
+  ### Disabling batching {#batching-disable}
+
+  By disabling batching, Unpoly will send individual requests for each call to `up.validate()`
+  and for each change of an `[up-validate]` field. Additional validations are queued until the
+  current validation request has loaded.
+
+  There are multiple ways to disable batching:
+
+  - Globally configuring `up.form.config.validateBatch = true`.
+  - Setting an [`[up-validate-batch]`](/up-validate) attribute on the element with `[up-validate]`.
+  - Passing an option `up.validate(element, { batch: false })`.
+
+  ## Preventing race conditions
+
+  Unpoly guarantees that many concurrent validations will eventually show a consistent form state,
+  regardless of how fast the user clicks or how slow the network is.
+
+  See [preventing race conditions](/reactive-server-forms#preventing-race-conditions) for details.
 
   @function up.validate
 
@@ -1140,13 +1181,15 @@ up.form = (function() {
 
   @section Request
     @param {string} options.url
-      TODO: Docs
+      The [URL to validate against](/).
 
     @param {string} options.method
       TODO: Docs
 
-    @param {boolean} options.batch
-      TODO: Docs
+    @param {boolean} [options.batch=true]
+      Whether to [batch validations](/up.validate#batching).
+
+      Defaults to `up.form.config.validateBatch`, which defaults to `true`.
 
     @param options.params
       @like up.render
@@ -1674,21 +1717,31 @@ up.form = (function() {
   form will be updated.
 
 
-  ### Updating a different fragment
+  ### Updating a different fragment {#target}
 
   If you don't want to update the field's form group, you can set the `[up-validate]`
   attribute to any [target selector](/targeting-fragments):
 
   ```html
-  <input type="text" name="email" up-validate=".email-errors"> <!-- mark-phrase ".email-errors" -->
+  <input name="email" up-validate=".email-errors"> <!-- mark-phrase ".email-errors" -->
   <div class="email-errors"></div>
   ```
 
-  You may also [update multiple fragments](/targeting-fragments#multiple)
+  You may [update multiple fragments](/targeting-fragments#multiple)
   by separating their target selectors with a comma:
 
   ```html
-  <input type="text" name="email" up-validate=".email-errors, .base-errors"> <!-- mark-phrase ".email-errors, .base-errors" -->
+  <input name="email" up-validate=".email-errors, .base-errors"> <!-- mark-phrase ".email-errors, .base-errors" -->
+  ```
+
+  To update another fragment *in addition* to the field's form group, include
+  the group in the target list.\
+  You can refer to the changed field as `:origin`:
+
+  ```html
+  <fieldset>
+    <input name="email" up-validate="fieldset:has(:origin), .base-errors"> <!-- mark-phrase "fieldset:has(:origin), .base-errors" -->
+  </fieldset>
   ```
 
   ## Updating dependent elements
@@ -1753,6 +1806,31 @@ up.form = (function() {
   </fieldset>
   ```
 
+  ### Validating against other URLs {#urls}
+
+  By default, validation requests will use `[method]` and `[action]` attributes from the form element.
+
+  You can validate against another server endpoint by setting `[up-validate-url]`
+  and `[up-validate-method]` attributes:
+
+  ```html
+  <form method="post" action="/order" up-validate-url="/validate-order"> <!-- mark-phrase "up-validate-url" -->
+    ...
+  </form>
+  ```
+
+  To have individual fields validate against different URLs, you can also set `[up-validate-url]` on a field:
+
+  ```html
+  <form method="post" action="/register">
+    <input name="email" up-validate-url="/validate-email"> <!-- mark-phrase "/validate-email" -->
+    <input name="password" up-validate-url="/validate-password"> <!-- mark-phrase "/validate-password" -->
+  </form>
+  ```
+
+  Multiple validations to the same URL will be [batched together](/up.validate#batching).
+
+
   ## Programmatic validation
 
   To update form fragments from your JavaScript, use the [`up.validate()`](/up.validate) function.
@@ -1768,6 +1846,9 @@ up.form = (function() {
       The [target selector](/targeting-fragments) to update with the server response.
 
       Defaults the closest [form group](/up-form-group) around the validating field.
+
+      You can set another selector to [update a different fragment](/up-validate#target).
+      To refer to the changed field, use the `:origin` pseudo-selector.
 
   @section Event source
     @mix up-watch/event-source

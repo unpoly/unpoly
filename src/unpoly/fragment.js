@@ -2285,7 +2285,7 @@ up.fragment = (function() {
 
   @include default-origins
 
-  ### Example
+  ## Example
 
   Below we see two links that will each update the `<div>` next to them.
   This requires a rather verbose `[up-target]` attribute:
@@ -2308,7 +2308,10 @@ up.fragment = (function() {
   <div>Task 2 will appear here</div
   ```
 
-  ### Setting the origin programmatically
+  When a link is clicked, `:origin` with a target [derived](/target-derivation) from the link element.
+  For example, clicking on the second link will target `a[href='/tasks/2']`.
+
+  ## Setting the origin programmatically
 
   When updating fragments programmatically through functions like `up.render()`
   you may pass an origin element as an `{ origin }` option:
