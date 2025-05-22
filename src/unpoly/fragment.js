@@ -1462,7 +1462,7 @@ up.fragment = (function() {
 
   ## Animating the removal
 
-  You may animate the element's removal by passing an option like `{ animate: 'fade-out' }`.
+  You may animate the element's removal by passing an option like `{ animation: 'fade-out' }`.
   Unpoly ships with a number of [predefined animations](/up.animate#named-animations) and
   you may so define [custom animations](/up.animation).
 
