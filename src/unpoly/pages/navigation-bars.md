@@ -122,6 +122,33 @@ When a link is placed in an overlay, the current location is the [location of th
 even if that overlay doesn't have [visible history](/history-in-overlays).
 
 
+### Watching other layers
+
+To highlight links that point to the location of *another* layer, use an `[up-layer]` attribute.
+
+Below you can see a "hamburger menu" that is shown in an overlay. It contains links to the root layer,
+whose `.up-current` class also match the root layer's location:
+
+```html
+<nav up-layer="root"> <!-- mark-phrase "up-layer" -->
+  <a href="/users" up-layer="root">Users</a>
+  <a href="/posts" up-layer="root">Posts</a>
+</nav>
+```
+
+You can also match multiple layers this way:
+
+```html
+<nav up-layer="root, current"> <!-- mark-phrase "root, current" -->
+  <a href="/users" up-layer="root">Users</a>
+  <a href="/posts" up-layer="root">Posts</a>
+  <a href="/menu" up-layer="current">Menu</a>
+</nav>
+```
+
+
+
+
 ## Styling current links
 
 Unpoly applies no default styling to `.up-current` links. Use your own CSS instead:
