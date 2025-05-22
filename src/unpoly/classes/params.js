@@ -180,7 +180,7 @@ up.Params = class Params {
   _arrayEntryToQuery(entry) {
     const { value } = entry
 
-    // We cannot transpot a binary value in a query string.
+    // We cannot transport a binary value in a query string.
     if (this._isBinaryValue(value)) {
       return
     }
