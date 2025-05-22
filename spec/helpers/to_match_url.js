@@ -9,7 +9,18 @@ beforeEach(() => {
           pass &&= u.isString(actual)
           pass &&= u.isString(expected)
           pass &&= u.normalizeURL(actual, normalizeOptions) === u.normalizeURL(expected, normalizeOptions)
-          return { pass }
+
+          if (pass) {
+            return {
+              pass,
+              message: u.sprintf("Expected %o to not match URL %o", actual, expected)
+            }
+          } else {
+            return {
+              pass,
+              message: u.sprintf("Expected %o to match URL %o", actual, expected)
+            }
+          }
         }
       }
     }
