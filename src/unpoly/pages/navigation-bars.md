@@ -10,8 +10,21 @@ This helps highlighting current menu sections using CSS.
 
 @include nav-example
 
+### Updating `.up-current` classes
 
-### Defining navigational containers
+The `.up-current` class is toggled automatically within all content that Unpoly renders.
+For example, when Unpoly [follows a link](/up-follow), [submits a form](/up-submit)
+or [renders from a script](/up.render), any newly inserted hyperlinks will get `.up-current`
+if they point to the current URL. When the browser location [changes](/up:location:changed),
+existing links will be updated to reflect the new location.
+
+To toggle `.up-current` on content that you manually inserted without Unpoly, use `up.hello()`.
+
+
+
+## Defining navigational containers {#navigational-containers}
+
+The `.up-current` class is applied to all links within a *navigational container*.
 
 Standard [`<nav>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/nav) elements are
 always considered navigational containers:
@@ -22,7 +35,6 @@ always considered navigational containers:
   <a href="/bar">Bar</a>
 </nav>
 ```
-
 
 If you cannot use a `<nav>` element, you can also set the `[up-nav]` attribute on an arbitrary tag instead:
 
@@ -56,32 +68,22 @@ up.status.config.navSelectors.push('.navbar')
 ```
 
 
-### Updating `.up-current` classes
 
-The `.up-current` class is toggled automatically within all content that Unpoly renders.
-For example, when Unpoly [follows a link](/up-follow), [submits a form](/up-submit)
-or [renders from a script](/up.render), any newly inserted hyperlinks will get `.up-current`
-if they point to the current URL. When the render pass changes history, existing links
-will be updated to reflect the new location.
-
-To toggle `.up-current` on content that you manually inserted without Unpoly, use `up.hello()`.
-
-
-## What is current?
+## Matching the current location {#matching-urls}
 
 The URL shown in the browser's [address bar](https://en.wikipedia.org/wiki/Address_bar) is
-generally considered the "current" location.
+generally considered the "current" location ([except with overlays](#layers)).
 
-A link matches the current location (and is marked as `.up-current`) if it matches either:
+A link is marked as `.up-current` when the current location matches either:
 
 - the link's `[href]` attribute
 - the link's `[up-href]` attribute on a [faux hyperlink](/faux-interactive-elements#acting-like-a-hyperlink)
-- the link's [URL alias](#aliases)
+- one of the link's [alias URLs](#aliases)
 
 Any `#hash` fragments will be ignored in both link attributes and in the current location.
 
 
-### Highlighting links for multiple URLs {#aliases}
+### Matching multiple URLs {#aliases}
 
 You often want to highlight a link for multiple URLs. For example a link to a *Users* section
 might open a list of users, but should also be "current" for the new user form.
@@ -112,17 +114,44 @@ You can also use a [URL pattern](/url-patterns):
 ```
 
 
-### Layers have separate locations
+### Matching the location of other layers {#layers}
 
-When no [overlay](/up.layer) is open, the current location is the URL displayed
-in the browser's [address bar](https://en.wikipedia.org/wiki/Address_bar).
+Each [layer](/up.layer) has a separate location that it considers "current".
+Even when the overlay has [no visible history](/history-in-overlays#configuring-visibility),
+it still tracks the location of the fragment it contains. 
 
-While overlays are open, Unpoly tracks a separate location for each layer.
-When a link is placed in an overlay, the current location is the [location of that overlay](/up.layer.location),
-even if that overlay doesn't have [visible history](/history-in-overlays).
+Links are marked as current when they point to location *of their own layer*.
+To highlight links that point to the location of *another* layer, set an [`[up-layer]`](/up-nav#up-layer) attribute
+on its [navigational container](#navigational-containers).
+The attribute value can be any [layer option](/layer-option).
+
+Below you can see a "hamburger menu" that is shown in an overlay. It contains links to the root layer,
+whose `.up-current` class also match the root layer's location:
+
+```html
+<!-- Shown within an overlay -->
+<nav up-layer="root"> <!-- mark-phrase "up-layer" -->
+  <a href="/users" up-layer="root">Users</a>
+  <a href="/posts" up-layer="root">Posts</a>
+</nav>
+```
+
+You can also match multiple layers this way. This is useful
+when links within a single navigation bar target various layers.
+
+In this example links are marked as "current" if their
+URL matches the location of *any* layer:
+
+```html
+<nav up-layer="any"> <!-- mark-phrase "any" -->
+  <a href="/users" up-layer="root">Users</a>
+  <a href="/posts" up-layer="root">Posts</a>
+  <a href="/sitemap" up-layer="current">Full sitemap</a>
+</nav>
+```
 
 
-## Styling current links
+## Styling current links {#styling}
 
 Unpoly applies no default styling to `.up-current` links. Use your own CSS instead:
 

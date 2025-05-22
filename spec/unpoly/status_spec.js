@@ -1096,6 +1096,21 @@ describe('up.status', function() {
         expect($otherLink).not.toHaveClass('up-current')
       })
 
+      it("respects links that are added to an existing [up-nav] by a fragment update", async function() {
+        const $nav = $fixture('.nav[up-nav]')
+        const $link = $nav.affix('a[href="/foo"][up-target=".main"]')
+        const $more = $nav.affix('.more')
+        up.hello($nav)
+
+        up.render({ fragment: '<div class="more"><a href="/bar"></div>', history: true, location: '/bar' })
+
+        await wait()
+
+        const $moreLink = $('.more').find('a')
+        expect($moreLink).toBeAttached()
+        expect($moreLink).toHaveClass('up-current')
+      })
+
       describe('updating .up-current marks when the URL changes', function() {
 
         it('marks an existing link as .up-current as it becomes current', async function() {
@@ -1234,6 +1249,10 @@ describe('up.status', function() {
           expect($link).toHaveClass('up-current')
         })
 
+      })
+
+      describe('with layers', function() {
+
         it("marks a link as .up-current if it links to its own layer's URL, but not when it links to another layer's URL", async function() {
           replaceURL('/background-url')
 
@@ -1278,6 +1297,139 @@ describe('up.status', function() {
           expect(this.backgroundLinkToOtherURL).not.toHaveClass('up-current')
         })
 
+        it("allows links to observe an ancestor layer with an [up-layer] attribute", async function() {
+          replaceURL('/background-url')
+
+          fixture('.background-content')
+
+          up.layer.open({ url: '/layer-url', target: '.layer-content', history: true })
+
+          await wait()
+
+          jasmine.respondWith(`
+            <div class="layer-content" up-nav up-layer="root">
+              <a class="layer-link" href="/background-url">text</a>
+              <a class="layer-link" href="/layer-url">text</a>
+              <a class="layer-link" href="/other-url">text</a>
+            </div>
+          `)
+
+          await wait()
+
+          expect(up.layer.current).toBeOverlay()
+          expect(up.layer.current.location).toMatchURL('/layer-url')
+
+          const layerLinkToBackgroundURL = e.get('.layer-content a[href="/background-url"]')
+          const layerLinkToLayerURL = e.get('.layer-content a[href="/layer-url"]')
+          const layerLinkToOtherURL = e.get('.layer-content a[href="/other-url"]')
+
+          expect(layerLinkToBackgroundURL).toHaveClass('up-current')
+          expect(layerLinkToLayerURL).not.toHaveClass('up-current')
+          expect(layerLinkToOtherURL).not.toHaveClass('up-current')
+
+          up.render({ layer: 'root', target: '.background-content', content: 'new content', history: true, location: '/other-url' })
+          await wait()
+
+
+          expect(layerLinkToBackgroundURL).not.toHaveClass('up-current')
+          expect(layerLinkToLayerURL).not.toHaveClass('up-current')
+          expect(layerLinkToOtherURL).toHaveClass('up-current')
+        })
+
+        it("allows links to observe a descendant layer with an [up-layer] attribute", async function() {
+          replaceURL('/background-url')
+
+          fixture('.background-content')
+
+          const nav = fixture('div[up-nav][up-layer="overlay"]')
+          const backgroundLinkToBackgroundURL = e.affix(nav, 'a[href="/background-url"]')
+          const backgroundLinkToLayerURL = e.affix(nav, 'a[href="/layer-url"]')
+          const backgroundLinkToOtherURL = e.affix(nav, 'a[href="/other-url"]')
+          up.hello(nav)
+
+          await wait()
+
+          // Because no matching layer is open, no link is current.
+          expect(backgroundLinkToBackgroundURL).not.toHaveClass('up-current')
+          expect(backgroundLinkToLayerURL).not.toHaveClass('up-current')
+          expect(backgroundLinkToOtherURL).not.toHaveClass('up-current')
+
+          up.layer.open({ url: '/layer-url', target: '.layer-content', history: true })
+
+          await wait()
+
+          jasmine.respondWith(`
+            <div class="layer-content">
+              overlay text
+            </div>
+          `)
+
+          await wait()
+
+          expect(up.layer.current).toBeOverlay()
+          expect(up.layer.current.location).toMatchURL('/layer-url')
+          expect(backgroundLinkToBackgroundURL).not.toHaveClass('up-current')
+          expect(backgroundLinkToLayerURL).toHaveClass('up-current')
+          expect(backgroundLinkToOtherURL).not.toHaveClass('up-current')
+
+          up.render({ layer: 'overlay', target: '.layer-content', content: 'new overlay content', history: true, location: '/other-url' })
+          await wait()
+
+          expect(up.layer.current).toBeOverlay()
+          expect(up.layer.current.location).toMatchURL('/other-url')
+          expect(backgroundLinkToBackgroundURL).not.toHaveClass('up-current')
+          expect(backgroundLinkToLayerURL).not.toHaveClass('up-current')
+          expect(backgroundLinkToOtherURL).toHaveClass('up-current')
+
+          up.layer.dismiss()
+          await wait()
+
+          expect(up.layer.current).toBeRootLayer()
+          expect(up.layer.current.location).toMatchURL('/background-url')
+
+          // Because no matching layer is open, no link is current.
+          expect(backgroundLinkToBackgroundURL).not.toHaveClass('up-current')
+          expect(backgroundLinkToLayerURL).not.toHaveClass('up-current')
+          expect(backgroundLinkToOtherURL).not.toHaveClass('up-current')
+        })
+
+        it('allows links to observe multiple layers with an [up-layer] attribute, setting up-current if at least one layer matches', async function() {
+          replaceURL('/background-url')
+
+          fixture('.background-content')
+
+          up.layer.open({ url: '/layer-url', target: '.layer-content', history: true })
+
+          await wait()
+
+          jasmine.respondWith(`
+            <div class="layer-content" up-nav up-layer="any">
+              <a class="layer-link" href="/background-url">text</a>
+              <a class="layer-link" href="/layer-url">text</a>
+              <a class="layer-link" href="/other-url">text</a>
+            </div>
+          `)
+
+          await wait()
+
+          expect(up.layer.current).toBeOverlay()
+          expect(up.layer.current.location).toMatchURL('/layer-url')
+
+          const layerLinkToBackgroundURL = e.get('.layer-content a[href="/background-url"]')
+          const layerLinkToLayerURL = e.get('.layer-content a[href="/layer-url"]')
+          const layerLinkToOtherURL = e.get('.layer-content a[href="/other-url"]')
+
+          expect(layerLinkToBackgroundURL).toHaveClass('up-current')
+          expect(layerLinkToLayerURL).toHaveClass('up-current')
+          expect(layerLinkToOtherURL).not.toHaveClass('up-current')
+
+          up.render({ layer: 'root', target: '.background-content', content: 'new content', history: true, location: '/other-url' })
+          await wait()
+
+          expect(layerLinkToBackgroundURL).not.toHaveClass('up-current')
+          expect(layerLinkToLayerURL).toHaveClass('up-current')
+          expect(layerLinkToOtherURL).toHaveClass('up-current')
+        })
 
         it("marks a link as .up-current if it links to its current layer's URL, even if that layer does not render location", async function() {
           replaceURL('/background-url')
@@ -1326,21 +1478,6 @@ describe('up.status', function() {
           expect(this.layerLinkToBackgroundURL).not.toHaveClass('up-current')
           expect(this.layerLinkToLayerURL).not.toHaveClass('up-current')
           expect(this.layerLinkToOtherURL).toHaveClass('up-current')
-        })
-
-        it("respects links that are added to an existing [up-nav] by a fragment update", async function() {
-          const $nav = $fixture('.nav[up-nav]')
-          const $link = $nav.affix('a[href="/foo"][up-target=".main"]')
-          const $more = $nav.affix('.more')
-          up.hello($nav)
-
-          up.render({ fragment: '<div class="more"><a href="/bar"></div>', history: true, location: '/bar' })
-
-          await wait()
-
-          const $moreLink = $('.more').find('a')
-          expect($moreLink).toBeAttached()
-          expect($moreLink).toHaveClass('up-current')
         })
 
       })

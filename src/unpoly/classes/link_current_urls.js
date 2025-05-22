@@ -3,7 +3,7 @@ const u = up.util
 up.LinkCurrentURLs = class LinkCurrentURLs {
 
   constructor(link) {
-    // A link with an unsafe method will never be higlighted with .up-current.
+    // A link with an unsafe method will never be highlighted with .up-current.
     this._isSafe = up.link.isSafe(link)
 
     if (this._isSafe) {
@@ -38,5 +38,16 @@ up.LinkCurrentURLs = class LinkCurrentURLs {
       this._upHREF === normalizedLocation ||
       this._aliasPattern?.test?.(normalizedLocation, false)
     )
+  }
+
+  isAnyCurrent(normalizedLocations) {
+    // It is important to return false instead of a falsey value.
+    // up.status feeds the return value to element.classList.toggle(),
+    // which would use a default for undefined.
+    return normalizedLocations.some((normalizedLocation) => (
+      this._href === normalizedLocation ||
+      this._upHREF === normalizedLocation ||
+      this._aliasPattern?.test?.(normalizedLocation, false)
+    ))
   }
 }

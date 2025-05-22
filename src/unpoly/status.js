@@ -124,41 +124,55 @@ up.status = (function() {
     return link.upCurrentURLs ||= new up.LinkCurrentURLs(link)
   }
 
-  /*-
-  Forces the toggling of `.up-current` classes for the given fragment.
+  function getNavLocations(nav) {
+    let layerRef = e.attr(nav, 'up-layer') || 'origin'
+    let layers = up.layer.getAll(layerRef, { origin: nav })
+    return u.compact(layers.map(getMatchableLayerLocation))
+  }
 
-  @function updateFragment
-  @param {Element} fragment
-  @internal
-  */
-  function updateFragment(fragment, { layer } = {}) {
-    layer ||= up.layer.get(fragment)
+  function updateNav(nav, links, { newLinks, anyLocationChanged }) {
+    // Only look up current layer locations when either:
+    //
+    // (1) the location changed or
+    // (2) we haven't cached previous locations
+    //
+    // Otherwise we re-use the previous locations.
+    let currentLocations = (!anyLocationChanged && nav.upNavLocations) || getNavLocations(nav)
 
-    // An overlay might not have a { location } property, e.g. if it was created
-    // from local { content }. In this case we remove .up-current from all links.
-    let layerLocation = getMatchableLayerLocation(layer)
-
-    // We need to match both an `a[href]` within an `[up-nav]` *and* and `a[href][up-nav]
-    // This should return a selector like `:is([up-nav], nav):not([up-nav=false]) :is(a, [up-href]), :is([up-nav], nav):not([up-nav=false]):is(a, [up-href])`
-    const navSelector = config.selector('navSelectors')
-    const navLinkSelector = `${navSelector} :is(${SELECTOR_LINK}), ${navSelector}:is(${SELECTOR_LINK})`
-
-    // The fragment may be the <body> element which contains all other overlays.
-    // But we only want to update the <body>. Hence the { layer } option.
-    const links = up.fragment.all(navLinkSelector, { layer })
-
-    for (let link of links) {
-      const isCurrent = linkCurrentURLs(link).isCurrent(layerLocation)
-      for (let currentClass of config.currentClasses) {
-        link.classList.toggle(currentClass, isCurrent)
+    // We only process when either:
+    //
+    // (1) We have unprocessed links
+    // (2) The location for this nav's [up-layer] setting changed
+    if (newLinks || !u.isEqual(nav.upNavLocations, currentLocations)) {
+      for (let link of links) {
+        const isCurrent = linkCurrentURLs(link).isAnyCurrent(currentLocations)
+        for (let currentClass of config.currentClasses) {
+          link.classList.toggle(currentClass, isCurrent)
+        }
+        e.setAttrPresence(link, 'aria-current', 'page', isCurrent)
       }
-      e.setAttrPresence(link, 'aria-current', 'page', isCurrent)
+
+      // Remember which locations we last processed
+      nav.upNavLocations = currentLocations
+    }
+  }
+
+  // Looks for [up-nav] containers in the given fragment and updates their contained links.
+  // Because we update full navs, we only need to lookup layer locations once.
+  function updateNavsAround(root, opts) {
+    const navSelector = config.selector('navSelectors')
+    const fullNavs = e.around(root, navSelector)
+
+    for (let fullNav of fullNavs) {
+      let links = e.subtree(fullNav, SELECTOR_LINK)
+      updateNav(fullNav, links, opts)
     }
   }
 
   function getMatchableLayerLocation(layer) {
     return u.matchableURL(layer.location)
   }
+
 
   /*-
   @function findActivatableArea
@@ -416,6 +430,17 @@ up.status = (function() {
   ```
 
   @selector [up-nav]
+  @param [up-layer="origin"]
+    The [layers](/up.layer) for which to match link locations.
+
+    By default, links are only marked as current when they point to location *of their own layer*.
+    To highlight links that point to the location of *another* layer, set this attribute to
+    any [layer option](/layer-option).
+
+    If the configured option matches multiple layers (e.g. `any` or `current, root`),
+    links are highlighted if they match the location of any matching layer.
+
+    See [Matching the location of other layers](/navigation-bars#layers) for examples.
   @stable
   */
 
@@ -458,11 +483,11 @@ up.status = (function() {
   */
 
   up.on('up:fragment:compile', (_event, newFragment) => {
-    updateFragment(newFragment)
+    updateNavsAround(newFragment, { newLinks: true, anyLocationChanged: false })
   })
 
-  up.on('up:layer:location:changed', ({ layer }) => {
-    updateFragment(layer.element, { layer })
+  up.on('up:layer:location:changed up:layer:opened up:layer:dismissed up:layer:accepted', () => {
+    updateNavsAround(document.body, { newLinks: false, anyLocationChanged: true })
   })
 
   return {
