@@ -351,6 +351,11 @@ up.viewport = (function() {
 
   @function up.viewport.revealHash
   @param {string} hash
+    Must be given!
+  @param {up.Layer|string} [options.layer]
+  @param {Element} [options.origin]
+  @param {boolean} [options.strong]
+  @param {string} [options.behavior="instant"]
   @internal
   */
   function revealHash(...args) {
@@ -365,7 +370,7 @@ up.viewport = (function() {
   @function up.viewport.revealHashFn
   @internal
   */
-  function revealHashFn(hash = location.hash, { strong, layer, origin, behavior = 'instant' } = {}) {
+  function revealHashFn(hash, { strong, layer, origin, behavior = 'instant' } = {}) {
     if (!hash) return
 
     let match = firstHashTarget(hash, { layer, origin })

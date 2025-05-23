@@ -75,7 +75,7 @@ up.framework = (function() {
   @function up.boot
   @experimental
   */
-  function boot() {
+  function boot({ mode = 'manual' } = {}) {
     if (readyState !== 'configuring') {
       // In an app with a lot of async script the user may attempt to boot us twice.
       console.error('Unpoly has already booted')
@@ -91,9 +91,9 @@ up.framework = (function() {
       // Change the state in case any user-provided compiler calls up.boot().
       // up.boot() is a no-op unless readyState === 'configuring'.
       readyState = 'booting'
-      up.emit('up:framework:boot', { log: false })
+      up.emit('up:framework:boot', { mode, log: false })
       readyState = 'booted'
-      up.emit('up:framework:booted', { log: false })
+      up.emit('up:framework:booted', { mode, log: false })
     } else {
       console.error("Unpoly cannot boot: %s", issue)
     }
@@ -166,7 +166,7 @@ up.framework = (function() {
       //     document.readyState === 'interactive'. We must wait until DOMContentLoaded, when we know that
       //     subsequent users scripts have executed and (possibly) configured Unpoly.
       // (3) There are no guarantees when [async] scripts execute. These must boot Unpoly manually.
-      document.addEventListener('DOMContentLoaded', boot)
+      document.addEventListener('DOMContentLoaded', () => boot({ mode: 'auto' }))
     }
 
     // After this line user scripts may run and configure Unpoly, add compilers, etc.

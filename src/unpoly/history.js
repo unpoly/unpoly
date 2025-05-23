@@ -433,7 +433,7 @@ up.history = (function() {
       restoreLocation(event.location)
     } else if (event.reason === 'hash') {
       // We handle every hashchange, since only we know reveal obstructions.
-      up.viewport.revealHash(event.hash, { strong: true })
+      up.viewport.revealHash(location.hash, { strong: true })
     }
   }
 
@@ -562,22 +562,22 @@ up.history = (function() {
 
   // Wait until the framework is booted before we (1) patch window.history
   // and (2) replace the current history state.
-  up.on('up:framework:boot', function() {
+  up.on('up:framework:boot', function({ mode }) {
     trackCurrentLocation({ reason: null, alreadyHandled: true }) // no event is emitted while booting
     patchHistoryAPI()
     adoptInitialHistoryEntry()
-  })
 
-  // Honor obstructions when the initial URL contains a #hash.
-  up.on('DOMContentLoaded', function() {
-    // (1) When reloading, Chrome's default scrolling behavior
-    //     happens *before* DOMContentLoaded. We fix that as soon as possible.
-    // (2) When following a link to another URL with a #hash URL, Chrome's default
-    //     scrolling behavior happens *after* DOMContentLoaded. We wait one more task to
-    //     fix the scroll position after the browser did its thing.
-    up.viewport.revealHash({ strong: true })
-
-    u.task(up.viewport.revealHash)
+    // (1) Honor obstructions when the initial URL contains a #hash.
+    // (2) Wait until booting because the developer might choose not to boot Unpoly.
+    // (3) Don't scroll when the user manually boots later, as the user might already have scrolled elsewhere.
+    if (mode === 'auto') {
+      // (1) When reloading, Chrome's default scrolling behavior
+      //     happens *before* DOMContentLoaded. We fix that as soon as possible.
+      // (2) When following a link to another URL with a #hash URL, Chrome's default
+      //     scrolling behavior happens *after* DOMContentLoaded. We wait one more task to
+      //     fix the scroll position after the browser did its thing.
+      up.viewport.revealHash(location.hash, { strong: true })
+    }
   })
 
   up.on(window, 'hashchange, popstate', () => {
