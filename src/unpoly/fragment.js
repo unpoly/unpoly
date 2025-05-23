@@ -2133,7 +2133,7 @@ up.fragment = (function() {
   Use `:main` to only update the main page content, while keeping static layout elements around it.
   To replace all visible elements of a layer, see `:layer`.
 
-  ### Targeting the main element
+  ## Targeting the main element
 
   You can target the main element using the `:main` selector:
 
@@ -2157,7 +2157,7 @@ up.fragment = (function() {
 
   Also see [targeting the main element](/targeting-fragments#targeting-the-main-element).
 
-  ### Default main targets
+  ## Default main targets
 
   The default main targets are:
 
@@ -2176,7 +2176,7 @@ up.fragment = (function() {
 
   Unpoly will update a main element when no more specific render target is given.
 
-  ### Example
+  ## Example
 
   Many links simply replace the primary content element in your application layout.
 
@@ -2208,7 +2208,7 @@ up.fragment = (function() {
   <a href="/foo" up-target=".profile">...</a>
   ```
 
-  ### Overlays can use different main targets {#overlays}
+  ## Overlays can use different main targets {#overlays}
 
   Overlays often use a different default selector, e.g. to exclude a navigation bar.
 
@@ -2228,7 +2228,7 @@ up.fragment = (function() {
   </body>
   ```
 
-  ### Using existing elements as main targets
+  ## Using existing elements as main targets
 
   Instead of the `[up-main]` attribute you may also use the standard [`<main>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/main) element.
 

@@ -399,7 +399,7 @@ up.status = (function() {
 
   See [Navigation bars](/navigation-bars) for details and examples.
 
-  ### Example
+  ## Example
 
   Let's look at a simple menu with two links:
 
@@ -474,7 +474,7 @@ up.status = (function() {
 
   See [Navigation bars](/navigation-bars) for more documentation and examples.
 
-  ### Example
+  ## Example
 
   @include nav-example
 
