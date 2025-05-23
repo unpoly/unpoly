@@ -162,7 +162,6 @@ up.history = (function() {
 
       let willHandle = !alreadyHandled && isAdopted(location)
 
-      // TODO: Document new up:location:changed properties
       let locationChangedEvent = up.event.build('up:location:changed', {
         reason,
         location,
