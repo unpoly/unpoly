@@ -76,7 +76,7 @@ Both `up.render()` and `up.render().finished` promises resolve to an `up.RenderR
 let result = await up.render({ url: '/path', target: '.target', failTarget: '.errors' })
 console.log("Updated layer: ", result.layer)
 console.log("Updated fragments: ", result.fragments)
-console.log("Effective option used: ", result.options)
+console.log("Effective option used: ", result.renderOptions)
 ```
 
 

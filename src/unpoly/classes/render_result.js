@@ -46,8 +46,8 @@ up.RenderResult = class RenderResult extends up.Record {
   [`fail` prefixes](/failed-response#rendering-failed-responses-differently)
   have been removed from the render options.
 
-  @property up.RenderResult#options
-  @param {string} options
+  @property up.RenderResult#renderOptions
+  @param {Object} renderOptions
   @internal
   */
 
@@ -87,7 +87,7 @@ up.RenderResult = class RenderResult extends up.Record {
       'fragments',
       'layer',
       'target',
-      'options', // set by up.Change.FromContent
+      'renderOptions', // set by up.Change.FromContent
       'finished',
     ]
   }
@@ -140,7 +140,7 @@ up.RenderResult = class RenderResult extends up.Record {
     return new this({
       target: main.target,
       layer: main.layer,
-      options: main.options,
+      renderOptions: main.renderOptions,
       fragments: main.fragments.concat(extension.fragments),
       finished: (mergeFinished && this.mergeFinished(main, extension)) //.finished // Promise.all([main.finished, extension.finished])
     })

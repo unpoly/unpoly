@@ -697,8 +697,8 @@ describe('up.fragment', function() {
           fixture('.target')
 
           const job = up.render('.target', { content: 'new text' })
-          expect(job.options.target).toBe('.target')
-          expect(job.options.content).toBe('new text')
+          expect(job.renderOptions.target).toBe('.target')
+          expect(job.renderOptions.content).toBe('new text')
         })
 
         it('returns a promise for an up.RenderResult describing the updated fragments and layer', async function() {
@@ -716,6 +716,7 @@ describe('up.fragment', function() {
 
           await expectAsync(promise).toBeResolvedTo(jasmine.any(up.RenderResult))
           await expectAsync(promise).toBeResolvedTo(jasmine.objectContaining({
+            target: '.one, .three',
             fragments: [document.querySelector('.one'), document.querySelector('.three')],
             layer: up.layer.root
           }))
@@ -1364,7 +1365,7 @@ describe('up.fragment', function() {
             expect('.target').toHaveText('new text')
           })
 
-          it('rejects the returned promise', async function() {
+          it('rejects the returned promise with an up.RenderResult describing the updated fragments and layer', async function() {
             fixture('.success-target')
             fixture('.failure-target')
             const renderJob = up.render('.success-target', { url: '/path', failTarget: '.failure-target' })
@@ -1374,6 +1375,11 @@ describe('up.fragment', function() {
             jasmine.respondWithSelector('.failure-target', { status: 500 })
 
             await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.objectContaining({
+              target: '.failure-target',
+              fragments: [document.querySelector('.failure-target')],
+              layer: up.layer.root
+            }))
           })
 
           it('rejects the up.render().finished promise', async function() {

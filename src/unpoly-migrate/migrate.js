@@ -9,10 +9,10 @@ up.migrate = (function() {
     logLevel: 'warn'
   }))
 
-  function renamedProperty(object, oldKey, newKey, warning) {
+  function renamedProperty(object, oldKey, newKey, customWarning) {
     // We memoize the warning to prevent infinite recursion. The `found in %o` will access the getter
     // to print the object, which will call the warning, which will access the getter, etc.
-    const doWarn = u.memoize(() => warning ? warn(warning) : warn('Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object))
+    const doWarn = u.memoize(() => customWarning ? warn(customWarning) : warn('Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object))
 
     Object.defineProperty(object, oldKey, {
       configurable: true,
@@ -27,10 +27,10 @@ up.migrate = (function() {
     })
   }
 
-  function removedProperty(object, key, warning) {
+  function removedProperty(object, key, customWarning) {
     // We memoize the warning to prevent infinite recursion. The `found in %o` will access the getter
     // to print the object, which will call the warning, which will access the getter, etc.
-    const doWarn = u.memoize(() => warning ? warn(warning) : warn('Property { %s } has been removed without replacement (found in %o)', key, object))
+    const doWarn = u.memoize(() => customWarning ? warn(customWarning) : warn('Property { %s } has been removed without replacement (found in %o)', key, object))
 
     let valueRef = [object[key]]
 

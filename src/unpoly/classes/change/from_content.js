@@ -66,7 +66,7 @@ up.Change.FromContent = class FromContent extends up.Change {
       this._onPlanApplicable.bind(this, matchedPlan)
     )
 
-    result.options = this.options
+    result.renderOptions = this.options
 
     return result
   }

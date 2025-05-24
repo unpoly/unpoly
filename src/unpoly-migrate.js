@@ -2,6 +2,8 @@
 up.framework.startExtension()
 require('./unpoly-migrate/migrate')
 require('./unpoly-migrate/classes/config')
+require('./unpoly-migrate/classes/render_job')
+require('./unpoly-migrate/classes/render_result')
 require('./unpoly-migrate/util')
 require('./unpoly-migrate/error')
 require('./unpoly-migrate/browser')

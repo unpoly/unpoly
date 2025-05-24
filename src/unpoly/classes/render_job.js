@@ -17,7 +17,7 @@ console.log(job.options.target) // logs ".foo"
 console.log(job.options.url) // logs "/users"
 let renderResult = await job // fragments were updated
 console.log(renderResult.fragment) // logs the updated fragment
-let finalResult = await job.finished // animations are done and cached content was revlidated
+let finalResult = await job.finished // animations are done and cached content was revalidated
 console.log(finalResult.fragment) // logs the revalidated fragment
 ```
 
@@ -26,8 +26,8 @@ console.log(finalResult.fragment) // logs the revalidated fragment
 */
 up.RenderJob = class RenderJob {
 
-  constructor(options) {
-    this.options = options
+  constructor(renderOptions) {
+    this.renderOptions = renderOptions
   }
 
   execute() {
@@ -38,8 +38,8 @@ up.RenderJob = class RenderJob {
   /*-
   The [render options](/up.render#parameters) for this job.
 
-  @property up.RenderJob#options
-  @param {Object} options
+  @property up.RenderJob#renderOptions
+  @param {Object} renderOptions
   @stable
   */
 
@@ -49,15 +49,15 @@ up.RenderJob = class RenderJob {
 
       // Do this after emitting { guardEvent }, in case listeners want to augment render options
       // that are shortcuts (e.g. { layer: 'new modal' }) or that affect other options.
-      this.options = up.RenderOptions.preprocess(this.options)
+      this.renderOptions = up.RenderOptions.preprocess(this.renderOptions)
 
       // Throw if { confirm } is given and the user rejects the dialog.
       // Do this after emitting { guardEvent }, in case listeners want to augment render options.
-      up.browser.assertConfirmed(this.options)
+      up.browser.assertConfirmed(this.renderOptions)
 
       // Ensure we have either { url, content, fragment, document } option.
       // Do this after emitting { guardEvent }, in case listeners want to augment render options.
-      up.RenderOptions.assertContentGiven(this.options)
+      up.RenderOptions.assertContentGiven(this.renderOptions)
 
       let result = await this._getChange().execute()
       this._handleResult(result)
@@ -75,9 +75,9 @@ up.RenderJob = class RenderJob {
     // (2) No fragment could be matched (return value is up.CannotMatch)
     // (3) We're preloading (early return value is up.Request)
     if (result instanceof up.RenderResult) {
-      let { onRendered, onFinished } = result.options
+      let { onRendered, onFinished } = result.renderOptions
 
-      // We call result.options.onRendered() instead of this.options.onRendered()
+      // We call result.renderOptions.onRendered() instead of this.renderOptions.onRendered()
       // as this will call the correct options.onRendered() or onFailRendered()
       // depending on options.failOptions.
       if (!result.none) up.error.guard(() => onRendered?.(result))
@@ -117,7 +117,7 @@ up.RenderJob = class RenderJob {
   _handleError(error) {
     let prefix = error instanceof up.Aborted ? 'Rendering was aborted' : 'Error while rendering'
     up.puts('up.render()', `${prefix}: ${error.name}: ${error.message}`)
-    up.error.guard(() => this.options.onError?.(error))
+    up.error.guard(() => this.renderOptions.onError?.(error))
   }
 
   /*-
@@ -162,7 +162,7 @@ up.RenderJob = class RenderJob {
     // (3) FromURL is eventually going to call FromContent.
     //     We memoize the callback so we only run it once.
     let handleAbort = u.memoize((request) => this._handleAbortOption(request))
-    let renderOptions = { ...this.options, handleAbort }
+    let renderOptions = { ...this.renderOptions, handleAbort }
 
     if (renderOptions.url) {
       return new up.Change.FromURL(renderOptions)
@@ -174,15 +174,15 @@ up.RenderJob = class RenderJob {
   }
 
   _emitGuardEvent() {
-    let guardEvent = u.pluckKey(this.options, 'guardEvent')
+    let guardEvent = u.pluckKey(this.renderOptions, 'guardEvent')
     if (guardEvent) {
       // Allow guard event handlers to manipulate render options for the default behavior.
       //
       // Note that we have removed { guardEvent } from options to not recursively define
       // guardEvent.renderOptions.guardEvent. This would cause an infinite loop for event
       // listeners that prevent the default and re-render.
-      guardEvent.renderOptions = this.options
-      if (up.emit(guardEvent, { target: this.options.origin }).defaultPrevented) {
+      guardEvent.renderOptions = this.renderOptions
+      if (up.emit(guardEvent, { target: this.renderOptions.origin }).defaultPrevented) {
         throw new up.Aborted(`Rendering was prevented by ${guardEvent.type} listener`)
       }
     }
@@ -190,7 +190,7 @@ up.RenderJob = class RenderJob {
 
   _handleAbortOption(request) {
     // When preloading up.RenderOptions forces { abort: false }.
-    let { abort } = this.options
+    let { abort } = this.renderOptions
 
     if (!abort || !up.network.isBusy()) return
 
