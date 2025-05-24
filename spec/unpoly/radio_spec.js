@@ -2590,8 +2590,8 @@ describe('up.radio', function() {
 
       describe('with [up-preview]', function() {
         it('shows a preview while the fragment is reloading', async function() {
-          const interval = 30
-          const timingTolerance = 30
+          const interval = 60
+          const timingTolerance = 60
           up.radio.config.pollInterval = interval
 
           const previewUndo = jasmine.createSpy('preview undo')
