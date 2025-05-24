@@ -214,7 +214,7 @@ up.RenderOptions = (function() {
         ...overrides,
         // We sometimes want to log that fail-prefixed options were used, to alert the
         // user of the fact that there are different option sets for success and failure.
-        ...{ failPrefixForced: true }
+        failPrefixForced: true,
       }
     } else {
       return {
