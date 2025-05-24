@@ -126,7 +126,7 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 (possibly organize this into sub-sections)
 
 - Navigation containers can now match the current location of other layers by setting an `[up-layer]` attribute
-- Listeners to `up:request:loaded` can now [inspect or mutate request options](/up:request:loaded#changing-requests)
+- Listeners to `up:request:load` can now [inspect or mutate request options](/up:request:load#changing-requests)
   before it is sent. This has been possible before, but was never documented.
 - iOS: Long-pressing a link to open the context menu will no longer follow an `[up-instant]` link (#271)
 - iOS: Long-pressing a link will no longer emit an `up:click` event (#721)
