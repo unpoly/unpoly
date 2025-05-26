@@ -6380,7 +6380,7 @@ describe('up.form', function() {
 
         })
 
-      })
+      }) // radio buttons
 
       describe('with [up-keep]', function() {
 
