@@ -81,7 +81,7 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 
 - You can now disable validation batching with `up.form.config.batchValidate = false`.
 - You can now send validation requests to a different server route (issue #486). You can use the new `[up-validate-url]` and `[up-validate-method]` attributes on indivudal fields or on entire forms. Unpoly still guarantees eventual consistency in a form with many concurrent validations.
-- Validation targets can now refer to the changed field with `:origin`. This has been possible before, but was never documented.
+- Validation targets can now refer to the changed field with `:origin`. This was possible before, but was never documented.
   
 
 ### Layers
@@ -125,9 +125,10 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 
 (possibly organize this into sub-sections)
 
+- `up.reload()` can restore a fragment to a previously cached state using an `{ cache: true }` option. This was possible before, but was never documented.
 - Navigation containers can now match the current location of other layers by setting an `[up-layer]` attribute
 - Listeners to `up:request:load` can now [inspect or mutate request options](/up:request:load#changing-requests)
-  before it is sent. This has been possible before, but was never documented.
+  before it is sent. This was possible before, but was never documented.
 -  ⚠️ Renamed property `up.RenderResult#options` to `#renderOptions`
 -  ⚠️ Renamed property `up.RenderJob#options` to `#renderOptions`
 - Added a property `up.RendeResult#ok`. It indicated whether the render pass has rendered a [successful response](/failed-responses).

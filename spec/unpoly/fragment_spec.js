@@ -13180,12 +13180,34 @@ describe('up.fragment', function() {
         })
       }
 
-      it('does not use a cached response', function() {
-        const renderSpy = up.fragment.render.mock()
-        const element = fixture('.element[up-source="/source"]')
+      describe('caching', function() {
+        it('does not use a cached response', async function() {
+          await jasmine.populateCache('/source', '<div class="element">cached text</div>')
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          const element = htmlFixture('<div class="element" up-source="/source">inserted text</div>')
 
-        up.reload(element)
-        expect(renderSpy).not.toHaveBeenCalledWith(jasmine.objectContaining({ cache: true }))
+          up.reload(element)
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+          jasmine.respondWith('<div class="element">fresh text</div>')
+          await wait()
+
+          expect('.element').toHaveText('fresh text')
+        })
+
+        it('restores an element from cache with { cache: true }', async function() {
+          await jasmine.populateCache('/source', '<div class="element">cached text</div>')
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          const element = htmlFixture('<div class="element" up-source="/source">inserted text</div>')
+
+          up.reload(element, { cache: true })
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect('.element').toHaveText('cached text')
+        })
+
       })
 
       it('does not reveal by default', async function() {

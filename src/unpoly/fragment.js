@@ -558,6 +558,9 @@ up.fragment = (function() {
   @section Request
     @mix up.render/request
 
+  @section Caching
+    @mix up.render/caching
+
   @section Local content
     @mix up.render/local-content
 
@@ -569,9 +572,6 @@ up.fragment = (function() {
 
   @section Animation
     @mix up.render/motion
-
-  @section Caching
-    @mix up.render/caching
 
   @section Scrolling
     @mix up.render/scrolling
@@ -1631,6 +1631,13 @@ up.fragment = (function() {
         The URL from which to reload the fragment.
 
         Defaults to the [URL from which the fragment was originally loaded](/up.fragment.source).
+
+  @section Caching
+    @param {boolean|string} [options.cache=false]
+      Whether to restore a fragment from its cached state.
+
+      By default the cache is ignored and a new HTTP request is sent.
+      You can pass `{ cache: 'auto' }` to restore a fragment to its previously cached state.
 
   @section Loading state
     @mix up.render/loading-state

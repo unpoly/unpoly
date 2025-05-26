@@ -30,6 +30,10 @@ Disabling caching {#disabling}
 
 You can disable the caching mechanism globally or selectively.
 
+Without caching every request and render pass will hit the network. Responses will also not be cached,
+unless there is an existing cache entry that can be updated.
+
+
 ### Disabling the cache globally {#diabling-globally} 
 
 [Navigation](/navigation) is the only moment when Unpoly caches by default.
