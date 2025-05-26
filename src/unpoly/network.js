@@ -46,113 +46,115 @@ up.network = (function() {
 
   @property up.network.config
 
-  @param {number|Function(): number} [config.concurrency]
-    The maximum number of concurrently loading requests.
+  @section Requests
+    @param {number|Function(): number} [config.concurrency]
+      The maximum number of concurrently loading requests.
 
-    Additional requests are queued. [Preload](/preloading) requests are
-    always queued behind non-preload requests.
+      Additional requests are queued. [Preload](/preloading) requests are
+      always queued behind non-preload requests.
 
-    By default Unpoly allows 6 concurrent requests.
-    You might find it useful to set a concurrency of `1` in end-to-end tests
-    to prevent race conditions.
+      By default Unpoly allows 6 concurrent requests.
+      You might find it useful to set a concurrency of `1` in end-to-end tests
+      to prevent race conditions.
 
-    Your browser may impose additional concurrency limits  regardless of what you configure here.
+      Your browser may impose additional concurrency limits  regardless of what you configure here.
 
-  @param {boolean} [config.wrapMethod=true]
-    Whether to wrap non-standard HTTP methods in a POST request.
+    @param {boolean} [config.wrapMethod=true]
+      Whether to wrap non-standard HTTP methods in a POST request.
 
-    If this is set, methods other than GET and POST will be converted to a `POST` request
-    and carry their original method as a `_method` parameter. This is to [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
+      If this is set, methods other than GET and POST will be converted to a `POST` request
+      and carry their original method as a `_method` parameter. This is to [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
 
-    If you disable method wrapping, make sure that your server always redirects with
-    with a 303 status code (rather than 302).
+      If you disable method wrapping, make sure that your server always redirects with
+      with a 303 status code (rather than 302).
 
-  @param {number} [config.cacheSize=70]
-    The maximum number of responses to cache.
+    @param {number|Function(up.Request): number|boolean} [config.lateDelay=400]
+      The number of milliseconds to wait before emitting the [`up:network:late` event](/up:network:late) and showing
+      the [progress bar](/progress-bar).
 
-    If the size is exceeded, the oldest responses will be dropped from the cache.
+      To never consider a request to be late, configure a function that returns `false` for that request.
 
-  @param {number|Function(up.Request): number|boolean} [config.lateDelay=400]
-    The number of milliseconds to wait before emitting the [`up:network:late` event](/up:network:late) and showing
-    the [progress bar](/progress-bar).
+      @experimental
+    @param {number|undefined} [config.timeout=90_000]
+      A default [timeout](/up.request#options.timeout) for [requests](/up.request) in milliseconds.
 
-    To never consider a request to be late, configure a function that returns `false` for that request.
+      Set `undefined` to not use a timeout.
 
-    @experimental
-  @param {number|undefined} [config.timeout=90_000]
-    A default [timeout](/up.request#options.timeout) for [requests](/up.request) in milliseconds.
+    @param {boolean|Function(up.Response): boolean} [config.fail]
+      Whether Unpoly will consider a response to constitute a [failed response](/failed-responses).
 
-    Set `undefined` to not use a timeout.
+      By default Unpoly will consider any status code other than HTTP 2xx or [304](/skipping-rendering#rendering-nothing) to represent a failed response.
+      You may use this option to customize this behavior. For instance, you can fail a response if it contains a given header or body text.
 
-  @param {boolean|Function(up.Response): boolean} [config.fail]
-    Whether Unpoly will consider a response to constitute a [failed response](/failed-responses).
+      The following configuration will fail all responses with an `X-Unauthorized` header:
 
-    By default Unpoly will consider any status code other than HTTP 2xx or [304](/skipping-rendering#rendering-nothing) to represent a failed response.
-    You may use this option to customize this behavior. For instance, you can fail a response if it contains a given header or body text.
+      ```js
+      let badStatus = up.network.config.fail
+      up.network.config.fail = (response) => badStatus(response) || response.header('X-Unauthorized')
+      ```
 
-    The following configuration will fail all responses with an `X-Unauthorized` header:
+      Also see [Customizing failure detection](/failed-responses#customizing-failure-detection).
 
-    ```js
-    let badStatus = up.network.config.fail
-    up.network.config.fail = (response) => badStatus(response) || response.header('X-Unauthorized')
-    ```
+  @section Caching
+    @param {number} [config.cacheSize=70]
+      The maximum number of responses to cache.
 
-    Also see [Customizing failure detection](/failed-responses#customizing-failure-detection).
+      If the size is exceeded, the oldest responses will be dropped from the cache.
 
-  @param {number} [config.cacheExpireAge=15_000]
-    The number of milliseconds after which a cache entry is considered [expired](/caching#expiration) and will trigger [revalidation](/caching#revalidation) when used.
+    @param {number} [config.cacheExpireAge=15_000]
+      The number of milliseconds after which a cache entry is considered [expired](/caching#expiration) and will trigger [revalidation](/caching#revalidation) when used.
 
-    The configured age should at least cover the average time between [preloading](/preloading) and following a link.
+      The configured age should at least cover the average time between [preloading](/preloading) and following a link.
 
-    Defaults to 15 seconds.
+      Defaults to 15 seconds.
 
-  @param {number} [config.cacheEvictAge=90*60*1000]
-    The number of milliseconds after which a cache entry is [evicted](/caching#eviction).
+    @param {number} [config.cacheEvictAge=90*60*1000]
+      The number of milliseconds after which a cache entry is [evicted](/caching#eviction).
 
-    In practice you will often prefer [*expiration*](/caching#expiration) over *eviction*.
+      In practice you will often prefer [*expiration*](/caching#expiration) over *eviction*.
 
-    Defaults to 90 minutes.
+      Defaults to 90 minutes.
 
-  @param {Function(up.Request): boolean} [config.autoCache]
-    Whether to [cache](/caching) the given request with `{ cache: 'auto' }`.
+    @param {Function(up.Request): boolean} [config.autoCache]
+      Whether to [cache](/caching) the given request with `{ cache: 'auto' }`.
 
-    By default Unpoly will auto-cache requests with [safe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP methods like `GET`.
+      By default Unpoly will auto-cache requests with [safe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP methods like `GET`.
 
-    You may change this default to prevent auto-caching of some of your routes. For example, this will prevent auto-caching
-    of requests to URLs ending with `/edit`:
+      You may change this default to prevent auto-caching of some of your routes. For example, this will prevent auto-caching
+      of requests to URLs ending with `/edit`:
 
-    ```js
-    let defaultAutoCache = up.network.config.autoCache
-    up.network.config.autoCache = function(request) {
-      return defaultAutoCache(request) && !request.url.endsWith('/edit')
-    }
-    ```
+      ```js
+      let defaultAutoCache = up.network.config.autoCache
+      up.network.config.autoCache = function(request) {
+        return defaultAutoCache(request) && !request.url.endsWith('/edit')
+      }
+      ```
 
-  @param {(Function(up.Request): boolean|string)|boolean} [config.expireCache]
-    A function that controls [cache expiration](/caching#expiration) before the given request loads.
+    @param {(Function(up.Request): boolean|string)|boolean} [config.expireCache]
+      A function that controls [cache expiration](/caching#expiration) before the given request loads.
 
-    Returning `true` will expire the entire cache.\
-    Returning `false` will not expire any cache entries.\
-    Returning a [URL pattern](/url-pattern) will expire matching cache entries only:
+      Returning `true` will expire the entire cache.\
+      Returning `false` will not expire any cache entries.\
+      Returning a [URL pattern](/url-pattern) will expire matching cache entries only:
 
-    By default Unpoly will expire the entire cache after a request with an [unsafe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP method:
+      By default Unpoly will expire the entire cache after a request with an [unsafe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP method:
 
-    ```js
-    up.request({ url: '/path', method: 'get' })  // no cache entries expired
-    up.request({ url: '/path', method: 'post' }) // entire cache expired
-    ```
+      ```js
+      up.request({ url: '/path', method: 'get' })  // no cache entries expired
+      up.request({ url: '/path', method: 'post' }) // entire cache expired
+      ```
 
-  @param {(Function(up.Request): boolean|string)|boolean} [config.evictCache=false]
-    A function that controls [cache eviction](/caching#eviction) before the given request loads.
+    @param {(Function(up.Request): boolean|string)|boolean} [config.evictCache=false]
+      A function that controls [cache eviction](/caching#eviction) before the given request loads.
 
-    Returning `true` will expire the entire cache.\
-    Returning `false` will not expire any cache entries.\
-    Returning a [URL pattern](/url-pattern) will expire matching cache entries only.
+      Returning `true` will expire the entire cache.\
+      Returning `false` will not expire any cache entries.\
+      Returning a [URL pattern](/url-pattern) will expire matching cache entries only.
 
-    By default Unpoly will *not* evict any cache entries when a request is made.
+      By default Unpoly will *not* evict any cache entries when a request is made.
 
-  @param {boolean|Function(): boolean} [config.progressBar]
-    Whether to show a [progress bar](/progress-bar) for [late requests](#config.lateDelay).
+    @param {boolean|Function(): boolean} [config.progressBar]
+      Whether to show a [progress bar](/progress-bar) for [late requests](#config.lateDelay).
 
   @stable
   */

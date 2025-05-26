@@ -33,20 +33,22 @@ up.status = (function() {
 
   @property up.status.config
 
-  @param {Array<string>} [config.currentClasses=['up-current']]
-    An array of classes to set on [links that point the current location](/up-current).
+  @section Feedback classes
+    @param {Array<string>} [config.activeClasses=['up-active']]
+      An array of classes to set on [activated links or form elements](/up-active).
 
-  @param {Array<string>} [config.activeClasses=['up-active']]
-    An array of classes to set on [activated links or form elements](/up-active).
+    @param {Array<string>} [config.loadingClasses=['up-loading']]
+      An array of classes to on [loading fragments](/up-loading).
 
-  @param {Array<string>} [config.loadingClasses=['up-loading']]
-    An array of classes to on [loading fragments](/up-loading).
+  @section Navigational containers
+    @param {Array<string>} [config.navSelectors=['[up-nav]', 'nav']]
+      An array of CSS selectors that match [navigational containers](/navigation-bars).
 
-  @param {Array<string>} [config.navSelectors=['[up-nav]', 'nav']]
-    An array of CSS selectors that match [navigational containers](/navigation-bars).
+    @param {Array<string>} [config.noNavSelectors=['[up-nav=false]']]
+      Exceptions to `up.status.config.navSelectors`.
 
-  @param {Array<string>} [config.noNavSelectors=['[up-nav=false]']]
-    Exceptions to `up.status.config.navSelectors`.
+    @param {Array<string>} [config.currentClasses=['up-current']]
+      An array of classes to set on [links that point the current location](/up-current).
 
   @stable
   */

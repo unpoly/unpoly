@@ -21,24 +21,26 @@ up.radio = (function() {
 
   @property up.radio.config
 
-  @param {Array<string>} [config.hungrySelectors]
-    An array of CSS selectors that is replaced whenever a matching element is found in a response.
-    These elements are replaced even when they were not targeted directly.
+  @section Hungry elements
+    @param {Array<string>} [config.hungrySelectors]
+      An array of CSS selectors that is replaced whenever a matching element is found in a response.
+      These elements are replaced even when they were not targeted directly.
 
-    By default this contains the `[up-hungry]` attribute.
+      By default this contains the `[up-hungry]` attribute.
 
-    The configured selectors will be used to find hungry elements in the current page.
-    For each matching element a target will be [derived](/target-derivation) from that
-    specific element. E.g. when you configure `up.radio.config.hungrySelectors.push('input')`,
-    a given input will be targeted with its derived selector (like `input[name=email]`).
+      The configured selectors will be used to find hungry elements in the current page.
+      For each matching element a target will be [derived](/target-derivation) from that
+      specific element. E.g. when you configure `up.radio.config.hungrySelectors.push('input')`,
+      a given input will be targeted with its derived selector (like `input[name=email]`).
 
-    For this to work hungry elements [must have a derivable target selector](/up-hungry#derivable-target-required).
+      For this to work hungry elements [must have a derivable target selector](/up-hungry#derivable-target-required).
 
-  @param {Array<string>} [config.noHungrySelectors=['[up-hungry=false]']]
-    Exceptions to `up.radio.config.hungrySelectors`.
+    @param {Array<string>} [config.noHungrySelectors=['[up-hungry=false]']]
+      Exceptions to `up.radio.config.hungrySelectors`.
 
-  @param {number} [config.pollInterval=30000]
-    The default [polling](/up-poll) interval in milliseconds.
+  @section Polling
+    @param {number} [config.pollInterval=30000]
+      The default [polling](/up-poll) interval in milliseconds.
 
   @stable
   */
@@ -118,7 +120,7 @@ up.radio = (function() {
   }
 
   /*-
-  Before an `[up-hungry]` is added to a render pass, a event `up:fragment:hungry` is emitted on the element.
+  Before an `[up-hungry]` element is added to a render pass, a event `up:fragment:hungry` is emitted on that element.
 
   ## Preventing hungry elements from being updated
 

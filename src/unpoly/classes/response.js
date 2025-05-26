@@ -6,10 +6,9 @@ A response to an [HTTP request](/up.request).
 ### Example
 
 ```js
-up.request('/foo').then(function(response) {
-  console.log(response.status) // 200
-  console.log(response.text)   // "<html><body>..."
-})
+let response = await up.request('/foo')
+console.log(response.status) // 200
+console.log(response.text)   // "<html><body>..."
 ```
 
 @class up.Response
