@@ -65,6 +65,8 @@ RedirectPermanent /notifications /flashes
 RedirectPermanent /notification-flashes /flashes
 
 RedirectPermanent /layer-reference /layer-option
+RedirectPermanent /focus-ring-visibility /focus-visibility
+RedirectPermanent /focus-outline-visibility /focus-visibility
 RedirectPermanent /focus-visible /focus-visibility
 RedirectPermanent /focus-ring /focus-visibility
 RedirectPermanent /focus-outline /focus-visibility
