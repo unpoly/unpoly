@@ -637,6 +637,7 @@ describe('up.radio', function() {
 
         await expectAsync(promise).toBeRejectedWith(jasmine.any(up.RenderResult))
         await expectAsync(promise).toBeRejectedWith(jasmine.objectContaining({
+          ok: false,
           target: '.failure-target, .hungry',
           fragments: [e.get('.failure-target'), e.get('.hungry')],
         }))
@@ -761,10 +762,14 @@ describe('up.radio', function() {
             fixture('#target.old', { text: 'old target' })
             fixture('#hungry.new', { text: 'old hungry', 'up-hungry': '', 'up-transition': 'cross-fade', 'up-duration': '200' })
 
-            const job = up.render('#target', { transition: 'cross-fade', document: `
-              <div id="target" class="new">new target</div>
-              <div id="hungry" class="new">new hungry</div>
-            ` })
+            const renderOptions = {
+              target: '#target',
+              transition: 'cross-fade',
+              document: `
+                <div id="target" class="new">new target</div>
+                <div id="hungry" class="new">new hungry</div>
+            ` }
+            const job = up.render(renderOptions)
 
             await wait(100)
 
@@ -777,6 +782,10 @@ describe('up.radio', function() {
               target: '#target, #hungry',
               fragments: [document.querySelector('#target.new'), document.querySelector('#hungry.new')],
               layer: up.layer.root,
+              renderOptions: jasmine.objectContaining({
+                target: '#target',
+                transition: 'cross-fade',
+              }),
             }))
           })
 
@@ -784,14 +793,13 @@ describe('up.radio', function() {
             fixture('#target.old', { text: 'old target' })
             fixture('#hungry.new', { text: 'old hungry', 'up-hungry': '', 'up-transition': 'cross-fade', 'up-duration': '200' })
 
-            const job = up.render({
+            const renderOptions = {
               target: '#target',
               failTarget: '#target',
               url: '/path2',
-            })
-            const {
-              finished
-            } = job
+            }
+            const job = up.render(renderOptions)
+            const { finished } = job
 
             await wait()
 
@@ -809,9 +817,14 @@ describe('up.radio', function() {
 
             await expectAsync(finished).toBeRejectedWith(jasmine.any(up.RenderResult))
             await expectAsync(finished).toBeRejectedWith(jasmine.objectContaining({
+              ok: false,
               target: '#target, #hungry',
               fragments: [document.querySelector('#target.new'), document.querySelector('#hungry.new')],
               layer: up.layer.root,
+              renderOptions: jasmine.objectContaining({
+                target: '#target',
+                url: '/path2',
+              }),
             }))
           })
         })
@@ -2659,6 +2672,7 @@ describe('up.radio', function() {
 
           expect('.element').toHaveText('newer text')
         })
+
       })
     })
   })

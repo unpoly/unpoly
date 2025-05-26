@@ -706,19 +706,29 @@ describe('up.fragment', function() {
           fixture('.two', { text: 'old two' })
           fixture('.three', { text: 'old three' })
 
-          const promise = up.render('.one, .three', {
-            document: `
-              <div class="one">new one</div>
-              <div class="two">new two</div>
-              <div class="three">new three</div>
-            `
-          })
+          const documentHTML = `
+            <div class="one">new one</div>
+            <div class="two">new two</div>
+            <div class="three">new three</div>
+          `
+
+          const renderOptions = {
+            target: '.one, .three',
+            document: documentHTML,
+          }
+          const promise = up.render(renderOptions)
 
           await expectAsync(promise).toBeResolvedTo(jasmine.any(up.RenderResult))
+
           await expectAsync(promise).toBeResolvedTo(jasmine.objectContaining({
+            ok: true,
             target: '.one, .three',
             fragments: [document.querySelector('.one'), document.querySelector('.three')],
-            layer: up.layer.root
+            layer: up.layer.root,
+            renderOptions: jasmine.objectContaining({
+              target: '.one, .three',
+              document: documentHTML,
+            }),
           }))
         })
       })
@@ -1368,7 +1378,8 @@ describe('up.fragment', function() {
           it('rejects the returned promise with an up.RenderResult describing the updated fragments and layer', async function() {
             fixture('.success-target')
             fixture('.failure-target')
-            const renderJob = up.render('.success-target', { url: '/path', failTarget: '.failure-target' })
+            const renderOptions = { url: '/path', target: '.success-target', failTarget: '.failure-target' }
+            const renderJob = up.render(renderOptions)
 
             await wait()
 
@@ -1376,9 +1387,14 @@ describe('up.fragment', function() {
 
             await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
             await expectAsync(renderJob).toBeRejectedWith(jasmine.objectContaining({
+              ok: false,
               target: '.failure-target',
               fragments: [document.querySelector('.failure-target')],
-              layer: up.layer.root
+              layer: up.layer.root,
+              renderOptions: jasmine.objectContaining({
+                target: '.failure-target',
+                url: '/path',
+              }),
             }))
           })
 
@@ -1855,7 +1871,8 @@ describe('up.fragment', function() {
             up.on('up:fragment:loaded', (e) => e.skip())
             fixture('.target', { text: 'old text' })
 
-            const changePromise = up.render({ target: '.target', url: '/url' })
+            const renderOptions = { target: '.target', url: '/url' }
+            const changePromise = up.render(renderOptions)
             await wait()
 
             jasmine.respondWith('new text')
@@ -1864,10 +1881,14 @@ describe('up.fragment', function() {
 
             expect('.target').toHaveText('old text')
 
-            let result = await promiseState(changePromise)
-            expect(result.state).toEqual('fulfilled')
-            expect(result.value).toEqual(jasmine.any(up.RenderResult))
-            expect(result.value.none).toBe(true)
+            let result = await changePromise
+
+            await expectAsync(changePromise).toBeResolvedTo(jasmine.any(up.RenderResult))
+            await expectAsync(changePromise).toBeResolvedTo(jasmine.objectContaining({
+              ok: true,
+              none: true,
+              renderOptions: jasmine.objectContaining({ target: ':none', url: '/url' }),
+            }))
           })
 
           it('allows listeners to mutate up.render() options to target another fragment', async function() {
@@ -1879,11 +1900,10 @@ describe('up.fragment', function() {
             up.render({ target: '.one', url: '/url' })
             await wait()
 
-            jasmine.respondWith(`\
-<div class="one">new one</div>
-<div class="two">new two</div>\
-`
-            )
+            jasmine.respondWith(`
+              <div class="one">new one</div>
+              <div class="two">new two</div>
+            `)
             await wait()
 
             expect('.one').toHaveText('old one')
@@ -1899,11 +1919,10 @@ describe('up.fragment', function() {
             up.render({ target: '.one', url: '/url' })
             await wait()
 
-            jasmine.respondWith({ status: 500, responseText: `\
-<div class="one">new one</div>
-<div class="two">new two</div>\
-`
-            })
+            jasmine.respondWith({ status: 500, responseText: `
+              <div class="one">new one</div>
+              <div class="two">new two</div>
+            ` })
             await wait()
 
             expect('.one').toHaveText('old one')
@@ -2526,7 +2545,8 @@ describe('up.fragment', function() {
               fixture('.one', { text: 'old one' })
               fixture('.two', { text: 'old two' })
 
-              const promise = up.render({ target: '.one', url: '/path' })
+              const renderOptions = { target: '.one', url: '/path' }
+              const promise = up.render(renderOptions)
               await wait()
 
               jasmine.respondWith({ responseHeaders: { 'X-Up-Target': ':none' }, responseText: '', contentType: 'text/plain' })
@@ -2535,10 +2555,14 @@ describe('up.fragment', function() {
               expect('.one').toHaveText('old one')
               expect('.two').toHaveText('old two')
 
-              let result = await promiseState(promise)
-              expect(result.state).toBe('fulfilled')
-              expect(result.value).toEqual(jasmine.any(up.RenderResult))
-              expect(result.value.fragments).toEqual([])
+              await expectAsync(promise).toBeResolvedTo(jasmine.any(up.RenderResult))
+              await expectAsync(promise).toBeResolvedTo(jasmine.objectContaining({
+                ok: true,
+                none: true,
+                target: ':none',
+                fragments: [],
+                renderOptions: jasmine.objectContaining({ target: ':none', url: '/path' }),
+              }))
             })
 
             it('does not call an { onRendered } callback', async function() {
@@ -2681,6 +2705,7 @@ describe('up.fragment', function() {
             <div class="child2">child2</div>
           ` })
 
+          expect(result.ok).toBe(true)
           expect(result.fragments.length).toBe(2)
           expect(result.fragments[0]).toMatchSelector('.child1')
           expect(result.fragments[1]).toMatchSelector('.child2')
@@ -3339,6 +3364,7 @@ describe('up.fragment', function() {
             })
 
             expect('#target').toHaveText('new child')
+            expect(result.ok).toBe(true)
             expect(result.fragments.length).toBe(1)
             expect(result.fragments[0]).toMatchSelector('.child')
           })
@@ -3392,6 +3418,7 @@ describe('up.fragment', function() {
             `
             })
 
+            expect(result.ok).toBe(true)
             expect(result.fragments.length).toBe(1)
             expect(result.fragments[0]).toMatchSelector('.child')
           })
@@ -3961,9 +3988,34 @@ describe('up.fragment', function() {
               expect('.one').toHaveText('old one')
               expect('.two').toHaveText('old two')
 
-              const result = await promiseState(promise)
-              expect(result.state).toBe('fulfilled')
+              await expectAsync(promise).toBeResolved()
             })
+
+            it('returns an up.RenderResult that is #none and #ok', async function() {
+              fixture('.one', { text: 'old one' })
+              fixture('.two', { text: 'old two' })
+
+              const renderOptions = { target: ':none', url: '/path' }
+              const promise = up.render(renderOptions)
+
+              await wait()
+
+              expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual(':none')
+              jasmine.respondWith({ responseText: '', contentType: 'text/plain' })
+
+              await wait()
+
+              await expectAsync(promise).toBeResolvedTo(jasmine.any(up.RenderResult))
+              await expectAsync(promise).toBeResolvedTo(jasmine.objectContaining({
+                ok: true,
+                none: true,
+                fragments: [],
+                fragment: undefined,
+                target: ':none',
+                renderOptions: jasmine.objectContaining({ target: ':none', url: '/path' }),
+              }))
+            })
+
           })
         })
 
@@ -4807,6 +4859,7 @@ describe('up.fragment', function() {
 
             promise.then(function(result) {
               expect(up.layer.count).toBe(2)
+              expect(result.ok).toBe(true)
               expect(result.fragments).toEqual([up.fragment.get('.overlay-element')])
               expect(result.layer).toBe(up.layer.current)
               done()
@@ -6769,66 +6822,90 @@ describe('up.fragment', function() {
           expect(version2).not.toHaveClass('up-destroying')
         })
 
-        it('runs an { onFinished } callback after the element has been removed from the DOM', function(done) {
+        it('runs an { onFinished } callback after the element has been removed from the DOM', async function() {
           const $parent = $fixture('.parent')
           const $element = $parent.affix('.element.v1').text('v1')
 
-          const testElementAttachment = function() {
-            expect($element).toBeDetached()
-            done()
-          }
-
-          up.render('.element', {
+          let renderOptions = {
             document: '<div class="element v2">v2</div>',
             transition: 'cross-fade',
-            duration: 50,
-            onFinished: testElementAttachment
-          })
+            duration: 75,
+          }
+          let onFinished = jasmine.createSpy('onFinished callback')
 
+          up.render('.element', { ...renderOptions, onFinished })
+          await wait()
+
+          expect('.element.v2').toHaveText('v2')
           expect($element).toBeAttached()
+          expect(onFinished).not.toHaveBeenCalled()
+
+          await wait(150)
+
+          expect($element).toBeDetached()
+          expect(onFinished).toHaveBeenCalledWith(jasmine.any(up.RenderResult))
+          expect(onFinished).toHaveBeenCalledWith(jasmine.objectContaining({
+            ok: true,
+            fragment: document.querySelector('.element.v2'),
+            renderOptions: jasmine.objectContaining(renderOptions),
+          }))
         })
 
-        it('fulfills the render().finished promise after the element has been removed from the DOM', function(done) {
+        it('fulfills the render().finished promise after the element has been removed from the DOM', async function() {
           const $parent = $fixture('.parent')
           const $element = $parent.affix('.element.v1').text('v1')
 
-          const testElementAttachment = function() {
-            expect($element).toBeDetached()
-            done()
-          }
-
-          const job = up.render('.element', {
+          const renderOptions = {
             document: '<div class="element v2">v2</div>',
             transition: 'cross-fade',
-            duration: 50,
-          })
+            duration: 75
+          }
+          const job = up.render('.element', renderOptions)
+          const finished = job.finished
+          await wait()
 
-          job.finished.then(testElementAttachment)
-
+          expect('.element.v2').toHaveText('v2')
           expect($element).toBeAttached()
+          await expectAsync(job.finished).toBePending()
+
+          await wait(150)
+
+          expect($element).toBeDetached()
+
+          await expectAsync(finished).toBeResolvedTo(jasmine.any(up.RenderResult))
+          await expectAsync(finished).toBeResolvedTo(jasmine.objectContaining({
+            ok: true,
+            fragment: document.querySelector('.element.v2'),
+            renderOptions: jasmine.objectContaining({
+              transition: 'cross-fade',
+              duration: 75
+            }),
+          }))
         })
 
         it('rejects the render().finished promise after the element has been removed from the DOM when updating from a failed response', async function() {
-          fixture('.target', { text: 'old target' })
+          fixture('.success-target', { text: 'old success target' })
+          fixture('.failure-target', { text: 'old failure target' })
 
-          const job = up.render({
-            target: '.target',
-            failTarget: '.target',
+          const renderOptions = {
+            target: '.success-target',
+            failTarget: '.failure-target',
             transition: 'cross-fade',
-            failTransition: 'cross-fade',
+            failTransition: 'move-up',
             duration: 200,
+            failDuration: 300,
             url: '/path2'
-          })
-          const {
-            finished
-          } = job
+          }
+
+          const job = up.render(renderOptions)
+          const { finished } = job
 
           await wait()
 
           jasmine.respondWith({
             status: 500,
             responseText: `
-              <div class="target">new target</div>
+              <div class="failure-target">new failure target</div>
             `
           })
 
@@ -6841,9 +6918,15 @@ describe('up.fragment', function() {
 
           await expectAsync(finished).toBeRejectedWith(jasmine.any(up.RenderResult))
           await expectAsync(finished).toBeRejectedWith(jasmine.objectContaining({
-            target: '.target',
-            fragments: [document.querySelector('.target')],
+            ok: false,
+            target: '.failure-target',
+            fragments: [document.querySelector('.failure-target')],
             layer: up.layer.root,
+            renderOptions: jasmine.objectContaining({
+              target: '.failure-target',
+              transition: 'move-up',
+              duration: 300,
+            }),
           }))
         })
 
@@ -11330,12 +11413,13 @@ describe('up.fragment', function() {
               expect('.target').toHaveText('cached text')
             })
 
-            it('fulfills up.render().finished promise with the cached up.RenderResult from the first render pass')
+            it('fulfills up.render().finished promise with the up.RenderResult from the first render pass')
 
             it('calls { onFinished } with the cached up.RenderResult from the first render pass', async function() {
               const onFinished = jasmine.createSpy('onFinished handler')
               const onRendered = jasmine.createSpy('onRendered handler')
-              up.render('.target', { url: '/cached-path', cache: true, revalidate: true, onRendered, onFinished })
+              const renderOptions = { url: '/cached-path', cache: true, revalidate: true }
+              up.render('.target', { ...renderOptions, onRendered, onFinished })
               await wait()
 
               expect('.target').toHaveText('cached text')
@@ -11343,8 +11427,11 @@ describe('up.fragment', function() {
 
               const renderedResult = onRendered.calls.argsFor(0)[0]
               expect(renderedResult).toEqual(jasmine.any(up.RenderResult))
+              expect(renderedResult.ok).toBe(true)
               expect(renderedResult.none).toBe(false)
               expect(renderedResult.fragment).toMatchSelector('.target')
+              expect(renderedResult.renderOptions).toEqual(jasmine.objectContaining(renderOptions))
+
 
               expect(up.network.isBusy()).toBe(true)
               jasmine.respondWith({ status: 304 })
@@ -11355,8 +11442,10 @@ describe('up.fragment', function() {
 
               const finishedResult = onFinished.calls.argsFor(0)[0]
               expect(finishedResult).toEqual(jasmine.any(up.RenderResult))
+              // expect(finishedResult.ok).toBe(true)
               expect(finishedResult.none).toBe(false)
               expect(finishedResult.fragment).toMatchSelector('.target')
+              expect(finishedResult.renderOptions).toEqual(jasmine.objectContaining(renderOptions))
             })
 
             it('keeps the older cache entry that did have content', async function() {

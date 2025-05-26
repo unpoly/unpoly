@@ -126,7 +126,11 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // if any of these options cause the layer to close.
     this.handleLayerChangeRequests()
 
-    this._currentLayerResult = this.executeSteps(this._steps, this.responseDoc, this.options)
+    this._currentLayerResult = this.executeSteps({
+      steps: this._steps,
+      responseDoc: this.responseDoc,
+      noneOptions: this.options,
+    })
   }
 
   _renderOtherLayers() {
@@ -139,7 +143,10 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // (1) ... to use the discarded content for hungry elements on other layers that have [up-if-layer=any].
     // (2) ... to see updated hungry elements on other layers in onDismissed/onAccepted handlers.
     let otherLayerSteps = this._getHungrySteps().other
-    this._otherLayersResult = this.executeSteps(otherLayerSteps, this.responseDoc)
+    this._otherLayersResult = this.executeSteps({
+      steps: otherLayerSteps,
+      responseDoc: this.responseDoc,
+    })
   }
 
   _matchPreflight() {

@@ -10,7 +10,7 @@ Some example for failed responses are:
 - The server-side app crashes with an HTTP 500 server error.
 - The request is [aborted](/aborting-requests) by a second request [targeting](/targeting-fragments) the same fragment.
 
-## Rendering failed responses differently
+## Rendering failed responses differently {#fail-options}
 
 You may pass different render options for server responses with an error code, which we will call *failed* responses below.
 Any HTTP status other than 2xx or [304](/skipping-rendering#rendering-nothing) is considered a failed response.
@@ -114,10 +114,12 @@ will emit `up:request:offline` and not render.
 
 Because there never was a server response, `up:fragment:loaded` will *not* be emitted in this case.
 
+See [Handling network issues](/network-issues).
+
 
 ## Handling aborted requests
 
-When a request was aborted, Unpoly will emit `up:request:aborted` and not render.
+When a request was [aborted](/aborting-requests), Unpoly will emit `up:request:aborted` and not render.
 
 A promise for an aborted request will reject with an `up.AbortError`.
 
@@ -129,7 +131,7 @@ A promise for an aborted request will reject with an `up.AbortError`.
 Rendering functions like `up.render()`, `up.follow()` or `up.submit()` return a promise that rejects when the server
 sends a failed response, or when there is another error.
 
-See [render error handling example](/render-lifecycle#error-handling-example).
+See [Render error handling example](/render-lifecycle#error-handling-example).
 
 
 @page failed-responses

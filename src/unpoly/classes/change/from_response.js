@@ -43,7 +43,7 @@ up.Change.FromResponse = class FromResponse extends up.Change {
   }
 
   _updateContentFromResponse(finalRenderOptions) {
-    if (finalRenderOptions.failPrefixForced) {
+    if (finalRenderOptions.didForceFailOptions) {
       up.puts('up.render()', 'Rendering failed response using fail-prefixed options (https://unpoly.com/failed-responses)')
     }
 
@@ -61,6 +61,7 @@ up.Change.FromResponse = class FromResponse extends up.Change {
   }
 
   async finish(renderResult, originalRenderOptions) {
+    // Wait until the original render pass has completed animations.
     renderResult = await renderResult.finished
 
     if (up.fragment.shouldRevalidate(this._request, this._response, originalRenderOptions)) {

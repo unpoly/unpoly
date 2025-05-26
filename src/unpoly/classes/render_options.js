@@ -204,26 +204,32 @@ up.RenderOptions = (function() {
   }
 
   function deriveFailOptions(preprocessedOptions) {
+    // Remember that this pass was a failure (for up.RenderResult#ok)
+    let markFailure = { didFail: true }
+
+    // Collect all fail-prefixed options
     let overrides = failOverrides(preprocessedOptions)
 
     if (preprocessedOptions.failOptions) {
       return {
+        // Only use global defaults and a few keys shared between success and failure.
         ...preprocessedOptions.defaults,
-        // Only a few keys are shared between success and failure cases.
         ...u.pick(preprocessedOptions, SHARED_KEYS),
         ...overrides,
         // We sometimes want to log that fail-prefixed options were used, to alert the
         // user of the fact that there are different option sets for success and failure.
-        failPrefixForced: true,
+        didForceFailOptions: true,
+        ...markFailure,
       }
     } else {
       return {
-        // Use all the sucess options.
+        // Use all the success options.
         ...preprocessedOptions,
         // We still allow to override individual options.
         // This is relevant for up.validate() which does not use fail options,
         // but lets users still override individual options for the failure case.
         ...overrides,
+        ...markFailure,
       }
     }
   }

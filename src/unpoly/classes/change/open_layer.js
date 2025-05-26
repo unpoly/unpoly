@@ -140,6 +140,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
       layer: this.layer,
       fragments: [this._content],
       target: this.target,
+      renderOptions: this.options,
     })
 
     // Compile the entire layer, not just the user content.
@@ -175,7 +176,10 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // (2) ... to see updated hungry elements on other layers in onDismissed/onAccepted handlers.
     let otherLayerSteps = this._getHungrySteps().other
 
-    this._otherLayersResult = this.executeSteps(otherLayerSteps, this.responseDoc)
+    this._otherLayersResult = this.executeSteps({
+      steps: otherLayerSteps,
+      responseDoc: this.responseDoc,
+    })
   }
 
   async _finish() {

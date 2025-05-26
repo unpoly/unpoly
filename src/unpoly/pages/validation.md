@@ -106,7 +106,7 @@ When Unpoly detects a failed form submission, it will ignore the form's [target]
 and update the `<form>` element instead.
 
 To render a failed response somewhere else, set an [`[up-fail-target]`](/up-submit#up-fail-target) attribute on the `<form>` element.
-See [handling failed responses differently](/failed-responses#rendering-failed-responses-differently) for details.
+See [handling failed responses differently](/failed-responses#fail-options) for details.
 
 
 ### HTML5 validations

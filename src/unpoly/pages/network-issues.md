@@ -96,4 +96,17 @@ an animated [progress bar](/progress-bar) is shown.
 You may also [change fragments while they are loading](/loading-state).
 
 
+HTTP error codes
+----------------
+
+When the server responds with an error code (like `505 Server Error`), no `up:fragment:offline` event is emitted.
+Instead you can tell Unpoly to [render such responses differently](/failed-responses#fail-options) from a successful response.
+
+By default, [navigation](/navigation) (like clicking a link or submitting a form) will render an error response's
+[main element](/main) in order to convey an error message from the server.
+
+See [Handling failed responses](/failed-responses) for details.
+
+
+
 @page network-issues

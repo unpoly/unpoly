@@ -49,7 +49,7 @@ Once the response is received the `.up-active` and `.up-loading` classes are rem
 ```
 
 Feedback classes will also be removed if the request ends for any other reason,
-such as the [server rendering an error code](/failed-responses#rendering-failed-responses-differently)
+such as the [server rendering an error code](/failed-responses#fail-options)
 or when the request is [aborted](/aborting-requests). See [How previews end](/previews#ending)
 for more examples for what terminates a request.
 

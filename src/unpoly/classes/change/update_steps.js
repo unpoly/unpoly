@@ -6,8 +6,9 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
   constructor(options) {
     super(options)
 
+    this._steps = u.copy(u.assert(options.steps)) // we mutate it below
+    this._passRenderOptions = u.assert(options.passRenderOptions)
     this._noneOptions = options.noneOptions || {}
-    this._steps = u.copy(options.steps) // we mutate it below
   }
 
   execute(responseDoc) {
@@ -16,37 +17,36 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     // Fill in `step.newElement` unless it was already done by our caller.
     // This may throw up.CannotMatch for non-optional steps that don't match in `responseDoc`.
     this._steps = responseDoc.selectSteps(this._steps)
+
+    // Now that we know our steps will succeed, we detach them from `responseDoc`.
+    // This way they won't be moved by hungry elements later.
     this._steps = responseDoc.commitSteps(this._steps)
 
-    if (!this._steps.length) {
-      return this._executeNone()
-    }
-
     this.renderResult = new up.RenderResult({
-      layer: this._steps[0]?.layer,
-      target: up.fragment.targetForSteps(this._steps),
+      layer: this._passRenderOptions.layer, // layer is looked up by FromContent#_expandIntoPlans()
+      target: up.fragment.targetForSteps(this._steps), // returns ':none' for empty steps
+      renderOptions: this._passRenderOptions,
     })
 
-    // We swap fragments in reverse order for two reasons:
-    //
-    // (1) Only the first step will process focus. Other steps may cause focus loss
-    //     (when they're swapping a fragment with focus), causing an option like
-    //     { focus: 'main-if-lost' } to not satisfy the "lost" condition.
-    // (2) Only the first step will scroll. However other steps may change
-    //     the viewport height through element insertions.
-    this._steps.reverse()
+    if (!this._steps.length) {
+      // When rendering nothing we still want to process { focus, scroll } options.
+      this._handleFocus(null, this._noneOptions)
+      this._handleScroll(null, this._noneOptions)
+    } else {
+      // We swap fragments in reverse order for two reasons:
+      //
+      // (1) Only the first step will process focus. Other steps may cause focus loss
+      //     (when they're swapping a fragment with focus), causing an option like
+      //     { focus: 'main-if-lost' } to not satisfy the "lost" condition.
+      // (2) Only the first step will scroll. However other steps may change
+      //     the viewport height through element insertions.
+      this._steps.reverse()
 
-    const motionEndPromises = this._steps.map((step) => this._executeStep(step))
-    this.renderResult.finished = this._finish(motionEndPromises)
+      const motionEndPromises = this._steps.map((step) => this._executeStep(step))
+      this.renderResult.finished = this._finish(motionEndPromises)
+    }
 
     return this.renderResult
-  }
-
-  _executeNone() {
-    // When rendering nothing we still want to process { focus, scroll } options.
-    this._handleFocus(null, this._noneOptions)
-    this._handleScroll(null, this._noneOptions)
-    return up.RenderResult.buildNone()
   }
 
   async _finish(motionEndPromises) {

@@ -311,6 +311,10 @@ up.util = (function() {
     return value === null
   }
 
+  function isTruthy(value) {
+    return !!value
+  }
+
   /*-
   Returns whether the given argument is `undefined`.
 
@@ -2265,8 +2269,12 @@ up.util = (function() {
     return mapObject(keys, (key) => [key, value])
   }
 
-  function assert(condition) {
-    if (!condition) throw "assert failed"
+  function assert(value, testFn = isTruthy) {
+    if (testFn(value)) {
+      return value
+    } else {
+      throw "assert failed"
+    }
   }
 
   return {

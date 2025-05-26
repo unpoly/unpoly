@@ -43,7 +43,7 @@ up.RenderResult = class RenderResult extends up.Record {
   The effective [render](/up.render) options used to produce this result.
 
   If this result was produced from a [failed response](/failed-response),
-  [`fail` prefixes](/failed-response#rendering-failed-responses-differently)
+  [`fail` prefixes](/failed-response#fail-options)
   have been removed from the render options.
 
   @property up.RenderResult#renderOptions
@@ -95,6 +95,7 @@ up.RenderResult = class RenderResult extends up.Record {
   defaults() {
     return {
       fragments: [],
+      finished: Promise.resolve(),
     }
   }
 
@@ -133,16 +134,34 @@ up.RenderResult = class RenderResult extends up.Record {
     return this.fragments[0]
   }
 
+  /*-
+  Whether this render pass has rendered a successful response.
+
+  By default responses with a `2xx` status code are considered successful.
+  Other HTTP codes (like `500` or `404`) are considered [failed responses](/failed-responses#fail-options).
+
+  Rendering a [string of HTML](/providing-html#string) is always successful.
+
+  @property up.RenderResult#ok
+  @param {boolean} up.RenderResult#ok
+  @experimental
+  */
+  get ok() {
+    return !this.renderOptions.didFail
+  }
+
   static both(main, extension, mergeFinished = true) {
     // TODO: Why does mergeFinished call this with an undefined extension?
-    if (!extension) return main
+    if (!extension) {
+      return main
+    }
 
     return new this({
       target: main.target,
       layer: main.layer,
       renderOptions: main.renderOptions,
       fragments: main.fragments.concat(extension.fragments),
-      finished: (mergeFinished && this.mergeFinished(main, extension)) //.finished // Promise.all([main.finished, extension.finished])
+      finished: (mergeFinished && this.mergeFinished(main, extension))
     })
   }
 
@@ -152,13 +171,6 @@ up.RenderResult = class RenderResult extends up.Record {
       await extension.finished,
       false
     )
-  }
-
-  static buildNone() {
-    return new this({
-      target: ':none',
-      finished: Promise.resolve(),
-    })
   }
 
 }

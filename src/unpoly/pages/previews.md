@@ -251,7 +251,7 @@ up.navigate({
 A preview ends when its associated request ends for *any* reason. Reasons include:
 
 - the server responds with new HTML
-- the server [renders an error code](/failed-responses#rendering-failed-responses-differently)
+- the server [renders an error code](/failed-responses#fail-options)
 - the request encounters a [fatal error](/failed-responses#handling-fatal-network-errors), like a timeout or loss of network connectivity.
 - the server [updates a different fragment](/X-Up-Target)
 - the request is [aborted](/aborting-requests), e.g. by a different link targeting the same fragment

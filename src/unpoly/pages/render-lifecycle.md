@@ -26,6 +26,9 @@ await up.render({ url: '/path', target: '.target' })
 console.log("Updated fragment is", document.querySelector('.target'))
 ```
 
+The promise rejects when there is a [network issue](/network-issue),
+or if the server [responds with an HTTP error code](/failed-responses). See [Handling errors](#handling-errors).
+
 ### Awaiting postprocessing
 
 After the `up.render()` promise fulfills the fragments may still change further through [animation](/up.motion) or [revalidation](/caching#revalidation).

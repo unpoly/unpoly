@@ -140,7 +140,7 @@ up.Response = class Response extends up.Record {
   }
 
   /*-
-  Returns whether the server responded with a 2xx HTTP status.
+  Returns whether the server responded with a `2xx` HTTP status.
 
   @property up.Response#ok
   @param {boolean} ok

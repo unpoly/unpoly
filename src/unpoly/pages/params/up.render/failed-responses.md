@@ -12,4 +12,4 @@
 @param {string|Element|jQuery|Array<string>} [options.failTarget]
   The [target selector](/targeting-fragments) to update after a [failed response](/failed-responses).
 
-  See [Rendering failed responses differently](/failed-responses#rendering-failed-responses-differently) for details.
+  See [Rendering failed responses differently](/failed-responses#fail-options) for details.

@@ -61,14 +61,10 @@ up.Change.FromContent = class FromContent extends up.Change {
   }
 
   _executePlan(matchedPlan) {
-    let result = matchedPlan.execute(
+    return matchedPlan.execute(
       this._getResponseDoc(),
       this._onPlanApplicable.bind(this, matchedPlan)
     )
-
-    result.renderOptions = this.options
-
-    return result
   }
 
   _isApplicablePlanError(error) {
@@ -169,7 +165,7 @@ up.Change.FromContent = class FromContent extends up.Change {
       throw new up.CannotMatch([reason + " (tried selectors %o in %s)", planTargets, humanizedLayerOption])
     } else if (this._layers.length === 0) {
       this._cannotMatchLayer()
-    } else if (this.options.failPrefixForced) {
+    } else if (this.options.didForceFailOptions) {
       throw new up.CannotMatch('No target selector given for failed responses (https://unpoly.com/failed-responses)')
     } else {
       throw new up.CannotMatch('No target selector given')

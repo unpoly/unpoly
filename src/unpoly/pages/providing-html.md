@@ -64,7 +64,7 @@ Other elements will be discarded from the response and kept unchanged on the pag
 > [tip]
 > If the server responds with an error code, Unpoly will ignore the `[up-target]` attribute
 > and update the selector found in the `[up-fail-target]` attribute instead. The default fail target
-> is the form itself. See [rendering failed responses differently](/failed-responses#rendering-failed-responses-differently).
+> is the form itself. See [rendering failed responses differently](/failed-responses#fail-options).
 
 
 ### Programmatic API
