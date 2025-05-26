@@ -1110,6 +1110,30 @@ describe('up.fragment', function() {
           expect('.target').toHaveText('new-text')
         })
 
+        // fit('emits an up:fragment:rendered event when the server response was received and the fragments were swapped', async function() {
+        //   fixture('.target')
+        //
+        //   const callback = jasmine.createSpy('up:fragment:rendered listener')
+        //   document.addEventListener('up:fragment:rendered', callback)
+        //   up.render('.target', { url: '/path' })
+        //
+        //   await wait()
+        //
+        //   expect(callback).not.toHaveBeenCalled()
+        //   jasmine.respondWithSelector('.target', { text: 'new-text' })
+        //
+        //   await wait()
+        //
+        //   expect('.target').toHaveText('new-text')
+        //   expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({
+        //     ok: true,
+        //     target: up.layer.root.element, // we cannot set { target } on an event
+        //     layer: up.layer.root,
+        //     fragments: [document.querySelector('.target')]
+        //   }))
+        //
+        // })
+
         it('uses a HTTP method given as { method } option', async function() {
           fixture('.target')
           up.render('.target', { url: '/path', method: 'put' })

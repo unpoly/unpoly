@@ -16,7 +16,7 @@ console.log(result.layer)     // => up.Layer.Root
 up.RenderResult = class RenderResult extends up.Record {
 
   /*-
-  An array of fragments that were inserted.
+  The effective fragments that ended up being inserted.
 
   @property up.RenderResult#fragments
   @param {Array<Element>} fragments
@@ -32,7 +32,30 @@ up.RenderResult = class RenderResult extends up.Record {
   */
 
   /*-
-  The [target selector](/targeting-fragments) that was rendered.
+  The effective [target selector](/targeting-fragments) for the rendered fragments.
+
+  ## Matches the actual fragments
+
+  Note that this property an exact target the for the [fragments that were rendered](/up.RenderResult.prototype.fragments).
+  This may differ from the initial render options.
+
+  For example, if our original render options contained an optional selector with `:maybe`,
+  and that selector didn't match, it is omitted from the `result.target`:
+
+  ```js
+  let result = await up.render({ target: '#foo, #bar:maybe' })
+  result.renderOptions // => "#foo, #bar:maybe"
+  result.target        // => "#foo"
+  ```
+
+  If any `[up-hungry]` elements were added to the render pass, they
+  are included in `result.target`, although they never explicitly mentioned in our render options:
+
+  ```js
+  let result = await up.render({ target: '#foo' })
+  result.renderOptions // => "#foo"
+  result.target        // => "#foo, #hungry"
+  ```
 
   @property up.RenderResult#target
   @param {string} target
@@ -40,7 +63,7 @@ up.RenderResult = class RenderResult extends up.Record {
   */
 
   /*-
-  The effective [render](/up.render) options used to produce this result.
+  The [render](/up.render) options used to produce this result.
 
   If this result was produced from a [failed response](/failed-response),
   [`fail` prefixes](/failed-response#fail-options)
@@ -87,7 +110,7 @@ up.RenderResult = class RenderResult extends up.Record {
       'fragments',
       'layer',
       'target',
-      'renderOptions', // set by up.Change.FromContent
+      'renderOptions',
       'finished',
     ]
   }
@@ -150,6 +173,13 @@ up.RenderResult = class RenderResult extends up.Record {
     return !this.renderOptions.didFail
   }
 
+  // emitAsEvent() {
+  //   let event = up.event.build('up:fragment:rendered')
+  //   // We cannot set { target } on an event
+  //   u.delegate(event, ['ok', 'none', 'fragment', 'fragments', 'layer', 'renderOptions', 'finished'], () => this)
+  //   up.emit(this.layer, event, { log: ['Render pass inserted %d fragment(s)', this.fragments.length] })
+  // }
+
   static both(main, extension, mergeFinished = true) {
     // TODO: Why does mergeFinished call this with an undefined extension?
     if (!extension) {
@@ -157,9 +187,7 @@ up.RenderResult = class RenderResult extends up.Record {
     }
 
     return new this({
-      target: main.target,
-      layer: main.layer,
-      renderOptions: main.renderOptions,
+      ...main,
       fragments: main.fragments.concat(extension.fragments),
       finished: (mergeFinished && this.mergeFinished(main, extension))
     })
