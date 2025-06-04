@@ -1011,7 +1011,7 @@ up.protocol = (function() {
     Defaults to the `content` attribute of a `<meta>` tag named `csp-nonce`:
 
     ```
-    <meta name='csrf-token' content='secret98765'>
+    <meta name='csp-nonce' content='secret4367243'>
     ```
 
   @param {string} [config.methodParam='_method']
