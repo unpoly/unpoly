@@ -667,12 +667,13 @@ up.element = (function() {
   See `up.element.createFromSelector()` for many more examples.
 
   @function up.element.affix
-  @param {Element} parent
-    The parent to which to attach the created element.
-  @param {string} [position='beforeend']
-    The position of the new element in relation to `parent`.
+  @section Position
+    @param {Element} parent
+      The parent to which to attach the created element.
+    @param {string} [position='beforeend']
+      The position of the new element in relation to `parent`.
 
-    @include adjacent-positions
+      @include adjacent-positions
   @include up.element.createFromSelector/all
   @stable
   */

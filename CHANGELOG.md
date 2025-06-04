@@ -146,6 +146,7 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 - `up.element.subtree()` now prevents redundant array allocations.
 - Requests now clear out their `{ bindLayer }` property after loading, allowing layer objects to be garbage-collected.
 - Fix a bug where `up.RenderResult#renderOptions` was sometimes `undefined`.
+- ⚠️ The experimental function up.`util.pickBy()` no longer passes the entire object as a third argument to the callback function.
 
 
 ### Developer experience

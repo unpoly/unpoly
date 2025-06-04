@@ -66,8 +66,12 @@ up.RenderOptions = (function() {
   // - Layer-related options (e.g. target layer or options for a new layer)
   // - Options that change focus. The user might focus a specific element from a success element,
   //   like { focus: '.result', failFocus: '.errors' }.
+  //   We do however set { focus: 'auto', failFocus: 'auto' } in up.fragment.config.navigateOptions,
+  //   as 'auto' is generic enough for a shared default.
   // - Options that change scrolling. The user might scroll to a specific element from a success element,
   //   like { scroll: '.result', failScroll: '.errors' }.
+  //   We do however set { scroll: 'auto', failScroll: 'auto' } in up.fragment.config.navigateOptions.
+  //   as 'auto' is generic enough for a shared default.
   const SHARED_KEYS = PREFLIGHT_KEYS.concat([
     'keep',         // If I want to discard [up-keep] elements, I also want to discard them for the fail case.
     'hungry',       // If I want to opportunistically update [up-hungry] elements, I also want it for the fail case.

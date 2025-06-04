@@ -24,48 +24,50 @@ up.history = (function() {
   Configures behavior when the user goes back or forward in browser history.
 
   @property up.history.config
-  @param {Array} [config.restoreTargets=['body']]
-    A list of possible CSS selectors to [replace](/up.render)
-    when the user [goes back or forward in history](/restoring-history).
+  @section History
+    @param {Array} [config.restoreTargets=['body']]
+      A list of possible CSS selectors to [replace](/up.render)
+      when the user [goes back or forward in history](/restoring-history).
 
-    If more than one target is configured, the first selector matching both
-    the current page and server response will be updated.
+      If more than one target is configured, the first selector matching both
+      the current page and server response will be updated.
 
-    If nothing is configured, the `<body>` element will be replaced.
-  @param {boolean} [config.enabled=true]
-    Configures whether [fragment updates](/up.render) can [update history](/updating-history).
+      If nothing is configured, the `<body>` element will be replaced.
+    @param {boolean} [config.enabled=true]
+      Configures whether [fragment updates](/up.render) can [update history](/updating-history).
 
-    If set to `false` Unpoly will never change history.
+      If set to `false` Unpoly will never change history.
 
-  @param {boolean} [config.updateMetaTags=true]
-    Configures whether [history changes](/updating-history) update
-    [meta tags](/updating-history#history-state) in addition
-    to the document's title and URL.
+  @section Meta tags
+    @param {boolean} [config.updateMetaTags=true]
+      Configures whether [history changes](/updating-history) update
+      [meta tags](/updating-history#history-state) in addition
+      to the document's title and URL.
 
-    Instead of disabling meta tag synchronization globally you may also disable it
-    per render pass. To do so pass a [`{ metaTags: false }`](/up.render#options.metaTags) option
-    or set an [`[up-meta-tags="false"]`](/up-follow#up-meta-tags) attribute
-    on a link.
+      Instead of disabling meta tag synchronization globally you may also disable it
+      per render pass. To do so pass a [`{ metaTags: false }`](/up.render#options.metaTags) option
+      or set an [`[up-meta-tags="false"]`](/up-follow#up-meta-tags) attribute
+      on a link.
 
-  @param {Array<string>} [config.metaTagSelectors]
-    An array of CSS selectors matching default [meta tags](/up-meta)
-    that are be updated during [history changes](/updating-history).
+    @param {Array<string>} [config.metaTagSelectors]
+      An array of CSS selectors matching default [meta tags](/up-meta)
+      that are be updated during [history changes](/updating-history).
 
-    By default popular `<meta>` and certain `<link>` elements are considered meta tags.
+      By default popular `<meta>` and certain `<link>` elements are considered meta tags.
 
-    Because of the [large number of `[rel]` attribute values](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/rel)
-    Unpoly the most common `link[rel]` elements are matched by default.
-    You can [include additional elements](/up-meta#including-meta-tags) by assigning an `[up-meta]` attribute
-    or by pushing their selector into this configuration array.
+      Because of the [large number of `[rel]` attribute values](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/rel)
+      Unpoly the most common `link[rel]` elements are matched by default.
+      You can [include additional elements](/up-meta#including-meta-tags) by assigning an `[up-meta]` attribute
+      or by pushing their selector into this configuration array.
 
-    Only elements in the `<head>` can be matched. Elements in the `<body>` are never considered,
-    even if they match one of the configured selectors.
+      Only elements in the `<head>` can be matched. Elements in the `<body>` are never considered,
+      even if they match one of the configured selectors.
 
-  @param {Array<string>} [config.noMetaTagSelectors]
-    Exceptions to `up.history.config.metaTagSelectors`.
+    @param {Array<string>} [config.noMetaTagSelectors]
+      Exceptions to `up.history.config.metaTagSelectors`.
 
-    Matching elements will *not* be considered [meta tags](/up-meta)
-    even if they match `up.history.config.metaTagSelectors`.
+      Matching elements will *not* be considered [meta tags](/up-meta)
+      even if they match `up.history.config.metaTagSelectors`.
 
   @stable
   */
