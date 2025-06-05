@@ -73,12 +73,9 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
   }
 
   _executeStep(step) {
-    // Remember where the element came from to support up.reload(element).
-    this.setReloadAttrs(step)
-
     switch (step.placement) {
       case 'swap': {
-        let keepPlan = this._findKeepPlan(step)
+        let keepPlan = up.fragment.keepPlan(step)
         if (keepPlan) {
           // Since we're keeping the element that was requested to be swapped,
           // we won't be making changes to the DOM.
@@ -110,17 +107,10 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
               // Hence we lose the original position of the keepable.
               this._restoreDescendantKeepables(step)
 
-              // Adopt CSP nonces and fix broken script tags
-              this.responseDoc.finalizeElement(step.newElement)
+              this._welcomeElement(step.newElement, step)
 
               // Remove the .up-keeping classes and emit up:fragment:kept.
               this._finalizeDescendantKeepables(step)
-
-              // up.hello() tracks which compilers have been called for which elements.
-              // Because of this we do not need to worry about [up-keep] elements being compiled twice.
-              up.hello(step.newElement, step)
-
-              this._addToResult(step.newElement)
             },
             beforeDetach: () => {
               // In the case of [up-keep] descendants, keepable elements have been replaced
@@ -182,11 +172,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
         let position = step.placement === 'before' ? 'afterbegin' : 'beforeend'
         step.oldElement.insertAdjacentElement(position, wrapper)
 
-        // Adopt CSP nonces and fix broken script tags
-        this.responseDoc.finalizeElement(wrapper)
-        up.hello(wrapper, step)
-
-        this._addToResult(wrapper)
+        this._welcomeElement(wrapper, step)
 
         this._handleFocus(wrapper, step)
 
@@ -205,49 +191,18 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     }
   }
 
-  // Returns a object detailing a keep operation iff the given element is [up-keep] and
-  // we can find a matching partner in newElement. Otherwise returns undefined.
-  //
-  // @param {Element} options.oldElement
-  // @param {Element} options.newElement
-  // @param {boolean} options.descendantsOnly
-  _findKeepPlan(options) {
-    if (!options.keep) { return }
+  _welcomeElement(element, step) {
+    // Adopt CSP nonces and fix broken script tags
+    this.responseDoc.finalizeElement(element)
 
-    const { oldElement, newElement } = options
+    // Remember where the element came from to support up.reload(element).
+    // TODO: Consider making setReloadAttrs() part of up.hello() options (would implicate move to up.fragment)
+    this.setReloadAttrs(step)
 
-    let doKeep = e.booleanAttr(oldElement, 'up-keep')
-    // Early return if [up-keep=false]
-    if (!doKeep) { return }
+    // Run macros and compilers. This also snapshots for [up-keep="same-html"].
+    up.hello(element, step)
 
-    let partner
-    let partnerSelector = up.fragment.toTarget(oldElement)
-    const lookupOpts = { layer: options.layer }
-
-    if (options.descendantsOnly) {
-      // Since newElement is from a freshly parsed HTML document, we could use
-      // up.element functions to match the selector. However, since we also want
-      // to use custom selectors like ":main" or "&" we use up.fragment.get().
-      partner = up.fragment.get(newElement, partnerSelector, lookupOpts)
-    } else {
-      partner = e.subtreeFirst(newElement, partnerSelector, lookupOpts)
-    }
-
-    // (1) The partner must be matched
-    // (2) The partner does not need to be [up-keep]
-    // (3) The partner must not be [up-keep=false]
-    if (partner && e.booleanAttr(partner, 'up-keep') !== false) {
-      const plan = {
-        oldElement, // the element that should be kept
-        newElement: partner, // the element that would have replaced it but now does not
-        newData: up.script.data(partner), // the parsed up-data attribute of the element we will discard
-        renderOptions: options,
-      }
-
-      if (!up.fragment.emitKeep(plan).defaultPrevented) {
-        return plan
-      }
-    }
+    this._addToResult(element)
   }
 
   // This will find all [up-keep] descendants in oldElement, overwrite their partner
@@ -258,7 +213,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
 
     if (step.keep) {
       for (let keepable of step.oldElement.querySelectorAll('[up-keep]')) {
-        let keepPlan = this._findKeepPlan({ ...step, oldElement: keepable, descendantsOnly: true })
+        let keepPlan = up.fragment.keepPlan({ ...step, oldElement: keepable, descendantsOnly: true })
         if (keepPlan) {
           // Replace keepable with its clone so it looks good in a transition
           // between oldElement and newElement.
@@ -273,7 +228,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
           // To prevent the execution of these placeholder-scripts, we change their { type }.
           up.script.disableSubtree(keepPlan.newElement)
 
-          // Attaching a viewport to another element will cause it to loose
+          // Attaching a viewport to another element will cause it to lose
           // its scroll position, even if both parents are in the same document.
           let viewports = up.viewport.subtree(keepPlan.oldElement)
           keepPlan.revivers = u.map(viewports, function(viewport) {

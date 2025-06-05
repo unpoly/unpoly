@@ -136,3 +136,9 @@ RedirectPermanent /dependent-fields /reactive-server-forms
 RedirectPermanent /dependent-elements /reactive-server-forms
 RedirectPermanent /dependent-forms /reactive-server-forms
 
+RedirectPermanent /preserving-fragments /preserving-elements
+RedirectPermanent /keeping-fragments /preserving-elements
+RedirectPermanent /keeping-elements /preserving-elements
+RedirectPermanent /persisting-fragments /preserving-elements
+RedirectPermanent /persisting-elements /preserving-elements
+

@@ -42,16 +42,17 @@ For low-level DOM utilities that complement the browser's native API, see `up.el
 
 @see navigation
 @see providing-html
+@see preserving-elements
 @see templates
 @see render-lifecycle
 @see skipping-rendering
 @see target-derivation
 
 @see up.render
-@see up.navigate
 @see up.destroy
 @see up.reload
 @see up.fragment.get
+@see [up-keep]
 
 @module up.fragment
 */
@@ -174,12 +175,29 @@ up.fragment = (function() {
       - If focus was lost with the old fragment, re-focus a [similar](/target-derivation) element.
       - If focus was lost with the old fragment, focus the new fragment.
 
-  @section Scripts
+  @section Preprocessing
 
     @param {boolean|Function(ScriptElement): boolean} [config.runScripts=false]
       Whether to load or execute `<script>` tags in updated fragments.
 
       See [Running inline `<script>` tags](/legacy-scripts#running-inline-script-tags) for details.
+
+    @param {Function(string): string} [config.normalizeKeepHTML]
+      A function that normalizes a HTML string before comparison with [`[up-keep="same-html"]`](/preserving-elements#same-html).
+
+      By default only light normalization is applied:
+
+      - Line indentation is ignored.
+      - Some fluctuating attributes are ignored, such as CSP nonces.
+
+      You can configure your own normalization instead of your own. For example, the following
+      would only strip leading and trailing whitespace:
+
+      ```js
+      up.fragment.config.normalizeKeepHTML = (str) => str.trim()
+      ```
+
+      See [Keeping an element until its HTML changes](/preserving-elements#same-html) for context.
 
   @section Responses
 
@@ -199,7 +217,7 @@ up.fragment = (function() {
       ```
 
     @param {Function(Object): boolean} [config.skipResponse]
-      When to finishes a render pass without changes,
+      When to finish a render pass without changes,
       usually to [not re-insert identical content](/skipping-rendering).
 
       The configured function accepts an object with the same properties
@@ -276,6 +294,7 @@ up.fragment = (function() {
     autoScroll: ['hash', 'layer-if-main'],
     autoRevalidate: (response) => response.expired,
     skipResponse: defaultSkipResponse,
+    normalizeKeepHTML: defaultNormalizeKeepHTML
   }))
 
   // Users who are not using layers will prefer settings default targets
@@ -824,21 +843,11 @@ up.fragment = (function() {
   */
 
   /*-
-  Elements with an `[up-keep]` attribute will be persisted during
-  [fragment updates](/up.fragment).
+  Elements with an `[up-keep]` attribute will be persisted when rendering.
 
-  Common use cases for `[up-keep]` include:
+  <a class="article-ref" href="/preserving-elements">Preserving elements</a>
 
-  - Elements that are expensive to [initialize](/up.compiler).
-  - Media elements (`<video>`, `<audio>`) that should retain their playback state during updates.
-  - Other elements with client-side state that is difficult to express in a URL or [data object](/data).
-
-  The element must have a [derivable target selector](/target-derivation)
-  so Unpoly can find its position within new content.
-
-  Emits the [`up:fragment:keep`](/up:fragment:keep) event.
-
-  ## Example
+  ## Basic example
 
   A common use case is to preserve the playback state of media elements:
 
@@ -853,81 +862,7 @@ up.fragment = (function() {
   its playback state will be the same before and after the update. All other elements (like the `<p>`)
   will be updated with new content.
 
-  ## Controlling if an element will be kept
-
-  Unpoly will **only** keep an existing element if:
-
-  - The existing element has an `[up-keep]` attribute
-  - The response contains an element matching the [derived target](/target-derivation) of the existing element
-
-  The element has multiple methods to veto against being kept:
-
-  - By setting a `[up-keep=false]` attribute on the new element version.
-  - By setting a different `[id]` or `[up-id]` attribute so its [derived target](/target-derivation) no longer matches the existing element.
-  - By preventing the [`up:fragment:keep`](/up:fragment:keep) event that is [emitted](/up.emit) on the existing element.
-  - By preventing the [`up:fragment:keep`](/up:fragment:keep) event that is passed to an [`[up-on-keep]`](#up-on-keep)
-    callback on the element.
-
-  You can also choose to render without keeping elements:
-
-  - Link or forms can force a swap of `[up-keep]` elements by setting an [`[up-use-keep=false]`](/up-follow#up-use-keep) attribute.
-  - Rendering functions can force a swap of `[up-keep]` elements by passing an [`{ keep: false }`](/up.render#options.keep) option.
-
-  ### Example for conditional keeping
-
-  Let's say we want only keep an `<audio up-keep>` element as long as it plays
-  the same song (as identified by the tag's `src` attribute).
-
-  On the client we can achieve this by listening to an `up:keep:fragment` event
-  and preventing it if the `src` attribute of the old and new element differ:
-
-  ```js
-  up.on('up:fragment:keep', 'audio', function(event) {
-    if (element.getAttribute('src') !== event.newElement.getAttribute('src')) {
-      event.preventDefault()
-    }
-  })
-  ```
-
-  ## Updating data for kept elements
-
-  Even when keeping elements, you may reconcile its [data object](/data) with the data
-  from the new element that was discarded.
-
-  Let's say you want to display a map within an element. The center of the map
-  is encoded using an `[up-data]` attribute:
-
-  ```html
-  <div id="map" up-keep up-data="{ lat: 50.86, lng: 7.40 }"></div>
-  ```
-
-  We can initialize the map using a [compiler](/up.compiler) like this:
-
-  ```js
-  up.compiler('#map', function(element, data) {
-    var map = new google.maps.Map(element)
-    map.setCenter(data)
-  })
-  ```
-
-  While we want to preserve the map during page loads, we *do* want to pick up
-  a new center coordinate when the containing fragment is updated. We can do so by
-  listening to an `up:fragment:keep` event and observing `event.newData`:
-
-  ```js
-  up.compiler('#map', function(element, data) {
-    var map = new google.maps.Map(element)
-    map.setCenter(data)
-
-    map.addEventListener('up:fragment:keep', function(event) { // mark-line
-      map.setCenter(event.newData) // mark-line
-    }) // mark-line
-  })
-  ```
-
-  > [TIP]
-  > Instead of keeping an element and update its data you may also
-  > [preserve an element's data through reloads](/data#preserving).
+  See [Preserving elements](/preserving-elements) for elaborate examples.
 
   ## Limitations
 
@@ -940,6 +875,21 @@ up.fragment = (function() {
 
 
   @selector [up-keep]
+  @param [up-keep='true']
+    How long to keep the element.
+
+    When set to `'true'` (the deferred), the element is kept as long as its
+    [derived target](/target-derivation) can be correlated in both the old and new content.
+
+    When set to `'same-html'`, the element is kept as long as its outer HTML
+    does not change between versions. See [Keeping an element until its HTML changes](/preserving-elements#same-html).
+
+    When set to `'same-data'`, the element is kept as long as its [data}(/data)
+    does not change between versions. See [Keeping an element until its data changes](/preserving-elements#same-data).
+
+    When set to `'false'` the element is never kept. A new element with `[up-keep="false"]`
+    will always replace an existing element, even if that existing element has `[up-keep="true"]`.
+    See [Forcing an update](/preserving-elements#forcing-updates).
   @param [up-on-keep]
     Code to run before an existing element is kept during a page update.
 
@@ -950,6 +900,150 @@ up.fragment = (function() {
     `this` (the old fragment), `newFragment` and `newData`.
   @stable
   */
+
+  function emitFragmentKeep(keepPlan) {
+    let { oldElement, newElement: newFragment, newData, renderOptions } = keepPlan
+    const log = ['Keeping fragment %o', oldElement]
+    const callback = e.callbackAttr(keepPlan.oldElement, 'up-on-keep', { exposedKeys: ['newFragment', 'newData'] })
+    const event = up.event.build('up:fragment:keep', { newFragment, newData, renderOptions })
+    return up.emit(oldElement, event, { log, callback })
+  }
+
+  /*-
+  This event is [emitted](/up.emit) before an existing element is [kept](/up-keep) during
+  a page update.
+
+  Event listeners can call `event.preventDefault()` on an `up:fragment:keep` event
+  to prevent the element from being persisted. If the event is prevented, the element
+  will be replaced with a fragment from the response.
+
+  <a class="article-ref" href="/preserving-elements#conditions">Keep conditions</a>
+
+  ### Example
+
+  The following would only keep an `<audio up-keep>` element as long as it plays
+  the same song (as identified by the tag's `src` attribute):
+
+  ```js
+  up.on('up:fragment:keep', 'audio', function(event) {
+    if (element.getAttribute('src') !== event.newElement.getAttribute('src')) {
+      // Preventing the event forces an update
+      event.preventDefault()
+    }
+  })
+  ```
+
+  You may also define an `up:fragment:keep` listener in HTML using an [`[up-on-keep]`](/up-keep#up-on-keep) attribute.
+
+  @event up:fragment:keep
+  @param event.preventDefault()
+    Prevents the fragment from being kept.
+
+    The fragment will be replaced with `event.newFragment`.
+  @param {Element} event.target
+    The fragment that will be kept.
+  @param {Element} event.newFragment
+    The discarded element.
+  @param {Object} event.newData
+    The [data](/data) attached to the discarded element.
+  @param {Object} event.renderOptions
+    An object with [render options](/up.render#parameters) for the current fragment update.
+  @stable
+  */
+
+  /*-
+  Returns a object detailing a keep operation iff the given { oldElement } is [up-keep] and
+  we can find a matching partner in { newElement }.
+
+  Otherwise returns undefined.
+
+  @function up.fragment.keepPlan
+  @param {Element} options.oldElement
+  @param {Element} options.newElement
+  @param {boolean} options.descendantsOnly
+  @param {boolean} options.keep
+  @internal
+  */
+  function findKeepPlan(options) {
+    if (options.keep === false) return
+
+    const { oldElement, newElement } = options
+
+    let oldElementMode = keepMode(oldElement)
+    // Early return if no [up-keep] attr or if [up-keep=false]
+    if (!oldElementMode) { return }
+
+    let partner
+    let partnerSelector = up.fragment.toTarget(oldElement)
+    const lookupOpts = { layer: options.layer }
+
+    if (options.descendantsOnly) {
+      // Since newElement is from a freshly parsed HTML document, we could use
+      // up.element functions to match the selector. However, since we also want
+      // to use custom selectors like ":main" or "&" we use up.fragment.get().
+      partner = up.fragment.get(newElement, partnerSelector, lookupOpts)
+    } else {
+      partner = e.subtreeFirst(newElement, partnerSelector, lookupOpts)
+    }
+
+    // (1) The partner must be matched
+    // (2) The partner does not need to be [up-keep]
+    if (!partner) return
+
+    let partnerMode = keepMode(partner)
+
+    // (1) The partner must not be [up-keep=false], regardless of oldElement's state.
+    // (2) We already tested old element for [up-keep=false] at the beginning of findKeepPlan().
+    if (partnerMode === false) return
+
+    let oldIdentity = keepIdentity(oldElement, oldElementMode)
+    let partnerIdentity = keepIdentity(partner, oldElementMode)
+
+    if (!u.isEqual(oldIdentity, partnerIdentity)) return
+
+    const plan = {
+      oldElement, // the element that should be kept
+      newElement: partner, // the element that would have replaced it but now does not
+      newData: up.script.data(partner), // the parsed up-data attribute of the element we will discard
+      renderOptions: options,
+    }
+
+    // Preventing up:fragment:keep will force a replacement
+    if (emitFragmentKeep(plan).defaultPrevented) return
+
+    // If we came this far, we can keep oldElement.
+    return plan
+  }
+
+  function keepIdentity(element, mode = keepMode(element)) {
+    return element.upKeepIdentity ??= u.copy(buildKeepIdentity(element, mode))
+  }
+
+  function defaultNormalizeKeepHTML(html) {
+    let tagPattern = /<[^<]+>/g
+    let attrs = ['up-etag', 'up-source', 'up-time', 'nonce', ...up.script.config.nonceableAttributes]
+    let attrPattern = new RegExp(`\\s+(${attrs.join('|')})="[^"]*"`, 'g')
+    let cleanTag = (match) => match.replace(attrPattern, '')
+    html = html.replace(tagPattern, cleanTag)
+    html = html.replace(/^[ \t]+/mg, '')
+    return html
+  }
+
+  function buildKeepIdentity(element, mode) {
+    if (mode === 'same-html') {
+      return config.normalizeKeepHTML(element.outerHTML)
+    } else if (mode === 'same-data') {
+      return up.data(element)
+    } else {
+      return true
+    }
+  }
+
+  up.macro('[up-keep]', (element) => keepIdentity(element))
+
+  function keepMode(element) {
+    return e.booleanOrStringAttr(element, 'up-keep')
+  }
 
 
   function emitFragmentInserted(element) {
@@ -984,53 +1078,6 @@ up.fragment = (function() {
   @stable
   */
 
-  function emitFragmentKeep(keepPlan) {
-    let { oldElement, newElement: newFragment, newData, renderOptions } = keepPlan
-    const log = ['Keeping fragment %o', oldElement]
-    const callback = e.callbackAttr(keepPlan.oldElement, 'up-on-keep', { exposedKeys: ['newFragment', 'newData'] })
-    const event = up.event.build('up:fragment:keep', { newFragment, newData, renderOptions })
-    return up.emit(oldElement, event, { log, callback })
-  }
-
-  /*-
-  This event is [emitted](/up.emit) before an existing element is [kept](/up-keep) during
-  a page update.
-
-  Event listeners can call `event.preventDefault()` on an `up:fragment:keep` event
-  to prevent the element from being persisted. If the event is prevented, the element
-  will be replaced with a fragment from the response.
-
-  ### Example
-
-  The following would only keep an `<audio up-keep>` element as long as it plays
-  the same song (as identified by the tag's `src` attribute):
-
-  ```js
-  up.on('up:fragment:keep', 'audio', function(event) {
-    if (element.getAttribute('src') !== event.newElement.getAttribute('src')) {
-      event.preventDefault()
-    }
-  })
-  ```
-
-  > [TIP]
-  > You may also define an `up:fragment:keep` listener in HTML using an [`[up-on-keep]`](/up-keep#up-on-keep) attribute.
-
-  @event up:fragment:keep
-  @param event.preventDefault()
-    Prevents the fragment from being kept.
-
-    The fragment will be replaced with `event.newFragment`.
-  @param {Element} event.target
-    The fragment that will be kept.
-  @param {Element} event.newFragment
-    The discarded element.
-  @param {Object} event.newData
-    The [data](/data) attached to the discarded element.
-  @param {Object} event.renderOptions
-    An object with [render options](/up.render#parameters) for the current fragment update.
-  @stable
-  */
 
   function emitFragmentDestroyed(fragment, options) {
     const log = options.log ?? ['Destroyed fragment %o', fragment]
@@ -2932,8 +2979,10 @@ up.fragment = (function() {
 
   up.on('up:framework:boot', function() {
     const { documentElement } = document
-    documentElement.setAttribute('up-source', normalizeSource(location.href))
+
     up.hello(documentElement)
+
+    documentElement.setAttribute('up-source', normalizeSource(location.href))
 
     if (!up.browser.canPushState()) {
       return up.warn('Cannot push history changes. Next render pass with history will load a full page.')
@@ -2959,6 +3008,8 @@ up.fragment = (function() {
     emitInserted: emitFragmentInserted,
     emitDestroyed: emitFragmentDestroyed,
     emitKeep: emitFragmentKeep,
+    keepPlan: findKeepPlan,
+    defaultNormalizeKeepHTML, // export for testing
     successKey,
     failKey,
     expandTargets,

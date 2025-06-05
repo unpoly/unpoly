@@ -150,6 +150,16 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 - Adopted `script[nonce]` attributes now show up in the attribute value for easier debugging.
 
 
+### Shorthand keep conditions
+
+- To preserve an element as long as its [data](/data) remains the same,
+  set an `[up-keep="same-data"]` attribute. Only when the element's `[up-data]` attribute changes between versions,
+  it is replaced by the new version. Changes in other attributes or its children are ignored.
+- To preserve an element as long as its [outer HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/outerHTML) remains the same,
+  set an `[up-keep="same-html"]` attribute. Only when the element's attributes or children changes between versions,
+  it is replaced by the new version.
+
+
 ### Developer experience
 
 - You can now run headless tests (without a browser window) by running `npm run test`.

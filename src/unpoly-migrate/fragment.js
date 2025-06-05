@@ -272,7 +272,7 @@ up.on('up:framework:boot', function() {
 // up.compiler('[up-keep]:not([up-keep=true]):not([up-keep=""])', function(element) {
 up.compiler('[up-keep]', function(element) {
   let selector = up.element.booleanOrStringAttr(element, 'up-keep')
-  if (u.isString(selector)) {
+  if (u.isString(selector) && /[.[#]/.test(selector)) {
     up.migrate.warn('The [up-keep] attribute no longer supports a selector value. Elements will be matched by their derived target. You may prevent keeping with [up-on-keep="if(condition) event.preventDefault()"]. ')
     // The best we can do here is prevent matching of the old and new element if the new element
     // does not match the selector.
