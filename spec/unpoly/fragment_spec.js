@@ -14882,6 +14882,210 @@ describe('up.fragment', function() {
         expect(oldTextDuringTransition).toEqual('old-foo old-bar')
         expect(newTextDuringTransition).toEqual('new-foo old-bar')
       })
+
+      describe('with [up-keep="html"]', function() {
+
+        it('keeps the element if its outer HTML is stable', async function() {
+          let keepable = up.hello(htmlFixture('<div id="keepable" up-keep="html">text</div>'))
+
+          up.render({ fragment: `<div id="keepable" up-keep="html">text</div>` })
+          await wait()
+
+          expect(document.querySelector('#keepable')).toBe(keepable)
+        })
+
+        it('keeps an [up-keep] descendant if its outer HTML is stable', async function() {
+          let [container, keepable] = htmlFixtureList(`
+            <div id="container">
+              <div id="keepable" up-keep="html">text</div>
+            </div>
+          `)
+          up.hello(container)
+
+          up.render({ fragment: `<div id="keepable" up-keep="html">text</div>` })
+          await wait()
+
+          expect(document.querySelector('#keepable')).toBe(keepable)
+        })
+
+        it('ignores HTML changes made by a user compiler', async function() {
+          up.compiler('#keepable', (el) => el.innerText = 'text changed by compiler')
+
+          let keepable = up.hello(htmlFixture('<div id="keepable" up-keep="html">text</div>'))
+          expect(keepable).toHaveText('text changed by compiler')
+
+          up.render({ fragment: `<div id="keepable" up-keep="html">text</div>` })
+          await wait()
+
+          expect(document.querySelector('#keepable')).toBe(keepable)
+          expect(document.querySelector('#keepable')).toHaveText('text changed by compiler')
+        })
+
+        it('ignores HTML changes that happened after rendering', async function() {
+          let keepable = up.hello(htmlFixture('<div id="keepable" up-keep="html">text</div>'))
+
+          keepable.innerText = 'text changed after rendering'
+          expect(keepable).toHaveText('text changed after rendering')
+
+          up.render({ fragment: `<div id="keepable" up-keep="html">text</div>` })
+          await wait()
+
+          expect(document.querySelector('#keepable')).toBe(keepable)
+          expect(document.querySelector('#keepable')).toHaveText('text changed after rendering')
+        })
+
+        it('replaces the element if its text changed', async function() {
+          let keepable = up.hello(htmlFixture('<div id="keepable" up-keep="html">old text</div>'))
+
+          up.render({ fragment: `<div id="keepable" up-keep="html">new text</div>` })
+          await wait()
+
+          expect(document.querySelector('#keepable')).not.toBe(keepable)
+        })
+
+        it('replaces the element if an attribute changed', async function() {
+          let keepable = up.hello(htmlFixture('<div id="keepable" up-keep="html" attr="old">text</div>'))
+
+          up.render({ fragment: `<div id="keepable" up-keep="html" attr="new">text</div>` })
+          await wait()
+
+          expect(document.querySelector('#keepable')).not.toBe(keepable)
+        })
+
+        it('replaces the element if child element changed', async function() {
+          let keepable = up.hello(htmlFixture('<div id="keepable" up-keep="html" attr="old"></div>'))
+
+          up.render({ fragment: `
+            <div id="keepable" up-keep="html" attr="new">
+              <span></span>
+            </div>
+          `})
+          await wait()
+
+          expect(document.querySelector('#keepable')).not.toBe(keepable)
+        })
+
+        // it('allows a user macro to set [up-keep="html"]', async function() {
+        //   up.macro('#keepable', (el) => el.setAttribute('up-keep', 'html'))
+        //
+        //   let keepable = up.hello(htmlFixture('<div id="keepable">text</div>'))
+        //
+        //   expect(keepable).toHaveAttribute('up-keep', 'html')
+        //
+        //   up.render({ fragment: `<div id="keepable">text</div>`})
+        //   await wait()
+        //
+        //   expect(document.querySelector('#keepable')).toBe(keepable)
+        //
+        //   up.render({ fragment: `<div id="keepable">changed text</div>`})
+        //   await wait()
+        //
+        //   expect(document.querySelector('#keepable')).not.toBe(keepable)
+        // })
+
+        it('adopts CSP nonces before the comparison')
+
+      })
+
+      describe('with [up-keep="data"]', function() {
+
+        it('keeps the element if its data is stable, even though the innerHTML changed', async function() {
+          let keepable = up.hello(htmlFixture('<div id="keepable" up-keep="data" up-data="{ foo: 1 }">text</div>'))
+
+          up.render({ fragment: `<div id="keepable" up-keep="data" up-data="{ foo: 1 }">changed text</div>` })
+          await wait()
+
+          expect(document.querySelector('#keepable')).toBe(keepable)
+        })
+
+        it('keeps an [up-keep] descendant if its data is stable, even though the innerHTML changed', async function() {
+          let [container, keepable] = htmlFixtureList(`
+            <div id="container">
+              <div id="keepable" up-keep="data" up-data="{ foo: 1 }">text</div>
+            </div>
+          `)
+          up.hello(container)
+
+          up.render({ fragment: `<div id="keepable" up-keep="data" up-data="{ foo: 1 }">changed text</div>` })
+          await wait()
+
+          expect(document.querySelector('#keepable')).toBe(keepable)
+        })
+
+        it('keeps an element with an empty [up-data] object when the new element has no [up-data] attribute at all')
+
+        it('merges [up-data] and [data-*] attribute in both elements before comparison')
+
+        it('ignores data mutated after rendering', async function() {
+          let keepable = up.hello(htmlFixture('<div id="keepable" up-keep="data" up-data="{ foo: 1 }">text</div>'))
+
+          up.data(keepable).bar = 2
+          expect(up.data(keepable)).toEqual({ foo: 1, bar: 2})
+
+          up.render({ fragment: `<div id="keepable" up-keep="data" up-data="{ foo: 1 }">text</div>` })
+          await wait()
+
+          expect(document.querySelector('#keepable')).toBe(keepable)
+        })
+
+        it('replaces the element if a data value changed', async function() {
+          let keepable = up.hello(htmlFixture('<div id="keepable" up-keep="data" up-data="{ foo: 1 }">text</div>'))
+
+          up.render({ fragment: `<div id="keepable" up-keep="data" up-data="{ foo: 2 }">text</div>` })
+          await wait()
+
+          expect(document.querySelector('#keepable')).not.toBe(keepable)
+        })
+
+        it('replaces the element if the new element has an additional data key', async function() {
+          let keepable = up.hello(htmlFixture('<div id="keepable" up-keep="data" up-data="{ foo: 1 }">text</div>'))
+
+          up.render({ fragment: `<div id="keepable" up-keep="data" up-data="{ foo: 1, bar: 2 }">text</div>` })
+          await wait()
+
+          expect(document.querySelector('#keepable')).not.toBe(keepable)
+        })
+
+        it('replaces the element if has data, but the new element does not', async function() {
+          let keepable = up.hello(htmlFixture('<div id="keepable" up-keep="data" up-data="{ foo: 1 }">text</div>'))
+
+          up.render({ fragment: `<div id="keepable" up-keep="data">text</div>` })
+          await wait()
+
+          expect(document.querySelector('#keepable')).not.toBe(keepable)
+        })
+
+        it("replaces the element if it doesn't have data, but the new element has data", async function() {
+          let keepable = up.hello(htmlFixture('<div id="keepable" up-keep="data"></div>'))
+
+          up.render({ fragment: `
+            <div id="keepable" up-keep="data" up-data="{ foo: 1 }"></div>
+          `})
+          await wait()
+
+          expect(document.querySelector('#keepable')).not.toBe(keepable)
+        })
+
+        // it('allows a user macro to set [up-keep="data"]', async function() {
+        //   up.macro('#keepable', (el) => el.setAttribute('up-keep', 'data'))
+        //
+        //   let keepable = up.hello(htmlFixture('<div id="keepable" up-data="{ foo: 1 }">text</div>'))
+        //
+        //   expect(keepable).toHaveAttribute('up-keep', 'data')
+        //
+        //   up.render({ fragment: `<div id="keepable" up-data="{ foo: 1 }">text</div>`})
+        //   await wait()
+        //
+        //   expect(document.querySelector('#keepable')).toBe(keepable)
+        //
+        //   up.render({ fragment: `<div id="keepable" up-data="{ foo: 2 }">text</div>`})
+        //   await wait()
+        //
+        //   expect(document.querySelector('#keepable')).not.toBe(keepable)
+        // })
+
+      })
+
     })
 
   })

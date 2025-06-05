@@ -130,9 +130,6 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // on background layers.
     this.layer.setContent(this._content)
 
-    // Remember where the element came from to support up.reload(element).
-    this.setReloadAttrs({ newElement: this._content, source: this.options.source })
-
     // Adopt CSP nonces and fix broken script tags
     this.responseDoc.finalizeElement(this._content)
 
@@ -146,6 +143,9 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // Compile the entire layer, not just the user content.
     // E.g. [up-dismiss] in the layer elements needs to go through a macro.
     up.hello(this.layer.element, { ...this.options, layer: this.layer, dataRoot: this._content })
+
+    // Remember where the element came from to support up.reload(element).
+    this.setReloadAttrs({ newElement: this._content, source: this.options.source })
 
     // Don't wait for the open animation to finish.
     // Otherwise a popup would start to open and only reveal itself after the animation.

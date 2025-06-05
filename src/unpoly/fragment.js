@@ -951,39 +951,6 @@ up.fragment = (function() {
   @stable
   */
 
-
-  function emitFragmentInserted(element) {
-    if (element.upInserted) return
-    element.upInserted = true
-
-    return up.emit(element, 'up:fragment:inserted', {
-      log: ['Inserted fragment %o', element],
-    })
-  }
-
-  /*-
-  When any page fragment has been [inserted or updated](/up.replace),
-  this event is [emitted](/up.emit) on the fragment.
-
-  If you're looking to run code when a new fragment matches
-  a selector, use `up.compiler()` instead.
-
-  The event is emitted after compilation.
-
-  ### Example
-
-  ```js
-  up.on('up:fragment:inserted', function(event, fragment) {
-    console.log("Looks like we have a new %o!", fragment)
-  })
-  ```
-
-  @event up:fragment:inserted
-  @param {Element} event.target
-    The fragment that has been inserted or swapped with a new version.
-  @stable
-  */
-
   function emitFragmentKeep(keepPlan) {
     let { oldElement, newElement: newFragment, newData, renderOptions } = keepPlan
     const log = ['Keeping fragment %o', oldElement]
@@ -1031,6 +998,138 @@ up.fragment = (function() {
     An object with [render options](/up.render#parameters) for the current fragment update.
   @stable
   */
+
+  /*-
+  Returns a object detailing a keep operation iff the given { oldElement } is [up-keep] and
+  we can find a matching partner in { newElement }.
+
+  Otherwise returns undefined.
+
+  @function up.fragment.keepPlan
+  @param {Element} options.oldElement
+  @param {Element} options.newElement
+  @param {boolean} options.descendantsOnly
+  @param {boolean} options.keep
+  @internal
+  */
+  function findKeepPlan(options) {
+    if (options.keep === false) return
+
+    const { oldElement, newElement } = options
+
+    let oldElementMode = keepMode(oldElement)
+    // Early return if no [up-keep] attr or if [up-keep=false]
+    if (!oldElementMode) { return }
+
+    let partner
+    let partnerSelector = up.fragment.toTarget(oldElement)
+    const lookupOpts = { layer: options.layer }
+
+    if (options.descendantsOnly) {
+      // Since newElement is from a freshly parsed HTML document, we could use
+      // up.element functions to match the selector. However, since we also want
+      // to use custom selectors like ":main" or "&" we use up.fragment.get().
+      partner = up.fragment.get(newElement, partnerSelector, lookupOpts)
+    } else {
+      partner = e.subtreeFirst(newElement, partnerSelector, lookupOpts)
+    }
+
+    // (1) The partner must be matched
+    // (2) The partner does not need to be [up-keep]
+    if (!partner) return
+
+    let partnerMode = keepMode(partner)
+
+    // (1) The partner must not be [up-keep=false], regardless of oldElement's state.
+    // (2) We already tested old element for [up-keep=false] at the beginning of findKeepPlan().
+    if (partnerMode === false) return
+
+    let oldIdentity = keepIdentity(oldElement, oldElementMode)
+    let partnerIdentity = keepIdentity(partner, oldElementMode)
+
+    if (!u.isEqual(oldIdentity, partnerIdentity)) return
+
+    const plan = {
+      oldElement, // the element that should be kept
+      newElement: partner, // the element that would have replaced it but now does not
+      newData: up.script.data(partner), // the parsed up-data attribute of the element we will discard
+      renderOptions: options,
+    }
+
+    // Preventing up:fragment:keep will force a replacement
+    if (emitFragmentKeep(plan).defaultPrevented) return
+
+    // If we came this far, we can keep oldElement.
+    return plan
+  }
+
+  function keepIdentity(element, mode = keepMode(element)) {
+    return element.upKeepIdentity ??= u.copy(buildKeepIdentity(element, mode))
+  }
+
+  function buildKeepIdentity(element, mode) {
+    if (mode === 'html') {
+      return element.outerHTML
+    } else if (mode === 'data') {
+      return up.data(element)
+    } else {
+      return true
+    }
+  }
+
+  up.macro('[up-keep]', (element) => keepIdentity(element))
+
+  // function snapshotKeepIdentities(element) {
+  //   // Because this is used for every up.hello(), use up.element.subtree() instead
+  //   // of up.fragment.subtree() for performance.
+  //   let keepables = e.subtree(element, '[up-keep]')
+  //   for (let keepable of keepables) {
+  //     let mode = keepMode(keepable)
+  //     if (mode === 'html') {
+  //       element.upKeepHTML ??= element.outerHTML
+  //     } else if (mode === 'data') {
+  //       element.upKeepData ??= u.copy(up.data(element))
+  //     }
+  //   }
+  // }
+
+  function keepMode(element) {
+    return e.booleanOrStringAttr(element, 'up-keep')
+  }
+
+
+  function emitFragmentInserted(element) {
+    if (element.upInserted) return
+    element.upInserted = true
+
+    return up.emit(element, 'up:fragment:inserted', {
+      log: ['Inserted fragment %o', element],
+    })
+  }
+
+  /*-
+  When any page fragment has been [inserted or updated](/up.replace),
+  this event is [emitted](/up.emit) on the fragment.
+
+  If you're looking to run code when a new fragment matches
+  a selector, use `up.compiler()` instead.
+
+  The event is emitted after compilation.
+
+  ### Example
+
+  ```js
+  up.on('up:fragment:inserted', function(event, fragment) {
+    console.log("Looks like we have a new %o!", fragment)
+  })
+  ```
+
+  @event up:fragment:inserted
+  @param {Element} event.target
+    The fragment that has been inserted or swapped with a new version.
+  @stable
+  */
+
 
   function emitFragmentDestroyed(fragment, options) {
     const log = options.log ?? ['Destroyed fragment %o', fragment]
@@ -2932,8 +3031,9 @@ up.fragment = (function() {
 
   up.on('up:framework:boot', function() {
     const { documentElement } = document
-    documentElement.setAttribute('up-source', normalizeSource(location.href))
+    // snapshotKeepIdentities(document.body)
     up.hello(documentElement)
+    documentElement.setAttribute('up-source', normalizeSource(location.href))
 
     if (!up.browser.canPushState()) {
       return up.warn('Cannot push history changes. Next render pass with history will load a full page.')
@@ -2959,6 +3059,8 @@ up.fragment = (function() {
     emitInserted: emitFragmentInserted,
     emitDestroyed: emitFragmentDestroyed,
     emitKeep: emitFragmentKeep,
+    keepPlan: findKeepPlan,
+    // snapshotKeepIdentities,
     successKey,
     failKey,
     expandTargets,
