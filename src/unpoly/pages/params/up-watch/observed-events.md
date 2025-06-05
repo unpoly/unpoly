@@ -1,4 +1,4 @@
-@partial up-watch/event-source
+@partial up-watch/observed-events
 
 @param [up-watch-event='input']
   The type of event to watch.

@@ -98,7 +98,7 @@ Merge the own properties of one or more `sources` into the `target` object.
 
 @function up.util.assign
 @param {Object} target
-@param {Array<Object>} sources...
+@param {Array<Object>} ...sources
 @deprecated
   Use [`Object.assign()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign) instead.
 */

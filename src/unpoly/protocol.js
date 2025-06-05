@@ -964,79 +964,83 @@ up.protocol = (function() {
 
   @property up.protocol.config
 
-  @param {string} [config.csrfHeader='X-CSRF-Token']
-    The name of the HTTP header that will include the
-    [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern)
-    for AJAX requests.
+  @section CSRF
+    @param {string} [config.csrfHeader='X-CSRF-Token']
+      The name of the HTTP header that will include the
+      [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern)
+      for AJAX requests.
 
-  @param {string|Function(): string} [config.csrfParam]
-    The `name` of the hidden `<input>` used for sending a
-    [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern) when
-    submitting a default, non-AJAX form. For AJAX request the token is sent as an
-    [HTTP header](/up.protocol.config#config.csrfHeader instead.
+    @param {string|Function(): string} [config.csrfParam]
+      The `name` of the hidden `<input>` used for sending a
+      [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern) when
+      submitting a default, non-AJAX form. For AJAX request the token is sent as an
+      [HTTP header](/up.protocol.config#config.csrfHeader instead.
 
-    The parameter name can be configured as a string or as function that returns the parameter name.
-    If no name is set, no token will be sent.
+      The parameter name can be configured as a string or as function that returns the parameter name.
+      If no name is set, no token will be sent.
 
-    Defaults to the `content` attribute of a `<meta>` tag named `csrf-param`:
+      Defaults to the `content` attribute of a `<meta>` tag named `csrf-param`:
 
-    ```html
-    <meta name="csrf-param" content="authenticity_token">
-    ```
+      ```html
+      <meta name="csrf-param" content="authenticity_token">
+      ```
 
-  @param {string|Function(): string} [config.csrfToken]
-    The [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern)
-    to send for unsafe requests. The token will be sent as either a HTTP header (for AJAX requests)
-    or hidden form `<input>` (for default, non-AJAX form submissions).
+    @param {string|Function(): string} [config.csrfToken]
+      The [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern)
+      to send for unsafe requests. The token will be sent as either a HTTP header (for AJAX requests)
+      or hidden form `<input>` (for default, non-AJAX form submissions).
 
-    The token can either be configured as a string or as function that returns the token.
-    If no token is set, no token will be sent.
+      The token can either be configured as a string or as function that returns the token.
+      If no token is set, no token will be sent.
 
-    Defaults to the `content` attribute of a `<meta>` tag named `csrf-token`:
+      Defaults to the `content` attribute of a `<meta>` tag named `csrf-token`:
 
-    ```
-    <meta name='csrf-token' content='secret12345'>
-    ```
+      ```
+      <meta name='csrf-token' content='secret12345'>
+      ```
 
-  @param {string|Function(): string} [config.cspNonce]
-    A [CSP script nonce](https://content-security-policy.com/nonce/)
-    for the initial page that [booted](/up.boot) Unpoly.
+  @section CSP
+    @param {string|Function(): string} [config.cspNonce]
+      A [CSP script nonce](https://content-security-policy.com/nonce/)
+      for the initial page that [booted](/up.boot) Unpoly.
 
-    The nonce let Unpoly run JavaScript in HTML attributes like
-    [`[up-on-loaded]`](/up-follow#up-on-loaded) or [`[up-on-accepted]`](/up-layer-new#up-on-accepted).
-    See [Working with a strict Content Security Policy](/csp).
+      The nonce let Unpoly run JavaScript in HTML attributes like
+      [`[up-on-loaded]`](/up-follow#up-on-loaded) or [`[up-on-accepted]`](/up-layer-new#up-on-accepted).
+      See [Working with a strict Content Security Policy](/csp).
 
-    The nonce can either be configured as a string or as function that returns the nonce.
+      The nonce can either be configured as a string or as function that returns the nonce.
 
-    Defaults to the `content` attribute of a `<meta>` tag named `csp-nonce`:
+      Defaults to the `content` attribute of a `<meta>` tag named `csp-nonce`:
 
-    ```
-    <meta name='csp-nonce' content='secret4367243'>
-    ```
+      ```
+      <meta name='csp-nonce' content='secret4367243'>
+      ```
 
-  @param {string} [config.methodParam='_method']
-    The name of request parameter containing the original request method when Unpoly needs to
-    [wrap](/up.network.config#config.wrapMethod) the method.
+  @section Method wrapping
+    @param {string} [config.methodParam='_method']
+      The name of request parameter containing the original request method when Unpoly needs to
+      [wrap](/up.network.config#config.wrapMethod) the method.
 
-    Methods must be wrapped when making a [full page request](/up.network.loadPage) with a methods other
-    than GET or POST. In this case Unpoly will make a POST request with the original request method
-    in a form parameter named `_method`:
+      Methods must be wrapped when making a [full page request](/up.network.loadPage) with a methods other
+      than GET or POST. In this case Unpoly will make a POST request with the original request method
+      in a form parameter named `_method`:
 
-    ```http
-    POST /test HTTP/1.1
-    Host: example.com
-    Content-Type: application/x-www-form-urlencoded
-    Content-Length: 11
+      ```http
+      POST /test HTTP/1.1
+      Host: example.com
+      Content-Type: application/x-www-form-urlencoded
+      Content-Length: 11
 
-    _method=PUT
-    ```
+      _method=PUT
+      ```
 
-  @param {number} [config.maxHeaderSize]
-    The preferred maximum length of an `X-Up`-prefixed header's value.
+  @section Header size
+    @param {number} [config.maxHeaderSize]
+      The preferred maximum length of an `X-Up`-prefixed header's value.
 
-    This is currently only honored for `X-Up-Validate`.
+      This is currently only honored for `X-Up-Validate`.
 
-    @experimental
+      @experimental
 
   @stable
   */

@@ -98,7 +98,8 @@ up.util = (function() {
   - Only `http` and `https` schemes are supported.
 
   @function up.util.normalizeURL
-  @param {string|URL} the URL to normalize
+  @param {string|URL} url
+    the URL to normalize
   @param {boolean} [options.host='cross-domain']
     Whether to include protocol, hostname and port in the normalized URL.
 
@@ -251,12 +252,27 @@ up.util = (function() {
   /*-
   Translate all items in a [list](/List) to new array of items.
 
+  ## Example
+
+  The given mapping function will be called for each element in the list:
+
+  ```js
+  up.util.map(['apple', 'cherry'], (str) => str.length) // => [5, 6]
+  ```
+
+  You can also pass a property name as a string,
+  which will be collected from each item in the list:
+
+  ```js
+  up.util.map(['apple', 'cherry'], 'length') // => [5, 6]
+  ```
+
   @function up.util.map
   @param {List|Iterator} list
   @param {Function(element, index): any|string} block
     A function that will be called with each element and (optional) iteration index.
 
-    You can also pass a property name as a String,
+    You can also pass a property name as a string,
     which will be collected from each item in the list.
   @return {Array}
     A new array containing the result of each function call.
@@ -849,6 +865,8 @@ up.util = (function() {
   /*-
   Creates a new object by merging together the properties from the given objects.
 
+  Source values that are `null` or `undefined` are ignored.
+
   ### Example
 
   ```js
@@ -858,7 +876,11 @@ up.util = (function() {
   ```
 
   @function up.util.merge
-  @param {Array<Object>} sources...
+  @param {Array<Object|null|undefined>} ...sources
+    The objects to merge.
+
+    Sources that are `null` or `undefined` are ignored.
+
   @return {Object}
     A new object with all merged properties.
   @stable
@@ -869,7 +891,7 @@ up.util = (function() {
 
   /*-
   @function up.util.mergeDefined
-  @param {Array<Object>} sources...
+  @param {Array<Object>} ...sources
   @return {Object}
   @internal
   */
@@ -1221,6 +1243,13 @@ up.util = (function() {
   Returns a copy of the given object that only contains
   the given keys.
 
+  ## Example
+
+  ```js
+  let object = { foo: 1, bar: 2, baz: 3 }
+  up.util.pick(object, ['foo', 'baz']) // => { foo:1, baz: 3 }
+  ```
+
   @function up.util.pick
   @param {Object} object
   @param {Array} keys
@@ -1243,10 +1272,10 @@ up.util = (function() {
 
   @function up.util.pickBy
   @param {Object} object
-  @param {Function(string, string, object): boolean} tester
+  @param {Function(value, key): boolean} tester
     A function that will be called with each property.
 
-    The arguments are the property value, key and the entire object.
+    The arguments are the property value and key.
   @return {Object}
   @experimental
   */
@@ -1255,7 +1284,7 @@ up.util = (function() {
     const filtered = {}
     for (let key in object) {
       const value = object[key]
-      if (tester(value, key, object)) {
+      if (tester(value, key)) {
         filtered[key] = object[key]
       }
     }
@@ -1265,6 +1294,13 @@ up.util = (function() {
   /*-
   Returns a copy of the given object that contains all except
   the given keys.
+
+  ## Example
+
+  ```js
+  let object = { foo: 1, bar: 2, baz: 3 }
+  up.util.omit(object, ['foo', 'baz']) // => { bar: 2 }
+  ```
 
   @function up.util.omit
   @param {Object} object
@@ -1385,8 +1421,13 @@ up.util = (function() {
 
   @function up.util.pluckKey
   @param {Object} object
+    The object from which to pluck a property.
   @param {string} key
+    The name of the property to pluck.
   @return {any}
+    The value of the property before it was deleted.
+
+    If the object didn't return the property, returns `undefined`.
   @experimental
   */
   function pluckKey(object, key) {
@@ -1528,6 +1569,7 @@ up.util = (function() {
   ```js
   let nested = [1, [2, 3], [4]]
   up.util.flatten(nested) // => [1, 2, 3, 4]
+  ```
 
   @function up.util.flatten
   @param {Array} array
@@ -1651,9 +1693,11 @@ up.util = (function() {
 
   @function up.util.isEqual
   @param {any} a
+    The first value to compare.
   @param {any} b
+    The second value to compare.
   @return {boolean}
-    Whether the arguments are equal by value.
+    Whether the arguments are considered equal.
   @experimental
   */
   function isEqual(a, b) {

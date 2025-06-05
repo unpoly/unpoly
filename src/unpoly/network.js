@@ -477,7 +477,7 @@ up.network = (function() {
       You may also pass a [URL pattern](/url-patterns) to only evict matching responses.
 
 
-  @section Render info
+  @section Render context
     @param {string} [options.target='body']
       The CSS selector that will be sent as an `X-Up-Target` header.
 

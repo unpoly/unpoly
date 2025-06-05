@@ -786,7 +786,7 @@ up.form = (function() {
 
   @function up.watch
 
-  @section Event source
+  @section Observed events
     @param {Element|jQuery} element
       The form field that will be watched.
 
@@ -872,7 +872,7 @@ up.form = (function() {
 
   @function up.autosubmit
 
-  @section Event source
+  @section Observed events
     @param {string|Element|jQuery} element
       The field or form to watch.
 
@@ -1850,8 +1850,8 @@ up.form = (function() {
       You can set another selector to [update a different fragment](/up-validate#target).
       To refer to the changed field, use the `:origin` pseudo-selector.
 
-  @section Event source
-    @mix up-watch/event-source
+  @section Observed events
+    @mix up-watch/observed-events
       @param [up-watch-event='change']
 
   @section Request
@@ -1921,8 +1921,8 @@ up.form = (function() {
       By default all matching elements within the form are switched.
       You can expand or narrow the search scope by configuring a different selector.
 
-  @section Event source
-    @mix up-watch/event-source
+  @section Observed events
+    @mix up-watch/observed-events
 
   @stable
   */
@@ -2132,8 +2132,8 @@ up.form = (function() {
 
       See [callback context](#callback-context).
 
-  @section Event source
-    @mix up-watch/event-source
+  @section Observed events
+    @mix up-watch/observed-events
 
   @stable
   */
@@ -2187,8 +2187,8 @@ up.form = (function() {
 
   @selector [up-autosubmit]
 
-  @section Event source
-    @mix up-watch/event-source
+  @section Observed events
+    @mix up-watch/observed-events
 
   @section Loading state
     @mix up-watch/loading-state

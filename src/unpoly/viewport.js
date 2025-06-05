@@ -33,70 +33,75 @@ up.viewport = (function() {
   Configures defaults for scrolling.
 
   @property up.viewport.config
-  @param {Array} [config.viewportSelectors]
-    An array of CSS selectors that match viewports.
+  @section Layout
+    @param {Array} [config.viewportSelectors]
+      An array of CSS selectors that match viewports.
 
-    By default this contains the `[up-viewport]` attribute.
+      By default this contains the `[up-viewport]` attribute.
 
-    Matching elements must have a [derivable target selector](/target-derivation).
+      Matching elements must have a [derivable target selector](/target-derivation).
 
-  @param {Array} [config.fixedTopSelectors]
-    An array of CSS selectors that find elements fixed to the
-    top edge of the screen (using `position: fixed`).
+    @param {Array} [config.fixedTopSelectors]
+      An array of CSS selectors that find elements fixed to the
+      top edge of the screen (using `position: fixed`).
 
-    See [`[up-fixed="top"]`](/up-fixed-top) for details.
-  @param {Array} [config.fixedBottomSelectors]
-    An array of CSS selectors that match elements fixed to the
-    bottom edge of the screen (using `position: fixed`).
+      See [`[up-fixed="top"]`](/up-fixed-top) for details.
+    @param {Array} [config.fixedBottomSelectors]
+      An array of CSS selectors that match elements fixed to the
+      bottom edge of the screen (using `position: fixed`).
 
-    See [`[up-fixed="bottom"]`](/up-fixed-bottom) for details.
-  @param {Array} [config.anchoredRightSelectors]
-    An array of CSS selectors that find elements anchored to the
-    right edge of the screen (using `right:0` with `position: fixed` or `position: absolute`).
+      See [`[up-fixed="bottom"]`](/up-fixed-bottom) for details.
+    @param {Array} [config.anchoredRightSelectors]
+      An array of CSS selectors that find elements anchored to the
+      right edge of the screen (using `right:0` with `position: fixed` or `position: absolute`).
 
-    See [`[up-anchored="right"]`](/up-anchored-right) for details.
-  @param {number} [config.revealSnap]
-    When [revealing](/up.reveal) elements, Unpoly will scroll an viewport
-    to the top when the revealed element is closer to the viewport's top edge
-    than `config.revealSnap`.
+      See [`[up-anchored="right"]`](/up-anchored-right) for details.
 
-    Set to `0` to disable snapping.
-  @param {number} [config.revealPadding]
-    The desired padding between a [revealed](/up.reveal) element and the
-    closest [viewport](/up.viewport) edge (in pixels).
-  @param {number} [config.revealMax]
-    A number indicating how many top pixel rows of a high element to [reveal](/up.reveal).
+  @section Scrolling
+    @param {number} [config.revealSnap]
+      When [revealing](/up.reveal) elements, Unpoly will scroll an viewport
+      to the top when the revealed element is closer to the viewport's top edge
+      than `config.revealSnap`.
 
-    Defaults to 50% of the available window height.
+      Set to `0` to disable snapping.
+    @param {number} [config.revealPadding]
+      The desired padding between a [revealed](/up.reveal) element and the
+      closest [viewport](/up.viewport) edge (in pixels).
+    @param {number} [config.revealMax]
+      A number indicating how many top pixel rows of a high element to [reveal](/up.reveal).
 
-    You may set this to `false` to always reveal as much of the element as the viewport allows.
+      Defaults to 50% of the available window height.
 
-    You may also pass a function that receives an argument `{ viewportRect, elementRect }` and returns
-    a maximum height in pixel. Each given rectangle has properties `{ top, right, buttom, left, width, height }`.
+      You may set this to `false` to always reveal as much of the element as the viewport allows.
 
-    @experimental
-  @param {number} [config.revealTop=false]
-    Whether to always scroll a [revealing](/up.reveal) element to the top.
+      You may also pass a function that receives an argument `{ viewportRect, elementRect }` and returns
+      a maximum height in pixel. Each given rectangle has properties `{ top, right, buttom, left, width, height }`.
 
-    By default Unpoly will scroll as little as possible to make the element visible.
-  @param {Function(Object): boolean} [config.autoFocusVisible]
-    Whether elements focused by Unpoly should have a [visible focus ring](/focus-visibility).
+      @experimental
+    @param {number} [config.revealTop=false]
+      Whether to always scroll a [revealing](/up.reveal) element to the top.
 
-    By default the focus ring will be visible if either the user [interacted with the keyboard](/up.event.inputDevice)
-    or the focused element is a [form field](/up.form.config#config.fieldSelectors).
+      By default Unpoly will scroll as little as possible to make the element visible.
 
-    The value is a function that accepts an object with `{ element, inputDevice }` properties and returns
-    a boolean. The `{ element }` property is the focused element. The `{ inputDevice }` property is a string
-    denoting the [interaction's input device](/up.event.inputDevice).
+  @section Focus
+    @param {Function(Object): boolean} [config.autoFocusVisible]
+      Whether elements focused by Unpoly should have a [visible focus ring](/focus-visibility).
 
-    The default configuration is implemented like this:
+      By default the focus ring will be visible if either the user [interacted with the keyboard](/up.event.inputDevice)
+      or the focused element is a [form field](/up.form.config#config.fieldSelectors).
 
-    ```js
-    up.viewport.config.autoFocusVisible = ({ element, inputDevice }) =>
-      inputDevice === 'key' || up.form.isField(element)
-    ```
+      The value is a function that accepts an object with `{ element, inputDevice }` properties and returns
+      a boolean. The `{ element }` property is the focused element. The `{ inputDevice }` property is a string
+      denoting the [interaction's input device](/up.event.inputDevice).
 
-    @experimental
+      The default configuration is implemented like this:
+
+      ```js
+      up.viewport.config.autoFocusVisible = ({ element, inputDevice }) =>
+        inputDevice === 'key' || up.form.isField(element)
+      ```
+
+      @experimental
   @stable
   */
   const config = new up.Config(() => ({
@@ -146,16 +151,17 @@ up.viewport = (function() {
 
     Defaults to `up.viewport.config.revealSnap`.
 
-  @param {string|Element|jQuery} [options.viewport]
-    The scrolling element to scroll.
-
-    Defaults to the [given element's viewport](/up.viewport.get).
-
   @param {boolean} [options.top]
     Whether to scroll the viewport so that the first element row aligns
     with the top edge of the viewport.
 
     Defaults to `up.viewport.config.revealTop`.
+
+  @param {number} [options.padding]
+    The desired padding between the revealed element and the
+    closest [viewport](/up.viewport) edge (in pixels).
+
+    Defaults to `up.viewport.config.revealPadding`.
 
   @param {string}[options.behavior='instant']
     When set to `'instant'`, this will immediately scroll to the new position.
@@ -165,11 +171,10 @@ up.viewport = (function() {
     When set to `'auto'`, the behavior is determined by the CSS property
     [`scroll-behavior`](https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-behavior) of the viewport element.
 
-  @param {number} [options.padding]
-    The desired padding between the revealed element and the
-    closest [viewport](/up.viewport) edge (in pixels).
+  @param {string|Element|jQuery} [options.viewport]
+    The scrolling element to scroll.
 
-    Defaults to `up.viewport.config.revealPadding`.
+    Defaults to the [given element's viewport](/up.viewport.get).
 
   @return {undefined}
 

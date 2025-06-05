@@ -134,6 +134,14 @@ up.framework = (function() {
   All [compilers](/up.script) will already have run on the initial page content.
 
   @event up:framework:booted
+  @param {string} event.mode
+    A string indicating what caused Unpoly to boot.
+
+    If set to `'auto'`, Unpoly was booted automatically on `DOMContentLoaded`.
+
+    If set to `'manual'`, Unpoly was booted [manually](/up-boot-manual).
+
+    @experimental
   @experimental
   */
 

@@ -89,7 +89,7 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 - The server can now force its response to open an overlay using an `X-Up-Open-Layer: { ...options }` response header.
 - Forms can now have `[up-dismiss]` and `[up-accept]` to close their overlay when submitted. The form's field values become the closing value.
 - The server can now detect if the request was triggered from an overlay using the `X-Up-Origin-Mode` request header.
-- Overflays better prevent scrolling of the background. Use "overflow-y: clip" when scrollbar is hidden.
+- Overlays better prevent scrolling of the background. Use "overflow-y: clip" when scrollbar is hidden.
 
 
 ### CSP and script security
@@ -146,6 +146,7 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 - `up.element.subtree()` now prevents redundant array allocations.
 - Requests now clear out their `{ bindLayer }` property after loading, allowing layer objects to be garbage-collected.
 - Fix a bug where `up.RenderResult#renderOptions` was sometimes `undefined`.
+- ⚠️ The experimental function up.`util.pickBy()` no longer passes the entire object as a third argument to the callback function.
 
 
 ### Developer experience
