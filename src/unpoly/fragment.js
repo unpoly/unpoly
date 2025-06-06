@@ -1081,9 +1081,9 @@ up.fragment = (function() {
   }
 
   function buildKeepIdentity(element, mode) {
-    if (mode === 'html') {
+    if (mode === 'same-html') {
       return config.normalizeKeepHTML(element.outerHTML)
-    } else if (mode === 'data') {
+    } else if (mode === 'same-data') {
       return up.data(element)
     } else {
       return true
@@ -1091,20 +1091,6 @@ up.fragment = (function() {
   }
 
   up.macro('[up-keep]', (element) => keepIdentity(element))
-
-  // function snapshotKeepIdentities(element) {
-  //   // Because this is used for every up.hello(), use up.element.subtree() instead
-  //   // of up.fragment.subtree() for performance.
-  //   let keepables = e.subtree(element, '[up-keep]')
-  //   for (let keepable of keepables) {
-  //     let mode = keepMode(keepable)
-  //     if (mode === 'html') {
-  //       element.upKeepHTML ??= element.outerHTML
-  //     } else if (mode === 'data') {
-  //       element.upKeepData ??= u.copy(up.data(element))
-  //     }
-  //   }
-  // }
 
   function keepMode(element) {
     return e.booleanOrStringAttr(element, 'up-keep')
@@ -3044,8 +3030,9 @@ up.fragment = (function() {
 
   up.on('up:framework:boot', function() {
     const { documentElement } = document
-    // snapshotKeepIdentities(document.body)
+
     up.hello(documentElement)
+
     documentElement.setAttribute('up-source', normalizeSource(location.href))
 
     if (!up.browser.canPushState()) {

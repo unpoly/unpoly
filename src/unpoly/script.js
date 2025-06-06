@@ -596,8 +596,6 @@ up.script = (function() {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
     element = up.fragment.get(element, options)
 
-    // up.fragment.snapshotKeepIdentities(element)
-
     up.puts('up.hello()', "Compiling fragment %o", element)
     compile(element, options)
     up.fragment.emitInserted(element)

@@ -73,11 +73,6 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
   }
 
   _executeStep(step) {
-    // up.fragment.snapshotKeepIdentities(step.newElement)
-
-    // Remember where the element came from to support up.reload(element).
-    // this.setReloadAttrs(step)
-
     switch (step.placement) {
       case 'swap': {
         let keepPlan = up.fragment.keepPlan(step)
@@ -200,11 +195,12 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     // Adopt CSP nonces and fix broken script tags
     this.responseDoc.finalizeElement(element)
 
-    // Run macros and compilers. This also snapshots for [up-keep="html"].
-    up.hello(element, step)
-
-    // TODO: Make setReloadAttrs() part of up.hello() options
+    // Remember where the element came from to support up.reload(element).
+    // TODO: Consider making setReloadAttrs() part of up.hello() options (would implicate move to up.fragment)
     this.setReloadAttrs(step)
+
+    // Run macros and compilers. This also snapshots for [up-keep="same-html"].
+    up.hello(element, step)
 
     this._addToResult(element)
   }
