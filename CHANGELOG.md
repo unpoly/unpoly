@@ -147,6 +147,7 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 - Requests now clear out their `{ bindLayer }` property after loading, allowing layer objects to be garbage-collected.
 - Fix a bug where `up.RenderResult#renderOptions` was sometimes `undefined`.
 - ⚠️ The experimental function up.`util.pickBy()` no longer passes the entire object as a third argument to the callback function.
+- Adopted `script[nonce]` attributes now show up in the attribute value for easier debugging.
 
 
 ### Developer experience
