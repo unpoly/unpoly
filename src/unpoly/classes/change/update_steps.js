@@ -199,6 +199,8 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
   _welcomeElement(element, step) {
     // Adopt CSP nonces and fix broken script tags
     this.responseDoc.finalizeElement(element)
+
+    // Run macros and compilers. This also snapshots for [up-keep="html"].
     up.hello(element, step)
 
     // TODO: Make setReloadAttrs() part of up.hello() options

@@ -13865,6 +13865,38 @@ describe('up.fragment', function() {
       })
     })
 
+    describe('up.fragment.defaultNormalizeKeepHTML()', function() {
+
+      for (let attr of ['nonce', 'up-etag', 'up-time', 'up-source', 'up-on-rendered', 'up-watch', 'up-on-accepted']) {
+
+        it(`removes a [${attr}] attribute from the root element`, function() {
+          let input = `<div ${attr}="value"></div>`
+          let output = up.fragment.defaultNormalizeKeepHTML(input)
+          expect(output).toBe('<div></div>')
+        })
+
+        it(`removes a [${attr}] attribute but leaves other attributes`, function() {
+          let input = `<div data-x="x" ${attr}="value" data-y="y"></div>`
+          let output = up.fragment.defaultNormalizeKeepHTML(input)
+          expect(output).toBe('<div data-x="x" data-y="y"></div>')
+        })
+
+        it(`removes multiple [${attr}] attributes in descendants`, function() {
+          let input = `<div><span ${attr}="value"></span><span ${attr}="value"></span></div>`
+          let output = up.fragment.defaultNormalizeKeepHTML(input)
+          expect(output).toBe('<div><span></span><span></span></div>')
+        })
+
+      }
+
+      it('removes multiple attributes from the same tag', function() {
+        let input = `<a id="keepable" href="/path" up-keep="html" up-on-rendered="nonce-page-secret foo()" data-x="x" up-on-finished="nonce-page-secret bar()" data-y="y">text</a>`
+        let output = up.fragment.defaultNormalizeKeepHTML(input)
+        expect(output).toBe(`<a id="keepable" href="/path" up-keep="html" data-x="x" data-y="y">text</a>`)
+      })
+
+    })
+
   })
 
   describe('unobtrusive behavior', function() {
@@ -13881,7 +13913,7 @@ describe('up.fragment', function() {
       }
 
       beforeEach(function() {
-        // Need to refactor this spec file so examples don't all share one example
+        // TODO: Refactor this spec file so examples don't all share one example
         $('.before, .middle, .after').remove()
       })
 
@@ -14883,11 +14915,11 @@ describe('up.fragment', function() {
         expect(newTextDuringTransition).toEqual('new-foo old-bar')
       })
 
-      function keepableFixture(html) {
+      function keepableFixture(html, renderOptions = {}) {
         // Make sure we insert the element through rendering, so we can test
         // our own HTML pollution with [up-etag], [up-time], [up-source].
         fixture('#keepable')
-        up.render({ target: '#keepable', document: html })
+        up.render({ target: '#keepable', document: html, ...renderOptions })
 
         return document.querySelector('#keepable')
       }
@@ -14928,6 +14960,55 @@ describe('up.fragment', function() {
 
           expect(document.querySelector('#keepable')).toBe(keepable)
           expect(document.querySelector('#keepable')).toHaveText('text changed by compiler')
+        })
+
+        it('ignores HTML changes made by a user macro', async function() {
+          up.macro('#keepable', (el) => el.innerText = 'text changed by macro')
+
+          let keepable = keepableFixture('<div id="keepable" up-keep="html">text</div>')
+          expect(keepable).toHaveText('text changed by macro')
+
+          up.render({ fragment: `<div id="keepable" up-keep="html">text</div>` })
+          await wait()
+
+          expect(document.querySelector('#keepable')).toBe(keepable)
+          expect(document.querySelector('#keepable')).toHaveText('text changed by macro')
+        })
+
+        it('ignores HTML changes made by a system macro', async function() {
+          html = `
+            <div id="keepable" up-expand up-keep="html">
+              <a href="/path">text</a>
+            </div>
+          `
+          let keepable = keepableFixture(html)
+          expect(keepable).toBeFollowable()
+          expect(keepable).toHaveAttribute('up-href', '/path')
+
+          up.render({ fragment: html })
+          await wait()
+
+          expect(document.querySelector('#keepable')).toBe(keepable)
+        })
+
+        it('keeps an identical element that was introduced by a transition (which adds tracking classes)', async function() {
+          fixture('#keepable')
+          html = '<div id="keepable" up-keep="html">text</div>'
+          let keepable = (await up.render({ target: '#keepable', document: html, transition: 'cross-fade', duration: 70 }).finished).fragment
+
+          up.render({ fragment: html })
+          await wait()
+
+          expect(document.querySelector('#keepable')).toBe(keepable)
+        })
+
+        it('keeps an element when a new identitcal was introduced by a transition (which adds tracking classes)', async function() {
+          html = '<div id="keepable" up-keep="html">text</div>'
+          let keepable = keepableFixture(html)
+
+          await up.render({ fragment: html, transition: 'cross-fade', duration: 70 }).finished
+
+          expect(document.querySelector('#keepable')).toBe(keepable)
         })
 
         it('ignores HTML changes that happened after rendering', async function() {
@@ -14974,25 +15055,62 @@ describe('up.fragment', function() {
           expect(document.querySelector('#keepable')).not.toBe(keepable)
         })
 
-        // it('allows a user macro to set [up-keep="html"]', async function() {
-        //   up.macro('#keepable', (el) => el.setAttribute('up-keep', 'html'))
-        //
-        //   let keepable = keepableFixture('<div id="keepable">text</div>')
-        //
-        //   expect(keepable).toHaveAttribute('up-keep', 'html')
-        //
-        //   up.render({ fragment: `<div id="keepable">text</div>`})
-        //   await wait()
-        //
-        //   expect(document.querySelector('#keepable')).toBe(keepable)
-        //
-        //   up.render({ fragment: `<div id="keepable">changed text</div>`})
-        //   await wait()
-        //
-        //   expect(document.querySelector('#keepable')).not.toBe(keepable)
-        // })
+        it('ignores a <script nonce> for the comparison', async function() {
+          up.fragment.config.runScripts = true
 
-        it('adopts CSP nonces before the comparison')
+          spyOn(up.protocol, 'cspNonce').and.returnValue('page-secret')
+
+          let keepable = keepableFixture(`<div id="keepable" up-keep="html"><script nonce="page-secret"></script></div>`)
+
+          up.render({ target: '#keepable', url: '/path' })
+          await wait()
+
+          jasmine.respondWith({
+            responseText: `<div id="keepable" up-keep="html"><script nonce="response-secret"></script></div>`,
+            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-response-secret'" }
+          })
+          await wait()
+
+          expect(document.querySelector('#keepable')).toBe(keepable)
+        })
+
+        it('ignores a callback nonce for the comparison', async function() {
+          up.fragment.config.runScripts = true
+
+          spyOn(up.protocol, 'cspNonce').and.returnValue('page-secret')
+
+          let keepable = keepableFixture(`<input id="keepable" name="foo" up-keep="html" up-watch="nonce-page-secret foo()"></input>`)
+
+          up.render({ target: '#keepable', url: '/path' })
+          await wait()
+
+          jasmine.respondWith({
+            responseText: `<input id="keepable" name="foo" up-keep="html" up-watch="nonce-response-secret foo()"></input>`,
+            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-response-secret'" }
+          })
+          await wait()
+
+          expect(document.querySelector('#keepable')).toBe(keepable)
+        })
+
+        it('ignores multiple callback nonces within the same tag', async function() {
+          up.fragment.config.runScripts = true
+
+          spyOn(up.protocol, 'cspNonce').and.returnValue('page-secret')
+
+          let keepable = keepableFixture(`<a id="keepable" href="/path" up-keep="html" up-on-rendered="nonce-page-secret foo()" data-x="x" up-on-finished="nonce-page-secret bar()" data-y="y">text</a>`)
+
+          up.render({ target: '#keepable', url: '/path' })
+          await wait()
+
+          jasmine.respondWith({
+            responseText: `<a id="keepable" href="/path" up-keep="html" up-on-rendered="nonce-response-secret foo()" data-x="x" up-on-finished="nonce-response-secret bar()" data-y="y">text</a>`,
+            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-response-secret'" }
+          })
+          await wait()
+
+          expect(document.querySelector('#keepable')).toBe(keepable)
+        })
 
       })
 
@@ -15074,24 +15192,6 @@ describe('up.fragment', function() {
 
           expect(document.querySelector('#keepable')).not.toBe(keepable)
         })
-
-        // it('allows a user macro to set [up-keep="data"]', async function() {
-        //   up.macro('#keepable', (el) => el.setAttribute('up-keep', 'data'))
-        //
-        //   let keepable = keepableFixture('<div id="keepable" up-data="{ foo: 1 }">text</div>')
-        //
-        //   expect(keepable).toHaveAttribute('up-keep', 'data')
-        //
-        //   up.render({ fragment: `<div id="keepable" up-data="{ foo: 1 }">text</div>`})
-        //   await wait()
-        //
-        //   expect(document.querySelector('#keepable')).toBe(keepable)
-        //
-        //   up.render({ fragment: `<div id="keepable" up-data="{ foo: 2 }">text</div>`})
-        //   await wait()
-        //
-        //   expect(document.querySelector('#keepable')).not.toBe(keepable)
-        // })
 
       })
 

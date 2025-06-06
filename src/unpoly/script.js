@@ -110,10 +110,10 @@ up.script = (function() {
     '[up-tooltip]': -200,     //
     '[up-dash]': -200,        // sets [up-href] unless already set, also other [up-*] attributes
     '[up-flashes]': -200,     //
-    '[up-keep]': -200,        // may set a mode like [up-keep=html] before outerHTML is snapshotted
     '[up-expand]': -300,      // distributes [up-*] attributes to parents
     '[data-method]': -400,    // converts [data-method] to [up-method] only if link has followable [up-*] attributes
     '[data-confirm]': -400,   // converts [data-conform] to [up-confirm] only if link has followable [up-*] attributes
+    '[up-keep]': 9999999999,  //
   }
 
   let registeredCompilers = []

@@ -276,6 +276,9 @@ up.fragment = (function() {
     autoScroll: ['hash', 'layer-if-main'],
     autoRevalidate: (response) => response.expired,
     skipResponse: defaultSkipResponse,
+
+    // TODO: Document
+    normalizeKeepHTML: defaultNormalizeKeepHTML
   }))
 
   // Users who are not using layers will prefer settings default targets
@@ -1067,9 +1070,19 @@ up.fragment = (function() {
     return element.upKeepIdentity ??= u.copy(buildKeepIdentity(element, mode))
   }
 
+  function defaultNormalizeKeepHTML(html) {
+    let tagPattern = /<[^<]+>/g
+    let attrs = ['up-etag', 'up-source', 'up-time', 'nonce', ...up.script.config.nonceableAttributes]
+    let attrPattern = new RegExp(`\\s+(${attrs.join('|')})="[^"]*"`, 'g')
+
+    return html.replace(tagPattern, function(match) {
+      return match.replace(attrPattern, '')
+    })
+  }
+
   function buildKeepIdentity(element, mode) {
     if (mode === 'html') {
-      return element.outerHTML
+      return config.normalizeKeepHTML(element.outerHTML)
     } else if (mode === 'data') {
       return up.data(element)
     } else {
@@ -3060,7 +3073,7 @@ up.fragment = (function() {
     emitDestroyed: emitFragmentDestroyed,
     emitKeep: emitFragmentKeep,
     keepPlan: findKeepPlan,
-    // snapshotKeepIdentities,
+    defaultNormalizeKeepHTML, // export for testing
     successKey,
     failKey,
     expandTargets,
