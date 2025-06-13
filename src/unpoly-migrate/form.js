@@ -38,8 +38,6 @@ Watches form fields and runs a callback when a value changes.
 
 Only fields with a `[name]` attribute can be watched.
 
-The programmatic variant of this is the [`up.watch()`](/up.watch) function.
-
 ## Example
 
 The following would run a log whenever the `<input>` changes:

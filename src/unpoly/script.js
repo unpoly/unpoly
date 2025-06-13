@@ -621,9 +621,11 @@ up.script = (function() {
   /*-
   Returns the [data](/data) attached to the given element.
 
-  Returns an empty object if the element has no attached data.
+  If the element has no attached data, an empty object is returned.
 
   Multiple `up.data()` calls for the same object always return the same object reference.
+
+  [Attaching data to elements](/data){:.article-ref}
 
   ## Use with `[up-data]`
 
@@ -678,6 +680,8 @@ up.script = (function() {
 
   To programmatically parse an `[up-data]` attribute into an object, use `up.data(element)`.
 
+  [Attaching data to elements](/data){:.article-ref}
+
   ## Example
 
   A container for a [Google Map](https://developers.google.com/maps/documentation/javascript/tutorial)
@@ -722,10 +726,6 @@ up.script = (function() {
   data[0].title // => 'Friedberg'
   ```
 
-  ## Alternatives
-
-  See [attaching data to elements](/data).
-
   @selector [up-data]
   @param up-data
     A data object serialized as [relaxed JSON](/relaxed-json).
@@ -767,6 +767,8 @@ up.script = (function() {
 
   When [rendering](/up.render), Unpoly compares the assets on the current page with the new assets
   from the server response. If the assets don't match, an `up:assets:changed` event is emitted.
+
+  [Handling changes in frontend code](/handling-asset-changes){:.article-ref}
 
 
   ## Default assets
@@ -848,16 +850,18 @@ up.script = (function() {
   /*-
   This event is emitted when [frontend code](/up-asset) changes while the application is running.
 
-  There is no default behavior when assets have changed.
-  In particular no asset elements from the response are updated in the current page.
-  Even listeners may [handle changed frontend code](/handling-asset-changes#handling-changed-assets),
-  e.g. by [notifying the user](/handling-asset-changes#notifying-the-user) or [loading new assets](/handling-asset-changes#loading-new-assets).
-
   When a server response has no `<head>`, this event is never emitted.
 
   The event is emitted on the `document`.
 
+  [Handling changes in frontend code](/handling-asset-changes){:.article-ref}
+
   ## Example
+
+  There is no default behavior when assets have changed.
+  In particular no asset elements from the response are updated in the current page.
+  Even listeners may [handle changed frontend code](/handling-asset-changes#handling-changed-assets),
+  e.g. by [notifying the user](/handling-asset-changes#notifying-the-user) or [loading new assets](/handling-asset-changes#loading-new-assets).
 
   The code below inserts a clickable `<div id="new-version">` banner when assets change.
   The user can then choose to reload at their convenience, by clicking on the notification.

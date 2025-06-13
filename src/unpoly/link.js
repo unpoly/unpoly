@@ -550,6 +550,8 @@ up.link = (function() {
   with pages the user is likely to click or requires
   [accessible while offline](/network-issues#offline-cache).
 
+  [Preloading links](/preloading){:.article-ref}
+
   @function up.link.preload
 
   @section General
@@ -618,6 +620,8 @@ up.link = (function() {
 
   Listeners may prevent this event to stop the link from being preloaded,
   or [change render options](/up:link:follow#changing-render-options) for the preload request.
+
+  [Preloading links](/preloading){:.article-ref}
 
   ## Example
 
@@ -754,7 +758,7 @@ up.link = (function() {
 
   It's up to you make the element appear interactive visually, e.g. by assigning a `.button` class from your design system.
 
-  See [Clicking on non-interactive elements](/faux-interactive-elements) for an overview of similiar techniques.
+  [Clicking on non-interactive elements](/faux-interactive-elements){:.article-ref}
 
   ## Example
 
@@ -1030,7 +1034,7 @@ up.link = (function() {
   /*-
   Loads a [`[up-defer="manual"]`](/up-defer) placeholder.
 
-  See [custom load timing for deferred content](/lazy-loading#scripted) for details and examples.
+  [Custom timing for lazy-loaded content](/lazy-loading#scripted){:.article-ref}
 
   @function up.deferred.load
 
@@ -1101,6 +1105,8 @@ up.link = (function() {
   The event can be [prevented](#event.preventDefault) to stop the network request.
   The loading will not be attempted again, but you can use `up.deferred.load()` to manually load afterwards.
 
+  [Lazy loading content](/lazy-loading){:.article-ref}
+
   @event up:deferred:load
   @param {Element} event.target
     The `[up-defer]` placeholder that is about to load its content.
@@ -1119,7 +1125,7 @@ up.link = (function() {
   By moving expensive but non-[critical](https://developer.mozilla.org/en-US/docs/Web/Performance/Critical_rendering_path) fragments into partials,
   you can paint critical content earlier.
 
-  See [lazy loading content](/lazy-loading) for details.
+  [Lazy loading content](/lazy-loading){:.article-ref}
 
   ## Example
 
@@ -1437,7 +1443,7 @@ up.link = (function() {
 
   Links with the `[up-preload]` attribute are always [followed by Unpoly](/up-follow) and will not make a full page load.
 
-  See [preloading links](/preloading) for more details and examples.
+  [Preloading links](/preloading){:.article-ref}
 
   ### Example
 

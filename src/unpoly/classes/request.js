@@ -138,6 +138,8 @@ up.Request = class Request extends up.Record {
 
   The context object will be sent as an `X-Up-Context` header.
 
+  [Layer context](/context){:.article-ref}
+
   @property up.Request#context
   @param {Object} context
   @experimental
@@ -196,6 +198,8 @@ up.Request = class Request extends up.Record {
   The [mode](/up.Layer.prototype.mode) of the layer targeted by this request.
 
   The value will be sent as an `X-Up-Mode` header.
+
+  [Customizing overlays](/customizing-overlays){:.article-ref}
 
   @property up.Request#mode
   @param {string} mode

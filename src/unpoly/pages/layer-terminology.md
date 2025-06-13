@@ -12,16 +12,19 @@ An *overlay* is any layer that is not the root layer.
 Available modes
 ---------------
 
-| Mode      | Description                           | Overlay? |
-| --------- | ------------------------------------- |----------|
-| `root`    | The initial page                      | no       |
-| `modal`   | A modal dialog box                    | yes      |
-| `drawer`  | A drawer sliding in from the side     | yes      |
-| `popup`   | A popup menu anchored to a link       | yes      |
-| `cover`   | An overlay covering the entire screen | yes      |
+The mode of the initial page is `root`.
 
-The default mode for [new overlays](/up-layer-new) is `modal`.
-You can change this in `up.layer.config.mode`.
+For overlays, the following modes are available:
+
+@include overlay-modes-table
+
+When [opening an overlay](/opening-overlays), you can pass an mode for the new overlay:
+
+```html
+<a href="/users/new/" up-layer="new drawer">
+```
+
+When no explicit mode is given, a `modal` overlay is opened. You can change this in `up.layer.config.mode`.
 
 You may configure default attributes for each layer mode in `up.layer.config`.
 

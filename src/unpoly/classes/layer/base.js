@@ -40,6 +40,8 @@ up.Layer = class Layer extends up.Record {
 
   If a layer does not have visible history, its desendant layers cannot have history either.
 
+  [History in overlays](/history-in-overlays){:.article-ref}
+
   @property up.Layer#history
   @param {boolean} history
     Whether this layer renders history.
@@ -49,7 +51,9 @@ up.Layer = class Layer extends up.Record {
   /*-
   This layer's mode which governs its appearance and behavior.
 
-  @see layer-terminology
+  Requests targeting this layer will send the mode value as an `X-Up-Mode` header.
+
+  [Customizing overlays](/customizing-overlays){:.article-ref}
 
   @property up.Layer#mode
   @param {string} mode
@@ -69,6 +73,8 @@ up.Layer = class Layer extends up.Record {
   layer.context.message = 'Please select a contact'
   console.log(layer.context) // logs "{ message: 'Please select a contact' }"
   ```
+
+  [Layer context](/context){:.article-ref}
 
   @property up.Layer#context
   @param {Object} context
@@ -137,6 +143,8 @@ up.Layer = class Layer extends up.Record {
 
   To dismiss a layer *without* an accepting intent, use `up.Layer#dismiss()` instead.
 
+  [Closing overlays](/closing-overlays){:.article-ref}
+
   @function up.Layer#accept
   @section Acceptance
     @param {any} [value]
@@ -195,6 +203,8 @@ up.Layer = class Layer extends up.Record {
   e.g. when a "Cancel" button was clicked.
 
   To close an overlay with an accepting intent, use `up.Layer#accept()` instead.
+
+  [Closing overlays](/closing-overlays){:.article-ref}
 
   @function up.Layer#dismiss
   @param {any} [value]
@@ -713,8 +723,7 @@ up.Layer = class Layer extends up.Record {
   If this layer does not [affect browser history](/up.Layer.prototype.history), this property will
   still return the title the layer would otherwise use.
 
-  When this layer opens a child layer with visible history, the browser window will change to the child
-  layer's title. When the child layer is closed, this layer's title will be restored.
+  [History in overlays](/history-in-overlays){:.article-ref}
 
   @property up.Layer#title
   @param {string} title
@@ -778,8 +787,7 @@ up.Layer = class Layer extends up.Record {
   still returns the URL of the content in the overlay. In this case
   the browser's address bar will show the location of an ancestor layer.
 
-  When this layer opens a child layer with visible history, the browser URL will change to the child
-  layer's location. When the child layer is closed, this layer's location will be restored.
+  [History in overlays](/history-in-overlays){:.article-ref}
 
   @property up.Layer#location
   @param {string} location

@@ -253,9 +253,6 @@ up.form = (function() {
   The response is parsed for a CSS selector and the matching elements will
   replace corresponding elements on the current page.
 
-  The unobtrusive variant of this is the `[up-submit]` selector.
-  See its documentation to learn how form submissions work in Unpoly.
-
   Submitting a form is considered [navigation](/navigation).
 
   Emits the event [`up:form:submit`](/up:form:submit).
@@ -696,8 +693,6 @@ up.form = (function() {
   - The callback's execution frequency can be [debounced](/watch-options#debouncing).
   - Guarantees that [only one async callback is running concurrently](#async-callbacks).
 
-  The unobtrusive variant of this is the `[up-watch]` attribute.
-
   ## Example
 
   The following would print to the console whenever an input field changes:
@@ -849,8 +844,6 @@ up.form = (function() {
 
   /*-
   Automatically submits a form when a field changes.
-
-  The unobtrusive variant of this is the `[up-autosubmit]` attribute.
 
   ## Example
 
@@ -1172,7 +1165,7 @@ up.form = (function() {
       Common options are documented below, but most [options for `up.submit()`](/up.submit#parameters) may be used.
 
       Note that validation requests may be [batched together](/up.validate#batching).
-      In this case Unpoly will try to merge render options where possible (e.g. `{ headers }`).
+      In this case Unpoly will try to merge render options where possible (e.g. `{ headers, target }`).
       When a render option cannot be merged (e.g. `{ scroll }`),
       the option from the last validation in the batch will be used.
 
@@ -1235,6 +1228,9 @@ up.form = (function() {
   /*-
   This event is emitted before a form is being [validated](/up-validate).
 
+  Listeners can [inspect](#properties), [modify](#event.renderOptions) or [prevent](#event.preventDefault)
+  the render pass that will load and show the validation results.
+
   @event up:form:validate
 
   @section Validation
@@ -1269,7 +1265,12 @@ up.form = (function() {
       that will show the validation results.
 
       Listeners may inspect and modify these options.
+
       Note that the request may be a [batch of multiple validations](/up.validate#batching).
+      In that case `event.renderOptions` will contain the merged render options
+      for every targeted fragment. Unpoly will try to merge render options where possible (e.g. `{ headers, target }`).
+      When a render option cannot be merged (e.g. `{ scroll }`),
+      the option from the last validation in the batch will be used.
 
     @param event.preventDefault()
       Prevents the validation request from being sent to the server.
@@ -1377,8 +1378,6 @@ up.form = (function() {
   The server must render an element matching the [target selector](/targeting-fragments) from the `[up-target]` attribute.
   A matching element in the current page is then swapped with the new element from the server response.
   The response may include other HTML (even an entire HTML document), but only the matching element will be updated.
-
-  The programmatic variant of this is the [`up.submit()`](/up.submit) function.
 
   ## Example
 
@@ -1502,7 +1501,7 @@ up.form = (function() {
   })
 
   /*-
-  Renders a new form state when a field changes, to show validation errors or
+  Renders a new form state when a field changes, to [show validation errors](/validation#validating-after-changing-a-field) or
   update [dependent elements](/reactive-server-forms).
 
   When a form field with an `[up-validate]` attribute is changed, the form is submitted to the server
@@ -1594,6 +1593,10 @@ up.form = (function() {
 
   Whenever a field with `[up-validate]` changes, the form is submitted to its `[action]` path
   with an additional `X-Up-Validate` HTTP header.
+
+  Read on to learn [how a validation request is sent to the server](#backend-protocol),
+  and
+  [how the server response is displayed](#how-validation-results-are-displayed).
 
   ## Backend protocol
 
@@ -1883,7 +1886,7 @@ up.form = (function() {
   /*-
   Controls the state of another element when this field changes.
 
-  See [Switching form state](/switching-form-state) for comprehensive examples.
+  [Switching form state](/switching-form-state){:.article-ref}
 
   ## Example
 
@@ -1934,6 +1937,8 @@ up.form = (function() {
   When an `[up-switch]` field changes, this event is emitted on all dependent elements.
 
   You can listen to `up:form:switch` to implement [custom switching effects](/switching-form-state#custom-effects).
+
+  [Switching form state](/switching-form-state){:.article-ref}
 
   ## Event targets
 
@@ -1993,7 +1998,7 @@ up.form = (function() {
 
   The element will be hidden for all other values.
 
-  See [Switching visibility](/switching-form-state) for details and examples.
+  [Switching visibility](/switching-form-state){:.article-ref}
 
   @selector [up-show-for]
   @param [up-show-for]
@@ -2008,7 +2013,7 @@ up.form = (function() {
 
   The element will be shown for all other values.
 
-  See [Switching visibility](/switching-form-state#toggle) for details and examples.
+  [Switching visibility](/switching-form-state#toggle){:.article-ref}
 
   @selector [up-hide-for]
   @param [up-hide-for]
@@ -2023,7 +2028,7 @@ up.form = (function() {
 
   The element will be enabled for all other values.
 
-  See [Switching disabled state](/switching-form-state#disable) for details and examples.
+  [Switching disabled state](/switching-form-state#disable){:.article-ref}
 
   @selector [up-disable-for]
   @param [up-disable-for]
@@ -2038,7 +2043,7 @@ up.form = (function() {
 
   The element will be disabled for all other values.
 
-  See [Switching disabled state](/switching-form-state#disable) for details and examples.
+  [Switching disabled state](/switching-form-state#disable){:.article-ref}
 
   @selector [up-enable-for]
   @param [up-enable-for]
@@ -2052,8 +2057,6 @@ up.form = (function() {
   Watches form fields and runs a callback when a value changes.
 
   Only fields with a `[name]` attribute can be watched.
-
-  The programmatic variant of this is the [`up.watch()`](/up.watch) function.
 
   ## Example
 
@@ -2142,8 +2145,6 @@ up.form = (function() {
 
   /*-
   Automatically submits a form when a field changes.
-
-  The programmatic variant of this is the [`up.autosubmit()`](/up.autosubmit) function.
 
   ## Example
 

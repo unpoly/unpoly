@@ -353,7 +353,8 @@ up.fragment = (function() {
 
   When the fragment is reloaded,
   its modification time is sent as an `If-Modified-Since` request header. The server may check the header and decide to [skip rendering](/skipping-rendering).
-  See [Conditional requests](/conditional-requests) for a full example.
+
+  [Conditional requests](/conditional-requests){:.article-ref}
 
   @function up.fragment.time
   @param {Element} element
@@ -381,9 +382,10 @@ up.fragment = (function() {
   When the fragment is reloaded,
   its known modification time is sent as an `If-Modified-Since` request header.
   The server may check the header and decide to [skip rendering](/skipping-rendering).
-  See [Conditional requests](/conditional-requests) for a full example.
 
-  ### How `[up-etag]` attributes are set
+  [Conditional requests](/conditional-requests){:.article-ref}
+
+  ### How `[up-time]` attributes are set
 
   Unpoly will automatically set an `[up-time]` attribute when a fragment was rendered
   from a response with a `Last-Modified` header. When a fragment was rendered without such a header,
@@ -409,13 +411,14 @@ up.fragment = (function() {
   /*-
   Returns the [ETag](https://en.wikipedia.org/wiki/HTTP_ETag) of the content in the given element.
 
-  The ETag corresponds to the [`ETag` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag)
+  The returned ETag corresponds to the [`ETag` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag)
   in the response that rendered the fragment. Alternatively the `[up-etag]` attribute of the element
   or an ancestor is used.
 
   When the fragment is reloaded,
   its ETag is sent as an `If-None-Match` request header. The server may check the header and decide to [skip rendering](/skipping-rendering).
-  See [Conditional requests](/conditional-requests) for a full example.
+
+  [Conditional requests](/conditional-requests){:.article-ref}
 
   @function up.fragment.etag
   @param {Element} element
@@ -435,8 +438,10 @@ up.fragment = (function() {
   /*-
   Sets an [ETag](https://en.wikipedia.org/wiki/HTTP_ETag) for the fragment's underlying data.
 
-  ETags can be used to skip unnecessary rendering of unchanged content.\
-  See [Conditional requests](/conditional-requests) for a full example.
+  ETags can be used to skip unnecessary rendering of unchanged content.
+  This is useful for [reloading](/up.reload), [cache revalidation](/caching#revalidation) and [polling](/up-poll).
+
+  [Conditional requests](/conditional-requests){:.article-ref}
 
   ### How `[up-etag]` attributes are set
 
@@ -845,7 +850,7 @@ up.fragment = (function() {
   /*-
   Elements with an `[up-keep]` attribute will be persisted when rendering.
 
-  <a class="article-ref" href="/preserving-elements">Preserving elements</a>
+  [Preserving elements](/preserving-elements){:.article-ref}
 
   ## Basic example
 
@@ -917,7 +922,7 @@ up.fragment = (function() {
   to prevent the element from being persisted. If the event is prevented, the element
   will be replaced with a fragment from the response.
 
-  <a class="article-ref" href="/preserving-elements#conditions">Keep conditions</a>
+  [Keep conditions](/preserving-elements#conditions){:.article-ref}
 
   ### Example
 
@@ -1406,15 +1411,17 @@ up.fragment = (function() {
   If a `:maybe` selector is not found in the current page or the server response,
   Unpoly will skip rendering the fragment instead of throwing an error.
 
-  When [updating multiple fragments](/targeting-fragments#multiple)
-  you may combine required and optional selectors in a single target string.
-
   An optional selector will be omitted from an `X-Up-Target` header unless it
   matches in the current page.
 
+  [Dealing with missing targets](/targeting-fragments#missing-targets){:.article-ref}
+
   ### Example
 
-  This link will update the fragments `.content` (required) and `.details` (optional):
+  When [updating multiple fragments](/targeting-fragments#multiple)
+  you may combine required and optional selectors in a single target string.
+
+  The link below will update the fragments `.content` (required) and `.details` (optional):
 
   ```html
   <a href="/card/5" up-target=".content, .details:maybe">...</a>
@@ -2006,9 +2013,10 @@ up.fragment = (function() {
 
   This identifier is used in [target derivation](/target-derivation)
   to create a CSS selector that matches this element precisely.
-
   If the element already has [other attributes that make a good identifier](/target-derivation#derivation-patterns),
   like a good `[id]` or `[class]` attribute, it is not necessary to also set `[up-id]`.
+
+  [Target derivation](/target-derivation){:.article-ref}
 
   ### Example
 
@@ -2189,6 +2197,8 @@ up.fragment = (function() {
   Use `:main` to only update the main page content, while keeping static layout elements around it.
   To replace all visible elements of a layer, see `:layer`.
 
+  [Targeting fragments](/targeting-fragments){:.article-ref}
+
   ## Targeting the main element
 
   You can target the main element using the `:main` selector:
@@ -2315,10 +2325,11 @@ up.fragment = (function() {
   /*-
   To make a server request without changing a fragment, use the `:none` [target](/targeting-fragments).
 
-  > [NOTE]
-  > Even with a target other than `:none`, the server can still decide to [skip the render pass](/skipping-rendering#rendering-nothing).
+  [Targeting fragments](/targeting-fragments){:.article-ref}
 
   ### Example
+
+  Clicking this link will make a request to `/ping`, but not update any element:
 
   ```html
   <a href="/ping" up-target=":none">Ping server</a>
@@ -2335,37 +2346,18 @@ up.fragment = (function() {
   The `:origin` placeholder will be replaced with a target [derived](/target-derivation)
   from the origin element.
 
-  ### Default origins
+  [Resolving ambiguous selectors](/targeting-fragments#ambiguous-selectors){:.article-ref}
+
+
+  ## Example
+
+  @include origin-selector-example
+
+  ## Default origins
 
   The origin element is automatically set for many actions, for example:
 
   @include default-origins
-
-  ## Example
-
-  Below we see two links that will each update the `<div>` next to them.
-  This requires a rather verbose `[up-target]` attribute:
-
-  ```html
-  <a href="/tasks/1" up-target="a[href='/tasks/1'] + div">Show task 1</a> <!-- mark-phrase "a[href='/tasks/1'] + div" -->
-  <div>Task 1 will appear here</div
-
-  <a href="/tasks/2" up-target="a[href='/tasks/2'] + div">Show task 2</a> <!-- mark-phrase "a[href='/tasks/2'] + div" -->
-  <div>Task 2 will appear here</div
-  ```
-
-  We can simplify the `[up-target]` by referencing the followed link by `:origin`:
-
-  ```html
-  <a href="/tasks/1" up-target=":origin + div">Show task 1</a> <!-- mark-phrase ":origin + div" -->
-  <div>Task 1 will appear here</div
-
-  <a href="/tasks/2" up-target=":origin + div">Show task 2</a> <!-- mark-phrase ":origin + div" -->
-  <div>Task 2 will appear here</div
-  ```
-
-  When a link is clicked, `:origin` with a target [derived](/target-derivation) from the link element.
-  For example, clicking on the second link will target `a[href='/tasks/2']`.
 
   ## Setting the origin programmatically
 
@@ -2401,12 +2393,11 @@ up.fragment = (function() {
   Your [target selectors](/targeting-fragments) may use this pseudo-selector
   to replace the layer's topmost swappable element.
 
-  The topmost swappable element is the first child of the layer's container element:
+  [Targeting fragments](/targeting-fragments){:.article-ref}
 
-  - For the [root layer](/up.layer.root) it is the `<body>` element.
-  - For an overlay it is the `{ target }` that the overlay was opened with.
-  - If an overlay was opened with an explicit target, Unpoly will create a [main element](/up-main).
-    This main element becomes the topmost swappable target.
+  ## What is targeted
+
+  @include topmost-swappable-layer-element
 
   Use `:layer` to replace all visible elements of a layer. To only update a layer's main content area
   while keeping static layout elements around it, see `:main`.
@@ -3052,6 +3043,8 @@ up.template = { clone: up.fragment.cloneTemplate }
 Returns the current [context](/context).
 
 This is aliased as `up.layer.context`.
+
+[Layer context](/context){:.article-ref}
 
 @property up.context
 @param {Object} context

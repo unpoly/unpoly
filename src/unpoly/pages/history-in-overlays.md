@@ -18,7 +18,7 @@ A render pass will only update the address bar if it *both* [changes history](/u
 | no                    | no                         | ❌ no                 |
 
 > [note]
-> When a link [updates another layer](/up-follow#up-layer), only the history visibility of the targeted layer is considered.
+> When a link [updates another layer](/up-follow#up-layer), only the history visibility of the targeted layer is considered.\
 > Settings for the link's *own* layer is not relevant.
 
 ## Configuring history visibility {#configuring-visibility}
@@ -95,6 +95,9 @@ up.layer.root.location    // => "/"
 location.pathname         // => "/"
 ```
 
+To track location changes, observe the `up:layer:location:changed` event.
+This event is also emitted for layers with invisible history (other than `up:location:changed`).
+
 
 ### Navigation bars work with invisible history
 
@@ -108,8 +111,7 @@ it compares a link's `[href]` with the location tracked in `up.layer.current.loc
 When an overlay with invisible history opens *another* overlay, the nested overlay is forced to
 also have invisible history.
 
-This cannot be overridden with `{ history: true }`.
-
+The nested overlay can not override this behavior `{ history: true }` or `[up-history=true]`.
 
 
 ## History restoration {#restoration}

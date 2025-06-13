@@ -87,11 +87,11 @@ Many links and forms update the site's primary content area, called the [main el
 <a href="/cards/5" up-follow>Load post</a>
 
 <main>
-  Post will appear heare
+  Post will appear here
 </main>
 ```
 
-Similarily when a JavaScript function omits an `{ target }` option, the main target will be rendered:
+Similarly when a JavaScript function omits an `{ target }` option, the main target will be rendered:
 
 ```js
 up.render({ url: '/cards/5' })
@@ -99,6 +99,17 @@ up.render({ url: '/cards/5' })
 
 You may configure main target selectors in `up.fragment.config.mainTargets`.
 
+
+### Targeting the entire layer
+
+To target all visible layer elements, use the `:layer` selector. This will swap the layer's
+topmost swappable element.
+
+```html
+<a href="/admin" up-follow up-target=":layer">Admin area</a>
+```
+
+@include topmost-swappable-layer-element
 
 ### Targeting an element object
 
@@ -159,9 +170,6 @@ To make a server request without changing a fragment, target the `:none` selecto
 ```html
 <a href="/ping" up-target=":none">Ping server</a>
 ```
-
-> [TIP]
-> Event when a specific target like `.content` is used, the server can still decide to [render nothing](/skipping-rendering#rendering-nothing).
 
 
 ## Resolving ambiguous selectors {#ambiguous-selectors}
@@ -231,6 +239,14 @@ If matching fragments around the origin does not work for you, you can tell Unpo
 - Configure `up.fragment.config.match = 'first` to disable region-aware fragment matching for all functions and elements. You can then opt in again with `{ match: 'region' }` or `[up-link=region]`.
 
 
+### Referring to the origin element
+
+Instead of relying of region-awareness, your targets can use `:origin` to refer to the 
+interaction's origin element. The `:origin` placeholder will be replaced with a target [derived](/target-derivation)
+from the origin element.
+
+@include origin-selector-example
+
 ## Dealing with missing targets {#missing-targets}
 
 By default Unpoly requires targets to match in both the current page and the server response. If no matching element is found in either, an error `up.CannotMatch` will be thrown.
@@ -262,6 +278,23 @@ up.render({ url: '/path', target: '.content', fallback: true })
 ```
 
 Falling back to the main target is the default when [navigating](/navigation). Therefore you don't need to include an empty `[up-fallback]` attribute with your links and forms, which are considered navigation by default.
+
+
+### Making targets optional
+
+A target selector with a `:maybe` suffix is considered optional and will not fail the render pass when
+missing.
+
+The link below will update the fragments `.content` (required) and `.details` (optional):
+
+```html
+<a href="/card/5" up-target=".content, .details:maybe">...</a>
+```
+
+If `.details` is missing
+in the current page or the server response, Unpoly will only update `.content`
+without an error.
+
 
 
 ## Changing the target in-flight {#changing-target}

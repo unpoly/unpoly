@@ -403,6 +403,8 @@ up.layer = (function() {
 
   Opening a layer is considered [navigation](/navigation) by default.
 
+  [Opening overlays](/opening-overlays){:.article-ref}
+
   ## Example
 
   ```js
@@ -657,12 +659,15 @@ up.layer = (function() {
   }
 
   /*-
-  This event is emitted before an overlay is opened.
+  This event is emitted before an overlay is [opened](/opening-overlays).
 
-  The overlay is not yet part of the [layer stack](/up.layer.stack) and has not yet been placed
-  in the DOM. Listeners may prevent this event to prevent the overlay from opening.
+  At emission time the overlay is not yet part of the [layer stack](/up.layer.stack).
+  The overlays elements have yet been placed in the DOM.
+  Listeners may prevent this event to prevent the overlay from opening.
 
   The event is emitted on the `document`.
+
+  [Opening overlays](/opening-overlays){:.article-ref}
 
   ### Changing layer options
 
@@ -697,8 +702,12 @@ up.layer = (function() {
   /*-
   This event is emitted after a new overlay was placed into the DOM.
 
+  [Opening overlays](/opening-overlays){:.article-ref}
+
+  ## Customizing the overlay appearance
+
   The event is emitted right before the opening animation starts. Because the overlay
-  has not been rendered by the browser, this makes it a good occasion to
+  has not yet been painted by the browser, this makes it a good occasion to
   [customize overlay elements](/customizing-overlays#customizing-overlay-elements):
 
   ```js
@@ -708,6 +717,9 @@ up.layer = (function() {
     }
   })
   ```
+
+  See [Customizing overlays](/customizing-overlays) for other methods to change
+  the overlay appearance.
 
   @event up:layer:opened
   @param {Element} event.origin
@@ -729,6 +741,8 @@ up.layer = (function() {
 
   This event is *not* emitted when an overlay is opened. For this observe `up:layer:opened` instead.
 
+  [History in overlays](/history-in-overlays){:.article-ref}
+
   @param {string} event.location
     The current layer location.
   @param {string|undefined} event.previousLocation
@@ -742,10 +756,12 @@ up.layer = (function() {
   */
 
   /*-
-  Opens an overlay and returns a promise for its [acceptance](/closing-overlays).
+  [Opens an overlay](/opening-overlays) and returns a promise for its [acceptance](/closing-overlays).
 
   It's useful to think of overlays as [promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
   which may either be **fulfilled (accepted)** or **rejected (dismissed)**.
+
+  [Opening overlays](/opening-overlays){:.article-ref}
 
   ## Example
 
@@ -768,8 +784,6 @@ up.layer = (function() {
     console.error("Could not register:", reason)
   }
   ```
-
-  @see closing-overlays
 
   @function up.layer.ask
 
@@ -1034,6 +1048,8 @@ up.layer = (function() {
   The [relaxed JSON](/relaxed-json) value of the `[up-dismiss]` attribute becomes the overlay's
   [dismissal value](/closing-overlays#overlay-result-values).
 
+  [Closing overlays](/closing-overlays){:.article-ref}
+
   ### Example
 
   ```html
@@ -1068,16 +1084,18 @@ up.layer = (function() {
   /*-
   [Accepts](/closing-overlays) the [current layer](/up.layer.current) when the link is clicked.
 
-  The JSON value of the `[up-accept]` attribute becomes the overlay's
+  The [relaxed JSON](/relaxed-json) value of the `[up-accept]` attribute becomes the overlay's
   [acceptance value](/closing-overlays#overlay-result-values).
 
-  ### Example
+  [Closing overlays](/closing-overlays){:.article-ref}
+
+  ## Example
 
   ```html
   <a href="/users/5" up-accept="{ id: 5 }">Choose user #5</a>
   ```
 
-  ### Fallback for the root layer
+  ## Fallback for the root layer
 
   The link's `[href]` will only be followed when this link is clicked in the [root layer](/up.layer).
   In an overlay the `click` event's default action is prevented.
@@ -1302,6 +1320,8 @@ up.layer = (function() {
 
   Afterwards the only remaining layer will be the [root layer](/up.layer.root).
 
+  [Closing overlays](/closing-overlays){:.article-ref}
+
   @function up.layer.dismissOverlays
   @param {any} [value]
     The dismissal value.
@@ -1327,6 +1347,8 @@ up.layer = (function() {
   This is a shortcut for `up.layer.current.accept()`.
   See `up.Layer#accept()` for more documentation.
 
+  [Closing overlays](/closing-overlays){:.article-ref}
+
   @function up.layer.accept
   @param {any} [value]
     @like up.Layer#accept
@@ -1339,6 +1361,8 @@ up.layer = (function() {
   This event is emitted *before* a layer is [accepted](/closing-overlays).
 
   The event is emitted on the [element of the layer](/up.layer.element) that is about to close.
+
+  [Closing overlays](/closing-overlays){:.article-ref}
 
   @event up:layer:accept
   @param {up.Layer} event.layer
@@ -1372,6 +1396,8 @@ up.layer = (function() {
   > [tip]
   > To prevent a layer from being closed, listen to `up:layer:accept` instead.
 
+  [Closing overlays](/closing-overlays){:.article-ref}
+
   @event up:layer:accepted
   @param {up.Layer} event.layer
     The layer that was closed.
@@ -1396,6 +1422,8 @@ up.layer = (function() {
   This is a shortcut for `up.layer.current.dismiss()`.
   See `up.Layer#dismiss()` for more documentation.
 
+  [Closing overlays](/closing-overlays){:.article-ref}
+
   @function up.layer.dismiss
   @param {any} [value]
     @like up.Layer#dismiss
@@ -1408,6 +1436,8 @@ up.layer = (function() {
   This event is emitted *before* a layer is [dismissed](/closing-overlays).
 
   The event is emitted on the [element of the layer](/up.layer.element) that is about to close.
+
+  [Closing overlays](/closing-overlays){:.article-ref}
 
   @event up:layer:dismiss
   @param {up.Layer} event.layer
@@ -1440,6 +1470,8 @@ up.layer = (function() {
 
   > [tip]
   > To prevent a layer from being closed, listen to `up:layer:dismiss` instead.
+
+  [Closing overlays](/closing-overlays){:.article-ref}
 
   @event up:layer:dismissed
   @param {up.Layer} event.layer
@@ -1555,6 +1587,8 @@ up.layer = (function() {
   This is a shortcut for `up.layer.current.history`.
   See `up.Layer#history` for more documentation.
 
+  [History in overlays](/history-in-overlays){:.article-ref}
+
   @property up.layer.history
   @param history
     @like up.Layer#history
@@ -1567,6 +1601,8 @@ up.layer = (function() {
   This is a shortcut for `up.layer.current.location`.
   See `up.Layer#location` for more documentation.
 
+  [History in overlays](/history-in-overlays){:.article-ref}
+
   @property up.layer.location
   @param location
     @like up.Layer#location
@@ -1575,10 +1611,12 @@ up.layer = (function() {
 
   /*-
   The [current layer](/up.layer.current)'s [mode](/up.layer.mode)
-  which governs its appearance and behavior.
+  which governs its [appearance and behavior](/customizing-overlays).
 
   This is a shortcut for `up.layer.current.mode`.
   See `up.Layer#mode` for more documentation.
+
+  [Customizing overlays](/customizing-overlays){:.article-ref}
 
   @property up.layer.mode
   @param mode
@@ -1593,6 +1631,8 @@ up.layer = (function() {
   See `up.Layer#context` for more documentation.
 
   Aliased as `up.context`.
+
+  [Layer context](/context){:.article-ref}
 
   @property up.layer.context
   @param context

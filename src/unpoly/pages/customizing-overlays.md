@@ -5,10 +5,24 @@ Overlays ship with minimal styling and common default behavior.
 That look and feel can be customized.
 
 
+Picking the right mode {#modes}
+----------------------
+
+The default appearance and behavior is governed by the overlay's *mode*.
+The mode is [set when the overlay is opened](/opening-overlays#modes).
+
+The following modes are available:
+
+@include overlay-modes-table
+
+When building a custom overlay, start with the closest mode and customize
+the look and feel using one of the methods below.
+
+
 Understanding the HTML structure
 --------------------------------
 
-The various [overlay modes](/up.layer.mode) have an HTML structure like this:
+The various [overlay modes](#modes) have an HTML structure like this:
 
 ```html
 <up-modal size="medium">                     <!-- container with attributes -->
@@ -151,12 +165,26 @@ being rendered by the browser.
 ```js
 up.on('up:layer:opened', function(event) {
   if (isChristmas()) {
-    up.element.affix(event.layer.element, '.santa-hat', text: 'Merry Christmas!')
+    up.element.affix(event.layer.element, '.santa-hat', { text: 'Merry Christmas!' })
   }
 })
 ```
 
 Make sure to not remove any of the existing overlay elements or things will break.
+
+
+Open and close animatios {#animation}
+------------------------
+
+When opening an overlay, you can configure an [animation](/up.motion#animations) for the opening and closing sequence:
+
+```html
+<a href="/details" up-layer="new" up-animation="move-from-top" up-close-animation="move-to-bottom">
+  Open details
+</a> 
+```
+
+Default animations can be configured in `up.layer.config`.
 
 
 Popup position
