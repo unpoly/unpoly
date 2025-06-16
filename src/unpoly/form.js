@@ -1780,12 +1780,12 @@ up.form = (function() {
 
     <fieldset>
       <label for="email" up-validate>E-mail</label>
-      <input type="text" id="email" name="email">
+      <input type="text" id="email" name="email"> <!-- chip "will validate" -->
     </fieldset>
 
     <fieldset>
       <label for="password" up-validate>Password</label>
-      <input type="password" id="password" name="password">
+      <input type="password" id="password" name="password"> <!-- chip "will validate" -->
     </fieldset>
 
     <button type="submit">Register</button>
@@ -1793,7 +1793,35 @@ up.form = (function() {
   </form>
   ```
 
- ### Validating radio buttons
+  You can also set `[up-validate]` on an intermediate container to only validate its children:
+
+
+  ```html
+  <form action="/users">
+
+    <div up-validate> <!-- mark-phrase "up-validate" -->
+      <fieldset>
+        <label for="email" up-validate>E-mail</label>
+        <input type="text" id="email" name="email"> <!-- chip "will validate" -->
+      </fieldset>
+
+      <fieldset>
+        <label for="password" up-validate>Password</label>
+        <input type="password" id="password" name="password"> <!-- chip "will validate" -->
+      </fieldset>
+    </div>
+
+    <fieldset>
+      <label for="name" up-validate>Name</label>
+      <input type="name" id="name" name="name"> <!-- chip "will NOT validate" -->
+    </fieldset>
+
+    <button type="submit">Register</button>
+
+  </form>
+  ```
+
+  ### Validating radio buttons
 
   Multiple radio buttons with the same `[name]` produce a single value for the form.
 

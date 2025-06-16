@@ -19,8 +19,8 @@ as a second argument:
 
 ```js
 up.compiler('.user', function(element, data) { // mark-phrase "data"
-  console.log(data.age)  // => "18"
-  console.log(data.name) // => "Bob"
+  console.log(data.age)  // result "18"
+  console.log(data.name) // result "Bob"
 })
 ```
 
