@@ -172,18 +172,13 @@ up.Params = class Params {
   @experimental
   */
   toQuery() {
-    let parts = u.map(this.entries, this._arrayEntryToQuery.bind(this))
-    parts = u.compact(parts)
+    let simpleEntries = this.withoutBinaryEntries().entries
+    let parts = simpleEntries.map(this._arrayEntryToQuery)
     return parts.join('&')
   }
 
   _arrayEntryToQuery(entry) {
     const { value } = entry
-
-    // We cannot transport a binary value in a query string.
-    if (this._isBinaryValue(value)) {
-      return
-    }
 
     let query = encodeURIComponent(entry.name)
     // There is a subtle difference when encoding blank values:
@@ -197,21 +192,25 @@ up.Params = class Params {
   }
 
   /*-
-  Returns whether the given value cannot be encoded into a query string.
+  Returns whether the given entry cannot be encoded into a query string.
 
   We will have `File` values in our params when we serialize a form with a file input.
   These entries will be filtered out when converting to a query string.
 
-  @function up.Params#_isBinaryValue
+  @function up.Params#_isBinaryEntry
   @internal
   */
-  _isBinaryValue(value) {
+  _isBinaryEntry({ value }) {
     return value instanceof Blob
   }
 
-  hasBinaryValues() {
-    const values = u.map(this.entries, 'value')
-    return u.some(values, this._isBinaryValue)
+  hasBinaryEntries() {
+    return u.some(this.entries, this._isBinaryEntry)
+  }
+
+  withoutBinaryEntries() {
+    let simpleEntries = u.reject(this.entries, this._isBinaryEntry)
+    return new this.constructor(simpleEntries)
   }
 
   /*-

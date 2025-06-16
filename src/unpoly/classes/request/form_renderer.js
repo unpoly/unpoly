@@ -13,7 +13,9 @@ up.Request.FormRenderer = class FormRenderer {
   }
 
   buildAndSubmit() {
-    this.params = u.copy(this._request.params)
+    // We cannot serialize binary entries as input fields
+    this.params = this._request.params.withoutBinaryEntries()
+
     let action = this._request.url
     let { method } = this._request
 

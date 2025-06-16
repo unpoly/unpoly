@@ -2792,6 +2792,22 @@ describe('up.network', function() {
           expect($form).toBeAttached()
           expect($form.attr('enctype')).toEqual('multipart/form-data')
         })
+
+        it('ignores binary entries, as we cannot encode them in form inputs', function() {
+          const submitForm = spyOn(up.browser, 'submitForm')
+          const params = [
+            { name: 'scalar', value: 'scalar-value' },
+            { name: 'blob', value: new Blob(['blob-value'], { type: "text/plain" })},
+          ]
+
+          up.network.loadPage({ url: '/endpoint', method: 'POST', params })
+
+          const form = document.querySelector('form.up-request-loader')
+          expect(form).toHaveSelector('input[name="scalar"]')
+          expect(form).not.toHaveSelector('input[name="blob"]')
+          expect(submitForm).toHaveBeenCalled()
+        })
+
       })
 
       u.each(['PUT', 'PATCH', 'DELETE'], function(method) {

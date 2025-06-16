@@ -74,7 +74,7 @@ up.Request.XHRRenderer = class XHRRenderer {
 
       // Determine the effective Content-Type by looking at our params values.
       if (!this._contentType) {
-        this._contentType = this._params.hasBinaryValues() ? CONTENT_TYPE_FORM_DATA : CONTENT_TYPE_URL_ENCODED
+        this._contentType = this._params.hasBinaryEntries() ? CONTENT_TYPE_FORM_DATA : CONTENT_TYPE_URL_ENCODED
       }
 
       // Serialize our payload
