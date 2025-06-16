@@ -289,14 +289,6 @@ up.Params = class Params {
     }
   }
 
-  setAll(raw) {
-    let other = u.wrapValue(this.constructor, raw)
-    // We cannot use iterate over other.entries and call set(), since other.entries
-    // might have multiple values for the same array key.
-    for (let key of other.keys()) this.delete(key)
-    this.addAll(other)
-  }
-
   /*-
   @function up.Params#keys
   @internal
@@ -638,14 +630,18 @@ up.Params = class Params {
     return u.normalizeURL(url, { search: false })
   }
 
-  static merge(...objects) {
-    return objects.reduce(
-      function(allParams, params) {
-        allParams.addAll(params)
-        return allParams
-      },
-      new up.Params()
-    )
+  static merge(start, ...objects) {
+    let merged = u.copy(start)
+
+    for (let object of objects) {
+      let other = u.wrapValue(this, object)
+      // We cannot use iterate over other.entries and call set(), since other.entries
+      // might have multiple values for the same array key.
+      for (let key of other.keys()) merged.delete(key)
+      merged.addAll(other)
+    }
+
+    return merged
   }
 
 }

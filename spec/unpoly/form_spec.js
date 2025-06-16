@@ -3785,21 +3785,43 @@ describe('up.form', function() {
           expect('.bar-focus').toBeFocused()
         })
 
-        it('merges the { params } option of all batched validations', async function() {
-          const form = fixture('form[action=/path][method=post]')
-          const fooField = e.affix(form, 'input[name=foo][value="foo-value"]')
-          const barField = e.affix(form, 'input[name=bar][value="bar-value"]')
+        describe('{ params }', function() {
 
-          up.validate(fooField, { params: { baz: 'baz-value' }, formGroup: false })
-          up.validate(barField, { params: { bam: 'bam-value' }, formGroup: false })
+          it('merges the { params } option of all batched validations', async function() {
+            const form = fixture('form[action=/path][method=post]')
+            const fooField = e.affix(form, 'input[name=foo][value="foo-value"]')
+            const barField = e.affix(form, 'input[name=bar][value="bar-value"]')
 
-          await wait()
+            up.validate(fooField, { params: { baz: 'baz-value' }, formGroup: false })
+            up.validate(barField, { params: { bam: 'bam-value' }, formGroup: false })
 
-          expect(jasmine.lastRequest().data()).toMatchParams({
-            foo: 'foo-value', // from form
-            bar: 'bar-value', // from form
-            baz: 'baz-value', // from validate() arg
-            bam: 'bam-value', // from validate() arg
+            await wait()
+
+            expect(jasmine.lastRequest().data()).toMatchParams({
+              foo: 'foo-value', // from form
+              bar: 'bar-value', // from form
+              baz: 'baz-value', // from validate() arg
+              bam: 'bam-value', // from validate() arg
+            })
+          })
+
+          it('overrides (not adds) form-parsed params with the same name', async function() {
+            const form = fixture('form[action=/path][method=post]')
+            const fooField = e.affix(form, 'input[name=foo][value="1"]')
+            const barField = e.affix(form, 'input[name=bar][value="2"]')
+            const bazField = e.affix(form, 'input[name=baz][value="3"]')
+
+            up.validate(fooField, { params: { foo: '4' }, formGroup: false })
+            up.validate(barField, { params: { baz: '5' }, formGroup: false })
+
+            await wait()
+
+            expect(jasmine.lastRequest().data()).toMatchParams([
+              { name: 'bar', value: '2' },
+              { name: 'foo', value: '4' },
+              { name: 'baz', value: '5' },
+            ])
+
           })
         })
 
