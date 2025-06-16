@@ -603,7 +603,7 @@ up.form = (function() {
     }
 
     // We had any { params } option to the params that we got from the form.
-    params.addAll(options.params)
+    params.setAll(options.params)
     options.params = params
 
     // Parse the form element's { url, method } *after* parsing the submit button.

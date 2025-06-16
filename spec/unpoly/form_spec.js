@@ -2728,12 +2728,14 @@ describe('up.form', function() {
 
     describe('up.form.submitOptions()', function() {
 
-      it('parses the render options that would be used to submit the given frm', function() {
+      it('parses the render options that would be used to submit the given form', function() {
         const form = fixture('form[action="/path"][up-method="PUT"][up-layer="new"]')
+        const input = e.affix(form, 'input[name=name][value=value]')
         const options = up.form.submitOptions(form)
         expect(options.url).toEqual('/path')
         expect(options.method).toEqual('PUT')
         expect(options.layer).toEqual('new')
+        expect(options.params.toQuery()).toBe('name=value')
       })
 
       it('does not render', function() {
@@ -2761,6 +2763,33 @@ describe('up.form', function() {
         expect(up.form.submitOptions(formWithDisable).disable).toBe(true)
         expect(up.form.submitOptions(formWithoutDisable).disable).toBe(false)
       })
+
+      describe('with { params } option', function() {
+
+        it('adds the given to the params parsed from form fields', function() {
+          const form = fixture('form[action="/path"][up-method="post"][up-layer="new"]')
+          const input = e.affix(form, 'input[name=foo][value=1]')
+          const options = up.form.submitOptions(form, { params: { bar: 2 } })
+          expect(options.params.toQuery()).toBe('foo=1&bar=2')
+        })
+
+        it('removes an existing param with the same name', function() {
+          const form = fixture('form[action="/path"][up-method="post"][up-layer="new"]')
+          const input = e.affix(form, 'input[name=foo][value=1]')
+          const options = up.form.submitOptions(form, { params: { foo: 2 } })
+          expect(options.params.toQuery()).toBe('foo=2')
+        })
+
+        it('removes an existing array param with the same name', function() {
+          const form = fixture('form[action="/path"][up-method="post"][up-layer="new"]')
+          e.affix(form, 'input', { name: 'foo[]', value: '1' })
+          fixture('input', { name: 'foo[]', value: '2' })
+          const options = up.form.submitOptions(form, { params: { 'foo[]': [3, 4] } })
+          expect(options.params.toQuery()).toBe('foo%5B%5D=3&foo%5B%5D=4')
+        })
+
+      })
+
     })
 
     describe('up.form.group()', function() {

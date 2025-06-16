@@ -290,9 +290,26 @@ up.Params = class Params {
     }
   }
 
+  setAll(raw) {
+    let other = u.wrapValue(this.constructor, raw)
+    // We cannot use iterate over other.entries and call set(), since other.entries
+    // might have multiple values for the same array key.
+    for (let key of other.keys()) this.delete(key)
+    this.addAll(other)
+  }
+
+  /*-
+  @function up.Params#keys
+  @internal
+  */
+  keys() {
+    return u.map(this.entries, 'name')
+  }
+
   _addAllFromObject(object) {
     for (let key in object) {
       const value = object[key]
+      // We cannot use up.util.wrapList() because we want to keep null as [null], not []
       const valueElements = u.isArray(value) ? value : [value]
       for (let valueElement of valueElements) {
         this.add(key, valueElement)
