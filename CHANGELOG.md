@@ -211,7 +211,7 @@ You can use previews to implement arbitrary [loading state](/loading-state). Two
 To show a placeholder while a link is loading, set an `[up-placeholder]` attribute with the placeholder's HTML as its value:
 
 ```html
-<a href="/path" up-follow up-placeholder="<p>Loading…</p>">Show story</a> <!-- mark-phrase "up-placeholder" -->
+<a href="/path" up-follow up-placeholder="<p>Loading…</p>">Show story</a> <!-- mark-phrase: up-placeholder -->
 ```
 
 When the link is clicked, the targeted fragment's content is replaced by the placeholder markup temporarily. When the request ends for [any reason](/previews#ending), the placeholder is removed and the original page state restored.
@@ -219,7 +219,7 @@ When the link is clicked, the targeted fragment's content is replaced by the pla
 Instead of passing the placeholder HTML directly, you can also refer to any [template](/templates) by its CSS selector:
 
 ```html
-<a href="/path" up-follow up-placeholder="#loading-template">Show story</a> <!-- mark-phrase "#loading-message" -->
+<a href="/path" up-follow up-placeholder="#loading-template">Show story</a> <!-- mark-phrase: #loading-message -->
 
 <template id="loading-template">
   <p>
@@ -257,13 +257,13 @@ To refer to a template, pass its CSS selector to any attribute or option that ac
 
 
 ```html
-<a href="#" up-target=".target" up-document="#my-template">Click me</a> <!-- mark-phrase "#my-template" -->
+<a href="#" up-target=".target" up-document="#my-template">Click me</a> <!-- mark-phrase: #my-template -->
 
 <div class="target">
   Old content
 </div>
 
-<template id="my-template"> <!-- mark-phrase "my-template" -->
+<template id="my-template"> <!-- mark-phrase: my-template -->
   <div class="target">
     New content
   </div>
@@ -278,7 +278,7 @@ Unpoly 3.10 offers many methods to implement [dynamic templates with variables](
 You can even [integrate template engines](/templates#template-engine) like [Mustache.js](https://github.com/janl/mustache.js) or [Handlebars](https://handlebarsjs.com/):
 
 ```html
-<script id="results-template" type="text/mustache"> <!-- mark-phrase "text/mustache" -->
+<script id="results-template" type="text/mustache"> <!-- mark-phrase: text/mustache -->
   <div id="game-results">
     <h1>Results of game {{gameCount}}</h1>
 
@@ -618,7 +618,7 @@ To remove the menu from the initial render pass, extract its contents to its own
 In the initial view, only leave a placeholder element and mark it with an `[up-defer]` attribute. Also set an `[up-href]` attribute with the URL from which to load the deferred content:
 
 ```html
-<div id="menu" up-defer up-href="/menu"> <!-- mark-phrase "up-defer" -->
+<div id="menu" up-defer up-href="/menu"> <!-- mark-phrase: up-defer -->
   Loading...
 </div>
 ```
@@ -640,13 +640,13 @@ For many years Unpoly has supported the `[up-preload]` attribute. This would pre
 You can now preload a link *as soon as it appears in the DOM*, by setting an [`[up-preload="insert"]`](/up-preload#up-preload) attribute. This is useful for links with a high probability of being clicked, like a navigation menu:
 
 ```html
-<a href="/menu" up-layer="new drawer" up-preload="insert">≡ Menu</a> <!-- mark-phrase "insert" -->
+<a href="/menu" up-layer="new drawer" up-preload="insert">≡ Menu</a> <!-- mark-phrase: insert -->
 ```
 
 To "lazy preload" a link when it is scrolled into the [viewport](/up-viewport), you can now set an [`[up-preload="reveal"]`](/up-preload#up-preload) attribute. This is useful when an element is [below the fold](https://www.optimizely.com/optimization-glossary/below-the-fold/) and is unlikely to be clicked until the the user scrolls:
 
 ```html
-<a href="/stories/106" up-preload="reveal">Full story</a> <!-- mark-phrase "reveal" -->
+<a href="/stories/106" up-preload="reveal">Full story</a> <!-- mark-phrase: reveal -->
 ```
 
 
@@ -674,8 +674,8 @@ See [infinite scrolling](/infinite-scrolling) for a full example and more detail
 Most Unpoly attributes can now be enabled with a value `"true"` and be disabled with a value `"false"`:
 
 ```html
-<a href="/path" up-follow="true">Click for single-page navigation</a> <!-- mark-phrase "true" -->
-<a href="/path" up-follow="false">Click for full page load</a> <!-- mark-phrase "false" -->
+<a href="/path" up-follow="true">Click for single-page navigation</a> <!-- mark-phrase: true -->
+<a href="/path" up-follow="false">Click for full page load</a> <!-- mark-phrase: false -->
 ```
 
 Instead of setting a `true` you can also set an empty value:
@@ -689,7 +689,7 @@ Instead of setting a `true` you can also set an empty value:
 Boolean values can be helpful with a server-side templating language like ERB, Liquid or Haml, when the attribute value is set from a boolean variable:
 
 ```erb
-<a href="/path" up-follow="<%= is_signed_in %>">Click me</a> <%# mark-phrase "is_signed_in" %>
+<a href="/path" up-follow="<%= is_signed_in %>">Click me</a> <%# mark-phrase: is_signed_in %>
 ```
 
 This can also help when you're generating HTML from a different programming language and want to pass a `true` literal as an attribute value:
@@ -1182,7 +1182,7 @@ See `[up-meta]` for ways to include or exclude head elements from synchronizatio
 You can disable the synchronization of meta tags [globally](/up.history.config#config.updateMetaTags) or [per render pass](/up.render#options.metaTags):
 
 ```js
-up.render('.element', { url: '/path', history: true, metaTags: false }) // mark-phrase "metaTags"
+up.render('.element', { url: '/path', history: true, metaTags: false }) // mark-phrase: metaTags
 ```
 
 
@@ -1420,10 +1420,10 @@ In cases where you don't want this behavior, you now have more options:
 
   ```js
   up.compiler('.user', function(element, data, meta) {
-    console.log(meta.response.text.length)        // => 160232
-    console.log(meta.response.header('X-Course')) // => "advanced-ruby"
-    console.log(meta.layer.mode)                  // => "root"
-    console.log(meta.revalidating)                // => boolean
+    console.log(meta.response.text.length)        // result: 160232
+    console.log(meta.response.header('X-Course')) // result: "advanced-ruby"
+    console.log(meta.layer.mode)                  // result: "root"
+    console.log(meta.revalidating)                // result: false
   })
   ```
 
@@ -1543,7 +1543,7 @@ we can use the HTML from the response and render it into the parent layer:
 <a href="/companies/new"
    up-layer="new"
    up-accept-location="/companies"
-   up-on-accepted="up.render('.companies', { response: event.response }"> <!-- mark-phrase "event.response" -->
+   up-on-accepted="up.render('.companies', { response: event.response }"> <!-- mark-phrase: event.response -->
   New company
 </a>
 ```
@@ -1865,10 +1865,10 @@ Unpoly 3 makes it easier to work with [element data](/data):
 
   ```js
   up.compiler('.user', function(element, data, meta) {
-    console.log(meta.response.text.length)        // => 160232
-    console.log(meta.response.header('X-Course')) // => "advanced-ruby"
-    console.log(meta.layer.mode)                  // => "root"
-    console.log(meta.revalidating)                // => true
+    console.log(meta.response.text.length)        // result: 160232
+    console.log(meta.response.header('X-Course')) // result: "advanced-ruby"
+    console.log(meta.layer.mode)                  // result: "root"
+    console.log(meta.revalidating)                // result: true
   })
   ```
 

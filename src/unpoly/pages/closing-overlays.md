@@ -204,7 +204,7 @@ we can use the HTML from the response and render it into the parent layer:
 <a href="/companies/new"
    up-layer="new"
    up-accept-location="/companies"
-   up-on-accepted="up.render('.companies', { response: event.response })"> <!-- mark-phrase "event.response" -->
+   up-on-accepted="up.render('.companies', { response: event.response })"> <!-- mark-phrase: event.response -->
   New company
 </a>
 ```
@@ -331,8 +331,8 @@ Most overlay modes have an button (`×`) in the top-right corner that dismisses 
 You may change the symbol and accessibility label for that icon:
 
 ```js
-up.layer.config.overlay.dismissLabel // => '×'
-up.layer.config.overlay.dismissARIALabel // => 'Dismiss dialog'
+up.layer.config.overlay.dismissLabel // result: '×'
+up.layer.config.overlay.dismissARIALabel // result: 'Dismiss dialog'
 ```
 
 

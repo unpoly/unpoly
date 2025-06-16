@@ -220,9 +220,9 @@ q
   as a second argument:
 
   ```js
-  up.compiler('.user', function(element, data) { // mark-phrase "data"
-    console.log(data.age)  // => 31
-    console.log(data.name) // => "Alice"
+  up.compiler('.user', function(element, data) { // mark-phrase: data
+    console.log(data.age)  // result: 31
+    console.log(data.name) // result: "Alice"
   })
   ```
 
@@ -243,9 +243,9 @@ q
   Compilers may accept a third argument with information about the current [render pass](/up.render):
 
   ```js
-  up.compiler('.user', function(element, data, meta) { // mark-phrase "meta"
-    console.log(meta.layer.mode)   // => "root"
-    console.log(meta.revalidating) // => boolean
+  up.compiler('.user', function(element, data, meta) { // mark-phrase: meta
+    console.log(meta.layer.mode)   // result: "root"
+    console.log(meta.revalidating) // result: true
   })
   ```
 
@@ -730,9 +730,9 @@ q
 
   ```
   let data = up.data('.google-map')
-  data[0].lat // => 48.36
-  data[0].lng // => 10.99
-  data[0].title // => 'Friedberg'
+  data[0].lat // result: 48.36
+  data[0].lng // result: 10.99
+  data[0].title // result: 'Friedberg'
   ```
 
   @selector [up-data]

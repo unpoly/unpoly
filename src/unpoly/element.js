@@ -337,8 +337,8 @@ up.element = (function() {
   ```js
   up.element.setAttrs(element, { title: 'Tooltip', tabindex: 1 })
 
-  element.getAttribute('title') // => "Tooltip"
-  element.getAttribute('tabindex') // => "1"
+  element.getAttribute('title') // result: "Tooltip"
+  element.getAttribute('tabindex') // result: "1"
   ```
 
   @function up.element.setAttrs
@@ -378,7 +378,7 @@ up.element = (function() {
   element.getAttribute('title') // => "Changed"
 
   undo()
-  element.getAttribute('title') // => "Original"
+  element.getAttribute('title') // result: "Original"
   ```
 
   @function up.element.setAttrsTemp
@@ -832,11 +832,11 @@ up.element = (function() {
   ## Example
 
   ```js
-  let list = up.element.createNodesFromHTML('foo <p>bar</p> baz') // => NodeList(3)
-  list.length // => 3
-  list[0] // => Text "foo "
-  list[1] // => Element "<p>bar</p>"
-  list[3] // => Text " bar"
+  let list = up.element.createNodesFromHTML('foo <p>bar</p> baz') // result: NodeList(3)
+  list.length // result: 3
+  list[0] // result: Text "foo "
+  list[1] // result: Element "<p>bar</p>"
+  list[3] // result: Text " bar"
   ```
 
   ## Whitespace trimming {#whitespace}
@@ -845,8 +845,8 @@ up.element = (function() {
   This prevents the creation all-whitespace `Text` nodes at the edges of the list:
 
   ```js
-  let list = up.element.createNodesFromHTML('  <p>bar</p>  ') // => NodeList(1)
-  list.length // => 1
+  let list = up.element.createNodesFromHTML('  <p>bar</p>  ') // result: NodeList(1)
+  list.length // result: 1
   ```
 
   No changes will be made to whitespace in the middle of the given string.
@@ -1238,7 +1238,7 @@ up.element = (function() {
   element.className // => 'foo bar'
 
   undo()
-  element.className // => 'foo'
+  element.className // result: 'foo'
   ```
 
   @function up.element.addClassTemp
@@ -1398,7 +1398,7 @@ up.element = (function() {
   getComputedStyle(element).fontSize // => '50px'
 
   undo()
-  getComputedStyle(element).fontSize // => '12px'
+  getComputedStyle(element).fontSize // result: '12px'
   ```
 
   @function up.element.setStyleTemp

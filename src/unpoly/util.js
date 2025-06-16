@@ -67,20 +67,20 @@ up.util = (function() {
   The main purpose of this function is to normalize two URLs for string comparison:
 
   ```js
-  up.util.normalizeURL('http://current-host/path') === up.util.normalizeURL('/path') // => true
+  up.util.normalizeURL('http://current-host/path') === up.util.normalizeURL('/path') // result: true
   ```
 
   By default the hostname is only included if it points to a different origin:
 
   ```js
-  up.util.normalizeURL('http://current-host/path') // => '/path'
-  up.util.normalizeURL('http://other-host/path') // => 'http://other-host/path'
+  up.util.normalizeURL('http://current-host/path') // result: '/path'
+  up.util.normalizeURL('http://other-host/path') // result: 'http://other-host/path'
   ```
 
   Relative paths are normalized to absolute paths:
 
   ```js
-  up.util.normalizeURL('index.html') // => '/path/index.html'
+  up.util.normalizeURL('index.html') // result: '/path/index.html'
   ```
 
   ### Excluding URL components
@@ -200,9 +200,9 @@ up.util = (function() {
 
   ```js
   let parsed = up.util.parseURL('/path?foo=value')
-  parsed.pathname // => '/path'
-  parsed.search // => '/?foo=value'
-  parsed.hash // => ''
+  parsed.pathname // result: '/path'
+  parsed.search // result: '/?foo=value'
+  parsed.hash // result: ''
   ```
 
   @function up.util.parseURL
@@ -257,14 +257,14 @@ up.util = (function() {
   The given mapping function will be called for each element in the list:
 
   ```js
-  up.util.map(['apple', 'cherry'], (str) => str.length) // => [5, 6]
+  up.util.map(['apple', 'cherry'], (str) => str.length) // result: [5, 6]
   ```
 
   You can also pass a property name as a string,
   which will be collected from each item in the list:
 
   ```js
-  up.util.map(['apple', 'cherry'], 'length') // => [5, 6]
+  up.util.map(['apple', 'cherry'], 'length') // result: [5, 6]
   ```
 
   @function up.util.map
@@ -760,10 +760,10 @@ up.util = (function() {
   ### Example
 
   ```js
-  up.util.wrapList([1, 2, 3]) // => [1, 2, 3]
-  up.util.wrapList('foo') // => ['foo']
-  up.util.wrapList(undefined) // => []
-  up.util.wrapList(null) // => []
+  up.util.wrapList([1, 2, 3]) // result: [1, 2, 3]
+  up.util.wrapList('foo') // result: [foo']'
+  up.util.wrapList(undefined) // result: []
+  up.util.wrapList(null) // result: []
   ```
 
   @function up.util.wrapList
@@ -872,7 +872,7 @@ up.util = (function() {
   ```js
   let a = { a: '1', b: '2' }
   let b = { b: '3', c: '4' }
-  up.util.merge(a, b) // => { a: '1', b: '3', c: '4' }
+  up.util.merge(a, b) // result: { a: 1', b: '3', c: '4' }'
   ```
 
   @function up.util.merge
@@ -1247,7 +1247,7 @@ up.util = (function() {
 
   ```js
   let object = { foo: 1, bar: 2, baz: 3 }
-  up.util.pick(object, ['foo', 'baz']) // => { foo:1, baz: 3 }
+  up.util.pick(object, ['foo', 'baz']) // result: { foo:1, baz: 3 }
   ```
 
   @function up.util.pick
@@ -1299,7 +1299,7 @@ up.util = (function() {
 
   ```js
   let object = { foo: 1, bar: 2, baz: 3 }
-  up.util.omit(object, ['foo', 'baz']) // => { bar: 2 }
+  up.util.omit(object, ['foo', 'baz']) // result: { bar: 2 }
   ```
 
   @function up.util.omit
@@ -1353,7 +1353,7 @@ up.util = (function() {
   up.util.evalOption(5) // => 5
 
   let fn = () => 1 + 2
-  up.util.evalOption(fn) // => 3
+  up.util.evalOption(fn) // result: 3
   ```
 
   @function up.util.evalOption
@@ -1568,7 +1568,7 @@ up.util = (function() {
 
   ```js
   let nested = [1, [2, 3], [4]]
-  up.util.flatten(nested) // => [1, 2, 3, 4]
+  up.util.flatten(nested) // result: [1, 2, 3, 4]
   ```
 
   @function up.util.flatten

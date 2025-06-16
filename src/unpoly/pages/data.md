@@ -18,9 +18,9 @@ An object with all data attributes will be passed to your [compilers](/up.compil
 as a second argument:
 
 ```js
-up.compiler('.user', function(element, data) { // mark-phrase "data"
-  console.log(data.age)  // result "18"
-  console.log(data.name) // result "Bob"
+up.compiler('.user', function(element, data) { // mark-phrase: data
+  console.log(data.age)  // result: 18
+  console.log(data.name) // result: "Bob"
 })
 ```
 
@@ -35,8 +35,8 @@ Data attributes with multiple, dash-separated words in their name can be accesse
 
 ```js
 up.compiler('.user', function(element, data) {
-  console.log(data.firstName) // => "Alice"
-  console.log(data.lastName)  // => "Anderson"
+  console.log(data.firstName) // result: "Alice"
+  console.log(data.lastName)  // result: "Anderson"
 })
 ```
 
@@ -77,8 +77,8 @@ The topmost expression may be any JSON-serializable value, like an object:
 
 ```js
 up.compiler('.user', function(element, data) {
-  console.log(data.name) // => "Bob"
-  console.log(data.age)  // => 18
+  console.log(data.name) // result: "Bob"
+  console.log(data.age)  // result: 18
 })
 ```
 
@@ -90,8 +90,8 @@ If `[up-data]` is a JSON object, any HTML5 data attributes will be merged into t
 
 ```js
 up.compiler('.user', function(element, data) {
-  console.log(data.name) // => "Bob" from [data-name]
-  console.log(data.age)  // => 18    from [up-data]
+  console.log(data.name) // result: "Bob"
+  console.log(data.age)  // result: 18
 })
 ```
 
@@ -116,8 +116,8 @@ Here is an example where we use arbitrary HTML attributes to attach data to our 
 
 ```js
 up.compiler('.user', function(element) {
-  console.log(element.getAttribute('name'))          // => "Bob"
-  console.log(up.element.numberAttr(element, 'age')) // => 18
+  console.log(element.getAttribute('name'))          // result: "Bob"
+  console.log(up.element.numberAttr(element, 'age')) // result: 18
 })
 ```
 

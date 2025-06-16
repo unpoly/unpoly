@@ -49,28 +49,28 @@ the overlay is open. Also [meta tags](/updating-history#history-state) from the 
 In the example below, we start with a root layer on the `/` path:
 
 ```js
-location.pathname // => "/"
+location.pathname // result: "/"
 ```
 
 We now open a new overlay with visible overlay. Note how its URL `/overlay` is reflected in the browser's address bar (`location.pathname`):
 
 ```js
-await up.layer.open({ url: '/overlay', history: true }) // mark-phrase "true"
-location.pathname // => "/overlay"
+await up.layer.open({ url: '/overlay', history: true }) // mark-phrase: true
+location.pathname // result: "/overlay"
 ```
 
 You can still access the tracked location for each individual layer:
 
 ```js
-up.layer.current.location // => "/overlay"
-up.layer.root.location    // => "/"
+up.layer.current.location // result: "/overlay"
+up.layer.root.location    // result: "/"
 ```
 
 When the overlay is closed, the root layer's URL, title and meta tags are restored:
 
 ```js
 await up.layer.dismiss()
-location.pathname // => "/"
+location.pathname // result: "/"
 ```
 
 ## Behavior with invisible history {#invisible-history}
@@ -82,17 +82,17 @@ In the example below, we open an overlay with invisible history from the URL `/o
 Note how the browser's address bar remains on the root layer's location (`/`):
 
 ```js
-location.pathname // => "/"
-await up.layer.open({ url: '/overlay', history: false }) // mark-phrase "false"
-location.pathname // => "/"
+location.pathname // result: "/"
+await up.layer.open({ url: '/overlay', history: false }) // mark-phrase: false
+location.pathname // result: "/"
 ```
 
 Overlays with invisible history still track their location using the rules [described above](#update-conditions). You can access the tracked location for each individual layer:
 
 ```js
-up.layer.current.location // => "/"
-up.layer.root.location    // => "/"
-location.pathname         // => "/"
+up.layer.current.location // result: "/"
+up.layer.root.location    // result: "/"
+location.pathname         // result: "/"
 ```
 
 To track location changes, observe the `up:layer:location:changed` event.

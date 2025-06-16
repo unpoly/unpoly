@@ -5,8 +5,8 @@ There is no actual `List` class. Instead that term refers to an abstract interfa
 for objects that have a `{ length }` property and allow random access to an indexed element:
 
 ```js
-list[2] // => 'hello'
-list.length // => 10
+list[2] // result: 'hello'
+list.length // result: 10
 ```
 
 You can also use them in a `for` loop:

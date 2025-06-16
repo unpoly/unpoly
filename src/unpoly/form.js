@@ -363,7 +363,7 @@ up.form = (function() {
   ```js
   let form = document.querySelector('form')
   let options = up.form.submitOptions(form)
-  // => { url: '/foo', method: 'POST', target: '.content', ... }
+  // result: { url: /foo', method: 'POST', target: '.content', ... }'
   ```
 
   @param {Element|jQuery|string} form
@@ -719,8 +719,8 @@ up.form = (function() {
   When rendering from a watch callback, you should forward the `options` to the rendering function:
 
   ```js
-  up.watch('input.query', function(value, name, options) { // mark-phrase "options"
-    return up.reload('main', { ...options, params: { query: value }) // mark-phrase "options"
+  up.watch('input.query', function(value, name, options) { // mark-phrase: options
+    return up.reload('main', { ...options, params: { query: value }) // mark-phrase: options
   })
   ```
 
@@ -747,7 +747,7 @@ up.form = (function() {
   ```js
   up.watch('input.query', function(value, name, options) {
     let url = '/search?query=' + escapeURIFragment(value)
-    return up.render('.results', { url, ...options }) // mark-phrase "return"
+    return up.render('.results', { url, ...options }) // mark-phrase: return
   })
   ```
 
@@ -758,9 +758,9 @@ up.form = (function() {
   You can also return a promise by using `async` / `await`:
 
   ```js
-  up.watch('input.query', async function(value, name, options) { // mark-phrase "async"
+  up.watch('input.query', async function(value, name, options) { // mark-phrase: async
     let url = '/search?query=' + escapeURIFragment(value)
-    await up.render('.results', { url, ...options }) // mark-phrase "await"
+    await up.render('.results', { url, ...options }) // mark-phrase: await
   })
   ```
 
@@ -1526,15 +1526,15 @@ up.form = (function() {
   ```html
   <form action="/users">
 
-    <fieldset>
+    <fieldset> <!-- mark-phrase: fieldset -->
       <label for="email">E-mail</label>
       <input type="text" id="email" name="email">
-    </fieldset>
+    </fieldset> <!-- mark-phrase: fieldset -->
 
-    <fieldset>
+    <fieldset> <!-- mark-phrase: fieldset -->
       <label for="password">Password</label>
       <input type="password" id="password" name="password">
-    </fieldset>
+    </fieldset> <!-- mark-phrase: fieldset -->
 
     <button type="submit">Register</button>
 
@@ -1576,12 +1576,12 @@ up.form = (function() {
   <form action="/users">
 
     <fieldset>
-      <label for="email" up-validate>E-mail</label> <!-- mark-phrase "up-validate" -->
+      <label for="email" up-validate>E-mail</label> <!-- mark-phrase: up-validate -->
       <input type="text" id="email" name="email">
     </fieldset>
 
     <fieldset>
-      <label for="password" up-validate>Password</label> <!-- mark-phrase "up-validate" -->
+      <label for="password" up-validate>Password</label> <!-- mark-phrase: up-validate -->
       <input type="password" id="password" name="password">
     </fieldset>
 
@@ -1725,7 +1725,7 @@ up.form = (function() {
   attribute to any [target selector](/targeting-fragments):
 
   ```html
-  <input name="email" up-validate=".email-errors"> <!-- mark-phrase ".email-errors" -->
+  <input name="email" up-validate=".email-errors"> <!-- mark-phrase: .email-errors -->
   <div class="email-errors"></div>
   ```
 
@@ -1733,7 +1733,7 @@ up.form = (function() {
   by separating their target selectors with a comma:
 
   ```html
-  <input name="email" up-validate=".email-errors, .base-errors"> <!-- mark-phrase ".email-errors, .base-errors" -->
+  <input name="email" up-validate=".email-errors, .base-errors"> <!-- mark-phrase: .email-errors, .base-errors -->
   ```
 
   To update another fragment *in addition* to the field's form group, include
@@ -1742,7 +1742,7 @@ up.form = (function() {
 
   ```html
   <fieldset>
-    <input name="email" up-validate="fieldset:has(:origin), .base-errors"> <!-- mark-phrase "fieldset:has(:origin), .base-errors" -->
+    <input name="email" up-validate="fieldset:has(:origin), .base-errors"> <!-- mark-phrase: fieldset:has(:origin), .base-errors -->
   </fieldset>
   ```
 
@@ -1776,7 +1776,7 @@ up.form = (function() {
   instead of setting `[up-validate]` on each individual `<input>`, we can also set it on the `<form>`:
 
   ```html
-  <form action="/users" up-validate> <!-- mark-phrase "up-validate" -->
+  <form action="/users" up-validate> <!-- mark-phrase: up-validate -->
 
     <fieldset>
       <label for="email" up-validate>E-mail</label>
@@ -1799,7 +1799,7 @@ up.form = (function() {
   ```html
   <form action="/users">
 
-    <div up-validate> <!-- mark-phrase "up-validate" -->
+    <div up-validate> <!-- mark-phrase: up-validate -->
       <fieldset>
         <label for="email" up-validate>E-mail</label>
         <input type="text" id="email" name="email"> <!-- chip "will validate" -->
@@ -1844,7 +1844,7 @@ up.form = (function() {
   and `[up-validate-method]` attributes:
 
   ```html
-  <form method="post" action="/order" up-validate-url="/validate-order"> <!-- mark-phrase "up-validate-url" -->
+  <form method="post" action="/order" up-validate-url="/validate-order"> <!-- mark-phrase: up-validate-url -->
     ...
   </form>
   ```
@@ -1853,8 +1853,8 @@ up.form = (function() {
 
   ```html
   <form method="post" action="/register">
-    <input name="email" up-validate-url="/validate-email"> <!-- mark-phrase "/validate-email" -->
-    <input name="password" up-validate-url="/validate-password"> <!-- mark-phrase "/validate-password" -->
+    <input name="email" up-validate-url="/validate-email"> <!-- mark-phrase: /validate-email -->
+    <input name="password" up-validate-url="/validate-password"> <!-- mark-phrase: /validate-password -->
   </form>
   ```
 
@@ -1931,7 +1931,7 @@ up.form = (function() {
   For example, the `[up-show-for]` will show an element while the field has one of the given values:
 
   ```html
-  <div class="level-dependent" up-show-for="beginner"> <!-- mark-phrase "up-show-for" -->
+  <div class="level-dependent" up-show-for="beginner"> <!-- mark-phrase: up-show-for -->
     shown for beginner level, hidden for other levels
   </div>
   ```
@@ -2147,7 +2147,7 @@ up.form = (function() {
   that settles once the work concludes:
 
     ```html
-  <input name="query" up-watch="return asyncWork()"> <!-- mark-phrase "return" -->
+  <input name="query" up-watch="return asyncWork()"> <!-- mark-phrase: return -->
   ```
 
   Unpoly will guarantee that only one async callback is running concurrently.
@@ -2179,7 +2179,7 @@ up.form = (function() {
 
   ```html
   <form method="GET" action="/search">
-    <input type="search" name="query" up-autosubmit> <!-- mark-phrase "up-autosubmit" -->
+    <input type="search" name="query" up-autosubmit> <!-- mark-phrase: up-autosubmit -->
     <input type="checkbox" name="archive"> Include archived
   </form>
   ```

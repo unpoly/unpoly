@@ -77,7 +77,7 @@ typing before running a callback. You can do so by setting an `[up-watch-delay]`
 ```html
 <form action="/search">
   <!-- Wait until the user has stopped typing for 100 milliseconds -->
-  <input name="query" up-autosubmit up-watch-delay="100"> <!-- mark-phrase "up-watch-delay" -->
+  <input name="query" up-autosubmit up-watch-delay="100"> <!-- mark-phrase: up-watch-delay -->
 </form>
 ```
 
@@ -105,7 +105,7 @@ For this set an `[up-watch-disable]` attribute on the form or field being watche
 ```html
 <form action="/search">
   <!-- Wait until the user has stopped typing for 100 milliseconds -->
-  <input name="query" up-autosubmit up-watch-disable> <!-- mark-phrase "up-watch-disable" -->
+  <input name="query" up-autosubmit up-watch-disable> <!-- mark-phrase: up-watch-disable -->
 </form>
 ```
 
@@ -129,7 +129,7 @@ To apply a [preview](/previews), set an `[up-watch-preview]` attribute on the fo
 
 ```html
 <form action="/search">
-  <input name="query" up-autosubmit up-watch-preview="spinner"> <!-- mark-phrase "up-watch-preview" -->
+  <input name="query" up-autosubmit up-watch-preview="spinner"> <!-- mark-phrase: up-watch-preview -->
 </form>
 ```
 
@@ -137,7 +137,7 @@ To show a [placeholder](/placeholders) while working, use an `[up-watch-placehol
 
 ```html
 <form action="/search">
-  <input name="query" up-autosubmit up-watch-placeholder="#results-placeholder"> <!-- mark-phrase "up-watch-placeholder" -->
+  <input name="query" up-autosubmit up-watch-placeholder="#results-placeholder"> <!-- mark-phrase: up-watch-placeholder -->
 </form>
 ```
 
@@ -153,7 +153,7 @@ The [closest](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest) 
 By setting attributes on the `<form>` you can configure defaults for *all* watchers:
 
 ```html
-<form action="/search" up-watch-disable> <!-- mark-phrase "up-watch-disable" -->
+<form action="/search" up-watch-disable> <!-- mark-phrase: up-watch-disable -->
   <input name="query" up-autosubmit>
 </form>
 ```
@@ -161,9 +161,9 @@ By setting attributes on the `<form>` you can configure defaults for *all* watch
 Form-wide options can be overridden at the input level:
 
 ```html
-<form action="/search" up-watch-disable> <!-- mark-phrase "up-watch-disable" -->
+<form action="/search" up-watch-disable> <!-- mark-phrase: up-watch-disable -->
   <input name="department" up-autosubmit>
-  <input name="query" up-autosubmit up-watch-disable="false"> <!-- mark-phrase "up-watch-disable" -->
+  <input name="query" up-autosubmit up-watch-disable="false"> <!-- mark-phrase: up-watch-disable -->
 </form>
 ```
 

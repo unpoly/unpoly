@@ -3,7 +3,7 @@ Switching form state
 
 A field with the `[up-switch]` attribute can control the state of other element when the field changes.
 
-Common effects are [showing, hiding](#toggle) or [disabling](#disable} another element.
+Common effects are [showing, hiding](#toggle) or [disabling](#disable) another element.
 You can also implement [custom switching effects](#custom).
 
 ## Showing or hiding other elements {#toggle}
@@ -22,11 +22,11 @@ The target elements can use [`[up-show-for]`](/up-show-for) and [`[up-hide-for]`
 attributes to indicate for which values they should be shown or hidden:
 
 ```html
-<div class="level-dependent" up-show-for="beginner"> <!-- mark-phrase "up-show-for" -->
+<div class="level-dependent" up-show-for="beginner"> <!-- mark-phrase: up-show-for -->
   shown for beginner level, hidden for other levels
 </div>
 
-<div class="level-dependent" up-hide-for="beginner"> <!-- mark-phrase "up-hide-for" -->
+<div class="level-dependent" up-hide-for="beginner"> <!-- mark-phrase: up-hide-for -->
   hidden for beginner level, shown for other levels
 </div>
 ```
@@ -36,7 +36,7 @@ By default the entire form will be searched for matches. This can be [configured
 To toggle an element [for multiple values](#multiple-values), separate with a comma:
 
 ```
-<div class="level-dependent" up-show-for="intermediate, expert"> <!-- mark-phrase "up-show-for" -->
+<div class="level-dependent" up-show-for="intermediate, expert"> <!-- mark-phrase: up-show-for -->
   only shown for intermediate and expert levels
 </div>
 ```
@@ -58,10 +58,10 @@ attributes to indicate for which values they should be shown or hidden:
 
 ```html
 <!-- The department field is only shown for managers -->
-<input class="role-dependent" name="department" up-enable-for="manager"> <!-- mark-phrase "up-enable-for" -->
+<input class="role-dependent" name="department" up-enable-for="manager"> <!-- mark-phrase: up-enable-for -->
 
 <!-- The mentor field is only shown for trainees -->
-<input class="role-dependent" name="mentor" up-disable-for="manager"> <!-- mark-phrase "up-disable-for" -->
+<input class="role-dependent" name="mentor" up-disable-for="manager"> <!-- mark-phrase: up-disable-for -->
 ```
 
 ## Custom switching effects {#custom-effects}
@@ -76,7 +76,7 @@ outline around the department field when the manager role is selected:
   <option value="manager">Manager</option>
 </select>
 
-<input class="role-dependent" name="department" highlight-for="manager"> <!-- mark-phrase "highlight-for" -->
+<input class="role-dependent" name="department" highlight-for="manager"> <!-- mark-phrase: highlight-for -->
 ```
 
 When the role select changes, an `up:form:switch` event is emitted on all elements matching `.role-dependent`.
@@ -98,7 +98,7 @@ up.on('up:form:switch', '[highlight-for]', (event) => {
 To switch for multiple values, separate them with a comma:
 
 ```html
-<div class="level-dependent" up-show-for="intermediate, expert"> <!-- mark-phrase "intermediate, expert" -->
+<div class="level-dependent" up-show-for="intermediate, expert"> <!-- mark-phrase: intermediate, expert -->
   only shown for intermediate and expert levels
 </div>
 ```
@@ -106,7 +106,7 @@ To switch for multiple values, separate them with a comma:
 If your values might contain spaces, you may also serialize them as a [relaxed JSON](/relaxed-json) array:
 
 ```html
-<div class='level-dependent' up-show-for='["John Doe", "Jane Doe"]'> <!-- mark-phrase '["John Doe", "Jane Doe"]' -->
+<div class='level-dependent' up-show-for='["John Doe", "Jane Doe"]'> <!-- mark-phrase: ["John Doe", "Jane Doe"] -->
   You selected John or Jane Doe
 </div>
 ```
@@ -116,7 +116,7 @@ If your values might contain spaces, you may also serialize them as a [relaxed J
 Instead of switching on specific string values, you can use `:blank` to match an empty input value:
 
 ```html
-<input type="text" name="user" up-switch=".target"> <!-- mark-phrase ":blank" -->
+<input type="text" name="user" up-switch=".target"> <!-- mark-phrase: :blank -->
 
 <div class="target" up-show-for=":blank">
   please enter a username
@@ -126,7 +126,7 @@ Instead of switching on specific string values, you can use `:blank` to match an
 Inversely, `:present` will match any non-empty input value:
 
 ```html
-<div class="target" up-hide-for=":present"> <!-- mark-phrase ":present" -->
+<div class="target" up-hide-for=":present"> <!-- mark-phrase: :present -->
   please enter a username
 </div>
 ```
@@ -163,11 +163,11 @@ You may also match against the `[value]` attribute of the checkbox element:
 Use `[up-switch]` on a container for a radio button group:
 
 ```html
-<div up-switch=".level-dependent"> <!-- mark-phrase "div" -->
+<div up-switch=".level-dependent"> <!-- mark-phrase: div -->
   <input type="radio" name="level" value="beginner">
   <input type="radio" name="level" value="intermediate">
   <input type="radio" name="level" value="expert">
-</div> <!-- mark-phrase "div" -->
+</div> <!-- mark-phrase: div -->
 
 <div class="level-dependent" up-show-for="beginner">
   shown for beginner level, hidden for other levels
@@ -188,7 +188,7 @@ To match all elements within the current [layer](/up.layer), set the region to `
 
 ```
 <form method="post" action="/order">
-  <select name="payment" up-switch="#info" up-switch-region=":layer"> <!-- mark-phrase "up-switch-region" -->
+  <select name="payment" up-switch="#info" up-switch-region=":layer"> <!-- mark-phrase: up-switch-region -->
     <option value="paypal">PayPal</option>
     <option value="manual">Manual wire transfer</option>
   </select>
@@ -221,7 +221,7 @@ For example, listening to `change` will wait until the text field is blurred
 before applying any switching effects:
 
 ```html
-<input type="text" name="user" up-switch=".user-dependent" up-watch-event="change"> <!-- mark-phrase "up-watch-event" -->
+<input type="text" name="user" up-switch=".user-dependent" up-watch-event="change"> <!-- mark-phrase: up-watch-event -->
 ```
 
 When watching a fast-firing event like `input`,
@@ -229,7 +229,7 @@ you can debounce the switching effect
 with an [`[up-watch-delay]`](/up-switch#up-watch-delay) attribute:
 
 ```html
-<input type="text" name="user" up-switch=".user-dependent" up-watch-event="input" up-watch-delay="150"> <!-- mark-phrase "up-watch-delay" -->
+<input type="text" name="user" up-switch=".user-dependent" up-watch-event="input" up-watch-delay="150"> <!-- mark-phrase: up-watch-delay -->
 ```
 
 

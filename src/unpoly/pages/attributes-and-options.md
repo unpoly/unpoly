@@ -8,7 +8,7 @@ For example, the [`[up-follow]`](/up-follow) attribute will cause a clicked link
 instead of replacing the full page:
 
 ```html
-<a href="/path" up-follow>Click me</a> <!-- mark-phrase "up-follow" -->
+<a href="/path" up-follow>Click me</a> <!-- mark-phrase: up-follow -->
 ```
 
 
@@ -19,7 +19,7 @@ For example, the `[up-transition]` attribute causes an `[up-follow]` to swap
 using an [animated transition](/up.motion):
 
 ```html
-<a href="/path" up-follow up-transition="cross-fade">Click me</a> <!-- mark-phrase "up-transition" -->
+<a href="/path" up-follow up-transition="cross-fade">Click me</a> <!-- mark-phrase: up-transition -->
 ```
 
 Modifying attributes are documented with the main attribute they're modifying.
@@ -55,7 +55,7 @@ an `[up-follow]` attribute:
 You can still make exceptions by setting an `[up-follow=false]` attribute:
 
 ```html
-<a href="/path" up-follow="false">Click for full page load</a> <!-- mark-phrase "false" -->
+<a href="/path" up-follow="false">Click for full page load</a> <!-- mark-phrase: false -->
 ```
 
 
@@ -99,7 +99,7 @@ Some attributes default to a value `"auto"`. This indicates a more complex defau
 For example, the [`[up-cache=auto]`](/up-follow#up-cache) attribute caches all links with a `GET` method:
 
 ```
-<a href="/path" up-follow up-cache="auto">Click me</a> <!-- mark-phrase "auto" -->
+<a href="/path" up-follow up-cache="auto">Click me</a> <!-- mark-phrase: auto -->
 ```
 
 You can usually configure auto-behavior. For example, the following will prevent auto-caching
@@ -117,8 +117,8 @@ up.network.config.autoCache = function(request) {
 Most Unpoly attributes can be enabled with a value `"true"` and be disabled with a value `"false"`:
 
 ```html
-<a href="/path" up-follow="true">Click for single-page navigation</a> <!-- mark-phrase "true" -->
-<a href="/path" up-follow="false">Click for full page load</a> <!-- mark-phrase "false" -->
+<a href="/path" up-follow="true">Click for single-page navigation</a> <!-- mark-phrase: true -->
+<a href="/path" up-follow="false">Click for full page load</a> <!-- mark-phrase: false -->
 ```
 
 Instead of setting a `true` you can also set an empty value:
@@ -133,7 +133,7 @@ Boolean values can be helpful with a server-side templating language like ERB, L
 set from a boolean variable:
 
 ```erb
-<a href="/path" up-follow="<%= is_signed_in %>">Click me</a> <%# mark-phrase "is_signed_in" %>
+<a href="/path" up-follow="<%= is_signed_in %>">Click me</a> <%# mark-phrase: is_signed_in %>
 ```
 
 This can also help when you're generating HTML from a different programming language and want to pass a `true` literal

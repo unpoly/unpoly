@@ -22,10 +22,10 @@ as content around it is updated. We can achieve this by setting an `[up-keep]` a
 on the element we want to keep:
 
 ```html
-<!-- label "Initial page" -->
+<!-- label: Initial page -->
 <div id="article">
   <p>Article 1</p>
-  <audio id="player" up-keep src="song1.mp3"></audio> <!-- mark-phrase "up-keep" -->
+  <audio id="player" up-keep src="song1.mp3"></audio> <!-- mark-phrase: up-keep -->
 </div>
 
 <a href="/article2" up-target="#article">Go to article 2</a>
@@ -34,7 +34,7 @@ on the element we want to keep:
 When the link is clicked, Unpoly will request `/article2` and receives HTML like this:
 
 ```html
-<!-- label "Response from the server" -->
+<!-- label: Response from the server -->
 <div id="article">
   <p>Article 2</p>
   <audio id="player" up-keep src="song2.mp3"></audio>
@@ -47,13 +47,13 @@ Because the `<audio>` element's  [derived target](/target-derivation) (`#player`
 Unpoly can preserve it. Elements around it will be updated with new content, highlighted below:
 
 ```html
-<!-- label "Page after update" -->
+<!-- label: Page after update -->
 <article>                                             <!-- mark-line -->
   <p>Article 2</p>                                    <!-- mark-line -->
-  <audio id="player" up-keep src="song1.mp3"></audio> <!-- preserved -->
+  <audio id="player" up-keep src="song1.mp3"></audio> <!-- chip: preserved -->
 </article>                                            <!-- mark-line -->
 
-<a href="/article2" up-target="#article">Go to article 2</a> <!-- not targeted -->
+<a href="/article2" up-target="#article">Go to article 2</a> <!-- chip: not targeted -->
 ```
 
 
@@ -84,7 +84,7 @@ We can achieve this by setting `[up-keep="same-html"]` on a container that conta
 and eventual error messages:
 
 ```html
-<fieldset id="department-group" up-keep="same-html"> <!-- mark-phrase "same-html" -->
+<fieldset id="department-group" up-keep="same-html"> <!-- mark-phrase: same-html -->
   <label for="department">Department</label>
   <select id="department" name="department" value="IT">
     <option>IT</option>
@@ -116,13 +116,13 @@ centered around the new location. We can achieve this by setting an `[up-keep="s
 the map container:
 
 ```html
-<div class="map" up-data="{ location: 'Hofbräuhaus Munich' }" up-keep="same-data"></div> <!-- mark-phrase "same-data" -->
+<div class="map" up-data="{ location: 'Hofbräuhaus Munich' }" up-keep="same-data"></div> <!-- mark-phrase: same-data -->
 ```
 
 Instead of `[up-data]` we can also use HTML5 [`[data-*]` attributes](https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes):
 
 ```html
-<div class="map" data-location="Hofbräuhaus Munich" up-keep="same-data"></div> <!-- mark-phrase "data-location" -->
+<div class="map" data-location="Hofbräuhaus Munich" up-keep="same-data"></div> <!-- mark-phrase: data-location -->
 ```
 
 Unpoly will compare the element's **initial data** as it is rendered by the server.\

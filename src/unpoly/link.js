@@ -391,7 +391,7 @@ up.link = (function() {
   ```js
   let link = document.querySelector('a[href="/foo"]')
   let options = up.link.followOptions(link)
-  // => { url: '/foo', method: 'GET', target: '.content', layer: 'new', ... }
+  // result: { url: /foo', method: 'GET', target: '.content', layer: 'new', ... }'
   ```
 
   @function up.link.followOptions
@@ -765,7 +765,7 @@ up.link = (function() {
   Add the `[up-clickable]` attribute to a non-interactive element, like a `<span>`:
 
   ```html
-  <span id="faux-button" up-clickable>Click me</span> <!-- mark-phrase "up-clickable" -->
+  <span id="faux-button" up-clickable>Click me</span> <!-- mark-phrase: up-clickable -->
   ```
 
   To react the element's effect when activated, handle the `up:click` event:
@@ -783,7 +783,7 @@ up.link = (function() {
   To activate the element on `mousedown` instead of `click`, also set an `[up-instant]` attribute:
 
     ```html
-  <span id="faux-button" up-clickable up-instant>Click me</span> <!-- mark-phrase "up-instant" -->
+  <span id="faux-button" up-clickable up-instant>Click me</span> <!-- mark-phrase: up-instant -->
   ```
 
   ## Unobtrusive use
@@ -1347,7 +1347,7 @@ up.link = (function() {
   ## Example
 
   ```html
-  <a href="/users" up-follow up-instant>User list</a> <!-- mark-phrase "up-instant" -->
+  <a href="/users" up-follow up-instant>User list</a> <!-- mark-phrase: up-instant -->
   ```
 
   ## Accessibility

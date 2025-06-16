@@ -266,8 +266,8 @@ up.history = (function() {
   ```js
   location.hostname // => '/path'
 
-  up.history.isLocation('/path') // => true
-  up.history.isLocation('/other') // => false
+  up.history.isLocation('/path') // result: true
+  up.history.isLocation('/other') // result: false
   ```
 
   By default, a trailing `#hash` will be ignored for the comparison. A `?query` string will not:
@@ -275,20 +275,20 @@ up.history = (function() {
   ```js
   location.hostname // => '/path'
 
-  up.history.isLocation('/path#hash') // => true
-  up.history.isLocation('/path?query') // => false
+  up.history.isLocation('/path#hash') // result: true
+  up.history.isLocation('/path?query') // result: false
   ```
 
   The given URL is [normalized](/up.util.normalizeURL), so any URL string pointing to the browser location
   will match:
 
   ```js
-  location.hostname // => '/current-host'
+  location.hostname // result: '/current-host'
   location.pathname // => '/foo'
 
-  up.history.isLocation('/foo') // => true
-  up.history.isLocation('http://current-host/foo') // => true
-  up.history.isLocation('http://otgher-host/foo') // => false
+  up.history.isLocation('/foo') // result: true
+  up.history.isLocation('http://current-host/foo') // result: true
+  up.history.isLocation('http://otgher-host/foo') // result: false
   ```
 
   @function up.history.isLocation

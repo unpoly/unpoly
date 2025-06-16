@@ -118,7 +118,7 @@ up.compiler('[track-page-view]', function(element, data, meta) {
   // Don't track duplicate page views if we just reloaded for cache revalidation. 
   if (!meta.revalidating) {
     // Send an event to our web analytics tool.
-    trackPageView(meta.layer.location, data) // mark-phrase "data"
+    trackPageView(meta.layer.location, data) // mark-phrase: data
   }
 }
 ```

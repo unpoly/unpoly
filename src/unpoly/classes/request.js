@@ -42,8 +42,8 @@ up.Request = class Request extends up.Record {
 
   ```js
   let request = up.request({ url: '/path#section' })
-  request.url // => '/path'
-  request.hash // => '#section'
+  request.url // result: '/path'
+  request.hash // result: '#section'
   ```
 
   @property up.Request#hash

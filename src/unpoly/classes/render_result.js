@@ -6,8 +6,8 @@ that resolve with an `up.RenderResult`:
 
 ```js
 let result = await up.render('.target', content: 'foo')
-console.log(result.fragments) // => [<div class="target">...</div>]
-console.log(result.layer)     // => up.Layer.Root
+console.log(result.fragments) // result: [<div class="target">...</div>]
+console.log(result.layer)     // result: up.Layer.Root
 ```
 
 @class up.RenderResult
@@ -44,8 +44,8 @@ up.RenderResult = class RenderResult extends up.Record {
 
   ```js
   let result = await up.render({ target: '#foo, #bar:maybe' })
-  result.renderOptions // => "#foo, #bar:maybe"
-  result.target        // => "#foo"
+  result.renderOptions // result: "#foo, #bar:maybe"
+  result.target        // result: "#foo"
   ```
 
   If any `[up-hungry]` elements were added to the render pass, they
@@ -53,8 +53,8 @@ up.RenderResult = class RenderResult extends up.Record {
 
   ```js
   let result = await up.render({ target: '#foo' })
-  result.renderOptions // => "#foo"
-  result.target        // => "#foo, #hungry"
+  result.renderOptions // result: "#foo"
+  result.target        // result: "#foo, #hungry"
   ```
 
   @property up.RenderResult#target

@@ -14,9 +14,9 @@ Unpoly adds CSS classes to interactive elements that are loading content,
 and to the fragments they are targeting:
 
 ```html
-<a href="/bar" up-target="#target" class="up-active">Bar</a> <!-- mark-phrase "up-active" -->
+<a href="/bar" up-target="#target" class="up-active">Bar</a> <!-- mark-phrase: up-active -->
 
-<div id="target" class="up-loading"> <!-- mark-phrase "up-loading" -->
+<div id="target" class="up-loading"> <!-- mark-phrase: up-loading -->
   Initial content
 </div>
 ```
@@ -30,10 +30,10 @@ Showing placeholders
 Placeholders are temporary spinners or UI skeletons shown while a fragment is loading:
 
 ```html
-<a href="/path" up-target="#target" up-placeholder="Loading…">Show story</a> <!-- mark-phrase "Loading…" -->
+<a href="/path" up-target="#target" up-placeholder="Loading…">Show story</a> <!-- mark-phrase: Loading… -->
 
 <div id="#target">
-  Loading… <!-- mark-phrase "Loading…" -->
+  Loading… <!-- mark-phrase: Loading… -->
 </div>
 ```
 
@@ -75,7 +75,7 @@ Disabling forms while working
 Unpoly lets you disable fields and buttons while a form is submitting:
 
 ```html
-<form up-submit up-disable action="/session"> <!-- mark-phrase "up-disable" -->
+<form up-submit up-disable action="/session"> <!-- mark-phrase: up-disable -->
   <input type="text" name="email">        <!-- will be disabled -->
   <input type="password" name="password"> <!-- will be disabled -->
   <button type="submit">Sign in</button>  <!-- will be disabled -->
@@ -103,7 +103,7 @@ Signaling severe network problems
 Unpoly provides events to handle network issues like disconnects or flaky connections:
 
 ```js
-up.on('up:fragment:offline', function(event) { // mark-phrase "up:fragment:offline"
+up.on('up:fragment:offline', function(event) { // mark-phrase: up:fragment:offline
   if (confirm('You are offline. Retry?')) event.retry()
 })
 ```

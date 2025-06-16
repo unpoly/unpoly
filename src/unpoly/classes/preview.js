@@ -91,7 +91,7 @@ up.Preview = class Preview {
   up.preview('my-preview', function(preview) {
     if (preview.fragment.hasAttribute('foo')) return
     preview.fragment.setAttribute('foo', 'foo-value')
-    return () => preview.fragment.removeAttribute('foo')) // mark-phrase "return"
+    return () => preview.fragment.removeAttribute('foo')) // mark-phrase: return
   })
   ```
 
@@ -235,12 +235,12 @@ up.Preview = class Preview {
   name:
 
   ```js
-  up.preview('foo', function(preview) { // mark-phrase "'foo'"
+  up.preview('foo', function(preview) { // mark-phrase: 'foo'
     // ...
   })
 
   up.preview('bar', function(preview) {
-    preview.run('foo') // mark-phrase "'foo'"
+    preview.run('foo') // mark-phrase: 'foo'
   })
   ```
 

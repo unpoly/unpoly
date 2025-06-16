@@ -84,7 +84,7 @@ up.status = (function() {
   We can use the `loading-attr` preview in any link or form by setting an `[up-preview]` attribute:
 
   ```html
-  <a href="/edit" up-follow up-preview="loading-attr">Edit page</a> <!-- mark-phrase "up-preview" -->
+  <a href="/edit" up-follow up-preview="loading-attr">Edit page</a> <!-- mark-phrase: up-preview -->
   ```
 
   ## Accepting parameters {#parameters}
@@ -104,7 +104,7 @@ up.status = (function() {
   From HTML you can append the options to the `[up-preview]` argument, after the preview name:
 
   ```html
-  <a href="/edit" up-follow up-preview="spinner { size: 100 }">Edit page</a> <!-- mark-phrase "{ size: 100 }" -->
+  <a href="/edit" up-follow up-preview="spinner { size: 100 }">Edit page</a> <!-- mark-phrase: { size: 100 } -->
   ```
 
   @function up.preview
@@ -272,13 +272,13 @@ up.status = (function() {
   To refer to a preview function, set its name as an `[up-preview]` attribute:
 
   ```html
-  <a href="/edit" up-follow up-preview="spinner">Edit page</a> <!-- mark-phrase "spinner" -->
+  <a href="/edit" up-follow up-preview="spinner">Edit page</a> <!-- mark-phrase: spinner -->
   ```
 
   To [call multiple previews](/previews#multiple), separate their names with a comma:
 
   ```html
-  <a href="/edit" up-follow up-preview="spinner, dim-page">Edit page</a> <!-- mark-phrase "spinner, dim-page" -->
+  <a href="/edit" up-follow up-preview="spinner, dim-page">Edit page</a> <!-- mark-phrase: spinner, dim-page -->
   ```
 
   [Preview options](#parameters) can be appended after each preview name, encoded as [Relaxed JSON](/relaxed-json):
@@ -286,7 +286,7 @@ up.status = (function() {
   ```html
   <a href="/edit"
      up-follow
-     up-preview="spinner { size: 20 }, dim-page { animation: 'pulse' }"> <!-- mark-phrase "spinner { size: 20 }, dim-page { animation: 'pulse' }" -->
+     up-preview="spinner { size: 20 }, dim-page { animation: 'pulse' }"> <!-- mark-phrase: spinner { size: 20 }, dim-page { animation: 'pulse' } -->
     Edit page
   </a>
   ```
@@ -317,7 +317,7 @@ up.status = (function() {
   This link will show the message *"Loading…"* within `#target` while its request is loading:
 
   ```html
-  <a href="/path" up-target="#target" up-placeholder="<p>Loading…</p>">Show story</a> <!-- mark-phrase "<p>Loading…</p>" -->
+  <a href="/path" up-target="#target" up-placeholder="<p>Loading…</p>">Show story</a> <!-- mark-phrase: <p>Loading…</p> -->
 
   <div id="#target">
     Old content
@@ -406,7 +406,7 @@ up.status = (function() {
   Let's look at a simple menu with two links:
 
   ```html
-  <div up-nav> <!-- mark-phrase "up-nav" -->
+  <div up-nav> <!-- mark-phrase: up-nav -->
     <a href="/foo">Foo</a>
     <a href="/bar">Bar</a>
   </div>
@@ -416,7 +416,7 @@ up.status = (function() {
 
   ```html
   <div up-nav>
-    <a href="/foo" class="up-current">Foo</a> <!-- mark-phrase "up-current" -->
+    <a href="/foo" class="up-current">Foo</a> <!-- mark-phrase: up-current -->
     <a href="/bar">Bar</a>
   </div>
   ```
@@ -427,7 +427,7 @@ up.status = (function() {
   ```html
   <div up-nav>
     <a href="/foo">Foo</a>
-    <a href="/bar" class="up-current">Bar</a> <!-- mark-phrase "up-current" -->
+    <a href="/bar" class="up-current">Bar</a> <!-- mark-phrase: up-current -->
   </div>
   ```
 

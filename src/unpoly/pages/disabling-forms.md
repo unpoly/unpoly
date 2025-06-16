@@ -13,7 +13,7 @@ To fully prevent access to the form while it is submitting, you need to disable 
 For this set an empty `[up-disable]` attribute on the `<form>` element:
 
 ```html
-<form up-submit up-disable action="/session"> <!-- mark-phrase "up-disable" -->
+<form up-submit up-disable action="/session"> <!-- mark-phrase: up-disable -->
   <input type="text" name="email">        <!-- will be disabled -->
   <input type="password" name="password"> <!-- will be disabled -->
   <button type="submit">Sign in</button>  <!-- will be disabled -->
@@ -40,7 +40,7 @@ To only disable some form controls, set the value of `[up-disable]` to any CSS s
 In the example below we disable all `<button>` elements by setting an `[up-disable="button"]` attribute on the form: 
 
 ```html
-<form up-submit up-disable="button" action="/session"> <!-- mark-phrase "button" -->
+<form up-submit up-disable="button" action="/session"> <!-- mark-phrase: button -->
   <input type="text" name="email">         <!-- will NOT be disabled -->
   <input type="password" name="password">  <!-- will NOT be disabled -->
   <button type="submit">Sign in</button>   <!-- will be disabled -->
@@ -51,7 +51,7 @@ In the example below we disable all `<button>` elements by setting an `[up-disab
 Instead of targeting form controls directly, you may also pass a selector for a container element. All fields and buttons within that container will be disabled:
 
 ```html
-<form up-submit up-disable=".actions" action="/session"> <!-- mark-phrase ".actions" -->
+<form up-submit up-disable=".actions" action="/session"> <!-- mark-phrase: .actions -->
   <input type="text" name="email">           <!-- will NOT be disabled -->
   <input type="password" name="password">    <!-- will NOT be disabled -->
   <div class="actions">
@@ -82,7 +82,7 @@ Setting an `[up-disable]` attribute on a link will disable all fields within the
   <input type="password" name="password"> <!-- will be disabled -->
   <button type="submit">Sign in</button>  <!-- will be disabled -->
 
-  <a href="/register" up-disable> <!-- mark-phrase "up-disable" -->
+  <a href="/register" up-disable> <!-- mark-phrase: up-disable -->
     Register an account instead
   </a>
 </form>
@@ -92,13 +92,13 @@ If the form is not an ancestor of the link, you can also set the `[up-disable]` 
 to a CSS selector that matches a form, fields, or any container that contains fields:
 
 ```html
-<form action="/session" id="session-form"> <!-- mark-phrase "session-form" -->
+<form action="/session" id="session-form"> <!-- mark-phrase: session-form -->
   <input type="text" name="email">        <!-- will be disabled -->
   <input type="password" name="password"> <!-- will be disabled -->
   <button type="submit">Sign in</button>  <!-- will be disabled -->
 </form>
 
-<a href="/register" up-disable="#session-form"> <!-- mark-phrase "#session-form" -->
+<a href="/register" up-disable="#session-form"> <!-- mark-phrase: #session-form -->
   Register an account instead
 </a>
 ```

@@ -30,7 +30,7 @@ Standard [`<nav>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/nav
 always considered navigational containers:
 
 ```html
-<nav> <!-- mark-phrase "nav" -->
+<nav> <!-- mark-phrase: nav -->
   <a href="/foo">Foo</a>
   <a href="/bar">Bar</a>
 </nav>
@@ -39,7 +39,7 @@ always considered navigational containers:
 If you cannot use a `<nav>` element, you can also set the `[up-nav]` attribute on an arbitrary tag instead:
 
 ```html
-<div up-nav> <!-- mark-phrase "up-nav" -->
+<div up-nav> <!-- mark-phrase: up-nav -->
   <a href="/foo">Foo</a>
   <a href="/bar">Bar</a>
 </div>
@@ -48,13 +48,13 @@ If you cannot use a `<nav>` element, you can also set the `[up-nav]` attribute o
 You may also assign `[up-nav]` to an individual link instead of an navigational container:
 
 ```html
-<a href="/foo" up-nav>Foo</a> <!-- mark-phrase "up-nav" -->
+<a href="/foo" up-nav>Foo</a> <!-- mark-phrase: up-nav -->
 ```
 
 Matching containers can opt *out* of `.up-current` assignment by setting an `[up-nav=false]` attribute:
 
 ```html
-<nav up-nav="false"> <!-- mark-phrase "false" -->
+<nav up-nav="false"> <!-- mark-phrase: false -->
   <a href="/foo">Foo</a>
   <a href="/bar">Bar</a>
 </nav>
@@ -130,7 +130,7 @@ whose `.up-current` class also match the root layer's location:
 
 ```html
 <!-- Shown within an overlay -->
-<nav up-layer="root"> <!-- mark-phrase "up-layer" -->
+<nav up-layer="root"> <!-- mark-phrase: up-layer -->
   <a href="/users" up-layer="root">Users</a>
   <a href="/posts" up-layer="root">Posts</a>
 </nav>
@@ -143,7 +143,7 @@ In this example links are marked as "current" if their
 URL matches the location of *any* layer:
 
 ```html
-<nav up-layer="any"> <!-- mark-phrase "any" -->
+<nav up-layer="any"> <!-- mark-phrase: any -->
   <a href="/users" up-layer="root">Users</a>
   <a href="/posts" up-layer="root">Posts</a>
   <a href="/sitemap" up-layer="current">Full sitemap</a>
@@ -172,7 +172,7 @@ Unpoly will set all configured classes on a current link:
 
 ```html
 <nav>
-  <a href="/foo" class="up-current my-current">Foo</a> <!-- mark-phrase "up-current selected" -->
+  <a href="/foo" class="up-current my-current">Foo</a> <!-- mark-phrase: up-current selected -->
   <a href="/bar">Bar</a>
 </nav>
 ```
@@ -185,7 +185,7 @@ to convey the emphasis to assistive technologies:
 
 ```html
 <nav>
-  <a href="/foo" class="up-current" aria-current="page">Foo</a> <!-- mark-phrase "aria-current" -->
+  <a href="/foo" class="up-current" aria-current="page">Foo</a> <!-- mark-phrase: aria-current -->
   <a href="/bar">Bar</a>
 </nav>
 ```
@@ -194,7 +194,7 @@ When using a non-`<nav>` element with `[up-nav]`, we recommend to also set a `[r
 to define a navigation landmark:
 
 ```html
-<div up-nav role="navigation"> <!-- mark-phrase "navigation" -->
+<div up-nav role="navigation"> <!-- mark-phrase: navigation -->
   <a href="/foo">Foo</a>
   <a href="/bar">Bar</a>
 </div>

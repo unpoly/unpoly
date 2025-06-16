@@ -19,13 +19,13 @@ To refer to a template, pass its CSS selector to any attribute or option that ac
 
 
 ```html
-<a href="#" up-target=".target" up-document="#my-template">Click me</a> <!-- mark-phrase "#my-template" -->
+<a href="#" up-target=".target" up-document="#my-template">Click me</a> <!-- mark-phrase: #my-template -->
 
 <div class="target">
   Old content
 </div>
 
-<template id="my-template"> <!-- mark-phrase "my-template" -->
+<template id="my-template"> <!-- mark-phrase: my-template -->
   <div class="target">
     New content
   </div>
@@ -75,7 +75,7 @@ this template in various places, but set a custom element text every time:
 ```html
 <template id="task-template">
   <div class="task">
-    {{taskDescription}} <!-- mark-phrase "{{taskDescription}}" -->
+    {{taskDescription}} <!-- mark-phrase: {{taskDescription}} -->
   </div>
 </template>
 ```
@@ -118,7 +118,7 @@ Sometimes we cannot use the `[up-use-data]` attribute, e.g. when configuring a [
 In that case we can append the data object after the template selector:
 
 ```html
-<a href="/home" up-placeholder="#spinner { size: 'xl' }"> <!-- mark-phrase "#spinner { size: 'xl' }" -->
+<a href="/home" up-placeholder="#spinner { size: 'xl' }"> <!-- mark-phrase: #spinner { size: 'xl' } -->
   Click me
 </a>
 ```
@@ -149,7 +149,7 @@ For this example we're going to use templates in the style of
 
 
 ```html
-<script id="results-template" type="text/mustache"> <!-- mark-phrase "text/mustache" -->
+<script id="results-template" type="text/mustache"> <!-- mark-phrase: text/mustache -->
   <div id="game-results">
     <h1>Results of game {{gameCount}}</h1>
 
@@ -191,7 +191,7 @@ If you only care about simple `{{variable}}` replacements, you can also use Java
 without adding a dependency. Here we define a very simple templating function for the `text/minimustache` type:
 
 ```js
-up.on('up:template:clone', '[type="text/minimustache"]', function(event) { // mark-phrase "text/minimustache"
+up.on('up:template:clone', '[type="text/minimustache"]', function(event) { // mark-phrase: text/minimustache
   let template = event.target.innerHTML
   let evaluate = (_match, variable) => up.util.escapeHTML(event.data[variable])
   let filled = template.replace(/{{(\w+)}}/g, evaluate)

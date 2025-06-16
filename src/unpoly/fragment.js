@@ -478,7 +478,7 @@ up.fragment = (function() {
   manually set `[up-source]` attribute:
 
   ```html
-  <div class="unread-count" up-poll up-source="/unread-count"> <!-- mark-phrase "up-source" -->
+  <div class="unread-count" up-poll up-source="/unread-count"> <!-- mark-phrase: up-source -->
     2 new messages
   </div>
   ```
@@ -1805,10 +1805,10 @@ up.fragment = (function() {
   ## Examples
 
   ```js
-  successKey('target')         // => undefined
-  successKey('onFinished')     // => undefined
-  successKey('failTarget')     // => 'target'
-  successKey('onFailFinished') // => 'onFinished'
+  successKey('target')         // result: undefined
+  successKey('onFinished')     // result: undefined
+  successKey('failTarget')     // result: 'target'
+  successKey('onFailFinished') // result: 'onFinished'
   ```
 
   @function up.fragment.successKey
@@ -1836,10 +1836,10 @@ up.fragment = (function() {
   ## Examples
 
   ```js
-  failKey('target')         // => 'failTarget'
-  failKey('onFinished')     // => 'onFailFinished'
-  failKey('failTarget')     // => undefined
-  failKey('onFailFinished') // => undefined
+  failKey('target')         // result: 'failTarget'
+  failKey('onFinished')     // result: 'onFailFinished'
+  failKey('failTarget')     // result: undefined
+  failKey('onFailFinished') // result: undefined
   ```
 
   @function up.fragment.failKey
@@ -2464,10 +2464,10 @@ up.fragment = (function() {
 
   ```js
   let element = document.querySelector('div[up-main]')
-  up.fragment.matches(element, 'div') // => true
-  up.fragment.matches(element, 'span') // => false
-  up.fragment.matches(element, ':main') // => true
-  up.fragment.matches(element, element) // => true
+  up.fragment.matches(element, 'div') // result: true
+  up.fragment.matches(element, 'span') // result: false
+  up.fragment.matches(element, ':main') // result: true
+  up.fragment.matches(element, element) // result: true
   ```
 
   @function up.fragment.matches
@@ -2891,7 +2891,7 @@ up.fragment = (function() {
   We want to integrate [Mustache](https://github.com/janl/mustache.js) to enable templates like this:
 
   ```html
-  <script id="greeter-template" type="text/mustache"> <!-- mark-phrase "text/mustache" -->
+  <script id="greeter-template" type="text/mustache"> <!-- mark-phrase: text/mustache -->
     <div id="greeter">
       Hello, {{name}}!
     </div>
