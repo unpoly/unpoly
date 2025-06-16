@@ -1380,6 +1380,37 @@ describe('up.form', function() {
             expect($checkbox.is(':checked')).toBe(false)
             expect(callback.calls.count()).toEqual(2)
           })
+
+          it('runs callbacks for array fields, considering the entire array as the value to compare', async function() {
+            const form = fixture('form')
+            const container = e.affix(form, 'div')
+            const input1 = e.affix(container, 'input', { type: "checkbox", name: "foo[]", value: "1" })
+            const input2 = e.affix(container, 'input', { type: "checkbox", name: "foo[]", value: "2" })
+            const callback = jasmine.createSpy('change callback')
+            up.watch(container, callback)
+
+            input1.checked = true
+            Trigger.change(input1)
+            await wait()
+
+            expect(callback.calls.count()).toEqual(1)
+            expect(callback.calls.mostRecent().args).toEqual([['1'], 'foo[]', jasmine.anything()])
+
+            input2.checked = true
+            Trigger.change(input2)
+            await wait()
+
+            expect(callback.calls.count()).toEqual(2)
+            expect(callback.calls.mostRecent().args).toEqual([['1', '2'], 'foo[]', jasmine.anything()])
+
+            input2.checked = false
+            Trigger.change(input2)
+            await wait()
+
+            expect(callback.calls.count()).toEqual(3)
+            expect(callback.calls.mostRecent().args).toEqual([['1'], 'foo[]', jasmine.anything()])
+          })
+
         })
       })
 
