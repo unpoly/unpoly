@@ -1185,10 +1185,10 @@ up.form = (function() {
       Defaults to `up.form.config.validateBatch`, which defaults to `true`.
 
     @param options.params
-      @like up.render
+      @like up.submit
 
     @param options.headers
-      @like up.render
+      @like up.submit
 
   @section Loading state
     @mix up.submit/loading-state
