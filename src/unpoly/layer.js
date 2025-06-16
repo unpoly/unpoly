@@ -1380,6 +1380,8 @@ up.layer = (function() {
 
     Will be `undefined` if the overlay is not closing in reaction to a server response.
 
+    See [Using the discarded response](/closing-overlays#using-the-discarded-response).
+
     @experimental
   @param event.preventDefault()
     Prevents the overlay from closing.
@@ -1411,6 +1413,8 @@ up.layer = (function() {
     The server response that caused this overlay to close.
 
     Will be `undefined` if the overlay was not closed in reaction to a server response.
+
+    See [Using the discarded response](/closing-overlays#using-the-discarded-response).
 
     @experimental
   @stable
@@ -1455,6 +1459,8 @@ up.layer = (function() {
 
     Will be `undefined` if the overlay is not closing in reaction to a server response.
 
+    See [Using the discarded response](/closing-overlays#using-the-discarded-response).
+
     @experimental
   @param event.preventDefault()
     Event listeners may call this method to prevent the overlay from closing.
@@ -1486,6 +1492,8 @@ up.layer = (function() {
     The server response that caused this overlay to close.
 
     Will be `undefined` if the overlay was not closed in reaction to a server response.
+
+    See [Using the discarded response](/closing-overlays#using-the-discarded-response).
 
     @experimental
   @stable

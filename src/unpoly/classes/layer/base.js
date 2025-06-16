@@ -169,6 +169,8 @@ up.Layer = class Layer extends up.Record {
 
       May be left blank if the overlay was not closed in reaction to a server response.
 
+      See [Using the discarded response](/closing-overlays#using-the-discarded-response).
+
       @experimental
 
   @section Animation

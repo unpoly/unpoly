@@ -1506,7 +1506,6 @@ up.form = (function() {
   When a form field with an `[up-validate]` attribute is changed, the form is submitted to the server
   which is expected to render a new form state from its current field values.
   The [form group](/up-form-group) around the changed field is updated with the server response.
-
   This quickly signals whether a change is valid,
   without the need to scroll for error messages or to backtrack to
   fields completed earlier.
