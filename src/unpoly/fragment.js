@@ -684,6 +684,8 @@ up.fragment = (function() {
   This event is also emitted when using a [cached](/caching) response.
   This allows performing the same transformations to both cache hits and cache misses.
 
+  [Render lifecycle](/render-lifecycle){:.article-ref}
+
   ### Example: Making a full page load instead
 
   Event listeners may call `event.preventDefault()` on an `up:fragment:loaded` event
@@ -825,6 +827,18 @@ up.fragment = (function() {
 
   The event is emitted on the targeted layer.
 
+  [Handling disconnects](/network-issues#disconnects){:.article-ref}
+
+  ## Example
+
+  This handler will ask the user if they want to retry a failed fragment update:
+
+  ```js
+  up.on('up:fragment:offline', function(event) {
+    if (confirm('You are offline. Retry?')) event.retry()
+  })
+  ```
+
   @event up:fragment:offline
 
   @param {up.Request} event.request
@@ -915,14 +929,14 @@ up.fragment = (function() {
   }
 
   /*-
-  This event is [emitted](/up.emit) before an existing element is [kept](/up-keep) during
-  a page update.
+  This event is [emitted](/up.emit) before an existing element is [kept](/preserving-elements)
+  during a page update.
 
   Event listeners can call `event.preventDefault()` on an `up:fragment:keep` event
   to prevent the element from being persisted. If the event is prevented, the element
   will be replaced with a fragment from the response.
 
-  [Keep conditions](/preserving-elements#conditions){:.article-ref}
+  [Preserving elements](/preserving-elements){:.article-ref}
 
   ### Example
 
@@ -1061,13 +1075,17 @@ up.fragment = (function() {
   }
 
   /*-
-  When any page fragment has been [inserted or updated](/up.replace),
-  this event is [emitted](/up.emit) on the fragment.
+  When a page fragment has been [inserted or updated](/up.replace),
+  this event is [emitted](/up.emit) on the new element.
+
+  When an element with children is inserted, `up:fragment:inserted` is only
+  emitted once for the entire new subtree.
 
   If you're looking to run code when a new fragment matches
-  a selector, use `up.compiler()` instead.
+  a selector, use `up.compiler()`.\
+  This event is emitted after compilation.
 
-  The event is emitted after compilation.
+  [Render lifecycle](/render-lifecycle){:.article-ref}
 
   ### Example
 
@@ -1093,9 +1111,14 @@ up.fragment = (function() {
   /*-
   This event is [emitted](/up.emit) after a page fragment was [destroyed](/up.destroy) and removed from the DOM.
 
-  If the destruction is animated, this event is emitted after the animation has ended.
+  If the destruction is [animated](/up.motion), this event is emitted *after* the animation has ended.
 
   The event is emitted on the parent element of the fragment that was removed.
+  If an element with children is destroyed, `up:fragment:destroyed`
+  is only emitted once for the entire subtree
+  that was removed.
+
+  [Render lifecycle](/render-lifecycle){:.article-ref}
 
   @event up:fragment:destroyed
   @param {Element} event.fragment
@@ -1527,8 +1550,8 @@ up.fragment = (function() {
   The element will also be given the [`[inert]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/inert)
   attribute to prevent interaction and to hide its content from assistive technologies.
 
-  Elements that are about to be destroyed (but still animating) are ignored by all
-  functions that lookup fragments, like `up.fragment.all()`, `up.fragment.get()` or `up.fragment.closest()`.
+  To prevent accidental selection of destroying elements, they are ignored by
+  Unpoly features like [`[up-target]`](/targeting-fragments) or `up.fragment.get()`.
 
   ## Running code after removal
 
@@ -1610,19 +1633,16 @@ up.fragment = (function() {
 
   ### Destroying elements are ignored
 
-  Elements that are being destroyed (but still animating) are ignored by all
-  functions for fragment lookup:
+  Destroyed element remain attached to the DOM while they are playing out their exit animation.
+  To prevent accidental selection of destroying elements, they are ignored by
+  Unpoly features like [`[up-target]`](/targeting-fragments) or `up.fragment.get()`.
 
-  - `up.fragment.all()`
-  - `up.fragment.get()`
-  - `up.fragment.closest()`
-
-  Note that the low-level DOM helpers in `up.element` will *not* ignore elements that are being destroyed.
+  Only the low-level DOM helpers in `up.element` will *not* ignore elements that are being destroyed.
 
   ### Accessibility
 
   While an element's destruction is animating, the element is also assigned an
-  [`[inertt]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/inert) attribute.
+  [`[inert]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/inert) attribute.
 
   This prevents interaction with the element and hides it from assistive technologies.
 
@@ -2242,6 +2262,8 @@ up.fragment = (function() {
 
   Unpoly will update a main element when no more specific render target is given.
 
+  [Targeting fragments](/targeting-fragments){:.article-ref}
+
   ## Example
 
   Many links simply replace the primary content element in your application layout.
@@ -2515,8 +2537,7 @@ up.fragment = (function() {
   Always emits the event `up:fragment:aborted`, regardless of whether there were requests to abort.
   If a request was aborted, the event `up:request:aborted` will also be emitted.
 
-  There is also a low-level `up.network.abort()` function, which aborts requests
-  matching arbitrary conditions.
+  [Aborting requests](/aborting-requests){:.article-ref}
 
   ### Aborting requests targeting a fragment
 
@@ -2546,6 +2567,16 @@ up.fragment = (function() {
   ```js
   up.fragment.abort({ layer: 'any' })
   ```
+
+  ### Low-level API
+
+  There is also a low-level `up.network.abort()` function, which aborts requests
+  matching arbitrary conditions.
+
+  If possible, prefer `up.fragment.abort()`, which matches requests by screen region.
+  Only when requests are aborted by screen region, components
+  can [react to being aborted](/up:fragment:aborted).
+
 
   @function up.fragment.abort
   @section Matching requests
@@ -2643,10 +2674,7 @@ up.fragment = (function() {
   If requests for entire layer were aborted, this event is emitted the
   [layer's outmost element](/up.Layer.prototype.element).
 
-  To simplify working with this event, the function `up.fragment.onAborted()` is also provided.
-
-  > [note]
-  > This event will *not* be emitted by the low-level `up.network.abort()` function.
+  [Aborting requests](/aborting-requests){:.article-ref}
 
   ### Example
 
@@ -2661,11 +2689,11 @@ up.fragment = (function() {
   A more common use case is to run code when an element *or one of its ancestors*
   were aborted:
 
-    ```js
+  ```js
   // Listen to all up:fragment:aborted events in case an ancestor
   let off = up.on('up:fragment:aborted', function(event) {
      if (event.target.contains(element)) {
-        // element or its ancestors were aborted
+        // element or an ancestor was aborted
      }
   })
   // Because we're registering a global event listener, we should
@@ -2673,9 +2701,16 @@ up.fragment = (function() {
   up.destructor(element, off)
   ```
 
-  > [tip]
-  > To simplify observing an element and its ancestors for aborted requests,
-  > the function `up.fragment.onAborted()` is provided.
+  To simplify observing an element and its ancestors for aborted requests,
+  the function `up.fragment.onAborted()` is provided. This allows us to shorten
+  the above code:
+
+  ```js
+  // Listen to all up:fragment:aborted events in case an ancestor
+  up.fragment.onAborted(element, function(event) {
+    // element or an ancestor was aborted
+  })
+  ```
 
   @event up:fragment:aborted
   @param {Element} event.target
@@ -2789,6 +2824,8 @@ up.fragment = (function() {
   Emits the `up:template:clone` event. You can use that event to integrate [template engines](/templates)
   like Mustache, EJS or Handlebars.
 
+  [Templates](/templates){:.article-ref}
+
   ### Example
 
   ```js
@@ -2834,6 +2871,8 @@ up.fragment = (function() {
 
   /*-
   This event is emitted before a [template is cloned](/templates).
+
+  [Templates](/templates){:.article-ref}
 
   ### Integrating template engines
 

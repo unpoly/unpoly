@@ -123,13 +123,13 @@ up.script = (function() {
   Registers a function to be called when an element with
   the given selector is inserted into the DOM.
 
-  Use compilers to activate your custom JavaScript behavior on matching
+
+  Compiler functions run both at page load and when a new fragment is inserted later.
+  This makes compilers a great tool to activate custom JavaScript behavior on matching
   elements.
 
-  You should migrate your [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event)
-  callbacks to compilers. This will make sure they run both at page load and
-  when a new fragment is inserted later.
-  See [Migrating legacy JavaScripts](/legacy-scripts) for advice on migrating legacy applications.
+  When an element with children is inserted, the compiler function is called once
+  for each match in the new subtree.
 
   ## Example
 
@@ -145,6 +145,15 @@ up.script = (function() {
 
   The compiler function will be called once for each matching element when
   the page loads, or when a matching fragment is rendered later.
+
+  ## Prefer compilers over `DOMContentLoaded`
+
+  Listeners to `DOMContentLoaded` (or `load`) only run when the page is loaded initially.
+  They will not run for subsequent fragment updates within the page.
+  Compiler functions run both at page load and when a new fragment is inserted later.
+q
+  You should migrate your [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event)
+  callbacks to compilers. See [Migrating legacy JavaScripts](/legacy-scripts) for advice on migrating legacy applications.
 
   ## Integrating JavaScript libraries {#integrating-libraries}
 

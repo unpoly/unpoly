@@ -448,6 +448,8 @@ up.history = (function() {
 
   When this event is emitted, the [browser location](/up.history.location) has already been updated.
 
+  [Restoring history](/restoring-history){:.article-ref}
+
   @event up:location:restore
   @param {string} event.location
     The URL for the restored history entry.
@@ -470,6 +472,10 @@ up.history = (function() {
 
   /*-
   Configures whether this `<head>` element is updated during [history changes](/updating-history).
+
+  [Updating history](/updating-history){:.article-ref}
+
+  ### Default meta elements
 
   By [default](/up.history.config#config.metaTagSelectors) popular `<meta>` and certain `<link>`
   elements in the `<head>` are considered meta tags.

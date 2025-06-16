@@ -42,7 +42,7 @@ or [submitting a form](/up-submit). To use the client from your own JavaScripts,
 up.network = (function() {
 
   /*-
-  Sets default options for this package.
+  Sets default options for network requests.
 
   @property up.network.config
 
@@ -680,6 +680,8 @@ up.network = (function() {
   > which matches requests by screen region. Only when requests are aborted by screen region, components
   > can [react to being aborted](/up:fragment:aborted).
 
+  [Aborting requests](/aborting-requests){:.article-ref}
+
   ## Effects of aborting
 
   When an `up.request()` is aborted, its returned promise rejects with an `up.AbortError`:
@@ -696,6 +698,8 @@ up.network = (function() {
   ```
 
   Also the event `up:request:aborted` will be emitted.
+  The region-specific event `up:fragment:aborted` will *not* be emitted by this function.
+  For this use `up.fragment.abort()` instead.
 
   ## Aborting all requests
 
@@ -799,21 +803,25 @@ up.network = (function() {
   This event is [emitted](/up.emit) when [AJAX requests](/up.request)
   are taking long to finish loading.
 
-  By default Unpoly will wait 400 ms for an AJAX request to finish
-  before emitting `up:network:late`. You may configure this delay like this:
+  [Slow server responses](/network-issues#slow-server-responses){:.article-ref}
 
-  ```js
-  up.network.config.lateDelay = 1000 // milliseconds
-  ```
+  ## Timing
+
+  By default Unpoly will wait 400 ms for an AJAX request to finish
+  before emitting `up:network:late`. You may [globally](/up.network.config#config.lateDelay),
+  for [individual links](/up-follow#up-late-delay) or [specific requests](/up.request#options.lateDelay).
 
   Once all responses have been received, an [`up:network:recover`](/up:network:recover)
   will be emitted.
 
-  > [IMPORTANT]
-  > If additional requests are made while Unpoly is already busy  waiting,
-  > **no** additional `up:network:late` events will be emitted.
+  If additional requests are made while Unpoly is already busy waiting,
+  **no** additional `up:network:late` events will be emitted.
 
-  Also see [Progress bar](/progress-bar).
+  ## Default behavior
+
+  By default, Unpoly will show a [Progress bar](/progress-bar) while late requests
+  are pending. You can [disable](/progress-bar#disabling) the progress bar
+  or [implement custom loading indicators](/progress-bar#custom-implementation).
 
   @event up:network:late
   @stable
@@ -823,9 +831,7 @@ up.network = (function() {
   This event is [emitted](/up.emit) when [AJAX requests](/up.request)
   have [taken long to finish](/up:network:late), but have finished now.
 
-  See [`up:network:late`](/up:network:late) for more documentation on
-  how to use this event for implementing a spinner that shows during
-  long-running requests.
+  [Slow server responses](/network-issues#slow-server-responses){:.article-ref}
 
   @event up:network:recover
   @stable

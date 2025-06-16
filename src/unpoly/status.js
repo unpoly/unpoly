@@ -29,7 +29,7 @@ up.status = (function() {
   const e = up.element
 
   /*-
-  Sets default options for this package.
+  Sets default options for status effects.
 
   @property up.status.config
 

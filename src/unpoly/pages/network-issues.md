@@ -60,7 +60,7 @@ to eagerly preload links as soon as they remain in the DOM. This way they remain
 
 ### Limitations to offline support
 
-While Unpoly lets you [handle disconnects](#disconnects), some parts are missing for full "offline" support:
+While Unpoly lets you handle disconnects, some parts are missing for full "offline" support:
 
 - To fill up the cache the device must be online for the first part of the session (warm start)
 - The cache is still in-memory and dies with the browser tab

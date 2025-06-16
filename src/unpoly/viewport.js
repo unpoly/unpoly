@@ -294,6 +294,8 @@ up.viewport = (function() {
 
   You can use this class to [remove an unwanted focus outline](#example).
 
+  [Focus ring visibility](/focus-visibility){:.article-ref}
+
   ## Relation to `:focus-visible`
 
   Unpoly will try to unset `:focus-visible` whenever it sets `.up-focus-visible`, but can only do so
@@ -315,6 +317,8 @@ up.viewport = (function() {
 
   You can use this class to [give a new component a focus ring](#example) for keyboard users,
   while not rendering a focus ring for mouse or touch users.
+
+  [Focus ring visibility](/focus-visibility){:.article-ref}
 
   ## Relation to `:focus-visible`
 

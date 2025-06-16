@@ -64,6 +64,8 @@ up.Request = class Request extends up.Record {
 
   The selector will be sent as an `X-Up-Target` header.
 
+  [Targeting fragments](/targeting-fragments){:.article-ref}
+
   @property up.Request#target
   @param {string} target
   @stable
@@ -74,6 +76,8 @@ up.Request = class Request extends up.Record {
   the server responds with an [error code](/failed-responses).
 
   The selector will be sent as an `X-Up-Fail-Target` header.
+
+  [Rendering failed responses differently](/failed-responses#fail-options){:.article-ref}
 
   @property up.Request#failTarget
   @param {string} failTarget
