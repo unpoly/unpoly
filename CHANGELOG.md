@@ -125,7 +125,7 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 
 (possibly organize this into sub-sections)
 
-- ⚠️ Submitting a form with an `{ params }` option now override existing params with the same name. Formerly a new param with the same name was added.
+- ⚠️ Submitting a form with a `{ params }` option now overrides existing params with the same name. Formerly, a new param with the same name was added.
 - `up.reload()` can restore a fragment to a previously cached state using an `{ cache: true }` option. This was possible before, but was never documented.
 - Navigation containers can now match the current location of other layers by setting an `[up-layer]` attribute
 - Listeners to `up:request:load` can now [inspect or mutate request options](/up:request:load#changing-requests)
