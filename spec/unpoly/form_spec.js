@@ -6062,6 +6062,55 @@ describe('up.form', function() {
       })
     })
 
+
+    describe('div[up-validate]', function() {
+
+      it('performs server-side validation for all fieldsets within the container, but not for fieldset outside it', async function() {
+        const [form, validateContainer, emailGroup, emailInput, passwordGroup, passwordInput, nameGroup, nameInput] = htmlFixtureList(`
+          <form action="/users" id="registration">
+            <div up-validate> 
+              <div up-form-group>
+                <input type="text" name="email">
+              </div>
+              <div up-form-group>
+                <input type="password" name="password">
+              </div>
+            </div>  
+            <div up-form-group>
+              <input type="text" name="name">
+            </div>
+          </form>
+        `)
+
+        up.hello(form)
+
+        emailInput.value = 'foo@bar.com'
+        Trigger.change(emailInput)
+        await wait()
+
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
+        jasmine.respondWith({ status: 204, responseText: '' })
+        await wait()
+
+        passwordInput.value = 'secret'
+        Trigger.change(passwordInput)
+        await wait()
+
+        expect(jasmine.Ajax.requests.count()).toEqual(2)
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('password')
+        jasmine.respondWith({ status: 204, responseText: '' })
+        await wait()
+
+        nameInput.value = 'Mr Foo'
+        Trigger.change(nameInput)
+        await wait()
+
+        // No validation request for a field outside the [up-validate] container
+        expect(jasmine.Ajax.requests.count()).toEqual(2)
+      })
+    })
+
     describe('form[up-validate]', function() {
 
       it('performs server-side validation for all fieldsets contained within the form', async function() {
