@@ -63,9 +63,9 @@ A **common callback** is to reload an element in the parent layer:
 
 ```html
 <a href="/companies/new"
-  up-layer="new"
-  up-accept-location="/companies/$id"
-  up-on-accepted="up.reload('.company-list')"> <!-- mark-line -->
+   up-layer="new"
+   up-accept-location="/companies/$id"
+   up-on-accepted="up.reload('.company-list')"> <!-- mark-line -->
   New company
 </a>
 
@@ -73,6 +73,20 @@ A **common callback** is to reload an element in the parent layer:
   ...
 </div>
 ```
+
+Sometimes the response that accepted the overlay already contains the HTML to update
+the element. In that case, we can render `event.response` instead of calling `up.reload()`:
+
+```html
+<a href="/companies/new"
+  up-layer="new"
+  up-accept-location="/companies"
+  up-on-accepted="up.render('.company-list', { response: event.response })"> <!-- mark-phrase: { response: event.response } -->
+  New company
+</a>
+```
+
+
 
 ### Adding options to an existing select
 
