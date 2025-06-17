@@ -13,8 +13,3 @@
 
   This is only relevant when updating a layer that is not the [frontmost layer](/up.layer.front).
 
-@param [up-context]
-  A [relaxed JSON](/relaxed-json) object that will be merged into the [context](/context)
-  of the current layer once the fragment is rendered.
-
-  @experimental
