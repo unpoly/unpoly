@@ -66,7 +66,7 @@ even when the response contains a matching fragment. After the configured
 interval, the server will be polled again.
 
 In order to *any* response that contains a matching fragment,
-set an `[up-fail=false]` attribute:
+set an [`[up-fail=false]`](/up-poll#up-fail) attribute:
 
 ```html
 <div class="download-status" up-poll up-fail="false"> <!-- mark-phrase: up-fail -->

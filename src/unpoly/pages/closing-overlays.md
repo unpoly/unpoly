@@ -124,6 +124,7 @@ in an overlay. The overlay interaction is decoupled from the interaction in the 
 
 
 ### Closing when a location is reached {#location-condition}
+{:toc="true"}
 
 The following will open an overlay that closes once a URL like `/companies/123` is reached:
 
@@ -143,6 +144,7 @@ To *dismiss* an overlay once a given location is reached, use `[up-dismiss-locat
 
 
 ### Closing when an event is emitted {#event-condition}
+{:toc="true"}
 
 Instead of waiting for a location to be reached,
 you may accept an overlay\
@@ -241,7 +243,7 @@ call `up.layer.accept()` to explicitly accept a layer from JavaScript:
 up.layer.accept()
 ```
 
-To accept with a value, pass it as an argument:
+To accept with a [result value](#overlay-result-values), pass it as an argument:
 
 ```js
 up.layer.accept({ name: 'Anna', email: 'anna@domain.tld' })
@@ -250,21 +252,102 @@ up.layer.accept({ name: 'Anna', email: 'anna@domain.tld' })
 To *dismiss* an overlay from JavaScript, use the `up.layer.dismiss()` function in the same fashion.
 
 
-Closing when an element is clicked
-----------------------------------
+Closing when a button is clicked
+--------------------------------
 
-Use an `[up-accept]` or `[up-dismiss]` attribute to close the [current layer](/up.layer.current)
-when the link is clicked:
+To close the [current layer](/up.layer.current) when a button is clicked, use an `[up-accept]` or `[up-dismiss]` attribute:
 
 ```html
-<a href="/fallback" up-accept>...</a>
+<button up-accept>Close overlay</button> <!-- mark-phrase: up-accept -->
 ```
 
-If an overlay was closed, the `click` event's [default action is prevented](https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault)
-and the link will not be followed. Only when this link is clicked in the
-[root layer](/up.layer.root), there is no overlay to close and the link to `/fallback` will be followed.
+To close with a [result value](#overlay-result-values), set a [relaxed JSON](/relaxed-json) on the attribute value:
 
-To *dismiss* an overlay once an element clicked, use the `[up-dismiss]` attribute in the same fashion.
+```html
+<button up-dismiss="{ id: 5 }">Choose user #5</button> <!-- mark-phrase: { id: 5 } -->
+```
+
+
+Closing when a link is followed
+-------------------------------
+
+When [reusing a page within an overlay](/subinteractions#reusing-existing-screens)
+it can be useful to have an element that closes the overlay when clicked, but navigates somewhere else on the root layer.
+
+In this case you can use a hyperlink (`<a>`)with a fallback URL in its `[href]` attribute:
+
+```html
+<a href="/list" up-accept>Finish</a>
+```
+
+Unpoly will only navigate to `/list` when this link is clicked in the [root layer](/up.layer).
+In an overlay the `click` event is prevented and the overlay is accepted.
+
+
+Closing when a form is submitted
+--------------------------------
+
+To close an overlay when a form is submitted, set an `[up-accept]` or `[up-dismiss]` attribute on the `<form>` element.
+This will immediately close the overlay on submission, without making a network request:
+
+```html
+<form up-accept> <!-- mark-phrase: up-accept -->
+  ...
+</form>
+```
+
+### Accessing the form params
+
+The form's field values will become the [result value](#overlay-result-values) of the closed overlay.
+
+For example, this form has two fields named `foo` and `bar`: 
+
+```html
+<form up-accept>
+  <input name="foo" value="1"> <!-- mark-phrase: foo -->
+  <input name="bar" value="2"> <!-- mark-phrase: bar -->
+</form>
+```
+
+The values are provided as an `up.Params` object that can be accessed from an `{ onAccepted }` or `{ onDismissed }` handler:
+
+```js
+up.layer.open({
+  url: '/form',
+  onAccepted: ({ value }) => {
+    console.log(value.get('foo')) // result: "1"
+    console.log(value.get('bar')) // result: "2"
+  }
+})
+```
+
+### Regular submission on the root layer
+
+When a form with `[up-accept]` or `[up-dismiss]` is submitted from within an overlay, the `submit` event
+is prevented and no request is made.
+
+When the same form is submitted from the root layer, there is no overlay to close. In this case
+a regular form submission (e.g. `POST` request) is made.
+This can be useful when [reusing an existing form within an overlay](/subinteractions#reusing-existing-screens).
+
+
+### Closing after the submission request
+
+When you do want the form to submit a request before the overlay closes, do *not* set
+an `[up-accept]` or `[up-dismiss]` attribute. Instead make a regular form that is handled by Unpoly:
+
+```html
+<form up-submit> <!-- mark-phrase: up-submit -->
+  ...
+</form>
+```
+
+After the server has processed the request, it can use any of the following techniques to close the overlay:
+
+- Sending a [response header that closes the overlay](#closing-from-the-server)
+- Emitting an [event that is a close condition](#event-condition)
+- Redirecting to a [location that is a close condition](#location-condition)
+
 
 
 Closing by targeting the parent layer
@@ -288,7 +371,7 @@ A successful submission will now dismiss the form's own overlay with a [dismissa
 
 > [note]
 > The form will still update its own layer when the [server responds with an error code](/failed-responses)
-> due to a validation error. To target another layer in this case, set an `[up-fail-layer]` attribute.
+> due to a validation error. To target another layer in this case, set an [`[up-fail-layer]`](/up-follow#up-fail-layer) attribute.
 
 
 Customizing dismiss controls

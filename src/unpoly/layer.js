@@ -1043,31 +1043,68 @@ up.layer = (function() {
   */
 
   /*-
-  [Dismisses](/closing-overlays) the [current layer](/up.layer.current) when the link is clicked.
+  [Dismisses](/closing-overlays) the [current layer](/up.layer.current) when this element is clicked or submitted.
 
   The [relaxed JSON](/relaxed-json) value of the `[up-dismiss]` attribute becomes the overlay's
   [dismissal value](/closing-overlays#overlay-result-values).
 
   [Closing overlays](/closing-overlays){:.article-ref}
 
-  ### Example
+  ## On a button
+
+  To dismiss the [current layer](/up.layer.current) when a button is clicked, use an `[up-dismiss]` attribute:
 
   ```html
-  <a href="/dashboard" up-dismiss="'sidebar-close'">Close</a>
+  <button up-dismiss>Close overlay</button>
   ```
 
-  ### Fallback for the root layer
+  This button will dismiss the overlay with the value `{ id: 5 }`:
 
-  The link's `[href]` will only be followed when this link is clicked in the [root layer](/up.layer).
-  In an overlay the `click` event's default action is prevented.
+  ```html
+  <button up-dismiss="{ id: 5 }">Choose user #5</button>
+  ```
 
-  You can also [omit the `[href]` attribute](/providing-html#omitting-href) to make a link that only works in overlays.
+  See [Closing when a button is clicked](/closing-overlays#closing-when-a-button-is-clicked).
+
+  ## On a hyperlink
+
+  When [reusing a page within an overlay](/subinteractions#reusing-existing-screens)
+  it can be useful to have a button that closes the overlay, but navigates somewhere else on the root layer.
+
+  In this case you can use a hyperlink (`<a>`) with a fallback URL in its `[href]` attribute:
+
+  ```html
+  <a href="/list" up-dismiss>Finish</a>
+  ```
+
+  Unpoly will only navigate to `/list` when this link is clicked in the [root layer](/up.layer).
+  In an overlay the `click` event is prevented and the overlay is accepted.
+
+  See [Closing when a link is followed](/closing-overlays#closing-when-a-link-is-clicked).
+
+  ## On a form
+
+  To dismiss an overlay when a form is submitted, set an `[up-dismiss]` attribute on the `<form>` element.
+  This will immediately dismiss the overlay on submission, without making a network request:
+
+  ```html
+  <form up-dismiss> <!-- mark-phrase: up-dismiss -->
+    ...
+  </form>
+  ```
+
+  The form's field values will become the [dismissal value](#overlay-result-values) of the closed overlay,
+  as an `up.Params` value.
+
+  See [Closing when a form is submitted](/closing-overlays#closing-when-a-form-is-submitted).
 
   @selector [up-dismiss]
 
   @section Dismissal
     @param [up-dismiss]
-      The overlay's [dismissal value](/closing-overlays#overlay-result-values) as a [relaxed JSON](/relaxed-json) value.
+      On buttons on links, the overlay's [dismissal value](/closing-overlays#overlay-result-values)
+      as a [relaxed JSON](/relaxed-json) string.
+
     @param [up-confirm]
       A message the user needs to confirm before the layer is closed.
 
@@ -1082,31 +1119,66 @@ up.layer = (function() {
   */
 
   /*-
-  [Accepts](/closing-overlays) the [current layer](/up.layer.current) when the link is clicked.
-
-  The [relaxed JSON](/relaxed-json) value of the `[up-accept]` attribute becomes the overlay's
-  [acceptance value](/closing-overlays#overlay-result-values).
+  [Accepts](/closing-overlays) the [current layer](/up.layer.current) when this element is clicked or submitted.
 
   [Closing overlays](/closing-overlays){:.article-ref}
 
-  ## Example
+  ## On a button
+
+  To accept the [current layer](/up.layer.current) when a button is clicked, use an `[up-accept]` attribute:
 
   ```html
-  <a href="/users/5" up-accept="{ id: 5 }">Choose user #5</a>
+  <button up-accept>Close overlay</button>
   ```
 
-  ## Fallback for the root layer
+  This button will accept the overlay with the value `{ id: 5 }`:
 
-  The link's `[href]` will only be followed when this link is clicked in the [root layer](/up.layer).
-  In an overlay the `click` event's default action is prevented.
+  ```html
+  <button up-accept="{ id: 5 }">Choose user #5</button>
+  ```
 
-  You can also omit the `[href]` attribute to make a link that only works in overlays.
+  See [Closing when a button is clicked](/closing-overlays#closing-when-a-button-is-clicked).
+
+  ## On a hyperlink
+
+  When [reusing a page within an overlay](/subinteractions#reusing-existing-screens)
+  it can be useful to have a button that closes the overlay, but navigates somewhere else on the root layer.
+
+  In this case you can use a hyperlink (`<a>`) with a fallback URL in its `[href]` attribute:
+
+  ```html
+  <a href="/list" up-accept>Finish</a>
+  ```
+
+  Unpoly will only navigate to `/list` when this link is clicked in the [root layer](/up.layer).
+  In an overlay the `click` event is prevented and the overlay is accepted.
+
+  See [Closing when a link is followed](/closing-overlays#closing-when-a-link-is-clicked).
+
+  ## On a form
+
+  To accept an overlay when a form is submitted, set an `[up-accept]` attribute on the `<form>` element.
+  This will immediately accept the overlay on submission, without making a network request:
+
+  ```html
+  <form up-accept> <!-- mark-phrase: up-accept -->
+    ...
+  </form>
+  ```
+
+  The form's field values will become the [acceptance value](#overlay-result-values) of the closed overlay,
+  as an `up.Params` value.
+
+  See [Closing when a form is submitted](/closing-overlays#closing-when-a-form-is-submitted).
 
   @selector [up-accept]
 
   @section Acceptance
     @param [up-accept]
-      The overlay's [acceptance value](/closing-overlays#overlay-result-values) as a [relaxed JSON](/relaxed-json) value.
+      On buttons and links, the overlay's [acceptance value](/closing-overlays#overlay-result-values)
+      as a [relaxed JSON](/relaxed-json) string.
+
+      If the attribute value is omitted, a value `null` will be used.
     @param [up-confirm]
       A message the user needs to confirm before the layer is closed.
 
