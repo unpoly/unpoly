@@ -12,6 +12,11 @@
   You may also pass an array of selector alternatives. The first selector
   matching in both old and new content will be used.
 
+@param {string|Element|jQuery|Array<string>} [options.failTarget]
+  The [target selector](/targeting-fragments) to update when the server responds with an error code.
+  
+  See [Rendering failed responses differently](/failed-responses#fail-options).
+
 @param {string|boolean} [options.fallback]
   Specifies behavior if the [target selector](/targeting-fragments) is missing from the current page or the server response.
 

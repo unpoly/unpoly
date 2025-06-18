@@ -439,7 +439,6 @@ up.network = (function() {
 
       @experimental
 
-  @section Failed responses
     @param {string|boolean|Function(up.Response): boolean} [options.fail]
       Whether the response to this request should be considered [failed](/failed-responses).
 

@@ -57,3 +57,11 @@
   The number of milliseconds after which this request fails with a timeout.
 
   Defaults to `up.network.config.timeout`.
+
+@param {boolean|Function(up.Response): boolean} [options.fail]
+  Whether to render [failed responses](/failed-responses) differently.
+
+  Failed responses will be rendered using options prefixed with `fail`, e.g. `{ failTarget }`.
+
+  By [default](/up.network.config#config.fail) any HTTP status code other than 2xx or 304 is considered failed.
+  Pass `{ fail: false }` to handle *any* response as successful, even with a 4xx or 5xx status code.

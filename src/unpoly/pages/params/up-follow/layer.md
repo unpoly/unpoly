@@ -8,6 +8,11 @@
   To [open the fragment in a new overlay](/opening-overlays), pass `[up-layer=new]`.
   In this case attributes for `[up-layer=new]` may also be used.
 
+@param [up-layer='origin, current']
+  The [layer](/up.layer) in which render if the server responds with an error code.
+
+  See [Rendering failed responses differently](/failed-responses#fail-options).
+
 @param [up-peel='true']
   Whether to close overlays obstructing the updated layer when the fragment is updated.
 

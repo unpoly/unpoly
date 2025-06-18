@@ -282,6 +282,13 @@ up.form = (function() {
 
   @section Targeting
     @mix up.render/targeting
+      @param options.failTarget
+        The [target selector](/targeting-fragments) to update when the server responds with an error code.
+
+        By default, failed responses will update the `<form>` element itself.
+
+        @see failed-responses
+
       @param options.origin
         The element that triggered the form submission.
 
@@ -319,15 +326,6 @@ up.form = (function() {
 
   @section Loading state
     @mix up.submit/loading-state
-
-  @section Failed responses
-    @mix up.render/failed-responses
-      @param options.failTarget
-        The [target selector](/targeting-fragments) to update when the server responds with an error code.
-
-        By default, failed responses will update the `<form>` element itself.
-
-        @see failed-responses
 
   @section Client state
     @mix up.render/client-state
@@ -1419,8 +1417,15 @@ up.form = (function() {
 
   @section Targeting
     @mix up-follow/targeting
-      @param [up-target]
+      @param up-target
         The [target selector](/targeting-fragments) to update for a successful form submission.
+
+      @param up-fail-target
+        The [target selector](/targeting-fragments) to update when the server responds with an error code.
+
+        By default, failed responses will update the `<form>` element itself.
+
+        @see failed-responses
 
   @section Navigation
     @mix up-follow/navigation
@@ -1469,15 +1474,6 @@ up.form = (function() {
         [Disables form controls](/disabling-forms) while the request is loading.
 
         The values of disabled fields will still be included in the submitted form params.
-
-  @section Failed responses
-    @mix up-follow/failed-responses
-      @param up-fail-target
-        The [target selector](/targeting-fragments) to update when the server responds with an error code.
-
-        By default, failed responses will update the `<form>` element itself.
-
-        @see failed-responses
 
   @section Client state
     @mix up-follow/client-state

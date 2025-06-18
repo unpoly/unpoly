@@ -5,6 +5,14 @@
 
   If omitted a [main target](/up-main) will be rendered.
 
+@param [up-fail-target=':main']
+  The [target selector](/targeting-fragments) to update when the server responds with an error code.
+
+  See [Rendering failed responses differently](/failed-responses#fail-options) for details.
+
+  If omitted, a failed response will *not* update the [`[up-target]`](#up-target),
+  but update the [main target](/up-main) instead.
+
 @param [up-fallback='true']
   Specifies behavior if the [target selector](/up.render#options.target) is missing from the current page or the server response.
 

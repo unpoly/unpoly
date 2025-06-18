@@ -418,7 +418,6 @@ up.radio = (function() {
       When making a `GET` request to a URL with a query string, the given `{ params }` will be added
       to the query parameters.
 
-  @section Failed responses
     @param [up-fail]
       How to handle [failed server responses](/failed-responses).
 

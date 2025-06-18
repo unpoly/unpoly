@@ -333,9 +333,6 @@ up.link = (function() {
   @section Loading state
     @mix up.render/loading-state
 
-  @section Failed responses
-    @mix up.render/failed-responses
-
   @section Client state
     @mix up.render/client-state
 
@@ -1292,9 +1289,6 @@ up.link = (function() {
 
   @section Loading state
     @mix up-follow/loading-state
-
-  @section Failed responses
-    @mix up-follow/failed-responses
 
   @section Client state
     @mix up-follow/client-state

@@ -5,6 +5,11 @@
 
   See [scrolling](/scrolling) for a list of allowed values.
 
+@param {boolean|string|Element|Function} [options.failScroll]
+  How to scroll after the new fragment was rendered from a failed response.
+
+  See [Rendering failed responses differently](/failed-responses#fail-options).
+
 @param {string} [options.scrollBehavior='instant']
   Whether to [animate the scroll motion](/scroll-tuning#animating-the-scroll-motion)
   when [prepending or appending](/targeting-fragments#appending-or-prepending) content.

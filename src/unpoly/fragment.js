@@ -606,9 +606,6 @@ up.fragment = (function() {
   @section Loading state
     @mix up.render/loading-state
 
-  @section Failed responses
-    @mix up.render/failed-responses
-
   @section Client state
     @mix up.render/client-state
 
@@ -1717,9 +1714,6 @@ up.fragment = (function() {
 
   @section Loading state
     @mix up.render/loading-state
-
-  @section Failed responses
-    @mix up.render/failed-responses
 
   @section Client state
     @mix up.reload/client-state
