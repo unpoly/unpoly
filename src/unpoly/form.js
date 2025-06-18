@@ -1378,6 +1378,8 @@ up.form = (function() {
 
   ## Example
 
+  This will submit the form in-page and update a fragment matching `.content`:
+
   ```html
   <form method="post" action="/users" up-submit up-target=".content">
     ...
