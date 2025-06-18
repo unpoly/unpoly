@@ -42,7 +42,7 @@ Note how the response only contains items for page 2, and a link to page 3:
   <div class="page">items for page 2</div> <!-- mark-line -->
 </div>
 
-<a id="next-page" href="/items?page=3" up-defer="reveal" up-target="#next-page, #pages:after"> <!-- mark-phrase: /items?page=3 -->
+<a id="next-page" href="/items?page=3" up-defer="reveal" up-target="#next-page, #pages:after"> <!-- mark: /items?page=3 -->
   load next page
 </div>
 ```
@@ -55,7 +55,7 @@ Unpoly renders the response, resulting in the following page:
   <div class="page">items for page 2</div> <!-- mark-line -->
 </div>
 
-<a id="next-page" href="/items?page=3" up-defer="reveal" up-target="#next-page, #pages:after"> <!-- mark-phrase: /items?page=3 -->
+<a id="next-page" href="/items?page=3" up-defer="reveal" up-target="#next-page, #pages:after"> <!-- mark: /items?page=3 -->
   load next page
 </div>
 ```

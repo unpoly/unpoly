@@ -20,7 +20,7 @@ You can use `[up-poll]` to refresh the counter every 30 seconds:
 You may set an optional `[up-interval]` attribute to set the reload interval in milliseconds:
 
 ```html
-<div class="unread-count" up-poll up-interval="10000"> <!-- mark-phrase: up-interval -->
+<div class="unread-count" up-poll up-interval="10000"> <!-- mark: up-interval -->
   2 new messages
 </div>
 ```
@@ -38,7 +38,7 @@ The element will be reloaded from the URL from which it was originally loaded.
 To reload from another URL, set an `[up-source]` attribute on the polling element:
 
 ```html
-<div class="unread-count" up-poll up-source="/unread-count"> <!-- mark-phrase: up-source -->
+<div class="unread-count" up-poll up-source="/unread-count"> <!-- mark: up-source -->
   2 new messages
 </div>
 ```
@@ -50,7 +50,7 @@ A target selector will be [derived](/target-derivation) from the polling element
 For example, the following element will be polled with the selector `#score`:
 
 ```html
-<div id="score" up-poll> <!-- mark-phrase: score -->
+<div id="score" up-poll> <!-- mark: score -->
   Score: 1400
 </div>
 ```
@@ -69,7 +69,7 @@ In order to *any* response that contains a matching fragment,
 set an [`[up-fail=false]`](/up-poll#up-fail) attribute:
 
 ```html
-<div class="download-status" up-poll up-fail="false"> <!-- mark-phrase: up-fail -->
+<div class="download-status" up-poll up-fail="false"> <!-- mark: up-fail -->
   Download not ready yet.
 </div>
 ```

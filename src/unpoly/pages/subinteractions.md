@@ -81,7 +81,7 @@ the element. In that case, we can render `event.response` instead of calling `up
 <a href="/companies/new"
   up-layer="new"
   up-accept-location="/companies"
-  up-on-accepted="up.render('.company-list', { response: event.response })"> <!-- mark-phrase: { response: event.response } -->
+  up-on-accepted="up.render('.company-list', { response: event.response })"> <!-- mark: { response: event.response } -->
   New company
 </a>
 ```

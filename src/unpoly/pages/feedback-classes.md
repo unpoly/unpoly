@@ -24,9 +24,9 @@ When the user clicks on the `/foo` link, the link is instantly assigned the `.up
 The [targeted](/targeting-fragments) fragment (the `<main>` element) gets the `.up-loading` class:
 
 ```html
-<a href="/bar" up-target="#target" class="up-active">Bar</a> <!-- mark-phrase: up-active -->
+<a href="/bar" up-target="#target" class="up-active">Bar</a> <!-- mark: up-active -->
 
-<div id="target" class="up-loading"> <!-- mark-phrase: up-loading -->
+<div id="target" class="up-loading"> <!-- mark: up-loading -->
   Initial content
 </div>
 ```
@@ -109,12 +109,12 @@ When the user clicks the submit button, both the button and the form are marked 
 while the form is submitting. The targeted fragment is marked as `.up-loading`:
 
 ```html
-<form action="/action" up-target="#target" class="up-active"> <!-- mark-phrase: up-active -->
+<form action="/action" up-target="#target" class="up-active"> <!-- mark: up-active -->
   <input type="text" name="email">
-  <button type="submit" class="up-active">Submit</button> <!-- mark-phrase: up-active -->
+  <button type="submit" class="up-active">Submit</button> <!-- mark: up-active -->
 </form>
 
-<div id="target" class="up-loading"> <!-- mark-phrase: up-loading -->
+<div id="target" class="up-loading"> <!-- mark: up-loading -->
   Initial content
 </div>
 ```
@@ -135,9 +135,9 @@ In these cases that field is considered the [origin](/origin) element that
 caused the submission. It is also marked as `.up-active`, in addition to the form and its default submit button:
 
 ```html
-<form action="/action" up-submit class="up-active"> <!-- mark-phrase: up-active -->
-  <input type="text" name="email" class="up-active"> <!-- mark-phrase: up-active -->
-  <button type="submit" class="up-active">Submit</button> <!-- mark-phrase: up-active -->
+<form action="/action" up-submit class="up-active"> <!-- mark: up-active -->
+  <input type="text" name="email" class="up-active"> <!-- mark: up-active -->
+  <button type="submit" class="up-active">Submit</button> <!-- mark: up-active -->
 </form>
 ```
 
@@ -157,7 +157,7 @@ For example, when button click causes a render pass, that button should be the o
 
 ```js
 up.on('click', '.my-button', function(event) {
-  up.render({ url: '/path', origin: event.target }) // mark-phrase: origin
+  up.render({ url: '/path', origin: event.target }) // mark: origin
 })
 ```
 
@@ -185,14 +185,14 @@ To disable feedback classes, set an
 
 
 ```html
-<a href="/path" up-follow up-feedback="false">Link</a> <!-- mark-phrase: false -->
+<a href="/path" up-follow up-feedback="false">Link</a> <!-- mark: false -->
 ```
 
 
 From JavaScript you may pass an [`{ feedback: false }`](/up.render#options.feedback) option:
 
 ```js
-up.follow(link, { feedback: false }) // mark-phrase: false
+up.follow(link, { feedback: false }) // mark: false
 ```
 
 

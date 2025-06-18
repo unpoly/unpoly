@@ -14,7 +14,7 @@ To fetch a HTML document from the server when a hyperlink is clicked, pass the U
 Also set an `[up-target]` attribute indicating which fragment to update.
 
 ```html
-<a href="/path" up-target=".target">Click me</a> <!-- mark-phrase: href -->
+<a href="/path" up-target=".target">Click me</a> <!-- mark: href -->
 
 <div class="target">
   Content will appear here
@@ -48,7 +48,7 @@ For a form, set the server endpoint URL as a standard `[action]` attribute.
 Also set an `[up-target]` attribute indicating which fragment to update after a successful submission.
 
 ```html
-<form action="/path" up-target=".target"> <!-- mark-phrase: action -->
+<form action="/path" up-target=".target"> <!-- mark: action -->
   ...
 </form>
 
@@ -104,7 +104,7 @@ For example, take the following HTML:
 We can update the element's children from a link like this:
 
 ```html
-<a href="#" up-target=".target" up-content="New content">Click me</a> <!-- mark-phrase: up-content -->
+<a href="#" up-target=".target" up-content="New content">Click me</a> <!-- mark: up-content -->
 ```
 
 Clicking the link will change the targeted element's inner HTML to the attribute value:
@@ -136,7 +136,7 @@ The target will be [derived](/target-derivation) from the root element in the gi
 You can also embed the HTML in an [`[up-fragment]`](/up-follow#up-fragment) attribute.
 
 ```html
-<a href='#' up-fragment='<div class="target">inner</div>'>Click me</a> <!-- mark-phrase: up-content -->
+<a href='#' up-fragment='<div class="target">inner</div>'>Click me</a> <!-- mark: up-content -->
 ```
 
 > [tip]
@@ -149,7 +149,7 @@ You can also embed the HTML in an [`[up-fragment]`](/up-follow#up-fragment) attr
 When updating fragments from a string or `<template>`, you may omit the `[href="#"]` attribute:
 
 ```html
-<a up-target=".target" up-content="New content">Click me</a> <!-- mark-phrase: up-content -->
+<a up-target=".target" up-content="New content">Click me</a> <!-- mark: up-content -->
 ```
 
 Unpoly will [make sure](/up.link.config#config.clickableSelectors) that such a link is focusable and supports keyboard activation.
@@ -214,13 +214,13 @@ in any attribute or option that accepts HTML:
 
 
 ```html
-<a href="#" up-target=".target" up-document="#my-template">Click me</a> <!-- mark-phrase: #my-template -->
+<a href="#" up-target=".target" up-document="#my-template">Click me</a> <!-- mark: #my-template -->
 
 <div class="target">
   Old content
 </div>
 
-<template id="my-template"> <!-- mark-phrase: my-template -->
+<template id="my-template"> <!-- mark: my-template -->
   <div class="target">
     New content
   </div>

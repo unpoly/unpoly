@@ -622,12 +622,12 @@ up.protocol = (function() {
   <form action="/users">
 
     <fieldset>
-      <label for="email" up-validate>E-mail</label> <!-- mark-phrase: up-validate -->
+      <label for="email" up-validate>E-mail</label> <!-- mark: up-validate -->
       <input type="text" id="email" name="email">
     </fieldset>
 
     <fieldset>
-      <label for="password" up-validate>Password</label> <!-- mark-phrase: up-validate -->
+      <label for="password" up-validate>Password</label> <!-- mark: up-validate -->
       <input type="password" id="password" name="password">
     </fieldset>
 

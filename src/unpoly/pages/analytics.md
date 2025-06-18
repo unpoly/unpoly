@@ -104,7 +104,7 @@ Using a compiler makes it easy to track custom event properties ("dimensions") a
 Encode it in an `[up-data]` attribute:
 
 ```html
-<main track-page-view up-data="{ course: 'ruby-basics', page: 1 }"> // mark-phrase up-data
+<main track-page-view up-data="{ course: 'ruby-basics', page: 1 }"> // mark: up-data
   ...
 </main>
 ```
@@ -118,7 +118,7 @@ up.compiler('[track-page-view]', function(element, data, meta) {
   // Don't track duplicate page views if we just reloaded for cache revalidation. 
   if (!meta.revalidating) {
     // Send an event to our web analytics tool.
-    trackPageView(meta.layer.location, data) // mark-phrase: data
+    trackPageView(meta.layer.location, data) // mark: data
   }
 }
 ```

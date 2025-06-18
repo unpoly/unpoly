@@ -478,7 +478,7 @@ up.fragment = (function() {
   manually set `[up-source]` attribute:
 
   ```html
-  <div class="unread-count" up-poll up-source="/unread-count"> <!-- mark-phrase: up-source -->
+  <div class="unread-count" up-poll up-source="/unread-count"> <!-- mark: up-source -->
     2 new messages
   </div>
   ```
@@ -2885,7 +2885,7 @@ up.fragment = (function() {
   We want to integrate [Mustache](https://github.com/janl/mustache.js) to enable templates like this:
 
   ```html
-  <script id="greeter-template" type="text/mustache"> <!-- mark-phrase: text/mustache -->
+  <script id="greeter-template" type="text/mustache"> <!-- mark: text/mustache -->
     <div id="greeter">
       Hello, {{name}}!
     </div>

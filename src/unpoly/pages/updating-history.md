@@ -81,7 +81,7 @@ A history update comprises the following:
 In the document below, the highlighted nodes will be updated when history is changed, in additional to the location URL:
 
 ```html
-<html lang="en"> <!-- mark-phrase: en -->
+<html lang="en"> <!-- mark: en -->
   <head>
     <title>AcmeCorp</title> <!-- mark-line -->
     <link rel="canonical" href="https://example.com/dresses/green-dresses"> <!-- mark-line -->

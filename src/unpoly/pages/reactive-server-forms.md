@@ -37,17 +37,17 @@ We can implement this form with three `[up-validate]` attributes and no addition
 <form method="post" action="/purchases">
   <fieldset>
     <label for="continent">Continent</label>
-    <select name="continent" id="continent" up-validate="#country">...</select> <!-- mark-phrase: up-validate -->
+    <select name="continent" id="continent" up-validate="#country">...</select> <!-- mark: up-validate -->
   </fieldset>
   
   <fieldset>
     <label for="country">Country</label>
-    <select name="country" id="country" up-validate="#price">...</select> <!-- mark-phrase: up-validate -->
+    <select name="country" id="country" up-validate="#price">...</select> <!-- mark: up-validate -->
   </fieldset>
   
   <fieldset>
     <label for="weight">Weight</label>
-    <input name="weight" id="weight" up-validate="#price"> kg <!-- mark-phrase: up-validate -->
+    <input name="weight" id="weight" up-validate="#price"> kg <!-- mark: up-validate -->
   </fieldset>
   
   <fieldset>
@@ -80,7 +80,7 @@ For instance, when the user changes the continent, the following would update th
 in addition to the country select:
 
 ```html
-<select name="continent" up-validate="#country, #price"> <!-- mark-phrase: #country, #price -->
+<select name="continent" up-validate="#country, #price"> <!-- mark: #country, #price -->
   ...
 </select>
 ```
@@ -92,7 +92,7 @@ You can refer to the changed field as `:origin`:
 
 ```html
 <fieldset>
-  <select name="continent" up-validate="fieldset:has(:origin), #country, #price"> <!-- mark-phrase: fieldset:has(:origin) -->
+  <select name="continent" up-validate="fieldset:has(:origin), #country, #price"> <!-- mark: fieldset:has(:origin) -->
     ...
   </select>
 </fieldset>
@@ -133,7 +133,7 @@ If you prefer to completely prevent user input during validation, give the form 
 `[up-watch-disable]` attribute. This will disable all form fields while validation requests are in flight: 
 
 ```html
-<form method="post" action="/purchases" up-watch-disable> <!-- mark-phrase: up-watch-disable -->
+<form method="post" action="/purchases" up-watch-disable> <!-- mark: up-watch-disable -->
   ...
 </form>
 ```
@@ -153,7 +153,7 @@ You can render content from another server endpoint by setting an
 
 ```html
 <form method="post" action="/order">
-  <input name="quantity" up-validate="#preview" up-validate-url="/preview-order"> <!-- mark-phrase: /preview-order -->
+  <input name="quantity" up-validate="#preview" up-validate-url="/preview-order"> <!-- mark: /preview-order -->
   
   <div id="preview">
     Order total: €190

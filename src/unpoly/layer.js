@@ -1088,7 +1088,7 @@ up.layer = (function() {
   This will immediately dismiss the overlay on submission, without making a network request:
 
   ```html
-  <form up-dismiss> <!-- mark-phrase: up-dismiss -->
+  <form up-dismiss> <!-- mark: up-dismiss -->
     ...
   </form>
   ```
@@ -1161,7 +1161,7 @@ up.layer = (function() {
   This will immediately accept the overlay on submission, without making a network request:
 
   ```html
-  <form up-accept> <!-- mark-phrase: up-accept -->
+  <form up-accept> <!-- mark: up-accept -->
     ...
   </form>
   ```

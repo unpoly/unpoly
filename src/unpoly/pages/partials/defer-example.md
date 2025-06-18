@@ -13,7 +13,7 @@ In the initial view, only leave a placeholder element and mark it with an `[up-d
 Also set an `[up-href]` attribute with the URL from which to load the deferred content:
 
 ```html
-<div id="menu" up-defer up-href="/menu"> <!-- mark-phrase: up-defer -->
+<div id="menu" up-defer up-href="/menu"> <!-- mark: up-defer -->
   Loading...
 </div>
 ```

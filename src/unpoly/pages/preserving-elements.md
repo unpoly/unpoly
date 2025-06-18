@@ -25,7 +25,7 @@ on the element we want to keep:
 <!-- label: Initial page -->
 <div id="article">
   <p>Article 1</p>
-  <audio id="player" up-keep src="song1.mp3"></audio> <!-- mark-phrase: up-keep -->
+  <audio id="player" up-keep src="song1.mp3"></audio> <!-- mark: up-keep -->
 </div>
 
 <a href="/article2" up-target="#article">Go to article 2</a>
@@ -84,7 +84,7 @@ We can achieve this by setting `[up-keep="same-html"]` on a container that conta
 and eventual error messages:
 
 ```html
-<fieldset id="department-group" up-keep="same-html"> <!-- mark-phrase: same-html -->
+<fieldset id="department-group" up-keep="same-html"> <!-- mark: same-html -->
   <label for="department">Department</label>
   <select id="department" name="department" value="IT">
     <option>IT</option>
@@ -116,13 +116,13 @@ centered around the new location. We can achieve this by setting an `[up-keep="s
 the map container:
 
 ```html
-<div class="map" up-data="{ location: 'Hofbräuhaus Munich' }" up-keep="same-data"></div> <!-- mark-phrase: same-data -->
+<div class="map" up-data="{ location: 'Hofbräuhaus Munich' }" up-keep="same-data"></div> <!-- mark: same-data -->
 ```
 
 Instead of `[up-data]` we can also use HTML5 [`[data-*]` attributes](https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes):
 
 ```html
-<div class="map" data-location="Hofbräuhaus Munich" up-keep="same-data"></div> <!-- mark-phrase: data-location -->
+<div class="map" data-location="Hofbräuhaus Munich" up-keep="same-data"></div> <!-- mark: data-location -->
 ```
 
 Unpoly will compare the element's **initial data** as it is rendered by the server.\

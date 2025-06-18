@@ -77,7 +77,7 @@ To migrate this script, think of an attribute or class that should activate the 
 and add it to the relevant element:  
 
 ```html
-<form action="/orders/new" track-view"> <!-- mark-phrase: track-view -->
+<form action="/orders/new" track-view"> <!-- mark: track-view -->
    ...
 </form>
 ```
@@ -85,7 +85,7 @@ and add it to the relevant element:
 Any parameters can be [attached to the element](/data):
 
 ```html
-<form action="/orders/new" track-view up-data="{ screen: 'order-form', step: 1 }"> <!-- mark-phrase: { screen: 'order-form', step: 1 } -->
+<form action="/orders/new" track-view up-data="{ screen: 'order-form', step: 1 }"> <!-- mark: { screen: 'order-form', step: 1 } -->
    ...
 </form>
 ```
@@ -94,7 +94,7 @@ You can now react to an element in a compiler:
 
 
 ```js
-up.compiler('[track-view]', function(element, data) { // mark-phrase: [track-view]
+up.compiler('[track-view]', function(element, data) { // mark: [track-view]
   trackView(data)
 })
 ```
@@ -140,7 +140,7 @@ A better solution is so move the `<script>` to head and [give it an `[defer]` at
 ```html
 <html>
   <head>
-    <script src="app.js" defer></script> <!-- mark-phrase: defer -->
+    <script src="app.js" defer></script> <!-- mark: defer -->
   </head>
   <body>
     <p>Content here</p>

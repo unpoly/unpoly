@@ -55,7 +55,7 @@ location.pathname // result: "/"
 We now open a new overlay with visible overlay. Note how its URL `/overlay` is reflected in the browser's address bar (`location.pathname`):
 
 ```js
-await up.layer.open({ url: '/overlay', history: true }) // mark-phrase: true
+await up.layer.open({ url: '/overlay', history: true }) // mark: true
 location.pathname // result: "/overlay"
 ```
 
@@ -83,7 +83,7 @@ Note how the browser's address bar remains on the root layer's location (`/`):
 
 ```js
 location.pathname // result: "/"
-await up.layer.open({ url: '/overlay', history: false }) // mark-phrase: false
+await up.layer.open({ url: '/overlay', history: false }) // mark: false
 location.pathname // result: "/"
 ```
 

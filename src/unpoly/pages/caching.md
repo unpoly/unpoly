@@ -133,7 +133,7 @@ To detect revalidation, compilers may accept a third argument with information a
 In the example below a compiler wants to [track a page view](/analytics) in a web analytics tool:
 
 ```js
-up.compiler('[track-page-view]', function(element, data, meta) { // mark-phrase: meta
+up.compiler('[track-page-view]', function(element, data, meta) { // mark: meta
   // Don't track duplicate page views if we just reloaded for cache revalidation. 
   if (!meta.revalidating) {
     // Send an event to our web analytics tool.

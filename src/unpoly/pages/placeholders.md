@@ -23,7 +23,7 @@ To show a placeholder while a link is loading, set an `[up-placeholder]` attribu
 with the placeholder's HTML as its value:
 
 ```html
-<a href="/path" up-target="#target" up-placeholder="<p>Loading…</p>">Show story</a> <!-- mark-phrase: up-placeholder -->
+<a href="/path" up-target="#target" up-placeholder="<p>Loading…</p>">Show story</a> <!-- mark: up-placeholder -->
 
 <div id="#target">
   Old content
@@ -56,7 +56,7 @@ In your scripts you may pass a `{ placeholder }` option to most rendering functi
 up.navigate({
   url: '/path',
   target: '#target',
-  placeholder: '<p>Loading…</p>' // mark-phrase: placeholder
+  placeholder: '<p>Loading…</p>' // mark: placeholder
 })
 ```
 
@@ -71,7 +71,7 @@ by its CSS selector. This is useful when you don't want to set long HTML string
 as attribute value, or when you want to re-use the same placeholder multiple times:
 
 ```html
-<a href="/path" up-target="#target" up-placeholder="#loading-template">Show story</a> <!-- mark-phrase: #loading-message -->
+<a href="/path" up-target="#target" up-placeholder="#loading-template">Show story</a> <!-- mark: #loading-message -->
 
 <div id="#target">
   Old content
@@ -98,7 +98,7 @@ can append variables as a data object after the template selector:
 <a
   href="/path"
   up-target="#target"
-  up-placeholder="#loading-template { size: 'xl', text: 'Please wait' }"> <!-- mark-phrase: #loading-template { size: 'xl', text: 'Please wait' } -->
+  up-placeholder="#loading-template { size: 'xl', text: 'Please wait' }"> <!-- mark: #loading-template { size: 'xl', text: 'Please wait' } -->
   Show story
 </a>
 ```

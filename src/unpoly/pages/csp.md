@@ -75,7 +75,7 @@ global script that satisfies your CSP:
 ```js
 <html>
   <head>
-    <script src="/compilers.js" defer></script> <!-- mark-phrase: /compilers.js -->
+    <script src="/compilers.js" defer></script> <!-- mark: /compilers.js -->
   </head>
   <body>
     ...
@@ -153,7 +153,7 @@ in the `<head>` of the initial page that [booted](/up.boot) Unpoly:
 
 ```html
 <head>
-  <meta name="csp-nonce" content="nonce-kO52Iphm8B"> <!-- mark-phrase: nonce-kO52Iphm8B -->
+  <meta name="csp-nonce" content="nonce-kO52Iphm8B"> <!-- mark: nonce-kO52Iphm8B -->
   ...
 </head>
 ```

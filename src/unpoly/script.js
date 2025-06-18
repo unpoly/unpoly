@@ -220,7 +220,7 @@ q
   as a second argument:
 
   ```js
-  up.compiler('.user', function(element, data) { // mark-phrase: data
+  up.compiler('.user', function(element, data) { // mark: data
     console.log(data.age)  // result: 31
     console.log(data.name) // result: "Alice"
   })
@@ -243,7 +243,7 @@ q
   Compilers may accept a third argument with information about the current [render pass](/up.render):
 
   ```js
-  up.compiler('.user', function(element, data, meta) { // mark-phrase: meta
+  up.compiler('.user', function(element, data, meta) { // mark: meta
     console.log(meta.layer.mode)   // result: "root"
     console.log(meta.revalidating) // result: true
   })

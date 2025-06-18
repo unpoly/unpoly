@@ -66,7 +66,7 @@ The `preview` argument is an `up.Preview` instance that offers many utilities to
 We can use the `link-spinner` preview in any link or form by setting an `[up-preview]` attribute:
 
 ```html
-<a href="/edit" up-follow up-preview="link-spinner">Edit page</a> <!-- mark-phrase: up-preview -->
+<a href="/edit" up-follow up-preview="link-spinner">Edit page</a> <!-- mark: up-preview -->
 ```
 
 When the link is followed, the preview will append the spinner element to the link label.
@@ -218,7 +218,7 @@ up.preview('spinner', function(preview, { size = 50 }) {
 From HTML you can append the options to the `[up-preview]` argument, after the preview name:
 
 ```html
-<a href="/edit" up-follow up-preview="spinner { size: 100 }">Edit page</a> <!-- mark-phrase: { size: 100 } -->
+<a href="/edit" up-follow up-preview="spinner { size: 100 }">Edit page</a> <!-- mark: { size: 100 } -->
 ```
 
 ### Passing options from JavaScript
@@ -278,7 +278,7 @@ To show a preview for the revalidating request, use the `[up-revalidate-preview]
 <a href="/clients"
    up-follow
    up-preview="index-placeholder"
-   up-revalidate-preview="spinner"> <!-- mark-phrase: up-revalidate-preview -->
+   up-revalidate-preview="spinner"> <!-- mark: up-revalidate-preview -->
   Clients
 </a>
 ```
@@ -294,7 +294,7 @@ to a [true value](/attributes-and-options#boolean-attributes):
 <a href="/clients"
    up-follow
    up-preview="spinner"
-   up-revalidate-preview="true"> <!-- mark-phrase: true -->
+   up-revalidate-preview="true"> <!-- mark: true -->
   Clients
 </a>
 ```
@@ -312,7 +312,7 @@ After the timer expires, the preview must check if it is still running before ch
 ```js
 up.preview('delayed-spinner', (preview) => {
   up.util.timer(1000, function() {
-    if (!preview.ended) { // mark-phrase: ended
+    if (!preview.ended) { // mark: ended
       preview.insert('<img src="spinner.gif">')      
     }
   })

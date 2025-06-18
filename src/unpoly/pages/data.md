@@ -18,7 +18,7 @@ An object with all data attributes will be passed to your [compilers](/up.compil
 as a second argument:
 
 ```js
-up.compiler('.user', function(element, data) { // mark-phrase: data
+up.compiler('.user', function(element, data) { // mark: data
   console.log(data.age)  // result: 18
   console.log(data.name) // result: "Bob"
 })

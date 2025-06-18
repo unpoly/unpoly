@@ -18,7 +18,7 @@ Instead of loading deferred content right away, you may also wait until the plac
 For this set an `[up-defer="reveal"]` attribute:
 
 ```html
-<div id="menu" up-defer="reveal" up-href="/menu"> <!-- mark-phrase: reveal -->
+<div id="menu" up-defer="reveal" up-href="/menu"> <!-- mark: reveal -->
   Loading...
 </div>
 ```
@@ -141,7 +141,7 @@ The initial children of an `[up-defer]` element are shown before its deferred co
 
 ```html
 <div id="menu" up-defer up-href="/menu">
-  Loading... <!-- mark-phrase: Loading... -->
+  Loading... <!-- mark: Loading... -->
 </div>
 ```
 
@@ -159,11 +159,11 @@ Deferred placeholders may be scattered throughout the page, but load from the sa
 
 
 ```html
-<div id="editorial-controls" up-defer up-href="/articles/123/deferred"></div> <!-- mark-phrase: #editorial-controls -->
+<div id="editorial-controls" up-defer up-href="/articles/123/deferred"></div> <!-- mark: #editorial-controls -->
 
 ... other HTML ...
 
-<div id="analytics-controls" up-defer up-href="/articles/123/deferred"></div> <!-- mark-phrase: #analytics-controls -->
+<div id="analytics-controls" up-defer up-href="/articles/123/deferred"></div> <!-- mark: #analytics-controls -->
 ```
 
 When loading the deferred content, Unpoly will send a *single request* with both targets:
@@ -183,7 +183,7 @@ The following placeholder would update the fragments `#editorial-controls` and `
 the placeholder is scrolled into view:
 
 ```html
-<a href="/articles/123/controls" up-defer="reveal" up-target="#editorial-controls, #analytics-controls"> <!-- mark-phrase: up-target -->
+<a href="/articles/123/controls" up-defer="reveal" up-target="#editorial-controls, #analytics-controls"> <!-- mark: up-target -->
   load controls
 </div>
 ```

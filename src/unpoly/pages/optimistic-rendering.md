@@ -63,7 +63,7 @@ The HTML for the TODO list is structured like this:
 ```html
 <div id="tasks">
   <!-- Form to add a new task -->
-  <form up-target="#tasks" up-preview="add-task"> <!-- mark-phrase: add-task -->
+  <form up-target="#tasks" up-preview="add-task"> <!-- mark: add-task -->
     <input type="text" name="text" required>
     <button type="submit">Save</button>
   </form>
@@ -110,7 +110,7 @@ the task text has been filled in:
 
 ```html
 <form up-target="#tasks" up-preview="add-task">
-  <input type="text" name="text" required> <!-- mark-phrase: required -->
+  <input type="text" name="text" required> <!-- mark: required -->
   <button type="submit">Save</button>
 </form>
 ```

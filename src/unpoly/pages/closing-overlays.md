@@ -206,7 +206,7 @@ we can use the HTML from the response and render it into the parent layer:
 <a href="/companies/new"
    up-layer="new"
    up-accept-location="/companies"
-   up-on-accepted="up.render('.companies', { response: event.response })"> <!-- mark-phrase: event.response -->
+   up-on-accepted="up.render('.companies', { response: event.response })"> <!-- mark: event.response -->
   New company
 </a>
 ```
@@ -258,13 +258,13 @@ Closing when a button is clicked
 To close the [current layer](/up.layer.current) when a button is clicked, use an `[up-accept]` or `[up-dismiss]` attribute:
 
 ```html
-<button up-accept>Close overlay</button> <!-- mark-phrase: up-accept -->
+<button up-accept>Close overlay</button> <!-- mark: up-accept -->
 ```
 
 To close with a [result value](#overlay-result-values), set a [relaxed JSON](/relaxed-json) on the attribute value:
 
 ```html
-<button up-dismiss="{ id: 5 }">Choose user #5</button> <!-- mark-phrase: { id: 5 } -->
+<button up-dismiss="{ id: 5 }">Choose user #5</button> <!-- mark: { id: 5 } -->
 ```
 
 
@@ -291,7 +291,7 @@ To close an overlay when a form is submitted, set an `[up-accept]` or `[up-dismi
 This will immediately close the overlay on submission, without making a network request:
 
 ```html
-<form up-accept> <!-- mark-phrase: up-accept -->
+<form up-accept> <!-- mark: up-accept -->
   ...
 </form>
 ```
@@ -304,8 +304,8 @@ For example, this form has two fields named `foo` and `bar`:
 
 ```html
 <form up-accept>
-  <input name="foo" value="1"> <!-- mark-phrase: foo -->
-  <input name="bar" value="2"> <!-- mark-phrase: bar -->
+  <input name="foo" value="1"> <!-- mark: foo -->
+  <input name="bar" value="2"> <!-- mark: bar -->
 </form>
 ```
 
@@ -337,7 +337,7 @@ When you do want the form to submit a request before the overlay closes, do *not
 an `[up-accept]` or `[up-dismiss]` attribute. Instead make a regular form that is handled by Unpoly:
 
 ```html
-<form up-submit> <!-- mark-phrase: up-submit -->
+<form up-submit> <!-- mark: up-submit -->
   ...
 </form>
 ```

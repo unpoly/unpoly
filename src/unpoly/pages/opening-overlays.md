@@ -52,7 +52,7 @@ Opening overlays from local content {#string}
 The [`[up-content]`](/up-follow#up-content) attribute lets you open an overlay without going through the server:
 
 ```html
-<a up-layer="new popup" up-content="<p>Helpful instructions here</p>"> <!-- mark-phrase: up-content -->
+<a up-layer="new popup" up-content="<p>Helpful instructions here</p>"> <!-- mark: up-content -->
   Help
 </a>
 ```
@@ -62,7 +62,7 @@ Since we didn't provide an `[up-target]` selector, it will be wrapped in a conta
 Instead of embedding an HTML string, you can also refer to a [template](/templates):
 
 ```html
-<a up-layer="new popup" up-content="#help"> <!-- mark-phrase: up-content -->
+<a up-layer="new popup" up-content="#help"> <!-- mark: up-content -->
   Help
 </a>
 
