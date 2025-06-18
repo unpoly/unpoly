@@ -51,7 +51,7 @@ In this layout rendering with `{ abort: 'target' }` has the following effect:
 
 ## Preventing requests from being aborted {#preventing}
 
-In some cases you may want protect a request from being aborted through `{ abort }`.\
+In some cases you may want to protect a request from being aborted through `{ abort }`.\
 You may do so by passing an `{ abortable: false }` option.
 
 ## Aborting imperatively
