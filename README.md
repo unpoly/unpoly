@@ -109,7 +109,7 @@ npm run watch-dev
 
 This will make a fresh build and then watch the project for changes to the source files. 
 
-hen a source changes, affected build files are automatically recompiled. The incremental recompilation is much faster than a full build.
+When a source changes, affected build files are automatically recompiled. The incremental recompilation is much faster than a full build.
 
 ### Running tests
 

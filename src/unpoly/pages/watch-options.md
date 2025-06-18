@@ -71,7 +71,7 @@ up.form.config.watchChangeEvents = function(field) {
 Debouncing callbacks {#debouncing}
 --------------------
 
-When observing the `input` event, you may want until to wait until the user has stopped
+When observing the `input` event, you may want to wait until the user has stopped
 typing before running a callback. You can do so by setting an `[up-watch-delay]` attribute:
 
 ```html

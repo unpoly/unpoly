@@ -19,7 +19,7 @@ describe('up.browser', function() {
         expect(call).toAbort()
       })
 
-      it('does now show a conformation dialog and fulfills if no { confirm } option is given', function() {
+      it('does now show a confirmation dialog and fulfills if no { confirm } option is given', function() {
         spyOn(window, 'confirm')
         up.browser.assertConfirmed({})
         expect(window.confirm).not.toHaveBeenCalled()

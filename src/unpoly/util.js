@@ -1620,13 +1620,13 @@ up.util = (function() {
 
   ```js
   let process = (value) => console.log(value)
-  up.always(promise, process)
+  up.util.always(promise, process)
   ```
 
   ### Example with `await`
 
   ```js
-  let value = await up.always(promise)
+  let value = await up.util.always(promise)
   console.log(value)
   ```
 

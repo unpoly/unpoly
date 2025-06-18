@@ -112,7 +112,7 @@ up.script = (function() {
     '[up-flashes]': -200,     //
     '[up-expand]': -300,      // distributes [up-*] attributes to parents
     '[data-method]': -400,    // converts [data-method] to [up-method] only if link has followable [up-*] attributes
-    '[data-confirm]': -400,   // converts [data-conform] to [up-confirm] only if link has followable [up-*] attributes
+    '[data-confirm]': -400,   // converts [data-confirm] to [up-confirm] only if link has followable [up-*] attributes
     '[up-keep]': 9999999999,  // cache the identity of e.g. [up-keep="same-html"] before any client-side changes
   }
 
