@@ -166,7 +166,7 @@ Deferred placeholders may be scattered throughout the page, but load from the sa
 <div id="analytics-controls" up-defer up-href="/articles/123/deferred"></div> <!-- mark: #analytics-controls -->
 ```
 
-When loading the deferred content, Unpoly will send a *single request* with both targets:
+When loading the deferred content, Unpoly will [send a *single request*](/X-Up-Target#merging) with both targets:
 
 ```http
 GET /articles/123/deferred HTTP/1.1
