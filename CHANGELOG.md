@@ -11,11 +11,11 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 3.11.0 (unreleased)
 -------------------
 
+(Image)
+
 Full changes: https://github.com/unpoly/unpoly/compare/v3.10.2...master
 
 This release contains some breaking changes, which are marked with the ⚠️ emoji in this CHANGELOG. Most breaking changes are polyfilled by [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading).
-
-
 
 ### History navigation
 
@@ -36,6 +36,7 @@ This release contains some breaking changes, which are marked with the ⚠️ em
 - For overlays with history, the `up:layer:location:changed' event is now emitted when the URL changes for *any* reason, not just after rendering.
 - The `up:location:location:changed` event now has a `{ previousLocation }` property.
 - Experimental function up.history.replace()
+- Fix a bug where history wasn't updated when a response contains comments before the `<!DOCTYPE>` or `<html>` tag (fixes #726)
 
 
 ### Clicking on `#hash` links
@@ -85,7 +86,8 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 - Fields or forms can add additional headers to the validation request using the `[up-validate-headers]` attribute.
 - You can now send validation requests to a different server route (issue #486). You can use the new `[up-validate-url]` and `[up-validate-method]` attributes on indivudal fields or on entire forms. Unpoly still guarantees eventual consistency in a form with many concurrent validations.
 - Validation targets can now refer to the changed field with `:origin`. This was possible before, but was never documented.
-  
+- `[up-validate]` can be set on any container of fields, not just an individual field or an entire form. This was possible before, but not properly documented.
+
 
 ### Layers
 
@@ -103,6 +105,7 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 - Unpoly now ignores CSP nonces from the `script-src-elem` directive.
 - Fix a bug where `<script>` elements in new fragments would lose their `[nonce]` attribute. That attribute is now rewritten to the current page's nonce *if* it matches a nonce from the response that inserted the fragment.
 - When `up:assets:changed` listeners inspect the `event.newAssets`, any asset nonces are now already rewritten to the current page's nonce *if* they a nonce from the response that caused the event.
+- Adopted `script[nonce]` attributes now show up in the attribute value for easier debugging.
 
 
 ### Documentation
@@ -110,6 +113,7 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 - Features with many attributes (or options) are now shown in groups like "Request" or "Animation".
   - TODO: Screenshot
 - Many attributes and options now explicitly documented instead of referring to `up.render()`.
+- New guides: ...
 
 
 ### Caching
@@ -117,47 +121,16 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 - ⚠️ Any `[up-expire-cache]` and `[up-evict-cache]` attributes are now executed *before* the request is sent. In previous version, the cache was only changed after a response was loaded. This change allows the combined use of `[up-evict-cache]` and `[up-cache]` to clear and re-populate the cache with a single render pass.
 - ⚠️ The server can no longer prevent expiration with an `X-Up-Expire-Cache: false` response header.
 - When a POST request redirects to a GET route, that final GET request is now cached.
-
-
-### Persistent keeping
-
-- `[up-keep]` fragment are now preserved without detaching and re-attaching the element. This allows to keep focus without re-focusing, which may e.g. cause custom dropdown implementation to re-open options. Only on [supporting browsers](https://caniuse.com/mdn-api_element_movebefore).
-
-
-### Smaller changes and bugfixes
-
-(possibly organize this into sub-sections)
-
-- Fix relaxed JSON parsing when input contains a section reference (like §1)
-- `[up-validate]` can be set on any container of fields, not just an individual field or an entire form. This was possible before, but not properly documented.
-- Calling `up.network.loadPage()` will now remove binary entries from a given `{ params }` option. JavaScript cannot make a full page load with binary params.
-- ⚠️ Submitting or validating a form with a `{ params }` option now overrides existing params with the same name. Formerly, a new param with the same name was added.
 - `up.reload()` can restore a fragment to a previously cached state using an `{ cache: true }` option. This was possible before, but was never documented.
-- Navigation containers can now match the current location of other layers by setting an `[up-layer]` attribute
-- Listeners to `up:request:load` can now [inspect or mutate request options](/up:request:load#changing-requests)
-  before it is sent. This was possible before, but was never documented.
--  ⚠️ Renamed property `up.RenderResult#options` to `#renderOptions`
--  ⚠️ Renamed property `up.RenderJob#options` to `#renderOptions`
-- Added a property `up.RendeResult#ok`. It indicated whether the render pass has rendered a [successful response](/failed-responses).
-- iOS: Long-pressing a link to open the context menu will no longer follow an `[up-instant]` link (#271)
-- iOS: Long-pressing a link will no longer emit an `up:click` event (#721)
-- Fix a bug where history wasn't updated when a response contains comments before the `<!DOCTYPE>` or `<html>` tag (fixes #726)
-- When `up.hello()` is called on a script that is already compiled, `up:fragment:inserted` is only emitted once.
-- Allow to override [focus ring visibility](/focus-visibility) by passing a `{ focusVisible }` render option, or by setting an `[up-focus-visible]` attribute.
+- Requests now clear out their `{ bindLayer }` property after loading, allowing layer objects to be garbage-collected while the request is cached.
 -  Hungry, preloading links no longer throw an error after rendering cached, but expired content.
-- `[up-poll]` now stops if an external script detaches the polling fragment.
-- ⚠️ The `up.util.task()` implementation now uses `postMessage()` instead of `setTimeout()`. This causes the new task to be scheduled earlier, ideally before the browser renders the next frame. The task is still guaranteed to run after all microtasks, such as settled promise callbacks.
-- Unpoly now prevents interactions with elements that are being destroyed (and playing out their exit animation). To achieve this, destroying elements are marked as [`[inert]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/inert).
-- [`unpoly-migrate`](https://unpoly.com/changes/upgrading) now allows to disable all deprecation warnings with `up.migrate.config.logLevel = 'none'`.
-- It is now guaranteed that `up:fragment:inserted` is emitted after compilation.
-- `up.element.subtree()` now prevents redundant array allocations.
-- Requests now clear out their `{ bindLayer }` property after loading, allowing layer objects to be garbage-collected.
-- Fix a bug where `up.RenderResult#renderOptions` was sometimes `undefined`.
-- ⚠️ The experimental function up.`util.pickBy()` no longer passes the entire object as a third argument to the callback function.
-- Adopted `script[nonce]` attributes now show up in the attribute value for easier debugging.
+
+## Match .up-current for other layers
+
+- Navigation containers can now match the current location of other layers by setting an `[up-layer]` attribute
 
 
-### Shorthand keep conditions
+### Persisting elements
 
 - To preserve an element as long as its [data](/data) remains the same,
   set an `[up-keep="same-data"]` attribute. Only when the element's `[up-data]` attribute changes between versions,
@@ -165,12 +138,65 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 - To preserve an element as long as its [outer HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/outerHTML) remains the same,
   set an `[up-keep="same-html"]` attribute. Only when the element's attributes or children changes between versions,
   it is replaced by the new version.
+- `[up-keep]` fragment are now preserved without detaching and re-attaching the element. This allows to keep focus without re-focusing, which may e.g. cause custom dropdown implementation to re-open options. Only on [supporting browsers](https://caniuse.com/mdn-api_element_movebefore).
+
+
+### Form data handling
+
+- ⚠️ Submitting or validating a form with a `{ params }` option now overrides existing params with the same name. Formerly, a new param with the same name was added.
+- Calling `up.network.loadPage()` will now remove binary entries from a given `{ params }` option. JavaScript cannot make a full page load with binary params.
+
+
+### Focus ring visibility
+
+- Allow to override [focus ring visibility](/focus-visibility) by passing a `{ focusVisible }` render option, or by setting an `[up-focus-visible]` attribute. This is in addition to the `up.viewport.config.autoFocusVisible` configuration.
+
+### Polling
+
+- `[up-poll]` now stops if an external script detaches the polling fragment.
+
+### Fixed instant links on iOS
+
+- iOS: Long-pressing a link to open the context menu will no longer follow an `[up-instant]` link (#271)
+- iOS: Long-pressing a link will no longer emit an `up:click` event (#721)
+
+
+### Utility functions
+
+- Fix relaxed JSON parsing when input contains a section reference (like §1)
+- ⚠️ The `up.util.task()` implementation now uses `postMessage()` instead of `setTimeout()`. This causes the new task to be scheduled earlier, ideally before the browser renders the next frame. The task is still guaranteed to run after all microtasks, such as settled promise callbacks.
+- [`unpoly-migrate`](https://unpoly.com/changes/upgrading) now allows to disable all deprecation warnings with `up.migrate.config.logLevel = 'none'`.
+- `up.element.subtree()` now prevents redundant array allocations.
+- ⚠️ The experimental function up.`util.pickBy()` no longer passes the entire object as a third argument to the callback function.
+
+
+### Accessibility
+
+- Unpoly now prevents interactions with elements that are being destroyed (and playing out their exit animation). To achieve this, destroying elements are marked as [`[inert]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/inert).
+
+
+### JavaScript Rendering API
+
+-  ⚠️ Renamed property `up.RenderResult#options` to `#renderOptions`
+-  ⚠️ Renamed property `up.RenderJob#options` to `#renderOptions`
+- Added a property `up.RenderResult#ok`. It indicated whether the render pass has rendered a [successful response](/failed-responses).
+- When `up.hello()` is called on a script that is already compiled, `up:fragment:inserted` is only emitted once.
+- It is now guaranteed that `up:fragment:inserted` is emitted after compilation.
+- Fix a bug where `up.RenderResult#renderOptions` was sometimes `undefined`.
+
+
+### Network requests
+
+- Listeners to `up:request:load` can now [inspect or mutate request options](/up:request:load#changing-requests)
+  before it is sent. This was possible before, but was never documented.
 
 
 ### Stabilization of features
 
 Many experimental features have been declared stable:
 
+- up.deferred.load()
+- up:deferred:load
 - up.event.build()
 - up.form.fields()
 - up.fragment.config.skipResponse
