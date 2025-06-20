@@ -129,7 +129,7 @@ Below you can see a "hamburger menu" that is shown in an overlay. It contains li
 whose `.up-current` class also match the root layer's location:
 
 ```html
-<!-- Shown within an overlay -->
+<!-- label: Navigation bar in an overlay -->
 <nav up-layer="root"> <!-- mark: up-layer -->
   <a href="/users" up-layer="root">Users</a>
   <a href="/posts" up-layer="root">Posts</a>

@@ -41,7 +41,7 @@ To toggle an element [for multiple values](#multiple-values), separate with a co
 </div>
 ```
 
-## Disabling or hiding fields {#disable}
+## Disabling or enabling fields {#disable}
 
 The controlling field gets an `[up-switch]` attribute with a selector
 for the fields to disable for enable:
