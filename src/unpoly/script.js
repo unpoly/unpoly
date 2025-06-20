@@ -933,14 +933,7 @@ q
 
     for (let script of findScripts(root, '[nonce]')) {
       if (responseNonces.includes(script.nonce)) {
-        // We want to see the adoption reflected in both the script.nonce property
-        // and script[nonce] attribute for easier debugging.
-        //
-        // Setting the script.nonce property would usually update the attribute,
-        // but only if the element has the browsing context of the current page.
-        // Since we're adopting nonces for up.ResponseDoc elements (which often live
-        // in a detached document), we use setAttribute() here.
-        script.setAttribute('nonce', pageNonce)
+        script.nonce = pageNonce
       }
     }
 

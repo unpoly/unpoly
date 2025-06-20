@@ -8910,11 +8910,7 @@ describe('up.fragment', function() {
           await wait()
 
           expect('#target').toHaveVisibleText('new target text')
-
-          // We want to see the adoption reflected in both the script.nonce property
-          // and script[nonce] attribute for easier debugging.
           expect('#target script').toHaveProperty('nonce', 'page-secret')
-          expect('#target script').toHaveAttribute('nonce', 'page-secret')
         })
 
         it("rewrites the [nonce] of a body script to use the current page's nonce when it matches one of multiple response's nonces", async function() {

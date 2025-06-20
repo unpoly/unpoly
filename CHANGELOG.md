@@ -105,7 +105,6 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 - Unpoly now ignores CSP nonces from the `script-src-elem` directive.
 - Fix a bug where `<script>` elements in new fragments would lose their `[nonce]` attribute. That attribute is now rewritten to the current page's nonce *if* it matches a nonce from the response that inserted the fragment.
 - When `up:assets:changed` listeners inspect the `event.newAssets`, any asset nonces are now already rewritten to the current page's nonce *if* they a nonce from the response that caused the event.
-- Adopted `script[nonce]` attributes now show up in the attribute value for easier debugging.
 
 
 ### Documentation
