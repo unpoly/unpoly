@@ -1859,6 +1859,26 @@ describe('up.form', function() {
         expect(up.form.validateOptions(fieldOutsideContainer).batch).toBe(true)
       })
 
+      it('parses the closest [up-validate-params] attribute into a { params } option', function() {
+        const form = fixture('form[action="/path1"]')
+        const container = e.affix(form, 'div[up-validate-params="{ foo: 1, bar: 2 }"]')
+        const field = e.affix(container, 'input[type="text"][name="foo"]')
+
+        const options = up.form.validateOptions(field)
+
+        expect(options.params).toEqual({ foo: 1, bar: 2 })
+      })
+
+      it('parses the closest [up-validate-headers] attribute into a { headers } option', function() {
+        const form = fixture('form[action="/path1"]')
+        const container = e.affix(form, 'div[up-validate-headers="{ foo: 1, bar: 2 }"]')
+        const field = e.affix(container, 'input[type="text"][name="foo"]')
+
+        const options = up.form.validateOptions(field)
+
+        expect(options.headers).toEqual({ foo: 1, bar: 2 })
+      })
+
       it('parses the closest [up-watch-event] attribute into an { event } option', function() {
         const form = fixture('form')
         const container = e.affix(form, 'div[up-watch-event="my:event"]')

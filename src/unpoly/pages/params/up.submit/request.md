@@ -22,7 +22,7 @@
 
     The given value will be added to params [parsed](/up.Params.fromForm)
     from the form's input fields. If a param with the same name already
-    existed in the form, it will be deleted and overriden with the given value.
+    existed in the form, it will be deleted and overridden with the given value.
 
 @param {Element|false} [options.submitButton]
   The submit button used to submit the form.

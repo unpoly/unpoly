@@ -482,6 +482,8 @@ up.form = (function() {
     parser.string('url')
     parser.string('method', { normalize: u.normalizeMethod })
     parser.boolean('batch', { default: config.validateBatch })
+    parser.json('params')
+    parser.json('headers')
     // parser.include(destinationOptions)
     parser.include(watchOptions, { defaults: { event: 'change' } })
     return options
@@ -1464,7 +1466,8 @@ up.form = (function() {
         [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
 
         The given value will be added to params [parsed](/up.Params.fromForm)
-        from the form's input fields.
+        from the form's input fields. If a param with the same name already
+        existed in the form, it will be deleted and overridden with the given value.
 
   @section Layer
     @mix up-follow/layer
@@ -1911,6 +1914,18 @@ up.form = (function() {
       By default Unpoly will use the form's `[method]` attribute
 
       See [Validating against other URLs](/up.validate#urls).
+
+      @experimental
+
+    @param [up-validate-params]
+      @like [up-submit]/up-params
+      @experimental
+
+    @param [up-validate-headers]
+      A [relaxed JSON](/relaxed-json) object with additional request headers.
+
+      By default Unpoly will send an `X-Up-Validate` header so the server
+      can [distinguish the validation request from a regular form submission](#backend-protocol).
 
       @experimental
 
