@@ -1171,15 +1171,29 @@ up.form = (function() {
 
   @section Request
     @param {string} options.url
-      The [URL to validate against](/).
+      The URL to which to submit the validation request.
+
+      By default Unpoly will use the form's `[action]` attribute
+
+      See [Validating against other URLs](/up.validate#urls).
+
+      @experimental
 
     @param {string} options.method
-      TODO: Docs
+      The method to use for submitting the validation request.
+
+      By default Unpoly will use the form's `[method]` attribute
+
+      See [Validating against other URLs](/up.validate#urls).
+
+      @experimental
 
     @param {boolean} [options.batch=true]
-      Whether to [batch validations](/up.validate#batching).
+      Whether to [consolidate multiple validations into a single request](/up.validate#batching).
 
       Defaults to `up.form.config.validateBatch`, which defaults to `true`.
+
+      @experimental
 
     @param options.params
       @like up.submit
@@ -1833,7 +1847,7 @@ up.form = (function() {
   </fieldset>
   ```
 
-  ### Validating against other URLs {#urls}
+  ## Validating against other URLs {#urls}
 
   By default, validation requests will use `[method]` and `[action]` attributes from the form element.
 
@@ -1883,15 +1897,28 @@ up.form = (function() {
 
   @section Request
     @param [up-validate-url]
-      TODO: Docs
+      The URL to which to submit the validation request.
+
+      By default Unpoly will use the form's `[action]` attribute
+
+      See [Validating against other URLs](/up.validate#urls).
+
       @experimental
 
     @param [up-validate-method]
-      TODO: Docs
+      The method to use for submitting the validation request.
+
+      By default Unpoly will use the form's `[method]` attribute
+
+      See [Validating against other URLs](/up.validate#urls).
+
       @experimental
 
-    @param [up-validate-batch]
-      TODO: Docs
+    @param [up-validate-batch='true']
+      Whether to [consolidate multiple validations into a single request](/up.validate#batching).
+
+      Defaults to `up.form.config.validateBatch`, which defaults to `true`.
+
       @experimental
 
   @section Loading state
