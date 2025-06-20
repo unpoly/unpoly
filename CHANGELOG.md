@@ -125,6 +125,7 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 
 (possibly organize this into sub-sections)
 
+- Fix relaxed JSON parsing when input contains a section reference (like §1)
 - `[up-validate]` can be set on any container of fields, not just an individual field or an entire form. This was possible before, but not properly documented.
 - Calling `up.network.loadPage()` will now remove binary entries from a given `{ params }` option. JavaScript cannot make a full page load with binary params.
 - ⚠️ Submitting or validating a form with a `{ params }` option now overrides existing params with the same name. Formerly, a new param with the same name was added.
