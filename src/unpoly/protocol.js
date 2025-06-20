@@ -269,9 +269,21 @@ up.protocol = (function() {
 
   ### Example
 
+  Assume we have the following form in a drawer overlay. The form targets
+  the root layer:
+
+  ```html
+  <form action="/submit" up-submit up-layer="root"> <!-- mark: up-layer -->
+    ...
+  </form>
+  ```
+
+  Because [failed form submissions update the `<form>` element](/validation#changing-how-validation-errors-are-rendered),
+  submitting this form will send the following headers:
+
   ```http
-  X-Up-Mode: drawer
-  X-Up-Fail-Mode: root
+  X-Up-Mode: root
+  X-Up-Fail-Mode: drawer
   ```
 
   @header X-Up-Fail-Mode
@@ -279,7 +291,35 @@ up.protocol = (function() {
   */
 
   /*-
-  TODO: Docs
+  This request header contains the [mode](/up.layer.mode) of the layer
+  from which the interaction [originated](/origin).
+
+    Links or forms may target another layer than their own.
+  The targeted layer is sent as an `X-Up-Mode` header.
+
+  ## Example
+
+  Assume we have the following link in a modal overlay. The link targets
+  the root layer:
+
+  ```html
+  <a href="/" up-follow up-layer="root">Click me</a> <!-- mark: up-layer -->
+  ```
+
+  When the link is clicked, the following headers are set:
+
+  ```http
+  X-Up-Mode: root
+  X-Up-Origin-Mode: modal
+  ```
+
+  ## Interaction origins
+
+  The origin element is automatically set for many actions, for example:
+
+  @include default-origins
+
+  When the origin element is unknown, this header is not sent.
 
   @header X-Up-Origin-Mode
   @experimental

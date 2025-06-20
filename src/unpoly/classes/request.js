@@ -221,6 +221,16 @@ up.Request = class Request extends up.Record {
   */
 
   /*-
+  The [mode](/up.Layer.prototype.mode) of the layer from which the interaction [originated](/origin).
+
+  The value will be sent as an `X-Up-Origin-Mode` header.
+
+  @property up.Request#originMode
+  @param {string} originMode
+  @experimental
+  */
+
+  /*-
   The format in which the [request params](/up.Request.prototype.params) will be encoded.
 
   @property up.Request#contentType
