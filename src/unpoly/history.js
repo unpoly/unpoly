@@ -97,11 +97,11 @@ up.history = (function() {
   /*-
   Returns a normalized URL for the previous history entry.
 
-  Only history entries added by Unpoly functions will be considered.
+  If no previous history entry is known, returns `undefined`.
 
   @property up.history.previousLocation
   @param {string} previousLocation
-  @experimental
+  @stable
   */
   let previousLocation
   let nextPreviousLocation
@@ -136,7 +136,7 @@ up.history = (function() {
 
   @property up.history.location
   @param {string} location
-  @experimental
+  @stable
   */
   function currentLocation() {
     return u.normalizeURL(location.href)
@@ -302,7 +302,7 @@ up.history = (function() {
     When set to `false` this function will consider the URLs `/foo#one` and `/foo#two` to be equal.
   @return {boolean}
     Whether the browser is currently at the given location.
-  @experimental
+  @stable
   */
   function isLocation(url, options) {
     return u.matchURLs(url, location.href, { hash: true, ...options })

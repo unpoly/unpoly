@@ -239,9 +239,9 @@ up.viewport = (function() {
   @param {boolean} [options.force=false]
     Whether to force focus even if `element` would otherwise not be a focusable element.
 
-    @experimental
+    @stable
 
-  @experimental
+  @stable
   */
   function doFocus(element, { preventScroll, force, inputDevice, focusVisible } = {}) {
     if (force) {
@@ -411,7 +411,7 @@ up.viewport = (function() {
   @function up.viewport.get
   @param {string|Element|jQuery} target
   @return {Element}
-  @experimental
+  @stable
   */
   function closest(target, options = {}) {
     const element = f.get(target, options)
@@ -477,7 +477,7 @@ up.viewport = (function() {
 
   @function up.viewport.root
   @return {Element}
-  @experimental
+  @stable
   */
   function getRoot() {
     return document.scrollingElement
@@ -537,7 +537,7 @@ up.viewport = (function() {
     The layer for which to save scroll positions.
 
     If omitted, positions for the current layer will be saved.
-  @experimental
+  @stable
   */
   function saveScroll(...args) {
     const [viewports, options] = parseOptions(args)
@@ -595,7 +595,7 @@ up.viewport = (function() {
     If omitted, the given [layer's location](/up.Layer.prototype.location) is used.
   @return {boolean}
     Returns whether scroll positions could be restored.
-  @experimental
+  @stable
   */
   function restoreScroll(...args) {
     const [viewports, options] = parseOptions(args)
@@ -639,7 +639,7 @@ up.viewport = (function() {
     The layer for which to save scroll positions.
 
     If omitted, state for the current layer will be saved.
-  @experimental
+  @stable
   */
   function saveFocus(options = {}) {
     const layer = up.layer.get(options)
@@ -670,7 +670,7 @@ up.viewport = (function() {
     If omitted, the given [layer's location](/up.Layer.prototype.location) is used.
   @return {boolean}
     Returns whether focus state could be restored.
-  @experimental
+  @stable
   */
   function restoreFocus(options = {}) {
     const layer = up.layer.get(options)

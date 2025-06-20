@@ -752,7 +752,7 @@ up.layer = (function() {
   @param {up.Layer} event.layer
     The [layer object](/up.Layer) that had its location changed.
   @event up:layer:location:changed
-  @experimental
+  @stable
   */
 
   /*-
@@ -1469,8 +1469,6 @@ up.layer = (function() {
     Will be `undefined` if the overlay is not closing in reaction to a server response.
 
     See [Using the discarded response](/closing-overlays#using-the-discarded-response).
-
-    @experimental
   @param event.preventDefault()
     Prevents the overlay from closing.
   @stable
@@ -1503,8 +1501,6 @@ up.layer = (function() {
     Will be `undefined` if the overlay was not closed in reaction to a server response.
 
     See [Using the discarded response](/closing-overlays#using-the-discarded-response).
-
-    @experimental
   @stable
   */
 
@@ -1548,8 +1544,6 @@ up.layer = (function() {
     Will be `undefined` if the overlay is not closing in reaction to a server response.
 
     See [Using the discarded response](/closing-overlays#using-the-discarded-response).
-
-    @experimental
   @param event.preventDefault()
     Event listeners may call this method to prevent the overlay from closing.
   @stable
@@ -1582,8 +1576,6 @@ up.layer = (function() {
     Will be `undefined` if the overlay was not closed in reaction to a server response.
 
     See [Using the discarded response](/closing-overlays#using-the-discarded-response).
-
-    @experimental
   @stable
   */
 

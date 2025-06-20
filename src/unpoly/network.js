@@ -74,7 +74,6 @@ up.network = (function() {
 
       To never consider a request to be late, configure a function that returns `false` for that request.
 
-      @experimental
     @param {number|undefined} [config.timeout=90_000]
       A default [timeout](/up.request#options.timeout) for [requests](/up.request) in milliseconds.
 
@@ -437,8 +436,6 @@ up.network = (function() {
 
       Defaults to `up.network.config.lateDelay`.
 
-      @experimental
-
     @param {string|boolean|Function(up.Response): boolean} [options.fail]
       Whether the response to this request should be considered [failed](/failed-responses).
 
@@ -665,7 +662,7 @@ up.network = (function() {
     @like up.render
   @param options.params
     @like up.render
-  @experimental
+  @stable
   */
   function loadPage(requestsAttrs) {
     new up.Request(requestsAttrs).loadPage()
@@ -795,7 +792,7 @@ up.network = (function() {
 
   @param event.preventDefault()
 
-  @experimental
+  @stable
   */
 
   /*-

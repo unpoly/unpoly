@@ -51,8 +51,6 @@
 
   Defaults to `up.network.config.lateDelay`.
 
-  @experimental
-
 @param {number} [options.timeout]
   The number of milliseconds after which this request fails with a timeout.
 

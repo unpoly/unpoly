@@ -197,7 +197,7 @@ up.Response = class Response extends up.Record {
 
   @property up.Response#contentType
   @param {string} contentType
-  @experimental
+  @stable
   */
   get contentType() {
     return this.header('Content-Type')
@@ -220,7 +220,7 @@ up.Response = class Response extends up.Record {
 
   @property up.Response#lastModified
   @param {Date|undefined} lastModified
-  @experimental
+  @stable
   */
   get lastModified() { // eslint-disable-line getter-return
     let header = this.header('Last-Modified')
@@ -236,7 +236,7 @@ up.Response = class Response extends up.Record {
 
   @property up.Response#etag
   @param {string|undefined} etag
-  @experimental
+  @stable
   */
   get etag() {
     return this.header('ETag')
@@ -271,7 +271,7 @@ up.Response = class Response extends up.Record {
 
   @property up.Response#age
   @param {number} age
-  @experimental
+  @stable
   */
   get age() {
     let now = new Date()
@@ -285,7 +285,7 @@ up.Response = class Response extends up.Record {
 
   @property up.Response#expired
   @param {boolean} expired
-  @experimental
+  @stable
   */
   get expired() {
     return this.age > up.network.config.cacheExpireAge ||

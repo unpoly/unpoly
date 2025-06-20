@@ -135,7 +135,7 @@ up.RenderResult = class RenderResult extends up.Record {
 
   @property up.RenderResult#none
   @param {boolean} none
-  @experimental
+  @stable
   */
   get none() {
     return !this.fragments.length

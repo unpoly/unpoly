@@ -1184,7 +1184,7 @@ up.link = (function() {
   @section Caching
     @mix up-follow/caching
 
-  @experimental
+  @stable
   */
   up.attribute('up-defer', { defaultValue: 'insert' }, function(link, condition) {
     let doLoad = (options) => up.error.muteUncriticalRejection(loadDeferred(link, options))

@@ -303,7 +303,7 @@ up.event = (function() {
     May also be passed as a first string argument.
   @return {Event}
     The unemitted event object.
-  @experimental
+  @stable
   */
   function build(...args) {
     const props = u.extractOptions(args)

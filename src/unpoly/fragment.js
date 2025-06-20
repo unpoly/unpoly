@@ -233,8 +233,6 @@ up.fragment = (function() {
 
       You may also skip responses by calling `event.skip()` on an `up:fragment:loaded` event.
 
-      @experimental
-
   @stable
   */
   const config = new up.Config(() => ({
@@ -351,6 +349,8 @@ up.fragment = (function() {
   The last modification time corresponds to the `Last-Modified` header in the response that
   rendered the fragment. Alternatively the `[up-time]` attribute of the element or an ancestor is used.
 
+  If no ancestor fragment with an `[up-time]` attribute exists, `undefined` is returned.
+
   When the fragment is reloaded,
   its modification time is sent as an `If-Modified-Since` request header. The server may check the header and decide to [skip rendering](/skipping-rendering).
 
@@ -362,7 +362,7 @@ up.fragment = (function() {
     The fragment's last modification time.
 
     Return `undefined` if the fragment was rendered without a modification time.
-  @experimental
+  @stable
   */
   function timeOf(element) {
     let value = e.closestAttr(element, 'up-time')
@@ -405,7 +405,7 @@ up.fragment = (function() {
 
     You can also set the value to `"false"` to prevent a `If-Modified-Since` request header
     when reloading this fragment.
-  @experimental
+  @stable
   */
 
   /*-
@@ -414,6 +414,8 @@ up.fragment = (function() {
   The returned ETag corresponds to the [`ETag` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag)
   in the response that rendered the fragment. Alternatively the `[up-etag]` attribute of the element
   or an ancestor is used.
+
+  If no ancestor fragment with an `[up-etag]` attribute exists, `undefined` is returned.
 
   When the fragment is reloaded,
   its ETag is sent as an `If-None-Match` request header. The server may check the header and decide to [skip rendering](/skipping-rendering).
@@ -426,7 +428,7 @@ up.fragment = (function() {
     The fragment's ETag.
 
     Return `undefined` if the fragment was rendered without an ETag.
-  @experimental
+  @stable
   */
   function etagOf(element) {
     let value = e.closestAttr(element, 'up-etag')
@@ -460,7 +462,7 @@ up.fragment = (function() {
 
     You can also set the value to `"false"` to prevent a `If-None-Match` request header
     when reloading this fragment.
-  @experimental
+  @stable
   */
 
   /*-
@@ -781,8 +783,6 @@ up.fragment = (function() {
     To configure global rules for responses that should be skipped, you may
     also use `up.fragment.config.skipResponse` instead of registering an `up:fragment:loaded` listener.
 
-    @experimental
-
   @param {up.Request} event.request
     The original request to the server.
 
@@ -790,7 +790,7 @@ up.fragment = (function() {
     The response received from the server.
 
   @param {boolean} event.revalidating
-     Whether the response contains fresh content for the purpose [cache revalidation](/caching#revalidation).
+     Whether responding to a [cache revalidation](/caching#revalidation) request.
      @experimental
 
   @param {up.Response|undefined} event.expiredResponse
@@ -855,7 +855,7 @@ up.fragment = (function() {
   @param {Element} [event.origin]
     The link or form element that caused the fragment update.
 
-  @experimental
+  @stable
   */
 
   /*-
@@ -1477,7 +1477,7 @@ up.fragment = (function() {
     The CSS selector to match.
   @return {NodeList<Element>|Array<Element>}
     A list of all matching elements.
-  @experimental
+  @stable
   */
   function getSubtree(element, selector, options = {}) {
     return new up.Selector(selector, element, options).subtree(element)
@@ -1907,7 +1907,7 @@ up.fragment = (function() {
     See [options for `up.fragment.toTarget()`](/up.fragment.toTarget).
   @return {boolean}
     Whether a selector can be derived for the given element.
-  @experimental
+  @stable
   */
   function isTargetable(element, options) {
     return !!tryToTarget(element, options)
@@ -2442,7 +2442,7 @@ up.fragment = (function() {
   ```
 
   @selector :layer
-  @experimental
+  @stable
   */
 
   /*-
@@ -2488,7 +2488,7 @@ up.fragment = (function() {
   @return {boolean}
     Whether `fragment` matches the given `selector`.
 
-  @experimental
+  @stable
   */
   function matches(element, selector, options = {}) {
     element = e.get(element)
@@ -2599,7 +2599,7 @@ up.fragment = (function() {
       to help debugging an unexpected aborting.
 
       If omitted, a default message will describe the abort conditions.
-  @experimental
+  @stable
   */
   function abort(...args) {
     let options = parseTargetAndOptions(args)
@@ -2717,7 +2717,7 @@ up.fragment = (function() {
     Whether the fragment was aborted by a [new overlay opening](/opening-overlays).
 
     @experimental
-  @experimental
+  @stable
   */
 
   /*-
@@ -2851,7 +2851,7 @@ up.fragment = (function() {
     the cloned templates.
 
     You can pass this link to any rendering function, like `up.render()` or `up.Preview#insert()`.
-  @experimental
+  @stable
   */
   function cloneTemplate(templateOrSelector, data = {}, { origin, htmlParser } = {}) {
     let template = getSmart(templateOrSelector, { origin }) || up.fail('Template not found: %o', templateOrSelector)
@@ -2914,7 +2914,7 @@ up.fragment = (function() {
 
     The value is `null` initially and must be set by a listener.
     When no listener sets `event.nodes`, Unpoly will parse the template's inner HTML.
-  @experimental
+  @stable
   */
 
   function defaultTemplateNodes(template, htmlParser = e.createNodesFromHTML) {

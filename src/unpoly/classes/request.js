@@ -170,7 +170,7 @@ up.Request = class Request extends up.Record {
 
   @property up.Request#layer
   @param {up.Layer|string} layer
-  @experimental
+  @stable
   */
 
   /*-
@@ -182,7 +182,7 @@ up.Request = class Request extends up.Record {
 
   @property up.Request#failLayer
   @param {up.Layer} layer
-  @experimental
+  @stable
   */
 
   /*-
@@ -195,7 +195,7 @@ up.Request = class Request extends up.Record {
 
   @property up.Request#origin
   @param {Element} origin
-  @experimental
+  @stable
   */
 
   /*-
@@ -268,7 +268,7 @@ up.Request = class Request extends up.Record {
 
   @property up.Request#background
   @param {boolean} [background=false]
-  @experimental
+  @stable
   */
 
   /*-
@@ -279,7 +279,7 @@ up.Request = class Request extends up.Record {
 
   @property up.Request#lateDelay
   @param {number|boolean} [lateDelay]
-  @experimental
+  @stable
   */
 
   keys() {
@@ -434,7 +434,7 @@ up.Request = class Request extends up.Record {
   @property up.Request#fragments
   @param {List<Element>} fragments
     A list of targeted fragments.
-  @experimental
+  @stable
   */
   get fragments() { // eslint-disable-line getter-return
     // This property is required for `up.fragment.abort()` to select requests within
@@ -474,7 +474,7 @@ up.Request = class Request extends up.Record {
   @property up.Request#fragment
   @param {Element} fragment
     The first targeted fragment.
-  @experimental
+  @stable
   */
   get fragment() {
     return this.fragments?.[0]
@@ -621,7 +621,7 @@ up.Request = class Request extends up.Record {
   Aborts all pending requests.
 
   @function up.Request#loadPage
-  @experimental
+  @stable
   */
   loadPage() {
     // This method works independently of @state, since it is often
@@ -689,7 +689,7 @@ up.Request = class Request extends up.Record {
     If omitted, a generic reason like `"Aborted request to GET /path"` will be used.
 
     The reason will be set as the `up.AbortError`'s message.
-  @experimental
+  @stable
   */
   abort({ reason } = {}) {
     // _setAbortedState() must be called before xhr.abort(), since xhr's event handlers
@@ -762,7 +762,7 @@ up.Request = class Request extends up.Record {
   @property up.Request#ended
   @param {boolean} ended
     Whether is request has ended.
-  @experimental
+  @stable
   */
   get ended() {
     return (this.state !== 'new') && (this.state !== 'loading') && (this.state !== 'tracking')

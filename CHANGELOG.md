@@ -35,6 +35,7 @@ This release contains some breaking changes, which are marked with the ⚠️ em
 - ⚠️ `up.history.push()` will now add another history entry if the given location matches the current location.
 - For overlays with history, the `up:layer:location:changed' event is now emitted when the URL changes for *any* reason, not just after rendering.
 - The `up:location:location:changed` event now has a `{ previousLocation }` property.
+- Experimental function up.history.replace()
 
 
 ### Clicking on `#hash` links
@@ -164,6 +165,101 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 - To preserve an element as long as its [outer HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/outerHTML) remains the same,
   set an `[up-keep="same-html"]` attribute. Only when the element's attributes or children changes between versions,
   it is replaced by the new version.
+
+
+### Stabilization of features
+
+Many experimental features have been declared stable:
+
+- up.event.build()
+- up.form.fields()
+- up.fragment.config.skipResponse
+- [up-etag]
+- up.fragment.etag()
+- [up-time]
+- up.fragment.time()
+- event.skip() for up:fragment:loaded
+- up:fragment:offline
+- up.fragment.subtree
+- up.fragment.isTargetable
+- :layer
+- up.fragment.matches()
+- up.fragment.abort()
+- up:fragment:aborted
+- up.template.clone()
+- up:template:clone
+- up.history.location
+- up.history.previousLocation
+- up.history.isLocation
+- up:layer:location:changed
+- event.response for up:layer:accept, up:layer:dismiss, up:layer:accepted, up:layer:dismissed
+- up-defer
+- up.network.config.lateDelay
+- { lateDelay } option for up.request()
+- up.network.loadPage()
+- up:request:aborted
+- up:fragment:hungry event
+- { ifLayer } option for up.radio.startPolling()
+- [up-if-layer] modifier for [up-poll]
+- up:fragment:poll
+- up.script.config.scriptSelectors and .noScriptSelectors
+- event.preventDefault() for up:assets:changed
+- up.util.noop
+- up.util.normalizeURL
+- up.util.isBlank.key
+- up.util.wrapList
+- up.util.copy.key
+- up.util.findResult
+- up.util.every
+- up.util.evalOption
+- up.util.pluckKey
+- up.util.flatten
+- up.util.flatMap
+- up.util.isEqual
+- up.util.isEqual.key
+- up.focus()
+- up.viewport.get()
+- up.viewport.root
+- up.viewport.saveScroll()
+- up.viewport.restoreScroll()
+- up.viewport.saveFocus()
+- up.viewport.restoreFocus()
+- Most up.Params methods
+  - new up.Params
+  - up.Params#clear
+  - up.Params#toFormData
+  - up.Params#toQuery
+  - up.Params#add
+  - up.Params#addAll
+  - up.Params#set
+  - up.Params#delete
+  - up.Params#get
+  - up.Params.fromForm
+  - up.Params.fromURL
+- up.RenderResult#none
+- up.RenderResult#ok
+- up.Request#layer
+- up.Request#failLayer
+- up.Request#origin
+- up.Request#background
+- up.Request#lateDelay
+- up.Request#fragments
+- up.Request#fragment
+- up.Request#loadPage
+- up.Request#abort
+- up.Request#ended
+- up.Response#contentType
+- up.Response#lastModified
+- up.Response#etag
+- up.Response#age
+- up.Response#expired
+- { response } option for up.Layer#accept and up.layer.accept()
+- up.Layer#asCurrent()
+- up.layer.location and up.Layer#location
+- [up-abortable] attr for [up-follow]
+- [up-late-delay] attr for [up-follow]
+- { lateDelay } option for up.render()
+
 
 
 ### Developer experience

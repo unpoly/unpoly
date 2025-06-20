@@ -155,7 +155,7 @@ up.radio = (function() {
     The [render options](/up.render#parameters) for the current render pass.
   @param event.preventDefault()
     Prevents the hungry element from being targeted in the current render pass.
-  @experimental
+  @stable
   */
 
   /*-
@@ -305,7 +305,6 @@ up.radio = (function() {
 
       When set to `'any'`, polling will continue on background layers.
 
-      @experimental
   @section Request
     @param {string} [options.url]
       The URL from which to reload the fragment.
@@ -471,7 +470,7 @@ up.radio = (function() {
     Listeners may inspect and modify these options.
   @param event.preventDefault()
     Prevents the fragment from being reloaded.
-  @experimental
+  @stable
   */
 
   /*-

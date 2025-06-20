@@ -171,8 +171,6 @@ up.Layer = class Layer extends up.Record {
 
       See [Using the discarded response](/closing-overlays#using-the-discarded-response).
 
-      @experimental
-
   @section Animation
     @param {string|Function(Element, Object)} [options.animation]
       The [animation](/up.animate) to use for closing this layer.
@@ -676,7 +674,7 @@ up.Layer = class Layer extends up.Record {
 
     Async functions are not supported.
   @function up.Layer#asCurrent
-  @experimental
+  @stable
   */
   asCurrent(fn) {
     return this.stack.asCurrent(this, fn)

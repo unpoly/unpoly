@@ -20,7 +20,7 @@ up.util = (function() {
   A function that does nothing.
 
   @function up.util.noop
-  @experimental
+  @stable
   */
   function noop() {
   }
@@ -114,7 +114,7 @@ up.util = (function() {
     Whether to include a trailing slash from the pathname.
   @return {string}
     The normalized URL.
-  @experimental
+  @stable
   */
   function normalizeURL(url, options) {
     options = newOptions(options, { host: 'cross-domain' })
@@ -466,7 +466,7 @@ up.util = (function() {
   ```
 
   @property up.util.isBlank.key
-  @experimental
+  @stable
   */
   isBlank.key = 'up.util.isBlank'
 
@@ -769,7 +769,7 @@ up.util = (function() {
   @function up.util.wrapList
   @param {any} value
   @return {Array|NodeList|jQuery}
-  @experimental
+  @stable
   */
   function wrapList(value) {
     if (isList(value)) {
@@ -855,7 +855,7 @@ up.util = (function() {
 
   @property up.util.copy.key
   @param {string} key
-  @experimental
+  @stable
   */
   copy.key = 'up.util.copy'
 
@@ -993,7 +993,7 @@ up.util = (function() {
     A function that will be called with each element and (optional) iteration index.
 
   @return {any|undefined}
-  @experimental
+  @stable
   */
   function findResult(list, tester) {
     tester = iteratee(tester)
@@ -1016,7 +1016,7 @@ up.util = (function() {
     A function that will be called with each element and (optional) iteration index.
 
   @return {boolean}
-  @experimental
+  @stable
   */
   function every(list, tester) {
     tester = iteratee(tester)
@@ -1360,7 +1360,7 @@ up.util = (function() {
   @param {any} value
   @param {Array} ...args
   @return {any}
-  @experimental
+  @stable
   */
   function evalOption(value, ...args) {
     return isFunction(value) ? value(...args) : value
@@ -1428,7 +1428,7 @@ up.util = (function() {
     The value of the property before it was deleted.
 
     If the object didn't return the property, returns `undefined`.
-  @experimental
+  @stable
   */
   function pluckKey(object, key) {
     const value = object[key]
@@ -1564,6 +1564,8 @@ up.util = (function() {
   /*-
   Flattens the given `array` a single depth level.
 
+  Will also flatten [array-like](/List) values, like a `NodeList`.
+
   ### Example
 
   ```js
@@ -1576,7 +1578,7 @@ up.util = (function() {
     An array which might contain other arrays
   @return {Array}
     The flattened array
-  @experimental
+  @stable
   */
   function flatten(array) {
     const flattened = []
@@ -1604,7 +1606,7 @@ up.util = (function() {
   @param {List|Iterator} list
   @param {Function(element)} mapping
   @return {Array}
-  @experimental
+  @stable
   */
   function flatMap(array, block) {
     return flatten(map(array, block))
@@ -1698,7 +1700,7 @@ up.util = (function() {
     The second value to compare.
   @return {boolean}
     Whether the arguments are considered equal.
-  @experimental
+  @stable
   */
   function isEqual(a, b) {
     // When two values have trivial equality, return immediately instead of going
@@ -1778,7 +1780,7 @@ up.util = (function() {
 
   @property up.util.isEqual.key
   @param {string} key
-  @experimental
+  @stable
   */
   isEqual.key = 'up.util.isEqual'
 

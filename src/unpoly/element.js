@@ -1478,7 +1478,7 @@ up.element = (function() {
 
   ### Examples
 
-  These `<div>` elments are all considered empty:
+  These `<div>` elements are all considered empty:
 
   ```html
   <div></div>

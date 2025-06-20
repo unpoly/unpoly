@@ -22,8 +22,6 @@
 
   See [aborting requests](/aborting-requests) for details.
 
-  @experimental
-
 @param [up-background='false']
   Whether this request will load in the background.
 
@@ -36,8 +34,6 @@
   an `up:network:late` event.
 
   Defaults to `up.network.config.lateDelay`.
-
-  @experimental
 
 @param [up-timeout]
   The number of milliseconds after which this request fails with a timeout.

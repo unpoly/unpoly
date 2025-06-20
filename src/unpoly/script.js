@@ -59,11 +59,9 @@ up.script = (function() {
       This configuration does not affect what Unpoly considers an [assets](/up-asset).
       For this configure `up.script.config.assetSelectors`.
 
-      @experimental
     @param {Array<string} [config.noScriptSelectors]
       Exceptions to `up.script.config.scriptSelectors`.
 
-      @experimental
   @property up.script.config
   @stable
   */
@@ -890,6 +888,7 @@ q
   If you cannot allow the rendering to proceed with changed assets, listeners may abort the render pass by calling `event.preventDefault()`.
 
   @event up:assets:changed
+
   @param {List<Element>} event.newAssets
     A list of all [assets](/up-asset) in the new content.
 
@@ -897,14 +896,16 @@ q
 
     By default no new asset are inserted into the current page.
     Event listeners must [explicitly load new assets](/handling-asset-changes#loading-new-assets).
+
   @param {List<Element>} event.oldAssets
     A list of [assets](/up-asset) in the `<head>` of the current page.
+
   @param {Object} event.renderOptions
     The [render options](/up.render#parameters) for the current render pass.
+
   @param event.preventDefault()
     Aborts this render pass before new content is inserted.
 
-    @experimental
   @stable
   */
 

@@ -187,7 +187,7 @@ up.form = (function() {
     If the element is itself a form field, a list of that element is returned.
   @return {List<Element>}
     The field elements within the given element.
-  @experimental
+  @stable
   */
   function findFields(root) {
     root = e.get(root) // unwrap jQuery
@@ -1179,8 +1179,6 @@ up.form = (function() {
 
       See [Validating against other URLs](/up.validate#urls).
 
-      @experimental
-
     @param {string} options.method
       The method to use for submitting the validation request.
 
@@ -1188,14 +1186,10 @@ up.form = (function() {
 
       See [Validating against other URLs](/up.validate#urls).
 
-      @experimental
-
     @param {boolean} [options.batch=true]
       Whether to [consolidate multiple validations into a single request](/up.validate#batching).
 
       Defaults to `up.form.config.validateBatch`, which defaults to `true`.
-
-      @experimental
 
     @param options.params
       @like up.submit
@@ -1906,16 +1900,12 @@ up.form = (function() {
 
       See [Validating against other URLs](/up.validate#urls).
 
-      @experimental
-
     @param [up-validate-method]
       The method to use for submitting the validation request.
 
       By default Unpoly will use the form's `[method]` attribute
 
       See [Validating against other URLs](/up.validate#urls).
-
-      @experimental
 
     @param [up-validate-params]
       @like [up-submit]/up-params
@@ -1933,8 +1923,6 @@ up.form = (function() {
       Whether to [consolidate multiple validations into a single request](/up.validate#batching).
 
       Defaults to `up.form.config.validateBatch`, which defaults to `true`.
-
-      @experimental
 
   @section Loading state
     @mix up-watch/loading-state

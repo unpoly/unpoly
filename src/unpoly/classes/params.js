@@ -32,7 +32,7 @@ up.Params = class Params {
 
     The given params value may be of any [supported type](/up.Params).
   @return {up.Params}
-  @experimental
+  @stable
   */
   constructor(raw) {
     this.clear()
@@ -43,7 +43,7 @@ up.Params = class Params {
   Removes all params from this object.
 
   @function up.Params#clear
-  @experimental
+  @stable
   */
   clear() {
     this.entries = []
@@ -133,7 +133,7 @@ up.Params = class Params {
 
   @function up.Params#toFormData
   @return {FormData}
-  @experimental
+  @stable
   */
   toFormData() {
     const formData = new FormData()
@@ -169,7 +169,7 @@ up.Params = class Params {
     the params to convert
   @return {string}
     a query string built from the given params
-  @experimental
+  @stable
   */
   toQuery() {
     let simpleEntries = this.withoutBinaryEntries().entries
@@ -255,7 +255,7 @@ up.Params = class Params {
     The name of the new entry.
   @param {any} value
     The value of the new entry.
-  @experimental
+  @stable
   */
   add(name, value) {
     this.entries.push({ name, value })
@@ -268,7 +268,7 @@ up.Params = class Params {
 
   @function up.Params#addAll
   @param {Object|Array|string|FormData|up.Params|undefined} params
-  @experimental
+  @stable
   */
   addAll(raw) {
     if (u.isMissing(raw)) {
@@ -345,7 +345,7 @@ up.Params = class Params {
     The name of the entry to set.
   @param {any} value
     The new value of the entry.
-  @experimental
+  @stable
   */
   set(name, value) {
     this.delete(name)
@@ -357,7 +357,7 @@ up.Params = class Params {
 
   @function up.Params#delete
   @param {string} name
-  @experimental
+  @stable
   */
   delete(name) {
     this.entries = u.reject(this.entries, this._matchEntryFn(name))
@@ -398,7 +398,7 @@ up.Params = class Params {
 
   @function up.Params#get
   @param {string} name
-  @experimental
+  @stable
   */
   get(name) {
     if (this._isArrayKey(name)) {
@@ -495,7 +495,7 @@ up.Params = class Params {
     A `<form>` element.
   @return {up.Params}
     A new `up.Params` instance with values from the given form.
-  @experimental
+  @stable
   */
   static fromForm(form) {
     return this.fromContainer(form)
@@ -596,7 +596,7 @@ up.Params = class Params {
     The URL from which to extract the query string.
   @return {string|undefined}
     The given URL's query string, or `undefined` if the URL has no query component.
-  @experimental
+  @stable
   */
   static fromURL(url) {
     const params = new (this)()
