@@ -2193,42 +2193,46 @@ up.util = (function() {
 
   function maskPattern(str, patterns, { keepDelimiters = false } = {}) {
     let maskCount = 0
-    let maskPattern = /§(\d+)/g
-    let matches = []
-    let replaceLayers = 0
+    let maskPattern = /§\d+/g
+    let maskings = {}
+    let replaceLayers = []
 
-    let replace = (replacePattern) => {
+    let replace = (replacePattern, allowRestoreTransform) => {
       let didReplace = false
 
       str = str.replaceAll(replacePattern, function(match) {
         didReplace = true
-        let glyph = '§' + (maskCount++)
-
-        let mask
+        let mask = '§' + (maskCount++)
+        let remain
         let masked
 
         if (keepDelimiters) {
           let startDelimiter = match[0]
           let endDelimiter = match.slice(-1)
           masked = match.slice(1, -1)
-          mask = startDelimiter + glyph + endDelimiter
+          remain = startDelimiter + mask + endDelimiter
         } else {
           masked = match
-          mask = glyph
+          remain = mask
         }
 
-        matches.push(masked)
-        return mask
+        maskings[mask] = masked
+        return remain
       })
 
-      if (didReplace) replaceLayers++
+      if (didReplace) replaceLayers.unshift({ allowRestoreTransform })
     }
 
-    [maskPattern, ...patterns].forEach(replace)
+    // If the input already contains a mask pattern (like §5), we mask it, but don't allow transforms on restore.
+    replace(maskPattern, false)
+
+    // When we mask the given patterns, we allow an optional transform on restore.
+    for (let pattern of patterns) replace(pattern, true)
 
     let restore = (s, transform = identity) => {
-      for (let i = 0; i < replaceLayers; i++) {
-        s = s.replace(maskPattern, (match, placeholderIndex) => transform(matches[placeholderIndex]))
+      for (let { allowRestoreTransform } of replaceLayers) {
+        let iterationTransform = allowRestoreTransform ? transform : identity
+        s = s.replace(maskPattern, (match) => iterationTransform(assert(maskings[match], isString)))
       }
       return s
     }
@@ -2253,7 +2257,7 @@ up.util = (function() {
   function ensureDoubleQuotes(str) {
     // If we already have double-quoted string, there's nothing to do.
     if (str[0] === '"') return str
-
+    assert(str[0] === "'")
     str = str.slice(1, -1)
 
     let transformed = str.replace(/(\\\\)|(\\')|(\\")|(")/g, function(_match, escapedBackslash, escapedSingleQuote, _doubleQuote) {

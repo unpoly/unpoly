@@ -3012,7 +3012,13 @@ describe('up.util', () => {
         expect(restored).toBe('foo <bar§0baz> qux')
       })
 
-      it('replaces multiple patterns')
+      it('replaces multiple patterns', function() {
+        let { masked, restore } = up.util.maskPattern('foo <bar> baz [bam] qux', [/<[^>]+>/g, /\[[^]+]/g])
+        expect(masked).toBe('foo §0 baz §1 qux')
+
+        let restored = restore(masked)
+        expect(restored).toBe('foo <bar> baz [bam] qux')
+      })
 
       describe('with { keepDelimiters: true }', function() {
 
@@ -3218,6 +3224,16 @@ describe('up.util', () => {
 
         it('parses a string', function() {
           let input = "foo"
+          expect(up.util.parseRelaxedJSON(JSON.stringify(input))).toEqual(input)
+        })
+
+        it('parses a string containing §0 (bugfix)', function() {
+          let input = 'foo §0 bar'
+          expect(up.util.parseRelaxedJSON(JSON.stringify(input))).toEqual(input)
+        })
+
+        it('parses a string containing §9 (bugfix)', function() {
+          let input = 'foo §9 bar'
           expect(up.util.parseRelaxedJSON(JSON.stringify(input))).toEqual(input)
         })
 
