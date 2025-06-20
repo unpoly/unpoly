@@ -119,9 +119,6 @@ You may also want to navigate to a new screen once an overlay was accepted:
 </a>
 ```
 
-
-
-
 Reusing existing screens
 ------------------------
 
@@ -132,6 +129,28 @@ You can now embed the existing company form into your project form
 what to do when it's done.** Instead the parent layer defines an
 acceptance condition and callback action.
 
+
+Awaiting subinteractions from JavaScript
+------------------------------------------
+
+`up.layer.ask()` returns a promise for the [acceptance value](/closing-overlays#acceptance-values), which you can `await`:
+
+```js
+let user = await up.layer.ask({ url: '/users/new' })
+console.log("New user is " + user)
+```
+
+To handle the case that the overlay wasn't completed successful, you
+can `catch` the rejected promise [reason](/closing-overlays#dismissal-reasons):
+
+```js
+try {
+  let user = await up.layer.ask({ url: '/users/new' })
+  console.log("New user is",  user)
+} catch (reason) {
+  console.error("Could not register:", reason)
+}
+```
 
 
 @page subinteractions
