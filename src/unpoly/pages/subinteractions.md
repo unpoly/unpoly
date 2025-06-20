@@ -40,7 +40,7 @@ We can improve this flow with a *subinteraction*:
 
 The diagram illustrates the difference between the two control flows:
 
-![Differences between sequential screen flow and subinteractions](images/subinteraction-flow.svg){:width='500'}
+![Differences between sequential screen flow and subinteractions](images/subinteraction-flow.svg){:width='600'}
 
 
 Starting a subinteraction
