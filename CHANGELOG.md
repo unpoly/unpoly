@@ -8,8 +8,8 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
-3.11.0 (unreleased)
--------------------
+3.11.0
+------
 
 (Image)
 
@@ -17,41 +17,67 @@ Full changes: https://github.com/unpoly/unpoly/compare/v3.10.2...master
 
 This release contains some breaking changes, which are marked with the ⚠️ emoji in this CHANGELOG. Most breaking changes are polyfilled by [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading).
 
-### History navigation
-
-- Unpoly can now restore history entries created by a changed location `#hash`.
-- Unpoly will now restore history entries that were later replaced by external scripts.
-- ⚠️ `up:location:changed` is now emitted when the URL change for *any* reason, not just after rendering:
-  - When a script calls `history.pushState()` or `up.history.push()`
-  - When a script calls `history.replaceState()` or `up.history.replace()`
-  - When the user presses the  back or forward button in the browser UI.
-  - When the user changes the `#hash` in the browser's address bar.
-  - When the user clicks on a `#hash` link.
-- The log now shows purple event badge when the user navigates within history using any of the above methods.
-- Some changes were made to the properties of the `up:location:changed` event:
-  - ⚠️ The `{ reason }` property can now be `'hash'` if only the location `#hash` was changed, without changes to the path or search query.
-  - A new experimental property `{ willHandle }` shows if Unpoly thinks it is responsible for restoring the new location state.
-  - A new experimental property `{ alreadyHandled }` shows if Unpoly thinks the change has already been handled (e.g. when a script calls `pushState()`).
-- ⚠️ `up.history.push()` will now add another history entry if the given location matches the current location.
-- For overlays with history, the `up:layer:location:changed' event is now emitted when the URL changes for *any* reason, not just after rendering.
-- The `up:location:location:changed` event now has a `{ previousLocation }` property.
-- Experimental function up.history.replace()
-- Fix a bug where history wasn't updated when a response contains comments before the `<!DOCTYPE>` or `<html>` tag (fixes #726)
+### History handling
 
 
-### Clicking on `#hash` links
+#### Every location change is tracked
 
-- Clicking a hash link will now, honor the viewport's [`scroll-behavior: smooth`](https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-behavior) style.
+`up:location:changed` (and `up:layer:location:changed`) used to only be emitted when history changed during rendering.\
+⚠️ These events are now emitted when the URL changes for *any* reason, including:
+
+- When a script calls `history.pushState()` or `up.history.push()`
+- When a script calls `history.replaceState()` or `up.history.replace()`
+- When the user presses the  back or forward button in the browser UI.
+- When the user changes the `#hash` in the browser's address bar.
+- When the user clicks on a `#hash` link.
+
+Reacting to `#hash` changes usually involves scrolling, not rendering. To better signal this case, the `{ reason }` property of `up:location:changed` can now be the string `'hash'` if only the location `#hash` was changed from the previous location.
+
+
+
+#### Improved history restoration
+
+When pressing the back button, Unpoly used to only restore history entries that it created itself. This sometimes caused the back button to do nothing when a state was pushed by a user interacting with the browser UI, or when an external script replaced an entry without also implementing restoration logic.
+
+Starting with this version, Unpoly will handle restoration for most history entries:
+
+- Unpoly will now restore history entries created by clicking an in-page link to another `#hash`. Going back to such an entry will now reveal a matching fragment, scrolling far enough to ignore any [obstructing elements](/scroll-tuning#fixed-layout-elements-obstructing-the-viewport) in the layout.
+- Unpoly will now restore history entries created by the user changing the `#hash` in the browser's address bar (without also changing the path or search query).
+- Unpoly will now restore its own history entries that were later replaced by external scripts (through [`history.replaceState()`](https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState)).
+
+When an external script pushes a history entry with a pass unknown to Unpoly, that external script is still responsible for restoration.
+
+Listeners to `up:location:changed` can now control which entry changes Unpoly should handle:
+
+- A new experimental property `{ willHandle }` shows if Unpoly thinks it is responsible for restoring the new location state.
+- A new experimental property `{ alreadyHandled }` shows if Unpoly thinks the change has already been handled (e.g. when a script calls `history.pushState()`).
+
+
+#### Complete handling of `#hash` links
+
+Unpoly now handles most clicks on a link to a `#hash` within the current page, taking great care to emulate the browser's native scrolling behavior:
+
+- Hash links will now honor the viewport's [`scroll-behavior: smooth`](https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-behavior) style.
 - Hash links can now override their scroll behavior using an `[up-scroll-behavior]` attribute. Valid values are `instant`, `smooth` and `auto` (uses CSS behavior).
-- Clicking a hash link will now always scroll to a fragment in link's layer, ignoring matching fragments in other layers.
-- Clicking a hash link will no longer scroll when another script evented the `click` event.
-- Clicking a hash link will now scroll the page without re-rendering.
+- Hash links will now always scroll to a fragment in link's layer, ignoring matching fragments in other layers.
+- Hash links will no longer scroll when another script prevented the `click` event.
+- Hash links that are [followable](/up.link.isFollowable) will now scroll the page without re-rendering.
+- Hash links will now reliably scroll far enough to ignore any [obstructing elements](/scroll-tuning#fixed-layout-elements-obstructing-the-viewport) in the layout.
+
+
+#### Other improvements to history handling
+
+- The [log](/up.log) now shows purple event badge when the user navigates within history. This helps to correlate e.g. a `popstate` event with the logging output from a subsequent history restoration.
+- Published an experimental function `up.history.replace()` to change the URL of the current history state.
+- Fix a bug where history wasn't updated when a response contains comments before the `<!DOCTYPE>` or `<html>` tag (fixes #726)
+- The `up:layer:location:changed` event now has a `{ previousLocation }` property.
 
 
 ### Scrolling
 
-- New [scroll option](/scrolling) `[up-scroll='bottom']`. This scrolls viewports around the targeted fragment to the bottom.
-- ⚠️ The option `[up-scroll='reset']` was changed to `[up-scroll='top']`.
+This release adds a new [scroll option](/scrolling) `[up-scroll='bottom']`. This scrolls viewports around the targeted fragment to the *bottom*.
+
+⚠️ For symmetry, the option `[up-scroll='reset']` was changed to `[up-scroll='top']`.
 
 
 ### Watching fields for changes
@@ -59,34 +85,48 @@ This release contains some breaking changes, which are marked with the ⚠️ em
 When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-validate]`, the following cases are now addressed:
 
 - If a watched field with `[up-watch-delay]` was manually removed during the delay, watchers will no longer fire callbacks or send requests.
-- Fix all cases where a watched field with `[up-keep]` is transported to a new form.
-- Fix all cases where a watched field outside its form (with `[form]` attribute) is added or removed.
-- When a watched field does run a callback, a purple event badge is logged to better understand cause and effect.
+- Fixed all cases where a watched field with `[up-keep]` is transported to a new `<form>` element.
+- Fixed all cases where a watched field outside its form (with [`[form]`](https://www.w3schools.com/tags/att_form.asp) attribute) is added or removed dynamically.
+- When a watched field runs a callback, a purple event badge is [logged](/up.log) to help correlating cause and effect.
 - ⚠️ Watching an individual radio button will now throw an error. Watch a container for the entire radio group instead.
 - Directly watching a field without a `[name]` will now throw an error explaining that this attribute is required. In earlier versions callbacks were simply never called.
 
 
-### Reworked `[up-switch]`
+### Switching form state
 
-- You can now disable dependent fields using `[up-disable-for]` and `[up-enable-for]`.
+#### New switching effects
+
+Unpoly has long supported the `[up-switch]` attribute to toggle the visibility of elements depending on the value of a field. Starting with this release, you can use `[up-switch]` to implement arbitrary client-side effects with field dependencies:
+
+- You can now [disable dependent fields](/switching-form-state#disable) using the `[up-disable-for]` and `[up-enable-for]` attributes.
 - You can now implement custom switching effect by listening to the `up:form:switch` event on any element targeted by `[up-switch]`.
+
+#### New modifiers
+
+The `[up-switch]` attribute itself has been reworked with new modifiying attributes:
+
 - A new `[up-switch-region]` attribute allows to expand or narrow the region where elements are switched.
-- `[up-switch]` can now react to other events with an `[up-watch-event]` attribute.
+- `[up-switch]` can now react to other events than `change`, by setting an `[up-watch-event]` attribute.
 - `[up-switch]` can now debounce their switching effects with an `[up-watch-delay]` attribute.
-- `[up-switch]` now works on a container for a radio group.
-- ⚠️ Unpoly will no longer un-hide elements targeted by `[up-switch]` when that element has neither `[up-show-for]` nor `[up-hide-for]` attributes. This was an undocumented side effect of the old implementation.
-- ⚠️ Fields with `[up-switch]` now require a `[name]` attribute.
+
+
+#### More `[up-switch]` changes
+
 - Using `[up-switch]` on a text field will now switch while the user is typing (as opposed to when the field is blurred).
+- `[up-switch]` now works on a container for a radio button group.
+- ⚠️ Setting `[up-switch]` on an individual radio button will now throw an error. Watch a container for the entire radio group instead.
+- ⚠️ Fields with `[up-switch]` now require a `[name]` attribute.
+- ⚠️ Unpoly will no longer un-hide elements targeted by `[up-switch]` when that element has neither `[up-show-for]` nor `[up-hide-for]` attributes. This was an undocumented side effect of the old implementation.
 
 
 ### Validations with `[up-validate]`
 
-- You can now disable validation batching globally with `up.form.config.batchValidate = false`, or for individual forms or fields with `up.validate({ batch: false })` or `[up-validate-batch="false"]`.
-- Fields or forms can add additional params to the validation request using the `[up-validate-params]` attribute.
-- Fields or forms can add additional headers to the validation request using the `[up-validate-headers]` attribute.
-- You can now send validation requests to a different server route (issue #486). You can use the new `[up-validate-url]` and `[up-validate-method]` attributes on indivudal fields or on entire forms. Unpoly still guarantees eventual consistency in a form with many concurrent validations.
+- You can now send validation requests to a different server route (issue #486). You can use the new [`[up-validate-url]`](/up-validate#up-validate-url) and [`[up-validate-method]`](/up-validate#up-validate-params) attributes on individudal fields or on entire forms. Even with multiple URLs, Unpoly still guarantees eventual consistency in a form with many concurrent validations. This is done by [separating request batches by URL](/up.validate#batching-multiple-urls) and ensuring that only a single validation request per form will be in flight at the same time.
+- You can now disable [validation batching](/up.validate#batching) globally with `up.form.config.batchValidate = false`, or for individual forms or fields with an `[up-validate-batch="false"]` attribute.
+- Fields or forms can add additional params to the validation request using the [`[up-validate-params]`](/up-validate#up-validate-params) attribute.
+- Fields or forms can add additional headers to the validation request using the [`[up-validate-headers]`](/up-validate#up-validate-headers) attribute.
 - Validation targets can now refer to the changed field with `:origin`. This was possible before, but was never documented.
-- `[up-validate]` can be set on any container of fields, not just an individual field or an entire form. This was possible before, but not properly documented.
+- `[up-validate]` can now be set on any container of fields, not just an individual field or an entire form. This was possible before, but not properly documented.
 
 
 ### Layers
@@ -112,7 +152,11 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 - Features with many attributes (or options) are now shown in groups like "Request" or "Animation".
   - TODO: Screenshot
 - Many attributes and options now explicitly documented instead of referring to `up.render()`.
-- New guides: ...
+- New guides:
+  - Reactive server forms
+  - Switching form state
+  - Preserving elements
+- Main article links
 
 
 ### Caching
@@ -124,49 +168,115 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 - Requests now clear out their `{ bindLayer }` property after loading, allowing layer objects to be garbage-collected while the request is cached.
 -  Hungry, preloading links no longer throw an error after rendering cached, but expired content.
 
-## Match .up-current for other layers
+### Navigation bars can match the location of other layers
 
-- Navigation containers can now match the current location of other layers by setting an `[up-layer]` attribute
+[Navigational containers](/navigation-bars) can now match the current location of other layers by setting an `[up-layer]` attribute.
+The `.up-current` class will be set when the matching layer is already at the link's `[href]`.
+
+Below you can see a "hamburger menu" that is shown in an overlay.
+
+See [Matching the location of other layers](/navigation-bars#layers).
+
+### [Persisting elements](/persisting-elements)
+
+#### Keeping an element until its HTML changes {#same-html}
+
+To preserve an element as long as its [outer HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/outerHTML) remains the same,
+set an `[up-keep="same-html"]` attribute. Only when the element's attributes or children changes between versions,
+it is replaced by the new version.
+
+The example below uses a JavaScript-based `<select>` replacement like [Tom Select](https://tom-select.js.org/).
+Because initialization is expensive, we want to preserve the element as long is possible. We *do* want to update
+it when the server renders a different value, different options, or a validation error.
+We can achieve this by setting `[up-keep="same-html"]` on a container that contains the select
+and eventual error messages:
+
+```html
+<fieldset id="department-group" up-keep="same-html"> <!-- mark: same-html -->
+  <label for="department">Department</label>
+  <select id="department" name="department" value="IT">
+    <option>IT</option>
+    <option>Sales</option>
+    <option>Production</option>
+    <option>Accounting</option>
+  </select>
+  <!-- Eventual errors go here -->
+</fieldset>
+```
+
+Unpoly will compare the element's **initial HTML** as it is rendered by the server.\
+Client-side changes to the element (e.g. by a [compiler](/up.compiler)) are ignored.
+
+#### Keeping an element until its data changes {#same-data}
+
+To preserve an element as long as its [data](/data) remains the same,
+set an `[up-keep="same-data"]` attribute. Only when the element's `[up-data]` attribute changes between versions,
+it is replaced by the new version. Changes in other attributes or its children are ignored.
+
+The example below uses a [compiler](/up.compiler) to render an interactive map into elements with a `.map` class.
+The initial map location is passed as an `[up-data]` attribute.
+Because we don't want to lose client-side state (like pan or zoom settings), we want to keep the map widget
+as long as possible. Only when the map's initial location changes, we want to re-render the map
+centered around the new location. We can achieve this by setting an `[up-keep="same-data"]` attribute on
+the map container:
+
+```html
+<div class="map" up-data="{ location: 'Hofbräuhaus Munich' }" up-keep="same-data"></div> <!-- mark: same-data -->
+```
+
+Instead of `[up-data]` we can also use HTML5 [`[data-*]` attributes](https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes):
+
+```html
+<div class="map" data-location="Hofbräuhaus Munich" up-keep="same-data"></div> <!-- mark: data-location -->
+```
+
+Unpoly will compare the element's **initial data** as it is rendered by the server.\
+Client-side changes to the data object (e.g. by a [compiler](/up.compiler)) are ignored.
 
 
-### Persisting elements
+#### Support for `Element#moveBefore()`
 
-- To preserve an element as long as its [data](/data) remains the same,
-  set an `[up-keep="same-data"]` attribute. Only when the element's `[up-data]` attribute changes between versions,
-  it is replaced by the new version. Changes in other attributes or its children are ignored.
-- To preserve an element as long as its [outer HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/outerHTML) remains the same,
-  set an `[up-keep="same-html"]` attribute. Only when the element's attributes or children changes between versions,
-  it is replaced by the new version.
-- `[up-keep]` fragment are now preserved without detaching and re-attaching the element. This allows to keep focus without re-focusing, which may e.g. cause custom dropdown implementation to re-open options. Only on [supporting browsers](https://caniuse.com/mdn-api_element_movebefore).
+`[up-keep]` fragments are now preserved without detaching and re-attaching the element.
+
+A use case of this is to preserve element focus without re-focusing after an update, which may e.g. cause JavaScript-based `<select>` replacements to re-open their options.
+This also prevents custom elements from re-initializing unnecessarily.
+
+The new implementation uses the `Element#moveBefore()` API which currently has [68% browser support](https://caniuse.com/mdn-api_element_movebefore).
+On unsupporting browsers the old preservation logic is used.
+
 
 
 ### Form data handling
 
-- ⚠️ Submitting or validating a form with a `{ params }` option now overrides existing params with the same name. Formerly, a new param with the same name was added.
+- ⚠️ Submitting or validating a form with a `{ params }` option now overrides existing params with the same name. Formerly, a new param with the same name was added. This made it impossible to override array fields (like `name[]`).
 - Calling `up.network.loadPage()` will now remove binary entries from a given `{ params }` option. JavaScript cannot make a full page load with binary params.
 
 
 ### Focus ring visibility
 
-- Allow to override [focus ring visibility](/focus-visibility) by passing a `{ focusVisible }` render option, or by setting an `[up-focus-visible]` attribute. This is in addition to the `up.viewport.config.autoFocusVisible` configuration.
+You can now override [focus ring visibility](/focus-visibility) for individual links or forms, by setting an `[up-focus-visible]` attribute or by passing a `{ focusVisible }` render option.
+
+For global visibility rules, use the existing `up.viewport.config.autoFocusVisible` configuration.
 
 ### Polling
 
-- `[up-poll]` now stops if an external script detaches the polling fragment.
+An `[up-poll]` fragment now stops polling if an external script detaches the element.
 
-### Fixed instant links on iOS
 
-- iOS: Long-pressing a link to open the context menu will no longer follow an `[up-instant]` link (#271)
-- iOS: Long-pressing a link will no longer emit an `up:click` event (#721)
+### Fixed issues with instant links on iOS
+
+Long-pressing an `[up-intant]` link to open the context menu will no longer follow the link on iOS (#271).
+
+Related, long-pressing an instant link will no longer emit an `up:click` event.
 
 
 ### Utility functions
 
-- Fix relaxed JSON parsing when input contains a section reference (like §1)
+- Fixed an error with [relaxed JSON](/relaxed-json) parsing when the input string contains a section reference (like `§1`) (#752).
 - ⚠️ The `up.util.task()` implementation now uses `postMessage()` instead of `setTimeout()`. This causes the new task to be scheduled earlier, ideally before the browser renders the next frame. The task is still guaranteed to run after all microtasks, such as settled promise callbacks.
-- [`unpoly-migrate`](https://unpoly.com/changes/upgrading) now allows to disable all deprecation warnings with `up.migrate.config.logLevel = 'none'`.
-- `up.element.subtree()` now prevents redundant array allocations.
+- [`unpoly-migrate`](https://unpoly.com/changes/upgrading) now allows to disable all deprecation warnings with `up.migrate.config.logLevel = 'none'`. This allows to keep the polyfills with a clean console.
 - ⚠️ The experimental function up.`util.pickBy()` no longer passes the entire object as a third argument to the callback function.
+- `up.element.subtree()` now prevents redundant array allocations.
 
 
 ### Accessibility
@@ -176,123 +286,132 @@ When watching fields `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-vali
 
 ### JavaScript Rendering API
 
--  ⚠️ Renamed property `up.RenderResult#options` to `#renderOptions`
--  ⚠️ Renamed property `up.RenderJob#options` to `#renderOptions`
 - Added a property `up.RenderResult#ok`. It indicated whether the render pass has rendered a [successful response](/failed-responses).
-- When `up.hello()` is called on a script that is already compiled, `up:fragment:inserted` is only emitted once.
+- Added a property `up.RenderResult#renderOptions` to `up.RenderResult#renderOptions`. It contains the effective render options used to produce this result.
+- ⚠️ Renamed the property `up.RenderJob#options` to `up.RenderJob#renderOptions`
+- When `up.hello()` is called on an element that has been compiled before, `up:fragment:inserted` is no longer emitted a second time.
 - It is now guaranteed that `up:fragment:inserted` is emitted after compilation.
-- Fix a bug where `up.RenderResult#renderOptions` was sometimes `undefined`.
 
 
 ### Network requests
 
-- Listeners to `up:request:load` can now [inspect or mutate request options](/up:request:load#changing-requests)
-  before it is sent. This was possible before, but was never documented.
+Listeners to `up:request:load` can now [inspect or mutate request options](/up:request:load#changing-requests) before it is sent:
+
+```js
+up.on('up:request:load', (event) => {
+  if (event.request.url === '/stocks') {
+    event.request.headers['X-Client-Time'] = Date.now().toString()
+    event.request.timeout = 10_000
+  }
+})
+```
+
+This was possible before, but was never documented.
 
 
-### Stabilization of features
+### Stabilization of experimental features
 
-Many experimental features have been declared stable:
+Many experimental features have now been declared as stable:
 
-- up.deferred.load()
-- up:deferred:load
-- up.event.build()
-- up.form.fields()
-- up.fragment.config.skipResponse
-- [up-etag]
-- up.fragment.etag()
-- [up-time]
-- up.fragment.time()
-- event.skip() for up:fragment:loaded
-- up:fragment:offline
-- up.fragment.subtree
-- up.fragment.isTargetable
-- :layer
-- up.fragment.matches()
-- up.fragment.abort()
-- up:fragment:aborted
-- up.template.clone()
-- up:template:clone
-- up.history.location
-- up.history.previousLocation
-- up.history.isLocation
-- up:layer:location:changed
-- event.response for up:layer:accept, up:layer:dismiss, up:layer:accepted, up:layer:dismissed
-- up-defer
-- up.network.config.lateDelay
-- { lateDelay } option for up.request()
-- up.network.loadPage()
-- up:request:aborted
-- up:fragment:hungry event
-- { ifLayer } option for up.radio.startPolling()
-- [up-if-layer] modifier for [up-poll]
-- up:fragment:poll
-- up.script.config.scriptSelectors and .noScriptSelectors
-- event.preventDefault() for up:assets:changed
-- up.util.noop
-- up.util.normalizeURL
-- up.util.isBlank.key
-- up.util.wrapList
-- up.util.copy.key
-- up.util.findResult
-- up.util.every
-- up.util.evalOption
-- up.util.pluckKey
-- up.util.flatten
-- up.util.flatMap
-- up.util.isEqual
-- up.util.isEqual.key
-- up.focus()
-- up.viewport.get()
-- up.viewport.root
-- up.viewport.saveScroll()
-- up.viewport.restoreScroll()
-- up.viewport.saveFocus()
-- up.viewport.restoreFocus()
-- Most up.Params methods
-  - new up.Params
-  - up.Params#clear
-  - up.Params#toFormData
-  - up.Params#toQuery
-  - up.Params#add
-  - up.Params#addAll
-  - up.Params#set
-  - up.Params#delete
-  - up.Params#get
-  - up.Params.fromForm
-  - up.Params.fromURL
-- up.RenderResult#none
-- up.RenderResult#ok
-- up.Request#layer
-- up.Request#failLayer
-- up.Request#origin
-- up.Request#background
-- up.Request#lateDelay
-- up.Request#fragments
-- up.Request#fragment
-- up.Request#loadPage
-- up.Request#abort
-- up.Request#ended
-- up.Response#contentType
-- up.Response#lastModified
-- up.Response#etag
-- up.Response#age
-- up.Response#expired
-- { response } option for up.Layer#accept and up.layer.accept()
-- up.Layer#asCurrent()
-- up.layer.location and up.Layer#location
-- [up-abortable] attr for [up-follow]
-- [up-late-delay] attr for [up-follow]
-- { lateDelay } option for up.render()
-
+- `up.deferred.load()` function
+- `up:deferred:load` event
+- `up.event.build()` function
+- `up.form.fields()` function
+- `up.fragment.config.skipResponse` configuration
+- `[up-etag]` attribute
+- `up.fragment.etag()` function
+- `[up-time]` attribute
+- `up.fragment.time()` function
+- `event.skip()` method for `up:fragment:loaded` event
+- `up:fragment:offline` event
+- `up.fragment.subtree()` function 
+- `up.fragment.isTargetable()` function
+- `:layer` selector
+- `up.fragment.matches()` function
+- `up.fragment.abort()` function
+- `up:fragment:aborted` event
+- `up.template.clone()` function
+- `up:template:clone` event
+- `up.history.location` property
+- `up.history.previousLocation` property
+- `up.history.isLocation()` function
+- `up:layer:location:changed` event
+- `event.response` property for `up:layer:accept`, `up:layer:dismiss`, `up:layer:accepted` and `up:layer:dismissed` events
+- `[up-defer]` attribute
+- `up.network.config.lateDelay` configuration
+- `{ lateDelay }` option for `up.request()`
+- `up.network.loadPage()` function
+- `up:request:aborted` event
+- `up:fragment:hungry` event
+- `{ ifLayer }` option for `up.radio.startPolling()`
+- `[up-if-layer]` modifier for `[up-poll]`
+- `up:fragment:poll` event
+- `up.script.config.scriptSelectors` and `up.script.config.noScriptSelectors` configuration
+- `event.preventDefault()` for `up:assets:changed` event
+- `up.util.noop()` function
+- `up.util.normalizeURL()` function
+- `up.util.isBlank.key` property
+- `up.util.wrapList()` function
+- `up.util.copy.key` property
+- `up.util.findResult()` function
+- `up.util.every()` function
+- `up.util.evalOption()` function
+- `up.util.pluckKey()` function
+- `up.util.flatten()` function
+- `up.util.flatMap()` function
+- `up.util.isEqual()` function
+- `up.util.isEqual.key` property
+- `up.focus()` function
+- `up.viewport.get()` function
+- `up.viewport.root` property
+- `up.viewport.saveScroll()` function
+- `up.viewport.restoreScroll()` function
+- `up.viewport.saveFocus()` function
+- `up.viewport.restoreFocus()` function
+- `new up.Params` constructor
+- `up.Params#clear()` method
+- `up.Params#toFormData()` method
+- `up.Params#toQuery()` method
+- `up.Params#add()` method
+- `up.Params#addAll()` method
+- `up.Params#set()` method
+- `up.Params#delete()` method
+- `up.Params#get()` method
+- `up.Params.fromForm()` static method
+- `up.Params.fromURL()` static method
+- `up.RenderResult#none` property
+- `up.RenderResult#ok` property
+- `up.Request#layer` property
+- `up.Request#failLayer` property
+- `up.Request#origin` property
+- `up.Request#background` property
+- `up.Request#lateDelay` property
+- `up.Request#fragments` property
+- `up.Request#fragment` property
+- `up.Request#loadPage()` function
+- `up.Request#abort()` function
+- `up.Request#ended` property
+- `up.Response#contentType` property
+- `up.Response#lastModified` property
+- `up.Response#etag` property
+- `up.Response#age` property
+- `up.Response#expired` proprty
+- `{ response }` option for `up.Layer#accept()` method and `up.layer.accept()` funciton
+- `up.Layer#asCurrent()`
+- `up.layer.location` and `up.Layer#location` properties
+- `[up-abortable]` attribute for `[up-follow]` links
+- `[up-late-delay]` attribute for `[up-follow]` links
+- `{ lateDelay }` option for `up.render()`
 
 
 ### Developer experience
 
+It is now easier to contribute to Unpoly:
+
+- All remaining CoffeeScript has been removed from the test suite.
 - You can now run headless tests (without a browser window) by running `npm run test`.
+- All tests now use `async` / `await` instead of our legacy `asyncSpec()` helper.
 - CI: Tests now [run automatically](https://github.com/unpoly/unpoly/actions) for every pull request.
-- All remaining CoffeeScript was removed from the test suite.
-- All tests now use `async` / `await` instead of the obscure `asyncSpec()` helper.
 - The release process was migrated from Ruby to Node.js.
 
 
