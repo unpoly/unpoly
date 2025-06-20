@@ -1073,7 +1073,7 @@ up.link = (function() {
     A promise that fulfills with an `up.RenderResult` once the deferred content
     has been loaded and rendered.
 
-  @experimental
+  @stable
   */
   function loadDeferred(link, options) {
     let guardEvent = up.event.build('up:deferred:load', { log: ['Loading deferred %o', link] })
@@ -1113,7 +1113,7 @@ up.link = (function() {
     Listeners may inspect and modify these options.
   @param event.preventDefault()
     Prevents the deferred content from being loaded.
-  @experimental
+  @stable
   */
 
   /*-
