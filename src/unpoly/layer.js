@@ -828,18 +828,30 @@ up.layer = (function() {
   }
 
   /*-
-  [Follows](/up-follow) this link and [opens the result in a new overlay](/opening-overlays).
+  Shows the response to a link click or form submission within [a new overlay](/opening-overlays).
 
-  ### Example
+  [Opening overlays](/opening-overlays){:.article-ref}
+
+  ## Example
+
+  This link will open its response in a modal overlay:
 
   ```html
-  <a href="/menu" up-layer="new">Open menu</a>
+  <a href="/menu" up-layer="new">Open menu</a> <!-- mark: up-layer -->
+  ```
+
+  This form will show error messages from a [failed submission](/failed-responses) within a modal overlay:
+
+  ```html
+  <form action="/submit" up-fail-layer="new"> <!-- mark: up-fail-layer -->
+    ...
+  </form>
   ```
 
   @selector [up-layer=new]
 
   @params-note
-    All modifying attributes for `[up-follow]` can also be used.\
+    All modifying attributes for `[up-follow]` (links) or `[up-submit]` (forms) can also be used.\
     Default layer attributes can be configured in `up.layer.config`.
 
   @section Placement
@@ -962,20 +974,24 @@ up.layer = (function() {
 
   @section Close conditions
     @param [up-accept-event]
-      One or more space-separated event types that will cause this overlay to automatically be
+      An event type that will cause this overlay to automatically be
       [accepted](/closing-overlays) when a matching event occurs within the overlay.
 
       The [overlay result value](/closing-overlays#overlay-result-values)
       is the event object that caused the overlay to close.
 
+      You may listen to multiple event types by separating types with a space or comma.
+
       See [Closing when an event is emitted](/closing-overlays#event-condition).
 
     @param [up-dismiss-event]
-      One or more space-separated event types that will cause this overlay to automatically be
+      An event type that will cause this overlay to automatically be
       [dismissed](/closing-overlays) when a matching event occurs within the overlay.
 
       The [overlay result value](/closing-overlays#overlay-result-values)
       is the event object that caused the overlay to close.
+
+      You may listen to multiple event types by separating types with a space or comma.
 
       See [Closing when an event is emitted](/closing-overlays#event-condition).
 

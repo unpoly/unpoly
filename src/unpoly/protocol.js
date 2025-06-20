@@ -273,6 +273,7 @@ up.protocol = (function() {
   the root layer:
 
   ```html
+  <!-- label: Form within an overlay -->
   <form action="/submit" up-submit up-layer="root"> <!-- mark: up-layer -->
     ...
   </form>
@@ -294,7 +295,7 @@ up.protocol = (function() {
   This request header contains the [mode](/up.layer.mode) of the layer
   from which the interaction [originated](/origin).
 
-    Links or forms may target another layer than their own.
+  Links or forms may target another layer than their own.
   The targeted layer is sent as an `X-Up-Mode` header.
 
   ## Example
@@ -303,10 +304,11 @@ up.protocol = (function() {
   the root layer:
 
   ```html
+  <!-- label: Link within an overlay -->
   <a href="/" up-follow up-layer="root">Click me</a> <!-- mark: up-layer -->
   ```
 
-  When the link is clicked, the following headers are set:
+  When the link is clicked, the following request headers are sent:
 
   ```http
   X-Up-Mode: root
@@ -770,7 +772,42 @@ up.protocol = (function() {
   }
 
   /*-
-  TODO: Docs
+  The server can send this response header to force its response to [open a new overlay](/opening-overlays).
+
+  ## Basic example
+
+  The following will select the [main](/main) element from the HTML payload
+  and open it with a basic `modal` overlay:
+
+  ```http
+  Content-Type: text/html
+  X-Up-Open-Layer: {}
+
+  <html>
+    <main>
+      Overlay content
+    </main>
+  </html>
+  ```
+
+  ## Custom layer options
+
+  When `X-Up-Open-Layer` is used without options, the new overlay will have the [default mode](/up.modal.config#config.mode) (`modal`), select a [main target](/main)
+  and use [default navigation options](/up.fragment.config#config.navigateOptions).
+
+  You can customize the target and appearance of the new overlay, by setting the header value to a [relaxed JSON](/relaxed-json) string
+  with render options:
+
+  ```http
+  Content-Type: text/html
+  X-Up-Open-Layer: { target: '#menu', mode: 'drawer', animation: 'move-to-right' }
+
+  <div id="menu">
+    Overlay content
+  </div>
+  ```
+
+  Many options from `up.layer.open()` are supported. Options must be JSON-serializable.
 
   @header X-Up-Open-Layer
   @experimental

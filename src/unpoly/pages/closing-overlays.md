@@ -126,7 +126,8 @@ in an overlay. The overlay interaction is decoupled from the interaction in the 
 ### Closing when a location is reached {#location-condition}
 {:toc="true"}
 
-The following will open an overlay that closes once a URL like `/companies/123` is reached:
+To open an overlay that closes once a URL like `/companies/123` is reached, set an [`[up-accept-location]`](/up-layer-new#up-accept-location)
+attribute with a [URL pattern](/url-patterns):
 
 ```html
 <a href="/companies/new"
@@ -146,9 +147,8 @@ To *dismiss* an overlay once a given location is reached, use `[up-dismiss-locat
 ### Closing when an event is emitted {#event-condition}
 {:toc="true"}
 
-Instead of waiting for a location to be reached,
-you may accept an overlay\
-once a given **event** is observed on the overlay:
+To open an overlay that closes once a given event is observed on the overlay,
+set an [`[up-accept-event]`](/up-layer-new#up-accept-event) attribute:
 
 ```html
 <a href="/users/new"

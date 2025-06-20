@@ -51,7 +51,7 @@ Starting a subinteraction
 - The acceptance callback is called with the result value.
 - The parent layer may change itself, e.g. by [reloading](/up.reload) a [fragment](/up.fragment).
 
-See [closing overlays](/closing-overlays) for an extensive explanation.
+See [Close conditions](/closing-overlays#close-conditions) for an extensive explanation.
 
 
 Common acceptance callbacks
