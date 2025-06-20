@@ -6,8 +6,9 @@ that resolve with an `up.RenderResult`:
 
 ```js
 let result = await up.render('.target', content: 'foo')
-console.log(result.fragments) // result: [<div class="target">...</div>]
-console.log(result.layer)     // result: up.Layer.Root
+console.log(result.fragments)     // result: [<div class="target">...</div>]
+console.log(result.layer)         // result: up.Layer.Root
+console.log(result.renderOptions) // result: { target: '.target', content: 'foo', ... }
 ```
 
 @class up.RenderResult
@@ -71,7 +72,7 @@ up.RenderResult = class RenderResult extends up.Record {
 
   @property up.RenderResult#renderOptions
   @param {Object} renderOptions
-  @internal
+  @experimental
   */
 
   /*-
