@@ -323,7 +323,7 @@ q
   <a href="/page3" smooth-link>Page 3</a>
   ```
 
-  We can define the `[content-link]` attribute by registering a macro that
+  We can define the `[smooth-link]` attribute by registering a macro that
   sets the `[up-layer]`, `[up-class]` and `[up-animation]` attributes for us:
 
   ```js
@@ -983,4 +983,3 @@ up.macro = up.script.macro
 up.data = up.script.data
 up.hello = up.script.hello
 up.attribute = up.script.attrCompiler
-
