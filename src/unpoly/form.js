@@ -1564,14 +1564,14 @@ up.form = (function() {
   <form action="/users">
 
     <fieldset>
-      <label for="email" up-validate>E-mail</label>
-      <input type="text" id="email" name="email" value="foo@bar.com">
+      <label for="email">E-mail</label>
+      <input type="text" id="email" name="email" value="foo@bar.com" up-validate>
       <div class="error">E-mail has already been taken!</div> <!-- mark-line -->
     </fieldset>
 
     <fieldset>
-      <label for="password" up-validate>Password</label>
-      <input type="password" id="password" name="password" value="secret">
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" value="secret" up-validate>
       <div class="error">Password is too short!</div> <!-- mark-line -->
     </fieldset>
 
@@ -1584,13 +1584,13 @@ up.form = (function() {
   <form action="/users">
 
     <fieldset>
-      <label for="email" up-validate>E-mail</label> <!-- mark: up-validate -->
-      <input type="text" id="email" name="email">
+      <label for="email">E-mail</label>
+      <input type="text" id="email" name="email" up-validate> <!-- mark: up-validate -->
     </fieldset>
 
     <fieldset>
-      <label for="password" up-validate>Password</label> <!-- mark: up-validate -->
-      <input type="password" id="password" name="password">
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" up-validate> <!-- mark: up-validate -->
     </fieldset>
 
     <button type="submit">Register</button>
@@ -1698,14 +1698,14 @@ up.form = (function() {
   <form action="/users">
 
     <fieldset>
-      <label for="email" up-validate>E-mail</label>
-      <input type="text" id="email" name="email" value="foo@bar.com">
+      <label for="email">E-mail</label>
+      <input type="text" id="email" name="email" value="foo@bar.com" up-validate>
       <div class="error">E-mail has already been taken!</div> <!-- mark-line -->
     </fieldset>
 
     <fieldset>
-      <label for="password" up-validate>Password</label>
-      <input type="password" id="password" name="password" value="secret">
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" value="secret" up-validate>
       <div class="error">Password is too short!</div> <!-- mark-line -->
     </fieldset>
 
@@ -1787,12 +1787,12 @@ up.form = (function() {
   <form action="/users" up-validate> <!-- mark: up-validate -->
 
     <fieldset>
-      <label for="email" up-validate>E-mail</label>
+      <label for="email">E-mail</label>
       <input type="text" id="email" name="email"> <!-- chip "will validate" -->
     </fieldset>
 
     <fieldset>
-      <label for="password" up-validate>Password</label>
+      <label for="password">Password</label>
       <input type="password" id="password" name="password"> <!-- chip "will validate" -->
     </fieldset>
 
@@ -1809,18 +1809,18 @@ up.form = (function() {
 
     <div up-validate> <!-- mark: up-validate -->
       <fieldset>
-        <label for="email" up-validate>E-mail</label>
+        <label for="email">E-mail</label>
         <input type="text" id="email" name="email"> <!-- chip "will validate" -->
       </fieldset>
 
       <fieldset>
-        <label for="password" up-validate>Password</label>
+        <label for="password">Password</label>
         <input type="password" id="password" name="password"> <!-- chip "will validate" -->
       </fieldset>
     </div>
 
     <fieldset>
-      <label for="name" up-validate>Name</label>
+      <label for="name">Name</label>
       <input type="name" id="name" name="name"> <!-- chip "will NOT validate" -->
     </fieldset>
 
