@@ -48,6 +48,13 @@ up.form = (function() {
       Matching forms will *not* be [submitted through Unpoly](/up-submit),
       even if they match `up.form.config.submitSelectors`.
 
+    @param {string} [config.arrayFields='suffix']
+      How fields are detected as arrays.
+
+      By default only fields with a name ending in `[]` are detected as arrays.
+      If set to 'all' then all files are handled as arrays and functions like
+      `up.watch` always get the value passed as array.
+
   @section Form elements
 
     @param {Array<string>} [config.groupSelectors=['[up-form-group]', 'fieldset', 'label', 'form']]
@@ -146,6 +153,7 @@ up.form = (function() {
     watchInputDelay: 0,
     watchChangeEvents: ['change'],
     watchableEvents: ['input', 'change'],
+    arrayFields: 'suffix',
   }))
 
   /*-

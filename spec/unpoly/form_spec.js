@@ -1381,6 +1381,39 @@ describe('up.form', function() {
             expect(callback.calls.count()).toEqual(2)
           })
 
+          it("runs the callback for fields with arrays as value", async function() {
+            up.form.config.arrayFields = 'all'
+
+            const form = fixture('form')
+            const container = e.affix(form, 'div')
+            const input1 = e.affix(container, 'input', { type: "checkbox", name: "foo", value: "1" })
+            const input2 = e.affix(container, 'input', { type: "checkbox", name: "foo", value: "2" })
+            const input3 = e.affix(container, 'input', { name: "bar", value: "" })
+            const callback = jasmine.createSpy('change callback')
+            up.watch(container, callback)
+
+            input1.checked = true
+            Trigger.change(input1)
+            await wait()
+
+            expect(callback.calls.count()).toEqual(1)
+            expect(callback.calls.mostRecent().args).toEqual([['1'], 'foo', jasmine.anything()])
+
+            input2.checked = true
+            Trigger.change(input2)
+            await wait()
+
+            expect(callback.calls.count()).toEqual(2)
+            expect(callback.calls.mostRecent().args).toEqual([['1', '2'], 'foo', jasmine.anything()])
+
+            input3.value = "test"
+            Trigger.change(input3)
+            await wait()
+
+            expect(callback.calls.count()).toEqual(3)
+            expect(callback.calls.mostRecent().args).toEqual([['test'], 'bar', jasmine.anything()])
+          })
+
           it('runs callbacks for array fields, considering the entire array as the value to compare', async function() {
             const form = fixture('form')
             const container = e.affix(form, 'div')
