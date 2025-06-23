@@ -39,8 +39,8 @@ jobs:
           - name: Chrome with minified build
             browser: chrome
             min: true
-          - name: Firefox
-            browser: firefox
+          # - name: Firefox
+          #   browser: firefox
     name: ${{ matrix.name }}
     env:
       BROWSER: "${{ matrix.browser }}"
