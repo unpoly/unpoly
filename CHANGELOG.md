@@ -234,18 +234,6 @@ Unpoly will compare the element's **initial data** as it is rendered by the serv
 Client-side changes to the data object (e.g. by a [compiler](/up.compiler)) are ignored.
 
 
-#### Support for `Element#moveBefore()`
-
-`[up-keep]` fragments are now preserved without detaching and re-attaching the element.
-
-A use case of this is to preserve element focus without re-focusing after an update, which may e.g. cause JavaScript-based `<select>` replacements to re-open their options.
-This also prevents custom elements from re-initializing unnecessarily.
-
-The new implementation uses the `Element#moveBefore()` API which currently has [68% browser support](https://caniuse.com/mdn-api_element_movebefore).
-On unsupporting browsers the old preservation logic is used.
-
-
-
 ### Form data handling
 
 - ⚠️ Submitting or validating a form with a `{ params }` option now overrides existing params with the same name. Formerly, a new param with the same name was added. This made it impossible to override array fields (like `name[]`).

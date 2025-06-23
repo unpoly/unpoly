@@ -884,8 +884,7 @@ up.fragment = (function() {
 
   - The `[up-keep]` attribute is only supported for elements within the `<body>`.
   - If an `<audio up-keep>` or `<video up-keep>` element is a *direct* child of the `<body>`,
-    it will lose its playback state during a fragment update in
-    [browsers that don't support `moveBefore()`](https://caniuse.com/mdn-api_element_movebefore).
+    it will lose its playback state during a fragment update.
     To preserve its playback state in all browsers,
     insert a container element between the `<body>` and the media element.
 

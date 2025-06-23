@@ -245,7 +245,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
             // to lose playback state. To avoid this we temporarily move the keepable (keepPlan.oldElement)
             // so it can remain attached while we swap fragment versions. We will move it to its place within
             // the new fragment version once the swap is complete.
-            e.preservingAppend(document.body, keepable)
+            document.body.append(keepable)
           }
 
           // // Since we're going to swap the entire oldElement and newElement containers afterwards,
@@ -262,11 +262,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
   _restoreDescendantKeepables(step) {
     for (let keepPlan of step.descendantKeepPlans) {
       // Now that we know the final destination of { newElement }, we can replace it with the keepable.
-      if (this._willChangeBody()) {
-        keepPlan.newElement.replaceWith(keepPlan.oldElement)
-      } else {
-        e.preservingReplace(keepPlan.newElement, keepPlan.oldElement)
-      }
+      keepPlan.newElement.replaceWith(keepPlan.oldElement)
 
       for (let reviver of keepPlan.revivers) {
         reviver()

@@ -1556,23 +1556,6 @@ up.element = (function() {
     }
   }
 
-  // Ponyfill for Element.prototype.moveBefore()
-  // https://developer.mozilla.org/en-US/docs/Web/API/Element/moveBefore
-  function moveBefore(parent, movedElement, referenceElement) {
-    let fn = parent.moveBefore || parent.insertBefore
-    fn.call(parent, movedElement, referenceElement)
-  }
-
-  function preservingAppend(parent, newNode) {
-    moveBefore(parent, newNode, null)
-  }
-
-  function preservingReplace(oldElement, newElement) {
-    let parent = oldElement.parentElement
-    moveBefore(parent, newElement, oldElement)
-    oldElement.remove()
-  }
-
   return {
     subtree,
     subtreeFirst,
@@ -1641,7 +1624,5 @@ up.element = (function() {
     matchSelectorMap,
     elementLikeMatches,
     documentPosition,
-    preservingAppend,
-    preservingReplace,
   }
 })()
