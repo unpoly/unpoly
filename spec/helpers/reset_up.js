@@ -77,6 +77,8 @@ beforeEach(function() {
   jasmine.locationBeforeExample = location.href
 })
 
+let lastIdleCallback = new Date()
+
 afterEach(async function() {
   jasmine.resetting = true
 
@@ -141,6 +143,16 @@ afterEach(async function() {
     document.scrollingElement.style.removeProperty('overflow-y')
     up.element.paint(document.scrollingElement)
     document.scrollingElement.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  }
+
+  // Let the browser return to idle every few seconds.
+  // We don't really know if this is necessary, but we're seeing occasional flaky tests
+  // and are experimenting with ways to address this.
+  let now = new Date()
+  if (now - lastIdleCallback > 10_000) {
+    lastIdleCallback = now
+    up.puts('specs', 'Awaiting an idle callback to let the browser catch up')
+    await jasmine.waitIdle(1000)
   }
 
   jasmine.resetting = false
