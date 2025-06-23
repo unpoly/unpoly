@@ -45,6 +45,19 @@ async function waitAnimationFrame() {
 
 jasmine.waitAnimationFrame = waitAnimationFrame
 
+async function waitIdle(timeout) {
+  return new Promise(function(resolve) {
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(resolve, { timeout })
+    } else {
+      // https://bugs.webkit.org/show_bug.cgi?id=285049
+      setTimeout(resolve)
+    }
+  })
+}
+
+jasmine.waitIdle = waitIdle
+
 function waitFlex(ms) {
   if (typeof ms === 'undefined') {
     return waitMessageChannel()
