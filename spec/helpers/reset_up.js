@@ -93,7 +93,7 @@ afterEach(async function() {
 
     const hadRequests = (jasmine.Ajax.requests.count() > 0)
     const hadLayers = (up.layer.count > 0)
-    const waitMore = hadRequests || hadLayers || AgentDetector.isFirefox()
+    const waitMore = hadRequests || hadLayers || AgentDetector.isFirefox() || AgentDetector.isSafari()
 
     // Abort all requests so any cancel handlers can run and do async things.
     up.network.abort({ reason: RESET_MESSAGE })
