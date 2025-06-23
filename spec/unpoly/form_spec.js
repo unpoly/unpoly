@@ -6102,6 +6102,86 @@ describe('up.form', function() {
 
         it('shows multiple previews')
       })
+
+      describe('validating while typing with [up-keep]', function() {
+
+        it('preserves focus, cursor position and value', async function() {
+          const keepSpy = jasmine.createSpy('up:fragment:keep listener')
+          up.on('up:fragment:keep', keepSpy)
+
+          const longText =
+            "foooooooooooooooooooooooo\n" +
+            "baaaaaaaaaaaaaaaaaaaaaaar\n" +
+            "baaaaaaaaaaaaaaaaaaaaaaaz\n" +
+            "baaaaaaaaaaaaaaaaaaaaaaam\n" +
+            "quuuuuuuuuuuuuuuuuuuuuuux\n" +
+            "foooooooooooooooooooooooo\n" +
+            "baaaaaaaaaaaaaaaaaaaaaaar\n" +
+            "baaaaaaaaaaaaaaaaaaaaaaaz\n" +
+            "baaaaaaaaaaaaaaaaaaaaaaam\n" +
+            "quuuuuuuuuuuuuuuuuuuuuuux\n"
+
+          let html = `
+            <form method="post">
+              <textarea
+                name="prose"
+                wrap="off"
+                rows="3"
+                cols="10"
+                up-validate
+                up-watch-event="input"
+                up-watch-delay="10"
+                up-keep
+              >${longText}</textarea>
+            </form>
+          `
+          let [form, field] = htmlFixtureList(html)
+          up.hello(form)
+          await wait()
+
+          field.value += "change1"
+          await wait() // Firefox mutates scroll positions async after changing the value
+          field.selectionStart = 10
+          field.selectionEnd = 11
+          field.scrollLeft = 12
+          field.focus()
+          expect(field).toBeFocused()
+
+          Trigger.input(field)
+
+          await wait(70)
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(keepSpy).not.toHaveBeenCalled()
+          expect(field).toBe(document.querySelector('textarea[name=prose]'))
+          expect(field.value).toBe(longText + 'change1')
+          expect(field).toBeFocused()
+          expect(field.selectionStart).toBeAround(10, 2)
+          expect(field.selectionEnd).toBeAround(11, 2)
+          expect(field.scrollLeft).toBeAround(12, 2)
+
+          field.value += "change2"
+          await wait() // Firefox mutates scroll positions async after changing the value
+          field.selectionStart = 20
+          field.selectionEnd = 21
+          field.scrollLeft = 23
+          await wait()
+
+          jasmine.respondWith(html)
+
+          await wait()
+
+          expect(keepSpy).toHaveBeenCalled()
+          expect(field).toBe(document.querySelector('textarea[name=prose]'))
+          expect(field).toBeFocused()
+          expect(field.value).toBe(longText + 'change1' + 'change2')
+          expect(field.selectionStart).toBeAround(20, 2)
+          expect(field.selectionEnd).toBeAround(21, 2)
+          expect(field.scrollLeft).toBeAround(23, 2)
+        })
+
+      })
+
     })
 
 
