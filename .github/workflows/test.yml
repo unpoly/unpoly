@@ -48,7 +48,7 @@ jobs:
       MIGRATE: "${{ matrix.migrate }}"
       ES6: "${{ matrix.es6 }}"
       MIN: "${{ matrix.min }}"
-      DEBUG: "puppeteer:*,-puppeteer:protocol:*"
+      DEBUG: "puppeteer:*,-puppeteer:protocol:*,-puppeteer:webDriverBiDi:*"
     steps:
       - uses: actions/checkout@v3
 
