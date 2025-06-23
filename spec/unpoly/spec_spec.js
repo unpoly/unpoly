@@ -1,7 +1,7 @@
 const u = up.util
 const $ = jQuery
 
-fdescribe('specs', function() {
+describe('specs', function() {
 
   describe('toEqual() matcher', function() {
     it('does not consider a jQuery collection to be equal to its contained element (which is what jasmine-jquery does and which makes out expectations too soft)', function() {
