@@ -297,6 +297,14 @@ up.Params = class Params {
     return u.map(this.entries, 'name')
   }
 
+  /*-
+  @function up.Params#values
+  @internal
+  */
+  values() {
+    return u.map(this.entries, 'value')
+  }
+
   _addAllFromObject(object) {
     for (let key in object) {
       const value = object[key]

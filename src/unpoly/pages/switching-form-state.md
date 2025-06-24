@@ -158,6 +158,24 @@ You may also match against the `[value]` attribute of the checkbox element:
 </div>
 ```
 
+### Array fields
+
+When you have multiple checkboxes for a single [array field](/up.form.config#config.arrayParam),
+set `[up-switch]` on an element containing all checkboxes:
+
+```html
+<div up-switch=".department-dependent">
+  <input type="checkbox" name="department[]" value="development"> Development
+  <input type="checkbox" name="department[]" value="sales"> Sales
+  <input type="checkbox" name="department[]" value="accounting"> Accounting
+</div>
+
+<div class="department-dependent" up-show-for="sales, accounting">
+  shown when either sales or accounting is checked
+</div>
+```
+
+
 ## Usage with radio buttons {#radio-buttons}
 
 Use `[up-switch]` on a container for a radio button group:
