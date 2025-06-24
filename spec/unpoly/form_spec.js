@@ -1382,7 +1382,7 @@ describe('up.form', function() {
           })
 
           it("runs the callback for fields with arrays as value", async function() {
-            up.form.config.arrayFields = 'all'
+            up.form.config.arrayParam = true
 
             const form = fixture('form')
             const container = e.affix(form, 'div')

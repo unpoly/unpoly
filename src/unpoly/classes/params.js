@@ -445,7 +445,7 @@ up.Params = class Params {
   }
 
   _isArrayKey(key) {
-    return key.endsWith('[]') || up.form.config.arrayFields === 'all'
+    return u.evalOption(up.form.config.arrayParam, key)
   }
 
   [u.isBlank.key]() {

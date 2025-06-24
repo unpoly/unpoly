@@ -48,13 +48,6 @@ up.form = (function() {
       Matching forms will *not* be [submitted through Unpoly](/up-submit),
       even if they match `up.form.config.submitSelectors`.
 
-    @param {string} [config.arrayFields='suffix']
-      How fields are detected as arrays.
-
-      By default only fields with a name ending in `[]` are detected as arrays.
-      If set to 'all' then all files are handled as arrays and functions like
-      `up.watch` always get the value passed as array.
-
   @section Form elements
 
     @param {Array<string>} [config.groupSelectors=['[up-form-group]', 'fieldset', 'label', 'form']]
@@ -95,6 +88,17 @@ up.form = (function() {
 
     @param {string} [config.genericButtonSelectors]
       An array of CSS selectors that represent push buttons with no default behavior, such as `input[type=button]` or `button[type=button]`.
+
+      @experimental
+
+    @param {Function(string): boolean|boolean} [config.arrayParam]
+      Whether a param name is treated as an array with multiple values.
+
+      By default, only field names ending in `"[]"` are treated as arrays.
+      You can configure another function that accepts a param name and returns a `boolean`.
+
+      If set to `true` then all files are handled as arrays and functions like
+      `up.watch()` always get the value passed as array.
 
       @experimental
 
@@ -153,7 +157,7 @@ up.form = (function() {
     watchInputDelay: 0,
     watchChangeEvents: ['change'],
     watchableEvents: ['input', 'change'],
-    arrayFields: 'suffix',
+    arrayParam: (name) => name.endsWith('[]'),
   }))
 
   /*-
