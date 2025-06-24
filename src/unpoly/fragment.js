@@ -1399,8 +1399,10 @@ up.fragment = (function() {
 
       The `selector` argument may refer to the origin as `:origin`.
 
-  @return {Element|undefined}
-    The first matching element, or `undefined` if no such element matched.
+  @return {NodeList<Element>|Array<Element>}
+    A list of all elements matching the selector.
+
+    Returns an empty list if there are no matches.
   @stable
   */
   function getAll(...args) {
