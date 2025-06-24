@@ -436,12 +436,8 @@ up.Params = class Params {
   @experimental
   */
   getAll(name) {
-    if (this._isArrayKey(name)) {
-      return this.getAll(name)
-    } else {
-      const entries = u.map(this.entries, this._matchEntryFn(name))
-      return u.map(entries, 'value')
-    }
+    const entries = u.filter(this.entries, this._matchEntryFn(name))
+    return u.map(entries, 'value')
   }
 
   _isArrayKey(key) {

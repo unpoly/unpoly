@@ -251,6 +251,7 @@ On unsupporting browsers the old preservation logic is used.
 - ⚠️ Submitting or validating a form with a `{ params }` option now overrides existing params with the same name. Formerly, a new param with the same name was added. This made it impossible to override array fields (like `name[]`).
 - Calling `up.network.loadPage()` will now remove binary entries from a given `{ params }` option. JavaScript cannot make a full page load with binary params.
 - You can now configure which params are treated as an array with multiple values, by setting `up.form.config.arrayParam`. By default, only field names ending in `"[]"` are treated as arrays. (by @apollo13)
+- Fix the method `up.Params#getAll()` not returning the correct results or causing a stack overflow.
 
 
 ### Focus ring visibility
