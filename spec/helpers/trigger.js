@@ -230,6 +230,16 @@ window.Trigger = (function() {
     click(element, options)
   }
 
+  function toggleCheckSequence(element, options = {}) {
+    element = e.get(element)
+    mousedown(element, options)
+    focus(element, options)
+    mouseup(element, options)
+    click(element, options) // this toggles the { checked } property
+    input(element, options)
+    change(element, options)
+  }
+
   function pointerdownSequence(element, options = {}) {
     element = e.get(element)
     pointerover(element, options)
@@ -408,6 +418,7 @@ window.Trigger = (function() {
     mouseleave,
     click,
     clickSequence,
+    toggleCheckSequence,
     pointerdown,
     pointerup,
     pointerdownSequence,

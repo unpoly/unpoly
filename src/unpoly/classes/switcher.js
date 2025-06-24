@@ -92,26 +92,19 @@ up.Switcher = class Switcher {
   }
 
   _buildFieldTokens() {
-    // root is either an individual input, or a container of radio buttons.
+    let values = up.Params.fromContainer(this._root).values()
+    let tokens = [...values]
+
+    let anyPresent = u.some(values, u.isPresent)
+    tokens.push(anyPresent ? ':present' : ':blank')
+
     let fields = up.form.fields(this._root)
-    let field = fields[0]
-    let meta
-
-    if (field.matches('input[type=checkbox]')) {
-      meta = field.checked ? ':checked' : ':unchecked'
+    if (fields[0]?.matches('[type=radio], [type=checkbox]')) {
+      let anyChecked = u.some(fields, 'checked')
+      tokens.push(anyChecked ? ':checked' : ':unchecked')
     }
 
-    if (field.matches('input[type=radio]')) {
-      field = u.find(fields, 'checked')
-    }
-
-    let value = field?.value
-
-    return u.compact([
-      value,
-      meta,
-      u.isPresent(value) ? ':present' : ':blank'
-    ])
+    return tokens
   }
 
 }

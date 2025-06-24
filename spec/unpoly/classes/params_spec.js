@@ -364,7 +364,23 @@ describe('up.Params', function() {
     })
   })
 
-  describe('#getAll', () => it('returns all entries with the given name'))
+  describe('#getAll', function() {
+    it('returns all entries with the given name', function() {
+      const params = new up.Params({})
+      params.add('foo', '1')
+      params.add('foo', '2')
+
+      expect(params.getAll('foo')).toEqual(['1', '2'])
+    })
+
+    it('returns all entries with the given array param name', function() {
+      const params = new up.Params({})
+      params.add('foo[]', '1')
+      params.add('foo[]', '2')
+
+      expect(params.getAll('foo[]')).toEqual(['1', '2'])
+    })
+  })
 
   describe('#delete', () => it('deletes all entries with the given name'))
 

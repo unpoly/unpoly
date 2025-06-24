@@ -1381,6 +1381,39 @@ describe('up.form', function() {
             expect(callback.calls.count()).toEqual(2)
           })
 
+          it("runs the callback for fields with arrays as value", async function() {
+            up.form.config.arrayParam = true
+
+            const form = fixture('form')
+            const container = e.affix(form, 'div')
+            const input1 = e.affix(container, 'input', { type: "checkbox", name: "foo", value: "1" })
+            const input2 = e.affix(container, 'input', { type: "checkbox", name: "foo", value: "2" })
+            const input3 = e.affix(container, 'input', { name: "bar", value: "" })
+            const callback = jasmine.createSpy('change callback')
+            up.watch(container, callback)
+
+            input1.checked = true
+            Trigger.change(input1)
+            await wait()
+
+            expect(callback.calls.count()).toEqual(1)
+            expect(callback.calls.mostRecent().args).toEqual([['1'], 'foo', jasmine.anything()])
+
+            input2.checked = true
+            Trigger.change(input2)
+            await wait()
+
+            expect(callback.calls.count()).toEqual(2)
+            expect(callback.calls.mostRecent().args).toEqual([['1', '2'], 'foo', jasmine.anything()])
+
+            input3.value = "test"
+            Trigger.change(input3)
+            await wait()
+
+            expect(callback.calls.count()).toEqual(3)
+            expect(callback.calls.mostRecent().args).toEqual([['test'], 'bar', jasmine.anything()])
+          })
+
           it('runs callbacks for array fields, considering the entire array as the value to compare', async function() {
             const form = fixture('form')
             const container = e.affix(form, 'div')
@@ -7070,6 +7103,21 @@ describe('up.form', function() {
             expect($target).toBeVisible()
           })
 
+          it('toggles visibility when all fields are configured to be array fields', async function() {
+            up.form.config.arrayParam = true
+
+            const $target = this.$form.affix('.target[up-show-for="something bar other"]')
+            up.hello(this.$form)
+            await wait()
+
+            expect($target).toBeHidden()
+            this.$select.val('bar')
+            Trigger.change(this.$select)
+            await wait()
+
+            expect($target).toBeVisible()
+          })
+
         })
 
         describe('on a checkbox', function() {
@@ -7103,6 +7151,62 @@ describe('up.form', function() {
             await wait()
 
             expect($target).toBeHidden()
+          })
+
+          it('shows the target element is an array checkbox contains an [up-show-for] token', async function() {
+            let [form, tags, tag1, tag2, tag3, target] = htmlFixtureList(`
+              <form>
+                <div up-switch="#target">
+                  <input type="checkbox" name="tag[]" value="1">
+                  <input type="checkbox" name="tag[]" value="2">
+                  <input type="checkbox" name="tag[]" value="3">
+                </div>
+                
+                <div id="target" up-show-for="1 3"></div>
+              </form>
+            `)
+            up.hello(form)
+
+            let selectedTags = () => up.Params.fromForm(form).get('tag[]')
+
+            expect(selectedTags()).toEqual([])
+            expect(target).toBeHidden()
+
+            Trigger.toggleCheckSequence(tag1)
+            await wait()
+
+            expect(selectedTags()).toEqual(['1'])
+            expect(target).toBeVisible()
+
+            Trigger.toggleCheckSequence(tag2)
+            await wait()
+
+            expect(selectedTags()).toEqual(['1', '2'])
+            expect(target).toBeVisible()
+
+            Trigger.toggleCheckSequence(tag1)
+            await wait()
+
+            expect(selectedTags()).toEqual(['2'])
+            expect(target).toBeHidden()
+
+            Trigger.toggleCheckSequence(tag3)
+            await wait()
+
+            expect(selectedTags()).toEqual(['2', '3'])
+            expect(target).toBeVisible()
+
+            Trigger.toggleCheckSequence(tag2)
+            await wait()
+
+            expect(selectedTags()).toEqual(['3'])
+            expect(target).toBeVisible()
+
+            Trigger.toggleCheckSequence(tag3)
+            await wait()
+
+            expect(selectedTags()).toEqual([])
+            expect(target).toBeHidden()
           })
 
           it("shows the target element if its up-hide-for attribute is :checked and the checkbox is unchecked", async function() {

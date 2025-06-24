@@ -91,6 +91,17 @@ up.form = (function() {
 
       @experimental
 
+    @param {Function(string): boolean|boolean} [config.arrayParam]
+      Whether a param name is treated as an array with multiple values.
+
+      By default, only field names ending in `"[]"` are treated as arrays.
+      You can configure another function that accepts a param name and returns a `boolean`.
+
+      If set to `true` then all files are handled as arrays and functions like
+      `up.watch()` always get the value passed as array.
+
+      @experimental
+
   @section Watching fields
 
     @param {number} [config.watchInputDelay=0]
@@ -146,6 +157,7 @@ up.form = (function() {
     watchInputDelay: 0,
     watchChangeEvents: ['change'],
     watchableEvents: ['input', 'change'],
+    arrayParam: (name) => name.endsWith('[]'),
   }))
 
   /*-
