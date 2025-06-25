@@ -12259,6 +12259,26 @@ describe('up.fragment', function() {
           expect('.element').toHaveText('cached text')
         })
 
+        it('revalidates an element restored from an expired cache entry with { revalidate: "auto" }', async function() {
+          await jasmine.populateCache('/source', '<div class="element">cached text</div>')
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          up.cache.expire()
+          await wait()
+
+          const element = htmlFixture('<div class="element" up-source="/source">inserted text</div>')
+
+          up.reload(element, { cache: true, revalidate: 'auto' })
+          await wait()
+
+          expect('.element').toHaveText('cached text')
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+
+          jasmine.respondWith('<div class="element">revalidated text</div>')
+          await wait()
+
+          expect('.element').toHaveText('revalidated text')
+        })
+
       })
 
       it('does not reveal by default', async function() {

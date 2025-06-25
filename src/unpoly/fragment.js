@@ -1656,8 +1656,8 @@ up.fragment = (function() {
   /*-
   Replaces the given element with a fresh copy fetched from the server.
 
-  By default, reloading is not considered a [user navigation](/navigation) and e.g. will not update
-  the browser location. You may change this with `{ navigate: true }`.
+  By default, reloading is **not** considered a [user navigation](/navigation) and will not scroll, focus
+  or update the browser location. You may change this with `{ navigate: true }`.
 
   ## Example
 
@@ -1679,6 +1679,23 @@ up.fragment = (function() {
   Your server-side app is not required to re-render a request if there are no changes to the cached content.
 
   By supporting [conditional HTTP requests](/conditional-requests) you can quickly produce an empty response for unchanged content.
+
+  ## Restoring content from cache
+
+  To instantly restore a fragment to the last [cached](/caching) version, pass a `{ cache: true }` option:
+
+  ```js
+  up.reload('.inbox', { cache: true }) // mark: cache
+  ```
+
+  If the fragment source isn't cached, a network request is made.
+
+  To restore a fragment from cache, but [revalidate](/caching#revalidation) cached content that
+  has [expired](/expiration), also pass a `{ revalidate: 'auto' }` option:
+
+  ```js
+  up.reload('.inbox', { cache: true, revalidate: 'auto' }) // mark: revalidate
+  ```
 
   @function up.reload
 
@@ -1712,6 +1729,9 @@ up.fragment = (function() {
 
       By default the cache is ignored and a new HTTP request is sent.
       You can pass `{ cache: 'auto' }` to restore a fragment to its previously cached state.
+
+    @param {boolean|string} [options.revalidate=false]
+      @like up.render
 
   @section Loading state
     @mix up.render/loading-state
