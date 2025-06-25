@@ -805,22 +805,35 @@ up.Layer = class Layer extends up.Record {
     }
   }
 
-  _updateLocation(location, { push }) {
-    location = u.normalizeURL(location)
-    let previousLocation = this._savedLocation
+  _updateLocation(newLocation, { push }) {
+    let prevSavedLocation = this._savedLocation
+    let liveLocation = up.history.location
 
-    if (location !== previousLocation) {
-      this._savedLocation = location
+    // (A) Update _savedLocation before we push a new state below.
+    //     Pushing a new state will emit up:location:changed, which will re-call _updateLocation()
+    // (B) Don't emit up:layer:location:changed before the browser location changed.
+    if (newLocation !== prevSavedLocation) {
+      this._savedLocation = newLocation
+    }
 
-      if (this.showsLiveHistory() && push) {
-        up.history.push(location)
-      }
+    // We compare the newLocation with the current browser location, not with _savedLocation.
+    // Comparing with _savedLocation would not push a history entry in the following edge case.
+    //
+    // - We have the root layer at /root and an overlay on /overlay
+    // - The overlay makes a request to /root with [up-layer=root]
+    // - The render pass will automatically close the overlay and bring the root layer back to front ("peeling").
+    // - Because we think a history state is coming, we don't insert a state for the root layer restoration (issue #397).
+    // - Because newLocation is also rootLayer._savedLocation, we don't push a new state.
+    // - We end up not changing the URL from /overlay to /root, because neither peeling nor the fragment update
+    //   has pushed a state.
+    if (newLocation !== liveLocation && this.showsLiveHistory() && push) {
+      up.history.push(newLocation)
+    }
 
-      // (1) The up:layer:location:changed event signals a location change for history-less overlays.
-      // (2) When opening we never emit up:layer:location:changed.
-      if (!this.opening) {
-        this.emit('up:layer:location:changed', { location, previousLocation, log: false })
-      }
+    // (A) Only emit up:layer:location:changed after we pushed a new history entry.
+    // (B) Don't emit when initially opening an overlay.
+    if (newLocation !== prevSavedLocation && !this.opening) {
+      this.emit('up:layer:location:changed', { location: newLocation, previousLocation: prevSavedLocation, log: false })
     }
   }
 

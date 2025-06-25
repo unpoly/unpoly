@@ -4825,6 +4825,59 @@ describe('up.fragment', function() {
               expect(locations).toEqual(['/overlay1', '/root2'])
             })
 
+            it('creates a history entry if the response redirects to the same URL as the URL before the overlay was opened (bugfix)', async function() {
+              up.history.config.enabled = true
+              up.history.replace('/users')
+              await wait()
+
+              let [main, link] = htmlFixtureList(`
+                <main>
+                  <a up-layer="new" href="/users/2/edit">Alice</a>
+                </main>
+              `)
+              up.hello(link)
+
+              Trigger.clickSequence(link)
+              await wait()
+
+              expect(jasmine.lastRequest().url).toMatchURL('/users/2/edit')
+              expect(jasmine.lastRequest()).toHaveRequestMethod('get')
+
+              jasmine.respondWith(`
+                <main>
+                  <form autocomplete="off" up-layer="root" action="/users/2" accept-charset="UTF-8" method="post">
+                    <button class="btn btn-primary" data-disable="true" type="submit">Save</button>
+                  </form>
+                </main>
+              `)
+              await wait()
+
+              expect(up.layer.count).toBe(2)
+              expect(up.history.location).toMatchURL('/users/2/edit')
+              expect(up.layer.current).toHaveSelector('form[action="/users/2"]')
+
+              console.debug(123)
+
+              Trigger.clickSequence('form button')
+              await wait()
+
+              expect(jasmine.lastRequest().url).toMatchURL('/users/2')
+              expect(jasmine.lastRequest()).toHaveRequestMethod('post')
+
+              jasmine.respondWith({
+                responseURL: '/users',
+                responseText: `
+                  <main>
+                    List of users
+                  </main>
+                `
+              })
+              await wait()
+
+              expect('main').toHaveText('List of users')
+              expect(up.history.location).toMatchURL('/users')
+            })
+
             it('does create a history entry for the peeled layer if the fragment update does not update history', async function() {
               up.history.config.enabled = true
               up.history.replace('/root1')
@@ -5403,6 +5456,19 @@ describe('up.fragment', function() {
 
               expect(up.layer.current).toHaveText('new overlay text')
               expect(listener.calls.count()).toBe(1)
+            })
+
+            it('is emitted after the browser location changed', async function() {
+              let browserLocationSpy = jasmine.createSpy('browser location spy')
+              history.replaceState?.({}, 'original title', '/original-url')
+              fixture('.target')
+
+              const listener = jasmine.createSpy('event listener')
+              up.on('up:layer:location:changed', () => browserLocationSpy(up.history.location))
+
+              await up.render({ target: '.target', location: '/new-url', content: 'new content', history: true })
+
+              expect(browserLocationSpy).toHaveBeenCalledWith('/new-url')
             })
 
             it('is not emitted when a layer is initially opened', async function() {

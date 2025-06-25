@@ -6,6 +6,8 @@ beforeEach(function() {
     toHaveRequestMethod(util, customEqualityTesters) {
       return {
         compare(request, expectedMethod) {
+          expectedMethod = up.util.normalizeMethod(expectedMethod)
+
           let wrappedMethod, wrappedMethodMatches
           const realMethodMatches = (request.method === expectedMethod)
           const formData = request.data()
