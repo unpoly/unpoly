@@ -615,10 +615,16 @@ up.Request = class Request extends up.Record {
   The full-page request will be loaded with the [URL](/up.Request.prototype.url),
   [method](/up.Request.prototype.method) and [params](/up.Request.prototype.params)
   from this request object.
-  Properties that are not possible in a full-page request (such as custom HTTP headers)
-  will be ignored.
 
   Aborts all pending requests.
+
+  ## Limitations
+
+  Some request properties cannot be transported with a full-page request, and will be ignored.
+  Such properties include
+
+  - Custom HTTP headers
+  - Binary params values (from file inputs)
 
   @function up.Request#loadPage
   @stable

@@ -662,6 +662,11 @@ up.network = (function() {
     @like up.render
   @param options.params
     @like up.render
+
+    Additional [parameters](/up.Params) that should be sent as the request's
+    [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
+
+    Binary values from file inputs will be removed from the given params.
   @stable
   */
   function loadPage(requestsAttrs) {
