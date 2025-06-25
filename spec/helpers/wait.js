@@ -1,7 +1,7 @@
 // Save the original function before it gets mocked by jasmine.clock()
 let originalSetTimeout = window.setTimeout
 
-function waitTime(ms) {
+function waitTime(ms = 0) {
   return new Promise(function(resolve) {
     originalSetTimeout(resolve, ms)
   })
@@ -58,15 +58,4 @@ async function waitIdle(timeout) {
 
 jasmine.waitIdle = waitIdle
 
-function waitFlex(ms) {
-  if (typeof ms === 'undefined') {
-    return waitMessageChannel()
-  } else {
-    return waitTime(ms)
-  }
-}
-
-jasmine.waitFlex = waitFlex
-
-window.wait = waitFlex
-
+window.wait = waitTime
