@@ -68,11 +68,11 @@ You can access the acceptance value from an `{ onAccepted }` callback:
 ```js
 up.layer.open({
   url: '/select-user',
-  onAccepted: (event) => console.log('Got user', event.value)
+  onAccepted: (event) => console.log('Got user', event.value) // mark: onAccepted
 })
 ```
 
-The acceptance value may also be accessed when you're opening layers from HTML:
+The acceptance value may also be accessed from an `[up-on-accepted]` attribute when you're opening layers from HTML:
 
 ```html
 <a href="/select-user"

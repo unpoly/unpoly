@@ -107,7 +107,7 @@ let address = await up.layer.ask({ url: '/address-picker' })
 ```
 
 
-Opening overlay from the server {#server}
+Opening overlays from the server {#server}
 -------------------------------
 
 The server can force its response to open an overlay, by sending an `X-Up-Open-Layer: {}` response header.

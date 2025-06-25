@@ -116,7 +116,7 @@ A CSP with [`strict-dynamic`](https://content-security-policy.com/strict-dynamic
 to load additional scripts. Because Unpoly is already an allowed script,
 this would allow *any* Unpoly-rendered script to execute.
 
-To prevent this, Unpoly requires [matching CSP nonces](#scripts-nonce) in any response with a `strict-dynamic` CSP.
+To prevent this, Unpoly requires [matching CSP nonces](#scripts-nonce) in any response with a `strict-dynamic` CSP, even with `up.fragment.config.runScripts = true`.
 
 If you cannot use nonces for some reasons, you can configure `up.fragment.config.runScripts` to a function
 that returns `true` for allowed scripts only:
