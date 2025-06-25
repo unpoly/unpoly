@@ -48,6 +48,9 @@ browser = await puppeteer.launch({
 
 const page = await browser.newPage()
 
+// Sometimes the document has no focus on GitHub actions
+await page.bringToFront()
+
 const runnerURL = serverURL + '/specs?' + config.toQueryString()
 const humanBrowser = config.browser.charAt(0).toUpperCase() + config.browser.slice(1)
 writeLine(pc.blue("Running specs with %s from %s"), humanBrowser, runnerURL)
