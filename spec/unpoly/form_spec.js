@@ -6174,8 +6174,8 @@ describe('up.form', function() {
 
           field.value += "change1"
           await wait() // Firefox mutates scroll positions async after changing the value
-          field.selectionStart = 10
-          field.selectionEnd = 11
+          field.selectionStart = 2
+          field.selectionEnd = 3
           field.scrollLeft = 12
           field.focus()
           expect(field).toBeFocused()
@@ -6189,14 +6189,14 @@ describe('up.form', function() {
           expect(field).toBe(document.querySelector('textarea[name=prose]'))
           expect(field.value).toBe(longText + 'change1')
           expect(field).toBeFocused()
-          expect(field.selectionStart).toBeAround(10, 2)
-          expect(field.selectionEnd).toBeAround(11, 2)
+          expect(field.selectionStart).toBe(2)
+          expect(field.selectionEnd).toBe(3)
           expect(field.scrollLeft).toBeAround(12, 2)
 
           field.value += "change2"
           await wait() // Firefox mutates scroll positions async after changing the value
-          field.selectionStart = 20
-          field.selectionEnd = 21
+          field.selectionStart = 4
+          field.selectionEnd = 5
           field.scrollLeft = 23
           await wait()
 
@@ -6208,8 +6208,8 @@ describe('up.form', function() {
           expect(field).toBe(document.querySelector('textarea[name=prose]'))
           expect(field).toBeFocused()
           expect(field.value).toBe(longText + 'change1' + 'change2')
-          expect(field.selectionStart).toBeAround(20, 2)
-          expect(field.selectionEnd).toBeAround(21, 2)
+          expect(field.selectionStart).toBe(4)
+          expect(field.selectionEnd).toBe(5)
           expect(field.scrollLeft).toBeAround(23, 2)
         })
 
