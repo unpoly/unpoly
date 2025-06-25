@@ -1399,7 +1399,7 @@ up.fragment = (function() {
 
       The `selector` argument may refer to the origin as `:origin`.
 
-  @return {NodeList<Element>|Array<Element>}
+  @return {List<Element>}
     A list of all elements matching the selector.
 
     Returns an empty list if there are no matches.

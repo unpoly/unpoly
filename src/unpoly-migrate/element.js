@@ -115,7 +115,7 @@ Returns all descendant elements matching the given selector.
   If omitted, all elements in the `document` will be searched.
 @param {string} selector
   The CSS selector to match.
-@return {NodeList<Element>|Array<Element>}
+@return {List<Element>}
   A list of all elements matching the selector.
 
   Returns an empty list if there are no matches.
