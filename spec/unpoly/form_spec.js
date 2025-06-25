@@ -1742,6 +1742,91 @@ describe('up.form', function() {
           })
         })
       })
+
+      describe('logging', function() {
+
+        function spyOnLog() {
+          // It's easier to make expectation on a single line of text, without formatting args
+          up.log.config.format = false
+
+          let unstubbedLog = console.log
+
+          let logSpy = jasmine.createSpy('log spy')
+          spyOn(console, 'log').and.callFake((...args) => {
+            if (args.length && args[0].includes("Interaction on")) logSpy(...args)
+            unstubbedLog.apply(console, args)
+          })
+
+          return logSpy
+        }
+
+        it('logs the event if a change was observed', async function() {
+          let logSpy = spyOnLog()
+
+          let [form, input] = htmlFixtureList(`
+            <form>
+              <input name="foo" value="initial">
+            </form>
+          `)
+          up.hello(form)
+          up.watch(input, () => true)
+          await wait()
+
+          expect(logSpy).not.toHaveBeenCalled()
+
+          input.value = "changed"
+          Trigger.change(input)
+          await wait()
+
+          expect(logSpy).toHaveBeenCalledWith(jasmine.stringContaining('[change] Interaction'))
+        })
+
+        it("does not log the event if the observed values didn't change", async function() {
+          let logSpy = spyOnLog()
+
+          let [form, input] = htmlFixtureList(`
+            <form>
+              <input name="foo" value="initial">
+            </form>
+          `)
+          up.hello(form)
+          up.watch(input, () => true)
+          await wait()
+
+          expect(logSpy).not.toHaveBeenCalled()
+
+          input.value = "initial"
+          Trigger.change(input)
+          await wait()
+
+          expect(logSpy).not.toHaveBeenCalled()
+        })
+
+        it('only logs the event once if multiple watchers observe the same event', async function() {
+          let logSpy = spyOnLog()
+
+          let [form, input] = htmlFixtureList(`
+            <form>
+              <input name="foo" value="initial">
+            </form>
+          `)
+          up.hello(form)
+          up.watch(input, () => true)
+          up.watch(input, () => true)
+          await wait()
+
+          expect(logSpy).not.toHaveBeenCalled()
+
+          input.value = "changed"
+          Trigger.change(input)
+          await wait()
+
+          expect(logSpy.calls.count()).toBe(1)
+          expect(logSpy).toHaveBeenCalledWith(jasmine.stringContaining('[change] Interaction'))
+        })
+
+      })
+
     })
 
     if (up.migrate.loaded) {

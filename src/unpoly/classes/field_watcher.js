@@ -163,11 +163,10 @@ up.FieldWatcher = class FieldWatcher {
   }
 
   _check(event, fieldOptions = {}) {
-    up.log.putsEvent(event)
-
     const values = this._readFieldValues()
 
     if (this._isNewValues(values)) {
+      up.log.putsEvent(event)
       this._scheduleValues(values, fieldOptions)
     }
   }
