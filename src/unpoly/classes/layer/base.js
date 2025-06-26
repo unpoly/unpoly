@@ -812,9 +812,7 @@ up.Layer = class Layer extends up.Record {
     // (A) Update _savedLocation before we push a new state below.
     //     Pushing a new state will emit up:location:changed, which will re-call _updateLocation()
     // (B) Don't emit up:layer:location:changed before the browser location changed.
-    if (newLocation !== prevSavedLocation) {
-      this._savedLocation = newLocation
-    }
+    this._savedLocation = newLocation
 
     // We compare the newLocation with the current browser location, not with _savedLocation.
     // Comparing with _savedLocation would not push a history entry in the following edge case.
