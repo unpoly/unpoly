@@ -1,6 +1,6 @@
 ---
 name: Documentation issue
-about: Suggest an improvement for the API docs on unpoly.com.
+about: Suggest an improvement for the API docs on unpoly.com
 title: ''
 labels: ''
 assignees: ''
