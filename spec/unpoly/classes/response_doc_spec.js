@@ -202,6 +202,43 @@ describe('up.ResponseDoc', function() {
         expect(doc.title).toBe('Document title')
       })
 
+      it("returns the <title> text of a document that starts whitespace before <!DOCTYPE>", function() {
+        let doc = new up.ResponseDoc({ document: `
+
+
+          <!DOCTYPE>
+          <html>
+            <head>
+              <title>Document title</title>
+            </head>
+            <body>
+            </body>
+          </html>  
+        ` })
+
+        expect(doc.title).toBe('Document title')
+      })
+
+      it("returns the <title> text of a document that starts with a mix of comments and whitespace before <!DOCTYPE>", function() {
+        let doc = new up.ResponseDoc({ document: `
+
+          <!-- Comment1 -->
+
+          <!-- Comment2 -->
+
+          <!DOCTYPE>
+          <html>
+            <head>
+              <title>Document title</title>
+            </head>
+            <body>
+            </body>
+          </html>  
+        ` })
+
+        expect(doc.title).toBe('Document title')
+      })
+
       it('returns a missing value if the document has no <title> element', function() {
         let doc = new up.ResponseDoc({ document: `
           <html>
