@@ -183,7 +183,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
 
         // Since we're adding content instead of replacing, we'll only
         // animate newElement instead of morphing between oldElement and newElement
-        return up.animate(wrapper, step.transition, step).then(() => e.unwrap(wrapper))
+        return up.animate(wrapper, step.animation, step).then(() => e.unwrap(wrapper))
       }
       default: {
         up.fail('Unknown placement: %o', step.placement)

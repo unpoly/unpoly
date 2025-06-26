@@ -2811,6 +2811,41 @@ describe('up.fragment', function() {
           expect(container.innerHTML).toEqual('<div class="new-child"></div><div class="old-child"></div>')
         })
 
+        it('animates the appending with { animation }', async function() {
+          up.motion.config.enabled = true
+
+          fixtureStyle(`
+            .new-child {
+              background: red;
+            }
+          `)
+
+          const container = fixture('.target')
+          e.affix(container, '.old-child', { text: 'OLD' })
+
+          up.render('.target:after', {
+            content: '<div class="new-child">NEW</div>',
+            animation: 'fade-in',
+            duration: 500,
+            easing: 'linear',
+          })
+          await wait()
+
+          expect('.target').toHaveSelector('.old-child')
+          expect('.target').toHaveSelector('.new-child')
+          expect('.old-child').toHaveEffectiveOpacity(1.0, 0.0)
+          expect('.new-child').toHaveEffectiveOpacity(0.0, 0.3)
+
+          await wait(250)
+
+          expect('.old-child').toHaveEffectiveOpacity(1.0, 0.0)
+          expect('.new-child').toHaveEffectiveOpacity(0.5, 0.3)
+
+          await wait(250)
+
+          expect('.new-child').toHaveEffectiveOpacity(1.0, 0.3)
+        })
+
         it('accepts a CSS selector for a <template> to clone', async function() {
           const template = htmlFixture(`
             <template id="target-template">

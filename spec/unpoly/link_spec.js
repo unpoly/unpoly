@@ -931,6 +931,38 @@ describe('up.link', function() {
         expect(options.fail).toBe(false)
       })
 
+      it('parses an [up-animation] attribute as a string', function() {
+        const link = fixture('a[href="/foo"][up-animation="fade-in"]')
+        up.hello(link)
+
+        const options = up.link.followOptions(link)
+        expect(options.animation).toBe('fade-in')
+      })
+
+      it('parses an [up-animation=false] attribute as a boolean', function() {
+        const link = fixture('a[href="/foo"][up-animation="false"]')
+        up.hello(link)
+
+        const options = up.link.followOptions(link)
+        expect(options.animation).toBe(false)
+      })
+
+      it('parses an [up-transition] attribute as a string', function() {
+        const link = fixture('a[href="/foo"][up-transition="fade-in"]')
+        up.hello(link)
+
+        const options = up.link.followOptions(link)
+        expect(options.transition).toBe('fade-in')
+      })
+
+      it('parses an [up-transition=false] attribute as a boolean', function() {
+        const link = fixture('a[href="/foo"][up-transition="false"]')
+        up.hello(link)
+
+        const options = up.link.followOptions(link)
+        expect(options.transition).toBe(false)
+      })
+
       if (up.migrate.loaded) {
         it('parses an [up-reset-scroll] attribute as { scroll: "top" }', function() {
           const link = fixture('a[href="/foo"][up-reset-scroll]')

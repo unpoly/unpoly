@@ -428,7 +428,7 @@ This release adds a new [scroll option](/scrolling) `[up-scroll='bottom']`. This
 
 Long-pressing an `[up-intant]` link to open the context menu will no longer follow the link on iOS (issue #271).
 
-Related, long-pressing an instant link will no longer emit an `up:click` event.
+Also long-pressing an instant link will no longer emit an `up:click` event.
 
 
 ### Utility functions
@@ -449,6 +449,11 @@ To achieve this, destroying elements are marked as [`[inert]`](https://developer
 ### Polling
 
 An `[up-poll]` fragment now stops polling if an external script detaches the element.
+
+
+### Animation
+
+Fixed a bug where [prepending or appending](/targeting-fragments#appending-or-prepending) an insertion could not be animated using an `{ animate }` option or `[up-animate]` option. Unpoly wrongly accepted a `{ transition }` option or `[up-transition]` attribute.
 
 
 ### JavaScript rendering API

@@ -603,8 +603,7 @@ up.motion = (function() {
 
   function registerOpacityAnimation(name, from, to) {
     namedAnimations.put(name, function(element, options) {
-      element.style.opacity = 0
-      e.setStyle(element, { opacity: from })
+      element.style.opacity = from
       return animateNow(element, { opacity: to }, options)
     })
   }
