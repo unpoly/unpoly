@@ -76,7 +76,7 @@ up.specUtil = (function() {
   }
 
   function assertTabFocused() {
-    if (!document.hasFocus()) {
+    if (!document.hasFocus() && !specs.config.headless) {
       throw "The Jasmine spec runner must be focused for focus-related specs to pass"
     }
   }
