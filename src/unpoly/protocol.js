@@ -792,7 +792,7 @@ up.protocol = (function() {
 
   ## Custom layer options
 
-  When `X-Up-Open-Layer` is used without options, the new overlay will have the [default mode](/up.modal.config#config.mode) (`modal`), select a [main target](/main)
+  When `X-Up-Open-Layer` is used without options, the new overlay will have the [default mode](/up.layer.config#config.mode) (`modal`), select a [main target](/main)
   and use [default navigation options](/up.fragment.config#config.navigateOptions).
 
   You can customize the target and appearance of the new overlay, by setting the header value to a [relaxed JSON](/relaxed-json) string

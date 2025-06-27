@@ -99,7 +99,7 @@ let layer = await up.layer.open({ url: '/users/new' })
 
 Choose a different layer mode by passing a `{ mode }` option.
 
-To get a promise for an overlay's [acceptance value](/closing-overlays#overlay-result-values),
+To get a promise for an overlay's [acceptance value](/closing-overlays#result-values),
 use `up.layer.ask()`:
 
 ```js
@@ -112,7 +112,7 @@ Opening overlays from the server {#server}
 
 The server can force its response to open an overlay, by sending an `X-Up-Open-Layer: {}` response header.
 
-This will open an overlay with the [default mode](/up.modal.config#config.mode), select a [main target](/main)
+This will open an overlay with the [default mode](/up.layer.config#config.mode), select a [main target](/main)
 and use [default navigation options](/up.fragment.config#config.navigateOptions):
 
 ```http

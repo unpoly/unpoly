@@ -230,7 +230,7 @@ up.history = (function() {
     @param {boolean} event.alreadyHandled
       Whether Unpoly thinks this change has already been handled and requires no additional processing.
 
-      For example, updating history by [navigating](/navigating) or calling `history.pushState()` is
+      For example, updating history by [navigating](/navigation) or calling `history.pushState()` is
       considered to be already handled.
 
       @experimental

@@ -64,7 +64,7 @@ up.viewport.config.autoFocusVisible = (options) =>
 
 ## Overriding visibility for a single interaction {#per-interaction}
 
-If you are happy with your default strategy, but want to override it for a single interaction, you can set an [`[up-focus-visible]`](/up-follow#focus-visible) attribute on any link or form:
+If you are happy with your default strategy, but want to override it for a single interaction, you can set an [`[up-focus-visible]`](/up-follow#up-focus-visible) attribute on any link or form:
 
 ```html
 <a href="/path" up-focus=":main" up-focus-visible="false">Click me</a> <!-- mark: up-focus-visible -->

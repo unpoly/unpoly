@@ -286,7 +286,7 @@ q
 
     1. The new element being compiled.
     2. Any [attached data](/data).
-    3. [Information about the current render pass](#accessing-information-about-the-render-pass).
+    3. [Information about the current render pass](#meta).
 
     The function may return a [destructor](/up.destructor) function that [cleans the compiled object](#destructor)
     before it is removed from the DOM. The destructor function is called with the compiled element.

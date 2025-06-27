@@ -149,7 +149,7 @@ Rendering from other URLs {#urls}
 By default, validation requests will use `[method]` and `[action]` attributes from the form element.
 
 You can render content from another server endpoint by setting an
-[`[up-validate-url]`](/up-validate#up-validate#url) attribute on a form or field:
+[`[up-validate-url]`](/up-validate#up-validate-url) attribute on a form or field:
 
 ```html
 <form method="post" action="/order">

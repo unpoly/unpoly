@@ -248,7 +248,7 @@ This will immediately close the overlay on submission, without making a network 
 </form>
 ```
 
-The form's field values become the overlay's [result value](/closing-overlays#overlay-result-values), encoded as an `up.Params` instance:
+The form's field values become the overlay's [result value](/closing-overlays#result-values), encoded as an `up.Params` instance:
 
 ```js
 up.layer.open({
@@ -384,11 +384,11 @@ For example, this navigation bar in an overlay will highlight links whose URL ma
 
 See [Matching the location of other layers](/navigation-bars#layers).
 
-### Persisting elements
+### Preserving elements
 
 The `[up-keep]` element now gives you more control over how long an element is kept.
 
-Also see our new guide [Persisting elements](/persisting-elements).
+Also see our new guide [Preserving elements](/preserving-elements).
 
 
 #### Keeping an element until its HTML changes {#same-html}
@@ -974,7 +974,7 @@ This is a maintenance release that addresses some bugs while we're working on th
 3.9.0
 -----
 
-This release brings many fixes and quality-of-life improvements that were requested by the [community](/community).
+This release brings many fixes and quality-of-life improvements that were requested by the community.
 
 The vast majority of these changes are backward compatible. One breaking change can be found with [making links followable](#making-links-followable). Existing usage is polyfilled by [`unpoly-migrate.js`](/changes/upgrading).
 
@@ -1043,7 +1043,7 @@ This release improves the handling of faux-interactive elements:
 3.8.0
 -----
 
-This release brings many improvements that were requested by the [community](/community).
+This release brings many improvements that were requested by the community.
 
 The vast majority of these changes are backward compatible. Some breaking changes can be found with the [Reworked style helpers](#reworked-style-helpers). Existing calls are polyfilled by [`unpoly-migrate.js`](/changes/upgrading).
 
@@ -1862,7 +1862,7 @@ In cases where you don't want this behavior, you now have more options:
     up.destructor(element, fn)
   }  
   ```
-- Unpoly 3.0.0 introduced a [third `meta` argument for compilers](/up.compiler#accessing-information-about-the-render-pass)
+- Unpoly 3.0.0 introduced a [third `meta` argument for compilers](/up.compiler#meta)
   containing information about the current render pass:
 
   ```js
@@ -2918,9 +2918,9 @@ The [polling](/up-poll) implementation was rewritten to fix many issues and edge
 ### Overlays
 
 - Events for [closing overlays](/closing-overlays) (`up:layer:dismiss`, `up:layer:dismissed`, `up:layer:accept`, `up:layer:accepted`) have gained new useful properties:
-  - The `{ value }` property is the [overlay result value](/closing-overlays#overlay-result-values).
+  - The `{ value }` property is the [overlay result value](/closing-overlays#result-values).
   - The `{ origin }` property is the element that caused the element to close.
-- When an overlay is [closed](/closing-overlays) its [result value](/closing-overlays#overlay-result-values) is now [logged](/up.log) for easier debugging.
+- When an overlay is [closed](/closing-overlays) its [result value](/closing-overlays#result-values) is now [logged](/up.log) for easier debugging.
 - Fix many issues where clicking into foreign overlays constructed other libraries would close an underlying Unpoly modal. In many cases this is no longer necessary. There are some remaining cases where Unpoly would steal focus from a foreign overlay. These can be fixed by attaching the foreign overlay to the Unpoly overlay's element. The next Unpoly version will ship a more comprehensive solution for this.
 - Published a configuration option `up.layer.config.overlay.class`. It can be used to configure a default HTML class for an overlay's container element.
 

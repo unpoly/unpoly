@@ -69,7 +69,7 @@ Inline scripts {#scripts}
 
 By default `<script>` tags will only run during the initial page load.
 Scripts in updated fragments will *not* be loaded or executed.
-If possible, [migrate these scripts to a compiler](#migrate-to-compiler). That compiler can then be moved into a
+If possible, [migrate these scripts to a compiler](/legacy-scripts#migrate-to-compiler). That compiler can then be moved into a
 global script that satisfies your CSP:
 
 ```js

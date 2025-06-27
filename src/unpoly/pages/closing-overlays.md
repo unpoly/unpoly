@@ -49,7 +49,7 @@ In HTML you may use `[up-on-accepted]` and `[up-on-dismissed]` attributes for th
 </a>
 ```
 
-Overlay result values
+Overlay result values {#result-values}
 ---------------------
 
 Overlays in Unpoly may be closed with an optional *result value*. The result value
@@ -218,7 +218,7 @@ The `{ response }` property is available whenever a server response causes an ov
 - When the server [explicitly closes](#closing-from-the-server) an overlay using an HTTP header.
 
 
-Closing from the server explicitly {#closing-from-the-server}
+Closing from the server explicitly {#from-the-server}
 -------------------------------------------------------------
 
 If you don't want to use [close conditions](#close-conditions),
@@ -232,7 +232,7 @@ The server may also test if the fragment change is targeting an overlay by looki
 When an overlay closes in reaction to a server response, you can [access the discarded response](#using-the-discarded-response).
 
 
-Closing from JavaScript
+Closing from JavaScript {#from-script}
 -----------------------
 
 If for some reason you cannot use a [close condition](#close-conditions), you may
@@ -243,7 +243,7 @@ call `up.layer.accept()` to explicitly accept a layer from JavaScript:
 up.layer.accept()
 ```
 
-To accept with a [result value](#overlay-result-values), pass it as an argument:
+To accept with a [result value](#result-values), pass it as an argument:
 
 ```js
 up.layer.accept({ name: 'Anna', email: 'anna@domain.tld' })
@@ -252,7 +252,7 @@ up.layer.accept({ name: 'Anna', email: 'anna@domain.tld' })
 To *dismiss* an overlay from JavaScript, use the `up.layer.dismiss()` function in the same fashion.
 
 
-Closing when a button is clicked
+Closing when a button is clicked {#on-click}
 --------------------------------
 
 To close the [current layer](/up.layer.current) when a button is clicked, use an `[up-accept]` or `[up-dismiss]` attribute:
@@ -261,14 +261,14 @@ To close the [current layer](/up.layer.current) when a button is clicked, use an
 <button up-accept>Close overlay</button> <!-- mark: up-accept -->
 ```
 
-To close with a [result value](#overlay-result-values), set a [relaxed JSON](/relaxed-json) on the attribute value:
+To close with a [result value](#result-values), set a [relaxed JSON](/relaxed-json) on the attribute value:
 
 ```html
 <button up-dismiss="{ id: 5 }">Choose user #5</button> <!-- mark: { id: 5 } -->
 ```
 
 
-Closing when a link is followed
+Closing when a link is followed {#on-follow}
 -------------------------------
 
 When [reusing a page within an overlay](/subinteractions#reusing-existing-screens)
@@ -284,7 +284,7 @@ Unpoly will only navigate to `/list` when this link is clicked in the [root laye
 In an overlay the `click` event is prevented and the overlay is accepted.
 
 
-Closing when a form is submitted
+Closing when a form is submitted {#on-submit}
 --------------------------------
 
 To close an overlay when a form is submitted, set an `[up-accept]` or `[up-dismiss]` attribute on the `<form>` element.
@@ -298,7 +298,7 @@ This will immediately close the overlay on submission, without making a network 
 
 ### Accessing the form params
 
-The form's field values will become the [result value](#overlay-result-values) of the closed overlay.
+The form's field values will become the [result value](#result-values) of the closed overlay.
 
 For example, this form has two fields named `foo` and `bar`: 
 
@@ -350,7 +350,7 @@ After the server has processed the request, it can use any of the following tech
 
 
 
-Closing by targeting the parent layer
+Closing by targeting the parent layer {#peeling}
 -------------------------------------
 
 When a link or form targets a parent layer, the current layer will [dismiss](#intents) when the parent layer is updated.
@@ -366,7 +366,7 @@ after a successful form submission:
 </form>
 ```
 
-A successful submission will now dismiss the form's own overlay with a [dismissal value](#overlay-result-values) of `":peel"`.
+A successful submission will now dismiss the form's own overlay with a [dismissal value](#result-values) of `":peel"`.
 
 
 > [note]

@@ -127,7 +127,7 @@ that work both on the root layer, and in an overlay.
 If you absolutely cannot work with the way Unpoly restores history with overlays, you have the following options:
 
 - Configure overlays to have no visible history by setting `up.layer.config.overlay.history = false`.
-- Implement a [custom restoration behavior](/restoring-history#custom-restoration-behavior).
+- Implement a [custom restoration behavior](/restoring-history#custom-behavior).
 
 
 

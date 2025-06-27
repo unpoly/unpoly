@@ -579,7 +579,7 @@ up.layer = (function() {
       One or more event types that will cause this overlay to automatically be
       [accepted](/closing-overlays) when a matching event occurs within the overlay.
 
-      The [overlay result value](/closing-overlays#overlay-result-values)
+      The [overlay result value](/closing-overlays#result-values)
       is the event object that caused the overlay to close.
 
       See [Closing when an event is emitted](/closing-overlays#event-condition).
@@ -588,7 +588,7 @@ up.layer = (function() {
       One or more event types that will cause this overlay to automatically be
       [dismissed](/closing-overlays) when a matching event occurs within the overlay.
 
-      The [overlay result value](/closing-overlays#overlay-result-values)
+      The [overlay result value](/closing-overlays#result-values)
       is the event object that caused the overlay to close.
 
       See [Closing when an event is emitted](/closing-overlays#event-condition).
@@ -597,7 +597,7 @@ up.layer = (function() {
       One or more [URL patterns](/url-patterns) that will cause this overlay to automatically be
       [accepted](/closing-overlays) when the overlay reaches a matching [location](/up.layer.location).
 
-      The [overlay result value](/closing-overlays#overlay-result-values)
+      The [overlay result value](/closing-overlays#result-values)
       is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
       by the URL pattern.
 
@@ -607,7 +607,7 @@ up.layer = (function() {
       One or more [URL patterns](/url-patterns) that will cause this overlay to automatically be
       [dismissed](/closing-overlays) when the overlay reaches a matching [location](/up.layer.location).
 
-      The [overlay result value](/closing-overlays#overlay-result-values)
+      The [overlay result value](/closing-overlays#result-values)
       is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
       by the URL pattern.
 
@@ -977,7 +977,7 @@ up.layer = (function() {
       An event type that will cause this overlay to automatically be
       [accepted](/closing-overlays) when a matching event occurs within the overlay.
 
-      The [overlay result value](/closing-overlays#overlay-result-values)
+      The [overlay result value](/closing-overlays#result-values)
       is the event object that caused the overlay to close.
 
       You may listen to multiple event types by separating types with a space or comma.
@@ -988,7 +988,7 @@ up.layer = (function() {
       An event type that will cause this overlay to automatically be
       [dismissed](/closing-overlays) when a matching event occurs within the overlay.
 
-      The [overlay result value](/closing-overlays#overlay-result-values)
+      The [overlay result value](/closing-overlays#result-values)
       is the event object that caused the overlay to close.
 
       You may listen to multiple event types by separating types with a space or comma.
@@ -999,7 +999,7 @@ up.layer = (function() {
       One or more space-separated [URL patterns](/url-patterns) that will cause this overlay to automatically be
       [accepted](/closing-overlays) when the overlay reaches a matching [location](/up.layer.location).
 
-      The [overlay result value](/closing-overlays#overlay-result-values)
+      The [overlay result value](/closing-overlays#result-values)
       is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
       by the URL pattern.
 
@@ -1009,7 +1009,7 @@ up.layer = (function() {
       One or more space-separated [URL patterns](/url-patterns) that will cause this overlay to automatically be
       [dismissed](/closing-overlays) when the overlay reaches a matching [location](/up.layer.location).
 
-      The [overlay result value](/closing-overlays#overlay-result-values)
+      The [overlay result value](/closing-overlays#result-values)
       is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
       by the URL pattern.
 
@@ -1036,7 +1036,7 @@ up.layer = (function() {
       |------------|-----------------------------------------------|
       | `this`     | The link that originally opened the overlay   |
       | `layer`    | An `up.Layer` object for the accepted overlay |
-      | `value`    | The overlay's [acceptance value](/closing-overlays#overlay-result-values) |
+      | `value`    | The overlay's [acceptance value](/closing-overlays#result-values) |
       | `response` | The server response that caused the overlay to close |
       | `event`    | An `up:layer:accepted` event                  |
 
@@ -1049,7 +1049,7 @@ up.layer = (function() {
       |------------|------------------------------------------------|
       | `this`     | The link that originally opened the overlay    |
       | `layer`    | An `up.Layer` object for the dismissed overlay |
-      | `value`    | The overlay's [dismissal value](/closing-overlays#overlay-result-values) |
+      | `value`    | The overlay's [dismissal value](/closing-overlays#result-values) |
       | `response` | The server response that caused the overlay to close |
       | `event`    | An `up:layer:dismissed` event                  |
 
@@ -1062,7 +1062,7 @@ up.layer = (function() {
   [Dismisses](/closing-overlays) the [current layer](/up.layer.current) when this element is clicked or submitted.
 
   The [relaxed JSON](/relaxed-json) value of the `[up-dismiss]` attribute becomes the overlay's
-  [dismissal value](/closing-overlays#overlay-result-values).
+  [dismissal value](/closing-overlays#result-values).
 
   [Closing overlays](/closing-overlays){:.article-ref}
 
@@ -1096,7 +1096,7 @@ up.layer = (function() {
   Unpoly will only navigate to `/list` when this link is clicked in the [root layer](/up.layer).
   In an overlay the `click` event is prevented and the overlay is accepted.
 
-  See [Closing when a link is followed](/closing-overlays#closing-when-a-link-is-clicked).
+  See [Closing when a link is followed](/closing-overlays#on-follow).
 
   ## On a form
 
@@ -1109,7 +1109,7 @@ up.layer = (function() {
   </form>
   ```
 
-  The form's field values will become the [dismissal value](#overlay-result-values) of the closed overlay,
+  The form's field values will become the [dismissal value](#result-values) of the closed overlay,
   as an `up.Params` value.
 
   See [Closing when a form is submitted](/closing-overlays#closing-when-a-form-is-submitted).
@@ -1118,7 +1118,7 @@ up.layer = (function() {
 
   @section Dismissal
     @param [up-dismiss]
-      On buttons on links, the overlay's [dismissal value](/closing-overlays#overlay-result-values)
+      On buttons on links, the overlay's [dismissal value](/closing-overlays#result-values)
       as a [relaxed JSON](/relaxed-json) string.
 
     @param [up-confirm]
@@ -1169,7 +1169,7 @@ up.layer = (function() {
   Unpoly will only navigate to `/list` when this link is clicked in the [root layer](/up.layer).
   In an overlay the `click` event is prevented and the overlay is accepted.
 
-  See [Closing when a link is followed](/closing-overlays#closing-when-a-link-is-clicked).
+  See [Closing when a link is followed](/closing-overlays#on-follow).
 
   ## On a form
 
@@ -1182,7 +1182,7 @@ up.layer = (function() {
   </form>
   ```
 
-  The form's field values will become the [acceptance value](#overlay-result-values) of the closed overlay,
+  The form's field values will become the [acceptance value](/closing-overlays#result-values) of the closed overlay,
   as an `up.Params` value.
 
   See [Closing when a form is submitted](/closing-overlays#closing-when-a-form-is-submitted).
@@ -1191,7 +1191,7 @@ up.layer = (function() {
 
   @section Acceptance
     @param [up-accept]
-      On buttons and links, the overlay's [acceptance value](/closing-overlays#overlay-result-values)
+      On buttons and links, the overlay's [acceptance value](/closing-overlays#result-values)
       as a [relaxed JSON](/relaxed-json) string.
 
       If the attribute value is omitted, a value `null` will be used.
@@ -1456,7 +1456,7 @@ up.layer = (function() {
   @param {up.Layer} event.layer
     The layer that is about to close.
   @param {any} [event.value]
-    The overlay's [acceptance value](/closing-overlays#overlay-result-values).
+    The overlay's [acceptance value](/closing-overlays#result-values).
 
     Listeners may replace or mutate this value.
   @param {Element} [event.origin]
@@ -1490,7 +1490,7 @@ up.layer = (function() {
   @param {up.Layer} event.layer
     The layer that was closed.
   @param {any} [event.value]
-    The overlay's final [acceptance value](/closing-overlays#overlay-result-values).
+    The overlay's final [acceptance value](/closing-overlays#result-values).
   @param {Element} [event.origin]
     The element that caused the layer to close.
 
@@ -1531,7 +1531,7 @@ up.layer = (function() {
   @param {up.Layer} event.layer
     The layer that is about to close.
   @param {any} [event.value]
-    The overlay's [dismissal value](/closing-overlays#overlay-result-values).
+    The overlay's [dismissal value](/closing-overlays#result-values).
 
     Listeners may replace or mutate this value.
   @param {Element} [event.origin]
@@ -1565,7 +1565,7 @@ up.layer = (function() {
   @param {up.Layer} event.layer
     The layer that was closed.
   @param {any} [event.value]
-    The overlay's final [dismissal value](/closing-overlays#overlay-result-values).
+    The overlay's final [dismissal value](/closing-overlays#result-values).
   @param {Element} [event.origin]
     The element that caused the layer to close.
 

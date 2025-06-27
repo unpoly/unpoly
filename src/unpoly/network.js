@@ -134,7 +134,7 @@ up.network = (function() {
 
       Returning `true` will expire the entire cache.\
       Returning `false` will not expire any cache entries.\
-      Returning a [URL pattern](/url-pattern) will expire matching cache entries only:
+      Returning a [URL pattern](/url-patterns) will expire matching cache entries only:
 
       By default Unpoly will expire the entire cache after a request with an [unsafe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP method:
 
@@ -148,7 +148,7 @@ up.network = (function() {
 
       Returning `true` will expire the entire cache.\
       Returning `false` will not expire any cache entries.\
-      Returning a [URL pattern](/url-pattern) will expire matching cache entries only.
+      Returning a [URL pattern](/url-patterns) will expire matching cache entries only.
 
       By default Unpoly will *not* evict any cache entries when a request is made.
 
@@ -439,7 +439,7 @@ up.network = (function() {
     @param {string|boolean|Function(up.Response): boolean} [options.fail]
       Whether the response to this request should be considered [failed](/failed-responses).
 
-      By [default](/up.network.config#config.autoFail) any HTTP status code other than 2xx or 304 is considered an error code.
+      By [default](/up.network.config#config.fail) any HTTP status code other than 2xx or 304 is considered an error code.
       Pass `{ fail: false }` to handle *any* response as successful, even with a 4xx or 5xx status code.
 
       A failed response will cause the [returned promise](#return-value) to reject.

@@ -85,7 +85,7 @@ it will try again after the configured interval.
 
 By default polling will pause while the fragment's [layer](/up.layer) is covered by an overlay.
 When the layer is uncovered, polling will resume.
-To keep polling on background layers, set [`[up-if-layer=any]`](#up-if-layer).
+To keep polling on background layers, set [`[up-if-layer=any]`](/up-poll#up-if-layer).
 
 Polling will also pause automatically while the browser tab is hidden.
 When the browser tab is re-activated, polling will resume.

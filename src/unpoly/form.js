@@ -1103,7 +1103,7 @@ up.form = (function() {
   ```
 
   When a validation request is already in flight,
-  additional validations are [queued](/reactive-server-forms#face-conditions).
+  additional validations are [queued](/reactive-server-forms#race-conditions).
   When the current request has loaded, queued validations are batched using
   the same rules as outlined above.
 
@@ -1143,7 +1143,7 @@ up.form = (function() {
   Unpoly guarantees that many concurrent validations will eventually show a consistent form state,
   regardless of how fast the user clicks or how slow the network is.
 
-  See [preventing race conditions](/reactive-server-forms#preventing-race-conditions) for details.
+  See [preventing race conditions](/reactive-server-forms#race-conditions) for details.
 
   @function up.validate
 
@@ -1786,7 +1786,7 @@ up.form = (function() {
   Such issues are solved with `[up-validate]`. The form will eventually show a consistent state,
   regardless of how fast the user clicks or how slow the network is.
 
-  See [preventing race conditions](/reactive-server-forms#preventing-race-conditions) for more details.
+  See [preventing race conditions](/reactive-server-forms#race-conditions) for more details.
 
   ## Validating multiple fields
 
@@ -1886,7 +1886,7 @@ up.form = (function() {
   To update form fragments from your JavaScript, use the [`up.validate()`](/up.validate) function.
   You may combine `[up-validate]` and `up.validate()` within the same form. Their updates
   will be [batched together](/up.validate#batching) in order to
-  [prevent race conditions](/reactive-server-forms#preventing-race-conditions).
+  [prevent race conditions](/reactive-server-forms#race-conditions).
 
 
   @selector [up-validate]

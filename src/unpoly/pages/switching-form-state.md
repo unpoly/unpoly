@@ -4,7 +4,7 @@ Switching form state
 A field with the `[up-switch]` attribute can control the state of other element when the field changes.
 
 Common effects are [showing, hiding](#toggle) or [disabling](#disable) another element.
-You can also implement [custom switching effects](#custom).
+You can also implement [custom switching effects](#custom-effects).
 
 ## Showing or hiding other elements {#toggle}
 
