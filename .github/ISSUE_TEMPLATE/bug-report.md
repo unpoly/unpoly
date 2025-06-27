@@ -13,10 +13,10 @@ A clear and concise description of what the bug is.
 
 ### Reproduction project
 
-Link to a minimal [Glitch](https://glitch.com/) project or [CodePen](https://codepen.io) that reproduces the issue.
+Link to a minimal [StackBlitz](https://stackblitz.com/) project or [CodePen](https://codepen.io) that reproduces the issue.
 
-We recommend using our Glitch template that loads Unpoly for you:
-https://glitch.com/edit/#!/empty-unpoly-project
+We recommend using our StackBlitz template that loads Unpoly for you:
+https://stackblitz.com/edit/empty-unpoly-project?file=index.html
 
 ### Steps to reproduce the behavior:
 
