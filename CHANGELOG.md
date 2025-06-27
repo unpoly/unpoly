@@ -11,14 +11,27 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 3.11.0
 ------
 
-This is a major release, shipping many features and quality-of-life improvements requested by the community.
+This is a major release, shipping many features and quality-of-life improvements requested by the community. Highlights include a complete overhaul of [history handling](#history-handling), [form state switching](/switching-form-state) and the [preservation of `[up-keep]` elements](/preserving-elements). We also [reworked major parts of the documentation](#reworked-documentation).
 
-Our sponsor [makandra](https://makandra.de/en) funded most of these changes ❤️\
-If you'd like to support the maintenance of Unpoly, consider [hiring makandra](https://makandra.de/en/services-2) for web development, DevOps or UI/UX work.
+Unpoly 3.11.0 also makes some breaking changes, which are marked with a ⚠️ emoji.\
+Most breaking changes are polyfilled by [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading).
 
-> [important]
-> This release contains some breaking changes, which are marked with a ⚠️ emoji.\
-> Most breaking changes are polyfilled by [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading).
+
+> [note]
+> Our sponsor [makandra](https://makandra.de/en) funded most of these changes ❤️\
+> Please take a minute to check out [makandra's services](https://makandra.de/en/services-2) for web development, DevOps or UI/UX.
+
+
+
+### Professional support options
+
+We're introducing [optional commercial support](https://unpoly.com/support) for businesses that depend on Unpoly.
+You can now sponsor bug fixes, commission new features, or get direct help from Unpoly’s core developers.
+
+This helps fund Unpoly’s ongoing development while keeping it fully open source for everyone.
+The [Discussions board](https://github.com/unpoly/unpoly/discussions) remains available for free community support, and the maintainers will also remain active there.
+
+Learn more about support options at [unpoly.com/support](https://unpoly.com/support).
 
 
 ### History handling
@@ -316,13 +329,30 @@ See [CSPs with `strict-dynamic`](/csp#scripts-strict-dynamic) for details.
 
 ### Reworked documentation
 
-- Features with many attributes (or options) are now shown in groups like "Request" or "Animation".
-  - TODO: Screenshot
-- Many attributes and options now explicitly documented instead of referring to `up.render()`.
-- New guides:
-  - Reactive server forms
-  - Switching form state
-  - Preserving elements
+#### Option sections
+
+Features with many attributes (or options) are now shown in sections like "Request" or "Animation":
+
+```
+TODO: Screenshot
+```
+
+#### Inherited parameters are documented
+
+Many attributes and options now explicitly documented instead of referring to `up.render()`.
+
+
+#### New guides
+
+A number of guides have been added or overhauled:
+
+- [Preserving elements](/preserving-elements)
+- [Polling](/polling)
+- [Switching form state](/switching-form-state)
+- [Reactive server forms](/reactive-server-forms)
+
+#### Guide links
+
 - Main article links
 
 
@@ -406,8 +436,8 @@ Client-side changes to the data object (e.g. by a [compiler](/up.compiler)) are 
 ### Form data handling
 
 - ⚠️ Submitting or validating a form with a `{ params }` option now overrides existing params with the same name. Formerly, a new param with the same name was added. This made it impossible to override array fields (like `name[]`).
-- Calling `up.network.loadPage()` will now remove binary values (from file inputs) from a given `{ params }` option. JavaScript cannot make a full page load with binary params.
 - You can now configure which params are treated as an array with multiple values, by setting `up.form.config.arrayParam`. By default, only field names ending in `"[]"` are treated as arrays. (by @apollo13)
+- Calling `up.network.loadPage()` will now remove binary values (from file inputs) from a given `{ params }` option. JavaScript cannot make a full page load with binary params.
 - Fix the method `up.Params#getAll()` not returning the correct results or causing a stack overflow.
 
 
@@ -424,9 +454,9 @@ This release adds a new [scroll option](/scrolling) `[up-scroll='bottom']`. This
 ⚠️ For symmetry, the option `[up-scroll='reset']` was changed to `[up-scroll='top']`.
 
 
-### Fixed issues with instant links on iOS
+### Instant links on iOS
 
-Long-pressing an `[up-intant]` link to open the context menu will no longer follow the link on iOS (issue #271).
+Long-pressing an `[up-instant]` link (to open the context menu) will no longer follow the link on iOS (issue #271).
 
 Also long-pressing an instant link will no longer emit an `up:click` event.
 
