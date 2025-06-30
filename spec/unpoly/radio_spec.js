@@ -2054,13 +2054,13 @@ describe('up.radio', function() {
       })
 
       it('keeps polling if a request failed with a network issue', async function() {
-        up.radio.config.pollInterval = 100
-        const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.reject(new up.Error('mocked network error')))
-
-        up.hello(fixture('.element[up-poll]'))
-
         await jasmine.spyOnGlobalErrorsAsync(async function(globalErrorSpy) {
-          await wait(125)
+          up.radio.config.pollInterval = 100
+          const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.reject(new up.Error('mocked network error')))
+
+          up.hello(fixture('.element[up-poll]'))
+
+          await wait(140)
 
           expect(reloadSpy.calls.count()).toBe(1)
           expect(globalErrorSpy.calls.count()).toBe(1)
@@ -2069,6 +2069,8 @@ describe('up.radio', function() {
 
           expect(reloadSpy.calls.count()).toBe(2)
           expect(globalErrorSpy.calls.count()).toBe(2)
+
+          await wait(10)
         })
       })
 

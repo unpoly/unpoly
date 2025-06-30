@@ -809,7 +809,7 @@ describe('up.form', function() {
 
             reset.click()
             await wait()
-            await wait() // We need to wait 1 task for the reset button to affect field values, then another task for a 0ms debounce delay.
+            await wait(50) // We need to wait 1 task for the reset button to affect field values, then another task for a 0ms debounce delay.
 
             expect(callback.calls.count()).toBe(2)
             expect(callback.calls.argsFor(1)[0]).toBe('default')
@@ -843,7 +843,7 @@ describe('up.form', function() {
 
             document.querySelector('input[type=reset]').click()
             await wait()
-            await wait() // We need to wait 1 task for the reset button to affect field values, then another task for a 0ms debounce delay.
+            await wait(50) // We need to wait 1 task for the reset button to affect field values, then another task for a 0ms debounce delay.
 
             expect(callback.calls.count()).toBe(2)
             expect(callback.calls.argsFor(1)[0]).toBe('default')

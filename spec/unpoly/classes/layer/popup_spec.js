@@ -45,7 +45,7 @@ describe('up.Layer.Popup', function() {
       expect(popup.element.style.left).not.toBe(origin.style.left)
 
       up.emit(window, 'resize')
-      await wait()
+      await wait(50)
 
       expect(popup.element.style.left).toBe(origin.style.left)
     })

@@ -97,7 +97,10 @@ afterEach(async function() {
     const hadLayers = (up.layer.count > 0)
     const waitMore = hadRequests || hadLayers || AgentDetector.isFirefox() || AgentDetector.isSafari()
 
-    // Abort all requests so any cancel handlers can run and do async things.
+    // Abort onAborted() handlers that observe a fragment
+    up.fragment.abort(document.body, { reason: RESET_MESSAGE })
+
+    // Abort requests that are not associated with a fragment
     up.network.abort({ reason: RESET_MESSAGE })
 
     // Most pending promises will wait for an animation to finish.

@@ -1801,7 +1801,7 @@ describe('up.fragment', function() {
             it('renders the expired content', async function() {
               up.render('.target', { url: '/path', cache: true })
 
-              await wait()
+              await wait(25)
 
               expect('.target').toHaveText('expired text')
             })

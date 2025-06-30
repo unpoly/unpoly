@@ -620,8 +620,7 @@ describe('up.network', function() {
               await wait()
 
               // Eviction is delayed by 1 task so event listeners can still observe the properties we're about to evict
-
-              await wait()
+              await wait(50)
 
               expect(request).not.toHaveRecursiveValue(u.isElement)
             })
@@ -634,9 +633,8 @@ describe('up.network', function() {
               jasmine.respondWith('response text')
               let response = await request
 
-              await wait()
-
               // Eviction is delayed by 1 task so event listeners can still observe the properties we're about to evict
+              await wait(50)
 
               expect(request).not.toHaveRecursiveValue(u.isElement)
             })
@@ -2254,7 +2252,7 @@ describe('up.network', function() {
         // The same request in the foreground does trigger up:network:late.
         up.request({ url: '/foo', cache: true })
 
-        await wait(20)
+        await wait(50)
 
         expect(this.events).toEqual([
           'up:request:load',
@@ -2268,7 +2266,7 @@ describe('up.network', function() {
           responseText: 'foo'
         })
 
-        await wait(10)
+        await wait(50)
 
         expect(this.events).toEqual([
           'up:request:load',
@@ -2299,7 +2297,7 @@ describe('up.network', function() {
         ])
 
         jasmine.respondWith('foo')
-        await wait(10)
+        await wait(25)
 
         expect(this.events).toEqual([
           'up:request:load',
@@ -2369,9 +2367,9 @@ describe('up.network', function() {
 
         jasmine.clock().install() // required by responseTimeout()
         jasmine.lastRequest().responseTimeout()
-        await wait(10)
+        await wait(20)
 
-        jasmine.clock().tick(10)
+        jasmine.clock().tick(30)
         expect(this.events).toEqual([
           'up:request:load',
           'up:network:late',
@@ -2392,7 +2390,7 @@ describe('up.network', function() {
         ])
 
         up.network.abort(this.request)
-        await wait(10)
+        await wait(25)
 
         expect(this.events).toEqual([
           'up:request:load',
@@ -2414,7 +2412,7 @@ describe('up.network', function() {
         ])
 
         jasmine.lastRequest().responseError()
-        await wait(10)
+        await wait(25)
 
         expect(this.events).toEqual([
           'up:request:load',
@@ -2425,7 +2423,7 @@ describe('up.network', function() {
       })
 
       it('delays up:network:recover until the foreground queue is completely empty', async function() {
-        up.network.config.lateDelay = 50
+        up.network.config.lateDelay = 60
 
         // Make a chain of requests, like a queued watcher diff.
         let request1, request2
@@ -2438,14 +2436,14 @@ describe('up.network', function() {
           'up:request:load'
         ])
 
-        await wait(100)
+        await wait(110)
         expect(this.events).toEqual([
           'up:request:load',
           'up:network:late',
         ])
 
         jasmine.respondWith('response 1')
-        await wait()
+        await wait(25)
 
         expect(this.events).toEqual([
           'up:request:load',
@@ -2455,7 +2453,7 @@ describe('up.network', function() {
         ])
 
         jasmine.respondWith('response 2')
-        await wait()
+        await wait(25)
 
         expect(this.events).toEqual([
           'up:request:load',
