@@ -285,7 +285,7 @@ up.Params = class Params {
     } else if (u.isObject(raw)) {
       this._addAllFromObject(raw)
     } else {
-      up.fail("Unsupport params type: %o", raw)
+      up.fail("Unsupported params type: %o", raw)
     }
   }
 
