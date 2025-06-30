@@ -38,7 +38,7 @@ up.FieldWatcher = class FieldWatcher {
     }
 
     if (up.form.isField(this._root) && !this._root.name) {
-      fail('%s can only watch fields with a [name] attribute (%o)')
+      fail('%s can only watch fields with a name (%o)')
     }
   }
 

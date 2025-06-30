@@ -868,6 +868,20 @@ describe('up.form', function() {
               expect(callback.calls.count()).toEqual(1)
             })
 
+            it('runs the callback if the field initially has no [value]', async function() {
+              const form = fixture('form')
+              const input = e.affix(form, 'input[name="input-name"]')
+              const callback = jasmine.createSpy('change callback')
+              up.watch(input, callback)
+              input.value = 'new-value'
+              Trigger[eventType](input)
+              Trigger[eventType](input)
+              await wait()
+
+              expect(callback).toHaveBeenCalledWith('new-value', 'input-name', jasmine.anything())
+              expect(callback.calls.count()).toEqual(1)
+            })
+
             it('keeps running callbacks after a field with [up-keep] is transported to a new form', async function() {
               const [oldForm, input] = htmlFixtureList(`
                 <form id="form">
@@ -1360,6 +1374,28 @@ describe('up.form', function() {
             expect(callback.calls.count()).toEqual(2)
           })
 
+          it('runs the callback when the checkbox without a [value] changes its checked state', async function() {
+            const $form = $fixture('form')
+            const $checkbox = $form.affix('input[name="input-name"][type="checkbox"]')
+            const callback = jasmine.createSpy('change callback')
+            up.watch($checkbox, callback)
+            expect($checkbox.is(':checked')).toBe(false)
+            Trigger.clickSequence($checkbox)
+
+            await wait()
+
+            expect($checkbox.is(':checked')).toBe(true)
+            expect(callback.calls.count()).toEqual(1)
+            expect(callback.calls.mostRecent().args[0]).toBe('on')
+            Trigger.clickSequence($checkbox)
+
+            await wait()
+
+            expect($checkbox.is(':checked')).toBe(false)
+            expect(callback.calls.count()).toEqual(2)
+            expect(callback.calls.mostRecent().args[0]).toBeMissing()
+          })
+
           it('runs the callback when the checkbox is toggled by clicking its label', async function() {
             const $form = $fixture('form')
             const $checkbox = $form.affix('input#tick[name="input-name"][type="checkbox"][value="checkbox-value"]')
@@ -1571,7 +1607,7 @@ describe('up.form', function() {
           `)
 
           let doWatch = () => up.watch(namelessInput, u.noop)
-          expect(doWatch).toThrowError(/up\.watch\(\) can only watch fields with a \[name\] attribute/i)
+          expect(doWatch).toThrowError(/up\.watch\(\) can only watch fields with a name/i)
         })
 
       })
@@ -7300,6 +7336,22 @@ describe('up.form', function() {
           it("shows the target element if its up-show-for attribute is :checked and the checkbox is checked", async function() {
            const $form = $fixture('form')
            const $checkbox = $form.affix('input[name="input-name"][type="checkbox"][value="1"][up-switch=".target"]')
+
+            const $target = $form.affix('.target[up-show-for=":checked"]')
+            up.hello($form)
+            await wait()
+
+            expect($target).toBeHidden()
+            $checkbox.prop('checked', true)
+            Trigger.change($checkbox)
+            await wait()
+
+            expect($target).toBeVisible()
+          })
+
+          it("shows the target element if its up-show-for attribute is :checked and the checkbox is checked and the checkbox has no value", async function() {
+           const $form = $fixture('form')
+           const $checkbox = $form.affix('input[name="input-name"][type="checkbox"][up-switch=".target"]')
 
             const $target = $form.affix('.target[up-show-for=":checked"]')
             up.hello($form)
