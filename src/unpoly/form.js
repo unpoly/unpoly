@@ -1189,14 +1189,14 @@ up.form = (function() {
 
       By default Unpoly will use the form's `[action]` attribute
 
-      See [Validating against other URLs](/up.validate#urls).
+      See [Validating against other URLs](/up-validate#urls).
 
     @param {string} options.method
       The method to use for submitting the validation request.
 
       By default Unpoly will use the form's `[method]` attribute
 
-      See [Validating against other URLs](/up.validate#urls).
+      See [Validating against other URLs](/up-validate#urls).
 
     @param {boolean} [options.batch=true]
       Whether to [consolidate multiple validations into a single request](/up.validate#batching).
@@ -1910,14 +1910,14 @@ up.form = (function() {
 
       By default Unpoly will use the form's `[action]` attribute
 
-      See [Validating against other URLs](/up.validate#urls).
+      See [Validating against other URLs](/up-validate#urls).
 
     @param [up-validate-method]
       The method to use for submitting the validation request.
 
       By default Unpoly will use the form's `[method]` attribute
 
-      See [Validating against other URLs](/up.validate#urls).
+      See [Validating against other URLs](/up-validate#urls).
 
     @param [up-validate-params]
       @like [up-submit]/up-params

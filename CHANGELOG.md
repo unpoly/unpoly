@@ -107,7 +107,7 @@ When watching fields using `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[u
 
 The `[up-switch]` attribute has been reworked to be more powerful and flexible.
 
-See our new guide [Switching form state](/switching-form-date).
+See our new guide [Switching form state](/switching-form-state).
 
 #### Disabling or enabling fields
 
@@ -238,7 +238,7 @@ See [Opening overlays from the server](/opening-overlays#server).
 
 #### Closing overlays from forms
 
-Forms can now have an `[up-dismiss]` or `[up-accept]` attribute to [close their overlay when submitted](/closing-overlays#closing-when-a-form-is-submitted).
+Forms can now have an `[up-dismiss]` or `[up-accept]` attribute to [close their overlay when submitted](/closing-overlays#on-submit).
 This will immediately close the overlay on submission, without making a network request:
 
 ```html
@@ -259,7 +259,7 @@ up.layer.open({
 })
 ```
 
-See [Closing when a form is submitted](/closing-overlays#closing-when-a-form-is-submitted).
+See [Closing when a form is submitted](/closing-overlays#on-submit).
 
 
 #### Detecting the origin layer
@@ -1999,7 +1999,7 @@ The `{ response }` property is available whenever a server response causes an ov
 
 - When a [server-sent event](/X-Up-Events) matches a [close condition](/closing-overlays#close-conditions).
 - When the new location matches a [close condition](/closing-overlays#close-conditions).
-- When the server [explicitly closes](/closing-overlays#closing-from-the-server) an overlay using an HTTP header.
+- When the server [explicitly closes](/closing-overlays#from-server) an overlay using an HTTP header.
 
 ### Rendering `up.Response` objects
 

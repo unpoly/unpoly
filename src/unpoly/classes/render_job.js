@@ -4,7 +4,7 @@ const u = up.util
 A queued render task.
 
 Rendering functions like `up.render()` or `up.submit()` return an `up.RenderJob`.
-Callers can inspect the job's [options](/up.RenderJob.prototype.options) or [`await` its completion](/render-lifecycle#running-code-after-rendering).
+Callers can inspect the job's [render options](/up.RenderJob.prototype.renderOptions) or [`await` its completion](/render-lifecycle#running-code-after-rendering).
 
 See [render hooks](/render-lifecycle) for examples for awaiting rendering completion
 and how to handle errors.

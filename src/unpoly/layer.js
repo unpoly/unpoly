@@ -1080,7 +1080,7 @@ up.layer = (function() {
   <button up-dismiss="{ id: 5 }">Choose user #5</button>
   ```
 
-  See [Closing when a button is clicked](/closing-overlays#closing-when-a-button-is-clicked).
+  See [Closing when a button is clicked](/closing-overlays#on-click).
 
   ## On a hyperlink
 
@@ -1109,10 +1109,10 @@ up.layer = (function() {
   </form>
   ```
 
-  The form's field values will become the [dismissal value](#result-values) of the closed overlay,
+  The form's field values will become the [dismissal value](/closing-overlays#result-values) of the closed overlay,
   as an `up.Params` value.
 
-  See [Closing when a form is submitted](/closing-overlays#closing-when-a-form-is-submitted).
+  See [Closing when a form is submitted](/closing-overlays#on-submit).
 
   @selector [up-dismiss]
 
@@ -1153,7 +1153,7 @@ up.layer = (function() {
   <button up-accept="{ id: 5 }">Choose user #5</button>
   ```
 
-  See [Closing when a button is clicked](/closing-overlays#closing-when-a-button-is-clicked).
+  See [Closing when a button is clicked](/closing-overlays#on-click).
 
   ## On a hyperlink
 
@@ -1185,7 +1185,7 @@ up.layer = (function() {
   The form's field values will become the [acceptance value](/closing-overlays#result-values) of the closed overlay,
   as an `up.Params` value.
 
-  See [Closing when a form is submitted](/closing-overlays#closing-when-a-form-is-submitted).
+  See [Closing when a form is submitted](/closing-overlays#on-submit).
 
   @selector [up-accept]
 

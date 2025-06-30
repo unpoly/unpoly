@@ -444,7 +444,7 @@ up.history = (function() {
   usually by pressing the back button.
 
   Listeners may prevent `up:location:restore` or mutate `event.renderOptions`
-  to [customize the restoration behavior](/restoring-history#custom-restoration-behavior).
+  to [customize the restoration behavior](/restoring-history#custom-behavior).
 
   When this event is emitted, the [browser location](/up.history.location) has already been updated.
 

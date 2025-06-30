@@ -1691,7 +1691,7 @@ up.fragment = (function() {
   If the fragment source isn't cached, a network request is made.
 
   To restore a fragment from cache, but [revalidate](/caching#revalidation) cached content that
-  has [expired](/expiration), also pass a `{ revalidate: 'auto' }` option:
+  has [expired](/caching#expiration), also pass a `{ revalidate: 'auto' }` option:
 
   ```js
   up.reload('.inbox', { cache: true, revalidate: 'auto' }) // mark: revalidate

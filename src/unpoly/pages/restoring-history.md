@@ -19,7 +19,7 @@ If only the `#hash` changed from the previous location, Unpoly will scroll to a 
 
 If the location's path or query string changed:
 
-- Emit `up:location:restore` to see if another script wants is implementing [custom restoration behavior](#custom).
+- Emit `up:location:restore` to see if another script wants is implementing [custom restoration behavior](#custom-behavior).
 - Fetch the content for the URL of the history entry being restored. [Cached](/caching) responses are used.
 - [Dismiss all overlays](/history-in-overlays#restoration).
 - Render the restored content into the `<body>` element. You may prefer other [targets](/targeting-fragments)

@@ -41,7 +41,7 @@ up.Preview = class Preview {
   /*-
   The [request](/up.Request) that is loading.
 
-  When the request ends for [any reason](#ending), all preview changes will be reverted before
+  When the request ends for [any reason](/previews#ending), all preview changes will be reverted before
   the server response is processed further.
 
   Also see [inspecting the preview context](/previews#inspecting-the-preview-context).

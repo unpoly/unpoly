@@ -66,8 +66,8 @@ up.RenderResult = class RenderResult extends up.Record {
   /*-
   The [render](/up.render) options used to produce this result.
 
-  If this result was produced from a [failed response](/failed-response),
-  [`fail` prefixes](/failed-response#fail-options)
+  If this result was produced from a [failed response](/failed-responses),
+  [`fail` prefixes](/failed-responses#fail-options)
   have been removed from the render options.
 
   @property up.RenderResult#renderOptions
@@ -132,7 +132,7 @@ up.RenderResult = class RenderResult extends up.Record {
   - Server sent HTTP status `204 No Content`.
   - The target selector was set to `':none'` by either client or server.
   - The server sent an `X-Up-Accept-Layer` or `X-Up-Dismiss-Layer` header.
-    This [closes an overlay](/closing-overlays#closing-from-the-server) before content is rendered.
+    This [closes an overlay](/closing-overlays#from-server) before content is rendered.
 
   @property up.RenderResult#none
   @param {boolean} none

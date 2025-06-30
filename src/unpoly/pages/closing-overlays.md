@@ -117,8 +117,8 @@ Close conditions
 When opening an overlay, you may define a *condition* when the overlay interaction ends.
 When the condition occurs, the overlay is automatically closed and a callback is run.
 
-It is recommend to use close conditions instead of closing with explicit commands like [`up.layer.accept()`](#closing-from-javascript)
-or [`X-Up-Accept-Layer`](#closing-from-the-server).
+It is recommend to use close conditions instead of closing with explicit commands like [`up.layer.accept()`](#from-script)
+or [`X-Up-Accept-Layer`](#from-server).
 By defining a close condition, the overlay content does not need to be aware that it's running
 in an overlay. The overlay interaction is decoupled from the interaction in the parent layer.
 
@@ -215,11 +215,11 @@ The `{ response }` property is available whenever a server response causes an ov
 
 - When a [server-sent event](/X-Up-Events) matches a [close condition](#close-conditions).
 - When the new location matches a [close condition](#close-conditions).
-- When the server [explicitly closes](#closing-from-the-server) an overlay using an HTTP header.
+- When the server [explicitly closes](#from-server) an overlay using an HTTP header.
 
 
-Closing from the server explicitly {#from-the-server}
--------------------------------------------------------------
+Closing from the server {#from-server}
+--------------------------------------
 
 If you don't want to use [close conditions](#close-conditions),
 the server may explicitly close an overlay by sending an `X-Up-Accept-Layer` or `X-Up-Dismiss-Layer` header.
@@ -344,7 +344,7 @@ an `[up-accept]` or `[up-dismiss]` attribute. Instead make a regular form that i
 
 After the server has processed the request, it can use any of the following techniques to close the overlay:
 
-- Sending a [response header that closes the overlay](#closing-from-the-server)
+- Sending a [response header that closes the overlay](#from-server)
 - Emitting an [event that is a close condition](#event-condition)
 - Redirecting to a [location that is a close condition](#location-condition)
 
