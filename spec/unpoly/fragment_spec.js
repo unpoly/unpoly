@@ -4891,8 +4891,6 @@ describe('up.fragment', function() {
               expect(up.history.location).toMatchURL('/users/2/edit')
               expect(up.layer.current).toHaveSelector('form[action="/users/2"]')
 
-              console.debug(123)
-
               Trigger.clickSequence('form button')
               await wait()
 

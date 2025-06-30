@@ -1444,6 +1444,25 @@ describe('up.form', function() {
             expect(callback.calls.mostRecent().args).toEqual([['1'], 'foo[]', jasmine.anything()])
           })
 
+          it('runs the callback for a checkbox without a form', async function() {
+            const $checkbox = $fixture('input[name="input-name"][type="checkbox"][value="checkbox-value"]')
+            const callback = jasmine.createSpy('change callback')
+            up.watch($checkbox, callback)
+            expect($checkbox.is(':checked')).toBe(false)
+            Trigger.clickSequence($checkbox)
+
+            await wait()
+
+            expect($checkbox.is(':checked')).toBe(true)
+            expect(callback.calls.count()).toEqual(1)
+            Trigger.clickSequence($checkbox)
+
+            await wait()
+
+            expect($checkbox.is(':checked')).toBe(false)
+            expect(callback.calls.count()).toEqual(2)
+          })
+
         })
       })
 
@@ -6969,6 +6988,25 @@ describe('up.form', function() {
           expect(targetOutsideForm).toBeVisible()
         })
 
+        it ('it allows a region to not exist now, but be inserted later', async function() {
+          const form = fixture('form')
+          const field = e.affix(form, 'input[name="foo"][up-switch=".target"][up-switch-region="#later"]')
+          up.hello(form)
+
+          const laterContainer = fixture('#later')
+          const target = e.affix(laterContainer, '.target[up-show-for="active"]')
+          up.hello(laterContainer)
+          await wait()
+
+          expect(target).toBeHidden()
+
+          field.value = 'active'
+          Trigger.change(field)
+          await wait()
+
+          expect(target).toBeVisible()
+        })
+
         it('switches matching element within a field ancestor with [up-switch-region="#selector"]', async function() {
           let [form, fieldContainer, field, target1, target2, otherContainer, target3] = htmlFixtureList(`
             <form>
@@ -7038,6 +7076,58 @@ describe('up.form', function() {
           expect(target2).toBeHidden()
           expect(target3).toBeVisible()
         })
+
+        describe('fields outside a <form>', function() {
+
+          it('switches elements in the layer if the watched field has no enclosing <form>', async function() {
+            const field = fixture('input[name="foo"][up-switch=".target"]')
+            up.hello(field)
+
+            const target = fixture('.target[up-show-for="active"]')
+            up.hello(target)
+            await wait()
+
+            expect(target).toBeHidden()
+
+            field.value = 'active'
+            Trigger.change(field)
+            await wait()
+
+            expect(target).toBeVisible()
+          })
+
+          it('allows to narrow the region with an [up-switch-region] selector', async function() {
+            const region = fixture('.region')
+            const targetInsideRegion = e.affix(region, '.target[up-show-for="active"]')
+            up.hello(region)
+            const targetOutsideRegion = fixture('.target[up-show-for="active"]')
+            up.hello(targetOutsideRegion)
+
+            const field = fixture('input[name="foo"][up-switch=".target"][up-switch-region=".region"]')
+            up.hello(field)
+
+            await wait()
+
+            expect(targetInsideRegion).toBeHidden()
+            expect(targetOutsideRegion).toBeVisible()
+
+            field.value = 'active'
+            Trigger.change(field)
+            await wait()
+
+            expect(targetInsideRegion).toBeVisible()
+            expect(targetOutsideRegion).toBeVisible()
+
+            field.value = 'inactive'
+            Trigger.change(field)
+            await wait()
+
+            expect(targetInsideRegion).toBeHidden()
+            expect(targetOutsideRegion).toBeVisible()
+          })
+
+        })
+
       })
 
       describe('switching visibility', function() {
@@ -7207,32 +7297,33 @@ describe('up.form', function() {
 
         describe('on a checkbox', function() {
 
-          beforeEach(function() {
-            this.$form = $fixture('form')
-            this.$checkbox = this.$form.affix('input[name="input-name"][type="checkbox"][value="1"][up-switch=".target"]')
-          })
-
           it("shows the target element if its up-show-for attribute is :checked and the checkbox is checked", async function() {
-            const $target = this.$form.affix('.target[up-show-for=":checked"]')
-            up.hello(this.$form)
+           const $form = $fixture('form')
+           const $checkbox = $form.affix('input[name="input-name"][type="checkbox"][value="1"][up-switch=".target"]')
+
+            const $target = $form.affix('.target[up-show-for=":checked"]')
+            up.hello($form)
             await wait()
 
             expect($target).toBeHidden()
-            this.$checkbox.prop('checked', true)
-            Trigger.change(this.$checkbox)
+            $checkbox.prop('checked', true)
+            Trigger.change($checkbox)
             await wait()
 
             expect($target).toBeVisible()
           })
 
           it("shows the target element if its up-show-for attribute is :unchecked and the checkbox is unchecked", async function() {
-            const $target = this.$form.affix('.target[up-show-for=":unchecked"]')
-            up.hello(this.$form)
+            const $form = $fixture('form')
+            const $checkbox = $form.affix('input[name="input-name"][type="checkbox"][value="1"][up-switch=".target"]')
+
+            const $target = $form.affix('.target[up-show-for=":unchecked"]')
+            up.hello($form)
             await wait()
 
             expect($target).toBeVisible()
-            this.$checkbox.prop('checked', true)
-            Trigger.change(this.$checkbox)
+            $checkbox.prop('checked', true)
+            Trigger.change($checkbox)
             await wait()
 
             expect($target).toBeHidden()
@@ -7295,26 +7386,45 @@ describe('up.form', function() {
           })
 
           it("shows the target element if its up-hide-for attribute is :checked and the checkbox is unchecked", async function() {
-            const $target = this.$form.affix('.target[up-hide-for=":checked"]')
-            up.hello(this.$form)
+            const $form = $fixture('form')
+            const $checkbox = $form.affix('input[name="input-name"][type="checkbox"][value="1"][up-switch=".target"]')
+            const $target = $form.affix('.target[up-hide-for=":checked"]')
+            up.hello($form)
             await wait()
 
             expect($target).toBeVisible()
-            this.$checkbox.prop('checked', true)
-            Trigger.change(this.$checkbox)
+            $checkbox.prop('checked', true)
+            Trigger.change($checkbox)
             await wait()
 
             expect($target).toBeHidden()
           })
 
           it("shows the target element if its up-hide-for attribute is :unchecked and the checkbox is checked", async function() {
-            const $target = this.$form.affix('.target[up-hide-for=":unchecked"]')
-            up.hello(this.$form)
+            const $form = $fixture('form')
+            const $checkbox = $form.affix('input[name="input-name"][type="checkbox"][value="1"][up-switch=".target"]')
+            const $target = $form.affix('.target[up-hide-for=":unchecked"]')
+            up.hello($form)
             await wait()
 
             expect($target).toBeHidden()
-            this.$checkbox.prop('checked', true)
-            Trigger.change(this.$checkbox)
+            $checkbox.prop('checked', true)
+            Trigger.change($checkbox)
+            await wait()
+
+            expect($target).toBeVisible()
+          })
+
+          it("switches checkboxes without a form, switching elements anywhere in the current layer", async function() {
+            const $checkbox = $fixture('input[name="input-name"][type="checkbox"][value="1"][up-switch=".target"]')
+
+            const $target = $fixture('.target[up-show-for=":checked"]')
+            up.hello($checkbox)
+            await wait()
+
+            expect($target).toBeHidden()
+            $checkbox.prop('checked', true)
+            Trigger.change($checkbox)
             await wait()
 
             expect($target).toBeVisible()

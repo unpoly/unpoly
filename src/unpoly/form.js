@@ -1346,10 +1346,10 @@ up.form = (function() {
     let [root, { guard }, callback] = u.args(args, 'val', 'options', 'callback')
 
     let filter = function(fields) {
-      let scope = getRegion(root)
+      let region = getRegion(root)
       return u.filter(fields, function(field) {
-        return (root === scope || root.contains(field))
-          && (getForm(field) === scope) // will also match external fields with [form]
+        return (root === region || root.contains(field))
+          && (getRegion(field) === region) // will also match external fields with [form]
           && (!guard || guard(field)) // user-provided condition
       })
     }
