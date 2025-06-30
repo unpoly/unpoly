@@ -718,12 +718,12 @@ describe('up.radio', function() {
           fixture('.target.old', { text: 'old target' })
           fixture('.hungry.new', { text: 'old hungry', 'up-hungry': '' })
 
-          up.render('.target', { transition: 'cross-fade', duration: 300, document: `
+          up.render('.target', { transition: 'cross-fade', easing: 'linear', duration: 400, document: `
             <div class="target new">new target</div>
             <div class="hungry new">new hungry</div>
             ` })
 
-          await wait(150)
+          await wait(200)
 
           // Target is morphing
           expect(document.querySelectorAll('.target').length).toBe(2)
