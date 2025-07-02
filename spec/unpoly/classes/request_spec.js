@@ -235,4 +235,9 @@ describe('up.Request', function() {
       expect(request.header('X-Foo')).toBeMissing()
     })
   })
+
+  describe('#loadPage()', function() {
+
+  })
+
 })

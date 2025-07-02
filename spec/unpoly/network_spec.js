@@ -2822,6 +2822,30 @@ describe('up.network', function() {
         })
       })
 
+      describe('with { htmlTarget } option', function() {
+
+        it('sets a [target] attribute on the form', function() {
+          const submitForm = spyOn(up.browser, 'submitForm')
+
+          up.network.loadPage({ url: '/endpoint', method: 'POST', htmlTarget: '_blank' })
+
+          const form = document.querySelector('form.up-request-loader')
+          expect(form).toHaveAttribute('target', '_blank')
+          expect(submitForm).toHaveBeenCalled()
+        })
+
+        it('does not set a [target] attribute from a { target } render option', function() {
+          const submitForm = spyOn(up.browser, 'submitForm')
+
+          up.network.loadPage({ url: '/endpoint', method: 'POST', target: '_blank' })
+
+          const form = document.querySelector('form.up-request-loader')
+          expect(form).not.toHaveAttribute('target')
+          expect(submitForm).toHaveBeenCalled()
+        })
+
+      })
+
       describe('CSRF', function() {
 
         beforeEach(function() {
