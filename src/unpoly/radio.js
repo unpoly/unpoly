@@ -291,7 +291,7 @@ up.radio = (function() {
 
       By default Unpoly will parse options from the fragment's attributes (see `[up-poll]`).
       You may pass this additional `options` object to [supplement or override](/attributes-and-options#options) options parsed from the fragment's attributes.
-  @section Timing
+  @section Trigger
     @param {number} [options.interval]
       The reload interval in milliseconds.
 
@@ -366,7 +366,7 @@ up.radio = (function() {
   /*-
   Elements with an `[up-poll]` attribute are [reloaded](/up.reload) from the server periodically.
 
-  See [Polling](/polling) for an in-depth guide.
+  [Polling](/polling){:.article-ref}
 
   ## Example
 
@@ -380,7 +380,7 @@ up.radio = (function() {
 
   @selector [up-poll]
 
-  @section Timing
+  @section Trigger
     @param [up-interval]
       The reload interval in milliseconds.
 

@@ -153,7 +153,11 @@ up.on('up:fragment:keep', 'audio', function(event) {
 })
 ```
 
-Short keep conditions can also be set as an [`[up-on-keep]`](/up-keep#up-on-keep) attribute. 
+Short keep conditions can also be inlined as an [`[up-on-keep]`](/up-keep#up-on-keep) attribute:
+
+```html
+<audio src="song.mp3" up-keep up-on-keep="if (!this.paused) event.preventDefault()"></audio> <!-- mark: up-on-keep -->
+```
 
 ## Forcing an update {#forcing-updates}
 

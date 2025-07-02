@@ -3,7 +3,7 @@ Changelog
 
 Changes to this project will be documented in this file.
 
-If you're upgrading from an older Unpoly version you should load [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading) to polyfill deprecated APIs. Changes handled by `unpoly-migrate.js` are not considered breaking changes.
+If you're upgrading from an older Unpoly version, you should load [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading) to polyfill deprecated APIs. Changes handled by `unpoly-migrate.js` are not considered breaking changes.
 
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
@@ -11,25 +11,24 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 3.11.0
 ------
 
-This is a major release, shipping many features and quality-of-life improvements requested by the community. Highlights include a complete overhaul of [history handling](#history-handling), [form state switching](/switching-form-state) and the [preservation of `[up-keep]` elements](/preserving-elements). We also [reworked major parts of the documentation](#reworked-documentation).
+This is a big release, shipping many features and quality-of-life improvements requested by the community. Highlights include a complete overhaul of [history handling](#history-handling), [form state switching](/switching-form-state) and the [preservation of `[up-keep]` elements](/preserving-elements). We also [reworked major parts of the documentation](#reworked-documentation) and [stabilized 89 experimental features](#stabilization-of-experimental-features).
 
-Unpoly 3.11.0 also makes some breaking changes, which are marked with a ⚠️ emoji.\
-Most breaking changes are polyfilled by [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading).
+We had to make some breaking changes, which are marked with a ⚠️ emoji in this CHANGELOG.\
+Most incompatibilities are polyfilled by [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading).
 
 
 > [note]
-> Our sponsor [makandra](https://makandra.de/en) funded most of these changes ❤️\
+> Our sponsor [makandra](https://makandra.de/en) funded this release ❤️\
 > Please take a minute to check out [makandra's services](https://makandra.de/en/services-2) for web development, DevOps or UI/UX.
 
 
 
 ### Professional support options
 
-We're introducing [optional commercial support](https://unpoly.com/support) for businesses that depend on Unpoly.
-You can now sponsor bug fixes, commission new features, or get direct help from Unpoly’s core developers.
+We're introducing [optional commercial support](https://unpoly.com/support) for businesses that depend on Unpoly. You can now sponsor bug fixes, commission new features, or get direct help from Unpoly’s core developers.
 
-This helps fund Unpoly’s ongoing development while keeping it fully open source for everyone.
-The [Discussions board](https://github.com/unpoly/unpoly/discussions) remains available for free community support, and the maintainers will also remain active there.
+Support commissions will fund Unpoly’s ongoing development while keeping it fully open source for everyone.\
+**The [Discussions board](https://github.com/unpoly/unpoly/discussions) remains available for free community support**, and the maintainers will also remain active there.
 
 Learn more about support options at [unpoly.com/support](https://unpoly.com/support).
 
@@ -46,12 +45,12 @@ Starting with this version, Unpoly will handle restoration for most history entr
 - Unpoly will now restore history entries created by the user changing the `#hash` in the browser's address bar (without also changing the path or search query).
 - Unpoly will now restore its own history entries that were later replaced by external scripts (through [`history.replaceState()`](https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState)).
 
-When an external script pushes a history entry with a path unknown to Unpoly, that external script is still responsible for restoration.
+When an external script pushes a history entry with a new path unknown to Unpoly, that external script is still responsible for restoration.
 
 Listeners to `up:location:changed` can now inspect and control which history changes Unpoly should handle:
 
 - A new experimental property `{ willHandle }` shows if Unpoly thinks it is responsible for restoring the new location state.
-- A new experimental property `{ alreadyHandled }` shows if Unpoly thinks the change has already been handled (e.g. when a script calls `history.pushState()`).
+- A new experimental property `{ alreadyHandled }` shows if Unpoly thinks the change has already been handled (e.g. after calls to `history.pushState()`).
 
 
 #### Complete handling of `#hash` links
@@ -71,8 +70,8 @@ Unpoly now handles most clicks on a link to a `#hash` within the current page, t
 `up:location:changed` (and `up:layer:location:changed`) used to only be emitted when history changed during rendering.\
 ⚠️ These events are now emitted when the URL changes for *any* reason, including:
 
-- When a script calls `history.pushState()` or `up.history.push()`
-- When a script calls `history.replaceState()` or `up.history.replace()`
+- When a script calls `history.pushState()` or `up.history.push()`.
+- When a script calls `history.replaceState()` or `up.history.replace()`.
 - When the user presses the  back or forward button in the browser UI.
 - When the user changes the `#hash` in the browser's address bar.
 - When the user clicks on a `#hash` link.
@@ -82,7 +81,7 @@ Reacting to `#hash` changes usually involves scrolling, not rendering. To better
 
 #### Other improvements to history handling
 
-- The [log](/up.log) now shows purple event badge when the user navigates within history. This helps to correlate e.g. a `popstate` event with the logging output from a subsequent history restoration.
+- The [log](/up.log) now shows a purple event badge when the user navigates within history. This helps to correlate e.g. a `popstate` event with the logging output from a subsequent history restoration.
 - When a fragment update closes an overlay and then navigates the parent layer to a new location, Unpoly will no longer push a redundant history entry of the parent layer's location before navigating.
 - Published an experimental function `up.history.replace()` to change the URL of the current history state.
 - The `up:layer:location:changed` event now has a `{ previousLocation }` property.
@@ -95,10 +94,10 @@ Reacting to `#hash` changes usually involves scrolling, not rendering. To better
 
 When watching fields using `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[up-validate]`, the following cases are now addressed:
 
-- If a watched field with `[up-watch-delay]` was detached by an external script during the delay, watchers will no longer fire callbacks or send requests.
 - Fixed all cases where a watched field with `[up-keep]` is transported to a new `<form>` element by a fragment update.
 - Fixed all cases where a watched field outside its form (with [`[form]`](https://www.w3schools.com/tags/att_form.asp) attribute) is added or removed dynamically.
 - When a watched field runs a callback, a purple event badge is now [logged](/up.log) to help correlating cause and effect.
+- If a watched field with `[up-watch-delay]` was detached by an external script during the delay, watchers will no longer fire callbacks or send requests.
 - ⚠️ Watching an individual radio button will now throw an error. Watch a container for the entire radio group instead.
 - Directly watching a field without a `[name]` will now throw an error explaining that this attribute is required. In earlier versions callbacks were simply never called.
 
@@ -107,14 +106,16 @@ When watching fields using `[up-watch]`, `[up-autosubmit]`, `[up-switch]` or `[u
 
 The `[up-switch]` attribute has been reworked to be more powerful and flexible.
 
-See our new guide [Switching form state](/switching-form-state).
+Also see our new guide [Switching form state](/switching-form-state).
 
 #### Disabling or enabling fields
 
-You can now disable dependent fields using the `[up-disable-for]` and `[up-enable-for]` attributes:
+You can now disable dependent fields using the new `[up-disable-for]` and `[up-enable-for]` attributes. 
+
+Let's say you have a `<select>` for a user role. Its selected value should enable or disable other. You begin by setting an `[up-switch]` attribute with an selector targeting the controlled fields:
 
 ```html
-<select name="role" up-switch=".role-dependent">
+<select name="role" up-switch=".role-dependent"> <!-- mark: up-switch -->
   <option value="trainee">Trainee</option>
   <option value="manager">Manager</option>
 </select>
@@ -156,7 +157,7 @@ We can use this event to implement our custom `[highlight-for]` effect:
 ```js
 up.on('up:form:switch', '[highlight-for]', (event) => {
   let highlightedValue = event.target.getAttribute('highlight-for')
-  let isHighlighted = (event.field.value === readonlyValue)
+  let isHighlighted = (event.field.value === highlightedValue)
   event.target.style.highlight = isHighlighted ? '2px solid orange' : ''
 })
 ```
@@ -176,8 +177,8 @@ The `[up-switch]` attribute itself has been reworked with new modifiying attribu
 #### More `[up-switch]` changes
 
 - Using `[up-switch]` on a text field will now switch while the user is typing (as opposed to when the field is blurred).
-- `[up-switch]` now works on a container for a radio button group.
-- `[up-switch]` now works on a container of multiple checkboxes for a single array param, like `category[]`.
+- `[up-switch]` now works on a [container for a radio button group](/switching-form-state#radio-buttons).
+- `[up-switch]` now works on a [container of multiple checkboxes](/switching-form-state#checkboxes) for a single array param, like `category[]`.
 - ⚠️ Setting `[up-switch]` on an individual radio button will now throw an error. Watch a container for the entire radio group instead.
 - ⚠️ Fields with `[up-switch]` now require a `[name]` attribute.
 - ⚠️ Unpoly will no longer un-hide elements targeted by `[up-switch]` when that element has neither `[up-show-for]` nor `[up-hide-for]` attributes. This was an undocumented side effect of the old implementation.
@@ -210,13 +211,33 @@ To have individual fields validate against different URLs, you can also set `[up
 
 Even with multiple URLs, Unpoly still guarantees eventual consistency in a form with many concurrent validations. This is done by [separating request batches by URL](/up.validate#batching-multiple-urls) and ensuring that only a single validation request per form will be in flight at the same time.
 
+Even with multiple URLs, only a single validation request per form will be in flight at the same time.
+
+Batches will be partitioned by URL. Batch requests are sent in sequence, with no concurrency.
+Additional validations are queued until the current batch request has loaded.
+
+For instance, let's assume the following four validations:
+
+```js
+up.validate('.foo', { url: '/path1' })
+up.validate('.bar', { url: '/path2' })
+up.validate('.baz', { url: '/path1' })
+up.validate('.qux', { url: '/path2' })
+```
+
+This will send a sequence of two requests:
+
+1. A request to `/path` targeting `.foo, .baz`. The other validations are queued.
+2. Once that request finishes, a second request to `/path2` targeting `.bar, .qux`.
+
+
 #### Other validation changes
 
 - You can now disable [validation batching](/up.validate#batching) globally with `up.form.config.batchValidate = false`, or for individual forms or fields with an `[up-validate-batch="false"]` attribute.
 - Fields or forms can add additional params to the validation request using the [`[up-validate-params]`](/up-validate#up-validate-params) attribute.
 - Fields or forms can add additional headers to the validation request using the [`[up-validate-headers]`](/up-validate#up-validate-headers) attribute.
 - Validation targets can now refer to the changed field with `:origin`. This was possible before, but was never documented.
-- `[up-validate]` can now be set on any container of fields, not just an individual field or an entire form. This was possible before, but not properly documented.
+- `[up-validate]` can now be set on any container of fields, not just an individual field or an entire form. This was possible before, but never documented.
 
 
 ### Layers
@@ -329,17 +350,19 @@ See [CSPs with `strict-dynamic`](/csp#scripts-strict-dynamic) for details.
 
 ### Reworked documentation
 
-#### Option sections
+#### Parameters are organized into sections
 
-Features with many attributes (or options) are now shown in sections like "Request" or "Animation":
+It was sometimes hard to find documentation for a given parameter (or attribute) for features with many options. To address this, options have now been organized in sections like *Request* or *Animation*:
 
-```
-TODO: Screenshot
-```
+<img src="images/docs/param-sections.png" alt="Parameters organized into sections" width="520">
 
 #### Inherited parameters are documented
 
-Many attributes and options now explicitly documented instead of referring to `up.render()`.
+You may discover that functions and attributes have a lot more documented options now.
+
+This is because most features end up calling `up.render()`, inheriting most available render options in the process. We used to document this with a note like *"Other `up.render()` options may also be used"*, which was often overlooked.
+
+Now most inherited options are now explicitly documented with the inheriting feature.
 
 
 #### New guides
@@ -353,17 +376,21 @@ A number of guides have been added or overhauled:
 
 #### Guide links
 
-- Main article links
+When there is a guide with more context, the documentation for attributes or functions now show a link to that guide:
+
+<img src="images/docs/guide-link.png" alt="Link to guide with more context" width="440">
 
 
 ### Caching
+
+
 
 - When a POST request redirects to a GET route, that final GET request is now cached.
 - `up.reload()` can now restore a fragment to a previously cached state using an `{ cache: true }` option. This was possible before, but was never documented.
 - ⚠️ Any `[up-expire-cache]` and `[up-evict-cache]` attributes are now executed *before* the request is sent. In previous version, the cache was only changed after a response was loaded. This change allows the combined use of `[up-evict-cache]` and `[up-cache]` to clear and re-populate the cache with a single render pass.
 - ⚠️ The server can no longer prevent expiration with an `X-Up-Expire-Cache: false` response header.
 - Requests now clear out their `{ bindLayer }` property after loading, allowing layer objects to be garbage-collected while the request is cached.
--  Hungry, preloading links no longer throw an error after rendering cached, but expired content.
+- Links with both `[up-hungry]` and `[up-preload]` no longer throw an error after rendering cached, but expired content.
 
 ### Navigation bars
 
@@ -432,6 +459,13 @@ Instead of `[up-data]` we can also use HTML5 [`[data-*]` attributes](https://dev
 Unpoly will compare the element's **initial data** as it is rendered by the server.\
 Client-side changes to the data object (e.g. by a [compiler](/up.compiler)) are ignored.
 
+#### Custom keep conditions
+
+We're providing `[up-keep="same-html"]` and `[up-keep="same-data"]` as shortcuts for common keep constraints.
+
+You can still implement [arbitrary keep conditions](/preserving-elements#custom-keep-condition) by listening to the `up:fragment:keep` event or setting an [`[up-on-keep]`](/up-keep#up-on-keep) attribute.
+
+
 
 ### Form data handling
 
@@ -446,6 +480,7 @@ Client-side changes to the data object (e.g. by a [compiler](/up.compiler)) are 
 You can now override [focus ring visibility](/focus-visibility) for individual links or forms, by setting an `[up-focus-visible]` attribute or by passing a `{ focusVisible }` render option.
 
 For global visibility rules, use the existing `up.viewport.config.autoFocusVisible` configuration.
+
 
 ### Scrolling to the top or bottom
 
@@ -465,8 +500,8 @@ Also long-pressing an instant link will no longer emit an `up:click` event.
 
 - Fixed an error with [relaxed JSON](/relaxed-json) parsing when the input string contains a section reference (like `"§1"`) (#752).
 - ⚠️ The `up.util.task()` implementation now uses `postMessage()` instead of `setTimeout()`. This causes the new task to be scheduled earlier, ideally before the browser renders the next frame. The task is still guaranteed to run after all microtasks, such as settled promise callbacks.
-- [`unpoly-migrate`](https://unpoly.com/changes/upgrading) now allows to disable all deprecation warnings with `up.migrate.config.logLevel = 'none'`. This allows to keep the polyfills with a clean console.
-- ⚠️ The experimental function up.`util.pickBy()` no longer passes the entire object as a third argument to the callback function.
+- [`unpoly-migrate`](https://unpoly.com/changes/upgrading) now allows to disable all deprecation warnings with `up.migrate.config.logLevel = 'none'`. This allows to keep polyfills installed without noise in the console.
+- ⚠️ The experimental function `up.util.pickBy()` no longer passes the entire object as a third argument to the callback function.
 - `up.element.subtree()` now prevents redundant array allocations.
 
 
@@ -483,7 +518,7 @@ An `[up-poll]` fragment now stops polling if an external script detaches the ele
 
 ### Animation
 
-Fixed a bug where [prepending or appending](/targeting-fragments#appending-or-prepending) an insertion could not be animated using an `{ animate }` option or `[up-animate]` option. Unpoly wrongly accepted a `{ transition }` option or `[up-transition]` attribute.
+Fixed a bug where [prepending or appending](/targeting-fragments#appending-or-prepending) an insertion could not be animated using an `{ animate }` option or `[up-animate]` option. In earlier versions, Unpoly wrongly expected animations in a `{ transition }` option or `[up-transition]` attribute.
 
 
 ### JavaScript rendering API
@@ -513,13 +548,14 @@ This was possible before, but was never documented.
 
 ### Developer experience
 
-It is now easier to contribute to Unpoly:
+We modernized the codebase so that contributing to Unpoly is now simpler:
 
 - You can now run headless tests (without a browser window) by running `npm run test`.
 - CI: Tests now [run automatically](https://github.com/unpoly/unpoly/actions) for every pull request.
 - All remaining CoffeeScript has been removed from the test suite.
 - All tests now use `async` / `await` instead of our legacy `asyncSpec()` helper.
 - The release process was migrated from Ruby to Node.js.
+- The CI setup now automatically runs tests against various integration styles, such as using an ES6 build, the migration polyfills or various CSP settings.
 
 
 ### Stabilization of experimental features

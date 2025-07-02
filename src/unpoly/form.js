@@ -1110,9 +1110,11 @@ up.form = (function() {
   ### Batching with multiple URLs {#batching-multiple-urls}
 
   Even with multiple URLs, only a single validation request per form will be in flight at the same time.
-  Additional validations are queued until the current validation request has loaded.
 
-  For instance, let's assume the following four validations:
+  Batches will be partitioned by URL. Batch requests are sent in sequence, with no concurrency.
+  Additional validations are queued until the current batch request has loaded.
+
+  For instance, let's assume the following four validations are queued:
 
   ```js
   up.validate('.foo', { url: '/path1' })
