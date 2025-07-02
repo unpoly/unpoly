@@ -85,7 +85,7 @@ We can use this event to implement our custom `[highlight-for]` effect:
 ```js
 up.on('up:form:switch', '[highlight-for]', (event) => {
   let highlightedValue = event.target.getAttribute('highlight-for')
-  let isHighlighted = (event.field.value === readonlyValue)
+  let isHighlighted = (event.field.value === highlightedValue)
   event.target.style.highlight = isHighlighted ? '2px solid orange' : ''
 })
 ```
