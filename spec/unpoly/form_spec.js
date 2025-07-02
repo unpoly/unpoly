@@ -2392,7 +2392,7 @@ describe('up.form', function() {
           fixture('.target')
           const form = fixture('form[up-target=".target"][action="/session"][method="post"]')
           const emailInput = e.affix(form, 'input[name="email"][value="foo@bar.com"]')
-          const passwordInput = e.affix(form, 'input[name="password"][value="secret"]')
+          const passwordInput = e.affix(form, 'input[name="password"][value="mumbling-shortcut-glorify"]')
 
           up.submit(form, { disable: true })
           await wait()
@@ -2402,7 +2402,7 @@ describe('up.form', function() {
 
           expect(jasmine.lastRequest().url).toMatchURL('/session')
           expect(jasmine.lastRequest().method).toBe('POST')
-          expect(jasmine.lastRequest().data()).toMatchParams({ email: 'foo@bar.com', password: 'secret' })
+          expect(jasmine.lastRequest().data()).toMatchParams({ email: 'foo@bar.com', password: 'mumbling-shortcut-glorify' })
         })
 
         it('re-enables the form when the submission ends in a successful response', async function() {
@@ -5897,7 +5897,7 @@ describe('up.form', function() {
           up.hello(form)
 
           const passwordInput = form.querySelector('input[name=password]')
-          passwordInput.value = 'secret5555'
+          passwordInput.value = 'mumbling-shortcut-glorify'
           Trigger.change(passwordInput)
 
           await wait()
@@ -6388,7 +6388,7 @@ describe('up.form', function() {
         jasmine.respondWith({ status: 204, responseText: '' })
         await wait()
 
-        passwordInput.value = 'secret'
+        passwordInput.value = 'mumbling-shortcut-glorify'
         Trigger.change(passwordInput)
         await wait()
 
@@ -6423,7 +6423,7 @@ describe('up.form', function() {
         up.hello(container)
 
         const $passwordInput = $('#registration input[name=password]')
-        $passwordInput.val('secret5435')
+        $passwordInput.val('mumbling-shortcut-glorify')
         Trigger.change($passwordInput)
 
         await wait()
@@ -6468,7 +6468,7 @@ describe('up.form', function() {
         up.hello(form)
 
         const $passwordInput = $('#registration input[name=password]')
-        $passwordInput.val('secret5435')
+        $passwordInput.val('mumbling-shortcut-glorify')
         Trigger.change($passwordInput)
 
         await wait()
