@@ -319,7 +319,7 @@ up.motion = (function() {
   @internal
   */
   function animateNow(element, lastFrame, options) {
-    if (up.migrate.loaded) lastFrame = up.migrate.fixStyleProps(lastFrame)
+    if (up.migrate.loaded) lastFrame = up.migrate.fixSetStyleProps(lastFrame)
     options = { ...options, finishEvent: motionController.finishEvent }
     const cssTransition = new up.CSSTransition(element, lastFrame, options)
     return cssTransition.start()

@@ -621,6 +621,16 @@ describe('up.element', function() {
           expect(element.style.marginTop).toEqual('200px')
           expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('CSS length values must have a unit'))
         })
+
+        it('sets a style string with an uppercase color value without warning', function() {
+          const warnSpy = up.migrate.warn.mock()
+          const element = up.element.createFromSelector('div', { style: 'background-color: #0000FF' })
+
+          const style = element.getAttribute('style')
+          expect(style).toContain('background-color: #0000FF')
+          expect(warnSpy).not.toHaveBeenCalled()
+        })
+
       }
     })
 
@@ -1469,7 +1479,7 @@ describe('up.element', function() {
     })
   })
 
-  describe('up.element.setStyle', function() {
+  describe('up.element.setStyle()', function() {
 
     it("sets the given style properties as the given element's [style] attribute", function() {
       const div = fixture('div')
@@ -1487,6 +1497,14 @@ describe('up.element', function() {
       expect(style).toContain('background-color: blue')
     })
 
+    it('sets a string of CSS properties', function() {
+      const div = fixture('div')
+      up.element.setStyle(div, 'color: red; background-color: blue')
+      const style = div.getAttribute('style')
+      expect(style).toContain('color: red')
+      expect(style).toContain('background-color: blue')
+    })
+
     if (up.migrate.loaded) {
       it('sets the given style properties in camelCase', function() {
         const warnSpy = up.migrate.warn.mock()
@@ -1497,6 +1515,16 @@ describe('up.element', function() {
         expect(style).toContain('font-family: Roboto')
         expect(style).toContain('background-color: blue')
         expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('CSS property names must be in kebab-case'))
+      })
+
+      it('sets a style string with an uppercase color value without warning', function() {
+        const warnSpy = up.migrate.warn.mock()
+        const div = fixture('div')
+        up.element.setStyle(div, 'background-color: #0000FF')
+
+        const style = div.getAttribute('style')
+        expect(style).toContain('background-color: #0000FF')
+        expect(warnSpy).not.toHaveBeenCalled()
       })
 
       it("converts the values of known length properties to px values automatically (with kebab-case)", function() {

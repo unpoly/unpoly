@@ -617,6 +617,11 @@ Many experimental features have now been declared as stable:
 - `{ lateDelay }` option for `up.render()`
 
 
+### Migration polyfills
+
+- Fix a bug in `unpoly-migrate.js` where a `{ style }` string passed to `up.element.affix()` or `up.element.createFromSelector()` would sometimes be transformed incorrectly.
+- Added polyfills for most breaking changes in this 3.11.0 release.
+
 
 
 3.10.2

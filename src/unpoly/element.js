@@ -1349,7 +1349,7 @@ up.element = (function() {
   }
 
   function extractFromStyleObject(style, keyOrKeys) {
-    if (up.migrate.loaded) keyOrKeys = up.migrate.fixStyleProps(keyOrKeys)
+    if (up.migrate.loaded) keyOrKeys = up.migrate.fixGetStyleProps(keyOrKeys)
 
     if (u.isString(keyOrKeys)) {
       return style.getPropertyValue(keyOrKeys)
@@ -1361,6 +1361,12 @@ up.element = (function() {
   /*-
   Sets the given CSS properties as inline styles on the given element.
 
+  ## Example
+
+  ```js
+  up.element.setStyle(element, { color: 'red', 'font-size': '2em' })
+  ```
+
   @function up.element.setStyle
   @param {Element} element
     The element on which to change inline styles.
@@ -1369,7 +1375,7 @@ up.element = (function() {
   @stable
   */
   function setInlineStyle(element, props, unit = '') {
-    if (up.migrate.loaded) props = up.migrate.fixStyleProps(props, unit)
+    if (up.migrate.loaded) props = up.migrate.fixSetStyleProps(props, unit)
 
     if (u.isString(props)) {
       element.setAttribute('style', props)

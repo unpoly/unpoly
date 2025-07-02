@@ -214,21 +214,35 @@ up.migrate = (function() {
     }
   }
 
-  function fixStyleProps(arg, unit) {
+  function fixGetStyleProps(keyOrKeys) {
     let transformed
 
-    if (u.isString(arg)) {
-      transformed = fixStylePropName(arg)
-    } else if (u.isArray(arg)) {
-      transformed = arg.map(fixStylePropName)
-    } else if (u.isObject(arg)) {
+    if (u.isString(keyOrKeys)) {
+      transformed = fixStylePropName(keyOrKeys)
+    } else if (u.isArray(keyOrKeys)) {
+      transformed = keyOrKeys.map(fixStylePropName)
+    } else {
+      // Unsupported case. Behave neutrally.
+      transformed = keyOrKeys
+    }
+
+    return transformed
+  }
+
+  function fixSetStyleProps(props, unit) {
+    let transformed
+
+    if (u.isObject(props)) {
       transformed = {}
-      for (let name in arg) {
-        let value = arg[name]
+      for (let name in props) {
+        let value = props[name]
         name = fixStylePropName(name)
         value = fixStylePropValue(name, value, unit)
         transformed[name] = value
       }
+    } else {
+      // Leave a string unchanged
+      transformed = props
     }
 
     return transformed
@@ -248,7 +262,8 @@ up.migrate = (function() {
     formerlyAsync,
     renamedEvent,
     removedEvent,
-    fixStyleProps,
+    fixGetStyleProps,
+    fixSetStyleProps,
     fixEventTypes,
     fixKey,
     warn,
