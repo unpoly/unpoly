@@ -123,14 +123,7 @@ up.link = (function() {
 
       By default Unpoly excludes:
 
-      - Links with an `[up-follow=false]` attribute.
-      - Links with a cross-origin `[href]`.
-      - Links with a [`[target]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#attr-target) attribute
-        (to target an iframe or open new browser tab).
-      - Links with a [`[download]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#attr-download) attribute.
-      - Links with an `[href]` attribute starting with `javascript:`.
-      - Links with an `[href="#"]` attribute that don't also have local HTML
-        in an `[up-document]`, `[up-fragment]` or `[up-content]` attribute.
+      @include no-follow-reasons
 
   @section Instant click
 
@@ -1212,6 +1205,14 @@ up.link = (function() {
   You can configure Unpoly to follow *all* links on a page without requiring an `[up-follow]` attribute.
 
   See [Handling all links and forms](/handling-everything).
+
+  ## Unfollowable links
+
+  Even with an `[up-follow]` attribute, some links cannot be handled by Unpoly:
+
+  @include no-follow-reasons
+
+  Clicking such links will fall back to default browser behavior.
 
   ## Preventing Unpoly from following links
 
