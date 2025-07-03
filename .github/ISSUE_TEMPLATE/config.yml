@@ -2,4 +2,7 @@ blank_issues_enabled: false
 contact_links:
   - name: Questions or ideas
     url: https://github.com/unpoly/unpoly/discussions/new/choose
-    about: Use our Discussions board
+    about: Post on our Discussions board
+  - name: Professional support
+    url: https://unpoly.com/support#professional
+    about: Purchase support from Unpoly's core developers
