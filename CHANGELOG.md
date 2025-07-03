@@ -495,7 +495,6 @@ Also long-pressing an instant link will no longer emit an `up:click` event.
 
 - Fixed an error with [relaxed JSON](/relaxed-json) parsing when the input string contains a section reference (like `"§1"`) (#752).
 - ⚠️ The `up.util.task()` implementation now uses `postMessage()` instead of `setTimeout()`. This causes the new task to be scheduled earlier, ideally before the browser renders the next frame. The task is still guaranteed to run after all microtasks, such as settled promise callbacks.
-- [`unpoly-migrate`](https://unpoly.com/changes/upgrading) now allows to disable all deprecation warnings with `up.migrate.config.logLevel = 'none'`. This allows to keep polyfills installed without noise in the console.
 - ⚠️ The experimental function `up.util.pickBy()` no longer passes the entire object as a third argument to the callback function.
 - `up.element.subtree()` now prevents redundant array allocations.
 
@@ -650,6 +649,7 @@ Many experimental features have now been declared as stable:
 
 ### Migration polyfills
 
+- [`unpoly-migrate`](https://unpoly.com/changes/upgrading) now allows to disable all deprecation warnings with `up.migrate.config.logLevel = 'none'`. This allows to keep polyfills installed without noise in the console.
 - Fix a bug in `unpoly-migrate.js` where a `{ style }` string passed to `up.element.affix()` or `up.element.createFromSelector()` would sometimes be transformed incorrectly.
 - Added polyfills for most breaking changes in this 3.11.0 release.
 
