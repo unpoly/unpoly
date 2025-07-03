@@ -10,9 +10,6 @@ on:
   workflow_dispatch:
     branches:
       - master
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 jobs:
   test:
     runs-on: ubuntu-22.04
