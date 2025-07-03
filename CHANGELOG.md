@@ -2460,7 +2460,7 @@ Unpoly 3 lets you configure selectors matching foreign overlays using `up.layer.
 
 - Fix a bug where when attempting to restore scroll positions that were never saved for the current URL, all scroll positions were reset to zero.
 - When a render pass results in no new content, the `{ scroll }` option now is still processed.
-- When [scrolling to a fragment](/scrolling#revealing-the-fragment), [obstructing elements](/scroll-tuning#fixed-layout-elements-obstructing-the-viewport) that are hidden are now ignored.
+- When [scrolling to a fragment](/scrolling#target), [obstructing elements](/scroll-tuning#fixed-layout-elements-obstructing-the-viewport) that are hidden are now ignored.
 
 
 ### Focus

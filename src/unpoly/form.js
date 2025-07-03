@@ -1214,7 +1214,7 @@ up.form = (function() {
   @section Loading state
     @mix up.submit/loading-state
 
-  @return {Promise<up.RenderResult}}
+  @return {Promise<up.RenderResult}
     A promise that fulfills when the server-side validation is received and the form was updated.
 
   @stable

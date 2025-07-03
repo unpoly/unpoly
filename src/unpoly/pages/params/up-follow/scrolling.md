@@ -32,4 +32,4 @@
 @param [up-save-scroll='true']
   Whether to [save scroll positions](/up.viewport.saveScroll) before updating the fragment.
 
-  Saved scroll positions can later be restored with [`[up-scroll=restore]`](/scrolling#restoring-scroll-positions).
+  Saved scroll positions can later be restored with [`[up-scroll=restore]`](/scrolling#restore).

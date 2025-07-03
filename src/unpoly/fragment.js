@@ -86,7 +86,7 @@ up.fragment = (function() {
       the current page and the server response.
 
       When [navigating](/navigation) to a main target, Unpoly will automatically
-      [reset scroll positions](/scrolling#automatic-scrolling-logic) and
+      [reset scroll positions](/scrolling#auto) and
       [update the browser history](/updating-history).
 
       This property is aliased as [`up.layer.config.any.mainTargets`](/up.layer.config#config.any.mainTargets).

@@ -519,7 +519,7 @@ up.viewport = (function() {
 
   The scroll positions will be associated with the current URL.
   They can later be restored by calling `up.viewport.restoreScroll()`
-  at the same URL, or by following a link with an [`[up-scroll="restore"]`](/scrolling#restoring-scroll-positions)
+  at the same URL, or by following a link with an [`[up-scroll="restore"]`](/scrolling#restore)
   attribute.
 
   Unpoly automatically saves scroll positions before [navigating](/navigation).
