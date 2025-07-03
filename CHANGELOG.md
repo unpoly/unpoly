@@ -211,11 +211,6 @@ To have individual fields validate against different URLs, you can also set `[up
 
 Even with multiple URLs, Unpoly still guarantees eventual consistency in a form with many concurrent validations. This is done by [separating request batches by URL](/up.validate#batching-multiple-urls) and ensuring that only a single validation request per form will be in flight at the same time.
 
-Even with multiple URLs, only a single validation request per form will be in flight at the same time.
-
-Batches will be partitioned by URL. Batch requests are sent in sequence, with no concurrency.
-Additional validations are queued until the current batch request has loaded.
-
 For instance, let's assume the following four validations:
 
 ```js
