@@ -23,13 +23,25 @@ up.FragmentPolling = class FragmentPolling {
     this._start()
   }
 
+  _onFragmentAborted({ newLayer }) {
+    console.debug("[_onFragmentAborted] with _abortable == %o", this._abortable)
+
+    // We temporarily set this._abortable to false while we're reloading our fragment, which also aborts our fragment.
+    if (this._abortable && !newLayer) {
+      this._stop()
+    }
+  }
+
   _onFragmentDestroyed() {
+    console.debug("[_onFragmentDestroyed] Stopping")
     // The element may come back (when it is swapped) or or may not come back (when it is destroyed).
     // If it does come back, `onPollAttributeObserved()` will restart the polling.
     this._stop()
   }
 
   _start(options) {
+    console.debug("[_start] state == %o", this._state)
+
     Object.assign(this._options, options)
 
     if (this._state !== 'started') {
@@ -45,6 +57,7 @@ up.FragmentPolling = class FragmentPolling {
   }
 
   _stop() {
+    console.debug("[_stop] state == %o", this._state)
     if (this._state === 'started') {
       this._clearReloadTimer()
       this._state = 'stopped'
@@ -70,6 +83,7 @@ up.FragmentPolling = class FragmentPolling {
   }
 
   _onVisibilityChange() {
+    // This callback can only run while we're started.
     if (this._isFragmentVisible()) {
       this._scheduleRemainingTime()
     } else {
@@ -91,8 +105,10 @@ up.FragmentPolling = class FragmentPolling {
   }
 
   _scheduleRemainingTime() {
+    console.debug("[_scheduleRemainingTime] reloadTimer %o, loading %o", this._reloadTimer, this._loading)
     if (!this._reloadTimer && !this._loading) {
       this._clearReloadTimer()
+      console.debug("[_scheduleRemainingTime] scheduling in %o ms", this._getRemainingDelay())
       this._reloadTimer = setTimeout(
         this._onTimerReached.bind(this),
         this._getRemainingDelay()
@@ -101,11 +117,14 @@ up.FragmentPolling = class FragmentPolling {
   }
 
   _onTimerReached() {
+    console.debug("[_onTimerReacher]")
     this._reloadTimer = null
     this._tryReload()
   }
 
   _tryReload() {
+    console.debug("[_tryReload] state == %o", this._state)
+
     // The setTimeout(doReload) callback might already be scheduled
     // before the polling stopped.
     if (this._state !== 'started') {
@@ -146,6 +165,8 @@ up.FragmentPolling = class FragmentPolling {
   }
 
   _reloadNow() {
+    console.debug("[_reloadNow]")
+
     // If we were called manually (not by a timeout), clear a scheduled timeout to prevent concurrency.
     // The timeout will be re-scheduled by this._onReloadSuccess() or this._onReloadFailure().
     this._clearReloadTimer()
@@ -154,6 +175,9 @@ up.FragmentPolling = class FragmentPolling {
 
     try {
       // Prevent our own reloading from aborting ourselves.
+      console.debug("[_reloadNow] setting abortable = false")
+
+      // TODO: Replace _abortable with a { renderJob } property for up:fragment:aborted
       this._abortable = false
 
       // Don't schedule timers while we're loading. _onReloadSuccess() and _onReloadFailure() will do that for us.
@@ -166,6 +190,7 @@ up.FragmentPolling = class FragmentPolling {
     } finally {
       // Now that our own render pass has process abort options (this happens sync),
       // we can resume listening to abort signals.
+      console.debug("[_reloadNow] reverting abortable = %o", oldAbortable)
       this._abortable = oldAbortable
     }
   }
@@ -175,14 +200,9 @@ up.FragmentPolling = class FragmentPolling {
     return { ...this._options, guardEvent }
   }
 
-  _onFragmentAborted({ newLayer }) {
-    // We temporarily set this._abortable to false while we're reloading our fragment, which also aborts our fragment.
-    if (this._abortable && !newLayer) {
-      this._stop()
-    }
-  }
-
   _onReloadSuccess({ fragment }) {
+    console.debug("[_onReloadSuccess] fragment", fragment)
+
     this._loading = false
     this._satisfyInterval()
 
@@ -190,17 +210,20 @@ up.FragmentPolling = class FragmentPolling {
       // No need to _scheduleRemainingTime() in this branch:
       //
       // (1) Either the new fragment also has an [up-poll] and we have already started in _onPollAttributeObserved().
-      // (2) Or we are force-started and we will start in __onFragmentSwapped().
+      // (2) Or we are force-started and we will start in _onFragmentSwapped().
       this._onFragmentSwapped(fragment)
     } else {
       // The server may have opted to not send an update, e.g. if there is no fresher content.
       // In that case we try again in the next interval.
+
+      // TODO: But we aborted ourselves and stopped?
+      // TODO: Can we just restart here?
       this._scheduleRemainingTime()
     }
   }
 
   _onFragmentSwapped(newFragment) {
-    this._stop()
+    this._stop() // TODO: abort already did this?
 
     if (this.forceStarted && up.fragment.matches(this._fragment, newFragment)) {
       // Force start the new up.Polling instance for the new fragment.
@@ -209,6 +232,11 @@ up.FragmentPolling = class FragmentPolling {
   }
 
   _onReloadFailure(reason) {
+    console.debug("[_onReloadFailure] reason", reason)
+
+    // Because we didn't supply a { failTarget } or { fallback } option, we can only reach
+    // this branch for a fatal render error.
+
     this._loading = false
     this._satisfyInterval()
     this._scheduleRemainingTime()

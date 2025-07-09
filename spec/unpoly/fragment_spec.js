@@ -10349,7 +10349,7 @@ describe('up.fragment', function() {
         })
       })
 
-      describe('with { abort } option', function() {
+      fdescribe('with { abort } option', function() {
 
         describe('with { abort: true }', function() {
 
@@ -10694,7 +10694,53 @@ describe('up.fragment', function() {
             expect(change1Error).toBeUndefined()
             expect(up.network.queue.allRequests.length).toEqual(1)
           })
+
+          it('aborts conflicting requests right before an element is swapped', async function() {
+            throw "implement me"
+          })
+
         })
+      })
+
+      fdescribe('up:fragment:aborted event', async function() {
+
+        it('has a { renderJob } property so listeners can exclude their own update')
+
+        describe('with { abort } option', function() {
+
+          it('is emitted before a request is made')
+
+          it('is emitted before a request is made when no other requests are in flight')
+
+          it('is emitted once before an element is swapped from a URL')
+
+          it('is emitted before an element is swapped from local HTML')
+
+          it("is emitted before an element's { content } is swapped")
+
+          it('is emitted a second time when a fragment is appended to')
+
+          it('is not emitted a second time when a fragment is kept')
+
+        })
+
+        describe('with { abort: false } option', function() {
+
+          it('is not emitted before the request')
+
+          it('is emitted once before an element is swapped from a URL')
+
+          it('is emitted before an element is swapped from local HTML')
+
+          it("is emitted before an element's { content } is swapped")
+
+          it('is emitted when a fragment is appended to')
+
+          it('is not emitted when a fragment is kept')
+
+        })
+
+
       })
 
       if (up.migrate.loaded) {
@@ -13448,7 +13494,7 @@ describe('up.fragment', function() {
       })
     })
 
-    describe('up.fragment.onAborted()', function() {
+    fdescribe('up.fragment.onAborted()', function() {
 
       it("runs the callback when the fragment is aborted", function() {
         const fragment = fixture('.fragment')

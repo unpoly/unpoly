@@ -1934,7 +1934,7 @@ describe('up.radio', function() {
       })
     })
 
-    describe('[up-poll]', function() {
+    fdescribe('[up-poll]', function() {
 
       it('reloads the element periodically', async function() {
         const interval = 150
@@ -2602,6 +2602,223 @@ describe('up.radio', function() {
         })
       })
 
+      describe('handling of [up-keep] elements', function() {
+
+        it('preserves [up-keep] elements contained within the polling fragment', async function() {
+          const interval = 150
+          const timingTolerance = interval / 3
+          up.radio.config.pollInterval = interval
+
+          const html = (version) => `
+            <div id="poller" up-poll data-version="${version}">
+              <div id="swapper" data-version="${version}"></div>
+              <div id="keeper" up-keep data-version="${version}"></div>                          
+            </div>
+          `
+          const [poller, swapper, keeper] = htmlFixtureList(html(1))
+          up.hello(poller)
+
+          await wait(timingTolerance)
+
+          expect('#poller').toHaveAttribute('data-version', '1')
+          expect('#swapper').toHaveAttribute('data-version', '1')
+          expect('#keeper').toHaveAttribute('data-version', '1')
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+          await wait(interval)
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          jasmine.respondWith(html(2))
+          await wait()
+
+          expect('#poller').toHaveAttribute('data-version', '2')
+          expect('#swapper').toHaveAttribute('data-version', '2')
+          expect('#keeper').toHaveAttribute('data-version', '1')
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          await wait(timingTolerance + interval)
+
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+
+          jasmine.respondWith(html(3))
+          await wait()
+
+          expect('#poller').toHaveAttribute('data-version', '3')
+          expect('#swapper').toHaveAttribute('data-version', '3')
+          expect('#keeper').toHaveAttribute('data-version', '1')
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+        })
+
+        it('keeps polling if the polling fragment is also [up-keep]', async function() {
+          const interval = 150
+          const timingTolerance = interval / 3
+          up.radio.config.pollInterval = interval
+          const keepSpy = jasmine.createSpy('up:fragment:keep listener')
+          up.on('up:fragment:keep', keepSpy)
+
+          const html = (version) => `
+            <div id="poller" up-poll up-keep data-version="${version}">
+            </div>
+          `
+          const [poller] = htmlFixtureList(html(1))
+          up.hello(poller)
+
+          await wait(timingTolerance)
+
+          expect('#poller').toHaveAttribute('data-version', '1')
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+          expect(keepSpy.calls.count()).toBe(0)
+
+          await wait(interval)
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(keepSpy.calls.count()).toBe(0)
+
+          jasmine.respondWith(html(2))
+          await wait()
+
+          expect('#poller').toHaveAttribute('data-version', '1')
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(keepSpy.calls.count()).toBe(1)
+
+          console.debug("[spec] waiting for %o ms", timingTolerance + interval)
+          await wait(timingTolerance + interval)
+
+          console.debug("[spec] expecting 2 requests")
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+          expect(keepSpy.calls.count()).toBe(1)
+
+          jasmine.respondWith(html(3))
+          await wait()
+
+          expect('#poller').toHaveAttribute('data-version', '1')
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+          expect(keepSpy.calls.count()).toBe(2)
+        })
+
+        it('keeps polling if an [up-keep] ancestor is kept', async function() {
+          const interval = 150
+          const timingTolerance = interval / 3
+          up.radio.config.pollInterval = interval
+          const keepSpy = jasmine.createSpy('up:fragment:keep listener')
+          up.on('up:fragment:keep', keepSpy)
+
+          const html = (version) => `
+            <div id="ancestor" up-keep data-version="${version}">
+              <div id="poller" up-poll data-version="${version}">
+              </div>
+            </div>
+          `
+          const [ancestor, poller] = htmlFixtureList(html(0))
+          up.hello(ancestor)
+
+          // Before interval 1. No changes yet. No requests yet.
+          await wait(timingTolerance)
+          expect(keepSpy.calls.count()).toBe(0)
+          expect('#ancestor').toHaveAttribute('data-version', '0')
+          expect('#poller').toHaveAttribute('data-version', '0')
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+          // After interval 1. Request 1 is in flight.
+          await wait(interval)
+          expect(keepSpy.calls.count()).toBe(0)
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          // After response 1. Ancestor is kept, poller is swapped.
+          jasmine.respondWith(html(1))
+          await wait()
+          expect(keepSpy.calls.count()).toBe(1)
+          expect('#ancestor').toHaveAttribute('data-version', '0')
+          expect('#poller').toHaveAttribute('data-version', '1')
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          // After interval 2. Request 2 is in flight.
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+
+          // After response 2. Ancestor is kept, poller is swapped.
+          jasmine.respondWith(html(1))
+          await wait()
+          expect(keepSpy.calls.count()).toBe(1)
+          expect('#ancestor').toHaveAttribute('data-version', '0')
+          expect('#poller').toHaveAttribute('data-version', '2')
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+
+          // After interval 3. Request 3 is in flight.
+          expect(jasmine.Ajax.requests.count()).toBe(3)
+        })
+
+        it('keeps polling if the polling fragment is [up-keep] and has a keep condition', async function() {
+          const interval = 150
+          const timingTolerance = interval / 3
+          up.radio.config.pollInterval = interval
+          const keepSpy = jasmine.createSpy('up:fragment:keep listener').and.callFake(function(event) {
+            let version = parseInt(event.target.dataset.version)
+            // Only swap even versions
+            if (version % 2 !== 0) event.preventDefault()
+          })
+          up.on('up:fragment:keep', keepSpy)
+
+          const html = (version) => `
+            <div id="poller" up-poll up-keep data-version="${version}">
+            </div>
+          `
+          const [poller] = htmlFixtureList(html(0))
+          up.hello(poller)
+
+          // Before interval 1. Nothing changed yet, no requests yet.
+          await wait(timingTolerance)
+          expect(keepSpy.calls.count()).toBe(0)
+          expect('#poller').toHaveAttribute('data-version', '0')
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+          // After interval 1. Request 1 is in flight.
+          await wait(interval)
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(keepSpy.calls.count()).toBe(0)
+
+          // After response 1. Discarding odd version 1 from server.
+          jasmine.respondWith(html(1))
+          await wait()
+          expect(keepSpy.calls.count()).toBe(1)
+          expect('#poller').toHaveAttribute('data-version', '0')
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          // After interval 2. Request 2 is in flight.
+          await wait(timingTolerance + interval)
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+
+          // After response 2. Swapping with even version 2 from server.
+          jasmine.respondWith(html(2))
+          await wait()
+          expect(keepSpy.calls.count()).toBe(2)
+          expect('#poller').toHaveAttribute('data-version', '2')
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+
+          // After interval 3. Request 3 is in flight.
+          await wait(timingTolerance + interval)
+          expect(jasmine.Ajax.requests.count()).toBe(3)
+
+          // After response 3. Discarding odd version 3 from server.
+          jasmine.respondWith(html(3))
+          await wait()
+          expect(keepSpy.calls.count()).toBe(3)
+          expect('#poller').toHaveAttribute('data-version', '2')
+          expect(jasmine.Ajax.requests.count()).toBe(3)
+
+          // After interval 4. Request 4 is in flight.
+          await wait(timingTolerance + interval)
+          expect(jasmine.Ajax.requests.count()).toBe(4)
+
+          // After response 4. Swapping with even version 4 from server.
+          jasmine.respondWith(html(4))
+          await wait()
+          expect(keepSpy.calls.count()).toBe(4)
+          expect('#poller').toHaveAttribute('data-version', '4')
+          expect(jasmine.Ajax.requests.count()).toBe(4)
+        })
+
+      })
 
       describe('with [up-preview]', function() {
         it('shows a preview while the fragment is reloading', async function() {

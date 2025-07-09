@@ -189,9 +189,12 @@ up.RenderJob = class RenderJob {
   }
 
   _handleAbortOption(request) {
+    console.debug("[_handleAbortOption] for request %o", request)
+
     // When preloading up.RenderOptions forces { abort: false }.
     let { abort } = this.renderOptions
 
+    // TODO: We must also abort when the network is idle, to emit up:fragment:aborted
     if (!abort || !up.network.isBusy()) return
 
     let { bindFragments, bindLayer, origin, layer } = this._getChange().getPreflightProps()
