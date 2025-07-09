@@ -103,7 +103,10 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // by passing { abort: false }, we abort pending requests targeting
     // the elements that we're about to remove.
     if (this.options.abort !== false) {
-      up.fragment.abort(this._getFragments(), { reason: 'Fragment is being replaced' })
+      up.fragment.abort(this._getFragments(), {
+        reason: 'Fragment is being replaced',
+        jid: this.options.jid,
+      })
     }
 
     Object.assign(this.layer.context, this._context)

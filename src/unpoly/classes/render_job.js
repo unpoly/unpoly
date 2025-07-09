@@ -192,7 +192,10 @@ up.RenderJob = class RenderJob {
     // When preloading up.RenderOptions forces { abort: false }.
     let { abort } = this.renderOptions
 
-    if (!abort || !up.network.isBusy()) return
+    // The only case where we don't call up.fragment.abort() is with { abort: false }.
+    // Even with no requests in flight we will call up.fragment.abort(),
+    // so non-network async jobs can wait for up:fragment:aborted as an aborting signal.
+    if (!abort) return
 
     let { bindFragments, bindLayer, origin, layer } = this._getChange().getPreflightProps()
 
@@ -201,6 +204,7 @@ up.RenderJob = class RenderJob {
       logOnce: ['up.render()', 'Change with { abort } option will abort other requests'],
       newLayer: (layer === 'new'),
       origin,
+      jid: this.renderOptions.jid,
     }
 
     if (abort === 'target') {

@@ -916,17 +916,15 @@ up.fragment = (function() {
   @stable
   */
 
-  function emitFragmentKeep(keepPlan) {
-    let { oldElement, newElement: newFragment, newData, renderOptions } = keepPlan
+  function emitFragmentKeep({ oldElement, newElement: newFragment, newData, renderOptions }) {
     const log = ['Keeping fragment %o', oldElement]
-    const callback = e.callbackAttr(keepPlan.oldElement, 'up-on-keep', { exposedKeys: ['newFragment', 'newData'] })
-    const event = up.event.build('up:fragment:keep', { newFragment, newData, renderOptions })
-    return up.emit(oldElement, event, { log, callback })
+    const callback = e.callbackAttr(oldElement, 'up-on-keep', { exposedKeys: ['newFragment', 'newData'] })
+    return up.emit(oldElement, 'up:fragment:keep', { log, callback, newFragment, newData, renderOptions })
   }
 
   /*-
-  This event is [emitted](/up.emit) before an existing element is [kept](/preserving-elements)
-  during a page update.
+  This event is emitted before an existing element is [kept](/preserving-elements)
+  during a render pass.
 
   Event listeners can call `event.preventDefault()` on an `up:fragment:keep` event
   to prevent the element from being persisted. If the event is prevented, the element
@@ -958,13 +956,35 @@ up.fragment = (function() {
   @param {Element} event.target
     The fragment that will be kept.
   @param {Element} event.newFragment
-    The discarded element.
+    The new element from the response.
   @param {Object} event.newData
-    The [data](/data) attached to the discarded element.
+    The [data](/data) attached to the new element.
   @param {Object} event.renderOptions
-    An object with [render options](/up.render#parameters) for the current fragment update.
+    An object with [render options](/up.render#parameters) for the current render pass.
   @stable
   */
+
+  /*-
+  The `up:fragment:kept` event is emitted *after* an existing element has been [kept](/preserving-elements) during a render pass.
+
+  All [keep conditions](/preserving-elements#keep-conditions) have already been evaluated.
+  The keeping can no longer be prevented. For this, use `up:fragment:keep` instead.
+
+  [Preserving elements](/preserving-elements){:.article-ref}
+
+  @event up:fragment:kept
+  @param {Element} event.target
+    The fragment that has been kept.
+  @param {Element} event.newFragment
+    The response fragment that has been discard.
+  @param {Object} event.newData
+    The [data](/data) attached to the discarded element.
+  @experimental
+  */
+
+  function emitFragmentKept({ oldElement, newElement: newFragment, newData }) {
+    return up.emit(oldElement, 'up:fragment:kept', { log: true, newFragment, newData })
+  }
 
   /*-
   Returns a object detailing a keep operation iff the given { oldElement } is [up-keep] and
@@ -2630,7 +2650,7 @@ up.fragment = (function() {
 
     // The reason will be logged with the up:request:abort event when we actually abort an event.
     // It should be a string, not an array that goes through sprintf().
-    let { reason, newLayer } = options
+    let { reason, newLayer, jid } = options
 
     // At the end we're going to emit up:fragment:aborted on these elements.
     // Other async code observing these elements can then chose to abort itself.
@@ -2678,7 +2698,7 @@ up.fragment = (function() {
       //     a message "Change with { abort } option will abort other requests' before
       //     we abort the first request. This is done via an { logOnce } option that
       //     this function passes on to up.network.abort().
-      up.emit(element, 'up:fragment:aborted', { reason, newLayer, log: false })
+      up.emit(element, 'up:fragment:aborted', { reason, newLayer, jid, log: reason })
     }
   }
 
@@ -2768,12 +2788,11 @@ up.fragment = (function() {
   @experimental
   */
   function onAborted(fragment, callback) {
-    let guard = (event) => event.target.contains(fragment)
-    let unsubscribe = up.on('up:fragment:aborted', { guard }, callback)
-    // Since we're binding to an element that is an ancestor of the fragment,
-    // we need to unregister the event listener when the fragment is removed.
-    up.destructor(fragment, unsubscribe)
-    return unsubscribe
+    return up.event.onAncestor(fragment, 'up:fragment:aborted', callback)
+  }
+
+  function onKept(fragment, callback) {
+    return up.event.onAncestor(fragment, 'up:fragment:kept', callback)
   }
 
   // This function lives in up.fragment (not up.element)
@@ -3053,6 +3072,7 @@ up.fragment = (function() {
     emitInserted: emitFragmentInserted,
     emitDestroyed: emitFragmentDestroyed,
     emitKeep: emitFragmentKeep,
+    emitKept: emitFragmentKept,
     keepPlan: findKeepPlan,
     defaultNormalizeKeepHTML, // export for testing
     successKey,
@@ -3069,6 +3089,7 @@ up.fragment = (function() {
     shouldRevalidate,
     abort,
     onAborted,
+    onKept,
     onFirstIntersect,
     splitTarget,
     parseTargetSteps,

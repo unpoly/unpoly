@@ -10588,6 +10588,26 @@ describe('up.fragment', function() {
             await expectAsync(change1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
           })
 
+          it('aborts a conflicting request made while the render pass is waiting for the network', async function() {
+            fixture('.element', { text: 'v1' })
+
+            const change1Promise = up.render('.element', { url: '/path2', abort: 'target' })
+            await wait()
+
+            expect(up.network.queue.allRequests.length).toBe(1)
+            const change2Promise = up.render('.element', { url: '/path1', abort: false })
+            await wait()
+
+            expect(up.network.queue.allRequests.length).toBe(2)
+
+            jasmine.Ajax.requests.at(0).respondWith({ responseText: '<div class="element">v2</div>' })
+            await wait()
+
+            expect('.element').toHaveText('v2')
+            await expectAsync(change1Promise).toBeResolvedTo(jasmine.any(up.RenderResult))
+            await expectAsync(change2Promise).toBeRejectedWith(jasmine.any(up.Aborted))
+          })
+
           it('aborts existing requests targeting the same element when updating from local content', async function() {
             fixture('.element')
             const change1Promise = up.render('.element', { url: '/path1' })
@@ -10642,6 +10662,109 @@ describe('up.fragment', function() {
             await expectAsync(followPromise).toBePending()
             expect(up.network.queue.allRequests.length).toBe(1)
           })
+
+          describe('up:fragment:aborted event', function() {
+
+            it('emits with a { jid } property so listeners can exclude their own update', async function() {
+              let element = fixture('.element')
+              const change1Promise = up.render('.element', { url: '/path1' })
+              await wait()
+
+              expect(up.network.queue.allRequests.length).toBe(1)
+
+              let abortedListener = jasmine.createSpy('up:fragment:aborted listener')
+              up.on('up:fragment:aborted', abortedListener)
+
+              up.render('.element', { url: '/path2', abort: 'target', jid: 'my-jid-123' })
+              await wait()
+
+              await expectAsync(change1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
+              expect(abortedListener.calls.count()).toBe(1)
+              expect(abortedListener.calls.mostRecent().args[0]).toEqual(jasmine.objectContaining({
+                type: 'up:fragment:aborted',
+                target: element,
+                jid: 'my-jid-123',
+              }))
+            })
+
+            it('is emitted before a request is made when other requests are in flight', async function() {
+              let element = fixture('.element')
+              const change1Promise = up.render('.element', { url: '/path1' })
+              await wait()
+
+              expect(up.network.queue.allRequests.length).toBe(1)
+
+              let abortedListener = jasmine.createSpy('up:fragment:aborted listener')
+              up.on('up:fragment:aborted', abortedListener)
+
+              up.render('.element', { url: '/path2', abort: 'target' })
+              await wait()
+
+              await expectAsync(change1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
+              expect(abortedListener.calls.count()).toBe(1)
+              expect(abortedListener.calls.mostRecent().args[0]).toEqual(jasmine.objectContaining({
+                type: 'up:fragment:aborted',
+                target: element,
+              }))
+            })
+
+            it('is emitted before a request is made when no other requests are in flight', async function() {
+              let element = fixture('.element')
+
+              let abortedListener = jasmine.createSpy('up:fragment:aborted listener')
+              up.on('up:fragment:aborted', abortedListener)
+
+              up.render('.element', { url: '/path2', abort: 'target' })
+              await wait()
+
+              expect(abortedListener.calls.count()).toBe(1)
+              expect(abortedListener.calls.mostRecent().args[0]).toEqual(jasmine.objectContaining({
+                type: 'up:fragment:aborted',
+                target: element,
+              }))
+            })
+
+            it('is emitted before an element is swapped from local HTML', async function() {
+              let originalElement = htmlFixture('<div class="element">v1</div>')
+              const change1Promise = up.render('.element', { url: '/path1' })
+              await wait()
+
+              expect(up.network.queue.allRequests.length).toBe(1)
+
+              let abortedListener = jasmine.createSpy('up:fragment:aborted listener')
+              up.on('up:fragment:aborted', abortedListener)
+
+              up.render({ fragment: '<div class="element">v2</div>', abort: 'target' })
+              await wait()
+
+              expect('.element').toHaveText('v2')
+              await expectAsync(change1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
+              expect(abortedListener.calls.count()).toBeGreaterThanOrEqual(1)
+              expect(abortedListener.calls.mostRecent().args[0]).toEqual(jasmine.objectContaining({
+                type: 'up:fragment:aborted',
+                target: originalElement,
+              }))
+            })
+
+            it('is emitted before an element is swapped from local HTML and no requests are in flight', async function() {
+              let originalElement = htmlFixture('<div class="element">v1</div>')
+
+              let abortedListener = jasmine.createSpy('up:fragment:aborted listener')
+              up.on('up:fragment:aborted', abortedListener)
+
+              up.render({ fragment: '<div class="element">v2</div>', abort: 'target' })
+              await wait()
+
+              expect('.element').toHaveText('v2')
+              expect(abortedListener.calls.count()).toBeGreaterThanOrEqual(1)
+              expect(abortedListener.calls.mostRecent().args[0]).toEqual(jasmine.objectContaining({
+                type: 'up:fragment:aborted',
+                target: originalElement,
+              }))
+            })
+
+          })
+
         })
 
         describe('with { abort: false }', function() {
@@ -10694,6 +10817,29 @@ describe('up.fragment', function() {
             expect(change1Error).toBeUndefined()
             expect(up.network.queue.allRequests.length).toEqual(1)
           })
+
+          describe('up:fragment:aborted event', function() {
+            it('is not emitted at any point during the render process', async function() {
+              fixture('.element')
+
+              up.render('.element', { url: '/path1' })
+              await wait()
+
+              expect(up.network.queue.allRequests.length).toEqual(1)
+
+              let abortedListener = jasmine.createSpy('up:fragment:aborted listener')
+              up.on('up:fragment:aborted', abortedListener)
+              await wait()
+
+              up.render('.element', { url: '/path2', abort: false })
+              await wait()
+
+              expect(up.network.queue.allRequests.length).toEqual(2)
+              expect(abortedListener).not.toHaveBeenCalled()
+            })
+
+          })
+
         })
       })
 
@@ -14531,6 +14677,32 @@ describe('up.fragment', function() {
             jasmine.anything()
           )
         })
+
+        it('emits an up:fragment:kept event if up:fragment:keep is not prevented', async function() {
+          let html = `<div id="keeper" up-keep></div>`
+          let [keeper] = htmlFixtureList(html)
+          let keptSpy = jasmine.createSpy('up:fragment:kept listener')
+          document.addEventListener('up:fragment:kept', keptSpy)
+
+          up.render({ fragment: html })
+          await wait()
+
+          expect(keptSpy).toHaveBeenCalledWith(jasmine.objectContaining({ type: 'up:fragment:kept' }))
+        })
+
+        it('does not emit an up:fragment:kept event if up:fragment:keep is prevented', async function() {
+          let html = `<div id="keeper" up-keep></div>`
+          let [keeper] = htmlFixtureList(html)
+          keeper.addEventListener('up:fragment:keep', (event) => event.preventDefault())
+          let keptSpy = jasmine.createSpy('up:fragment:kept listener')
+          document.addEventListener('up:fragment:kept', keptSpy)
+
+          up.render({ fragment: html })
+          await wait()
+
+          expect(keptSpy).not.toHaveBeenCalled()
+        })
+
       })
 
       it("removes an [up-keep] element if no matching element is found in the response", async function() {
@@ -14911,6 +15083,42 @@ describe('up.fragment', function() {
         await wait()
 
         expect('.keeper').toHaveText('new-inside')
+      })
+
+      it('emits an up:fragment:kept event if up:fragment:keep is not prevented', async function() {
+        let html = `
+          <div id="container">
+            <div id="keeper" up-keep></div>
+          </div>
+        `
+        let [container, keeper] = htmlFixtureList(html)
+        let keptSpy = jasmine.createSpy('up:fragment:kept listener')
+        document.addEventListener('up:fragment:kept', keptSpy)
+
+        up.render({ fragment: html })
+        await wait()
+
+        expect(keptSpy).toHaveBeenCalledWith(jasmine.objectContaining({
+          type: 'up:fragment:kept',
+          target: keeper,
+        }))
+      })
+
+      it('does not emit an up:fragment:kept event if up:fragment:keep is prevented', async function() {
+        let html = `
+          <div id="container">
+            <div id="keeper" up-keep></div>
+          </div>
+        `
+        let [container, keeper] = htmlFixtureList(html)
+        keeper.addEventListener('up:fragment:keep', (event) => event.preventDefault())
+        let keptSpy = jasmine.createSpy('up:fragment:kept listener')
+        document.addEventListener('up:fragment:kept', keptSpy)
+
+        up.render({ fragment: html })
+        await wait()
+
+        expect(keptSpy).not.toHaveBeenCalled()
       })
 
       it('lets listeners prevent up:fragment:keep event if the element was kept before (bugfix)', async function() {
