@@ -10702,17 +10702,17 @@ describe('up.fragment', function() {
         })
       })
 
-      fdescribe('up:fragment:aborted event', async function() {
+      fdescribe('up:fragment:aborted event', function() {
 
-        it('has a { renderJob } property so listeners can exclude their own update')
+        it('has a { jid } property so listeners can exclude their own update')
 
-        describe('with { abort } option', function() {
+        describe('with a truthy { abort } option', function() {
 
           it('is emitted before a request is made')
 
           it('is emitted before a request is made when no other requests are in flight')
 
-          it('is emitted once before an element is swapped from a URL')
+          it('is emitted before an element is swapped from a URL')
 
           it('is emitted before an element is swapped from local HTML')
 
@@ -10728,7 +10728,7 @@ describe('up.fragment', function() {
 
           it('is not emitted before the request')
 
-          it('is emitted once before an element is swapped from a URL')
+          it('is emitted before an element is swapped from a URL')
 
           it('is emitted before an element is swapped from local HTML')
 

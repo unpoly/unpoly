@@ -204,6 +204,7 @@ up.RenderJob = class RenderJob {
       logOnce: ['up.render()', 'Change with { abort } option will abort other requests'],
       newLayer: (layer === 'new'),
       origin,
+      jid: this.renderOptions.jid,
     }
 
     if (abort === 'target') {

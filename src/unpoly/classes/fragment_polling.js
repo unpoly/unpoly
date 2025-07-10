@@ -1,4 +1,5 @@
 const e = up.element
+const u = up.util
 
 up.FragmentPolling = class FragmentPolling {
 
@@ -7,10 +8,9 @@ up.FragmentPolling = class FragmentPolling {
 
     this._fragment = fragment
     up.destructor(fragment, this._onFragmentDestroyed.bind(this))
-    up.fragment.onAborted(fragment, this._onFragmentAborted.bind(this))
 
     this._state = 'initialized' // 'initialized' || 'started' || 'stopped'
-    this._abortable = true
+    // this._abortable = true
     this._loading = false
     this._satisfyInterval()
   }
@@ -23,11 +23,10 @@ up.FragmentPolling = class FragmentPolling {
     this._start()
   }
 
-  _onFragmentAborted({ newLayer }) {
-    console.debug("[_onFragmentAborted] with _abortable == %o", this._abortable)
+  _onFragmentAborted({ newLayer, jid }) {
+    console.debug("[_onFragmentAborted] with _reloadJID == %o", this._reloadJID)
 
-    // We temporarily set this._abortable to false while we're reloading our fragment, which also aborts our fragment.
-    if (this._abortable && !newLayer) {
+    if (jid !== this._reloadJID && !newLayer) {
       this._stop()
     }
   }
@@ -61,7 +60,8 @@ up.FragmentPolling = class FragmentPolling {
     if (this._state === 'started') {
       this._clearReloadTimer()
       this._state = 'stopped'
-      this._unbindEvents?.()
+      this._unbindVisibilityChanged?.()
+      this._unbindAborted?.()
     }
   }
 
@@ -77,8 +77,9 @@ up.FragmentPolling = class FragmentPolling {
   }
 
   _ensureEventsBound() {
-    if (!this._unbindEvents) {
-      this._unbindEvents = up.on('visibilitychange up:layer:opened up:layer:dismissed up:layer:accepted', this._onVisibilityChange.bind(this))
+    if (!this._unbindVisibilityChanged) {
+      this._unbindVisibilityChanged = up.on('visibilitychange up:layer:opened up:layer:dismissed up:layer:accepted', this._onVisibilityChange.bind(this))
+      this._unbindAborted = up.fragment.onAborted(this._fragment, this._onFragmentAborted.bind(this))
     }
   }
 
@@ -171,34 +172,38 @@ up.FragmentPolling = class FragmentPolling {
     // The timeout will be re-scheduled by this._onReloadSuccess() or this._onReloadFailure().
     this._clearReloadTimer()
 
-    let oldAbortable = this._abortable
+    // let oldAbortable = this._abortable
 
     try {
       // Prevent our own reloading from aborting ourselves.
       console.debug("[_reloadNow] setting abortable = false")
 
       // TODO: Replace _abortable with a { renderJob } property for up:fragment:aborted
-      this._abortable = false
+      // this._abortable = false
 
       // Don't schedule timers while we're loading. _onReloadSuccess() and _onReloadFailure() will do that for us.
       this._loading = true
 
-      up.reload(this._fragment, this._reloadOptions()).then(
+      let guardEvent = up.event.build('up:fragment:poll', { log: ['Polling fragment', this._fragment] })
+      let jid = this._reloadJID = u.uid()
+      let reloadOptions = { ...this._options, guardEvent, jid }
+
+      up.reload(this._fragment, reloadOptions).then(
         this._onReloadSuccess.bind(this),
         this._onReloadFailure.bind(this)
       )
     } finally {
       // Now that our own render pass has process abort options (this happens sync),
       // we can resume listening to abort signals.
-      console.debug("[_reloadNow] reverting abortable = %o", oldAbortable)
-      this._abortable = oldAbortable
+      // console.debug("[_reloadNow] reverting abortable = %o", oldAbortable)
+      // this._abortable = oldAbortable
     }
   }
 
-  _reloadOptions() {
-    let guardEvent = up.event.build('up:fragment:poll', { log: ['Polling fragment', this._fragment] })
-    return { ...this._options, guardEvent }
-  }
+  // _reloadOptions() {
+  //   let guardEvent = up.event.build('up:fragment:poll', { log: ['Polling fragment', this._fragment] })
+  //   return { ...this._options, guardEvent }
+  // }
 
   _onReloadSuccess({ fragment }) {
     console.debug("[_onReloadSuccess] fragment", fragment)
