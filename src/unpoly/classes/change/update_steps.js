@@ -84,6 +84,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
           this._handleScroll(step.oldElement, step)
 
           // Don't add kept fragment to this.renderResult.
+          up.fragment.emitKept(keepPlan)
 
           return Promise.resolve()
 
@@ -273,6 +274,8 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
   _finalizeDescendantKeepables(step) {
     for (let keepPlan of step.descendantKeepPlans) {
       keepPlan.oldElement.classList.remove('up-keeping')
+      console.debug("[UpdateSteps] emitting kept")
+      up.fragment.emitKept(keepPlan)
     }
   }
 

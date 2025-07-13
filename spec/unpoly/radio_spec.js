@@ -2710,7 +2710,7 @@ describe('up.radio', function() {
               </div>
             </div>
           `
-          const [ancestor, poller] = htmlFixtureList(html(0))
+          const [ancestor, poller] = htmlFixtureList(html(0, 0))
           up.hello(ancestor)
 
           // Before interval 1. No changes yet. No requests yet.
@@ -2725,28 +2725,44 @@ describe('up.radio', function() {
           expect(keepSpy.calls.count()).toBe(0)
           expect(jasmine.Ajax.requests.count()).toBe(1)
 
-          // // After response 1. Ancestor is kept, poller is swapped.
-          // jasmine.respondWith(html(1))
-          // await wait()
-          // expect(keepSpy.calls.count()).toBe(1)
-          // expect('#ancestor').toHaveAttribute('data-version', '0')
-          // expect('#poller').toHaveAttribute('data-version', '1')
-          // expect(jasmine.Ajax.requests.count()).toBe(1)
-          //
-          // // After interval 2. Request 2 is in flight.
-          // expect(jasmine.Ajax.requests.count()).toBe(2)
-          //
-          // // After response 2. Ancestor is kept, poller is swapped.
-          // jasmine.respondWith(html(1))
-          // await wait()
-          // expect(keepSpy.calls.count()).toBe(1)
-          // expect('#ancestor').toHaveAttribute('data-version', '0')
-          // expect('#poller').toHaveAttribute('data-version', '2')
-          // expect(jasmine.Ajax.requests.count()).toBe(2)
-          //
-          // // After interval 3. Request 3 is in flight.
-          // expect(jasmine.Ajax.requests.count()).toBe(3)
-        })
+          // After response 1. Poller is swapped.
+          jasmine.respondWith(html(1, 1))
+          await wait()
+          expect(keepSpy.calls.count()).toBe(0)
+          expect('#ancestor').toHaveAttribute('data-version', '0')
+          expect('#poller').toHaveAttribute('data-version', '1')
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          // Ancestor is re-rendered, but ends up being kept.
+          console.debug("[spec] reloading ancestor, which ends up being kept")
+          up.reload('#ancestor')
+          await wait()
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+          jasmine.respondWith(html(2, 2))
+          await wait()
+
+          expect(keepSpy.calls.count()).toBe(1)
+          expect('#ancestor').toHaveAttribute('data-version', '0')
+          expect('#poller').toHaveAttribute('data-version', '1')
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+
+          // After interval 2. Poller reloads.
+          await wait(interval + timingTolerance)
+          expect(jasmine.Ajax.requests.count()).toBe(3)
+
+          // Polling response
+          jasmine.respondWith(html(3, 3))
+          await wait()
+
+          expect(keepSpy.calls.count()).toBe(1)
+          expect('#ancestor').toHaveAttribute('data-version', '0')
+          expect('#poller').toHaveAttribute('data-version', '3')
+          expect(jasmine.Ajax.requests.count()).toBe(3)
+
+          // After interval 3. Poller reloads.
+          await wait(interval + timingTolerance)
+          expect(jasmine.Ajax.requests.count()).toBe(4)
+          })
 
         it('keeps polling if the polling fragment is [up-keep] and has a keep condition', async function() {
           const interval = 150

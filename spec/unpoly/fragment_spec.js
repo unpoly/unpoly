@@ -10704,7 +10704,9 @@ describe('up.fragment', function() {
 
       fdescribe('up:fragment:aborted event', function() {
 
-        it('has a { jid } property so listeners can exclude their own update')
+        it('has a { jid } property so listeners can exclude their own update', async function() {
+          throw "test if anything breaks if FragmentPolling loses the jid handling"
+        })
 
         describe('with a truthy { abort } option', function() {
 
@@ -10726,17 +10728,7 @@ describe('up.fragment', function() {
 
         describe('with { abort: false } option', function() {
 
-          it('is not emitted before the request')
-
-          it('is emitted before an element is swapped from a URL')
-
-          it('is emitted before an element is swapped from local HTML')
-
-          it("is emitted before an element's { content } is swapped")
-
-          it('is emitted when a fragment is appended to')
-
-          it('is not emitted when a fragment is kept')
+          it('is not emitted at any point during the render process')
 
         })
 
@@ -14085,7 +14077,7 @@ describe('up.fragment', function() {
 
   describe('unobtrusive behavior', function() {
 
-    describe('[up-keep]', function() {
+    fdescribe('[up-keep]', function() {
 
       function squish(string) {
         if (u.isString(string)) {
@@ -14577,6 +14569,32 @@ describe('up.fragment', function() {
             jasmine.anything()
           )
         })
+
+        it('emits an up:fragment:kept event if up:fragment:keep is not prevented', async function() {
+          let html = `<div id="keeper" up-keep></div>`
+          let [keeper] = htmlFixtureList(html)
+          let keptSpy = jasmine.createSpy('up:fragment:kept listener')
+          document.addEventListener('up:fragment:kept', keptSpy)
+
+          up.render({ fragment: html })
+          await wait()
+
+          expect(keptSpy).toHaveBeenCalledWith(jasmine.objectContaining({ type: 'up:fragment:kept' }))
+        })
+
+        it('does not emit an up:fragment:kept event if up:fragment:keep is prevented', async function() {
+          let html = `<div id="keeper" up-keep></div>`
+          let [keeper] = htmlFixtureList(html)
+          keeper.addEventListener('up:fragment:keep', (event) => event.preventDefault())
+          let keptSpy = jasmine.createSpy('up:fragment:kept listener')
+          document.addEventListener('up:fragment:kept', keptSpy)
+
+          up.render({ fragment: html })
+          await wait()
+
+          expect(keptSpy).not.toHaveBeenCalled()
+        })
+
       })
 
       it("removes an [up-keep] element if no matching element is found in the response", async function() {
@@ -14957,6 +14975,42 @@ describe('up.fragment', function() {
         await wait()
 
         expect('.keeper').toHaveText('new-inside')
+      })
+
+      it('emits an up:fragment:kept event if up:fragment:keep is not prevented', async function() {
+        let html = `
+          <div id="container">
+            <div id="keeper" up-keep></div>
+          </div>
+        `
+        let [container, keeper] = htmlFixtureList(html)
+        let keptSpy = jasmine.createSpy('up:fragment:kept listener')
+        document.addEventListener('up:fragment:kept', keptSpy)
+
+        up.render({ fragment: html })
+        await wait()
+
+        expect(keptSpy).toHaveBeenCalledWith(jasmine.objectContaining({
+          type: 'up:fragment:kept',
+          target: keeper,
+        }))
+      })
+
+      it('does not emit an up:fragment:kept event if up:fragment:keep is prevented', async function() {
+        let html = `
+          <div id="container">
+            <div id="keeper" up-keep></div>
+          </div>
+        `
+        let [container, keeper] = htmlFixtureList(html)
+        keeper.addEventListener('up:fragment:keep', (event) => event.preventDefault())
+        let keptSpy = jasmine.createSpy('up:fragment:kept listener')
+        document.addEventListener('up:fragment:kept', keptSpy)
+
+        up.render({ fragment: html })
+        await wait()
+
+        expect(keptSpy).not.toHaveBeenCalled()
       })
 
       it('lets listeners prevent up:fragment:keep event if the element was kept before (bugfix)', async function() {
