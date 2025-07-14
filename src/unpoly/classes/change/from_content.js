@@ -84,7 +84,7 @@ up.Change.FromContent = class FromContent extends up.Change {
     }
 
     // Used by up.RenderJob
-    this.options.handleAbort?.(null)
+    this.options.handleAbort(this.getPreflightProps())
   }
 
   _getResponseDoc() {

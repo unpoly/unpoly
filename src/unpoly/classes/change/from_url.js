@@ -12,12 +12,13 @@ up.Change.FromURL = class FromURL extends up.Change {
       return u.unresolvablePromise()
     }
 
-    let request = this.request = up.request(this._getRequestAttrs())
+    let requestAttrs = this._getRequestAttrs()
+    let request = this.request = up.request(requestAttrs)
     this.options.onRequestKnown?.(request)
 
     if (this.options.preload) return request
 
-    this.options.handleAbort?.(request)
+    this.options.handleAbort({ request, ...requestAttrs })
     request.runPreviews(this.options)
 
     // Use always() since _onRequestSettled() will decide whether the promise
@@ -42,6 +43,9 @@ up.Change.FromURL = class FromURL extends up.Change {
     }
   }
 
+  // - Includes the render options
+  // - Includes the preflight props of the actual Change instance
+  // - Includes the preflight props for fail-prefixed options
   _getRequestAttrs() {
     const successAttrs = this._preflightPropsForRenderOptions(this.options)
     const failAttrs = this._preflightPropsForRenderOptions(this.deriveFailOptions(), { optional: true })
