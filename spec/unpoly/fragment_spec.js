@@ -10349,7 +10349,7 @@ describe('up.fragment', function() {
         })
       })
 
-      fdescribe('with { abort } option', function() {
+      describe('with { abort } option', function() {
 
         describe('with { abort: true }', function() {
 
@@ -10731,7 +10731,6 @@ describe('up.fragment', function() {
 
               expect(up.network.queue.allRequests.length).toBe(1)
 
-              console.debug("[spec] installing aborted listener")
               let abortedListener = jasmine.createSpy('up:fragment:aborted listener')
               up.on('up:fragment:aborted', abortedListener)
 
@@ -13595,7 +13594,7 @@ describe('up.fragment', function() {
       })
     })
 
-    fdescribe('up.fragment.onAborted()', function() {
+    describe('up.fragment.onAborted()', function() {
 
       it("runs the callback when the fragment is aborted", function() {
         const fragment = fixture('.fragment')
@@ -14186,7 +14185,7 @@ describe('up.fragment', function() {
 
   describe('unobtrusive behavior', function() {
 
-    fdescribe('[up-keep]', function() {
+    describe('[up-keep]', function() {
 
       function squish(string) {
         if (u.isString(string)) {

@@ -176,19 +176,8 @@ up.event = (function() {
   }
 
   function onAncestor(fragment, eventType, callback) {
-    let guard = (event) => {
-      console.debug("[onAncestor] guarding event %o", event.type)
-      return event.target.contains(fragment)
-    }
-    let unsubscribe2 = up.on(eventType, { guard }, function(...args) {
-      console.debug("[onAncestor] got event type %o", args[0].type)
-      callback(...args)
-    })
-
-    let unsubscribe = function(...args) {
-      console.debug("unsubscribing from %o", eventType)
-      unsubscribe2(...args)
-    }
+    let guard = (event) => event.target.contains(fragment)
+    let unsubscribe = up.on(eventType, { guard }, callback)
 
     // Since we're binding to an element that is an ancestor of the fragment,
     // we should unregister the event listener when the fragment is removed.

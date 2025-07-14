@@ -2792,7 +2792,6 @@ up.fragment = (function() {
   }
 
   function onKept(fragment, callback) {
-    console.debug("[onKept] frag %o", fragment)
     return up.event.onAncestor(fragment, 'up:fragment:kept', callback)
   }
 

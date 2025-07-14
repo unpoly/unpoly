@@ -1934,7 +1934,7 @@ describe('up.radio', function() {
       })
     })
 
-    fdescribe('[up-poll]', function() {
+    describe('[up-poll]', function() {
 
       it('reloads the element periodically', async function() {
         const interval = 150
@@ -2682,10 +2682,8 @@ describe('up.radio', function() {
           expect(jasmine.Ajax.requests.count()).toBe(1)
           expect(keepSpy.calls.count()).toBe(1)
 
-          console.debug("[spec] waiting for %o ms", timingTolerance + interval)
           await wait(timingTolerance + interval)
 
-          console.debug("[spec] expecting 2 requests")
           expect(jasmine.Ajax.requests.count()).toBe(2)
           expect(keepSpy.calls.count()).toBe(1)
 
@@ -2734,7 +2732,6 @@ describe('up.radio', function() {
           expect(jasmine.Ajax.requests.count()).toBe(1)
 
           // Ancestor is re-rendered, but ends up being kept.
-          console.debug("[spec] reloading ancestor, which ends up being kept")
           up.reload('#ancestor')
           await wait()
           expect(jasmine.Ajax.requests.count()).toBe(2)

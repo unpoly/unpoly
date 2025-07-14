@@ -189,8 +189,6 @@ up.RenderJob = class RenderJob {
   }
 
   _handleAbortOption(request) {
-    console.debug("[_handleAbortOption] for request %o", request)
-
     // When preloading up.RenderOptions forces { abort: false }.
     let { abort } = this.renderOptions
 

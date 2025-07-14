@@ -274,7 +274,6 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
   _finalizeDescendantKeepables(step) {
     for (let keepPlan of step.descendantKeepPlans) {
       keepPlan.oldElement.classList.remove('up-keeping')
-      console.debug("[UpdateSteps] emitting kept")
       up.fragment.emitKept(keepPlan)
     }
   }

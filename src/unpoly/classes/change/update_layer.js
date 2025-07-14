@@ -103,9 +103,6 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // by passing { abort: false }, we abort pending requests targeting
     // the elements that we're about to remove.
     if (this.options.abort !== false) {
-      // TODO: We should only do this when we actually swap a fragment (in UpdateSteps), but not when we keep it
-      // TODO: We should not honor { abort: false } when we actually swap a fragment. up.destroy() does not either.
-      // TODO: We should not abort fragments that are kept
       up.fragment.abort(this._getFragments(), {
         reason: 'Fragment is being replaced',
         jid: this.options.jid,
