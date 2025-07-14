@@ -2708,6 +2708,46 @@ describe('up.fragment', function() {
           expect('.target').toHaveText('new text')
           expect(location.href).toMatchURL('/response-url')
         })
+
+        it('does not crash if another request is in flight (bugfix)', async function() {
+          const target = fixture('.target', { text: 'old text' })
+          const request = up.request('/response-url')
+          await wait()
+
+          jasmine.respondWith('<div class="target">new text</div>')
+          const response = await request
+
+          const otherRequest = up.request('/other-url')
+          await wait()
+
+          expect('.target').toHaveText('old text')
+          let changePromise = up.render({ target: '.target', response, history: true })
+
+          await expectAsync(changePromise).toBeResolvedTo(jasmine.any(up.RenderResult))
+
+          expect('.target').toHaveText('new text')
+        })
+
+        it('aborts a conflicting request (bugfix)', async function() {
+          const target = fixture('.target', { text: 'old text' })
+          const request = up.request('/response-url')
+          await wait()
+
+          jasmine.respondWith('<div class="target">new text</div>')
+          const response = await request
+
+          const conflictingChange = up.render({ target: '.target', url: '/other-url' })
+          await wait()
+
+          expect('.target').toHaveText('old text')
+          let changePromise = up.render({ target: '.target', response, history: true })
+
+          await expectAsync(changePromise).toBeResolvedTo(jasmine.any(up.RenderResult))
+          await expectAsync(conflictingChange).toBeRejectedWith(jasmine.any(up.Aborted))
+
+          expect('.target').toHaveText('new text')
+        })
+
       })
 
       describe('with { content } option', function() {
@@ -10605,6 +10645,28 @@ describe('up.fragment', function() {
 
             expect('.element').toHaveText('v2')
             await expectAsync(change1Promise).toBeResolvedTo(jasmine.any(up.RenderResult))
+            await expectAsync(change2Promise).toBeRejectedWith(jasmine.any(up.Aborted))
+          })
+
+          it('aborts a conflicting request made while the render pass is waiting for a failed response', async function() {
+            fixture('.element', { text: 'v1' })
+            fixture('.fail-element', { text: 'v1' })
+
+            const change1Promise = up.render({ target: '.element', failTarget: '.fail-element', url: '/path2', abort: 'target' })
+            await wait()
+
+            expect(up.network.queue.allRequests.length).toBe(1)
+            const change2Promise = up.render('.fail-element', { url: '/path1', abort: false })
+            await wait()
+
+            expect(up.network.queue.allRequests.length).toBe(2)
+
+            jasmine.Ajax.requests.at(0).respondWith({ responseText: '<div class="fail-element">v2</div>', status: 500 })
+            await wait()
+
+            expect('.element').toHaveText('v1')
+            expect('.fail-element').toHaveText('v2')
+            await expectAsync(change1Promise).toBeRejectedWith(jasmine.any(up.RenderResult))
             await expectAsync(change2Promise).toBeRejectedWith(jasmine.any(up.Aborted))
           })
 

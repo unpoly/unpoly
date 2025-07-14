@@ -37,6 +37,7 @@ up.RenderOptions = (function() {
     'fallback',  // this may produce a different X-Up-Target request header if { target } is missing on page
     'abort',
     'abortable',
+    'handleAbort',
     'confirm',
     'feedback',
     'disable',
