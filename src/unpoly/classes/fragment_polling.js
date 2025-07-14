@@ -518,11 +518,8 @@ up.FragmentPolling = class FragmentPolling {
       // (2) Or we are force-started and we will start in _onFragmentSwapped().
       this._onFragmentSwapped(fragment)
     } else {
-      // The server may have opted to not send an update, e.g. if there is no fresher content.
+      // The server may have opted to not send an update (e.g. if there is no fresher content) or if the fragment was kept.
       // In that case we try again in the next interval.
-
-      // TODO: But we aborted ourselves and stopped?
-      // TODO: Can we just restart here?
       this._scheduleRemainingTime()
     }
   }

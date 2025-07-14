@@ -106,7 +106,6 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       // TODO: We should only do this when we actually swap a fragment (in UpdateSteps), but not when we keep it
       // TODO: We should not honor { abort: false } when we actually swap a fragment. up.destroy() does not either.
       // TODO: We should not abort fragments that are kept
-      // TODO: We should not abort fragments when we prepend/append
       up.fragment.abort(this._getFragments(), {
         reason: 'Fragment is being replaced',
         jid: this.options.jid,

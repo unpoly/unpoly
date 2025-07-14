@@ -2698,7 +2698,7 @@ up.fragment = (function() {
       //     a message "Change with { abort } option will abort other requests' before
       //     we abort the first request. This is done via an { logOnce } option that
       //     this function passes on to up.network.abort().
-      up.emit(element, 'up:fragment:aborted', { reason, newLayer, jid, log: false })
+      up.emit(element, 'up:fragment:aborted', { reason, newLayer, jid, log: reason })
     }
   }
 
