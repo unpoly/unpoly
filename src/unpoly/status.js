@@ -177,14 +177,12 @@ up.status = (function() {
 
 
   /*-
-  @function findActivatableArea
+  @function findActivatableAreas
   @param {string|Element|jQuery} element
   @internal
   */
-  function findActivatableArea(element) {
-    // Try to enlarge links that are expanded with [up-expand] on a surrounding container.
-    // Note that the expression below is not the same as e.closest(area, SELECTOR_LINK)!
-    return e.ancestor(element, SELECTOR_LINK) || element
+  function findActivatableAreas(element) {
+    return element.upExpandedPair || [element]
   }
 
   /*-
@@ -193,7 +191,7 @@ up.status = (function() {
   The class remains set while the request is loading.
   It is removed when the request [ends](/up.Request.prototype.ended) for any reason.
 
-  See [Feedback classes](/feedback-classes) for details and examples.
+  [Feedback classes](/feedback-classes){:.article-ref}
 
   > [tip]
   > If you're looking to style the [targeted](/targeting-fragments) fragment, see `.up-loading`.
@@ -208,7 +206,7 @@ up.status = (function() {
   The class remains set while the request is loading.
   It is removed when the request [ends](/up.Request.prototype.ended) for any reason.
 
-  See [Feedback classes](/feedback-classes) for details and examples.
+  [Feedback classes](/feedback-classes){:.article-ref}
 
   > [tip]
   > If you're looking to style the [origin](/origin) that targeted the fragment, see `.up-active`.
@@ -370,7 +368,7 @@ up.status = (function() {
   function getActiveElements({ origin, activeElements }) {
     activeElements ||= u.wrapList(origin)
     // If the link area was grown with [up-expand], we highlight the [up-expand] container.
-    return activeElements.map(findActivatableArea)
+    return u.flatMap(activeElements, findActivatableAreas)
   }
 
   function getFeedbackClassesPreviewFn(feedbackOption, fragments) {

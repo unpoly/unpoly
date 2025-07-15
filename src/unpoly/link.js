@@ -1361,7 +1361,7 @@ up.link = (function() {
   /*-
   Enlarges the click area of a descendant link.
 
-  `[up-expand]` honors all the Unppoly attributes in expanded links, like
+  `[up-expand]` honors all the Unpoly attributes in expanded links, like
   [`[up-target]`](/up-follow#up-target), `[up-instant]` or `[up-preload]`.
 
   ## Example
@@ -1376,7 +1376,7 @@ up.link = (function() {
   In the example above, clicking anywhere within `.notification` element
   would [follow](/up.follow) the *Close* link.
 
-  ## Elements with multiple contained links
+  ## Multiple contained links
 
   If a container contains more than one link, you can set the value of the
   `[up-expand]` attribute to a CSS selector to define which link should be expanded:
@@ -1386,6 +1386,39 @@ up.link = (function() {
     Record was saved!
     <a class="details" href="/records/5">Details</a>
     <a class="close" href="/records">Close</a>
+  </div>
+  ```
+
+  ## Feedback classes
+
+  Unpoly assigns the `.up-active` class to clicked links while they are loading.
+  This class is assigned to both the expanding link and the expanded click area.
+
+  Assume this `[up-expand]` container with two contained links:
+
+  ```html
+  <div up-expand>
+    <a href="/foo">Foo</a>
+    <a href="/bar">Bar</a>
+  </div>
+  ```
+
+  When either the `[up-expand]` container or the first link is clicked, the `.up-active` class
+  is assigned to both elements:
+
+  ```html
+  <div up-expand class="up-active"> <!-- mark: up-active -->
+    <a href="/foo" class="up-active">Foo</a> <!-- mark: up-active -->
+    <a href="/bar">Bar</a>
+  </div>
+  ```
+
+  When a non-expanded link is clicked, only that link becomes `.up-active`:
+
+  ```html
+  <div up-expand>
+    <a href="/foo">Foo</a> <!-- chip: not active -->
+    <a href="/bar" class="up-active">Bar</a> <!-- mark: up-active -->
   </div>
   ```
 
@@ -1416,6 +1449,9 @@ up.link = (function() {
         'up-href': e.attr(childLink, 'href'),
         ...e.upAttrs(childLink)
       })
+
+      // Remember the expander and expandee so we can set .up-active classes efficiently.
+      childLink.upExpandedPair = area.upExpandedPair = [area, childLink]
 
       // This is our current workaround for expanded areas gaining an .up-current class from the contained link.
       e.addClasses(area, e.upClasses(childLink))

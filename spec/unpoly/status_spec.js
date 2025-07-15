@@ -1662,27 +1662,6 @@ describe('up.status', function() {
           expect($link).not.toHaveClass('up-active')
         })
 
-        it('prefers to mark an enclosing [up-expand] click area', async function() {
-          const $area = $fixture('div[up-expand] a[href="/foo"][up-target=".main"]')
-          up.hello($area)
-          const $link = $area.find('a')
-          fixture('.main')
-          Trigger.clickSequence($link)
-
-          await wait()
-
-          expect($link).not.toHaveClass('up-active')
-          expect($area).toHaveClass('up-active')
-
-          await wait()
-
-          jasmine.respondWith('<div class="main">new-text</div>')
-
-          await wait()
-
-          expect($area).not.toHaveClass('up-active')
-        })
-
         it('allows to set additional active classes via up.status.config.activeClasses', async function() {
           up.status.config.activeClasses.push('working')
           const link = fixture('a[href="/foo"][up-target=".main"]')

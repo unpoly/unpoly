@@ -2263,11 +2263,24 @@ describe('up.link', function() {
 
     describe('[up-follow]', function() {
 
-      it("calls up.follow with the clicked link", async function() {
+      it("calls up.follow() with the clicked link", async function() {
         const link = fixture('a[href="/follow-path"][up-follow]')
         const followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
 
         Trigger.clickSequence(link)
+
+        await wait()
+
+        expect(followSpy).toHaveBeenCalledWith(link)
+        expect(link).not.toHaveBeenDefaultFollowed()
+      })
+
+      it("calls up.follow() with the closest link if a link child was clicked", async function() {
+        const link = fixture('a[href="/follow-path"][up-follow]')
+        const linkChild = e.affix(link, '#child', { text: 'label' })
+        const followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+
+        Trigger.clickSequence(linkChild)
 
         await wait()
 
@@ -2304,7 +2317,7 @@ describe('up.link', function() {
         expect('#main').toHaveText('link content')
       })
 
-      describe('when the server reponds with an error', function() {
+      describe('when the server responds with an error', function() {
 
         it('updates the [up-fail-target] instead')
 
@@ -3081,6 +3094,82 @@ describe('up.link', function() {
         expect('main').toHaveText('new text')
       })
 
+      describe('feedback classes', function() {
+
+        it('marks both [up-expand] container and first link as .up-active when the first link is clicked', async function() {
+          let [container, link1, link2, target] = htmlFixtureList(`
+            <div up-expand>
+              <a href="/path1" up-target="#target">link1</a>
+              <a href="/path2" up-target="#target">link2</a>
+             </div>
+             <div id="target">target</div>
+          `)
+          up.hello(container)
+
+          Trigger.clickSequence(link1)
+
+          expect(link1).toHaveClass('up-active')
+          expect(link2).not.toHaveClass('up-active')
+          expect(container).toHaveClass('up-active')
+          expect(target).toHaveClass('up-loading')
+        })
+
+        it('marks both [up-expand] container and first link as .up-active when the container is clicked', async function() {
+          let [container, link1, link2, target] = htmlFixtureList(`
+            <div up-expand>
+              <a href="/path1" up-target="#target">link1</a>
+              <a href="/path2" up-target="#target">link2</a>
+             </div>
+             <div id="target">target</div>
+          `)
+          up.hello(container)
+
+          Trigger.clickSequence(container)
+
+          expect(link1).toHaveClass('up-active')
+          expect(link2).not.toHaveClass('up-active')
+          expect(container).toHaveClass('up-active')
+          expect(target).toHaveClass('up-loading')
+        })
+
+        it('marks the [up-expand] container as active if a child of the link was clicked', async function() {
+          let [container, link1, link1Child, link2, target] = htmlFixtureList(`
+            <div up-expand>
+              <a href="/path1" up-target="#target"><span>link1</span></a>
+              <a href="/path2" up-target="#target">link2</a>
+             </div>
+             <div id="target">target</div>
+          `)
+          up.hello(container)
+
+          Trigger.clickSequence(link1Child)
+
+          expect(link1).toHaveClass('up-active')
+          expect(link2).not.toHaveClass('up-active')
+          expect(container).toHaveClass('up-active')
+          expect(target).toHaveClass('up-loading')
+        })
+
+        it('does not mark an [up-expand] as active if the expanding link is not the first link', async function() {
+          let [container, link1, link2, target] = htmlFixtureList(`
+            <div up-expand>
+              <a href="/path1" up-target="#target">link1</a>
+              <a href="/path2" up-target="#target">link2</a>
+             </div>
+             <div id="target">target</div>
+          `)
+          up.hello(container)
+
+          Trigger.clickSequence(link2)
+
+          expect(link1).not.toHaveClass('up-active')
+          expect(link2).toHaveClass('up-active')
+          expect(container).not.toHaveClass('up-active')
+          expect(target).toHaveClass('up-loading')
+        })
+
+      })
+
       it('is not keyboard-accessible, as screen readers will already announce the contained link', function() {
         const area = fixture('div[up-expand]')
         const link = e.affix(area, 'a[href="/path1"]')
@@ -3221,6 +3310,46 @@ describe('up.link', function() {
           const $link2 = $fixture('a.second[href="/path2"]') // not a child of $area
           up.hello($area)
           expect($area.attr('up-href')).toBeUndefined()
+        })
+
+        describe('feedback classes', function() {
+
+          it('marks both [up-expand] container and matched link as .up-active when the container is clicked', async function() {
+            let [container, link1, link2, target] = htmlFixtureList(`
+              <div up-expand="#link2">
+                <a id="link1" href="/path1" up-target="#target">link1</a>
+                <a id="link2" href="/path2" up-target="#target">link2</a>
+               </div>
+               <div id="target">target</div>
+            `)
+            up.hello(container)
+
+            Trigger.clickSequence(container)
+
+            expect(link1).not.toHaveClass('up-active')
+            expect(link2).toHaveClass('up-active')
+            expect(container).toHaveClass('up-active')
+            expect(target).toHaveClass('up-loading')
+          })
+
+          it('marks both [up-expand] container and matched link as .up-active when the link is clicked', async function() {
+            let [container, link1, link2, target] = htmlFixtureList(`
+              <div up-expand="#link2">
+                <a id="link1" href="/path1" up-target="#target">link1</a>
+                <a id="link2" href="/path2" up-target="#target">link2</a>
+               </div>
+               <div id="target">target</div>
+            `)
+            up.hello(container)
+
+            Trigger.clickSequence(link2)
+
+            expect(link1).not.toHaveClass('up-active')
+            expect(link2).toHaveClass('up-active')
+            expect(container).toHaveClass('up-active')
+            expect(target).toHaveClass('up-loading')
+          })
+
         })
       })
     })
