@@ -5,10 +5,11 @@ Custom JavaScript
 The `up.script` package lets you pair HTML elements with JavaScript behavior.
 
 Unpoly encourages you to migrate all your custom JavaScript from `DOMContentLoaded`
-callbacks to [compilers](/up.compiler). This will make sure they run both at page load and
+callbacks to [compilers](/enhancing-elements). This will make sure they run both at page load and
 when a new fragment is inserted later. See [Migrating legacy JavaScripts](/legacy-scripts)
 for details.
 
+@see enhancing-elements
 @see data
 @see legacy-scripts
 @see handling-asset-changes
@@ -118,171 +119,81 @@ up.script = (function() {
   let registeredMacros = []
 
   /*-
-  Registers a function to be called when an element with
-  the given selector is inserted into the DOM.
+  Registers a function that is when a matching element is inserted into the DOM.
 
+  [Enhancing elements](/enhancing-elements){:.article-ref}
 
-  Compiler functions run both at page load and when a new fragment is inserted later.
-  This makes compilers a great tool to activate custom JavaScript behavior on matching
-  elements.
+  ## Anatomy of a compiler
 
-  When an element with children is inserted, the compiler function is called once
-  for each match in the new subtree.
+  This code registers a function that is called when an element with a `.foo` class
+  enters the DOM:
 
-  ## Example
+  ```js
+  up.compiler('.foo', function(element, data, meta) {
+    // do something with `element`
+  })
+  ```
 
-  This compiler will insert the current time into a
-  `<div class='current-time'></div>`:
+  The compiler function is passed three arguments:
+
+  1. The newly inserted `element` matching the selector
+  2. Any [data attached to the element](/data)
+  3. [Meta information](/enhancing-elements#meta) about the current render pass
+
+  ## Destructor functions {#destructor}
+
+  When a compiler registers effects *outside* the compiling element's subtree,
+  it must return a destructor function that reverts the effect. The destructor
+  function is called automatically when the element is swapped or destroyed later.
+
+  Examples for non-local effects are global event handlers bound to
+  the `document`, or `setInterval()`:
 
   ```js
   up.compiler('.current-time', function(element) {
-    var now = new Date()
-    element.textContent = now.toString()
+    let update = () => element.textContent = new Date().toString()
+    let updateInterval = setInterval(update, 1000)
+    return () => clearInterval(updateInterval)
   })
   ```
 
-  The compiler function will be called once for each matching element when
-  the page loads, or when a matching fragment is rendered later.
+  See [cleaning up after yourself](/enhancing-elements#destructor)
+  for more details and examples.
 
-  ## Prefer compilers over `DOMContentLoaded`
+  ## Batching multiple elements
 
-  Listeners to `DOMContentLoaded` (or `load`) only run when the page is loaded initially.
-  They will not run for subsequent fragment updates within the page.
-  Compiler functions run both at page load and when a new fragment is inserted later.
+  When multiple elements in update match the selector, the compiler function
+  is called once for each element.
 
-  You should migrate your [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event)
-  callbacks to compilers. See [Migrating legacy JavaScripts](/legacy-scripts) for advice on migrating legacy applications.
-
-  ## Integrating JavaScript libraries {#integrating-libraries}
-
-  `up.compiler()` is a great way to integrate JavaScript libraries.
-  Let's say your JavaScript plugin wants you to call `lightboxify()`
-  on links that should open a lightbox. You decide to
-  do this for all links with an `lightbox` class:
+  Let's say a fragment with three `.card` elements is inserted and compiled:
 
   ```html
-  <a href="river.png" class="lightbox">River</a>
-  <a href="ocean.png" class="lightbox">Ocean</a>
+  <div class="fragment">
+    <div class="card">...</div>
+    <div class="card">...</div>
+    <div class="card">...</div>
+  </div>
   ```
 
-  This JavaScript will do exactly that:
+  A compiler function for `.card` would be called three separate times:
 
   ```js
-  up.compiler('a.lightbox', function(element) {
-    lightboxify(element)
+  up.compiler('.card', function(card, data) {
+    // chip: called three times
   })
   ```
 
-  ## Cleaning up after yourself {#destructor}
-
-  in Unpoly the JavaScript environment will persist through many page loads.
-  To prevent memory leaks, is important that any compiler effects can be garbage collected when the element is destroyed.
-
-  ### Element-local effects require no clean-up
-
-  When a compiler binds an event listener to the compiling element (or its descendants),
-  they can be garbage collected once the element leaves the DOM, no further steps required:
+  If you would like the compiler to run *once* for all matches within
+  a render pass, use a `{ batch: true }` option:
 
   ```js
-  // label: ✔️ Garbage collectable
-  up.compiler('.click-to-hide', function(element) {
-    let hide = () => element.style.display = 'none'
-    element.addEventListener('click', hide)
+  up.compiler('.card', { batch: true }, function(cards, datas) {
+    console.debug(`We have ${cards.length} new cards`)
   })
   ```
 
-  ### Global effects require a destructor function
 
-  When your compiler registers effects *outside* the compiling element subtree,
-  that effect is *not* cleaned up automatically.
-
-  For example, this compiler registers a global `scroll` listener to the global `window` object.
-  Every compilation will subscribe another listener that is never removed, causing a memory leak:
-
-  ```js
-  // label: ❌ Memory leak
-  up.compiler('.scroll-to-hide', function(element) {
-    let hide = () => element.style.display = 'none'
-    window.addEventListener('scroll', hide)
-  })
-  ```
-
-  To address this, a compiler can return a destructor function that reverts its non-local effect.
-  Unpoly will call this destructor when the element is destroyed:
-
-  ```js
-  // label: ✔️ Garbage collectable
-  up.compiler('.scroll-to-hide', function(element) {
-    let hide = () => element.style.display = 'none'
-    window.addEventListener('scroll', hide)
-    return () => window.removeEventListener('scroll', hide) // mark: return
-  })
-  ```
-
-  This compiler function is now safe for garbage collection.
-
-  > [important]
-  > The destructor function is *not* expected to remove the element from the DOM.
-
-  ### Alternative ways to register destructors
-
-  To run multiple functions when the element is destroyed, return an array of functions:
-
-  ```js
-  up.compiler('.auto-hide', function(element) {
-    let hide = () => element.style.display = 'none'
-
-    window.addEventListener('scroll', hide)
-    let offScroll = () => window.removeEventListener('scroll', hide))
-
-    window.addEventListener('load', hide)
-    let offLoad = () => window.removeEventListener('load', hide))
-
-    return [offScroll, offLoad]
-  })
-  ```
-
-  Instead of returning a destructor function, you can register it with `up.destructor()`.
-  This helps placing the clean-up logic close to the effect that it reverts:
-
-  ```js
-  up.compiler('.auto-hide', function(element) {
-    let hide = () => element.style.display = 'none'
-
-    window.addEventListener('scroll', hide)
-    up.destructor(element, () => window.removeEventListener('scroll', hide))
-
-    window.addEventListener('load', hide)
-    up.destructor(element, () => window.removeEventListener('load', hide))
-  })
-  ```
-
-  > [tip]
-  > Other than `addEventListener()`, `up.on()` returns a function that unbinds the listener.
-
-
-  ## Passing parameters to a compiler {#data}
-
-  You may attach data to an element using HTML5 data attributes
-  or encoded as [relaxed JSON](/relaxed-json) in an `[up-data]` attribute:
-
-  ```html
-  <span class="user" up-data="{ age: 31, name: 'Alice' }">Alice</span>
-  ```
-
-  An object with the element's attached data will be passed to your [compilers](/up.compiler)
-  as a second argument:
-
-  ```js
-  up.compiler('.user', function(element, data) { // mark: data
-    console.log(data.age)  // result: 31
-    console.log(data.name) // result: "Alice"
-  })
-  ```
-
-  See [attaching data to elements](/data) for more details and examples.
-
-  ## Throwing exceptions from compilers {#errors}
+  ## Error handling {#errors}
 
   It is safe to throw exceptions from a compiler or its [destructor](#destructor).
   A crashing compiler will *not* interrupt a render pass, or prevent other compilers on the same element.
@@ -292,23 +203,25 @@ up.script = (function() {
 
   See [errors in user code](/render-lifecycle#errors-in-user-code) for details.
 
-  ## Accessing information about the render pass {#meta}
+  ## Compilation order {#order}
 
-  Compilers may accept a third argument with information about the current [render pass](/up.render):
+  Compilers are called in the order they were registered.
+
+  You can control the order by passing a `{ priority }` option.
+  The default priority is `0`. Compilers with a higher priority are run first.
 
   ```js
-  up.compiler('.user', function(element, data, meta) { // mark: meta
-    console.log(meta.layer.mode)   // result: "root"
-    console.log(meta.revalidating) // result: true
+  up.compiler('.foo', { priority: 999 }, function() {
+    // called before compilers with a lower priority
   })
   ```
 
-  The following properties are available:
+  When a compiler sets an Unpoly attribute, this usually has no effect, since attributes have already been evaluated.
+  Use a [macro](/up.macro) instead.
 
-  | Property               | Type          |                                                 | Description                                               |
-  |------------------------|---------------|-------------------------------------------------|-----------------------------------------------------------|
-  | `meta.layer`           | `up.Layer`    |                                                 | The [layer](/up.layer) of the fragment being compiled.<br>This has the same value as `up.layer.current`. |
-  | `meta.revalidating`    | `boolean`     | <span class="tag is_light_gray">optional</span> | Whether the element was reloaded for the purpose of [cache revalidation](/caching#revalidation). |
+  See [Rendering lifecycle](/render-lifecycle) for a full overview of
+  Unpoly's rendering steps.
+
 
   ## Registering compilers after booting
 
@@ -318,34 +231,40 @@ up.script = (function() {
   When compilers are registered after Unpoly was booted, it is run
   on current elements, but **only** if the compiler has the default priority.
 
-  If the compiler has a non-default priority, it is run on future
+  If the compiler has a non-default [priority](#order), it is run on future
   fragments only. In this case either remove the `{ priority }` option
   or manually call `up.hello()` on an element that should be
   [recompiled](/up.hello#recompiling-elements).
 
+
   @function up.compiler
+
   @param {string} selector
     The selector to match.
+
   @param {number} [options.priority=0]
     The priority of this compiler.
 
     Compilers with a higher priority are run first.
     Two compilers with the same priority are run in the order they were registered.
+
   @param {boolean} [options.batch=false]
     If set to `true` and a fragment insertion contains multiple
     elements matching `selector`, the `compiler` function is only called once
     with all these elements.
+
   @param {Function(element, data, meta): (Function(element)|Array<Function(element)>)} compiler
     The function to call when an element matching `selector` is inserted.
 
-    The function may accept up to three arguments:
+    Up to three arguments can be accepted:
 
-    1. The new element being compiled.
-    2. Any [attached data](/data).
-    3. [Information about the current render pass](/up.compiler#meta).
+    1. The newly inserted `element` matching the selector
+    2. Any [data attached to the element](/data)
+    3. [Meta information](/enhancing-elements#meta) about the current render pass
 
-    The function may return a [destructor](#destructor) function that [cleans the compiled object](/up.compiler#destructor)
+    The function may return a [destructor function](/enhancing-elements#destructor) that is called
     before it is removed from the DOM. The destructor function is called with the compiled element.
+
   @stable
   */
   function registerCompiler(...args) {
@@ -353,12 +272,12 @@ up.script = (function() {
   }
 
   /*-
-  Registers a [compiler](/up.compiler) that is run before all other compilers.
+  Registers a [compiler](/enhancing-elements) that is run before all other compilers.
 
-  A macro lets you set UJS attributes that will be compiled afterwards.
+  A macro lets you set attributes that will be compiled afterwards.
 
   If you want default attributes for *every* link and form, consider customizing your
-  [navigation options](/navigation).
+  [navigation options](/navigation) or configure Unpoly to [handle everything](/handling-everything).
 
   ## Example
 
@@ -366,24 +285,24 @@ up.script = (function() {
 
   ```html
   <a href="/page1" up-layer="new modal" up-class="warning" up-animation="shake">Page 1</a>
-  <a href="/page1" up-layer="new modal" up-class="warning" up-animation="shake">Page 1</a>
-  <a href="/page1" up-layer="new modal" up-class="warning" up-animation="shake">Page 1</a>
+  <a href="/page1" up-layer="new modal" up-class="warning" up-animation="shake">Page 2</a>
+  <a href="/page1" up-layer="new modal" up-class="warning" up-animation="shake">Page 3</a>
   ```
 
-  We would much rather define a new `[smooth-link]` attribute that let's us
+  We would much rather define a new `[shake-modal]` attribute that let's us
   write the same links like this:
 
   ```html
-  <a href="/page1" smooth-link>Page 1</a>
-  <a href="/page2" smooth-link>Page 2</a>
-  <a href="/page3" smooth-link>Page 3</a>
+  <a href="/page1" shake-modal>Page 1</a>
+  <a href="/page2" shake-modal>Page 2</a>
+  <a href="/page3" shake-modal>Page 3</a>
   ```
 
-  We can define the `[smooth-link]` attribute by registering a macro that
+  We can define the `[shake-midal]` attribute by registering a macro that
   sets the `[up-layer]`, `[up-class]` and `[up-animation]` attributes for us:
 
   ```js
-  up.macro('[smooth-link]', function(link) {
+  up.macro('[shake-modal]', function(link) {
     link.setAttribute('up-layer', 'new modal')
     link.setAttribute('up-class', 'warning')
     link.setAttribute('up-animation', 'shake')
@@ -398,7 +317,7 @@ up.script = (function() {
   @param {Object} options
     See options for [`up.compiler()`](/up.compiler).
 
-  @param {Function(element, data)} macro
+  @param macro
     @like up.compiler/compiler
   @stable
   */
@@ -524,7 +443,7 @@ up.script = (function() {
   closes, or when `up.destroy()` is called on the element or its container.
 
   An alternative way to register a destructor function is to
-  [return it from your compiler function](/up.compiler#destructor).
+  [return it from your compiler function](/enhancing-elements#destructor).
 
   ## Example
 
@@ -573,7 +492,7 @@ up.script = (function() {
   Manually compiles a page fragment that has been inserted into the DOM
   by external code.
 
-  All registered [compilers](/up.compiler) and [macros](/up.macro) will be called
+  All registered [compilers](/enhancing-elements) and [macros](/up.macro) will be called
   with matches in the given `element`.
 
   The [`up:fragment:inserted`](/up:fragment:inserted) event is emitted on the compiled element.
@@ -645,11 +564,11 @@ up.script = (function() {
     An object mapping selectors to `options.data`.
     @internal
   @param {Object} [options.meta={}]
-    An object containing [information about this compiler pass](/up.compiler#meta).
+    An object containing [information about this compiler pass](/enhancing-elements#meta).
 
     This typically contains `{ layer, revalidating }` properties.
 
-    It will be passed as a third [compiler](/up.compiler) argument.
+    It will be passed as a third [compiler](/enhancing-elements) argument.
     @experimental
   @return {Element}
     The compiled element

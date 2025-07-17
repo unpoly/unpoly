@@ -12,7 +12,7 @@ Unpoly apps rarely do fine-grained element updates, instead opting to update med
 However, there are use cases for preserving individual elements:
 
 - Media elements (`<video>`, `<audio>`) that should retain their playback state during updates.
-- Elements that are expensive to [initialize](/up.compiler), like heavy `<select>` replacements.
+- Elements that are expensive to [initialize](/enhancing-elements), like heavy `<select>` replacements.
 - Other elements with client-side state that is difficult to express in a URL or [data object](/data).
 
 ## Basic example
@@ -97,7 +97,7 @@ and eventual error messages:
 ```
 
 Unpoly will compare the element's **initial HTML** as it is rendered by the server.\
-Client-side changes to the element (e.g. by a [compiler](/up.compiler)) are ignored.
+Client-side changes to the element (e.g. by a [compiler](/enhancing-elements)) are ignored.
 
 Before the HTML is compared, **light normalization** is applied.\
 You can customize normalization with `up.fragment.config.normalizeKeepHTML`.
@@ -108,7 +108,7 @@ To preserve an element as long as its [data](/data) remains the same,
 set an `[up-keep="same-data"]` attribute. Only when the element's `[up-data]` attribute changes between versions,
 it is replaced by the new version. Changes in other attributes or its children are ignored.
 
-The example below uses a [compiler](/up.compiler) to render an interactive map into elements with a `.map` class.
+The example below uses a [compiler](/enhancing-elements) to render an interactive map into elements with a `.map` class.
 The initial map location is passed as an `[up-data]` attribute.
 Because we don't want to lose client-side state (like pan or zoom settings), we want to keep the map widget
 as long as possible. Only when the map's initial location changes, we want to re-render the map
@@ -126,7 +126,7 @@ Instead of `[up-data]` we can also use HTML5 [`[data-*]` attributes](https://dev
 ```
 
 Unpoly will compare the element's **initial data** as it is rendered by the server.\
-Client-side changes to the data object (e.g. by a [compiler](/up.compiler)) are ignored.
+Client-side changes to the data object (e.g. by a [compiler](/enhancing-elements)) are ignored.
 
 > [tip]
 > Instead of re-rendering when data changes you can [inspect data in the new version](#updating-data)
@@ -186,7 +186,7 @@ is encoded using an `[up-data]` attribute:
 <div id="map" up-keep up-data="{ lat: 50.86, lng: 7.40 }"></div>
 ```
 
-We can initialize the map using a [compiler](/up.compiler) like this:
+We can initialize the map using a [compiler](/enhancing-elements) like this:
 
 ```js
 up.compiler('.map', function(element, data) {

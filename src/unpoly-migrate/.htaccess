@@ -110,6 +110,7 @@ RedirectPermanent /skeleton /placeholders
 RedirectPermanent /skeletons /placeholders
 
 RedirectPermanent /render-hooks /render-lifecycle
+RedirectPermanent /rendering-lifecycle /render-lifecycle
 
 RedirectPermanent /template /templates
 RedirectPermanent /templating /templates
@@ -141,4 +142,10 @@ RedirectPermanent /keeping-fragments /preserving-elements
 RedirectPermanent /keeping-elements /preserving-elements
 RedirectPermanent /persisting-fragments /preserving-elements
 RedirectPermanent /persisting-elements /preserving-elements
+
+RedirectPermanent /javascript-sprinkles /enhancing-elements
+RedirectPermanent /compiler /enhancing-elements
+RedirectPermanent /compilers /enhancing-elements
+RedirectPermanent /compilation /enhancing-elements
+
 

@@ -1898,7 +1898,7 @@ In cases where you don't want this behavior, you now have more options:
     up.destructor(element, fn)
   }  
   ```
-- Unpoly 3.0.0 introduced a [third `meta` argument for compilers](/up.compiler#meta)
+- Unpoly 3.0.0 introduced a [third `meta` argument for compilers](/enhancing-elements#meta)
   containing information about the current render pass:
 
   ```js

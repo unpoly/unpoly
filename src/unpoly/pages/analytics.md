@@ -81,7 +81,7 @@ is rendered:
 </main>
 ```
 
-We can implement this using a [compiler](/up.compiler):
+We can implement this using a [compiler](/enhancing-elements):
 
 ```js
 up.compiler('[track-page-view]', function(element, data, meta) {

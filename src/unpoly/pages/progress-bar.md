@@ -63,7 +63,7 @@ To build a custom loading indicator, place an element like this in your applicat
 <loading-indicator>Please wait!</loading-indicator>
 ```
 
-Now add a [compiler](/up.compiler) that hides the `<loading-indicator>` element
+Now add a [compiler](/enhancing-elements) that hides the `<loading-indicator>` element
 while there are no long-running requests:
 
 ```js

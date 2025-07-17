@@ -43,7 +43,7 @@ By setting an `[up-defer="manual"]` attribute, the deferred content will not loa
 ```
 
 You can now control the load timing by calling `up.deferred.load()` from your own JavaScripts.
-The code below uses a [compiler](/up.compiler) to load the fragment after two seconds:
+The code below uses a [compiler](/enhancing-elements) to load the fragment after two seconds:
 
 ```js
 up.compiler('#menu[up-defer]', function(placeholder) {

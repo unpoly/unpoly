@@ -580,8 +580,8 @@ up.Preview = class Preview {
 
   ## Compilation
 
-  When this function inserts a new element, it is [compiled](/up.compiler).\
-  When the preview [ends](/previews#ending), the element is [destroyed](/up.compiler#destructor).
+  When this function inserts a new element, it is [compiled](/enhancing-elements).\
+  When the preview [ends](/previews#ending), the element is [destroyed](/enhancing-elements#destructor).
 
   ## Moving existing elements
 

@@ -17,7 +17,7 @@ with some additional properties that are useful in the context of a server-rende
 - Fragments are [identified by a CSS selector](/target-derivation), like a `.class` or `#id`.
 - Fragments are usually updated by a [link](/up-follow) for [form](/up-submit) that targets their selector.
   When the server renders HTML with a matching element, the fragment is swapped with a new version.
-- As fragments enter the page they are automatically [compiled](/up.compiler) to activate [JavaScript behavior](/up.script).
+- As fragments enter the page they are automatically [compiled](/enhancing-elements) to activate [JavaScript behavior](/up.script).
 - Fragment changes may be [animated](/up.motion).
 - Fragments are placed on a [layer](/up.layer) that is isolated from other layers.
   Unpoly features will only see or change fragments from the [current layer](/up.layer.current)
@@ -967,7 +967,7 @@ up.fragment = (function() {
   /*-
   The `up:fragment:kept` event is emitted *after* an existing element has been [kept](/preserving-elements) during a render pass.
 
-  All [keep conditions](/preserving-elements#keep-conditions) have already been evaluated.
+  All [keep conditions](/preserving-elements#conditions) have already been evaluated.
   The keeping can no longer be prevented. For this, use `up:fragment:keep` instead.
 
   [Preserving elements](/preserving-elements){:.article-ref}
@@ -1550,7 +1550,7 @@ up.fragment = (function() {
   /*-
   Destroys the given element or selector.
 
-  All registered [destructors](/up.compiler#destructor) are called.
+  All registered [destructors](/enhancing-elements#destructor) are called.
   The element is then removed from the DOM.
 
   Unfinished requests targeting the destroyed fragment or its descendants are [aborted](/aborting-requests).
@@ -1602,7 +1602,7 @@ up.fragment = (function() {
 
   ## Detecting destructor errors
 
-  If a [destructor](/up.compiler#destructor) throws an error, `up.destroy()` will still remove the element and *not* throw an error.
+  If a [destructor](/enhancing-elements#destructor) throws an error, `up.destroy()` will still remove the element and *not* throw an error.
 
   Instead compiler errors will print to the [error console](https://developer.mozilla.org/en-US/docs/Web/API/console/error)
   and emit an [`error` event on `window`](https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event).

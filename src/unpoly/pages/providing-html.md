@@ -115,7 +115,7 @@ Clicking the link will change the targeted element's inner HTML to the attribute
 </div>
 ```
 
-Only the element's inner HTML will be [compiled](/up.compiler) and updated.
+Only the element's inner HTML will be [compiled](/enhancing-elements) and updated.
 The element node itself, including its attributes and event listeners, will remain unchanged.
 
 
@@ -243,7 +243,7 @@ up.render({ target: '.target', content: element })
 If the element was already [attached](https://developer.mozilla.org/en-US/docs/Web/API/Node/isConnected)
 before rendering, it will be moved to the target position in the DOM tree.
 
-The element will be [compiled](/up.compiler) after insertion.
+The element will be [compiled](/enhancing-elements) after insertion.
 If the element has been compiled before, it will [not be re-compiled](/up.hello#recompiling-elements).
 
 If the element is a [template](/templates), it will be cloned before insertion.

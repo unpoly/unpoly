@@ -93,7 +93,7 @@ where future flashes should be placed.
 ### Removing messages after a delay {#clearing-after-delay}
 
 Typically you want to clear flash messages after some time.
-This [compiler](/up.compiler) removes child elements of your `[up-flashes]` container after 5 seconds: 
+This [compiler](/enhancing-elements) removes child elements of your `[up-flashes]` container after 5 seconds: 
 
 
 ```js

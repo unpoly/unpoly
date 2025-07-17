@@ -103,7 +103,7 @@ When we reference a template, we can pass a data object for the cloned element a
 </a>
 ```
 
-By defining a matching a [compiler](/up.compiler) function, we can post-process the cloned element
+By defining a matching a [compiler](/enhancing-elements) function, we can post-process the cloned element
 and its data object. When the compiler below is called with the cloned element, it's `data` argument will be set to `{ description: 'Buy toast' }`.
 
 ```js

@@ -68,7 +68,7 @@ Custom preload conditions {#scripted}
 
 To programmatically preload any link element at a time of your choosing, use the `up.link.preload()` function.
 
-The following [compiler](/up.compiler) would preload a link with a `[rel=next]` attribute when
+The following [compiler](/enhancing-elements) would preload a link with a `[rel=next]` attribute when
 the user hovers over a `main` element:
 
 ```js

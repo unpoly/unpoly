@@ -2,7 +2,7 @@ Attaching data to elements
 ==========================
 
 Unpoly lets you attach structured data to an element, to be consumed
-by a [compiler](/up.compiler) or [event handler](/up.on).
+by a [compiler](/enhancing-elements) or [event handler](/up.on).
 
 
 ## Using data attributes for simple key/value pairs
@@ -14,7 +14,7 @@ to attach simple string values:
 <span class='user' data-age='18' data-name='Bob'>Bob</span>
 ```
 
-An object with all data attributes will be passed to your [compilers](/up.compiler)
+An object with all data attributes will be passed to your [compilers](/enhancing-elements)
 as a second argument:
 
 ```js

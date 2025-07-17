@@ -196,7 +196,7 @@ up.framework = (function() {
   Returns whether Unpoly can boot in the current browser.
 
   If this returns `false` Unpoly will not automatically [boot](/up.boot)
-  and will not [compile](/up.compiler) the initial page.
+  and will not [compile](/enhancing-elements) the initial page.
   This leaves you with a server-side web application without any JavaScript enhancements.
 
   The support check is very cursory. While it will exclude most legacy browsers

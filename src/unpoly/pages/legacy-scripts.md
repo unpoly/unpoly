@@ -22,7 +22,7 @@ This may cause some of the following issues:
    are going to stack up.
 
 The cleanest solution to these issues is to call all your JavaScript
-from an [Unpoly compiler](/up.compiler).
+from an [Unpoly compiler](/enhancing-elements).
 
 
 ## Migrating legacy scripts to a compiler {#migrate-to-compiler}
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
 Since the code only runs after the initial page load, links contained in
 a fragment update will not be "lightboxified".
 
-You can fix this by moving your code to a [compiler](/up.compiler):
+You can fix this by moving your code to a [compiler](/enhancing-elements):
 
 ```js
 up.compiler('a.lightbox', function(element) {
