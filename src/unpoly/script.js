@@ -149,7 +149,7 @@ up.script = (function() {
   Listeners to `DOMContentLoaded` (or `load`) only run when the page is loaded initially.
   They will not run for subsequent fragment updates within the page.
   Compiler functions run both at page load and when a new fragment is inserted later.
-q
+
   You should migrate your [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event)
   callbacks to compilers. See [Migrating legacy JavaScripts](/legacy-scripts) for advice on migrating legacy applications.
 
@@ -175,35 +175,91 @@ q
 
   ## Cleaning up after yourself {#destructor}
 
-  If your compiler returns a function, Unpoly will use this as a *destructor* to
-  clean up if the element leaves the DOM. Note that in Unpoly the same DOM and JavaScript environment
-  will persist through many page loads, so it's important to not create
-  [memory leaks](https://makandracards.com/makandra/31325-how-to-create-memory-leaks-in-jquery).
+  in Unpoly the JavaScript environment will persist through many page loads.
+  To prevent memory leaks, is important that any compiler effects can be garbage collected when the element is destroyed.
 
-  You should clean up after yourself whenever your compilers have global
-  side effects, like a [`setInterval`](https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers/setInterval)
-  or [event handlers bound to the document root](/up.on).
+  ### Element-local effects require no clean-up
 
-  Here is a version of `.current-time` that updates
-  the time every second, and cleans up once it's done. Note how it returns
-  a function that calls `clearInterval`:
+  When a compiler binds an event listener to the compiling element (or its descendants),
+  they can be garbage collected once the element leaves the DOM, no further steps required:
 
   ```js
-  up.compiler('.current-time', function(element) {
-    let update = () => element.textContent = new Date().toString()
-    let updateInterval = setInterval(update, 1000)
-    return () => clearInterval(updateInterval)
+  // label: ✔️ Garbage collectable
+  up.compiler('.click-to-hide', function(element) {
+    let hide = () => element.style.display = 'none'
+    element.addEventListener('click', hide)
   })
   ```
 
-  If we didn't clean up after ourselves, we would have many ticking intervals
-  operating on detached DOM elements after we have created and removed a couple
-  of `.current-time` elements.
+  ### Global effects require a destructor function
 
-  An alternative way to register a destructor function is `up.destructor()`.
+  When your compiler registers effects *outside* the compiling element subtree,
+  that effect is *not* cleaned up automatically.
+
+  For example, this compiler registers a global `scroll` listener to the global `window` object.
+  Every compilation will subscribe another listener that is never removed, causing a memory leak:
+
+  ```js
+  // label: ❌ Memory leak
+  up.compiler('.scroll-to-hide', function(element) {
+    let hide = () => element.style.display = 'none'
+    window.addEventListener('scroll', hide)
+  })
+  ```
+
+  To address this, a compiler can return a destructor function that reverts its non-local effect.
+  Unpoly will call this destructor when the element is destroyed:
+
+  ```js
+  // label: ✔️ Garbage collectable
+  up.compiler('.scroll-to-hide', function(element) {
+    let hide = () => element.style.display = 'none'
+    window.addEventListener('scroll', hide)
+    return () => window.removeEventListener('scroll', hide) // mark: return
+  })
+  ```
+
+  This compiler function is now safe for garbage collection.
 
   > [important]
   > The destructor function is *not* expected to remove the element from the DOM.
+
+  ### Alternative ways to register destructors
+
+  To run multiple functions when the element is destroyed, return an array of functions:
+
+  ```js
+  up.compiler('.auto-hide', function(element) {
+    let hide = () => element.style.display = 'none'
+
+    window.addEventListener('scroll', hide)
+    let offScroll = () => window.removeEventListener('scroll', hide))
+
+    window.addEventListener('load', hide)
+    let offLoad = () => window.removeEventListener('load', hide))
+
+    return [offScroll, offLoad]
+  })
+  ```
+
+  Instead of returning a destructor function, you can register it with `up.destructor()`.
+  This helps placing the clean-up logic close to the effect that it reverts:
+
+  ```js
+  up.compiler('.auto-hide', function(element) {
+    let hide = () => element.style.display = 'none'
+
+    window.addEventListener('scroll', hide)
+    up.destructor(element, () => window.removeEventListener('scroll', hide))
+
+    window.addEventListener('load', hide)
+    up.destructor(element, () => window.removeEventListener('load', hide))
+  })
+  ```
+
+  > [tip]
+  > Other than `addEventListener()`, `up.on()` returns a function that unbinds the listener.
+
 
   ## Passing parameters to a compiler {#data}
 
@@ -279,7 +335,7 @@ q
     If set to `true` and a fragment insertion contains multiple
     elements matching `selector`, the `compiler` function is only called once
     with all these elements.
-  @param {Function(element, data, meta): Function(element)} compiler
+  @param {Function(element, data, meta): (Function(element)|Array<Function(element)>)} compiler
     The function to call when an element matching `selector` is inserted.
 
     The function may accept up to three arguments:
@@ -288,7 +344,7 @@ q
     2. Any [attached data](/data).
     3. [Information about the current render pass](/up.compiler#meta).
 
-    The function may return a [destructor](/up.destructor) function that [cleans the compiled object](/up.compiler#destructor)
+    The function may return a [destructor](#destructor) function that [cleans the compiled object](/up.compiler#destructor)
     before it is removed from the DOM. The destructor function is called with the compiled element.
   @stable
   */

@@ -32,6 +32,48 @@ describe('up.script', function() {
         expect(traces).toEqual(['bar', 'foo', 'baz'])
       })
 
+      describe('destructors', function() {
+
+        it('lets callbacks return a function that is called when the element is destroyed later', function() {
+          const destructor = jasmine.createSpy('destructor')
+          up.compiler('.element', (element) => destructor)
+          up.hello(fixture('.element'))
+          up.destroy('.element')
+          expect(destructor).toHaveBeenCalled()
+        })
+
+        it('lets callbacks return an array of functions that is called when the element is destroyed later', function() {
+          const destructor1 = jasmine.createSpy('destructor1')
+          const destructor2 = jasmine.createSpy('destructor2')
+          up.compiler('.element', (element) => [destructor1, destructor2])
+          up.hello(fixture('.element'))
+          up.destroy('.element')
+          expect(destructor1).toHaveBeenCalled()
+          expect(destructor2).toHaveBeenCalled()
+        })
+
+        it('allows callback register destructors using up.destructor()', function() {
+          const destructor1 = jasmine.createSpy('destructor1')
+          const destructor2 = jasmine.createSpy('destructor2')
+          up.compiler('.element', (element) => {
+            up.destructor(element, destructor1)
+            up.destructor(element, destructor2)
+          })
+          up.hello(fixture('.element'))
+          up.destroy('.element')
+          expect(destructor1).toHaveBeenCalled()
+          expect(destructor2).toHaveBeenCalled()
+        })
+
+        it('does not crash during compilation or destruction if a non-function value is returned (e.g. from CoffeeScript implicit returns)', function() {
+          up.compiler('.element', (element) => 'foo')
+          element = fixture('.element')
+          expect(() => up.hello(element)).not.toThrowError()
+          expect(() => up.destroy(element)).not.toThrowError()
+        })
+
+      })
+
       describe('with { batch } option', function() {
 
         it('compiles all matching elements at once', function() {
