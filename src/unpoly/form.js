@@ -419,6 +419,8 @@ up.form = (function() {
     // that are possible on both <form> and <a> elements.
     parser.include(up.link.followOptions)
 
+    Object.assign(options, submitButtonOverrides(options.submitButton))
+
     return options
   }
 
@@ -634,6 +636,14 @@ up.form = (function() {
     }
 
     return options
+  }
+
+  function submitButtonOverrides(submitButton) {
+    if (!submitButton) return {}
+    let followOptions = up.link.followOptions(submitButton, {}, { defaults: false })
+    // The parsing of [formmethod] and [formaction] (into { method, url })
+    // already happens in destinationOptions()
+    return u.omit(followOptions, ['method', 'url', 'guardEvent', 'origin'])
   }
 
   /*-
@@ -1440,6 +1450,9 @@ up.form = (function() {
   See [Handling all links and forms](/handling-everything).
 
   @selector [up-submit]
+
+  @params-note
+    Most of these attributes can also be placed at the submit button.
 
   @section Targeting
     @mix up-follow/targeting
@@ -2271,6 +2284,7 @@ up.form = (function() {
     submit,
     submitOptions,
     destinationOptions,
+    submitButtonOverrides,
     watchOptions,
     validateOptions,
     isSubmittable,

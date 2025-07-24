@@ -25,7 +25,7 @@ up.OptionsParser = class OptionsParser {
     this._fail = parserOptions.fail
     this._closest = parserOptions.closest
     this._attrPrefix = parserOptions.attrPrefix || 'up-'
-    this._defaults = parserOptions.defaults || {}
+    this._defaults = parserOptions.defaults ?? {}
   }
 
   string(key, keyOptions) {
@@ -67,7 +67,9 @@ up.OptionsParser = class OptionsParser {
       value ??= this._parseFromAttr(attrValueFn, this._element, attrName)
     }
 
-    value ??= keyOptions.default ?? this._defaults[key]
+    if (this._defaults !== false) {
+      value ??= keyOptions.default ?? this._defaults[key]
+    }
 
     if (u.isDefined(value)) {
       let normalizeFn = keyOptions.normalize
