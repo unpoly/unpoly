@@ -49,8 +49,10 @@ module.exports = {
       "globals": {
         "jasmine": "writable",
         "describe": "readonly",
+        "fdescribe": "readonly",
         "xdescribe": "readonly",
         "it": "readonly",
+        "fit": "readonly",
         "xit": "readonly",
         "expect": "readonly",
         "expectAsync": "readonly",
