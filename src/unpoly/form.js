@@ -1525,11 +1525,15 @@ up.form = (function() {
   */
 
   up.on('submit', config.selectorFn('submitSelectors'), function(event, form) {
-    // Users may configure up.form.config.submitSelectors.push('form')
-    // and then opt out individual forms with [up-submit=false].
-    if (event.defaultPrevented) return
-
+    // We pass on the event.submitter prop as a { submitButton } prop.
+    // Otherwise submitOptions() would default to the first submit button.
     const submitButton = u.presence(event.submitter, isSubmitButton)
+
+    // Allow individual submit buttons from opting out of Unpoly handling.
+    if (submitButton?.getAttribute('up-submit') === 'false') return
+
+    // Don't handle a form that's already been handled by foreign code.
+    if (event.defaultPrevented) return
 
     up.event.halt(event, { log: true })
     up.error.muteUncriticalRejection(submit(form, { submitButton }))

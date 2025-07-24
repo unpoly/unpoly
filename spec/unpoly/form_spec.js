@@ -4792,19 +4792,68 @@ describe('up.form', function() {
       })
 
       it('submits a form with [up-submit=true]', async function() {
-        fixture('main', { text: 'old text' })
+        let [main, form, input, submitButton] = htmlFixtureList(`
+          <main>old text</main>
 
-        const $form = $fixture('form[action="/form-target"][method="put"][up-submit="true"]')
-        $form.append('<input name="field" value="value">')
-        const $submitButton = $form.affix('input[type="submit"]')
-        up.hello($form)
+          <form action="/form-target" method="put" up-submit="true">
+            <input name="field" value="value">
+            <input type="submit">
+          </form>
+        `)
 
-        Trigger.clickSequence($submitButton)
+        up.hello(form)
 
+        Trigger.clickSequence(submitButton)
         await wait()
 
         expect(jasmine.lastRequest().data()['field']).toEqual(['value'])
         expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('main')
+      })
+
+      it('makes a full page load with [up-submit=false]', async function() {
+        let [main, form, input, submitButton] = htmlFixtureList(`
+          <main>old text</main>
+
+          <form action="/form-target" method="put" up-submit="false">
+            <input name="field" value="value">
+            <input type="submit">
+          </form>
+        `)
+
+        up.hello(form)
+
+        Trigger.clickSequence(submitButton)
+        await wait()
+
+        expect(form).toHaveBeenDefaultSubmitted()
+      })
+
+      it('allows individual submit buttons to opt into a full page load with [up-submit=false]', async function() {
+        let [main, form, input, unpolySubmitButton, vanillaSubmitButton] = htmlFixtureList(`
+          <main>old text</main>
+
+          <form action="/form-target" method="put" up-submit>
+            <input name="field" value="value">
+            <input type="submit">
+            <input type="submit" up-submit="false">
+          </form>
+        `)
+
+        up.hello(form)
+
+        expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        Trigger.clickSequence(unpolySubmitButton)
+        await wait()
+
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(form).not.toHaveBeenDefaultSubmitted()
+
+        Trigger.clickSequence(vanillaSubmitButton)
+        await wait()
+
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(form).toHaveBeenDefaultSubmitted()
       })
 
       it('does not focus the submit button when pressing Enter within an input (discussion #658)', async function() {
