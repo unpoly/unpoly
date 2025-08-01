@@ -1429,6 +1429,8 @@ up.form = (function() {
   A matching element in the current page is then swapped with the new element from the server response.
   The response may include other HTML (even an entire HTML document), but only the matching element will be updated.
 
+  [Submitting forms](/submitting-forms){:.article-ref}
+
   ## Example
 
   This will submit the form in-page and update a fragment matching `.content`:
