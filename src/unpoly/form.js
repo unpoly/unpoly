@@ -4,6 +4,7 @@ Forms
 
 The `up.form` module helps you work with non-trivial forms.
 
+@see submitting-forms
 @see validation
 @see switching-form-state
 @see reactive-server-forms
@@ -1429,49 +1430,43 @@ up.form = (function() {
   A matching element in the current page is then swapped with the new element from the server response.
   The response may include other HTML (even an entire HTML document), but only the matching element will be updated.
 
+  [Submitting forms](/submitting-forms){:.article-ref}
+
   ## Example
 
-  This will submit the form in-page and update a fragment matching `.content`:
+  This will submit the form in-page and update a fragment matching `#success`:
 
   ```html
-  <form method="post" action="/users" up-submit up-target=".content">
+  <form method="post" action="/users" up-submit up-target="#success"> <!-- mark: up-submit -->
     ...
   </form>
+
+  <div id="success">
+    <!-- chip: Content will appear here -->
+  </div>
   ```
 
-  ## Handling validation errors
+  See [Submitting forms](/submitting-forms) for elaborate examples..
+
+  ## Input validation
 
   When the form could not be submitted due to invalid user input,
   Unpoly can re-render the form with validation errors.
 
-  See [validating forms](/validation) for details and examples.
-
-
-  ## Showing that the form is processing
-
-  See [Loading state](/loading-state) and [Disabling form controls while working](/disabling-forms).
-
+  See [Validating forms](/validation) for details and examples.
 
   ## Short notation
 
   You may omit the `[up-submit]` attribute if the form has one of the following attributes:
 
-  - `[up-target]`
-  - `[up-layer]`
-  - `[up-transition]`
-
-  Such a form will still be submitted through Unpoly.
-
-  ## Handling all forms automatically
-
-  You can configure Unpoly to handle *all* forms on a page without requiring an `[up-submit]` attribute.
-
-  See [Handling all links and forms](/handling-everything).
+  - [`[up-target]`](#up-target)
+  - [`[up-layer]`](#up-layer)
+  - [`[up-transition]`](#up-transition)
 
   @selector [up-submit]
 
   @params-note
-    Most of these attributes can also be placed at the submit button.
+    Most of these attributes can also be [set on the submit button](/submitting-forms#submit-button).
 
   @section Targeting
     @mix up-follow/targeting

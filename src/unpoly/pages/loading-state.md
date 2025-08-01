@@ -4,7 +4,8 @@ Loading state
 Unpoly offers many tools to show loading state after a user interaction.
 
 This is an overview of all available strategies to signal that the app is working,
-or to provide clues for how the page will ultimately look.
+or to provide clues for how the page will ultimately look. Techniques can be applied
+to both [link clicks](/up.link) and [form submissions](/submitting-forms).
 
 
 Styling loading elements
