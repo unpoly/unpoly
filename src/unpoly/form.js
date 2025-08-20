@@ -1980,11 +1980,11 @@ up.form = (function() {
 
   @stable
   */
-  up.compiler('form', function(form) {
-    // We pre-emptively initialize a FormValidator for *every* form, so it can start tracking fields.
+  up.compiler('[up-validate]', { rerun: true }, function(element) {
     // There are non-intuitive ways that an [up-validate] field can find its way into a <form>,
     // e.g. when the field is also [up-keep] and is transplanted into a new <form> later.
-    getFormValidator(form)
+    let form = getForm(element)
+    if (form) getFormValidator(form)
   })
 
   /*-

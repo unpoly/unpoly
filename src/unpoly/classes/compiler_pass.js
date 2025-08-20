@@ -108,13 +108,18 @@ up.CompilerPass = class CompilerPass {
 
   _selectOnce(compiler) {
     let matches = this._select(compiler.selector)
-    return u.filter(matches, (element) => {
-      let appliedCompilers = (element.upAppliedCompilers ||= new Set())
-      if (!appliedCompilers.has(compiler)) {
-        appliedCompilers.add(compiler)
-        return true
-      }
-    })
+
+    if (!compiler.rerun) {
+      matches = u.filter(matches, (element) => {
+        let appliedCompilers = (element.upAppliedCompilers ||= new Set())
+        if (!appliedCompilers.has(compiler)) {
+          appliedCompilers.add(compiler)
+          return true
+        }
+      })
+    }
+
+    return matches
   }
 
 }

@@ -384,6 +384,7 @@ up.script = (function() {
       isDefault: up.framework.evaling,
       priority: 0,
       batch: false,
+      rerun: false,
     })
     return Object.assign(callback, options, overrides)
   }

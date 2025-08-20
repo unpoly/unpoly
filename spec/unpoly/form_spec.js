@@ -6496,6 +6496,71 @@ describe('up.form', function() {
         expect(renderSpy.calls.mostRecent().args[0].focus).not.toEqual('layer')
       })
 
+      it('keeps validating the input when it is also [up-keep] and is transported into a new form', async function() {
+        const validateListener = jasmine.createSpy('up:form:validate listener')
+        up.on('up:form:validate', validateListener)
+
+        const [oldForm, input] = htmlFixtureList(`
+          <form id="form">
+            <input name="name" up-validate up-keep>
+          </form>
+        `)
+
+        up.hello(oldForm)
+        await wait()
+
+        input.value = 'foo'
+        Trigger.change(input)
+        await wait()
+
+        expect(validateListener.calls.count()).toBe(1)
+        expect(validateListener.calls.argsFor(0)[0].form).toBe(oldForm)
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+
+        const { fragment: newForm } = await up.render({ fragment: `
+          <form id="form">
+            <input name="name" up-validate>
+          </form>
+        ` })
+
+        expect(input).toBeAttached()
+        expect(input.parentElement).toBe(newForm)
+
+        input.value = 'bar'
+        Trigger.change(input)
+        await wait()
+
+        expect(validateListener.calls.count()).toBe(2)
+        expect(validateListener.calls.argsFor(1)[0].form).toBe(newForm)
+        expect(jasmine.Ajax.requests.count()).toBe(2)
+      })
+
+      it('validates an input that is manually attached to an existing form and is activated with up.hello()', async function() {
+        const validateListener = jasmine.createSpy('up:form:validate listener')
+        up.on('up:form:validate', validateListener)
+
+        const [form] = htmlFixtureList(`
+          <form id="form">
+          </form>
+        `)
+
+        up.hello(form)
+        await wait()
+
+        const input = e.affix(form, 'input[name=name][up-validate]')
+        up.hello(input)
+        await wait()
+
+        input.value = 'foo'
+        Trigger.change(input)
+        await wait()
+
+        expect(validateListener.calls.count()).toBe(1)
+        expect(validateListener.calls.argsFor(0)[0].form).toBe(form)
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+
+      })
+
       describe('with [up-watch-event]', function() {
         it('starts validation on another event', async function() {
           const form = fixture('form[up-submit][action="/path"]')
