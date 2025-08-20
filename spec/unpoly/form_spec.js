@@ -6,6 +6,100 @@ describe('up.form', function() {
 
   describe('JavaScript functions', function() {
 
+    describe('up.form.get()', function() {
+
+      describe('for a form element', function() {
+
+        it('returns the form element', function() {
+          const form = fixture('form')
+          expect(up.form.get(form)).toBe(form)
+        })
+
+      })
+
+      describe('for a field element', function() {
+
+        it('returns an ancestor form', function() {
+          const [form, group, input] = htmlFixtureList(`
+            <form>
+              <div id="group">
+                <input type="text" name="email">
+              </div>
+            </form>
+          `)
+
+          expect(up.form.get(input)).toBe(form)
+        })
+
+        it('returns the associated form for a form-external field', function() {
+          const [form, externalInput] = htmlFixtureList(`
+            <form id="my-form">
+            </form>
+            <input form="my-form">
+          `)
+
+          expect(up.form.get(externalInput)).toBe(form)
+        })
+
+        it('returns the associated form for a form-external field when multiple layers have the same form[id]', function() {
+          const html = `
+            <div id="container">
+              <form id="my-form">
+              </form>
+              <input id="my-field" form="my-form">
+            </div>
+          `
+
+          makeLayers([
+            { fragment: html },
+            { fragment: html },
+          ])
+
+          expect(up.layer.count).toBe(2)
+
+          let rootForm = up.fragment.get('#my-form', { layer: 'root' })
+          let rootInput = up.fragment.get('#my-field', { layer: 'root' })
+          expect(rootForm).toBeAttached()
+          expect(rootInput).toBeAttached()
+
+          let overlayForm = up.fragment.get('#my-form', { layer: 'overlay' })
+          let overlayInput = up.fragment.get('#my-field', { layer: 'overlay' })
+          expect(overlayForm).toBeAttached()
+          expect(overlayInput).toBeAttached()
+
+          expect(up.form.get(rootInput)).toBe(rootForm)
+          expect(up.form.get(overlayInput)).toBe(overlayForm)
+        })
+
+      })
+
+
+      describe('for a div', function() {
+
+        it('returns the closest form', function() {
+          const [form, group, input] = htmlFixtureList(`
+            <form>
+              <div id="group">
+                <input type="text" name="email">
+              </div>
+            </form>
+          `)
+
+          expect(up.form.get(group)).toBe(form)
+        })
+
+        it('returns a missing value if the div is not in a form', function() {
+          const [div] = htmlFixtureList('<div></div>')
+
+          expect(up.form.get(div)).toBeMissing()
+        })
+
+      })
+
+
+
+    })
+
     describe('up.form.fields', function() {
 
       it('returns a list of form fields within the given element', function() {

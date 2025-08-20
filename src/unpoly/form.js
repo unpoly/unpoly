@@ -390,6 +390,7 @@ up.form = (function() {
   @stable
   */
   function submitOptions(form, options, parserOptions) {
+    form = up.fragment.get(form)
     form = getForm(form)
 
     options = u.options(options)
@@ -1309,12 +1310,30 @@ up.form = (function() {
   @stable
   */
 
-  function getForm(elementOrSelector, options = {}) {
-    const element = up.fragment.get(elementOrSelector, options)
+  function getForm(element) {
+    return getLiteralForm(element) || getClosestForm(element) || getAssociatedForm(element)
+  }
 
-    // (1) Element#form will also work if the element is outside the form with an [form=form-id] attribute
-    // (2) We still need the closest('form') in case we're called with a non-field element
-    return element.form || element.closest('form')
+  function getLiteralForm(element) {
+    // We're making a lot of calls to getForm() and getRegion().
+    // For performance reasons we want to return a literal <form> without further DOM look-ups.
+    if (element instanceof HTMLFormElement) return element
+  }
+
+  function getClosestForm(element) {
+    // Return the closest form for vanilla fields, or any non-field element within a form (like a form group).
+    return element.closest('form')
+  }
+
+  function getAssociatedForm(element) {
+    // We support fields without a <form> ancestor, which are associated via an [form] attribute.
+    // We could use element's { form } property, but that is not layer-aware. It will always return
+    // the first form with a matching [id].
+    let formID = element.getAttribute('form')
+    if (formID) {
+      let selector = 'form' + e.idSelector(formID)
+      return up.fragment.get(selector, { layer: element })
+    }
   }
 
   function getFormValidator(form) {
@@ -1337,7 +1356,7 @@ up.form = (function() {
   // Does not support a selector string as a first argument. Only works with Element arguments.
   function getRegion(origin, options) {
     if (origin) {
-      return getForm(origin, options) || up.layer.get(origin).element
+      return getForm(origin) || up.layer.get(origin).element
     } else {
       return up.layer.current.element
     }
