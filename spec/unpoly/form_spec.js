@@ -185,11 +185,11 @@ describe('up.form', function() {
         expect(attachCallback.calls.allArgs()).toEqual([[field1]])
       })
 
-      it('runs the callback for fields that are appended to the form later', async function() {
+      it('runs the callback for fields that are rendered into to the form later', async function() {
         let attachSpy = jasmine.createSpy('attach callback')
         let detachSpy = jasmine.createSpy('detach callback')
 
-        const [form, field1, field2] = htmlFixtureList(`
+        const [form, field1, target] = htmlFixtureList(`
           <form>
             <input type="text" name="field1">
             <div id="target"></div>
@@ -213,7 +213,33 @@ describe('up.form', function() {
         expect(attachSpy.calls.allArgs()).toEqual([['field1'], ['field2']])
       })
 
-      it('does not run the callback for fields that are appended to another form later', async function() {
+      it('runs the callback for fields that are manually inserted into the form later, when up.hello() is called', async function() {
+        let attachSpy = jasmine.createSpy('attach callback')
+        let detachSpy = jasmine.createSpy('detach callback')
+
+        const [form, field1] = htmlFixtureList(`
+          <form>
+            <input type="text" name="field1">
+          </form>
+        `)
+
+        up.form.trackFields(form, (field) => {
+          attachSpy(field.name)
+          return () => detachSpy(field.name)
+        })
+
+        expect(attachSpy.calls.allArgs()).toEqual([['field1']])
+
+        const field2 = up.element.createFromHTML('<input type="text" name="field2">')
+        form.append(field2)
+        up.hello(field2)
+
+        await wait()
+
+        expect(attachSpy.calls.allArgs()).toEqual([['field1'], ['field2']])
+      })
+
+      it('does not run the callback for fields that are rendered into another form later', async function() {
         let attachSpy = jasmine.createSpy('attach callback')
         let detachSpy = jasmine.createSpy('detach callback')
 
@@ -245,7 +271,7 @@ describe('up.form', function() {
         expect(attachSpy.calls.allArgs()).toEqual([['field1']])
       })
 
-      it('runs an undo callback when the field is destroyed', async function() {
+      it('runs an undo callback when the field is destroyed with up.destroy()', async function() {
         let detachCallback = jasmine.createSpy('detach callback')
         let attachCallback = jasmine.createSpy('attach callback').and.returnValue(detachCallback)
 
