@@ -110,6 +110,60 @@ up.compiler('[up-flashes] > *', function(message) {
 To animate the removal, pass an [`{ animation }`](/up.destroy#options.animation) option to `up.destroy()`.
 
 
+Caching considerations {#caching}
+---------------------------------
+
+Responses with notification flashes don't [cache](/caching) well.
+When such a response is re-used, old flash messages will be shown again.
+
+There are several workarounds for this:
+
+1. Do not cache responses with flashes.
+2. Have a [compiler suppress flash messages](#suppressing-cached-flashes-suppressing-cached-flashes) that have been shown before.
+3. Use a different URL for responses with flashes, such es `/users/3?updated=true`.
+4. Transport flash messages in a client-readable cookie instead.
+
+
+### Suppressing cached flashes {#suppressing-cached-flashes}
+
+You can write a [compiler](/enhancing-elements) that removes the DOM elements for flashes that have already been shown.
+This allows you to keep caching responses with flashes, but only show each message once.
+
+To give each flash message a identity that we can track, render them with random attribute, such as `[data-nonce]`: 
+
+
+```html
+<div up-flashes>
+  <strong data-nonce="6792525983">User was updated!</strong> <!-- mark: data-nonce -->
+</div>
+```
+
+The client can now track which nonces it has already seen. When a cached response it re-used,
+it recognizes an older nonce and removes the message element:
+
+```js
+let seen = new Set()
+
+up.compiler('[up-flashes] > *', function(message, { nonce }) {
+  if (seen.has(nonce)) {
+    // Remove a flash message that has already been shown
+    message.remove()
+  } else {
+    // Remember that we've seen this flash message
+    seen.add(nonce)
+
+    // Only track the last 100 nonces
+    if (seen.size > 100) {
+      seen.delete(seen.values().next().value)
+    }
+  }
+})
+```
+
+Because compilers run before the browser paints, removed flash messages will never
+be visible to the user.
+
+
 Building a custom flashes container
 -----------------------------------
 
