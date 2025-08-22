@@ -3310,6 +3310,21 @@ describe('up.form', function() {
             }))
           })
 
+          it('uses destination from the form if the form has submit buttons, but { submitButton: false } is passed', function() {
+            let [form, submitButton] = htmlFixtureList(`
+              <form method="form-method" action="/form-action">
+                <button type="submit" formmethod="button1-method" formaction="/button1-action">Submit 1</button>
+                <button type="submit" formmethod="button2-method" formaction="/button2-action">Submit 2</button>
+              </form>
+            `)
+
+            let options = up.form.submitOptions(form, { submitButton: false })
+
+            expect(options).toEqual(jasmine.objectContaining({
+              method: 'FORM-METHOD',
+              url: '/form-action',
+            }))
+          })
 
         })
 
@@ -3371,6 +3386,21 @@ describe('up.form', function() {
             expect(options).toEqual(jasmine.objectContaining({
               target: '#button-target',
               failTarget: '#button-fail-target',
+            }))
+          })
+
+          it('uses overrides from the the form if the form has submit buttons, but { submitButton: false } is passed', function() {
+            let [form, submitButton] = htmlFixtureList(`
+              <form method="post" action="/action" up-target="#form-target" up-fail-target="#form-fail-target">
+                <button type="submit" up-target="#button-target" up-fail-target="#button-fail-target">Submit me</button>
+              </form>
+            `)
+
+            let options = up.form.submitOptions(form, { submitButton: false })
+
+            expect(options).toEqual(jasmine.objectContaining({
+              target: '#form-target',
+              failTarget: '#form-fail-target',
             }))
           })
 
