@@ -9,10 +9,11 @@ up.SelectorTracker = class SelectorTracker {
     this._filter = options.filter || u.identity
     this._live = options.live ?? true
     this._knownMatches = new Map()
+    this._syncScheduled = false
   }
 
   start() {
-    this._sync()
+    this._scheduleSync()
 
     return u.sequence(
       this._trackFragments(),
@@ -22,11 +23,23 @@ up.SelectorTracker = class SelectorTracker {
 
   _trackFragments() {
     if (this._live) {
-      return up.on('up:fragment:inserted up:fragment:destroyed', () => this._sync())
+      return up.on('up:fragment:inserted up:fragment:destroyed', () => this._scheduleSync())
+    }
+  }
+
+  _scheduleSync() {
+    if (!this._syncScheduled) {
+      this._syncScheduled = true
+      // When we're in the middle of a render pass, we don't want to react to every
+      // up:fragment:inserted/destroyed event, for performance reasons.
+      // We want to only sync once at the end of the render pass.
+      up.fragment.afterMutate(() => this._sync())
     }
   }
 
   _sync() {
+    this._syncScheduled = false
+
     let removeMap = new Map(this._knownMatches)
     this._knownMatches.clear()
 

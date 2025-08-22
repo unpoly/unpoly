@@ -255,6 +255,42 @@ describe('up.util', () => {
         expect(action2.calls.count()).toBe(1)
       })
 
+      describe('with "fifo" order', function() {
+
+        it("runs clean-up actions in the same order that they've been scheduled in", function() {
+          let actions = []
+          let cleaner = up.util.cleaner('fifo')
+          cleaner(() => actions.push('one'))
+          cleaner(() => actions.push('two'))
+
+          cleaner.clean()
+
+          expect(actions).toEqual(['one', 'two'])
+        })
+
+        it('does not let clean-up actions schedule more clean-up actions', function() {
+          let cleaner = up.util.cleaner('fifo')
+
+          let recursiveAction = jasmine.createSpy('recursive action')
+          let action = jasmine.createSpy('clean-up action').and.callFake(() => {
+            cleaner(recursiveAction)
+          })
+
+          cleaner(action)
+
+          expect(action).not.toHaveBeenCalled()
+          expect(recursiveAction).not.toHaveBeenCalled()
+
+          let doClean = () => cleaner.clean()
+          expect(doClean).not.toThrowError()
+
+          expect(action).toHaveBeenCalled()
+          expect(recursiveAction).not.toHaveBeenCalled()
+        })
+
+
+      })
+
     })
 
     describe('up.util.isEqual', function() {

@@ -580,8 +580,14 @@ up.script = (function() {
     element = up.fragment.get(element, options)
 
     up.puts('up.hello()', "Compiling fragment %o", element)
-    compile(element, options)
-    up.fragment.emitInserted(element)
+
+    // Group compilation and emission of up:fragment:inserted into a mutation block.
+    // This allows up.SelectorTracker to only sync once after the mutation, and
+    // ignore any events in between.
+    up.fragment.mutate(() => {
+      compile(element, options)
+      up.fragment.emitInserted(element)
+    })
 
     return element
   }

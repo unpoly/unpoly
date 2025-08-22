@@ -3041,6 +3041,26 @@ up.fragment = (function() {
     return tracker.start()
   }
 
+  let mutateLevel = 0
+  let afterMutateCleaner = u.cleaner('fifo')
+
+  function mutate(callback) {
+    try {
+      mutateLevel++
+      callback()
+    } finally {
+      if (--mutateLevel === 0) afterMutateCleaner.clean()
+    }
+  }
+
+  function afterMutate(callback) {
+    if (mutateLevel === 0) {
+      callback()
+    } else {
+      afterMutateCleaner(callback)
+    }
+  }
+
   up.on('up:framework:boot', function() {
     const { documentElement } = document
 
@@ -3102,6 +3122,8 @@ up.fragment = (function() {
     provideNodes,
     cloneTemplate,
     trackSelector,
+    mutate,
+    afterMutate,
     // swapTemp,
     // timer: scheduleTimer
   }

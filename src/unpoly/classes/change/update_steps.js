@@ -42,8 +42,13 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
       //     the viewport height through element insertions.
       this._steps.reverse()
 
-      const motionEndPromises = this._steps.map((step) => this._executeStep(step))
-      this.renderResult.finished = this._finish(motionEndPromises)
+      // Group compilation and emission of up:fragment:inserted into a mutation block.
+      // This allows up.SelectorTracker to only sync once after the mutation, and
+      // ignore any events in between.
+      up.fragment.mutate(() => {
+        const motionEndPromises = this._steps.map((step) => this._executeStep(step))
+        this.renderResult.finished = this._finish(motionEndPromises)
+      })
     }
 
     return this.renderResult

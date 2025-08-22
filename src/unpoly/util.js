@@ -2164,7 +2164,7 @@ up.util = (function() {
     return values.flat().filter(isFunction)
   }
 
-  function cleaner() {
+  function cleaner(order = 'lifo') {
     let fns = []
 
     let track = function(values, transform) {
@@ -2181,12 +2181,20 @@ up.util = (function() {
     }
 
     api.clean = function(...args) {
-      // (1) Run clean-up actions in the reverse order that they were scheduled in
-      // (2) Don't allow clean-up actions to schedule more clean-up actions, to
-      //     prevent infinite loops. E.g. a user misunderstanding Preview#show() calls
-      //     Preview#hide() in an undo action.
-      let { length } = fns
-      for (let i = length - 1; i >= 0; i--) fns[i](...args)
+      // By default, we run clean-up actions in the reverse order that they were scheduled in
+      if (order === 'lifo') fns.reverse()
+
+      // We don't allow clean-up actions to schedule more clean-up actions, to
+      // prevent infinite loops. E.g. a user misunderstanding Preview#show() calls
+      // Preview#hide() in an undo action.
+      //
+      // We can leverage the behavior of forEach(), which sets its range before the first iteration
+      // and does not iterate over additional elements.
+      // https://tc39.es/ecma262/multipage/indexed-collections.html#sec-array.prototype.foreach
+      // AFAIK for ... of loops would behave differently.
+      fns.forEach((fn) => fn(...args))
+
+      // Allow the cleaner to be re-used.
       fns = []
     }
 
