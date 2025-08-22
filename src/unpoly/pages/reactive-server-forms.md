@@ -14,7 +14,7 @@ By using the `[up-validate]` attribute we can implement logic like this on the s
 and no additional JavaScript.
 
 > [tip]
-> For trivial effects (like toggling visibility) no server request is required.
+> For light, client-side effects (like toggling visibility) no server request is required.
 > See [Switching form state](/switching-form-state).
 
 

@@ -6,6 +6,10 @@ A field with the `[up-switch]` attribute can control the state of other element 
 Common effects are [showing, hiding](#toggle) or [disabling](#disable) another element.
 You can also implement [custom switching effects](#custom-effects).
 
+> [tip]
+> The `[up-switch]` attribute handles light, client-side effects.
+> See [Reactive server forms](/reactive-server-forms) for effects that render on the server.
+
 ## Showing or hiding other elements {#toggle}
 
 The controlling form field gets an `[up-switch]` attribute with a selector for the elements to show or hide:
