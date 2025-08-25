@@ -372,6 +372,50 @@ describe('up.script', function() {
         expect(element.className).toBe('element')
       })
 
+      it('immediately calls a destructor function if an element has already been detached', async function() {
+        let destructorSpy = jasmine.createSpy('destructor function')
+        let element = fixture('.element')
+
+        up.destroy(element)
+        await wait()
+
+        up.destructor(element, destructorSpy)
+        expect(destructorSpy).toHaveBeenCalled()
+      })
+
+      it('calls a destructor that is registered while the element is playing its destroy animation', async function() {
+        let destructorSpy = jasmine.createSpy('destructor function')
+        let element = fixture('.element')
+
+        up.destroy(element, { animation: 'fade-out', duration: 500 })
+        await wait(250)
+
+        expect(element).toBeAttached()
+
+        up.destructor(element, destructorSpy)
+        await wait(500)
+
+        expect(element).toBeDetached()
+        expect(destructorSpy).toHaveBeenCalled()
+      })
+
+      it('calls a destructor that is registered while the element is playing its swap transition', async function() {
+        let destructorSpy = jasmine.createSpy('destructor function')
+        let html = '<div class="element"></div>'
+        let element = htmlFixture(html)
+
+        up.render({ fragment: html, transition: 'cross-fade', duration: 500 })
+        await wait(250)
+
+        expect(element).toBeAttached()
+
+        up.destructor(element, destructorSpy)
+        await wait(500)
+
+        expect(element).toBeDetached()
+        expect(destructorSpy).toHaveBeenCalled()
+      })
+
     })
 
     describe('up.data()', function() {

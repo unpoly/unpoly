@@ -479,8 +479,18 @@ up.script = (function() {
     let fns = u.scanFunctions(value)
     if (!fns.length) return
 
-    let registry = (element.upDestructors ||= buildDestructorRegistry(element))
-    registry.guard(fns)
+    // (A) If the element has already been destroyed, registering a destructor function
+    //     has no effect. No one will ever look at the destructor registry again.
+    //     In this case we immediately call the destructor function.
+    // (B) Because destructors are called *after* an destroy animation, we don't need
+    //     to check .up-destroying here. We can use the cheaper Element#isConnected instead.
+    if (element.isConnected) {
+      let registry = (element.upDestructors ||= buildDestructorRegistry(element))
+      registry.guard(fns)
+    } else {
+      // The element was destroyed before an async compiler function resolved.
+      for (let fn of fns) up.error.guard(fn, element)
+    }
   }
 
   function buildDestructorRegistry(element) {

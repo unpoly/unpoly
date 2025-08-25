@@ -79,26 +79,23 @@ up.CompilerPass = class CompilerPass {
       compileArgs.push(data, this._meta)
     }
 
-    let result = this._applyCompilerFunction(compiler, element, compileArgs)
+    let maybeDestructor = this._applyCompilerFunction(compiler, element, compileArgs)
 
-    if (u.isPromise(result)) {
-      let resultPromise = up.error.guardPromise(result)
-      this._compilePromises.push(resultPromise)
+    if (u.isPromise(maybeDestructor)) {
+      // If the async compiler rejects, emit an `error` event but don't reject.
+      let guardedPromise = up.error.guardPromise(maybeDestructor)
 
-      // TODO: Move to up.destructor()
+      // Remember this promise for the return value of #run()
+      this._compilePromises.push(guardedPromise)
 
-      let fns = u.scanFunctions(await resultPromise)
-
-      if (fns.length) {
-        if (up.fragment.isAlive(element)) { // needs to be isAlive
-          up.destructor(element, fns)
-        } else {
-          fns.forEach((fn) => up.error.guard(fn, element))
-        }
-      }
-    } else {
-      up.destructor(element, result)
+      // (1) We don't know yet if the async compiler function will return destructors.
+      // (2) Ideally we want to avoid setting .up-can-clean on every element that is async-compiled.
+      // (3) There is an edge case where a an element is destroyed, before its async compiler
+      //     function resolves. In that case we still want to execute a returned destructor function.
+      maybeDestructor = await guardedPromise
     }
+
+    up.destructor(element, maybeDestructor)
   }
 
   _compileBatch(compiler, elements) {
