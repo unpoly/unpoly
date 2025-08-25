@@ -13,6 +13,7 @@ up.CompilerPass = class CompilerPass {
     this._data = data
     this._dataRoot = dataRoot || root
     this._dataMap = dataMap
+    this._compilePromises = []
 
     // The meta object may have a getter on { response }, defined by unpoly-migrate.js.
     // Hence we cannot make a new object here.
@@ -31,6 +32,8 @@ up.CompilerPass = class CompilerPass {
         this._runCompiler(compiler)
       }
     })
+
+    return Promise.all(this._compilePromises)
   }
 
   setCompileData() {
@@ -63,10 +66,10 @@ up.CompilerPass = class CompilerPass {
       }
     }
 
-    return up.migrate.postCompile?.(matches, compiler)
+    up.migrate.postCompile?.(matches, compiler)
   }
 
-  _compileOneElement(compiler, element) {
+  async _compileOneElement(compiler, element) {
     const compileArgs = [element]
     // Do not retrieve and parse [up-data] unless the compiler function
     // expects a second argument. Note that we must pass data for an argument
@@ -76,8 +79,26 @@ up.CompilerPass = class CompilerPass {
       compileArgs.push(data, this._meta)
     }
 
-    const result = this._applyCompilerFunction(compiler, element, compileArgs)
-    up.destructor(element, result)
+    let result = this._applyCompilerFunction(compiler, element, compileArgs)
+
+    if (u.isPromise(result)) {
+      let resultPromise = up.error.guardPromise(result)
+      this._compilePromises.push(resultPromise)
+
+      // TODO: Move to up.destructor()
+
+      let fns = u.scanFunctions(await resultPromise)
+
+      if (fns.length) {
+        if (up.fragment.isAlive(element)) { // needs to be isAlive
+          up.destructor(element, fns)
+        } else {
+          fns.forEach((fn) => up.error.guard(fn, element))
+        }
+      }
+    } else {
+      up.destructor(element, result)
+    }
   }
 
   _compileBatch(compiler, elements) {

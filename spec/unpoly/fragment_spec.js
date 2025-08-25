@@ -9529,7 +9529,7 @@ describe('up.fragment', function() {
 
           up.compiler('.container', (element) => () => testElementState(element))
 
-          up.hello(fixture('.container', { text: 'old text' }))
+          helloFixture('.container', { text: 'old text' })
 
           up.render({ fragment: '<div class="container">new text</div>' })
 
@@ -12162,7 +12162,7 @@ describe('up.fragment', function() {
       it('calls destructors for custom elements', function() {
         const destructor = jasmine.createSpy('destructor')
         up.compiler('.element', (element) => destructor)
-        up.hello(fixture('.element'))
+        helloFixture('.element')
         up.destroy('.element')
         expect(destructor).toHaveBeenCalled()
       })
@@ -12202,7 +12202,7 @@ describe('up.fragment', function() {
 
         up.compiler('.container', (element) => () => testElement(element))
 
-        up.hello(fixture('.container', { text: 'old text' }))
+        helloFixture('.container', { text: 'old text' })
 
         up.destroy('.container')
       })

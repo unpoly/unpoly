@@ -182,7 +182,7 @@ describe('up.radio', function() {
         up.radio.config.pollInterval = interval
         const timingTolerance = interval / 3
 
-        const element = up.hello(fixture('.element[up-poll]', { text: 'old text' }))
+        const element = helloFixture('.element[up-poll]', { text: 'old text' })
 
         up.radio.startPolling(element)
 
@@ -199,7 +199,7 @@ describe('up.radio', function() {
         up.radio.config.pollInterval = (interval = 150)
         const timingTolerance = interval / 3
 
-        const element = up.hello(fixture('.element[up-poll][up-source="/one"]'))
+        const element = helloFixture('.element[up-poll][up-source="/one"]')
 
         await wait()
 
@@ -228,7 +228,7 @@ describe('up.radio', function() {
         up.radio.config.pollInterval = (interval = 150)
         const timingTolerance = interval / 3
 
-        const element = up.hello(fixture('.element[up-poll][up-href="/one"]'))
+        const element = helloFixture('.element[up-poll][up-href="/one"]')
 
         await wait()
 
@@ -257,7 +257,7 @@ describe('up.radio', function() {
         up.radio.config.pollInterval = defaultInterval
         const timingTolerance = defaultInterval / 3
 
-        const element = up.hello(fixture('.element'))
+        const element = helloFixture('.element')
 
         up.radio.startPolling(element, { interval: defaultInterval * 2 })
 
@@ -272,7 +272,7 @@ describe('up.radio', function() {
       })
 
       it('does not emit up:network:late if the server is slow to respond', async function() {
-        const element = up.hello(fixture('.element'))
+        const element = helloFixture('.element')
         up.network.config.lateDelay = 20
         const lateListener = jasmine.createSpy('up:network:late listener')
         up.on('up:network:late', lateListener)
@@ -1941,7 +1941,7 @@ describe('up.radio', function() {
         const timingTolerance = interval / 3
         up.radio.config.pollInterval = interval
 
-        const element = up.hello(fixture('.element[up-poll]', { text: 'old text' }))
+        const element = helloFixture('.element[up-poll]', { text: 'old text' })
 
         await wait(timingTolerance)
 
@@ -1975,7 +1975,7 @@ describe('up.radio', function() {
         const timingTolerance = interval / 3
         up.radio.config.pollInterval = interval
 
-        up.hello(fixture('.element[up-poll=true]', { text: 'old text' }))
+        helloFixture('.element[up-poll=true]', { text: 'old text' })
 
         await wait(timingTolerance)
 
@@ -1987,7 +1987,7 @@ describe('up.radio', function() {
       })
 
       it('does not reload an element with [up-poll=false]', async function() {
-        up.hello(fixture('.element[up-poll=false][up-interval=50][up-source="/source-path"]', { text: 'old text' }))
+        helloFixture('.element[up-poll=false][up-interval=50][up-source="/source-path"]', { text: 'old text' })
 
         await wait(120)
 
@@ -2004,7 +2004,7 @@ describe('up.radio', function() {
           return deferred
         })
 
-        up.hello(fixture('.element[up-poll]'))
+        helloFixture('.element[up-poll]')
 
         await wait(200)
         expect(reloadSpy.calls.count()).toBe(1)
@@ -2019,7 +2019,7 @@ describe('up.radio', function() {
 
       it('keeps the polling rhythm when the server responds with `X-Up-Target: :none` (bugfix)', async function() {
         up.radio.config.pollInterval = 250
-        up.hello(fixture('.element[up-poll][up-source="/source"]'))
+        helloFixture('.element[up-poll][up-source="/source"]')
 
         await wait(50)
         expect(jasmine.Ajax.requests.count()).toBe(0)
@@ -2037,7 +2037,7 @@ describe('up.radio', function() {
 
       it('keeps polling if the server responds with a 304 Not Modified status', async function() {
         up.radio.config.pollInterval = 250
-        up.hello(fixture('.element[up-poll][up-source="/source"]'))
+        helloFixture('.element[up-poll][up-source="/source"]')
 
         await wait(50)
         expect(jasmine.Ajax.requests.count()).toBe(0)
@@ -2058,7 +2058,7 @@ describe('up.radio', function() {
           up.radio.config.pollInterval = 100
           const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.reject(new up.Error('mocked network error')))
 
-          up.hello(fixture('.element[up-poll]'))
+          helloFixture('.element[up-poll]')
 
           await wait(140)
 
@@ -2079,7 +2079,7 @@ describe('up.radio', function() {
         it('tries again after the next interval', async function() {
           up.radio.config.pollInterval = 250
 
-          up.hello(fixture('.element[up-poll][up-source="/source"]'))
+          helloFixture('.element[up-poll][up-source="/source"]')
 
           await wait(50)
           expect(jasmine.Ajax.requests.count()).toBe(0)
@@ -2104,7 +2104,7 @@ describe('up.radio', function() {
         it('does not update a matching fragment from the response', async function() {
           up.radio.config.pollInterval = 250
 
-          up.hello(fixture('.element[up-poll][up-source="/source"]', { text: 'original text' }))
+          helloFixture('.element[up-poll][up-source="/source"]', { text: 'original text' })
 
           await wait(50)
           expect(jasmine.Ajax.requests.count()).toBe(0)
@@ -2128,7 +2128,7 @@ describe('up.radio', function() {
         it('updates a matching fragment from the response with [up-fail="false"]', async function() {
           up.radio.config.pollInterval = 250
 
-          up.hello(fixture('.element[up-poll][up-source="/source"][up-fail="false"]', { text: 'original text' }))
+          helloFixture('.element[up-poll][up-source="/source"][up-fail="false"]', { text: 'original text' })
 
           await wait(50)
 
@@ -2156,7 +2156,7 @@ describe('up.radio', function() {
         spyOnProperty(document, 'visibilityState', 'get').and.returnValue('hidden')
         const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
 
-        up.hello(fixture('.element[up-poll]'))
+        helloFixture('.element[up-poll]')
 
         await wait(100)
         expect(reloadSpy).not.toHaveBeenCalled()
@@ -2199,7 +2199,7 @@ describe('up.radio', function() {
         up.radio.config.pollInterval = 75
         const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
 
-        const element = up.hello(fixture('.element[up-poll]'))
+        const element = helloFixture('.element[up-poll]')
 
         await wait(125)
         expect(reloadSpy.calls.count()).toBe(1)
@@ -2213,7 +2213,7 @@ describe('up.radio', function() {
         up.radio.config.pollInterval = 75
         const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
 
-        const element = up.hello(fixture('.element[up-poll]'))
+        const element = helloFixture('.element[up-poll]')
 
         await wait(125)
         expect(reloadSpy.calls.count()).toBe(1)
@@ -2230,7 +2230,7 @@ describe('up.radio', function() {
         up.radio.config.pollInterval = (interval = 150)
         const timingTolerance = interval / 3
 
-        const element = up.hello(fixture('.element[up-poll]', { text: 'old text' }))
+        const element = helloFixture('.element[up-poll]', { text: 'old text' })
 
         await wait(timingTolerance)
 
@@ -2256,7 +2256,7 @@ describe('up.radio', function() {
         up.radio.config.pollInterval = (interval = 150)
         const timingTolerance = interval / 3
 
-        const element = up.hello(fixture('.element[up-poll]', { text: 'old text' }))
+        const element = helloFixture('.element[up-poll]', { text: 'old text' })
 
         await wait(timingTolerance)
 
@@ -2314,7 +2314,7 @@ describe('up.radio', function() {
 
       it('stops polling when the element is destroyed while waiting for a previous request (bugfix)', async function() {
         up.radio.config.pollInterval = 75
-        const element = up.hello(fixture('.element[up-poll]'))
+        const element = helloFixture('.element[up-poll]')
 
         await wait(125)
 
@@ -2336,7 +2336,7 @@ describe('up.radio', function() {
 
         up.radio.config.pollInterval = 30
 
-        up.hello(fixture('.element[up-poll][up-interval=80]'))
+        helloFixture('.element[up-poll][up-interval=80]')
 
         await wait(30)
         expect(reloadSpy).not.toHaveBeenCalled()
@@ -2350,7 +2350,7 @@ describe('up.radio', function() {
         up.radio.config.pollInterval = (interval = 70)
         const timingTolerance = 20
 
-        up.hello(fixture('.element[up-poll]'))
+        helloFixture('.element[up-poll]')
         let eventCount = 0
 
         up.on('up:fragment:poll', '.element', function(event) {
@@ -2379,7 +2379,7 @@ describe('up.radio', function() {
         up.radio.config.pollInterval = (interval = 50)
         const timingTolerance = 20
 
-        up.hello(fixture('.element[up-poll][up-href="/path"]'))
+        helloFixture('.element[up-poll][up-href="/path"]')
 
         up.on('up:fragment:poll', (event) => event.renderOptions.url = '/mutated-path')
 
@@ -2462,7 +2462,7 @@ describe('up.radio', function() {
       it('does not poll a fragment with a weak selector', async function() {
         const warnSpy = spyOn(up, 'warn')
 
-        up.hello(fixture('div[up-poll][up-interval=30]', { text: 'old text' }))
+        helloFixture('div[up-poll][up-interval=30]', { text: 'old text' })
 
         await wait(80)
 
@@ -2508,7 +2508,7 @@ describe('up.radio', function() {
       describe('controlling the reload URL', function() {
 
         it('uses a URL from an [up-source] attribute on the [up-poll] element', async function() {
-          up.hello(fixture('.element[up-poll][up-source="/optimized-path"][up-interval=2]'))
+          helloFixture('.element[up-poll][up-source="/optimized-path"][up-interval=2]')
 
           await wait(29)
 
@@ -2534,7 +2534,7 @@ describe('up.radio', function() {
         })
 
         it('prefers an explicit [up-href] attribute over the (automatically set) [up-source] attribute', async function() {
-          up.hello(fixture('.element[up-poll][up-source="/up-source-path"][up-href="/up-href-path"][up-interval=2]'))
+          helloFixture('.element[up-poll][up-source="/up-source-path"][up-href="/up-href-path"][up-interval=2]')
 
           await wait(29)
 
@@ -2546,7 +2546,7 @@ describe('up.radio', function() {
           up.radio.config.pollInterval = (interval = 150)
           const timingTolerance = interval / 3
 
-          up.hello(fixture('.element[up-poll][up-source="/one"]', { text: 'old text' }))
+          helloFixture('.element[up-poll][up-source="/one"]', { text: 'old text' })
 
           await wait(timingTolerance)
 
@@ -2843,7 +2843,7 @@ describe('up.radio', function() {
           const previewApply = jasmine.createSpy('preview apply').and.returnValue(previewUndo)
           up.preview('my:polling:preview', previewApply)
 
-          const element = up.hello(fixture('.element[up-poll][up-preview="my:polling:preview"]', { text: 'old text' }))
+          const element = helloFixture('.element[up-poll][up-preview="my:polling:preview"]', { text: 'old text' })
 
           await wait(interval + timingTolerance)
 
@@ -2880,7 +2880,7 @@ describe('up.radio', function() {
           const timingTolerance = 50
           up.radio.config.pollInterval = interval
 
-          const element = up.hello(fixture('.element[up-poll][up-placeholder="<span>placeholder text</span>"]', { text: 'old text' }))
+          const element = helloFixture('.element[up-poll][up-placeholder="<span>placeholder text</span>"]', { text: 'old text' })
           expect('.element').toHaveVisibleText('old text')
 
           await wait(interval + timingTolerance)

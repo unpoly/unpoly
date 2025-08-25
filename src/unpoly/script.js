@@ -433,7 +433,7 @@ up.script = (function() {
     up.emit(fragment, 'up:fragment:compile', { log: false })
     let compilers = options.compilers || registeredMacros.concat(registeredCompilers)
     const pass = new up.CompilerPass(fragment, compilers, options)
-    pass.run()
+    return pass.run()
   }
 
   /*-
@@ -475,8 +475,8 @@ up.script = (function() {
     One or more destructor functions.
   @stable
   */
-  function registerDestructor(element, destructor) {
-    let fns = u.scanFunctions(destructor)
+  function registerDestructor(element, value) {
+    let fns = u.scanFunctions(value)
     if (!fns.length) return
 
     let registry = (element.upDestructors ||= buildDestructorRegistry(element))
@@ -575,7 +575,7 @@ up.script = (function() {
     The compiled element
   @stable
   */
-  function hello(element, options = {}) {
+  async function hello(element, options = {}) {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
     element = up.fragment.get(element, options)
 
@@ -584,9 +584,11 @@ up.script = (function() {
     // Group compilation and emission of up:fragment:inserted into a mutation block.
     // This allows up.SelectorTracker to only sync once after the mutation, and
     // ignore any events in between.
-    up.fragment.mutate(() => {
-      compile(element, options)
+    await up.fragment.mutate(async () => {
+      let compilePromise = compile(element, options)
+      console.debug("[up.hello] got compilePromise", compilePromise)
       up.fragment.emitInserted(element)
+      await compilePromise
     })
 
     return element

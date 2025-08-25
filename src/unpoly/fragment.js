@@ -3047,7 +3047,7 @@ up.fragment = (function() {
   function mutate(callback) {
     try {
       mutateLevel++
-      callback()
+      return callback()
     } finally {
       if (--mutateLevel === 0) afterMutateCleaner.clean()
     }

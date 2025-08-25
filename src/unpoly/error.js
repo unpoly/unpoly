@@ -86,6 +86,10 @@ up.error = (function() {
     }
   }
 
+  function guardPromise(promise) {
+    return promise.catch(reportError)
+  }
+
   function guardFn(fn) {
     return (...args) => guard(() => fn(...args))
   }
@@ -96,6 +100,7 @@ up.error = (function() {
     muteUncriticalRejection,
     muteUncriticalSync,
     guard,
+    guardPromise,
     guardFn,
   }
 })()

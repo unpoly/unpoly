@@ -933,7 +933,7 @@ describe('up.status', function() {
       })
 
       it('does not throw if the current location does not match an [up-alias] wildcard (bugfix)', function() {
-        const inserter = () => up.hello(fixture('a[up-nav][up-alias="/qqqq*"]'))
+        const inserter = () => helloFixture('a[up-nav][up-alias="/qqqq*"]')
         expect(inserter).not.toThrow()
       })
 

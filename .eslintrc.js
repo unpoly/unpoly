@@ -63,6 +63,7 @@ module.exports = {
         "spyOnProperty": "readonly",
         "pending": "readonly",
         "fixture": "readonly",
+        "helloFixture": "readonly",
         "fixtureStyle": "readonly",
         "fixtureStyleSheet": "readonly",
         "htmlFixture": "readonly",
