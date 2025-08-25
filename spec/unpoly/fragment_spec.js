@@ -988,6 +988,96 @@ describe('up.fragment', function() {
             expect(crashingDestructor).toHaveBeenCalled()
           })
         })
+
+        describe('async compilers', function() {
+
+          it('does not delay the up.render() promise', async function() {
+            let compilerDeferred = u.newDeferred()
+            up.compiler('.element', async function() {
+              await compilerDeferred
+            })
+
+            const html = '<div class="element"></div>'
+            const element = htmlFixture(html)
+
+            const renderPromise = up.render(element, { fragment: html })
+            await wait()
+
+            await expectAsync(compilerDeferred).toBePending()
+            await expectAsync(renderPromise).toBeResolved()
+          })
+
+          it('delays the up.render().finished promise', async function() {
+            let compilerDeferred = u.newDeferred()
+            up.compiler('.element', async function() {
+              await compilerDeferred
+            })
+
+            const html = '<div class="element"></div>'
+            const element = htmlFixture(html)
+
+            const finishedPromise = up.render({ fragment: html }).finished
+            await wait()
+
+            await expectAsync(compilerDeferred).toBePending()
+            await expectAsync(finishedPromise).toBePending()
+
+            compilerDeferred.resolve()
+            await wait()
+
+            await expectAsync(compilerDeferred).toBeResolved()
+            await expectAsync(finishedPromise).toBeResolved()
+          })
+
+          it('delays the up.render().finished promise when opening a new overlay', async function() {
+            let compilerDeferred = u.newDeferred()
+            up.compiler('.element', async function() {
+              await compilerDeferred
+            })
+
+            const finishedPromise = up.render({ fragment: '<div class="element">text</div>', layer: 'new modal' }).finished
+            await wait()
+
+            expect(up.layer.current).toBeOverlay()
+            await expectAsync(compilerDeferred).toBePending()
+            await expectAsync(finishedPromise).toBePending()
+
+            compilerDeferred.resolve()
+            await wait()
+
+            await expectAsync(compilerDeferred).toBeResolved()
+            await expectAsync(finishedPromise).toBeResolved()
+          })
+
+          it('starts a transition before async compilers have terminated', async function() {
+            up.motion.config.enabled = true
+            const events = []
+
+            up.compiler('.element', async function() {
+              events.push('compiler:start')
+              await wait(100)
+              events.push('compiler:end')
+            })
+
+            up.transition('logging', async function() {
+              events.push('transition:start')
+              await wait(50)
+              events.push('transition:end')
+            })
+
+            const html = '<div class="element"></div>'
+            const element = htmlFixture(html)
+
+            const finishedPromise = up.render({ fragment: html, transition: 'logging' }).finished
+            expect(events).toEqual(['compiler:start', 'transition:start'])
+
+            await expectAsync(finishedPromise).toBeResolved()
+
+            expect(events).toEqual(['compiler:start', 'transition:start', 'transition:end', 'compiler:end'])
+          })
+
+        })
+
       })
 
       describe('with { url } option', function() {
@@ -9529,7 +9619,7 @@ describe('up.fragment', function() {
 
           up.compiler('.container', (element) => () => testElementState(element))
 
-          up.hello(fixture('.container', { text: 'old text' }))
+          helloFixture('.container', { text: 'old text' })
 
           up.render({ fragment: '<div class="container">new text</div>' })
 
@@ -12162,7 +12252,7 @@ describe('up.fragment', function() {
       it('calls destructors for custom elements', function() {
         const destructor = jasmine.createSpy('destructor')
         up.compiler('.element', (element) => destructor)
-        up.hello(fixture('.element'))
+        helloFixture('.element')
         up.destroy('.element')
         expect(destructor).toHaveBeenCalled()
       })
@@ -12202,7 +12292,7 @@ describe('up.fragment', function() {
 
         up.compiler('.container', (element) => () => testElement(element))
 
-        up.hello(fixture('.container', { text: 'old text' }))
+        helloFixture('.container', { text: 'old text' })
 
         up.destroy('.container')
       })

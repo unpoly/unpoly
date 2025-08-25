@@ -9,6 +9,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     this._steps = u.copy(u.assert(options.steps)) // we mutate it below
     this._passRenderOptions = u.assert(options.passRenderOptions)
     this._noneOptions = options.noneOptions || {}
+    this._finishDelays = []
   }
 
   execute(responseDoc) {
@@ -54,8 +55,12 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     return this.renderResult
   }
 
-  async _finish(motionEndPromises) {
-    await Promise.all(motionEndPromises)
+  _delayFinish(delay) {
+    this._finishDelays.push(delay)
+  }
+
+  async _finish() {
+    await Promise.all(this._finishDelays)
 
     // If our layer was closed while animations are running, don't finish
     // and reject with an up.AbortError.
@@ -91,8 +96,8 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
           // Don't add kept fragment to this.renderResult.
           up.fragment.emitKept(keepPlan)
 
-          return Promise.resolve()
-
+          break
+          // return Promise.resolve()
         } else {
           // This needs to happen before up.script.clean() below.
           // Otherwise we would run destructors for elements we want to keep.
@@ -128,6 +133,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
             afterDetach() {
               e.cleanJQuery()
               up.fragment.emitDestroyed(step.oldElement, { parent, log: false })
+              step.afterDetach?.()
             },
             scrollNew: () => {
               this._handleFocus(step.newElement, step)
@@ -135,12 +141,11 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
             }
           }
 
-          return up.morph(
-            step.oldElement,
-            step.newElement,
-            step.transition,
-            morphOptions
+          this._delayFinish(
+            up.morph(step.oldElement, step.newElement, step.transition, morphOptions)
           )
+
+          break
         }
       }
       case 'content': {
@@ -153,16 +158,18 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
           placement: 'swap',
           oldElement: oldWrapper,
           newElement: newWrapper,
-          focus: false
+          focus: false,
+          afterDetach: () => {
+            e.unwrap(newWrapper)
+            // (A) Unwrapping may destroy focus, so we need to handle it again.
+            // (B) Since we never inserted step.newElement (only its children), we handle focus on step.oldElement.
+            this._handleFocus(step.oldElement, step)
+          },
         }
 
-        return this._executeStep(wrapperStep).then(() => {
-          e.unwrap(newWrapper)
-          // Unwrapping may destroy focus, so we need to handle it again.
-          // Since we never inserted step.newElement (only its children), we handle focus on step.oldElement.
-          this._handleFocus(step.oldElement, step)
-        })
+        this._executeStep(wrapperStep)
 
+        break
       }
       case 'before':
       case 'after': {
@@ -189,7 +196,11 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
 
         // Since we're adding content instead of replacing, we'll only
         // animate newElement instead of morphing between oldElement and newElement
-        return up.animate(wrapper, step.animation, step).then(() => e.unwrap(wrapper))
+        this._delayFinish(
+          up.animate(wrapper, step.animation, step).then(() => e.unwrap(wrapper))
+        )
+
+        break
       }
       default: {
         up.fail('Unknown placement: %o', step.placement)
@@ -206,7 +217,9 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     this.setReloadAttrs(step)
 
     // Run macros and compilers. This also snapshots for [up-keep="same-html"].
-    up.hello(element, step)
+    this._delayFinish(
+      up.hello(element, step)
+    )
 
     this._addToResult(element)
   }

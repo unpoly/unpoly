@@ -2196,7 +2196,7 @@ describe('up.history', function() {
       it('sets an [up-href] attribute to the previous URL and sets the up-scroll attribute to "restore"', function() {
         up.history.push('/path1')
         up.history.push('/path2')
-        const element = up.hello(fixture('a[href="/path3"][up-back]', { text: 'text' }))
+        const element = helloFixture('a[href="/path3"][up-back]', { text: 'text' })
         expect(element.getAttribute('href')).toMatchURL('/path3')
         expect(element.getAttribute('up-href')).toMatchURL('/path1')
         expect(element.getAttribute('up-scroll')).toBe('restore')

@@ -3025,8 +3025,8 @@ describe('up.layer', function() {
 
       it("does not fail when, with a popup overlay open, user clicks on a preloaded, popup-opening link in the background layer (bugfix)", async function() {
         up.link.config.preloadDelay = 10
-        const oneLink = up.hello(fixture('a[up-target=".target"][up-layer="new popup"][href="/one"][up-preload]', { text: 'open one' }))
-        const twoLink = up.hello(fixture('a[up-target=".target"][up-layer="new popup"][href="/two"][up-preload]', { text: 'open two' }))
+        const oneLink = helloFixture('a[up-target=".target"][up-layer="new popup"][href="/one"][up-preload]', { text: 'open one' })
+        const twoLink = helloFixture('a[up-target=".target"][up-layer="new popup"][href="/two"][up-preload]', { text: 'open two' })
 
         Trigger.hoverSequence(oneLink)
 

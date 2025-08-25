@@ -1355,7 +1355,7 @@ up.form = (function() {
   // (3) Called without an origin element => Returns the current layer element
   //
   // Does not support a selector string as a first argument. Only works with Element arguments.
-  function getRegion(origin, options) {
+  function getRegion(origin) {
     if (origin) {
       return getForm(origin) || up.layer.get(origin).element
     } else {

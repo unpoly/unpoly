@@ -138,7 +138,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
 
     // Compile the entire layer, not just the user content.
     // E.g. [up-dismiss] in the layer elements needs to go through a macro.
-    up.hello(this.layer.element, { ...this.options, layer: this.layer, dataRoot: this._content })
+    this._helloPromise = up.hello(this.layer.element, { ...this.options, layer: this.layer, dataRoot: this._content })
 
     this._newOverlayResult = new up.RenderResult({
       layer: this.layer,
@@ -184,6 +184,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
 
   async _finish() {
     await this.layer.startOpenAnimation()
+    await this._helloPromise
 
     // Don't change focus if the layer has been closed while the animation was running.
     this.abortWhenLayerClosed()

@@ -35,6 +35,13 @@ function createFixtureFromSelector(...args) {
   return element
 }
 
+function helloFixture(...args) {
+  console.debug("helloFixture(%o)", args)
+  let element = createFixtureFromSelector(...args)
+  up.hello(element)
+  return element
+}
+
 function createFixtureFromHTML(html) {
   const element = e.createFromHTML(html)
   getCreatedFixtureContainer().append(element)
@@ -66,6 +73,7 @@ function createJQueryFixture(...args) {
 }
 
 window.fixture = createFixtureFromSelector
+window.helloFixture = helloFixture
 window.htmlFixture = createFixtureFromHTML
 window.htmlFixtureList = createFixtureListFromHTML
 window.$fixture = createJQueryFixture

@@ -2190,7 +2190,7 @@ describe('up.link', function() {
 
         it('updates a fragment with the given inner HTML string', async function() {
           const target = fixture('.target', { text: 'old content' })
-          const link = up.hello(fixture('a[up-target=".target"][up-content="new content"]'))
+          const link = helloFixture('a[up-target=".target"][up-content="new content"]')
 
           Trigger.clickSequence(link)
           await wait()
@@ -2200,14 +2200,14 @@ describe('up.link', function() {
 
         it('gives the link a pointer cursor', function() {
           const target = fixture('.target', { text: 'old content' })
-          const link = up.hello(fixture('a[up-target=".target"][up-content="new content"]'))
+          const link = helloFixture('a[up-target=".target"][up-content="new content"]')
 
           expect(link).toHaveCursorStyle('pointer')
         })
 
         it('enables keyboard interaction for the link', async function() {
           const target = fixture('.target', { text: 'old content' })
-          const link = up.hello(fixture('a[up-target=".target"][up-content="new content"]'))
+          const link = helloFixture('a[up-target=".target"][up-content="new content"]')
 
           expect(link).toBeKeyboardFocusable()
 
@@ -2346,7 +2346,7 @@ describe('up.link', function() {
       describe('exemptions from following', function() {
 
         it('never follows a link with [download] (which opens a save-as-dialog)', async function() {
-          const link = up.hello(fixture('a[href="/path"][up-target=".target"][download]'))
+          const link = helloFixture('a[href="/path"][up-target=".target"][download]')
 
           Trigger.click(link)
 
@@ -2357,7 +2357,7 @@ describe('up.link', function() {
         })
 
         it('never preloads a link with a [target] attribute (which updates a frame or opens a tab)', async function() {
-          const link = up.hello(fixture('a[href="/path"][up-target=".target"][target="_blank"]'))
+          const link = helloFixture('a[href="/path"][up-target=".target"][target="_blank"]')
 
           Trigger.click(link)
 
@@ -2369,7 +2369,7 @@ describe('up.link', function() {
 
         it('never follows an a[href="#"]', async function() {
           const followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
-          const link = up.hello(fixture('a[href="#"][up-target=".target"]'))
+          const link = helloFixture('a[href="#"][up-target=".target"]')
           const clickListener = jasmine.createSpy('click listener')
           up.on('click', clickListener)
 
@@ -2384,7 +2384,7 @@ describe('up.link', function() {
         it('never follows a link with a "mailto:..." [href] attribute', async function() {
           const followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
           up.link.config.followSelectors.push('a[href]')
-          const link = up.hello(fixture('a[href="mailto:foo@bar.com"]'))
+          const link = helloFixture('a[href="mailto:foo@bar.com"]')
 
           Trigger.click(link)
 
@@ -2397,7 +2397,7 @@ describe('up.link', function() {
         it('never follows a link with a "tel:..." [href] attribute', async function() {
           const followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
           up.link.config.followSelectors.push('a[href]')
-          const link = up.hello(fixture('a[href="tel:+49123456"]'))
+          const link = helloFixture('a[href="tel:+49123456"]')
 
           Trigger.click(link)
 
@@ -2410,7 +2410,7 @@ describe('up.link', function() {
         it('never follows a link with a "whatsapp://..." attribute', async function() {
           const followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
           up.link.config.followSelectors.push('a[href]')
-          const link = up.hello(fixture('a[href="whatsapp://send?text=Hello"]'))
+          const link = helloFixture('a[href="whatsapp://send?text=Hello"]')
 
           Trigger.click(link)
 
@@ -2422,7 +2422,7 @@ describe('up.link', function() {
 
         it('does follow an a[href="#"] if the link also has local content via an [up-content], [up-fragment] or [up-document] attribute', async function() {
           const target = fixture('.target', { text: 'old text' })
-          const link = up.hello(fixture('a[href="#"][up-target=".target"][up-content="new text"]'))
+          const link = helloFixture('a[href="#"][up-target=".target"][up-content="new text"]')
 
           Trigger.clickSequence(link)
 
@@ -2663,7 +2663,7 @@ describe('up.link', function() {
 
         it('fires a click event on an a[href="#"] link that will be handled by the browser', async function() {
           const followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
-          const link = up.hello(fixture('a[href="#"][up-instant][up-target=".target"]'))
+          const link = helloFixture('a[href="#"][up-instant][up-target=".target"]')
 
           const clickListener = jasmine.createSpy('click listener')
           up.on('click', clickListener)
@@ -2680,7 +2680,7 @@ describe('up.link', function() {
 
         it('follows a[onclick] links on click instead of mousedown', async function() {
           const followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
-          const link = up.hello(fixture('a[href="/foo"][onclick="console.log(\'clicked\')"][up-instant][up-target=".target"]'))
+          const link = helloFixture('a[href="/foo"][onclick="console.log(\'clicked\')"][up-instant][up-target=".target"]')
 
           Trigger.mousedown(link)
           await wait()
@@ -2698,7 +2698,7 @@ describe('up.link', function() {
           // In reality the user will have configured an overly greedy selector like
           // up.fragment.config.instantSelectors.push('a[href]') and we want to help them
           // not break all their "javascript:" links.
-          const link = up.hello(fixture('a[href="#"][up-instant][up-target=".target"][up-content="new content"]'))
+          const link = helloFixture('a[href="#"][up-instant][up-target=".target"][up-content="new content"]')
           fixture('.target')
 
           const clickListener = jasmine.createSpy('click listener')
@@ -2718,7 +2718,7 @@ describe('up.link', function() {
           // In reality the user will have configured an overly greedy selector like
           // up.fragment.config.instantSelectors.push('a[href]') and we want to help them
           // not break all their #anchor link.s
-          const link = up.hello(fixture('a[href="#details"][up-instant]'))
+          const link = helloFixture('a[href="#details"][up-instant]')
 
           const clickListener = jasmine.createSpy('click listener')
           up.on('click', clickListener)
@@ -2737,7 +2737,7 @@ describe('up.link', function() {
           // In reality the user will have configured an overly greedy selector like
           // up.fragment.config.instantSelectors.push('a[href]') and we want to help them
           // not break all their "javascript:" links.
-          const link = up.hello(fixture('a[href="javascript:console.log(\'hi world\')"][up-instant]'))
+          const link = helloFixture('a[href="javascript:console.log(\'hi world\')"][up-instant]')
 
           const clickListener = jasmine.createSpy('click listener')
           up.on('click', clickListener)
@@ -2756,7 +2756,7 @@ describe('up.link', function() {
           // In reality the user will have configured an overly greedy selector like
           // up.fragment.config.instantSelectors.push('a[href]') and we want to help them
           // not break all their "javascript:" links.
-          const link = up.hello(fixture('a[href="http://other-site.tld/path"][up-instant]'))
+          const link = helloFixture('a[href="http://other-site.tld/path"][up-instant]')
 
           const clickListener = jasmine.createSpy('click listener')
           up.on('click', clickListener)
@@ -2778,7 +2778,7 @@ describe('up.link', function() {
 
           it('focused the link after the click sequence (like a vanilla link)', function() {
             const followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
-            const link = up.hello(fixture('a[href="/path"][up-follow][up-instant]'))
+            const link = helloFixture('a[href="/path"][up-follow][up-instant]')
 
             Trigger.clickSequence(link, { focus: false })
 
@@ -2788,7 +2788,7 @@ describe('up.link', function() {
 
           it('hides a focus ring when activated with the mouse', function() {
             const followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
-            const link = up.hello(fixture('a[href="/path"][up-follow][up-instant]'))
+            const link = helloFixture('a[href="/path"][up-follow][up-instant]')
             Trigger.clickSequence(link, { focus: false })
 
             expect(followSpy).toHaveBeenCalled()
@@ -2799,7 +2799,7 @@ describe('up.link', function() {
 
           it('shows a focus ring when activated with a non-pointing device (keyboard or unknown)', function() {
             const followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
-            const link = up.hello(fixture('a[href="/path"][up-follow][up-instant]'))
+            const link = helloFixture('a[href="/path"][up-follow][up-instant]')
             Trigger.clickLinkWithKeyboard(link)
 
             expect(followSpy).toHaveBeenCalled()
@@ -2810,7 +2810,7 @@ describe('up.link', function() {
 
           it('hides the focus ring when activated with the mouse, then shows the focus ring when activated with the keyboard', function() {
             const followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
-            const link = up.hello(fixture('a[href="/path"][up-follow][up-instant]'))
+            const link = helloFixture('a[href="/path"][up-follow][up-instant]')
 
             Trigger.clickSequence(link, { focus: false })
             expect(followSpy.calls.count()).toBe(1)
@@ -3014,29 +3014,29 @@ describe('up.link', function() {
         if (up.migrate.loaded) {
 
           it('is made followable', function() {
-            const fauxLink = up.hello(fixture('span[up-href="/path"]'))
+            const fauxLink = helloFixture('span[up-href="/path"]')
             expect(fauxLink).toBeFollowable()
           })
 
           it('is keyboard focusable', function() {
-            const fauxLink = up.hello(fixture('span[up-href="/path"]'))
+            const fauxLink = helloFixture('span[up-href="/path"]')
             expect(fauxLink).toBeKeyboardFocusable()
           })
 
         } else {
 
           it('is not followable', function() {
-            const fauxLink = up.hello(fixture('span[up-href="/path"]'))
+            const fauxLink = helloFixture('span[up-href="/path"]')
             expect(fauxLink).not.toBeFollowable()
           })
 
           it('gets no pointer cursor', function() {
-            const fauxLink = up.hello(fixture('span[up-href="/path"]'))
+            const fauxLink = helloFixture('span[up-href="/path"]')
             expect(fauxLink).toHaveCursorStyle('auto')
           })
 
           it('is not keyboard focusable', function() {
-            const fauxLink = up.hello(fixture('span[up-href="/path"]'))
+            const fauxLink = helloFixture('span[up-href="/path"]')
             expect(fauxLink).not.toBeKeyboardFocusable()
           })
         }
@@ -3928,7 +3928,7 @@ describe('up.link', function() {
         })
 
         it('never preloads a link with an unsafe method', async function() {
-          const link = up.hello(fixture('a[href="/path"][up-target=".target"][up-preload][data-method="post"]'))
+          const link = helloFixture('a[href="/path"][up-target=".target"][up-preload][data-method="post"]')
 
           Trigger.hoverSequence(link)
 
@@ -3938,7 +3938,7 @@ describe('up.link', function() {
         })
 
         it('never preloads a link that has been marked with [up-cache=false]', async function() {
-          const link = up.hello(fixture('a[href="/no-auto-caching-path"][up-cache=false]'))
+          const link = helloFixture('a[href="/no-auto-caching-path"][up-cache=false]')
 
           Trigger.hoverSequence(link)
 
@@ -3953,7 +3953,7 @@ describe('up.link', function() {
             return request.url !== '/no-auto-caching-path'
           }
 
-          const link = up.hello(fixture('a[href="/no-auto-caching-path"][up-preload][up-target=".target"]'))
+          const link = helloFixture('a[href="/no-auto-caching-path"][up-preload][up-target=".target"]')
 
           Trigger.hoverSequence(link)
 
@@ -3963,7 +3963,7 @@ describe('up.link', function() {
         })
 
         it('never preloads a link with cross-origin [href]', async function() {
-          const link = up.hello(fixture('a[href="https://other-domain.com/path"][up-preload][up-target=".target"]'))
+          const link = helloFixture('a[href="https://other-domain.com/path"][up-preload][up-target=".target"]')
 
           Trigger.hoverSequence(link)
 
@@ -3973,7 +3973,7 @@ describe('up.link', function() {
         })
 
         it('never preloads a link with [download] (which opens a save-as-dialog)', async function() {
-          const link = up.hello(fixture('a[href="/path"][up-target=".target"][up-preload][download]'))
+          const link = helloFixture('a[href="/path"][up-target=".target"][up-preload][download]')
 
           Trigger.hoverSequence(link)
 
@@ -3983,7 +3983,7 @@ describe('up.link', function() {
         })
 
         it('never preloads a link with a [target] attribute (which updates a frame or opens a tab)', async function() {
-          const link = up.hello(fixture('a[href="/path"][up-target=".target"][up-preload][target="_blank"]'))
+          const link = helloFixture('a[href="/path"][up-target=".target"][up-preload][target="_blank"]')
 
           Trigger.hoverSequence(link)
 
@@ -3993,7 +3993,7 @@ describe('up.link', function() {
         })
 
         it('never preloads a link with [href="#"]', async function() {
-          const link = up.hello(fixture('a[href="#"][up-preload]'))
+          const link = helloFixture('a[href="#"][up-preload]')
 
           Trigger.hoverSequence(link)
 
@@ -4004,7 +4004,7 @@ describe('up.link', function() {
 
         it('never preloads a link with local content via [up-content]', async function() {
           fixture('.target', { text: 'old text' })
-          const link = up.hello(fixture('a[up-preload][up-content="new text"][up-target=".target"]'))
+          const link = helloFixture('a[up-preload][up-content="new text"][up-target=".target"]')
 
           Trigger.hoverSequence(link)
 
@@ -4022,7 +4022,7 @@ describe('up.link', function() {
         describeFallback('canPushState', function() {
           it('does not preload a link', async function() {
             fixture('.target')
-            const link = up.hello(fixture('a[href="/path"][up-target=".target"][up-preload]'))
+            const link = helloFixture('a[href="/path"][up-target=".target"][up-preload]')
 
             Trigger.hoverSequence(link)
 
@@ -4235,7 +4235,7 @@ describe('up.link', function() {
 
           spyOn(window, 'confirm').and.returnValue(true)
           fixture('#target')
-          const link = up.hello(fixture('a[href="/danger"][up-target="#target"][up-preload][up-confirm="Really?"]'))
+          const link = helloFixture('a[href="/danger"][up-target="#target"][up-preload][up-confirm="Really?"]')
 
           Trigger.hoverSequence(link)
 
@@ -4253,7 +4253,7 @@ describe('up.link', function() {
 
           spyOn(window, 'confirm')
           fixture('#target')
-          const link = up.hello(fixture('a[href="/slow"][up-target="#target"][up-preload][up-preview="my:preview"]'))
+          const link = helloFixture('a[href="/slow"][up-target="#target"][up-preload][up-preview="my:preview"]')
 
           Trigger.hoverSequence(link)
 
@@ -4268,7 +4268,7 @@ describe('up.link', function() {
 
           spyOn(window, 'confirm')
           fixture('#target', { text: 'old text' })
-          const link = up.hello(fixture('a[href="/slow"][up-target="#target"][up-preload][up-placeholder="<span>placeholder text</span>"]'))
+          const link = helloFixture('a[href="/slow"][up-target="#target"][up-preload][up-placeholder="<span>placeholder text</span>"]')
 
           Trigger.hoverSequence(link)
 
@@ -5379,7 +5379,7 @@ describe('up.link', function() {
     describe('[up-clickable]', function() {
 
       it('makes the element emit up:click events on click', async function() {
-        const fauxButton = up.hello(fixture('.hyperlink[up-clickable]'))
+        const fauxButton = helloFixture('.hyperlink[up-clickable]')
         const clickListener = jasmine.createSpy('up:click listener')
         fauxButton.addEventListener('up:click', clickListener)
 
@@ -5389,7 +5389,7 @@ describe('up.link', function() {
       })
 
       it('makes the element emit up:click events on Enter', async function() {
-        const fauxButton = up.hello(fixture('.hyperlink[up-clickable]'))
+        const fauxButton = helloFixture('.hyperlink[up-clickable]')
         const clickListener = jasmine.createSpy('up:click listener')
         fauxButton.addEventListener('up:click', clickListener)
 
@@ -5399,32 +5399,32 @@ describe('up.link', function() {
       })
 
       it('makes the element focusable for keyboard users', function() {
-        const fauxButton = up.hello(fixture('.hyperlink[up-clickable]'))
+        const fauxButton = helloFixture('.hyperlink[up-clickable]')
 
         expect(fauxButton).toBeKeyboardFocusable()
       })
 
       it('gives the element a pointer cursor if it has [up-follow] and hence looks like a link', function() {
-        const fauxButton = up.hello(fixture('.hyperlink[up-clickable][up-follow]'))
+        const fauxButton = helloFixture('.hyperlink[up-clickable][up-follow]')
 
         expect(getComputedStyle(fauxButton).cursor).toEqual('pointer')
       })
 
       it('gives the element a pointer cursor if it has [role=link] and hence looks like a link', function() {
-        const fauxButton = up.hello(fixture('.hyperlink[up-clickable][role=link]'))
+        const fauxButton = helloFixture('.hyperlink[up-clickable][role=link]')
 
         expect(getComputedStyle(fauxButton).cursor).toEqual('pointer')
       })
 
       it('gives the element a default cursor if it does not look like a link', function() {
-        const fauxButton = up.hello(fixture('.hyperlink[up-clickable]'))
+        const fauxButton = helloFixture('.hyperlink[up-clickable]')
 
         expect(getComputedStyle(fauxButton).cursor).toEqual('auto')
       })
 
       it('makes other selectors clickable via up.link.config.clickableSelectors', function() {
         up.link.config.clickableSelectors.push('.foo')
-        const fauxButton = up.hello(fixture('.foo'))
+        const fauxButton = helloFixture('.foo')
 
         expect(fauxButton).toBeKeyboardFocusable()
         expect(fauxButton).toHaveAttribute('up-clickable')
@@ -5441,12 +5441,12 @@ describe('up.link', function() {
       describe('when applied on a link (which is already interactive)', function() {
 
         it('does not set a [role] attribute', function() {
-          const link = up.hello(fixture('a[href="/path"][up-clickable]', { text: 'label' }))
+          const link = helloFixture('a[href="/path"][up-clickable]', { text: 'label' })
           expect(link).not.toHaveAttribute('role')
         })
 
         it('does not cause duplicate up:click events when activated with the keyboard', async function() {
-          const link = up.hello(fixture('a[href="/path"][up-clickable]', { text: 'label' }))
+          const link = helloFixture('a[href="/path"][up-clickable]', { text: 'label' })
           const listener = jasmine.createSpy('up:click listener').and.callFake((event) => event.preventDefault())
           link.addEventListener('up:click', listener)
 
@@ -5459,29 +5459,29 @@ describe('up.link', function() {
       describe('[role] attribute', function() {
 
         it('sets [role=button] on a non-interactive element', function() {
-          const fauxButton = up.hello(fixture('.hyperlink[up-clickable]'))
+          const fauxButton = helloFixture('.hyperlink[up-clickable]')
           expect(fauxButton).toHaveAttribute('role', 'button')
         })
 
         it('does not override an existing [role] attribute', function() {
-          const fauxButton = up.hello(fixture('.hyperlink[up-clickable][role="existing-role"]'))
+          const fauxButton = helloFixture('.hyperlink[up-clickable][role="existing-role"]')
           expect(fauxButton).toHaveAttribute('role', 'existing-role')
         })
 
         it('sets [role=link] for an a:not([href]) element, like a[up-content]', function() {
-          const fauxLink = up.hello(fixture('a[up-content="inner"][up-target="#target"]'))
+          const fauxLink = helloFixture('a[up-content="inner"][up-target="#target"]')
           expect(fauxLink).toHaveAttribute('role', 'link')
         })
 
         it('sets [role=link] for an [up-follow][up-href] element', function() {
-          const fauxLink = up.hello(fixture('a[up-follow][up-href="/path"]'))
+          const fauxLink = helloFixture('a[up-follow][up-href="/path"]')
           expect(fauxLink).toHaveAttribute('role', 'link')
         })
       })
 
       describe('with [up-instant]', function() {
         it('emits up:click on mousedown instead of click', async function() {
-          const fauxButton = up.hello(fixture('.hyperlink[up-clickable][up-instant]'))
+          const fauxButton = helloFixture('.hyperlink[up-clickable][up-instant]')
           const clickListener = jasmine.createSpy('up:click listener')
           fauxButton.addEventListener('up:click', clickListener)
 
@@ -5497,19 +5497,19 @@ describe('up.link', function() {
       describe('on an element that is already interactive', function() {
 
         it('does not set attributes on an a[href] element', function() {
-          const realLink = up.hello(fixture('a[href="/path"][up-clickable]'))
+          const realLink = helloFixture('a[href="/path"][up-clickable]')
           expect(realLink).not.toHaveAttribute('role')
           expect(realLink).not.toHaveAttribute('tabindex')
         })
 
         it('does not set attributes on a button element', function() {
-          const realButton = up.hello(fixture('button[up-clickable]'))
+          const realButton = helloFixture('button[up-clickable]')
           expect(realButton).not.toHaveAttribute('role')
           expect(realButton).not.toHaveAttribute('tabindex')
         })
 
         it('does not cause duplicate up:click events when activated with the keyboard', async function() {
-          const link = up.hello(fixture('a[href="/path"][up-clickable]', { text: 'label' }))
+          const link = helloFixture('a[href="/path"][up-clickable]', { text: 'label' })
           const listener = jasmine.createSpy('up:click listener').and.callFake((event) => event.preventDefault())
           link.addEventListener('up:click', listener)
 

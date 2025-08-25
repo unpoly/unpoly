@@ -13,6 +13,7 @@ up.CompilerPass = class CompilerPass {
     this._data = data
     this._dataRoot = dataRoot || root
     this._dataMap = dataMap
+    this._compilePromises = []
 
     // The meta object may have a getter on { response }, defined by unpoly-migrate.js.
     // Hence we cannot make a new object here.
@@ -31,6 +32,8 @@ up.CompilerPass = class CompilerPass {
         this._runCompiler(compiler)
       }
     })
+
+    return Promise.all(this._compilePromises)
   }
 
   setCompileData() {
@@ -63,7 +66,7 @@ up.CompilerPass = class CompilerPass {
       }
     }
 
-    return up.migrate.postCompile?.(matches, compiler)
+    up.migrate.postCompile?.(matches, compiler)
   }
 
   _compileOneElement(compiler, element) {
@@ -76,8 +79,8 @@ up.CompilerPass = class CompilerPass {
       compileArgs.push(data, this._meta)
     }
 
-    const result = this._applyCompilerFunction(compiler, element, compileArgs)
-    up.destructor(element, result)
+    let onDestructor = (destructor) => up.destructor(element, destructor)
+    this._applyCompilerFunction(compiler, element, compileArgs, onDestructor)
   }
 
   _compileBatch(compiler, elements) {
@@ -90,16 +93,33 @@ up.CompilerPass = class CompilerPass {
       compileArgs.push(dataList, this._meta)
     }
 
-    const result = this._applyCompilerFunction(compiler, elements, compileArgs)
-
-    if (result) {
-      up.fail('Compilers with { batch: true } cannot return destructors')
-    }
+    let onDestructor = () => this._reportBatchCompilerWithDestructor(compiler)
+    this._applyCompilerFunction(compiler, elements, compileArgs, onDestructor)
   }
 
-  _applyCompilerFunction(compiler, elementOrElements, compileArgs) {
-    // return compiler.apply(elementOrElements, compileArgs)
-    return up.error.guard(() => compiler.apply(elementOrElements, compileArgs))
+  async _applyCompilerFunction(compiler, elementOrElements, compileArgs, onDestructor) {
+    let maybeDestructor = up.error.guard(() => compiler.apply(elementOrElements, compileArgs))
+
+    if (u.isPromise(maybeDestructor)) {
+      // If the async compiler rejects, emit an `error` event but don't reject.
+      let guardedPromise = up.error.guardPromise(maybeDestructor)
+
+      // Remember this promise for the return value of #run()
+      this._compilePromises.push(guardedPromise)
+
+      // (1) We don't know yet if the async compiler function will return destructors.
+      // (2) Ideally we want to avoid setting .up-can-clean on every element that is async-compiled.
+      // (3) There is an edge case where a an element is destroyed, before its async compiler
+      //     function resolves. In that case we still want to execute a returned destructor function.
+      maybeDestructor = await guardedPromise
+    }
+
+    if (maybeDestructor) onDestructor(maybeDestructor)
+  }
+
+  _reportBatchCompilerWithDestructor(compiler) {
+    let error = new up.Error(['Batch compiler (%s) cannot return a destructor', compiler.selector])
+    reportError(error)
   }
 
   _select(selector) {
