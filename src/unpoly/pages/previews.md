@@ -16,7 +16,7 @@ increases the perceived responsiveness of your application.
 ## Overview {#overview}
 
 Previews are small functions that can
-be attached to a [link](/up-follow), [form](/up-submit) or any [programmatic render pass](/up.render).
+be attached to a [link](/up-follow), [form](/submitting-forms) or any [programmatic render pass](/up.render).
 
 When the user interacts with a link or form, its preview function is invoked immediately.
 The function will usually [mutate the DOM](#basic-mutations) in a way the user gets

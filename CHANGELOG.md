@@ -1832,7 +1832,7 @@ This release addresses many many errors when matching fragments in closed layers
 - Unpoly now [logs](/up.log) when rendering was aborted or threw an internal error.
 - [Cache revalidation](/caching#revalidation) now updates the correct element when the initial render pass matched in the [region of the clicked link](/targeting-fragments#ambiguous-selectors) and that link has since been detached.
 - Rendering no longer forces a full page load when the initial page was loaded with non-GET, but the render pass does not change history.
-  This allows to use `[up-validate]` in forms that are not [submitted through Unpoly](/up-submit).
+  This allows to use `[up-validate]` in forms that are not [submitted through Unpoly](/submitting-forms).
 - Updates for `[up-keep]` no longer need to also be `[up-keep]`. You can prevent keeping by setting `[up-keep=false]`. This allows you to set `[up-keep]` via a [macro](/up.macro).
 - Fix a bug where reloading a fragment that was rendered from local content would be reloaded from path `"/true"` (sic).
 - Fix a bug where, when revalidating a [fallback target](/targeting-fragments#providing-a-fallback-target), we would log that we're `"revalidating undefined"`
@@ -4378,7 +4378,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
   contained input field changes.
 - Fix a bug where `[up-autosubmit]` didn't honor an `[up-delay]` attribute if
   used on a form.
-- When [submitting a form](/up-submit), the `name` and `value` of the submit button is now included with the form parameters.
+- When [submitting a form](/submitting-forms), the `name` and `value` of the submit button is now included with the form parameters.
 - [Going back in history](/up.history) after a [fragment update](/up.link) now always restores elements the page layer, never a selector in [modals](/up.modal) or [popups](/up.popup).
 - [Going back in history](/up.history) now always closes a [modal](/up.modal) or [popup](/up.popup).
 - Switch to [unpkg](https://unpkg.com) as our [CDN](/install/cdn).
@@ -4747,7 +4747,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Compatible changes
 
-- Fix a bug where [submitting a form](/up-submit) with file uploads would throw an error `"Cannot convert FormData into a query string"`
+- Fix a bug where [submitting a form](/submitting-forms) with file uploads would throw an error `"Cannot convert FormData into a query string"`
 
 
 

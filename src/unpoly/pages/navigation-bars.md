@@ -13,7 +13,7 @@ This helps highlighting current menu sections using CSS.
 ### Updating `.up-current` classes
 
 The `.up-current` class is toggled automatically within all content that Unpoly renders.
-For example, when Unpoly [follows a link](/up-follow), [submits a form](/up-submit)
+For example, when Unpoly [follows a link](/up-follow), [submits a form](/submitting-forms)
 or [renders from a script](/up.render), any newly inserted hyperlinks will get `.up-current`
 if they point to the current URL. When the browser location [changes](/up:location:changed),
 existing links will be updated to reflect the new location.

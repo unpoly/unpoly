@@ -72,7 +72,7 @@ up.migrate.renamedAttribute('up-observe', 'up-watch')
 /*-
 Marks this element as a from group, which (usually) contains a label, input and error message.
 
-You are not required to use form groups to [submit forms through Unpoly](/up-submit).
+You are not required to use form groups to [submit forms through Unpoly](/submitting-forms).
 However, structuring your form into groups will help Unpoly to make smaller changes to the DOM when
 working with complex form. For instance, when [validating](/up-validate) a field,
 Unpoly will re-render the [closest](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest)

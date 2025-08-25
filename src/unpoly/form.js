@@ -32,7 +32,7 @@ up.form = (function() {
   @section Submittable forms
 
     @param {Array<string>} [config.submitSelectors]
-      An array of CSS selectors matching forms that will be [submitted through Unpoly](/up-submit).
+      An array of CSS selectors matching forms that will be [submitted through Unpoly](/submitting-forms).
 
       You can configure Unpoly to handle *all* forms on a page without requiring an `[up-submit]` attribute:
 
@@ -46,7 +46,7 @@ up.form = (function() {
     @param {Array<string>} [config.noSubmitSelectors]
       Exceptions to `up.form.config.submitSelectors`.
 
-      Matching forms will *not* be [submitted through Unpoly](/up-submit),
+      Matching forms will *not* be [submitted through Unpoly](/submitting-forms),
       even if they match `up.form.config.submitSelectors`.
 
   @section Form elements
@@ -981,7 +981,7 @@ up.form = (function() {
   /*-
   Marks this element as a from group, which (usually) contains a label, input and error message.
 
-  You are not required to use form groups to [submit forms through Unpoly](/up-submit).
+  You are not required to use form groups to [submit forms through Unpoly](/submitting-forms).
   However, structuring your form into groups will help Unpoly to make smaller changes to the DOM when
   working with complex form. For instance, when [validating](/validation#validating-after-changing-a-field) a field,
   Unpoly will re-render the [closest](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest)
@@ -1398,7 +1398,7 @@ up.form = (function() {
   }
 
   /*-
-  Returns whether the given form will be [submitted](/up-submit) through Unpoly
+  Returns whether the given form will be [submitted](/submitting-forms) through Unpoly
   instead of making a full page load.
 
   By default, Unpoly will follow forms if the element has

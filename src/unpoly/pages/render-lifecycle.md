@@ -47,7 +47,7 @@ it is the result from the initial render pass.
 The promise rejects when there is any error during the initial render pass or during revalidation.
 
 Instead of awaiting a promise you may also pass an [`{ onFinished }`](/up.render#options.onRendered) callback.\
-In HTML you can set an [`[up-on-finished]`](/up-follow#up-on-finished) attribute on a [link](/up-follow) or [form](/up-submit).
+In HTML you can set an [`[up-on-finished]`](/up-follow#up-on-finished) attribute on a [link](/up-follow) or [form](/submitting-forms).
 
 
 ### Running code after each render pass
@@ -59,7 +59,7 @@ This callback may be called zero, one or two times:
 - When the server rendered a matching fragment, it will be updated on the page. `{ onRendered }` is called with the [result](/up.RenderResult).
 - When [revalidation](/caching#revalidation) renders a second time, `{ onRendered }` is called again with the final result.
 
-In HTML you can set an [`[up-on-rendered]`](/up-follow#up-on-rendered) attribute on a [link](/up-follow) or [form](/up-submit):
+In HTML you can set an [`[up-on-rendered]`](/up-follow#up-on-rendered) attribute on a [link](/up-follow) or [form](/submitting-forms):
 
 ```html
 <a

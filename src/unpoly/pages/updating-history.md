@@ -2,7 +2,7 @@ Updating history
 ================
 
 Unpoly will update the browser location, document title and meta tags
-as the user [follows links](/up-follow) and [submits forms](/up-submit).
+as the user [follows links](/up-follow) and [submits forms](/submitting-forms).
 
 
 
