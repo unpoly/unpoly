@@ -274,7 +274,7 @@ up.protocol = (function() {
 
   ```html
   <!-- label: Form within an overlay -->
-  <form action="/submit" up-submit up-layer="root"> <!-- mark: up-layer -->
+  <form action="/submit" up-submit up-layer="root"> <!-- mark: up-layer="root" -->
     ...
   </form>
   ```
@@ -305,7 +305,7 @@ up.protocol = (function() {
 
   ```html
   <!-- label: Link within an overlay -->
-  <a href="/" up-follow up-layer="root">Click me</a> <!-- mark: up-layer -->
+  <a href="/" up-follow up-layer="root">Click me</a> <!-- mark: up-layer="root" -->
   ```
 
   When the link is clicked, the following request headers are sent:

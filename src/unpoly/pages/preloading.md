@@ -39,7 +39,7 @@ To preload a link as soon as it appears in the DOM, set an [`[up-preload="insert
 This is useful for links with a high probability of being clicked, like a navigation menu:
 
 ```html
-<a href="/menu" up-layer="new drawer" up-preload="insert">≡ Menu</a> <!-- mark: insert -->
+<a href="/menu" up-layer="new drawer" up-preload="insert">≡ Menu</a> <!-- mark: up-preload="insert" -->
 ```
 
 When an eagerly preloaded fragment is rendered multiple times, only a single request is made.
@@ -56,7 +56,7 @@ This is useful when an element is [below the fold](https://www.optimizely.com/op
 and is unlikely to be clicked until the the user scrolls:
 
 ```html
-<a href="/stories/106" up-preload="reveal">Full story</a> <!-- mark: reveal -->
+<a href="/stories/106" up-preload="reveal">Full story</a> <!-- mark: up-preload="reveal" -->
 ```
 
 When a lazy preloading link enters and exit its viewport repeatedly, only a single request is made.

@@ -66,7 +66,7 @@ The `preview` argument is an `up.Preview` instance that offers many utilities to
 We can use the `link-spinner` preview in any link or form by setting an `[up-preview]` attribute:
 
 ```html
-<a href="/edit" up-follow up-preview="link-spinner">Edit page</a> <!-- mark: up-preview -->
+<a href="/edit" up-follow up-preview="link-spinner">Edit page</a> <!-- mark: up-preview="link-spinner" -->
 ```
 
 When the link is followed, the preview will append the spinner element to the link label.
@@ -218,7 +218,7 @@ up.preview('spinner', function(preview, { size = 50 }) {
 From HTML you can append the options to the `[up-preview]` argument, after the preview name:
 
 ```html
-<a href="/edit" up-follow up-preview="spinner { size: 100 }">Edit page</a> <!-- mark: { size: 100 } -->
+<a href="/edit" up-follow up-preview="spinner { size: 100 }">Edit page</a> <!-- mark: spinner { size: 100 } -->
 ```
 
 ### Passing options from JavaScript
@@ -278,7 +278,7 @@ To show a preview for the revalidating request, use the `[up-revalidate-preview]
 <a href="/clients"
    up-follow
    up-preview="index-placeholder"
-   up-revalidate-preview="spinner"> <!-- mark: up-revalidate-preview -->
+   up-revalidate-preview="spinner"> <!-- mark: up-revalidate-preview="spinner" -->
   Clients
 </a>
 ```
@@ -294,7 +294,7 @@ to a [true value](/attributes-and-options#boolean-attributes):
 <a href="/clients"
    up-follow
    up-preview="spinner"
-   up-revalidate-preview="true"> <!-- mark: true -->
+   up-revalidate-preview="true"> <!-- mark: up-revalidate-preview="true" -->
   Clients
 </a>
 ```
@@ -307,7 +307,7 @@ before it is reverted. To avoid a flash of preview state, you may want to
 run some previews for long-running requests only.
 
 To do this, a preview function can set a timer using `setTimeout()` or `up.util.timer()`.
-After the timer expires, the preview must check if it is still running before changing the page:
+After the timer expires, the preview must [check if it is still running](/up.Preview.prototype.ended) before changing the page:
 
 ```js
 up.preview('delayed-spinner', (preview) => {

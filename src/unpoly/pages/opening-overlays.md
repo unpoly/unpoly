@@ -10,7 +10,7 @@ Opening an overlay from a link {#link}
 To open the response to a hyperlink in a modal overlay, set an `[up-layer=new]` attribute:
 
 ```html
-<a href="/menu" up-layer="new">Open menu</a> <!-- mark: up-layer -->
+<a href="/menu" up-layer="new">Open menu</a> <!-- mark: up-layer="new" -->
 ```
 
 ### Chosing the overlay mode {#modes}
@@ -19,13 +19,13 @@ The overlay will open with the default [mode](/layer-terminology) (a modal dialo
 To use a different mode, like `popup` or `drawer`, use an `[up-mode]` attribute:
 
 ```html
-<a href="/menu" up-layer="new" up-mode="drawer"> <!-- mark: up-mode -->
+<a href="/menu" up-layer="new" up-mode="drawer"> <!-- mark: up-mode="drawer" -->
 ```
 
 As a **shorthand** you may also append the layer mode to the `[up-layer=new]` attribute:
 
 ```html
-<a href="/menu" up-layer="new drawer"> <!-- mark: new drawer -->
+<a href="/menu" up-layer="new drawer"> <!-- mark: up-layer="new drawer" -->
 ```
 
 You can change the default layer mode in `up.layer.config.mode`.
@@ -37,7 +37,7 @@ Opening an overlay from a form {#form}
 To show the response to a successful form submission within an overlay, set an `[up-layer=new]` attribute: 
 
 ```html
-<form action="/submit" up-layer="new"> <!-- mark: up-layer -->
+<form action="/submit" up-layer="new"> <!-- mark: up-layer="new" -->
   ...
 </form>
 ```
@@ -46,7 +46,7 @@ To show the response to a successful form submission within an overlay, set an `
 To only use an overlay for error messages from a [failed submission](/failed-responses), set an `[up-fail-layer=new]` attribute:
 
 ```html
-<form action="/submit" up-fail-layer="new"> <!-- mark: up-fail-layer -->
+<form action="/submit" up-fail-layer="new"> <!-- mark: up-fail-layer="new" -->
   ...
 </form>
 ```
@@ -60,7 +60,7 @@ Opening overlays from local content {#string}
 The [`[up-content]`](/up-follow#up-content) attribute lets you open an overlay without going through the server:
 
 ```html
-<a up-layer="new popup" up-content="<p>Helpful instructions here</p>"> <!-- mark: up-content -->
+<a up-layer="new popup" up-content="<p>Helpful instructions here</p>"> <!-- mark: up-content="<p>Helpful instructions here</p>" -->
   Help
 </a>
 ```
@@ -70,11 +70,11 @@ Since we didn't provide an `[up-target]` selector, it will be wrapped in a conta
 Instead of embedding an HTML string, you can also refer to a [template](/templates):
 
 ```html
-<a up-layer="new popup" up-content="#help"> <!-- mark: up-content -->
+<a up-layer="new popup" up-content="#help"> <!-- mark: up-content="#help" -->
   Help
 </a>
 
-<template id="help">
+<template id="help"> <!-- mark: id="help" -->
   <p>Helpful instructions here</p>
 </template>
 ```

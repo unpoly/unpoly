@@ -373,7 +373,7 @@ up.radio = (function() {
   This fragment `#score` will be reloaded every 30 seconds:
 
   ```html
-  <div id="score" up-poll> <!-- mark: score -->
+  <div id="score" up-poll> <!-- mark: id="score" -->
     Score: 1400
   </div>
   ```

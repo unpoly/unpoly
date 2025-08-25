@@ -19,13 +19,13 @@ To refer to a template, pass its CSS selector to any attribute or option that ac
 
 
 ```html
-<a href="#" up-target=".target" up-document="#my-template">Click me</a> <!-- mark: #my-template -->
+<a href="#" up-target=".target" up-document="#my-template">Click me</a> <!-- mark: up-document="#my-template" -->
 
 <div class="target">
   Old content
 </div>
 
-<template id="my-template"> <!-- mark: my-template -->
+<template id="my-template"> <!-- mark: id="my-template" -->
   <div class="target">
     New content
   </div>

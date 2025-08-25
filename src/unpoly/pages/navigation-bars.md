@@ -30,10 +30,10 @@ Standard [`<nav>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/nav
 always considered navigational containers:
 
 ```html
-<nav> <!-- mark: nav -->
+<nav> <!-- mark: <nav> -->
   <a href="/foo">Foo</a>
   <a href="/bar">Bar</a>
-</nav>
+</nav> <!-- mark: </nav> -->
 ```
 
 If you cannot use a `<nav>` element, you can also set the `[up-nav]` attribute on an arbitrary tag instead:
@@ -54,7 +54,7 @@ You may also assign `[up-nav]` to an individual link instead of an navigational 
 Matching containers can opt *out* of `.up-current` assignment by setting an `[up-nav=false]` attribute:
 
 ```html
-<nav up-nav="false"> <!-- mark: false -->
+<nav up-nav="false"> <!-- mark: up-nav="false" -->
   <a href="/foo">Foo</a>
   <a href="/bar">Bar</a>
 </nav>
@@ -130,7 +130,7 @@ whose `.up-current` class also match the root layer's location:
 
 ```html
 <!-- label: Navigation bar in an overlay -->
-<nav up-layer="root"> <!-- mark: up-layer -->
+<nav up-layer="root"> <!-- mark: up-layer="root" -->
   <a href="/users" up-layer="root">Users</a>
   <a href="/posts" up-layer="root">Posts</a>
 </nav>
@@ -143,7 +143,7 @@ In this example links are marked as "current" if their
 URL matches the location of *any* layer:
 
 ```html
-<nav up-layer="any"> <!-- mark: any -->
+<nav up-layer="any"> <!-- mark: up-layer="any" -->
   <a href="/users" up-layer="root">Users</a>
   <a href="/posts" up-layer="root">Posts</a>
   <a href="/sitemap" up-layer="current">Full sitemap</a>
@@ -172,7 +172,7 @@ Unpoly will set all configured classes on a current link:
 
 ```html
 <nav>
-  <a href="/foo" class="up-current my-current">Foo</a> <!-- mark: up-current selected -->
+  <a href="/foo" class="up-current my-current">Foo</a> <!-- mark: class="up-current selected" -->
   <a href="/bar">Bar</a>
 </nav>
 ```
@@ -185,7 +185,7 @@ to convey the emphasis to assistive technologies:
 
 ```html
 <nav>
-  <a href="/foo" class="up-current" aria-current="page">Foo</a> <!-- mark: aria-current -->
+  <a href="/foo" class="up-current" aria-current="page">Foo</a> <!-- mark: aria-current="page" -->
   <a href="/bar">Bar</a>
 </nav>
 ```
@@ -194,7 +194,7 @@ When using a non-`<nav>` element with `[up-nav]`, we recommend to also set a `[r
 to define a navigation landmark:
 
 ```html
-<div up-nav role="navigation"> <!-- mark: navigation -->
+<div up-nav role="navigation"> <!-- mark: role="navigation" -->
   <a href="/foo">Foo</a>
   <a href="/bar">Bar</a>
 </div>

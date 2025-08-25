@@ -84,7 +84,7 @@ up.status = (function() {
   We can use the `loading-attr` preview in any link or form by setting an `[up-preview]` attribute:
 
   ```html
-  <a href="/edit" up-follow up-preview="loading-attr">Edit page</a> <!-- mark: up-preview -->
+  <a href="/edit" up-follow up-preview="loading-attr">Edit page</a> <!-- mark: up-preview="loading-attr" -->
   ```
 
   ## Accepting parameters {#parameters}
@@ -270,13 +270,13 @@ up.status = (function() {
   To refer to a preview function, set its name as an `[up-preview]` attribute:
 
   ```html
-  <a href="/edit" up-follow up-preview="spinner">Edit page</a> <!-- mark: spinner -->
+  <a href="/edit" up-follow up-preview="spinner">Edit page</a> <!-- mark: up-preview="spinner" -->
   ```
 
   To [call multiple previews](/previews#multiple), separate their names with a comma:
 
   ```html
-  <a href="/edit" up-follow up-preview="spinner, dim-page">Edit page</a> <!-- mark: spinner, dim-page -->
+  <a href="/edit" up-follow up-preview="spinner, dim-page">Edit page</a> <!-- mark: up-preview="spinner, dim-page" -->
   ```
 
   [Preview options](#parameters) can be appended after each preview name, encoded as [Relaxed JSON](/relaxed-json):
@@ -315,7 +315,7 @@ up.status = (function() {
   This link will show the message *"Loading…"* within `#target` while its request is loading:
 
   ```html
-  <a href="/path" up-target="#target" up-placeholder="<p>Loading…</p>">Show story</a> <!-- mark: <p>Loading…</p> -->
+  <a href="/path" up-target="#target" up-placeholder="<p>Loading…</p>">Show story</a> <!-- mark: up-placeholder="<p>Loading…</p>" -->
 
   <div id="#target">
     Old content
@@ -414,7 +414,7 @@ up.status = (function() {
 
   ```html
   <div up-nav>
-    <a href="/foo" class="up-current">Foo</a> <!-- mark: up-current -->
+    <a href="/foo" class="up-current">Foo</a> <!-- mark: class="up-current" -->
     <a href="/bar">Bar</a>
   </div>
   ```
@@ -425,7 +425,7 @@ up.status = (function() {
   ```html
   <div up-nav>
     <a href="/foo">Foo</a>
-    <a href="/bar" class="up-current">Bar</a> <!-- mark: up-current -->
+    <a href="/bar" class="up-current">Bar</a> <!-- mark: class="up-current" -->
   </div>
   ```
 

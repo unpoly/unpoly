@@ -480,7 +480,7 @@ up.fragment = (function() {
   manually set `[up-source]` attribute:
 
   ```html
-  <div class="unread-count" up-poll up-source="/unread-count"> <!-- mark: up-source -->
+  <div class="unread-count" up-poll up-source="/unread-count"> <!-- mark: up-source="/unread-count" -->
     2 new messages
   </div>
   ```
@@ -1705,7 +1705,7 @@ up.fragment = (function() {
   To instantly restore a fragment to the last [cached](/caching) version, pass a `{ cache: true }` option:
 
   ```js
-  up.reload('.inbox', { cache: true }) // mark: cache
+  up.reload('.inbox', { cache: true }) // mark: cache: true
   ```
 
   If the fragment source isn't cached, a network request is made.
@@ -1714,7 +1714,7 @@ up.fragment = (function() {
   has [expired](/caching#expiration), also pass a `{ revalidate: 'auto' }` option:
 
   ```js
-  up.reload('.inbox', { cache: true, revalidate: 'auto' }) // mark: revalidate
+  up.reload('.inbox', { cache: true, revalidate: 'auto' }) // mark: revalidate: 'auto'
   ```
 
   @function up.reload
@@ -2925,17 +2925,17 @@ up.fragment = (function() {
   We want to integrate [Mustache](https://github.com/janl/mustache.js) to enable templates like this:
 
   ```html
-  <script id="greeter-template" type="text/mustache"> <!-- mark: text/mustache -->
+  <script id="greeter-template" type="text/mustache"> <!-- mark: type="text/mustache" -->
     <div id="greeter">
       Hello, {{name}}!
     </div>
   </script>
   ```
 
-  An event handler for an integration would look like this:
+  An event handler for a Mustache integration would look like this:
 
   ```js
-  up.on('up:template:clone', '[type="text/mustache"]', function(event) {
+  up.on('up:template:clone', '[type="text/mustache"]', function(event) { // mark: [type="text/mustache"]
     const template = event.target.innerHTML
     const result = Mustache.render(template, event.data)
     event.nodes = up.element.createNodesFromHTML(result)

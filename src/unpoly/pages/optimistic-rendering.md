@@ -63,7 +63,7 @@ The HTML for the TODO list is structured like this:
 ```html
 <div id="tasks">
   <!-- Form to add a new task -->
-  <form up-target="#tasks" up-preview="add-task"> <!-- mark: add-task -->
+  <form up-target="#tasks" up-preview="add-task"> <!-- mark: up-preview="add-task" -->
     <input type="text" name="text" required>
     <button type="submit">Save</button>
   </form>

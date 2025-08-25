@@ -1407,8 +1407,8 @@ up.link = (function() {
   is assigned to both elements:
 
   ```html
-  <div up-expand class="up-active"> <!-- mark: up-active -->
-    <a href="/foo" class="up-active">Foo</a> <!-- mark: up-active -->
+  <div up-expand class="up-active"> <!-- mark: class="up-active" -->
+    <a href="/foo" class="up-active">Foo</a> <!-- mark: class="up-active" -->
     <a href="/bar">Bar</a>
   </div>
   ```
@@ -1418,7 +1418,7 @@ up.link = (function() {
   ```html
   <div up-expand>
     <a href="/foo">Foo</a> <!-- chip: not active -->
-    <a href="/bar" class="up-active">Bar</a> <!-- mark: up-active -->
+    <a href="/bar" class="up-active">Bar</a> <!-- mark: class="up-active" -->
   </div>
   ```
 

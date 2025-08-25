@@ -26,11 +26,11 @@ The target elements can use [`[up-show-for]`](/up-show-for) and [`[up-hide-for]`
 attributes to indicate for which values they should be shown or hidden:
 
 ```html
-<div class="level-dependent" up-show-for="beginner"> <!-- mark: up-show-for -->
+<div class="level-dependent" up-show-for="beginner"> <!-- mark: up-show-for="beginner" -->
   shown for beginner level, hidden for other levels
 </div>
 
-<div class="level-dependent" up-hide-for="beginner"> <!-- mark: up-hide-for -->
+<div class="level-dependent" up-hide-for="beginner"> <!-- mark: up-hide-for="beginner" -->
   hidden for beginner level, shown for other levels
 </div>
 ```
@@ -40,7 +40,7 @@ By default the entire form will be searched for matches. This can be [configured
 To toggle an element [for multiple values](#multiple-values), separate with a comma:
 
 ```
-<div class="level-dependent" up-show-for="intermediate, expert"> <!-- mark: up-show-for -->
+<div class="level-dependent" up-show-for="intermediate, expert"> <!-- mark: up-show-for="intermediate, expert" -->
   only shown for intermediate and expert levels
 </div>
 ```
@@ -62,10 +62,10 @@ attributes to indicate for which values they should be shown or hidden:
 
 ```html
 <!-- The department field is only shown for managers -->
-<input class="role-dependent" name="department" up-enable-for="manager"> <!-- mark: up-enable-for -->
+<input class="role-dependent" name="department" up-enable-for="manager"> <!-- mark: up-enable-for="manager" -->
 
 <!-- The mentor field is only shown for trainees -->
-<input class="role-dependent" name="mentor" up-disable-for="manager"> <!-- mark: up-disable-for -->
+<input class="role-dependent" name="mentor" up-disable-for="manager"> <!-- mark: up-disable-for="manager" -->
 ```
 
 ## Custom switching effects {#custom-effects}
@@ -80,7 +80,7 @@ outline around the department field when the manager role is selected:
   <option value="manager">Manager</option>
 </select>
 
-<input class="role-dependent" name="department" highlight-for="manager"> <!-- mark: highlight-for -->
+<input class="role-dependent" name="department" highlight-for="manager"> <!-- mark: highlight-for="manager" -->
 ```
 
 When the role select changes, an `up:form:switch` event is emitted on all elements matching `.role-dependent`.
@@ -102,7 +102,7 @@ up.on('up:form:switch', '[highlight-for]', (event) => {
 To switch for multiple values, separate them with a comma:
 
 ```html
-<div class="level-dependent" up-show-for="intermediate, expert"> <!-- mark: intermediate, expert -->
+<div class="level-dependent" up-show-for="intermediate, expert"> <!-- mark: up-show-for="intermediate, expert" -->
   only shown for intermediate and expert levels
 </div>
 ```
@@ -110,7 +110,7 @@ To switch for multiple values, separate them with a comma:
 If your values might contain spaces, you may also serialize them as a [relaxed JSON](/relaxed-json) array:
 
 ```html
-<div class='level-dependent' up-show-for='["John Doe", "Jane Doe"]'> <!-- mark: ["John Doe", "Jane Doe"] -->
+<div class='level-dependent' up-show-for='["John Doe", "Jane Doe"]'> <!-- mark: up-show-for='["John Doe", "Jane Doe"]' -->
   You selected John or Jane Doe
 </div>
 ```
@@ -120,9 +120,9 @@ If your values might contain spaces, you may also serialize them as a [relaxed J
 Instead of switching on specific string values, you can use `:blank` to match an empty input value:
 
 ```html
-<input type="text" name="user" up-switch=".target"> <!-- mark: :blank -->
+<input type="text" name="user" up-switch=".target">
 
-<div class="target" up-show-for=":blank">
+<div class="target" up-show-for=":blank"> <!-- mark: up-show-for=":blank" -->
   please enter a username
 </div>
 ```
@@ -130,7 +130,7 @@ Instead of switching on specific string values, you can use `:blank` to match an
 Inversely, `:present` will match any non-empty input value:
 
 ```html
-<div class="target" up-hide-for=":present"> <!-- mark: :present -->
+<div class="target" up-hide-for=":present"> <!-- mark: up-hide-for=":present" -->
   please enter a username
 </div>
 ```
@@ -185,11 +185,11 @@ set `[up-switch]` on an element containing all checkboxes:
 Use `[up-switch]` on a container for a radio button group:
 
 ```html
-<div up-switch=".level-dependent"> <!-- mark: div -->
+<div up-switch=".level-dependent"> <!-- mark: <div> -->
   <input type="radio" name="level" value="beginner">
   <input type="radio" name="level" value="intermediate">
   <input type="radio" name="level" value="expert">
-</div> <!-- mark: div -->
+</div> <!-- mark: </div> -->
 
 <div class="level-dependent" up-show-for="beginner">
   shown for beginner level, hidden for other levels
@@ -210,7 +210,7 @@ To match all elements within the current [layer](/up.layer), set the region to `
 
 ```
 <form method="post" action="/order">
-  <select name="payment" up-switch="#info" up-switch-region=":layer"> <!-- mark: up-switch-region -->
+  <select name="payment" up-switch="#info" up-switch-region=":layer"> <!-- mark: up-switch-region=":layer" -->
     <option value="paypal">PayPal</option>
     <option value="manual">Manual wire transfer</option>
   </select>
@@ -243,7 +243,7 @@ For example, listening to `change` will wait until the text field is blurred
 before applying any switching effects:
 
 ```html
-<input type="text" name="user" up-switch=".user-dependent" up-watch-event="change"> <!-- mark: up-watch-event -->
+<input type="text" name="user" up-switch=".user-dependent" up-watch-event="change"> <!-- mark: up-watch-event="change" -->
 ```
 
 When watching a fast-firing event like `input`,
@@ -251,7 +251,7 @@ you can debounce the switching effect
 with an [`[up-watch-delay]`](/up-switch#up-watch-delay) attribute:
 
 ```html
-<input type="text" name="user" up-switch=".user-dependent" up-watch-event="input" up-watch-delay="150"> <!-- mark: up-watch-delay -->
+<input type="text" name="user" up-switch=".user-dependent" up-watch-event="input" up-watch-delay="150"> <!-- mark: up-watch-delay="150" -->
 ```
 
 

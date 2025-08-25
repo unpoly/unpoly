@@ -77,7 +77,7 @@ typing before running a callback. You can do so by setting an `[up-watch-delay]`
 ```html
 <form action="/search">
   <!-- Wait until the user has stopped typing for 100 milliseconds -->
-  <input name="query" up-autosubmit up-watch-delay="100"> <!-- mark: up-watch-delay -->
+  <input name="query" up-autosubmit up-watch-delay="100"> <!-- mark: up-watch-delay="100" -->
 </form>
 ```
 
@@ -129,7 +129,7 @@ To apply a [preview](/previews), set an `[up-watch-preview]` attribute on the fo
 
 ```html
 <form action="/search">
-  <input name="query" up-autosubmit up-watch-preview="spinner"> <!-- mark: up-watch-preview -->
+  <input name="query" up-autosubmit up-watch-preview="spinner"> <!-- mark: up-watch-preview="spinner" -->
 </form>
 ```
 
@@ -137,7 +137,7 @@ To show a [placeholder](/placeholders) while working, use an `[up-watch-placehol
 
 ```html
 <form action="/search">
-  <input name="query" up-autosubmit up-watch-placeholder="#results-placeholder"> <!-- mark: up-watch-placeholder -->
+  <input name="query" up-autosubmit up-watch-placeholder="#results-placeholder"> <!-- mark: up-watch-placeholder="#results-placeholder" -->
 </form>
 ```
 
@@ -163,7 +163,7 @@ Form-wide options can be overridden at the input level:
 ```html
 <form action="/search" up-watch-disable> <!-- mark: up-watch-disable -->
   <input name="department" up-autosubmit>
-  <input name="query" up-autosubmit up-watch-disable="false"> <!-- mark: up-watch-disable -->
+  <input name="query" up-autosubmit up-watch-disable="false"> <!-- mark: up-watch-disable="false" -->
 </form>
 ```
 

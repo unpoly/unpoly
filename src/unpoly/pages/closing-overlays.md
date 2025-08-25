@@ -264,7 +264,7 @@ To close the [current layer](/up.layer.current) when a button is clicked, use an
 To close with a [result value](#result-values), set a [relaxed JSON](/relaxed-json) on the attribute value:
 
 ```html
-<button up-dismiss="{ id: 5 }">Choose user #5</button> <!-- mark: { id: 5 } -->
+<button up-accept="{ id: 5 }">Choose user #5</button> <!-- mark: { id: 5 } -->
 ```
 
 

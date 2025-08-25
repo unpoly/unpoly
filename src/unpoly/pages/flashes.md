@@ -134,7 +134,7 @@ To give each flash message a identity that we can track, render them with random
 
 ```html
 <div up-flashes>
-  <strong data-nonce="6792525983">User was updated!</strong> <!-- mark: data-nonce -->
+  <strong data-nonce="6792525983">User was updated!</strong> <!-- mark: data-nonce="6792525983" -->
 </div>
 ```
 

@@ -84,7 +84,7 @@ We can achieve this by setting `[up-keep="same-html"]` on a container that conta
 and eventual error messages:
 
 ```html
-<fieldset id="department-group" up-keep="same-html"> <!-- mark: same-html -->
+<fieldset id="department-group" up-keep="same-html"> <!-- mark: up-keep="same-html" -->
   <label for="department">Department</label>
   <select id="department" name="department" value="IT">
     <option>IT</option>
@@ -116,13 +116,13 @@ centered around the new location. We can achieve this by setting an `[up-keep="s
 the map container:
 
 ```html
-<div class="map" up-data="{ location: 'Hofbräuhaus Munich' }" up-keep="same-data"></div> <!-- mark: same-data -->
+<div class="map" up-data="{ location: 'Hofbräuhaus Munich' }" up-keep="same-data"></div> <!-- mark: up-keep="same-data" -->
 ```
 
 Instead of `[up-data]` we can also use HTML5 [`[data-*]` attributes](https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes):
 
 ```html
-<div class="map" data-location="Hofbräuhaus Munich" up-keep="same-data"></div> <!-- mark: data-location -->
+<div class="map" data-location="Hofbräuhaus Munich" up-keep="same-data"></div> <!-- mark: data-location="Hofbräuhaus Munich" -->
 ```
 
 Unpoly will compare the element's **initial data** as it is rendered by the server.\
@@ -156,7 +156,7 @@ up.on('up:fragment:keep', 'audio', function(event) {
 Short keep conditions can also be inlined as an [`[up-on-keep]`](/up-keep#up-on-keep) attribute:
 
 ```html
-<audio src="song.mp3" up-keep up-on-keep="if (!this.paused) event.preventDefault()"></audio> <!-- mark: up-on-keep -->
+<audio src="song.mp3" up-keep up-on-keep="if (!this.paused) event.preventDefault()"></audio> <!-- mark: up-on-keep="if (!this.paused) event.preventDefault()" -->
 ```
 
 ## Forcing an update {#forcing-updates}

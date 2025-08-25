@@ -1579,15 +1579,15 @@ up.form = (function() {
   ```html
   <form action="/users">
 
-    <fieldset> <!-- mark: fieldset -->
+    <fieldset> <!-- mark: <fieldset> -->
       <label for="email">E-mail</label>
       <input type="text" id="email" name="email">
-    </fieldset> <!-- mark: fieldset -->
+    </fieldset> <!-- mark: </fieldset> -->
 
-    <fieldset> <!-- mark: fieldset -->
+    <fieldset> <!-- mark: <fieldset> -->
       <label for="password">Password</label>
       <input type="password" id="password" name="password">
-    </fieldset> <!-- mark: fieldset -->
+    </fieldset> <!-- mark: </fieldset> -->
 
     <button type="submit">Register</button>
 
@@ -1778,7 +1778,7 @@ up.form = (function() {
   attribute to any [target selector](/targeting-fragments):
 
   ```html
-  <input name="email" up-validate=".email-errors"> <!-- mark: .email-errors -->
+  <input name="email" up-validate=".email-errors"> <!-- mark: up-validate=".email-errors" -->
   <div class="email-errors"></div>
   ```
 
@@ -1786,7 +1786,7 @@ up.form = (function() {
   by separating their target selectors with a comma:
 
   ```html
-  <input name="email" up-validate=".email-errors, .base-errors"> <!-- mark: .email-errors, .base-errors -->
+  <input name="email" up-validate=".email-errors, .base-errors"> <!-- mark: up-validate=".email-errors, .base-errors" -->
   ```
 
   To update another fragment *in addition* to the field's form group, include
@@ -1795,7 +1795,7 @@ up.form = (function() {
 
   ```html
   <fieldset>
-    <input name="email" up-validate="fieldset:has(:origin), .base-errors"> <!-- mark: fieldset:has(:origin), .base-errors -->
+    <input name="email" up-validate="fieldset:has(:origin), .base-errors"> <!-- mark: up-validate="fieldset:has(:origin), .base-errors" -->
   </fieldset>
   ```
 
@@ -1897,7 +1897,7 @@ up.form = (function() {
   and `[up-validate-method]` attributes:
 
   ```html
-  <form method="post" action="/order" up-validate-url="/validate-order"> <!-- mark: up-validate-url -->
+  <form method="post" action="/order" up-validate-url="/validate-order"> <!-- mark: up-validate-url="/validate-order" -->
     ...
   </form>
   ```
@@ -1906,8 +1906,8 @@ up.form = (function() {
 
   ```html
   <form method="post" action="/register">
-    <input name="email" up-validate-url="/validate-email"> <!-- mark: /validate-email -->
-    <input name="password" up-validate-url="/validate-password"> <!-- mark: /validate-password -->
+    <input name="email" up-validate-url="/validate-email"> <!-- mark: up-validate-url="/validate-email" -->
+    <input name="password" up-validate-url="/validate-password"> <!-- mark: up-validate-url="/validate-password" -->
   </form>
   ```
 
@@ -1992,7 +1992,7 @@ up.form = (function() {
   The controlling form field gets an `[up-switch]` attribute with a selector for the elements to show or hide:
 
   ```html
-  <select name="level" up-switch=".level-dependent">
+  <select name="level" up-switch=".level-dependent"> <!-- mark: up-switch=".level-dependent" -->
     <option value="beginner">beginner</option>
     <option value="intermediate">intermediate</option>
     <option value="expert">expert</option>
@@ -2003,7 +2003,7 @@ up.form = (function() {
   For example, the `[up-show-for]` will show an element while the field has one of the given values:
 
   ```html
-  <div class="level-dependent" up-show-for="beginner"> <!-- mark: up-show-for -->
+  <div class="level-dependent" up-show-for="beginner"> <!-- mark: up-show-for="beginner" -->
     shown for beginner level, hidden for other levels
   </div>
   ```

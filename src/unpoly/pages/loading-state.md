@@ -15,9 +15,9 @@ Unpoly adds CSS classes to interactive elements that are loading content,
 and to the fragments they are targeting:
 
 ```html
-<a href="/bar" up-target="#target" class="up-active">Bar</a> <!-- mark: up-active -->
+<a href="/bar" up-target="#target" class="up-active">Bar</a> <!-- mark: class="up-active" -->
 
-<div id="target" class="up-loading"> <!-- mark: up-loading -->
+<div id="target" class="up-loading"> <!-- mark: class="up-loading" -->
   Initial content
 </div>
 ```

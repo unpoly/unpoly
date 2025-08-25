@@ -24,9 +24,9 @@ When the user clicks on the `/foo` link, the link is instantly assigned the `.up
 The [targeted](/targeting-fragments) fragment (the `<main>` element) gets the `.up-loading` class:
 
 ```html
-<a href="/bar" up-target="#target" class="up-active">Bar</a> <!-- mark: up-active -->
+<a href="/bar" up-target="#target" class="up-active">Bar</a> <!-- mark: class="up-active" -->
 
-<div id="target" class="up-loading"> <!-- mark: up-loading -->
+<div id="target" class="up-loading"> <!-- mark: class="up-loading" -->
   Initial content
 </div>
 ```
@@ -109,12 +109,12 @@ When the user clicks the submit button, both the button and the form are marked 
 while the form is submitting. The targeted fragment is marked as `.up-loading`:
 
 ```html
-<form action="/action" up-target="#target" class="up-active"> <!-- mark: up-active -->
+<form action="/action" up-target="#target" class="up-active"> <!-- mark: class="up-active" -->
   <input type="text" name="email">
-  <button type="submit" class="up-active">Submit</button> <!-- mark: up-active -->
+  <button type="submit" class="up-active">Submit</button> <!-- mark: class="up-active" -->
 </form>
 
-<div id="target" class="up-loading"> <!-- mark: up-loading -->
+<div id="target" class="up-loading"> <!-- mark: class="up-loading" -->
   Initial content
 </div>
 ```
@@ -185,14 +185,14 @@ To disable feedback classes, set an
 
 
 ```html
-<a href="/path" up-follow up-feedback="false">Link</a> <!-- mark: false -->
+<a href="/path" up-follow up-feedback="false">Link</a> <!-- mark: up-feedback="false" -->
 ```
 
 
 From JavaScript you may pass an [`{ feedback: false }`](/up.render#options.feedback) option:
 
 ```js
-up.follow(link, { feedback: false }) // mark: false
+up.follow(link, { feedback: false }) // mark: { feedback: false }
 ```
 
 

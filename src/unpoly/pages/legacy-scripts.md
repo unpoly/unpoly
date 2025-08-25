@@ -85,7 +85,7 @@ and add it to the relevant element:
 Any parameters can be [attached to the element](/data):
 
 ```html
-<form action="/orders/new" track-view up-data="{ screen: 'order-form', step: 1 }"> <!-- mark: { screen: 'order-form', step: 1 } -->
+<form action="/orders/new" track-view up-data="{ screen: 'order-form', step: 1 }"> <!-- mark: up-data="{ screen: 'order-form', step: 1 }" -->
    ...
 </form>
 ```

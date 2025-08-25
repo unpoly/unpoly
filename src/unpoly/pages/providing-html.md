@@ -14,7 +14,7 @@ To fetch a HTML document from the server when a hyperlink is clicked, pass the U
 Also set an `[up-target]` attribute indicating which fragment to update.
 
 ```html
-<a href="/path" up-target=".target">Click me</a> <!-- mark: href -->
+<a href="/path" up-target=".target">Click me</a> <!-- mark: up-target=".target" -->
 
 <div class="target">
   Content will appear here
@@ -48,7 +48,7 @@ For a form, set the server endpoint URL as a standard `[action]` attribute.
 Also set an `[up-target]` attribute indicating which fragment to update after a successful submission.
 
 ```html
-<form action="/path" up-target=".target"> <!-- mark: action -->
+<form action="/path" up-target=".target"> <!-- mark: up-target=".target" -->
   ...
 </form>
 
@@ -61,10 +61,11 @@ When the form is submitted, the server is expected to respond with HTML that con
 The server response may contain other HTML, but only the element matching `.target` will be extracted and placed into the page.
 Other elements will be discarded from the response and kept unchanged on the page.
 
-> [tip]
-> If the server responds with an error code, Unpoly will ignore the `[up-target]` attribute
-> and update the selector found in the `[up-fail-target]` attribute instead. The default fail target
-> is the form itself. See [rendering failed responses differently](/failed-responses#fail-options).
+If the server responds with an error code, Unpoly will ignore the `[up-target]` attribute
+and update the selector found in the `[up-fail-target]` attribute instead. The default fail target
+is the form itself.
+
+See [Submitting forms in-place](/submitting-forms) for an expanded example.
 
 
 ### Programmatic API
@@ -104,7 +105,7 @@ For example, take the following HTML:
 We can update the element's children from a link like this:
 
 ```html
-<a href="#" up-target=".target" up-content="New content">Click me</a> <!-- mark: up-content -->
+<a href="#" up-target=".target" up-content="New content">Click me</a> <!-- mark: up-content="New content" -->
 ```
 
 Clicking the link will change the targeted element's inner HTML to the attribute value:
@@ -127,7 +128,7 @@ To render a string of HTML comprising *only* the new fragment's [outer HTML](htt
 
 ```js
 // This will update .foo
-up.render({ fragment: '<div class=".target">inner</div>' })
+up.render({ fragment: '<div class=".target">inner</div>' }) // mark: fragment: '<div class=".target">inner</div>'
 ```
 
 Note how we omitted a `{ target }` option or `[up-target]` attribute.
@@ -136,7 +137,7 @@ The target will be [derived](/target-derivation) from the root element in the gi
 You can also embed the HTML in an [`[up-fragment]`](/up-follow#up-fragment) attribute.
 
 ```html
-<a href='#' up-fragment='<div class="target">inner</div>'>Click me</a> <!-- mark: up-content -->
+<a href='#' up-fragment='<div class="target">inner</div>'>Click me</a> <!-- mark: up-fragment='<div class="target" -->
 ```
 
 > [tip]
@@ -149,7 +150,7 @@ You can also embed the HTML in an [`[up-fragment]`](/up-follow#up-fragment) attr
 When updating fragments from a string or `<template>`, you may omit the `[href="#"]` attribute:
 
 ```html
-<a up-target=".target" up-content="New content">Click me</a> <!-- mark: up-content -->
+<a up-target=".target" up-content="New content">Click me</a> <!-- mark: up-content="New content" -->
 ```
 
 Unpoly will [make sure](/up.link.config#config.clickableSelectors) that such a link is focusable and supports keyboard activation.
@@ -214,13 +215,13 @@ in any attribute or option that accepts HTML:
 
 
 ```html
-<a href="#" up-target=".target" up-document="#my-template">Click me</a> <!-- mark: #my-template -->
+<a href="#" up-target=".target" up-document="#my-template">Click me</a> <!-- mark: up-document="#my-template" -->
 
 <div class="target">
   Old content
 </div>
 
-<template id="my-template"> <!-- mark: my-template -->
+<template id="my-template"> <!-- mark: id="my-template" -->
   <div class="target">
     New content
   </div>

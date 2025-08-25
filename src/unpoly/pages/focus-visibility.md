@@ -67,17 +67,17 @@ up.viewport.config.autoFocusVisible = (options) =>
 If you are happy with your default strategy, but want to override it for a single interaction, you can set an [`[up-focus-visible]`](/up-follow#up-focus-visible) attribute on any link or form:
 
 ```html
-<a href="/path" up-focus=":main" up-focus-visible="false">Click me</a> <!-- mark: up-focus-visible -->
+<a href="/path" up-focus=":main" up-focus-visible="false">Click me</a> <!-- mark: up-focus-visible="false" -->
 ```
 
 When rendering from JavaScript, you can pass an `{ focusVisible }` option:
 
 ```js
-up.navigate{
+up.navigate({
   url: '/path',
   focus: ':main', 
-  focusVisible: false // mark: focusVisible
-}
+  focusVisible: false // mark: focusVisible: false
+})
 ```
 
 

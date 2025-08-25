@@ -837,13 +837,13 @@ up.layer = (function() {
   This link will open its response in a modal overlay:
 
   ```html
-  <a href="/menu" up-layer="new">Open menu</a> <!-- mark: up-layer -->
+  <a href="/menu" up-layer="new">Open menu</a> <!-- mark: up-layer="new" -->
   ```
 
   This form will show error messages from a [failed submission](/failed-responses) within a modal overlay:
 
   ```html
-  <form action="/submit" up-fail-layer="new"> <!-- mark: up-fail-layer -->
+  <form action="/submit" up-fail-layer="new"> <!-- mark: up-fail-layer="new" -->
     ...
   </form>
   ```

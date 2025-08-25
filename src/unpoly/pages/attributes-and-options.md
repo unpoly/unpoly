@@ -19,7 +19,7 @@ For example, the `[up-transition]` attribute causes an `[up-follow]` to swap
 using an [animated transition](/up.motion):
 
 ```html
-<a href="/path" up-follow up-transition="cross-fade">Click me</a> <!-- mark: up-transition -->
+<a href="/path" up-follow up-transition="cross-fade">Click me</a> <!-- mark: up-transition="cross-fade" -->
 ```
 
 Modifying attributes are documented with the main attribute they're modifying.
@@ -55,7 +55,7 @@ an `[up-follow]` attribute:
 You can still make exceptions by setting an `[up-follow=false]` attribute:
 
 ```html
-<a href="/path" up-follow="false">Click for full page load</a> <!-- mark: false -->
+<a href="/path" up-follow="false">Click for full page load</a> <!-- mark: up-follow="false" -->
 ```
 
 
@@ -99,7 +99,7 @@ Some attributes default to a value `"auto"`. This indicates a more complex defau
 For example, the [`[up-cache=auto]`](/up-follow#up-cache) attribute caches all links with a `GET` method:
 
 ```
-<a href="/path" up-follow up-cache="auto">Click me</a> <!-- mark: auto -->
+<a href="/path" up-follow up-cache="auto">Click me</a> <!-- mark: up-cache="auto" -->
 ```
 
 You can usually configure auto-behavior. For example, the following will prevent auto-caching
@@ -140,7 +140,7 @@ This can also help when you're generating HTML from a different programming lang
 as an attribute value:  
 
 ```ruby
-link_to 'Click me', '/path', 'up-follow': true
+link_to 'Click me', '/path', 'up-follow': true # mark: true
 ```
 
 

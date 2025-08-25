@@ -37,17 +37,17 @@ We can implement this form with three `[up-validate]` attributes and no addition
 <form method="post" action="/purchases">
   <fieldset>
     <label for="continent">Continent</label>
-    <select name="continent" id="continent" up-validate="#country">...</select> <!-- mark: up-validate -->
+    <select name="continent" id="continent" up-validate="#country">...</select> <!-- mark: up-validate="#country" -->
   </fieldset>
   
   <fieldset>
     <label for="country">Country</label>
-    <select name="country" id="country" up-validate="#price">...</select> <!-- mark: up-validate -->
+    <select name="country" id="country" up-validate="#price">...</select> <!-- mark: up-validate="#price" -->
   </fieldset>
   
   <fieldset>
     <label for="weight">Weight</label>
-    <input name="weight" id="weight" up-validate="#price"> kg <!-- mark: up-validate -->
+    <input name="weight" id="weight" up-validate="#price"> kg <!-- mark: up-validate="#price" -->
   </fieldset>
   
   <fieldset>
@@ -153,7 +153,7 @@ You can render content from another server endpoint by setting an
 
 ```html
 <form method="post" action="/order">
-  <input name="quantity" up-validate="#preview" up-validate-url="/preview-order"> <!-- mark: /preview-order -->
+  <input name="quantity" up-validate="#preview" up-validate-url="/preview-order"> <!-- mark: up-validate-url="/preview-order" -->
   
   <div id="preview">
     Order total: €190
