@@ -1167,10 +1167,20 @@ up.util = (function() {
   }
 
   /*-
-  Pushes the given function to the [JavaScript task queue](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/) (also "macrotask queue").
+  Schedules a function to the [JavaScript task queue](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/) (also "macrotask queue").
+
+  ## Example
+
+  Pass a function argument to schedule it for the next macrotask:
+
+  ```
+  up.util.task(() => console.log('Hello from next task!'))
+  console.log('Hello from current task!')
+  ```
 
   @function up.util.task
-  @param {Function()} block
+  @param {Function()} callback
+    The function to schedule.
   @stable
   */
   function queueTask(task) {

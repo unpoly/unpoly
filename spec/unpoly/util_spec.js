@@ -6,6 +6,25 @@ describe('up.util', () => {
 
   describe('JavaScript functions', function() {
 
+    describe('up.util.task()', function() {
+
+      it('schedules the given function to be executed in the next macrotask', async function() {
+        let callback = jasmine.createSpy('callback')
+        up.util.task(callback)
+
+        // Not yet called in this microtask
+        expect(callback).not.toHaveBeenCalled()
+
+        // Not yet called in the next microtask
+        await Promise.resolve()
+        expect(callback).not.toHaveBeenCalled()
+
+        await jasmine.waitTime(0)
+        expect(callback).toHaveBeenCalled()
+      })
+
+    })
+
     describe('up.util.wrapList()', function() {
 
       describe('with null', function() {
