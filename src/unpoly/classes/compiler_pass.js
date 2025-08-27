@@ -69,7 +69,7 @@ up.CompilerPass = class CompilerPass {
     up.migrate.postCompile?.(matches, compiler)
   }
 
-  async _compileOneElement(compiler, element) {
+  _compileOneElement(compiler, element) {
     const compileArgs = [element]
     // Do not retrieve and parse [up-data] unless the compiler function
     // expects a second argument. Note that we must pass data for an argument
@@ -79,7 +79,26 @@ up.CompilerPass = class CompilerPass {
       compileArgs.push(data, this._meta)
     }
 
-    let maybeDestructor = this._applyCompilerFunction(compiler, element, compileArgs)
+    let onDestructor = (destructor) => up.destructor(element, destructor)
+    this._applyCompilerFunction(compiler, element, compileArgs, onDestructor)
+  }
+
+  _compileBatch(compiler, elements) {
+    const compileArgs = [elements]
+    // Do not retrieve and parse [up-data] unless the compiler function
+    // expects a second argument. Note that we must pass data for an argument
+    // count of 0, since then the function might take varargs.
+    if (compiler.length !== 1) {
+      const dataList = u.map(elements, up.script.data)
+      compileArgs.push(dataList, this._meta)
+    }
+
+    let onDestructor = () => this._reportBatchCompilerWithDestructor(compiler)
+    this._applyCompilerFunction(compiler, elements, compileArgs, onDestructor)
+  }
+
+  async _applyCompilerFunction(compiler, elementOrElements, compileArgs, onDestructor) {
+    let maybeDestructor = up.error.guard(() => compiler.apply(elementOrElements, compileArgs))
 
     if (u.isPromise(maybeDestructor)) {
       // If the async compiler rejects, emit an `error` event but don't reject.
@@ -95,29 +114,12 @@ up.CompilerPass = class CompilerPass {
       maybeDestructor = await guardedPromise
     }
 
-    up.destructor(element, maybeDestructor)
+    if (maybeDestructor) onDestructor(maybeDestructor)
   }
 
-  _compileBatch(compiler, elements) {
-    const compileArgs = [elements]
-    // Do not retrieve and parse [up-data] unless the compiler function
-    // expects a second argument. Note that we must pass data for an argument
-    // count of 0, since then the function might take varargs.
-    if (compiler.length !== 1) {
-      const dataList = u.map(elements, up.script.data)
-      compileArgs.push(dataList, this._meta)
-    }
-
-    const result = this._applyCompilerFunction(compiler, elements, compileArgs)
-
-    if (result) {
-      up.fail('Compilers with { batch: true } cannot return destructors')
-    }
-  }
-
-  _applyCompilerFunction(compiler, elementOrElements, compileArgs) {
-    // return compiler.apply(elementOrElements, compileArgs)
-    return up.error.guard(() => compiler.apply(elementOrElements, compileArgs))
+  _reportBatchCompilerWithDestructor(compiler) {
+    let error = new up.Error(['Batch compiler (%s) cannot return a destructor', compiler.selector])
+    reportError(error)
   }
 
   _select(selector) {

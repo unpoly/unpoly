@@ -489,6 +489,7 @@ up.script = (function() {
       registry.guard(fns)
     } else {
       // The element was destroyed before an async compiler function resolved.
+      up.puts('up.destructor()', 'Immediately calling destructor for detached element (%o)', element)
       for (let fn of fns) up.error.guard(fn, element)
     }
   }
@@ -596,7 +597,6 @@ up.script = (function() {
     // ignore any events in between.
     await up.fragment.mutate(async () => {
       let compilePromise = compile(element, options)
-      console.debug("[up.hello] got compilePromise", compilePromise)
       up.fragment.emitInserted(element)
       await compilePromise
     })

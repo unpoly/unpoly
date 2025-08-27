@@ -36,7 +36,7 @@ describe('up.script', function() {
 
         it('lets callbacks return a function that is called when the element is destroyed later', function() {
           const destructor = jasmine.createSpy('destructor')
-          up.compiler('.element', (element) => destructor)
+          up.compiler('.element', (_element) => destructor)
           helloFixture('.element')
           up.destroy('.element')
           expect(destructor).toHaveBeenCalled()
@@ -45,7 +45,7 @@ describe('up.script', function() {
         it('lets callbacks return an array of functions that is called when the element is destroyed later', function() {
           const destructor1 = jasmine.createSpy('destructor1')
           const destructor2 = jasmine.createSpy('destructor2')
-          up.compiler('.element', (element) => [destructor1, destructor2])
+          up.compiler('.element', (_element) => [destructor1, destructor2])
           helloFixture('.element')
           up.destroy('.element')
           expect(destructor1).toHaveBeenCalled()
@@ -72,6 +72,82 @@ describe('up.script', function() {
           expect(() => up.destroy(element)).not.toThrowError()
         })
 
+        describe('with async callbacks', function() {
+
+          it('lets async callbacks resolve to a destructor function', async function() {
+            const destructor = jasmine.createSpy('destructor')
+            up.compiler('.element', async function(_element) {
+              return destructor
+            })
+            await up.hello(fixture('.element'))
+            expect(destructor).not.toHaveBeenCalled()
+
+            up.destroy('.element')
+
+            expect(destructor).toHaveBeenCalled()
+          })
+
+          it('lets async callbacks resolve to an array of destructor functions', async function() {
+            const destructor1 = jasmine.createSpy('destructor1')
+            const destructor2 = jasmine.createSpy('destructor2')
+            up.compiler('.element', async function(_element) {
+              return [destructor1, destructor2]
+            })
+            await up.hello(fixture('.element'))
+            expect(destructor1).not.toHaveBeenCalled()
+            expect(destructor2).not.toHaveBeenCalled()
+            await wait()
+
+            up.destroy('.element')
+
+            expect(destructor1).toHaveBeenCalled()
+            expect(destructor2).toHaveBeenCalled()
+          })
+
+          it('avoids setting .up-can-clean while the async callback is running (nice-to-have, no public API commitment)', async function() {
+            const blocker = u.newDeferred()
+            up.compiler('.element', async function(_element) {
+              await blocker
+              return up.util.noop // destructor will be returned after the element is destroyed
+            })
+
+            // Start up.hello(), but don't wait for it to settle
+            up.hello(fixture('.element'))
+            await wait()
+
+            expect('.element').not.toHaveClass('up-can-clean')
+
+            // Don't leave the async callback running
+            blocker.resolve()
+          })
+
+          it('runs a destructor if the element was destroyed before the async callback finished', async function() {
+            const blocker = u.newDeferred()
+            const destructor = jasmine.createSpy('destructor')
+            up.compiler('.element', async function(_element) {
+              await blocker
+              return destructor
+            })
+
+            // Start up.hello(), but don't wait for it to settle
+            up.hello(fixture('.element'))
+            await wait()
+
+            expect(destructor).not.toHaveBeenCalled()
+
+            up.destroy('.element')
+            await wait()
+
+            expect(destructor).not.toHaveBeenCalled()
+
+            blocker.resolve()
+            await wait()
+
+            expect(destructor).toHaveBeenCalled()
+          })
+
+        })
+
       })
 
       describe('with { batch } option', function() {
@@ -87,14 +163,30 @@ describe('up.script', function() {
           expect(compiler).toHaveBeenCalledWith([first, second])
         })
 
-        it('rejects with an error if the batch compiler returns a destructor', async function() {
+        it('reports an error if the batch compiler returns a destructor', async function() {
           const destructor = function() {}
-          up.compiler('.element', { batch: true }, (element) => destructor)
+          up.compiler('.element', { batch: true }, (_elements) => destructor)
           const $container = $fixture('.element')
-          const compilePromise = up.hello($container)
 
-          await expectAsync(compilePromise).toBeRejectedWithError(/cannot return destructor/i)
+          await jasmine.expectGlobalError(/cannot return a destructor/i, async function() {
+            const compilePromise = up.hello($container)
+            await expectAsync(compilePromise).toBeResolved()
+          })
         })
+
+        it('reports an error if an async batch compiler returns a destructor', async function() {
+          const destructor = function() {}
+          up.compiler('.element', { batch: true }, async function(_elements) {
+            return destructor
+          })
+          const $container = $fixture('.element')
+
+          await jasmine.expectGlobalError(/cannot return a destructor/i, async function() {
+            const compilePromise = up.hello($container)
+            await expectAsync(compilePromise).toBeResolved()
+          })
+        })
+
       })
 
       if (up.migrate.loaded) {
@@ -710,6 +802,21 @@ describe('up.script', function() {
           expect(callOrder).toEqual(['compiler', 'event'])
         })
 
+        it('does not delay up:fragment:inserted until an async compiler has run', async function() {
+          const callOrder = []
+          up.compiler('.element', async () => {
+            callOrder.push('compiler:start')
+            await wait(50)
+            callOrder.push('compiler:end')
+          })
+          const target = fixture('.element')
+          target.addEventListener('up:fragment:inserted', () => callOrder.push('event'))
+
+          await up.hello(target)
+
+          expect(callOrder).toEqual(['compiler:start', 'event', 'compiler:end'])
+        })
+
         it('only calls up:fragment:inserted once when the same element is passed to up.hello() multiple times', async function() {
           const target = fixture('.element')
           const listener = jasmine.createSpy('up:fragment:inserted listener')
@@ -842,7 +949,24 @@ describe('up.script', function() {
 
         it('returns a promise that delays fulfillment until all async compilers have terminated', async function() {
           let compilerDeferred = u.newDeferred()
-          up.compiler('.element', async function() {
+          up.compiler('.element', async function(_element) {
+            await compilerDeferred
+          })
+          const element = fixture('.element')
+
+          let promise = up.hello(element)
+          expect(promise).toEqual(jasmine.any(Promise))
+          await wait(50)
+
+          await expectAsync(promise).toBePending()
+          compilerDeferred.resolve()
+
+          await expectAsync(promise).toBeResolvedTo(element)
+        })
+
+        it('delays the promise until async batch compilers have terminated', async function() {
+          let compilerDeferred = u.newDeferred()
+          up.compiler('.element', { batch: true }, async function(_elements) {
             await compilerDeferred
           })
           const element = fixture('.element')
@@ -860,7 +984,26 @@ describe('up.script', function() {
         it('fulfills the promise when an async compiler rejects (and emits an error event)', async function() {
           let asyncError = new Error('error from async compiler')
           let compilerDeferred = u.newDeferred()
-          up.compiler('.element', async function() {
+          up.compiler('.element', async function(_element) {
+            await compilerDeferred
+          })
+          const element = fixture('.element')
+
+          let promise = up.hello(element)
+
+          await wait(10)
+
+          await jasmine.expectGlobalError(asyncError, async function() {
+            compilerDeferred.reject(asyncError)
+            await wait()
+            await expectAsync(promise).toBeResolvedTo(element)
+          })
+        })
+
+        it('fulfills the promise when an async batch compiler rejects (and emits an error event)', async function() {
+          let asyncError = new Error('error from async compiler')
+          let compilerDeferred = u.newDeferred()
+          up.compiler('.element', { batch: true }, async function(_elements) {
             await compilerDeferred
           })
           const element = fixture('.element')

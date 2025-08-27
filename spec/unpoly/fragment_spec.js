@@ -1049,7 +1049,32 @@ describe('up.fragment', function() {
             await expectAsync(finishedPromise).toBeResolved()
           })
 
-          it('starts a transition before async compilers have terminated')
+          it('starts a transition before async compilers have terminated', async function() {
+            up.motion.config.enabled = true
+            const events = []
+
+            up.compiler('.element', async function() {
+              events.push('compiler:start')
+              await wait(100)
+              events.push('compiler:end')
+            })
+
+            up.transition('logging', async function() {
+              events.push('transition:start')
+              await wait(50)
+              events.push('transition:end')
+            })
+
+            const html = '<div class="element"></div>'
+            const element = htmlFixture(html)
+
+            const finishedPromise = up.render({ fragment: html, transition: 'logging' }).finished
+            expect(events).toEqual(['compiler:start', 'transition:start'])
+
+            await expectAsync(finishedPromise).toBeResolved()
+
+            expect(events).toEqual(['compiler:start', 'transition:start', 'transition:end', 'compiler:end'])
+          })
 
         })
 
