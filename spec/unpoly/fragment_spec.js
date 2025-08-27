@@ -9840,6 +9840,50 @@ describe('up.fragment', function() {
             expect('.focused').toBeFocused()
           })
 
+          it('preserves focus when only updating children (using :content)', async function() {
+            const container = fixture('.container')
+            const oldFocused = e.affix(container, '.focused[tabindex=0]', { text: 'old focused' })
+            oldFocused.focus()
+            expect(oldFocused).toBeFocused()
+
+            up.render('.container:content', {
+              focus: 'keep',
+              document: `
+                <div class="container">
+                  <div class="focused" tabindex="0">new focused</div>
+                </div>
+              `
+            })
+            await wait()
+
+            expect('.focused').toHaveText('new focused')
+            expect('.focused').toBeFocused()
+          })
+
+          it('preserves focus when only updating children (using :content) with a transition', async function() {
+            up.motion.config.enabled = true
+
+            const container = fixture('.container')
+            const oldFocused = e.affix(container, '.focused[tabindex=0]', { text: 'old focused' })
+            oldFocused.focus()
+            expect(oldFocused).toBeFocused()
+
+            up.render('.container:content', {
+              focus: 'keep',
+              transition: 'cross-fade',
+              duration: 50,
+              document: `
+                <div class="container">
+                  <div class="focused" tabindex="0">new focused</div>
+                </div>
+              `
+            })
+            await wait(120)
+
+            expect('.focused').toHaveText('new focused')
+            expect('.focused').toBeFocused()
+          })
+
           it('preserves focus when morphing with a { transition }', async function() {
             up.motion.config.enabled = true
 
