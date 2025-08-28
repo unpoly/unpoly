@@ -125,3 +125,16 @@ up.migrate.processCompilerPassMeta = function(meta, response) {
       return response
   } })
 }
+
+let modernHello = up.hello
+let errorMessage = 'up.hello() is now async and returns a promise'
+
+class WasElementIsPromise extends Promise {}
+up.migrate.defineThrowingProps(WasElementIsPromise.prototype, Element.prototype, errorMessage)
+up.migrate.defineThrowingProps(WasElementIsPromise.prototype, Node.prototype, errorMessage)
+up.migrate.defineThrowingProps(WasElementIsPromise.prototype, EventTarget.prototype, errorMessage)
+
+up.hello = function(element, ...args) {
+  let elementPromise = modernHello(element, ...args)
+  return WasElementIsPromise.resolve(elementPromise)
+}

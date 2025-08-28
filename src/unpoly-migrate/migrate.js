@@ -180,7 +180,7 @@ up.migrate = (function() {
     const promise = Promise.resolve()
     const oldThen = promise.then
     promise.then = function() {
-      warn(`${label} no longer returns a promise`)
+      warn(`${label} is now sync and no longer returns a promise`)
       return oldThen.apply(this, arguments)
     }
     return promise
@@ -248,6 +248,21 @@ up.migrate = (function() {
     return transformed
   }
 
+  function defineThrowingProps(object, forbiddenPrototype, errorMessage) {
+    let complain = () => { throw new TypeError(errorMessage) }
+
+    for (const propName of Object.getOwnPropertyNames(forbiddenPrototype)) {
+      if (!(propName in object)) {
+        Object.defineProperty(object, propName, {
+          get: complain,
+          set: complain,
+          enumerable: false,
+          configurable: false,
+        })
+      }
+    }
+  }
+
   up.on('up:framework:reset', reset)
 
   return {
@@ -255,6 +270,7 @@ up.migrate = (function() {
     renamedPackage,
     renamedProperty,
     removedProperty,
+    defineThrowingProps,
     forbiddenPropertyValue,
     transformAttribute,
     renamedAttribute,

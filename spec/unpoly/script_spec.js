@@ -942,7 +942,7 @@ describe('up.script', function() {
           const element = fixture('.element')
 
           let promise = up.hello(element)
-          expect(promise).toEqual(jasmine.any(Promise))
+          expect(promise).toBePromiseLike()
 
           await expectAsync(promise).toBeResolvedTo(element)
         })
@@ -955,7 +955,7 @@ describe('up.script', function() {
           const element = fixture('.element')
 
           let promise = up.hello(element)
-          expect(promise).toEqual(jasmine.any(Promise))
+          expect(promise).toBePromiseLike()
           await wait(50)
 
           await expectAsync(promise).toBePending()
@@ -972,7 +972,7 @@ describe('up.script', function() {
           const element = fixture('.element')
 
           let promise = up.hello(element)
-          expect(promise).toEqual(jasmine.any(Promise))
+          expect(promise).toBePromiseLike()
           await wait(50)
 
           await expectAsync(promise).toBePending()
@@ -1032,6 +1032,38 @@ describe('up.script', function() {
         expect(compiler).toHaveBeenCalledWith($first[0])
         expect(compiler).toHaveBeenCalledWith($second[0])
       })
+
+      if (up.migrate.loaded) {
+
+        it('throws if the return value is used like an Element (the former API)', async function() {
+          let element = fixture('.element')
+          up.compiler('.element', async function() { })
+
+          let result = up.hello(element)
+
+          let getInnerHTML = () => result.innerHTML
+          expect(getInnerHTML).toThrowError(/now async/)
+
+          let callQuerySelector = () => result.querySelector('span')
+          expect(callQuerySelector).toThrowError(/now async/)
+
+          let callGetAttribute = () => result.getAttribute('data-foo')
+          expect(callGetAttribute).toThrowError(/now async/)
+        })
+
+        it('does not throw if the return value is used like a Promise (the current API)', async function() {
+          const compiler = jasmine.createSpy('compiler')
+          up.compiler('.element', compiler)
+          const element = fixture('.element')
+
+          let promise = up.hello(element)
+          expect(promise).toBePromiseLike()
+
+          await expectAsync(promise).toBeResolvedTo(element)
+        })
+
+      }
+
     })
 
     describe('up.script.clean()', function() {
