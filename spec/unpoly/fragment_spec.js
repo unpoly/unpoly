@@ -1869,23 +1869,21 @@ describe('up.fragment', function() {
 
           describe('when there is an expired cache entry', function() {
 
-            beforeEach(function(done) {
+            beforeEach(async function() {
               fixture('.target', { text: 'old text' })
 
               const request = up.request('/path', { target: '.target', cache: true })
+              await wait()
 
-              u.task(() => jasmine.respondWithSelector('.target', { text: 'expired text' }))
+              expect(request).toBeCached()
 
-              u.task(function() {
-                expect(request).toBeCached()
-                expect(request).not.toBeExpired()
+              jasmine.respondWithSelector('.target', { text: 'expired text' })
+              await wait()
 
-                up.cache.expire(request)
-
-                expect(request).toBeExpired()
-
-                done()
-              })
+              expect(request).toBeCachedWithResponse()
+              expect(request).not.toBeExpired()
+              up.cache.expire(request)
+              expect(request).toBeExpired()
             })
 
             it('renders the expired content', async function() {
@@ -1905,12 +1903,14 @@ describe('up.fragment', function() {
               await expectAsync(renderJob).toBeResolvedTo(jasmine.any(up.RenderResult))
               await expectAsync(renderJob.finished).toBePending()
 
+              // For some reason, with migrate loaded, the revalidation request is in the queue but has not yet been sent
+              await wait()
+
               expect(up.network.isBusy()).toBe(true)
               expect(onFinished).not.toHaveBeenCalled()
               expect(onOffline).not.toHaveBeenCalled()
-
               expect('.target').toHaveText('expired text')
-              expect(up.network.isBusy()).toBe(true)
+
 
               jasmine.lastRequest().responseError()
 
@@ -11940,6 +11940,9 @@ describe('up.fragment', function() {
 
               await job2
 
+              // For some reason, with migrate loaded, the revalidation request is in the queue but has not yet been sent
+              await wait()
+
               // See that we kept the last known response in the cache.
               expect('.target').toHaveText('cached text')
 
@@ -12077,6 +12080,8 @@ describe('up.fragment', function() {
               const job2 = up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
 
               await job2
+              // For some reason, with migrate loaded, the revalidation request is in the queue but has not yet been sent
+              await wait()
 
               // See that we kept the last known response in the cache.
               expect('.target').toHaveText('cached text')
