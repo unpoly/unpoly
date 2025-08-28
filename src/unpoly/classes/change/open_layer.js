@@ -184,7 +184,6 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
 
   async _finish() {
     await this.layer.startOpenAnimation()
-    await this._helloPromise
 
     // Don't change focus if the layer has been closed while the animation was running.
     this.abortWhenLayerClosed()
@@ -192,6 +191,8 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // A11Y: Place the focus on the overlay element and setup a focus circle.
     // However, don't change focus if the layer has been closed while the animation was running.
     this._handleFocus()
+
+    await this._helloPromise
 
     // The fulfillment value of the finished promise is the same as for the rendered promise.
     return this._newOverlayResult
