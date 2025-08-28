@@ -50,11 +50,9 @@
 @param [up-on-finished]
   A JavaScript snippet that is executed when no further DOM changes will be caused by this render pass.
 
-  In particular:
+  @include finished-state
 
-  - [Animations](/up.motion) have concluded and [transitioned](/up-transition) elements were removed from the DOM tree.
-  - A [cached response](#up-cache) was [revalidated with the server](/caching#revalidation).
-    If the server has responded with new content, this content has also been rendered.
+  The snippet runs in the following scope:
 
   | Expression | Value                                                                  |
   |------------|------------------------------------------------------------------------|
@@ -65,7 +63,7 @@
   second render pass. If no revalidation was performed, or if revalidation yielded an [empty response](/caching#when-nothing-changed),
   it is the result from the initial render pass.
 
-  Also see [Awaiting postprocessing](/render-lifecycle#awaiting-postprocessing).
+  Also see [Awaiting postprocessing](/render-lifecycle#postprocessing).
 
 @param [up-on-error]
   A JavaScript snippet that is run when any error is thrown during the rendering process.

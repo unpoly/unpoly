@@ -36,7 +36,6 @@ function createFixtureFromSelector(...args) {
 }
 
 function helloFixture(...args) {
-  console.debug("helloFixture(%o)", args)
   let element = createFixtureFromSelector(...args)
   up.hello(element)
   return element

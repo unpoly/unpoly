@@ -1768,7 +1768,7 @@ You can now freely control when an hungry element is updated:
 Some improvements have been to [hungry elements with animated transitions](/up-hungry#up-transition):
 
 - Hungry elements can now control their transition using `[up-duration]` and `[up-easing]` attributes.
-- Hungry elements with transitions now delay the [`up.render().finished`](/render-lifecycle#awaiting-postprocessing) promise.
+- Hungry elements with transitions now delay the [`up.render().finished`](/render-lifecycle#postprocessing) promise.
 
 
 

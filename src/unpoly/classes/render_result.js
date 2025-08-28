@@ -92,7 +92,7 @@ up.RenderResult = class RenderResult extends up.Record {
   The promise will reject if the server sends an error status,
   if there is a network issue, or if targets could not be matched.
 
-  Also see [Awaiting postprocessing](/render-lifecycle#awaiting-postprocessing).
+  Also see [Awaiting postprocessing](/render-lifecycle#postprocessing).
 
   ### Example
 

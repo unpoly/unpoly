@@ -36,18 +36,14 @@
 @param {Function(up.RenderResult)} [options.onFinished]
   A function to call when no further DOM changes will be caused by this render pass.
 
-  In particular:
-
-  - [Animations](/up.motion) have concluded and [transitioned](/up-transition) elements were removed from the DOM tree.
-  - A [cached response](#options.cache) was [revalidated with the server](/caching#revalidation).
-    If the server has responded with new content, this content has also been rendered.
+  @include finished-state
 
   The callback argument is the last `up.RenderResult` that updated a fragment.
   If [revalidation](/caching#revalidation) re-rendered the fragment, it is the result from the
   second render pass. If no revalidation was performed, or if revalidation yielded an [empty response](/caching#when-nothing-changed),
   it is the result from the initial render pass.
 
-  Also see [Awaiting postprocessing](/render-lifecycle#awaiting-postprocessing).
+  Also see [Awaiting postprocessing](/render-lifecycle#postprocessing).
 
 @param {Function(Error)} [options.onError]
   A callback that will be run when any error is thrown during the rendering process.

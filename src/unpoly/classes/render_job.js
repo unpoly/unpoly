@@ -121,8 +121,7 @@ up.RenderJob = class RenderJob {
   }
 
   /*-
-  A promise that fulfills when fragments were updated, [animations](/up.motion) have concluded and
-  cached content was [revalidated](/caching#revalidation).
+  A promise that fulfills when fragments were updated and all [postprocessing steps](/render-lifecycle#postprocessing) have concluded.
 
   The promise will reject when the server responds with a [failed HTTP status](/failed-responses),
   when any request is [aborted](/aborting-requests) or when there is [network issue](/network-issues).

@@ -222,8 +222,49 @@ up.script = (function() {
   See [Rendering lifecycle](/render-lifecycle) for a full overview of
   Unpoly's rendering steps.
 
+  ## Asynchronous compilers {#async}
 
-  ## Registering compilers after booting
+  Compiler functions can be `async`. This is useful when a compiler needs to fetch network
+  resources, or when calling a library with an asynchronous API:
+
+  ```js
+  up.compiler('textarea.wysiwyg', async function(textarea) { // mark: async
+    let editor = await import('wysiwyg-editor') // mark: await
+    await editor.init(textarea) // mark: await
+    return () => editor.destroy(textarea)
+  })
+  ```
+
+  You can also use this to split up expensive tasks, giving the browser a chance
+  to render and process user input:
+
+
+  ```js
+  up.compiler('.element', async function(element) {
+    doRenderBlockingWork(element)
+    await scheduler.yield() // mark-line
+    doUserVisibleWork(element)
+  })
+  ```
+
+  ### Destructors
+
+  Async compiler functions can fulfill with a [destructor function](#destructor).
+  Unpoly guarantees that the destructor is called, even if the element gets destroyed
+  before the compiler function terminates.
+
+  ### Timing
+
+  Before the browser renders new fragments, Unpoly will call synchronous compiler functions, and the first [task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/) of an async compiler
+  functions. Any render-blocking mutations (that should be hidden from the user) must happen in that first task.
+
+  ![Timing of compiler tasks and browser render frames](images/compiler-tasks.svg){:width='670'}
+
+  Async compilers will not delay the promise returned by rendering functions `up.render()` or `up.layer.open()`.
+  Async compilers *will* delay the promise returned by [`up.render().finished`](/render-lifecycle#postprocessing)
+  and `up.hello()`.
+
+  ## Registering compilers after booting {#late}
 
   When you [deliver your JavaScript in multiple files](https://makandracards.com/makandra/498036-webpacker-loading-code-on-demand),
   you may register compilers after Unpoly was booted.
@@ -253,7 +294,7 @@ up.script = (function() {
     elements matching `selector`, the `compiler` function is only called once
     with all these elements.
 
-  @param {Function(element, data, meta): (Function(element)|Array<Function(element)>)} compiler
+  @param {Function(element, data, meta): (Function|Array<Function>|Promise<Function>|undefined)} compiler
     The function to call when an element matching `selector` is inserted.
 
     Up to three arguments can be accepted:
@@ -264,6 +305,8 @@ up.script = (function() {
 
     The function may return a [destructor function](/enhancing-elements#destructor) that is called
     before it is removed from the DOM. The destructor function is called with the compiled element.
+
+    The compiler function can be [`async`](/up.compiler#async).
 
   @stable
   */
@@ -455,6 +498,15 @@ up.script = (function() {
   up.destructor(element, () => console.log('Element was destroyed!'))
   ```
 
+  ## Registration time
+
+  The element should be attached when the destructor is registered. This is commonly done during
+  [compilation](/enhancing-elements).
+
+  If called on a detached element Unpoly assumes
+  an [async compiler](/up.compiler#async) has registered the destructor after the element has been destroyed.
+  The destructor is then run immediately.
+
   ## Reusing destructor functions
 
   You may reuse the same destructor function for multiple element.
@@ -562,6 +614,28 @@ up.script = (function() {
 
   See [errors in user code](/render-lifecycle#errors-in-user-code) for details.
 
+  ## Awaiting asynchronous compilation {#async}
+
+  Unpoly supports [`async` compiler functions](/up.compiler#async):
+
+  ```js
+  up.compiler('textarea.wysiwyg', async function(textarea) { // mark: async
+    let editor = await import('wysiwyg-editor') // mark: await
+    await editor.init(textarea) // mark: await
+    return () => editor.destroy(textarea)
+  })
+  ```
+
+  The `up.hello()` function returns a promise that fulfills when all synchronous and asynchronous
+  compilers have terminated:
+
+  ```
+  let textarea = up.element.createFromHTML('<textarea class="wysiwyg"></textarea>')
+  await up.hello(textarea) // mark: await
+  // chip: WYISWYG editor is now initialized
+  ```
+
+
   @function up.hello
   @param {Element|jQuery|string} element
     The root element of the new page fragment.
@@ -582,8 +656,8 @@ up.script = (function() {
 
     It will be passed as a third [compiler](/enhancing-elements) argument.
     @experimental
-  @return {Element}
-    The compiled element
+  @return {Promise<Element>}
+    A promise that fulfills when the element has finished compilation.
   @stable
   */
   async function hello(element, options = {}) {

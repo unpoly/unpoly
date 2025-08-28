@@ -29,15 +29,17 @@ console.log("Updated fragment is", document.querySelector('.target'))
 The promise rejects when there is a [network issue](/network-issues),
 or if the server [responds with an HTTP error code](/failed-responses). See [Handling errors](#handling-errors).
 
-### Awaiting postprocessing
+### Awaiting postprocessing {#postprocessing}
 
-After the `up.render()` promise fulfills the fragments may still change further through [animation](/up.motion) or [revalidation](/caching#revalidation).
-To run code when animations have concluded and cached content was revalidated, use the [`up.render().finished`](/up.RenderJob.prototype.finished) promise:
+After the `up.render()` promise fulfills, fragments may still change due to asynchronous postprocessing.
+To run code after postprocessing has concluded, await the [`up.render().finished`](/up.RenderJob.prototype.finished) promise:
 
 ```js
 let result = await up.render({ target: '.target', url: '/path' }).finished
 console.log("Final fragments: ", result.fragments)
 ```
+
+@include finished-state
 
 The `up.render().finished` promise resolves to the last `up.RenderResult` that updated a fragment.
 If revalidation re-rendered the fragment, it is the result from the
