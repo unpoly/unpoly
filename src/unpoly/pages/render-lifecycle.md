@@ -252,7 +252,7 @@ up.on('up:link:follow', 'a[require-session]', async function(event) {
     // Wait until the user has signed in in a modal
     await up.layer.ask('/session/new', { acceptLocation: '/welcome' })
 
-    // Start a new render pass with the original render pass
+    // Start a new render pass with the original render options
     up.render(event.renderOptions)
   }
 })
