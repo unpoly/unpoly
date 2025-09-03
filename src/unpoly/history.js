@@ -646,7 +646,6 @@ up.history = (function() {
     }
   }
 
-  // TODO: Support [up-scroll-behavior]
   up.on('up:click', 'a[href*="#"]', onJumpLinkClicked)
 
   /*-
