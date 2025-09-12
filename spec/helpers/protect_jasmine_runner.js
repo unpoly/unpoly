@@ -111,10 +111,15 @@ window.safeHistory = new (class {
   }
 
   async throttle() {
+    let notification
+
     while (this.truncateActionTimes().length > (THROTTLE_MAX_WINDOW_ACTIONS - THROTTLE_MAX_SPEC_ACTIONS)) {
+      notification ||= up.element.affix(document.body, 'div', { text: 'Throttling History API usage...', style: { 'position': 'fixed', 'bottom': '5px', 'right': '5px', 'background-color': '#ffcc66', 'padding': '5px' }})
       this.forceLog("safeHistory: Too many uses of the history API. Waiting for throttle window to clear (%o actions left).", this.actionTimes.length)
       await wait(1000)
     }
+
+    notification?.remove()
   }
 
   truncateActionTimes() {
