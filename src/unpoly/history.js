@@ -108,19 +108,13 @@ up.history = (function() {
   let nextTrackOptions
   let adoptedBases = new up.FIFOCache({ capacity: 100, normalizeKey: getBase })
 
-  function isAdopted(location) {
-    // We handle bases (path + query string) that were pushed or replaced via up.history methods.
-    // All other bases we assume are pushed by external JS that wants to handle restoration itself.
-    return !!adoptedBases.get(location)
-  }
-
   function reset() {
     previousLocation = undefined
     nextPreviousLocation = undefined
     nextTrackOptions = undefined
     adoptedBases.clear()
     trackCurrentLocation({ reason: null, alreadyHandled: true })
-    adopt() // make sure we will process the current history entry
+    adoptBase() // make sure we will process the current history entry
   }
 
   /*-
@@ -142,6 +136,15 @@ up.history = (function() {
     return u.normalizeURL(location.href)
   }
 
+  function withTrackOptions(trackOptions, fn) {
+    try {
+      nextTrackOptions = trackOptions
+      fn()
+    } finally {
+      nextTrackOptions = undefined
+    }
+  }
+
   /*-
   Remembers the current URL so we can use previousLocation on pop.
 
@@ -149,10 +152,22 @@ up.history = (function() {
   @internal
   */
   function trackCurrentLocation(trackOptions) {
-    let { reason, alreadyHandled } = nextTrackOptions || trackOptions
+    let { reason, alreadyHandled, pauseTracking } = nextTrackOptions || trackOptions
+    if (pauseTracking) return
 
-    // currentLocation() normalizes
+    // The currentLocation() function normalizes
     let location = currentLocation()
+
+    if (isAdoptedState()) {
+      // The user might have refreshed the page, making us lose adoptedBases.
+      // However, we can still recognize the { up: true } marker from history.state.
+      adoptBase(location)
+    } else if (isAdoptedBase(location)) {
+      // When the user navigates from an adopted base to a #hash, the browser pushes a history
+      // entry with an empty state. We must mark that entry with an { up: true } state
+      // so we can recognize it when the user reloads the page.
+      adoptState()
+    }
 
     if (nextPreviousLocation !== location) {
       previousLocation = nextPreviousLocation
@@ -162,7 +177,7 @@ up.history = (function() {
         reason = (getBase(location) === getBase(previousLocation)) ? 'hash' : 'pop'
       }
 
-      let willHandle = !alreadyHandled && isAdopted(location)
+      let willHandle = !alreadyHandled && isAdoptedBase(location)
 
       let locationChangedEvent = up.event.build('up:location:changed', {
         reason,
@@ -361,23 +376,46 @@ up.history = (function() {
   }
 
   function placeAdoptedHistoryEntry(method, location, trackOptions) {
-    adopt(location)
+    adoptBase(location)
 
     if (config.enabled) {
-      nextTrackOptions = trackOptions
-      // Call this instead of originalPushState in case someone else has patched history.pushState()
-      history[method](null, '', location)
-      nextTrackOptions = undefined
+      withTrackOptions(trackOptions, function() {
+        // Call this instead of originalPushState in case someone else has patched history.pushState()
+        // Our own tests do this to rate-limit the use of the history API.
+        history[method](null, { up: true }, location)
+      })
     }
   }
 
-  /*-
-  @function up.history.adopt
-  @internal
-  */
-  function adopt(location = currentLocation()) {
+  function isAdoptedBase(location) {
+    // We handle bases (path + query string) that were pushed or replaced via up.history methods.
+    // All other bases we assume are pushed by external JS that wants to handle restoration itself.
+    return !!adoptedBases.get(location)
+  }
+
+  function adoptBase(location = currentLocation()) {
     location = u.normalizeURL(location)
     adoptedBases.set(location, true)
+  }
+
+  function isAdoptedState() {
+    return history.state?.up
+  }
+
+  function adoptState() {
+    let { state } = history
+
+    // If we already have history.state.up, don't waste another replaceState() call.
+    // We're on a throttling quota after all.
+    if (isAdoptedState()) return
+
+    // Add our { up } key to "don't care" states like "", null or {}, but not
+    // to other values.
+    if (u.isBlank(state) || u.isObject(state)) {
+      withTrackOptions({ pauseTracking: true }, function() {
+        history.replaceState({ ...state, up: true }, '')
+      })
+    }
   }
 
   function restoreLocation(location) {
@@ -563,7 +601,10 @@ up.history = (function() {
     // Unpoly will wrongly assume that it can restore the state by reloading with GET.
     if (up.protocol.initialRequestMethod() === 'GET') {
       // Replace the vanilla state of the initial page load with an Unpoly-enabled state
-      adopt()
+      adoptState()
+
+      // Adopt all #hash navigations to the same URL.
+      adoptBase()
     }
   }
 
