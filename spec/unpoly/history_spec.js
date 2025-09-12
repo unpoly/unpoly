@@ -535,6 +535,170 @@ describe('up.history', function() {
         expect(up.network.isBusy()).toBe(false)
       })
 
+      it('loads locations when the navigation changes both path and hash and the user reloads in between (issue #773)', async function() {
+        const waitForBrowser = 100
+
+        const configure = () => {
+          up.network.config.autoCache = false
+          up.history.config.restoreTargets = ['main']
+          up.viewport.config.revealSnap = 0
+        }
+
+        configure()
+
+        async function fakeReload() {
+          // We can't really reload the browser without losing the spec runner.
+          // Instead we reset the framework to throw away internal state that we would also
+          // lose during a reload.
+          up.framework.reset()
+          await wait()
+          configure()
+        }
+
+        let [nav, link1, link2a, link2b, link3, viewport, target] = htmlFixtureList(`
+          <nav>
+            <a href="/path1" up-follow>path1</a>
+            <a href="/path2#a" up-follow>path2#a</a>
+            <a href="/path2#b" up-follow>path2#b</a>
+            <a href="/path3" up-follow>path3</a>
+          </nav>
+          <div id="viewport" up-viewport style="height: 200px; overflow-y: scroll; background-color: yellow;">
+            <main>
+              initial text
+            </main>
+          </div>
+        `)
+
+        let path1Text = `
+          <main>
+            path1 text
+          </main>
+        `
+
+        let path2Text = `
+          <main>
+            <div style="height: 300px">before</div>
+            <div id="a" style="height: 50px; background-color: green">
+              path2#a text
+            </div>
+            <div style="height: 300px">between</div>
+            <div id="b" style="height: 50px; background-color: blue">
+              path2#b text
+            </div>
+            <div style="height: 300px">below</div>
+          </main>
+        `
+
+        let path3Text = `
+          <main>
+            path3 text
+          </main>
+        `
+
+        expect('main').toHaveText('initial text')
+
+        Trigger.clickSequence(link1)
+        await wait()
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path1')
+        jasmine.respondWith(path1Text)
+        await wait()
+        expect(location.href).toMatchURL('/path1')
+        expect('main').toHaveText('path1 text')
+        expect(viewport.scrollTop).toBe(0)
+
+        Trigger.clickSequence(link2a)
+        await wait()
+        expect(jasmine.Ajax.requests.count()).toBe(2)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path2')
+        jasmine.respondWith(path2Text)
+        await wait()
+        expect(location.href).toMatchURL('/path2#a')
+        expect('main #a').toHaveText('path2#a text')
+
+        expect(viewport.scrollTop).toBe(300) // revealing a hash always aligns with top
+
+        Trigger.clickSequence(link2b)
+        await wait()
+        expect(up.network.isBusy()).toBe(false)
+        expect(jasmine.Ajax.requests.count()).toBe(2)
+        expect(viewport.scrollTop).toBe(300 + 50 + 300)
+        expect(location.href).toMatchURL('/path2#b')
+
+        Trigger.clickSequence(link3)
+        await wait()
+        expect(jasmine.Ajax.requests.count()).toBe(3)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path3')
+        jasmine.respondWith(path3Text)
+        await wait()
+        expect(location.href).toMatchURL('/path3')
+        expect('main').toHaveText('path3 text')
+        expect(viewport.scrollTop).toBe(0)
+
+        await fakeReload()
+
+        history.back()
+        await wait(waitForBrowser)
+
+        expect(jasmine.Ajax.requests.count()).toBe(4)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path2')
+        jasmine.respondWith(path2Text)
+        await wait()
+        expect(location.href).toMatchURL('/path2#b')
+        expect('main #b').toHaveText('path2#b text')
+
+        expect(viewport.scrollTop).toBe(300 + 50 + 300)
+
+        history.back()
+        await wait(waitForBrowser)
+        expect(jasmine.Ajax.requests.count()).toBe(4)
+        expect(up.network.isBusy()).toBe(false)
+        expect(location.href).toMatchURL('/path2#a')
+        expect(viewport.scrollTop).toBe(300)
+
+        history.back()
+        await wait(waitForBrowser)
+        expect(jasmine.Ajax.requests.count()).toBe(5)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path1')
+        jasmine.respondWith(path1Text)
+        await wait()
+        expect(location.href).toMatchURL('/path1')
+        expect('main').toHaveText('path1 text')
+        expect(viewport.scrollTop).toBe(0)
+
+        await fakeReload()
+
+        history.forward()
+        await wait(waitForBrowser)
+        expect(jasmine.Ajax.requests.count()).toBe(6)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path2')
+        jasmine.respondWith(path2Text)
+        await wait()
+        expect(location.href).toMatchURL('/path2#a')
+        expect('main #a').toHaveText('path2#a text')
+        expect(viewport.scrollTop).toBe(300)
+
+        history.forward()
+        await wait(waitForBrowser)
+        expect(jasmine.Ajax.requests.count()).toBe(6)
+        expect(up.network.isBusy()).toBe(false)
+        expect(location.href).toMatchURL('/path2#b')
+        expect('main #b').toHaveText('path2#b text')
+        expect(viewport.scrollTop).toBe(300 + 50 + 300)
+
+        history.forward()
+        await wait(waitForBrowser)
+        expect(jasmine.Ajax.requests.count()).toBe(7)
+        expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path3')
+        jasmine.respondWith(path3Text)
+        await wait()
+        expect(location.href).toMatchURL('/path3')
+        expect('main').toHaveText('path3 text')
+        expect(viewport.scrollTop).toBe(0)
+
+        expect(up.network.isBusy()).toBe(false)
+      })
+
       it('loads locations when the navigation changes both query string and hash', async function() {
         const waitForBrowser = 100
 

@@ -106,21 +106,17 @@ up.history = (function() {
   let previousLocation
   let nextPreviousLocation
   let nextTrackOptions
+  let locationTrackingActive = true
   let adoptedBases = new up.FIFOCache({ capacity: 100, normalizeKey: getBase })
-
-  function isAdopted(location) {
-    // We handle bases (path + query string) that were pushed or replaced via up.history methods.
-    // All other bases we assume are pushed by external JS that wants to handle restoration itself.
-    return !!adoptedBases.get(location)
-  }
 
   function reset() {
     previousLocation = undefined
     nextPreviousLocation = undefined
     nextTrackOptions = undefined
+    locationTrackingActive = true
     adoptedBases.clear()
     trackCurrentLocation({ reason: null, alreadyHandled: true })
-    adopt() // make sure we will process the current history entry
+    adoptBase() // make sure we will process the current history entry
   }
 
   /*-
@@ -149,10 +145,21 @@ up.history = (function() {
   @internal
   */
   function trackCurrentLocation(trackOptions) {
+    // TODO: locationTractingActive can be part of nextTrackOptions
+    //       withTrackOptions({ disableTracking: true }, fn)
+    if (!locationTrackingActive) return
     let { reason, alreadyHandled } = nextTrackOptions || trackOptions
 
-    // currentLocation() normalizes
+    // The currentLocation() function normalizes
     let location = currentLocation()
+
+    if (isAdoptedState()) {
+      // The user might have refreshed the page, making us lose adoptedBases.
+      adoptBase(location)
+    } else if (isAdoptedBase(location)) {
+      // The user might
+      adoptState()
+    }
 
     if (nextPreviousLocation !== location) {
       previousLocation = nextPreviousLocation
@@ -162,7 +169,7 @@ up.history = (function() {
         reason = (getBase(location) === getBase(previousLocation)) ? 'hash' : 'pop'
       }
 
-      let willHandle = !alreadyHandled && isAdopted(location)
+      let willHandle = !alreadyHandled && isAdoptedBase(location)
 
       let locationChangedEvent = up.event.build('up:location:changed', {
         reason,
@@ -361,23 +368,43 @@ up.history = (function() {
   }
 
   function placeAdoptedHistoryEntry(method, location, trackOptions) {
-    adopt(location)
+    adoptBase(location)
 
     if (config.enabled) {
       nextTrackOptions = trackOptions
       // Call this instead of originalPushState in case someone else has patched history.pushState()
-      history[method](null, '', location)
+      // Our own tests do this to rate-limit the use of the history API.
+      history[method](null, { up: true }, location)
       nextTrackOptions = undefined
     }
   }
 
-  /*-
-  @function up.history.adopt
-  @internal
-  */
-  function adopt(location = currentLocation()) {
+  function isAdoptedBase(location) {
+    // We handle bases (path + query string) that were pushed or replaced via up.history methods.
+    // All other bases we assume are pushed by external JS that wants to handle restoration itself.
+    return !!adoptedBases.get(location)
+  }
+
+  function adoptBase(location = currentLocation()) {
     location = u.normalizeURL(location)
     adoptedBases.set(location, true)
+  }
+
+  function isAdoptedState() {
+    return history.state?.up
+  }
+
+  function adoptState() {
+    let { state } = history
+
+    // If we already have history.state.up, don't waste another replaceState() call.
+    if (isAdoptedState()) return
+
+    if (u.isBlank(state) || u.isObject(state)) {
+      locationTrackingActive = false
+      history.replaceState({ ...state, up: true }, '')
+      locationTrackingActive = true
+    }
   }
 
   function restoreLocation(location) {
@@ -563,7 +590,10 @@ up.history = (function() {
     // Unpoly will wrongly assume that it can restore the state by reloading with GET.
     if (up.protocol.initialRequestMethod() === 'GET') {
       // Replace the vanilla state of the initial page load with an Unpoly-enabled state
-      adopt()
+      adoptState()
+
+      // Adopt all #hash navigations to the same URL.
+      adoptBase()
     }
   }
 
