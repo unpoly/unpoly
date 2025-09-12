@@ -106,14 +106,12 @@ up.history = (function() {
   let previousLocation
   let nextPreviousLocation
   let nextTrackOptions
-  let locationTrackingActive = true
   let adoptedBases = new up.FIFOCache({ capacity: 100, normalizeKey: getBase })
 
   function reset() {
     previousLocation = undefined
     nextPreviousLocation = undefined
     nextTrackOptions = undefined
-    locationTrackingActive = true
     adoptedBases.clear()
     trackCurrentLocation({ reason: null, alreadyHandled: true })
     adoptBase() // make sure we will process the current history entry
@@ -138,6 +136,15 @@ up.history = (function() {
     return u.normalizeURL(location.href)
   }
 
+  function withTrackOptions(trackOptions, fn) {
+    try {
+      nextTrackOptions = trackOptions
+      fn()
+    } finally {
+      nextTrackOptions = undefined
+    }
+  }
+
   /*-
   Remembers the current URL so we can use previousLocation on pop.
 
@@ -145,10 +152,8 @@ up.history = (function() {
   @internal
   */
   function trackCurrentLocation(trackOptions) {
-    // TODO: locationTractingActive can be part of nextTrackOptions
-    //       withTrackOptions({ disableTracking: true }, fn)
-    if (!locationTrackingActive) return
-    let { reason, alreadyHandled } = nextTrackOptions || trackOptions
+    let { reason, alreadyHandled, pauseTracking } = nextTrackOptions || trackOptions
+    if (pauseTracking) return
 
     // The currentLocation() function normalizes
     let location = currentLocation()
@@ -371,11 +376,11 @@ up.history = (function() {
     adoptBase(location)
 
     if (config.enabled) {
-      nextTrackOptions = trackOptions
-      // Call this instead of originalPushState in case someone else has patched history.pushState()
-      // Our own tests do this to rate-limit the use of the history API.
-      history[method](null, { up: true }, location)
-      nextTrackOptions = undefined
+      withTrackOptions(trackOptions, function() {
+        // Call this instead of originalPushState in case someone else has patched history.pushState()
+        // Our own tests do this to rate-limit the use of the history API.
+        history[method](null, { up: true }, location)
+      })
     }
   }
 
@@ -401,9 +406,9 @@ up.history = (function() {
     if (isAdoptedState()) return
 
     if (u.isBlank(state) || u.isObject(state)) {
-      locationTrackingActive = false
-      history.replaceState({ ...state, up: true }, '')
-      locationTrackingActive = true
+      withTrackOptions({ pauseTracking: true }, function() {
+        history.replaceState({ ...state, up: true }, '')
+      })
     }
   }
 
