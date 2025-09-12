@@ -17,7 +17,7 @@ function fail(...args) {
 //     https://bugs.webkit.org/show_bug.cgi?id=156115#:~:text=http%20for%20security%20restrictions%20An,updates%20per%20second%20is%20not
 const THROTTLE_WINDOW_DURATION = AgentDetector.isSafari() ? 30_000 : 10_000
 const THROTTLE_MAX_WINDOW_ACTIONS = AgentDetector.isSafari() ? 100 : 200
-const THROTTLE_MAX_SPEC_ACTIONS = 20 // the maximum number of history changes we expect in a spec
+const THROTTLE_MAX_SPEC_ACTIONS = 40 // the maximum number of history changes we expect in a spec
 const THROTTLE_CLOCK_INACCURACY = 1100
 
 window.safeHistory = new (class {
