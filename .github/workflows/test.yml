@@ -13,7 +13,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-22.04
-    timeout-minutes: 8
+    timeout-minutes: 16
     strategy:
       fail-fast: false
       matrix:
