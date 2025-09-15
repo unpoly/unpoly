@@ -429,6 +429,51 @@ describe('up.viewport', function() {
           expect(document.scrollingElement.scrollTop).toBe(50)
         })
 
+        describe('obstructions with `position: sticky`', function() {
+
+          it('assumes a top obstruction with `position: sticky` is in fixed positioning mode', async function() {
+            const $topNav = $fixture('[up-fixed=top]').css({
+              position: 'sticky',
+              'background-color': 'red',
+              top: '10px',
+              left: '0',
+              right: '0',
+              height: '100px',
+            }).text('nav').appendTo(this.$container)
+
+            up.reveal(this.$elements[2], { viewport: this.viewport })
+            await wait()
+
+            expect($(document).scrollTop()).toBe(
+              this.clientHeight // scroll past @$elements[0]
+              + 50              // scroll past @$elements[1]
+              - 100             // obstruction height
+              - 10              // obstruction's top property
+            )
+          })
+
+          it('assumes a bottom obstruction with `position: sticky` is in fixed positioning mode', async function() {
+            const $bottomNav = $fixture('[up-fixed=bottom]').css({
+              position: 'sticky',
+              'background-color': 'red',
+              bottom: '10px',
+              left: '0',
+              right: '0',
+              height: '100px',
+            }).text('nav').appendTo(this.$container)
+
+            up.reveal(this.$elements[1])
+            await wait()
+
+            expect($(document).scrollTop()).toBe(
+              50     // height of elements[1]
+              + 100  // obstruction height
+              + 10   // obstruction's bottom property
+            )
+          })
+
+        })
+
         it('does not crash when called with a CSS selector (bugfix)', function() {
           up.reveal('.container', { behavior: 'instant' })
           expect(true).toBe(true)

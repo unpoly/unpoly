@@ -85,14 +85,22 @@ up.RevealMotion = class RevealMotion {
     }
   }
 
-  _selectObstructions(selector) {
+  _computeObstructionRects(selector) {
     let elements = up.fragment.all(selector, { layer: this._obstructionsLayer })
-    return u.filter(elements, e.isVisible)
+    elements = u.filter(elements, e.isVisible)
+    return u.map(elements, (element) => {
+      if (e.style(element, 'position') === 'sticky') {
+        // There is no simple way to detect if a sticky element is in static or fixed positioning.
+        // We pretend it is always fixed for the purpose of measuring obstruction.
+        return up.Rect.fromElementAsFixed(element)
+      } else {
+        return up.Rect.fromElement(element)
+      }
+    })
   }
 
   _substractObstructions(viewportRect) {
-    for (let obstruction of this._selectObstructions(this._topObstructionSelector)) {
-      let obstructionRect = up.Rect.fromElement(obstruction)
+    for (let obstructionRect of this._computeObstructionRects(this._topObstructionSelector)) {
       let diff = obstructionRect.bottom - viewportRect.top
       if (diff > 0) {
         viewportRect.top += diff
@@ -100,8 +108,7 @@ up.RevealMotion = class RevealMotion {
       }
     }
 
-    for (let obstruction of this._selectObstructions(this._bottomObstructionSelector)) {
-      let obstructionRect = up.Rect.fromElement(obstruction)
+    for (let obstructionRect of this._computeObstructionRects(this._bottomObstructionSelector)) {
       let diff = viewportRect.bottom - obstructionRect.top
       if (diff > 0) {
         viewportRect.height -= diff

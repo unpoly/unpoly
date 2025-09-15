@@ -856,8 +856,17 @@ up.viewport = (function() {
   ### Example
 
   ```html
-  <div class="top-nav" up-fixed="top">...</div>
+  <div class="top-nav" up-fixed="top">
+    <!-- chip: Navigation bar fixed to the top edge -->
+  </div>
   ```
+
+  ### Use with sticky positioning
+
+  You can use `[up-fixed]` on elements with [`position: sticky`](https://www.w3schools.com/howto/howto_css_sticky_element.asp).
+
+  Unpoly will measure sticky element like permanently fixed elements.
+  The current scroll position is not taken into account.
 
   @selector [up-fixed=top]
   @stable
@@ -878,8 +887,17 @@ up.viewport = (function() {
   ### Example
 
   ```html
-  <div class="bottom-nav" up-fixed="bottom">...</div>
+  <div class="bottom-nav" up-fixed="bottom">
+    <!-- chip: Navigation bar fixed to the bottom edge -->
+  </div>
   ```
+
+  ### Use with sticky positioning
+
+  You can use `[up-fixed]` on elements with [`position: sticky`](https://www.w3schools.com/howto/howto_css_sticky_element.asp).
+
+  Unpoly will measure sticky element like permanently fixed elements.
+  The current scroll position is not taken into account.
 
   @selector [up-fixed=bottom]
   @stable
