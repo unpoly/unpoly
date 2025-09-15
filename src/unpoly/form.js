@@ -600,7 +600,14 @@ up.form = (function() {
     parser.json('headers')
 
     // Parse params from form fields.
-    const params = up.Params.fromForm(form)
+    const paramParts = [
+      up.Params.fromForm(form),
+      e.jsonAttr(form, 'up-params'),
+    ]
+
+    const headerParts = [
+      e.jsonAttr(form, 'up-headers'),
+    ]
 
     // (1) When processing a `submit` event, we may have received a { submitButton: event.submitter } option.
     // (2) When the user submits the form from a focused input via Enter, the browser will also submit
@@ -610,7 +617,14 @@ up.form = (function() {
     if (submitButton) {
       // Submit buttons with a [name] attribute will add to the params.
       // Note that addField() will only add an entry if the given button has a [name] attribute.
-      params.addField(submitButton)
+      paramParts.push(
+        up.Params.fromFields(submitButton),
+        e.jsonAttr(submitButton, 'up-params')
+      )
+
+      headerParts.push(
+        e.jsonAttr(submitButton, 'up-headers')
+      )
 
       // Submit buttons may have [formmethod] and [formaction] attribute
       // that override [method] and [action] attribute from the <form> element.
@@ -618,8 +632,17 @@ up.form = (function() {
       options.url ||= submitButton.getAttribute('formaction')
     }
 
-    // We had any { params } option to the params that we got from the form.
-    options.params = up.Params.merge(params, options.params)
+    // We merge any { params } option into the params that we got from the form elements.
+    options.params = up.Params.merge(
+      ...paramParts,
+      options.params,
+    )
+
+    // We merge any { headers } option to the headers that we got from the form elements.
+    options.headers = u.merge(
+      ...headerParts,
+      options.headers,
+    )
 
     // Parse the form element's { url, method } *after* parsing the submit button.
     // The submit button's [formmethod] and [formaction] attributes have precedence.
@@ -645,7 +668,7 @@ up.form = (function() {
     let followOptions = up.link.followOptions(submitButton, {}, { defaults: false })
     // The parsing of [formmethod] and [formaction] (into { method, url })
     // already happens in destinationOptions()
-    return u.omit(followOptions, ['method', 'url', 'guardEvent', 'origin'])
+    return u.omit(followOptions, ['method', 'url', 'guardEvent', 'origin', 'params', 'headers'])
   }
 
   /*-

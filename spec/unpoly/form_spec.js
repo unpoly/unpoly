@@ -3248,7 +3248,7 @@ describe('up.form', function() {
 
       describe('submit button overrides', function() {
 
-        describe('request destination', function() {
+        describe('method and URL', function() {
 
           it('uses action and method from the form if no submit button exists', function() {
             let [form] = htmlFixtureList(`
@@ -3324,6 +3324,206 @@ describe('up.form', function() {
               method: 'FORM-METHOD',
               url: '/form-action',
             }))
+          })
+
+        })
+
+        describe('params', function() {
+
+          it('uses field params if neither form nor submit button has [up-params]', function() {
+            let [form] = htmlFixtureList(`
+              <form action="/action">
+                <input type="text" name="field-name" value="field-value">
+                <button type="submit"></button>
+              </form>
+            `)
+
+            let options = up.form.submitOptions(form)
+
+            expect(options.params).toEqual(new up.Params([
+              { name: 'field-name', value: 'field-value' }
+            ]))
+          })
+
+          it('allows the form to define additional [up-params]', function() {
+            let [form] = htmlFixtureList(`
+              <form action="/action" up-params="{ 'form-name': 'form-value' }">
+                <input type="text" name="field-name" value="field-value">
+                <button type="submit"></button>
+              </form>
+            `)
+
+            let options = up.form.submitOptions(form)
+
+            expect(options.params).toEqual(new up.Params([
+              { name: 'field-name', value: 'field-value' },
+              { name: 'form-name', value: 'form-value' },
+            ]))
+          })
+
+          it('allows the form and the default submit button to define additional [up-params]', function() {
+            let [form] = htmlFixtureList(`
+              <form action="/action" up-params="{ 'form-name': 'form-value' }">
+                <input type="text" name="field-name" value="field-value">
+                <button type="submit" name="button-name" value="button-value-1"></button>
+                <button type="submit" name="button-name" value="button-value-2"></button>
+              </form>
+            `)
+
+            let options = up.form.submitOptions(form)
+
+            expect(options.params).toEqual(new up.Params([
+              { name: 'field-name', value: 'field-value' },
+              { name: 'form-name', value: 'form-value' },
+              { name: 'button-name', value: 'button-value-1' },
+            ]))
+          })
+
+          it('allows the form and the given submit button to define additional [up-params]', function() {
+            let [form, submitButton1, submitButton2] = htmlFixtureList(`
+              <form action="/action" up-params="{ 'form-name': 'form-value' }">
+                <input type="text" name="field-name" value="field-value">
+                <button type="submit" name="button-name" value="button-value-1"></button>
+                <button type="submit" name="button-name" value="button-value-2"></button>
+              </form>
+            `)
+
+            let options = up.form.submitOptions(form, { submitButton: submitButton2 })
+
+            expect(options.params).toEqual(new up.Params([
+              { name: 'field-name', value: 'field-value' },
+              { name: 'form-name', value: 'form-value' },
+              { name: 'button-name', value: 'button-value-1' },
+            ]))
+          })
+
+          it('merges a { params } option into params from fields, form and submit button', function() {
+            let [form, submitButton1, submitButton2] = htmlFixtureList(`
+              <form action="/action" up-params="{ 'form-name': 'form-value' }">
+                <input type="text" name="field-name" value="field-value">
+                <button type="submit" name="button-name" value="button-value-1"></button>
+                <button type="submit" name="button-name" value="button-value-2"></button>
+              </form>
+            `)
+
+            let options = up.form.submitOptions(form, { submitButton: submitButton2, params: { 'options-name': 'options-value' } })
+
+            expect(options.params).toEqual(new up.Params([
+              { name: 'field-name', value: 'field-value' },
+              { name: 'form-name', value: 'form-value' },
+              { name: 'button-name', value: 'button-value-1' },
+              { name: 'options-name', value: 'options-value' },
+            ]))
+          })
+
+          it('ignores [up-params] from the submit button if { submitButton: false } is passed', function() {
+            let [form] = htmlFixtureList(`
+              <form action="/action" up-params="{ 'form-name': 'form-value' }">
+                <input type="text" name="field-name" value="field-value">
+                <button type="submit" name="button-name" value="button-value-1"></button>
+                <button type="submit" name="button-name" value="button-value-2"></button>
+              </form>
+            `)
+
+            let options = up.form.submitOptions(form, { submitButton: false })
+
+            expect(options.params).toEqual(new up.Params([
+              { name: 'field-name', value: 'field-value' },
+              { name: 'form-name', value: 'form-value' },
+            ]))
+
+          })
+
+        })
+
+        describe('headers', function() {
+
+          it('parses no extra headers if neither form nor submit button has [up-headers]', function() {
+            let [form] = htmlFixtureList(`
+              <form action="/action">
+                <button type="submit"></button>
+              </form>
+            `)
+
+            let options = up.form.submitOptions(form)
+
+            expect(options.headers).toBeBlank()
+          })
+
+          it('allows the form to set additional [up-headers]', function() {
+            let [form] = htmlFixtureList(`
+              <form action="/action" up-headers="{ 'form-name': 'form-value' }">
+                <button type="submit"></button>
+              </form>
+            `)
+
+            let options = up.form.submitOptions(form)
+
+            expect(options.headers).toEqual({ 'form-name': 'form-value' })
+          })
+
+          it('allows the form and default submit button to set additional [up-headers]', function() {
+            let [form] = htmlFixtureList(`
+              <form action="/action" up-headers="{ 'form-name': 'form-value' }">
+                <button type="submit" up-headers="{ 'button-name': 'button-value-1' }"</button>
+                <button type="submit" up-headers="{ 'button-name': 'button-value-2' }"></button>
+              </form>
+            `)
+
+            let options = up.form.submitOptions(form)
+
+            expect(options.headers).toEqual({
+              'form-name': 'form-value',
+              'button-name': 'button-value-1',
+            })
+          })
+
+          it('allows the form and given submit button to set additional [up-headers]', function() {
+            let [form, submitButton1, submitButton2] = htmlFixtureList(`
+              <form action="/action" up-headers="{ 'form-name': 'form-value' }">
+                <button type="submit" up-headers="{ 'button-name': 'button-value-1' }"</button>
+                <button type="submit" up-headers="{ 'button-name': 'button-value-2' }"></button>
+              </form>
+            `)
+
+            let options = up.form.submitOptions(form, { submitButton: submitButton2 })
+
+            expect(options.headers).toEqual({
+              'form-name': 'form-value',
+              'button-name': 'button-value-2',
+            })
+          })
+
+          it('ignores [up-headers] from the submit button if { submitButton: false } is passed', function() {
+            let [form, submitButton1, submitButton2] = htmlFixtureList(`
+              <form action="/action" up-headers="{ 'form-name': 'form-value' }">
+                <button type="submit" up-headers="{ 'button-name': 'button-value-1' }"</button>
+                <button type="submit" up-headers="{ 'button-name': 'button-value-2' }"></button>
+              </form>
+            `)
+
+            let options = up.form.submitOptions(form, { submitButton: false })
+
+            expect(options.headers).toEqual({
+              'form-name': 'form-value',
+            })
+          })
+
+          it('merges a { headers } option into heades parsed from the form and submit button', function() {
+            let [form, submitButton1, submitButton2] = htmlFixtureList(`
+              <form action="/action" up-headers="{ 'form-name': 'form-value' }">
+                <button type="submit" up-headers="{ 'button-name': 'button-value-1' }"</button>
+                <button type="submit" up-headers="{ 'button-name': 'button-value-2' }"></button>
+              </form>
+            `)
+
+            let options = up.form.submitOptions(form, { submitButton: submitButton2, headers: { 'options-name': 'options-value' } })
+
+            expect(options.headers).toEqual({
+              'form-name': 'form-value',
+              'button-name': 'button-value-2',
+              'options-name': 'options-value',
+            })
           })
 
         })
