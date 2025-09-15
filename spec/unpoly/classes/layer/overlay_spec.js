@@ -409,56 +409,96 @@ describe('up.Layer.Overlay', function() {
       expect(document).not.toHaveSelector('up-modal')
     })
 
-    describe('when a destructor crashes', function() {
+    fdescribe('destructors', function() {
 
-      it('still closes the overlay', async function() {
-        const destroyError = new Error('error from destructor')
-        up.compiler('.overlay-element', () => (function() { throw destroyError }))
+      it('runs destructors for the old overlay content', async function() {
+        const destructor = jasmine.createSpy('destructor')
+        const compiler = jasmine.createSpy('compiler').and.returnValue(destructor)
+        up.compiler('.overlay-element', compiler)
 
-        up.layer.open({ fragment: '<div class="overlay-element"></div>', mode: 'modal' })
+        await up.layer.open({ fragment: '<div class="overlay-element"></div>', mode: 'modal' })
 
-        expect(up.layer.isOverlay()).toBe(true)
+        const overlayElement = up.fragment.get('.overlay-element', { layer: 'overlay' })
+        expect(overlayElement).toBeAttached()
 
-        await jasmine.expectGlobalError(destroyError, () => up.layer.accept())
+        expect(compiler).toHaveBeenCalledWith(overlayElement, jasmine.anything(), jasmine.anything())
 
-        expect(up.layer.isOverlay()).toBe(false)
-        // Check that an half-completed change does not leave elements in the DOM.
-        expect(document).not.toHaveSelector('up-modal')
+        await up.layer.accept()
+        expect(overlayElement).toBeDetached()
+
+        expect(destructor).toHaveBeenCalledWith(overlayElement)
       })
 
-      it('still emits an up:layer:accepted event', async function() {
-        const acceptedListener = jasmine.createSpy('listener to up:layer:accepted')
-        up.on('up:layer:accepted', acceptedListener)
+      it('runs destructors for the overlay container, so users can e.g. set a compiler on an <up-modal>', async function() {
+        const destructor = jasmine.createSpy('destructor')
+        const compiler = jasmine.createSpy('compiler').and.returnValue(destructor)
+        up.compiler('up-modal', compiler)
 
-        const destroyError = new Error('error from destructor')
-        up.compiler('.overlay-element', () => (function() { throw destroyError }))
+        await up.layer.open({ fragment: '<div class="overlay-element"></div>', mode: 'modal' })
 
-        up.layer.open({ fragment: '<div class="overlay-element"></div>', mode: 'modal' })
+        const modalContainer = up.fragment.get('up-modal', { layer: 'overlay' })
+        expect(modalContainer).toBeAttached()
 
-        await jasmine.expectGlobalError(destroyError, () => up.layer.accept())
+        expect(compiler).toHaveBeenCalledWith(modalContainer, jasmine.anything(), jasmine.anything())
 
-        expect(acceptedListener).toHaveBeenCalled()
+        await up.layer.accept()
+        expect(modalContainer).toBeDetached()
+
+        expect(destructor).toHaveBeenCalledWith(modalContainer)
       })
 
-      if (up.specUtil.rootHasReducedWidthFromScrollbar()) {
-        it('still restores document scroll bars', async function() {
-          const overflowElement = up.specUtil.documentOverflowElement()
-          const getOverflowY = () => getComputedStyle(overflowElement).overflowY
+      describe('when a destructor crashes', function() {
+
+        it('still closes the overlay', async function() {
+          const destroyError = new Error('error from destructor')
+          up.compiler('.overlay-element', () => (function() { throw destroyError }))
+
+          up.layer.open({ fragment: '<div class="overlay-element"></div>', mode: 'modal' })
+
+          expect(up.layer.isOverlay()).toBe(true)
+
+          await jasmine.expectGlobalError(destroyError, () => up.layer.accept())
+
+          expect(up.layer.isOverlay()).toBe(false)
+          // Check that an half-completed change does not leave elements in the DOM.
+          expect(document).not.toHaveSelector('up-modal')
+        })
+
+        it('still emits an up:layer:accepted event', async function() {
+          const acceptedListener = jasmine.createSpy('listener to up:layer:accepted')
+          up.on('up:layer:accepted', acceptedListener)
 
           const destroyError = new Error('error from destructor')
           up.compiler('.overlay-element', () => (function() { throw destroyError }))
 
-          await up.layer.open({ fragment: '<div class="overlay-element"></div>', mode: 'modal' })
-
-          await wait()
-
-          expect(['clip', 'hidden'].includes(getOverflowY())).toBe(true)
+          up.layer.open({ fragment: '<div class="overlay-element"></div>', mode: 'modal' })
 
           await jasmine.expectGlobalError(destroyError, () => up.layer.accept())
 
-          expect(['clip', 'hidden'].includes(getOverflowY())).toBe(false)
+          expect(acceptedListener).toHaveBeenCalled()
         })
-      }
+
+        if (up.specUtil.rootHasReducedWidthFromScrollbar()) {
+          it('still restores document scroll bars', async function() {
+            const overflowElement = up.specUtil.documentOverflowElement()
+            const getOverflowY = () => getComputedStyle(overflowElement).overflowY
+
+            const destroyError = new Error('error from destructor')
+            up.compiler('.overlay-element', () => (function() { throw destroyError }))
+
+            await up.layer.open({ fragment: '<div class="overlay-element"></div>', mode: 'modal' })
+
+            await wait()
+
+            expect(['clip', 'hidden'].includes(getOverflowY())).toBe(true)
+
+            await jasmine.expectGlobalError(destroyError, () => up.layer.accept())
+
+            expect(['clip', 'hidden'].includes(getOverflowY())).toBe(false)
+          })
+        }
+      })
+
     })
 
     describe('with { response } option', function() {
