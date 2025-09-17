@@ -1296,6 +1296,12 @@ up.fragment = (function() {
 
       If a root element was passed as first argument, this option is ignored and the
       root element's layer is searched.
+
+    @param {boolean} [options.destroying=false]
+      Whether to include destroyed elements still playing out their exit animation.
+
+      @experimental
+
   @section Region awareness
     @param {string} [options.match='region']
       Controls which fragment to return when the [`{ target }`](#options.target) selector yields multiple results.
@@ -1339,9 +1345,7 @@ up.fragment = (function() {
     // (2) We must not pass a { document } option to up.FragmentFinder.
     return new up.FragmentFinder({
       selector,
-      origin: options.origin,
-      layer: options.layer,
-      match: options.match,
+      ...u.pick(options, ['layer', 'match', 'origin', 'destroying']),
     }).find()
   }
 

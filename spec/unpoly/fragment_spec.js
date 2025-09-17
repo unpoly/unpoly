@@ -263,6 +263,46 @@ describe('up.fragment', function() {
         })
       })
 
+      describe('exclusion of destroying fragments', function() {
+
+        it('does not find destroyed fragments that are still playing their exit animation', async function() {
+          const [fragment] = htmlFixtureList(`
+            <div id="fragment">text</div>
+          `)
+          up.destroy(fragment, { animation: 'fade-out', duration: 200 })
+          await wait()
+
+          expect(document.querySelector('#fragment')).toBe(fragment)
+          expect(up.fragment.get('#fragment')).toBeMissing()
+        })
+
+        it('does not find descendants of destroying fragments', async function() {
+          const [container, fragment] = htmlFixtureList(`
+            <div id="container">
+              <div id="fragment">text</div>
+            </div>
+          `)
+          up.destroy(container, { animation: 'fade-out', duration: 200 })
+          await wait()
+
+          expect(document.querySelector('#fragment')).toBe(fragment)
+          expect(up.fragment.get('#fragment')).toBeMissing()
+        })
+
+        it('does find destroying fragments with { destroying: true }', async function() {
+          const [fragment] = htmlFixtureList(`
+            <div id="fragment">text</div>
+          `)
+          up.destroy(fragment, { animation: 'fade-out', duration: 200 })
+          await wait()
+
+          expect(document.querySelector('#fragment')).toBe(fragment)
+
+          expect(up.fragment.get('#fragment', { destroying: true })).toBe(fragment)
+        })
+
+      })
+
       describe('expansion of :main', function() {
 
         it('returns an element matching the configured main target selectors', function() {
