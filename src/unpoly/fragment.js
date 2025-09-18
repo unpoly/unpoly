@@ -1151,11 +1151,36 @@ up.fragment = (function() {
   }
 
   /*-
-  Returns whether the given fragment is both connected and not currently in a destroy animation.
+  Returns whether the given fragment is both [attached to the DOM](https://developer.mozilla.org/en-US/docs/Web/API/Node/isConnected)
+  and not currently in a destroy animation.
+
+  ## Understanding aliveness
+
+  A fragment that is alive can be [targeted](/targeting), and can be discovered by `up.fragment` functions.
+
+  An fragment becomes "unalive" immediately when it is destroyed, or when an ancestor is destroyed.
+  If the destruction is [animated](/up.motion), the fragment is "unalive" while the animation is still playing.
+
+  | Element state            | `up.fragment.isAlive(element)` |
+  |---------------------------|----------------------|
+  | Entered DOM               | `true`               |
+  | Enter animation playing   | `true`               |
+  | Still element in the DOM  | `true`               |
+  | Exit animation playing    | `false`              |
+  | Removed from DOM          | `false`              |
+
+  ## See also
+
+  - The `.up-destroying` class is automatically assigned to elements in their exit animation.
+  - All `up.fragment` functions (like `up.fragment.get()`) ignore elements in their exit animation.
+  - The `up.Layer#isAlive()` method checks if an overlay is is attached to the DOM and also not in a closing animation.
 
   @function up.fragment.isAlive
   @param {Element} fragment
-  @internal
+    The fragment to check.
+  @return {boolean}
+    Whether the fragment (and its ancestors) are considered alive.
+  @experimental
   */
   function isAlive(fragment) {
     return fragment.isConnected && isNotDestroying(fragment)

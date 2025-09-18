@@ -295,7 +295,7 @@ up.Layer = class Layer extends up.Record {
 
   ## Understanding aliveness
 
-  A layer that is alive can be [targeted](/targeting) with fragment changes, or [queried](/up.fragment.get) for contents.
+  A layer that is alive can be [targeted](/targeting) with fragment changes, or [queried](/up.fragment.get) for containing elements.
 
   The [root layer](/layer-terminology) is always alive.
   An overlay is alive as soon as it enters the DOM, even when it is still playing its opening animation.
@@ -312,9 +312,15 @@ up.Layer = class Layer extends up.Record {
   | Closing animation playing | `false`              |
   | Removed from DOM          | `false`              |
 
+  ## See also
+
+  - The `.up-destroying` class is automatically assigned to elements in their exit animation.
+  - All `up.fragment` functions (like `up.fragment.get()`) ignore elements in their exit animation.
+  - The `up.fragment.isAlive()` function checks if an element is attached to the DOM and also not in an exit animation.
+
   @function up.Layer#isAlive
   @return {boolean}
-    Whether this layer is still open.
+    Whether this layer is considered alive.
   @stable
   */
   isAlive() {

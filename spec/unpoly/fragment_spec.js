@@ -13452,6 +13452,88 @@ describe('up.fragment', function() {
       })
     })
 
+    describe('up.fragment.isAlive()', function() {
+
+      it('returns true for the body element', function() {
+        expect(up.fragment.isAlive(document.body)).toBe(true)
+      })
+
+      it('returns true for a fragment attached to the DOM', function() {
+        let element = fixture('#fragment')
+        expect(up.fragment.isAlive(element)).toBe(true)
+      })
+
+      it('returns true for a fragmnent in an enter transition, but false for a fragment in an exit transition', async function() {
+        htmlFixture(`<div id="fragment" class="old">old</div>`)
+        up.render({ fragment: '<div id="fragment" class="new">new</div>', transition: 'cross-fade', duration: 1000 })
+
+        let oldElement = document.querySelector('#fragment.old')
+        let newElement = document.querySelector('#fragment.new')
+
+        expect(oldElement).toBeAttached()
+        expect(newElement).toBeAttached()
+
+        expect(up.fragment.isAlive(oldElement)).toBe(false)
+        expect(up.fragment.isAlive(newElement)).toBe(true)
+      })
+
+      it('returns false for a detached fragment', function() {
+        let element = document.createElement('div')
+        expect(up.fragment.isAlive(element)).toBe(false)
+      })
+
+      it('returns false for a fragment with a detached ancestor', function() {
+        let [container, child] = htmlFixtureList(`
+          <div id="container">
+            <div id="child"></div>
+          </div>
+        `)
+
+        expect(up.fragment.isAlive(child)).toBe(true)
+        container.remove()
+        expect(up.fragment.isAlive(child)).toBe(false)
+      })
+
+      it('returns false for a fully destroyed fragmnent', function() {
+        let element = fixture('#fragment')
+        expect(up.fragment.isAlive(element)).toBe(true)
+
+        up.destroy(element)
+
+        expect(up.fragment.isAlive(element)).toBe(false)
+      })
+
+      it('returns false for a destroying fragmnent still playing its exit animation', async function() {
+        let element = fixture('#fragment')
+        expect(up.fragment.isAlive(element)).toBe(true)
+
+        up.destroy(element, { animation: 'fade-out', duration: 1000 })
+
+        await wait(50)
+
+        expect(element).toBeAttached()
+        expect(up.fragment.isAlive(element)).toBe(false)
+      })
+
+      it('returns false for a fragmnent with a destroying ancestor still playing its exit animation', async function() {
+        let [container, child] = htmlFixtureList(`
+          <div id="container">
+            <div id="child"></div>
+          </div>
+        `)
+
+        expect(up.fragment.isAlive(child)).toBe(true)
+
+        up.destroy(container, { animation: 'fade-out', duration: 1000 })
+
+        await wait(50)
+
+        expect(child).toBeAttached()
+        expect(up.fragment.isAlive(child)).toBe(false)
+      })
+
+    })
+
     describe('up.context', function() {
 
       it('gets up.layer.current.context', function() {
