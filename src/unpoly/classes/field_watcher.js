@@ -19,7 +19,7 @@ up.FieldWatcher = class FieldWatcher {
     this._callbackRunning = false
 
     return u.sequence(
-      up.form.trackFields(this._root, (field) => this._watchField(field)),
+      this._trackFields(),
       this._trackAbort(),
       this._trackReset(),
       () => this._abort(),
@@ -39,6 +39,14 @@ up.FieldWatcher = class FieldWatcher {
 
     if (up.form.isField(this._root) && !this._root.name) {
       fail('%s can only watch fields with a name (%o)')
+    }
+  }
+
+  _trackFields() {
+    if (up.form.isField(this._root)) {
+      return this._watchField(this._root)
+    } else {
+      return up.form.trackFields(this._root, (field) => this._watchField(field))
     }
   }
 

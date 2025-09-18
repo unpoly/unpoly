@@ -1399,7 +1399,7 @@ up.form = (function() {
     The callback can return another function that is called when that field no longer matches.
   @internal
   */
-  function trackFields(...args) {
+  const trackFields = up.mockable(function(...args) {
     let [root, { guard }, callback] = u.args(args, 'val', 'options', 'callback')
 
     let filter = function(fields) {
@@ -1411,12 +1411,8 @@ up.form = (function() {
       })
     }
 
-    // If root is already a field, it cannot contain other fields.
-    // We do not need to listed to up:fragment:inserted etc.
-    const live = true // !isField(root)
-
-    return up.fragment.trackSelector(fieldSelector(), { filter, live }, callback)
-  }
+    return up.fragment.trackSelector(fieldSelector(), { filter }, callback)
+  })
 
   function focusedField() {
     return u.presence(document.activeElement, isField)

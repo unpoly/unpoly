@@ -7,7 +7,6 @@ up.SelectorTracker = class SelectorTracker {
     this._addCallback = addCallback
     this._layer = options.layer || 'any'
     this._filter = options.filter || u.identity
-    this._live = options.live ?? true
     this._knownMatches = new Map()
     this._syncScheduled = false
   }
@@ -22,9 +21,7 @@ up.SelectorTracker = class SelectorTracker {
   }
 
   _trackFragments() {
-    if (this._live) {
-      return up.on('up:fragment:inserted up:fragment:destroyed', () => this._scheduleSync())
-    }
+    return up.on('up:fragment:inserted up:fragment:destroyed', () => this._scheduleSync())
   }
 
   _scheduleSync() {

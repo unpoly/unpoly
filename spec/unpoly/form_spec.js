@@ -576,6 +576,60 @@ describe('up.form', function() {
 
       })
 
+      describe('with a root that is a single field', function() {
+
+        it('runs the callback once for the field', async function() {
+          let changeSpy = jasmine.createSpy('change spy')
+
+          const [form, field1] = htmlFixtureList(`
+            <form id="form">
+              <input type="text" name="field1">
+            </form>
+          `)
+
+          up.form.trackFields(field1, (f) => {
+            changeSpy('attach', f.name)
+            return () => changeSpy('detach', f.name)
+          })
+
+          expect(changeSpy.calls.allArgs()).toEqual([['attach', 'field1']])
+        })
+
+        it('runs the callback for a field without an enclosing form', async function() {
+          let changeSpy = jasmine.createSpy('change spy')
+
+          const [field1] = htmlFixtureList(`
+            <input type="text" name="field1">
+          `)
+
+          up.form.trackFields(field1, (f) => {
+            changeSpy('attach', f.name)
+            return () => changeSpy('detach', f.name)
+          })
+
+          expect(changeSpy.calls.allArgs()).toEqual([['attach', 'field1']])
+        })
+
+        it('does not run the callback for other fields in the form', async function() {
+          let changeSpy = jasmine.createSpy('change spy')
+
+          const [form, field1, field2] = htmlFixtureList(`
+            <form id="form">
+              <input type="text" name="field1">
+              <input type="text" name="field2">
+            </form>
+          `)
+
+          up.form.trackFields(field1, (f) => {
+            changeSpy('attach', f.name)
+            return () => changeSpy('detach', f.name)
+          })
+
+          expect(changeSpy.calls.allArgs()).toEqual([['attach', 'field1']])
+        })
+
+      })
+
       describe('form-external fields with [form] attribute', function() {
 
         it('runs the callback for an existing form-external field', async function() {
@@ -1081,6 +1135,28 @@ describe('up.form', function() {
             expect(callback.calls.argsFor(1)[0]).toBe('default')
           })
 
+        })
+
+        it('does not unnecessarily track fields for performance reasons', async function() {
+          const trackFieldsSpy = up.form.trackFields.mock().and.callThrough()
+          const syncSpy = spyOn(up.SelectorTracker.prototype, '_sync').and.callThrough()
+
+          const [form, root, field1, outside, field2] = htmlFixtureList(`
+            <form id="form">
+              <div id="root">
+                <input type="text" name="field1">
+              </div>
+              <div id="outside">
+              </div>
+            </form>
+          `)
+
+          up.watch(field1, u.noop)
+
+          await wait()
+
+          expect(trackFieldsSpy).not.toHaveBeenCalled()
+          expect(syncSpy).not.toHaveBeenCalled()
         })
 
         u.each(defaultInputEvents, function(eventType) {
