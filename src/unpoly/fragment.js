@@ -238,6 +238,25 @@ up.fragment = (function() {
 
       You may also skip responses by calling `event.skip()` on an `up:fragment:loaded` event.
 
+  @param {Function(up.Response): boolean} [config.renderableResponse]
+    Whether the given response has a [content-type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type)
+    that is considered renderable.
+
+    By default Unpoly renders responses with an [HTML content-type](/up.Response.prototype.isHTML).
+    Trying to render responses with a different type will throw an error, even if the response body contains HTML markup.
+
+    Restricting content types is a security precaution. It protects in a hypothetical scenario where an attacker can both
+    upload a file *and* can use an existing XSS vulnerability to cause Unpoly to render that file. It doesn't
+    affect applications that reliably escape user input.
+
+    To render *any* response regardless of content-type, configure a function that always returns `true`:
+
+    ```js
+    up.fragment.config.renderableResponse = () => true
+    ```
+
+    @experimental
+
   @stable
   */
   const config = new up.Config(() => ({
@@ -297,6 +316,7 @@ up.fragment = (function() {
     autoScroll: ['hash', 'layer-if-main'],
     autoRevalidate: (response) => response.expired,
     skipResponse: defaultSkipResponse,
+    renderableResponse: (response) => response.isHTML(),
     normalizeKeepHTML: defaultNormalizeKeepHTML
   }))
 

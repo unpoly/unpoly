@@ -1,4 +1,5 @@
 const u = up.util
+const HTML_CONTENT_TYPE = /^(text\/html|application\/xhtml\+xml) *(;|$)/i
 
 /*-
 A response to an [HTTP request](/up.request).
@@ -201,6 +202,23 @@ up.Response = class Response extends up.Record {
   */
   get contentType() {
     return this.header('Content-Type')
+  }
+
+  /*-
+  Returns whether the response has a [content-type](/up.Response.prototype.contentType)
+  for HTML or XHTML.
+
+  This method tests if the `Content-Type` header is either `text/html` or `application/xhtml+xml`.
+  It doesn't test if the response body actual contains a valid HTML
+  document.
+
+  @function up.Response#isHTML
+  @return {boolean}
+    Whether the response has a HTML mime type.
+  @experimental
+  */
+  isHTML() {
+    return HTML_CONTENT_TYPE.test(this.contentType)
   }
 
   /*-

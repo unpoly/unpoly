@@ -2019,14 +2019,14 @@ describe('up.network', function() {
           expect(jasmine.Ajax.requests.count()).toEqual(1)
           await wait()
 
-          jasmine.respondWith('first response', { request: jasmine.Ajax.requests.at(0) })
+          jasmine.respondWith('first response', { request: 0 })
           await wait()
 
           expect(responses).toEqual(['first response'])
           expect(jasmine.Ajax.requests.count()).toEqual(2)
           await wait()
 
-          jasmine.respondWith('second response', { request: jasmine.Ajax.requests.at(1) })
+          jasmine.respondWith('second response', { request: 1 })
           await wait()
 
           expect(responses).toEqual(['first response', 'second response'])

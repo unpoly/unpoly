@@ -143,5 +143,52 @@ describe('up.Response', function() {
       expect(response.varyHeaderNames).toEqual([])
     })
   })
+
+  describe('#isHTML()', function() {
+
+    async function responseWithContentType(contentType) {
+      const request = up.request('/foo')
+      await wait()
+      jasmine.respondWith({ contentType })
+      return await request
+    }
+
+    it('returns true for a content-type of "text/html"', async function() {
+      let response = await responseWithContentType('text/html')
+      expect(response.isHTML()).toBe(true)
+    })
+
+    it('returns true for a content-type of "text/html; charset=utf-8"', async function() {
+      let response = await responseWithContentType('text/html; charset=utf-8')
+      expect(response.isHTML()).toBe(true)
+    })
+
+    it('returns true for a content-type of "application/xhtml+xml"', async function() {
+      let response = await responseWithContentType('application/xhtml+xml')
+      expect(response.isHTML()).toBe(true)
+    })
+
+    it('returns false for a content-type of "text/plain"', async function() {
+      let response = await responseWithContentType('text/plain')
+      expect(response.isHTML()).toBe(false)
+    })
+
+    it('returns false for a content-type of "image/svg+xml"', async function() {
+      let response = await responseWithContentType('image/svg+xml')
+      expect(response.isHTML()).toBe(false)
+    })
+
+    it('returns false for a content-type of "application/pdf"', async function() {
+      let response = await responseWithContentType('application/pdf')
+      expect(response.isHTML()).toBe(false)
+    })
+
+    it('returns false for a content-type of "application/octet-stream"', async function() {
+      let response = await responseWithContentType('application/octet-stream')
+      expect(response.isHTML()).toBe(false)
+    })
+
+  })
+
 })
 

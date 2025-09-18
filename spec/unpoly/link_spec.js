@@ -4536,8 +4536,8 @@ describe('up.link', function() {
           expect(jasmine.Ajax.requests.at(1).url).toMatchURL('/partial2-path')
           expect(jasmine.Ajax.requests.at(1).requestHeaders['X-Up-Target']).toBe('#partial2')
 
-          jasmine.Ajax.requests.at(0).respondWith({ responseText: '<div id="partial1">partial1 content</div>' })
-          jasmine.Ajax.requests.at(1).respondWith({ responseText: '<div id="partial2">partial2 content</div>' })
+          jasmine.respondWith({ request: 0, responseText: '<div id="partial1">partial1 content</div>' })
+          jasmine.respondWith({ request: 1, responseText: '<div id="partial2">partial2 content</div>' })
 
           await wait()
 

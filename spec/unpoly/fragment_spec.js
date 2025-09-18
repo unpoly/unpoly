@@ -1465,7 +1465,75 @@ describe('up.fragment', function() {
           })
         })
 
-        describe('when the server responds with an error or unexpected content', function() {
+        describe('checking of response type', function() {
+
+          it('updates a fragment if the server sends an HTML content-type', async function() {
+            fixture('.target', { text: 'old text' })
+
+            up.render('.target', { url: '/path', failTarget: '.failure' })
+
+            await wait()
+
+            jasmine.respondWith({
+              contentType: 'text/html',
+              responseText: '<div class="target">new text</div>'
+            })
+
+            await wait()
+
+            expect('.target').toHaveText('new text')
+          })
+
+          it('updates a fragment if the server sends an XHTML content-type', async function() {
+            fixture('.target', { text: 'old text' })
+
+            up.render('.target', { url: '/path', failTarget: '.failure' })
+
+            await wait()
+
+            jasmine.respondWith({
+              contentType: 'application/xhtml+xml',
+              responseText: '<div class="target">new text</div>'
+            })
+
+            await wait()
+
+            expect('.target').toHaveText('new text')
+          })
+
+          it('throws an error if the server sends plain text', async function() {
+            fixture('.target', { text: 'old text' })
+
+            let renderPromise = up.render('.target', { url: '/path', failTarget: '.failure' })
+
+            await wait()
+
+            jasmine.respondWith({
+              contentType: 'text/plain',
+              responseText: '<div class="target">new text</div>'
+            })
+
+            await expectAsync(renderPromise).toBeRejectedWith(jasmine.anyError(/Cannot render response with content-type "text\/plain"/i))
+          })
+
+          it('throws an error if the server sends an SVG', async function() {
+            fixture('.target', { text: 'old text' })
+
+            let renderPromise = up.render('.target', { url: '/path', failTarget: '.failure' })
+
+            await wait()
+
+            jasmine.respondWith({
+              contentType: 'image/svg+xml',
+              responseText: '<div class="target">new text</div>'
+            })
+
+            await expectAsync(renderPromise).toBeRejectedWith(jasmine.anyError(/Cannot render response with content-type "image\/svg\+xml"/i))
+          })
+
+        })
+
+        describe('when the server responds with an error or unexpected HTML', function() {
 
           it('uses a target selector given as { failTarget } option', async function() {
             fixture('.success-target', { text: 'old success text' })
@@ -1510,23 +1578,6 @@ describe('up.fragment', function() {
 
             expect('.success-target').toHaveText('old success text')
             expect('.fallback').toHaveText('new fallback text')
-          })
-
-          it('does update a fragment if the server sends an XHTML content-type instead of text/html', async function() {
-            fixture('.target', { text: 'old text' })
-
-            up.render('.target', { url: '/path', failTarget: '.failure' })
-
-            await wait()
-
-            jasmine.respondWith({
-              contentType: 'application/xhtml+xml',
-              responseText: '<div class="target">new text</div>'
-            })
-
-            await wait()
-
-            expect('.target').toHaveText('new text')
           })
 
           it('rejects the returned promise with an up.RenderResult describing the updated fragments and layer', async function() {
@@ -10814,7 +10865,7 @@ describe('up.fragment', function() {
 
             expect(up.network.queue.allRequests.length).toBe(2)
 
-            jasmine.Ajax.requests.at(0).respondWith({ responseText: '<div class="element">v2</div>' })
+            jasmine.respondWith({ request: 0, responseText: '<div class="element">v2</div>' })
             await wait()
 
             expect('.element').toHaveText('v2')
@@ -10835,7 +10886,7 @@ describe('up.fragment', function() {
 
             expect(up.network.queue.allRequests.length).toBe(2)
 
-            jasmine.Ajax.requests.at(0).respondWith({ responseText: '<div class="fail-element">v2</div>', status: 500 })
+            jasmine.respondWith({ request: 0, responseText: '<div class="fail-element">v2</div>', status: 500 })
             await wait()
 
             expect('.element').toHaveText('v1')

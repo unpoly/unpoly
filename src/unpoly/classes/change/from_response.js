@@ -23,6 +23,8 @@ up.Change.FromResponse = class FromResponse extends up.Change {
         log: ['Loaded fragment from %s', this._response.description],
         skip: () => this._skip()
       })
+
+      this._assetRenderableResponse()
     }
 
     // Listeners to up:fragment:loaded may have changed renderOptions.fail
@@ -34,6 +36,12 @@ up.Change.FromResponse = class FromResponse extends up.Change {
     }
 
     return this._updateContentFromResponse(this.options)
+  }
+
+  _assetRenderableResponse() {
+    if (!up.fragment.config.renderableResponse(this._response)) {
+      throw new up.CannotParse(['Cannot render response with content-type "%s" (configure with up.fragment.config.renderableResponse)', this._response.contentType])
+    }
   }
 
   _skip() {

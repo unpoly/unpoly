@@ -42,7 +42,10 @@ jasmine.respondWith = function(...args) {
     responseURL: options.responseURL
   }
 
-  const request = options.request || jasmine.lastRequest()
+  let request = options.request ?? jasmine.lastRequest()
+  if (u.isNumber(request)) {
+    request = jasmine.Ajax.requests.at(request)
+  }
 
   request.respondWith(requestAttrs)
 }
