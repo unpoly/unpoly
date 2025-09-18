@@ -53,6 +53,30 @@ describe('up.Layer.Overlay', function() {
       expect(listener.calls.argsFor(2)[0]).toBeEvent('up:layer:accepted', { layer: this.layers[1] })
     })
 
+    it('throws an AbortError is the layer is already closing, but is still playing its closing animation', async function() {
+      up.motion.config.enabled = true
+      let overlay = await up.layer.open()
+      let doAccept = () => overlay.accept(null, { animation: 'fade-out', duration: 1000})
+      expect(doAccept).not.toThrowError()
+
+      expect(document).toHaveSelector('up-modal.up-destroying')
+
+      expect(doAccept).toThrowError(up.Aborted)
+      await wait()
+      expect(doAccept).toThrowError(up.Aborted)
+    })
+
+    it('throws an AbortError is the layer has already been closed and removed from the DOM', async function() {
+      let overlay = await up.layer.open()
+      let doAccept = () => overlay.accept(null, { animation: false })
+      expect(doAccept).not.toThrowError()
+      await wait()
+
+      expect(document).not.toHaveSelector('up-modal')
+
+      expect(doAccept).toThrowError(up.Aborted)
+    })
+
     it('aborts pending requests for this layer', async function() {
       const abortedURLs = []
       up.on('up:request:aborted', (event) => abortedURLs.push(event.request.url))
