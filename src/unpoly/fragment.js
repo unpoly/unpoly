@@ -1655,9 +1655,10 @@ up.fragment = (function() {
   */
   function destroy(...args) {
     const options = parseTargetAndOptions(args)
+    const element = getSmart(options.target, options)
 
-    if (options.element = getSmart(options.target, options)) {
-      new up.Change.DestroyFragment(options).execute()
+    if (element) {
+      new up.Change.DestroyFragment({ ...options, element }).execute()
     }
 
     return up.migrate.formerlyAsync?.('up.destroy()')
