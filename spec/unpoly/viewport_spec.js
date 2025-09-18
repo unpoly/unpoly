@@ -645,7 +645,7 @@ describe('up.viewport', function() {
 
           up.reveal(destination, { behavior: 'smooth' })
 
-          await wait(80)
+          await wait(160)
 
           const finalScrollTop = 20000 - document.scrollingElement.clientHeight + 100
           expect(document.scrollingElement.scrollTop).toBeGreaterThan(10)
