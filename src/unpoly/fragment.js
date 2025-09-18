@@ -220,9 +220,6 @@ up.fragment = (function() {
       When to finish a render pass without changes,
       usually to [not re-insert identical content](/skipping-rendering).
 
-      The configured function accepts an object with the same properties
-      as an `up:fragment:loaded` event.
-
       By default Unpoly skips the following responses:
 
       - Responses without text in their body.
@@ -230,6 +227,14 @@ up.fragment = (function() {
         in answered with HTTP status `304 Not Modified` or `204 No Content`.
       - When [revalidating](/caching#revalidation), if the expired response and fresh response
         have the exact same text.
+
+      The configured function accepts an object with the same properties
+      as an `up:fragment:loaded` event. You can provide a different function to use your own logic.
+      For example, the following would never skip a response by default:
+
+      ```js
+      up.fragment.config.skipResponse = ({ response, expiredResponse }) => false
+      ```
 
       You may also skip responses by calling `event.skip()` on an `up:fragment:loaded` event.
 
