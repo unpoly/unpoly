@@ -28,4 +28,12 @@ up.Change = class Change {
     return up.RenderOptions.deriveFailOptions(this.options)
   }
 
+  ensureLayerAlive(layer = this.layer) {
+    if (!layer.isAlive()) {
+      // Wind up the call stack. Whoever has closed the layer will also clean up
+      // elements, handlers, etc.
+      throw new up.Aborted("Layer is already " + layer.state)
+    }
+  }
+
 }

@@ -27,7 +27,7 @@ up.Change.FromContent = class FromContent extends up.Change {
   }
 
   _isRenderableLayer(layer) {
-    return (layer === 'new') || layer.isOpen()
+    return (layer === 'new') || layer.isAlive()
   }
 
   _filterLayers() {

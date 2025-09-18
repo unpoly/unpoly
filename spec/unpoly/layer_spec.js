@@ -47,7 +47,7 @@ describe('up.layer', function() {
           expect(up.layer.get(0)).toBe(root)
           expect(up.layer.get(1)).toBe(overlay1)
           expect(up.layer.get(2)).not.toBe(overlay2)
-          expect(overlay2).toBeClosed()
+          expect(overlay2).not.toBeAlive()
         })
 
         it('closes existing overlays over the { baseLayer }, ignoring a { peel: false } option', function() {
@@ -60,7 +60,7 @@ describe('up.layer', function() {
           expect(up.layer.get(0)).toBe(root)
           expect(up.layer.get(1)).toBe(overlay1)
           expect(up.layer.get(2)).not.toBe(overlay2)
-          expect(overlay2).toBeClosed()
+          expect(overlay2).not.toBeAlive()
         })
 
         it('still opens the layer if a destructor for an existing overlay crashes', async function() {
@@ -3276,7 +3276,7 @@ describe('up.layer', function() {
             Trigger.clickSequence(link)
 
             expect(confirmSpy).toHaveBeenCalledWith(jasmine.objectContaining({ confirm: 'Are you sure?' }))
-            expect(overlay).toBeClosed()
+            expect(overlay).not.toBeAlive()
           })
 
           it('does not accept the overlay or follow the link if the message is not confirmed', function() {
@@ -3295,7 +3295,7 @@ describe('up.layer', function() {
             Trigger.clickSequence(link)
 
             expect(confirmSpy).toHaveBeenCalled()
-            expect(overlay).not.toBeClosed()
+            expect(overlay).toBeAlive()
             expect(followListener).not.toHaveBeenCalled()
             expect(link).not.toHaveBeenDefaultFollowed()
           })
@@ -3443,7 +3443,7 @@ describe('up.layer', function() {
             Trigger.clickSequence(submitButton)
 
             expect(confirmSpy).toHaveBeenCalledWith(jasmine.objectContaining({ confirm: 'Are you sure?' }))
-            expect(overlay).toBeClosed()
+            expect(overlay).not.toBeAlive()
           })
 
           it('does not accept the overlay or submit the form if the message is not confirmed', function() {
@@ -3463,7 +3463,7 @@ describe('up.layer', function() {
             Trigger.clickSequence(submitButton)
 
             expect(confirmSpy).toHaveBeenCalled()
-            expect(overlay).not.toBeClosed()
+            expect(overlay).toBeAlive()
             expect(submitListener).not.toHaveBeenCalled()
           })
         })

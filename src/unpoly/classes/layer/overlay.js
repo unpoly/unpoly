@@ -87,14 +87,18 @@ up.Layer.Overlay = class Overlay extends up.Layer {
       'dismissEvent',
       'acceptLocation',
       'dismissLocation',
-
-      // Internal state
-      'opening' // internal flag to know that the layer is being opened
     ]
   }
 
+
   constructor(options) {
     super(options)
+
+    // We need to mark the layer as "opening" so its topmost swappable element
+    // does not resolve from the :layer pseudo-selector. Since :layer is a part of
+    // up.fragment.config.mainTargets and :main is a part of fragment.config.autoHistoryTargets,
+    // this would otherwise cause auto-history for *every* overlay regardless of initial target.
+    this.state = 'opening'
 
     if (this.dismissable === true) {
       this.dismissable = ['button', 'key', 'outside']
@@ -377,7 +381,6 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     super.teardownHandlers()
     this._unbindParentClicked?.()
     this._unbindEscapePressed?.()
-    this.overlayFocus.teardown()
   }
 
   /*-
@@ -447,8 +450,12 @@ up.Layer.Overlay = class Overlay extends up.Layer {
       boxAnimation,
       backdropAnimation,
       easing: options.easing || this.closeEasing,
-      duration: options.duration || this.closeDuration
+      duration: options.duration || this.closeDuration,
     })
+  }
+
+  isAlive() {
+    return ['opening', 'opened'].includes(this.state)
   }
 
   accept(value = null, options = {}) {

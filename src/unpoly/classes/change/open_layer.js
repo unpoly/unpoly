@@ -71,7 +71,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
       this._content = this.responseDoc.select(this.target)
     }
 
-    if (!this._content || this._baseLayer.isClosed()) {
+    if (!this._content || !this._baseLayer.isAlive()) {
       // An error message will be chosen by up.Change.FromContent
       throw new up.CannotMatch()
     }
@@ -157,12 +157,12 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
 
     // Emit up:layer:opened to indicate that the layer was opened successfully.
     // This is a good time for listeners to manipulate the overlay optics.
-    this.layer.opening = false
+    this.layer.state = 'opened'
     this._emitOpenedEvent()
 
     // In case a listener to up:layer:opened immediately dimisses the new layer,
     // reject the promise returned by up.layer.open().
-    this.abortWhenLayerClosed()
+    this.ensureLayerAlive()
   }
 
   _renderOtherLayers() {
@@ -186,7 +186,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     await this.layer.startOpenAnimation()
 
     // Don't change focus if the layer has been closed while the animation was running.
-    this.abortWhenLayerClosed()
+    this.ensureLayerAlive()
 
     // A11Y: Place the focus on the overlay element and setup a focus circle.
     // However, don't change focus if the layer has been closed while the animation was running.
@@ -199,17 +199,11 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
   }
 
   _buildLayer() {
-    // We need to mark the layer as { opening: true } so its topmost swappable element
-    // does not resolve from the :layer pseudo-selector. Since :layer is a part of
-    // up.fragment.config.mainTargets and :main is a part of fragment.config.autoHistoryTargets,
-    // this would otherwise cause auto-history for *every* overlay regardless of initial target.
-    const buildOptions = { ...this.options, opening: true }
-
     const beforeNew = (optionsWithLayerDefaults) => {
       return this.options = up.RenderOptions.finalize(optionsWithLayerDefaults)
     }
 
-    return up.layer.build(buildOptions, beforeNew)
+    return up.layer.build(this.options, beforeNew)
   }
 
   _handleHistory() {

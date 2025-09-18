@@ -3,10 +3,10 @@ const $ = jQuery
 
 beforeEach(function() {
   jasmine.addMatchers({
-    toBeClosed(util, customEqualityTesters) {
+    toBeAlive(util, customEqualityTesters) {
       return {
         compare(layer) {
-          return { pass: layer.isClosed() }
+          return { pass: layer.isAlive() }
         }
       }
     }

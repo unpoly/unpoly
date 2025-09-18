@@ -56,6 +56,10 @@ up.Layer.Root = class Root extends up.Layer {
     this.setupHandlers()
   }
 
+  isAlive() {
+    return true
+  }
+
   accept() {
     this._cannotCloseRoot()
   }

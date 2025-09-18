@@ -15,21 +15,21 @@ up.Change.Addition = class Addition extends up.Change {
     if (this.layer.isOverlay()) {
       // The server may send an HTTP header `X-Up-Accept-Layer: value`
       this._tryAcceptLayerFromServer()
-      this.abortWhenLayerClosed()
+      this.ensureLayerAlive()
 
       // A close condition { acceptLocation: '/path' } might have been
       // set when the layer was opened.
       this.layer.tryAcceptForLocation(this._responseOptions())
-      this.abortWhenLayerClosed()
+      this.ensureLayerAlive()
 
       // The server may send an HTTP header `X-Up-Dismiss-Layer: value`
       this._tryDismissLayerFromServer()
-      this.abortWhenLayerClosed()
+      this.ensureLayerAlive()
 
       // A close condition { dismissLocation: '/path' } might have been
       // set when the layer was opened.
       this.layer.tryDismissForLocation(this._responseOptions())
-      this.abortWhenLayerClosed()
+      this.ensureLayerAlive()
     }
 
     // On the server we support up.layer.emit('foo'), which sends:
@@ -43,7 +43,7 @@ up.Change.Addition = class Addition extends up.Change {
     this.layer.asCurrent(() => {
       for (let eventPlan of this._eventPlans) {
         up.emit({ ...eventPlan, ...this._responseOptions() })
-        this.abortWhenLayerClosed()
+        this.ensureLayerAlive()
       }
     })
   }
@@ -59,14 +59,6 @@ up.Change.Addition = class Addition extends up.Change {
     // When dismissing without a value, the server will send X-Up-Dismiss-Layer: null
     if (u.isDefined(this._dismissLayer) && this.layer.isOverlay()) {
       this.layer.dismiss(this._dismissLayer, this._responseOptions())
-    }
-  }
-
-  abortWhenLayerClosed(layer = this.layer) {
-    if (layer.isClosed()) {
-      // Wind up the call stack. Whoever has closed the layer will also clean up
-      // elements, handlers, etc.
-      throw new up.Aborted('Layer was closed')
     }
   }
 

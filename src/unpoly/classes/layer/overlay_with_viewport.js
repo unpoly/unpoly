@@ -31,7 +31,7 @@ up.Layer.OverlayWithViewport = class OverlayWithViewport extends up.Layer.Overla
     // We also check #isOpen() in case some async code calls #sync() on a layer
     // that was already closed. In that case don't run the code below that might
     // re-attach the overlay.
-    if (this.isDetached() && this.isOpen()) {
+    if (this.isDetached() && this.isAlive()) {
       this.constructor.getParentElement().appendChild(this.element)
     }
   }

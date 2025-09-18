@@ -3,7 +3,9 @@ const e = up.element
 
 describe('up.Layer.Overlay', function() {
 
-  beforeEach(function() { up.motion.config.enabled = false })
+  beforeEach(function() {
+    up.motion.config.enabled = false
+  })
 
   describe('#accept()', function() {
 
@@ -16,6 +18,24 @@ describe('up.Layer.Overlay', function() {
       up.layer.accept(null, { animation: false })
 
       expect(modes()).toEqual(['root'])
+    })
+
+    it('removes the layer elements', async function() {
+      await up.layer.open({ fragment: '<div id="content"></div>' })
+
+      let overallContainer = document.querySelector('up-modal')
+      let contentContainer = overallContainer.querySelector('up-modal-content')
+      let contentElement = contentContainer.querySelector('#content')
+
+      expect(overallContainer).toBeAttached()
+      expect(contentContainer).toBeAttached()
+      expect(contentElement).toBeAttached()
+
+      await up.layer.accept()
+
+      expect(overallContainer).toBeDetached()
+      expect(contentContainer).toBeDetached()
+      expect(contentElement).toBeDetached()
     })
 
     it('dismiss descendants before closing this layer', function() {
@@ -409,7 +429,7 @@ describe('up.Layer.Overlay', function() {
       expect(document).not.toHaveSelector('up-modal')
     })
 
-    fdescribe('destructors', function() {
+    describe('destructors', function() {
 
       it('runs destructors for the old overlay content', async function() {
         const destructor = jasmine.createSpy('destructor')
@@ -445,6 +465,105 @@ describe('up.Layer.Overlay', function() {
         expect(modalContainer).toBeDetached()
 
         expect(destructor).toHaveBeenCalledWith(modalContainer)
+      })
+
+      it('runs destructors while the layer stack still contains the overlay', async function() {
+        const stackSpy = jasmine.createSpy('layer spy')
+        up.compiler('.overlay-element', function() {
+          return () => {
+            // Spy on a copy of the current state, not the stack reference which is always live
+            stackSpy([...up.layer.stack])
+          }
+        })
+
+        await up.layer.open({ fragment: '<div class="overlay-element"></div>', mode: 'modal' })
+
+        expect(up.layer.current).toBeOverlay()
+        let modalLayer = up.layer.current
+
+        expect(stackSpy).not.toHaveBeenCalled()
+
+        await up.layer.accept()
+
+        expect(stackSpy).toHaveBeenCalledWith([up.layer.root, modalLayer])
+      })
+
+      it('runs destructors while up.layer.current still points to the destroying overlay', async function() {
+        const currentLayerSpy = jasmine.createSpy('current layer spy')
+        up.compiler('.overlay-element', function() {
+          return () => {
+            // Spy on a copy of the current state, not the stack reference which is always live
+            currentLayerSpy(up.layer.current)
+          }
+        })
+
+        await up.layer.open({ fragment: '<div class="overlay-element"></div>', mode: 'modal' })
+
+        expect(up.layer.current).toBeOverlay()
+        let modalLayer = up.layer.current
+
+        expect(currentLayerSpy).not.toHaveBeenCalled()
+
+        await up.layer.accept()
+
+        expect(currentLayerSpy).toHaveBeenCalledWith(modalLayer)
+      })
+
+      it('allows destructors to query fragments within the destroying overlay (bugfix)', async function() {
+        const lookupSpy = jasmine.createSpy('layer spy')
+        up.compiler('.overlay-element', function() {
+          return () => {
+            lookupSpy(up.fragment.get('.overlay-element', { destroying: true }))
+          }
+        })
+
+        await up.layer.open({ fragment: '<div class="overlay-element"></div>', mode: 'modal' })
+
+        expect(up.layer.current).toBeOverlay()
+        expect(lookupSpy).not.toHaveBeenCalled()
+
+        await up.layer.accept()
+
+        expect(lookupSpy).toHaveBeenCalledWith(jasmine.any(Element))
+      })
+
+      it('allows destructors to look up the layer of the destroying overlay (bugfix)', async function() {
+        const lookupSpy = jasmine.createSpy('layer spy')
+        up.compiler('.overlay-element', function(element) {
+          return () => {
+            lookupSpy(up.layer.get(element))
+          }
+        })
+
+        let modalOverlay = await up.layer.open({ fragment: '<div class="overlay-element"></div>', mode: 'modal' })
+
+        expect(up.layer.current).toBeOverlay()
+        expect(lookupSpy).not.toHaveBeenCalled()
+
+        await up.layer.accept()
+
+        expect(lookupSpy).toHaveBeenCalledWith(modalOverlay)
+      })
+
+      it('runs destructors while the browser location is still on the overlay location', async function() {
+        up.history.config.enabled = true
+
+        up.history.replace('/root-location')
+
+        const locationSpy = jasmine.createSpy('layer spy')
+        up.compiler('.overlay-element', function() {
+          return () => { locationSpy(location.href) }
+        })
+
+        await up.layer.open({ fragment: '<div class="overlay-element"></div>', mode: 'modal', history: true, location: '/modal-location' })
+
+        expect(location.href).toMatchURL('/modal-location')
+        expect(locationSpy).not.toHaveBeenCalled()
+
+        await up.layer.accept()
+
+        expect(locationSpy).toHaveBeenCalled()
+        expect(locationSpy.calls.argsFor(0)[0]).toMatchURL('/modal-location')
       })
 
       describe('when a destructor crashes', function() {
@@ -612,6 +731,160 @@ describe('up.Layer.Overlay', function() {
       expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value: 'dismissal value' }))
     })
   })
+
+  describe('#isAlive()', function() {
+
+    beforeEach(function() {
+      up.motion.config.enabled = true
+    })
+
+    it('returns true for an layer in its opening animation', async function() {
+      up.layer.open({ content: 'layer content', animation: 'fade-in', duration: 1000 })
+      await wait()
+
+      expect(up.layer.current).toBeOverlay()
+      expect(up.layer.current.isAlive()).toBe(true)
+    })
+
+    it('returns true for an opened layer', async function() {
+      up.layer.open({ content: 'layer content', animation: false })
+      await wait()
+
+      expect(up.layer.current).toBeOverlay()
+      expect(up.layer.current.isAlive()).toBe(true)
+    })
+
+    it('returns false for a layer in its closing animation', async function() {
+      let overlay = await up.layer.open({ content: 'layer content', animation: false })
+
+      expect(up.layer.current).toBeOverlay()
+
+      up.layer.dismiss(null, { animation: 'fade-out', duration: 1000 })
+      await wait()
+
+      expect(up.layer.current).toBeRootLayer()
+      expect(overlay.isDetached()).toBe(false)
+      expect(overlay.isAlive()).toBe(false)
+    })
+
+    it('returns false for a layer that has been closed and removed from the DOM', async function() {
+      let overlay = await up.layer.open({ content: 'layer content', animation: false })
+
+      expect(up.layer.current).toBeOverlay()
+
+      up.layer.dismiss(null, { animation: false })
+      await wait()
+
+      expect(up.layer.current).toBeRootLayer()
+      expect(overlay.isDetached()).toBe(true)
+      expect(overlay.isAlive()).toBe(false)
+    })
+
+  })
+
+  if (up.migrate.loaded) {
+
+    describe('#isOpen()', function() {
+
+      beforeEach(function() {
+        up.motion.config.enabled = true
+      })
+
+      it('returns true for an layer in its opening animation', async function() {
+        up.layer.open({ content: 'layer content', animation: 'fade-in', duration: 1000 })
+        await wait()
+
+        expect(up.layer.current).toBeOverlay()
+        expect(up.layer.current.isOpen()).toBe(true)
+      })
+
+      it('returns true for an opened layer', async function() {
+        up.layer.open({ content: 'layer content', animation: false })
+        await wait()
+
+        expect(up.layer.current).toBeOverlay()
+        expect(up.layer.current.isOpen()).toBe(true)
+      })
+
+      it('returns false for a layer in its closing animation', async function() {
+        let overlay = await up.layer.open({ content: 'layer content', animation: false })
+
+        expect(up.layer.current).toBeOverlay()
+
+        up.layer.dismiss(null, { animation: 'fade-out', duration: 1000 })
+        await wait()
+
+        expect(up.layer.current).toBeRootLayer()
+        expect(overlay.isDetached()).toBe(false)
+        expect(overlay.isOpen()).toBe(false)
+      })
+
+      it('returns false for a layer that has been closed and removed from the DOM', async function() {
+        let overlay = await up.layer.open({ content: 'layer content', animation: false })
+
+        expect(up.layer.current).toBeOverlay()
+
+        up.layer.dismiss(null, { animation: false })
+        await wait()
+
+        expect(up.layer.current).toBeRootLayer()
+        expect(overlay.isDetached()).toBe(true)
+        expect(overlay.isOpen()).toBe(false)
+      })
+
+    })
+
+    describe('#isClosed()', function() {
+
+      beforeEach(function() {
+        up.motion.config.enabled = true
+      })
+
+      it('returns false for an layer in its opening animation', async function() {
+        up.layer.open({ content: 'layer content', animation: 'fade-in', duration: 1000 })
+        await wait()
+
+        expect(up.layer.current).toBeOverlay()
+        expect(up.layer.current.isClosed()).toBe(false)
+      })
+
+      it('returns false for an opened layer', async function() {
+        up.layer.open({ content: 'layer content', animation: false })
+        await wait()
+
+        expect(up.layer.current).toBeOverlay()
+        expect(up.layer.current.isClosed()).toBe(false)
+      })
+
+      it('returns true for a layer in its closing animation', async function() {
+        let overlay = await up.layer.open({ content: 'layer content', animation: false })
+
+        expect(up.layer.current).toBeOverlay()
+
+        up.layer.dismiss(null, { animation: 'fade-out', duration: 1000 })
+        await wait()
+
+        expect(up.layer.current).toBeRootLayer()
+        expect(overlay.isDetached()).toBe(false)
+        expect(overlay.isClosed()).toBe(true)
+      })
+
+      it('returns true for a layer that has been closed and removed from the DOM', async function() {
+        let overlay = await up.layer.open({ content: 'layer content', animation: false })
+
+        expect(up.layer.current).toBeOverlay()
+
+        up.layer.dismiss(null, { animation: false })
+        await wait()
+
+        expect(up.layer.current).toBeRootLayer()
+        expect(overlay.isDetached()).toBe(true)
+        expect(overlay.isClosed()).toBe(true)
+      })
+
+    })
+
+  }
 
   describe('#location', function() {
 

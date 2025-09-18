@@ -2155,7 +2155,7 @@ up.fragment = (function() {
         // Discard this target for new layers, which don't have a first-swappable-element.
         // Also don't && the layer check into the `else if` condition above, or it will
         // be returned as a verbatim string below.
-        if (layer === 'new' || layer.opening) continue
+        if (layer === 'new' || layer.state === 'opening') continue
         let firstSwappableTarget = toTarget(layer.getFirstSwappableElement(), options)
         targets.unshift(target.replace(LAYER_PSEUDO, firstSwappableTarget))
       } else if (u.isElementLike(target)) {

@@ -264,8 +264,8 @@ describe('up.Layer.Popup', function() {
 
       await humanClick(modal.dismissElement)
 
-      expect(popup).toBeClosed()
-      expect(modal).toBeClosed()
+      expect(popup).not.toBeAlive()
+      expect(modal).not.toBeAlive()
     })
 
     it('also dismisses the popup when it is positioned below the fold (bugfix)', async function() {
@@ -277,8 +277,8 @@ describe('up.Layer.Popup', function() {
 
       await humanClick(modal.dismissElement)
 
-      expect(popup).toBeClosed()
-      expect(modal).toBeClosed()
+      expect(popup).not.toBeAlive()
+      expect(modal).not.toBeAlive()
     })
   })
 })

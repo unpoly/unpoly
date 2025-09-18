@@ -27,7 +27,7 @@ up.Layer.OverlayWithTether = class OverlayWithTether extends up.Layer.Overlay {
   sync() {
     // In case some async code calls #sync() on a layer that was already closed,
     // don't run the code below that might re-attach the overlay.
-    if (this.isOpen()) {
+    if (this.isAlive()) {
 
       if (this.isDetached() || this._tether.isDetached()) {
         // If our tether parent and anchor is gone, the best thing we can

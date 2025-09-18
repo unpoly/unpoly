@@ -12372,6 +12372,22 @@ describe('up.fragment', function() {
         expect(attachmentSpy).toHaveBeenCalledWith(true)
       })
 
+      it('calls destructors of descendants that will be detached with the element', function() {
+        const destructor = jasmine.createSpy('destructor')
+        const compiler = (element) => () => destructor()
+        up.compiler('.element', compiler)
+
+        const element = htmlFixture(`
+          <div class="container">
+            <div class="element">element</div>
+          </div>
+        `)
+        up.hello(element)
+        up.destroy(element)
+
+        expect(destructor).toHaveBeenCalled()
+      })
+
       it('marks the old element as [inert] before destructors', function(done) {
         const testElement = function(element) {
           expect(element).toHaveText('old text')

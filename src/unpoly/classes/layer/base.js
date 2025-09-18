@@ -291,35 +291,34 @@ up.Layer = class Layer extends up.Record {
   }
 
   /*-
-  Returns whether this layer is still part of the [layer stack](/up.layer.stack).
+  Returns whether this layer is part of the [layer stack](/up.layer.stack) and can be interacted with.
 
-  A layer is considered "closed" immediately after it has been [dismissed](/up.Layer.prototype.dismiss)
-  or [accepted](/up.Layer.prototype.dismiss). If the closing is animated, a layer may be considered "closed" while
+  ## Understanding aliveness
+
+  A layer that is alive can be [targeted](/targeting) with fragment changes, or [queried](/up.fragment.get) for contents.
+
+  The [root layer](/layer-terminology) is always alive.
+  An overlay is alive as soon as it enters the DOM, even when it is still playing its opening animation.
+
+  An overlay becomes "unalive" immediately when it starts [closing](/closing-overlays).
+  If the closing is animated, a layer is considered "unalive" while
   closing animation is still playing.
 
-  @function up.Layer#isOpen
+  | Overlay state             | `up.Layer#isAlive()` |
+  |---------------------------|----------------------|
+  | Entered DOM               | `true`               |
+  | Opening animation playing | `true`               |
+  | Opened                    | `true`               |
+  | Closing animation playing | `false`              |
+  | Removed from DOM          | `false`              |
+
+  @function up.Layer#isAlive
   @return {boolean}
     Whether this layer is still open.
   @stable
   */
-  isOpen() {
-    return this.stack.isOpen(this)
-  }
-
-  /*-
-  Returns whether this layer is no longer part of the [layer stack](/up.layer.stack).
-
-  A layer is considered "closed" immediately after it has been [dismissed](/up.Layer.prototype.dismiss)
-  or [accepted](/up.Layer.prototype.dismiss). If the closing is animated, a layer may be considered "closed" while
-  closing animation is still playing.
-
-  @function up.Layer#isClosed
-  @return {boolean}
-    Whether this layer has been closed..
-  @stable
-  */
-  isClosed() {
-    return this.stack.isClosed(this)
+  isAlive() {
+    throw new up.NotImplemented()
   }
 
   /*-
@@ -443,7 +442,7 @@ up.Layer = class Layer extends up.Record {
 
   The [root layer](/up.layer.root) has an index of `0`, its child overlay has an index of `1`, and so on.
 
-  This property has no defined behavior for [closed](/up.Layer.prototype.isClosed) layers.
+  This property has no defined behavior for layers that are [closed or are being closed](/up.Layer.prototype.isAlive).
 
   @property up.Layer#index
   @return {number} index
@@ -830,7 +829,7 @@ up.Layer = class Layer extends up.Record {
 
     // (A) Only emit up:layer:location:changed after we pushed a new history entry.
     // (B) Don't emit when initially opening an overlay.
-    if (newLocation !== prevSavedLocation && !this.opening) {
+    if (newLocation !== prevSavedLocation && this.state !== 'opening') {
       this.emit('up:layer:location:changed', { location: newLocation, previousLocation: prevSavedLocation, log: false })
     }
   }

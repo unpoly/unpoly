@@ -36,14 +36,6 @@ up.LayerStack = class LayerStack {
     this.root.reset()
   }
 
-  isOpen(layer) {
-    return u.contains(this.layers, layer)
-  }
-
-  isClosed(layer) {
-    return !this.isOpen(layer)
-  }
-
   parentOf(layer) {
     return this.layers[layer.index - 1]
   }
