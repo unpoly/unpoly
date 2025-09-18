@@ -1379,10 +1379,12 @@ up.form = (function() {
   //
   // Does not support a selector string as a first argument. Only works with Element arguments.
   function getRegion(origin) {
+    return getOriginRegion(origin) || up.layer.current.element
+  }
+
+  function getOriginRegion(origin) {
     if (origin) {
-      return getForm(origin) || up.layer.get(origin).element
-    } else {
-      return up.layer.current.element
+      return getForm(origin) || up.layer.get(origin)?.element
     }
   }
 

@@ -8898,6 +8898,21 @@ describe('up.form', function() {
 
       })
 
+      it('does not crash when a form-less input with [up-switch] is in an overlay, and that overlay closes (bugfix)', async function() {
+        await up.layer.open({ fragment: `
+          <div id="container">
+            <input type="text" name="foo" up-switch="#target"></input>
+            <div id="target" up-show-for="foo"></div>
+          </div>
+        `})
+
+        expect(up.layer.current).toBeOverlay()
+        expect(up.layer.current).toHaveSelector('[up-switch]')
+
+        let doDismiss = () => up.layer.dismiss()
+        expect(doDismiss).not.toThrowError()
+      })
+
 
     })
   })

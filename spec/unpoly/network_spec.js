@@ -2674,7 +2674,7 @@ describe('up.network', function() {
         expect({ url: '/foo' }).not.toBeCached()
       })
 
-      it('it does not crash if the cache is evicted before a caching request starts loading (bugfix)', async function() {
+      it('does not crash if the cache is evicted before a caching request starts loading (bugfix)', async function() {
         up.request({ url: '/foo', cache: true })
         up.cache.evict()
 
