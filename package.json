@@ -27,12 +27,12 @@
     "url": "git+https://github.com/unpoly/unpoly.git"
   },
   "keywords": [
-    "progressive enhancement",
-    "unobtrusive javascript",
-    "html over the wire",
-    "ujs",
-    "server-side",
-    "ssr"
+    "html",
+    "hypermedia",
+    "progressive-enhancement",
+    "server-side-rendering",
+    "html-driven",
+    "html-over-the-wire"
   ],
   "author": "Henning Koch <henning@triskweline.de> (https://makandra.com)",
   "license": "MIT",
