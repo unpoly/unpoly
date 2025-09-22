@@ -154,7 +154,7 @@ up.event = (function() {
 
   ```js
   let element = document.querySelector(...)
-  up.on(element, 'mouseenter, mouseleave', function(event) {
+  up.on(element, 'mouseenter mouseleave', function(event) {
     console.log('Mouse entered or left')
   })
   ```

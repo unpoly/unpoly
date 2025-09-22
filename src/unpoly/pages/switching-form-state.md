@@ -37,10 +37,10 @@ attributes to indicate for which values they should be shown or hidden:
 
 By default the entire form will be searched for matches. This can be [configured](#region).
 
-To toggle an element [for multiple values](#multiple-values), separate with a comma:
+To toggle an element [for multiple values](#multiple-values), separate with a space or comma:
 
 ```
-<div class="level-dependent" up-show-for="intermediate, expert"> <!-- mark: up-show-for="intermediate, expert" -->
+<div class="level-dependent" up-show-for="intermediate expert"> <!-- mark: up-show-for="intermediate expert" -->
   only shown for intermediate and expert levels
 </div>
 ```
@@ -99,10 +99,10 @@ up.on('up:form:switch', '[highlight-for]', (event) => {
 
 ## Switching for multiple values {#multiple-values}
 
-To switch for multiple values, separate them with a comma:
+To switch for multiple values, separate them with a space or comma:
 
 ```html
-<div class="level-dependent" up-show-for="intermediate, expert"> <!-- mark: up-show-for="intermediate, expert" -->
+<div class="level-dependent" up-show-for="intermediate expert"> <!-- mark: up-show-for="intermediate expert" -->
   only shown for intermediate and expert levels
 </div>
 ```

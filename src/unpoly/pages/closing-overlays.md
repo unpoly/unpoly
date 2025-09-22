@@ -399,7 +399,7 @@ The following control names are available:
 To enable multiple dismiss controls, separate their name by a comma or space character:
 
 ```html
-<a href="/terms" up-layer="new" up-dismissable="button, key">Show terms</a>
+<a href="/terms" up-layer="new" up-dismissable="button key">Show terms</a>
 ```
 
 Regardless of which dismiss controls are enabled, an overlay may always be dismissed by

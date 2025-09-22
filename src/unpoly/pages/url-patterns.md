@@ -105,7 +105,7 @@ Here is an example of a URL pattern with alternatives:
 
 ```html
 <!-- Closes layer when user visits either /account or anything underneath "/users/" -->
-<a href="/users/" up-accept-location="/users/*, /account" up-layer="new">Users</a>
+<a href="/users/" up-accept-location="/users/* /account" up-layer="new">Users</a>
 ```
 
 JavaScript functions that URL patterns will accept multiple patterns
