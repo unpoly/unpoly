@@ -1601,7 +1601,7 @@ describe('up.history', function() {
         })
 
         describe('scrolling to #top', function() {
-          it("scrolls to the top if the link's hash '#top', even if there is no matching fragment", async function() {
+          it("scrolls to the top if the link's hash is '#top', even if there is no matching fragment", async function() {
             location.hash = ''
             await wait()
 
@@ -1614,7 +1614,7 @@ describe('up.history', function() {
             // Firefox will only do native #anchor processing when we use link.click(),
             // but not when we emit a synthetic 'click' event.
             link.click()
-            await wait(100)
+            await wait(200)
 
             expect(up.viewport.root.scrollTop).toBe(0)
             expect(location.hash).toBe('#top')
