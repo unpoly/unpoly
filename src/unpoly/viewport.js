@@ -387,7 +387,7 @@ up.viewport = (function() {
     if (match) {
       return () => {
         let doReveal = () => reveal(match, { top: true, behavior })
-        if (strong) u.task(doReveal)
+        if (strong) u.fastTask(doReveal)
         return doReveal()
       }
     } else if (hash === '#top') {

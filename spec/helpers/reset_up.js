@@ -83,7 +83,7 @@ afterEach(async function() {
   jasmine.resetting = true
 
   // Wait 1 more frame for async errors to (correctly) fail the test.
-  await jasmine.waitMessageChannel()
+  await wait()
 
   // Ignore errors while the framework is being reset.
   await jasmine.spyOnGlobalErrorsAsync(async function(_globalErrorSpy) {
@@ -111,12 +111,12 @@ afterEach(async function() {
     // Wait one more frame so pending callbacks have a chance to run.
     // Pending callbacks might change the URL or cause errors that bleed into
     // the next example.
-    if (resetLocation() || waitMore) { await jasmine.waitMessageChannel() }
+    if (resetLocation() || waitMore) { await wait() }
 
     up.framework.reset()
 
     // Resetting the framework may change the location, title, etc. again.
-    if (resetLocation() || waitMore) { await jasmine.waitMessageChannel() }
+    if (resetLocation() || waitMore) { await wait() }
 
     resetTitle()
     resetMetaTags()

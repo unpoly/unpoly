@@ -20,6 +20,7 @@ describe('up.util', () => {
         expect(callback).not.toHaveBeenCalled()
 
         await jasmine.waitTime(0)
+
         expect(callback).toHaveBeenCalled()
       })
 

@@ -1184,6 +1184,24 @@ up.util = (function() {
   @stable
   */
   function queueTask(task) {
+    setTimeout(task)
+  }
+
+  /*-
+  Schedules a macrotask.
+
+  Other than `up.util.task()`, this function uses `postMessage()` instead of `setTimeout()`.
+  This has pros and cons:
+
+  - This *tends* to cause the task to run before `setTimeout()`, sometimes even before the browser paints the screen.
+  - Safari does not honor the order of `postMessage()` calls on multiple `MessageChannels`, making
+    it hard to reason about the order of tasks.
+  - Safari sometimes executes a `postMessage()` task before a `setTimeout()` task.
+
+  @function up.util.fastTask
+  @internal
+  */
+  function queueFastTask(task) {
     const channel = new MessageChannel()
     channel.port1.onmessage = () => task()
     channel.port2.postMessage(0)
@@ -2430,6 +2448,7 @@ up.util = (function() {
     isBasicObjectProperty,
     isCrossOrigin,
     task: queueTask,
+    fastTask: queueFastTask,
     isEqual,
     getSimpleTokens,
     getComplexTokens,
