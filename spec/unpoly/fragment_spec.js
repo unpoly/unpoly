@@ -10888,11 +10888,10 @@ describe('up.fragment', function() {
             expect(up.network.queue.allRequests.length).toBe(2)
 
             jasmine.respondWith({ request: 0, responseText: '<div class="element">v2</div>' })
-            await wait()
 
-            expect('.element').toHaveText('v2')
-            await expectAsync(change1Promise).toBeResolvedTo(jasmine.any(up.RenderResult))
             await expectAsync(change2Promise).toBeRejectedWith(jasmine.any(up.Aborted))
+            await expectAsync(change1Promise).toBeResolvedTo(jasmine.any(up.RenderResult))
+            expect('.element').toHaveText('v2')
           })
 
           it('aborts a conflicting request made while the render pass is waiting for a failed response', async function() {
@@ -10909,12 +10908,11 @@ describe('up.fragment', function() {
             expect(up.network.queue.allRequests.length).toBe(2)
 
             jasmine.respondWith({ request: 0, responseText: '<div class="fail-element">v2</div>', status: 500 })
-            await wait()
 
+            await expectAsync(change2Promise).toBeRejectedWith(jasmine.any(up.Aborted))
+            await expectAsync(change1Promise).toBeRejectedWith(jasmine.any(up.RenderResult))
             expect('.element').toHaveText('v1')
             expect('.fail-element').toHaveText('v2')
-            await expectAsync(change1Promise).toBeRejectedWith(jasmine.any(up.RenderResult))
-            await expectAsync(change2Promise).toBeRejectedWith(jasmine.any(up.Aborted))
           })
 
           it('aborts existing requests targeting the same element when updating from local content', async function() {
@@ -10985,7 +10983,6 @@ describe('up.fragment', function() {
               up.on('up:fragment:aborted', abortedListener)
 
               up.render('.element', { url: '/path2', abort: 'target', jid: 'my-jid-123' })
-              await wait()
 
               await expectAsync(change1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
               expect(abortedListener.calls.count()).toBe(1)
@@ -11007,7 +11004,6 @@ describe('up.fragment', function() {
               up.on('up:fragment:aborted', abortedListener)
 
               up.render('.element', { url: '/path2', abort: 'target' })
-              await wait()
 
               await expectAsync(change1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
               expect(abortedListener.calls.count()).toBe(1)
@@ -11044,15 +11040,14 @@ describe('up.fragment', function() {
               up.on('up:fragment:aborted', abortedListener)
 
               up.render({ fragment: '<div class="element">v2</div>', abort: 'target' })
-              await wait()
 
-              expect('.element').toHaveText('v2')
               await expectAsync(change1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
               expect(abortedListener.calls.count()).toBeGreaterThanOrEqual(1)
               expect(abortedListener.calls.mostRecent().args[0]).toEqual(jasmine.objectContaining({
                 type: 'up:fragment:aborted',
                 target: originalElement,
               }))
+              expect('.element').toHaveText('v2')
             })
 
             it('is emitted before an element is swapped from local HTML and no requests are in flight', async function() {

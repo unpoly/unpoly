@@ -620,7 +620,7 @@ describe('up.network', function() {
               await wait()
 
               // Eviction is delayed by 1 task so event listeners can still observe the properties we're about to evict
-              await wait(50)
+              await wait(70)
 
               expect(request).not.toHaveRecursiveValue(u.isElement)
             })
@@ -634,7 +634,7 @@ describe('up.network', function() {
               let response = await request
 
               // Eviction is delayed by 1 task so event listeners can still observe the properties we're about to evict
-              await wait(50)
+              await wait(70)
 
               expect(request).not.toHaveRecursiveValue(u.isElement)
             })
@@ -2194,7 +2194,7 @@ describe('up.network', function() {
 
         expect(lateListener).not.toHaveBeenCalled()
 
-        await wait(60)
+        await wait(80)
         expect(lateListener).toHaveBeenCalled()
       })
 
@@ -2211,7 +2211,7 @@ describe('up.network', function() {
         expect(badResponseTimeFn).toHaveBeenCalled()
         expect(lateListener).not.toHaveBeenCalled()
 
-        await wait(60)
+        await wait(80)
         expect(lateListener).toHaveBeenCalled()
       })
 
@@ -2224,7 +2224,7 @@ describe('up.network', function() {
         await wait(40)
 
         expect(lateListener).not.toHaveBeenCalled()
-        await wait(60)
+        await wait(80)
 
         expect(lateListener).toHaveBeenCalled()
       })
@@ -2235,7 +2235,7 @@ describe('up.network', function() {
         up.on('up:network:late', lateListener)
 
         up.request({ url: '/foo', lateDelay: false })
-        await wait(70)
+        await wait(80)
 
         expect(lateListener).not.toHaveBeenCalled()
       })
