@@ -64,7 +64,7 @@ up.framework = (function() {
   There are only two cases when you would boot manually:
 
   - When you load Unpoly with `<script async>`
-  - When you explicitly ask to manually boot by loading Unpoly with [`<script up-boot="manual">`](/up-boot-manual).
+  - When you explicitly ask to manually boot by setting an [`<html up-boot="manual">`](/up-boot-manual) attribute..
 
   Before you manually boot, Unpoly should be configured and compilers should be registered.
   Booting will cause Unpoly to [compile](/up.hello) the initial page.
@@ -99,22 +99,20 @@ up.framework = (function() {
     }
   }
 
-  function mustBootManually() {
-    // Since this function runs before the support check, we may be dealing
-    // with a browser that does not support `document.currentScript` (e.g. IE11).
-    // See https://caniuse.com/document-currentscript
-    let unpolyScript = document.currentScript
-
-    // If we're is loaded via <script async>, there are no guarantees
-    // when we're called or when subsequent scripts that configure Unpoly
-    // have executed
-    if (unpolyScript?.async) {
+  function mustManualBoot() {
+    // (A) If we're loaded via <script async>, there are no guarantees when we're called or when
+    //     subsequent scripts that configure Unpoly have executed.
+    // (B) We cannot rely on document.currentScript being present.
+    //     This function runs before the support check, we may be dealing with a browser that doesn't support `document.currentScript` (e.g. IE11).
+    //     Also `document.currentScript` is `undefined` for a `<script type="module">`.
+    if (document.currentScript?.async) {
       return true
     }
 
-    // If we're loaded with <script up-boot="manual"> the user explicitly
-    // requested to boot Unpoly manually.
-    if (unpolyScript?.getAttribute('up-boot') === 'manual') {
+    // (A) If we're loaded with <html up-boot="manual"> the user explicitly requested to boot Unpoly manually.
+    // (B) There is a legacy API to also allow <script up-boot="manual">.
+    //     We cannot migrate this in unpoly-migrate, as unpoly-migrate will be evaled after us.
+    if (document.querySelector('[up-boot=manual]:is(html, script)')) {
       return true
     }
 
@@ -150,11 +148,12 @@ up.framework = (function() {
 
   By default Unpoly [automatically boots](/install#initialization)
   on [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event).
-  To prevent this, add an `[up-boot="manual"]` attribute to the `<script>` element
-  that loads Unpoly:
+  To prevent this, add an `[up-boot="manual"]` attribute to the `<html>` element:
 
   ```html
-  <script src="unpoly.js" up-boot="manual"></script>
+  <html up-boot="manual"> <!-- mark: up-boot="manual" -->
+    ...
+  </html>
   ```
   You may then call `up.boot()` to manually boot Unpoly at a later time.
 
@@ -165,7 +164,7 @@ up.framework = (function() {
   function onEvaled() {
     up.emit('up:framework:evaled', { log: false })
 
-    if (mustBootManually()) {
+    if (mustManualBoot()) {
       console.debug('Call up.boot() after you have configured Unpoly')
     } else {
       // (1) On DOMContentLoaded we know that all non-[async] scripts have executed.
