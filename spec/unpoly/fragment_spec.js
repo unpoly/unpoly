@@ -3291,6 +3291,28 @@ describe('up.fragment', function() {
           expect('#bar').toHaveText('old bar')
           expect('#baz').toHaveText('new baz')
         })
+
+        it('can update a single <tr> from a document that only contains that <tr>', async function() {
+          const table = htmlFixture(`
+            <table>
+              <tbody>
+                <tr id="row1"><td>cell1 old</td></tr>
+                <tr id="row2"><td>cell2 old</td></tr>
+                <tr id="row3"><td>cell3 old</td></tr>
+              </tbody>
+            </table>
+          `)
+
+          up.render({ target: '#row2', document: `
+            <tr id="row2"><td>cell2 new</td></tr>
+          `})
+          await wait()
+
+          expect('#row1 td').toHaveText('cell1 old')
+          expect('#row2 td').toHaveText('cell2 new')
+          expect('#row3 td').toHaveText('cell3 old')
+        })
+
       })
 
 

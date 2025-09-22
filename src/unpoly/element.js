@@ -745,6 +745,12 @@ up.element = (function() {
   @internal
   */
   function createBrokenDocumentFromHTML(html) {
+    // DOMParser is usually smart enough to parse an incomplete HTML fragment into a full <html> document.
+    // However, any table components without an enclosing <table> will be parsed into a simple text node.
+    const firstTag = firstTagNameInHTML(html)
+    if (['TR', 'TD', 'TH', 'THEAD', 'TBODY'].includes(firstTag)) {
+      html = `<table>${html}</table>`
+    }
     return new DOMParser().parseFromString(html, 'text/html')
   }
 
@@ -1562,6 +1568,18 @@ up.element = (function() {
     }
   }
 
+  // HTML allows comments before a <!DOCTYPE> or <html> tag (issue #726)
+  const FIRST_TAG_NAME_PATTERN = /^\s*(<!--[^-]*.*?-->\s*)*<([a-z-!]+)\b/i
+
+  function firstTagNameInHTML(html) {
+    return FIRST_TAG_NAME_PATTERN.exec(html)?.[2].toUpperCase()
+  }
+
+  function isFullDocumentHTML(html) {
+    let firstTag = firstTagNameInHTML(html)
+    return firstTag === 'HTML' || firstTag === '!DOCTYPE'
+  }
+
   return {
     subtree,
     subtreeFirst,
@@ -1630,5 +1648,7 @@ up.element = (function() {
     matchSelectorMap,
     elementLikeMatches,
     documentPosition,
+    firstTagNameInHTML,
+    isFullDocumentHTML,
   }
 })()

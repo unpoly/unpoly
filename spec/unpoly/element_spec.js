@@ -808,6 +808,72 @@ describe('up.element', function() {
       expect(element.querySelector("title")).toBeMissing()
       expect(element.querySelector("h1").textContent).toEqual('Full story')
     })
+
+    describe('table fragments without an enclosing <table>', function() {
+      it('parses a single <tbody>', function() {
+        const html = `
+          <tbody>
+            <tr>
+              <td>cell</td>
+            </tr>
+          </tbody>
+        `
+        const element = up.element.createBrokenDocumentFromHTML(html)
+        expect(element.querySelector("tbody")).toBeElement()
+        expect(element.querySelector("tbody tr")).toBeElement()
+        expect(element.querySelector("tbody tr td")).toBeElement()
+        expect(element.querySelector("tbody tr td").textContent).toBe('cell')
+      })
+
+      it('parses a single <tr>', function() {
+        const html = `
+          <tr>
+            <td>cell</td>
+          </tr>
+        `
+        const element = up.element.createBrokenDocumentFromHTML(html)
+        expect(element.querySelector("tr")).toBeElement()
+        expect(element.querySelector("tr td")).toBeElement()
+        expect(element.querySelector("tr td").textContent).toBe('cell')
+      })
+
+      it('parses a single <tr> with an [id]', function() {
+        const html = `
+          <tr id="row123">
+            <td>cell</td>
+          </tr>
+        `
+        const element = up.element.createBrokenDocumentFromHTML(html)
+        expect(element.querySelector("tr")).toBeElement()
+        expect(element.querySelector("tr")).toHaveAttribute('id', 'row123')
+        expect(element.querySelector("tr td")).toBeElement()
+        expect(element.querySelector("tr td").textContent).toBe('cell')
+      })
+
+      it('parses a single <tr>, preceded by a comment', function() {
+        const html = `
+          <!-- partial "row.erb" -->
+          <tr>
+            <td>cell</td>
+          </tr>
+        `
+        const element = up.element.createBrokenDocumentFromHTML(html)
+        expect(element.querySelector("tr")).toBeElement()
+        expect(element.querySelector("tr td")).toBeElement()
+        expect(element.querySelector("tr td").textContent).toBe('cell')
+      })
+
+      it('parses a single <td>', function() {
+        const html = `
+          <td>cell</td>
+        `
+        const element = up.element.createBrokenDocumentFromHTML(html)
+        expect(element.querySelector("td")).toBeElement()
+        expect(element.querySelector("td").textContent).toBe('cell')
+      })
+
+    })
+
   })
 
   describe('up.element.createNodesFromHTML()', function() {

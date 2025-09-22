@@ -1,9 +1,6 @@
 const u = up.util
 const e = up.element
 
-// HTML allows comments before a <!DOCTYPE> or <html> tag (issue #726)
-const FULL_DOCUMENT_PATTERN = /^\s*(<!--[^-]*.*?-->\s*)*<(html|!DOCTYPE)\b/i
-
 up.ResponseDoc = class ResponseDoc {
 
   constructor({ document, fragment, content, target, origin, data, cspInfo, match }) {
@@ -38,7 +35,7 @@ up.ResponseDoc = class ResponseDoc {
       // Remember whether the HTML originally contained a full document.
       // Asset comparison needs to know whether the document has a <head> because
       // e.createBrokenDocumentFromHTML() always creates an (empty) <head> if missing in the HTML.
-      this._isFullDocument = FULL_DOCUMENT_PATTERN.test(value)
+      this._isFullDocument = e.isFullDocumentHTML(value)
 
       let htmlParser = (html) => [e.createBrokenDocumentFromHTML(html)]
       let nodes = up.fragment.provideNodes(value, { origin, data, htmlParser })
