@@ -14,52 +14,110 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 We had to make some breaking changes, which are marked with a ⚠️ emoji in this CHANGELOG.\
 Most incompatibilities are polyfilled by [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading).
 
-- Revert implementation of up.util.task() to again use setTimeout() instead of postMessage(). postMessage() was introduced in 3.11 to more often call before rendering. Unfortunately message order is erratic in Safari, making it hard to reason about the code.
-- Fragments with both `[up-poll]` and `[up-keep]` now continue polling when the element is kept (fixes #763)
-- New experimental event `up:fragment:kept event`. This event is emitted after all [keep conditions](/preserving-elements#conditions) are evaluated. A listener can now be sure that the element is going to be kept.
-- Fix edge case errors with { abort }:
-  - Fix up.render({ response }) crashing when another request is in flight.
-  - When rendering from a { url }, and another conflicting request was made while waiting for the network, and the render response turned out to be failed, the conflicting request is now aborted.
-- Mark as `.up-active` both the expanded link and the [up-expand] area containing it (fixes #738)
-- Submit buttons can override [up] attributes for the form (fixes #568)
-- Allow submit buttons to opt out of Unpoly handling with [up-submit=false]
-- Make up.form.get() work in multiple layers with the same form[id]
-- Improve performance of up.form.get() lookups
+
+### Asynchronous compilers
+
+- Copy docs from /up.compiler#async
+- All edge cases
+- Timing
+- ⚠️ up.hello() now returns a Promise instead of the given Element
+
+
+### Performance fixes
+
 - Fix a performance regression where Unpoly would track `[up-validate]` fields in every form. Only start a field-tracking FormValidator in validating forms.
 - SelectorTracker only syncs once after a render pass
+- Watching a single field no longer tracks dynamically inserted fields
+- Improve performance of up.form.get() lookups
+
+
+### HTML content-type required
+
+⚠️ Unpoly now requires server responses with an HTML content-type, like `text/html` or `application/xhtml+xml`. Trying to render responses with a different type will throw an error, even if the response body contains HTML markup.
+
+Restricting content types is a security precaution. It protects in a hypothetical scenario where an attacker can both upload a file *and* can use an existing XSS vulnerability to cause Unpoly to render that file. It doesn't affect applications that reliably escape user input.
+
+You can configure which responses Unpoly will process by configuring a function in `up.fragment.config.renderableResponse`. To render *any* response regardless of content-type, configure a function that always returns true`:
+    
+```js
+up.fragment.config.renderableResponse = (response) => true
+```
+
+#### New guides
+
 - New guide /enhancing-elements
 - New guide /submitting-forms
 - Show how to deal with cached notification flashes (/flashes#caching)
-- Asynchronous compilers
-  - Copy docs from /up.compiler#async
-  - All edge cases
-  - Timing
-  - ⚠️ up.hello() now returns a Promise instead of the given Element
-- Fix a bug where Unpoly would no longer history navigations after the page is reloaded (issue #773)
+
+
+### Submit buttons can override form attributes
+
+- Submit buttons can override [up] attributes for the form (fixes #568)
+- Allow submit buttons to opt out of Unpoly handling with [up-submit=false]
+
+
+### Support for sticky positioning
+
 - Obstructions with [up-fixed] measure sticky elements as if they're always using fixed positioning
-- New { destroying } option for up.fragment.get()
+
+
+
+### Partial tables
+
+Unpoly can now parse responses that only contain a `<tr>`, `<td>` or `<th>` element, without an enclosing `<table>` ( (issues #777, #91).
+
+
+### Expanding click areas
+
+- Mark as `.up-active` both the expanded link and the [up-expand] area containing it (fixes #738)
+  - Show example
+- No longer mark an [up-expanded] link as `.up-active` if the clicked link is not the expanding link
+
+
+
+### Preserving fragments
+
+- New experimental event `up:fragment:kept event`. This event is emitted after all [keep conditions](/preserving-elements#conditions) are evaluated. A listener can now be sure that the element is going to be kept.
+- Fragments with both `[up-poll]` and `[up-keep]` now continue polling when the element is kept (fixes #763)
+
+
+### Closing overlays
+
 - Destroy overlay elements before popping the layer stack
 - Replace up.Layer#isOpen()/#isClosed() with #isActive()
-- When closing a closed layer, throw AbortError instead of doing nothing
-- Don't crash when an [up-switch] without a surrounding form is placed in an overlay, and that overlay is closed (bugfix)
-- Watching a single field no longer tracks dynamically inserted fields
-- Publish up.fragment.isAlive() as experimental
-- ⚠️ Only render responses with an HTML content-type
-  - By default Unpoly renders responses with an [HTML content-type](/up.Response.prototype.isHTML).
-  Trying to render responses with a different type will throw an error, even if the response body contains HTML markup.
+- Don't crash when an [up-switch] without a surrounding form is placed in an overlay, and that overlay is closed
+- When [closing an overlay](/closing-overlays) that is already closed, unpoly now throws an `AbortError` instead of doing nothing.
 
-  Restricting content types is a security precaution. It protects in a hypothetical scenario where an attacker can both upload a file *and* can use an existing XSS vulnerability to cause Unpoly to render that file. It doesn't
-  affect applications that reliably escape user input.
-  To render *any* response regardless of content-type, configure a function that always returns true`:
-    
-  ```js
-  up.fragment.config.renderableResponse = () => true
-  ```
-- Add experimental method up.Response#isHTML()
-- Parse incomplete HTML fragments that only contain a <tr> or <td> or <th> (#777, #91)
+
+
+### Manual booting
+
+- ⚠️ To boot manually, the `[up-boot=manual]` must now be set on the `<html>` element instead of on the `<script>` loading Unpoly.
+- Unpoly now supports [manual booting](/up-boot-false) when Unpoly is loaded as a `<script type="module">`.
+
+
+### Space-separated tokens are here to stay
+
 - In examples, separate token lists with a space by default
-- ⚠️ Require [up-boot=manual] to be set on the <html> document instead of the `<script>` loading Unpoly.
-- Support manual booting when Unpoly is loaded as a `<script type="module">`
+
+
+### Fragment API
+
+- New { destroying } option for up.fragment.get()
+- Publish up.fragment.isAlive() as experimental
+
+
+### Smaller fixes and changes
+
+- Revert implementation of up.util.task() to again use setTimeout() instead of postMessage(). postMessage() was introduced in 3.11 to more often call before rendering. Unfortunately message order is erratic in Safari, making it hard to reason about the code.
+- Add experimental method up.Response#isHTML()
+- Fix edge case errors with { abort }:
+  - Fix up.render({ response }) crashing when another request is in flight.
+  - When rendering from a { url }, and another conflicting request was made while waiting for the network, and the render response turned out to be failed, the conflicting request is now aborted.
+- Make up.form.get() work in multiple layers with the same form[id]
+- Fix a bug where Unpoly would no longer history navigations after the page is reloaded (issue #773)
+
+
 
 
 3.11.0
