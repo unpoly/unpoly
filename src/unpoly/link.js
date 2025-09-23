@@ -1382,10 +1382,10 @@ up.link = (function() {
   `[up-expand]` attribute to a CSS selector to define which link should be expanded:
 
   ```html
-  <div class="notification" up-expand=".close">
+  <div class="notification" up-expand="#close"> <!-- mark: #close -->
     Record was saved!
-    <a class="details" href="/records/5">Details</a>
-    <a class="close" href="/records">Close</a>
+    <a id="details" href="/records/5">Details</a>
+    <a id="close" href="/records">Close</a> <!-- mark: id="close" -->
   </div>
   ```
 

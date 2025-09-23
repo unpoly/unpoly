@@ -3150,7 +3150,7 @@ describe('up.link', function() {
           expect(target).toHaveClass('up-loading')
         })
 
-        it('does not mark an [up-expand] as active if the expanding link is not the first link', async function() {
+        it('does not mark an [up-expand] as active if the clicked link is not the first link', async function() {
           let [container, link1, link2, target] = htmlFixtureList(`
             <div up-expand>
               <a href="/path1" up-target="#target">link1</a>
@@ -3164,6 +3164,24 @@ describe('up.link', function() {
 
           expect(link1).not.toHaveClass('up-active')
           expect(link2).toHaveClass('up-active')
+          expect(container).not.toHaveClass('up-active')
+          expect(target).toHaveClass('up-loading')
+        })
+
+        it('does not mark an [up-expand] as active if the first link is clicked, but is not the expanding link', async function() {
+          let [container, link1, link2, target] = htmlFixtureList(`
+            <div up-expand="link2">
+              <a id="link1" href="/path1" up-target="#target">link1</a>
+              <a id="link2" href="/path2" up-target="#target">link2</a>
+             </div>
+             <div id="target">target</div>
+          `)
+          up.hello(container)
+
+          Trigger.clickSequence(link1)
+
+          expect(link1).toHaveClass('up-active')
+          expect(link2).not.toHaveClass('up-active')
           expect(container).not.toHaveClass('up-active')
           expect(target).toHaveClass('up-loading')
         })
