@@ -93,8 +93,10 @@ Just like in regular HTML, you can have multiple submit buttons on a form.
 Unpoly will submit the form when any of the buttons is clicked. Submitting the form
 by pressing the `Enter` key will submit using the first submit button.
 
+### Per-button parameters {#per-button-params}
+
 If a submit button has a `[name]` and `[value]` attribute, it will be included
-in the form params sent to the server:
+in the form parameters sent to the server:
 
 ```html
 <form method="post" action="/proposal" up-submit>
@@ -102,6 +104,14 @@ in the form params sent to the server:
   <button type="submit" name="decision" value="reject">Reject</button> <!-- chip: Sends { decision: 'reject' } -->
 </form>
 ```
+
+To include multiple params, set an [`[up-params]`](/up-submit#up-params) attribute on the button:
+
+```html
+<button type="submit" up-params="{ decision: 'reject', reason: 'Poor quality' }">Reject</button> <!-- mark: up-params="{ decision: 'reject', reason: 'Poor quality' }" -->
+```
+
+### Per-button actions {#per-button-action}
 
 Submit buttons can cause the form to submit to a different server endpoint,
 by setting `[formaction]` and `[formaction]` attributes:
@@ -113,14 +123,7 @@ by setting `[formaction]` and `[formaction]` attributes:
 </form>
 ```
 
-Individual submit buttons can opt for a full page load, by setting an `[up-submit="false"]` attribute:
-
-```html
-<form method="post" action="/report/update" up-submit>
-  <button type="submit" name="command" value="save">Save report</button>
-  <button type="submit" name="command" value="download" up-submit="false">Download PDF</button> <!-- mark: up-submit="false" -->
-</form>
-```
+### Overriding render options {#per-button-options}
 
 Submit buttons can supplement or override most Unpoly attributes from the form:
 
@@ -130,6 +133,21 @@ Submit buttons can supplement or override most Unpoly attributes from the form:
   <button type="submit" up-target="#failure" up-confirm="Really reject?">Reject</button> <!-- mark: up-confirm="Really reject?" -->
 </form>
 ```
+
+See [`[up-submit]`](/up-submit#attributes) for a list of overridable attributes 
+
+
+### Opting into a full page load {#per-button-opt-out}
+
+Individual submit buttons can opt for a full page load, by setting an `[up-submit="false"]` attribute:
+
+```html
+<form method="post" action="/report/update" up-submit>
+  <button type="submit" name="command" value="save">Save report</button>
+  <button type="submit" name="command" value="download" up-submit="false">Download PDF</button> <!-- mark: up-submit="false" -->
+</form>
+```
+
   
 
 
