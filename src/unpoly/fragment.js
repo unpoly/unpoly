@@ -252,7 +252,7 @@ up.fragment = (function() {
     To render *any* response regardless of content-type, configure a function that always returns `true`:
 
     ```js
-    up.fragment.config.renderableResponse = () => true
+    up.fragment.config.renderableResponse = (response) => true
     ```
 
     @experimental
