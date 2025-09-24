@@ -1181,7 +1181,7 @@ up.fragment = (function() {
 
   ## Understanding aliveness
 
-  A fragment that is alive can be [targeted](/targeting), and can be discovered by `up.fragment` functions.
+  A fragment that is alive can be [targeted](/targeting-fragments), and can be discovered by `up.fragment` functions.
 
   An fragment becomes "unalive" immediately when it is destroyed, or when an ancestor is destroyed.
   If the destruction is [animated](/up.motion), the fragment is "unalive" while the animation is still playing.

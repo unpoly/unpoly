@@ -119,7 +119,7 @@ When such a response is re-used, old flash messages will be shown again.
 There are several workarounds for this:
 
 1. Do not cache responses with flashes.
-2. Have a [compiler suppress flash messages](#suppressing-cached-flashes-suppressing-cached-flashes) that have been shown before.
+2. Have a [compiler suppress flash messages](#suppressing-cached-flashes) that have been shown before.
 3. Use a different URL for responses with flashes, such es `/users/3?updated=true`.
 4. Transport flash messages in a client-readable cookie instead.
 

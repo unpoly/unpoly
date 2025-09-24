@@ -1487,7 +1487,7 @@ up.form = (function() {
   @selector [up-submit]
 
   @params-note
-    Most of these attributes can also be [set on the submit button](/submitting-forms#submit-button).
+    Most of these attributes can also be [set on the submit button](/submitting-forms#submit-buttons).
 
   @section Targeting
     @mix up-follow/targeting

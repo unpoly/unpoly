@@ -11,24 +11,90 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 3.12.0
 ------
 
-We had to make some breaking changes, which are marked with a ⚠️ emoji in this CHANGELOG.\
-Most incompatibilities are polyfilled by [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading).
+This release adds [asynchronous compilers](/up.compiler#async) and many other features requested by the community.\
+We also fixed a number of [performance regressions](#performance-fixes) introduced by Unpoly [3.11](/changes/3.11.0).
+
+Breaking changes are marked with a ⚠️ emoji and polyfilled by [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading).
+
+> [note]
+> Our sponsor [makandra](https://makandra.de/en) funded this release ❤️\
+> Please consider hiring makandra for [Unpoly support](https://unpoly.com/support).
 
 
 ### Asynchronous compilers
 
-- Copy docs from /up.compiler#async
-- All edge cases
-- Timing
-- ⚠️ up.hello() now returns a Promise instead of the given Element
+Compiler functions can now be [`async`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function). This is useful when a compiler needs to fetch network  resources, or when calling a library with an asynchronous API:
+
+```js
+up.compiler('textarea.wysiwyg', async function(textarea) { // mark: async
+  let editor = await import('wysiwyg-editor') // mark: await
+  editor.init(textarea) // mark: await
+})
+```
+
+You can also use this to split up expensive tasks, giving the browser a chance to render and process user input:
+
+
+```js
+up.compiler('.element', async function(element) {
+  doRenderBlockingWork(element)
+  await scheduler.yield() // mark-line
+  doUserVisibleWork(element)
+})
+```
+
+#### Cleaning up async work {#async-destructors}
+
+Like synchronous compilers, async compiler functions can return a [destructor function](#destructor):
+
+```js
+up.compiler('textarea.wysiwyg', async function(textarea) {
+  let editor = await import('wysiwyg-editor')
+  editor.init(textarea) // mark: await
+  return () => editor.destroy(textarea) // mark-line
+})
+```
+
+Unpoly guarantees that the destructor is called, even if the element gets destroyed before the compiler function terminates.
+
+#### Timing render-blocking mutations {#async-timing}
+
+Unpoly will run the first [task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/) of every compiler function before allowing the browser to render DOM changes. If an async compiler function runs for multiple tasks, the browser will render between tasks. If you have render-blocking mutations that should be hidden from the user, these must happen in the first task.
+
+![Timing of compiler tasks and browser render frames](images/compiler-tasks.svg){:width='670'}
+
+Async compilers will not delay the promise returned by rendering functions `up.render()` or `up.layer.open()`.\
+Async compilers *will* delay the promise returned by [`up.render().finished`](/render-lifecycle#postprocessing)
+and `up.hello()`.
+
+
+#### `up.hello()` is now async
+
+⚠️ The `up.hello()` function now returns a promise that fulfills when all synchronous and asynchronous compilers have terminated:
+
+```js
+let textarea = up.element.createFromHTML('<textarea class="wysiwyg"></textarea>')
+await up.hello(textarea) // mark: await
+// chip: WYISWYG editor is now initialized
+```
+
+The fulfillment value is the same element that was passed as an argument:
+
+```js
+let html = '<textarea class="wysiwyg"></textarea>'
+let textarea = await up.hello(up.element.createFromHTML(html))
+```
+
 
 
 ### Performance fixes
 
-- Fix a performance regression where Unpoly would track `[up-validate]` fields in every form. Only start a field-tracking FormValidator in validating forms.
-- SelectorTracker only syncs once after a render pass
-- Watching a single field no longer tracks dynamically inserted fields
-- Improve performance of up.form.get() lookups
+Unpoly 3.11 introduced a number of performance regressions that would be very noticable on pages with many elements, or many forms. To address this, this release includes a number of performance fixes:
+
+- Fix a performance regression where Unpoly would track the DOM for dynamically inserted `[up-validate]` fields for every form. Now fields are only tracked for forms that use `[up-validate]`.
+- Features that need to track the insertion or removal of elements now only sync with the DOM once after a render pass.
+- Watching a single field no longer tracks dynamically inserted fields.
+- Improved the performance of internal form lookups.
 
 
 ### HTML content-type required
@@ -43,79 +109,124 @@ You can configure which responses Unpoly will process by configuring a function 
 up.fragment.config.renderableResponse = (response) => true
 ```
 
-#### New guides
+### New guides
 
-- New guide /enhancing-elements
-- New guide /submitting-forms
-- Show how to deal with cached notification flashes (/flashes#caching)
+The [documentation](https://unpoly.com/api) has been extended with new guides:
+
+- [Enhancing elements with JavaScript](/enhancing-elements) teaches everything you need to know about compilers, destructors and preventing memory leaks.
+- [Submitting forms in-place](/submitting-forms) shows how to have Unpoly handle forms from HTML or JavaScript.
+- [Notification flashes](/flashes) now contains guidance for [suppressing flashes in cached responses](/flashes#caching).
 
 
 ### Submit buttons can override form attributes
 
-- Submit buttons can override [up] attributes for the form (fixes #568)
-- Allow submit buttons to opt out of Unpoly handling with [up-submit=false]
+Submit buttons can now supplement or override most Unpoly attributes from the form:
+
+```html
+<form method="post" action="/proposal/accept" up-submit>
+  <button type="submit" up-target="#success">Accept</button>
+  <button type="submit" up-target="#failure" up-confirm="Really reject?">Reject</button> <!-- mark: up-confirm="Really reject?" -->
+</form>
+```
+
+Individual submit buttons can now opt for a full page load, by setting an `[up-submit="false"]` attribute:
+
+```html
+<form method="post" action="/report/update" up-submit>
+  <button type="submit" name="command" value="save">Save report</button>
+  <button type="submit" name="command" value="download" up-submit="false">Download PDF</button> <!-- mark: up-submit="false" -->
+</form>
+```
 
 
-### Support for sticky positioning
-
-- Obstructions with [up-fixed] measure sticky elements as if they're always using fixed positioning
+See [`[up-submit]`](/up-submit#attributes) for a list of overridable attributes 
 
 
+### Sticky layout elements
 
-### Partial tables
+When scrolling to reveal a target element, Unpoly will ensure that layout elements with [`[up-fixed=top]`](/up-fixed-top) are not covering the revealed content.
 
-Unpoly can now parse responses that only contain a `<tr>`, `<td>` or `<th>` element, without an enclosing `<table>` ( (issues #777, #91).
+You can now use `[up-fixed]` on elements with [`position: sticky`](https://www.w3schools.com/howto/howto_css_sticky_element.asp). Unpoly will measure sticky element like permanently fixed elements. The current scroll position is not taken into account.
+
+
+### Support partial tables responses
+
+In the past Unpoly didn't allow a server to [optimize its response](/optimizing-responses) when the result was a single table row (or cell) without an enclosing `<table>`:
+
+```http
+Content-type: text/html
+
+<tr>
+  <td>...</td>
+</tr>
+```
+
+Unpoly can now parse responses that only contain a `<tr>`, `<td>` or `<th>` element, without an enclosing `<table>` (issue #91).
 
 
 ### Expanding click areas
 
-- Mark as `.up-active` both the expanded link and the [up-expand] area containing it (fixes #738)
-  - Show example
-- No longer mark an [up-expanded] link as `.up-active` if the clicked link is not the expanding link
+Unpoly lets you enlarge a link's click area using the `[up-expand]` attribute. This version addresses inconsistent (or impractical) assignment of the `.up-active` [feedback class](/feedback-classes) when an expanded link is clicked.
+
+When either the `[up-expand]` container or the first link is clicked, the `.up-active` class
+is now assigned to both elements:
+
+```html
+<div up-expand class="up-active"> <!-- mark: class="up-active" -->
+  <a href="/foo" class="up-active">Foo</a> <!-- mark: class="up-active" -->
+  <a href="/bar">Bar</a>
+</div>
+```
+
+When a non-expanded link is clicked, now only that link becomes `.up-active`:
+
+```html
+<div up-expand>
+  <a href="/foo">Foo</a> <!-- chip: not active -->
+  <a href="/bar" class="up-active">Bar</a> <!-- mark: class="up-active" -->
+</div>
+```
+
 
 
 
 ### Preserving fragments
 
-- New experimental event `up:fragment:kept event`. This event is emitted after all [keep conditions](/preserving-elements#conditions) are evaluated. A listener can now be sure that the element is going to be kept.
+Two changes were made to [preserving elements](/preserving-elements) using the `[up-keep]` attribute:
+
+- Added an experimental event `up:fragment:kept`. This event is emitted after all [keep conditions](/preserving-elements#conditions) are evaluated and preservation can no longer be prevented. A listener can be sure that the element is going to be kept.
 - Fragments with both `[up-poll]` and `[up-keep]` now continue polling when the element is kept (fixes #763)
 
 
 ### Closing overlays
 
-- Destroy overlay elements before popping the layer stack
-- Replace up.Layer#isOpen()/#isClosed() with #isActive()
-- Don't crash when an [up-switch] without a surrounding form is placed in an overlay, and that overlay is closed
-- When [closing an overlay](/closing-overlays) that is already closed, unpoly now throws an `AbortError` instead of doing nothing.
+- When an overlay is [closed](/closing-overlays), the overlay now remains in the [layer stack](/up.layer.stack) until all destructors have run. This way destructor functions can still look up elements in their layer.
+- ⚠️ The method `up.Layer#isOpen()` has been deprecated. Use `up.Layer#isAlive() instead`.
+- ⚠️ The method `up.Layer#isClosed()` has been deprecated. Use `!up.Layer#isAlive() instead`.
+- When [closing an overlay](/closing-overlays) that is already closed, Unpoly now throws an `AbortError` instead of doing nothing.
+- Fix a crash when an `[up-switch]` input without a containing form is placed in an overlay, and that overlay is closed.
 
 
 
 ### Manual booting
 
 - ⚠️ To boot manually, the `[up-boot=manual]` must now be set on the `<html>` element instead of on the `<script>` loading Unpoly.
-- Unpoly now supports [manual booting](/up-boot-false) when Unpoly is loaded as a `<script type="module">`.
-
-
-### Space-separated tokens are here to stay
-
-- In examples, separate token lists with a space by default
+- Unpoly now supports [manual booting](/up-boot-manual) when Unpoly is loaded as a `<script type="module">`.
 
 
 ### Fragment API
 
-- New { destroying } option for up.fragment.get()
-- Publish up.fragment.isAlive() as experimental
+- The `up.fragment.get()` function now has a `{ destroying: true }` option. This allows to find destroyed elements that are still playing out their exit animation. Note that all `up.fragment` functions normally ignore elements in an exit animation.
+- Added an experimental function `up.fragment.isAlive()`. It returns whether an element is both attached to the DOM and also not in an exit animation.
 
 
 ### Smaller fixes and changes
 
-- Revert implementation of up.util.task() to again use setTimeout() instead of postMessage(). postMessage() was introduced in 3.11 to more often call before rendering. Unfortunately message order is erratic in Safari, making it hard to reason about the code.
-- Add experimental method up.Response#isHTML()
-- Fix edge case errors with { abort }:
-  - Fix up.render({ response }) crashing when another request is in flight.
-  - When rendering from a { url }, and another conflicting request was made while waiting for the network, and the render response turned out to be failed, the conflicting request is now aborted.
-- Make up.form.get() work in multiple layers with the same form[id]
-- Fix a bug where Unpoly would no longer history navigations after the page is reloaded (issue #773)
+- Reverted the implementation of `up.util.task()` to again queue macrotasks using `setTimeout()` instead of `postMessage()`. Unpoly 3.11 only recently switched to `postMessage()` because of its tighter scheduling. Unfortunately message order is erratic with `postMessage()` in Safari, making it hard to reason about the sequence of asynchronous callbacks.
+- Fix a bug where Unpoly would no longer restore history entries after the page is reloaded (issue #773).
+- Added an experimental method `up.Response#isHTML()`. It returns whether the response has a [content-type](/up.Response.prototype.contentType) of `text/html` or `application/xml+html`. It doesn't test if the response body actual contains a valid HTML document.
+- Fix a crash when `up.render({ response })` is called while another request is in flight.
+- When rendering, and request with the same [`{ failTarget }`](/failed-responses#fail-options) was made while waiting for the network, and the first request responded with an error status and updates , the second request is now aborted.
 
 
 
@@ -197,7 +308,7 @@ Reacting to `#hash` changes usually involves scrolling, not rendering. To better
 - When a fragment update closes an overlay and then navigates the parent layer to a new location, Unpoly will no longer push a redundant history entry of the parent layer's location before navigating.
 - Published an experimental function `up.history.replace()` to change the URL of the current history state.
 - The `up:layer:location:changed` event now has a `{ previousLocation }` property.
-- Fix a bug where history wasn't updated when a response contains comments before the `<!DOCTYPE>` or `<html>` tag (fixes #726)
+- Fix a bug where history wasn't updated when a response contains comments before the `<!DOCTYPE>` or `<html>` tag (issue #726)
 
 
 
@@ -1526,9 +1637,9 @@ Several new guides were also added:
 - When [updating history](/updating-history), the `html[lang]` is now also updated. This can be prevented by setting an `[up-lang=false]` attribute or passing a `{ lang: false }` option.
 - The function `up.util.microtask()` was deprecated. Use the browser's built-in [`queueMicrotask()`](https://developer.mozilla.org/en-US/docs/Web/API/queueMicrotask) instead.
 - [Right-anchored](/up-anchored-right) can now control their appearance while a scrolling overlay is open, by styling the `.up-scrollbar-away` class.
-- Fix a bug where the back button did not work after following a link that contains an anchor starting with a number (fixes #603).
+- Fix a bug where the back button did not work after following a link that contains an anchor starting with a number (issue #603).
 - Clickable elements now get an ARIA role of `button`. In earlier versions these elements received a link `link` role.
-- Fix a bug where animating with `{ duration: 0 }` would apply the default duration instead of skipping the animation (fixes #588).
+- Fix a bug where animating with `{ duration: 0 }` would apply the default duration instead of skipping the animation (issue #588).
 - You can now exclude navigational containers from applying `.up-current` by adding a selector to `up.status.config.noNavSelectors`.
 
 

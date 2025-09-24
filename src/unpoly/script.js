@@ -224,14 +224,14 @@ up.script = (function() {
 
   ## Asynchronous compilers {#async}
 
-  Compiler functions can be `async`. This is useful when a compiler needs to fetch network
+  Compiler functions can be [`async`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function).
+  This is useful when a compiler needs to fetch network
   resources, or when calling a library with an asynchronous API:
 
   ```js
   up.compiler('textarea.wysiwyg', async function(textarea) { // mark: async
     let editor = await import('wysiwyg-editor') // mark: await
-    await editor.init(textarea) // mark: await
-    return () => editor.destroy(textarea)
+    editor.init(textarea) // mark: await
   })
   ```
 
@@ -247,20 +247,31 @@ up.script = (function() {
   })
   ```
 
-  ### Destructors
+  ### Cleaning up async work {#async-destructors}
 
-  Async compiler functions can fulfill with a [destructor function](#destructor).
+  Like synchronous compilers, async compiler functions can return a [destructor function](#destructor):
+
+  ```js
+  up.compiler('textarea.wysiwyg', async function(textarea) {
+    let editor = await import('wysiwyg-editor')
+    editor.init(textarea) // mark: await
+    return () => editor.destroy(textarea) // mark-line
+  })
+  ```
+
   Unpoly guarantees that the destructor is called, even if the element gets destroyed
   before the compiler function terminates.
 
-  ### Timing
+  ### Timing render-blocking mutations {#async-timing}
 
-  Before the browser renders new fragments, Unpoly will call synchronous compiler functions, and the first [task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/) of an async compiler
-  functions. Any render-blocking mutations (that should be hidden from the user) must happen in that first task.
+  Unpoly will run the first [task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/) of every compiler
+  function before allowing the browser to render DOM changes. If an async compiler function runs for multiple tasks,
+  the browser will render between tasks. If you have render-blocking mutations that should be hidden from the user,
+  these must happen in the first task.
 
   ![Timing of compiler tasks and browser render frames](images/compiler-tasks.svg){:width='670'}
 
-  Async compilers will not delay the promise returned by rendering functions `up.render()` or `up.layer.open()`.
+  Async compilers will not delay the promise returned by rendering functions `up.render()` or `up.layer.open()`.\
   Async compilers *will* delay the promise returned by [`up.render().finished`](/render-lifecycle#postprocessing)
   and `up.hello()`.
 
@@ -595,7 +606,7 @@ up.script = (function() {
   In particular every compiler function is guaranteed to only run once for each matching element.
 
   If a new compiler is registered after initial compilation,
-  that new compiler is [run automatically on current elements](/up.compiler#registering-compilers-after-booting).
+  that new compiler is [run automatically on current elements](/up.compiler#late).
 
   ## Detecting compiler errors
 
@@ -629,12 +640,18 @@ up.script = (function() {
   The `up.hello()` function returns a promise that fulfills when all synchronous and asynchronous
   compilers have terminated:
 
-  ```
+  ```js
   let textarea = up.element.createFromHTML('<textarea class="wysiwyg"></textarea>')
   await up.hello(textarea) // mark: await
   // chip: WYISWYG editor is now initialized
   ```
 
+  The fulfillment value is the same element that was passed as an argument:
+
+  ```js
+  let html = '<textarea class="wysiwyg"></textarea>'
+  let textarea = await up.hello(up.element.createFromHTML(html))
+  ```
 
   @function up.hello
   @param {Element|jQuery|string} element
@@ -658,6 +675,8 @@ up.script = (function() {
     @experimental
   @return {Promise<Element>}
     A promise that fulfills when the element has finished compilation.
+
+    The fulfillment value is the `element` argument.
   @stable
   */
   async function hello(element, options = {}) {
