@@ -2615,3 +2615,151 @@ Refactored internals. No API changes.
 - No longer preloads links with unsafe HTTP methods
 
 
+0.6.1
+-----
+
+- Fix a bug that prevented `up.proxy.ajax()` calls from terminating.
+
+0.6.0
+-----
+
+- Default options are now applied for `null` and `undefined` values, but no longer for empty strings.
+- Allow to disable cache use on a per-request basis.
+- `up.reload()` no longer reads from the cache by default.
+- Renamed `[up-marker]` to `[up-slot]`
+- `up.destroy()` can now animate the element removal with a new `{ animate }` option.
+
+0.5.0
+-----
+
+- Add animation options (delay, duration, easing) to most Javascript functions and UJS behavior
+- Fix a bug that prevented replacing fragments during a running animation or transition
+
+0.4.4
+-----
+
+- Allow to call `up.modal.open()` without an opening hyperlink.
+
+0.4.3
+-----
+
+- Fix URL normalization in Internet Explorer.
+- New function `up.util.isElement()`.
+- New function `up.util.nullJquery()`.
+- Allow to override the target URL in `up.popup.open()` with an `{ url }` option.
+- Fix `{ scroll }` option for `up.follow()`
+
+0.4.2
+-----
+
+- Remove unintended dependency on underscore.js.
+- Disable `[up-instant]` if a modifier key is pressed or if the element is right-clicked.
+- Popups and modals no longer restore history upon closing when there was a fragment change behind the overlay.
+- Fix incorrect window title after fragment update.
+- Fix erratic scrolling behavior.
+- Remove unintended logging.
+- Add configuration `up.viewport.config`.
+- Reveal elements before they are replaced.
+- `.up-active` now looks at `[up-href]` instead of `[up-source]` for alternate URLs.
+- `.up-active` classes are now set for `[up-instant]` links.
+
+0.4.1
+-----
+
+- No longer clear the cache for requests with `HEAD` or `OPTIONS` method.
+- `[up-dash]` shorthand to apply all supported accelerations with a single attribute.
+
+0.4.0
+-----
+
+- Error messages no longer take over the entire screen.
+- Don't create redundant ghost elemants when not transitioning.
+- Remove nested log grouping, as group headers cannot be filtered away in Chrome DevTools.
+- `.up-current` is now also applied to links with an `[up-source]` attribute.
+- Errors are now shown within the page body (instead of opening an input-blocking alert).
+- Rename `up.cache` module to `up.proxy`.
+- `up.proxy` defaults are now configurable.
+- Add `[up-instant]` attribute to follow a link on `mousedown` instead of `click`.
+- Add `[up-preload]` attribute to preload a link on hover.
+- Don't boot with jQuery versions older than 1.9.
+- `up.form.observe()` detects changes on browsers that do not fire `input` events.
+- Line breaks in tooltips are no longer allowed, as it breaks positioning.
+- `[up-tooltip]` can now read the tooltip text from an existing `[title]` attribute.
+- `up.util.debug()` no longer crashes when there are no placeholders in the message.
+- Format logging with nested groups.
+- You can now attach data to elements using the new `[up-data]` attribute. The attribute value is parsed as JSON and passed to compilers.
+- More robust implementation of `up.form.observe()`.
+- Starting new animations and transitions now cancels existing motion.
+
+0.3.2
+-----
+
+This version adds compatibility (or graceful degredation) for IE9 and Safari:
+
+- The results of browser feature detection are now cached.
+- Modals CSS now adds vendor prefixes for IE and Safari.
+- Animations are now skipped in unsupporting browsers.
+- Modals and popups now force-disable history if the browser cannot currently call `pushState()`.
+
+Support for IE8 has been dropped. Unpoly will no longer boot in IE8.
+
+0.3.0
+-----
+
+- Add `{ batch }` option for `up.awaken()`.
+- Fix light-dismissing of dialogs (by clicking on the background).
+- Transition ghosts are now inserted as sibling elements of their sources; they now work with padding and have proper z-indexes.
+- Animations like `move-to-right` now measure the actual number of pixels that need to be traveled.
+- Animations now force 3D acceleration.
+- `up.util.isBlank()` now works with objects.
+- Support `{ history: false }` option to not change history when updating a fragment.
+- Allow to set default animation options.
+
+0.2.2
+-----
+
+- Support `{ history: false }` option to not change history when submitting a form.
+- Tone down logging for `up.awaken()` invocations.
+- Tooltips now have "speech bubble" like arrows.
+- Trailing slashes are now ignored when marking links as `.up-current`
+- The server must now signal a redirected URL using `'X-Up-Current-Location'` instead of `X-Up-Previous-Redirect-Location`.
+
+0.2.1
+-----
+
+- Support for Bower.
+
+0.2.0
+-----
+
+- Add a MIT License.
+- Compiled JS and CSS is now pushed to the repository as `dist/up.css` and `dist/up.js`. This way clients no longer need to compile Unpoly themselves.
+- `up.destroy()` now restores URL and title before emitting `up:fragment:destroy`.
+- Modal dialogs now grow to the content size by default.
+- Overlays now support `[ width }` and `{ height }` options.
+- Overlays now restore the previous url and title when closed.
+- Fix modal rendering issue in chrome.
+- Simplify modal template HTML structure.
+- New overlay option `{ closeLabel }`.
+- The transition `move-top` has been renamed to `move-up`.
+- The transition `move-bottom` has been renamed to `move-down`.
+- Support prepending fragments with `:before`.
+- Support appending fragments with `:after`.
+- New attribute `[up-marker]` to define a slot for later targeting. It is hidden visually while it is empty.
+- Prefer to place fragments in overlays if the same target exists in the background.
+- Popups are now positioned in a way that they are always within the viewport.
+- `up.animate()` now accepts a hash of CSS properties.
+- Fix inconsistent animation handling.
+- Support custom tooltips with `[up-tooltip]`.
+- Animations and transitions now support a `{ delay }` option.
+- Add an `[up-close]` attribute for buttons that should close an enclosing popup.
+
+0.1.0
+-----
+
+- Initial release of Unpoly 🎉
+- Allow to update page fragments from hyperlinks.
+- Allow to submit forms in-place.
+- Basic caching.
+- Basic animations and transitions.
+- First draft of the JavaScript API.
