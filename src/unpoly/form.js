@@ -161,13 +161,24 @@ up.form = (function() {
     arrayParam: (name) => name.endsWith('[]'),
   }))
 
-  /*-
-  @function up.form.fieldSelector
-  @internal
-  */
-  function fieldSelector(suffix = '') {
-    return config.fieldSelectors.map((field) => field + suffix).join()
+  function findFormElements(root, selectorFn) {
+    root = e.get(root) // unwrap jQuery
+    let elements = e.subtree(root, selectorFn())
+
+    // If findFormElements() is called with an entire form, gather fields outside the form
+    // element that are associated with the form (through <input form="id-of-form">, which
+    // is an HTML feature.)
+    if (root.matches('form[id]')) {
+      const formReference = e.attrSelector('form', root.getAttribute('id'))
+      const externalElementsSelector = selectorFn(formReference)
+      const externalElements = up.fragment.all(externalElementsSelector, { layer: root })
+      elements = u.uniq([...elements, ...externalElements])
+    }
+
+    return elements
   }
+
+  const [fieldSelector, isField] = config.selectorFns('fieldSelectors')
 
   /*-
   Returns whether the given element is a form field, such as `input` or `select`.
@@ -181,9 +192,6 @@ up.form = (function() {
     Whether the given element is a form field.
   @stable
   */
-  function isField(element) {
-    return element.matches(fieldSelector())
-  }
 
   /*-
   Returns a list of form fields within the given element.
@@ -203,19 +211,7 @@ up.form = (function() {
   @stable
   */
   function findFields(root) {
-    root = e.get(root) // unwrap jQuery
-    let fields = e.subtree(root, fieldSelector())
-
-    // If findFields() is called with an entire form, gather fields outside the form
-    // element that are associated with the form (through <input form="id-of-form">, which
-    // is an HTML feature.)
-    if (root.matches('form[id]')) {
-      const outsideFieldSelector = fieldSelector(e.attrSelector('form', root.getAttribute('id')))
-      const outsideFields = up.fragment.all(outsideFieldSelector, { layer: root })
-      fields = u.uniq([...fields, ...outsideFields])
-    }
-
-    return fields
+    return findFormElements(root, fieldSelector)
   }
 
   function findFieldsAndButtons(container) {
@@ -225,6 +221,8 @@ up.form = (function() {
       ...findGenericButtons(container),
     ]
   }
+
+  const [submitButtonSelector, isSubmitButton] = config.selectorFns('submitButtonSelectors')
 
   /*-
   Returns a list of submit buttons within the given element.
@@ -240,23 +238,13 @@ up.form = (function() {
   @experimental
   */
   function findSubmitButtons(root) {
-    return e.subtree(root, submitButtonSelector())
+    return findFormElements(root, submitButtonSelector)
   }
+
+  const genericButtonSelector = config.selectorFn('genericButtonSelectors')
 
   function findGenericButtons(root) {
-    return e.subtree(root, config.selector('genericButtonSelectors'))
-  }
-
-  function isSubmitButton(element) {
-    return element?.matches(submitButtonSelector())
-  }
-
-  /*-
-  @function up.form.submitButtonSelector
-  @internal
-  */
-  function submitButtonSelector() {
-    return config.selector('submitButtonSelectors')
+    return findFormElements(root, genericButtonSelector)
   }
 
   /*-

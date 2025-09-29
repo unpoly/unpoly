@@ -1004,8 +1004,8 @@ up.script = (function() {
     }
   }
 
-  function findScripts(root, selectorSuffix = '') {
-    let selector = config.selector('scriptSelectors') + selectorSuffix
+  function findScripts(root, condition = '') {
+    let selector = config.selector('scriptSelectors', condition)
     return e.subtree(root, selector)
   }
 

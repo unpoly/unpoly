@@ -14,18 +14,25 @@ up.Config = class Config {
     Object.assign(this, this._blueprintFn())
   }
 
-  matches(element, prop) {
-    return element.matches(this.selector(prop))
+  matches(element, prop, condition) {
+    return element?.matches(this.selector(prop, condition))
   }
 
-  selector(prop) {
+  matchesFn(prop) {
+    return (element, condition) => this.matches(element, prop, condition)
+  }
+
+  selector(prop, condition = '') {
     let includes = this[prop]
     let excludes = this['no' + u.upperCaseFirst(prop)]
-    return e.unionSelector(includes, excludes)
+    return e.unionSelector(includes, excludes, condition)
   }
 
   selectorFn(prop) {
-    return () => this.selector(prop)
+    return (condition) => this.selector(prop, condition)
   }
 
+  selectorFns(prop) {
+    return [this.selectorFn(prop), this.matchesFn(prop)]
+  }
 }

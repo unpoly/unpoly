@@ -248,10 +248,10 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     this._registerExternalEventCloser(this.acceptEvent, this.accept)
     this._registerExternalEventCloser(this.dismissEvent, this.dismiss)
 
-    this.on('up:click', 'label[for]', (event, label) => this._onLabelClicked(event, label))
+    this.on('up:click', 'label[for]', (event, label) => this._onLabelForClicked(event, label))
   }
 
-  _onLabelClicked(event, label) {
+  _onLabelForClicked(event, label) {
     // We do our own focus logic when the user clicks an label[for].
     // If an input with the same [id] is on an ancestor layer the browser would
     // focus that (even though label and input are in different forms).

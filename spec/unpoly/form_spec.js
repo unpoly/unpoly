@@ -100,7 +100,7 @@ describe('up.form', function() {
 
     })
 
-    describe('up.form.fields', function() {
+    describe('up.form.fields()', function() {
 
       it('returns a list of form fields within the given element', function() {
         const form = fixture('form')
@@ -1059,6 +1059,14 @@ describe('up.form', function() {
 
         const result = up.form.submitButtons(form)
         expect(result).toEqual(jasmine.arrayWithExactContents([submitButton, submitInput]))
+      })
+
+      it("includes fields outside the form with a [form] attribute matching the given form's ID", function() {
+        const form = fixture('form#form-id')
+        const insideButton = e.affix(form, 'input[type=submit][value="Submit inside"]')
+        const outsideButton = fixture('input[type=submit][form=form-id][value="Submit outside"]')
+        const results = up.form.submitButtons(form)
+        expect(results).toMatchList([insideButton, outsideButton])
       })
     })
 
@@ -3406,7 +3414,7 @@ describe('up.form', function() {
 
         describe('params', function() {
 
-          it('uses field params if neither form nor submit button has [up-params]', function() {
+          it('uses only field params if neither form nor submit button has [up-params]', function() {
             let [form] = htmlFixtureList(`
               <form action="/action">
                 <input type="text" name="field-name" value="field-value">
@@ -3418,6 +3426,60 @@ describe('up.form', function() {
 
             expect(options.params).toEqual(new up.Params([
               { name: 'field-name', value: 'field-value' }
+            ]))
+          })
+
+          it('includes the [name] and [value] of the default submit button', function() {
+            let [form] = htmlFixtureList(`
+              <form action="/action" up-params="{ 'form-name': 'form-value' }">
+                <input type="text" name="field-name" value="field-value">
+                <button type="submit" name="button-name" value="button-value-1"></button>
+                <button type="submit" name="button-name" value="button-value-2"></button>
+              </form>
+            `)
+
+            let options = up.form.submitOptions(form)
+
+            expect(options.params).toEqual(new up.Params([
+              { name: 'field-name', value: 'field-value' },
+              { name: 'form-name', value: 'form-value' },
+              { name: 'button-name', value: 'button-value-1' },
+            ]))
+          })
+
+          it('includes the [name] and [value] of a default submit button that is form-external (with [form] attr)', function() {
+            let [form, externalSubmitButton] = htmlFixtureList(`
+              <form action="/action" up-params="{ 'form-name': 'form-value' }" id="form-id">
+                <input type="text" name="field-name" value="field-value">
+              </form>
+
+              <button type="submit" name="button-name" value="button-value-1" form="form-id"></button>
+            `)
+
+            let options = up.form.submitOptions(form)
+
+            expect(options.params).toEqual(new up.Params([
+              { name: 'field-name', value: 'field-value' },
+              { name: 'form-name', value: 'form-value' },
+              { name: 'button-name', value: 'button-value-1' },
+            ]))
+          })
+
+          it('includes the [name] and [value] of the given submit button', function() {
+            let [form, submitButton1, submitButton2] = htmlFixtureList(`
+              <form action="/action" up-params="{ 'form-name': 'form-value' }">
+                <input type="text" name="field-name" value="field-value">
+                <button type="submit" name="button-name" value="button-value-1"></button>
+                <button type="submit" name="button-name" value="button-value-2"></button>
+              </form>
+            `)
+
+            let options = up.form.submitOptions(form, { submitButton: submitButton2 })
+
+            expect(options.params).toEqual(new up.Params([
+              { name: 'field-name', value: 'field-value' },
+              { name: 'form-name', value: 'form-value' },
+              { name: 'button-name', value: 'button-value-1' },
             ]))
           })
 
@@ -3441,8 +3503,8 @@ describe('up.form', function() {
             let [form] = htmlFixtureList(`
               <form action="/action" up-params="{ 'form-name': 'form-value' }">
                 <input type="text" name="field-name" value="field-value">
-                <button type="submit" name="button-name" value="button-value-1"></button>
-                <button type="submit" name="button-name" value="button-value-2"></button>
+                <button type="submit" up-params="{ 'button-name': 'button-value-1' }"></button>
+                <button type="submit" up-params="{ 'button-name': 'button-value-2' }"></button>
               </form>
             `)
 
@@ -3459,8 +3521,8 @@ describe('up.form', function() {
             let [form, submitButton1, submitButton2] = htmlFixtureList(`
               <form action="/action" up-params="{ 'form-name': 'form-value' }">
                 <input type="text" name="field-name" value="field-value">
-                <button type="submit" name="button-name" value="button-value-1"></button>
-                <button type="submit" name="button-name" value="button-value-2"></button>
+                <button type="submit" up-params="{ 'button-name': 'button-value-1' }"></button>
+                <button type="submit" up-params="{ 'button-name': 'button-value-2' }"></button>
               </form>
             `)
 
@@ -3477,8 +3539,8 @@ describe('up.form', function() {
             let [form, submitButton1, submitButton2] = htmlFixtureList(`
               <form action="/action" up-params="{ 'form-name': 'form-value' }">
                 <input type="text" name="field-name" value="field-value">
-                <button type="submit" name="button-name" value="button-value-1"></button>
-                <button type="submit" name="button-name" value="button-value-2"></button>
+                <button type="submit" up-params="{ 'button-name': 'button-value-1' }"></button>
+                <button type="submit" up-params="{ 'button-name': 'button-value-2' }"></button>
               </form>
             `)
 
@@ -3492,12 +3554,12 @@ describe('up.form', function() {
             ]))
           })
 
-          it('ignores [up-params] from the submit button if { submitButton: false } is passed', function() {
+          it('ignores [name], [value] and [up-params] from the submit button if { submitButton: false } is passed', function() {
             let [form] = htmlFixtureList(`
               <form action="/action" up-params="{ 'form-name': 'form-value' }">
                 <input type="text" name="field-name" value="field-value">
-                <button type="submit" name="button-name" value="button-value-1"></button>
-                <button type="submit" name="button-name" value="button-value-2"></button>
+                <button type="submit" name="button-input-name" value="button-value-1" up-params="{ 'button-attr-name': 'button-attr-value-1' }"></button>
+                <button type="submit" name="button-input-name" value="button-value-2" up-params="{ 'button-attr-name': 'button-attr-value-2' }"></button>
               </form>
             `)
 
@@ -5727,23 +5789,6 @@ describe('up.form', function() {
           expect(params['submit-button-2']).toEqual(['submit-button-2-value'])
         })
 
-        it('assumes the first submit button if the form was submitted with enter', async function() {
-          const $form = $fixture('form[action="/action"][up-target=".target"][method=post]')
-          const $textField = $form.affix('input[type="text"][name="text-field"][value="text-field-value"]')
-          const $submitButton1 = $form.affix('input[type="submit"][name="submit-button-1"][value="submit-button-1-value"]')
-          const $submitButton2 = $form.affix('input[type="submit"][name="submit-button-2"][value="submit-button-2-value"]')
-          up.hello($form)
-
-          Trigger.submit($form)
-
-          await wait()
-
-          const params = jasmine.lastRequest().data()
-          expect(params['text-field']).toEqual(['text-field-value'])
-          expect(params['submit-button-1']).toEqual(['submit-button-1-value'])
-          expect(params['submit-button-2']).toBeUndefined()
-        })
-
         it('does not explode if the form has no submit buttons', async function() {
           const $form = $fixture('form[action="/action"][up-target=".target"][method=post]')
           const $textField = $form.affix('input[type="text"][name="text-field"][value="text-field-value"]')
@@ -5771,6 +5816,304 @@ describe('up.form', function() {
           expect(request.url).toMatchURL('/button-path')
           expect(request.method).toBe('POST')
         })
+
+        describe('when the form is submitted by pressing enter', function() {
+
+          it('assumes the first submit button if the form was submitted with enter', async function() {
+            const [form, textField, submitButton1, submitButton2, target] = htmlFixtureList(`
+              <form method="post" action="/action" up-target="#target">
+                <input type="text" name="text-field" value="text-field-value">
+                <input type="submit" name="submit-button-1" value="submit-button-1-value">
+                <input type="submit" name="submit-button-2" value="submit-button-2-value">
+              </form>
+              <div id="target"></div>
+            `)
+            up.hello(form)
+            await wait()
+
+            Trigger.submit(form)
+            await wait()
+
+            const params = jasmine.lastRequest().data()
+            expect(params['text-field']).toEqual(['text-field-value'])
+            expect(params['submit-button-1']).toEqual(['submit-button-1-value'])
+            expect(params['submit-button-2']).toBeUndefined()
+          })
+
+          it('assumes a sole, form-external submit button (with [form] attribute)', async function() {
+            const [form, textField, externalSubmitButton, target] = htmlFixtureList(`
+              <form method="post" action="/action" up-target="#target" id="form-id">
+                <input type="text" name="text-field" value="text-field-value">
+              </form>
+              <input type="submit" name="external-submit-button" value="external-submit-button-value" form="form-id">
+              <div id="target"></div>
+            `)
+            up.hello(form)
+            await wait()
+
+            Trigger.submit(form)
+            await wait()
+
+            const params = jasmine.lastRequest().data()
+            expect(params['text-field']).toEqual(['text-field-value'])
+            expect(params['external-submit-button']).toEqual(['external-submit-button-value'])
+          })
+
+          it('submits a form without submit buttons', async function() {
+            const [form, textField, target] = htmlFixtureList(`
+              <form method="post" action="/action" up-target="#target" id="form-id">
+                <input type="text" name="text-field" value="text-field-value">
+              </form>
+              <div id="target"></div>
+            `)
+            up.hello(form)
+            await wait()
+
+            Trigger.submit(form)
+            await wait()
+
+            const data = jasmine.lastRequest().data()
+            expect(data).toMatchParams({
+              'text-field': 'text-field-value'
+            })
+          })
+
+        })
+
+      })
+
+      describe('choice of layer', function() {
+
+        describe('without an [up-layer] attribute', function() {
+
+          it('updates the current layer by default', async function() {
+            let [form, submitButton, target] = htmlFixtureList(`
+              <form up-submit up-target="#target" action="/action" method="/post">
+                <input type="submit" value="Submit">
+              </form>
+              
+              <div id="target">old target</div>
+            `)
+
+            up.hello(form)
+            await wait()
+
+            Trigger.clickSequence(submitButton)
+            await wait()
+
+            jasmine.respondWith(`<div id="target">new target</div>`)
+            await wait()
+
+            expect('#target').toHaveText('new target')
+          })
+
+          it('updates the current overlay by default', async function() {
+            up.layer.open({ content: `
+              <form up-submit up-target="#target" action="/action" method="/post">
+                <input type="submit" value="Submit">
+              </form>
+              
+              <div id="target">old target</div>
+            `})
+            await wait()
+
+            expect('up-modal #target').toHaveText('old target')
+
+            Trigger.clickSequence('input[type=submit]')
+            await wait()
+
+            jasmine.respondWith(`<div id="target">new target</div>`)
+            await wait()
+
+            expect(up.layer.current).toBeOverlay()
+            expect('up-modal #target').toHaveText('new target')
+          })
+
+        })
+
+        describe('with [up-layer="new"]', function() {
+
+          it('renders a successful submission in a new overlay', async function() {
+            let [form, submitButton, target] = htmlFixtureList(`
+              <form up-submit up-target="#target" up-layer="new" action="/action" method="/post">
+                <input type="submit" value="Submit">
+              </form>
+              
+              <div id="target">old target</div>
+            `)
+
+            up.hello(form)
+            await wait()
+
+            Trigger.clickSequence(submitButton)
+            await wait()
+
+            jasmine.respondWith(`<div id="target">new target</div>`)
+            await wait()
+
+            expect(up.layer.current).toBeOverlay()
+            expect(up.fragment.get('#target', { layer: 'root' })).toHaveText('old target')
+            expect(up.fragment.get('#target', { layer: 'overlay' })).toHaveText('new target')
+          })
+
+          it('renders a failed submission to the current layer', async function() {
+            let [form, submitButton, successTarget, failureTarget] = htmlFixtureList(`
+              <form up-submit up-target="#success" up-fail-target="#failure" up-layer="new" action="/action" method="/post">
+                <input type="submit" value="Submit">
+              </form>
+              
+              <div id="success">old success</div>
+              <div id="failure">old failure</div>
+            `)
+
+            up.hello(form)
+            await wait()
+
+            Trigger.clickSequence(submitButton)
+            await wait()
+
+            jasmine.respondWith(`<div id="failure">new failure</div>`, { status: 500 })
+            await wait()
+
+            expect(up.layer.current).toBeRootLayer()
+            expect(up.fragment.get('#success', { layer: 'root' })).toHaveText('old success')
+            expect(up.fragment.get('#failure', { layer: 'root' })).toHaveText('new failure')
+          })
+
+        })
+
+        describe('with [up-fail-layer="new"]', function() {
+
+          it('renders a successful submission in the current layer', async function() {
+            let [form, submitButton, successTarget, failureTarget] = htmlFixtureList(`
+              <form up-submit up-target="#success" up-fail-target="#failure" up-fail-layer="new" action="/action" method="/post">
+                <input type="submit" value="Submit">
+              </form>
+              
+              <div id="success">old success</div>
+              <div id="failure">old failure</div>
+            `)
+
+            up.hello(form)
+            await wait()
+
+            Trigger.clickSequence(submitButton)
+            await wait()
+
+            jasmine.respondWith(`<div id="success">new success</div>`, { status: 200 })
+            await wait()
+
+            expect(up.layer.current).toBeRootLayer()
+            expect(up.fragment.get('#success', { layer: 'root' })).toHaveText('new success')
+            expect(up.fragment.get('#failure', { layer: 'root' })).toHaveText('old failure')
+          })
+
+          it('renders a failed submission in a new overlay', async function() {
+            let [form, submitButton, successTarget, failureTarget] = htmlFixtureList(`
+              <form up-submit up-target="#success" up-fail-target="#failure" up-fail-layer="new" action="/action" method="/post">
+                <input type="submit" value="Submit">
+              </form>
+              
+              <div id="success">old success</div>
+              <div id="failure">old failure</div>
+            `)
+
+            up.hello(form)
+            await wait()
+
+            Trigger.clickSequence(submitButton)
+            await wait()
+
+            jasmine.respondWith(`<div id="failure">new failure</div>`, { status: 500 })
+            await wait()
+
+            expect(up.layer.current).toBeOverlay()
+            expect(up.fragment.get('#failure', { layer: 'root' })).toHaveText('old failure')
+            expect(up.fragment.get('#failure', { layer: 'overlay' })).toHaveText('new failure')
+
+          })
+
+        })
+
+        describe('with [up-layer="root"]', function() {
+
+          it('renders a successful submission in the root layer, closing a current overlay', async function() {
+            htmlFixtureList('<div id="target">root target</div>')
+
+            up.layer.open({ content: `
+              <form up-submit up-target="#target" up-layer="root" action="/action" method="/post">
+                <input type="submit" value="Submit">
+              </form>
+              
+              <div id="target">overlay target</div>
+            `})
+            await wait()
+
+            expect('up-modal #target').toHaveText('overlay target')
+
+            Trigger.clickSequence('input[type=submit]')
+            await wait()
+
+            jasmine.respondWith(`<div id="target">new target</div>`)
+            await wait()
+
+            expect(up.layer.current).toBeRootLayer()
+            expect(up.fragment.get('#target', { layer: 'root' })).toHaveText('new target')
+          })
+
+          it('renders a failed submission in the current overlay', async function() {
+            htmlFixtureList(`
+              <div id="success">root success</div>
+              <div id="failure">root failure</div>
+            `)
+
+            up.layer.open({ content: `
+              <form up-submit up-target="#success" up-fail-target="#failure" up-layer="root" action="/action" method="/post">
+                <input type="submit" value="Submit">
+              </form>
+              
+              <div id="success">overlay success</div>
+              <div id="failure">overlay failure</div>
+            `})
+            await wait()
+
+            Trigger.clickSequence('input[type=submit]')
+            await wait()
+
+            jasmine.respondWith(`<div id="failure">new failure</div>`, { status: 500 })
+            await wait()
+
+            expect(up.layer.current).toBeOverlay()
+            expect(up.fragment.get('#success', { layer: 'root' })).toHaveText('root success')
+            expect(up.fragment.get('#failure', { layer: 'root' })).toHaveText('root failure')
+            expect(up.fragment.get('#success', { layer: 'overlay' })).toHaveText('overlay success')
+            expect(up.fragment.get('#failure', { layer: 'overlay' })).toHaveText('new failure')
+          })
+
+        })
+
+        it('lets submit buttons override the [up-layer] setting', async function() {
+          let [form, submitButton, target] = htmlFixtureList(`
+            <form up-submit up-target="#target" up-layer="new" action="/action" method="/post">
+              <input type="submit" value="Submit" up-layer="current">
+            </form>
+            
+            <div id="target">old target</div>
+          `)
+
+          up.hello(form)
+          await wait()
+
+          Trigger.clickSequence(submitButton)
+          await wait()
+
+          jasmine.respondWith(`<div id="target">new target</div>`)
+          await wait()
+
+          expect(up.layer.current).toBeRootLayer()
+          expect(up.fragment.get('#target', { layer: 'root' })).toHaveText('new target')
+        })
+
       })
 
       describe('origin of submission', function() {

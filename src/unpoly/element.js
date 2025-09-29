@@ -1538,9 +1538,24 @@ up.element = (function() {
       (rect.right  > 0) && (rect.left < window.innerWidth)
   }
 
-  function unionSelector(includes, excludes) {
+  /*-
+  ```
+  up.element.unionSelector(['input', 'textarea']) // result: ':is(input, textarea)'
+  up.element.unionSelector(['input', 'textarea'], undefined) // result: ':is(input, textarea)'
+  up.element.unionSelector(['input', 'textarea'], ['.disabled', '[disabled]']) // result: ':is(input, textarea):not(.disabled, [disabled])'
+  up.element.unionSelector(['input', 'textarea'], ['.disabled', '[disabled]'], '.active') // result: ':is(input, textarea):not(.disabled, [disabled]):is(.active)'
+  ```
+
+  @function up.element.unionSelector
+  @param {Array<string>} includes
+  @param {Array<string>} [excludes]
+  @param {string} [condition]
+  @internal
+  */
+  function unionSelector(includes, excludes, condition) {
     let selector = `:is(${includes.join()})`
     if (u.isPresent(excludes)) selector += `:not(${excludes.join()})`
+    if (condition) selector += `:is(${condition})`
     return selector
   }
 
