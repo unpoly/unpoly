@@ -107,7 +107,7 @@ Content-Security-Policy: script-src 'self' 'nonce-kO52Iphm8B'
 </script>
 ```
 
-When the nonces from the HTML and the response header match, Unpoly will Unpoly will [rewrite the HTML to the document's nonce](#nonce-rewriting).
+When the nonces from the HTML and the response header match, Unpoly will [rewrite the HTML to the document's nonce](#nonce-rewriting).
 
 
 ### CSPs with `strict-dynamic` {#scripts-strict-dynamic}
