@@ -35,12 +35,14 @@ describe('up.layer', function() {
         expect(up.layer.current.isOverlay()).toBe(true)
       })
 
-      describe('if there are existing overlays over the { baseLayer }', function() {
+      fdescribe('if there are existing overlays over the { baseLayer }', function() {
 
-        it('closes existing overlays over the { baseLayer }', function() {
+        it('dismisses existing overlays over the { baseLayer }', async function() {
           const [root, overlay1, overlay2] = makeLayers(3)
+          await wait()
 
           up.layer.open({ baseLayer: overlay1 })
+          await wait()
 
           expect(up.layer.count).toBe(3)
 
@@ -50,10 +52,53 @@ describe('up.layer', function() {
           expect(overlay2).not.toBeAlive()
         })
 
-        it('closes existing overlays over the { baseLayer }, ignoring a { peel: false } option', function() {
+        it('accepts (not dismisses) overlaying layers with { peel: "accept" }', async function() {
           const [root, overlay1, overlay2] = makeLayers(3)
+          await wait()
+
+          const acceptListener = jasmine.createSpy('up:layer:accept listener')
+          up.on('up:layer:accept', acceptListener)
+          const dismissListener = jasmine.createSpy('up:layer:dismiss listener')
+          up.on('up:layer:dismiss', dismissListener)
+
+          up.layer.open({ baseLayer: overlay1, peel: 'accept' })
+          await wait()
+
+          expect(up.layer.count).toBe(3)
+
+          expect(up.layer.get(0)).toBe(root)
+          expect(up.layer.get(1)).toBe(overlay1)
+          expect(up.layer.get(2)).not.toBe(overlay2)
+          expect(overlay2).not.toBeAlive()
+
+          expect(dismissListener).not.toHaveBeenCalled()
+          expect(acceptListener).toHaveBeenCalled()
+        })
+
+        it('dismisses existing overlays over the { baseLayer }, ignoring a { peel: false } option', async function() {
+          const [root, overlay1, overlay2] = makeLayers(3)
+          await wait()
 
           up.layer.open({ baseLayer: overlay1, peel: false })
+          await wait()
+
+          expect(up.layer.count).toBe(3)
+
+          expect(up.layer.get(0)).toBe(root)
+          expect(up.layer.get(1)).toBe(overlay1)
+          expect(up.layer.get(2)).not.toBe(overlay2)
+          expect(overlay2).not.toBeAlive()
+        })
+
+        it('does not allow up:layer:dismiss listeners to prevent the peeling', async function() {
+          const [root, overlay1, overlay2] = makeLayers(3)
+          await wait()
+
+          const dismissListener = jasmine.createSpy('up:layer:dismiss listener').and.callFake((event) => event.preventDefault())
+          up.on('up:layer:dismiss', dismissListener)
+
+          up.layer.open({ baseLayer: overlay1 })
+          await wait()
 
           expect(up.layer.count).toBe(3)
 

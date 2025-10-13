@@ -306,7 +306,7 @@ up.fragment = (function() {
       focus: 'auto',
       scroll: 'auto',
       history: 'auto',
-      peel: true,
+      peel: 'dismiss',
     },
 
     match: 'region',

@@ -991,6 +991,40 @@ describe('up.link', function() {
 
       })
 
+      fdescribe('[up-peel]', function() {
+
+        it('parses [up-peel] as true', function() {
+          const link = fixture('a[href="/foo"][up-peel]')
+          const options = up.link.followOptions(link)
+          expect(options.peel).toBe(true)
+        })
+
+        it('parses [up-peel=true] as true', function() {
+          const link = fixture('a[href="/foo"][up-peel="true"]')
+          const options = up.link.followOptions(link)
+          expect(options.peel).toBe(true)
+        })
+
+        it('parses [up-peel=false] as false', function() {
+          const link = fixture('a[href="/foo"][up-peel="false"]')
+          const options = up.link.followOptions(link)
+          expect(options.peel).toBe(false)
+        })
+
+        it('parses [up-peel="accept"] as "accept"', function() {
+          const link = fixture('a[href="/foo"][up-peel="accept"]')
+          const options = up.link.followOptions(link)
+          expect(options.peel).toBe("accept")
+        })
+
+        it('parses [up-peel="dismiss"] as "dismiss"', function() {
+          const link = fixture('a[href="/foo"][up-peel="dismiss"]')
+          const options = up.link.followOptions(link)
+          expect(options.peel).toBe("dismiss")
+        })
+
+      })
+
       if (up.migrate.loaded) {
         it('parses an [up-reset-scroll] attribute as { scroll: "top" }', function() {
           const link = fixture('a[href="/foo"][up-reset-scroll]')

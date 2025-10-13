@@ -5155,137 +5155,258 @@ describe('up.fragment', function() {
             expect(up.layer.get(2)).toHaveText('old text in overlay 2')
           })
 
-          describe('with { peel: true }', function() {
+          fdescribe('peeling', function() {
 
-            it('closes all overlays over the target with { peel: true }', function() {
-              makeLayers([
-                { target: '.element', content: 'old text in root' },
-                { target: '.element', content: 'old text in overlay 1' },
-                { target: '.element', content: 'old text in overlay 2' }
-              ])
-
-              up.render('.element', { content: 'new text', layer: 'root', peel: true })
-
-              expect(up.layer.count).toBe(1)
-              expect(up.layer.current.mode).toBe('root')
-              expect(up.layer.current).toHaveText(/new text/)
-            })
-
-            it('does not create a history entry for the peeled layer', async function() {
-              up.history.config.enabled = true
-              up.history.replace('/root1')
-              const locations = []
-              up.on('up:location:changed', ({ location }) => locations.push(up.util.normalizeURL(location)))
-
-              fixture('.content', { text: 'root 1' })
-
-              up.layer.open({ location: '/overlay1', history: true })
-              await wait()
-
-              expect(up.layer.count).toBe(2)
-              expect(locations).toEqual(['/overlay1'])
-
-              up.render({ content: 'root 2', target: '.content', history: true, location: '/root2', layer: 'root', peel: true })
-              await wait()
-
-              expect('.content').toHaveText('root 2')
-              expect(up.layer.count).toBe(1)
-              expect(locations).toEqual(['/overlay1', '/root2'])
-            })
-
-            it('creates a history entry if the response redirects to the same URL as the URL before the overlay was opened (bugfix)', async function() {
-              up.history.config.enabled = true
-              up.history.replace('/users')
-              await wait()
-
-              let [main, link] = htmlFixtureList(`
-                <main>
-                  <a up-layer="new" href="/users/2/edit">Alice</a>
-                </main>
-              `)
-              up.hello(link)
-
-              Trigger.clickSequence(link)
-              await wait()
-
-              expect(jasmine.lastRequest().url).toMatchURL('/users/2/edit')
-              expect(jasmine.lastRequest()).toHaveRequestMethod('get')
-
-              jasmine.respondWith(`
-                <main>
-                  <form autocomplete="off" up-layer="root" action="/users/2" accept-charset="UTF-8" method="post">
-                    <button class="btn btn-primary" data-disable="true" type="submit">Save</button>
-                  </form>
-                </main>
-              `)
-              await wait()
-
-              expect(up.layer.count).toBe(2)
-              expect(up.history.location).toMatchURL('/users/2/edit')
-              expect(up.layer.current).toHaveSelector('form[action="/users/2"]')
-
-              Trigger.clickSequence('form button')
-              await wait()
-
-              expect(jasmine.lastRequest().url).toMatchURL('/users/2')
-              expect(jasmine.lastRequest()).toHaveRequestMethod('post')
-
-              jasmine.respondWith({
-                responseURL: '/users',
-                responseText: `
-                  <main>
-                    List of users
-                  </main>
-                `
+            describe('with { peel: true }', function() {
+  
+              it('dismisses all overlays over the target', async function() {
+                let dismissListener = jasmine.createSpy('up:layer:dismiss listener')
+                up.on('up:layer:dismiss', dismissListener)
+                
+                makeLayers([
+                  { target: '.element', content: 'old text in root' },
+                  { target: '.element', content: 'old text in overlay 1' },
+                  { target: '.element', content: 'old text in overlay 2' }
+                ])
+                await wait()
+                
+                expect(dismissListener).not.toHaveBeenCalled()
+  
+                up.render('.element', { content: 'new text', layer: 'root', peel: true })
+                await wait()
+  
+                expect(dismissListener).toHaveBeenCalled()
+                expect(up.layer.count).toBe(1)
+                expect(up.layer.current.mode).toBe('root')
+                expect(up.layer.current).toHaveText(/new text/)
               })
-              await wait()
 
-              expect('main').toHaveText('List of users')
-              expect(up.history.location).toMatchURL('/users')
+              it('not not allow up:layer:dismiss handlers to prevent the peeling', async function() {
+                let dismissListener = jasmine.createSpy('up:layer:dismiss listener').and.callFake((event) => event.preventDefault())
+                up.on('up:layer:dismiss', dismissListener)
+                let dismissedListener = jasmine.createSpy('up:layer:dismissed listener')
+                up.on('up:layer:dismissed', dismissedListener)
+
+                makeLayers([
+                  { target: '.element', content: 'old text in root' },
+                  { target: '.element', content: 'old text in overlay 1' },
+                  { target: '.element', content: 'old text in overlay 2' }
+                ])
+                await wait()
+
+                expect(dismissListener).not.toHaveBeenCalled()
+
+                let renderPromise = up.render('.element', { content: 'new text', layer: 'root', peel: true })
+                await expectAsync(renderPromise).toBeResolved()
+
+                expect(dismissListener).toHaveBeenCalled()
+                expect(dismissedListener).toHaveBeenCalled()
+                expect(up.layer.count).toBe(1)
+                expect(up.layer.current.mode).toBe('root')
+                expect(up.layer.current).toHaveText(/new text/)
+              })
+
+              it('does not create a history entry for the peeled layer', async function() {
+                up.history.config.enabled = true
+                up.history.replace('/root1')
+                const locations = []
+                up.on('up:location:changed', ({ location }) => locations.push(up.util.normalizeURL(location)))
+  
+                fixture('.content', { text: 'root 1' })
+  
+                up.layer.open({ location: '/overlay1', history: true })
+                await wait()
+  
+                expect(up.layer.count).toBe(2)
+                expect(locations).toEqual(['/overlay1'])
+  
+                up.render({ content: 'root 2', target: '.content', history: true, location: '/root2', layer: 'root', peel: true })
+                await wait()
+  
+                expect('.content').toHaveText('root 2')
+                expect(up.layer.count).toBe(1)
+                expect(locations).toEqual(['/overlay1', '/root2'])
+              })
+  
+              it('creates a history entry if the response redirects to the same URL as the URL before the overlay was opened (bugfix)', async function() {
+                up.history.config.enabled = true
+                up.history.replace('/users')
+                await wait()
+  
+                let [main, link] = htmlFixtureList(`
+                  <main>
+                    <a up-layer="new" href="/users/2/edit">Alice</a>
+                  </main>
+                `)
+                up.hello(link)
+  
+                Trigger.clickSequence(link)
+                await wait()
+  
+                expect(jasmine.lastRequest().url).toMatchURL('/users/2/edit')
+                expect(jasmine.lastRequest()).toHaveRequestMethod('get')
+  
+                jasmine.respondWith(`
+                  <main>
+                    <form autocomplete="off" up-layer="root" action="/users/2" accept-charset="UTF-8" method="post">
+                      <button class="btn btn-primary" data-disable="true" type="submit">Save</button>
+                    </form>
+                  </main>
+                `)
+                await wait()
+  
+                expect(up.layer.count).toBe(2)
+                expect(up.history.location).toMatchURL('/users/2/edit')
+                expect(up.layer.current).toHaveSelector('form[action="/users/2"]')
+  
+                Trigger.clickSequence('form button')
+                await wait()
+  
+                expect(jasmine.lastRequest().url).toMatchURL('/users/2')
+                expect(jasmine.lastRequest()).toHaveRequestMethod('post')
+  
+                jasmine.respondWith({
+                  responseURL: '/users',
+                  responseText: `
+                    <main>
+                      List of users
+                    </main>
+                  `
+                })
+                await wait()
+  
+                expect('main').toHaveText('List of users')
+                expect(up.history.location).toMatchURL('/users')
+              })
+  
+              it('does create a history entry for the peeled layer if the fragment update does not update history', async function() {
+                up.history.config.enabled = true
+                up.history.replace('/root1')
+                const locations = []
+                up.on('up:location:changed', ({ location }) => locations.push(up.util.normalizeURL(location)))
+  
+                fixture('.content', { text: 'root 1' })
+  
+                up.layer.open({ location: '/overlay1', history: true })
+                await wait()
+  
+                expect(up.layer.count).toBe(2)
+                expect(locations).toEqual(['/overlay1'])
+  
+                up.render({ content: 'root 2', target: '.content', history: false, layer: 'root', peel: true })
+                await wait()
+  
+                expect('.content').toHaveText('root 2')
+                expect(up.layer.count).toBe(1)
+                expect(locations).toEqual(['/overlay1', '/root1'])
+              })
+  
+              it('still renders content if a destructor for the peeled layer crashes', async function() {
+                const destroyError = new Error('error from crashing destructor')
+  
+                up.compiler('.overlay-element', () => (function() { throw destroyError }))
+  
+                htmlFixture('<div class="root-element">new root</div>')
+                up.layer.open({ fragment: '<div class="overlay-element"></div>' })
+  
+                expect(up.layer.isOverlay()).toBe(true)
+  
+                await jasmine.expectGlobalError(destroyError, () => up.render({
+                  fragment: '<div class="root-element">new root</div>',
+                  peel: true,
+                  layer: 'root'
+                }))
+  
+                expect('.root-element').toHaveText('new root')
+                expect(up.layer.isOverlay()).toBe(false)
+              })
             })
 
-            it('does create a history entry for the peeled layer if the fragment update does not update history', async function() {
-              up.history.config.enabled = true
-              up.history.replace('/root1')
-              const locations = []
-              up.on('up:location:changed', ({ location }) => locations.push(up.util.normalizeURL(location)))
+            describe('with { peel: "dismiss" }', function() {
 
-              fixture('.content', { text: 'root 1' })
+              it('dismisses all overlays over the target', async function() {
+                let dismissListener = jasmine.createSpy('up:layer:dismiss listener')
+                up.on('up:layer:dismiss', dismissListener)
 
-              up.layer.open({ location: '/overlay1', history: true })
-              await wait()
+                makeLayers([
+                  { target: '.element', content: 'old text in root' },
+                  { target: '.element', content: 'old text in overlay 1' },
+                  { target: '.element', content: 'old text in overlay 2' }
+                ])
+                await wait()
 
-              expect(up.layer.count).toBe(2)
-              expect(locations).toEqual(['/overlay1'])
+                expect(dismissListener).not.toHaveBeenCalled()
 
-              up.render({ content: 'root 2', target: '.content', history: false, layer: 'root', peel: true })
-              await wait()
+                up.render('.element', { content: 'new text', layer: 'root', peel: 'dismiss' })
+                await wait()
 
-              expect('.content').toHaveText('root 2')
-              expect(up.layer.count).toBe(1)
-              expect(locations).toEqual(['/overlay1', '/root1'])
+                expect(dismissListener).toHaveBeenCalled()
+                expect(up.layer.count).toBe(1)
+                expect(up.layer.current.mode).toBe('root')
+                expect(up.layer.current).toHaveText(/new text/)
+              })
+
             })
 
-            it('still renders content if a destructor for the peeled layer crashes', async function() {
-              const destroyError = new Error('error from crashing destructor')
+            describe('with { peel: "accept" }', function() {
 
-              up.compiler('.overlay-element', () => (function() { throw destroyError }))
+              it('accepts (not dismisses) all overlays over the target', async function() {
+                let dismissListener = jasmine.createSpy('up:layer:dismiss listener')
+                up.on('up:layer:dismiss', dismissListener)
+                let acceptListener = jasmine.createSpy('up:layer:accept listener')
+                up.on('up:layer:accept', acceptListener)
 
-              htmlFixture('<div class="root-element">new root</div>')
-              up.layer.open({ fragment: '<div class="overlay-element"></div>' })
+                makeLayers([
+                  { target: '.element', content: 'old text in root' },
+                  { target: '.element', content: 'old text in overlay 1' },
+                  { target: '.element', content: 'old text in overlay 2' }
+                ])
+                await wait()
 
-              expect(up.layer.isOverlay()).toBe(true)
+                expect(dismissListener).not.toHaveBeenCalled()
+                expect(acceptListener).not.toHaveBeenCalled()
 
-              await jasmine.expectGlobalError(destroyError, () => up.render({
-                fragment: '<div class="root-element">new root</div>',
-                peel: true,
-                layer: 'root'
-              }))
+                up.render('.element', { content: 'new text', layer: 'root', peel: 'accept' })
+                await wait()
 
-              expect('.root-element').toHaveText('new root')
-              expect(up.layer.isOverlay()).toBe(false)
+                expect(dismissListener).not.toHaveBeenCalled()
+                expect(acceptListener).toHaveBeenCalled()
+                expect(up.layer.count).toBe(1)
+                expect(up.layer.current.mode).toBe('root')
+                expect(up.layer.current).toHaveText(/new text/)
+              })
+
             })
+
+            describe('with { peel: false }', function() {
+
+              it('renders in a background layer, leaving any overlays open', async function() {
+                let dismissListener = jasmine.createSpy('up:layer:dismiss listener')
+                up.on('up:layer:dismiss', dismissListener)
+
+                makeLayers([
+                  { target: '.element', content: 'old text in root' },
+                  { target: '.element', content: 'old text in overlay 1' },
+                  { target: '.element', content: 'old text in overlay 2' }
+                ])
+                await wait()
+
+                expect(dismissListener).not.toHaveBeenCalled()
+
+                up.render('.element', { content: 'new text', layer: 'root', peel: false })
+                await wait()
+
+                expect(dismissListener).not.toHaveBeenCalled()
+                expect(up.layer.count).toBe(3)
+                expect(up.layer.current.mode).toBe('modal')
+                expect(up.layer.current).not.toHaveText(/new text/)
+                expect(up.layer.root).toHaveText(/new text/)
+              })
+
+            })
+
           })
+            
         })
 
         describe('stacking a new overlay', function() {
