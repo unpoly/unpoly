@@ -175,7 +175,7 @@ up.Layer = class Layer extends up.Record {
     @param {string|Function(Element, Object)} [options.animation]
       The [animation](/up.animate) to use for closing this layer.
 
-      Defaults to the close animation configured for this layer mode.
+      Defaults to the close animation [configured](/up.layer.config) for this layer mode.
     @param {number} [options.duration]
       The duration for the close animation in milliseconds.
     @param {number} [options.easing]
@@ -231,8 +231,29 @@ up.Layer = class Layer extends up.Record {
   Descendant overlays will be dismissed with value `':peel'`.
 
   @function up.Layer#peel
-  @param {Object} options
-    See options for `up.Layer#accept()`.
+  @section Closing
+    @param {any} [options.value=":peel"]
+      The [result value](/closing-overlays#result-values) for the descendant overlays.
+
+    @param {string} [options.intent="dismiss"]
+      The [close intent](/closing-overlays#intents) for the descendant overlays.
+
+      By default descendant overlays will be dismissed.\
+      You can pass `{ intent: "accept" }` to
+      accept them instead.
+
+  @section Animation
+    @param {string|Function(Element, Object)} [options.animation]
+      The [animation](/up.animate) to use for closing descendant overlays.
+
+      Defaults to the close animation [configured](/up.layer.config) for the respective layer modes.
+
+    @param [options.duration]
+      @like up.Layer#accept
+
+    @param [options.easing]
+      @like up.Layer#accept
+
   @stable
   */
   peel(options) {

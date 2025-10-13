@@ -13,7 +13,10 @@
 
   See [Rendering failed responses differently](/failed-responses#fail-options).
 
-@param {boolean} [options.peel]
-  Whether to close overlays obstructing the updated layer when the fragment is updated.
+@param {boolean|string} [options.peel]
+  Whether to close overlays obstructing the target layer,
+  when [updating a background layer from an overlay](/closing-overlays#peeling).
 
-  This is only relevant when updating a layer that is not the [frontmost layer](/up.layer.front).
+  To [dismiss](/closing-overlays#intents) obstructing overlays, pass `{ peel: true }` or `{ peel: 'dismiss' }`.\
+  To [accept](/closing-overlays#intents) obstructing overlays, pass `{ peel: false }`.\
+  To not peel, pass `{ peel: false }`.

@@ -350,11 +350,11 @@ After the server has processed the request, it can use any of the following tech
 
 
 
-Closing by targeting the parent layer {#peeling}
+Closing by targeting a background layer {#peeling}
 -------------------------------------
 
-When a link or form targets a parent layer, the current layer will [dismiss](#intents) when the parent layer is updated.
-This behavior is called *peeling*.
+When a link or form from an overlay targets a background layer, the overlay
+will [dismiss](#intents) when the parent layer is updated. This behavior is called *peeling*.
 
 The example below uses an [`[up-layer]` attribute](/layer-option) to update the parent layer
 after a successful form submission:
@@ -368,10 +368,22 @@ after a successful form submission:
 
 A successful submission will now dismiss the form's own overlay with a [dismissal value](#result-values) of `":peel"`.
 
-
 > [note]
 > The form will still update its own layer when the [server responds with an error code](/failed-responses)
-> due to a validation error. To target another layer in this case, set an [`[up-fail-layer]`](/up-follow#up-fail-layer) attribute.
+> due to a validation error.\
+> To update another layer in this case, set an [`[up-fail-layer]`](/up-follow#up-fail-layer) attribute.
+
+
+### Accepting peeled overlays
+
+By default, peeled overlays will be [dismissed](#intents). To [accept](#intents) them instead, set an `[up-peel="accept"]` attribute
+on the link or form that is targeting a background layer:
+
+```html
+<form method="post" action="/users" up-layer="parent" up-peel="accept"> <!-- mark: up-peel="accept" -->
+  ...
+</form>
+```
 
 
 Customizing dismiss controls

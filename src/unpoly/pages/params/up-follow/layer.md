@@ -13,8 +13,10 @@
 
   See [Rendering failed responses differently](/failed-responses#fail-options).
 
-@param [up-peel='true']
-  Whether to close overlays obstructing the updated layer when the fragment is updated.
+@param [up-peel='dismiss']
+  Whether to close overlays obstructing the target layer,
+  when [updating a background layer from an overlay](/closing-overlays#peeling).
 
-  This is only relevant when updating a layer that is not the [frontmost layer](/up.layer.front).
-
+  By default, obstructing overlays will be [dismissed](/closing-overlays#intents).\
+  To [accept](/closing-overlays#intents) them instead, set `[up-peel="accept"]`.\
+  To not peel, set `[up-peel="false"]`.

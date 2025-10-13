@@ -134,25 +134,91 @@ describe('up.Layer', function() {
 
   describe('#peel()', function() {
 
+    // Additional specs can be found for up.render({ peel })
+
     it('dismisses all descendants', function() {
+      let dismissedSpy = jasmine.createSpy('dismiss listener')
+      let acceptedSpy = jasmine.createSpy('accept listener')
+
+      up.on('up:layer:dismissed', dismissedSpy)
+      up.on('up:layer:accepted', acceptedSpy)
+
       makeLayers(4)
       expect(up.layer.count).toBe(4)
       const secondLayer = up.layer.get(1)
 
       secondLayer.peel()
 
+      expect(dismissedSpy.calls.count()).toBe(2)
+      expect(acceptedSpy.calls.count()).toBe(0)
       expect(up.layer.count).toBe(2)
     })
 
-    it('uses a dismissal value :peel', function() {
-      const listener = jasmine.createSpy('dismiss listener')
-      up.on('up:layer:dismiss', listener)
+    describe('close intent', function() {
 
-      makeLayers(2)
+      it('dismisses descendants with { intent: "dismiss" }', function() {
+        let dismissedSpy = jasmine.createSpy('dismiss listener')
+        let acceptedSpy = jasmine.createSpy('accept listener')
 
-      up.layer.root.peel()
+        up.on('up:layer:dismissed', dismissedSpy)
+        up.on('up:layer:accepted', acceptedSpy)
 
-      expect(listener.calls.argsFor(0)[0]).toEqual(jasmine.objectContaining({ value: ':peel' }))
+        makeLayers(4)
+        expect(up.layer.count).toBe(4)
+        const secondLayer = up.layer.get(1)
+
+        secondLayer.peel({ intent: 'dismiss' })
+
+        expect(dismissedSpy.calls.count()).toBe(2)
+        expect(acceptedSpy.calls.count()).toBe(0)
+        expect(up.layer.count).toBe(2)
+      })
+
+      it('accepts descendants with { intent: "accept" }', function() {
+        let dismissedSpy = jasmine.createSpy('dismiss listener')
+        let acceptedSpy = jasmine.createSpy('accept listener')
+
+        up.on('up:layer:dismissed', dismissedSpy)
+        up.on('up:layer:accepted', acceptedSpy)
+
+        makeLayers(4)
+        expect(up.layer.count).toBe(4)
+        const secondLayer = up.layer.get(1)
+
+        secondLayer.peel({ intent: 'accept' })
+
+        expect(dismissedSpy.calls.count()).toBe(0)
+        expect(acceptedSpy.calls.count()).toBe(2)
+        expect(up.layer.count).toBe(2)
+      })
+
+
+    })
+
+    describe('close value', function() {
+
+      it('uses a dismissal value :peel', function() {
+        const listener = jasmine.createSpy('dismiss listener')
+        up.on('up:layer:dismiss', listener)
+
+        makeLayers(2)
+
+        up.layer.root.peel()
+
+        expect(listener.calls.argsFor(0)[0]).toEqual(jasmine.objectContaining({ value: ':peel' }))
+      })
+
+      it('allows to pass a custom { value }', async function() {
+        const listener = jasmine.createSpy('dismiss listener')
+        up.on('up:layer:dismiss', listener)
+
+        makeLayers(2)
+
+        up.layer.root.peel({ value: 'custom'})
+
+        expect(listener.calls.argsFor(0)[0]).toEqual(jasmine.objectContaining({ value: 'custom' }))
+      })
+
     })
 
     describe('when a destructor throws an error', function() {

@@ -46,7 +46,7 @@ The following default options will be used when navigating:
 | `{ cache: 'auto' }`      | [Cache responses](/caching)                                                               |
 | `{ revalidate: 'auto' }` | [Cache responses](/caching)                                                               |
 | `{ focus: 'auto' }`      | [Focus](/focus) the new fragment ([read more](/up.fragment.config#config.autoFocus))      |
-| `{ peel: true }`         | Close overlays when targeting a layer below                                               |
+| `{ peel: 'dismiss' }`    | Dismiss overlays when [targeting a background layer](/closing-overlays#peeling)           |
 
 
 ### Customizing defaults

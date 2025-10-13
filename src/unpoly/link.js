@@ -427,7 +427,7 @@ up.link = (function() {
     parser.callback('onError', { mainKey: 'error' }) // not a request option!
 
     // Layer options
-    parser.boolean('peel')
+    parser.booleanOrString('peel')
     parser.string('layer')
     parser.string('baseLayer')
     parser.json('context')

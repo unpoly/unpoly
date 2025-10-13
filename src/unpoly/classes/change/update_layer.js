@@ -100,7 +100,8 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       up.viewport.saveFocus({ layer: this.layer })
     }
 
-    if (this.options.peel) {
+    let { peel } = this.options
+    if (peel) {
       // (1) Layer#peel() will manipulate the stack sync.
       //     We don't wait for the peeling animation to finish.
       //
@@ -108,7 +109,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       //
       // (3) Only restore the base layer's history if the fragment update adds a
       //     history entry (issue #397).
-      this.layer.peel({ history: !this._hasHistory() })
+      this.layer.peel({ history: !this._hasHistory(), intent: peel })
     }
 
     // Unless the user has explicitly opted out of the default { abort: 'target' }
