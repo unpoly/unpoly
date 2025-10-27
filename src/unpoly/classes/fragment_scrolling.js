@@ -10,6 +10,7 @@ up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
       'revealMax',
       'revealSnap',
       'scrollBehavior',
+      'oldScrollTops',
     ])
   }
 
@@ -23,8 +24,10 @@ up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
         return this._revealLayer()
       case 'main':
         return this._revealSelector(':main')
+      case 'keep':
+        return this._restoreOld()
       case 'restore':
-        return this._restore()
+        return this._restoreSaved()
       case 'hash':
         return this.hash && up.viewport.revealHash(this.hash, this.attributes())
       case 'target':
@@ -67,8 +70,15 @@ up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
     return up.viewport.scrollTo(position, { ...this.attributes(), around: this.fragment })
   }
 
-  _restore() {
-    // With { around: undefined }, restoreScroll() restores all viewports in { layer }
-    return up.viewport.restoreScroll({ ...this.attributes(), around: this.fragment })
+  _restoreOld() {
+    if (this.oldScrollTops) {
+      return this._restoreSaved({ scrollTops: this.oldScrollTops })
+    }
   }
+
+  _restoreSaved(extraOptions) {
+    // With { around: undefined }, restoreScroll() restores all viewports in { layer }
+    return up.viewport.restoreScroll({ ...this.attributes(), around: this.fragment, ...extraOptions })
+  }
+
 }

@@ -7993,6 +7993,56 @@ describe('up.fragment', function() {
 
         })
 
+        describe('with { scroll: "keep" }', function() {
+
+          it('keeps scroll positions of a swapped list', async function() {
+            let html = (text) => `
+              <div up-viewport id="viewport" style="height: 200px; overflow-y: scroll">
+                <div style="height: 1000px">
+                  ${text}
+                </div>
+              </div>
+            `
+            const [viewport] = htmlFixtureList(html('old text'))
+            viewport.scrollTop = 460
+            await wait()
+
+            expect(viewport).toBeScrolledTo(460)
+
+            up.render({ fragment: html('new text'), scroll: 'keep' })
+            await wait()
+
+            expect('#viewport').toHaveText('new text')
+            expect('#viewport').toBeScrolledTo(460)
+          })
+
+          it('keeps scroll positions when the location changes', async function() {
+            up.history.config.enabled = true
+
+            let html = (text) => `
+              <div up-viewport id="viewport" style="height: 200px; overflow-y: scroll">
+                <div style="height: 1000px">
+                  ${text}
+                </div>
+              </div>
+            `
+            const [viewport] = htmlFixtureList(html('old text'))
+            viewport.scrollTop = 460
+            await wait()
+
+            expect(viewport).toBeScrolledTo(460)
+
+            up.render({ fragment: html('new text'), scroll: 'keep', history: true, location: '/location-after-swap' })
+            await wait()
+
+            expect(up.history.location).toMatchURL('/location-after-swap')
+            expect('#viewport').toHaveText('new text')
+            expect('#viewport').toBeScrolledTo(460)
+
+          })
+
+        })
+
         describe('with an array of { scroll } options', function() {
 
           mockRevealBeforeEach()

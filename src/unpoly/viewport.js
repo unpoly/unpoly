@@ -543,7 +543,7 @@ up.viewport = (function() {
     const [viewports, options] = parseOptions(args)
     const location = options.location || options.layer.location
     if (location) {
-      const tops = getScrollTopsForSave(viewports)
+      const tops = getScrollTopsForViewportElements(viewports)
       options.layer.lastScrollTops.set(location, tops)
     }
   }
@@ -554,14 +554,14 @@ up.viewport = (function() {
   Each key in the hash is a viewport selector. The corresponding
   value is the viewport's top scroll position:
 
-      getScrollTopsForSave()
+      getScrollTopsForSave(viewports)
       => { '.main': 0, '.sidebar': 73 }
 
   @function getScrollTopsForSave
   @return {Object<string, number>}
   @internal
   */
-  function getScrollTopsForSave(viewports) {
+  function getScrollTopsForViewportElements(viewports) {
     let tops = {}
     for (let viewport of viewports) {
       let key = scrollTopKey(viewport)
@@ -572,6 +572,11 @@ up.viewport = (function() {
       }
     }
     return tops
+  }
+
+  function getScrollTops(...args) {
+    let viewports = getAll(...args)
+    return getScrollTopsForViewportElements(viewports)
   }
 
   /*-
@@ -599,11 +604,10 @@ up.viewport = (function() {
   */
   function restoreScroll(...args) {
     const [viewports, options] = parseOptions(args)
-    const { location } = options.layer
-    const locationScrollTops = options.layer.lastScrollTops.get(location)
-    if (locationScrollTops) {
-      setScrollPositions(viewports, locationScrollTops, 0)
-      up.puts('up.viewport.restoreScroll()', 'Restored scroll positions to %o', locationScrollTops)
+    const scrollTops = options.scrollTops ?? options.layer.lastScrollTops.get(options.layer.location)
+    if (scrollTops) {
+      setScrollPositions(viewports, scrollTops, 0)
+      up.puts('up.viewport.restoreScroll()', 'Restored scroll positions to %o', scrollTops)
       return true
     } else {
       return false
@@ -1049,6 +1053,7 @@ up.viewport = (function() {
     get: closest,
     subtree: getSubtree,
     around: getAround,
+    getScrollTops,
     get root() { return getRoot() },
     rootWidth,
     rootHeight,

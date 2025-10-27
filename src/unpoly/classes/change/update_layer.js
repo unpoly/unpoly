@@ -203,12 +203,14 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // Store the focused element's selector, scroll position and selection range
     // in an up.FocusCapsule for later restoration.
     let focusCapsule = up.FocusCapsule.preserve(this.layer)
+    let oldScrollTops = up.viewport.getScrollTops({ layer: this.layer })
 
     this._steps.forEach((step, i) => {
       step.focusCapsule = focusCapsule
+      step.oldScrollTops = oldScrollTops
 
       // Since up.motion will call @handleScrollAndFocus() after each fragment,
-      // and we only have a single scroll position and focus, only scroll/focus  for the first step.
+      // and we only have a single scroll position and focus, only scroll/focus for the first step.
       if (i > 0) {
         step.scroll = false
         step.focus = false
