@@ -603,13 +603,17 @@ up.motion = (function() {
 
   function registerOpacityAnimation(name, from, to) {
     namedAnimations.put(name, function(element, options) {
-      element.style.opacity = from
+      element.style.opacity = u.evalOption(from, element)
       return animateNow(element, { opacity: to }, options)
     })
   }
 
+  function currentOpacity(element) {
+    return e.style(element, 'opacity')
+  }
+
   registerOpacityAnimation('fade-in', 0, 1)
-  registerOpacityAnimation('fade-out', 1, 0)
+  registerOpacityAnimation('fade-out', currentOpacity, 0)
 
   function translateCSS(dx, dy) {
     return { transform: `translate(${dx}px, ${dy}px)` }
