@@ -17,15 +17,16 @@
 $overlay-with-tether-z-index: 1000
 $overlay-with-viewport-z-index: 2000
 
-// Currently all overlay modes with a viewport have the same backdrop.
-// When we do a lightbox mode, we will need a darker backdrop for that one mode.
-// Hence we cannot share it across all modes using a CSS variable.
-$overlay-backdrop: rgba(0, 0, 0, 0.4)
+:root
+  // Currently all overlay modes with a viewport have the same backdrop.
+  // When we do a lightbox mode, we will need a darker backdrop for that one mode.
+  // Hence we cannot share it across all modes using a CSS variable.
+  --up-overlay-backdrop: rgba(0, 0, 0, 0.4)
 
-// If multiple modals are nested inside each other, the padding is
-// multiplied by the nesting depth.
-$modal-viewport-padding-x: 15px
-$modal-viewport-padding-y: 25px
+  // If multiple modals are nested inside each other, the padding is
+  // multiplied by the nesting depth.
+  --up-modal-viewport-padding-x: 15px
+  --up-modal-viewport-padding-y: 25px
 
 up-focus-trap
   // Prevent focusing the trap from scrolling the underlying root layer
@@ -67,7 +68,7 @@ up-focus-trap
 %overlay-backdrop
   @extend %maximize
   position: absolute
-  background: $overlay-backdrop
+  background: var(--up-overlay-backdrop)
 
 %overlay-viewport
   @extend %maximize
@@ -148,9 +149,8 @@ up-modal-viewport
   // if the modal contents are very wide and cannot wrap (e.g. code blocks).
   @for $nesting from 0 through 4
     up-modal[nesting="#{$nesting}"] &
-      $padding-x: $modal-viewport-padding-x * ($nesting + 1)
-      $padding-y: $modal-viewport-padding-y * ($nesting + 1)
-      padding: $padding-y $padding-x
+      padding-inline: calc(#{$nesting + 1} * var(--up-modal-viewport-padding-x))
+      padding-block: calc(#{$nesting + 1} * var(--up-modal-viewport-padding-y))
 
 up-modal-box
   @extend %overlay-box
