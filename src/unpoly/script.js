@@ -689,9 +689,9 @@ up.script = (function() {
     // This allows up.SelectorTracker to only sync once after the mutation, and
     // ignore any events in between.
     await up.fragment.mutate(async () => {
-      let compilePromise = compile(element, options)
-      up.fragment.emitInserted(element)
-      await compilePromise
+      let { finished, meta } = compile(element, options)
+      up.fragment.emitInserted(element, meta)
+      await finished
     })
 
     return element

@@ -18,7 +18,9 @@ up.CompilerPass = class CompilerPass {
     // The meta object may have a getter on { response }, defined by unpoly-migrate.js.
     // Hence we cannot make a new object here.
     meta ||= {}
-    meta.layer = layer
+    meta.layer ??= layer
+    meta.ok ??= true
+    meta.revalidating ??= false
     this._meta = meta
   }
 
@@ -33,7 +35,10 @@ up.CompilerPass = class CompilerPass {
       }
     })
 
-    return Promise.all(this._compilePromises)
+    return {
+      finished: Promise.all(this._compilePromises),
+      meta: this._meta,
+    }
   }
 
   setCompileData() {
