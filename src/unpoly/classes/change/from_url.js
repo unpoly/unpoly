@@ -58,6 +58,8 @@ up.Change.FromURL = class FromURL extends up.Change {
   }
 
   // This is required by up.RenderJob to handle { abort: 'target' }.
+  // TODO: I think this is no longer required. Instead _handleAbortOption() is called with { bindFragments }...
+
   getPreflightProps() {
     return this._getRequestAttrs()
   }
