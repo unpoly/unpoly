@@ -24,8 +24,10 @@ up.FormValidator = class FormValidator {
   _onFieldAdded(field) {
     let eventType = up.form.validateOptions(field).event
     return up.on(field, eventType, (event) => {
-      up.log.putsEvent(event)
-      up.error.muteUncriticalRejection(this.validate({ origin: field }))
+      if (!field.closest('.up-keeping')) {
+        up.log.putsEvent(event)
+        up.error.muteUncriticalRejection(this.validate({ origin: field }))
+      }
     })
   }
 

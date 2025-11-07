@@ -7475,7 +7475,7 @@ describe('up.form', function() {
             "quuuuuuuuuuuuuuuuuuuuuuux\n"
 
           let html = `
-            <form method="post">
+            <form method="post" action="/action">
               <textarea
                 name="prose"
                 wrap="off"
@@ -7531,6 +7531,67 @@ describe('up.form', function() {
           expect(field.selectionStart).toBe(4)
           expect(field.selectionEnd).toBe(5)
           expect(field.scrollLeft).toBeAround(23, 2)
+        })
+
+        it('does not send duplicate requests when the keeping element is temporarily blurred and thus emits another change event (bugfix)', async function() {
+          const keepSpy = jasmine.createSpy('up:fragment:keep listener')
+          up.on('up:fragment:keep', keepSpy)
+
+          const validateSpy = jasmine.createSpy('up:form:validate listener')
+          up.on('up:form:validate', validateSpy)
+
+          let html = `
+            <form method="post" id="note-form" action="/action">
+              <input
+                type="text"
+                name="note-title"
+                up-validate
+                up-watch-event="input"
+                up-watch-delay="0"
+                up-keep
+              >
+            </form>
+          `
+          let [form, field] = htmlFixtureList(html)
+          field.classList.add('old-field')
+
+          // It is hard to reproduce Chrome's behavior here.
+          // We temporarily stash the keepable at the end of the body, then
+          // swap in a clone, then swap keepable and clone once the clone position is known.
+          // Because this blurs a field internally, Chrome fires a change event.
+          field.addEventListener('blur', function() {
+            Trigger.change(field)
+          })
+
+          up.hello(form)
+          await wait()
+
+          field.focus()
+          field.value += "change1"
+          Trigger.input(field)
+
+          // field.addEventListener('blur', () => console.log("[SPEC] FIELD GOT BLURRED"))
+
+          await wait(50)
+
+          expect(validateSpy.calls.count()).toBe(1)
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(up.network.isBusy()).toBe(true)
+
+          expect(keepSpy).not.toHaveBeenCalled()
+          expect(field).toBeFocused()
+
+          jasmine.respondWith(html)
+
+          await wait(100)
+
+          expect(keepSpy).toHaveBeenCalled()
+          expect(field).toBe(document.querySelector('input[name="note-title"]'))
+          expect(field).toBeFocused()
+
+          expect(validateSpy.calls.count()).toBe(1)
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(up.network.isBusy()).toBe(false)
         })
 
       })
