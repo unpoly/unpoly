@@ -112,9 +112,9 @@ JavaScript functions that URL patterns will accept multiple patterns
 as either a space-separated string, a comma-separated string or as an array of patterns:
 
 ```js
-up.layer.open({ acceptLocation: "/users/* /account" })
-up.layer.open({ acceptLocation: "/users/*, /account" })
-up.layer.open({ acceptLocation: ["/users/*", "/account"] })
+up.layer.open({ url: '/users', acceptLocation: "/users/* /account" })
+up.layer.open({ url: '/users', acceptLocation: "/users/*, /account" })
+up.layer.open({ url: '/users', acceptLocation: ["/users/*", "/account"] })
 ```
 
 ## Excluding patterns from matching
@@ -171,7 +171,10 @@ We can use the same pattern from JavaScript. Here we're using the `up.layer.ask(
 and returns a promise for its [result value](/closing-overlays#result-values):
 
 ```js
-var { name } = await up.layer.ask({ acceptLocation: '/users/:name' });
+var { name } = await up.layer.ask({
+  url: '/users',
+  acceptLocation: '/users/:name'
+});
 ```
 
 ### Capturing number segments
@@ -183,9 +186,6 @@ To define a captured segment consisting of digits only, prefix it with a `$` lik
 ```
 
 The above URL pattern will match `/users/123` as `{ id: 123 }`. It will not match `/users/new`.
-
-
-
 
 
 @page url-patterns
