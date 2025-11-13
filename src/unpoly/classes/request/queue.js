@@ -65,8 +65,12 @@ up.Request.Queue = class Queue {
     return (maxConcurrency === -1) || (this._currentRequests.length < maxConcurrency)
   }
 
+  get size() {
+    return this.allRequests.length
+  }
+
   isBusy() {
-    return this._currentRequests.length > 0 || this._queuedRequests.length > 0
+    return this.size > 0
   }
 
   _queueRequest(request) {
