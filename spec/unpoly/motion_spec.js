@@ -8,23 +8,6 @@ describe('up.motion', function() {
 
     describe('up.animate()', function() {
 
-      it('animates the given element with a predefined animation', async function() {
-        const element = fixture('.element', { text: 'content' })
-        up.animate(element, 'fade-in', { duration: 200, easing: 'linear' })
-
-        await wait(1)
-
-        expect(element).toHaveOpacity(0.0, 0.15)
-
-        await wait(100)
-
-        expect(element).toHaveOpacity(0.5, 0.3)
-
-        await wait(260)
-
-        expect(element).toHaveOpacity(1.0, 0.15)
-      })
-
       it('animates the given element to a frame of kebab-case CSS properties', async function() {
         const element = fixture('.element', { text: 'content', style: { opacity: 0 } })
         up.animate(element, { opacity: 1 }, { duration: 200, easing: 'linear' })
@@ -40,6 +23,69 @@ describe('up.motion', function() {
         await wait(260)
 
         expect(element).toHaveOpacity(1.0, 0.15)
+      })
+
+      fdescribe('predefined animations', function() {
+
+        describe("fade-in", function() {
+
+          it('fades in the element from 100% to 0% transparency', async function() {
+            const element = fixture('.element', { text: 'content' })
+            up.animate(element, 'fade-in', { duration: 200, easing: 'linear' })
+
+            await wait(1)
+
+            expect(element).toHaveOpacity(0.0, 0.15)
+
+            await wait(100)
+
+            expect(element).toHaveOpacity(0.5, 0.3)
+
+            await wait(260)
+
+            expect(element).toHaveOpacity(1.0, 0.15)
+          })
+
+        })
+
+        describe("fade-out", function() {
+
+          it('fades out the element from 0% to 100% transparency', async function() {
+            const element = fixture('.element', { text: 'content' })
+            up.animate(element, 'fade-out', { duration: 200, easing: 'linear' })
+
+            await wait(1)
+
+            expect(element).toHaveOpacity(1.0, 0.15)
+
+            await wait(100)
+
+            expect(element).toHaveOpacity(0.5, 0.3)
+
+            await wait(260)
+
+            expect(element).toHaveOpacity(0.0, 0.15)
+          })
+
+          it("starts the animation at a semi-transparent element's current opacity", async function() {
+            const element = fixture('.element', { text: 'content', style: { 'opacity': '0.5' } })
+            up.animate(element, 'fade-out', { duration: 200, easing: 'linear' })
+
+            await wait(1)
+
+            expect(element).toHaveOpacity(0.5, 0.1)
+
+            await wait(100)
+
+            expect(element).toHaveOpacity(0.3, 0.15)
+
+            await wait(260)
+
+            expect(element).toHaveOpacity(0.0, 0.1)
+          })
+
+        })
+
       })
 
       if (up.migrate.loaded) {
