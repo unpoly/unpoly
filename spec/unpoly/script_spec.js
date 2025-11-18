@@ -791,6 +791,21 @@ describe('up.script', function() {
           expect(listener).toHaveBeenCalledWith(expectedEvent)
         })
 
+        it('exposes meta information about the compiler pass as event properties', function() {
+          const target = fixture('.element')
+          const listener = jasmine.createSpy('up:fragment:inserted listener')
+          target.addEventListener('up:fragment:inserted', listener)
+
+          up.hello(target)
+
+          const expectedEvent = jasmine.objectContaining({
+            ok: true,
+            revalidating: false,
+            layer: up.layer.root,
+          })
+          expect(listener).toHaveBeenCalledWith(expectedEvent)
+        })
+
         it('emits up:fragment:inserted after compilation', function() {
           const callOrder = []
           up.compiler('.element', () => callOrder.push('compiler'))
@@ -817,7 +832,7 @@ describe('up.script', function() {
           expect(callOrder).toEqual(['compiler:start', 'event', 'compiler:end'])
         })
 
-        it('only calls up:fragment:inserted once when the same element is passed to up.hello() multiple times', async function() {
+        it('only emits up:fragment:inserted once when the same element is passed to up.hello() multiple times', async function() {
           const target = fixture('.element')
           const listener = jasmine.createSpy('up:fragment:inserted listener')
           target.addEventListener('up:fragment:inserted', listener)
@@ -930,6 +945,126 @@ describe('up.script', function() {
             expect(observeArgs.calls.argsFor(0)).toEqual(['child1', { foo: 'foo for child1' }])
             expect(observeArgs.calls.argsFor(1)).toEqual(['child2', { foo: 'foo for child2' }])
           })
+        })
+
+      })
+
+      describe('meta information about the render pass', function() {
+
+        describe('meta.layer', function() {
+
+          it('points to the layer in which we render', async function() {
+            const compiler = jasmine.createSpy('compiler')
+            up.compiler('.target', compiler)
+
+            let targetHTML = (text) => `<div class="target">${text}</div>`
+
+            await makeLayers([
+              { fragment: targetHTML('old root') },
+              { fragment: targetHTML('old overlay') },
+            ])
+
+            await up.render({ fragment: targetHTML('new root'), layer: 'root' })
+            expect(up.fragment.get('.target', { layer: 'root' })).toHaveText('new root')
+            expect(compiler.calls.mostRecent().args[2].layer).toBe(up.layer.get(0))
+
+
+            await up.render({ fragment: targetHTML('new overlay'), layer: 'overlay' })
+            expect(up.fragment.get('.target', { layer: 'overlay' })).toHaveText('new overlay')
+            expect(compiler.calls.mostRecent().args[2].layer).toBe(up.layer.get(1))
+          })
+        })
+
+        describe('meta.ok', function() {
+
+          it('returns true when rendering from a successful response', async function() {
+            const compiler = jasmine.createSpy('compiler')
+            up.compiler('.target', compiler)
+
+            let targetHTML = (text) => `<div class="target">${text}</div>`
+            htmlFixture(targetHTML('old'))
+
+            up.render({ target: '.target', url: '/path' })
+            await wait()
+            jasmine.respondWith(targetHTML('new'))
+            await wait()
+
+            expect('.target').toHaveText('new')
+            expect(compiler.calls.mostRecent().args[2].ok).toBe(true)
+          })
+
+          it('returns false when rendering from a failed response', async function() {
+            const compiler = jasmine.createSpy('compiler')
+            up.compiler('.target', compiler)
+
+            let targetHTML = (text) => `<div class="target">${text}</div>`
+            htmlFixture(targetHTML('old'))
+
+            up.render({ target: '.target', failTarget: '.target', url: '/path' })
+            await wait()
+            jasmine.respondWith({ status: 500, responseText: targetHTML('new') })
+            await wait()
+
+            expect('.target').toHaveText('new')
+            expect(compiler.calls.mostRecent().args[2].ok).toBe(false)
+          })
+
+          it('returns true when rendering local content', async function() {
+            const compiler = jasmine.createSpy('compiler')
+            up.compiler('.target', compiler)
+
+            let targetHTML = (text) => `<div class="target">${text}</div>`
+            htmlFixture(targetHTML('old'))
+
+            up.render({ fragment: targetHTML('new') })
+            await wait()
+
+            expect('.target').toHaveText('new')
+            expect(compiler.calls.mostRecent().args[2].ok).toBe(true)
+          })
+
+        })
+
+        describe('meta.revalidating', function() {
+
+          it("returns whether we're compiling content from a revalidation response", async function() {
+            const compiler = jasmine.createSpy('compiler')
+            up.compiler('.target', compiler)
+
+            let targetHTML = (text) => `<div class="target">${text}</div>`
+            htmlFixture(targetHTML('old'))
+
+            await jasmine.populateCache('/path', targetHTML('<div class="target">expired</div>'))
+            up.cache.expire()
+
+            up.render({ target: '.target', url: '/path', cache: true, revalidate: 'auto' })
+            await wait()
+
+            expect('.target').toHaveText('expired')
+            expect(compiler.calls.mostRecent().args[2].revalidating).toBe(false)
+
+            expect(up.network.isBusy()).toBe(true)
+            jasmine.respondWith(targetHTML('revalidated'))
+            await wait()
+
+            expect('.target').toHaveText('revalidated')
+            expect(compiler.calls.mostRecent().args[2].revalidating).toBe(true)
+          })
+
+          it('returns false when rendering local content', async function() {
+            const compiler = jasmine.createSpy('compiler')
+            up.compiler('.target', compiler)
+
+            let targetHTML = (text) => `<div class="target">${text}</div>`
+            htmlFixture(targetHTML('old'))
+
+            up.render({ fragment: targetHTML('new') })
+            await wait()
+
+            expect('.target').toHaveText('new')
+            expect(compiler.calls.mostRecent().args[2].revalidating).toBe(false)
+          })
+
         })
 
       })

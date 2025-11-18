@@ -193,16 +193,18 @@ Compilers may accept a third argument with information about the current [render
 ```js
 up.compiler('.user', function(element, data, meta) { // mark: meta
   console.log(meta.layer.mode)   // result: "root"
-  console.log(meta.revalidating) // result: true
+  console.log(meta.ok)           // result: true
+  console.log(meta.revalidating) // result: false
 })
 ```
 
 The following properties are available:
 
-| Property               | Type          |                                                 | Description                                               |
-|------------------------|---------------|-------------------------------------------------|-----------------------------------------------------------|
-| `meta.layer`           | `up.Layer`    |                                                 | The [layer](/up.layer) of the fragment being compiled.<br>This has the same value as `up.layer.current`. |
-| `meta.revalidating`    | `boolean`     | <span class="tag is_light_gray">optional</span> | Whether the element was reloaded for the purpose of [cache revalidation](/caching#revalidation). |
+| Property            | Type          | Description                                                                                                        |
+|---------------------|---------------|--------------------------------------------------------------------------------------------------------------------|
+| `meta.layer`        | `up.Layer`    | The [layer](/up.layer) of the compiling fragment.<br>This has the same value as `up.layer.current`. |
+| `meta.ok`           | `boolean`     | Whether the element was loaded from a [successful response](/failed-responses#fail-options).                       |
+| `meta.revalidating` | `boolean`     | Whether the element was reloaded for the purpose of [cache revalidation](/caching#revalidation).                   |
 
 
 

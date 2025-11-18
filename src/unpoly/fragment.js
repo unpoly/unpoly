@@ -1139,7 +1139,14 @@ up.fragment = (function() {
 
   @event up:fragment:inserted
   @param {Element} event.target
-    The fragment that has been inserted or swapped with a new version.
+    The fragment that has been inserted or updated.
+  @param {up.Layer} event.layer
+    The [layer](/up.layer) of the new fragment.
+  @param {boolean} event.ok
+    Whether the element was loaded from a [successful response](/failed-responses#fail-options).
+  @param {boolean} event.revalidating
+    Whether the element was reloaded for the purpose of [cache revalidation](/caching#revalidation).
+
   @stable
   */
 
