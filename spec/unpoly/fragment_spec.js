@@ -7772,6 +7772,25 @@ describe('up.fragment', function() {
             expect(this.revealedText).toEqual(['origin text'])
           })
 
+          it('only scrolls the first fragment of a multi-target update', async function() {
+            htmlFixtureList(`
+              <div id="target1">old target1</div>
+              <div id="target2">old target2</div>
+            `)
+
+            await up.render({
+              target: '#target1, #target2',
+              document: `
+                <div id="target1">new target1</div>
+                <div id="target2">new target2</div>
+              `,
+              scroll: 'target'
+            })
+
+            expect(this.revealedText).toEqual(['new target1'])
+
+          })
+
           if (up.migrate.loaded) {
             describe('with { reveal: true }', function() {
               it('scrolls to the new element that is inserted into the DOM', async function() {
