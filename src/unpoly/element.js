@@ -1559,20 +1559,6 @@ up.element = (function() {
     return selector
   }
 
-  function matchSelectorMap(selectorMap, element) {
-    let matches = []
-
-    if (selectorMap) {
-      for (let [selector, value] of Object.entries(selectorMap)) {
-        if (u.isDefined(value) && element.matches(selector)) {
-          matches.push(value)
-        }
-      }
-    }
-
-    return matches
-  }
-
   function documentPosition(element) {
     let nextSibling = element.nextElementSibling
     if (nextSibling) {
@@ -1660,10 +1646,8 @@ up.element = (function() {
     crossOriginSelector,
     isIntersectingWindow,
     unionSelector,
-    matchSelectorMap,
     elementLikeMatches,
     documentPosition,
-    firstTagNameInHTML,
     isFullDocumentHTML,
   }
 })()

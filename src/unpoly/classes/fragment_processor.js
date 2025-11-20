@@ -11,6 +11,11 @@ up.FragmentProcessor = class FragmentProcessor extends up.Record {
     ]
   }
 
+  processMap(map, fallbackOpt) {
+    let mappedOpt = up.fragment.matchSelectorMap(this.fragment, map, { layer: this.layer })[0]
+    return this.process(mappedOpt ?? fallbackOpt)
+  }
+
   process(opt) {
     let preprocessed = this.preprocess(opt)
     return this.tryProcess(preprocessed)

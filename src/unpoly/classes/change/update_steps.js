@@ -318,7 +318,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
       fragment,
       autoMeans: up.fragment.config.autoScroll
     })
-    return scrolling.process(options.scroll)
+    return scrolling.processMap(options.scrollMap, options.scroll)
   }
 
 }

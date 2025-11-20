@@ -2604,6 +2604,20 @@ up.fragment = (function() {
     }
   }
 
+  function matchSelectorMap(element, selectorMap, { layer = element } = {}) {
+    let hits = []
+
+    if (selectorMap && element) {
+      for (let [selector, value] of Object.entries(selectorMap)) {
+        if (u.isDefined(value) && matches(element, selector, { layer })) {
+          hits.push(value)
+        }
+      }
+    }
+
+    return hits
+  }
+
   function shouldRevalidate(request, response, options = {}) {
     return request.fromCache && u.evalAutoOption(options.revalidate, config.autoRevalidate, response)
   }
@@ -3166,6 +3180,7 @@ up.fragment = (function() {
     tryToTarget,
     isTargetable,
     matches,
+    matchSelectorMap,
     hasAutoHistory,
     time: timeOf,
     etag: etagOf,
