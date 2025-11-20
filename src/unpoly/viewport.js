@@ -475,8 +475,8 @@ up.viewport = (function() {
   Return the [scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/document/scrollingElement)
   for the browser's main content area.
 
-  @function up.viewport.root
-  @return {Element}
+  @property up.viewport.root
+  @param {Element} root
   @stable
   */
   function getRoot() {
