@@ -246,8 +246,8 @@ up.status = (function() {
     // but each with individual preview effects.
     for (let fragment of fragments) {
       let eachPreview = previewForFragment(fragment)
-      eachPreview.run(e.matchSelectorMap(renderOptions.previewMap, fragment))
-      eachPreview.run(e.matchSelectorMap(renderOptions.placeholderMap, fragment).flatMap(getPlaceholderPreviewFn))
+      eachPreview.run(up.fragment.matchSelectorMap(fragment, renderOptions.previewMap))
+      eachPreview.run(up.fragment.matchSelectorMap(fragment, renderOptions.placeholderMap).flatMap(getPlaceholderPreviewFn))
     }
 
     return cleaner.clean

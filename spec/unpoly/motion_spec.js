@@ -25,7 +25,7 @@ describe('up.motion', function() {
         expect(element).toHaveOpacity(1.0, 0.15)
       })
 
-      fdescribe('predefined animations', function() {
+      describe('predefined animations', function() {
 
         describe("fade-in", function() {
 

@@ -7661,6 +7661,7 @@ describe('up.fragment', function() {
         })
       })
 
+
       describe('scrolling', function() {
 
         const mockReveal = function() {
@@ -7788,7 +7789,6 @@ describe('up.fragment', function() {
             })
 
             expect(this.revealedText).toEqual(['new target1'])
-
           })
 
           if (up.migrate.loaded) {
@@ -8178,6 +8178,161 @@ describe('up.fragment', function() {
 
             expect(this.revealedText).toEqual(['origin text'])
           })
+        })
+
+        describe('with { scrollMap } option', function() {
+
+          mockRevealBeforeEach()
+
+          it('allows to scroll different viewports in a multi-target update', async function() {
+            htmlFixtureList(`
+              <div id="viewport1" up-viewport>
+                <div id="target1">old target1</div>
+              </div>
+              <div id="viewport2" up-viewport>
+                <div id="target2">old target2</div>
+              </div>
+            `)
+
+            await up.render({
+              target: '#target1, #target2',
+              document: `
+                <div id="target1">new target1</div>
+                <div id="target2">new target2</div>
+              `,
+              scrollMap: { '#target1': 'target', '#target2': 'target' }
+            })
+
+            expect(this.revealedText).toEqual(jasmine.arrayWithExactContents(['new target1', 'new target2']))
+          })
+
+          it('allows to match custom pseudos like :main', async function() {
+            htmlFixtureList(`
+              <div id="viewport" up-main>
+                old main
+              </div>
+            `)
+
+            await up.render({
+              target: ':main',
+              document: `
+                <div id="viewport" up-main>
+                  new main
+                </div>
+              `,
+              scrollMap: { ':main': 'target' }
+            })
+
+            expect(this.revealedText).toEqual(jasmine.arrayWithExactContents(['new main']))
+
+          })
+
+          it('allows to scroll all updated viewports by mapping the "*" selector', async function() {
+            htmlFixtureList(`
+              <div id="viewport1" up-viewport>
+                <div id="target1">old target1</div>
+              </div>
+              <div id="viewport2" up-viewport>
+                <div id="target2">old target2</div>
+              </div>
+            `)
+
+            await up.render({
+              target: '#target1, #target2',
+              document: `
+                <div id="target1">new target1</div>
+                <div id="target2">new target2</div>
+              `,
+              scrollMap: { '*': 'target' }
+            })
+
+            expect(this.revealedText).toEqual(jasmine.arrayWithExactContents(['new target1', 'new target2']))
+          })
+
+          it('allows to scroll when opening an overlay', async function() {
+            await up.render({
+              layer: 'new modal',
+              fragment: `
+                <div id="root">
+                  <div id="child1">
+                    overlay child1
+                  </div>
+
+                  <div id="child2">
+                    overlay child2
+                  </div>
+                </div>
+              `,
+              scrollMap: { '#root': '#child2' }
+            })
+
+            expect(this.revealedText).toEqual(['overlay child2'])
+          })
+
+          it('allows to scroll a hungry element', async function() {
+            htmlFixtureList(`
+              <div id="viewport1" up-viewport>
+                <div id="target">old target</div>
+              </div>
+              <div id="viewport2" up-viewport>
+                <div id="hungry" up-hungry>old hungry</div>
+              </div>
+            `)
+
+            await up.render({
+              target: '#target',
+              document: `
+                <div id="target">new target</div>
+                <div id="hungry" up-hungry>new hungry</div>
+              `,
+              scrollMap: { '#hungry': 'target' }
+            })
+
+            expect(this.revealedText).toEqual(['new hungry'])
+          })
+
+          it('allows to scroll a hungry element when opening a layer', async function() {
+            htmlFixtureList(`
+              <div id="hungry" up-hungry up-if-layer="any">old hungry</div>
+            `)
+
+            await up.render({
+              layer: 'new modal',
+              target: '#target',
+              document: `
+                <div id="target">new target</div>
+                <div id="hungry" up-hungry>new hungry</div>
+              `,
+              scrollMap: { '#hungry': 'target' }
+            })
+
+            expect(this.revealedText).toEqual(['new hungry'])
+          })
+
+          it('overrides a { scroll } option', async function() {
+            htmlFixtureList(`
+              <div id="viewport1" up-viewport>
+                <div id="target1">old target1</div>
+                <div id="other">old other</div>
+              </div>
+              <div id="viewport2" up-viewport>
+                <div id="target2">old target2</div>
+              </div>
+            `)
+
+            await up.render({
+              target: '#target1, #target2',
+              document: `
+                <div id="target1">new target1</div>
+                <div id="target2">new target2</div>
+              `,
+              scroll: '#other',
+              scrollMap: { '#target1': 'target', '#target2': 'target' }
+            })
+
+            expect(this.revealedText).toEqual(jasmine.arrayWithExactContents(['new target1', 'new target2']))
+          })
+
         })
 
         describe('with { scrollBehavior } option', function() {

@@ -77,7 +77,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     }
 
     // Make sure only the first step will have scroll-related options.
-    this._setScrollAndFocusOptions()
+    this._setViewportOptions()
 
     if (this.options.saveScroll) {
       up.viewport.saveScroll({ layer: this.layer })
@@ -199,7 +199,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     return up.radio.hungrySteps(this._getEffectiveRenderOptions())
   }
 
-  _setScrollAndFocusOptions() {
+  _setViewportOptions() {
     // Store the focused element's selector, scroll position and selection range
     // in an up.FocusCapsule for later restoration.
     let focusCapsule = up.FocusCapsule.preserve(this.layer)

@@ -84,6 +84,10 @@ up.radio = (function() {
         let selectEvent = up.event.build('up:fragment:hungry', { log: false })
         let selectCallback = e.callbackAttr(element, 'up-on-hungry', { exposedKeys: ['newFragment', 'renderOptions'] })
 
+        // While we only process { scroll } for the first step, we allow
+        // to scroll secondary targets using { scrollMap }.
+        let { scrollMap } = renderOptions
+
         let step = {
           selector,            // The selector for a single step is { selector }
           oldElement: element, // The match on the current page
@@ -93,6 +97,7 @@ up.radio = (function() {
           placement: 'swap',   // Hungry elements are always swapped, never appended
           keep: true,          // Always honor [up-keep] in hungry elements. Set here because we don't inherit default render options.
           maybe: true,         // Don't fail if we cannot match { newElement } later.
+          scrollMap,
           meta,
           selectEvent,         // Used by up.ResponseDoc#selectStep()
           selectCallback,      // Used by up.ResponseDoc#selectStep()
