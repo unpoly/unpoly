@@ -1779,7 +1779,7 @@ describe('up.status', function() {
 
           await jasmine.expectGlobalError('up.Offline', async function() {
             jasmine.lastRequest().responseError()
-            await wait(10)
+            await wait(30)
           }) // waiting for a single task does not work for some reason
 
           expect(link).not.toHaveClass('up-active')
