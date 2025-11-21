@@ -119,7 +119,7 @@ up.script = (function() {
   let registeredMacros = []
 
   /*-
-  Registers a function that is when a matching element is inserted into the DOM.
+  Registers a function that is called when a matching element is inserted into the DOM.
 
   [Enhancing elements](/enhancing-elements){:.article-ref}
 
