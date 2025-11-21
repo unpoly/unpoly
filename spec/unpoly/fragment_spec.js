@@ -8206,6 +8206,59 @@ describe('up.fragment', function() {
             expect(this.revealedText).toEqual(jasmine.arrayWithExactContents(['new target1', 'new target2']))
           })
 
+          it('allows to preserve scroll positions of multiple swapped viewports', async function() {
+            fixtureStyle(`
+              #viewport1, #viewport2 {
+                height: 150px;
+                overflow-y: scroll;
+              }
+            `)
+
+            fixtureStyle(`
+              .content {
+                height: 2000px;
+              }
+            `)
+
+            htmlFixtureList(`
+              <div id="viewport1" up-viewport>
+                <div class="content">
+                  old content in viewport1
+                </div>
+              </div>
+              <div id="viewport2" up-viewport>
+                <div class="content">
+                  old content in viewport2
+                </div>
+              </div>
+            `)
+
+            document.querySelector('#viewport1').scrollTop = 333
+            document.querySelector('#viewport2').scrollTop = 444
+
+            await up.render({
+              target: '#viewport1, #viewport2',
+              document: `
+                <div id="viewport1" up-viewport>
+                  <div class="content">
+                    new content in viewport1
+                  </div>
+                </div>
+                <div id="viewport2" up-viewport>
+                  <div class="content">
+                    new content in viewport2
+                  </div>
+                </div>
+              `,
+              scrollMap: { '*': 'keep' }
+            })
+
+            expect('#viewport1').toHaveText('new content in viewport1')
+            expect('#viewport1').toBeScrolledTo(333)
+            expect('#viewport2').toHaveText('new content in viewport2')
+            expect('#viewport2').toBeScrolledTo(444)
+          })
+
           it('allows to match custom pseudos like :main', async function() {
             htmlFixtureList(`
               <div id="viewport" up-main>
