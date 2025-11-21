@@ -5,10 +5,18 @@
 
   See [scrolling](/scrolling) for a list of allowed values.
 
+  When [updating multiple fragments](/targeting-fragments#multiple), this option
+  will only be applied to the *first* fragment. To scroll other fragments, use [`{ scrollMap }`](#options.scrollMap).
+
 @param {boolean|string|Element|Function} [options.failScroll]
   How to scroll after the new fragment was rendered from a failed response.
 
   See [Rendering failed responses differently](/failed-responses#fail-options).
+
+@param {Object} [options.scrollMap]
+  An object mapping fragment selectors to a [scrolling option](/scrolling).
+  
+  See [Scrolling multiple viewports](/scrolling#multiple-viewports) for examples.
 
 @param {string} [options.scrollBehavior='instant']
   Whether to [animate the scroll motion](/scroll-tuning#animating-the-scroll-motion)
