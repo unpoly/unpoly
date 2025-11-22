@@ -10,6 +10,11 @@
 
   See [Rendering failed responses differently](/failed-responses#fail-options).
 
+@param [up-scroll-map]
+  A [relaxed JSON](/relaxed-json) object mapping fragment selectors to a [scrolling option](/scrolling).
+  
+  See [Scrolling multiple viewports](/scrolling#multiple-viewports) for examples.
+
 @param [up-scroll-behavior='instant']
   Whether to [animate the scroll motion](/scroll-tuning#animating-the-scroll-motion)
   when [prepending or appending](/targeting-fragments#appending-or-prepending) content.
