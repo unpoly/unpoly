@@ -147,6 +147,9 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
       renderOptions: this.options,
     })
 
+    // A11Y: Place the focus on the overlay element and setup a focus circle.
+    this._handleFocus()
+
     // Don't wait for the open animation to finish.
     // Otherwise a popup would start to open and only reveal itself after the animation.
     this._handleScroll()
@@ -187,10 +190,6 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
 
     // Don't change focus if the layer has been closed while the animation was running.
     this.ensureLayerAlive()
-
-    // A11Y: Place the focus on the overlay element and setup a focus circle.
-    // However, don't change focus if the layer has been closed while the animation was running.
-    this._handleFocus()
 
     await this._helloPromise
 
