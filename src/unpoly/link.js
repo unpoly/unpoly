@@ -457,6 +457,7 @@ up.link = (function() {
     parser.boolean('saveScroll')
     parser.boolean('saveFocus')
     parser.booleanOrString('scroll')
+    parser.json('scrollMap')
     parser.boolean('revealTop')
     parser.number('revealMax')
     parser.number('revealPadding')

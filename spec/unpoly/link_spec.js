@@ -963,6 +963,34 @@ describe('up.link', function() {
         expect(options.transition).toBe(false)
       })
 
+      describe('[up-scroll-map]', function() {
+
+        it('parses a relaxed JSON value', function() {
+          const link = htmlFixture(`
+            <a
+              href="/dashboard"
+              up-target="#left, #right"
+              up-scroll-map="{ '#left': 'bottom', '#right': 'bottom' }"
+            >
+              Link label
+            </a>
+          `)
+          up.hello(link)
+
+          const options = up.link.followOptions(link)
+          expect(options.scrollMap).toEqual({ '#left': 'bottom', '#right': 'bottom' })
+        })
+
+        it('returns a missing value if the the attribute is missing', function() {
+          const link = fixture('a[href="/foo"][up-follow]')
+          up.hello(link)
+
+          const options = up.link.followOptions(link)
+          expect(options.scrollMap).toBeMissing()
+        })
+
+      })
+
       if (up.migrate.loaded) {
         it('parses an [up-reset-scroll] attribute as { scroll: "top" }', function() {
           const link = fixture('a[href="/foo"][up-reset-scroll]')
