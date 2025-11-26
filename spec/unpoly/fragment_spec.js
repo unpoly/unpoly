@@ -758,6 +758,11 @@ describe('up.fragment', function() {
           }
           const promise = up.render(renderOptions)
 
+          // const res = await promise
+          // debugger
+          //
+          // console.log(res)
+
           await expectAsync(promise).toBeResolvedTo(jasmine.any(up.RenderResult))
 
           await expectAsync(promise).toBeResolvedTo(jasmine.objectContaining({

@@ -9,7 +9,6 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     this._steps = u.copy(u.assert(options.steps)) // we mutate it below
     this._passRenderOptions = u.assert(options.passRenderOptions)
     this._noneOptions = options.noneOptions || {}
-    this._finishDelays = []
   }
 
   execute(responseDoc) {
@@ -23,44 +22,47 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     // This way they won't be moved by hungry elements later.
     this._steps = responseDoc.commitSteps(this._steps)
 
-    this.renderResult = new up.RenderResult({
-      layer: this._passRenderOptions.layer, // layer is looked up by FromContent#_expandIntoPlans()
-      target: up.fragment.targetForSteps(this._steps), // returns ':none' for empty steps
-      renderOptions: this._passRenderOptions,
-    })
+    // returns ':none' for empty steps
+    let targetForSteps = up.fragment.targetForSteps(this._steps)
 
-    if (!this._steps.length) {
-      // When rendering nothing we still want to process { focus, scroll } options.
-      this._handleFocus(null, this._noneOptions)
-      this._handleScroll(null, this._noneOptions)
-    } else {
-      // We swap fragments in reverse order for two reasons:
-      //
-      // (1) Only the first step will process focus. Other steps may cause focus loss
-      //     (when they're swapping a fragment with focus), causing an option like
-      //     { focus: 'main-if-lost' } to not satisfy the "lost" condition.
-      // (2) Only the first step will scroll. However other steps may change
-      //     the viewport height through element insertions.
-      this._steps.reverse()
+    // Group compilation and emission of up:fragment:inserted into a mutation block.
+    // This allows up.SelectorTracker to only sync once after the mutation, and
+    // ignore any events in between.
+    return up.fragment.mutate(() => {
+      let results
+      if (this._steps.length) {
+        // We swap fragments in reverse order for two reasons:
+        //
+        // (1) Only the first step will process focus. Other steps may cause focus loss
+        //     (when they're swapping a fragment with focus), causing an option like
+        //     { focus: 'main-if-lost' } to not satisfy the "lost" condition.
+        // (2) Only the first step will scroll. However other steps may change
+        //     the viewport height through element insertions.
 
-      // Group compilation and emission of up:fragment:inserted into a mutation block.
-      // This allows up.SelectorTracker to only sync once after the mutation, and
-      // ignore any events in between.
-      up.fragment.mutate(() => {
-        const motionEndPromises = this._steps.map((step) => this._executeStep(step))
-        this.renderResult.finished = this._finish(motionEndPromises)
+        // TODO: Once we implemented the phased render engine, we should no longer need to reverse steps.
+        this._steps.reverse()
+        results = this._steps.map((step) => this._executeStep(step))
+      } else {
+        results = [this._executeNoSteps()]
+      }
+
+      let renderResult = new up.RenderResult({
+        layer: this._passRenderOptions.layer, // layer is looked up by FromContent#_expandIntoPlans()
+        target: targetForSteps,
+        renderOptions: this._passRenderOptions,
+        fragments: u.flatMap(results.toReversed(), 'newFragments'), // Since we reversed steps, restore fragment order
       })
-    }
 
-    return this.renderResult
+      renderResult.finished = this._finish(u.map(results, 'postprocess'), renderResult)
+
+      return renderResult
+    })
   }
 
-  _delayFinish(delay) {
-    this._finishDelays.push(delay)
-  }
+  async _finish(postprocessFns, renderResult) {
+    let postprocessPromises = postprocessFns.map((fn) => fn())
 
-  async _finish() {
-    await Promise.all(this._finishDelays)
+    await Promise.all(postprocessPromises)
 
     // If our layer was closed while animations are running, don't finish
     // and reject with an up.AbortError.
@@ -70,16 +72,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
 
     // The RenderResult has not changed. We still updated the same target and fragments.
     // We only want to signal the time of the end of animations / DOM changes.
-    return this.renderResult
-  }
-
-  _addToResult(fragment) {
-    let newFragments = fragment.matches('up-wrapper') ? fragment.children : [fragment]
-
-    // Since we're executing steps in reverse order we prepend the new fragment
-    // to the beginning of the array. This way the elements will be in the order
-    // that the user named them in their { target }.
-    this.renderResult.fragments.unshift(...newFragments)
+    return renderResult
   }
 
   _executeStep(step) {
@@ -87,105 +80,224 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
       case 'swap': {
         let keepPlan = up.fragment.keepPlan(step)
         if (keepPlan) {
-          // Since we're keeping the element that was requested to be swapped,
-          // we won't be making changes to the DOM.
-
-          this._handleFocus(step.oldElement, step)
-          this._handleScroll(step.oldElement, step)
-
-          // Don't add kept fragment to this.renderResult.
-          up.fragment.emitKept(keepPlan)
-
-          break
-          // return Promise.resolve()
-        } else {
-          // This needs to happen before up.script.clean() below.
-          // Otherwise we would run destructors for elements we want to keep.
-          this._preserveDescendantKeepables(step)
-
-          // TODO: Don't suppport [up-keep] for direct children of <body>
-
-          const parent = step.oldElement.parentNode
-
-          const morphOptions = {
-            ...step,
-            beforeStart() {
-              up.fragment.markAsDestroying(step.oldElement)
-            },
-            afterInsert: () => {
-              // Restore keepable before finalizing. Finalizing will rewrite elements that DOMParser broke,
-              // causing a keepPlans's newElement to point to a rewritten element that is now detached.
-              // Hence we lose the original position of the keepable.
-              this._restoreDescendantKeepables(step)
-
-              this._welcomeElement(step.newElement, step)
-
-              // Remove the .up-keeping classes and emit up:fragment:kept.
-              this._finalizeDescendantKeepables(step)
-            },
-            beforeDetach: () => {
-              // In the case of [up-keep] descendants, keepable elements have been replaced
-              // with a clone in step.oldElement. However, since that clone was never compiled,
-              // it does not have destructors registered. Hence we will not clean the clone
-              // unnecessarily.
-              up.script.clean(step.oldElement, { layer: step.layer })
-            },
-            afterDetach() {
-              e.cleanJQuery()
-              up.fragment.emitDestroyed(step.oldElement, { parent, log: false })
-              step.afterDetach?.()
-            },
-            scrollNew: () => {
-              this._handleFocus(step.newElement, step)
-              this._handleScroll(step.newElement, step)
-            }
-          }
-
-          this._delayFinish(
-            up.morph(step.oldElement, step.newElement, step.transition, morphOptions)
-          )
-
-          break
+          return this._executeKeepEverythingStep(step, keepPlan)
+        }  else {
+          return this._executeSwapStep(step)
         }
       }
       case 'content': {
-        let oldWrapper = e.wrapChildren(step.oldElement)
-        // oldWrapper.appendTo(step.oldElement)
-        let newWrapper = e.wrapChildren(step.newElement)
-
-        let wrapperStep = {
-          ...step,
-          placement: 'swap',
-          oldElement: oldWrapper,
-          newElement: newWrapper,
-          focus: false,
-          afterDetach: () => {
-            e.unwrap(newWrapper)
-            // (A) Unwrapping may destroy focus, so we need to handle it again.
-            // (B) Since we never inserted step.newElement (only its children), we handle focus on step.oldElement.
-            this._handleFocus(step.oldElement, step)
-          },
-        }
-
-        this._executeStep(wrapperStep)
-
-        break
+        return this._executeSwapChildrenStep(step)
       }
       case 'before':
       case 'after': {
-        // We're either appending or prepending. No keepable elements must be honored.
+        return this._executeInsertChildrenStep(step)
+      }
+      default: {
+        up.fail('Unknown placement: %o', step.placement)
+      }
+    }
+  }
 
-        // Text nodes are wrapped in an <up-wrapper> container so we can
-        // animate them and measure their position/size for scrolling.
-        // This is not possible for container-less text nodes.
-        let wrapper = e.wrapChildren(step.newElement)
+  _executeNoSteps() {
+    this._handleFocus(null, this._noneOptions)
+    this._handleScroll(null, this._noneOptions)
 
-        // Note that since we're prepending/appending instead of replacing,
-        // newElement will not actually be inserted into the DOM, only its children.
-        let position = step.placement === 'before' ? 'afterbegin' : 'beforeend'
-        step.oldElement.insertAdjacentElement(position, wrapper)
+    return {
+      newFragments: [],
+      postprocess: u.asyncNoop
+    }
+  }
 
-        this._welcomeElement(wrapper, step)
+  // _willStepMorph(step) {
+  //   return up.motion.willAnimate(step.oldElement, step.transition, step)
+  // }
+
+  _executeKeepEverythingStep(step, keepPlan) {
+    if (!keepPlan) return
+
+    // Nothing to do
+
+    return {
+      // Don't add kept fragment to this.renderResult.
+      newFragments: [],
+      postprocess: async () => {
+        up.fragment.emitKept(keepPlan)
+
+        this._handleFocus(step.oldElement, step)
+        this._handleScroll(step.oldElement, step)
+      }
+    }
+  }
+
+  // _executeSimpleSwapStep(step) {
+  //   const parent = step.parentElement ?? step.oldElement.parentNode
+  //
+  //   this._preserveDescendantKeepables(step)
+  //   e.cleanJQuery(step.oldElement)
+  //   up.script.clean(step.oldElement, { layer: step.layer })
+  //   step.oldElement.replaceWith(step.newElement)
+  //
+  //   this._restoreDescendantKeepables(step)
+  //
+  //   up.fragment.emitDestroyed(step.oldElement, { parent, log: false })
+  //
+  //   return {
+  //     newFragments: [step.newElement],
+  //
+  //     // TODO: It would be more clearer to have syncPostprocess() and asyncPostprocess() separately
+  //
+  //     async postprocess() {
+  //       let compilePromise = this._welcomeElement(step.newElement, step)
+  //
+  //       // Remove the .up-keeping classes and emit up:fragment:kept.
+  //       this._finalizeDescendantKeepables(step)
+  //
+  //       this._handleFocus(step.newElement, step)
+  //       this._handleScroll(step.newElement, step)
+  //
+  //       await compilePromise
+  //     }
+  //   }
+  // }
+  //
+  // _executeMorphingSwapStep(step) {
+  //   const parent = step.parentElement ?? step.oldElement.parentNode
+  //   const oldRect = step.oldElement
+  //
+  //   up.fragment.markAsDestroying(step.oldElement)
+  //
+  //   // This needs to happen before up.script.clean() below.
+  //   // Otherwise we would run destructors for elements we want to keep.
+  //   this._preserveDescendantKeepables(step)
+  //   e.insertBefore(step.oldElement, step.newElement)
+  //   this._restoreDescendantKeepables(step)
+  //
+  //   return {
+  //     newFragments: [step.newElement],
+  //     async postprocess() {
+  //       // TODO: welcomeElement currently tracks up.hello promises. Can we do this here?
+  //       let compilePromise = this._welcomeElement(step.newElement, step)
+  //
+  //       // Remove the .up-keeping classes and emit up:fragment:kept.
+  //       this._finalizeDescendantKeepables(step)
+  //
+  //       await up.morph(step.oldElement, step.newElement, step.transition, {
+  //         ...step,
+  //         oldRect,
+  //         scrollNew: () => {
+  //           this._handleFocus(step.newElement, step)
+  //           this._handleScroll(step.newElement, step)
+  //         }
+  //       })
+  //
+  //       e.cleanJQuery(step.oldElement) // TODO: Can this be part of up.script.clean()?
+  //       up.script.clean(step.oldElement, { layer: step.layer })
+  //       up.fragment.emitDestroyed(step.oldElement, { parent, log: false })
+  //
+  //       await compilePromise
+  //     }
+  //   }
+  // }
+
+  _executeSwapStep(step) {
+    const parent = step.parentElement ?? step.oldElement.parentNode
+    const oldRect = step.oldElement
+
+    up.fragment.markAsDestroying(step.oldElement)
+
+    // This needs to happen before up.script.clean() below.
+    // Otherwise we would run destructors for elements we want to keep.
+    this._preserveDescendantKeepables(step)
+    const morphPhases = up.motion.phasedMorph(step.oldElement, step.newElement, step.transition, {
+      ...step,
+      oldRect,
+      scrollNew: () => {
+        this._handleFocus(step.newElement, step)
+        this._handleScroll(step.newElement, step)
+      },
+      beforeRemove: () => {
+        up.script.clean(step.oldElement, { layer: step.layer })
+      },
+      afterRemove: () => {
+        e.cleanJQuery(step.oldElement) // TODO: Can this be part of up.script.clean()?
+        up.fragment.emitDestroyed(step.oldElement, { parent, log: false })
+      }
+    })
+    this._restoreDescendantKeepables(step)
+
+    return {
+      newFragments: [step.newElement],
+      postprocess: async () => {
+        console.debug("[_executeSwapStep] postprocess newElement %o", step.newElement)
+        // TODO: welcomeElement currently tracks up.hello promises. Can we do this here?
+        let compilePromise = this._welcomeElement(step.newElement, step)
+
+        // Remove the .up-keeping classes and emit up:fragment:kept.
+        this._finalizeDescendantKeepables(step)
+
+        await morphPhases.postprocess()
+
+        await compilePromise
+      }
+    }
+  }
+
+  _executeSwapChildrenStep(step) {
+    // Make a copy since it's a live HTMLCollection, and we're going to move these elements.
+    let newChildren = [...step.newElement.children]
+
+    let oldWrapper = e.wrapChildren(step.oldElement)
+    let newWrapper = e.wrapChildren(step.newElement)
+
+    let wrapperStep = {
+      ...step,
+      placement: 'swap',
+      parentElement: step.oldElement.parentNode, // TODO: Test that we get up:fragment:destroyed on the parent, not the wrapper.
+      oldElement: oldWrapper,
+      newElement: newWrapper,
+      focus: false,
+    }
+
+    let wrapperResults = this._executeStep(wrapperStep)
+    e.unwrap(newWrapper)
+
+    return {
+      newFragments: newChildren,
+      postprocess: async () => {
+        // (A) Unwrapping may destroy focus, so we need to handle it again.
+        // (B) Since we never inserted step.newElement (only its children), we handle focus on step.oldElement.
+        // (B improved) TODO: Handle focus for the first new fragment, if it's an element
+        this._handleFocus(step.oldElement, step)
+
+        throw "the wrapper is already childless, so we don't compile children"
+        throw "maybe delay unwrapping and re-handle focus like with insertions?"
+        throw "add missing tests for compiling here, and also for insertion"
+
+        await wrapperResults.postprocess()
+      }
+    }
+  }
+
+  _executeInsertChildrenStep(step) {
+    // Make a copy since it's a live HTMLCollection, and we're going to move these elements.
+    let newChildren = [...step.newElement.children]
+
+    // We're either appending or prepending. No keepable elements must be honored.
+
+    // Text nodes are wrapped in an <up-wrapper> container so we can
+    // animate them and measure their position/size for scrolling.
+    // This is not possible for container-less text nodes.
+    let wrapper = e.wrapChildren(step.newElement)
+
+    // Note that since we're prepending/appending instead of replacing,
+    // newElement will not actually be inserted into the DOM, only its children.
+    let position = step.placement === 'before' ? 'afterbegin' : 'beforeend'
+    step.oldElement.insertAdjacentElement(position, wrapper)
+
+    return {
+      newFragments: newChildren,
+      postprocess: async () => {
+        let compilePromise = this._welcomeElement(wrapper, step)
 
         this._handleFocus(wrapper, step)
 
@@ -194,21 +306,22 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
         // if options.scrollBehavior is given.
         this._handleScroll(wrapper, step)
 
-        // Since we're adding content instead of replacing, we'll only
-        // animate newElement instead of morphing between oldElement and newElement
-        this._delayFinish(
-          up.animate(wrapper, step.animation, step).then(() => e.unwrap(wrapper))
-        )
+        await up.animate(wrapper, step.animation, step)
+        e.unwrap(wrapper)
 
-        break
-      }
-      default: {
-        up.fail('Unknown placement: %o', step.placement)
+        // (A) Unwrapping may destroy focus, so we need to handle it again.
+        // (B) Since we never inserted step.newElement (only its children), we handle focus on step.oldElement.
+        // (B improved) TODO: Handle focus for the first new fragment, if it's an element
+        this._handleFocus(step.oldElement, step)
+
+        await compilePromise
       }
     }
   }
 
-  _welcomeElement(element, step) {
+  async _welcomeElement(element, step) {
+    console.debug("[_welcomeElement] %o", element)
+
     // Adopt CSP nonces and fix broken script tags
     this.responseDoc.finalizeElement(element)
 
@@ -217,11 +330,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     this.setReloadAttrs(step)
 
     // Run macros and compilers. This also snapshots for [up-keep="same-html"].
-    this._delayFinish(
-      up.hello(element, step)
-    )
-
-    this._addToResult(element)
+    await up.hello(element, step)
   }
 
   // This will find all [up-keep] descendants in oldElement, overwrite their partner

@@ -731,7 +731,7 @@ up.viewport = (function() {
     const viewportRect = viewport.getBoundingClientRect()
     const originalRect = element.getBoundingClientRect()
 
-    const boundsRect = new up.Rect({
+    const boundsRect = options.rect ?? new up.Rect({
       left: originalRect.left - viewportRect.left,
       top: originalRect.top - viewportRect.top,
       width: originalRect.width,

@@ -438,9 +438,67 @@ up.motion = (function() {
     A promise that fulfills when the transition ends.
   @stable
   */
-  function morph(oldElement, newElement, transitionObject, options) {
+  function morph(...args) {
+    return phasedMorph(...args).postprocess()
+    // options = u.options(options)
+    // applyConfig(options)
+    //
+    // // If passed a selector, up.fragment.get() will prefer a match on the current layer.
+    // // This also unwraps jQuery collections.
+    // oldElement = up.fragment.get(oldElement)
+    // newElement = up.fragment.get(newElement)
+    //
+    // let transitionFn = findTransitionFn(transitionObject)
+    // transitionFn = up.error.guardFn(transitionFn)
+    //
+    // // Remove callbacks from our options hash in case transitionFn calls morph() recursively.
+    // const scrollNew = u.pluckKey(options, 'scrollNew') || u.noop
+    //
+    // // If morph() is called from inside a transition function we
+    // // (1) don't want to track it again and
+    // // (2) don't want to create additional absolutized bounds
+    // if (motionController.isActive(oldElement) && (options.trackMotion === false)) {
+    //   return transitionFn(oldElement, newElement, options)
+    // }
+    //
+    // up.puts('up.morph()', 'Morphing %o to %o with transition %O over %d ms', oldElement, newElement, transitionObject, options.duration)
+    //
+    // const viewport = up.viewport.get(oldElement)
+    // const scrollTopBeforeScroll = viewport.scrollTop
+    //
+    // let oldRemote
+    // if (document.contains(newElement)) {
+    //   // During a render pass, the change class will also have inserted the new element.
+    //   // Since the insertion has shifted the position of oldElement, we require its
+    //   // bounding box to be passed to morph() via { oldRect } option.
+    //   oldRemote = up.viewport.absolutize(oldElement, { rect: u.assert(options.oldRect) })
+    // } else {
+    //   // Programmatic calls of up.morph() will expect the function to insert the new element.
+    //   oldRemote = up.viewport.absolutize(oldElement)
+    //   e.insertBefore(oldElement, newElement)
+    // }
+    //
+    // const trackable = async function() {
+    //   // Scroll newElement into position before we start the enter animation.
+    //   scrollNew()
+    //
+    //   // Since we have scrolled the viewport (containing both oldElement and newElement),
+    //   // we must shift the old copy so it looks like it it is still sitting
+    //   // in the same position.
+    //   const scrollTopAfterReveal = viewport.scrollTop
+    //   oldRemote.moveBounds(0, scrollTopAfterReveal - scrollTopBeforeScroll)
+    //
+    //   await transitionFn(oldElement, newElement, options)
+    //
+    //   oldRemote.bounds.remove()
+    // }
+    //
+    // return motionController.startFunction([oldElement, newElement], trackable, options)
+  }
+
+  function phasedMorph(oldElement, newElement, transitionObject, options) {
     options = u.options(options)
-    applyConfig(options)
+    // applyConfig(options)
 
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
     // This also unwraps jQuery collections.
@@ -448,80 +506,73 @@ up.motion = (function() {
     newElement = up.fragment.get(newElement)
 
     let transitionFn = findTransitionFn(transitionObject)
-    // willAnimate() also sets a default { duration } and { easing }.
     const willMorph = willAnimate(oldElement, transitionFn, options)
     transitionFn = up.error.guardFn(transitionFn)
 
     // Remove callbacks from our options hash in case transitionFn calls morph() recursively.
-    // If we passed on these callbacks, we might call destructors, events, etc. multiple times.
-    const beforeStart = u.pluckKey(options, 'beforeStart') || u.noop
-    const afterInsert = u.pluckKey(options, 'afterInsert') || u.noop
-    const beforeDetach = u.pluckKey(options, 'beforeDetach') || u.noop
-    const afterDetach = u.pluckKey(options, 'afterDetach') || u.noop
-    // Callback to scroll newElement into position before we start the enter animation.
     const scrollNew = u.pluckKey(options, 'scrollNew') || u.noop
-
-    beforeStart()
+    const beforeRemove = u.pluckKey(options, 'beforeRemove') || u.noop
+    const afterRemove = u.pluckKey(options, 'afterRemove') || u.noop
 
     if (willMorph) {
       // If morph() is called from inside a transition function we
       // (1) don't want to track it again and
       // (2) don't want to create additional absolutized bounds
       if (motionController.isActive(oldElement) && (options.trackMotion === false)) {
-        return transitionFn(oldElement, newElement, options)
+        return {
+          postprocess: () => transitionFn(oldElement, newElement, options)
+        }
       }
 
       up.puts('up.morph()', 'Morphing %o to %o with transition %O over %d ms', oldElement, newElement, transitionObject, options.duration)
 
       const viewport = up.viewport.get(oldElement)
-      const scrollTopBeforeReveal = viewport.scrollTop
+      const scrollTopBeforeScroll = viewport.scrollTop
 
-      const oldRemote = up.viewport.absolutize(oldElement, {
-        // Because the insertion will shift elements visually, we must delay insertion
-        // until absolutize() has measured the bounding box of the old element.
-        //
-        // After up.viewport.absolutize() the DOM tree will look like this:
-        //
-        //     <new-element></new-element>
-        //     <up-bounds>
-        //        <old-element><old-element>
-        //     </up-bounds>
-        afterMeasure() {
-          e.insertBefore(oldElement, newElement)
-          afterInsert()
-        }
-      })
-
-      const trackable = async function() {
-        // Scroll newElement into position before we start the enter animation.
-        scrollNew()
-
-        // Since we have scrolled the viewport (containing both oldElement and newElement),
-        // we must shift the old copy so it looks like it it is still sitting
-        // in the same position.
-        const scrollTopAfterReveal = viewport.scrollTop
-        oldRemote.moveBounds(0, scrollTopAfterReveal - scrollTopBeforeReveal)
-
-        await transitionFn(oldElement, newElement, options)
-
-        beforeDetach()
-        oldRemote.bounds.remove()
-        afterDetach()
+      // During a render pass, the change class will also have inserted the new element.
+      // Since the insertion has shifted the position of oldElement, we require its
+      // bounding box to be passed to morph() via { oldRect } option.
+      const { oldRect } = options
+      let oldRemote
+      if (oldRect) {
+        oldRemote = up.viewport.absolutize(oldElement, { rect: oldRect })
+      } else {
+        // Programmatic calls of up.morph() will expect the function to insert the new element.
+        oldRemote = up.viewport.absolutize(oldElement, { afterMeasure: () => e.insertBefore(oldElement, newElement) })
       }
 
-      return motionController.startFunction([oldElement, newElement], trackable, options)
+      return {
+        async postprocess() {
+          const trackable = async function() {
+            // Scroll newElement into position before we start the enter animation.
+            scrollNew()
 
+            // Since we have scrolled the viewport (containing both oldElement and newElement),
+            // we must shift the old copy so it looks like it it is still sitting
+            // in the same position.
+            const scrollTopAfterReveal = viewport.scrollTop
+            oldRemote.moveBounds(0, scrollTopAfterReveal - scrollTopBeforeScroll)
+
+            await transitionFn(oldElement, newElement, options)
+
+            beforeRemove()
+            oldRemote.bounds.remove()
+            afterRemove()
+          }
+
+          await motionController.startFunction([oldElement, newElement], trackable, options)
+        }
+      }
     } else {
-      beforeDetach()
-      // Swapping the elements directly with replaceWith() will cause
-      // jQuery to remove all data attributes, which we use to store destructors
+      beforeRemove()
       swapElementsDirectly(oldElement, newElement)
-      afterInsert()
-      afterDetach()
-      scrollNew()
 
-      // Satisfy our signature as an async function.
-      return Promise.resolve()
+      return {
+        async postprocess() {
+          scrollNew()
+          afterRemove()
+        }
+      }
     }
   }
 
@@ -730,6 +781,7 @@ up.motion = (function() {
 
   return {
     morph,
+    phasedMorph,
     animate,
     finish,
     finishCount() { return motionController.finishCount },
