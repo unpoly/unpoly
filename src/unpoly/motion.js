@@ -262,38 +262,33 @@ up.motion = (function() {
     A promise for the animation's end.
   @stable
   */
-  function animate(element, animation, options) {
+  async function animate(element, animation, options = {}) {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
     element = up.fragment.get(element)
-    options = u.options(options)
 
-    let animationFn = findAnimationFn(animation)
+    const onFinished = options.onFinished ?? u.noop
+
     // willAnimate() also sets a default { duration } and { easing }.
     const willRun = willAnimate(element, animation, options)
-    animationFn = up.error.guardFn(animationFn)
 
     if (willRun) {
-      // up.puts 'up.animate()', Animating %o with animation %o', element, animation
-      const runNow = () => animationFn(element, options)
-      return motionController.startFunction(element, runNow, options)
+      let animationFn = up.error.guardFn(findAnimationFn(animation))
+      let fnOptions = u.pick(options, ['duration', 'easing', 'trackMotion'])
+      const runNow = () => animationFn(element, fnOptions).finally(onFinished)
+      await motionController.startFunction(element, runNow, fnOptions)
     } else {
-      return skipAnimate(element, animation)
+      if (u.isOptions(animation)) {
+        // If we are given the final animation frame as an object of CSS properties,
+        // the best we can do is to set the final frame without animation.
+        e.setStyle(element, animation)
+      }
+      onFinished()
     }
   }
 
   function willAnimate(element, animationOrTransition, options) {
     applyConfig(options)
     return isEnabled() && !isNone(animationOrTransition) && (options.duration > 0) && !e.isSingleton(element)
-  }
-
-  function skipAnimate(element, animation) {
-    if (u.isOptions(animation)) {
-      // If we are given the final animation frame as an object of CSS properties,
-      // the best we can do is to set the final frame without animation.
-      e.setStyle(element, animation)
-    }
-    // Signal that the animation is already done.
-    return Promise.resolve()
   }
 
   /*-
@@ -438,9 +433,12 @@ up.motion = (function() {
     A promise that fulfills when the transition ends.
   @stable
   */
-  function morph(oldElement, newElement, transitionObject, options) {
+  function morph(...args) {
+    return phasedMorph(...args).postprocess()
+  }
+
+  function phasedMorph(oldElement, newElement, transitionObject, options) {
     options = u.options(options)
-    applyConfig(options)
 
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
     // This also unwraps jQuery collections.
@@ -448,80 +446,65 @@ up.motion = (function() {
     newElement = up.fragment.get(newElement)
 
     let transitionFn = findTransitionFn(transitionObject)
-    // willAnimate() also sets a default { duration } and { easing }.
     const willMorph = willAnimate(oldElement, transitionFn, options)
     transitionFn = up.error.guardFn(transitionFn)
 
     // Remove callbacks from our options hash in case transitionFn calls morph() recursively.
-    // If we passed on these callbacks, we might call destructors, events, etc. multiple times.
-    const beforeStart = u.pluckKey(options, 'beforeStart') || u.noop
-    const afterInsert = u.pluckKey(options, 'afterInsert') || u.noop
-    const beforeDetach = u.pluckKey(options, 'beforeDetach') || u.noop
-    const afterDetach = u.pluckKey(options, 'afterDetach') || u.noop
-    // Callback to scroll newElement into position before we start the enter animation.
     const scrollNew = u.pluckKey(options, 'scrollNew') || u.noop
-
-    beforeStart()
+    const beforeRemove = u.pluckKey(options, 'beforeRemove') || u.noop
+    const afterRemove = u.pluckKey(options, 'afterRemove') || u.noop
 
     if (willMorph) {
       // If morph() is called from inside a transition function we
       // (1) don't want to track it again and
       // (2) don't want to create additional absolutized bounds
       if (motionController.isActive(oldElement) && (options.trackMotion === false)) {
-        return transitionFn(oldElement, newElement, options)
+        return {
+          postprocess: () => transitionFn(oldElement, newElement, options)
+        }
       }
 
       up.puts('up.morph()', 'Morphing %o to %o with transition %O over %d ms', oldElement, newElement, transitionObject, options.duration)
 
       const viewport = up.viewport.get(oldElement)
-      const scrollTopBeforeReveal = viewport.scrollTop
+      const scrollTopBeforeScroll = viewport.scrollTop
 
       const oldRemote = up.viewport.absolutize(oldElement, {
-        // Because the insertion will shift elements visually, we must delay insertion
-        // until absolutize() has measured the bounding box of the old element.
-        //
-        // After up.viewport.absolutize() the DOM tree will look like this:
-        //
-        //     <new-element></new-element>
-        //     <up-bounds>
-        //        <old-element><old-element>
-        //     </up-bounds>
-        afterMeasure() {
-          e.insertBefore(oldElement, newElement)
-          afterInsert()
-        }
+        afterMeasure: () => e.insertBefore(oldElement, newElement)
       })
 
-      const trackable = async function() {
-        // Scroll newElement into position before we start the enter animation.
-        scrollNew()
+      return {
+        async postprocess() {
+          const trackable = async function() {
+            // Scroll newElement into position before we start the enter animation.
+            scrollNew()
 
-        // Since we have scrolled the viewport (containing both oldElement and newElement),
-        // we must shift the old copy so it looks like it it is still sitting
-        // in the same position.
-        const scrollTopAfterReveal = viewport.scrollTop
-        oldRemote.moveBounds(0, scrollTopAfterReveal - scrollTopBeforeReveal)
+            // Since we have scrolled the viewport (containing both oldElement and newElement),
+            // we must shift the old copy so it looks like it it is still sitting
+            // in the same position.
+            const scrollTopAfterScroll = viewport.scrollTop
+            oldRemote.moveBounds(0, scrollTopAfterScroll - scrollTopBeforeScroll)
 
-        await transitionFn(oldElement, newElement, options)
+            await transitionFn(oldElement, newElement, options)
 
-        beforeDetach()
-        oldRemote.bounds.remove()
-        afterDetach()
+            beforeRemove()
+            oldRemote.bounds.remove()
+            afterRemove()
+          }
+
+          await motionController.startFunction([oldElement, newElement], trackable, options)
+        }
       }
-
-      return motionController.startFunction([oldElement, newElement], trackable, options)
-
     } else {
-      beforeDetach()
-      // Swapping the elements directly with replaceWith() will cause
-      // jQuery to remove all data attributes, which we use to store destructors
+      beforeRemove()
       swapElementsDirectly(oldElement, newElement)
-      afterInsert()
-      afterDetach()
-      scrollNew()
 
-      // Satisfy our signature as an async function.
-      return Promise.resolve()
+      return {
+        async postprocess() {
+          scrollNew()
+          afterRemove()
+        }
+      }
     }
   }
 
@@ -730,6 +713,7 @@ up.motion = (function() {
 
   return {
     morph,
+    phasedMorph,
     animate,
     finish,
     finishCount() { return motionController.finishCount },

@@ -6,7 +6,6 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change {
     this._element = this.options.element
     this._animation = this.options.animation
     this._log = this.options.log
-    this._onFinished = this.options.onFinished
   }
 
   execute() {
@@ -26,32 +25,14 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change {
     // removal animation.
     up.fragment.markAsDestroying(this._element)
 
-    if (up.motion.willAnimate(this._element, this._animation, this.options)) {
-      // If we're animating, we resolve *before* removing the element.
-      // The destroy animation will then play out, but the destroying
-      // element is ignored by all up.fragment.* functions.
-      this._destroyAfterAnimation()
-    } else {
-      this._destroyNow()
-    }
-  }
-
-  async _destroyAfterAnimation() {
-    this._emitDestroyed()
-    await this._animate()
-    this._erase()
-    this._onFinished?.()
-  }
-
-  _destroyNow() {
-    // If we're not animating, we can remove the element before emitting up:fragment:destroyed.
-    this._erase()
-    this._emitDestroyed()
-    this._onFinished?.()
-  }
-
-  _animate() {
-    return up.motion.animate(this._element, this._animation, this.options)
+    up.animate(this._element, this._animation, {
+      ...this.options,
+      onFinished: () => {
+        this._erase()
+        this._emitDestroyed()
+        this.options.onFinished?.()
+      }
+    })
   }
 
   _erase() {

@@ -611,10 +611,6 @@ up.Layer = class Layer extends up.Record {
     return this._buildEventEmitter(args).emit()
   }
 
-  isDetached() {
-    return !this.element.isConnected
-  }
-
   saveHistory() {
     // (1) showsLiveHistory() would always return false unless we're the front layer
     // (2) Getters like this.title would always return this._savedTitle unless we're the front layer
@@ -891,4 +887,3 @@ up.Layer = class Layer extends up.Record {
   }
 
 }
-

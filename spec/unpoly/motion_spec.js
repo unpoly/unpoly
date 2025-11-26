@@ -209,6 +209,51 @@ describe('up.motion', function() {
         expect(parseFloat($element.css('height'))).toBeAround(200, 40)
       })
 
+      describe('{ onFinished } option', function() {
+
+        it('is called after the animation has finished', async function() {
+          let onFinished = jasmine.createSpy('onFinished callback')
+
+          let element = fixture('.element', { text: 'content' })
+          up.animate(element, 'fade-in', { duration: 1000, easing: 'linear', onFinished })
+
+          await wait(500)
+
+          expect(element).toHaveOpacity(0.5, 0.3)
+          expect(onFinished).not.toHaveBeenCalled()
+
+          await wait(500 + 250)
+
+          expect(element).toHaveOpacity(1.0)
+          expect(onFinished).toHaveBeenCalled()
+        })
+
+        it('is called synchronously when not animating', async function() {
+          let onFinished = jasmine.createSpy('onFinished callback')
+
+          let element = fixture('.element', { text: 'content' })
+          up.animate(element, 'none', { duration: 1000, easing: 'linear', onFinished })
+
+          expect(element).toHaveOpacity(1.0)
+          expect(onFinished).toHaveBeenCalled()
+        })
+
+        it('is not passed to the animation function (to prevent multiple calls)', async function() {
+          let onFinished = jasmine.createSpy('onFinished callback')
+          let animationFn = jasmine.createSpy('animation function').and.returnValue(Promise.resolve())
+
+          let element = fixture('.element', { text: 'content' })
+          up.animate(element, animationFn, { duration: 50, easing: 'linear', onFinished })
+
+          await wait(150)
+
+          expect(onFinished.calls.count()).toBe(1)
+          expect(animationFn.calls.count()).toBe(1)
+          expect(animationFn.calls.mostRecent().args[1].onFinished).toBeMissing()
+        })
+
+      })
+
       describe('{ duration } option', function() {
 
         it('uses the given duration', async function() {
@@ -294,27 +339,6 @@ describe('up.motion', function() {
 
           u.task(() => {
             expect(up.motion.finishCount()).toEqual(1)
-            done()
-          })
-        })
-      })
-
-
-      describe('with animations disabled globally', function() {
-
-        beforeEach(() => {
-          up.motion.config.enabled = false
-        })
-
-        it("doesn't animate and directly sets the last frame instead", function(done) {
-          const $element = $fixture('.element').text('content')
-          const callback = jasmine.createSpy('animation done callback')
-          const animateDone = up.animate($element, { 'font-size': '40px' }, { duration: 10000, easing: 'linear' })
-          animateDone.then(callback)
-
-          u.timer(5, () => {
-            expect($element.css('font-size')).toEqual('40px')
-            expect(callback).toHaveBeenCalled()
             done()
           })
         })

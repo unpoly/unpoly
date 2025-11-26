@@ -776,12 +776,32 @@ describe('up.fragment', function() {
 
       describe('compilation', function() {
 
-        it('runs compilers for matching elements in the new content', function() {
+        it('runs compilers for matching elements in the new content', async function() {
+          const childCompiler = jasmine.createSpy('compiler')
+          up.compiler('.child', (element) => childCompiler(element.tagName, element.className))
+
+          up.hello(fixture('.fragment'))
+          await up.render({ fragment: '<div class="fragment"><span class="child"></span></div>' })
+
+          expect(childCompiler).toHaveBeenCalledWith('SPAN', 'child')
+        })
+
+        it('runs compilers when swapping children', async function() {
+          const childCompiler = jasmine.createSpy('compiler')
+          up.compiler('.child', (element) => childCompiler(element.tagName, element.className))
+
+          up.hello(fixture('.fragment'))
+          await up.render({ target: '.fragment:content', document: '<div class="fragment"><span class="child"></span></div>' })
+
+          expect(childCompiler).toHaveBeenCalledWith('SPAN', 'child')
+        })
+
+        it('runs compilers when appending children', async function() {
           const childCompiler = jasmine.createSpy('compiler')
           up.compiler('.child', (element) => childCompiler(element.tagName, element.className))
 
           fixture('.fragment')
-          up.render({ fragment: '<div class="fragment"><span class="child"></span></div>' })
+          await up.render({ target: '.fragment:after', document: '<div class="fragment"><span class="child"></span></div>' })
 
           expect(childCompiler).toHaveBeenCalledWith('SPAN', 'child')
         })
@@ -8520,7 +8540,7 @@ describe('up.fragment', function() {
             fixture('.element', { content: 'old text' })
 
             up.render('.element', { content: 'new text', scroll: scrollHandler })
-
+            
             expect('.element').toHaveText('new text')
             expect(scrollHandler).toHaveBeenCalled()
           })
@@ -9980,6 +10000,62 @@ describe('up.fragment', function() {
             expect(destructor).toHaveBeenCalledWith('old text')
             done()
           })
+        })
+
+        it('calls destructors when swapping children', async function() {
+          let destructorSpy = jasmine.createSpy('destructor spy')
+
+          up.compiler('.old-child', function(element) {
+            return () => destructorSpy(element.classList[0])
+          })
+
+          up.hello(htmlFixture(`
+            <div class="fragment">
+              <div class="old-child">old child</div>
+            </div>
+          `))
+
+          await up.render({
+            target: '.fragment:content',
+            document: `
+            <div class="fragment">
+              <div class="new-child">new child</div>
+            </div>
+            `
+          })
+
+          expect('.fragment').toHaveSelector('.new-child')
+          expect('.fragment').not.toHaveSelector('.old-child')
+          
+          expect(destructorSpy).toHaveBeenCalledWith('old-child')
+        })
+
+        it('does not call destructors when appending children', async function() {
+          let destructorSpy = jasmine.createSpy('destructor spy')
+
+          up.compiler('.old-child', function(element) {
+            return destructorSpy
+          })
+
+          up.hello(htmlFixture(`
+            <div class="fragment">
+              <div class="old-child">old child</div>
+            </div>
+          `))
+
+          await up.render({
+            target: '.fragment:after',
+            document: `
+            <div class="fragment">
+              <div class="new-child">new child</div>
+            </div>
+            `
+          })
+
+          expect('.fragment').toHaveSelector('.old-child')
+          expect('.fragment').toHaveSelector('.new-child')
+
+          expect(destructorSpy).not.toHaveBeenCalled()
         })
 
         it('calls destructors when the replaced element is a singleton element like <body> (bugfix)', async function() {
@@ -12796,23 +12872,6 @@ describe('up.fragment', function() {
         expect(onFinished).toHaveBeenCalled()
       })
 
-      it('emits an up:fragment:destroyed event on the former parent element after the element was marked as .up-destroying and started its close animation', async function() {
-        const $parent = $fixture('.parent')
-        const $element = $parent.affix('.element')
-        expect($element).toBeAttached()
-
-        const listener = jasmine.createSpy('event listener')
-
-        $parent[0].addEventListener('up:fragment:destroyed', listener)
-
-        up.destroy($element, { animation: 'fade-out', duration: 30 })
-        await wait()
-
-        expect(listener).toHaveBeenCalled()
-        expect($element).toMatchSelector('.up-destroying')
-        expect($element).toBeAttached()
-      })
-
       it('removes element-related data from the global jQuery cache (bugfix)', async function() {
         const $element = $fixture('.element')
         $element.data('foo', { foo: '1' })
@@ -12846,6 +12905,52 @@ describe('up.fragment', function() {
         up.hello(detachedElement)
         up.destroy(detachedElement)
         expect(destructor).toHaveBeenCalled()
+      })
+
+      describe('emission of up:fragment:destroyed', function() {
+
+        it('awaits an exit animation before emitting up:fragment:destroyed', async function() {
+          const parent = fixture('.parent')
+          const element = e.affix(parent, '.element')
+          expect(element).toBeAttached()
+
+          const listener = jasmine.createSpy('event listener')
+          parent.addEventListener('up:fragment:destroyed', listener)
+
+          up.destroy(element, { animation: 'fade-out', duration: 60 })
+          await wait()
+
+          expect(element).toMatchSelector('.up-destroying')
+          expect(element).toBeAttached()
+          expect(listener).not.toHaveBeenCalled()
+
+          await wait(100)
+
+          expect(element).toBeDetached()
+          expect(listener).toHaveBeenCalled()
+        })
+
+        it('awaits an exit animation before emitting up:fragment:destroyed', async function() {
+          const parent = fixture('.parent')
+          const element = e.affix(parent, '.element')
+          expect(element).toBeAttached()
+
+          const listener = jasmine.createSpy('event listener')
+          parent.addEventListener('up:fragment:destroyed', listener)
+
+          up.destroy(element, { animation: 'fade-out', duration: 60 })
+          await wait()
+
+          expect(element).toMatchSelector('.up-destroying')
+          expect(element).toBeAttached()
+          expect(listener).not.toHaveBeenCalled()
+
+          await wait(100)
+
+          expect(element).toBeDetached()
+          expect(listener).toHaveBeenCalled()
+        })
+
       })
 
       describe('when a destructor crashes', function() {
