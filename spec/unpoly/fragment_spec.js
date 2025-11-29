@@ -781,12 +781,32 @@ describe('up.fragment', function() {
 
       describe('compilation', function() {
 
-        it('runs compilers for matching elements in the new content', function() {
+        it('runs compilers for matching elements in the new content', async function() {
+          const childCompiler = jasmine.createSpy('compiler')
+          up.compiler('.child', (element) => childCompiler(element.tagName, element.className))
+
+          up.hello(fixture('.fragment'))
+          await up.render({ fragment: '<div class="fragment"><span class="child"></span></div>' })
+
+          expect(childCompiler).toHaveBeenCalledWith('SPAN', 'child')
+        })
+
+        it('runs compilers when swapping children', async function() {
+          const childCompiler = jasmine.createSpy('compiler')
+          up.compiler('.child', (element) => childCompiler(element.tagName, element.className))
+
+          up.hello(fixture('.fragment'))
+          await up.render({ target: '.fragment:content', document: '<div class="fragment"><span class="child"></span></div>' })
+
+          expect(childCompiler).toHaveBeenCalledWith('SPAN', 'child')
+        })
+
+        it('runs compilers when appending children', async function() {
           const childCompiler = jasmine.createSpy('compiler')
           up.compiler('.child', (element) => childCompiler(element.tagName, element.className))
 
           fixture('.fragment')
-          up.render({ fragment: '<div class="fragment"><span class="child"></span></div>' })
+          await up.render({ target: '.fragment:after', document: '<div class="fragment"><span class="child"></span></div>' })
 
           expect(childCompiler).toHaveBeenCalledWith('SPAN', 'child')
         })
@@ -9985,6 +10005,62 @@ describe('up.fragment', function() {
             expect(destructor).toHaveBeenCalledWith('old text')
             done()
           })
+        })
+
+        it('calls destructors when swapping children', async function() {
+          let destructorSpy = jasmine.createSpy('destructor spy')
+
+          up.compiler('.old-child', function(element) {
+            return () => destructorSpy(element.classList[0])
+          })
+
+          up.hello(htmlFixture(`
+            <div class="fragment">
+              <div class="old-child">old child</div>
+            </div>
+          `))
+
+          await up.render({
+            target: '.fragment:content',
+            document: `
+            <div class="fragment">
+              <div class="new-child">new child</div>
+            </div>
+            `
+          })
+
+          expect('.fragment').toHaveSelector('.new-child')
+          expect('.fragment').not.toHaveSelector('.old-child')
+          
+          expect(destructorSpy).toHaveBeenCalledWith('old-child')
+        })
+
+        it('does not call destructors when appending children', async function() {
+          let destructorSpy = jasmine.createSpy('destructor spy')
+
+          up.compiler('.old-child', function(element) {
+            return destructorSpy
+          })
+
+          up.hello(htmlFixture(`
+            <div class="fragment">
+              <div class="old-child">old child</div>
+            </div>
+          `))
+
+          await up.render({
+            target: '.fragment:after',
+            document: `
+            <div class="fragment">
+              <div class="new-child">new child</div>
+            </div>
+            `
+          })
+
+          expect('.fragment').toHaveSelector('.old-child')
+          expect('.fragment').toHaveSelector('.new-child')
+
+          expect(destructorSpy).not.toHaveBeenCalled()
         })
 
         it('calls destructors when the replaced element is a singleton element like <body> (bugfix)', async function() {

@@ -259,21 +259,18 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     }
 
     let wrapperResults = this._executeStep(wrapperStep)
-    e.unwrap(newWrapper)
 
     return {
       newFragments: newChildren,
       postprocess: async () => {
+        await wrapperResults.postprocess()
+
+        e.unwrap(newWrapper)
+
         // (A) Unwrapping may destroy focus, so we need to handle it again.
         // (B) Since we never inserted step.newElement (only its children), we handle focus on step.oldElement.
         // (B improved) TODO: Handle focus for the first new fragment, if it's an element
         this._handleFocus(step.oldElement, step)
-
-        throw "the wrapper is already childless, so we don't compile children"
-        throw "maybe delay unwrapping and re-handle focus like with insertions?"
-        throw "add missing tests for compiling here, and also for insertion"
-
-        await wrapperResults.postprocess()
       }
     }
   }
