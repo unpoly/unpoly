@@ -201,7 +201,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
 
   _executeSwapStep(step) {
     const parent = step.parentElement ?? step.oldElement.parentNode
-    const oldRect = step.oldElement
+    // const oldRect = step.oldElement
 
     up.fragment.markAsDestroying(step.oldElement)
 
@@ -210,8 +210,9 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     this._preserveDescendantKeepables(step)
     const morphPhases = up.motion.phasedMorph(step.oldElement, step.newElement, step.transition, {
       ...step,
-      oldRect,
+      // oldRect,
       scrollNew: () => {
+        console.debug("[_executeSwapStep] scrollNew handles focus on element %o with opt", step.newElement, step.focus)
         this._handleFocus(step.newElement, step)
         this._handleScroll(step.newElement, step)
       },
@@ -221,8 +222,10 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
       afterRemove: () => {
         e.cleanJQuery(step.oldElement) // TODO: Can this be part of up.script.clean()?
         up.fragment.emitDestroyed(step.oldElement, { parent, log: false })
+        step.afterRemove?.()
       }
     })
+
     this._restoreDescendantKeepables(step)
 
     return {
@@ -256,15 +259,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
       oldElement: oldWrapper,
       newElement: newWrapper,
       focus: false,
-    }
-
-    let wrapperResults = this._executeStep(wrapperStep)
-
-    return {
-      newFragments: newChildren,
-      postprocess: async () => {
-        await wrapperResults.postprocess()
-
+      afterRemove: () => {
         e.unwrap(newWrapper)
 
         // (A) Unwrapping may destroy focus, so we need to handle it again.
@@ -272,6 +267,13 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
         // (B improved) TODO: Handle focus for the first new fragment, if it's an element
         this._handleFocus(step.oldElement, step)
       }
+    }
+
+    let wrapperResults = this._executeSwapStep(wrapperStep)
+
+    return {
+      newFragments: newChildren,
+      postprocess: wrapperResults.postprocess,
     }
   }
 

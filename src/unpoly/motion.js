@@ -529,29 +529,34 @@ up.motion = (function() {
       const viewport = up.viewport.get(oldElement)
       const scrollTopBeforeScroll = viewport.scrollTop
 
-      // During a render pass, the change class will also have inserted the new element.
-      // Since the insertion has shifted the position of oldElement, we require its
-      // bounding box to be passed to morph() via { oldRect } option.
-      const { oldRect } = options
-      let oldRemote
-      if (oldRect) {
-        oldRemote = up.viewport.absolutize(oldElement, { rect: oldRect })
-      } else {
-        // Programmatic calls of up.morph() will expect the function to insert the new element.
-        oldRemote = up.viewport.absolutize(oldElement, { afterMeasure: () => e.insertBefore(oldElement, newElement) })
-      }
+      // // During a render pass, the change class will also have inserted the new element.
+      // // Since the insertion has shifted the position of oldElement, we require its
+      // // bounding box to be passed to morph() via { oldRect } option.
+      // const { oldRect } = options
+      // let oldRemote
+      // if (oldRect) {
+      //   oldRemote = up.viewport.absolutize(oldElement, { rect: oldRect })
+      // } else {
+      //   // Programmatic calls of up.morph() will expect the function to insert the new element.
+      //   oldRemote = up.viewport.absolutize(oldElement, { afterMeasure: () => e.insertBefore(oldElement, newElement) })
+      // }
+
+      const oldRemote = up.viewport.absolutize(oldElement, {
+        afterMeasure: () => e.insertBefore(oldElement, newElement)
+      })
 
       return {
         async postprocess() {
           const trackable = async function() {
+            console.debug("[transition swap] scrollNew()")
             // Scroll newElement into position before we start the enter animation.
             scrollNew()
 
             // Since we have scrolled the viewport (containing both oldElement and newElement),
             // we must shift the old copy so it looks like it it is still sitting
             // in the same position.
-            const scrollTopAfterReveal = viewport.scrollTop
-            oldRemote.moveBounds(0, scrollTopAfterReveal - scrollTopBeforeScroll)
+            const scrollTopAfterScroll = viewport.scrollTop
+            oldRemote.moveBounds(0, scrollTopAfterScroll - scrollTopBeforeScroll)
 
             await transitionFn(oldElement, newElement, options)
 
@@ -569,6 +574,7 @@ up.motion = (function() {
 
       return {
         async postprocess() {
+          console.debug("[direct swap] scrollNew()")
           scrollNew()
           afterRemove()
         }

@@ -8545,6 +8545,8 @@ describe('up.fragment', function() {
             fixture('.element', { content: 'old text' })
 
             up.render('.element', { content: 'new text', scroll: scrollHandler })
+            
+            console.debug("[spec] expectation")
 
             expect('.element').toHaveText('new text')
             expect(scrollHandler).toHaveBeenCalled()
@@ -10885,6 +10887,7 @@ describe('up.fragment', function() {
             await up.render('.element', { content: 'new text', focus: focusHandler })
 
             expect('.element').toHaveText('new text')
+            console.debug("[spec] expectation")
             expect(focusHandler).toHaveBeenCalled()
           })
 
