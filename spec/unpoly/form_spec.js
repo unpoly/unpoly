@@ -7805,8 +7805,43 @@ describe('up.form', function() {
         expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('password')
         expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.result')
       })
-    })
 
+      it('validates after switching effects have run', async function() {
+        let html = (input1Value = "") => `
+          <form action="/foo" up-validate method="post">
+            <input id="input1" name="input1" up-switch="#input2" value="${input1Value}">
+            <input id="input2" name="input2" value="input2-value" up-disable-for="disabling-value">
+          </form>
+        `
+        let form = htmlFixture(html())
+
+        up.hello(form)
+        await wait()
+
+        document.querySelector('#input1').value = 'disabling-value'
+        Trigger.change('#input1')
+
+        await wait()
+
+        expect("#input2").toBeDisabled()
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+        expect(jasmine.lastRequest().data()).toMatchParams({ 'input1': 'disabling-value' })
+
+        jasmine.respondWith(html("disabling-value"))
+        await wait()
+
+        document.querySelector('#input1').value = 'enabling-value'
+        Trigger.change('#input1')
+
+        await wait()
+
+        expect("#input2").not.toBeDisabled()
+        expect(jasmine.Ajax.requests.count()).toEqual(2)
+        expect(jasmine.lastRequest().data()).toMatchParams({ 'input1': 'enabling-value', 'input2': 'input2-value' })
+      })
+
+    })
 
     describe('[up-switch]', function() {
 
