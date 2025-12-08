@@ -262,38 +262,33 @@ up.motion = (function() {
     A promise for the animation's end.
   @stable
   */
-  function animate(element, animation, options) {
+  async function animate(element, animation, options = {}) {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
     element = up.fragment.get(element)
-    options = u.options(options)
 
-    let animationFn = findAnimationFn(animation)
+    const onFinished = options.onFinished ?? u.noop
+
     // willAnimate() also sets a default { duration } and { easing }.
     const willRun = willAnimate(element, animation, options)
-    animationFn = up.error.guardFn(animationFn)
 
     if (willRun) {
-      // up.puts 'up.animate()', Animating %o with animation %o', element, animation
-      const runNow = () => animationFn(element, options)
-      return motionController.startFunction(element, runNow, options)
+      let animationFn = up.error.guardFn(findAnimationFn(animation))
+      let fnOptions = u.pick(options, ['duration', 'easing', 'trackMotion'])
+      const runNow = () => animationFn(element, fnOptions).finally(onFinished)
+      await motionController.startFunction(element, runNow, fnOptions)
     } else {
-      return skipAnimate(element, animation)
+      if (u.isOptions(animation)) {
+        // If we are given the final animation frame as an object of CSS properties,
+        // the best we can do is to set the final frame without animation.
+        e.setStyle(element, animation)
+      }
+      onFinished()
     }
   }
 
   function willAnimate(element, animationOrTransition, options) {
     applyConfig(options)
     return isEnabled() && !isNone(animationOrTransition) && (options.duration > 0) && !e.isSingleton(element)
-  }
-
-  function skipAnimate(element, animation) {
-    if (u.isOptions(animation)) {
-      // If we are given the final animation frame as an object of CSS properties,
-      // the best we can do is to set the final frame without animation.
-      e.setStyle(element, animation)
-    }
-    // Signal that the animation is already done.
-    return Promise.resolve()
   }
 
   /*-
@@ -548,7 +543,6 @@ up.motion = (function() {
       return {
         async postprocess() {
           const trackable = async function() {
-            console.debug("[transition swap] scrollNew()")
             // Scroll newElement into position before we start the enter animation.
             scrollNew()
 
@@ -574,7 +568,6 @@ up.motion = (function() {
 
       return {
         async postprocess() {
-          console.debug("[direct swap] scrollNew()")
           scrollNew()
           afterRemove()
         }

@@ -44,8 +44,9 @@ up.Tether = class Tether {
     return this.syncTimer = u.task(this.sync.bind(this))
   }
 
-  isDetached() {
-    return !this.parent.isConnected || !this._anchor.isConnected
+  isAlive() {
+    // return !this.parent.isConnected || !this._anchor.isConnected
+    return up.fragment.isAlive(this.parent) && up.fragment.isAlive(this._anchor)
   }
 
   sync() {

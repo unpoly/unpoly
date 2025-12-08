@@ -1450,11 +1450,11 @@ describe('up.Preview', function() {
 
         let animateCount = 0
 
-        function fakeAnimate(element, animation, options) {
+        async function fakeAnimate(element, animation, options) {
           if (up.motion.willAnimate(element, animation, options)) {
             animateCount++
           }
-          return Promise.resolve()
+          options.onFinished?.()
         }
 
         let animateSpy = spyOn(up, 'animate').and.callFake(fakeAnimate)
@@ -1467,7 +1467,7 @@ describe('up.Preview', function() {
         expect(up.layer.count).toBe(2)
         expect(up.layer.current.getFirstSwappableElement()).toMatchSelector('#target')
         expect(up.layer.current.getFirstSwappableElement()).toHaveText('preview content')
-        expect(animateCount).toBe(2)
+        expect(animateCount).toBe(1)
 
         jasmine.respondWithSelector('#target', { text: 'server content' })
         await wait()
@@ -1475,7 +1475,7 @@ describe('up.Preview', function() {
         expect(up.layer.count).toBe(2)
         expect(up.layer.current.getFirstSwappableElement()).toMatchSelector('#target')
         expect(up.layer.current.getFirstSwappableElement()).toHaveText('server content')
-        expect(animateCount).toBe(2)
+        expect(animateCount).toBe(1)
       })
 
       // See more specs for #openLayer() below

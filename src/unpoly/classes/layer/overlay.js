@@ -398,7 +398,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   @internal
   */
   destroyElements(options) {
-    const animation = () => this.startCloseAnimation(options)
+    const animation = this.closeAnimationFn(options)
 
     const onFinished = () => {
       this.onElementsRemoved() // callback for layer implementations that need to clean up
@@ -414,39 +414,53 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   onElementsRemoved() {
   }
 
-  _startAnimation(options = {}) {
-    const boxDone = up.animate(this.getBoxElement(), options.boxAnimation, options)
+  _animationFn({ boxAnimation, backdropAnimation, easing, duration }) {
+    // If we don't animate the box, we don't animate the backdrop either.
+    if (up.motion.isNone(boxAnimation)) return false
 
-    // If we don't animate the box, we don't animate the backdrop
-    let backdropDone
-    if (this.backdrop && !up.motion.isNone(options.boxAnimation)) {
-      backdropDone = up.animate(this.backdropElement, options.backdropAnimation, options)
+    // Only animate the backdrop element if this layer has a backdrop.
+    backdropAnimation = this.backdrop && backdropAnimation
+
+    return () => {
+      const animateOptions = { easing, duration }
+      const boxDone = up.animate(this.getBoxElement(), boxAnimation, animateOptions)
+      const backdropDone = up.animate(this.backdropElement, backdropAnimation, animateOptions)
+
+      // Promise.all() ignores non-Thenables in the given array
+      return Promise.all([boxDone, backdropDone])
     }
-
-    // Promise.all() ignores non-Thenables in the given array
-    return Promise.all([boxDone, backdropDone])
   }
 
-  async startOpenAnimation(options = {}) {
+  startOpenAnimation(options = {}) {
+    let animation = this.openAnimationFn(options)
+    return up.animate(this.element, animation, {
+      ...options,
+      onFinished: () => {
+        this.wasEverVisible = true
+        options.onFinished?.()
+      }
+    })
+  }
+
+  openAnimationFn(options = {}) {
     let boxAnimation = options.animation ?? this.evalOption(this.openAnimation)
     // _startAnimation() will ignore this animation unless the box is also animating
     let backdropAnimation = 'fade-in'
 
-    await this._startAnimation({
+    return this._animationFn({
       boxAnimation,
       backdropAnimation,
       easing: options.easing || this.openEasing,
-      duration: options.duration || this.openDuration
+      duration: options.duration || this.openDuration,
     })
-    this.wasEverVisible = true
   }
 
-  startCloseAnimation(options = {}) {
+  closeAnimationFn(options = {}) {
     let boxAnimation =  this.wasEverVisible && (options.animation ?? this.evalOption(this.closeAnimation))
     // _startAnimation() will ignore this animation unless the box is also animating
     let backdropAnimation = 'fade-out'
 
-    return this._startAnimation({
+    return this._animationFn({
       boxAnimation,
       backdropAnimation,
       easing: options.easing || this.closeEasing,

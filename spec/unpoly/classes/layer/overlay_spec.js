@@ -453,6 +453,43 @@ describe('up.Layer.Overlay', function() {
       expect(document).not.toHaveSelector('up-modal')
     })
 
+    describe('with { onFinished } option', function() {
+
+      it('runs the callback when the close animation has concluded', async function() {
+        const onFinished = jasmine.createSpy('onFinished callback')
+
+        up.motion.config.enabled = true
+        up.layer.config.modal.openAnimation = 'none'
+        up.layer.config.modal.closeAnimation = 'fade-out'
+        up.layer.config.modal.closeDuration = 600
+
+        await up.layer.open({ mode: 'modal' })
+
+        up.layer.current.accept(null, { onFinished })
+
+        await wait(300)
+
+        expect(document).toHaveSelector('up-modal')
+        expect(onFinished).not.toHaveBeenCalled()
+
+        await wait(600)
+        expect(document).not.toHaveSelector('up-modal')
+        expect(onFinished).toHaveBeenCalled()
+      })
+
+      it('runs the callback when not animating', async function() {
+        await up.layer.open({ mode: 'modal', animation: false })
+
+        const onFinished = jasmine.createSpy('onFinished callback')
+        up.layer.current.accept(null, { onFinished, animation: false })
+        await wait()
+
+        expect(document).not.toHaveSelector('up-modal')
+        expect(onFinished).toHaveBeenCalled()
+      })
+      
+    })
+
     describe('destructors', function() {
 
       it('runs destructors for the old overlay content', async function() {
@@ -767,15 +804,17 @@ describe('up.Layer.Overlay', function() {
       await wait()
 
       expect(up.layer.current).toBeOverlay()
+      expect(up.layer.element.isConnected).toBe(true)
       expect(up.layer.current.isAlive()).toBe(true)
     })
 
     it('returns true for an opened layer', async function() {
-      up.layer.open({ content: 'layer content', animation: false })
+      let overlay = await up.layer.open({ content: 'layer content', animation: false })
       await wait()
 
       expect(up.layer.current).toBeOverlay()
-      expect(up.layer.current.isAlive()).toBe(true)
+      expect(overlay.element.isConnected).toBe(true)
+      expect(overlay.isAlive()).toBe(true)
     })
 
     it('returns false for a layer in its closing animation', async function() {
@@ -787,7 +826,7 @@ describe('up.Layer.Overlay', function() {
       await wait()
 
       expect(up.layer.current).toBeRootLayer()
-      expect(overlay.isDetached()).toBe(false)
+      expect(overlay.element.isConnected).toBe(true)
       expect(overlay.isAlive()).toBe(false)
     })
 
@@ -800,7 +839,7 @@ describe('up.Layer.Overlay', function() {
       await wait()
 
       expect(up.layer.current).toBeRootLayer()
-      expect(overlay.isDetached()).toBe(true)
+      expect(overlay.element.isConnected).toBe(false)
       expect(overlay.isAlive()).toBe(false)
     })
 

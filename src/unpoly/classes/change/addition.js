@@ -92,7 +92,6 @@ up.Change.Addition = class Addition extends up.Change {
   }
 
   setReloadAttrs(options) {
-    console.debug("[setReloadAttrs] newElement is %o")
     this._setSource(options)
     this._setTime(options)
     this._setETag(options)

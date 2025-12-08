@@ -212,7 +212,6 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
       ...step,
       // oldRect,
       scrollNew: () => {
-        console.debug("[_executeSwapStep] scrollNew handles focus on element %o with opt", step.newElement, step.focus)
         this._handleFocus(step.newElement, step)
         this._handleScroll(step.newElement, step)
       },
@@ -231,7 +230,6 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     return {
       newFragments: [step.newElement],
       postprocess: async () => {
-        console.debug("[_executeSwapStep] postprocess newElement %o", step.newElement)
         // TODO: welcomeElement currently tracks up.hello promises. Can we do this here?
         let compilePromise = this._welcomeElement(step.newElement, step)
 
@@ -305,13 +303,17 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
         // if options.scrollBehavior is given.
         this._handleScroll(wrapper, step)
 
-        await up.animate(wrapper, step.animation, step)
-        e.unwrap(wrapper)
+        await up.animate(wrapper, step.animation, {
+          ...step,
+          onFinished: () => {
+            e.unwrap(wrapper)
 
-        // (A) Unwrapping may destroy focus, so we need to handle it again.
-        // (B) Since we never inserted step.newElement (only its children), we handle focus on step.oldElement.
-        // (B improved) TODO: Handle focus for the first new fragment, if it's an element
-        this._handleFocus(step.oldElement, step)
+            // (A) Unwrapping may destroy focus, so we need to handle it again.
+            // (B) Since we never inserted step.newElement (only its children), we handle focus on step.oldElement.
+            // (B improved) TODO: Handle focus for the first new fragment, if it's an element
+            this._handleFocus(step.oldElement, step)
+          }
+        })
 
         await compilePromise
       }
@@ -319,8 +321,6 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
   }
 
   async _welcomeElement(element, step) {
-    console.debug("[_welcomeElement] %o", element)
-
     // Adopt CSP nonces and fix broken script tags
     this.responseDoc.finalizeElement(element)
 
