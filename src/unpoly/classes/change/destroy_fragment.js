@@ -1,5 +1,3 @@
-const u = up.util
-
 up.Change.DestroyFragment = class DestroyFragment extends up.Change {
 
   constructor(options) {

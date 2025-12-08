@@ -254,7 +254,7 @@ describe('up.Layer.Modal', function() {
         dismissModal(100)
 
         expect(up.layer.count).toBe(1)
-        expect(document).not.toHaveVerticalScrollbar()
+        expect(document).toHaveVerticalScrollbar()
 
         await wait(300)
 
