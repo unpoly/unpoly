@@ -2124,7 +2124,7 @@ describe('up.network', function() {
           up.request('/path1', { method: 'post' })
           await wait()
 
-          expect(jasmine.lastRequest().params).toMatchParams({ key: 'value' })
+          expect(jasmine.lastRequest().data()).toMatchParams({ key: 'value' })
         })
 
         it('allows listeners to add request params for a GET request, which are moved to the URL before connecting', async function() {
@@ -2136,7 +2136,8 @@ describe('up.network', function() {
           await wait()
 
           expect(jasmine.lastRequest().url).toMatchURL('/path1?key1=value1&key2=value2&key3=value3')
-          expect(jasmine.lastRequest().params).toMatchParams({})
+
+          expect(jasmine.lastRequest().data()).toMatchParams({})
         })
 
         // Specs for up.network ensure that changing params will re-index a cached requests
