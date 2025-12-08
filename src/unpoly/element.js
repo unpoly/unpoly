@@ -1006,6 +1006,12 @@ up.element = (function() {
   function wrapChildren(element) {
     const wrapper = wrapNodes(element.childNodes)
     element.append(wrapper)
+    // <element>
+    //   <up-wrapper>
+    //     <child>
+    //     <child>
+    //   </up-wrapper>
+    // </element>
     return wrapper
   }
 
