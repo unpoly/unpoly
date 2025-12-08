@@ -942,13 +942,13 @@ describe('up.element', function() {
     it("throws an error if there is more than one element in the given string's the root depth", function() {
       const html = "<h1>Full story</h1><h2>Subtitle </h2>"
       const parse = () => up.element.createFromHTML(html)
-      expect(parse).toThrowError(/Expected a single element, but got 2 elements/)
+      expect(parse).toThrowError(/Expected a single element, but got 2 nodes/)
     })
 
     it("throws an error if there is no element in the given string", function() {
       const html = "    "
       const parse = () => up.element.createFromHTML(html)
-      expect(parse).toThrowError(/Expected a single element, but got 0 elements/)
+      expect(parse).toThrowError(/Expected a single element, but got 0 nodes/)
     })
 
   })

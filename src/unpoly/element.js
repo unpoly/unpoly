@@ -823,10 +823,12 @@ up.element = (function() {
   @internal
   */
   function extractSingular(nodes) {
+    return tryExtractSingular(nodes) || up.fail('Expected a single element, but got %d nodes', nodes.length)
+  }
+
+  function tryExtractSingular(nodes) {
     if (nodes.length === 1 && u.isElementLike(nodes[0])) {
       return nodes[0]
-    } else {
-      up.fail('Expected a single element, but got %d elements', nodes.length)
     }
   }
 
