@@ -7806,39 +7806,106 @@ describe('up.form', function() {
         expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.result')
       })
 
-      it('validates after switching effects have run', async function() {
-        let html = (input1Value = "") => `
-          <form action="/foo" up-validate method="post">
-            <input id="input1" name="input1" up-switch="#input2" value="${input1Value}">
+      describe('order of switching vs. validation', function() {
+
+        it('validates after switching', async function() {
+          let html = (input1Value = "") => `
+            <form id="validating-form" action="/foo" method="post">
+              <input id="input1" name="input1" up-switch="#input2" value="${input1Value}" up-validate>
+              <input id="input2" name="input2" value="input2-value" up-disable-for="disabling-value">
+            </form>
+          `
+          let form = htmlFixture(html())
+          up.hello(form)
+          await wait()
+
+          document.querySelector('#input1').value = 'disabling-value'
+          Trigger.change('#input1')
+
+          await wait()
+
+          expect("#input2").toBeDisabled()
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+          expect(jasmine.lastRequest().data()).toMatchParams({ 'input1': 'disabling-value' })
+
+          jasmine.respondWith(html("disabling-value"))
+          await wait()
+
+          let eventOrder = []
+          up.on(document.querySelector('#validating-form'), 'up:form:switch up:form:validate', ({ type }) => eventOrder.push(type))
+
+          document.querySelector('#input1').value = 'enabling-value'
+          Trigger.change('#input1')
+
+          await wait()
+
+          expect(eventOrder).toEqual(['up:form:switch', 'up:form:validate'])
+          expect("#input2").not.toBeDisabled()
+          expect(jasmine.Ajax.requests.count()).toEqual(2)
+          expect(jasmine.lastRequest().data()).toMatchParams({ 'input1': 'enabling-value', 'input2': 'input2-value' })
+        })
+
+        it('validates after switching when the switcher is inserted later', async function() {
+          let form = htmlFixture(`
+            <form action="/foo" method="post">
+              <div id="input1"><!-- input1 will be inserted later --></div>
+              <input id="input2" name="input2" value="input2-value" up-disable-for="disabling-value">
+            </form>
+          `)
+          up.hello(form)
+          await wait()
+
+          expect('#input2').not.toBeDisabled()
+
+          await up.render({ fragment: `
+            <input id="input1" name="input1" up-switch="#input2" value="disabling-value" up-validate>
+          ` })
+
+          expect(form).toHaveSelector('input#input1')
+          expect('#input2').toBeDisabled()
+
+          let eventOrder = []
+          up.on(form, 'up:form:switch up:form:validate', ({ type }) => eventOrder.push(type))
+
+          document.querySelector('#input1').value = 'enabling-value'
+          Trigger.change('#input1')
+          await wait(50)
+
+          expect(eventOrder).toEqual(['up:form:switch', 'up:form:validate'])
+          expect('#input2').not.toBeDisabled()
+          expect(jasmine.lastRequest().data()).toMatchParams({ 'input1': 'enabling-value', 'input2': 'input2-value' })
+        })
+
+        it('validates after switching when the switchee is inserted later', async function() {
+          let form = htmlFixture(`
+            <form action="/foo" method="post">
+              <input id="input1" name="input1" up-switch="#input2" value="disabling-value" up-validate>
+              <div id="input2"><!-- input2 will be inserted here --></div>
+            </form>
+          `)
+          up.hello(form)
+          await wait()
+
+          await up.render({ fragment: `
             <input id="input2" name="input2" value="input2-value" up-disable-for="disabling-value">
-          </form>
-        `
-        let form = htmlFixture(html())
+          ` })
 
-        up.hello(form)
-        await wait()
+          expect(form).toHaveSelector('input#input2')
+          expect('#input2').toBeDisabled()
 
-        document.querySelector('#input1').value = 'disabling-value'
-        Trigger.change('#input1')
+          let eventOrder = []
+          up.on(form, 'up:form:switch up:form:validate', ({ type }) => eventOrder.push(type))
 
-        await wait()
+          document.querySelector('#input1').value = 'enabling-value'
+          Trigger.change('#input1')
+          await wait(50)
 
-        expect("#input2").toBeDisabled()
-        expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(eventOrder).toEqual(['up:form:switch', 'up:form:validate'])
+          expect('#input2').not.toBeDisabled()
+          expect(jasmine.lastRequest().data()).toMatchParams({ 'input1': 'enabling-value', 'input2': 'input2-value' })
+        })
 
-        expect(jasmine.lastRequest().data()).toMatchParams({ 'input1': 'disabling-value' })
-
-        jasmine.respondWith(html("disabling-value"))
-        await wait()
-
-        document.querySelector('#input1').value = 'enabling-value'
-        Trigger.change('#input1')
-
-        await wait()
-
-        expect("#input2").not.toBeDisabled()
-        expect(jasmine.Ajax.requests.count()).toEqual(2)
-        expect(jasmine.lastRequest().data()).toMatchParams({ 'input1': 'enabling-value', 'input2': 'input2-value' })
       })
 
     })
