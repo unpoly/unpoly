@@ -173,7 +173,7 @@ will be ignored.
 
 Aborts all pending requests.
 
-@function up.Request#loadPage
+@function up.Request#navigate
 @deprecated
   Use `up.Request#loadPage()` instead.
 */
