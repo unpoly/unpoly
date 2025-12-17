@@ -12872,16 +12872,6 @@ describe('up.fragment', function() {
         expect(onFinished).toHaveBeenCalled()
       })
 
-      it('removes element-related data from the global jQuery cache (bugfix)', async function() {
-        const $element = $fixture('.element')
-        $element.data('foo', { foo: '1' })
-        expect($element.data('foo')).toEqual({ foo: '1' })
-        up.destroy($element)
-        await wait()
-
-        expect($element.data('foo')).toBeMissing()
-      })
-
       it('calls #sync() on all layers in the stack', async function() {
         makeLayers(2)
         await wait()

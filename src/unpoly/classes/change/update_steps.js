@@ -149,7 +149,6 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
         up.script.clean(step.oldElement, { layer: step.layer })
       },
       afterRemove: () => {
-        e.cleanJQuery(step.oldElement) // TODO: Can this be part of up.script.clean()?
         up.fragment.emitDestroyed(step.oldElement, { parent, log: false })
         step.afterRemove?.()
       }

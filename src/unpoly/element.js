@@ -1474,24 +1474,6 @@ up.element = (function() {
   }
 
   /*-
-  Cleans up internal jQuery caches for the given element.
-
-  As a side effect the element is removed from the DOM.
-
-  @function up.element.safeRemove
-  @param {Element} element
-  @internal
-  */
-  function cleanJQuery(element) {
-    if (up.browser.canJQuery()) {
-      // jQuery elements store internal attributes in a global cache.
-      // We need to remove the element via jQuery or we will leak memory.
-      // See https://makandracards.com/makandra/31325-how-to-create-memory-leaks-in-jquery
-      jQuery(element).remove()
-    }
-  }
-
-  /*-
   Returns whether the given element has no content.
 
   An element is considered to have content if it has either child elements or non-whitespace text.
@@ -1648,7 +1630,6 @@ up.element = (function() {
     addClasses,
     addClassTemp,
     removeClassTemp,
-    cleanJQuery,
     parseSelector,
     isEmpty,
     crossOriginSelector,
