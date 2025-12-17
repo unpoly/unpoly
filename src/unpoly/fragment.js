@@ -1008,7 +1008,7 @@ up.fragment = (function() {
   */
 
   function emitFragmentKept({ oldElement, newElement: newFragment, newData }) {
-    return up.emit(oldElement, 'up:fragment:kept', { log: true, newFragment, newData })
+    return up.emit(oldElement, 'up:fragment:kept', { log: false, newFragment, newData })
   }
 
   /*-
