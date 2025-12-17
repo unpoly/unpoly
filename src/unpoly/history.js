@@ -230,6 +230,10 @@ up.history = (function() {
       The new URL after the change.
 
       When this event is emitted, the [browser location](/up.history.location) has already been updated.
+    @param {string} event.previousLocation
+      The URL before the change.
+
+      @experimental
     @param {string} event.reason
       The action that caused this change in history state.
 
