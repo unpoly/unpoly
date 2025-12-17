@@ -165,7 +165,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
 
     // In case a listener to up:layer:opened immediately dimisses the new layer,
     // reject the promise returned by up.layer.open().
-    this.ensureLayerAlive()
+    this.layer.assertAlive()
   }
 
   _renderOtherLayers() {
@@ -189,7 +189,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     await this.layer.startOpenAnimation()
 
     // Don't change focus if the layer has been closed while the animation was running.
-    this.ensureLayerAlive()
+    this.layer.assertAlive()
 
     await this._helloPromise
 

@@ -117,6 +117,19 @@ up.history = (function() {
     adoptBase() // make sure we will process the current history entry
   }
 
+  // Values we want to keep:
+  // - false (no update)
+  // - string (forced update)
+  // Values we want to override:
+  // - true (do update with defaults)
+  function refineOption(existingValue, newValue) {
+    if ((existingValue === false) || u.isString(existingValue)) {
+      return existingValue
+    } else {
+      return newValue
+    }
+  }
+
   /*-
   Returns a normalized URL for the current browser location.
 
@@ -747,5 +760,6 @@ up.history = (function() {
     updateMetaTags,
     getLang,
     updateLang,
+    refineOption,
   }
 })()

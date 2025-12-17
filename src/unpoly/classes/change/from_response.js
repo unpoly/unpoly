@@ -174,10 +174,10 @@ up.Change.FromResponse = class FromResponse extends up.Change {
 
     if (isReloadable) {
       // Remember where we got the fragment from so we can up.reload() it later.
-      renderOptions.source = this.improveHistoryValue(renderOptions.source, responseURL)
+      renderOptions.source = up.history.refineOption(renderOptions.source, responseURL)
     } else {
       // Keep the source of the previous fragment (e.g. the form that was submitted into failure).
-      renderOptions.source = this.improveHistoryValue(renderOptions.source, 'keep')
+      renderOptions.source = up.history.refineOption(renderOptions.source, 'keep')
       // Since the current URL is not retrievable over the GET-only address bar,
       // we can only provide history if an *explicit* location URL is passed as an option.
       renderOptions.history = !!renderOptions.location
@@ -196,8 +196,8 @@ up.Change.FromResponse = class FromResponse extends up.Change {
       Object.assign(renderOptions, openLayerOptions)
     }
 
-    renderOptions.location = this.improveHistoryValue(renderOptions.location, serverLocation)
-    renderOptions.title = this.improveHistoryValue(renderOptions.title, this._response.title)
+    renderOptions.location = up.history.refineOption(renderOptions.location, serverLocation)
+    renderOptions.title = up.history.refineOption(renderOptions.title, this._response.title)
     renderOptions.eventPlans = this._response.eventPlans
 
     let serverTarget = this._response.target

@@ -327,6 +327,14 @@ up.Layer = class Layer extends up.Record {
     throw new up.NotImplemented()
   }
 
+  assertAlive() {
+    if (!this.isAlive()) {
+      // Wind up the call stack. Whoever has closed the layer will also clean up
+      // elements, handlers, etc.
+      throw new up.Aborted("Layer is no longer alive")
+    }
+  }
+
   /*-
   Returns this layer's parent layer.
 

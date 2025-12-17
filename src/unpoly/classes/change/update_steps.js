@@ -67,7 +67,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     // If our layer was closed while animations are running, don't finish
     // and reject with an up.AbortError.
     for (let step of this._steps) {
-      this.ensureLayerAlive(step.layer)
+      step.layer.assertAlive()
     }
 
     // The RenderResult has not changed. We still updated the same target and fragments.

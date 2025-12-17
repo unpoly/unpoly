@@ -1,5 +1,3 @@
-const u = up.util
-
 up.Change = class Change {
 
   constructor(options) {
@@ -10,30 +8,9 @@ up.Change = class Change {
     throw new up.NotImplemented()
   }
 
-  // Values we want to keep:
-  // - false (no update)
-  // - string (forced update)
-  // Values we want to override:
-  // - true (do update with defaults)
-  improveHistoryValue(existingValue, newValue) {
-    if ((existingValue === false) || u.isString(existingValue)) {
-      return existingValue
-    } else {
-      return newValue
-    }
-  }
-
   deriveFailOptions() {
     // This will merge shared keys and unprefix failKeys.
     return up.RenderOptions.deriveFailOptions(this.options)
-  }
-
-  ensureLayerAlive(layer = this.layer) {
-    if (!layer.isAlive()) {
-      // Wind up the call stack. Whoever has closed the layer will also clean up
-      // elements, handlers, etc.
-      throw new up.Aborted("Layer is already " + layer.state)
-    }
   }
 
 }

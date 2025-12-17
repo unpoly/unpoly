@@ -15,21 +15,21 @@ up.Change.Addition = class Addition extends up.Change {
     if (this.layer.isOverlay()) {
       // The server may send an HTTP header `X-Up-Accept-Layer: value`
       this._tryAcceptLayerFromServer()
-      this.ensureLayerAlive()
+      this.layer.assertAlive()
 
       // A close condition { acceptLocation: '/path' } might have been
       // set when the layer was opened.
       this.layer.tryAcceptForLocation(this._responseOptions())
-      this.ensureLayerAlive()
+      this.layer.assertAlive()
 
       // The server may send an HTTP header `X-Up-Dismiss-Layer: value`
       this._tryDismissLayerFromServer()
-      this.ensureLayerAlive()
+      this.layer.assertAlive()
 
       // A close condition { dismissLocation: '/path' } might have been
       // set when the layer was opened.
       this.layer.tryDismissForLocation(this._responseOptions())
-      this.ensureLayerAlive()
+      this.layer.assertAlive()
     }
 
     // On the server we support up.layer.emit('foo'), which sends:
@@ -43,7 +43,7 @@ up.Change.Addition = class Addition extends up.Change {
     this.layer.asCurrent(() => {
       for (let eventPlan of this._eventPlans) {
         up.emit({ ...eventPlan, ...this._responseOptions() })
-        this.ensureLayerAlive()
+        this.layer.assertAlive()
       }
     })
   }

@@ -54,6 +54,7 @@ up.Change.FromContent = class FromContent extends up.Change {
   execute() {
     // Preloading from local content is a no-op.
     if (this.options.preload) {
+      // TODO: This is not an async method? So just return undefined?
       return Promise.resolve()
     }
 
@@ -123,9 +124,9 @@ up.Change.FromContent = class FromContent extends up.Change {
       this.options.target ||= responseDoc.rootSelector()
     }
 
-    this.options.title = this.improveHistoryValue(this.options.title, responseDoc.title)
-    this.options.metaTags = this.improveHistoryValue(this.options.metaTags, responseDoc.metaTags)
-    this.options.lang = this.improveHistoryValue(this.options.lang, responseDoc.lang)
+    this.options.title = up.history.refineOption(this.options.title, responseDoc.title)
+    this.options.metaTags = up.history.refineOption(this.options.metaTags, responseDoc.metaTags)
+    this.options.lang = up.history.refineOption(this.options.lang, responseDoc.lang)
   }
 
   _defaultPlacement() {
