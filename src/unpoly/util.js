@@ -1865,18 +1865,6 @@ up.util = (function() {
   }
 
   /*-
-  Returns a copy of the given list, in reversed order.
-
-  @function up.util.reverse
-  @param {List<T>} list
-  @return {Array<T>}
-  @internal
-  */
-  function reverse(list) {
-    return copy(list).reverse()
-  }
-
-  /*-
   Returns a copy of the given object, with its key transformed by the given function.
 
   If the given function returns `undefined` for a key, that key
@@ -2460,7 +2448,6 @@ up.util = (function() {
     delegate: defineDelegates,
     delegatePromise,
     // temporaryDelegate: defineTemporaryDelegates,
-    reverse,
     // prefixCamelCase,
     // unprefixCamelCase,
     camelToKebabCase,

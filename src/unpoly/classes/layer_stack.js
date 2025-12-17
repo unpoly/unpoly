@@ -18,7 +18,7 @@ up.LayerStack = class LayerStack {
   peel(layer, options) {
     // We will dismiss descendants closer to the front first to prevent
     // recursive calls of peel().
-    const descendants = u.reverse(layer.descendants)
+    const descendants = layer.descendants.toReversed()
 
     // Callers expect the effects of peel() to manipulate the layer stack sync.
     // Because of this we will dismiss alle descendants sync rather than waiting
@@ -46,7 +46,7 @@ up.LayerStack = class LayerStack {
 
   ancestorsOf(layer) {
     // Return closest ancestors first
-    return u.reverse(this.layers.slice(0, layer.index))
+    return this.layers.slice(0, layer.index).toReversed()
   }
 
   selfAndAncestorsOf(layer) {
@@ -98,12 +98,12 @@ up.LayerStack = class LayerStack {
   }
 
   reversed() {
-    return u.reverse(this.layers)
+    return this.layers.toReversed()
   }
 
   dismissOverlays(value = null, options = {}) {
     options.dismissable = false
-    for (let overlay of u.reverse(this.overlays)) {
+    for (let overlay of this.overlays.toReversed()) {
       overlay.dismiss(value, options)
     }
   }

@@ -94,7 +94,7 @@ up.LayerLookup = class LayerLookup {
         return this._stack.root
       case 'overlay':
       case 'overlays':
-        return u.reverse(this._stack.overlays)
+        return this._stack.overlays.toReversed()
       case 'front':
         return this._stack.front
       case 'origin':

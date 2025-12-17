@@ -94,7 +94,7 @@ up.OverlayFocus = class OverlayFocus {
 
   _focusLastDescendant(element) {
     // Don't use forEach since we need to break out of the loop with `return`
-    for (let child of u.reverse(element.children)) {
+    for (let child of [...element.children].toReversed()) {
       if (up.viewport.tryFocus(child) || this._focusLastDescendant(child)) {
         return true
       }

@@ -365,7 +365,7 @@ up.layer = (function() {
 
     // modeConfigs() returns the most specific options first,
     // but in merge() below later args override keys from earlier args.
-    const configs = u.reverse(modeConfigs(mode))
+    const configs = modeConfigs(mode).toReversed()
 
     let handleDeprecatedConfig = up.migrate.handleLayerConfig
     if (handleDeprecatedConfig) {
