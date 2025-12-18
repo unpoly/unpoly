@@ -1,5 +1,3 @@
-const u = up.util
-
 /*-
 Instances of `up.RenderResult` describe the effects of [rendering](/up.render).
 
@@ -16,7 +14,7 @@ console.log(result.renderOptions) // result: { target: '.target', content: 'foo'
 @class up.RenderResult
 @parent up.fragment
 */
-up.RenderResult = class RenderResult {
+up.RenderResult = class RenderResult extends up.Record {
 
   /*-
   The effective fragments that ended up being inserted.
@@ -108,13 +106,21 @@ up.RenderResult = class RenderResult {
   ```
   */
 
-  constructor({ layer, target, renderOptions } = {}) {
-    this.layer = layer
-    this.target = target
-    this.renderOptions = renderOptions
-    this.fragments = []
-    this.finishers = []
-    this.verifyers = []
+  keys() {
+    return [
+      'fragments',
+      'layer',
+      'target',
+      'renderOptions',
+      'finished',
+    ]
+  }
+
+  defaults() {
+    return {
+      fragments: [],
+      finished: Promise.resolve(),
+    }
   }
 
   /*-
@@ -168,29 +174,6 @@ up.RenderResult = class RenderResult {
     return !this.renderOptions.didFail
   }
 
-  // addStep(fragments, finisher) {
-  //   this.fragments.push(...fragments)
-  //   if (finisher) this.finishers.push(finisher)
-  // }
-  //
-  // addVerifyer(verifyer) {
-  //   this.verifyers.push(verifyer)
-  // }
-
-  async finish() {
-    // TODO: Consider making a state machine of allowed transitions, and reuse that in Request and Overlay
-    if (this._finishCalled) throw new Error('Cannot call up.RenderResult#finish twice')
-    this._finishCalled = true
-
-    await Promise.all(u.callAll(this.finishers))
-    let finishedResult = this
-    for (let verifyer of this.verifyers) {
-      let verifyerResult = await verifyer(finishedResult)
-      finishedResult = verifyerResult || finishedResult
-    }
-    return finishedResult
-  }
-
   // emitAsEvent() {
   //   let event = up.event.build('up:fragment:rendered')
   //   // We cannot set { target } on an event
@@ -198,25 +181,25 @@ up.RenderResult = class RenderResult {
   //   up.emit(this.layer, event, { log: ['Render pass inserted %d fragment(s)', this.fragments.length] })
   // }
 
-  // static both(main, extension, mergeFinished = true) {
-  //   // TODO: Why does mergeFinished call this with an undefined extension?
-  //   if (!extension) {
-  //     return main
-  //   }
-  //
-  //   return new this({
-  //     ...main,
-  //     fragments: main.fragments.concat(extension.fragments),
-  //     finished: (mergeFinished && this.mergeFinished(main, extension))
-  //   })
-  // }
-  //
-  // static async mergeFinished(main, extension) {
-  //   return this.both(
-  //     await main.finished,
-  //     await extension.finished,
-  //     false
-  //   )
-  // }
+  static both(main, extension, mergeFinished = true) {
+    // TODO: Why does mergeFinished call this with an undefined extension?
+    if (!extension) {
+      return main
+    }
+
+    return new this({
+      ...main,
+      fragments: main.fragments.concat(extension.fragments),
+      finished: (mergeFinished && this.mergeFinished(main, extension))
+    })
+  }
+
+  static async mergeFinished(main, extension) {
+    return this.both(
+      await main.finished,
+      await extension.finished,
+      false
+    )
+  }
 
 }

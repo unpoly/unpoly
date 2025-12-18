@@ -50,18 +50,26 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     onApplicable()
 
     // Create the overlay elements, but don't render content yet.
+    // This sets this.layer.
     this._createOverlay()
+
+    let result = new up.RenderResult({
+      layer: this.layer,
+      target: this.target,
+      renderOptions: this.options,
+    })
 
     // If our layer ends up being closed during rendering, we still want to render
     // [up-hungry][up-if-layer=any] elements on other layers.
     let unbindClosing = this.layer.on('up:layer:accepting up:layer:dimissing', this._renderOtherLayers.bind(this))
     try {
-      this._renderOverlayContent()
-      this._renderOtherLayers()
-      return up.RenderResult.both(this._newOverlayResult, this._otherLayersResult)
+      this._renderOverlayContent(result)
+      this._renderOtherLayers(result)
     } finally {
       unbindClosing()
     }
+
+    return result
   }
 
   _matchPostflight() {
@@ -106,7 +114,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     this.layer.setupHandlers()
   }
 
-  _renderOverlayContent() {
+  _renderOverlayContent(result) {
     // (1) Change history before compilation, so new fragments see the new location.
     // (2) Change history before checking { acceptLocation, dismissLocation }, so we check the overlay's location and not the parent layer's location.
     this._handleHistory()
@@ -136,16 +144,12 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // Remember where the element came from to support up.reload(element).
     this.setReloadAttrs({ newElement: this._content, source: this.options.source })
 
-    // Compile the entire layer, not just the user content.
-    // E.g. [up-dismiss] in the layer elements needs to go through a macro.
-    this._helloPromise = up.hello(this.layer.element, { ...this.options, layer: this.layer, dataRoot: this._content })
+    result.fragments.push(this._content)
+    result.finishers.push(() => this._compileLayer())
+    result.finishers.push(() => this._animateOpening())
+    result.verifyers.push(() => this._assertLayerAlive())
 
-    this._newOverlayResult = new up.RenderResult({
-      layer: this.layer,
-      fragments: [this._content],
-      target: this.target,
-      renderOptions: this.options,
-    })
+    throw "all of this must be the sync part of the finisher"
 
     // A11Y: Place the focus on the overlay element and setup a focus circle.
     this._handleFocus()
@@ -153,10 +157,6 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // Don't wait for the open animation to finish.
     // Otherwise a popup would start to open and only reveal itself after the animation.
     this._handleScroll()
-
-    // This starts the open animation.
-    // Resolve the RenderResult#finished promise for callers that need to know when animations are done.
-    this._newOverlayResult.finished = this._finish()
 
     // Emit up:layer:opened to indicate that the layer was opened successfully.
     // This is a good time for listeners to manipulate the overlay optics.
@@ -185,16 +185,22 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     })
   }
 
-  async _finish() {
-    await this.layer.startOpenAnimation()
+  async _compileLayer() {
+    // Compile the entire layer, not just the user content.
+    // E.g. [up-dismiss] in the layer elements needs to go through a macro.
+    await up.hello(this.layer.element, {
+      ...this.options,
+      layer: this.layer,
+      dataRoot: this._content
+    })
+  }
 
-    // Don't change focus if the layer has been closed while the animation was running.
+  _assertLayerAlive() {
     this.layer.assertAlive()
+  }
 
-    await this._helloPromise
-
-    // The fulfillment value of the finished promise is the same as for the rendered promise.
-    return this._newOverlayResult
+  async _animateOpening() {
+    await this.layer.startOpenAnimation()
   }
 
   _buildLayer() {

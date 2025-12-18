@@ -11,8 +11,9 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     this._noneOptions = options.noneOptions || {}
   }
 
-  execute(responseDoc) {
+  execute(responseDoc, result) {
     this.responseDoc = responseDoc
+    this.result = result
 
     // Fill in `step.newElement` unless it was already done by our caller.
     // This may throw up.CannotMatch for non-optional steps that don't match in `responseDoc`.
@@ -23,13 +24,12 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     this._steps = responseDoc.commitSteps(this._steps)
 
     // returns ':none' for empty steps
-    let targetForSteps = up.fragment.targetForSteps(this._steps)
+    // let targetForSteps = up.fragment.targetForSteps(this._steps)
 
     // Group compilation and emission of up:fragment:inserted into a mutation block.
     // This allows up.SelectorTracker to only sync once after the mutation, and
     // ignore any events in between.
     return up.fragment.mutate(() => {
-      let results
       if (this._steps.length) {
         // We swap fragments in reverse order for two reasons:
         //
@@ -40,39 +40,32 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
         //     the viewport height through element insertions.
 
         // TODO: Once we implemented the phased render engine, we should no longer need to reverse steps.
-        this._steps.reverse()
-        results = this._steps.map((step) => this._executeStep(step))
+        let stepResults = this._steps.toReversed().map((step) => this._executeStep(step)).toReversed()
+        result.fragments.push(...u.flatMap(stepResults, 'newFragments'))
+        result.finishers.push(...u.map(stepResults, 'postprocess'))
+        result.verifyers.push(() => this._assertLayersAlive())
       } else {
-        results = [this._executeNoSteps()]
+        this._executeNoSteps()
       }
 
-      let renderResult = new up.RenderResult({
-        layer: this._passRenderOptions.layer, // layer is looked up by FromContent#_expandIntoPlans()
-        target: targetForSteps,
-        renderOptions: this._passRenderOptions,
-        fragments: u.flatMap(results.toReversed(), 'newFragments'), // Since we reversed steps, restore fragment order
-      })
 
-      renderResult.finished = this._finish(u.map(results, 'postprocess'), renderResult)
-
-      return renderResult
+      // let renderResult = new up.RenderResult({
+      //   layer: this._passRenderOptions.layer, // layer is looked up by FromContent#_expandIntoPlans()
+      //   target: targetForSteps,
+      //   renderOptions: this._passRenderOptions,
+      //   fragments: u.flatMap(results.toReversed(), 'newFragments'), // Since we reversed steps, restore fragment order
+      // })
+      //
+      // renderResult.finished = this._finish(u.map(results, 'postprocess'), renderResult)
     })
   }
 
-  async _finish(postprocessFns, renderResult) {
-    let postprocessPromises = postprocessFns.map((fn) => fn())
-
-    await Promise.all(postprocessPromises)
-
+  async _assertLayersAlive() {
     // If our layer was closed while animations are running, don't finish
     // and reject with an up.AbortError.
     for (let step of this._steps) {
       step.layer.assertAlive()
     }
-
-    // The RenderResult has not changed. We still updated the same target and fragments.
-    // We only want to signal the time of the end of animations / DOM changes.
-    return renderResult
   }
 
   _executeStep(step) {
@@ -101,11 +94,6 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
   _executeNoSteps() {
     this._handleFocus(null, this._noneOptions)
     this._handleScroll(null, this._noneOptions)
-
-    return {
-      newFragments: [],
-      postprocess: u.asyncNoop
-    }
   }
 
   // _willStepMorph(step) {
@@ -159,7 +147,6 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     return {
       newFragments: [step.newElement],
       postprocess: async () => {
-        // TODO: welcomeElement currently tracks up.hello promises. Can we do this here?
         let compilePromise = this._welcomeElement(step.newElement, step)
 
         // Remove the .up-keeping classes and emit up:fragment:kept.
