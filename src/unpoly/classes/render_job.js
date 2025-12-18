@@ -59,6 +59,8 @@ up.RenderJob = class RenderJob {
       // Do this after emitting { guardEvent }, in case listeners want to augment render options.
       up.RenderOptions.assertContentGiven(this.renderOptions)
 
+      // TODO: Should the change always return a successful result for easier handling here, and we then throw on !result.ok?
+
       let result = await this._getChange().execute()
       this._handleResult(result)
       return result
@@ -75,6 +77,8 @@ up.RenderJob = class RenderJob {
     // (2) No fragment could be matched (return value is up.CannotMatch)
     // (3) We're preloading (early return value is up.Request)
     if (result instanceof up.RenderResult) {
+      result.produce()
+
       let { onRendered, onFinished } = result.renderOptions
 
       // We call result.renderOptions.onRendered() instead of this.renderOptions.onRendered()
@@ -137,13 +141,14 @@ up.RenderJob = class RenderJob {
     return this._awaitFinished()
   }
 
+  // Method is memoized below
   async _awaitFinished() {
     try {
       let result = await this._rendered
-      return await result.finished
+      return await result.finish()
     } catch (error) {
       if (error instanceof up.RenderResult) {
-        throw await error.finished
+        throw await error.finish()
       } else {
         throw error
       }

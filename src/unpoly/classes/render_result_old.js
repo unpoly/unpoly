@@ -1,5 +1,3 @@
-const u = up.util
-
 /*-
 Instances of `up.RenderResult` describe the effects of [rendering](/up.render).
 
@@ -16,7 +14,7 @@ console.log(result.renderOptions) // result: { target: '.target', content: 'foo'
 @class up.RenderResult
 @parent up.fragment
 */
-up.RenderResult = class RenderResult {
+up.RenderResult = class RenderResult extends up.Record {
 
   /*-
   The effective fragments that ended up being inserted.
@@ -108,11 +106,21 @@ up.RenderResult = class RenderResult {
   ```
   */
 
-  constructor({ layer, target, renderOptions, weavables } = {}) {
-    this.layer = layer
-    this.target = target
-    this.renderOptions = renderOptions
-    this._collapseWeavables([weavables, ...(renderOptions.extraWeavables || [])])
+  keys() {
+    return [
+      'fragments',
+      'layer',
+      'target',
+      'renderOptions',
+      'finished',
+    ]
+  }
+
+  defaults() {
+    return {
+      fragments: [],
+      finished: Promise.resolve(),
+    }
   }
 
   /*-
@@ -166,38 +174,6 @@ up.RenderResult = class RenderResult {
     return !this.renderOptions.didFail
   }
 
-  // addStep(fragments, finisher) {
-  //   this.fragments.push(...fragments)
-  //   if (finisher) this.finishers.push(finisher)
-  // }
-  //
-  // addVerifyer(verifyer) {
-  //   this.verifyers.push(verifyer)
-  // }
-
-  _collapseWeavables(weavables) {
-    this.fragments = this._getWeavablePhase(weavables, 'value').flat()
-    this.finished = this._finish(weavables)
-  }
-
-  async _finish(weavables) {
-    let finishFns = this._getWeavablePhase(weavables, 'finish')
-    let verifyFns = this._getWeavablePhase(weavables, 'verify')
-
-    let finishedResult = this
-    await Promise.all(u.callAll(finishFns, finishedResult))
-
-    for (let verifyFn of verifyFns) {
-      let verifyerResult = await verifyFn(finishedResult)
-      finishedResult = verifyerResult || finishedResult
-    }
-    return finishedResult
-  }
-
-  _getWeavablePhase(weavables, phase) {
-    return u.compact(u.map(weavables, phase))
-  }
-
   // emitAsEvent() {
   //   let event = up.event.build('up:fragment:rendered')
   //   // We cannot set { target } on an event
@@ -205,25 +181,25 @@ up.RenderResult = class RenderResult {
   //   up.emit(this.layer, event, { log: ['Render pass inserted %d fragment(s)', this.fragments.length] })
   // }
 
-  // static both(main, extension, mergeFinished = true) {
-  //   // TODO: Why does mergeFinished call this with an undefined extension?
-  //   if (!extension) {
-  //     return main
-  //   }
-  //
-  //   return new this({
-  //     ...main,
-  //     fragments: main.fragments.concat(extension.fragments),
-  //     finished: (mergeFinished && this.mergeFinished(main, extension))
-  //   })
-  // }
-  //
-  // static async mergeFinished(main, extension) {
-  //   return this.both(
-  //     await main.finished,
-  //     await extension.finished,
-  //     false
-  //   )
-  // }
+  static both(main, extension, mergeFinished = true) {
+    // TODO: Why does mergeFinished call this with an undefined extension?
+    if (!extension) {
+      return main
+    }
+
+    return new this({
+      ...main,
+      fragments: main.fragments.concat(extension.fragments),
+      finished: (mergeFinished && this.mergeFinished(main, extension))
+    })
+  }
+
+  static async mergeFinished(main, extension) {
+    return this.both(
+      await main.finished,
+      await extension.finished,
+      false
+    )
+  }
 
 }

@@ -63,23 +63,22 @@ up.Change.FromResponse = class FromResponse extends up.Change {
     // will be passed as a third argument to compilers.
     finalRenderOptions.meta = this._compilerPassMeta()
 
-    let result = new up.Change.FromContent(finalRenderOptions).execute()
-    result.finished = this.finish(result, finalRenderOptions)
-    return result
+    finalRenderOptions.extraWeavables = this._revalidateWeavables(finalRenderOptions)
+
+    return new up.Change.FromContent(finalRenderOptions).execute()
   }
 
-  async finish(renderResult, originalRenderOptions) {
-    // Wait until the original render pass has completed animations.
-    renderResult = await renderResult.finished
-
+  async _revalidateWeavables(originalRenderOptions) {
     if (up.fragment.shouldRevalidate(this._request, this._response, originalRenderOptions)) {
-      renderResult = await this._revalidate(renderResult, originalRenderOptions)
+      return [{
+        verify: (result) => this._revalidate(result, originalRenderOptions)
+      }]
     }
-
-    return renderResult
   }
 
   async _revalidate(renderResult, originalRenderOptions) {
+    if (!up.fragment.shouldRevalidate(this._request, this._response, originalRenderOptions)) return
+
     // This is an explicit target passed as `{ render }` option.
     // It may be `undefined` if the user has not given an explicit selector and relies on a fallback.
     // If its is given, it may still contain ':before' or ':after'.
@@ -118,11 +117,9 @@ up.Change.FromResponse = class FromResponse extends up.Change {
       // and will *not* have called { onResult } a second time. We will however return the original
       // render result so it can be passed to up.RenderJob#finished() callbacks.
       if (!verifyResult.none) {
-        renderResult = verifyResult
+        return verifyResult
       }
     }
-
-    return renderResult
   }
 
   _revalidatePreview({ preview, revalidatePreview }) {

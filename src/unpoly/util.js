@@ -1558,9 +1558,13 @@ up.util = (function() {
     A function that will call all `functions` if called.
   @internal
   */
-  function sequence(...args) {
-    let functions = scanFunctions(...args)
-    return (...args) => map(functions, (fn) => fn(...args))
+  function sequence(...fns) {
+    return (...callArgs) => callAll(fns, callArgs)
+  }
+
+  function callAll(fns, ...args) {
+    fns = scanFunctions(fns)
+    return map(fns, (fn) => fn(...args))
   }
 
 //  ###**
@@ -2428,6 +2432,7 @@ up.util = (function() {
     escapeHTML,
     escapeRegExp,
     sequence,
+    callAll,
     evalOption,
     evalAutoOption,
     flatten,

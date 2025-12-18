@@ -434,10 +434,10 @@ up.motion = (function() {
   @stable
   */
   function morph(...args) {
-    return phasedMorph(...args).postprocess()
+    return weavableMorph(...args).postprocess()
   }
 
-  function phasedMorph(oldElement, newElement, transitionObject, options) {
+  function weavableMorph(oldElement, newElement, transitionObject, options) {
     options = u.options(options)
 
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
@@ -474,7 +474,7 @@ up.motion = (function() {
       })
 
       return {
-        async postprocess() {
+        async finish() {
           const trackable = async function() {
             // Scroll newElement into position before we start the enter animation.
             scrollNew()
@@ -500,7 +500,7 @@ up.motion = (function() {
       swapElementsDirectly(oldElement, newElement)
 
       return {
-        async postprocess() {
+        async finish() {
           scrollNew()
           afterRemove()
         }
@@ -713,7 +713,7 @@ up.motion = (function() {
 
   return {
     morph,
-    phasedMorph,
+    weavableMorph,
     animate,
     finish,
     finishCount() { return motionController.finishCount },
