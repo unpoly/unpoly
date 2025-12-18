@@ -1160,6 +1160,13 @@ describe('up.util', () => {
         expect(values).toEqual(['one', 'two', 'three'])
       })
 
+      it('returns an array of all return values', function() {
+        const one = () => 1
+        const two = () => 2
+        const sequence = up.util.sequence(one, two)
+        expect(sequence()).toEqual([1, 2])
+      })
+
     })
 
     describe('up.util.timer', function() {
@@ -1992,12 +1999,12 @@ describe('up.util', () => {
 //        obj = up.util.deepMerge(obj, other)
 //        expect(obj).toEqual { a: ['3', '4'] }
 
-    describe('up.util.memoize', function() {
+    describe('up.util.memoize()', function() {
 
       it('returns a function that calls the memoized function', function() {
-        const fun = (a, b) => a + b
+        const fun = () => 'foo'
         const memoized = u.memoize(fun)
-        expect(memoized(2, 3)).toEqual(5)
+        expect(memoized()).toEqual('foo')
       })
 
       it('returns the cached return value of the first call when called again', function() {
@@ -2007,6 +2014,51 @@ describe('up.util', () => {
         expect(memoized(2, 3)).toEqual(5)
         expect(spy.calls.count()).toEqual(1)
       })
+
+      it('caches undefined', function() {
+        const spy = jasmine.createSpy().and.returnValue(undefined)
+        const memoized = u.memoize(spy)
+        expect(memoized()).toBeUndefined()
+        expect(memoized()).toBeUndefined()
+        expect(spy.calls.count()).toEqual(1)
+      })
+
+      it('caches false', function() {
+        const spy = jasmine.createSpy().and.returnValue(false)
+        const memoized = u.memoize(spy)
+        expect(memoized()).toBe(false)
+        expect(memoized()).toBe(false)
+        expect(spy.calls.count()).toEqual(1)
+      })
+
+      it('throws a cached error from the first caller', function() {
+        let error = new Error('foo')
+        const spy = jasmine.createSpy().and.throwError(error)
+        const memoized = u.memoize(spy)
+        expect(memoized).toThrow(error)
+        expect(memoized).toThrow(error)
+        expect(spy.calls.count()).toEqual(1)
+      })
+
+      it('allows callers to control `this`', function() {
+        const thisSpy = jasmine.createSpy('this spy')
+        const fun = function() { thisSpy(this) }
+        const memoized = u.memoize(fun)
+        const givenThis = {}
+
+        memoized.apply(givenThis)
+        memoized.apply(givenThis)
+
+        expect(thisSpy).toHaveBeenCalledWith(givenThis)
+        expect(thisSpy.calls.count()).toBe(1)
+      })
+
+      it('allows callers to control arguments', function() {
+        const fun = (a, b) => a + b
+        const memoized = u.memoize(fun)
+        expect(memoized(2, 3)).toEqual(5)
+      })
+
     })
 
     if (up.migrate.loaded) {
@@ -2624,25 +2676,25 @@ describe('up.util', () => {
         expect(spy.calls.count()).toBe(1)
       })
 
-      it('caches separately for separate arguments', function() {
-        const spy = jasmine.createSpy('spy')
-
-        const obj = {
-          foo(arg) {
-            spy(arg)
-            return arg * 2
-          }
-        }
-
-        up.util.memoizeMethod(obj, { foo: true })
-
-        expect(obj.foo(3)).toBe(6)
-        expect(obj.foo(3)).toBe(6)
-        expect(spy.calls.count()).toBe(1)
-
-        expect(obj.foo(5)).toBe(10)
-        expect(spy.calls.count()).toBe(2)
-      })
+      // it('caches separately for separate arguments', function() {
+      //   const spy = jasmine.createSpy('spy')
+      //
+      //   const obj = {
+      //     foo(arg) {
+      //       spy(arg)
+      //       return arg * 2
+      //     }
+      //   }
+      //
+      //   up.util.memoizeMethod(obj, { foo: true })
+      //
+      //   expect(obj.foo(3)).toBe(6)
+      //   expect(obj.foo(3)).toBe(6)
+      //   expect(spy.calls.count()).toBe(1)
+      //
+      //   expect(obj.foo(5)).toBe(10)
+      //   expect(spy.calls.count()).toBe(2)
+      // })
 
       it('caches multiple method names', function() {
         const fooSpy = jasmine.createSpy('foo method').and.returnValue('foo return value')

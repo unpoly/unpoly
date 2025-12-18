@@ -62,9 +62,14 @@ up.Change.FromContent = class FromContent extends up.Change {
   }
 
   _executePlan(matchedPlan) {
-    return matchedPlan.execute(
-      this._getResponseDoc(),
-      this._onPlanApplicable.bind(this, matchedPlan)
+    // Group compilation and emission of up:fragment:inserted into a mutation block.
+    // This allows up.SelectorTracker to only sync once after the mutation, and
+    // ignore any events in between.
+    return up.fragment.mutate(() =>
+      matchedPlan.execute(
+        this._getResponseDoc(),
+        this._onPlanApplicable.bind(this, matchedPlan)
+      )
     )
   }
 

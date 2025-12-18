@@ -45,14 +45,17 @@ up.util = (function() {
   @function up.util.memoize
   @internal
   */
-  function memoize(func) {
-    let cachedValue, cached
+  function memoize(func, cacheProp) {
+    let cache = {}
+
     return function(...args) {
-      if (cached) {
-        return cachedValue
-      } else {
-        cached = true
-        return cachedValue = func.apply(this, args)
+      if (cacheProp) cache = (this[cacheProp] ||= {})
+      if (cache.value) return cache.value[0]
+      if (cache.error) throw cache.error
+      try {
+        return (cache.value = [func.apply(this, args)])[0]
+      } catch (error) {
+        throw (cache.error = error)
       }
     }
   }
@@ -1558,9 +1561,13 @@ up.util = (function() {
     A function that will call all `functions` if called.
   @internal
   */
-  function sequence(...args) {
-    let functions = scanFunctions(...args)
-    return (...args) => map(functions, (fn) => fn(...args))
+  function sequence(...fns) {
+    return (...callArgs) => callAll(fns, callArgs)
+  }
+
+  function callAll(fns, ...args) {
+    fns = scanFunctions(fns)
+    return map(fns, (fn) => fn(...args))
   }
 
 //  ###**
@@ -2028,64 +2035,15 @@ up.util = (function() {
     }
   }
 
-  function useMemoizeCacheEntry(cacheEntry) {
-    if (cacheEntry.error) {
-      throw cacheEntry.error
-    } else {
-      return cacheEntry.value
-    }
-  }
-
-  function buildMemoizeCacheEntry(oldImpl, self, args) {
-    try {
-      return { value: oldImpl.apply(self, args) }
-    } catch (e) {
-      return { error: e }
-    }
-  }
-
-  // function memoizeMethodOrGetter(object, propLiteral) {
-  //   // We're accepting the property names as the keys of an object. We don't care about the values.
-  //   // We do this so that object's keys go through the same property mangling as the rest of the code.
-  //   for (let prop in propLiteral) {
-  //     let originalDescriptor = Object.getOwnPropertyDescriptor(object, prop)
-  //
-  //     let oldImpl = originalDescriptor.get || originalDescriptor.value
-  //
-  //     let cachingImpl = function(...args) {
-  //       let cache = this[`__${prop}MemoizeCache`] ||= {}
-  //       let cacheKey = JSON.stringify(args)
-  //       cache[cacheKey] ||= buildMemoizeCacheEntry(oldImpl, this, args)
-  //       return useMemoizeCacheEntry(cache[cacheKey])
-  //     }
-  //
-  //     if (originalDescriptor.get) {
-  //       Object.defineProperty(object, prop, {
-  //         get: cachingImpl
-  //       })
-  //     } else {
-  //       object[prop] = cachingImpl
-  //     }
-  //
-  //   }
-  // }
-
   function memoizeMethod(object, propLiteral) {
     // We're accepting the property names as the keys of an object. We don't care about the values.
     // We do this so that object's keys go through the same property mangling as the rest of the code.
     for (let prop in propLiteral) {
+      // TODO: Why can't we just get the old prop using object[prop] ?
       let originalDescriptor = Object.getOwnPropertyDescriptor(object, prop)
-
       let oldImpl = originalDescriptor.value
-
-      let cachingImpl = function(...args) {
-        let cache = this[`__${prop}MemoizeCache`] ||= {}
-        let cacheKey = JSON.stringify(args)
-        cache[cacheKey] ||= buildMemoizeCacheEntry(oldImpl, this, args)
-        return useMemoizeCacheEntry(cache[cacheKey])
-      }
-
-      object[prop] = cachingImpl
+      let memoizedImpl = memoize(oldImpl, `__${prop}MemoizeCache`)
+      object[prop] = memoizedImpl
     }
   }
 
@@ -2177,15 +2135,15 @@ up.util = (function() {
   // }
 
   function scanFunctions(...values) {
-    return values.flat().filter(isFunction)
+    return values.flat(2).filter(isFunction)
   }
 
   function cleaner(order = 'lifo') {
     let fns = []
 
     let track = function(values, transform) {
-      values = scanFunctions(...values).map(transform)
-      fns.push(...scanFunctions(...values))
+      values = scanFunctions(values).map(transform)
+      fns.push(...scanFunctions(values))
     }
 
     let api = function(...values) {
@@ -2428,6 +2386,7 @@ up.util = (function() {
     escapeHTML,
     escapeRegExp,
     sequence,
+    callAll,
     evalOption,
     evalAutoOption,
     flatten,

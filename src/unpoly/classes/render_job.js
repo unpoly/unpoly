@@ -59,6 +59,8 @@ up.RenderJob = class RenderJob {
       // Do this after emitting { guardEvent }, in case listeners want to augment render options.
       up.RenderOptions.assertContentGiven(this.renderOptions)
 
+      // TODO: Should the change always return a successful result for easier handling here, and we then throw on !result.ok?
+
       let result = await this._getChange().execute()
       this._handleResult(result)
       return result
@@ -137,6 +139,7 @@ up.RenderJob = class RenderJob {
     return this._awaitFinished()
   }
 
+  // Method is memoized below
   async _awaitFinished() {
     try {
       let result = await this._rendered
@@ -145,6 +148,7 @@ up.RenderJob = class RenderJob {
       if (error instanceof up.RenderResult) {
         throw await error.finished
       } else {
+        // Fatal error, not a failure result.
         throw error
       }
     }

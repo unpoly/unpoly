@@ -2508,7 +2508,7 @@ describe('up.fragment', function() {
             expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value: 123 }))
           })
 
-          it('makes the discarded response available to up:layer:accepted listeners as a { response } property 2', async function() {
+          it('makes the discarded response available to up:layer:accepted listeners as a { response } property', async function() {
             const callback = jasmine.createSpy('onAccepted callback')
             up.layer.open({ onDismissed: callback, target: '.target', content: 'Initial content' })
 

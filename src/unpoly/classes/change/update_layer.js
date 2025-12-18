@@ -34,7 +34,13 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   _bestPreflightSelector() {
     this._matchPreflight()
 
-    return up.fragment.targetForSteps(this._steps)
+    const isProbable = (step) => !step.maybe || step.oldElement?.isConnected
+    return up.fragment.targetForSteps(this._steps, isProbable)
+  }
+
+  _renderedSelector() {
+    const isCommitted = (step) => step.committed
+    return up.fragment.targetForSteps(this._steps, isCommitted)
   }
 
   _getFragments() {
@@ -44,15 +50,13 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   }
 
   execute(responseDoc, onApplicable) {
-    this.responseDoc = responseDoc
-
     // (1) For each step, find a `step.newElement` that matches both in this.layer
     //     and in the response document.
     // (2) Match newElements here instead of relying on up.Change.UpdateSteps to
     //     do it later. This way we will throw up.CannotMatch early, and our caller
     //     up.Change.FromContent knows that this plan is not applicable. It can then
     //     try a fallback plan.
-    this._matchPostflight()
+    this._matchPostflight(responseDoc)
 
     // If our steps can be matched, up.Change.FromContent wants a chance to some final
     // preparations before we start rendering.
@@ -60,17 +64,30 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
     // If our layer ends up being closed during rendering, we still want to render
     // [up-hungry][up-if-layer=any] elements on other layers.
-    let unbindClosing = this.layer.on('up:layer:accepting up:layer:dimissing', this._renderOtherLayers.bind(this))
+    let renderOtherLayersOnce = u.memoize(() => this._renderOtherLayers(responseDoc))
+    let unbindClosing = this.layer.on('up:layer:accepting up:layer:dismissing', renderOtherLayersOnce)
     try {
-      this._renderCurrentLayer()
-      this._renderOtherLayers()
-      return up.RenderResult.both(this._currentLayerResult, this._otherLayersResult)
+      let weavables = [
+        ...this._renderCurrentLayer(responseDoc),
+        ...renderOtherLayersOnce(),
+      ]
+
+      console.debug("[UpdateLayer#execute] Steps are %o", this._steps)
+      console.debug("[UpdateLayer#execute] result target is %o", this._renderedSelector())
+      // let targetForSteps = up.fragment.targetForSteps(this._steps)
+
+      return new up.RenderResult({
+        target: this._renderedSelector(),
+        layer: this.layer,
+        renderOptions: this.options,
+        weavables,
+      })
     } finally {
       unbindClosing()
     }
   }
 
-  _renderCurrentLayer() {
+  _renderCurrentLayer(responseDoc) {
     if (this._steps.length) {
       // Don't log this.target since that does not include hungry elements
       up.puts('up.render()', `Updating "${this._bestPreflightSelector()}" in ${this.layer}`)
@@ -129,26 +146,24 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // if any of these options cause the layer to close.
     this.handleLayerChangeRequests()
 
-    this._currentLayerResult = this.executeSteps({
+    return this.executeSteps({
       steps: this._steps,
-      responseDoc: this.responseDoc,
       noneOptions: this.options,
+      responseDoc,
     })
   }
 
-  _renderOtherLayers() {
-    // Can be called twice but most only execute once.
-    if (this._otherLayersResult) return
-
+  _renderOtherLayers(responseDoc) {
     // We execute steps on other layers first. If the render pass ends up closing this
     // layer (e.g. by reaching a close condition or X-Up-Accept-Layer) we want:
     //
     // (1) ... to use the discarded content for hungry elements on other layers that have [up-if-layer=any].
     // (2) ... to see updated hungry elements on other layers in onDismissed/onAccepted handlers.
     let otherLayerSteps = this._getHungrySteps().other
-    this._otherLayersResult = this.executeSteps({
+
+    return this.executeSteps({
       steps: otherLayerSteps,
-      responseDoc: this.responseDoc,
+      responseDoc,
     })
   }
 
@@ -157,11 +172,11 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     this._compressNestedSteps()
   }
 
-  _matchPostflight() {
+  _matchPostflight(responseDoc) {
     this._matchOldElements()
     this._addHungryStepsOnCurrentLayer()
     this._compressNestedSteps()
-    this._matchNewElements()
+    this._matchNewElements(responseDoc)
   }
 
   _addHungryStepsOnCurrentLayer() {
@@ -186,8 +201,8 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     })
   }
 
-  _matchNewElements() {
-    this._steps = this.responseDoc.selectSteps(this._steps)
+  _matchNewElements(responseDoc) {
+    this._steps = responseDoc.selectSteps(this._steps)
   }
 
   _compressNestedSteps() {
