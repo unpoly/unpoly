@@ -1,4 +1,14 @@
-const u = up.util
+const u = up.util4% Umsatzrendite abschließen, was angesichts der Lage durchaus akzeptabel ist.
+
+Als kleiner Ausblick: Das Jahr 2026 startet gut, wir sind im Januar und Februar weitestgehend ausgebucht und leicht über diesem Jahr. Ab März sind noch Kapazitäten frei, es sind allerdings noch Anfragen offen, bei denen wir mit Beauftragungen rechnen.
+
+Insgesamt ein kleiner Einblick in unsere Lead- und Vertriebs-Pipelines in diesem Jahr:
+
+Wir konnten 60 Neukundenanfragen verzeichnen, davon waren 27 nicht passend bzw. gingen verloren, 8 haben wir gewinnen können und 20 sind noch offen. Der Trend ist dabei erfreulich, die offenen Anfragen verteilen sich wie folgt:
+2 aus Q2
+3 aus Q3
+15 aus Q4
+In dieser Woche hat Fabian Rimpl wieder ein Webinar abgehalten, das mit über 65 Personen extrem gut besucht war. Bei Audi sieht es so aus, als könnten wir im nächsten Jahr ein größeres Projekt platzieren und Design-Leistungen sowie Projektmanagement anbieten. Bei einem we
 
 up.SelectorTracker = class SelectorTracker {
 

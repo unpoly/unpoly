@@ -56,23 +56,30 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // preparations before we start rendering.
     onApplicable()
 
-    let result = new up.RenderResult({
-      target: this._bestPreflightSelector(),
-      layer: this.layer,
-      renderOptions: this.options,
-    })
+    // let result = new up.RenderResult({
+    //   target: this._bestPreflightSelector(),
+    //   layer: this.layer,
+    //   renderOptions: this.options,
+    // })
 
     // If our layer ends up being closed during rendering, we still want to render
     // [up-hungry][up-if-layer=any] elements on other layers.
-    let unbindClosing = this.layer.on('up:layer:accepting up:layer:dimissing', this._renderOtherLayers.bind(this))
+    let unbindClosing = this.layer.on('up:layer:accepting up:layer:dismissing', this._renderOtherLayers.bind(this))
     try {
-      this._renderCurrentLayer(responseDoc, result)
-      this._renderOtherLayers(responseDoc, result)
+      let phases = [
+        ...this._renderCurrentLayer(responseDoc),
+        ...this._renderOtherLayers(responseDoc),
+      ]
+
+      return new up.RenderResult({
+        target: this._bestPreflightSelector(),
+        layer: this.layer,
+        renderOptions: this.options,
+        phases,
+      })
     } finally {
       unbindClosing()
     }
-
-    return result
   }
 
   _renderCurrentLayer(responseDoc, result) {

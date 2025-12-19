@@ -108,13 +108,11 @@ up.RenderResult = class RenderResult {
   ```
   */
 
-  constructor({ layer, target, renderOptions } = {}) {
+  constructor({ layer, target, renderOptions, weavables } = {}) {
     this.layer = layer
     this.target = target
     this.renderOptions = renderOptions
-    this.fragments = []
-    this.finishers = []
-    this.verifyers = []
+    this.weavables = weavables || []
   }
 
   /*-
@@ -177,15 +175,24 @@ up.RenderResult = class RenderResult {
   //   this.verifyers.push(verifyer)
   // }
 
-  async finish() {
-    // TODO: Consider making a state machine of allowed transitions, and reuse that in Request and Overlay
-    if (this._finishCalled) throw new Error('Cannot call up.RenderResult#finish twice')
-    this._finishCalled = true
+  _getWeavablePhase(phase) {
+    return u.compact(u.map(this.weavables, phase))
+  }
 
-    await Promise.all(u.callAll(this.finishers))
+  produce() {
+    this.fragments = this._getWeavablePhase('value').flat()
+    this.finished = this._finish()
+  }
+
+  async _finish() {
+    let finishFns = this._getWeavablePhase('finish')
+    let verifyFns = this._getWeavablePhase('verify')
+
     let finishedResult = this
-    for (let verifyer of this.verifyers) {
-      let verifyerResult = await verifyer(finishedResult)
+    await Promise.all(u.callAll(finishFns, finishedResult))
+
+    for (let verifyFn of verifyFns) {
+      let verifyerResult = await verifyFn(finishedResult)
       finishedResult = verifyerResult || finishedResult
     }
     return finishedResult

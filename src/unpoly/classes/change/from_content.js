@@ -52,6 +52,9 @@ up.Change.FromContent = class FromContent extends up.Change {
   }
 
   execute() {
+
+
+
     // Preloading from local content is a no-op.
     if (this.options.preload) {
       // TODO: This is not an async method? So just return undefined?

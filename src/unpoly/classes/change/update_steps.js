@@ -29,26 +29,14 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     // Group compilation and emission of up:fragment:inserted into a mutation block.
     // This allows up.SelectorTracker to only sync once after the mutation, and
     // ignore any events in between.
+
+    throw "this no longer covers compilation"
+
     return up.fragment.mutate(() => {
-      if (this._steps.length) {
-        // We swap fragments in reverse order for two reasons:
-        //
-        // (1) Only the first step will process focus. Other steps may cause focus loss
-        //     (when they're swapping a fragment with focus), causing an option like
-        //     { focus: 'main-if-lost' } to not satisfy the "lost" condition.
-        // (2) Only the first step will scroll. However other steps may change
-        //     the viewport height through element insertions.
-
-        // TODO: Once we implemented the phased render engine, we should no longer need to reverse steps.
-        let stepResults = this._steps.toReversed().map((step) => this._executeStep(step)).toReversed()
-        result.fragments.push(...u.flatMap(stepResults, 'newFragments'))
-        result.finishers.push(...u.map(stepResults, 'postprocess'))
-        result.verifyers.push(() => this._assertLayersAlive())
-      } else {
-        this._executeNoSteps()
-      }
-
-
+      return [
+        ...this._executeSteps(),
+        this._assertLayersAlive(),
+      ]
       // let renderResult = new up.RenderResult({
       //   layer: this._passRenderOptions.layer, // layer is looked up by FromContent#_expandIntoPlans()
       //   target: targetForSteps,
@@ -60,11 +48,32 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     })
   }
 
-  async _assertLayersAlive() {
-    // If our layer was closed while animations are running, don't finish
-    // and reject with an up.AbortError.
-    for (let step of this._steps) {
-      step.layer.assertAlive()
+  _executeSteps() {
+    if (this._steps.length) {
+      // We swap fragments in reverse order for two reasons:
+      //
+      // (1) Only the first step will process focus. Other steps may cause focus loss
+      //     (when they're swapping a fragment with focus), causing an option like
+      //     { focus: 'main-if-lost' } to not satisfy the "lost" condition.
+      // (2) Only the first step will scroll. However other steps may change
+      //     the viewport height through element insertions.
+
+      // TODO: Once we implemented the phased render engine, we should no longer need to reverse steps.
+      return this._steps.toReversed().map((step) => this._executeStep(step)).toReversed()
+    } else {
+      return this._executeNoSteps()
+    }
+  }
+
+  _assertLayersAlive() {
+    return {
+      verify: () => {
+        // If our layer was closed while animations are running, don't finish
+        // and reject with an up.AbortError.
+        for (let step of this._steps) {
+          step.layer.assertAlive()
+        }
+      }
     }
   }
 
@@ -92,8 +101,12 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
   }
 
   _executeNoSteps() {
-    this._handleFocus(null, this._noneOptions)
-    this._handleScroll(null, this._noneOptions)
+    return [{
+      finish: () => {
+        this._handleFocus(null, this._noneOptions)
+        this._handleScroll(null, this._noneOptions)
+      }
+    }]
   }
 
   // _willStepMorph(step) {
@@ -106,9 +119,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     // Nothing to do
 
     return {
-      // Don't add kept fragment to this.renderResult.
-      newFragments: [],
-      postprocess: async () => {
+      finish: async () => {
         up.fragment.emitKept(keepPlan)
 
         this._handleFocus(step.oldElement, step)
@@ -126,7 +137,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     // This needs to happen before up.script.clean() below.
     // Otherwise we would run destructors for elements we want to keep.
     this._preserveDescendantKeepables(step)
-    const morphPhases = up.motion.phasedMorph(step.oldElement, step.newElement, step.transition, {
+    const morphWeavable = up.motion.weavableMorph(step.oldElement, step.newElement, step.transition, {
       ...step,
       // oldRect,
       scrollNew: () => {
@@ -145,14 +156,15 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     this._restoreDescendantKeepables(step)
 
     return {
-      newFragments: [step.newElement],
-      postprocess: async () => {
+      ...morphWeavable,
+      value: [step.newElement],
+      finish: async () => {
         let compilePromise = this._welcomeElement(step.newElement, step)
 
         // Remove the .up-keeping classes and emit up:fragment:kept.
         this._finalizeDescendantKeepables(step)
 
-        await morphPhases.postprocess()
+        await morphWeavable.finish()
 
         await compilePromise
       }
@@ -183,11 +195,9 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
       }
     }
 
-    let wrapperResults = this._executeSwapStep(wrapperStep)
-
     return {
-      newFragments: newChildren,
-      postprocess: wrapperResults.postprocess,
+      ...this._executeSwapStep(wrapperStep),
+      value: newChildren,
     }
   }
 
@@ -208,8 +218,8 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     step.oldElement.insertAdjacentElement(position, wrapper)
 
     return {
-      newFragments: newChildren,
-      postprocess: async () => {
+      value: newChildren,
+      finish: async () => {
         let compilePromise = this._welcomeElement(wrapper, step)
 
         this._handleFocus(wrapper, step)

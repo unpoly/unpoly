@@ -77,6 +77,8 @@ up.RenderJob = class RenderJob {
     // (2) No fragment could be matched (return value is up.CannotMatch)
     // (3) We're preloading (early return value is up.Request)
     if (result instanceof up.RenderResult) {
+      result.produce()
+
       let { onRendered, onFinished } = result.renderOptions
 
       // We call result.renderOptions.onRendered() instead of this.renderOptions.onRendered()
