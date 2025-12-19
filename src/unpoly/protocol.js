@@ -1159,7 +1159,7 @@ up.protocol = (function() {
     if (cspHeader) {
       let declarations = cspHeader.split(/\s*;\s*/)
       for (let declaration of declarations) {
-        let directive = declaration.match(/^(script|default)-src:/)?.[1]
+        let directive = declaration.match(/^(script|default)-src\s/)?.[1]
         if (directive) {
           results[directive] = {
             declaration: declaration,
