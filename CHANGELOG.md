@@ -8,6 +8,12 @@ If you're upgrading from an older Unpoly version, you should load [`unpoly-migra
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+3.12.1
+------
+
+- Fix a bug where Unpoly did not [rewrite CSP nonces within new fragments](https://unpoly.com/csp#nonce-rewriting).
+
+
 3.12.0
 ------
 
