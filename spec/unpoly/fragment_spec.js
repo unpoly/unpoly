@@ -8374,7 +8374,7 @@ describe('up.fragment', function() {
             await wait()
 
             jasmine.respondWith({
-              responseHeaders: { 'Content-Security-Policy': "script-src: 'specs-nonce'" },
+              responseHeaders: { 'Content-Security-Policy': "script-src 'specs-nonce'" },
               responseText: `
                 <div class="target">
                   new text
@@ -8795,7 +8795,7 @@ describe('up.fragment', function() {
                 await wait()
 
                 jasmine.respondWith({
-                  responseHeaders: { 'Content-Security-Policy': "script-src: 'strict-dynamic' 'specs-nonce'" },
+                  responseHeaders: { 'Content-Security-Policy': "script-src 'strict-dynamic' 'specs-nonce'" },
                   responseText: `
                   <div class="target">
                     new text
@@ -8851,7 +8851,7 @@ describe('up.fragment', function() {
                 await wait()
 
                 jasmine.respondWith({
-                  responseHeaders: { 'Content-Security-Policy': "script-src: 'strict-dynamic' 'specs-nonce'" },
+                  responseHeaders: { 'Content-Security-Policy': "script-src 'strict-dynamic' 'specs-nonce'" },
                   responseText: `
                   <div class="target">
                     new text
@@ -8885,7 +8885,7 @@ describe('up.fragment', function() {
                 await wait()
 
                 jasmine.respondWith({
-                  responseHeaders: { 'Content-Security-Policy': "script-src: 'strict-dynamic' 'specs-nonce'" },
+                  responseHeaders: { 'Content-Security-Policy': "script-src 'strict-dynamic' 'specs-nonce'" },
                   responseText: `
                   <div class="target">
                     new text
@@ -8915,7 +8915,7 @@ describe('up.fragment', function() {
                 await wait()
 
                 jasmine.respondWith({
-                  responseHeaders: { 'Content-Security-Policy': "script-src: 'strict-dynamic' 'specs-nonce'" },
+                  responseHeaders: { 'Content-Security-Policy': "script-src 'strict-dynamic' 'specs-nonce'" },
                   responseText: `
                   <div class="target">
                     new text
@@ -8945,7 +8945,7 @@ describe('up.fragment', function() {
                 await wait()
 
                 jasmine.respondWith({
-                  responseHeaders: { 'Content-Security-Policy': "script-src: 'strict-dynamic' 'self'" },
+                  responseHeaders: { 'Content-Security-Policy': "script-src 'strict-dynamic' 'self'" },
                   responseText: `
                   <div class="target">
                     new text
@@ -8975,7 +8975,7 @@ describe('up.fragment', function() {
                 await wait()
 
                 jasmine.respondWith({
-                  responseHeaders: { 'Content-Security-Policy': "script-src: 'strict-dynamic' 'response-nonce'" },
+                  responseHeaders: { 'Content-Security-Policy': "script-src 'strict-dynamic' 'response-nonce'" },
                   responseText: `
                   <div class="target">
                     new text
@@ -9005,7 +9005,7 @@ describe('up.fragment', function() {
                 await wait()
 
                 jasmine.respondWith({
-                  responseHeaders: { 'Content-Security-Policy': "script-src: 'strict-dynamic' 'response-nonce'" },
+                  responseHeaders: { 'Content-Security-Policy': "script-src 'strict-dynamic' 'response-nonce'" },
                   responseText: `
                   <div class="target">
                     new text
@@ -9079,7 +9079,7 @@ describe('up.fragment', function() {
               await wait()
 
               jasmine.respondWith({
-                responseHeaders: { 'Content-Security-Policy': "script-src: 'strict-dynamic' 'specs-nonce'" },
+                responseHeaders: { 'Content-Security-Policy': "script-src 'strict-dynamic' 'specs-nonce'" },
                 responseText: `
                 <div class="target">
                   new text
@@ -9247,7 +9247,7 @@ describe('up.fragment', function() {
                 <script nonce="response-secret"></script>
               </div>
             `,
-            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-response-secret'" }
+            responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-response-secret'" }
           })
           await wait()
 
@@ -9274,7 +9274,7 @@ describe('up.fragment', function() {
                 <script nonce="response-secret-2"></script>
               </div>
             `,
-            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-response-secret-1' 'nonce-response-secret-2' 'nonce-response-secret-3'" }
+            responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-response-secret-1' 'nonce-response-secret-2' 'nonce-response-secret-3'" }
           })
           await wait()
 
@@ -9301,7 +9301,7 @@ describe('up.fragment', function() {
                 <script nonce="response-secret"></script>
               </div>
             `,
-            responseHeaders: { 'Content-Security-Policy-Report-Only': "script-src: 'nonce-response-secret'" }
+            responseHeaders: { 'Content-Security-Policy-Report-Only': "script-src 'nonce-response-secret'" }
           })
           await wait()
 
@@ -9328,7 +9328,7 @@ describe('up.fragment', function() {
                 <script nonce="response-secret"></script>
               </div>
             `,
-            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-response-secret'" }
+            responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-response-secret'" }
           })
           await wait()
 
@@ -9355,7 +9355,7 @@ describe('up.fragment', function() {
                 <script nonce="html-secret"></script>
               </div>
             `,
-            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-response-secret'" }
+            responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-response-secret'" }
           })
           await wait()
 
@@ -9383,7 +9383,7 @@ describe('up.fragment', function() {
                 <script nonce="style-secret"></script>
               </div>
             `,
-            responseHeaders: { 'Content-Security-Policy': "style-src: 'nonce-style-secret'" }
+            responseHeaders: { 'Content-Security-Policy': "style-src 'nonce-style-secret'" }
           })
           await wait()
 
@@ -9410,7 +9410,7 @@ describe('up.fragment', function() {
                 <script></script>
               </div>
             `,
-            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-response-secret'" }
+            responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-response-secret'" }
           })
           await wait()
 
@@ -9450,7 +9450,7 @@ describe('up.fragment', function() {
                 </body>
               </html>
             `,
-            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-response-secret'" }
+            responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-response-secret'" }
           })
           await wait()
 
@@ -9485,7 +9485,7 @@ describe('up.fragment', function() {
             responseText: `
               <div class="target" callback="nonce-secret2 alert()">new text</div>
             `,
-            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'" }
+            responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-secret2'" }
           })
 
           await wait()
@@ -9505,7 +9505,7 @@ describe('up.fragment', function() {
             responseText: `
               <div class="target" callback="nonce-secret2 alert()">new text</div>
             `,
-            responseHeaders: { 'Content-Security-Policy-Report-Only': "script-src: 'nonce-secret2'" }
+            responseHeaders: { 'Content-Security-Policy-Report-Only': "script-src 'nonce-secret2'" }
           })
 
           await wait()
@@ -9524,7 +9524,7 @@ describe('up.fragment', function() {
             responseText: `
               <div class="target" callback="nonce-secret2 alert()">new text</div>
             `,
-            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'" }
+            responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-secret2'" }
           })
 
           await wait()
@@ -9550,7 +9550,7 @@ describe('up.fragment', function() {
           await wait()
 
           jasmine.respondWith({
-            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'" },
+            responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-secret2'" },
             responseText: `
               <html>
                 <head>
@@ -9586,7 +9586,7 @@ describe('up.fragment', function() {
             responseText: `
               <div class="target" callback="nonce-secret3 alert()">new text</div>
             `,
-            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2' 'self' 'nonce-secret3'" }
+            responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-secret2' 'self' 'nonce-secret3'" }
           })
 
           await wait()
@@ -9606,7 +9606,7 @@ describe('up.fragment', function() {
             responseText: `
               <div class="target" callback="nonce-wrong alert()">new text</div>
             `,
-            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'" }
+            responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-secret2'" }
           })
 
           await wait()
@@ -9626,7 +9626,7 @@ describe('up.fragment', function() {
             responseText: `
               <div class="target" callback="nonce-secret2 alert()">new text</div>
             `,
-            responseHeaders: { 'Content-Security-Policy': "style-src: 'nonce-secret2'" }
+            responseHeaders: { 'Content-Security-Policy': "style-src 'nonce-secret2'" }
           })
 
           await wait()
@@ -9646,7 +9646,7 @@ describe('up.fragment', function() {
             responseText: `
               <div class="target" callback="nonce-secret2 alert()">new text</div>
             `,
-            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'" }
+            responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-secret2'" }
           })
 
           await wait()
@@ -15803,7 +15803,7 @@ describe('up.fragment', function() {
 
           jasmine.respondWith({
             responseText: `<div id="keepable" up-keep="same-html"><script nonce="response-secret"></script></div>`,
-            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-response-secret'" }
+            responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-response-secret'" }
           })
           await wait()
 
@@ -15822,7 +15822,7 @@ describe('up.fragment', function() {
 
           jasmine.respondWith({
             responseText: `<input id="keepable" name="foo" up-keep="same-html" up-watch="nonce-response-secret foo()"></input>`,
-            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-response-secret'" }
+            responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-response-secret'" }
           })
           await wait()
 
@@ -15841,7 +15841,7 @@ describe('up.fragment', function() {
 
           jasmine.respondWith({
             responseText: `<a id="keepable" href="/path" up-keep="same-html" up-on-rendered="nonce-response-secret foo()" data-x="x" up-on-finished="nonce-response-secret bar()" data-y="y">text</a>`,
-            responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-response-secret'" }
+            responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-response-secret'" }
           })
           await wait()
 
