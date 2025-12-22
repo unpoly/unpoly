@@ -53,23 +53,24 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // This sets this.layer.
     this._createOverlay()
 
-    let result = new up.RenderResult({
-      layer: this.layer,
-      target: this.target,
-      renderOptions: this.options,
-    })
-
     // If our layer ends up being closed during rendering, we still want to render
     // [up-hungry][up-if-layer=any] elements on other layers.
-    let unbindClosing = this.layer.on('up:layer:accepting up:layer:dimissing', this._renderOtherLayers.bind(this))
+    let unbindClosing = this.layer.on('up:layer:accepting up:layer:dismissing', this._renderOtherLayers.bind(this))
     try {
-      this._renderOverlayContent(result)
-      this._renderOtherLayers(result)
+      let weavables = [
+        ...this._renderOverlayContent(),
+        ...this._renderOtherLayers(),
+      ]
+
+      return new up.RenderResult({
+        layer: this.layer,
+        target: this.target,
+        renderOptions: this.options,
+        weavables,
+      })
     } finally {
       unbindClosing()
     }
-
-    return result
   }
 
   _matchPostflight() {
@@ -114,7 +115,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     this.layer.setupHandlers()
   }
 
-  _renderOverlayContent(result) {
+  _renderOverlayContent() {
     // (1) Change history before compilation, so new fragments see the new location.
     // (2) Change history before checking { acceptLocation, dismissLocation }, so we check the overlay's location and not the parent layer's location.
     this._handleHistory()
@@ -143,6 +144,8 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
 
     // Remember where the element came from to support up.reload(element).
     this.setReloadAttrs({ newElement: this._content, source: this.options.source })
+
+
 
     result.fragments.push(this._content)
     result.finishers.push(() => this._compileLayer())

@@ -66,7 +66,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // [up-hungry][up-if-layer=any] elements on other layers.
     let unbindClosing = this.layer.on('up:layer:accepting up:layer:dismissing', this._renderOtherLayers.bind(this))
     try {
-      let phases = [
+      let weavables = [
         ...this._renderCurrentLayer(responseDoc),
         ...this._renderOtherLayers(responseDoc),
       ]
@@ -75,14 +75,14 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
         target: this._bestPreflightSelector(),
         layer: this.layer,
         renderOptions: this.options,
-        phases,
+        weavables,
       })
     } finally {
       unbindClosing()
     }
   }
 
-  _renderCurrentLayer(responseDoc, result) {
+  _renderCurrentLayer(responseDoc) {
     if (this._steps.length) {
       // Don't log this.target since that does not include hungry elements
       up.puts('up.render()', `Updating "${this._bestPreflightSelector()}" in ${this.layer}`)
@@ -141,15 +141,14 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // if any of these options cause the layer to close.
     this.handleLayerChangeRequests()
 
-    this.executeSteps({
+    return this.executeSteps({
       steps: this._steps,
       noneOptions: this.options,
       responseDoc,
-      result,
     })
   }
 
-  _renderOtherLayers(responseDoc, result) {
+  _renderOtherLayers(responseDoc) {
     // We execute steps on other layers first. If the render pass ends up closing this
     // layer (e.g. by reaching a close condition or X-Up-Accept-Layer) we want:
     //
@@ -157,10 +156,9 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // (2) ... to see updated hungry elements on other layers in onDismissed/onAccepted handlers.
     let otherLayerSteps = this._getHungrySteps().other
 
-    this.executeSteps({
+    return this.executeSteps({
       steps: otherLayerSteps,
       responseDoc,
-      result,
     })
   }
 

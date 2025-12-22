@@ -11,9 +11,8 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     this._noneOptions = options.noneOptions || {}
   }
 
-  execute(responseDoc, result) {
+  execute(responseDoc) {
     this.responseDoc = responseDoc
-    this.result = result
 
     // Fill in `step.newElement` unless it was already done by our caller.
     // This may throw up.CannotMatch for non-optional steps that don't match in `responseDoc`.
@@ -26,26 +25,18 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     // returns ':none' for empty steps
     // let targetForSteps = up.fragment.targetForSteps(this._steps)
 
-    // Group compilation and emission of up:fragment:inserted into a mutation block.
-    // This allows up.SelectorTracker to only sync once after the mutation, and
-    // ignore any events in between.
-
-    throw "this no longer covers compilation"
-
-    return up.fragment.mutate(() => {
-      return [
-        ...this._executeSteps(),
-        this._assertLayersAlive(),
-      ]
-      // let renderResult = new up.RenderResult({
-      //   layer: this._passRenderOptions.layer, // layer is looked up by FromContent#_expandIntoPlans()
-      //   target: targetForSteps,
-      //   renderOptions: this._passRenderOptions,
-      //   fragments: u.flatMap(results.toReversed(), 'newFragments'), // Since we reversed steps, restore fragment order
-      // })
-      //
-      // renderResult.finished = this._finish(u.map(results, 'postprocess'), renderResult)
-    })
+    return [
+      ...this._executeSteps(),
+      this._assertLayersAlive(),
+    ]
+    // let renderResult = new up.RenderResult({
+    //   layer: this._passRenderOptions.layer, // layer is looked up by FromContent#_expandIntoPlans()
+    //   target: targetForSteps,
+    //   renderOptions: this._passRenderOptions,
+    //   fragments: u.flatMap(results.toReversed(), 'newFragments'), // Since we reversed steps, restore fragment order
+    // })
+    //
+    // renderResult.finished = this._finish(u.map(results, 'postprocess'), renderResult)
   }
 
   _executeSteps() {

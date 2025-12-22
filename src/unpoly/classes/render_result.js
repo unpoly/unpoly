@@ -112,7 +112,7 @@ up.RenderResult = class RenderResult {
     this.layer = layer
     this.target = target
     this.renderOptions = renderOptions
-    this.weavables = weavables || []
+    this._collapseWeavables([weavables, ...(renderOptions.extraWeavables || [])])
   }
 
   /*-
@@ -175,18 +175,14 @@ up.RenderResult = class RenderResult {
   //   this.verifyers.push(verifyer)
   // }
 
-  _getWeavablePhase(phase) {
-    return u.compact(u.map(this.weavables, phase))
+  _collapseWeavables(weavables) {
+    this.fragments = this._getWeavablePhase(weavables, 'value').flat()
+    this.finished = this._finish(weavables)
   }
 
-  produce() {
-    this.fragments = this._getWeavablePhase('value').flat()
-    this.finished = this._finish()
-  }
-
-  async _finish() {
-    let finishFns = this._getWeavablePhase('finish')
-    let verifyFns = this._getWeavablePhase('verify')
+  async _finish(weavables) {
+    let finishFns = this._getWeavablePhase(weavables, 'finish')
+    let verifyFns = this._getWeavablePhase(weavables, 'verify')
 
     let finishedResult = this
     await Promise.all(u.callAll(finishFns, finishedResult))
@@ -196,6 +192,10 @@ up.RenderResult = class RenderResult {
       finishedResult = verifyerResult || finishedResult
     }
     return finishedResult
+  }
+
+  _getWeavablePhase(weavables, phase) {
+    return u.compact(u.map(weavables, phase))
   }
 
   // emitAsEvent() {

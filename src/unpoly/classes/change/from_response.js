@@ -63,12 +63,17 @@ up.Change.FromResponse = class FromResponse extends up.Change {
     // will be passed as a third argument to compilers.
     finalRenderOptions.meta = this._compilerPassMeta()
 
-    let result = new up.Change.FromContent(finalRenderOptions).execute()
+    finalRenderOptions.extraWeavables = this._revalidateWeavables(finalRenderOptions)
 
-    result.verifyers.push((result) => this._revalidate(result, finalRenderOptions))
+    return new up.Change.FromContent(finalRenderOptions).execute()
+  }
 
-    // result.finished = this.finish(result, finalRenderOptions)
-    return result
+  async _revalidateWeavables(originalRenderOptions) {
+    if (up.fragment.shouldRevalidate(this._request, this._response, originalRenderOptions)) {
+      return [{
+        verify: (result) => this._revalidate(result, originalRenderOptions)
+      }]
+    }
   }
 
   async _revalidate(renderResult, originalRenderOptions) {
