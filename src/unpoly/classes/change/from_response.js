@@ -68,7 +68,7 @@ up.Change.FromResponse = class FromResponse extends up.Change {
     return new up.Change.FromContent(finalRenderOptions).execute()
   }
 
-  async _revalidateWeavables(originalRenderOptions) {
+  _revalidateWeavables(originalRenderOptions) {
     if (up.fragment.shouldRevalidate(this._request, this._response, originalRenderOptions)) {
       return [{
         verify: (result) => this._revalidate(result, originalRenderOptions)

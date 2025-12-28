@@ -101,8 +101,9 @@ up.Change.Addition = class Addition extends up.Change {
     return { response: this._response }
   }
 
-  executeSteps({ steps, responseDoc, noneOptions, passRenderOptions = this.options }) {
-    return new up.Change.UpdateSteps({ steps, noneOptions, passRenderOptions }).execute(responseDoc)
+  executeSteps({ steps, responseDoc, noneOptions }) {
+    console.debug("Calling UpdateSteps with responseDoc: %o", responseDoc)
+    return new up.Change.UpdateSteps({ steps, noneOptions }).execute(responseDoc)
   }
 
 }

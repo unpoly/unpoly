@@ -2042,9 +2042,9 @@ up.util = (function() {
 
   function buildMemoizeCacheEntry(oldImpl, self, args) {
     try {
-      return { value: oldImpl.apply(self, args) }
-    } catch (e) {
-      return { error: e }
+      return { args, value: oldImpl.apply(self, args) }
+    } catch (error) {
+      return { args, error }
     }
   }
 
@@ -2081,12 +2081,18 @@ up.util = (function() {
       let originalDescriptor = Object.getOwnPropertyDescriptor(object, prop)
 
       let oldImpl = originalDescriptor.value
+      let cache = []
 
+      // TODO: Do we really distinguish by args anywhere?
       let cachingImpl = function(...args) {
-        let cache = this[`__${prop}MemoizeCache`] ||= {}
-        let cacheKey = JSON.stringify(args)
-        cache[cacheKey] ||= buildMemoizeCacheEntry(oldImpl, this, args)
-        return useMemoizeCacheEntry(cache[cacheKey])
+
+        let cacheEntry = cache.find((entry) => isEqual(entry.args, args))
+        if (!cacheEntry) {
+          cacheEntry = buildMemoizeCacheEntry(oldImpl, this, args)
+          cache.push(cacheEntry)
+        }
+
+        return useMemoizeCacheEntry(cacheEntry)
       }
 
       object[prop] = cachingImpl

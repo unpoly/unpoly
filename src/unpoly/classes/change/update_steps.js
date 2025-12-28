@@ -7,7 +7,6 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     super(options)
 
     this._steps = u.copy(u.assert(options.steps)) // we mutate it below
-    this._passRenderOptions = u.assert(options.passRenderOptions)
     this._noneOptions = options.noneOptions || {}
   }
 

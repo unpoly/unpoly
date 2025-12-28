@@ -58,7 +58,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     let unbindClosing = this.layer.on('up:layer:accepting up:layer:dismissing', this._renderOtherLayers.bind(this))
     try {
       let weavables = [
-        ...this._renderOverlayContent(),
+        this._renderOverlayContent(),
         ...this._renderOtherLayers(),
       ]
 

@@ -77,8 +77,6 @@ up.RenderJob = class RenderJob {
     // (2) No fragment could be matched (return value is up.CannotMatch)
     // (3) We're preloading (early return value is up.Request)
     if (result instanceof up.RenderResult) {
-      result.produce()
-
       let { onRendered, onFinished } = result.renderOptions
 
       // We call result.renderOptions.onRendered() instead of this.renderOptions.onRendered()
@@ -145,11 +143,12 @@ up.RenderJob = class RenderJob {
   async _awaitFinished() {
     try {
       let result = await this._rendered
-      return await result.finish()
+      return await result.finished
     } catch (error) {
       if (error instanceof up.RenderResult) {
-        throw await error.finish()
+        throw await error.finished
       } else {
+        // Fatal error, not a failure result.
         throw error
       }
     }
