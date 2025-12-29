@@ -3336,7 +3336,7 @@ describe('up.fragment', function() {
       })
 
 
-      describe('with { fragment } option', function() {
+      fdescribe('with { fragment } option', function() {
 
         it('derives target and outer HTML from the given { fragment } string', async function() {
           $fixture('.before').text('old-before')

@@ -45,14 +45,17 @@ up.util = (function() {
   @function up.util.memoize
   @internal
   */
-  function memoize(func) {
-    let cachedValue, cached
+  function memoize(func, cacheProp) {
+    let cache = {}
+
     return function(...args) {
-      if (cached) {
-        return cachedValue
-      } else {
-        cached = true
-        return cachedValue = func.apply(this, args)
+      if (cacheProp) cache = (this[cacheProp] ||= {})
+      if (cache.value) return cache.value[0]
+      if (cache.error) throw cache.error
+      try {
+        return (cache.value = [func.apply(this, args)])[0]
+      } catch (error) {
+        throw (cache.error = error)
       }
     }
   }
@@ -2032,21 +2035,21 @@ up.util = (function() {
     }
   }
 
-  function useMemoizeCacheEntry(cacheEntry) {
-    if (cacheEntry.error) {
-      throw cacheEntry.error
-    } else {
-      return cacheEntry.value
-    }
-  }
-
-  function buildMemoizeCacheEntry(oldImpl, self, args) {
-    try {
-      return { args, value: oldImpl.apply(self, args) }
-    } catch (error) {
-      return { args, error }
-    }
-  }
+  // function useMemoizeCacheEntry(cacheEntry) {
+  //   if (cacheEntry.error) {
+  //     throw cacheEntry.error
+  //   } else {
+  //     return cacheEntry.value
+  //   }
+  // }
+  //
+  // function buildMemoizeCacheEntry(oldImpl, self, args) {
+  //   try {
+  //     return { args, value: oldImpl.apply(self, args) }
+  //   } catch (error) {
+  //     return { args, error }
+  //   }
+  // }
 
   // function memoizeMethodOrGetter(object, propLiteral) {
   //   // We're accepting the property names as the keys of an object. We don't care about the values.
@@ -2074,30 +2077,44 @@ up.util = (function() {
   //   }
   // }
 
+  // TODO: Test this method
   function memoizeMethod(object, propLiteral) {
     // We're accepting the property names as the keys of an object. We don't care about the values.
     // We do this so that object's keys go through the same property mangling as the rest of the code.
     for (let prop in propLiteral) {
+      // TODO: Why can't we just get the old prop using object[prop] ?
       let originalDescriptor = Object.getOwnPropertyDescriptor(object, prop)
-
       let oldImpl = originalDescriptor.value
-      let cache = []
-
-      // TODO: Do we really distinguish by args anywhere?
-      let cachingImpl = function(...args) {
-
-        let cacheEntry = cache.find((entry) => isEqual(entry.args, args))
-        if (!cacheEntry) {
-          cacheEntry = buildMemoizeCacheEntry(oldImpl, this, args)
-          cache.push(cacheEntry)
-        }
-
-        return useMemoizeCacheEntry(cacheEntry)
-      }
-
-      object[prop] = cachingImpl
+      let memoizedImpl = memoize(oldImpl, `__${prop}MemoizeCache`)
+      object[prop] = memoizedImpl
     }
   }
+  //
+  // // TODO: Test this method
+  // function memoizeMethod(object, propLiteral) {
+  //   // We're accepting the property names as the keys of an object. We don't care about the values.
+  //   // We do this so that object's keys go through the same property mangling as the rest of the code.
+  //   for (let prop in propLiteral) {
+  //     let originalDescriptor = Object.getOwnPropertyDescriptor(object, prop)
+  //
+  //     let oldImpl = originalDescriptor.value
+  //     let cache = []
+  //
+  //     // TODO: Do we really distinguish by args anywhere?
+  //     let cachingImpl = function(...args) {
+  //
+  //       let cacheEntry = cache.find((entry) => isEqual(entry.args, args))
+  //       if (!cacheEntry) {
+  //         cacheEntry = buildMemoizeCacheEntry(oldImpl, this, args)
+  //         cache.push(cacheEntry)
+  //       }
+  //
+  //       return useMemoizeCacheEntry(cacheEntry)
+  //     }
+  //
+  //     object[prop] = cachingImpl
+  //   }
+  // }
 
   function safeStringifyJSON(value) {
     let json = JSON.stringify(value)
