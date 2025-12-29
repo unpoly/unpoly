@@ -1992,7 +1992,7 @@ describe('up.util', () => {
 //        obj = up.util.deepMerge(obj, other)
 //        expect(obj).toEqual { a: ['3', '4'] }
 
-    fdescribe('up.util.memoize()', function() {
+    describe('up.util.memoize()', function() {
 
       it('returns a function that calls the memoized function', function() {
         const fun = () => 'foo'
@@ -2587,7 +2587,7 @@ describe('up.util', () => {
       })
     })
 
-    fdescribe('up.util.memoizeMethod()', function() {
+    describe('up.util.memoizeMethod()', function() {
 
       it("caches a function property's return value", function() {
         const spy = jasmine.createSpy('method').and.returnValue('return value')

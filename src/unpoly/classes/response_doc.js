@@ -171,7 +171,9 @@ up.ResponseDoc = class ResponseDoc {
   commitSteps(steps) {
     // If multiple steps want to match the same new element, the first step will remain in the left.
     // This will happen when multiple layers have the same hungry element with [up-if-layer=any].
-    return steps.filter((step) => this.commitElement(step.newElement))
+    return steps.filter((step) => {
+      return step.committed = this.commitElement(step.newElement)
+    })
   }
 
   _trySelectStep(step) {

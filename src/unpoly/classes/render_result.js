@@ -108,11 +108,11 @@ up.RenderResult = class RenderResult {
   ```
   */
 
-  constructor({ layer, target, renderOptions, weavables } = {}) {
+  constructor({ layer, target, renderOptions = {}, weavables } = {}) {
     this.layer = layer
     this.target = target
     this.renderOptions = renderOptions
-    this._collapseWeavables([...weavables, ...(renderOptions.extraWeavables || [])])
+    this._collapseWeavables(weavables, renderOptions.extraWeavables)
   }
 
   /*-
@@ -175,7 +175,8 @@ up.RenderResult = class RenderResult {
   //   this.verifyers.push(verifyer)
   // }
 
-  _collapseWeavables(weavables) {
+  _collapseWeavables(...weavableLists) {
+    let weavables = u.flatten(u.compact(weavableLists))
     this.fragments = this._getWeavablePhase(weavables, 'value').flat()
     this.finished = this._finish(weavables)
   }

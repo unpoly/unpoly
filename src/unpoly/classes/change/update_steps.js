@@ -91,7 +91,6 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     }]
   }
 
-
   _executeKeepEverythingStep(step, keepPlan) {
     if (!keepPlan) return
 

@@ -69,11 +69,9 @@ up.Change.FromResponse = class FromResponse extends up.Change {
   }
 
   _revalidateWeavables(originalRenderOptions) {
-    if (up.fragment.shouldRevalidate(this._request, this._response, originalRenderOptions)) {
-      return [{
-        verify: (result) => this._revalidate(result, originalRenderOptions)
-      }]
-    }
+    return [{
+      verify: (result) => this._revalidate(result, originalRenderOptions)
+    }]
   }
 
   async _revalidate(renderResult, originalRenderOptions) {
@@ -88,6 +86,8 @@ up.Change.FromResponse = class FromResponse extends up.Change {
     // It may be a fallback target. It is always defined.
     // It never contains ':before' or ':after'.
     let effectiveTarget = renderResult.target
+
+    console.debug("[_revalidate] effectiveTarget = %o", effectiveTarget)
 
     if (/:(before|after)/.test(inputTarget)) {
       up.warn('up.render()', 'Cannot revalidate cache when prepending/appending (target %s)', inputTarget)

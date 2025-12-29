@@ -434,7 +434,7 @@ up.motion = (function() {
   @stable
   */
   function morph(...args) {
-    return weavableMorph(...args).postprocess()
+    return weavableMorph(...args).finish()
   }
 
   function weavableMorph(oldElement, newElement, transitionObject, options) {
@@ -460,7 +460,7 @@ up.motion = (function() {
       // (2) don't want to create additional absolutized bounds
       if (motionController.isActive(oldElement) && (options.trackMotion === false)) {
         return {
-          postprocess: () => transitionFn(oldElement, newElement, options)
+          finish: () => transitionFn(oldElement, newElement, options)
         }
       }
 

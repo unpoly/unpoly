@@ -2622,8 +2622,8 @@ up.fragment = (function() {
     return request.fromCache && u.evalAutoOption(options.revalidate, config.autoRevalidate, response)
   }
 
-  function targetForSteps(steps) {
-    let bestSteps = steps.filter((step) => !step.maybe || step.oldElement?.isConnected)
+  function targetForSteps(steps, filterFn = () => true) {
+    let bestSteps = steps.filter(filterFn)
     let selectors = u.map(bestSteps, 'selector')
     return selectors.join(', ') || ':none'
   }

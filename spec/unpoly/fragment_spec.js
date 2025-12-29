@@ -731,7 +731,7 @@ describe('up.fragment', function() {
         expect(document.querySelector('#target').getAttribute('foo')).toBe(attrValue)
       })
 
-      fdescribe('return value', function() {
+      describe('return value', function() {
 
         it('returns an up.RenderJob that describes the render options', function() {
           fixture('.target')
@@ -774,7 +774,7 @@ describe('up.fragment', function() {
       })
 
 
-      fdescribe('compilation', function() {
+      describe('compilation', function() {
 
         it('runs compilers for matching elements in the new content', async function() {
           const childCompiler = jasmine.createSpy('compiler')
@@ -1140,7 +1140,7 @@ describe('up.fragment', function() {
 
       })
 
-      fdescribe('with { url } option', function() {
+      describe('with { url } option', function() {
 
         it('replaces the given selector with the same selector from a freshly fetched page', async function() {
           fixture('.before', { text: 'old-before' })
@@ -3215,7 +3215,7 @@ describe('up.fragment', function() {
         })
       })
 
-      fdescribe('with { document } option', function() {
+      describe('with { document } option', function() {
 
         it('replaces the given selector with a matching element that has the outer HTML from the given { document } string', async function() {
           $fixture('.before').text('old-before')
@@ -3336,7 +3336,7 @@ describe('up.fragment', function() {
       })
 
 
-      fdescribe('with { fragment } option', function() {
+      describe('with { fragment } option', function() {
 
         it('derives target and outer HTML from the given { fragment } string', async function() {
           $fixture('.before').text('old-before')
@@ -3586,7 +3586,7 @@ describe('up.fragment', function() {
         })
       })
 
-      fdescribe('choice of target', function() {
+      describe('choice of target', function() {
 
         it('uses a selector given as { target } option', function() {
           const one = fixture('.one', { text: 'old one' })
