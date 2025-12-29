@@ -39,11 +39,9 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
   }
 
   execute(responseDoc, onApplicable) {
-    this.responseDoc = responseDoc
-
     // Find our target in the responseDoc.
     // If it cannot be matched, up.CannotMatch is thrown and up.Change.FromContent will try the next plan.
-    this._matchPostflight()
+    this._matchPostflight(responseDoc)
 
     // If our steps can be matched, up.Change.FromContent wants a chance to some final
     // preparations before we start rendering.
@@ -55,11 +53,13 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
 
     // If our layer ends up being closed during rendering, we still want to render
     // [up-hungry][up-if-layer=any] elements on other layers.
-    let unbindClosing = this.layer.on('up:layer:accepting up:layer:dismissing', this._renderOtherLayers.bind(this))
+    let renderOtherLayersOnce = u.memoize(() => this._renderOtherLayers(responseDoc))
+    let unbindClosing = this.layer.on('up:layer:accepting up:layer:dismissing', renderOtherLayersOnce)
+
     try {
       let weavables = [
-        this._renderOverlayContent(),
-        ...this._renderOtherLayers(),
+        ...this._renderOverlayContent(responseDoc),
+        ...renderOtherLayersOnce(),
       ]
 
       return new up.RenderResult({
@@ -73,11 +73,11 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     }
   }
 
-  _matchPostflight() {
+  _matchPostflight(responseDoc) {
     if (this.target === ':none') {
       this._content = document.createElement('up-none')
     } else {
-      this._content = this.responseDoc.select(this.target)
+      this._content = responseDoc.select(this.target)
     }
 
     if (!this._content || !this._baseLayer.isAlive()) {
@@ -115,7 +115,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     this.layer.setupHandlers()
   }
 
-  _renderOverlayContent() {
+  _renderOverlayContent(responseDoc) {
     // (1) Change history before compilation, so new fragments see the new location.
     // (2) Change history before checking { acceptLocation, dismissLocation }, so we check the overlay's location and not the parent layer's location.
     this._handleHistory()
@@ -132,7 +132,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     this.handleLayerChangeRequests()
 
     // Preprocess content element before insertion.
-    this.responseDoc.commitElement(this._content)
+    responseDoc.commitElement(this._content)
 
     // Only if handleLayerChangeRequests() does not abort, we insert the content in the overlay.
     // If it does abort we want to use the content for [up-hungry][up-if-layer=any] elements
@@ -140,12 +140,12 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     this.layer.setContent(this._content)
 
     // Adopt CSP nonces and fix broken script tags
-    this.responseDoc.finalizeElement(this._content)
+    responseDoc.finalizeElement(this._content)
 
     // Remember where the element came from to support up.reload(element).
     this.setReloadAttrs({ newElement: this._content, source: this.options.source })
 
-    return {
+    return [{
       value: [this._content],
       finish: async () => {
         // Start compilation in the sync phase of postprocessing.
@@ -174,21 +174,17 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
       verify: () => {
         this.layer.assertAlive()
       }
-    }
+    }]
   }
 
-  _renderOtherLayers() {
+  _renderOtherLayers(responseDoc) {
     // We execute steps on other layers first. If the render pass ends up closing this
     // layer (e.g. by reaching a close condition or X-Up-Accept-Layer) we want:
     //
     // (1) ... to use the discarded content for hungry elements on other layers that have [up-if-layer=any].
     // (2) ... to see updated hungry elements on other layers in onDismissed/onAccepted handlers.
-    let otherLayerSteps = this._getHungrySteps().other
-
-    return this.executeSteps({
-      steps: otherLayerSteps,
-      responseDoc: this.responseDoc,
-    })
+    let steps = this._getHungrySteps().other
+    return this.executeSteps({ steps, responseDoc })
   }
 
   async _compileLayer() {
@@ -285,12 +281,6 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
       layer: this.layer,
       history: this.layer.history,
     }
-  }
-
-  static {
-    u.memoizeMethod(this.prototype, {
-      _renderOtherLayers: true,
-    })
   }
 
 }

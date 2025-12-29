@@ -731,7 +731,7 @@ describe('up.fragment', function() {
         expect(document.querySelector('#target').getAttribute('foo')).toBe(attrValue)
       })
 
-      describe('return value', function() {
+      fdescribe('return value', function() {
 
         it('returns an up.RenderJob that describes the render options', function() {
           fixture('.target')
@@ -774,7 +774,7 @@ describe('up.fragment', function() {
       })
 
 
-      describe('compilation', function() {
+      fdescribe('compilation', function() {
 
         it('runs compilers for matching elements in the new content', async function() {
           const childCompiler = jasmine.createSpy('compiler')
@@ -1140,7 +1140,7 @@ describe('up.fragment', function() {
 
       })
 
-      describe('with { url } option', function() {
+      fdescribe('with { url } option', function() {
 
         it('replaces the given selector with the same selector from a freshly fetched page', async function() {
           fixture('.before', { text: 'old-before' })
@@ -2508,7 +2508,7 @@ describe('up.fragment', function() {
             expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value: 123 }))
           })
 
-          it('makes the discarded response available to up:layer:accepted listeners as a { response } property 2', async function() {
+          it('makes the discarded response available to up:layer:accepted listeners as a { response } property', async function() {
             const callback = jasmine.createSpy('onAccepted callback')
             up.layer.open({ onDismissed: callback, target: '.target', content: 'Initial content' })
 
@@ -3215,7 +3215,7 @@ describe('up.fragment', function() {
         })
       })
 
-      describe('with { document } option', function() {
+      fdescribe('with { document } option', function() {
 
         it('replaces the given selector with a matching element that has the outer HTML from the given { document } string', async function() {
           $fixture('.before').text('old-before')
@@ -3586,7 +3586,7 @@ describe('up.fragment', function() {
         })
       })
 
-      describe('choice of target', function() {
+      fdescribe('choice of target', function() {
 
         it('uses a selector given as { target } option', function() {
           const one = fixture('.one', { text: 'old one' })

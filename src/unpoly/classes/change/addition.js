@@ -102,7 +102,6 @@ up.Change.Addition = class Addition extends up.Change {
   }
 
   executeSteps({ steps, responseDoc, noneOptions }) {
-    console.debug("Calling UpdateSteps with responseDoc: %o", responseDoc)
     return new up.Change.UpdateSteps({ steps, noneOptions }).execute(responseDoc)
   }
 

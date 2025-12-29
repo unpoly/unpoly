@@ -64,11 +64,12 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
     // If our layer ends up being closed during rendering, we still want to render
     // [up-hungry][up-if-layer=any] elements on other layers.
-    let unbindClosing = this.layer.on('up:layer:accepting up:layer:dismissing', this._renderOtherLayers.bind(this))
+    let renderOtherLayersOnce = u.memoize(() => this._renderOtherLayers(responseDoc))
+    let unbindClosing = this.layer.on('up:layer:accepting up:layer:dismissing', renderOtherLayersOnce)
     try {
       let weavables = [
         ...this._renderCurrentLayer(responseDoc),
-        ...this._renderOtherLayers(responseDoc),
+        ...renderOtherLayersOnce(),
       ]
 
       return new up.RenderResult({
@@ -253,7 +254,6 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       _matchOldElements: true,
       _hasHistory: true,
       _getHungrySteps: true,
-      _renderOtherLayers: true,
     })
   }
 

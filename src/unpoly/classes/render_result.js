@@ -112,10 +112,6 @@ up.RenderResult = class RenderResult {
     this.layer = layer
     this.target = target
     this.renderOptions = renderOptions
-
-    console.debug("[ctr] opts.extraWeavables is %o", renderOptions.extraWeavables)
-    console.debug("[ctr] expression is %o", (renderOptions.extraWeavables || []))
-
     this._collapseWeavables([...weavables, ...(renderOptions.extraWeavables || [])])
   }
 
