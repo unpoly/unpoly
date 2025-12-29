@@ -2204,15 +2204,15 @@ up.util = (function() {
   // }
 
   function scanFunctions(...values) {
-    return values.flat().filter(isFunction)
+    return values.flat(2).filter(isFunction)
   }
 
   function cleaner(order = 'lifo') {
     let fns = []
 
     let track = function(values, transform) {
-      values = scanFunctions(...values).map(transform)
-      fns.push(...scanFunctions(...values))
+      values = scanFunctions(values).map(transform)
+      fns.push(...scanFunctions(values))
     }
 
     let api = function(...values) {

@@ -1160,6 +1160,13 @@ describe('up.util', () => {
         expect(values).toEqual(['one', 'two', 'three'])
       })
 
+      it('returns an array of all return values', function() {
+        const one = () => 1
+        const two = () => 2
+        const sequence = up.util.sequence(one, two)
+        expect(sequence()).toEqual([1, 2])
+      })
+
     })
 
     describe('up.util.timer', function() {
