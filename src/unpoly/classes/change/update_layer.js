@@ -35,12 +35,9 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     this._matchPreflight()
 
     const isProbable = (step) => !step.maybe || step.oldElement?.isConnected
-    return up.fragment.targetForSteps(this._steps, isProbable)
-  }
-
-  _renderedSelector() {
-    const isCommitted = (step) => step.committed
-    return up.fragment.targetForSteps(this._steps, isCommitted)
+    let bestSteps = this._steps.filter(isProbable)
+    let selectors = u.map(bestSteps, 'selector')
+    return selectors.join(', ') || ':none'
   }
 
   _getFragments() {
@@ -72,12 +69,8 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
         ...renderOtherLayersOnce(),
       ]
 
-      console.debug("[UpdateLayer#execute] Steps are %o", this._steps)
-      console.debug("[UpdateLayer#execute] result target is %o", this._renderedSelector())
-      // let targetForSteps = up.fragment.targetForSteps(this._steps)
-
       return new up.RenderResult({
-        target: this._renderedSelector(),
+        target: this.target,
         layer: this.layer,
         renderOptions: this.options,
         weavables,

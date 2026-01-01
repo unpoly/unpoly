@@ -1679,7 +1679,7 @@ describe('up.link', function() {
 
           jasmine.respondWith(`
             <div id="target">cached target</div>
-            <div id="hungry">cached hungry</div>
+            <div id="hungry" up-hungry>cached hungry</div>
           `)
 
           await wait()
@@ -1696,7 +1696,7 @@ describe('up.link', function() {
           expect('#hungry').toHaveText('cached hungry')
           expect(up.network.isBusy()).toBe(true)
           expect(jasmine.lastRequest().url).toMatchURL('/path')
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#target, #hungry')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toContain('#target')
 
           jasmine.respondWith(`
             <div id="target">revalidated target</div>

@@ -2622,12 +2622,6 @@ up.fragment = (function() {
     return request.fromCache && u.evalAutoOption(options.revalidate, config.autoRevalidate, response)
   }
 
-  function targetForSteps(steps, filterFn = () => true) {
-    let bestSteps = steps.filter(filterFn)
-    let selectors = u.map(bestSteps, 'selector')
-    return selectors.join(', ') || ':none'
-  }
-
   function isContainedByRivalStep(steps, candidateStep) {
     return u.some(steps, function(rivalStep) {
       return (rivalStep !== candidateStep) &&
@@ -3193,7 +3187,6 @@ up.fragment = (function() {
     parseTargetSteps,
     isAlive,
     isNotDestroying,
-    targetForSteps,
     compressNestedSteps,
     containsMainPseudo,
     insertTemp,
