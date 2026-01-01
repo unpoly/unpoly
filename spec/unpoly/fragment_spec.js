@@ -741,7 +741,7 @@ describe('up.fragment', function() {
           expect(job.renderOptions.content).toBe('new text')
         })
 
-        it('returns a promise for an up.RenderResult describing the updated fragments and layer', async function() {
+        it('resolves to an up.RenderResult describing the updated fragments and layer', async function() {
           fixture('.one', { text: 'old one' })
           fixture('.two', { text: 'old two' })
           fixture('.three', { text: 'old three' })
@@ -771,8 +771,20 @@ describe('up.fragment', function() {
             }),
           }))
         })
-      })
 
+        it('resolves to an up.RenderResult describing the actual target and layer used, when multiple values could match', async function() {
+          let mainHTML = (text) => `<div id="page" up-main>${text}</div>`
+          htmlFixture(mainHTML('old main'))
+
+          const job = up.render({ target: ':main', layer: 'any', document: mainHTML('new main') })
+
+          await expectAsync(job).toBeResolvedTo(jasmine.objectContaining({
+            target: "[up-main='']",
+            layer: up.layer.root,
+          }))
+        })
+
+      })
 
       describe('compilation', function() {
 
@@ -11893,44 +11905,105 @@ describe('up.fragment', function() {
             expect('#bar').toHaveText('verified bar')
           })
 
-          it('reloads hungry targets that piggy-backed on the initial request when an { origin } is given (bugfix)', async function() {
-            fixture('#foo', { text: 'initial foo' })
-            fixture('#bar[up-hungry]', { text: 'initial bar' })
-            const origin = fixture('#origin', { text: 'origin' })
+          describe('revalidation of hungry fragments', function() {
 
-            up.request('/multi-cached-path', { cache: true })
+            it('reloads hungry fragments when an { origin } is given (bugfix)', async function() {
+              let html = (labelPrefix) => `
+                <div id="foo">${labelPrefix} foo</div>
+                <div id="bar" up-hungry>${labelPrefix} bar</div>
+              `
 
-            await wait()
+              htmlFixtureList(html('initial'))
+              const origin = fixture('#origin', { text: 'origin' })
 
-            jasmine.respondWith(`
-              <div id="foo">cached foo</div>
-              <div id="bar">cached bar</div>
-            `)
+              up.request('/multi-cached-path', { cache: true })
+              await wait()
 
-            await wait()
+              jasmine.respondWith(html('cached'))
+              await wait()
 
-            expect({ url: '/multi-cached-path' }).toBeCached()
+              expect({ url: '/multi-cached-path' }).toBeCached()
 
-            up.render('#foo', { url: '/multi-cached-path', cache: true, revalidate: true, origin })
+              up.render('#foo', { url: '/multi-cached-path', cache: true, revalidate: true, origin })
+              await wait()
 
-            await wait()
+              expect('#foo').toHaveText('cached foo')
+              expect('#bar').toHaveText('cached bar')
+              expect(up.network.isBusy()).toBe(true)
+              expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toContain('#foo')
 
-            expect('#foo').toHaveText('cached foo')
-            expect('#bar').toHaveText('cached bar')
+              jasmine.respondWith(html('verified'))
+              await wait()
 
-            expect(up.network.isBusy()).toBe(true)
-            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#foo, #bar')
+              expect('#foo').toHaveText('verified foo')
+              expect('#bar').toHaveText('verified bar')
+              expect(up.network.isBusy()).toBe(false)
+            })
 
-            jasmine.respondWith(`
-              <div id="foo">verified foo</div>
-              <div id="bar">verified bar</div>
-            `)
+            it('reloads hungry fragments on another layer', async function() {
+              let hungryHTML = (labelPrefix) => `
+                <div id="hungry" up-hungry up-if-layer="any">${labelPrefix} hungry</div>
+              `
 
-            await wait()
+              let overlayHTML = (labelPrefix) => `
+                <div id="overlay">${labelPrefix} overlay</div>
+              `
 
-            expect(up.network.isBusy()).toBe(false)
-            expect('#foo').toHaveText('verified foo')
-            expect('#bar').toHaveText('verified bar')
+              // Root only has the hungry
+              htmlFixture(hungryHTML('initial'))
+
+              // Initial overlay is rendered without the cache being involved
+              await up.layer.open({ fragment: overlayHTML('initial')  })
+
+              await jasmine.populateCache('/overlay2', hungryHTML('cached') + overlayHTML('cached'))
+              up.cache.expire()
+
+              up.render('#overlay', { layer: 'new', url: '/overlay2', cache: true, revalidate: true })
+              await wait()
+
+              expect(up.fragment.get('#hungry', { layer: 'root' })).toHaveText('cached hungry')
+              expect(up.fragment.get('#overlay', { layer: 'overlay' })).toHaveText('cached overlay')
+              expect(up.network.isBusy()).toBe(true)
+              expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toContain('#overlay')
+
+              jasmine.respondWith(hungryHTML('verified') + overlayHTML('verified'))
+              await wait()
+
+              expect(up.fragment.get('#hungry', { layer: 'root' })).toHaveText('verified hungry')
+              expect(up.fragment.get('#overlay', { layer: 'overlay' })).toHaveText('verified overlay')
+              expect(up.network.isBusy()).toBe(false)
+            })
+
+            it('reloads hungry fragments on another layer when opening a new layer', async function() {
+              let hungryHTML = (labelPrefix) => `
+                <div id="hungry" up-hungry up-if-layer="any">${labelPrefix} hungry</div>
+              `
+
+              let overlayHTML = (labelPrefix) => `
+                <div id="overlay">${labelPrefix} overlay</div>
+              `
+
+              // Root only has the hungry
+              htmlFixture(hungryHTML('initial'))
+
+              await jasmine.populateCache('/overlay', hungryHTML('cached') + overlayHTML('cached'))
+
+              up.render('#overlay', { layer: 'new', url: '/overlay', cache: true, revalidate: true })
+              await wait()
+
+              expect(up.fragment.get('#hungry', { layer: 'root' })).toHaveText('cached hungry')
+              expect(up.fragment.get('#overlay', { layer: 'overlay' })).toHaveText('cached overlay')
+              expect(up.network.isBusy()).toBe(true)
+              expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toContain('#overlay')
+
+              jasmine.respondWith(hungryHTML('verified') + overlayHTML('verified'))
+              await wait()
+
+              expect(up.fragment.get('#hungry', { layer: 'root' })).toHaveText('verified hungry')
+              expect(up.fragment.get('#overlay', { layer: 'overlay' })).toHaveText('verified overlay')
+              expect(up.network.isBusy()).toBe(false)
+            })
+
           })
 
           it('does not verify a fragment rendered from a recent cached response with { revalidate: "auto" }', async function() {

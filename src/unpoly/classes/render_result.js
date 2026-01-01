@@ -35,34 +35,23 @@ up.RenderResult = class RenderResult {
   */
 
   /*-
-  The effective [target selector](/targeting-fragments) for the rendered fragments.
+  The [target selector](/targeting-fragments) for the rendered fragments.
 
-  ## Matches the actual fragments
-
-  Note that this property an exact target the for the [fragments that were rendered](/up.RenderResult.prototype.fragments).
-  This may differ from the initial render options.
-
-  For example, if our original render options contained an optional selector with `:maybe`,
-  and that selector didn't match, it is omitted from the `result.target`:
+  When the given target contains an abstract selector like `:main` or `:layer`,
+  this property describes the specific selector that matched:
 
   ```js
-  let result = await up.render({ target: '#foo, #bar:maybe' })
-  result.renderOptions // result: "#foo, #bar:maybe"
-  result.target        // result: "#foo"
+  let result = await up.render({ target: ':main' })
+  result.renderOptions.target // result: ":main"
+  result.target               // result: "[up-main='']"
   ```
 
   If any `[up-hungry]` elements were added to the render pass, they
-  are included in `result.target`, although they never explicitly mentioned in our render options:
-
-  ```js
-  let result = await up.render({ target: '#foo' })
-  result.renderOptions // result: "#foo"
-  result.target        // result: "#foo, #hungry"
-  ```
+  are *not* included in `result.target`.
 
   @property up.RenderResult#target
   @param {string} target
-  @stable
+  @experimental
   */
 
   /*-

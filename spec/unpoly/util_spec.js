@@ -1138,7 +1138,7 @@ describe('up.util', () => {
         expect(values).toEqual(['one', 'two', 'three'])
       })
 
-      it('combines multiple function args into a single function', function() {
+      it('combines multiple function varargs into a single function', function() {
         const values = []
         const one = () => values.push('one')
         const two = () => values.push('two')
