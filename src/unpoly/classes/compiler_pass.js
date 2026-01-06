@@ -19,8 +19,8 @@ up.CompilerPass = class CompilerPass {
 
     // (A) When a render pass compilers, it passes along a { meta } option.
     //     When up.hello() is called by the user, { meta } will be missing and we set defaults.
-    // (B) The meta object may have a deprecated getter on { response }, defined by unpoly-migrate.js.
-    //     Hence we cannot make a new object here.
+    // (B) We cannot make a new object literal here.
+    //     The meta arg may have a deprecated getter on { response }, defined by unpoly-migrate.js.
     meta ||= {}
     meta.layer ??= layer
     meta.ok ??= true

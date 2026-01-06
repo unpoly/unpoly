@@ -2310,10 +2310,10 @@ up.util = (function() {
   }
 
   function concludeWeavableFn(weavableFn) {
-    return (...args) => weavableFn(...args).finish()
+    return (...args) => concludeWeavable(weavableFn(...args))
   }
 
-  async function concludeWeavable(weavable, finishedValue = weavable.value) {
+  function concludeWeavable(weavable, finishedValue = weavable.value) {
     return collapseWeavables([weavable], finishedValue).finish()
   }
 
@@ -2321,7 +2321,7 @@ up.util = (function() {
     return compact(map(weavables, phase))
   }
 
-  async function collapseWeavables(weavables, finishedValue) {
+  function collapseWeavables(weavables, finishedValue) {
     let values = getWeavablesPhase(weavables, 'value')
     let finishFns = getWeavablesPhase(weavables, 'finish')
     let verifyFns = getWeavablesPhase(weavables, 'verify')

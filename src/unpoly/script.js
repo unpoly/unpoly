@@ -457,7 +457,7 @@ up.script = (function() {
           hello(layer.element, { layer, compilers: [newCompiler], macros: [], insertedEvent: false })
         }
       } else {
-        up.puts('up.compiler()', 'Compiler %s was registered after booting Unpoly. Compiler will run for future fragments only.', newCompiler.selector)
+        up.puts('up.compiler()', 'Compiler with priority (%s) was registered after booting Unpoly. Compiler will run for future fragments only.', newCompiler.selector)
       }
     }
 
@@ -682,8 +682,11 @@ up.script = (function() {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
     element = up.fragment.get(element, options)
 
+    // We default to running all registered processor fns, but callers
+    // can opt to only run given processor arguments.
     let macros = options.macros ?? registeredMacros
     let compilers = options.compilers ?? registeredCompilers
+
     const pass = new up.CompilerPass(element, macros, compilers, options)
     return pass.weavableRun()
   }

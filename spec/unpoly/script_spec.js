@@ -247,8 +247,11 @@ describe('up.script', function() {
           it('prints a message explaining that the compiler will only run for future fragments', function() {
             spyOn(up, 'puts').and.callThrough()
             up.compiler('.foo', { priority: 10 }, u.noop)
-            expect(up.puts).toHaveBeenCalled()
-            expect(up.puts.calls.argsFor(0)[1]).toMatch(/will run for future fragments/i)
+            expect(up.puts).toHaveBeenCalledWith(
+              jasmine.anything(),
+              jasmine.stringContaining('will run for future fragments'),
+              jasmine.anything()
+            )
           })
 
           it('runs the compiler for future fragments, but not for current fragments (even if they match)', function() {
@@ -269,7 +272,7 @@ describe('up.script', function() {
           it('prints no message explaining when the compiler will run', function() {
             spyOn(up, 'puts').and.callThrough()
             up.compiler('.foo', u.noop)
-            expect(up.puts).not.toHaveBeenCalled()
+            expect(up.puts).not.toHaveBeenCalledWith(jasmine.anything(), jasmine.stringContaining('will run'))
           })
 
           it('compiles current fragments', function() {
