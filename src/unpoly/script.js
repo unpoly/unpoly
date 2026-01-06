@@ -454,7 +454,7 @@ up.script = (function() {
     if (up.framework.booted) {
       if (newCompiler.priority === 0) {
         for (let layer of up.layer.stack) {
-          compile(layer.element, { layer, compilers: [newCompiler] })
+          hello(layer.element, { layer, compilers: [newCompiler], macros: [], insertedEvent: false })
         }
       } else {
         up.puts('up.compiler()', 'Compiler %s was registered after booting Unpoly. Compiler will run for future fragments only.', newCompiler.selector)
@@ -462,32 +462,6 @@ up.script = (function() {
     }
 
     return newCompiler
-  }
-
-  /*-
-  Applies all compilers on the given element and its descendants.
-
-  Unlike [`up.hello()`](/up.hello), this doesn't emit `up:fragment:inserted`.
-
-  @function up.script.compile
-  @param {Element} target
-  @param {Array<Element>} [options.skip]
-    A list of elements whose subtrees should not be compiled.
-  @param {Object} [options.data]
-    Override data for `target`
-  @param {Object} [options.dataMap]
-    An object mapping selectors to data-override in subtree of `target`.
-  @param {Object} [options.compilers]
-    A list of compilers to use.
-
-    Defaults to all registered macros and compilers.
-  @internal
-  */
-  function compile(fragment, options) {
-    up.emit(fragment, 'up:fragment:compile', { log: false })
-    let compilers = options.compilers || registeredMacros.concat(registeredCompilers)
-    const pass = new up.CompilerPass(fragment, compilers, options)
-    return pass.run()
   }
 
   /*-
@@ -654,18 +628,23 @@ up.script = (function() {
   ```
 
   @function up.hello
+
   @param {Element|jQuery|string} element
     The root element of the new page fragment.
+
   @param {Object} [options.layer]
     An existing `up.Layer` object can be passed to prevent re-lookup.
     @internal
+
   @param {Object} [options.data]
     Overrides properties from the new fragment's `[up-data]`
     with the given [data object](/data).
     @experimental
+
   @param {Object} [options.dataMap]
     An object mapping selectors to `options.data`.
     @internal
+
   @param {Object} [options.meta={}]
     An object containing [information about this compiler pass](/enhancing-elements#meta).
 
@@ -673,28 +652,40 @@ up.script = (function() {
 
     It will be passed as a third [compiler](/enhancing-elements) argument.
     @experimental
+
+  @param {Object} [options.compilers]
+    A list of compilers to use.
+
+    Defaults to all registered compilers.
+    @internal
+
+  @param {Object} [options.compilers]
+    A list of macros to use.
+
+    Defaults to all registered macros.
+    @internal
+
+  @param {boolean} [insertedEvent]
+    Whether to emit `up:fragment:inserted` after compilation:
+    @internal
+
   @return {Promise<Element>}
     A promise that fulfills when the element has finished compilation.
 
     The fulfillment value is the `element` argument.
+
   @stable
   */
-  async function hello(element, options = {}) {
+  const hello = u.concludeWeavableFn(weavableHello)
+
+  function weavableHello(element, options = {}) {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
     element = up.fragment.get(element, options)
 
-    up.puts('up.hello()', "Compiling fragment %o", element)
-
-    // Group compilation and emission of up:fragment:inserted into a mutation block.
-    // This allows up.SelectorTracker to only sync once after the mutation, and
-    // ignore any events in between.
-    await up.fragment.mutate(async () => {
-      let { finished, meta } = compile(element, options)
-      up.fragment.emitInserted(element, meta)
-      await finished
-    })
-
-    return element
+    let macros = options.macros ?? registeredMacros
+    let compilers = options.compilers ?? registeredCompilers
+    const pass = new up.CompilerPass(element, macros, compilers, options)
+    return pass.weavableRun()
   }
 
   /*-
@@ -1054,6 +1045,7 @@ up.script = (function() {
     attrCompiler: registerAttrCompiler,
     destructor: registerDestructor,
     hello,
+    weavableHello,
     clean,
     data: readData,
     findAssets,

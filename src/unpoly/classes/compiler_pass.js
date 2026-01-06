@@ -2,21 +2,25 @@ const u = up.util
 
 up.CompilerPass = class CompilerPass {
 
-  constructor(root, compilers, { layer, data, dataRoot, dataMap, meta }) {
+  constructor(root, macros, compilers, { layer, data, dataRoot, dataMap, meta, insertedEvent }) {
     // (1) If a caller has already looked up the layer we don't want to look it up again.
     // (2) Default to the current layer in case the user manually compiles a detached element.
     layer ||= up.layer.get(root) || up.layer.current
 
     this._root = root
+    this._macros = macros
     this._compilers = compilers
     this._layer = layer
     this._data = data
     this._dataRoot = dataRoot || root
     this._dataMap = dataMap
     this._compilePromises = []
+    this._insertedEvent = insertedEvent ?? true
 
-    // The meta object may have a getter on { response }, defined by unpoly-migrate.js.
-    // Hence we cannot make a new object here.
+    // (A) When a render pass compilers, it passes along a { meta } option.
+    //     When up.hello() is called by the user, { meta } will be missing and we set defaults.
+    // (B) The meta object may have a deprecated getter on { response }, defined by unpoly-migrate.js.
+    //     Hence we cannot make a new object here.
     meta ||= {}
     meta.layer ??= layer
     meta.ok ??= true
@@ -24,24 +28,33 @@ up.CompilerPass = class CompilerPass {
     this._meta = meta
   }
 
-  run() {
-    // If we're compiling a fragment in a background layer, we want
-    // up.layer.current to resolve to that background layer, not the front layer.
-    this._layer.asCurrent(() => {
-      this.setCompileData()
-
-      for (let compiler of this._compilers) {
-        this._runCompiler(compiler)
-      }
-    })
+  weavableRun() {
+    up.puts('up.hello()', "Compiling fragment %o", this._root)
+    this._assignDataToElements()
+    this._runCompilers(this._macros)
 
     return {
-      finished: Promise.all(this._compilePromises),
-      meta: this._meta,
+      value: this._root,
+      finish: async () => {
+        this._emitCompileEvent()
+        this._runCompilers(this._compilers)
+        this._emitInsertedEvent()
+        await Promise.all(this._compilePromises)
+      }
     }
   }
 
-  setCompileData() {
+  _emitCompileEvent() {
+    up.emit(this._root, 'up:fragment:compile', { log: false })
+  }
+
+  _emitInsertedEvent() {
+    if (this._insertedEvent) {
+      up.fragment.emitInserted(this._root, this._meta)
+    }
+  }
+
+  _assignDataToElements() {
     if (this._data) {
       this._dataRoot.upCompileData = this._data
     }
@@ -53,6 +66,16 @@ up.CompilerPass = class CompilerPass {
         }
       }
     }
+  }
+
+  _runCompilers(compilers) {
+    // If we're compiling a fragment in a background layer, we want
+    // up.layer.current to resolve to that background layer, not the front layer.
+    this._layer.asCurrent(() => {
+      for (let compiler of compilers) {
+        this._runCompiler(compiler)
+      }
+    })
   }
 
   _runCompiler(compiler) {
@@ -76,9 +99,8 @@ up.CompilerPass = class CompilerPass {
 
   _compileOneElement(compiler, element) {
     const compileArgs = [element]
-    // Do not retrieve and parse [up-data] unless the compiler function
-    // expects a second argument. Note that we must pass data for an argument
-    // count of 0, since then the function might take varargs.
+    // (A) For performance reason, do not parse [up-data] unless the compiler function expects a second argument.
+    // (B) We must pass data for an argument count of 0, since then the function might take varargs.
     if (compiler.length !== 1) {
       const data = up.script.data(element)
       compileArgs.push(data, this._meta)

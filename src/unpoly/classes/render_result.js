@@ -157,26 +157,9 @@ up.RenderResult = class RenderResult {
 
   _collapseWeavables(...weavableLists) {
     let weavables = u.flatten(u.compact(weavableLists))
-    this.fragments = this._getWeavablePhase(weavables, 'value').flat()
-    this.finished = this._finish(weavables)
-  }
-
-  async _finish(weavables) {
-    let finishFns = this._getWeavablePhase(weavables, 'finish')
-    let verifyFns = this._getWeavablePhase(weavables, 'verify')
-
-    let finishedResult = this
-    await Promise.all(u.callAll(finishFns, finishedResult))
-
-    for (let verifyFn of verifyFns) {
-      let verifyerResult = await verifyFn(finishedResult)
-      finishedResult = verifyerResult || finishedResult
-    }
-    return finishedResult
-  }
-
-  _getWeavablePhase(weavables, phase) {
-    return u.compact(u.map(weavables, phase))
+    let collapsed = u.collapseWeavables(weavables, this)
+    this.fragments = collapsed.value.flat()
+    this.finished = collapsed.finish()
   }
 
 }
