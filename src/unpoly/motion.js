@@ -433,9 +433,7 @@ up.motion = (function() {
     A promise that fulfills when the transition ends.
   @stable
   */
-  function morph(...args) {
-    return weavableMorph(...args).finish()
-  }
+  const morph = u.concludeWeavableFn(weavableMorph)
 
   function weavableMorph(oldElement, newElement, transitionObject, options) {
     options = u.options(options)
@@ -466,6 +464,7 @@ up.motion = (function() {
 
       up.puts('up.morph()', 'Morphing %o to %o with transition %O over %d ms', oldElement, newElement, transitionObject, options.duration)
 
+      // All changes to the DOM must be sync.
       const viewport = up.viewport.get(oldElement)
       const scrollTopBeforeScroll = viewport.scrollTop
 
@@ -475,6 +474,8 @@ up.motion = (function() {
 
       return {
         async finish() {
+          // At this point macros and compilers have run on the new element.
+
           const trackable = async function() {
             // Scroll newElement into position before we start the enter animation.
             scrollNew()

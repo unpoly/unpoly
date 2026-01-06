@@ -2309,6 +2309,37 @@ up.util = (function() {
     }
   }
 
+  function concludeWeavableFn(weavableFn) {
+    return (...args) => concludeWeavable(weavableFn(...args))
+  }
+
+  function concludeWeavable(weavable, finishedValue = weavable.value) {
+    return collapseWeavables([weavable], finishedValue).finish()
+  }
+
+  function getWeavablesPhase(weavables, phase) {
+    return compact(map(weavables, phase))
+  }
+
+  function collapseWeavables(weavables, finishedValue) {
+    let values = getWeavablesPhase(weavables, 'value')
+    let finishFns = getWeavablesPhase(weavables, 'finish')
+    let verifyFns = getWeavablesPhase(weavables, 'verify')
+
+    return {
+      value: values,
+      finish: async function() {
+        await Promise.all(callAll(finishFns, finishedValue))
+
+        for (let verifyFn of verifyFns) {
+          let verifyerResult = await verifyFn(finishedValue)
+          finishedValue = verifyerResult || finishedValue
+        }
+        return finishedValue
+      }
+    }
+  }
+
   return {
     parseURL,
     normalizeURL,
@@ -2425,6 +2456,9 @@ up.util = (function() {
     expressionOutline,
     parseString,
     assert,
+    collapseWeavables,
+    concludeWeavable,
+    concludeWeavableFn,
     // partialRight,
   }
 })()

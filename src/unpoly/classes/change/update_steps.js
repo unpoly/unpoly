@@ -108,16 +108,15 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
 
   _executeSwapStep(step) {
     const parent = step.parentElement ?? step.oldElement.parentNode
-    // const oldRect = step.oldElement
 
     up.fragment.markAsDestroying(step.oldElement)
 
     // This needs to happen before up.script.clean() below.
     // Otherwise we would run destructors for elements we want to keep.
     this._preserveDescendantKeepables(step)
+
     const morphWeavable = up.motion.weavableMorph(step.oldElement, step.newElement, step.transition, {
       ...step,
-      // oldRect,
       scrollNew: () => {
         this._handleFocus(step.newElement, step)
         this._handleScroll(step.newElement, step)
@@ -133,18 +132,19 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
 
     this._restoreDescendantKeepables(step)
 
+    // Immediately run macros and set reload attrs.
+    const welcomeWeavable = this._weavableWelcomeElement(step.newElement, step)
+
     return {
-      ...morphWeavable,
       value: [step.newElement],
       finish: async () => {
         // Start compilation in the sync phase of postprocessing.
-        let compilePromise = this._welcomeElement(step.newElement, step)
+        const compilePromise = welcomeWeavable.finish()
 
         // Remove the .up-keeping classes and emit up:fragment:kept.
         this._finalizeDescendantKeepables(step)
 
         await morphWeavable.finish()
-
         await compilePromise
       }
     }
@@ -196,11 +196,14 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     let position = step.placement === 'before' ? 'afterbegin' : 'beforeend'
     step.oldElement.insertAdjacentElement(position, wrapper)
 
+    // Immediately run macros and set reload attrs.
+    let welcomeWeavable = this._weavableWelcomeElement(wrapper, step)
+
     return {
       value: newChildren,
       finish: async () => {
         // Start compilation in the sync phase of postprocessing.
-        let compilePromise = this._welcomeElement(wrapper, step)
+        let compilePromise = welcomeWeavable.finish()
 
         this._handleFocus(wrapper, step)
 
@@ -226,16 +229,15 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     }
   }
 
-  async _welcomeElement(element, step) {
+  _weavableWelcomeElement(element, step) {
     // Adopt CSP nonces and fix broken script tags
     this.responseDoc.finalizeElement(element)
 
-    // Remember where the element came from to support up.reload(element).
-    // TODO: Consider making setReloadAttrs() part of up.hello() options (would implicate move to up.fragment)
+    // Set [up-source], [up-etag], [up-time] from request/response.
     this.setReloadAttrs(step)
 
     // Run macros and compilers. This also snapshots for [up-keep="same-html"].
-    await up.hello(element, step)
+    return up.script.weavableHello(element, step)
   }
 
   // This will find all [up-keep] descendants in oldElement, overwrite their partner

@@ -1110,10 +1110,11 @@ up.fragment = (function() {
     if (element.upInserted) return
     element.upInserted = true
 
-    return up.emit(element, 'up:fragment:inserted', {
-      ...meta,
-      log: ['Inserted fragment %o', element],
-    })
+    const log = ['Inserted fragment %o', element]
+
+    // TODO: Is it important to wrap the entire compilation in mutate()? In case a programmatic cal to up.hello calls a compiler runs up.hello()?
+
+    return mutate(() => up.emit(element, 'up:fragment:inserted', { ...meta, log }))
   }
 
   /*-
@@ -1154,7 +1155,7 @@ up.fragment = (function() {
   function emitFragmentDestroyed(fragment, options) {
     const log = options.log ?? ['Destroyed fragment %o', fragment]
     const parent = options.parent || document
-    return up.emit(parent, 'up:fragment:destroyed', { fragment, parent, log })
+    return mutate(() => up.emit(parent, 'up:fragment:destroyed', { fragment, parent, log }))
   }
 
   /*-

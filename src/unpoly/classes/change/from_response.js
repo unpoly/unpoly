@@ -87,8 +87,6 @@ up.Change.FromResponse = class FromResponse extends up.Change {
     // It never contains ':before' or ':after'.
     let effectiveTarget = renderResult.target
 
-    console.debug("[_revalidate] effectiveTarget = %o", effectiveTarget)
-
     if (/:(before|after)/.test(inputTarget)) {
       up.warn('up.render()', 'Cannot revalidate cache when prepending/appending (target %s)', inputTarget)
     } else {
