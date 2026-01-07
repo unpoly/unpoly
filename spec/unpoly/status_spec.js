@@ -937,6 +937,87 @@ describe('up.status', function() {
         expect(inserter).not.toThrow()
       })
 
+      describe('setting [up-alias] from a macro', function() {
+
+        it('works with up.hello()', async function() {
+          replaceURL('/bar')
+
+          up.macro('#link', (link) => link.setAttribute('up-alias', '/bar'))
+
+          const nav = htmlFixture(`
+            <div up-nav>
+              <a id="link" href="/foo">label</a>
+            </div>
+          `)
+
+          await up.hello(nav)
+
+          expect('#link').toHaveAttribute('up-alias', '/bar')
+          expect('#link').toHaveClass('up-current')
+        })
+
+        it('works when rendering the nav', async function() {
+          replaceURL('/bar')
+
+          up.macro('#link', (link) => link.setAttribute('up-alias', '/bar'))
+
+          await up.hello(htmlFixture(`
+            <div up-nav id="nav">
+              navigation will render here
+            </div>
+          `))
+
+          await up.render({
+            fragment: `
+              <div up-nav id="nav">
+                <a id="link" href="/foo">label</a>
+              </div>
+            `
+          })
+
+          expect('#link').toHaveAttribute('up-alias', '/bar')
+          expect('#link').toHaveClass('up-current')
+        })
+
+        it('works when navigating to another page', async function() {
+          replaceURL('/qux')
+
+          up.macro('#link', (link) => link.setAttribute('up-alias', '/bar'))
+
+          const [app, nav, content] = htmlFixtureList(`
+            <div id="app">
+              <div up-nav>
+                <a id="link" href="/foo">label</a>
+              </div>
+
+              <div id="content">
+                old content
+              </div>
+            </div>
+          `)
+
+          await up.hello(app)
+
+          expect(up.history.location).toMatchURL('/qux')
+          expect('#link').toHaveAttribute('up-alias', '/bar')
+          expect('#link').not.toHaveClass('up-current')
+
+          await up.render({
+            history: true,
+            location: '/bar',
+            fragment: `
+              <div id="content">
+                new content
+              </div>
+            `
+          })
+
+          expect(up.history.location).toMatchURL('/bar')
+          expect('#link').toHaveClass('up-current')
+        })
+
+      })
+
       it('has an [up-alias] ending in "/*" match a query string (#542)', function() {
         replaceURL('/test/?whatever')
         const nav = fixture('div[up-nav]')
