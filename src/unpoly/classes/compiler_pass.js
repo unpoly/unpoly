@@ -29,20 +29,15 @@ up.CompilerPass = class CompilerPass {
     this._meta = meta
   }
 
-  weavableRun() {
+  async run() {
     up.puts('up.hello()', "Compiling fragment %o", this._root)
     this._assignDataToElements()
     this._runCompilers(this._macros)
-
-    return {
-      value: this._root,
-      finish: async () => {
-        this._emitCompileEvent()
-        this._runCompilers(this._compilers)
-        this._emitInsertedEvent()
-        await Promise.all(this._compilePromises)
-      }
-    }
+    this._emitCompileEvent()
+    this._runCompilers(this._compilers)
+    this._emitInsertedEvent()
+    await Promise.all(this._compilePromises)
+    return this._root
   }
 
   _emitCompileEvent() {

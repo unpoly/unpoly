@@ -132,14 +132,11 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
 
     this._restoreDescendantKeepables(step)
 
-    // Immediately run macros and set reload attrs.
-    const welcomeWeavable = this._weavableWelcomeElement(step.newElement, step)
-
     return {
       value: [step.newElement],
       finish: async () => {
         // Start compilation in the sync phase of postprocessing.
-        const compilePromise = welcomeWeavable.finish()
+        const compilePromise = this._welcomeElement(step.newElement, step)
 
         // Remove the .up-keeping classes and emit up:fragment:kept.
         this._finalizeDescendantKeepables(step)
@@ -196,14 +193,11 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     let position = step.placement === 'before' ? 'afterbegin' : 'beforeend'
     step.oldElement.insertAdjacentElement(position, wrapper)
 
-    // Immediately run macros and set reload attrs.
-    let welcomeWeavable = this._weavableWelcomeElement(wrapper, step)
-
     return {
       value: newChildren,
       finish: async () => {
         // Start compilation in the sync phase of postprocessing.
-        let compilePromise = welcomeWeavable.finish()
+        let compilePromise = this._welcomeElement(wrapper, step)
 
         this._handleFocus(wrapper, step)
 
@@ -229,7 +223,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     }
   }
 
-  _weavableWelcomeElement(element, step) {
+  _welcomeElement(element, step) {
     // Adopt CSP nonces and fix broken script tags
     this.responseDoc.finalizeElement(element)
 
@@ -237,7 +231,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     this.setReloadAttrs(step)
 
     // Run macros and compilers. This also snapshots for [up-keep="same-html"].
-    return up.script.weavableHello(element, step)
+    return up.hello(element, step)
   }
 
   // This will find all [up-keep] descendants in oldElement, overwrite their partner

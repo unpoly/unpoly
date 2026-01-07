@@ -676,9 +676,7 @@ up.script = (function() {
 
   @stable
   */
-  const hello = u.concludeWeavableFn(weavableHello)
-
-  function weavableHello(element, options = {}) {
+  function hello(element, options = {}) {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
     element = up.fragment.get(element, options)
 
@@ -688,7 +686,7 @@ up.script = (function() {
     let compilers = options.compilers ?? registeredCompilers
 
     const pass = new up.CompilerPass(element, macros, compilers, options)
-    return pass.weavableRun()
+    return pass.run()
   }
 
   /*-
@@ -1048,7 +1046,6 @@ up.script = (function() {
     attrCompiler: registerAttrCompiler,
     destructor: registerDestructor,
     hello,
-    weavableHello,
     clean,
     data: readData,
     findAssets,
