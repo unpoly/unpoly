@@ -1563,6 +1563,266 @@ up.form = (function() {
   })
 
   /*-
+  Controls the state of another element when this field changes.
+
+  [Switching form state](/switching-form-state){:.article-ref}
+
+  ## Example
+
+  The controlling form field gets an `[up-switch]` attribute with a selector for the elements to show or hide:
+
+  ```html
+  <select name="level" up-switch=".level-dependent"> <!-- mark: up-switch=".level-dependent" -->
+    <option value="beginner">beginner</option>
+    <option value="intermediate">intermediate</option>
+    <option value="expert">expert</option>
+  </select>
+  ```
+
+  The target elements can choose how to alter their state after the controlling field changes.
+  For example, the `[up-show-for]` will show an element while the field has one of the given values:
+
+  ```html
+  <div class="level-dependent" up-show-for="beginner"> <!-- mark: up-show-for="beginner" -->
+    shown for beginner level, hidden for other levels
+  </div>
+  ```
+
+  There are other attributes like `[up-hide-for]`, `[up-disable-for]` or `[up-enable-for]`.
+  You can also [implement custom switching effects](/switching-form-state#custom-effects).
+
+  @selector [up-switch]
+
+  @section Dependencies
+    @param up-switch
+      A CSS selector for elements whose state depends on this field's value.
+
+    @param [up-switch-region='form']
+      A selector for the region in which elements are switched.
+
+      By default all matching elements within the form are switched.
+      You can expand or narrow the search scope by configuring a different selector.
+
+  @section Observed events
+    @mix up-watch/observed-events
+
+  @stable
+  */
+  up.compiler('[up-switch]', (switcher) => {
+    return new up.Switcher(switcher).start()
+  })
+
+  /*-
+  When an `[up-switch]` field changes, this event is emitted on all dependent elements.
+
+  You can listen to `up:form:switch` to implement [custom switching effects](/switching-form-state#custom-effects).
+
+  [Switching form state](/switching-form-state){:.article-ref}
+
+  ## Event targets
+
+  This event is *not* emitted on the switching field. Instead each element matching the switch selector will receive an `up:form:switch` event:
+
+  ```html
+  <!-- Switching field won't receive an event on change -->
+  <select name="role" up-switch=".role-dependent">
+    <option value="trainee">Trainee</option>
+    <option value="manager">Manager</option>
+  </select>
+
+  <!-- Dependent field will receive up:form:switch -->
+  <input class="role-dependent" name="department">
+
+  <!-- Dependent field will receive up:form:switch -->
+  <input class="role-dependent" name="budget">
+  ```
+
+  ## Timing
+
+  The `up:form:switch` is emitted at the following times:
+
+  - when the switching field is initially rendered.
+  - after a switching field has changed its value.
+  - after a switching checkbox was checked or unchecked.
+  - when a new selector match enters the form.
+  - when a [kept](/up-keep) `[up-switch]` field is transported to a new form.
+
+  @event up:form:switch
+
+  @param {Element} event.target
+    The dependent element matching the `[up-switch]` selector.
+
+    If multiple elements match the selector, this event is emitted once for
+    each match.
+
+  @param {Element} event.field
+    The controlling `[up-switch]` field.
+
+  @param {Array<string>} event.fieldTokens
+    An array describing the state of the controlling `[up-switch]` field.
+
+    The array contains:
+
+    - The field's value.
+    - A pseudo-value [`:blank` or `:present`](/switching-form-state#presence), depending on the field's value.
+    - For [checkboxes](/switching-form-state#checkboxes), a pseudo-value `:checked` or `:unchecked`.
+
+    @experimental
+
+  @stable
+  */
+
+  /*-
+  Only shows this element if an input field with `[up-switch]` has one of the given values.
+
+  The element will be hidden for all other values.
+
+  [Switching visibility](/switching-form-state){:.article-ref}
+
+  @selector [up-show-for]
+  @param [up-show-for]
+    A list of input values for which this element should be shown.
+
+    @include switch-token-serialization
+  @stable
+  */
+
+  /*-
+  Hides this element while an input field with `[up-switch]` has one of the given values.
+
+  The element will be shown for all other values.
+
+  [Switching visibility](/switching-form-state#toggle){:.article-ref}
+
+  @selector [up-hide-for]
+  @param [up-hide-for]
+    A list of input values for which this element should be hidden.
+
+    @include switch-token-serialization
+  @stable
+  */
+
+  /*-
+  Disables this element while an input field with `[up-switch]` has one of the given values.
+
+  The element will be enabled for all other values.
+
+  [Switching disabled state](/switching-form-state#disable){:.article-ref}
+
+  @selector [up-disable-for]
+  @param [up-disable-for]
+    A list of input values for which this element should be disabled.
+
+    @include switch-token-serialization
+  @stable
+  */
+
+  /*-
+  Enables this element while an input field with `[up-switch]` has one of the given values.
+
+  The element will be disabled for all other values.
+
+  [Switching disabled state](/switching-form-state#disable){:.article-ref}
+
+  @selector [up-enable-for]
+  @param [up-enable-for]
+    A list of input values for which this element should be enabled.
+
+    @include switch-token-serialization
+  @stable
+  */
+
+  /*-
+  Watches form fields and runs a callback when a value changes.
+
+  Only fields with a `[name]` attribute can be watched.
+
+  ## Example
+
+  The following would log a message whenever the `<input>` changes:
+
+  ```html
+  <input name="query" up-watch="console.log('New value', value)">
+  ```
+
+  ## Callback context
+
+  The script given to `[up-watch]` runs with the following context:
+
+  @include watch-callback-arguments
+
+  ## Watching multiple fields
+
+  You can set `[up-watch]` on any element to observe all contained fields.
+  The `name` argument contains the name of the field that was changed:
+
+  ```html
+  <form>
+    <div up-watch="console.log(`New value of ${name} is ${value}`)">
+      <input type="email" name="email">
+      <input type="password" name="password">
+    </div>
+
+    <!-- This field is outside the [up-watch] container and will not be watched -->
+    <input type="text" name="screen-name">
+  </form>
+  ```
+
+  You may also set `[up-watch]` on a `<form>` element to watch *all* fields in a form:
+
+  ```html
+  <form up-watch="console.log(`New value of ${name} is ${value}`)">
+    <input type="email" name="email">
+    <input type="password" name="password">
+    <input type="text" name="screen-name">
+  </form>
+  ```
+
+  ## Watching radio buttons
+
+  Multiple radio buttons with the same `[name]` produce a single value for the form.
+
+  To watch radio buttons group, use the `[up-watch]` attribute on an
+  element that contains all radio button elements with a given name:
+
+  ```html
+  <div up-watch="console.log('New value is', value)">
+    <input type="radio" name="format" value="html"> HTML format
+    <input type="radio" name="format" value="pdf"> PDF format
+    <input type="radio" name="format" value="txt"> Text format
+  </div>
+  ```
+
+  ## Async callbacks
+
+  When your callback does async work (like fetching data over the network) it must return a promise
+  that settles once the work concludes:
+
+    ```html
+  <input name="query" up-watch="return asyncWork()"> <!-- mark: return -->
+  ```
+
+  Unpoly will guarantee that only one async callback is running concurrently.
+  If the form is changed while an async callback is still processing, Unpoly will wait
+  until the callback concludes and then run it again with the latest field values.
+
+  @selector [up-watch]
+
+  @section Callback
+    @param up-watch
+      The code to run when any field's value changes.
+
+      See [callback context](#callback-context).
+
+  @section Observed events
+    @mix up-watch/observed-events
+
+  @stable
+  */
+
+  up.attribute('up-watch', (formOrField) => watch(formOrField))
+
+  /*-
   Renders a new form state when a field changes, to [show validation errors](/validation#validating-after-changing-a-field) or
   update [dependent elements](/reactive-server-forms).
 
@@ -1990,266 +2250,6 @@ up.form = (function() {
     let form = getForm(element)
     if (form) getFormValidator(form)
   })
-
-  /*-
-  Controls the state of another element when this field changes.
-
-  [Switching form state](/switching-form-state){:.article-ref}
-
-  ## Example
-
-  The controlling form field gets an `[up-switch]` attribute with a selector for the elements to show or hide:
-
-  ```html
-  <select name="level" up-switch=".level-dependent"> <!-- mark: up-switch=".level-dependent" -->
-    <option value="beginner">beginner</option>
-    <option value="intermediate">intermediate</option>
-    <option value="expert">expert</option>
-  </select>
-  ```
-
-  The target elements can choose how to alter their state after the controlling field changes.
-  For example, the `[up-show-for]` will show an element while the field has one of the given values:
-
-  ```html
-  <div class="level-dependent" up-show-for="beginner"> <!-- mark: up-show-for="beginner" -->
-    shown for beginner level, hidden for other levels
-  </div>
-  ```
-
-  There are other attributes like `[up-hide-for]`, `[up-disable-for]` or `[up-enable-for]`.
-  You can also [implement custom switching effects](/switching-form-state#custom-effects).
-
-  @selector [up-switch]
-
-  @section Dependencies
-    @param up-switch
-      A CSS selector for elements whose state depends on this field's value.
-
-    @param [up-switch-region='form']
-      A selector for the region in which elements are switched.
-
-      By default all matching elements within the form are switched.
-      You can expand or narrow the search scope by configuring a different selector.
-
-  @section Observed events
-    @mix up-watch/observed-events
-
-  @stable
-  */
-  up.compiler('[up-switch]', (switcher) => {
-    return new up.Switcher(switcher).start()
-  })
-
-  /*-
-  When an `[up-switch]` field changes, this event is emitted on all dependent elements.
-
-  You can listen to `up:form:switch` to implement [custom switching effects](/switching-form-state#custom-effects).
-
-  [Switching form state](/switching-form-state){:.article-ref}
-
-  ## Event targets
-
-  This event is *not* emitted on the switching field. Instead each element matching the switch selector will receive an `up:form:switch` event:
-
-  ```html
-  <!-- Switching field won't receive an event on change -->
-  <select name="role" up-switch=".role-dependent">
-    <option value="trainee">Trainee</option>
-    <option value="manager">Manager</option>
-  </select>
-
-  <!-- Dependent field will receive up:form:switch -->
-  <input class="role-dependent" name="department">
-
-  <!-- Dependent field will receive up:form:switch -->
-  <input class="role-dependent" name="budget">
-  ```
-
-  ## Timing
-
-  The `up:form:switch` is emitted at the following times:
-
-  - when the switching field is initially rendered.
-  - after a switching field has changed its value.
-  - after a switching checkbox was checked or unchecked.
-  - when a new selector match enters the form.
-  - when a [kept](/up-keep) `[up-switch]` field is transported to a new form.
-
-  @event up:form:switch
-
-  @param {Element} event.target
-    The dependent element matching the `[up-switch]` selector.
-
-    If multiple elements match the selector, this event is emitted once for
-    each match.
-
-  @param {Element} event.field
-    The controlling `[up-switch]` field.
-
-  @param {Array<string>} event.fieldTokens
-    An array describing the state of the controlling `[up-switch]` field.
-
-    The array contains:
-
-    - The field's value.
-    - A pseudo-value [`:blank` or `:present`](/switching-form-state#presence), depending on the field's value.
-    - For [checkboxes](/switching-form-state#checkboxes), a pseudo-value `:checked` or `:unchecked`.
-
-    @experimental
-
-  @stable
-  */
-
-  /*-
-  Only shows this element if an input field with `[up-switch]` has one of the given values.
-
-  The element will be hidden for all other values.
-
-  [Switching visibility](/switching-form-state){:.article-ref}
-
-  @selector [up-show-for]
-  @param [up-show-for]
-    A list of input values for which this element should be shown.
-
-    @include switch-token-serialization
-  @stable
-  */
-
-  /*-
-  Hides this element while an input field with `[up-switch]` has one of the given values.
-
-  The element will be shown for all other values.
-
-  [Switching visibility](/switching-form-state#toggle){:.article-ref}
-
-  @selector [up-hide-for]
-  @param [up-hide-for]
-    A list of input values for which this element should be hidden.
-
-    @include switch-token-serialization
-  @stable
-  */
-
-  /*-
-  Disables this element while an input field with `[up-switch]` has one of the given values.
-
-  The element will be enabled for all other values.
-
-  [Switching disabled state](/switching-form-state#disable){:.article-ref}
-
-  @selector [up-disable-for]
-  @param [up-disable-for]
-    A list of input values for which this element should be disabled.
-
-    @include switch-token-serialization
-  @stable
-  */
-
-  /*-
-  Enables this element while an input field with `[up-switch]` has one of the given values.
-
-  The element will be disabled for all other values.
-
-  [Switching disabled state](/switching-form-state#disable){:.article-ref}
-
-  @selector [up-enable-for]
-  @param [up-enable-for]
-    A list of input values for which this element should be enabled.
-
-    @include switch-token-serialization
-  @stable
-  */
-
-  /*-
-  Watches form fields and runs a callback when a value changes.
-
-  Only fields with a `[name]` attribute can be watched.
-
-  ## Example
-
-  The following would log a message whenever the `<input>` changes:
-
-  ```html
-  <input name="query" up-watch="console.log('New value', value)">
-  ```
-
-  ## Callback context
-
-  The script given to `[up-watch]` runs with the following context:
-
-  @include watch-callback-arguments
-
-  ## Watching multiple fields
-
-  You can set `[up-watch]` on any element to observe all contained fields.
-  The `name` argument contains the name of the field that was changed:
-
-  ```html
-  <form>
-    <div up-watch="console.log(`New value of ${name} is ${value}`)">
-      <input type="email" name="email">
-      <input type="password" name="password">
-    </div>
-
-    <!-- This field is outside the [up-watch] container and will not be watched -->
-    <input type="text" name="screen-name">
-  </form>
-  ```
-
-  You may also set `[up-watch]` on a `<form>` element to watch *all* fields in a form:
-
-  ```html
-  <form up-watch="console.log(`New value of ${name} is ${value}`)">
-    <input type="email" name="email">
-    <input type="password" name="password">
-    <input type="text" name="screen-name">
-  </form>
-  ```
-
-  ## Watching radio buttons
-
-  Multiple radio buttons with the same `[name]` produce a single value for the form.
-
-  To watch radio buttons group, use the `[up-watch]` attribute on an
-  element that contains all radio button elements with a given name:
-
-  ```html
-  <div up-watch="console.log('New value is', value)">
-    <input type="radio" name="format" value="html"> HTML format
-    <input type="radio" name="format" value="pdf"> PDF format
-    <input type="radio" name="format" value="txt"> Text format
-  </div>
-  ```
-
-  ## Async callbacks
-
-  When your callback does async work (like fetching data over the network) it must return a promise
-  that settles once the work concludes:
-
-    ```html
-  <input name="query" up-watch="return asyncWork()"> <!-- mark: return -->
-  ```
-
-  Unpoly will guarantee that only one async callback is running concurrently.
-  If the form is changed while an async callback is still processing, Unpoly will wait
-  until the callback concludes and then run it again with the latest field values.
-
-  @selector [up-watch]
-
-  @section Callback
-    @param up-watch
-      The code to run when any field's value changes.
-
-      See [callback context](#callback-context).
-
-  @section Observed events
-    @mix up-watch/observed-events
-
-  @stable
-  */
-
-  up.attribute('up-watch', (formOrField) => watch(formOrField))
 
   /*-
   Automatically submits a form when a field changes.
