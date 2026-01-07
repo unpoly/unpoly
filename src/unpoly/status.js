@@ -135,7 +135,7 @@ up.status = (function() {
   function updateNav(nav, links, { newLinks, anyLocationChanged }) {
     // Only look up current layer locations when either:
     //
-    // (1) the location changed or
+    // (1) the location changed (anyLocationChanged = true) or
     // (2) we haven't cached previous locations
     //
     // Otherwise we re-use the previous locations.
@@ -143,7 +143,7 @@ up.status = (function() {
 
     // We only process when either:
     //
-    // (1) We have unprocessed links
+    // (1) We have unprocessed links (newLinks = true)
     // (2) The location for this nav's [up-layer] setting changed
     if (newLinks || !u.isEqual(nav.upNavLocations, currentLocations)) {
       for (let link of links) {
@@ -159,8 +159,13 @@ up.status = (function() {
     }
   }
 
-  // Looks for [up-nav] containers in the given fragment and updates their contained links.
-  // Because we update full navs, we only need to lookup layer locations once.
+  /*-
+  Looks for [up-nav] containers in the given fragment and updates their contained links.
+  Because we update full navs, we only need to lookup layer locations once.
+
+  @function updateNavsAround
+  @internal
+  */
   function updateNavsAround(root, opts) {
     const navSelector = config.selector('navSelectors')
     const fullNavs = e.around(root, navSelector)

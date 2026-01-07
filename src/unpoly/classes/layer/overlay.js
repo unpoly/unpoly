@@ -356,14 +356,17 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     })
   }
 
+  // TODO: The options arg is just { response }
   tryAcceptForLocation(options) {
     this._tryCloseForLocation(this.acceptLocation, this.accept, options)
   }
 
+  // TODO: The options arg is just { response }
   tryDismissForLocation(options) {
     this._tryCloseForLocation(this.dismissLocation, this.dismiss, options)
   }
 
+  // TODO: The options arg is just { response }
   _tryCloseForLocation(urlPattern, closeFn, options) {
     let location, resolution
     if (urlPattern && (location = this.location) && (resolution = urlPattern.recognize(location))) {
@@ -472,10 +475,12 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     return ['opening', 'opened'].includes(this.state)
   }
 
+  // Documented in up.Layer.Base
   accept(value = null, options = {}) {
     return this._executeCloseChange('accept', value, options)
   }
 
+  // Documented in up.Layer.Base
   dismiss(value = null, options = {}) {
     return this._executeCloseChange('dismiss', value, options)
   }
