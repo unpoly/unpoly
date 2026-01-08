@@ -818,6 +818,64 @@ describe('up.fragment', function() {
           expect(childCompiler).toHaveBeenCalledWith('SPAN', 'child')
         })
 
+        it('runs compilers after all fragments have been swapped', async function() {
+          let compileSpy = jasmine.createSpy('compile spy')
+
+          let html = (prefix) => `
+            <div id="fragment1">
+              ${prefix} fragment1
+            </div>
+            <div id="fragment2">
+              ${prefix} fragment2
+            </div>
+          `
+
+          up.compiler('#fragment1', (element) => {
+            compileSpy(
+              document.querySelector('#fragment1').textContent.trim(),
+              document.querySelector('#fragment2').textContent.trim(),
+            )
+          })
+
+          htmlFixtureList(html('old'))
+
+          await up.render({ target: '#fragment1, #fragment2', document: html('new') })
+
+          expect(compileSpy).toHaveBeenCalledWith(
+            'new fragment1',
+            'new fragment2',
+          )
+        })
+
+        it('runs compilers after hungry fragments have been swapped', async function() {
+          let compileSpy = jasmine.createSpy('compile spy')
+
+          let html = (prefix) => `
+            <div id="fragment1">
+              ${prefix} fragment1
+            </div>
+            <div id="fragment2" up-hungry>
+              ${prefix} fragment2
+            </div>
+          `
+
+          up.compiler('#fragment1', (element) => {
+            compileSpy(
+              document.querySelector('#fragment1').textContent.trim(),
+              document.querySelector('#fragment2').textContent.trim(),
+            )
+          })
+
+          htmlFixtureList(html('old'))
+
+          await up.render({ target: '#fragment1', document: html('new') })
+
+          expect(compileSpy).toHaveBeenCalledWith(
+            'new fragment1',
+            'new fragment2',
+          )
+        })
+
         it('calls compilers with a third "meta" argument containing information about the render pass', async function() {
           const compiler = jasmine.createSpy('compiler')
           up.compiler('.element', compiler)
