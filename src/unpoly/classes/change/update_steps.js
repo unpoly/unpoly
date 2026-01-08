@@ -21,9 +21,6 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     // This way they won't be moved by hungry elements later.
     this._steps = responseDoc.commitSteps(this._steps)
 
-    // returns ':none' for empty steps
-    // let targetForSteps = up.fragment.targetForSteps(this._steps)
-
     return [
       ...this._executeSteps(),
       this._assertLayersAlive(),
@@ -32,15 +29,13 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
 
   _executeSteps() {
     if (this._steps.length) {
-      // We swap fragments in reverse order for two reasons:
+      // We swap fragments in reverse order for several reasons:
       //
       // (1) Only the first step will process focus. Other steps may cause focus loss
       //     (when they're swapping a fragment with focus), causing an option like
       //     { focus: 'main-if-lost' } to not satisfy the "lost" condition.
       // (2) Only the first step will scroll. However other steps may change
       //     the viewport height through element insertions.
-
-      // TODO: Once we implemented the phased render engine, we should no longer need to reverse steps.
       return this._steps.toReversed().map((step) => this._executeStep(step)).toReversed()
     } else {
       return this._executeNoSteps()
@@ -49,7 +44,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
 
   _assertLayersAlive() {
     return {
-      verify: () => {
+      verifyFinished: () => {
         // If our layer was closed while animations are running, don't finish
         // and reject with an up.AbortError.
         for (let step of this._steps) {
@@ -83,27 +78,23 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
   }
 
   _executeNoSteps() {
-    return [{
-      finish: () => {
-        this._handleFocus(null, this._noneOptions)
-        this._handleScroll(null, this._noneOptions)
-      }
-    }]
+    this._handleFocus(null, this._noneOptions)
+    this._handleScroll(null, this._noneOptions)
+
+    return [{}]
   }
 
   _executeKeepEverythingStep(step, keepPlan) {
     if (!keepPlan) return
 
-    // Nothing to do
+    // Nothing to mutate in the DOM.
 
-    return {
-      finish: async () => {
-        up.fragment.emitKept(keepPlan)
+    up.fragment.emitKept(keepPlan)
 
-        this._handleFocus(step.oldElement, step)
-        this._handleScroll(step.oldElement, step)
-      }
-    }
+    this._handleFocus(step.oldElement, step)
+    this._handleScroll(step.oldElement, step)
+
+    return {}
   }
 
   _executeSwapStep(step) {
@@ -115,9 +106,21 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     // Otherwise we would run destructors for elements we want to keep.
     this._preserveDescendantKeepables(step)
 
-    const morphWeavable = up.motion.weavableMorph(step.oldElement, step.newElement, step.transition, {
+    let compilePromise
+
+    let morphPromise = up.motion.morph(step.oldElement, step.newElement, step.transition, {
       ...step,
-      scrollNew: () => {
+      afterInsert: () => {
+        // Restore keepable before finalizing. Finalizing will rewrite elements that DOMParser broke,
+        // causing a keepPlans's newElement to point to a rewritten element that is now detached.
+        // Hence we lose the original position of the keepable.
+        this._restoreDescendantKeepables(step)
+
+        compilePromise = this._welcomeElement(step.newElement, step)
+
+        // Remove the .up-keeping classes and emit up:fragment:kept.
+        this._finalizeDescendantKeepables(step)
+
         this._handleFocus(step.newElement, step)
         this._handleScroll(step.newElement, step)
       },
@@ -130,20 +133,9 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
       }
     })
 
-    this._restoreDescendantKeepables(step)
-
     return {
-      value: [step.newElement],
-      finish: async () => {
-        // Start compilation in the sync phase of postprocessing.
-        const compilePromise = this._welcomeElement(step.newElement, step)
-
-        // Remove the .up-keeping classes and emit up:fragment:kept.
-        this._finalizeDescendantKeepables(step)
-
-        await morphWeavable.finish()
-        await compilePromise
-      }
+      fragments: [step.newElement],
+      finished: Promise.all([morphPromise, compilePromise]),
     }
   }
 
@@ -154,26 +146,25 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     let oldWrapper = e.wrapChildren(step.oldElement)
     let newWrapper = e.wrapChildren(step.newElement)
 
-    let wrapperStep = {
+    let wrapperResult = this._executeSwapStep({
       ...step,
       placement: 'swap',
       parentElement: step.oldElement.parentNode, // TODO: Test that we get up:fragment:destroyed on the parent, not the wrapper.
       oldElement: oldWrapper,
       newElement: newWrapper,
-      focus: false,
+      focus: false, // We will need to handle focus after unwrapping below.
       afterRemove: () => {
         e.unwrap(newWrapper)
 
         // (A) Unwrapping may destroy focus, so we need to handle it again.
         // (B) Since we never inserted step.newElement (only its children), we handle focus on step.oldElement.
-        // (B improved) TODO: Handle focus for the first new fragment, if it's an element
         this._handleFocus(step.oldElement, step)
       }
-    }
+    })
 
     return {
-      ...this._executeSwapStep(wrapperStep),
-      value: newChildren,
+      fragments: newChildren,
+      finished: wrapperResult.finished,
     }
   }
 
@@ -193,33 +184,29 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     let position = step.placement === 'before' ? 'afterbegin' : 'beforeend'
     step.oldElement.insertAdjacentElement(position, wrapper)
 
-    return {
-      value: newChildren,
-      finish: async () => {
-        // Start compilation in the sync phase of postprocessing.
-        let compilePromise = this._welcomeElement(wrapper, step)
+    // Start compilation in the sync phase of postprocessing.
+    let compilePromise = this._welcomeElement(wrapper, step)
 
-        this._handleFocus(wrapper, step)
+    // Reveal the element that was being prepended/appended.
+    // Since we will animate (not morph) it's OK to allow animation of scrolling with { scrollBehavior }.
+    this._handleScroll(wrapper, step)
 
-        // Reveal element that was being prepended/appended.
-        // Since we will animate (not morph) it's OK to allow animation of scrolling
-        // if options.scrollBehavior is given.
-        this._handleScroll(wrapper, step)
+    let animatePromise = up.animate(wrapper, step.animation, {
+      ...step,
+      onFinished: () => {
+        e.unwrap(wrapper)
 
-        await up.animate(wrapper, step.animation, {
-          ...step,
-          onFinished: () => {
-            e.unwrap(wrapper)
-
-            // (A) Unwrapping may destroy focus, so we need to handle it again.
-            // (B) Since we never inserted step.newElement (only its children), we handle focus on step.oldElement.
-            // (B improved) TODO: Handle focus for the first new fragment, if it's an element
-            this._handleFocus(step.oldElement, step)
-          }
-        })
-
-        await compilePromise
+        // (A) Unwrapping may destroy focus, so we need to handle it again.
+        // (B) We never inserted step.newElement, only its children.
+        // (C) We focus the first new element child. If it's all text nodes, we focus step.oldElement.
+        const focusElement = e.leadingElement(step.oldElement.childNodes) || step.oldElement
+        this._handleFocus(focusElement, step)
       }
+    })
+
+    return {
+      fragments: newChildren,
+      finished: Promise.all([compilePromise, animatePromise]),
     }
   }
 

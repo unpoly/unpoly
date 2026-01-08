@@ -63,15 +63,10 @@ up.Change.FromResponse = class FromResponse extends up.Change {
     // will be passed as a third argument to compilers.
     finalRenderOptions.meta = this._compilerPassMeta()
 
-    finalRenderOptions.extraWeavables = this._revalidateWeavables(finalRenderOptions)
+    // After the initial render pass has finished, consider reloading stale content.
+    finalRenderOptions.verifyFinished = (result) => this._revalidate(result, finalRenderOptions)
 
     return new up.Change.FromContent(finalRenderOptions).execute()
-  }
-
-  _revalidateWeavables(originalRenderOptions) {
-    return [{
-      verify: (result) => this._revalidate(result, originalRenderOptions)
-    }]
   }
 
   async _revalidate(renderResult, originalRenderOptions) {
@@ -79,19 +74,18 @@ up.Change.FromResponse = class FromResponse extends up.Change {
 
     // This is an explicit target passed as `{ render }` option.
     // It may be `undefined` if the user has not given an explicit selector and relies on a fallback.
-    // If its is given, it may still contain ':before' or ':after'.
+    // If it is given, it may still contain ':before' or ':after'.
     let inputTarget = originalRenderOptions.target
 
     // This is the target that we ended up rendering.
     // It may be a fallback target. It is always defined.
-    // It never contains ':before' or ':after'.
     let effectiveTarget = renderResult.target
 
     if (/:(before|after)/.test(inputTarget)) {
       up.warn('up.render()', 'Cannot revalidate cache when prepending/appending (target %s)', inputTarget)
     } else {
       up.puts('up.render()', 'Revalidating cached response for target "%s"', effectiveTarget)
-      let verifyResult = await up.reload(effectiveTarget, {
+      let revalidateResult = await up.reload(effectiveTarget, {
         ...originalRenderOptions,
         ...up.RenderOptions.NO_MOTION, // offering something like { verifyTransition } would mean we need to delay { onFinished } even further
         ...up.RenderOptions.NO_INPUT_INTERFERENCE,
@@ -114,8 +108,8 @@ up.Change.FromResponse = class FromResponse extends up.Change {
       // In this case the up.RenderJob from up.reload() has already seen that the result has no content,
       // and will *not* have called { onResult } a second time. We will however return the original
       // render result so it can be passed to up.RenderJob#finished() callbacks.
-      if (!verifyResult.none) {
-        return verifyResult
+      if (!revalidateResult.none) {
+        return revalidateResult
       }
     }
   }

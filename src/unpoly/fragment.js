@@ -1099,6 +1099,8 @@ up.fragment = (function() {
     }
   }
 
+  // Snapshot the keep identity before macros make changes.
+  // TODO: Doesn't this need to happen before other macros?
   up.macro('[up-keep]', (element) => keepIdentity(element))
 
   function keepMode(element) {
@@ -1692,7 +1694,6 @@ up.fragment = (function() {
     const element = getSmart(options.target, options)
 
     if (element) {
-      // TODO: Move mutation() back into DestroyFragment and CompilerPass
       new up.Change.DestroyFragment({ ...options, element }).execute()
     }
 

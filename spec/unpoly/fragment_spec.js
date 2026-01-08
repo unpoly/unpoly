@@ -10204,6 +10204,80 @@ describe('up.fragment', function() {
 
             expect('.foo-bar').toBeFocused()
           })
+
+          describe('when appending children', function() {
+
+            it('focuses the first appended child element', async function() {
+              htmlFixture(`
+                <form id="form">
+                </form>
+              `)
+
+              up.render({
+                focus: 'target',
+                target: '#form:after',
+                fragment: `
+                <form id="form">
+                  <input id="input">
+                </form>
+              `
+              })
+
+              await wait()
+
+              expect('#input').toBeFocused()
+            })
+
+            it('focuses the container when the first appended node is a non-whitespace text node', async function() {
+              htmlFixture(`
+                <form id="form">
+                </form>
+              `)
+
+              up.render({
+                focus: 'target',
+                target: '#form:after',
+                fragment: `
+                <form id="form">
+                  Text
+                  <input id="input">
+                </form>
+              `
+              })
+
+              await wait()
+
+              expect('#form').toBeFocused()
+            })
+
+          })
+
+          describe('when swapping children', function() {
+
+            it('focuses the container', async function() {
+              htmlFixture(`
+                <form id="form">
+                </form>
+              `)
+
+              up.render({
+                focus: 'target',
+                target: '#form:content',
+                fragment: `
+                <form id="form">
+                  Text
+                  <input id="input">
+                </form>
+              `
+              })
+
+              await wait()
+
+              expect('#form').toBeFocused()
+            })
+
+          })
+
         })
 
         describe('with { focus: "main" }', function() {
@@ -16157,7 +16231,7 @@ describe('up.fragment', function() {
         })
 
         it('ignores HTML changes made by a system macro', async function() {
-          html = `
+          let html = `
             <div id="keepable" up-expand up-keep="same-html">
               <a href="/path">text</a>
             </div>
@@ -16174,8 +16248,9 @@ describe('up.fragment', function() {
 
         it('keeps an identical element that was introduced by a transition (which adds tracking classes)', async function() {
           fixture('#keepable')
-          html = '<div id="keepable" up-keep="same-html">text</div>'
+          let html = '<div id="keepable" up-keep="same-html">text</div>'
           let keepable = (await up.render({ target: '#keepable', document: html, transition: 'cross-fade', duration: 70 }).finished).fragment
+          expect(keepable).toMatchSelector('#keepable')
 
           up.render({ fragment: html })
           await wait()
@@ -16183,11 +16258,100 @@ describe('up.fragment', function() {
           expect(document.querySelector('#keepable')).toBe(keepable)
         })
 
-        it('keeps an element when a new identitcal was introduced by a transition (which adds tracking classes)', async function() {
-          html = '<div id="keepable" up-keep="same-html">text</div>'
+        it('keeps an element when a new identical element was introduced by a transition (which adds tracking classes)', async function() {
+          let html = '<div id="keepable" up-keep="same-html">text</div>'
           let keepable = keepableFixture(html)
 
           await up.render({ fragment: html, transition: 'cross-fade', duration: 70 }).finished
+
+          expect(document.querySelector('#keepable')).toBe(keepable)
+        })
+
+        it('keeps an identical element that was originally appended with an animation (which adds tracking classes)', async function() {
+          htmlFixture(`
+            <div id="container">
+            </div>
+          `)
+
+          const containerWithKeepableHTML = `
+            <div id="container">
+              <div id="keepable" up-keep="same-html">text</div>
+            </div>
+          `
+
+          let keepable = (await up.render({
+            target: '#container:after',
+            animation: 'fade-in',
+            duration: 70,
+            document: containerWithKeepableHTML,
+          }).finished).fragment
+
+          expect(keepable).toMatchSelector('#keepable')
+
+          await up.render({
+            target: '#container',
+            document: containerWithKeepableHTML,
+            transition: 'cross-fade',
+            duration: 70
+          }).finished
+
+          expect(document.querySelector('#keepable')).toBe(keepable)
+        })
+
+        it('keeps an identical element that was originally appended without animation', async function() {
+          htmlFixture(`
+            <div id="container">
+            </div>
+          `)
+
+          const containerWithKeepableHTML = `
+            <div id="container">
+              <div id="keepable" up-keep="same-html">text</div>
+            </div>
+          `
+
+          let keepable = (await up.render({
+            target: '#container:after',
+            document: containerWithKeepableHTML,
+          }).finished).fragment
+
+          expect(keepable).toMatchSelector('#keepable')
+
+          await up.render({
+            target: '#container',
+            document: containerWithKeepableHTML,
+            transition: 'cross-fade',
+            duration: 70
+          }).finished
+
+          expect(document.querySelector('#keepable')).toBe(keepable)
+        })
+
+        it('keeps an identical element that was introduced by swapping children with :content', async function() {
+          htmlFixture(`
+            <div id="container">
+            </div>
+          `)
+
+          const containerWithKeepableHTML = `
+            <div id="container">
+              <div id="keepable" up-keep="same-html">text</div>
+            </div>
+          `
+
+          let keepable = (await up.render({
+            target: '#container:content',
+            document: containerWithKeepableHTML,
+          }).finished).fragment
+
+          expect(keepable).toMatchSelector('#keepable')
+
+          await up.render({
+            target: '#container:content',
+            document: containerWithKeepableHTML,
+            transition: 'cross-fade',
+            duration: 70
+          }).finished
 
           expect(document.querySelector('#keepable')).toBe(keepable)
         })

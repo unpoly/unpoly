@@ -1994,6 +1994,51 @@ describe('up.element', function() {
 
   })
 
+  describe('up.element.leadingElement()', function() {
+
+    it('returns the first child node when it is an element', function() {
+      const nodes = up.element.createFromHTML(`<div><span id="match"></span></div>`).childNodes
+
+      expect(up.element.leadingElement(nodes)).toMatchSelector('#match')
+    })
+
+    it('returns the first element that is only preceded by a whitespace text node', function() {
+      const nodes = up.element.createFromHTML(`
+        <div>
+          <span id="match"></span>
+        </div>
+      `).childNodes
+
+      expect(up.element.leadingElement(nodes)).toMatchSelector('#match')
+    })
+
+    it('returns undefined if the first element is preceded by non-whitespace text node', function() {
+      const nodes = up.element.createFromHTML(`
+        <div>
+          text
+          <span id="match"></span>
+        </div>
+      `).childNodes
+
+      expect(up.element.leadingElement(nodes)).toBeUndefined()
+    })
+
+    it('returns undefined if the node list only contains text nodes', function() {
+      const nodes = up.element.createFromHTML(`
+        <div>
+          text
+        </div>
+      `).childNodes
+
+      expect(up.element.leadingElement(nodes)).toBeUndefined()
+    })
+
+    it('returns undefined if the node list is empty', function() {
+      expect(up.element.leadingElement([])).toBeUndefined()
+    })
+
+  })
+
   if (up.migrate.loaded) {
     describe('up.element.isAttached()', function() {
 

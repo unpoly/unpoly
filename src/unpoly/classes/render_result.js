@@ -97,11 +97,30 @@ up.RenderResult = class RenderResult {
   ```
   */
 
-  constructor({ layer, target, renderOptions = {}, weavables } = {}) {
+  constructor({ layer, target, renderOptions = {}, partialResults = [] } = {}) {
     this.layer = layer
     this.target = target
     this.renderOptions = renderOptions
-    this._collapseWeavables(weavables, renderOptions.extraWeavables)
+
+    this.fragments = this._partialPhase(partialResults, 'fragments').flat()
+    this.finished = this._finish(partialResults)
+  }
+
+  _partialPhase(partialResults, phase, extraValue) {
+    return u.compact([...u.map(partialResults, phase), extraValue])
+  }
+
+  async _finish(partialResults) {
+    let finishedPromises = this._partialPhase(partialResults, 'finished')
+    let verifyFns = this._partialPhase(partialResults, 'verifyFinished', this.renderOptions.verifyFinished)
+    await Promise.all(finishedPromises)
+
+    let finishedResult = this
+    for (let verifyFn of verifyFns) {
+      let verifyerResult = await verifyFn(finishedResult)
+      finishedResult = verifyerResult || finishedResult
+    }
+    return finishedResult
   }
 
   /*-
@@ -153,13 +172,6 @@ up.RenderResult = class RenderResult {
   */
   get ok() {
     return !this.renderOptions.didFail
-  }
-
-  _collapseWeavables(...weavableLists) {
-    let weavables = u.flatten(u.compact(weavableLists))
-    let collapsed = u.collapseWeavables(weavables, this)
-    this.fragments = collapsed.value.flat()
-    this.finished = collapsed.finish()
   }
 
 }

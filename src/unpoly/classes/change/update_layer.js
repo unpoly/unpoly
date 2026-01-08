@@ -62,9 +62,11 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // If our layer ends up being closed during rendering, we still want to render
     // [up-hungry][up-if-layer=any] elements on other layers.
     let renderOtherLayersOnce = u.memoize(() => this._renderOtherLayers(responseDoc))
+
+    // TODO: Can this be a try ... catch ?
     let unbindClosing = this.layer.on('up:layer:accepting up:layer:dismissing', renderOtherLayersOnce)
     try {
-      let weavables = [
+      let partialResults = [
         ...this._renderCurrentLayer(responseDoc),
         ...renderOtherLayersOnce(),
       ]
@@ -73,7 +75,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
         target: this.target,
         layer: this.layer,
         renderOptions: this.options,
-        weavables,
+        partialResults,
       })
     } finally {
       unbindClosing()

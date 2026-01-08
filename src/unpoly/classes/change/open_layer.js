@@ -57,8 +57,8 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     let unbindClosing = this.layer.on('up:layer:accepting up:layer:dismissing', renderOtherLayersOnce)
 
     try {
-      let weavables = [
-        ...this._renderOverlayContent(responseDoc),
+      let partialResults = [
+        this._renderOverlayContent(responseDoc),
         ...renderOtherLayersOnce(),
       ]
 
@@ -66,7 +66,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
         layer: this.layer,
         target: this.target,
         renderOptions: this.options,
-        weavables,
+        partialResults,
       })
     } finally {
       unbindClosing()
@@ -145,36 +145,32 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // Remember where the element came from to support up.reload(element).
     this.setReloadAttrs({ newElement: this._content, source: this.options.source })
 
-    return [{
-      value: [this._content],
-      finish: async () => {
-        // Start compilation in the sync phase of postprocessing.
-        let compilePromise = this._compileLayer()
+    // Start compilation in the sync phase of postprocessing.
+    let compilePromise = this._compileLayer()
 
-        // A11Y: Place the focus on the overlay element and setup a focus circle.
-        this._handleFocus()
+    // A11Y: Place the focus on the overlay element and setup a focus circle.
+    this._handleFocus()
 
-        // Don't wait for the open animation to finish.
-        // Otherwise a popup would start to open and only reveal itself after the animation.
-        this._handleScroll()
+    // Don't wait for the open animation to finish.
+    // Otherwise a popup would start to open and only reveal itself after the animation.
+    this._handleScroll()
 
-        // Emit up:layer:opened to indicate that the layer was opened successfully.
-        // This is a good time for listeners to manipulate the overlay optics.
-        this.layer.state = 'opened'
-        this._emitOpenedEvent()
+    // Emit up:layer:opened to indicate that the layer was opened successfully.
+    // This is a good time for listeners to manipulate the overlay optics.
+    this.layer.state = 'opened'
+    this._emitOpenedEvent()
 
-        // In case a listener to up:layer:opened immediately dimisses the new layer,
-        // reject the promise returned by up.layer.open().
-        this.layer.assertAlive()
+    // In case a listener to up:layer:opened immediately dismisses the new layer,
+    // reject the promise returned by up.layer.open().
+    this.layer.assertAlive()
 
-        await this.layer.startOpenAnimation()
+    let animatePromise = this.layer.startOpenAnimation()
 
-        await compilePromise
-      },
-      verify: () => {
-        this.layer.assertAlive()
-      }
-    }]
+    return {
+      fragments: [this._content],
+      finished: Promise.all([compilePromise, animatePromise]),
+      verifyFinished: () => this.layer.assertAlive()
+    }
   }
 
   _renderOtherLayers(responseDoc) {

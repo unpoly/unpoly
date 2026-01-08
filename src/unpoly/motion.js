@@ -433,9 +433,7 @@ up.motion = (function() {
     A promise that fulfills when the transition ends.
   @stable
   */
-  const morph = u.concludeWeavableFn(weavableMorph)
-
-  function weavableMorph(oldElement, newElement, transitionObject, options) {
+  async function morph(oldElement, newElement, transitionObject, options) {
     options = u.options(options)
 
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
@@ -448,7 +446,7 @@ up.motion = (function() {
     transitionFn = up.error.guardFn(transitionFn)
 
     // Remove callbacks from our options hash in case transitionFn calls morph() recursively.
-    const scrollNew = u.pluckKey(options, 'scrollNew') || u.noop
+    const afterInsert = u.pluckKey(options, 'afterInsert') || u.noop
     const beforeRemove = u.pluckKey(options, 'beforeRemove') || u.noop
     const afterRemove = u.pluckKey(options, 'afterRemove') || u.noop
 
@@ -457,9 +455,8 @@ up.motion = (function() {
       // (1) don't want to track it again and
       // (2) don't want to create additional absolutized bounds
       if (motionController.isActive(oldElement) && (options.trackMotion === false)) {
-        return {
-          finish: () => transitionFn(oldElement, newElement, options)
-        }
+        await transitionFn(oldElement, newElement, options)
+        return
       }
 
       up.puts('up.morph()', 'Morphing %o to %o with transition %O over %d ms', oldElement, newElement, transitionObject, options.duration)
@@ -469,43 +466,35 @@ up.motion = (function() {
       const scrollTopBeforeScroll = viewport.scrollTop
 
       const oldRemote = up.viewport.absolutize(oldElement, {
+        // TODO: Can't we do this after absolutize? Without a callback?
         afterMeasure: () => e.insertBefore(oldElement, newElement)
       })
 
-      return {
-        async finish() {
-          // At this point macros and compilers have run on the new element.
+      // (A) Compile the element in case of DOM changes that affect its size or position
+      // (B) Compile the element to capture its [up-keep] identity before we add a tracking class
+      // (B) Scroll newElement into position before we start the enter animation.
+      afterInsert()
 
-          const trackable = async function() {
-            // Scroll newElement into position before we start the enter animation.
-            scrollNew()
+      // Since we have scrolled the viewport (containing both oldElement and newElement),
+      // we must shift the old copy so it looks like it it is still sitting
+      // in the same position.
+      const scrollTopAfterScroll = viewport.scrollTop
+      oldRemote.moveBounds(0, scrollTopAfterScroll - scrollTopBeforeScroll)
 
-            // Since we have scrolled the viewport (containing both oldElement and newElement),
-            // we must shift the old copy so it looks like it it is still sitting
-            // in the same position.
-            const scrollTopAfterScroll = viewport.scrollTop
-            oldRemote.moveBounds(0, scrollTopAfterScroll - scrollTopBeforeScroll)
+      const trackable = async function() {
+        await transitionFn(oldElement, newElement, options)
 
-            await transitionFn(oldElement, newElement, options)
-
-            beforeRemove()
-            oldRemote.bounds.remove()
-            afterRemove()
-          }
-
-          await motionController.startFunction([oldElement, newElement], trackable, options)
-        }
+        beforeRemove()
+        oldRemote.bounds.remove()
+        afterRemove()
       }
+
+      await motionController.startFunction([oldElement, newElement], trackable, options)
     } else {
       beforeRemove()
       swapElementsDirectly(oldElement, newElement)
-
-      return {
-        async finish() {
-          scrollNew()
-          afterRemove()
-        }
-      }
+      afterInsert()
+      afterRemove()
     }
   }
 
@@ -714,7 +703,6 @@ up.motion = (function() {
 
   return {
     morph,
-    weavableMorph,
     animate,
     finish,
     finishCount() { return motionController.finishCount },

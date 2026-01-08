@@ -1571,6 +1571,18 @@ up.element = (function() {
     return firstTag === 'HTML' || firstTag === '!DOCTYPE'
   }
 
+  function leadingElement(nodes) {
+    for (let node of nodes) {
+      if (u.isElement(node)) {
+        return node
+      } else if (u.isTextNode(node) && node.textContent.trim()) {
+        return
+      } else {
+        // Empty text node or comment node. Try the next node.
+      }
+    }
+  }
+
   return {
     subtree,
     subtreeFirst,
@@ -1638,5 +1650,6 @@ up.element = (function() {
     elementLikeMatches,
     documentPosition,
     isFullDocumentHTML,
+    leadingElement,
   }
 })()
