@@ -11109,6 +11109,43 @@ describe('up.fragment', function() {
               expect(focusHandler).toHaveBeenCalled()
             })
           })
+
+          it('calls the function after all fragments have been swapped', async function() {
+            let focusSpy = jasmine.createSpy('focus spy')
+
+            let html = (prefix) => `
+              <div id="fragment1">
+                ${prefix} fragment1
+              </div>
+              <div id="fragment2">
+                ${prefix} fragment2
+              </div>
+            `
+
+            let focusFn = () => {
+              let fragment1 = document.querySelector('#fragment1')
+              let fragment2 = document.querySelector('#fragment2')
+
+              focusSpy(
+                fragment1.textContent.trim(),
+                fragment2.textContent.trim(),
+              )
+
+              up.focus(fragment2, { force: true })
+            }
+
+            htmlFixtureList(html('old'))
+
+            await up.render({ target: '#fragment1, #fragment2', document: html('new'), focus: focusFn })
+
+            expect(focusSpy).toHaveBeenCalledWith(
+              'new fragment1',
+              'new fragment2',
+            )
+
+            expect('#fragment2').toBeFocused()
+          })
+
         })
 
         describe('when rendering nothing', function() {
