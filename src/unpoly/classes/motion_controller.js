@@ -57,7 +57,7 @@ up.MotionController = class MotionController {
       this.finish(cluster)
       this._markCluster(cluster)
       let promise = this._whileForwardingFinishEvent(cluster, mutedAnimator)
-      promise = promise.then(() => this._unmarkCluster(cluster))
+      promise = promise.finally(() => this._unmarkCluster(cluster))
       // Return the original promise that is still running
       return promise
     }

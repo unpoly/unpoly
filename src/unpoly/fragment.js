@@ -1692,6 +1692,7 @@ up.fragment = (function() {
     const element = getSmart(options.target, options)
 
     if (element) {
+      // TODO: Move mutation() back into DestroyFragment and CompilerPass
       new up.Change.DestroyFragment({ ...options, element }).execute()
     }
 
