@@ -11,23 +11,18 @@ up.FragmentProcessor = class FragmentProcessor extends up.Record {
     ]
   }
 
-  processMap(map, fallbackOpt) {
-    let mappedOpt = up.fragment.matchSelectorMap(this.fragment, map, { layer: this.layer })[0]
-    return this.process(mappedOpt ?? fallbackOpt)
-  }
-
   process(opt) {
-    let preprocessed = this.preprocess(opt)
+    let preprocessed = u.getComplexTokens(opt)
     return this.tryProcess(preprocessed)
-  }
-
-  preprocess(opt) {
-    return u.getComplexTokens(opt)
   }
 
   tryProcess(opt) {
     if (u.isArray(opt)) {
       return this.processArray(opt)
+    }
+
+    if (u.isOptions(opt)) {
+      return this.processSelectorMap(opt)
     }
 
     if (u.isFunction(opt)) {
@@ -47,11 +42,22 @@ up.FragmentProcessor = class FragmentProcessor extends up.Record {
 
       let match = opt.match(/^(.+?)-if-(.+?)$/)
       if (match) {
-        return this.resolveCondition(match[2]) && this.process(match[1])
+        return this.resolveCondition(match[2]) && this.tryProcess(match[1])
       }
     }
 
     return this.processPrimitive(opt)
+  }
+
+  processSelectorMap(map) {
+    return Object.keys(map).filter((selector) => {
+      let match = this.findSelector(selector)
+      if (match) {
+        let matchProcessor = new this.constructor({ ...this.attributes(), fragment: match })
+        let opt = map[selector]
+        return matchProcessor.process(opt)
+      }
+    })
   }
 
   processArray(array) {

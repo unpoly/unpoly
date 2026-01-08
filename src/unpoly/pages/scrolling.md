@@ -188,45 +188,49 @@ and you don't want secondary fragments to influence the one scroll bar.
 However, when you update fragments within multiple viewports, you can only scroll once that way:
 
 ```html
-<a href="/dashboard" up-target="#left, #right" up-scroll="bottom"> <!-- mark: up-target="#left, #right" -->
+<a href="/dashboard" up-target="#fragment1, #fragment2" up-scroll="bottom"> <!-- mark: up-target="#left, #right" -->
   Update fragments
 </a>
 
-<div up-viewport style="overflow-y: scroll">
+<div id="viewport1" up-viewport style="overflow-y: scroll">
   <!-- chip: ✔ Will be scrolled -->
-  <div id="left">…</div>
+  <div id="fragment1">…</div>
 </div>
 
 
-<div up-viewport style="overflow-y: scroll">
+<div id="viewport2" up-viewport style="overflow-y: scroll">
   <!-- chip: ❌ Will not be scrolled -->
-  <div id="right">…</div>
+  <div id="fragment2">…</div>
 </div>
 ```
 
 To scroll multiple viewports, set an [`[up-scroll-map]`](/up-follow#up-scroll-map) attribute.\
-Its value is a [relaxed JSON](relaxed-json) object mapping the fragment selectors to scroll options:
+Its value is a [relaxed JSON](relaxed-json) object mapping selectors to scroll options:
 
 ```html
 <a
   href="/dashboard"
-  up-target="#left, #right"
-  up-scroll-map="{ '#left': 'bottom', '#right': 'bottom' }"
+  up-target="#fragment1, fragment2"
+  up-scroll-map="{ '#viewport1': 'bottom', '#viewport2': 'bottom' }"
 >
-  Link label
+  Update fragments
 </a>
 ```
 
-> [note]
-> The keys in the map must match the updated fragments, not their viewports.
+You can also select viewports by any contained fragment. The following two scroll maps have the same effect:
+
+```html
+<a … up-scroll-map="{ '#fragment1': 'bottom', '#fragment2': 'bottom' }">…</a>
+<a … up-scroll-map="{ '#viewport1': 'bottom', '#viewport2': 'bottom' }">…</a>
+```
 
 In JavaScript you can pass an object as a [`{ scrollMap }`](/up.render#options.scrollMap) option:
 
 ```js
 up.render({
   url: '/dashboard',
-  target: '#left, #right',
-  scrollMap: { '#left': 'bottom', '#right': 'bottom' }
+  target: '#fragment1, #fragment2',
+  scrollMap: { '#viewport1': 'bottom', '#viewport2': 'bottom' }
 })
 ```
 

@@ -240,7 +240,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
       autoMeans: ['hash', 'layer']
     }
     const scrolling = new up.FragmentScrolling(scrollingOptions)
-    scrolling.processMap(this.options.scrollMap, this.options.scroll)
+    scrolling.process(this.options.scrollMap ?? this.options.scroll)
   }
 
   _assertOpenEventEmitted() {

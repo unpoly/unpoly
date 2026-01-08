@@ -8238,6 +8238,55 @@ describe('up.fragment', function() {
             expect(this.revealedText).toEqual(jasmine.arrayWithExactContents(['new target1', 'new target2']))
           })
 
+          it('allows to scroll viewports that were not targeted', async function() {
+            fixtureStyle(`
+              #viewport1, #viewport2 {
+                height: 150px;
+                overflow-y: scroll;
+              }
+            `)
+
+            fixtureStyle(`
+              .content {
+                height: 2000px;
+              }
+            `)
+
+            htmlFixtureList(`
+              <div id="target">
+                old target
+              </div>
+
+              <div id="viewport1" up-viewport>
+                <div class="content">
+                  old content in viewport1
+                </div>
+              </div>
+              <div id="viewport2" up-viewport>
+                <div class="content">
+                  old content in viewport2
+                </div>
+              </div>
+            `)
+
+            document.querySelector('#viewport1').scrollTop = 333
+            document.querySelector('#viewport2').scrollTop = 444
+
+            await up.render({
+              target: '#target',
+              document: `
+                <div id="target">
+                  new target
+                </div>
+              `,
+              scrollMap: { '#viewport1': 'top', '#viewport2': 'bottom' }
+            })
+
+            expect('#target').toHaveText('new target')
+            expect('#viewport1').toBeScrolledTo(0)
+            expect('#viewport2').toBeScrolledTo(2000 - 150)
+          })
+
           it('allows to preserve scroll positions of multiple swapped viewports', async function() {
             fixtureStyle(`
               #viewport1, #viewport2 {
@@ -8282,7 +8331,7 @@ describe('up.fragment', function() {
                   </div>
                 </div>
               `,
-              scrollMap: { '*': 'keep' }
+              scrollMap: { '#viewport1': 'keep', '#viewport2': 'keep' }
             })
 
             expect('#viewport1').toHaveText('new content in viewport1')
@@ -8312,28 +8361,6 @@ describe('up.fragment', function() {
 
           })
 
-          it('allows to scroll all updated viewports by mapping the "*" selector', async function() {
-            htmlFixtureList(`
-              <div id="viewport1" up-viewport>
-                <div id="target1">old target1</div>
-              </div>
-              <div id="viewport2" up-viewport>
-                <div id="target2">old target2</div>
-              </div>
-            `)
-
-            await up.render({
-              target: '#target1, #target2',
-              document: `
-                <div id="target1">new target1</div>
-                <div id="target2">new target2</div>
-              `,
-              scrollMap: { '*': 'target' }
-            })
-
-            expect(this.revealedText).toEqual(jasmine.arrayWithExactContents(['new target1', 'new target2']))
-          })
-
           it('allows to scroll when opening an overlay', async function() {
             await up.render({
               layer: 'new modal',
@@ -8354,7 +8381,7 @@ describe('up.fragment', function() {
             expect(this.revealedText).toEqual(['overlay child2'])
           })
 
-          it('allows to scroll a hungry element', async function() {
+          it('allows to scroll a hungry element on the same layer', async function() {
             htmlFixtureList(`
               <div id="viewport1" up-viewport>
                 <div id="target">old target</div>
@@ -8365,24 +8392,6 @@ describe('up.fragment', function() {
             `)
 
             await up.render({
-              target: '#target',
-              document: `
-                <div id="target">new target</div>
-                <div id="hungry" up-hungry>new hungry</div>
-              `,
-              scrollMap: { '#hungry': 'target' }
-            })
-
-            expect(this.revealedText).toEqual(['new hungry'])
-          })
-
-          it('allows to scroll a hungry element when opening a layer', async function() {
-            htmlFixtureList(`
-              <div id="hungry" up-hungry up-if-layer="any">old hungry</div>
-            `)
-
-            await up.render({
-              layer: 'new modal',
               target: '#target',
               document: `
                 <div id="target">new target</div>
@@ -8556,6 +8565,66 @@ describe('up.fragment', function() {
             expect('.element').toHaveText('new text')
             expect(scrollHandler).toHaveBeenCalled()
           })
+
+
+          it('calls the function after all targets were updated', async function() {
+            fixtureStyle(`
+              #viewport1, #viewport2 {
+                height: 150px;
+                overflow-y: scroll;
+              }
+            `)
+
+            fixtureStyle(`
+              .content {
+                height: 2000px;
+              }
+            `)
+
+            let html = (prefix) => `
+              <div id="viewport1" up-viewport>
+                <div class="content">
+                  ${prefix} content in viewport1
+                </div>
+              </div>
+              <div id="viewport2" up-viewport>
+                <div class="content">
+                  ${prefix} content in viewport2
+                </div>
+              </div>
+            `
+
+            htmlFixtureList(html('old'))
+
+            document.querySelector('#viewport1').scrollTop = 333
+            document.querySelector('#viewport2').scrollTop = 444
+
+            let scrollSpy = jasmine.createSpy('scroll spy')
+
+            let scrollFn = () => {
+              let viewport1 = document.querySelector('#viewport1')
+              let viewport2 = document.querySelector('#viewport2')
+
+              scrollSpy(
+                viewport1.textContent.trim(),
+                viewport2.textContent.trim()
+              )
+
+              viewport1.scrollTop = 555
+              viewport2.scrollTop = 666
+            }
+
+            await up.render({
+              target: '#viewport1, #viewport2',
+              document: html('new'),
+              scroll: scrollFn
+            })
+
+            expect(scrollSpy).toHaveBeenCalledWith('new content in viewport1', 'new content in viewport2')
+            expect('#viewport1').toBeScrolledTo(555)
+            expect('#viewport2').toBeScrolledTo(666)
+          })
+
 
           it('does not crash the render pass and emits an error event if the function throws', async function() {
             const scrollError = new Error('error in scroll handler')

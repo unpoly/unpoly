@@ -223,6 +223,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       // and we only have a single scroll position and focus, only scroll/focus for the first step.
       if (i > 0) {
         step.scroll = false
+        step.scrollMap = undefined
         step.focus = false
       }
     })
