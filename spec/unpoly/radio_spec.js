@@ -1193,6 +1193,117 @@ describe('up.radio', function() {
               })
             })
 
+            describe('when a response closes the overlay via X-Up-Dismiss-Layer', function() {
+
+              it('updates the [up-hungry] element with the discarded overlay content', async function() {
+                $fixture('.outside').text('old outside').attr('up-hungry', true).attr('up-if-layer', 'any')
+
+                const closeEventHandler = jasmine.createSpy('close event handler')
+                up.on('up:layer:dismiss', closeEventHandler)
+
+                up.layer.open({ fragment: `
+                  <div class='inside'>
+                    old inside
+                  </div>
+                ` })
+
+                expect(up.layer.count).toBe(2)
+
+                const updatePromise = up.render('.inside', { url: '/page2' })
+
+                await wait()
+
+                jasmine.respondWith({
+                  responseText: `
+                    <div class="outside">
+                      new outside
+                    </div>
+                    <div class='inside'>
+                      new inside
+                    </div>
+                  `,
+                  responseHeaders: { 'X-Up-Dismiss-Layer': 'null' }
+                })
+
+                await expectAsync(updatePromise).toBeRejectedWith(jasmine.any(up.Aborted))
+
+                expect(closeEventHandler).toHaveBeenCalled()
+                expect(up.layer.count).toBe(1)
+                expect('.outside').toHaveText('new outside')
+              })
+
+              it('updates the [up-hungry] element with the discarded overlay content even if it would have been contained by the explicit target', async function() {
+                fixture('.foo', { text: 'old foo in root', 'up-hungry': '', 'up-if-layer': 'any' })
+
+                up.layer.open({ fragment: `
+                  <div class='overlay'>
+                    <div class='foo'>old foo in overlay</div>
+                    <div class='content'>old content in overlay</div>
+                  </div>
+                ` })
+
+                await wait()
+
+                const updatePromise = up.render('.overlay', { url: '/page2' })
+
+                await wait()
+
+                jasmine.respondWith({
+                  responseHeaders: { 'X-Up-Dismiss-Layer': 'null' },
+                  responseText: `
+                    <div class='overlay'>
+                      <div class='foo'>new foo</div>
+                      <div class='content'>new content</div>
+                    </div>
+                  `
+                })
+
+                await expectAsync(updatePromise).toBeRejectedWith(jasmine.any(up.Aborted))
+
+                await wait()
+
+                expect(up.layer.isRoot()).toBe(true)
+
+                expect(up.fragment.get('.foo', { layer: 'root' })).toHaveText('new foo')
+              })
+
+              it('updates the [up-hungry] element before onDismissed callbacks', async function() {
+                $fixture('.outside').text('old outside').attr('up-hungry', true).attr('up-if-layer', 'any')
+
+                const outsideSpy = jasmine.createSpy('outside spy')
+                const onDismissed = () => outsideSpy(document.querySelector('.outside').innerText.trim())
+
+                up.layer.open({ onDismissed, fragment: `
+                  <div class='inside'>
+                    old inside
+                  </div>
+                ` })
+
+                expect(up.layer.count).toBe(2)
+
+                const updatePromise = up.render('.inside', { url: '/page2' })
+
+                await wait()
+
+                jasmine.respondWith({
+                  responseText: `
+                    <div class="outside">
+                      new outside
+                    </div>
+                    <div class='inside'>
+                      new inside
+                    </div>
+                  `,
+                  responseHeaders: { 'X-Up-Dismiss-Layer': 'null' }
+                })
+
+                await expectAsync(updatePromise).toBeRejectedWith(jasmine.any(up.Aborted))
+
+                expect(up.layer.count).toBe(1)
+                expect(outsideSpy).toHaveBeenCalledWith('new outside')
+              })
+            })
+
             describe('when a response closes the overlay via X-Up-Events', function() {
 
               it('updates the [up-hungry] element with the discarded overlay content', async function() {
