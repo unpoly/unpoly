@@ -487,7 +487,7 @@ up.status = (function() {
   @stable
   */
 
-  up.on('up:fragment:compile', (_event, newFragment) => {
+  up.on('up:compilers:before', (_event, newFragment) => {
     updateNavsAround(newFragment, { newLinks: true, anyLocationChanged: false })
   })
 

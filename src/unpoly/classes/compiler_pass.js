@@ -41,7 +41,7 @@ up.CompilerPass = class CompilerPass {
   }
 
   _emitCompileEvent() {
-    up.emit(this._root, 'up:fragment:compile', { log: false })
+    up.emit(this._root, 'up:compilers:before', { log: false })
   }
 
   _emitInsertedEvent() {
