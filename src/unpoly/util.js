@@ -293,8 +293,31 @@ up.util = (function() {
   }
 
   /*-
+  Creates an object from the given array and mapping function.
+
+  ## Example
+
+  The mapping function is called with each array element. It must return a tuple of the object key and value:
+
+  ```js
+  up.util.mapObject(['alice', 'bob'], function(element) {
+    return [element.toUpperCase(), element.length]
+  })
+  // result: { ALICE: 5, BOB: 3 }
+  ```
+
+  @param {Array} array
+    The array from which to create an object.
+
+    Each array element will become a property of the created object.
+
+  @param {Function(element): Pair<string, any>} mapping
+    A function that is called with each array element.
+
+    It must return a tuple of the object key and value.
+
   @function up.util.mapObject
-  @internal
+  @stable
   */
   function mapObject(array, pairer) {
     return Object.fromEntries(array.map(pairer))

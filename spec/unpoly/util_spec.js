@@ -920,6 +920,7 @@ describe('up.util', () => {
     })
 
     describe('up.util.mapObject()', function() {
+
       it('creates an object from the given array and pairer', function() {
         const array = ['foo', 'bar', 'baz']
         const object = up.util.mapObject(array, (str) => [`${str}Key`, `${str}Value`])
@@ -929,6 +930,12 @@ describe('up.util', () => {
           bazKey: 'bazValue'
         })
       })
+
+      it('returns an empty object if the given array is empty', function() {
+        const object = up.util.mapObject([], (str) => [`${str}Key`, `${str}Value`])
+        expect(object).toEqual({})
+      })
+
     })
 
     describe('up.util.spanObject()', function() {
