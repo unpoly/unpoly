@@ -1034,7 +1034,11 @@ up.fragment = (function() {
     if (!oldElementMode) { return }
 
     let partner
-    let partnerSelector = up.fragment.toTarget(oldElement)
+    let partnerSelector = up.fragment.tryToTarget(oldElement)
+    if (!partnerSelector) {
+      up.warn('[up-keep]', 'Cannot keep untargetable %o', oldElement)
+    }
+
     const lookupOpts = { layer: options.layer }
 
     if (options.descendantsOnly) {

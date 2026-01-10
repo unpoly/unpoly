@@ -16314,6 +16314,28 @@ describe('up.fragment', function() {
         expect(newTextDuringTransition).toEqual('new-foo old-bar')
       })
 
+      it('prints a warning when the [up-keep] element is not targetable, but does not crash the render pass', async function() {
+        spyOn(up, 'warn').and.callThrough()
+
+        let html = (prefix) => `
+          <div id="target">
+            <span up-keep>${prefix} keepable</span>
+            <span id="content">${prefix} content</span>
+          </div>
+        `
+
+        htmlFixture(html('old'))
+
+        let renderPromise = up.render({ fragment: html('new') })
+
+        await expectAsync(renderPromise).toBeResolvedTo(jasmine.any(up.RenderResult))
+
+        expect('#target [up-keep]').toHaveText('new keepable')
+        expect('#target #content').toHaveText('new content')
+
+        expect(up.warn).toHaveBeenCalledWith('[up-keep]', jasmine.stringMatching(/Cannot keep untargetable/i), jasmine.anything())
+      })
+
       function keepableFixture(html, renderOptions = {}) {
         // Make sure we insert the element through rendering, so we can test
         // our own HTML pollution with [up-etag], [up-time], [up-source].
