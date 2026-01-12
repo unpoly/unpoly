@@ -21,6 +21,8 @@ Unpoly is mostly a superset of Rails UJS, so we convert attributes like `[data-m
 
   function defineMacro(elementSelector, relevantFn) {
     up.macro(`:is([data-confirm], [data-method]):is(${elementSelector})`, function(element) {
+      // It would be nicer to test isRailsUJSLoaded() once at up:framework:boot,
+      // but this would make it harder to test.
       if (isRailsUJSLoaded() && relevantFn(element)) {
         swapAttr(element, 'data-confirm', 'up-confirm')
         swapAttr(element, 'data-method', 'up-method')
