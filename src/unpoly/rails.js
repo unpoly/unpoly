@@ -6,25 +6,29 @@ Unpoly is mostly a superset of Rails UJS, so we convert attributes like `[data-m
 */
 (function() {
 
-  const e = up.element
-
-  function isRails() {
+  function isRailsUJSLoaded() {
     return window.Rails || // rails-ujs gem
       window.jQuery?.rails // jquery-ujs gem
   }
 
-  for (let feature of ['method', 'confirm']) {
-    const upAttribute = `up-${feature}`
-    const dataAttribute = `data-${feature}`
+  function swapAttr(element, dataAttr, upAttr) {
+    if (element.hasAttribute(dataAttr)) {
+      let dataValue = element.getAttribute(dataAttr)
+      up.element.setMissingAttr(element, upAttr, dataValue)
+      element.removeAttribute(dataAttr)
+    }
+  }
 
-    up.macro(`a[${dataAttribute}]`, function(link) {
-      if (isRails() && up.link.isFollowable(link)) {
-        e.setMissingAttr(link, upAttribute, link.getAttribute(dataAttribute))
-        // Remove the [data-...] attribute so links will not be
-        // handled a second time by Rails UJS.
-        link.removeAttribute(dataAttribute)
+  function defineMacro(elementSelector, relevantFn) {
+    up.macro(`:is([data-confirm], [data-method]):is(${elementSelector})`, function(element) {
+      if (isRailsUJSLoaded() && relevantFn(element)) {
+        swapAttr(element, 'data-confirm', 'up-confirm')
+        swapAttr(element, 'data-method', 'up-method')
       }
     })
   }
+
+  defineMacro('a[href], [up-href]', (el) => up.link.isFollowable(el))
+  defineMacro('form, input[type=submit], button[type=submit], button:not([type])', (el) => up.form.isSubmittable(up.form.get(el)))
 
 })()
