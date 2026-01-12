@@ -25,33 +25,11 @@ up.LayerStack = class LayerStack {
     // for each descendant to finish its closing animation.
     const closeOptions = { ...options, preventable: false }
 
-    // TODO: Consider forbidding { peel: true } and force people to use { peel: 'dismiss' }
+    // We allow to dismiss using either { peel: 'dismiss' } (explicit) or { peel: true } (don't care).
     const closeMethod = options.intent === 'accept' ? 'accept' : 'dismiss'
 
     for (let descendant of descendants) {
       descendant[closeMethod](':peel', closeOptions)
-    }
-  }
-
-  peel2(layer, options) {
-    // We will dismiss descendants closer to the front first to prevent
-    // recursive calls of peel().
-    const descendants = u.reverse(layer.descendants)
-
-    // Callers expect the effects of peel() to manipulate the layer stack sync.
-    // Because of this we will dismiss alle descendants sync rather than waiting
-    // for each descendant to finish its closing animation.
-    const closeOptions = { ...options, preventable: false }
-
-    // TODO: Consider forbidding { peel: true } and force people to use { peel: 'dismiss' }
-    const closeMethod = options.intent === 'accept' ? 'accept' : 'dismiss'
-
-    console.debug("intent %o => closeMethod %o", options.intent, closeMethod)
-
-
-    for (let descendant of descendants) {
-      // descendant[closeMethod](':peel', closeOptions)
-      descendant.dismiss(':peel', closeOptions)
     }
   }
 

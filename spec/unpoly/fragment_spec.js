@@ -5181,6 +5181,24 @@ describe('up.fragment', function() {
                 expect(up.layer.current).toHaveText(/new text/)
               })
 
+              it('dismisses multiple overlays in the order of topmost layer to root', async function() {
+                let dismissedModes = []
+                up.on('up:layer:dismiss', ({ layer }) => dismissedModes.push(layer.mode))
+
+                makeLayers([
+                  { target: '.element', content: 'old text in root' },
+                  { target: '.element', content: 'old text in modal', mode: 'modal' },
+                  { target: '.element', content: 'old text in drawer', mode: 'drawer' }
+                ])
+                await wait()
+
+                up.render('.element', { content: 'new text', layer: 'root', peel: true })
+                await wait()
+
+                expect(up.layer.current.mode).toBe('root')
+                expect(dismissedModes).toEqual(['drawer', 'modal'])
+              })
+
               it('not not allow up:layer:dismiss handlers to prevent the peeling', async function() {
                 let dismissListener = jasmine.createSpy('up:layer:dismiss listener').and.callFake((event) => event.preventDefault())
                 up.on('up:layer:dismiss', dismissListener)
