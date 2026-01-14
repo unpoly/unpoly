@@ -8291,6 +8291,73 @@ describe('up.fragment', function() {
 
         })
 
+        describe('with { scroll: Number } or a number-parseable string', function() {
+
+          it('scrolls the top to the given positive position', async function() {
+            let html = (text) => `
+              <div up-viewport id="viewport" style="height: 200px; overflow-y: scroll">
+                <div style="height: 1000px">
+                  ${text}
+                </div>
+              </div>
+            `
+            const [viewport] = htmlFixtureList(html('old text'))
+            viewport.scrollTop = 130
+            await wait()
+
+            expect(viewport).toBeScrolledTo(130)
+
+            up.render({ fragment: html('new text'), scroll: 270 })
+            await wait()
+
+            expect('#viewport').toHaveText('new text')
+            expect('#viewport').toBeScrolledTo(270)
+          })
+
+          it('scrolls the bottom to the given negative position', async function() {
+            let html = (text) => `
+              <div up-viewport id="viewport" style="height: 200px; overflow-y: scroll">
+                <div style="height: 1000px">
+                  ${text}
+                </div>
+              </div>
+            `
+            const [viewport] = htmlFixtureList(html('old text'))
+            viewport.scrollTop = 130
+            await wait()
+
+            expect(viewport).toBeScrolledTo(130)
+
+            up.render({ fragment: html('new text'), scroll: -50 })
+            await wait()
+
+            expect('#viewport').toHaveText('new text')
+            expect('#viewport').toBeScrolledTo(1000 - 200 - 50)
+          })
+
+          it('scrolls the bottom with { scroll: -0 } (negative zero)', async function() {
+            let html = (text) => `
+              <div up-viewport id="viewport" style="height: 200px; overflow-y: scroll">
+                <div style="height: 1000px">
+                  ${text}
+                </div>
+              </div>
+            `
+            const [viewport] = htmlFixtureList(html('old text'))
+            viewport.scrollTop = 130
+            await wait()
+
+            expect(viewport).toBeScrolledTo(130)
+
+            up.render({ fragment: html('new text'), scroll: -0 })
+            await wait()
+
+            expect('#viewport').toHaveText('new text')
+            expect('#viewport').toBeScrolledTo(1000 - 200)
+          })
+
+        })
+
         describe('with an array of { scroll } options', function() {
 
           mockRevealBeforeEach()
@@ -8433,6 +8500,42 @@ describe('up.fragment', function() {
             })
 
             expect(this.revealedText).toEqual(jasmine.arrayWithExactContents(['new target1', 'new target2']))
+          })
+
+          it('allows to scroll to absolute pixel positions', async function() {
+            fixtureStyle(`
+              #viewport1, #viewport2 {
+                height: 150px;
+                overflow-y: scroll;
+              }
+            `)
+
+            fixtureStyle(`
+              #target1, #target2 {
+                height: 2000px;
+              }
+            `)
+
+            htmlFixtureList(`
+              <div id="viewport1" up-viewport>
+                <div id="target1">old target1</div>
+              </div>
+              <div id="viewport2" up-viewport>
+                <div id="target2">old target2</div>
+              </div>
+            `)
+
+            await up.render({
+              target: '#target1, #target2',
+              document: `
+                <div id="target1">new target1</div>
+                <div id="target2">new target2</div>
+              `,
+              scrollMap: { '#target1': 123, '#target2': 456 }
+            })
+
+            expect(document.querySelector('#viewport1')).toBeScrolledTo(123)
+            expect(document.querySelector('#viewport2')).toBeScrolledTo(456)
           })
 
           it('allows to scroll viewports that were not targeted', async function() {

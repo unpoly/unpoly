@@ -720,7 +720,13 @@ up.viewport = (function() {
   function setScrollPositions(viewports, tops, defaultTop, behavior = 'instant') {
     for (let viewport of viewports) {
       const key = scrollTopKey(viewport)
-      const top = tops[key] || defaultTop
+      let top = tops[key] || defaultTop
+
+      // Negative numbers scroll to the bottom, leaving an unscrolled buffer.
+      if (top < 0 || Object.is(top, -0)) {
+        top += viewport.scrollHeight - viewport.clientHeight
+      }
+
       viewport.scrollTo({ top, behavior })
     }
   }

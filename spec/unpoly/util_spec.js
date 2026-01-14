@@ -883,7 +883,7 @@ describe('up.util', () => {
 
       it('passes the iteration index as second argument to the given function', function() {
         const array = ["apple", "orange", "cucumber"]
-        const mapped = up.util.map(array, (element, i) => i)
+        const mapped = up.util.map(array, (i) => i)
         expect(mapped).toEqual([0, 1, 2])
       })
 
@@ -1203,7 +1203,7 @@ describe('up.util', () => {
 //    describe 'up.util.argNames', ->
 //
 //      it 'returns an array of argument names for the given function', ->
-//        fun = ($element, data) ->
+//        fun = ($data) ->
 //        expect(up.util.argNames(fun)).toEqual(['$element', 'data'])
 
     describe('up.util.pick', function() {
@@ -3480,6 +3480,63 @@ describe('up.util', () => {
       })
 
     })
+    
+    describe('parseNumber()', function() {
 
+      it("parses the given string as an integer", function() {
+        expect(up.util.parseNumber('123')).toBe(123)
+      })
+  
+      it("parses the given string as a float", function() {
+        expect(up.util.parseNumber('123.45')).toBe(123.45)
+      })
+
+      it("parses the given string as a float with omitted integer part", function() {
+        expect(up.util.parseNumber('.45')).toBe(0.45)
+      })
+
+      it("ignores underscores for digit groups", function() {
+        expect(up.util.parseNumber('123_000')).toBe(123000)
+      })
+  
+      it("parses a negative number", function() {
+        expect(up.util.parseNumber('-123')).toBe(-123)
+      })
+  
+      it("parses negative zero (-0)", function() {
+        let parsed = up.util.parseNumber('-0')
+        expect(Object.is(parsed, -0)).toBe(true)
+      })
+  
+      it("returns undefined for a string cannot be parsed as a number", function() {
+        expect(up.util.parseNumber('bar')).toBeUndefined()
+      })
+  
+      it("returns undefined for undefined", function() {
+        expect(up.util.parseNumber(undefined)).toBeUndefined()
+      })
+
+      it("returns undefined for null", function() {
+        expect(up.util.parseNumber(undefined)).toBeUndefined()
+      })
+
+      it("returns undefined for a single underscore", function() {
+        expect(up.util.parseNumber("_")).toBeUndefined()
+      })
+
+      it("returns undefined for a single dot", function() {
+        expect(up.util.parseNumber(".")).toBeUndefined()
+      })
+
+      it("returns undefined for a single dash", function() {
+        expect(up.util.parseNumber("-")).toBeUndefined()
+      })
+
+      it('returns a number value without parsing', function() {
+        expect(up.util.parseNumber(123)).toBe(123)
+      })
+
+    })
+    
   })
 })

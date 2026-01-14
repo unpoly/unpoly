@@ -19,7 +19,7 @@ up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
       case 'top':
         return this._scrollTo(0)
       case 'bottom':
-        return this._scrollTo(99999999)
+        return this._scrollTo(-0)
       case 'layer':
         return this._revealLayer()
       case 'main':
@@ -35,7 +35,9 @@ up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
       case true:
         return this._revealElement(this.fragment)
       default:
-        if (u.isString(opt)) {
+        if (u.isNumber(opt)) {
+          return this._scrollTo(opt)
+        } else if (u.isString(opt)) {
           return this._revealSelector(opt)
         }
     }

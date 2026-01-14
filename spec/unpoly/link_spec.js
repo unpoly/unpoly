@@ -795,10 +795,20 @@ describe('up.link', function() {
         expect(options.animation).toBe('move-from-top')
       })
 
-      it('parses an [up-scroll] attribute', function() {
-        const link = fixture('a[href="/foo"][up-scroll="top"]')
-        const options = up.link.followOptions(link)
-        expect(options.scroll).toBe('top')
+      describe('[up-scroll]', function() {
+
+        it('parses a scrolling option keyword', function() {
+          const link = fixture('a[href="/foo"][up-scroll="top"]')
+          const options = up.link.followOptions(link)
+          expect(options.scroll).toBe('top')
+        })
+
+        it('parses a pixel value as a number (not as a string)', function() {
+          const link = fixture('a[href="/foo"][up-scroll="367"]')
+          const options = up.link.followOptions(link)
+          expect(options.scroll).toBe(367)
+        })
+
       })
 
       it('parses an [up-scroll-behavior] attribute', function() {

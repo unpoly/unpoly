@@ -2324,6 +2324,124 @@ up.util = (function() {
     return mapObject(keys, (key) => [key, value])
   }
 
+  /*-
+  Parses the given value and returns a number.
+
+  ## Example
+
+  ```js
+  up.util.parseNumber("123.4") // result: 123.4
+  ```
+
+  ## Supported values
+
+  The list of supported notations differ slightly from [`parseFloat()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseFloat)
+  and [`Number()`](https://www.w3schools.com/jsref/jsref_number.asp):
+
+  <table>
+    <thead>
+      <tr>
+        <th colspan="2">Supported argument</th>
+        <th>Return value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>✔️ Zero</td>
+        <td><code>"0"</code></td>
+        <td><code>0</code></td>
+      </tr>
+      <tr>
+        <td>✔️ Positive integer</td>
+        <td><code>"123"</code></td>
+        <td><code>123</code></td>
+      </tr>
+      <tr>
+        <td>✔️ Negative value</td>
+        <td><code>"-5"</code></td>
+        <td><code>-5</code></td>
+      </tr>
+      <tr>
+        <td>✔️ Floating point number</td>
+        <td><code>"4.6"</code></td>
+        <td><code>4.6</code></td>
+      </tr>
+      <tr>
+        <td>✔️ Numeric separators</td>
+        <td><code>"1_000_000"</code></td>
+        <td><code>1000000</code></td>
+      </tr>
+      <tr>
+        <td>✔️ Already a number</td>
+        <td><code>10</code></td>
+        <td><code>10</code></td>
+      </tr>
+      <tr>
+        <td>✔️ Negative zero</td>
+        <td><code>"-0"</code></td>
+        <td><code>-0</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  If the argument cannot be parsed, it returns `undefined`.
+  This function never throws an error and never returns `NaN`.
+
+  <table>
+    <thead>
+      <tr>
+        <th colspan="2">Unsupported argument</th>
+        <th>Return value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>❌ Unparseable format</td>
+        <td><code>"foo"</code></td>
+        <td><code>undefined</code></td>
+      </tr>
+      <tr>
+        <td>❌ Missing argument</td>
+        <td><code>undefined</code></td>
+        <td><code>undefined</code></td>
+      </tr>
+      <tr>
+        <td>❌ Infinity</td>
+        <td><code>"Infinity"</code></td>
+        <td><code>undefined</code></td>
+      </tr>
+      <tr>
+        <td>❌ Exponential notation</td>
+        <td><code>"314e-2"</code></td>
+        <td><code>undefined</code></td>
+      </tr>
+      <tr>
+        <td>❌ Unparseable type</td>
+        <td><code>{ foo: 3 }</code></td>
+        <td><code>undefined</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  @function up.util.parseNumber
+  @param {string|number} value
+    The value to parse, usually a string.
+
+    If a number is given, it is returned without further processing.
+  @return {number|undefined}
+    The parsed number value.
+
+    If the argument cannot be parsed, `undefined` is returned.
+  @experimental
+  */
+  function parseNumber(str) {
+    if (isNumber(str)) {
+      return str
+    } else if (isString(str) && /^-?\.?\d[\d._]*$/.test(str)) {
+      return parseFloat(str.replaceAll('_', ''))
+    }
+  }
+
   function assert(value, testFn = isTruthy) {
     if (testFn(value)) {
       return value
@@ -2448,6 +2566,7 @@ up.util = (function() {
     expressionOutline,
     parseString,
     assert,
+    parseNumber,
     // partialRight,
   }
 })()
