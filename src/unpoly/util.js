@@ -2324,6 +2324,15 @@ up.util = (function() {
     return mapObject(keys, (key) => [key, value])
   }
 
+  // TODO: Publish as experimental
+  function parseNumber(str) {
+    if (isNumber(str)) {
+      return str
+    } else if (isString(str) && /^-?\.?\d[\d._]*$/.test(str)) {
+      return parseFloat(str.replaceAll('_', ''))
+    }
+  }
+
   function assert(value, testFn = isTruthy) {
     if (testFn(value)) {
       return value
@@ -2448,6 +2457,7 @@ up.util = (function() {
     expressionOutline,
     parseString,
     assert,
+    parseNumber,
     // partialRight,
   }
 })()

@@ -11,7 +11,7 @@ or by passing a [`{ scroll }`](/up.render#options.scroll) option.
 When [navigating](/navigation), Unpoly will try a **sequence of scroll strategies** that works for most cases:
 
 1. If the URL has a `#hash`, scroll to a fragment matching tht hash.
-2. If updating a [main target](/up-main), reset scroll positions.\
+2. If updating a [main target](/up-main), [scroll to the top](#top-position) of its viewport.
    The assumption being that we navigated to a new screen.
 3. Otherwise don't scroll.\
    The assumption being that we updated a minor fragment.
@@ -95,7 +95,47 @@ To reveal the updated layer's [main element](/up-main), set `[up-scroll="main"]`
 ```
 
 
-## Preserving scroll positions
+
+
+
+## Setting absolute scroll positions {#absolute-positions}
+
+### Scrolling to the top {#top-position}
+
+The reset scroll positions to the top, set `[up-scroll="top"]`:
+
+```html
+<a href="/list" up-follow up-scroll="top">Back to list</a> <!-- mark: up-scroll="top" -->
+```
+
+This affects all viewports that are ancestors or descendants of the updated fragment.
+
+### Scrolling to the bottom {#bottom-position}
+
+The scroll to the bottom, set `[up-scroll="bottom"]`:
+
+```html
+<a href="/chat" up-follow up-scroll="bottom">Open chat</a> <!-- mark: up-scroll="bottom" -->
+```
+
+This affects all viewports that are ancestors or descendants of the updated fragment.
+
+### Scrolling to a pixel position {#pixel-position}
+
+To scroll a specific pixel position from the top, set a number value:
+
+```html
+<a href="/list" up-follow up-scroll="35">Back to list</a> <!-- mark: up-scroll="35" -->
+```
+
+To scroll to the bottom, but leave a margin of some pixels, set a <i>negative</i> number value:
+
+
+```html
+<a href="/messages" up-follow up-scroll="-40">Latest messages</a> <!-- mark: up-scroll="-40" -->
+```
+
+## Preserving scroll positions {#preserving}
 
 ### Don't scroll {#false}
 
@@ -109,6 +149,7 @@ when [navigating](/navigation), you can disable it like so:
 
 When rendering without [navigation](/navigation), no scrolling will happen by default.
 
+
 ### Preserving current scroll positions {#keep}
 
 When you update a scrolled viewport, that new viewport element will be scrolled to the top. This is the default browser behavior for newly inserted elements.
@@ -120,7 +161,7 @@ To do so, set `[up-scroll="keep"]`:
 <a href="/list" up-follow up-scroll="keep">Reload list</a> <!-- mark: up-scroll="keep" -->
 ```
 
-Internally Unpoly will measure scroll positions before the update, and restore the same positions after the update. 
+Internally Unpoly will measure scroll positions before the update, and restore the same positions after the update.
 
 
 ### Restoring previous scroll positions {#restore}
@@ -134,29 +175,6 @@ Set `[up-scroll="restore"]` to restore the last known scroll positions for the u
 
 Before a fragment update, Unpoly will save the scroll position for the current URL.\
 You can prevent this by setting `[up-save-scroll="false"]`.
-
-
-## Resetting scroll positions
-
-### Scrolling to the top {#top}
-
-The reset scroll positions to the top, set `[up-scroll="top"]`:
-
-```html
-<a href="/list" up-follow up-scroll="top">Back to list</a> <!-- mark: up-scroll="top" -->
-```
-
-This affects all viewports that are ancestors or descendants of the updated fragment.
-
-### Scrolling to the bottom {#bottom}
-
-The scroll to the bottom, set `[up-scroll="bottom"]`:
-
-```html
-<a href="/chat" up-follow up-scroll="bottom">Open chat</a> <!-- mark: up-scroll="bottom" -->
-```
-
-This affects all viewports that are ancestors or descendants of the updated fragment.
 
 
 ## Sequence of scroll strategies {#sequence}
@@ -178,8 +196,6 @@ up.render({ url: '/path#section', scroll: ['hash', 'top'] }) // mark: scroll: ['
 
 
 ## Scrolling multiple viewports {#multiple-viewports}
-
-<span class="todo">We don't parse that map yet</span>
 
 When [updating multiple fragments](/targeting-fragments#multiple), any `[up-scroll]` attribute (or `{ scroll }` option)
 will only be applied to the *first* fragment. This is the behavior desired when you only have a single viewport,

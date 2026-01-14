@@ -12,12 +12,16 @@ up.FragmentProcessor = class FragmentProcessor extends up.Record {
   }
 
   process(opt) {
-    let preprocessed = u.getComplexTokens(opt)
+    let preprocessed = this.preprocessOnce(opt)
     return this.tryProcess(preprocessed)
   }
 
+  preprocessOnce(opt) {
+    return u.getComplexTokens(opt)
+  }
+
   tryProcess(opt) {
-    if (u.isArray(opt)) {
+   if (u.isArray(opt)) {
       return this.processArray(opt)
     }
 

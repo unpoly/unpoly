@@ -48,6 +48,10 @@ up.OptionsParser = class OptionsParser {
     this.parse(e.booleanOrNumberAttr, key, keyOptions)
   }
 
+  booleanOrNumberOrString(key, keyOptions) {
+    this.parse(e.booleanOrNumberOrStringAttr, key, keyOptions)
+  }
+
   json(key, keyOptions) {
     this.parse(e.jsonAttr, key, keyOptions)
   }

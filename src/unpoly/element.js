@@ -1154,6 +1154,24 @@ up.element = (function() {
   }
 
   /*-
+  Returns the given attribute value cast as boolean or number.
+
+  If the attribute value cannot be cast, returns the attribute value unchanged.
+
+  @function up.element.booleanOrNumberOrStringAttr
+  @param {Element} element
+    The element from which to retrieve the attribute value.
+  @param {string} attribute
+    The attribute name.
+  @return {boolean|string|undefined}
+    The cast attribute value.
+  @internal
+  */
+  function booleanOrNumberOrStringAttr(element, attribute) {
+    return parseAttr(element, attribute, tryParseNumber, tryParseString)
+  }
+
+  /*-
   Returns the value of the given attribute on the given element, cast to a number.
 
   If the attribute value cannot be cast to a number, `undefined` is returned.
@@ -1172,10 +1190,8 @@ up.element = (function() {
   }
 
   function tryParseNumber(value) {
-    value = value.replaceAll('_', '')
-    if (value.match(/^-?[\d.]+$/)) {
-      return parseFloat(value)
-    }
+    // Call without second argument
+    return u.parseNumber(value)
   }
 
   /*-
@@ -1630,6 +1646,7 @@ up.element = (function() {
     callbackAttr,
     booleanOrStringAttr,
     booleanOrNumberAttr,
+    booleanOrNumberOrStringAttr,
     setStyleTemp,
     style: computedStyle,
     styleNumber: computedStyleNumber,

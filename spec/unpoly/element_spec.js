@@ -1176,7 +1176,7 @@ describe('up.element', function() {
     })
   })
 
-  describe('up.element.numberAttr', function() {
+  fdescribe('up.element.numberAttr', function() {
 
     it("returns the given attribute's value parsed as an integer", function() {
       const element = up.element.createFromHTML('<div foo="123">/div>')
@@ -1188,11 +1188,6 @@ describe('up.element', function() {
       expect(up.element.numberAttr(element, 'foo')).toBe(123.4)
     })
 
-    it("returns undefined if the given attribute value cannot be parsed as a number", function() {
-      const element = up.element.createFromHTML('<div foo="bar">/div>')
-      expect(up.element.numberAttr(element, 'foo')).toBeUndefined()
-    })
-
     it("ignores underscores for digit groups", function() {
       const element = up.element.createFromHTML('<div foo="123_000">/div>')
       expect(up.element.numberAttr(element, 'foo')).toBe(123000)
@@ -1201,6 +1196,27 @@ describe('up.element', function() {
     it("parses a negative number", function() {
       const element = up.element.createFromHTML('<div foo="-123">/div>')
       expect(up.element.numberAttr(element, 'foo')).toBe(-123)
+    })
+
+    it("parses negative zero (-0)", function() {
+      const element = up.element.createFromHTML('<div foo="-0">/div>')
+      let parsed = up.element.numberAttr(element, 'foo')
+      expect(Object.is(parsed, -0)).toBe(true)
+    })
+
+    it("returns undefined if the given attribute value cannot be parsed as a number", function() {
+      const element = up.element.createFromHTML('<div foo="bar">/div>')
+      expect(up.element.numberAttr(element, 'foo')).toBeUndefined()
+    })
+
+    it("returns undefined if the given attribute is empty", function() {
+      const element = up.element.createFromHTML('<div foo="">/div>')
+      expect(up.element.numberAttr(element, 'foo')).toBeUndefined()
+    })
+
+    it("returns undefined if the given attribute is missing entirely", function() {
+      const element = up.element.createFromHTML('<div>/div>')
+      expect(up.element.numberAttr(element, 'foo')).toBeUndefined()
     })
   })
 

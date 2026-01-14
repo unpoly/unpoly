@@ -199,6 +199,15 @@ up.viewport = (function() {
     return up.migrate.formerlyAsync?.('up.reveal()') || true
   })
 
+  // function scroll(element, top, options = {}) {
+  //   let viewport = closest(element)
+  //   let { behavior = 'instant' } = options
+  //   if (top < 0 || Object.is(top, -0)) {
+  //     top = viewport.scrollHeight - viewport.clientHeight - top
+  //   }
+  //   viewport.scrollTo({ top, behavior })
+  // }
+
   /*-
   Focuses the given element.
 
@@ -720,7 +729,13 @@ up.viewport = (function() {
   function setScrollPositions(viewports, tops, defaultTop, behavior = 'instant') {
     for (let viewport of viewports) {
       const key = scrollTopKey(viewport)
-      const top = tops[key] || defaultTop
+      let top = tops[key] || defaultTop
+
+      // Negative numbers scroll to the bottom, leaving an unscrolled buffer.
+      if (top < 0 || Object.is(top, -0)) {
+        top += viewport.scrollHeight - viewport.clientHeight
+      }
+
       viewport.scrollTo({ top, behavior })
     }
   }
@@ -1048,6 +1063,7 @@ up.viewport = (function() {
     reveal,
     revealHash,
     revealHashFn,
+    scroll,
     firstHashTarget,
     config,
     get: closest,
