@@ -774,19 +774,19 @@ up.script = (function() {
   might attach the location and names of its marker pins:
 
   ```html
-  <div class="google-map" up-data="[
+  <div class="google-map" up-data="{ pins: [
     { lat: 48.36, lng: 10.99, title: 'Friedberg' },
     { lat: 48.75, lng: 11.45, title: 'Ingolstadt' }
-  ]"></div>
+  ] }"></div>
   ```
 
   The attribute value will be parsed as [relaxed JSON](/relaxed-json).
   The parsed object is handed to your compiler as a second argument:
 
   ```js
-  up.compiler('.google-map', function(element, pins) {
+  up.compiler('.google-map', function(element, data) {
     var map = new google.maps.Map(element)
-    for (let pin of pins) {
+    for (let pin of data.pins) {
       var position = new google.maps.LatLng(pin.lat, pin.lng)
       new google.maps.Marker({ position, map, title: pin.title })
     }

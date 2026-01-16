@@ -49,10 +49,10 @@ For a more powerful alternative you can set the `[up-data]` attribute to any
 [relaxed JSON](/relaxed-json) value:
 
 ```html
-<div class="google-map" up-data="[
+<div class="google-map" up-data="{ pins: [
   { lat: 48.36, lng: 10.99, title: 'Friedberg' },
   { lat: 48.75, lng: 11.45, title: 'Ingolstadt' }
-]"></div>
+] }"></div>
 ```
 
 The JSON will be parsed and passed to your compiler function as a second argument:
@@ -60,7 +60,7 @@ The JSON will be parsed and passed to your compiler function as a second argumen
 ```js
 up.compiler('.google-map', function(element, pins) {
   var map = new google.maps.Map(element)
-  for (let pin of pins) {
+  for (let pin of data.pins) {
     var position = new google.maps.LatLng(pin.lat, pin.lng)
     new google.maps.Marker({ position, map, title: pin.title })
   }
