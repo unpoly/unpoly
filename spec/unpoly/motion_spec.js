@@ -269,12 +269,13 @@ describe('up.motion', function() {
         })
 
         it('defaults to up.motion.config.duration if no { duration } is given', async function() {
-          up.motion.config.duration = 200
+          // Use more than twice the factory duration to provoke a failing test.
+          up.motion.config.duration = 400
 
           const element = fixture('.element', { text: 'content' })
           up.animate(element, 'fade-in', { easing: 'linear' })
 
-          await wait(100)
+          await wait(200)
 
           expect(element).toHaveOpacity(0.5, 0.3)
         })
@@ -561,7 +562,7 @@ describe('up.motion', function() {
       })
     })
 
-    describe('up.morph', function() {
+    describe('up.morph()', function() {
 
       it('transitions between two element by absolutely positioning one element above the other', async function() {
         let tolerance
@@ -586,6 +587,37 @@ describe('up.motion', function() {
         expect($new).toHaveOpacity(0.5, 0.25)
 
         await wait(100 + (tolerance = 110))
+
+        expect($new).toHaveOpacity(1.0, 0.25)
+        expect($old).toBeDetached()
+      })
+
+      it('uses a default duration from up.motion.config.duration if no { duration } is given', async function() {
+        // Use more than twice the factory duration to provoke a failing test.
+        up.motion.config.duration = 400
+
+        let tolerance
+        const $old = $fixture('.old').text('old content').css({ width: '200px', height: '200px' })
+        const $new = $fixture('.new').text('new content').css({ width: '200px', height: '200px' }).detach()
+
+        const oldDims = $old[0].getBoundingClientRect()
+
+        up.morph($old, $new, 'cross-fade', { easing: 'linear' })
+
+        await wait()
+
+        expect($old[0].getBoundingClientRect()).toEqual(oldDims)
+        expect($new[0].getBoundingClientRect()).toEqual(oldDims)
+
+        expect($old).toHaveOpacity(1.0, 0.25)
+        expect($new).toHaveOpacity(0.0, 0.25)
+
+        await wait(200)
+
+        expect($old).toHaveOpacity(0.5, 0.25)
+        expect($new).toHaveOpacity(0.5, 0.25)
+
+        await wait(200 + (tolerance = 110))
 
         expect($new).toHaveOpacity(1.0, 0.25)
         expect($old).toBeDetached()
