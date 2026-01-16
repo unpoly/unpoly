@@ -12,6 +12,8 @@
 
 @param [up-scroll-map]
   A [relaxed JSON](/relaxed-json) object mapping fragment selectors to a [scrolling option](/scrolling).
+
+  When a scroll map is given, the [`[up-scroll]`](#up-scroll) attribute is ignored.
   
   See [Scrolling multiple viewports](/scrolling#multiple-viewports) for examples.
 

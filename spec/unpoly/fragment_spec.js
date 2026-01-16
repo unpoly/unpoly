@@ -8264,6 +8264,37 @@ describe('up.fragment', function() {
             expect('#viewport').toBeScrolledTo(460)
           })
 
+          it('keeps scroll positions of a swapped list that is a secondary target', async function() {
+            let html = (prefix) => `
+              <div up-viewport id="viewport1" style="height: 200px; overflow-y: scroll; background-color: #ff6666;">
+                <div style="height: 1000px">
+                  ${prefix} viewport1
+                </div>
+              </div>
+              <div up-viewport id="viewport2" style="height: 200px; overflow-y: scroll; background-color: #66ff66;">
+                <div style="height: 1000px">
+                  ${prefix} viewport2
+                </div>
+              </div>
+            `
+            const [viewport1, _content1, viewport2, _content2] = htmlFixtureList(html('old'))
+            viewport1.scrollTop = 123
+            viewport2.scrollTop = 456
+
+            await wait()
+
+            expect(viewport1).toBeScrolledTo(123)
+            expect(viewport2).toBeScrolledTo(456)
+
+            up.render({ target: '#viewport1, #viewport2', document: html('new'), scroll: 'keep' })
+            await wait()
+
+            expect('#viewport1').toHaveText('new viewport1')
+            expect('#viewport1').toBeScrolledTo(123)
+            expect('#viewport2').toHaveText('new viewport2')
+            expect('#viewport2').toBeScrolledTo(456)
+          })
+
           it('keeps scroll positions when the location changes', async function() {
             up.history.config.enabled = true
 

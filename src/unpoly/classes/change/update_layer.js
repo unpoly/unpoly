@@ -220,12 +220,16 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       step.focusCapsule = focusCapsule
       step.oldScrollTops = oldScrollTops
 
+      // A { scrollMap } option always overrides a { scroll } option.
+      if (step.scrollMap) step.scroll = false
+
       // Since up.motion will call @handleScrollAndFocus() after each fragment,
       // and we only have a single scroll position and focus, only scroll/focus for the first step.
       if (i > 0) {
-        step.scroll = false
-        step.scrollMap = undefined
         step.focus = false
+        step.scrollMap = undefined
+        // The only option we apply to all fragments is { scroll: 'keep' }.
+        if (step.scroll !== 'keep') step.scroll = false
       }
     })
   }

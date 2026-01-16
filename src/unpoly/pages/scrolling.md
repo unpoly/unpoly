@@ -10,7 +10,7 @@ or by passing a [`{ scroll }`](/up.render#options.scroll) option.
 
 When [navigating](/navigation), Unpoly will try a **sequence of scroll strategies** that works for most cases:
 
-1. If the URL has a `#hash`, scroll to a fragment matching tht hash.
+1. If the URL has a `#hash`, scroll to a fragment matching that hash.
 2. If updating a [main target](/up-main), [scroll to the top](#top-position) of its viewport.
    The assumption being that we navigated to a new screen.
 3. Otherwise don't scroll.\
@@ -18,7 +18,14 @@ When [navigating](/navigation), Unpoly will try a **sequence of scroll strategie
 
 You may configure this sequence in `up.fragment.config.autoScroll`.
 
-To apply the default scrolling strategy when *not* [navigating](/navigation), pass `{ scroll: 'auto' }`:
+Because links and forms are considered [navigation](/navigation), is the default scrolling strategy is applied automatically.
+You can explicitly enable the strategy by setting `[up-scroll="auto"]`:
+
+```htmlScroll positions might still reset when you insert a new viewport element 
+<a href="/details" up-follow up-scroll="auto">Show more</a> <!-- mark: up-scroll="auto" -->
+```
+
+To apply the default scrolling strategy from JavaScripts, pass `{ scroll: 'auto' }`:
 
 ```js
 up.render({ url: '/path', scroll: 'auto' }) // mark: scroll: 'auto'
@@ -149,19 +156,26 @@ when [navigating](/navigation), you can disable it like so:
 
 When rendering without [navigation](/navigation), no scrolling will happen by default.
 
+> [note]
+> DOM mutations may still cause scrolling, even when Unpoly does not touch scroll positions.\
+> Set [`[up-scroll="keep"]`](#keep) to force the preservation of scroll positions.  
 
-### Preserving current scroll positions {#keep}
 
-When you update a scrolled viewport, that new viewport element will be scrolled to the top. This is the default browser behavior for newly inserted elements.
+### Keeping current scroll positions {#keep}
 
-You can ask Unpoly to preserve the current scroll position of all [viewports](/up.viewport) that are ancestors or descendants of the updated fragment.
+Scroll positions will reset when you insert a new viewport element (as opposed to updating a child element).
+This is default browser behavior for newly inserted elements.
+
+You can ask Unpoly to preserve the scroll positions of all [viewports](/up.viewport) around the updated fragment. 
 To do so, set `[up-scroll="keep"]`:
 
 ```html
 <a href="/list" up-follow up-scroll="keep">Reload list</a> <!-- mark: up-scroll="keep" -->
 ```
 
-Internally Unpoly will measure scroll positions before the update, and restore the same positions after the update.
+Internally, Unpoly will measure scroll positions before the update, and restore the same positions after the update.
+For this to work, viewports must have a [derivable target selector](/target-derivation),
+e.g. by setting an `[id]` attribute.
 
 
 ### Restoring previous scroll positions {#restore}
@@ -174,7 +188,7 @@ Set `[up-scroll="restore"]` to restore the last known scroll positions for the u
 ```
 
 Before a fragment update, Unpoly will save the scroll position for the current URL.\
-You can prevent this by setting `[up-save-scroll="false"]`.
+You can prevent this by setting [`[up-save-scroll="false"]`](/up-follow#up-save-scroll).
 
 
 ## Sequence of scroll strategies {#sequence}

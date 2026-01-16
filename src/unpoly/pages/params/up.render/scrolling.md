@@ -15,8 +15,11 @@
 
 @param {Object} [options.scrollMap]
   An object mapping fragment selectors to a [scrolling option](/scrolling).
-  
+
+  When a scroll map is given, the [`{ scroll }`](#options.scroll) option is ignored.
+
   See [Scrolling multiple viewports](/scrolling#multiple-viewports) for examples.
+
 
 @param {string} [options.scrollBehavior='instant']
   Whether to [animate the scroll motion](/scroll-tuning#animating-the-scroll-motion)
