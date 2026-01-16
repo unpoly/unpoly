@@ -196,6 +196,10 @@ up.viewport = (function() {
     const motion = new up.RevealMotion(element, options)
     motion.start()
 
+    if (options.focus) {
+      tryFocus(element, { force: true, preventScroll: true })
+    }
+
     return up.migrate.formerlyAsync?.('up.reveal()') || true
   })
 
@@ -379,14 +383,14 @@ up.viewport = (function() {
   @function up.viewport.revealHashFn
   @internal
   */
-  function revealHashFn(hash, { strong, layer, origin, behavior = 'instant' } = {}) {
+  function revealHashFn(hash, { strong, layer, origin, behavior = 'instant', focus = false } = {}) {
     if (!hash) return
 
     let match = firstHashTarget(hash, { layer, origin })
 
     if (match) {
       return () => {
-        let doReveal = () => reveal(match, { top: true, behavior })
+        let doReveal = () => reveal(match, { top: true, behavior, focus })
         if (strong) u.fastTask(doReveal)
         return doReveal()
       }

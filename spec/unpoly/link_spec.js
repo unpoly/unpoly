@@ -3113,6 +3113,7 @@ describe('up.link', function() {
           })
         }
       })
+
     })
 
     if (up.migrate.loaded) {

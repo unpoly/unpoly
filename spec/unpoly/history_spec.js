@@ -1341,7 +1341,7 @@ describe('up.history', function() {
 
       describe('clicking link containing only a #hash in its [href]', function() {
 
-        it("reveals a fragment matching the link's hash, honoring obstructions", async function() {
+        it("reveals and focuses a fragment matching the link's hash, honoring obstructions", async function() {
           location.hash = ''
           await wait()
 
@@ -1357,10 +1357,10 @@ describe('up.history', function() {
 
           expect(up.viewport.root.scrollTop).toBe(5000 - 30)
           expect(location.hash).toBe('#element')
-
+          expect('#element').toBeFocused()
         })
 
-        it("reveals a fragment when the location is already on the link's #hash", async function() {
+        it("reveals and focuses fragment when the location is already on the link's #hash", async function() {
           location.hash = '#element'
           await wait()
 
@@ -1376,6 +1376,7 @@ describe('up.history', function() {
 
           expect(up.viewport.root.scrollTop).toBe(5000 - 30)
           expect(location.hash).toBe('#element')
+          expect('#element').toBeFocused()
         })
 
         it("reveals a fragment within a history-less layer", async function() {
@@ -1423,6 +1424,25 @@ describe('up.history', function() {
 
           expect(revealSpy).not.toHaveBeenCalled()
           expect(location.hash).toBe('#element')
+        })
+
+        it("does not change focus when no fragment matches the link's #hash", async function() {
+          location.hash = ''
+          await wait()
+
+          const input = fixture('input[type=text]')
+          input.focus()
+          expect(input).toBeFocused()
+
+          const link = fixture('a', { href: '#element' })
+
+          // Firefox will only do native #anchor processing when we use link.click(),
+          // but not when we emit a synthetic 'click' event.
+          link.click()
+          await wait(100)
+
+          expect(location.hash).toBe('#element')
+          expect(input).toBeFocused()
         })
 
 
@@ -1731,7 +1751,7 @@ describe('up.history', function() {
 
         describe("when the link's base matches the current location", function() {
 
-          it('reveals a matching fragment, honoring obstructions', async function() {
+          it('reveals and focuses a matching fragment, honoring obstructions', async function() {
             let base = location.pathname + location.search
 
             location.hash = ''
@@ -1749,9 +1769,10 @@ describe('up.history', function() {
 
             expect(up.viewport.root.scrollTop).toBe(5000 - 30)
             expect(location.hash).toBe('#element')
+            expect('#element').toBeFocused()
           })
 
-          it("reveals a matching fragment when we are already on the link's #hash", async function() {
+          it("reveals and focuses a matching fragment when we are already on the link's #hash", async function() {
             let base = location.pathname + location.search
 
             location.hash = '#element'
@@ -1769,6 +1790,7 @@ describe('up.history', function() {
 
             expect(up.viewport.root.scrollTop).toBe(5000 - 30)
             expect(location.hash).toBe('#element')
+            expect('#element').toBeFocused()
           })
 
           it("scrolls to the top if the link's hash is '#top', even if there is no matching fragment", async function() {
@@ -1795,7 +1817,7 @@ describe('up.history', function() {
 
         describe("when the link's base matches another location", function() {
 
-          it('renders the new location and reveals a matching fragment in the new content', async function() {
+          it('renders the new location then reveals and focuses a matching fragment in the new content', async function() {
             location.hash = ''
             await wait()
 
@@ -1818,6 +1840,7 @@ describe('up.history', function() {
             expect('#element').toHaveText('new content')
             expect(up.viewport.root.scrollTop).toBe(5000 - 30)
             expect(location.hash).toBe('#element')
+            expect('#element').toBeFocused()
 
           })
 

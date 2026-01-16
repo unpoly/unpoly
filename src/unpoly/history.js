@@ -641,7 +641,7 @@ up.history = (function() {
       // (2) When following a link to another URL with a #hash URL, Chrome's default
       //     scrolling behavior happens *after* DOMContentLoaded. We wait one more task to
       //     fix the scroll position after the browser did its thing.
-      up.viewport.revealHash(location.hash, { strong: true })
+      up.viewport.revealHash(location.hash, { strong: true, focus: true })
     }
   })
 
@@ -677,7 +677,7 @@ up.history = (function() {
     // (2) Scroll with { behavior: 'auto' } (instead of thew default { behavior: 'instant' }
     //     so it picks up any scroll-behavior CSS rule on the viewport element.
     let layer = up.layer.get(link)
-    let revealFn = up.viewport.revealHashFn(linkHash, { layer, behavior })
+    let revealFn = up.viewport.revealHashFn(linkHash, { layer, behavior, focus: true })
 
     if (revealFn) {
       // (1) Prevent the browser, Unpoly or other JavaScript from following the link.
