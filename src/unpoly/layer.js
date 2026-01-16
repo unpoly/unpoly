@@ -528,8 +528,7 @@ up.layer = (function() {
     @param {Object} [options.data]
       The [data object](/data) object for the overlay's root content element (`{ target }`).
 
-      If the content element already has an `[up-data]` attribute, this option will override
-      individual properties from that attribute.
+      If the content element already has an `[up-data]` attribute, properties from `{ data }` take precedence.
 
     @param {Object} [options.context={}]
       The initial [context](/up.layer.context) object for the new overlay.
@@ -927,8 +926,7 @@ up.layer = (function() {
       The [data object](/data) object for the overlay's root content element (`[up-target]`),
       encoded as [relaxed JSON](/relaxed-json).
 
-      If the content element already has an `[up-data]` attribute, this option will override
-      individual properties from that attribute.
+      If the content element already has an `[up-data]` attribute, properties from `[up-use-data]` take precedence.
 
     @param [up-context]
       The new overlay's [context](/up.layer.context) object, encoded as [relaxed JSON](/relaxed-json).

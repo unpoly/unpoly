@@ -3,8 +3,10 @@
 @param {Object} [options.data]
   The [data object](/data) object for the new fragment.
 
-  If the new fragment already has an `[up-data]` object, this option will override
-  individual properties from that attribute.
+  If the new fragment already has an `[up-data]` object, properties from `{ data }` take precedence.
+
+  When updating [multiple fragments](/targeting-fragments#multiple), `{ data }` is only applied to the primary fragment.
+  To apply data to multiple fragments, use [`{ dataMap }`](/options.dataMap).
 
   See [Overriding data for a render pass](/data#override).
 

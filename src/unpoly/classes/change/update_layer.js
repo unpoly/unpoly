@@ -89,7 +89,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     }
 
     // Make sure only the first step will have scroll-related options.
-    this._setViewportOptions()
+    this._coordinateSteps()
 
     if (this.options.saveScroll) {
       up.viewport.saveScroll({ layer: this.layer })
@@ -210,7 +210,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     return up.radio.hungrySteps(this._getEffectiveRenderOptions())
   }
 
-  _setViewportOptions() {
+  _coordinateSteps() {
     // Store the focused element's selector, scroll position and selection range
     // in an up.FocusCapsule for later restoration.
     let focusCapsule = up.FocusCapsule.preserve(this.layer)
@@ -230,6 +230,10 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
         step.scrollMap = undefined
         // The only option we apply to all fragments is { scroll: 'keep' }.
         if (step.scroll !== 'keep') step.scroll = false
+
+        // Data is only applied to the primary target.
+        // To override data for secondary or hungry targets, use { dataMap }.
+        step.data = undefined
       }
     })
   }

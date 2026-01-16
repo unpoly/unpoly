@@ -13851,6 +13851,50 @@ describe('up.fragment', function() {
           // Non-overridden props are still visible
           expect(dataSpy.calls.argsFor(1)[0].bar).toBe('c')
         })
+
+        it('does not override data for secondary targets', async function() {
+          const html = (prefix) => `
+            <div id="foo">
+              ${prefix} foo
+            </div>  
+
+            <div id="bar">
+              ${prefix} bar
+            </div>  
+          `
+
+          htmlFixtureList(html('old'))
+
+          await up.render({ target: '#foo, #bar', document: html('new'), data: { fooKey: 'fooValue' } })
+
+          expect('#foo').toHaveText('new foo')
+          expect('#bar').toHaveText('new bar')
+
+          expect(up.data('#foo')).toEqual({ fooKey: 'fooValue' })
+          expect(up.data('#bar')).toEqual({ })
+        })
+
+        it('does not override data for hungry targets', async function() {
+          const html = (prefix) => `
+            <div id="foo">
+              ${prefix} foo
+            </div>  
+
+            <div id="bar" up-hungry>
+              ${prefix} bar
+            </div>  
+          `
+
+          htmlFixtureList(html('old'))
+
+          await up.render({ target: '#foo', document: html('new'), data: { fooKey: 'fooValue' } })
+
+          expect('#foo').toHaveText('new foo')
+          expect('#bar').toHaveText('new bar')
+
+          expect(up.data('#foo')).toEqual({ fooKey: 'fooValue' })
+          expect(up.data('#bar')).toEqual({ })
+        })
       })
 
       describe('with { keepData: true } option', function() {

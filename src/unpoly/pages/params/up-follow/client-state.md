@@ -4,6 +4,9 @@
   A [relaxed JSON](/relaxed-json) object that [overrides properties](/data#override)
   from the new fragment's [data](/data).
 
+  When updating [multiple fragments](/targeting-fragments#multiple), `{ data }` is only applied to the primary fragment.
+  To apply data to multiple fragments, set [`[up-use-data-map]`](/up-use-data-map).
+
 @param [up-use-data-map]
   A [relaxed JSON](/relaxed-json) object mapping selectors to [data objects](/data).
 
