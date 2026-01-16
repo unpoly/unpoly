@@ -867,7 +867,7 @@ describe('up.util', () => {
       })
     })
 
-    describe('up.util.map', function() {
+    describe('up.util.map()', function() {
 
       it('creates a new array of values by calling the given function on each item of the given array', function() {
         const array = ["apple", "orange", "cucumber"]
@@ -883,7 +883,7 @@ describe('up.util', () => {
 
       it('passes the iteration index as second argument to the given function', function() {
         const array = ["apple", "orange", "cucumber"]
-        const mapped = up.util.map(array, (i) => i)
+        const mapped = up.util.map(array, (element, i) => i)
         expect(mapped).toEqual([0, 1, 2])
       })
 

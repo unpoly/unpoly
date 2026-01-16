@@ -37,7 +37,7 @@ describe('up.RenderOptions', function() {
 
         expect(options.feedback).toBe(true)
         expect(options.fallback).toBe(true)
-        expect(options.peel).toBe(true)
+        expect(options.peel).toBe('dismiss')
         expect(options.cache).toBe('auto')
       })
 
@@ -142,27 +142,31 @@ describe('up.RenderOptions', function() {
       expect(options.keep).toBe(true)
     })
 
-    describe('with { navigate: true }', () => it('sets defaults appropriate for user navigation', function() {
-      const givenOptions = { navigate: true }
+    describe('with { navigate: true }', function() {
+      it('sets defaults appropriate for user navigation', function() {
+        const givenOptions = { navigate: true }
 
-      const options = preprocessAndDerive(givenOptions)
+        const options = preprocessAndDerive(givenOptions)
 
-      expect(options.feedback).toBe(true)
-      expect(options.fallback).toBe(true)
-      expect(options.history).toBe('auto')
-      expect(options.peel).toBe(true)
-      expect(options.scroll).toBe('auto')
-      expect(options.cache).toBe('auto')
-    }))
+        expect(options.feedback).toBe(true)
+        expect(options.fallback).toBe(true)
+        expect(options.history).toBe('auto')
+        expect(options.peel).toBe('dismiss')
+        expect(options.scroll).toBe('auto')
+        expect(options.cache).toBe('auto')
+      })
+    })
 
-    describe('with { navigate: false }', () => it('only sets defaults appropriate to programmatic fragment changes', function() {
-      const givenOptions = { navigate: false }
-      const options = preprocessAndDerive(givenOptions)
+    describe('with { navigate: false }', function() {
+      it('only sets defaults appropriate to programmatic fragment changes', function() {
+        const givenOptions = { navigate: false }
+        const options = preprocessAndDerive(givenOptions)
 
-      expect(options.history).toBeFalsy()
-      expect(options.cache).toBe(undefined)
-      expect(options.abort).toBe('target')
-    }))
+        expect(options.history).toBeFalsy()
+        expect(options.cache).toBe(undefined)
+        expect(options.abort).toBe('target')
+      })
+    })
 
     it('inherits shared keys from success options', function() {
       const givenOptions = { confirm: 'Really?', origin: document.body, history: true }
