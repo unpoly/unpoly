@@ -5,7 +5,7 @@ Unpoly lets you attach structured data to an element, to be consumed
 by a [compiler](/enhancing-elements) or [event handler](/up.on).
 
 
-## Using data attributes for simple key/value pairs
+## Using data attributes for simple key/value pairs {#data-attributes}
 
 You may use HTML5 [`[data-*]` attributes](https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes)
 to attach simple string values:
@@ -40,7 +40,7 @@ up.compiler('.user', function(element, data) {
 })
 ```
 
-## Describing structured data with `[up-data]`
+## Describing structured data with `[up-data]` {#up-data-attribute}
 
 HTML5 data attributes cannot express structured data, like an array or object.
 Also their values are always strings.
@@ -95,7 +95,7 @@ up.compiler('.user', function(element, data) {
 })
 ```
 
-## Using arbitrary attributes
+## Using arbitrary attributes {#attribute-functions}
 
 Your compilers and event handlers may access any HTML attribute
 via the standard [`Element#getAttribute()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/getAttribute)
@@ -121,7 +121,7 @@ up.compiler('.user', function(element) {
 })
 ```
 
-## Using data in an event handler
+## Using data in an event handler {#event-handlers}
 
 Any attached data will also be passed to event handler registered with `up.on()`.
 
@@ -140,30 +140,72 @@ up.on('click', '.user', function(event, element, data) {
 ```
 
 
-## Accessing data programmatically
+## Accessing data programmatically {#read}
 
-Use [`up.data(element)`](/up-data) to retrieve an object with the given element's data.
+Use [`up.data(element)`](/up-data) to retrieve an object with the given element's data:
+
+```js
+up.data('.user') // result: { age: 18, name: 'Bob' }
+```
 
 
-## Overriding data for a render pass {#overriding}
+## Overriding data for a render pass {#override}
 
 When rendering a single fragment, you can override data keys
-from the server by using the [`[up-use-data]`](/up-follow#up-use-data) attribute:
+from the server HTML. For this use an [`[up-use-data]`](/up-follow#up-use-data) attribute or [`{ data }`](/up.render#options.data) option.
+The new fragment will compile with the given data, without requiring an `[up-data]` attribute in the HTML:
 
 ```html
-<a href="/score" up-target=".score" up-use-data="{ startScore: 1500 }">
+<a href="/score" up-target="#score" up-use-data="{ startScore: 1500 }"> <!-- mark: up-use-data="{ startScore: 1500 }" -->
+  Load score
+</a>
+
+<div id="score">
+  <!-- chip: Will compile with data { startScore: 1500 } -->
+</div>
+```
+
+### Mapping selectors to data {#map}
+
+Use an [`[up-use-data-map]`](/up-follow#up-use-data) attribute or [`{ dataMap }`](/up.render#options.data) option to map selectors to data objects.
+When a selector matches any element within an updated fragment, the matching element is compiled with the mapped data:
+
+```html
+<a
+  href="/score"
+  up-target="#stats"
+  up-use-data-map="{ '#score': { startScore: 1500 }, '#message': { max: 3 } }"> <!-- mark: up-use-data-map="{ '#score': { startScore: 1500 }, '#message': { max: 3 } }" -->
+  Load score
+</a>
+
+<div id="stats">
+  <div id="score">
+    <!-- chip: Will compile with data { startScore: 1500 } -->
+  </div>
+  
+  <div id="message">
+    <!-- chip: Will compile with data { max: 3 } -->
+  </div>
+</div>
+```
+
+You can also map data objects when updating [multiple fragments](/targeting-fragments#multiple) using a comma-separated target:
+
+```html
+<a
+  href="/score"
+  up-target="#score, #message"
+  up-use-data-map="{ '#score': { startScore: 1500 }, '#message': { max: 3 } }">
   Load score
 </a>
 ```
 
-From JavaScript, use the [`{ data }`](/up.render#options.data) option.
 
 
 ## Preserving data through reloads {#preserving}
 
 When [reloading](/up.reload) or [validating](/up.validate) an element,
 you may keep an existing data object by passing it as a [`{ data }`](/up.render#options.data) option.
-As a shortcut may also pass `{ keepData: true }`.
 
 In the example below, `data.counter` is increased by `1` for every compiler pass,
 regardless of what the server renders into `[up-data]`:
@@ -178,6 +220,8 @@ up.compiler('.element', function(element, data) {
   })
 })
 ```
+
+As a shortcut may also pass [`{ keepData: true }`](/up.reload#options.keepData) when reloading.
 
 To keep an entire element, you may also use `[up-keep]`.
 The `up:fragment:keep` event lets you inspect the old and new element

@@ -418,6 +418,7 @@ up.link = (function() {
     parser.boolean('keep', { attr: 'up-use-keep' }) // cannot be [up-keep] because it would affect the link itself
     parser.boolean('hungry', { attr: 'up-use-hungry' }) // cannot be [up-hungry] because it would affect the link itself
     parser.json('data', { attr: 'up-use-data' }) // cannot be [up-data] because it would affect the link itself
+    parser.json('dataMap', { attr: 'up-use-data-map' }) // could be [up-data-map], but be consistent with [up-use-data]
 
     // Lifecycle options
     parser.callback('onLoaded')

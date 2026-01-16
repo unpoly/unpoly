@@ -1137,7 +1137,7 @@ This release includes the following changes:
 - New configuration `up.fragment.config.renderOptions`. This is an object of default render options to always apply, even when not [navigating](/navigation).
 - When calling `up.fragment.get()` with multiple search layers (e.g. `{ layer: "current, parent"}`), Unpoly will now search those layers in the given order.
 - Calling `up.fragment.get()` with an `Element`, that element is returned without further lookups.
-- New `[up-use-data]` attribute allows to [override data](/data#overriding) for the targeted fragment. The corresponding render options is `{ data }`.
+- New `[up-use-data]` attribute allows to [override data](/data#override) for the targeted fragment. The corresponding render options is `{ data }`.
 - The render option `{ useHungry }` has been renamed to `{ hungry }`, but `{ useHungry }` is still accepted as an alias. The corresponding HTML attribute remains `[up-use-hungry]` as to not conflict with a link's or form's own `[up-hungry]` modifier.
 - The render option `{ useKeep }` has been renamed to `{ keep }`, but `{ useKeep }` is still accepted as an alias. The corresponding HTML attribute remains `[up-use-keep]` as to not conflict with a link's or form's own `[up-keep]` modifier.
 

@@ -973,6 +973,34 @@ describe('up.link', function() {
         expect(options.transition).toBe(false)
       })
 
+      describe('[up-use-data-map]', function() {
+
+        it('parses a relaxed JSON value into a { dataMap } option (not { useDataMap })', function() {
+          const link = htmlFixture(`
+            <a
+              href="/dashboard"
+              up-target="#left, #right"
+              up-use-data-map="{ '#left': { leftKey: 'leftValue' }, '#right': { rightKey: 'rightValue' } }"
+            >
+              Link label
+            </a>
+          `)
+          up.hello(link)
+
+          const options = up.link.followOptions(link)
+          expect(options.dataMap).toEqual({ '#left': { leftKey: 'leftValue' }, '#right': { rightKey: 'rightValue' } })
+        })
+
+        it('returns a missing value if the the attribute is missing', function() {
+          const link = fixture('a[href="/foo"][up-follow]')
+          up.hello(link)
+
+          const options = up.link.followOptions(link)
+          expect(options.dataMap).toBeMissing()
+        })
+
+      })
+
       describe('[up-scroll-map]', function() {
 
         it('parses a relaxed JSON value', function() {

@@ -721,7 +721,7 @@ up.script = (function() {
   <span class="person" up-data="{ age: 18, name: 'Bob' }">Bob</span>
   ```
 
-  Calling `up.script.data()` will deserialize the JSON string into a JavaScript object:
+  Calling `up.data()` will deserialize the JSON string into a JavaScript object:
 
   ```js
   up.data('.person') // returns { age: 18, name: 'Bob' }
