@@ -35,17 +35,19 @@ describe('up.Layer.Modal', function() {
           // Delay skipping until beforeEach() so the stylesheet that controls the scroll bar is loaded
           pending("Skipping test on browser without visible scroll bars")
         }
+
+        // Unset any overlay styles from the test runner.
+        fixtureStyle(`
+          body, html {
+            overflow: unset;
+          }
+        `)
       })
 
       it("replaces a scrollbar on <body> with a new scrollbar on its viewport element", async function() {
         fixtureStyle(`
           body {
             overflow-y: scroll;
-          }
-        `)
-        fixtureStyle(`
-          html {
-            overflow-y: unset;
           }
         `)
 
@@ -72,12 +74,7 @@ describe('up.Layer.Modal', function() {
         expect(document.body).toHaveVerticalScrollbar()
       })
 
-      it("replaces a scrollbar on <html> with a new scrollbar on its viewport element 2", async function() {
-        fixtureStyle(`
-          body {
-            overflow-y: unset;
-          }
-        `)
+      it("replaces a scrollbar on <html> with a new scrollbar on its viewport element", async function() {
         fixtureStyle(`
           html {
             overflow-y: scroll;
@@ -90,6 +87,60 @@ describe('up.Layer.Modal', function() {
 
         up.layer.open({ mode: 'modal', content: '<div style="height: 10000px"></div>' })
         expect(up.layer.isOverlay()).toBe(true)
+
+        expect(document.querySelector('up-modal-viewport').offsetLeft).toBe(0)
+        expect(document.querySelector('up-modal-viewport').offsetTop).toBe(0)
+
+        expect(document.querySelector('up-modal-viewport').offsetWidth).toBe(window.innerWidth)
+        expect(document.querySelector('up-modal-viewport').offsetHeight).toBe(window.innerHeight)
+
+        expect(document.documentElement).not.toHaveVerticalScrollbar()
+        expect('up-modal-viewport').toHaveVerticalScrollbar()
+        expect('up-modal-box').not.toHaveVerticalScrollbar()
+        expect('up-modal-content').not.toHaveVerticalScrollbar()
+
+        await up.layer.dismiss()
+
+        expect(document.documentElement).toHaveVerticalScrollbar()
+      })
+
+      fit('allows sticky elements on the root layer to keep their "stuck" positions', async function() {
+        let [_before, sticky, _after] = htmlFixtureList(`
+          <div id="before" style="height: 10000px"></div>
+          <div id="sticky" style="position: sticky; top: 100px; background-color: orange">sticky</div>
+          <div id="after" style="height: 10000px"></div>
+        `)
+
+        // Check that the sticky element is stuck to its positioning parent
+        document.scrollingElement.scrollTop = 16000
+        expect(sticky.getBoundingClientRect().top).toBe(100)
+
+        document.scrollingElement.scrollTop = 16050
+        expect(sticky.getBoundingClientRect().top).toBe(100)
+
+        expect(document).toHaveVerticalScrollbar()
+
+        up.layer.open({ mode: 'modal', content: '<div style="height: 10000px"></div>' })
+        expect(up.layer.isOverlay()).toBe(true)
+
+        await wait(100)
+
+        expect(document).not.toHaveVerticalScrollbar()
+        expect('up-modal-viewport').toHaveVerticalScrollbar()
+
+        // Sticky element is still stuck
+        expect(sticky.getBoundingClientRect().top).toBe(100)
+      })
+
+      fit("replaces a scrollbar on <html> with default overflow (bugfix for Firefox)", async function() {
+        fixture('div', { style: { height: '10000px' } })
+
+        expect(document.documentElement).toHaveVerticalScrollbar()
+
+        up.layer.open({ mode: 'modal', content: '<div style="height: 10000px"></div>' })
+        expect(up.layer.isOverlay()).toBe(true)
+
+        await wait(100)
 
         expect(document.querySelector('up-modal-viewport').offsetLeft).toBe(0)
         expect(document.querySelector('up-modal-viewport').offsetTop).toBe(0)
