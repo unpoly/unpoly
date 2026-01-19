@@ -134,7 +134,7 @@ describe('up.Layer.Modal', function() {
       //   expect(document).not.toHaveVerticalScrollbar()
       // })
 
-      fit('allows sticky elements on the root layer to keep their "stuck" positions', async function() {
+      it('allows sticky elements on the root layer to keep their "stuck" positions', async function() {
         let [_before, sticky, _after] = htmlFixtureList(`
           <div id="before" style="height: 10000px"></div>
           <div id="sticky" style="position: sticky; top: 100px; background-color: orange">sticky</div>
@@ -162,7 +162,7 @@ describe('up.Layer.Modal', function() {
         expect(sticky.getBoundingClientRect().top).toBe(100)
       })
 
-      fit("replaces a scrollbar on <html> with default overflow (bugfix for Firefox)", async function() {
+      it("replaces a scrollbar on <html> with default overflow (bugfix for Firefox)", async function() {
         fixture('div', { style: { height: '10000px' } })
 
         expect(document.documentElement).toHaveVerticalScrollbar()
