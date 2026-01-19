@@ -104,6 +104,36 @@ describe('up.Layer.Modal', function() {
         expect(document.documentElement).toHaveVerticalScrollbar()
       })
 
+      // it("still hides the document scrollbar after <body> was swapped and the overlay was re-attached", async function() {
+      //   fixtureStyle(`
+      //     html {
+      //       overflow-y: scroll;
+      //     }
+      //   `)
+      //
+      //   fixture('div', { style: { height: '10000px' } })
+      //
+      //   expect(document).toHaveVerticalScrollbar()
+      //
+      //   up.layer.open({ mode: 'modal', content: '<div style="height: 10000px"></div>' })
+      //   expect(document).not.toHaveVerticalScrollbar()
+      //   expect('up-modal-viewport').toHaveVerticalScrollbar()
+      //
+      //   await up.render({ target: 'body', document: '<body><div style="height: 10000px">new body</div></body>', peel: false, layer: 'root' })
+      //
+      //   expect(document.body.textContent).toEqual(jasmine.stringContaining('new body'))
+      //   expect(document).not.toHaveVerticalScrollbar()
+      //
+      //   expect('up-modal').toBeAttached()
+      //   expect('up-modal-viewport').toHaveVerticalScrollbar()
+      //
+      //   await up.layer.dismiss()
+      //
+      //   expect(up.layer.mode).toBe('root')
+      //   expect('up-modal').not.toBeAttached()
+      //   expect(document).not.toHaveVerticalScrollbar()
+      // })
+
       fit('allows sticky elements on the root layer to keep their "stuck" positions', async function() {
         let [_before, sticky, _after] = htmlFixtureList(`
           <div id="before" style="height: 10000px"></div>
