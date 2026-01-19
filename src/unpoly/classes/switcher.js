@@ -29,7 +29,7 @@ up.Switcher = class Switcher {
   _trackFieldChanges() {
     let callback = () => this._onFieldChanged()
     return up.migrate.watchForSwitch?.(this._root, callback)
-      || up.watch(this._root, { logPrefix: '[up-switch]' }, callback)
+      || up.watch(this._root, { logPrefix: '[up-switch]', includeDisabled: true }, callback)
   }
 
   _trackNewSwitchees() {
@@ -93,7 +93,7 @@ up.Switcher = class Switcher {
   }
 
   _buildFieldTokens() {
-    let values = up.Params.fromContainer(this._root).values()
+    let values = up.Params.fromContainer(this._root, { includeDisabled: true }).values()
     let tokens = [...values]
 
     let anyPresent = u.some(values, u.isPresent)

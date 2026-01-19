@@ -8,6 +8,7 @@ up.FieldWatcher = class FieldWatcher {
     this._callback = callback
     this._batch = options.batch
     this._logPrefix = options.logPrefix ?? 'up.watch()'
+    this._includeDisabled = options.includeDisabled
 
     this._ensureWatchable()
   }
@@ -167,7 +168,7 @@ up.FieldWatcher = class FieldWatcher {
   }
 
   _readFieldValues() {
-    return up.Params.fromContainer(this._root).toObject()
+    return up.Params.fromContainer(this._root, { includeDisabled: this._includeDisabled }).toObject()
   }
 
   _check(event, fieldOptions = {}) {

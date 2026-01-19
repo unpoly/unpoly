@@ -8565,6 +8565,20 @@ describe('up.form', function() {
             expect($target2).toBeVisible()
           })
 
+          it("switch a disabled select", async function() {
+            this.$select.attr('disabled', '')
+            const $target = this.$form.affix('.target[up-show-for="something bar other"]')
+            up.hello(this.$form)
+            await wait()
+
+            expect($target).toBeHidden()
+            this.$select.val('bar')
+            Trigger.change(this.$select)
+            await wait()
+
+            expect($target).toBeVisible()
+          })
+
           it("shows the target element if a space-separated [up-hide-for] attribute doesn't contain the select value", async function() {
             const $target = this.$form.affix('.target[up-hide-for="something bar other"]')
             up.hello(this.$form)

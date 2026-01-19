@@ -34,7 +34,8 @@ up.Params = class Params {
   @return {up.Params}
   @stable
   */
-  constructor(raw) {
+  constructor(raw, options = {}) {
+    this._options = options
     this.clear()
     this.addAll(raw)
   }
@@ -50,7 +51,7 @@ up.Params = class Params {
   }
 
   [u.copy.key]() {
-    return new up.Params(this)
+    return new up.Params(this, this._options)
   }
 
   /*-
@@ -210,7 +211,7 @@ up.Params = class Params {
 
   withoutBinaryEntries() {
     let simpleEntries = u.reject(this.entries, this._isBinaryEntry)
-    return new this.constructor(simpleEntries)
+    return new this.constructor(simpleEntries, this._options)
   }
 
   /*-
@@ -501,13 +502,13 @@ up.Params = class Params {
     A new `up.Params` instance with values from the given form.
   @stable
   */
-  static fromForm(form) {
-    return this.fromContainer(form)
+  static fromForm(form, options) {
+    return this.fromContainer(form, options)
   }
 
-  static fromContainer(container) {
+  static fromContainer(container, options) {
     let fields = up.form.fields(container)
-    return this.fromFields(fields)
+    return this.fromFields(fields, options)
   }
 
   /*-
@@ -525,8 +526,8 @@ up.Params = class Params {
   @return {up.Params}
   @experimental
   */
-  static fromFields(fields) {
-    const params = new (this)()
+  static fromFields(fields, options) {
+    const params = new this(null, options)
     for (let field of u.wrapList(fields)) {
       params.addField(field)
     }
@@ -552,7 +553,7 @@ up.Params = class Params {
     // Input fields are excluded from form submissions if they have no [name]
     // or when they are [disabled].
     let name = field.name
-    if (name && !field.disabled) {
+    if (name && this._considerFieldEnabled(field)) {
       const { tagName } = field
       const { type } = field
       if (tagName === 'SELECT') {
@@ -575,6 +576,10 @@ up.Params = class Params {
         return this.add(name, field.value)
       }
     }
+  }
+
+  _considerFieldEnabled(field) {
+    return !field.disabled || this._options.includeDisabled
   }
 
   [u.isEqual.key](other) {
