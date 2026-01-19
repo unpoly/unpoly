@@ -3446,26 +3446,43 @@ describe('up.fragment', function() {
           expect('.target').toHaveText('new text')
         })
 
-        it('can append content with an :after selector', async function() {
-          const container = fixture('.target')
-          e.affix(container, '.old-child')
+        describe('appending and prepending', function() {
 
-          up.render('.target:after', { fragment: '<div class="target"><div class="new-child"></div></div>' })
-          await wait()
+          it('can append content with an :after selector', async function() {
+            const container = fixture('.target')
+            e.affix(container, '.old-child')
 
-          const newTarget = document.querySelector('.target')
-          expect(newTarget.innerHTML).toEqual('<div class="old-child"></div><div class="new-child"></div>')
-        })
+            up.render('.target:after', { fragment: '<div class="target"><div class="new-child"></div></div>' })
+            await wait()
 
-        it('can prepend content with an :before selector', async function() {
-          const container = fixture('.target')
-          e.affix(container, '.old-child')
+            const newTarget = document.querySelector('.target')
+            expect(newTarget.innerHTML).toEqual('<div class="old-child"></div><div class="new-child"></div>')
+          })
 
-          up.render('.target:before', { fragment: '<div class="target"><div class="new-child"></div></div>' })
-          await wait()
+          it('can prepend content with an :before selector', async function() {
+            const container = fixture('.target')
+            e.affix(container, '.old-child')
 
-          const newTarget = document.querySelector('.target')
-          expect(newTarget.innerHTML).toEqual('<div class="new-child"></div><div class="old-child"></div>')
+            up.render('.target:before', { fragment: '<div class="target"><div class="new-child"></div></div>' })
+            await wait()
+
+            const newTarget = document.querySelector('.target')
+            expect(newTarget.innerHTML).toEqual('<div class="new-child"></div><div class="old-child"></div>')
+          })
+
+          it('does not leave <up-wrapper> elements in the DOM', async function() {
+            const container = fixture('.target')
+            e.affix(container, '.old-child')
+
+            up.render('.target:after', { fragment: '<div class="target"><div class="new-child"></div></div>' })
+            await wait()
+
+            const newTarget = document.querySelector('.target')
+            expect(newTarget.innerHTML).toEqual('<div class="old-child"></div><div class="new-child"></div>')
+
+            expect(document.querySelectorAll('up-wrapper').length).toBe(0)
+          })
+
         })
 
         describe('cloning a <template>', function() {
