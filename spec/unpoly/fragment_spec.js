@@ -7376,11 +7376,8 @@ describe('up.fragment', function() {
           })
           await wait()
 
-          let oldElement = undefined
-          let newElement = undefined
-
-          oldElement = document.querySelector('.element.v1')
-          newElement = document.querySelector('.element.v2')
+          let oldElement = document.querySelector('.element.v1')
+          let newElement = document.querySelector('.element.v2')
 
           expect(oldElement).toHaveOpacity(1.0, 0.15)
           expect(newElement).toHaveOpacity(0.0, 0.15)
@@ -7392,6 +7389,44 @@ describe('up.fragment', function() {
 
           expect(newElement).toHaveOpacity(1.0, 0.1)
           expect(oldElement).toBeDetached()
+        })
+
+        it('allows to morphs when swapping children with :content', async function() {
+          let html = (version) => `
+            <div class="container v${version}">
+              <div class="element v${version}">
+                version ${version}
+              </div>
+            </div>
+          `
+
+          let [container1] = htmlFixtureList(html(1))
+
+          up.render('.container:content', {
+            document: html(2),
+            transition: 'cross-fade',
+            duration: 200,
+            easing: 'linear'
+          })
+          await wait()
+
+          let oldElement = document.querySelector('.element.v1')
+          let newElement = document.querySelector('.element.v2')
+
+          expect(oldElement).toHaveEffectiveOpacity(1.0, 0.15)
+          expect(newElement).toHaveEffectiveOpacity(0.0, 0.15)
+          await wait(100)
+
+          expect(oldElement).toHaveEffectiveOpacity(0.5, 0.3)
+          expect(newElement).toHaveEffectiveOpacity(0.5, 0.3)
+          await wait(170)
+
+          expect(newElement).toHaveEffectiveOpacity(1.0, 0.1)
+          expect(oldElement).toBeDetached()
+
+          let currentContainer = document.querySelector('.container')
+          expect(currentContainer).toHaveClass('v1')
+          expect(currentContainer).toBe(container1)
         })
 
         it('ignores a { transition } option when replacing a singleton element like <body>', async function() {
