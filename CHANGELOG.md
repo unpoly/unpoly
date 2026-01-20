@@ -2546,7 +2546,7 @@ Unpoly 3 makes it easier to work with [element data](/data):
 - Simple data key/values can now be attached to an element using standard HTML5 `[data-*]` attributes (in addition to `[up-data]`).
 - The data argument passed to a compiler is merged from both `[data-*]` and `[up-data]` attributes. These three elements produce the same compiler data:
    
-  ```html 
+  ```html
   <div up-data='{ "foo": "one", "bar": "two" }'></div>
   <div data-foo='one' data-bar='two'></div>
   <div up-data='{ "foo": "one" }' data-bar='bar'></div>

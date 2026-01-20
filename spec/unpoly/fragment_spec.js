@@ -11387,28 +11387,6 @@ describe('up.fragment', function() {
           })
         })
 
-        describe('without a { focus } option', function() {
-          it('preserves focus of an element within the changed fragment', async function() {
-            const container = fixture('.container')
-            const oldFocused = e.affix(container, '.focused[tabindex=0]', { text: 'old focused' })
-            oldFocused.focus()
-            expect(oldFocused).toBeFocused()
-
-            up.render('.container', {
-              document: `
-                <div class="container">
-                  <div class="focused" tabindex="0">new focused</div>
-                </div>
-              `
-            })
-
-            await wait()
-
-            expect('.focused').toHaveText('new focused')
-            expect('.focused').toBeFocused()
-          })
-        })
-
         describe('with a function passed as { focus } option', function() {
 
           it('calls the function', async function() {
@@ -13806,6 +13784,57 @@ describe('up.fragment', function() {
 
         expect('.element').toHaveText('new text')
         expect(revealSpy).not.toHaveBeenCalled()
+      })
+
+      it('keeps scroll positions of reloaded viewports', async function() {
+        let html = (text) => `
+          <div id="target" up-source="/source">
+            <div id="viewport" up-viewport style="overflow-y: scroll; height: 100px;">
+              <div id="content" style="height: 10000px;">
+                ${text}
+              </div>
+            </div>
+          </div>
+        `
+
+        htmlFixtureList(html('old content'))
+
+        document.querySelector('#viewport').scrollTop = 433
+        expect('#viewport').toBeScrolledTo(433)
+
+        up.reload('#target')
+        await wait()
+        jasmine.respondWith(html('new content'))
+        await wait()
+
+        expect('#viewport').toHaveText('new content')
+        expect('#viewport').toBeScrolledTo(433)
+      })
+
+      it('keeps focus if the focused element can be rediscovered', async function() {
+        let html = (text) => `
+          <div id="target" up-source="/source">
+            <form>
+              <input id="input" type="text">
+            </form>
+            <div id="content">
+              ${text}
+            </div>
+          </div>
+        `
+
+        htmlFixtureList(html('old content'))
+
+        document.querySelector('#input').focus()
+        expect('#input').toBeFocused()
+
+        up.reload('#target')
+        await wait()
+        jasmine.respondWith(html('new content'))
+        await wait()
+
+        expect('#content').toHaveText('new content')
+        expect('#input').toBeFocused()
       })
 
       describe('last modification time', function() {

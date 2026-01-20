@@ -12,24 +12,42 @@ Focus strategies
 When updating a fragment you may control how Unpoly moves focus by passing
 a `{ focus }` option or `[up-focus]` attribute.
 
-### Defaults {#default-strategy}
+### Default focus strategy {#auto}
 
-When you don't pass a `{ focus }` option or set an `[up-focus]` attribute, Unpoly has some defaults:
+When [navigating](/navigation), Unpoly will try a **sequence of focus strategies** that works for most cases:
+- Focus a `#hash` in the URL.
+- Focus an `[autofocus]` element in the new fragment.
+- If updating a [main target](/up-main), focus the new fragment.
+- If focus was lost with the old fragment, re-focus a [similar](/target-derivation) element.
+- If focus was lost with the old fragment, and the previous focus element could not be rediscovered in the new content, focus the new fragment.
 
-- When rendering without navigation Unpoly will default to [`{ focus: 'keep' }`](#preserving-focus). This will preserve focus in updated fragments. 
-- When [navigating](/navigation) Unpoly will default to [`{ focus: 'auto' }`](#automatic-focus-logic). In most cases this focuses the new fragment.
+You may configure this logic in `up.fragment.config.autoFocus`.
 
-### Focusing the fragment
+Because following links and submitting forms is considered [navigation](/navigation), is the default focus strategy is applied automatically.
+You can explicitly enable the strategy by setting `[up-focus="auto"]`:
+
+```html
+<a href="/details" up-follow up-focus="auto">Show more</a> <!-- mark: up-focus="auto" -->
+```
+
+To apply the default scrolling strategy from JavaScripts, pass `{ focus: 'auto' }`:
+
+```js
+up.render({ url: '/path', focus: 'auto' }) // mark: focus: 'auto'
+```
+
+
+### Focusing the fragment {#target}
 
 Pass `{ focus: 'target' }` to focus the new fragment.
 
-### Focusing the current layer
+### Focusing the current layer {#layer}
 
 Pass `{ focus: 'layer' }` to focus the [layer](/up.layer) of the updated fragment.
 
-### Focusing another element
+### Focusing another element {#selector}
 
-Pass a CSS selector string to focus a matching element:https://en.wikipedia.org/wiki/Focus_(computing)
+Pass a CSS selector string to focus a matching element:
 
 ```js
 up.render({
@@ -43,7 +61,7 @@ From JavaScript you may also pass the `Element` object that should be focused.
 
 If the element isn't already focusable, Unpoly will give it an `[tabindex=-1]` attribute.
 
-### Preserving focus
+### Preserving focus {#keep}
 
 Pass `{ focus: 'keep' }` to preserve focus-related state through a fragment update.
 
@@ -54,23 +72,25 @@ The following properties are preserved:
 
 @include focus-state
 
-### Restoring focus
+Focus can only be preserved when the focused element has a [derivable target selector](/target-derivation).
 
-Pass `{ focus: 'restore' }` to restore an previously [saved focus state](/up.viewport.saveFocus)
+### Restoring focus {#restore}
+
+Pass `{ focus: 'restore' }` to restore a previously [saved focus state](/up.viewport.saveFocus)
 for the updated layer's URL.
 
 Unpoly will automatically save focus-related state before a fragment update.
 You may disable this behavior with `{ saveFocus: false }`.
 
-### Revealing the URL's `#hash` target
+### Revealing the URL's `#hash` target {#hash}
 
 Pass `{ focus: 'hash' }` to focus the element matching the `#hash` in the URL.
 
-### Revealing the main element
+### Revealing the main element {#main}
 
 Pass `{ focus: 'main' }` to reveal the updated layer's [main element](/up-main).
 
-### Don't focus
+### Don't focus {#false}
 
 Pass `{ focus: false }` to not actively manipulate focus.
 
@@ -78,7 +98,7 @@ Note that even with `{ focus: false }` the focus may change during a fragment up
 
 To actively try and preserve focus, use [`{ focus: 'keep' }`](#preserving-focus) instead.
 
-### Conditional focusing
+### Conditional focusing {#condition}
 
 To only focus when a [main target](/up-main) is updated,
 you may append `-if-main` to any of the string options in this list.
@@ -93,7 +113,7 @@ to be lost.
 
 To implement other conditions, [pass a function](#custom-focus-logic) instead.
 
-### Attempt multiple focus strategies
+### Attempt multiple focus strategies {#multiple-strategies}
 
 Pass an array of focus option and Unpoly will use the first applicable value.
 
@@ -106,20 +126,7 @@ In an `[up-focus]` attribute you may separate scroll options with an comma:
 <a href="/path#section" up-follow up-focus="hash, reset">Link label</a>
 ```
 
-### Automatic focus logic
-
-Pass `{ focus: 'auto' }` to try a sequence of focus strategies that works for most cases.
-This is the default when [navigating](/navigation).
-
-- Focus a `#hash` in the URL.
-- Focus an `[autofocus]` element in the new fragment.
-- If updating a [main target](/up-main), focus the new fragment.
-- If focus was lost with the old fragment, re-focus a [similar](/target-derivation) element.
-- If focus was lost with the old fragment, focus the new fragment.
-
-You may configure this logic in `up.fragment.config.autoFocus`.
-
-### Custom focus logic
+### Custom focus logic {#function}
 
 You may also pass a function with your custom focusing logic.
 
@@ -134,13 +141,13 @@ The function is expected to either:
 - Do nothing
 
 
-Styling focus states
+Styling focus states {#focus-visibility}
 --------------------
 
 Unpoly lets you control whether a fragment [shows a visible focus ring](/focus-visibility).
 
 
-Focus in overlays
+Focus in overlays {#overlays}
 -----------------
 
 ### When an overlay is opened

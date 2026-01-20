@@ -18,10 +18,10 @@ When [navigating](/navigation), Unpoly will try a **sequence of scroll strategie
 
 You may configure this sequence in `up.fragment.config.autoScroll`.
 
-Because links and forms are considered [navigation](/navigation), is the default scrolling strategy is applied automatically.
+Because following links and submitting forms are considered [navigation](/navigation), is the default scrolling strategy is applied automatically.
 You can explicitly enable the strategy by setting `[up-scroll="auto"]`:
 
-```htmlScroll positions might still reset when you insert a new viewport element 
+```html
 <a href="/details" up-follow up-scroll="auto">Show more</a> <!-- mark: up-scroll="auto" -->
 ```
 

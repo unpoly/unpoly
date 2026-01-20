@@ -182,7 +182,7 @@ describe('up.RenderOptions', function() {
       const options = preprocessAndDerive(givenOptions)
 
       expect(options.scroll).toBeUndefined()
-      expect(options.focus).toBe('keep')
+      expect(options.focus).toBeUndefined()
     })
 
     it('overrides defaults with given fail-prefixed options', function() {

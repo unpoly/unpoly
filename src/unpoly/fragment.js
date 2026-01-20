@@ -146,6 +146,13 @@ up.fragment = (function() {
 
       @experimental
 
+    @param {Object} [config.reloadOptions]
+      An object of default render options to apply when [reloading fragments](/up.reload).
+
+      To set defaults for *all* render passes (when reloading or not), use `up.fragment.config.renderOptions`.
+
+      @experimental
+
     @param {Array<string>} [config.autoHistoryTargets]
       When an updated fragments contain an element matching one of the given [target selectors](/targeting-fragments),
       history will be updated with `{ history: 'auto' }`.
@@ -290,7 +297,6 @@ up.fragment = (function() {
       keep: true,
       saveScroll: true,
       saveFocus: true,
-      focus: 'keep',
       focusVisible: 'auto',
       abort: 'target',
       failOptions: true,
@@ -307,6 +313,12 @@ up.fragment = (function() {
       scroll: 'auto',
       history: 'auto',
       peel: 'dismiss',
+    },
+
+    reloadOptions: {
+      target: ':main',
+      scroll: 'keep',
+      focus: 'keep',
     },
 
     match: 'region',
@@ -1803,6 +1815,8 @@ up.fragment = (function() {
 
       Common options are documented below, but most [options for `up.render()`](/up.render#parameters) may be used.
 
+      Defaults can be configured in `up.fragment.config.reloadOptions` and `up.fragment.config.renderOptions`.
+
     @param {boolean} [options.navigate=false]
       Whether the reloading constitutes a [user navigation](/navigation).
 
@@ -1823,6 +1837,28 @@ up.fragment = (function() {
     @param {boolean|string} [options.revalidate=false]
       @like up.render
 
+  @section Scrolling
+    @param [options.scroll='keep']
+      Whether to scroll after the fragment was reloaded.
+
+      By default Unpoly will [keep scroll positions](/scrolling#keep) of all viewports
+      around the updated fragment.
+
+      See [scrolling](/scrolling) for a list of allowed values.
+
+      @like up.render
+
+  @section Focus
+    @param [options.focus='keep']
+      What to focus after the fragment was reloaded.
+
+      By default Unpoly will [keep scroll positions](/scrolling#keep) of all viewports
+      around the updated fragment.
+
+      See [scrolling](/scrolling) for a list of allowed values.
+
+      @like up.render
+
   @section Loading state
     @mix up.render/loading-state
 
@@ -1838,7 +1874,7 @@ up.fragment = (function() {
   @stable
   */
   function reload(...args) {
-    const options = parseTargetAndOptions(args)
+    const options = { ...config.reloadOptions, ...parseTargetAndOptions(args) }
     options.target ||= ':main'
     const element = getSmart(options.target, options)
     options.url ||= sourceOf(element)
