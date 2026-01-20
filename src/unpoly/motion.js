@@ -459,7 +459,7 @@ up.motion = (function() {
         return
       }
 
-      up.puts('up.morph()', 'Morphing %o to %o with transition %O over %d ms', oldElement, newElement, transitionObject, options.duration)
+      up.puts('up.morph()', 'Morphing %o to %o with transition %o over %d ms', oldElement, newElement, transitionObject, options.duration)
 
       // All changes to the DOM must be sync.
       const viewport = up.viewport.get(oldElement)
