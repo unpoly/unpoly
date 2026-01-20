@@ -685,7 +685,7 @@ up.script = (function() {
     let macros = options.macros ?? registeredMacros
     let compilers = options.compilers ?? registeredCompilers
 
-    const pass = new up.CompilerPass(element, macros, compilers, options)
+    const pass = new up.HelloFragment(element, macros, compilers, options)
     return pass.run()
   }
 

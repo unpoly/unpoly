@@ -1,7 +1,6 @@
 const u = up.util
 
-// TODO: Rename to CompilePass or ProcessorPass
-up.CompilerPass = class CompilerPass {
+up.HelloFragment = class HelloFragment {
 
   constructor(root, macros, compilers, { layer, data, dataRoot, dataMap, meta, insertedEvent }) {
     // (1) If a caller has already looked up the layer we don't want to look it up again.

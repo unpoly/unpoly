@@ -61,7 +61,7 @@ up.Change.FromResponse = class FromResponse extends up.Change {
 
     // When up.Change.FromContent eventually compiles fragments, the { meta } object
     // will be passed as a third argument to compilers.
-    finalRenderOptions.meta = this._compilerPassMeta()
+    finalRenderOptions.meta = this._helloMeta()
 
     // After the initial render pass has finished, consider reloading stale content.
     finalRenderOptions.verifyFinished = (result) => this._revalidate(result, finalRenderOptions)
@@ -134,7 +134,7 @@ up.Change.FromResponse = class FromResponse extends up.Change {
     }
   }
 
-  _compilerPassMeta() {
+  _helloMeta() {
     // (1) We avoid exposing values that would prevent garbage collection
     //    by compilers holding a reference to their meta arg in their closure.
     //
@@ -143,7 +143,7 @@ up.Change.FromResponse = class FromResponse extends up.Change {
     //
     // (3) Another property { layer } will be assigned by up.hello().
     let meta = { revalidating: !!this.options.expiredResponse, ok: this._response.ok }
-    up.migrate.processCompilerPassMeta?.(meta, this._response)
+    up.migrate.processHelloMeta?.(meta, this._response)
     return meta
   }
 
