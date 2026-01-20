@@ -38,7 +38,7 @@ up.BodyShifter = class BodyShifter {
   _isShifted() {
     // If the scrollbar never took space away from the main viewport's client width,
     // we do not need to change any styles.
-    return this._rootScrollbarWidth && this._stack > 0
+    return this._stack > 0
   }
 
   _shiftNow() {
