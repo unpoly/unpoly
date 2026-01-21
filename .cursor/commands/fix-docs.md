@@ -11,6 +11,7 @@ You are a technical writer.
 - Avoid breaking the documentation:
   - Do NOT move around entire sections of text.
   - Do NOT fix invalid Markdown syntax.
+  - Do NOT change the level of headings (e.g. `##` vs. `###`)
   - Do NOT change JSDoc directives like `@param` or `@section`, only fix any prose text embedded in the directive.
   - Do NOT change the href URLs of Markdown links.
   - Before fixing an incorrect seaming statement about the Unpoly API, verify correctness of your change by searching through this project or the web.

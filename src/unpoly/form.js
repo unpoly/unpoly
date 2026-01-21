@@ -68,7 +68,7 @@ up.form = (function() {
       </fieldset>
       ```
 
-      If no good selector cannot be derived from the group element, the resulting target will
+      If no good selector can be derived from the group element, the resulting target will
       use a `:has()` suffix that matches the changed field. In the example below the target
       would be `fieldset:has(#city)`:
 
@@ -98,8 +98,8 @@ up.form = (function() {
       By default, only field names ending in `"[]"` are treated as arrays.
       You can configure another function that accepts a param name and returns a `boolean`.
 
-      If set to `true` then all files are handled as arrays and functions like
-      `up.watch()` always get the value passed as array.
+      If set to `true` then all fields are handled as arrays and functions like
+      `up.watch()` always get the value passed as an array.
 
       @experimental
 
@@ -501,9 +501,9 @@ up.form = (function() {
 
   Returns a function that re-enables the elements that were disabled.
 
-  ### Dealing with focus loss
+  ## Dealing with focus loss
 
-  When a focus field is disabled, it will lose focus.
+  When a focused field is disabled, it will lose focus.
 
   In that case Unpoly will focus the [closest form group](/up.form.group) around the disabled control.
 
@@ -663,7 +663,7 @@ up.form = (function() {
   This event is [emitted](/up.emit) when a form is [submitted](/up.submit) through Unpoly.
 
   When the form is being [validated](/up-validate), this event is not emitted.
-  Instead an `up:form:validate` event is emitted.
+  Instead, an `up:form:validate` event is emitted.
 
   ## Changing render options
 
@@ -693,7 +693,7 @@ up.form = (function() {
     @param {Element} [event.submitButton]
       The button used to submit the form.
 
-      If no button was pressed directly (e.g. the user pressed `Enter` inside a focused text field),
+      If no button was pressed directly (e.g., the user pressed `Enter` inside a focused text field),
       this returns the first submit button.
 
       If the form has no submit buttons, this property is `undefined`.
@@ -721,7 +721,7 @@ up.form = (function() {
   Watches form fields and runs a callback when a value changes.
 
   While you can also listen to a [standard `input` event](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/input_event),
-  using `up.watch()` comes with a number of quality of live improvements:
+  using `up.watch()` comes with a number of quality of life improvements:
 
   - The callback only runs when a value was actually changed. Multiple events resulting in the same value will only run the callback once.
   - The callback's execution frequency can be [debounced](/watch-options#debouncing).
@@ -755,7 +755,7 @@ up.form = (function() {
 
   ```js
   up.watch('input.query', function(value, name, options) { // mark: options
-    return up.reload('main', { ...options, params: { query: value }) // mark: options
+    return up.reload('main', { ...options, params: { query: value }}) // mark: options
   })
   ```
 
@@ -776,7 +776,7 @@ up.form = (function() {
 
   ## Async callbacks
 
-  When your callback does async work (like fetching data over the network) it should return a promise
+  When your callback does async work (like fetching data over the network), it should return a promise
   that settles once the work concludes:
 
   ```js
@@ -990,11 +990,11 @@ up.form = (function() {
   }
 
   /*-
-  Marks this element as a from group, which (usually) contains a label, input and error message.
+  Marks this element as a form group, which (usually) contains a label, input and error message.
 
   You are not required to use form groups to [submit forms through Unpoly](/submitting-forms).
-  However, structuring your form into groups will help Unpoly to make smaller changes to the DOM when
-  working with complex form. For instance, when [validating](/validation#validating-after-changing-a-field) a field,
+  However, structuring your form into groups will help Unpoly make smaller changes to the DOM when
+  working with complex forms. For instance, when [validating](/validation#validating-after-changing-a-field) a field,
   Unpoly will re-render the [closest](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest)
   form group around that field.
 
@@ -1064,7 +1064,7 @@ up.form = (function() {
   the form submission and render a new form state. See [this example](/up-validate#backend-protocol)
   for control flow on the server.
 
-  To automatically update a form after a field was changed, use the the `[up-validate]` attribute.
+  To automatically update a form after a field was changed, use the `[up-validate]` attribute.
   You may combine `[up-validate]` and `up.validate()` within the same form. In order to reduce
   requests, their updates will be [batched together](#batching).
 
@@ -1148,7 +1148,7 @@ up.form = (function() {
 
   This will send a sequence of two requests:
 
-  1. A request to `/path` targeting `.foo, .baz`. The other validations are queued.
+  1. A request to `/path1` targeting `.foo, .baz`. The other validations are queued.
   2. Once that request finishes, a second request to `/path2` targeting `.bar, .qux`.
 
   ### Disabling batching {#batching-disable}
@@ -1159,7 +1159,7 @@ up.form = (function() {
 
   There are multiple ways to disable batching:
 
-  - Globally configuring `up.form.config.validateBatch = true`.
+  - Globally by configuring `up.form.config.validateBatch = false`.
   - Setting an [`[up-validate-batch]`](/up-validate) attribute on the element with `[up-validate]`.
   - Passing an option `up.validate(element, { batch: false })`.
 
@@ -1181,7 +1181,7 @@ up.form = (function() {
     @param {string} [options.target=element]
       The [target selector](/targeting-fragments) to re-render.
 
-      By default the given `element` will be rendered.
+      By default, the given `element` will be rendered.
       If `element` is a field, its form group or `[up-validate]` target will be rendered.
 
     @param {boolean} [options.formGroup = true]
@@ -1212,14 +1212,14 @@ up.form = (function() {
     @param {string} options.url
       The URL to which to submit the validation request.
 
-      By default Unpoly will use the form's `[action]` attribute
+      By default, Unpoly will use the form's `[action]` attribute.
 
       See [Validating against other URLs](/up-validate#urls).
 
     @param {string} options.method
       The method to use for submitting the validation request.
 
-      By default Unpoly will use the form's `[method]` attribute
+      By default, Unpoly will use the form's `[method]` attribute.
 
       See [Validating against other URLs](/up-validate#urls).
 
@@ -1272,7 +1272,7 @@ up.form = (function() {
   /*-
   This event is emitted before a form is being [validated](/up-validate).
 
-  Listeners can [inspect](#properties), [modify](#event.renderOptions) or [prevent](#event.preventDefault)
+  Listeners can [inspect](#properties), [modify](#event.renderOptions), or [prevent](#event.preventDefault)
   the render pass that will load and show the validation results.
 
   @event up:form:validate
@@ -1455,7 +1455,7 @@ up.form = (function() {
   </div>
   ```
 
-  See [Submitting forms](/submitting-forms) for elaborate examples..
+  See [Submitting forms](/submitting-forms) for elaborate examples.
 
   ## Input validation
 
@@ -1502,7 +1502,7 @@ up.form = (function() {
       The value is case-insensitive.
 
       You can also use methods that would not be allowed on a `<form>` element,
-      such as `'patch`' or `'delete'`. These will be [wrapped in a POST request](/up.network.config#config.wrapMethod).
+      such as `'patch'` or `'delete'`. These will be [wrapped in a POST request](/up.network.config#config.wrapMethod).
 
     @mix up-follow/request-extras
       @param up-params
@@ -1795,7 +1795,7 @@ up.form = (function() {
 
   ## Async callbacks
 
-  When your callback does async work (like fetching data over the network) it must return a promise
+  When your callback does async work (like fetching data over the network), it must return a promise
   that settles once the work concludes:
 
     ```html
@@ -1870,7 +1870,7 @@ up.form = (function() {
   - When the user changes the `password` field, we want to validate
     the minimum password length.
 
-  If validation fails we want to show validation errors *as soon as the user blurs the field*.
+  If validation fails, we want to show validation errors *as soon as the user blurs the field*.
 
   We're going to render validation errors using the following HTML:
 
@@ -1937,7 +1937,7 @@ up.form = (function() {
   the form submission and render a new form state from the request parameters.
 
   This requires a change in the backend code that handles the form's `[action]` path.
-  Until now the backend only had to handle two cases:
+  Until now, the backend only had to handle two cases:
 
   1. The form was submitted with valid data. We create a new account and sign in the user.
   2. The form submission failed due to an invalid email or password. We re-render the form with error messages.
@@ -2029,12 +2029,12 @@ up.form = (function() {
   ## How validation results are displayed
 
   `[up-validate]` always submits the entire form with its current field values to the form's
-  `[action]` path. Typically only a fragment of the form is updated with the response.
-  This minimizes the chance for loss of transient state like scroll positions, cursor selection
+  `[action]` path. Typically, only a fragment of the form is updated with the response.
+  This minimizes the chance for loss of transient state like scroll positions, cursor selection,
   or user input while the request is in flight.
 
-  By default Unpoly will only update the closest [form group](/up-form-group)
-  around the validating field. The [example above](#marking-fields-for-validation),
+  By default, Unpoly will only update the closest [form group](/up-form-group)
+  around the validating field. In the [example above](#marking-fields-for-validation),
   after changing the `email` field, only the `<fieldset>` around the field will be updated.
 
   If the form is not structured into groups, the entire
@@ -2083,7 +2083,7 @@ up.form = (function() {
 
   ## Preventing race conditions
 
-  Custom dynamic form implementations will often exhibit race conditions, e.g. when the user
+  Custom dynamic form implementations will often exhibit race conditions, e.g., when the user
   is quickly changing fields while requests are still in flight.
   Such issues are solved with `[up-validate]`. The form will eventually show a consistent state,
   regardless of how fast the user clicks or how slow the network is.
@@ -2210,14 +2210,14 @@ up.form = (function() {
     @param [up-validate-url]
       The URL to which to submit the validation request.
 
-      By default Unpoly will use the form's `[action]` attribute
+      By default, Unpoly will use the form's `[action]` attribute.
 
       See [Validating against other URLs](/up-validate#urls).
 
     @param [up-validate-method]
       The method to use for submitting the validation request.
 
-      By default Unpoly will use the form's `[method]` attribute
+      By default, Unpoly will use the form's `[method]` attribute.
 
       See [Validating against other URLs](/up-validate#urls).
 
@@ -2228,7 +2228,7 @@ up.form = (function() {
     @param [up-validate-headers]
       A [relaxed JSON](/relaxed-json) object with additional request headers.
 
-      By default Unpoly will send an `X-Up-Validate` header so the server
+      By default, Unpoly will send an `X-Up-Validate` header so the server
       can [distinguish the validation request from a regular form submission](#backend-protocol).
 
       @experimental
