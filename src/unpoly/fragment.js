@@ -15,7 +15,7 @@ A fragment is a standard DOM [`Element`](https://developer.mozilla.org/en-US/doc
 with some additional properties that are useful in the context of a server-rendered web application:
 
 - Fragments are [identified by a CSS selector](/target-derivation), like a `.class` or `#id`.
-- Fragments are usually updated by a [link](/up-follow) for [form](/submitting-forms) that targets their selector.
+- Fragments are usually updated by a [link](/up-follow) or a [form](/submitting-forms) that targets their selector.
   When the server renders HTML with a matching element, the fragment is swapped with a new version.
 - As fragments enter the page they are automatically [compiled](/enhancing-elements) to activate [JavaScript behavior](/up.script).
 - Fragment changes may be [animated](/up.motion).
@@ -32,7 +32,7 @@ with some additional properties that are useful in the context of a server-rende
 ## Differences to the DOM API
 
 While `up.fragment` contains many functions to look up CSS selectors, their behavior
-differ from browser APIs like `document.querySelector()`:
+differs from browser APIs like `document.querySelector()`:
 
 - Functions in `up.fragment` will only see elements on the [current layer](/up.layer.current). Other layers are only visible when an [`{ layer }` option](/layer-option) is passed explicitly.
 - Functions in `up.fragment` [ignore destroyed elements](/up-destroying) that are playing out their exit animation.
@@ -97,7 +97,7 @@ up.fragment = (function() {
       An array of [target derivation patterns](/target-derivation#derivation-patterns)
       used to [guess a target selector](/target-derivation) for an element.
 
-      For instance, a pattern pattern `'a[href]'` is applicable to all `<a href="...">` elements.
+      For instance, a pattern `'a[href]'` is applicable to all `<a href="...">` elements.
       It produces a target like `a[href="/users"]`.
 
       If your deriver can't be expressed in a pattern string, you may also add a function that
@@ -197,7 +197,7 @@ up.fragment = (function() {
       - Line indentation is ignored.
       - Some fluctuating attributes are ignored, such as CSP nonces.
 
-      You can configure your own normalization instead of your own. For example, the following
+      You can configure your own normalization instead of the default. For example, the following
       would only strip leading and trailing whitespace:
 
       ```js
@@ -351,7 +351,7 @@ up.fragment = (function() {
   In the HTML below, the element `#one` was loaded from the URL `/foo`:
 
   ```html
-  <div id="one" up-source"/foo">
+  <div id="one" up-source="/foo">
   <div id="two">...</div>
   </div>
   ```
@@ -930,13 +930,13 @@ up.fragment = (function() {
   @param [up-keep='true']
     How long to keep the element.
 
-    When set to `'true'` (the deferred), the element is kept as long as its
+    When set to `'true'` (the default), the element is kept as long as its
     [derived target](/target-derivation) can be correlated in both the old and new content.
 
     When set to `'same-html'`, the element is kept as long as its outer HTML
     does not change between versions. See [Keeping an element until its HTML changes](/preserving-elements#same-html).
 
-    When set to `'same-data'`, the element is kept as long as its [data}(/data)
+    When set to `'same-data'`, the element is kept as long as its [data](/data)
     does not change between versions. See [Keeping an element until its data changes](/preserving-elements#same-data).
 
     When set to `'false'` the element is never kept. A new element with `[up-keep="false"]`
@@ -1013,7 +1013,7 @@ up.fragment = (function() {
   @param {Element} event.target
     The fragment that has been kept.
   @param {Element} event.newFragment
-    The response fragment that has been discard.
+    The response fragment that has been discarded.
   @param {Object} event.newData
     The [data](/data) attached to the discarded element.
   @experimental
@@ -1210,7 +1210,7 @@ up.fragment = (function() {
 
   A fragment that is alive can be [targeted](/targeting-fragments), and can be discovered by `up.fragment` functions.
 
-  An fragment becomes "unalive" immediately when it is destroyed, or when an ancestor is destroyed.
+  A fragment becomes "unalive" immediately when it is destroyed, or when an ancestor is destroyed.
   If the destruction is [animated](/up.motion), the fragment is "unalive" while the animation is still playing.
 
   | Element state            | `up.fragment.isAlive(element)` |
@@ -1292,7 +1292,7 @@ up.fragment = (function() {
   </div>
   ```
 
-  When processing an event for the `<a href"...">` you can pass the link element
+  When processing an event for the `<a href="...">` you can pass the link element
   as `{ origin }` to match the [closest](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest)
   element in the link's ancestry:
 
@@ -1302,7 +1302,7 @@ up.fragment = (function() {
   up.fragment.get('.element', { origin: link }) // returns the second .element
   ```
 
-  When the link's does not have an ancestor matching `.element`,
+  When the link does not have an ancestor matching `.element`,
   Unpoly will search the entire layer for `.element`.
 
   To [disable region-aware fragment matching](/targeting-fragments#disabling-region-aware-fragment-matching), pass a `{ match: 'first' }` option:
@@ -1329,7 +1329,7 @@ up.fragment = (function() {
   </div>
   ```
 
-  When processing an event for the `<a href"...">` you can pass the link element
+  When processing an event for the `<a href="...">` you can pass the link element
   as `{ origin }` to match within the link's container:
 
   ```js
@@ -2170,7 +2170,7 @@ up.fragment = (function() {
   }
 
   /*-
-  Sets an unique identifier for this element.
+  Sets a unique identifier for this element.
 
   This identifier is used in [target derivation](/target-derivation)
   to create a CSS selector that matches this element precisely.
@@ -2197,7 +2197,7 @@ up.fragment = (function() {
   We can improve this by assigning an `[up-id]`:
 
   ```html
-  <a href="/" up-id="link-to-home">Open user 4</a>
+  <a href="/" up-id="link-to-home">Homepage</a>
   ```
 
   The attribute value is used to create a better selector:
@@ -2368,7 +2368,7 @@ up.fragment = (function() {
   <a href="/cards/5" up-target=":main">Load post</a>
 
   <main>
-    Post will appear heare
+    Post will appear here
   </main>
   ```
 
@@ -2378,7 +2378,7 @@ up.fragment = (function() {
   <a href="/cards/5" up-follow>Load post</a>
 
   <main>
-    Post will appear heare
+    Post will appear here
   </main>
   ```
 
@@ -2884,7 +2884,7 @@ up.fragment = (function() {
 
   Let's say we want to [reload](/up.reload) an element after 10 seconds.
   If requests for that element were [aborted](/aborting-requests) before the
-  10 seconds are over, we no no longer want to reload:
+  10 seconds are over, we no longer want to reload:
 
   ```js
   let timeout = setTimeout(() => up.reload(element), 10000)

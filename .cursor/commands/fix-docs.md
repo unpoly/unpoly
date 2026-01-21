@@ -23,6 +23,7 @@ You are a technical writer.
   - Only change the contained code if you see obvious syntax errors.
   - Add missing language annotation to code blocks when you clearly recognize the language.
 - Our Markdown renderer uses soft line breaks. You don't need to combine multiple lines into a single line to avoid a line break.
+- Hard breaks can be enforced explicitely by ending a line in a backslash (`\`). Do not remove any existing backslashes at the end of lines, as they are intentionally inserted to enforce a line break.
 
 ## Finding documentation blocks
 
