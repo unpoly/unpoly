@@ -50,7 +50,7 @@ up.event = (function() {
   - You may pass a selector for [event delegation](https://davidwalsh.name/event-delegate).
   - The [event target](https://developer.mozilla.org/en-US/docs/Web/API/Event/target) is automatically passed as a second argument.
   - Your event listener will not be called when Unpoly has not [booted](/up.boot) in an unsupported browser
-  - You may register a listener to multiple events by passing a space-separated list of event name (e.g. `"click mousedown"`)
+  - You may register a listener to multiple events by passing a space-separated list of event names (e.g. `"click mousedown"`)
   - You may register a listener to multiple elements in a single `up.on()` call, by passing a [list](/List) of elements.
   - Any [data attached to the observed element](/data) will be passed as a third argument to your handler function.
 
@@ -190,7 +190,7 @@ up.event = (function() {
 
   ### Example
 
-  Let's say you are listing to clicks on `.button` elements:
+  Let's say you are listening to clicks on `.button` elements:
 
   ```js
   var listener = function() { ... }
@@ -438,7 +438,7 @@ up.event = (function() {
   on the element, or on its ancestors.
 
   While the `[up-emit]` attribute is often used with an `<a>` or `<button>` element,
-  you can also apply to to non-interactive elements, like a `<span>`.
+  you can also apply it to non-interactive elements, like a `<span>`.
   See [clicking on non-interactive elements](/faux-interactive-elements) for details and
   accessibility considerations.
 
@@ -558,7 +558,7 @@ up.event = (function() {
   ## Limitations
 
   Unpoly can only detect the input device when the user interacts with the document area.
-  Interactions with browser-drawn UI elements (like the back button or scroll bar) can not be detected:
+  Interactions with browser-drawn UI elements (like the back button or scroll bar) cannot be detected:
 
   ```js
   window.addEventListener('scroll', function() {
