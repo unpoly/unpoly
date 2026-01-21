@@ -45,7 +45,7 @@ Your HTML could look like this:
 <nav>
   <a href="/pages/a">A</a>
   <a href="/pages/b">B</a>
-  <a href="/pages/b">C</a>
+  <a href="/pages/c">C</a>
 </nav>
 
 <article>
@@ -60,7 +60,7 @@ with an `up-target` attribute:
 <nav>
   <a href="/pages/a" up-target="article">A</a>
   <a href="/pages/b" up-target="article">B</a>
-  <a href="/pages/b" up-target="article">C</a>
+  <a href="/pages/c" up-target="article">C</a>
 </nav>
 ```
 
@@ -182,7 +182,7 @@ up.link = (function() {
     @param {Array<string>} [config.noClickableSelectors]
       Exceptions to `up.link.config.clickableSelectors`.
 
-      Matching elements will *not* be receive [interactive behavior](/up-follow),
+      Matching elements will *not* receive [interactive behavior](/up-follow),
       even if they match `up.link.config.clickableSelectors`.
 
       @experimental
@@ -494,7 +494,7 @@ up.link = (function() {
 
   Listeners may inspect and manipulate [render options](/up.render#parameters) for the coming fragment update.
 
-  The code below will open all form-contained links in an overlay, as to not
+  The code below will open all form-contained links in an overlay, so as not to
   lose the user's form data:
 
   ```js
@@ -539,7 +539,7 @@ up.link = (function() {
   making the interaction feel instant.
 
   You may use this function to [programmatically populate the cache](/preloading#scripted)
-  with pages the user is likely to click or requires
+  with pages the user is likely to click or that should be
   [accessible while offline](/network-issues#offline-cache).
 
   [Preloading links](/preloading){:.article-ref}
@@ -622,7 +622,7 @@ up.link = (function() {
   ```js
   function isSlowConnection() {
     // https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation
-    return navigator.connection && navigator.connection.effectiveType.include('2g')
+    return navigator.connection && navigator.connection.effectiveType.includes('2g')
   }
 
   up.on('up:link:preload', function(event) {
@@ -645,7 +645,7 @@ up.link = (function() {
   */
 
   /*-
-  Returns the HTTP method that Unpoly will be use when [following](/up-follow) the given link.
+  Returns the HTTP method that Unpoly will use when [following](/up-follow) the given link.
 
   Looks at the link's `[up-method]` or `[data-method]` attributes. Defaults to `"get"`.
 
@@ -730,7 +730,7 @@ up.link = (function() {
     e.setMissingAttrs(element, {
       tabindex: '0',     // Make them part of the natural tab order
       role,              // Make screen readers pronounce "button" or "link"
-      'up-clickable': '' // Get pointer pointer from link.css
+      'up-clickable': '' // Get pointer cursor from link.css
     })
 
     element.addEventListener('keydown', function(event) {
@@ -748,7 +748,7 @@ up.link = (function() {
   Enables [keyboard interaction and other accessibility behaviors](/faux-interactive-elements#accessibility)
   for non-interactive elements that represent clickable buttons.
 
-  It's up to you make the element appear interactive visually, e.g. by assigning a `.button` class from your design system.
+  It's up to you to make the element appear interactive visually, e.g. by assigning a `.button` class from your design system.
 
   [Clicking on non-interactive elements](/faux-interactive-elements){:.article-ref}
 
@@ -760,7 +760,7 @@ up.link = (function() {
   <span id="faux-button" up-clickable>Click me</span> <!-- mark: up-clickable -->
   ```
 
-  To react the element's effect when activated, handle the `up:click` event:
+  To react to the element's activation, handle the `up:click` event:
 
   ```js
   let button = document.querySelector('#faux-button')
@@ -840,11 +840,11 @@ up.link = (function() {
   - It is emitted on mousedown for [up-instant] elements
   - It is not emitted if the element has disappeared (or was overshadowed)
     between `mousedown` and `click`. This can happen if `mousedown` creates a new element
-    that obstructs interaction with this element, or if a `mousedown` handler removes a handler.
+    that obstructs interaction with this element, or if a `mousedown` handler removes this element.
   - It is not emitted if the user clicks with a non-first mouse button.
-  - It is not emitted it the user holds a modifier key when clicking.
+  - It is not emitted if the user holds a modifier key when clicking.
 
-  Stopping an up:click event will also stop the underlying event.
+  Stopping an `up:click` event will also stop the underlying event.
 
   Also see docs for `up:click`.
 
@@ -960,7 +960,7 @@ up.link = (function() {
 
   You may cancel an `up:click` event using `event.preventDefault()`.
 
-  Canceling `up:click` on a hyperlink will prevent any Unpoly from [following](/up-follow) that link.
+  Canceling `up:click` on a hyperlink will prevent Unpoly from [following](/up-follow) that link.
 
   The underlying `click` or `mousedown` event will also be canceled.
 
@@ -974,7 +974,7 @@ up.link = (function() {
   To prevent overriding native browser behavior, the `up:click` is only emitted for unmodified clicks.
 
   In particular, it is not emitted when the user holds `Shift`, `CTRL` or `Meta` while clicking.
-  Neither it is emitted when the user clicks with a secondary mouse button.
+  Nor is it emitted when the user clicks with a secondary mouse button.
 
   @event up:click
   @param {Element} event.target
@@ -1095,7 +1095,7 @@ up.link = (function() {
   This event is emitted before an `[up-defer]` placeholder loads its deferred content.
 
   The event can be [prevented](#event.preventDefault) to stop the network request.
-  The loading will not be attempted again, but you can use `up.deferred.load()` to manually load afterwards.
+  The loading will not be attempted again, but you can use `up.deferred.load()` to load it manually afterwards.
 
   [Lazy loading content](/lazy-loading){:.article-ref}
 
@@ -1132,7 +1132,7 @@ up.link = (function() {
     @param [up-defer='insert']
       When to load and render the deferred content.
 
-      When set to `'insert'` (the default), the deferred content will load immediatedly when
+      When set to `'insert'` (the default), the deferred content will load immediately when
       the `[up-defer]` element is inserted into the DOM.
 
       When set to `'reveal'`, the deferred content will load when the `[up-defer]` placeholder is scrolled
@@ -1227,7 +1227,7 @@ up.link = (function() {
   To force a [full page load](/up.network.loadPage) when a followable link is clicked:
 
   - Set an [`[up-follow=false]`](/attributes-and-options#boolean-attributes) attribute on the link element
-  - Prevent the `up:link:follow` event and call `up.network.loadPage(event.renderOptions)`.
+  - Prevent the `up:link:follow` event, then call `up.network.loadPage(event.renderOptions)`.
 
   ## Making non-interactive elements act as hyperlinks
 
@@ -1333,7 +1333,7 @@ up.link = (function() {
   Activates this link-like element on `mousedown` instead of `click` ("Act on press").
 
   For links with `[up-follow]` this will save some time that would otherwise be spent
-  on waiting for the user to release the mouse button. Since an AJAX request will be triggered right way,
+  on waiting for the user to release the mouse button. Since an AJAX request will be triggered right away,
   the interaction will appear faster.
 
   For [faux-interactive elements](/faux-interactive-elements) setting `[up-instant]` will cause
@@ -1352,8 +1352,8 @@ up.link = (function() {
   Links or [faux-interactive elements](/faux-interactive-elements) with `[up-instant]`
   can still be activated with the keyboard.
 
-  With `[up-instant]` users can no longer cancel a click by dragging the pressed mouse away from the elements.
-  However, for navigation actions this isn't required. E.g. many operation systems switch tabs on `mousedown`
+  With `[up-instant]` users can no longer cancel a click by dragging the pressed mouse away from the element.
+  However, for navigation actions this isn't required. E.g. many operating systems switch tabs on `mousedown`
   instead of `click`.
 
   @selector [up-instant]
@@ -1493,7 +1493,7 @@ up.link = (function() {
 
       When set to `'hover'` (the default), preloading will start when the user hovers
       over this link [for a while](#up-preload-delay). On touch devices preloading will
-      begin when the user places her finger on the link. Also see [preloading on hover](/preloading#on-hover).
+      begin when the user places their finger on the link. Also see [preloading on hover](/preloading#on-hover).
 
       When set to `'insert'`, preloading will start immediately when this
       link is inserted into the DOM. Also see [eagerly preloading on insertion](/preloading#on-insert).
@@ -1506,7 +1506,7 @@ up.link = (function() {
       You can still preload this link programmatically using `up.link.preload()`.
 
     @param [up-preload-delay]
-      [`[up-preload="hover"]`](#up-preload), this requires the user to hover
+      With [`[up-preload="hover"]`](#up-preload), this requires the user to hover
       for the given number of milliseconds before the link is preloaded.
 
       Defaults to `up.link.config.preloadDelay`.
