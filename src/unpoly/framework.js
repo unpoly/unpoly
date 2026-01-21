@@ -64,7 +64,7 @@ up.framework = (function() {
   There are only two cases when you would boot manually:
 
   - When you load Unpoly with `<script async>`
-  - When you explicitly ask to manually boot by setting an [`<html up-boot="manual">`](/up-boot-manual) attribute..
+  - When you explicitly ask to manually boot by setting an [`<html up-boot="manual">`](/up-boot-manual) attribute.
 
   Before you manually boot, Unpoly should be configured and compilers should be registered.
   Booting will cause Unpoly to [compile](/up.hello) the initial page.
@@ -205,7 +205,7 @@ up.framework = (function() {
 
   ### Browser support
 
-  Unpoly aims to supports all modern browsers.
+  Unpoly aims to support all modern browsers.
 
   #### Chrome, Firefox, Microsoft Edge
 
@@ -213,11 +213,11 @@ up.framework = (function() {
 
   #### Safari, Mobile Safari
 
-  Unpolys upports the last two major versions of Safari.
+  Unpoly supports the last two major versions of Safari.
 
   #### Internet Explorer
 
-  Internet Explorer 11 or lower are [now longer supported](https://github.com/unpoly/unpoly/discussions/340).
+  Internet Explorer 11 or lower are [no longer supported](https://github.com/unpoly/unpoly/discussions/340).
 
   If you need to support Internet Explorer 11, use Unpoly 2.
 
