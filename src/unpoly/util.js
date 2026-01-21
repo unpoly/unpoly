@@ -5,7 +5,7 @@ Utility functions
 The `up.util` module contains functions to facilitate the work with basic JavaScript
 values like lists, strings or functions.
 
-You will recognize many functions form other utility libraries like [Lodash](https://lodash.com/).
+You will recognize many functions from other utility libraries like [Lodash](https://lodash.com/).
 While feature parity with Lodash is not a goal of `up.util`, you might find it sufficient
 to not include another library in your asset bundle.
 
@@ -106,7 +106,7 @@ up.util = (function() {
   @param {boolean} [options.host='cross-domain']
     Whether to include protocol, hostname and port in the normalized URL.
 
-    When set to `'cross-domain'` (the default), the host is only included if it differ's from the page's hostname.
+    When set to `'cross-domain'` (the default), the host is only included if it differs from the page's hostname.
 
     The port is omitted if the port is the standard port for the given protocol, e.g. `:443` for `https://`.
   @param {boolean} [options.hash=true]
@@ -253,7 +253,7 @@ up.util = (function() {
   }
 
   /*-
-  Translate all items in a [list](/List) to new array of items.
+  Maps all items in a [list](/List) to a new array of items.
 
   ## Example
 
@@ -324,7 +324,7 @@ up.util = (function() {
   }
 
   /*-
-  Calls the given function for each element (and, optional, index)
+  Calls the given function for each element (and optional index)
   of the given [list](/List) or iterator.
 
   @function up.util.each
@@ -416,7 +416,7 @@ up.util = (function() {
   //   isNumber(value) && value != +value
 
   /*-
-  Return whether the given argument is considered to be blank.
+  Returns whether the given argument is considered to be blank.
 
   By default, this function returns `true` for:
 
@@ -428,12 +428,12 @@ up.util = (function() {
 
   All other arguments return `false`.
 
-  To check implement blank-ness checks for user-defined classes,
+  To implement blank-ness checks for user-defined classes,
   see `up.util.isBlank.key`.
 
   @function up.util.isBlank
   @param {any} value
-    The value is to check.
+    The value to check.
   @return {boolean}
     Whether the value is blank.
   @stable
@@ -575,7 +575,7 @@ up.util = (function() {
   }
 
   /*-
-  Returns whether the given argument is an options hash,
+  Returns whether the given argument is an options hash.
 
   Differently from [`up.util.isObject()`], this returns false for
   functions, jQuery collections, promises, `FormData` instances and arrays.
@@ -787,7 +787,7 @@ up.util = (function() {
 
   ```js
   up.util.wrapList([1, 2, 3]) // result: [1, 2, 3]
-  up.util.wrapList('foo') // result: [foo']'
+  up.util.wrapList('foo') // result: ['foo']
   up.util.wrapList(undefined) // result: []
   up.util.wrapList(null) // result: []
   ```
@@ -869,7 +869,7 @@ up.util = (function() {
 
   We may now use `Account` instances with `up.util.copy()`:
 
-  ```
+  ```js
   original = new User('foo@foo.com')
 
   copy = up.util.copy(original)
@@ -898,7 +898,7 @@ up.util = (function() {
   ```js
   let a = { a: '1', b: '2' }
   let b = { b: '3', c: '4' }
-  up.util.merge(a, b) // result: { a: 1', b: '3', c: '4' }'
+  up.util.merge(a, b) // result: { a: '1', b: '3', c: '4' }
   ```
 
   @function up.util.merge
@@ -970,7 +970,7 @@ up.util = (function() {
   Passes each element in the given [array-like value](/List) to the given function.
   Returns the first element for which the function returns a truthy value.
 
-  If no object matches, returns `undefined`.
+  If no element matches, returns `undefined`.
 
   @function up.util.find
   @param {List<T>} list
@@ -1007,10 +1007,10 @@ up.util = (function() {
   }
 
   /*-
-  Consecutively calls the given function which each element
+  Consecutively calls the given function with each element
   in the given list. Returns the first truthy return value.
 
-  Returned `undefined` iff the function does not return a truthy
+  Returns `undefined` if the function does not return a truthy
   value for any element in the list.
 
   @function up.util.findResult
@@ -1088,9 +1088,9 @@ up.util = (function() {
   }
 
   /*-
-  This function is like [`uniq`](/up.util.uniq), accept that
+  This function is like [`uniq`](/up.util.uniq), except that
   the given function is invoked for each element to generate the value
-  for which uniquness is computed.
+  for which uniqueness is computed.
 
   @function up.util.uniqBy
   @param {Array} array
@@ -1199,7 +1199,7 @@ up.util = (function() {
 
   Pass a function argument to schedule it for the next macrotask:
 
-  ```
+  ```js
   up.util.task(() => console.log('Hello from next task!'))
   console.log('Hello from current task!')
   ```
@@ -1216,7 +1216,7 @@ up.util = (function() {
   /*-
   Schedules a macrotask.
 
-  Other than `up.util.task()`, this function uses `postMessage()` instead of `setTimeout()`.
+  Unlike `up.util.task()`, this function uses `postMessage()` instead of `setTimeout()`.
   This has pros and cons:
 
   - This *tends* to cause the task to run before `setTimeout()`, sometimes even before the browser paints the screen.
@@ -1481,7 +1481,7 @@ up.util = (function() {
   @return {any}
     The value of the property before it was deleted.
 
-    If the object didn't return the property, returns `undefined`.
+    If the object didn't have the property, returns `undefined`.
   @stable
   */
   function pluckKey(object, key) {
@@ -1673,7 +1673,7 @@ up.util = (function() {
   /*-
   Sets the given callback as both fulfillment and rejection handler for the given promise.
 
-  [Unlike `promise#finally()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/finally#Description), `up.util.always()` may change the settlement value
+  [Unlike `Promise#finally()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/finally#Description), `up.util.always()` may change the settlement value
   of the given promise.
 
   ### Example: Callback style
@@ -1746,10 +1746,10 @@ up.util = (function() {
 
   - By default `up.util.isEqual()` can compare strings, numbers,
     [array-like values](/List), plain objects and `Date` objects.
-  - To make the copying protocol work with user-defined classes,
+  - To make the comparison protocol work with user-defined classes,
     see `up.util.isEqual.key`.
   - Objects without a defined comparison protocol are
-    defined by reference (`===`).
+    compared by reference (`===`).
 
   @function up.util.isEqual
   @param {any} a
@@ -1807,7 +1807,7 @@ up.util = (function() {
 
   We have a user-defined `Account` class that we want to use with `up.util.isEqual()`:
 
-  ```
+  ```js
   class Account {
     constructor(email) {
       this.email = email
@@ -1895,7 +1895,7 @@ up.util = (function() {
   }
 
   /*-
-  Returns a copy of the given object, with its key transformed by the given function.
+  Returns a copy of the given object, with its keys transformed by the given function.
 
   If the given function returns `undefined` for a key, that key
   will be omitted from the returned object.
@@ -2291,7 +2291,7 @@ up.util = (function() {
 
   ## Syntax errors
 
-  When the passed text is not in Relaxed JSON format, a `SyntaxError` is thrown.
+  When the passed text is not in relaxed JSON format, a `SyntaxError` is thrown.
 
   @function up.util.parseRelaxedJSON
   @param {string} text
@@ -2335,7 +2335,7 @@ up.util = (function() {
 
   ## Supported values
 
-  The list of supported notations differ slightly from [`parseFloat()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseFloat)
+  The list of supported notations differs slightly from [`parseFloat()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseFloat)
   and [`Number()`](https://www.w3schools.com/jsref/jsref_number.asp):
 
   <table>

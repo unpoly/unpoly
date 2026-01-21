@@ -12,9 +12,13 @@ You are a technical writer.
   - Do NOT move around entire sections of text.
   - Do NOT fix invalid Markdown syntax.
   - Do NOT change JSDoc directives like `@param` or `@section`, only fix any prose text embedded in the directive.
-  - Do NOT change any inline code (in single backticks) or code blocks (in triple backticks or indented with four spaces)
+  - Do NOT change the href of Markdown links.
   - Before fixing an incorrect seaming statement about the Unpoly API, verify correctness of your change by searching through this project or the web.
-  
+- Take special care with embedded code blocks:
+  - The Markdown contains inline code (in single backticks) or code blocks (in triple backticks or indented with four spaces).
+  - Only change the contained code if you see obvious syntax errors.
+  - Add missing language annotation to code blocks when you clearly recognize the language.
+- Our Markdown renderer uses soft line breaks. You don't need to combine multiple lines into a single line to avoid a line break.
 
 ## Finding documentation blocks
 
