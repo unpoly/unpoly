@@ -1,7 +1,7 @@
 Working with Content Security Policies
 ======================================
 
-This guide shows how address issues with a strict [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) (or  CSP). 
+This guide shows how to address issues with a strict [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) (or CSP). 
 
 
 Attribute callbacks {#attribute-callbacks}
@@ -9,7 +9,7 @@ Attribute callbacks {#attribute-callbacks}
 
 When your CSP disallows `eval()`, Unpoly cannot directly run JavaScript code in HTML attributes. This affects `[up-on-...]` attributes like [`[up-on-loaded]`](/up-follow#up-on-loaded) or [`[up-on-accepted]`](/up-layer-new#up-on-accepted).
 
-For example, the following callback would crash the fragment update with an error like `Uncaught EvalError: call to Function() blocked by CSP`:
+For example, the following callback will crash the fragment update with an error like `Uncaught EvalError: call to Function() blocked by CSP`:
 
 ```html
 <a href="/path" up-follow up-on-loaded="alert()">Click me</a>
@@ -148,7 +148,7 @@ You do *not* need to track and re-use the nonce of the initial document.
 
 ### Providing the document nonce to Unpoly {#providing-document-nonce}
 
-For Unpoly to able to rewrite response nonces, you must include a `<meta name="csp-nonce">` tag
+For Unpoly to be able to rewrite response nonces, you must include a `<meta name="csp-nonce">` tag
 in the `<head>` of the initial page that [booted](/up.boot) Unpoly:
 
 ```html
@@ -163,9 +163,9 @@ you never need to update the `<meta>` tag with the latest nonce.
 
 To provide the nonce through another method, configure `up.protocol.config.cspNonce`.
 
-### Only `style-src` directives are supported
+### Only `script-src` directives are supported
 
-When verifying responses, only the `style-src` directive is parsed.
+When verifying responses, only the `script-src` directive is parsed.
 A `default-src` directive is parsed if no `script-src` directive is set.
 
 The `script-src-elem` and `script-src-attr` directives are not currently supported.
