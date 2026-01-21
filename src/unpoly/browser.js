@@ -23,7 +23,7 @@ up.browser = (function() {
   Returns whether this browser supports manipulation of the current URL
   via [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState).
 
-  When `pushState`  (e.g. through [`up.follow()`](/up.follow)), it will gracefully
+  When `pushState` is not supported (e.g. through [`up.follow()`](/up.follow)), Unpoly will gracefully
   fall back to a full page load.
 
   > [NOTE]
@@ -38,7 +38,7 @@ up.browser = (function() {
     //
     // 1. Unpoly replaces the initial state so it can handle the pop event when the
     //    user goes back to the initial URL later. If the initial request was a POST,
-    //    Unpoly will wrongly assumed that it can restore the state by reloading with GET.
+    //    Unpoly will wrongly assume that it can restore the state by reloading with GET.
     //
     // 2. Some browsers have a bug where the initial request method is used for all
     //    subsequently pushed states. That means if the user reloads the page on a later

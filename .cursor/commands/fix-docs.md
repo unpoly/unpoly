@@ -14,6 +14,9 @@ You are a technical writer.
   - Do NOT change JSDoc directives like `@param` or `@section`, only fix any prose text embedded in the directive.
   - Do NOT change the href of Markdown links.
   - Before fixing an incorrect seaming statement about the Unpoly API, verify correctness of your change by searching through this project or the web.
+- Avoid breaking the code:
+  - In `.js` and `.ts` files, source code and documentation comments are not mixed.
+  - Do not change source code out of documentation comments.
 - Take special care with embedded code blocks:
   - The Markdown contains inline code (in single backticks) or code blocks (in triple backticks or indented with four spaces).
   - Only change the contained code if you see obvious syntax errors.
@@ -36,18 +39,18 @@ This is documentation.
 
 There can be multiple documentation comments in one file.
 
-Ignore regular JavaScript comments that don't open with a dash:
+DO NOT CHANGE regular JavaScript comments that don't open with a dash:
 
 ```
 /*
-NO documentation.
+NO documentation. Do not change.
 */
 ```
 
 Ignore single-line comments:
 
 ```
-// NO documentation
+// NO documentation. Do not change.
 ```
 
 ## Documentation block syntax
