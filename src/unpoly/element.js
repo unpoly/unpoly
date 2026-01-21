@@ -66,7 +66,7 @@ up.element = (function() {
   }
 
   /*-
-  Like `Element#matches()`, but returns `false` for a `Document` or `Window argument.
+  Like `Element#matches()`, but returns `false` for a `Document` or `Window` argument.
 
   @function elementLikeMatches
   @internal
@@ -105,13 +105,13 @@ up.element = (function() {
   Returns the native [Element](https://developer.mozilla.org/en-US/docs/Web/API/Element) for the given value.
 
   This function is not aware of [layers](/up.layer) or [transitions](/up-destroying)
-  and does not support non-standard selectors like `:main`. For this use `up.fragment.get()`.
+  and does not support non-standard selectors like `:main`. For this, use `up.fragment.get()`.
 
   ### Casting rules
 
   - If given an element, returns that element.
   - If given a CSS selector string, returns the first element matching that selector.
-  - If given a jQuery collection , returns the first element in the collection.
+  - If given a jQuery collection, returns the first element in the collection.
     Throws an error if the collection contains more than one element.
   - If given any other argument (`undefined`, `null`, `document`, `window`…), returns the argument unchanged.
 
@@ -157,7 +157,7 @@ up.element = (function() {
 
   ### Casting rules
 
-  - If given a string, returns the all elements matching that string.
+  - If given a string, returns all elements matching that string.
   - If given any other argument, returns the argument [wrapped as a list](/up.util.wrapList).
 
   ### Example
@@ -214,13 +214,13 @@ up.element = (function() {
 
   When Unpoly hides an element for any reason, it will set an `[hidden]` attribute
   instead of using an inline style like `display: none`.
-  This allows users to tweak the hiding implementation using CSS.
+  This allows users to customize the hiding implementation using CSS.
 
   ## Customizing the CSS
 
-  While `[hidden]` is a [standard HTML attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/hidden)
+  While `[hidden]` is a [standard HTML attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/hidden),
   its default implementation is [not very useful](https://meowni.ca/hidden.is.a.lie.html).
-  In particular it cannot hide elements with any `display` rule.
+  In particular, it cannot hide elements with any `display` rule.
   Unpoly improves the default CSS styles of `[hidden]` so it can hide arbitrary elements.
 
   Unpoly's default styles for `[hidden]` look like this:
@@ -242,7 +242,7 @@ up.element = (function() {
 
   > [IMPORTANT]
   > Any overriding selector must have a [specificity of `(0, 2, 0)`](https://polypane.app/css-specificity-calculator/#selector=.element%5Bhidden%5D).
-  > Also all rules should be defined with [`!important`](https://www.w3schools.com/css/css_important.asp) to override other
+  > Also, all rules should be defined with [`!important`](https://www.w3schools.com/css/css_important.asp) to override other
   > styles defined on that element.
 
   @selector [hidden]
@@ -257,11 +257,11 @@ up.element = (function() {
   ### Limitations
 
   The element is shown by removing the `[hidden]` attribute set by `up.element.hide()`.
-  In case the element is hidden by an inline style (`[style="display: none"]`),
+  If the element is hidden by an inline style (`[style="display: none"]`),
   that inline style is also removed.
 
   You may have CSS rules causing the element to remain hidden after calling `up.element.show(element)`.
-  Unpoly will *not* handle such cases in order to keep this function performant. As a workaround, you may
+  Unpoly will *not* handle such cases to keep this function performant. As a workaround, you may
   manually set `element.style.display = 'block'`.
 
   @function up.element.show
@@ -419,7 +419,7 @@ up.element = (function() {
   Creates an element matching the given CSS selector.
 
   The created element will not yet be attached to the DOM tree.
-  Attach it with [`Element#appendChild()`](https://developer.mozilla.org/en-US/docs/Web/API/Node/appendChild)
+  Attach it with [`Element#appendChild()`](https://developer.mozilla.org/en-US/docs/Web/API/Node/appendChild),
   or use `up.element.affix()` to create an already-attached element.
 
   Use `up.hello()` to activate [JavaScript behavior](/up.script) within the created element.
@@ -463,7 +463,7 @@ up.element = (function() {
   // element is <div attr="value"></div>
   ```
 
-  You may also pass an object of attribute names/values as a second argument:
+  You may also pass an object of attribute names and values as a second argument:
 
   ```js
   element = up.element.createFromSelector('div', { attr: 'value' })
@@ -735,9 +735,9 @@ up.element = (function() {
   even if the given `html` string only contains a fragment.
 
   Due to quirks in the `DOMParser` spec, `<script>` and `<noscript>`
-  elements in the returned document will be inert. Also media elements may
+  elements in the returned document will be inert. Also, media elements may
   not work fully on Safari. To make them active, clone them after insertion
-  into the destination document, using `up.element.revivedClone()`.
+  into the destination document using `up.element.revivedClone()`.
 
   @function up.element.createBrokenDocumentFromHTML
   @param {string} html
@@ -814,8 +814,8 @@ up.element = (function() {
   /*-
   Checks if the given list contains a single `Element` and returns that element.
 
-  Throws an error if the given list contains more than one node.
-  Throws an error if the given list only contains a `Text` node.
+  Throws an error if the given list contains more than one node,
+  or if the given list only contains a `Text` node.
 
   @function up.element.extractSingular
   @param {List<Node>} nodes
@@ -835,7 +835,7 @@ up.element = (function() {
   /*-
   Parses a [list](/List) of [nodes](https://developer.mozilla.org/en-US/docs/Web/API/Node) from a string of HTML.
 
-  The returned list can be a mixed list of `Element`, `Text` or `Comment` nodes.
+  The returned list can be a mixed list of `Element`, `Text`, or `Comment` nodes.
 
   ## Example
 
@@ -850,7 +850,7 @@ up.element = (function() {
   ## Whitespace trimming {#whitespace}
 
   Before parsing, whitespace will be trimmed from the beginning and end of the string.
-  This prevents the creation all-whitespace `Text` nodes at the edges of the list:
+  This prevents the creation of all-whitespace `Text` nodes at the edges of the list:
 
   ```js
   let list = up.element.createNodesFromHTML('  <p>bar</p>  ') // result: NodeList(1)
@@ -863,7 +863,7 @@ up.element = (function() {
   @param {string} html
     A string of HTML to parse.
   @return {List<Node>}
-    A list of `Element`, `Text` or `Comment` nodes.
+    A list of `Element`, `Text`, or `Comment` nodes.
 
   @experimental
   */
@@ -955,7 +955,7 @@ up.element = (function() {
   }
 
   /*-
-  On the given element, set attributes that are still missing.
+  On the given element, sets attributes that are still missing.
 
   @function up.element.setMissingAttrs
   @internal
@@ -998,7 +998,7 @@ up.element = (function() {
       // There are multiple cases when we want to create a wrapper:
       // (1) We have multiple nodes, possibly a mix of Element and Text nodes
       // (2) We have a single Text node
-      // (39 We have an empty list
+      // (3) We have an empty list
       return wrapNodes(nodes)
     }
   }
@@ -1041,9 +1041,9 @@ up.element = (function() {
   Returns the given `attribute` value for the given `element`.
 
   If the element does not have the given attribute, it returns `undefined`.
-  This is a difference to the native `Element#getAttribute()`, which [mostly returns `null` in that case](https://developer.mozilla.org/en-US/docs/Web/API/Element/getAttribute#Non-existing_attributes).
+  This is a difference from the native `Element#getAttribute()`, which [mostly returns `null` in that case](https://developer.mozilla.org/en-US/docs/Web/API/Element/getAttribute#Non-existing_attributes).
 
-  If the element has the attribute but without value (e.g. `<input readonly>`), it returns an empty string.
+  If the element has the attribute but without a value (e.g. `<input readonly>`), it returns an empty string.
 
   @function up.element.attr
   @param {Element} element
@@ -1071,8 +1071,8 @@ up.element = (function() {
 
   This function deviates from the
   [HTML Standard for boolean attributes](https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#boolean-attributes)
-  in order to allow `undefined` values. When an attribute is missing, Unpoly considers the value to be `undefined`
-  (where the standard would assume `false`).
+  to allow `undefined` values. When an attribute is missing, Unpoly considers the value to be `undefined`
+  (whereas the standard would assume `false`).
 
   Unpoly also allows `"true"` and `"false"` as attribute values.
 
@@ -1136,7 +1136,7 @@ up.element = (function() {
   /*-
   Returns the given attribute value cast as boolean.
 
-  If the attribute value cannot be cast to a boolean, tries to cast the the attribute value to a number.
+  If the attribute value cannot be cast to a boolean, tries to cast the attribute value to a number.
 
   If the attribute value cannot be cast to either boolean or number, returns `undefined`.
 
@@ -1293,7 +1293,7 @@ up.element = (function() {
   }
 
   /*-
-  Receives [computed CSS styles](https://developer.mozilla.org/en-US/docs/Web/API/Window/getComputedStyle)
+  Returns [computed CSS styles](https://developer.mozilla.org/en-US/docs/Web/API/Window/getComputedStyle)
   for the given element.
 
   If a property is not set, it will be returned as an empty string.
@@ -1328,13 +1328,13 @@ up.element = (function() {
   }
 
   /*-
-  Receives a [computed CSS property value](https://developer.mozilla.org/en-US/docs/Web/API/Window/getComputedStyle)
-  for the given element, casted as a number.
+  Returns a [computed CSS property value](https://developer.mozilla.org/en-US/docs/Web/API/Window/getComputedStyle)
+  for the given element, cast as a number.
 
-  The value is casted by removing the property's [unit](https://www.w3schools.com/cssref/css_units.asp) (which is usually `px` for computed properties).
+  The value is cast by removing the property's [unit](https://www.w3schools.com/cssref/css_units.asp) (which is usually `px` for computed properties).
   The result is then parsed as a floating point number.
 
-  Returns `undefined` if the property value is missing. Returns `NaN` if the value cannot parsed as a number.
+  Returns `undefined` if the property value is missing. Returns `NaN` if the value cannot be parsed as a number.
 
   ### Examples
 
@@ -1456,7 +1456,7 @@ up.element = (function() {
   Returns whether the given element is currently visible.
 
   An element is considered visible if it consumes space in the document.
-  Elements with `{ visibility: hidden }` or `{ opacity: 0 }` are considered visible, since they still consume space in the layout.
+  Elements with `{ visibility: hidden }` or `{ opacity: 0 }` are considered visible since they still consume space in the layout.
 
   Elements not attached to the DOM are considered hidden.
 

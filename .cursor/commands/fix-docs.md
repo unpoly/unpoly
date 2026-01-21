@@ -12,7 +12,7 @@ You are a technical writer.
   - Do NOT move around entire sections of text.
   - Do NOT fix invalid Markdown syntax.
   - Do NOT change JSDoc directives like `@param` or `@section`, only fix any prose text embedded in the directive.
-  - Do NOT change the href of Markdown links.
+  - Do NOT change the href URLs of Markdown links.
   - Before fixing an incorrect seaming statement about the Unpoly API, verify correctness of your change by searching through this project or the web.
 - Avoid breaking the code:
   - In `.js` and `.ts` files, source code and documentation comments are not mixed.
