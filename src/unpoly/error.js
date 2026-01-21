@@ -37,7 +37,7 @@ up.error = (function() {
   This prevents browsers from printing "Uncaught (in promise)" to the error
   console when the promise is rejected.
 
-  This is helpful for event handlers where it is clear that no rejection
+  This is helpful for event handlers where you know that no rejection
   handler will be registered:
 
   ```js
