@@ -26,6 +26,24 @@ describe('up.util', () => {
 
     })
 
+    describe('up.util.compact()', function() {
+
+      it('returns a copy of the given list with null elements removed', function() {
+        let input = [1, null, 2]
+        let output = up.util.compact(input)
+        expect(output).toEqual([1, 2])
+        expect(output).not.toBe(input)
+      })
+
+      it('returns a copy of the given list with undefined elements removed', function() {
+        let input = [1, undefined, 2]
+        let output = up.util.compact(input)
+        expect(output).toEqual([1, 2])
+        expect(output).not.toBe(input)
+      })
+
+    })
+
     describe('up.util.wrapList()', function() {
 
       describe('with null', function() {
@@ -699,7 +717,7 @@ describe('up.util', () => {
       })
     })
 
-    describe('up.util.flatMap', function() {
+    describe('up.util.flatMap()', function() {
 
       it('collects the Array results of the given map function, then concatenates the result arrays into one flat array', function() {
         const fun = (x) => [x, x]
@@ -735,7 +753,7 @@ describe('up.util', () => {
     })
 
 
-    describe('up.util.uniq', function() {
+    describe('up.util.uniq()', function() {
 
       it('returns the given array with duplicates elements removed', function() {
         const input = [1, 2, 1, 1, 3]
@@ -758,17 +776,20 @@ describe('up.util', () => {
       })
     })
 
-//    describe 'up.util.uniqBy', ->
-//
-//      it 'returns the given array with duplicate elements removed, calling the given function to determine value for uniqueness', ->
-//        input = ["foo", "bar", "apple", 'orange', 'banana']
-//        result = up.util.uniqBy(input, (element) -> element.length)
-//        expect(result).toEqual ['foo', 'apple', 'orange']
-//
-//      it 'accepts a property name instead of a function, which collects that property from each item to compute uniquness', ->
-//        input = ["foo", "bar", "apple", 'orange', 'banana']
-//        result = up.util.uniqBy(input, 'length')
-//        expect(result).toEqual ['foo', 'apple', 'orange']
+    describe('up.util.uniqBy', function() {
+
+      it('returns the given array with duplicate elements removed, calling the given function to determine value for uniqueness', function() {
+        let input = ["foo", "bar", "apple", 'orange', 'banana']
+        let result = up.util.uniqBy(input, (element) => element.length)
+        expect(result).toEqual(['foo', 'apple', 'orange'])
+      })
+
+      it('accepts a property name instead of a function, which collects that property from each item to compute uniqueness', function() {
+        let input = ["foo", "bar", "apple", 'orange', 'banana']
+        let result = up.util.uniqBy(input, 'length')
+        expect(result).toEqual(['foo', 'apple', 'orange'])
+      })
+    })
 
 //    describe 'up.util.parsePath', ->
 //
@@ -962,7 +983,7 @@ describe('up.util', () => {
 
     })
 
-    describe('up.util.each', function() {
+    describe('up.util.each()', function() {
 
       it('calls the given function once for each item of the given array', function() {
         const args = []
@@ -1020,7 +1041,7 @@ describe('up.util', () => {
       })
     })
 
-    describe('up.util.filter', function() {
+    describe('up.util.filter()', function() {
 
       it('returns an array of those elements in the given array for which the given function returns true', function() {
         const array = ["foo", "orange", "cucumber"]
@@ -1065,7 +1086,7 @@ describe('up.util', () => {
       })
     })
 
-    describe('up.util.reject', function() {
+    describe('up.util.reject()', function() {
 
       it('returns an array of those elements in the given array for which the given function returns false', function() {
         const array = ["foo", "orange", "cucumber"]
@@ -1303,7 +1324,7 @@ describe('up.util', () => {
       })
     })
 
-    describe('up.util.every', function() {
+    describe('up.util.every()', function() {
 
       it('returns true if all element in the array returns true for the given function', function() {
         const result = up.util.every(['foo', 'bar', 'baz'], up.util.isPresent)
@@ -1386,7 +1407,7 @@ describe('up.util', () => {
 //        expect(up.util.none(allFalse, 'prop')).toBe(true)
 //        expect(up.util.none(someTrue, 'prop')).toBe(false)
 
-    describe('up.util.some', function() {
+    describe('up.util.some()', function() {
 
       it('returns true if at least one element in the array returns true for the given function', function() {
         const result = up.util.some(['', 'bar', null], up.util.isPresent)
@@ -1436,7 +1457,7 @@ describe('up.util', () => {
       })
     })
 
-    describe('up.util.findResult', function() {
+    describe('up.util.findResult()', function() {
 
       it('consecutively applies the function to each array element and returns the first truthy return value', function() {
         const map = {
@@ -1647,7 +1668,7 @@ describe('up.util', () => {
       })
     })
 
-    describe('up.util.find', function() {
+    describe('up.util.find()', function() {
 
       it('finds the first element in the given array that matches the given tester', function() {
         const array = ['foo', 'bar', 'baz']
@@ -1696,23 +1717,35 @@ describe('up.util', () => {
 
       describe('for a string', function() {
 
-        it('returns true if the given string contains the given substring', () => expect(up.util.contains('foobar', 'oba')).toBe(true))
+        it('returns true if the given string contains the given substring', () => {
+          expect(up.util.contains('foobar', 'oba')).toBe(true)
+        })
 
-        it('returns false if the given string does not contain the given substring', () => expect(up.util.contains('foobar', 'baz')).toBe(false))
+        it('returns false if the given string does not contain the given substring', () => {
+          expect(up.util.contains('foobar', 'baz')).toBe(false)
+        })
       })
 
       describe('for an array', function() {
 
-        it('returns true if the given array contains the given element', () => expect(up.util.contains(['foo', 'bar', 'baz'], 'bar')).toBe(true))
+        it('returns true if the given array contains the given element', () => {
+          expect(up.util.contains(['foo', 'bar', 'baz'], 'bar')).toBe(true)
+        })
 
-        it('returns false if the given array does not contain the given element', () => expect(up.util.contains(['foo', 'bar', 'baz'], 'qux')).toBe(false))
+        it('returns false if the given array does not contain the given element', () => {
+          expect(up.util.contains(['foo', 'bar', 'baz'], 'qux')).toBe(false)
+        })
       })
 
       describe('for a NodeList', function() {
 
-        it('returns true if the given NodeList contains the given element', () => expect(up.util.contains(document.querySelectorAll('body'), document.body)).toBe(true))
+        it('returns true if the given NodeList contains the given element', () => {
+          expect(up.util.contains(document.querySelectorAll('body'), document.body)).toBe(true)
+        })
 
-        it('returns false if the given NodeList does not contain the given element', () => expect(up.util.contains(document.querySelectorAll('div'), document.body)).toBe(false))
+        it('returns false if the given NodeList does not contain the given element', () => {
+          expect(up.util.contains(document.querySelectorAll('div'), document.body)).toBe(false)
+        })
       })
     })
 
@@ -1734,7 +1767,7 @@ describe('up.util', () => {
       })
     })
 
-    describe('up.util.flatten', function() {
+    describe('up.util.flatten()', function() {
 
       it('flattens the given array', function() {
         const array = [1, [2, 3], 4]
@@ -1798,7 +1831,28 @@ describe('up.util', () => {
       })
     })
 
-    describe('up.util.isOptions', function() {
+    describe('up.util.isArray()', function() {
+
+      it('returns true for an Array', function() {
+        expect(up.util.isArray([1, 2, 3])).toBe(true)
+      })
+
+      it('returns false for a string', function() {
+        expect(up.util.isArray('foo')).toBe(false)
+      })
+
+      it('returns false for a null', function() {
+        expect(up.util.isArray(null)).toBe(false)
+      })
+
+      it('returns false for a NodeList', function() {
+        let nodeList = document.querySelectorAll('div')
+        expect(up.util.isArray(nodeList)).toBe(false)
+      })
+
+    })
+
+    describe('up.util.isOptions()', function() {
 
       it('returns true for an Object instance', () => {
         expect(up.util.isOptions(new Object())).toBe(true)
@@ -1892,7 +1946,7 @@ describe('up.util', () => {
       })
     })
 
-    describe('up.util.merge', function() {
+    describe('up.util.merge()', function() {
 
       it('merges the given objects', function() {
         const obj = { a: '1', b: '2' }
@@ -2122,7 +2176,23 @@ describe('up.util', () => {
       })
     }
 
-    describe('up.util.copy', function() {
+    describe('up.util.pluckKey()', function() {
+      it('deletes the property with the given key from the given object and returns its value', function() {
+        let input = { a: 1, b: 2, c: 3 }
+        let output = up.util.pluckKey(input, 'b')
+        expect(input).toEqual({ a: 1, c: 3 })
+        expect(output).toEqual(2)
+      })
+
+      it('returns undefined if the given key does not exist on the object', function() {
+        let input = { a: 1, b: 2 }
+        let output = up.util.pluckKey(input, 'c')
+        expect(input).toEqual({ a: 1, b: 2 })
+        expect(output).toBeUndefined()
+      })
+    })
+
+    describe('up.util.copy()', function() {
 
       it('returns a shallow copy of the given array', function() {
         const original = ['a', { b: 'c' }, 'd']
@@ -2583,7 +2653,7 @@ describe('up.util', () => {
 //        result = up.util.unprefixCamelCase('prefix', 'prefix')
 //        expect(result).toBeUndefined()
 
-    describe('up.util.escapeHTML', function() {
+    describe('up.util.escapeHTML()', function() {
 
       it('escapes double quotes', function() {
         const result = up.util.escapeHTML('before"after')
@@ -2599,6 +2669,17 @@ describe('up.util', () => {
         const result = up.util.escapeHTML('before<script>after')
         expect(result).toEqual('before&lt;script&gt;after')
       })
+
+      it('escapes ampersands', function() {
+        const result = up.util.escapeHTML('before&after')
+        expect(result).toEqual('before&amp;after')
+      })
+
+      it('escapes HTML entities', function() {
+        const result = up.util.escapeHTML('before&quote;after')
+        expect(result).toEqual('before&amp;quote;after')
+      })
+
     })
 
     describe('up.util.memoizeMethod()', function() {
