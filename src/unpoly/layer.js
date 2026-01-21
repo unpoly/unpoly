@@ -7,18 +7,18 @@ const e = up.element
 Layers
 ======
 
-Unpoly allows you to [open page fragments in an overlay](/opening-overlays). Overlays may be stacked infinitely.
+Unpoly allows you to [open page fragments in an overlay](/opening-overlays). Overlays can be stacked infinitely.
 
 A variety of [overlay modes](/layer-terminology) are supported,
-such as modal dialogs, popup overlays or drawers. You may [customize their appearance and behavior](/customizing-overlays).
+such as modal dialogs, popup overlays, or drawers. You can [customize their appearance and behavior](/customizing-overlays).
 
 Layers are isolated, meaning a screen in one layer will not accidentally see elements
 or events from another layer. For instance, [fragment links](/up.link) will only update elements from the [current layer](/up.layer.current)
 unless you [explicitly target another layer](/layer-option).
 
 Overlays allow you to break up a complex screen into [subinteractions](/subinteractions).
-Subinteractions take place in overlays and may span one or many pages while the original screen remains open in the background.
-Once the subinteraction is *done*, the overlay is closed and a result value is communicated back to the parent layer.
+Subinteractions take place in overlays and can span one or many pages while the original screen remains open in the background.
+Once the subinteraction is *done*, the overlay is closed, and a result value is communicated back to the parent layer.
 
 @see layer-terminology
 @see layer-option
@@ -48,7 +48,7 @@ up.layer = (function() {
   /*-
   Configures default attributes for new overlays.
 
-  All options for `up.layer.open()` may be configured.
+  All options for `up.layer.open()` can be configured.
   The configuration will also be used for `[up-layer=new]` links.
 
   Defaults are configured separately for each [layer mode](/layer-terminology):
@@ -61,7 +61,7 @@ up.layer = (function() {
   | `up.layer.config.popup`   | Defaults for popup overlays  |
   | `up.layer.config.cover`   | Defaults for cover overlays  |
 
-  For convenience you may configure options that affect all layer modes
+  For convenience, you can configure options that affect all layer modes
   or all overlay modes:
 
   | Object                    | Effect                       |
@@ -69,9 +69,9 @@ up.layer = (function() {
   | `up.layer.config.any`     | Defaults for all layers      |
   | `up.layer.config.overlay` | Defaults for all overlays    |
 
-  Options configured in such a way are inherited.
-  E.g. when you open a new drawer overlay, defaults from `up.layer.config.drawer`,
-  `up.layer.config.overlay` and `up.layer.config.any` will be used (in decreasing priority).
+  Options configured this way are inherited.
+  For example, when you open a new drawer overlay, defaults from `up.layer.config.drawer`,
+  `up.layer.config.overlay`, and `up.layer.config.any` will be used (in decreasing priority).
 
   ### Example
 
@@ -82,7 +82,7 @@ up.layer = (function() {
   ```
 
   To configure an additional [main target](/up-main)
-  for overlay of any mode:
+  for overlays of any mode:
 
   ```js
   up.layer.config.overlay.mainTargets.unshift('.content')
@@ -190,11 +190,11 @@ up.layer = (function() {
     Other JavaScript libraries often attach their overlay elements
     to the end of the `<body>`, which makes Unpoly consider these overlays
     to be part of the root layer. This can cause Unpoly to steal focus from foreign
-    overlays, or cause Unpoly overlays to incorrectly close when the foreign overlay is clicked.
+    overlays, or cause Unpoly overlays to close incorrectly when the foreign overlay is clicked.
     Adding a selector to this array will cause Unpoly to
     be less opinionated about user interactions within matching elements.
 
-    By default this contains a selector matching the
+    By default, this contains a selector matching the
     [`<dialog>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dialog) element.
 
   @stable
@@ -416,11 +416,11 @@ up.layer = (function() {
 
   @section Render options
     @param {Object} [options]
-      Render options to apply for opening the new overlay.
+      Render options to apply when opening the new overlay.
 
-      Common options are documented below, bust most [options for `up.render()`](/up.render#parameters) may be used.
+      Common options are documented below, but most [options for `up.render()`](/up.render#parameters) can be used.
 
-      You may configure default layer options in `up.layer.config`.
+      You can configure default layer options in `up.layer.config`.
       For example, options in `up.layer.config.overlay` become defaults for all overlays,
       while options in `up.layer.config.drawer` become defaults for all drawers.
 
@@ -429,11 +429,11 @@ up.layer = (function() {
 
   @section Placement
     @param {string} [options.target]
-      The selector of root content element to place inside the overlay container.
+      The selector of the root content element to place inside the overlay container.
 
-      The given `{ target }` must be matchable within the HTML provided by either `{ url }`, `{ content }`, `{ fragment }` or `{ document }` option.
+      The given `{ target }` must be matchable within the HTML provided by either the `{ url }`, `{ content }`, `{ fragment }`, or `{ document }` option.
 
-      If the `{ target }` option is emitted, Unpoly will use the first matching [main target](/up-main) configured for the overlay mode. E.g. the default selectors for modals are configured in `up.layer.config.modal.mainTargets`. See [main targets in overlays](/up-main#overlays).
+      If the `{ target }` option is omitted, Unpoly will use the first matching [main target](/up-main) configured for the overlay mode. For example, the default selectors for modals are configured in `up.layer.config.modal.mainTargets`. See [main targets in overlays](/up-main#overlays).
 
     @param {string} [options.layer="new"]
       Whether to stack the new overlay or replace existing overlays.
@@ -493,7 +493,7 @@ up.layer = (function() {
     @param {string} [options.size]
       The size of the overlay.
 
-      Supported values are `'small'`, `'medium'`, `'large'` and `'grow'`.\
+      Supported values are `'small'`, `'medium'`, `'large'`, and `'grow'`.\
       See [overlay sizes](/customizing-overlays#overlay-sizes) for details.
 
     @param {string} [options.class]
@@ -502,13 +502,13 @@ up.layer = (function() {
       See [overlay classes](/customizing-overlays#overlay-classes).
 
     @param {boolean|string|Array<string>} [options.dismissable=true]
-      How the overlay may be [dismissed](/closing-overlays) by the user.
+      How the overlay can be [dismissed](/closing-overlays) by the user.
 
-      Supported values are `'key'`, `'outside'` and `'button'`.\
+      Supported values are `'key'`, `'outside'`, and `'button'`.\
       See [customizing dismiss controls](/closing-overlays#customizing-dismiss-controls)
       for details.
 
-      You may enable multiple dismiss controls by passing an array or
+      You can enable multiple dismiss controls by passing an array or
       a space-separated string.
 
       Passing `true` or `false` will enable or disable all dismiss controls.
@@ -526,7 +526,7 @@ up.layer = (function() {
 
   @section Client state
     @param {Object} [options.data]
-      The [data object](/data) object for the overlay's root content element (`{ target }`).
+      The [data object](/data) for the overlay's root content element (`{ target }`).
 
       If the content element already has an `[up-data]` attribute, properties from `{ data }` take precedence.
 
@@ -540,13 +540,13 @@ up.layer = (function() {
       @param {boolean|string} [options.history]
         Whether the overlay has [visible history](/history-in-overlays).
 
-        If set to `true` the overlay location, title and meta tags will be shown
+        If set to `true`, the overlay location, title, and meta tags will be shown
         while the overlay is open. When the overlay is closed, the parent layer's history is restored.
 
-        If set to `'auto'` history will be visible if the initial overlay
+        If set to `'auto'`, history will be visible if the initial overlay
         content matches a [main target](/up-main).
 
-        If set to `false`, fragments changes within the overlay will *never* update the address bar.
+        If set to `false`, fragment changes within the overlay will *never* update the address bar.
         You can still access the overlay's current location using `up.layer.location`.
 
         See [History in overlays](/history-in-overlays).
@@ -660,9 +660,9 @@ up.layer = (function() {
   /*-
   This event is emitted before an overlay is [opened](/opening-overlays).
 
-  At emission time the overlay is not yet part of the [layer stack](/up.layer.stack).
-  The overlays elements have yet been placed in the DOM.
-  Listeners may prevent this event to prevent the overlay from opening.
+  At emission time, the overlay is not yet part of the [layer stack](/up.layer.stack).
+  The overlay's elements have not yet been placed in the DOM.
+  Listeners can prevent this event to prevent the overlay from opening.
 
   The event is emitted on the `document`.
 
@@ -670,7 +670,7 @@ up.layer = (function() {
 
   ### Changing layer options
 
-  Listeners may inspect and manipulate options for the overlay that is about to open.
+  Listeners can inspect and manipulate options for the overlay that is about to open.
 
   For example, to give overlays the CSS class `.warning` if the initial URL contains
   the word `"confirm"`:
@@ -687,8 +687,8 @@ up.layer = (function() {
   @param {Object} event.layerOptions
     Options for the overlay that is about to open.
 
-    Listeners may inspect and change the options.
-    All options for `up.layer.open()` may be used.
+    Listeners can inspect and change the options.
+    All options for `up.layer.open()` can be used.
   @param {Element} event.origin
     The link element that is opening the overlay.
   @param event.preventDefault()
@@ -706,7 +706,7 @@ up.layer = (function() {
   ## Customizing the overlay appearance
 
   The event is emitted right before the opening animation starts. Because the overlay
-  has not yet been painted by the browser, this makes it a good occasion to
+  has not yet been painted by the browser, this is a good occasion to
   [customize overlay elements](/customizing-overlays#customizing-overlay-elements):
 
   ```js
@@ -733,12 +733,12 @@ up.layer = (function() {
   has changed value.
 
   This event is *also* emitted when a layer [without visible history](/up.Layer.prototype.history)
-  has reached a new location. If you are only interested in changes the are visible in
+  has reached a new location. If you are only interested in changes that are visible in
   the browser's address bar, observe `up:location:changed` instead.
 
-  The event is also event for location changes on the [root layer](/layer-terminology).
+  The event is also emitted for location changes on the [root layer](/layer-terminology).
 
-  This event is *not* emitted when an overlay is opened. For this observe `up:layer:opened` instead.
+  This event is *not* emitted when an overlay is opened. For this, observe `up:layer:opened` instead.
 
   [History in overlays](/history-in-overlays){:.article-ref}
 
@@ -758,13 +758,13 @@ up.layer = (function() {
   [Opens an overlay](/opening-overlays) and returns a promise for its [acceptance](/closing-overlays).
 
   It's useful to think of overlays as [promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
-  which may either be **fulfilled (accepted)** or **rejected (dismissed)**.
+  that can either be **fulfilled (accepted)** or **rejected (dismissed)**.
 
   [Opening overlays](/opening-overlays){:.article-ref}
 
   ## Example
 
-  Instead of using `up.layer.open()` and passing callbacks, you may use `up.layer.ask()`.
+  Instead of using `up.layer.open()` and passing callbacks, you can use `up.layer.ask()`.
   `up.layer.ask()` returns a promise for the [acceptance value](/closing-overlays#acceptance-values), which you can `await`:
 
   ```js
@@ -772,7 +772,7 @@ up.layer = (function() {
   console.log("New user is " + user)
   ```
 
-  To handle the case that the overlay wasn't completed successful, you
+  To handle the case where the overlay wasn't completed successfully, you
   can `catch` the rejected promise [reason](/closing-overlays#dismissal-reasons):
 
   ```js
@@ -792,9 +792,9 @@ up.layer = (function() {
   @return {Promise}
     A promise that settles when the overlay closes.
 
-    When the overlay was accepted, the promise will fulfill with the overlay's [acceptance value](/closing-overlays#acceptance-values).
+    When the overlay is accepted, the promise will fulfill with the overlay's [acceptance value](/closing-overlays#acceptance-values).
 
-    When the overlay was dismissed, the promise will reject with the overlay's [dismissal reason](/closing-overlays#dismissal-reasons).
+    When the overlay is dismissed, the promise will reject with the overlay's [dismissal reason](/closing-overlays#dismissal-reasons).
 
   @stable
   */
@@ -855,11 +855,11 @@ up.layer = (function() {
 
   @section Placement
     @param [up-target]
-      The selector of root content element to place inside the overlay container.
+      The selector of the root content element to place inside the overlay container.
 
-      The target must be matchable within the HTML provided by either `[href]`, `[up-content]`, `[up-fragment]` or `[up-document]` option.
+      The target must be matchable within the HTML provided by either the `[href]`, `[up-content]`, `[up-fragment]`, or `[up-document]` attribute.
 
-      If the attribute is emitted, Unpoly will use the first matching [main target](/up-main) configured for the overlay mode. E.g. the default selectors for modals are configured in `up.layer.config.modal.mainTargets`. See [main targets in overlays](/up-main#overlays).
+      If the attribute is omitted, Unpoly will use the first matching [main target](/up-main) configured for the overlay mode. For example, the default selectors for modals are configured in `up.layer.config.modal.mainTargets`. See [main targets in overlays](/up-main#overlays).
 
     @param [up-layer="new"]
       @like up.layer.open/options.layer
@@ -912,18 +912,18 @@ up.layer = (function() {
       See [overlay classes](/customizing-overlays#overlay-classes).
 
     @param [up-dismissable]
-      How the overlay may be [dismissed](/closing-overlays) by the user.
+      How the overlay can be [dismissed](/closing-overlays) by the user.
 
       See [customizing dismiss controls](/closing-overlays#customizing-dismiss-controls)
       for details.
 
-      You may enable multiple dismiss controls by separating values with a space or comma character.
+      You can enable multiple dismiss controls by separating values with a space or comma character.
 
       Passing `true` or `false` will enable or disable all dismiss controls.
 
   @section Client state
     @param [up-use-data]
-      The [data object](/data) object for the overlay's root content element (`[up-target]`),
+      The [data object](/data) for the overlay's root content element (`[up-target]`),
       encoded as [relaxed JSON](/relaxed-json).
 
       If the content element already has an `[up-data]` attribute, properties from `[up-use-data]` take precedence.
@@ -938,13 +938,13 @@ up.layer = (function() {
       @param [up-history]
         Whether the overlay has [visible history](/history-in-overlays).
 
-        If set to `'true'` the overlay location, title and meta tags will be shown
+        If set to `'true'`, the overlay location, title, and meta tags will be shown
         while the overlay is open. When the overlay is closed, the parent layer's history is restored.
 
-        If set to `'auto'` history will be visible if the initial overlay
+        If set to `'auto'`, history will be visible if the initial overlay
         content matches a [main target](/up-main).
 
-        If set to `'false'`, fragments changes within the overlay will *never* update the address bar.
+        If set to `'false'`, fragment changes within the overlay will *never* update the address bar.
         You can still access the overlay's current location using `up.layer.location`.
 
         See [History in overlays](/history-in-overlays).
@@ -978,7 +978,7 @@ up.layer = (function() {
       The [overlay result value](/closing-overlays#result-values)
       is the event object that caused the overlay to close.
 
-      You may listen to multiple event types by separating types with a space or comma.
+      You can listen to multiple event types by separating types with a space or comma.
 
       See [Closing when an event is emitted](/closing-overlays#event-condition).
 
@@ -989,7 +989,7 @@ up.layer = (function() {
       The [overlay result value](/closing-overlays#result-values)
       is the event object that caused the overlay to close.
 
-      You may listen to multiple event types by separating types with a space or comma.
+      You can listen to multiple event types by separating types with a space or comma.
 
       See [Closing when an event is emitted](/closing-overlays#event-condition).
 
@@ -1082,24 +1082,24 @@ up.layer = (function() {
 
   ## On a hyperlink
 
-  When [reusing a page within an overlay](/subinteractions#reusing-existing-screens)
-  it can be useful to have a button that closes the overlay, but navigates somewhere else on the root layer.
+  When [reusing a page within an overlay](/subinteractions#reusing-existing-screens),
+  it can be useful to have a button that closes the overlay but navigates somewhere else on the root layer.
 
-  In this case you can use a hyperlink (`<a>`) with a fallback URL in its `[href]` attribute:
+  In this case, you can use a hyperlink (`<a>`) with a fallback URL in its `[href]` attribute:
 
   ```html
   <a href="/list" up-dismiss>Finish</a>
   ```
 
   Unpoly will only navigate to `/list` when this link is clicked in the [root layer](/up.layer).
-  In an overlay the `click` event is prevented and the overlay is accepted.
+  In an overlay, the `click` event is prevented and the overlay is dismissed.
 
   See [Closing when a link is followed](/closing-overlays#on-follow).
 
   ## On a form
 
   To dismiss an overlay when a form is submitted, set an `[up-dismiss]` attribute on the `<form>` element.
-  This will immediately dismiss the overlay on submission, without making a network request:
+  This will immediately dismiss the overlay upon submission, without making a network request:
 
   ```html
   <form up-dismiss> <!-- mark: up-dismiss -->
@@ -1107,7 +1107,7 @@ up.layer = (function() {
   </form>
   ```
 
-  The form's field values will become the [dismissal value](/closing-overlays#result-values) of the closed overlay,
+  The form's field values will become the [dismissal value](/closing-overlays#result-values) of the closed overlay
   as an `up.Params` value.
 
   See [Closing when a form is submitted](/closing-overlays#on-submit).
@@ -1155,24 +1155,24 @@ up.layer = (function() {
 
   ## On a hyperlink
 
-  When [reusing a page within an overlay](/subinteractions#reusing-existing-screens)
-  it can be useful to have a button that closes the overlay, but navigates somewhere else on the root layer.
+  When [reusing a page within an overlay](/subinteractions#reusing-existing-screens),
+  it can be useful to have a button that closes the overlay but navigates somewhere else on the root layer.
 
-  In this case you can use a hyperlink (`<a>`) with a fallback URL in its `[href]` attribute:
+  In this case, you can use a hyperlink (`<a>`) with a fallback URL in its `[href]` attribute:
 
   ```html
   <a href="/list" up-accept>Finish</a>
   ```
 
   Unpoly will only navigate to `/list` when this link is clicked in the [root layer](/up.layer).
-  In an overlay the `click` event is prevented and the overlay is accepted.
+  In an overlay, the `click` event is prevented and the overlay is accepted.
 
   See [Closing when a link is followed](/closing-overlays#on-follow).
 
   ## On a form
 
   To accept an overlay when a form is submitted, set an `[up-accept]` attribute on the `<form>` element.
-  This will immediately accept the overlay on submission, without making a network request:
+  This will immediately accept the overlay upon submission, without making a network request:
 
   ```html
   <form up-accept> <!-- mark: up-accept -->
@@ -1180,7 +1180,7 @@ up.layer = (function() {
   </form>
   ```
 
-  The form's field values will become the [acceptance value](/closing-overlays#result-values) of the closed overlay,
+  The form's field values will become the [acceptance value](/closing-overlays#result-values) of the closed overlay
   as an `up.Params` value.
 
   See [Closing when a form is submitted](/closing-overlays#on-submit).
@@ -1239,7 +1239,7 @@ up.layer = (function() {
   Returns the current layer in the [layer stack](/up.layer.stack).
 
   The *current* layer is usually the [frontmost layer](/up.layer.front).
-  There are however some cases where the current layer is a layer in the background:
+  However, there are some cases where the current layer is a layer in the background:
 
   - While an element in a background layer is being [compiled](/enhancing-elements).
   - While an Unpoly event like `up:request:loaded` is being triggered from a background layer.
@@ -1249,14 +1249,14 @@ up.layer = (function() {
 
   ### Remembering the current layer
 
-  Most functions in the `up.layer` package affect the current layer. E.g. `up.layer.dismiss()`
+  Most functions in the `up.layer` package affect the current layer. For example, `up.layer.dismiss()`
   is shorthand for `up.layer.current.dismiss()`.
 
-  As described above `up.layer.current` is set to the right layer in compilers and most events,
+  As described above, `up.layer.current` is set to the correct layer in compilers and most events,
   even if that layer is not the frontmost layer.
 
-  If you have async code, the current layer may change when your callback is called.
-  To address this you may retrieve the current layer for later reference:
+  If you have async code, the current layer can change when your callback is called.
+  To address this, you can retrieve the current layer for later reference:
 
   ```js
   function dismissCurrentLayerIn(seconds) {
@@ -1288,7 +1288,6 @@ up.layer = (function() {
   /*-
   Returns an `up.Layer` object for the given element or [layer option](/layer-option).
 
-
   ### Looking up the layer of an element
 
   Passing an element will return the layer containing that element:
@@ -1298,7 +1297,7 @@ up.layer = (function() {
   up.layer.get(element) // returns the element's layer
   ```
 
-  If the given element is detached, or part of a closing overlay, `undefined` is returned.
+  If the given element is detached or part of a closing overlay, `undefined` is returned.
 
   ### Getting the nth layer
 
@@ -1393,7 +1392,7 @@ up.layer = (function() {
   The frontmost layer is the layer directly facing the user. If an overlay is
   stacked on top of the frontmost layer, that overlay becomes the new frontmost layer.
 
-  In most cases you don't want to refer to the frontmost layer,
+  In most cases, you don't want to refer to the frontmost layer
   but to the [current layer](/up.layer.current) instead.
 
   @property up.layer.front
@@ -1456,11 +1455,11 @@ up.layer = (function() {
   @param {any} [event.value]
     The overlay's [acceptance value](/closing-overlays#result-values).
 
-    Listeners may replace or mutate this value.
+    Listeners can replace or mutate this value.
   @param {Element} [event.origin]
     The element that is causing the layer to close.
 
-    Will be `undefined` if the overlay is not closing by a user interacting with an element.
+    Will be `undefined` if the overlay is not closing due to a user interacting with an element.
   @param {up.Response} [event.response]
     The server response that is causing this overlay to close.
 
@@ -1475,8 +1474,8 @@ up.layer = (function() {
   /*-
   This event is emitted *after* a layer was [accepted](/closing-overlays).
 
-  The event is emitted on the [layer's](/up.layer.element) when the close animation
-  is starting. If the layer has no close animaton and was already removed from the DOM,
+  The event is emitted on the [layer element](/up.layer.element) when the close animation
+  is starting. If the layer has no close animation and was already removed from the DOM,
   the event is emitted a second time on the `document`.
 
   > [tip]
@@ -1531,11 +1530,11 @@ up.layer = (function() {
   @param {any} [event.value]
     The overlay's [dismissal value](/closing-overlays#result-values).
 
-    Listeners may replace or mutate this value.
+    Listeners can replace or mutate this value.
   @param {Element} [event.origin]
     The element that is causing the layer to close.
 
-    Will be `undefined` if the overlay is not closing by a user interacting with an element.
+    Will be `undefined` if the overlay is not closing due to a user interacting with an element.
   @param {up.Response} [event.response]
     The server response that is causing this overlay to close.
 
@@ -1543,15 +1542,15 @@ up.layer = (function() {
 
     See [Using the discarded response](/closing-overlays#using-the-discarded-response).
   @param event.preventDefault()
-    Event listeners may call this method to prevent the overlay from closing.
+    Event listeners can call this method to prevent the overlay from closing.
   @stable
   */
 
   /*-
   This event is emitted *after* a layer was [dismissed](/closing-overlays).
 
-  The event is emitted on the [layer's](/up.layer.element) when the close animation
-  is starting. If the layer has no close animaton and was already removed from the DOM,
+  The event is emitted on the [layer element](/up.layer.element) when the close animation
+  is starting. If the layer has no close animation and was already removed from the DOM,
   the event is emitted a second time on the `document`.
 
   > [tip]
@@ -1668,7 +1667,7 @@ up.layer = (function() {
 
   /*-
   Whether fragment updates within the [current layer](/up.layer.current)
-  can affect browser history and window title.
+  can affect the browser history and window title.
 
   This is a shortcut for `up.layer.current.history`.
   See `up.Layer#history` for more documentation.
@@ -1696,7 +1695,7 @@ up.layer = (function() {
   */
 
   /*-
-  The [current layer](/up.layer.current)'s [mode](/up.layer.mode)
+  The [current layer](/up.layer.current)'s [mode](/up.layer.mode),
   which governs its [appearance and behavior](/customizing-overlays).
 
   This is a shortcut for `up.layer.current.mode`.
