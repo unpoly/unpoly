@@ -23,8 +23,8 @@ up.radio = (function() {
 
   @section Hungry elements
     @param {Array<string>} [config.hungrySelectors]
-      An array of CSS selectors that is replaced whenever a matching element is found in a response.
-      These elements are replaced even when they were not targeted directly.
+      An array of CSS selectors that are replaced whenever matching elements are found in a response.
+      These elements are replaced even when they are not targeted directly.
 
       By default this contains the `[up-hungry]` attribute.
 
@@ -120,14 +120,14 @@ up.radio = (function() {
   }
 
   /*-
-  Before an `[up-hungry]` element is added to a render pass, a event `up:fragment:hungry` is emitted on that element.
+  Before an `[up-hungry]` element is added to a render pass, an event `up:fragment:hungry` is emitted on that element.
 
   ## Preventing hungry elements from being updated
 
-  You may prevent the `up:fragment:hungry` event to exclude an hungry element from the render pass.
-  Use this to define arbitrary conditions for when an hungry element should be updated.
+  You may prevent the `up:fragment:hungry` event to exclude a hungry element from the render pass.
+  Use this to define arbitrary conditions for when a hungry element should be updated.
 
-  For example, the following would update an hungry element only for render passes that [update history](/updating-history):
+  For example, the following would update a hungry element only for render passes that [update history](/updating-history):
 
   ```js
   element.addEventListener('up:fragment:hungry', function(event) {
@@ -136,7 +136,7 @@ up.radio = (function() {
   ```
 
   You may also define conditions based on the *new* element that a hungry element would be swapped with.
-  The following would skip an update if the new element has a class `.is-empty`:
+  The following would skip an update if the new element has the class `.is-empty`:
 
   ```js
   element.addEventListener('up:fragment:hungry', function(event) {
@@ -160,7 +160,7 @@ up.radio = (function() {
 
   /*-
   Elements with an `[up-hungry]` attribute are updated whenever the server
-  sends a matching element, even if the element isn't [targeted](/targeting-fragments).
+  sends a matching element, even if the element is not [targeted](/targeting-fragments).
 
   Hungry elements are optional in the same way as `:maybe` targets.
   When an `[up-hungry]` element does not match in the server response, the element will not be updated,
@@ -184,7 +184,7 @@ up.radio = (function() {
   </div>
   ```
 
-  An selector for the hungry element (`.unread-messages`) will be added to target selectors automatically.
+  A selector for the hungry element (`.unread-messages`) will be added to target selectors automatically.
 
   ## Derivable target required {#derivable-target-required}
 
@@ -192,7 +192,7 @@ up.radio = (function() {
   will [derive a target selector](/target-derivation) for the hungry element.
 
   For this to work the hungry element must have an [identifying attribute](/target-derivation#derivation-patterns),
-  like an `[id]` or a unique `[class]` attribute.
+  such as an `[id]` or a unique `[class]` attribute.
   When no good target can be derived, the hungry element is excluded from the update and a
   message like this will be [logged](/up.log):
 
@@ -211,11 +211,11 @@ up.radio = (function() {
   ## Conflict resolution
 
   When Unpoly renders new content, each element in that content can only be inserted once.
-  When multiple hungry elements conflict with each other or with the the [primary render target](/targeting-fragments),
-  that conflict is resolved using the following rules:
+  When multiple hungry elements conflict with each other or with the [primary render target](/targeting-fragments),
+  the conflict is resolved using the following rules:
 
-  1. When both a [target selector](/targeting-fragments) and a hungry elements target the same fragment in the response, only the direct render target will be updated.
-  2. When hungry elements are nested within each other, the outmost fragment will be updated. Note that we recommend to not over-use the hungry mechanism, and prefer to explicit render targets instead.
+  1. When both a [target selector](/targeting-fragments) and a hungry element target the same fragment in the response, only the direct render target will be updated.
+  2. When hungry elements are nested within each other, the outermost fragment will be updated. Note that we recommend not overusing the hungry mechanism, and preferring explicit render targets instead.
   3. When hungry elements on different layers target the same fragment in the response,
      the layer closest to the rendering layer will be chosen.
 
@@ -239,8 +239,8 @@ up.radio = (function() {
 
       Relative references like `'parent'` or `'child'` will be resolved in relation to the hungry element's layer.
 
-      To match a hungry element when updating one of multiple layers, separate the references using and `or` delimiter.
-      For example, `'current or child'` will match for updates on either the hungry element's layer, or
+      To match a hungry element when updating one of multiple layers, separate the references using an `or` delimiter.
+      For example, `'current or child'` will match for updates on either the hungry element's layer or
       its direct child.
 
       To match a hungry element when updating *any* layer, set this attribute to `'any'`.
@@ -262,8 +262,8 @@ up.radio = (function() {
       Calling `event.preventDefault()` will prevent the hungry fragment
       from being updated.
 
-      For instance, you want to auto-update an hungry navigation bar,
-      but only if we're changing history entries:
+      For instance, if you want to auto-update a hungry navigation bar
+      only when changing history entries:
 
       ```html
       <nav id="side-nav" up-hungry up-on-hungry="if (!renderOptions.history) event.preventDefault()">
@@ -446,7 +446,7 @@ up.radio = (function() {
   /*-
   This event is emitted before a [polling](/up-poll) fragment is reloaded from the server.
 
-  Listener may prevent the `up:fragment:poll` event to prevent the fragment from being reloaded.
+  Listeners may prevent the `up:fragment:poll` event to prevent the fragment from being reloaded.
   Preventing the event will only skip a single update:
 
   ```js
@@ -478,8 +478,7 @@ up.radio = (function() {
 
   ![A confirmation flash, an error flash and a warning flash](images/flashes.png){:width='480'}
 
-  You application layout should have an empty `[up-flashes]` element to indicate where flash messages
-should be inserted:
+  Your application layout should have an empty `[up-flashes]` element to indicate where flash messages should be inserted:
 
   ```html
   <nav>
