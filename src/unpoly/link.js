@@ -15,13 +15,13 @@ user follows a link:
 
 This makes for an unfriendly experience:
 
-- State changes caused by AJAX updates get lost during the page transition.
-- Unsaved form changes get lost during the page transition.
+- State changes caused by AJAX updates are lost during the page transition.
+- Unsaved form changes are lost during the page transition.
 - The JavaScript VM is reset during the page transition.
-- If the page layout is composed from multiple scrollable containers
-  (e.g. a pane view), the scroll positions get lost during the page transition.
+- If the page layout is composed of multiple scrollable containers
+  (e.g. a pane view), the scroll positions are lost during the page transition.
 - The user sees a "flash" as the browser loads and renders the new page,
-  even if large portions of the old and new page are the same (navigation, layout, etc.).
+  even if large portions of the old and new pages are the same (navigation, layout, etc.).
 
 Unpoly fixes this by letting you annotate links with an [`[up-target]`](/up-follow#up-target)
 attribute. The value of this attribute is a CSS selector that indicates which page
@@ -31,7 +31,7 @@ the targeted fragments and discard the rest:
 ![Unpoly page flow](/images/tutorial/fragment_flow_unpoly.svg){:width="620" class="picture has_border is_sepia has_padding"}
 
 With this model, following links feels smooth. All DOM state outside the updated fragment is preserved.
-Pages also load much faster since the DOM, CSS and JavaScript environments do not need to be
+Pages also load much faster since the DOM, CSS, and JavaScript environments do not need to be
 destroyed and recreated for every request.
 
 
@@ -103,7 +103,7 @@ up.link = (function() {
   /*-
   Configures defaults for link handling.
 
-  In particular you can configure Unpoly to handle [all links on the page](/handling-everything)
+  In particular, you can configure Unpoly to handle [all links on the page](/handling-everything)
   without requiring developers to set `[up-...]` attributes.
 
   @property up.link.config
@@ -251,7 +251,7 @@ up.link = (function() {
   /*-
   Follows the given link with JavaScript and updates a fragment with the server response.
 
-  By default the layer's [main element](/up-main)
+  By default, the layer's [main element](/up-main)
   will be replaced. Attributes like [`[up-target]`](/up-follow#up-target)
   or [`[up-layer]`](/up-follow#up-layer) will be honored.
 
@@ -381,7 +381,7 @@ up.link = (function() {
   ```js
   let link = document.querySelector('a[href="/foo"]')
   let options = up.link.followOptions(link)
-  // result: { url: /foo', method: 'GET', target: '.content', layer: 'new', ... }'
+  // result: { url: '/foo', method: 'GET', target: '.content', layer: 'new', ... }'
   ```
 
   @function up.link.followOptions
@@ -494,7 +494,7 @@ up.link = (function() {
 
   Listeners may inspect and manipulate [render options](/up.render#parameters) for the coming fragment update.
 
-  The code below will open all form-contained links in an overlay, so as not to
+  The code below will open all form-contained links in an overlay so as not to
   lose the user's form data:
 
   ```js
@@ -508,7 +508,7 @@ up.link = (function() {
   When changing render options for a [preloaded link](/preloading), consider making the
   same change for `up:link:preload` so the [preload request](/preloading#preload-request-behavior) sends the same [HTTP headers](/up.protocol).
 
-  In the example above we want to ensure a `X-Up-Mode: modal` header to be sent, so we modify
+  In the example above, we want to ensure an `X-Up-Mode: modal` header is sent, so we modify
   both events:
 
   ```js
@@ -525,8 +525,8 @@ up.link = (function() {
   @param {Object} event.renderOptions
     An object with [render options](/up.render#parameters) for the coming fragment update.
 
-    Listeners may inspect and modify these options. It is recommended to
-    change render options for `up:link:preload` in the same way.
+    Listeners may inspect and modify these options. It is recommended that
+    render options for `up:link:preload` be changed in the same way.
   @param event.preventDefault()
     Prevents the link from being followed.
   @stable
@@ -610,7 +610,7 @@ up.link = (function() {
   /*-
   This event is [emitted](/up.emit) before a link is [preloaded](/preloading).
 
-  Listeners may prevent this event to stop the link from being preloaded,
+  Listeners may prevent this event to stop the link from being preloaded
   or [change render options](/up:link:follow#changing-render-options) for the preload request.
 
   [Preloading links](/preloading){:.article-ref}
@@ -748,7 +748,7 @@ up.link = (function() {
   Enables [keyboard interaction and other accessibility behaviors](/faux-interactive-elements#accessibility)
   for non-interactive elements that represent clickable buttons.
 
-  It's up to you to make the element appear interactive visually, e.g. by assigning a `.button` class from your design system.
+  It's up to you to make the element appear interactive visually, e.g., by assigning a `.button` class from your design system.
 
   [Clicking on non-interactive elements](/faux-interactive-elements){:.article-ref}
 
@@ -934,9 +934,9 @@ up.link = (function() {
   A `click` event that honors the `[up-instant]` attribute.
 
   This event is generally emitted when an element is clicked. However, for elements
-  with an `[up-instant]` attribute this event is emitted on `mousedown` instead.
+  with an `[up-instant]` attribute, this event is emitted on `mousedown` instead.
 
-  This is useful to listen to links being activated, without needing to know whether
+  This is useful for listening to links being activated without needing to know whether
   a link is `[up-instant]`.
 
   ## Example
@@ -971,10 +971,10 @@ up.link = (function() {
 
   ## Only unmodified clicks are considered
 
-  To prevent overriding native browser behavior, the `up:click` is only emitted for unmodified clicks.
+  To prevent overriding native browser behavior, the `up:click` event is only emitted for unmodified clicks.
 
-  In particular, it is not emitted when the user holds `Shift`, `CTRL` or `Meta` while clicking.
-  Nor is it emitted when the user clicks with a secondary mouse button.
+  In particular, it is not emitted when the user holds `Shift`, `CTRL`, or `Meta` while clicking,
+  nor when the user clicks with a secondary mouse button.
 
   @event up:click
   @param {Element} event.target
@@ -1112,7 +1112,7 @@ up.link = (function() {
   */
 
   /*-
-  A placeholder for content that is loaded later from another URL.
+  A placeholder for content to be loaded later from another URL.
 
   By moving expensive but non-[critical](https://developer.mozilla.org/en-US/docs/Web/Performance/Critical_rendering_path) fragments into partials,
   you can paint critical content earlier.
@@ -1137,10 +1137,10 @@ up.link = (function() {
 
       When set to `'reveal'`, the deferred content will load when the `[up-defer]` placeholder is scrolled
       into the [viewport](/up-viewport). If the element is already visible when
-      inserted, loading will start immediately.  Also see [loading as the placeholder becomes visible](/lazy-loading#on-reveal).
+      inserted, loading will start immediately. Also see [loading as the placeholder becomes visible](/lazy-loading#on-reveal).
 
-      When set to `'manual'` the deferred content will not load on its own.
-      You can control the load timing by calling `up.deferred.load()` from your own JavaScripts.
+      When set to `'manual'`, the deferred content will not load on its own.
+      You can control the load timing by calling `up.deferred.load()` from your own JavaScript.
 
     @param [up-intersect-margin='0']
       With `[up-defer=reveal]`, this enlarges the viewport by the given number of pixels before
@@ -1193,7 +1193,7 @@ up.link = (function() {
 
   ## Example
 
-  This link will update the fragment `<div class="content">` with the same element
+  This link will update the `<div class="content">` fragment with the same element
   fetched from `/posts/5`:
 
   ```html
@@ -1227,7 +1227,7 @@ up.link = (function() {
   To force a [full page load](/up.network.loadPage) when a followable link is clicked:
 
   - Set an [`[up-follow=false]`](/attributes-and-options#boolean-attributes) attribute on the link element
-  - Prevent the `up:link:follow` event, then call `up.network.loadPage(event.renderOptions)`.
+  - Prevent the `up:link:follow` event, then call `up.network.loadPage(event.renderOptions)`
 
   ## Making non-interactive elements act as hyperlinks
 
@@ -1332,11 +1332,11 @@ up.link = (function() {
   /*-
   Activates this link-like element on `mousedown` instead of `click` ("Act on press").
 
-  For links with `[up-follow]` this will save some time that would otherwise be spent
-  on waiting for the user to release the mouse button. Since an AJAX request will be triggered right away,
+  For links with `[up-follow]`, this will save time that would otherwise be spent
+  waiting for the user to release the mouse button. Since an AJAX request will be triggered right away,
   the interaction will appear faster.
 
-  For [faux-interactive elements](/faux-interactive-elements) setting `[up-instant]` will cause
+  For [faux-interactive elements](/faux-interactive-elements), setting `[up-instant]` will cause
   the `up:click` event to be emitted on `mousedown` instead of `click`.
 
   To apply the instant effect without changing your HTML, configure `up.link.config.instantSelectors`.
@@ -1352,8 +1352,8 @@ up.link = (function() {
   Links or [faux-interactive elements](/faux-interactive-elements) with `[up-instant]`
   can still be activated with the keyboard.
 
-  With `[up-instant]` users can no longer cancel a click by dragging the pressed mouse away from the element.
-  However, for navigation actions this isn't required. E.g. many operating systems switch tabs on `mousedown`
+  With `[up-instant]`, users can no longer cancel a click by dragging the pressed mouse away from the element.
+  However, for navigation actions this isn't required. E.g., many operating systems switch tabs on `mousedown`
   instead of `click`.
 
   @selector [up-instant]
@@ -1364,7 +1364,7 @@ up.link = (function() {
   Enlarges the click area of a descendant link.
 
   `[up-expand]` honors all the Unpoly attributes in expanded links, like
-  [`[up-target]`](/up-follow#up-target), `[up-instant]` or `[up-preload]`.
+  [`[up-target]`](/up-follow#up-target), `[up-instant]`, or `[up-preload]`.
 
   ## Example
 
@@ -1381,7 +1381,7 @@ up.link = (function() {
   ## Multiple contained links
 
   If a container contains more than one link, you can set the value of the
-  `[up-expand]` attribute to a CSS selector to define which link should be expanded:
+  `[up-expand]` attribute to a CSS selector that defines which link should be expanded:
 
   ```html
   <div class="notification" up-expand="#close"> <!-- mark: #close -->
@@ -1394,7 +1394,7 @@ up.link = (function() {
   ## Feedback classes
 
   Unpoly assigns the `.up-active` class to clicked links while they are loading.
-  This class is assigned to both the expanding link and the expanded click area.
+  This class is assigned to both the expanded link and the expanded click area.
 
   Assume this `[up-expand]` container with two contained links:
 
@@ -1428,8 +1428,8 @@ up.link = (function() {
 
   `[up-expand]` has some limitations for advanced browser users:
 
-  - Users won't be able to right-click the expanded area to open a context menu
-  - Users won't be able to `CTRL`+click the expanded area to open a new tab
+  - Users won't be able to right-click the expanded area to open a context menu.
+  - Users won't be able to `CTRL`+click the expanded area to open a new tab.
 
   To overcome these limitations, consider nesting the entire clickable area in an actual `<a>` tag.
   [It's OK to put block elements inside an anchor tag](https://makandracards.com/makandra/43549-it-s-ok-to-put-block-elements-inside-an-a-tag).
@@ -1474,7 +1474,7 @@ up.link = (function() {
   Unpoly will only preload [links with safe methods](/up.link.isSafe). The `[up-preload]` attribute
   has no effect on unsafe links.
 
-  Links with the `[up-preload]` attribute are always [followed by Unpoly](/up-follow) and will not make a full page load.
+  Links with an `[up-preload]` attribute are always [followed by Unpoly](/up-follow) and will not make a full page load.
 
   [Preloading links](/preloading){:.article-ref}
 
@@ -1492,7 +1492,7 @@ up.link = (function() {
       When to preload this link.
 
       When set to `'hover'` (the default), preloading will start when the user hovers
-      over this link [for a while](#up-preload-delay). On touch devices preloading will
+      over this link [for a while](#up-preload-delay). On touch devices, preloading will
       begin when the user places their finger on the link. Also see [preloading on hover](/preloading#on-hover).
 
       When set to `'insert'`, preloading will start immediately when this
@@ -1500,7 +1500,7 @@ up.link = (function() {
 
       When set to `'reveal'`, preloading will start when the link is scrolled
       into the [viewport](/up-viewport). If the link is already visible when
-      inserted, preloading will start immediately.  Also see [preloading when a link becomes visible](/preloading#on-reveal).
+      inserted, preloading will start immediately. Also see [preloading when a link becomes visible](/preloading#on-reveal).
 
       When set to `'false'`, the link will not be preloaded.
       You can still preload this link programmatically using `up.link.preload()`.
