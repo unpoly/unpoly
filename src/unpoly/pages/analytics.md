@@ -5,14 +5,14 @@ This guide shows how to track page views using web analytics tools like
 [Matomo](https://matomo.org/) or [Google Analytics](https://analytics.google.com/).
 
 Web analytics tools usually track a page visit during the initial page load.
-When you [follow links with Unpoly](/up-follow) your app only has a single page load when the user begins her session.
+When you [follow links with Unpoly](/up-follow) your app only has a single page load when the user begins their session.
 After that [only fragments are updated](/up.link) within the same page and no additional visits are tracked.
 These *in-page navigations* may be missing from your statistics.
 
 
 ## Tracking in-page navigations
 
-Below you find multiple approaches to track in-page navigations. 
+Below you will find multiple approaches to track in-page navigations. 
 Choose and adapt the strategy that fits the amount of data you want to track.
 
 All code examples assume that a function `trackPageView(url)` is used to track a page view.
@@ -44,7 +44,7 @@ This behavior is close to that of classic tracking codes from tools like Google 
 #### Tracking navigation within overlays
 
 Unpoly lets you render content in [multiple layers](/up.layer). However, not all overlays have [visible history](/up.Layer.prototype.history).
-When an overlay without visible history is opened or navigated to a new location, the browser's address bar will not change and no `up:location:changed` event will be emitted.
+When an overlay without visible history is opened or the user navigates to a new location, the browser's address bar will not change and no `up:location:changed` event will be emitted.
 
 If you want to track navigation within overlays, observe `up:layer:location:changed` instead: 
 

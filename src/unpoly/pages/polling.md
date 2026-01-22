@@ -55,7 +55,7 @@ For example, the following element will be polled with the selector `#score`:
 </div>
 ```
 
-When you see an error `Cannot poll untargetable fragment`, Unpoly cannot derive a good
+When you see an error `Cannot poll untargetable fragment`, it means Unpoly cannot derive a good
 selector that identifies the element. In that case, set a unique `[id]` or `[up-id]` attribute.
 
 

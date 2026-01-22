@@ -12,7 +12,7 @@ or by [rendering different content for overlays](#rendering-different-content-fo
 Unpoly transmits the [targeted selector](/targeting-fragments) in an `X-Up-Target` request header.
 
 Server-side code may shorten its response by only rendering HTML
-that matches the target selector. For example, you might prefer to not render an
+that matches the target selector. For example, you might prefer not to render an
 expensive sidebar if the sidebar is not targeted.
 
 Doing this is **fully optional**. The server is free to send redundant elements or full HTML documents.

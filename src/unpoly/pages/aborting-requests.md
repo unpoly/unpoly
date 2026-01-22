@@ -3,7 +3,7 @@ Aborting requests
 
 When two requests [target](/targeting-fragments) the same element, Unpoly will abort the earlier request.
 
-This is to non-deterministic updates when two requests race to render the same fragment.
+This prevents non-deterministic updates when two requests race to render the same fragment.
 Note that responses may or may not arrive in the same order as they were requested.
 
 

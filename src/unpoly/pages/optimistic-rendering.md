@@ -2,7 +2,7 @@ Optimistic rendering
 ====================
 
 Optimistic rendering is a pattern where we update the page
-without waiting for the server. When the server eventually does respond, the optimistic change
+without waiting for the server. When the server eventually responds, the optimistic change
 is reverted and replaced by the server-confirmed content.
 
 
@@ -25,7 +25,7 @@ To limit the duplication of view logic, you may [use templates](#templates).
 By embedding templates into your responses, the server stays in control of HTML rendering.
 
 > [note]
-> Optimistic rendering is a recent feature in Unpoly, and inherently difficult in a server-driven approach.
+> Optimistic rendering is a recent feature in Unpoly, and is inherently difficult in a server-driven approach.
 > Expect more changes as we're looking for the best patterns.
 
 

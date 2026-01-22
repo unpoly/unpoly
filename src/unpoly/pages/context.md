@@ -93,7 +93,7 @@ We can implement such an contact picker with this [ERB](https://github.com/ruby/
 
 Our effective contact object would now be something like `{ project: 'Hosting 2021' }`.
 
-When rendering the `/contacts` the server can access the current layer context through the `X-Up-Context` header.
+When rendering the `/contacts`, the server can access the current layer context through the `X-Up-Context` header.
 It can then decide to render a different title:
 
 ```erb

@@ -152,7 +152,7 @@ Focus in overlays {#overlays}
 
 ### When an overlay is opened
 
-When opening an [overlay](/up.layer) the first applicable strategy will be used:
+When opening an [overlay](/up.layer), the first applicable strategy will be used:
 
 - Focus an `[autofocus]` element in the new overlay.
 - Focus the overlay element.
@@ -177,7 +177,7 @@ When updating a fragment within an existing overlay, all [focus strategies](#foc
 
 When an overlay is closed, the link that originally opened the overlay is re-focused.
 
-Ihe layer was [opened programmatically](/up.layer.open) without an `{ origin }` option, the origin link is unknown. In that case the the parent layer is focused.
+If the layer was [opened programmatically](/up.layer.open) without an `{ origin }` option, the origin link is unknown. In that case, the parent layer is focused.
 
 
 @page focus

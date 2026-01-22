@@ -1,7 +1,7 @@
 Enhancing elements with JavaScript
 ==================================
 
-Unpoly apps often want to. E.g. a `<div class="map">` should automatically start a Google Map widget.
+Unpoly apps often want to enhance elements with JavaScript behaviors. For example, a `<div class="map">` should automatically start a Google Map widget.
 
 Unpoly offers *compilers* to call JavaScript snippets when an element is inserted the DOM, and
 that element is matching a CSS selectors.
