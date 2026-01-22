@@ -108,7 +108,7 @@ up.motion = (function() {
   ## Callback contract
 
   For animations that can be expressed through [CSS transitions](https://www.w3schools.com/css/css3_transitions.asp),
-  we recommend that your definitions end by calling calling [`up.animate()`](/up.animate) with an object argument,
+  we recommend that your definitions end by calling [`up.animate()`](/up.animate) with an object argument,
   passing along your `options` and returning the result.
 
   If you choose to *not* use `up.animate()` and roll your own
@@ -153,7 +153,7 @@ up.motion = (function() {
   ## Callback contract
 
   For animations that can be expressed through [CSS transitions](https://www.w3schools.com/css/css3_transitions.asp),
-  we recomend that your definitions end by calling [`up.animate()`](/up.animate) with an object argument,
+  we recommend that your definitions end by calling [`up.animate()`](/up.animate) with an object argument,
   passing along your `options` and returning the result.
 
   If you choose to *not* use `up.animate()` and roll your own
@@ -250,7 +250,7 @@ up.motion = (function() {
 
       - The name of a [registered](/up.animation) animation
       - A function performing the animation (same contract as a function passed to `up.animation()`)
-      - An object of CSS attributes describing the last frame of the animation (using kebeb-case property names)
+      - An object of CSS attributes describing the last frame of the animation (using kebab-case property names)
     @param {number} [options.duration=300]
       The duration of the animation, in milliseconds.
     @param {string} [options.easing='ease']
@@ -294,7 +294,7 @@ up.motion = (function() {
   /*-
   Animates the given element's CSS properties using CSS transitions.
 
-  Does not track the animation, nor does it finishes existing animations
+  Does not track the animation, nor does it finish existing animations
   (use `up.motion.animate()` for that). It does, however, listen to the motionController's
   finish event.
 
@@ -371,12 +371,12 @@ up.motion = (function() {
   /*-
   Performs an animated transition between two elements.
 
-  Transitions are implement by performing two animations in parallel,
-  causing `oldElement` to disappear and the `newElement` to appear.
+  Transitions are implemented by performing two animations in parallel,
+  causing `oldElement` to disappear and `newElement` to appear.
 
   - `newElement` is [inserted before](https://developer.mozilla.org/en-US/docs/Web/API/Node/insertBefore) `oldElement`
   - `oldElement` is removed from the [document flow](https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout/Positioning) with `position: absolute`.
-     It will be positioned over its original place in the flow that is now occupied by `newElement`.
+    It will be positioned over its original place in the flow that is now occupied by `newElement`.
   - Both `oldElement` and `newElement` are animated in parallel
   - `oldElement` is removed from the DOM
 
@@ -389,11 +389,11 @@ up.motion = (function() {
 
   ## Implementation details
 
-  During a transition both the old and new element occupy
+  During a transition, both the old and new element occupy
   the same position on the screen.
 
   Since the CSS layout flow will usually not allow two elements to
-  overlay the same space, Unpoly:
+  overlay the same space, Unpoly does the following:
 
   - The old and new elements are cloned
   - The old element is removed from the layout flow using `display: hidden`
@@ -410,10 +410,10 @@ up.motion = (function() {
     @param {Element|jQuery|string} oldElement
       The old element to transition away from.
 
-      It will remain attached when the transition finished, but may be hidden our
+      It will remain attached when the transition finishes, but may be hidden or
       be located outside the visible viewport.
     @param {Element|jQuery|string} newElement
-      The new element that will remain in the DOM once the transition finished.
+      The new element that will remain in the DOM once the transition finishes.
 
       It should be detached before calling `up.morph()`.
   @section Transition
