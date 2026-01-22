@@ -18,7 +18,7 @@ Also set an `[up-href]` attribute with the URL from which to load the deferred c
 </div>
 ```
 
-The placeholder content can show a pending state while the full content is loading.
+The placeholder content can display a pending state while the full content is loading.
 
 When the `[up-defer]` placeholder is rendered, it will immediately make a request to fetch
 its content from `/menu`:
@@ -40,7 +40,7 @@ The server is now expected to respond with a page containing `#menu` with conten
 </div>
 ```
 
-The element in the response should no longer have an `[up-defer]` attribute. This would cause infinite reloading.
+The element in the response should no longer have an `[up-defer]` attribute, as this would cause infinite reloading.
 
 The server is free to send additional elements or even a full HTML document.
 Only `#menu` will be updated on the page. Other elements from the response will be discarded.

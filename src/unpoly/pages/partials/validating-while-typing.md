@@ -1,4 +1,4 @@
-By default `[up-validate]` reacts to the `change` event that is emitted
+By default, `[up-validate]` reacts to the `change` event that is emitted
 when the user is done editing and focuses the next field.
 
 We can validate while the user is typing by setting an `[up-watch-event="input"]` attribute:
@@ -10,8 +10,8 @@ We can validate while the user is typing by setting an `[up-watch-event="input"]
 Note that we set some additional [watch options](/watch-options) to improve the experience:
 
 - The [`[up-watch-delay]`](/watch-options#debouncing)
-  attribute to delay validation until the user has stopped typing for 100 milliseconds.
-- The `[up-keep]` attribute to preserve additional user input while the validation request is in flight.
+  attribute delays validation until the user has stopped typing for 100 milliseconds.
+- The `[up-keep]` attribute preserves additional user input while the validation request is in flight.
 
 If you're using this pattern a lot, you may want to configure a [macro](/up.macro) for it.
 

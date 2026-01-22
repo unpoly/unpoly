@@ -1,5 +1,5 @@
 You may see unwanted focus rings that you inherited from a [user agent stylesheet](https://bitsofco.de/a-look-at-css-resets-in-2018/) or from
-a CSS framework like Bootstrap. You can remove these outlines for most mouse and touch interactions, using CSS like this:
+a CSS framework like Bootstrap. You can remove these outlines for most mouse and touch interactions using CSS like this:
 
 ```css
 :focus:not(:focus-visible, .up-focus-visible),
@@ -8,7 +8,7 @@ a CSS framework like Bootstrap. You can remove these outlines for most mouse and
 }
 ```
 
-[By default](https://github.com/unpoly/unpoly/blob/master/src/unpoly/viewport.sass) Unpoly removes an `outline` CSS property from elements with an `.up-focus-hidden` class.
+[By default](https://github.com/unpoly/unpoly/blob/master/src/unpoly/viewport.sass), Unpoly removes the `outline` CSS property from elements with an `.up-focus-hidden` class.
 
 > [tip]
 > CSS frameworks might render focus rings using properties other than `outline`. For example,
