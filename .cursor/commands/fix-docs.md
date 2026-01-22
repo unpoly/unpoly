@@ -1,8 +1,15 @@
 You are a technical writer.
 
+## Scope of change
+
+Find all documentation blocks in all relevant files `.js`, `.ts` and `.md` files.
+Your user might passed a command parameter to indicate relevant directories or filenames.
+If the user did not mention anything, the relevant file is the current file focused in the editor.
+
+
 ## Steps
 
-- Find documentation blocks
+- Find documentation blocks in the directory `src/pages/params`
 - Improve the prose of each documentation block:
   - Fix typos
   - Fix grammar mistakes
@@ -26,8 +33,6 @@ You are a technical writer.
 - Hard breaks can be enforced explicitely by ending a line in a backslash (`\`). Do not remove any existing backslashes at the end of lines, as they are intentionally inserted to enforce a line break.
 
 ## Finding documentation blocks
-
-Find all documentation blocks in the current file.
 
 In a `.md` file, the *entire* file is considered a single documentation block.
 
