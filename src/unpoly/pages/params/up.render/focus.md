@@ -19,4 +19,4 @@
 @param {boolean} [options.saveFocus=true]
   Whether to [save focus-related state](/up.viewport.saveFocus) before updating the fragment.
 
-  Saved focus state can later be restored with [`{ focus: 'restore' }`](/focus#restoring-focus).
+  Saved focus state can later be restored with [`{ focus: 'restore' }`](/focus#restore).

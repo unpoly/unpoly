@@ -19,4 +19,4 @@
 @param [up-save-focus='true']
   Whether to [save focus-related state](/up.viewport.saveFocus) before updating the fragment.
 
-  Saved scroll positions can later be restored with [`[up-focus=restore]`](/focus#restoring-focus).
+  Saved scroll positions can later be restored with [`[up-focus=restore]`](/focus#restore).

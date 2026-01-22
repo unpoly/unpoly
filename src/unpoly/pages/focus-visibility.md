@@ -3,7 +3,7 @@ Focus ring visibility
 
 Unpoly lets you control whether a [focused](/focus) fragment shows a visible focus ring.
 
-Because Unpoly [often focuses new content](/focus#default-strategy), you may see focus outline appear in unexpected places.
+Because Unpoly [often focuses new content](/focus#auto), you may see focus outline appear in unexpected places.
 Try to resist an initial instinct to just remove focus rings globally using CSS.
 Focus rings are important for users of keyboards and screen readers to be able to orient themselves
 as the focus moves on the page. However, mouse and touch users often dislike the visual effect of a focus ring.

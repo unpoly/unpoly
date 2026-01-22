@@ -8,6 +8,12 @@ If you're upgrading from an older Unpoly version, you should load [`unpoly-migra
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+3.13.0
+------
+
+TODO
+
+
 3.12.1
 ------
 
@@ -1701,7 +1707,7 @@ This change fixes two regressions for form field watchers, introduced by [3.7.0]
 
 You can now control whether a focused fragment shows a [visible focus ring](/focus-visibility).
 
-Because Unpoly [often focuses new content](/focus#default-strategy), you may see focus outline appear in unexpected places.
+Because Unpoly [often focuses new content](/focus#auto), you may see focus outline appear in unexpected places.
 Focus rings are important for users of keyboards and screen readers to be able to orient themselves
 as the focus moves on the page. However, mouse and touch users often dislike the visual effect of a focus ring.
 

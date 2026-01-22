@@ -629,7 +629,7 @@ up.viewport = (function() {
 
   Saved state will be associated with the given layer's location.
   It can later be restored by calling `up.viewport.restoreScroll()`
-  at the same location, or by following a link with an [`[up-focus="restore"]`](/focus#restoring-focus)
+  at the same location, or by following a link with an [`[up-focus="restore"]`](/focus#restore)
   attribute to that same location.
 
   Unpoly automatically saves focus-related state before [navigating](/navigation).

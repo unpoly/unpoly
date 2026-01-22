@@ -445,7 +445,7 @@ up.layer = (function() {
     @param {Element} [options.origin]
       The link or button element that caused this overlay to open.
 
-      The origin [will be re-focused](/focus#focus-in-overlays) when the overlay closes.
+      The origin [will be re-focused](/focus#overlays) when the overlay closes.
 
       When opening a popup, the overlay will be anchored relative to the origin element.
 

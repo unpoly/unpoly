@@ -235,7 +235,7 @@ However, when you update fragments within multiple viewports, you can only scrol
 ```
 
 To scroll multiple viewports, set an [`[up-scroll-map]`](/up-follow#up-scroll-map) attribute.\
-Its value is a [relaxed JSON](relaxed-json) object mapping selectors to scroll options:
+Its value is a [relaxed JSON](/relaxed-json) object mapping selectors to scroll options:
 
 ```html
 <a

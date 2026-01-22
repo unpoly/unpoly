@@ -6,7 +6,7 @@
   If the new fragment already has an `[up-data]` object, properties from `{ data }` take precedence.
 
   When updating [multiple fragments](/targeting-fragments#multiple), `{ data }` is only applied to the primary fragment.
-  To apply data to multiple fragments, use [`{ dataMap }`](/options.dataMap).
+  To apply data to multiple fragments, use [`{ dataMap }`](#options.dataMap).
 
   See [Overriding data for a render pass](/data#override).
 

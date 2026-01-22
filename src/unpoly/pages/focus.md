@@ -96,7 +96,7 @@ Pass `{ focus: false }` to not actively manipulate focus.
 
 Note that even with `{ focus: false }` the focus may change during a fragment update. For instance, when a fragment contains focus and is then swapped, focus will revert to the `<body>` element.
 
-To actively try and preserve focus, use [`{ focus: 'keep' }`](#preserving-focus) instead.
+To actively try and preserve focus, use [`{ focus: 'keep' }`](#keep) instead.
 
 ### Conditional focusing {#condition}
 
@@ -111,7 +111,7 @@ you may append `-if-lost` to any of the string options in this list.
 E.g. `{ focus: 'target-if-lost' }` will focus the new fragment, but only if the update caused focus
 to be lost.
 
-To implement other conditions, [pass a function](#custom-focus-logic) instead.
+To implement other conditions, [pass a function](#function) instead.
 
 ### Attempt multiple focus strategies {#multiple-strategies}
 
