@@ -4,7 +4,7 @@ const u = up.util
 Instances of `up.RenderResult` describe the effects of [rendering](/up.render).
 
 Functions like `up.render()`, `up.follow()` or `up.submit()` return a promise
-that resolve with an `up.RenderResult`:
+that resolves with an `up.RenderResult`:
 
 ```js
 let result = await up.render('.target', content: 'foo')
@@ -126,10 +126,10 @@ up.RenderResult = class RenderResult {
   /*-
   Whether this render pass did not result in any fragments being rendered.
 
-  There are some cases where we did not render any fragment:
+  There are some cases where no fragments were rendered:
 
-  - Server sent HTTP status `304 Not Modified` to [avoid re-rendering unchanged content](/skipping-rendering).
-  - Server sent HTTP status `204 No Content`.
+  - The server sent HTTP status `304 Not Modified` to [avoid re-rendering unchanged content](/skipping-rendering).
+  - The server sent HTTP status `204 No Content`.
   - The target selector was set to `':none'` by either client or server.
   - The server sent an `X-Up-Accept-Layer` or `X-Up-Dismiss-Layer` header.
     This [closes an overlay](/closing-overlays#from-server) before content is rendered.

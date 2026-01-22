@@ -56,7 +56,7 @@ up.Response = class Response extends up.Record {
   [HTTP status code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes)
   as a `number`.
 
-  A successful response will usually have a `200` or `201' status code.
+  A successful response will usually have a `200` or `201` status code.
 
   @property up.Response#status
   @param {number} status
@@ -94,7 +94,7 @@ up.Response = class Response extends up.Record {
   /*-
   A [render target pushed by the server](/X-Up-Target).
 
-  If the server pushed no title via HTTP header, this will be `undefined`.
+  If the server pushed no target via HTTP header, this will be `undefined`.
 
   @property up.Response#target
   @param {string|undefined} [target]
@@ -153,7 +153,7 @@ up.Response = class Response extends up.Record {
   }
 
   /*-
-  Response whether the response has an empty body text.
+  Returns whether the response has an empty body text.
 
   There are some cases where the server might send us an empty body:
 
@@ -209,7 +209,7 @@ up.Response = class Response extends up.Record {
   for HTML or XHTML.
 
   This method tests if the `Content-Type` header is either `text/html` or `application/xhtml+xml`.
-  It doesn't test if the response body actual contains a valid HTML
+  It doesn't test if the response body actually contains a valid HTML
   document.
 
   @function up.Response#isHTML

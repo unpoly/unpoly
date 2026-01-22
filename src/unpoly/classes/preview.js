@@ -41,8 +41,8 @@ up.Preview = class Preview {
   /*-
   The [request](/up.Request) that is loading.
 
-  When the request ends for [any reason](/previews#ending), all preview changes will be reverted before
-  the server response is processed further.
+  When the request ends for [any reason](/previews#ending), all preview changes will be reverted
+  before the server response is processed further.
 
   Also see [inspecting the preview context](/previews#inspecting-the-preview-context).
 
@@ -56,7 +56,7 @@ up.Preview = class Preview {
 
   Preview functions may mutate this object to influence
   the render pass after the request ends. Note that the request has already been queued
-  when previews run. Thus setting request-related render options will have no effect.
+  when previews run. Thus, setting request-related render options will have no effect.
 
   Also see [inspecting the preview context](/previews#inspecting-the-preview-context).
 
@@ -207,7 +207,7 @@ up.Preview = class Preview {
   }
 
   /*-
-  Whether the previewed render pass is a [revalidation an expired cache entry](/caching#revalidation).
+  Whether the previewed render pass is a [revalidation of an expired cache entry](/caching#revalidation).
 
   Cache revalidation is only previewed when an
   [`[up-revalidate-preview]`](/up-follow#up-revalidate-preview) attribute is set
@@ -231,7 +231,7 @@ up.Preview = class Preview {
 
   ## Example
 
-  To run another preview function registered with `up.preview()`, pass it's
+  To run another preview function registered with `up.preview()`, pass its
   name:
 
   ```js
@@ -335,7 +335,7 @@ up.Preview = class Preview {
   Temporarily changes an element's attributes.
 
   The element's original attributes will be restored
-  when whe preview [ends](/previews#ending).
+  when the preview [ends](/previews#ending).
 
   ## Example
 
@@ -372,7 +372,7 @@ up.Preview = class Preview {
 
   ## Example
 
-  This preview sets a temporary `.loading` class to the targeted fragment:
+  This preview sets a temporary `.loading` class on the targeted fragment:
 
   ```js
   up.preview('loading-attr', function(preview) {
@@ -585,7 +585,7 @@ up.Preview = class Preview {
 
   ## Moving existing elements
 
-  When the last argument is an attached element, it is moved to the indicated position relative to the reference.
+  When the last argument is an attached element, it is moved to the indicated position relative to the reference element.
   When the preview ends, the element is returned to its initial position.
 
   Moved elements are neither [compiled nor destroyed](#compilation) by this function.
@@ -687,7 +687,7 @@ up.Preview = class Preview {
 
   ## Example
 
-  This preview (visually) replaces the children of the [targeted fragment](/up.Preview.prototype.fragment)
+  This preview visually replaces the children of the [targeted fragment](/up.Preview.prototype.fragment)
   with a `.spinner` element:
 
   ```js
@@ -697,12 +697,12 @@ up.Preview = class Preview {
   })
   ```
 
-  For a more concise way to temporarily swap the children with a temporary element,
+  For a more concise way to temporarily swap children with a temporary element,
   see the [`swapContent()`](/up.Preview.prototype.swapContent) method.
 
   @function up.Preview#hideContent
   @param {Element|string} [element=this.fragment]
-    The element or selector to hide the children off.
+    The element or selector to hide the children of.
 
     If omitted, the children of the [targeted fragment](/up.Preview.prototype.fragment) will be hidden.
   @experimental
@@ -727,8 +727,7 @@ up.Preview = class Preview {
 
   ## Example
 
-  This preview below shows a `.skeleton` element within the [targeted fragment](/up.Preview.prototype.fragment).
-  Other children of the
+  This preview shows a `.skeleton` element within the [targeted fragment](/up.Preview.prototype.fragment):
 
   ```js
   up.preview('skeleton', function(preview) {
@@ -795,7 +794,7 @@ up.Preview = class Preview {
 
   ## Example
 
-  This preview (visually) replaces the children of the [targeted fragment](/up.Preview.prototype.fragment)
+  This preview visually replaces the children of the [targeted fragment](/up.Preview.prototype.fragment)
   with a `.spinner` element:
 
   ```js
@@ -814,7 +813,7 @@ up.Preview = class Preview {
 
   @function up.Preview#swapContent
   @param {Element|string} [element=this.fragment]
-    The element or selector to visually swap children off.
+    The element or selector to visually swap children of.
 
     If omitted, the children of the [targeted fragment](/up.Preview.prototype.fragment) will be swapped.
   @param {Element|string} newContent

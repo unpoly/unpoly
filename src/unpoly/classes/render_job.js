@@ -6,7 +6,7 @@ A queued render task.
 Rendering functions like `up.render()` or `up.submit()` return an `up.RenderJob`.
 Callers can inspect the job's [render options](/up.RenderJob.prototype.renderOptions) or [`await` its completion](/render-lifecycle#running-code-after-rendering).
 
-See [render hooks](/render-lifecycle) for examples for awaiting rendering completion
+See [render hooks](/render-lifecycle) for examples of awaiting rendering completion
 and how to handle errors.
 
 ## Example
@@ -236,10 +236,10 @@ up.RenderJob = class RenderJob {
   was updated from a successful server response.
 
   The promise will *reject* for responses with a [failed HTTP status](/failed-responses),
-  when the request is [aborted](/aborting-requests) or when there is
+  when the request is [aborted](/aborting-requests), or when there is a
   [network issue](/network-issues).
 
-  See [render hooks](/render-lifecycle) for examples for awaiting rendering completion
+  See [render hooks](/render-lifecycle) for examples of awaiting rendering completion
   and how to handle errors.
 
   @function up.RenderJob#then

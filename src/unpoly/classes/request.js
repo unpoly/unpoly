@@ -252,7 +252,7 @@ up.Request = class Request extends up.Record {
   Whether the request is abortable through `up.fragment.abort()`.
 
   This belongs to the `up.fragment` API, not `up.request`.
-  A request with `{ abortable: false }` can still be aborted through `up.request.abort()`.
+  A request with `{ abortable: false }` can still be aborted through `up.network.abort()`.
 
   @property up.Request#abortable
   @param {boolean} [abortable=true]
@@ -262,7 +262,7 @@ up.Request = class Request extends up.Record {
   /*-
   Whether this request is loading in the background.
 
-  Background requests deprioritized over foreground requests.
+  Background requests are deprioritized over foreground requests.
   Background requests also won't emit `up:network:late` events and won't trigger
   the [progress bar](/up.network.config#config.progressBar).
 
@@ -620,11 +620,11 @@ up.Request = class Request extends up.Record {
 
   ## Limitations
 
-  Some request properties cannot be transported with a full-page request, and will be ignored.
-  Such properties include
+  Some request properties cannot be transported with a full-page request and will be ignored.
+  Such properties include:
 
   - Custom HTTP headers
-  - Binary params values (from file inputs)
+  - Binary param values (from file inputs)
 
   @function up.Request#loadPage
   @stable
@@ -675,10 +675,10 @@ up.Request = class Request extends up.Record {
   ### Example
 
   ```javascript
-  let request = await up.request('/path')
+  let request = up.request('/path')
 
   try {
-    let response = await request('/path')
+    let response = await request
   } catch (result) {
     if (result instanceof up.AbortError) {
       console.log('Request was aborted.')
@@ -767,7 +767,7 @@ up.Request = class Request extends up.Record {
 
   @property up.Request#ended
   @param {boolean} ended
-    Whether is request has ended.
+    Whether this request has ended.
   @stable
   */
   get ended() {
@@ -959,7 +959,7 @@ up.Request = class Request extends up.Record {
   with a status code of 2xx or [304](/skipping-rendering#rendering-nothing).
 
   The promise will reject for responses with a failed HTTP status,
-  when the request is [aborted](/aborting-requests) or when there is
+  when the request is [aborted](/aborting-requests) or when there is a
   [network issue](/network-issues).
 
   ### Example
@@ -969,10 +969,10 @@ up.Request = class Request extends up.Record {
     let response = await up.request('foo')
     console.log('Successful response:', response.text)
   } catch (error) {
-    if (error instanceof up.Request) {
-      console.log('Response with error code:', response.text)
+    if (error instanceof up.Response) {
+      console.log('Response with error code:', error.text)
     } else {
-      console.log("Other error during request: ", error)
+      console.log("Other error during request:", error)
     }
   }
   ```

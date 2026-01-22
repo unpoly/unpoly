@@ -150,11 +150,11 @@ up.Params = class Params {
   }
 
   /*-
-  Returns an [query string](https://en.wikipedia.org/wiki/Query_string) for this `up.Params` instance.
+  Returns a [query string](https://en.wikipedia.org/wiki/Query_string) for this `up.Params` instance.
 
   The keys and values in the returned query string will be [percent-encoded](https://developer.mozilla.org/en-US/docs/Glossary/percent-encoding).
-  Non-primitive values (like [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) will be omitted from
-  the retuned query string.
+  Non-primitive values (like [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File)) will be omitted from
+  the returned query string.
 
   ### Example
 
@@ -215,11 +215,11 @@ up.Params = class Params {
   }
 
   /*-
-  Builds an URL string from the given base URL and
+  Builds a URL string from the given base URL and
   this `up.Params` instance as a [query string](https://en.wikipedia.org/wiki/Query_string).
 
   The base URL may or may not already contain a query string. The
-  additional query string will be joined with an `&` or `?` character accordingly.
+  additional query string will be joined with `&` or `?` accordingly.
 
   @function up.Params#toURL
   @param {string} base
@@ -377,7 +377,7 @@ up.Params = class Params {
   }
 
   /*-
-  Returns the first param value with the given `name` from the given `params`.
+  Returns the first param value with the given `name`.
 
   Returns `undefined` if no param value with that name is set.
 
@@ -385,18 +385,18 @@ up.Params = class Params {
   are returned as an array. If no param value with that array name is set, an empty
   array is returned.
 
-  To always return a single value use `up.Params#getFirst()` instead.
-  To always return an array of values use `up.Params#getAll()` instead.
+  To always return a single value, use `up.Params#getFirst()` instead.
+  To always return an array of values, use `up.Params#getAll()` instead.
 
   ### Example
 
   ```js
   var params = new up.Params({ foo: 'fooValue', bar: 'barValue' })
   var params = new up.Params([
-    { name: 'foo', value: 'fooValue' }
-    { name: 'bar[]', value: 'barValue1' }
-    { name: 'bar[]', value: 'barValue2' })
-  ]})
+    { name: 'foo', value: 'fooValue' },
+    { name: 'bar[]', value: 'barValue1' },
+    { name: 'bar[]', value: 'barValue2' }
+  ])
 
   var foo = params.get('foo')
   // foo is now 'fooValue'
@@ -469,11 +469,10 @@ up.Params = class Params {
   - All `<input>` types are suppported
   - Field values are usually strings, but an `<input type="file">` will produce
     [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) values.
-  - An `<input type="radio">` or `<input type="checkbox">` will only be added if they are `[checked]`.
-  - An `<select>` will only be added if at least one value is `[checked]`.
+  - An `<input type="radio">` or `<input type="checkbox">` will only be added if it is `[checked]`.
+  - A `<select>` will only be added if at least one value is `[selected]`.
   - If passed a `<select multiple>` or `<input type="file" multiple>`, all selected values are added.
-    If passed a `<select multiple>`, all selected values are added.
-  - Fields that are `[disabled]` are ignored
+  - Fields that are `[disabled]` are ignored.
   - Fields without a `[name]` attribute are ignored.
 
   ### Example
@@ -539,7 +538,7 @@ up.Params = class Params {
 
   The added params will include exactly those form values that would be
   included for the given field in a regular form submission. If the given field wouldn't
-  submit a value (like an unchecked `<input type="checkbox">`, nothing will be added.
+  submit a value (like an unchecked `<input type="checkbox">`), nothing will be added.
 
   See `up.Params.fromForm()` for more details and examples.
 
