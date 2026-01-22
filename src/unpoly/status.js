@@ -38,7 +38,7 @@ up.status = (function() {
       An array of classes to set on [activated links or form elements](/up-active).
 
     @param {Array<string>} [config.loadingClasses=['up-loading']]
-      An array of classes to on [loading fragments](/up-loading).
+      An array of classes to set on [loading fragments](/up-loading).
 
   @section Navigational containers
     @param {Array<string>} [config.navSelectors=['[up-nav]', 'nav']]
@@ -65,7 +65,7 @@ up.status = (function() {
   /*-
   Registers a named [preview](/previews) function.
 
-  Preview function are applied using the `[up-preview]` attribute or [`{ preview }`](/up.render#options.preview) option.
+  Preview functions are applied using the `[up-preview]` attribute or [`{ preview }`](/up.render#options.preview) option.
   See [Previews](/previews) for an overview.
 
   ## Example
@@ -263,7 +263,7 @@ up.status = (function() {
   loading content from the server.
 
   When the user interacts with a link or form, its preview function is invoked immediately.
-  The function will usually [mutate the DOM](/previews#basic-mutations) to signal that the app is working,
+  The function will usually [mutate the DOM](/previews#basic-mutations) to signal that the app is working
   or to provide clues for how the page will ultimately look.
   For example, if the user is deleting an item from a list, the preview
   function could hide that item visually.
@@ -309,7 +309,7 @@ up.status = (function() {
   fragment while loading content from the server.
 
   All other children of the targeted fragment will be hidden while
-  the request is in flight.  When the requests [ends](/up.Request.prototype.ended) for any reason,
+  the request is in flight. When the request [ends](/up.Request.prototype.ended) for any reason,
   the placeholder will be removed and the original fragment children will be un-hidden.
 
   When [targeting multiple fragments](/targeting-fragments#multiple),
@@ -450,8 +450,8 @@ up.status = (function() {
   */
 
   /*-
-  Links within [navigational container](/navigation-bars)
-  may use the `[up-alias]` attribute to alternative URLs for which they
+  Links within [navigational containers](/navigation-bars)
+  may use the `[up-alias]` attribute to define alternative URLs for which they
   should also be highlighted as `.up-current`.
 
   See [Highlighting links for multiple URLs](/navigation-bars#aliases) for more documentation.
