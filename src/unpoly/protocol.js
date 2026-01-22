@@ -68,12 +68,12 @@ up.protocol = (function() {
 
   The user updates a fragment. Unpoly automatically includes the following request header:
 
-    ```http
+  ```http
   X-Up-Version: 1.0.0
   ```
 
-  The server chooses to render different HTML to Unpoly requests, e.g. by excluding the document `<head>`
-  and only rendering the `<body>`. The server responds with the folowing HTTP:
+  The server chooses to render different HTML for Unpoly requests, e.g. by excluding the document `<head>`
+  and only rendering the `<body>`. The server responds with the following HTTP:
 
   ```http
   Vary: X-Up-Version
@@ -140,10 +140,10 @@ up.protocol = (function() {
 
   ### Optional targets are omitted {#optional-targets}
 
-  An optional selector part (`:maybe` suffix) will be omitted from an `X-Up-Target` header unless it
+  An optional selector part (`:maybe` suffix) will be omitted from the `X-Up-Target` header unless it
   matches in the current page.
 
-  Required selector parts are always included in `X-Up-Target`.
+  Required selector parts are always included in the `X-Up-Target` header.
 
   @include vary-header-note
 
@@ -200,8 +200,8 @@ up.protocol = (function() {
   Unpoly needs to know whether the form submission has failed (to update the form with
   validation errors) or succeeded (to update the `[up-target]` selector).
 
-  For Unpoly to be able to detect a failed form submission, the response must be
-  return a non-2xx HTTP status code. We recommend to use
+  For Unpoly to be able to detect a failed form submission, the response must
+  return a non-2xx HTTP status code. We recommend using
   [HTTP 422](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422) (Unprocessable Entity).
 
   To do so in [Ruby on Rails](http://rubyonrails.org/), pass a [`:status` option to `render`](http://guides.rubyonrails.org/layouts_and_rendering.html#the-status-option):
@@ -546,7 +546,7 @@ up.protocol = (function() {
   There is no explicit protocol to *remove* keys from the context, but the server may send a key
   with a `null` value to effectively remove a key.
 
-  The frontend will use the server-provided context upates for both successful (HTTP status `200 OK`)
+  The frontend will use the server-provided context updates for both successful (HTTP status `200 OK`)
   and failed (status `4xx` or `5xx`) responses.  If no `X-Up-Context` response header is set,
   the updating layer's context will not be changed.
 
@@ -598,7 +598,7 @@ up.protocol = (function() {
   This assumption is correct for redirects with status codes 301, 302 and 303,
   and incorrect for the [less common codes 307 and 308](https://makandracards.com/makandra/501468-modern-http-status-codes-for-redirecting).
 
-  Also for technical reason Unpoly cannot detect redirects to the same URL, but using a different method. For example, when a request
+  Also for technical reasons Unpoly cannot detect redirects to the same URL, but using a different method. For example, when a request
   to `POST /users` redirects to `GET /users`.
 
   You can address both edge cases by including an `X-Up-Method` header in your responses.
@@ -709,7 +709,7 @@ up.protocol = (function() {
   ### When too many fields are validated
 
   Validating a long form may cause the `X-Up-Validate` header to become excessively long.
-  This may cause web infrastructure from rejecting the request with an `413 Entity Too Large` error.
+  This may cause web infrastructure to reject the request with a `413 Entity Too Large` error.
 
   To prevent this, the header value is set to `:unknown` if its length exceeds `up.protocol.config.maxHeaderSize`.
 
@@ -729,8 +729,7 @@ up.protocol = (function() {
   Each element in the array is an object representing an event to be emitted
   on the `document`.
 
-  The object property `{ "type" }` defines the event's [type](https://developer.mozilla.org/en-US/docs/Web/API/Event/type). Other properties become properties of the emitted
-  event object.
+  The object property `{ "type" }` defines the event's [type](https://developer.mozilla.org/en-US/docs/Web/API/Event/type). Other properties become properties of the emitted event object.
 
   @include unicode-header-values
 
@@ -879,7 +878,7 @@ up.protocol = (function() {
   the response's HTML content.
 
   The header value is the dismissal value serialized as a JSON object.
-  To accept an overlay without value, set the header value to the string `null`.
+  To dismiss an overlay without value, set the header value to the string `null`.
 
   @include unicode-header-values
 
@@ -1018,7 +1017,7 @@ up.protocol = (function() {
   > [tip]
   > Server-side Unpoly apps may inspect [request headers](/up.protocol) to [customize or shorten responses](/optimizing-responses),
   > e.g. by omitting content that isn't [targeted](/targeting-fragments).
-  > When a response is optimized in that fasion, a `Vary` header should be sent.
+  > When a response is optimized in that fashion, a `Vary` header should be sent.
 
   ### Example
 
@@ -1050,8 +1049,8 @@ up.protocol = (function() {
     @param {string|Function(): string} [config.csrfParam]
       The `name` of the hidden `<input>` used for sending a
       [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern) when
-      submitting a default, non-AJAX form. For AJAX request the token is sent as an
-      [HTTP header](/up.protocol.config#config.csrfHeader instead.
+      submitting a default, non-AJAX form. For AJAX requests the token is sent as an
+      [HTTP header](/up.protocol.config#config.csrfHeader) instead.
 
       The parameter name can be configured as a string or as function that returns the parameter name.
       If no name is set, no token will be sent.
@@ -1064,8 +1063,8 @@ up.protocol = (function() {
 
     @param {string|Function(): string} [config.csrfToken]
       The [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern)
-      to send for unsafe requests. The token will be sent as either a HTTP header (for AJAX requests)
-      or hidden form `<input>` (for default, non-AJAX form submissions).
+      to send for unsafe requests. The token will be sent as either an HTTP header (for AJAX requests)
+      or a hidden form `<input>` (for default, non-AJAX form submissions).
 
       The token can either be configured as a string or as function that returns the token.
       If no token is set, no token will be sent.
@@ -1081,11 +1080,11 @@ up.protocol = (function() {
       A [CSP script nonce](https://content-security-policy.com/nonce/)
       for the initial page that [booted](/up.boot) Unpoly.
 
-      The nonce let Unpoly run JavaScript in HTML attributes like
+      The nonce lets Unpoly run JavaScript in HTML attributes like
       [`[up-on-loaded]`](/up-follow#up-on-loaded) or [`[up-on-accepted]`](/up-layer-new#up-on-accepted).
       See [Working with a strict Content Security Policy](/csp).
 
-      The nonce can either be configured as a string or as function that returns the nonce.
+      The nonce can either be configured as a string or as a function that returns the nonce.
 
       Defaults to the `content` attribute of a `<meta>` tag named `csp-nonce`:
 
