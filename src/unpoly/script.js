@@ -5,8 +5,8 @@ Custom JavaScript
 The `up.script` package lets you pair HTML elements with JavaScript behavior.
 
 Unpoly encourages you to migrate all your custom JavaScript from `DOMContentLoaded`
-callbacks to [compilers](/enhancing-elements). This will make sure they run both at page load and
-when a new fragment is inserted later. See [Migrating legacy JavaScripts](/legacy-scripts)
+callbacks to [compilers](/enhancing-elements). This will ensure they run both at page load and
+when a new fragment is inserted later. See [Migrating legacy JavaScript](/legacy-scripts)
 for details.
 
 @see enhancing-elements
@@ -33,7 +33,7 @@ up.script = (function() {
     @param {Array<string} [config.assetSelectors]
       An array of CSS selectors matching default [assets](/up-asset).
 
-      By default all remote scripts and stylesheets in the `<head>` are considered assets.
+      By default, all remote scripts and stylesheets in the `<head>` are considered assets.
       [Inline scripts](https://simpledev.io/lesson/inline-script-javascript-1/) and
       [internal styles](https://www.tutorialspoint.com/How-to-use-internal-CSS-Style-Sheet-in-HTML)
       are not tracked by default, but you can include them with an `[up-asset]` attribute.
@@ -46,19 +46,19 @@ up.script = (function() {
     @param {Array<string} [config.noAssetSelectors]
       Exceptions to `up.script.config.assetSelectors`.
 
-      Matching elements will *not* be considered [assets](/up-asset)
+      Matching elements will *not* be considered [assets](/up-asset),
       even if they match `up.script.config.assetSelectors`.
 
   @section Scripts
     @param {Array<string} [config.scriptSelectors]
       An array of CSS selectors matching elements that run JavaScript.
 
-      By default this matches all `<script>` tags.
+      By default, this matches all `<script>` tags.
 
       Matching elements will be removed from new page fragments with `up.fragment.config.runScripts = false`.
 
-      This configuration does not affect what Unpoly considers an [assets](/up-asset).
-      For this configure `up.script.config.assetSelectors`.
+      This configuration does not affect what Unpoly considers [assets](/up-asset).
+      For this, configure `up.script.config.assetSelectors`.
 
     @param {Array<string} [config.noScriptSelectors]
       Exceptions to `up.script.config.scriptSelectors`.
@@ -119,7 +119,7 @@ up.script = (function() {
   let registeredMacros = []
 
   /*-
-  Registers a function that is called when a matching element is inserted into the DOM.
+  Registers a function to be called when a matching element is inserted into the DOM.
 
   [Enhancing elements](/enhancing-elements){:.article-ref}
 
@@ -146,7 +146,7 @@ up.script = (function() {
   it must return a destructor function that reverts the effect. The destructor
   function is called automatically when the element is swapped or destroyed later.
 
-  Examples for non-local effects are global event handlers bound to
+  Examples of non-local effects are global event handlers bound to
   the `document`, or `setInterval()`:
 
   ```js
@@ -162,7 +162,7 @@ up.script = (function() {
 
   ## Batching multiple elements
 
-  When multiple elements in update match the selector, the compiler function
+  When multiple elements in an update match the selector, the compiler function
   is called once for each element.
 
   Let's say a fragment with three `.card` elements is inserted and compiled:
@@ -184,7 +184,7 @@ up.script = (function() {
   ```
 
   If you would like the compiler to run *once* for all matches within
-  a render pass, use a `{ batch: true }` option:
+  a render pass, use the `{ batch: true }` option:
 
   ```js
   up.compiler('.card', { batch: true }, function(cards, datas) {
@@ -196,7 +196,7 @@ up.script = (function() {
   ## Error handling {#errors}
 
   It is safe to throw exceptions from a compiler or its [destructor](#destructor).
-  A crashing compiler will *not* interrupt a render pass, or prevent other compilers on the same element.
+  A crashing compiler will *not* interrupt a render pass or prevent other compilers on the same element.
 
   Exceptions thrown by compiler functions are logged to the browser's [error console](https://developer.mozilla.org/en-US/docs/Web/API/console/error).
   Unpoly also emits an [`error` event on `window`](https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event).
@@ -216,7 +216,7 @@ up.script = (function() {
   })
   ```
 
-  When a compiler sets an Unpoly attribute, this usually has no effect, since attributes have already been evaluated.
+  When a compiler sets an Unpoly attribute, this usually has no effect since attributes have already been evaluated.
   Use a [macro](/up.macro) instead.
 
   See [Rendering lifecycle](/render-lifecycle) for a full overview of
@@ -225,8 +225,8 @@ up.script = (function() {
   ## Asynchronous compilers {#async}
 
   Compiler functions can be [`async`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function).
-  This is useful when a compiler needs to fetch network
-  resources, or when calling a library with an asynchronous API:
+  This is useful when a compiler needs to fetch network resources
+  or when calling a library with an asynchronous API:
 
   ```js
   up.compiler('textarea.wysiwyg', async function(textarea) { // mark: async
@@ -237,7 +237,6 @@ up.script = (function() {
 
   You can also use this to split up expensive tasks, giving the browser a chance
   to render and process user input:
-
 
   ```js
   up.compiler('.element', async function(element) {
@@ -259,7 +258,7 @@ up.script = (function() {
   })
   ```
 
-  Unpoly guarantees that the destructor is called, even if the element gets destroyed
+  Unpoly guarantees that the destructor is called even if the element is destroyed
   before the compiler function terminates.
 
   ### Timing render-blocking mutations {#async-timing}
@@ -267,7 +266,7 @@ up.script = (function() {
   Unpoly will run the first [task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/) of every compiler
   function before allowing the browser to render DOM changes. If an async compiler function runs for multiple tasks,
   the browser will render between tasks. If you have render-blocking mutations that should be hidden from the user,
-  these must happen in the first task.
+  they must happen in the first task.
 
   ![Timing of compiler tasks and browser render frames](images/compiler-tasks.svg){:width='670'}
 
@@ -278,13 +277,13 @@ up.script = (function() {
   ## Registering compilers after booting {#late}
 
   When you [deliver your JavaScript in multiple files](https://makandracards.com/makandra/498036-webpacker-loading-code-on-demand),
-  you may register compilers after Unpoly was booted.
+  you may register compilers after Unpoly has booted.
 
-  When compilers are registered after Unpoly was booted, it is run
+  When compilers are registered after Unpoly has booted, they are run
   on current elements, but **only** if the compiler has the default priority.
 
   If the compiler has a non-default [priority](#order), it is run on future
-  fragments only. In this case either remove the `{ priority }` option
+  fragments only. In this case, either remove the `{ priority }` option
   or manually call `up.hello()` on an element that should be
   [recompiled](/up.hello#recompiling-elements).
 
@@ -328,10 +327,10 @@ up.script = (function() {
   /*-
   Registers a [compiler](/enhancing-elements) that is run before all other compilers.
 
-  A macro lets you set attributes that will be compiled afterwards.
+  A macro lets you set attributes that will be compiled afterward.
 
   If you want default attributes for *every* link and form, consider customizing your
-  [navigation options](/navigation) or configure Unpoly to [handle everything](/handling-everything).
+  [navigation options](/navigation) or configuring Unpoly to [handle everything](/handling-everything).
 
   ## Example
 
@@ -343,7 +342,7 @@ up.script = (function() {
   <a href="/page1" up-layer="new modal" up-class="warning" up-animation="shake">Page 3</a>
   ```
 
-  We would much rather define a new `[shake-modal]` attribute that let's us
+  We would much rather define a new `[shake-modal]` attribute that lets us
   write the same links like this:
 
   ```html
@@ -352,8 +351,8 @@ up.script = (function() {
   <a href="/page3" shake-modal>Page 3</a>
   ```
 
-  We can define the `[shake-midal]` attribute by registering a macro that
-  sets the `[up-layer]`, `[up-class]` and `[up-animation]` attributes for us:
+  We can define the `[shake-modal]` attribute by registering a macro that
+  sets the `[up-layer]`, `[up-class]`, and `[up-animation]` attributes for us:
 
   ```js
   up.macro('[shake-modal]', function(link) {
@@ -468,7 +467,7 @@ up.script = (function() {
   Registers a function to be called when the given element
   is destroyed.
 
-  Elements are destroyed when they are swapped during render pass, when their [layer](/up.layer)
+  Elements are destroyed when they are swapped during a render pass, when their [layer](/up.layer)
   closes, or when `up.destroy()` is called on the element or its container.
 
   An alternative way to register a destructor function is to
@@ -488,13 +487,13 @@ up.script = (function() {
   The element should be attached when the destructor is registered. This is commonly done during
   [compilation](/enhancing-elements).
 
-  If called on a detached element Unpoly assumes
+  If called on a detached element, Unpoly assumes
   an [async compiler](/up.compiler#async) has registered the destructor after the element has been destroyed.
   The destructor is then run immediately.
 
   ## Reusing destructor functions
 
-  You may reuse the same destructor function for multiple element.
+  You may reuse the same destructor function for multiple elements.
   The destructor function is called with the element being destroyed:
 
   ```js
@@ -557,14 +556,14 @@ up.script = (function() {
   // The fragment is already compiled. No need to call up.hello().
   ```
 
-  You only ever need to use `up.hello()` after creating DOM elements without Unpoly's involvement, for example:
+  You only need to use `up.hello()` after creating DOM elements without Unpoly's involvement, for example:
 
-  - Creating elements with `document.createElement()`.
+  - Creating elements with `document.createElement()`
   - Setting the `innerHTML` property on an existing element
-  - Parsing HTML into elements using browser APIs like `DOMParser()`.
+  - Parsing HTML into elements using browser APIs like `DOMParser()`
   - Elements created by other libraries
 
-  In this case compilers will *not* run automatically  and some of Unpoly's own HTML selectors will not be active.
+  In this case, compilers will *not* run automatically and some of Unpoly's own HTML selectors will not be active.
   We can address this by manually calling `up.hello()` on new elements:
 
   ```js
@@ -577,7 +576,7 @@ up.script = (function() {
   ## Recompiling elements
 
   It is safe to call `up.hello()` multiple times with the same elements.
-  In particular every compiler function is guaranteed to only run once for each matching element.
+  In particular, every compiler function is guaranteed to run only once for each matching element.
 
   If a new compiler is registered after initial compilation,
   that new compiler is [run automatically on current elements](/up.compiler#late).
@@ -586,7 +585,7 @@ up.script = (function() {
 
   If a compiler function throws an error, `up.hello()` will still finish the compilation and *not* throw an error.
 
-  Instead compiler errors will print to the [error console](https://developer.mozilla.org/en-US/docs/Web/API/console/error)
+  Instead, compiler errors will print to the [error console](https://developer.mozilla.org/en-US/docs/Web/API/console/error)
   and emit an [`error` event on `window`](https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event):
 
   ```js
@@ -617,7 +616,7 @@ up.script = (function() {
   ```js
   let textarea = up.element.createFromHTML('<textarea class="wysiwyg"></textarea>')
   await up.hello(textarea) // mark: await
-  // chip: WYISWYG editor is now initialized
+  // chip: WYSIWYG editor is now initialized
   ```
 
   The fulfillment value is the same element that was passed as an argument:
@@ -690,7 +689,7 @@ up.script = (function() {
   }
 
   /*-
-  Runs any destructor on the given fragment and its descendants in the same layer.
+  Runs any destructors on the given fragment and its descendants in the same layer.
 
   Unlike [`up.destroy()`](/up.destroy), this does not emit any events
   and does not remove the element from the DOM.
@@ -709,7 +708,7 @@ up.script = (function() {
 
   If the element has no attached data, an empty object is returned.
 
-  Multiple `up.data()` calls for the same object always return the same object reference.
+  Multiple `up.data()` calls for the same element always return the same object reference.
 
   [Attaching data to elements](/data){:.article-ref}
 
@@ -753,12 +752,12 @@ up.script = (function() {
 
     Returns an empty object if the element has no attached data.
 
-    Multiple `up.data()` calls for the same object always return the same object reference.
+    Multiple `up.data()` calls for the same element always return the same object reference.
   @stable
   */
 
   /*-
-  Attaches structured data to an element, to be consumed by a compiler or event handler.
+  Attaches structured data to an element to be consumed by a compiler or event handler.
 
   If an element with an `[up-data]` attribute enters the DOM,
   Unpoly will parse the JSON and pass the resulting object to any matching
@@ -781,7 +780,7 @@ up.script = (function() {
   ```
 
   The attribute value will be parsed as [relaxed JSON](/relaxed-json).
-  The parsed object is handed to your compiler as a second argument:
+  The parsed object is passed to your compiler as a second argument:
 
   ```js
   up.compiler('.google-map', function(element, data) {
@@ -794,7 +793,7 @@ up.script = (function() {
   ```
 
   Similarly, when an event is triggered on an element annotated with
-  [`up-data`], the parsed object will be passed to any matching
+  `[up-data]`, the parsed object will be passed to any matching
   [`up.on()`](/up.on) handlers:
 
   ```js
@@ -805,7 +804,7 @@ up.script = (function() {
 
   You may also parse the data object programmatically using the `up.data()` function:
 
-  ```
+  ```js
   let data = up.data('.google-map')
   data[0].lat // result: 48.36
   data[0].lng // result: 10.99
@@ -849,7 +848,7 @@ up.script = (function() {
   }
 
   /*-
-  Tracks an element as a [frontend asset](/handling-asset-changes), usually JavaScripts and stylesheets.
+  Tracks an element as a [frontend asset](/handling-asset-changes), usually JavaScript and stylesheets.
 
   When [rendering](/up.render), Unpoly compares the assets on the current page with the new assets
   from the server response. If the assets don't match, an `up:assets:changed` event is emitted.
@@ -859,7 +858,7 @@ up.script = (function() {
 
   ## Default assets
 
-  By default all remote scripts and stylesheets in the `<head>` are considered assets:
+  By default, all remote scripts and stylesheets in the `<head>` are considered assets:
 
   ```html
   <html>
@@ -896,7 +895,7 @@ up.script = (function() {
   To track additional assets in the `<head>`, mark them with an `[up-asset]` attribute.
 
   For example, [inline scripts](https://simpledev.io/lesson/inline-script-javascript-1/) are not tracked by default,
-  but you can include them explictily:
+  but you can include them explicitly:
 
   ```html
   <script up-asset>
@@ -912,7 +911,7 @@ up.script = (function() {
 
   To detect a new deployment of your *backend* code, consider including the deployed commit hash in a `<meta>` tag.
 
-  By marking the `<meta>` tag with `[up-asset]` it will also emit an `up:assets:changed` event when the commit hash changes:
+  By marking the `<meta>` tag with `[up-asset]`, it will also emit an `up:assets:changed` event when the commit hash changes:
 
   ```html
   <meta name="backend-version" value="d50c6dd629e9bbc80304e14a6ba99a18c32ba738" up-asset>
@@ -945,23 +944,23 @@ up.script = (function() {
   ## Example
 
   There is no default behavior when assets have changed.
-  In particular no asset elements from the response are updated in the current page.
-  Even listeners may [handle changed frontend code](/handling-asset-changes#handling-changed-assets),
-  e.g. by [notifying the user](/handling-asset-changes#notifying-the-user) or [loading new assets](/handling-asset-changes#loading-new-assets).
+  In particular, no asset elements from the response are updated in the current page.
+  Event listeners may [handle changed frontend code](/handling-asset-changes#handling-changed-assets),
+  e.g., by [notifying the user](/handling-asset-changes#notifying-the-user) or [loading new assets](/handling-asset-changes#loading-new-assets).
 
   The code below inserts a clickable `<div id="new-version">` banner when assets change.
-  The user can then choose to reload at their convenience, by clicking on the notification.
+  The user can then choose to reload at their convenience by clicking on the notification.
 
   @include new-asset-notification-example
 
-  For more examples see [Handling asset changes](/handling-asset-changes).
+  For more examples, see [Handling asset changes](/handling-asset-changes).
 
   ## Emission time
 
   The event is emitted at a particular time in the [render lifecycle](/render-lifecycle):
 
    - *after* new content has been loaded from the server
-   - *before* any fragments have been changed on the page.
+   - *before* any fragments have been changed on the page
    - *before* the [browser history](/up.history) was changed. A future history location may be found in `event.renderOptions.location`.
 
   If you cannot allow the rendering to proceed with changed assets, listeners may abort the render pass by calling `event.preventDefault()`.
@@ -971,9 +970,9 @@ up.script = (function() {
   @param {List<Element>} event.newAssets
     A list of all [assets](/up-asset) in the new content.
 
-    The list also includes asset that have a matching element on the current page.
+    The list also includes assets that have a matching element on the current page.
 
-    By default no new asset are inserted into the current page.
+    By default, no new assets are inserted into the current page.
     Event listeners must [explicitly load new assets](/handling-asset-changes#loading-new-assets).
 
   @param {List<Element>} event.oldAssets
