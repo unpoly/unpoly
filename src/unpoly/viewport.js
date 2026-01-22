@@ -9,7 +9,7 @@ and [focus](/focus) within scrollable containers ("viewports").
 
 The default viewport for any web application is the
 [document's scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/Document/scrollingElement).
-An application may define additional viewports by giving the CSS property `{ overflow-y: scroll }` to any block element.
+An application may define additional viewports by assigning the CSS property `{ overflow-y: scroll }` to any block element.
 
 @see scrolling
 @see scroll-tuning
@@ -59,7 +59,7 @@ up.viewport = (function() {
 
   @section Scrolling
     @param {number} [config.revealSnap]
-      When [revealing](/up.reveal) elements, Unpoly will scroll an viewport
+      When [revealing](/up.reveal) elements, Unpoly will scroll a viewport
       to the top when the revealed element is closer to the viewport's top edge
       than `config.revealSnap`.
 
@@ -68,14 +68,14 @@ up.viewport = (function() {
       The desired padding between a [revealed](/up.reveal) element and the
       closest [viewport](/up.viewport) edge (in pixels).
     @param {number} [config.revealMax]
-      A number indicating how many top pixel rows of a high element to [reveal](/up.reveal).
+      A number indicating how many top pixel rows of a tall element to [reveal](/up.reveal).
 
       Defaults to 50% of the available window height.
 
       You may set this to `false` to always reveal as much of the element as the viewport allows.
 
       You may also pass a function that receives an argument `{ viewportRect, elementRect }` and returns
-      a maximum height in pixel. Each given rectangle has properties `{ top, right, buttom, left, width, height }`.
+      a maximum height in pixels. Each given rectangle has properties `{ top, right, bottom, left, width, height }`.
 
       @experimental
     @param {number} [config.revealTop=false]
@@ -144,7 +144,7 @@ up.viewport = (function() {
     The element to reveal.
 
   @param {string} [options.snap]
-    When the the revealed element would be closer to the viewport's top edge
+    When the revealed element would be closer to the viewport's top edge
     than this value, Unpoly will scroll the viewport to the top.
 
     Set to `0` to disable snapping.
@@ -351,7 +351,7 @@ up.viewport = (function() {
   [multiple viewports](/up-viewport) and honors [fixed elements](/up-fixed-top) obstructing the user's
   view of the viewport.
 
-  When the page loads initially, this function is automatically called with the hash from
+  When the page initially loads, this function is automatically called with the hash from
   the current URL.
 
   If no element matches the given `#hash` anchor, a falsy value is returned.
@@ -426,10 +426,10 @@ up.viewport = (function() {
   }
 
   /*-
-  Returns a list of all the viewports contained within the
+  Returns a list of all viewports contained within the
   given selector or element.
 
-  If the given element is itself a viewport, the element is included
+  If the given element itself is a viewport, it is included
   in the returned list.
 
   @function up.viewport.subtree
@@ -445,10 +445,10 @@ up.viewport = (function() {
 
   /*-
   Returns a list of all viewports that are either contained within
-  the given element or that are ancestors of the given element.
+  the given element or are ancestors of the given element.
 
   This is relevant when updating a fragment with `{ scroll: 'restore' | 'reset' }`.
-  In tht case we restore / reset the scroll tops of all viewports around the fragment.
+  In that case we restore / reset the scroll tops of all viewports around the fragment.
 
   @function up.viewport.around
   @param {string|Element|jQuery} element
@@ -476,7 +476,7 @@ up.viewport = (function() {
   }
 
   /*-
-  Return the [scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/document/scrollingElement)
+  Returns the [scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/document/scrollingElement)
   for the browser's main content area.
 
   @property up.viewport.root
@@ -556,7 +556,7 @@ up.viewport = (function() {
   Returns a hash with scroll positions.
 
   Each key in the hash is a viewport selector. The corresponding
-  value is the viewport's top scroll position:
+  value is the viewport's vertical scroll position:
 
       getScrollTopsForSave(viewports)
       => { '.main': 0, '.sidebar': 73 }
@@ -586,7 +586,7 @@ up.viewport = (function() {
   /*-
   Restores [previously saved](/up.viewport.saveScroll) scroll positions.
 
-  If no earlier scroll position is known, scroll positions are not changed
+  If no saved scroll position is known, scroll positions are not changed
   and `false` is returned.
 
   Unpoly automatically restores scroll positions when the user [presses the back button](/restoring-history).
@@ -667,7 +667,7 @@ up.viewport = (function() {
 
   @function up.viewport.restoreFocus
   @param {Element|Array<Element>} [viewport]
-    The viewports for which to restore focus-related state..
+    The viewports for which to restore focus-related state.
 
     Defaults to all viewports within the given layer.
   @param {up.Layer|string} [options.layer='current']
@@ -800,17 +800,17 @@ up.viewport = (function() {
   Marks this element as a scrolling container ("viewport").
 
   Apply this attribute if your app uses a custom panel layout with fixed positioning
-  instead of scrolling the `<body>` element. As an alternative you can also push a selector
+  instead of scrolling the `<body>` element. Alternatively, you can also push a selector
   matching your custom viewport to the `up.viewport.config.viewportSelectors` array.
 
-  When [scrolling](/scrolling) Unpoly will always scroll the viewport closest
+  When [scrolling](/scrolling), Unpoly will always scroll the viewport closest
   to the updated element. By default this is the `<body>` element.
 
   Elements with the `[up-viewport]` attribute must also have a [derivable target selector](/target-derivation).
 
   ### Example
 
-  Here is an example for a layout for an e-mail client, showing a list of e-mails
+  Here is an example of a layout for an e-mail client, showing a list of e-mails
   on the left side and the e-mail text on the right side:
 
   ```css
@@ -920,15 +920,15 @@ up.viewport = (function() {
 
   /*-
   Marks this element as being anchored to the right edge of the screen,
-  typically fixed navigation bars.
+  such as fixed navigation bars.
 
   Since [overlays](/up.layer) hide the document scroll bar,
-  elements anchored to the right appear to jump when the dialog opens or
+  elements anchored to the right appear to jump when an overlay opens or
   closes. Applying this attribute to anchored elements will make Unpoly
   aware of the issue and adjust the `right` property accordingly.
   You may customize this behavior by styling the `.up-scrollbar-away` class.
 
-  Instead of giving this attribute to any affected element,
+  Instead of applying this attribute to each affected element,
   you can also configure a selector in `up.viewport.config.anchoredRightSelectors`.
 
   > [note]
@@ -962,7 +962,7 @@ up.viewport = (function() {
   This class is assigned to the `<body>` and [right-anchored](/up-anchored-right)
   elements while an [overlay](/up.layer) with a scrolling viewport is open.
 
-  Overlays temporarily hide the document's main scroll bar, to prevent multiple scrollbars from being rendered.
+  Overlays temporarily hide the document's main scroll bar to prevent multiple scrollbars from being rendered.
   Without a scrollbar, the `<body>` becomes wider. This may cause elements to jump in width as the overlay opens and
   closes. Elements can use this class to compensate by setting a larger `right` or `margin-right` style in their CSS.
 
@@ -986,12 +986,11 @@ up.viewport = (function() {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    right: 20px;
   }
   ```
 
-  While a scrolling overlay is open we want to add the scrollbar width to the `right`
-  so it position remains stable:
+  While a scrolling overlay is open, we want to add the scrollbar width to the `right`
+  so its position remains stable:
 
   ```css
   .chat.up-scrollbar-away {
