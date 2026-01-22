@@ -57,16 +57,16 @@ up.network = (function() {
       You might find it useful to set a concurrency of `1` in end-to-end tests
       to prevent race conditions.
 
-      Your browser may impose additional concurrency limits  regardless of what you configure here.
+      Your browser may impose additional concurrency limits regardless of what you configure here.
 
     @param {boolean} [config.wrapMethod=true]
       Whether to wrap non-standard HTTP methods in a POST request.
 
       If this is set, methods other than GET and POST will be converted to a `POST` request
-      and carry their original method as a `_method` parameter. This is to [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
+      and will carry their original method as a `_method` parameter. This is to [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
 
       If you disable method wrapping, make sure that your server always redirects with
-      with a 303 status code (rather than 302).
+      a 303 status code (rather than 302).
 
     @param {number|Function(up.Request): number|boolean} [config.lateDelay=400]
       The number of milliseconds to wait before emitting the [`up:network:late` event](/up:network:late) and showing
@@ -82,7 +82,7 @@ up.network = (function() {
     @param {boolean|Function(up.Response): boolean} [config.fail]
       Whether Unpoly will consider a response to constitute a [failed response](/failed-responses).
 
-      By default Unpoly will consider any status code other than HTTP 2xx or [304](/skipping-rendering#rendering-nothing) to represent a failed response.
+      By default, Unpoly will consider any status code other than HTTP 2xx or [304](/skipping-rendering#rendering-nothing) to represent a failed response.
       You may use this option to customize this behavior. For instance, you can fail a response if it contains a given header or body text.
 
       The following configuration will fail all responses with an `X-Unauthorized` header:
@@ -117,7 +117,7 @@ up.network = (function() {
     @param {Function(up.Request): boolean} [config.autoCache]
       Whether to [cache](/caching) the given request with `{ cache: 'auto' }`.
 
-      By default Unpoly will auto-cache requests with [safe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP methods like `GET`.
+      By default, Unpoly will auto-cache requests with [safe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP methods like `GET`.
 
       You may change this default to prevent auto-caching of some of your routes. For example, this will prevent auto-caching
       of requests to URLs ending with `/edit`:
@@ -134,9 +134,9 @@ up.network = (function() {
 
       Returning `true` will expire the entire cache.\
       Returning `false` will not expire any cache entries.\
-      Returning a [URL pattern](/url-patterns) will expire matching cache entries only:
+      Returning a [URL pattern](/url-patterns) will expire matching cache entries only.
 
-      By default Unpoly will expire the entire cache after a request with an [unsafe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP method:
+      By default, Unpoly will expire the entire cache after a request with an [unsafe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP method:
 
       ```js
       up.request({ url: '/path', method: 'get' })  // no cache entries expired
@@ -146,11 +146,11 @@ up.network = (function() {
     @param {(Function(up.Request): boolean|string)|boolean} [config.evictCache=false]
       A function that controls [cache eviction](/caching#eviction) before the given request loads.
 
-      Returning `true` will expire the entire cache.\
-      Returning `false` will not expire any cache entries.\
-      Returning a [URL pattern](/url-patterns) will expire matching cache entries only.
+      Returning `true` will evict the entire cache.\
+      Returning `false` will not evict any cache entries.\
+      Returning a [URL pattern](/url-patterns) will evict matching cache entries only.
 
-      By default Unpoly will *not* evict any cache entries when a request is made.
+      By default, Unpoly will *not* evict any cache entries when a request is made.
 
     @param {boolean|Function(): boolean} [config.progressBar]
       Whether to show a [progress bar](/progress-bar) for [late requests](#config.lateDelay).
@@ -185,7 +185,7 @@ up.network = (function() {
 
   Returns `undefined` if the given request is not currently cached.
 
-  > [IMPORTANT]
+  > [important]
   > `up.request()` and `up.render()` will only write to the cache when a [`{ cache }`](/up.request#options.cache)
   > option is set.
 
@@ -246,7 +246,7 @@ up.network = (function() {
   after rendering.
 
   By default, Unpoly automatically expires the entire cache whenever it processes
-  a request with an non-GET HTTP method. To customize this rule, use `up.network.config.expireCache`.
+  a request with a non-GET HTTP method. To customize this rule, use `up.network.config.expireCache`.
 
   The server may also expire cache entries by sending an [`X-Up-Expire-Cache`](/X-Up-Expire-Cache) header.
 
@@ -276,7 +276,7 @@ up.network = (function() {
   Makes the [cache](/caching) assume that `newRequest` has the same response as the
   already cached `oldRequest`.
 
-  Unpoly uses this internally when the user redirects from `/old` to `/new`.
+  Unpoly uses this internally when the user is redirected from `/old` to `/new`.
   In that case, both `/old` and `/new` will cache the same response from `/new`.
 
   @function up.cache.alias
@@ -287,19 +287,19 @@ up.network = (function() {
   @return {up.Request|undefined}
     If an alias could be registered, `newRequest` is returned.
 
-    If `oldRequest` wasn't found in the cache, `undefined` is returned.
+    If `oldRequest` was not found in the cache, `undefined` is returned.
   @experimental
   */
 
   /*-
   Manually stores a request in the [cache](/caching).
 
-  Future calls to `up.request()` will try to re-use this request before
+  Future calls to `up.request()` will try to reuse this request before
   making a new request.
 
   @function up.cache.set
   @param {up.Request} request
-    The request to cache. The cache is also a promise for the response.
+    The request to cache. The request is also a promise for the response.
   @internal
   */
 
@@ -393,7 +393,7 @@ up.network = (function() {
       Whether to wrap non-standard HTTP methods in a POST request.
 
       If this is set, methods other than GET and POST will be converted to a `POST` request
-      and carry their original method as a `_method` parameter. This is to [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
+      and will carry their original method as a `_method` parameter. This is to [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
 
       Defaults to [`up.network.config`](/up.network.config#config.wrapMethod).
 
@@ -426,7 +426,7 @@ up.network = (function() {
     @param {boolean} [options.background=false]
       Whether this request will load in the background.
 
-      Background requests deprioritized over foreground requests.
+      Background requests are deprioritized over foreground requests.
       Background requests also won't emit `up:network:late` events and won't trigger
       the [progress bar](/progress-bar).
 
@@ -439,7 +439,7 @@ up.network = (function() {
     @param {string|boolean|Function(up.Response): boolean} [options.fail]
       Whether the response to this request should be considered [failed](/failed-responses).
 
-      By [default](/up.network.config#config.fail) any HTTP status code other than 2xx or 304 is considered an error code.
+      By [default](/up.network.config#config.fail), any HTTP status code other than 2xx or 304 is considered an error code.
       Pass `{ fail: false }` to handle *any* response as successful, even with a 4xx or 5xx status code.
 
       A failed response will cause the [returned promise](#return-value) to reject.
@@ -448,20 +448,19 @@ up.network = (function() {
     @param {boolean} [options.cache=false]
       Whether to read from and write to the [cache](/caching).
 
-      With `{ cache: true }` Unpoly will try to re-use a cached response before connecting
+      With `{ cache: true }`, Unpoly will try to reuse a cached response before connecting
       to the network. If no cached response exists, Unpoly will make a request and cache
       the server response.
 
-      With `{ cache: 'auto' }` Unpoly will use the cache only if `up.network.config.autoCache`
+      With `{ cache: 'auto' }`, Unpoly will use the cache only if `up.network.config.autoCache`
       returns `true` for this request.
 
-      With `{ cache: false }` (the default) Unpoly will always make a network request.
+      With `{ cache: false }` (the default), Unpoly will always make a network request.
 
     @param {boolean|string} [options.expireCache]
       Whether to [expire](/caching#expiration) the [cache](/caching) after this request.
 
-      Defaults to the result of `up.network.config.expireCache`, which
-      defaults to expiring the entire cache after a non-GET request.
+      Defaults to the result of `up.network.config.expireCache`, which defaults to expiring the entire cache after a non-GET request.
 
       You may also pass a [URL pattern](/url-patterns) to only expire matching responses.
 
@@ -677,9 +676,9 @@ up.network = (function() {
   Aborts pending [requests](/up.request) matching a condition.
 
   > [important]
-  > This is a low-level API matching requests by their properties. If possible, use `up.fragment.abort()`,
-  > which matches requests by screen region. Only when requests are aborted by screen region, components
-  > can [react to being aborted](/up:fragment:aborted).
+  > This is a low-level API for matching requests by their properties. If possible, use `up.fragment.abort()`,
+  > which matches requests by screen region. Only when requests are aborted by screen region can components
+  > [react to being aborted](/up:fragment:aborted).
 
   [Aborting requests](/aborting-requests){:.article-ref}
 
@@ -730,8 +729,8 @@ up.network = (function() {
   ## Aborting requests matching an arbitrary condition
 
   To abort all requests matching an arbitrary condition, pass a function that takes a request
-  and returns a boolean value. Unpoly will abort all request for which the given
-  function returns `true`. E.g. to abort all requests with a HTTP method as `GET`:
+  and returns a boolean value. Unpoly will abort all requests for which the given
+  function returns `true`. For example, to abort all requests with an HTTP method of `GET`:
 
   ```js
   up.network.abort((request) => request.method == 'GET')
@@ -750,7 +749,7 @@ up.network = (function() {
 
     If set to an `up.Request` object, that one request is aborted.
 
-    If set to a function, it will be called for each pending requests.
+    If set to a function, it will be called for each pending request.
     All requests for which the function returns `true` will be aborted.
 
     If set to `true`, all pending requests are aborted.
@@ -808,19 +807,20 @@ up.network = (function() {
 
   ## Timing
 
-  By default Unpoly will wait 400 ms for an AJAX request to finish
-  before emitting `up:network:late`. You may [globally](/up.network.config#config.lateDelay),
-  for [individual links](/up-follow#up-late-delay) or [specific requests](/up.request#options.lateDelay).
+  By default, Unpoly will wait 400 ms for an AJAX request to finish
+  before emitting `up:network:late`. You may configure this delay
+  [globally](/up.network.config#config.lateDelay),
+  for [individual links](/up-follow#up-late-delay), or for [specific requests](/up.request#options.lateDelay).
 
   Once all responses have been received, an [`up:network:recover`](/up:network:recover)
-  will be emitted.
+  event will be emitted.
 
   If additional requests are made while Unpoly is already busy waiting,
   **no** additional `up:network:late` events will be emitted.
 
   ## Default behavior
 
-  By default, Unpoly will show a [Progress bar](/progress-bar) while late requests
+  By default, Unpoly will show a [progress bar](/progress-bar) while late requests
   are pending. You can [disable](/progress-bar#disabling) the progress bar
   or [implement custom loading indicators](/progress-bar#custom-implementation).
 
@@ -844,7 +844,7 @@ up.network = (function() {
 
   Only requests that are sent via Unpoly features
   (like `[up-follow]` or `up.request()`) will trigger this event.
-  When making a requests using `fetch()` or `XMLHttpRequest`, no event is emitted.
+  When making requests using `fetch()` or `XMLHttpRequest`, no event is emitted.
 
   The event is emitted on the layer that caused the request.
 
@@ -852,9 +852,9 @@ up.network = (function() {
 
   Listeners to `up:request:load` can inspect or
   mutate the [request options](/up.request#parameters-request)
-  before it is loaded.
+  before the request is loaded.
 
-  For example, this listeners changes requests to `/stocks`
+  For example, this listener changes requests to `/stocks`
   to include a custom header and have a timeout of 10 seconds:
 
   ```js
@@ -870,7 +870,7 @@ up.network = (function() {
   @param {up.Request} event.request
     The request that will be sent.
 
-    Listeners can [inspect or mutate request options](#changing-requests) before it is sent.
+    Listeners can [inspect or mutate request options](#changing-requests) before the request is sent.
   @param {up.Layer} [event.layer]
     The [layer](/up.layer) this request is associated with.
 
@@ -926,9 +926,9 @@ up.network = (function() {
   This event is [emitted](/up.emit) when an [AJAX request](/up.request)
   encounters a fatal error, like a [timeout](/up.network.config#config.timeout) or loss of network connectivity.
 
-  > [NOTE]
-  > This event will *not* be emitted when the server produces an
-  > error message with an HTTP status like `500`. When the server can produce
+  > [note]
+  > This event will *not* be emitted when the server produces
+  > an error message with an HTTP status like `500`. When the server can produce
   > any response, [`up:request:loaded`](/up:request:loaded) is emitted instead.
 
   The event is emitted on the layer that caused the request.
