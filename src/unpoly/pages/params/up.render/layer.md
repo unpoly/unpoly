@@ -9,7 +9,7 @@
   In this case options for `up.layer.open()` may also be used.
 
 @param {string|up.Layer|Element} [options.failLayer='origin, current']
-  The [layer](/up.layer) in which render if the server responds with an error code.
+  The [layer](/up.layer) in which to render if the server responds with an error code.
 
   See [Rendering failed responses differently](/failed-responses#fail-options).
 
@@ -18,5 +18,5 @@
   when [updating a background layer from an overlay](/closing-overlays#peeling).
 
   To [dismiss](/closing-overlays#intents) obstructing overlays, pass `{ peel: true }` or `{ peel: 'dismiss' }`.\
-  To [accept](/closing-overlays#intents) obstructing overlays, pass `{ peel: false }`.\
+  To [accept](/closing-overlays#intents) obstructing overlays, pass `{ peel: 'accept' }`.\
   To not peel, pass `{ peel: false }`.

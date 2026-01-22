@@ -4,17 +4,17 @@
   The [target selector](/targeting-fragments) to update after a successful response.
 
   If omitted, a [main target](/up-main) will be rendered.
-  
+
   You may also pass a DOM element or jQuery element here, in which case a selector
   will be [derived](/target-derivation).
   The given element will also be used as [`{ origin }`](#options.origin) for the fragment update.
-  
+
   You may also pass an array of selector alternatives. The first selector
   matching in both old and new content will be used.
 
 @param {string|Element|jQuery|Array<string>} [options.failTarget]
   The [target selector](/targeting-fragments) to update when the server responds with an error code.
-  
+
   See [Rendering failed responses differently](/failed-responses#fail-options).
 
 @param {string|boolean} [options.fallback]

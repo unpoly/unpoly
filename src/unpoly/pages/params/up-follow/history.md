@@ -6,7 +6,7 @@
   If set to `true`, the history will always be updated, using the title and URL from
   the server response, or from given `[up-title]` and `[up-location]` attributes.
 
-  If set to `auto` history will be updated if the `[up-target]` matches
+  If set to `auto`, history will be updated if the `[up-target]` matches
   a selector in `up.fragment.config.autoHistoryTargets`. By default this contains all
   [main targets](/up-main).
 
@@ -16,14 +16,14 @@
 
 @param [up-fail-history='auto']
   Whether to update history when the server responds with an error code.
-  
+
   See [Rendering failed responses differently](/failed-responses#fail-options).
 
 @param [up-title]
   An explicit document title to set before rendering.
 
   By default the title is extracted from the response's `<title>` tag.
-  To prevent the title from being updated, set `[up-title=false]` to explicitly
+  To prevent the title from being updated, set `[up-title=false]`.
 
   This attribute is only used when [updating history](#up-history).
 
@@ -48,6 +48,6 @@
 
   By default Unpoly will extract the language from the response and update the `html[lang]`
   attribute in the current page.
-  To prevent the attrribute from being changed, set `[up-lang=false]`.
+  To prevent the attribute from being changed, set `[up-lang=false]`.
 
   This attribute is only used when [updating history](#up-history).

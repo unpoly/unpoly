@@ -1,7 +1,7 @@
 @partial up.render/client-state
 
 @param {Object} [options.data]
-  The [data object](/data) object for the new fragment.
+  The [data](/data) object for the new fragment.
 
   If the new fragment already has an `[up-data]` object, properties from `{ data }` take precedence.
 

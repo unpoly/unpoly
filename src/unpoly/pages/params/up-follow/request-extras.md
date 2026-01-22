@@ -11,7 +11,7 @@
   A [relaxed JSON](/relaxed-json) object with additional request headers.
 
   Unpoly will by default send a number of custom request headers.
-  E.g. the `X-Up-Target` header includes the [target selector](/targeting-fragments).
+  For example, the `X-Up-Target` header includes the [target selector](/targeting-fragments).
   See `up.protocol` for details.
 
 @param [up-abort='target']
@@ -25,7 +25,7 @@
 @param [up-background='false']
   Whether this request will load in the background.
 
-  Background requests deprioritized over foreground requests.
+  Background requests are deprioritized over foreground requests.
   Background requests also won't emit `up:network:late` events and won't trigger
   the [progress bar](/progress-bar).
 

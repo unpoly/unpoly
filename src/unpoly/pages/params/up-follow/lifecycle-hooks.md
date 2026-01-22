@@ -63,7 +63,7 @@
   second render pass. If no revalidation was performed, or if revalidation yielded an [empty response](/caching#when-nothing-changed),
   it is the result from the initial render pass.
 
-  Also see [Awaiting postprocessing](/render-lifecycle#postprocessing).
+  Also see [Awaiting post-processing](/render-lifecycle#postprocessing).
 
 @param [up-on-error]
   A JavaScript snippet that is run when any error is thrown during the rendering process.
@@ -73,7 +73,7 @@
   | `this`     | The link being followed                       |
   | `error`    | An `Error` object                             |
 
-  The callback is also called when the render pass fails due to [network issues](/network-issues),
+  The callback is also called when the render pass fails due to [network issues](/network-issues)
   or [aborts](/aborting-requests).
 
   Also see [Handling errors](/render-lifecycle#handling-errors).

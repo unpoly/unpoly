@@ -43,7 +43,7 @@
   second render pass. If no revalidation was performed, or if revalidation yielded an [empty response](/caching#when-nothing-changed),
   it is the result from the initial render pass.
 
-  Also see [Awaiting postprocessing](/render-lifecycle#postprocessing).
+  Also see [Awaiting post-processing](/render-lifecycle#postprocessing).
 
 @param {Function(Error)} [options.onError]
   A callback that will be run when any error is thrown during the rendering process.

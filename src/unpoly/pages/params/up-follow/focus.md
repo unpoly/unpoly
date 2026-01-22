@@ -12,7 +12,7 @@
 
 @param [up-focus-visible='auto']
   Whether the focused element should have a [visible focus ring](/focus-visibility).
-  
+
   By default focus will be visible if `up.viewport.config.autoFocusVisible()`
   returns `true` for the focused element and [current input device](/up.event.inputDevice).
 

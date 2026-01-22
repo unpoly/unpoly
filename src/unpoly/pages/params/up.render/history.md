@@ -15,14 +15,14 @@
 
 @param {boolean|string} [options.failHistory]
   Whether to update history when the server responds with an error code.
-  
+
   See [Rendering failed responses differently](/failed-responses#fail-options).
 
 @param {boolean|string} [options.title]
   An explicit document title to set before rendering.
 
   By default the title is extracted from the response's `<title>` tag.
-  To prevent the title from being updated, pass `{ title: false }`
+  To prevent the title from being updated, pass `{ title: false }`.
 
   This option is only used when [updating history](#options.history).
 
@@ -47,6 +47,6 @@
 
   By default Unpoly will extract the language from the response and update the `html[lang]`
   attribute in the current page.
-  To prevent the attrribute from being changed, pass `{ lang: false }`.
+  To prevent the attribute from being changed, pass `{ lang: false }`.
 
   This option is only used when [updating history](#options.history).

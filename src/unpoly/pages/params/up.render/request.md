@@ -8,8 +8,8 @@
 @param {string} [options.method='get']
   The HTTP method to use for the request.
 
-  Common values are `'get'`, `'post'`, `'put'`, `'patch'` and `'delete`'.
-  The value is case insensitive.
+  Common values are `'get'`, `'post'`, `'put'`, `'patch'` and `'delete'`.
+  The value is case-insensitive.
 
 @param {Object|up.Params|FormData|string|Array} [options.params]
   Additional [parameters](/up.Params) that should be sent as the request's
@@ -22,7 +22,7 @@
   An object with additional request headers.
 
   Unpoly will by default send a number of custom request headers.
-  E.g. the `X-Up-Target` header includes the [targeted](/targeting-fragments) CSS selector.
+  For example, the `X-Up-Target` header includes the [targeted](/targeting-fragments) CSS selector.
   See `up.protocol` for details.
 
 @param {boolean|string|Function(request): boolean} [options.abort='target']
@@ -39,7 +39,7 @@
 @param {boolean} [options.background=false]
   Whether this request will load in the background.
 
-  Background requests deprioritized over foreground requests.
+  Background requests are deprioritized over foreground requests.
   Background requests also won't emit `up:network:late` events and won't trigger
   the [progress bar](/progress-bar).
 

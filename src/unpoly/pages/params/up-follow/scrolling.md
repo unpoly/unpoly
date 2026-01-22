@@ -34,7 +34,7 @@
   when scrolling to an element.
 
 @param [up-reveal-max]
-  How many pixel lines of [high element to reveal](/scroll-tuning#revealing-with-padding) when scrolling to an element.
+  How many pixel lines of a [high element to reveal](/scroll-tuning#revealing-with-padding) when scrolling to an element.
 
 @param [up-save-scroll='true']
   Whether to [save scroll positions](/up.viewport.saveScroll) before updating the fragment.

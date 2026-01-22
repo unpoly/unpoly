@@ -16,7 +16,7 @@
   while new content is loading.
 
   The preview changes will be reverted automatically
-  when the request ends for [any reason](/previews#ending).
+  when the request ends for any reason.
 
 @param {boolean} [options.feedback=true]
   Whether to set [feedback classes](/feedback-classes)

@@ -14,7 +14,7 @@
     The value is case-insensitive.
 
     You can also use methods that would not be allowed on a `<form>` element,
-    such as `'patch`' or `'delete'`. These will be [wrapped in a POST request](/up.network.config#config.wrapMethod).
+    such as `'patch'` or `'delete'`. These will be [wrapped in a POST request](/up.network.config#config.wrapMethod).
 
   @param options.params
     Additional [Form parameters](/up.Params) that should be sent as the request's

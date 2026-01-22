@@ -1,7 +1,7 @@
 @partial up-follow/motion
 
 @param [up-transition]
-  The name of an [transition](/up.motion) to morph between the old and few fragment.
+  The name of a [transition](/up.motion) to morph between the old and new fragment.
 
   If you are [prepending or appending content](/targeting-fragments#appending-or-prepending),
   use the `[up-animation]` attribute instead.
@@ -13,7 +13,7 @@
   If you are replacing content (the default), use the `[up-transition]` attribute instead.
 
 @param [up-duration]
-  The duration of the transition or animation (in millisconds).
+  The duration of the transition or animation (in milliseconds).
 
 @param [up-easing]
   The timing function that accelerates the transition or animation.

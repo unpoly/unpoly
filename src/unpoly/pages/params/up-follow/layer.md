@@ -9,7 +9,7 @@
   In this case attributes for `[up-layer=new]` may also be used.
 
 @param [up-fail-layer='origin, current']
-  The [layer](/up.layer) in which render if the server responds with an error code.
+  The [layer](/up.layer) in which to render if the server responds with an error code.
 
   See [Rendering failed responses differently](/failed-responses#fail-options).
 
