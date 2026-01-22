@@ -10,7 +10,7 @@ The information in the log includes:
 - When we're [making requests to the network](/up.request)
 - Which [compilers](/up.script) are applied to which elements
 
-By default only errors are logged. You can enable debug logging through `up.log.enable()`:
+By default, only errors are logged. You can enable debug logging through `up.log.enable()`:
 
 ![Screenshot of Unpoly logging to the browser console](images/log-interaction-event.png){:width='800'}
 
@@ -24,7 +24,7 @@ up.log = (function() {
   const u = up.util
 
   /*-
-  Configures the logging output on the developer console.
+  Configures the logging output to the developer console.
 
   @property up.log.config
   @param {boolean} [config.enabled=false]
