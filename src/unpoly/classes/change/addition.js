@@ -11,8 +11,10 @@ up.Change.Addition = class Addition extends up.Change {
     this._response = options.response
   }
 
-  handleLayerChangeRequests() {
+  handleLayerChangeRequests(newElements) {
     if (this.layer.isOverlay()) {
+      // TODO: Can we do this with "close"?
+
       // The server may send an HTTP header `X-Up-Accept-Layer: value`
       this._tryAcceptLayerFromServer()
       this.layer.assertAlive()
@@ -22,6 +24,9 @@ up.Change.Addition = class Addition extends up.Change {
       this.layer.tryAcceptForLocation(this._responseOptions())
       this.layer.assertAlive()
 
+      this.layer.tryAcceptForElements(newElements, this._responseOptions())
+      this.layer.assertAlive()
+
       // The server may send an HTTP header `X-Up-Dismiss-Layer: value`
       this._tryDismissLayerFromServer()
       this.layer.assertAlive()
@@ -29,6 +34,9 @@ up.Change.Addition = class Addition extends up.Change {
       // A close condition { dismissLocation: '/path' } might have been
       // set when the layer was opened.
       this.layer.tryDismissForLocation(this._responseOptions())
+      this.layer.assertAlive()
+
+      this.layer.tryDismissForElements(newElements, this._responseOptions())
       this.layer.assertAlive()
     }
 

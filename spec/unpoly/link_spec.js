@@ -1063,6 +1063,26 @@ describe('up.link', function() {
 
       })
 
+      fdescribe('[up-accept-fragment]', function() {
+
+        it('parses as a string', function() {
+          const link = fixture('a[href="/foo"][up-accept-fragment="#foo"]')
+          const options = up.link.followOptions(link)
+          expect(options.acceptFragment).toBe('#foo')
+        })
+
+      })
+
+      fdescribe('[up-dismiss-fragment]', function() {
+
+        it('parses as a string', function() {
+          const link = fixture('a[href="/foo"][up-dismiss-fragment="#foo"]')
+          const options = up.link.followOptions(link)
+          expect(options.dismissFragment).toBe('#foo')
+        })
+
+      })
+
       if (up.migrate.loaded) {
         it('parses an [up-reset-scroll] attribute as { scroll: "top" }', function() {
           const link = fixture('a[href="/foo"][up-reset-scroll]')

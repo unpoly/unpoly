@@ -1789,6 +1789,216 @@ describe('up.layer', function() {
           })
         })
 
+        fdescribe('{ acceptFragment }', function() {
+
+          describe('when updating a layer', function() {
+
+            it('accepts the layer when an fragment with the given selector is rendered into the layer', async function() {
+              const callback = jasmine.createSpy('onAccepted callback')
+              up.layer.open({
+                onAccepted: callback,
+                acceptFragment: '#match',
+                fragment: `
+                  <div id="fragment">
+                    <span>initial text</span>
+                  </div>
+                `
+              })
+              await wait()
+
+              expect(up.layer.current.mode).toBe('modal')
+              expect(up.layer.current).toHaveText('initial text')
+              expect(callback).not.toHaveBeenCalled()
+
+              let ignoredUpdateJob = up.render({ fragment: `
+                <div id="fragment">
+                  <span id="no-match">ignored update</span>
+                </div>
+              `})
+              await expectAsync(ignoredUpdateJob).toBeResolvedTo(jasmine.any(up.RenderResult))
+
+              expect(up.layer.current.mode).toBe('modal')
+              expect(up.layer.current).toHaveText('ignored update')
+              expect(callback).not.toHaveBeenCalled()
+
+              let matchingUpdateJob = up.render({ fragment: `
+                <div id="fragment">
+                  <span id="match">matching text</span>
+                </div>
+              `})
+              await expectAsync(matchingUpdateJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
+              expect(up.layer.current.mode).toBe('root')
+              expect(document).not.toHaveSelector('#match')
+              expect(callback).toHaveBeenCalled()
+            })
+
+            it('accepts a fragment matching a comma-separated selector union', async function() {
+              const callback = jasmine.createSpy('onAccepted callback')
+              up.layer.open({
+                onAccepted: callback,
+                acceptFragment: '#leading, #match, #trailing',
+                fragment: `
+                  <div id="fragment">
+                    <span>initial text</span>
+                  </div>
+                `
+              })
+              await wait()
+
+              expect(up.layer.current.mode).toBe('modal')
+              expect(up.layer.current).toHaveText('initial text')
+              expect(callback).not.toHaveBeenCalled()
+
+              let ignoredUpdateJob = up.render({ fragment: `
+                <div id="fragment">
+                  <span id="no-match">ignored update</span>
+                </div>
+              `})
+              await expectAsync(ignoredUpdateJob).toBeResolvedTo(jasmine.any(up.RenderResult))
+
+              expect(up.layer.current.mode).toBe('modal')
+              expect(up.layer.current).toHaveText('ignored update')
+              expect(callback).not.toHaveBeenCalled()
+
+              let matchingUpdateJob = up.render({ fragment: `
+                <div id="fragment">
+                  <span id="match">matching text</span>
+                </div>
+              `})
+              await expectAsync(matchingUpdateJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
+              expect(up.layer.current.mode).toBe('root')
+              expect(document).not.toHaveSelector('#match')
+              expect(callback).toHaveBeenCalled()
+            })
+
+            it('does not accept the layer when a matching fragment is rendered into a different layer')
+
+            it('does not compile the matching element')
+
+            it('does not show the accepting fragment in a closing animation')
+
+            it('allows the matching element to be consumed by a hungry fragment on a parent layer')
+
+            it("uses the fragment's data as the acceptance value", async function() {
+              const callback = jasmine.createSpy('onAccepted callback')
+              up.layer.open({
+                onAccepted: callback,
+                acceptFragment: '#match',
+                fragment: `
+                  <div id="fragment">
+                    <span>initial text</span>
+                  </div>
+                `
+              })
+              await wait()
+
+              expect(up.layer.current.mode).toBe('modal')
+              expect(up.layer.current).toHaveText('initial text')
+              expect(callback).not.toHaveBeenCalled()
+
+              let matchingUpdateJob = up.render({ fragment: `
+                <div id="fragment">
+                  <span id="match" up-data="{ name: 'Bob' }">matching text</span>
+                </div>
+              `})
+              await expectAsync(matchingUpdateJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
+              expect(up.layer.current.mode).toBe('root')
+              expect(document).not.toHaveSelector('#match')
+              expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({
+                type: 'up:layer:accepted',
+                value: { name: 'Bob' },
+              }))
+            })
+          })
+
+          describe('when opening a layer', function() {
+
+            describe('when its initial content matches the given selector', function() {
+
+              it('immediately accepts a layer when its initial content matches the given selector', async function() {
+                const callback = jasmine.createSpy('onAccepted callback')
+
+                const compiler = jasmine.createSpy('compiler')
+                up.compiler('#match', compiler)
+
+                const openPromise = up.layer.open({
+                  onAccepted: callback,
+                  acceptFragment: '#match',
+                  fragment: `
+                  <div id="container">
+                    <div id="match" up-data="{ name: 'Bob' }">matching text</div>
+                  </div>
+                `
+                })
+
+                await expectAsync(openPromise).toBeRejectedWith(jasmine.any(up.Aborted))
+
+                expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({
+                  type: 'up:layer:accepted',
+                  value: { name: 'Bob' },
+                }))
+
+                expect(up.layer.mode).toBe('root')
+                expect(document).not.toHaveSelector('#match')
+              })
+
+              it('does not compile the matching element')
+
+              it('allows the matching element to be consumed by a hungry fragment on a parent layer')
+
+            })
+
+          })
+        })
+
+        fdescribe('{ dismissFragment }', function() {
+
+          it('dismisses the layer when an fragment with the given selector is rendered into the layer', async function() {
+            const callback = jasmine.createSpy('onDismissed callback')
+            up.layer.open({
+              onDismissed: callback,
+              dismissFragment: '#match',
+              fragment: `
+                  <div id="fragment">
+                    <span>initial text</span>
+                  </div>
+                `
+            })
+            await wait()
+
+            expect(up.layer.current.mode).toBe('modal')
+            expect(up.layer.current).toHaveText('initial text')
+            expect(callback).not.toHaveBeenCalled()
+
+            let ignoredUpdateJob = up.render({ fragment: `
+                <div id="fragment">
+                  <span id="no-match">ignored update</span>
+                </div>
+              `})
+            await expectAsync(ignoredUpdateJob).toBeResolvedTo(jasmine.any(up.RenderResult))
+
+            expect(up.layer.current.mode).toBe('modal')
+            expect(up.layer.current).toHaveText('ignored update')
+            expect(callback).not.toHaveBeenCalled()
+
+            let matchingUpdateJob = up.render({ fragment: `
+              <div id="fragment">
+                <span id="match">matching text</span>
+              </div>
+            `})
+            await expectAsync(matchingUpdateJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
+            expect(up.layer.current.mode).toBe('root')
+            expect(document).not.toHaveSelector('#match')
+            expect(callback).toHaveBeenCalled()
+          })
+
+
+        })
+
         describe('{ acceptLocation }', function() {
 
           beforeEach(function() {

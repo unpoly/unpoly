@@ -87,6 +87,8 @@ up.Layer.Overlay = class Overlay extends up.Layer {
       'dismissEvent',
       'acceptLocation',
       'dismissLocation',
+      'acceptFragment',
+      'dismissFragment',
     ]
   }
 
@@ -354,6 +356,26 @@ up.Layer.Overlay = class Overlay extends up.Layer {
         closeFn.call(this, event, { response: event.response })
       )
     })
+  }
+
+  // TODO: The options arg is just { response }
+  tryAcceptForElements(newElements, options) {
+    this._tryCloseForElements(this.acceptFragment, this.accept, newElements, options)
+  }
+
+  // TODO: The options arg is just { response }
+  tryDismissForElements(newElements, options) {
+    this._tryCloseForElements(this.dismissFragment, this.dismiss, newElements, options)
+  }
+
+  _tryCloseForElements(selector, closeFn, newElements, options) {
+    let match = u.findResult(newElements, (element) => element.querySelector(selector))
+    if (match) {
+      const closeValue = up.data(match)
+      up.error.muteUncriticalSync(() =>
+        closeFn.call(this, closeValue, options)
+      )
+    }
   }
 
   // TODO: The options arg is just { response }

@@ -129,7 +129,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     //
     // Note that @handleLayerChangeRequests() also calls throws an up.AbortError
     // if any of these options cause the layer to close.
-    this.handleLayerChangeRequests()
+    this.handleLayerChangeRequests([this._content])
 
     // Preprocess content element before insertion.
     responseDoc.commitElement(this._content)
