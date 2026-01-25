@@ -443,6 +443,8 @@ up.link = (function() {
     parser.parse(up.layer.closeCallbackAttr, 'onDismissed')
     parser.string('acceptEvent')
     parser.string('dismissEvent')
+    parser.string('acceptFragment')
+    parser.string('dismissFragment')
     parser.string('acceptLocation')
     parser.string('dismissLocation')
     parser.booleanOrString('closeAnimation')

@@ -140,7 +140,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     //
     // Note that @handleLayerChangeRequests() also throws an `up.AbortError`
     // if any of these options cause the layer to close.
-    this.handleLayerChangeRequests()
+    this.handleLayerChangeRequests(u.map(this._steps, 'newElement'))
 
     return this.executeSteps({
       steps: this._steps,
