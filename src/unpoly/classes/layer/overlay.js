@@ -423,7 +423,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   @internal
   */
   destroyElements(options) {
-    const animation = this.closeAnimationFn(options)
+    const animationProps = this.closeAnimationProps(options)
 
     const onFinished = () => {
       this.onElementsRemoved() // callback for layer implementations that need to clean up
@@ -431,23 +431,26 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     }
 
     // Do not re-use `options`, or we would call startCloseAnimation(animation: startCloseAnimation)!
-    const destroyOptions = { ...options, animation, onFinished, log: false }
-    up.destroy(this.element, destroyOptions)
+    up.destroy(this.element, {
+      ...options,
+      ...animationProps,
+      onFinished,
+      log: false,
+    })
   }
 
   // Optional callback used by sub-classes
   onElementsRemoved() {
   }
 
-  _animationFn({ boxAnimation, backdropAnimation, easing, duration }) {
+  _animationFn(boxAnimation, backdropAnimation) {
     // If we don't animate the box, we don't animate the backdrop either.
     if (up.motion.isNone(boxAnimation)) return false
 
     // Only animate the backdrop element if this layer has a backdrop.
     backdropAnimation = this.backdrop && backdropAnimation
 
-    return () => {
-      const animateOptions = { easing, duration }
+    return (_element, animateOptions) => {
       const boxDone = up.animate(this.getBoxElement(), boxAnimation, animateOptions)
       const backdropDone = up.animate(this.backdropElement, backdropAnimation, animateOptions)
 
@@ -457,40 +460,37 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   }
 
   startOpenAnimation(options = {}) {
-    let animation = this.openAnimationFn(options)
-    return up.animate(this.element, animation, {
-      ...options,
-      onFinished: () => {
-        this.wasEverVisible = true
-        options.onFinished?.()
-      }
-    })
+    const animationProps = this.openAnimationProps(options)
+    const onFinished = () => {
+      this.wasEverVisible = true
+      options.onFinished?.()
+    }
+
+    return up.animate(this.element, animationProps.animation, { ...animationProps, onFinished })
   }
 
-  openAnimationFn(options = {}) {
+  openAnimationProps(options = {}) {
     let boxAnimation = options.animation ?? this.evalOption(this.openAnimation)
-    // _startAnimation() will ignore this animation unless the box is also animating
-    let backdropAnimation = 'fade-in'
+    let backdropAnimation = 'fade-in' // _animationFn() will ignore this animation unless the box is also animating
+    let animationFn = this._animationFn(boxAnimation, backdropAnimation)
 
-    return this._animationFn({
-      boxAnimation,
-      backdropAnimation,
+    return {
+      animation: animationFn,
       easing: options.easing || this.openEasing,
       duration: options.duration || this.openDuration,
-    })
+    }
   }
 
-  closeAnimationFn(options = {}) {
+  closeAnimationProps(options = {}) {
     let boxAnimation =  this.wasEverVisible && (options.animation ?? this.evalOption(this.closeAnimation))
-    // _startAnimation() will ignore this animation unless the box is also animating
-    let backdropAnimation = 'fade-out'
+    let backdropAnimation = 'fade-out' // _animationFn() will ignore this animation unless the box is also animating
+    let animationFn = this._animationFn(boxAnimation, backdropAnimation)
 
-    return this._animationFn({
-      boxAnimation,
-      backdropAnimation,
+    return {
+      animation: animationFn,
       easing: options.easing || this.closeEasing,
-      duration: options.duration || this.closeDuration,
-    })
+      duration: options.duration ?? this.closeDuration,
+    }
   }
 
   isAlive() {

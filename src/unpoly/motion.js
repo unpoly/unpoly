@@ -288,6 +288,7 @@ up.motion = (function() {
 
   function willAnimate(element, animationOrTransition, options) {
     applyConfig(options)
+
     return isEnabled() && !isNone(animationOrTransition) && (options.duration > 0) && !e.isSingleton(element)
   }
 

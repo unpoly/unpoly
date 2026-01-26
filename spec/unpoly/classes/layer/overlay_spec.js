@@ -453,6 +453,24 @@ describe('up.Layer.Overlay', function() {
       expect(document).not.toHaveSelector('up-modal')
     })
 
+    it("uses the overlay instance's close duration when the global animation duration has been set to zero (bugfix)", async function() {
+      up.motion.config.enabled = true
+      up.motion.config.duration = 0
+
+      up.layer.open({ mode: 'modal', openAnimation: 'none', closeAnimation: 'fade-out', closeDuration: 600 })
+      await wait()
+
+      up.layer.current.accept()
+
+      await wait(300)
+
+      expect(document).toHaveSelector('up-modal')
+      expect('up-modal-box').toHaveOpacity(0.5, 0.4)
+
+      await wait(600)
+      expect(document).not.toHaveSelector('up-modal')
+    })
+
     describe('with { onFinished } option', function() {
 
       it('runs the callback when the close animation has concluded', async function() {
