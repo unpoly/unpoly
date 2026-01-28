@@ -1789,7 +1789,7 @@ describe('up.layer', function() {
           })
         })
 
-        fdescribe('{ acceptFragment }', function() {
+        describe('{ acceptFragment }', function() {
 
           describe('when updating a layer', function() {
 
@@ -1850,17 +1850,6 @@ describe('up.layer', function() {
               expect(up.layer.current).toHaveText('initial text')
               expect(callback).not.toHaveBeenCalled()
 
-              let ignoredUpdateJob = up.render({ fragment: `
-                <div id="fragment">
-                  <span id="no-match">ignored update</span>
-                </div>
-              `})
-              await expectAsync(ignoredUpdateJob).toBeResolvedTo(jasmine.any(up.RenderResult))
-
-              expect(up.layer.current.mode).toBe('modal')
-              expect(up.layer.current).toHaveText('ignored update')
-              expect(callback).not.toHaveBeenCalled()
-
               let matchingUpdateJob = up.render({ fragment: `
                 <div id="fragment">
                   <span id="match">matching text</span>
@@ -1873,13 +1862,139 @@ describe('up.layer', function() {
               expect(callback).toHaveBeenCalled()
             })
 
-            it('does not accept the layer when a matching fragment is rendered into a different layer')
+            it('does not accept the layer when a matching fragment is rendered into a different layer', async function() {
+              htmlFixtureList(`
+                <div id="fragment">initial root text</div>
+              `)
 
-            it('does not compile the matching element')
+              const callback = jasmine.createSpy('onAccepted callback')
+              up.layer.open({
+                onAccepted: callback,
+                acceptFragment: '#match',
+                fragment: `
+                  <div id="fragment">
+                    initial overlay text
+                  </div>
+                `
+              })
+              await wait()
 
-            it('does not show the accepting fragment in a closing animation')
+              expect(up.layer.current.mode).toBe('modal')
+              expect(up.layer.current).toHaveText('initial overlay text')
+              expect(callback).not.toHaveBeenCalled()
 
-            it('allows the matching element to be consumed by a hungry fragment on a parent layer')
+              up.render({ layer: 'root', fragment: `
+                <div id="fragment">
+                  <div id="match">updated root text</div>
+                </div>
+              ` })
+              await wait()
+
+              expect(up.layer.current.mode).toBe('modal')
+              expect(callback).not.toHaveBeenCalled()
+
+              expect(up.fragment.get('#fragment', { layer: 'root' })).toHaveText('updated root text')
+              expect(up.fragment.get('#fragment', { layer: 'overlay' })).toHaveText('initial overlay text')
+            })
+
+            it('does not compile the matching element', async function() {
+              const compilerFn = jasmine.createSpy('compiler function')
+              up.compiler('#match', compilerFn)
+
+              const callback = jasmine.createSpy('onAccepted callback')
+              up.layer.open({
+                onAccepted: callback,
+                acceptFragment: '#match',
+                fragment: `
+                  <div id="fragment">
+                    <span>initial text</span>
+                  </div>
+                `
+              })
+              await wait()
+
+              expect(callback).not.toHaveBeenCalled()
+
+              let matchingUpdateJob = up.render({ fragment: `
+                <div id="fragment">
+                  <span id="match">matching text</span>
+                </div>
+              `})
+              await expectAsync(matchingUpdateJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
+              expect(callback).toHaveBeenCalled()
+              expect(up.layer.mode).toBe('root')
+              expect(compilerFn).not.toHaveBeenCalled()
+            })
+
+            it('does not show the accepting fragment in a closing animation', async function() {
+              up.motion.config.enabled = true
+
+              const callback = jasmine.createSpy('onAccepted callback')
+              up.layer.open({
+                onAccepted: callback,
+                acceptFragment: '#match',
+                fragment: `
+                  <div id="fragment">
+                    <span>initial text</span>
+                  </div>
+                `,
+                closeAnimation: 'fade-out',
+                closeDuration: 300,
+                closeEasing: 'linear',
+              })
+              await wait()
+
+              expect(callback).not.toHaveBeenCalled()
+
+              let matchingUpdateJob = up.render({ fragment: `
+                <div id="fragment">
+                  <span id="match">matching text</span>
+                </div>
+              `})
+              await expectAsync(matchingUpdateJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
+              expect(callback).toHaveBeenCalled()
+              expect(up.layer.mode).toBe('root')
+              expect(document).toHaveSelector('up-modal')
+              expect('up-modal-content').toHaveText('initial text')
+              expect('up-modal-content').not.toHaveText('matching text')
+              await wait(400)
+
+              expect(document).not.toHaveSelector('up-modal')
+            })
+
+            it('allows the matching element to be consumed by a hungry fragment on a parent layer', async function() {
+              htmlFixture(`
+                <div id="fragment" up-hungry up-if-layer="any">
+                  initial root text
+                </div>
+              `)
+
+              const callback = jasmine.createSpy('onAccepted callback')
+              up.layer.open({
+                onAccepted: callback,
+                acceptFragment: '#match',
+                fragment: `
+                  <div id="fragment">
+                    <span>initial overlay text</span>
+                  </div>
+                `
+              })
+              await wait()
+
+              let matchingUpdateJob = up.render({ fragment: `
+                <div id="fragment">
+                  <span id="match">matching text</span>
+                </div>
+              `})
+              await expectAsync(matchingUpdateJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
+              expect(up.layer.current.mode).toBe('root')
+              expect(callback).toHaveBeenCalled()
+              expect(up.fragment.get('#fragment', { layer: 'root' })).toHaveSelector('#match')
+              expect(up.fragment.get('#fragment', { layer: 'root' })).toHaveText('matching text')
+            })
 
             it("uses the fragment's data as the acceptance value", async function() {
               const callback = jasmine.createSpy('onAccepted callback')
@@ -1918,11 +2033,8 @@ describe('up.layer', function() {
 
             describe('when its initial content matches the given selector', function() {
 
-              it('immediately accepts a layer when its initial content matches the given selector', async function() {
+              it('immediately accepts a layer when its initial content contains the given selector', async function() {
                 const callback = jasmine.createSpy('onAccepted callback')
-
-                const compiler = jasmine.createSpy('compiler')
-                up.compiler('#match', compiler)
 
                 const openPromise = up.layer.open({
                   onAccepted: callback,
@@ -1945,16 +2057,76 @@ describe('up.layer', function() {
                 expect(document).not.toHaveSelector('#match')
               })
 
-              it('does not compile the matching element')
+              it('immediately accepts a layer when its initial content matches the given selector', async function() {
+                const callback = jasmine.createSpy('onAccepted callback')
 
-              it('allows the matching element to be consumed by a hungry fragment on a parent layer')
+                const openPromise = up.layer.open({
+                  onAccepted: callback,
+                  acceptFragment: '#match',
+                  fragment: `
+                    <div id="match" up-data="{ name: 'Bob' }">matching text</div>
+                  `
+                })
+                await expectAsync(openPromise).toBeRejectedWith(jasmine.any(up.Aborted))
+
+                expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({
+                  type: 'up:layer:accepted',
+                  value: { name: 'Bob' },
+                }))
+
+                expect(up.layer.mode).toBe('root')
+                expect(document).not.toHaveSelector('#match')
+              })
+
+              it('does not compile the matching element', async function() {
+                const compilerFn = jasmine.createSpy('compiler function')
+                up.compiler('#match', compilerFn)
+
+                const callback = jasmine.createSpy('onAccepted callback')
+                const openPromise = up.layer.open({
+                  onAccepted: callback,
+                  acceptFragment: '#match',
+                  fragment: `
+                    <div id="match"></div>
+                  `
+                })
+                await expectAsync(openPromise).toBeRejectedWith(jasmine.any(up.Aborted))
+
+                expect(callback).toHaveBeenCalled()
+                expect(up.layer.mode).toBe('root')
+                expect(compilerFn).not.toHaveBeenCalled()
+              })
+
+              it('allows the matching element to be consumed by a hungry fragment on a parent layer', async function() {
+                htmlFixture(`
+                  <div id="fragment" up-hungry up-if-layer="any">
+                    initial root text
+                  </div>
+                `)
+
+                const callback = jasmine.createSpy('onAccepted callback')
+                const openPromise = up.layer.open({
+                  onAccepted: callback,
+                  acceptFragment: '#fragment',
+                  fragment: `
+                    <div id="fragment">
+                      matching text
+                    </div>
+                  `
+                })
+                await expectAsync(openPromise).toBeRejectedWith(jasmine.any(up.Aborted))
+
+                expect(up.layer.current.mode).toBe('root')
+                expect(callback).toHaveBeenCalled()
+                expect(up.fragment.get('#fragment', { layer: 'root' })).toHaveText('matching text')
+              })
 
             })
 
           })
         })
 
-        fdescribe('{ dismissFragment }', function() {
+        describe('{ dismissFragment }', function() {
 
           it('dismisses the layer when an fragment with the given selector is rendered into the layer', async function() {
             const callback = jasmine.createSpy('onDismissed callback')

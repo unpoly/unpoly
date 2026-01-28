@@ -1,6 +1,7 @@
 const u = up.util
 const e = up.element
 
+// TODO: Get rid of this class and all utility functions
 up.MotionController = class MotionController {
 
   constructor(name) {
@@ -8,11 +9,11 @@ up.MotionController = class MotionController {
     this._selector = `.${this._activeClass}`
     this.finishEvent = `up:${name}:finish`
 
-    // Track the number of finish() calls for testing
-    this.finishCount = 0
-
     // Track the number of active clusters. If no clusters are active, we can early return in finish().
     this._clusterCount = 0
+
+    this._nerfAutoFinishCount = 0
+    this._callingRoots = []
   }
 
   /*-
@@ -28,39 +29,55 @@ up.MotionController = class MotionController {
   [`finished`](/up.MotionController.finish) later.
 
   @function startFunction
-  @param {Element|List<Element>} cluster
+  @param {List<Element>} cluster
     A list of elements that will be affected by the motion.
   @param {Function(): Promise} startMotion
-  @param {Object} [memory.trackMotion=true]
   @return {Promise}
     A promise that fulfills when the animation ends.
   */
-  startFunction(cluster, startMotion, memory = {}) {
-    cluster = e.list(cluster)
-
-    // Some motions might reject after starting. E.g. a scrolling animation
-    // will reject when the user scrolls manually during the animation. For
-    // the purpose of this controller, we just want to know when the animation
-    // has setteld, regardless of whether it was resolved or rejected.
-    const mutedAnimator = () => up.error.muteUncriticalRejection(startMotion())
-
-    // Callers can pass an options hash `{ memory }` in which we store a { trackMotion }
-    // property. With this we can prevent tracking the same motion multiple times.
-    // This is an issue when composing a transition from two animations, or when
-    // using another transition from within a transition function.
-    memory.trackMotion = memory.trackMotion ?? up.motion.isEnabled()
-
-    if (memory.trackMotion === false) {
-      return mutedAnimator()
-    } else {
-      memory.trackMotion = false
+  startFunction(cluster, startMotionFn) {
+    if (this._nerfAutoFinishCount === 0) {
       this.finish(cluster)
-      this._markCluster(cluster)
+    }
+
+    // TODO: Get rid of "cluster" concept
+    // TODO: Get rid of markings and refactor to ancestor finish event
+    this._markCluster(cluster)
+
+    try {
+      this._nerfAutoFinishCount++
+      let nested = u.some(cluster, (el) => u.some(this._callingRoots, (root) => root.contains(el)))
+      this._callingRoots.push(...cluster)
+
+      // Some motions might reject after starting. E.g. a scrolling animation
+      // will reject when the user scrolls manually during the animation. For
+      // the purpose of this controller, we just want to know when the animation
+      // has settled, regardless of whether it was resolved or rejected.
+      const mutedAnimator = () => up.error.muteUncriticalRejection(startMotionFn( { nested }))
+
       let promise = this._whileForwardingFinishEvent(cluster, mutedAnimator)
+
       promise = promise.finally(() => this._unmarkCluster(cluster))
       // Return the original promise that is still running
       return promise
+    } finally {
+      for (let element of cluster) u.remove(this._callingRoots, element)
+      this._nerfAutoFinishCount--
     }
+
+    // // Callers can pass an options hash `{ memory }` in which we store a { trackMotion }
+    // // property. With this we can prevent tracking the same motion multiple times.
+    // // This is an issue when composing a transition from two animations, or when
+    // // using another transition from within a transition function.
+    // // memory.trackMotion ??= up.motion.isEnabled()
+    //
+    // if (false && memory.trackMotion === false) {
+    //   return mutedAnimator()
+    // } else {
+    //   memory.trackMotion = false
+    //   this.finish(cluster)
+    //
+    // }
   }
 
   /*-
@@ -71,7 +88,6 @@ up.MotionController = class MotionController {
   @return {Promise} A promise that fulfills when animations have finished.
   */
   finish(elements) {
-    this.finishCount++
     if ((this._clusterCount === 0) || !up.motion.isEnabled()) { return }
     elements = this._expandFinishRequest(elements)
 
@@ -84,7 +100,8 @@ up.MotionController = class MotionController {
 
   _expandFinishRequest(elements) {
     if (elements) {
-      return u.flatMap(elements, (el) => e.list(el.closest(this._selector), el.querySelectorAll(this._selector)))
+      elements = u.wrapList(elements)
+      return u.flatMap(elements, (el) => e.around(el, this._selector))
     } else {
       // If no reference elements were given, we finish every matching
       // element on the screen.
@@ -144,7 +161,8 @@ up.MotionController = class MotionController {
 
   async reset() {
     await this.finish()
-    this.finishCount = 0
     this._clusterCount = 0
+    this._nerfAutoFinishCount = 0
+    this._callingRoots = []
   }
 }

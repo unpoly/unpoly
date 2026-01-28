@@ -1063,7 +1063,7 @@ describe('up.link', function() {
 
       })
 
-      fdescribe('[up-accept-fragment]', function() {
+      describe('[up-accept-fragment]', function() {
 
         it('parses as a string', function() {
           const link = fixture('a[href="/foo"][up-accept-fragment="#foo"]')
@@ -1073,7 +1073,7 @@ describe('up.link', function() {
 
       })
 
-      fdescribe('[up-dismiss-fragment]', function() {
+      describe('[up-dismiss-fragment]', function() {
 
         it('parses as a string', function() {
           const link = fixture('a[href="/foo"][up-dismiss-fragment="#foo"]')

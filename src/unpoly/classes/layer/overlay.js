@@ -369,7 +369,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   }
 
   _tryCloseForElements(selector, closeFn, newElements, options) {
-    let match = u.findResult(newElements, (element) => element.querySelector(selector))
+    let match = u.findResult(newElements, (element) => e.subtreeFirst(element, selector))
     if (match) {
       const closeValue = up.data(match)
       up.error.muteUncriticalSync(() =>
@@ -485,6 +485,14 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     let boxAnimation =  this.wasEverVisible && (options.animation ?? this.evalOption(this.closeAnimation))
     let backdropAnimation = 'fade-out' // _animationFn() will ignore this animation unless the box is also animating
     let animationFn = this._animationFn(boxAnimation, backdropAnimation)
+
+    console.log("[closeAnimationProps] returning props %o", {
+        animation: animationFn,
+        easing: options.easing || this.closeEasing,
+        duration: options.duration ?? this.closeDuration,
+      }
+    )
+
 
     return {
       animation: animationFn,

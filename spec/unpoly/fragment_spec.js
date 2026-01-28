@@ -1330,7 +1330,7 @@ describe('up.fragment', function() {
           expect('.target').toHaveText('new-text')
         })
 
-        // fit('emits an up:fragment:rendered event when the server response was received and the fragments were swapped', async function() {
+        // it('emits an up:fragment:rendered event when the server response was received and the fragments were swapped', async function() {
         //   fixture('.target')
         //
         //   const callback = jasmine.createSpy('up:fragment:rendered listener')
@@ -12310,11 +12310,14 @@ describe('up.fragment', function() {
         describe('cache revalidation with { revalidate }', function() {
 
           beforeEach(async function() {
+            console.debug("[BEFORE] cache population, making request")
+
             fixture('.target', { text: 'initial text' })
             up.request('/cached-path', { cache: true })
 
             await wait()
 
+            console.debug("[BEFORE] cache population, responding to request")
             jasmine.respondWithSelector('.target', {
               text: 'cached text',
               responseHeaders: {
@@ -12989,17 +12992,22 @@ describe('up.fragment', function() {
             })
 
             it('keeps the older cache entry that did have content', async function() {
-              const job1 = up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
+              console.debug("[SPEC] rendering from stale cache")
 
-              await job1
+              const job1 = up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
+              await wait()
 
               expect('.target').toHaveText('cached text')
 
               await expectAsync(job1).toBeResolvedTo(jasmine.any(up.RenderResult))
               await expectAsync(job1.finished).toBePending()
 
+              await wait()
+
+              console.debug("[SPEC] asserting isBusy")
               expect(up.network.isBusy()).toBe(true)
 
+              console.debug("[SPEC] responding with 304")
               jasmine.respondWith({ status: 304 })
 
               await expectAsync(job1.finished).toBeResolvedTo(jasmine.any(up.RenderResult))
@@ -13012,8 +13020,6 @@ describe('up.fragment', function() {
 
               // Re-render the cached content that we could not revalidate earlier.
               const job2 = up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
-
-              await job2
 
               // For some reason, with migrate loaded, the revalidation request is in the queue but has not yet been sent
               await wait()
@@ -13038,8 +13044,7 @@ describe('up.fragment', function() {
 
             it('rejects up.render().finished promise', async function() {
               const job = up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
-
-              await job
+              await wait()
 
               expect('.target').toHaveText('cached text')
 
@@ -13058,8 +13063,7 @@ describe('up.fragment', function() {
             it('rejects up.render().finished promise if there also is an { onFinished } callback (bugfix)', async function() {
               const onFinished = jasmine.createSpy('onFinished callback')
               const job = up.render('.target', { url: '/cached-path', cache: true, revalidate: true, onFinished })
-
-              await job
+              await wait()
 
               expect('.target').toHaveText('cached text')
 
@@ -13081,8 +13085,7 @@ describe('up.fragment', function() {
               const onFinished = jasmine.createSpy('onFinished callback')
               const job = up.render('.target', { url: '/cached-path', cache: true, revalidate: true, onFinished })
               const logErrorSpy = spyOn(up, 'puts').and.callThrough()
-
-              await job
+              await wait()
 
               expect('.target').toHaveText('cached text')
 
@@ -13103,8 +13106,7 @@ describe('up.fragment', function() {
             // Cannot get this spec to work in both Chrome and Safari. See comment in up.RenderJob.
             xit('reports an unhandled rejection if no catch() handler is attached to the up.render().finished promise', async function() {
               const job = up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
-
-              await job
+              await wait()
 
               expect('.target').toHaveText('cached text')
 
@@ -13131,8 +13133,7 @@ describe('up.fragment', function() {
 
             it('keeps the expired response in the cache so users can keep navigating within the last known content', async function() {
               const job1 = up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
-
-              await job1
+              await wait()
 
               expect('.target').toHaveText('cached text')
 
@@ -16747,6 +16748,7 @@ describe('up.fragment', function() {
 
         it('keeps the element if its outer HTML is stable', async function() {
           let keepable = keepableFixture('<div id="keepable" up-keep="same-html">text</div>')
+          await wait()
 
           up.render({ fragment: `<div id="keepable" up-keep="same-html">text</div>` })
           await wait()
