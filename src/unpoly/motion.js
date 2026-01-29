@@ -290,7 +290,7 @@ up.motion = (function() {
       }
     }
 
-    await motionController.startFunction([element], trackable)
+    await motionController.startFunction(element, null, trackable)
   }
 
   function willAnimate(element, animationOrTransition, options) {
@@ -323,7 +323,6 @@ up.motion = (function() {
   */
   function animateNow(element, lastFrame, options) {
     if (up.migrate.loaded) lastFrame = up.migrate.fixSetStyleProps(lastFrame)
-    options = { ...options, finishEvent: motionController.finishEvent }
     const cssTransition = new up.CSSTransition(element, lastFrame, options)
     return cssTransition.start()
   }
@@ -355,7 +354,9 @@ up.motion = (function() {
   @stable
   */
   function finish(element) {
-    return motionController.finish(element)
+    element = up.fragment.get(element)
+    motionController.finish(element)
+    return up.migrate.formerlyAsync?.('up.motion.finish()')
   }
 
   /*-
@@ -495,7 +496,7 @@ up.motion = (function() {
       }
     }
 
-    await motionController.startFunction([oldElement, newElement], trackable)
+    await motionController.startFunction(newElement, oldElement, trackable)
   }
 
   // let nerfAutoFinishCount = 0
@@ -595,6 +596,10 @@ up.motion = (function() {
   function isNone(animationOrTransition) {
     // false, undefined, '', null and the string "none" are all ways to skip animations
     return !animationOrTransition || animationOrTransition === 'none'
+  }
+
+  function onFinish(element, fn) {
+    return up.event.onAncestor(element, motionController.finishEvent, fn)
   }
 
   function registerOpacityAnimation(name, from, to) {
@@ -736,6 +741,7 @@ up.motion = (function() {
     willAnimate,
     swapElementsDirectly,
     motionOptions,
+    onFinish,
   }
 })()
 

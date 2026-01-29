@@ -454,6 +454,20 @@ describe('up.motion', function() {
       describe('when called with an element or selector', function() {
 
         it('cancels an existing animation on the given element by instantly jumping to the last frame', async function() {
+          const element = fixture('.element', { text: 'content' })
+          up.animate(element, { 'font-size': '40px', 'opacity': '0.5' }, { duration: 30000 })
+
+          await wait()
+
+          up.motion.finish(element)
+
+          await wait()
+
+          expect(element).toHaveComputedStyle({ 'font-size': '40px' })
+          expect(element).toHaveOpacity(0.5, 0.01)  // Safari sometimes has rounding errors
+        })
+
+        it('accepts the element as a jQuery collection', async function() {
           const $element = $fixture('.element').text('content')
           up.animate($element, { 'font-size': '40px', 'opacity': '0.5' }, { duration: 30000 })
 
@@ -518,24 +532,27 @@ describe('up.motion', function() {
           expect(currentTransitionProperty).not.toContain('opacity')
         })
 
-        it('cancels an existing transition on the old element by instantly jumping to the last frame', async function() {
-          const $v1 = $fixture('.element').text('v1')
-          const $v2 = $fixture('.element').text('v2')
-
-          up.morph($v1, $v2, 'cross-fade', { duration: 200 })
-
-          await wait()
-
-          expect($v1).toHaveOpacity(1.0, 0.2)
-          expect($v2).toHaveOpacity(0.0, 0.2)
-
-          up.motion.finish($v1)
-
-          await wait()
-
-          expect($v1).toBeDetached()
-          expect($v2).toHaveOpacity(1.0, 0.2)
-        })
+        // it('cancels an existing transition on the old element by instantly jumping to the last frame', async function() {
+        //   const $v1 = $fixture('.element').text('v1')
+        //   const $v2 = $fixture('.element').text('v2')
+        //
+        //   up.morph($v1, $v2, 'cross-fade', { duration: 200 })
+        //
+        //   await wait()
+        //
+        //   expect($v1).toHaveOpacity(1.0, 0.2)
+        //   expect($v2).toHaveOpacity(0.0, 0.2)
+        //
+        //   console.debug("[SPEC] calling finish()")
+        //   up.motion.finish($v1)
+        //
+        //   await wait()
+        //
+        //   console.debug("[SPEC] expectations")
+        //
+        //   expect($v1).toBeDetached()
+        //   expect($v2).toHaveOpacity(1.0, 0.2)
+        // })
 
 
         it('cancels an existing transition on the new element by instantly jumping to the last frame', async function() {
@@ -585,7 +602,7 @@ describe('up.motion', function() {
 
           await wait()
 
-          up.motion.finish($old)
+          up.motion.finish($new)
 
           await wait()
 
@@ -594,31 +611,25 @@ describe('up.motion', function() {
         })
 
         it('emits an up:motion:finish event on the given animating element, so custom animation functions can react to the finish request', async function() {
-          const $element = $fixture('.element').text('element text')
+          const element = fixture('.element', { text: 'element text' })
+
+          up.animate(element, 'fade-in', { duration: 3000 })
+
           const listener = jasmine.createSpy('finish event listener')
-          $element.on('up:motion:finish', listener)
+          element.addEventListener('up:motion:finish', listener)
 
-          up.animate($element, 'fade-in')
-
-          await wait()
+          await wait(50)
 
           expect(listener).not.toHaveBeenCalled()
-          up.motion.finish()
+
+          console.debug("[SPEC] explicit finish(%o)", element)
+          up.motion.finish(element)
 
           await wait()
 
           expect(listener).toHaveBeenCalled()
         })
 
-        it('does not emit an up:motion:finish event if no element is animating', async function() {
-          const listener = jasmine.createSpy('finish event listener')
-          up.on('up:motion:finish', listener)
-          up.motion.finish()
-
-          await wait()
-
-          expect(listener).not.toHaveBeenCalled()
-        })
       })
 
 

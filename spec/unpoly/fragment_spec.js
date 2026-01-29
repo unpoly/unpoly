@@ -7597,6 +7597,7 @@ describe('up.fragment', function() {
         it('cancels an existing transition by instantly jumping to the last frame', async function() {
           $fixture('.element.v1').text('version 1')
 
+          console.debug("[SPEC] Swapping v1 with v2")
           up.render('.element', {
             document: '<div class="element v2">version 2</div>',
             transition: 'cross-fade',
@@ -7613,11 +7614,16 @@ describe('up.fragment', function() {
           expect($ghost2).toHaveLength(1)
           expect($ghost2.css('opacity')).toBeAround(0.0, 0.1)
 
-          await up.render('.element', {
+          console.debug("[SPEC] Swapping v2 with v3")
+          up.render('.element', {
             document: '<div class="element v3">version 3</div>',
             transition: 'cross-fade',
             duration: 200
           })
+
+          await wait()
+
+          console.debug("[SPEC] expectations")
 
           const $ghost1After = $('.element:contains("version 1")')
           expect($ghost1After).toHaveLength(0)
@@ -12310,14 +12316,10 @@ describe('up.fragment', function() {
         describe('cache revalidation with { revalidate }', function() {
 
           beforeEach(async function() {
-            console.debug("[BEFORE] cache population, making request")
-
             fixture('.target', { text: 'initial text' })
             up.request('/cached-path', { cache: true })
-
             await wait()
 
-            console.debug("[BEFORE] cache population, responding to request")
             jasmine.respondWithSelector('.target', {
               text: 'cached text',
               responseHeaders: {
@@ -12992,8 +12994,6 @@ describe('up.fragment', function() {
             })
 
             it('keeps the older cache entry that did have content', async function() {
-              console.debug("[SPEC] rendering from stale cache")
-
               const job1 = up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
               await wait()
 
@@ -13004,10 +13004,8 @@ describe('up.fragment', function() {
 
               await wait()
 
-              console.debug("[SPEC] asserting isBusy")
               expect(up.network.isBusy()).toBe(true)
 
-              console.debug("[SPEC] responding with 304")
               jasmine.respondWith({ status: 304 })
 
               await expectAsync(job1.finished).toBeResolvedTo(jasmine.any(up.RenderResult))

@@ -8,7 +8,6 @@ up.CSSTransition = class CSSTransition {
     this._element = element
     this._lastFrame = lastFrame
     this._lastFrameKeys = Object.keys(this._lastFrame)
-    this._finishEvent = options.finishEvent
     this._duration = options.duration
     this._easing = options.easing
     this._finished = false
@@ -35,9 +34,7 @@ up.CSSTransition = class CSSTransition {
   }
 
   _listenToFinishEvent() {
-    if (this._finishEvent) {
-      this._stopListenToFinishEvent = up.event.onAncestor(this._element, this._finishEvent, this._finish.bind(this))
-    }
+    this._stopListenToFinishEvent = up.motion.onFinish(this._element, this._finish.bind(this))
   }
 
   _startFallbackTimer() {
