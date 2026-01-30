@@ -532,28 +532,24 @@ describe('up.motion', function() {
           expect(currentTransitionProperty).not.toContain('opacity')
         })
 
-        // it('cancels an existing transition on the old element by instantly jumping to the last frame', async function() {
-        //   const $v1 = $fixture('.element').text('v1')
-        //   const $v2 = $fixture('.element').text('v2')
-        //
-        //   up.morph($v1, $v2, 'cross-fade', { duration: 200 })
-        //
-        //   await wait()
-        //
-        //   expect($v1).toHaveOpacity(1.0, 0.2)
-        //   expect($v2).toHaveOpacity(0.0, 0.2)
-        //
-        //   console.debug("[SPEC] calling finish()")
-        //   up.motion.finish($v1)
-        //
-        //   await wait()
-        //
-        //   console.debug("[SPEC] expectations")
-        //
-        //   expect($v1).toBeDetached()
-        //   expect($v2).toHaveOpacity(1.0, 0.2)
-        // })
+        it('cancels an existing transition on the old element by instantly jumping to the last frame', async function() {
+          const $v1 = $fixture('.element').text('v1')
+          const $v2 = $fixture('.element').text('v2')
 
+          up.morph($v1, $v2, 'cross-fade', { duration: 200 })
+
+          await wait()
+
+          expect($v1).toHaveOpacity(1.0, 0.2)
+          expect($v2).toHaveOpacity(0.0, 0.2)
+
+          up.motion.finish($v1)
+
+          await wait()
+
+          expect($v1).toBeDetached()
+          expect($v2).toHaveOpacity(1.0, 0.2)
+        })
 
         it('cancels an existing transition on the new element by instantly jumping to the last frame', async function() {
           const $v1 = $fixture('.element').text('v1')
@@ -622,7 +618,6 @@ describe('up.motion', function() {
 
           expect(listener).not.toHaveBeenCalled()
 
-          console.debug("[SPEC] explicit finish(%o)", element)
           up.motion.finish(element)
 
           await wait()

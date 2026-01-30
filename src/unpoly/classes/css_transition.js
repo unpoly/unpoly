@@ -34,7 +34,7 @@ up.CSSTransition = class CSSTransition {
   }
 
   _listenToFinishEvent() {
-    this._stopListenToFinishEvent = up.motion.onFinish(this._element, this._finish.bind(this))
+    this._stopListenToFinishEvent = up.on(this._element, 'up:motion:finish', this._finish.bind(this))
   }
 
   _startFallbackTimer() {

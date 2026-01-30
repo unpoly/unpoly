@@ -7597,7 +7597,6 @@ describe('up.fragment', function() {
         it('cancels an existing transition by instantly jumping to the last frame', async function() {
           $fixture('.element.v1').text('version 1')
 
-          console.debug("[SPEC] Swapping v1 with v2")
           up.render('.element', {
             document: '<div class="element v2">version 2</div>',
             transition: 'cross-fade',
@@ -7614,7 +7613,6 @@ describe('up.fragment', function() {
           expect($ghost2).toHaveLength(1)
           expect($ghost2.css('opacity')).toBeAround(0.0, 0.1)
 
-          console.debug("[SPEC] Swapping v2 with v3")
           up.render('.element', {
             document: '<div class="element v3">version 3</div>',
             transition: 'cross-fade',
@@ -7622,8 +7620,6 @@ describe('up.fragment', function() {
           })
 
           await wait()
-
-          console.debug("[SPEC] expectations")
 
           const $ghost1After = $('.element:contains("version 1")')
           expect($ghost1After).toHaveLength(0)
