@@ -880,22 +880,26 @@ describe('up.motion', function() {
           expect($new).toBeAttached()
         })
 
-        it('finishes animations only once', async function() {
+        it('finishes animations only once per element', async function() {
           const finishSpy = spyOn(up.MotionController.prototype, 'finish').and.callThrough()
 
-          const $old = $fixture('.old').text('old content')
-          const $new = $fixture('.new').text('new content').detach()
+          const oldFixture = fixture('.old', { text: 'old content' })
+          const newFixture = up.element.createFromSelector('.new', { text: 'new content' }) // need detached element
 
           const transition = function(oldElement, newElement, options) {
             up.animate(oldElement, 'fade-out', options)
             up.animate(newElement, 'fade-in', options)
           }
 
-          up.morph($old, $new, transition, { duration: 200, easing: 'linear' })
+          up.morph(oldFixture, newFixture, transition, { duration: 200, easing: 'linear' })
 
           await wait()
 
-          expect(finishSpy.calls.count()).toEqual(1)
+          expect(finishSpy.calls.count()).toEqual(2)
+          expect(finishSpy.calls.allArgs()).toEqual(jasmine.arrayWithExactContents([
+            [newFixture],
+            [oldFixture],
+          ]))
         })
 
       })
@@ -937,16 +941,21 @@ describe('up.motion', function() {
         it("finishes animations only once", async function() {
           const finishSpy = spyOn(up.MotionController.prototype, 'finish').and.callThrough()
 
-          const $old = $fixture('.old').text('old content')
-          const $new = $fixture('.new').text('new content').detach()
+          const oldFixture = fixture('.old', { text: 'old content' })
+          const newFixture = up.element.createFromSelector('.new', { text: 'new content' })  // need detached element
 
           const transition = (oldElement, newElement, options) => up.morph(oldElement, newElement, 'cross-fade', options)
 
-          up.morph($old, $new, transition, { duration: 50, easing: 'linear' })
+          up.morph(oldFixture, newFixture, transition, { duration: 50, easing: 'linear' })
 
           await wait()
 
-          expect(finishSpy.calls.count()).toEqual(1)
+          expect(finishSpy.calls.count()).toEqual(2)
+          expect(finishSpy.calls.allArgs()).toEqual(jasmine.arrayWithExactContents([
+            [newFixture],
+            [oldFixture],
+          ]))
+
         })
 
       })

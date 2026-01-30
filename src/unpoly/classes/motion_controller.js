@@ -57,6 +57,8 @@ up.MotionController = class MotionController {
           console.debug("[MotionController] primary %o finished, CO-finishing secondary %o", primaryElement, secondaryElement)
           this.finish(secondaryElement)
         })
+
+        // TODO: I think we also need it the other way around
       }
 
 
