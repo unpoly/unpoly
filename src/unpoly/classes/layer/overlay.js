@@ -486,6 +486,14 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     let backdropAnimation = 'fade-out' // _animationFn() will ignore this animation unless the box is also animating
     let animationFn = this._animationFn(boxAnimation, backdropAnimation)
 
+    console.log("[closeAnimationProps] returning props %o", {
+        animation: animationFn,
+        easing: options.easing || this.closeEasing,
+        duration: options.duration ?? this.closeDuration,
+      }
+    )
+
+
     return {
       animation: animationFn,
       easing: options.easing || this.closeEasing,

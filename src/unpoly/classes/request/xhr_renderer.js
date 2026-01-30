@@ -38,6 +38,7 @@ up.Request.XHRRenderer = class XHRRenderer {
     }
 
     Object.assign(xhr, handlers)
+
     xhr.send(this._getPayload())
   }
 

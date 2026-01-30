@@ -262,28 +262,35 @@ up.motion = (function() {
     A promise for the animation's end.
   @stable
   */
-  async function animate(element, animation, options = {}) {
+  async function animate(element, animation, { duration, easing, onFinished } = {}) {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
     element = up.fragment.get(element)
 
-    const onFinished = options.onFinished ?? u.noop
+    // Nested calls should not re-call callbacks.
+    const motionOptionsWithoutCallbacks = { duration, easing }
 
     // willAnimate() also sets a default { duration } and { easing }.
-    const willRun = willAnimate(element, animation, options)
+    const willRun = willAnimate(element, animation, motionOptionsWithoutCallbacks)
 
-    if (willRun) {
-      let animationFn = up.error.guardFn(findAnimationFn(animation))
-      let fnOptions = u.pick(options, ['duration', 'easing', 'trackMotion'])
-      const runNow = () => animationFn(element, fnOptions).finally(onFinished)
-      await motionController.startFunction(element, runNow, fnOptions)
-    } else {
-      if (u.isOptions(animation)) {
-        // If we are given the final animation frame as an object of CSS properties,
-        // the best we can do is to set the final frame without animation.
-        e.setStyle(element, animation)
+    let trackable = async function() {
+      if (willRun) {
+        let animationFn = up.error.guardFn(findAnimationFn(animation))
+        try {
+          await animationFn(element, motionOptionsWithoutCallbacks)
+        } finally {
+          onFinished?.()
+        }
+      } else {
+        if (u.isOptions(animation)) {
+          // If we are given the final animation frame as an object of CSS properties,
+          // the best we can do is to set the final frame without animation.
+          e.setStyle(element, animation)
+        }
+        onFinished?.()
       }
-      onFinished()
     }
+
+    await motionController.startFunction([element], trackable)
   }
 
   function willAnimate(element, animationOrTransition, options) {
@@ -316,7 +323,6 @@ up.motion = (function() {
   */
   function animateNow(element, lastFrame, options) {
     if (up.migrate.loaded) lastFrame = up.migrate.fixSetStyleProps(lastFrame)
-    options = { ...options, finishEvent: motionController.finishEvent }
     const cssTransition = new up.CSSTransition(element, lastFrame, options)
     return cssTransition.start()
   }
@@ -348,7 +354,9 @@ up.motion = (function() {
   @stable
   */
   function finish(element) {
-    return motionController.finish(element)
+    element = up.fragment.get(element)
+    motionController.finish(element)
+    return up.migrate.formerlyAsync?.('up.motion.finish()')
   }
 
   /*-
@@ -434,70 +442,85 @@ up.motion = (function() {
     A promise that fulfills when the transition ends.
   @stable
   */
-  async function morph(oldElement, newElement, transitionObject, options) {
-    options = u.options(options)
-
-    // If passed a selector, up.fragment.get() will prefer a match on the current layer.
-    // This also unwraps jQuery collections.
+  async function morph(oldElement, newElement, transitionObject, { duration, easing, afterInsert, beforeRemove, afterRemove } = {}) {
+    // (A) If passed a selector, up.fragment.get() will prefer a match on the current layer.
+    // (B) This also unwraps jQuery collections.
     oldElement = up.fragment.get(oldElement)
     newElement = up.fragment.get(newElement)
 
+    // Nested calls should not re-call callbacks.
+    const motionOptionsWithoutCallbacks = { duration, easing }
+
     let transitionFn = findTransitionFn(transitionObject)
-    const willMorph = willAnimate(oldElement, transitionFn, options)
+    const willMorph = willAnimate(oldElement, transitionFn, motionOptionsWithoutCallbacks)
     transitionFn = up.error.guardFn(transitionFn)
 
-    // Remove callbacks from our options hash in case transitionFn calls morph() recursively.
-    const afterInsert = u.pluckKey(options, 'afterInsert') || u.noop
-    const beforeRemove = u.pluckKey(options, 'beforeRemove') || u.noop
-    const afterRemove = u.pluckKey(options, 'afterRemove') || u.noop
+    const trackable = async function({ nested }) {
+      if (willMorph) {
+        if (nested) {
+          // If morph() is called inside a transition function  we don't want to create additional absolutized bounds.
+          await transitionFn(oldElement, newElement, motionOptionsWithoutCallbacks)
+        } else {
+          // All changes to the DOM must be sync.
+          const viewport = up.viewport.get(oldElement)
+          const scrollTopBeforeScroll = viewport.scrollTop
 
-    if (willMorph) {
-      // If morph() is called from inside a transition function we
-      // (1) don't want to track it again and
-      // (2) don't want to create additional absolutized bounds
-      if (motionController.isActive(oldElement) && (options.trackMotion === false)) {
-        await transitionFn(oldElement, newElement, options)
-        return
+          const oldRemote = up.viewport.absolutize(oldElement, {
+            afterMeasure: () => e.insertBefore(oldElement, newElement)
+          })
+
+          // (A) Compile the element in case of DOM changes that affect its size or position
+          // (B) Compile the element to capture its [up-keep] identity before we add a tracking class
+          // (B) Scroll newElement into position before we start the enter animation.
+          afterInsert?.()
+
+          // Since we have scrolled the viewport (containing both oldElement and newElement),
+          // we must shift the old copy so it looks like it is still sitting in the same position.
+          const scrollTopAfterScroll = viewport.scrollTop
+          oldRemote.moveBounds(0, scrollTopAfterScroll - scrollTopBeforeScroll)
+
+          // TODO: Instead of plucking callbacks above, we could only pass actual options here. We can do that now we no longer have { trackMotion }.
+          await transitionFn(oldElement, newElement, motionOptionsWithoutCallbacks)
+
+          beforeRemove?.()
+          // TODO: Don't expose { bounds }, why not remove()?
+          oldRemote.bounds.remove()
+          afterRemove?.()
+        }
+      } else {
+        // We still wrap in startFunction() so we will auto-finish previous transitions.
+        beforeRemove?.()
+        swapElementsDirectly(oldElement, newElement)
+        afterInsert?.()
+        afterRemove?.()
       }
-
-      up.puts('up.morph()', 'Morphing %o to %o with transition %o over %d ms', oldElement, newElement, transitionObject, options.duration)
-
-      // All changes to the DOM must be sync.
-      const viewport = up.viewport.get(oldElement)
-      const scrollTopBeforeScroll = viewport.scrollTop
-
-      const oldRemote = up.viewport.absolutize(oldElement, {
-        // TODO: Can't we do this after absolutize? Without a callback?
-        afterMeasure: () => e.insertBefore(oldElement, newElement)
-      })
-
-      // (A) Compile the element in case of DOM changes that affect its size or position
-      // (B) Compile the element to capture its [up-keep] identity before we add a tracking class
-      // (B) Scroll newElement into position before we start the enter animation.
-      afterInsert()
-
-      // Since we have scrolled the viewport (containing both oldElement and newElement),
-      // we must shift the old copy so it looks like it it is still sitting
-      // in the same position.
-      const scrollTopAfterScroll = viewport.scrollTop
-      oldRemote.moveBounds(0, scrollTopAfterScroll - scrollTopBeforeScroll)
-
-      const trackable = async function() {
-        await transitionFn(oldElement, newElement, options)
-
-        beforeRemove()
-        oldRemote.bounds.remove()
-        afterRemove()
-      }
-
-      await motionController.startFunction([oldElement, newElement], trackable, options)
-    } else {
-      beforeRemove()
-      swapElementsDirectly(oldElement, newElement)
-      afterInsert()
-      afterRemove()
     }
+
+    await motionController.startFunction([newElement, oldElement], trackable)
   }
+
+  // let nerfAutoFinishCount = 0
+  //
+  // function applyMotionFn(element, fn, options = {}) {
+  //   if (!nerfAutoFinishCount && options.finish !== false) {
+  //     finishMotion(element)
+  //   }
+  //
+  //   try {
+  //     nerfAutoFinishCount++
+  //     return up.error.muteUncriticalRejection(fn())
+  //   } finally {
+  //     nerfAutoFinishCount--
+  //   }
+  // }
+  //
+  // function finishMotion(element) {
+  //   if (up.emit(element, 'up:motion:finish').defaultPrevented) return
+  //   for (let animation of element.getAnimations({ subtree: true })) {
+  //     animation.finish()
+  //     animation.commitStyles()
+  //   }
+  // }
 
   function findTransitionFn(value) {
     if (isNone(value)) {
@@ -706,7 +729,6 @@ up.motion = (function() {
     morph,
     animate,
     finish,
-    finishCount() { return motionController.finishCount },
     transition: namedTransitions.put,
     animation: namedAnimations.put,
     config,

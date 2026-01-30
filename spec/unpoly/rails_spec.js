@@ -199,7 +199,6 @@ describe('up.rails', function() {
 
             it("does not overwrite an existing up-confirm attribute, but gets deleted", function() {
               const $element = $fixture(`a[href="/foo"][${followableAttr}][up-confirm="Seriously?"][data-confirm="Really?"]`)
-              console.debug("[spec] is followable: %o", up.link.isFollowable($element.get(0)))
               up.hello($element)
               expect($element.attr('data-confirm')).toBeUndefined()
               expect($element.attr('up-confirm')).toEqual('Seriously?')

@@ -56,7 +56,7 @@ describe('up.Layer.Overlay', function() {
     it('throws an AbortError is the layer is already closing, but is still playing its closing animation', async function() {
       up.motion.config.enabled = true
       let overlay = await up.layer.open()
-      let doAccept = () => overlay.accept(null, { animation: 'fade-out', duration: 1000})
+      let doAccept = () => overlay.accept(null, { animation: 'fade-out', duration: 1000 })
       expect(doAccept).not.toThrowError()
 
       expect(document).toHaveSelector('up-modal.up-destroying')

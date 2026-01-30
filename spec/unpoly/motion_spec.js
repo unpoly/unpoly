@@ -158,6 +158,16 @@ describe('up.motion', function() {
         expect($element).toHaveOpacity(1.0, 0.15)
       })
 
+      it("cancels an existing animation when the current animation doesn't animate", async function() {
+        const $element = $fixture('.element').text('content')
+
+        up.animate($element, { 'font-size': '40px' }, { duration: 10000, easing: 'linear' })
+        up.animate($element, 'none', { duration: 200, easing: 'linear' })
+
+        expect($element.css('font-size')).toEqual('40px')
+        expect($element).toHaveOpacity(1.0)
+      })
+
       it('pauses an existing CSS transition and restores it once the Unpoly animation is done', async function() {
         let tolerance
         const $element = $fixture('.element').text('content').css({
@@ -329,20 +339,97 @@ describe('up.motion', function() {
         })
 
         it("finishes animations only once", function(done) {
+          const finishSpy = spyOn(up.MotionController.prototype, 'finish').and.callThrough()
           const $element = $fixture('.element').text('content')
 
-          const animation = function($element, options) {
-            e.setStyle($element, { opacity: 0 })
-            return up.animate($element, { opacity: 1 }, options)
+          const animation = function(element, options) {
+            e.setStyle(element, { opacity: 0 })
+            return up.animate(element, { opacity: 1 }, options)
           }
 
           up.animate($element, animation, { duration: 200, easing: 'linear' })
 
           u.task(() => {
-            expect(up.motion.finishCount()).toEqual(1)
+            expect(finishSpy.calls.count()).toEqual(1)
             done()
           })
         })
+
+        describe('when animating child elements', function() {
+
+          it('animates child elements', async function() {
+            const [container, child1, child2] = htmlFixtureList(`
+              <div id="container">
+                <div id="child1">child1 text</div>
+                <div id="child2">child2 text</div>
+              </div>
+            `)
+
+            const animation = function(element, options) {
+              const child1 = element.querySelector('#child1')
+              const child2 = element.querySelector('#child2')
+
+              return Promise.all([
+                up.animate(child1, 'fade-in', options),
+                up.animate(child2, 'fade-in', options),
+              ])
+
+            }
+
+            const animatePromise = up.animate(container, animation, { duration: 1000, easing: 'linear' })
+            await wait(500)
+
+            expect(child1).toHaveOpacity(0.5, 0.2)
+            expect(child2).toHaveOpacity(0.5, 0.2)
+
+            await expectAsync(animatePromise).toBePending()
+
+            await wait(600)
+
+            expect(child1).toHaveOpacity(1.0, 0.2)
+            expect(child1).toHaveOpacity(1.0, 0.2)
+
+            await expectAsync(animatePromise).already.toBeResolved()
+          })
+
+          it('finishes child animations when the container animation is finished', async function() {
+            const [container, child1, child2] = htmlFixtureList(`
+              <div id="container">
+                <div id="child1">child1 text</div>
+                <div id="child2">child2 text</div>
+              </div>
+            `)
+
+            const animation = function(element, options) {
+              const child1 = element.querySelector('#child1')
+              const child2 = element.querySelector('#child2')
+
+              return Promise.all([
+                up.animate(child1, 'fade-in', options),
+                up.animate(child2, 'fade-in', options),
+              ])
+
+            }
+
+            const animatePromise = up.animate(container, animation, { duration: 1000, easing: 'linear' })
+            await wait(250)
+
+            expect(child1).toHaveOpacity(0.25, 0.2)
+            expect(child2).toHaveOpacity(0.25, 0.2)
+
+            await expectAsync(animatePromise).toBePending()
+
+            up.motion.finish(container)
+            await wait(1)
+
+            expect(child1).toHaveOpacity(1.0, 0.2)
+            expect(child1).toHaveOpacity(1.0, 0.2)
+
+            await expectAsync(animatePromise).already.toBeResolved()
+          })
+
+        })
+
       })
 
       for (let noneAnimation of [false, null, undefined, 'none', '', {}]) {
@@ -367,6 +454,20 @@ describe('up.motion', function() {
       describe('when called with an element or selector', function() {
 
         it('cancels an existing animation on the given element by instantly jumping to the last frame', async function() {
+          const element = fixture('.element', { text: 'content' })
+          up.animate(element, { 'font-size': '40px', 'opacity': '0.5' }, { duration: 30000 })
+
+          await wait()
+
+          up.motion.finish(element)
+
+          await wait()
+
+          expect(element).toHaveComputedStyle({ 'font-size': '40px' })
+          expect(element).toHaveOpacity(0.5, 0.01)  // Safari sometimes has rounding errors
+        })
+
+        it('accepts the element as a jQuery collection', async function() {
           const $element = $fixture('.element').text('content')
           up.animate($element, { 'font-size': '40px', 'opacity': '0.5' }, { duration: 30000 })
 
@@ -450,7 +551,6 @@ describe('up.motion', function() {
           expect($v2).toHaveOpacity(1.0, 0.2)
         })
 
-
         it('cancels an existing transition on the new element by instantly jumping to the last frame', async function() {
           const $v1 = $fixture('.element').text('v1')
           const $v2 = $fixture('.element').text('v2')
@@ -498,7 +598,7 @@ describe('up.motion', function() {
 
           await wait()
 
-          up.motion.finish($old)
+          up.motion.finish($new)
 
           await wait()
 
@@ -507,31 +607,24 @@ describe('up.motion', function() {
         })
 
         it('emits an up:motion:finish event on the given animating element, so custom animation functions can react to the finish request', async function() {
-          const $element = $fixture('.element').text('element text')
+          const element = fixture('.element', { text: 'element text' })
+
+          up.animate(element, 'fade-in', { duration: 3000 })
+
           const listener = jasmine.createSpy('finish event listener')
-          $element.on('up:motion:finish', listener)
+          element.addEventListener('up:motion:finish', listener)
 
-          up.animate($element, 'fade-in')
-
-          await wait()
+          await wait(50)
 
           expect(listener).not.toHaveBeenCalled()
-          up.motion.finish()
+
+          up.motion.finish(element)
 
           await wait()
 
           expect(listener).toHaveBeenCalled()
         })
 
-        it('does not emit an up:motion:finish event if no element is animating', async function() {
-          const listener = jasmine.createSpy('finish event listener')
-          up.on('up:motion:finish', listener)
-          up.motion.finish()
-
-          await wait()
-
-          expect(listener).not.toHaveBeenCalled()
-        })
       })
 
 
@@ -695,6 +788,26 @@ describe('up.motion', function() {
         expect($v3).toHaveOpacity(0.0, 0.2)
       })
 
+      it("cancels an existing transition when the current transition doesn't animate", async function() {
+        const $v1 = $fixture('.element').text('v1')
+        const $v2 = $fixture('.element').text('v2')
+        const $v3 = $fixture('.element').text('v3')
+
+        up.morph($v1, $v2, 'cross-fade', { duration: 200 })
+
+        await wait()
+
+        expect($v1).toHaveOpacity(1.0, 0.2)
+        expect($v2).toHaveOpacity(0.0, 0.2)
+
+        up.morph($v2, $v3, 'none', { duration: 200 })
+
+        await wait()
+
+        expect($v2).toBeDetached()
+        expect($v3).toHaveOpacity(1.0)
+      })
+
       it('detaches the old element in the DOM', async function() {
         const $v1 = $fixture('.element').text('v1')
         const $v2 = $fixture('.element').text('v2')
@@ -762,20 +875,26 @@ describe('up.motion', function() {
           expect($new).toBeAttached()
         })
 
-        it('finishes animations only once', async function() {
-          const $old = $fixture('.old').text('old content')
-          const $new = $fixture('.new').text('new content').detach()
+        it('finishes animations only once per element', async function() {
+          const finishSpy = spyOn(up.MotionController.prototype, 'finish').and.callThrough()
+
+          const oldFixture = fixture('.old', { text: 'old content' })
+          const newFixture = up.element.createFromSelector('.new', { text: 'new content' }) // need detached element
 
           const transition = function(oldElement, newElement, options) {
             up.animate(oldElement, 'fade-out', options)
             up.animate(newElement, 'fade-in', options)
           }
 
-          up.morph($old, $new, transition, { duration: 200, easing: 'linear' })
+          up.morph(oldFixture, newFixture, transition, { duration: 200, easing: 'linear' })
 
           await wait()
 
-          expect(up.motion.finishCount()).toEqual(1)
+          expect(finishSpy.calls.count()).toEqual(2)
+          expect(finishSpy.calls.allArgs()).toEqual(jasmine.arrayWithExactContents([
+            [newFixture],
+            [oldFixture],
+          ]))
         })
 
       })
@@ -815,16 +934,23 @@ describe('up.motion', function() {
 
 
         it("finishes animations only once", async function() {
-          const $old = $fixture('.old').text('old content')
-          const $new = $fixture('.new').text('new content').detach()
+          const finishSpy = spyOn(up.MotionController.prototype, 'finish').and.callThrough()
+
+          const oldFixture = fixture('.old', { text: 'old content' })
+          const newFixture = up.element.createFromSelector('.new', { text: 'new content' })  // need detached element
 
           const transition = (oldElement, newElement, options) => up.morph(oldElement, newElement, 'cross-fade', options)
 
-          up.morph($old, $new, transition, { duration: 50, easing: 'linear' })
+          up.morph(oldFixture, newFixture, transition, { duration: 50, easing: 'linear' })
 
           await wait()
 
-          expect(up.motion.finishCount()).toEqual(1)
+          expect(finishSpy.calls.count()).toEqual(2)
+          expect(finishSpy.calls.allArgs()).toEqual(jasmine.arrayWithExactContents([
+            [newFixture],
+            [oldFixture],
+          ]))
+
         })
 
       })

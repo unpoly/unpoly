@@ -95,7 +95,8 @@ afterEach(async function() {
 
     const hadRequests = (jasmine.Ajax.requests.count() > 0)
     const hadLayers = (up.layer.count > 0)
-    const waitMore = hadRequests || hadLayers || AgentDetector.isFirefox() || AgentDetector.isSafari()
+    const hadDestroying = !!document.querySelector('.up-destroying')
+    const waitMore = hadRequests || hadLayers || hadDestroying || AgentDetector.isFirefox() || AgentDetector.isSafari()
 
     // Abort onAborted() handlers that observe a fragment
     up.fragment.abort(document.body, { reason: RESET_MESSAGE })

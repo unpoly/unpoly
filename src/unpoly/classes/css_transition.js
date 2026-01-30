@@ -1,13 +1,13 @@
 const u = up.util
 const e = up.element
 
+// TODO: Get rid of this class and all utility functions
 up.CSSTransition = class CSSTransition {
 
   constructor(element, lastFrame, options) {
     this._element = element
     this._lastFrame = lastFrame
     this._lastFrameKeys = Object.keys(this._lastFrame)
-    this._finishEvent = options.finishEvent
     this._duration = options.duration
     this._easing = options.easing
     this._finished = false
@@ -34,15 +34,7 @@ up.CSSTransition = class CSSTransition {
   }
 
   _listenToFinishEvent() {
-    if (this._finishEvent) {
-      this._stopListenToFinishEvent = up.on(this._element, this._finishEvent, this._onFinishEvent.bind(this))
-    }
-  }
-
-  _onFinishEvent(event) {
-    // don't waste time letting the event bubble up the DOM
-    event.stopPropagation()
-    this._finish()
+    this._stopListenToFinishEvent = up.on(this._element, 'up:motion:finish', this._finish.bind(this))
   }
 
   _startFallbackTimer() {

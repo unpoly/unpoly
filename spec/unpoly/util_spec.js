@@ -1683,7 +1683,7 @@ describe('up.util', () => {
       })
     })
 
-    describe('up.util.remove', function() {
+    describe('up.util.remove()', function() {
 
       it('removes the given string from the given array', function() {
         const array = ['a', 'b', 'c']
