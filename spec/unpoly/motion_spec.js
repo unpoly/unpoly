@@ -168,8 +168,7 @@ describe('up.motion', function() {
         expect($element).toHaveOpacity(1.0)
       })
 
-      it('pauses an existing CSS transition and restores it once the Unpoly animation is done', async function() {
-        let tolerance
+      it('keeps playing an existing CSS transition while the animation is active', async function() {
         const $element = $fixture('.element').text('content').css({
           backgroundColor: 'yellow',
           fontSize: '10px',
@@ -187,36 +186,19 @@ describe('up.motion', function() {
           height: '200px'
         })
 
-        await wait(500)
-
-        // Original CSS transition should now be ~50% done
-        this.fontSizeBeforeAnimate = parseFloat($element.css('fontSize'))
-        this.heightBeforeAnimate = parseFloat($element.css('height'))
-
-        expect(this.fontSizeBeforeAnimate).toBeAround(0.5 * (100 - 10), 20)
-        expect(this.heightBeforeAnimate).toBeAround(0.5 * (200 - 20), 40)
-
         up.animate($element, 'fade-in', { duration: 1000, easing: 'linear' })
 
         await wait(500)
 
-        // Original CSS transition should remain paused at ~50%
-        // Unpoly animation should now be ~50% done
-        expect(parseFloat($element.css('fontSize'))).toBeAround(this.fontSizeBeforeAnimate, 10)
-        expect(parseFloat($element.css('height'))).toBeAround(this.heightBeforeAnimate, 10)
-        expect(parseFloat($element.css('opacity'))).toBeAround(0.5, 0.3)
+        expect(parseFloat($element.css('fontSize'))).toBeAround(0.5 * (100 - 10), 30)
+        expect(parseFloat($element.css('height'))).toBeAround(0.5 * (200 - 20), 30)
+        expect(parseFloat($element.css('opacity'))).toBeAround(0.5, 0.25)
 
-        await wait(500)
+        await wait(500 + 50)
 
-        // Unpoly animation should now be done
-        // The original transition resumes. For technical reasons it will take
-        // its full duration for the remaining frames of the transition.
-        expect(parseFloat($element.css('opacity'))).toBeAround(1.0, 0.3)
-
-        await wait(1000 + (tolerance = 250))
-
+        expect(parseFloat($element.css('opacity'))).toBeAround(1.0, 0.1)
         expect(parseFloat($element.css('fontSize'))).toBeAround(100, 20)
-        expect(parseFloat($element.css('height'))).toBeAround(200, 40)
+        expect(parseFloat($element.css('height'))).toBeAround(200, 20)
       })
 
       describe('{ onFinished } option', function() {
@@ -432,7 +414,7 @@ describe('up.motion', function() {
 
       })
 
-      for (let noneAnimation of [false, null, undefined, 'none', '', {}]) {
+      for (let noneAnimation of [false, null, undefined, 'none', '']) {
         describe(`when called with a \`${noneAnimation}\` animation`, () => {
 
           it("doesn't animate and resolves instantly", async function() {

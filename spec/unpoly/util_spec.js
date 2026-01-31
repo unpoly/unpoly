@@ -2639,6 +2639,34 @@ describe('up.util', () => {
 
     })
 
+    describe('up.util.camelToKebabCase()', function() {
+
+      it('converts camelCase to kebab-case', function() {
+        expect(up.util.camelToKebabCase('fooBar')).toEqual('foo-bar')
+      })
+
+      it("doesn't change a string that is already in kebab-case", function() {
+        expect(up.util.camelToKebabCase('foo-bar')).toEqual('foo-bar')
+      })
+
+      it("doesn't change CSS custom property name", function() {
+        expect(up.util.camelToKebabCase('--foo-bar')).toEqual('--foo-bar')
+      })
+
+    })
+
+    describe('up.util.kebabToCamelCase()', function() {
+
+      it('converts camelCase to kebab-case', function() {
+        expect(up.util.kebabToCamelCase('foo-bar')).toEqual('fooBar')
+      })
+
+      it("doesn't change a string that is already in camel-case", function() {
+        expect(up.util.kebabToCamelCase('fooBar')).toEqual('fooBar')
+      })
+
+    })
+
 //    describe 'up.util.unprefixCamelCase', ->
 //
 //      it 'returns the given key without the given prefixed', ->

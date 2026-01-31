@@ -1920,6 +1920,10 @@ up.util = (function() {
     return str.replace(/[A-Z]/g, (char) => '-' + char.toLowerCase())
   }
 
+  function kebabToCamelCase(str) {
+    return str.replace(/-([a-z])/g, (_match, char) => char.toUpperCase())
+  }
+
   // function prefixCamelCase(str, prefix) {
   //   return prefix + upperCaseFirst(str)
   // }
@@ -2551,6 +2555,7 @@ up.util = (function() {
     // prefixCamelCase,
     // unprefixCamelCase,
     camelToKebabCase,
+    kebabToCamelCase,
     sprintf,
     withRenamedKeys,
     memoizeMethod,
