@@ -2893,20 +2893,39 @@ up.fragment = (function() {
 
   @function up.fragment.onAborted
   @param {Element} element
+    The element to observe with its ancestors.
   @param {Function(event)} callback
     The callback to run.
 
     It will be called with an `up:fragment:aborted` argument.
   @return {Function}
     A function that unsubscribes the callback.
+
+    When the element is destroyed, the callback will be unsubscribed automatically.
   @experimental
   */
   function onAborted(fragment, callback) {
-    return up.event.onAncestor(fragment, 'up:fragment:aborted', callback)
+    return up.event.onClosest(fragment, 'up:fragment:aborted', callback)
   }
 
+  /*-
+  Runs a callback when the given element *or its ancestors* were [kept](/preserving-elements).
+
+  @function up.fragment.onKept
+  @param {Element} element
+    The element to observe with its ancestors.
+  @param {Function(event)} callback
+    The callback to run.
+
+    It will be called with an `up:fragment:kept` argument.
+  @return {Function}
+    A function that unsubscribes the callback.
+
+    When the element is destroyed, the callback will be unsubscribed automatically.
+  @experimental
+  */
   function onKept(fragment, callback) {
-    return up.event.onAncestor(fragment, 'up:fragment:kept', callback)
+    return up.event.onClosest(fragment, 'up:fragment:kept', callback)
   }
 
   // This function lives in up.fragment (not up.element)

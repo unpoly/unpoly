@@ -175,7 +175,31 @@ up.event = (function() {
     return buildListenerGroup(args).bind()
   }
 
-  function onAncestor(fragment, eventType, callback) {
+  /*-
+  Runs a callback when the given event is observed on the given element *or its ancestors*.
+
+  ## Example
+
+  ```js
+  up.event.onClosest(element, 'click', function() {
+    // chip: Someone clicked on element or its ancestors
+  })
+  ```
+
+  @function up.event.onClosest
+  @param {Element} element
+    The element to observe with its ancestors.
+  @param {Function(event)} callback
+    The callback to run.
+
+    It will be called with the observed event.
+  @return {Function}
+    A function that unsubscribes the callback.
+
+    When the element is destroyed, the callback will be unsubscribed automatically.
+  @experimental
+  */
+  function onClosest(fragment, eventType, callback) {
     let guard = (event) => event.target.contains(fragment)
     let unsubscribe = up.on(eventType, { guard }, callback)
 
@@ -588,7 +612,7 @@ up.event = (function() {
 
   return {
     on,
-    onAncestor,
+    onClosest,
     off,
     build,
     emit,
