@@ -2187,13 +2187,13 @@ describe('up.link', function() {
           this.newGhost = document.querySelector('.target.new')
           expect(this.oldGhost).toBeAttached()
           expect(this.newGhost).toBeAttached()
-          expect(this.oldGhost).toHaveOpacity(1, 0.15)
-          expect(this.newGhost).toHaveOpacity(0, 0.15)
+          expect(this.oldGhost).toHaveOwnOpacity(1, 0.15)
+          expect(this.newGhost).toHaveOwnOpacity(0, 0.15)
 
           await wait(300)
 
-          expect(this.oldGhost).toHaveOpacity(0.5, 0.15)
-          expect(this.newGhost).toHaveOpacity(0.5, 0.15)
+          expect(this.oldGhost).toHaveOwnOpacity(0.5, 0.15)
+          expect(this.newGhost).toHaveOwnOpacity(0.5, 0.15)
         })
 
         it('does not crash when updating a main element (fix for issue #187)', async function() {
@@ -2210,8 +2210,8 @@ describe('up.link', function() {
           const newGhost = document.querySelector('main.target.new')
           expect(oldGhost).toBeAttached()
           expect(newGhost).toBeAttached()
-          expect(oldGhost).toHaveOpacity(0.5, 0.45)
-          expect(newGhost).toHaveOpacity(0.5, 0.45)
+          expect(oldGhost).toHaveOwnOpacity(0.5, 0.45)
+          expect(newGhost).toHaveOwnOpacity(0.5, 0.45)
 
           await wait(600)
 
@@ -2230,20 +2230,20 @@ describe('up.link', function() {
           await wait()
 
           expect('.target.old').toBeAttached()
-          expect('.target.old').toHaveOpacity(1, 0.15)
+          expect('.target.old').toHaveOwnOpacity(1, 0.15)
           expect('.target.old').toHaveText('text 1')
 
           expect('.target:not(.old)').toBeAttached()
-          expect('.target:not(.old)').toHaveOpacity(0, 0.15)
+          expect('.target:not(.old)').toHaveOwnOpacity(0, 0.15)
           expect('.target:not(.old)').toHaveText('text 2')
 
           up.render('.target', { content: 'text 3' })
           await wait(300)
 
-          expect('.target.old').toHaveOpacity(0.5, 0.15)
+          expect('.target.old').toHaveOwnOpacity(0.5, 0.15)
           expect('.target.old').toHaveText('text 1')
 
-          expect('.target:not(.old)').toHaveOpacity(0.5, 0.15)
+          expect('.target:not(.old)').toHaveOwnOpacity(0.5, 0.15)
           expect('.target:not(.old)').toHaveText('text 3')
         })
 

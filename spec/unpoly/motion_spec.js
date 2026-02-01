@@ -14,15 +14,15 @@ describe('up.motion', function() {
 
         await wait(1)
 
-        expect(element).toHaveOpacity(0.0, 0.15)
+        expect(element).toHaveOwnOpacity(0.0, 0.15)
 
         await wait(100)
 
-        expect(element).toHaveOpacity(0.5, 0.3)
+        expect(element).toHaveOwnOpacity(0.5, 0.3)
 
         await wait(260)
 
-        expect(element).toHaveOpacity(1.0, 0.15)
+        expect(element).toHaveOwnOpacity(1.0, 0.15)
       })
 
       describe('predefined animations', function() {
@@ -35,15 +35,15 @@ describe('up.motion', function() {
 
             await wait(1)
 
-            expect(element).toHaveOpacity(0.0, 0.15)
+            expect(element).toHaveOwnOpacity(0.0, 0.15)
 
             await wait(100)
 
-            expect(element).toHaveOpacity(0.5, 0.3)
+            expect(element).toHaveOwnOpacity(0.5, 0.3)
 
             await wait(260)
 
-            expect(element).toHaveOpacity(1.0, 0.15)
+            expect(element).toHaveOwnOpacity(1.0, 0.15)
           })
 
         })
@@ -56,15 +56,15 @@ describe('up.motion', function() {
 
             await wait(1)
 
-            expect(element).toHaveOpacity(1.0, 0.15)
+            expect(element).toHaveOwnOpacity(1.0, 0.15)
 
             await wait(100)
 
-            expect(element).toHaveOpacity(0.5, 0.3)
+            expect(element).toHaveOwnOpacity(0.5, 0.3)
 
             await wait(260)
 
-            expect(element).toHaveOpacity(0.0, 0.15)
+            expect(element).toHaveOwnOpacity(0.0, 0.15)
           })
 
           it("starts the animation at a semi-transparent element's current opacity", async function() {
@@ -73,15 +73,15 @@ describe('up.motion', function() {
 
             await wait(1)
 
-            expect(element).toHaveOpacity(0.5, 0.1)
+            expect(element).toHaveOwnOpacity(0.5, 0.1)
 
             await wait(100)
 
-            expect(element).toHaveOpacity(0.3, 0.15)
+            expect(element).toHaveOwnOpacity(0.3, 0.15)
 
             await wait(260)
 
-            expect(element).toHaveOpacity(0.0, 0.1)
+            expect(element).toHaveOwnOpacity(0.0, 0.1)
           })
 
         })
@@ -137,11 +137,11 @@ describe('up.motion', function() {
         await wait()
 
         expect($element.css('font-size')).toEqual('40px')
-        expect($element).toHaveOpacity(0.0, 0.15)
+        expect($element).toHaveOwnOpacity(0.0, 0.15)
 
         await wait(250)
 
-        expect($element).toHaveOpacity(1.0, 0.15)
+        expect($element).toHaveOwnOpacity(1.0, 0.15)
       })
 
       it('cancels an existing animation on the element by instantly jumping to the last frame (sync)', async function() {
@@ -151,11 +151,11 @@ describe('up.motion', function() {
         up.animate($element, 'fade-in', { duration: 200, easing: 'linear' })
 
         expect($element.css('font-size')).toEqual('40px')
-        expect($element).toHaveOpacity(0.0, 0.15)
+        expect($element).toHaveOwnOpacity(0.0, 0.15)
 
         await wait(250)
 
-        expect($element).toHaveOpacity(1.0, 0.15)
+        expect($element).toHaveOwnOpacity(1.0, 0.15)
       })
 
       it("cancels an existing animation when the current animation doesn't animate", async function() {
@@ -165,7 +165,7 @@ describe('up.motion', function() {
         up.animate($element, 'none', { duration: 200, easing: 'linear' })
 
         expect($element.css('font-size')).toEqual('40px')
-        expect($element).toHaveOpacity(1.0)
+        expect($element).toHaveOwnOpacity(1.0)
       })
 
       it('keeps playing an existing CSS transition while the animation is active', async function() {
@@ -211,12 +211,12 @@ describe('up.motion', function() {
 
           await wait(500)
 
-          expect(element).toHaveOpacity(0.5, 0.3)
+          expect(element).toHaveOwnOpacity(0.5, 0.3)
           expect(onFinished).not.toHaveBeenCalled()
 
           await wait(500 + 250)
 
-          expect(element).toHaveOpacity(1.0)
+          expect(element).toHaveOwnOpacity(1.0)
           expect(onFinished).toHaveBeenCalled()
         })
 
@@ -226,7 +226,7 @@ describe('up.motion', function() {
           let element = fixture('.element', { text: 'content' })
           up.animate(element, 'none', { duration: 1000, easing: 'linear', onFinished })
 
-          expect(element).toHaveOpacity(1.0)
+          expect(element).toHaveOwnOpacity(1.0)
           expect(onFinished).toHaveBeenCalled()
         })
 
@@ -257,7 +257,7 @@ describe('up.motion', function() {
 
           await wait(100)
 
-          expect(element).toHaveOpacity(0.5, 0.3)
+          expect(element).toHaveOwnOpacity(0.5, 0.3)
         })
 
         it('defaults to up.motion.config.duration if no { duration } is given', async function() {
@@ -269,7 +269,7 @@ describe('up.motion', function() {
 
           await wait(200)
 
-          expect(element).toHaveOpacity(0.5, 0.3)
+          expect(element).toHaveOwnOpacity(0.5, 0.3)
         })
 
         it('animates instantly with { duration: 0 }', async function() {
@@ -280,7 +280,7 @@ describe('up.motion', function() {
 
           await wait()
 
-          expect(element).toHaveOpacity(1.0)
+          expect(element).toHaveOwnOpacity(1.0)
         })
       })
 
@@ -309,15 +309,15 @@ describe('up.motion', function() {
 
           await wait(5)
 
-          expect($element).toHaveOpacity(0.0, 0.25)
+          expect($element).toHaveOwnOpacity(0.0, 0.25)
 
           await wait(1000)
 
-          expect($element).toHaveOpacity(0.5, 0.25)
+          expect($element).toHaveOwnOpacity(0.5, 0.25)
 
           await wait(1000)
 
-          expect($element).toHaveOpacity(1.0, 0.25)
+          expect($element).toHaveOwnOpacity(1.0, 0.25)
         })
 
         it("finishes animations only once", function(done) {
@@ -361,15 +361,15 @@ describe('up.motion', function() {
             const animatePromise = up.animate(container, animation, { duration: 1000, easing: 'linear' })
             await wait(500)
 
-            expect(child1).toHaveOpacity(0.5, 0.2)
-            expect(child2).toHaveOpacity(0.5, 0.2)
+            expect(child1).toHaveOwnOpacity(0.5, 0.2)
+            expect(child2).toHaveOwnOpacity(0.5, 0.2)
 
             await expectAsync(animatePromise).toBePending()
 
             await wait(600)
 
-            expect(child1).toHaveOpacity(1.0, 0.2)
-            expect(child1).toHaveOpacity(1.0, 0.2)
+            expect(child1).toHaveOwnOpacity(1.0, 0.2)
+            expect(child1).toHaveOwnOpacity(1.0, 0.2)
 
             await expectAsync(animatePromise).already.toBeResolved()
           })
@@ -396,16 +396,16 @@ describe('up.motion', function() {
             const animatePromise = up.animate(container, animation, { duration: 1000, easing: 'linear' })
             await wait(250)
 
-            expect(child1).toHaveOpacity(0.25, 0.2)
-            expect(child2).toHaveOpacity(0.25, 0.2)
+            expect(child1).toHaveOwnOpacity(0.25, 0.2)
+            expect(child2).toHaveOwnOpacity(0.25, 0.2)
 
             await expectAsync(animatePromise).toBePending()
 
             up.motion.finish(container)
             await wait(1)
 
-            expect(child1).toHaveOpacity(1.0, 0.2)
-            expect(child1).toHaveOpacity(1.0, 0.2)
+            expect(child1).toHaveOwnOpacity(1.0, 0.2)
+            expect(child1).toHaveOwnOpacity(1.0, 0.2)
 
             await expectAsync(animatePromise).already.toBeResolved()
           })
@@ -446,7 +446,7 @@ describe('up.motion', function() {
           await wait()
 
           expect(element).toHaveComputedStyle({ 'font-size': '40px' })
-          expect(element).toHaveOpacity(0.5, 0.01)  // Safari sometimes has rounding errors
+          expect(element).toHaveOwnOpacity(0.5, 0.01)  // Safari sometimes has rounding errors
         })
 
         it('accepts the element as a jQuery collection', async function() {
@@ -460,7 +460,7 @@ describe('up.motion', function() {
           await wait()
 
           expect($element.css('font-size')).toEqual('40px')
-          expect($element).toHaveOpacity(0.5, 0.01)  // Safari sometimes has rounding errors
+          expect($element).toHaveOwnOpacity(0.5, 0.01)  // Safari sometimes has rounding errors
         })
 
         it('cancels animations on children of the given element', async function() {
@@ -507,7 +507,7 @@ describe('up.motion', function() {
 
           await wait()
 
-          expect($element).toHaveOpacity(1)
+          expect($element).toHaveOwnOpacity(1)
           const currentTransitionProperty = $element.css('transition-property')
           expect(currentTransitionProperty).toEqual(oldTransitionProperty)
           expect(currentTransitionProperty).toContain('font-size')
@@ -522,15 +522,15 @@ describe('up.motion', function() {
 
           await wait()
 
-          expect($v1).toHaveOpacity(1.0, 0.2)
-          expect($v2).toHaveOpacity(0.0, 0.2)
+          expect($v1).toHaveOwnOpacity(1.0, 0.2)
+          expect($v2).toHaveOwnOpacity(0.0, 0.2)
 
           up.motion.finish($v1)
 
           await wait()
 
           expect($v1).toBeDetached()
-          expect($v2).toHaveOpacity(1.0, 0.2)
+          expect($v2).toHaveOwnOpacity(1.0, 0.2)
         })
 
         it('cancels an existing transition on the new element by instantly jumping to the last frame', async function() {
@@ -541,15 +541,15 @@ describe('up.motion', function() {
 
           await wait()
 
-          expect($v1).toHaveOpacity(1.0, 0.2)
-          expect($v2).toHaveOpacity(0.0, 0.2)
+          expect($v1).toHaveOwnOpacity(1.0, 0.2)
+          expect($v2).toHaveOwnOpacity(0.0, 0.2)
 
           up.motion.finish($v2)
 
           await wait()
 
           expect($v1).toBeDetached()
-          expect($v2).toHaveOpacity(1.0, 0.2)
+          expect($v2).toHaveOwnOpacity(1.0, 0.2)
         })
 
         it('cancels transitions on children of the given element', async function() {
@@ -561,15 +561,15 @@ describe('up.motion', function() {
 
           await wait()
 
-          expect($old).toHaveOpacity(1.0, 0.1)
-          expect($new).toHaveOpacity(0.0, 0.1)
+          expect($old).toHaveOwnOpacity(1.0, 0.1)
+          expect($new).toHaveOwnOpacity(0.0, 0.1)
 
           up.motion.finish($parent)
 
           await wait()
 
           expect($old).toBeDetached()
-          expect($new).toHaveOpacity(1.0)
+          expect($new).toHaveOwnOpacity(1.0)
         })
 
         it('does not leave <up-bounds> elements in the DOM', async function() {
@@ -621,8 +621,8 @@ describe('up.motion', function() {
 
           await wait()
 
-          expect($element1).toHaveOpacity(0.0, 0.1)
-          expect($element2).toHaveOpacity(0.0, 0.1)
+          expect($element1).toHaveOwnOpacity(0.0, 0.1)
+          expect($element2).toHaveOwnOpacity(0.0, 0.1)
 
           up.motion.finish()
 
@@ -630,8 +630,8 @@ describe('up.motion', function() {
 
           $element1 = $('.element1')
           $element2 = $('.element2')
-          expect($element1).toHaveOpacity(1.0)
-          expect($element2).toHaveOpacity(1.0)
+          expect($element1).toHaveOwnOpacity(1.0)
+          expect($element2).toHaveOwnOpacity(1.0)
         })
 
       })
@@ -653,17 +653,17 @@ describe('up.motion', function() {
         expect($old[0].getBoundingClientRect()).toEqual(oldDims)
         expect($new[0].getBoundingClientRect()).toEqual(oldDims)
 
-        expect($old).toHaveOpacity(1.0, 0.25)
-        expect($new).toHaveOpacity(0.0, 0.25)
+        expect($old).toHaveOwnOpacity(1.0, 0.25)
+        expect($new).toHaveOwnOpacity(0.0, 0.25)
 
         await wait(100)
 
-        expect($old).toHaveOpacity(0.5, 0.25)
-        expect($new).toHaveOpacity(0.5, 0.25)
+        expect($old).toHaveOwnOpacity(0.5, 0.25)
+        expect($new).toHaveOwnOpacity(0.5, 0.25)
 
         await wait(100 + (tolerance = 110))
 
-        expect($new).toHaveOpacity(1.0, 0.25)
+        expect($new).toHaveOwnOpacity(1.0, 0.25)
         expect($old).toBeDetached()
       })
 
@@ -684,17 +684,17 @@ describe('up.motion', function() {
         expect($old[0].getBoundingClientRect()).toEqual(oldDims)
         expect($new[0].getBoundingClientRect()).toEqual(oldDims)
 
-        expect($old).toHaveOpacity(1.0, 0.25)
-        expect($new).toHaveOpacity(0.0, 0.25)
+        expect($old).toHaveOwnOpacity(1.0, 0.25)
+        expect($new).toHaveOwnOpacity(0.0, 0.25)
 
         await wait(200)
 
-        expect($old).toHaveOpacity(0.5, 0.25)
-        expect($new).toHaveOpacity(0.5, 0.25)
+        expect($old).toHaveOwnOpacity(0.5, 0.25)
+        expect($new).toHaveOwnOpacity(0.5, 0.25)
 
         await wait(200 + (tolerance = 110))
 
-        expect($new).toHaveOpacity(1.0, 0.25)
+        expect($new).toHaveOwnOpacity(1.0, 0.25)
         expect($old).toBeDetached()
       })
 
@@ -758,16 +758,16 @@ describe('up.motion', function() {
 
         await wait()
 
-        expect($v1).toHaveOpacity(1.0, 0.2)
-        expect($v2).toHaveOpacity(0.0, 0.2)
+        expect($v1).toHaveOwnOpacity(1.0, 0.2)
+        expect($v2).toHaveOwnOpacity(0.0, 0.2)
 
         up.morph($v2, $v3, 'cross-fade', { duration: 200 })
 
         await wait()
 
         expect($v1).toBeDetached()
-        expect($v2).toHaveOpacity(1.0, 0.2)
-        expect($v3).toHaveOpacity(0.0, 0.2)
+        expect($v2).toHaveOwnOpacity(1.0, 0.2)
+        expect($v3).toHaveOwnOpacity(0.0, 0.2)
       })
 
       it("cancels an existing transition when the current transition doesn't animate", async function() {
@@ -779,15 +779,15 @@ describe('up.motion', function() {
 
         await wait()
 
-        expect($v1).toHaveOpacity(1.0, 0.2)
-        expect($v2).toHaveOpacity(0.0, 0.2)
+        expect($v1).toHaveOwnOpacity(1.0, 0.2)
+        expect($v2).toHaveOwnOpacity(0.0, 0.2)
 
         up.morph($v2, $v3, 'none', { duration: 200 })
 
         await wait()
 
         expect($v2).toBeDetached()
-        expect($v3).toHaveOpacity(1.0)
+        expect($v3).toHaveOwnOpacity(1.0)
       })
 
       it('detaches the old element in the DOM', async function() {
@@ -842,17 +842,17 @@ describe('up.motion', function() {
           expect($old[0].getBoundingClientRect()).toEqual(oldDims)
           expect($new[0].getBoundingClientRect()).toEqual(oldDims)
 
-          expect($old).toHaveOpacity(1.0, 0.25)
-          expect($new).toHaveOpacity(0.0, 0.25)
+          expect($old).toHaveOwnOpacity(1.0, 0.25)
+          expect($new).toHaveOwnOpacity(0.0, 0.25)
 
           await wait(100)
 
-          expect($old).toHaveOpacity(0.5, 0.25)
-          expect($new).toHaveOpacity(0.5, 0.25)
+          expect($old).toHaveOwnOpacity(0.5, 0.25)
+          expect($new).toHaveOwnOpacity(0.5, 0.25)
 
           await wait(100 + (tolerance = 110))
 
-          expect($new).toHaveOpacity(1.0, 0.1)
+          expect($new).toHaveOwnOpacity(1.0, 0.1)
           expect($old).toBeDetached()
           expect($new).toBeAttached()
         })
@@ -899,17 +899,17 @@ describe('up.motion', function() {
           expect($old[0].getBoundingClientRect()).toEqual(oldDims)
           expect($new[0].getBoundingClientRect()).toEqual(oldDims)
 
-          expect($old).toHaveOpacity(1.0, 0.25)
-          expect($new).toHaveOpacity(0.0, 0.25)
+          expect($old).toHaveOwnOpacity(1.0, 0.25)
+          expect($new).toHaveOwnOpacity(0.0, 0.25)
 
           await wait(200)
 
-          expect($old).toHaveOpacity(0.5, 0.25)
-          expect($new).toHaveOpacity(0.5, 0.25)
+          expect($old).toHaveOwnOpacity(0.5, 0.25)
+          expect($new).toHaveOwnOpacity(0.5, 0.25)
 
           await wait(200 + (tolerance = 110))
 
-          expect($new).toHaveOpacity(1.0, 0.25)
+          expect($new).toHaveOwnOpacity(1.0, 0.25)
           expect($old).toBeDetached()
           expect($new).toBeAttached()
         })
@@ -953,7 +953,7 @@ describe('up.motion', function() {
 
           expect($old).toBeDetached()
           expect($new).toBeAttached()
-          expect($new).toHaveOpacity(1.0)
+          expect($new).toHaveOwnOpacity(1.0)
         })
       })
 
@@ -969,7 +969,7 @@ describe('up.motion', function() {
 
             expect($old).toBeDetached()
             expect($new).toBeAttached()
-            expect($new).toHaveOpacity(1.0)
+            expect($new).toHaveOwnOpacity(1.0)
           })
 
           it('returns a fulfilled promise', async function() {

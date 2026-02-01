@@ -727,12 +727,12 @@ describe('up.radio', function() {
 
           // Target is morphing
           expect(document.querySelectorAll('.target').length).toBe(2)
-          expect('.target.old').toHaveOpacity(0.5, 0.35)
-          expect('.target.new').toHaveOpacity(0.5, 0.35)
+          expect('.target.old').toHaveOwnOpacity(0.5, 0.35)
+          expect('.target.new').toHaveOwnOpacity(0.5, 0.35)
 
           // Hungry is not morphing
           expect(document.querySelectorAll('.hungry').length).toBe(1)
-          expect('.hungry').toHaveOpacity(1.0)
+          expect('.hungry').toHaveOwnOpacity(1.0)
         })
 
         describe('with [up-transition]', function() {
@@ -750,12 +750,12 @@ describe('up.radio', function() {
 
             // Hungry is morphing
             expect(document.querySelectorAll('#hungry').length).toBe(2)
-            expect('#hungry.old').toHaveOpacity(0.5, 0.35)
-            expect('#hungry.new').toHaveOpacity(0.5, 0.35)
+            expect('#hungry.old').toHaveOwnOpacity(0.5, 0.35)
+            expect('#hungry.new').toHaveOwnOpacity(0.5, 0.35)
 
             // Target is not morphing
             expect(document.querySelectorAll('#target').length).toBe(1)
-            expect('#target').toHaveOpacity(1.0)
+            expect('#target').toHaveOwnOpacity(1.0)
           })
 
           it('delays the fulfillment of the up.render().finished promise', async function() {

@@ -52,7 +52,7 @@ function doCompare({ elementOrTarget, expectedOpacity, tolerance = 0.0, property
 
 beforeEach(function() {
   jasmine.addMatchers({
-    toHaveOpacity(util, customEqualityTesters) {
+    toHaveOwnOpacity(util, customEqualityTesters) {
       return {
         compare(elementOrTarget, expectedOpacity, tolerance = 0.0) {
           return doCompare({

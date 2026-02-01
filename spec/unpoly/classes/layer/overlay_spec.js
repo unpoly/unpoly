@@ -447,7 +447,7 @@ describe('up.Layer.Overlay', function() {
       await wait(300)
 
       expect(document).toHaveSelector('up-modal')
-      expect('up-modal-box').toHaveOpacity(0.5, 0.4)
+      expect('up-modal-box').toHaveOwnOpacity(0.5, 0.4)
 
       await wait(600)
       expect(document).not.toHaveSelector('up-modal')
@@ -465,7 +465,7 @@ describe('up.Layer.Overlay', function() {
       await wait(300)
 
       expect(document).toHaveSelector('up-modal')
-      expect('up-modal-box').toHaveOpacity(0.5, 0.4)
+      expect('up-modal-box').toHaveOwnOpacity(0.5, 0.4)
 
       await wait(600)
       expect(document).not.toHaveSelector('up-modal')

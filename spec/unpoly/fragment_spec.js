@@ -7379,15 +7379,15 @@ describe('up.fragment', function() {
           let oldElement = document.querySelector('.element.v1')
           let newElement = document.querySelector('.element.v2')
 
-          expect(oldElement).toHaveOpacity(1.0, 0.15)
-          expect(newElement).toHaveOpacity(0.0, 0.15)
+          expect(oldElement).toHaveOwnOpacity(1.0, 0.15)
+          expect(newElement).toHaveOwnOpacity(0.0, 0.15)
           await wait(100)
 
-          expect(oldElement).toHaveOpacity(0.5, 0.3)
-          expect(newElement).toHaveOpacity(0.5, 0.3)
+          expect(oldElement).toHaveOwnOpacity(0.5, 0.3)
+          expect(newElement).toHaveOwnOpacity(0.5, 0.3)
           await wait(170)
 
-          expect(newElement).toHaveOpacity(1.0, 0.1)
+          expect(newElement).toHaveOwnOpacity(1.0, 0.1)
           expect(oldElement).toBeDetached()
         })
 
@@ -7449,7 +7449,7 @@ describe('up.fragment', function() {
           // See that we've already immediately swapped the element and ignored the duration of 200ms
           expect(renderDone).toHaveBeenCalled()
           expect($('fake-body').length).toEqual(1)
-          expect('fake-body').toHaveOpacity(1.0)
+          expect('fake-body').toHaveOwnOpacity(1.0)
         })
 
         it('marks the old fragment as .up-destroying during the transition', async function() {
@@ -7652,9 +7652,9 @@ describe('up.fragment', function() {
           const newFocused = document.querySelector('.focused[data-version="new"]')
 
           expect(oldFocused).toBeAttached()
-          expect(oldFocused).toHaveOpacity(0.5, 0.4)
+          expect(oldFocused).toHaveOwnOpacity(0.5, 0.4)
           expect(newFocused).toBeAttached()
-          expect(newFocused).toHaveOpacity(0.5, 0.4)
+          expect(newFocused).toHaveOwnOpacity(0.5, 0.4)
 
           oldFocused.focus()
           expect(oldFocused).not.toBeFocused()
@@ -7663,7 +7663,7 @@ describe('up.fragment', function() {
 
           expect(oldFocused).toBeDetached()
           expect(newFocused).toBeAttached()
-          expect(newFocused).toHaveOpacity(1.0, 0.2)
+          expect(newFocused).toHaveOwnOpacity(1.0, 0.2)
         })
 
         it('resolves the returned promise as soon as both elements are in the DOM and the transition has started', function(done) {
@@ -10911,16 +10911,16 @@ describe('up.fragment', function() {
             const newFocused = document.querySelector('.focused[data-version="new"]')
 
             expect(oldFocused).toBeAttached()
-            expect(oldFocused).toHaveOpacity(0.5, 0.4)
+            expect(oldFocused).toHaveOwnOpacity(0.5, 0.4)
             expect(newFocused).toBeAttached()
-            expect(newFocused).toHaveOpacity(0.5, 0.4)
+            expect(newFocused).toHaveOwnOpacity(0.5, 0.4)
             expect(newFocused).toBeFocused()
 
             await wait(800)
 
             expect(oldFocused).toBeDetached()
             expect(newFocused).toBeAttached()
-            expect(newFocused).toHaveOpacity(1.0, 0.2)
+            expect(newFocused).toHaveOwnOpacity(1.0, 0.2)
             expect(newFocused).toBeFocused()
           })
 
@@ -12675,12 +12675,12 @@ describe('up.fragment', function() {
             await wait()
 
             expect('.target').toHaveText('cached text')
-            expect('.target:not(.up-destroying)').toHaveOpacity(0, 0.15)
+            expect('.target:not(.up-destroying)').toHaveOwnOpacity(0, 0.15)
             expect(up.network.isBusy()).toBe(false)
 
             await wait(300)
 
-            expect('.target:not(.up-destroying)').toHaveOpacity(1)
+            expect('.target:not(.up-destroying)').toHaveOwnOpacity(1)
             expect(up.network.isBusy()).toBe(true)
 
             jasmine.respondWithSelector('.target', { text: 'verified text' })
@@ -13359,10 +13359,10 @@ describe('up.fragment', function() {
         up.destroy($element, { animation: 'fade-out', duration: 200, easing: 'linear' })
         await wait()
 
-        expect($element).toHaveOpacity(1.0, 0.15)
+        expect($element).toHaveOwnOpacity(1.0, 0.15)
         await wait(100)
 
-        expect($element).toHaveOpacity(0.5, 0.3)
+        expect($element).toHaveOwnOpacity(0.5, 0.3)
         await wait(175)
 
         expect($element).toBeDetached()

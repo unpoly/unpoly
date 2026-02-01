@@ -468,10 +468,10 @@ describe('up.layer', function() {
           await wait(300)
 
           expect(document).toHaveSelector('up-modal')
-          expect('up-modal-box').toHaveOpacity(0.5, 0.4)
+          expect('up-modal-box').toHaveOwnOpacity(0.5, 0.4)
 
           await wait(500)
-          expect('up-modal-box').toHaveOpacity(1.0)
+          expect('up-modal-box').toHaveOwnOpacity(1.0)
         })
 
         it('uses a different animation with { animation } option', async function() {
