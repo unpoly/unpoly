@@ -421,11 +421,11 @@ up.link = (function() {
     parser.json('dataMap', { attr: 'up-use-data-map' }) // could be [up-data-map], but be consistent with [up-use-data]
 
     // Lifecycle options
-    parser.callback('onLoaded')
-    parser.callback('onRendered', { mainKey: 'result' })
-    parser.callback('onFinished', { mainKey: 'result' })
-    parser.callback('onOffline', { mainKey: 'error' }) // not a request option!
-    parser.callback('onError', { mainKey: 'error' }) // not a request option!
+    parser.renderCallback('onLoaded')
+    parser.renderCallback('onRendered')
+    parser.renderCallback('onFinished')
+    parser.renderCallback('onOffline') // not a request option!
+    parser.renderCallback('onError') // not a request option!
 
     // Layer options
     parser.booleanOrString('peel')
@@ -438,9 +438,9 @@ up.link = (function() {
     parser.string('class')
     parser.string('size')
     parser.booleanOrString('dismissable')
-    parser.parse(up.layer.openCallbackAttr, 'onOpened')
-    parser.parse(up.layer.closeCallbackAttr, 'onAccepted')
-    parser.parse(up.layer.closeCallbackAttr, 'onDismissed')
+    parser.renderCallback('onOpened')
+    parser.renderCallback('onAccepted')
+    parser.renderCallback('onDismissed')
     parser.string('acceptEvent')
     parser.string('dismissEvent')
     parser.string('acceptFragment')

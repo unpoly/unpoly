@@ -18,14 +18,17 @@ describe('up.NonceableCallback', function() {
 
   })
 
-  describe('#toFunction()', function() {
+  describe('#unsafeEval()', function() {
 
-    it('builds a callable function', function() {
+    it('runs the callback with the given argNames and argValues', function() {
       let callback = up.NonceableCallback.fromString('return a + b')
 
       let callFnWithArgs = () => {
-        let fn = callback.toFunction('a', 'b')
-        return fn(2, 3)
+        let evalEnv = {
+          argNames: ['a', 'b'],
+          argValues: [2, 3],
+        }
+        return callback.unsafeEval(evalEnv)
       }
 
       if (specs.config.csp === 'none') {
@@ -35,32 +38,38 @@ describe('up.NonceableCallback', function() {
       }
     })
 
-    it('evals a function with an embedded nonce', function() {
-      let callback = up.NonceableCallback.fromString('nonce-specs-nonce return a + b')
-      let fn = callback.toFunction('a', 'b')
-      expect(fn(2, 3)).toBe(5)
+    it('runs the callback with the given thisContext', function() {
+      let callback = up.NonceableCallback.fromString('return this.length + a')
+
+      let callFnWithArgs = () => {
+        let evalEnv = {
+          thisContext: new String('hello'),
+          argNames: ['a'],
+          argValues: [2],
+        }
+        return callback.unsafeEval(evalEnv)
+      }
+
+      if (specs.config.csp === 'none') {
+        expect(callFnWithArgs()).toBe(7)
+      } else {
+        expect(callFnWithArgs).toThrowError(EvalError)
+      }
     })
 
-    it('evals a function using a <script nonce> element', function() {
-      spyOn(up.element, 'affix').and.callThrough()
+    it('runs a function with an embedded nonce', function() {
       let callback = up.NonceableCallback.fromString('nonce-specs-nonce return a + b')
-      let fn = callback.toFunction('a', 'b')
-      fn()
-      expect(up.element.affix).toHaveBeenCalledWith(document.body, 'script', jasmine.objectContaining({ nonce: 'specs-nonce' }))
+      let result = callback.unsafeEval({
+        argNames: ['a', 'b'],
+        argValues: [2, 3],
+      })
+      expect(result).toBe(5)
     })
 
     it('re-throws errors thrown by the callback script', function() {
       let callback = up.NonceableCallback.fromString('nonce-specs-nonce throw "error message"')
-      let fn = callback.toFunction()
-      expect(fn).toThrow('error message')
-    })
-
-    it('returns a function that can be re-bound to another `this`', function() {
-      let callback = up.NonceableCallback.fromString('nonce-specs-nonce return this')
-      let fn = callback.toFunction()
-      let newThis = new String('hi world')
-      let value = fn.apply(newThis)
-      expect(value).toBe(newThis)
+      let doEval = () => callback.unsafeEval({ argNames: [], argValues: []})
+      expect(doEval).toThrow('error message')
     })
 
   })

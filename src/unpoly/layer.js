@@ -1,7 +1,6 @@
 require('./layer.sass')
 
 const u = up.util
-const e = up.element
 
 /*-
 Layers
@@ -383,14 +382,6 @@ up.layer = (function() {
     }
 
     return new Class(options)
-  }
-
-  function openCallbackAttr(link, attr) {
-    return e.callbackAttr(link, attr, { exposedKeys: ['layer'] })
-  }
-
-  function closeCallbackAttr(link, attr) {
-    return e.callbackAttr(link, attr, { exposedKeys: ['layer', 'value', 'response'] })
   }
 
   function reset() {
@@ -1227,8 +1218,6 @@ up.layer = (function() {
     build,
     ask,
     normalizeOptions,
-    openCallbackAttr,
-    closeCallbackAttr,
     anySelector,
     optionToString,
     get stack() { return stack.layers },

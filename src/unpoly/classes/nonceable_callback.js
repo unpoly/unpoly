@@ -8,34 +8,15 @@ up.NonceableCallback = class NonceableCallback {
   }
 
   static fromString(string) {
-    let match = string.match(/^(nonce-([^\s]+)\s)?(.*)$/)
+    let match = string.match(/^(nonce-(\S+)\s)?(.*)$/)
     return new this(match[3], match[2])
   }
 
-  /*-
-  Replacement for `new Function()` that can take a nonce to work with a strict Content Security Policy.
-
-  It also prints an error when a strict CSP is active, but user supplies no nonce.
-
-  ### Examples
-
-  ```js
-  new up.NonceableCallback('1 + 2', 'secret').toFunction()
-  ```
-
-  @function up.NonceableCallback#toFunction
-  @internal
-  */
-  toFunction(...argNames) {
-    let script = this.script
+  unsafeEval(evalEnv) {
     if (this.nonce) {
-      // Don't return a bound function so callers can re-bind to a different this.
-      let callbackThis = this
-      return function(...args) {
-        return callbackThis._runAsNoncedFunction(script, this, argNames, args)
-      }
+      return this._runAsScriptElement(evalEnv)
     } else {
-      return new Function(...argNames, script)
+      return this._runAsFunction(evalEnv)
     }
   }
 
@@ -43,12 +24,19 @@ up.NonceableCallback = class NonceableCallback {
     return `nonce-${this.nonce} ${this.script}`
   }
 
-  _runAsNoncedFunction(script, thisArg, argNames, args) {
+  _runAsFunction({ argNames, argValues, thisContext }) {
+    let fn = new Function(...argNames, this.script)
+    return fn.apply(thisContext, argValues)
+  }
+
+  _runAsScriptElement(evalEnv) {
+    // A strict CSP will block use of `eval()` or `new Function()`.
+    // What we can do instead is insert an inline script that is allowed per a [nonce] attr.
     let wrappedScript = `
       try {
-        up.noncedEval.value = (function(${argNames.join()}) {
-          ${script}
-        }).apply(up.noncedEval.thisArg, up.noncedEval.args)
+        up.noncedEval.value = (function(${evalEnv.argNames.join()}) {
+          ${this.script}
+        }).apply(up.noncedEval.thisContext, up.noncedEval.argValues)
       } catch (error) {
         up.noncedEval.error = error
       }
@@ -56,7 +44,7 @@ up.NonceableCallback = class NonceableCallback {
 
     let scriptElement
     try {
-      up.noncedEval = { args, thisArg: thisArg }
+      up.noncedEval = { ...evalEnv }
       scriptElement = e.affix(document.body, 'script', { nonce: this.nonce, text: wrappedScript })
       if (up.noncedEval.error) {
         throw up.noncedEval.error
@@ -65,9 +53,7 @@ up.NonceableCallback = class NonceableCallback {
       }
     } finally {
       up.noncedEval = undefined
-      if (scriptElement) {
-        scriptElement.remove()
-      }
+      scriptElement?.remove()
     }
   }
 

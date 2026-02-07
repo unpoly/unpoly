@@ -56,19 +56,25 @@ up.OptionsParser = class OptionsParser {
     this.parse(e.jsonAttr, key, keyOptions)
   }
 
-  callback(key, keyOptions = {}) {
-    let parser = (link, attr) => e.callbackAttr(link, attr, keyOptions)
-    this.parse(parser, key, keyOptions)
+  // // Currently not needed anywhere
+  // callback(key, keyOptions = {}) {
+  //   let attrReader = (link, attr) => e.callbackAttr(link, attr, keyOptions)
+  //   this.parse(attrReader, key, keyOptions)
+  // }
+
+  renderCallback(key, keyOptions = {}) {
+    let attrReader = (link, attr) => up.RenderOptions.callbackAttr(link, attr, key)
+    this.parse(attrReader, key, keyOptions)
   }
 
-  parse(attrValueFn, key, keyOptions = {}) {
+  parse(attrReader, key, keyOptions = {}) {
     const attrNames = u.wrapList(keyOptions.attr ?? this._attrNameForKey(key))
 
     // Below we will only set @options[key] = value if value is defined.
     let value = this._options[key]
 
     for (let attrName of attrNames) {
-      value ??= this._parseFromAttr(attrValueFn, this._element, attrName)
+      value ??= this._parseFromAttr(attrReader, this._element, attrName)
     }
 
     if (this._defaults !== false) {
@@ -87,7 +93,7 @@ up.OptionsParser = class OptionsParser {
     let failKey
     if (this._fail && (failKey = up.fragment.failKey(key))) {
       const failAttrNames = u.compact(u.map(attrNames, (attrName) => this._deriveFailAttrName(attrName)))
-      this.parse(attrValueFn, failKey, { ... keyOptions, attr: failAttrNames })
+      this.parse(attrReader, failKey, { ... keyOptions, attr: failAttrNames })
     }
   }
 

@@ -175,6 +175,12 @@ up.Change.FromResponse = class FromResponse extends up.Change {
 
     let openLayerOptions = this._response.openLayer
     if (openLayerOptions) {
+      // For callback strings like { onAccepted } we need to
+      // (1) check up.script.config.allow and possibly block
+      // (2) adopt any prefixed nonces
+      // (3) parse the string into a function
+      up.script.adoptRenderOptionsFromHeader(openLayerOptions, this._response.cspInfo)
+
       Object.assign(renderOptions, {
         ...up.Layer.Overlay.UNSET_VISUALS,     // When we're already opening an overlay, don't adopt its visuals.
         target: undefined,                     // The original target may no longer be appropriate, even if it exists in the response.
@@ -182,8 +188,6 @@ up.Change.FromResponse = class FromResponse extends up.Change {
         ...openLayerOptions,                   // Anything explicitly passed as the value of `X-Up-Open-Layer`.
         layer: 'new',                          // Don't accept `X-Up-Open-Layer: { layer: 'parent' }`.
       })
-
-      Object.assign(renderOptions, openLayerOptions)
     }
 
     renderOptions.location = up.history.refineOption(renderOptions.location, serverLocation)

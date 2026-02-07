@@ -47,58 +47,11 @@ describe('up.protocol', function() {
     })
   })
 
-  describe('up.protocol.headerize', function() {
+  describe('up.protocol.headerize()', function() {
     it('turns a camelized identifier into an X-Up-Foo-Bar style header name', function() {
       const header = up.protocol.headerize('fooBar')
       expect(header).toEqual('X-Up-Foo-Bar')
     })
   })
 
-  describe('up.protocol.cspInfoFromHeader()', function() {
-
-    it('returns the CSP nonces for script-src', function() {
-      const info = up.protocol.cspInfoFromHeader("script-src 'nonce-secret2' 'self' 'nonce-secret3'")
-      expect(info).toEqual({
-        nonces: ['secret2', 'secret3'],
-        declaration: "script-src 'nonce-secret2' 'self' 'nonce-secret3'",
-      })
-    })
-
-    it('returns the CSP nonces for default-src if no script-src is set', function() {
-      const info = up.protocol.cspInfoFromHeader("default-src 'nonce-secret2' 'self' 'nonce-secret3'")
-      expect(info).toEqual({
-        nonces: ['secret2', 'secret3'],
-        declaration: "default-src 'nonce-secret2' 'self' 'nonce-secret3'",
-      })
-    })
-
-    it('ignores CSP nonces for default-src if script-src is set', function() {
-      const info = up.protocol.cspInfoFromHeader("default-src 'nonce-secret1'; script-src 'nonce-secret2' 'self' 'nonce-secret3'")
-      expect(info).toEqual({
-        nonces: ['secret2', 'secret3'],
-        declaration: "script-src 'nonce-secret2' 'self' 'nonce-secret3'",
-      })
-    })
-
-    it('returns an empty object if the header has neither default-src nor script-src directive', function() {
-      const info = up.protocol.cspInfoFromHeader("image-src 'nonce-secret2'")
-      expect(info).toEqual({})
-    })
-
-    it('does not parse a script-src-elem declaration, because we also validate attribute callbacks', function() {
-      const info = up.protocol.cspInfoFromHeader("script-src-elem: 'nonce-secret2' 'self' 'nonce-secret3'")
-      expect(info).toEqual({})
-    })
-
-    it('does not parse a style-src declaration', function() {
-      const info = up.protocol.cspInfoFromHeader("style-src 'nonce-secret'")
-      expect(info).toEqual({})
-    })
-
-    it('returns an empty object if the header is missing', function() {
-      const info = up.protocol.cspInfoFromHeader(null)
-      expect(info).toEqual({})
-    })
-
-  })
 })

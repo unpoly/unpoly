@@ -15,7 +15,8 @@ up.ResponseDoc = class ResponseDoc {
     }
 
     // This is the parsed script-src declaration from the response
-    this._cspInfo = cspInfo || {}
+    this._cspInfo = cspInfo
+    up.script.warnOfUnsafeCSP(cspInfo)
 
     if (origin) {
       let originSelector = up.fragment.tryToTarget(origin)
@@ -125,10 +126,17 @@ up.ResponseDoc = class ResponseDoc {
   get assets() {
     return this._fromHead((head) => {
       let assets = up.script.findAssets(head)
+
+      // Need to use up.util.map() for a NodeList, which does not support #map()
       return u.map(assets, (asset) => {
-        this._adoptNoncesInSubtree(asset)
-        let clone = this._reviveElementAsClone(asset)
-        return clone
+        // (A) Assets might contain elements that need to be re-created in the current document context.
+        // (B) Returns copies so multiple calls to #assets return the same array, even if some assets where inserted.
+        asset = e.revivedClone(asset)
+
+        // Rewrite [nonce] attributes so we don't see up:assets:changed with every request.
+        up.script.adoptDetachedHeadAsset(asset, this._cspInfo)
+
+        return asset
       })
     })
   }
@@ -209,34 +217,23 @@ up.ResponseDoc = class ResponseDoc {
     }
   }
 
-  _disableScriptsInSubtree(element) {
-    // Retrieve the page nonce once for multiple checks.
-    let pageNonce = up.protocol.cspNonce()
+  commitElement(element) {
+    // If multiple steps want to match the name new element, only he first will succeed.
+    // This will happen when multiple layers have the same hungry element with [up-if-layer=any].
+    if (this._document.contains(element)) {
+      // (A) If the user doesn't want to run scripts in the new fragment, we block all <script> elements.
+      //     We cannot wait until finalizeElement(), because then the script has already been inserted and has executed.
+      // (B) For the remaining scripts we verify and adopt CSP nonces so they can be executed in the current page.
+      up.script.adoptNewFragment(element, this._cspInfo)
 
-    // While <script> elements parsed by `DOMParser` are inert anyway, we also parse HTML through
-    // other methods, which do create non-inert <script> elements.
-    up.script.disableSubtree(element, (script) => !this._isScriptAllowed(script, pageNonce))
-  }
+      // Ensure that the element cannot be matched for subsequent selects().
+      element.remove()
 
-  _isScriptAllowed(scriptElement, pageNonce) {
-    let strategy = up.fragment.config.runScripts
-    // When the strategy is a constant `true` and also using strict-dynamic,
-    // we enforce a correct nonce. Otherwise we would allow all scripts (as strict-dynamic is viral,
-    // and Unpoly is already an allowed script).
-    if (strategy === true && this._cspInfo.declaration?.includes("'strict-dynamic'")) {
-      return pageNonce && (pageNonce === scriptElement.nonce)
-    } else {
-      // If the strategy is a function or not using strict-dynamic, we allow anything
-      // for which runScripts evals to true. Will be subject to the browser's CSP afterwards.
-      return u.evalOption(strategy, scriptElement)
+      return true
     }
   }
 
-  _reviveElementAsClone(element) {
-    return e.revivedClone(element)
-  }
-
-  _reviveSubtreeInPlace(element) {
+  finalizeElement(element) {
     // If we plucked elements from a Document we assume that document was created by DOMParser,
     // which operates in a different context and creates inert elements:
     //
@@ -248,38 +245,10 @@ up.ResponseDoc = class ResponseDoc {
     if (this._document instanceof Document) {
       for (let brokenElement of e.subtree(element, ':is(noscript, script, audio, video):not(.up-keeping, .up-keeping *)')) {
         // throw "why does this not re-execute a <script> tag? wouldn't it be safer to disable all scripts, then revive some of them?"
-        let clone = this._reviveElementAsClone(brokenElement)
+        let clone = e.revivedClone(brokenElement)
         brokenElement.replaceWith(clone)
       }
     }
-  }
-
-  _adoptNoncesInSubtree(element) {
-    // Rewrite per-request CSP nonces to match that of the current page.
-    up.script.adoptNoncesInSubtree(element, this._cspInfo.nonces)
-  }
-
-  commitElement(element) {
-    // If multiple steps want to match the name new element, only he first will succeed.
-    // This will happen when multiple layers have the same hungry element with [up-if-layer=any].
-    if (this._document.contains(element)) {
-      this._adoptNoncesInSubtree(element)
-
-      // (1) If the user doesn't want to run scripts in the new fragment, we disable all <script> elements.
-      // (2) We cannot wait until finalizeElement(), because then the script has already been inserted and has executed.
-      this._disableScriptsInSubtree(element)
-
-      // Ensure that the element cannot be matched for subsequent selects().
-      element.remove()
-
-      return true
-    }
-  }
-
-  finalizeElement(element) {
-    // Now that these elements is attached to the current document, we can re-create them
-    // in the correct browsing context.
-    this._reviveSubtreeInPlace(element)
   }
 
   static {

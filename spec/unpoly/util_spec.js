@@ -2555,9 +2555,12 @@ describe('up.util', () => {
       }))
 
       describe('with element argument', () => it('serializes the tag name with id, up-iid, name and class attributes, but ignores other attributes', function() {
-        const element = e.createFromHTML('<table id="id-value" up-id="up-id-value" name="name-value" class="class-value" title="title-value"></table>')
+        const openTag = '<table id="id-value" up-id="up-id-value" name="name-value" class="class-value" title="title-value">'
+        const content = '<tr><td>cell</td></tr>'
+        const closeTag = '</table>'
+        const element = e.createFromHTML(openTag + content + closeTag)
         const formatted = up.util.sprintf('before %o after', element)
-        expect(formatted).toEqual('before <table id="id-value" up-id="up-id-value" name="name-value" class="class-value"> after')
+        expect(formatted).toEqual('before ' + openTag + ' after')
       }))
 
       describe('with jQuery argument', () => it('serializes the tag name with id, name and class attributes, but ignores other attributes', function() {

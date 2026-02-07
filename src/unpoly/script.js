@@ -13,6 +13,7 @@ for details.
 @see data
 @see legacy-scripts
 @see handling-asset-changes
+@see script-security
 
 @see up.compiler
 @see [up-data]
@@ -53,9 +54,7 @@ up.script = (function() {
     @param {Array<string} [config.scriptSelectors]
       An array of CSS selectors matching elements that run JavaScript.
 
-      By default, this matches all `<script>` tags.
-
-      Matching elements will be removed from new page fragments with `up.fragment.config.runScripts = false`.
+      By default, this matches all `<script>` elements with a JavaScript type.
 
       This configuration does not affect what Unpoly considers [assets](/up-asset).
       For this, configure `up.script.config.assetSelectors`.
@@ -63,10 +62,39 @@ up.script = (function() {
     @param {Array<string} [config.noScriptSelectors]
       Exceptions to `up.script.config.scriptSelectors`.
 
+    @param {string} [config.evalCallbackPolicy='auto']
+      Whether Unpoly will [run callbacks in HTML attributes](/script-security#callbacks) like (`[up-on-loaded]`)(/up-follow#up-on-loaded).
+
+    @param {string} [config.scriptElementPolicy='auto']
+      Whether Unpoly will [run `<script>` elements in new fragments](/script-security#script-elements).
+
+    @param {string|Function(): string} [config.cspNonce]
+      A [CSP script nonce](https://content-security-policy.com/nonce/)
+      for the initial page that [booted](/up.boot) Unpoly.
+
+      The nonce lets Unpoly run JavaScript in HTML attributes like
+      [`[up-on-loaded]`](/up-follow#up-on-loaded) or [`[up-on-accepted]`](/up-layer-new#up-on-accepted).
+      See [Restricting callbacks with nonces](/script-security#callback-nonces).
+
+      The nonce can either be configured as a string or as a function that returns the nonce.
+
+      Defaults to the `content` attribute of a `<meta>` tag named `csp-nonce`:
+
+      ```
+      <meta name='csp-nonce' content='secret4367243'>
+      ```
+
+    @param {boolean} [config.cspWarnings=true]
+      Whether Unpoly will print a warning when it observes a potentially unsafe `Content-Security-Policy` header.
+
   @property up.script.config
   @stable
   */
   const config = new up.Config(() => ({
+    cspNonce() { return e.metaContent('csp-nonce') },
+    cspWarnings: true,
+    scriptElementPolicy: 'auto',
+    evalCallbackPolicy: 'auto',
     assetSelectors: [
       'link[rel=stylesheet]',
       'script[src]',
@@ -843,6 +871,12 @@ up.script = (function() {
     }
   }
 
+  /*-
+  @function up.script.assets
+  @param {Element} [head=document.head]
+  @return {NodeList}
+  @internal
+  */
   function findAssets(head = document.head) {
     return head.querySelectorAll(config.selector('assetSelectors'))
   }
@@ -987,11 +1021,9 @@ up.script = (function() {
   @stable
   */
 
-  function disableScriptsInSubtree(root, guard = () => true) {
+  function block(root) {
     for (let script of findScripts(root)) {
-      if (guard(script)) {
-        script.type = 'up-disabled-script'
-      }
+      script.type = 'up-blocked-script'
     }
   }
 
@@ -1004,29 +1036,49 @@ up.script = (function() {
     return config.matches(value, 'scriptSelectors')
   }
 
-  function adoptNoncesInSubtree(root, responseNonces) {
-    let pageNonce = up.protocol.cspNonce()
+  function adoptNewFragment(fragment, cspInfo) {
+    new up.ScriptGate(cspInfo).adoptNewFragment(fragment)
+  }
 
-    if (!responseNonces?.length || !pageNonce) return
+  function adoptDetachedHeadAsset(script, cspInfo) {
+    new up.ScriptGate(cspInfo).adoptDetachedHeadAsset(script)
+  }
 
-    for (let script of findScripts(root, '[nonce]')) {
-      if (responseNonces.includes(script.nonce)) {
-        script.nonce = pageNonce
+  function adoptRenderOptionsFromHeader(renderOptions, cspInfo) {
+    new up.ScriptGate(cspInfo).adoptRenderOptionsFromHeader(renderOptions)
+  }
+
+  function callbackAttr(element, attrName, parseOpts) {
+    return e.parseAttr(element, attrName, (code) => {
+      let fn = parseCallback(code, parseOpts)
+      // Emulate the behavior of the `onclick` attribute, where `this` refers to the clicked element.
+      return fn.bind(element)
+    })
+  }
+
+  function parseCallback(code, { argNames = ['event'], expandObject = false } = {}) {
+    // Return an unbound function so callers can bind to an object of their choice.
+    return function(...argValues) {
+      if (expandObject) {
+        let object = argValues[0]
+        argNames = [...argNames, ...expandObject]
+        argValues = [object, ...Object.values(u.pick(object, expandObject))]
       }
-    }
 
-    for (let attribute of config.nonceableAttributes) {
-      let matches = e.subtree(root, `[${attribute}^="nonce-"]`)
-      for (let match of matches) {
-        let attributeValue = match.getAttribute(attribute)
-        let callback = up.NonceableCallback.fromString(attributeValue)
-        if (responseNonces.includes(callback.nonce)) {
-          callback.nonce = pageNonce
-          match.setAttribute(attribute, callback.toString())
-        }
-      }
+      const nonceableCallback = up.NonceableCallback.fromString(code)
+      const evalEnv = { thisContext: this, argNames, argValues }
+      return new up.ScriptGate().evalCallback(nonceableCallback, evalEnv)
     }
   }
+
+  function cspNonce() {
+    return u.evalOption(config.cspNonce)
+  }
+
+  function warnOfUnsafeCSP(cspInfo) {
+    new up.ScriptGate(cspInfo).warnOfUnsafeCSP()
+  }
+
   /*
   Resets the list of registered compiler directives to the
   moment when the framework was booted.
@@ -1049,9 +1101,16 @@ up.script = (function() {
     data: readData,
     findAssets,
     assertAssetsOK,
-    disableSubtree: disableScriptsInSubtree,
-    adoptNoncesInSubtree,
+    block,
+    adoptNewFragment,
+    adoptRenderOptionsFromHeader,
+    adoptDetachedHeadAsset,
+    parseCallback,
+    cspNonce,
+    warnOfUnsafeCSP,
+    callbackAttr,
     isScript,
+    findScripts,
   }
 })()
 

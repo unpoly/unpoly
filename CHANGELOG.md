@@ -540,7 +540,7 @@ X-Up-Origin-Mode: modal
 
 ### Script security
 
-This version revises mechanisms to prevent cross-site scripting and handle strict [content security policies](/csp).
+This version revises mechanisms to prevent cross-site scripting and handle strict [content security policies](/script-security).
 
 #### Scripts in fragments are no longer executed
 
@@ -1184,7 +1184,7 @@ The `up.feedback` package has been renamed to `up.status`. This package exposed 
 
 ### Other changes
 
-- You can now [embed CSP nonces](/csp) into the attribute callbacks `[up-on-keep]`, `[up-on-hungry]` and `[up-on-opened]`.
+- You can now [embed CSP nonces](/script-security#callback-nonces) into the attribute callbacks `[up-on-keep]`, `[up-on-hungry]` and `[up-on-opened]`.
 - New property `up.Request#ended` indicates whether this request is no longer waiting for the network for any reason. It is `true` when the server has responded or when the request
   [failed](/failed-responses) or was [aborted](/aborting-requests).
 - The attribute `[up-flashes]` is now stable (discussion #679)
@@ -3067,7 +3067,7 @@ All existing documentation pages from Unpoly 2 remain available:
 - [Layer context](/context)
 - [Motion tuning](/motion-tuning)
 - [URL patterns](/url-patterns)
-- [Working with strict Content Security Policies](/csp)
+- Working with strict Content Security Policies
 
 
 ### Migration polyfills
@@ -3297,8 +3297,6 @@ Users of the [unpoly-rails](https://github.com/unpoly/unpoly-rails) gem can inse
 ```erb
 <a href="/path" up-follow up-on-loaded="<%= up.safe_callback('alert()') %>">Click me</a>
 ```
-
-Also see our new [guide to working with strict Content Security Policies](/csp).
 
 ### New options for existing features
 

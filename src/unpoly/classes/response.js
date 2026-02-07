@@ -228,7 +228,7 @@ up.Response = class Response extends up.Record {
   */
   get cspInfo() {
     let policy = this.header('Content-Security-Policy') || this.header('Content-Security-Policy-Report-Only')
-    return up.protocol.cspInfoFromHeader(policy)
+    return up.CSPInfo.fromHeader(policy)
   }
 
   /*-

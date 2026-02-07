@@ -298,8 +298,8 @@ describe('up.script', function() {
             expect(spy.calls.argsFor(1)[0]).toBe(overlayElement)
           })
 
-          it('does not compile elements twice if the new fragment contains a <script> that defines a new compiler', function() {
-            up.fragment.config.runScripts = true
+          it('compile elements once (not twice) if the new fragment contains a <script> that defines a new compiler', function() {
+            up.script.config.scriptElementPolicy = 'pass'
 
             const container = fixture('.container')
             const element = e.affix(container, '.element', { text: 'old text' })
@@ -307,13 +307,13 @@ describe('up.script', function() {
             window.compileSpy = jasmine.createSpy('compile spy')
 
             up.render({ fragment: `
-            <div class="container">
-              <div class="element">new text</div>
-              <script nonce="specs-nonce">
-                up.compiler('.element', (element) => window.compileSpy(element))
-              </script>
-            </div>
-          ` })
+              <div class="container">
+                <div class="element">new text</div>
+                <script nonce="specs-nonce">
+                  up.compiler('.element', (element) => window.compileSpy(element))
+                </script>
+              </div>
+            ` })
 
             expect(window.compileSpy.calls.count()).toBe(1)
 
@@ -1359,7 +1359,1524 @@ describe('up.script', function() {
         expect(up.script.findAssets()).not.toContain(link)
       })
     })
+
+    describe('up.script.cspNonce()', function() {
+
+      beforeEach(function() {
+        // Remove the CSP meta to start with a clean slate.
+        // This change will be undone by protect_jasmine_runner.js
+        this.runnerCSPMeta = document.querySelector('meta[name=csp-nonce]')
+        this.runnerCSPMeta.remove()
+      })
+
+      it('returns undefined if the <head> has no <meta name="csp-nonce>"', function() {
+        expect(document.head).not.toHaveSelector('meta[name="csp-nonce"]')
+        expect(up.script.cspNonce()).toBeUndefined()
+      })
+
+      it('returns the content from a <meta name="csp-nonce">', function() {
+        up.element.affix(document.head, 'meta[name="csp-nonce"][content="custom-nonce"]')
+        expect(up.script.cspNonce()).toBe('custom-nonce')
+      })
+
+      it('returns a string assigned to up.script.config.cspNonce', function() {
+        up.element.affix(document.head, 'meta[name="csp-nonce"][content="ignored-nonce"]')
+        up.script.config.cspNonce = 'config-nonce'
+        expect(up.script.cspNonce()).toBe('config-nonce')
+      })
+
+      it('evals a function assigned to up.script.config.cspNonce', function() {
+        up.element.affix(document.head, 'meta[name="csp-nonce"][content="ignored-nonce"]')
+        up.script.config.cspNonce = () => 'function-nonce'
+        expect(up.script.cspNonce()).toBe('function-nonce')
+      })
+
+    })
+
+    describe('up.script.warnOfUnsafeCSP()', function() {
+
+      let warnSpy
+
+      beforeEach(function() {
+        warnSpy = spyOn(console, 'warn').and.callThrough()
+      })
+
+      const CSP_PRESETS = {
+        'host-based': "script-src 'self' https://api.com",
+        'nonce-only':  "script-src 'nonce-secret111'",
+        'strict-dynamic': "script-src 'nonce-secret111' 'strict-dynamic'",
+        'unsafe-inline': "script-src 'unsafe-inline'",
+        'unsafe-eval': "script-src 'unsafe-eval'",
+      }
+
+      describe('unexpectedly liberal script execution', function() {
+
+        const warnArgs = [jasmine.stringContaining("A 'strict-dynamic' CSP allows arbitrary <script> elements in new fragments"), jasmine.anything(), jasmine.anything()]
+
+        function itWarnsFor(cspName) {
+          const cspString = CSP_PRESETS[cspName] ?? up.fail('Unknown CSP preset' + cspName)
+
+          it(`warns with a ${cspName} CSP`, function() {
+            let cspInfo = up.CSPInfo.fromHeader(cspString)
+            up.script.warnOfUnsafeCSP(cspInfo)
+            expect(warnSpy).toHaveBeenCalledWith(...warnArgs)
+          })
+        }
+
+        function itDoesNotWarnFor(cspName) {
+          const cspString = CSP_PRESETS[cspName] ?? up.fail('Unknown CSP preset' + cspName)
+
+          it(`does not warn with a ${cspName} CSP`, function() {
+            let cspInfo = up.CSPInfo.fromHeader(cspString)
+            up.script.warnOfUnsafeCSP(cspInfo)
+            expect(warnSpy).not.toHaveBeenCalledWith(...warnArgs)
+          })
+        }
+
+        describe('with up.script.config.scriptElementPolicy = "block"', function() {
+
+          beforeEach(function() {
+            up.script.config.scriptElementPolicy = "block"
+          })
+
+          itDoesNotWarnFor('host-based')
+          itDoesNotWarnFor('nonce-only')
+          itDoesNotWarnFor('strict-dynamic')
+          itDoesNotWarnFor('unsafe-inline')
+
+        })
+
+        describe('with up.script.config.scriptElementPolicy = "nonce"', function() {
+
+          beforeEach(function() {
+            up.script.config.scriptElementPolicy = "nonce"
+          })
+
+          itDoesNotWarnFor('host-based')
+          itDoesNotWarnFor('nonce-only')
+          itDoesNotWarnFor('strict-dynamic')
+          itDoesNotWarnFor('unsafe-inline')
+
+        })
+
+        describe('with up.script.config.scriptElementPolicy = "pass"', function() {
+
+          beforeEach(function() {
+            up.script.config.scriptElementPolicy = "pass"
+          })
+
+          itDoesNotWarnFor('host-based')
+          itDoesNotWarnFor('nonce-only')
+          itWarnsFor('strict-dynamic')
+          itDoesNotWarnFor('unsafe-inline')
+
+        })
+
+        describe('with up.script.config.scriptElementPolicy = "auto"', function() {
+
+          beforeEach(function() {
+            up.script.config.scriptElementPolicy = "auto"
+          })
+
+          itDoesNotWarnFor('host-based')
+          itDoesNotWarnFor('nonce-only')
+          itDoesNotWarnFor('strict-dynamic') // detected and sitches to "nonce"
+          itDoesNotWarnFor('unsafe-inline')
+
+        })
+
+      })
+
+      describe('unexpectedly liberal callback execution', function() {
+
+        const warnArgs = [jasmine.stringContaining("An 'unsafe-eval' CSP allows arbitrary [up-on...] callbacks"), jasmine.anything(), jasmine.anything()]
+
+        function itWarnsFor(cspName) {
+          const cspString = CSP_PRESETS[cspName] ?? up.fail('Unknown CSP preset' + cspName)
+
+          it(`warns with a ${cspName} CSP`, function() {
+            let cspInfo = up.CSPInfo.fromHeader(cspString)
+            up.script.warnOfUnsafeCSP(cspInfo)
+            expect(warnSpy).toHaveBeenCalledWith(...warnArgs)
+          })
+        }
+
+        function itDoesNotWarnFor(cspName) {
+          const cspString = CSP_PRESETS[cspName] ?? up.fail('Unknown CSP preset' + cspName)
+
+          it(`does not warn with a ${cspName} CSP`, function() {
+            let cspInfo = up.CSPInfo.fromHeader(cspString)
+            up.script.warnOfUnsafeCSP(cspInfo)
+            expect(warnSpy).not.toHaveBeenCalledWith(...warnArgs)
+          })
+        }
+
+        describe('with up.script.config.evalCallbackPolicy = "block"', function() {
+
+          beforeEach(function() {
+            up.script.config.evalCallbackPolicy = "block"
+          })
+
+          itDoesNotWarnFor('host-based')
+          itDoesNotWarnFor('nonce-only')
+          itDoesNotWarnFor('strict-dynamic')
+          itDoesNotWarnFor('unsafe-eval')
+          itDoesNotWarnFor('unsafe-inline')
+
+        })
+
+        describe('with up.script.config.evalCallbackPolicy = "nonce"', function() {
+
+          beforeEach(function() {
+            up.script.config.evalCallbackPolicy = "nonce"
+          })
+
+          itDoesNotWarnFor('host-based')
+          itDoesNotWarnFor('nonce-only')
+          itDoesNotWarnFor('strict-dynamic')
+          itDoesNotWarnFor('unsafe-eval')
+          itDoesNotWarnFor('unsafe-inline')
+
+        })
+
+        describe('with up.script.config.evalCallbackPolicy = "pass"', function() {
+
+          beforeEach(function() {
+            up.script.config.evalCallbackPolicy = "pass"
+          })
+
+          itDoesNotWarnFor('host-based')
+          itDoesNotWarnFor('nonce-only')
+          itDoesNotWarnFor('strict-dynamic')
+          itWarnsFor('unsafe-eval')
+          itDoesNotWarnFor('unsafe-inline')
+
+        })
+
+        describe('with up.script.config.evalCallbackPolicy = "auto"', function() {
+
+          beforeEach(function() {
+            up.script.config.evalCallbackPolicy = "auto"
+          })
+
+          describe('when the page nonce is known', function() {
+            beforeEach(function() {
+              spyOn(up.script, 'cspNonce').and.returnValue('secret000')
+            })
+
+            itDoesNotWarnFor('host-based')
+            itDoesNotWarnFor('nonce-only')
+            itDoesNotWarnFor('strict-dynamic')
+            itDoesNotWarnFor('unsafe-eval') // we auto-switch to "nonce"
+            itDoesNotWarnFor('unsafe-inline')
+
+          })
+
+          describe('when the page nonce is not known', function() {
+            beforeEach(function() {
+              spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+            })
+
+            itDoesNotWarnFor('host-based')
+            itDoesNotWarnFor('nonce-only')
+            itDoesNotWarnFor('strict-dynamic')
+            itWarnsFor('unsafe-eval')
+            itDoesNotWarnFor('unsafe-inline')
+
+          })
+
+        })
+        
+      })
+
+    })
+
+    describe('up.script.adoptNewFragment()', function() {
+
+      describe('CSP nonces in body scripts', function() {
+
+        function itBehavesLikeBlock({ pageNonce } = {}) {
+
+          describe(`when the page nonce is ${pageNonce ? 'known' : 'not known'}`, function() {
+
+            beforeEach(function() {
+              up.script.config.cspNonce = up.util.assert(pageNonce, u.isDefined)
+            })
+
+            it('blocks a script element without nonce', function() {
+              const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+              const script = up.element.createFromSelector('script')
+              expect(script).toBeActiveScript()
+
+              up.script.adoptNewFragment(script, cspInfo)
+
+              expect(script).toBeInertScript()
+            })
+
+            it('blocks a script element with the correct page nonce', function() {
+              const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+              const script = up.element.createFromSelector('script[nonce="response123"]')
+              expect(script).toBeActiveScript()
+
+              up.script.adoptNewFragment(script, cspInfo)
+
+              expect(script).toBeInertScript()
+            })
+
+            it('blocks a script element with an incorrect nonce', function() {
+              const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+              const script = up.element.createFromSelector('script[nonce="wrong456"]')
+              expect(script).toBeActiveScript()
+
+              up.script.adoptNewFragment(script, cspInfo)
+
+              expect(script).toBeInertScript()
+            })
+
+            it('does not change a script element with a non-JavaScript type', function() {
+              const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+              const script = up.element.createFromSelector('script[type="text/ramenscript"]', { text: 'console.log("hello")' })
+              const scriptHTMLBefore = script.outerHTML
+
+              up.script.adoptNewFragment(script, cspInfo)
+
+              expect(script.outerHTML).toEqual(scriptHTMLBefore)
+            })
+
+          })
+
+        }
+
+        function itBehavesLikePass({ strictDynamic } = {}) {
+
+          describe(`when the CSP is ${strictDynamic ? 'strict-dynamic' : 'not strict-dynamic'}`, function() {
+
+            beforeEach(function() {
+              let strictDynamicPart = up.util.assert(strictDynamic, up.util.isBoolean) ? "'strict-dynamic'" : ""
+              this.cspInfo ??= up.CSPInfo.fromHeader(`script-src 'self' 'nonce-response111' ${strictDynamicPart}`)
+            })
+
+            it('does not change a script element without a [nonce]', function() {
+              spyOn(up.script, 'cspNonce').and.returnValue('page000')
+
+              const script = up.element.createFromSelector('script', { text: 'console.log("hello")' })
+              const scriptHTMLBefore = script.outerHTML
+
+              up.script.adoptNewFragment(script, this.cspInfo)
+
+              expect(script).toBeActiveScript()
+              expect(script.outerHTML).toEqual(scriptHTMLBefore)
+            })
+
+            it("does not change am inline script element when its [nonce] doesn't match the response nonce", function() {
+              spyOn(up.script, 'cspNonce').and.returnValue('page000')
+
+              const script = up.element.createFromSelector('script', { nonce: 'incorrect456', text: 'console.log("hello")' })
+              const scriptHTMLBefore = script.outerHTML
+
+              up.script.adoptNewFragment(script, this.cspInfo)
+
+              expect(script).toBeActiveScript()
+              expect(script.outerHTML).toEqual(scriptHTMLBefore)
+            })
+
+            it('does not add a [nonce] to linked, un-nonced script, as that might bypass a host-based CSP (bugfix)', async function() {
+              spyOn(up.script, 'cspNonce').and.returnValue('page000')
+
+              const script = up.element.createFromSelector('script', { src: up.specUtil.staticFile('linked_noop_script.js') })
+              const scriptHTMLBefore = script.outerHTML
+
+              up.script.adoptNewFragment(script, this.cspInfo)
+
+              expect(script).toBeActiveScript()
+              expect(script.outerHTML).toEqual(scriptHTMLBefore)
+            })
+
+            it("rewrites the [nonce] of a body script when it matches the response nonce", async function() {
+              spyOn(up.script, 'cspNonce').and.returnValue('page000')
+
+              const script = up.element.createFromSelector('script', { nonce: 'response111', text: 'console.log("hello")' })
+
+              up.script.adoptNewFragment(script, this.cspInfo)
+
+              expect(script).toBeActiveScript()
+              expect(script).toHaveProperty('nonce', 'page000')
+            })
+
+            it('does not change a script element with an correct nonce, but the page nonce is unknown', function() {
+              spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+
+              const script = up.element.createFromSelector('script', { nonce: 'response111', text: 'console.log("hello")' })
+              const scriptHTMLBefore = script.outerHTML
+
+              up.script.adoptNewFragment(script, this.cspInfo)
+
+              expect(script).toBeActiveScript()
+              expect(script.outerHTML).toEqual(scriptHTMLBefore)
+            })
+
+            it('does not change a script element with a non-JavaScript type', function() {
+              const script = up.element.createFromSelector('script[type="text/ramenscript"]', { text: 'console.log("hello")' })
+              const scriptHTMLBefore = script.outerHTML
+
+              up.script.adoptNewFragment(script, this.cspInfo)
+
+              expect(script.outerHTML).toEqual(scriptHTMLBefore)
+            })
+          })
+
+        }
+
+        function itBehavesLikeNonce({ strictDynamic } = {}) {
+
+          describe(`when the CSP is ${strictDynamic ? 'strict-dynamic' : 'not strict-dynamic'}`, function() {
+
+            beforeEach(function() {
+              let strictDynamicPart = up.util.assert(strictDynamic, up.util.isGiven) ? "'strict-dynamic'" : ""
+              this.cspInfo ??= up.CSPInfo.fromHeader(`script-src 'self' 'nonce-response111' ${strictDynamicPart}`)
+            })
+
+            it('blocks a script element without nonce', function() {
+              spyOn(up.script, 'cspNonce').and.returnValue('page000')
+              const script = up.element.createFromSelector('script')
+              expect(script).toBeActiveScript()
+
+              up.script.adoptNewFragment(script, this.cspInfo)
+
+              expect(script).toBeInertScript()
+            })
+
+            it('rewrites a script element nonce that matches its response', function() {
+              spyOn(up.script, 'cspNonce').and.returnValue('page000')
+              const script = up.element.createFromSelector('script[nonce="response111"]')
+              expect(script).toBeActiveScript()
+
+              up.script.adoptNewFragment(script, this.cspInfo)
+
+              expect(script).toBeActiveScript()
+              expect(script).toHaveProperty('nonce', 'page000')
+            })
+
+            it('blocks a script element whose nonce that matches its response, but the page nonce is unknown', function() {
+              spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+              const script = up.element.createFromSelector('script[nonce="response111"]')
+              expect(script).toBeActiveScript()
+
+              up.script.adoptNewFragment(script, this.cspInfo)
+
+              expect(script).toBeInertScript()
+            })
+
+            it('blocks a script element with an incorrect nonce', function() {
+              spyOn(up.script, 'cspNonce').and.returnValue('page000')
+              const script = up.element.createFromSelector('script[nonce="wrong222"]')
+              expect(script).toBeActiveScript()
+
+              up.script.adoptNewFragment(script, this.cspInfo)
+
+              expect(script).toBeInertScript()
+            })
+
+            it('does not change a script element with a non-JavaScript type', function() {
+              spyOn(up.script, 'cspNonce').and.returnValue('page000')
+              const script = up.element.createFromSelector('script[type="text/ramenscript"]', { text: 'console.log("hello")' })
+              const scriptHTMLBefore = script.outerHTML
+
+              up.script.adoptNewFragment(script, this.cspInfo)
+
+              expect(script.outerHTML).toEqual(scriptHTMLBefore)
+            })
+          })
+
+        }
+
+        describe('with up.script.config.scriptElementPolicy = "block"', function() {
+
+          beforeEach(function() {
+            up.script.config.scriptElementPolicy = "block"
+          })
+
+          itBehavesLikeBlock({ pageNonce: 'page000' })
+          itBehavesLikeBlock({ pageNonce: null })
+
+        })
+
+        describe('with up.script.config.scriptElementPolicy = "pass"', function() {
+
+          beforeEach(function() {
+            up.script.config.scriptElementPolicy = "pass"
+          })
+
+          itBehavesLikePass({ strictDynamic: false })
+
+          itBehavesLikePass({ strictDynamic: true })
+        })
+
+        describe('with up.script.config.scriptElementPolicy = "nonce"', function() {
+
+          beforeEach(function() {
+            up.script.config.scriptElementPolicy = "nonce"
+          })
+
+          describe('when the page nonce is known', function() {
+            itBehavesLikeNonce({ strictDynamic: false })
+          })
+
+          describe('when the page nonce is unknown', function() {
+            itBehavesLikeBlock({ pageNonce: null })
+          })
+
+        })
+
+        describe('with up.script.config.scriptElementPolicy = "auto"', function() {
+
+          beforeEach(function() {
+            up.script.config.scriptElementPolicy = "auto"
+          })
+
+          describe('without a strict-dynamic CSP', function() {
+            itBehavesLikePass({ strictDynamic: false })
+          })
+
+          describe('with a strict-dynamic CSP', function() {
+            itBehavesLikeNonce({ strictDynamic: true })
+          })
+
+          // it('rewrites the [nonce] of a body script with Content-Security-Policy-Report-Only response header', async function() {
+          //   spyOn(up.script, 'cspNonce').and.returnValue('page-secret')
+          //
+          //   let [target] = htmlFixtureList(`
+          //     <div id="target">
+          //       old target text
+          //     </div>
+          //   `)
+          //
+          //   up.render('#target', { url: '/path' })
+          //   await wait()
+          //
+          //   jasmine.respondWith({
+          //     responseText: `
+          //       <div id="target">
+          //         new target text
+          //         <script nonce="response-secret"></script>
+          //       </div>
+          //     `,
+          //     responseHeaders: { 'Content-Security-Policy-Report-Only': "script-src 'nonce-response-secret'" }
+          //   })
+          //   await wait()
+          //
+          //   expect('#target').toHaveVisibleText('new target text')
+          //   expect('#target script').toHaveProperty('nonce', 'page-secret')
+          // })
+
+        })
+
+        if (up.migrate.loaded) {
+
+          describe('with up.fragment.config.runScripts = true', function() {
+
+            beforeEach(function() {
+              up.fragment.config.runScripts = true
+            })
+
+            describe('without a strict-dynamic CSP', function() {
+              itBehavesLikePass({ strictDynamic: false })
+            })
+
+            describe('with a strict-dynamic CSP', function() {
+              itBehavesLikeNonce({ strictDynamic: true })
+            })
+
+          })
+
+          describe('up.fragment.config.runScripts = false', function() {
+
+            beforeEach(function() {
+              up.fragment.config.runScripts = false
+            })
+
+            itBehavesLikeBlock({ pageNonce: 'page000' })
+            itBehavesLikeBlock({ pageNonce: null })
+
+          })
+
+
+        }
+
+      })
+
+      describe('CSP nonces in callback attributes', function() {
+
+        function itBehavesLikeBlock({ pageNonce } = {}) {
+          describe(`when the page nonce is ${pageNonce ? 'known' : 'unknown'}`, function() {
+
+            beforeEach(function() {
+              up.script.config.cspNonce = up.util.assert(pageNonce, u.isDefined)
+            })
+
+            it('blocks a callback without nonce', function() {
+              const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+              const link = up.element.createFromHTML(`
+                <a href="/foo" up-follow up-on-loaded="console.log('hi')"></a>              
+              `)
+
+              expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
+
+              up.script.adoptNewFragment(link, cspInfo)
+
+              expect(link.getAttribute('up-on-loaded')).toBeInertCallbackString()
+            })
+
+            it('blocks a callback with the correct nonce', function() {
+              const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+              const link = up.element.createFromHTML(`
+                <a href="/foo" up-follow up-on-loaded="nonce-response123 console.log('hi')"></a>              
+              `)
+
+              expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
+
+              up.script.adoptNewFragment(link, cspInfo)
+
+              expect(link.getAttribute('up-on-loaded')).toBeInertCallbackString()
+            })
+
+            it('blocks a callback with an incorrect nonce', function() {
+              const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+              const link = up.element.createFromHTML(`
+                <a href="/foo" up-follow up-on-loaded="nonce-wrong456 console.log('hi')"></a>              
+              `)
+
+              expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
+
+              up.script.adoptNewFragment(link, cspInfo)
+
+              expect(link.getAttribute('up-on-loaded')).toBeInertCallbackString()
+            })
+
+          })
+        }
+
+        function itBehavesLikePass({ pageNonce } = {}) {
+
+          describe(`when the page nonce is ${pageNonce ? 'known' : 'unknown'}`, function() {
+            beforeEach(function() {
+              up.script.config.cspNonce = up.util.assert(pageNonce, u.isDefined)
+            })
+
+            it('does not change a callback without a nonce', function() {
+              const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+              const link = up.element.createFromHTML(`
+              <a href="/foo" up-follow up-on-loaded="console.log('hi')"></a>              
+            `)
+
+              up.script.adoptNewFragment(link, cspInfo)
+
+              expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
+              expect(link.getAttribute('up-on-loaded')).toBe("console.log('hi')")
+            })
+
+            it('does not change a callback with an incorrect nonce', function() {
+              const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+              const link = up.element.createFromHTML(`
+              <a href="/foo" up-follow up-on-loaded="nonce-wrong456 console.log('hi')"></a>              
+            `)
+
+              up.script.adoptNewFragment(link, cspInfo)
+
+              expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
+              expect(link.getAttribute('up-on-loaded')).toBe("nonce-wrong456 console.log('hi')")
+            })
+
+            if (pageNonce) {
+
+              it('rewrites a correct callback nonce', function() {
+                const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+                const link = up.element.createFromHTML(`
+                <a href="/foo" up-follow up-on-loaded="nonce-response123 console.log('hi')"></a>              
+              `)
+
+                up.script.adoptNewFragment(link, cspInfo)
+
+                expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
+                expect(link.getAttribute('up-on-loaded')).toBe("nonce-page000 console.log('hi')")
+              })
+
+            } else {
+
+              it('does not rewrite a correct callback nonce', function() {
+                const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+                const link = up.element.createFromHTML(`
+                <a href="/foo" up-follow up-on-loaded="nonce-response123 console.log('hi')"></a>              
+              `)
+
+                up.script.adoptNewFragment(link, cspInfo)
+
+                expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
+                expect(link.getAttribute('up-on-loaded')).toBe("nonce-response123 console.log('hi')")
+              })
+
+            }
+          })
+
+        }
+
+        function itBehavesLikeNonce({ pageNonce } = {}) {
+          describe(`when the page nonce is ${pageNonce ? 'known' : 'unknown'}`, function() {
+
+            beforeEach(function() {
+              up.script.config.cspNonce = up.util.assert(pageNonce, u.isDefined)
+            })
+
+            it('blocks a callback without nonce', function() {
+              const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+              const link = up.element.createFromHTML(`
+              <a href="/foo" up-follow up-on-loaded="console.log('hi')"></a>              
+            `)
+
+              expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
+
+              up.script.adoptNewFragment(link, cspInfo)
+
+              expect(link.getAttribute('up-on-loaded')).toBeInertCallbackString()
+            })
+
+            it('blocks a callback with an incorrect nonce', function() {
+              const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+              const link = up.element.createFromHTML(`
+              <a href="/foo" up-follow up-on-loaded="nonce-wrong456 console.log('hi')"></a>              
+            `)
+
+              expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
+
+              up.script.adoptNewFragment(link, cspInfo)
+
+              expect(link.getAttribute('up-on-loaded')).toBeInertCallbackString()
+            })
+
+            if (pageNonce) {
+              it('rewrites a callback nonce that matches its response', function() {
+                const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+                const link = up.element.createFromHTML(`
+              <a href="/foo" up-follow up-on-loaded="nonce-response123 console.log('hi')"></a>              
+            `)
+
+                expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
+
+                up.script.adoptNewFragment(link, cspInfo)
+
+                expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
+                expect(link.getAttribute('up-on-loaded')).toBe("nonce-page000 console.log('hi')")
+              })
+            } else {
+              it('blocks a callback whose nonce matches its response', function() {
+                spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+                const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+                const link = up.element.createFromHTML(`
+              <a href="/foo" up-follow up-on-loaded="nonce-response123 console.log('hi')"></a>              
+            `)
+
+                expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
+
+                up.script.adoptNewFragment(link, cspInfo)
+
+                expect(link.getAttribute('up-on-loaded')).toBeInertCallbackString()
+              })
+            }
+
+          })
+
+        }
+
+        describe('with up.script.config.evalCallbackPolicy = "block"', function() {
+
+          beforeEach(function() {
+            up.script.config.evalCallbackPolicy = "block"
+          })
+
+          itBehavesLikeBlock({ pageNonce: 'page000' })
+          itBehavesLikeBlock({ pageNonce: null })
+
+        })
+
+        describe('with up.script.config.evalCallbackPolicy = "pass"', function() {
+
+          beforeEach(function() {
+            up.script.config.evalCallbackPolicy = "pass"
+          })
+
+          itBehavesLikePass({ pageNonce: 'page000' })
+          itBehavesLikePass({ pageNonce: null })
+
+        })
+
+        describe('with up.script.config.evalCallbackPolicy = "nonce"', function() {
+
+          beforeEach(function() {
+            up.script.config.evalCallbackPolicy = "nonce"
+          })
+
+          describe('when the page nonce is known', function() {
+            itBehavesLikeNonce({ pageNonce: 'page000' })
+          })
+
+          describe('when the page nonce is not known', function() {
+            itBehavesLikeBlock({ pageNonce: null })
+          })
+
+        })
+
+        describe('with up.script.config.evalCallbackPolicy = "auto"', function() {
+
+          beforeEach(function() {
+            up.script.config.evalCallbackPolicy = "auto"
+            up.script.config.nonceableAttributes.push('callback')
+          })
+
+          describe('when the page nonce is known', function() {
+
+            itBehavesLikeNonce({ pageNonce: 'page000' })
+
+            // it("rewrites nonceable callbacks to use the current page's nonce with Content-Security-Policy-Report-Only response header", async function() {
+            //   spyOn(up.script, 'cspNonce').and.returnValue('secret1')
+            //   fixture('.target')
+            //   up.render('.target', { url: '/path' })
+            //
+            //   await wait()
+            //
+            //   jasmine.respondWith({
+            //     responseText: `
+            //       <div class="target" callback="nonce-secret2 alert()">new text</div>
+            //     `,
+            //     responseHeaders: { 'Content-Security-Policy-Report-Only': "script-src 'nonce-secret2'" }
+            //   })
+            //
+            //   await wait()
+            //
+            //   expect('.target').toHaveText('new text')
+            //   expect('.target').toHaveAttribute('callback', "nonce-secret1 alert()")
+            // })
+  
+            // it("rewrites nonceable callbacks to use the current page's nonce when opening a new overlay (bugfix)", async function() {
+            //   spyOn(up.script, 'cspNonce').and.returnValue('secret1')
+            //   up.render('.target', { url: '/path', layer: 'new' })
+            //
+            //   await wait()
+            //
+            //   jasmine.respondWith({
+            //     responseText: `
+            //       <div class="target" callback="nonce-secret2 alert()">new text</div>
+            //     `,
+            //     responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-secret2'" }
+            //   })
+            //
+            //   await wait()
+            //
+            //   expect(up.layer.isOverlay()).toBe(true)
+            //
+            //   expect('.target').toHaveText('new text')
+            //   expect('.target').toHaveAttribute('callback', "nonce-secret1 alert()")
+            // })
+
+            // it("ensures nonced callbacks still match the current page's nonce after a render pass that updates history (meta tags are part of history state) (bugfix)", async function() {
+            //   let suiteMeta = document.querySelector('meta[name="csp-nonce"]')
+            //   suiteMeta.remove()
+            //
+            //   up.element.affix(document.head, 'meta#test-nonce[name="csp-nonce"][content="nonce-secret1"]')
+            //   expect(up.script.cspNonce()).toBe('nonce-secret1')
+            //
+            //   const element = fixture('.element', { callback: 'nonce-secret1 alert()' })
+            //   fixture('.target', { text: 'old text' })
+            //
+            //   up.render('.target', { url: '/path', history: true })
+            //
+            //   await wait()
+            //
+            //   jasmine.respondWith({
+            //     responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-secret2'" },
+            //     responseText: `
+            //       <html>
+            //         <head>
+            //           <meta id="test-nonce" name="csp-nonce" content="nonce-secret2">
+            //         </head>
+            //         <body>
+            //           <div class="target">
+            //             new text
+            //           </div>
+            //         </body>
+            //       </html>
+            //     `
+            //   })
+            //
+            //   await wait()
+            //
+            //   const currentPageNonce = up.script.cspNonce()
+            //   expect(element.getAttribute('callback')).toBe(`${currentPageNonce} alert()`)
+            // })
+  
+          })
+
+          describe('when the page nonce is not known', function() {
+
+            itBehavesLikePass({ pageNonce: null })
+
+          })
+
+        })
+
+      })
+
+    })
+
+    describe('up.script.adoptDetachedHeadAsset()', function() {
+
+      function itBehavesLikeExamples() {
+
+        describe('scripts', function() {
+
+          it('rewrites a matching [nonce]', function() {
+            spyOn(up.script, 'cspNonce').and.returnValue('page000')
+
+            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response111'")
+            const script = up.element.createFromSelector('script[nonce="response111"][src="external.js"]')
+            up.script.adoptDetachedHeadAsset(script, cspInfo)
+
+            expect(script).toHaveProperty('nonce', 'page000')
+          })
+
+          it('does not rewrite a non-matching [nonce]', function() {
+            spyOn(up.script, 'cspNonce').and.returnValue('page000')
+
+            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response111'")
+            const script = up.element.createFromSelector('script[nonce="wrong222"][src="external.js"]')
+            up.script.adoptDetachedHeadAsset(script, cspInfo)
+
+            expect(script).toHaveProperty('nonce', 'wrong222')
+          })
+
+          it('does not rewrite a matching [nonce] when the page nonce is not known', function() {
+            spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+
+            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response111'")
+            const script = up.element.createFromSelector('script[nonce="response111"][src="external.js"]')
+            up.script.adoptDetachedHeadAsset(script, cspInfo)
+
+            expect(script).toHaveProperty('nonce', 'response111')
+          })
+
+          it('does not change an element without a [nonce] attribute', function() {
+            spyOn(up.script, 'cspNonce').and.returnValue('page000')
+
+            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response111'")
+            const script = up.element.createFromSelector('script[src="external.js"]')
+            const scriptHTMLBefore = script.outerHTML
+            up.script.adoptDetachedHeadAsset(script, cspInfo)
+
+            expect(script.nonce).toBeBlank()
+            expect(script.outerHTML).toEqual(scriptHTMLBefore)
+          })
+
+        })
+
+        describe('inline styles (not supported)', function() {
+
+          it('does not rewrite the [nonce] of inline <style> elements using the script-src nonce', function() {
+            spyOn(up.script, 'cspNonce').and.returnValue('page000')
+
+            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response111'")
+            const style = up.element.createFromSelector('style[nonce="response111"]')
+            up.script.adoptDetachedHeadAsset(style, cspInfo)
+
+            expect(style).toHaveProperty('nonce', 'response111')
+          })
+
+        })
+
+        it('does not trigger up:assets:changed if a script elements is identical after the [nonce] was rewritten', async function() {
+          spyOn(up.script, 'cspNonce').and.returnValue('page000')
+          const listener = jasmine.createSpy('up:assets:changed listener')
+          up.on('up:assets:changed', listener)
+
+          // TODO: Remove "linked_" prefix from both files
+          let scriptPath = up.specUtil.staticFile('linked_noop_script.js')
+
+          let targetHTML = (version) => `
+            <div id="target">
+              target v${version}
+            </div>
+          `
+
+          let respond = (nonce, targetVersion) => {
+            jasmine.respondWith({
+              responseText: `
+                <html>
+                  <head>
+                    <script src='${scriptPath}' nonce="${nonce}"></script>
+                  </head>
+                  <body>
+                    ${targetHTML(targetVersion)}
+                  </body>
+                </html>
+              `,
+              responseHeaders: {
+                'Content-Security-Policy': `script-src 'nonce-${nonce}'`
+              }
+            })
+          }
+
+          let [target] = htmlFixtureList(targetHTML(0))
+          expect('#target').toHaveVisibleText('target v0')
+
+          up.render({ target: '#target', url: '/path1' })
+          await wait()
+
+          respond('response111', 1)
+
+          await wait()
+
+          expect('#target').toHaveVisibleText('target v1')
+          expect(listener.calls.count()).toBe(1)
+          const event = listener.calls.mostRecent().args[0]
+          expect(event.newAssets.length).toBe(1)
+          const newScript = event.newAssets[0]
+          expect(newScript).toMatchSelector(`script[src="${scriptPath}"]`)
+          expect(newScript).toHaveProperty('nonce', 'page000')
+
+          // Insert the remote script
+          document.head.append(newScript)
+
+          up.render({ target: '#target', url: '/path2' })
+          await wait()
+
+          respond('response222', 2)
+          await wait()
+
+          expect('#target').toHaveVisibleText('target v2')
+
+          // No additional up:assets:changed event
+          expect(listener.calls.count()).toBe(1)
+
+          // Head assets are cleaned up automatically, but let's be good citizens
+          newScript.remove()
+        })
+      }
+
+      describe('CSP nonces in head assets', function() {
+
+        itBehavesLikeExamples()
+
+        describe("scriptElementPolicy only controlling body scripts (and we don't want blocking policies to cause up:assets:changed with every render pass)", function() {
+
+          describe('with up.script.config.scriptElementPolicy = "block"', function() {
+
+            beforeEach(function() {
+              up.script.config.scriptElementPolicy = "block"
+            })
+
+            itBehavesLikeExamples()
+          })
+
+          describe('with up.script.config.scriptElementPolicy = "nonce"', function() {
+
+            beforeEach(function() {
+              up.script.config.scriptElementPolicy = "nonce"
+            })
+
+            itBehavesLikeExamples()
+          })
+
+        })
+
+      })
+
+    })
+
+    describe('adoptRenderOptionsFromHeader()', function() {
+
+      describe('CSP nonces in a JSON of render options', function() {
+
+        beforeEach(function() {
+          window.callbackSpy = jasmine.createSpy('callback spy')
+        })
+
+        afterEach(function() {
+          delete window.callbackSpy
+        })
+
+        function itBehavesLikeNonce({ pageNonce } = {}) {
+
+          describe(`when the page nonce is ${pageNonce ? 'known' : 'unknown'}`, function() {
+
+            beforeEach(function() {
+              up.script.config.cspNonce = up.util.assert(pageNonce, u.isDefined)
+              this.cspInfo ??= up.CSPInfo.fromHeader(`script-src 'self' 'nonce-response111'`)
+            })
+
+            it('returns a throwing function for a callback without nonce', function() {
+              let code = 'window.callbackSpy()'
+              let renderOptions = { onLoaded: code }
+              up.script.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
+              let fn = renderOptions.onLoaded
+              expect(fn).toThrowError(up.Blocked)
+              expect(window.callbackSpy).not.toHaveBeenCalled()
+            })
+
+            it('returns an executable function for a callback with the correct nonce', function() {
+              let code = 'nonce-specs-nonce window.callbackSpy()'
+              let renderOptions = { onLoaded: code }
+              up.script.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
+              let fn = renderOptions.onLoaded
+              expect(fn).not.toThrowError(up.Blocked)
+              expect(window.callbackSpy).toHaveBeenCalled()
+            })
+
+            it('returns a throwing function for a callback with an incorrect nonce', function() {
+              let code = 'nonce-wrong222 window.callbackSpy()'
+              let renderOptions = { onLoaded: code }
+              up.script.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
+              let fn = renderOptions.onLoaded
+              expect(fn).toThrowError(up.Blocked)
+              expect(window.callbackSpy).not.toHaveBeenCalled()
+            })
+
+          })
+
+        }
+
+        function itBehavesLikeBlock({ pageNonce } = {}) {
+
+          describe(`when the page nonce is ${pageNonce ? 'known' : 'unknown'}`, function() {
+
+            beforeEach(function() {
+              up.script.config.cspNonce = up.util.assert(pageNonce, u.isDefined)
+            })
+
+            it('returns a throwing function for a callback without nonce', function() {
+              let code = 'window.callbackSpy()'
+              let renderOptions = { onLoaded: code }
+              up.script.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
+              let fn = renderOptions.onLoaded
+              expect(fn).toThrowError(up.Blocked)
+              expect(window.callbackSpy).not.toHaveBeenCalled()
+            })
+
+            it('returns a throwing function a callback with the correct nonce', function() {
+              let code = 'nonce-specs-nonce window.callbackSpy()'
+              let renderOptions = { onLoaded: code }
+              up.script.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
+              let fn = renderOptions.onLoaded
+              expect(fn).toThrowError(up.Blocked)
+              expect(window.callbackSpy).not.toHaveBeenCalled()
+            })
+
+            it('returns a throwing function a callback with the correct nonce, but the page nonce is not known to Unpoly', function() {
+              spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+              let code = 'nonce-specs-nonce window.callbackSpy()'
+              let renderOptions = { onLoaded: code }
+              up.script.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
+              let fn = renderOptions.onLoaded
+              expect(fn).toThrowError(up.Blocked)
+              expect(window.callbackSpy).not.toHaveBeenCalled()
+            })
+
+            it('returns a throwing function for a callback with an incorrect nonce', function() {
+              spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+              let code = 'nonce-wrong222 window.callbackSpy()'
+              let renderOptions = { onLoaded: code }
+              up.script.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
+              let fn = renderOptions.onLoaded
+              expect(fn).toThrowError(up.Blocked)
+              expect(window.callbackSpy).not.toHaveBeenCalled()
+            })
+
+          })
+
+        }
+
+        function itBehavesLikePass({ pageNonce } = {}) {
+
+          describe(`when the page nonce is ${pageNonce ? 'known' : 'unknown'}`, function() {
+
+            beforeEach(function() {
+              up.script.config.cspNonce = up.util.assert(pageNonce, u.isDefined)
+            })
+
+            it('returns an executable function for a callback with the correct nonce', function() {
+              let code = 'nonce-specs-nonce window.callbackSpy()'
+              let renderOptions = { onLoaded: code }
+              up.script.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
+              let fn = renderOptions.onLoaded
+              expect(fn).not.toThrowError(up.Blocked)
+              expect(window.callbackSpy).toHaveBeenCalled()
+            })
+
+            if (specs.config.csp === 'none') {
+              it('returns an executable function for a callback without a nonce', function() {
+                let code = 'window.callbackSpy()'
+                let renderOptions = { onLoaded: code }
+                up.script.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
+                let fn = renderOptions.onLoaded
+                expect(fn).not.toThrowError(up.Blocked)
+                expect(window.callbackSpy).toHaveBeenCalled()
+              })
+            }
+
+            if (specs.config.csp === 'nonce-only') {
+              it('returns a throwing function for a callback without a nonce', function() {
+                let code = 'window.callbackSpy()'
+                let renderOptions = { onLoaded: code }
+                up.script.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
+                let fn = renderOptions.onLoaded
+                expect(fn).toThrowError(up.Blocked) // new Function() throws EvalError internally
+                expect(window.callbackSpy).not.toHaveBeenCalled()
+              })
+
+              it('returns a noop function for a callback with an incorrect nonce', function() {
+                let code = 'nonce-wrong222 window.callbackSpy()'
+                let renderOptions = { onLoaded: code }
+                up.script.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
+                let fn = renderOptions.onLoaded
+                // We would prefer to detect the violation and throw up.Blocked here.
+                // Unfortunately the securitypolicyviolation event is emitted async after our eval,
+                // and we don't want to be async ourselves.
+                fn()
+                expect(window.callbackSpy).not.toHaveBeenCalled()
+              })
+
+              if (!pageNonce) {
+                it('returns an executable function for a callback with a correct nonce, but the page nonce is not known to Unpoly', function() {
+                  spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+                  let code = 'nonce-specs-nonce window.callbackSpy()'
+                  let renderOptions = { onLoaded: code }
+                  up.script.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
+                  let fn = renderOptions.onLoaded
+                  expect(fn).not.toThrowError(up.Blocked)
+                  expect(window.callbackSpy).toHaveBeenCalled()
+                })
+              }
+            }
+
+          })
+
+        }
+
+        describe('with up.script.config.evalCallbackPolicy = "block"', function() {
+
+          beforeEach(function() {
+            up.script.config.evalCallbackPolicy = "block"
+          })
+
+          itBehavesLikeBlock({ pageNonce: 'specs-nonce' })
+          itBehavesLikeBlock({ pageNonce: null })
+
+        })
+
+        describe('with up.script.config.evalCallbackPolicy = "pass"', function() {
+
+          beforeEach(function() {
+            up.script.config.evalCallbackPolicy = "pass"
+          })
+
+          itBehavesLikePass({ pageNonce: 'specs-nonce' })
+          itBehavesLikePass({ pageNonce: null })
+
+        })
+
+        describe('with up.script.config.evalCallbackPolicy = "nonce"', function() {
+
+          beforeEach(function() {
+            up.script.config.evalCallbackPolicy = "nonce"
+          })
+
+          itBehavesLikeNonce({ pageNonce: 'specs-nonce' })
+          itBehavesLikeBlock({ pageNonce: null })
+
+        })
+
+        describe('with up.script.config.evalCallbackPolicy = "auto"', function() {
+
+          beforeEach(function() {
+            up.script.config.evalCallbackPolicy = "auto"
+          })
+
+          itBehavesLikeNonce({ pageNonce: 'specs-nonce' })
+          itBehavesLikePass({ pageNonce: null })
+
+        })
+
+
+
+        // describe('with up.script.config.evalCallbackPolicy = "block"', function() {
+        //
+        //   beforeEach(function() {
+        //     up.script.config.evalCallbackPolicy = "block"
+        //   })
+        //
+        //   it('blocks a callback without nonce')
+        //
+        //   it('blocks a callback with the correct nonce')
+        //
+        //   it('blocks a callback with an incorrect nonce')
+        //
+        // })
+        //
+        // describe('with up.script.config.evalCallbackPolicy = "pass"', function() {
+        //
+        //   beforeEach(function() {
+        //     up.script.config.evalCallbackPolicy = "pass"
+        //   })
+        //
+        //   it('rewrites a correct callback nonce')
+        //
+        //   it('does not change a callback with an incorrect nonce')
+        //
+        // })
+        //
+        // describe('with up.script.config.evalCallbackPolicy = "nonce"', function() {
+        //
+        //   beforeEach(function() {
+        //     up.script.config.evalCallbackPolicy = "nonce"
+        //   })
+        //
+        //   it('must have tests', function() {
+        //     throw "test me"
+        //   })
+        //
+        // })
+        //
+        // describe('with up.script.config.evalCallbackPolicy = "auto"', function() {
+        //
+        //   beforeEach(function() {
+        //     up.script.config.evalCallbackPolicy = "auto"
+        //   })
+        //
+        //   it('must have tests', function() {
+        //     throw "test me"
+        //   })
+        //
+        // })
+
+
+
+      })
+
+    })
+
+    describe('parseCallback()', function() {
+
+      beforeEach(function() {
+        window.callbackSpy = jasmine.createSpy('callback spy')
+      })
+
+      afterEach(function() {
+        delete window.callbackSpy
+      })
+
+      function itBehavesLikeNonce({ pageNonce } = {}) {
+
+        describe(`when the page nonce is ${pageNonce ? 'known' : 'unknown'}`, function() {
+
+          beforeEach(function() {
+            up.script.config.cspNonce = up.util.assert(pageNonce, u.isDefined)
+          })
+
+          it('returns a throwing function for a callback without nonce', function() {
+            let code = 'window.callbackSpy()'
+            let fn = up.script.parseCallback(code)
+            expect(fn).toThrowError(up.Blocked)
+            expect(window.callbackSpy).not.toHaveBeenCalled()
+          })
+
+          it('returns an executable function for a callback with the correct nonce', function() {
+            let code = 'nonce-specs-nonce window.callbackSpy()'
+            let fn = up.script.parseCallback(code)
+            expect(fn).not.toThrowError(up.Blocked)
+            expect(window.callbackSpy).toHaveBeenCalled()
+          })
+
+          it('returns a throwing function for a callback with an incorrect nonce', function() {
+            let code = 'nonce-wrong222 window.callbackSpy()'
+            let fn = up.script.parseCallback(code)
+            expect(fn).toThrowError(up.Blocked)
+            expect(window.callbackSpy).not.toHaveBeenCalled()
+          })
+
+        })
+
+      }
+
+      function itBehavesLikeBlock({ pageNonce } = {}) {
+
+        describe(`when the page nonce is ${pageNonce ? 'known' : 'unknown'}`, function() {
+
+          beforeEach(function() {
+            up.script.config.cspNonce = up.util.assert(pageNonce, u.isDefined)
+          })
+
+          it('returns a throwing function for a callback without nonce', function() {
+            let code = 'window.callbackSpy()'
+            let fn = up.script.parseCallback(code)
+            expect(fn).toThrowError(up.Blocked)
+            expect(window.callbackSpy).not.toHaveBeenCalled()
+          })
+
+          it('returns a throwing function a callback with the correct nonce', function() {
+            let code = 'nonce-specs-nonce window.callbackSpy()'
+            let fn = up.script.parseCallback(code)
+            expect(fn).toThrowError(up.Blocked)
+            expect(window.callbackSpy).not.toHaveBeenCalled()
+          })
+
+          it('returns a throwing function a callback with the correct nonce, but the page nonce is not known to Unpoly', function() {
+            spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+            let code = 'nonce-specs-nonce window.callbackSpy()'
+            let fn = up.script.parseCallback(code)
+            expect(fn).toThrowError(up.Blocked)
+            expect(window.callbackSpy).not.toHaveBeenCalled()
+          })
+
+          it('returns a throwing function for a callback with an incorrect nonce', function() {
+            spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+            let code = 'nonce-wrong222 window.callbackSpy()'
+            let fn = up.script.parseCallback(code)
+            expect(fn).toThrowError(up.Blocked)
+            expect(window.callbackSpy).not.toHaveBeenCalled()
+          })
+
+        })
+
+      }
+
+      function itBehavesLikePass({ pageNonce } = {}) {
+
+        describe(`when the page nonce is ${pageNonce ? 'known' : 'unknown'}`, function() {
+
+          beforeEach(function() {
+            up.script.config.cspNonce = up.util.assert(pageNonce, u.isDefined)
+          })
+
+          it('returns an executable function for a callback with the correct nonce', function() {
+            let code = 'nonce-specs-nonce window.callbackSpy()'
+            let fn = up.script.parseCallback(code)
+            expect(fn).not.toThrowError(up.Blocked)
+            expect(window.callbackSpy).toHaveBeenCalled()
+          })
+
+          if (specs.config.csp === 'none') {
+            it('returns an executable function for a callback without a nonce', function() {
+              let code = 'window.callbackSpy()'
+              let fn = up.script.parseCallback(code)
+              expect(fn).not.toThrowError(up.Blocked)
+              expect(window.callbackSpy).toHaveBeenCalled()
+            })
+          }
+
+          if (specs.config.csp === 'nonce-only') {
+            it('returns a throwing function for a callback without a nonce', function() {
+              let code = 'window.callbackSpy()'
+              let fn = up.script.parseCallback(code)
+              expect(fn).toThrowError(up.Blocked) // new Function() throws EvalError internally
+              expect(window.callbackSpy).not.toHaveBeenCalled()
+            })
+
+            it('returns a noop function for a callback with an incorrect nonce', function() {
+              let code = 'nonce-wrong222 window.callbackSpy()'
+              let fn = up.script.parseCallback(code)
+              // We would prefer to detect the violation and throw up.Blocked here.
+              // Unfortunately the securitypolicyviolation event is emitted async after our eval,
+              // and we don't want to be async ourselves.
+              fn()
+              expect(window.callbackSpy).not.toHaveBeenCalled()
+            })
+
+            if (!pageNonce) {
+              it('returns an executable function for a callback with a correct nonce, but the page nonce is not known to Unpoly', function() {
+                spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+                let code = 'nonce-specs-nonce window.callbackSpy()'
+                let fn = up.script.parseCallback(code)
+                expect(fn).not.toThrowError(up.Blocked)
+                expect(window.callbackSpy).toHaveBeenCalled()
+              })
+            }
+
+          }
+
+        })
+
+      }
+
+      describe('with up.script.config.evalCallbackPolicy = "block"', function() {
+
+        beforeEach(function() {
+          up.script.config.evalCallbackPolicy = "block"
+        })
+
+        itBehavesLikeBlock({ pageNonce: 'specs-nonce' })
+        itBehavesLikeBlock({ pageNonce: null })
+
+      })
+
+      describe('with up.script.config.evalCallbackPolicy = "pass"', function() {
+
+        beforeEach(function() {
+          up.script.config.evalCallbackPolicy = "pass"
+        })
+
+        itBehavesLikePass({ pageNonce: 'specs-nonce' })
+        itBehavesLikePass({ pageNonce: null })
+
+      })
+
+      describe('with up.script.config.evalCallbackPolicy = "nonce"', function() {
+
+        beforeEach(function() {
+          up.script.config.evalCallbackPolicy = "nonce"
+        })
+
+        itBehavesLikeNonce({ pageNonce: 'specs-nonce' })
+        itBehavesLikeBlock({ pageNonce: null })
+
+      })
+
+      describe('with up.script.config.evalCallbackPolicy = "auto"', function() {
+
+        beforeEach(function() {
+          up.script.config.evalCallbackPolicy = "auto"
+        })
+
+        itBehavesLikeNonce({ pageNonce: 'specs-nonce' })
+        itBehavesLikePass({ pageNonce: null })
+
+      })
+
+      describe('callback context', function() {
+
+        it('exposes the first arg as `event` by default', function() {
+          let event = { type: 'test' }
+          let code = 'nonce-specs-nonce window.callbackSpy(event)'
+          let fn = up.script.parseCallback(code)
+          expect(() => fn(event)).not.toThrowError(up.Blocked)
+          expect(window.callbackSpy).toHaveBeenCalledWith(event)
+        })
+
+        it('exposes properties of the first arg with { expandObject } option', function() {
+          let event = { type: 'test', prop1: 'value1', prop2: 'value2' }
+          let code = 'nonce-specs-nonce window.callbackSpy(prop1, prop2)'
+          let fn = up.script.parseCallback(code, { expandObject: ['prop1', 'prop2']})
+          expect(() => fn(event)).not.toThrowError(up.Blocked)
+          expect(window.callbackSpy).toHaveBeenCalledWith('value1', 'value2')
+        })
+
+        it('allows to configure arg names with { argNames } option', function() {
+          let code = 'nonce-specs-nonce window.callbackSpy(arg1, arg2)'
+          let fn = up.script.parseCallback(code, { argNames: ['arg1', 'arg2']})
+          expect(() => fn('foo', 'bar')).not.toThrowError(up.Blocked)
+          expect(window.callbackSpy).toHaveBeenCalledWith('foo', 'bar')
+        })
+
+      })
+
+    })
+
   })
+
 })
-
-

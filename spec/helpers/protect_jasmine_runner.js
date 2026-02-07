@@ -291,10 +291,47 @@ afterEach(function() {
   }
 })
 
-const findAssets = () => document.head.querySelectorAll('link[rel=stylesheet], script[src]')
+
+// Exclude the Jasmine runner's default assets from up:assets:changed comparison
+const findRunnerAssets = () => document.head.querySelectorAll('link[rel=stylesheet], script[src]')
+beforeAll(function() {
+  for (let asset of findRunnerAssets()) {
+    asset.setAttribute('up-asset', 'false')
+  }
+})
+
+// Remove all assets that might have been inserted by a test
+afterEach(function() {
+  let assets = [...up.script.findAssets()]
+  for (let asset of assets) {
+    asset.remove()
+  }
+})
+
+// Restore the runner's <meta name="csp-nonce"> if that was removed or changed during the spec
+let originalCSPNonceMetaElement = null
+let originalCSPNonceValue = null
+
+function currentCSPNonceMetaElement() {
+  return document.head.querySelector('meta[name="csp-nonce"]')
+}
 
 beforeAll(function() {
-  for (let asset of findAssets()) {
-    asset.setAttribute('up-asset', 'false')
+  originalCSPNonceMetaElement = currentCSPNonceMetaElement()
+  originalCSPNonceValue = originalCSPNonceMetaElement?.getAttribute('content')
+})
+
+afterEach(function() {
+  let currentElement = currentCSPNonceMetaElement()
+
+  // Check if the nonce meta was detached or replaced
+  if (originalCSPNonceMetaElement !== currentElement) {
+    currentElement?.remove()
+    document.head.append(originalCSPNonceMetaElement)
+  }
+
+  // Check if the content value was changed
+  if (originalCSPNonceMetaElement.content !== originalCSPNonceValue) {
+    originalCSPNonceMetaElement.content = originalCSPNonceValue
   }
 })

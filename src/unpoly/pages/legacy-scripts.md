@@ -100,27 +100,8 @@ up.compiler('[track-view]', function(element, data) { // mark: [track-view]
 ```
 
 
-## Running inline `<script>` tags
 
-By default `<script>` tags will only run during the initial page load.
-Scripts in updated fragments will *not* be loaded or executed.
-If possible, [migrate these scripts to a compiler](#migrate-to-compiler).
-
-If you absolutely want to run scripts in new fragments, you can change the default:
-
-
-```js
-up.fragment.config.runScripts = true // default is false
-```
-
-Even with this setting, there may be reasons why a script is not executed:
-
-- A strict [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) may forbid a script from running. See [Running scripts with a CSP](/csp#scripts).
-- Scripts in the `<head>` are never inserted automatically. See [Handling new asset versions](/handling-asset-changes#handling-changed-assets).
-
-
-
-### Avoiding scripts in the `<body>`
+### Avoid loading avoiding your application scripts in the `<body>`
 
 When allowing inline scripts to run, mind that the `<body>` element is a default [main target](/main).
 If you include your global scripts at the end of your `<body>`, swapping the `<body>` will re-execute these scripts:

@@ -81,6 +81,14 @@ up.specUtil = (function() {
     }
   }
 
+  function staticFile(filename, { bustCache = false } = {}) {
+    let path = `/spec/files/${filename}`
+    if (bustCache) {
+      path = path + `?cache-buster=${Math.random().toString()}`
+    }
+    return path
+  }
+
   return {
     isDetached,
     isAttached,
@@ -91,5 +99,6 @@ up.specUtil = (function() {
     rootHasReducedWidthFromScrollbar,
     documentOverflowElement,
     assertTabFocused,
+    staticFile,
   }
 })()

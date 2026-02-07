@@ -184,11 +184,6 @@ up.fragment = (function() {
 
   @section Preprocessing
 
-    @param {boolean|Function(ScriptElement): boolean} [config.runScripts=false]
-      Whether to load or execute `<script>` tags in updated fragments.
-
-      See [Running inline `<script>` tags](/legacy-scripts#running-inline-script-tags) for details.
-
     @param {Function(string): string} [config.normalizeKeepHTML]
       A function that normalizes a HTML string before comparison with [`[up-keep="same-html"]`](/preserving-elements#same-html).
 
@@ -322,7 +317,6 @@ up.fragment = (function() {
     },
 
     match: 'region',
-    runScripts: false,
     autoHistoryTargets: [':main'],
     autoFocus: ['hash', 'autofocus', 'main-if-main', 'keep', 'target-if-lost'],
     autoScroll: ['hash', 'layer-if-main'],
@@ -955,7 +949,7 @@ up.fragment = (function() {
 
   function emitFragmentKeep({ oldElement, newElement: newFragment, newData, renderOptions }) {
     const log = ['Keeping fragment %o', oldElement]
-    const callback = e.callbackAttr(oldElement, 'up-on-keep', { exposedKeys: ['newFragment', 'newData'] })
+    const callback = up.script.callbackAttr(oldElement, 'up-on-keep', { expandObject: ['newFragment', 'newData'] })
     return up.emit(oldElement, 'up:fragment:keep', { log, callback, newFragment, newData, renderOptions })
   }
 
