@@ -1220,11 +1220,15 @@ up.element = (function() {
     }
  }
 
-  function callbackAttr(link, attr, callbackOptions) {
-    return parseAttr(link, attr, (value) => tryParseCallback(value, link, callbackOptions))
+  function callbackAttr(link, attr, parseFnOrOptions) {
+    return parseAttr(link, attr, (value) => {
+      let parsedCallback = u.isFunction(parseFnOrOptions) ? parseFnOrOptions(value) : parseCallback(value, parseFnOrOptions)
+      return parsedCallback.bind(link)
+    })
   }
 
-  function tryParseCallback(code, link, { exposedKeys = [], mainKey = 'event' } = {}) {
+  // TODO: Consider moving to up.script
+  function parseCallback(code, { mainKey = 'event', exposedKeys = [] } = {}) {
     // Users can prefix a CSP nonce like this: <a href="/path" up-on-loaded="nonce-kO52Iphm8B alert()">
     // In up.ResponseDoc#finalizeElement() we have rewritten the attribute nonce to the current page's nonce
     // IFF the attribute nonce matches the fragment response's nonce.
@@ -1236,7 +1240,7 @@ up.element = (function() {
 
       // Emulate the behavior of the `onclick` attribute,
       // where `this` refers to the clicked element.
-      return callback.call(link, event, ...exposedValues)
+      return callback.call(this, event, ...exposedValues)
     }
   }
 
@@ -1644,6 +1648,7 @@ up.element = (function() {
     numberAttr,
     jsonAttr,
     callbackAttr,
+    parseCallback,
     booleanOrStringAttr,
     booleanOrNumberAttr,
     booleanOrNumberOrStringAttr,

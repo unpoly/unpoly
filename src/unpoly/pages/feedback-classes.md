@@ -16,12 +16,12 @@ We have a link targeting a fragment `#target`:
 <a href="/path" up-target="#target">Link</a>
 
 <div id="target">
-  Inital content
+  Initial content
 </div>
 ```
 
-When the user clicks on the `/foo` link, the link is instantly assigned the `.up-active` class.
-The [targeted](/targeting-fragments) fragment (the `<main>` element) gets the `.up-loading` class:
+When the user clicks on the link, the link is instantly assigned the `.up-active` class.
+The [targeted](/targeting-fragments) fragment (the `#target` element) gets the `.up-loading` class:
 
 ```html
 <a href="/bar" up-target="#target" class="up-active">Bar</a> <!-- mark: class="up-active" -->
@@ -51,7 +51,7 @@ Once the response is received the `.up-active` and `.up-loading` classes are rem
 Feedback classes will also be removed if the request ends for any other reason,
 such as the [server rendering an error code](/failed-responses#fail-options)
 or when the request is [aborted](/aborting-requests). See [How previews end](/previews#ending)
-for more examples for what terminates a request.
+for more examples of what terminates a request.
 
 
 ## Conveying feedback with CSS styles {#styling}
@@ -86,8 +86,8 @@ You can show a hidden loading message while a form is submitting:
 ```
 
 If these CSS rules are not enough, see [Loading state](/loading-state) for a variety
-of other strategies. In particular [previews](/previews) give you access to both the origin and
-targeted elements, and allow to make arbitrary changes to the page while a request loading.
+of other strategies. In particular, [previews](/previews) give you access to both the origin and
+targeted elements, and allow you to make arbitrary changes to the page while a request is loading.
 
 
 ## Feedback when submitting forms {#form}
@@ -131,7 +131,7 @@ Sometimes a form is not submitted by pressing a submit button, but by interactin
 - A field with `[up-autosubmit]` is changed
 - A field with `[up-validate]` is changed
 
-In these cases that field is considered the [origin](/origin) element that
+In these cases, that field is considered the [origin](/origin) element that
 caused the submission. It is also marked as `.up-active`, in addition to the form and its default submit button:
 
 ```html
@@ -168,7 +168,7 @@ up.follow(link)
 ```
 
 In situations where Unpoly cannot guess the origin, you can pass it as an `{ origin }` option.
-For example, when button click causes a render pass, that button should be the origin:
+For example, when a button click causes a render pass, that button should be the origin:
 
 ```js
 up.on('click', '.my-button', function(event) {

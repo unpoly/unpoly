@@ -322,7 +322,7 @@ up.fragment = (function() {
     },
 
     match: 'region',
-    runScripts: false,
+    runScripts: false, // TODO: Maybe move to up.script.config.runBodyScripts to pair with config.runHeaderCallbacks
     autoHistoryTargets: [':main'],
     autoFocus: ['hash', 'autofocus', 'main-if-main', 'keep', 'target-if-lost'],
     autoScroll: ['hash', 'layer-if-main'],

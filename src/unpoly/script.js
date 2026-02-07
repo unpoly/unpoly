@@ -1005,28 +1005,38 @@ up.script = (function() {
   }
 
   function adoptNoncesInSubtree(root, responseNonces) {
-    let pageNonce = up.protocol.cspNonce()
-
-    if (!responseNonces?.length || !pageNonce) return
-
     for (let script of findScripts(root, '[nonce]')) {
-      if (responseNonces.includes(script.nonce)) {
-        script.nonce = pageNonce
-      }
+      updateNonce(script.nonce, responseNonces, (pageNonce) => script.nonce = pageNonce)
     }
 
     for (let attribute of config.nonceableAttributes) {
       let matches = e.subtree(root, `[${attribute}^="nonce-"]`)
       for (let match of matches) {
         let attributeValue = match.getAttribute(attribute)
-        let callback = up.NonceableCallback.fromString(attributeValue)
-        if (responseNonces.includes(callback.nonce)) {
-          callback.nonce = pageNonce
-          match.setAttribute(attribute, callback.toString())
-        }
+        updateNoncedScript(attributeValue, responseNonces, (newValue) => match.setAttribute(attribute, newValue))
       }
     }
   }
+
+  function adoptNoncesInJSON(json, nonceableProperties, responseNonces) {
+    for (let property of nonceableProperties) {
+      let value = json[property]
+      updateNoncedScript(value, responseNonces, (newValue) => json[property] = newValue)
+    }
+  }
+
+  function updateNonce(claimedNonce, responseNonces, updateFn) {
+    let pageNonce = up.protocol.cspNonce()
+    if (claimedNonce && responseNonces?.length && pageNonce && responseNonces.includes(claimedNonce)) {
+      updateFn(pageNonce)
+    }
+  }
+
+  function updateNoncedScript(noncedScript, responseNonces, updateFn) {
+    let callback = up.NonceableCallback.fromString(noncedScript)
+    updateNonce(callback.nonce, responseNonces, (pageNonce) => updateFn(callback.toString(pageNonce)))
+  }
+
   /*
   Resets the list of registered compiler directives to the
   moment when the framework was booted.
@@ -1052,6 +1062,7 @@ up.script = (function() {
     disableSubtree: disableScriptsInSubtree,
     adoptNoncesInSubtree,
     isScript,
+    findScripts,
   }
 })()
 

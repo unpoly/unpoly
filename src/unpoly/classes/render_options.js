@@ -1,4 +1,5 @@
 const u = up.util
+const e = up.element
 
 up.RenderOptions = (function() {
 
@@ -97,6 +98,27 @@ up.RenderOptions = (function() {
     'focus',
     'scroll',
   ]
+
+  const EVENT_CALLBACK = {} // default in up.element.parseCallback() is { mainKey: 'event' }
+  const RESULT_CALLBACK = { mainKey: 'result' }
+  const ERROR_CALLBACK = { mainKey: 'error' }
+  const OPEN_LAYER_CALLBACK = { exposedKeys: ['layer'] }
+  const CLOSE_LAYER_CALLBACK = { exposedKeys: ['layer', 'value', 'response'] }
+
+  const CALLBACKS = {
+    onLoaded: EVENT_CALLBACK,
+    onRendered: RESULT_CALLBACK,
+    onFinished: RESULT_CALLBACK,
+    onOffline: ERROR_CALLBACK,
+    onError: ERROR_CALLBACK,
+    onOpened: OPEN_LAYER_CALLBACK,
+    onDismissed: CLOSE_LAYER_CALLBACK,
+    onAccepted: CLOSE_LAYER_CALLBACK,
+  }
+  function parseCallback(key, code) {
+    let parseOpts = CALLBACKS[key] ?? up.fail(`Unknown callback { ${key} }`)
+    return e.parseCallback(code, parseOpts)
+  }
 
   function navigateDefaults(options) {
     if (options.navigate) {
@@ -244,6 +266,7 @@ up.RenderOptions = (function() {
     finalize,
     assertContentGiven,
     deriveFailOptions,
+    parseCallback,
     NO_PREVIEWS,
     NO_MOTION,
     NO_INPUT_INTERFERENCE,

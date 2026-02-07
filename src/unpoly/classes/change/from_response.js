@@ -183,7 +183,7 @@ up.Change.FromResponse = class FromResponse extends up.Change {
         layer: 'new',                          // Don't accept `X-Up-Open-Layer: { layer: 'parent' }`.
       })
 
-      Object.assign(renderOptions, openLayerOptions)
+      // Object.assign(renderOptions, openLayerOptions)
     }
 
     renderOptions.location = up.history.refineOption(renderOptions.location, serverLocation)
