@@ -67,6 +67,13 @@ up.script = (function() {
   @stable
   */
   const config = new up.Config(() => ({
+    allow: {
+      default: 'auto',
+      scriptElements: null,
+      attributeCallbacks: null,
+      headerCallbacks: null,
+    },
+
     assetSelectors: [
       'link[rel=stylesheet]',
       'script[src]',
