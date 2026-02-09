@@ -9,15 +9,24 @@ const STRATEGY_FNS = {
 
 up.ScriptAdopter = class ScriptAdopter {
 
-  constructor({ response, strategy }) {
-    this._response = response
-    this._strategy = this._resolveStrategy(strategy)
+  constructor(cspInfo) {
+    this._cspInfo = cspInfo
     this._pageNonce = up.protocol.cspNonce()
   }
 
-  adoptNewFragment(root) {
-    this._adoptScriptElements(root)
-    this._adoptAttributeCallbacks(root)
+  adoptNewFragment(fragment) {
+    this._adoptScriptElements(fragment, this._resolveStrategy(up.script.config.allow.scriptElements))
+    this._adoptAttributeCallbacks(fragment, this._resolveStrategy(up.script.config.allow.attributeCallbacks))
+  }
+
+
+  adoptDetachedAssets(assets) {
+    // (A) These assets are not normally going to be inserted into the page, but may emit up:assets:changed.
+    // (B) We need to adopt script[nonce] attributes for the comparison, and in case the user wants to insert manually.
+    // (C) We don't block untrusted scripts for the same reason.
+    for (let asset of assets) {
+      this._adoptScriptElements(asset, 'pass')
+    }
   }
 
   adoptRenderOptionsFromHeader(object) {
@@ -28,28 +37,25 @@ up.ScriptAdopter = class ScriptAdopter {
       if (/^on[A-Z]$/.test(key) && u.isString(script)) {
         let item = new ObjectPropertyItem(object, key)
         this._processItem(item, objectStrategy)
+        object[key] = up.RenderOptions.parseCallback(key, object[key])
       }
     }
   }
 
-  _adoptScriptElements(root) {
-    let scriptElementStrategy = this._resolveStrategy(up.script.config.allow.scriptElements)
-
+  _adoptScriptElements(root, strategy) {
     for (let script of up.script.findScripts(root)) {
       let item = new ScriptElementItem(script)
-      this._processItem(item, scriptElementStrategy)
+      this._processItem(item, strategy)
     }
   }
 
-  _adoptAttributeCallbacks(root) {
-    let attributeStrategy = this._resolveStrategy(up.script.config.allow.attributeCallbacks)
-
+  _adoptAttributeCallbacks(root, strategy) {
     // TODO: It is weird that we keep a list of callback options in RenderOptions, but the list of nonceable attrs is in up.script? Maybe at least move them together?
     for (let attribute of up.script.config.nonceableAttributes) {
       let matches = e.subtree(root, e.attrSelector(attribute))
       for (let element of matches) {
         let item = new AttributeItem(element, attribute)
-        this._processItem(item, attributeStrategy)
+        this._processItem(item, strategy)
       }
     }
   }
@@ -70,7 +76,7 @@ up.ScriptAdopter = class ScriptAdopter {
 
   _hasValidNonce(item) {
     let nonce = item.readNonce()
-    return nonce && ((this._pageNonce === nonce) || this._response?.cspInfo.nonces?.includes(nonce))
+    return nonce && ((this._pageNonce === nonce) || this._cspInfo?.nonces?.includes(nonce))
   }
 
   _resolveStrategy(strategy = up.script.config.allow.default) {
@@ -84,15 +90,14 @@ up.ScriptAdopter = class ScriptAdopter {
 
   _resolveAutoStrategy(strategy) {
     if (strategy === 'auto') {
-      // When the strategy is a constant `true` and also using strict-dynamic,
-      // we enforce a correct nonce. Otherwise we would allow all scripts (as strict-dynamic is viral,
-      // and Unpoly is already an allowed script).
+      // With a strict-dynamic CSP, it's a good idea to enforce nonces.
+      // Otherwise, we would allow *all* scripts as strict-dynamic is viral, and Unpoly is already an allowed script.
       return this._isStrictDynamicCSP() ? 'nonce' : 'pass'
     }
   }
 
   _isStrictDynamicCSP() {
-    return this._response?.cspInfo.declaration.includes("'strict-dynamic'")
+    return this._cspInfo?.declaration.includes("'strict-dynamic'")
   }
 
 }

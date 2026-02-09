@@ -1011,37 +1011,16 @@ up.script = (function() {
     return config.matches(value, 'scriptSelectors')
   }
 
-  function adoptNoncesInSubtree(root, responseNonces) {
-    for (let script of findScripts(root, '[nonce]')) {
-      updateNonce(script.nonce, responseNonces, (pageNonce) => script.nonce = pageNonce)
-    }
-
-    for (let attribute of config.nonceableAttributes) {
-      let matches = e.subtree(root, `[${attribute}^="nonce-"]`)
-      for (let match of matches) {
-        let attributeValue = match.getAttribute(attribute)
-        updateNoncedScript(attributeValue, responseNonces, (newValue) => match.setAttribute(attribute, newValue))
-      }
-    }
+  function adoptNewFragment(fragment, cspInfo) {
+    new up.ScriptAdopter(cspInfo).adoptNewFragment(fragment)
   }
 
-  function adoptNoncesInJSON(json, nonceableProperties, responseNonces) {
-    for (let property of nonceableProperties) {
-      let value = json[property]
-      updateNoncedScript(value, responseNonces, (newValue) => json[property] = newValue)
-    }
+  function adoptDetachedAssets(fragment, cspInfo) {
+    new up.ScriptAdopter(cspInfo).adoptDetachedAssets(fragment)
   }
 
-  function updateNonce(claimedNonce, responseNonces, updateFn) {
-    let pageNonce = up.protocol.cspNonce()
-    if (claimedNonce && responseNonces?.length && pageNonce && responseNonces.includes(claimedNonce)) {
-      updateFn(pageNonce)
-    }
-  }
-
-  function updateNoncedScript(noncedScript, responseNonces, updateFn) {
-    let callback = up.NonceableCallback.fromString(noncedScript)
-    updateNonce(callback.nonce, responseNonces, (pageNonce) => updateFn(callback.toString(pageNonce)))
+  function adoptRenderOptionsFromHeader(renderOptions, cspInfo) {
+    new up.ScriptAdopter(cspInfo).adoptRenderOptionsFromHeader(renderOptions)
   }
 
   /*
@@ -1067,7 +1046,9 @@ up.script = (function() {
     findAssets,
     assertAssetsOK,
     disableSubtree: disableScriptsInSubtree,
-    adoptNoncesInSubtree,
+    adoptNewFragment,
+    adoptRenderOptionsFromHeader,
+    adoptDetachedAssets,
     isScript,
     findScripts,
   }
