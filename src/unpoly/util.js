@@ -2050,20 +2050,10 @@ up.util = (function() {
     return message.replace(SPRINTF_PLACEHOLDERS, (placeholder) => stringifyArg(args.shift(), placeholder))
   }
 
-  // function shortTagDescriptor(element) {
-  //   let attrString = ''
-  //   for (let attr of ['id', 'up-id', 'name', 'class', 'action', 'href', 'src', 'type']) {
-  //     let value = element.getAttribute(attr)
-  //     if (isString(value)) {
-  //       attrString += ` ${attr}="${escapeHTML(value)}"`
-  //     }
-  //   }
-  //   return '<' + element.tagName.toLowerCase() + attrString + '>'
-  // }
-
   const SERIALIZED_TAG_PATTERN = /<("[^"]*"|[^">])*>/
 
-  // This could go in up.element, but we want up.util to not have any dependencies.
+  // This could go in up.element, but we want up.util to not have any dependencies
+  // so every other module can depend on up.util.
   function tagOuterHTML(element) {
     return element.cloneNode().outerHTML.match(SERIALIZED_TAG_PATTERN)[0]
   }

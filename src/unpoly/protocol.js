@@ -1144,8 +1144,6 @@ up.protocol = (function() {
     return u.evalOption(config.csrfToken)
   }
 
-  alert(document.currentScript?.nonce || 'unknown')
-
   // TODO: Consider moving to up.script
   function cspNonce() {
     return u.evalOption(config.cspNonce)
