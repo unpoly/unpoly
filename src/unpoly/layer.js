@@ -385,22 +385,6 @@ up.layer = (function() {
     return new Class(options)
   }
 
-  function parseOpenCallback(script) {
-    return e.parseCallback(script, { exposedKeys: ['layer'] })
-  }
-
-  function parseCloseCallback(script) {
-    return e.parseCallback(script, { exposedKeys: ['layer', 'value', 'response'] })
-  }
-
-  function openCallbackAttr(link, attr) {
-    return e.callbackAttr(link, attr, parseOpenCallback)
-  }
-
-  function closeCallbackAttr(link, attr) {
-    return e.callbackAttr(link, attr, parseCloseCallback)
-  }
-
   function reset() {
     stack.reset()
     handlers = u.filter(handlers, 'isDefault')
@@ -1244,8 +1228,6 @@ up.layer = (function() {
     build,
     ask,
     normalizeOptions,
-    openCallbackAttr,
-    closeCallbackAttr,
     anySelector,
     optionToString,
     get stack() { return stack.layers },

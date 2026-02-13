@@ -2,7 +2,7 @@ const e = up.element
 const u = up.util
 
 function logBlocked(scriptElementOrCallbackString) {
-  up.puts('up.script', 'Blocking script: %o', scriptElementOrCallbackString)
+  up.puts('up.script', 'Blocked script: %o', scriptElementOrCallbackString)
 }
 
 up.ScriptGate = class ScriptGate {
@@ -12,9 +12,21 @@ up.ScriptGate = class ScriptGate {
     this._pageNonce = up.protocol.cspNonce()
   }
 
-  verifyAndRunCallback(nonceableCallback, ...runArgs) {
-    if (!this._satisfiesPolicy(nonceableCallback.policy, nonceableCallback.nonce)) {
-      return nonceableCallback.runUnsafe(...runArgs)
+  evalCallback(nonceableCallback, evalEnv, policy) {
+    // There are multiple reasons why we explicitly check if a callback is allowed,
+    // instead of relying on the document's CSP checks:
+    //
+    // (A) The user might have configured a rejecting script policy in up.script.config.policy.
+    //     This policy might be stricter than the CSP, e.g. to prevent callbacks entirely.
+    // (B) While we proactively block scripts in new fragments, we may have unprocessed scripts
+    //     from the initial page load, or from an attacker that has some control over the HTML.
+    // (C) We might have a nonced callback, meaning we need to execute using a <script nonce> element.
+    //     With a viral strict-dynamic CSP the browser will happily let Unpoly execute *any* <script>,
+    //     even if a nonce is missing or incorrect. In this case we want to explicitly check for
+    //     a valid nonce. Otherwise an attacker could set an [up-on-loaded] callback with an incorrect nonce,
+    //     trigger <script nonce> execution and run arbitrary JavaScript.
+    if (!this._satisfiesPolicy(policy, nonceableCallback.nonce)) {
+      return nonceableCallback.unsafeEval(...evalEnv)
     } else {
       logBlocked(nonceableCallback.script)
     }
@@ -65,26 +77,6 @@ up.ScriptGate = class ScriptGate {
     }
   }
 
-  // _processItem(item, policy) {
-  //   // We need the nonce twice below. Only read it once for performance.
-  //   let nonce = item.readNonce()
-  //
-  //   if (this._satisfiesPolicy(policy, nonce)) {
-  //     // We always process nonced scripts by either rewriting or blocking them.
-  //     if (nonce) {
-  //       if (this._isValidNonce(nonce)) {
-  //         item.writeNonce(this._pageNonce)
-  //       } else {
-  //         item.block()
-  //       }
-  //     } else {
-  //       // Allow nonce-less item that fulfills policy
-  //     }
-  //   } else {
-  //     item.block()
-  //   }
-  // }
-
   _processItem(item, policy) {
     // We need the nonce twice below. Only read it once for performance.
     let nonce = item.readNonce()
@@ -99,7 +91,6 @@ up.ScriptGate = class ScriptGate {
     }
   }
 
-  // TODO: The method names sounds like it would already do the check. Should it do the check?
   _satisfiesPolicy(policy = up.script.config.policy.default, itemNonce) {
     if (policy === 'auto') {
       // With a strict-dynamic CSP, it's a good idea to enforce nonces.
@@ -184,7 +175,6 @@ class AttributeItem extends StringCallbackItem {
     this._element.setAttribute(this._attribute, newString)
   }
 
-
 }
 
 class ObjectPropertyItem extends StringCallbackItem {
@@ -221,7 +211,7 @@ class ScriptElementItem {
 
   block() {
     logBlocked(this._element)
-    this._element.type = 'up-blocked-script'
+    up.script.block(this._element)
   }
 
 }

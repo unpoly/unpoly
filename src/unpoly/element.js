@@ -1220,32 +1220,6 @@ up.element = (function() {
     }
  }
 
-  function callbackAttr(link, attr, parseFnOrOptions) {
-    return parseAttr(link, attr, (value) => {
-      let parsedCallback = u.isFunction(parseFnOrOptions)
-        ? parseFnOrOptions(value)
-        : parseCallback(value, { ...parseFnOrOptions, policy: up.script.config.attributeCallback })
-      return parsedCallback.bind(link)
-    })
-  }
-
-  // TODO: Consider moving to up.script
-  function parseCallback(code, { mainKey = 'event', exposedKeys = [], policy } = {}) {
-    // Users can prefix a CSP nonce like this: <a href="/path" up-on-loaded="nonce-kO52Iphm8B alert()">
-    // In up.ResponseDoc#finalizeElement() we have rewritten the attribute nonce to the current page's nonce
-    // IFF the attribute nonce matches the fragment response's nonce.
-    const callback = up.NonceableCallback.fromString(code, policy).toFunction(mainKey, ...exposedKeys)
-
-    return function(event) {
-      // Allow callbacks to refer to an exposed property directly instead of through `event.value`.
-      const exposedValues = Object.values(u.pick(event, exposedKeys))
-
-      // Emulate the behavior of the `onclick` attribute,
-      // where `this` refers to the clicked element.
-      return callback.call(this, event, ...exposedValues)
-    }
-  }
-
   function closestAttr(element, attr, readAttrFn = stringAttr) {
     let match = element.closest('[' + attr + ']')
     if (match) {
@@ -1649,8 +1623,7 @@ up.element = (function() {
     booleanAttr,
     numberAttr,
     jsonAttr,
-    callbackAttr,
-    parseCallback,
+    parseAttr,
     booleanOrStringAttr,
     booleanOrNumberAttr,
     booleanOrNumberOrStringAttr,

@@ -100,10 +100,10 @@ up.RenderOptions = (function() {
   ]
 
   const EVENT_CALLBACK = {} // default in up.element.parseCallback() is { mainKey: 'event' }
-  const RESULT_CALLBACK = { mainKey: 'result' }
-  const ERROR_CALLBACK = { mainKey: 'error' }
-  const OPEN_LAYER_CALLBACK = { exposedKeys: ['layer'] }
-  const CLOSE_LAYER_CALLBACK = { exposedKeys: ['layer', 'value', 'response'] }
+  const RESULT_CALLBACK = { argNames: ['result'] }
+  const ERROR_CALLBACK = { argNames: ['error'] }
+  const OPEN_LAYER_CALLBACK = { expandObject: ['layer'] }
+  const CLOSE_LAYER_CALLBACK = { expandObject: ['layer', 'value', 'response'] }
 
   const CALLBACKS = {
     onLoaded: EVENT_CALLBACK,
@@ -116,7 +116,6 @@ up.RenderOptions = (function() {
     onAccepted: CLOSE_LAYER_CALLBACK,
   }
   function parseCallback(key, code, policy) {
-    throw "Can't I check the policy right here?"
     let parseOpts = CALLBACKS[key] ?? up.fail(`Unknown callback { ${key} }`)
     return e.parseCallback(code, { ...parseOpts, policy })
   }

@@ -994,11 +994,9 @@ up.script = (function() {
   @stable
   */
 
-  function disableScriptsInSubtree(root, guard = () => true) {
+  function block(root) {
     for (let script of findScripts(root)) {
-      if (guard(script)) {
-        script.type = 'up-disabled-script'
-      }
+      script.type = 'up-blocked-script'
     }
   }
 
@@ -1011,10 +1009,6 @@ up.script = (function() {
     return config.matches(value, 'scriptSelectors')
   }
 
-  function isExistingCallbackAllowed(nonceableCallback) {
-    new up.ScriptGate().isExistingCallbackAllowed(nonceableCallback)
-  }
-
   function adoptNewFragment(fragment, cspInfo) {
     new up.ScriptGate(cspInfo).adoptNewFragment(fragment)
   }
@@ -1025,6 +1019,29 @@ up.script = (function() {
 
   function adoptRenderOptionsFromHeader(renderOptions, cspInfo) {
     new up.ScriptGate(cspInfo).adoptRenderOptionsFromHeader(renderOptions)
+  }
+
+  function callbackAttr(element, attrName, parseOpts) {
+    return e.parseAttr(element, attrName, (code) => {
+      let fn = parseCallback(code, { ...parseOpts, policy: config.policy.attributeCallback })
+      // Emulate the behavior of the `onclick` attribute, where `this` refers to the clicked element.
+      return fn.bind(element)
+    })
+  }
+
+  function parseCallback(code, { policy, argNames = ['event'], expandObject = false } = {}) {
+    // Return an unbound function so callers can bind to an object of their choice.
+    return function(...argValues) {
+      if (expandObject) {
+        let object = argValues[0]
+        argNames = [...argNames, ...expandObject]
+        argValues = [object, Object.values(u.pick(object, expandObject))]
+      }
+
+      const nonceableCallback = up.NonceableCallback.fromString(code)
+      const evalEnv = { thisContext: this, argNames, argValues }
+      return new up.ScriptGate().evalCallback(nonceableCallback, evalEnv, policy)
+    }
   }
 
   /*
@@ -1049,11 +1066,12 @@ up.script = (function() {
     data: readData,
     findAssets,
     assertAssetsOK,
-    disableSubtree: disableScriptsInSubtree,
+    block,
     adoptNewFragment,
     adoptRenderOptionsFromHeader,
     adoptDetachedAssets,
-    isExistingCallbackAllowed,
+    parseCallback,
+    callbackAttr,
     isScript,
     findScripts,
   }
