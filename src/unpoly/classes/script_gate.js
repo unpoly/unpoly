@@ -34,7 +34,7 @@ up.ScriptGate = class ScriptGate {
 
   adoptNewFragment(fragment) {
     this._adoptScriptElements(fragment, up.script.config.policy.bodyScript)
-    this._adoptAttributeCallbacks(fragment, up.script.config.policy.attributeCallback)
+    this._adoptAttrCallbacks(fragment, up.script.config.policy.attrCallback)
   }
 
   adoptDetachedAssets(assets) {
@@ -66,7 +66,7 @@ up.ScriptGate = class ScriptGate {
     }
   }
 
-  _adoptAttributeCallbacks(root, policy) {
+  _adoptAttrCallbacks(root, policy) {
     // TODO: It is weird that we keep a list of callback options in RenderOptions, but the list of nonceable attrs is in up.script? Maybe at least move them together?
     for (let attribute of up.script.config.nonceableAttributes) {
       let matches = e.subtree(root, e.attrSelector(attribute))

@@ -70,7 +70,7 @@ up.script = (function() {
     policy: {
       default: 'auto',
       bodyScript: null,
-      attributeCallback: null,
+      attrCallback: null,
       headerCallback: null,
     },
 
@@ -1023,7 +1023,7 @@ up.script = (function() {
 
   function callbackAttr(element, attrName, parseOpts) {
     return e.parseAttr(element, attrName, (code) => {
-      let fn = parseCallback(code, { ...parseOpts, policy: config.policy.attributeCallback })
+      let fn = parseCallback(code, { ...parseOpts, policy: config.policy.attrCallback })
       // Emulate the behavior of the `onclick` attribute, where `this` refers to the clicked element.
       return fn.bind(element)
     })
