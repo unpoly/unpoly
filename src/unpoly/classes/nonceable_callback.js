@@ -38,7 +38,7 @@ up.NonceableCallback = class NonceableCallback {
       // instead of relying on the document's CSP checks:
       //
       // (A) The user might have configured a rejecting script policy in up.script.config.policy.
-      //     This policy might be stricter than the CSP, e.g. to prevent body scripts from executing.
+      //     This policy might be stricter than the CSP, e.g. to prevent callbacks entirely.
       // (B) While we proactively block scripts in new fragments, we may have unprocessed scripts
       //     from the initial page load, or from an attacker that has some control over the HTML.
       // (C) We might have a nonced callback, meaning we need to execute using a <script nonce> element.
