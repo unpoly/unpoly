@@ -2004,6 +2004,7 @@ up.util = (function() {
 
       // In the browser console %o displays a string with quotes
       if (placeholder === '%o') {
+        // This adds quotes and will log line breaks as verbatim `\n`.
         string = JSON.stringify(string)
       }
     } else if (isUndefined(arg)) {
@@ -2016,14 +2017,7 @@ up.util = (function() {
     } else if (isJQuery(arg)) {
       string = `$(${map(arg, stringifyArg).join(', ')})`
     } else if (isElement(arg)) {
-      string = `<${arg.tagName.toLowerCase()}`
-      for (let attr of ['id', 'up-id', 'name', 'class']) {
-        let value = arg.getAttribute(attr)
-        if (value) {
-          string += ` ${attr}="${value}"`
-        }
-      }
-      string += ">"
+      string = tagOuterHTML(arg)
     } else if (isRegExp(arg) || isError(arg)) {
       string = arg.toString()
     } else { // object, null
@@ -2054,6 +2048,24 @@ up.util = (function() {
   */
   function sprintf(message, ...args) {
     return message.replace(SPRINTF_PLACEHOLDERS, (placeholder) => stringifyArg(args.shift(), placeholder))
+  }
+
+  // function shortTagDescriptor(element) {
+  //   let attrString = ''
+  //   for (let attr of ['id', 'up-id', 'name', 'class', 'action', 'href', 'src', 'type']) {
+  //     let value = element.getAttribute(attr)
+  //     if (isString(value)) {
+  //       attrString += ` ${attr}="${escapeHTML(value)}"`
+  //     }
+  //   }
+  //   return '<' + element.tagName.toLowerCase() + attrString + '>'
+  // }
+
+  const SERIALIZED_TAG_PATTERN = /<("[^"]*"|[^">])*>/
+
+  // This could go in up.element, but we want up.util to not have any dependencies.
+  function tagOuterHTML(element) {
+    return element.cloneNode().outerHTML.match(SERIALIZED_TAG_PATTERN)[0]
   }
 
   function negate(fn) {

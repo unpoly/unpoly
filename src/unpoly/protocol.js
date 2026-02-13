@@ -1124,10 +1124,13 @@ up.protocol = (function() {
     methodParam: '_method',
     csrfParam() { return e.metaContent('csrf-param') },
     csrfToken() { return e.metaContent('csrf-token') },
-    cspNonce() { return e.metaContent('csp-nonce') },
+    // TODO: Move config to up.script
+    cspNonce() { return e.metaContent('csp-nonce') ?? unpolyScriptNonce },
     csrfHeader: 'X-CSRF-Token', // Used by Rails. Other frameworks use different headers.
     maxHeaderSize: 2048,
   }))
+
+  const unpolyScriptNonce = document.currentScript?.nonce
 
   function csrfHeader() {
     return u.evalOption(config.csrfHeader)
@@ -1141,6 +1144,9 @@ up.protocol = (function() {
     return u.evalOption(config.csrfToken)
   }
 
+  alert(document.currentScript?.nonce || 'unknown')
+
+  // TODO: Consider moving to up.script
   function cspNonce() {
     return u.evalOption(config.cspNonce)
   }

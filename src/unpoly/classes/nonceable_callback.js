@@ -2,14 +2,15 @@ const e = up.element
 
 up.NonceableCallback = class NonceableCallback {
 
-  constructor(script, nonce) {
+  constructor(script, nonce, policy) {
     this.script = script
     this.nonce = nonce
+    this.policy = policy
   }
 
-  static fromString(string) {
+  static fromString(string, policy = 'block') {
     let match = string.match(/^(nonce-([^\s]+)\s)?(.*)$/)
-    return new this(match[3], match[2])
+    return new this(match[3], match[2], policy)
   }
 
   /*-
@@ -20,22 +21,40 @@ up.NonceableCallback = class NonceableCallback {
   ### Examples
 
   ```js
-  new up.NonceableCallback('1 + 2', 'secret').toFunction()
+  new up.NonceableCallback('1 + 2', 'secret', up.script.config.policy.default).toFunction()
   ```
 
   @function up.NonceableCallback#toFunction
   @internal
   */
   toFunction(...argNames) {
-    let script = this.script
+    // Don't return a bound function so callers can re-bind to a different this.
+    let me = this
+
+    // For performance reason we delay callback verification until the script is called.
+    // When parsing follow options on links we may parse a lot of callbacks, and most will never be used.
+    return function(...args) {
+      // There are multiple reasons why we explicitly check if a callback is allowed,
+      // instead of relying on the document's CSP checks:
+      //
+      // (A) The user might have configured a rejecting script policy in up.script.config.policy.
+      //     This policy might be stricter than the CSP, e.g. to prevent body scripts from executing.
+      // (B) While we proactively block scripts in new fragments, we may have unprocessed scripts
+      //     from the initial page load, or from an attacker that has some control over the HTML.
+      // (C) We might have a nonced callback, meaning we need to execute using a <script nonce> element.
+      //     With a viral strict-dynamic CSP the browser will happily let Unpoly execute *any* <script>,
+      //     even if a nonce is missing or incorrect. In this case we want to explicitly check for
+      //     a valid nonce. Otherwise an attacker could set an [up-on-loaded] callback with an incorrect nonce,
+      //     trigger <script nonce> execution and run arbitrary JavaScript.
+      return up.script.verifyAndRunCallback(me, argNames, this, args)
+    }
+  }
+
+  runUnsafe(...runArgs) {
     if (this.nonce) {
-      // Don't return a bound function so callers can re-bind to a different this.
-      let callbackThis = this
-      return function(...args) {
-        return callbackThis._runAsNoncedFunction(script, this, argNames, args)
-      }
+      return this._runAsScriptElement(...runArgs)
     } else {
-      return new Function(...argNames, script)
+      return this._runAsFunction(...runArgs)
     }
   }
 
@@ -43,11 +62,15 @@ up.NonceableCallback = class NonceableCallback {
     return `nonce-${this.nonce} ${this.script}`
   }
 
-  _runAsNoncedFunction(script, thisArg, argNames, args) {
+  _runAsFunction(argNames, thisArg, args) {
+    return new Function(...argNames, this.script).apply(thisArg, args)
+  }
+
+  _runAsScriptElement(argNames, thisArg, args) {
     let wrappedScript = `
       try {
         up.noncedEval.value = (function(${argNames.join()}) {
-          ${script}
+          ${this.script}
         }).apply(up.noncedEval.thisArg, up.noncedEval.args)
       } catch (error) {
         up.noncedEval.error = error
@@ -65,9 +88,7 @@ up.NonceableCallback = class NonceableCallback {
       }
     } finally {
       up.noncedEval = undefined
-      if (scriptElement) {
-        scriptElement.remove()
-      }
+      scriptElement?.remove()
     }
   }
 

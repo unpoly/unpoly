@@ -67,11 +67,11 @@ up.script = (function() {
   @stable
   */
   const config = new up.Config(() => ({
-    allow: {
+    policy: {
       default: 'auto',
-      scriptElements: null,
-      attributeCallbacks: null,
-      headerCallbacks: null,
+      bodyScript: null,
+      attributeCallback: null,
+      headerCallback: null,
     },
 
     assetSelectors: [
@@ -1011,16 +1011,20 @@ up.script = (function() {
     return config.matches(value, 'scriptSelectors')
   }
 
+  function isExistingCallbackAllowed(nonceableCallback) {
+    new up.ScriptGate().isExistingCallbackAllowed(nonceableCallback)
+  }
+
   function adoptNewFragment(fragment, cspInfo) {
-    new up.ScriptAdopter(cspInfo).adoptNewFragment(fragment)
+    new up.ScriptGate(cspInfo).adoptNewFragment(fragment)
   }
 
   function adoptDetachedAssets(fragment, cspInfo) {
-    new up.ScriptAdopter(cspInfo).adoptDetachedAssets(fragment)
+    new up.ScriptGate(cspInfo).adoptDetachedAssets(fragment)
   }
 
   function adoptRenderOptionsFromHeader(renderOptions, cspInfo) {
-    new up.ScriptAdopter(cspInfo).adoptRenderOptionsFromHeader(renderOptions)
+    new up.ScriptGate(cspInfo).adoptRenderOptionsFromHeader(renderOptions)
   }
 
   /*
@@ -1049,6 +1053,7 @@ up.script = (function() {
     adoptNewFragment,
     adoptRenderOptionsFromHeader,
     adoptDetachedAssets,
+    isExistingCallbackAllowed,
     isScript,
     findScripts,
   }

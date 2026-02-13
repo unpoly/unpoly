@@ -63,7 +63,7 @@ up.OptionsParser = class OptionsParser {
   // }
 
   renderCallback(key, keyOptions = {}) {
-    let codeParser = (code) => up.RenderOptions.parseCallback(key, code)
+    let codeParser = (code) => up.RenderOptions.parseCallback(key, code, up.script.config.policy.attributeCallback)
     let attrReader = (link, attr) => e.callbackAttr(link, attr, codeParser)
     this.parse(attrReader, key, keyOptions)
   }
