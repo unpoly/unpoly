@@ -91,7 +91,9 @@ up.ScriptGate = class ScriptGate {
     }
   }
 
-  _satisfiesPolicy(policy = up.script.config.policy.default, itemNonce) {
+  _satisfiesPolicy(policy, itemNonce) {
+    policy ??= up.script.config.policy.default
+
     if (policy === 'auto') {
       // With a strict-dynamic CSP, it's a good idea to enforce nonces.
       // Otherwise, we would allow *all* scripts as strict-dynamic is viral, and Unpoly is already an allowed script.

@@ -298,8 +298,9 @@ describe('up.script', function() {
             expect(spy.calls.argsFor(1)[0]).toBe(overlayElement)
           })
 
-          it('does not compile elements twice if the new fragment contains a <script> that defines a new compiler', function() {
+          it('compile elements once (not twice) if the new fragment contains a <script> that defines a new compiler', function() {
             up.fragment.config.runScripts = true
+            up.script.config.policy.default = 'pass'
 
             const container = fixture('.container')
             const element = e.affix(container, '.element', { text: 'old text' })
@@ -307,13 +308,13 @@ describe('up.script', function() {
             window.compileSpy = jasmine.createSpy('compile spy')
 
             up.render({ fragment: `
-            <div class="container">
-              <div class="element">new text</div>
-              <script nonce="specs-nonce">
-                up.compiler('.element', (element) => window.compileSpy(element))
-              </script>
-            </div>
-          ` })
+              <div class="container">
+                <div class="element">new text</div>
+                <script nonce="specs-nonce">
+                  up.compiler('.element', (element) => window.compileSpy(element))
+                </script>
+              </div>
+            ` })
 
             expect(window.compileSpy.calls.count()).toBe(1)
 
