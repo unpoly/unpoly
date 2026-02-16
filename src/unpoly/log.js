@@ -46,6 +46,7 @@ up.log = (function() {
   Prints a logging message to the browser console.
 
   @function up.puts
+  @param {string} context
   @param {string} message
   @param {Array} ...args
   @internal
