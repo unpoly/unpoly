@@ -66,6 +66,8 @@ up.browser = (function() {
     }
   }
 
+  const ownCSPNonce = document.currentScript?.nonce
+
   /*-
   @return {boolean}
   @function up.browser.ensureConfirmed
@@ -87,5 +89,6 @@ up.browser = (function() {
     canJQuery,
     assertConfirmed,
     popCookie,
+    ownCSPNonce() { return ownCSPNonce }
   }
 })()

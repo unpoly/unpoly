@@ -94,11 +94,7 @@ up.ScriptGate = class ScriptGate {
   _satisfiesPolicy(policy, itemNonce) {
     policy ??= up.script.config.policy.default
 
-    if (policy === 'auto') {
-      // With a strict-dynamic CSP, it's a good idea to enforce nonces.
-      // Otherwise, we would allow *all* scripts as strict-dynamic is viral, and Unpoly is already an allowed script.
-      policy = this._isStrictDynamicCSP() ? 'nonce' : 'pass'
-    }
+    if (policy === 'auto') policy = this._resolveAutoPolicy()
 
     switch (policy) {
       // Always pass. Script must pass CSP.
@@ -113,6 +109,18 @@ up.ScriptGate = class ScriptGate {
       case 'nonce': return this._isValidNonce(itemNonce)
 
       default: up.fail('Unknown script policy: %o', policy)
+    }
+  }
+
+  _resolveAutoPolicy() {
+    // (A) With a strict-dynamic CSP, it's a good idea to enforce nonces in the new content.
+    //     Otherwise, we would allow *all* scripts as strict-dynamic is viral, and Unpoly is already an allowed script.
+    // (B) Don't assume 'nonce' when we see a <meta name="csp-nonce">. The user might want to provide
+    //     a nonce for Unpoly callbacks, but still use a hostname-based allowlist.
+    if (this._isStrictDynamicCSP()) {
+      return 'nonce'
+    } else {
+      return 'pass'
     }
   }
 
