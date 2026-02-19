@@ -64,6 +64,12 @@ up.script = (function() {
     @param {Array<string} [config.noScriptSelectors]
       Exceptions to `up.script.config.scriptSelectors`.
 
+    @param {string} [config.evalCallbackPolicy='auto']
+      Whether Unpoly will [run callbacks in HTML attributes](/script-security#callbacks) like (`[up-on-loaded]`)(/up-follow#up-on-loaded).
+
+    @param {string} [config.scriptElementPolicy='auto']
+      Whether Unpoly will [run `<script>` elements in ewn fragments](/script-security#script-elements).
+
     @param {string|Function(): string} [config.cspNonce]
       A [CSP script nonce](https://content-security-policy.com/nonce/)
       for the initial page that [booted](/up.boot) Unpoly.
@@ -80,17 +86,15 @@ up.script = (function() {
       <meta name='csp-nonce' content='secret4367243'>
       ```
 
-   @param {string} [config.evalCallbackPolicy='auto']
-     Whether Unpoly will [run callbacks in HTML attributes](/script-security#callbacks) like (`[up-on-loaded]`)(/up-follow#up-on-loaded).
-
-   @param {string} [config.scriptElementPolicy='auto']
-     Whether Unpoly will [run `<script>` elements in ewn fragments](/script-security#script-elements).
+    @param {boolean} [config.cspWarnings=true]
+      Whether Unpoly will print a warning when it observes a potentially unsafe `Content-Security-Policy` header.
 
   @property up.script.config
   @stable
   */
   const config = new up.Config(() => ({
     cspNonce() { return e.metaContent('csp-nonce') },
+    cspWarnings: true,
     scriptElementPolicy: 'auto',
     evalCallbackPolicy: 'auto',
     assetSelectors: [

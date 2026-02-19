@@ -11,8 +11,10 @@ up.ScriptGate = class ScriptGate {
   }
 
   warnOfUnsafeCSP() {
-    this._evalCallbackPolicy.warnOfUnsafeCSP()
-    this._scriptElementPolicy.warnOfUnsafeCSP()
+    if (up.script.config.cspWarnings) {
+      this._evalCallbackPolicy.warnOfUnsafeCSP()
+      this._scriptElementPolicy.warnOfUnsafeCSP()
+    }
   }
 
   evalCallback(nonceableCallback, evalEnv) {
@@ -100,7 +102,7 @@ class Policy {
   }
 
   hasCSP(str) {
-    return this._cspInfo?.declaration.includes(str)
+    return this._cspInfo?.declaration?.includes(str)
   }
 
   resolveAuto() {
