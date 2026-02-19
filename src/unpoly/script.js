@@ -13,6 +13,7 @@ for details.
 @see data
 @see legacy-scripts
 @see handling-asset-changes
+@see script-security
 
 @see up.compiler
 @see [up-data]

@@ -6,6 +6,7 @@ This page explains how Unpoly's scripting facilities affect security, and how to
 Unpoly extends HTML with [attributes that contain JavaScript](#callbacks), and might also run [`<script>` elements in new fragments](#script-elements). An existing Content Security Policy is generally honored. You can configure Unpoly to be more permissive or more restrictive when executing scripts.
 
 
+<!--
 General advice
 --------------
 
@@ -29,7 +30,7 @@ This is a not a replacement for [escaping untrusted strings](#escape-html), but 
 
 When user input can contain HTML (e.g. from a WYSIWYG editor), you cannot escape it for rendering.
 You must instead sanitize it against a list of allowed tags, attributes and URL protocols.
-
+-->
 
 Callbacks {#callbacks}
 ------------------
@@ -77,13 +78,14 @@ You can configure a stricter behavior with `up.script.config.evalCallbackPolicy`
 
 ### Running callbacks with a strict CSP {#callback-with-strict-csp}
 
-When your CSP disallows `eval()`, Unpoly cannot directly run scripts in HTML attributes. For example, the following callback will crash the fragment update with an error like `Uncaught EvalError: call to Function() blocked by CSP`:
+When your CSP doesn't allow `unsafe-eval`, callbacks like `[up-on-loaded]` will fail with an error like this:
 
-```html
-<a href="/path" up-follow up-on-loaded="alert()">Click me</a>
+```text
+Uncaught EvalError: call to Function() blocked by CSP`
 ```
 
-You can address this by [prefixing callback nonces](#callback-nonces) or by [replacing callbacks with event listeners](#listener-for-callback).
+You can address this by [prefixing callback nonces](#callback-nonces)
+or by [replacing callbacks with event listeners](#listener-for-callback).
 
 
 ### Restricting callbacks with nonces {#callback-nonces}

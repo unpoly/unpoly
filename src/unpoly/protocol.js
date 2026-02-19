@@ -27,7 +27,6 @@ There are existing implementations for various web frameworks:
 
 @see optimizing-responses
 @see conditional-requests
-@see csp
 
 @module up.protocol
 */
@@ -1082,7 +1081,7 @@ up.protocol = (function() {
 
       The nonce lets Unpoly run JavaScript in HTML attributes like
       [`[up-on-loaded]`](/up-follow#up-on-loaded) or [`[up-on-accepted]`](/up-layer-new#up-on-accepted).
-      See [Working with a strict Content Security Policy](/csp).
+      See [Restricting callbacks with nonces](/script-security#callback-nonces).
 
       The nonce can either be configured as a string or as a function that returns the nonce.
 
@@ -1124,6 +1123,7 @@ up.protocol = (function() {
     methodParam: '_method',
     csrfParam() { return e.metaContent('csrf-param') },
     csrfToken() { return e.metaContent('csrf-token') },
+    // TODO: Let's move config.cspNonce() to up.script.config after all
     cspNonce() { return e.metaContent('csp-nonce') },
     csrfHeader: 'X-CSRF-Token', // Used by Rails. Other frameworks use different headers.
     maxHeaderSize: 2048,
