@@ -85,3 +85,18 @@ If no timestamp is known, Unpoly will send a value of zero (`X-Up-Reload-From-Ti
 @stable
 */
 
+up.protocol.config.patch(function() {
+  const cspNonceMoved = () => up.migrate.deprecated('up.protocol.config.cspNonce', 'up.script.config.cspNonce')
+
+  Object.defineProperty(this, 'cspNonce', {
+    configurable: true,
+    get() {
+      cspNonceMoved()
+      return up.script.config.cspNonce
+    },
+    set(value) {
+      cspNonceMoved()
+      up.script.config.cspNonce = value
+    }
+  })
+})

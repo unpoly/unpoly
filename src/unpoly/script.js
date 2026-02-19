@@ -64,13 +64,35 @@ up.script = (function() {
     @param {Array<string} [config.noScriptSelectors]
       Exceptions to `up.script.config.scriptSelectors`.
 
+    @param {string|Function(): string} [config.cspNonce]
+      A [CSP script nonce](https://content-security-policy.com/nonce/)
+      for the initial page that [booted](/up.boot) Unpoly.
+
+      The nonce lets Unpoly run JavaScript in HTML attributes like
+      [`[up-on-loaded]`](/up-follow#up-on-loaded) or [`[up-on-accepted]`](/up-layer-new#up-on-accepted).
+      See [Restricting callbacks with nonces](/script-security#callback-nonces).
+
+      The nonce can either be configured as a string or as a function that returns the nonce.
+
+      Defaults to the `content` attribute of a `<meta>` tag named `csp-nonce`:
+
+      ```
+      <meta name='csp-nonce' content='secret4367243'>
+      ```
+
+   @param {string} [config.evalCallbackPolicy='auto']
+     Whether Unpoly will [run callbacks in HTML attributes](/script-security#callbacks) like (`[up-on-loaded]`)(/up-follow#up-on-loaded).
+
+   @param {string} [config.scriptElementPolicy='auto']
+     Whether Unpoly will [run `<script>` elements in ewn fragments](/script-security#script-elements).
+
   @property up.script.config
   @stable
   */
   const config = new up.Config(() => ({
+    cspNonce() { return e.metaContent('csp-nonce') },
     scriptElementPolicy: 'auto',
     evalCallbackPolicy: 'auto',
-
     assetSelectors: [
       'link[rel=stylesheet]',
       'script[src]',

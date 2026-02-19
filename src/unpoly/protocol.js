@@ -1074,23 +1074,6 @@ up.protocol = (function() {
       <meta name='csrf-token' content='secret12345'>
       ```
 
-  @section CSP
-    @param {string|Function(): string} [config.cspNonce]
-      A [CSP script nonce](https://content-security-policy.com/nonce/)
-      for the initial page that [booted](/up.boot) Unpoly.
-
-      The nonce lets Unpoly run JavaScript in HTML attributes like
-      [`[up-on-loaded]`](/up-follow#up-on-loaded) or [`[up-on-accepted]`](/up-layer-new#up-on-accepted).
-      See [Restricting callbacks with nonces](/script-security#callback-nonces).
-
-      The nonce can either be configured as a string or as a function that returns the nonce.
-
-      Defaults to the `content` attribute of a `<meta>` tag named `csp-nonce`:
-
-      ```
-      <meta name='csp-nonce' content='secret4367243'>
-      ```
-
   @section Method wrapping
     @param {string} [config.methodParam='_method']
       The name of request parameter containing the original request method when Unpoly needs to
@@ -1124,7 +1107,6 @@ up.protocol = (function() {
     csrfParam() { return e.metaContent('csrf-param') },
     csrfToken() { return e.metaContent('csrf-token') },
     // TODO: Let's move config.cspNonce() to up.script.config after all
-    cspNonce() { return e.metaContent('csp-nonce') },
     csrfHeader: 'X-CSRF-Token', // Used by Rails. Other frameworks use different headers.
     maxHeaderSize: 2048,
   }))
