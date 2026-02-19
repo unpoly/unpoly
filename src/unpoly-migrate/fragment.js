@@ -246,25 +246,30 @@ up.migrate.resolveOrigin = function(target, { origin } = {}) {
 }
 
 up.fragment.config.patch(function() {
-  this.runScriptsValue = this.runScripts
-  this.runScriptsSet = false
-
   Object.defineProperty(this, 'runScripts', {
     configurable: true,
     get() {
-      return this.runScriptsValue
+      up.migrate.deprecated('up.fragment.config.runScripts', 'up.script.config.scriptElementPolicy = "auto"')
+      switch(up.script.config.scriptElementPolicy) {
+        case 'auto': return true
+        case 'pass': return true
+        case 'block': return false
+        case 'nonce': return (script) => !!script.nonce
+      }
     },
     set(value) {
-      this.runScriptsValue = value
-      this.runScriptsSet = true
+      if (value === true) {
+        up.migrate.deprecated('up.fragment.config.runScripts = true', 'up.script.config.scriptElementPolicy = "auto"')
+        up.script.config.scriptElementPolicy = 'auto'
+      } else if (value === false) {
+        up.migrate.deprecated('up.fragment.config.runScripts = false', 'up.script.config.scriptElementPolicy = "block"')
+        up.script.config.scriptElementPolicy = 'block'
+      } else if (u.isFunction(value)) {
+        up.migrate.warn('up.fragment.config.runScripts has been replaced by up.script.config.scriptElementPolicy, but no longer supports a function value.')
+        up.script.config.scriptElementPolicy = 'block'
+      }
     }
   })
-})
-
-up.on('up:framework:boot', function() {
-  if (!up.fragment.config.runScriptsSet) {
-    up.migrate.warn('Scripts within fragments are no longer executed. Configure up.fragment.config.runScripts to remove this warning.')
-  }
 })
 
 // up.compiler('[up-keep]:not([up-keep=true]):not([up-keep=""])', function(element) {

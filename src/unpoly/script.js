@@ -67,12 +67,8 @@ up.script = (function() {
   @stable
   */
   const config = new up.Config(() => ({
-    policy: {
-      default: 'auto',
-      bodyScript: null,
-      attrCallback: null,
-      headerCallback: null,
-    },
+    scriptElementPolicy: 'auto',
+    evalCallbackPolicy: 'auto',
 
     assetSelectors: [
       'link[rel=stylesheet]',
@@ -1029,7 +1025,7 @@ up.script = (function() {
     })
   }
 
-  function parseCallback(code, { policy, argNames = ['event'], expandObject = false } = {}) {
+  function parseCallback(code, { argNames = ['event'], expandObject = false } = {}) {
     // Return an unbound function so callers can bind to an object of their choice.
     return function(...argValues) {
       if (expandObject) {
@@ -1040,8 +1036,12 @@ up.script = (function() {
 
       const nonceableCallback = up.NonceableCallback.fromString(code)
       const evalEnv = { thisContext: this, argNames, argValues }
-      return new up.ScriptGate().evalCallback(nonceableCallback, evalEnv, policy)
+      return new up.ScriptGate().evalCallback(nonceableCallback, evalEnv)
     }
+  }
+
+  function warnOfUnsafeCSP(cspInfo) {
+    new up.ScriptGate(cspInfo).warnOfUnsafeCSP()
   }
 
   /*
@@ -1071,6 +1071,7 @@ up.script = (function() {
     adoptRenderOptionsFromHeader,
     adoptDetachedAssets,
     parseCallback,
+    warnOfUnsafeCSP,
     callbackAttr,
     isScript,
     findScripts,

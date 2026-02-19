@@ -1,18 +1,23 @@
 const e = up.element
 const u = up.util
 
-function logBlocked(scriptElementOrCallbackString) {
-  up.puts('up.script', 'Blocked script: %o', scriptElementOrCallbackString)
-}
-
 up.ScriptGate = class ScriptGate {
 
   constructor(cspInfo) {
     this._cspInfo = cspInfo
     this._pageNonce = up.protocol.cspNonce()
+    this._evalCallbackPolicy = new EvalCallbackPolicy(this._pageNonce, this._cspInfo)
+    this._scriptElementPolicy = new ScriptElementPolicy(this._pageNonce, this._cspInfo)
   }
 
-  evalCallback(nonceableCallback, evalEnv, policy) {
+  warnOfUnsafeCSP() {
+    this._evalCallbackPolicy.warnOfUnsafeCSP()
+    this._scriptElementPolicy.warnOfUnsafeCSP()
+  }
+
+  evalCallback(nonceableCallback, evalEnv) {
+    const policy = this._evalCallbackPolicy
+
     // There are multiple reasons why we explicitly check if a callback is allowed,
     // instead of relying on the document's CSP checks:
     //
@@ -25,16 +30,17 @@ up.ScriptGate = class ScriptGate {
     //     even if a nonce is missing or incorrect. In this case we want to explicitly check for
     //     a valid nonce. Otherwise an attacker could set an [up-on-loaded] callback with an incorrect nonce,
     //     trigger <script nonce> execution and run arbitrary JavaScript.
-    if (!this._satisfiesPolicy(policy, nonceableCallback.nonce)) {
+    if (!policy.passesItem(nonceableCallback.nonce)) {
       return nonceableCallback.unsafeEval(...evalEnv)
     } else {
-      logBlocked(nonceableCallback.script)
+      // We don't change the DOM in this path. We only refuse to eval and log the refusal.
+      policy.logBlocked(['Blocked callback: %o', nonceableCallback.script])
     }
   }
 
   adoptNewFragment(fragment) {
-    this._adoptScriptElements(fragment, up.script.config.policy.bodyScript)
-    this._adoptAttrCallbacks(fragment, up.script.config.policy.attrCallback)
+    this._adoptScriptElements(fragment)
+    this._adoptAttrCallbacks(fragment)
   }
 
   adoptDetachedAssets(assets) {
@@ -47,56 +53,81 @@ up.ScriptGate = class ScriptGate {
   }
 
   adoptRenderOptionsFromHeader(object) {
-    let policy = up.script.config.policy.headerCallback
+    let policy = this._evalCallbackPolicy
 
     for (let key of Object.keys(object)) {
       let script = object[key]
       if (/^on[A-Z]$/.test(key) && u.isString(script)) {
         let item = new ObjectPropertyItem(object, key)
-        this._processItem(item, policy)
-        object[key] = up.RenderOptions.parseCallback(key, object[key], policy)
+        policy.processItem(item)
+        object[key] = up.RenderOptions.parseCallback(key, object[key])
       }
     }
   }
 
-  _adoptScriptElements(root, policy) {
+  _adoptScriptElements(root) {
+    const policy = this._scriptElementPolicy
+
     for (let script of up.script.findScripts(root)) {
-      let item = new ScriptElementItem(script, policy)
-      this._processItem(item, policy)
+      let item = new ScriptElementItem(script)
+      policy.processItem(item)
     }
   }
 
-  _adoptAttrCallbacks(root, policy) {
+  _adoptAttrCallbacks(root) {
+    const policy = this._evalCallbackPolicy
+
     // TODO: It is weird that we keep a list of callback options in RenderOptions, but the list of nonceable attrs is in up.script? Maybe at least move them together?
     for (let attribute of up.script.config.nonceableAttributes) {
       let matches = e.subtree(root, e.attrSelector(attribute))
       for (let element of matches) {
         let item = new AttributeItem(element, attribute, policy)
-        this._processItem(item, policy)
+        policy.processItem(item)
       }
     }
   }
 
-  _processItem(item, policy) {
+}
+
+class Policy {
+
+  constructor(configProp, pageNonce, cspInfo) {
+    this._configProp = configProp
+    const policyString = up.script.config[configProp]
+    this._policyString = (policyString === 'auto' ? this.resolveAuto() : policyString)
+    this.pageNonce = pageNonce
+    this._cspInfo = cspInfo
+  }
+
+  hasCSP(str) {
+    return this._cspInfo?.declaration.includes(str)
+  }
+
+  resolveAuto() {
+    throw new up.NotImplemented()
+  }
+
+  warnOfUnsafeCSP() {
+    throw new up.NotImplemented()
+  }
+
+  processItem(item) {
     // We need the nonce twice below. Only read it once for performance.
     let nonce = item.readNonce()
-    let blocked = !this._satisfiesPolicy(policy, nonce)
+    let blocked = !this.passesItem(nonce)
 
     if (blocked) {
       // (A) Script elements need to be blocked on adoption, as inserting a script immediately executes them.
       // (B) Callback strings will get another check during execution. We still block them during adoption for debuggability.
+      this.logBlocked(...item.logBlockedDescriptor())
       item.block()
     } else if (nonce) {
-      item.writeNonce(this._pageNonce)
+      item.writeNonce(this.pageNonce)
     }
   }
 
-  _satisfiesPolicy(policy, itemNonce) {
-    policy ??= up.script.config.policy.default
-
-    if (policy === 'auto') policy = this._resolveAutoPolicy()
-
-    switch (policy) {
+  passesItem(itemNonce) {
+    switch (this._policyString) {
       // Always pass. Script must pass CSP.
       // Bad idea for a strict-dynamic CSP, which allows everything.
       case 'pass': return true
@@ -105,40 +136,83 @@ up.ScriptGate = class ScriptGate {
       case 'block': return false
 
       // Block any non-nonced scripts.
-      // Nonced scripts will be validated (or blocked) in _processItem().
+      // Nonces will be checked in processItem().
       case 'nonce': return this._isValidNonce(itemNonce)
 
-      default: up.fail('Unknown script policy: %o', policy)
+      default: up.fail('Unknown policy: %s = %o', this.configExpression(), this._policyString)
     }
   }
 
-  _resolveAutoPolicy() {
-    // (A) With a strict-dynamic CSP, it's a good idea to enforce nonces in the new content.
-    //     Otherwise, we would allow *all* scripts as strict-dynamic is viral, and Unpoly is already an allowed script.
-    // (B) Don't assume 'nonce' when we see a <meta name="csp-nonce">. The user might want to provide
-    //     a nonce for Unpoly callbacks, but still use a hostname-based allowlist.
-    if (this._isStrictDynamicCSP()) {
+  logBlocked(...descriptorArgs) {
+    up.puts(this.configExpression(), ...descriptorArgs)
+  }
+
+  _isValidNonce(nonce) {
+    return nonce && ((this.pageNonce === nonce) || this._cspInfo?.nonces?.includes(nonce))
+  }
+
+  configExpression() {
+    return 'up.script.config.' + this._configProp
+  }
+
+}
+
+class EvalCallbackPolicy extends Policy {
+
+  constructor(...args) {
+    super('evalCallbackPolicy', ...args)
+  }
+
+  resolveAuto() {
+    // When the user inserted a <meta name="csp-nonce">, we assume their intent is to
+    // enforce nonces for any callback.
+    if (this.pageNonce) {
       return 'nonce'
     } else {
       return 'pass'
     }
   }
 
-  _isValidNonce(nonce) {
-    return nonce && ((this._pageNonce === nonce) || this._cspInfo?.nonces?.includes(nonce))
-  }
-
-  _isStrictDynamicCSP() {
-    return this._cspInfo?.declaration.includes("'strict-dynamic'")
+  warnOfUnsafeCSP() {
+    if (this.hasCSP("'unsafe-eval'")) {
+      up.warn(`An 'unsafe-eval' CSP allows arbitrary [up-on...] callbacks. Consider setting ${this.configExpression()} = 'nonce'.`)
+    }
   }
 
 }
 
-class StringCallbackItem {
+class ScriptElementPolicy extends Policy {
 
-  constructor(policy) {
-    this.policy = policy
+  constructor(...args) {
+    super('scriptElementPolicy', ...args)
   }
+
+  _hasStrictDynamic() {
+    return this.hasCSP("'strict-dynamic'")
+  }
+
+  resolveAuto() {
+    // (A) With a strict-dynamic CSP, it's a good idea to enforce nonces in the new content.
+    //     Otherwise, we would allow *all* scripts as strict-dynamic is viral, and Unpoly is already an allowed script.
+    // (B) Don't assume 'nonce' when we see a <meta name="csp-nonce">. The user might want to provide
+    //     a nonce for Unpoly callbacks, but still use a hostname-based allowlist.
+    if (this._hasStrictDynamic()) {
+      return 'nonce'
+    } else {
+      return 'pass'
+    }
+  }
+
+  warnOfUnsafeCSP() {
+    if (this._hasStrictDynamic()) {
+      up.warn(`A 'strict-dynamic' CSP allows arbitrary <script> elements in new fragments. Consider setting ${this.configExpression()} = 'nonce'.`)
+    }
+  }
+
+}
+
+
+class StringCallbackItem {
 
   readNonce() {
     return this._getCallback().nonce
@@ -151,11 +225,14 @@ class StringCallbackItem {
   }
 
   _getCallback() {
-    return this._cacheCallback ||= up.NonceableCallback.fromString(this.readCallbackString(), this.policy)
+    return this._cacheCallback ||= up.NonceableCallback.fromString(this.readCallbackString())
+  }
+
+  logBlockedDescriptor() {
+    throw new up.NotImplemented()
   }
 
   block() {
-    logBlocked(this._getCallback().script)
     this.writeCallbackString('/* blocked */')
   }
 
@@ -171,10 +248,14 @@ class StringCallbackItem {
 
 class AttributeItem extends StringCallbackItem {
 
-  constructor(element, attribute, policy) {
-    super(policy)
+  constructor(element, attribute) {
+    super()
     this._element = element
     this._attribute = attribute
+  }
+
+  logBlockedDescriptor() {
+    return ['Blocked callback attribute: %s', e.attrSelector(this._attribute, this.readCallbackString())]
   }
 
   readCallbackString() {
@@ -189,10 +270,14 @@ class AttributeItem extends StringCallbackItem {
 
 class ObjectPropertyItem extends StringCallbackItem {
 
-  constructor(object, key, policy) {
-    super(policy)
+  constructor(object, key) {
+    super()
     this._object = object
     this._key = key
+  }
+
+  logBlockedDescriptor() {
+    return ['Blocked string callback: { %s: %o }', this._key, this.readCallbackString()]
   }
 
   readCallbackString() {
@@ -219,8 +304,11 @@ class ScriptElementItem {
     this._element.nonce = nonce
   }
 
+  logBlockedDescriptor() {
+    return ['Blocked <script> element: %o', this._element]
+  }
+
   block() {
-    logBlocked(this._element)
     up.script.block(this._element)
   }
 

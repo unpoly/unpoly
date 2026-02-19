@@ -115,9 +115,9 @@ up.RenderOptions = (function() {
     onDismissed: CLOSE_LAYER_CALLBACK,
     onAccepted: CLOSE_LAYER_CALLBACK,
   }
-  function parseCallback(key, code, policy) {
+  function parseCallback(key, code) {
     let parseOpts = CALLBACKS[key] ?? up.fail(`Unknown callback { ${key} }`)
-    return e.parseCallback(code, { ...parseOpts, policy })
+    return up.script.parseCallback(code, parseOpts)
   }
 
   function navigateDefaults(options) {

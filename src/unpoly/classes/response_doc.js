@@ -3,7 +3,7 @@ const e = up.element
 
 up.ResponseDoc = class ResponseDoc {
 
-  constructor({ document, fragment, content, target, origin, data, cspInfo, match }) {
+  constructor({ document, fragment, content, target, origin, data, cspInfo = {}, match }) {
     if (document) {
       this._parseDocument(document, origin, data)
     } else if (fragment) {
@@ -15,7 +15,8 @@ up.ResponseDoc = class ResponseDoc {
     }
 
     // This is the parsed script-src declaration from the response
-    this._cspInfo = cspInfo || {}
+    this._cspInfo = cspInfo
+    up.script.warnOfUnsafeCSP(cspInfo)
 
     if (origin) {
       let originSelector = up.fragment.tryToTarget(origin)
