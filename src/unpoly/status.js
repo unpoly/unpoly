@@ -40,6 +40,11 @@ up.status = (function() {
     @param {Array<string>} [config.loadingClasses=['up-loading']]
       An array of classes to set on [loading fragments](/up-loading).
 
+    @param {Array<string>} [config.revalidatingClasses=['up-revalidating']]
+      An array of classes to set on [revalidating fragments](/up-revalidating).
+
+      @experimental
+
   @section Navigational containers
     @param {Array<string>} [config.navSelectors=['[up-nav]', 'nav']]
       An array of CSS selectors that match [navigational containers](/navigation-bars).
@@ -56,6 +61,7 @@ up.status = (function() {
     currentClasses: ['up-current'],
     activeClasses: ['up-active'],
     loadingClasses: ['up-loading'],
+    revalidatingClasses: ['up-revalidating'],
     navSelectors: ['[up-nav]', 'nav'],
     noNavSelectors: ['[up-nav=false]'],
   }))
@@ -220,6 +226,19 @@ up.status = (function() {
   @stable
   */
 
+  /*-
+  While [revalidating](/caching#revalidation) content rendered from a stale cache entry,
+  all [targeted fragments](/targeting-fragments) are assigned the `.up-revalidating` class.
+
+  The class remains set while the revalidation request is loading.
+  It is removed when the request [ends](/up.Request.prototype.ended) for any reason.
+
+  [Feedback classes](/feedback-classes){:.article-ref}
+
+  @selector .up-revalidating
+  @experimental
+  */
+
   function runPreviews(request, renderOptions) {
     let { bindLayer } = request
     let focusCapsule = up.FocusCapsule.preserve(bindLayer)
@@ -380,8 +399,14 @@ up.status = (function() {
     if (!feedbackOption) return
 
     return function(preview) {
-      preview.addClassBatch(getActiveElements(preview.renderOptions), config.activeClasses)
-      preview.addClassBatch(fragments, config.loadingClasses)
+      const { renderOptions } = preview
+
+      if (renderOptions.expiredResponse) {
+        preview.addClassBatch(fragments, config.revalidatingClasses)
+      } else {
+        preview.addClassBatch(getActiveElements(renderOptions), config.activeClasses)
+        preview.addClassBatch(fragments, config.loadingClasses)
+      }
     }
   }
 

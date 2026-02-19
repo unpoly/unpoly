@@ -141,6 +141,21 @@ caused the submission. It is also marked as `.up-active`, in addition to the for
 </form>
 ```
 
+## Feedback during cache revalidation {#cache-revalidation}
+
+When rendering content from a stale [cache](/caching) entry,
+Unpoly [automatically reloads the fragment](/caching#revalidation) to ensure that the user never sees expired content.
+
+During this cache revalidation Unpoly will mark the targeted fragment as `.up-revalidating`:
+
+```html
+<div id="target" class="up-revalidating"> <!-- mark: class="up-revalidating" -->
+  Stale content
+</div>
+```
+
+Note that the `.up-loading` and `.up-active` classes are *not* set during cache revalidation.
+
 
 ## Feedback classes from JavaScript
 
@@ -157,7 +172,7 @@ For example, when button click causes a render pass, that button should be the o
 
 ```js
 up.on('click', '.my-button', function(event) {
-  up.render({ url: '/path', origin: event.target }) // mark: origin
+  up.render({ url: '/path', origin: event.target, feedback: true }) // mark: origin
 })
 ```
 
@@ -175,6 +190,12 @@ a class name to `up.status.config.loadingClasses`:
 
 ```js
 up.status.config.loadingClasses.push('fetching')
+```
+
+To set additional classes during cache revalidation, push a class name to `up.status.config.revalidatingClasses`:
+
+```js
+up.status.config.revalidatingClasses.push('checking')
 ```
 
 

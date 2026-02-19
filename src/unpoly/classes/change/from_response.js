@@ -90,6 +90,7 @@ up.Change.FromResponse = class FromResponse extends up.Change {
         ...up.RenderOptions.NO_MOTION, // offering something like { verifyTransition } would mean we need to delay { onFinished } even further
         ...up.RenderOptions.NO_INPUT_INTERFERENCE,
         ...up.RenderOptions.NO_PREVIEWS,
+        feedback: originalRenderOptions.feedback, // we do want to keep { feedback } for .up-revalidating
         preferOldElements: renderResult.fragments, // ensure we match the same fragments when initial render pass matched around { origin } and { origin } has been detached
         layer: renderResult.layer, // if the original render opened a layer, we now update it
         onFinished: null, // the earlier onFinished handler will already be honored by the up.RenderJob that called us

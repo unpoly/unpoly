@@ -1667,6 +1667,74 @@ describe('up.status', function() {
 
     })
 
+    describe('.up-revalidating', function() {
+
+      it('gives a stale element an .up-revalidating class while it is revalidating with the server', async function() {
+        await jasmine.populateCache('/foo', '<div id="target">expired target</div>')
+        up.cache.expire()
+
+        fixture('#target', { content: 'old target' })
+
+        up.render('#target', { url: '/foo', feedback: true, cache: true, revalidate: true })
+        await wait()
+
+        expect('#target').toHaveVisibleText('expired target')
+        expect(up.network.isBusy()).toBe(true)
+        expect('#target').not.toHaveClass('up-loading')
+        expect('#target').toHaveClass('up-revalidating')
+
+        jasmine.respondWithSelector('#target', { text: 'revalidated target' })
+        await wait()
+
+        expect('#target').toHaveVisibleText('revalidated target')
+        expect(up.network.isBusy()).toBe(false)
+        expect('#target').not.toHaveClass('up-loading')
+        expect('#target').not.toHaveClass('up-revalidating')
+      })
+
+      it('does not assign the .up-revalidating class with { feedback: false }', async function() {
+        await jasmine.populateCache('/foo', '<div id="target">expired target</div>')
+        up.cache.expire()
+
+        fixture('#target', { content: 'old target' })
+
+        up.render('#target', { url: '/foo', feedback: false, cache: true, revalidate: true })
+        await wait()
+
+        expect('#target').toHaveVisibleText('expired target')
+        expect(up.network.isBusy()).toBe(true)
+        expect('#target').not.toHaveClass('up-revalidating')
+
+        jasmine.respondWithSelector('#target', { text: 'revalidated target' })
+        await wait()
+
+        expect('#target').toHaveVisibleText('revalidated target')
+        expect(up.network.isBusy()).toBe(false)
+        expect('#target').not.toHaveClass('up-revalidating')
+      })
+
+      it('removes the .up-revalidating class when the server has no newer content', async function() {
+        await jasmine.populateCache('/foo', '<div id="target">expired target</div>')
+        up.cache.expire()
+
+        fixture('#target', { content: 'old target' })
+
+        up.render('#target', { url: '/foo', feedback: false, cache: true, revalidate: true })
+        await wait()
+
+        expect('#target').toHaveVisibleText('expired target')
+        expect(up.network.isBusy()).toBe(true)
+        expect('#target').not.toHaveClass('up-revalidating')
+
+        jasmine.respondWith({ status: 204 })
+        await wait()
+
+        expect('#target').toHaveVisibleText('expired target')
+        expect(up.network.isBusy()).toBe(false)
+        expect('#target').not.toHaveClass('up-revalidating')
+      })
+
+    })
 
     describe('.up-active', function() {
 
