@@ -150,4 +150,6 @@ RedirectPermanent /compilation /enhancing-elements
 
 RedirectPermanent /up-fixed /up-fixed-top
 
+RedirectPermanent /csp /script-security
+
 
