@@ -9376,6 +9376,18 @@ describe('up.fragment', function() {
 
         })
 
+        describe('with up.script.config.scriptElementPolicy = "nonce"', function() {
+
+          beforeEach(function() {
+            up.script.config.scriptElementPolicy = "nonce"
+          })
+
+          it('must have tests', function() {
+            throw "test me"
+          })
+
+        })
+
         describe('with up.script.config.scriptElementPolicy = "auto"', function() {
 
           beforeEach(function() {

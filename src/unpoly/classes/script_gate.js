@@ -37,7 +37,7 @@ up.ScriptGate = class ScriptGate {
       return nonceableCallback.unsafeEval(...evalEnv)
     } else {
       // We don't change the DOM in this path. We only refuse to eval and log the refusal.
-      policy.logBlocked(['Blocked callback: %o', nonceableCallback.script])
+      policy.log(['Blocked callback: %o', nonceableCallback.script])
     }
   }
 
@@ -95,17 +95,24 @@ up.ScriptGate = class ScriptGate {
 class Policy {
 
   constructor(configProp, pageNonce, cspInfo) {
+    this._configProp = configProp
+
+    // Page nonce and CSP info must be known for #resolveAuto()
     this.pageNonce = pageNonce
     this.cspInfo = cspInfo
-    this._validNonces = new Set(cspInfo.nonces)
 
+    let policyString = up.script.config[configProp]
+    if (policyString === 'auto') policyString = this.resolveAuto()
+    if (policyString === 'nonce' && !this.pageNonce) {
+      this.warn('Enforcing nonces requires a <meta name="csp-nonce">.')
+      policyString = 'block'
+    }
+    this._policyString = policyString
+
+    this._validNonces = new Set(cspInfo.nonces)
     // (A) Allow the page nonce for up.script.evalCallback(), which checks an already adopted callback.
     // (B) Allow the page nonce for developers who do keep their nonces stable across sessions.
     if (pageNonce) this._validNonces.add(pageNonce)
-
-    this._configProp = configProp
-    const policyString = up.script.config[configProp]
-    this._policyString = (policyString === 'auto' ? this.resolveAuto() : policyString)
   }
 
   resolveAuto() {
@@ -124,7 +131,7 @@ class Policy {
     if (blocked) {
       // (A) Script elements need to be blocked on adoption, as inserting a script immediately executes them.
       // (B) Callback strings will get another check during execution. We still block them during adoption for debuggability.
-      this.logBlocked(...item.logBlockedDescriptor())
+      this.log(...item.logBlockedDescriptor())
       item.block()
     } else if (this.pageNonce && this._validNonces.has(nonce)) {
       // (A) Only rewrite nonces if we know a better nonce from <meta name="csp-nonce">. Don't set "undefined".
@@ -151,8 +158,12 @@ class Policy {
     }
   }
 
-  logBlocked(...descriptorArgs) {
+  log(...descriptorArgs) {
     up.puts(this.configExpression(), ...descriptorArgs)
+  }
+
+  warn(...descriptorArgs) {
+    up.warn(this.configExpression(), ...descriptorArgs)
   }
 
   configExpression() {

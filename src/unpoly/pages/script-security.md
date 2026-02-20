@@ -255,7 +255,12 @@ in the `<head>` of the initial page load:
 </head>
 ```
 
-To provide the nonce through another method, configure `up.protocol.config.cspNonce()`.
+To provide the nonce through another method, configure `up.script.config.cspNonce()`.
+
+> [important]
+> Once Unpoly knows your document nonce, it will enforce nonces in all [callbacks](#callbacks).\
+> [Script elements](#script-elements) without nonces are still allowed, as long as they pass your CSP checks.
+
 
 ### How responses are altered {#response-processing} 
 
