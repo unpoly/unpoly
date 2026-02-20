@@ -6561,8 +6561,8 @@ describe('up.fragment', function() {
             expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
           })
 
-          it('updates a script[type="application/ld+json"] from the response with up.fragment.config.runScripts = false (bugfix)', async function() {
-            up.fragment.config.runScripts = false
+          it('updates a script[type="application/ld+json"] from the response with up.script.config.scriptElementPolicy = "block" (bugfix)', async function() {
+            up.script.config.scriptElementPolicy = "block"
 
             const json = `
               {
@@ -6990,8 +6990,8 @@ describe('up.fragment', function() {
             expect(listener).not.toHaveBeenCalled()
           })
 
-          it('does not emit up:assets:changed after a script in the <body> was disabled through up.fragmentconfig.runScripts = false (bugfix)', async function() {
-            up.fragment.config.runScripts = false
+          it('does not emit up:assets:changed after a script in the <body> was disabled through up.script.config.scriptElementPolicy = "block" (bugfix)', async function() {
+            up.script.config.scriptElementPolicy = "block"
             const listener = jasmine.createSpy('up:assets:changed listener')
             up.on('up:assets:changed', listener)
 

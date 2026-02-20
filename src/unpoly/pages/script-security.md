@@ -180,7 +180,8 @@ You can configure a stricter behavior for new fragments with `up.script.config.s
 
 
 > [note]
-> Configuration will only affect new fragments. The initial page load is solely governed by your CSP.
+> Configuration will only affect new fragments in the `<body>`.
+> The initial page load is solely governed by your CSP.
 
 
 ### Restricting script elements with nonces {#script-element-nonces}

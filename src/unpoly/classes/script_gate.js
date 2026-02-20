@@ -23,7 +23,7 @@ up.ScriptGate = class ScriptGate {
     // There are multiple reasons why we explicitly check if a callback is allowed,
     // instead of relying on the document's CSP checks:
     //
-    // (A) The user might have configured a rejecting script policy in up.script.config.policy.
+    // (A) The user might have configured a blocking script policy in up.script.config.evalCallbackPolicy.
     //     This policy might be stricter than the CSP, e.g. to prevent callbacks entirely.
     // (B) While we proactively block scripts in new fragments, we may have unprocessed scripts
     //     from the initial page load, or from an attacker that has some control over the HTML.

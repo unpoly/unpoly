@@ -184,11 +184,6 @@ up.fragment = (function() {
 
   @section Preprocessing
 
-    @param {boolean|Function(ScriptElement): boolean} [config.runScripts=false]
-      Whether to load or execute `<script>` tags in updated fragments.
-
-      See [Running inline `<script>` tags](/legacy-scripts#running-inline-script-tags) for details.
-
     @param {Function(string): string} [config.normalizeKeepHTML]
       A function that normalizes a HTML string before comparison with [`[up-keep="same-html"]`](/preserving-elements#same-html).
 
@@ -322,7 +317,6 @@ up.fragment = (function() {
     },
 
     match: 'region',
-    runScripts: false, // TODO: Maybe move to up.script.config.runBodyScripts to pair with config.runHeaderCallbacks
     autoHistoryTargets: [':main'],
     autoFocus: ['hash', 'autofocus', 'main-if-main', 'keep', 'target-if-lost'],
     autoScroll: ['hash', 'layer-if-main'],

@@ -54,9 +54,7 @@ up.script = (function() {
     @param {Array<string} [config.scriptSelectors]
       An array of CSS selectors matching elements that run JavaScript.
 
-      By default, this matches all `<script>` tags.
-
-      Matching elements will be removed from new page fragments with `up.fragment.config.runScripts = false`.
+      By default, this matches all `<script>` elements with a JavaScript type.
 
       This configuration does not affect what Unpoly considers [assets](/up-asset).
       For this, configure `up.script.config.assetSelectors`.
@@ -68,7 +66,7 @@ up.script = (function() {
       Whether Unpoly will [run callbacks in HTML attributes](/script-security#callbacks) like (`[up-on-loaded]`)(/up-follow#up-on-loaded).
 
     @param {string} [config.scriptElementPolicy='auto']
-      Whether Unpoly will [run `<script>` elements in ewn fragments](/script-security#script-elements).
+      Whether Unpoly will [run `<script>` elements in new fragments](/script-security#script-elements).
 
     @param {string|Function(): string} [config.cspNonce]
       A [CSP script nonce](https://content-security-policy.com/nonce/)

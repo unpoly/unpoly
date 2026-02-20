@@ -1,7 +1,6 @@
 require('./layer.sass')
 
 const u = up.util
-const e = up.element
 
 /*-
 Layers
@@ -810,15 +809,6 @@ up.layer = (function() {
       return `layer "${option}"`
     } else {
       return option.toString()
-    }
-  }
-
-  function finalizeOpenLayerFromResponse(response) {
-    let options = response.openLayer
-    if (options) {
-      let adopter = new up.NonceAdopter(response.cspInfo.nonces)
-      adopter.adopt(options)
-
     }
   }
 
