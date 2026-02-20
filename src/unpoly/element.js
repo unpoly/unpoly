@@ -403,7 +403,7 @@ up.element = (function() {
   */
   function metaContent(name) {
     const selector = "meta" + attrSelector('name', name)
-    return document.head.querySelector(selector)?.getAttribute('content')
+    return document.head.querySelector(selector)?.content
   }
 
   /*-

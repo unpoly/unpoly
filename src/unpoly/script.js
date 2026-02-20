@@ -1065,6 +1065,10 @@ up.script = (function() {
     }
   }
 
+  function cspNonce() {
+    return u.evalOption(config.cspNonce)
+  }
+
   function warnOfUnsafeCSP(cspInfo) {
     new up.ScriptGate(cspInfo).warnOfUnsafeCSP()
   }
@@ -1096,6 +1100,7 @@ up.script = (function() {
     adoptRenderOptionsFromHeader,
     adoptDetachedAssets,
     parseCallback,
+    cspNonce,
     warnOfUnsafeCSP,
     callbackAttr,
     isScript,

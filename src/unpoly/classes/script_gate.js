@@ -3,11 +3,12 @@ const u = up.util
 
 up.ScriptGate = class ScriptGate {
 
-  constructor(cspInfo) {
-    this._cspInfo = cspInfo
-    this._pageNonce = up.protocol.cspNonce()
-    this._evalCallbackPolicy = new EvalCallbackPolicy(this._pageNonce, this._cspInfo)
-    this._scriptElementPolicy = new ScriptElementPolicy(this._pageNonce, this._cspInfo)
+  constructor(cspInfo = up.CSPInfo.none()) {
+    // Only parse the page nonce once for adopting multiple items.
+    let pageNonce = up.script.cspNonce()
+
+    this._evalCallbackPolicy = new EvalCallbackPolicy(pageNonce, cspInfo)
+    this._scriptElementPolicy = new ScriptElementPolicy(pageNonce, cspInfo)
   }
 
   warnOfUnsafeCSP() {
@@ -94,15 +95,17 @@ up.ScriptGate = class ScriptGate {
 class Policy {
 
   constructor(configProp, pageNonce, cspInfo) {
+    this.pageNonce = pageNonce
+    this.cspInfo = cspInfo
+    this._validNonces = new Set(cspInfo.nonces)
+
+    // (A) Allow the page nonce for up.script.evalCallback(), which checks an already adopted callback.
+    // (B) Allow the page nonce for developers who do keep their nonces stable across sessions.
+    if (pageNonce) this._validNonces.add(pageNonce)
+
     this._configProp = configProp
     const policyString = up.script.config[configProp]
     this._policyString = (policyString === 'auto' ? this.resolveAuto() : policyString)
-    this.pageNonce = pageNonce
-    this._cspInfo = cspInfo
-  }
-
-  hasCSP(str) {
-    return this._cspInfo?.declaration?.includes(str)
   }
 
   resolveAuto() {
@@ -123,7 +126,10 @@ class Policy {
       // (B) Callback strings will get another check during execution. We still block them during adoption for debuggability.
       this.logBlocked(...item.logBlockedDescriptor())
       item.block()
-    } else if (nonce) {
+    } else if (this.pageNonce && this._validNonces.has(nonce)) {
+      // (A) Only rewrite nonces if we know a better nonce from <meta name="csp-nonce">. Don't set "undefined".
+      // (B) Even with "pass" we only want to adopt valid nonces. Otherwise we might accidentally allow a
+      //     script with disallowed hostname in a host-based CSPs that also has nonces for callbacks.
       item.writeNonce(this.pageNonce)
     }
   }
@@ -139,7 +145,7 @@ class Policy {
 
       // Block any non-nonced scripts.
       // Nonces will be checked in processItem().
-      case 'nonce': return this._isValidNonce(itemNonce)
+      case 'nonce': return this._validNonces.has(itemNonce)
 
       default: up.fail('Unknown policy: %s = %o', this.configExpression(), this._policyString)
     }
@@ -147,10 +153,6 @@ class Policy {
 
   logBlocked(...descriptorArgs) {
     up.puts(this.configExpression(), ...descriptorArgs)
-  }
-
-  _isValidNonce(nonce) {
-    return nonce && ((this.pageNonce === nonce) || this._cspInfo?.nonces?.includes(nonce))
   }
 
   configExpression() {
@@ -176,7 +178,7 @@ class EvalCallbackPolicy extends Policy {
   }
 
   warnOfUnsafeCSP() {
-    if (this.hasCSP("'unsafe-eval'")) {
+    if (this.cspInfo.isUnsafeEval()) {
       up.warn(`An 'unsafe-eval' CSP allows arbitrary [up-on...] callbacks. Consider setting ${this.configExpression()} = 'nonce'.`)
     }
   }
@@ -189,16 +191,14 @@ class ScriptElementPolicy extends Policy {
     super('scriptElementPolicy', ...args)
   }
 
-  _hasStrictDynamic() {
-    return this.hasCSP("'strict-dynamic'")
-  }
-
   resolveAuto() {
+    console.debug('[ScriptElementPolicy#isStrictDynamic] cspInfo is %o', this.cspInfo)
+
     // (A) With a strict-dynamic CSP, it's a good idea to enforce nonces in the new content.
     //     Otherwise, we would allow *all* scripts as strict-dynamic is viral, and Unpoly is already an allowed script.
     // (B) Don't assume 'nonce' when we see a <meta name="csp-nonce">. The user might want to provide
     //     a nonce for Unpoly callbacks, but still use a hostname-based allowlist.
-    if (this._hasStrictDynamic()) {
+    if (this.cspInfo.isStrictDynamic()) {
       return 'nonce'
     } else {
       return 'pass'
@@ -206,7 +206,7 @@ class ScriptElementPolicy extends Policy {
   }
 
   warnOfUnsafeCSP() {
-    if (this._hasStrictDynamic()) {
+    if (this.cspInfo.isStrictDynamic()) {
       up.warn(`A 'strict-dynamic' CSP allows arbitrary <script> elements in new fragments. Consider setting ${this.configExpression()} = 'nonce'.`)
     }
   }

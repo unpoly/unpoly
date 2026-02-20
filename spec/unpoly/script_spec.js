@@ -1359,6 +1359,818 @@ describe('up.script', function() {
         expect(up.script.findAssets()).not.toContain(link)
       })
     })
+
+    fdescribe('up.script.cspNonce()', function() {
+
+      beforeEach(function() {
+        // Remove the CSP meta to start with a clean slate.
+        // This change will be undone by protect_jasmine_runner.js
+        this.runnerCSPMeta = document.querySelector('meta[name=csp-nonce]')
+        this.runnerCSPMeta.remove()
+      })
+
+      it('returns undefined if the <head> has no <meta name="csp-nonce>"', function() {
+        expect(document.head).not.toHaveSelector('meta[name="csp-nonce"]')
+        expect(up.script.cspNonce()).toBeUndefined()
+      })
+
+      it('returns the content from a <meta name="csp-nonce">', function() {
+        up.element.affix(document.head, 'meta[name="csp-nonce"][content="custom-nonce"]')
+        expect(up.script.cspNonce()).toBe('custom-nonce')
+      })
+
+      it('returns a string assigned to up.script.config.cspNonce', function() {
+        up.element.affix(document.head, 'meta[name="csp-nonce"][content="ignored-nonce"]')
+        up.script.config.cspNonce = 'config-nonce'
+        expect(up.script.cspNonce()).toBe('config-nonce')
+      })
+
+      it('evals a function assigned to up.script.config.cspNonce', function() {
+        up.element.affix(document.head, 'meta[name="csp-nonce"][content="ignored-nonce"]')
+        up.script.config.cspNonce = () => 'function-nonce'
+        expect(up.script.cspNonce()).toBe('function-nonce')
+      })
+
+    })
+
+    fdescribe('up.script.adoptNewFragment()', function() {
+
+      describe('CSP nonces in body scripts', function() {
+
+        describe('with up.script.config.scriptElementPolicy = "block"', function() {
+
+          beforeEach(function() {
+            up.script.config.scriptElementPolicy = "block"
+          })
+
+          it('blocks a script element without nonce', function() {
+            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+            const script = up.element.createFromSelector('script')
+            expect(script).toBeActiveScript()
+
+            up.script.adoptNewFragment(script, cspInfo)
+
+            expect(script).toBeInertScript()
+          })
+
+          it('blocks a script element with the correct page nonce', function() {
+            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+            const script = up.element.createFromSelector('script[nonce="response123"]')
+            expect(script).toBeActiveScript()
+
+            up.script.adoptNewFragment(script, cspInfo)
+
+            expect(script).toBeInertScript()
+          })
+
+          it('blocks a script element with an incorrect nonce', function() {
+            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+            const script = up.element.createFromSelector('script[nonce="wrong456"]')
+            expect(script).toBeActiveScript()
+
+            up.script.adoptNewFragment(script, cspInfo)
+
+            expect(script).toBeInertScript()
+          })
+
+          it('does not change a script element with a non-JavaScript type', function() {
+            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+            const script = up.element.createFromSelector('script[type="text/ramenscript"]', { text: 'console.log("hello")' })
+            const scriptHTMLBefore = script.outerHTML
+
+            up.script.adoptNewFragment(script, cspInfo)
+
+            expect(script.outerHTML).toEqual(scriptHTMLBefore)
+          })
+
+        })
+
+        describe('with up.script.config.scriptElementPolicy = "pass"', function() {
+
+          beforeEach(function() {
+            up.script.config.scriptElementPolicy = "pass"
+          })
+
+          it('does not change a script element without nonce', function() {
+            spyOn(up.script, 'cspNonce').and.returnValue('page-secret')
+
+            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+            const script = up.element.createFromSelector('script', { text: 'console.log("hello")' })
+            const scriptHTMLBefore = script.outerHTML
+
+            up.script.adoptNewFragment(script, cspInfo)
+
+            expect(script).toBeActiveScript()
+            expect(script.outerHTML).toEqual(scriptHTMLBefore)
+          })
+
+          it('does not change a script element with an incorrect nonce', function() {
+            spyOn(up.script, 'cspNonce').and.returnValue('page-secret')
+
+            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+            const script = up.element.createFromSelector('script', { nonce: 'incorrect456', text: 'console.log("hello")' })
+            const scriptHTMLBefore = script.outerHTML
+
+            up.script.adoptNewFragment(script, cspInfo)
+
+            expect(script).toBeActiveScript()
+            expect(script.outerHTML).toEqual(scriptHTMLBefore)
+          })
+
+          it("rewrites the [nonce] of a body script to use the current page's nonce when it matches the response nonce", async function() {
+            spyOn(up.script, 'cspNonce').and.returnValue('page-secret')
+
+            let [target] = htmlFixtureList(`
+              <div id="target">
+                old target text
+              </div>
+            `)
+
+            up.render('#target', { url: '/path' })
+            await wait()
+
+            jasmine.respondWith({
+              responseText: `
+                <div id="target">
+                  new target text
+                  <script nonce="response-secret"></script>
+                </div>
+              `,
+              responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-response-secret'" }
+            })
+            await wait()
+
+            expect('#target').toHaveVisibleText('new target text')
+            expect('#target script').toHaveProperty('nonce', 'page-secret')
+          })
+
+          it('does not change a script element with a non-JavaScript type', function() {
+            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+            const script = up.element.createFromSelector('script[type="text/ramenscript"]', { text: 'console.log("hello")' })
+            const scriptHTMLBefore = script.outerHTML
+
+            up.script.adoptNewFragment(script, cspInfo)
+
+            expect(script.outerHTML).toEqual(scriptHTMLBefore)
+          })
+
+        })
+
+        describe('with up.script.config.scriptElementPolicy = "auto"', function() {
+
+          beforeEach(function() {
+            up.script.config.scriptElementPolicy = "auto"
+          })
+
+          it("rewrites the [nonce] of a body script to use the current page's nonce when it matches the response nonce", async function() {
+            spyOn(up.script, 'cspNonce').and.returnValue('page-secret')
+
+            let [target] = htmlFixtureList(`
+              <div id="target">
+                old target text
+              </div>
+            `)
+
+            up.render('#target', { url: '/path' })
+            await wait()
+
+            jasmine.respondWith({
+              responseText: `
+                <div id="target">
+                  new target text
+                  <script nonce="response-secret"></script>
+                </div>
+              `,
+              responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-response-secret'" }
+            })
+            await wait()
+
+            expect('#target').toHaveVisibleText('new target text')
+            expect('#target script').toHaveProperty('nonce', 'page-secret')
+          })
+
+          it("rewrites the [nonce] of a body script to use the current page's nonce when it matches one of multiple response's nonces", async function() {
+            spyOn(up.script, 'cspNonce').and.returnValue('page-secret')
+
+            let [target] = htmlFixtureList(`
+              <div id="target">
+                old target text
+              </div>
+            `)
+
+            up.render('#target', { url: '/path' })
+            await wait()
+
+            jasmine.respondWith({
+              responseText: `
+                <div id="target">
+                  new target text
+                  <script nonce="response-secret-2"></script>
+                </div>
+              `,
+              responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-response-secret-1' 'nonce-response-secret-2' 'nonce-response-secret-3'" }
+            })
+            await wait()
+
+            expect('#target').toHaveVisibleText('new target text')
+            expect('#target script').toHaveProperty('nonce', 'page-secret')
+          })
+
+          it('rewrites the [nonce] of a body script with Content-Security-Policy-Report-Only response header', async function() {
+            spyOn(up.script, 'cspNonce').and.returnValue('page-secret')
+
+            let [target] = htmlFixtureList(`
+              <div id="target">
+                old target text
+              </div>
+            `)
+
+            up.render('#target', { url: '/path' })
+            await wait()
+
+            jasmine.respondWith({
+              responseText: `
+                <div id="target">
+                  new target text
+                  <script nonce="response-secret"></script>
+                </div>
+              `,
+              responseHeaders: { 'Content-Security-Policy-Report-Only': "script-src 'nonce-response-secret'" }
+            })
+            await wait()
+
+            expect('#target').toHaveVisibleText('new target text')
+            expect('#target script').toHaveProperty('nonce', 'page-secret')
+          })
+
+          it('does not change a body script when the current page nonce is unknown', async function() {
+            spyOn(up.script, 'cspNonce').and.returnValue(null)
+
+            let [target] = htmlFixtureList(`
+              <div id="target">
+                old target text
+              </div>
+            `)
+
+            up.render('#target', { url: '/path' })
+            await wait()
+
+            jasmine.respondWith({
+              responseText: `
+                <div id="target">
+                  new target text
+                  <script nonce="response-secret"></script>
+                </div>
+              `,
+              responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-response-secret'" }
+            })
+            await wait()
+
+            expect('#target').toHaveVisibleText('new target text')
+            expect('#target script').toHaveProperty('nonce', 'response-secret')
+          })
+
+          it("does not change a body script that doesn't match the response's script-src policy", async function() {
+            spyOn(up.script, 'cspNonce').and.returnValue('page-secret')
+
+            let [target] = htmlFixtureList(`
+              <div id="target">
+                old target text
+              </div>
+            `)
+
+            up.render('#target', { url: '/path' })
+            await wait()
+
+            jasmine.respondWith({
+              responseText: `
+                <div id="target">
+                  new target text
+                  <script nonce="html-secret"></script>
+                </div>
+              `,
+              responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-response-secret'" }
+            })
+            await wait()
+
+            expect('#target').toHaveVisibleText('new target text')
+            expect('#target script').toHaveProperty('nonce', 'html-secret')
+
+          })
+
+          it("does not change a body script that only matches the response's style-src policy", async function() {
+            spyOn(up.script, 'cspNonce').and.returnValue('page-secret')
+
+            let [target] = htmlFixtureList(`
+              <div id="target">
+                old target text
+              </div>
+            `)
+
+            up.render('#target', { url: '/path' })
+            await wait()
+
+            jasmine.respondWith({
+              responseText: `
+                <div id="target">
+                  new target text
+                  <script nonce="style-secret"></script>
+                </div>
+              `,
+              responseHeaders: { 'Content-Security-Policy': "style-src 'nonce-style-secret'" }
+            })
+            await wait()
+
+            expect('#target').toHaveVisibleText('new target text')
+            expect('#target script').toHaveProperty('nonce', 'style-secret')
+          })
+
+          it("does not change inline scripts that never had [nonce] attribute", async function() {
+            spyOn(up.script, 'cspNonce').and.returnValue('page-secret')
+
+            let [target] = htmlFixtureList(`
+              <div id="target">
+                old target text
+              </div>
+            `)
+
+            up.render('#target', { url: '/path' })
+            await wait()
+
+            jasmine.respondWith({
+              responseText: `
+                <div id="target">
+                  new target text
+                  <script></script>
+                </div>
+              `,
+              responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-response-secret'" }
+            })
+            await wait()
+
+            expect('#target').toHaveVisibleText('new target text')
+            expect(document.querySelector('#target script').nonce).toBeBlank()
+          })
+
+          it('does not add a [nonce] attributed to linked, un-nonced script, as that might bypass a host-based CSP (bugfix)', async function() {
+            fixture('.target')
+
+            up.render({ target: '.target', url: '/path' })
+            await wait()
+
+            jasmine.respondWith(`
+                <div class="target">
+                  <script type="text/javascript" src="${this.linkedScriptPath}"></script>
+                </div>
+              `)
+            await wait(1500)
+
+            expect(document).toHaveSelector('.target script') // we did not disable, but the browser blocked it
+            // Cannot use toHaveAttribute() here, because on pages with a CSP that value is masked by the browser.
+            expect(document.querySelector('.target script').nonce).toBeBlank()
+          })
+
+          it('does not change a script element with a non-JavaScript type', function() {
+            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+            const script = up.element.createFromSelector('script[type="text/ramenscript"]', { text: 'console.log("hello")' })
+            const scriptHTMLBefore = script.outerHTML
+
+            up.script.adoptNewFragment(script, cspInfo)
+
+            expect(script.outerHTML).toEqual(scriptHTMLBefore)
+          })
+
+        })
+
+      })
+
+      describe('CSP nonces in callback attributes', function() {
+
+        describe('with up.script.config.evalCallbackPolicy = "block"', function() {
+
+          beforeEach(function() {
+            up.script.config.evalCallbackPolicy = "block"
+          })
+
+          it('blocks a callback without nonce', function() {
+            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+            const link = up.element.createFromHTML(`
+              <a href="/foo" up-follow up-on-loaded="console.log('hi')"></a>              
+            `)
+
+            expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
+
+            up.script.adoptNewFragment(link, cspInfo)
+
+            expect(link.getAttribute('up-on-loaded')).toBeInertCallbackString()
+          })
+
+          it('blocks a callback with the correct nonce', function() {
+            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+            const link = up.element.createFromHTML(`
+              <a href="/foo" up-follow up-on-loaded="nonce-response123 console.log('hi')"></a>              
+            `)
+
+            expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
+
+            up.script.adoptNewFragment(link, cspInfo)
+
+            expect(link.getAttribute('up-on-loaded')).toBeInertCallbackString()
+          })
+
+          it('blocks a callback with an incorrect nonce', function() {
+            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+            const link = up.element.createFromHTML(`
+              <a href="/foo" up-follow up-on-loaded="nonce-wrong456 console.log('hi')"></a>              
+            `)
+
+            expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
+
+            up.script.adoptNewFragment(link, cspInfo)
+
+            expect(link.getAttribute('up-on-loaded')).toBeInertCallbackString()
+          })
+
+        })
+
+        describe('with up.script.config.evalCallbackPolicy = "pass"', function() {
+
+          beforeEach(function() {
+            up.script.config.evalCallbackPolicy = "pass"
+            spyOn(up.script, 'cspNonce').and.returnValue('page000')
+          })
+
+          it('does not change a callback without a nonce', function() {
+            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+            const link = up.element.createFromHTML(`
+              <a href="/foo" up-follow up-on-loaded="console.log('hi')"></a>              
+            `)
+
+            up.script.adoptNewFragment(link, cspInfo)
+
+            expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
+            expect(link.getAttribute('up-on-loaded')).toBe("console.log('hi')")
+          })
+
+          it('rewrites a correct callback nonce', function() {
+            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+            const link = up.element.createFromHTML(`
+              <a href="/foo" up-follow up-on-loaded="nonce-response123 console.log('hi')"></a>              
+            `)
+
+            up.script.adoptNewFragment(link, cspInfo)
+
+            expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
+            expect(link.getAttribute('up-on-loaded')).toBe("nonce-page000 console.log('hi')")
+          })
+
+          it('does not change a callback with an incorrect nonce', function() {
+            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+            const link = up.element.createFromHTML(`
+              <a href="/foo" up-follow up-on-loaded="nonce-wrong456 console.log('hi')"></a>              
+            `)
+
+            up.script.adoptNewFragment(link, cspInfo)
+
+            expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
+            expect(link.getAttribute('up-on-loaded')).toBe("nonce-wrong456 console.log('hi')")
+          })
+
+        })
+
+        describe('with up.script.config.scriptElementPolicy = "auto"', function() {
+
+          beforeEach(function() {
+            up.script.config.evalCallbackPolicy = "auto"
+          })
+
+          it('must have tests', function() {
+            throw "test me"
+          })
+
+        })
+
+        beforeEach(function() {
+          up.script.config.nonceableAttributes.push('callback')
+        })
+
+        it("rewrites nonceable callbacks to use the current page's nonce", async function() {
+          spyOn(up.script, 'cspNonce').and.returnValue('secret1')
+          fixture('.target')
+          up.render('.target', { url: '/path' })
+
+          await wait()
+
+          jasmine.respondWith({
+            responseText: `
+              <div class="target" callback="nonce-secret2 alert()">new text</div>
+            `,
+            responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-secret2'" }
+          })
+
+          await wait()
+
+          expect('.target').toHaveText('new text')
+          expect('.target').toHaveAttribute('callback', "nonce-secret1 alert()")
+        })
+
+        it("rewrites nonceable callbacks to use the current page's nonce with Content-Security-Policy-Report-Only response header", async function() {
+          spyOn(up.script, 'cspNonce').and.returnValue('secret1')
+          fixture('.target')
+          up.render('.target', { url: '/path' })
+
+          await wait()
+
+          jasmine.respondWith({
+            responseText: `
+              <div class="target" callback="nonce-secret2 alert()">new text</div>
+            `,
+            responseHeaders: { 'Content-Security-Policy-Report-Only': "script-src 'nonce-secret2'" }
+          })
+
+          await wait()
+
+          expect('.target').toHaveText('new text')
+          expect('.target').toHaveAttribute('callback', "nonce-secret1 alert()")
+        })
+
+        it("rewrites nonceable callbacks to use the current page's nonce when opening a new overlay (bugfix)", async function() {
+          throw "must disable instead"
+
+          spyOn(up.script, 'cspNonce').and.returnValue('secret1')
+          up.render('.target', { url: '/path', layer: 'new' })
+
+          await wait()
+
+          jasmine.respondWith({
+            responseText: `
+              <div class="target" callback="nonce-secret2 alert()">new text</div>
+            `,
+            responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-secret2'" }
+          })
+
+          await wait()
+
+          expect(up.layer.isOverlay()).toBe(true)
+
+          expect('.target').toHaveText('new text')
+          expect('.target').toHaveAttribute('callback', "nonce-secret1 alert()")
+        })
+
+        it("ensures nonced callbacks still match the current page's nonce after a render pass that updates history (meta tags are part of history state) (bugfix)", async function() {
+          let suiteMeta = document.querySelector('meta[name="csp-nonce"]')
+          suiteMeta.remove()
+
+          up.element.affix(document.head, 'meta#test-nonce[name="csp-nonce"][content="nonce-secret1"]')
+          expect(up.script.cspNonce()).toBe('nonce-secret1')
+
+          const element = fixture('.element', { callback: 'nonce-secret1 alert()' })
+          fixture('.target', { text: 'old text' })
+
+          up.render('.target', { url: '/path', history: true })
+
+          await wait()
+
+          jasmine.respondWith({
+            responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-secret2'" },
+            responseText: `
+              <html>
+                <head>
+                  <meta id="test-nonce" name="csp-nonce" content="nonce-secret2">
+                </head>
+                <body>
+                  <div class="target">
+                    new text
+                  </div>
+                </body>
+              </html>
+            `
+          })
+
+          await wait()
+
+          const currentPageNonce = up.script.cspNonce()
+          expect(element.getAttribute('callback')).toBe(`${currentPageNonce} alert()`)
+        })
+
+        it("rewrites a callback's nonce it the nonce matches one of multiple script-src nonces in its own response", async function() {
+          spyOn(up.script, 'cspNonce').and.returnValue('secret1')
+          fixture('.target')
+          up.render('.target', { url: '/path' })
+
+          await wait()
+
+          jasmine.respondWith({
+            responseText: `
+              <div class="target" callback="nonce-secret3 alert()">new text</div>
+            `,
+            responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-secret2' 'self' 'nonce-secret3'" }
+          })
+
+          await wait()
+
+          expect('.target').toHaveText('new text')
+          expect('.target').toHaveAttribute('callback', "nonce-secret1 alert()")
+        })
+
+        it("does not rewrite a callback's nonce it the nonce does not match a script-src nonce in its own response", async function() {
+          throw "must disable instead"
+          spyOn(up.script, 'cspNonce').and.returnValue('secret1')
+          fixture('.target')
+          up.render('.target', { url: '/path' })
+
+          await wait()
+
+          jasmine.respondWith({
+            responseText: `
+              <div class="target" callback="nonce-wrong alert()">new text</div>
+            `,
+            responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-secret2'" }
+          })
+
+          await wait()
+
+          expect('.target').toHaveText('new text')
+          expect('.target').toHaveAttribute('callback', "nonce-wrong alert()")
+        })
+
+        it("does not rewrite a callback's nonce it the nonce only matches a style-src nonce in its own response", async function() {
+          throw "must disable instead"
+          spyOn(up.script, 'cspNonce').and.returnValue('secret1')
+          fixture('.target')
+          up.render('.target', { url: '/path' })
+
+          await wait()
+
+          jasmine.respondWith({
+            responseText: `
+              <div class="target" callback="nonce-secret2 alert()">new text</div>
+            `,
+            responseHeaders: { 'Content-Security-Policy': "style-src 'nonce-secret2'" }
+          })
+
+          await wait()
+
+          expect('.target').toHaveText('new text')
+          expect('.target').toHaveAttribute('callback', "nonce-secret2 alert()")
+        })
+
+        it("does not rewrite a callback's nonce it the curent page's nonce is unknown", async function() {
+          throw "must disable instead"
+          spyOn(up.script, 'cspNonce').and.returnValue(null)
+          fixture('.target')
+          up.render('.target', { url: '/path' })
+
+          await wait()
+
+          jasmine.respondWith({
+            responseText: `
+              <div class="target" callback="nonce-secret2 alert()">new text</div>
+            `,
+            responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-secret2'" }
+          })
+
+          await wait()
+
+          expect('.target').toHaveText('new text')
+          expect('.target').toHaveAttribute('callback', "nonce-secret2 alert()")
+        })
+
+      })
+
+    })
+
+    fdescribe('up.script.adoptDetachedAssets()', function() {
+
+      fdescribe('CSP nonces in head scripts', function() {
+
+        describe('with up.script.config.scriptElementPolicy = "block"', function() {
+
+          beforeEach(function() {
+            up.script.config.scriptElementPolicy = "block"
+          })
+
+          it("still rewrites a head script with a correct nonce (as scriptElementPolicy only refers to body scripts and we don't want script blockers to get up:assets:changed with every render pass)", function() {
+            throw "This is broken"
+          })
+
+          it('does not give a nonce-less head script a nonce')
+
+          it('does not rewrite a head script with an incorrect nonce')
+
+        })
+
+        it('rewrites a matching [nonce] of a head script before it is passed to up:assets:changed', async function() {
+          spyOn(up.script, 'cspNonce').and.returnValue('page-secret')
+          const listener = jasmine.createSpy('up:assets:changed listener')
+          up.on('up:assets:changed', listener)
+
+          let [target] = htmlFixtureList(`
+            <div id="target">
+              old target text
+            </div>
+          `)
+
+          up.render('#target', { url: '/path', history: true })
+          await wait()
+
+          jasmine.respondWith({
+            responseText: `
+              <html>
+                <head>
+                  <script src='head-script.js' nonce="response-secret"></script>
+                </head>
+                <body>
+                  <div id="target">
+                    new target text
+                    <script nonce="response-secret"></script>
+                  </div>
+                </body>
+              </html>
+            `,
+            responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-response-secret'" }
+          })
+          await wait()
+
+          expect('#target').toHaveVisibleText('new target text')
+          expect(listener).toHaveBeenCalled()
+          const event = listener.calls.mostRecent().args[0]
+          expect(event.newAssets.length).toBe(1)
+          expect(event.newAssets[0]).toMatchSelector('script[src="head-script.js"]')
+          expect(event.newAssets[0]).toHaveProperty('nonce', 'page-secret')
+        })
+
+        it('does not rewrite a non-matching [nonce] of a head script before it is passed to up:assets:changed')
+
+        it('does not trigger up:assets:changed if a script elements is identical after the [nonce] was rewritten')
+
+      })
+
+    })
+
+    fdescribe('adoptRenderOptionsFromHeader()', function() {
+
+      describe('CSP nonces in a JSON of render options', function() {
+
+        describe('with up.script.config.evalCallbackPolicy = "block"', function() {
+
+          beforeEach(function() {
+            up.script.config.evalCallbackPolicy = "block"
+          })
+
+          it('blocks a callback without nonce')
+
+          it('blocks a callback with the correct nonce')
+
+          it('blocks a callback with an incorrect nonce')
+
+        })
+
+        describe('with up.script.config.evalCallbackPolicy = "pass"', function() {
+
+          beforeEach(function() {
+            up.script.config.evalCallbackPolicy = "pass"
+          })
+
+          it('rewrites a correct callback nonce')
+
+          it('does not change a callback with an incorrect nonce')
+
+        })
+
+        describe('with up.script.config.scriptElementPolicy = "auto"', function() {
+
+          beforeEach(function() {
+            up.script.config.evalCallbackPolicy = "auto"
+          })
+
+          it('must have tests', function() {
+            throw "test me"
+          })
+
+        })
+
+
+      })
+
+    })
+
+    fdescribe('up.script.findAssets()', function() {
+
+      describe('callbacks that were present during the initial page load', function() {
+
+        it("does not execute callbacks with a nonce that doesn't match the page nonce")
+
+        if (specs.config.csp === 'nonce-only' || specs.config.csp === 'strict-dynamic') {
+          it("does not execute nonce-less callbacks if the CSP disallows 'unsafe-eval'", function() {
+            throw "implement me"
+          })
+        }
+
+      })
+
+    })
+
   })
 })
 

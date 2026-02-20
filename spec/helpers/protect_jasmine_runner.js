@@ -298,3 +298,31 @@ beforeAll(function() {
     asset.setAttribute('up-asset', 'false')
   }
 })
+
+// Restore the runner's <meta name="csp-nonce"> if that was removed or changed during the spec
+let originalCSPNonceMetaElement = null
+let originalCSPNonceValue = null
+
+function currentCSPNonceMetaElement() {
+  return document.head.querySelector('meta[name="csp-nonce"]')
+}
+
+beforeAll(function() {
+  originalCSPNonceMetaElement = currentCSPNonceMetaElement()
+  originalCSPNonceValue = originalCSPNonceMetaElement?.getAttribute('content')
+})
+
+afterEach(function() {
+  let currentElement = currentCSPNonceMetaElement()
+
+  // Check if the nonce meta was detached or replaced
+  if (originalCSPNonceMetaElement !== currentElement) {
+    currentElement?.remove()
+    document.head.append(originalCSPNonceMetaElement)
+  }
+
+  // Check if the content value was changed
+  if (originalCSPNonceMetaElement.content !== originalCSPNonceValue) {
+    originalCSPNonceMetaElement.content = originalCSPNonceValue
+  }
+})

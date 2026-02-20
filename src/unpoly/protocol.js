@@ -1123,35 +1123,6 @@ up.protocol = (function() {
     return u.evalOption(config.csrfToken)
   }
 
-  function cspNonce() {
-    return u.evalOption(config.cspNonce)
-  }
-
-  const NONCE_PATTERN = /'nonce-([^']+)'/g
-
-  function findNonces(cspPart) {
-    let matches = cspPart.matchAll(NONCE_PATTERN)
-    return u.map(matches, '1')
-  }
-
-  function cspInfoFromHeader(cspHeader) {
-    let results = {}
-
-    if (cspHeader) {
-      let declarations = cspHeader.split(/\s*;\s*/)
-      for (let declaration of declarations) {
-        let directive = declaration.match(/^(script|default)-src\s/)?.[1]
-        if (directive) {
-          results[directive] = {
-            declaration: declaration,
-            nonces: findNonces(declaration)
-          }
-        }
-      }
-    }
-    return results.script || results.default || {}
-  }
-
   function wrapMethod(method, params) {
     params.add(config.methodParam, method)
     return 'POST'
@@ -1173,10 +1144,8 @@ up.protocol = (function() {
     csrfHeader,
     csrfParam,
     csrfToken,
-    cspNonce,
     initialRequestMethod,
     headerize,
     wrapMethod,
-    cspInfoFromHeader,
   }
 })()

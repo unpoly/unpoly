@@ -3,7 +3,7 @@ const e = up.element
 
 up.ResponseDoc = class ResponseDoc {
 
-  constructor({ document, fragment, content, target, origin, data, cspInfo = {}, match }) {
+  constructor({ document, fragment, content, target, origin, data, cspInfo, match }) {
     if (document) {
       this._parseDocument(document, origin, data)
     } else if (fragment) {
