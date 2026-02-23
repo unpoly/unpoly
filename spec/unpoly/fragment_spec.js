@@ -2693,6 +2693,65 @@ describe('up.fragment', function() {
 
             })
 
+            fdescribe('callbacks', function() {
+
+              beforeEach(function() {
+                window.callbackSpy = jasmine.createSpy('callback spy')
+              })
+
+              afterEach(function() {
+                delete window.callbackSpy
+              })
+
+              it('allows to pass a callback string as { onOpened }', async function() {
+                fixture('#target', { text: 'old target' })
+                up.render('#target', { url: '/path' })
+                await wait()
+
+                let openLayerOptions = {
+                  target: '#overlay',
+                  onOpened: 'nonce-specs-nonce window.callbackSpy(event)'
+                }
+
+                jasmine.respondWith({
+                  responseText: '<div id="overlay">overlay</div>',
+                  responseHeaders: { 'X-Up-Open-Layer': JSON.stringify(openLayerOptions) }
+                })
+                await wait()
+
+                expect(up.layer.current).toBeOverlay()
+                expect(up.layer.current).toHaveSelector('#overlay')
+                expect(window.callbackSpy).toHaveBeenCalledWith(jasmine.anyEvent('up:layer:opened'))
+              })
+
+              it('allows to pass a callback string as { onDismissed }', async function() {
+                fixture('#target', { text: 'old target' })
+                up.render('#target', { url: '/path' })
+                await wait()
+
+                let openLayerOptions = {
+                  target: '#overlay',
+                  onDismissed: 'nonce-specs-nonce window.callbackSpy(event)'
+                }
+
+                jasmine.respondWith({
+                  responseText: '<div id="overlay">overlay</div>',
+                  responseHeaders: { 'X-Up-Open-Layer': JSON.stringify(openLayerOptions) }
+                })
+                await wait()
+
+                expect(up.layer.current).toBeOverlay()
+                expect(up.layer.current).toHaveSelector('#overlay')
+                expect(window.callbackSpy).not.toHaveBeenCalled()
+
+                await up.layer.dismiss()
+
+                expect(up.layer.current).toBeRootLayer()
+                expect(window.callbackSpy).toHaveBeenCalledWith(jasmine.anyEvent('up:layer:dismissed'))
+              })
+
+            })
+
           })
 
           describe('when already opening an overlay', function() {
@@ -15829,7 +15888,7 @@ describe('up.fragment', function() {
           up.render({ fragment: html })
           await wait()
 
-          expect(keptSpy).toHaveBeenCalledWith(jasmine.objectContaining({ type: 'up:fragment:kept' }))
+          expect(keptSpy).toHaveBeenCalledWith(jasmine.anyEvent('up:fragment:kept'))
         })
 
         it('does not emit an up:fragment:kept event if up:fragment:keep is prevented', async function() {
