@@ -173,7 +173,7 @@ class ConfigurablePolicy extends Policy {
       this.warn('Enforcing nonces requires a <meta name="csp-nonce">.')
       policyString = 'block'
     }
-    this._policyString = policyString
+    this.policyString = policyString
   }
 
   resolveAuto() {
@@ -181,7 +181,7 @@ class ConfigurablePolicy extends Policy {
   }
 
   passesItem(itemNonce) {
-    switch (this._policyString) {
+    switch (this.policyString) {
       // Always pass. Script must pass CSP.
       // Bad idea for a strict-dynamic CSP, which allows everything.
       case 'pass': return true
@@ -193,7 +193,7 @@ class ConfigurablePolicy extends Policy {
       // Nonces will be checked in processItem().
       case 'nonce': return this.isValidNonce(itemNonce)
 
-      default: up.fail('Unknown policy: %s = %o', this.configExpression(), this._policyString)
+      default: up.fail('Unknown policy: %s = %o', this.configExpression(), this.policyString)
     }
   }
 
@@ -228,8 +228,8 @@ class EvalCallbackPolicy extends ConfigurablePolicy {
   }
 
   warnOfUnsafeCSP() {
-    if (this.cspInfo.isUnsafeEval()) {
-      up.warn(`An 'unsafe-eval' CSP allows arbitrary [up-on...] callbacks. Consider setting ${this.configExpression()} = 'nonce'.`)
+    if (this.policyString === 'pass' && this.cspInfo.isUnsafeEval()) {
+      this.warn(`An 'unsafe-eval' CSP allows arbitrary [up-on...] callbacks. Consider setting ${this.configExpression()} = 'nonce'.`)
     }
   }
 
@@ -254,8 +254,8 @@ class BodyScriptElementPolicy extends ConfigurablePolicy {
   }
 
   warnOfUnsafeCSP() {
-    if (this.cspInfo.isStrictDynamic()) {
-      up.warn(`A 'strict-dynamic' CSP allows arbitrary <script> elements in new fragments. Consider setting ${this.configExpression()} = 'nonce'.`)
+    if (this.policyString === 'pass' && this.cspInfo.isStrictDynamic()) {
+      this.warn(`A 'strict-dynamic' CSP allows arbitrary <script> elements in new fragments. Consider setting ${this.configExpression()} = 'nonce'.`)
     }
   }
 

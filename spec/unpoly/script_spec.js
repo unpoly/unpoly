@@ -1395,8 +1395,198 @@ describe('up.scriptxxx', function() {
 
     fdescribe('up.script.warnOfUnsafeCSP()', function() {
 
-      it('must have tests', function() {
-        throw "test that warnings come with dangerous combinations of CSPInfo and policy config"
+      let warnSpy
+
+      beforeEach(function() {
+        warnSpy = spyOn(console, 'warn').and.callThrough()
+      })
+
+      const CSP_PRESETS = {
+        'host-based': "script-src 'self' https://api.com",
+        'nonce-only':  "script-src 'nonce-secret111'",
+        'strict-dynamic': "script-src 'nonce-secret111' 'strict-dynamic'",
+        'unsafe-inline': "script-src 'unsafe-inline'",
+        'unsafe-eval': "script-src 'unsafe-eval'",
+      }
+
+      describe('unexpectedly liberal script execution', function() {
+
+        const warnArgs = [jasmine.stringContaining("A 'strict-dynamic' CSP allows arbitrary <script> elements in new fragments"), jasmine.anything(), jasmine.anything()]
+
+        function itWarnsFor(cspName) {
+          const cspString = CSP_PRESETS[cspName] ?? up.fail('Unknown CSP preset' + cspName)
+
+          it(`warns with a ${cspName} CSP`, function() {
+            let cspInfo = up.CSPInfo.fromHeader(cspString)
+            up.script.warnOfUnsafeCSP(cspInfo)
+            expect(warnSpy).toHaveBeenCalledWith(...warnArgs)
+          })
+        }
+
+        function itDoesNotWarnFor(cspName) {
+          const cspString = CSP_PRESETS[cspName] ?? up.fail('Unknown CSP preset' + cspName)
+
+          it(`does not warn with a ${cspName} CSP`, function() {
+            let cspInfo = up.CSPInfo.fromHeader(cspString)
+            up.script.warnOfUnsafeCSP(cspInfo)
+            expect(warnSpy).not.toHaveBeenCalledWith(...warnArgs)
+          })
+        }
+
+        describe('with up.script.config.scriptElementPolicy = "block"', function() {
+
+          beforeEach(function() {
+            up.script.config.scriptElementPolicy = "block"
+          })
+
+          itDoesNotWarnFor('host-based')
+          itDoesNotWarnFor('nonce-only')
+          itDoesNotWarnFor('strict-dynamic')
+          itDoesNotWarnFor('unsafe-inline')
+
+        })
+
+        describe('with up.script.config.scriptElementPolicy = "nonce"', function() {
+
+          beforeEach(function() {
+            up.script.config.scriptElementPolicy = "nonce"
+          })
+
+          itDoesNotWarnFor('host-based')
+          itDoesNotWarnFor('nonce-only')
+          itDoesNotWarnFor('strict-dynamic')
+          itDoesNotWarnFor('unsafe-inline')
+
+        })
+
+        describe('with up.script.config.scriptElementPolicy = "pass"', function() {
+
+          beforeEach(function() {
+            up.script.config.scriptElementPolicy = "pass"
+          })
+
+          itDoesNotWarnFor('host-based')
+          itDoesNotWarnFor('nonce-only')
+          itWarnsFor('strict-dynamic')
+          itDoesNotWarnFor('unsafe-inline')
+
+        })
+
+        describe('with up.script.config.scriptElementPolicy = "auto"', function() {
+
+          beforeEach(function() {
+            up.script.config.scriptElementPolicy = "auto"
+          })
+
+          itDoesNotWarnFor('host-based')
+          itDoesNotWarnFor('nonce-only')
+          itDoesNotWarnFor('strict-dynamic') // detected and sitches to "nonce"
+          itDoesNotWarnFor('unsafe-inline')
+
+        })
+
+      })
+
+      describe('unexpectedly liberal callback execution', function() {
+
+        const warnArgs = [jasmine.stringContaining("An 'unsafe-eval' CSP allows arbitrary [up-on...] callbacks"), jasmine.anything(), jasmine.anything()]
+
+        function itWarnsFor(cspName) {
+          const cspString = CSP_PRESETS[cspName] ?? up.fail('Unknown CSP preset' + cspName)
+
+          it(`warns with a ${cspName} CSP`, function() {
+            let cspInfo = up.CSPInfo.fromHeader(cspString)
+            up.script.warnOfUnsafeCSP(cspInfo)
+            expect(warnSpy).toHaveBeenCalledWith(...warnArgs)
+          })
+        }
+
+        function itDoesNotWarnFor(cspName) {
+          const cspString = CSP_PRESETS[cspName] ?? up.fail('Unknown CSP preset' + cspName)
+
+          it(`does not warn with a ${cspName} CSP`, function() {
+            let cspInfo = up.CSPInfo.fromHeader(cspString)
+            up.script.warnOfUnsafeCSP(cspInfo)
+            expect(warnSpy).not.toHaveBeenCalledWith(...warnArgs)
+          })
+        }
+
+        describe('with up.script.config.evalCallbackPolicy = "block"', function() {
+
+          beforeEach(function() {
+            up.script.config.evalCallbackPolicy = "block"
+          })
+
+          itDoesNotWarnFor('host-based')
+          itDoesNotWarnFor('nonce-only')
+          itDoesNotWarnFor('strict-dynamic')
+          itDoesNotWarnFor('unsafe-eval')
+          itDoesNotWarnFor('unsafe-inline')
+
+        })
+
+        describe('with up.script.config.evalCallbackPolicy = "nonce"', function() {
+
+          beforeEach(function() {
+            up.script.config.evalCallbackPolicy = "nonce"
+          })
+
+          itDoesNotWarnFor('host-based')
+          itDoesNotWarnFor('nonce-only')
+          itDoesNotWarnFor('strict-dynamic')
+          itDoesNotWarnFor('unsafe-eval')
+          itDoesNotWarnFor('unsafe-inline')
+
+        })
+
+        describe('with up.script.config.evalCallbackPolicy = "pass"', function() {
+
+          beforeEach(function() {
+            up.script.config.evalCallbackPolicy = "pass"
+          })
+
+          itDoesNotWarnFor('host-based')
+          itDoesNotWarnFor('nonce-only')
+          itDoesNotWarnFor('strict-dynamic')
+          itWarnsFor('unsafe-eval')
+          itDoesNotWarnFor('unsafe-inline')
+
+        })
+
+        describe('with up.script.config.evalCallbackPolicy = "auto"', function() {
+
+          beforeEach(function() {
+            up.script.config.evalCallbackPolicy = "auto"
+          })
+
+          describe('when the page nonce is known', function() {
+            beforeEach(function() {
+              spyOn(up.script, 'cspNonce').and.returnValue('secret000')
+            })
+
+            itDoesNotWarnFor('host-based')
+            itDoesNotWarnFor('nonce-only')
+            itDoesNotWarnFor('strict-dynamic')
+            itDoesNotWarnFor('unsafe-eval') // we auto-switch to "nonce"
+            itDoesNotWarnFor('unsafe-inline')
+
+          })
+
+          describe('when the page nonce is not known', function() {
+            beforeEach(function() {
+              spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+            })
+
+            itDoesNotWarnFor('host-based')
+            itDoesNotWarnFor('nonce-only')
+            itDoesNotWarnFor('strict-dynamic')
+            itWarnsFor('unsafe-eval')
+            itDoesNotWarnFor('unsafe-inline')
+
+          })
+
+        })
+        
       })
 
     })
@@ -2315,21 +2505,6 @@ describe('up.scriptxxx', function() {
 
     })
 
-    fdescribe('up.script.findAssets()', function() {
-
-      describe('callbacks that were present during the initial page load', function() {
-
-        it("does not execute callbacks with a nonce that doesn't match the page nonce")
-
-        if (specs.config.csp === 'nonce-only' || specs.config.csp === 'strict-dynamic') {
-          it("does not execute nonce-less callbacks if the CSP disallows 'unsafe-eval'", function() {
-            throw "implement me"
-          })
-        }
-
-      })
-
-    })
-
   })
+
 })
