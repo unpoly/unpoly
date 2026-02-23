@@ -5,10 +5,12 @@ up.ScriptGate = class ScriptGate {
 
   constructor(cspInfo = up.CSPInfo.none()) {
     // Only parse the page nonce once for adopting multiple items.
+    // TODO: Consider moving page none parsing to CSPInfo
     let pageNonce = up.script.cspNonce()
 
     this._evalCallbackPolicy = new EvalCallbackPolicy(pageNonce, cspInfo)
-    this._scriptElementPolicy = new ScriptElementPolicy(pageNonce, cspInfo)
+    this._scriptElementPolicy = new BodyScriptElementPolicy(pageNonce, cspInfo)
+    this._detachedAssetPolicy = new DetachedAssetPolicy(pageNonce, cspInfo)
   }
 
   warnOfUnsafeCSP() {
@@ -46,13 +48,14 @@ up.ScriptGate = class ScriptGate {
     this._adoptAttrCallbacks(fragment)
   }
 
-  adoptDetachedAssets(assets) {
+  adoptDetachedHeadAsset(asset) {
+    if (!up.script.isScript(asset)) return
+
     // (A) These assets are not normally going to be inserted into the page, but may emit up:assets:changed.
     // (B) We need to adopt script[nonce] attributes for the comparison, and in case the user wants to insert manually.
     // (C) We don't block untrusted scripts for the same reason.
-    for (let asset of assets) {
-      this._adoptScriptElements(asset, 'pass')
-    }
+    let item = new ScriptElementItem(asset)
+    this._detachedAssetPolicy.processItem(item)
   }
 
   adoptRenderOptionsFromHeader(object) {
@@ -94,20 +97,11 @@ up.ScriptGate = class ScriptGate {
 
 class Policy {
 
-  constructor(configProp, pageNonce, cspInfo) {
-    this._configProp = configProp
-
-    // Page nonce and CSP info must be known for #resolveAuto()
+  constructor(pageNonce, cspInfo) {
     this.pageNonce = pageNonce
-    this.cspInfo = cspInfo
 
-    let policyString = up.script.config[configProp]
-    if (policyString === 'auto') policyString = this.resolveAuto()
-    if (policyString === 'nonce' && !this.pageNonce) {
-      this.warn('Enforcing nonces requires a <meta name="csp-nonce">.')
-      policyString = 'block'
-    }
-    this._policyString = policyString
+    // TODO: Consider moving nonce checking to CSPInfo
+    this.cspInfo = cspInfo
 
     this._validNonces = new Set(cspInfo.nonces)
     // (A) Allow the page nonce for up.script.evalCallback(), which checks an already adopted callback.
@@ -115,8 +109,17 @@ class Policy {
     if (pageNonce) this._validNonces.add(pageNonce)
   }
 
-  resolveAuto() {
-    throw new up.NotImplemented()
+  isValidNonce(nonce) {
+    return this._validNonces.has(nonce)
+  }
+
+  tryRewriteNonce(allowedItem, nonce = allowedItem.readNonce()) {
+    // (A) Only rewrite nonces if we know a better nonce from <meta name="csp-nonce">. Don't set "undefined".
+    // (B) Even with "pass" we only want to adopt valid nonces. Otherwise we might accidentally allow a
+    //     script with disallowed hostname in a host-based CSPs that also has nonces for callbacks.
+    if (this.pageNonce && this.isValidNonce(nonce)) {
+      allowedItem.writeNonce(this.pageNonce)
+    }
   }
 
   warnOfUnsafeCSP() {
@@ -133,12 +136,48 @@ class Policy {
       // (B) Callback strings will get another check during execution. We still block them during adoption for debuggability.
       this.log(...item.logBlockedDescriptor())
       item.block()
-    } else if (this.pageNonce && this._validNonces.has(nonce)) {
-      // (A) Only rewrite nonces if we know a better nonce from <meta name="csp-nonce">. Don't set "undefined".
-      // (B) Even with "pass" we only want to adopt valid nonces. Otherwise we might accidentally allow a
-      //     script with disallowed hostname in a host-based CSPs that also has nonces for callbacks.
-      item.writeNonce(this.pageNonce)
+    } else {
+      this.tryRewriteNonce(item, nonce)
     }
+  }
+
+  passesItem(itemNonce) {
+    throw new up.NotImplemented()
+  }
+
+}
+
+class DetachedAssetPolicy extends Policy {
+
+  constructor(...args) {
+    super(...args)
+  }
+
+  passesItem(_itemNonce) {
+    return true
+  }
+
+}
+
+class ConfigurablePolicy extends Policy {
+
+  constructor(configProp, pageNonce, cspInfo) {
+    // Page nonce and CSP info must be known for #resolveAuto()
+    super(pageNonce, cspInfo)
+
+    this._configProp = configProp
+
+    let policyString = up.script.config[configProp]
+    if (policyString === 'auto') policyString = this.resolveAuto()
+    if (policyString === 'nonce' && !this.pageNonce) {
+      this.warn('Enforcing nonces requires a <meta name="csp-nonce">.')
+      policyString = 'block'
+    }
+    this._policyString = policyString
+  }
+
+  resolveAuto() {
+    throw new up.NotImplemented()
   }
 
   passesItem(itemNonce) {
@@ -152,7 +191,7 @@ class Policy {
 
       // Block any non-nonced scripts.
       // Nonces will be checked in processItem().
-      case 'nonce': return this._validNonces.has(itemNonce)
+      case 'nonce': return this.isValidNonce(itemNonce)
 
       default: up.fail('Unknown policy: %s = %o', this.configExpression(), this._policyString)
     }
@@ -172,7 +211,7 @@ class Policy {
 
 }
 
-class EvalCallbackPolicy extends Policy {
+class EvalCallbackPolicy extends ConfigurablePolicy {
 
   constructor(...args) {
     super('evalCallbackPolicy', ...args)
@@ -196,15 +235,13 @@ class EvalCallbackPolicy extends Policy {
 
 }
 
-class ScriptElementPolicy extends Policy {
+class BodyScriptElementPolicy extends ConfigurablePolicy {
 
   constructor(...args) {
     super('scriptElementPolicy', ...args)
   }
 
   resolveAuto() {
-    console.debug('[ScriptElementPolicy#isStrictDynamic] cspInfo is %o', this.cspInfo)
-
     // (A) With a strict-dynamic CSP, it's a good idea to enforce nonces in the new content.
     //     Otherwise, we would allow *all* scripts as strict-dynamic is viral, and Unpoly is already an allowed script.
     // (B) Don't assume 'nonce' when we see a <meta name="csp-nonce">. The user might want to provide
@@ -314,7 +351,8 @@ class ScriptElementItem {
   }
 
   writeNonce(nonce) {
-    this._element.nonce = nonce
+    // Set an attribute (instead of the property), so the change is reflected in the DOM explorer for easier debugging
+    this._element.setAttribute('nonce', nonce)
   }
 
   logBlockedDescriptor() {

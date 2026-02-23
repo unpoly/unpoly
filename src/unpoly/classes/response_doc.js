@@ -126,8 +126,18 @@ up.ResponseDoc = class ResponseDoc {
   get assets() {
     return this._fromHead((head) => {
       let assets = up.script.findAssets(head)
-      up.script.adoptDetachedAssets(assets, this._cspInfo)
-      return u.map(assets, (asset) => e.revivedClone(asset))
+
+      // Need to use up.util.map() for a NodeList, which does not support #map()
+      return u.map(assets, (asset) => {
+        // (A) Assets might contain elements that need to be re-created in the current document context.
+        // (B) Returns copies so multiple calls to #assets return the same array, even if some assets where inserted.
+        asset = e.revivedClone(asset)
+
+        // Rewrite [nonce] attributes so we don't see up:assets:changed with every request.
+        up.script.adoptDetachedHeadAsset(asset, this._cspInfo)
+
+        return asset
+      })
     })
   }
 

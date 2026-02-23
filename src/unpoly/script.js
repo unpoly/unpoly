@@ -871,6 +871,12 @@ up.script = (function() {
     }
   }
 
+  /*-
+  @function up.script.assets
+  @param {Element} [head=document.head]
+  @return {NodeList}
+  @internal
+  */
   function findAssets(head = document.head) {
     return head.querySelectorAll(config.selector('assetSelectors'))
   }
@@ -1034,8 +1040,8 @@ up.script = (function() {
     new up.ScriptGate(cspInfo).adoptNewFragment(fragment)
   }
 
-  function adoptDetachedAssets(fragment, cspInfo) {
-    new up.ScriptGate(cspInfo).adoptDetachedAssets(fragment)
+  function adoptDetachedHeadAsset(script, cspInfo) {
+    new up.ScriptGate(cspInfo).adoptDetachedHeadAsset(script)
   }
 
   function adoptRenderOptionsFromHeader(renderOptions, cspInfo) {
@@ -1098,7 +1104,7 @@ up.script = (function() {
     block,
     adoptNewFragment,
     adoptRenderOptionsFromHeader,
-    adoptDetachedAssets,
+    adoptDetachedHeadAsset,
     parseCallback,
     cspNonce,
     warnOfUnsafeCSP,

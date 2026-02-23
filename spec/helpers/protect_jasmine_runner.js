@@ -291,11 +291,20 @@ afterEach(function() {
   }
 })
 
-const findAssets = () => document.head.querySelectorAll('link[rel=stylesheet], script[src]')
 
+// Exclude the Jasmine runner's default assets from up:assets:changed comparison
+const findRunnerAssets = () => document.head.querySelectorAll('link[rel=stylesheet], script[src]')
 beforeAll(function() {
-  for (let asset of findAssets()) {
+  for (let asset of findRunnerAssets()) {
     asset.setAttribute('up-asset', 'false')
+  }
+})
+
+// Remove all assets that might have been inserted by a test
+afterEach(function() {
+  let assets = [...up.script.findAssets()]
+  for (let asset of assets) {
+    asset.remove()
   }
 })
 

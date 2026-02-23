@@ -9061,7 +9061,9 @@ describe('up.fragment', function() {
 
         beforeEach(function() {
           window.scriptTagExecuted = jasmine.createSpy('scriptTagExecuted')
-          this.linkedScriptPath = `/spec/files/linked_script.js?cache-buster=${Math.random().toString()}`
+          this.linkedScriptPath = up.specUtil.staticFile('linked_script-js', { bustCache: true })
+
+          // throw "do we really duplicate tests here?"
         })
 
         afterEach(function() {
@@ -9475,8 +9477,6 @@ describe('up.fragment', function() {
               </div>
             `)
             await wait(100)
-
-            debugger
 
             expect(window.scriptTagExecuted).toHaveBeenCalled()
             expect(document).toHaveSelector('.target')

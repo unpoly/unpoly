@@ -2,7 +2,7 @@ const u = up.util
 const e = up.element
 const $ = jQuery
 
-describe('up.script', function() {
+describe('up.scriptxxx', function() {
 
   describe('JavaScript functions', function() {
 
@@ -1393,6 +1393,14 @@ describe('up.script', function() {
 
     })
 
+    fdescribe('up.script.warnOfUnsafeCSP()', function() {
+
+      it('must have tests', function() {
+        throw "test that warnings come with dangerous combinations of CSPInfo and policy config"
+      })
+
+    })
+
     fdescribe('up.script.adoptNewFragment()', function() {
 
       describe('CSP nonces in body scripts', function() {
@@ -1485,7 +1493,7 @@ describe('up.script', function() {
             it('does not add a [nonce] to linked, un-nonced script, as that might bypass a host-based CSP (bugfix)', async function() {
               spyOn(up.script, 'cspNonce').and.returnValue('page000')
 
-              const script = up.element.createFromSelector('script', { src: this.linkedScriptPath })
+              const script = up.element.createFromSelector('script', { src: up.specUtil.staticFile('linked_noop_script.js') })
               const scriptHTMLBefore = script.outerHTML
 
               up.script.adoptNewFragment(script, this.cspInfo)
@@ -1610,8 +1618,8 @@ describe('up.script', function() {
           })
 
           itBehavesLikePass({ strictDynamic: false })
-          itBehavesLikePass({ strictDynamic: true })
 
+          itBehavesLikePass({ strictDynamic: true })
         })
 
         describe('with up.script.config.scriptElementPolicy = "nonce"', function() {
@@ -1621,15 +1629,11 @@ describe('up.script', function() {
           })
 
           describe('when the page nonce is known', function() {
-
             itBehavesLikeNonce({ strictDynamic: false })
-
           })
 
           describe('when the page nonce is unknown', function() {
-
             itBehavesLikeBlock({ pageNonce: null })
-
           })
 
         })
@@ -1641,15 +1645,11 @@ describe('up.script', function() {
           })
 
           describe('without a strict-dynamic CSP', function() {
-
             itBehavesLikePass({ strictDynamic: false })
-
           })
 
           describe('with a strict-dynamic CSP', function() {
-
             itBehavesLikeNonce({ strictDynamic: true })
-
           })
 
           // it('rewrites the [nonce] of a body script with Content-Security-Policy-Report-Only response header', async function() {
@@ -1680,6 +1680,38 @@ describe('up.script', function() {
           // })
 
         })
+
+        if (up.migrate.loaded) {
+
+          describe('with up.fragment.config.runScripts = true', function() {
+
+            beforeEach(function() {
+              up.fragment.config.runScripts = true
+            })
+
+            describe('without a strict-dynamic CSP', function() {
+              itBehavesLikePass({ strictDynamic: false })
+            })
+
+            describe('with a strict-dynamic CSP', function() {
+              itBehavesLikeNonce({ strictDynamic: true })
+            })
+
+          })
+
+          describe('up.fragment.config.runScripts = false', function() {
+
+            beforeEach(function() {
+              up.fragment.config.runScripts = false
+            })
+
+            itBehavesLikeBlock({ pageNonce: 'page000' })
+            itBehavesLikeBlock({ pageNonce: null })
+
+          })
+
+
+        }
 
       })
 
@@ -1994,59 +2026,144 @@ describe('up.script', function() {
 
     })
 
-    fdescribe('up.script.adoptDetachedAssets()', function() {
+    fdescribe('up.script.adoptDetachedHeadAsset()', function() {
 
       function itBehavesLikeExamples() {
-        it('rewrites a matching [nonce] of a head script before it is passed to up:assets:changed', async function() {
-          spyOn(up.script, 'cspNonce').and.returnValue('page-secret')
+
+        describe('scripts', function() {
+
+          it('rewrites a matching [nonce]', function() {
+            spyOn(up.script, 'cspNonce').and.returnValue('page000')
+
+            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response111'")
+            const script = up.element.createFromSelector('script[nonce="response111"][src="external.js"]')
+            up.script.adoptDetachedHeadAsset(script, cspInfo)
+
+            expect(script).toHaveProperty('nonce', 'page000')
+          })
+
+          it('does not rewrite a non-matching [nonce]', function() {
+            spyOn(up.script, 'cspNonce').and.returnValue('page000')
+
+            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response111'")
+            const script = up.element.createFromSelector('script[nonce="wrong222"][src="external.js"]')
+            up.script.adoptDetachedHeadAsset(script, cspInfo)
+
+            expect(script).toHaveProperty('nonce', 'wrong222')
+          })
+
+          it('does not rewrite a matching [nonce] when the page nonce is not known', function() {
+            spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+
+            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response111'")
+            const script = up.element.createFromSelector('script[nonce="response111"][src="external.js"]')
+            up.script.adoptDetachedHeadAsset(script, cspInfo)
+
+            expect(script).toHaveProperty('nonce', 'response111')
+          })
+
+          it('does not change an element without a [nonce] attribute', function() {
+            spyOn(up.script, 'cspNonce').and.returnValue('page000')
+
+            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response111'")
+            const script = up.element.createFromSelector('script[src="external.js"]')
+            const scriptHTMLBefore = script.outerHTML
+            up.script.adoptDetachedHeadAsset(script, cspInfo)
+
+            expect(script.nonce).toBeBlank()
+            expect(script.outerHTML).toEqual(scriptHTMLBefore)
+          })
+
+        })
+
+        describe('inline styles (not supported)', function() {
+
+          it('does not rewrite the [nonce] of inline <style> elements using the script-src nonce', function() {
+            spyOn(up.script, 'cspNonce').and.returnValue('page000')
+
+            const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response111'")
+            const style = up.element.createFromSelector('style[nonce="response111"]')
+            up.script.adoptDetachedHeadAsset(style, cspInfo)
+
+            expect(style).toHaveProperty('nonce', 'response111')
+          })
+
+        })
+
+        it('does not trigger up:assets:changed if a script elements is identical after the [nonce] was rewritten', async function() {
+          spyOn(up.script, 'cspNonce').and.returnValue('page000')
           const listener = jasmine.createSpy('up:assets:changed listener')
           up.on('up:assets:changed', listener)
 
-          let [target] = htmlFixtureList(`
+          // TODO: Remove "linked_" prefix from both files
+          let scriptPath = up.specUtil.staticFile('linked_noop_script.js')
+
+          let targetHTML = (version) => `
             <div id="target">
-              old target text
+              target v${version}
             </div>
-          `)
+          `
 
-          up.render('#target', { url: '/path', history: true })
+          let respond = (nonce, targetVersion) => {
+            jasmine.respondWith({
+              responseText: `
+                <html>
+                  <head>
+                    <script src='${scriptPath}' nonce="${nonce}"></script>
+                  </head>
+                  <body>
+                    ${targetHTML(targetVersion)}
+                  </body>
+                </html>
+              `,
+              responseHeaders: {
+                'Content-Security-Policy': `script-src 'nonce-${nonce}'`
+              }
+            })
+          }
+
+          let [target] = htmlFixtureList(targetHTML(0))
+          expect('#target').toHaveVisibleText('target v0')
+
+          up.render({ target: '#target', url: '/path1' })
           await wait()
 
-          jasmine.respondWith({
-            responseText: `
-              <html>
-                <head>
-                  <script src='head-script.js' nonce="response-secret"></script>
-                </head>
-                <body>
-                  <div id="target">
-                    new target text
-                    <script nonce="response-secret"></script>
-                  </div>
-                </body>
-              </html>
-            `,
-            responseHeaders: { 'Content-Security-Policy': "script-src 'nonce-response-secret'" }
-          })
+          respond('response111', 1)
+
           await wait()
 
-          expect('#target').toHaveVisibleText('new target text')
-          expect(listener).toHaveBeenCalled()
+          expect('#target').toHaveVisibleText('target v1')
+          expect(listener.calls.count()).toBe(1)
           const event = listener.calls.mostRecent().args[0]
           expect(event.newAssets.length).toBe(1)
-          expect(event.newAssets[0]).toMatchSelector('script[src="head-script.js"]')
-          expect(event.newAssets[0]).toHaveProperty('nonce', 'page-secret')
+          const newScript = event.newAssets[0]
+          expect(newScript).toMatchSelector(`script[src="${scriptPath}"]`)
+          expect(newScript).toHaveProperty('nonce', 'page000')
+
+          // Insert the remote script
+          document.head.append(newScript)
+
+          up.render({ target: '#target', url: '/path2' })
+          await wait()
+
+          respond('response222', 2)
+          await wait()
+
+          expect('#target').toHaveVisibleText('target v2')
+
+          // No additional up:assets:changed event
+          expect(listener.calls.count()).toBe(1)
+
+          // Head assets are cleaned up automatically, but let's be good citizens
+          newScript.remove()
         })
-
-        it('does not rewrite a non-matching [nonce] of a head script before it is passed to up:assets:changed')
-
-        it('does not trigger up:assets:changed if a script elements is identical after the [nonce] was rewritten')
       }
 
-      fdescribe('CSP nonces in head scripts', function() {
+      fdescribe('CSP nonces in head assets', function() {
 
         itBehavesLikeExamples()
 
-        describe("scriptElementPolicy only controls body scripts (and we don't want script blockers to get up:assets:changed with every render pass)", function() {
+        describe("scriptElementPolicy only controlling body scripts (and we don't want blocking policies to cause up:assets:changed with every render pass)", function() {
 
           describe('with up.script.config.scriptElementPolicy = "block"', function() {
 
