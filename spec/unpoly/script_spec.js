@@ -2459,19 +2459,146 @@ describe('up.scriptxxx', function() {
         delete window.callbackSpy
       })
 
+      function itBehavesLikeNonce({ pageNonce } = {}) {
+
+        describe(`when the page nonce is ${pageNonce ? 'known' : 'unknown'}`, function() {
+
+          beforeEach(function() {
+            up.script.config.cspNonce = up.util.assert(pageNonce, u.isDefined)
+          })
+
+          it('returns a throwing function for a callback without nonce', function() {
+            let code = 'window.callbackSpy()'
+            let fn = up.script.parseCallback(code)
+            expect(fn).toThrowError(up.Blocked)
+            expect(window.callbackSpy).not.toHaveBeenCalled()
+          })
+
+          it('returns an executable function for a callback with the correct nonce', function() {
+            let code = 'nonce-specs-nonce window.callbackSpy()'
+            let fn = up.script.parseCallback(code)
+            expect(fn).not.toThrowError(up.Blocked)
+            expect(window.callbackSpy).toHaveBeenCalled()
+          })
+
+          it('returns a throwing function for a callback with an incorrect nonce', function() {
+            let code = 'nonce-wrong222 window.callbackSpy()'
+            let fn = up.script.parseCallback(code)
+            expect(fn).toThrowError(up.Blocked)
+            expect(window.callbackSpy).not.toHaveBeenCalled()
+          })
+
+        })
+
+      }
+
+      function itBehavesLikeBlock({ pageNonce } = {}) {
+
+        describe(`when the page nonce is ${pageNonce ? 'known' : 'unknown'}`, function() {
+
+          beforeEach(function() {
+            up.script.config.cspNonce = up.util.assert(pageNonce, u.isDefined)
+          })
+
+          it('returns a throwing function for a callback without nonce', function() {
+            let code = 'window.callbackSpy()'
+            let fn = up.script.parseCallback(code)
+            expect(fn).toThrowError(up.Blocked)
+            expect(window.callbackSpy).not.toHaveBeenCalled()
+          })
+
+          it('returns a throwing function a callback with the correct nonce', function() {
+            let code = 'nonce-specs-nonce window.callbackSpy()'
+            let fn = up.script.parseCallback(code)
+            expect(fn).toThrowError(up.Blocked)
+            expect(window.callbackSpy).not.toHaveBeenCalled()
+          })
+
+          it('returns a throwing function a callback with the correct nonce, but the page nonce is not known to Unpoly', function() {
+            spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+            let code = 'nonce-specs-nonce window.callbackSpy()'
+            let fn = up.script.parseCallback(code)
+            expect(fn).toThrowError(up.Blocked)
+            expect(window.callbackSpy).not.toHaveBeenCalled()
+          })
+
+          it('returns a throwing function for a callback with an incorrect nonce', function() {
+            spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+            let code = 'nonce-wrong222 window.callbackSpy()'
+            let fn = up.script.parseCallback(code)
+            expect(fn).toThrowError(up.Blocked)
+            expect(window.callbackSpy).not.toHaveBeenCalled()
+          })
+
+        })
+
+      }
+
+      function itBehavesLikePass({ pageNonce } = {}) {
+
+        describe(`when the page nonce is ${pageNonce ? 'known' : 'unknown'}`, function() {
+
+          beforeEach(function() {
+            up.script.config.cspNonce = up.util.assert(pageNonce, u.isDefined)
+          })
+
+          it('returns an executable function for a callback with the correct nonce', function() {
+            let code = 'nonce-specs-nonce window.callbackSpy()'
+            let fn = up.script.parseCallback(code)
+            expect(fn).not.toThrowError(up.Blocked)
+            expect(window.callbackSpy).toHaveBeenCalled()
+          })
+
+          if (specs.config.csp === 'none') {
+            it('returns an executable function for a callback without a nonce', function() {
+              let code = 'window.callbackSpy()'
+              let fn = up.script.parseCallback(code)
+              expect(fn).not.toThrowError(up.Blocked)
+              expect(window.callbackSpy).toHaveBeenCalled()
+            })
+          }
+
+          if (specs.config.csp === 'nonce-only') {
+            it('returns a throwing function for a callback without a nonce', function() {
+              let code = 'window.callbackSpy()'
+              let fn = up.script.parseCallback(code)
+              expect(fn).toThrowError(up.Blocked) // new Function() throws EvalError internally
+              expect(window.callbackSpy).not.toHaveBeenCalled()
+            })
+
+            it('returns a noop function for a callback with an incorrect nonce', function() {
+              let code = 'nonce-wrong222 window.callbackSpy()'
+              let fn = up.script.parseCallback(code)
+              // We would prefer to detect the violation and throw up.Blocked here.
+              // Unfortunately the securitypolicyviolation event is emitted async after our eval,
+              // and we don't want to be async ourselves.
+              fn()
+              expect(window.callbackSpy).not.toHaveBeenCalled()
+            })
+
+            if (!pageNonce) {
+              it('returns an executable function for a callback with a correct nonce, but the page nonce is not known to Unpoly', function() {
+                spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+                let code = 'nonce-specs-nonce window.callbackSpy()'
+                let fn = up.script.parseCallback(code)
+                expect(fn).not.toThrowError(up.Blocked)
+                expect(window.callbackSpy).toHaveBeenCalled()
+              })
+            }
+          }
+
+        })
+
+      }
+
       describe('with up.script.config.evalCallbackPolicy = "block"', function() {
 
         beforeEach(function() {
           up.script.config.evalCallbackPolicy = "block"
         })
 
-        it('returns a noop function for a callback without nonce')
-
-        it('returns a noop function a callback with the correct nonce')
-
-        it('returns a noop function a callback with the correct nonce, but the page nonce is not known to Unpoly')
-
-        it('returns a noop function for a callback with an incorrect nonce')
+        itBehavesLikeBlock({ pageNonce: 'specs-nonce' })
+        itBehavesLikeBlock({ pageNonce: null })
 
       })
 
@@ -2481,48 +2608,8 @@ describe('up.scriptxxx', function() {
           up.script.config.evalCallbackPolicy = "pass"
         })
 
-        it('returns an executable function for a callback with the correct nonce', function() {
-          let code = 'nonce-specs-nonce window.callbackSpy()'
-          let fn = up.script.parseCallback(code)
-          expect(fn).not.toThrowError(up.Blocked)
-          expect(window.callbackSpy).toHaveBeenCalled()
-        })
-
-        if (specs.config.csp === 'none') {
-          it('returns an executable function for a callback without a nonce', function() {
-            let code = 'window.callbackSpy()'
-            let fn = up.script.parseCallback(code)
-            expect(fn).not.toThrowError(up.Blocked)
-            expect(window.callbackSpy).toHaveBeenCalled()
-          })
-        }
-
-        if (specs.config.csp === 'nonce-only') {
-          it('returns a throwing function for a callback without a nonce', function() {
-            let code = 'window.callbackSpy()'
-            let fn = up.script.parseCallback(code)
-            expect(fn).toThrowError(up.Blocked)
-            expect(window.callbackSpy).not.toHaveBeenCalled()
-          })
-
-          it('returns a noop function for a callback with an incorrect nonce', function() {
-            let code = 'nonce-wrong222 window.callbackSpy()'
-            let fn = up.script.parseCallback(code)
-            // We would prefer to detect the violation and throw up.Blocked here.
-            // Unfortunately the securitypolicyviolation event is emitted async after our eval,
-            // and we don't want to be async ourselves.
-            fn()
-            expect(window.callbackSpy).not.toHaveBeenCalled()
-          })
-
-          it('returns an executable function for a callback with a correct nonce, but the page nonce is not known to Unpoly', function() {
-            spyOn(up.script, 'cspNonce').and.returnValue(undefined)
-            let code = 'nonce-specs-nonce window.callbackSpy()'
-            let fn = up.script.parseCallback(code)
-            expect(fn).not.toThrowError(up.Blocked)
-            expect(window.callbackSpy).toHaveBeenCalled()
-          })
-        }
+        itBehavesLikePass({ pageNonce: 'specs-nonce' })
+        itBehavesLikePass({ pageNonce: null })
 
       })
 
@@ -2532,11 +2619,8 @@ describe('up.scriptxxx', function() {
           up.script.config.evalCallbackPolicy = "nonce"
         })
 
-        it('returns an executable function for a callback that has the page nonce')
-
-        it('returns a noop function for a callback that has a different nonce')
-
-        it('returns a noop function for a callback without a nonce')
+        itBehavesLikeNonce({ pageNonce: 'specs-nonce' })
+        itBehavesLikeBlock({ pageNonce: null })
 
       })
 
@@ -2546,21 +2630,8 @@ describe('up.scriptxxx', function() {
           up.script.config.evalCallbackPolicy = "auto"
         })
 
-        describe('when the page nonce is known', function() {
-
-          // copy examples from "nonce"
-
-          it('must have tests')
-
-        })
-
-        describe('when the page nonce is not known', function() {
-
-          // copy examples from "pass"
-
-          it('must have tests')
-
-        })
+        itBehavesLikeNonce({ pageNonce: 'specs-nonce' })
+        itBehavesLikePass({ pageNonce: null })
 
       })
 
