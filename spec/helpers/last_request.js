@@ -34,7 +34,7 @@ jasmine.respondWith = function(...args) {
   const headers = options.responseHeaders || {}
   headers['Content-Type'] ||= contentType
 
-  const requestAttrs = {
+  const responseAttrs = {
     status,
     contentType,
     responseHeaders: headers,
@@ -47,7 +47,7 @@ jasmine.respondWith = function(...args) {
     request = jasmine.Ajax.requests.at(request)
   }
 
-  request.respondWith(requestAttrs)
+  request.respondWith(responseAttrs)
 }
 
 jasmine.respondWithSelector = function(selector, options = {}) {

@@ -1960,7 +1960,6 @@ describe('up.scriptxxx', function() {
 
           describe(`when the page nonce is ${pageNonce ? 'known' : 'unknown'}`, function() {
             beforeEach(function() {
-              console.debug("[beforeEach] configuring cspNonce to %o", pageNonce)
               up.script.config.cspNonce = up.util.assert(pageNonce, u.isDefined)
             })
 

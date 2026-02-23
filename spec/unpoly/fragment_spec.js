@@ -9120,74 +9120,16 @@ describe('up.fragment', function() {
 
         beforeEach(function() {
           window.scriptTagExecuted = jasmine.createSpy('scriptTagExecuted')
-          this.linkedScriptPath = up.specUtil.staticFile('linked_script-js', { bustCache: true })
-
-          // throw "do we really duplicate tests here?"
+          this.linkedScriptPath = up.specUtil.staticFile('linked_script.js', { bustCache: true })
         })
 
         afterEach(function() {
           delete window.scriptTagExecuted
         })
 
-        describe('with up.script.config.scriptElementPolicy = "block"', function() {
+        function itBehavesLikeBlock() {
 
-          beforeEach(function() {
-            up.script.config.scriptElementPolicy = "block"
-          })
-
-          it('does not execute inline script tags from a fragment response', async function() {
-            htmlFixtureList(`
-              <div class="target">
-                old text
-              </div>
-            `)
-
-            up.render({
-              fragment: `
-                <div class="target">
-                  new text
-                  <script type="text/javascript">
-                    window.scriptTagExecuted()
-                  </script>
-                </div>
-              `
-            })
-
-            await wait(100)
-
-            expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-            expect(document).toHaveSelector('.target')
-            expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
-            expect('.target').toHaveVisibleText('new text')
-          })
-
-          it('does not execute inline script tags that match the page nonce', async function() {
-            htmlFixtureList(`
-              <div class="target">
-                old text
-              </div>
-            `)
-
-            up.render({
-              fragment: `
-                <div class="target">
-                  new text
-                  <script type="text/javascript" nonce="specs-nonce">
-                    window.scriptTagExecuted()
-                  </script>
-                </div>
-              `
-            })
-
-            await wait(100)
-
-            expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-            expect(document).toHaveSelector('.target')
-            expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
-            expect('.target').toHaveVisibleText('new text')
-          })
-
-          it('does not execute inline script tags that match the response nonce', async function() {
+          it('does not execute inline scripts', async function() {
             htmlFixtureList(`
               <div class="target">
                 old text
@@ -9217,6 +9159,23 @@ describe('up.fragment', function() {
             expect('.target').toHaveVisibleText('new text')
           })
 
+          it('does not execute linked scripts', async function() {
+            fixture('.target')
+            up.render({
+              fragment: `
+                <div class="target">
+                  <script type="text/javascript" src="${this.linkedScriptPath}" nonce="specs-nonce"></script>
+                </div>
+              `
+            })
+
+            await wait(1500)
+
+            expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+            expect(document).toHaveSelector('.target')
+            expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
+          })
+
           it('does not execute a script[type=module]', async function() {
             fixture('.target', { text: 'old text' })
 
@@ -9239,7 +9198,7 @@ describe('up.fragment', function() {
             expect('.target').toHaveVisibleText('new text')
           })
 
-          it('does not execute inline script tags from a document response', async function() {
+          it('does not execute script elements when rendering from a string', async function() {
             fixture('.target', { text: 'old text' })
 
             up.render('.target', {
@@ -9306,23 +9265,6 @@ describe('up.fragment', function() {
             expect('.target').toHaveVisibleText('before after')
           })
 
-          it('does not execute linked scripts to prevent re-inclusion of javascript inserted before the closing body tag', async function() {
-            fixture('.target')
-            up.render({
-              fragment: `
-                <div class="target">
-                  <script type="text/javascript" src="${this.linkedScriptPath}" nonce="specs-nonce"></script>
-                </div>
-              `
-            })
-
-            await wait(1500)
-
-            expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-            expect(document).toHaveSelector('.target')
-            expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
-          })
-
           it('keeps script[type="application/ld+json"]', async function() {
             const json = `
               {
@@ -9356,172 +9298,176 @@ describe('up.fragment', function() {
             expect(document.querySelector('#target')).toHaveSelector('script[type="application/ld+json"]')
             expect(document.querySelector('#target script[type="application/ld+json"]')).toHaveText(json)
           })
-        })
+        }
 
+        function itBehavesLikeNonce({ strictDynamic } = {}) {
 
-        describe('with up.script.config.scriptElementPolicy = "pass"', function() {
+          describe(`when the CSP is ${strictDynamic ? 'strict-dynamic' : 'not strict-dynamic'}`, function() {
 
-          beforeEach(function() {
-            up.script.config.scriptElementPolicy = "pass"
-          })
+            function cspString() {
+              if (u.assert(strictDynamic, u.isGiven)) {
+                return "script-src 'strict-dynamic' 'nonce-response111'"
+              } else {
+                return "script-src 'self' 'nonce-response111'"
+              }
+            }
 
-          it('executes CSP-allowed inline script elements inside the updated fragment', async function() {
-            fixture('.target', { text: 'old text' })
-
-            up.render({ target: '.target', url: '/path' })
-            await wait()
-
-            jasmine.respondWith(`
-              <div class="target">
-                new text
-                <script type="text/javascript" nonce="specs-nonce">
-                  window.scriptTagExecuted()
-                </script>
-              </div>
-            `)
-
-            await wait(100)
-
-            expect(window.scriptTagExecuted).toHaveBeenCalled()
-            expect(document).toHaveSelector('.target')
-            expect(document).toHaveSelector('.target script[type="text/javascript"]')
-            expect('.target').toHaveVisibleText(/new text/)
-          })
-
-          if (specs.config.csp === 'nonce-only') {
-            describe('with a nonce-only CSP', function() {
-
-              it('does not execute inline scripts with an incorrect [nonce]', async function() {
-                fixture('.target', { text: 'old text' })
-
-                up.render({ target: '.target', url: '/path' })
-                await wait()
-
-                jasmine.respondWith(`
-                  <div class="target">
-                    new text
-                    <script type="text/javascript" nonce="incorrect-nonce">
-                      console.log("execute!")
-                      window.scriptTagExecuted()
-                    </script>
-                  </div>
-                `)
-                await wait(100)
-
-                expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-                expect(document).toHaveSelector('.target script') // we did not disable, but the browser blocked it
-                // Cannot use toHaveAttribute() here, because on pages with a CSP that value is masked by the browser.
-                expect('.target script').toHaveProperty('nonce', 'incorrect-nonce')
+            function respondWith(text) {
+              jasmine.respondWith({
+                responseText: text,
+                responseHeaders: { 'Content-Security-Policy': cspString() },
               })
+            }
 
-              it('does not execute linked scripts with an incorrect [nonce]', async function() {
-                fixture('.target')
+            it('executes inline scripts with the correct [nonce]', async function() {
+              fixture('.target', { text: 'old text' })
 
-                up.render({ target: '.target', url: '/path' })
-                await wait()
+              up.render({ target: '.target', url: '/path' })
+              await wait()
 
-                jasmine.respondWith(`
-                  <div class="target">
-                    <script type="text/javascript" src="${this.linkedScriptPath}" nonce="incorrect-nonce"></script>
-                  </div>
-                `)
-                await wait(1500)
-
-                expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-                expect(document).toHaveSelector('.target script') // we did not disable, but the browser blocked it
-                // Cannot use toHaveAttribute() here, because on pages with a CSP that value is masked by the browser.
-                expect('.target script').toHaveProperty('nonce', 'incorrect-nonce')
-              })
-            })
-          }
-
-        })
-
-        describe('with up.script.config.scriptElementPolicy = "nonce"', function() {
-
-          beforeEach(function() {
-            up.script.config.scriptElementPolicy = "nonce"
-          })
-
-          it('must have tests', function() {
-            throw "test me"
-          })
-
-        })
-
-        describe('with up.script.config.scriptElementPolicy = "auto"', function() {
-
-          beforeEach(function() {
-            up.script.config.scriptElementPolicy = "auto"
-          })
-
-          it('executes CSP-allowed inline script elements inside the updated fragment', async function() {
-            fixture('.target', { text: 'old text' })
-
-            up.render({ target: '.target', url: '/path' })
-            await wait()
-
-            jasmine.respondWith(`
-              <div class="target">
-                new text
-                <script type="text/javascript" nonce="specs-nonce">
-                  window.scriptTagExecuted()
-                </script>
-              </div>
-            `)
-
-            await wait(100)
-
-            expect(window.scriptTagExecuted).toHaveBeenCalled()
-            expect(document).toHaveSelector('.target')
-            expect(document).toHaveSelector('.target script[type="text/javascript"]')
-            expect('.target').toHaveVisibleText(/new text/)
-          })
-
-          it('executes inline script elements in fragments only once when rendering a { fragment } (bugfix)', async function() {
-            fixture('.target', { text: 'old text' })
-
-            up.render({
-              fragment: `
+              respondWith(`
                 <div class="target">
                   new text
-                  <script type="text/javascript" nonce="specs-nonce">
+                  <script type="text/javascript" nonce="response111">
                     window.scriptTagExecuted()
                   </script>
                 </div>
-              `
+              `)
+              await wait(100)
+
+              expect(window.scriptTagExecuted).toHaveBeenCalled()
+              expect(document).toHaveSelector('.target')
+              expect(document).toHaveSelector('.target script[type="text/javascript"]')
+              expect('.target').toHaveVisibleText(/new text/)
             })
 
-            await wait(100)
+            it('does not execute inline scripts with an incorrect [nonce]', async function() {
+              fixture('.target', { text: 'old text' })
 
-            expect(window.scriptTagExecuted.calls.count()).toBe(1)
-          })
+              up.render({ target: '.target', url: '/path' })
+              await wait()
 
-          it('executes inline script elements in fragments only once when rendering a full document from a { url } (bugfix)', async function() {
-            fixture('.target', { text: 'old text' })
+              respondWith(`
+                <div class="target">
+                  new text
+                  <script type="text/javascript" nonce="incorrect-nonce">
+                    console.log("execute!")
+                    window.scriptTagExecuted()
+                  </script>
+                </div>
+              `)
+              await wait(100)
 
-            up.render({ url: '/url', target: '.target' })
-            await wait()
+              expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+              expect(document).toHaveSelector('.target script') // we did not disable, but the browser blocked it
+              // Cannot use toHaveAttribute() here, because on pages with a CSP that value is masked by the browser.
+              expect('.target script').toHaveProperty('nonce', 'incorrect-nonce')
+            })
 
-            jasmine.respondWith(`
-              <html>
-                <body>
+            it('executes linked scripts with the correct [nonce]', async function() {
+              fixture('.target')
+
+              up.render({ target: '.target', url: '/path' })
+              await wait()
+
+              respondWith(`
+                <div class="target">
+                new text
+                  <script type="text/javascript" src="${this.linkedScriptPath}" nonce="specs-nonce"></script>
+                </div>
+              `)
+              await wait(1500)
+
+              expect(window.scriptTagExecuted).toHaveBeenCalled()
+              expect(document).toHaveSelector('.target')
+              expect(document).toHaveSelector('.target script[type="text/javascript"]')
+              expect('.target').toHaveVisibleText(/new text/)
+            })
+
+            it('does not execute linked scripts with an incorrect [nonce]', async function() {
+              fixture('.target')
+
+              up.render({ target: '.target', url: '/path' })
+              await wait()
+
+              respondWith(`
+                <div class="target">
+                  new text
+                  <script type="text/javascript" src="${this.linkedScriptPath}" nonce="incorrect-nonce"></script>
+                </div>
+              `)
+              await wait(1500)
+
+              expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+              expect(document).toHaveSelector('.target script') // we did not disable, but the browser blocked it
+              // Cannot use toHaveAttribute() here, because on pages with a CSP that value is masked by the browser.
+              expect('.target script').toHaveProperty('nonce', 'incorrect-nonce')
+              expect('.target').toHaveVisibleText(/new text/)
+            })
+
+            it('runs a script[nonce] when its nonce matches the page nonce when rendering a { fragment }', async function() {
+              htmlFixtureList(`
+                <div class="target">
+                  old text
+                </div>
+              `)
+
+              up.render({
+                fragment: `
                   <div class="target">
                     new text
                     <script type="text/javascript" nonce="specs-nonce">
                       window.scriptTagExecuted()
                     </script>
                   </div>
-                </body>
-              </html>
-            `)
+                `
+              })
 
-            await wait(100)
+              await wait(100)
 
-            expect(window.scriptTagExecuted.calls.count()).toBe(1)
+              expect(window.scriptTagExecuted).toHaveBeenCalled()
+              expect(document).toHaveSelector('.target')
+              expect(document).toHaveSelector('.target script[type="text/javascript"]')
+              expect('.target').toHaveVisibleText('new text')
+            })
+
+            it('does not run a script without a [nonce] attribute', async function() {
+              htmlFixtureList(`
+                <div class="target">
+                  old text
+                </div>
+              `)
+
+              up.render({ url: '/path', target: '.target' })
+              await wait()
+
+              jasmine.respondWith({
+                responseHeaders: { 'Content-Security-Policy': "script-src 'strict-dynamic' 'specs-nonce'" },
+                responseText: `
+                  <div class="target">
+                    new text
+                    <script type="text/javascript">
+                      window.scriptTagExecuted()
+                    </script>
+                  </div>
+                `
+              })
+
+              await wait(100)
+
+              expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+              expect(document).toHaveSelector('.target')
+              expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
+              expect('.target').toHaveVisibleText('new text')
+            })
+
           })
 
-          it('executes scripts with a correct [nonce]', async function() {
+        }
+
+        function itBehavesLikePass() {
+
+          it('executes inline scripts the updated fragment', async function() {
             fixture('.target', { text: 'old text' })
 
             up.render({ target: '.target', url: '/path' })
@@ -9535,14 +9481,31 @@ describe('up.fragment', function() {
                 </script>
               </div>
             `)
+
             await wait(100)
 
             expect(window.scriptTagExecuted).toHaveBeenCalled()
             expect(document).toHaveSelector('.target')
             expect(document).toHaveSelector('.target script[type="text/javascript"]')
-            // Cannot use toHaveAttribute() here, because on pages with a CSP that value is masked by the browser.
-            expect('.target script[type="text/javascript"]').toHaveProperty('nonce', 'specs-nonce')
             expect('.target').toHaveVisibleText(/new text/)
+          })
+
+          it('executes linked scripts', async function() {
+            fixture('.target')
+
+            up.render({ target: '.target', url: '/path' })
+            await wait()
+
+            jasmine.respondWith(`
+              <div class="target">
+                <script type="text/javascript" src="${this.linkedScriptPath}" nonce="specs-nonce"></script>
+              </div>
+            `)
+            await wait(1500)
+
+            expect(window.scriptTagExecuted).toHaveBeenCalled()
+            expect(document).toHaveSelector('.target')
+            expect(document).toHaveSelector('.target script')
           })
 
           it('executes a script[type=module] inside the updated fragment', async function() {
@@ -9607,34 +9570,14 @@ describe('up.fragment', function() {
             expect('.target').toHaveVisibleText('new text')
           })
 
-          it('executes linked scripts', async function() {
-            fixture('.target')
-
-            up.render({ target: '.target', url: '/path' })
-            await wait()
-
-            jasmine.respondWith(`
-              <div class="target">
-                <script type="text/javascript" src="${this.linkedScriptPath}" nonce="specs-nonce"></script>
-              </div>
-            `)
-            await wait(1500)
-
-            expect(window.scriptTagExecuted).toHaveBeenCalled()
-            expect(document).toHaveSelector('.target')
-            expect(document).toHaveSelector('.target script')
-          })
-
           if (specs.config.csp === 'nonce-only') {
-            describe('with a nonce-only CSP', function() {
+            it('does not execute inline scripts that violate the CSP', async function() {
+              fixture('.target', { text: 'old text' })
 
-              it('does not execute inline scripts with an incorrect [nonce]', async function() {
-                fixture('.target', { text: 'old text' })
+              up.render({ target: '.target', url: '/path' })
+              await wait()
 
-                up.render({ target: '.target', url: '/path' })
-                await wait()
-
-                jasmine.respondWith(`
+              jasmine.respondWith(`
                 <div class="target">
                   new text
                   <script type="text/javascript" nonce="incorrect-nonce">
@@ -9643,359 +9586,39 @@ describe('up.fragment', function() {
                   </script>
                 </div>
               `)
-                await wait(100)
+              await wait(100)
 
-                expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-                expect(document).toHaveSelector('.target script') // we did not disable, but the browser blocked it
-                // Cannot use toHaveAttribute() here, because on pages with a CSP that value is masked by the browser.
-                expect('.target script').toHaveProperty('nonce', 'incorrect-nonce')
-              })
-
-              it('does not execute linked scripts with an incorrect [nonce]', async function() {
-                fixture('.target')
-
-                up.render({ target: '.target', url: '/path' })
-                await wait()
-
-                jasmine.respondWith(`
-                <div class="target">
-                  <script type="text/javascript" src="${this.linkedScriptPath}" nonce="incorrect-nonce"></script>
-                </div>
-              `)
-                await wait(1500)
-
-                expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-                expect(document).toHaveSelector('.target script') // we did not disable, but the browser blocked it
-                // Cannot use toHaveAttribute() here, because on pages with a CSP that value is masked by the browser.
-                expect('.target script').toHaveProperty('nonce', 'incorrect-nonce')
-              })
-            })
-          }
-
-          if (specs.config.csp === 'strict-dynamic') {
-            describe('with a strict-dynamic CSP', function() {
-
-              it('runs a script[nonce] when its nonce matches the response nonce', async function() {
-                htmlFixtureList(`
-                  <div class="target">
-                    old text
-                  </div>
-                `)
-
-                up.render({ url: '/path', target: '.target' })
-                await wait()
-
-                jasmine.respondWith({
-                  responseHeaders: { 'Content-Security-Policy': "script-src 'strict-dynamic' 'specs-nonce'" },
-                  responseText: `
-                  <div class="target">
-                    new text
-                    <script type="text/javascript" nonce="specs-nonce">
-                      window.scriptTagExecuted()
-                    </script>
-                  </div>
-                `
-                })
-
-                await wait(100)
-
-                expect(window.scriptTagExecuted).toHaveBeenCalled()
-                expect(document).toHaveSelector('.target')
-                expect(document).toHaveSelector('.target script[type="text/javascript"]')
-                expect('.target').toHaveVisibleText('new text')
-              })
-
-              it('runs a script[nonce] when its nonce matches the page nonce when rendering a { fragment }', async function() {
-                htmlFixtureList(`
-                  <div class="target">
-                    old text
-                  </div>
-                `)
-
-                up.render({
-                  fragment: `
-                  <div class="target">
-                    new text
-                    <script type="text/javascript" nonce="specs-nonce">
-                      window.scriptTagExecuted()
-                    </script>
-                  </div>
-                `
-                })
-
-                await wait(100)
-
-                expect(window.scriptTagExecuted).toHaveBeenCalled()
-                expect(document).toHaveSelector('.target')
-                expect(document).toHaveSelector('.target script[type="text/javascript"]')
-                expect('.target').toHaveVisibleText('new text')
-              })
-
-              it('does not run a script without a [nonce] attribute', async function() {
-                htmlFixtureList(`
-                <div class="target">
-                  old text
-                </div>
-              `)
-
-                up.render({ url: '/path', target: '.target' })
-                await wait()
-
-                jasmine.respondWith({
-                  responseHeaders: { 'Content-Security-Policy': "script-src 'strict-dynamic' 'specs-nonce'" },
-                  responseText: `
-                  <div class="target">
-                    new text
-                    <script type="text/javascript">
-                      window.scriptTagExecuted()
-                    </script>
-                  </div>
-                `
-                })
-
-                await wait(100)
-
-                expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-                expect(document).toHaveSelector('.target')
-                expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
-                expect('.target').toHaveVisibleText('new text')
-              })
-
-              it('does not run a script without a [nonce] attribute when the page nonce is unknown', async function() {
-                let suiteMeta = document.querySelector('meta[name="csp-nonce"]')
-                suiteMeta.remove()
-                expect(up.script.cspNonce()).toBeMissing()
-
-                htmlFixtureList(`
-                  <div class="target">
-                    old text
-                  </div>
-                `)
-
-                up.render({ url: '/path', target: '.target' })
-                await wait()
-
-                jasmine.respondWith({
-                  responseHeaders: { 'Content-Security-Policy': "script-src 'strict-dynamic' 'specs-nonce'" },
-                  responseText: `
-                  <div class="target">
-                    new text
-                    <script type="text/javascript">
-                      window.scriptTagExecuted()
-                    </script>
-                  </div>
-                `
-                })
-
-                await wait(100)
-
-                expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-                expect(document).toHaveSelector('.target')
-                expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
-                expect('.target').toHaveVisibleText('new text')
-              })
-
-              it('does not run a script[nonce] when its nonce does not match the response nonce', async function() {
-                htmlFixtureList(`
-                  <div class="target">
-                    old text
-                  </div>
-                `)
-
-                up.render({ url: '/path', target: '.target' })
-                await wait()
-
-                jasmine.respondWith({
-                  responseHeaders: { 'Content-Security-Policy': "script-src 'strict-dynamic' 'specs-nonce'" },
-                  responseText: `
-                  <div class="target">
-                    new text
-                    <script type="text/javascript" nonce="other-nonce">
-                      window.scriptTagExecuted()
-                    </script>
-                  </div>
-                `
-                })
-
-                await wait(100)
-
-                expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-                expect(document).toHaveSelector('.target')
-                expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
-                expect('.target').toHaveVisibleText('new text')
-              })
-
-              it("does not run a script[nonce] with a response CSP of `script-src 'self' but without a nonce", async function() {
-                htmlFixtureList(`
-                  <div class="target">
-                    old text
-                  </div>
-                `)
-
-                up.render({ url: '/path', target: '.target' })
-                await wait()
-
-                jasmine.respondWith({
-                  responseHeaders: { 'Content-Security-Policy': "script-src 'strict-dynamic' 'self'" },
-                  responseText: `
-                  <div class="target">
-                    new text
-                    <script type="text/javascript">
-                      window.scriptTagExecuted()
-                    </script>
-                  </div>
-                `
-                })
-
-                await wait(100)
-
-                expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-                expect(document).toHaveSelector('.target')
-                expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
-                expect('.target').toHaveVisibleText('new text')
-              })
-
-              it('does not run a script[nonce] when its nonce does not match the response nonce', async function() {
-                htmlFixtureList(`
-                  <div class="target">
-                    old text
-                  </div>
-                `)
-
-                up.render({ url: '/path', target: '.target' })
-                await wait()
-
-                jasmine.respondWith({
-                  responseHeaders: { 'Content-Security-Policy': "script-src 'strict-dynamic' 'response-nonce'" },
-                  responseText: `
-                  <div class="target">
-                    new text
-                    <script type="text/javascript" nonce="other-nonce">
-                      window.scriptTagExecuted()
-                    </script>
-                  </div>
-                `
-                })
-
-                await wait(100)
-
-                expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-                expect(document).toHaveSelector('.target')
-                expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
-                expect('.target').toHaveVisibleText('new text')
-              })
-
-              it('does not run a script[nonce] when its nonce matches the response nonce but the page has no nonce', async function() {
-                htmlFixtureList(`
-                  <div class="target">
-                    old text
-                  </div>
-                `)
-
-                up.render({ url: '/path', target: '.target' })
-                await wait()
-
-                jasmine.respondWith({
-                  responseHeaders: { 'Content-Security-Policy': "script-src 'strict-dynamic' 'response-nonce'" },
-                  responseText: `
-                  <div class="target">
-                    new text
-                    <script type="text/javascript" nonce="response-nonce">
-                      window.scriptTagExecuted()
-                    </script>
-                  </div>
-                `
-                })
-
-                await wait(100)
-
-                expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-                expect(document).toHaveSelector('.target')
-                expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
-                expect('.target').toHaveVisibleText('new text')
-              })
-
-            })
-          }
-        }) // scriptElementPolicy == 'auto'
-
-        if (up.migrate.loaded) {
-          describe('with up.fragment.config.runScripts = true', function() {
-
-            beforeEach(function() {
-              up.fragment.config.runScripts = true
+              expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+              expect(document).toHaveSelector('.target script') // we did not disable, but the browser blocked it
+              // Cannot use toHaveAttribute() here, because on pages with a CSP that value is masked by the browser.
+              expect('.target script').toHaveProperty('nonce', 'incorrect-nonce')
             })
 
-            it('executes inline script elements inside the updated fragment', async function() {
-              fixture('.target', { text: 'old text' })
+            it('does not execute linked scripts that violate the CSP', async function() {
+              fixture('.target')
 
               up.render({ target: '.target', url: '/path' })
               await wait()
 
               jasmine.respondWith(`
-              <div class="target">
-                new text
-                <script type="text/javascript" nonce="specs-nonce">
-                  window.scriptTagExecuted()
-                </script>
-              </div>
-            `)
-
-              await wait(100)
-
-              expect(window.scriptTagExecuted).toHaveBeenCalled()
-              expect(document).toHaveSelector('.target')
-              expect(document).toHaveSelector('.target script[type="text/javascript"]')
-              expect('.target').toHaveVisibleText(/new text/)
-            })
-
-          })
-
-          describe('with up.fragment.config.runScripts = false', function() {
-
-            beforeEach(function() {
-              up.fragment.config.runScripts = false
-            })
-
-            it('does not execute inline script tags from a fragment response', async function() {
-              htmlFixtureList(`
-              <div class="target">
-                old text
-              </div>
-            `)
-
-              up.render({
-                fragment: `
                 <div class="target">
-                  new text
-                  <script type="text/javascript">
-                    window.scriptTagExecuted()
-                  </script>
+                  <script type="text/javascript" src="${this.linkedScriptPath}" nonce="incorrect-nonce"></script>
                 </div>
-              `
-              })
-
-              await wait(100)
+              `)
+              await wait(1500)
 
               expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-              expect(document).toHaveSelector('.target')
-              expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
-              expect('.target').toHaveVisibleText('new text')
+              expect(document).toHaveSelector('.target script') // we did not disable, but the browser blocked it
+              // Cannot use toHaveAttribute() here, because on pages with a CSP that value is masked by the browser.
+              expect('.target script').toHaveProperty('nonce', 'incorrect-nonce')
             })
+          }
 
-            it('does not execute inline script tags that match the response nonce', async function() {
-              htmlFixtureList(`
-              <div class="target">
-                old text
-              </div>
-            `)
+          it('executes inline script elements in fragments only once when rendering a { fragment } (bugfix)', async function() {
+            fixture('.target', { text: 'old text' })
 
-              up.render({ url: '/path', target: '.target' })
-              await wait()
-
-              jasmine.respondWith({
-                responseHeaders: { 'Content-Security-Policy': "script-src 'specs-nonce'" },
-                responseText: `
+            up.render({
+              fragment: `
                 <div class="target">
                   new text
                   <script type="text/javascript" nonce="specs-nonce">
@@ -10003,18 +9626,91 @@ describe('up.fragment', function() {
                   </script>
                 </div>
               `
-              })
-
-              await wait(100)
-
-              expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-              expect(document).toHaveSelector('.target')
-              expect(document).not.toHaveSelector('.target script[type="text/javascript"]')
-              expect('.target').toHaveVisibleText('new text')
             })
 
+            await wait(100)
+
+            expect(window.scriptTagExecuted.calls.count()).toBe(1)
           })
+
+          it('executes inline script elements in fragments only once when rendering a full document from a { url } (bugfix)', async function() {
+            fixture('.target', { text: 'old text' })
+
+            up.render({ url: '/url', target: '.target' })
+            await wait()
+
+            jasmine.respondWith(`
+              <html>
+                <body>
+                  <div class="target">
+                    new text
+                    <script type="text/javascript" nonce="specs-nonce">
+                      window.scriptTagExecuted()
+                    </script>
+                  </div>
+                </body>
+              </html>
+            `)
+
+            await wait(100)
+
+            expect(window.scriptTagExecuted.calls.count()).toBe(1)
+          })
+
         }
+
+        describe('with up.script.config.scriptElementPolicy = "block"', function() {
+
+          beforeEach(function() {
+            up.script.config.scriptElementPolicy = "block"
+          })
+
+          itBehavesLikeBlock()
+
+        })
+
+        describe('with up.script.config.scriptElementPolicy = "pass"', function() {
+
+          beforeEach(function() {
+            up.script.config.scriptElementPolicy = "pass"
+          })
+
+          itBehavesLikePass()
+
+        })
+
+        describe('with up.script.config.scriptElementPolicy = "nonce"', function() {
+
+          beforeEach(function() {
+            up.script.config.scriptElementPolicy = "nonce"
+          })
+
+          describe('if the page nonce is known', function() {
+            itBehavesLikeNonce({ strictDynamic: true })
+            itBehavesLikeNonce({ strictDynamic: false })
+          })
+
+          describe('if the page nonce is not known', function() {
+            beforeEach(function() {
+              spyOn(up.script, 'cspNonce').and.returnValue(null)
+            })
+
+            itBehavesLikeBlock()
+          })
+
+        })
+
+        describe('with up.script.config.scriptElementPolicy = "auto"', function() {
+
+          beforeEach(function() {
+            up.script.config.scriptElementPolicy = "auto"
+          })
+
+          itBehavesLikePass()
+
+          itBehavesLikeNonce({ strictDynamic: true })
+
+        }) // scriptElementPolicy == 'auto'
 
       })
 
@@ -15704,7 +15400,7 @@ describe('up.fragment', function() {
       describe('scripts', function() {
 
         beforeEach(function() {
-          up.fragment.config.runScripts = true
+          up.script.config.scriptElementPolicy = 'pass'
         })
 
         it('keeps a <script> element (bugfix)', async function() {
@@ -16699,7 +16395,7 @@ describe('up.fragment', function() {
         })
 
         it('ignores a <script nonce> for the comparison', async function() {
-          up.fragment.config.runScripts = true
+          up.script.config.scriptElementPolicy = 'pass'
 
           spyOn(up.script, 'cspNonce').and.returnValue('page-secret')
 
@@ -16718,7 +16414,7 @@ describe('up.fragment', function() {
         })
 
         it('ignores a callback nonce for the comparison', async function() {
-          up.fragment.config.runScripts = true
+          up.script.config.scriptElementPolicy = 'pass'
 
           spyOn(up.script, 'cspNonce').and.returnValue('page-secret')
 
@@ -16737,7 +16433,7 @@ describe('up.fragment', function() {
         })
 
         it('ignores multiple callback nonces within the same tag', async function() {
-          up.fragment.config.runScripts = true
+          up.script.config.scriptElementPolicy = 'pass'
 
           spyOn(up.script, 'cspNonce').and.returnValue('page-secret')
 
