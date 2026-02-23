@@ -35,11 +35,19 @@ up.ScriptGate = class ScriptGate {
     //     even if a nonce is missing or incorrect. In this case we want to explicitly check for
     //     a valid nonce. Otherwise an attacker could set an [up-on-loaded] callback with an incorrect nonce,
     //     trigger <script nonce> execution and run arbitrary JavaScript.
-    if (!policy.passesItem(nonceableCallback.nonce)) {
-      return nonceableCallback.unsafeEval(...evalEnv)
+    if (policy.passesItem(nonceableCallback.nonce)) {
+      try {
+        return nonceableCallback.unsafeEval(evalEnv)
+      } catch (error) {
+        if (error instanceof EvalError) {
+          throw new up.Blocked(error.message)
+        } else {
+          throw error
+        }
+      }
     } else {
-      // We don't change the DOM in this path. We only refuse to eval and log the refusal.
-      policy.log(['Blocked callback: %o', nonceableCallback.script])
+      // We don't rewrite the callback string in the DOM.
+      throw new up.Blocked('Blocked callback: ' + nonceableCallback.script)
     }
   }
 
