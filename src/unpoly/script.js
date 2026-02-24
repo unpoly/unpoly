@@ -1050,7 +1050,7 @@ up.script = (function() {
 
   function callbackAttr(element, attrName, parseOpts) {
     return e.parseAttr(element, attrName, (code) => {
-      let fn = parseCallback(code, { ...parseOpts, policy: config.policy.attrCallback })
+      let fn = parseCallback(code, parseOpts)
       // Emulate the behavior of the `onclick` attribute, where `this` refers to the clicked element.
       return fn.bind(element)
     })
@@ -1062,7 +1062,7 @@ up.script = (function() {
       if (expandObject) {
         let object = argValues[0]
         argNames = [...argNames, ...expandObject]
-        argValues = [object, Object.values(u.pick(object, expandObject))]
+        argValues = [object, ...Object.values(u.pick(object, expandObject))]
       }
 
       const nonceableCallback = up.NonceableCallback.fromString(code)

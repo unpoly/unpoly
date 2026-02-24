@@ -63,8 +63,7 @@ up.OptionsParser = class OptionsParser {
   // }
 
   renderCallback(key, keyOptions = {}) {
-    let codeParser = (code) => up.RenderOptions.parseCallback(key, code)
-    let attrReader = (link, attr) => e.callbackAttr(link, attr, codeParser)
+    let attrReader = (link, attr) => up.RenderOptions.callbackAttr(link, attr, key)
     this.parse(attrReader, key, keyOptions)
   }
 

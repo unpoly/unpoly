@@ -949,7 +949,7 @@ up.fragment = (function() {
 
   function emitFragmentKeep({ oldElement, newElement: newFragment, newData, renderOptions }) {
     const log = ['Keeping fragment %o', oldElement]
-    const callback = e.callbackAttr(oldElement, 'up-on-keep', { exposedKeys: ['newFragment', 'newData'] })
+    const callback = up.script.callbackAttr(oldElement, 'up-on-keep', { expandObject: ['newFragment', 'newData'] })
     return up.emit(oldElement, 'up:fragment:keep', { log, callback, newFragment, newData, renderOptions })
   }
 

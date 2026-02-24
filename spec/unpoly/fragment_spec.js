@@ -2693,7 +2693,7 @@ describe('up.fragment', function() {
 
             })
 
-            fdescribe('callbacks', function() {
+            describe('callbacks', function() {
 
               beforeEach(function() {
                 window.callbackSpy = jasmine.createSpy('callback spy')
@@ -9116,7 +9116,7 @@ describe('up.fragment', function() {
         })
       })
 
-      fdescribe('execution of scripts', function() {
+      describe('execution of scripts', function() {
 
         beforeEach(function() {
           window.scriptTagExecuted = jasmine.createSpy('scriptTagExecuted')
@@ -15953,7 +15953,7 @@ describe('up.fragment', function() {
       })
 
       it('allows to define a listener in an [up-on-keep] attribute', async function() {
-        const keeper = fixture('.keeper[up-keep][up-on-keep="nonce-specs-nonce this.onKeepSpy(this, newFragment, newData)"]', { text: 'old-inside' })
+        const keeper = fixture('.keeper[up-keep][up-on-keep="nonce-specs-nonce this.onKeepSpy(this, event, newFragment, newData)"]', { text: 'old-inside' })
 
         keeper.onKeepSpy = jasmine.createSpy('onKeep spy')
 
@@ -15965,6 +15965,7 @@ describe('up.fragment', function() {
 
         expect(keeper.onKeepSpy).toHaveBeenCalledWith(
           keeper,
+          jasmine.anyEvent('up:fragment:keep'),
           jasmine.objectContaining({ className: 'keeper new' }),
           jasmine.objectContaining({ key: 'new-value' })
         )

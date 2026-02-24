@@ -1,6 +1,6 @@
 const u = up.util
 
-fdescribe('up.CSPInfo', function() {
+describe('up.CSPInfo', function() {
 
   beforeEach(function() {
     jasmine.addMatchers({

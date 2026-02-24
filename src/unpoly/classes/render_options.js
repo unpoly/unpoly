@@ -1,4 +1,5 @@
 const u = up.util
+const e = up.element
 
 up.RenderOptions = (function() {
 
@@ -114,9 +115,18 @@ up.RenderOptions = (function() {
     onDismissed: CLOSE_LAYER_CALLBACK,
     onAccepted: CLOSE_LAYER_CALLBACK,
   }
+
   function parseCallback(key, code) {
-    let parseOpts = CALLBACKS[key] ?? up.fail(`Unknown callback { ${key} }`)
-    return up.script.parseCallback(code, parseOpts)
+    return up.script.parseCallback(code, parseCallbackOptions(key))
+  }
+
+  function parseCallbackOptions(key) {
+    return CALLBACKS[key] ?? up.fail(`Unknown callback { ${key} }`)
+  }
+
+  function callbackAttr(element, attrName, key) {
+    // return e.parseAttr(element, attrName, (value) => parseCallback(key, value))
+    return up.script.callbackAttr(element, attrName, parseCallbackOptions(key))
   }
 
   function navigateDefaults(options) {
@@ -266,6 +276,7 @@ up.RenderOptions = (function() {
     assertContentGiven,
     deriveFailOptions,
     parseCallback,
+    callbackAttr,
     NO_PREVIEWS,
     NO_MOTION,
     NO_INPUT_INTERFERENCE,

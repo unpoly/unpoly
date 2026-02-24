@@ -2,7 +2,7 @@ const u = up.util
 const e = up.element
 const $ = jQuery
 
-describe('up.scriptxxx', function() {
+describe('up.script', function() {
 
   describe('JavaScript functions', function() {
 
@@ -1360,7 +1360,7 @@ describe('up.scriptxxx', function() {
       })
     })
 
-    fdescribe('up.script.cspNonce()', function() {
+    describe('up.script.cspNonce()', function() {
 
       beforeEach(function() {
         // Remove the CSP meta to start with a clean slate.
@@ -1393,7 +1393,7 @@ describe('up.scriptxxx', function() {
 
     })
 
-    fdescribe('up.script.warnOfUnsafeCSP()', function() {
+    describe('up.script.warnOfUnsafeCSP()', function() {
 
       let warnSpy
 
@@ -1591,7 +1591,7 @@ describe('up.scriptxxx', function() {
 
     })
 
-    fdescribe('up.script.adoptNewFragment()', function() {
+    describe('up.script.adoptNewFragment()', function() {
 
       describe('CSP nonces in body scripts', function() {
 
@@ -2227,7 +2227,7 @@ describe('up.scriptxxx', function() {
 
     })
 
-    fdescribe('up.script.adoptDetachedHeadAsset()', function() {
+    describe('up.script.adoptDetachedHeadAsset()', function() {
 
       function itBehavesLikeExamples() {
 
@@ -2360,7 +2360,7 @@ describe('up.scriptxxx', function() {
         })
       }
 
-      fdescribe('CSP nonces in head assets', function() {
+      describe('CSP nonces in head assets', function() {
 
         itBehavesLikeExamples()
 
@@ -2390,7 +2390,7 @@ describe('up.scriptxxx', function() {
 
     })
 
-    fdescribe('adoptRenderOptionsFromHeader()', function() {
+    describe('adoptRenderOptionsFromHeader()', function() {
 
       describe('CSP nonces in a JSON of render options', function() {
 
@@ -2661,7 +2661,7 @@ describe('up.scriptxxx', function() {
 
     })
 
-    fdescribe('parseCallback()', function() {
+    describe('parseCallback()', function() {
 
       beforeEach(function() {
         window.callbackSpy = jasmine.createSpy('callback spy')
@@ -2797,6 +2797,7 @@ describe('up.scriptxxx', function() {
                 expect(window.callbackSpy).toHaveBeenCalled()
               })
             }
+
           }
 
         })
@@ -2844,6 +2845,33 @@ describe('up.scriptxxx', function() {
 
         itBehavesLikeNonce({ pageNonce: 'specs-nonce' })
         itBehavesLikePass({ pageNonce: null })
+
+      })
+
+      describe('callback context', function() {
+
+        it('exposes the first arg as `event` by default', function() {
+          let event = { type: 'test' }
+          let code = 'nonce-specs-nonce window.callbackSpy(event)'
+          let fn = up.script.parseCallback(code)
+          expect(() => fn(event)).not.toThrowError(up.Blocked)
+          expect(window.callbackSpy).toHaveBeenCalledWith(event)
+        })
+
+        it('exposes properties of the first arg with { expandObject } option', function() {
+          let event = { type: 'test', prop1: 'value1', prop2: 'value2' }
+          let code = 'nonce-specs-nonce window.callbackSpy(prop1, prop2)'
+          let fn = up.script.parseCallback(code, { expandObject: ['prop1', 'prop2']})
+          expect(() => fn(event)).not.toThrowError(up.Blocked)
+          expect(window.callbackSpy).toHaveBeenCalledWith('value1', 'value2')
+        })
+
+        it('allows to configure arg names with { argNames } option', function() {
+          let code = 'nonce-specs-nonce window.callbackSpy(arg1, arg2)'
+          let fn = up.script.parseCallback(code, { argNames: ['arg1', 'arg2']})
+          expect(() => fn('foo', 'bar')).not.toThrowError(up.Blocked)
+          expect(window.callbackSpy).toHaveBeenCalledWith('foo', 'bar')
+        })
 
       })
 
