@@ -81,7 +81,7 @@ You can configure a stricter behavior with `up.script.config.evalCallbackPolicy`
 When your CSP doesn't allow `unsafe-eval`, callbacks like `[up-on-loaded]` will fail with an error like this:
 
 ```text
-Uncaught EvalError: call to Function() blocked by CSP`
+Uncaught EvalError: call to Function() blocked by CSP
 ```
 
 You can address this by [prefixing callback nonces](#callback-nonces)
