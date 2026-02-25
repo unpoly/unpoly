@@ -150,7 +150,7 @@ class Policy {
     }
   }
 
-  passesItem(itemNonce) {
+  passesItem(_itemNonce) {
     throw new up.NotImplemented()
   }
 
