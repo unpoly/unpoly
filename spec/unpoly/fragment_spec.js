@@ -6942,6 +6942,47 @@ describe('up.fragment', function() {
             expect(u.map(event.newAssets, 'outerHTML')).toEqual(['<script src="scripts-2.js"></script>'])
           })
 
+          fit('exposes a { response } property on up:assets:changed so users can implement their own nonce rewriting for non-script assets', async function() {
+            const listener = jasmine.createSpy('up:assets:changed listener')
+            up.on('up:assets:changed', listener)
+
+            const style = e.createFromSelector('script[src="scripts-1.js"]')
+            registerFixture(style)
+            document.head.append(style)
+
+            fixture('.container', { text: 'old container text' })
+            up.render('.container', {
+              url: '/path',
+              history: true,
+            })
+            await wait()
+
+            jasmine.respondWith({
+              responseText: `
+                <html>
+                  <head>
+                    <script src='scripts-2.js'></script>
+                  </head>
+                  <body>
+                    <div class='container'>
+                      new container text
+                    </div>
+                  </body>
+                </html>
+              `,
+              responseHeaders: {
+                'Content-Security-Policy': "style-src: 'nonce-123"
+              }
+            })
+            await wait()
+
+            expect(listener).toHaveBeenCalled()
+            const event = listener.calls.mostRecent().args[0]
+            expect(event.type).toBe('up:assets:changed')
+            expect(event.response).toEqual(jasmine.any(up.Response))
+            expect(event.response.header('Content-Security-Policy')).toBe("style-src: 'nonce-123")
+          })
+
           it('allows the user to insert an executable script from event.newAssets (bugfix)', async function() {
             const listener = jasmine.createSpy('up:assets:changed listener').and.callFake((event) => {
               for (let newAsset of event.newAssets) {

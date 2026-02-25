@@ -960,9 +960,10 @@ up.script = (function() {
 
     let oldHTML = u.map(oldAssets, 'outerHTML').join()
     let newHTML = u.map(newAssets, 'outerHTML').join()
+    let { response } = renderOptions
 
     if (oldHTML !== newHTML) {
-      up.event.assertEmitted('up:assets:changed', { oldAssets, newAssets, renderOptions })
+      up.event.assertEmitted('up:assets:changed', { oldAssets, newAssets, renderOptions, response })
     }
   }
 
@@ -1014,6 +1015,13 @@ up.script = (function() {
 
   @param {Object} event.renderOptions
     The [render options](/up.render#parameters) for the current render pass.
+
+  @param {up.Response} [event.response]
+    The response that contained new assets.
+
+    When [rendering from a string](/providing-html#string), this property is `undefined`.
+
+    @experimental
 
   @param event.preventDefault()
     Aborts this render pass before new content is inserted.
