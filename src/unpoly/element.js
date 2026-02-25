@@ -905,36 +905,6 @@ up.element = (function() {
   }
 
   /*-
-  @function up.element.concludeCSSTransition
-  @internal
-  */
-  function concludeCSSTransition(element) {
-    const undo = setStyleTemp(element, { transition: 'none' })
-    // Browsers need to paint at least one frame without a transition to stop the
-    // animation. In theory we could just wait until the next paint, but in case
-    // someone will set another transition after us, let's force a repaint here.
-    paint(element)
-    return undo
-  }
-
-  /*-
-  Returns whether the given element has a CSS transition set.
-
-  @function up.element.hasCSSTransition
-  @param {Object} styleHash
-  @return {boolean}
-  @internal
-  */
-  function hasCSSTransition(styleHash) {
-    const prop = styleHash['transition-property']
-    const duration = styleHash['transition-duration']
-    // The default transition for elements is actually "all 0s ease 0s"
-    // instead of "none", although that has the same effect as "none".
-    const noTransition = ((prop === 'none') || ((prop === 'all') && (duration === 0)))
-    return !noTransition
-  }
-
-  /*-
   @function up.element.fixedToAbsolute
   @internal
   */
@@ -1611,8 +1581,6 @@ up.element = (function() {
     extractSingular,
     get root() { return getRoot() },
     paint,
-    concludeCSSTransition,
-    hasCSSTransition,
     fixedToAbsolute,
     setMissingAttrs,
     setMissingAttr,
