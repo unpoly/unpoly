@@ -537,6 +537,15 @@ up.Request = class Request extends up.Record {
     this.params.clear()
   }
 
+  /*-
+  Returns whether this request uses [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
+  HTTP method like `GET`.
+
+  @function up.Request#isSafe
+  @return {boolean}
+    Whether the request uses a safe HTTP method.
+  @experimental
+  */
   isSafe() {
     return up.network.isSafeMethod(this.method)
   }
