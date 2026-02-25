@@ -1212,13 +1212,15 @@ describe('up.util', () => {
         return setTimeout(done, 50 + 75)
       })
 
-      describe('if the delay is zero', () => it('calls the given function in the next execution frame', function() {
-        const callback = jasmine.createSpy()
-        up.util.timer(0, callback)
-        expect(callback).not.toHaveBeenCalled()
+      describe('if the delay is zero', function() {
+        it('calls the given function in the next execution frame', function() {
+          const callback = jasmine.createSpy()
+          up.util.timer(0, callback)
+          expect(callback).not.toHaveBeenCalled()
 
-        return setTimeout((() => expect(callback).toHaveBeenCalled()), 0)
-      }))
+          return setTimeout((() => expect(callback).toHaveBeenCalled()), 0)
+        })
+      })
     })
 
 //    describe 'up.util.argNames', ->
@@ -2539,36 +2541,46 @@ describe('up.util', () => {
         })
       })
 
-      describe('with number argument', () => it('serializes the number as string', function() {
-        const formatted = up.util.sprintf('before %o after', 5)
-        expect(formatted).toEqual('before 5 after')
-      }))
+      describe('with number argument', function() {
+        it('serializes the number as string', function() {
+          const formatted = up.util.sprintf('before %o after', 5)
+          expect(formatted).toEqual('before 5 after')
+        })
+      })
 
-      describe('with function argument', () => it('serializes the function code', function() {
-        const formatted = up.util.sprintf('before %o after', function foo() {})
-        expect(formatted).toEqual('before function foo() { } after')
-      }))
+      describe('with function argument', function() {
+        it('serializes the function code', function() {
+          const formatted = up.util.sprintf('before %o after', function foo() {})
+          expect(formatted).toEqual('before function foo() { } after')
+        })
+      })
 
-      describe('with array argument', () => it('recursively serializes the elements', function() {
-        const formatted = up.util.sprintf('before %o after', [1, "foo"])
-        expect(formatted).toEqual('before [1, foo] after')
-      }))
+      describe('with array argument', function() {
+        it('recursively serializes the elements', function() {
+          const formatted = up.util.sprintf('before %o after', [1, "foo"])
+          expect(formatted).toEqual('before [1, foo] after')
+        })
+      })
 
-      describe('with element argument', () => it('serializes the tag name with id, up-iid, name and class attributes, but ignores other attributes', function() {
-        const openTag = '<table id="id-value" up-id="up-id-value" name="name-value" class="class-value" title="title-value">'
-        const content = '<tr><td>cell</td></tr>'
-        const closeTag = '</table>'
-        const element = e.createFromHTML(openTag + content + closeTag)
-        const formatted = up.util.sprintf('before %o after', element)
-        expect(formatted).toEqual('before ' + openTag + ' after')
-      }))
+      describe('with element argument', function() {
+        it('serializes the tag name with id, up-iid, name and class attributes, but ignores other attributes', function() {
+          const openTag = '<table id="id-value" up-id="up-id-value" name="name-value" class="class-value" title="title-value">'
+          const content = '<tr><td>cell</td></tr>'
+          const closeTag = '</table>'
+          const element = e.createFromHTML(openTag + content + closeTag)
+          const formatted = up.util.sprintf('before %o after', element)
+          expect(formatted).toEqual('before ' + openTag + ' after')
+        })
+      })
 
-      describe('with jQuery argument', () => it('serializes the tag name with id, name and class attributes, but ignores other attributes', function() {
-        const $element1 = $('<table id="table-id">')
-        const $element2 = $('<ul id="ul-id">')
-        const formatted = up.util.sprintf('before %o after', $element1.add($element2))
-        expect(formatted).toEqual('before $(<table id="table-id">, <ul id="ul-id">) after')
-      }))
+      describe('with jQuery argument', function() {
+        it('serializes the tag name with id, name and class attributes, but ignores other attributes', function() {
+          const $element1 = $('<table id="table-id">')
+          const $element2 = $('<ul id="ul-id">')
+          const formatted = up.util.sprintf('before %o after', $element1.add($element2))
+          expect(formatted).toEqual('before $(<table id="table-id">, <ul id="ul-id">) after')
+        })
+      })
 
       describe('with object argument', function() {
 
@@ -2597,16 +2609,20 @@ describe('up.util', () => {
         })
       })
 
-      describe('with Error argument', () => it("serializes the error's class and message", function() {
-        const error = new up.CannotTarget("Error message")
-        const formatted = up.util.sprintf('before %o after', error)
-        expect(formatted).toBe('before up.CannotTarget: Error message after')
-      }))
+      describe('with Error argument', function() {
+        it("serializes the error's class and message", function() {
+          const error = new up.CannotTarget("Error message")
+          const formatted = up.util.sprintf('before %o after', error)
+          expect(formatted).toBe('before up.CannotTarget: Error message after')
+        })
+      })
 
-      describe('with color style (%c)', () => it('discards the style directives', function() {
-        const formatted = up.util.sprintf('foo %cbar', 'color: red')
-        expect(formatted).toBe('foo bar')
-      }))
+      describe('with color style (%c)', function() {
+        it('discards the style directives', function() {
+          const formatted = up.util.sprintf('foo %cbar', 'color: red')
+          expect(formatted).toBe('foo bar')
+        })
+      })
     })
 
     describe('up.util.withRenamedKeys', function() {
@@ -3180,10 +3196,12 @@ describe('up.util', () => {
 
     describe('up.util.evalAutoOption()', function() {
 
-      describe('if the first argument is a primitive value', () => it('returns the first argument', function() {
-        const autoDefault = 'auto default'
-        expect(up.util.evalAutoOption('foo', autoDefault)).toBe('foo')
-      }))
+      describe('if the first argument is a primitive value', function() {
+        it('returns the first argument', function() {
+          const autoDefault = 'auto default'
+          expect(up.util.evalAutoOption('foo', autoDefault)).toBe('foo')
+        })
+      })
 
       describe('if the first agument is "auto"', function() {
 

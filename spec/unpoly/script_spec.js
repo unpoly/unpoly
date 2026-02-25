@@ -190,23 +190,25 @@ describe('up.script', function() {
       })
 
       if (up.migrate.loaded) {
-        describe('with { keep } option', () => it('adds an up-keep attribute to the fragment during compilation', function() {
+        describe('with { keep } option', function() {
+          it('adds an up-keep attribute to the fragment during compilation', function() {
 
-          up.compiler('.foo', { keep: true }, function() {})
-          up.compiler('.bar', { }, function() {})
-          up.compiler('.bar', { keep: false }, function() {})
-          up.compiler('.bam', { keep: '.partner' }, function() {})
+            up.compiler('.foo', { keep: true }, function() {})
+            up.compiler('.bar', { }, function() {})
+            up.compiler('.bar', { keep: false }, function() {})
+            up.compiler('.bam', { keep: '.partner' }, function() {})
 
-          const $foo = $(helloFixture('.foo'))
-          const $bar = $(helloFixture('.bar'))
-          const $baz = $(helloFixture('.baz'))
-          const $bam = $(helloFixture('.bam'))
+            const $foo = $(helloFixture('.foo'))
+            const $bar = $(helloFixture('.bar'))
+            const $baz = $(helloFixture('.baz'))
+            const $bam = $(helloFixture('.bam'))
 
-          expect($foo.attr('up-keep')).toEqual('')
-          expect($bar.attr('up-keep')).toBeMissing()
-          expect($baz.attr('up-keep')).toBeMissing()
-          expect($bam.attr('up-keep')).toEqual('.partner')
-        }))
+            expect($foo.attr('up-keep')).toEqual('')
+            expect($bar.attr('up-keep')).toBeMissing()
+            expect($baz.attr('up-keep')).toBeMissing()
+            expect($bam.attr('up-keep')).toEqual('.partner')
+          })
+        })
       }
 
       describe('with { priority } option', function() {

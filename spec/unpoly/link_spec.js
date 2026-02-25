@@ -5045,26 +5045,28 @@ describe('up.link', function() {
         })
       })
 
-      describe('with [up-placeholder]', () => it('shows a placeholder while the deferred is loading', async function() {
-        const partial = fixture('a#partial[up-defer="manual"][href="/slow-path"][up-placeholder="<span>placeholder text</span>"]', { text: 'initial text' })
-        up.hello(partial)
+      describe('with [up-placeholder]', function() {
+        it('shows a placeholder while the deferred is loading', async function() {
+          const partial = fixture('a#partial[up-defer="manual"][href="/slow-path"][up-placeholder="<span>placeholder text</span>"]', { text: 'initial text' })
+          up.hello(partial)
 
-        await wait()
+          await wait()
 
-        expect(jasmine.Ajax.requests.count()).toEqual(0)
-        expect('#partial').toHaveVisibleText('initial text')
+          expect(jasmine.Ajax.requests.count()).toEqual(0)
+          expect('#partial').toHaveVisibleText('initial text')
 
-        up.deferred.load(partial)
-        await wait()
+          up.deferred.load(partial)
+          await wait()
 
-        expect(jasmine.Ajax.requests.count()).toEqual(1)
-        expect('#partial').toHaveVisibleText('placeholder text')
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect('#partial').toHaveVisibleText('placeholder text')
 
-        jasmine.respondWithSelector('#partial', { text: 'new text' })
-        await wait()
+          jasmine.respondWithSelector('#partial', { text: 'new text' })
+          await wait()
 
-        expect('#partial').toHaveVisibleText('new text')
-      }))
+          expect('#partial').toHaveVisibleText('new text')
+        })
+      })
 
       describe('up:deferred:load event', function() {
 

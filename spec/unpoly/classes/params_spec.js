@@ -382,7 +382,9 @@ describe('up.Params', function() {
     })
   })
 
-  describe('#delete', () => it('deletes all entries with the given name'))
+  describe('#delete', function() {
+    it('deletes all entries with the given name')
+  })
 
   describe('#set', function() {
 

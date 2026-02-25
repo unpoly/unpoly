@@ -1,13 +1,15 @@
 describe('up.Config', function() {
 
-  describe('constructor', () => it('creates an object from a function that productes the initial attributes', function() {
-    const object = new up.Config(() => ({
-      a: 1,
-      b: 2
-    }))
-    expect(object.a).toBe(1)
-    expect(object.b).toBe(2)
-  }))
+  describe('constructor', function() {
+    it('creates an object from a function that productes the initial attributes', function() {
+      const object = new up.Config(() => ({
+        a: 1,
+        b: 2
+      }))
+      expect(object.a).toBe(1)
+      expect(object.b).toBe(2)
+    })
+  })
 
   describe('#reset', function() {
 

@@ -1,11 +1,13 @@
 describe('up.EventEmitter', function() {
   describe('.fromEmitArgs', function() {
 
-    describe('with ([String])', () => it('builds an event with the given name, which emits on the document', function() {
-      const emitter = up.EventEmitter.fromEmitArgs(['my:event'])
-      expect(emitter.event).toBeEvent('my:event')
-      expect(emitter.target).toBe(document)
-    }))
+    describe('with ([String])', function() {
+      it('builds an event with the given name, which emits on the document', function() {
+        const emitter = up.EventEmitter.fromEmitArgs(['my:event'])
+        expect(emitter.event).toBeEvent('my:event')
+        expect(emitter.target).toBe(document)
+      })
+    })
 
     describe('with ([String, Object])', function() {
       it('builds an event with the given name and props, which emits on the document', function() {
