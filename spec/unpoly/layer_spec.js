@@ -988,7 +988,7 @@ describe('up.layer', function() {
         })
       })
 
-      fdescribe('closing', function() {
+      describe('closing', function() {
 
         beforeEach(function() {
           up.motion.config.enabled = false

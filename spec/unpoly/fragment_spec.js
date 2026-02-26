@@ -7005,7 +7005,7 @@ describe('up.fragment', function() {
             expect(u.map(event.newAssets, 'outerHTML')).toEqual(['<script src="scripts-2.js"></script>'])
           })
 
-          fit('exposes a { response } property on up:assets:changed so users can implement their own nonce rewriting for non-script assets', async function() {
+          it('exposes a { response } property on up:assets:changed so users can implement their own nonce rewriting for non-script assets', async function() {
             const listener = jasmine.createSpy('up:assets:changed listener')
             up.on('up:assets:changed', listener)
 
