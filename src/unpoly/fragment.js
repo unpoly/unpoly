@@ -853,6 +853,8 @@ up.fragment = (function() {
   Listeners may decide how to handle the connection loss. E.g. you may choose to display an error, or to offer a button that retries the failed request.
   See [handling connection loss](/network-issues#disconnects) for more details and examples.
 
+  The event is *not* emitted when [preloading](/preloading) fails.
+
   The event is emitted on the targeted layer.
 
   [Handling disconnects](/network-issues#disconnects){:.article-ref}

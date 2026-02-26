@@ -2101,6 +2101,69 @@ describe('up.fragment', function() {
               expect(onOffline).toHaveBeenCalled()
             })
           })
+
+          describe('when preloading', function() {
+
+            it('does not emit up:fragment:offline', async function() {
+              const listener = jasmine.createSpy('up:fragment:offline listener')
+              up.on('up:fragment:offline', listener)
+
+              let target = fixture('.target')
+              let link = fixture('a[href="/foo"][up-follow]', { text: 'label' })
+
+              const preloadJob = up.link.preload(link)
+              await wait()
+
+              expect(jasmine.Ajax.requests.count()).toBe(1)
+              expect(listener).not.toHaveBeenCalled()
+
+              jasmine.lastRequest().responseError()
+
+              await expectAsync(preloadJob).toBeRejectedWith(jasmine.any(up.Offline))
+
+              expect(listener).not.toHaveBeenCalled()
+              expect(jasmine.Ajax.requests.count()).toBe(1)
+              expect(up.network.isBusy()).toBe(false)
+            })
+
+            it('emits up:fragment:offline when later clicking the link that could not be preloaded', async function() {
+              const listener = jasmine.createSpy('up:fragment:offline listener')
+              up.on('up:fragment:offline', listener)
+
+              let target = fixture('.target')
+              let link = fixture('a[href="/foo"][up-follow]', { text: 'label' })
+
+              const preloadJob = up.link.preload(link)
+              await wait()
+
+              expect(jasmine.Ajax.requests.count()).toBe(1)
+              expect(listener).not.toHaveBeenCalled()
+
+              jasmine.lastRequest().responseError()
+
+              await expectAsync(preloadJob).toBeRejectedWith(jasmine.any(up.Offline))
+
+              expect(listener).not.toHaveBeenCalled()
+              expect(jasmine.Ajax.requests.count()).toBe(1)
+              expect(up.network.isBusy()).toBe(false)
+
+              Trigger.clickSequence(link)
+              await wait()
+
+              expect(jasmine.Ajax.requests.count()).toBe(2)
+              expect(up.network.isBusy()).toBe(true)
+
+              await jasmine.expectGlobalError('up.Offline', async function() {
+                jasmine.lastRequest().responseError()
+                await wait()
+
+                expect(listener).toHaveBeenCalled()
+                await wait()
+              })
+            })
+
+          })
+
         })
 
         describe('up:fragment:loaded event', function() {
