@@ -795,10 +795,10 @@ up.fragment = (function() {
 
   Also see [skipping unnecessary rendering](/skipping-rendering).
 
-  ### Emission cases
+  ### Cases that trigger the event {#cases}
 
-  The `up:fragment:loaded` event is emitted before a server response with HTML
-  is being placed on the screen.
+  The `up:fragment:loaded` event is emitted when we have a HTML response from the server
+  *and* we are about to render elements:
 
   | Case                                                            | `up:fragment:loaded` emitted? |
   |-----------------------------------------------------------------|-------------------------------|
@@ -809,7 +809,6 @@ up.fragment = (function() {
   | Server [renders nothing](/skipping-rendering#rendering-nothing) | ❌ no                            |
   | [Fatal network error](/network-issues#disconnects)              | ❌ no                            |
   | [Preloading](/preloading)                                       | ❌ no                            |
-
 
   @event up:fragment:loaded
 
@@ -866,8 +865,6 @@ up.fragment = (function() {
   Listeners may decide how to handle the connection loss. E.g. you may choose to display an error, or to offer a button that retries the failed request.
   See [handling connection loss](/network-issues#disconnects) for more details and examples.
 
-  The event is *not* emitted when [preloading](/preloading) fails.
-
   The event is emitted on the targeted layer.
 
   [Handling disconnects](/network-issues#disconnects){:.article-ref}
@@ -881,6 +878,19 @@ up.fragment = (function() {
     if (confirm('You are offline. Retry?')) event.retry()
   })
   ```
+
+  ### Cases that trigger the event {#cases}
+
+  The `up:fragment:offline` event is emitted when we have a fatal connectivity issue
+  *and* we were about to render elements:
+
+  | Case                                                            | `up:fragment:offline` emitted? |
+  |-----------------------------------------------------------------|--------------------------------|
+  | [Fatal network error](/network-issues#disconnects)              | ✔️ yes                        |
+  | Server responds with an [error code](/failed-responses)         | ❌ no                         |
+  | Server [renders nothing](/skipping-rendering#rendering-nothing) | ❌ no                         |
+  | [Preloading](/preloading) fails                                 | ❌ no                         |
+
 
   @event up:fragment:offline
 
