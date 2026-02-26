@@ -2295,10 +2295,9 @@ describe('up.fragment', function() {
             up.render({ target: '.one', url: '/url' })
             await wait()
 
-            jasmine.respondWith(`\
-<div class="one">new one</div>\
-`
-            )
+            jasmine.respondWith(`
+              <div class="one">new one</div>
+            `)
             await wait()
 
             expect(up.layer.isOverlay()).toBe(true)
@@ -2313,10 +2312,9 @@ describe('up.fragment', function() {
             up.render({ target: '.one', failTarget: '.one', url: '/url' })
             await wait()
 
-            jasmine.respondWith({ status: 500, responseText: `\
-<div class="one">new one</div>\
-`
-            })
+            jasmine.respondWith({ status: 500, responseText: `
+              <div class="one">new one</div>
+            ` })
             await wait()
 
             expect(up.layer.isOverlay()).toBe(true)
@@ -2336,11 +2334,11 @@ describe('up.fragment', function() {
 
             jasmine.respondWith({
               status: 500,
-              responseText: `\
-<div class="one">new one</div>
-<div class="two">new two</div>
-<div class="three">new three</div>\
-`
+              responseText: `
+                <div class="one">new one</div>
+                <div class="two">new two</div>
+                <div class="three">new three</div>
+              `
             })
 
             await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
