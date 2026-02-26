@@ -116,10 +116,6 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
   }
 
   _renderOverlayContent(responseDoc) {
-    // (1) Change history before compilation, so new fragments see the new location.
-    // (2) Change history before checking { acceptLocation, dismissLocation }, so we check the overlay's location and not the parent layer's location.
-    this._handleHistory()
-
     // The server may trigger multiple signals that may cause the overlay to close immediately:
     //
     // - Close the layer directly through X-Up-Accept-Layer or X-Up-Dismiss-Layer
@@ -129,7 +125,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     //
     // Note that @handleLayerChangeRequests() also calls throws an up.AbortError
     // if any of these options cause the layer to close.
-    this.handleLayerChangeRequests([this._content])
+    this.handleLayerChangeRequests([this._content], this._getNewLocation())
 
     // Preprocess content element before insertion.
     responseDoc.commitElement(this._content)
@@ -141,6 +137,9 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
 
     // Adopt CSP nonces and fix broken script tags
     responseDoc.finalizeElement(this._content)
+
+    // Change history before compilation, so new fragments see the new location.
+    this._handleHistory()
 
     // Remember where the element came from to support up.reload(element).
     this.setReloadAttrs({ newElement: this._content, source: this.options.source })
@@ -215,7 +214,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // For the initial fragment insertion we always update its location, even if the layer
     // does not have visible history ({ history } attribute). This ensures that a
     // layer always has a #location.
-    this.layer.updateHistory(this.options)
+    this.layer.updateHistory(this._getEffectiveHistoryOptions())
   }
 
   _handleFocus() {
@@ -277,6 +276,17 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
       layer: this.layer,
       history: this.layer.history,
     }
+  }
+
+  _getEffectiveHistoryOptions() {
+    // For the initial fragment insertion we always update its location, even if the layer
+    // does not have visible history ({ history } attribute). This ensures that a
+    // layer always has a #location.
+    return up.history.options(this.options)
+  }
+
+  _getNewLocation() {
+    return this._getEffectiveRenderOptions().location
   }
 
 }

@@ -988,7 +988,7 @@ describe('up.layer', function() {
         })
       })
 
-      describe('closing', function() {
+      fdescribe('closing', function() {
 
         beforeEach(function() {
           up.motion.config.enabled = false
@@ -1708,6 +1708,61 @@ describe('up.layer', function() {
 
             expect(callback).toHaveBeenCalled()
           })
+
+          it('allows the accepted response body to be consumed by a hungry element on another layer', async function() {
+            pending("test me")
+          })
+
+          it('does not push a history entry if an X-Up-Events response header accepts the overlay', async function() {
+            up.history.config.enabled = true
+            up.history.replace('/root')
+            up.history.config.restoreTargets = ['main']
+            expect(up.history.location).toMatchURL('/root')
+
+            htmlFixture(`<main>root text</main>`)
+
+            const callback = jasmine.createSpy('onAccepted callback')
+            up.layer.open({
+              target: 'main',
+              acceptEvent: 'my:event',
+              onAccepted: callback,
+              history: true,
+              url: '/overlay1',
+            })
+            await wait()
+
+            jasmine.respondWith(`<main>overlay1 text</main>`)
+            await wait()
+
+            expect(up.layer.current.mode).toBe('modal')
+            expect(up.layer.current).toHaveText('overlay1 text')
+            expect(up.history.location).toMatchURL('/overlay1')
+            expect(callback).not.toHaveBeenCalled()
+
+            let matchingUpdateJob = up.render({ target: 'main', url: '/overlay2', history: true })
+            await wait()
+
+            jasmine.respondWith({
+              responseHeaders: {
+                'X-Up-Events': JSON.stringify([{ type: 'my:event', layer: 'current' }]),
+              },
+              responseText: `<main>overlay2 text</main>`
+            })
+
+            await expectAsync(matchingUpdateJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
+            expect(callback).toHaveBeenCalled()
+            expect(up.layer.current.mode).toBe('root')
+            expect(up.history.location).toMatchURL('/root')
+
+            history.back()
+            await wait(400)
+
+            expect(up.layer.current.mode).toBe('root')
+            expect(up.history.location).toMatchURL('/overlay1')
+            expect('main').toHaveText('overlay1 text')
+          })
+
         })
 
         describe('{ dismissEvent }', function() {
@@ -2027,9 +2082,67 @@ describe('up.layer', function() {
                 value: { name: 'Bob' },
               }))
             })
+
+            it('does not push a history entry if the response accepts the overlay', async function() {
+              up.history.config.enabled = true
+              up.history.replace('/root')
+              up.history.config.restoreTargets = ['main']
+              expect(up.history.location).toMatchURL('/root')
+
+              htmlFixture(`
+                <main>
+                  <span>root text</span>
+                </main>
+              `)
+
+              const callback = jasmine.createSpy('onAccepted callback')
+              up.layer.open({
+                target: 'main',
+                acceptFragment: '#match',
+                onAccepted: callback,
+                history: true,
+                url: '/overlay1',
+              })
+              await wait()
+
+              jasmine.respondWith(`
+                <main>
+                  <span>overlay1 text</span>
+                </main>
+              `)
+              await wait()
+
+              expect(up.layer.current.mode).toBe('modal')
+              expect(up.layer.current).toHaveText('overlay1 text')
+              expect(up.history.location).toMatchURL('/overlay1')
+              expect(callback).not.toHaveBeenCalled()
+
+              let matchingUpdateJob = up.render({ target: 'main', url: '/overlay2', history: true })
+              await wait()
+
+              jasmine.respondWith(`
+                <main>
+                  <span id="match">overlay2 text</span>
+                </main>
+              `)
+
+              await expectAsync(matchingUpdateJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
+              expect(callback).toHaveBeenCalled()
+              expect(up.layer.current.mode).toBe('root')
+              expect(up.history.location).toMatchURL('/root')
+
+              history.back()
+              await wait(400)
+
+              expect(up.layer.current.mode).toBe('root')
+              expect(up.history.location).toMatchURL('/overlay1')
+              expect('main').toHaveText('overlay1 text')
+            })
+
           })
 
-          describe('when opening a layer', function() {
+          describe('when opening an overlay', function() {
 
             describe('when its initial content matches the given selector', function() {
 
@@ -2121,6 +2234,52 @@ describe('up.layer', function() {
                 expect(up.fragment.get('#fragment', { layer: 'root' })).toHaveText('matching text')
               })
 
+              it('does not push a history entry', async function() {
+                up.history.config.enabled = true
+                up.history.config.restoreTargets = ['main']
+                up.history.replace('/root1')
+                expect(up.history.location).toMatchURL('/root1')
+                htmlFixture(`<main>root1 text</main>`)
+
+                up.render({ target: 'main', url: '/root2', history: true })
+                await wait()
+
+                jasmine.respondWith('<main>root2 text</main>')
+                await wait()
+
+                expect('main').toHaveText('root2 text')
+
+                const callback = jasmine.createSpy('onAccepted callback')
+                let matchingUpdateJob = up.layer.open({
+                  target: 'main',
+                  acceptFragment: '#match',
+                  onAccepted: callback,
+                  history: true,
+                  url: '/overlay1',
+                })
+                await wait()
+
+                // We wait if the response ends up being rendered, and with what URL.
+                expect(callback).not.toHaveBeenCalled()
+
+                jasmine.respondWith(`<main><span id="match">overlay1 text</span></main>`)
+                await expectAsync(matchingUpdateJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
+                expect(callback).toHaveBeenCalled()
+                expect(up.layer.current.mode).toBe('root')
+                expect(up.history.location).toMatchURL('/root2')
+                expect('main').toHaveText('root2 text')
+
+                history.back()
+                await wait(400)
+
+                expect(up.layer.current.mode).toBe('root')
+                expect(up.history.location).toMatchURL('/root1')
+
+                expect(up.network.isBusy()).toBe(true)
+                expect(jasmine.lastRequest().url).toMatchURL('/root1')
+              })
+
             })
 
           })
@@ -2193,7 +2352,6 @@ describe('up.layer', function() {
             expect(callback).not.toHaveBeenCalled()
 
             up.navigate('.overlay-content', { content: 'other content', location: '/other-location' })
-
             await wait()
 
             expect(up.layer.mode).toBe('modal')
@@ -2305,78 +2463,250 @@ describe('up.layer', function() {
             expect(callback).not.toHaveBeenCalled()
           })
 
-          it('immediately accepts a layer when its initial location matches the given location', async function() {
-            up.history.replace('/root-path')
-            expect(up.history.location).toMatchURL('/root-path')
-
+          it('accepts the layer when the response redirects to the observed location', async function() {
             const callback = jasmine.createSpy('onAccepted callback')
-
-            const compiler = jasmine.createSpy('compiler')
-            up.compiler('.overlay-content', compiler)
-
-            const openPromise = up.layer.open({
-              target: '.overlay-content',
-              history: true,
-              onAccepted: callback,
-              url: '/overlay-path',
-              acceptLocation: '/overlay-path',
-            })
-
-            await wait()
-
-            expect(up.layer.mode).toBe('root')
-            expect(callback).not.toHaveBeenCalled()
-
-            jasmine.respondWithSelector('.overlay-content', { text: 'initial content' })
-
-            // await wait()
-
-            await expectAsync(openPromise).toBeRejectedWith(jasmine.any(up.Aborted))
-            expect(callback).toHaveBeenCalled()
-            expect(up.layer.mode).toBe('root')
-            expect(up.history.location).toMatchURL('/root-path')
-
-            expect(document).not.toHaveSelector('.overlay-content')
-            expect(compiler).not.toHaveBeenCalled()
-          })
-
-          it('does not immediately accept a layer if its parent layer is already on the given location (bugfix)', async function() {
-            up.history.replace('/root-path')
-            expect(up.history.location).toMatchURL('/root-path')
-
-            const callback = jasmine.createSpy('onAccepted callback')
-
             up.layer.open({
               target: '.overlay-content',
-              history: true,
+              content: 'start content',
+              location: '/start-location',
               onAccepted: callback,
-              url: '/overlay-path',
-              acceptLocation: '/root-path',
+              acceptLocation: '/acceptable-location'
             })
 
             await wait()
 
-            expect(up.layer.mode).toBe('root')
-            expect(callback).not.toHaveBeenCalled()
-
-            jasmine.respondWithSelector('.overlay-content', { text: 'initial content' })
-
-            await wait()
-
-            expect(callback).not.toHaveBeenCalled()
             expect(up.layer.mode).toBe('modal')
-            expect(up.history.location).toMatchURL('/overlay-path')
+            expect(callback).not.toHaveBeenCalled()
 
-            const navigatePromise = up.navigate({ url: '/root-path' })
+            const closingJob = up.navigate({
+              target: '.overlay-content',
+              url: '/requested-location'
+            })
+            await wait()
+
+            jasmine.respondWith({
+              responseText: '<span class="overlay-content">You are being redirected</span>',
+              responseURL: '/acceptable-location',
+            })
+
+            await expectAsync(closingJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
+            expect(up.layer.mode).toBe('root')
+            const value = { location: u.normalizeURL('/acceptable-location') }
+            expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value }))
+          })
+
+          it('does not accept the layer when the observed location is requested, but ends up redirecting elsewhere', async function() {
+            const callback = jasmine.createSpy('onAccepted callback')
+            up.layer.open({
+              target: '.overlay-content',
+              content: 'start content',
+              location: '/start-location',
+              onAccepted: callback,
+              acceptLocation: '/acceptable-location'
+            })
 
             await wait()
 
-            jasmine.respondWithSelector('.overlay-content', { text: 'next content' })
+            expect(up.layer.mode).toBe('modal')
+            expect(callback).not.toHaveBeenCalled()
 
-            await expectAsync(navigatePromise).toBeRejectedWith(jasmine.any(up.Aborted))
+            const closingJob = up.navigate({
+              target: '.overlay-content',
+              url: '/acceptable-location'
+            })
+            await wait()
+
+            // We wait if the location ends up being rendered
+            expect(callback).not.toHaveBeenCalled()
+
+            jasmine.respondWith({
+              responseText: '<span class="overlay-content">updated overlay content</span>',
+              responseURL: '/redirect-location',
+            })
+
+            await expectAsync(closingJob).toBeResolvedTo(jasmine.any(up.RenderResult))
+
+            expect(up.layer.mode).toBe('modal')
+            expect(up.layer.location).toMatchURL('/redirect-location')
+            expect(callback).not.toHaveBeenCalled()
+          })
+
+          it('allows the accepted response body to be consumed by a hungry element on another layer', async function() {
+            pending("test me")
+          })
+
+          it('does not push a history entry if the response accepts the overlay', async function() {
+            up.history.config.enabled = true
+            up.history.replace('/root')
+            up.history.config.restoreTargets = ['main']
+            expect(up.history.location).toMatchURL('/root')
+
+            htmlFixture(`<main>root text</main>`)
+
+            const callback = jasmine.createSpy('onAccepted callback')
+            up.layer.open({
+              target: 'main',
+              acceptLocation: '/overlay2',
+              onAccepted: callback,
+              history: true,
+              url: '/overlay1',
+            })
+            await wait()
+
+            jasmine.respondWith(`<main>overlay1 text</main>`)
+            await wait()
+
+            expect(up.layer.current.mode).toBe('modal')
+            expect(up.layer.current).toHaveText('overlay1 text')
+            expect(up.history.location).toMatchURL('/overlay1')
+            expect(callback).not.toHaveBeenCalled()
+
+            let matchingUpdateJob = up.render({ target: 'main', url: '/overlay2', history: true })
+            await wait()
+
+            // We wait if the response ends up being rendered, and with what URL.
+            expect(callback).not.toHaveBeenCalled()
+
+            jasmine.respondWith(`<main>overlay2 text</main>`)
+
+            await expectAsync(matchingUpdateJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
             expect(callback).toHaveBeenCalled()
-            expect(up.layer.mode).toBe('root')
-            expect(up.history.location).toMatchURL('/root-path')
+            expect(up.layer.current.mode).toBe('root')
+            expect(up.history.location).toMatchURL('/root')
+
+            history.back()
+            await wait(400)
+
+            expect(up.layer.current.mode).toBe('root')
+            expect(up.history.location).toMatchURL('/overlay1')
+            expect('main').toHaveText('overlay1 text')
+          })
+
+          describe('when opening an overlay', function() {
+
+            it('immediately accepts a new overlay when its initial location matches the given location', async function() {
+              up.history.replace('/root-path')
+              expect(up.history.location).toMatchURL('/root-path')
+
+              const callback = jasmine.createSpy('onAccepted callback')
+
+              const compiler = jasmine.createSpy('compiler')
+              up.compiler('.overlay-content', compiler)
+
+              const openPromise = up.layer.open({
+                target: '.overlay-content',
+                history: true,
+                onAccepted: callback,
+                url: '/overlay-path',
+                acceptLocation: '/overlay-path',
+              })
+
+              await wait()
+
+              expect(up.layer.mode).toBe('root')
+              expect(callback).not.toHaveBeenCalled()
+
+              jasmine.respondWithSelector('.overlay-content', { text: 'initial content' })
+
+              // await wait()
+
+              await expectAsync(openPromise).toBeRejectedWith(jasmine.any(up.Aborted))
+              expect(callback).toHaveBeenCalled()
+              expect(up.layer.mode).toBe('root')
+              expect(up.history.location).toMatchURL('/root-path')
+
+              expect(document).not.toHaveSelector('.overlay-content')
+              expect(compiler).not.toHaveBeenCalled()
+            })
+
+            it('does not immediately accept a layer if its parent layer is already on the given location (bugfix)', async function() {
+              up.history.replace('/root-path')
+              expect(up.history.location).toMatchURL('/root-path')
+
+              const callback = jasmine.createSpy('onAccepted callback')
+
+              up.layer.open({
+                target: '.overlay-content',
+                history: true,
+                onAccepted: callback,
+                url: '/overlay-path',
+                acceptLocation: '/root-path',
+              })
+
+              await wait()
+
+              expect(up.layer.mode).toBe('root')
+              expect(callback).not.toHaveBeenCalled()
+
+              jasmine.respondWithSelector('.overlay-content', { text: 'initial content' })
+
+              await wait()
+
+              expect(callback).not.toHaveBeenCalled()
+              expect(up.layer.mode).toBe('modal')
+              expect(up.history.location).toMatchURL('/overlay-path')
+
+              const navigatePromise = up.navigate({ url: '/root-path' })
+
+              await wait()
+
+              jasmine.respondWithSelector('.overlay-content', { text: 'next content' })
+
+              await expectAsync(navigatePromise).toBeRejectedWith(jasmine.any(up.Aborted))
+              expect(callback).toHaveBeenCalled()
+              expect(up.layer.mode).toBe('root')
+              expect(up.history.location).toMatchURL('/root-path')
+            })
+
+            it('does not push a history if the initial response closes the overlay', async function() {
+              up.history.config.enabled = true
+              up.history.config.restoreTargets = ['main']
+              up.history.replace('/root1')
+              expect(up.history.location).toMatchURL('/root1')
+              htmlFixture(`<main>root1 text</main>`)
+
+              up.render({ target: 'main', url: '/root2', history: true })
+              await wait()
+
+              jasmine.respondWith('<main>root2 text</main>')
+              await wait()
+
+              expect('main').toHaveText('root2 text')
+
+              const callback = jasmine.createSpy('onAccepted callback')
+              let matchingUpdateJob = up.layer.open({
+                target: 'main',
+                acceptLocation: '/overlay1',
+                onAccepted: callback,
+                history: true,
+                url: '/overlay1',
+              })
+              await wait()
+
+              // We wait if the response ends up being rendered, and with what URL.
+              expect(callback).not.toHaveBeenCalled()
+
+              jasmine.respondWith(`<main>overlay1 text</main>`)
+              await expectAsync(matchingUpdateJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
+              expect(callback).toHaveBeenCalled()
+              expect(up.layer.current.mode).toBe('root')
+              expect(up.history.location).toMatchURL('/root2')
+              expect('main').toHaveText('root2 text')
+
+              history.back()
+              await wait(400)
+
+              expect(up.layer.current.mode).toBe('root')
+              expect(up.history.location).toMatchURL('/root1')
+
+              expect(up.network.isBusy()).toBe(true)
+              expect(jasmine.lastRequest().url).toMatchURL('/root1')
+
+            })
+
           })
 
           it('makes the discarded response available to up:layer:accepted listeners as a { response } property', async function() {

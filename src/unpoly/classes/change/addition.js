@@ -11,9 +11,10 @@ up.Change.Addition = class Addition extends up.Change {
     this._response = options.response
   }
 
-  handleLayerChangeRequests(newElements) {
+  // TODO: Consider moving this to up.Layer.Base
+  handleLayerChangeRequests(newElements, newLocation) {
     if (this.layer.isOverlay()) {
-      // TODO: Can we do this with "close"?
+      // TODO: Can we do this with "close"? Please recheck
 
       // The server may send an HTTP header `X-Up-Accept-Layer: value`
       this._tryAcceptLayerFromServer()
@@ -21,10 +22,10 @@ up.Change.Addition = class Addition extends up.Change {
 
       // A close condition { acceptLocation: '/path' } might have been
       // set when the layer was opened.
-      this.layer.tryAcceptForLocation(this._responseOptions())
+      this.layer.tryAcceptForLocation(newLocation, this._response)
       this.layer.assertAlive()
 
-      this.layer.tryAcceptForElements(newElements, this._responseOptions())
+      this.layer.tryAcceptForElements(newElements, this._response)
       this.layer.assertAlive()
 
       // The server may send an HTTP header `X-Up-Dismiss-Layer: value`
@@ -33,10 +34,10 @@ up.Change.Addition = class Addition extends up.Change {
 
       // A close condition { dismissLocation: '/path' } might have been
       // set when the layer was opened.
-      this.layer.tryDismissForLocation(this._responseOptions())
+      this.layer.tryDismissForLocation(newLocation, this._response)
       this.layer.assertAlive()
 
-      this.layer.tryDismissForElements(newElements, this._responseOptions())
+      this.layer.tryDismissForElements(newElements, this._response)
       this.layer.assertAlive()
     }
 
@@ -50,7 +51,7 @@ up.Change.Addition = class Addition extends up.Change {
     // A listener to such a server-sent event might also close the layer.
     this.layer.asCurrent(() => {
       for (let eventPlan of this._eventPlans) {
-        up.emit({ ...eventPlan, ...this._responseOptions() })
+        up.emit({ ...eventPlan, response: this._response })
         this.layer.assertAlive()
       }
     })
@@ -58,15 +59,15 @@ up.Change.Addition = class Addition extends up.Change {
 
   _tryAcceptLayerFromServer() {
     // When accepting without a value, the server will send X-Up-Accept-Layer: null
-    if (u.isDefined(this._acceptLayer) && this.layer.isOverlay()) {
-      this.layer.accept(this._acceptLayer, this._responseOptions())
+    if (u.isDefined(this._acceptLayer)) {
+      this.layer.accept(this._acceptLayer, { response: this._response })
     }
   }
 
   _tryDismissLayerFromServer() {
     // When dismissing without a value, the server will send X-Up-Dismiss-Layer: null
-    if (u.isDefined(this._dismissLayer) && this.layer.isOverlay()) {
-      this.layer.dismiss(this._dismissLayer, this._responseOptions())
+    if (u.isDefined(this._dismissLayer)) {
+      this.layer.dismiss(this._dismissLayer, { response: this._response })
     }
   }
 
@@ -103,10 +104,6 @@ up.Change.Addition = class Addition extends up.Change {
     this._setSource(options)
     this._setTime(options)
     this._setETag(options)
-  }
-
-  _responseOptions() {
-    return { response: this._response }
   }
 
   executeSteps({ steps, responseDoc, noneOptions }) {

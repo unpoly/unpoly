@@ -124,11 +124,6 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
     Object.assign(this.layer.context, this._context)
 
-    // Change history before compilation, so new fragments see the new location.
-    if (this._hasHistory()) {
-      this.layer.updateHistory(this.options)
-    }
-
     // If the update causes the overlay to close, we don't want to render changes.
     //
     // The server may trigger multiple signals that may cause the layer to close:
@@ -140,7 +135,13 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     //
     // Note that @handleLayerChangeRequests() also throws an `up.AbortError`
     // if any of these options cause the layer to close.
-    this.handleLayerChangeRequests(u.map(this._steps, 'newElement'))
+    this.handleLayerChangeRequests(
+      u.map(this._steps, 'newElement'),
+      this._getNewLocation(),
+    )
+
+    // Change history before compilation, so new fragments see the new location.
+    this.layer.updateHistory(this._getEffectiveHistoryOptions())
 
     return this.executeSteps({
       steps: this._steps,
@@ -249,11 +250,23 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     return up.fragment.hasAutoHistory(oldFragments, this.layer)
   }
 
+  _getNewLocation() {
+    return this._getEffectiveHistoryOptions().location
+  }
+
   _getEffectiveRenderOptions() {
     return {
       ...this.options,
       layer: this.layer,
       history: this._hasHistory(),
+    }
+  }
+
+  _getEffectiveHistoryOptions() {
+    if (this._hasHistory()) {
+      return up.history.options(this.options)
+    } else {
+      return {}
     }
   }
 

@@ -130,6 +130,15 @@ up.history = (function() {
     }
   }
 
+  function historyOptions(options) {
+    return u.pick(options, [
+      'location',
+      'title',
+      'metaTags',
+      'lang'
+    ])
+  }
+
   /*-
   Returns a normalized URL for the current browser location.
 
@@ -760,5 +769,6 @@ up.history = (function() {
     getLang,
     updateLang,
     refineOption,
+    options: historyOptions,
   }
 })()

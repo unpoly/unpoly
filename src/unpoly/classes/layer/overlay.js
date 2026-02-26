@@ -358,46 +358,42 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     })
   }
 
-  // TODO: The options arg is just { response }
-  tryAcceptForElements(newElements, options) {
-    this._tryCloseForElements(this.acceptFragment, this.accept, newElements, options)
+  tryAcceptForElements(newElements, response) {
+    this._tryCloseForElements(this.acceptFragment, this.accept, newElements, response)
   }
 
-  // TODO: The options arg is just { response }
-  tryDismissForElements(newElements, options) {
-    this._tryCloseForElements(this.dismissFragment, this.dismiss, newElements, options)
+  tryDismissForElements(newElements, response) {
+    this._tryCloseForElements(this.dismissFragment, this.dismiss, newElements, response)
   }
 
-  _tryCloseForElements(selector, closeFn, newElements, options) {
+  _tryCloseForElements(selector, closeFn, newElements, response) {
     let match = u.findResult(newElements, (element) => e.subtreeFirst(element, selector))
     if (match) {
       const closeValue = up.data(match)
       up.error.muteUncriticalSync(() =>
-        closeFn.call(this, closeValue, options)
+        closeFn.call(this, closeValue, { response })
       )
     }
   }
 
-  // TODO: The options arg is just { response }
-  tryAcceptForLocation(options) {
-    this._tryCloseForLocation(this.acceptLocation, this.accept, options)
+  tryAcceptForLocation(newLocation, response) {
+    this._tryCloseForLocation(newLocation, this.acceptLocation, this.accept, response)
   }
 
-  // TODO: The options arg is just { response }
-  tryDismissForLocation(options) {
-    this._tryCloseForLocation(this.dismissLocation, this.dismiss, options)
+  tryDismissForLocation(newLocation, response) {
+    this._tryCloseForLocation(newLocation, this.dismissLocation, this.dismiss, response)
   }
 
-  // TODO: The options arg is just { response }
-  _tryCloseForLocation(urlPattern, closeFn, options) {
-    let location, resolution
-    if (urlPattern && (location = this.location) && (resolution = urlPattern.recognize(location))) {
+  _tryCloseForLocation(newLocation, urlPattern, closeFn, response) {
+    console.debug("[tryCloseForLocation] newLocation=%o urlPattern=%o, response=%o", newLocation, urlPattern, response)
+    let resolution = newLocation && urlPattern?.recognize(newLocation)
+    if (resolution) {
       // resolution now contains named capture groups, e.g. when
       // '/decks/:deckId/cards/:cardId' is matched against
       // '/decks/123/cards/456' resolution is { deckId: 123, cardId: 456 }.
-      const closeValue = { ...resolution, location }
+      const closeValue = { ...resolution, location: newLocation }
       up.error.muteUncriticalSync(() =>
-        closeFn.call(this, closeValue, options)
+        closeFn.call(this, closeValue, { response })
       )
     }
   }
@@ -520,6 +516,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   }
 
   _executeCloseChange(verb, value, options) {
+    console.debug("[_executeCloseChange] verb=%o value=%o options=%o", verb, value, options)
     options = { ...options, verb, value, layer: this }
     return new up.Change.CloseLayer(options).execute()
   }
