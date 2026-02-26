@@ -131,7 +131,12 @@ up.history = (function() {
   }
 
   function historyOptions(options) {
-    return u.pick(options, ['location', 'title', 'metaTags', 'lang'])
+    return u.pick(options, [
+      'location',
+      'title',
+      'metaTags',
+      'lang'
+    ])
   }
 
   /*-

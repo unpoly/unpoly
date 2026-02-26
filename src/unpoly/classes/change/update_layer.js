@@ -47,8 +47,6 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   }
 
   execute(responseDoc, onApplicable) {
-    console.debug("[execute] executing UpdateLayer with history = %o", this.options.history)
-
     // (1) For each step, find a `step.newElement` that matches both in this.layer
     //     and in the response document.
     // (2) Match newElements here instead of relying on up.Change.UpdateSteps to
@@ -143,9 +141,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     )
 
     // Change history before compilation, so new fragments see the new location.
-    if (this._hasHistory()) {
-      this.layer.updateHistory(this.options)
-    }
+    this.layer.updateHistory(this._getEffectiveHistoryOptions())
 
     return this.executeSteps({
       steps: this._steps,
@@ -255,9 +251,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   }
 
   _getNewLocation() {
-    if (this._hasHistory()) {
-      return this.options.location
-    }
+    return this._getEffectiveHistoryOptions().location
   }
 
   _getEffectiveRenderOptions() {
@@ -265,6 +259,14 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       ...this.options,
       layer: this.layer,
       history: this._hasHistory(),
+    }
+  }
+
+  _getEffectiveHistoryOptions() {
+    if (this._hasHistory()) {
+      return up.history.options(this.options)
+    } else {
+      return {}
     }
   }
 

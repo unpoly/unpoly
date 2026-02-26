@@ -125,7 +125,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     //
     // Note that @handleLayerChangeRequests() also calls throws an up.AbortError
     // if any of these options cause the layer to close.
-    this.handleLayerChangeRequests([this._content], this.options.location)
+    this.handleLayerChangeRequests([this._content], this._getNewLocation())
 
     // Preprocess content element before insertion.
     responseDoc.commitElement(this._content)
@@ -214,7 +214,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // For the initial fragment insertion we always update its location, even if the layer
     // does not have visible history ({ history } attribute). This ensures that a
     // layer always has a #location.
-    this.layer.updateHistory(this.options)
+    this.layer.updateHistory(this._getEffectiveHistoryOptions())
   }
 
   _handleFocus() {
@@ -276,6 +276,17 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
       layer: this.layer,
       history: this.layer.history,
     }
+  }
+
+  _getEffectiveHistoryOptions() {
+    // For the initial fragment insertion we always update its location, even if the layer
+    // does not have visible history ({ history } attribute). This ensures that a
+    // layer always has a #location.
+    return up.history.options(this.options)
+  }
+
+  _getNewLocation() {
+    return this._getEffectiveRenderOptions().location
   }
 
 }
