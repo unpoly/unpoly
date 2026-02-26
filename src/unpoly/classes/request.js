@@ -714,25 +714,25 @@ up.Request = class Request extends up.Record {
     }
   }
 
-  _setAbortedState(reason) {
+  _setAbortedState(reason = 'Unknown reason') {
     if (this.ended) return
 
-    let message = 'Aborted request to ' + this.description + (reason ? ': ' + reason : '')
+    let log = ["Aborted request to %s: %s", this.description, reason]
     this.state = 'aborted'
-    this._reject(new up.Aborted(message))
-    this.emit('up:request:aborted', { log: message })
+    this._reject(new up.Aborted(log))
+    this.emit('up:request:aborted', { log })
 
     // Return true so callers know we didn't return early without actually aborting anything.
     return true
   }
 
-  _setOfflineState(reason) {
+  _setOfflineState(reason = 'Unknown reason') {
     if (this.ended) return
 
-    let log = 'Cannot load request from ' + this.description + (reason ? (': ' + reason) : '')
+    let log = ['Cannot load request from %s: %s', this.description, reason]
     this.state = 'offline'
     this.emit('up:request:offline', { log })
-    this._reject(new up.Offline(log, { reason }))
+    this._reject(new up.Offline(log, { reason, request: this }))
   }
 
   respondWith(response) {

@@ -89,7 +89,7 @@ up.Change.FromURL = class FromURL extends up.Change {
 
   _onRequestSettledWithError(error) {
     if (error instanceof up.Offline) {
-      let log = 'Cannot load fragment from ' + this.request.description + (error.reason ? (': ' + error.reason) : '')
+      let log = ['Cannot load fragment from %s: %s', error.request.description, error.reason]
       this.request.emit('up:fragment:offline', {
         callback: this.options.onOffline,
         renderOptions: this.options,
