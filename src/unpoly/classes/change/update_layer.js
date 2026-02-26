@@ -47,6 +47,8 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   }
 
   execute(responseDoc, onApplicable) {
+    console.debug("[execute] executing UpdateLayer with history = %o", this.options.history)
+
     // (1) For each step, find a `step.newElement` that matches both in this.layer
     //     and in the response document.
     // (2) Match newElements here instead of relying on up.Change.UpdateSteps to
@@ -124,11 +126,6 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
     Object.assign(this.layer.context, this._context)
 
-    // Change history before compilation, so new fragments see the new location.
-    if (this._hasHistory()) {
-      this.layer.updateHistory(this.options)
-    }
-
     // If the update causes the overlay to close, we don't want to render changes.
     //
     // The server may trigger multiple signals that may cause the layer to close:
@@ -140,7 +137,15 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     //
     // Note that @handleLayerChangeRequests() also throws an `up.AbortError`
     // if any of these options cause the layer to close.
-    this.handleLayerChangeRequests(u.map(this._steps, 'newElement'))
+    this.handleLayerChangeRequests(
+      u.map(this._steps, 'newElement'),
+      this._getNewLocation(),
+    )
+
+    // Change history before compilation, so new fragments see the new location.
+    if (this._hasHistory()) {
+      this.layer.updateHistory(this.options)
+    }
 
     return this.executeSteps({
       steps: this._steps,
@@ -247,6 +252,12 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // one targeted fragment has auto-history.
     const oldFragments = u.map(this._steps, 'oldElement')
     return up.fragment.hasAutoHistory(oldFragments, this.layer)
+  }
+
+  _getNewLocation() {
+    if (this._hasHistory()) {
+      return this.options.location
+    }
   }
 
   _getEffectiveRenderOptions() {

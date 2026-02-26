@@ -2640,7 +2640,7 @@ describe('up.script', function() {
         //   })
         //
         //   it('must have tests', function() {
-        //     throw "test me"
+        //     pending("test me")
         //   })
         //
         // })
@@ -2652,7 +2652,7 @@ describe('up.script', function() {
         //   })
         //
         //   it('must have tests', function() {
-        //     throw "test me"
+        //     pending("test me")
         //   })
         //
         // })
