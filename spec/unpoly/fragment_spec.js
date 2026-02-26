@@ -2385,6 +2385,104 @@ describe('up.fragment', function() {
             expect(event.request.url).toMatchURL('/url')
           })
 
+          it('is emitted when rendering from cache (so the user can apply same transformation)', async function() {
+            const listener = jasmine.createSpy('up:fragment:loaded listener')
+            up.on('up:fragment:loaded', listener)
+
+            let html = (text) => `<div class="target">${text}</div>`
+
+            await jasmine.populateCache('/cached-url', html('cached content'))
+
+            htmlFixture(html('initial content'))
+
+            let renderJob = up.render('.target', { url: '/cached-url', cache: true })
+            await expectAsync(renderJob).toBeResolvedTo(jasmine.any(up.RenderResult))
+
+            expect(listener).toHaveBeenCalled()
+            expect(up.network.isBusy()).toBe(false)
+          })
+
+          it('is not emitted when preloading', async function() {
+            const listener = jasmine.createSpy('up:fragment:loaded listener')
+            up.on('up:fragment:loaded', listener)
+
+            let target = fixture('.target')
+            let link = fixture('a[href="/foo"][up-follow]', { text: 'label' })
+
+            const preloadJob = up.link.preload(link)
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(listener).not.toHaveBeenCalled()
+
+            jasmine.respondWith(`
+              <div class="target">
+                server content
+              </div>
+            `)
+
+            await expectAsync(preloadJob).toBeResolved()
+
+            expect(listener).not.toHaveBeenCalled()
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(up.network.isBusy()).toBe(false)
+          })
+
+          it('is not emitted after a fatal network issue', async function() {
+            const listener = jasmine.createSpy('up:fragment:loaded listener')
+            up.on('up:fragment:loaded', listener)
+
+            let target = fixture('.target')
+
+            const renderJob = up.render({ target: '.target', url: '/some-url' })
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(listener).not.toHaveBeenCalled()
+
+            jasmine.lastRequest().responseError()
+
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.Offline))
+
+            expect(listener).not.toHaveBeenCalled()
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(up.network.isBusy()).toBe(false)
+          })
+
+          it('is not emitted when the server responds without content (e.g. 304 Not Modified)', async function() {
+            const listener = jasmine.createSpy('up:fragment:loaded listener')
+            up.on('up:fragment:loaded', listener)
+
+            let target = fixture('.target')
+
+            const renderJob = up.render({ target: '.target', url: '/some-url' })
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(listener).not.toHaveBeenCalled()
+
+            jasmine.respondWith({ status: 304, responseText: '' })
+
+            await expectAsync(renderJob).toBeResolvedTo(jasmine.any(up.RenderResult))
+
+            expect(listener).not.toHaveBeenCalled()
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(up.network.isBusy()).toBe(false)
+          })
+
+          it('is not emitted when rendering a local string of HTML', async function() {
+            const listener = jasmine.createSpy('up:fragment:loaded listener')
+            up.on('up:fragment:loaded', listener)
+
+            let target = fixture('.target')
+
+            const renderJob = up.render({ target: '.target', content: 'new text' })
+            await wait()
+
+            expect(listener).not.toHaveBeenCalled()
+            expect('.target').toHaveText('new text')
+          })
+
           describe('emission target', function() {
 
             it('is emitted on the element of the updating layer', async function() {
@@ -2422,7 +2520,7 @@ describe('up.fragment', function() {
               expect(spy).toHaveBeenCalledWith(baseLayer.element)
             })
           })
-        })
+        }) // up:fragment:loaded event
 
         describe('when the server sends an X-Up-Events header', function() {
 

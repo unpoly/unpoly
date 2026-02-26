@@ -711,9 +711,6 @@ up.fragment = (function() {
   When [opening an overlay](/opening-overlays), the event is emitted on the parent layer
   of the new overlay.
 
-  This event is also emitted when using a [cached](/caching) response.
-  This allows performing the same transformations to both cache hits and cache misses.
-
   [Render lifecycle](/render-lifecycle){:.article-ref}
 
   ### Example: Making a full page load instead
@@ -797,6 +794,22 @@ up.fragment = (function() {
   ```
 
   Also see [skipping unnecessary rendering](/skipping-rendering).
+
+  ### Emission cases
+
+  The `up:fragment:loaded` event is emitted before a server response with HTML
+  is being placed on the screen.
+
+  | Case                                                            | `up:fragment:loaded` emitted? |
+  |-----------------------------------------------------------------|-------------------------------|
+  | Server responds with 200 OK                                     | ✔️ yes                           |
+  | Server responds with an [error code](/failed-responses)         | ✔️ yes                           |
+  | Rendering from [cache](/caching)                                | ✔️ yes                           |
+  | Rendering a [string of HTML](/providing-html#string)            | ❌ no                            |
+  | Server [renders nothing](/skipping-rendering#rendering-nothing) | ❌ no                            |
+  | [Fatal network error](/network-issues#disconnects)              | ❌ no                            |
+  | [Preloading](/preloading)                                       | ❌ no                            |
+
 
   @event up:fragment:loaded
 
