@@ -1115,11 +1115,9 @@ up.fragment = (function() {
   }
 
   function defaultNormalizeKeepHTML(html) {
-    let tagPattern = /<[^<]+>/g
-    let attrs = ['up-etag', 'up-source', 'up-time', 'nonce', ...up.script.config.nonceableAttributes]
-    let attrPattern = new RegExp(`\\s+(${attrs.join('|')})="[^"]*"`, 'g')
-    let cleanTag = (match) => match.replace(attrPattern, '')
-    html = html.replace(tagPattern, cleanTag)
+    // Remove attributes that might fluctuate beteen responses, but don't normally contribute to element identity.
+    html = e.removeAttrsFromHTML(html, ['up-etag', 'up-source', 'up-time', 'nonce', ...up.script.config.nonceableAttributes])
+    // Remove leading spaces.
     html = html.replace(/^[ \t]+/mg, '')
     return html
   }

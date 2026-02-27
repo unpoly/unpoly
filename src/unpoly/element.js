@@ -1549,6 +1549,14 @@ up.element = (function() {
     }
   }
 
+  function removeAttrsFromHTML(html, attrs) {
+    let tagPattern = /<[^<]+>/g
+    let attrPattern = new RegExp(`\\s+(${attrs.join('|')})="[^"]*"`, 'g')
+    let cleanTag = (match) => match.replace(attrPattern, '')
+    html = html.replace(tagPattern, cleanTag)
+    return html
+  }
+
   return {
     subtree,
     subtreeFirst,
@@ -1616,5 +1624,6 @@ up.element = (function() {
     documentPosition,
     isFullDocumentHTML,
     leadingElement,
+    removeAttrsFromHTML,
   }
 })()

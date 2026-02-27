@@ -2294,7 +2294,7 @@ describe('up.script', function() {
         })
 
         it('does not trigger up:assets:changed if a script elements is identical after the [nonce] was rewritten', async function() {
-          spyOn(up.script, 'cspNonce').and.returnValue('page000')
+          spyOn(up.script, 'cspNonce').and.returnValue('specs-nonce')
           const listener = jasmine.createSpy('up:assets:changed listener')
           up.on('up:assets:changed', listener)
 
@@ -2337,14 +2337,14 @@ describe('up.script', function() {
 
           expect('#target').toHaveVisibleText('target v1')
           expect(listener.calls.count()).toBe(1)
-          const event = listener.calls.mostRecent().args[0]
-          expect(event.newAssets.length).toBe(1)
-          const newScript = event.newAssets[0]
-          expect(newScript).toMatchSelector(`script[src="${scriptPath}"]`)
-          expect(newScript).toHaveProperty('nonce', 'page000')
+          const v1Event = listener.calls.mostRecent().args[0]
+          expect(v1Event.newAssets.length).toBe(1)
+          const v1Script = v1Event.newAssets[0]
+          expect(v1Script).toMatchSelector(`script[src="${scriptPath}"]`)
+          expect(v1Script).toHaveProperty('nonce', 'specs-nonce')
 
           // Insert the remote script
-          document.head.append(newScript)
+          document.head.append(v1Script)
 
           up.render({ target: '#target', url: '/path2' })
           await wait()
@@ -2354,11 +2354,16 @@ describe('up.script', function() {
 
           expect('#target').toHaveVisibleText('target v2')
 
+          const v2Event = listener.calls.mostRecent().args[0]
+          const v2Script = v2Event.newAssets[0]
+          expect(v2Script).toMatchSelector(`script[src="${scriptPath}"]`)
+          expect(v2Script).toHaveProperty('nonce', 'specs-nonce')
+
           // No additional up:assets:changed event
           expect(listener.calls.count()).toBe(1)
 
           // Head assets are cleaned up automatically, but let's be good citizens
-          newScript.remove()
+          v1Script.remove()
         })
       }
 

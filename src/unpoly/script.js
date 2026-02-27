@@ -956,15 +956,22 @@ up.script = (function() {
   */
 
   function assertAssetsOK(newAssets, renderOptions) {
+    let { response } = renderOptions
     let oldAssets = findAssets()
 
-    let oldHTML = u.map(oldAssets, 'outerHTML').join()
-    let newHTML = u.map(newAssets, 'outerHTML').join()
-    let { response } = renderOptions
-
-    if (oldHTML !== newHTML) {
+    if (assetsIdentity(oldAssets) !== assetsIdentity(newAssets)) {
       up.event.assertEmitted('up:assets:changed', { oldAssets, newAssets, renderOptions, response })
     }
+  }
+
+  function assetsIdentity(assets) {
+    return u.map(assets, assetIdentity).join()
+  }
+
+  function assetIdentity(assetElement) {
+    // Remove the [nonce] attribute which the browser usually masks from the outerHTML of <script> elements.
+    // However it isn't masked for inert scripts (e.g. when they fail a CSP check).
+    return e.removeAttrsFromHTML(assetElement.outerHTML, ['nonce'])
   }
 
   /*-

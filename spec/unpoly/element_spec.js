@@ -2055,6 +2055,25 @@ describe('up.element', function() {
 
   })
 
+  describe('up.element.removeAttrsFromHTML()', function() {
+    it('removes the given attributes from the given HTML', function() {
+      const html = `
+        <div id="container" class="foo" data-foo="bar">
+          <span id="match">text</span>
+        </div>
+      `.trim()
+
+      const result = up.element.removeAttrsFromHTML(html, ['id', 'data-foo'])
+
+      expect(result).toBe(`
+        <div class="foo">
+          <span>text</span>
+        </div>
+      `.trim()
+      )
+    })
+  })
+
   if (up.migrate.loaded) {
     describe('up.element.isAttached()', function() {
 
