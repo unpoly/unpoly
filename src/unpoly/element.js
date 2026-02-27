@@ -1138,7 +1138,7 @@ up.element = (function() {
   @internal
   */
   function booleanOrNumberOrStringAttr(element, attribute) {
-    return parseAttr(element, attribute, tryParseNumber, tryParseString)
+    return parseAttr(element, attribute, tryParseBoolean, tryParseNumber, tryParseString)
   }
 
   /*-

@@ -809,6 +809,12 @@ describe('up.link', function() {
           expect(options.scroll).toBe(367)
         })
 
+        it('parses a boolean value', function() {
+          const link = fixture('a[href="/foo"][up-scroll="false"]')
+          const options = up.link.followOptions(link)
+          expect(options.scroll).toBe(false)
+        })
+
       })
 
       it('parses an [up-scroll-behavior] attribute', function() {
