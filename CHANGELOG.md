@@ -13,6 +13,8 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 
 TODO
 
+- Animations can be defined in camel-case again
+
 
 3.12.1
 ------

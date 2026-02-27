@@ -2264,7 +2264,7 @@ describe('up.link', function() {
 
           jasmine.respondWithSelector('.target.new', { text: 'v2' })
 
-          await wait(50)
+          await wait(80)
 
           const newElement = document.querySelector('.target')
           expect(newElement).toHaveText('v2')

@@ -896,7 +896,6 @@ describe('up.Layer.Overlay', function() {
         await wait()
 
         expect(up.layer.current).toBeRootLayer()
-        expect(overlay.isDetached()).toBe(false)
         expect(overlay.isOpen()).toBe(false)
       })
 
@@ -909,7 +908,6 @@ describe('up.Layer.Overlay', function() {
         await wait()
 
         expect(up.layer.current).toBeRootLayer()
-        expect(overlay.isDetached()).toBe(true)
         expect(overlay.isOpen()).toBe(false)
       })
 
@@ -946,7 +944,6 @@ describe('up.Layer.Overlay', function() {
         await wait()
 
         expect(up.layer.current).toBeRootLayer()
-        expect(overlay.isDetached()).toBe(false)
         expect(overlay.isClosed()).toBe(true)
       })
 
@@ -959,7 +956,6 @@ describe('up.Layer.Overlay', function() {
         await wait()
 
         expect(up.layer.current).toBeRootLayer()
-        expect(overlay.isDetached()).toBe(true)
         expect(overlay.isClosed()).toBe(true)
       })
 

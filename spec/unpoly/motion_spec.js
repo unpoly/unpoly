@@ -92,18 +92,15 @@ describe('up.motion', function() {
         it('animates the given element to a frame of camelCase CSS properties', async function() {
           const warnSpy = up.migrate.warn.mock()
           const element = fixture('.element', { text: 'content', style: { 'font-size': '0px' } })
-          up.animate(element, { fontSize: '100px' }, { duration: 200, easing: 'linear' })
 
-          await wait(1)
+          up.animate(element, { fontSize: '100px' }, { duration: 400, easing: 'linear' })
+          await wait(0)
 
           expect(up.element.styleNumber(element, 'font-size')).toBeAround(0, 15)
-          expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('CSS property names must be in kebab-case'))
-
-          await wait(100)
+          await wait(200)
 
           expect(up.element.styleNumber(element, 'font-size')).toBeAround(50, 30)
-
-          await wait(260)
+          await wait(420)
 
           expect(up.element.styleNumber(element, 'font-size')).toBeAround(100, 15)
         })

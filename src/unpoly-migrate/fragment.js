@@ -279,7 +279,11 @@ up.compiler('[up-keep]', function(element) {
     up.migrate.warn('The [up-keep] attribute no longer supports a selector value. Elements will be matched by their derived target. You may prevent keeping with [up-on-keep="if(condition) event.preventDefault()"]. ')
     // The best we can do here is prevent matching of the old and new element if the new element
     // does not match the selector.
-    up.element.setMissingAttr(element, 'up-on-keep', `if (!newFragment.matches(${JSON.stringify(selector)})) event.preventDefault()`)
+    element.addEventListener('up:fragment:keep', function(event) {
+      if (event.target === element && !event.newFragment.matches(selector)) {
+        event.preventDefault()
+      }
+    })
     element.setAttribute('up-keep', '')
   }
 })
