@@ -1045,7 +1045,7 @@ up.viewport = (function() {
     for (let key of CURSOR_PROPS) {
       try {
         to[key] = from[key]
-      } catch (error) {
+      } catch (_error) {
         // Safari throws a TypeError when accessing { selectionStart }
         // from a focused <input type="submit">. We ignore it.
       }
