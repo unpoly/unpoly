@@ -162,7 +162,7 @@ let extractCssLoader = {
   options: {}
 }
 
-stylePipeline = function(filename = "[name.css]") {
+function stylePipeline(filename = "[name.css]") {
   return {
     plugins: [
       new MiniCssExtractPlugin({
@@ -191,7 +191,7 @@ stylePipeline = function(filename = "[name.css]") {
   }
 }
 
-discardStyles = function() {
+function discardStyles() {
   return {
     module: {
       rules: [

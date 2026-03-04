@@ -1,5 +1,5 @@
 const webpack = require('webpack')
-const { merge, file, scriptPipeline, stylePipeline, minify } = require('./shared.js')
+const { merge, file, scriptPipeline, stylePipeline, minify, discardStyles } = require('./shared.js')
 
 function unpoly({ es, min }) {
   return merge(
