@@ -96,4 +96,12 @@ export default tseslint.config(
       },
     },
   },
+  {
+    files: ['webpack/**/*.js'],
+    languageOptions: {
+      globals: {
+        __dirname: 'readonly',
+      },
+    },
+  },
 )
