@@ -6,7 +6,9 @@
 /rdoc
 /dist/manifest.json
 /dist/*.js
+/dist/*.js.map
 /dist/*.css
+/dist/*.css.map
 /dist/*.tgz
 /dist/*.gz
 /dist/*.js.LICENSE.txt

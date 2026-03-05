@@ -137,12 +137,12 @@ async function publishToNpm() {
 function paths() {
   const globs = [
     'package.json',
-    'dist/unpoly{.js,.min.js}',
-    'dist/unpoly.es6{.js,.min.js}',
-    'dist/unpoly{.css,.min.css}',
-    'dist/unpoly-migrate{.js,.min.js}',
-    'dist/unpoly-bootstrap{3,4,5}{.js,.min.js}',
-    'dist/unpoly-bootstrap{3,4,5}{.css,.min.css}',
+    'dist/unpoly{.js,.min.js,.min.js.map}',
+    'dist/unpoly.es6{.js,.min.js,.min.js.map}',
+    'dist/unpoly{.css,.min.css,.min.css.map}',
+    'dist/unpoly-migrate{.js,.min.js,.min.js.map}',
+    'dist/unpoly-bootstrap{3,4,5}{.js,.min.js,.min.js.map}',
+    'dist/unpoly-bootstrap{3,4,5}{.css,.min.css,.min.css.map}',
     'dist/README.md',
     'dist/CHANGELOG.md',
     'dist/LICENSE'

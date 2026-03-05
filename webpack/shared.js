@@ -6,6 +6,7 @@ const TerserPlugin = require('terser-webpack-plugin')
 function minify(doMinify) {
   return {
     mode: doMinify ? 'production' : 'none',
+    devtool: doMinify ? 'source-map' : false,
     optimization: {
       minimize: doMinify,
       minimizer: [
