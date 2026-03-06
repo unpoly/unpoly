@@ -14,7 +14,8 @@ to not include another library in your asset bundle.
 
 @module up.util
 */
-up.util = (function() {
+
+const util = (function() {
 
   /*-
   A function that does nothing.
@@ -349,7 +350,7 @@ up.util = (function() {
   @return {boolean}
   @stable
   */
-  function isNull(value) {
+  function isNull(value: unknown) {
     return value === null
   }
 
@@ -570,7 +571,7 @@ up.util = (function() {
   @return {boolean}
   @stable
   */
-  function isNumber(value) {
+  function isNumber(value: unknown) {
     return (typeof(value) === 'number') || value instanceof Number
   }
 
@@ -585,7 +586,7 @@ up.util = (function() {
   @return {boolean}
   @internal
   */
-  function isOptions(value) {
+  function isOptions(value: unknown) {
     return (typeof(value) === 'object') && !isNull(value) && (isUndefined(value.constructor) || (value.constructor === Object))
   }
 
@@ -2440,7 +2441,7 @@ up.util = (function() {
     If the argument cannot be parsed, `undefined` is returned.
   @experimental
   */
-  function parseNumber(str) {
+  function parseNumber(str: string | number) {
     if (isNumber(str)) {
       return str
     } else if (isString(str) && /^-?\.?\d[\d._]*$/.test(str)) {
@@ -2577,3 +2578,21 @@ up.util = (function() {
     // partialRight,
   }
 })()
+
+export default util
+
+
+
+
+
+// up.util = upUtil()
+//
+// export type UpUtil = ReturnType<typeof upUtil>
+//
+// interface Up {
+//   util: UpUtil,
+// }
+//
+// declare global {
+//   var up: Up
+// }

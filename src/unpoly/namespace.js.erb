@@ -1,9 +1,7 @@
 /***
 @module up
 */
-window.up = {
-  version: '<%=
-    require 'json'
-    JSON.parse(File.read('package.json')).fetch('version')
-  %>'
-}
+window.up.version = '<%=
+  require 'json'
+  JSON.parse(File.read('package.json')).fetch('version')
+%>'
