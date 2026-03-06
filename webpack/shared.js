@@ -70,6 +70,7 @@ function scriptPipeline({ es, lint = true }) {
     options: {
       appendTsSuffixTo: [/.*/],
       transpileOnly: true,
+      configFile: 'tsconfig.empty.json',
       compilerOptions: {
         allowJs: true,
         checkJs: true,
