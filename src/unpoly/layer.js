@@ -603,6 +603,26 @@ up.layer = (function() {
 
       See [Closing when a location is reached](/closing-overlays#location-condition).
 
+    @param {string} [options.acceptFragment]
+      An CSS selector that will cause this overlay to automatically be
+      [accepted](/closing-overlays) when a matching element is observed within the overlay.
+
+      The [overlay result value](/closing-overlays#result-values)
+      is the matching fragment's [data](/data) object.\
+      If the fragment has no data, the value is an empty object.
+
+      See [Closing when a fragment is detected](/closing-overlays#fragment-condition).
+
+    @param {string} [options.dismissFragment]
+      An CSS selector that will cause this overlay to automatically be
+      [dismissed](/closing-overlays) when a matching element is observed within the overlay.
+
+      The [overlay result value](/closing-overlays#result-values)
+      is the matching fragment's [data](/data) object.\
+      If the fragment has no data, the value is an empty object.
+
+      See [Closing when a fragment is detected](/closing-overlays#fragment-condition).
+
   @section Callbacks
     @param {Function(Event)} [options.onOpened]
       A function that is called when the overlay was inserted into the DOM.
@@ -1003,6 +1023,26 @@ up.layer = (function() {
       by the URL pattern.
 
       See [Closing when a location is reached](/closing-overlays#location-condition).
+
+    @param [up-accept-fragment]
+      An CSS selector that will cause this overlay to automatically be
+      [accepted](/closing-overlays) when a matching element is observed within the overlay.
+
+      The [overlay result value](/closing-overlays#result-values)
+      is the matching fragment's [data](/data) object.\
+      If the fragment has no data, the value is an empty object.
+
+      See [Closing when a fragment is detected](/closing-overlays#fragment-condition).
+
+    @param [up-dismiss-fragment]
+      An CSS selector that will cause this overlay to automatically be
+      [dismissed](/closing-overlays) when a matching element is observed within the overlay.
+
+      The [overlay result value](/closing-overlays#result-values)
+      is the matching fragment's [data](/data) object.\
+      If the fragment has no data, the value is an empty object.
+
+      See [Closing when a fragment is detected](/closing-overlays#fragment-condition).
 
   @section Callbacks
     @param [up-on-opened]

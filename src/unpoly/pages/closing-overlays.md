@@ -178,6 +178,36 @@ When an event causes an overlay to close, its default is prevented. You can use 
 to make a link that emits a closing event in an overlay, but navigates to a different page on the [root layer](/up.layer.root).
 
 
+### Closing when a fragment is detected {#fragment-condition}
+{:toc="true"}
+
+To open an overlay that closes once a fragment matching a selector is observed on the overlay,
+set an [`[up-accept-fragment]`](/up-layer-new#up-accept-event) attribute:
+
+```html
+<a href="/users/new"
+  up-layer="new"
+  up-accept-fragment=".user-profile"
+  up-on-accepted="alert('Hello user #' + value.id)">
+  Add a user
+</a>
+```
+
+When an element in the new overlay matches the `.user-profile` selector, the overlay is closed automatically.
+The fragment's [data](/data) becomes the overlay's acceptance value:
+
+```html
+<div class="user-profile" data-id="123">
+  ...
+</div>
+```
+
+If the fragment has no data, the acceptance value is an empty object (`{}`).
+
+To *dismiss* an overlay once a given event is observed, use the `[up-dismiss-fragment]` and `[up-on-dismissed]` attributes in the same fashion.
+
+
+
 ### Rendering discarded notification flashes
 
 When an overlay closes in reaction to a server response, the content from that response is discarded.
