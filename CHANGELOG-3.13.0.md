@@ -1,17 +1,29 @@
 # Unpoly 3.13.0
 
-## Animations
 
-- Animations now use the **Web Animations API** instead of CSS transitions.
-- This means Unpoly animations no longer pause existing CSS transitions on the animated element -- both play simultaneously.
-- The `fade-out` animation now starts from the element's current opacity, rather than always starting from `1.0`.
+## Closing overlays when a fragment matches a selector
 
-## Focus
+To open an overlay that closes once a fragment matching a selector is observed on the overlay, set an [`[up-accept-fragment]`](/up-layer-new#up-accept-event) attribute:
 
-- The previous default of `{ focus: 'keep' }` for all render passes has been removed. You can restore the old behavior by setting `up.fragment.config.renderOptions.focus = 'keep'`.
-- When appending/prepending, focus is now placed on the **leading element** instead of the old container element.
-- When revealing a **`#hash` fragment** from the address bar or a hash link, Unpoly now also **focuses** the matching element (#787).
-- Overlays are now **focused before the opening animation** starts, rather than after.
+```html
+<a href="/users/new"
+  up-layer="new"
+  up-accept-fragment=".user-profile"
+  up-on-accepted="alert('Hello user #' + value.id)">
+  Add a user
+</a>
+```
+
+When an element in the new overlay matches the `.user-profile` selector, the overlay is closed automatically. The fragment's [data](/data) becomes the overlay's acceptance value:
+
+```html
+<div class="user-profile" data-id="123">
+  ...
+</div>
+```
+
+See [Closing when a fragment is detected](/closing-overlays#fragment-condition).
+
 
 ## Scrolling
 
@@ -32,14 +44,26 @@
 - The `up.RenderResult#target` property now reflects the **actual resolved target selector** used, rather than the originally requested one (e.g. resolving `:main` to the concrete selector).
 - When an `[up-keep]` element is not targetable, Unpoly now prints a **warning** instead of crashing the render pass.
 - Compiler's third `meta` argument now contains an `{ ok }` properties. It indicates if the fragment is being rendered from a successful response (`200 OK`). Rendering HTML from an existing string is always considered successful.
-- 
 - The `up:fragment:inserted` event now includes **meta properties**: `{ layer, revalidating, ok }`, matching what compilers receive.
 
 
-## Mapping selectors to data
+## Animations
 
-Links and forms can now use an [`[up-use-data-map]`](/up-follow#up-use-data) attribute or [`{ dataMap }`](/up.render#options.data) option to map selectors to data objects.
-When a selector matches any element within an updated fragment, the matching element is compiled with the mapped data:
+- Animations now use the **Web Animations API** instead of CSS transitions.
+- This means Unpoly animations no longer pause existing CSS transitions on the animated element -- both play simultaneously.
+- The `fade-out` animation now starts from the element's current opacity, rather than always starting from `1.0`.
+
+## Focus
+
+- When revealing a `#hash` fragment from the address bar or a link, Unpoly now also focuses the matching element (#787).
+- When [appending or prepending](/targeting-fragments#appending-or-prepending), focus is now placed on the first new element instead of the container element.
+- Overlays are now focused before the opening animation starts, rather than after.
+- Unpoly will no longer try to preserve focus when calling the low-level `up.render()` function. You can restore the old behavior by setting `up.fragment.config.renderOptions.focus = 'keep'`. Unpoly will still [be smart about setting focus](/focus#auto) when [navigating](/navigation). 
+
+
+## Setting data for multiple fragments
+
+Links and forms can now use an [`[up-use-data-map]`](/up-follow#up-use-data) attribute or [`{ dataMap }`](/up.render#options.data) option to map selectors to data objects. When a selector matches any element within an updated fragment, the matching element is compiled with the mapped data:
 
 ```html
 <a
@@ -77,37 +101,13 @@ on the link or form that is targeting a background layer:
 </form>
 ```
 
-When rendering from JavaScript, pass an [`{ peel: 'accept' }`](/up.render#options.peel`) option for the same effect.  
+When rendering from JavaScript, pass an [`{ peel: 'accept' }`](/up.render#options.peel`) option for the same effect.
 
-
-## Closing overlays when a fragment matches a selector
-
-To open an overlay that closes once a fragment matching a selector is observed on the overlay, set an [`[up-accept-fragment]`](/up-layer-new#up-accept-event) attribute:
-
-```html
-<a href="/users/new"
-  up-layer="new"
-  up-accept-fragment=".user-profile"
-  up-on-accepted="alert('Hello user #' + value.id)">
-  Add a user
-</a>
-```
-
-When an element in the new overlay matches the `.user-profile` selector, the overlay is closed automatically. The fragment's [data](/data) becomes the overlay's acceptance value:
-
-```html
-<div class="user-profile" data-id="123">
-  ...
-</div>
-```
-
-See [Closing when a fragment is detected](/closing-overlays#fragment-condition). 
 
 
 ## Overlays
 
 - The `X-Up-Open-Layer` response header can now include **callback strings** (like `onOpened`, `onDismissed`) when accompanied by a valid nonce.
-- When a location-based or fragment-based close condition closes an overlay, Unpoly now **does not push a history entry** for the closing response, preventing phantom entries in the browser history.
 - Fixed **duplicate scrollbars** when opening overlays on pages where `<html>` does not have `overflow-x: hidden`, particularly on Firefox (#795). The fix uses `overflow-y: clip` on `<body>` and `overflow-y: hidden` on `<html>` to properly hide the root scrollbar.
 - Fixed **scrolling the overlay background in Safari** (#790, #795).
 - When the global animation duration is set to zero, overlay open/close animations now correctly use the **overlay instance's configured duration**.
@@ -124,23 +124,24 @@ See [Closing when a fragment is detected](/closing-overlays#fragment-condition).
 
 ## Forms
 
-- `[up-switch]` now works with disabled fields. 
-- **Form-external submit buttons** (using the HTML `[form]` attribute) are now supported.
-- Fixed duplicate validation requests when using `[up-validate][up-watch-event=input][up-keep]` to validate a field while the user is typing in it.
-- Fixed `[up-switch]` effects not always running before validations**.
+- `[up-switch]` now switches disabled fields. This is useful when re-use your (disabled) forms as read-only views, but also rely on `[up-switch]` to control dependent form sections.
+- `[up-switch]` effects are now consistently applied before `[up-validate]` requests.
+- Form-external submit buttons (using the HTML `[form]` attribute) are now supported consistently.
+- Unpoly no longer sends duplicate validation requests when using `[up-validate][up-watch-event=input][up-keep]` to validate a field while the user is typing in it.
 
 ## Event utilities
 
-- New experimental function `up.event.onClosest()`. Listens for an event on an element or its ancestors.
-- New experimental function `up.fragment.onKept()`. Runs a callback when an element or its ancestors are kept during a render pass.
+- New experimental function `up.event.onClosest()`. This runs a callback when an event is observed on an element or its ancestors.
+- New experimental function `up.fragment.onKept()`. This runs a callback when an element or its ancestors are [kept](/preserving-elements) during a render pass.
 
 ## Frontend assets
 
-- The **`up:assets:changed`** event now exposes `{ response }` so users can implement custom nonce rewriting for non-script assets (like stylesheets).
+- The `up:assets:changed` event now has a `{ response }` property. This is the `up.Response` that contained [new asset versions](/handling-asset-changes) not found on the current page. 
 
 ## History
 
-- **`up:location:changed`** event now exposes `{ previousLocation }` (experimental).
+- When an overlay [close condition](/closing-overlays#close-conditions) is reached, Unpoly no longer pushes a history entry for the closing response, preventing phantom entries in the browser history.
+- The `up:location:changed` event now has a `{ previousLocation }` property.
 
 ## Utilities
 
@@ -155,12 +156,11 @@ See [Closing when a fragment is detected](/closing-overlays#fragment-condition).
 
 ## Documentation fixes
 
+- Cleaned up typos and wording everywhere.
 - Fixed docs incorrectly describing `up.viewport.root` as a function, when it is really a property.
 - Fix incorrect deprecation of up.Request#loadPage() (it was #navigate() that was deprecated)
-- Cleaned up typos and wording everywhere.
 
 ## Rails UJS compatibility
 
-For a long time Unpoly has migrated links with Rails UJS attributes (`[data-method]`, `[data-confirm]`) to their Unpoly counterparts.
-
+For a long time Unpoly has migrated links with Rails UJS attributes (`[data-method]`, `[data-confirm]`) to their Unpoly counterparts.\
 This migration is now also applied to forms and submit buttons, not just links. 

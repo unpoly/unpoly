@@ -102,9 +102,6 @@ To reveal the updated layer's [main element](/up-main), set `[up-scroll="main"]`
 ```
 
 
-
-
-
 ## Setting absolute scroll positions {#absolute-positions}
 
 ### Scrolling to the top {#top-position}
