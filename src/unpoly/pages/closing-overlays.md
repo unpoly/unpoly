@@ -182,7 +182,7 @@ to make a link that emits a closing event in an overlay, but navigates to a diff
 {:toc="true"}
 
 To open an overlay that closes once a fragment matching a selector is observed on the overlay,
-set an [`[up-accept-fragment]`](/up-layer-new#up-accept-event) attribute:
+set an [`[up-accept-fragment]`](/up-layer-new#up-accept-fragment) attribute:
 
 ```html
 <a href="/users/new"

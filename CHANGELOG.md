@@ -23,9 +23,9 @@ Breaking changes are marked with a ⚠️ emoji and polyfilled by [`unpoly-migra
 
 ### Closing overlays when a fragment matches a selector
 
-You can now auto-close an overlay once it reaches a fragment that matches a CSS selector. This is an alternative close condition similiar to observing [events](/closing-overlays#event-condition) or [locations](/closing-overlays#location-condition).
+You can now auto-close an overlay once it reaches a fragment that matches a CSS selector. This is an alternative close condition similar to observing [events](/closing-overlays#event-condition) or [locations](/closing-overlays#location-condition).
 
-To wait for a fragment, set an [`[up-accept-fragment]`](/up-layer-new#up-accept-event) attribute on the link that opens an overlay:
+To wait for a fragment, set an [`[up-accept-fragment]`](/up-layer-new#up-accept-fragment) attribute on the link that opens an overlay:
 
 ```html
 <a href="/users/new"
@@ -90,7 +90,7 @@ You can now scroll multiple viewports with a single render pass, by using an [`[
 ```html
 <a
   href="/dashboard"
-  up-target="#fragment1, fragment2"
+  up-target="#viewport1, #viewport2"
   up-scroll-map="{ '#viewport1': 'top', '#viewport2': 'bottom' }"
 >
   Update fragments
@@ -139,7 +139,7 @@ You can configure custom revalidation classes in `up.status.config.revalidatingC
 ```js
 up.compiler('#result', function(element, data, meta) { // mark: meta
   if (meta.ok) { // mark: meta.ok
-    console.log("Rendering from succcessful response")
+    console.log("Rendering from successful response")
   } else {
     console.log("Rendering from failed response")
   }
@@ -196,7 +196,7 @@ To apply data to multiple fragments, use a data map as shown above.
 
 ### Overlay peel intent
 
-When a link or form from an overlay targets a background layer, the overlay will [dismiss](#intents) when the parent layer is updated. This behavior is called *peeling*.
+When a link or form from an overlay targets a background layer, the overlay will [dismiss](/closing-overlays#intents) when the parent layer is updated. This behavior is called *peeling*.
 
 By default, peeled overlays will be [dismissed](/closing-overlays#intents). You can now choose to [accept](/closing-overlays#intents) them instead, by setting an `[up-peel="accept"]` attribute
 on the link or form that is targeting a background layer:
@@ -207,7 +207,7 @@ on the link or form that is targeting a background layer:
 </form>
 ```
 
-When rendering from JavaScript, pass an [`{ peel: 'accept' }`](/up.render#options.peel`) option for the same effect.
+When rendering from JavaScript, pass an [`{ peel: 'accept' }`](/up.render#options.peel) option for the same effect.
 
 
 ### Setting overlay callbacks from the server
@@ -285,12 +285,12 @@ By default Unpoly will parse and execute callbacks, but require a nonce once you
 
 You can configure `up.script.config.callbackPolicy` to block all callbacks, or to only allow [callbacks with a valid nonce](/script-security#callback-nonces):
 
-| `evalCallbackPolicy` | Runs without CSP?  | Runs with CSP?     | Runs with CSP and [`<meta name="csp-nonce">`](#meta-csp-nonce)? |
-|----------------------|--------------------|--------------------|-----------------------------------------------------------------|
-| `auto` (default)     | Always             | ⚠️ With `unsafe-eval` | With allowed nonce                                              |
-| `pass`               | Always             | ⚠️ With `unsafe-eval` | ⚠️ With `unsafe-eval`                                           |
-| `block`              | Never              | Never              | Never                                                           |
-| `nonce`              | With allowed nonce | With allowed nonce   | With allowed nonce                                              |
+| `evalCallbackPolicy` | Runs without CSP?  | Runs with CSP?        | Runs with CSP and [`<meta name="csp-nonce">`](/script-security#meta-csp-nonce)? |
+|----------------------|--------------------|-----------------------|----------------------------------------------------------------------------------|
+| `auto` (default)     | Always             | ⚠️ With `unsafe-eval` | With allowed nonce                                                               |
+| `pass`               | Always             | ⚠️ With `unsafe-eval` | ⚠️ With `unsafe-eval`                                                            |
+| `block`              | Never              | Never                 | Never                                                                            |
+| `nonce`              | With allowed nonce | With allowed nonce    | With allowed nonce                                                               |
 
 See [Security for callbacks](/script-security#callbacks).
 
@@ -332,7 +332,7 @@ Renamed `up.protocol.config.cspNonce` to `up.script.config.cspNonce`. It still d
 - When revealing a `#hash` fragment from the address bar or a link, Unpoly now also focuses the matching element (#787).
 - When [appending or prepending](/targeting-fragments#appending-or-prepending), focus is now placed on the first new element instead of the container element.
 - Overlays are now focused before the opening animation starts, rather than after.
-- Unpoly will no longer try to preserve focus when calling the low-level `up.render()` function. Unpoly will still [be smart about setting focus](/focus#auto) when [navigating](/navigation). You can restore the old behavior by setting `up.fragment.config.renderOptions.focus = 'keep'`.
+- Unpoly will no longer try to [preserve focus](/focus#keep) when calling the low-level `up.render()` function. Unpoly will still [be smart about setting focus](/focus#auto) when [navigating](/navigation). You can restore the old behavior by setting `up.fragment.config.renderOptions.focus = 'keep'`.
 
 
 ### Overlays
@@ -344,10 +344,10 @@ Renamed `up.protocol.config.cspNonce` to `up.script.config.cspNonce`. It still d
 
 ### Forms
 
-- `[up-switch]` now switches disabled fields. This is useful when re-use your (disabled) forms as read-only views, but also rely on `[up-switch]` to control dependent form sections.
+- `[up-switch]` now switches disabled fields. This is useful when you re-use your (disabled) forms as read-only views, but also rely on `[up-switch]` to control dependent form sections.
 - `[up-switch]` effects are now consistently applied before `[up-validate]` requests.
-- Form-external submit buttons (using the HTML `[form]` attribute) are now supported consistently.
 - Unpoly no longer sends duplicate validation requests when using `[up-validate][up-watch-event=input][up-keep]` to validate a field while the user is typing in it.
+- Form-external submit buttons (using the HTML `[form]` attribute) are now supported consistently.
 
 ### Event utilities
 
@@ -378,7 +378,7 @@ Renamed `up.protocol.config.cspNonce` to `up.script.config.cspNonce`. It still d
 
 - Cleaned up typos and wording everywhere.
 - Fixed docs incorrectly describing `up.viewport.root` as a function, when it is really a property.
-- Fix incorrect deprecation of up.Request#loadPage() (it was #navigate() that was deprecated)
+- Fix incorrect deprecation of `up.Request#loadPage()` (it was `#navigate()` that was deprecated)
 
 ### Rails UJS compatibility
 
