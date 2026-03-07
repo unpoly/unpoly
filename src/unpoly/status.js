@@ -235,6 +235,27 @@ up.status = (function() {
 
   [Feedback classes](/feedback-classes){:.article-ref}
 
+  ## Example
+
+  This fragment has been rendered from an older cache entry. Unpoly will automatically send a revalidation request
+  and marks the fragment as `.up-revalidating`:
+
+  ```html
+  <div id="target" class="up-revalidating"> <!-- mark: class="up-revalidating" -->
+    Possibly stale content
+  </div>
+  ```
+
+  You can style revalidating fragments to convey that content might be stale:
+
+  ```css
+  .up-revalidating {
+    filter: grayscale(80%);
+    opacity: 0.5;
+  }
+  ```
+
+
   @selector .up-revalidating
   @experimental
   */

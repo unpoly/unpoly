@@ -788,7 +788,7 @@ up.protocol = (function() {
   </html>
   ```
 
-  ## Custom layer options
+  ## Custom layer options {#options}
 
   When `X-Up-Open-Layer` is used without options, the new overlay will have the [default mode](/up.layer.config#config.mode) (`modal`), select a [main target](/main)
   and use [default navigation options](/up.fragment.config#config.navigateOptions).
@@ -805,7 +805,24 @@ up.protocol = (function() {
   </div>
   ```
 
-  Many options from `up.layer.open()` are supported. Options must be JSON-serializable.
+  Many options from `up.layer.open()` are supported.
+
+  ### Callback options {#callbacks}
+
+  Callbacks like `{ onAccepted }` or `{ onDismissed }` can be passed as a string of JavaScript:
+
+  ```http
+  Content-Type: text/html
+  X-Up-Open-Layer: { onAccepted: 'up.reload("#users-list")' }
+  ```
+
+  With a strict CSP you can [prefix your callback with a nonce](/script-security#callbacks-with-strict-csp):
+
+  ```http
+  Content-Type: text/html
+  X-Up-Open-Layer: { onAccepted: 'nonce-secret123 up.reload("#users-list")' }
+  ```
+
 
   @header X-Up-Open-Layer
   @experimental

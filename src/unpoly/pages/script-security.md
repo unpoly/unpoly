@@ -70,10 +70,10 @@ You can configure a stricter behavior with `up.script.config.evalCallbackPolicy`
 
 | `evalCallbackPolicy` | Runs without CSP?  | Runs with CSP?     | Runs with CSP and [`<meta name="csp-nonce">`](#meta-csp-nonce)? |
 |----------------------|--------------------|--------------------|-----------------------------------------------------------------|
-| `'auto'` (default)     | Always             | ⚠️ With `unsafe-eval` | With allowed nonce                                              |
-| `'pass'`               | Always             | ⚠️ With `unsafe-eval` | ⚠️ With `unsafe-eval`                                           |
-| `'block'`              | Never              | Never              | Never                                                           |
-| `'nonce'`              | With allowed nonce | With allowed nonce   | With allowed nonce                                              |
+| `auto` (default)     | Always             | ⚠️ With `unsafe-eval` | With allowed nonce                                              |
+| `pass`               | Always             | ⚠️ With `unsafe-eval` | ⚠️ With `unsafe-eval`                                           |
+| `block`              | Never              | Never              | Never                                                           |
+| `nonce`              | With allowed nonce | With allowed nonce   | With allowed nonce                                              |
 
 
 ### Running callbacks with a strict CSP {#callback-with-strict-csp}
@@ -173,10 +173,10 @@ You can configure a stricter behavior for new fragments with `up.script.config.s
 
 | `scriptElementPolicy` | Runs without CSP?  | Runs with CSP?     | Runs with `strict-dynamic` CSP? |
 |-----------------------|--------------------|--------------------|---------------------------------|
-| `'auto'` (default)      | Always             | If passes CSP      | With allowed nonce              |
-| `'pass'`                | Always             | If passes CSP      | ⚠️ Always                       |
-| `'block'`               | Never              | Never              | Never                           |
-| `'nonce'`               | With allowed nonce | With allowed nonce | With allowed nonce              |
+| `auto` (default)      | Always             | If passes CSP      | With allowed nonce              |
+| `pass`                | Always             | If passes CSP      | ⚠️ Always                       |
+| `block`               | Never              | Never              | Never                           |
+| `nonce`               | With allowed nonce | With allowed nonce | With allowed nonce              |
 
 
 > [note]

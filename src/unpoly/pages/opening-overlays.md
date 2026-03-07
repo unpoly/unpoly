@@ -138,7 +138,7 @@ X-Up-Open-Layer: { target: '#menu', mode: 'drawer', animation: 'move-to-right' }
 </div>
 ```
 
-Many options from `up.layer.open()` are supported. Options must be JSON-serializable.
+Many options from `up.layer.open()` are supported. [Callbacks can be passed as strings](/X-Up-Open-Layer#callbacks).
 
 
 Close conditions {#close-conditions}

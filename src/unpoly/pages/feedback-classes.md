@@ -150,7 +150,7 @@ During this cache revalidation Unpoly will mark the targeted fragment as `.up-re
 
 ```html
 <div id="target" class="up-revalidating"> <!-- mark: class="up-revalidating" -->
-  Stale content
+  Possibly stale content
 </div>
 ```
 

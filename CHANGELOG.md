@@ -11,9 +11,379 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 3.13.0
 ------
 
-TODO
+This release adds many requested features and polishes off sharp edges.
 
-- Animations can be defined in camel-case again
+Breaking changes are marked with a ⚠️ emoji and polyfilled by [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading).
+
+> [note]
+> Our sponsor [makandra](https://makandra.de/en) funded this release ❤️\
+> Please take a minute to check out [makandra's services](https://makandra.de/en/services-2) for web development, DevOps or UI/UX.
+
+
+
+### Closing overlays when a fragment matches a selector
+
+You can now auto-close an overlay once it reaches a fragment that matches a CSS selector. This is an alternative close condition similiar to observing [events](/closing-overlays#event-condition) or [locations](/closing-overlays#location-condition).
+
+To wait for a fragment, set an [`[up-accept-fragment]`](/up-layer-new#up-accept-event) attribute on the link that opens an overlay:
+
+```html
+<a href="/users/new"
+  up-layer="new"
+  up-accept-fragment=".user-profile"
+  up-on-accepted="alert('Hello user #' + value.id)">
+  Add a user
+</a>
+```
+
+When an element in the new overlay matches the `.user-profile` selector, the overlay is closed automatically. The fragment's [data](/data) becomes the overlay's acceptance value:
+
+```html
+<div class="user-profile" data-id="123">
+  ...
+</div>
+```
+
+See [Closing when a fragment is detected](/closing-overlays#fragment-condition).
+
+
+### Keeping current scroll positions
+
+Scroll positions will reset when you insert a new viewport element (as opposed to updating a child element). This is default browser behavior for newly inserted elements.
+
+You can now ask Unpoly to preserve the scroll positions of all [viewports](/up.viewport) around the updated fragment. To do so, set `[up-scroll="keep"]`:
+
+```html
+<a href="/list" up-follow up-scroll="keep">Reload list</a> <!-- mark: up-scroll="keep" -->
+```
+
+Internally, Unpoly will measure scroll positions before the update, and restore the same positions after the update.
+
+`up.reload()` now uses this feature to preserve scroll positions by default.
+
+
+See [Keeping current scroll positions](/scrolling#keep).
+
+
+### Scrolling to a pixel position
+
+To scroll a specific pixel position from the top, you can now use a number value for the `[up-scroll]` attribute or `{ scroll }` option:
+
+```html
+<a href="/list" up-follow up-scroll="35">Back to list</a> <!-- mark: up-scroll="35" -->
+```
+
+To scroll to the bottom, but leave a margin of some pixels, set a <i>negative</i> number value:
+
+```html
+<a href="/messages" up-follow up-scroll="-40">Latest messages</a> <!-- mark: up-scroll="-40" -->
+```
+
+See [Scrolling to a pixel position](/scrolling#pixel-position).
+
+
+### Scrolling multiple viewports
+
+You can now scroll multiple viewports with a single render pass, by using an [`[up-scroll-map]`](/up-follow#up-scroll-map) attribute or `{ scrollMap }` option. Its value is an object mapping selectors to [scroll options](/scrolling):
+
+
+```html
+<a
+  href="/dashboard"
+  up-target="#fragment1, fragment2"
+  up-scroll-map="{ '#viewport1': 'top', '#viewport2': 'bottom' }"
+>
+  Update fragments
+</a>
+
+<div id="viewport1" up-viewport>
+  <!-- chip: ✔ Will be scrolled to the top -->
+</div>
+
+
+<div id="viewport2" up-viewport>
+  <!-- chip: ✔ Will be scrolled to the bottom -->
+</div>
+```
+
+### Styling revalidating fragments
+
+When rendering content from a stale [cache](/caching) entry, Unpoly [automatically reloads the fragment](/caching#revalidation) to ensure that the user never sees expired content.
+
+Unpoly will now assign revalidating fragments the `.up-revalidating` class while the revalidation request is in flight:
+
+```html
+<div id="target" class="up-revalidating"> <!-- mark: class="up-revalidating" -->
+  Possibly stale content
+</div>
+```
+
+You can style revalidating fragments to convey that content might be stale:
+
+```css
+.up-revalidating {
+  filter: grayscale(80%);
+  opacity: 0.5;
+}
+```
+
+Note that the `.up-loading` and `.up-active` classes are *not* set during cache revalidation.
+
+You can configure custom revalidation classes in `up.status.config.revalidatingClasses`.
+
+
+### Detecting success or failure from a compiler or event
+
+[Compilers](/enhancing-elements) now receive a `meta.ok` argument. It indicates if the fragment is being rendered from a successful response (`200 OK`).
+
+```js
+up.compiler('#result', function(element, data, meta) { // mark: meta
+  if (meta.ok) { // mark: meta.ok
+    console.log("Rendering from succcessful response")
+  } else {
+    console.log("Rendering from failed response")
+  }
+})
+```
+
+The `up:fragment:inserted` event now includes `{ layer, revalidating, ok }` properties, matching what compilers receive as `meta`:
+
+```js
+up.on('up:fragment:inserted', function(event) {
+  console.log(event.layer)
+  console.log(event.revalidating)
+  console.log(event.ok)
+})
+```
+
+[Rendering HTML from a string](/providing-html#string) is always considered successful.
+
+
+### Setting URL aliases from a macro
+
+`[up-nav]` links can now set `[up-alias]` from a [macro](/up.macro).
+
+This can be useful to link nested navigation trees programmatically.
+
+
+
+### Setting data for multiple fragments
+
+Links and forms can now use an [`[up-use-data-map]`](/up-follow#up-use-data) attribute or [`{ dataMap }`](/up.render#options.data) option to map selectors to data objects. When a selector matches any element within an updated fragment, the matching element is compiled with the mapped data:
+
+```html
+<a
+  href="/score"
+  up-target="#stats"
+  up-use-data-map="{ '#score': { startScore: 1500 }, '#message': { max: 3 } }"> <!-- mark: up-use-data-map="{ '#score': { startScore: 1500 }, '#message': { max: 3 } }" -->
+  Load score
+</a>
+
+<div id="stats">
+  <div id="score">
+    <!-- chip: Will compile with data { startScore: 1500 } -->
+  </div>
+  
+  <div id="message">
+    <!-- chip: Will compile with data { max: 3 } -->
+  </div>
+</div>
+```
+
+When rendering multiple fragments, any `[up-use-data]` attribute or `{ data }` option will only apply to the first fragment.
+To apply data to multiple fragments, use a data map as shown above.
+
+
+### Overlay peel intent
+
+When a link or form from an overlay targets a background layer, the overlay will [dismiss](#intents) when the parent layer is updated. This behavior is called *peeling*.
+
+By default, peeled overlays will be [dismissed](/closing-overlays#intents). You can now choose to [accept](/closing-overlays#intents) them instead, by setting an `[up-peel="accept"]` attribute
+on the link or form that is targeting a background layer:
+
+```html
+<form method="post" action="/users" up-layer="parent" up-peel="accept"> <!-- mark: up-peel="accept" -->
+  ...
+</form>
+```
+
+When rendering from JavaScript, pass an [`{ peel: 'accept' }`](/up.render#options.peel`) option for the same effect.
+
+
+### Setting overlay callbacks from the server
+
+Servers can send an `X-Up-Open-Layer` response header to force its response to [open a new overlay](/opening-overlays).
+
+Callbacks like `{ onAccepted }` or `{ onDismissed }` can now be passed as a string of JavaScript:
+
+```http
+Content-Type: text/html
+X-Up-Open-Layer: { onAccepted: 'up.reload("#users-list")' }
+```
+
+With a strict CSP you can [prefix your callback with a nonce](/script-security#callbacks-with-strict-csp):
+
+```http
+Content-Type: text/html
+X-Up-Open-Layer: { onAccepted: 'nonce-secret123 up.reload("#users-list")' }
+```
+
+
+### Script security
+
+This version introduces settings to globally control whether Unpoly will execute JavaScript on your page.
+
+
+#### Script elements
+
+The boolean `up.fragment.config.runScripts` has been replaced with a more flexible setting `up.script.config.scriptElementPolicy`. This lets you control whether to run scripts in new fragments:
+
+```html
+<div id="fragment">
+  <script>
+    <!-- chip: ❓ Will this script run? -->
+  </script>
+</div>
+```
+
+By default Unpoly will now run any `<script>` that passes your CSP checks, but requires a nonce for viral CSPs with `strict-dynamic`.
+
+You can configure `up.script.config.scriptElementPolicy` to block all script elements, or to only allow [scripts with a valid `[nonce]` attribute](/script-security#script-element-nonces):
+
+| `scriptElementPolicy` | Runs without CSP?  | Runs with CSP?     | Runs with `strict-dynamic` CSP? |
+|-----------------------|--------------------|--------------------|---------------------------------|
+| `auto` (default)      | Always             | If passes CSP      | With allowed nonce              |
+| `pass`                | Always             | If passes CSP      | ⚠️ Always                       |
+| `block`               | Never              | Never              | Never                           |
+| `nonce`               | With allowed nonce | With allowed nonce | With allowed nonce              |
+
+
+See [Security for script elements](/script-security#script-elements).
+
+
+#### Callbacks
+
+Added a new setting `up.script.config.callbackPolicy`. This lets you control whether Unpoly will execute string callbacks in attributes or response headers:
+
+```html
+<a
+  href="/path"
+  up-follow
+  up-on-loaded="console.log('Will this callback run?')"> <!-- mark: up-on-loaded -->
+  Click link
+</>
+
+<form>
+  <input
+    type="text"
+    name="title"
+    up-watch="console.log('Will this callback run?')"> <!-- mark: up-watch -->
+</form>
+```
+
+By default Unpoly will parse and execute callbacks, but require a nonce once you set a `<meta name="csp-nonce">` in your `<head>`.
+
+You can configure `up.script.config.callbackPolicy` to block all callbacks, or to only allow [callbacks with a valid nonce](/script-security#callback-nonces):
+
+| `evalCallbackPolicy` | Runs without CSP?  | Runs with CSP?     | Runs with CSP and [`<meta name="csp-nonce">`](#meta-csp-nonce)? |
+|----------------------|--------------------|--------------------|-----------------------------------------------------------------|
+| `auto` (default)     | Always             | ⚠️ With `unsafe-eval` | With allowed nonce                                              |
+| `pass`               | Always             | ⚠️ With `unsafe-eval` | ⚠️ With `unsafe-eval`                                           |
+| `block`              | Never              | Never              | Never                                                           |
+| `nonce`              | With allowed nonce | With allowed nonce   | With allowed nonce                                              |
+
+See [Security for callbacks](/script-security#callbacks).
+
+
+
+#### Warnings for dangerous settings
+
+Unpoly will now log warnings for configurations or CSP headers it considers overly permissive (marked with ⚠️ above).
+
+
+```text
+An 'unsafe-eval' CSP allows arbitrary [up-on...] callbacks. Consider setting up.script.config.callbackPolicy = 'nonce'.
+```
+
+You can disable these warnings with `up.script.config.cspWarnings = false`.
+
+
+#### Other changes
+
+Renamed `up.protocol.config.cspNonce` to `up.script.config.cspNonce`. It still defaults to reading `<meta name="csp-nonce">`.
+
+
+
+### Fragment rendering
+
+- New default reload options can be configured in `up.fragment.config.reloadOptions`.
+- The `up.RenderResult#target` property now reflects the **actual resolved target selector** used, rather than the originally requested one (e.g. resolving `:main` to the concrete selector).
+- When an `[up-keep]` element is not targetable, Unpoly now prints a **warning** instead of crashing the render pass.
+
+
+### Animations
+
+- Unpoly [animations and transitions](/up.motion) now use the [Web Animations API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API) internally (instead of CSS transitions). The public API did not change.
+- Unpoly animations no longer pause existing CSS transitions on the animated element. Both play simultaneously.
+- The `fade-out` animation now starts from the element's current opacity, rather than always starting from `1.0`.
+
+### Focus and accessibility
+
+- When revealing a `#hash` fragment from the address bar or a link, Unpoly now also focuses the matching element (#787).
+- When [appending or prepending](/targeting-fragments#appending-or-prepending), focus is now placed on the first new element instead of the container element.
+- Overlays are now focused before the opening animation starts, rather than after.
+- Unpoly will no longer try to preserve focus when calling the low-level `up.render()` function. Unpoly will still [be smart about setting focus](/focus#auto) when [navigating](/navigation). You can restore the old behavior by setting `up.fragment.config.renderOptions.focus = 'keep'`.
+
+
+### Overlays
+
+- Fixed duplicate scrollbars when opening overlays on pages where `<html>` does not have `overflow-x: hidden`, particularly on Firefox (#795).
+- Fixed scrolling the overlay background in Safari (#790, #795).
+- When the [global animation duration](/up.motion.config#config.duration) is set to zero, overlay animations now correctly use the duration configured at the overlay.
+
+
+### Forms
+
+- `[up-switch]` now switches disabled fields. This is useful when re-use your (disabled) forms as read-only views, but also rely on `[up-switch]` to control dependent form sections.
+- `[up-switch]` effects are now consistently applied before `[up-validate]` requests.
+- Form-external submit buttons (using the HTML `[form]` attribute) are now supported consistently.
+- Unpoly no longer sends duplicate validation requests when using `[up-validate][up-watch-event=input][up-keep]` to validate a field while the user is typing in it.
+
+### Event utilities
+
+- New experimental function `up.event.onClosest()`. This runs a callback when an event is observed on an element or its ancestors.
+- New experimental function `up.fragment.onKept()`. This runs a callback when an element or its ancestors are [kept](/preserving-elements) during a render pass.
+
+### Frontend assets
+
+- The `up:assets:changed` event now has a `{ response }` property. This is the `up.Response` that contained [new asset versions](/handling-asset-changes) not found on the current page. 
+
+### History
+
+- When an overlay [close condition](/closing-overlays#close-conditions) is reached, Unpoly no longer pushes a history entry for the closing response, preventing phantom entries in the browser history.
+- The `up:location:changed` event now has a `{ previousLocation }` property.
+
+### Utilities
+
+- New function `up.util.mapObject()`. It creates an object from a given array and mapping function. 
+- Removed function `up.util.reverse()`. Use [`Array#toReversed()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/toReversed) instead.
+- New experimental function `up.util.parseNumber()`. Parses a string as a number, supporting negative numbers, negative zero, underscores for digit grouping, and floats.
+
+### Network
+
+- New experimental method `up.Request#isSafe()`. It returns whether the request uses a safe HTTP method like `GET`.
+- Fixed event message for `up:fragment:offline` showing `"undefined"` as the reason.
+
+### Documentation fixes
+
+- Cleaned up typos and wording everywhere.
+- Fixed docs incorrectly describing `up.viewport.root` as a function, when it is really a property.
+- Fix incorrect deprecation of up.Request#loadPage() (it was #navigate() that was deprecated)
+
+### Rails UJS compatibility
+
+For a long time Unpoly has migrated links with Rails UJS attributes (`[data-method]`, `[data-confirm]`) to their Unpoly counterparts.\
+This migration is now also applied to forms and submit buttons, not just links. 
 
 
 3.12.1
