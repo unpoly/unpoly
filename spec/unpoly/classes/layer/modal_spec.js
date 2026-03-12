@@ -334,7 +334,12 @@ describe('up.Layer.Modal', function() {
 
         dismissModal(100)
 
+        // Layer count reduces immediately
         expect(up.layer.count).toBe(1)
+
+        // Only when the viewport element has been removed (after close animation), the original scrollbar is restored.
+        await wait(150)
+
         expect(document).toHaveVerticalScrollbar()
 
         await wait(300)

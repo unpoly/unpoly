@@ -18,7 +18,7 @@ up.BodyShifter = class BodyShifter {
   }
 
   lowerStack() {
-    if (--this._stack === 0) this._cleaner.clean()
+    if (--this._stack === 0) this._unshiftNow()
   }
 
   raiseStack() {
@@ -57,6 +57,10 @@ up.BodyShifter = class BodyShifter {
     for (let element of this._anchoredElements) {
       this._shiftElement(element, 'right')
     }
+  }
+
+  _unshiftNow() {
+    this._cleaner.clean()
   }
 
   _shiftElement(element, styleProp) {
