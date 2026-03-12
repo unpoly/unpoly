@@ -86,6 +86,80 @@ describe('up.motion', function() {
 
         })
 
+        describe('move-to-top', function() {
+
+          it('makes an element disappear towards the top edge', async function() {
+            const element = fixture('.element', { text: 'content', style: {
+              'position': 'absolute',
+              'top': '100px',
+              'left': '100px',
+              'width': '100px',
+              'height': '100px',
+              'background-color': 'red',
+            } })
+
+            expect(element.getBoundingClientRect().left).toBe(100)
+            expect(element.getBoundingClientRect().top).toBe(100)
+
+            up.animate(element, 'move-to-top', { duration: 400, easing: 'linear' })
+
+            await wait(200)
+
+            expect(element.getBoundingClientRect().left).toBe(100)
+            expect(element.getBoundingClientRect().top).toBeAround(0, 20)
+
+            await wait(250)
+
+            expect(element.getBoundingClientRect().left).toBe(100)
+            expect(element.getBoundingClientRect().top).toBeAround(-100, 20)
+          })
+
+        })
+
+        describe('move-from-top', function() {
+
+          it('makes an element appear from the top edge', async function() {
+            const element = fixture('.element', { text: 'content', style: {
+              'position': 'absolute',
+              'top': '100px',
+              'left': '100px',
+              'width': '100px',
+              'height': '100px',
+              'background-color': 'red',
+            } })
+
+            expect(element.getBoundingClientRect().left).toBe(100)
+            expect(element.getBoundingClientRect().top).toBe(100)
+
+            up.animate(element, 'move-from-top', { duration: 400, easing: 'linear' })
+
+            await wait()
+
+            expect(element.getBoundingClientRect().left).toBe(100)
+            expect(element.getBoundingClientRect().top).toBeAround(-100, 20)
+
+            await wait(200)
+
+            expect(element.getBoundingClientRect().left).toBe(100)
+            expect(element.getBoundingClientRect().top).toBeAround(0, 20)
+
+            await wait(250)
+
+            expect(element.getBoundingClientRect().left).toBe(100)
+            expect(element.getBoundingClientRect().top).toBe(100)
+          })
+
+          it('does not leave a `transform` CSS property once the animation finishes, as to not affect the positioning of child elements', async function() {
+            // https://github.com/unpoly/unpoly/issues/439
+            const element = fixture('.element')
+
+            await up.animate(element, 'move-from-top', { duration: 50 })
+
+            expect(element.style.transform).toBeBlank()
+          })
+
+        })
+
       })
 
       if (up.migrate.loaded) {
@@ -278,17 +352,6 @@ describe('up.motion', function() {
           await wait()
 
           expect(element).toHaveOwnOpacity(1.0)
-        })
-      })
-
-      describe('with an animation that flies in the element from the screen edge', () => {
-        it('does not leave a `transform` CSS property once the animation finishes, as to not affect the positioning of child elements', async function() {
-          // https://github.com/unpoly/unpoly/issues/439
-          const element = fixture('.element')
-
-          await up.animate(element, 'move-from-left', { duration: 50 })
-
-          expect(element.style.transform).toBeBlank()
         })
       })
 

@@ -321,7 +321,7 @@ up.motion = (function() {
     A promise that fulfills when the animation ends.
   @internal
   */
-  async function animateNow(element, lastFrame, { duration, easing }) {
+  async function animateNow(element, lastFrame, { duration, easing, finishedFrame }) {
     // if (up.migrate.loaded) lastFrame = up.migrate.fixSetStyleProps(lastFrame)
     // TODO: We could accepting camelCase everywhere we now run fixSetStyleProps or fixStyleProps
     let camelizedLastFrame = u.withRenamedKeys(lastFrame, u.kebabToCamelCase)
@@ -332,7 +332,8 @@ up.motion = (function() {
       // There is also Animation#commitStyles(), but that has two issues:
       // (A) Throws on detached elements
       // (B) Can't set an empty last frame property, e.g. when we're transforming towards { transform: '' }
-      e.setStyle(element, lastFrame)
+      e.setStyle(element, finishedFrame ?? lastFrame)
+
       animation.cancel()
       offFinish()
     }
@@ -630,12 +631,12 @@ up.motion = (function() {
     return { transform: `translate(${dx}px, ${dy}px)` }
   }
 
-  function noTranslateCSS() {
-    return { transform: '' }
+  function zeroTranslateCSS() {
+    return { transform: 'translate(0, 0)' }
   }
 
   function untranslatedBox(element) {
-    e.setStyle(element, noTranslateCSS())
+    e.setStyle(element, zeroTranslateCSS())
     return element.getBoundingClientRect()
   }
 
@@ -653,7 +654,7 @@ up.motion = (function() {
       const box = untranslatedBox(element)
       const transform = boxToTransform(box)
       e.setStyle(element, transform)
-      return animateNow(element, noTranslateCSS(), options)
+      return animateNow(element, zeroTranslateCSS(), { ...options, finishedFrame: { transform: '' } })
     })
   }
 
