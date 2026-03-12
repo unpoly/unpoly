@@ -134,7 +134,6 @@ To scroll a specific pixel position from the top, set a number value:
 
 To scroll to the bottom, but leave a margin of some pixels, set a <i>negative</i> number value:
 
-
 ```html
 <a href="/messages" up-follow up-scroll="-40">Latest messages</a> <!-- mark: up-scroll="-40" -->
 ```

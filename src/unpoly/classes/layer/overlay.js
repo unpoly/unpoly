@@ -385,7 +385,6 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   }
 
   _tryCloseForLocation(newLocation, urlPattern, closeFn, response) {
-    console.debug("[tryCloseForLocation] newLocation=%o urlPattern=%o, response=%o", newLocation, urlPattern, response)
     let resolution = newLocation && urlPattern?.recognize(newLocation)
     if (resolution) {
       // resolution now contains named capture groups, e.g. when
@@ -482,14 +481,6 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     let backdropAnimation = 'fade-out' // _animationFn() will ignore this animation unless the box is also animating
     let animationFn = this._animationFn(boxAnimation, backdropAnimation)
 
-    console.log("[closeAnimationProps] returning props %o", {
-        animation: animationFn,
-        easing: options.easing || this.closeEasing,
-        duration: options.duration ?? this.closeDuration,
-      }
-    )
-
-
     return {
       animation: animationFn,
       easing: options.easing || this.closeEasing,
@@ -516,7 +507,6 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   }
 
   _executeCloseChange(verb, value, options) {
-    console.debug("[_executeCloseChange] verb=%o value=%o options=%o", verb, value, options)
     options = { ...options, verb, value, layer: this }
     return new up.Change.CloseLayer(options).execute()
   }
