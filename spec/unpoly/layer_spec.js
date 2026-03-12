@@ -994,46 +994,46 @@ describe('up.layer', function() {
           up.motion.config.enabled = false
         })
 
-        describe('{ dismissable }', function() {
+        describe('{ dismissible }', function() {
 
-          describe('with { dismissable: true }', function() {
-            it('sets all other dismissable options to true', async function() {
-              const layer = await up.layer.open({ dismissable: true })
-              expect(layer.dismissable).toMatchList(['button', 'key', 'outside'])
+          describe('with { dismissible: true }', function() {
+            it('sets all other dismissible options to true', async function() {
+              const layer = await up.layer.open({ dismissible: true })
+              expect(layer.dismissible).toMatchList(['button', 'key', 'outside'])
             })
           })
 
-          describe('with { dismissable: false }', function() {
-            it('sets all other dismissable options to false if passed { dismissable: false }', async function() {
-              const layer = await up.layer.open({ dismissable: false })
-              expect(layer.dismissable).toEqual([])
+          describe('with { dismissible: false }', function() {
+            it('sets all other dismissible options to false if passed { dismissible: false }', async function() {
+              const layer = await up.layer.open({ dismissible: false })
+              expect(layer.dismissible).toEqual([])
             })
           })
 
-          describe('with { dismissable } set to a space-separated string', function() {
+          describe('with { dismissible } set to a space-separated string', function() {
             it('sets only the given dismiss methods', async function() {
-              const layer = await up.layer.open({ dismissable: 'button outside' })
-              expect(layer.dismissable).toMatchList(['button', 'outside'])
+              const layer = await up.layer.open({ dismissible: 'button outside' })
+              expect(layer.dismissible).toMatchList(['button', 'outside'])
             })
           })
 
-          describe('with { dismissable } set to a comma-separated string', function() {
+          describe('with { dismissible } set to a comma-separated string', function() {
             it('sets only the given dismiss methods', async function() {
-              const layer = await up.layer.open({ dismissable: 'button, outside' })
-              expect(layer.dismissable).toMatchList(['button', 'outside'])
+              const layer = await up.layer.open({ dismissible: 'button, outside' })
+              expect(layer.dismissible).toMatchList(['button', 'outside'])
             })
           })
 
-          describe('with { dismissable: "button" }', function() {
+          describe('with { dismissible: "button" }', function() {
 
             it('adds a button that dimisses the layer', async function() {
-              const layer = await up.layer.open({ dismissable: 'button' })
+              const layer = await up.layer.open({ dismissible: 'button' })
               expect(layer.element).toHaveSelector('up-modal-dismiss[up-dismiss]')
             })
 
             it('allows to customize the button using { dismissLabel, dismissARIALabel }', async function() {
               const layer = await up.layer.open({
-                dismissable: 'button',
+                dismissible: 'button',
                 dismissLabel: 'CLOSE ME',
                 dismissARIALabel: 'Close this overlay'
               })
@@ -1045,7 +1045,7 @@ describe('up.layer', function() {
             if (up.migrate.loaded) {
               it('allows to customize the button using { dismissLabel, dismissAriaLabel }', async function() {
                 const layer = await up.layer.open({
-                  dismissable: 'button',
+                  dismissible: 'button',
                   dismissLabel: 'CLOSE ME',
                   dismissAriaLabel: 'Close this overlay'
                 })
@@ -1056,7 +1056,7 @@ describe('up.layer', function() {
             }
 
             it('emits an up:layer:dismissed event with { value: ":button" } and other details', async function() {
-              up.layer.open({ dismissable: 'button', mode: 'modal' })
+              up.layer.open({ dismissible: 'button', mode: 'modal' })
               let buttonElement = null
               const listener = jasmine.createSpy('up:layer:dismissed listener')
               up.on('up:layer:dismissed', listener)
@@ -1080,7 +1080,7 @@ describe('up.layer', function() {
             })
 
             it('does not emit a global error if the button is clicked and up:layer:dismiss is prevented', async function() {
-              up.layer.open({ dismissable: 'button', mode: 'modal' })
+              up.layer.open({ dismissible: 'button', mode: 'modal' })
               up.on('up:layer:dismiss', (event) => event.preventDefault())
 
               await wait()
@@ -1095,7 +1095,7 @@ describe('up.layer', function() {
             })
 
             it('returns focus to the link that opened the overlay, hiding a focus ring as it is a mouse interaction', async function() {
-              const opener = fixture('a[href="/overlay"][up-layer="new"][up-target="#content"][up-dismissable="button"]')
+              const opener = fixture('a[href="/overlay"][up-layer="new"][up-target="#content"][up-dismissible="button"]')
               Trigger.clickSequence(opener)
 
               await wait()
@@ -1116,7 +1116,7 @@ describe('up.layer', function() {
             })
 
             it('returns focus to the link that opened the overlay, showing a focus ring when the button was activated with a keyboard', async function() {
-              const opener = fixture('a[href="/overlay"][up-layer="new"][up-target="#content"][up-dismissable="button"]')
+              const opener = fixture('a[href="/overlay"][up-layer="new"][up-target="#content"][up-dismissible="button"]')
               Trigger.clickSequence(opener)
 
               await wait()
@@ -1137,17 +1137,17 @@ describe('up.layer', function() {
             })
           })
 
-          describe('without { dismissable: "button" }', function() {
+          describe('without { dismissible: "button" }', function() {
             it('does not add a button that dimisses the layer', async function() {
-              const layer = await up.layer.open({ dismissable: false })
+              const layer = await up.layer.open({ dismissible: false })
               expect(layer.element).not.toHaveSelector('up-modal-dismiss[up-dismiss]')
             })
           })
 
-          describe('with { dismissable: "key" }', function() {
+          describe('with { dismissible: "key" }', function() {
 
             it('lets the user close the layer by pressing Escape', async function() {
-              up.layer.open({ dismissable: "key" })
+              up.layer.open({ dismissible: "key" })
 
               await wait()
 
@@ -1161,7 +1161,7 @@ describe('up.layer', function() {
             })
 
             it('does not emit a global error when Escape is pressed and up:layer:dismiss is prevented', async function() {
-              up.layer.open({ dismissable: "key" })
+              up.layer.open({ dismissible: "key" })
               up.on('up:layer:dismiss', (event) => event.preventDefault())
 
               await wait()
@@ -1175,7 +1175,7 @@ describe('up.layer', function() {
             })
 
             it('returns focus to the link that opened the overlay, showing a focus ring as it is a keyboard interaction', async function() {
-              const opener = fixture('a[href="/overlay"][up-target="#content"][up-layer="new"][up-dismissable="key"]')
+              const opener = fixture('a[href="/overlay"][up-target="#content"][up-layer="new"][up-dismissible="key"]')
               Trigger.clickSequence(opener)
 
               await wait()
@@ -1196,7 +1196,7 @@ describe('up.layer', function() {
             })
 
             it('emits an up:layer:dismissed event with { value: ":key" } and other details', async function() {
-              up.layer.open({ dismissable: 'key', mode: 'modal' })
+              up.layer.open({ dismissible: 'key', mode: 'modal' })
               const listener = jasmine.createSpy('up:layer:dismissed listener')
               up.on('up:layer:dismissed', listener)
 
@@ -1218,9 +1218,9 @@ describe('up.layer', function() {
             })
           })
 
-          describe('without { dismissable: "key" }', function() {
+          describe('without { dismissible: "key" }', function() {
             it('does not let the user close the layer by pressing escape', async function() {
-              up.layer.open({ dismissable: false })
+              up.layer.open({ dismissible: false })
 
               await wait()
 
@@ -1234,12 +1234,12 @@ describe('up.layer', function() {
             })
           })
 
-          describe('with { dismissable: "outside" }', function() {
+          describe('with { dismissible: "outside" }', function() {
 
             describe('for an overlay with viewport', function() {
 
               it('dismisses the overlay when the user clicks on the viewport (which sits over the backdrop and will receive all clicks outside the frame)', async function() {
-                up.layer.open({ dismissable: 'outside', mode: 'modal' })
+                up.layer.open({ dismissible: 'outside', mode: 'modal' })
 
                 await wait()
 
@@ -1253,7 +1253,7 @@ describe('up.layer', function() {
               })
 
               it('emits an up:layer:dismissed event with { value: ":outside" } and other details', async function() {
-                up.layer.open({ dismissable: 'outside', mode: 'modal' })
+                up.layer.open({ dismissible: 'outside', mode: 'modal' })
                 let viewportElement = null
                 const listener = jasmine.createSpy('up:layer:dismissed listener')
                 up.on('up:layer:dismissed', listener)
@@ -1279,7 +1279,7 @@ describe('up.layer', function() {
               })
 
               it('does not emit a global error when the viewport is clicked and up:layer:dismiss is prevented', async function() {
-                up.layer.open({ dismissable: "outside", mode: 'modal' })
+                up.layer.open({ dismissible: "outside", mode: 'modal' })
                 up.on('up:layer:dismiss', (event) => event.preventDefault())
 
                 await wait()
@@ -1299,7 +1299,7 @@ describe('up.layer', function() {
                 up.layer.config.foreignOverlaySelectors = ['.foreign-overlay']
                 const foreignOverlay = fixture('.foreign-overlay', { text: 'foreign overlay content' })
 
-                up.layer.open({ dismissable: 'outside', mode: 'modal' })
+                up.layer.open({ dismissible: 'outside', mode: 'modal' })
 
                 await wait()
 
@@ -1317,7 +1317,7 @@ describe('up.layer', function() {
 
               it('dismisses the overlay when the user clicks anywhere on the parent layer', async function() {
                 const opener = fixture('a', { text: 'label' })
-                up.layer.open({ dismissable: 'outside', mode: 'popup', origin: opener })
+                up.layer.open({ dismissible: 'outside', mode: 'popup', origin: opener })
                 await wait()
 
                 expect(up.layer.isOverlay()).toBe(true)
@@ -1333,7 +1333,7 @@ describe('up.layer', function() {
                 const foreignOverlay = fixture('.foreign-overlay', { text: 'foreign overlay content' })
 
                 const opener = fixture('a', { text: 'label' })
-                up.layer.open({ dismissable: 'outside', mode: 'popup', origin: opener })
+                up.layer.open({ dismissible: 'outside', mode: 'popup', origin: opener })
 
                 await wait()
 
@@ -1348,7 +1348,7 @@ describe('up.layer', function() {
 
               it('lets the user close an overlay with tether by clicking on its opener', async function() {
                 const opener = fixture('a', { text: 'label' })
-                up.layer.open({ dismissable: 'outside', mode: 'popup', origin: opener })
+                up.layer.open({ dismissible: 'outside', mode: 'popup', origin: opener })
 
                 await wait()
 
@@ -1364,7 +1364,7 @@ describe('up.layer', function() {
               describe('focus', function() {
 
                 it('focuses the link that opened the overlay', async function() {
-                  const opener = fixture('a[href="#"][up-content="overlay content"][up-dismissable="outside"][up-layer="new popup"]', { text: 'label' })
+                  const opener = fixture('a[href="#"][up-content="overlay content"][up-dismissible="outside"][up-layer="new popup"]', { text: 'label' })
                   Trigger.clickSequence(opener)
                   await wait()
 
@@ -1378,13 +1378,13 @@ describe('up.layer', function() {
                 })
 
                 it('focuses the link that opened the overlay when nested overlays are dismissed', async function() {
-                  const rootOpener = fixture('a[href="#"][up-content="overlay content"][up-dismissable="outside"][up-layer="new popup"]', { text: 'label' })
+                  const rootOpener = fixture('a[href="#"][up-content="overlay content"][up-dismissible="outside"][up-layer="new popup"]', { text: 'label' })
                   Trigger.clickSequence(rootOpener)
                   await wait()
 
                   expect(up.layer.current.index).toBe(1)
 
-                  const overlay1Opener = up.layer.affix('a[href="#"][up-content="overlay content"][up-dismissable="outside"][up-layer="new popup"]', { text: 'label' })
+                  const overlay1Opener = up.layer.affix('a[href="#"][up-content="overlay content"][up-dismissible="outside"][up-layer="new popup"]', { text: 'label' })
                   Trigger.clickSequence(overlay1Opener)
                   await wait()
 
@@ -1398,7 +1398,7 @@ describe('up.layer', function() {
                 })
 
                 it('preserves focus when the overlay was dismissed by clicking a focusable element on the parent layer', async function() {
-                  const opener = fixture('a[href="#"][up-content="overlay content"][up-dismissable="outside"][up-layer="new popup"]', { text: 'label' })
+                  const opener = fixture('a[href="#"][up-content="overlay content"][up-dismissible="outside"][up-layer="new popup"]', { text: 'label' })
                   const input = fixture('input[type=text]')
 
                   Trigger.clickSequence(opener)
@@ -1416,9 +1416,9 @@ describe('up.layer', function() {
             })
           })
 
-          describe('without { dismissable: "outside" }', function() {
+          describe('without { dismissible: "outside" }', function() {
             it('does not let the user close a layer with viewport by clicking on its viewport (which sits over the backdrop and will receive all clicks outside the frame)', async function() {
-              up.layer.open({ dismissable: false, mode: 'modal' })
+              up.layer.open({ dismissible: false, mode: 'modal' })
 
               await wait()
 
@@ -1432,6 +1432,19 @@ describe('up.layer', function() {
             })
           })
         })
+
+        if (up.migrate.loaded) {
+
+          describe('{ dismissable } (deprecated)', function() {
+
+            it('forwards its value to { dismissible }', async function() {
+              const layer = await up.layer.open({ dismissable: 'button outside' })
+              expect(layer.dismissible).toMatchList(['button', 'outside'])
+            })
+
+          })
+
+        }
 
         describe('{ onAccepted }', function() {
 
@@ -2754,7 +2767,7 @@ describe('up.layer', function() {
               content: 'start content',
               location: '/start-location',
               onDismissed: callback,
-              dismissLocation: '/dismissable-location'
+              dismissLocation: '/dismissible-location'
             })
 
             await wait()
@@ -2768,13 +2781,13 @@ describe('up.layer', function() {
             expect(callback).not.toHaveBeenCalled()
 
             const closingJob = up.navigate('.overlay-content', {
-              content: 'dismissable content',
-              location: '/dismissable-location'
+              content: 'dismissible content',
+              location: '/dismissible-location'
             })
 
             await expectAsync(closingJob).toBeRejectedWith(jasmine.any(up.Aborted))
 
-            const value = { location: u.normalizeURL('/dismissable-location') }
+            const value = { location: u.normalizeURL('/dismissible-location') }
             expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value }))
           })
         })

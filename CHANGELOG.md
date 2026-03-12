@@ -310,7 +310,7 @@ You can disable these warnings with `up.script.config.cspWarnings = false`.
 
 #### Other changes
 
-Renamed `up.protocol.config.cspNonce` to `up.script.config.cspNonce`. It still defaults to reading `<meta name="csp-nonce">`.
+- Renamed `up.protocol.config.cspNonce` to `up.script.config.cspNonce`. It still defaults to reading `<meta name="csp-nonce">`.
 
 
 
@@ -341,6 +341,8 @@ Renamed `up.protocol.config.cspNonce` to `up.script.config.cspNonce`. It still d
 - Fixed duplicate scrollbars when opening overlays on pages where `<html>` does not have `overflow-x: hidden`, particularly on Firefox (#795).
 - Fixed scrolling the overlay background in Safari (#790, #795).
 - When the [global animation duration](/up.motion.config#config.duration) is set to zero, overlay animations now correctly use the duration configured at the overlay.
+- The option `{ dismissable }` has been renamed to `{ dismissible }`.
+- The attribute `[up-dismissable]` has been renamed to `[up-dismissible]`.
 
 
 ### Forms

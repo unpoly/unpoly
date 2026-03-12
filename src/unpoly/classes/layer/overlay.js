@@ -58,7 +58,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     'origin', // for tethered anchor element
     'class',
     'backdrop',
-    'dismissable',
+    'dismissible',
     'dismissLabel',
     'dismissARIALabel',
     'openAnimation',
@@ -102,12 +102,12 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     // this would otherwise cause auto-history for *every* overlay regardless of initial target.
     this.state = 'opening'
 
-    if (this.dismissable === true) {
-      this.dismissable = ['button', 'key', 'outside']
-    } else if (this.dismissable === false) {
-      this.dismissable = []
+    if (this.dismissible === true) {
+      this.dismissible = ['button', 'key', 'outside']
+    } else if (this.dismissible === false) {
+      this.dismissible = []
     } else {
-      this.dismissable = u.getSimpleTokens(this.dismissable)
+      this.dismissible = u.getSimpleTokens(this.dismissible)
     }
 
     if (this.acceptLocation) {
@@ -503,7 +503,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   }
 
   _supportsDismissMethod(method) {
-    return u.contains(this.dismissable, method)
+    return u.contains(this.dismissible, method)
   }
 
   _executeCloseChange(verb, value, options) {

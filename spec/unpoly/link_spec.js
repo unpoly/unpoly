@@ -1121,6 +1121,19 @@ describe('up.link', function() {
           const options = up.link.followOptions(link)
           expect(options.lateDelay).toBe(123)
         })
+
+        describe('[up-dismissable]', function() {
+
+          it('parses into { dismissible }', function() {
+            const link = fixture('a[href="/foo"][up-layer="new"][up-dismissable="key"]')
+            up.hello(link)
+
+            const options = up.link.followOptions(link)
+            expect(options.dismissible).toBe('key')
+          })
+
+        })
+
       }
     })
 

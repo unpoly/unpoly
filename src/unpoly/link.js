@@ -437,7 +437,7 @@ up.link = (function() {
     parser.string('position')
     parser.string('class')
     parser.string('size')
-    parser.booleanOrString('dismissable')
+    parser.booleanOrString('dismissible')
     parser.renderCallback('onOpened')
     parser.renderCallback('onAccepted')
     parser.renderCallback('onDismissed')

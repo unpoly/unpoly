@@ -4,7 +4,8 @@
 
 up.migrate.handleLayerOptions = function(options) {
   up.migrate.fixKey(options, 'flavor', 'mode')
-  up.migrate.fixKey(options, 'closable', 'dismissable')
+  up.migrate.fixKey(options, 'closable', 'dismissible')
+  up.migrate.fixKey(options, 'dismissable', 'dismissible')
   up.migrate.fixKey(options, 'closeLabel', 'dismissLabel')
   up.migrate.fixKey(options, 'dismissAriaLabel', 'dismissARIALabel')
 

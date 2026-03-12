@@ -422,12 +422,12 @@ Customizing dismiss controls
 By default the user can dismiss an overlay user by pressing `Escape`, by clicking outside the overlay box
 or by pressing an `×` icon in the top-right corner.
 
-You may customize the dismiss methods available to the user by passing a `{ dismissable }` option
-or `[up-dismissable]` attribute when opening an overlay. For example, the link below will open an overlay that
+You may customize the dismiss methods available to the user by passing a `{ dismissible }` option
+or `[up-dismissible]` attribute when opening an overlay. For example, the link below will open an overlay that
 has a close button (`×`), but cannot dismissed by pressing `Escape` or clicking on the background: 
 
 ```html
-<a href="/terms" up-layer="new" up-dismissable="button">Show terms</a>
+<a href="/terms" up-layer="new" up-dismissible="button">Show terms</a>
 ```
 
 The following control names are available:
@@ -441,7 +441,7 @@ The following control names are available:
 To enable multiple dismiss controls, separate their name by a comma or space character:
 
 ```html
-<a href="/terms" up-layer="new" up-dismissable="button key">Show terms</a>
+<a href="/terms" up-layer="new" up-dismissible="button key">Show terms</a>
 ```
 
 Regardless of which dismiss controls are enabled, an overlay may always be dismissed by

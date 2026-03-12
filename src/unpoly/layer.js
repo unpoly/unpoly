@@ -218,7 +218,7 @@ up.layer = (function() {
         closeAnimation: 'fade-out',
         dismissLabel: '×',
         dismissARIALabel: 'Dismiss dialog',
-        dismissable: true,
+        dismissible: true,
         history: 'auto',
         trapFocus: true,
       },
@@ -253,7 +253,7 @@ up.layer = (function() {
         position: 'bottom',
         size: 'medium',
         align: 'left',
-        dismissable: 'outside key',
+        dismissible: 'outside key',
         trapFocus: false,
       },
       foreignOverlaySelectors: ['dialog']
@@ -492,7 +492,7 @@ up.layer = (function() {
 
       See [overlay classes](/customizing-overlays#overlay-classes).
 
-    @param {boolean|string|Array<string>} [options.dismissable=true]
+    @param {boolean|string|Array<string>} [options.dismissible=true]
       How the overlay can be [dismissed](/closing-overlays) by the user.
 
       Supported values are `'key'`, `'outside'`, and `'button'`.\
@@ -922,7 +922,7 @@ up.layer = (function() {
 
       See [overlay classes](/customizing-overlays#overlay-classes).
 
-    @param [up-dismissable]
+    @param [up-dismissible]
       How the overlay can be [dismissed](/closing-overlays) by the user.
 
       See [customizing dismiss controls](/closing-overlays#customizing-dismiss-controls)
