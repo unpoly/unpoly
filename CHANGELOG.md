@@ -326,6 +326,7 @@ Renamed `up.protocol.config.cspNonce` to `up.script.config.cspNonce`. It still d
 - Unpoly [animations and transitions](/up.motion) now use the [Web Animations API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API) internally (instead of CSS transitions). The public API did not change.
 - Unpoly animations no longer pause existing CSS transitions on the animated element. Both play simultaneously.
 - The `fade-out` animation now starts from the element's current opacity, rather than always starting from `1.0`.
+- The function `up.motion.isEnabled()` has been deprecated. Use `up.motion.config.enabled` instead.
 
 ### Focus and accessibility
 

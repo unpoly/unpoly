@@ -182,20 +182,6 @@ up.motion = (function() {
   }
 
   /*-
-  Returns whether Unpoly will perform animations and transitions.
-
-  Set [`up.motion.config.enabled = false`](/up.motion.config#config.enabled) in order to disable animations globally.
-
-  @function up.motion.isEnabled
-  @return {boolean}
-    Whether animation is enabled.
-  @stable
-  */
-  function isEnabled() {
-    return config.enabled
-  }
-
-  /*-
   Applies the given animation to the given element.
 
   ## Example
@@ -296,7 +282,7 @@ up.motion = (function() {
   function willAnimate(element, animationOrTransition, options) {
     applyConfig(options)
 
-    return isEnabled() && !isNone(animationOrTransition) && (options.duration > 0) && !e.isSingleton(element)
+    return config.enabled && !isNone(animationOrTransition) && (options.duration > 0) && !e.isSingleton(element)
   }
 
   /*-
@@ -596,7 +582,7 @@ up.motion = (function() {
   up.on('up:framework:boot', function() {
     // Explain to the user why animations aren't working.
     // E.g. the user might have disabled animations in her OS.
-    if (!isEnabled()) {
+    if (!config.enabled) {
       up.puts('up.motion', 'Animations are disabled')
     }
   })
@@ -747,7 +733,6 @@ up.motion = (function() {
     transition: namedTransitions.put,
     animation: namedAnimations.put,
     config,
-    isEnabled,
     isNone,
     willAnimate,
     swapElementsDirectly,
