@@ -772,6 +772,37 @@ describe('up.fragment', function() {
           }))
         })
 
+        it('delays the promise until fragments were swapped and destructors have run', async function() {
+          const compilerSpy = jasmine.createSpy('compiler spy')
+          const destructorSpy = jasmine.createSpy('destructor spy')
+
+          up.compiler('.target', function(target) {
+            const text = target.textContent.trim()
+            compilerSpy(text)
+            return () => destructorSpy(text)
+          })
+
+          const html = (text) => `
+            <div class="target">
+              ${text}
+            </div>
+          `
+
+          htmlFixture(html('version 1'))
+
+          await up.render({ fragment: html('version 2') })
+
+          expect('.target').toHaveText('version 2')
+          expect(destructorSpy).not.toHaveBeenCalled() // version 1 was never compiled
+          expect(compilerSpy).toHaveBeenCalledWith('version 2')
+
+          await up.render({ fragment: html('version 3') })
+
+          expect('.target').toHaveText('version 3')
+          expect(destructorSpy).toHaveBeenCalledWith('version 2')
+          expect(compilerSpy).toHaveBeenCalledWith('version 3')
+        })
+
         it('resolves to an up.RenderResult describing the actual target and layer used, when multiple values could match', async function() {
           let mainHTML = (text) => `<div id="page" up-main>${text}</div>`
           htmlFixture(mainHTML('old main'))
@@ -10181,7 +10212,7 @@ describe('up.fragment', function() {
             fragment: '<div class="container">new text</div>',
             transition: 'cross-fade',
             duration: 100
-          })
+          }).finished
 
           expect('.container').toHaveText('new text')
           expect(destructor).toHaveBeenCalledWith('old text', true)
@@ -10215,7 +10246,7 @@ describe('up.fragment', function() {
             fragment: '<div class="element">new text</div>',
             transition: 'cross-fade',
             duration: 30
-          })
+          }).finished
 
           expect(spy).toHaveBeenCalledWith('old text', $parent.get(0))
         })
