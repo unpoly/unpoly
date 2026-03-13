@@ -43,7 +43,7 @@ describe('up.motion', function() {
 
             await wait(260)
 
-            expect(element).toHaveOwnOpacity(1.0, 0.15)
+            expect(element).toHaveOwnOpacity(1.0, 0.0)
           })
 
         })
@@ -64,7 +64,7 @@ describe('up.motion', function() {
 
             await wait(260)
 
-            expect(element).toHaveOwnOpacity(0.0, 0.15)
+            expect(element).toHaveOwnOpacity(0.0, 0.0)
           })
 
           it("starts the animation at a semi-transparent element's current opacity", async function() {
@@ -81,7 +81,23 @@ describe('up.motion', function() {
 
             await wait(260)
 
-            expect(element).toHaveOwnOpacity(0.0, 0.1)
+            expect(element).toHaveOwnOpacity(0.0, 0.0)
+          })
+
+          it('immediately turns the element transparent when motion is disabled', async function() {
+            up.motion.config.enabled = false
+
+
+            const element = fixture('.element', { text: 'content', style: { 'opacity': '0.5' } })
+            up.animate(element, 'fade-out', { duration: 200, easing: 'linear' })
+
+            let promise = up.animate(element, 'fade-out', { duration: 400, easing: 'linear' })
+
+            await wait()
+
+            expect(element).toHaveOwnOpacity(0.0, 0.0)
+
+            await expectAsync(promise).already.toBeResolved()
           })
 
         })
@@ -101,7 +117,7 @@ describe('up.motion', function() {
             expect(element.getBoundingClientRect().left).toBe(100)
             expect(element.getBoundingClientRect().top).toBe(100)
 
-            up.animate(element, 'move-to-top', { duration: 400, easing: 'linear' })
+            let promise = up.animate(element, 'move-to-top', { duration: 400, easing: 'linear' })
 
             await wait(200)
 
@@ -112,6 +128,33 @@ describe('up.motion', function() {
 
             expect(element.getBoundingClientRect().left).toBe(100)
             expect(element.getBoundingClientRect().top).toBeAround(-100, 20)
+
+            await expectAsync(promise).already.toBeResolved()
+          })
+
+          it('immediately moves the element out of the screen when motion is disabled', async function() {
+            up.motion.config.enabled = false
+
+            const element = fixture('.element', { text: 'content', style: {
+              'position': 'absolute',
+              'top': '100px',
+              'left': '100px',
+              'width': '100px',
+              'height': '100px',
+              'background-color': 'red',
+            } })
+
+            expect(element.getBoundingClientRect().left).toBe(100)
+            expect(element.getBoundingClientRect().top).toBe(100)
+
+            let promise = up.animate(element, 'move-to-top', { duration: 400, easing: 'linear' })
+
+            await wait()
+
+            expect(element.getBoundingClientRect().left).toBe(100)
+            expect(element.getBoundingClientRect().top).toBeAround(-100, 20)
+
+            await expectAsync(promise).already.toBeResolved()
           })
 
         })

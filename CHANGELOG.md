@@ -328,6 +328,7 @@ You can disable these warnings with `up.script.config.cspWarnings = false`.
 - Unpoly animations no longer pause existing CSS transitions on the animated element. Both play simultaneously.
 - ⚠️ The `fade-out` animation now starts from the element's current opacity, rather than always starting from `1.0`.
 - ⚠️ The function `up.motion.isEnabled()` has been deprecated. Use `up.motion.config.enabled` instead.
+- When [motion is disabled](/up.motion.config#config.enabled), all animations and transitions now instantly jump to the last frame (instead of doing nothing). This makes it easier to reason about the effects of animations, independent on the user's preferences.
 
 ### Focus and accessibility
 

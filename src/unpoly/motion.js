@@ -248,30 +248,28 @@ up.motion = (function() {
     A promise for the animation's end.
   @stable
   */
-  async function animate(element, animation, { duration, easing, onFinished } = {}) {
+  async function animate(element, animationValue, { duration, easing, onFinished } = {}) {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
     element = up.fragment.get(element)
 
-    // Nested calls should not re-call callbacks.
-    const motionOptionsWithoutCallbacks = { duration, easing }
-
-    // willAnimate() also sets a default { duration } and { easing }.
-    const willRun = willAnimate(element, animation, motionOptionsWithoutCallbacks)
-
     let trackable = async function() {
-      if (willRun) {
-        let animationFn = up.error.guardFn(findAnimationFn(animation))
+      if (canAnimate(element, animationValue)) {
+        // (A) Apply defaults.
+        // (B) Set zero duration if motion is disabled.
+        // (C) Nested calls should not re-call callbacks.
+        const timingOptions = effectiveTimingOptions({ duration, easing })
+
+        // Convert the given animation value (which might be `false` or a string)
+        // to a function we can call.
+        const animationFn = up.error.guardFn(findAnimationFn(animationValue))
+
         try {
-          await animationFn(element, motionOptionsWithoutCallbacks)
+          await animationFn(element, timingOptions)
         } finally {
           onFinished?.()
         }
       } else {
-        if (u.isOptions(animation)) {
-          // If we are given the final animation frame as an object of CSS properties,
-          // the best we can do is to set the final frame without animation.
-          e.setStyle(element, animation)
-        }
+        // Behave like a sync function. Don't delay changes by a microtask.
         onFinished?.()
       }
     }
@@ -279,6 +277,34 @@ up.motion = (function() {
     await motionController.startFunction([element], trackable)
   }
 
+  function canAnimate(element, motionValue) {
+    return !isNone(motionValue) && !e.isSingleton(element)
+  }
+
+  /*-
+  This function will:
+
+  - Apply the configured default easing
+  - Apply the configured default duration
+  - Set a duration of 0 if motion is disabled. This causes animations to instantly jump to the last frame.
+
+  @function effectiveTimingOptions
+  @internal
+  */
+  function effectiveTimingOptions({ duration, easing }) {
+    return {
+      duration: config.enabled ? (duration ?? config.duration) : 0,
+      easing: easing ?? config.easing,
+    }
+  }
+
+  // TODO: Remove me
+  function applyConfig(options) {
+    options.easing ??= config.easing
+    options.duration ??= config.duration
+  }
+
+  // TODO: Remove me
   function willAnimate(element, animationOrTransition, options) {
     applyConfig(options)
 
@@ -326,11 +352,6 @@ up.motion = (function() {
     offFinish = up.on(element, 'up:motion:finish', conclude)
     await animation.finished
     conclude()
-  }
-
-  function applyConfig(options) {
-    options.easing ??= config.easing
-    options.duration ??= config.duration
   }
 
   /*-
@@ -443,24 +464,26 @@ up.motion = (function() {
     A promise that fulfills when the transition ends.
   @stable
   */
-  async function morph(oldElement, newElement, transitionObject, { duration, easing, afterInsert, beforeRemove, afterRemove } = {}) {
+  async function morph(oldElement, newElement, transitionValue, { duration, easing, afterInsert, beforeRemove, afterRemove } = {}) {
     // (A) If passed a selector, up.fragment.get() will prefer a match on the current layer.
     // (B) This also unwraps jQuery collections.
     oldElement = up.fragment.get(oldElement)
     newElement = up.fragment.get(newElement)
 
-    // Nested calls should not re-call callbacks.
-    const motionOptionsWithoutCallbacks = { duration, easing }
-
-    let transitionFn = findTransitionFn(transitionObject)
-    const willMorph = willAnimate(oldElement, transitionFn, motionOptionsWithoutCallbacks)
-    transitionFn = up.error.guardFn(transitionFn)
-
     const trackable = async function({ nested }) {
-      if (willMorph) {
+      if (canAnimate(oldElement, transitionValue)) {
+        // (A) Apply defaults.
+        // (B) Set zero duration if motion is disabled.
+        // (C) Nested calls should not re-call callbacks.
+        const timingOptions = effectiveTimingOptions({ duration, easing })
+
+        // Convert the given transition value (which might be `undefined`, `false` or a string)
+        // to a function we can call.
+        const transitionFn = up.error.guardFn(findTransitionFn(transitionValue))
+
         if (nested) {
           // If morph() is called inside a transition function  we don't want to create additional absolutized bounds.
-          await transitionFn(oldElement, newElement, motionOptionsWithoutCallbacks)
+          await transitionFn(oldElement, newElement, timingOptions)
         } else {
           // All changes to the DOM must be sync.
           const viewport = up.viewport.get(oldElement)
@@ -481,7 +504,7 @@ up.motion = (function() {
           oldRemote.moveBounds(0, scrollTopAfterScroll - scrollTopBeforeScroll)
 
           // TODO: Instead of plucking callbacks above, we could only pass actual options here. We can do that now we no longer have { trackMotion }.
-          await transitionFn(oldElement, newElement, motionOptionsWithoutCallbacks)
+          await transitionFn(oldElement, newElement, timingOptions)
 
           beforeRemove?.()
           // TODO: Don't expose { bounds }, why not remove()?
@@ -594,9 +617,9 @@ up.motion = (function() {
   @function up.motion.isNone
   @internal
   */
-  function isNone(animationOrTransition) {
+  function isNone(motionValue) {
     // false, undefined, '', null and the string "none" are all ways to skip animations
-    return !animationOrTransition || animationOrTransition === 'none'
+    return !motionValue || motionValue === 'none'
   }
 
   function registerOpacityAnimation(name, from, to) {
