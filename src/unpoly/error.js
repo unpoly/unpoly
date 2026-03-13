@@ -91,7 +91,9 @@ up.error = (function() {
   }
 
   function guardFn(fn) {
-    return (...args) => guard(() => fn(...args))
+    if (fn) {
+      return (...args) => guard(() => fn(...args))
+    }
   }
 
   return {

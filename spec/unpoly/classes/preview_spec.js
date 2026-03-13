@@ -1451,7 +1451,7 @@ describe('up.Preview', function() {
         let animateCount = 0
 
         async function fakeAnimate(element, animation, options) {
-          if (up.motion.willAnimate(element, animation, options)) {
+          if (!up.motion.isNone(animation)) {
             animateCount++
           }
           options.onFinished?.()

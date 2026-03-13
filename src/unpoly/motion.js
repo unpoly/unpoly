@@ -252,17 +252,17 @@ up.motion = (function() {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
     element = up.fragment.get(element)
 
+    // Convert the given animation value to a function we can call.
+    // This returns undefined for values like `undefined`, `false`, `[null, null]` etc.
+    const animationFn = up.error.guardFn(findAnimationFn(animationValue))
+
+    // (A) Apply defaults.
+    // (B) Set zero duration if motion is disabled.
+    // (C) Nested calls should not re-call callbacks.
+    const timingOptions = effectiveTimingOptions({ duration, easing })
+
     let trackable = async function() {
-      if (canAnimate(element, animationValue)) {
-        // (A) Apply defaults.
-        // (B) Set zero duration if motion is disabled.
-        // (C) Nested calls should not re-call callbacks.
-        const timingOptions = effectiveTimingOptions({ duration, easing })
-
-        // Convert the given animation value (which might be `false` or a string)
-        // to a function we can call.
-        const animationFn = up.error.guardFn(findAnimationFn(animationValue))
-
+      if (animationFn && canAnimateElement(element)) {
         try {
           await animationFn(element, timingOptions)
         } finally {
@@ -277,8 +277,8 @@ up.motion = (function() {
     await motionController.startFunction([element], trackable)
   }
 
-  function canAnimate(element, motionValue) {
-    return !isNone(motionValue) && !e.isSingleton(element)
+  function canAnimateElement(element) {
+    return !e.isSingleton(element)
   }
 
   /*-
@@ -296,19 +296,6 @@ up.motion = (function() {
       duration: config.enabled ? (duration ?? config.duration) : 0,
       easing: easing ?? config.easing,
     }
-  }
-
-  // TODO: Remove me
-  function applyConfig(options) {
-    options.easing ??= config.easing
-    options.duration ??= config.duration
-  }
-
-  // TODO: Remove me
-  function willAnimate(element, animationOrTransition, options) {
-    applyConfig(options)
-
-    return config.enabled && !isNone(animationOrTransition) && (options.duration > 0) && !e.isSingleton(element)
   }
 
   /*-
@@ -470,17 +457,17 @@ up.motion = (function() {
     oldElement = up.fragment.get(oldElement)
     newElement = up.fragment.get(newElement)
 
+    // Convert the given transition value to a function we can call.
+    // This returns undefined for values like `undefined`, `false`, `[null, null]` etc.
+    const transitionFn = up.error.guardFn(findTransitionFn(transitionValue))
+
+    // (A) Apply defaults.
+    // (B) Set zero duration if motion is disabled.
+    // (C) Nested calls should not re-call callbacks.
+    const timingOptions = effectiveTimingOptions({ duration, easing })
+
     const trackable = async function({ nested }) {
-      if (canAnimate(oldElement, transitionValue)) {
-        // (A) Apply defaults.
-        // (B) Set zero duration if motion is disabled.
-        // (C) Nested calls should not re-call callbacks.
-        const timingOptions = effectiveTimingOptions({ duration, easing })
-
-        // Convert the given transition value (which might be `undefined`, `false` or a string)
-        // to a function we can call.
-        const transitionFn = up.error.guardFn(findTransitionFn(transitionValue))
-
+      if (transitionFn && canAnimateElement(oldElement)) {
         if (nested) {
           // If morph() is called inside a transition function  we don't want to create additional absolutized bounds.
           await transitionFn(oldElement, newElement, timingOptions)
@@ -522,29 +509,6 @@ up.motion = (function() {
 
     await motionController.startFunction([newElement, oldElement], trackable)
   }
-
-  // let nerfAutoFinishCount = 0
-  //
-  // function applyMotionFn(element, fn, options = {}) {
-  //   if (!nerfAutoFinishCount && options.finish !== false) {
-  //     finishMotion(element)
-  //   }
-  //
-  //   try {
-  //     nerfAutoFinishCount++
-  //     return up.error.muteUncriticalRejection(fn())
-  //   } finally {
-  //     nerfAutoFinishCount--
-  //   }
-  // }
-  //
-  // function finishMotion(element) {
-  //   if (up.emit(element, 'up:motion:finish').defaultPrevented) return
-  //   for (let animation of element.getAnimations({ subtree: true })) {
-  //     animation.finish()
-  //     animation.commitStyles()
-  //   }
-  // }
 
   function findTransitionFn(value) {
     if (isNone(value)) {
@@ -757,7 +721,6 @@ up.motion = (function() {
     animation: namedAnimations.put,
     config,
     isNone,
-    willAnimate,
     swapElementsDirectly,
     motionOptions,
   }
