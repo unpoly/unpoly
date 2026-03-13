@@ -2040,6 +2040,7 @@ describe('up.form', function() {
 
       describe('with an element containing fields', function() {
         u.each(defaultInputEvents, function(eventType) {
+
           describe(`when any of the contained fields receives a ${eventType} event`, function() {
 
             it("runs the callback if the value changed", async function() {
@@ -2073,6 +2074,48 @@ describe('up.form', function() {
 
               expect(callback).not.toHaveBeenCalled()
             })
+
+            it('runs the callback when (1) in a render pass and (2) another compiler changes the initial selection', async function() {
+              let changedSpy = jasmine.createSpy('changed spy')
+
+              up.compiler('.container', { priority: 100 }, function(container) {
+                up.watch(container, (value) => {
+                  changedSpy(value)
+                })
+              })
+
+              up.compiler('.field', { priority: 1 }, function(field) {
+                field.value = 'value-from-compiler'
+                Trigger[eventType](field)
+              })
+
+              fixture('#root')
+
+              let { fragment: root } = await up.render({ fragment: `
+                <div id="root">
+                  <form>
+                    <div class="container">
+                      <input name="field" class="field" value="initial-value">
+                    </div>
+                  </form>
+                </div>
+              ` })
+
+              const field = root.querySelector('.field')
+
+              // Watch callbacks are debounced by at least 1 task
+              await wait(0)
+
+              expect(field.value).toBe('value-from-compiler')
+              expect(changedSpy).toHaveBeenCalledWith('value-from-compiler')
+
+              field.value = 'value-from-spec'
+              Trigger[eventType](field)
+              await wait()
+
+              expect(changedSpy).toHaveBeenCalledWith('value-from-spec')
+            })
+
           })
         })
       })
@@ -6561,9 +6604,13 @@ describe('up.form', function() {
 
     describe('input[up-watch]', function() {
 
-      beforeEach(function() { window.watchCallbackSpy = jasmine.createSpy('watch callback') })
+      beforeEach(function() {
+        window.watchCallbackSpy = jasmine.createSpy('watch callback')
+      })
 
-      afterEach(function() { window.watchCallbackSpy = undefined })
+      afterEach(function() {
+        window.watchCallbackSpy = undefined
+      })
 
       it('calls the JavaScript code in the attribute value when a change is observed in the field', async function() {
         const form = fixture('form')
@@ -6743,6 +6790,54 @@ describe('up.form', function() {
           ])
         })
       })
+    })
+
+    describe('[up-watch] on a container that is neither form nor field', function() {
+
+      beforeEach(function() {
+        window.watchCallbackSpy = jasmine.createSpy('watch callback')
+      })
+
+      afterEach(function() {
+        window.watchCallbackSpy = undefined
+      })
+
+      it('runs the callback when any contained field changes')
+
+      it("runs the callback when (1) in a render pass and (2) another compiler changes the watched field's initial value (bugfix)", async function() {
+        up.compiler('.field', { priority: -100 }, function(field) {
+          field.value = 'value-from-compiler'
+          Trigger.change(field)
+        })
+
+        fixture('#root')
+
+        let { fragment: root } = await up.render({ fragment: `
+          <div id="root">
+            <form>
+              <div class="container" up-watch="nonce-specs-nonce watchCallbackSpy(value)">
+                <input name="field" class="field" value="initial-value">
+              </div>
+            </form>
+          </div>
+        ` })
+
+        const field = root.querySelector('.field')
+
+        // Watching is debounced by at least 1 task.
+        await wait()
+
+        expect(field.value).toBe('value-from-compiler')
+        expect(window.watchCallbackSpy).toHaveBeenCalledWith('value-from-compiler')
+
+        field.value = 'value-from-spec'
+        Trigger.change(field)
+        await wait()
+
+        expect(field.value).toBe('value-from-spec')
+        expect(window.watchCallbackSpy).toHaveBeenCalledWith('value-from-spec')
+      })
+
     })
 
     describe('input[up-validate]', function() {
@@ -8026,7 +8121,7 @@ describe('up.form', function() {
 
       describe('radio buttons', function() {
 
-        it('allows to switch a container of radio buttons', async function() {
+        it('switches a container of radio buttons', async function() {
           const [form, container, radio1, radio2, switchee] = htmlFixtureList(`
             <form>
               <div up-switch="#switchee">
@@ -8059,6 +8154,64 @@ describe('up.form', function() {
           await wait()
 
           expect(switchee).toBeVisible()
+        })
+
+        it('switches a container of radio buttons when (1) in a render pass and (2) a compiler changes the initial selection zzz', async function() {
+          up.compiler('.container', function(container) {
+            let radio2 = container.querySelector('input[value="2"]')
+            radio2.checked = true
+            Trigger.change(radio2)
+          })
+
+          fixture('#root')
+
+          let { fragment: root } = await up.render({ fragment: `
+            <div id="root">
+              <form>
+                <div up-switch=".switchee" class="container">
+                  <input type="radio" name="group" value="1" checked>
+                  <input type="radio" name="group" value="2">
+                </div>
+  
+                <div class="switchee" up-show-for="1">
+                  Switchee1
+                </div>
+  
+                <div class="switchee" up-show-for="2">
+                  Switchee2
+                </div>
+              </form>
+            </div>
+          ` })
+
+          // Watch callbacks are debounced by at least 1 task.
+          await wait(0)
+
+          const [radio1, radio2] = root.querySelectorAll('input[type=radio]')
+          const [switchee1, switchee2] = root.querySelectorAll('.switchee')
+
+          expect(radio1).not.toBeChecked()
+          expect(radio2).toBeChecked()
+          expect(switchee1).not.toBeVisible()
+          expect(switchee2).toBeVisible()
+
+          radio1.checked = true
+          Trigger.change(radio1)
+          await wait()
+
+          expect(radio1).toBeChecked()
+          expect(radio2).not.toBeChecked()
+          expect(switchee1).toBeVisible()
+          expect(switchee2).not.toBeVisible()
+
+          radio2.checked = true
+          Trigger.change(radio2)
+          await wait()
+
+          expect(radio1).not.toBeChecked()
+          expect(radio2).toBeChecked()
+          expect(switchee1).not.toBeVisible()
+          expect(switchee2).toBeVisible()
         })
 
         describe('when [up-switch] is set on an input[type=radio] instead of a group container', function() {

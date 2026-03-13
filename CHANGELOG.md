@@ -352,6 +352,7 @@ You can disable these warnings with `up.script.config.cspWarnings = false`.
 - `[up-switch]` effects are now consistently applied before `[up-validate]` requests.
 - Unpoly no longer sends duplicate validation requests when using `[up-validate][up-watch-event=input][up-keep]` to validate a field while the user is typing in it.
 - Form-external submit buttons (using the HTML `[form]` attribute) are now supported consistently.
+- Fix a race condition where, when the same form field was both watched and changed by compilers in the same render pass, that change wasn't always detected. This affected features like `[up-switch]` or `up.watch()` when another compiler changed the initial value of the observed field.
 
 ### Event utilities
 

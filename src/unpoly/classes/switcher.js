@@ -18,6 +18,8 @@ up.Switcher = class Switcher {
   }
 
   start() {
+    // Switch our region once immediately.
+    // Don't risk unswitched state showing up in the browser.
     this._switchRegion()
 
     return u.sequence(
@@ -39,7 +41,6 @@ up.Switcher = class Switcher {
     }
 
     let onSwitcheeAdded = (switchee) => this._switchSwitchee(switchee)
-
     return up.fragment.trackSelector(this._switcheeSelector, { filter }, onSwitcheeAdded)
   }
 

@@ -12,7 +12,16 @@ up.SelectorTracker = class SelectorTracker {
   }
 
   start() {
-    this._scheduleSync()
+    // Get initial matches immediately. If we waited for scheduleSync(), the following race condition
+    // could occur:
+    //
+    // (1) When we encounter [up-switch], we immediately-sync read field values.
+    // (2) A later user compiler (after) us changes a field value and emits 'change'.
+    //     The change event would normally cause us to re-read field values.
+    //     But we aren't yet listening to field events!
+    // (3) The change event is only registered via trackFields() and up.SelectorTracker, which
+    //     only syncs the current mutation (after up:fragment:insert) for performance reasons.
+    this._sync()
 
     return u.sequence(
       this._trackFragments(),
