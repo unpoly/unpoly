@@ -190,7 +190,7 @@ Links and forms can now use an [`[up-use-data-map]`](/up-follow#up-use-data) att
 </div>
 ```
 
-When rendering multiple fragments, any `[up-use-data]` attribute or `{ data }` option will only apply to the first fragment.
+⚠️ When rendering multiple fragments, any `[up-use-data]` attribute or `{ data }` option will only apply to the first fragment.
 To apply data to multiple fragments, use a data map as shown above.
 
 
@@ -246,14 +246,14 @@ The boolean `up.fragment.config.runScripts` has been replaced with a more flexib
 </div>
 ```
 
-By default Unpoly will now run any `<script>` that passes your CSP checks, but requires a nonce for viral CSPs with `strict-dynamic`.
+⚠️ By default Unpoly will now run any `<script>` that passes your CSP checks, but requires a nonce for viral CSPs with `strict-dynamic`.
 
 You can configure `up.script.config.scriptElementPolicy` to block all script elements, or to only allow [scripts with a valid `[nonce]` attribute](/script-security#script-element-nonces):
 
 | `scriptElementPolicy` | Runs without CSP?  | Runs with CSP?     | Runs with `strict-dynamic` CSP? |
 |-----------------------|--------------------|--------------------|---------------------------------|
 | `auto` (default)      | Always             | If passes CSP      | With allowed nonce              |
-| `pass`                | Always             | If passes CSP      | ⚠️ Always                       |
+| `pass`                | Always             | If passes CSP      | 🔥 Always                       |
 | `block`               | Never              | Never              | Never                           |
 | `nonce`               | With allowed nonce | With allowed nonce | With allowed nonce              |
 
@@ -281,14 +281,14 @@ Added a new setting `up.script.config.callbackPolicy`. This lets you control whe
 </form>
 ```
 
-By default Unpoly will parse and execute callbacks, but require a nonce once you set a `<meta name="csp-nonce">` in your `<head>`.
+⚠️ By default Unpoly will parse and execute callbacks, but require a nonce once you set a `<meta name="csp-nonce">` in your `<head>`.
 
 You can configure `up.script.config.callbackPolicy` to block all callbacks, or to only allow [callbacks with a valid nonce](/script-security#callback-nonces):
 
 | `evalCallbackPolicy` | Runs without CSP?  | Runs with CSP?        | Runs with CSP and [`<meta name="csp-nonce">`](/script-security#meta-csp-nonce)? |
 |----------------------|--------------------|-----------------------|----------------------------------------------------------------------------------|
-| `auto` (default)     | Always             | ⚠️ With `unsafe-eval` | With allowed nonce                                                               |
-| `pass`               | Always             | ⚠️ With `unsafe-eval` | ⚠️ With `unsafe-eval`                                                            |
+| `auto` (default)     | Always             | 🔥 With `unsafe-eval` | With allowed nonce                                                               |
+| `pass`               | Always             | 🔥 With `unsafe-eval` | 🔥 With `unsafe-eval`                                                            |
 | `block`              | Never              | Never                 | Never                                                                            |
 | `nonce`              | With allowed nonce | With allowed nonce    | With allowed nonce                                                               |
 
@@ -298,7 +298,7 @@ See [Security for callbacks](/script-security#callbacks).
 
 #### Warnings for dangerous settings
 
-Unpoly will now log warnings for configurations or CSP headers it considers overly permissive (marked with ⚠️ above).
+Unpoly will now log warnings for configurations or CSP headers it considers overly permissive (marked with 🔥 above).
 
 
 ```text
@@ -310,7 +310,8 @@ You can disable these warnings with `up.script.config.cspWarnings = false`.
 
 #### Other changes
 
-- Renamed `up.protocol.config.cspNonce` to `up.script.config.cspNonce`. It still defaults to reading `<meta name="csp-nonce">`.
+- ⚠️ Renamed `up.protocol.config.cspNonce` to `up.script.config.cspNonce`.\
+  It still defaults to reading `<meta name="csp-nonce">`.
 
 
 
@@ -318,15 +319,15 @@ You can disable these warnings with `up.script.config.cspWarnings = false`.
 
 - New default reload options can be configured in `up.fragment.config.reloadOptions`.
 - The `up.RenderResult#target` property now reflects the **actual resolved target selector** used, rather than the originally requested one (e.g. resolving `:main` to the concrete selector).
-- When an `[up-keep]` element is not targetable, Unpoly now prints a **warning** instead of crashing the render pass.
+- When an `[up-keep]` element is not targetable, Unpoly now prints a warning instead of crashing the render pass.
 
 
 ### Animations
 
 - Unpoly [animations and transitions](/up.motion) now use the [Web Animations API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API) internally (instead of CSS transitions). The public API did not change.
 - Unpoly animations no longer pause existing CSS transitions on the animated element. Both play simultaneously.
-- The `fade-out` animation now starts from the element's current opacity, rather than always starting from `1.0`.
-- The function `up.motion.isEnabled()` has been deprecated. Use `up.motion.config.enabled` instead.
+- ⚠️ The `fade-out` animation now starts from the element's current opacity, rather than always starting from `1.0`.
+- ⚠️ The function `up.motion.isEnabled()` has been deprecated. Use `up.motion.config.enabled` instead.
 
 ### Focus and accessibility
 
@@ -341,8 +342,8 @@ You can disable these warnings with `up.script.config.cspWarnings = false`.
 - Fixed duplicate scrollbars when opening overlays on pages where `<html>` does not have `overflow-x: hidden`, particularly on Firefox (#795).
 - Fixed scrolling the overlay background in Safari (#790, #795).
 - When the [global animation duration](/up.motion.config#config.duration) is set to zero, overlay animations now correctly use the duration configured at the overlay.
-- The option `{ dismissable }` has been renamed to `{ dismissible }`.
-- The attribute `[up-dismissable]` has been renamed to `[up-dismissible]`.
+- ⚠️ The option `{ dismissable }` has been renamed to `{ dismissible }`.
+- ⚠️ The attribute `[up-dismissable]` has been renamed to `[up-dismissible]`.
 
 
 ### Forms
