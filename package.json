@@ -9,7 +9,8 @@
     "README.md",
     "CHANGELOG.md",
     "unpoly*.js",
-    "unpoly*.css"
+    "unpoly*.css",
+    "unpoly*.map"
   ],
   "scripts": {
     "test-server": "node bin/test-server.mjs",
