@@ -21,7 +21,7 @@ Breaking changes are marked with a ⚠️ emoji and polyfilled by [`unpoly-migra
 
 
 
-### Scripting security controls
+### Global scripting policies
 
 This version introduces settings to globally control whether Unpoly will execute JavaScript on your page.
 
