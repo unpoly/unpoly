@@ -816,7 +816,7 @@ up.protocol = (function() {
   X-Up-Open-Layer: { onAccepted: 'up.reload("#users-list")' }
   ```
 
-  With a strict CSP you can [prefix your callback with a nonce](/script-security#callbacks-with-strict-csp):
+  With a strict CSP you can [prefix your callback with a nonce](/script-security#callback-nonces):
 
   ```http
   Content-Type: text/html

@@ -55,7 +55,7 @@ These generally work like [`[onclick]`](https://www.w3schools.com/jsref/event_on
 </form>
 ```
 
-Some [response headers](up.protocol) can also contain callbacks encoded as a JSON string:
+Some [response headers](/up.protocol) can also contain callbacks encoded as a JSON string:
 
 ```http
 Content-Type: text/html
