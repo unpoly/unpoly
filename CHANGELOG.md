@@ -8,6 +8,12 @@ If you're upgrading from an older Unpoly version, you should load [`unpoly-migra
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+3.14.1
+------
+
+- Source maps for minified are now included in the npm package.
+
+
 3.14.0
 ------
 
