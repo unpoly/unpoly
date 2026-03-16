@@ -514,6 +514,48 @@ up.status = (function() {
 
   To configure multiple alternative URLs, use a [URL pattern](/url-patterns).
 
+  ### Setting URL aliases from macros {#from-macro}
+
+  An `[up-alias]` attribute can be set by a [macro](/up.macro).
+
+  This can be useful to link nested navigation trees programmatically.\
+  Let's say we have a main navigation linking to two sections:
+
+  ```html
+  <nav class="main-nav">
+    <a href="/companies" data-section="companies"> <!-- mark: data-section="companies"-->
+    <a href="/users" data-section="users"> <!-- mark: data-section="users"-->
+  </nav>
+  ```
+
+  We also have a sub-navigation for each section:
+
+  ```html
+  <nav class="sub-nav" data-section="companies"> <!-- mark: data-section="companies"-->
+    <a href="/companies">All companies</a>
+    <a href="/companies/sync">Sync CRM</a>
+    <a href="/companies/export">Export</a>
+  </nav>
+
+  <nav class="sub-nav" data-section="users"> <!-- mark: data-section="users"-->
+    <a href="/users">All users</a>
+    <a href="/users/online">Now online</a>
+    <a href="/users/profile">Your profile</a>
+  </nav>
+  ```
+
+  We want the main navigation section to be `.up-current` for any sub-section URL.
+  We can do that with a macro that finds the respective sub-navigation, and sets an `[up-alias]` attribute at the main navigation link:
+
+  ```js
+  up.macro('.main-nav a', function(link, { section }) {
+    let subLink = document.querySelectorAll(`.sub-nav[data-section="${section}"]`)
+    let subURLs = up.util.map(subLink, 'href')
+    link.setAttribute(subURLs.join())
+  })
+  ```
+
+
   @selector [up-alias]
   @param up-alias
     A [URL pattern](/url-patterns) with alternative URLs.

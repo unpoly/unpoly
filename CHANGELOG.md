@@ -212,11 +212,48 @@ You can configure custom revalidation classes in `up.status.config.revalidatingC
 
 
 
+
 ### Setting URL aliases from macros
 
 `[up-nav]` links can now set `[up-alias]` from a [macro](/up.macro).
 
-This can be useful to link nested navigation trees programmatically.
+This can be useful to link nested navigation trees programmatically.\
+Let's say we have a main navigation linking to two sections:
+
+```html
+<nav class="main-nav">
+  <a href="/companies" data-section="companies"> <!-- mark: data-section="companies"-->
+  <a href="/users" data-section="users"> <!-- mark: data-section="users"-->
+</nav>
+```
+
+We also have a sub-navigation for each section:
+
+```html
+<nav class="sub-nav" data-section="companies"> <!-- mark: data-section="companies"-->
+  <a href="/companies">All companies</a>
+  <a href="/companies/sync">Sync CRM</a>
+  <a href="/companies/export">Export</a>
+</nav>
+
+<nav class="sub-nav" data-section="users"> <!-- mark: data-section="users"-->
+  <a href="/users">All users</a>
+  <a href="/users/online">Now online</a>
+  <a href="/users/profile">Your profile</a>
+</nav>
+```
+
+We want the main navigation section to be `.up-current` for any sub-section URL.
+We can do that with a macro that finds the respective sub-navigation, and sets an `[up-alias]` attribute at the main navigation link:
+
+```js
+up.macro('.main-nav a', function(link, { section }) {
+  let subLink = document.querySelectorAll(`.sub-nav[data-section="${section}"]`)
+  let subURLs = up.util.map(subLink, 'href')
+  link.setAttribute(subURLs.join())
+})
+```
+
 
 
 
