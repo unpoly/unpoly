@@ -549,9 +549,9 @@ up.status = (function() {
 
   ```js
   up.macro('.main-nav a', function(link, { section }) {
-    let subLink = document.querySelectorAll(`.sub-nav[data-section="${section}"]`)
-    let subURLs = up.util.map(subLink, 'href')
-    link.setAttribute(subURLs.join())
+    let subLinks = document.querySelectorAll(`.sub-nav[data-section="${section}"]`)
+    let subURLs = up.util.map(subLinks, 'href')
+    link.setAttribute('up-alias', subURLs.join())
   })
   ```
 
