@@ -1,4 +1,5 @@
 require('./fragment.sass')
+const { scripts: ZONE_PSEUDO } = require("ejs/ejs")
 
 const u = up.util
 const e = up.element
@@ -2246,6 +2247,7 @@ up.fragment = (function() {
   const MAIN_PSEUDO = /:main\b/
   const LAYER_PSEUDO = /:layer\b/
   const ORIGIN_PSEUDO = /:origin\b/
+  const ZONE_PSEUDO = /:zone\b/
 
   function containsMainPseudo(target) {
     return MAIN_PSEUDO.test(target)
@@ -2277,6 +2279,8 @@ up.fragment = (function() {
         if (layer === 'new' || layer.state === 'opening') continue
         let firstSwappableTarget = toTarget(layer.getFirstSwappableElement(), options)
         targets.unshift(target.replace(LAYER_PSEUDO, firstSwappableTarget))
+      } else if (ZONE_PSEUDO.test(target)) {
+        targets.unshift(resolveZone(target, options))
       } else if (u.isElementLike(target)) {
         expanded.push(toTarget(target, options))
       } else if (u.isString(target)) {
@@ -2293,6 +2297,18 @@ up.fragment = (function() {
     } else {
       return layer.mode
     }
+  }
+
+  function resolveZone(target, { origin } = {}) {
+    return target.replace(ZONE_PSEUDO, function(match) {
+      if (origin) {
+        let closestZone = closest(origin, config.selector('zoneSelectors')) ||
+          up.fail('Cannot find zone of %o', origin)
+        return toTarget(closestZone)
+      } else {
+        up.fail('Missing { origin } element to resolve "%s" reference (found in %s)', match, target)
+      }
+    })
   }
 
   function modernResolveOrigin(target, { origin } = {}) {
