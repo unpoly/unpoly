@@ -5453,23 +5453,23 @@ describe('up.fragment', function() {
           describe('peeling', function() {
 
             describe('with { peel: true }', function() {
-  
+
               it('dismisses all overlays over the target', async function() {
                 let dismissListener = jasmine.createSpy('up:layer:dismiss listener')
                 up.on('up:layer:dismiss', dismissListener)
-                
+
                 makeLayers([
                   { target: '.element', content: 'old text in root' },
                   { target: '.element', content: 'old text in overlay 1' },
                   { target: '.element', content: 'old text in overlay 2' }
                 ])
                 await wait()
-                
+
                 expect(dismissListener).not.toHaveBeenCalled()
-  
+
                 up.render('.element', { content: 'new text', layer: 'root', peel: true })
                 await wait()
-  
+
                 expect(dismissListener).toHaveBeenCalled()
                 expect(up.layer.count).toBe(1)
                 expect(up.layer.current.mode).toBe('root')
@@ -5524,41 +5524,41 @@ describe('up.fragment', function() {
                 up.history.replace('/root1')
                 const locations = []
                 up.on('up:location:changed', ({ location }) => locations.push(up.util.normalizeURL(location)))
-  
+
                 fixture('.content', { text: 'root 1' })
-  
+
                 up.layer.open({ location: '/overlay1', history: true })
                 await wait()
-  
+
                 expect(up.layer.count).toBe(2)
                 expect(locations).toEqual(['/overlay1'])
-  
+
                 up.render({ content: 'root 2', target: '.content', history: true, location: '/root2', layer: 'root', peel: true })
                 await wait()
-  
+
                 expect('.content').toHaveText('root 2')
                 expect(up.layer.count).toBe(1)
                 expect(locations).toEqual(['/overlay1', '/root2'])
               })
-  
+
               it('creates a history entry if the response redirects to the same URL as the URL before the overlay was opened (bugfix)', async function() {
                 up.history.config.enabled = true
                 up.history.replace('/users')
                 await wait()
-  
+
                 let [main, link] = htmlFixtureList(`
                   <main>
                     <a up-layer="new" href="/users/2/edit">Alice</a>
                   </main>
                 `)
                 up.hello(link)
-  
+
                 Trigger.clickSequence(link)
                 await wait()
-  
+
                 expect(jasmine.lastRequest().url).toMatchURL('/users/2/edit')
                 expect(jasmine.lastRequest()).toHaveRequestMethod('get')
-  
+
                 jasmine.respondWith(`
                   <main>
                     <form autocomplete="off" up-layer="root" action="/users/2" accept-charset="UTF-8" method="post">
@@ -5567,17 +5567,17 @@ describe('up.fragment', function() {
                   </main>
                 `)
                 await wait()
-  
+
                 expect(up.layer.count).toBe(2)
                 expect(up.history.location).toMatchURL('/users/2/edit')
                 expect(up.layer.current).toHaveSelector('form[action="/users/2"]')
-  
+
                 Trigger.clickSequence('form button')
                 await wait()
-  
+
                 expect(jasmine.lastRequest().url).toMatchURL('/users/2')
                 expect(jasmine.lastRequest()).toHaveRequestMethod('post')
-  
+
                 jasmine.respondWith({
                   responseURL: '/users',
                   responseText: `
@@ -5587,49 +5587,49 @@ describe('up.fragment', function() {
                   `
                 })
                 await wait()
-  
+
                 expect('main').toHaveText('List of users')
                 expect(up.history.location).toMatchURL('/users')
               })
-  
+
               it('does create a history entry for the peeled layer if the fragment update does not update history', async function() {
                 up.history.config.enabled = true
                 up.history.replace('/root1')
                 const locations = []
                 up.on('up:location:changed', ({ location }) => locations.push(up.util.normalizeURL(location)))
-  
+
                 fixture('.content', { text: 'root 1' })
-  
+
                 up.layer.open({ location: '/overlay1', history: true })
                 await wait()
-  
+
                 expect(up.layer.count).toBe(2)
                 expect(locations).toEqual(['/overlay1'])
-  
+
                 up.render({ content: 'root 2', target: '.content', history: false, layer: 'root', peel: true })
                 await wait()
-  
+
                 expect('.content').toHaveText('root 2')
                 expect(up.layer.count).toBe(1)
                 expect(locations).toEqual(['/overlay1', '/root1'])
               })
-  
+
               it('still renders content if a destructor for the peeled layer crashes', async function() {
                 const destroyError = new Error('error from crashing destructor')
-  
+
                 up.compiler('.overlay-element', () => (function() { throw destroyError }))
-  
+
                 htmlFixture('<div class="root-element">new root</div>')
                 up.layer.open({ fragment: '<div class="overlay-element"></div>' })
-  
+
                 expect(up.layer.isOverlay()).toBe(true)
-  
+
                 await jasmine.expectGlobalError(destroyError, () => up.render({
                   fragment: '<div class="root-element">new root</div>',
                   peel: true,
                   layer: 'root'
                 }))
-  
+
                 expect('.root-element').toHaveText('new root')
                 expect(up.layer.isOverlay()).toBe(false)
               })
@@ -5719,7 +5719,7 @@ describe('up.fragment', function() {
             })
 
           })
-            
+
         })
 
         describe('stacking a new overlay', function() {
@@ -9265,7 +9265,7 @@ describe('up.fragment', function() {
             fixture('.element', { content: 'old text' })
 
             up.render('.element', { content: 'new text', scroll: scrollHandler })
-            
+
             expect('.element').toHaveText('new text')
             expect(scrollHandler).toHaveBeenCalled()
           })
@@ -10166,7 +10166,7 @@ describe('up.fragment', function() {
 
           expect('.fragment').toHaveSelector('.new-child')
           expect('.fragment').not.toHaveSelector('.old-child')
-          
+
           expect(destructorSpy).toHaveBeenCalledWith('old-child')
         })
 
