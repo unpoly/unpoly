@@ -77,6 +77,7 @@ A history update comprises the following:
 - The document title shown as the browser's window title.
 - Meta tags like `meta[name=description]` or `link[rel=canonical]`.
 - The `[lang]` attribute of the root `<html>` element.
+- [JSON-LD](https://json-ld.org/) annotations in the `<head>`.
 
 In the document below, the highlighted nodes will be updated when history is changed, in additional to the location URL:
 
@@ -89,6 +90,7 @@ In the document below, the highlighted nodes will be updated when history is cha
     <meta prop="og:image" content="https://app.com/og.jpg"> <!-- mark-line -->
     <script src="/assets/app.js"></script>
     <link rel="stylesheet" href="/assets/app.css">
+    <script type="application/ld+json">...</script> <!-- mark-line -->
   </head>
   <body>
     ...
@@ -96,7 +98,13 @@ In the document below, the highlighted nodes will be updated when history is cha
 </html>
 ```
 
-The linked JavaScript and stylesheet are *not* part of history state and will not be updated.
+You can tie additional `<head>` elements to history changes, by setting an `[up-meta]` attribute or configuring `up.history.config.metaTagSelectors`.
+
+> [note]
+> The linked JavaScript and stylesheet are *not* part of history state and will not be updated.\
+> See [Handling changes in frontend code](/handling-asset-changes) for strategies to detect new app deployments.
+
+
 
 ### Partial history updates
 

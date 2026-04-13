@@ -53,10 +53,14 @@ up.history = (function() {
       An array of CSS selectors matching default [meta tags](/up-meta)
       that are updated during [history changes](/updating-history).
 
-      By default, popular `<meta>` and certain `<link>` elements are considered meta tags.
+      By default, the following elements are matched:
 
-      Because of the [large number of `[rel]` attribute values](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/rel),
-      Unpoly matches only the most common `link[rel]` elements by default.
+      - All `meta` elements
+      - A `link[rel="alternate"]` element
+      - A `link[rel="canonical"]` element
+      - A `link[rel="icon"]` element
+      - [JSON-LD](https://json-ld.org/) annotations
+
       You can [include additional elements](/up-meta#including-meta-tags) by assigning an `[up-meta]` attribute
       or by pushing their selector into this configuration array.
 
