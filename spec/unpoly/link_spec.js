@@ -1822,7 +1822,124 @@ describe('up.link', function() {
         })
       })
 
-      describe('choice of target layer', function() {
+      describe('choice of target', function() {
+
+        it('prefers to match an element closest to the link', async function() {
+          htmlFixtureList(`
+            <div class="element" id="root">
+              <div class="element">old one</div>
+              <div class="element">
+                old two
+                <a class="origin" href="/path" up-target=".element">link label</a>
+              </div>
+              <div class="element">old three</div>
+            </div>
+          `)
+
+          const origin = document.querySelector('.origin')
+          Trigger.clickSequence(origin)
+          await wait()
+
+          jasmine.respondWith(`
+            <div class="element">
+              new text
+            </div>
+          `)
+          await wait()
+
+          const elements = document.querySelectorAll('.element')
+          expect(elements.length).toBe(4)
+
+          // While #root is an ancestor, two was closer
+          expect(elements[0]).toMatchSelector('#root')
+          expect(elements[0]).not.toHaveText('new text')
+
+          // One is a sibling of two
+          expect(elements[1]).toHaveText('old one')
+
+          // Two is the closest match around the origin
+          expect(elements[2]).toHaveText('new text')
+
+          // Three is a sibling of three
+          expect(elements[3]).toHaveText('old three')
+        })
+
+
+        it('processes a target ".attendee-8993501089:maybe" (bugfix)', async function() {
+          htmlFixtureList(`
+            <div class="element attendee-1">
+              old one
+            </div>
+
+            <div class="element attendee-8993501089">
+              old two
+              <a class="origin" href="/path" up-target=".element">link label</a>
+            </div>
+
+            <div class="element attendee-3">
+              old three
+            </div>
+          `)
+
+          const origin = document.querySelector('.origin')
+          Trigger.clickSequence(origin)
+          await wait()
+
+          jasmine.respondWith(`
+            <div class="element">
+              new text
+            </div>
+          `)
+          await wait()
+
+          const elements = document.querySelectorAll('.element')
+          expect(elements.length).toBe(3)
+
+          expect(elements[0]).toHaveText('old one')
+          expect(elements[1]).toHaveText('new text')
+          expect(elements[2]).toHaveText('old three')
+        })
+
+        it('processes a target ".container:has(:origin):maybe" (bugfix)', async function() {
+          htmlFixtureList(`
+            <div class="container">
+              old one
+            </div>
+
+            <div class="container">
+              old two
+              <a href="/path" up-target=".container:has(:origin):maybe">link label</a>
+            </div>
+
+            <div class="container">
+              old three
+            </div>
+          `)
+
+          const origin = document.querySelector('.container a[href]')
+          Trigger.clickSequence(origin)
+          await wait()
+
+          jasmine.respondWith(`
+            <div class="container">
+              new text
+              <a href="/path">link label</a>
+            </div>
+          `)
+          await wait()
+
+          const containers = document.querySelectorAll('.container')
+          expect(containers.length).toBe(3)
+
+          expect(containers[0]).toHaveText('old one')
+          expect(containers[1]).toHaveText('new text link label')
+          expect(containers[2]).toHaveText('old three')
+        })
+
+
+      })
+
+      describe('choice of layer', function() {
 
         beforeEach(function() {
           up.motion.config.enabled = false

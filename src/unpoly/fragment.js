@@ -2328,12 +2328,12 @@ up.fragment = (function() {
       let placement = defaultPlacement
       let maybe = defaultMaybe
 
-      selector = selector.replace(/\b::?(before|after|content)\b/, (_match, customPlacement) => {
+      selector = selector.replace(/::?(before|after|content)\b/, (_match, customPlacement) => {
         placement = customPlacement
         return ''
       })
 
-      selector = selector.replace(/\b:maybe\b/, () => {
+      selector = selector.replace(/:maybe\b/, () => {
         maybe = true
         return ''
       })

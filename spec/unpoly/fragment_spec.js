@@ -3719,6 +3719,28 @@ describe('up.fragment', function() {
             expect(newTarget.innerHTML).toEqual('<div class="new-child"></div><div class="old-child"></div>')
           })
 
+          it('allows the combination :has(.selector):before', async function() {
+            const container = fixture('.target')
+            e.affix(container, '.old-child')
+
+            up.render('.target:has(div):before', { fragment: '<div class="target"><div class="new-child"></div></div>' })
+            await wait()
+
+            const newTarget = document.querySelector('.target')
+            expect(newTarget.innerHTML).toEqual('<div class="new-child"></div><div class="old-child"></div>')
+          })
+
+          it('allows the combination :before:maybe', async function() {
+            const container = fixture('.target')
+            e.affix(container, '.old-child')
+
+            up.render('.target:before:maybe', { fragment: '<div class="target"><div class="new-child"></div></div>' })
+            await wait()
+
+            const newTarget = document.querySelector('.target')
+            expect(newTarget.innerHTML).toEqual('<div class="new-child"></div><div class="old-child"></div>')
+          })
+
           it('does not leave <up-wrapper> elements in the DOM', async function() {
             const container = fixture('.target')
             e.affix(container, '.old-child')
@@ -4128,6 +4150,25 @@ describe('up.fragment', function() {
             up.render('.foo:maybe, .bar', {
               document: `
                 <div class="foo">new foo</div>
+                <div class="bar">new bar</div>
+              `
+            })
+
+            await wait()
+
+            expect('.foo').toHaveText('new foo')
+            expect('.bar').toHaveText('new bar')
+          })
+
+          it('allows the combination :has(.selector):maybe (bugfix)', async function() {
+            htmlFixtureList(`
+                <div class="foo"><span>old foo</span></div>
+                <div class="bar">old bar</div>
+            `)
+
+            up.render('.foo:has(span):maybe, .bar', {
+              document: `
+                <div class="foo"><span>new foo</span></div>
                 <div class="bar">new bar</div>
               `
             })
@@ -4603,6 +4644,31 @@ describe('up.fragment', function() {
             expect(elements[0]).toHaveText('old one')
             expect(elements[1]).toHaveText('new text')
             expect(elements[2]).toHaveText('old three')
+          })
+
+
+          it('processes the (redundant) target ".container:has(:origin) .selector:maybe" (bugfix)', function() {
+            const element1 = fixture('.element#element1')
+            const element1Child1 = e.affix(element1, '.child', { text: 'old element1Child1' })
+            const element1Child2 = e.affix(element1, '.child.sibling', { text: 'old element1Child2' })
+
+            const element2 = fixture('.element#element2')
+            const element2Child1 = e.affix(element2, '#origin.child', { text: 'old element2Child1' })
+            const element2Child2 = e.affix(element2, '.child.sibling', { text: 'old element2Child2' })
+
+            up.render({ target: '.element:has(:origin) .sibling:maybe', origin: element2Child1, document: `
+              <div class="element" id="element2">
+                <div class="child" id="origin"></div>
+                <div class="child sibling">new text</div>
+              </div>
+            `})
+
+            const children = document.querySelectorAll('.child')
+            expect(children.length).toBe(4)
+            expect(children[0]).toHaveText('old element1Child1')
+            expect(children[1]).toHaveText('old element1Child2')
+            expect(children[2]).toHaveText('old element2Child1')
+            expect(children[3]).toHaveText('new text')
           })
 
         })
