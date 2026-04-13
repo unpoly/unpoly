@@ -153,3 +153,5 @@ RedirectPermanent /up-fixed /up-fixed-top
 RedirectPermanent /csp /script-security
 RedirectPermanent /scripting-security /script-security
 
+RedirectPermanent /before /targeting-fragments#appending-or-prepending
+RedirectPermanent /after /targeting-fragments#appending-or-prepending
