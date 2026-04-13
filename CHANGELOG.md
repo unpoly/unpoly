@@ -7,6 +7,17 @@ If you're upgrading from an older Unpoly version, you should load [`unpoly-migra
 
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
+3.14.2
+------
+
+You can now use `:has()` selectors with Unpoly-specific suffixes like `:maybe`, [`:before`](/targeting-fragments#appending-or-prepending) and [`:after`](/targeting-fragments#appending-or-prepending).
+
+For example, this target selector is now valid:
+
+```css
+.container:has(.child):maybe
+```
+
 
 3.14.1
 ------
