@@ -4575,8 +4575,37 @@ describe('up.fragment', function() {
             expect(elements[1]).toHaveText('new one')
             expect(elements[2]).toHaveText('old three')
           })
-        })
 
+          it('swaps an element with target ".attendee-8993501089:maybe" (bugfix)', async function() {
+            htmlFixtureList(`
+              <div class="element attendee-1">
+                old one
+              </div>
+
+              <div class="element attendee-8993501089">
+                old two
+                <span class="origin"></span>
+              </div>
+
+              <div class="element attendee-3">
+                old three
+              </div>
+            `)
+
+            const origin = document.querySelector('.origin')
+            up.render('.attendee-8993501089:maybe', { origin, content: 'new text' })
+
+            await wait()
+
+            const elements = document.querySelectorAll('.element')
+            expect(elements.length).toBe(3)
+
+            expect(elements[0]).toHaveText('old one')
+            expect(elements[1]).toHaveText('new text')
+            expect(elements[2]).toHaveText('old three')
+          })
+
+        })
 
         describe('non-standard selector extensions', function() {
 
