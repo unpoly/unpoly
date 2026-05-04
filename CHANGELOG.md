@@ -7,6 +7,13 @@ If you're upgrading from an older Unpoly version, you should load [`unpoly-migra
 
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
+
+3.14.3
+------
+
+- [Revalidation of expired content](/caching#revalidation) will now preserve the scroll positions of any viewports contained in the revalidated area.
+
+
 3.14.2
 ------
 
