@@ -12,7 +12,7 @@ up.RenderOptions = (function() {
 
   // Sometimes we need to use given render options, but disable meddling with user control.
   const NO_INPUT_INTERFERENCE = {
-    scroll: false,
+    scroll: 'keep',
     focus: 'keep',
     confirm: false,
   }

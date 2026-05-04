@@ -12187,6 +12187,45 @@ describe('up.fragment', function() {
             expect('#bar').toHaveText('verified bar')
           })
 
+          describe('scrolling', function() {
+
+            it('keeps scroll positions of reloaded viewports', async function() {
+              let html = (text) => `
+                <div id="target">
+                  <div id="viewport" up-viewport style="overflow-y: scroll; height: 100px;">
+                    <div id="content" style="height: 10000px;">
+                      ${text}
+                    </div>
+                  </div>
+                </div>
+              `
+
+              await jasmine.populateCache({ url: '/cached' }, html('expired content'))
+              await up.cache.expire()
+
+              expect({ url: '/cached' }).toBeCached()
+              expect({ url: '/cached' }).toBeExpired()
+
+              htmlFixtureList(html('page content'))
+              expect('#target').toHaveText('page content')
+
+              up.navigate({ target: '#target', url: '/cached', cache: true, revalidate: true })
+              await wait()
+
+              expect('#target').toHaveText('expired content')
+              expect(up.network.isBusy()).toBe(true)
+
+              document.querySelector('#viewport').scrollTop = 433
+              expect('#viewport').toBeScrolledTo(433)
+
+              jasmine.respondWith(html('revalidated content'))
+              await wait()
+
+              expect('#target').toHaveText('revalidated content')
+              expect('#viewport').toBeScrolledTo(433)
+            })
+          })
+
           describe('revalidation of hungry fragments', function() {
 
             it('reloads hungry fragments when an { origin } is given (bugfix)', async function() {
@@ -14000,6 +14039,14 @@ describe('up.fragment', function() {
         document.body.classList.add('some-custom-class')
         expect(up.fragment.toTarget(document.body)).toBe("body")
         document.body.classList.remove('some-custom-class')
+      })
+
+      it('can target the <body>', function() {
+        expect(up.fragment.toTarget(document.body)).toBe("body")
+      })
+
+      it('can target the document root element (<html>)', function() {
+        expect(up.fragment.toTarget(document.documentElement)).toBe("html")
       })
 
       it('does not use the tag name of a non-unique element', function() {
