@@ -2,28 +2,18 @@
 Server protocol
 ===============
 
-Unpoly has an **optional** protocol your server may implement to exchange additional information
-when Unpoly is [updating fragments](/up.link). The protocol mostly works by adding
-additional HTTP headers (like `X-Up-Target`) to requests and responses.
+Unpoly has an **optional** protocol your backend may implement to inspect and manipulate Unpoly's rendering.
+
+The protocol mostly works by reading or setting simple HTTP headers (like `X-Up-Target`).
+It's quite straightforward to use in your own code, and you don't have to implement all of it.
+
+You can also use [existing implementations](/install/server-bindings),
+which are available for most popular web frameworks.
 
 > [IMPORTANT]
 > While the protocol can help you optimize performance and handle some edge cases,
 > implementing it is **entirely optional**. For instance, `unpoly.com` itself is a static site
 > that uses Unpoly on the frontend and doesn't even have an active server component.
-
-## Existing implementations
-
-You should be able to implement the protocol in a very short time.
-
-There are existing implementations for various web frameworks:
-
-- [Ruby on Rails](/install/ruby)
-- [Roda](https://github.com/adam12/roda-unpoly)
-- [Rack](https://github.com/adam12/rack-unpoly) (Sinatra, Padrino, Hanami, Cuba, ...)
-- [Phoenix](https://elixirforum.com/t/unpoly-a-framework-like-turbolinks/3614/15) (Elixir)
-- [PHP](https://github.com/webstronauts/php-unpoly) (Symfony, Laravel, Stack)
-- [Python](https://gitlab.com/rocketduck/python-unpoly) (Python, including Django support)
-- [Rust](https://crates.io/crates/unpoly) (Rust, including Axum support)
 
 @see optimizing-responses
 @see conditional-requests
