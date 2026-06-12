@@ -1,7 +1,7 @@
 Opening overlays
 ================
 
-Fragment updates will render within the [current layer](/up.layer.current) by default.
+Instead of updating the [current layer](/up.layer.current) layer, you can open a fragment in a new overlay (like a modal or drawer).
 
 
 Opening an overlay from a link {#link}
