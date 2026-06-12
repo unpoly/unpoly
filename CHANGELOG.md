@@ -2655,7 +2655,7 @@ In cases where you don't want this behavior, you now have more options:
 
 ### Build
 
-- `unpoly.js` is now compiled using ES2021 (up from ES2020). The [ES6 build](/install#legacy-browsers) for legacy browsers remains available.
+- `unpoly.js` is now compiled using ES2021 (up from ES2020). The [ES6 build](/install/legacy-browsers) for legacy browsers remains available.
 - Improve compression of minified builds. In particular private object properties are now prefixed with an underscore (`_`) [so they can be mangled safely](https://makandracards.com/makandra/608582-minifying-object-properties-in-javascript-files).
 
   If you are re-bundling the unminified build of Unpoly you can [configure your minifier](https://makandracards.com/makandra/608582-minifying-object-properties-in-javascript-files#section-mangling-private-properties)
@@ -5078,7 +5078,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 - When [submitting a form](/submitting-forms), the `name` and `value` of the submit button is now included with the form parameters.
 - [Going back in history](/up.history) after a [fragment update](/up.link) now always restores elements the page layer, never a selector in [modals](/up.modal) or [popups](/up.popup).
 - [Going back in history](/up.history) now always closes a [modal](/up.modal) or [popup](/up.popup).
-- Switch to [unpkg](https://unpkg.com) as our [CDN](/install/cdn).
+- Switch to [unpkg](https://unpkg.com) as our CDN.
 
 
 0.35.2
