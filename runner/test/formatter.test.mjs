@@ -35,6 +35,15 @@ test('run summary reports counts', () => {
   assert.match(runSummary({ passed: 56, failed: 1, pending: 1 }), /56 passed, 1 failed, 1 skipped/)
 })
 
+test('the --verbose hint (on failure) is preceded by a blank line', () => {
+  assert.match(runSummary({ passed: 5, failed: 1, pending: 0 }, { verbose: false }), /\n\nRe-run with --verbose/)
+})
+
+test('no --verbose hint when passing or already verbose', () => {
+  assert.doesNotMatch(runSummary({ passed: 5, failed: 0, pending: 0 }), /Re-run/)
+  assert.doesNotMatch(runSummary({ passed: 5, failed: 1, pending: 0 }, { verbose: true }), /Re-run/)
+})
+
 test('group summary shows only passed when all pass', () => {
   assert.match(groupSummary({ passed: 14, failed: 0, pending: 0 }), /14 passed/)
 })

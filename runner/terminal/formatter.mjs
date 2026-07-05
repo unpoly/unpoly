@@ -74,7 +74,7 @@ export function failureBlock(failure, { verbose } = {}) {
 
 export function runSummary(counts, { verbose } = {}) {
   let hint = (counts.failed && !verbose)
-    ? '\n' + pc.dim('Re-run with --verbose for browser logs and HTML state.')
+    ? '\n\n' + pc.dim('Re-run with --verbose for browser logs and HTML state.')
     : ''
   return '\n' + formatCounts(counts, { always: true }) + hint + '\n'
 }

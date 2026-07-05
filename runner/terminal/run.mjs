@@ -44,6 +44,7 @@ export async function runDev(argv, env) {
       console.error(pc.blue('Starting the dev environment (server + watcher) in the background — first build may take ~15s…'))
       await startDevEnv()
       console.error(pc.blue('Dev processes kept running in the background — stop with `bin/dev stop`.'))
+      console.error('')
     } catch (error) {
       console.error(pc.red(error.message))
       return 3
