@@ -116,14 +116,7 @@ When a source changes, affected build files are automatically recompiled. The in
 ### Running tests
 
 Unpoly's ~4000 specs run in a **real browser** (they manipulate the actual DOM and
-cannot run under jsdom). Both ways of running them assume a **running dev
-environment** — start it once, in its own terminal:
-
-```
-npm run dev
-```
-
-This runs the spec server and a build watcher together (via `Procfile.dev`).
+cannot run under jsdom).
 
 #### From the terminal
 
@@ -131,11 +124,20 @@ This runs the spec server and a build watcher together (via `Procfile.dev`).
 npm test          # or: bin/test
 ```
 
-`npm test` drives the specs headlessly in Chrome (Puppeteer) and prints a single,
-compact report. It does **not** build or start a server itself — it relies on the
-watcher and server from `npm run dev`, and errors clearly if either is missing. It
-also **waits for the watcher to finish rebuilding your latest edit** before running,
-so you never test stale code.
+`bin/test` drives the specs headlessly in Chrome (Puppeteer) and prints a single,
+compact report. It needs a **dev environment** — a spec server plus a build watcher
+— and **starts one in the background automatically** if it isn't already running
+(the first build takes ~15s), leaving it up for subsequent runs. It also **waits for
+the watcher to finish rebuilding your latest edit** before running, so you never test
+stale code.
+
+If you'd rather run the dev environment in its own terminal (with live logs), or
+need to stop the background one, use `bin/dev`:
+
+```
+bin/dev            # start server + watcher in the foreground (Ctrl-C to stop)
+bin/dev stop       # stop a background environment that bin/test started
+```
 
 Run a subset by filtering on the spec's full name (the top-level `describe` is named
 after the module). Config can come from a `--flag` or an env var:
@@ -157,15 +159,16 @@ overlays) at the moment of failure:
 bin/test --spec="up.layer" --verbose
 ```
 
-Exit codes: `0` pass · `1` failures · `2` runner timeout · `3` no server · `4`
-watcher not running or build stale. Other options: `--headless=false` (show the
-window), `--browser=firefox`.
+Exit codes: `0` pass · `1` failures · `2` runner timeout · `3` couldn't start the
+dev environment · `4` build didn't refresh in time. Other options:
+`--headless=false` (show the window), `--browser=firefox`.
 
 #### In a browser (for interactive debugging)
 
 For DevTools (breakpoints, element inspection, poking at `up.*`), open
-`http://localhost:4000` (served by `npm run dev`). The `Debug in browser:` URL a
-failing terminal run prints opens the browser straight to that single spec.
+`http://localhost:4000` (served by the dev environment — start it with `bin/dev`, or
+let `bin/test` start it). The `Debug in browser:` URL a failing terminal run prints
+opens the browser straight to that single spec.
 
 In addition to the unit tests, there is an optional support repo [`unpoly-manual-tests`](https://github.com/unpoly/unpoly-manual-tests). It contains a Rails app to play with Unpoly features that are hard to test well with a unit test. E.g. the visual look of overlays, or edge cases when booting Unpoly.
 

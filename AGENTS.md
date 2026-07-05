@@ -4,17 +4,13 @@ How to work effectively in the Unpoly repository as an automated agent. Humans
 should read [`README.md`](README.md); this is the same information framed for an
 edit → test → fix loop.
 
-## Prerequisite: a running dev environment
+## The dev environment (auto-started)
 
-The spec runner is a *client* of a running dev environment — it does not build or
-start a server itself. Assume the developer has started:
-
-```
-npm run dev
-```
-
-which runs the spec server **and** a build watcher together. If either is missing,
-the runner exits with a clear error (that's a setup problem, not a test failure).
+Running specs needs a spec server + a build watcher. You don't have to manage them:
+`bin/test` **starts them in the background automatically** if they aren't running
+(first build ~15s), and reuses them on later runs. It prints a line telling you they
+were left running; stop them with `bin/dev stop`. (`bin/dev` alone runs them in the
+foreground.)
 
 ## Running the specs
 
@@ -27,8 +23,8 @@ bin/test --spec="up.form"      # or: SPEC="up.form" npm test
 
 `bin/test` drives Chrome headlessly and prints one compact report. Before running it
 **waits for the watcher to finish rebuilding your latest edit**, so you never test
-stale code. Exit codes: `0` pass · `1` failures · `2` runner timeout · `3` no server
-· `4` watcher not running / build stale.
+stale code. Exit codes: `0` pass · `1` failures · `2` runner timeout · `3` couldn't
+start the dev environment · `4` build didn't refresh in time.
 
 Config is one schema, readable as `--flags` or env vars (CLI wins): `--spec`,
 `--csp`, `--es6`, `--minify`, `--migrate`, `--browser`, `--headless`. Unknown flags
@@ -107,7 +103,9 @@ All runner code lives in `runner/`:
   event, and disables Unpoly's CSS log styling.
 - `runner/server/` — the Express server and EJS runner page.
 - `runner/config.mjs` — the config schema (env / query / `--argv`).
-- `bin/test`, `bin/ci`, `bin/test-server` — thin extensionless wrappers.
+- `runner/dev_env.mjs` — start/stop the background dev environment (foreman +
+  `Procfile.test`); `startDevEnv()` resolves once the first build + server are ready.
+- `bin/test`, `bin/ci`, `bin/test-server`, `bin/dev` — thin extensionless wrappers.
 
 The invariant: **the browser posts data (JSON-simple values); Node does all
 formatting.** That keeps the formatter pure and fast to test.

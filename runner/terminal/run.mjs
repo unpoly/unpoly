@@ -15,6 +15,7 @@ import { waitForFreshBuild, BuildSyncError } from './build_sync.mjs'
 import { createRemapper } from './source_map.mjs'
 import { createReceiver } from './receiver.mjs'
 import { specsURL } from './urls.mjs'
+import { isDevEnvRunning, startDevEnv } from '../dev_env.mjs'
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const WINDOW = { width: 1200, height: 800 }
@@ -36,9 +37,17 @@ export async function runDev(argv, env) {
   const config = parseConfig(argv, env)
   if (!config) return CONFIG_ERROR
 
-  if (!(await isServerRunning())) {
-    console.error(pc.red(`No test server on ${serverURL} — start it with \`npm run dev\` (or \`npm run test-server\`).`))
-    return 3
+  // Assume a dev environment (server + watcher). Start one in the background if
+  // it isn't already up, so `bin/test` just works without manual setup.
+  if (!(await isDevEnvRunning())) {
+    try {
+      console.error(pc.blue('Starting the dev environment (server + watcher) in the background — first build may take ~15s…'))
+      await startDevEnv()
+      console.error(pc.blue('Dev processes kept running in the background — stop with `bin/dev stop`.'))
+    } catch (error) {
+      console.error(pc.red(error.message))
+      return 3
+    }
   }
 
   try {

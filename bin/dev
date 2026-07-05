@@ -1,0 +1,22 @@
+#!/usr/bin/env node
+// Start (default) or stop the dev environment (spec server + build watcher).
+//   bin/dev [start]   run it in the foreground (Ctrl-C to stop)
+//   bin/dev stop      stop a background env started by bin/test
+import { runDevEnvForeground, stopDevEnv } from '../runner/dev_env.mjs'
+import pc from 'picocolors'
+
+const command = process.argv[2] || 'start'
+
+if (command === 'start') {
+  process.exit(await runDevEnvForeground())
+} else if (command === 'stop') {
+  if (stopDevEnv()) {
+    console.log(pc.blue('Dev environment stopped.'))
+    process.exit(0)
+  }
+  console.error(pc.red('No background dev environment found to stop.'))
+  process.exit(1)
+} else {
+  console.error('Usage: bin/dev [start|stop]')
+  process.exit(2)
+}
