@@ -82,6 +82,25 @@ test('lists every failure at the end, blank-line separated, then the summary', a
   assert.equal(code, 1)
 })
 
+test('reports only the first expectation of a failed spec, noting the rest', async () => {
+  let { text } = await run([
+    { type: 'suiteStarted', description: 'up.thing' },
+    {
+      type: 'specDone', fullName: 'up.thing x', description: 'x', status: 'failed',
+      failedExpectations: [
+        { message: 'first boom', stack: 'at f (spec/x_spec.js:1:1)' },
+        { message: 'second boom', stack: 'at g (spec/x_spec.js:2:1)' },
+      ],
+      failure: { log: [], dom: [] },
+    },
+    { type: 'suiteDone', description: 'up.thing', failedExpectations: [] },
+    { type: 'jasmineDone', overallStatus: 'failed' },
+  ])
+  assert.match(text, /first boom/)
+  assert.doesNotMatch(text, /second boom/)
+  assert.match(text, /\+1 more failed expectation, not shown/)
+})
+
 test('excluded specs are ignored', async () => {
   let { text } = await run([
     { type: 'suiteStarted', description: 'up.form' },

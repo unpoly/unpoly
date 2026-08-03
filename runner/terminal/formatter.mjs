@@ -42,7 +42,11 @@ export function failureBlock(failure, { verbose } = {}) {
   lines.push('')
 
   lines.push(indent('Failure/error:', 2))
-  for (let message of failure.messages) lines.push(indent(pc.red(message), 4))
+  lines.push(indent(pc.red(failure.message), 4))
+  if (failure.extraFailures > 0) {
+    let plural = failure.extraFailures === 1 ? '' : 's'
+    lines.push(indent(pc.dim(`(+${failure.extraFailures} more failed expectation${plural}, not shown)`), 4))
+  }
   lines.push('')
 
   lines.push(indent('Stacktrace:', 2))

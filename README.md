@@ -141,8 +141,11 @@ SPEC="up.form" npm test                      # same, via env
 bin/test --spec="up.form submits the form"   # a single example
 ```
 
-**On failure**, each report shows the message, a **stack trace mapped back to the
-original source** (`spec/unpoly/form_spec.js:877`, not a bundle position), and a
+**On failure**, a spec stops at its **first** failed expectation — so the report
+(message, stack, log and DOM) describes one coherent moment rather than a cascade of
+consequential failures (pass `--stop-on-failure=false` to see every failed
+expectation instead). Each report shows the message, a **stack trace mapped back to
+the original source** (`spec/unpoly/form_spec.js:877`, not a bundle position), and a
 `Debug in browser:` URL for that one spec. Add **`--verbose`** for the deep dive — it
 also prints the **browser log** and the **HTML state** (fixtures + overlays) at the
 moment of failure:
@@ -163,6 +166,7 @@ line and re-running is the quickest way to inspect state.
 | `--verbose` | Add the browser log + HTML state to each failure |
 | `--browser=firefox` | Run in Firefox instead of Chrome |
 | `--headless=false` | Show the browser window while running |
+| `--stop-on-failure=false` | Keep running a spec after its first failed expectation (default: stop) |
 | `--csp=…` · `--es6` · `--migrate` | Serve the specs under a CSP / ES6 / unpoly-migrate variant |
 
 (`--minify` is also accepted but needs a minified build — `npm run build-ci`.)

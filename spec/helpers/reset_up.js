@@ -80,16 +80,18 @@ beforeEach(function() {
 let lastIdleCallback = new Date()
 
 afterEach(async function() {
+  // Announce the reset as the very first thing — before any teardown, cleanup, or
+  // even the `await wait()` below — so the terminal poster
+  // (runner/terminal/poster.js) snapshots fixtures/overlays and closes its log
+  // buffer at the moment the spec ended (which, with stopSpecOnExpectationFailure,
+  // is the first failure) rather than after the DOM has moved on. Present-tense name
+  // = "before" (interruptible), per the Unpoly event-naming convention.
+  document.dispatchEvent(new CustomEvent('specs:reset'))
+
   jasmine.resetting = true
 
   // Wait 1 more frame for async errors to (correctly) fail the test.
   await wait()
-
-  // Announce that we're about to reset, before we tear anything down. The terminal
-  // poster (runner/terminal/poster.js) listens for this to snapshot fixtures and
-  // overlays for a failed spec while they're still in the DOM. Present-tense name =
-  // "before" (interruptible), per the Unpoly event-naming convention.
-  document.dispatchEvent(new CustomEvent('specs:reset'))
 
   // Ignore errors while the framework is being reset.
   await jasmine.spyOnGlobalErrorsAsync(async function(_globalErrorSpy) {

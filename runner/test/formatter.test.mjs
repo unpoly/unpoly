@@ -5,7 +5,8 @@ import { failureBlock, runSummary, groupSummary, mark } from '../terminal/format
 const FAILURE = {
   index: 1,
   path: 'up.layer → opens overlay',
-  messages: ['Expected true to be false.'],
+  message: 'Expected true to be false.',
+  extraFailures: 0,
   frames: ['spec/unpoly/layer_spec.js:12 in anonymous function'],
   log: ['log: 🔧 agent marker', 'log: up:request:load Loading GET /x'],
   dom: [{ tag: 'div', id: 'fixtures', classes: [], attrs: {}, children: [] }],
@@ -29,6 +30,12 @@ test('verbose failure includes an agent-inserted debug log and HTML state', () =
   assert.match(out, /🔧 agent marker/)
   assert.match(out, /HTML state:/)
   assert.match(out, /#fixtures/)
+})
+
+test('shows only the first failure message, noting any extras', () => {
+  let out = failureBlock({ ...FAILURE, extraFailures: 2 }, { verbose: false })
+  assert.match(out, /Expected true to be false\./)
+  assert.match(out, /\+2 more failed expectations, not shown/)
 })
 
 test('run summary reports counts', () => {

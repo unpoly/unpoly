@@ -94,23 +94,23 @@ export function createReceiver({ verbose = false, remapper, serverURL = '', out 
     let index = 0
     for (let raw of failures) {
       index++
-      let messages = raw.expectations.map((e) => e.message)
-      if (!messages.length) messages = ['(failed with no expectation message)']
+      // Report only the first failure. With stopOnFailure there's normally just
+      // one; anything after it is a consequence (or a stray callback failure), so
+      // we show the first and note the count of any extras.
+      let expectations = raw.expectations
+      let message = expectations.length ? expectations[0].message : '(failed with no expectation message)'
 
-      let frames = []
-      for (let expectation of raw.expectations) {
-        if (expectation.stack) {
-          let remapped = remapper ? await remapper.remapStack(expectation.stack) : expectation.stack
-          frames = formatStack(remapped, { verbose })
-          break
-        }
-      }
+      let stackExpectation = expectations.find((e) => e.stack)
+      let frames = stackExpectation
+        ? formatStack(remapper ? await remapper.remapStack(stackExpectation.stack) : stackExpectation.stack, { verbose })
+        : []
 
       write(fmt.failureBlock({
         index,
         path: raw.path.join(' → '),
-        messages,
+        message,
         frames,
+        extraFailures: Math.max(0, expectations.length - 1),
         log: raw.log,
         dom: raw.dom,
         debugURL: specsURL(serverURL, { spec: raw.fullName }),

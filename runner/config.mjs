@@ -40,6 +40,10 @@ const PARSERS = {
   // (terminal only) Whether to print the detailed failure report (browser log +
   // HTML state). Read by the runner only; the browser ignores it.
   'verbose': (value) => parseBoolean(value, false),
+  // Whether Jasmine stops a spec at its first failed expectation (rather than
+  // continuing and piling up consequential failures). On by default; a spec
+  // helper applies it to Jasmine, so it affects the browser runner too.
+  'stopOnFailure': (value) => parseBoolean(value, true),
 }
 
 // Collects the raw (unparsed) string values for known settings from an env-like
@@ -141,9 +145,10 @@ export class Config {
     for (let token of argv) {
       let match = /^--([^=]+)(?:=(.*))?$/.exec(token)
       if (!match) continue
-      let key = match[1]
+      // Accept kebab-case flags for camelCase keys (--stop-on-failure -> stopOnFailure).
+      let key = match[1].replace(/-([a-z])/g, (_, char) => char.toUpperCase())
       if (!(key in PARSERS)) {
-        throw new Error(`Unknown option: --${key}`)
+        throw new Error(`Unknown option: --${match[1]}`)
       }
       raw[key] = match[2] ?? 'true'
     }

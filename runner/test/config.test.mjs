@@ -27,6 +27,12 @@ test('verbose is part of the schema (flag or env)', () => {
   assert.equal(Config.fromArgv([]).verbose, false)
 })
 
+test('stopOnFailure defaults true; kebab-case flag and env can disable it', () => {
+  assert.equal(Config.fromArgv([]).stopOnFailure, true)
+  assert.equal(Config.fromArgv(['--stop-on-failure=false']).stopOnFailure, false)
+  assert.equal(Config.fromArgv([], { STOPONFAILURE: 'false' }).stopOnFailure, false)
+})
+
 test('toCSPHeader per csp setting', () => {
   assert.equal(Config.fromArgv(['--csp=none']).toCSPHeader(), undefined)
   assert.match(Config.fromArgv(['--csp=nonce-only']).toCSPHeader(), /script-src 'nonce-specs-nonce'/)
