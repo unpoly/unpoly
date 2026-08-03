@@ -62,21 +62,16 @@ npm install
 
 ### Quick start
 
-The following will build the library and start a server to run tests:
+After `npm install`, run the specs with:
 
 ```
-npm run dev
+npm test          # or: bin/test
 ```
 
-Allow a moment for Unpoly and tests to build in `dist/`. Changing a file will re-build automatically.
-
-`npm run dev` runs the spec server and a build watcher together. With it running,
-you can run tests in either of these ways:
-
-- From your terminal, using `npm test` (or `bin/test`) — see [Running tests](#running-tests)
-- In a browser, by opening `http://localhost:4000`
-
-See [Running tests](#running-tests) for details, or run the underlying tasks individually as described below.
+That's it — the first run starts a background dev environment (spec server + build
+watcher) and reuses it afterwards. See [Running tests](#running-tests) for filtering,
+debugging, and the `bin/dev` command; the granular build/watch tasks are described
+below.
 
 
 ### Building the library
@@ -118,29 +113,27 @@ When a source changes, affected build files are automatically recompiled. The in
 Unpoly's ~4000 specs run in a **real browser** (they manipulate the actual DOM and
 cannot run under jsdom).
 
-#### From the terminal
-
 ```
 npm test          # or: bin/test
 ```
 
-`bin/test` drives the specs headlessly in Chrome (Puppeteer) and prints a single,
+`bin/test` runs the specs headlessly in Chrome (Puppeteer) and prints a single,
 compact report. It needs a **dev environment** — a spec server plus a build watcher
 — and **starts one in the background automatically** if it isn't already running
-(the first build takes ~15s), leaving it up for subsequent runs. It also **waits for
-the watcher to finish rebuilding your latest edit** before running, so you never test
-stale code.
+(the first build takes ~15s), reusing it on later runs. It also **waits for the
+watcher to finish rebuilding your latest edit**, so you never test stale code.
 
-If you'd rather run the dev environment in its own terminal (with live logs), or
-need to stop the background one, use `bin/dev`:
+Prefer to run the dev environment yourself (e.g. to watch the build logs), or need
+to control the background one? Use `bin/dev`:
 
 ```
-bin/dev            # start server + watcher in the foreground (Ctrl-C to stop)
+bin/dev            # run server + watcher in the foreground (Ctrl-C to stop)
 bin/dev stop       # stop a background environment that bin/test started
+bin/dev status     # report whether the dev environment is running
 ```
 
-Run a subset by filtering on the spec's full name (the top-level `describe` is named
-after the module). Config can come from a `--flag` or an env var:
+**Run a subset.** Filter on the spec's full name (the top-level `describe` is named
+after the module). The whole suite takes a few minutes, so filter while iterating:
 
 ```
 bin/test --spec="up.form"                    # the whole up.form suite
@@ -148,31 +141,44 @@ SPEC="up.form" npm test                      # same, via env
 bin/test --spec="up.form submits the form"   # a single example
 ```
 
-Each failure prints the message, a **stack trace mapped back to the original
-source** (e.g. `spec/unpoly/form_spec.js:877`, not a bundle position), and a
-`Debug in browser:` URL for that one spec. Add **`--verbose`** for the deep dive: it
-also shows the **browser log** (Unpoly's requests / fragment updates / layer
-changes, plus anything you `console.log`) and the **HTML state** (fixtures and
-overlays) at the moment of failure:
+**On failure**, each report shows the message, a **stack trace mapped back to the
+original source** (`spec/unpoly/form_spec.js:877`, not a bundle position), and a
+`Debug in browser:` URL for that one spec. Add **`--verbose`** for the deep dive — it
+also prints the **browser log** and the **HTML state** (fixtures + overlays) at the
+moment of failure:
 
 ```
 bin/test --spec="up.layer" --verbose
 ```
 
+Anything you `console.log` / `console.debug` in a spec or in `src/unpoly` shows up in
+that browser log (objects, arrays and DOM elements are serialized), so adding a log
+line and re-running is the quickest way to inspect state.
+
+**Options** — pass as `--flags` or `UPPERCASE` env vars (a flag beats the env):
+
+| Option | Effect |
+|--------|--------|
+| `--spec="…"` | Only run specs whose full name contains this string |
+| `--verbose` | Add the browser log + HTML state to each failure |
+| `--browser=firefox` | Run in Firefox instead of Chrome |
+| `--headless=false` | Show the browser window while running |
+| `--csp=…` · `--es6` · `--migrate` | Serve the specs under a CSP / ES6 / unpoly-migrate variant |
+
+(`--minify` is also accepted but needs a minified build — `npm run build-ci`.)
+
 Exit codes: `0` pass · `1` failures · `2` runner timeout · `3` couldn't start the
-dev environment · `4` build didn't refresh in time. Other options:
-`--headless=false` (show the window), `--browser=firefox`.
+dev environment · `4` build didn't refresh in time.
 
 #### In a browser (for interactive debugging)
 
 For DevTools (breakpoints, element inspection, poking at `up.*`), open
-`http://localhost:4000` (served by the dev environment — start it with `bin/dev`, or
-let `bin/test` start it). The `Debug in browser:` URL a failing terminal run prints
-opens the browser straight to that single spec.
+`http://localhost:4000` (served by the dev environment). The `Debug in browser:` URL
+a failing run prints opens the browser straight to that single spec.
 
 In addition to the unit tests, there is an optional support repo [`unpoly-manual-tests`](https://github.com/unpoly/unpoly-manual-tests). It contains a Rails app to play with Unpoly features that are hard to test well with a unit test. E.g. the visual look of overlays, or edge cases when booting Unpoly.
 
-> **Working with an AI coding agent?** See [`AGENTS.md`](AGENTS.md) for the same powers described from an agent's point of view.
+> **Working with an AI coding agent?** See [`AGENTS.md`](AGENTS.md).
 
 ### Making a new release
 
