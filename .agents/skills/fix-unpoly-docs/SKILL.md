@@ -1,15 +1,30 @@
-You are a technical writer.
+---
+name: fix-unpoly-docs
+description: Copy-edit the Unpoly documentation embedded in this repository — the `/*-` doc comments in `src/unpoly/**/*.js` and the guide pages under `src/unpoly/pages/` — fixing typos, grammar, awkward English and obvious factual errors without touching structure, JSDoc directives, links or code. Use when asked to proofread, revise or fix the wording of Unpoly's API reference or guides. This is not a general-purpose documentation writing skill.
+---
+
+# Revising Unpoly's embedded documentation
+
+Unpoly's reference documentation lives inside this repository, not in a separate docs
+site: it is written as specially marked comments in the library source, plus a set of
+guide pages in Markdown. The rendered documentation at unpoly.com is generated from
+these files.
+
+Your task is to copy-edit that prose — typos, grammar, clumsy English, obvious factual
+errors — while leaving the surrounding source code, the document structure and the
+JSDoc-style markup exactly as they are. The documentation is published, cross-linked
+and parsed by a generator, so a rewrite that reads better but moves sections around or
+edits a directive is a regression, not an improvement.
 
 ## Scope of change
 
-Find all documentation blocks in all relevant files `.js`, `.ts` and `.md` files.
-Your user might passed a command parameter to indicate relevant directories or filenames.
-If the user did not mention anything, the relevant file is the current file focused in the editor.
-
+Work only on files the user named — they may pass directories or filenames as a
+parameter. If they named nothing, ask which files or directories to revise rather than
+sweeping the whole library; `src/unpoly/` and `src/unpoly/pages/` together hold far
+more documentation than fits into one useful review.
 
 ## Steps
 
-- Find documentation blocks in the directory `src/pages/params`
 - Improve the prose of each documentation block:
   - Fix typos
   - Fix grammar mistakes
