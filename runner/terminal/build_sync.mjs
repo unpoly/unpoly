@@ -39,6 +39,14 @@ function defaultSleep(ms) {
 
 export class BuildSyncError extends Error {}
 
+// The watcher produced a fresh build, but it has compile/lint errors.
+export class BuildFailedError extends Error {
+  constructor(errors) {
+    super('Build failed')
+    this.errors = errors
+  }
+}
+
 export async function waitForFreshBuild({
   read = () => readStatus(),
   newestMtime,
@@ -60,7 +68,10 @@ export async function waitForFreshBuild({
   let deadline = now() + timeoutMs
   while (true) {
     status = read()
-    if (status && status.state === 'idle' && status.startedAt >= newestMtime) return status
+    if (status && status.state === 'idle' && status.startedAt >= newestMtime) {
+      if (status.ok === false) throw new BuildFailedError(status.errors || '(no error output captured)')
+      return status
+    }
     if (now() >= deadline) {
       throw new BuildSyncError(`Build watcher didn't rebuild for your latest edit within ${Math.round(timeoutMs / 1000)}s.`)
     }

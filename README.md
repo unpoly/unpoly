@@ -81,8 +81,12 @@ instead:
 ```
 bin/dev                              # run it in this terminal (Ctrl-C to stop)
 bin/dev stop                         # stop a running environment
-bin/dev status                       # report whether one is running
+bin/dev status                       # report whether one is running (and flag a broken build)
 ```
+
+If a build has errors — a syntax slip, or an ESLint violation — `bin/test` prints
+them instead of running the specs and exits non-zero, and `bin/dev status` reports
+them too. The watcher itself keeps running, so your next edit can fix things.
 
 A run with one failing spec looks like this:
 

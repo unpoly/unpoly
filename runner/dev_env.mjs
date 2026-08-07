@@ -50,6 +50,14 @@ export async function isDevEnvRunning() {
   return (await runningDevEnvPid()) !== null
 }
 
+// The build errors from the watcher's most recent build, or null if the last build
+// was clean (or there is no status yet). Lets `bin/dev status` surface a broken
+// build the same way `bin/test` does.
+export function lastBuildErrors(read = readStatus) {
+  const status = read()
+  return status && status.ok === false ? (status.errors || '(no error output captured)') : null
+}
+
 // --- Starting --------------------------------------------------------------
 
 // Starts the environment in the background and resolves once it is ready: the

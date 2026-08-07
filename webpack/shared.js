@@ -95,7 +95,12 @@ function scriptPipeline({ es, lint = true }) {
   if (lint) {
     plugins.push(
       new ESLintPlugin({
-        extensions: ['js', 'ts']
+        extensions: ['js', 'ts'],
+        // Emit lint problems as compilation errors (so `stats.hasErrors()` is true
+        // and one-shot builds still exit non-zero), but never *throw* — a thrown
+        // HookWebpackError would kill `webpack --watch`, and the watcher must keep
+        // watching so the next edit can fix things.
+        failOnError: false,
       })
     )
   }

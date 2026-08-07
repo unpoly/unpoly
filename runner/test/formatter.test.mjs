@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { failureBlock, runSummary, groupSummary, mark } from '../terminal/formatter.mjs'
+import { failureBlock, runSummary, groupSummary, mark, buildFailure } from '../terminal/formatter.mjs'
 
 const FAILURE = {
   index: 1,
@@ -59,4 +59,17 @@ test('mark maps status to a glyph', () => {
   assert.equal(mark('passed'), '.')
   assert.equal(mark('failed'), 'F')
   assert.equal(mark('pending'), 'S')
+})
+
+test('buildFailure renders a header and the indented error output', () => {
+  let out = buildFailure('ERROR in ./src/unpoly/foo.js\nSyntaxError: Unexpected token')
+  assert.match(out, /Build failed/)
+  assert.match(out, /ERROR in \.\/src\/unpoly\/foo\.js/)
+  assert.match(out, /SyntaxError: Unexpected token/)
+})
+
+test('buildFailure tolerates empty error text', () => {
+  let out = buildFailure('')
+  assert.match(out, /Build failed/)
+  assert.match(out, /no error output captured/)
 })

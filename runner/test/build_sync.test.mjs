@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { waitForFreshBuild, BuildSyncError } from '../terminal/build_sync.mjs'
+import { waitForFreshBuild, BuildSyncError, BuildFailedError } from '../terminal/build_sync.mjs'
 
 const noop = async () => {}
 
@@ -24,6 +24,28 @@ test('resolves when idle and built after the latest edit', async () => {
     newestMtime: 100, isAlive: () => true, sleep: noop,
   })
   assert.equal(status.state, 'idle')
+})
+
+test('resolves when a fresh build reports ok:true', async () => {
+  let status = await waitForFreshBuild({
+    read: () => ({ pid: 1, state: 'idle', startedAt: 200, ok: true, errors: '' }),
+    newestMtime: 100, isAlive: () => true, sleep: noop,
+  })
+  assert.equal(status.ok, true)
+})
+
+test('throws BuildFailedError carrying the errors when the fresh build failed', async () => {
+  await assert.rejects(
+    waitForFreshBuild({
+      read: () => ({ pid: 1, state: 'idle', startedAt: 200, ok: false, errors: 'ERROR in ./src/unpoly/foo.js\nSyntaxError' }),
+      newestMtime: 100, isAlive: () => true, sleep: noop,
+    }),
+    (error) => {
+      assert.ok(error instanceof BuildFailedError)
+      assert.match(error.errors, /SyntaxError/)
+      return true
+    }
+  )
 })
 
 test('times out when the build stays older than the edit', async () => {

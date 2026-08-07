@@ -12,9 +12,10 @@ import { fileURLToPath } from 'node:url'
 import pc from 'picocolors'
 import { Config } from '../config.mjs'
 import { serverURL, isServerRunning, startServer } from '../server/server.mjs'
-import { waitForFreshBuild, BuildSyncError } from './build_sync.mjs'
+import { waitForFreshBuild, BuildSyncError, BuildFailedError } from './build_sync.mjs'
 import { createRemapper } from './source_map.mjs'
 import { createReceiver } from './receiver.mjs'
+import { buildFailure } from './formatter.mjs'
 import { specsURL } from './urls.mjs'
 import { isDevEnvRunning, startDevEnv } from '../dev_env.mjs'
 
@@ -54,6 +55,10 @@ export async function runDev(argv, env) {
   try {
     await waitForFreshBuild()
   } catch (error) {
+    if (error instanceof BuildFailedError) {
+      process.stdout.write(buildFailure(error.errors))
+      return 6
+    }
     if (error instanceof BuildSyncError) {
       console.error(pc.red(error.message))
       return 4
