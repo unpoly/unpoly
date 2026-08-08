@@ -1,7 +1,7 @@
 # The spec runner
 
 Everything that runs Unpoly's specs lives here. For *using* it (`bin/test`, filters,
-options, exit codes) see [`README.md` → Running tests](../README.md#running-tests).
+options, exit codes) see [Testing](../docs/contributing/testing.md).
 This file is for *changing* it.
 
 ## The invariant
