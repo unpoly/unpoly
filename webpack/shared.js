@@ -73,6 +73,10 @@ function scriptPipeline({ es, lint = true }) {
       compilerOptions: {
         allowJs: true,
         checkJs: true,
+        // Emit a source map from the ts-loader output back to the original
+        // source, so webpack can chain it and stack traces resolve to real
+        // file:line positions (not the transpiled, comment-stripped output).
+        sourceMap: true,
         // importHelpers: true,
         // module: "ES2020",
         target: es,
@@ -208,11 +212,25 @@ function discardStyles() {
   }
 }
 
+// Force separate source maps onto a list of configs.
+//
+// We only enable source maps for the *development*, *CI* and *test* builds, not
+// for the published production build (which would otherwise ship a
+// sourceMappingURL comment in the non-minified unpoly.js). Source maps let
+// bin/test.mjs translate stack traces from bundle positions (dist/specs.js:11887)
+// back to the original source (spec/unpoly/form_spec.js:877) even though we
+// don't minify the test build — bundling and the ts-loader alone already shift
+// every line number.
+function withSourceMaps(configs) {
+  return configs.map((config) => ({ ...config, devtool: 'source-map' }))
+}
+
 module.exports = {
   merge,
   file,
   scriptPipeline,
   stylePipeline,
   discardStyles,
-  minify
+  minify,
+  withSourceMaps
 }

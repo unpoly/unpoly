@@ -12,25 +12,22 @@
 
     <script nonce="specs-nonce">
       window.specs = {}
-      window.specs.config = <%- config.toJSON() %>;
+      window.specs.config = <%- config.toJSONString() %>;
     </script>
 
-    <script nonce="specs-nonce" src="/dist/jasmine.js"></script>
+    <% var dist = config.distFilenames() %>
 
-    <%
-      var esSuffix = config.es6 ? '.es6' : ''
-      var minifySuffix = config.minify  ? '.min' : ''
-    %>
+    <script nonce="specs-nonce" src="/dist/<%- dist.jasmine %>"></script>
 
-    <script nonce="specs-nonce" src="/dist/unpoly<%- esSuffix + minifySuffix %>.js"></script>
+    <script nonce="specs-nonce" src="/dist/<%- dist.unpoly %>"></script>
 
     <script nonce="specs-nonce" src="https://code.jquery.com/jquery-3.6.0.js"></script>
 
     <% if (config.migrate) { %>
-      <script nonce="specs-nonce" src="/dist/unpoly-migrate<%- minifySuffix %>.js"></script>
+      <script nonce="specs-nonce" src="/dist/<%- dist.migrate %>"></script>
     <% } %>
 
-    <script nonce="specs-nonce" src="/dist/specs<%- esSuffix %>.js"></script>
+    <script nonce="specs-nonce" src="/dist/<%- dist.specs %>"></script>
   </head>
   <body>
   </body>

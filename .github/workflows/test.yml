@@ -44,8 +44,11 @@ jobs:
       CSP: "${{ matrix.csp }}"
       MIGRATE: "${{ matrix.migrate }}"
       ES6: "${{ matrix.es6 }}"
-      MIN: "${{ matrix.min }}"
-      DEBUG: "puppeteer:*,-puppeteer:protocol:*,-puppeteer:webDriverBiDi:*"
+      # Config reads MINIFY (the `minify` setting); MIN would be silently ignored.
+      MINIFY: "${{ matrix.min }}"
+      # To debug Puppeteer/CDP issues in CI, uncomment (the runner leaves DEBUG free
+      # for Puppeteer's own `debug` logging — locally: `DEBUG=puppeteer:* bin/ci`):
+      # DEBUG: "puppeteer:*,-puppeteer:protocol:*,-puppeteer:webDriverBiDi:*"
     steps:
       - uses: actions/checkout@v3
 
@@ -68,11 +71,7 @@ jobs:
       - name: Build Unpoly and tests
         run: npm run build-ci
 
-      - name: Start test server
-        run: npm run test-server &
-
-      - name: Wait for test server
-        run: npx wait-on http://localhost:4000
-
+      # bin/ci boots its own spec server in-process and runs against the build-ci
+      # artifacts, so there is no separate "start server" / "wait for server" step.
       - name: Run tests
-        run: npm run test
+        run: npm run test-ci

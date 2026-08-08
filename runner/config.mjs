@@ -33,14 +33,24 @@ const PARSERS = {
   'random': (value) => parseBoolean(value, false),
   // Whether we load unpoly-migrate.js.
   'migrate': (value) => parseBoolean(value, false),
-  // Whether the runner is called from a terminal. This activates extra logging to communicate with Puppeteer.
-  'terminal': (value) => parseBoolean(value, false),
-  // (Terminal only) Whether the remote-controlled browser is hidden (true) or visible (false)
-  'headless': (value) => parseBoolean(value, true),
-  // (Terminal only) Which type of browser to remote-control
+  // (terminal only) Which type of browser to remote-control
   'browser' : (value) => parseEnumString(value, ['chrome', 'firefox'], 'chrome'),
-  // (Terminal only) Whether the test runner should print out example names as they are running.
-  'verbose' : (value) => parseBoolean(value, false),
+  // (terminal only) Whether the remote-controlled browser is hidden (true) or visible (false)
+  'headless': (value) => parseBoolean(value, true),
+  // (terminal only) Whether to print the detailed failure report (browser log +
+  // HTML state). Read by the runner only; the browser ignores it.
+  'verbose': (value) => parseBoolean(value, false),
+}
+
+// Collects the raw (unparsed) string values for known settings from an env-like
+// object, reading each as its UPPERCASE name. Shared by fromProcessEnv/fromArgv.
+function envToRaw(env) {
+  let raw = {}
+  for (let key in PARSERS) {
+    let value = env[key.toUpperCase()]
+    if (value !== undefined) raw[key] = value
+  }
+  return raw
 }
 
 export class Config {
@@ -50,18 +60,19 @@ export class Config {
     Object.assign(this, object) // for direct access
   }
 
-  toJSON() {
+  // Note: intentionally not named toJSON() — that hook must return a serializable
+  // value, but we return the already-encoded string (injected into runner.ejs).
+  toJSONString() {
     return JSON.stringify(this._object)
   }
 
-  toQueryString() {
+  // The settings that differ from their defaults, as a plain object (used to build
+  // the runner URL — see runner/terminal/urls.mjs).
+  toParams() {
     let defaults = this.constructor.fromObject({})
-
-    let objectWithoutDefaults = Object.fromEntries(
+    return Object.fromEntries(
       Object.entries(this._object).filter(([key, val]) => val !== defaults[key])
     )
-
-    return new URLSearchParams(objectWithoutDefaults).toString()
   }
 
   toCSPHeader() {
@@ -93,12 +104,23 @@ export class Config {
     }
   }
 
+  // Which built files the runner page should load, given es6/minify.
+  // (specs are never minified.)
+  distFilenames() {
+    let es = this.es6 ? '.es6' : ''
+    let min = this.minify ? '.min' : ''
+    return {
+      unpoly: `unpoly${es}${min}.js`,
+      specs: `specs${es}.js`,
+      migrate: `unpoly-migrate${min}.js`,
+      jasmine: `jasmine.js`,
+    }
+  }
+
   static fromObject(object, overrides = {}) {
     let obj = {}
     for (let key in PARSERS) {
-      let parse = PARSERS[key]
-      let value = object[key]
-      obj[key] = parse(value)
+      obj[key] = PARSERS[key](object[key])
     }
     return new this({ ...obj, ...overrides })
   }
@@ -108,13 +130,24 @@ export class Config {
   }
 
   static fromProcessEnv(env, overrides = {}) {
-    let obj = {}
-    for (let key in PARSERS) {
-      let parse = PARSERS[key]
-      let value = env[key.toUpperCase()]
-      obj[key] = parse(value)
+    return this.fromObject(envToRaw(env), overrides)
+  }
+
+  // Reads config from CLI args (--key=value, or bare --flag => "true"), falling
+  // back to env vars, falling back to defaults. Precedence: CLI > env > default.
+  // Unknown --flags throw, to catch typos.
+  static fromArgv(argv, env = {}, overrides = {}) {
+    let raw = envToRaw(env)
+    for (let token of argv) {
+      let match = /^--([^=]+)(?:=(.*))?$/.exec(token)
+      if (!match) continue
+      let key = match[1]
+      if (!(key in PARSERS)) {
+        throw new Error(`Unknown option: --${key}`)
+      }
+      raw[key] = match[2] ?? 'true'
     }
-    return new this({ ...obj, ...overrides })
+    return this.fromObject(raw, overrides)
   }
 
 }

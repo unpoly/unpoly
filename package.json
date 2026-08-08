@@ -13,8 +13,10 @@
     "unpoly*.map"
   ],
   "scripts": {
-    "test-server": "node bin/test-server.mjs",
-    "test": "node bin/test.mjs",
+    "test-server": "node bin/test-server",
+    "test": "node bin/test",
+    "test-ci": "node bin/ci",
+    "self-test-runner": "NO_COLOR=1 node --test runner/test/*.test.mjs",
     "build": "webpack --config ./webpack/production.js && gzip --keep --force dist/unpoly.es6.min.js dist/unpoly.min.js",
     "build-ci": "webpack --config ./webpack/ci.js",
     "build-dev": "webpack --config ./webpack/development.js",
@@ -64,6 +66,7 @@
     "rails-erb-loader": "*",
     "sass": "*",
     "sass-loader": "*",
+    "source-map": "^0.6.1",
     "terser-webpack-plugin": "*",
     "ts-loader": "*",
     "typescript": "*",

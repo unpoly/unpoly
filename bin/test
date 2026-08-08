@@ -1,0 +1,4 @@
+#!/usr/bin/env node
+// Dev spec runner. Assumes `npm run dev` is running (server + watcher).
+import { runDev } from '../runner/terminal/run.mjs'
+process.exit(await runDev(process.argv.slice(2), process.env))

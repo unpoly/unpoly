@@ -1,0 +1,69 @@
+// Dev-only: makes the runner wait until the watcher has produced a build that
+// includes the developer's/agent's latest edit, so tests never run against stale
+// code. All external inputs (status reader, source mtime, liveness, clock, sleep)
+// are injectable so the logic is unit-tested without a real watcher or filesystem.
+
+import { readdirSync, statSync } from 'node:fs'
+import path from 'node:path'
+import { readStatus } from './build_status.mjs'
+
+const SKIP_DIRS = new Set(['node_modules', 'dist', 'tmp', '.git'])
+
+export function newestSourceMtime(root = process.cwd(), dirs = ['src', 'spec']) {
+  let newest = 0
+  for (let dir of dirs) walk(path.join(root, dir), (mtime) => { if (mtime > newest) newest = mtime })
+  return newest
+}
+
+function walk(dir, onFile) {
+  let entries
+  try { entries = readdirSync(dir, { withFileTypes: true }) } catch { return }
+  for (let entry of entries) {
+    if (SKIP_DIRS.has(entry.name)) continue
+    let full = path.join(dir, entry.name)
+    if (entry.isDirectory()) {
+      walk(full, onFile)
+    } else {
+      try { onFile(statSync(full).mtimeMs) } catch { /* ignore */ }
+    }
+  }
+}
+
+function defaultIsAlive(pid) {
+  try { process.kill(pid, 0); return true } catch { return false }
+}
+
+function defaultSleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+export class BuildSyncError extends Error {}
+
+export async function waitForFreshBuild({
+  read = () => readStatus(),
+  newestMtime,
+  isAlive = defaultIsAlive,
+  now = Date.now,
+  sleep = defaultSleep,
+  timeoutMs = 30_000,
+} = {}) {
+  if (newestMtime === undefined) newestMtime = newestSourceMtime()
+
+  let status = read()
+  if (!status) {
+    throw new BuildSyncError('Build watcher not running (no tmp/build-status.json). Start it with `npm run dev` (or `npm run watch-dev`).')
+  }
+  if (!isAlive(status.pid)) {
+    throw new BuildSyncError('Build watcher not running (its process is gone). Start it with `npm run dev` (or `npm run watch-dev`).')
+  }
+
+  let deadline = now() + timeoutMs
+  while (true) {
+    status = read()
+    if (status && status.state === 'idle' && status.startedAt >= newestMtime) return status
+    if (now() >= deadline) {
+      throw new BuildSyncError(`Build watcher didn't rebuild for your latest edit within ${Math.round(timeoutMs / 1000)}s.`)
+    }
+    await sleep(100)
+  }
+}
