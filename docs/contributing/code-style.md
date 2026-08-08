@@ -12,4 +12,12 @@
 - No jQuery
 - Acronyms are uppercased, e.g. `parseURL()`, *not* `parseUrl()`.
 - Public names are generally brief
-- How to run eslint
+
+## Linting
+
+`bin/lint` runs ESLint over `src/`, using the same rules the Webpack build enforces.
+Extra arguments are forwarded, so `bin/lint --fix` works.
+
+You don't have to run it separately to catch violations: a lint error fails the build,
+which makes `bin/test` print the errors instead of running the specs. See
+[Setting up a dev environment](dev-environment.md).

@@ -1,19 +1,19 @@
-# Values & API philosophy
+# Philosophy
 
-## Unpoly's values
+## Values
 
 These values guide us when we decide which features to add, and how we design them.
 
 - **Unpoly is app-centric HTML from the future.** We extend the document-centric HTML with functionality required by non-trivial, interactive web applications. This enables use cases traditionally thought to require heavy JS, e.g. for dynamic forms, intricate overlay interactions or optimistic rendering.
-- **Every line must pull its weight.** While Unpoly isn't the smallest library, it exposes a *ton* of functionality per KB of code. We agonize over every added line of code, which must provide significant value or be dropped. We sometimes use suboptimal coding patterns when it saves bytes (such as passing around giant, mutable option objects). Unpoly has zero dependencies and always will.
-- **No race conditions.** We take great care to always behave consistently, even under heavy async pressure (slow networks, wild user inputs, fast browser automation). We don't ever delay a callback with `setTimeout()` and hope that nothing unexpected happens within that task. Parts of Unpoly deliberately stay synchronous to completely preclude concurrency, and to never make incomplete state observable.
 - **Backend agnostic.** Unpoly works with any server framework that produces HTML, or even with a folder with static HTML. We don't require a frontend build pipeline.
 - **Progressive enhancement.** We enhance server-rendered HTML with better UI/UX. We require little to no changes to existing server-side templates.
 - **Graceful degradation.** Every feature we design should have a graceful degradation story. Server-rendered HTML should retain basic function without Unpoly (or JS). E.g. a link that would open an animated overlay with Unpoly will, without Unpoly, load the same content as a full page, without animation. Much of this comes from using existing HTML elements as intended by the browser platform: Hyperlinks stay `<a href>`, forms stay `<form>`. Enhancements are added through attributes like `[up-target]` or `[up-transition]`.
 - **High level API with secondary considerations covered by default.** We don't just paint rectangles on the screen and leave it to the developer to handle edge cases. Instead we understand developer intent and apply strong defaults, like dealing with concurrent input or flaky connections, handling scroll positions, preserving focus, updating history, caching, etc.
+- **Every line must pull its weight.** While Unpoly isn't the smallest library, it exposes a *ton* of functionality per KB of code. We agonize over every added line of code, which must provide significant value or be dropped. We sometimes use suboptimal coding patterns when it saves bytes (such as passing around giant, mutable option objects). Unpoly has zero dependencies and always will.
+- **No race conditions.** We take great care to always behave consistently, even under heavy async pressure (slow networks, wild user inputs, fast browser automation). We don't ever delay a callback with `setTimeout()` and hope that nothing unexpected happens within that task. Parts of Unpoly deliberately stay synchronous to completely preclude concurrency, and to never make incomplete state observable.
 
 
-## Our API philosophy / How developers interact with Unpoly
+## Layered APIs
 
 **Simple things should be simple:** Unpoly tries to always provide the most high-level API possible, using smart defaults, guessing developer intent and convention-over-configuration. Common use cases must be implementable with a concise call site, usually by setting a single HTML attribute or by invoking a single function.
 
