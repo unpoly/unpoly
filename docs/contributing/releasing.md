@@ -4,5 +4,5 @@ There is a guided CLI interface to lead you through the release process. To star
 process run:
 
 ```
-npm run release
+bin/release
 ```

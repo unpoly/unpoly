@@ -2,8 +2,8 @@
 //   runDev — ensures a dev environment (starting one in the background if none is
 //            running), waits for the watcher to produce a build that includes the
 //            latest edit, then runs.
-//   runCI  — self-contained: boots its own server, skips the build wait (build-ci
-//            already produced the artifacts), then runs.
+//   runCI  — self-contained: boots its own server, skips the build wait
+//            (`bin/build --config=ci` already produced the artifacts), then runs.
 // Neither reads the CI env var — behavior is chosen by which function is called.
 
 import puppeteer from 'puppeteer'

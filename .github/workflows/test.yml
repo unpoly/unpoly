@@ -69,9 +69,9 @@ jobs:
         run: npx puppeteer browsers install firefox
 
       - name: Build Unpoly and tests
-        run: npm run build-ci
+        run: bin/build --config=ci
 
-      # bin/ci boots its own spec server in-process and runs against the build-ci
+      # bin/ci boots its own spec server in-process and runs against the CI build
       # artifacts, so there is no separate "start server" / "wait for server" step.
       - name: Run tests
-        run: npm run test-ci
+        run: bin/ci

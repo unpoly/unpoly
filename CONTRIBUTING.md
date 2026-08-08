@@ -137,7 +137,7 @@ feature that might be too new.
 
 ## Releasing
 
-`npm run release` starts a guided CLI that walks through cutting a release.
+`bin/release` starts a guided CLI that walks through cutting a release.
 
 **Maintainers only, when publishing a new version.**
 

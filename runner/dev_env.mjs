@@ -19,11 +19,11 @@ import { readStatus } from './terminal/build_status.mjs'
 
 // The environment, in one place. A process with a `cwd` lives in a sibling
 // repository: it is skipped when that repository isn't checked out, and its death
-// never takes the environment down. `test-server` deliberately sets no PORT —
+// never takes the environment down. `server` deliberately sets no PORT —
 // inheriting it keeps the server on the port isServerRunning() probes.
 const PROCESSES = [
-  { name: 'watch-dev',   command: 'npm run watch-dev' },
-  { name: 'test-server', command: 'npm run test-server' },
+  { name: 'watch',       command: 'bin/build --config=development --watch' },
+  { name: 'server',      command: 'bin/test-server' },
   { name: 'docs',        command: 'bundle exec middleman server', cwd: '../unpoly-site',         env: { PORT: '4567' } },
   { name: 'manual-test', command: 'bundle exec rails server',     cwd: '../unpoly-manual-tests', env: { PORT: '4001' } },
 ]
@@ -33,6 +33,9 @@ const LOG_FILE = 'tmp/dev.log'
 const READY_TIMEOUT = 60_000
 const SHUTDOWN_GRACE = 5_000
 const SUPERVISOR = import.meta.filename
+// The repo root (this file lives in runner/). Local processes run from here so the
+// relative `bin/…` commands resolve no matter where `bin/dev` was invoked.
+const PROJECT_ROOT = path.dirname(path.dirname(SUPERVISOR))
 
 // --- Detecting -------------------------------------------------------------
 
@@ -217,7 +220,7 @@ function superviseDevEnv() {
   processes.forEach((proc, index) => {
     const child = spawn(proc.command, {
       shell: true,
-      cwd: proc.cwd && path.resolve(proc.cwd),
+      cwd: proc.cwd ? path.resolve(proc.cwd) : PROJECT_ROOT,
       env: { ...process.env, ...proc.env },
       stdio: ['ignore', 'pipe', 'pipe'],
     })

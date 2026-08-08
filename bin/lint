@@ -1,0 +1,11 @@
+#!/usr/bin/env node
+// Lint src/ with ESLint — the same rules the webpack build enforces, run standalone.
+import { spawn } from 'node:child_process'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+const eslintBin = path.join(projectRoot, 'node_modules', '.bin', 'eslint')
+
+let child = spawn(eslintBin, ['src', ...process.argv.slice(2)], { stdio: 'inherit', cwd: projectRoot })
+child.on('exit', (code) => process.exit(code ?? 1))

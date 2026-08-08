@@ -64,7 +64,7 @@ URL from a failing run rather than trying to step-debug the headless browser.
 | `--stop-on-failure=false` | Keep running a spec after its first failed expectation (default: stop) |
 | `--csp=…` · `--es6` · `--migrate` | Serve the specs under a CSP / ES6 / unpoly-migrate variant |
 
-(`--minify` is also accepted but needs a minified build — `npm run build-ci`.)
+(`--minify` is also accepted but needs a minified build — `bin/build --config=ci`.)
 
 The spec runner itself is documented in [`runner/README.md`](../../runner/README.md).
 

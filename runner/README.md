@@ -46,7 +46,7 @@ run.mjs (dev) ── terminal/build_sync.mjs waits until fresh ◄────�
   (`Config.fromArgv`, `--key=value`, CLI > env > default, strict on unknown flags).
 - `dev_env.mjs` — the dev environment: one process table, one supervisor, one pid
   file (`tmp/dev.pid`). See [its own contract](#the-dev-environment) below.
-- `test/` — the self-tests: `npm run self-test-runner`.
+- `test/` — the self-tests: `bin/self-test`.
 - `bin/test`, `bin/ci`, `bin/dev` — thin **extensionless** executables (shebang +
   `chmod +x`), relying on Node 22's extensionless-ESM detection. The package is
   deliberately *not* `type: module` (that would break the CommonJS webpack configs),
@@ -107,10 +107,10 @@ CSS-selector outline (`#id.class[attr="v"]`, `div` implied when anchored).
   exit `3`) → `waitForFreshBuild` (else exit `4`) → puppeteer → receiver → exit 0/1.
   The runner never builds; dev relies on the watcher.
 - `bin/ci` → `runCI(argv, env)`: boots its own server, skips the build wait, runs
-  against `npm run build-ci` artifacts. CI workflow: `npm ci` → `build-ci` → `bin/ci`.
+  against `bin/build --config=ci` artifacts. CI workflow: `npm ci` (install) → `bin/build --config=ci` → `bin/ci`.
 - Exit codes: `0` pass · `1` failures · `2` runner timeout (the watchdog fires when the
   receiver sees no event for 30s) · `3` no dev environment · `4` build stale ·
-  `5` bad config/flags.
+  `5` bad config/flags · `6` build failed (compile/lint errors).
 
 `up.log.config.format` deliberately stays at its default (`true`): some specs assert on
 the exact `%c`-styled arguments Unpoly passes to `console.warn`/`debug`. The console
@@ -148,7 +148,7 @@ process manager. The rules, in one place:
 
 ## Self-tests
 
-`npm run self-test-runner` (`node --test runner/test/*.test.mjs`, `NO_COLOR=1`) — no
+`bin/self-test` (`node --test runner/test/*.test.mjs`, `NO_COLOR=1`) — no
 browser, no build, runs in a second. Cover changes here rather than through the
 suite. What's covered today:
 

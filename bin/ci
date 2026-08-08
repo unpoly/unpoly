@@ -1,5 +1,5 @@
 #!/usr/bin/env node
 // CI spec runner. Self-contained: boots its own server, runs against the
-// artifacts produced by `npm run build-ci`. Does not wait for a watcher.
+// artifacts produced by `bin/build --config=ci`. Does not wait for a watcher.
 import { runCI } from '../runner/terminal/run.mjs'
 process.exit(await runCI(process.argv.slice(2), process.env))

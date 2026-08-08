@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const fs = require('fs')
 const { execSync } = require('child_process')
 const readline = require('readline')
@@ -74,7 +75,7 @@ function clean() {
 function build() {
   console.log("Compiling a fresh build...")
   console.log()
-  run('npm run build')
+  run('bin/build')
   console.log()
 }
 
