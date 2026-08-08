@@ -1,6 +1,7 @@
 // Orchestration for the terminal runner. Two entry points share one driver:
-//   runDev — assumes `npm run dev` is up: probes the server, waits for the watcher
-//            to produce a build that includes the latest edit, then runs.
+//   runDev — ensures a dev environment (starting one in the background if none is
+//            running), waits for the watcher to produce a build that includes the
+//            latest edit, then runs.
 //   runCI  — self-contained: boots its own server, skips the build wait (build-ci
 //            already produced the artifacts), then runs.
 // Neither reads the CI env var — behavior is chosen by which function is called.
@@ -37,13 +38,12 @@ export async function runDev(argv, env) {
   const config = parseConfig(argv, env)
   if (!config) return CONFIG_ERROR
 
-  // Assume a dev environment (server + watcher). Start one in the background if
-  // it isn't already up, so `bin/test` just works without manual setup.
+  // Start one in the background if none is up, so `bin/test` needs no manual setup.
   if (!(await isDevEnvRunning())) {
     try {
-      console.error(pc.blue('Starting the dev environment (server + watcher) in the background — first build may take ~15s…'))
+      console.error(pc.blue('Starting the dev environment in the background — the first build may take ~15s…'))
       await startDevEnv()
-      console.error(pc.blue('Dev processes kept running in the background — stop with `bin/dev stop`.'))
+      console.error(pc.blue('Dev environment kept running in the background (logs in tmp/dev.log) — stop with `bin/dev stop`.'))
       console.error('')
     } catch (error) {
       console.error(pc.red(error.message))

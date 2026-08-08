@@ -51,10 +51,10 @@ export async function waitForFreshBuild({
 
   let status = read()
   if (!status) {
-    throw new BuildSyncError('Build watcher not running (no tmp/build-status.json). Start it with `npm run dev` (or `npm run watch-dev`).')
+    throw new BuildSyncError('Build watcher not running (no tmp/build-status.json). Start it with `bin/dev`.')
   }
   if (!isAlive(status.pid)) {
-    throw new BuildSyncError('Build watcher not running (its process is gone). Start it with `npm run dev` (or `npm run watch-dev`).')
+    throw new BuildSyncError('Build watcher not running (its process is gone). Start it with `bin/dev`.')
   }
 
   let deadline = now() + timeoutMs

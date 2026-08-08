@@ -1,9 +1,24 @@
 # Notes for AI coding agents
 
+## Directory structure
+
+The project repository is structured using these root directories:
+
+- `src/`: Source code for the Unpoly library.
+- `webpack/`: Webpack configuration.
+- `dist/`: Webpack bundle output. Never read or write to files in `dist`. Gitignored.
+- `node_modules/`: Development dependencies for transpilation and bundling.
+- `bin/`: Development scripts. Also exposed as `npm run` scripts.
+- `spec/`: Jasmine specs.
+- `runner/`: The spec runner for the Jasmine specs.
+
+
+
+## Running tests
+
 Read [`README.md` → Running tests](README.md#running-tests) for the workflow —
 `bin/test`, `--spec` filtering, `--verbose`, the auto-started dev environment, the
-failure report and options. To change the runner itself, read
-[`runner/README.md`](runner/README.md).
+failure report and options.
 
 - **Filter while you work.** After editing `src/unpoly/form.js` (or its spec), run
   `bin/test --spec="up.form"`. The full suite runs in a real browser and takes

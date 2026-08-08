@@ -44,8 +44,8 @@ run.mjs (dev) ── terminal/build_sync.mjs waits until fresh ◄────�
 - `server/` — the Express server and the EJS runner page.
 - `config.mjs` — the one config schema, readable from env / query / `--argv`
   (`Config.fromArgv`, `--key=value`, CLI > env > default, strict on unknown flags).
-- `dev_env.mjs` — start/stop the background dev environment (foreman +
-  `Procfile.test`); `startDevEnv()` resolves once the first build + server are ready.
+- `dev_env.mjs` — the dev environment: one process table, one supervisor, one pid
+  file (`tmp/dev.pid`). See [its own contract](#the-dev-environment) below.
 - `test/` — the self-tests: `npm run self-test-runner`.
 - `bin/test`, `bin/ci`, `bin/dev` — thin **extensionless** executables (shebang +
   `chmod +x`), relying on Node 22's extensionless-ESM detection. The package is
@@ -115,6 +115,36 @@ CSS-selector outline (`#id.class[attr="v"]`, `div` implied when anchored).
 `up.log.config.format` deliberately stays at its default (`true`): some specs assert on
 the exact `%c`-styled arguments Unpoly passes to `console.warn`/`debug`. The console
 wrapper strips the `%c`/CSS while serializing, so the terminal output is clean anyway.
+
+## The dev environment
+
+`dev_env.mjs` owns the dev environment end to end — there is no Procfile and no
+process manager. The rules, in one place:
+
+- **One process table.** A process with a `cwd` lives in a sibling repository: it is
+  skipped when that repository isn't checked out, and its death never takes the
+  environment down. Everything else is required — if it exits, the environment stops.
+- **One supervisor.** `spawnSupervisor()` runs `node runner/dev_env.mjs`, which
+  executes the table and prefixes each child's output with its name. `bin/dev` and
+  `bin/test` spawn the identical supervisor; only its stdio differs (your terminal
+  vs. `tmp/dev.log`).
+- **One pid file.** Both start paths spawn the supervisor `detached`, so its pid *is*
+  a process group id and `killGroup()` sweeps every descendant — `sh`, `npm`, webpack,
+  Ruby and all. `killGroup()` has no bare-pid fallback on purpose: that would signal
+  one process, orphan the descendants, and report success. The parent writes
+  `tmp/dev.pid` (the caller needs the pid at once) and the supervisor removes it as
+  it exits — so a wedged supervisor stays reachable for a second `bin/dev stop`. A
+  file left by a SIGKILLed one is harmless.
+- **One definition of "running"**: `runningDevEnvPid()` — the spec server answers
+  *and* the watcher is alive. It is what `bin/dev` and `runDev()` both ask. The pid
+  file is never trusted on its own; `recordedPid()` reports only live pids.
+- **One readiness check.** `startDevEnv()` resolves only once the watcher has
+  finished a build it *started after the spawn* (so a stale `build-status.json`
+  can't satisfy it) and the server answers. It rejects — killing what it started —
+  if the supervisor dies first or `READY_TIMEOUT` passes, and refuses outright if
+  another environment is already booting.
+- Being detached means Ctrl-C reaches `bin/dev`, not the supervisor, so `bin/dev`
+  forwards the signal.
 
 ## Self-tests
 

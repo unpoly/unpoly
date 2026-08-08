@@ -1,26 +1,38 @@
 #!/usr/bin/env node
-// Control the dev environment (spec server + build watcher).
-//   bin/dev [start]   run it in the foreground (Ctrl-C to stop)
-//   bin/dev stop      stop a background env started by bin/test
-//   bin/dev status    report whether it is running
-import { runDevEnvForeground, stopDevEnv, isDevEnvRunning } from '../runner/dev_env.mjs'
+// Control the dev environment (build watcher + spec server + any sibling projects):
+//   bin/dev [start]   run it in this terminal (Ctrl-C to stop)
+//   bin/dev stop      stop a running environment
+//   bin/dev status    report whether one is running
+// All the logic lives in runner/dev_env.mjs.
+import { runDevEnvForeground, stopDevEnv, runningDevEnvPid } from '../runner/dev_env.mjs'
 import pc from 'picocolors'
 
 const command = process.argv[2] || 'start'
 
 if (command === 'start') {
+  const pid = await runningDevEnvPid()
+  if (pid) {
+    console.log(pc.yellow(`A dev environment is already running (PID ${pid}). Stop with \`bin/dev stop\`.`))
+    process.exit(0)
+  }
   process.exit(await runDevEnvForeground())
 } else if (command === 'stop') {
-  if (stopDevEnv()) {
+  const result = await stopDevEnv()
+  if (result === 'stopped') {
     console.log(pc.blue('Dev environment stopped.'))
     process.exit(0)
   }
-  console.error(pc.red('No background dev environment found to stop.'))
+  if (result === 'foreign') {
+    console.error(pc.red('A dev environment is running that bin/dev did not start. Stop it where you started it.'))
+    process.exit(1)
+  }
+  console.error(pc.red('No dev environment is running.'))
   process.exit(1)
 } else if (command === 'status') {
   // Exit 0 = running, 3 = not running (LSB "status" convention).
-  if (await isDevEnvRunning()) {
-    console.log(pc.green('Dev environment is running.'))
+  const pid = await runningDevEnvPid()
+  if (pid) {
+    console.log(pc.green(`Dev environment is running (PID ${pid}).`))
     process.exit(0)
   }
   console.log(pc.yellow('Dev environment is not running.'))
