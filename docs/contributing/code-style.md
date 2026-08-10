@@ -1,17 +1,58 @@
 # Code style
 
-> **TODO:** This guide is still an outline. The notes below are the intended scope,
-> not finished prose.
+Some of these rules are enforced by ESLint, most are not.
 
-- No types
-- Minimal size is paramount
-  - Unpoly reuses itself heavily
-  - Pass large (render options) options hashes, rather than fetching and re-composing smaller options
-- No dependencies whatsoever
-  - OK to use depenencies for runner, specs, build pipeline
-- No jQuery. Some legacy tests still use jQuery, but they should be refactored away.
-- Acronyms are uppercased, e.g. `parseURL()`, *not* `parseUrl()`.
-- Public names are generally brief
+
+## No types
+
+Unpoly is plain JavaScript. There is no TypeScript, and no build step checks types.
+
+Types are described in [doc comments](documentation.md) only, in a notation loosely
+inspired by TypeScript. They document intent for the reader; no tool verifies them.
+
+
+## Every byte counts
+
+Unpoly isn't the smallest library, but it exposes a lot of functionality per KB, and
+[every line must pull its weight](philosophy.md#values). Two consequences you meet
+while writing code:
+
+- **Unpoly reuses itself heavily.** Before writing a helper, look for an existing one
+  in `up.util` or `up.element`.
+- **Pass large option hashes around**, rather than picking values apart and
+  re-composing smaller ones further down. Render options travel through many
+  functions, and threading the whole object costs fewer bytes than rebuilding it at
+  each level.
+
+We sometimes accept a suboptimal pattern because it saves bytes.
+
+
+## No dependencies
+
+Unpoly has zero runtime dependencies, and always will.
+
+Development dependencies are fine. The spec runner, the specs and the build pipeline
+use plenty.
+
+
+## No jQuery
+
+We don't use jQuery. Public functions accept a jQuery collection wherever they accept
+an element, but that is interop for apps that have jQuery — nothing in Unpoly requires
+it.
+
+Some legacy specs still use jQuery. Refactor them away when you touch them.
+
+
+## Naming
+
+Acronyms are uppercased: `parseURL()`, not `parseUrl()`. Same for `escapeHTML()` or
+`parseRelaxedJSON()`. A *leading* acronym stays lowercase, as camelCase requires:
+`jsonAttr()`.
+
+Public names are brief. They appear in every call site, and often in an HTML
+attribute.
+
 
 ## Linting
 
