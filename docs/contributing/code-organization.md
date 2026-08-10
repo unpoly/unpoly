@@ -179,7 +179,30 @@ up.follow = up.link.follow
 
 ## Entry points and optional bundles
 
-> **TODO:** This section is still an outline. The notes below are the intended
-> scope, not finished prose.
+Files directly in `src/` are Webpack entry points, one per bundle we publish. Everything
+in `src/unpoly/` is only ever reached through one of them.
 
-- Entrypoints and optional bundles
+- `src/unpoly.js` is the main bundle. It is built twice: `unpoly.js` for current
+  browsers, and `unpoly.es6.js` for
+  [older ones](https://unpoly.com/install/legacy-browsers).
+- `src/unpoly-migrate.js` polyfills renamed and removed APIs, so an app can
+  [upgrade](https://unpoly.com/changes/upgrading) without changing all its call sites at
+  once. See [Compatibility](compatibility.md#breaking-changes) for how to write one.
+- `src/unpoly-bootstrap{3,4,5}.js` adapt Unpoly to
+  [Bootstrap](https://unpoly.com/install/bootstrap).
+
+Read one of the Bootstrap entries before you add anything to `src/`. They contain no
+behavior at all — only configuration:
+
+```js
+up.status.config.currentClasses.push('active')
+up.viewport.config.fixedTopSelectors.push('.navbar.fixed-top')
+```
+
+That is the intended shape of an optional bundle: `up.*.config` defaults for one
+ecosystem, plus a sibling `.sass` file. If a bundle seems to need behavior of its own,
+that behavior belongs in a main module, reachable through config from outside.
+`unpoly-migrate` is the exception, and it earns it by shipping polyfills.
+
+A new bundle needs an entry in `webpack/entries.js` *and* its output files listed in
+`bin/release`, or it won't be published.
