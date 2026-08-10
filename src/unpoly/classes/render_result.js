@@ -90,11 +90,12 @@ up.RenderResult = class RenderResult {
   ```js
   let result = await up.render({ url: '/path' }).finished
   console.log(result.fragments)
+  ```
 
   @property up.RenderResult#finished
   @param {Promise<up.RenderResult>} finished
     A promise that settles after all DOM changes.
-  ```
+  @stable
   */
 
   constructor({ layer, target, renderOptions = {}, partialResults = [] } = {}) {
