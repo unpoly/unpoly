@@ -1,6 +1,6 @@
 # Commit conventions
 
-## Subject prefix
+## Message prefix
 
 Every commit subject begins with the [main module](code-organization.md#responsibilities)
 it affects, in square brackets:
@@ -12,12 +12,7 @@ it affects, in square brackets:
 ```
 
 If a change touches several modules, name the one it is mainly about. You don't need
-to list them all. Occasionally two prefixes are combined when both are genuinely the
-subject, e.g. `[specs] [layer] Fix flakey spec with overlay scrollbars`, but one is
-the norm.
-
-
-## When there is no module
+to list them all.
 
 Some commits don't belong to a module. Make up a term that reads like one:
 
@@ -29,20 +24,13 @@ Some commits don't belong to a module. Make up a term that reads like one:
 ```
 
 
-## Never commit generated files
-
-Both `dist/` and `tmp/` are generated and gitignored.
-
-
 ## Continuous integration
 
-CI runs the whole suite in six Chrome configurations: without CSP, under a nonce-only
+CI runs the whole suite in multiple Chrome configurations: without CSP, under a nonce-only
 CSP, under a strict-dynamic CSP, against the `unpoly-migrate` build, against the ES6
 build and against the minified build.
 
-It runs on every pull request against `master`, and on every push to `master`. Pushing
-a feature branch on its own does *not* trigger it, so open the pull request if you want
-CI to see your work.
+It runs on every pull request against `master`, and on every push to `master`.
 
 
 ## If you are an agent
