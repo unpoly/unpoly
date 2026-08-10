@@ -9,7 +9,7 @@
   - Pass large (render options) options hashes, rather than fetching and re-composing smaller options
 - No dependencies whatsoever
   - OK to use depenencies for runner, specs, build pipeline
-- No jQuery
+- No jQuery. Some legacy tests still use jQuery, but they should be refactored away.
 - Acronyms are uppercased, e.g. `parseURL()`, *not* `parseUrl()`.
 - Public names are generally brief
 

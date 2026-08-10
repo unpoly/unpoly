@@ -2,16 +2,13 @@
 
 ## Referring to features
 
-- The word "user" is used inconsistently. Depending on context it can mean different roles. Prefer these more specific terms in new docs:
-  - The "developer" who is building an Unpoly-enhanced application.
-  - The "visitor" who is interacting with that application.
-  - The "maintainer" who is maintaining the Unpoly framework project.
-- Because Unpoly has many similar-sounding APIs, the documentation uses consistent syntax to distinguish DOM elements, attributes, classes, JS functions and non-function values:
-  - E.g. "the element is assigned an `.up-loading` class" (think CSS)
-  - E.g. "set an `[up-target]` attribute" (think CSS)
-  - E.g. "this will update the `<main>` element" (deviating from CSS here)
-  - E.g. "Call the `up.render()` function" (functions are referred to with parentheses)
-  - E.g. "Configure the `up.form.config.watchInputDelay` property" (no parentheses for non-function values)
+Because Unpoly has many similar-sounding APIs, the documentation uses consistent syntax to distinguish DOM elements, attributes, classes, JS functions and non-function values:
+
+- E.g. "the element is assigned an `.up-loading` class" (think CSS)
+- E.g. "set an `[up-target]` attribute" (think CSS)
+- E.g. "this will update the `<main>` element" (deviating from CSS here)
+- E.g. "Call the `up.render()` function" (functions are referred to with parentheses)
+- E.g. "Configure the `up.form.config.watchInputDelay` property" (no parentheses for non-function values)
 
 ## More sections (must be split)
 
@@ -22,10 +19,10 @@
 - Documentation is parsed and served by sibling project (../unpoly-site)
   - This is a Middleman site (static site generator, Ruby based)
     - This also parses our JSDoc extension
+    - Ensure unpoly-site has a good README (install Ruby, bundle install) and link to that
   - If exists, dev environment will boot it and serve on http://localhost:4567
   - Changes in underlying code, will be picked up after reload
   - Restart dev env if you add new pages rather than updating existing ones (new API, new doc pages)
-- Refer to elements using CSS selectors (see terminology & syntax section)
 - Most API references is defined over the code that defines it
   - All APIs get a top-level doc site path with their slug-ified name, e.g.
     - `@function up.render` => `/up.render`
@@ -37,13 +34,19 @@
     - Features with many params can be grouped into sections, only relevant for documentation display
     - Types losely inspired by TypeScript, but no formal syntax
     - Example with options
+  - If a function/listener/etc. defines multiple API symbols in one go, the main API is documented ABOVE the code and all the side effect APIs are documented BELOW the code
+    - Example: A function up.fn() emits two events up:foo, and up:bar, then the code order is
+      1. docs for up.fn()
+      2. impl for up.fn()
+      3. docs for up:foo
+      4. docs for up:bar
 - Magic comments in code blocks (syntax_highlighting.js)
   - Use comment syntax of respective language
   - Highlight line (`// mark-line`)
   - Highlight phrase in line (`// mark: up-target`)
   - Block Caption (`// label: Bad example`)
   - Chip (`// chip: Content goes here`)
-  - Return (`// return: [1, 2, 3]`)
+  - Return (`// result: [1, 2, 3]`)
 - Explain `src/unpoly/pages/` ("guide pages")
   - Overarching holistic guides, each covering one topic, tying all the API parts together, driven by developer view
   - These should have the best docs and examples
@@ -58,3 +61,6 @@
   - e.g. the guide pages and technical references share paragraphs or tables
   - Can be included with @include
 - Explain @mix, 
+- Visibilities
+  - Only experimental, deprecated, stable are shown
+  - Params can have their own visibilities

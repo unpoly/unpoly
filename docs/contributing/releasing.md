@@ -6,3 +6,5 @@ process run:
 ```
 bin/release
 ```
+
+Agents should never make a release.

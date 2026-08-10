@@ -122,6 +122,11 @@ To illustrate, here is a *very* simplified version of `up.link`:
 // An Unpoly "module" is simply an object property of the `window.up` global.
 // Here we assign `up.link` to an IIFE that returns the public symbols (classic "module pattern")
 up.link = (function() {
+  
+  // Short aliases for our two utility modules.
+  const u = up.util
+  const e = up.element
+  
   // Settings to globally configure link handling.
   // Published as up.link.config.
   const config = new up.Config(() => ({
