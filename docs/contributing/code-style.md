@@ -5,10 +5,11 @@ Some of these rules are enforced by ESLint, most are not.
 
 ## No types
 
-Unpoly is plain JavaScript. There is no TypeScript, and no build step checks types.
+Unpoly is plain JavaScript, and nothing type-checks it. The build runs the source
+through TypeScript, but only to transpile it.
 
-Types are described in [doc comments](documentation.md) only, in a notation loosely
-inspired by TypeScript. They document intent for the reader; no tool verifies them.
+Types appear in [doc comments](documentation.md) only, in a notation loosely inspired by
+TypeScript. They document intent for the reader; no tool verifies them.
 
 
 ## Every byte counts
