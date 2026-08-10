@@ -2,37 +2,36 @@
 
 A collection of guides to help humans and agents work on the Unpoly framework.
 
-Each section below summarizes a guide and says when to read it in full.
-\
-The summaries are
-deliberately not sufficient: they exist so you can tell which guide you need, not so
-you can skip it.
+Each section below summarizes a guide and says when to read it in full.\
+The summaries are deliberately not sufficient: they exist so you can tell which guide
+you need, not so you can skip it.
 
 
 ### [🍭 First change walkthrough](docs/contributing/first-change.md)
 
 > A quick end-to-end pass through a typical change:\
-> Implement a new `[up]` attribute, spec it,document it, commit it.
+> Implement a new `[up-*]` attribute, spec it, document it, commit it.
 
-[Start with the walkthrough](docs/contributing/first-change.md) if this is your first change to Unpoly,
+[Start with the walkthrough](docs/contributing/first-change.md) if this is your first change to Unpoly.
 
 
 ### [💻 Setting up a dev environment](docs/contributing/dev-environment.md)
 
 > Tests don't run against `src/` directly, but against a transpiled
 > build in `dist/`.\
-> The `bin/dev` tools boots a build watcher, test server and the documentation site.
+> The `bin/dev` tool boots a build watcher, a test server and the documentation site.
 
-[Read the dev environment guide](docs/contributing/dev-environment.md) for trying out your changes,
+[Read the dev environment guide](docs/contributing/dev-environment.md) before trying out your changes,
 or when you suspect a stale build.
 
 
 ### [🎓 Philosophy](docs/contributing/philosophy.md)
 
-> Values that guide us when we decide which features to add, and how we design them, how we review code.
+> Values that guide us when we decide which features to add, how we design them, and
+> how we review code.
 > Explains the shape of Unpoly's public API and internal implementation.
-> Common use cases must have minimal call sites, complex use cases must be possible through
-> configuration and escape hatches.
+> Common use cases must have minimal call sites; complex use cases must be possible
+> through configuration and escape hatches.
 
 [Read our philosophy](docs/contributing/philosophy.md) before designing a new
 feature, or before reviewing someone else's.
@@ -41,7 +40,7 @@ feature, or before reviewing someone else's.
 ### [🗂️ Code organization](docs/contributing/code-organization.md)
 
 > Where files live, why Unpoly is a `window.up` global, which module owns which topic,
-> how we structure modules internally, how to find tests for a given file.
+> how we structure modules internally, and how to find tests for a given file.
 
 [Read the code organization guide](docs/contributing/code-organization.md) before
 adding or moving code.
@@ -55,14 +54,15 @@ adding or moving code.
 > async code. Filtering to the module you're editing turns a multi-minute suite into a few seconds.
 
 [Read the full testing guide](docs/contributing/testing.md) before writing or changing a spec.
+Many old specs use deprecated patterns, so don't copy a neighbour.
 
 
 ### [📖 Documentation](docs/contributing/documentation.md)
 
-> All public API must be documented thoroughly. 
+> All public API must be documented thoroughly.
 > API references live in `/*- ... */` doc comments beside the code they describe,
 > written in a superset of JSDoc with custom directives like `@selector`.
-> Additionally holistic guides in `src/unpoly/pages` show how to tie multiple features
+> Additionally, holistic guides in `src/unpoly/pages` show how to tie multiple features
 > together for common use cases. A sibling repo (`../unpoly-site`) parses and serves all of it.
 
 [Read the full documentation guide](docs/contributing/documentation.md) before
@@ -74,7 +74,7 @@ changing documentation. The directive set is large and you won't guess it.
 > No types, no dependencies, no jQuery.
 > Byte count is a real constraint that sometimes
 > justifies unconventional code.
-> You can run ESLint rules with `bin/lint`.
+> You can run ESLint with `bin/lint`.
 
 [Skim the code style guide](docs/contributing/code-style.md) before showing your code to someone else.
 
@@ -92,8 +92,8 @@ commit.
 
 ### [⚙️ Rendering core deep-dive](docs/contributing/rendering.md)
 
-> Most calls to Unpoly end up in `up.render()`, which is the most complicated
-> sub-system in Unpoly. It negotiates target selectors, makes requests, deals
+> Most calls to Unpoly end up in `up.render()`, its most complicated sub-system.
+> It negotiates target selectors, makes requests, deals
 > with unexpected responses and might update many elements or multiple layers.
 > Control flow moves through numerous functions and objects.
 
