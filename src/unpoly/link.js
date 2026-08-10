@@ -559,7 +559,7 @@ up.link = (function() {
       but no elements will be changed while preloading.
 
   @section Request
-    @params {string} [options.url]
+    @param {string} [options.url]
       The URL to preload.
 
       Defaults to the link's `[href]` attribute.
