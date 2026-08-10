@@ -48,10 +48,7 @@ Getting started
 Contributing
 ------------
 
-To work on Unpoly itself — setting up a dev environment, running the specs, writing
-documentation, our code style and commit conventions — see
-[`CONTRIBUTING.md`](CONTRIBUTING.md). It is written for both humans and AI coding
-agents.
+- See [`CONTRIBUTING.md`](CONTRIBUTING.md) for how to work on the Unpoly framework itself.
 
 
 License

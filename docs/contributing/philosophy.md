@@ -2,7 +2,7 @@
 
 ## Values
 
-These values guide us when we decide which features to add, and how we design them.
+These values guide us when we decide which features to add, how we design new features, and how we review code.
 
 - **Unpoly is app-centric HTML from the future.** We extend the document-centric HTML with functionality required by non-trivial, interactive web applications. This enables use cases traditionally thought to require heavy JS, e.g. for dynamic forms, intricate overlay interactions or optimistic rendering.
 - **Backend agnostic.** Unpoly works with any server framework that produces HTML, or even with a folder with static HTML. We don't require a frontend build pipeline.
