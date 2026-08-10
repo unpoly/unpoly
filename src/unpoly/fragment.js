@@ -3184,6 +3184,7 @@ up.fragment = (function() {
   @param {Function(Element): Function(Element)} callback
     A callback that is called when we discover a new match.
     The callback can return another function that is called when that element no longer matches.
+  @internal
   */
   function trackSelector(...args) {
     let parsedArgs = u.args(args, 'val', 'options', 'callback')

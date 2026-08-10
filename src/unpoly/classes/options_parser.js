@@ -18,6 +18,7 @@ up.OptionsParser = class OptionsParser {
   @param {Object} parserOptions.defaults
     An object of default key/values if an option can neither be found in `options`
     nor can be parsed from `element`.
+  @internal
   */
   constructor(element, options, parserOptions = {}) {
     this._options = options

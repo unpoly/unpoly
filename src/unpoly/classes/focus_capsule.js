@@ -24,6 +24,7 @@ up.FocusCapsule = class FocusCapsule {
   ```
 
   @function up.FocusCapsule.prototype.autoVoid
+  @internal
   */
   autoVoid() {
     up.on('focusin', { once: true }, () => this._voided = true)
