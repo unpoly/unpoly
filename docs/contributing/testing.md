@@ -19,8 +19,9 @@ the background if none is running.
 
 **Filter while you work.** After editing `src/unpoly/form.js` (or its spec), run
 `bin/test --spec="up.form"`. The full suite runs in a real browser and takes
-several minutes; run it unfiltered only as a final gate, and note that CI runs the
-full matrix on push anyway.
+several minutes, so run it unfiltered only as a final gate — and note that
+[CI](commit-conventions.md#continuous-integration) runs the full matrix once you open
+a pull request.
 
 A run with one failing spec looks like this:
 

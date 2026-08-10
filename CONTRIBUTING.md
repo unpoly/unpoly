@@ -82,7 +82,7 @@ changing documentation. The directive set is large and you won't guess it.
 ### [✉️ Commit conventions](docs/contributing/commit-conventions.md)
 
 > Commit messages are prefixed with the main module in square brackets, e.g.
-> `[link] Ignore CTRL clicks`. CI runs all tests on push.
+> `[link] Ignore CTRL clicks`. CI runs all tests on every pull request.
 > Agents should ask their human before committing, pushing or opening a
 > pull request.
 

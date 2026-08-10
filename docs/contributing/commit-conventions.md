@@ -1,19 +1,50 @@
 # Commit conventions
 
-Never commit anything in `dist/` or `tmp/` — both are generated and gitignored.
+## Subject prefix
 
-Agents should ask their human before committing, pushing or opening a pull request.
+Every commit subject begins with the [main module](code-organization.md#responsibilities)
+it affects, in square brackets:
 
-> **TODO:** This guide is still an outline. The notes below are the intended scope,
-> not finished prose.
+```
+[link] Ignore clicks when user holds CTRL, Shift or Meta key
+[layer] Dismiss popup when user clicks on background element
+[form] Support form attribute to associate outside elements with a form ID
+```
 
-- Main Module in square brackets
-  - Don't need to list it all
-  - E.g. `[link] Ignore clicks when user holds CTRL, Shift or Meta key`
-  - E.g. `[layer] Dismiss popup when user clicks on background element`
-  - E.g. `[form] Support form attribute to associate outside elements with a form ID`
-- Sometimes there isn't a module, then we make up a term
-  - E.g. `[build] Upgrade Webpack`
-  - E.g. `[version] Bump version to 3.5.0`
-  - E.g. `[specs] Replace old fixtures helper`
-- CI runs for PRs
+If a change touches several modules, name the one it is mainly about. You don't need
+to list them all. Occasionally two prefixes are combined when both are genuinely the
+subject, e.g. `[specs] [layer] Fix flakey spec with overlay scrollbars`, but one is
+the norm.
+
+
+## When there is no module
+
+Some commits don't belong to a module. Make up a term that reads like one:
+
+```
+[build] Upgrade Webpack
+[version] Version 3.5.0
+[specs] Replace old fixtures helper
+[docs] Document optimistic rendering
+```
+
+
+## Never commit generated files
+
+Both `dist/` and `tmp/` are generated and gitignored.
+
+
+## Continuous integration
+
+CI runs the whole suite in six Chrome configurations: without CSP, under a nonce-only
+CSP, under a strict-dynamic CSP, against the `unpoly-migrate` build, against the ES6
+build and against the minified build.
+
+It runs on every pull request against `master`, and on every push to `master`. Pushing
+a feature branch on its own does *not* trigger it, so open the pull request if you want
+CI to see your work.
+
+
+## If you are an agent
+
+Ask your human before committing, pushing or opening a pull request.

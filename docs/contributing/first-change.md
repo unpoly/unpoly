@@ -311,10 +311,9 @@ git commit -m "[docs] Document up.form.trim() and [up-trim]"
 
 ## Opening a pull request
 
-Push the branch and open a pull request with all three commits. CI runs the whole
-suite on every push, so you don't have to run `bin/test` unfiltered yourself — though
-it only takes [a few minutes](testing.md#running-tests) if you want to see it green
-first.
+Push the branch and open a pull request with all three commits. Opening it is what
+starts [CI](commit-conventions.md#continuous-integration), which runs the whole suite
+in six configurations — pushing a branch on its own runs nothing.
 
 If you are an agent, ask your human before committing, pushing or opening a pull
 request. See [commit conventions](commit-conventions.md) for the details.
