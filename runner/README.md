@@ -72,6 +72,12 @@ so webpack's `require.context` picks it up.
 - `failure` (failed specs only): `{ log: string[], dom: DomNode[] }`. Log lines are
   already serialized strings; `dom` is a tree, not HTML.
 - `DomNode`: `{ tag, id, classes[], attrs{}, children: (DomNode | { text })[] }`.
+- `dom` is rooted at `<body>`, so it also captures elements a spec attached outside
+  `#fixtures` and state Unpoly writes onto `body` itself. Jasmine's own
+  `.jasmine_html-reporter` subtree is excluded — it renders every spec result and runs to
+  thousands of nodes. A `MAX_NODES` budget (600, counting elements *and* text nodes)
+  bounds the payload; if it clips, the producer appends a `{ text }` marker saying so
+  rather than truncating silently.
 - Node derives top-level groups from `suiteStarted`/`suiteDone` depth (depth 1 = group).
 
 ### `specs:reset` (browser `CustomEvent`)
@@ -97,9 +103,10 @@ One format, with `--verbose` as a detail toggle — there is no `output` enum an
 
 Normal: a progress line per top-level group (`up.layer .....F... 8 passed, 1 failed`),
 then a numbered failure list (message + compact stack + deep-link), then a summary.
-The compact stack drops `node_modules/**` frames and renders `path:line in fn()`.
-`--verbose` adds the full stack, the browser log, and the HTML state as a
-CSS-selector outline (`#id.class[attr="v"]`, `div` implied when anchored).
+The compact stack keeps just two frames — the topmost in a `spec/` file and the topmost
+in `src/` — and renders them `path:line in fn()`. `--verbose` keeps every frame, and adds
+the browser log plus the HTML state as a CSS-selector outline (`#id.class[attr="v"]`,
+`div` implied when anchored).
 
 ## Lifecycle
 
