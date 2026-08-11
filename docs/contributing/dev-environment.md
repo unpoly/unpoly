@@ -35,9 +35,9 @@ If a build has errors — a syntax slip, or an ESLint violation — `bin/test` p
 them instead of running the specs and exits non-zero, and `bin/dev status` reports
 them too. The watcher itself keeps running, so your next edit can fix things.
 
-`bin/dev` also boots the sibling repositories
+`bin/dev` also boots the (optional) sibling repositories
 [`unpoly-manual-tests`](https://github.com/unpoly/unpoly-manual-tests) and
-[`unpoly-site`](https://github.com/unpoly/unpoly-site), if you have them checked out
+[`unpoly-site`](https://github.com/unpoly/unpoly-site), *if* you have them checked out
 next to this repository:
 
 ```
