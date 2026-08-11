@@ -379,7 +379,7 @@ describe('up.util', () => {
         })
 
         it('returns true for a NodeList with the same elements', function() {
-          const parent = e.affix(document.body, '.parent')
+          const parent = fixture('.parent')
           const child1 = e.affix(parent, '.child.one')
           const child2 = e.affix(parent, '.child.two')
 
@@ -390,7 +390,7 @@ describe('up.util', () => {
         })
 
         it('returns true for a HTMLCollection with the same elements', function() {
-          const parent = e.affix(document.body, '.parent')
+          const parent = fixture('.parent')
           const child1 = e.affix(parent, '.child.one')
           const child2 = e.affix(parent, '.child.two')
 
