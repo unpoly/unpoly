@@ -79,6 +79,9 @@ The spec runner itself is documented in [`runner/README.md`](../../runner/README
 - Chrome easier to debug for humans (can use DevTools)
 - Organization
   - Finding specs
+  - Organization in a spec
+    - Usually module => JavaScript functions | unobtrusive behavior => tests by function or feature 
+    - Large functions or feature often get another nesting group by topic or option
   - Running only single spec
   - Running only single example
     - Nested example groups are joined by space
