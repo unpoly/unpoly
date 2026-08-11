@@ -38,5 +38,16 @@ them too. The watcher itself keeps running, so your next edit can fix things.
 `bin/dev` also boots the sibling repositories
 [`unpoly-manual-tests`](https://github.com/unpoly/unpoly-manual-tests) and
 [`unpoly-site`](https://github.com/unpoly/unpoly-site), if you have them checked out
-next to this repository. See [Testing](testing.md) and
-[Documentation](documentation.md) respectively.
+next to this repository:
+
+```
+projects/
+  unpoly/                 # this repository
+  unpoly-site/            # unpoly.com (Ruby) — serves on port 4567
+  unpoly-manual-tests/    # manual test app (Ruby) — serves on port 4001
+```
+
+The directory names matter. `unpoly-site` reaches this repository through a committed
+symlink that expects to find it at `../unpoly`.
+
+See [Testing](testing.md) and [Documentation](documentation.md) respectively.
