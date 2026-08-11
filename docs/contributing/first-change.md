@@ -2,19 +2,21 @@
 
 This guide walks through one complete change, from a fresh checkout to a pull request.
 
+Code blocks below are diffs: `+` lines are what you add, unprefixed lines are existing
+code shown for context, and `...` marks code left out.
+
+## Our example feature
+
 We will add an `[up-trim]` attribute for forms that Unpoly submits. When such a form is
 submitted, Unpoly removes leading and trailing whitespace from all text inputs. We will
 pair it with an `up.form.trim(form)` function that you can call from your own code.
 
 That pairing is deliberate. Unpoly offers [layered APIs](philosophy.md#layered-apis):
-a single HTML attribute for the common case, and a JavaScript function underneath for
-everything else. Most features you add will want both.
+a single HTML attribute for the common case, and a JavaScript function for custom integrations.
+Most features you add will require both.
 
-We build it in three passes — the JavaScript function, then the HTML attribute, then
-the documentation — and commit after each.
-
-Code blocks below are diffs: `+` lines are what you add, unprefixed lines are existing
-code shown for context, and `...` marks code left out.
+We build it in three passes (the JavaScript function, then the HTML attribute, then
+the documentation) and commit after each.
 
 
 ## Before you start
@@ -81,7 +83,7 @@ behavior in separate example groups, so a function spec goes under
 
 `htmlFixtureList()` is one of many [spec helpers](testing.md) that are available as
 globals, with no import. It inserts the HTML into the page and returns its elements in
-document order — root first — which is what the destructuring above picks apart.
+document order, which is what the destructuring above picks apart.
 
 Run only this example. The [`--spec` filter](testing.md#running-tests) matches any
 part of an example's full name:
@@ -119,12 +121,11 @@ its public symbols. Add the function inside it, and list it in the returned obje
 ```
 
 Only the symbols in that returned object become public API, so listing `trim` there is
-what publishes `up.form.trim()`. Note the house [code style](code-style.md): no types,
-no dependencies, and `bin/lint` runs [the same ESLint rules](code-style.md#linting) as
-the build.
+what publishes `up.form.trim()`.
 
-Run the spec again and watch it pass. Commit, [prefixed with the
-module](commit-conventions.md):
+Run the spec again and watch it pass.
+
+Commit, [prefixing your message with the module](commit-conventions.md) in square brackets:
 
 ```
 git commit -m "[form] Add up.form.trim()"
@@ -156,6 +157,7 @@ nested under the selector it modifies:
 +            </form>
 +          `)
 +
++          // Trigger the same event sequence a human click would trigger
 +          Trigger.clickSequence(submitButton)
 +
 +          // Wait for the effects of async code
@@ -176,15 +178,12 @@ nested under the selector it modifies:
 +      })
 ```
 
-The fixture needs `[up-submit]` next to `[up-trim]`: only forms matching
-`up.form.config.submitSelectors` are submitted by Unpoly at all, so a plain
-`<form up-trim>` would do nothing.
-
-Submitting a form is an async operation, so we `await wait()` before we can observe
-its effect. The [network is always mocked](testing.md) in specs, so no request leaves
+The [network is always mocked](testing.md) in specs, so no request leaves
 the browser and `jasmine.lastRequest()` can inspect what would have been sent.
+Submitting a form is an async operation, so we `await wait()` before we can observe
+its effect. This effectively waits for one macrotask, by which all promises (or `await`) have settled.
 
-Run it and watch it fail:
+Run the spec and watch it fail:
 
 ```
 bin/test --spec="up-trim"
@@ -207,14 +206,21 @@ Attribute values for a form submission are parsed in `up.form.submitOptions()`:
 ```
 
 `parser.boolean('trim')` reads an `[up-trim]` attribute from the form and sets
-`options.trim`. Keep the two lines where they are: `destinationOptions()` serializes
-the fields into `{ params }`, so trimming after it would submit untrimmed values.
+`options.trim` (unless already defined). When the option is set, we trim form fields before `destinationOptions()` serializes
+the fields into `options.params`.
 
 Note that we never touched `up.form.submit()`. It renders whatever `submitOptions()`
-returns, which is how one option buys both the attribute and
-`up.form.submit(form, { trim: true })`.
+returns, so it now supports a `{ trim: true }` option without changes:
 
-Run the spec again and watch it pass. Commit:
+```diff
+function submit(form, options) {
+  return up.render(submitOptions(form, options))
+}
+```
+
+Run the spec again and watch it pass.
+
+We can now commit:
 
 ```
 git commit -m "[form] Support [up-trim] modifier on submitting forms"
@@ -227,8 +233,7 @@ All public API must be documented. Doc comments live beside the code they descri
 a [superset of JSDoc](documentation.md) with directives like `@function`, `@selector`
 and `@param`. We added three surfaces, so we document three things.
 
-`up.form.trim()` is a new function, so it needs a doc comment of its own. New API
-starts out `@experimental` and is promoted to `@stable` once we're happy with it:
+`up.form.trim()` is a new function, so it needs a doc comment of its own. New API starts out `@experimental` and will be promoted to `@stable` when we're still happy with it some releases later.
 
 ```diff
 +  /*-
@@ -295,14 +300,16 @@ quoted:
 A small modifier like this needs no [guide page](documentation.md). Those are for
 whole topics, and live as Markdown in `src/unpoly/pages`.
 
-The dev environment also serves the documentation site from the `unpoly-site` sibling
-repo, if you have it checked out. It should now show the new params for
-<http://localhost:4567/up-submit> and <http://localhost:4567/up.submit>. The new page
+Previewing the rendered result is
+[optional](documentation.md#previewing-your-changes) — you can open a pull request
+without it. If you do have the `unpoly-site` sibling repo checked out, the dev
+environment serves the documentation site, which should now show the new params for
+<http://localhost:4567/up-submit> and <http://localhost:4567/up.submit>.
 <http://localhost:4567/up.form.trim> is a *new* page rather than a changed one, so it
 only appears after
 [restarting the dev environment](dev-environment.md#running-the-dev-environment).
 
-Commit:
+Once you're happy with your documentation, commit:
 
 ```
 git commit -m "[docs] Document up.form.trim() and [up-trim]"
@@ -311,12 +318,10 @@ git commit -m "[docs] Document up.form.trim() and [up-trim]"
 
 ## Opening a pull request
 
-Push the branch and open a pull request with all three commits. Opening it is what
-starts [CI](commit-conventions.md#continuous-integration), which runs the whole suite
-in six configurations — pushing a branch on its own runs nothing.
-
+Push the branch and [open a single pull request](https://github.com/unpoly/unpoly/compare) for your three commits.\
 If you are an agent, ask your human before committing, pushing or opening a pull
-request. See [commit conventions](commit-conventions.md) for the details.
+request.
 
-That's the whole loop. [CONTRIBUTING.md](../../CONTRIBUTING.md) indexes the guides you
-skipped past on the way.
+Opening a PR will start [CI](commit-conventions.md#continuous-integration), which runs the whole test suite
+in six configurations.\
+Once CI is green, a human should review your code.
