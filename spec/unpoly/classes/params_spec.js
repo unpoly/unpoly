@@ -91,15 +91,6 @@ describe('up.Params', function() {
     })
   })
 
-//    describeCapability 'canInspectFormData', ->
-//
-//      it 'converts a FormData object to a query string', ->
-//        fd = new FormData()
-//        fd.append('key1', 'value1')
-//        fd.append('key2', 'value2')
-//        string = toQuery(fd)
-//        expect(string).toEqual('key1=value1&key2=value2')
-
   describe('#toArray', function() {
 
     it('normalized null to an empty array', function() {
@@ -196,17 +187,6 @@ describe('up.Params', function() {
     })
   })
 
-//    describeCapability 'canInspectFormData', ->
-//
-//      it 'converts a FormData object to an array', ->
-//        fd = new FormData()
-//        fd.append('key1', 'value1')
-//        fd.append('key2', 'value2')
-//        array = toArray(fd)
-//        expect(array).toEqual([
-//          { name: 'key1', value: 'value1' },
-//          { name: 'key2', value: 'value2' },
-//        ])
 
 
   describe('#toFormData', function() {

@@ -1,12 +1,5 @@
 const u = up.util
 const e = up.element
-const $ = jQuery
-
-beforeEach(function() {
-  this.lastRequest = jasmine.lastRequest
-  this.respondWith = jasmine.respondWith
-  this.respondWithSelector = jasmine.respondWithSelector
-})
 
 jasmine.lastRequest = function() {
   return jasmine.Ajax.requests.mostRecent() || up.fail('There is no last request')

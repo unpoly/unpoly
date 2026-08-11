@@ -20,7 +20,7 @@ const THROTTLE_MAX_WINDOW_ACTIONS = AgentDetector.isSafari() ? 100 : 200
 const THROTTLE_MAX_SPEC_ACTIONS = 40 // the maximum number of history changes we expect in a spec
 const THROTTLE_CLOCK_INACCURACY = 1100
 
-window.safeHistory = new (class {
+const safeHistory = new (class {
   constructor() {
     this.logEnabled = false
     this.cursor = -1 // we don't know the initial state

@@ -524,12 +524,10 @@ describe('up.fragment', function() {
 
       describe('layer matching', function() {
 
-        beforeEach(function(done) {
+        beforeEach(async function() {
           this.rootElement = fixture('.element.in-root')
-          fixtureInOverlay('.element.in-overlay').then((element) => {
-            this.overlayElement = element
-            done()
-          })
+          this.overlayElement = e.createFromSelector('.element.in-overlay')
+          await up.layer.open({ fragment: this.overlayElement })
         })
 
         it('matches elements in the current layer only', function() {

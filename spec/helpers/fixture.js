@@ -80,9 +80,3 @@ window.registerFixture = registerExternalFixture
 
 // A lot of legacy tests require this jQuery function
 $.fn.affix = function(...args) { return $(e.affix(this[0], ...args)) }
-
-// TODO: Replace me with makeLayers()
-window.fixtureInOverlay = function(target, ...args) {
-  const fragment = e.createFromSelector(target, ...args) // will be destroyed when the stack is reset
-  return up.layer.open({ fragment }).then(() => fragment)
-}

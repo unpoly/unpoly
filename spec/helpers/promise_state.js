@@ -2,7 +2,7 @@
 // Unfortunately Promise.race() converts *all* non-native thenables to native Promises
 // using Promise.resolve(). This way the thenable takes another microtask tick to fulfill,
 // and can never win the race.
-window.raceThenables = function(promises) {
+function raceThenables(promises) {
   return new Promise(function(resolve, reject) {
     var finished = false
 
