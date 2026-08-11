@@ -3610,13 +3610,13 @@ describe('up.util', () => {
       })
 
     })
-    
+
     describe('parseNumber()', function() {
 
       it("parses the given string as an integer", function() {
         expect(up.util.parseNumber('123')).toBe(123)
       })
-  
+
       it("parses the given string as a float", function() {
         expect(up.util.parseNumber('123.45')).toBe(123.45)
       })
@@ -3628,20 +3628,20 @@ describe('up.util', () => {
       it("ignores underscores for digit groups", function() {
         expect(up.util.parseNumber('123_000')).toBe(123000)
       })
-  
+
       it("parses a negative number", function() {
         expect(up.util.parseNumber('-123')).toBe(-123)
       })
-  
+
       it("parses negative zero (-0)", function() {
         let parsed = up.util.parseNumber('-0')
         expect(Object.is(parsed, -0)).toBe(true)
       })
-  
+
       it("returns undefined for a string cannot be parsed as a number", function() {
         expect(up.util.parseNumber('bar')).toBeUndefined()
       })
-  
+
       it("returns undefined for undefined", function() {
         expect(up.util.parseNumber(undefined)).toBeUndefined()
       })
@@ -3667,6 +3667,6 @@ describe('up.util', () => {
       })
 
     })
-    
+
   })
 })
