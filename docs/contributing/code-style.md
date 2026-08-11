@@ -47,12 +47,12 @@ Some legacy specs still use jQuery. Refactor them away when you touch them.
 
 ## Naming
 
+Public names are brief. They appear in every call site, and often in an HTML
+attribute.
+
 Acronyms are uppercased: `parseURL()`, not `parseUrl()`. Same for `escapeHTML()` or
 `parseRelaxedJSON()`. A *leading* acronym stays lowercase, as camelCase requires:
 `jsonAttr()`.
-
-Public names are brief. They appear in every call site, and often in an HTML
-attribute.
 
 
 ## Linting
