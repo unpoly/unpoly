@@ -5,6 +5,7 @@
 Source lives in `src/unpoly/`; each module `foo.js` has a spec
 `spec/unpoly/foo_spec.js`.
 
+
 ## Running tests
 
 Unpoly's specs run in a real browser, driven from your terminal:
@@ -54,6 +55,58 @@ and re-running is usually the quickest way to inspect state — and the only way
 can't open a browser. When you genuinely need DevTools, open the `Debug in browser:`
 URL from a failing run rather than trying to step-debug the headless browser.
 
+**`--verbose` adds the state you would otherwise have to guess at.** Re-running a
+failure with the flag keeps everything above and adds the browser log plus an outline of
+the DOM as it stood when the spec failed:
+
+```
+F1) state demo → shows the HTML state on failure
+
+  Failure/error:
+    Expected 'foo@example.com' to equal 'bar@example.com'.
+
+  Stacktrace:
+    <jasmine internals>
+    spec/unpoly/tmp_state_demo_spec.js:15 in anonymous function
+    <jasmine internals>
+
+  Browser log:
+    log: field value is "foo@example.com"
+
+  HTML state:
+    body
+      default-fallback
+      #fixtures
+        form#signup.signup-form[method="post"][action="/action"][up-submit]
+          input[type="text"][name="email"][value="foo@example.com"]
+          button[type="submit"]
+            Sign up
+      #outside-fixtures
+        attached outside #fixtures
+
+  Debug in browser:
+    http://localhost:4000/specs?spec=state%20demo%20shows%20the%20HTML%20state%20on%20failure
+```
+
+The HTML state is a tree of CSS selectors rather than raw markup, which keeps a large
+fixture readable: `div` is implied for an element anchored by id or class, attributes
+appear in brackets, and text nodes are shown as indented text. That outline is usually
+enough to identify the problem without opening a browser — a fixture that was never
+compiled, an overlay still on the stack, a fragment inserted in the wrong place, or an
+attribute you expected Unpoly to have set.
+
+It is rooted at `body`, so it includes elements attached outside `#fixtures` and any
+state Unpoly wrote onto `body` itself. Jasmine's own reporter is excluded, and
+`default-fallback` is a container the spec harness adds to every layer so that specs
+always have a main target. Very large trees are clipped at 600 nodes, with a line saying
+so — if you hit that, narrow the fixture rather than trusting what's shown.
+
+`--verbose` also changes the stack. The compact form shows just two lines — the topmost
+frame in a spec file (which spec failed) and the topmost frame in `src/` (where in Unpoly
+it originated) — while the verbose form keeps every frame. The `<jasmine internals>`
+markers are Jasmine's own work: it collapses its internal frames before the runner ever
+sees the stack.
+
 **Options:**
 
 | Option | Effect |
@@ -67,59 +120,419 @@ URL from a failing run rather than trying to step-debug the headless browser.
 
 (`--minify` is also accepted but needs a minified build — `bin/build --config=ci`.)
 
-The spec runner itself is documented in [`runner/README.md`](../../runner/README.md).
+A failed spec exits with a non-zero exit code, so `bin/test` composes with other
+tooling. The spec runner itself — its exit codes, architecture and self-tests — is
+documented in [`runner/README.md`](../../runner/README.md).
 
-## More sections
+### If you are an agent
 
-> **TODO:** This guide is still an outline. The notes below are the intended scope,
-> not finished prose.
+**Give the command a generous timeout.** The full suite takes minutes, and nothing caps
+its total runtime. A tool timeout shorter than that kills the run part-way and tells you
+nothing about your change.
 
-- Explain that it always runs a headless Chrome, even in CLI mode
-  - Cannot use jsdom, tests care for nuances of browser implementations
-- Chrome easier to debug for humans (can use DevTools)
-- Organization
-  - Finding specs
-  - Organization in a spec
-    - Usually module => JavaScript functions | unobtrusive behavior => tests by function or feature 
-    - Large functions or feature often get another nesting group by topic or option
-  - Running only single spec
-  - Running only single example
-    - Nested example groups are joined by space
-- Spec Helpers
-- Running all
-  - Explain that it takes 5 minutes.
-- Network mocked always
-- Waiting for effects of async code
-  - Await promise if you have one
-  - Or do await wait()
-  - Wait for time *only* when we do animations
-  - Don't use jasmine.Clock()
-- Fixture
-  - Show deprecated ways to make fixtures
-- Deprecated: jQuery
-- Trigger class that triggers events
-- Typical test
-  - fixture
-  - interaction
-  - assert request
-  - respond with test-provided HTML
-  - assert mutated DOM
-- Show repeated HTML gen with function
+You don't need to guard against a hang yourself. The runner watches for *silence*, not
+duration: if it sees no spec event for 30 seconds — a frozen browser session, say — it
+reports `no progress from the spec runner for 30s` and exits with code `2`. A single spec
+that never settles is caught earlier still, by Jasmine's 5-second per-spec timeout. So
+set your timeout from how long the suite actually takes, not from either of those
+numbers.
+
+**Don't pipe the output through `tail` or `head`.** The part you need from a red run is
+the failure block, and truncating it means running the whole suite again to see what
+broke. If the output is too long to read directly, keep all of it and read the end:
+
+```
+bin/test 2>&1 | tee tmp/test.log
+```
+
+`tmp/` is gitignored, so a log left there is harmless.
+
+
+## Why a real browser
+
+Specs always run in a real browser: headless Chrome by default, Firefox with
+`--browser=firefox`. There is no jsdom variant, and we don't want one. Unpoly's
+behavior depends on details that a DOM emulation doesn't reproduce faithfully — focus
+handling, scroll positions, form serialization, event ordering, CSS resolution. A spec
+that passes against an emulated DOM would tell us very little.
+
+Chrome is the default because it's the easiest to debug by hand: a failing run prints a
+`Debug in browser:` URL that opens the single spec in a real browser window with
+DevTools available. See [Compatibility](compatibility.md#browser-support) for which
+browsers we support and which ones CI actually exercises.
+
+
+## How specs are organized
+
+One spec file per module, at the mirrored path. `src/unpoly/form.js` is tested by
+`spec/unpoly/form_spec.js`, and `src/unpoly/classes/params.js` by
+`spec/unpoly/classes/params_spec.js`.
+
+Inside a [main module](code-organization.md#responsibilities) spec, the outermost groups
+separate the two kinds of API a module exposes:
+
+```js
+describe('up.form', function() {
+
+  describe('JavaScript functions', function() {
+
+    describe('up.form.submit()', function() {
+      it('...', async function() { ... })
+    })
+
+  })
+
+  describe('unobtrusive behavior', function() {
+
+    describe('[up-submit]', function() {
+      it('...', async function() { ... })
+    })
+
+  })
+
+})
+```
+
+Functions are named with parentheses (`up.form.submit()`), selectors in brackets
+(`[up-submit]`). A feature with many options often gets one more nesting level, grouped
+by topic or by the option under test.
+
+Class specs skip the functions/behavior split — a class has no unobtrusive behavior, so
+`params_spec.js` goes straight from `describe('up.Params')` to a group per method.
+
+Nested group names concatenate with spaces to form a spec's *full name*, which is what
+`--spec` matches against. So the example above can be narrowed at any depth:
+
+```
+bin/test --spec="up.form"                       # the whole module
+bin/test --spec="unobtrusive behavior"          # only the attribute specs
+bin/test --spec="up.form.submit()"              # one function
+```
+
+
+## Anatomy of a spec
+
+Most specs for unobtrusive behavior follow the same five beats: build the HTML, act on
+it, assert what was requested, answer the request, assert what changed.
+
+```js
+it('submits the form and updates the target', async function() {
+  // (1) build the HTML
+  const [form, field, submitButton] = htmlFixtureList(`
+    <form method="post" action="/action" up-submit up-target="#target">
+      <input type="text" name="email" value="foo@example.com">
+      <button type="submit">Submit</button>
+    </form>
+  `)
+  htmlFixtureList('<div id="target">old target</div>')
+
+  // (2) act
+  Trigger.clickSequence(submitButton)
+  await wait()
+
+  // (3) assert the request
+  expect(jasmine.lastRequest().data()).toMatchParams({ email: 'foo@example.com' })
+
+  // (4) answer it
+  jasmine.respondWithSelector('#target', { text: 'new target' })
+  await wait()
+
+  // (5) assert the result
+  expect('#target').toHaveText('new target')
+})
+```
+
+Specs for JavaScript functions are usually shorter — often just build, call, assert —
+because there's no user interaction to simulate and frequently no request.
+
+Each beat has a section below.
+
+
+## Building test HTML
+
+**Use `htmlFixtureList()`.** It takes a string of HTML, inserts it into the page, and
+returns the created elements in document order — outermost first — so you can
+destructure the ones you need:
+
+```js
+const [form, field] = htmlFixtureList(`
+  <form method="post" action="/action">
+    <input type="text" name="email">
+  </form>
+`)
+```
+
+Writing the literal HTML is the point. Unpoly's features are HTML features, and a spec
+that spells out its markup lets you see at a glance what is being tested. Everything
+inserted this way is removed after the spec, so there's no cleanup to write.
+
+### The parameterized HTML function
+
+When a spec needs the same markup more than once with variations — typically an "old"
+page and the server's "new" response — build it with a function:
+
+```js
+it('runs compilers after hungry fragments have been swapped', async function() {
+  let compileSpy = jasmine.createSpy('compile spy')
+
+  let html = (prefix) => `
+    <div id="fragment1">
+      ${prefix} fragment1
+    </div>
+    <div id="fragment2" up-hungry>
+      ${prefix} fragment2
+    </div>
+  `
+
+  up.compiler('#fragment1', (element) => {
+    compileSpy(
+      document.querySelector('#fragment1').textContent.trim(),
+      document.querySelector('#fragment2').textContent.trim(),
+    )
+  })
+
+  htmlFixtureList(html('old'))
+
+  await up.render({ target: '#fragment1', document: html('new') })
+
+  expect(compileSpy).toHaveBeenCalledWith(
+    'new fragment1',
+    'new fragment2',
+  )
+})
+```
+
+This keeps the two versions visibly identical apart from the one thing that differs.
+
+### Fixtures are not compiled
+
+`htmlFixtureList()` inserts elements without running [compilers](https://unpoly.com/up.compiler).
+When the feature under test is implemented as a compiler or with `up.attribute()`, call
+`up.hello()` yourself:
+
+```js
+const [form, field] = htmlFixtureList(`...`)
+up.hello(form)
+```
+
+Keeping this explicit is deliberate. It's often not needed — behavior wired to a
+delegated event listener works on an uncompiled fixture — and when it *is* needed, some
+specs care about exactly when compilers run. An implicit `up.hello()` would take that
+observation away.
+
+### Overlays and styles
+
+| Helper | Use |
+|---|---|
+| `makeLayers(n)` or `makeLayers([plan, …])` | Build a layer stack. Pass a count for *n* plain layers, or plans (`{ target, content, fragment, … }`) to control each one |
+| `fixtureStyle(css)` | Insert a temporary stylesheet |
+| `registerFixture(element)` | Register an element you created yourself, so it gets cleaned up with the rest |
+
+### Older fixture patterns
+
+Most existing specs build HTML from selectors instead, via `fixture()`, `$fixture()`,
+`htmlFixture()`, `helloFixture()` or `up.element.affix()`:
+
+```js
+// The older style. Don't write new specs like this.
+const $form = $fixture('form[action="/form-target"][method="put"][up-submit]')
+$form.append('<input name="field1" value="value1">')
+const $submitButton = $form.affix('input[type="submit"]')
+```
+
+There are thousands of these, and they work fine — they just produce a wall of
+selectors that's hard to read as HTML. We're migrating them to `htmlFixtureList()` over
+time. Write new specs in the current style; if you find yourself editing an old one, you
+may as well convert it, but a working spec in the old style is much better than no spec.
+
+`up.element.affix()` remains useful for spawning a one-off element from a selector
+elsewhere in a spec. Just don't build the spec's initial HTML with it.
+
+
+## Simulating user interaction
+
+`Trigger` dispatches the full event sequence a real interaction produces, not just the
+single event you might reach for. `Trigger.clickSequence(button)` fires
+`pointerover`, `mouseover`, `pointerdown`, `mousedown`, focus, `pointerup`, `mouseup`
+and `click` — which matters, because Unpoly listens across that sequence.
+
+Frequently used:
+
+| Call | Simulates |
+|---|---|
+| `Trigger.clickSequence(element)` | A click, with its full pointer and focus sequence |
+| `Trigger.change(field)` · `Trigger.input(field)` | A changed field (set `field.value` first) |
+| `Trigger.submitFormWithEnter(field)` | Pressing Enter inside a field |
+| `Trigger.toggleCheckSequence(checkbox)` | Toggling a checkbox or radio |
+| `Trigger.keySequence(element, 'Escape')` · `Trigger.escapeSequence(element)` | A key press |
+| `Trigger.hoverSequence(element)` · `Trigger.unhoverSequence(element)` | Pointer entering or leaving |
+| `Trigger.tabSequence(element)` | Tabbing to the next focusable element |
+| `Trigger.clickLinkWithKeyboard(link)` | Activating a link from the keyboard |
+
+`spec/helpers/trigger.js` has the rest, including the individual events
+(`Trigger.mousedown()`, `Trigger.focus()`, …) when you need one in isolation.
+
+
+## The network is always mocked
+
+A global `beforeEach` installs `jasmine.Ajax`, so **no request ever leaves the browser**
+and there is nothing to set up or tear down per spec. Instead you inspect what Unpoly
+would have sent, and decide what the server says:
+
+| Call | Purpose |
+|---|---|
+| `jasmine.lastRequest()` | The most recent request. Fails the spec if there was none |
+| `jasmine.lastRequest().data()` | Its params, for `toMatchParams()` |
+| `jasmine.respondWith(html)` | Answer with an HTML body |
+| `jasmine.respondWith({ status, responseHeaders, responseText, … })` | Answer with a specific status or headers |
+| `jasmine.respondWithSelector('#target', { text: 'new' })` | Answer with a body built from a selector — the common case |
+
+`jasmine.respondWith()` answers the last request by default; pass `{ request }` (an
+index, or a request object) to answer an earlier one when several are in flight.
+
+
+## Waiting for async code
+
+There is **no single rule** here, because the right thing to await depends on what you
+want to observe.
+
+In particular, you often can't just await the promise the API returns. `up.render({ url })`
+settles only after the server has responded *and* the fragment has been updated — so if
+you await it, you've already sailed past the point where the request was inspectable and
+answerable. That's why the shape in [Anatomy of a spec](#anatomy-of-a-spec) waits twice:
+once to let the request go out, once to let the response render.
+
+When you *do* only care about the end state, awaiting the promise is the clearest thing
+to write — as the compiler example above does with `await up.render(...)`.
+
+### How to wait
+
+`wait()` does nearly all of it. It waits one macrotask, which is enough for the
+already-queued callbacks to run:
+
+```js
+await wait()        // one macrotask
+await wait(50)      // 50ms of real time — only for animations, see below
+```
+
+`spec/helpers/wait.js` holds finer-grained variants — microtask ticks, a fixed number of
+macrotasks, an idle callback — for the rare spec that has to land between two specific
+ticks. Reach for one only when `wait()` genuinely can't express the timing.
+
+### Real time and clocks
+
+Wait for actual time **only when the thing you're testing is time-based** — an
+animation, or a configured delay like `up.form.config.watchInputDelay`. Everywhere else
+a real-time wait just makes the suite slower and flakier.
+
+`jasmine.clock()` is not the tool for this either. Don't install it, with one exception:
+making a mocked request time out. `jasmine.lastRequest().responseTimeout()` comes from
+jasmine-ajax and only works with the clock installed. The handful of specs that do this
+say so in a comment.
+
+Older specs use `up.util.timer(ms, callback)`. Use `jasmine.waitTime(ms)` instead.
+
+### Asserting on promises
+
+Prefer Jasmine's `expectAsync()`:
+
+```js
+await expectAsync(promise).toBeResolvedTo(value)
+await expectAsync(promise).toBeRejected()
+```
+
+`promiseState(promise)` resolves to `{ state, value }` with `state` being `'pending'`,
+`'fulfilled'` or `'rejected'`. Reach for it when you need to assert that a promise
+*hasn't* settled yet, which `expectAsync()` can't express.
+
+### When async/await isn't enough
+
+A few callback-timing observations can't be expressed with `async`/`await` — cases where
+you must assert from *inside* a callback rather than after awaiting it. For those,
+Jasmine's `done` callback is still available: declare the spec as
+`it('…', function(done) { … })` and call `done()` once the observation is complete.
+
+It isn't the default. Most of the remaining `done()` specs predate `async`/`await` and
+would read better converted, so reach for it only when the observation genuinely needs
+it.
+
+
+## Matchers
+
+Custom matchers live one per file in `spec/helpers/`, named after the matcher
+(`to_have_text.js` → `toHaveText()`). There are around ninety. Check for an existing one
+before asserting by hand — most things you'd want to say about an element, a request or
+a cache entry already have a matcher, and using it gives a far better failure message
+than a hand-rolled boolean.
+
+Most element matchers accept a **CSS selector string** in place of the element, which is
+why specs can assert without keeping a reference around:
+
+```js
+expect('#target').toHaveText('new target')
+expect('#target').toBeVisible()
+```
+
+To assert that an element is *gone*, negate a containment check rather than looking for
+a "missing" matcher:
+
+```js
+expect(document).not.toHaveSelector('up-progress-bar')
+```
+
+The ones you'll use constantly:
+
+| Matcher | Asserts |
+|---|---|
+| `toHaveText(text)` | The element's text content |
+| `toHaveClass(name)` | A CSS class is present |
+| `toHaveSelector(selector)` | A descendant matches the selector |
+| `toMatchSelector(selector)` | The element itself matches |
+| `toBeAttached()` · `toBeDetached()` | Whether the element is in the DOM tree |
+| `toBeMissing()` | A *value* is `null`, `undefined` or blank — not a DOM check |
+| `toBeVisible()` · `toBeHidden()` | Rendered visibility |
+| `toBeFocused()` | The element has focus |
+| `toHaveAttribute(name, value)` | An attribute and (optionally) its value |
+| `toMatchParams(object)` | Request params, from `jasmine.lastRequest().data()` |
+| `toMatchURL(url)` | URL equality, ignoring irrelevant differences |
+| `toBeCached()` · `toBeExpired()` | The state of a cache entry |
+| `toBeOverlay()` · `toBeRootLayer()` | What kind of layer this is |
+
+Alongside these, Jasmine's own `jasmine.createSpy()` and `spyOn()` carry a lot of the
+weight in function specs — the compiler example above asserts entirely through a spy.
+
+
+## Specs with special conditions
+
+**Browser capabilities.** `describeFallback()` runs a group with an `up.browser`
+capability stubbed out, so you can cover the degraded path:
+
+```js
+describeFallback('canPushState', function() { ... })
+```
+
+`up.browser` exposes only two capabilities today — `canPushState()` and `canJQuery()`.
+
+**Expected errors.** Jasmine fails a spec when an error reaches `window.onerror`, which
+is wrong when the error is the thing you're testing. Call `allowGlobalErrors()` in the
+group, or assert on it with `jasmine.expectGlobalError()`.
+
+**Deprecated features.** Specs for `unpoly-migrate` polyfills are guarded with
+`if (up.migrate.loaded)`, because the suite also runs without that build. See
+[Compatibility](compatibility.md#specs-for-deprecated-features).
+
+**Order.** Specs run in declaration order, not Jasmine's default random order, so a
+failure is reproducible. Pass `?random=true` in the browser runner if you want to hunt
+for order dependencies.
+
 
 ## Manual tests
 
-In addition to the specs, there is an optional support repo
-[`unpoly-manual-tests`](https://github.com/unpoly/unpoly-manual-tests). It contains a
-Rails app to play with Unpoly features that are hard to test well with a unit test.
-E.g. the visual look of overlays, or edge cases when booting Unpoly.
-[`bin/dev`](dev-environment.md) also boots it, if you have it checked out next to this
-repository.
+Some things are impractical to assert in a unit test — the visual look of an overlay,
+or edge cases while Unpoly boots. For those there is an optional sibling repository,
+[`unpoly-manual-tests`](https://github.com/unpoly/unpoly-manual-tests): a Rails app
+whose pages exercise Unpoly features against a real server.
 
-> **TODO:** This section is still an outline. The notes below are the intended scope,
-> not finished prose.
-
-- Manual Tests Repo
-  - Separate sibling repo
-  - Auto booted
-  - Is Rails
-  - Can be used as scratch pad
+[`bin/dev`](dev-environment.md#running-the-dev-environment) boots it on port 4001 if you
+have it checked out next to this repository. It doubles as a scratch pad — when you want
+to poke at a feature by hand rather than through a spec, add a page there.
