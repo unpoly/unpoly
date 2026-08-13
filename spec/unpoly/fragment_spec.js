@@ -1486,7 +1486,9 @@ describe('up.fragment', function() {
 
         it('looks up a selector in the given { origin } before looking at other layers', function() {
           const [layer0, layer1, layer2] = makeLayers(3)
-          const layer0Match = layer0.affix('.match#layer0-element')
+          // Elements in an overlay are removed when the overlay closes, but layer0 is
+          // the root layer. Register its element so it does not survive into later specs.
+          const layer0Match = registerFixture(layer0.affix('.match#layer0-element'))
           const layer1Match = layer1.affix('.match#layer1-element')
 
           expect(up.fragment.provideNodes('.match', { origin: layer0.element })).toEqual([layer0Match])
