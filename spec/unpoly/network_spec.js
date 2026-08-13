@@ -631,7 +631,7 @@ describe('up.network', function() {
           const submitForm = spyOn(up.browser, 'submitForm')
           const params = [
             { name: 'scalar', value: 'scalar-value' },
-            { name: 'blob', value: new Blob(['blob-value'], { type: "text/plain" })},
+            { name: 'blob', value: new Blob(['blob-value'], { type: "text/plain" }) },
           ]
 
           up.network.loadPage({ url: '/endpoint', method: 'POST', params })

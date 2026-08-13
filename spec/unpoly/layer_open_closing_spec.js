@@ -900,7 +900,7 @@ extendDescribe('up.layer', function() {
                 <div id="fragment">
                   <span id="no-match">ignored update</span>
                 </div>
-              `})
+              ` })
               await expectAsync(ignoredUpdateJob).toBeResolvedTo(jasmine.any(up.RenderResult))
 
               expect(up.layer.current.mode).toBe('modal')
@@ -911,7 +911,7 @@ extendDescribe('up.layer', function() {
                 <div id="fragment">
                   <span id="match">matching text</span>
                 </div>
-              `})
+              ` })
               await expectAsync(matchingUpdateJob).toBeRejectedWith(jasmine.any(up.Aborted))
 
               expect(up.layer.current.mode).toBe('root')
@@ -940,7 +940,7 @@ extendDescribe('up.layer', function() {
                 <div id="fragment">
                   <span id="match">matching text</span>
                 </div>
-              `})
+              ` })
               await expectAsync(matchingUpdateJob).toBeRejectedWith(jasmine.any(up.Aborted))
 
               expect(up.layer.current.mode).toBe('root')
@@ -1005,7 +1005,7 @@ extendDescribe('up.layer', function() {
                 <div id="fragment">
                   <span id="match">matching text</span>
                 </div>
-              `})
+              ` })
               await expectAsync(matchingUpdateJob).toBeRejectedWith(jasmine.any(up.Aborted))
 
               expect(callback).toHaveBeenCalled()
@@ -1037,7 +1037,7 @@ extendDescribe('up.layer', function() {
                 <div id="fragment">
                   <span id="match">matching text</span>
                 </div>
-              `})
+              ` })
               await expectAsync(matchingUpdateJob).toBeRejectedWith(jasmine.any(up.Aborted))
 
               expect(callback).toHaveBeenCalled()
@@ -1073,7 +1073,7 @@ extendDescribe('up.layer', function() {
                 <div id="fragment">
                   <span id="match">matching text</span>
                 </div>
-              `})
+              ` })
               await expectAsync(matchingUpdateJob).toBeRejectedWith(jasmine.any(up.Aborted))
 
               expect(up.layer.current.mode).toBe('root')
@@ -1103,7 +1103,7 @@ extendDescribe('up.layer', function() {
                 <div id="fragment">
                   <span id="match" up-data="{ name: 'Bob' }">matching text</span>
                 </div>
-              `})
+              ` })
               await expectAsync(matchingUpdateJob).toBeRejectedWith(jasmine.any(up.Aborted))
 
               expect(up.layer.current.mode).toBe('root')
@@ -1339,7 +1339,7 @@ extendDescribe('up.layer', function() {
                 <div id="fragment">
                   <span id="no-match">ignored update</span>
                 </div>
-              `})
+              ` })
             await expectAsync(ignoredUpdateJob).toBeResolvedTo(jasmine.any(up.RenderResult))
 
             expect(up.layer.current.mode).toBe('modal')
@@ -1350,7 +1350,7 @@ extendDescribe('up.layer', function() {
               <div id="fragment">
                 <span id="match">matching text</span>
               </div>
-            `})
+            ` })
             await expectAsync(matchingUpdateJob).toBeRejectedWith(jasmine.any(up.Aborted))
 
             expect(up.layer.current.mode).toBe('root')

@@ -110,7 +110,7 @@ extendDescribe('up.form', function() {
             <div id="extension">
               <div class="target" up-show-for="active">target2</div>
             </div>
-          `})
+          ` })
           await wait()
 
           expect(listener.calls.count()).toBe(2)
@@ -330,7 +330,7 @@ extendDescribe('up.form', function() {
           // Show that the kept switcher is still watching for new fragments on the new form
           up.render({ fragment: `
             <div id="target" up-show-for="foo">newer target</div>
-          `})
+          ` })
           await wait()
 
           expect('#target').toHaveText('newer target')
@@ -1652,7 +1652,7 @@ extendDescribe('up.form', function() {
             <input type="text" name="foo" up-switch="#target"></input>
             <div id="target" up-show-for="foo"></div>
           </div>
-        `})
+        ` })
 
         expect(up.layer.current).toBeOverlay()
         expect(up.layer.current).toHaveSelector('[up-switch]')

@@ -214,7 +214,7 @@ describe('up.Layer', function() {
 
         makeLayers(2)
 
-        up.layer.root.peel({ value: 'custom'})
+        up.layer.root.peel({ value: 'custom' })
 
         expect(listener.calls.argsFor(0)[0]).toEqual(jasmine.objectContaining({ value: 'custom' }))
       })

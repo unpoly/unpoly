@@ -62,7 +62,7 @@ export async function isServerRunning() {
     clearTimeout(timeout)
 
     return response.ok // true for 2xx responses, false otherwise
-  } catch (err) {
+  } catch (_err) {
     return false // Network error, timeout, or server not responding
   }
 }

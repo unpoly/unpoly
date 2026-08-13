@@ -380,7 +380,7 @@ extendDescribe('up.fragment', function() {
 
           up.render({ target: '#row2', document: `
             <tr id="row2"><td>cell2 new</td></tr>
-          `})
+          ` })
           await wait()
 
           expect('#row1 td').toHaveText('cell1 old')

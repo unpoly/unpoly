@@ -68,7 +68,7 @@ describe('up.NonceableCallback', function() {
 
     it('re-throws errors thrown by the callback script', function() {
       let callback = up.NonceableCallback.fromString('nonce-specs-nonce throw "error message"')
-      let doEval = () => callback.unsafeEval({ argNames: [], argValues: []})
+      let doEval = () => callback.unsafeEval({ argNames: [], argValues: [] })
       expect(doEval).toThrow('error message')
     })
 

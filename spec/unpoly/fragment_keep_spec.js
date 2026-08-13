@@ -1313,7 +1313,7 @@ extendDescribe('up.fragment', function() {
             <div id="keepable" up-keep="same-html" attr="new">
               <span></span>
             </div>
-          `})
+          ` })
           await wait()
 
           expect(document.querySelector('#keepable')).not.toBe(keepable)
@@ -1411,7 +1411,7 @@ extendDescribe('up.fragment', function() {
           let keepable = keepableFixture('<div id="keepable" up-keep="same-data" up-data="{ foo: 1 }">text</div>')
 
           up.data(keepable).bar = 2
-          expect(up.data(keepable)).toEqual({ foo: 1, bar: 2})
+          expect(up.data(keepable)).toEqual({ foo: 1, bar: 2 })
 
           up.render({ fragment: `<div id="keepable" up-keep="same-data" up-data="{ foo: 1 }">text</div>` })
           await wait()
@@ -1451,7 +1451,7 @@ extendDescribe('up.fragment', function() {
 
           up.render({ fragment: `
             <div id="keepable" up-keep="same-data" up-data="{ foo: 1 }"></div>
-          `})
+          ` })
           await wait()
 
           expect(document.querySelector('#keepable')).not.toBe(keepable)

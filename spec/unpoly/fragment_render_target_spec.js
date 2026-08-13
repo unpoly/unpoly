@@ -725,7 +725,7 @@ extendDescribe('up.fragment', function() {
                 <div class="child" id="origin"></div>
                 <div class="child sibling">new text</div>
               </div>
-            `})
+            ` })
 
             const children = document.querySelectorAll('.child')
             expect(children.length).toBe(4)

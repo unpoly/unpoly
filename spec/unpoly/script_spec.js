@@ -1419,14 +1419,14 @@ describe('up.script', function() {
         it('exposes properties of the first arg with { expandObject } option', function() {
           let event = { type: 'test', prop1: 'value1', prop2: 'value2' }
           let code = 'nonce-specs-nonce window.callbackSpy(prop1, prop2)'
-          let fn = up.script.parseCallback(code, { expandObject: ['prop1', 'prop2']})
+          let fn = up.script.parseCallback(code, { expandObject: ['prop1', 'prop2'] })
           expect(() => fn(event)).not.toThrowError(up.Blocked)
           expect(window.callbackSpy).toHaveBeenCalledWith('value1', 'value2')
         })
 
         it('allows to configure arg names with { argNames } option', function() {
           let code = 'nonce-specs-nonce window.callbackSpy(arg1, arg2)'
-          let fn = up.script.parseCallback(code, { argNames: ['arg1', 'arg2']})
+          let fn = up.script.parseCallback(code, { argNames: ['arg1', 'arg2'] })
           expect(() => fn('foo', 'bar')).not.toThrowError(up.Blocked)
           expect(window.callbackSpy).toHaveBeenCalledWith('foo', 'bar')
         })

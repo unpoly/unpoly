@@ -11,6 +11,30 @@ on:
     branches:
       - master
 jobs:
+  # bin/build only lints src/, so specs and the runner need their own step. It is a
+  # separate job rather than a step in `test`, which would repeat it once per matrix entry.
+  lint:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    name: Lint
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Read .nvmrc
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvm
+
+      - name: Install Node.js vom .nvmrc
+        uses: actions/setup-node@v4
+        with:
+          node-version: "${{ steps.nvm.outputs.NVMRC }}"
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Lint src, specs and runner
+        run: bin/lint
+
   test:
     runs-on: ubuntu-22.04
     timeout-minutes: 16

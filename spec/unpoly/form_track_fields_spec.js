@@ -644,7 +644,7 @@ extendDescribe('up.form', function() {
 
           up.render({ fragment: `
             <input type="text" name="field2" id="field">
-          `})
+          ` })
 
           await wait()
 

@@ -75,24 +75,39 @@ export default tseslint.config(
         makeLayers: 'readonly',
         Trigger: 'readonly',
         promiseState: 'readonly',
-        raceThenables: 'readonly',
         allowGlobalErrors: 'readonly',
-        fixtureInOverlay: 'readonly',
         describeFallback: 'readonly',
+        extendDescribe: 'readonly',
         AgentDetector: 'readonly',
-        safeHistory: 'readonly',
         specs: 'writable',
       },
     },
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
+      // typescript-eslint's recommended config turns no-undef off, since tsc covers it.
+      // We have no tsc, and specs need it: a spec file extracted from a larger one is its
+      // own module, so anything it used from the enclosing file's scope is now undefined.
+      // It also catches an assignment that forgot its const, which leaks a global that
+      // outlives the fixture it points at.
+      'no-undef': 'error',
     },
   },
   {
-    files: ['bin/**/*.{js,mjs}', 'spec/runner/**/*.{js,mjs}'],
+    files: ['bin/**/*.{js,mjs}', 'runner/**/*.{js,mjs}'],
     languageOptions: {
       globals: {
         process: 'readonly',
+      },
+    },
+  },
+  {
+    // The one part of the runner that ships to the browser: a Jasmine reporter that
+    // posts to the terminal. See runner/README.md.
+    files: ['runner/terminal/poster.js'],
+    languageOptions: {
+      globals: {
+        jasmine: 'readonly',
+        specs: 'readonly',
       },
     },
   },

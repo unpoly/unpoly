@@ -560,7 +560,7 @@ extendDescribe('up.form', function() {
               </form>
               
               <div id="target">old target</div>
-            `})
+            ` })
             await wait()
 
             expect('up-modal #target').toHaveText('old target')
@@ -692,7 +692,7 @@ extendDescribe('up.form', function() {
               </form>
               
               <div id="target">overlay target</div>
-            `})
+            ` })
             await wait()
 
             expect('up-modal #target').toHaveText('overlay target')
@@ -720,7 +720,7 @@ extendDescribe('up.form', function() {
               
               <div id="success">overlay success</div>
               <div id="failure">overlay failure</div>
-            `})
+            ` })
             await wait()
 
             Trigger.clickSequence('input[type=submit]')
