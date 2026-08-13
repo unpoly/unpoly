@@ -5400,7 +5400,7 @@ describe('up.form', function() {
     })
   })
 
-   describe('unobtrusive behavior', function() {
+  describe('unobtrusive behavior', function() {
 
     describe('[up-submit]', function() {
 
