@@ -140,10 +140,6 @@ change to those as needing the full suite.
 Run the full suite once before you hand the change over. CI runs it on every pull request
 across several CSP and build variants, so it is a check, not your only safety net.
 
-`--random=true` runs specs in a random order. A handful of specs currently fail that way
-for reasons that predate any given change — if you try it, don't read those failures as
-something you broke.
-
 ### If you are an agent
 
 **Give the command a generous timeout.** The full suite takes minutes, and nothing caps
