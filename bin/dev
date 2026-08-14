@@ -3,20 +3,28 @@
 //   bin/dev [start]   run it in this terminal (Ctrl-C to stop)
 //   bin/dev stop      stop a running environment
 //   bin/dev status    report whether one is running
-// All the logic lives in runner/dev_env.mjs.
-import { runDevEnvForeground, stopDevEnv, runningDevEnvPid, lastBuildErrors } from '../runner/dev_env.mjs'
+// All the logic lives in runner/dev_env.mjs, which is also the only thing that decides
+// whether an environment exists — we just switch on the state it reports.
+import { devEnvState, runDevEnvForeground, stopDevEnv, lastBuildErrors } from '../runner/dev_env.mjs'
 import { buildFailure } from '../runner/terminal/formatter.mjs'
 import pc from 'picocolors'
 
 const command = process.argv[2] || 'start'
 
 if (command === 'start') {
-  const pid = await runningDevEnvPid()
-  if (pid) {
-    console.log(pc.yellow(`A dev environment is already running (PID ${pid}). Stop with \`bin/dev stop\`.`))
-    process.exit(0)
+  // No pre-check of our own: runDevEnvForeground() refuses if an environment already
+  // exists, and its message is the authoritative one. Checking here too would duplicate
+  // the wording and leave a window between the check and the lock.
+  try {
+    process.exit(await runDevEnvForeground())
+  } catch (error) {
+    if (error.devEnvExists) {
+      console.log(pc.yellow(error.message)) // you wanted an environment; there is one
+      process.exit(0)
+    }
+    console.error(pc.red(error.stack || error.message))
+    process.exit(1)
   }
-  process.exit(await runDevEnvForeground())
 } else if (command === 'stop') {
   const result = await stopDevEnv()
   if (result === 'stopped') {
@@ -27,23 +35,39 @@ if (command === 'start') {
     console.error(pc.red('A dev environment is running that bin/dev did not start. Stop it where you started it.'))
     process.exit(1)
   }
+  if (result === 'unidentified') {
+    const { pid } = await devEnvState()
+    console.error(pc.red(`tmp/dev.pid names PID ${pid}, which is alive but cannot be identified. Check it, then remove the file if nothing is running.`))
+    process.exit(1)
+  }
   console.error(pc.red('No dev environment is running.'))
   process.exit(1)
 } else if (command === 'status') {
-  // Exit 0 = running & building cleanly, 1 = running but the last build failed,
-  // 3 = not running (LSB "status" convention).
-  const pid = await runningDevEnvPid()
-  if (!pid) {
+  // Exit 0 = usable, 1 = running but the last build failed, 3 = not usable
+  // (LSB "status" convention).
+  const { state, pid } = await devEnvState()
+  if (state === 'none') {
     console.log(pc.yellow('Dev environment is not running.'))
     process.exit(3)
   }
+  if (state === 'booting') {
+    console.log(pc.yellow(`Dev environment is starting (PID ${pid}).`))
+    process.exit(3)
+  }
+  if (state === 'unidentified') {
+    // Exit 3, not 0: bin/test refuses to run in this state, so `bin/dev status &&
+    // bin/test` must not green-light it.
+    console.log(pc.yellow(`tmp/dev.pid names PID ${pid}, which is alive but cannot be identified.`))
+    process.exit(3)
+  }
+  const where = state === 'foreign' ? 'running (started outside bin/dev)' : `running (PID ${pid})`
   const errors = lastBuildErrors()
   if (errors) {
-    console.log(pc.green(`Dev environment is running (PID ${pid}), but the latest build failed:`))
+    console.log(pc.green(`Dev environment is ${where}, but the latest build failed:`))
     process.stdout.write(buildFailure(errors))
     process.exit(1)
   }
-  console.log(pc.green(`Dev environment is running (PID ${pid}).`))
+  console.log(pc.green(`Dev environment is ${where}.`))
   process.exit(0)
 } else {
   console.error('Usage: bin/dev [start|stop|status]')

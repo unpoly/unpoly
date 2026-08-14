@@ -10,8 +10,9 @@
 // The supervisor is this very file, re-executed as `node runner/dev_env.mjs` —
 // see superviseDevEnv() and the entry check at the bottom.
 
-import { spawn } from 'node:child_process'
-import { closeSync, existsSync, openSync, readFileSync, writeFileSync, unlinkSync, mkdirSync } from 'node:fs'
+import { execFileSync, spawn } from 'node:child_process'
+import { createServer } from 'node:net'
+import { closeSync, existsSync, openSync, readFileSync, writeSync, unlinkSync, mkdirSync } from 'node:fs'
 import path from 'node:path'
 import pc from 'picocolors'
 import { isServerRunning } from './server/server.mjs'
@@ -28,29 +29,63 @@ const PROCESSES = [
   { name: 'manual-test', command: 'bundle exec rails server',     cwd: '../unpoly-manual-tests', env: { PORT: '4001' } },
 ]
 
-const PID_FILE = 'tmp/dev.pid'
-const LOG_FILE = 'tmp/dev.log'
-const READY_TIMEOUT = 60_000
-const SHUTDOWN_GRACE = 5_000
 const SUPERVISOR = import.meta.filename
 // The repo root (this file lives in runner/). Local processes run from here so the
 // relative `bin/…` commands resolve no matter where `bin/dev` was invoked.
 const PROJECT_ROOT = path.dirname(path.dirname(SUPERVISOR))
 
+// Absolute, not cwd-relative, so every caller refers to the same files no matter where
+// it was invoked from. (Running bin/test from a subdirectory still fails later, in
+// waitForFreshBuild(), which resolves tmp/build-status.json against the cwd.)
+const PID_FILE = path.join(PROJECT_ROOT, 'tmp/dev.pid')
+const LOG_FILE = path.join(PROJECT_ROOT, 'tmp/dev.log')
+// Held only while a start is in progress, to serialise concurrent starts. Not a
+// service: nothing ever connects to it.
+const START_LOCK_PORT = 4099
+const READY_TIMEOUT = 60_000
+const SHUTDOWN_GRACE = 5_000
+
 // --- Detecting -------------------------------------------------------------
 
-// The pid of a running dev environment, or null. "Running" means the spec server
-// answers *and* the build watcher is alive — the two processes everything else
-// needs. The pid is the supervisor's, or the watcher's for an environment someone
-// started by hand.
-export async function runningDevEnvPid() {
-  const watcher = watcherPid()
-  if (!watcher || !(await isServerRunning())) return null
-  return recordedPid() ?? watcher
+// devEnvState() is the *only* place that decides whether an environment exists.
+// Everything asks here and switches on the answer. Two functions read the file directly
+// without deciding anything: startUnderLock() confirms its own claim, and the supervisor
+// checks whether the file is still its own before removing it.
+//
+// Two rules make that answer trustworthy:
+//
+//   1. A live pid proves nothing. The OS recycles pids, so tmp/dev.pid can name a
+//      stranger — we once refused to start because an unrelated `node` had inherited
+//      our old pid. We therefore also check that the process *is* one of our
+//      supervisors, and we never signal a pid that isn't.
+//   2. Liveness comes from the spec server's socket, which the OS closes when the
+//      process dies. It cannot go stale and no other process can forge it. In
+//      particular we no longer read tmp/build-status.json here: any one-shot build
+//      could overwrite it and make a healthy environment look dead.
+//
+//   'running'      our supervisor is alive and the server answers — usable
+//   'booting'      our supervisor is alive, the server does not answer yet
+//   'foreign'      the server answers but we didn't start it (someone ran the
+//                  processes by hand) — usable, but not ours to stop
+//   'unidentified' tmp/dev.pid names a live process we cannot identify — we neither
+//                  signal it nor start alongside it, and say so
+//   'none'         nothing is running
+//
+// The dependencies are injectable so the state machine can be unit-tested.
+export async function devEnvState({ owner = pidFileOwner, serving = isServerRunning } = {}) {
+  const { pid, owner: whose } = owner()
+  const answers = await serving()
+
+  if (whose === 'ours') return { state: answers ? 'running' : 'booting', pid }
+  if (whose === 'unknown') return { state: 'unidentified', pid }
+  // 'gone', or a recycled pid belonging to a stranger: nothing of ours is recorded.
+  return { state: answers ? 'foreign' : 'none', pid: null }
 }
 
+// Whether specs can be run: something is serving, ours or not.
 export async function isDevEnvRunning() {
-  return (await runningDevEnvPid()) !== null
+  const { state } = await devEnvState()
+  return state === 'running' || state === 'foreign'
 }
 
 // The build errors from the watcher's most recent build, or null if the last build
@@ -67,23 +102,54 @@ export function lastBuildErrors(read = readStatus) {
 // watcher's first build has finished and the server answers. The processes outlive
 // this one — stop them with stopDevEnv(). Rejects, without leaking a half-started
 // environment, if the supervisor dies early or readiness times out.
-export function startDevEnv() {
-  ensureTmp()
-
-  // Callers only reach us when no environment *answers* yet, which includes the
-  // window in which one is still booting. Starting a second one there would fight
-  // over the port, the pid file and dist/, so refuse instead.
-  const booting = recordedPid()
-  if (booting) {
-    throw new Error(`A dev environment is already starting or running (PID ${booting}). Wait for it, or stop it with \`bin/dev stop\`.`)
-  }
-
-  const logFd = openSync(LOG_FILE, 'w')
-  const supervisor = spawnSupervisor(['ignore', logFd, logFd])
-  closeSync(logFd) // the supervisor holds its own copy now
+export async function startDevEnv() {
+  // The lock covers everything up to and including the pid write — see startUnderLock().
+  // Waiting for readiness takes up to a minute and deliberately happens outside it: by
+  // then tmp/dev.pid names a live supervisor, so another start sees 'booting' and stops.
+  const supervisor = await withStartLock(() => startUnderLock(backgroundStdio))
   supervisor.unref()
   return waitUntilReady(supervisor)
 }
+
+// The critical section: decide, take over a leftover, claim, spawn, record the pid.
+// Every step must be inside the lock. Two earlier versions released it before the pid
+// was written, and since readPidFile() maps an empty file to null, a racer arriving in
+// that window saw 'none' and cleared the winner's own fresh claim.
+async function startUnderLock(openStdio) {
+  const { state, pid } = await devEnvState()
+  if (state !== 'none') throw existingEnvError(state, pid)
+
+  // Safe only under the lock: 'none' means no live supervisor owns this file, so it is
+  // a leftover from a SIGKILLed one, and nobody else can be claiming it right now.
+  clearPidFile()
+  const claim = claimPidFile()
+  if (!claim) throw new Error(`Could not claim ${PID_FILE}. Remove it and try again.`)
+
+  // Only now, past the point of no return, do we touch the log — opening it truncates,
+  // and a start that turns back here would otherwise wipe a live environment's log. The
+  // lock does not help with that: a winner releases it in milliseconds and then boots
+  // for ~15s, during which a second `bin/test` sees 'booting' and turns back right here.
+  const { stdio, close } = openStdio()
+  try {
+    const supervisor = spawnSupervisor(stdio, claim)
+    if (readPidFile() !== supervisor.pid) {
+      killGroup(supervisor.pid)
+      throw new Error(`${PID_FILE} changed while starting. Try again.`)
+    }
+    return supervisor
+  } finally {
+    close() // the supervisor holds its own copy of the fds now
+  }
+}
+
+// `bin/test` sends the supervisor's output to tmp/dev.log; `bin/dev` inherits the
+// terminal. Both are opened lazily, so a start that never gets going touches nothing.
+const backgroundStdio = () => {
+  const logFd = openSync(LOG_FILE, 'w')
+  return { stdio: ['ignore', logFd, logFd], close: () => closeSync(logFd) }
+}
+
+const foregroundStdio = () => ({ stdio: 'inherit', close: () => {} })
 
 // Resolves when the watcher has finished a build it started *after* the spawn and
 // the server answers — so a stale tmp/build-status.json can't satisfy us.
@@ -129,8 +195,8 @@ function waitUntilReady(supervisor) {
 // Runs the same supervisor in the foreground: logs stream to this terminal, and
 // Ctrl-C (which reaches us, not the detached supervisor) stops the environment.
 // Resolves with an exit code.
-export function runDevEnvForeground() {
-  const supervisor = spawnSupervisor('inherit')
+export async function runDevEnvForeground() {
+  const supervisor = await withStartLock(() => startUnderLock(foregroundStdio))
   const forward = () => killGroup(supervisor.pid)
   process.on('SIGINT', forward)
   process.on('SIGTERM', forward)
@@ -140,24 +206,53 @@ export function runDevEnvForeground() {
 
 // --- Stopping --------------------------------------------------------------
 
-// Stops a running environment. Returns 'stopped', 'foreign' (something is running
-// that we didn't start, so there is no pid to kill) or 'not-running'.
+// Stops a running environment. Returns 'stopped', 'foreign' (something is serving
+// that we didn't start, so there is no pid of ours to kill) or 'not-running'.
+//
+// We only ever signal a supervisor of ours — see devEnvState(). A live environment's
+// pid file belongs to its supervisor, which removes it as it exits, so we clear the
+// file only when nobody owns it any more; a supervisor that ignores SIGTERM stays
+// reachable for a second `bin/dev stop`.
 export async function stopDevEnv() {
-  if (killRecordedEnv()) return 'stopped'
-  return (await runningDevEnvPid()) ? 'foreign' : 'not-running'
+  const { state, pid } = await devEnvState()
+  switch (state) {
+    case 'running':
+    case 'booting':
+      return killGroup(pid) ? 'stopped' : 'not-running'
+    case 'foreign':
+      return 'foreign'
+    case 'unidentified':
+      return 'unidentified' // alive but unreadable: never signal what we cannot name
+    default:
+      // Deliberately *not* clearing a leftover file here. Probing and then unlinking are
+      // two steps, and unlocked they race a concurrent start: we could unlink the pid
+      // file of an environment that came up in between, leaving it unstoppable. A
+      // leftover is inert anyway — devEnvState() reports 'none' for it — and the next
+      // start clears it inside the lock, where that is safe.
+      return 'not-running'
+  }
 }
 
-// Kills the environment recorded in tmp/dev.pid, if it is still alive. Returns
-// whether there was one. A live environment's pid file belongs to its supervisor,
-// which removes it as it dies — we only clear one that nobody owns any more, so a
-// supervisor that ignores SIGTERM stays reachable for a second `bin/dev stop`.
-function killRecordedEnv() {
-  const pid = recordedPid()
-  if (!pid) {
-    clearPidFile()
-    return false
+// Thrown when a start is refused because an environment already exists. Flagged so
+// callers can treat it as "you asked for one and there is one" rather than a failure.
+function existingEnvError(state, pid) {
+  const error = new Error(alreadyRunning(state, pid))
+  // 'unidentified' deliberately excluded: it means we cannot *prove* an environment
+  // exists, and bin/test refuses to run in that state — so `bin/dev start` must not
+  // report success for it either.
+  error.devEnvExists = state !== 'unidentified'
+  return error
+}
+
+function alreadyRunning(state, pid) {
+  switch (state) {
+    case 'foreign':
+      return 'A dev environment is running that bin/dev did not start. Stop it where you started it.'
+    case 'unidentified':
+      return `${PID_FILE} names PID ${pid}, which is alive but cannot be identified. Check it, then remove the file if nothing is running.`
+    default:
+      return `A dev environment is already ${state} (PID ${pid}). Wait for it, or stop it with \`bin/dev stop\`.`
   }
-  return killGroup(pid)
 }
 
 // --- Process plumbing ------------------------------------------------------
@@ -165,13 +260,52 @@ function killRecordedEnv() {
 // Spawns the supervisor detached — its pid becomes a process group id, so
 // killGroup() reaches every descendant — and records it in tmp/dev.pid. We write
 // the file here because the caller needs the pid right away; the supervisor
-// removes it again when it exits. A file left behind by a SIGKILLed supervisor is
-// harmless: recordedPid() only reports pids that are still alive.
-function spawnSupervisor(stdio) {
-  ensureTmp()
+// removes it again when it exits. We write it here, rather than letting the supervisor
+// do it, because the pid must land while the start lock is still held. A file left behind
+// by a SIGKILLed supervisor is harmless: devEnvState() ignores a pid that is dead *or*
+// no longer a supervisor, and the next start clears it under the lock.
+function spawnSupervisor(stdio, claim) {
   const supervisor = spawn(process.execPath, [SUPERVISOR], { detached: true, stdio })
-  writeFileSync(PID_FILE, String(supervisor.pid))
+  writeSync(claim, String(supervisor.pid)) // fill in the claim we already hold
+  closeSync(claim)
   return supervisor
+}
+
+// Creates tmp/dev.pid, or returns null if it already exists. O_EXCL makes that atomic.
+function claimPidFile(file = PID_FILE) {
+  ensureTmp()
+  try {
+    return openSync(file, 'wx')
+  } catch (error) {
+    if (error.code === 'EEXIST') return null
+    throw error
+  }
+}
+
+// Serialises the whole start sequence by holding a listening socket for its duration.
+// A socket is the one lock we can take without a dependency that the OS also releases
+// for us: it cannot outlive the process holding it, so unlike a lock file it can never
+// go stale and need recovering. Nothing connects to it; binding *is* the lock.
+export async function withStartLock(body) {
+  const server = createServer()
+  try {
+    await new Promise((resolve, reject) => {
+      server.once('error', reject)
+      server.listen(START_LOCK_PORT, '127.0.0.1', resolve)
+    })
+  } catch (error) {
+    if (error.code === 'EADDRINUSE') {
+      throw new Error(`Port ${START_LOCK_PORT} is taken, which means another dev environment is starting right now — or something unrelated is listening there. Wait for it, or check the port.`)
+    }
+    server.close()
+    throw error
+  }
+
+  try {
+    return await body()
+  } finally {
+    server.close()
+  }
 }
 
 // Signals the process group led by `pid`. Everything we spawn is detached, so its
@@ -211,7 +345,7 @@ function superviseDevEnv() {
       const timedOut = Date.now() > deadline
       if (!children.every(hasExited) && !timedOut) return
       clearInterval(wait)
-      if (recordedPid() === process.pid) clearPidFile() // before SIGKILL, which hits us too
+      if (readPidFile() === process.pid) clearPidFile() // before SIGKILL, which hits us too
       if (timedOut) killGroup(process.pid, 'SIGKILL')
       process.exit(code)
     }, 50)
@@ -274,22 +408,40 @@ const note = (message) => console.log(pc.blue(`dev | ${message}`))
 
 // --- Small helpers ---------------------------------------------------------
 
-function recordedPid() {
+// The pid in tmp/dev.pid, whatever its state. The only function that reads the file
+// — everything else goes through devEnvState().
+function readPidFile() {
   try {
     const pid = Number(readFileSync(PID_FILE, 'utf8').trim())
-    return isAlive(pid) ? pid : null
+    return Number.isInteger(pid) && pid > 0 ? pid : null
   } catch {
     return null
   }
 }
 
-function watcherPid() {
-  const status = readStatus()
-  return status && isAlive(status.pid) ? status.pid : null
+// What tmp/dev.pid currently refers to: { pid, owner }, where owner is
+//
+//   'ours'      a live process running this file — safe to report and to signal
+//   'stranger'  alive, but something else: the pid was recycled
+//   'unknown'   alive, but we cannot read its command line to tell
+//   'gone'      no file, or the pid is dead
+//
+// 'unknown' is kept distinct from 'stranger' on purpose. Both refuse to signal, but
+// only a *proven* stranger may be treated as absent — guessing "not ours" where we
+// cannot look (no /proc and no usable `ps`, hidepid) would clear the file and start a
+// second environment alongside a healthy one. A zombie is not one of those cases: its
+// /proc entry exists and reads empty, which is a proven stranger, and starting beside
+// something that holds nothing is right.
+function pidFileOwner() {
+  const pid = readPidFile()
+  if (!pid || !isAlive(pid)) return { pid, owner: 'gone' }
+
+  const command = commandLine(pid)
+  if (command === null) return { pid, owner: 'unknown' }
+  return { pid, owner: isSupervisor(command) ? 'ours' : 'stranger' }
 }
 
 function isAlive(pid) {
-  if (!pid) return false
   try {
     process.kill(pid, 0)
     return true
@@ -298,11 +450,56 @@ function isAlive(pid) {
   }
 }
 
+// Whether `pid` is running this very file. Guards against a recycled pid, which
+// would otherwise make us refuse to start — or, worse, signal a stranger's process
+// group. When we cannot tell, we say no: declining to kill something we can't
+// identify is the safe half of the trade, and a stale pid file is easy to recover
+// from (`bin/dev stop`, or just starting again).
+// A supervisor runs as `node <SUPERVISOR>`, and we require *both* parts. Matching the
+// path alone would also accept `vim …/dev_env.mjs`, `tail -f` on it, or a `pgrep` whose
+// own arguments mention it — and a recycled pid landing on one of those would let us
+// signal a stranger's process group.
+//
+// On Linux we get a real argv and compare it exactly. The `ps` fallback can only offer
+// a space-joined string, where splitting breaks for paths containing spaces, so there
+// we settle for "mentions node and mentions the path".
+export function isSupervisor(command) {
+  if (Array.isArray(command)) return isNode(command[0]) && command[1] === SUPERVISOR
+  return command.split(/\s+/).some(isNode) && command.includes(SUPERVISOR)
+}
+
+// Any node-ish binary, not just the one *we* run: the supervisor inherits the execPath
+// of whoever started it, so a `bin/dev stop` from a shell where node resolves to `node`
+// must still recognise a supervisor started under `nodejs` or `node22`. Getting this
+// wrong makes a user unable to stop their own environment, or spawns a second one beside
+// it. Paired with the exact argv[1] match above, this is strict enough.
+const isNode = (executable = '') => {
+  const name = path.basename(executable)
+  return /^node/i.test(name) || name === path.basename(process.execPath)
+}
+
+// The command line of `pid` as an argv array (Linux) or a string (`ps`), or null when
+// we cannot tell — which is *not* the same as "not a supervisor". See pidFileOwner().
+function commandLine(pid) {
+  try {
+    return readFileSync(`/proc/${pid}/cmdline`, 'utf8').split('\0').filter(Boolean)
+  } catch { /* no /proc: BSD, macOS, or a restricted mount */ }
+
+  try {
+    // -ww: unlimited width. Without it `ps` truncates to the terminal width — 80
+    // columns when its output is a pipe, which is shorter than a typical
+    // `node /Users/…/runner/dev_env.mjs`, so every supervisor looked foreign.
+    return execFileSync('ps', ['-ww', '-o', 'command=', '-p', String(pid)], { encoding: 'utf8' })
+  } catch {
+    return null
+  }
+}
+
 const ensureTmp = () => mkdirSync(path.dirname(PID_FILE), { recursive: true })
 
-function clearPidFile() {
+function clearPidFile(file = PID_FILE) {
   try {
-    unlinkSync(PID_FILE)
+    unlinkSync(file)
   } catch { /* already gone */ }
 }
 

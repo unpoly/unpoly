@@ -24,6 +24,7 @@ export class BuildStatusPlugin {
   #startedAt = Date.now()
   #errors = []
   #sink
+  #watching = false
 
   // `write` is a seam for the self-tests; production uses the file writer.
   constructor({ write = writeStatusFile } = {}) {
@@ -31,7 +32,15 @@ export class BuildStatusPlugin {
   }
 
   apply(compiler) {
+    // Only a *watching* compiler may write the status file, so there is exactly one
+    // writer: the dev environment's watcher. `watchRun` fires only under --watch, and
+    // arming on it is what makes this structural — `done` fires for one-shot builds
+    // too, and webpack/ci.js reuses the watcher's configs (plugin included), so
+    // `bin/build --config=ci` used to overwrite a running watcher's status with its
+    // own pid. Everything that read the file then saw a dead process and concluded
+    // the dev environment was gone.
     compiler.hooks.watchRun.tap('BuildStatusPlugin', () => {
+      this.#watching = true
       if (this.#building === 0) {
         this.#startedAt = Date.now()
         this.#errors = [] // start of a fresh rebuild round
@@ -40,6 +49,7 @@ export class BuildStatusPlugin {
       this.#write('building')
     })
     compiler.hooks.done.tap('BuildStatusPlugin', (stats) => {
+      if (!this.#watching) return // a one-shot build: not ours to report
       // Runs for failed compilations too (webpack, ts-loader syntax errors, and
       // ESLint via eslint-webpack-plugin all surface as compilation errors). We
       // record them but never throw — the watcher must keep watching.

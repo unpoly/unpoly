@@ -94,6 +94,12 @@ shared plugin instance counts in-flight sub-compilers, so `idle` means *all* cur
 rebuilds finished (no partial-read race). `waitForFreshBuild` errors if the file is
 missing or the pid is dead, else waits until `idle && startedAt >= newestSourceMtime`.
 
+**Only a watching compiler writes it**, which is what keeps it single-writer. The
+plugin arms itself on `watchRun` (watch-only) and ignores `done` until then, because
+`done` fires for one-shot builds too and `webpack/ci.js` reuses the watcher's configs,
+plugin included — so `bin/build --config=ci` used to overwrite a running watcher's
+status with its own pid, and every reader then concluded the environment was gone.
+
 Transient files (`build-status.json`, any `.pid`) belong in the gitignored `tmp/`.
 
 ## Output
@@ -139,18 +145,44 @@ process manager. The rules, in one place:
 - **One pid file.** Both start paths spawn the supervisor `detached`, so its pid *is*
   a process group id and `killGroup()` sweeps every descendant — `sh`, `npm`, webpack,
   Ruby and all. `killGroup()` has no bare-pid fallback on purpose: that would signal
-  one process, orphan the descendants, and report success. The parent writes
-  `tmp/dev.pid` (the caller needs the pid at once) and the supervisor removes it as
-  it exits — so a wedged supervisor stays reachable for a second `bin/dev stop`. A
-  file left by a SIGKILLed one is harmless.
-- **One definition of "running"**: `runningDevEnvPid()` — the spec server answers
-  *and* the watcher is alive. It is what `bin/dev` and `runDev()` both ask. The pid
-  file is never trusted on its own; `recordedPid()` reports only live pids.
+  one process, orphan the descendants, and report success. The supervisor removes
+  `tmp/dev.pid` as it exits, so a wedged one stays reachable for a second
+  `bin/dev stop`; a file left by a SIGKILLed one is inert (see below).
+- **One decision about state**: `devEnvState()` → `running` · `booting` · `foreign` ·
+  `unidentified` · `none`. Everything — `bin/dev`, `runDev()`, `stopDevEnv()` — asks it
+  and switches on the answer. Nothing else reads `tmp/dev.pid`, and two rules make its
+  answer trustworthy:
+  - *A live pid proves nothing.* Pids get recycled, so the recorded pid must also
+    still **be** a supervisor: a `node` process whose argv names this file. Without
+    that an unrelated process inheriting our old pid made the environment look busy,
+    and `killGroup()` would have signalled a stranger's whole group. Where we cannot
+    read a command line at all (no `/proc`, no usable `ps`, a zombie) the answer is
+    `unidentified` rather than "absent" — we neither signal it nor start beside it,
+    because guessing "not ours" would spawn a second environment next to a healthy one.
+  - *Liveness is the server's socket*, which the OS closes when the process dies — it
+    cannot go stale or be forged. `build-status.json` is deliberately **not** consulted
+    here: any one-shot build could overwrite it and make a healthy environment look
+    dead. (`waitForFreshBuild()` still reads the watcher pid from it, for freshness
+    rather than for existence.)
+- **One start lock.** `withStartLock()` holds a listening socket on `START_LOCK_PORT`
+  for the whole of `startUnderLock()` — probe, clear a leftover, claim, spawn, **write
+  the pid** — so `bin/dev` and `bin/test` fired together cannot both get through; the
+  loser is told the port is taken. A socket is the only lock available without a
+  dependency that the OS also *releases* for us, so it cannot outlive its holder and
+  never needs recovering. Readiness is awaited *outside* the lock: by then the pid file
+  names a live supervisor, so a later start sees `booting` and stops.
+
+  The scope is the whole point, and three attempts got it wrong. Deciding a pid file is
+  stale and then acting on it are two steps: an `O_EXCL` create alone let racers unlink
+  each other's fresh claim, an atomic rename let them displace it, and holding the lock
+  only until the claim was *returned* left the file empty — which reads as "nothing
+  running", so a racer cleared the winner's own claim. `startUnderLock()` also asserts
+  the file names its supervisor before returning. A self-test pins the invariant by
+  failing if two bodies ever run at once.
 - **One readiness check.** `startDevEnv()` resolves only once the watcher has
   finished a build it *started after the spawn* (so a stale `build-status.json`
   can't satisfy it) and the server answers. It rejects — killing what it started —
-  if the supervisor dies first or `READY_TIMEOUT` passes, and refuses outright if
-  another environment is already booting.
+  if the supervisor dies first or `READY_TIMEOUT` passes.
 - Being detached means Ctrl-C reaches `bin/dev`, not the supervisor, so `bin/dev`
   forwards the signal.
 
