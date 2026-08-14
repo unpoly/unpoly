@@ -202,6 +202,10 @@ export async function runDevEnvForeground() {
   const forward = () => killGroup(supervisor.pid)
   process.on('SIGINT', forward)
   process.on('SIGTERM', forward)
+  // SIGHUP matters as much as the other two: closing the terminal window kills us but
+  // not the detached supervisor, which then writes to a dead pty, dies on EIO *without*
+  // running its shutdown, and leaves its children serving with no pid file to stop them by.
+  process.on('SIGHUP', forward)
 
   return new Promise((resolve) => supervisor.on('exit', (code) => resolve(code ?? 0)))
 }
@@ -220,7 +224,12 @@ export async function stopDevEnv() {
   switch (state) {
     case 'running':
     case 'booting':
-      return { result: killGroup(pid) ? 'stopped' : 'not-running', pid }
+      if (!killGroup(pid)) return { result: 'not-running', pid }
+      // Wait for it to actually go, and escalate if it won't. Reporting "stopped" the
+      // moment SIGTERM was *delivered* meant `bin/dev stop && bin/dev start` could exit 0
+      // with nothing running: the second command saw the dying supervisor, decided an
+      // environment already existed, and said so cheerfully.
+      return { result: await waitForExit(pid) ? 'stopped' : 'wedged', pid }
     case 'foreign':
       return { result: 'foreign', pid }
     case 'unidentified':
@@ -257,6 +266,23 @@ function alreadyRunning(state, pid) {
     default:
       return `A dev environment is already ${state} (PID ${pid}). Wait for it, or stop it with \`bin/dev stop\`.`
   }
+}
+
+// Waits for a signalled supervisor to exit, escalating to SIGKILL if it outstays the
+// grace period. Returns whether it is gone. The supervisor escalates on its own too, but
+// only from its signal handler — a wedged event loop never runs it, and then nothing but
+// this escalation can reach it.
+async function waitForExit(pid, { grace = SHUTDOWN_GRACE, poll = 100 } = {}) {
+  const deadline = Date.now() + grace
+  while (isAlive(pid)) {
+    if (Date.now() > deadline) break
+    await new Promise((resolve) => setTimeout(resolve, poll))
+  }
+  if (!isAlive(pid)) return true
+
+  killGroup(pid, 'SIGKILL')
+  await new Promise((resolve) => setTimeout(resolve, poll))
+  return !isAlive(pid)
 }
 
 // --- Process plumbing ------------------------------------------------------

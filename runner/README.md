@@ -159,9 +159,11 @@ process manager. The rules, in one place:
     still **be** a supervisor: a `node` process whose argv names this file. Without
     that an unrelated process inheriting our old pid made the environment look busy,
     and `killGroup()` would have signalled a stranger's whole group. Where we cannot
-    read a command line at all (no `/proc`, no usable `ps`, a zombie) the answer is
-    `unidentified` rather than "absent" — we neither signal it nor start beside it,
-    because guessing "not ours" would spawn a second environment next to a healthy one.
+    read a command line at all (no `/proc`, no usable `ps`) the answer is `unidentified`
+    rather than "absent" — we neither signal it nor start beside it, because guessing
+    "not ours" would spawn a second environment next to a healthy one. A zombie is *not*
+    one of those cases: its `/proc` entry reads empty, so it is a proven stranger, and
+    starting beside something that holds no ports or files is right.
   - *Liveness is the server's socket*, which the OS closes when the process dies — it
     cannot go stale or be forged. `build-status.json` is deliberately **not** consulted
     here: any one-shot build could overwrite it and make a healthy environment look

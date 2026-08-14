@@ -32,6 +32,10 @@ if (command === 'start') {
     console.log(pc.blue('Dev environment stopped.'))
     process.exit(0)
   }
+  if (result === 'wedged') {
+    console.error(pc.red(`The dev environment (PID ${pid}) ignored SIGTERM and survived SIGKILL. Investigate it by hand.`))
+    process.exit(1)
+  }
   if (result === 'foreign') {
     console.error(pc.red('A dev environment is running that bin/dev did not start. Stop it where you started it.'))
     process.exit(1)
