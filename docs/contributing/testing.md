@@ -124,6 +124,26 @@ A failed spec exits with a non-zero exit code, so `bin/test` composes with other
 tooling. The spec runner itself — its exit codes, architecture and self-tests — is
 documented in [`runner/README.md`](../../runner/README.md).
 
+### Which specs to run
+
+The full suite takes several minutes, so don't run it on every edit. While you work, run
+the module you are changing:
+
+```
+bin/test --spec="up.form"
+```
+
+Some modules are used by most others, and a change there can break specs anywhere:
+`up.fragment`, `up.network`, `up.script`, `up.layer`, `up.util` and `up.element`. Treat a
+change to those as needing the full suite.
+
+Run the full suite once before you hand the change over. CI runs it on every pull request
+across several CSP and build variants, so it is a check, not your only safety net.
+
+`--random=true` runs specs in a random order. A handful of specs currently fail that way
+for reasons that predate any given change — if you try it, don't read those failures as
+something you broke.
+
 ### If you are an agent
 
 **Give the command a generous timeout.** The full suite takes minutes, and nothing caps
@@ -164,9 +184,11 @@ browsers we support and which ones CI actually exercises.
 
 ## How specs are organized
 
-One spec file per module, at the mirrored path. `src/unpoly/form.js` is tested by
+Every module has a spec file at the mirrored path. `src/unpoly/form.js` is tested by
 `spec/unpoly/form_spec.js`, and `src/unpoly/classes/params.js` by
-`spec/unpoly/classes/params_spec.js`.
+`spec/unpoly/classes/params_spec.js`. Where a group of specs grew too large to live
+there, it moved into a sibling file that shares the module's prefix — see
+[extracted spec files](#extracted-spec-files) below.
 
 Inside a [main module](code-organization.md#responsibilities) spec, the outermost groups
 separate the two kinds of API a module exposes:
@@ -208,6 +230,102 @@ bin/test --spec="up.form"                       # the whole module
 bin/test --spec="unobtrusive behavior"          # only the attribute specs
 bin/test --spec="up.form.submit()"              # one function
 ```
+
+Full names never change when specs move between files, so a filter is always safe to
+copy from a failure and re-run.
+
+
+### Finding the spec for a feature
+
+**By file name.** Start from the module: `up.form` is tested in `spec/unpoly/form_spec.js`.
+If a feature grew large enough to be extracted, it sits in `<module>_<feature>_spec.js`
+alongside it — `form_switch_spec.js` for `[up-switch]`, `layer_open_spec.js` for
+`up.layer.open()`. Every file for a module shares its prefix, so a listing groups them:
+
+```
+$ ls spec/unpoly | grep ^form_
+form_spec.js  form_submit_attr_spec.js  form_submit_fn_spec.js  form_switch_spec.js …
+```
+
+Opening the module file also tells you what it gave away, and where that used to sit:
+
+```
+grep -n "require('./" spec/unpoly/fragment_spec.js
+```
+
+**By title.** When you know what a spec says but not where it lives, `bin/find-spec`
+searches every `describe()` and `it()` title — and only titles, so it won't drown you in
+spec code that happens to call the feature:
+
+```
+$ bin/find-spec "kept element"
+fragment_keep_spec.js:47 up.fragment / unobtrusive behavior / [up-keep] / does not run destructors within kept elements
+fragment_keep_spec.js:143 up.fragment / unobtrusive behavior / [up-keep] / omits a kept element from the returned up.RenderResult
+radio_poll_spec.js:769 up.radio / unobtrusive behavior / [up-poll] / keeps polling if an [up-keep] ancestor is kept
+```
+
+Each path is the spec's full name, so you can hand any part of it back to `--spec`. Passing
+a feature name also shows how many files it is spread across — `bin/find-spec "up.render()"`
+lists fourteen.
+
+
+### Where a new spec goes
+
+Put it in the `describe()` group it belongs to. The file follows from the group — you
+don't pick a file, and you very rarely create one. If that group happens to live in an
+extracted file, add it there; nothing else changes, because the group's full name is the
+same either way.
+
+Only extract a group into a new file when it has grown to a size that makes its module
+file hard to read — a few dozen KB. That is a rare, deliberate act, not something to do
+while adding a spec.
+
+
+### Extracted spec files
+
+The module file keeps a `require()` at the exact position the group used to occupy, so
+reading order survives:
+
+```js
+// fragment_render_spec.js
+describe('up.render()', function() {
+
+  require('./fragment_render_url_spec')
+
+  describe('with { response } option', function() { ... })
+```
+
+The extracted file spells out the path it belongs to with `extendDescribe()`, which
+declares no group of its own — it documents the nesting, and the real `describe()` lands
+wherever the `require()` sits:
+
+```js
+// fragment_render_url_spec.js
+extendDescribe('up.fragment', function() {
+  extendDescribe('JavaScript functions', function() {
+    extendDescribe('up.render()', function() {
+
+      describe('with { url } option', function() { ... })
+```
+
+So the split is invisible from the outside: one suite per module, unchanged full names,
+and `beforeEach` hooks from the module file still apply. An extracted file can extract
+further, as `up.render()` does — it is the only feature large enough to need it.
+
+Two things to know if you ever add such a file:
+
+- It must **not** be listed in `spec/specs.js`, which requires every other spec file by
+  hand. It is only ever loaded by its one `require()`. `bin/self-test` enforces both
+  halves: it fails on a spec file that nothing loads, and on an extracted file that
+  `specs.js` would load a second time.
+- It is its own module, so aliases like `const u = up.util` at the top of the module file
+  are not in scope. Redeclare the ones you use — `bin/lint` names them.
+
+The feature part of the name is the feature's own name without `up.` or `up-`:
+`form_switch_spec.js` for `[up-switch]`, `layer_open_spec.js` for `up.layer.open()`. When
+a module has both a function and a selector of that name, both files say which:
+`form_validate_fn_spec.js` and `form_validate_attr_spec.js`. A file may also hold several
+related features under a topic name, as `util_lists_spec.js` does.
 
 
 ## Anatomy of a spec

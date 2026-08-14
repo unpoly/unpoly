@@ -2,7 +2,8 @@
 
 ## Directory structure / Where to find files
 
-You will mostly make changes in `src/unpoly` and test them in `spec/unpoly`.
+You will mostly make changes in `src/unpoly` and test them in `spec/unpoly`. How the specs
+themselves are structured is covered in [Testing](testing.md#how-specs-are-organized).
 
 This repository is organized like this:
 
@@ -28,6 +29,7 @@ src/                      # Webpack entry points for Unpoly's main and optional 
 spec/
   unpoly/                 # Tests (Jasmine specs)
     form_spec.js          # ... Tests for up.form module
+    form_switch_spec.js   # ... Tests for [up-switch], too large to keep in form_spec.js
     link_spec.js          # ... Tests for up.link module
     layer_spec.js         # ... Tests for up.layer module
     ...                   # ... Tests for other modules
@@ -47,6 +49,7 @@ spec/
 bin/                      # Scripts for development
   dev                     # ... Start or stop dev environment (Webpack bundler, Jasmine runner)
   test                    # ... Run tests from terminal (will execute in headless Chrome internally)
+  find-spec               # ... Find specs by a phrase in their describe()/it() titles
   ...                     # ... other dev scripts
 
 runner/                   # The Jasmine spec runner server (rarely need to edit here)
@@ -65,6 +68,12 @@ dist/                     # Output directory for the Webpack bundler (gitignored
   unpoly.min.css          # ... Minified Unpoly bundle (CSS)
   ...
 ```
+
+A module's specs are not always in a single file: a group that grew too large lives in a
+sibling file sharing the module's prefix, like `form_switch_spec.js` above. See
+[How specs are organized](testing.md#how-specs-are-organized) for the naming, how to
+[find the spec for a feature](testing.md#finding-the-spec-for-a-feature), and
+[where a new spec goes](testing.md#where-a-new-spec-goes).
 
 
 ## Architecture

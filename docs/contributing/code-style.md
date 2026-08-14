@@ -57,9 +57,12 @@ Acronyms are uppercased: `parseURL()`, not `parseUrl()`. Same for `escapeHTML()`
 
 ## Linting
 
-`bin/lint` runs ESLint over `src/`, using the same rules the Webpack build enforces.
-Extra arguments are forwarded, so `bin/lint --fix` works.
+`bin/lint` runs ESLint over `src/`, `spec/` and `runner/`. Extra arguments are forwarded,
+so `bin/lint --fix` works.
 
-You don't have to run it separately to catch violations: a lint error fails the build,
-which makes `bin/test` print the errors instead of running the specs. See
-[Setting up a dev environment](dev-environment.md).
+For `src/` you don't have to run it separately: those are the same rules the Webpack build
+enforces, and a lint error fails the build, which makes `bin/test` print the errors instead
+of running the specs. See [Setting up a dev environment](dev-environment.md).
+
+Specs and the runner are not part of that build, so nothing checks them until you run
+`bin/lint` — or until CI does, in its own job.
