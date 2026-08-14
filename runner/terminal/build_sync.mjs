@@ -9,9 +9,35 @@ import { readStatus } from './build_status.mjs'
 
 const SKIP_DIRS = new Set(['node_modules', 'dist', 'tmp', '.git'])
 
-export function newestSourceMtime(root = process.cwd(), dirs = ['src', 'spec']) {
+// Files outside src/ and spec/ that webpack nevertheless compiles into dist/specs.js:
+// spec/helpers/terminal_reporter.js imports poster.js, which pulls in the other two.
+//
+// The scanned set must equal the *watched* set in both directions. Miss a file the
+// watcher watches and bin/test runs against a stale bundle — the one thing this module
+// exists to prevent. Add a file the watcher does not watch (formatter.mjs, say, which
+// runs in Node) and every run after editing it waits out the timeout instead.
+export const BROWSER_RUNNER_FILES = [
+  'runner/terminal/poster.js',
+  'runner/terminal/log_value.mjs',
+  'runner/terminal/dom_snapshot.js',
+]
+
+export function newestSourceMtime(root = process.cwd(), dirs = ['src', 'spec'], files = BROWSER_RUNNER_FILES) {
   let newest = 0
-  for (let dir of dirs) walk(path.join(root, dir), (mtime) => { if (mtime > newest) newest = mtime })
+  let seen = 0
+  for (let dir of dirs) {
+    walk(path.join(root, dir), (mtime) => { seen++; if (mtime > newest) newest = mtime })
+  }
+  for (let file of files) {
+    // Deliberately not swallowed: a renamed file would otherwise drop out of the scan
+    // silently, and silently is how stale runs happen.
+    let mtime = statSync(path.join(root, file)).mtimeMs
+    seen++
+    if (mtime > newest) newest = mtime
+  }
+  // No sources at all means the wrong cwd (or a broken checkout). Reporting 0 would say
+  // "everything is fresh" and let the run proceed against whatever is in dist/.
+  if (seen === 0) throw new Error(`No source files found under ${root}. Run from the project root.`)
   return newest
 }
 

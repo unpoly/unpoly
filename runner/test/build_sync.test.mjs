@@ -1,6 +1,8 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { waitForFreshBuild, BuildSyncError, BuildFailedError } from '../terminal/build_sync.mjs'
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
+import { waitForFreshBuild, newestSourceMtime, BROWSER_RUNNER_FILES, BuildSyncError, BuildFailedError } from '../terminal/build_sync.mjs'
 
 const noop = async () => {}
 
@@ -58,4 +60,32 @@ test('times out when the build stays older than the edit', async () => {
     }),
     /didn't rebuild/
   )
+})
+
+test('the browser-side runner files webpack compiles into the specs bundle are all scanned', () => {
+  // The freshness check scans src/ and spec/. Anything else that reaches dist/specs.js
+  // has to be listed by hand, and a hand-maintained list rots — so derive the truth from
+  // the imports and fail if the list falls behind.
+  const root = new URL('../../', import.meta.url).pathname
+  const entry = 'runner/terminal/poster.js' // what spec/helpers/terminal_reporter.js pulls in
+
+  const reachable = new Set()
+  const visit = (relative) => {
+    if (reachable.has(relative)) return
+    reachable.add(relative)
+    const source = readFileSync(path.join(root, relative), 'utf8')
+    for (const [, target] of source.matchAll(/^import\s[^']*'(\.[^']+)'/gm)) {
+      visit(path.join(path.dirname(relative), target))
+    }
+  }
+  visit(entry)
+
+  for (const file of reachable) {
+    assert.ok(BROWSER_RUNNER_FILES.includes(file),
+      `${file} reaches the specs bundle but is not in the freshness scan`)
+  }
+})
+
+test('a scan that finds nothing fails closed rather than reporting "fresh"', () => {
+  assert.throws(() => newestSourceMtime('/nonexistent-checkout', ['src'], []), /No source files found/)
 })
