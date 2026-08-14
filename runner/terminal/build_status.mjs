@@ -21,14 +21,20 @@ export function readStatus(root = process.cwd()) {
 
 export class BuildStatusPlugin {
   #building = 0
-  #startedAt = Date.now()
+  #startedAt
   #errors = []
   #sink
   #watching = false
+  #startedPerCompiler = new Map()
 
-  // `write` is a seam for the self-tests; production uses the file writer.
-  constructor({ write = writeStatusFile } = {}) {
+  #now
+
+  // `write` and `now` are seams for the self-tests; production uses the file writer and
+  // the wall clock.
+  constructor({ write = writeStatusFile, now = Date.now } = {}) {
     this.#sink = write
+    this.#now = now
+    this.#startedAt = now()
   }
 
   apply(compiler) {
@@ -41,11 +47,14 @@ export class BuildStatusPlugin {
     // the dev environment was gone.
     compiler.hooks.watchRun.tap('BuildStatusPlugin', () => {
       this.#watching = true
-      if (this.#building === 0) {
-        this.#startedAt = Date.now()
-        this.#errors = [] // start of a fresh rebuild round
-      }
+      if (this.#building === 0) this.#errors = [] // start of a fresh rebuild round
       this.#building++
+      // Per compiler, because they rebuild independently: a fast one can finish and
+      // start again while a slow one is still going, so the counter never returns to
+      // zero between two logical rounds. Keying `startedAt` off that counter left it
+      // stuck at the first round's time, and `waitForFreshBuild()` then waited out its
+      // timeout insisting the watcher had not picked up an edit it had already built.
+      this.#startedPerCompiler.set(compiler, this.#now())
       this.#write('building')
     })
     compiler.hooks.done.tap('BuildStatusPlugin', (stats) => {
@@ -56,17 +65,44 @@ export class BuildStatusPlugin {
       if (stats.hasErrors()) {
         this.#errors.push(stats.toString({ all: false, errors: true, colors: false }))
       }
-      this.#building = Math.max(0, this.#building - 1)
-      if (this.#building === 0) this.#write('idle')
+      this.#settle()
     })
+    // A watch cycle can fail *without* reaching `done` — an fs error while emitting,
+    // EMFILE, a plugin throwing. Webpack fires `failed` instead, and without this tap
+    // the counter never returned to zero: the status stayed "building" for ever and
+    // every later bin/test timed out blaming a watcher that was fine.
+    compiler.hooks.failed.tap('BuildStatusPlugin', (error) => {
+      if (!this.#watching) return
+      this.#errors.push(String(error && error.stack || error))
+      this.#settle()
+    })
+  }
+
+  #settle() {
+    this.#building = Math.max(0, this.#building - 1)
+    if (this.#building > 0) return
+
+    this.#write('idle')
+    // The busy period is over, so the next one starts from a clean slate. Without this
+    // a compiler that stops taking part would pin `startedAt` to its last start for
+    // ever, and nothing would ever look fresh again.
+    this.#startedPerCompiler.clear()
+  }
+
+  // The oldest start among the compilers taking part in the current busy period.
+  // Reporting the newest would certify an edit that only the fastest compiler picked up;
+  // the oldest is conservative, so the worst case is waiting for one more rebuild.
+  #oldestStart() {
+    const starts = [...this.#startedPerCompiler.values()]
+    return starts.length ? Math.min(...starts) : this.#startedAt
   }
 
   #write(state) {
     this.#sink({
       pid: process.pid,
       state,
-      startedAt: this.#startedAt,
-      finishedAt: state === 'idle' ? Date.now() : null,
+      startedAt: this.#oldestStart(),
+      finishedAt: state === 'idle' ? this.#now() : null,
       ok: this.#errors.length === 0,
       // Several sub-compilers build the same source (es5/es6, CSP variants…), so
       // the same file's error shows up more than once — collapse the duplicates.
