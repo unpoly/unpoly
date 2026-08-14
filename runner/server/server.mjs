@@ -27,7 +27,7 @@ export function startServer(port = serverPort) {
   app.get('/specs', (req, res) => {
     const headers = {}
 
-    const config = Config.fromExpressQuery(req.query)
+    const config = Config.fromObject(req.query)
 
     let cspHeader = config.toCSPHeader()
     if (cspHeader) {

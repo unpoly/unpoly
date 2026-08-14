@@ -37,7 +37,6 @@ function install() {
   })
 
   jasmine.getEnv().addReporter({
-    jasmineStarted: (info) => post({ type: 'jasmineStarted', totalSpecs: info && info.totalSpecsDefined }),
     suiteStarted: (result) => post({ type: 'suiteStarted', description: result.description }),
     suiteDone: (result) => post({
       type: 'suiteDone',
@@ -57,14 +56,12 @@ function install() {
         description: result.description,
         status: result.status,
         failedExpectations: mapExpectations(result.failedExpectations),
-        pendingReason: result.pendingReason,
         failure,
       })
     },
     jasmineDone: (result) => post({
       type: 'jasmineDone',
       overallStatus: result.overallStatus,
-      totalTime: result.totalTime,
       incompleteReason: result.incompleteReason,
       failedExpectations: mapExpectations(result.failedExpectations),
     }),
@@ -85,7 +82,6 @@ function install() {
   function mapExpectations(failedExpectations) {
     return (failedExpectations || []).map((failure) => ({
       message: failure.message,
-      matcherName: failure.matcherName,
       stack: failure.stack,
     }))
   }

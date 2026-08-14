@@ -102,7 +102,6 @@ export class BuildStatusPlugin {
       pid: process.pid,
       state,
       startedAt: this.#oldestStart(),
-      finishedAt: state === 'idle' ? this.#now() : null,
       ok: this.#errors.length === 0,
       // Several sub-compilers build the same source (es5/es6, CSP variants…), so
       // the same file's error shows up more than once — collapse the duplicates.

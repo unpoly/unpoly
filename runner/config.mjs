@@ -47,7 +47,7 @@ const PARSERS = {
 }
 
 // Collects the raw (unparsed) string values for known settings from an env-like
-// object, reading each as its UPPERCASE name. Shared by fromProcessEnv/fromArgv.
+// object, reading each as its UPPERCASE name. Used by fromArgv, so CLI beats env.
 function envToRaw(env) {
   let raw = {}
   for (let key in PARSERS) {
@@ -125,26 +125,18 @@ export class Config {
     }
   }
 
-  static fromObject(object, overrides = {}) {
+  static fromObject(object) {
     let obj = {}
     for (let key in PARSERS) {
       obj[key] = PARSERS[key](object[key])
     }
-    return new this({ ...obj, ...overrides })
-  }
-
-  static fromExpressQuery(query, overrides = {}) {
-    return this.fromObject(query, overrides)
-  }
-
-  static fromProcessEnv(env, overrides = {}) {
-    return this.fromObject(envToRaw(env), overrides)
+    return new this(obj)
   }
 
   // Reads config from CLI args (--key=value, or bare --flag => "true"), falling
   // back to env vars, falling back to defaults. Precedence: CLI > env > default.
   // Unknown --flags throw, to catch typos.
-  static fromArgv(argv, env = {}, overrides = {}) {
+  static fromArgv(argv, env = {}) {
     let raw = envToRaw(env)
     for (let token of argv) {
       let match = /^--([^=]+)(?:=(.*))?$/.exec(token)
@@ -160,7 +152,7 @@ export class Config {
       }
       raw[key] = match[2] ?? 'true'
     }
-    return this.fromObject(raw, overrides)
+    return this.fromObject(raw)
   }
 
 }

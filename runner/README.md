@@ -63,13 +63,14 @@ so webpack's `require.context` picks it up.
 
 | type | fields |
 |------|--------|
-| `jasmineStarted` | `totalSpecs` |
 | `suiteStarted` | `description` |
 | `suiteDone` | `description`, `failedExpectations[]` |
-| `specDone` | `fullName`, `description`, `status`, `failedExpectations[]`, `pendingReason?`, `failure?` |
-| `jasmineDone` | `overallStatus`, `totalTime`, `incompleteReason?`, `failedExpectations[]` |
+| `specDone` | `fullName`, `description`, `status`, `failedExpectations[]`, `failure?` |
+| `jasmineDone` | `overallStatus`, `incompleteReason?`, `failedExpectations[]` |
 
-- `failedExpectations[]`: `{ message, matcherName, stack }` — raw stack, Node remaps it.
+- `failedExpectations[]`: `{ message, stack }` — raw stack, Node remaps it. On `jasmineDone`
+  these belong to no spec (a top-level `afterAll` that threw) and are reported as their own
+  failure, so a red run cannot print a green summary.
 - `failure` (failed specs only): `{ log: string[], dom: DomNode[] }`. Log lines are
   already serialized strings; `dom` is a tree, not HTML.
 - `DomNode`: `{ tag, id, classes[], attrs{}, children: (DomNode | { text })[] }`.
@@ -89,7 +90,7 @@ snapshots the DOM for a failed spec, then closes the log buffer.
 
 ### `tmp/build-status.json` (webpack → runner)
 
-`{ pid, state: "building" | "idle", startedAt, finishedAt | null, ok, errors }`. A single
+`{ pid, state: "building" | "idle", startedAt, ok, errors }`. A single
 shared plugin instance counts in-flight sub-compilers, so `idle` means *all* current
 rebuilds finished (no partial-read race) — and `errors` is deduplicated, because the same
 source is built by several sub-compilers and would otherwise report each failure once per
@@ -198,7 +199,7 @@ browser, no build, runs in a second. Cover changes here rather than through the
 suite. What's covered today:
 
 - `formatter` / `stack` / `dom_outline` / `urls`: progress line, compact vs. verbose
-  failure block, `node_modules` filtering, selector outline, summary.
+  failure block, frame selection, selector outline, summary.
 - `log_value`: `%s/%o/%d/%c` substitution, objects, circular structures, elements —
   including that an agent-inserted `console.log` reaches verbose output but not compact.
 - `config`: `fromArgv`/`fromProcessEnv` precedence, unknown-flag error, CSP header,

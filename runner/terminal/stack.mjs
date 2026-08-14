@@ -28,14 +28,12 @@ function parseFrame(rawLine) {
   return { raw: rawLine, other: true } // message or unrecognized line
 }
 
-function frame(raw, func, file, line, col) {
+function frame(raw, func, file, line) {
   return {
     raw,
     func: func || null,
     file,
     line: Number(line),
-    col: Number(col),
-    nodeModules: /(^|\/)node_modules\//.test(file),
     spec: /(^|\/)spec\//.test(file),
     src: /(^|\/)src\//.test(file),
   }
