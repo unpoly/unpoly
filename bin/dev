@@ -22,11 +22,12 @@ if (command === 'start') {
       console.log(pc.yellow(error.message)) // you wanted an environment; there is one
       process.exit(0)
     }
-    console.error(pc.red(error.stack || error.message))
+    // `expected` marks a refusal the user can act on — no stack for those.
+    console.error(pc.red(error.expected ? error.message : (error.stack || error.message)))
     process.exit(1)
   }
 } else if (command === 'stop') {
-  const result = await stopDevEnv()
+  const { result, pid } = await stopDevEnv()
   if (result === 'stopped') {
     console.log(pc.blue('Dev environment stopped.'))
     process.exit(0)
@@ -36,7 +37,6 @@ if (command === 'start') {
     process.exit(1)
   }
   if (result === 'unidentified') {
-    const { pid } = await devEnvState()
     console.error(pc.red(`tmp/dev.pid names PID ${pid}, which is alive but cannot be identified. Check it, then remove the file if nothing is running.`))
     process.exit(1)
   }

@@ -1,10 +1,15 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { devEnvState, isSupervisor, lastBuildErrors, withStartLock } from '../dev_env.mjs'
+import { closeSync, mkdtempSync, readFileSync, rmSync, writeSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
+import { devEnvState, isSupervisor, lastBuildErrors, startUnderLock, withStartLock } from '../dev_env.mjs'
 
 const SERVING = async () => true
 const SILENT = async () => false
 const owned = (pid, owner) => () => ({ pid, owner })
+const NOTHING_RUNNING = async () => ({ state: 'none', pid: null })
+const noStdio = () => ({ stdio: 'ignore', close: () => {} })
 
 // --- devEnvState: the one decision -----------------------------------------
 
@@ -116,4 +121,47 @@ test('lastBuildErrors returns the errors when the last build failed', () => {
 
 test('lastBuildErrors falls back to a placeholder when a failed build has no text', () => {
   assert.match(lastBuildErrors(() => ({ ok: false, errors: '' })), /no error output/)
+})
+
+// --- startUnderLock: the sequence that broke three times ---------------------
+
+test('the pid file names the supervisor before the critical section returns', async () => {
+  // Every generation of this bug left the pid file empty (or someone else's) at the
+  // moment the lock was released, because the write happened outside the critical
+  // section. Nothing but this assertion pins the ordering.
+  const dir = mkdtempSync(path.join(tmpdir(), 'unpoly-under-lock-'))
+  const file = path.join(dir, 'dev.pid')
+  try {
+    const spawnIt = (_stdio, claim) => {
+      writeSync(claim, '4242')
+      closeSync(claim)
+      return { pid: 4242 }
+    }
+    const supervisor = await startUnderLock(noStdio, { probe: NOTHING_RUNNING, spawnIt, file })
+    assert.equal(supervisor.pid, 4242)
+    assert.equal(readFileSync(file, 'utf8').trim(), '4242', 'pid written before returning')
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
+test('nothing is touched when an environment already exists', async () => {
+  // The probe must be consulted before the pid file is cleared and before stdio is
+  // opened — opening the log truncates it, which used to wipe a booting environment's.
+  let stdioOpened = false
+  const openStdio = () => { stdioOpened = true; return noStdio() }
+  const spawnIt = () => { throw new Error('must not spawn') }
+
+  await assert.rejects(
+    startUnderLock(openStdio, { probe: async () => ({ state: 'booting', pid: 7 }), spawnIt }),
+    /already booting \(PID 7\)/
+  )
+  assert.equal(stdioOpened, false, 'stdio must not be opened before the state is known')
+})
+
+test('the supervisor is spawned as node <dev_env.mjs> with no extra arguments', () => {
+  // isSupervisor() matches argv[1] exactly, so a node flag added to this spawn would
+  // make every running environment unidentifiable — and unstoppable.
+  const source = readFileSync(new URL('../dev_env.mjs', import.meta.url), 'utf8')
+  assert.match(source, /spawn\(process\.execPath, \[SUPERVISOR\], \{ detached: true, stdio \}\)/)
 })

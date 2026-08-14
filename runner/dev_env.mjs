@@ -34,9 +34,11 @@ const SUPERVISOR = import.meta.filename
 // relative `bin/…` commands resolve no matter where `bin/dev` was invoked.
 const PROJECT_ROOT = path.dirname(path.dirname(SUPERVISOR))
 
-// Absolute, not cwd-relative, so every caller refers to the same files no matter where
-// it was invoked from. (Running bin/test from a subdirectory still fails later, in
-// waitForFreshBuild(), which resolves tmp/build-status.json against the cwd.)
+// Absolute, not cwd-relative, so every caller refers to the same files no matter where it
+// was invoked from. That is not enough to make bin/test work from a subdirectory: the
+// build status is still resolved against the cwd, so such a run either fails in
+// waitForFreshBuild() or — if it started the environment itself — waits out
+// READY_TIMEOUT and then kills the healthy environment it just booted. Run from the root.
 const PID_FILE = path.join(PROJECT_ROOT, 'tmp/dev.pid')
 const LOG_FILE = path.join(PROJECT_ROOT, 'tmp/dev.log')
 // Held only while a start is in progress, to serialise concurrent starts. Not a
@@ -115,15 +117,15 @@ export async function startDevEnv() {
 // Every step must be inside the lock. Two earlier versions released it before the pid
 // was written, and since readPidFile() maps an empty file to null, a racer arriving in
 // that window saw 'none' and cleared the winner's own fresh claim.
-async function startUnderLock(openStdio) {
-  const { state, pid } = await devEnvState()
+export async function startUnderLock(openStdio, { probe = devEnvState, spawnIt = spawnSupervisor, file = PID_FILE } = {}) {
+  const { state, pid } = await probe()
   if (state !== 'none') throw existingEnvError(state, pid)
 
   // Safe only under the lock: 'none' means no live supervisor owns this file, so it is
   // a leftover from a SIGKILLed one, and nobody else can be claiming it right now.
-  clearPidFile()
-  const claim = claimPidFile()
-  if (!claim) throw new Error(`Could not claim ${PID_FILE}. Remove it and try again.`)
+  clearPidFile(file)
+  const claim = claimPidFile(file)
+  if (!claim) throw new Error(`Could not claim ${file}. Remove it and try again.`)
 
   // Only now, past the point of no return, do we touch the log — opening it truncates,
   // and a start that turns back here would otherwise wipe a live environment's log. The
@@ -131,10 +133,10 @@ async function startUnderLock(openStdio) {
   // for ~15s, during which a second `bin/test` sees 'booting' and turns back right here.
   const { stdio, close } = openStdio()
   try {
-    const supervisor = spawnSupervisor(stdio, claim)
-    if (readPidFile() !== supervisor.pid) {
+    const supervisor = spawnIt(stdio, claim)
+    if (readPidFile(file) !== supervisor.pid) {
       killGroup(supervisor.pid)
-      throw new Error(`${PID_FILE} changed while starting. Try again.`)
+      throw new Error(`${file} changed while starting. Try again.`)
     }
     return supervisor
   } finally {
@@ -218,18 +220,18 @@ export async function stopDevEnv() {
   switch (state) {
     case 'running':
     case 'booting':
-      return killGroup(pid) ? 'stopped' : 'not-running'
+      return { result: killGroup(pid) ? 'stopped' : 'not-running', pid }
     case 'foreign':
-      return 'foreign'
+      return { result: 'foreign', pid }
     case 'unidentified':
-      return 'unidentified' // alive but unreadable: never signal what we cannot name
+      return { result: 'unidentified', pid } // alive but unreadable: never signal it
     default:
       // Deliberately *not* clearing a leftover file here. Probing and then unlinking are
       // two steps, and unlocked they race a concurrent start: we could unlink the pid
       // file of an environment that came up in between, leaving it unstoppable. A
       // leftover is inert anyway — devEnvState() reports 'none' for it — and the next
       // start clears it inside the lock, where that is safe.
-      return 'not-running'
+      return { result: 'not-running', pid }
   }
 }
 
@@ -237,10 +239,12 @@ export async function stopDevEnv() {
 // callers can treat it as "you asked for one and there is one" rather than a failure.
 function existingEnvError(state, pid) {
   const error = new Error(alreadyRunning(state, pid))
-  // 'unidentified' deliberately excluded: it means we cannot *prove* an environment
-  // exists, and bin/test refuses to run in that state — so `bin/dev start` must not
-  // report success for it either.
+  // 'unidentified' deliberately excluded from devEnvExists: it means we cannot *prove*
+  // an environment exists, and bin/test refuses to run in that state — so `bin/dev start`
+  // must not report success for it either. It is still an expected refusal, not a bug,
+  // hence `expected`: the caller prints the message rather than a stack trace.
   error.devEnvExists = state !== 'unidentified'
+  error.expected = true
   return error
 }
 
@@ -266,6 +270,12 @@ function alreadyRunning(state, pid) {
 // no longer a supervisor, and the next start clears it under the lock.
 function spawnSupervisor(stdio, claim) {
   const supervisor = spawn(process.execPath, [SUPERVISOR], { detached: true, stdio })
+  // A launch failure (EAGAIN, ENOMEM) is reported asynchronously and leaves pid
+  // undefined. Claim it here so it cannot resurface later as an uncaught exception;
+  // waitUntilReady() reports it through the 'exit' it also raises.
+  supervisor.on('error', (error) => note(`the dev environment failed to start: ${error.message}`))
+  if (!supervisor.pid) throw new Error(`Could not spawn the dev environment (${SUPERVISOR}).`)
+
   writeSync(claim, String(supervisor.pid)) // fill in the claim we already hold
   closeSync(claim)
   return supervisor
@@ -410,9 +420,9 @@ const note = (message) => console.log(pc.blue(`dev | ${message}`))
 
 // The pid in tmp/dev.pid, whatever its state. The only function that reads the file
 // — everything else goes through devEnvState().
-function readPidFile() {
+function readPidFile(file = PID_FILE) {
   try {
-    const pid = Number(readFileSync(PID_FILE, 'utf8').trim())
+    const pid = Number(readFileSync(file, 'utf8').trim())
     return Number.isInteger(pid) && pid > 0 ? pid : null
   } catch {
     return null

@@ -89,10 +89,13 @@ snapshots the DOM for a failed spec, then closes the log buffer.
 
 ### `tmp/build-status.json` (webpack → runner)
 
-`{ pid, state: "building" | "idle", startedAt, finishedAt | null, hash }`. A single
+`{ pid, state: "building" | "idle", startedAt, finishedAt | null, ok, errors }`. A single
 shared plugin instance counts in-flight sub-compilers, so `idle` means *all* current
-rebuilds finished (no partial-read race). `waitForFreshBuild` errors if the file is
-missing or the pid is dead, else waits until `idle && startedAt >= newestSourceMtime`.
+rebuilds finished (no partial-read race) — and `errors` is deduplicated, because the same
+source is built by several sub-compilers and would otherwise report each failure once per
+variant. `waitForFreshBuild` errors if the file is missing or the pid is dead, else waits
+until `idle && startedAt >= newestSourceMtime`, then throws if `ok` is false;
+`bin/dev status` reads the same two fields through `lastBuildErrors()`.
 
 **Only a watching compiler writes it**, which is what keeps it single-writer. The
 plugin arms itself on `watchRun` (watch-only) and ignores `done` until then, because
