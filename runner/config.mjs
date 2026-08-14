@@ -144,7 +144,11 @@ export class Config {
     let raw = envToRaw(env)
     for (let token of argv) {
       let match = /^--([^=]+)(?:=(.*))?$/.exec(token)
-      if (!match) continue
+      // A bare word is a mistake, not a filter: `bin/test up.form` silently ran the
+      // whole suite, which is the opposite of what anyone typing that intends.
+      if (!match) {
+        throw new Error(`Unexpected argument: ${token}. Did you mean --spec="${token}"?`)
+      }
       // Accept kebab-case flags for camelCase keys (--stop-on-failure -> stopOnFailure).
       let key = match[1].replace(/-([a-z])/g, (_, char) => char.toUpperCase())
       if (!(key in PARSERS)) {

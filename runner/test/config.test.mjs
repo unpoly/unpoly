@@ -45,3 +45,11 @@ test('distFilenames reflect es6 and minify', () => {
   assert.deepEqual(Config.fromArgv(['--es6', '--minify']).distFilenames(),
     { unpoly: 'unpoly.es6.min.js', specs: 'specs.es6.js', migrate: 'unpoly-migrate.min.js', jasmine: 'jasmine.js' })
 })
+
+test('a bare argument is an error, not a silently ignored filter', () => {
+  // `bin/test up.form` used to run the entire suite, because non-flag tokens were
+  // dropped — hostile to exactly the person reaching for --spec.
+  assert.throws(() => Config.fromArgv(['up.form']), /Unexpected argument: up\.form/)
+  // and it suggests the flag the user meant
+  assert.throws(() => Config.fromArgv(['up.form']), /--spec="up\.form"/)
+})
