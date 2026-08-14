@@ -1,0 +1,45 @@
+#!/usr/bin/env node
+// Finds specs whose describe()/it() title contains a phrase, and prints where they live:
+//
+//     bin/find-spec "up.render"
+//     bin/find-spec "kept element"
+//
+// Specs for one feature are spread over several files (see docs/contributing/testing.md),
+// so the point of this is the full group path, not just the file. Colors are used only
+// when writing to a terminal, so piped output stays plain.
+import { readFileSync, readdirSync } from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { findSpecs, formatMatches } from '../runner/find_spec.mjs'
+
+const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+const specDir = path.join(projectRoot, 'spec/unpoly')
+
+const phrase = process.argv[2]
+if (!phrase) {
+  console.error('Usage: bin/find-spec "phrase"')
+  process.exit(64)
+}
+
+function specFiles(dir) {
+  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const full = path.join(dir, entry.name)
+    if (entry.isDirectory()) return specFiles(full)
+    return entry.name.endsWith('_spec.js') ? [full] : []
+  })
+}
+
+const sources = specFiles(specDir).sort().map((file) => ({
+  file: path.relative(specDir, file),
+  text: readFileSync(file, 'utf8'),
+}))
+
+const matches = findSpecs(sources, phrase)
+const color = process.stdout.isTTY && !process.env.NO_COLOR
+
+for (let line of formatMatches(matches, { phrase, color })) console.log(line)
+
+if (!matches.length) {
+  console.error(`No spec title contains ${JSON.stringify(phrase)}.`)
+  process.exit(1)
+}

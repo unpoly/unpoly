@@ -1,0 +1,62 @@
+// Finds specs by a phrase in their describe()/it() titles. PURE: the caller reads the
+// files, this parses and formats. See bin/find-spec.
+//
+// Titles are parsed by indentation rather than by braces, which is enough because every
+// one of them is written on a single line. extendDescribe() counts as a group: it names
+// the path an extracted spec file belongs to (see docs/contributing/testing.md).
+
+const TITLE = /^(\s*)(extendDescribe|[fx]?describe|[fx]?it)\(\s*(['"`])(.*?)\3/
+
+const ANSI = {
+  path: (s) => `\x1b[36m${s}\x1b[0m`,      // cyan: file:line
+  ancestry: (s) => `\x1b[2m${s}\x1b[0m`,   // dim: the groups above the match
+  match: (s) => `\x1b[1;33m${s}\x1b[0m`,   // bold yellow: the phrase itself
+}
+
+// Returns [{ file, line, titles, isGroup }], where titles is the full path to the match
+// including its own title. Matching is case-insensitive on the title alone, so a phrase
+// never matches spec code.
+export function findSpecs(sources, phrase) {
+  const needle = phrase.toLowerCase()
+  const matches = []
+
+  for (let { file, text } of sources) {
+    const stack = []
+    text.split('\n').forEach((line, index) => {
+      const parsed = TITLE.exec(line)
+      if (!parsed) return
+
+      const [, indent, kind, , title] = parsed
+      const isGroup = kind !== 'it' && kind !== 'fit' && kind !== 'xit'
+
+      while (stack.length && stack[stack.length - 1].indent >= indent.length) stack.pop()
+      const titles = [...stack.map((entry) => entry.title), title]
+      if (isGroup) stack.push({ indent: indent.length, title })
+
+      if (title.toLowerCase().includes(needle)) {
+        matches.push({ file, line: index + 1, titles, isGroup })
+      }
+    })
+  }
+
+  return matches
+}
+
+// One line per match: "file:line group / group / title", with the phrase highlighted.
+export function formatMatches(matches, { phrase, color = false } = {}) {
+  const paint = color ? ANSI : { path: (s) => s, ancestry: (s) => s, match: (s) => s }
+
+  return matches.map(({ file, line, titles }) => {
+    const own = titles[titles.length - 1]
+    const ancestry = titles.slice(0, -1)
+    const at = paint.path(`${file}:${line}`)
+    const above = ancestry.length ? paint.ancestry(ancestry.join(' / ') + ' / ') : ''
+    return `${at} ${above}${highlight(own, phrase, paint)}`
+  })
+}
+
+function highlight(title, phrase, paint) {
+  const at = title.toLowerCase().indexOf(phrase.toLowerCase())
+  if (at === -1) return title
+  return title.slice(0, at) + paint.match(title.slice(at, at + phrase.length)) + title.slice(at + phrase.length)
+}

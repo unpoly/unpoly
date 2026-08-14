@@ -36,6 +36,7 @@ Node (runner/terminal)
   dom_outline.mjs PURE: DOM tree → CSS-selector outline
   urls.mjs        PURE: spec deep-links etc.
   log_value.mjs   PURE: console arg serialization (runs in the browser, unit-tested in Node)
+  find_spec.mjs   PURE: spec titles → their group path (bin/find-spec); no runner involvement
 
 webpack --watch (webpack/development.js) ─► terminal/build_status.mjs plugin ─► tmp/build-status.json
 run.mjs (dev) ── terminal/build_sync.mjs waits until fresh ◄────────────────────┘
@@ -47,7 +48,7 @@ run.mjs (dev) ── terminal/build_sync.mjs waits until fresh ◄────�
 - `dev_env.mjs` — the dev environment: one process table, one supervisor, one pid
   file (`tmp/dev.pid`). See [its own contract](#the-dev-environment) below.
 - `test/` — the self-tests: `bin/self-test`.
-- `bin/test`, `bin/ci`, `bin/dev` — thin **extensionless** executables (shebang +
+- `bin/test`, `bin/ci`, `bin/dev`, `bin/find-spec` — thin **extensionless** executables (shebang +
   `chmod +x`), relying on Node 22's extensionless-ESM detection. The package is
   deliberately *not* `type: module` (that would break the CommonJS webpack configs),
   so everything under `runner/**` is `.mjs`.
