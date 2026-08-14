@@ -53,3 +53,12 @@ test('a bare argument is an error, not a silently ignored filter', () => {
   // and it suggests the flag the user meant
   assert.throws(() => Config.fromArgv(['up.form']), /--spec="up\.form"/)
 })
+
+test('the serialized config cannot break out of the script block it is injected into', () => {
+  // ?spec=</script><script>alert(1)</script> used to reflect a live script into the
+  // runner page — and the same URL can ask for csp=none, so the header is no defense.
+  let json = Config.fromObject({ spec: '</script><script>alert(1)</script>' }).toJSONString()
+  assert.doesNotMatch(json, /<\/script>/i)
+  assert.match(json, /\\u003c/)
+  assert.equal(JSON.parse(json).spec, '</script><script>alert(1)</script>', 'still round-trips')
+})

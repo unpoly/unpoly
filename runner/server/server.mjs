@@ -37,8 +37,19 @@ export function startServer(port = serverPort) {
     res.set(headers).render('runner/server/runner', { config })
   })
 
-  return new Promise((resolve) => {
-    const httpServer = app.listen(port, serverHost, () => {
+  return new Promise((resolve, reject) => {
+    // Express wires this callback as *both* the listening callback and the 'error'
+    // handler, so without the check a port collision resolved with a handle to a server
+    // that was not listening: `bin/test-server` announced itself and exited 0, taking
+    // the dev environment down with it, and runCI aimed puppeteer at whatever else held
+    // the port and died 30s later with a bare timeout.
+    const httpServer = app.listen(port, serverHost, (error) => {
+      if (error) {
+        reject(error.code === 'EADDRINUSE'
+          ? new Error(`Port ${port} is already in use — something else is listening there.`)
+          : error)
+        return
+      }
       resolve({
         stopServer: () => stopServer(httpServer),
         url: urlFor(port),

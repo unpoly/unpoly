@@ -1,5 +1,15 @@
 #!/usr/bin/env node
+// Serves the spec runner page and dist/ — see runner/server/server.mjs. Normally started
+// as part of the dev environment (`bin/dev`), but it runs standalone too.
 import { startServer, serverURL } from '../runner/server/server.mjs'
 import pc from 'picocolors'
-await startServer()
+
+try {
+  await startServer()
+} catch (error) {
+  // Most likely a port collision, which is expected enough not to warrant a stack.
+  console.error(pc.red(error.message))
+  process.exit(1)
+}
+
 console.log(pc.blue(`Unpoly specs serving on ${serverURL}. Press CTRL+C to quit.`))

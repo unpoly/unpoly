@@ -43,3 +43,15 @@ test('minify loads the minified bundles', async () => {
 test('migrate loads unpoly-migrate', async () => {
   assert.match((await get('/specs?migrate=true')).body, /unpoly-migrate\.js/)
 })
+
+test('a port collision rejects instead of resolving with a dead server', async () => {
+  // Express passes the same callback for 'listening' and 'error', so the old code
+  // resolved on EADDRINUSE: bin/test-server printed "serving on ..." and exited 0.
+  const { startServer } = await import('../server/server.mjs')
+  const first = await startServer(4781)
+  try {
+    await assert.rejects(startServer(4781), /already in use/)
+  } finally {
+    await first.stopServer()
+  }
+})

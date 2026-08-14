@@ -66,8 +66,12 @@ export class Config {
 
   // Note: intentionally not named toJSON() — that hook must return a serializable
   // value, but we return the already-encoded string (injected into runner.ejs).
+  //
+  // `<` is escaped because this lands inside a <script> block, where JSON.stringify's
+  // quoting is not enough: a ?spec= containing "</script>" would otherwise close the
+  // block and let the rest of the query run as markup.
   toJSONString() {
-    return JSON.stringify(this._object)
+    return JSON.stringify(this._object).replace(/</g, '\\u003c')
   }
 
   // The settings that differ from their defaults, as a plain object (used to build
