@@ -88,6 +88,13 @@ export function failureBlock(failure, { verbose } = {}) {
   return lines.join('\n') + '\n'
 }
 
+// A problem with the run as a whole rather than with a spec: an incomplete run, or a
+// filter that matched nothing. Printed after the summary, because the summary's counts
+// are what make it puzzling ("0 failed" yet non-zero exit).
+export function runProblem(message) {
+  return pc.red(message) + '\n'
+}
+
 export function runSummary(counts, { verbose } = {}) {
   let hint = (counts.failed && !verbose)
     ? '\n\n' + pc.dim('Re-run with --verbose for browser logs and HTML state.')

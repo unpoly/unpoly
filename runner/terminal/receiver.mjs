@@ -91,6 +91,14 @@ export function createReceiver({ verbose = false, remapper, serverURL = '', out 
   }
 
   async function onJasmineDone(event) {
+    // Jasmine reports a failure that belongs to no spec — most often a top-level
+    // afterAll that threw — only here. Turning it into a failure record is what keeps
+    // a red run from printing an all-green summary.
+    for (let expectation of event.failedExpectations || []) {
+      counts.failed++
+      failures.push({ path: ['(after all specs)'], fullName: '', expectations: [expectation] })
+    }
+
     let index = 0
     for (let raw of failures) {
       index++
@@ -118,7 +126,21 @@ export function createReceiver({ verbose = false, remapper, serverURL = '', out 
     }
 
     write(fmt.runSummary(counts, { verbose }))
-    return event.overallStatus === 'failed' ? 1 : 0
+
+    // Only 'passed' is success. 'incomplete' means Jasmine ran something other than
+    // what we asked for — a committed fdescribe/fit focused the run, or the bundle
+    // defined no specs at all — and reporting that as success let a green CI run
+    // cover a fraction of the suite.
+    if (event.overallStatus === 'passed') {
+      if (counts.passed + counts.failed + counts.pending === 0) {
+        write(fmt.runProblem('No specs ran. Check the --spec filter.'))
+        return 1
+      }
+      return 0
+    }
+
+    if (event.incompleteReason) write(fmt.runProblem(`Run incomplete: ${event.incompleteReason}`))
+    return 1
   }
 
   return {

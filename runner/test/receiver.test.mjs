@@ -111,3 +111,44 @@ test('excluded specs are ignored', async () => {
   ])
   assert.match(text, /up\.form \. 1 passed/) // one dot, one passed (excluded skipped)
 })
+
+test('a failure that belongs to no spec is reported, not swallowed into a green summary', async () => {
+  // Jasmine puts a top-level afterAll failure only on jasmineDone. Dropping it printed
+  // "1 passed, 0 failed" in green while exiting 1 — a red run with no diagnosis.
+  let { text, code } = await run([
+    { type: 'suiteStarted', description: 'up.util' },
+    { type: 'specDone', fullName: 'up.util a', description: 'a', status: 'passed' },
+    { type: 'suiteDone', description: 'up.util', failedExpectations: [] },
+    {
+      type: 'jasmineDone',
+      overallStatus: 'failed',
+      failedExpectations: [{ message: 'Overlays survived reset!', stack: 'at reset_up.js:140' }],
+    },
+  ])
+
+  assert.equal(code, 1)
+  assert.match(text, /after all specs/)
+  assert.match(text, /Overlays survived reset!/)
+  assert.match(text, /1 passed, 1 failed/)
+})
+
+test('an incomplete run fails, naming the reason', async () => {
+  // A committed fdescribe/fit focuses the run: Jasmine reports 'incomplete' and CI used
+  // to go green having run a fraction of the suite.
+  let { text, code } = await run([
+    { type: 'suiteStarted', description: 'up.util' },
+    { type: 'specDone', fullName: 'up.util a', description: 'a', status: 'passed' },
+    { type: 'suiteDone', description: 'up.util', failedExpectations: [] },
+    { type: 'jasmineDone', overallStatus: 'incomplete', incompleteReason: 'fit() or fdescribe() was found' },
+  ])
+
+  assert.equal(code, 1)
+  assert.match(text, /Run incomplete: fit\(\) or fdescribe\(\)/)
+})
+
+test('a filter that matched nothing fails instead of reporting success', async () => {
+  let { text, code } = await run([{ type: 'jasmineDone', overallStatus: 'passed' }])
+
+  assert.equal(code, 1)
+  assert.match(text, /No specs ran/)
+})
