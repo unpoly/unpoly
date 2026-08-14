@@ -635,8 +635,8 @@ extendDescribe('up.fragment', function() {
 
           it("sets document.title after calling history.pushState() to prevent mutating the old history state", async function() {
             const calls = []
-            spyOn(up.layer.root, '_updateLocation').and.callFake(() => calls.push('set location'))
-            spyOn(up.layer.root, '_updateTitle').and.callFake(() => calls.push('set title'))
+            spyOn(up.layer.root, 'updateLocation').and.callFake(() => calls.push('set location'))
+            spyOn(up.layer.root, 'updateTitle').and.callFake(() => calls.push('set title'))
 
             // Instead of setting Layer#title or document#title, an alternative implementation is to insert
             // a new <title> element.

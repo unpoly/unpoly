@@ -21,7 +21,7 @@ up.SelectorTracker = class SelectorTracker {
     //     But we aren't yet listening to field events!
     // (3) The change event is only registered via trackFields() and up.SelectorTracker, which
     //     only syncs the current mutation (after up:fragment:insert) for performance reasons.
-    this._sync()
+    this.sync()
 
     return u.sequence(
       this._trackFragments(),
@@ -39,11 +39,12 @@ up.SelectorTracker = class SelectorTracker {
       // When we're in the middle of a render pass, we don't want to react to every
       // up:fragment:inserted/destroyed event, for performance reasons.
       // We want to only sync once at the end of the render pass.
-      up.fragment.afterMutate(() => this._sync())
+      up.fragment.afterMutate(() => this.sync())
     }
   }
 
-  _sync() {
+  // No _ prefix: specs spy on this name, and _-prefixed members are mangled in the minified build.
+  sync() {
     this._syncScheduled = false
 
     let removeMap = new Map(this._knownMatches)

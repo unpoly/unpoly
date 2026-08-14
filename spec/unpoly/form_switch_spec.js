@@ -1189,7 +1189,7 @@ extendDescribe('up.form', function() {
             $select.val('foo')
             const $existingTarget = $form.affix('.target.existing[up-show-for="bar"]')
 
-            const switchTargetSpy = spyOn(up.Switcher.prototype, '_switchSwitcheeNow').and.callThrough()
+            const switchTargetSpy = spyOn(up.Switcher.prototype, 'switchSwitcheeNow').and.callThrough()
 
             up.hello($form)
             await wait()
@@ -1628,7 +1628,7 @@ extendDescribe('up.form', function() {
             $select.val('foo')
             const $existingTarget = $form.affix('.target.existing[up-enable-for="bar"]')
 
-            const switchTargetSpy = spyOn(up.Switcher.prototype, '_switchSwitcheeNow').and.callThrough()
+            const switchTargetSpy = spyOn(up.Switcher.prototype, 'switchSwitcheeNow').and.callThrough()
 
             up.hello($form)
             await wait()

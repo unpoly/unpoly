@@ -106,7 +106,8 @@ up.ResponseDoc = class ResponseDoc {
   Returns `undefined` if the root has no contentful `<head>`, e.g. if the root was
   parsed from a fragment, or from a document without a `<head>` element.
   */
-  _getHead() {
+  // No _ prefix: specs call this directly, and _-prefixed members are mangled in the minified build.
+  getHead() {
     // The root may be a `Document` (which always has a `#head`, even if it wasn't present in the HTML)
     // or an `Element` (which never has a `#head`).
     if (this._isFullDocument) {
@@ -115,7 +116,7 @@ up.ResponseDoc = class ResponseDoc {
   }
 
   _fromHead(fn) {
-    let head = this._getHead()
+    let head = this.getHead()
     return head && fn(head)
   }
 
@@ -254,7 +255,7 @@ up.ResponseDoc = class ResponseDoc {
   static {
     // Cache since multiple plans will query this.
     u.memoizeMethod(this.prototype, {
-      _getHead: true,
+      getHead: true,
     })
   }
 

@@ -95,7 +95,7 @@ describe('up.ResponseDoc', function() {
 
     })
 
-    describe('#_getHead()', function() {
+    describe('#getHead()', function() {
 
       it('returns the head element', function() {
         let doc = new up.ResponseDoc({ document: `
@@ -107,7 +107,7 @@ describe('up.ResponseDoc', function() {
           </html>  
         ` })
 
-        expect(doc._getHead()).toEqual(jasmine.any(HTMLHeadElement))
+        expect(doc.getHead()).toEqual(jasmine.any(HTMLHeadElement))
       })
 
       it('returns a missing value if the document is only a fragment', function() {
@@ -115,7 +115,7 @@ describe('up.ResponseDoc', function() {
           <div id="target">target</div>  
         ` })
 
-        expect(doc._getHead()).toBeMissing()
+        expect(doc.getHead()).toBeMissing()
       })
 
       // it('adopts nonces only once when called multiple times', function() {
@@ -130,8 +130,8 @@ describe('up.ResponseDoc', function() {
       //     </html>
       //   ` })
       //
-      //   doc._getHead()
-      //   doc._getHead()
+      //   doc.getHead()
+      //   doc.getHead()
       //
       //   expect(adoptNoncesSpy.calls.count()).toBe(1)
       // })
@@ -313,14 +313,14 @@ describe('up.ResponseDoc', function() {
 
     })
 
-    describe('#_getHead()', function() {
+    describe('#getHead()', function() {
 
       it('returns a missing value', function() {
         let doc = new up.ResponseDoc({ fragment: `
           <div class="foo">foo text</div>
         ` })
 
-        expect(doc._getHead()).toBeMissing()
+        expect(doc.getHead()).toBeMissing()
       })
 
     })
@@ -384,12 +384,12 @@ describe('up.ResponseDoc', function() {
 
     })
 
-    describe('#_getHead()', function() {
+    describe('#getHead()', function() {
 
       it('returns a missing value', function() {
         let doc = new up.ResponseDoc({ target: '.foo', content: 'foo text' })
 
-        expect(doc._getHead()).toBeMissing()
+        expect(doc.getHead()).toBeMissing()
       })
 
     })

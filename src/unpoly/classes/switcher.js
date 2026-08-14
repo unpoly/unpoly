@@ -59,11 +59,12 @@ up.Switcher = class Switcher {
     let previousValues = switchee.upSwitchValues
     if (!u.isEqual(previousValues, fieldTokens)) {
       switchee.upSwitchValues = fieldTokens
-      this._switchSwitcheeNow(switchee, fieldTokens)
+      this.switchSwitcheeNow(switchee, fieldTokens)
     }
   }
 
-  _switchSwitcheeNow(switchee, fieldTokens) {
+  // No _ prefix: specs spy on this name, and _-prefixed members are mangled in the minified build.
+  switchSwitcheeNow(switchee, fieldTokens) {
     for (let { attr, toggle } of BUILTIN_SWITCH_EFFECTS) {
       let attrValue = switchee.getAttribute(attr)
       if (attrValue) {

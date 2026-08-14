@@ -615,7 +615,7 @@ extendDescribe('up.form', function() {
       describe('performance', function() {
 
         it('syncs once after initialization', async function() {
-          const syncSpy = spyOn(up.SelectorTracker.prototype, '_sync').and.callThrough()
+          const syncSpy = spyOn(up.SelectorTracker.prototype, 'sync').and.callThrough()
 
           const [form, field1, field2] = htmlFixtureList(`
             <form>
@@ -640,7 +640,7 @@ extendDescribe('up.form', function() {
           up.form.trackFields(form, u.noop)
           await wait()
 
-          const syncSpy = spyOn(up.SelectorTracker.prototype, '_sync').and.callThrough()
+          const syncSpy = spyOn(up.SelectorTracker.prototype, 'sync').and.callThrough()
 
           up.render({ fragment: `
             <input type="text" name="field2" id="field">
@@ -662,7 +662,7 @@ extendDescribe('up.form', function() {
           up.form.trackFields(form, u.noop)
           await wait()
 
-          const syncSpy = spyOn(up.SelectorTracker.prototype, '_sync').and.callThrough()
+          const syncSpy = spyOn(up.SelectorTracker.prototype, 'sync').and.callThrough()
 
           up.render({ fragment: `
             <div id="target">
@@ -687,7 +687,7 @@ extendDescribe('up.form', function() {
           up.form.trackFields(form, u.noop)
           await wait()
 
-          const syncSpy = spyOn(up.SelectorTracker.prototype, '_sync').and.callThrough()
+          const syncSpy = spyOn(up.SelectorTracker.prototype, 'sync').and.callThrough()
 
           let field2 = up.element.createFromHTML('<input type="text" name="field2">')
           form.append(field2)
@@ -711,7 +711,7 @@ extendDescribe('up.form', function() {
           up.form.trackFields(form, u.noop)
           await wait()
 
-          const syncSpy = spyOn(up.SelectorTracker.prototype, '_sync').and.callThrough()
+          const syncSpy = spyOn(up.SelectorTracker.prototype, 'sync').and.callThrough()
 
           let result = await up.render({
             target: 'input[name=field1], input[name=field2]',

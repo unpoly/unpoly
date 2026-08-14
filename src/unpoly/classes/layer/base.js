@@ -713,7 +713,7 @@ up.Layer = class Layer extends up.Record {
   updateHistory(options) {
     // Set unless { location: false }
     if (u.isString(options.location)) {
-      this._updateLocation(options.location, { push: true })
+      this.updateLocation(options.location, { push: true })
     }
 
     // Set unless { metaTags: false }
@@ -724,7 +724,7 @@ up.Layer = class Layer extends up.Record {
 
     // Set unless { title: false }
     if (u.isString(options.title)) {
-      this._updateTitle(options.title)
+      this.updateTitle(options.title)
     }
 
     // Set unless { lang: false }
@@ -739,7 +739,7 @@ up.Layer = class Layer extends up.Record {
 
   _onBrowserLocationChanged({ location }) {
     if (this.showsLiveHistory()) {
-      this._updateLocation(location, { push: false })
+      this.updateLocation(location, { push: false })
     }
   }
 
@@ -770,7 +770,8 @@ up.Layer = class Layer extends up.Record {
     }
   }
 
-  _updateTitle(title) {
+  // No _ prefix: specs spy on this name, and _-prefixed members are mangled in the minified build.
+  updateTitle(title) {
     this._savedTitle = title
 
     if (this.showsLiveHistory()) {
@@ -835,12 +836,13 @@ up.Layer = class Layer extends up.Record {
     }
   }
 
-  _updateLocation(newLocation, { push }) {
+  // No _ prefix: specs spy on this name, and _-prefixed members are mangled in the minified build.
+  updateLocation(newLocation, { push }) {
     let prevSavedLocation = this._savedLocation
     let liveLocation = up.history.location
 
     // (A) Update _savedLocation before we push a new state below.
-    //     Pushing a new state will emit up:location:changed, which will re-call _updateLocation()
+    //     Pushing a new state will emit up:location:changed, which will re-call updateLocation()
     // (B) Don't emit up:layer:location:changed before the browser location changed.
     this._savedLocation = newLocation
 
