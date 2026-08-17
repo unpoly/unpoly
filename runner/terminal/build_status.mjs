@@ -5,13 +5,16 @@
 // the status only flips to "idle" when every current rebuild has finished, which
 // avoids a runner reading a half-written dist bundle.
 
-import { writeFileSync, mkdirSync, readFileSync } from 'node:fs'
+import { writeFileSync, mkdirSync, readFileSync, renameSync } from 'node:fs'
 import path from 'node:path'
 
-// Relative to the project root (webpack and the runner both run from there).
+// The repo root, derived from this file rather than the cwd: a `bin/test` run from a
+// subdirectory has to read the very file the watcher wrote, and resolving against the cwd
+// silently read a different (absent) path — which reported a healthy watcher as missing.
+export const PROJECT_ROOT = path.dirname(path.dirname(path.dirname(import.meta.filename)))
 export const STATUS_PATH = 'tmp/build-status.json'
 
-export function readStatus(root = process.cwd()) {
+export function readStatus(root = PROJECT_ROOT) {
   try {
     return JSON.parse(readFileSync(path.join(root, STATUS_PATH), 'utf8'))
   } catch {
@@ -112,9 +115,14 @@ export class BuildStatusPlugin {
 
 function writeStatusFile(status) {
   try {
-    let file = path.resolve(STATUS_PATH)
+    let file = path.join(PROJECT_ROOT, STATUS_PATH)
     mkdirSync(path.dirname(file), { recursive: true })
-    writeFileSync(file, JSON.stringify(status))
+    // Write-then-rename, because a reader polling every 100ms can otherwise catch a
+    // half-written file: readStatus() returns null for it, and the runner reported a
+    // healthy watcher as missing.
+    let temp = `${file}.${process.pid}.tmp`
+    writeFileSync(temp, JSON.stringify(status))
+    renameSync(temp, file)
   } catch {
     // best effort — never fail a build over status bookkeeping
   }

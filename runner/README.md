@@ -96,7 +96,9 @@ rebuilds finished (no partial-read race) — and `errors` is deduplicated, becau
 source is built by several sub-compilers and would otherwise report each failure once per
 variant. `waitForFreshBuild` errors if the file is missing or the pid is dead, else waits
 until `idle && startedAt >= newestSourceMtime`, then throws if `ok` is false;
-`bin/dev status` reads the same two fields through `lastBuildErrors()`.
+`bin/dev status` reads the same two fields through `lastBuildErrors()`. Reader and writer
+both anchor the path to the repo root, and the write is a rename — so a `bin/test` run from
+a subdirectory works, and a poll landing mid-write cannot read a half-written file.
 
 **Only a watching compiler writes it**, which is what keeps it single-writer. The
 plugin arms itself on `watchRun` (watch-only) and ignores `done` until then, because

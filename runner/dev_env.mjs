@@ -34,11 +34,9 @@ const SUPERVISOR = import.meta.filename
 // relative `bin/…` commands resolve no matter where `bin/dev` was invoked.
 const PROJECT_ROOT = path.dirname(path.dirname(SUPERVISOR))
 
-// Absolute, not cwd-relative, so every caller refers to the same files no matter where it
-// was invoked from. That is not enough to make bin/test work from a subdirectory: the
-// build status is still resolved against the cwd, so such a run either fails in
-// waitForFreshBuild() or — if it started the environment itself — waits out
-// READY_TIMEOUT and then kills the healthy environment it just booted. Run from the root.
+// Absolute, not cwd-relative, so every caller refers to the same files no matter which
+// directory it was invoked from. The build status is anchored the same way (see
+// build_status.mjs), so `bin/test` works from a subdirectory too.
 const PID_FILE = path.join(PROJECT_ROOT, 'tmp/dev.pid')
 const LOG_FILE = path.join(PROJECT_ROOT, 'tmp/dev.log')
 // Held only while a start is in progress, to serialise concurrent starts. Not a

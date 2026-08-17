@@ -8,11 +8,13 @@
 
 import puppeteer from 'puppeteer'
 import path from 'node:path'
+import { existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import pc from 'picocolors'
 import { Config } from '../config.mjs'
 import { serverURL, isServerRunning, startServer } from '../server/server.mjs'
 import { waitForFreshBuild, BuildSyncError, BuildFailedError } from './build_sync.mjs'
+import { PROJECT_ROOT } from './build_status.mjs'
 import { createRemapper } from './source_map.mjs'
 import { createReceiver } from './receiver.mjs'
 import { buildFailure } from './formatter.mjs'
@@ -35,9 +37,26 @@ function parseConfig(argv, env) {
   }
 }
 
+// Which of the bundles this config asks the page to load are absent. Only meaningful for
+// variants the dev watcher does not build (currently --minify).
+function missingDistFiles(config) {
+  let dist = path.join(PROJECT_ROOT, 'dist')
+  return Object.values(config.distFilenames())
+    .filter((name) => !existsSync(path.join(dist, name)))
+}
+
 export async function runDev(argv, env) {
   const config = parseConfig(argv, env)
   if (!config) return CONFIG_ERROR
+
+  // The dev watcher never builds the minified bundles, so --minify loads files only
+  // `bin/build --config=ci` produces. Missing, they merely 404 and the specs run against
+  // no Unpoly at all — so check before spending ten minutes finding that out.
+  let missing = missingDistFiles(config)
+  if (missing.length) {
+    console.error(pc.red(`Missing from dist/: ${missing.join(', ')}. Build them with \`bin/build --config=ci\`.`))
+    return CONFIG_ERROR
+  }
 
   // Start one in the background if none is up, so `bin/test` needs no manual setup.
   if (!(await isDevEnvRunning())) {

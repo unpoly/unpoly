@@ -5,7 +5,7 @@
 
 import { readdirSync, statSync } from 'node:fs'
 import path from 'node:path'
-import { readStatus } from './build_status.mjs'
+import { readStatus, PROJECT_ROOT } from './build_status.mjs'
 
 const SKIP_DIRS = new Set(['node_modules', 'dist', 'tmp', '.git'])
 
@@ -22,7 +22,7 @@ export const BROWSER_RUNNER_FILES = [
   'runner/terminal/dom_snapshot.js',
 ]
 
-export function newestSourceMtime(root = process.cwd(), dirs = ['src', 'spec'], files = BROWSER_RUNNER_FILES) {
+export function newestSourceMtime(root = PROJECT_ROOT, dirs = ['src', 'spec'], files = BROWSER_RUNNER_FILES) {
   let newest = 0
   let seen = 0
   for (let dir of dirs) {
