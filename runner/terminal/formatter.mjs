@@ -74,7 +74,12 @@ export function failureBlock(failure, { verbose } = {}) {
     let outline = renderOutline(failure.dom)
     if (outline) {
       lines.push('')
-      lines.push(indent('HTML state:', 2))
+      // Two different moments, and they must not look alike: a teardown snapshot is
+      // taken after the other afterEach hooks ran, so #fixtures is already destroyed.
+      let title = failure.domAt === 'teardown'
+        ? 'HTML state (after teardown, since the spec failed while cleaning up):'
+        : 'HTML state:'
+      lines.push(indent(title, 2))
       lines.push(indent(outline, 4))
     }
   }

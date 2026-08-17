@@ -42,13 +42,14 @@ export function createReceiver({ verbose = false, remapper, serverURL = '', vari
   // Normalizes and collects a failure record for the end-of-run report. Does NOT
   // touch counts — spec failures are already counted in onSpecDone, and afterAll
   // failures are counted by their caller (they aren't specs).
-  function recordFailure({ path, fullName, expectations, log, dom }) {
+  function recordFailure({ path, fullName, expectations, log, dom, domAt }) {
     failures.push({
       path,
       fullName,
       expectations: expectations || [],
       log: log || [],
       dom: dom || null,
+      domAt,
     })
   }
 
@@ -88,6 +89,7 @@ export function createReceiver({ verbose = false, remapper, serverURL = '', vari
         expectations: event.failedExpectations,
         log: event.failure && event.failure.log,
         dom: event.failure && event.failure.dom,
+        domAt: event.failure && event.failure.domAt,
       })
     }
   }
@@ -123,6 +125,7 @@ export function createReceiver({ verbose = false, remapper, serverURL = '', vari
         extraFailures: Math.max(0, expectations.length - 1),
         log: raw.log,
         dom: raw.dom,
+        domAt: raw.domAt,
         debugURL: specsURL(serverURL, { ...variant, spec: raw.fullName }),
       }, { verbose }))
     }

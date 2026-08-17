@@ -19,6 +19,19 @@ async function run(events) {
   return { text: buffer, code }
 }
 
+// Same as run(), with --verbose so the log and HTML state blocks are rendered.
+async function runVerbose(events) {
+  let buffer = ''
+  let receiver = createReceiver({
+    verbose: true,
+    remapper: noRemap,
+    serverURL: 'http://localhost:4000',
+    out: { write: (string) => { buffer += string } },
+  })
+  for (let event of events) await receiver.handle(event)
+  return { text: buffer }
+}
+
 test('prints live progress and a passing summary, exit 0', async () => {
   let { text, code } = await run([
     { type: 'jasmineStarted', totalSpecs: 2 },
@@ -151,4 +164,44 @@ test('a filter that matched nothing fails instead of reporting success', async (
 
   assert.equal(code, 1)
   assert.match(text, /No specs ran/)
+})
+
+test('a teardown snapshot is labelled so it is not mistaken for the failure-time DOM', async () => {
+  // A spec that passes its expectations and then dies in teardown gets its snapshot late,
+  // after #fixtures has been destroyed — so the heading has to say so.
+  let { text } = await runVerbose([
+    { type: 'suiteStarted', description: 'up.layer' },
+    {
+      type: 'specDone',
+      fullName: 'up.layer leaks an overlay',
+      description: 'leaks an overlay',
+      status: 'failed',
+      failedExpectations: [{ message: 'Overlays survived reset!', stack: 'at reset_up.js:140' }],
+      failure: { log: [], dom: [{ tag: 'up-modal', classes: [], attrs: {}, children: [] }], domAt: 'teardown' },
+    },
+    { type: 'suiteDone', description: 'up.layer', failedExpectations: [] },
+    { type: 'jasmineDone', overallStatus: 'failed' },
+  ])
+
+  assert.match(text, /HTML state \(after teardown/)
+  assert.match(text, /up-modal/)
+})
+
+test('a failure-time snapshot keeps the plain heading', async () => {
+  let { text } = await runVerbose([
+    { type: 'suiteStarted', description: 'up.layer' },
+    {
+      type: 'specDone',
+      fullName: 'up.layer fails an expectation',
+      description: 'fails an expectation',
+      status: 'failed',
+      failedExpectations: [{ message: 'Expected 1 to be 2.', stack: 'at spec/unpoly/layer_spec.js:5' }],
+      failure: { log: [], dom: [{ tag: 'div', id: 'fixtures', classes: [], attrs: {}, children: [] }], domAt: 'failure' },
+    },
+    { type: 'suiteDone', description: 'up.layer', failedExpectations: [] },
+    { type: 'jasmineDone', overallStatus: 'failed' },
+  ])
+
+  assert.match(text, /HTML state:/)
+  assert.doesNotMatch(text, /after teardown/)
 })

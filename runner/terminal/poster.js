@@ -48,7 +48,14 @@ function install() {
       capturing = false
       let failure
       if (result.status === 'failed') {
-        failure = { log: currentLog.slice(), dom: pendingDom || [] }
+        // A spec that passed its expectations and then died in teardown has no
+        // snapshot yet — reset_up.js's checks ("Overlays survived reset!") are the
+        // usual cause, and the element they complain about is still on the page. Grab
+        // it now, flagged, because by this point the other afterEach hooks have run
+        // and #fixtures is already gone.
+        failure = pendingDom
+          ? { log: currentLog.slice(), dom: pendingDom, domAt: 'failure' }
+          : { log: currentLog.slice(), dom: snapshotDom(), domAt: 'teardown' }
       }
       return post({
         type: 'specDone',

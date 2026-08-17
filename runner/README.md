@@ -71,8 +71,13 @@ so webpack's `require.context` picks it up.
 - `failedExpectations[]`: `{ message, stack }` — raw stack, Node remaps it. On `jasmineDone`
   these belong to no spec (a top-level `afterAll` that threw) and are reported as their own
   failure, so a red run cannot print a green summary.
-- `failure` (failed specs only): `{ log: string[], dom: DomNode[] }`. Log lines are
-  already serialized strings; `dom` is a tree, not HTML.
+- `failure` (failed specs only): `{ log: string[], dom: DomNode[], domAt }`. Log lines are
+  already serialized strings; `dom` is a tree, not HTML. `domAt` is `'failure'` for the
+  usual snapshot taken at `specs:reset` — which, since specs stop at their first failed
+  expectation, is the moment of the failure — or `'teardown'` for a spec that passed its
+  expectations and then died while cleaning up (`Overlays survived reset!` and friends).
+  A `'teardown'` snapshot is taken at `specDone`, after the other `afterEach` hooks have
+  run, so `#fixtures` is already gone and the output says so.
 - `DomNode`: `{ tag, id, classes[], attrs{}, children: (DomNode | { text })[] }`.
 - `dom` is rooted at `<body>`, so it also captures elements a spec attached outside
   `#fixtures` and state Unpoly writes onto `body` itself. Jasmine's own
