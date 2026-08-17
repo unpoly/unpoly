@@ -474,6 +474,8 @@ up.Params = class Params {
   - If passed a `<select multiple>` or `<input type="file" multiple>`, all selected values are added.
   - Fields that are `[disabled]` are ignored.
   - Fields without a `[name]` attribute are ignored.
+  - Form-associated custom elements and values added by `formdata` event listeners are included.
+  - Custom controls configured with `up.form.config.fieldSelectors` are included.
 
   ### Example
 
