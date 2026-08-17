@@ -502,7 +502,11 @@ up.Params = class Params {
   @stable
   */
   static fromForm(form, options) {
-    return this.fromContainer(form, options)
+    form = e.get(form)
+    const params = new this(new FormData(form), options)
+    const additionalFields = u.reject(up.form.fields(form), (field) => u.contains(form.elements, field))
+    params.addAll(this.fromFields(additionalFields, options))
+    return params
   }
 
   static fromContainer(container, options) {
