@@ -33,7 +33,9 @@ Setting an `[up-follow]` attribute causes Unpoly to follow a link. By convention
 </main>
 ```
 
-Because `[up-follow]` is a *high-level* API, it will make many assumptions: That you want to update the dominant content area (`<main>`), that you want to cache the response for some seconds, etc. It also takes care of secondary considerations such as scrolling, focus, browser history, unexpected server responses, etc.
+Being a *high-level* API, `[up-follow]` also assumes you want the response cached for a
+few seconds, and takes care of secondary considerations: scrolling, focus, browser history,
+unexpected server responses.
 
 All defaults can be disabled or changed. For example, if the developer wants to update another element, they can explicitly override the default by also setting an `[up-target]` attribute:
 
@@ -61,7 +63,7 @@ All HTML attributes have a corresponding JavaScript function that triggers their
 
 ```js
 let element = document.querySelector('a[href]')
-setInterval(() => up.link.follow(element), 1000)
+setTimeout(() => up.link.follow(element), 1000)
 ```
 
 If the developer needs even more control, there are often low-level functions. For example, `up.render({ target, document })` only updates a single DOM element with no other default behavior:

@@ -2,8 +2,7 @@
 
 This guide walks through one complete change, from a fresh checkout to a pull request.
 
-Code blocks below are diffs: `+` lines are what you add, unprefixed lines are existing
-code shown for context, and `...` marks code left out.
+Code blocks below are diffs, where `...` marks code left out.
 
 ## Our example feature
 
@@ -43,11 +42,13 @@ Every feature belongs to exactly one [main module](code-organization.md#responsi
 Forms are the topic of `up.form`, so we work in two files:
 
 - `src/unpoly/form.js` for the implementation
-- `spec/unpoly/form_spec.js` for the specs
+- `spec/unpoly/form_spec.js` for the specs — except the `[up-submit]` specs, which grew
+  large enough to live in a sibling file, `spec/unpoly/form_submit_attr_spec.js`
 
-Every module `foo.js` has a spec `foo_spec.js`. See
-[code organization](code-organization.md#directory-structure--where-to-find-files)
-for the full layout.
+Every module `foo.js` has a spec `foo_spec.js`, and a feature with a lot of specs may have
+one of its own. `bin/find-spec "[up-submit]"` tells you which file to open; see
+[testing](testing.md#finding-the-spec-for-a-feature) and
+[code organization](code-organization.md#directory-structure--where-to-find-files).
 
 
 ## 1. The JavaScript function
@@ -134,14 +135,15 @@ git commit -m "[form] Add up.form.trim()"
 
 ## 2. The HTML attribute
 
-Again, start with the spec. This one goes into the `unobtrusive behavior` group,
-nested under the selector it modifies:
+Again, start with the spec. This one goes into the `unobtrusive behavior` group, nested
+under the selector it modifies — which lives in `spec/unpoly/form_submit_attr_spec.js`.
+That file names the groups it belongs to with `extendDescribe()` instead of `describe()`,
+because it was extracted from `form_spec.js`; nothing else about writing the spec changes.
 
 ```diff
- describe('up.form', function() {
+ extendDescribe('up.form', function() {
  
-   describe('unobtrusive behavior', function() {
-     ...
+   extendDescribe('unobtrusive behavior', function() {
  
      describe('[up-submit]', function() {
        ...
@@ -210,9 +212,9 @@ Attribute values for a form submission are parsed in `up.form.submitOptions()`:
 the fields into `options.params`.
 
 Note that we never touched `up.form.submit()`. It renders whatever `submitOptions()`
-returns, so it now supports a `{ trim: true }` option without changes:
+returns, so it now supports a `{ trim: true }` option without changes (simplified):
 
-```diff
+```js
 function submit(form, options) {
   return up.render(submitOptions(form, options))
 }
@@ -302,12 +304,7 @@ whole topics, and live as Markdown in `src/unpoly/pages`.
 
 Previewing the rendered result is
 [optional](documentation.md#previewing-your-changes) — you can open a pull request
-without it. If you do have the `unpoly-site` sibling repo checked out, the dev
-environment serves the documentation site, which should now show the new params for
-<http://localhost:4567/up-submit> and <http://localhost:4567/up.submit>.
-<http://localhost:4567/up.form.trim> is a *new* page rather than a changed one, so it
-only appears after
-[restarting the dev environment](dev-environment.md#running-the-dev-environment).
+without it.
 
 Once you're happy with your documentation, commit:
 

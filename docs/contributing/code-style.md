@@ -55,14 +55,18 @@ Acronyms are uppercased: `parseURL()`, not `parseUrl()`. Same for `escapeHTML()`
 `jsonAttr()`.
 
 
+## Private members and the minified build
+
+Members prefixed with `_` are internal, and the minified build *mangles* their names to save
+bytes. So a member that a spec reaches by name — `spyOn(up.Switcher.prototype, '…')`, or a
+direct call — cannot be `_`-prefixed: the name it asks for does not exist in
+`dist/unpoly.min.js`. If a method is tested directly, drop the underscore and note why.
+
+
 ## Linting
 
 `bin/lint` runs ESLint over `src/`, `spec/` and `runner/`. Extra arguments are forwarded,
 so `bin/lint --fix` works.
 
-For `src/` you don't have to run it separately: those are the same rules the Webpack build
-enforces, and a lint error fails the build, which makes `bin/test` print the errors instead
-of running the specs. See [Setting up a dev environment](dev-environment.md).
-
-Specs and the runner are not part of that build, so nothing checks them until you run
-`bin/lint` — or until CI does, in its own job.
+Lint errors in `src/` fail the build, so `bin/test` surfaces them for you. Specs and the
+runner are not part of that build, so only `bin/lint` (or CI's lint job) checks those.

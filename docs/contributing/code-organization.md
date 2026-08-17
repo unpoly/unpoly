@@ -58,9 +58,6 @@ runner/                   # The Jasmine spec runner server (rarely need to edit 
 webpack/                  # Webpack configuration (rarely need to edit here)
   ...
 
-node_modules/             # Development dependencies for tests and Webpack (Unpoly itself has no dependencies)
-  ...
-
 dist/                     # Output directory for the Webpack bundler (gitignored, never edit directly)
   unpoly.js               # ... Main Unpoly bundle (JS)
   unpoly.css              # ... Main Unpoly bundle (CSS)
@@ -92,18 +89,18 @@ Unpoly isn't an ESM module that can be imported. Instead it defines a global `wi
 
 Unpoly's functionality is handled by a number of "main modules" below. Each module handles a topic (e.g. "forms") and defines any HTML extensions and JS API to support that topic.
 
-| Module | Topics | Selectors | Functions | Events |
+| Module | Topics | Example selectors | Example functions | Example events |
 |---|---|---|---|---|
 | `up.link` | Hyperlinks, preloading, lazy-loading | `[up-follow]`, `[up-preload]`, `[up-defer]` | `up.follow()` | `up:link:follow` |
 | `up.form` | Forms, validation, dependent fields | `[up-submit]`, `[up-validate]`, `[up-switch]` | `up.submit()`, `up.watch()` | `up:form:submit`, `up:form:validate` |
 | `up.script` | Custom JavaScript, element data | `[up-data]` | `up.compiler()`, `up.hello()` | `up:assets:changed` |
 | `up.layer` | Overlays, subinteractions | `[up-layer=new]`, `[up-accept]` | `up.layer.open()`, `up.layer.ask()` | `up:layer:accepted` |
 | `up.fragment` | Rendering, targeting, render lifecycle | `[up-main]`, `[up-keep]` | `up.render()`, `up.reload()` | `up:fragment:loaded`, `up:fragment:inserted` |
-| `up.radio` | Passive updates, polling | `[up-hungry]`, `[up-poll]` | — | `up:fragment:poll` |
+| `up.radio` | Passive updates, polling | `[up-hungry]`, `[up-poll]` | `up.radio.startPolling()` | `up:fragment:poll` |
 | `up.motion` | Transitions, animations | `[up-transition]` | `up.morph()`, `up.animate()` | `up:motion:finish` |
 | `up.status` | Navigation bars, loading state, previews | `[up-nav]`, `.up-current`, `[up-preview]` | `up.preview()` | — |
 | `up.network` | HTTP client, caching, offline | — | `up.request()`, `up.cache.expire()` | `up:network:late`, `up:request:offline` |
-| `up.event` | Emitting and observing events | — | `up.on()`, `up.emit()` | — |
+| `up.event` | Emitting and observing events | `[up-emit]` | `up.on()`, `up.emit()` | — |
 | `up.protocol` | Server headers, optimized responses | — | — | *(`X-Up-*` headers)* |
 | `up.element` | Low-level DOM helpers | — | `up.element.affix()`, `up.element.jsonAttr()` | — |
 | `up.viewport` | Scrolling, focus | `[up-viewport]`, `[up-fixed=top]` | `up.reveal()`, `up.focus()` | — |

@@ -1,7 +1,5 @@
 # Setting up a dev environment
 
-The terms "bundler" and "build pipeline" both refer to tools like esbuild or Webpack.
-
 ## Installing development dependencies
 
 To build Unpoly you require Node.js, Webpack and other npm packages.
