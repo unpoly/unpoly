@@ -74,6 +74,15 @@ export class Config {
     return JSON.stringify(this._object).replace(/</g, '\\u003c')
   }
 
+  // The settings that change what the *browser* loads or runs, as opposed to how the
+  // terminal drives it. These are what a debug link must carry to reproduce a failure.
+  toPageParams() {
+    const pageKeys = ['csp', 'es6', 'minify', 'migrate', 'random']
+    return Object.fromEntries(
+      Object.entries(this.toParams()).filter(([key]) => pageKeys.includes(key))
+    )
+  }
+
   // The settings that differ from their defaults, as a plain object (used to build
   // the runner URL — see runner/terminal/urls.mjs).
   toParams() {

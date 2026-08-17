@@ -43,3 +43,18 @@ test('verbose keeps all frames (incl. jasmine + node_modules)', () => {
   assert.ok(lines.some((line) => line.includes('src/unpoly/layer.js:47')))
   assert.ok(lines.some((line) => line.includes('spec/unpoly/layer_spec.js:1234')))
 })
+
+test('an unmapped stack still shows frames instead of an empty Stacktrace', () => {
+  // When source maps are missing the frames are bundle URLs, matching neither spec/ nor
+  // src/ — the compact filter then returned nothing and the failure block printed a bare
+  // `Stacktrace:` header, leaving no location at all.
+  const raw = [
+    'at Object.<anonymous> (http://localhost:4000/dist/specs.js:12345:6)',
+    'at http://localhost:4000/dist/specs.js:9999:1',
+  ].join('\n')
+
+  const frames = formatStack(raw, { verbose: false })
+  assert.ok(frames.length, 'must not be empty')
+  assert.ok(frames.length <= 2, 'stays compact')
+  assert.match(frames[0], /specs\.js:12345/)
+})

@@ -116,7 +116,7 @@ async function drive(config) {
     await enableDeepAsyncStacks(page)
 
     const remapper = createRemapper(projectRoot)
-    const receiver = createReceiver({ verbose: config.verbose, remapper, serverURL, out: process.stdout })
+    const receiver = createReceiver({ verbose: config.verbose, remapper, serverURL, variant: config.toPageParams(), out: process.stdout })
 
     let resolveDone
     const done = new Promise((resolve) => { resolveDone = resolve })

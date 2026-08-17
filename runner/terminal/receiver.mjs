@@ -8,7 +8,9 @@ import * as fmt from './formatter.mjs'
 import { formatStack } from './stack.mjs'
 import { specsURL } from './urls.mjs'
 
-export function createReceiver({ verbose = false, remapper, serverURL = '', out = process.stdout } = {}) {
+// `variant` carries the run's non-default settings (--csp, --es6, --migrate…) so the
+// debug link reproduces the run rather than the default configuration.
+export function createReceiver({ verbose = false, remapper, serverURL = '', variant = {}, out = process.stdout } = {}) {
   const counts = { passed: 0, failed: 0, pending: 0 }
   const suiteStack = []      // describe descriptions, innermost last
   const failures = []        // raw, resolved on jasmineDone
@@ -121,7 +123,7 @@ export function createReceiver({ verbose = false, remapper, serverURL = '', out 
         extraFailures: Math.max(0, expectations.length - 1),
         log: raw.log,
         dom: raw.dom,
-        debugURL: specsURL(serverURL, { spec: raw.fullName }),
+        debugURL: specsURL(serverURL, { ...variant, spec: raw.fullName }),
       }, { verbose }))
     }
 

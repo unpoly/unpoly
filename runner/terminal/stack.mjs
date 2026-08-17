@@ -52,6 +52,13 @@ export function filterFrames(frames, { verbose } = {}) {
   let out = []
   if (spec) out.push(spec)
   if (src && src !== spec) out.push(src)
+
+  // Neither pattern matched, yet there are frames — which happens when source-map
+  // remapping did not run, leaving bundle URLs like /dist/specs.js:12345. Showing the
+  // first two beats printing an empty `Stacktrace:` and leaving the reader with no
+  // location at all.
+  if (!out.length) return real.slice(0, 2)
+
   return out
 }
 

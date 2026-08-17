@@ -62,3 +62,12 @@ test('the serialized config cannot break out of the script block it is injected 
   assert.match(json, /\\u003c/)
   assert.equal(JSON.parse(json).spec, '</script><script>alert(1)</script>', 'still round-trips')
 })
+
+test('toPageParams carries only what changes the browser, so a debug link reproduces the run', () => {
+  let config = Config.fromArgv(['--csp=strict-dynamic', '--es6', '--verbose', '--headless=false'])
+  assert.deepEqual(config.toPageParams(), { csp: 'strict-dynamic', es6: true })
+})
+
+test('a default run contributes nothing to the link', () => {
+  assert.deepEqual(Config.fromArgv([]).toPageParams(), {})
+})
