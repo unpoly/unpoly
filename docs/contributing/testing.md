@@ -261,8 +261,8 @@ radio_poll_spec.js:769 up.radio / unobtrusive behavior / [up-poll] / keeps polli
 ```
 
 Each path is the spec's full name, so you can hand any part of it back to `--spec`. Passing
-a feature name also shows how many files it is spread across — `bin/find-spec "up.render()"`
-lists fourteen.
+a feature name also shows every file it is spread across, which for a big feature like
+`up.render()` is more than a dozen.
 
 
 ### Where a new spec goes
