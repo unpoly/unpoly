@@ -118,7 +118,12 @@ sees the stack.
 | `--stop-on-failure=false` | Keep running a spec after its first failed expectation (default: stop) |
 | `--csp=…` · `--es6` · `--migrate` | Serve the specs under a CSP / ES6 / unpoly-migrate variant |
 
-(`--minify` is also accepted but needs a minified build — `bin/build --config=ci`.)
+`--minify` runs the specs against the bundle we actually ship. That matters because the
+minifier renames every `_`-prefixed member, so a spec that reaches one by name passes
+unminified and fails in production — see
+[private members](code-style.md#private-members-and-the-minified-build). It needs a
+minified build first (`bin/build --config=ci`), and says so if one is missing. CI runs this
+variant on every pull request.
 
 A failed spec exits with a non-zero exit code, so `bin/test` composes with other
 tooling. The spec runner itself — its exit codes, architecture and self-tests — is
