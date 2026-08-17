@@ -22,7 +22,9 @@ the background if none is running.
 `bin/test --spec="up.form"`. The full suite runs in a real browser and takes
 several minutes, so run it unfiltered only as a final gate — and note that
 [CI](commit-conventions.md#continuous-integration) runs the full matrix once you open
-a pull request.
+a pull request. Some modules are used by most others, so a change to `up.fragment`,
+`up.network`, `up.script`, `up.layer`, `up.util` or `up.element` can break specs anywhere
+and deserves the full suite.
 
 A run with one failing spec looks like this:
 
@@ -50,7 +52,7 @@ Stack traces are mapped back to the original source, and the `Debug in browser:`
 opens that single spec in a browser you can put DevTools on.
 
 **Debug by instrumenting, not stepping.** Anything you `console.log` in a spec or in
-`src/unpoly` appears in the browser log that `--verbose` prints, so adding a log line
+`src/unpoly` appears in the browser log that `--verbose` prints (below), so adding a log line
 and re-running is usually the quickest way to inspect state — and the only way if you
 can't open a browser. When you genuinely need DevTools, open the `Debug in browser:`
 URL from a failing run rather than trying to step-debug the headless browser.
@@ -60,32 +62,16 @@ failure with the flag keeps everything above and adds the browser log plus an ou
 the DOM as it stood when the spec failed:
 
 ```
-F1) state demo → shows the HTML state on failure
-
-  Failure/error:
-    Expected 'foo@example.com' to equal 'bar@example.com'.
-
-  Stacktrace:
-    <jasmine internals>
-    spec/unpoly/tmp_state_demo_spec.js:15 in anonymous function
-    <jasmine internals>
-
   Browser log:
     log: field value is "foo@example.com"
 
   HTML state:
     body
-      default-fallback
       #fixtures
         form#signup.signup-form[method="post"][action="/action"][up-submit]
           input[type="text"][name="email"][value="foo@example.com"]
           button[type="submit"]
             Sign up
-      #outside-fixtures
-        attached outside #fixtures
-
-  Debug in browser:
-    http://localhost:4000/specs?spec=state%20demo%20shows%20the%20HTML%20state%20on%20failure
 ```
 
 The HTML state is a tree of CSS selectors rather than raw markup, which keeps a large
@@ -95,17 +81,9 @@ enough to identify the problem without opening a browser — a fixture that was 
 compiled, an overlay still on the stack, a fragment inserted in the wrong place, or an
 attribute you expected Unpoly to have set.
 
-It is rooted at `body`, so it includes elements attached outside `#fixtures` and any
-state Unpoly wrote onto `body` itself. Jasmine's own reporter is excluded, and
-`default-fallback` is a container the spec harness adds to every layer so that specs
-always have a main target. Very large trees are clipped at 600 nodes, with a line saying
-so — if you hit that, narrow the fixture rather than trusting what's shown.
-
-`--verbose` also changes the stack. The compact form shows just two lines — the topmost
-frame in a spec file (which spec failed) and the topmost frame in `src/` (where in Unpoly
-it originated) — while the verbose form keeps every frame. The `<jasmine internals>`
-markers are Jasmine's own work: it collapses its internal frames before the runner ever
-sees the stack.
+It is rooted at `body`, so it includes elements attached outside `#fixtures`, and a very
+large tree is clipped with a line saying so. `--verbose` also keeps every stack frame,
+where the default shows only the topmost frame in a spec file and in `src/`.
 
 **Options:**
 
@@ -116,7 +94,7 @@ sees the stack.
 | `--browser=firefox` | Run in Firefox instead of Chrome |
 | `--headless=false` | Show the browser window while running |
 | `--stop-on-failure=false` | Keep running a spec after its first failed expectation (default: stop) |
-| `--csp=…` · `--es6` · `--migrate` | Serve the specs under a CSP / ES6 / unpoly-migrate variant |
+| `--csp=none\|nonce-only\|strict-dynamic` · `--es6` · `--migrate` | Serve the specs under a CSP / ES6 / unpoly-migrate variant |
 
 `--minify` runs the specs against the bundle we actually ship. That matters because the
 minifier renames every `_`-prefixed member, so a spec that reaches one by name passes
@@ -129,34 +107,14 @@ A failed spec exits with a non-zero exit code, so `bin/test` composes with other
 tooling. The spec runner itself — its exit codes, architecture and self-tests — is
 documented in [`runner/README.md`](../../runner/README.md).
 
-### Which specs to run
-
-The full suite takes several minutes, so don't run it on every edit. While you work, run
-the module you are changing:
-
-```
-bin/test --spec="up.form"
-```
-
-Some modules are used by most others, and a change there can break specs anywhere:
-`up.fragment`, `up.network`, `up.script`, `up.layer`, `up.util` and `up.element`. Treat a
-change to those as needing the full suite.
-
-Run the full suite once before you hand the change over. CI runs it on every pull request
-across several CSP and build variants, so it is a check, not your only safety net.
-
 ### If you are an agent
 
 **Give the command a generous timeout.** The full suite takes minutes, and nothing caps
 its total runtime. A tool timeout shorter than that kills the run part-way and tells you
 nothing about your change.
 
-You don't need to guard against a hang yourself. The runner watches for *silence*, not
-duration: if it sees no spec event for 30 seconds — a frozen browser session, say — it
-reports `no progress from the spec runner for 30s` and exits with code `2`. A single spec
-that never settles is caught earlier still, by Jasmine's 5-second per-spec timeout. So
-set your timeout from how long the suite actually takes, not from either of those
-numbers.
+You don't need to guard against a hang yourself: a run that stops making progress detects
+itself and exits non-zero. Set your timeout from how long the suite actually takes.
 
 **Don't pipe the output through `tail` or `head`.** The part you need from a red run is
 the failure block, and truncating it means running the whole suite again to see what
@@ -245,7 +203,11 @@ alongside it — `form_switch_spec.js` for `[up-switch]`, `layer_open_spec.js` f
 
 ```
 $ ls spec/unpoly | grep ^form_
-form_spec.js  form_submit_attr_spec.js  form_submit_fn_spec.js  form_switch_spec.js …
+form_spec.js
+form_submit_attr_spec.js
+form_submit_fn_spec.js
+form_switch_spec.js
+…
 ```
 
 Opening the module file also tells you what it gave away, and where that used to sit:
@@ -262,7 +224,8 @@ spec code that happens to call the feature:
 $ bin/find-spec "kept element"
 fragment_keep_spec.js:47 up.fragment / unobtrusive behavior / [up-keep] / does not run destructors within kept elements
 fragment_keep_spec.js:143 up.fragment / unobtrusive behavior / [up-keep] / omits a kept element from the returned up.RenderResult
-radio_poll_spec.js:769 up.radio / unobtrusive behavior / [up-poll] / keeps polling if an [up-keep] ancestor is kept
+fragment_keep_spec.js:189 up.fragment / unobtrusive behavior / [up-keep] / keeps the scroll position of an [up-viewport] within a kept element
+…
 ```
 
 Each path is the spec's full name, so you can hand any part of it back to `--spec`. Passing
@@ -310,23 +273,11 @@ extendDescribe('up.fragment', function() {
 ```
 
 So the split is invisible from the outside: one suite per module, unchanged full names,
-and `beforeEach` hooks from the module file still apply. An extracted file can extract
-further, as `up.render()` does — it is the only feature large enough to need it.
+and `beforeEach` hooks from the module file still apply.
 
-Two things to know if you ever add such a file:
-
-- It must **not** be listed in `spec/specs.js`, which requires every other spec file by
-  hand. It is only ever loaded by its one `require()`. `bin/self-test` enforces both
-  halves: it fails on a spec file that nothing loads, and on an extracted file that
-  `specs.js` would load a second time.
-- It is its own module, so aliases like `const u = up.util` at the top of the module file
-  are not in scope. Redeclare the ones you use — `bin/lint` names them.
-
-The feature part of the name is the feature's own name without `up.` or `up-`:
-`form_switch_spec.js` for `[up-switch]`, `layer_open_spec.js` for `up.layer.open()`. When
-a module has both a function and a selector of that name, both files say which:
-`form_validate_fn_spec.js` and `form_validate_attr_spec.js`. A file may also hold several
-related features under a topic name, as `util_lists_spec.js` does.
+If you ever add such a file, the tooling keeps you honest: `bin/self-test` fails if it is
+listed in `spec/specs.js` (or if nothing loads it), and `bin/lint` names any alias you need
+to redeclare, since an extracted file is its own module.
 
 
 ## Anatomy of a spec
@@ -391,34 +342,14 @@ When a spec needs the same markup more than once with variations — typically a
 page and the server's "new" response — build it with a function:
 
 ```js
-it('runs compilers after hungry fragments have been swapped', async function() {
-  let compileSpy = jasmine.createSpy('compile spy')
+let html = (prefix) => `
+  <div id="fragment1">${prefix} fragment1</div>
+  <div id="fragment2" up-hungry>${prefix} fragment2</div>
+`
 
-  let html = (prefix) => `
-    <div id="fragment1">
-      ${prefix} fragment1
-    </div>
-    <div id="fragment2" up-hungry>
-      ${prefix} fragment2
-    </div>
-  `
+htmlFixtureList(html('old'))
 
-  up.compiler('#fragment1', (element) => {
-    compileSpy(
-      document.querySelector('#fragment1').textContent.trim(),
-      document.querySelector('#fragment2').textContent.trim(),
-    )
-  })
-
-  htmlFixtureList(html('old'))
-
-  await up.render({ target: '#fragment1', document: html('new') })
-
-  expect(compileSpy).toHaveBeenCalledWith(
-    'new fragment1',
-    'new fragment2',
-  )
-})
+await up.render({ target: '#fragment1', document: html('new') })
 ```
 
 This keeps the two versions visibly identical apart from the one thing that differs.
@@ -434,10 +365,15 @@ const [form, field] = htmlFixtureList(`...`)
 up.hello(form)
 ```
 
-Keeping this explicit is deliberate. It's often not needed — behavior wired to a
-delegated event listener works on an uncompiled fixture — and when it *is* needed, some
-specs care about exactly when compilers run. An implicit `up.hello()` would take that
-observation away.
+Keeping this explicit is deliberate: some specs care about exactly when compilers run.
+
+### State resets between specs
+
+You never have to undo what a spec did. Fixtures are removed, and Unpoly itself is reset
+after every spec — compilers you registered, `up.*.config` you changed, open overlays, the
+cache. So a spec can call `up.compiler()` or set config freely, and the next one starts
+clean.
+
 
 ### Overlays and styles
 
@@ -549,7 +485,7 @@ making a mocked request time out. `jasmine.lastRequest().responseTimeout()` come
 jasmine-ajax and only works with the clock installed. The handful of specs that do this
 say so in a comment.
 
-Older specs use `up.util.timer(ms, callback)`. Use `jasmine.waitTime(ms)` instead.
+Older specs use `up.util.timer(ms, callback)`. Use `await wait(ms)` instead.
 
 ### Asserting on promises
 
@@ -579,7 +515,7 @@ it.
 ## Matchers
 
 Custom matchers live one per file in `spec/helpers/`, named after the matcher
-(`to_have_text.js` → `toHaveText()`). There are around ninety. Check for an existing one
+(`to_have_text.js` → `toHaveText()`). There are around seventy. Check for an existing one
 before asserting by hand — most things you'd want to say about an element, a request or
 a cache entry already have a matcher, and using it gives a far better failure message
 than a hand-rolled boolean.
@@ -608,7 +544,7 @@ The ones you'll use constantly:
 | `toHaveSelector(selector)` | A descendant matches the selector |
 | `toMatchSelector(selector)` | The element itself matches |
 | `toBeAttached()` · `toBeDetached()` | Whether the element is in the DOM tree |
-| `toBeMissing()` | A *value* is `null`, `undefined` or blank — not a DOM check |
+| `toBeMissing()` | A *value* is `null` or `undefined` — not a DOM check |
 | `toBeVisible()` · `toBeHidden()` | Rendered visibility |
 | `toBeFocused()` | The element has focus |
 | `toHaveAttribute(name, value)` | An attribute and (optionally) its value |

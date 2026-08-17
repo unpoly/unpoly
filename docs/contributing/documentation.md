@@ -248,7 +248,7 @@ argument in the rendered signature:
 @param {string} [options.method='post']
 ```
 
-Recognized prefixes include `options`, `attrs`, `params`, `config`, `event` and
+Recognized prefixes include `options`, `attrs`, `params`, `config`, `eventProps` and
 `props`.
 
 ### Modifying attributes

@@ -26,9 +26,10 @@ of the rename.
 `src/unpoly-migrate/` mirrors the [main modules](code-organization.md#responsibilities),
 so a renamed `up.form` API gets its polyfill in `src/unpoly-migrate/form.js`.
 
-`up.migrate` has helpers for the usual cases — renamed functions, attributes, events,
-properties and modules, removed options, functions that used to be async. Read
-`src/unpoly-migrate/migrate.js` before hand-rolling one. Two examples follow.
+`up.migrate` has helpers for the usual cases — renamed or removed attributes, events and
+properties, renamed packages, functions that used to be async. A renamed *function* is
+delegated by hand with `up.migrate.deprecated()`. Read `src/unpoly-migrate/migrate.js`
+before hand-rolling one. Two examples follow.
 
 
 ### Renaming a function
