@@ -62,6 +62,20 @@ extendDescribe('up.fragment', function() {
 
           expect(result).toEqual(element)
         })
+
+        it('only matches descendants of the given root element while an overlay is open', function() {
+          // Note that makeLayers() creates its own .element fixture, so this spec
+          // uses .needle to keep the two candidates unambiguous.
+          makeLayers(2)
+          const needleOutsideContainer = fixture('.needle', { text: 'outside container' })
+          const container = fixture('.container')
+          const needleInsideContainer = e.affix(container, '.needle', { text: 'inside container' })
+
+          const result = up.fragment.get(container, '.needle')
+
+          expect(result.innerText).toBe('inside container')
+          expect(result).toBe(needleInsideContainer)
+        })
       })
 
       describe('when given a root Document for the search', function() {
@@ -218,6 +232,22 @@ extendDescribe('up.fragment', function() {
 
           const result = up.fragment.get('.element .sibling', { origin: element2Child1 })
 
+          expect(result).toBe(element2Child2)
+        })
+
+        it('prefers to match a descendant selector in the region of the origin while an overlay is open', function() {
+          makeLayers(2)
+          const element1 = fixture('.element')
+          const element1Child1 = e.affix(element1, '.child', { text: 'old element1Child1' })
+          const element1Child2 = e.affix(element1, '.child.sibling', { text: 'old element1Child2' })
+
+          const element2 = fixture('.element')
+          const element2Child1 = e.affix(element2, '.child', { text: 'old element2Child1' })
+          const element2Child2 = e.affix(element2, '.child.sibling', { text: 'old element2Child2' })
+
+          const result = up.fragment.get('.element .sibling', { origin: element2Child1 })
+
+          expect(result.innerText).toBe('old element2Child2')
           expect(result).toBe(element2Child2)
         })
 
@@ -463,6 +493,15 @@ extendDescribe('up.fragment', function() {
           const child = e.affix(parent, '.element')
 
           expect(up.fragment.all(parent, '.element')).toEqual([child])
+        })
+
+        it('only matches descendants of that root while an overlay is open', function() {
+          makeLayers(2)
+          const elementBeforeParent = fixture('.match')
+          const parent = fixture('.parent')
+          const elementWithinParent = e.affix(parent, '.match')
+
+          expect(up.fragment.all(parent, '.match')).toEqual([elementWithinParent])
         })
 
         it("only matches descendants in that root's layer", function() {
