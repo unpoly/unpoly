@@ -8,7 +8,7 @@
 
 import puppeteer from 'puppeteer'
 import path from 'node:path'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import pc from 'picocolors'
 import { Config } from '../config.mjs'
@@ -19,6 +19,7 @@ import { createRemapper } from './source_map.mjs'
 import { createReceiver } from './receiver.mjs'
 import { buildFailure } from './formatter.mjs'
 import { specsURL } from './urls.mjs'
+import { specFilterFor } from '../find_spec.mjs'
 import { isDevEnvRunning, startDevEnv } from '../dev_env.mjs'
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
@@ -30,11 +31,41 @@ const WATCHDOG_TIMEOUT = 30_000
 const CONFIG_ERROR = 5
 function parseConfig(argv, env) {
   try {
-    return Config.fromArgv(argv, env)
+    return resolveFileOption(Config.fromArgv(argv, env))
   } catch (error) {
     console.error(pc.red(error.message))
     return null
   }
+}
+
+// Turns `--file=path[:line]` into an ordinary `spec` filter, so the rest of the runner
+// (and the page URL) only ever deals with full names. Reuses the parser behind
+// bin/find-spec rather than growing a second way to read a spec file.
+//
+// Without a line it takes the file's first group, which is its outermost describe — so it
+// runs that module, including any specs extracted into sibling files. With a line it takes
+// the block declared there, and refuses if there is none.
+function resolveFileOption(config) {
+  if (!config.file) return config
+  // Both would mean two filters where Jasmine takes one. Refusing beats silently
+  // honouring whichever we happen to apply last.
+  if (config.spec) throw new Error('Pass either --file or --spec, not both.')
+
+  const [, name, lineText] = /^(.*?)(?::(\d+))?$/.exec(config.file)
+  const line = lineText ? Number(lineText) : null
+  const absolute = path.isAbsolute(name) ? name : path.join(projectRoot, name)
+
+  if (!existsSync(absolute)) throw new Error(`No such file: ${name}`)
+
+  const filter = specFilterFor(readFileSync(absolute, 'utf8'), line)
+  if (!filter) {
+    throw new Error(line
+      ? `Nothing is declared at ${name}:${line} — point at a describe() or it() line.`
+      : `${name} declares no specs.`)
+  }
+
+  console.error(pc.blue(`--file=${config.file} → --spec="${filter}"`))
+  return Config.fromObject({ ...config, spec: filter, file: '' })
 }
 
 // Which of the bundles this config asks the page to load are absent. Only meaningful for

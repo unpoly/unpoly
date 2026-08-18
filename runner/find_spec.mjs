@@ -55,6 +55,21 @@ export function findSpecs(sources, phrase) {
   return matches
 }
 
+// The --spec filter that runs a file, or just the block declared at `line`. Returns null
+// when the file declares nothing, or when no block starts at that line — the caller has
+// the path and can say so usefully.
+//
+// Note that the filter is a *full name*, so running a whole file runs whatever else shares
+// its outermost group: naming an extracted file runs its module, the same as naming the
+// module's own spec file. That is the intent — both mean "this module's specs".
+export function specFilterFor(text, line = null) {
+  const entries = parseTitles(text)
+  if (!entries.length) return null
+
+  const entry = line === null ? entries[0] : entries.find((e) => e.line === line)
+  return entry ? entry.titles.join(' ') : null
+}
+
 // One line per match: `file:line "full describe path"`. The path is space-joined, which
 // makes it exactly the full name Jasmine matches, so it can be pasted straight into
 // --spec; the quotes mark where it starts and ends. Ancestry stays dim and the matched

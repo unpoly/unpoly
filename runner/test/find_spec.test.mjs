@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { findSpecs, formatMatches } from '../find_spec.mjs'
+import { findSpecs, formatMatches, specFilterFor } from '../find_spec.mjs'
 
 function source(text, file = 'form_spec.js') {
   return [{ file, text }]
@@ -155,4 +155,51 @@ test('padding is measured without the colour codes', () => {
   const strip = (s) => s.replaceAll(/\x1b\[[0-9;]*m/g, '')
 
   assert.deepEqual(colored.map(strip), plain, 'colour must not change the layout')
+})
+
+// --- specFilterFor: turning a file (or a line in it) into a --spec filter ------
+
+const FILE = `
+describe('up.Params', function() {
+
+  describe('#toQuery', function() {
+
+    it('returns the query section', function() {})
+
+  })
+
+})
+`
+
+test('a file resolves to its outermost group', () => {
+  assert.equal(specFilterFor(FILE), 'up.Params')
+})
+
+test('a line resolves to the full name of the block declared there', () => {
+  assert.equal(specFilterFor(FILE, 4), 'up.Params #toQuery')
+  assert.equal(specFilterFor(FILE, 6), 'up.Params #toQuery returns the query section')
+})
+
+test('a line with no block declared on it resolves to nothing', () => {
+  // The caller turns this into an error naming the file and line, rather than silently
+  // running something the reader did not point at.
+  assert.equal(specFilterFor(FILE, 5), null)
+})
+
+test('a file declaring nothing resolves to nothing', () => {
+  assert.equal(specFilterFor('// just a comment\n'), null)
+})
+
+test('an extracted file resolves to its module, since extendDescribe names the ancestry', () => {
+  const extracted = `
+extendDescribe('up.fragment', function() {
+  extendDescribe('unobtrusive behavior', function() {
+    describe('[up-keep]', function() {
+      it('keeps', function() {})
+    })
+  })
+})
+`
+  assert.equal(specFilterFor(extracted), 'up.fragment')
+  assert.equal(specFilterFor(extracted, 4), 'up.fragment unobtrusive behavior [up-keep]')
 })

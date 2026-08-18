@@ -1,9 +1,20 @@
 # Testing
 
-"Tests", "specs" and "examples" are used interchangeably.
+Unpoly is almost all API surface. Every module publishes HTML attributes, JavaScript
+functions, events and configuration, and each of those has to keep behaving across
+browsers, CSP modes, slow networks and impatient users. Nobody holds all of that in their
+head — not the maintainers, and not an agent reading one file.
 
-Source lives in `src/unpoly/`; each module `foo.js` has a spec
-`spec/unpoly/foo_spec.js`.
+That is what the suite is for. Around 4,000 specs run in a real browser on every change, so
+you can alter code you do not fully understand and find out immediately whether you broke
+something. Treat a green suite as permission to be bold, and a red one as the cheapest
+possible bug report.
+
+The corollary: **any change needs a spec.** A behaviour with no spec is a behaviour the next
+person will break without noticing.
+
+"Tests", "specs" and "examples" are used interchangeably. Source lives in `src/unpoly/`;
+each module `foo.js` has a spec `spec/unpoly/foo_spec.js`.
 
 
 ## Running tests
@@ -48,14 +59,15 @@ F1) up.Params → #toQuery → returns the query section for the given object
 Re-run with --verbose for browser logs and HTML state.
 ```
 
-Stack traces are mapped back to the original source, and the `Debug in browser:` URL
-opens that single spec in a browser you can put DevTools on.
+Stack traces are mapped back to the original source, so the frames point at
+`src/unpoly/…` and `spec/unpoly/…` rather than at the bundle.
 
-**Debug by instrumenting, not stepping.** Anything you `console.log` in a spec or in
-`src/unpoly` appears in the browser log that `--verbose` prints (below), so adding a log line
-and re-running is usually the quickest way to inspect state — and the only way if you
-can't open a browser. When you genuinely need DevTools, open the `Debug in browser:`
-URL from a failing run rather than trying to step-debug the headless browser.
+**How to debug depends on where you are running.** In the terminal runner there is
+nothing to attach a debugger to, so inspecting state means logging it: anything you
+`console.log` in a spec or in `src/unpoly` shows up in the browser log that `--verbose`
+prints (below). But the terminal is not the only option — every failure comes with a
+`Debug in browser:` link that opens exactly that spec, and stepping through it in DevTools
+is usually the fastest way to understand a failure you can't explain.
 
 **`--verbose` adds the state you would otherwise have to guess at.** Re-running a
 failure with the flag keeps everything above and adds the browser log plus an outline of
@@ -90,6 +102,7 @@ where the default shows only the topmost frame in a spec file and in `src/`.
 | Option | Effect |
 |--------|--------|
 | `--spec="…"` | Only run specs whose full name contains this string |
+| `--file=path[:line]` | Run what a file declares — or, with `:line`, just the group or spec declared on that line |
 | `--verbose` | Add the browser log + HTML state (fixtures, overlays) to each failure |
 | `--browser=firefox` | Run in Firefox instead of Chrome |
 | `--headless=false` | Show the browser window while running |
@@ -222,15 +235,26 @@ spec code that happens to call the feature:
 
 ```
 $ bin/find-spec "kept element"
-spec/unpoly/fragment_keep_spec.js:47 "up.fragment unobtrusive behavior [up-keep] does not run destructors within kept elements"
+spec/unpoly/fragment_keep_spec.js:47  "up.fragment unobtrusive behavior [up-keep] does not run destructors within kept elements"
+spec/unpoly/fragment_keep_spec.js:73  "up.fragment unobtrusive behavior [up-keep] does not run destructors within kept elements when the <body> is targeted (bugfix)"
 spec/unpoly/fragment_keep_spec.js:143 "up.fragment unobtrusive behavior [up-keep] omits a kept element from the returned up.RenderResult"
-spec/unpoly/fragment_keep_spec.js:189 "up.fragment unobtrusive behavior [up-keep] keeps the scroll position of an [up-viewport] within a kept element"
 …
 ```
 
 The quoted string *is* the spec's full name, so you can paste it straight into `--spec` —
 or any part of it, to widen the filter. Passing a feature name also shows every file it is
 spread across, which for a big feature like `up.render()` is more than a dozen.
+
+Or skip the copying: `--file` takes a location and works out the filter itself.
+
+```
+bin/test --file=spec/unpoly/classes/params_spec.js        # what that file declares
+bin/test --file=spec/unpoly/classes/params_spec.js:29     # just the group on line 29
+```
+
+Naming a file runs its outermost group, which is its module — so pointing at an extracted
+file runs the module's specs, the same as pointing at the module's own file. Pointing at a
+line that declares nothing is an error rather than a silent wider run.
 
 
 ### Where a new spec goes
@@ -575,10 +599,6 @@ group, or assert on it with `jasmine.expectGlobalError()`.
 **Deprecated features.** Specs for `unpoly-migrate` polyfills are guarded with
 `if (up.migrate.loaded)`, because the suite also runs without that build. See
 [Compatibility](compatibility.md#specs-for-deprecated-features).
-
-**Order.** Specs run in declaration order, not Jasmine's default random order, so a
-failure is reproducible. Pass `?random=true` in the browser runner if you want to hunt
-for order dependencies.
 
 
 ## Manual tests

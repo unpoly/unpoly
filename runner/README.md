@@ -36,7 +36,7 @@ Node (runner/terminal)
   dom_outline.mjs PURE: DOM tree → CSS-selector outline
   urls.mjs        PURE: spec deep-links etc.
   log_value.mjs   PURE: console arg serialization (runs in the browser, unit-tested in Node)
-  find_spec.mjs   PURE: spec titles → their group path (bin/find-spec); no runner involvement
+  find_spec.mjs   PURE: spec titles → their group path (bin/find-spec, and --file=path:line)
 
 webpack --watch (webpack/development.js) ─► terminal/build_status.mjs plugin ─► tmp/build-status.json
 run.mjs (dev) ── terminal/build_sync.mjs waits until fresh ◄────────────────────┘

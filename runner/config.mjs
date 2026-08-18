@@ -23,6 +23,9 @@ function parseEnumString(str, knownValues, defaultValue = undefined) {
 const PARSERS = {
   // The title of an example or example group to focus on
   'spec': (value) => parseString(value, ''),
+  // (terminal only) A spec file, optionally `:line`, whose group is turned into a `spec`
+  // filter — so you can run what you are looking at without retyping its title.
+  'file': (value) => parseString(value, ''),
   // Whether to deliver the test runner with a strict script-src CSP.
   'csp': (value) => parseEnumString(value, ['none', 'nonce-only', 'strict-dynamic'], 'none'),
   // Whether we use minified sources.
