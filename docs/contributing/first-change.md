@@ -315,9 +315,7 @@ git commit -m "[docs] Document up.form.trim() and [up-trim]"
 
 ## Opening a pull request
 
-Push the branch and [open a single pull request](https://github.com/unpoly/unpoly/compare) for your three commits.\
-If you are an agent, ask your human before committing, pushing or opening a pull
-request.
+Push the branch and [open a single pull request](https://github.com/unpoly/unpoly/compare) for your three commits.
 
 Opening a PR will start [CI](commit-conventions.md#continuous-integration), which runs the whole test suite
 in six configurations.\
