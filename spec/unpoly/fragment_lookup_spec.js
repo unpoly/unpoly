@@ -329,6 +329,30 @@ extendDescribe('up.fragment', function() {
           expect(up.fragment.get('#fragment', { destroying: true })).toBe(fragment)
         })
 
+        it('does find a destroying fragment in the region of the origin with { destroying: true }', async function() {
+          // A descendant selector is matched in two steps: find the '.element' closest to
+          // the origin, then look for '.sibling' inside it. The inner step must search with
+          // the same options as the outer one.
+          const [, farSibling, , origin, nearSibling] = htmlFixtureList(`
+            <div class="element">
+              <div class="child sibling">far sibling</div>
+            </div>
+            <div class="element">
+              <div class="child">origin</div>
+              <div class="child sibling">near sibling</div>
+            </div>
+          `)
+          up.destroy(nearSibling, { animation: 'fade-out', duration: 200 })
+          await wait()
+
+          const result = up.fragment.get('.element .sibling', { origin, destroying: true })
+
+          // If the inner step drops { destroying: true } it skips nearSibling, and the
+          // lookup falls back to the first '.sibling' on the page, which is farSibling.
+          expect(result).toBe(nearSibling)
+          expect(result).not.toBe(farSibling)
+        })
+
       })
 
       describe('expansion of :main', function() {
