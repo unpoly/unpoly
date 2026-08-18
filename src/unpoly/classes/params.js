@@ -474,6 +474,8 @@ up.Params = class Params {
   - If passed a `<select multiple>` or `<input type="file" multiple>`, all selected values are added.
   - Fields that are `[disabled]` are ignored.
   - Fields without a `[name]` attribute are ignored.
+  - Form-associated custom elements and values added by `formdata` event listeners are included.
+  - Custom controls configured with `up.form.config.fieldSelectors` are included.
 
   ### Example
 
@@ -502,7 +504,11 @@ up.Params = class Params {
   @stable
   */
   static fromForm(form, options) {
-    return this.fromContainer(form, options)
+    form = e.get(form)
+    const params = new this(new FormData(form), options)
+    const additionalFields = u.reject(up.form.fields(form), (field) => u.contains(form.elements, field))
+    params.addAll(this.fromFields(additionalFields, options))
+    return params
   }
 
   static fromContainer(container, options) {
