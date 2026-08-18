@@ -25,7 +25,26 @@ while writing code:
   functions, and threading the whole object costs fewer bytes than rebuilding it at
   each level.
 
-We sometimes accept a suboptimal pattern because it saves bytes.
+We sometimes accept a suboptimal pattern because it saves bytes. Only bytes a minifier
+can't recover, though — see [Leave it to the minifier](#leave-it-to-the-minifier).
+
+
+## Leave it to the minifier
+
+We ship a minified build, and apps bundle Unpoly through their own minifier. Terser
+already collapses branches into conditional expressions and rewrites control flow to
+return early. Hand-writing those transformations saves nothing, and the version we have
+to read and maintain for years is the unminified one.
+
+- **Don't chain ternaries.** A single ternary for a genuinely binary choice is fine. A
+  chain of them standing in for `if` / `else if` / `else` is not: it reads as a puzzle,
+  and the minifier produces the same output from the readable form.
+- **Early returns are for guards.** Return early to reject a missing argument, or an
+  element we don't handle, before the real work starts. Don't restructure a function
+  body into early returns just to avoid an `else`.
+
+The same reasoning applies to any other trick whose only benefit is fewer characters.
+Shorten code by removing work or reusing a helper, not by compressing its syntax.
 
 
 ## No dependencies
