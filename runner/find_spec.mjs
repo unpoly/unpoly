@@ -14,6 +14,30 @@ const ANSI = {
 }
 
 // Returns [{ file, line, titles, isGroup }], where titles is the full path to the match
+// Every group and spec declared in one file, in source order, each with the full path of
+// titles leading to it. This is the one parse; everything else here filters or selects
+// from it.
+export function parseTitles(text) {
+  const entries = []
+  const stack = []
+
+  text.split('\n').forEach((line, index) => {
+    const parsed = TITLE.exec(line)
+    if (!parsed) return
+
+    const [, indent, kind, , title] = parsed
+    const isGroup = kind !== 'it' && kind !== 'fit' && kind !== 'xit'
+
+    while (stack.length && stack[stack.length - 1].indent >= indent.length) stack.pop()
+    const titles = [...stack.map((entry) => entry.title), title]
+    if (isGroup) stack.push({ indent: indent.length, title })
+
+    entries.push({ line: index + 1, kind, title, titles, isGroup })
+  })
+
+  return entries
+}
+
 // including its own title. Matching is case-insensitive on the title alone, so a phrase
 // never matches spec code.
 export function findSpecs(sources, phrase) {
@@ -21,22 +45,11 @@ export function findSpecs(sources, phrase) {
   const matches = []
 
   for (let { file, text } of sources) {
-    const stack = []
-    text.split('\n').forEach((line, index) => {
-      const parsed = TITLE.exec(line)
-      if (!parsed) return
-
-      const [, indent, kind, , title] = parsed
-      const isGroup = kind !== 'it' && kind !== 'fit' && kind !== 'xit'
-
-      while (stack.length && stack[stack.length - 1].indent >= indent.length) stack.pop()
-      const titles = [...stack.map((entry) => entry.title), title]
-      if (isGroup) stack.push({ indent: indent.length, title })
-
-      if (title.toLowerCase().includes(needle)) {
-        matches.push({ file, line: index + 1, titles, isGroup })
+    for (let { line, titles, isGroup } of parseTitles(text)) {
+      if (titles[titles.length - 1].toLowerCase().includes(needle)) {
+        matches.push({ file, line, titles, isGroup })
       }
-    })
+    }
   }
 
   return matches
