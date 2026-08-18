@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-// Serves the spec runner page and dist/ — see runner/server/server.mjs. Normally started
+// Serves the spec runner page and dist/ — see tooling/runner/server/server.mjs. Normally started
 // as part of the dev environment (`bin/dev`), but it runs standalone too.
-import { startServer, serverURL } from '../runner/server/server.mjs'
+import { startServer, serverURL } from '../tooling/runner/server/server.mjs'
 import pc from 'picocolors'
 
 try {

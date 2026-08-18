@@ -10,7 +10,7 @@
 import { readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { findSpecs, formatMatches } from '../runner/find_spec.mjs'
+import { findSpecs, formatMatches } from '../tooling/find_spec.mjs'
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const specDir = path.join(projectRoot, 'spec/unpoly')

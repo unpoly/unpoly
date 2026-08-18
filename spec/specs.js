@@ -14,7 +14,7 @@ helpers.keys().forEach(helpers)
 //
 // So every *_spec.js file below is a suite of its own, and every *_spec.js file that is
 // missing from this list is extracted, and required by the file it was extracted from.
-// A self-test (runner/test/spec_manifest.test.mjs) keeps both halves honest.
+// A self-test (tooling/test/spec_manifest.test.mjs) keeps both halves honest.
 require('./unpoly/browser_spec.js')
 require('./unpoly/classes/config_spec.js')
 require('./unpoly/classes/csp_info_spec.js')

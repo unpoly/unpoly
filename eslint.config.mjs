@@ -93,7 +93,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['bin/**/*.{js,mjs}', 'runner/**/*.{js,mjs}'],
+    files: ['bin/**/*.{js,mjs}', 'tooling/**/*.{js,mjs}'],
     languageOptions: {
       globals: {
         process: 'readonly',
@@ -102,8 +102,8 @@ export default tseslint.config(
   },
   {
     // The one part of the runner that ships to the browser: a Jasmine reporter that
-    // posts to the terminal. See runner/README.md.
-    files: ['runner/terminal/poster.js'],
+    // posts to the terminal. See tooling/README.md.
+    files: ['tooling/runner/browser/poster.js'],
     languageOptions: {
       globals: {
         jasmine: 'readonly',
@@ -112,7 +112,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['webpack/**/*.js'],
+    files: ['tooling/build/webpack/**/*.js'],
     languageOptions: {
       globals: {
         __dirname: 'readonly',

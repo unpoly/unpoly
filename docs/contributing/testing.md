@@ -118,7 +118,7 @@ variant on every pull request.
 
 A failed spec exits with a non-zero exit code, so `bin/test` composes with other
 tooling. The spec runner itself — its exit codes, architecture and self-tests — is
-documented in [`runner/README.md`](../../runner/README.md).
+documented in [`tooling/README.md`](../../tooling/README.md).
 
 ### If you are an agent
 

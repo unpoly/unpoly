@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-// Lint src/, spec/ and runner/ with ESLint. For src/ these are the same rules the webpack
+// Lint src/, spec/ and tooling/ with ESLint. For src/ these are the same rules the webpack
 // build enforces, run standalone. The build lints nothing else -- the specs bundle sets
-// lint: false and the runner is never bundled -- so this is the only thing that checks
+// lint: false and the tooling is never bundled -- so this is the only thing that checks
 // them, in particular no-undef, which catches a spec file using something from another
 // file's scope. CI runs this as its own step.
 //
@@ -13,5 +13,5 @@ import { fileURLToPath } from 'node:url'
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const eslintBin = path.join(projectRoot, 'node_modules', '.bin', 'eslint')
 
-let child = spawn(eslintBin, ['src', 'spec', 'runner', ...process.argv.slice(2)], { stdio: 'inherit', cwd: projectRoot })
+let child = spawn(eslintBin, ['src', 'spec', 'tooling', ...process.argv.slice(2)], { stdio: 'inherit', cwd: projectRoot })
 child.on('exit', (code) => process.exit(code ?? 1))

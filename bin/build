@@ -5,5 +5,5 @@
 //   bin/build --config=ci              minified bundles for CI
 //   bin/build --watch                  rebuild on change (never gzips)
 //   bin/build --gzip / --no-gzip       force gzip on/off (default: on for production)
-import { runBuild } from '../runner/build.mjs'
+import { runBuild } from '../tooling/build/build.mjs'
 process.exit(await runBuild(process.argv.slice(2)))

@@ -3,10 +3,10 @@
 //   bin/dev [start]   run it in this terminal (Ctrl-C to stop)
 //   bin/dev stop      stop a running environment
 //   bin/dev status    report whether one is running
-// All the logic lives in runner/dev_env.mjs, which is also the only thing that decides
+// All the logic lives in tooling/dev_env.mjs, which is also the only thing that decides
 // whether an environment exists — we just switch on the state it reports.
-import { devEnvState, runDevEnvForeground, stopDevEnv, lastBuildErrors } from '../runner/dev_env.mjs'
-import { buildFailure } from '../runner/terminal/formatter.mjs'
+import { devEnvState, runDevEnvForeground, stopDevEnv, lastBuildErrors } from '../tooling/dev_env.mjs'
+import { buildFailure } from '../tooling/runner/terminal/formatter.mjs'
 import pc from 'picocolors'
 
 const command = process.argv[2] || 'start'

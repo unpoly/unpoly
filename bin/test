@@ -1,4 +1,4 @@
 #!/usr/bin/env node
 // Dev spec runner. Starts the dev environment in the background if none is running.
-import { runDev } from '../runner/terminal/run.mjs'
+import { runDev } from '../tooling/runner/terminal/run.mjs'
 process.exit(await runDev(process.argv.slice(2), process.env))

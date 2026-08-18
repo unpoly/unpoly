@@ -52,11 +52,12 @@ bin/                      # Scripts for development
   find-spec               # ... Find specs by a phrase in their describe()/it() titles
   ...                     # ... other dev scripts
 
-runner/                   # The Jasmine spec runner server (rarely need to edit here)
-  ...
-
-webpack/                  # Webpack configuration (rarely need to edit here)
-  ...
+tooling/                  # Our own dev machinery, never shipped (rarely need to edit here)
+  runner/                 # ... Runs the specs: server, terminal driver, in-page reporter
+  build/                  # ... bin/build and the Webpack configuration
+  dev_env.mjs             # ... The dev environment behind bin/dev
+  find_spec.mjs           # ... Spec-title search behind bin/find-spec
+  test/                   # ... Unit tests for all of the above (bin/self-test)
 
 dist/                     # Output directory for the Webpack bundler (gitignored, never edit directly)
   unpoly.js               # ... Main Unpoly bundle (JS)
@@ -210,5 +211,5 @@ ecosystem, plus a sibling `.sass` file. If a bundle seems to need behavior of it
 that behavior belongs in a main module, reachable through config from outside.
 `unpoly-migrate` is the exception, and it earns it by shipping polyfills.
 
-A new bundle needs an entry in `webpack/entries.js` *and* its output files listed in
+A new bundle needs an entry in `tooling/build/webpack/entries.js` *and* its output files listed in
 `bin/release`, or it won't be published.

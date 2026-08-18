@@ -82,7 +82,7 @@ let lastIdleCallback = new Date()
 afterEach(async function() {
   // Announce the reset as the very first thing — before any teardown, cleanup, or
   // even the `await wait()` below — so the terminal poster
-  // (runner/terminal/poster.js) snapshots fixtures/overlays and closes its log
+  // (tooling/runner/browser/poster.js) snapshots fixtures/overlays and closes its log
   // buffer at the moment the spec ended (which, with stopSpecOnExpectationFailure,
   // is the first failure) rather than after the DOM has moved on. Present-tense name
   // = "before" (interruptible), per the Unpoly event-naming convention.

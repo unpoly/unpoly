@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Runs the runner's OWN unit tests (Node's test runner), not the browser specs.
+// Runs the tooling's OWN unit tests (Node's test runner), not the browser specs.
 // NO_COLOR keeps the output stable so the formatter tests can assert on plain text.
 import { spawn } from 'node:child_process'
 import path from 'node:path'
@@ -7,9 +7,9 @@ import { fileURLToPath } from 'node:url'
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 
-// shell:true so the glob expands (Node's --test wants explicit file paths).
-let child = spawn('node --test runner/test/*.test.mjs', {
-  shell: true,
+// A glob, because --test only walks a directory when given one file pattern; the
+// tree is nested now, so `tooling/test/*.test.mjs` would miss the subdirectories.
+let child = spawn(process.execPath, ['--test', 'tooling/test/**/*.test.mjs'], {
   stdio: 'inherit',
   cwd: projectRoot,
   env: { ...process.env, NO_COLOR: '1' },

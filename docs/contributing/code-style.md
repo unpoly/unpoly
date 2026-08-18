@@ -65,8 +65,8 @@ direct call — cannot be `_`-prefixed: the name it asks for does not exist in
 
 ## Linting
 
-`bin/lint` runs ESLint over `src/`, `spec/` and `runner/`. Extra arguments are forwarded,
+`bin/lint` runs ESLint over `src/`, `spec/` and `tooling/`. Extra arguments are forwarded,
 so `bin/lint --fix` works.
 
 Lint errors in `src/` fail the build, so `bin/test` surfaces them for you. Specs and the
-runner are not part of that build, so only `bin/lint` (or CI's lint job) checks those.
+tooling are not part of that build, so only `bin/lint` (or CI's lint job) checks those.
