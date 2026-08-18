@@ -30,7 +30,7 @@ function specFiles(dir) {
 }
 
 const sources = specFiles(specDir).sort().map((file) => ({
-  file: path.relative(specDir, file),
+  file: path.relative(projectRoot, file), // full path from the root, so it is clickable
   text: readFileSync(file, 'utf8'),
 }))
 

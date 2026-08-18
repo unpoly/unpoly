@@ -222,15 +222,15 @@ spec code that happens to call the feature:
 
 ```
 $ bin/find-spec "kept element"
-fragment_keep_spec.js:47 up.fragment / unobtrusive behavior / [up-keep] / does not run destructors within kept elements
-fragment_keep_spec.js:143 up.fragment / unobtrusive behavior / [up-keep] / omits a kept element from the returned up.RenderResult
-fragment_keep_spec.js:189 up.fragment / unobtrusive behavior / [up-keep] / keeps the scroll position of an [up-viewport] within a kept element
+spec/unpoly/fragment_keep_spec.js:47 "up.fragment unobtrusive behavior [up-keep] does not run destructors within kept elements"
+spec/unpoly/fragment_keep_spec.js:143 "up.fragment unobtrusive behavior [up-keep] omits a kept element from the returned up.RenderResult"
+spec/unpoly/fragment_keep_spec.js:189 "up.fragment unobtrusive behavior [up-keep] keeps the scroll position of an [up-viewport] within a kept element"
 …
 ```
 
-Each path is the spec's full name, so you can hand any part of it back to `--spec`. Passing
-a feature name also shows every file it is spread across, which for a big feature like
-`up.render()` is more than a dozen.
+The quoted string *is* the spec's full name, so you can paste it straight into `--spec` —
+or any part of it, to widen the filter. Passing a feature name also shows every file it is
+spread across, which for a big feature like `up.render()` is more than a dozen.
 
 
 ### Where a new spec goes

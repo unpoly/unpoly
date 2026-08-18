@@ -103,7 +103,7 @@ describe('up.form', function() {
   assert.equal(matches[0].isGroup, false)
 })
 
-test('formats one line per match, ancestry separated by slashes', () => {
+test('formats one line per match as a quoted full name, ready for --spec', () => {
   let matches = findSpecs(source(`
 describe('up.form', function() {
   describe('[up-submit]', function() {
@@ -112,8 +112,9 @@ describe('up.form', function() {
 })
 `), 'submits')
 
+  // Space-joined and quoted, because that string *is* what --spec matches.
   assert.deepEqual(formatMatches(matches, { phrase: 'submits' }),
-    ['form_spec.js:4 up.form / [up-submit] / submits the form'])
+    ['form_spec.js:4 "up.form [up-submit] submits the form"'])
 })
 
 test('color highlights the phrase and leaves plain output untouched', () => {

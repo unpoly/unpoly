@@ -42,7 +42,10 @@ export function findSpecs(sources, phrase) {
   return matches
 }
 
-// One line per match: "file:line group / group / title", with the phrase highlighted.
+// One line per match: `file:line "full describe path"`. The path is space-joined, which
+// makes it exactly the full name Jasmine matches, so it can be pasted straight into
+// --spec; the quotes mark where it starts and ends. Ancestry stays dim and the matched
+// phrase bold, which is what separates the levels now that there is no separator.
 export function formatMatches(matches, { phrase, color = false } = {}) {
   const paint = color ? ANSI : { path: (s) => s, ancestry: (s) => s, match: (s) => s }
 
@@ -50,8 +53,8 @@ export function formatMatches(matches, { phrase, color = false } = {}) {
     const own = titles[titles.length - 1]
     const ancestry = titles.slice(0, -1)
     const at = paint.path(`${file}:${line}`)
-    const above = ancestry.length ? paint.ancestry(ancestry.join(' / ') + ' / ') : ''
-    return `${at} ${above}${highlight(own, phrase, paint)}`
+    const above = ancestry.length ? paint.ancestry(ancestry.join(' ') + ' ') : ''
+    return `${at} "${above}${highlight(own, phrase, paint)}"`
   })
 }
 
