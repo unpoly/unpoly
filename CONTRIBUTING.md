@@ -41,6 +41,7 @@ feature, or before reviewing someone else's.
 
 > Where files live, why Unpoly is a `window.up` global, which module owns which topic,
 > how we structure modules internally, and how to find tests for a given file.
+> Implementation plans for larger changes go in `docs/plans/`, named after their subject.
 
 [Read the code organization guide](docs/contributing/code-organization.md) before
 adding or moving code.

@@ -59,6 +59,10 @@ tooling/                  # Our own dev machinery, never shipped (rarely need to
   find_spec.mjs           # ... Spec-title search behind bin/find-spec
   test/                   # ... Unit tests for all of the above (bin/self-test)
 
+docs/                     # Documentation for contributors, never shipped
+  contributing/           # ... The guides linked from CONTRIBUTING.md
+  plans/                  # ... Implementation plans (gitignored)
+
 dist/                     # Output directory for the Webpack bundler (gitignored, never edit directly)
   unpoly.js               # ... Main Unpoly bundle (JS)
   unpoly.css              # ... Main Unpoly bundle (CSS)
@@ -72,6 +76,27 @@ sibling file sharing the module's prefix, like `form_switch_spec.js` above. See
 [How specs are organized](testing.md#how-specs-are-organized) for the naming, how to
 [find the spec for a feature](testing.md#finding-the-spec-for-a-feature), and
 [where a new spec goes](testing.md#where-a-new-spec-goes).
+
+
+### Implementation plans
+
+A change worth more than one commit is worth a written plan first: what was decided,
+what was ruled out and why, and the sequence of commits it will take. Plans go in
+`docs/plans/`, which is gitignored except for its `.gitkeep`.
+
+A plan is a working note, not a deliverable. Keeping it out of the history means it
+never reaches a reviewer, while still surviving the branch switches and rebases that a
+long-lived branch goes through.
+
+Name the file after the change it plans — the request, the feature or the pull request —
+so that a directory listing reads as an index:
+
+```
+docs/plans/
+  pr-807-form-associated-custom-elements.md
+  up-switch-array-fields.md
+  optimistic-rendering.md
+```
 
 
 ## Architecture
