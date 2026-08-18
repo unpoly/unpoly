@@ -60,7 +60,7 @@ test('the serialized config cannot break out of the script block it is injected 
   let json = Config.fromObject({ spec: '</script><script>alert(1)</script>' }).toJSONString()
   assert.doesNotMatch(json, /<\/script>/i)
   assert.match(json, /\\u003c/)
-  assert.equal(JSON.parse(json).spec, '</script><script>alert(1)</script>', 'still round-trips')
+  assert.deepEqual(JSON.parse(json).spec, ['</script><script>alert(1)</script>'], 'still round-trips')
 })
 
 test('toPageParams carries only what changes the browser, so a debug link reproduces the run', () => {
@@ -70,4 +70,34 @@ test('toPageParams carries only what changes the browser, so a debug link reprod
 
 test('a default run contributes nothing to the link', () => {
   assert.deepEqual(Config.fromArgv([]).toPageParams(), {})
+})
+
+// --- repeatable settings -------------------------------------------------------
+
+test('--spec is repeatable and unions', () => {
+  let config = Config.fromArgv(['--spec=up.form', '--spec=up.radio'])
+  assert.deepEqual(config.spec, ['up.form', 'up.radio'])
+})
+
+test('a single --spec still yields one filter', () => {
+  assert.deepEqual(Config.fromArgv(['--spec=up.form']).spec, ['up.form'])
+})
+
+test('an absent --spec is an empty list, not an empty string', () => {
+  // The browser-side filter checks .length, so "no filter" must not look like one filter.
+  assert.deepEqual(Config.fromObject({}).spec, [])
+})
+
+test('a repeated flag builds on the environment rather than replacing it', () => {
+  let config = Config.fromArgv(['--spec=from-argv'], { SPEC: 'from-env' })
+  assert.deepEqual(config.spec, ['from-env', 'from-argv'])
+})
+
+test('a list that Express parsed from a repeated query param is accepted as-is', () => {
+  assert.deepEqual(Config.fromObject({ spec: ['a', 'b'] }).spec, ['a', 'b'])
+})
+
+test('default lists do not show up as changed settings in a debug link', () => {
+  // toParams() compares against the defaults; two empty arrays are not "!==" equal.
+  assert.deepEqual(Config.fromObject({}).toParams(), {})
 })

@@ -18,3 +18,14 @@ test('encodes multiple params', () => {
   assert.match(url, /csp=nonce-only/)
   assert.match(url, /es6=true/)
 })
+
+test('a repeatable setting becomes one query param per value', () => {
+  // Passing the array straight to URLSearchParams would comma-join it into a single
+  // filter that matches nothing.
+  let url = specsURL('http://localhost:4000', { spec: ['up.form [up-switch]', 'up.radio'] })
+  assert.equal(url, 'http://localhost:4000/specs?spec=up.form%20%5Bup-switch%5D&spec=up.radio')
+})
+
+test('a single value still produces a single param', () => {
+  assert.equal(specsURL('http://x', { spec: 'up.form' }), 'http://x/specs?spec=up.form')
+})
