@@ -128,3 +128,31 @@ describe('up.form', function() {
   assert.match(colored, /\x1b\[1;33msubmits\x1b\[0m the form/)
   assert.doesNotMatch(formatMatches(matches, { phrase: 'submits' })[0], /\x1b/)
 })
+
+test('locations are padded so every describe path starts in the same column', () => {
+  // Alignment is what makes a long result list scannable. It needs the whole match set
+  // up front, which is why formatMatches() takes the array rather than a single match.
+  const matches = [
+    { file: 'spec/unpoly/form_spec.js', line: 7, titles: ['up.form', 'submits'] },
+    { file: 'spec/unpoly/fragment_render_history_spec.js', line: 1234, titles: ['up.fragment', 'submits'] },
+  ]
+
+  const lines = formatMatches(matches, { phrase: 'submits' })
+  const columns = lines.map((line) => line.indexOf('"'))
+
+  assert.equal(columns[0], columns[1], `paths start in different columns: ${columns}`)
+  assert.match(lines[0], /form_spec\.js:7 {2,}"/, 'the shorter location is padded')
+})
+
+test('padding is measured without the colour codes', () => {
+  const matches = [
+    { file: 'a.js', line: 1, titles: ['x', 'submits'] },
+    { file: 'bbbbbbbb.js', line: 22, titles: ['x', 'submits'] },
+  ]
+
+  const plain = formatMatches(matches, { phrase: 'submits' })
+  const colored = formatMatches(matches, { phrase: 'submits', color: true })
+  const strip = (s) => s.replaceAll(/\x1b\[[0-9;]*m/g, '')
+
+  assert.deepEqual(colored.map(strip), plain, 'colour must not change the layout')
+})

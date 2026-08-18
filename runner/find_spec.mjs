@@ -49,10 +49,16 @@ export function findSpecs(sources, phrase) {
 export function formatMatches(matches, { phrase, color = false } = {}) {
   const paint = color ? ANSI : { path: (s) => s, ancestry: (s) => s, match: (s) => s }
 
+  // Locations are padded to the widest one so every path starts in the same column, which
+  // is what makes a long result list scannable. Measured before painting, since the ANSI
+  // codes would otherwise count towards the width.
+  const width = Math.max(0, ...matches.map(({ file, line }) => `${file}:${line}`.length))
+
   return matches.map(({ file, line, titles }) => {
     const own = titles[titles.length - 1]
     const ancestry = titles.slice(0, -1)
-    const at = paint.path(`${file}:${line}`)
+    const location = `${file}:${line}`
+    const at = paint.path(location) + ' '.repeat(width - location.length)
     const above = ancestry.length ? paint.ancestry(ancestry.join(' ') + ' ') : ''
     return `${at} "${above}${highlight(own, phrase, paint)}"`
   })
