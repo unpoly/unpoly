@@ -7,6 +7,12 @@ extendDescribe('up.form', function() {
 
     describe('up.watch()', function() {
 
+      beforeEach(function() { up.form.config.watchInputDelay = 0 })
+
+      // Actually we only need `input`, but we want to notice
+      // if another script manually triggers `change` on the element.
+      const defaultInputEvents = ['input', 'change']
+
       describe('custom form fields', function() {
 
         it('watches a form-associated custom element without configuration', async function() {
@@ -87,13 +93,6 @@ extendDescribe('up.form', function() {
         })
 
       })
-
-
-      beforeEach(function() { up.form.config.watchInputDelay = 0 })
-
-      // Actually we only need `input`, but we want to notice
-      // if another script manually triggers `change` on the element.
-      const defaultInputEvents = ['input', 'change']
 
       describe('with a field element', function() {
 

@@ -151,14 +151,17 @@ extendDescribe('up.form', function() {
         })
 
         it('submits the native field that a custom control keeps hidden and synced', async function() {
-          const [form] = htmlFixtureList(`
+          const [form, select] = htmlFixtureList(`
             <form action="/action" method="post">
               <select name="size" hidden>
                 <option value="S">S</option>
-                <option value="M" selected>M</option>
+                <option value="M">M</option>
               </select>
             </form>
           `)
+
+          // A custom control writes the value, as the compiler in the .fromForm specs does.
+          select.value = 'M'
 
           up.submit(form)
           await wait()
@@ -614,9 +617,7 @@ extendDescribe('up.form', function() {
               <input type="file" name="file-input">
             </form>
           `)
-          const transfer = new DataTransfer()
-          transfer.items.add(new File(['data'], 'data.txt', { type: 'text/plain' }))
-          input.files = transfer.files
+          input.files = fileList(new File(['data'], 'data.txt', { type: 'text/plain' }))
 
           up.submit(form)
 
@@ -640,6 +641,7 @@ extendDescribe('up.form', function() {
           await wait()
 
           expect(jasmine.lastRequest().requestHeaders['Content-Type']).toBeMissing()
+          expect(jasmine.lastRequest().params).toEqual(jasmine.any(FormData))
         })
 
         it('defaults to multipart/form-data when a binary param is passed explicitly', async function() {

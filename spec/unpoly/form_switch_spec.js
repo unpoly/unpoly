@@ -49,7 +49,7 @@ extendDescribe('up.form', function() {
         })
 
         it('switches on the native field that a custom control keeps hidden and synced', async function() {
-          const [form, select, , , target] = htmlFixtureList(`
+          const [form] = htmlFixtureList(`
             <form>
               <select name="mode" hidden up-switch=".target">
                 <option value="inactive" selected>inactive</option>
@@ -61,6 +61,8 @@ extendDescribe('up.form', function() {
           up.hello(form)
           await wait()
 
+          const select = form.querySelector('select')
+          const target = form.querySelector('.target')
           expect(target).toBeHidden()
 
           select.value = 'active'

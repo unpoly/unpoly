@@ -69,24 +69,29 @@ class TestFormAssociatedElement extends HTMLElement {
 // the { name, value, disabled } properties that up.form.config.fieldSelectors expects.
 class TestFormField extends HTMLElement {
 
+  // { value } and { disabled } are deliberately *not* reflected back to an attribute. Unpoly
+  // reads and writes the properties, and a spec must fail if it ever switched to
+  // getAttribute() / setAttribute(). The attributes only seed the initial state, so that a
+  // fixture can still be written as HTML.
+
   get name() {
     return this.getAttribute('name')
   }
 
   get value() {
-    return this.getAttribute('value') ?? ''
+    return this._value ?? this.getAttribute('value') ?? ''
   }
 
   set value(newValue) {
-    this.setAttribute('value', newValue)
+    this._value = newValue
   }
 
   get disabled() {
-    return this.hasAttribute('disabled')
+    return this._disabled ?? this.hasAttribute('disabled')
   }
 
   set disabled(newDisabled) {
-    this.toggleAttribute('disabled', newDisabled)
+    this._disabled = newDisabled
   }
 
 }

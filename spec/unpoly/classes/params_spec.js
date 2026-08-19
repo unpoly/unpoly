@@ -519,9 +519,7 @@ describe('up.Params', function() {
       input.files = fileList(new File(['content'], 'file.txt', { type: 'text/plain' }))
 
       const entries = up.Params.fromForm(form).toArray()
-      expect(entries.length).toBe(1)
-      expect(entries[0].name).toBe('key')
-      expect(entries[0].value).toEqual(jasmine.any(File))
+      expect(entries).toEqual([{ name: 'key', value: jasmine.any(File) }])
       expect(entries[0].value.name).toBe('file.txt')
     })
 
@@ -549,12 +547,6 @@ describe('up.Params', function() {
       expect(entries[0].value.size).toBe(0)
       expect(params.hasBinaryEntries()).toBe(true)
     })
-
-    function fileList(...files) {
-      const transfer = new DataTransfer()
-      for (let file of files) transfer.items.add(file)
-      return transfer.files
-    }
 
     it('includes an <input type="checkbox"> that was [checked] by default', function() {
       const $form = $fixture('form')
@@ -645,6 +637,47 @@ describe('up.Params', function() {
       expect(params.toArray()).toEqual([])
     })
 
+    it('serializes a <textarea>', function() {
+      const [form, textArea] = htmlFixtureList('<form><textarea name="key">value</textarea></form>')
+
+      expect(up.Params.fromForm(form).toArray()).toEqual([
+        { name: 'key', value: 'value' },
+      ])
+    })
+
+    it('serializes a <textarea> that had its value changed by a script', function() {
+      const [form, textArea] = htmlFixtureList('<form><textarea name="key">value-from-markup</textarea></form>')
+      textArea.value = 'value-from-script'
+
+      expect(up.Params.fromForm(form).toArray()).toEqual([
+        { name: 'key', value: 'value-from-script' },
+      ])
+    })
+
+    it("serializes a field outside the form with a [form] attribute matching the form's ID", function() {
+      const [form] = htmlFixtureList('<form id="form-id"><input name="inside" value="inside-value"></form>')
+      htmlFixtureList('<input name="outside" value="outside-value" form="form-id">')
+
+      expect(up.Params.fromForm(form).toArray()).toEqual([
+        { name: 'inside', value: 'inside-value' },
+        { name: 'outside', value: 'outside-value' },
+      ])
+    })
+
+    it("serializes a configured custom element outside the form with a [form] attribute", function() {
+      // The browser ignores [form] on an element that is not form-associated, so only
+      // Unpoly's own field lookup finds this control.
+      up.form.config.fieldSelectors.push('test-form-field')
+
+      const [form] = htmlFixtureList('<form id="form-id"><input name="inside" value="inside-value"></form>')
+      htmlFixtureList('<test-form-field name="outside" value="outside-value" form="form-id"></test-form-field>')
+
+      expect(up.Params.fromForm(form).toArray()).toEqual([
+        { name: 'inside', value: 'inside-value' },
+        { name: 'outside', value: 'outside-value' },
+      ])
+    })
+
     it('includes an <input readonly>', function() {
       const $form = $fixture('form')
       const $input = $('<input type="text" name="key" value="value" readonly>').appendTo($form)
@@ -683,6 +716,21 @@ describe('up.Params', function() {
         ])
       })
 
+      it('does not serialize a form-associated custom element inside a <fieldset disabled>', function() {
+        const [form] = htmlFixtureList(`
+          <form>
+            <fieldset disabled>
+              <test-form-associated-element name="email" value="foo@example.com"></test-form-associated-element>
+            </fieldset>
+            <input name="city" value="Berlin">
+          </form>
+        `)
+
+        expect(up.Params.fromForm(form).toArray()).toEqual([
+          { name: 'city', value: 'Berlin' },
+        ])
+      })
+
       it('does not serialize a configured custom element without a readable value', function() {
         up.form.config.fieldSelectors.push('test-valueless-field')
 
@@ -715,7 +763,7 @@ describe('up.Params', function() {
           }
         })
 
-        const [form, , , , , pill] = htmlFixtureList(`
+        const [form] = htmlFixtureList(`
           <form>
             <div class="pills">
               <select name="size" hidden>
@@ -728,7 +776,7 @@ describe('up.Params', function() {
         `)
         up.hello(form)
 
-        Trigger.clickSequence(pill)
+        Trigger.clickSequence(form.querySelector('button'))
 
         expect(up.Params.fromForm(form).toArray()).toEqual([
           { name: 'size', value: 'M' },
@@ -843,6 +891,20 @@ describe('up.Params', function() {
         `)
 
         expect(up.Params.fromContainer(form).toArray()).toEqual([])
+      })
+
+      it('includes a [disabled] configured custom element with { includeDisabled: true }', function() {
+        up.form.config.fieldSelectors.push('test-form-field')
+
+        const [form] = htmlFixtureList(`
+          <form>
+            <test-form-field name="email" value="foo@example.com" disabled></test-form-field>
+          </form>
+        `)
+
+        expect(up.Params.fromContainer(form, { includeDisabled: true }).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+        ])
       })
 
       it('does not run formdata listeners, which only affect submissions', function() {

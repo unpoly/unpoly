@@ -11,7 +11,7 @@ extendDescribe('up.form', function() {
         it('validates a custom element that is configured in up.form.config.fieldSelectors', async function() {
           up.form.config.fieldSelectors.push('test-form-field')
 
-          const [, group, field] = htmlFixtureList(`
+          const [, , field] = htmlFixtureList(`
             <form action="/form" method="post">
               <div up-form-group>
                 <test-form-field name="email" value="foo@example.com"></test-form-field>
@@ -27,7 +27,7 @@ extendDescribe('up.form', function() {
         })
 
         it('sends the value of a form-associated custom element with the validation request', async function() {
-          const [, group, field] = htmlFixtureList(`
+          const [, , cityField] = htmlFixtureList(`
             <form action="/form" method="post">
               <div up-form-group>
                 <input name="city" value="Berlin">
@@ -36,14 +36,15 @@ extendDescribe('up.form', function() {
             </form>
           `)
 
-          up.validate(field)
+          // Validating any field sends the whole form, so the custom element's value rides along.
+          up.validate(cityField)
           await wait()
 
           expect(jasmine.lastRequest().data()).toMatchParams({ city: 'Berlin', email: 'foo@example.com' })
         })
 
         it('sends values added by a formdata event listener with the validation request', async function() {
-          const [form, group, field] = htmlFixtureList(`
+          const [form, , field] = htmlFixtureList(`
             <form action="/form" method="post">
               <div up-form-group>
                 <input name="email" value="foo@example.com">
