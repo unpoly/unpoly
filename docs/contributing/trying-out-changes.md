@@ -113,8 +113,12 @@ export const post = (req, res) => {
 
 `view('my-thing', locals)` renders `pages/my-thing.ejs` and `layout()` wraps it. Any page's
 name works, so sharing markup between two pages is the same call. **The `.mjs` wins when both
-files exist** and renders the view itself, so a static page becomes a dynamic one by dropping
-a handler beside it — the markup never moves.
+files exist** and renders the view itself, so a static page becomes a dynamic one by dropping a
+handler beside it — the markup never moves.
+
+`layout()` takes a second argument, `{ title }`, for the document title. A plain `.ejs` page
+gets its filename for free; a handler page reads `Unpoly scratch` until it passes one. Worth
+setting once you have several scratch tabs open.
 
 Look at `pages/form.mjs` for the shape worth copying: `blankUser()`, `userFromRequest()` and
 `validateUser()` kept apart from the two handlers, so what the page *does* stays legible.
