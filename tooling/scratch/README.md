@@ -11,8 +11,8 @@ tooling/scratch/
   server.mjs      express wiring: routing, the build gate, request logging, error pages
   pages.mjs       a URL → the files behind it, and the listing (pure; unit-tested)
   helpers/        page-facing API: layout.mjs + layout.ejs, view.mjs
-  assets/         scratch.css, scratch.js — served at /assets
-  pages/          the URL space (gitignored except the exemplary pages)
+  assets/         styles.css, scripts.js — served at /assets
+  pages/          the URL space — examples, tracked, and yours to edit while you work
 ```
 
 `bin/scratch-server` is a shebang plus one import, like the other `bin/*` executables. The
@@ -25,6 +25,10 @@ dev environment runs it from the process table in `tooling/dev_env.mjs`.
   run. It also gives the scratch pages the root of their own URL space.
 - **Everything in `pages/` is a route.** No ignore lists, no underscore prefixes — which is
   why `helpers/`, `assets/` and this README live outside it.
+- **Nothing here is isolated from you.** The pages are tracked examples, not fixtures — no test
+  reads them — and you are expected to edit them and `git restore` afterwards. An earlier
+  version gitignored `pages/*` behind an allowlist; that hid leftovers from `git status` and
+  forced setup out of `assets/scripts.js` for no gain.
 - **Helpers load files and build strings; they never touch `req` or `res`.** This is what
   stops a project-specific response API accreting (`acceptLayer(res)`, `respondSlowly(res)`)
   and leaves every response decision visible in the page that makes it.

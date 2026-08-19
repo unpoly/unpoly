@@ -1,7 +1,10 @@
 import express from 'express'
 import { Config } from '../config.mjs'
+import { PORTS } from '../../ports.mjs'
 
-const serverPort = process.env.PORT || 4000
+// PORT still wins, for running this server on its own; otherwise the shared port table, which
+// PORT_OFFSET can move for a second checkout.
+const serverPort = process.env.PORT || PORTS.specServer
 const serverHost = process.env.HOST || 'localhost'
 const urlFor = (port) => `http://${serverHost}:${port}`
 // Default-port URL, used by the runner and isServerRunning(). startServer() may be

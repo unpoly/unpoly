@@ -11,7 +11,8 @@ test('a fragment is wrapped into a document that loads the build', () => {
   assert.match(html, /^<!DOCTYPE html>/)
   assert.match(html, /<title>scratchy<\/title>/)
   assert.match(html, /\/dist\/unpoly\.js/)
-  assert.match(html, /\/assets\/scratch\.js/)
+  assert.match(html, /\/assets\/scripts\.js/)
+  assert.match(html, /\/assets\/styles\.css/)
   assert.match(html, /<p>hello<\/p>/)
 })
 

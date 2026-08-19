@@ -12,12 +12,13 @@ import { statSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
 import { waitForFreshBuild, BuildFailedError, BuildSyncError } from '../build/build_sync.mjs'
 import { PROJECT_ROOT } from '../build/build_status.mjs'
+import { PORTS } from '../ports.mjs'
 import { listPages, resolvePage, PAGES_DIR } from './pages.mjs'
 import { layout } from './helpers/layout.mjs'
 import { renderView } from './helpers/view.mjs'
 
 const SCRATCH_DIR = path.dirname(import.meta.filename)
-const serverPort = process.env.PORT || 4001
+const serverPort = process.env.PORT || PORTS.scratch
 const serverHost = process.env.HOST || 'localhost'
 const urlFor = (port) => `http://${serverHost}:${port}`
 
@@ -158,7 +159,7 @@ function indexPage(pages) {
   const rows = pages.map((page) => `      <li><a href="${page.url}">${page.url}</a> <small>${[page.handler, page.view].filter(Boolean).map((file) => escapeHTML(path.basename(file))).join(' + ')}</small></li>`)
   return `<!DOCTYPE html>
 <html lang="en">
-  <head><meta charset="utf-8"><title>Unpoly scratch pages</title><link rel="stylesheet" href="/assets/scratch.css"></head>
+  <head><meta charset="utf-8"><title>Unpoly scratch pages</title><link rel="stylesheet" href="/assets/styles.css"></head>
   <body>
     <h1>Unpoly scratch pages</h1>
     <ul>
@@ -174,7 +175,7 @@ function errorPage(title, detail, pages = null) {
   const list = pages ? `    <ul>\n${pages.map((page) => `      <li><a href="${page.url}">${page.url}</a></li>`).join('\n')}\n    </ul>\n` : ''
   return `<!DOCTYPE html>
 <html lang="en">
-  <head><meta charset="utf-8"><title>${escapeHTML(title)}</title><link rel="stylesheet" href="/assets/scratch.css"></head>
+  <head><meta charset="utf-8"><title>${escapeHTML(title)}</title><link rel="stylesheet" href="/assets/styles.css"></head>
   <body>
     <h1>${escapeHTML(title)}</h1>
     <pre>${escapeHTML(detail)}</pre>
