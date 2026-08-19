@@ -512,8 +512,7 @@ up.Params = class Params {
   }
 
   static fromContainer(container, options) {
-    let fields = up.form.fields(container)
-    return this.fromFields(fields, options)
+    return this.fromFields(up.form.fields(container), options)
   }
 
   /*-
@@ -557,28 +556,27 @@ up.Params = class Params {
 
     // Input fields are excluded from form submissions if they have no [name]
     // or when they are [disabled].
-    let name = field.name
+    let { name, tagName, type } = field
     if (name && this._considerFieldEnabled(field)) {
-      const { tagName } = field
-      const { type } = field
+      let values = []
+
       if (tagName === 'SELECT') {
-        for (let option of field.querySelectorAll('option')) {
-          if (option.selected) {
-            this.add(name, option.value)
-          }
-        }
+        // A <select> can have multiple selected options.
+        values = u.map(field.selectedOptions, 'value')
       } else if ((type === 'checkbox') || (type === 'radio')) {
-        if (field.checked) {
-          this.add(name, field.value)
-        }
+        if (field.checked) values = [field.value]
       } else if (type === 'file') {
         // The value of an input[type=file] is the local path displayed in the form.
         // The actual File objects are in the #files property.
-        for (let file of field.files) {
-          this.add(name, file)
-        }
-      } else {
-        return this.add(name, field.value)
+        values = field.files
+      } else if (u.isDefined(field.value)) {
+        // A custom control may expose a { name } without a readable { value },
+        // in which case it has nothing to contribute.
+        values = [field.value]
+      }
+
+      for (let value of values) {
+        this.add(name, value)
       }
     }
   }

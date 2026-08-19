@@ -91,5 +91,16 @@ class TestFormField extends HTMLElement {
 
 }
 
+// A custom element that reports a { name } but no readable { value } — the shape of a
+// form-associated element whose author never exposed one. It has nothing to contribute.
+class TestValuelessField extends HTMLElement {
+
+  get name() {
+    return this.getAttribute('name')
+  }
+
+}
+
 customElements.define('test-form-associated-element', TestFormAssociatedElement)
 customElements.define('test-form-field', TestFormField)
+customElements.define('test-valueless-field', TestValuelessField)

@@ -683,6 +683,18 @@ describe('up.Params', function() {
         ])
       })
 
+      it('does not serialize a configured custom element without a readable value', function() {
+        up.form.config.fieldSelectors.push('test-valueless-field')
+
+        const [form] = htmlFixtureList(`
+          <form>
+            <test-valueless-field name="email"></test-valueless-field>
+          </form>
+        `)
+
+        expect(up.Params.fromForm(form).toArray()).toEqual([])
+      })
+
       it('does not serialize a custom element that is neither form-associated nor configured', function() {
         const [form] = htmlFixtureList(`
           <form>
