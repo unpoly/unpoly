@@ -158,7 +158,7 @@ function indexPage(pages) {
   const rows = pages.map((page) => `      <li><a href="${page.url}">${page.url}</a> <small>${[page.handler, page.view].filter(Boolean).map((file) => escapeHTML(path.basename(file))).join(' + ')}</small></li>`)
   return `<!DOCTYPE html>
 <html lang="en">
-  <head><meta charset="utf-8"><title>Unpoly scratch pages</title><link rel="stylesheet" href="/assets/scratch.css"></head>
+  <head><meta charset="utf-8"><title>Unpoly scratch pages</title><link rel="stylesheet" href="/assets/styles.css"></head>
   <body>
     <h1>Unpoly scratch pages</h1>
     <ul>
@@ -174,7 +174,7 @@ function errorPage(title, detail, pages = null) {
   const list = pages ? `    <ul>\n${pages.map((page) => `      <li><a href="${page.url}">${page.url}</a></li>`).join('\n')}\n    </ul>\n` : ''
   return `<!DOCTYPE html>
 <html lang="en">
-  <head><meta charset="utf-8"><title>${escapeHTML(title)}</title><link rel="stylesheet" href="/assets/scratch.css"></head>
+  <head><meta charset="utf-8"><title>${escapeHTML(title)}</title><link rel="stylesheet" href="/assets/styles.css"></head>
   <body>
     <h1>${escapeHTML(title)}</h1>
     <pre>${escapeHTML(detail)}</pre>

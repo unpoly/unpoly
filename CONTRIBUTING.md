@@ -30,8 +30,8 @@ when you suspect a stale build, or when you need to see what a service actually 
 
 > Some things you have to see: how an overlay looks, a form across three validation
 > roundtrips.\
-> `bin/dev` serves a scratch server on port 4001 — a few real pages against a real server,
-> where you add a page, poke at it with your mouse, Puppeteer or Playwright, and throw it away.
+> `bin/dev` serves a scratch server on port 4001 — a few real pages against a real server.\
+> Every file there is an editable example: change what you need, then `git restore` it.
 
 [Read the scratch server guide](docs/contributing/trying-out-changes.md) when a spec cannot
 show you what you need to see. What you learn there still belongs in a spec.
