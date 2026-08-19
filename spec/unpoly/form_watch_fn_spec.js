@@ -9,6 +9,25 @@ extendDescribe('up.form', function() {
 
       describe('custom form fields', function() {
 
+        it('watches a form-associated custom element without configuration', async function() {
+          const [, field] = htmlFixtureList(`
+            <form>
+              <test-form-associated-element name="email" value="old@example.com"></test-form-associated-element>
+            </form>
+          `)
+          const callback = jasmine.createSpy('watch callback')
+
+          up.watch(field, callback)
+
+          field.value = 'new@example.com'
+          Trigger.change(field)
+          await wait()
+
+          expect(callback.calls.count()).toBe(1)
+          expect(callback.calls.argsFor(0)[0]).toBe('new@example.com')
+          expect(callback.calls.argsFor(0)[1]).toBe('email')
+        })
+
         it('watches a custom element that is configured in up.form.config.fieldSelectors', async function() {
           up.form.config.fieldSelectors.push('test-form-field')
 

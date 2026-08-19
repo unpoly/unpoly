@@ -8,6 +8,25 @@ extendDescribe('up.form', function() {
 
       describe('custom form fields', function() {
 
+        it('switches on a form-associated custom element without configuration', async function() {
+          const [form, field, target] = htmlFixtureList(`
+            <form>
+              <test-form-associated-element name="mode" value="inactive" up-switch=".target"></test-form-associated-element>
+              <div class="target" up-show-for="active">target</div>
+            </form>
+          `)
+          up.hello(form)
+          await wait()
+
+          expect(target).toBeHidden()
+
+          field.value = 'active'
+          Trigger.change(field)
+          await wait()
+
+          expect(target).toBeVisible()
+        })
+
         it('switches on a custom element that is configured in up.form.config.fieldSelectors', async function() {
           up.form.config.fieldSelectors.push('test-form-field')
 

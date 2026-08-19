@@ -104,6 +104,43 @@ describe('up.form', function() {
 
       describe('custom form fields', function() {
 
+        it('does not include buttons, fieldsets or outputs, which the :enabled selector also matches', function() {
+          const [form, textField] = htmlFixtureList(`
+            <form>
+              <input name="email" type="text">
+              <input type="submit">
+              <input type="image" name="image">
+              <input type="button">
+              <button type="submit">Submit</button>
+              <button type="button">Push</button>
+              <fieldset></fieldset>
+              <output name="output"></output>
+            </form>
+          `)
+
+          expect(up.form.fields(form)).toMatchList([textField])
+        })
+
+        it('includes a form-associated custom element without configuration', function() {
+          const [form, field] = htmlFixtureList(`
+            <form>
+              <test-form-associated-element name="email" value="foo@example.com"></test-form-associated-element>
+            </form>
+          `)
+
+          expect(up.form.fields(form)).toMatchList([field])
+        })
+
+        it('includes a form-associated custom element that is [disabled]', function() {
+          const [form, field] = htmlFixtureList(`
+            <form>
+              <test-form-associated-element name="email" value="foo@example.com" disabled></test-form-associated-element>
+            </form>
+          `)
+
+          expect(up.form.fields(form)).toMatchList([field])
+        })
+
         it('includes a custom element that is configured in up.form.config.fieldSelectors', function() {
           up.form.config.fieldSelectors.push('test-form-field')
 
@@ -1136,6 +1173,21 @@ describe('up.form', function() {
     describe('up.form.disableTemp()', function() {
 
       describe('custom form fields', function() {
+
+        it('disables a form-associated custom element without configuration', function() {
+          const [form, field] = htmlFixtureList(`
+            <form>
+              <test-form-associated-element name="email" value="foo@example.com"></test-form-associated-element>
+            </form>
+          `)
+          expect(field).not.toBeDisabled()
+
+          const reenable = up.form.disableTemp(form)
+          expect(field).toBeDisabled()
+
+          reenable()
+          expect(field).not.toBeDisabled()
+        })
 
         it('disables a configured custom element through its { disabled } property', function() {
           up.form.config.fieldSelectors.push('test-form-field')

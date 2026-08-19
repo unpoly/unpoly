@@ -10,6 +10,7 @@ The `up.form` module helps you work with non-trivial forms.
 @see reactive-server-forms
 @see disabling-forms
 @see watch-options
+@see custom-form-fields
 
 @see [up-submit]
 @see [up-validate]
@@ -82,7 +83,11 @@ up.form = (function() {
     @param {string} [config.fieldSelectors]
       An array of CSS selectors that represent form fields, such as `input` or `select`.
 
-      When you add custom JavaScript controls to this list, matching elements should respond to the properties `{ name, value, disabled }`.
+      [Form-associated custom elements](/custom-form-fields#form-associated) are matched by
+      default and need not be added.
+
+      When you add other custom controls to this list, matching elements should respond to the
+      properties `{ name, value, disabled }`. See [Custom form fields](/custom-form-fields).
 
     @param {string} [config.submitButtonSelectors]
       An array of CSS selectors that represent submit buttons, such as `input[type=submit]` or `button[type=submit]`.
@@ -146,7 +151,17 @@ up.form = (function() {
    */
   const config = new up.Config(() => ({
     groupSelectors: ['[up-form-group]', 'fieldset', 'label', 'form'],
-    fieldSelectors: ['select', 'input:not([type=submit], [type=image], [type=button])', 'button[type]:not([type=submit], [type=button])', 'textarea'],
+    fieldSelectors: [
+      'select',
+      'input:not([type=submit], [type=image], [type=button])',
+      'button[type]:not([type=submit], [type=button])',
+      'textarea',
+      // Form-associated custom elements. No selector can name them directly, but they are
+      // the only elements outside this list that the :enabled / :disabled pseudo-classes
+      // match. Matching both states matters: an element must not stop being a field when
+      // it is disabled.
+      ':is(:enabled, :disabled):not(input, select, textarea, button, fieldset, optgroup, option, a, area, object)',
+    ],
     submitSelectors: ['form:is([up-submit], [up-target], [up-layer], [up-transition])'],
     noSubmitSelectors: ['[up-submit=false]', '[target]', e.crossOriginSelector('action')],
     submitButtonSelectors: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])'],
