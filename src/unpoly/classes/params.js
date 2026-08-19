@@ -598,7 +598,7 @@ up.Params = class Params {
 
     // Input fields are excluded from form submissions if they have no [name]
     // or when they are [disabled].
-    let name = up.form.fieldName(field)
+    let name = up.form.readFieldName(field)
     let { tagName, type } = field
     if (name && this._considerFieldEnabled(field)) {
       let values = []
@@ -625,7 +625,7 @@ up.Params = class Params {
   }
 
   _considerFieldEnabled(field) {
-    return !field.disabled || this._options.includeDisabled
+    return !up.form.readFieldDisabled(field) || this._options.includeDisabled
   }
 
   [u.isEqual.key](other) {

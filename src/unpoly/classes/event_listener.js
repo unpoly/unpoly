@@ -93,7 +93,11 @@ up.EventListener = class EventListener extends up.Record {
         args.push(data)
       }
 
-      // Do not allow click events from disabled elements to propagate
+      // Do not allow click events from disabled elements to propagate.
+      //
+      // This deliberately does not use up.form.readFieldDisabled(): the question here is
+      // whether an element is inert, not whether it is a form field, and up.form depends on
+      // this class rather than the other way around.
       if (this.eventType === 'click' && element.disabled) {
         return
       }

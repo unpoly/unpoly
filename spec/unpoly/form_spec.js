@@ -1174,6 +1174,54 @@ describe('up.form', function() {
 
       describe('custom form fields', function() {
 
+        it('does not create a { disabled } property on an element that has none', function() {
+          // Assigning the property would create it, and it would shadow the attribute in
+          // every later read — so a field the author disables afterwards would look enabled.
+          const [form, field] = htmlFixtureList(`
+            <form>
+              <test-attribute-named-field name="email" value="foo@example.com"></test-attribute-named-field>
+            </form>
+          `)
+
+          up.form.disableTemp(form)()
+
+          expect('disabled' in field).toBe(false)
+
+          // The author disables it later. Unpoly must still see that.
+          field.setAttribute('disabled', '')
+          expect(up.Params.fromContainer(form).toArray()).toEqual([])
+        })
+
+        it('disables a form-associated custom element that has no { disabled } property', function() {
+          // The platform gives such an element no property, so only the attribute disables it.
+          const [form, field] = htmlFixtureList(`
+            <form>
+              <test-attribute-named-field name="email" value="foo@example.com"></test-attribute-named-field>
+            </form>
+          `)
+          expect(field.matches('[disabled]')).toBe(false)
+
+          const reenable = up.form.disableTemp(form)
+          expect(field.matches('[disabled]')).toBe(true)
+
+          reenable()
+          expect(field.matches('[disabled]')).toBe(false)
+        })
+
+        it('leaves a form-associated custom element that was already [disabled]', function() {
+          const [form, field] = htmlFixtureList(`
+            <form>
+              <test-attribute-named-field name="email" value="foo@example.com" disabled></test-attribute-named-field>
+            </form>
+          `)
+
+          const reenable = up.form.disableTemp(form)
+          reenable()
+
+          // We never enable a control that we did not disable.
+          expect(field.matches('[disabled]')).toBe(true)
+        })
+
         it('disables a form-associated custom element without configuration', function() {
           const [form, field] = htmlFixtureList(`
             <form>

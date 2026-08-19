@@ -86,8 +86,9 @@ up.form = (function() {
       [Form-associated custom elements](/custom-form-fields#form-associated) are matched by
       default and need not be added.
 
-      When you add other custom controls to this list, matching elements should respond to the
-      properties `{ name, value, disabled }`. See [Custom form fields](/custom-form-fields).
+      Add a selector for a [custom control](/custom-form-fields#configured) that is not
+      form-associated. Matching elements must expose their state as described in
+      [what Unpoly reads from a field](/custom-form-fields#contract).
 
     @param {string} [config.submitButtonSelectors]
       An array of CSS selectors that represent submit buttons, such as `input[type=submit]` or `button[type=submit]`.
@@ -233,11 +234,44 @@ up.form = (function() {
     return findFormElements(root, fieldSelector)
   }
 
-  // A form-associated custom element takes its name from the [name] attribute, which is all the
-  // browser needs — so it often exposes no { name } property. A native control always reflects
-  // the attribute into the property, so reading the attribute changes nothing for them.
-  function fieldName(field) {
+  // ALWAYS access a field's { name } and { disabled } state through the three functions below.
+  // Reading or writing the property or the attribute directly is wrong for at least one kind of
+  // field, and which one is wrong depends on the field — see /custom-form-fields#contract.
+  //
+  // Component authors declare properties that are fed from attributes and rarely reflected back
+  // (Lit advises reflecting "sparingly"), while a hand-rolled form-associated element declares
+  // nothing at all, because the browser reads its attributes itself. So the property holds the
+  // live value wherever one exists, and the attribute is where the platform guarantees one.
+  //
+  // Both fall back on *absence*, not falseness: a native reports name === '' and
+  // disabled === false, which are answers rather than gaps.
+
+  function readFieldName(field) {
     return field.name ?? field.getAttribute('name')
+  }
+
+  // A field's own disabled state. An ancestor <fieldset disabled> also disables a field for the
+  // browser, but Unpoly deliberately does not track that.
+  function readFieldDisabled(field) {
+    return field.disabled ?? field.hasAttribute('disabled')
+  }
+
+  // Write whichever spelling the control implements, never both:
+  //
+  // (1) A control that declares a { disabled } property is written through it. For a native
+  //     that also sets the attribute, since the property reflects.
+  // (2) A form-associated custom element gets no property from the platform, and assigning one
+  //     would *create* it — shadowing the attribute in readFieldDisabled() from then on. Its
+  //     attribute is the only thing that disables it anyway.
+  //
+  // Writing both would also let us remove an attribute we never set, for a control whose
+  // unreflected property disagrees with its markup.
+  function writeFieldDisabled(field, disabled) {
+    if ('disabled' in field) {
+      field.disabled = disabled
+    } else {
+      field.toggleAttribute('disabled', disabled)
+    }
   }
 
   // A browser only submits the button that was pressed. When there is no submitter we assume
@@ -572,15 +606,15 @@ up.form = (function() {
   function disableControlTemp(control) {
     // Ignore controls that were already disabled before us.
     // This way we don't accidentally re-enable a control that we didn't change.
-    if (control.disabled) return
+    if (readFieldDisabled(control)) return
 
     let focusFallback
     if (document.activeElement === control) {
       focusFallback = findGroup(control)
-      control.disabled = true
+      writeFieldDisabled(control, true)
       up.focus(focusFallback, { force: true, preventScroll: true })
     } else {
-      control.disabled = true
+      writeFieldDisabled(control, true)
     }
 
     // (1) This function is only returned if we didn't early-return above
@@ -589,7 +623,7 @@ up.form = (function() {
     //     selection or scroll position here. The up.form.disableTemp() function is *only*
     //     used via up.Preview#disable(), and previews already use a FocusCapsule
     //     to preserve and restore focus-related state.
-    return () => { control.disabled = false }
+    return () => writeFieldDisabled(control, false)
   }
 
   function getDisableContainers(disable, origin) {
@@ -621,7 +655,7 @@ up.form = (function() {
     // This function is much simpler than disableContainerTemp(), as we only require
     // it for [up-enable-for] / [up-disable-for].
     for (let control of findFieldsAndButtons(container)) {
-      control.disabled = disabled
+      writeFieldDisabled(control, disabled)
     }
   }
 
@@ -2372,7 +2406,9 @@ up.form = (function() {
     submitButtons: findSubmitButtons,
     defaultSubmitButton,
     assertFieldsInSameLayer,
-    fieldName,
+    readFieldName,
+    readFieldDisabled,
+    writeFieldDisabled,
     focusedField,
     // disableWhile,
     disableTemp: disableContainerTemp,

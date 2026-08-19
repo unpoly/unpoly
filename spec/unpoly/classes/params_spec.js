@@ -1048,6 +1048,31 @@ describe('up.Params', function() {
         ])
       })
 
+      it('ignores a form-associated custom element that is [disabled] but has no property', function() {
+        const [form] = htmlFixtureList(`
+          <form>
+            <test-attribute-named-field name="email" value="foo@example.com" disabled></test-attribute-named-field>
+            <input name="city" value="Berlin">
+          </form>
+        `)
+
+        expect(up.Params.fromContainer(form).toArray()).toEqual([
+          { name: 'city', value: 'Berlin' },
+        ])
+      })
+
+      it('includes it with { includeDisabled: true }', function() {
+        const [form] = htmlFixtureList(`
+          <form>
+            <test-attribute-named-field name="email" value="foo@example.com" disabled></test-attribute-named-field>
+          </form>
+        `)
+
+        expect(up.Params.fromContainer(form, { includeDisabled: true }).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+        ])
+      })
+
       it('ignores a configured custom element that is [disabled]', function() {
         up.form.config.fieldSelectors.push('test-form-field')
 

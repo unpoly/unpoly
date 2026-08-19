@@ -100,28 +100,38 @@ for free.
 Submission is all the browser can do for you. To also be watched, validated, switched or
 disabled, your element needs to be readable from a script:
 
-| What Unpoly reads | Needed for |
-|---|---|
-| the `[name]` attribute | every feature that identifies a field — no property required |
-| a `value` property | [watching](/up.watch), [validating](/validation), [switching](/switching-form-state) |
-| a `disabled` property | [disabling](/disabling-forms) |
+### What Unpoly reads from a field {#contract}
 
-A `value` getter is the one to remember: the browser reads your value through
-`setFormValue()`, which a script cannot read back, so without a getter your element is
-submitted but never watched.
+Submission is all the browser can do for you. To also be watched, validated, switched or
+disabled, your element must be readable from a script:
 
-For `disabled`, report the state the browser computed, so an ancestor `<fieldset disabled>`
-is covered too:
+| | Unpoly reads | Unpoly writes | You must provide |
+|---|---|---|---|
+| `value` | the property | never | **a getter** |
+| `name` | the property, else the `[name]` attribute | never | nothing |
+| `disabled` | the property, else the `[disabled]` attribute | whichever one you have | nothing |
 
-```js
-get disabled() {
-  return this.matches(':disabled')
-}
+**A `value` getter is the one thing to remember.** The browser reads your value through
+`setFormValue()`, which a script cannot read back — so without a getter your element is
+submitted correctly but never watched.
 
-set disabled(newDisabled) {
-  this.toggleAttribute('disabled', newDisabled)
-}
-```
+The other two need nothing from you, because of how component authoring actually works. Authors
+declare properties that are fed *from* attributes and rarely reflect them back, so the property
+holds the live value wherever one exists. A hand-rolled form-associated element declares nothing
+at all, and there the attribute is guaranteed — the browser reads it to name and disable your
+element. So Unpoly prefers the property and falls back to the attribute.
+
+Both fall back on *absence*, not falseness. A native field reports `name === ''` and
+`disabled === false`, which are answers rather than gaps.
+
+When Unpoly [disables a form](/disabling-forms) it writes whichever spelling your element
+implements, never both: the property if you declared one, otherwise the attribute. Assigning a
+property you never declared would create it, and it would shadow your attribute from then on.
+
+> [note]
+> Unpoly only looks at a field's own disabled state. A field inside a `<fieldset disabled>` is
+> omitted from a submission, because the browser omits it, but it is still reported to
+> [watchers](/up.watch).
 
 > [tip]
 > If your element's definition is loaded lazily, register its tag name in

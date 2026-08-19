@@ -33,6 +33,8 @@ Unpoly now builds a form's request params with the browser's own [form-data algo
 - ⚠️ Unpoly now throws an error when a field uses a `[form]` attribute to associate with a form in another [layer](/up.layer). The browser resolves such an attribute by document order and ignores layers, so it would submit one layer's field with another layer's form. If you render the same page into an overlay and it uses `[form]`, either give the form a unique `[id]` per layer, or move the field inside the form. Two forms sharing an `[id]` within a single layer are unaffected.
 - ⚠️ A field inside a `<fieldset disabled>` is no longer submitted or validated, but is still reported by [watchers](/up.watch) and [`[up-switch]`](/switching-form-state). Submission follows the browser, which omits it; watching reads the field's `{ disabled }` property, which an ancestor `<fieldset>` does not set.
 - A custom control that exposes a `{ name }` but no readable `{ value }` no longer contributes an `undefined` param when watched.
+- [Disabling a form](/disabling-forms) now also disables a form-associated custom element. Such an element gets no `{ disabled }` property from the platform, so Unpoly writes its `[disabled]` attribute instead, and reads the attribute when no property exists.
+- ⚠️ The contract for a [custom form field](/custom-form-fields#contract) is now stated in terms of what Unpoly reads, rather than requiring `{ name, value, disabled }` properties. A `value` getter is the only thing a custom control must provide: `name` and `disabled` are read from the property if there is one, and from the attribute otherwise.
 
 
 3.14.3
