@@ -852,6 +852,39 @@ describe('up.Params', function() {
         ])
       })
 
+      it('prefers a { name } property over the [name] attribute', function() {
+        up.form.config.fieldSelectors.push('test-form-field')
+
+        const [form, field] = htmlFixtureList(`
+          <form>
+            <test-form-field name="from-attribute" value="foo@example.com"></test-form-field>
+          </form>
+        `)
+        // A component that does not reflect its property, then has it changed by a script.
+        Object.defineProperty(field, 'name', { configurable: true, get() { return 'from-property' } })
+
+        expect(up.Params.fromContainer(form).toArray()).toEqual([
+          { name: 'from-property', value: 'foo@example.com' },
+        ])
+      })
+
+      it('prefers a { disabled } property over the [disabled] attribute', function() {
+        up.form.config.fieldSelectors.push('test-form-field')
+
+        const [form, field] = htmlFixtureList(`
+          <form>
+            <test-form-field name="email" value="foo@example.com" disabled></test-form-field>
+          </form>
+        `)
+        // The property says enabled while the markup still says otherwise. The property is the
+        // author's intent, so the field takes part.
+        Object.defineProperty(field, 'disabled', { configurable: true, get() { return false } })
+
+        expect(up.Params.fromContainer(form).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+        ])
+      })
+
       it('serializes a form-associated custom element that has no { name } property', function() {
         // The browser reads the [name] attribute, so a custom element has no reason to expose
         // a property for it. Unpoly's own field walking must fall back to the attribute.

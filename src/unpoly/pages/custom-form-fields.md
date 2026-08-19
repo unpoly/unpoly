@@ -10,8 +10,8 @@ reaches the server, and in how much Unpoly needs to know about your control.
 | Pattern | Submitted | Watched, validated, switched, disabled |
 |---|---|---|
 | [A hidden native field](#hidden-field) | Yes | Yes |
-| [A form-associated custom element](#form-associated) | Yes | With a `{ value }` property |
-| [A configured custom element](#configured) | Yes | Yes |
+| [A form-associated custom element](#form-associated) | Yes | With a `value` getter |
+| [A configured custom element](#configured) | Yes | With a `value` getter |
 | [A `formdata` listener](#formdata) | Yes | No |
 
 If you can keep a native field in the form, do. It is the only pattern where nothing about
@@ -97,13 +97,12 @@ for free.
 > A form-associated element is only submitted if it calls `setFormValue()`. Declaring
 > `formAssociated` alone makes the browser aware of your element, but with no value to send.
 
-Submission is all the browser can do for you. To also be watched, validated, switched or
-disabled, your element needs to be readable from a script:
 
-### What Unpoly reads from a field {#contract}
+## What Unpoly reads from a field {#contract}
 
 Submission is all the browser can do for you. To also be watched, validated, switched or
-disabled, your element must be readable from a script:
+disabled, your element must be readable from a script. This applies to every kind of custom
+field, however it takes part in a submission.
 
 | | Unpoly reads | Unpoly writes | You must provide |
 |---|---|---|---|
@@ -128,10 +127,16 @@ When Unpoly [disables a form](/disabling-forms) it writes whichever spelling you
 implements, never both: the property if you declared one, otherwise the attribute. Assigning a
 property you never declared would create it, and it would shadow your attribute from then on.
 
+The same rule cuts the other way when re-enabling. If your element declares an unreflected
+`disabled` property and its markup also carries `[disabled]`, Unpoly writes only the property
+and leaves the attribute alone — it never removes an attribute it did not set. Your element will
+report itself enabled while any CSS keyed on `[disabled]` still applies, so reflect the property
+if you style from the attribute.
+
 > [note]
 > Unpoly only looks at a field's own disabled state. A field inside a `<fieldset disabled>` is
 > omitted from a submission, because the browser omits it, but it is still reported to
-> [watchers](/up.watch).
+> [watchers](/up.watch) and to [`[up-switch]`](/switching-form-state).
 
 > [tip]
 > If your element's definition is loaded lazily, register its tag name in
@@ -141,8 +146,8 @@ property you never declared would create it, and it would shadow your attribute 
 
 ## A configured custom element {#configured}
 
-A custom element that is *not* form-associated can still take part, if you tell Unpoly what
-to look for and expose the three properties above:
+A custom element that is *not* form-associated can still take part, if you tell Unpoly what to
+look for and make its state readable [as described above](#contract):
 
 ```js
 up.form.config.fieldSelectors.push('date-picker')

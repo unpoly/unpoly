@@ -243,8 +243,11 @@ up.form = (function() {
   // nothing at all, because the browser reads its attributes itself. So the property holds the
   // live value wherever one exists, and the attribute is where the platform guarantees one.
   //
-  // Both fall back on *absence*, not falseness: a native reports name === '' and
-  // disabled === false, which are answers rather than gaps.
+  // readFieldName() falls back on *absence*, not falseness: a native reports name === '', which
+  // is an answer rather than a gap.
+  //
+  // A field's { value } needs no accessor: the property is the only source there is, and
+  // up.Params#addField() is the only place that reads it.
 
   function readFieldName(field) {
     return field.name ?? field.getAttribute('name')
@@ -252,25 +255,33 @@ up.form = (function() {
 
   // A field's own disabled state. An ancestor <fieldset disabled> also disables a field for the
   // browser, but Unpoly deliberately does not track that.
+  // This asks the same question as writeFieldDisabled() below — does the field implement a
+  // property at all — so that the two can never disagree about which spelling is authoritative.
   function readFieldDisabled(field) {
-    return field.disabled ?? field.hasAttribute('disabled')
+    return 'disabled' in field ? field.disabled : field.hasAttribute('disabled')
   }
 
-  // Write whichever spelling the control implements, never both:
+  // Write whichever spelling the control implements. We never issue both writes, although the
+  // platform may reflect one into the other for a native control.
   //
-  // (1) A control that declares a { disabled } property is written through it. For a native
-  //     that also sets the attribute, since the property reflects.
+  // (1) A control that declares a { disabled } property is written through it.
   // (2) A form-associated custom element gets no property from the platform, and assigning one
   //     would *create* it — shadowing the attribute in readFieldDisabled() from then on. Its
   //     attribute is the only thing that disables it anyway.
   //
   // Writing both would also let us remove an attribute we never set, for a control whose
   // unreflected property disagrees with its markup.
+  // Returns a function that undoes this write with the same spelling. Deciding again at undo
+  // time could straddle a custom element upgrade: we would disable a not-yet-defined element
+  // through its attribute, and re-enable it through a property that only just appeared,
+  // leaving our attribute behind for good.
   function writeFieldDisabled(field, disabled) {
     if ('disabled' in field) {
       field.disabled = disabled
+      return () => { field.disabled = !disabled }
     } else {
       field.toggleAttribute('disabled', disabled)
+      return () => field.toggleAttribute('disabled', !disabled)
     }
   }
 
@@ -608,13 +619,14 @@ up.form = (function() {
     // This way we don't accidentally re-enable a control that we didn't change.
     if (readFieldDisabled(control)) return
 
+    let undoDisable
     let focusFallback
     if (document.activeElement === control) {
       focusFallback = findGroup(control)
-      writeFieldDisabled(control, true)
+      undoDisable = writeFieldDisabled(control, true)
       up.focus(focusFallback, { force: true, preventScroll: true })
     } else {
-      writeFieldDisabled(control, true)
+      undoDisable = writeFieldDisabled(control, true)
     }
 
     // (1) This function is only returned if we didn't early-return above
@@ -623,7 +635,7 @@ up.form = (function() {
     //     selection or scroll position here. The up.form.disableTemp() function is *only*
     //     used via up.Preview#disable(), and previews already use a FocusCapsule
     //     to preserve and restore focus-related state.
-    return () => writeFieldDisabled(control, false)
+    return undoDisable
   }
 
   function getDisableContainers(disable, origin) {

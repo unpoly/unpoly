@@ -8,6 +8,25 @@ extendDescribe('up.form', function() {
 
       describe('custom form fields', function() {
 
+        it('disables a form-associated custom element with [up-disable-for]', async function() {
+          const [form, field, target] = htmlFixtureList(`
+            <form>
+              <input name="mode" up-switch=".target" value="inactive">
+              <test-attribute-named-field class="target" name="email" value="foo@example.com" up-disable-for="active"></test-attribute-named-field>
+            </form>
+          `)
+          up.hello(form)
+          await wait()
+
+          expect(target).not.toBeDisabled()
+
+          field.value = 'active'
+          Trigger.change(field)
+          await wait()
+
+          expect(target).toBeDisabled()
+        })
+
         it('switches on a form-associated custom element without configuration', async function() {
           const [form, field, target] = htmlFixtureList(`
             <form>

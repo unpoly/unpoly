@@ -95,9 +95,11 @@ up.EventListener = class EventListener extends up.Record {
 
       // Do not allow click events from disabled elements to propagate.
       //
-      // This deliberately does not use up.form.readFieldDisabled(): the question here is
-      // whether an element is inert, not whether it is a form field, and up.form depends on
-      // this class rather than the other way around.
+      // This deliberately does not use up.form.readFieldDisabled(): the question here is whether
+      // an element is inert, not whether it is a form field. The platform already suppresses
+      // clicks on anything it considers disabled — including a form-associated custom element —
+      // so the property is the right signal, and reading the attribute would newly swallow
+      // clicks from any element that carries [disabled] only for styling.
       if (this.eventType === 'click' && element.disabled) {
         return
       }

@@ -1174,6 +1174,53 @@ describe('up.form', function() {
 
       describe('custom form fields', function() {
 
+        it('does not also set the [disabled] attribute on a control that has a property', function() {
+          up.form.config.fieldSelectors.push('test-form-field')
+
+          const [form, field] = htmlFixtureList(`
+            <form>
+              <test-form-field name="email" value="foo@example.com"></test-form-field>
+            </form>
+          `)
+
+          up.form.disableTemp(form)
+
+          // The element's own property is unreflected, so an attribute here could only have
+          // come from us — and writing both spellings is what we must not do.
+          expect(field.disabled).toBe(true)
+          expect(field.hasAttribute('disabled')).toBe(false)
+        })
+
+        it('undoes a disable with the spelling it used, even if the field gains a property meanwhile', function() {
+          // A custom element whose definition arrives late starts out with no { disabled }
+          // property, so it is disabled through its attribute. If it is upgraded before the
+          // preview ends, deciding the spelling again would re-enable it through the property
+          // and leave our attribute behind for good.
+          const [form, field] = htmlFixtureList(`
+            <form>
+              <test-attribute-named-field name="email" value="foo@example.com"></test-attribute-named-field>
+            </form>
+          `)
+
+          const reenable = up.form.disableTemp(form)
+          expect(field.hasAttribute('disabled')).toBe(true)
+
+          // The definition arrives and the element gains the property it never had. Its own
+          // state is whatever the component decided, which is not ours to change.
+          let disabled = false
+          Object.defineProperty(field, 'disabled', {
+            configurable: true,
+            get() { return disabled },
+            set(newDisabled) { disabled = newDisabled },
+          })
+
+          reenable()
+
+          // We must remove the attribute we set, rather than write the property that appeared.
+          expect(field.hasAttribute('disabled')).toBe(false)
+          expect(up.form.readFieldDisabled(field)).toBe(false)
+        })
+
         it('does not create a { disabled } property on an element that has none', function() {
           // Assigning the property would create it, and it would shadow the attribute in
           // every later read — so a field the author disables afterwards would look enabled.
