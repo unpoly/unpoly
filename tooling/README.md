@@ -134,7 +134,7 @@ plugin arms itself on `watchRun` (watch-only) and ignores `done` until then, bec
 plugin included — so `bin/build --config=ci` used to overwrite a running watcher's
 status with its own pid, and every reader then concluded the environment was gone.
 
-Transient files (`build-status.json`, any `.pid`) belong in the gitignored `tmp/`.
+Transient files (`build-status.json`, any `.pid`, any `.log`) belong in the gitignored `tmp/`.
 
 ## Output
 
@@ -186,6 +186,23 @@ process manager. The rules, in one place:
   one process, orphan the descendants, and report success. The supervisor removes
   `tmp/dev.pid` as it exits, so a wedged one stays reachable for a second
   `bin/dev stop`; a file left by a SIGKILLed one is inert (see below).
+- **One log.** The supervisor writes `tmp/dev.log` itself rather than having its stdio
+  redirected into it, so the log lands in the same place however the environment was
+  started. It used to exist only on the background path, which made "read `tmp/dev.log`"
+  advice that worked or not depending on who had started what — a coin flip a human shrugs
+  off and an agent cannot. Every line goes to two sinks, because their readers differ: the
+  terminal keeps colors, the file does not. Colors are for the human watching a build; in a
+  file they only cost tokens and wreck field splitting — the label sits between the
+  timestamp and the text, so `awk '{print $2}'` yields `\x1b[36mwatch` and an exact label
+  match never fires. Only child text is stripped — our labels come in two variants, so we never
+  colorize and undo it. Children are *asked* for colors (`FORCE_COLOR`) only when there is a
+  terminal to show them on, and `NO_COLOR` still wins; they are piped, so otherwise they
+  turn their own colors off and webpack's coloured errors were being thrown away even with a
+  human watching. `DEV_ENV_BACKGROUND` tells a background supervisor it has no terminal:
+  without it, its terminal sink *is* the file its raw stdio points at, and every line lands
+  twice (169 lines in each, measured). The timestamp comes from the supervisor, since
+  third-party children cannot be made to agree on a format — WEBrick stamps its own, webpack
+  stamps nothing — though it marks when the pipe delivered, not when the child spoke.
 - **One decision about state**: `devEnvState()` → `running` · `booting` · `foreign` ·
   `unidentified` · `none`. Everything — `bin/dev`, `runDev()`, `stopDevEnv()` — asks it
   and switches on the answer. Nothing else reads `tmp/dev.pid`, and two rules make its
@@ -243,3 +260,6 @@ suite. What's covered today:
   `--migrate`), and that a watcher-built `dist` leaves nothing to report.
 - `build_sync`: dead pid / missing file / stale / fresh / timeout, with an injected clock.
 - `receiver`: canned event arrays → captured output + exit code.
+- `dev_env`: the state machine, the start lock, pid-file identity — plus `createLog`: both
+  sinks reached, escapes stripped from the file only, one timestamp shared by both lines,
+  truncation per session, and `terminal: false` writing the file alone.

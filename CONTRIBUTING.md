@@ -19,10 +19,11 @@ you need, not so you can skip it.
 
 > Tests don't run against `src/` directly, but against a transpiled
 > build in `dist/`.\
-> The `bin/dev` tool boots a build watcher, a test server and the documentation site.
+> The `bin/dev` tool boots a build watcher, a test server and the documentation site.\
+> Everything they print lands in `tmp/dev.log`, however the environment was started.
 
 [Read the dev environment guide](docs/contributing/dev-environment.md) before trying out your changes,
-or when you suspect a stale build.
+when you suspect a stale build, or when you need to see what a service actually did.
 
 
 ### [🎓 Philosophy](docs/contributing/philosophy.md)

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { closeSync, mkdtempSync, readFileSync, rmSync, writeSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { devEnvState, isSupervisor, lastBuildErrors, startUnderLock, withStartLock } from '../dev_env.mjs'
+import { createLog, devEnvState, isSupervisor, lastBuildErrors, startUnderLock, withStartLock } from '../dev_env.mjs'
 
 const SERVING = async () => true
 const SILENT = async () => false
@@ -161,7 +161,106 @@ test('nothing is touched when an environment already exists', async () => {
 
 test('the supervisor is spawned as node <dev_env.mjs> with no extra arguments', () => {
   // isSupervisor() matches argv[1] exactly, so a node flag added to this spawn would
-  // make every running environment unidentifiable — and unstoppable.
+  // make every running environment unidentifiable — and unstoppable. Only argv is pinned:
+  // the options object grew an `env` (see DEV_ENV_BACKGROUND) and may grow again.
   const source = readFileSync(new URL('../dev_env.mjs', import.meta.url), 'utf8')
-  assert.match(source, /spawn\(process\.execPath, \[SUPERVISOR\], \{ detached: true, stdio \}\)/)
+  assert.match(source, /spawn\(process\.execPath, \[SUPERVISOR\], \{ detached: true,/)
+})
+
+
+// --- Logging: one line, two sinks ------------------------------------------
+
+const sink = () => ({ lines: [], write(text) { this.lines.push(text) } })
+
+function logInto() {
+  const dir = mkdtempSync(path.join(tmpdir(), 'unpoly-devlog-'))
+  const file = path.join(dir, 'dev.log')
+  const out = sink()
+  const log = createLog({ file, now: () => '09:32:06.123' })
+  return { log, out, read: () => readFileSync(file, 'utf8'), cleanup: () => rmSync(dir, { recursive: true, force: true }) }
+}
+
+const LABELS = { color: '\x1b[36mwatch |\x1b[39m', plain: 'watch |' }
+
+test('a line reaches both the terminal and the log file', () => {
+  const { log, out, read, cleanup } = logInto()
+  try {
+    log.write(LABELS, 'compiled 3 modules', out)
+    log.close()
+    assert.equal(out.lines.length, 1)
+    assert.match(out.lines[0], /compiled 3 modules/)
+    assert.match(read(), /compiled 3 modules/)
+  } finally { cleanup() }
+})
+
+test('the terminal keeps colors and the log file does not', () => {
+  const { log, out, read, cleanup } = logInto()
+  try {
+    // Child text carrying its own escapes is the case that needs stripping — our labels
+    // are composed per sink, so they are never colorized and undone.
+    log.write(LABELS, '\x1b[31mERROR\x1b[39m in ./src/unpoly/link.js', out)
+    log.close()
+    assert.ok(out.lines[0].includes('\x1b['), 'terminal line should keep its escapes')
+    assert.ok(!read().includes('\x1b['), 'log file should hold no escapes')
+    assert.match(read(), /ERROR in \.\/src\/unpoly\/link\.js/)
+  } finally { cleanup() }
+})
+
+test('the log file gets the plain label, so `grep \'^watch\'` anchors', () => {
+  const { log, out, read, cleanup } = logInto()
+  try {
+    log.write(LABELS, 'ok', out)
+    log.close()
+    // The timestamp comes first, then the unadorned label — no escapes in between.
+    assert.match(read(), /^09:32:06\.123 watch \| ok$/m)
+  } finally { cleanup() }
+})
+
+test('both sinks carry the same timestamp for the same line', () => {
+  // Two calls to the clock can straddle a millisecond, which would report one line as
+  // two different moments depending on which sink you read.
+  let ticks = 0
+  const dir = mkdtempSync(path.join(tmpdir(), 'unpoly-devlog-'))
+  const file = path.join(dir, 'dev.log')
+  const out = sink()
+  const log = createLog({ file, now: () => `t${++ticks}` })
+  try {
+    log.write(LABELS, 'ok', out)
+    log.close()
+    assert.equal(ticks, 1)
+    assert.match(out.lines[0], /^t1 /)
+    assert.match(readFileSync(file, 'utf8'), /^t1 /)
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+test('opening the log truncates it, so a session log is that session', () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'unpoly-devlog-'))
+  const file = path.join(dir, 'dev.log')
+  const stale = createLog({ file, now: () => 'old' })
+  stale.write(LABELS, 'yesterday', sink())
+  stale.close()
+
+  const fresh = createLog({ file, now: () => 'new' })
+  fresh.write(LABELS, 'today', sink())
+  fresh.close()
+  try {
+    const text = readFileSync(file, 'utf8')
+    assert.ok(!text.includes('yesterday'), 'previous session should be gone')
+    assert.match(text, /today/)
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+test('terminal: false writes the log only', () => {
+  // The background supervisor's stdout and stderr *are* files, so writing the terminal
+  // sink there duplicated the whole log into tmp/dev-crash.log — 169 lines in each.
+  const dir = mkdtempSync(path.join(tmpdir(), 'unpoly-devlog-'))
+  const file = path.join(dir, 'dev.log')
+  const out = sink()
+  const log = createLog({ file, now: () => 'at', terminal: false })
+  try {
+    log.write(LABELS, 'compiled', out)
+    log.close()
+    assert.deepEqual(out.lines, [])
+    assert.match(readFileSync(file, 'utf8'), /^at watch \| compiled$/m)
+  } finally { rmSync(dir, { recursive: true, force: true }) }
 })

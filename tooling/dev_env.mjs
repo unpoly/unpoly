@@ -39,6 +39,13 @@ const PROJECT_ROOT = path.dirname(path.dirname(SUPERVISOR))
 // build_status.mjs), so `bin/test` works from a subdirectory too.
 const PID_FILE = path.join(PROJECT_ROOT, 'tmp/dev.pid')
 const LOG_FILE = path.join(PROJECT_ROOT, 'tmp/dev.log')
+// Not a second log: where a supervisor's *raw* stdout and stderr go when it runs in the
+// background. Almost always empty — the supervisor writes tmp/dev.log itself (see
+// createLog()), so this only catches what never reached the log writer — an import error, a syntax slip in this very
+// file — which would otherwise vanish and leave `bin/test` reporting a start that failed
+// for no stated reason. It cannot be tmp/dev.log itself: two writers holding independent
+// offsets on one file interleave into garbage.
+const CRASH_LOG_FILE = path.join(PROJECT_ROOT, 'tmp/dev-crash.log')
 // Held only while a start is in progress, to serialise concurrent starts. Not a
 // service: nothing ever connects to it.
 const START_LOCK_PORT = 4099
@@ -129,9 +136,9 @@ export async function startUnderLock(openStdio, { probe = devEnvState, spawnIt =
   // and a start that turns back here would otherwise wipe a live environment's log. The
   // lock does not help with that: a winner releases it in milliseconds and then boots
   // for ~15s, during which a second `bin/test` sees 'booting' and turns back right here.
-  const { stdio, close } = openStdio()
+  const { stdio, env, close } = openStdio()
   try {
-    const supervisor = spawnIt(stdio, claim)
+    const supervisor = spawnIt(stdio, claim, env)
     if (readPidFile(file) !== supervisor.pid) {
       killGroup(supervisor.pid)
       throw new Error(`${file} changed while starting. Try again.`)
@@ -142,14 +149,30 @@ export async function startUnderLock(openStdio, { probe = devEnvState, spawnIt =
   }
 }
 
-// `bin/test` sends the supervisor's output to tmp/dev.log; `bin/dev` inherits the
-// terminal. Both are opened lazily, so a start that never gets going touches nothing.
+// Where the supervisor's *raw* stdio goes: a boot log in the background, this terminal
+// under `bin/dev`. Neither is the environment's log — the supervisor writes that itself,
+// to the same path either way. Opened lazily, so a start that never gets going touches
+// nothing.
 const backgroundStdio = () => {
-  const logFd = openSync(LOG_FILE, 'w')
-  return { stdio: ['ignore', logFd, logFd], close: () => closeSync(logFd) }
+  const logFd = openSync(CRASH_LOG_FILE, 'w')
+  // Truncate the real log too. The supervisor truncates it when it opens it, but if it
+  // dies before that, tail() would hand the failure message the *previous* session's
+  // lines and blame them for this start.
+  closeSync(openSync(LOG_FILE, 'w'))
+  // Both stdout and stderr, so nothing written outside the log writer can be lost. That is
+  // only safe because DEV_ENV_BACKGROUND turns the supervisor's terminal sink off: while it
+  // was on, its sink *was* these fds and every line got duplicated into this file (169
+  // lines in each, measured). We pass the flag rather than checking isTTY in the supervisor
+  // because the parent knows — it chose the stdio — and guessing would also silence
+  // `bin/dev | tee`, where the human still wants output.
+  //
+  // In practice this file stays empty: everything the supervisor prints goes through
+  // createLog(). What lands here died before that existed — an import error, a syntax slip
+  // in this very file — or bypassed it.
+  return { stdio: ['ignore', logFd, logFd], env: { DEV_ENV_BACKGROUND: '1' }, close: () => closeSync(logFd) }
 }
 
-const foregroundStdio = () => ({ stdio: 'inherit', close: () => {} })
+const foregroundStdio = () => ({ stdio: 'inherit', env: {}, close: () => {} })
 
 // Resolves when the watcher has finished a build it started *after* the spawn and
 // the server answers — so a stale tmp/build-status.json can't satisfy us.
@@ -169,7 +192,7 @@ function waitUntilReady(supervisor) {
       if (settled) return
       finish()
       killGroup(supervisor.pid) // don't leak the environment we just started
-      reject(new Error(`${message}\n${tail(LOG_FILE)}`))
+      reject(new Error(`${message}\n${tail(LOG_FILE) || tail(CRASH_LOG_FILE)}`))
     }
 
     const onExit = (code) => fail(`The dev environment exited (code ${code}) before it was ready.`)
@@ -292,8 +315,8 @@ async function waitForExit(pid, { grace = SHUTDOWN_GRACE, poll = 100 } = {}) {
 // do it, because the pid must land while the start lock is still held. A file left behind
 // by a SIGKILLed supervisor is harmless: devEnvState() ignores a pid that is dead *or*
 // no longer a supervisor, and the next start clears it under the lock.
-function spawnSupervisor(stdio, claim) {
-  const supervisor = spawn(process.execPath, [SUPERVISOR], { detached: true, stdio })
+function spawnSupervisor(stdio, claim, env = {}) {
+  const supervisor = spawn(process.execPath, [SUPERVISOR], { detached: true, stdio, env: { ...process.env, ...env } })
   // A launch failure (EAGAIN, ENOMEM) is reported asynchronously and leaves pid
   // undefined. Claim it here so it cannot resurface later as an uncaught exception;
   // waitUntilReady() reports it through the 'exit' it also raises.
@@ -360,8 +383,9 @@ function killGroup(pid, signal = 'SIGTERM') {
 // Runs the process table and stays alive until it is signalled or a required
 // process dies. Runs in the child spawned by spawnSupervisor(), never in-process.
 function superviseDevEnv() {
+  // Before the filter, so that shouldRun()'s "skipping X" notes are logged too.
+  devLog = createLog({ terminal: !process.env.DEV_ENV_BACKGROUND })
   const processes = PROCESSES.filter(shouldRun)
-  const width = Math.max(...processes.map((proc) => proc.name.length))
   const children = []
   let stopping = false
 
@@ -380,6 +404,7 @@ function superviseDevEnv() {
       if (!children.every(hasExited) && !timedOut) return
       clearInterval(wait)
       if (readPidFile() === process.pid) clearPidFile() // before SIGKILL, which hits us too
+      devLog.close()
       if (timedOut) killGroup(process.pid, 'SIGKILL')
       process.exit(code)
     }, 50)
@@ -389,10 +414,13 @@ function superviseDevEnv() {
     const child = spawn(proc.command, {
       shell: true,
       cwd: proc.cwd ? path.resolve(proc.cwd) : PROJECT_ROOT,
-      env: { ...process.env, ...proc.env },
+      // Children are piped, so they see no terminal and turn their own colors off —
+      // which silently cost us webpack's coloured errors even when a human was watching.
+      // proc.env stays last so a process can still overrule us.
+      env: { ...process.env, ...(wantColor() ? { FORCE_COLOR: '1' } : {}), ...proc.env },
       stdio: ['ignore', 'pipe', 'pipe'],
     })
-    prefixOutput(child, label(proc.name, index, width))
+    prefixOutput(child, labelsFor(proc.name, LABEL_COLORS[index % LABEL_COLORS.length]), devLog)
     child.on('exit', (code) => {
       if (stopping) return
       if (isOptional(proc)) {
@@ -422,23 +450,76 @@ function shouldRun(proc) {
   return false
 }
 
-const LABEL_COLORS = [pc.cyan, pc.magenta, pc.yellow, pc.green]
+// --- Logging ---------------------------------------------------------------
+//
+// Every line the supervisor emits goes to two sinks: its own stdout (your terminal, under
+// `bin/dev`) and tmp/dev.log. The supervisor writes that file itself rather than having
+// its stdio redirected into it, which is what makes the log land in the same place however
+// the environment was started. It used to exist only on the background path, so "read
+// tmp/dev.log" was advice that worked or didn't depending on who had started what — a
+// coin flip a human can shrug off and an agent cannot.
+//
+// The terminal keeps colors and the file does not, because their readers differ: colors
+// are for the human watching a build, and in a file they only cost tokens and break
+// `grep '^watch'`, whose whole point is isolating one service. Stripping applies to child
+// text alone — our own labels come in two variants, so we never colorize and undo it.
 
-const label = (name, index, width) => LABEL_COLORS[index % LABEL_COLORS.length](`${name.padEnd(width)} |`)
+const ANSI = /\x1b\[[0-9;]*[A-Za-z]/g
+
+const LABEL_COLORS = [pc.cyan, pc.magenta, pc.yellow, pc.green]
+// Padded from the full table, not from the processes that happen to be running, so the
+// columns don't shift depending on which sibling repositories are checked out.
+const LABEL_WIDTH = Math.max(...PROCESSES.map((proc) => proc.name.length), 'dev'.length)
+
+const labelsFor = (name, color) => ({ color: color(`${name.padEnd(LABEL_WIDTH)} |`), plain: `${name.padEnd(LABEL_WIDTH)} |` })
+const DEV_LABELS = labelsFor('dev', pc.blue)
+
+// Whether to ask children for colors. Only worth it when a human is watching: with no
+// terminal there is nobody to see them and we would strip them straight back out. Our own
+// labels need no such check — picocolors makes the same call for itself.
+const wantColor = () => Boolean(process.stdout.isTTY) && !process.env.NO_COLOR
+
+const timestamp = (now = new Date()) => `${now.toTimeString().slice(0, 8)}.${String(now.getMilliseconds()).padStart(3, '0')}`
+
+// Opens the log and returns the write-to-both function. Truncates: a session's log should
+// be that session, or "read the log" makes an agent wade through yesterday's run first.
+// `terminal: false` drops the terminal sink — the background supervisor has no terminal,
+// only files, and writing to them here would duplicate the log into them.
+export function createLog({ file = LOG_FILE, now = timestamp, terminal = true } = {}) {
+  ensureTmp()
+  const fd = openSync(file, 'w')
+  return {
+    // One timestamp per line, computed once — two calls can straddle a millisecond, and
+    // then the same line reads as two different moments in the two sinks.
+    write(labels, line, out = process.stdout) {
+      const at = now()
+      if (terminal) out.write(`${at} ${labels.color} ${line}\n`)
+      writeSync(fd, `${at} ${labels.plain} ${line.replace(ANSI, '')}\n`)
+    },
+    close: () => closeSync(fd),
+  }
+}
+
+// Set by the supervisor. Parent-side callers (bin/dev, and spawnSupervisor's error
+// handler) have no log of their own and fall back to the console.
+let devLog = null
 
 // Prefixes each line a child prints with its name, so one stream stays readable.
-function prefixOutput(child, label) {
+function prefixOutput(child, labels, log) {
   for (const [stream, out] of [[child.stdout, process.stdout], [child.stderr, process.stderr]]) {
     let rest = ''
     stream.on('data', (chunk) => {
       const lines = (rest + chunk).split('\n')
       rest = lines.pop()
-      for (const line of lines) out.write(`${label} ${line}\n`)
+      for (const line of lines) log.write(labels, line, out)
     })
   }
 }
 
-const note = (message) => console.log(pc.blue(`dev | ${message}`))
+function note(message) {
+  if (devLog) return devLog.write(DEV_LABELS, message)
+  console.log(pc.blue(`dev | ${message}`))
+}
 
 // --- Small helpers ---------------------------------------------------------
 
