@@ -120,6 +120,68 @@ extendDescribe('up.form', function() {
         })
       })
 
+      describe('custom form fields', function() {
+
+        it('submits a form-associated custom element without configuration', async function() {
+          const [form] = htmlFixtureList(`
+            <form action="/action" method="post">
+              <test-form-associated-element name="email" value="foo@example.com"></test-form-associated-element>
+            </form>
+          `)
+
+          up.submit(form)
+          await wait()
+
+          expect(jasmine.lastRequest().data()).toMatchParams({ email: 'foo@example.com' })
+        })
+
+        it('submits a custom element that is configured in up.form.config.fieldSelectors', async function() {
+          up.form.config.fieldSelectors.push('test-form-field')
+
+          const [form] = htmlFixtureList(`
+            <form action="/action" method="post">
+              <test-form-field name="email" value="foo@example.com"></test-form-field>
+            </form>
+          `)
+
+          up.submit(form)
+          await wait()
+
+          expect(jasmine.lastRequest().data()).toMatchParams({ email: 'foo@example.com' })
+        })
+
+        it('submits the native field that a custom control keeps hidden and synced', async function() {
+          const [form] = htmlFixtureList(`
+            <form action="/action" method="post">
+              <select name="size" hidden>
+                <option value="S">S</option>
+                <option value="M" selected>M</option>
+              </select>
+            </form>
+          `)
+
+          up.submit(form)
+          await wait()
+
+          expect(jasmine.lastRequest().data()).toMatchParams({ size: 'M' })
+        })
+
+        it('submits values added by a formdata event listener', async function() {
+          const [form] = htmlFixtureList(`
+            <form action="/action" method="post">
+              <input name="email" value="foo@example.com">
+            </form>
+          `)
+          form.addEventListener('formdata', (event) => event.formData.append('csrf', 'token'))
+
+          up.submit(form)
+          await wait()
+
+          expect(jasmine.lastRequest().data()).toMatchParams({ email: 'foo@example.com', csrf: 'token' })
+        })
+
+      })
+
       describe('when the server responds with an error', function() {
 
         it('replaces the form', async function() {
@@ -546,11 +608,43 @@ extendDescribe('up.form', function() {
           expect(jasmine.lastRequest().requestHeaders['Content-Type']).toEqual('application/x-www-form-urlencoded')
         })
 
-        it('defaults to multipart/form-data in a form with file inputs', async function() {
+        it('defaults to multipart/form-data in a form with a file input', async function() {
+          const [form, input] = htmlFixtureList(`
+            <form action="/path" method="post">
+              <input type="file" name="file-input">
+            </form>
+          `)
+          const transfer = new DataTransfer()
+          transfer.items.add(new File(['data'], 'data.txt', { type: 'text/plain' }))
+          input.files = transfer.files
+
+          up.submit(form)
+
+          await wait()
+
+          expect(jasmine.lastRequest().requestHeaders['Content-Type']).toBeMissing()
+          expect(jasmine.lastRequest().params).toEqual(jasmine.any(FormData))
+        })
+
+        it('defaults to multipart/form-data in a form with an empty file input', async function() {
+          // The browser's form-data algorithm produces an entry even for a file input with
+          // no selected file. Because that entry is binary, the form is sent as multipart.
+          const [form] = htmlFixtureList(`
+            <form action="/path" method="post">
+              <input type="file" name="file-input">
+            </form>
+          `)
+
+          up.submit(form)
+
+          await wait()
+
+          expect(jasmine.lastRequest().requestHeaders['Content-Type']).toBeMissing()
+        })
+
+        it('defaults to multipart/form-data when a binary param is passed explicitly', async function() {
           const form = fixture('form[action="/path"][method=post]')
 
-          // Since this test cannot programmatically append an <input type="file"> with
-          // a value, we pass a binary param with the { params } option.
           const params = { 'file-input': new Blob(['data']) }
           up.submit(form, { params })
 

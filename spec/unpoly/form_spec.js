@@ -102,6 +102,42 @@ describe('up.form', function() {
 
     describe('up.form.fields()', function() {
 
+      describe('custom form fields', function() {
+
+        it('includes a custom element that is configured in up.form.config.fieldSelectors', function() {
+          up.form.config.fieldSelectors.push('test-form-field')
+
+          const [form, field] = htmlFixtureList(`
+            <form>
+              <test-form-field name="email" value="foo@example.com"></test-form-field>
+            </form>
+          `)
+
+          expect(up.form.fields(form)).toMatchList([field])
+        })
+
+        it('does not include a custom element that is not configured', function() {
+          const [form] = htmlFixtureList(`
+            <form>
+              <test-form-field name="email" value="foo@example.com"></test-form-field>
+            </form>
+          `)
+
+          expect(up.form.fields(form)).toMatchList([])
+        })
+
+        it("includes a configured custom element outside the form with a [form] attribute matching the form's ID", function() {
+          up.form.config.fieldSelectors.push('test-form-field')
+
+          const [form] = htmlFixtureList('<form id="form-id"></form>')
+          const [outside] = htmlFixtureList('<test-form-field name="email" value="foo@example.com" form="form-id"></test-form-field>')
+
+          expect(up.form.fields(form)).toMatchList([outside])
+        })
+
+      })
+
+
       it('returns a list of form fields within the given element', function() {
         const form = fixture('form')
         const textField = e.affix(form, 'input[name=email][type=text]')
@@ -1098,6 +1134,55 @@ describe('up.form', function() {
     require('./form_validate_fn_spec')
 
     describe('up.form.disableTemp()', function() {
+
+      describe('custom form fields', function() {
+
+        it('disables a configured custom element through its { disabled } property', function() {
+          up.form.config.fieldSelectors.push('test-form-field')
+
+          const [form, field] = htmlFixtureList(`
+            <form>
+              <test-form-field name="email" value="foo@example.com"></test-form-field>
+            </form>
+          `)
+          expect(field).not.toBeDisabled()
+
+          up.form.disableTemp(form)
+
+          expect(field).toBeDisabled()
+        })
+
+        it('re-enables a configured custom element when the returned function is called', function() {
+          up.form.config.fieldSelectors.push('test-form-field')
+
+          const [form, field] = htmlFixtureList(`
+            <form>
+              <test-form-field name="email" value="foo@example.com"></test-form-field>
+            </form>
+          `)
+
+          const reenable = up.form.disableTemp(form)
+          expect(field).toBeDisabled()
+
+          reenable()
+
+          expect(field).not.toBeDisabled()
+        })
+
+        it('does not disable a custom element that is not configured', function() {
+          const [form, field] = htmlFixtureList(`
+            <form>
+              <test-form-field name="email" value="foo@example.com"></test-form-field>
+            </form>
+          `)
+
+          up.form.disableTemp(form)
+
+          expect(field).not.toBeDisabled()
+        })
+
+      })
+
 
       it("disables the form's fields", function() {
         const form = fixture('form')

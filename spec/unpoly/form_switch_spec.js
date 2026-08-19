@@ -6,6 +6,54 @@ extendDescribe('up.form', function() {
 
     describe('[up-switch]', function() {
 
+      describe('custom form fields', function() {
+
+        it('switches on a custom element that is configured in up.form.config.fieldSelectors', async function() {
+          up.form.config.fieldSelectors.push('test-form-field')
+
+          const [form, field, target] = htmlFixtureList(`
+            <form>
+              <test-form-field name="mode" value="inactive" up-switch=".target"></test-form-field>
+              <div class="target" up-show-for="active">target</div>
+            </form>
+          `)
+          up.hello(form)
+          await wait()
+
+          expect(target).toBeHidden()
+
+          field.value = 'active'
+          Trigger.change(field)
+          await wait()
+
+          expect(target).toBeVisible()
+        })
+
+        it('switches on the native field that a custom control keeps hidden and synced', async function() {
+          const [form, select, , , target] = htmlFixtureList(`
+            <form>
+              <select name="mode" hidden up-switch=".target">
+                <option value="inactive" selected>inactive</option>
+                <option value="active">active</option>
+              </select>
+              <div class="target" up-show-for="active">target</div>
+            </form>
+          `)
+          up.hello(form)
+          await wait()
+
+          expect(target).toBeHidden()
+
+          select.value = 'active'
+          Trigger.change(select)
+          await wait()
+
+          expect(target).toBeVisible()
+        })
+
+      })
+
+
       describe('emitting up:form:switch on changes', function() {
 
         it('emits up:form:switch on switchees with { field, fieldTokens }', async function() {
