@@ -101,7 +101,7 @@ up.compiler('[track-view]', function(element, data) { // mark: [track-view]
 
 
 
-### Avoid loading avoiding your application scripts in the `<body>`
+### Avoid loading your application scripts in the `<body>`
 
 When allowing inline scripts to run, mind that the `<body>` element is a default [main target](/main).
 If you include your global scripts at the end of your `<body>`, swapping the `<body>` will re-execute these scripts:
