@@ -1,0 +1,16 @@
+#!/usr/bin/env node
+// Serves the scratch pages — see tooling/scratch/server.mjs. Normally started as part of
+// the dev environment (`bin/dev`), but it runs standalone too.
+import { startServer } from '../tooling/scratch/server.mjs'
+import pc from 'picocolors'
+
+let handle
+try {
+  handle = await startServer()
+} catch (error) {
+  // Most likely a port collision, which is expected enough not to warrant a stack.
+  console.error(pc.red(error.message))
+  process.exit(1)
+}
+
+console.log(pc.blue(`Unpoly scratch pages serving on ${handle.url}. Press CTRL+C to quit.`))

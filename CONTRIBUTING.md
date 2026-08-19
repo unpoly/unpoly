@@ -19,10 +19,22 @@ you need, not so you can skip it.
 
 > Tests don't run against `src/` directly, but against a transpiled
 > build in `dist/`.\
-> The `bin/dev` tool boots a build watcher, a test server and the documentation site.
+> The `bin/dev` tool boots a build watcher, a test server and the documentation site.\
+> Everything they print lands in `tmp/dev.log`, however the environment was started.
 
 [Read the dev environment guide](docs/contributing/dev-environment.md) before trying out your changes,
-or when you suspect a stale build.
+when you suspect a stale build, or when you need to see what a service actually did.
+
+
+### [🔭 Trying out changes](docs/contributing/trying-out-changes.md)
+
+> Some things you have to see: how an overlay looks, a form across three validation
+> roundtrips.\
+> `bin/dev` serves a scratch server on port 4001 — a few real pages against a real server,
+> where you add a page, poke at it with your mouse, Puppeteer or Playwright, and throw it away.
+
+[Read the scratch server guide](docs/contributing/trying-out-changes.md) when a spec cannot
+show you what you need to see. What you learn there still belongs in a spec.
 
 
 ### [🎓 Philosophy](docs/contributing/philosophy.md)

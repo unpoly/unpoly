@@ -8,6 +8,7 @@ For *using* it (`bin/test`, filters, options, exit codes) see
 ```
 tooling/
   runner/       the spec runner, split by where the code runs (below)
+  scratch/      the scratch server — real pages on port 4001 (own README)
   build/        bin/build, the Webpack configs, and the build-freshness protocol
   dev_env.mjs   the dev environment behind bin/dev
   find_spec.mjs spec-title search behind bin/find-spec and bin/test --file
@@ -69,6 +70,9 @@ function, so its tests live in Node with the rest.
   file runs that file rather than its whole module.
 - `dev_env.mjs` — the dev environment: one process table, one supervisor, one pid
   file (`tmp/dev.pid`). See [its own contract](#the-dev-environment) below.
+- `scratch/` — the scratch server behind port 4001: real pages for trying a change by hand.
+  Its own process, deliberately not a route on the spec server, which `bin/ci` boots. See
+  [its README](scratch/README.md) and [Trying out changes](../docs/contributing/trying-out-changes.md).
 - `test/` — the self-tests: `bin/self-test`.
 - `bin/test`, `bin/ci`, `bin/dev`, `bin/find-spec` — thin **extensionless** executables (shebang +
   `chmod +x`), relying on Node 22's extensionless-ESM detection. The package is
@@ -134,7 +138,7 @@ plugin arms itself on `watchRun` (watch-only) and ignores `done` until then, bec
 plugin included — so `bin/build --config=ci` used to overwrite a running watcher's
 status with its own pid, and every reader then concluded the environment was gone.
 
-Transient files (`build-status.json`, any `.pid`) belong in the gitignored `tmp/`.
+Transient files (`build-status.json`, any `.pid`, any `.log`) belong in the gitignored `tmp/`.
 
 ## Output
 
@@ -152,13 +156,17 @@ the browser log plus the HTML state as a CSS-selector outline (`#id.class[attr="
 ## Lifecycle
 
 - `bin/test` → `runDev(argv, env)`: ensure a dev environment (start it if needed, else
-  exit `3`) → `waitForFreshBuild` (else exit `4`) → puppeteer → receiver → exit 0/1.
-  The runner never builds; dev relies on the watcher.
+  exit `3`) → `waitForFreshBuild` (else exit `4`) → confirm the bundles the page loads are
+  in `dist` (else exit `4`) → puppeteer → receiver → exit 0/1.
+  The runner never builds; dev relies on the watcher. The `dist` check comes *after* the
+  build wait, because `dist` is gitignored: before the watcher's first build everything is
+  missing, and asking up front failed every fresh clone's first run.
 - `bin/ci` → `runCI(argv, env)`: boots its own server, skips the build wait, runs
   against `bin/build --config=ci` artifacts. CI workflow: `npm ci` (install) → `bin/build --config=ci` → `bin/ci`.
 - Exit codes: `0` pass · `1` failures · `2` runner timeout (the watchdog fires when the
-  receiver sees no event for 30s) · `3` no dev environment · `4` build stale ·
-  `5` bad config/flags · `6` build failed (compile/lint errors).
+  receiver sees no event for 30s) · `3` no dev environment · `4` build stale, or a bundle
+  the page loads is absent from `dist` · `5` bad config/flags · `6` build failed
+  (compile/lint errors).
 
 `up.log.config.format` deliberately stays at its default (`true`): some specs assert on
 the exact `%c`-styled arguments Unpoly passes to `console.warn`/`debug`. The console
@@ -182,6 +190,23 @@ process manager. The rules, in one place:
   one process, orphan the descendants, and report success. The supervisor removes
   `tmp/dev.pid` as it exits, so a wedged one stays reachable for a second
   `bin/dev stop`; a file left by a SIGKILLed one is inert (see below).
+- **One log.** The supervisor writes `tmp/dev.log` itself rather than having its stdio
+  redirected into it, so the log lands in the same place however the environment was
+  started. It used to exist only on the background path, which made "read `tmp/dev.log`"
+  advice that worked or not depending on who had started what — a coin flip a human shrugs
+  off and an agent cannot. Every line goes to two sinks, because their readers differ: the
+  terminal keeps colors, the file does not. Colors are for the human watching a build; in a
+  file they only cost tokens and wreck field splitting — the label sits between the
+  timestamp and the text, so `awk '{print $2}'` yields `\x1b[36mwatch` and an exact label
+  match never fires. Only child text is stripped — our labels come in two variants, so we never
+  colorize and undo it. Children are *asked* for colors (`FORCE_COLOR`) only when there is a
+  terminal to show them on, and `NO_COLOR` still wins; they are piped, so otherwise they
+  turn their own colors off and webpack's coloured errors were being thrown away even with a
+  human watching. `DEV_ENV_BACKGROUND` tells a background supervisor it has no terminal:
+  without it, its terminal sink *is* the file its raw stdio points at, and every line lands
+  twice (169 lines in each, measured). The timestamp comes from the supervisor, since
+  third-party children cannot be made to agree on a format — WEBrick stamps its own, webpack
+  stamps nothing — though it marks when the pipe delivered, not when the child spoke.
 - **One decision about state**: `devEnvState()` → `running` · `booting` · `foreign` ·
   `unidentified` · `none`. Everything — `bin/dev`, `runDev()`, `stopDevEnv()` — asks it
   and switches on the answer. Nothing else reads `tmp/dev.pid`, and two rules make its
@@ -235,5 +260,12 @@ suite. What's covered today:
 - `config`: `fromArgv`/`fromProcessEnv` precedence, unknown-flag error, CSP header,
   dist filenames. Plus a `server` integration test (start Express, fetch `/specs` with
   csp/es6/min/migrate, assert headers + script tags).
+- `run`: `missingDistFiles()` — which bundles a config actually loads (migrate only with
+  `--migrate`), and that a watcher-built `dist` leaves nothing to report.
 - `build_sync`: dead pid / missing file / stale / fresh / timeout, with an injected clock.
 - `receiver`: canned event arrays → captured output + exit code.
+- `scratch`: page resolution and the name guard, layout wrapping vs. pass-through, EJS locals
+  and error positions, plus an Express instance with the build gate and log injected.
+- `dev_env`: the state machine, the start lock, pid-file identity — plus `createLog`: both
+  sinks reached, escapes stripped from the file only, one timestamp shared by both lines,
+  truncation per session, and `terminal: false` writing the file alone.

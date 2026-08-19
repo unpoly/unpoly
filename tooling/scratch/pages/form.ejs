@@ -1,0 +1,25 @@
+<%# [up-validate] on a field makes Unpoly re-submit the form when that field changes, sending
+    `X-Up-Validate: <field name>`. The server answers with the whole form, and Unpoly updates
+    only the form group the field lives in — the <fieldset> here. It belongs on the field, not
+    on the label: on a label nothing registers and no request is ever made. %>
+<h1>Form with validation</h1>
+
+<% if (saved) { %>
+  <p id="saved"><strong>Saved.</strong></p>
+<% } %>
+
+<form action="/form" method="post" up-submit>
+  <fieldset>
+    <label for="email">E-mail</label>
+    <input type="text" id="email" name="email" value="<%= user.email %>" up-validate>
+    <% if (errors.email) { %><div class="error"><%= errors.email %></div><% } %>
+  </fieldset>
+
+  <fieldset>
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" value="<%= user.password %>" up-validate>
+    <% if (errors.password) { %><div class="error"><%= errors.password %></div><% } %>
+  </fieldset>
+
+  <button type="submit">Save</button>
+</form>
