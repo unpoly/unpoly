@@ -101,3 +101,23 @@ carries on without it.
 
 See [Trying out changes](trying-out-changes.md) for the scratch server, [Testing](testing.md)
 for the spec runner, and [Documentation](documentation.md) for the site.
+
+
+## Running more than one checkout
+
+Two checkouts can each run their own environment — the state is already separate, since
+`tmp/dev.pid` and `tmp/build-status.json` belong to the checkout rather than to your machine.
+The ports are the only thing they share. Move them with `PORT_OFFSET`:
+
+```
+export PORT_OFFSET=100    # spec runner 4100, scratch 4101, docs 4667
+bin/dev
+```
+
+Set it for **every** command in that checkout, `bin/test` included — the runner finds the
+environment by probing its port, so a mismatch makes it conclude nothing is running. That
+failure is loud rather than subtle: starting a second environment on ports another checkout
+already holds stops immediately with `Port 4000 is already in use`.
+
+The checkout that sets nothing keeps 4000, 4001 and 4567 — the numbers the rest of these
+guides name.

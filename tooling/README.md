@@ -207,6 +207,13 @@ process manager. The rules, in one place:
   twice (169 lines in each, measured). The timestamp comes from the supervisor, since
   third-party children cannot be made to agree on a format — WEBrick stamps its own, webpack
   stamps nothing — though it marks when the pipe delivered, not when the child spoke.
+- **One port table.** `tooling/ports.mjs` owns all four (spec server, scratch, start lock,
+  docs), and `PORT_OFFSET` moves them together so a second checkout can run its own
+  environment. They are fixed numbers rather than derived from the checkout path because the
+  guides quote them; an offset is opt-in, so the default checkout stays documented. Nothing
+  else was shared — `tmp/dev.pid` and `tmp/build-status.json` are already anchored to the
+  project root — which is why ports were the whole of the collision. A service that can read
+  the table (our own two) is given no `PORT`; only middleman needs one passed in.
 - **One decision about state**: `devEnvState()` → `running` · `booting` · `foreign` ·
   `unidentified` · `none`. Everything — `bin/dev`, `runDev()`, `stopDevEnv()` — asks it
   and switches on the answer. Nothing else reads `tmp/dev.pid`, and two rules make its

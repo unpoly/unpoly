@@ -16,6 +16,7 @@ import { closeSync, existsSync, openSync, readFileSync, writeSync, unlinkSync, m
 import path from 'node:path'
 import pc from 'picocolors'
 import { isServerRunning } from './runner/server/server.mjs'
+import { PORTS } from './ports.mjs'
 import { readStatus } from './build/build_status.mjs'
 
 // The environment, in one place. A process with a `cwd` lives in a sibling
@@ -25,8 +26,11 @@ import { readStatus } from './build/build_status.mjs'
 const PROCESSES = [
   { name: 'watch',       command: 'bin/build --config=development --watch' },
   { name: 'server',      command: 'bin/test-server' },
-  { name: 'scratch',     command: 'bin/scratch-server',                                  env: { PORT: '4001' } },
-  { name: 'docs',        command: 'bundle exec middleman server', cwd: '../unpoly-site',  env: { PORT: '4567' } },
+  // Neither local server is given a PORT: each reads the shared table, so PORT_OFFSET moves
+  // them and the port isServerRunning() probes without anything being threaded through here.
+  // middleman cannot do that, so docs gets an explicit one.
+  { name: 'scratch',     command: 'bin/scratch-server' },
+  { name: 'docs',        command: 'bundle exec middleman server', cwd: '../unpoly-site',  env: { PORT: String(PORTS.docs) } },
 ]
 
 const SUPERVISOR = import.meta.filename
@@ -48,7 +52,7 @@ const LOG_FILE = path.join(PROJECT_ROOT, 'tmp/dev.log')
 const CRASH_LOG_FILE = path.join(PROJECT_ROOT, 'tmp/dev-crash.log')
 // Held only while a start is in progress, to serialise concurrent starts. Not a
 // service: nothing ever connects to it.
-const START_LOCK_PORT = 4099
+const START_LOCK_PORT = PORTS.startLock
 const READY_TIMEOUT = 60_000
 const SHUTDOWN_GRACE = 5_000
 
@@ -281,7 +285,11 @@ function existingEnvError(state, pid) {
 function alreadyRunning(state, pid) {
   switch (state) {
     case 'foreign':
-      return 'A dev environment is running that bin/dev did not start. Stop it where you started it.'
+      // Naming the other checkout matters: the ports are shared but tmp/dev.pid is not, so a
+      // sibling clone's environment reads as 'foreign' here while `bin/test` separately
+      // reports *this* checkout's watcher as gone. Both messages are true and together they
+      // sent someone looking in the wrong place.
+      return `A dev environment is running that bin/dev did not start — possibly from another checkout of this repository, since port ${PORTS.specServer} is shared. Stop it where you started it, or set PORT_OFFSET to move this checkout's ports (see docs/contributing/dev-environment.md#running-more-than-one-checkout).`
     case 'unidentified':
       return `${PID_FILE} names PID ${pid}, which is alive but cannot be identified. Check it, then remove the file if nothing is running.`
     default:

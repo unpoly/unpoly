@@ -12,12 +12,13 @@ import { statSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
 import { waitForFreshBuild, BuildFailedError, BuildSyncError } from '../build/build_sync.mjs'
 import { PROJECT_ROOT } from '../build/build_status.mjs'
+import { PORTS } from '../ports.mjs'
 import { listPages, resolvePage, PAGES_DIR } from './pages.mjs'
 import { layout } from './helpers/layout.mjs'
 import { renderView } from './helpers/view.mjs'
 
 const SCRATCH_DIR = path.dirname(import.meta.filename)
-const serverPort = process.env.PORT || 4001
+const serverPort = process.env.PORT || PORTS.scratch
 const serverHost = process.env.HOST || 'localhost'
 const urlFor = (port) => `http://${serverHost}:${port}`
 
