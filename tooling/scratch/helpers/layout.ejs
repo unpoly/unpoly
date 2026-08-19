@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/dist/unpoly.css">
+    <link rel="stylesheet" href="/assets/scratch.css">
+    <script src="/dist/unpoly.js"></script>
+    <script src="/assets/scratch.js"></script>
+  </head>
+  <body>
+    <%# Outside <main>, so it survives a navigation that replaces the page content. %>
+    <nav id="scratch-nav" up-nav>
+      <a href="/">All scratch pages</a>
+    </nav>
+
+    <%# <main> matches up.fragment.config.mainTargets, so a plain [up-follow] with no
+        [up-target] replaces exactly this — which is why the navigation pages need no
+        target of their own. %>
+    <main>
+<%- body %>
+    </main>
+  </body>
+</html>

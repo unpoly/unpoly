@@ -1,0 +1,15 @@
+/* Deliberately tiny. A scratch page should look like the plain HTML you would write, so you
+   never wonder whether what you are seeing is Unpoly's behaviour or ours. */
+
+body {
+  margin: 2rem;
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+/* Unpoly styles none of its own state classes — that is the host app's job — so on a bare
+   page the very thing you came to observe is invisible. This is the one that earns its
+   keep: without it the navigation pages demonstrate nothing. */
+[up-nav] a.up-current {
+  font-weight: bold;
+}

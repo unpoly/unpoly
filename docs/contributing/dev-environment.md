@@ -15,7 +15,8 @@ npm install
 ## Running the dev environment
 
 Specs don't consume the sources directly, but a transpiled build in `dist/`. Hence
-`bin/test` needs a **dev environment**: a build watcher and the spec server. It
+`bin/test` needs a **dev environment**: a build watcher, the spec server and the
+[scratch server](trying-out-changes.md). It
 starts one in the background if none is running (the first build takes ~15s), reuses
 it on later runs, and waits for the watcher to pick up your latest edit — so you
 never test stale code.
@@ -75,19 +76,28 @@ One neighbour, `tmp/dev-crash.log`, is not a second log. It catches the supervis
 output for the one case the log cannot cover: dying before it opens the log, which in
 practice means a syntax error or bad import in `tooling/dev_env.mjs`. It is empty otherwise.
 
-`bin/dev` also boots the (optional) sibling repositories
-[`unpoly-manual-tests`](https://github.com/unpoly/unpoly-manual-tests) and
-[`unpoly-site`](https://github.com/unpoly/unpoly-site), *if* you have them checked out
-next to this repository:
+## What it runs
+
+```
+watch      # the Webpack build watcher, keeping dist/ current
+server     # the spec runner            — serves on port 4000
+scratch    # pages for trying a change by hand — serves on port 4001
+docs       # unpoly.com, if checked out — serves on port 4567
+```
+
+The first three are in this repository. The last one is the (optional) sibling repository
+[`unpoly-site`](https://github.com/unpoly/unpoly-site), booted *if* you have it checked out
+next to this one:
 
 ```
 projects/
   unpoly/                 # this repository
   unpoly-site/            # unpoly.com (Ruby) — serves on port 4567
-  unpoly-manual-tests/    # manual test app (Ruby) — serves on port 4001
 ```
 
-The directory names matter. `unpoly-site` reaches this repository through a committed
-symlink that expects to find it at `../unpoly`.
+The directory names matter: `unpoly-site` reaches this repository through a committed symlink
+that expects to find it at `../unpoly`. If it isn't checked out, the environment says so and
+carries on without it.
 
-See [Testing](testing.md) and [Documentation](documentation.md) respectively.
+See [Trying out changes](trying-out-changes.md) for the scratch server, [Testing](testing.md)
+for the spec runner, and [Documentation](documentation.md) for the site.

@@ -26,6 +26,17 @@ you need, not so you can skip it.
 when you suspect a stale build, or when you need to see what a service actually did.
 
 
+### [🔭 Trying out changes](docs/contributing/trying-out-changes.md)
+
+> Some things you have to see: how an overlay looks, a form across three validation
+> roundtrips.\
+> `bin/dev` serves a scratch server on port 4001 — a few real pages against a real server,
+> where you add a page, poke at it with your mouse, Puppeteer or Playwright, and throw it away.
+
+[Read the scratch server guide](docs/contributing/trying-out-changes.md) when a spec cannot
+show you what you need to see. What you learn there still belongs in a spec.
+
+
 ### [🎓 Philosophy](docs/contributing/philosophy.md)
 
 > Values that guide us when we decide which features to add, how we design them, and

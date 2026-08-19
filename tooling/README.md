@@ -8,6 +8,7 @@ For *using* it (`bin/test`, filters, options, exit codes) see
 ```
 tooling/
   runner/       the spec runner, split by where the code runs (below)
+  scratch/      the scratch server — real pages on port 4001 (own README)
   build/        bin/build, the Webpack configs, and the build-freshness protocol
   dev_env.mjs   the dev environment behind bin/dev
   find_spec.mjs spec-title search behind bin/find-spec and bin/test --file
@@ -69,6 +70,9 @@ function, so its tests live in Node with the rest.
   file runs that file rather than its whole module.
 - `dev_env.mjs` — the dev environment: one process table, one supervisor, one pid
   file (`tmp/dev.pid`). See [its own contract](#the-dev-environment) below.
+- `scratch/` — the scratch server behind port 4001: real pages for trying a change by hand.
+  Its own process, deliberately not a route on the spec server, which `bin/ci` boots. See
+  [its README](scratch/README.md) and [Trying out changes](../docs/contributing/trying-out-changes.md).
 - `test/` — the self-tests: `bin/self-test`.
 - `bin/test`, `bin/ci`, `bin/dev`, `bin/find-spec` — thin **extensionless** executables (shebang +
   `chmod +x`), relying on Node 22's extensionless-ESM detection. The package is
@@ -260,6 +264,8 @@ suite. What's covered today:
   `--migrate`), and that a watcher-built `dist` leaves nothing to report.
 - `build_sync`: dead pid / missing file / stale / fresh / timeout, with an injected clock.
 - `receiver`: canned event arrays → captured output + exit code.
+- `scratch`: page resolution and the name guard, layout wrapping vs. pass-through, EJS locals
+  and error positions, plus an Express instance with the build gate and log injected.
 - `dev_env`: the state machine, the start lock, pid-file identity — plus `createLog`: both
   sinks reached, escapes stripped from the file only, one timestamp shared by both lines,
   truncation per session, and `terminal: false` writing the file alone.

@@ -622,13 +622,15 @@ group, or assert on it with `jasmine.expectGlobalError()`.
 [Compatibility](compatibility.md#specs-for-deprecated-features).
 
 
-## Manual tests
+## Trying something by hand
 
-Some things are impractical to assert in a unit test — the visual look of an overlay,
-or edge cases while Unpoly boots. For those there is an optional sibling repository,
-[`unpoly-manual-tests`](https://github.com/unpoly/unpoly-manual-tests): a Rails app
-whose pages exercise Unpoly features against a real server.
+Some things are impractical to assert in a unit test — the visual look of an overlay, a form
+across several validation roundtrips, edge cases while Unpoly boots. Since
+[the network here is always mocked](#the-network-is-always-mocked), the suite cannot show you
+any of it.
 
-[`bin/dev`](dev-environment.md#running-the-dev-environment) boots it on port 4001 if you
-have it checked out next to this repository. It doubles as a scratch pad — when you want
-to poke at a feature by hand rather than through a spec, add a page there.
+For those, `bin/dev` serves a **scratch server** on port 4001: a few real pages against a
+real server, in this repository, where you add a page and throw it away afterwards. See
+[Trying out changes](trying-out-changes.md).
+
+It proves nothing on its own. What you learn there belongs in a spec.

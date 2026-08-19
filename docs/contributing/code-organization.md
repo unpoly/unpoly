@@ -54,6 +54,7 @@ bin/                      # Scripts for development
 
 tooling/                  # Our own dev machinery, never shipped (rarely need to edit here)
   runner/                 # ... Runs the specs: server, terminal driver, in-page reporter
+  scratch/                # ... Pages for trying a change by hand (see Trying out changes)
   build/                  # ... bin/build and the Webpack configuration
   dev_env.mjs             # ... The dev environment behind bin/dev
   find_spec.mjs           # ... Spec-title search behind bin/find-spec

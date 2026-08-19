@@ -1,5 +1,5 @@
-// The dev environment: the build watcher, the spec server, and — for whoever has
-// them checked out — the sibling projects (docs site, manual tests).
+// The dev environment: the build watcher, the spec server, the scratch server, and — for
+// whoever has it checked out — the documentation site.
 //
 // One process table, one supervisor, one pid file, no special cases. `bin/dev`
 // runs the supervisor in the foreground (logs on your terminal, Ctrl-C stops it);
@@ -25,8 +25,8 @@ import { readStatus } from './build/build_status.mjs'
 const PROCESSES = [
   { name: 'watch',       command: 'bin/build --config=development --watch' },
   { name: 'server',      command: 'bin/test-server' },
-  { name: 'docs',        command: 'bundle exec middleman server', cwd: '../unpoly-site',         env: { PORT: '4567' } },
-  { name: 'manual-test', command: 'bundle exec rails server',     cwd: '../unpoly-manual-tests', env: { PORT: '4001' } },
+  { name: 'scratch',     command: 'bin/scratch-server',                                  env: { PORT: '4001' } },
+  { name: 'docs',        command: 'bundle exec middleman server', cwd: '../unpoly-site',  env: { PORT: '4567' } },
 ]
 
 const SUPERVISOR = import.meta.filename

@@ -17,3 +17,15 @@ npm-debug.log
 /tmp
 /node_modules
 .$*.xml.*
+
+# Scratch pages are a workbench, not a suite. Write freely in tooling/scratch/pages and
+# throw it away; only the exemplary pages listed here are tracked, so `git add .` cannot
+# quietly turn your experiment into part of the repository. Adding a real page is meant to
+# be deliberate: list it below and `git add -f` it.
+/tooling/scratch/pages/*
+!/tooling/scratch/pages/navigation-one.ejs
+!/tooling/scratch/pages/navigation-two.ejs
+!/tooling/scratch/pages/overlay-opener.ejs
+!/tooling/scratch/pages/overlay-content.ejs
+!/tooling/scratch/pages/form.ejs
+!/tooling/scratch/pages/form.mjs
