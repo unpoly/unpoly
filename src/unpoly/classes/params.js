@@ -463,26 +463,33 @@ up.Params = class Params {
   The returned params may be passed as `{ params }` option to
   `up.request()` or `up.replace()`.
 
-  The constructed `up.Params` will include exactly those form values that would be
-  included in a regular form submission. In particular:
+  The params are built with the browser's own
+  [form-data algorithm](https://developer.mozilla.org/en-US/docs/Web/API/FormData/FormData),
+  so they contain exactly what a regular form submission would send:
 
-  - All `<input>` types are suppported
+  - All `<input>` types are supported.
   - Field values are usually strings, but an `<input type="file">` will produce
     [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) values.
-  - An `<input type="radio">` or `<input type="checkbox">` will only be added if it is `[checked]`.
-  - A `<select>` will only be added if at least one value is `[selected]`.
-  - If passed a `<select multiple>` or `<input type="file" multiple>`, all selected values are added.
-  - Fields that are `[disabled]` are ignored.
+  - An `<input type="radio">` or `<input type="checkbox">` is only added if it is checked.
+  - A `<select>` adds every selected option.
+  - Fields that are disabled, or inside a `<fieldset disabled>`, are ignored.
   - Fields without a `[name]` attribute are ignored.
-  - Form-associated custom elements and values added by `formdata` event listeners are included.
-  - Custom controls configured with `up.form.config.fieldSelectors` are included.
+  - Fields [outside the form](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#form)
+    that reference it with a `[form]` attribute are included.
+  - [Form-associated custom elements](/custom-form-fields#form-associated) are included.
+  - Values appended by a [`formdata`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/formdata_event)
+    event listener are included.
+  - The [submit button](#submit-button) contributes its `[name]` and `[value]`.
+
+  On top of that, [custom controls](/custom-form-fields#configured) configured in
+  `up.form.config.fieldSelectors` are included. The browser cannot know about those.
 
   ### Example
 
   Given this HTML form:
 
   ```html
-  <form>
+  <form id="signup">
     <input type="text" name="email" value="foo@bar.com">
     <input type="password" name="pass" value="secret">
   </form>
@@ -491,23 +498,51 @@ up.Params = class Params {
   This would serialize the form into an array representation:
 
   ```js
-  let params = up.Params.fromForm('input[name=email]')
+  let params = up.Params.fromForm(document.querySelector('#signup'))
   let email = params.get('email') // email is now 'foo@bar.com'
   let pass = params.get('pass') // pass is now 'secret'
   ```
 
+  ### Submit buttons {#submit-button}
+
+  A submit button only contributes params when it is the one that submitted the form.
+  Pass the button as a `{ submitButton }` option, or `false` to submit no button at all.
+  Without the option the first submit button is assumed, which is also what a browser
+  does when the user submits from a field by pressing `Enter`.
+
   @function up.Params.fromForm
   @param {Element} form
     A `<form>` element.
+  @param {Element|false} [options.submitButton]
+    The submit button that submitted the form.
   @return {up.Params}
     A new `up.Params` instance with values from the given form.
   @stable
   */
-  static fromForm(form, options) {
+  static fromForm(form, options = {}) {
     form = e.get(form)
-    const params = new this(new FormData(form), options)
-    const additionalFields = u.reject(up.form.fields(form), (field) => u.contains(form.elements, field))
-    params.addAll(this.fromFields(additionalFields, options))
+
+    // The browser's algorithm never includes a disabled control, so { includeDisabled } cannot
+    // apply here. Drop it, rather than have it half-apply to the configured controls below.
+    options = u.omit(options, ['includeDisabled'])
+
+    // A browser only includes the button that submitted the form. Without an explicit option we
+    // assume the first one, as a browser does when the user submits a field with Enter.
+    let submitButton = options.submitButton ?? up.form.submitButtons(form)[0]
+
+    // The FormData constructor throws unless the submitter is owned by this form, and
+    // up.form.submitButtons() can return a button that carries [form] for another form.
+    if (submitButton?.form !== form) submitButton = undefined
+
+    let params = new this(new FormData(form, submitButton), options)
+
+    // The algorithm above covers everything in form.elements. Add the controls it cannot know
+    // about, like custom elements from up.form.config.fieldSelectors.
+    let nativeFields = new Set(form.elements)
+    for (let field of up.form.fields(form)) {
+      if (!nativeFields.has(field)) params.addField(field)
+    }
+
     return params
   }
 

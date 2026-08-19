@@ -688,6 +688,96 @@ describe('up.Params', function() {
       ])
     })
 
+    describe('submit buttons', function() {
+
+      it('includes the [name] and [value] of the first submit button', function() {
+        const [form] = htmlFixtureList(`
+          <form>
+            <input name="email" value="foo@example.com">
+            <button type="submit" name="action" value="save">Save</button>
+            <button type="submit" name="action" value="preview">Preview</button>
+          </form>
+        `)
+
+        expect(up.Params.fromForm(form).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+          { name: 'action', value: 'save' },
+        ])
+      })
+
+      it('includes the [name] and [value] of a given { submitButton }', function() {
+        const [form, , , preview] = htmlFixtureList(`
+          <form>
+            <input name="email" value="foo@example.com">
+            <button type="submit" name="action" value="save">Save</button>
+            <button type="submit" name="action" value="preview">Preview</button>
+          </form>
+        `)
+
+        expect(up.Params.fromForm(form, { submitButton: preview }).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+          { name: 'action', value: 'preview' },
+        ])
+      })
+
+      it('includes no submit button with { submitButton: false }', function() {
+        const [form] = htmlFixtureList(`
+          <form>
+            <input name="email" value="foo@example.com">
+            <button type="submit" name="action" value="save">Save</button>
+          </form>
+        `)
+
+        expect(up.Params.fromForm(form, { submitButton: false }).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+        ])
+      })
+
+      it('includes the click coordinates of an <input type="image"> submit button', function() {
+        const [form, , imageButton] = htmlFixtureList(`
+          <form>
+            <input name="email" value="foo@example.com">
+            <input type="image" name="place" src="/image.png">
+          </form>
+        `)
+
+        expect(up.Params.fromForm(form, { submitButton: imageButton }).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+          { name: 'place.x', value: '0' },
+          { name: 'place.y', value: '0' },
+        ])
+      })
+
+      it('ignores a submit button that the browser associates with another form', function() {
+        // up.form.submitButtons() finds this button by subtree, but its [form] attribute makes
+        // the browser own it elsewhere. Passing it as a submitter would throw a NotFoundError.
+        const [form] = htmlFixtureList(`
+          <form>
+            <input name="email" value="foo@example.com">
+            <button type="submit" name="action" value="save" form="other-form">Save</button>
+          </form>
+        `)
+        htmlFixtureList('<form id="other-form"></form>')
+
+        expect(up.Params.fromForm(form).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+        ])
+      })
+    })
+
+    it('ignores a { includeDisabled } option, which the browser algorithm cannot honor', function() {
+      const [form] = htmlFixtureList(`
+        <form>
+          <input name="email" value="foo@example.com" disabled>
+          <input name="city" value="Berlin">
+        </form>
+      `)
+
+      expect(up.Params.fromForm(form, { includeDisabled: true }).toArray()).toEqual([
+        { name: 'city', value: 'Berlin' },
+      ])
+    })
+
     describe('custom form fields', function() {
 
       it('serializes a form-associated custom element', function() {

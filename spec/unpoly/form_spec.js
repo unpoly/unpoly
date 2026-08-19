@@ -799,8 +799,8 @@ describe('up.form', function() {
 
             expect(options.params).toEqual(new up.Params([
               { name: 'field-name', value: 'field-value' },
-              { name: 'form-name', value: 'form-value' },
               { name: 'button-name', value: 'button-value-1' },
+              { name: 'form-name', value: 'form-value' },
             ]))
           })
 
@@ -817,13 +817,13 @@ describe('up.form', function() {
 
             expect(options.params).toEqual(new up.Params([
               { name: 'field-name', value: 'field-value' },
-              { name: 'form-name', value: 'form-value' },
               { name: 'button-name', value: 'button-value-1' },
+              { name: 'form-name', value: 'form-value' },
             ]))
           })
 
           it('includes the [name] and [value] of the given submit button', function() {
-            let [form, submitButton1, submitButton2] = htmlFixtureList(`
+            let [form, , submitButton1, submitButton2] = htmlFixtureList(`
               <form action="/action" up-params="{ 'form-name': 'form-value' }">
                 <input type="text" name="field-name" value="field-value">
                 <button type="submit" name="button-name" value="button-value-1"></button>
@@ -831,12 +831,12 @@ describe('up.form', function() {
               </form>
             `)
 
-            let options = up.form.submitOptions(form, { submitButton: submitButton2 })
+            let options = up.form.submitOptions(form, { submitButton: submitButton1 })
 
             expect(options.params).toEqual(new up.Params([
               { name: 'field-name', value: 'field-value' },
-              { name: 'form-name', value: 'form-value' },
               { name: 'button-name', value: 'button-value-1' },
+              { name: 'form-name', value: 'form-value' },
             ]))
           })
 

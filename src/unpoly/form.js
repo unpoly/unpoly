@@ -602,9 +602,18 @@ up.form = (function() {
     parser.string('contentType', { attr: 'enctype' })
     parser.json('headers')
 
+    // (1) When processing a `submit` event, we may have received a { submitButton: event.submitter } option.
+    // (2) When the user submits the form from a focused input via Enter, the browser will also submit
+    //     with the first submit button set as submitter.
+    // (3) For pragmatic calls of up.submit(), we assume the first submit button.
+    //
+    // We resolve this before parsing params, because the button's [name] and [value] are
+    // contributed by the browser's form-data algorithm in up.Params.fromForm().
+    const submitButton = (options.submitButton ??= findSubmitButtons(form)[0])
+
     // Parse params from form fields.
     const paramParts = [
-      up.Params.fromForm(form),
+      up.Params.fromForm(form, options),
       e.jsonAttr(form, 'up-params'),
     ]
 
@@ -612,16 +621,8 @@ up.form = (function() {
       e.jsonAttr(form, 'up-headers'),
     ]
 
-    // (1) When processing a `submit` event, we may have received a { submitButton: event.submitter } option.
-    // (2) When the user submits the form from a focused input via Enter, the browser will also submit
-    //     with the first submit button set as submitter.
-    // (3) For pragmatic calls of up.submit(), we assume the first submit button.
-    const submitButton = (options.submitButton ??= findSubmitButtons(form)[0])
     if (submitButton) {
-      // Submit buttons with a [name] attribute will add to the params.
-      // Note that addField() will only add an entry if the given button has a [name] attribute.
       paramParts.push(
-        up.Params.fromFields(submitButton),
         e.jsonAttr(submitButton, 'up-params')
       )
 
